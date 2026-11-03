@@ -4,8 +4,8 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SectionCard } from "@/components/patterns/section-card"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCan } from "@/features/auth/api/staff"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
@@ -60,10 +60,12 @@ export function FraudRulesCard({ className }: { className?: string }) {
             <label htmlFor="fraud-score" className="text-sm font-medium">
               {t(`${C}.score`)}
             </label>
-            <Input
+            <NumberField
+              min={10}
+              max={200}
+              step={10}
               id="fraud-score"
-              inputMode="numeric"
-              className="w-32 tabular-nums"
+              className="w-40"
               value={scoreText}
               disabled={!owner}
               aria-invalid={scoreValue === null || undefined}
@@ -76,10 +78,12 @@ export function FraudRulesCard({ className }: { className?: string }) {
             <label htmlFor="fraud-amount" className="text-sm font-medium">
               {t(`${C}.amount`)}
             </label>
-            <Input
+            <NumberField
+              decimals={2}
+              min={0}
+              step={100}
               id="fraud-amount"
-              inputMode="decimal"
-              className="w-32 tabular-nums"
+              className="w-40"
               value={amountText}
               disabled={!owner}
               aria-invalid={amountValue === null || undefined}

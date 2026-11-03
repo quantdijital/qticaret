@@ -75,7 +75,7 @@ export function InviteDialog({
   const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
   return (
     <Dialog open={open} onOpenChange={close}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t(`${T}.inviteTitle`)}</DialogTitle>
           <DialogDescription>{t(link ? `${T}.invitedHint` : `${T}.inviteHint`)}</DialogDescription>
@@ -83,7 +83,7 @@ export function InviteDialog({
         {link ? (
           <InviteLink link={link} />
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-5">
             <Field label={t(`${T}.email`)} htmlFor="invite-email">
               <Input
                 id="invite-email"

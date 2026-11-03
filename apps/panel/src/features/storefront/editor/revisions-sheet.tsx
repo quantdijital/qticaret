@@ -56,7 +56,7 @@ export function RevisionsSheet({ revisions, live, ask, busy, onRestore }: Revisi
             <SheetTitle>{t(`${V}.title`)}</SheetTitle>
             <SheetDescription>{t(`${V}.description`)}</SheetDescription>
           </SheetHeader>
-          <div className="flex-1 overflow-y-auto px-4 pb-4">
+          <div className="flex-1 overflow-y-auto px-6 pb-6">
             {revisions.length === 0 ? (
               <p className="rounded-md border border-dashed px-4 py-3 text-[13px] text-muted-foreground">
                 {t(`${V}.empty`)}

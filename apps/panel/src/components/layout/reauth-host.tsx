@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -58,9 +59,9 @@ export function ReauthHost() {
         }
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent size="sm">
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-6"
           onSubmit={(event) => {
             event.preventDefault()
             if (ready) {
@@ -74,48 +75,50 @@ export function ReauthHost() {
               {t(withCode ? "reauth.withCode" : "reauth.withPassword")}
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="reauth-secret">
-              {t(
-                method === "totp"
-                  ? "login.mfa.code"
-                  : method === "recovery_code"
-                    ? "login.mfa.recoveryCode"
-                    : "login.password"
-              )}
-            </Label>
-            <Input
-              id="reauth-secret"
-              autoFocus
-              value={secret}
-              onChange={(event) => {
-                setSecret(event.target.value)
-              }}
-              {...(method === "totp"
-                ? { inputMode: "numeric" as const, autoComplete: "one-time-code", maxLength: 6 }
-                : method === "password"
-                  ? { type: "password", autoComplete: "current-password" }
-                  : { autoComplete: "off" })}
-            />
-            {ask?.failed ? (
-              <p role="alert" className="text-sm text-destructive">
-                {t(method === "password" ? "reauth.failedPassword" : "reauth.failed")}
-              </p>
-            ) : null}
-            {withCode ? (
-              <Button
-                type="button"
-                variant="link"
-                className="h-auto self-start px-0"
-                onClick={() => {
-                  setRecovery(!recovery)
-                  setSecret("")
+          <DialogBody>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="reauth-secret">
+                {t(
+                  method === "totp"
+                    ? "login.mfa.code"
+                    : method === "recovery_code"
+                      ? "login.mfa.recoveryCode"
+                      : "login.password"
+                )}
+              </Label>
+              <Input
+                id="reauth-secret"
+                autoFocus
+                value={secret}
+                onChange={(event) => {
+                  setSecret(event.target.value)
                 }}
-              >
-                {t(recovery ? "login.mfa.useApp" : "login.mfa.useRecovery")}
-              </Button>
-            ) : null}
-          </div>
+                {...(method === "totp"
+                  ? { inputMode: "numeric" as const, autoComplete: "one-time-code", maxLength: 6 }
+                  : method === "password"
+                    ? { type: "password", autoComplete: "current-password" }
+                    : { autoComplete: "off" })}
+              />
+              {ask?.failed ? (
+                <p role="alert" className="text-sm text-destructive">
+                  {t(method === "password" ? "reauth.failedPassword" : "reauth.failed")}
+                </p>
+              ) : null}
+              {withCode ? (
+                <Button
+                  type="button"
+                  variant="link"
+                  className="h-auto self-start px-0"
+                  onClick={() => {
+                    setRecovery(!recovery)
+                    setSecret("")
+                  }}
+                >
+                  {t(recovery ? "login.mfa.useApp" : "login.mfa.useRecovery")}
+                </Button>
+              ) : null}
+            </div>
+          </DialogBody>
           <DialogFooter>
             <Button
               type="button"

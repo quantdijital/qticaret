@@ -45,8 +45,8 @@ describe("LabelSizeCard", () => {
 
     await userEvent.click(screen.getByRole("combobox", { name: "Etiket boyutu" }))
     await userEvent.click(await screen.findByRole("option", { name: "Özel ölçü" }))
-    const width = screen.getByRole("textbox", { name: "En (mm)" })
-    const height = screen.getByRole("textbox", { name: "Boy (mm)" })
+    const width = screen.getByRole("spinbutton", { name: "En (mm)" })
+    const height = screen.getByRole("spinbutton", { name: "Boy (mm)" })
     await userEvent.clear(width)
     await userEvent.type(width, "50")
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))

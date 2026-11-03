@@ -2,8 +2,8 @@ import { FlaskConical, Info, Loader2, Play } from "lucide-react"
 import type { ComponentProps } from "react"
 import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import type { MigrationMode } from "@/features/settings/api/migration"
 import { PARCEL_FIELDS } from "@/features/settings/components/migration/parcel"
 import type { ParcelField } from "@/features/settings/components/migration/parcel"
@@ -12,7 +12,7 @@ const R = "settings.migration.run"
 
 interface ParcelFieldsProps {
   /** Each input's value and change, or a form's registration of it. */
-  inputProps: (field: ParcelField) => ComponentProps<typeof Input>
+  inputProps: (field: ParcelField) => ComponentProps<typeof NumberField>
   /** In place of the hint: what this source's products are likely to lack, and what happens then. */
   note?: string | undefined
   /** An i18n'd sentence: the four values do not make a parcel. */
@@ -40,7 +40,12 @@ export function ParcelFields({ inputProps, note, error }: ParcelFieldsProps) {
       <div className="grid grid-cols-2 gap-3">
         {PARCEL_FIELDS.map((field) => (
           <Field key={field} label={t(`${R}.parcel.${field}`)} htmlFor={`parcel-${field}`}>
-            <Input id={`parcel-${field}`} inputMode="decimal" {...inputProps(field)} />
+            <NumberField
+              decimals={field === "weight" ? 0 : 1}
+              min={0}
+              id={`parcel-${field}`}
+              {...inputProps(field)}
+            />
           </Field>
         ))}
       </div>

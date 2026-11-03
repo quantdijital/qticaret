@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Field } from "@/components/patterns/form-section"
 import { SearchPicker } from "@/components/patterns/search-picker"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -14,7 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { useDiscountListProducts } from "@/features/price-lists/api/price-lists"
 import { percentOf } from "@/features/price-lists/form"
 import { productNamesQuery, searchProducts } from "@/features/promotions/api/scope-options"
@@ -125,7 +125,7 @@ export function DiscountDialog({ listId, products, open, onOpenChange }: Discoun
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>
             {t(products ? "priceLists.discount.allTitle" : "priceLists.discount.addTitle")}
@@ -139,21 +139,19 @@ export function DiscountDialog({ listId, products, open, onOpenChange }: Discoun
             htmlFor="price-list-percent"
             error={error}
           >
-            <div className="relative w-32">
-              <Input
-                id="price-list-percent"
-                inputMode="decimal"
-                className="pr-8 text-right tabular-nums"
-                value={text}
-                onChange={(event) => {
-                  setText(event.target.value)
-                  setError(undefined)
-                }}
-              />
-              <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-muted-foreground">
-                %
-              </span>
-            </div>
+            <NumberField
+              decimals={2}
+              min={0}
+              max={99}
+              className="w-40"
+              suffix="%"
+              id="price-list-percent"
+              value={text}
+              onChange={(event) => {
+                setText(event.target.value)
+                setError(undefined)
+              }}
+            />
           </Field>
         </div>
         <DialogFooter>

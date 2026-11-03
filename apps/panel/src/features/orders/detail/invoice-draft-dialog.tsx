@@ -262,7 +262,7 @@ export function InvoiceDraftDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent size="xl">
         <DialogHeader>
           <DialogTitle>
             {t(

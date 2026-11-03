@@ -127,7 +127,7 @@ export function InvoiceEntryDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t(numbered ? `${I}.pdfTitle` : `${I}.title`)}</DialogTitle>
           <DialogDescription>{t(`${I}.description`)}</DialogDescription>

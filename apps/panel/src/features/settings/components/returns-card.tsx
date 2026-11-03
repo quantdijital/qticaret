@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
-import { Input } from "@/components/ui/input"
+import { NumberField } from "@/components/patterns/number-field"
 import { Skeleton } from "@/components/ui/skeleton"
 import { MIN_WITHDRAWAL_DAYS, sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { ReturnsSettings } from "@/features/settings/api/sections"
@@ -68,7 +68,12 @@ function Form({ saved }: { saved: ReturnsSettings }) {
           hint={t(`${R}.daysHint`, { min: MIN_WITHDRAWAL_DAYS })}
           error={errors.withdrawal_days?.message ? t(errors.withdrawal_days.message) : undefined}
         >
-          <Input id="returns-days" inputMode="numeric" {...form.register("withdrawal_days")} />
+          <NumberField
+            min={MIN_WITHDRAWAL_DAYS}
+            max={365}
+            id="returns-days"
+            {...form.register("withdrawal_days")}
+          />
         </Field>
         {/* The rule in words where a control was: since 1.1.2026 the shopper never pays it (MSY md. 12) */}
         <div className="flex flex-col gap-2">

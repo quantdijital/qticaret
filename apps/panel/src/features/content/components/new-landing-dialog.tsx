@@ -10,6 +10,7 @@ import type { PickerOption } from "@/components/patterns/search-picker"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -80,52 +81,54 @@ export function NewLandingDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent size="sm">
         <DialogHeader>
           <DialogTitle>{t("content.add.landing")}</DialogTitle>
           <DialogDescription>{t("content.landing.addHint")}</DialogDescription>
         </DialogHeader>
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-6"
           onSubmit={(event) => {
             event.preventDefault()
             submit()
           }}
         >
-          <Field label={t("content.landing.category")} htmlFor="landing-category" required>
-            <SearchPicker
-              id="landing-category"
-              value={category}
-              onChange={setCategory}
-              search={searchCategories}
-              queryKey={["landings", "category-options"]}
-              placeholder={t("content.landing.pickCategory")}
-              empty={t("content.editor.card.none")}
-            />
-          </Field>
-          <Field label={t("content.landing.facet")} htmlFor="landing-facet" required>
-            <FacetSelect
-              id="landing-facet"
-              value={facet}
-              onChange={setFacet}
-              catalog={catalog.data}
-            />
-          </Field>
-          <Field
-            label={t("content.fields.title")}
-            htmlFor="landing-title"
-            error={failure ?? undefined}
-            required
-          >
-            <Input
-              id="landing-title"
-              value={title}
-              maxLength={200}
-              onChange={(event) => {
-                setTitle(event.target.value)
-              }}
-            />
-          </Field>
+          <DialogBody>
+            <Field label={t("content.landing.category")} htmlFor="landing-category" required>
+              <SearchPicker
+                id="landing-category"
+                value={category}
+                onChange={setCategory}
+                search={searchCategories}
+                queryKey={["landings", "category-options"]}
+                placeholder={t("content.landing.pickCategory")}
+                empty={t("content.editor.card.none")}
+              />
+            </Field>
+            <Field label={t("content.landing.facet")} htmlFor="landing-facet" required>
+              <FacetSelect
+                id="landing-facet"
+                value={facet}
+                onChange={setFacet}
+                catalog={catalog.data}
+              />
+            </Field>
+            <Field
+              label={t("content.fields.title")}
+              htmlFor="landing-title"
+              error={failure ?? undefined}
+              required
+            >
+              <Input
+                id="landing-title"
+                value={title}
+                maxLength={200}
+                onChange={(event) => {
+                  setTitle(event.target.value)
+                }}
+              />
+            </Field>
+          </DialogBody>
           <DialogFooter>
             <Button type="button" variant="outline" disabled={create.isPending} onClick={close}>
               {t("common.cancel")}

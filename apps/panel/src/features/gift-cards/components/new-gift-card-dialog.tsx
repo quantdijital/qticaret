@@ -4,9 +4,11 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Field } from "@/components/patterns/form-section"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -73,21 +75,18 @@ function GiftCardFields({
   return (
     <>
       <Field label={t("giftCards.value")} htmlFor="gift-card-value" error={error} required>
-        <div className="relative w-40">
-          <Input
-            id="gift-card-value"
-            inputMode="decimal"
-            autoFocus
-            className="pr-8 text-right tabular-nums"
-            value={draft.value}
-            onChange={(event) => {
-              onChange({ ...draft, value: event.target.value })
-            }}
-          />
-          <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-muted-foreground">
-            ₺
-          </span>
-        </div>
+        <NumberField
+          id="gift-card-value"
+          decimals={2}
+          min={0}
+          suffix="₺"
+          autoFocus
+          className="w-48"
+          value={draft.value}
+          onChange={(event) => {
+            onChange({ ...draft, value: event.target.value })
+          }}
+        />
       </Field>
       <Field label={t("giftCards.note")} htmlFor="gift-card-note" hint={t("giftCards.noteHint")}>
         <Input
@@ -128,20 +127,22 @@ function NewCardForm({
   }
   return (
     <form
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-6"
       onSubmit={(event) => {
         event.preventDefault()
         submit()
       }}
     >
-      <GiftCardFields
-        draft={draft}
-        error={error}
-        onChange={(next) => {
-          setDraft(next)
-          setError(undefined)
-        }}
-      />
+      <DialogBody>
+        <GiftCardFields
+          draft={draft}
+          error={error}
+          onChange={(next) => {
+            setDraft(next)
+            setError(undefined)
+          }}
+        />
+      </DialogBody>
       <DialogFooter>
         <Button type="button" variant="outline" disabled={create.isPending} onClick={onCancel}>
           {t("common.cancel")}
@@ -179,7 +180,7 @@ export function NewGiftCardDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent size="sm">
         <DialogHeader>
           <DialogTitle>{t("giftCards.new")}</DialogTitle>
           <DialogDescription>{t("giftCards.newHint")}</DialogDescription>

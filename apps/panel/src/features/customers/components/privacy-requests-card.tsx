@@ -7,6 +7,7 @@ import { SectionCard } from "@/components/patterns/section-card"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -69,7 +70,7 @@ function RecordDialog({ customerId, onClose }: { customerId: string; onClose: ()
     >
       <DialogContent>
         <form
-          className="flex flex-col gap-5"
+          className="flex flex-col gap-6"
           onSubmit={(event) => {
             event.preventDefault()
             submit()
@@ -79,59 +80,61 @@ function RecordDialog({ customerId, onClose }: { customerId: string; onClose: ()
             <DialogTitle>{t(`${P}.recordTitle`)}</DialogTitle>
             <DialogDescription>{t(`${P}.recordHint`)}</DialogDescription>
           </DialogHeader>
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            value={kind}
-            aria-label={t(`${P}.kind`)}
-            onValueChange={(next) => {
-              if (next) {
-                setKind(next as PrivacyRequest["kind"])
-              }
-            }}
-            className="w-full"
-          >
-            <ToggleGroupItem value="export" className="flex-1">
-              {t(`${P}.kinds.export`)}
-            </ToggleGroupItem>
-            <ToggleGroupItem value="erasure" className="flex-1">
-              {t(`${P}.kinds.erasure`)}
-            </ToggleGroupItem>
-          </ToggleGroup>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="privacy-channel">{t(`${P}.channel`)}</Label>
-              <Select
-                value={channel}
-                onValueChange={(next) => {
-                  setChannel(next as PrivacyRequest["channel"])
-                }}
-              >
-                <SelectTrigger id="privacy-channel" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRIVACY_CHANNELS.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {t(`${P}.channels.${option}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <DialogBody>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              value={kind}
+              aria-label={t(`${P}.kind`)}
+              onValueChange={(next) => {
+                if (next) {
+                  setKind(next as PrivacyRequest["kind"])
+                }
+              }}
+              className="w-full"
+            >
+              <ToggleGroupItem value="export" className="flex-1">
+                {t(`${P}.kinds.export`)}
+              </ToggleGroupItem>
+              <ToggleGroupItem value="erasure" className="flex-1">
+                {t(`${P}.kinds.erasure`)}
+              </ToggleGroupItem>
+            </ToggleGroup>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="privacy-channel">{t(`${P}.channel`)}</Label>
+                <Select
+                  value={channel}
+                  onValueChange={(next) => {
+                    setChannel(next as PrivacyRequest["channel"])
+                  }}
+                >
+                  <SelectTrigger id="privacy-channel" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PRIVACY_CHANNELS.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {t(`${P}.channels.${option}`)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="privacy-received">{t(`${P}.receivedOn`)}</Label>
+                <Input
+                  id="privacy-received"
+                  type="date"
+                  max={today()}
+                  value={received}
+                  onChange={(event) => {
+                    setReceived(event.target.value)
+                  }}
+                />
+              </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="privacy-received">{t(`${P}.receivedOn`)}</Label>
-              <Input
-                id="privacy-received"
-                type="date"
-                max={today()}
-                value={received}
-                onChange={(event) => {
-                  setReceived(event.target.value)
-                }}
-              />
-            </div>
-          </div>
+          </DialogBody>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               {t("common.cancel")}

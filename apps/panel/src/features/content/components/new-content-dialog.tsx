@@ -8,6 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -69,46 +70,48 @@ export function NewContentDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent size="sm">
         <DialogHeader>
           <DialogTitle>{t(`content.add.${kind}`)}</DialogTitle>
           <DialogDescription>{t("content.addHint")}</DialogDescription>
         </DialogHeader>
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-6"
           onSubmit={(event) => {
             event.preventDefault()
             submit()
           }}
         >
-          <Field
-            label={t("content.fields.title")}
-            htmlFor="content-new-title"
-            error={failure ?? undefined}
-            required
-          >
-            <Input
-              id="content-new-title"
-              value={title}
-              autoFocus
-              maxLength={200}
-              onChange={(event) => {
-                setTitle(event.target.value)
-              }}
-            />
-          </Field>
-          {kind === "page" && looksLikeLegalText(title) ? (
-            <Alert>
-              <Scale aria-hidden="true" />
-              <AlertTitle>{t("content.legal.title")}</AlertTitle>
-              <AlertDescription>
-                <p>{t("content.legal.text")}</p>
-                <Link to="/settings/legal" className="font-medium underline underline-offset-4">
-                  {t("content.legal.link")}
-                </Link>
-              </AlertDescription>
-            </Alert>
-          ) : null}
+          <DialogBody>
+            <Field
+              label={t("content.fields.title")}
+              htmlFor="content-new-title"
+              error={failure ?? undefined}
+              required
+            >
+              <Input
+                id="content-new-title"
+                value={title}
+                autoFocus
+                maxLength={200}
+                onChange={(event) => {
+                  setTitle(event.target.value)
+                }}
+              />
+            </Field>
+            {kind === "page" && looksLikeLegalText(title) ? (
+              <Alert>
+                <Scale aria-hidden="true" />
+                <AlertTitle>{t("content.legal.title")}</AlertTitle>
+                <AlertDescription>
+                  <p>{t("content.legal.text")}</p>
+                  <Link to="/settings/legal" className="font-medium underline underline-offset-4">
+                    {t("content.legal.link")}
+                  </Link>
+                </AlertDescription>
+              </Alert>
+            ) : null}
+          </DialogBody>
           <DialogFooter>
             <Button type="button" variant="outline" disabled={create.isPending} onClick={close}>
               {t("common.cancel")}

@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { parseMoneyInput } from "@/lib/money-input"
@@ -11,18 +12,14 @@ import type { WizardValues } from "../schema"
 function PriceInput({ index, label }: { index: number; label: string }) {
   const { register } = useFormContext<WizardValues>()
   return (
-    <div className="relative">
-      <Input
-        inputMode="decimal"
-        aria-label={label}
-        placeholder="0,00"
-        className="pr-7 text-right tabular-nums"
-        {...register(`variants.${index}.price`)}
-      />
-      <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-xs text-muted-foreground">
-        ₺
-      </span>
-    </div>
+    <NumberField
+      decimals={2}
+      min={0}
+      suffix="₺"
+      aria-label={label}
+      placeholder="0,00"
+      {...register(`variants.${index}.price`)}
+    />
   )
 }
 
@@ -44,11 +41,10 @@ export function SingleVariant() {
         error={message(errors?.stock?.message)}
         hint={manage ? undefined : t("products.wizard.stockUntracked")}
       >
-        <Input
+        <NumberField
           id="variant-stock"
-          inputMode="numeric"
+          min={0}
           disabled={!manage}
-          className="tabular-nums"
           {...register("variants.0.stock")}
         />
       </Field>
@@ -84,12 +80,15 @@ function BulkPrice() {
   return (
     <div className="flex flex-wrap items-center gap-2">
       <span className="text-sm text-muted-foreground">{t("products.wizard.bulkPrice")}</span>
-      <Input
+      <NumberField
+        size="compact"
+        decimals={2}
+        min={0}
+        suffix="₺"
         value={text}
-        inputMode="decimal"
         placeholder="0,00"
         aria-label={t("products.wizard.bulkPrice")}
-        className="h-8 w-28 text-right tabular-nums"
+        className="w-36"
         onChange={(event) => {
           setText(event.target.value)
         }}
@@ -125,12 +124,12 @@ export function VariantsTable() {
         <BulkPrice />
       </div>
       <div className="overflow-x-auto rounded-lg border">
-        <table className="w-full min-w-[44rem] text-sm">
+        <table className="w-full min-w-[50rem] text-sm">
           <thead className="bg-muted/60">
             <tr>
               <th className={headClass}>{t("products.wizard.variant")}</th>
-              <th className={cn(headClass, "w-36")}>{t("products.wizard.price")}</th>
-              <th className={cn(headClass, "w-28")}>{t("products.wizard.stock")}</th>
+              <th className={cn(headClass, "w-44")}>{t("products.wizard.price")}</th>
+              <th className={cn(headClass, "w-36")}>{t("products.wizard.stock")}</th>
               <th className={cn(headClass, "w-40")}>{t("products.wizard.sku")}</th>
               <th className={cn(headClass, "w-40")}>{t("products.wizard.ean")}</th>
             </tr>
@@ -164,11 +163,10 @@ export function VariantsTable() {
                     />
                   </td>
                   <td className="px-3 py-2">
-                    <Input
-                      inputMode="numeric"
+                    <NumberField
+                      min={0}
                       disabled={!manage}
                       aria-label={`${variant.title} ${t("products.wizard.stock")}`}
-                      className="tabular-nums"
                       {...register(`variants.${index}.stock`)}
                     />
                   </td>

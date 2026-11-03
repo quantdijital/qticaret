@@ -92,7 +92,7 @@ export function TeamInvitesCard({ invites }: { invites: readonly TeamInvite[] })
           }
         }}
       >
-        <DialogContent className="sm:max-w-lg">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>{t(`${T}.resentTitle`)}</DialogTitle>
             <DialogDescription>{t(`${T}.invitedHint`)}</DialogDescription>

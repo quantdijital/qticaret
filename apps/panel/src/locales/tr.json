@@ -22,7 +22,9 @@
     "clear": "Temizle",
     "more": "Diğer işlemler",
     "notifications": "Bildirimler",
-    "previous": "Önceki"
+    "previous": "Önceki",
+    "increase": "Artır",
+    "decrease": "Azalt"
   },
   "errors": {
     "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
@@ -3568,6 +3570,7 @@
         "title": "İade ya da değişim talebi aç",
         "description": "Müşteri adına açılır: aynı kurallar geçerli, müşteriye e-posta gider ve talep İade talepleri kuyruğunda bekler.",
         "kind": "Talep türü",
+        "lines": "Ürünler",
         "return": "İade",
         "exchange": "Değişim",
         "left_one": "{{count}} adet iade edilebilir",
@@ -3609,6 +3612,8 @@
       "priceOf": "{{name}} birim fiyatı",
       "remove": "{{name}} kalemini çıkar",
       "shopPrice": "Mağaza fiyatı",
+      "linesTitle": "Siparişteki ürünler",
+      "addTitle": "Ürün ekle",
       "addLabel": "Eklenecek ürün",
       "addPlaceholder": "Eklenecek ürünü arayın",
       "addEmpty": "Ürün bulunamadı.",

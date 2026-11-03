@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { cleanup, render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import "@/lib/i18n"
 import {
@@ -8,14 +8,30 @@ import {
   AlertDialogFooter,
   AlertDialogTitle,
 } from "./alert-dialog"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogTitle } from "./dialog"
+import {
+  Dialog,
+  DialogBody,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogSection,
+  DialogTitle,
+} from "./dialog"
+import type { DialogSize } from "./dialog"
 
-function renderDialog(className?: string) {
+function renderDialog(size?: DialogSize) {
   render(
     <Dialog open>
-      <DialogContent className={className}>
+      <DialogContent {...(size ? { size } : {})}>
         <DialogTitle>Başlık</DialogTitle>
         <DialogDescription>Açıklama</DialogDescription>
+        <DialogBody list>
+          <DialogSection title="Ürünler">
+            <ul>
+              <li>Şef bıçağı</li>
+            </ul>
+          </DialogSection>
+        </DialogBody>
         <DialogFooter>
           <button type="button">Kaydet</button>
         </DialogFooter>
@@ -43,17 +59,31 @@ describe("DialogContent", () => {
     expectHeld(renderDialog().box)
   })
 
-  it("keeps all that when a dialog only sets its width", () => {
-    const { box } = renderDialog("sm:max-w-3xl")
-    expectHeld(box)
-    expect(box).toHaveClass("sm:max-w-3xl")
-    expect(box).not.toHaveClass("sm:max-w-lg")
+  it("is a form's width unless its size says otherwise, and keeps all that", () => {
+    const { box } = renderDialog()
+    expect(box).toHaveAttribute("data-size", "md")
+    expect(box).toHaveClass("sm:max-w-(--dialog-width-md)")
+    cleanup()
+    const wide = renderDialog("lg").box
+    expectHeld(wide)
+    expect(wide).toHaveClass("sm:max-w-(--dialog-width-lg)")
+    expect(wide).not.toHaveClass("sm:max-w-(--dialog-width-md)")
+  })
+
+  it("gives room around and between its parts (the owner, 2026-11-03: ferah)", () => {
+    const { box } = renderDialog()
+    // 24 px apart, inside 24 px of padding on a phone and 32 px from `sm` up
+    expect(box).toHaveClass("gap-6", "p-6", "sm:p-8")
+    // A one-line list does not leave a strip; its section is named
+    expect(box.querySelector("[data-slot=dialog-body]")).toHaveClass("gap-5", "sm:min-h-44")
+    expect(screen.getByRole("heading", { level: 3, name: "Ürünler" })).toBeInTheDocument()
   })
 
   it("pins its footer to the box's bottom edge over what scrolls under it", () => {
     const { footer } = renderDialog()
     // `-bottom-6`: the browser sticks it inside the box's padding, which it covers
     expect(footer).toHaveClass("sticky", "-bottom-6", "-mb-6", "pb-6", "bg-background")
+    expect(footer).toHaveClass("sm:-bottom-8", "sm:-mb-8", "sm:pb-8")
   })
 })
 
@@ -71,6 +101,8 @@ describe("AlertDialogContent", () => {
       </AlertDialog>
     )
     expectHeld(screen.getByRole("alertdialog"))
+    // A confirm is the narrowest dialog
+    expect(screen.getByRole("alertdialog")).toHaveClass("sm:max-w-(--dialog-width-sm)")
     expect(
       screen.getByRole("button", { name: "Sil" }).closest("[data-slot=alert-dialog-footer]")
     ).toHaveClass("sticky", "-bottom-6")

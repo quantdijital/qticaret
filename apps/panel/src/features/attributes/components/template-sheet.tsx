@@ -78,7 +78,7 @@ export function TemplateSheet({ template, open, onOpenChange }: TemplateSheetPro
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl">
-        <SheetHeader className="border-b px-6 py-4">
+        <SheetHeader className="border-b">
           <SheetTitle>{template ? template.name : t("attributes.newTemplate")}</SheetTitle>
           <SheetDescription>{t("attributes.templateHint")}</SheetDescription>
         </SheetHeader>
@@ -89,7 +89,7 @@ export function TemplateSheet({ template, open, onOpenChange }: TemplateSheetPro
             onSubmit={(event) => {
               void submit(event)
             }}
-            className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-5"
+            className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-6"
           >
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label={t("attributes.templateName")} htmlFor="template-name" required>
@@ -147,7 +147,7 @@ export function TemplateSheet({ template, open, onOpenChange }: TemplateSheetPro
             </div>
           </form>
         </FormProvider>
-        <SheetFooter className="flex-row items-center justify-between border-t px-6 py-3">
+        <SheetFooter className="flex-row items-center justify-between border-t">
           {template ? (
             <Button
               type="button"

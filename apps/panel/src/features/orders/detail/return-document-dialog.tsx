@@ -94,7 +94,7 @@ export function ReturnDocumentDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t(`${R}.enterTitle.${document}`)}</DialogTitle>
           <DialogDescription>{t(`${R}.enterHint.${document}`)}</DialogDescription>

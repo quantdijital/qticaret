@@ -6,8 +6,8 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { useSaveSection } from "@/features/settings/api/sections"
 import type { ShippingSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
@@ -80,19 +80,21 @@ export function DeliveryCard({ saved }: { saved: ShippingSettings }) {
           : undefined
       }
     >
-      <span className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Input
+      <span className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+        <NumberField
+          min={0}
+          max={99}
           id={`shipping-${kind}-min`}
-          inputMode="numeric"
           aria-label={t(`${S}.min`)}
-          className="w-20"
+          className="w-36"
           {...form.register(`${kind}_days_min`)}
         />
         –
-        <Input
-          inputMode="numeric"
+        <NumberField
+          min={0}
+          max={99}
           aria-label={t(`${S}.max`)}
-          className="w-20"
+          className="w-36"
           {...form.register(`${kind}_days_max`)}
         />
         {t(`${S}.days`)}
@@ -196,25 +198,27 @@ export function RatesCard({ saved }: { saved: ShippingSettings }) {
               className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground"
             >
               {t(`${S}.upTo`)}
-              <Input
-                inputMode="decimal"
+              <NumberField
+                decimals={1}
+                min={0}
                 aria-label={t(`${S}.maxDesi`, { number: index + 1 })}
                 aria-invalid={Boolean(errors.rows?.[index]?.max_desi)}
-                className="w-20"
+                className="w-32"
                 {...form.register(`rows.${index}.max_desi`)}
               />
               {t(`${S}.desi`)}
-              <Input
-                inputMode="decimal"
+              <NumberField
+                decimals={2}
+                min={0}
+                suffix="₺"
                 aria-label={t(`${S}.priceOf`, { number: index + 1 })}
                 aria-invalid={Boolean(errors.rows?.[index]?.price)}
-                className="w-28"
+                className="w-40"
                 {...form.register(`rows.${index}.price`)}
               />
-              TL
               <Button
                 type="button"
-                size="icon-sm"
+                size="icon"
                 variant="ghost"
                 aria-label={t(`${S}.removeRate`, { number: index + 1 })}
                 onClick={() => {
@@ -247,10 +251,11 @@ export function RatesCard({ saved }: { saved: ShippingSettings }) {
         hint={t(`${S}.overHint`)}
         error={errors.over?.message ? t(errors.over.message) : undefined}
       >
-        <Input
+        <NumberField
+          decimals={2}
+          min={0}
           id="shipping-over-desi"
-          inputMode="decimal"
-          className="w-28"
+          className="w-40"
           {...form.register("over")}
         />
       </Field>

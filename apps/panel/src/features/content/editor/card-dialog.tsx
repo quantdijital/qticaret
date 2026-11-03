@@ -63,7 +63,7 @@ export function CardDialog({
       }}
     >
       {kind ? (
-        <DialogContent className="sm:max-w-md">
+        <DialogContent size="sm">
           <DialogHeader>
             <DialogTitle>{t(`content.editor.card.add.${kind}`)}</DialogTitle>
             <DialogDescription>{t("content.editor.card.hint")}</DialogDescription>

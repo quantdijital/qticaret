@@ -7,6 +7,7 @@ import { z } from "zod"
 import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
+import { NumberField } from "@/components/patterns/number-field"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { useSaveSection } from "@/features/settings/api/sections"
@@ -120,13 +121,12 @@ function AccountFields({ form }: { form: UseFormReturn<AccountInput, unknown, Ac
         hint={t(`${B}.deadlineHint`)}
         error={message(errors.deadline_hours?.message)}
       >
-        <Input
+        <NumberField
+          plain
           id="bank-deadline"
-          type="number"
-          inputMode="numeric"
           min={1}
           max={336}
-          className="w-32"
+          className="w-40"
           {...form.register("deadline_hours")}
         />
       </Field>

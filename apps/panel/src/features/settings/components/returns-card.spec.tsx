@@ -30,7 +30,7 @@ describe("ReturnsCard", () => {
 
   it("refuses fewer days than the law's 14, and saves a longer period", async () => {
     renderCard()
-    const days = await screen.findByRole("textbox", { name: "Cayma süresi (gün)" })
+    const days = await screen.findByRole("spinbutton", { name: "Cayma süresi (gün)" })
     expect(days).toHaveValue("14")
 
     await userEvent.clear(days)
@@ -53,7 +53,7 @@ describe("ReturnsCard", () => {
 
   it("says the return's shipping is the shop's by law, with no control to choose", async () => {
     renderCard()
-    await screen.findByRole("textbox", { name: "Cayma süresi (gün)" })
+    await screen.findByRole("spinbutton", { name: "Cayma süresi (gün)" })
 
     expect(
       screen.getByText(
@@ -67,7 +67,7 @@ describe("ReturnsCard", () => {
   // The form keeps dirty values on a background refetch; undo must not
   it("puts back what was saved on undo, even in a field typed in", async () => {
     renderCard()
-    const days = await screen.findByRole("textbox", { name: "Cayma süresi (gün)" })
+    const days = await screen.findByRole("spinbutton", { name: "Cayma süresi (gün)" })
 
     await userEvent.clear(days)
     await userEvent.type(days, "30")
@@ -82,7 +82,7 @@ describe("ReturnsCard", () => {
 
   it("shows what the server stored after a save, not the text typed", async () => {
     renderCard()
-    const days = await screen.findByRole("textbox", { name: "Cayma süresi (gün)" })
+    const days = await screen.findByRole("spinbutton", { name: "Cayma süresi (gün)" })
 
     await userEvent.clear(days)
     await userEvent.type(days, "030")

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { Field } from "@/components/patterns/form-section"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -131,7 +132,7 @@ export function ShippingOptionDialog({
   })
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent size="sm">
         <DialogHeader>
           <DialogTitle>{t(option ? `${S}.editTitle` : `${S}.addTitle`)}</DialogTitle>
           <DialogDescription>{t(`${S}.dialogDescription`)}</DialogDescription>
@@ -196,9 +197,10 @@ export function ShippingOptionDialog({
               hint={t(`${S}.amountHint`)}
               error={errors.amount?.message ? t(errors.amount.message) : undefined}
             >
-              <Input
+              <NumberField
+                decimals={2}
+                min={0}
                 id="shipping-option-amount"
-                inputMode="decimal"
                 className="w-40"
                 {...form.register("amount")}
               />

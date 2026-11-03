@@ -33,7 +33,7 @@ export function AddSectionDialog({
   const { t } = useTranslation()
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent size="lg">
         <DialogHeader>
           <DialogTitle>{t(`${A}.title`)}</DialogTitle>
           <DialogDescription>

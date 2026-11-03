@@ -10,6 +10,7 @@ import { Field } from "@/components/patterns/form-section"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -95,45 +96,47 @@ function LocationFormBody({ location, onDone }: { location: Location | null; onD
   const isBusy = isSubmitting || save.isPending
   return (
     <form
-      className="flex flex-col gap-5"
+      className="flex flex-col gap-6"
       noValidate
       onSubmit={(event) => {
         void submit(event)
       }}
     >
-      <Field
-        label={t("settings.locations.form.name")}
-        htmlFor="location-name"
-        hint={t("settings.locations.form.nameHint")}
-        error={message(errors.name?.message)}
-        required
-      >
-        <Input id="location-name" autoComplete="off" maxLength={100} {...form.register("name")} />
-      </Field>
-      {isForeign ? (
-        <p className="flex items-start gap-2 rounded-md bg-muted px-3 py-2.5 text-[13px] text-muted-foreground">
-          <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          {t("settings.locations.form.foreign")}
-        </p>
-      ) : (
-        <TrAddressFields
-          control={form.control}
-          idPrefix="location"
-          errors={{
-            address_1: message(errors.address_1?.message),
-            address_2: message(errors.address_2?.message),
-            province: message(errors.province?.message),
-            city: message(errors.city?.message),
-            postal_code: message(errors.postal_code?.message),
-            phone: message(errors.phone?.message),
-          }}
-        />
-      )}
-      {failure ? (
-        <p role="alert" className="text-sm text-destructive-text">
-          {failure}
-        </p>
-      ) : null}
+      <DialogBody>
+        <Field
+          label={t("settings.locations.form.name")}
+          htmlFor="location-name"
+          hint={t("settings.locations.form.nameHint")}
+          error={message(errors.name?.message)}
+          required
+        >
+          <Input id="location-name" autoComplete="off" maxLength={100} {...form.register("name")} />
+        </Field>
+        {isForeign ? (
+          <p className="flex items-start gap-2 rounded-md bg-muted px-3 py-2.5 text-[13px] text-muted-foreground">
+            <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+            {t("settings.locations.form.foreign")}
+          </p>
+        ) : (
+          <TrAddressFields
+            control={form.control}
+            idPrefix="location"
+            errors={{
+              address_1: message(errors.address_1?.message),
+              address_2: message(errors.address_2?.message),
+              province: message(errors.province?.message),
+              city: message(errors.city?.message),
+              postal_code: message(errors.postal_code?.message),
+              phone: message(errors.phone?.message),
+            }}
+          />
+        )}
+        {failure ? (
+          <p role="alert" className="text-sm text-destructive-text">
+            {failure}
+          </p>
+        ) : null}
+      </DialogBody>
       <DialogFooter>
         <Button type="button" variant="outline" onClick={onDone}>
           {t("common.cancel")}
@@ -161,7 +164,7 @@ export function LocationDialog({
   const { t } = useTranslation()
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>
             {t(location ? "settings.locations.form.editTitle" : "settings.locations.form.title")}

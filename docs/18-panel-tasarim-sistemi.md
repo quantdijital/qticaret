@@ -50,7 +50,7 @@ Sürümler `apps/panel/package.json`'da exact ve ≥14 gün kuralıyla (docs/04)
   - Hiçbir kartın yanında ya da altında anlamsız boşluk kalmaz; uzun içerik kendi sekmesine taşınır (Raporlar).
   - `e2e/layout.e2e.ts` her sayfayı masaüstü genişlikte ölçer; ihlal testi kırar.
 - `e2e/shell.e2e.ts` (2026-11-03): her sayfa üç ekran boyunda sonuna kaydırılır; içeriğin bittiği yerle ekranın altı arasında sayfa arka planı dışında bir alan, yüzey–kanvas farkı ya da yatay kaydırma olamaz; listelerin ilk kaydı da açılır, kayıt yoksa atlanır. Ayarlar menüsü lg+'da yapışkan ve kendi içinde kayar (sayfa yalnız kendi içeriği kadar uzundur).
-- Diyalog ve sheet'ler (2026-11-03): paylaşılan `DialogContent` tek sütun `grid-cols-[minmax(0,1fr)]` (içerik kutuyu genişletemez), ekrandan uzunsa içinde kayar, alt bilgi yapışkan; <640 px'te alt kenardan tam genişlik sheet (içeriği kadar, en çok ekran). Radix onay kutusu/radyo/anahtar/seçim satırı `relative` (gizli mutlak input kaydırılan listeden kaçmasın — `globals.css`). `e2e/dialogs.e2e.ts` 11 diyaloğu 1440 ve 390'da açıp taşma/kırpılma ölçer.
+- Diyalog ve sheet'ler (2026-11-03): paylaşılan `DialogContent` tek sütun `grid-cols-[minmax(0,1fr)]` (içerik kutuyu genişletemez), ekrandan uzunsa içinde kayar, alt bilgi yapışkan; <640 px'te alt kenardan tam genişlik sheet (içeriği kadar, en çok ekran). Radix onay kutusu/radyo/anahtar/seçim satırı `relative` (gizli mutlak input kaydırılan listeden kaçmasın — `globals.css`). `e2e/dialogs.e2e.ts` 11 diyaloğu 1440 ve 390'da açıp taşma/kırpılma ölçer. Ferah düzen (2026-11-03, "ince ve geniş"): genişlik `size` ile (§4.3), iç boşluk 24 px (telefon) / 32 px, başlık–gövde–alt bilgi arası 24 px, gövde parçaları `DialogBody` içinde 20 px, uzun diyalogda `DialogSection` başlıkları, satırlar 48 px, satır listeli diyalog `DialogBody list` ile en az 176 px gövde; sheet'ler aynı 24 px kenar boşluğunu kullanır. Sayı alanı yalnızca `NumberField` (`components/patterns`): tarayıcı oku yok, lucide `Minus`/`Plus` çifti 36 px (`compact` 32 px, satırlar için), birim eki (₺, %, cm), Türkçe ondalık; `type="number"` kullanan çıplak input `house-rules.spec.ts`'te kırılır.
 
 ---
 
@@ -97,7 +97,7 @@ Tek kaynak: `apps/panel/src/theme/tokens.css`. Üç katman; bileşenler yalnızc
 | `--layout-topbar-height` | 56 px | sabit |
 | `--page-padding`, `--page-padding-wide`, `--grid-gap` | 24 / 32 / 16 px | sabit. İçerik tam genişlik kullanır (üst sınır yok, kullanıcı kararı 2026-10-25); okunabilirlik 12 kolonlu ızgara ve kart genişlikleriyle sağlanır |
 | `--chart-muted`, `--chart-grid`, `--chart-canceled`, `--chart-ramp-1..4` | motor türetir | grafik: karşılaştırma serisi, ızgara, iptal, sıralı aşama rampası (akromatik markada gri rampa) |
-| `--dialog-width-sm/md/lg` | 420 / 560 / 760 px | sabit |
+| `--dialog-width-sm/md/lg/xl` | 448 / 512 / 672 / 768 px | sabit; `DialogContent size`: onay ve kısa form / form ve satır listesi (varsayılan) / tablo ya da iki sütun / geniş seçici ya da önizleme |
 | `--overlay` | nötr-900 %40 | sabit |
 | `--shadow-overlay` | tek gölge | sabit |
 | `--focus-ring` | marka, 2 px, 2 px ofset | sabit. Yalnızca klavyeyle (Tab) gezerken düğme benzeri kontrollerde görünür; yazı alanlarında halka ya da renkli kenarlık yok, fare/dokunmada hiç yok (`lib/input-mode.ts`, kullanıcı kararı 2026-10-28) |

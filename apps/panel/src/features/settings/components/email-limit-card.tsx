@@ -4,8 +4,8 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SectionCard } from "@/components/patterns/section-card"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { NotificationSettings } from "@/features/settings/api/sections"
@@ -53,10 +53,12 @@ export function EmailLimitCard() {
             <label htmlFor="email-daily-limit" className="text-sm font-medium">
               {t(`${L}.label`)}
             </label>
-            <Input
+            <NumberField
+              min={100}
+              max={200_000}
+              step={100}
               id="email-daily-limit"
-              inputMode="numeric"
-              className="w-32 tabular-nums"
+              className="w-40"
               value={text}
               aria-invalid={!valid || undefined}
               onChange={(event) => {

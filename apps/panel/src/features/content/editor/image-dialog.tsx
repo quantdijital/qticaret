@@ -7,6 +7,7 @@ import { Field } from "@/components/patterns/form-section"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -49,7 +50,7 @@ function ImageForm({ editor, onDone }: { editor: Editor; onDone: () => void }) {
     }
   }
   return (
-    <DialogContent className="sm:max-w-md">
+    <DialogContent size="sm">
       <DialogHeader>
         <DialogTitle>
           {t(selected ? "content.editor.image.editTitle" : "content.editor.image.title")}
@@ -57,38 +58,40 @@ function ImageForm({ editor, onDone }: { editor: Editor; onDone: () => void }) {
         <DialogDescription>{t("content.editor.image.hint")}</DialogDescription>
       </DialogHeader>
       <form
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-6"
         onSubmit={(event) => {
           event.preventDefault()
           void submit()
         }}
       >
-        {selected ? null : (
-          <Field label={t("content.editor.image.file")} htmlFor="content-image-file" required>
+        <DialogBody>
+          {selected ? null : (
+            <Field label={t("content.editor.image.file")} htmlFor="content-image-file" required>
+              <Input
+                id="content-image-file"
+                type="file"
+                accept={IMAGE_ACCEPT}
+                onChange={(event) => {
+                  setFile(event.target.files?.[0] ?? null)
+                }}
+              />
+            </Field>
+          )}
+          <Field
+            label={t("content.editor.image.alt")}
+            htmlFor="content-image-alt"
+            hint={t("content.editor.image.altHint")}
+          >
             <Input
-              id="content-image-file"
-              type="file"
-              accept={IMAGE_ACCEPT}
+              id="content-image-alt"
+              value={alt}
+              maxLength={500}
               onChange={(event) => {
-                setFile(event.target.files?.[0] ?? null)
+                setAlt(event.target.value)
               }}
             />
           </Field>
-        )}
-        <Field
-          label={t("content.editor.image.alt")}
-          htmlFor="content-image-alt"
-          hint={t("content.editor.image.altHint")}
-        >
-          <Input
-            id="content-image-alt"
-            value={alt}
-            maxLength={500}
-            onChange={(event) => {
-              setAlt(event.target.value)
-            }}
-          />
-        </Field>
+        </DialogBody>
         <DialogFooter>
           <Button type="submit" disabled={busy || (!selected && !file)}>
             {busy ? <Loader2 className="animate-spin" /> : null}

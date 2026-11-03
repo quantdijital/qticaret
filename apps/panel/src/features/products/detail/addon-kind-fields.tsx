@@ -2,6 +2,7 @@ import type { FieldError } from "react-hook-form"
 import { Controller, useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
+import { NumberField } from "@/components/patterns/number-field"
 import { Input } from "@/components/ui/input"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { ADDON_CHARSETS, ADDON_LIMITS } from "@/features/products/api/addons"
@@ -10,7 +11,7 @@ import { emptyChoice } from "./addon-values"
 import type { AddonDraft } from "./addon-values"
 
 const A = "products.addons"
-const CHOICE_GRID = "grid grid-cols-[minmax(0,1fr)_7rem_auto] items-start gap-2"
+const CHOICE_GRID = "grid grid-cols-[minmax(0,1fr)_10rem_auto] items-start gap-2"
 
 /** A field's error key in words; undefined while it holds none. */
 function useErrorText() {
@@ -34,9 +35,12 @@ export function TextRules() {
           hint={t(`${A}.priceHint`)}
           error={errorText(errors.price)}
         >
-          <Input
+          <NumberField
+            decimals={2}
+            min={0}
+            max={ADDON_LIMITS.price}
+            suffix="₺"
             id="addon-price"
-            inputMode="decimal"
             placeholder="0,00"
             aria-invalid={Boolean(errors.price)}
             {...register("price")}
@@ -48,9 +52,10 @@ export function TextRules() {
           hint={t(`${A}.maxLengthHint`, { max: ADDON_LIMITS.textMax })}
           error={errorText(errors.max_length)}
         >
-          <Input
+          <NumberField
+            min={1}
+            max={ADDON_LIMITS.textMax}
             id="addon-max-length"
-            inputMode="numeric"
             aria-invalid={Boolean(errors.max_length)}
             {...register("max_length")}
           />
@@ -61,9 +66,10 @@ export function TextRules() {
           hint={t(`${A}.maxQuantityHint`)}
           error={errorText(errors.max_quantity)}
         >
-          <Input
+          <NumberField
+            min={1}
+            max={ADDON_LIMITS.quantityMax}
             id="addon-max-quantity"
-            inputMode="numeric"
             placeholder={t(`${A}.unlimited`)}
             aria-invalid={Boolean(errors.max_quantity)}
             {...register("max_quantity")}
@@ -139,8 +145,11 @@ export function ChoiceRows() {
                 />
               </RowCell>
               <RowCell error={priceError} errorId={`${id}-price-error`}>
-                <Input
-                  inputMode="decimal"
+                <NumberField
+                  decimals={2}
+                  min={0}
+                  max={ADDON_LIMITS.price}
+                  suffix="₺"
                   placeholder="0,00"
                   aria-label={t(`${A}.choicePriceOf`, { number })}
                   aria-invalid={Boolean(priceError)}

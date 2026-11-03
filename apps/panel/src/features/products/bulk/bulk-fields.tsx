@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
+import { NumberField } from "@/components/patterns/number-field"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { BulkAction } from "@/features/products/api/bulk"
@@ -71,9 +71,10 @@ function PriceFields({ form, onChange, error }: FieldsProps) {
             : t("products.bulk.price.hint")
         }
       >
-        <Input
+        <NumberField
+          decimals={2}
+          min={0}
           id="bulk-value"
-          inputMode="decimal"
           autoComplete="off"
           value={form.value}
           aria-invalid={error ? true : undefined}
@@ -108,9 +109,9 @@ function StockFields({ form, onChange, error }: FieldsProps) {
         hint={t("products.bulk.stock.hint")}
         error={error ? t(error) : undefined}
       >
-        <Input
+        <NumberField
+          min={0}
           id="bulk-value"
-          inputMode="numeric"
           autoComplete="off"
           value={form.value}
           aria-invalid={error ? true : undefined}

@@ -68,7 +68,7 @@ export function TermSheet({ term, onClose }: { term: Term; onClose: () => void }
       }}
     >
       <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-xl">
-        <SheetHeader className="border-b px-6 py-4">
+        <SheetHeader className="border-b">
           <SheetTitle>{term.name}</SheetTitle>
           <SheetDescription className="font-mono text-xs">{term.path}</SheetDescription>
         </SheetHeader>
@@ -98,7 +98,7 @@ export function TermSheet({ term, onClose }: { term: Term; onClose: () => void }
             </TabsContent>
           </div>
         </Tabs>
-        <SheetFooter className="flex-row items-center justify-start border-t px-6 py-3">
+        <SheetFooter className="flex-row items-center justify-start border-t">
           <Button
             type="button"
             variant="ghost"

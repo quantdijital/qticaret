@@ -68,7 +68,8 @@ function SheetContent({
       >
         {children}
         {showCloseButton && (
-          <SheetPrimitive.Close className="absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 outline-hidden focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none data-[state=open]:bg-secondary">
+          // Level with the title, as in a dialog (DIALOG_CLOSE_CLASS)
+          <SheetPrimitive.Close className="absolute top-4 right-4 flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors outline-hidden hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none">
             <XIcon className="size-4" />
             <span className="sr-only">{t("common.close")}</span>
           </SheetPrimitive.Close>
@@ -82,7 +83,8 @@ function SheetHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sheet-header"
-      className={cn("flex flex-col gap-1.5 p-4", className)}
+      // A dialog's room (docs/18): 24 px aside, clear of the close button
+      className={cn("flex flex-col gap-2 py-5 pr-14 pl-6", className)}
       {...props}
     />
   )
@@ -92,7 +94,7 @@ function SheetFooter({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="sheet-footer"
-      className={cn("mt-auto flex flex-col gap-2 p-4", className)}
+      className={cn("mt-auto flex flex-col gap-2 px-6 py-4", className)}
       {...props}
     />
   )
@@ -102,7 +104,7 @@ function SheetTitle({ className, ...props }: React.ComponentProps<typeof SheetPr
   return (
     <SheetPrimitive.Title
       data-slot="sheet-title"
-      className={cn("font-semibold text-foreground", className)}
+      className={cn("text-lg leading-snug font-semibold text-foreground", className)}
       {...props}
     />
   )

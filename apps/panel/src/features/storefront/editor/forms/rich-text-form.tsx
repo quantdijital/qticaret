@@ -69,7 +69,7 @@ export function RichTextForm({ section, problems, onChange }: SectionFormProps<R
         </Button>
       </FieldGroup>
       <Dialog open={editing} onOpenChange={setEditing}>
-        <DialogContent className="sm:max-w-3xl">
+        <DialogContent size="xl">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{t(`${T}.description`)}</DialogDescription>

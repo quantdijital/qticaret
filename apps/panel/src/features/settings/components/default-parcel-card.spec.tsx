@@ -40,7 +40,7 @@ function renderCard(saved: ShippingSettings, store: StoreSettings = STORE) {
   )
 }
 
-const input = (name: string) => screen.getByRole("textbox", { name })
+const input = (name: string) => screen.getByRole("spinbutton", { name })
 
 describe("DefaultParcelCard (adr/0054)", () => {
   beforeEach(() => {

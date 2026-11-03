@@ -3,6 +3,7 @@ import { Controller, useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
+import { NumberField } from "@/components/patterns/number-field"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -92,10 +93,11 @@ export function DiscountTab() {
             error={fieldError(errors.discountValue)}
             required
           >
-            <Input
+            <NumberField
               id="link-discount-value"
-              inputMode={type === "percentage" ? "numeric" : "decimal"}
-              className="tabular-nums"
+              decimals={type === "percentage" ? 0 : 2}
+              min={0}
+              {...(type === "percentage" ? { suffix: "%" } : {})}
               {...register("discountValue")}
             />
           </Field>

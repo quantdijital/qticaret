@@ -44,21 +44,43 @@ function DialogOverlay({
  * instead of pushing every row out of the dialog. A box taller than the
  * screen scrolls inside, its footer pinned at the bottom. On a phone it is
  * a sheet from the bottom edge, as tall as its content and at most the
- * whole screen, so its actions stay in reach.
+ * whole screen, so its actions stay in reach. Header, body and footer sit
+ * 24 px apart inside 24 px (phone) or 32 px of padding (the owner,
+ * 2026-11-03: "biraz yüksekliğini artırarak daha ferah").
  */
 export const DIALOG_CONTENT_CLASS =
-  "fixed inset-x-0 bottom-0 z-50 grid max-h-dvh w-full grid-cols-[minmax(0,1fr)] gap-4 overflow-y-auto overscroll-contain rounded-t-lg border-t bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:inset-x-auto sm:top-[50%] sm:bottom-auto sm:left-[50%] sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100%-2rem)] sm:max-w-lg sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border"
+  "fixed inset-x-0 bottom-0 z-50 grid max-h-dvh w-full grid-cols-[minmax(0,1fr)] gap-6 overflow-y-auto overscroll-contain rounded-t-lg border-t bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:inset-x-auto sm:top-[50%] sm:bottom-auto sm:left-[50%] sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100%-2rem)] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border sm:p-8"
+
+/**
+ * How wide a dialog is from `sm` up (tokens `--dialog-width-*`): `sm` a
+ * confirm or a short form, `md` a form or a list of lines, `lg` a table
+ * or two columns, `xl` a wide picker or a preview.
+ */
+export const DIALOG_SIZE_CLASS = {
+  sm: "sm:max-w-(--dialog-width-sm)",
+  md: "sm:max-w-(--dialog-width-md)",
+  lg: "sm:max-w-(--dialog-width-lg)",
+  xl: "sm:max-w-(--dialog-width-xl)",
+} as const
+
+export type DialogSize = keyof typeof DIALOG_SIZE_CLASS
 
 /** Pinned to the box's bottom edge over what scrolls under it; the box's own padding kept around it. */
 export const DIALOG_FOOTER_CLASS =
-  "sticky -bottom-6 z-10 -mx-6 -mt-4 -mb-6 flex flex-col-reverse gap-2 bg-background px-6 pt-4 pb-6 sm:flex-row sm:justify-end"
+  "sticky -bottom-6 z-10 -mx-6 -mt-4 -mb-6 flex flex-col-reverse gap-2 bg-background px-6 pt-4 pb-6 sm:-bottom-8 sm:-mx-8 sm:-mb-8 sm:flex-row sm:justify-end sm:px-8 sm:pb-8"
+
+/** The close button in the box's corner, level with the title. */
+export const DIALOG_CLOSE_CLASS =
+  "absolute top-4 right-4 flex size-8 items-center justify-center rounded-md text-muted-foreground transition-colors outline-hidden hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none sm:top-6 sm:right-6 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
 
 function DialogContent({
   className,
   children,
+  size = "md",
   showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
+  size?: DialogSize
   showCloseButton?: boolean
 }) {
   const { t } = useTranslation()
@@ -67,15 +89,13 @@ function DialogContent({
       <DialogOverlay />
       <DialogPrimitive.Content
         data-slot="dialog-content"
-        className={cn(DIALOG_CONTENT_CLASS, className)}
+        data-size={size}
+        className={cn(DIALOG_CONTENT_CLASS, DIALOG_SIZE_CLASS[size], className)}
         {...props}
       >
         {children}
         {showCloseButton && (
-          <DialogPrimitive.Close
-            data-slot="dialog-close"
-            className="absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 outline-hidden focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
-          >
+          <DialogPrimitive.Close data-slot="dialog-close" className={DIALOG_CLOSE_CLASS}>
             <XIcon />
             <span className="sr-only">{t("common.close")}</span>
           </DialogPrimitive.Close>
@@ -89,9 +109,55 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="dialog-header"
-      className={cn("flex flex-col gap-2 text-center sm:text-left", className)}
+      // Clear of the close button in the corner
+      className={cn("flex flex-col gap-2 px-6 text-center sm:px-0 sm:pr-6 sm:text-left", className)}
       {...props}
     />
+  )
+}
+
+/**
+ * What sits between the header and the footer, its parts 20 px apart.
+ * `list`: a dialog over a list of lines, held at a calm height from `sm`
+ * up so a one-line list does not leave a strip.
+ */
+function DialogBody({
+  className,
+  list = false,
+  ...props
+}: React.ComponentProps<"div"> & { list?: boolean }) {
+  return (
+    <div
+      data-slot="dialog-body"
+      className={cn("flex min-w-0 flex-col gap-5", list && "sm:min-h-44", className)}
+      {...props}
+    />
+  )
+}
+
+/** A titled part of a long dialog: what the lines below are, in a word or two. */
+function DialogSection({
+  title,
+  description,
+  className,
+  children,
+  ...props
+}: Omit<React.ComponentProps<"section">, "title"> & {
+  title: React.ReactNode
+  description?: React.ReactNode
+}) {
+  return (
+    <section
+      data-slot="dialog-section"
+      className={cn("flex min-w-0 flex-col gap-3", className)}
+      {...props}
+    >
+      <div className="flex flex-col gap-1">
+        <h3 className="text-sm font-medium">{title}</h3>
+        {description ? <p className="text-xs text-muted-foreground">{description}</p> : null}
+      </div>
+      {children}
+    </section>
   )
 }
 
@@ -120,7 +186,7 @@ function DialogTitle({ className, ...props }: React.ComponentProps<typeof Dialog
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg leading-none font-semibold", className)}
+      className={cn("text-lg leading-snug font-semibold", className)}
       {...props}
     />
   )
@@ -141,6 +207,7 @@ function DialogDescription({
 
 export {
   Dialog,
+  DialogBody,
   DialogClose,
   DialogContent,
   DialogDescription,
@@ -148,6 +215,7 @@ export {
   DialogHeader,
   DialogOverlay,
   DialogPortal,
+  DialogSection,
   DialogTitle,
   DialogTrigger,
 }

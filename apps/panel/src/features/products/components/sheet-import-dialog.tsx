@@ -95,12 +95,12 @@ export function SheetImportDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("products.sheets.importTitle")}</DialogTitle>
           <DialogDescription>{t("products.sheets.importHint")}</DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
           <div className="flex flex-col gap-1">
             <Button
               variant="link"

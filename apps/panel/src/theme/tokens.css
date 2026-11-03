@@ -89,9 +89,11 @@
   --page-padding: 1.5rem;
   --page-padding-wide: 2rem;
   --grid-gap: 1rem;
-  --dialog-width-sm: 26.25rem;
-  --dialog-width-md: 35rem;
-  --dialog-width-lg: 47.5rem;
+  /* Dialog widths (DialogContent `size`): a confirm, a form, a table or two columns, a wide picker */
+  --dialog-width-sm: 28rem;
+  --dialog-width-md: 32rem;
+  --dialog-width-lg: 42rem;
+  --dialog-width-xl: 48rem;
   --overlay: oklch(0.145 0.006 262 / 40%);
   --shadow-overlay: 0 12px 32px -8px oklch(0.145 0.006 262 / 22%);
 }

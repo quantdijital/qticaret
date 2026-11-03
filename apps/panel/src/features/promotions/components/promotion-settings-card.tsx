@@ -4,8 +4,8 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SectionCard } from "@/components/patterns/section-card"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
@@ -97,21 +97,18 @@ export function PromotionSettingsCard() {
                   <label htmlFor="free-shipping-threshold" className="text-sm font-medium">
                     {t("promotions.settings.threshold")}
                   </label>
-                  <div className="relative w-40">
-                    <Input
-                      id="free-shipping-threshold"
-                      inputMode="decimal"
-                      className="pr-8 text-right tabular-nums"
-                      value={text}
-                      aria-invalid={!valid || undefined}
-                      onChange={(event) => {
-                        setDraft(event.target.value)
-                      }}
-                    />
-                    <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-muted-foreground">
-                      ₺
-                    </span>
-                  </div>
+                  <NumberField
+                    decimals={2}
+                    min={0}
+                    className="w-44"
+                    suffix="₺"
+                    id="free-shipping-threshold"
+                    value={text}
+                    aria-invalid={!valid || undefined}
+                    onChange={(event) => {
+                      setDraft(event.target.value)
+                    }}
+                  />
                 </div>
               </div>
             ) : null}

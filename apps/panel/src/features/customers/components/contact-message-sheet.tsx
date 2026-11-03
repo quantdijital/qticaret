@@ -149,7 +149,7 @@ export function ContactMessageSheet({
         </SheetHeader>
         {message ? (
           <>
-            <div className="flex-1 overflow-y-auto px-4 pb-6">
+            <div className="flex-1 overflow-y-auto px-6 py-6">
               <dl className="divide-y">
                 <Fact label={t(`${M}.detail.name`)}>{message.name}</Fact>
                 <Fact label={t(`${M}.detail.email`)}>

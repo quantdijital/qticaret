@@ -4,6 +4,7 @@ import { Controller, useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
+import { NumberField } from "@/components/patterns/number-field"
 import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
@@ -37,17 +38,17 @@ function BuyGetFields() {
       error={error("buyCount")}
     >
       <div className="flex flex-wrap items-center gap-2 text-sm">
-        <Input
+        <NumberField
+          min={1}
           aria-label={t("promotions.form.buyCount")}
-          inputMode="numeric"
-          className="w-16 text-right tabular-nums"
+          className="w-28"
           {...register("buyCount")}
         />
         <span>{t("promotions.form.buyWord")}</span>
-        <Input
+        <NumberField
+          min={1}
           aria-label={t("promotions.form.payCount")}
-          inputMode="numeric"
-          className="w-16 text-right tabular-nums"
+          className="w-28"
           {...register("payCount")}
         />
         <span>{t("promotions.form.payWord")}</span>
@@ -109,17 +110,15 @@ export function OfferCard({ kindLocked }: { kindLocked: boolean }) {
             required
             error={error("value")}
           >
-            <div className="relative w-40">
-              <Input
-                id="promotion-value"
-                inputMode="decimal"
-                className="pr-8 text-right tabular-nums"
-                {...register("value")}
-              />
-              <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-muted-foreground">
-                {kind === "percentage" ? "%" : "₺"}
-              </span>
-            </div>
+            <NumberField
+              decimals={2}
+              min={0}
+              max={kind === "percentage" ? 100 : undefined}
+              className="w-44"
+              suffix={kind === "percentage" ? "%" : "₺"}
+              id="promotion-value"
+              {...register("value")}
+            />
           </Field>
         )}
       </div>
@@ -192,12 +191,12 @@ export function UsageCard({ datesLocked = false }: { datesLocked?: boolean }) {
             hint={t(automatic ? "promotions.form.limitAutomatic" : "promotions.form.limitHint")}
             error={error("limit")}
           >
-            <Input
+            <NumberField
+              min={1}
               id="promotion-limit"
-              inputMode="numeric"
               disabled={automatic}
               placeholder={t("promotions.form.unlimited")}
-              className="tabular-nums"
+
               {...register("limit")}
             />
           </Field>

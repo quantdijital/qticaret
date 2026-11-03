@@ -3,16 +3,17 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Field } from "@/components/patterns/form-section"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { useExtendPaymentLink } from "@/features/payment-links/api/payment-links"
 import type { PaymentLink } from "@/features/payment-links/api/types"
 import { MAX_HOURS, MIN_HOURS, hoursOf } from "@/features/payment-links/form"
@@ -41,9 +42,9 @@ export function ExtendDialog({ link, onClose }: { link: PaymentLink; onClose: ()
         }
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent size="sm">
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-6"
           noValidate
           onSubmit={(event) => {
             event.preventDefault()
@@ -72,24 +73,27 @@ export function ExtendDialog({ link, onClose }: { link: PaymentLink; onClose: ()
               })}
             </DialogDescription>
           </DialogHeader>
-          <Field
-            label={t(`${X}.hours`)}
-            htmlFor="link-extend-hours"
-            hint={t(`${X}.hoursHint`)}
-            error={failure ?? undefined}
-            required
-          >
-            <Input
-              id="link-extend-hours"
-              inputMode="numeric"
-              className="w-32 tabular-nums"
-              value={text}
-              aria-invalid={failure ? true : undefined}
-              onChange={(event) => {
-                setText(event.target.value)
-              }}
-            />
-          </Field>
+          <DialogBody>
+            <Field
+              label={t(`${X}.hours`)}
+              htmlFor="link-extend-hours"
+              hint={t(`${X}.hoursHint`)}
+              error={failure ?? undefined}
+              required
+            >
+              <NumberField
+                min={MIN_HOURS}
+                max={MAX_HOURS}
+                id="link-extend-hours"
+                className="w-40"
+                value={text}
+                aria-invalid={failure ? true : undefined}
+                onChange={(event) => {
+                  setText(event.target.value)
+                }}
+              />
+            </Field>
+          </DialogBody>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               {t("common.cancel")}

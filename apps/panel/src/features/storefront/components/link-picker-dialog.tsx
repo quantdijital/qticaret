@@ -140,7 +140,7 @@ export function LinkPickerDialog({ row, onClose, onPick }: LinkPickerDialogProps
         }
       }}
     >
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent size="xl">
         <DialogHeader>
           <DialogTitle>{t(row ? `${P}.change` : `${P}.add`)}</DialogTitle>
           <DialogDescription>{t(`${P}.description`)}</DialogDescription>

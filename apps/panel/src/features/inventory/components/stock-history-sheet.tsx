@@ -8,8 +8,8 @@ import { Pagination } from "@/components/patterns/pagination"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   Sheet,
   SheetContent,
@@ -129,10 +129,11 @@ function ThresholdForm({ itemId }: { itemId: string }) {
         {t("inventory.history.threshold")}
       </label>
       <div className="flex items-center gap-2">
-        <Input
+        <NumberField
+          min={0}
+          max={100_000}
           id="own-threshold"
-          inputMode="numeric"
-          className="min-w-0 flex-1 tabular-nums"
+          className="min-w-0 flex-1"
           placeholder={watch.data ? String(watch.data.fallback) : ""}
           value={text}
           aria-invalid={!valid || undefined}
@@ -209,7 +210,7 @@ export function StockHistorySheet({
           </SheetDescription>
         </SheetHeader>
         {item ? (
-          <div className="flex flex-1 flex-col gap-4 overflow-y-auto p-4">
+          <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-6">
             <ThresholdForm key={item.id} itemId={item.id} />
             <History key={`history-${item.id}`} itemId={item.id} />
           </div>

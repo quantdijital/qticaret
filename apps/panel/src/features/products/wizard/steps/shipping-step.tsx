@@ -3,7 +3,7 @@ import { useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
-import { Input } from "@/components/ui/input"
+import { NumberField } from "@/components/patterns/number-field"
 import { useStoreUnits } from "@/features/products/use-units"
 import { parseMeasureInput } from "@/lib/money-input"
 import { hasMeasures } from "../schema"
@@ -24,17 +24,7 @@ function MeasureInput({ name, unit }: { name: Measure; unit: string }) {
       htmlFor={`measure-${name}`}
       error={error ? t(error) : undefined}
     >
-      <div className="relative">
-        <Input
-          id={`measure-${name}`}
-          inputMode="decimal"
-          className="pr-10 tabular-nums"
-          {...register(name)}
-        />
-        <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
-          {unit}
-        </span>
-      </div>
+      <NumberField decimals={3} min={0} suffix={unit} id={`measure-${name}`} {...register(name)} />
     </Field>
   )
 }

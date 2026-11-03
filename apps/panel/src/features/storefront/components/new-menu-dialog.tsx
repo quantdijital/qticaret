@@ -6,6 +6,7 @@ import { Field } from "@/components/patterns/form-section"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -84,77 +85,79 @@ export function NewMenuDialog({ menus, onClose, onCreated }: NewMenuDialogProps)
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t(`${N}.title`)}</DialogTitle>
           <DialogDescription>{t(`${N}.description`)}</DialogDescription>
         </DialogHeader>
         <form
           noValidate
-          className="flex flex-col gap-5"
+          className="flex flex-col gap-6"
           onSubmit={(event) => {
             event.preventDefault()
             submit()
           }}
         >
-          <fieldset className="flex flex-col gap-3">
-            <legend className="mb-3 text-sm font-medium">{t(`${N}.place`)}</legend>
-            <RadioGroup
-              value={location}
-              onValueChange={(value) => {
-                setLocation(value as MenuLocation)
-              }}
+          <DialogBody>
+            <fieldset className="flex flex-col gap-3">
+              <legend className="mb-3 text-sm font-medium">{t(`${N}.place`)}</legend>
+              <RadioGroup
+                value={location}
+                onValueChange={(value) => {
+                  setLocation(value as MenuLocation)
+                }}
+              >
+                {MENU_LOCATIONS.map((place) => (
+                  <label
+                    key={place}
+                    htmlFor={`new-menu-${place}`}
+                    className="flex cursor-pointer items-start gap-3 rounded-md border p-3 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 has-[[data-state=checked]]:border-primary"
+                  >
+                    <RadioGroupItem
+                      id={`new-menu-${place}`}
+                      value={place}
+                      disabled={taken.has(place)}
+                      className="mt-0.5"
+                    />
+                    <span className="flex flex-col gap-0.5">
+                      <span className="text-sm font-medium">
+                        {t(`${M}.place.${place}`)}
+                        {taken.has(place) ? (
+                          <span className="ml-2 text-xs font-normal text-muted-foreground">
+                            {t(`${N}.taken`)}
+                          </span>
+                        ) : null}
+                      </span>
+                      <span className="text-[13px] text-muted-foreground">
+                        {t(`${N}.hints.${place}`)}
+                      </span>
+                    </span>
+                  </label>
+                ))}
+              </RadioGroup>
+            </fieldset>
+            <Field
+              label={t(`${M}.editor.title`)}
+              htmlFor="new-menu-title"
+              hint={t(`${M}.editor.titleHint.${location}`)}
+              error={
+                failure ??
+                (problem ? t(`${M}.errors.${problem}`, { max: MENU_LIMITS.title }) : undefined)
+              }
+              required
             >
-              {MENU_LOCATIONS.map((place) => (
-                <label
-                  key={place}
-                  htmlFor={`new-menu-${place}`}
-                  className="flex cursor-pointer items-start gap-3 rounded-md border p-3 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60 has-[[data-state=checked]]:border-primary"
-                >
-                  <RadioGroupItem
-                    id={`new-menu-${place}`}
-                    value={place}
-                    disabled={taken.has(place)}
-                    className="mt-0.5"
-                  />
-                  <span className="flex flex-col gap-0.5">
-                    <span className="text-sm font-medium">
-                      {t(`${M}.place.${place}`)}
-                      {taken.has(place) ? (
-                        <span className="ml-2 text-xs font-normal text-muted-foreground">
-                          {t(`${N}.taken`)}
-                        </span>
-                      ) : null}
-                    </span>
-                    <span className="text-[13px] text-muted-foreground">
-                      {t(`${N}.hints.${place}`)}
-                    </span>
-                  </span>
-                </label>
-              ))}
-            </RadioGroup>
-          </fieldset>
-          <Field
-            label={t(`${M}.editor.title`)}
-            htmlFor="new-menu-title"
-            hint={t(`${M}.editor.titleHint.${location}`)}
-            error={
-              failure ??
-              (problem ? t(`${M}.errors.${problem}`, { max: MENU_LIMITS.title }) : undefined)
-            }
-            required
-          >
-            <Input
-              id="new-menu-title"
-              value={written}
-              placeholder={t(`${N}.placeholder`)}
-              maxLength={200}
-              aria-invalid={Boolean(problem)}
-              onChange={(event) => {
-                setTitle(event.target.value)
-              }}
-            />
-          </Field>
+              <Input
+                id="new-menu-title"
+                value={written}
+                placeholder={t(`${N}.placeholder`)}
+                maxLength={200}
+                aria-invalid={Boolean(problem)}
+                onChange={(event) => {
+                  setTitle(event.target.value)
+                }}
+              />
+            </Field>
+          </DialogBody>
           <DialogFooter>
             <Button type="button" variant="outline" disabled={create.isPending} onClick={onClose}>
               {t("common.cancel")}

@@ -75,7 +75,7 @@ export function ApiKeyDialog({
   const valid = title.trim().length > 0 && title.trim().length <= 60 && scopes.length > 0
   return (
     <Dialog open={open} onOpenChange={close}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t(`${K}.title`)}</DialogTitle>
           <DialogDescription>{t(token ? `${K}.madeHint` : `${K}.hint`)}</DialogDescription>
@@ -83,7 +83,7 @@ export function ApiKeyDialog({
         {token ? (
           <MadeKey token={token} />
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-5">
             <Field label={t(`${K}.name`)} htmlFor="api-key-title" hint={t(`${K}.nameHint`)}>
               <Input
                 id="api-key-title"

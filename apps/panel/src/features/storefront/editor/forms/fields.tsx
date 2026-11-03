@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import { Field } from "@/components/patterns/form-section"
+import { NumberField } from "@/components/patterns/number-field"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { ShopTokenPreview, TokenSlot } from "@/features/settings/components/shop-token-menu"
@@ -104,10 +105,9 @@ export function CountField({
 }) {
   return (
     <Field label={label} htmlFor={id} hint={hint}>
-      <Input
+      <NumberField
+        plain
         id={id}
-        type="number"
-        inputMode="numeric"
         min={1}
         max={max}
         step={1}

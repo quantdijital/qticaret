@@ -5,7 +5,7 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
-import { Input } from "@/components/ui/input"
+import { NumberField } from "@/components/patterns/number-field"
 import {
   Select,
   SelectContent,
@@ -136,19 +136,21 @@ export function LabelSizeCard({ saved }: { saved: ShippingSettings }) {
                   : undefined
               }
             >
-              <span className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Input
+              <span className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+                <NumberField
+                  min={70}
+                  max={210}
                   id="label-width"
-                  inputMode="numeric"
                   aria-label={t(`${L}.width`)}
-                  className="w-20"
+                  className="w-36"
                   {...form.register("width")}
                 />
                 ×
-                <Input
-                  inputMode="numeric"
+                <NumberField
+                  min={70}
+                  max={297}
                   aria-label={t(`${L}.height`)}
-                  className="w-20"
+                  className="w-36"
                   {...form.register("height")}
                 />
                 mm

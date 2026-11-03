@@ -5,9 +5,9 @@ import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
 import { SearchPicker } from "@/components/patterns/search-picker"
 import { SectionCard } from "@/components/patterns/section-card"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { CategoryTree } from "@/features/products/components/category-tree"
 import {
@@ -169,18 +169,15 @@ export function ConditionsCard({ perCustomerLocked }: { perCustomerLocked: boole
             hint={t("promotions.form.minimumHint")}
             error={error("minimum")}
           >
-            <div className="relative w-40">
-              <Input
-                id="promotion-minimum"
-                inputMode="decimal"
-                placeholder={t("promotions.form.none")}
-                className="pr-8 text-right tabular-nums"
-                {...register("minimum")}
-              />
-              <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-muted-foreground">
-                ₺
-              </span>
-            </div>
+            <NumberField
+              decimals={2}
+              min={0}
+              className="w-44"
+              suffix="₺"
+              id="promotion-minimum"
+              placeholder={t("promotions.form.none")}
+              {...register("minimum")}
+            />
           </Field>
           <Field
             label={t("promotions.form.perCustomer")}
@@ -192,12 +189,12 @@ export function ConditionsCard({ perCustomerLocked }: { perCustomerLocked: boole
             )}
             error={error("perCustomer")}
           >
-            <Input
+            <NumberField
+              min={1}
               id="promotion-per-customer"
-              inputMode="numeric"
               disabled={perCustomerLocked}
               placeholder={t("promotions.form.unlimited")}
-              className="w-40 tabular-nums"
+              className="w-44"
               {...register("perCustomer")}
             />
           </Field>

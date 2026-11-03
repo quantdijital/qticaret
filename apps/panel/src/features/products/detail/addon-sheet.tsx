@@ -105,7 +105,7 @@ export function AddonSheet({ addon, saving, failure, onClose, onSave }: AddonShe
       }}
     >
       <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-xl">
-        <SheetHeader className="border-b px-6 py-4">
+        <SheetHeader className="border-b">
           <SheetTitle>{addon ? addon.label : t(`${A}.new`)}</SheetTitle>
           <SheetDescription>{t(`${A}.sheetHint`)}</SheetDescription>
         </SheetHeader>
@@ -116,7 +116,7 @@ export function AddonSheet({ addon, saving, failure, onClose, onSave }: AddonShe
             onSubmit={(event) => {
               void submit(event)
             }}
-            className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-5"
+            className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-6"
           >
             <Field
               label={t(`${A}.kind`)}
@@ -193,7 +193,7 @@ export function AddonSheet({ addon, saving, failure, onClose, onSave }: AddonShe
             {failure ? <AddonNotice tone="danger" {...failure} /> : null}
           </form>
         </FormProvider>
-        <SheetFooter className="flex-row items-center justify-between gap-3 border-t px-6 py-3">
+        <SheetFooter className="flex-row items-center justify-between gap-3 border-t">
           <span className="text-xs text-muted-foreground">{t(`${A}.savesAll`)}</span>
           <div className="flex shrink-0 gap-2">
             <Button type="button" variant="outline" onClick={onClose}>

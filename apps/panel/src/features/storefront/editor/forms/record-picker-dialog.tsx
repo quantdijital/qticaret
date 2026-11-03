@@ -59,7 +59,7 @@ export function RecordPickerDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t(`${R}.pick.${kind}`)}</DialogTitle>
           <DialogDescription>{t(multiple ? `${R}.pickMany` : `${R}.pickOne`)}</DialogDescription>

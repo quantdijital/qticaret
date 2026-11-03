@@ -3,6 +3,7 @@ import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Field } from "@/components/patterns/form-section"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -106,14 +107,13 @@ export function TermForm({ term }: { term: Term }) {
         />
       </Field>
       <Field label={t(`${T}.fields.rank`)} htmlFor={id("rank")} hint={t(`${T}.rankHint`)}>
-        <Input
+        <NumberField
+          plain
           id={id("rank")}
-          type="number"
-          inputMode="numeric"
           min={0}
           max={RANK_MAX}
           step={1}
-          className="w-28"
+          className="w-40"
           {...form.register("rank")}
         />
       </Field>

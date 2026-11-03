@@ -84,7 +84,7 @@ export function ShipResultsDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t(`${S}.resultsTitle`)}</DialogTitle>
           <DialogDescription>

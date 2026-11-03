@@ -8,6 +8,7 @@ import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
 import { EmptyState, ErrorState, LoadingRows } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -17,7 +18,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { sheetJobQuery } from "@/features/products/api/sheets"
 import {
   MAX_CODES,
@@ -88,7 +88,7 @@ function MakeCodesDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent size="sm">
         <DialogHeader>
           <DialogTitle>{t("promotions.codes.makeTitle")}</DialogTitle>
           <DialogDescription>{t("promotions.codes.makeHint", { code })}</DialogDescription>
@@ -99,10 +99,11 @@ function MakeCodesDialog({
           hint={t("promotions.codes.countHint", { max: formatCount(MAX_CODES) })}
           error={error}
         >
-          <Input
+          <NumberField
+            min={1}
+            max={MAX_CODES}
             id="code-count"
-            inputMode="numeric"
-            className="w-32 tabular-nums"
+            className="w-40"
             value={text}
             disabled={running || created !== null}
             onChange={(event) => {

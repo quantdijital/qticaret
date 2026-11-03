@@ -2,17 +2,18 @@ import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { excludedLinesOf, returnLinesQuery, useReceiveReturn } from "@/features/orders/api/returns"
 import type { ReturnReason, ReturnRequest } from "@/features/orders/api/returns"
 import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
@@ -29,7 +30,6 @@ import type { CountKey, Counts } from "@/features/orders/receive-rules"
 import { sealedLinesOf } from "@/features/orders/return-facts"
 import { giftLineIds } from "@/features/orders/return-rules"
 import { errorText } from "@/lib/errors"
-import { cn } from "@/lib/utils"
 
 const R = "orders.returns"
 
@@ -77,118 +77,125 @@ export function ReceiveReturnDialog({
         }
       }}
     >
-      <DialogContent className={cn("sm:max-w-lg", sealed.size > 0 && "sm:max-w-xl")}>
+      <DialogContent size={sealed.size > 0 ? "lg" : "md"}>
         <DialogHeader>
           <DialogTitle>
             {t(`${R}.receiveTitle`, { number: request.order_display_id ?? "—" })}
           </DialogTitle>
           <DialogDescription>{t(`${R}.receiveDescription`)}</DialogDescription>
         </DialogHeader>
-        <ReturnFacts request={request} />
-        <div className="rounded-md border">
-          <div className="flex items-center gap-3 border-b px-3 py-2 text-xs font-medium text-muted-foreground">
-            <span className="flex-1">{t(`${R}.lineColumn`)}</span>
-            {keys.map((key) => (
-              <span key={key} className="w-16 text-right">
-                {t(`${R}.${key}Column`)}
+        <DialogBody list>
+          <ReturnFacts request={request} />
+          <div className="rounded-md border">
+            {/* A phone names the line over its fields: only the columns are labelled */}
+            <div className="flex items-center justify-end gap-3 border-b px-3 py-2 text-xs font-medium text-muted-foreground sm:justify-start">
+              <span className="hidden min-w-0 flex-1 truncate sm:block">
+                {t(`${R}.lineColumn`)}
               </span>
-            ))}
-            <span className="w-10" />
-          </div>
-          <ul className="flex flex-col divide-y">
-            {request.items.map((item) => {
-              const line = byId.get(item.line_item_id)
-              const count = counts[item.line_item_id] ?? EMPTY_COUNT
-              const name = line?.title ?? ""
-              return (
-                // A phone puts the counts under the name: no name column squeezed under 160 px
-                <li
-                  key={item.line_item_id}
-                  className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2.5 sm:flex-nowrap"
-                >
-                  <span className="flex min-w-0 basis-full flex-col gap-1 sm:flex-1 sm:basis-auto">
-                    <span className="truncate text-sm font-medium">{line?.title ?? "—"}</span>
-                    {line?.variant_title ? (
-                      <span className="truncate text-xs text-muted-foreground">
-                        {line.variant_title}
-                      </span>
-                    ) : null}
-                    {excluded.has(item.line_item_id) || sealed.has(item.line_item_id) ? (
-                      <span className="flex flex-wrap gap-1.5">
-                        {excluded.has(item.line_item_id) ? (
-                          <NonWithdrawableBadge reason={excluded.get(item.line_item_id)} />
-                        ) : null}
-                        {sealed.has(item.line_item_id) ? <SealedGoodsBadge /> : null}
-                      </span>
-                    ) : null}
+              <span className="flex shrink-0 items-center gap-2">
+                {keys.map((key) => (
+                  <span key={key} className="w-22 text-center">
+                    {t(`${R}.${key}Column`)}
                   </span>
-                  <span className="ml-auto flex shrink-0 items-center gap-3">
-                    {keys.map((key) =>
-                      // Only a sealed good is refused for being opened (`returns.refusal_not_sealed`)
-                      key === "refused" && !sealed.has(item.line_item_id) ? (
-                        <span
-                          key={key}
-                          aria-hidden="true"
-                          className="w-16 text-right text-muted-foreground"
-                        >
-                          —
+                ))}
+                <span className="w-7" />
+              </span>
+            </div>
+            <ul className="flex flex-col divide-y">
+              {request.items.map((item) => {
+                const line = byId.get(item.line_item_id)
+                const count = counts[item.line_item_id] ?? EMPTY_COUNT
+                const name = line?.title ?? ""
+                return (
+                  // A phone puts the counts under the name: no name column squeezed under 160 px
+                  <li
+                    key={item.line_item_id}
+                    className="flex min-h-12 flex-wrap items-center gap-x-3 gap-y-2 px-3 py-1.5 sm:flex-nowrap"
+                  >
+                    <span className="flex min-w-0 basis-full flex-col gap-1 sm:flex-1 sm:basis-auto">
+                      <span className="truncate text-sm font-medium">{line?.title ?? "—"}</span>
+                      {line?.variant_title ? (
+                        <span className="truncate text-xs text-muted-foreground">
+                          {line.variant_title}
                         </span>
-                      ) : (
-                        <Input
-                          key={key}
-                          type="number"
-                          inputMode="numeric"
-                          min={0}
-                          max={item.quantity}
-                          aria-label={t(`${R}.${key}Of`, { name })}
-                          className="h-8 w-16 text-right tabular-nums"
-                          value={count[key]}
-                          onChange={(event) => {
-                            setCounts({
-                              ...counts,
-                              [item.line_item_id]: setCount(
-                                count,
-                                key,
-                                Number(event.target.value),
-                                item.quantity
-                              ),
-                            })
-                          }}
-                        />
-                      )
-                    )}
-                    <span className="w-10 text-sm text-muted-foreground tabular-nums">
-                      / {item.quantity}
+                      ) : null}
+                      {excluded.has(item.line_item_id) || sealed.has(item.line_item_id) ? (
+                        <span className="flex flex-wrap gap-1.5">
+                          {excluded.has(item.line_item_id) ? (
+                            <NonWithdrawableBadge reason={excluded.get(item.line_item_id)} />
+                          ) : null}
+                          {sealed.has(item.line_item_id) ? <SealedGoodsBadge /> : null}
+                        </span>
+                      ) : null}
                     </span>
-                  </span>
-                </li>
-              )
-            })}
-          </ul>
-        </div>
-        {sealed.size > 0 ? (
-          <p className="text-xs text-muted-foreground">{t(`${R}.refusedHint`)}</p>
-        ) : null}
-        {request.items.some((item) => gifts.has(item.line_item_id)) ? <GiftReturnNote /> : null}
-        {/* A swap gives no money back for the parcel: the new one goes free */}
-        {request.kind === "return" ? (
-          <label className="flex items-start gap-3 text-sm">
-            <Checkbox
-              className="mt-0.5"
-              checked={refundShipping}
-              disabled={rule !== "choice"}
-              onCheckedChange={(on) => {
-                setStaffShipping(on === true)
-              }}
-            />
-            <span className="flex flex-col gap-0.5">
-              <span className="font-medium">{t(`${R}.refundShipping`)}</span>
-              <span className="text-xs text-muted-foreground">
-                {t(`${R}.refundShippingHints.${rule}`)}
+                    <span className="ml-auto flex shrink-0 items-center gap-2">
+                      {keys.map((key) =>
+                        // Only a sealed good is refused for being opened (`returns.refusal_not_sealed`)
+                        key === "refused" && !sealed.has(item.line_item_id) ? (
+                          <span
+                            key={key}
+                            aria-hidden="true"
+                            className="w-22 text-center text-muted-foreground"
+                          >
+                            —
+                          </span>
+                        ) : (
+                          <NumberField
+                            key={key}
+                            plain
+                            size="compact"
+                            min={0}
+                            max={item.quantity}
+                            aria-label={t(`${R}.${key}Of`, { name })}
+                            className="w-22"
+                            value={count[key]}
+                            onChange={(event) => {
+                              setCounts({
+                                ...counts,
+                                [item.line_item_id]: setCount(
+                                  count,
+                                  key,
+                                  Number(event.target.value),
+                                  item.quantity
+                                ),
+                              })
+                            }}
+                          />
+                        )
+                      )}
+                      <span className="w-7 text-sm text-muted-foreground tabular-nums">
+                        / {item.quantity}
+                      </span>
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+          {sealed.size > 0 ? (
+            <p className="text-xs text-muted-foreground">{t(`${R}.refusedHint`)}</p>
+          ) : null}
+          {request.items.some((item) => gifts.has(item.line_item_id)) ? <GiftReturnNote /> : null}
+          {/* A swap gives no money back for the parcel: the new one goes free */}
+          {request.kind === "return" ? (
+            <label className="flex items-start gap-3 text-sm">
+              <Checkbox
+                className="mt-0.5"
+                checked={refundShipping}
+                disabled={rule !== "choice"}
+                onCheckedChange={(on) => {
+                  setStaffShipping(on === true)
+                }}
+              />
+              <span className="flex flex-col gap-0.5">
+                <span className="font-medium">{t(`${R}.refundShipping`)}</span>
+                <span className="text-xs text-muted-foreground">
+                  {t(`${R}.refundShippingHints.${rule}`)}
+                </span>
               </span>
-            </span>
-          </label>
-        ) : null}
+            </label>
+          ) : null}
+        </DialogBody>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             {t("common.cancel")}

@@ -7,6 +7,7 @@ import { Field } from "@/components/patterns/form-section"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -71,41 +72,43 @@ export function NewBulkMessageDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent size="sm">
         <DialogHeader>
           <DialogTitle>{t(`${C}.title`)}</DialogTitle>
           <DialogDescription>{t(`${C}.hint`)}</DialogDescription>
         </DialogHeader>
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-6"
           onSubmit={(event) => {
             event.preventDefault()
             submit()
           }}
         >
-          <Field
-            label={t("bulkMessages.fields.name")}
-            htmlFor="bulk-new-name"
-            hint={t("bulkMessages.fields.nameHint")}
-            error={failure ?? undefined}
-            required
-          >
-            <Input
-              id="bulk-new-name"
-              value={name}
-              autoFocus
-              maxLength={LIMITS.name}
-              onChange={(event) => {
-                setName(event.target.value)
-              }}
-            />
-          </Field>
-          <div className="flex flex-col gap-2">
-            <span id="bulk-new-channel" className="text-sm font-medium">
-              {t("bulkMessages.fields.channel")}
-            </span>
-            <ChannelPicker value={channel} onChange={setChannel} labelledBy="bulk-new-channel" />
-          </div>
+          <DialogBody>
+            <Field
+              label={t("bulkMessages.fields.name")}
+              htmlFor="bulk-new-name"
+              hint={t("bulkMessages.fields.nameHint")}
+              error={failure ?? undefined}
+              required
+            >
+              <Input
+                id="bulk-new-name"
+                value={name}
+                autoFocus
+                maxLength={LIMITS.name}
+                onChange={(event) => {
+                  setName(event.target.value)
+                }}
+              />
+            </Field>
+            <div className="flex flex-col gap-2">
+              <span id="bulk-new-channel" className="text-sm font-medium">
+                {t("bulkMessages.fields.channel")}
+              </span>
+              <ChannelPicker value={channel} onChange={setChannel} labelledBy="bulk-new-channel" />
+            </div>
+          </DialogBody>
           <DialogFooter>
             <Button type="button" variant="outline" disabled={create.isPending} onClick={close}>
               {t("common.cancel")}

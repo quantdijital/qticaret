@@ -41,7 +41,7 @@ export function WebhookSecretDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t(`${W}.rotateTitle`)}</DialogTitle>
           <DialogDescription>

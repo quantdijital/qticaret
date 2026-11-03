@@ -4,8 +4,8 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SectionCard } from "@/components/patterns/section-card"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { isThreshold } from "@/features/inventory/drafts"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
@@ -55,10 +55,11 @@ export function LowStockCard({ className }: { className?: string }) {
             <label htmlFor="low-stock-threshold" className="text-sm font-medium">
               {t("settings.locations.lowStock.label")}
             </label>
-            <Input
+            <NumberField
+              min={0}
+              max={100_000}
               id="low-stock-threshold"
-              inputMode="numeric"
-              className="w-32 tabular-nums"
+              className="w-40"
               value={text}
               aria-invalid={!valid || undefined}
               onChange={(event) => {

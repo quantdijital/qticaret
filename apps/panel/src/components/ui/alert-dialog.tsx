@@ -3,7 +3,12 @@ import { cn } from "@/lib/utils"
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 
 import { Button } from "@/components/ui/button"
-import { DIALOG_CONTENT_CLASS, DIALOG_FOOTER_CLASS } from "@/components/ui/dialog"
+import {
+  DIALOG_CONTENT_CLASS,
+  DIALOG_FOOTER_CLASS,
+  DIALOG_SIZE_CLASS,
+} from "@/components/ui/dialog"
+import type { DialogSize } from "@/components/ui/dialog"
 
 function AlertDialog({ ...props }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
   return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
@@ -35,12 +40,13 @@ function AlertDialogOverlay({
   )
 }
 
+/** A question before an action: the dialog's box, a confirm's width unless set (`DialogSize`). */
 function AlertDialogContent({
   className,
-  size = "default",
+  size = "sm",
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
-  size?: "default" | "sm"
+  size?: DialogSize
 }) {
   return (
     <AlertDialogPortal>
@@ -50,7 +56,8 @@ function AlertDialogContent({
         data-size={size}
         className={cn(
           DIALOG_CONTENT_CLASS,
-          "group/alert-dialog-content data-[size=sm]:sm:max-w-xs",
+          DIALOG_SIZE_CLASS[size],
+          "group/alert-dialog-content",
           className
         )}
         {...props}
@@ -64,7 +71,7 @@ function AlertDialogHeader({ className, ...props }: React.ComponentProps<"div">)
     <div
       data-slot="alert-dialog-header"
       className={cn(
-        "grid grid-rows-[auto_1fr] place-items-center gap-1.5 text-center has-data-[slot=alert-dialog-media]:grid-rows-[auto_auto_1fr] has-data-[slot=alert-dialog-media]:gap-x-6 sm:group-data-[size=default]/alert-dialog-content:place-items-start sm:group-data-[size=default]/alert-dialog-content:text-left sm:group-data-[size=default]/alert-dialog-content:has-data-[slot=alert-dialog-media]:grid-rows-[auto_1fr]",
+        "grid grid-rows-[auto_1fr] place-items-center gap-2 text-center has-data-[slot=alert-dialog-media]:grid-rows-[auto_auto_1fr] has-data-[slot=alert-dialog-media]:gap-x-6 sm:place-items-start sm:text-left sm:has-data-[slot=alert-dialog-media]:grid-rows-[auto_1fr]",
         className
       )}
       {...props}
@@ -76,11 +83,7 @@ function AlertDialogFooter({ className, ...props }: React.ComponentProps<"div">)
   return (
     <div
       data-slot="alert-dialog-footer"
-      className={cn(
-        DIALOG_FOOTER_CLASS,
-        "group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2",
-        className
-      )}
+      className={cn(DIALOG_FOOTER_CLASS, className)}
       {...props}
     />
   )
@@ -94,7 +97,7 @@ function AlertDialogTitle({
     <AlertDialogPrimitive.Title
       data-slot="alert-dialog-title"
       className={cn(
-        "text-lg font-semibold sm:group-data-[size=default]/alert-dialog-content:group-has-data-[slot=alert-dialog-media]/alert-dialog-content:col-start-2",
+        "text-lg leading-snug font-semibold sm:group-has-data-[slot=alert-dialog-media]/alert-dialog-content:col-start-2",
         className
       )}
       {...props}
@@ -120,7 +123,7 @@ function AlertDialogMedia({ className, ...props }: React.ComponentProps<"div">) 
     <div
       data-slot="alert-dialog-media"
       className={cn(
-        "mb-2 inline-flex size-16 items-center justify-center rounded-md bg-muted sm:group-data-[size=default]/alert-dialog-content:row-span-2 *:[svg:not([class*='size-'])]:size-8",
+        "mb-2 inline-flex size-16 items-center justify-center rounded-md bg-muted sm:row-span-2 *:[svg:not([class*='size-'])]:size-8",
         className
       )}
       {...props}

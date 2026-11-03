@@ -5,7 +5,7 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
-import { Input } from "@/components/ui/input"
+import { NumberField } from "@/components/patterns/number-field"
 import { useStoreUnits } from "@/features/products/use-units"
 import { PLATFORM_PARCEL, useSaveSection } from "@/features/settings/api/sections"
 import type { ShippingSettings } from "@/features/settings/api/sections"
@@ -110,18 +110,14 @@ export function DefaultParcelCard({ saved }: { saved: ShippingSettings }) {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {FIELDS.map(({ name, unit }) => (
           <Field key={name} label={t(`${P}.${name}`)} htmlFor={`default-parcel-${name}`}>
-            <div className="relative">
-              <Input
-                id={`default-parcel-${name}`}
-                inputMode="decimal"
-                aria-invalid={Boolean(errors[name])}
-                className="pr-10 tabular-nums"
-                {...form.register(name)}
-              />
-              <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
-                {units[unit]}
-              </span>
-            </div>
+            <NumberField
+              id={`default-parcel-${name}`}
+              decimals={3}
+              min={0}
+              suffix={units[unit]}
+              aria-invalid={Boolean(errors[name])}
+              {...form.register(name)}
+            />
           </Field>
         ))}
       </div>

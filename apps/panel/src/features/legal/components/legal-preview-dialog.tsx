@@ -40,7 +40,7 @@ export function LegalPreviewDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent size="xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description ?? t("settings.legal.preview.hint")}</DialogDescription>

@@ -78,7 +78,7 @@ export function WebhookDialog({
   const valid = url.trim().startsWith("https://") && events.length > 0
   return (
     <Dialog open={open} onOpenChange={close}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t(`${W}.newTitle`)}</DialogTitle>
           <DialogDescription>{t(secret ? `${W}.madeHint` : `${W}.newHint`)}</DialogDescription>

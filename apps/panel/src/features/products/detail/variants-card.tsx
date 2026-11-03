@@ -75,15 +75,15 @@ export function VariantsCard({
       }}
     >
       <div className="-mx-5 overflow-x-auto border-y">
-        <table className={cn("w-full text-sm", preorder ? "min-w-[50rem]" : "min-w-[44rem]")}>
+        <table className={cn("w-full text-sm", preorder ? "min-w-[58rem]" : "min-w-[52rem]")}>
           <thead className="bg-muted/60">
             <tr>
               <th className={cn(head, "pl-5")}>{t("products.wizard.variant")}</th>
-              <th className={cn(head, "w-32")}>{t("products.wizard.price")}</th>
-              <th className={cn(head, "w-32")} title={t("products.detail.costHint")}>
+              <th className={cn(head, "w-44")}>{t("products.wizard.price")}</th>
+              <th className={cn(head, "w-44")} title={t("products.detail.costHint")}>
                 {t("products.detail.cost")}
               </th>
-              <th className={cn(head, "w-28")}>{t("products.wizard.stock")}</th>
+              <th className={cn(head, "w-36")}>{t("products.wizard.stock")}</th>
               <th className={cn(head, "w-32 text-right", !preorder && "pr-5")}>
                 {t("products.detail.reserved")}
               </th>

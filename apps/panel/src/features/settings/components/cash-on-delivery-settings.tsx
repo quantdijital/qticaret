@@ -8,8 +8,8 @@ import { z } from "zod"
 import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
+import { NumberField } from "@/components/patterns/number-field"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Switch } from "@/components/ui/switch"
 import { featuresQuery, useSetFeature } from "@/features/settings/api/features"
@@ -129,7 +129,7 @@ function FeeFields({
           hint={t(`${C}.fee.hint`)}
           error={message(errors.fee?.message)}
         >
-          <Input id="cod-fee" inputMode="decimal" className="w-40" {...register("fee")} />
+          <NumberField decimals={2} min={0} id="cod-fee" className="w-40" {...register("fee")} />
         </Field>
       )}
       <Field
@@ -138,7 +138,7 @@ function FeeFields({
         hint={t(`${C}.maxHint`)}
         error={message(errors.max?.message)}
       >
-        <Input id="cod-max" inputMode="decimal" className="w-40" {...register("max")} />
+        <NumberField decimals={2} min={0} id="cod-max" className="w-40" {...register("max")} />
       </Field>
     </>
   )

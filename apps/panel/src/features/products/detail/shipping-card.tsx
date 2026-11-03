@@ -7,7 +7,6 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
-import { Input } from "@/components/ui/input"
 import { productCatalogQuery } from "@/features/products/api/product-edit"
 import { useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
@@ -16,6 +15,7 @@ import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@/lib/forms"
 import { formatMeasureInput, parseMeasureInput } from "@/lib/money-input"
 import { CardForm } from "@/components/patterns/card-form"
+import { NumberField } from "@/components/patterns/number-field"
 
 const FIELDS = [
   { name: "weight", unit: "weight" },
@@ -109,17 +109,13 @@ export function ShippingCard({ product }: { product: ProductDetail }) {
               htmlFor={`detail-${name}`}
               error={error ? t(error) : undefined}
             >
-              <div className="relative">
-                <Input
-                  id={`detail-${name}`}
-                  inputMode="decimal"
-                  className="pr-10 tabular-nums"
-                  {...form.register(name)}
-                />
-                <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
-                  {units[unit]}
-                </span>
-              </div>
+              <NumberField
+                decimals={3}
+                min={0}
+                suffix={units[unit]}
+                id={`detail-${name}`}
+                {...form.register(name)}
+              />
             </Field>
           )
         })}

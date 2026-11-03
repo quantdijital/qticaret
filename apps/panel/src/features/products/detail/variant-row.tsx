@@ -1,7 +1,7 @@
 import { Controller } from "react-hook-form"
 import type { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Input } from "@/components/ui/input"
+import { NumberField } from "@/components/patterns/number-field"
 import { Switch } from "@/components/ui/switch"
 import { formatCount } from "@/lib/format"
 import { cn } from "@/lib/utils"
@@ -46,39 +46,31 @@ export function VariantRow({
         </div>
       </td>
       <td className="px-3 py-2">
-        <div className="relative">
-          <Input
-            inputMode="decimal"
-            aria-label={label("products.wizard.price")}
-            className="pr-7 text-right tabular-nums"
-            {...form.register(`rows.${index}.price`)}
-          />
-          <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-xs text-muted-foreground">
-            ₺
-          </span>
-        </div>
+        <NumberField
+          decimals={2}
+          min={0}
+          suffix="₺"
+          aria-label={label("products.wizard.price")}
+          {...form.register(`rows.${index}.price`)}
+        />
       </td>
       <td className="px-3 py-2">
-        <div className="relative">
-          <Input
-            inputMode="decimal"
-            aria-label={label("products.detail.cost")}
-            placeholder="—"
-            className="pr-7 text-right tabular-nums"
-            {...form.register(`rows.${index}.cost`)}
-          />
-          <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-xs text-muted-foreground">
-            ₺
-          </span>
-        </div>
+        <NumberField
+          decimals={2}
+          min={0}
+          suffix="₺"
+          aria-label={label("products.detail.cost")}
+          placeholder="—"
+          {...form.register(`rows.${index}.cost`)}
+        />
       </td>
       <td className="px-3 py-2">
         {variant.manage_inventory ? (
-          <Input
-            inputMode="numeric"
+          <NumberField
+            min={0}
             aria-label={label("products.wizard.stock")}
             disabled={!locationId}
-            className="tabular-nums"
+
             {...form.register(`rows.${index}.stock`)}
           />
         ) : (

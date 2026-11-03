@@ -5,8 +5,8 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SectionCard } from "@/components/patterns/section-card"
 import { ErrorState } from "@/components/patterns/states"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import { useStaff } from "@/features/auth/api/staff"
@@ -69,21 +69,20 @@ export function PaymentLinkSettingsCard() {
             <label htmlFor="link-admin-limit" className="text-sm font-medium">
               {t(`${C}.limit`)}
             </label>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">%</span>
-              <Input
-                id="link-admin-limit"
-                inputMode="numeric"
-                className="w-24 tabular-nums"
-                value={limitText}
-                disabled={!owner}
-                aria-invalid={!valid || undefined}
-                aria-describedby="link-admin-limit-hint"
-                onChange={(event) => {
-                  setLimit(event.target.value.trim())
-                }}
-              />
-            </div>
+            <NumberField
+              min={0}
+              max={99}
+              suffix="%"
+              id="link-admin-limit"
+              className="w-40"
+              value={limitText}
+              disabled={!owner}
+              aria-invalid={!valid || undefined}
+              aria-describedby="link-admin-limit-hint"
+              onChange={(event) => {
+                setLimit(event.target.value.trim())
+              }}
+            />
             <p
               id="link-admin-limit-hint"
               className={valid ? "text-xs text-muted-foreground" : "text-xs text-destructive-text"}

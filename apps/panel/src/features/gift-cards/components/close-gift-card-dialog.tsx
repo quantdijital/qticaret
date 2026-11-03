@@ -7,6 +7,7 @@ import { Field } from "@/components/patterns/form-section"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -54,22 +55,28 @@ function CloseForm({ card, onDone }: { card: GiftCard; onDone: () => void }) {
   }
   return (
     <form
-      className="flex flex-col gap-4"
+      className="flex flex-col gap-6"
       onSubmit={(event) => {
         event.preventDefault()
         submit()
       }}
     >
-      <Field label={t(`${C}.reason`)} htmlFor="gift-card-close-reason" hint={t(`${C}.reasonHint`)}>
-        <Input
-          id="gift-card-close-reason"
-          maxLength={REASON_MAX}
-          value={reason}
-          onChange={(event) => {
-            setReason(event.target.value)
-          }}
-        />
-      </Field>
+      <DialogBody>
+        <Field
+          label={t(`${C}.reason`)}
+          htmlFor="gift-card-close-reason"
+          hint={t(`${C}.reasonHint`)}
+        >
+          <Input
+            id="gift-card-close-reason"
+            maxLength={REASON_MAX}
+            value={reason}
+            onChange={(event) => {
+              setReason(event.target.value)
+            }}
+          />
+        </Field>
+      </DialogBody>
       <DialogFooter>
         <Button type="button" variant="outline" disabled={close.isPending} onClick={onDone}>
           {t("common.cancel")}
@@ -107,7 +114,7 @@ export function CloseGiftCardDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent size="sm">
         <DialogHeader>
           <DialogTitle>{t(`${C}.title`)}</DialogTitle>
           <DialogDescription>

@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
+import { NumberField } from "@/components/patterns/number-field"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import {
@@ -93,10 +94,10 @@ export function AttributeInput({ definition, value, onChange }: AttributeInputPr
           </SelectContent>
         </Select>
       ) : definition.type === "number" ? (
-        <Input
+        <NumberField
+          plain
+          decimals={3}
           id={id}
-          type="number"
-          inputMode="decimal"
           value={typeof value === "number" ? String(value) : ""}
           onChange={(event) => {
             const text = event.target.value

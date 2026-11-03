@@ -5,9 +5,11 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { Field } from "@/components/patterns/form-section"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -60,16 +62,18 @@ function ChargebackFields({
 }) {
   const { t } = useTranslation()
   return (
-    <div className="flex flex-col gap-4">
+    <DialogBody>
       <Field
         label={t(`${C}.amount`)}
         htmlFor="chargeback-amount"
         error={errors.amount?.message ? t(errors.amount.message) : undefined}
       >
-        <Input
+        <NumberField
           id="chargeback-amount"
-          inputMode="decimal"
-          className="w-40"
+          decimals={2}
+          min={0}
+          suffix="₺"
+          className="w-48"
           {...register("amount")}
         />
       </Field>
@@ -106,7 +110,7 @@ function ChargebackFields({
       <Field label={t(`${C}.note`)} htmlFor="chargeback-note">
         <Textarea id="chargeback-note" rows={3} maxLength={1000} {...register("note")} />
       </Field>
-    </div>
+    </DialogBody>
   )
 }
 

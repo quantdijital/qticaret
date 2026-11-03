@@ -129,7 +129,7 @@ export function ImportDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("seo.redirects.import.title")}</DialogTitle>
           <DialogDescription>{t("seo.redirects.import.description")}</DialogDescription>

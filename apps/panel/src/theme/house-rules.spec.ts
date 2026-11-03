@@ -83,6 +83,14 @@ describe("the panel's house rules (docs/18 §9)", () => {
     expect(breaches(PX_CORNER)).toEqual([])
   })
 
+  it("types numbers in the panel's own field, never the browser's spinner", () => {
+    // The owner, 2026-11-03: "artır azalt ikonları default ikonlar olarak geliyor"
+    const own = (file: string) =>
+      file === "components/patterns/number-field.tsx" || file.startsWith("components/charts/")
+    expect(breaches(/<Input\b[^>]*\btype="number"/g, own)).toEqual([])
+    expect(breaches(/<input\b[^>]*\btype="number"/g, own)).toEqual([])
+  })
+
   it("has every text in Turkish and English, Turkish without exclamation marks", () => {
     const turkish = leaves(tr)
     expect(turkish.map(([key]) => key).sort()).toEqual(

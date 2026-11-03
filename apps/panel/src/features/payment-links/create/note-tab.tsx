@@ -2,7 +2,7 @@ import { useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
-import { Input } from "@/components/ui/input"
+import { NumberField } from "@/components/patterns/number-field"
 import { Textarea } from "@/components/ui/textarea"
 import { DEFAULT_HOURS, MAX_HOURS, MIN_HOURS } from "@/features/payment-links/form"
 import type { LinkFormValues } from "@/features/payment-links/form"
@@ -29,10 +29,11 @@ export function NoteTab() {
           error={fieldError(errors.hours)}
           required
         >
-          <Input
+          <NumberField
+            min={MIN_HOURS}
+            max={MAX_HOURS}
             id="link-hours"
-            inputMode="numeric"
-            className="w-32 tabular-nums"
+            className="w-40"
             {...register("hours")}
           />
         </Field>

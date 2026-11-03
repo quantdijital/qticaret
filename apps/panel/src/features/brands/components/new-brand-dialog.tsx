@@ -7,6 +7,7 @@ import { Field } from "@/components/patterns/form-section"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -60,34 +61,36 @@ export function NewBrandDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent size="sm">
         <DialogHeader>
           <DialogTitle>{t("brands.add")}</DialogTitle>
           <DialogDescription>{t("brands.addHint")}</DialogDescription>
         </DialogHeader>
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-6"
           onSubmit={(event) => {
             event.preventDefault()
             submit()
           }}
         >
-          <Field
-            label={t("brands.name")}
-            htmlFor="brand-new-name"
-            error={failure ?? undefined}
-            required
-          >
-            <Input
-              id="brand-new-name"
-              value={name}
-              autoFocus
-              maxLength={120}
-              onChange={(event) => {
-                setName(event.target.value)
-              }}
-            />
-          </Field>
+          <DialogBody>
+            <Field
+              label={t("brands.name")}
+              htmlFor="brand-new-name"
+              error={failure ?? undefined}
+              required
+            >
+              <Input
+                id="brand-new-name"
+                value={name}
+                autoFocus
+                maxLength={120}
+                onChange={(event) => {
+                  setName(event.target.value)
+                }}
+              />
+            </Field>
+          </DialogBody>
           <DialogFooter>
             <Button type="button" variant="outline" disabled={create.isPending} onClick={close}>
               {t("common.cancel")}

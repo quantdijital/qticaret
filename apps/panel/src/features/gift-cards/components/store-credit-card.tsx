@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SectionCard } from "@/components/patterns/section-card"
 import { ErrorState } from "@/components/patterns/states"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -28,20 +29,17 @@ function CreditInputs({
   const { t } = useTranslation()
   return (
     <div className="flex gap-2">
-      <div className="relative w-32 shrink-0">
-        <Input
-          id="store-credit-amount"
-          inputMode="decimal"
-          className="pr-8 text-right tabular-nums"
-          value={amount}
-          onChange={(event) => {
-            onAmount(event.target.value)
-          }}
-        />
-        <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-sm text-muted-foreground">
-          ₺
-        </span>
-      </div>
+      <NumberField
+        id="store-credit-amount"
+        decimals={2}
+        min={0}
+        suffix="₺"
+        className="w-44 shrink-0"
+        value={amount}
+        onChange={(event) => {
+          onAmount(event.target.value)
+        }}
+      />
       <Input
         aria-label={t("storeCredit.note")}
         placeholder={t("storeCredit.note")}

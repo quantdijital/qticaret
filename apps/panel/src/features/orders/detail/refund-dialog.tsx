@@ -4,18 +4,19 @@ import { useDeferredValue, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Field } from "@/components/patterns/form-section"
+import { NumberField } from "@/components/patterns/number-field"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { refundPreviewQuery, useRefundOrder } from "@/features/orders/api/orders"
@@ -65,114 +66,120 @@ export function RefundDialog({ order, money, open, onOpenChange }: RefundDialogP
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t(`${R}.title`, { number: order.display_id })}</DialogTitle>
           <DialogDescription>
             {t(`${R}.description`, { refundable: formatMoney(money.refundable, currency) })}
           </DialogDescription>
         </DialogHeader>
-        <ToggleGroup
-          type="single"
-          variant="outline"
-          aria-label={t(`${R}.mode`)}
-          value={mode}
-          onValueChange={(next) => {
-            if (next) {
-              setMode(next as RefundMode)
-            }
-          }}
-          className="w-full"
-        >
-          {(["items", "amount"] as const).map((option) => (
-            <ToggleGroupItem
-              key={option}
-              value={option}
-              className="flex-1 px-3 text-[13px] data-[state=on]:bg-accent data-[state=on]:font-medium data-[state=on]:text-accent-foreground"
-            >
-              {t(`${R}.modes.${option}`)}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-        {mode === "items" ? (
-          <div className="flex flex-col gap-3">
-            <ul className="relative flex max-h-72 flex-col divide-y overflow-y-auto rounded-md border">
-              {lines.map((line) => {
-                const item = byId.get(line.id)
-                const max = refundableUnits(line)
-                return (
-                  <li key={line.id} className="flex items-center gap-3 px-3 py-2.5">
-                    <ProductThumb src={item?.thumbnail} className="size-9" />
-                    <span className="flex min-w-0 flex-1 flex-col">
-                      <span className="truncate text-sm font-medium">{item?.title}</span>
-                      <span className="truncate text-xs text-muted-foreground">
-                        {t(`${R}.left`, { count: max })}
-                      </span>
-                    </span>
-                    <Input
-                      type="number"
-                      inputMode="numeric"
-                      min={0}
-                      max={max}
-                      aria-label={t(`${R}.quantity`, { name: item?.title ?? line.id })}
-                      className="w-20 text-right tabular-nums"
-                      value={quantities[line.id] ?? 0}
-                      onChange={(event) => {
-                        const next = Math.min(
-                          Math.max(Math.trunc(Number(event.target.value) || 0), 0),
-                          max
-                        )
-                        setQuantities((current) => ({ ...current, [line.id]: next }))
-                      }}
-                    />
-                  </li>
-                )
-              })}
-            </ul>
-            {shippingLeftover > 0 ? (
-              <label className="flex cursor-pointer items-center gap-2.5 text-sm">
-                <Checkbox
-                  checked={shipping}
-                  onCheckedChange={(checked) => {
-                    setShipping(checked === true)
-                  }}
-                />
-                {t(`${R}.shipping`, { amount: formatMoney(shippingLeftover, currency) })}
-              </label>
-            ) : null}
-          </div>
-        ) : (
-          <Field
-            label={t(`${R}.amount`)}
-            htmlFor="refund-amount"
-            hint={t(`${R}.amountHint`, { refundable: formatMoney(money.refundable, currency) })}
+        <DialogBody list>
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            aria-label={t(`${R}.mode`)}
+            value={mode}
+            onValueChange={(next) => {
+              if (next) {
+                setMode(next as RefundMode)
+              }
+            }}
+            className="w-full"
           >
-            <Input
-              id="refund-amount"
-              inputMode="decimal"
-              value={amount}
+            {(["items", "amount"] as const).map((option) => (
+              <ToggleGroupItem
+                key={option}
+                value={option}
+                className="flex-1 px-3 text-[13px] data-[state=on]:bg-accent data-[state=on]:font-medium data-[state=on]:text-accent-foreground"
+              >
+                {t(`${R}.modes.${option}`)}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+          {mode === "items" ? (
+            <div className="flex flex-col gap-3">
+              <ul className="relative flex max-h-72 flex-col divide-y overflow-y-auto rounded-md border">
+                {lines.map((line) => {
+                  const item = byId.get(line.id)
+                  const max = refundableUnits(line)
+                  return (
+                    <li key={line.id} className="flex min-h-12 items-center gap-3 px-3 py-1.5">
+                      <ProductThumb src={item?.thumbnail} className="size-9" />
+                      <span className="flex min-w-0 flex-1 flex-col">
+                        <span className="truncate text-sm font-medium">{item?.title}</span>
+                        <span className="truncate text-xs text-muted-foreground">
+                          {t(`${R}.left`, { count: max })}
+                        </span>
+                      </span>
+                      <NumberField
+                        plain
+                        size="compact"
+                        min={0}
+                        max={max}
+                        aria-label={t(`${R}.quantity`, { name: item?.title ?? line.id })}
+                        className="w-24 shrink-0"
+                        value={quantities[line.id] ?? 0}
+                        onChange={(event) => {
+                          const next = Math.min(
+                            Math.max(Math.trunc(Number(event.target.value) || 0), 0),
+                            max
+                          )
+                          setQuantities((current) => ({ ...current, [line.id]: next }))
+                        }}
+                      />
+                    </li>
+                  )
+                })}
+              </ul>
+              {shippingLeftover > 0 ? (
+                <label className="flex cursor-pointer items-center gap-2.5 text-sm">
+                  <Checkbox
+                    checked={shipping}
+                    onCheckedChange={(checked) => {
+                      setShipping(checked === true)
+                    }}
+                  />
+                  {t(`${R}.shipping`, { amount: formatMoney(shippingLeftover, currency) })}
+                </label>
+              ) : null}
+            </div>
+          ) : (
+            <Field
+              label={t(`${R}.amount`)}
+              htmlFor="refund-amount"
+              hint={t(`${R}.amountHint`, { refundable: formatMoney(money.refundable, currency) })}
+            >
+              <NumberField
+                id="refund-amount"
+                decimals={2}
+                min={0}
+                max={Number(money.refundable)}
+                suffix="₺"
+                className="sm:w-48"
+                value={amount}
+                onChange={(event) => {
+                  setAmount(event.target.value)
+                }}
+              />
+            </Field>
+          )}
+          <Field label={t(`${R}.note`)} htmlFor="refund-note" hint={t(`${R}.noteHint`)}>
+            <Textarea
+              id="refund-note"
+              rows={2}
+              maxLength={500}
+              value={note}
               onChange={(event) => {
-                setAmount(event.target.value)
+                setNote(event.target.value)
               }}
             />
           </Field>
-        )}
-        <Field label={t(`${R}.note`)} htmlFor="refund-note" hint={t(`${R}.noteHint`)}>
-          <Textarea
-            id="refund-note"
-            rows={2}
-            maxLength={500}
-            value={note}
-            onChange={(event) => {
-              setNote(event.target.value)
-            }}
-          />
-        </Field>
-        {preview.error ? (
-          <Alert variant="destructive">
-            <AlertDescription>{errorText(t, preview.error)}</AlertDescription>
-          </Alert>
-        ) : null}
+          {preview.error ? (
+            <Alert variant="destructive">
+              <AlertDescription>{errorText(t, preview.error)}</AlertDescription>
+            </Alert>
+          ) : null}
+        </DialogBody>
         <DialogFooter>
           <Button
             variant="outline"

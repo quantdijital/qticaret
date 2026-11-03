@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
-import { Input } from "@/components/ui/input"
+import { NumberField } from "@/components/patterns/number-field"
 import { Choices } from "@/features/products/bulk/bulk-choices"
 import type { FieldsProps } from "@/features/products/bulk/bulk-fields"
 
@@ -49,9 +49,10 @@ export function BulkCostFields({ form, onChange, error }: FieldsProps) {
           hint={t(`products.bulk.cost.hints.${form.costMode}`)}
           error={error ? t(error) : undefined}
         >
-          <Input
+          <NumberField
+            decimals={2}
+            min={0}
             id="bulk-value"
-            inputMode="decimal"
             autoComplete="off"
             value={form.value}
             aria-invalid={error ? true : undefined}

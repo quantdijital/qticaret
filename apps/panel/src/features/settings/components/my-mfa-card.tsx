@@ -48,7 +48,7 @@ function TurnOffDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-md">
+      <DialogContent size="sm">
         <DialogHeader>
           <DialogTitle>{t(`${S}.${next === "setup" ? "changeTitle" : "offTitle"}`)}</DialogTitle>
           <DialogDescription>

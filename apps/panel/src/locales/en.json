@@ -22,7 +22,9 @@
     "clear": "Clear",
     "more": "More actions",
     "notifications": "Notifications",
-    "previous": "Previous"
+    "previous": "Previous",
+    "increase": "Increase",
+    "decrease": "Decrease"
   },
   "errors": {
     "generic": "The action could not be completed. Try again in a moment.",
@@ -3568,6 +3570,7 @@
         "title": "Open a return or exchange request",
         "description": "Opened for the shopper: the same rules apply, the shopper gets an e-mail and the request waits in the returns queue.",
         "kind": "Request type",
+        "lines": "Items",
         "return": "Return",
         "exchange": "Exchange",
         "left_one": "{{count}} unit can be returned",
@@ -3609,6 +3612,8 @@
       "priceOf": "Unit price of {{name}}",
       "remove": "Take {{name}} off",
       "shopPrice": "Shop price",
+      "linesTitle": "Items in the order",
+      "addTitle": "Add a product",
       "addLabel": "Product to add",
       "addPlaceholder": "Search a product to add",
       "addEmpty": "No product found.",

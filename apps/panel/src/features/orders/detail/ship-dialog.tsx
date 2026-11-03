@@ -1,11 +1,13 @@
 import { Loader2, Truck } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -91,91 +93,97 @@ export function ShipDialog({
     chosen.every((item, index) => item.quantity === items[index]?.quantity)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t("orders.ship.title", { number: order.display_id })}</DialogTitle>
           <DialogDescription>{t("orders.ship.description")}</DialogDescription>
         </DialogHeader>
-        <ul className="relative flex max-h-72 flex-col divide-y overflow-y-auto rounded-md border">
-          {items.map(({ id, quantity }) => {
-            const item = byId.get(id)
-            return (
-              <li key={id} className="flex items-center gap-3 px-3 py-2.5">
-                <ProductThumb src={item?.thumbnail} className="size-9" />
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate text-sm font-medium">{item?.title}</span>
-                  {item?.subtitle ? (
-                    <span className="truncate text-xs text-muted-foreground">{item.subtitle}</span>
-                  ) : null}
-                </span>
-                {packed ? (
-                  <span className="text-sm tabular-nums">× {formatCount(quantity)}</span>
-                ) : (
-                  <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <Input
-                      type="number"
-                      inputMode="numeric"
-                      min={0}
-                      max={quantity}
-                      aria-label={t("orders.ship.quantityOf", { name: item?.title ?? "" })}
-                      className="h-8 w-16 text-right tabular-nums"
-                      value={countOf(id, quantity)}
-                      onChange={(event) => {
-                        setCounts({ ...counts, [id]: Number(event.target.value) || 0 })
-                      }}
-                    />
-                    <span className="tabular-nums">/ {formatCount(quantity)}</span>
+        <DialogBody list>
+          <ul className="relative flex max-h-72 flex-col divide-y overflow-y-auto rounded-md border">
+            {items.map(({ id, quantity }) => {
+              const item = byId.get(id)
+              return (
+                <li key={id} className="flex min-h-12 items-center gap-3 px-3 py-1.5">
+                  <ProductThumb src={item?.thumbnail} className="size-9" />
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate text-sm font-medium">{item?.title}</span>
+                    {item?.subtitle ? (
+                      <span className="truncate text-xs text-muted-foreground">
+                        {item.subtitle}
+                      </span>
+                    ) : null}
                   </span>
-                )}
-              </li>
-            )
-          })}
-        </ul>
-        <details className="rounded-md border px-3 py-2 text-sm">
-          <summary className="cursor-pointer font-medium">{t("orders.ship.trackingTitle")}</summary>
-          <p className="mt-2 text-xs text-muted-foreground">{t("orders.ship.trackingHint")}</p>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2">
-            <Input
-              aria-label={t("orders.ship.carrier")}
-              placeholder={t("orders.ship.carrier")}
-              maxLength={60}
-              value={carrier}
-              onChange={(event) => {
-                setCarrier(event.target.value)
+                  {packed ? (
+                    <span className="text-sm tabular-nums">× {formatCount(quantity)}</span>
+                  ) : (
+                    <span className="flex shrink-0 items-center gap-2 text-sm text-muted-foreground">
+                      <NumberField
+                        plain
+                        size="compact"
+                        min={0}
+                        max={quantity}
+                        aria-label={t("orders.ship.quantityOf", { name: item?.title ?? "" })}
+                        className="w-24"
+                        value={countOf(id, quantity)}
+                        onChange={(event) => {
+                          setCounts({ ...counts, [id]: Number(event.target.value) || 0 })
+                        }}
+                      />
+                      <span className="tabular-nums">/ {formatCount(quantity)}</span>
+                    </span>
+                  )}
+                </li>
+              )
+            })}
+          </ul>
+          <details className="rounded-md border px-3 py-2 text-sm">
+            <summary className="cursor-pointer font-medium">
+              {t("orders.ship.trackingTitle")}
+            </summary>
+            <p className="mt-2 text-xs text-muted-foreground">{t("orders.ship.trackingHint")}</p>
+            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+              <Input
+                aria-label={t("orders.ship.carrier")}
+                placeholder={t("orders.ship.carrier")}
+                maxLength={60}
+                value={carrier}
+                onChange={(event) => {
+                  setCarrier(event.target.value)
+                }}
+              />
+              <Input
+                aria-label={t("orders.ship.trackingNumber")}
+                placeholder={t("orders.ship.trackingNumber")}
+                maxLength={40}
+                value={trackingNumber}
+                onChange={(event) => {
+                  setTrackingNumber(event.target.value)
+                }}
+              />
+              <Input
+                type="url"
+                aria-label={t("orders.ship.trackingUrl")}
+                placeholder={t("orders.ship.trackingUrl")}
+                maxLength={500}
+                className="sm:col-span-2"
+                value={trackingUrl}
+                onChange={(event) => {
+                  setTrackingUrl(event.target.value)
+                }}
+              />
+            </div>
+            {problem ? <p className="mt-2 text-xs text-destructive">{t(problem)}</p> : null}
+          </details>
+          <label className="flex cursor-pointer items-center gap-2.5 text-sm">
+            <Checkbox
+              checked={notify}
+              onCheckedChange={(checked) => {
+                setNotify(checked === true)
               }}
             />
-            <Input
-              aria-label={t("orders.ship.trackingNumber")}
-              placeholder={t("orders.ship.trackingNumber")}
-              maxLength={40}
-              value={trackingNumber}
-              onChange={(event) => {
-                setTrackingNumber(event.target.value)
-              }}
-            />
-            <Input
-              type="url"
-              aria-label={t("orders.ship.trackingUrl")}
-              placeholder={t("orders.ship.trackingUrl")}
-              maxLength={500}
-              className="sm:col-span-2"
-              value={trackingUrl}
-              onChange={(event) => {
-                setTrackingUrl(event.target.value)
-              }}
-            />
-          </div>
-          {problem ? <p className="mt-2 text-xs text-destructive">{t(problem)}</p> : null}
-        </details>
-        <label className="flex cursor-pointer items-center gap-2.5 text-sm">
-          <Checkbox
-            checked={notify}
-            onCheckedChange={(checked) => {
-              setNotify(checked === true)
-            }}
-          />
-          {t("orders.ship.notify")}
-        </label>
+            {t("orders.ship.notify")}
+          </label>
+        </DialogBody>
         <DialogFooter>
           <Button
             variant="outline"

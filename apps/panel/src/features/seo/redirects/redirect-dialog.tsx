@@ -8,6 +8,7 @@ import { Field } from "@/components/patterns/form-section"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -78,143 +79,145 @@ function RedirectFormBody({
 
   return (
     <form
-      className="flex flex-col gap-5"
+      className="flex flex-col gap-6"
       noValidate
       onSubmit={(event) => {
         void submit(event)
       }}
     >
-      <Field label={t("seo.redirects.form.match")} hint={t(`seo.redirects.matchHints.${match}`)}>
-        <Controller
-          control={form.control}
-          name="match"
-          render={({ field }) => (
-            <ToggleGroup
-              type="single"
-              variant="outline"
-              value={field.value}
-              onValueChange={(next) => {
-                if (next) {
-                  field.onChange(next)
-                }
-              }}
-              className="w-full"
-            >
-              {REDIRECT_MATCHES.map((option) => (
-                <ToggleGroupItem key={option} value={option} className="flex-1">
-                  {t(`seo.redirects.matches.${option}`)}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
-          )}
-        />
-      </Field>
-      <Field
-        label={t("seo.redirects.form.source")}
-        htmlFor="redirect-source"
-        hint={t("seo.redirects.form.sourceHint")}
-        error={message(errors.source?.message)}
-        required
-      >
-        <Input
-          id="redirect-source"
-          spellCheck={false}
-          autoComplete="off"
-          className="font-mono text-[13px]"
-          placeholder={t(`seo.redirects.placeholders.${match}`)}
-          {...form.register("source")}
-        />
-      </Field>
-      <div className="grid gap-5 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)]">
-        <Field label={t("seo.redirects.form.status")} htmlFor="redirect-status">
+      <DialogBody>
+        <Field label={t("seo.redirects.form.match")} hint={t(`seo.redirects.matchHints.${match}`)}>
           <Controller
             control={form.control}
-            name="status"
+            name="match"
             render={({ field }) => (
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger id="redirect-status" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUSES.map((option) => (
-                    <SelectItem key={option} value={option}>
-                      {t(`seo.redirects.statuses.${option}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <ToggleGroup
+                type="single"
+                variant="outline"
+                value={field.value}
+                onValueChange={(next) => {
+                  if (next) {
+                    field.onChange(next)
+                  }
+                }}
+                className="w-full"
+              >
+                {REDIRECT_MATCHES.map((option) => (
+                  <ToggleGroupItem key={option} value={option} className="flex-1">
+                    {t(`seo.redirects.matches.${option}`)}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
             )}
           />
         </Field>
-        {status === "410" ? (
-          <p className="self-end pb-2 text-[13px] text-muted-foreground">
-            {t("seo.redirects.form.goneHint")}
-          </p>
-        ) : (
-          <Field
-            label={t("seo.redirects.form.target")}
-            htmlFor="redirect-target"
-            hint={match === "exact" ? undefined : t("seo.redirects.form.targetPatternHint")}
-            error={message(errors.target?.message)}
-            required
-          >
-            <Input
-              id="redirect-target"
-              spellCheck={false}
-              autoComplete="off"
-              className="font-mono text-[13px]"
-              placeholder={t(`seo.redirects.targetPlaceholders.${match}`)}
-              {...form.register("target")}
-            />
-          </Field>
-        )}
-      </div>
-      {status === "410" ? null : (
-        <Field label={t("seo.redirects.form.query")} htmlFor="redirect-query">
-          <div className="flex flex-col gap-2">
+        <Field
+          label={t("seo.redirects.form.source")}
+          htmlFor="redirect-source"
+          hint={t("seo.redirects.form.sourceHint")}
+          error={message(errors.source?.message)}
+          required
+        >
+          <Input
+            id="redirect-source"
+            spellCheck={false}
+            autoComplete="off"
+            className="font-mono text-[13px]"
+            placeholder={t(`seo.redirects.placeholders.${match}`)}
+            {...form.register("source")}
+          />
+        </Field>
+        <div className="grid gap-5 sm:grid-cols-[minmax(0,14rem)_minmax(0,1fr)]">
+          <Field label={t("seo.redirects.form.status")} htmlFor="redirect-status">
             <Controller
               control={form.control}
-              name="query_policy"
+              name="status"
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger id="redirect-query" className="w-full">
+                  <SelectTrigger id="redirect-status" className="w-full">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {QUERY_POLICIES.map((option) => (
+                    {STATUSES.map((option) => (
                       <SelectItem key={option} value={option}>
-                        {t(`seo.redirects.queryPolicies.${option}`)}
+                        {t(`seo.redirects.statuses.${option}`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               )}
             />
-            {policy === "keep_list" ? (
+          </Field>
+          {status === "410" ? (
+            <p className="self-end pb-2 text-[13px] text-muted-foreground">
+              {t("seo.redirects.form.goneHint")}
+            </p>
+          ) : (
+            <Field
+              label={t("seo.redirects.form.target")}
+              htmlFor="redirect-target"
+              hint={match === "exact" ? undefined : t("seo.redirects.form.targetPatternHint")}
+              error={message(errors.target?.message)}
+              required
+            >
               <Input
-                aria-label={t("seo.redirects.form.keepList")}
+                id="redirect-target"
                 spellCheck={false}
+                autoComplete="off"
                 className="font-mono text-[13px]"
-                placeholder="utm_source, utm_medium"
-                {...form.register("query_keep")}
+                placeholder={t(`seo.redirects.targetPlaceholders.${match}`)}
+                {...form.register("target")}
               />
-            ) : null}
-            {errors.query_keep?.message ? (
-              <p role="alert" className="text-xs text-destructive-text">
-                {t(errors.query_keep.message)}
-              </p>
-            ) : null}
-          </div>
-        </Field>
-      )}
-      {failure ? (
-        <p
-          role="alert"
-          className="rounded-md bg-destructive/10 px-3 py-2 text-[13px] text-destructive-text"
-        >
-          {failure}
-        </p>
-      ) : null}
+            </Field>
+          )}
+        </div>
+        {status === "410" ? null : (
+          <Field label={t("seo.redirects.form.query")} htmlFor="redirect-query">
+            <div className="flex flex-col gap-2">
+              <Controller
+                control={form.control}
+                name="query_policy"
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger id="redirect-query" className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {QUERY_POLICIES.map((option) => (
+                        <SelectItem key={option} value={option}>
+                          {t(`seo.redirects.queryPolicies.${option}`)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              {policy === "keep_list" ? (
+                <Input
+                  aria-label={t("seo.redirects.form.keepList")}
+                  spellCheck={false}
+                  className="font-mono text-[13px]"
+                  placeholder="utm_source, utm_medium"
+                  {...form.register("query_keep")}
+                />
+              ) : null}
+              {errors.query_keep?.message ? (
+                <p role="alert" className="text-xs text-destructive-text">
+                  {t(errors.query_keep.message)}
+                </p>
+              ) : null}
+            </div>
+          </Field>
+        )}
+        {failure ? (
+          <p
+            role="alert"
+            className="rounded-md bg-destructive/10 px-3 py-2 text-[13px] text-destructive-text"
+          >
+            {failure}
+          </p>
+        ) : null}
+      </DialogBody>
       <DialogFooter>
         <Button type="button" variant="outline" disabled={save.isPending} onClick={onDone}>
           {t("common.cancel")}
@@ -237,7 +240,7 @@ export function RedirectDialog({ open, onOpenChange, ...props }: RedirectDialogP
   const { t } = useTranslation()
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent size="lg">
         <DialogHeader>
           <DialogTitle>
             {t(props.ruleId ? "seo.redirects.form.editTitle" : "seo.redirects.form.title")}

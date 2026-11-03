@@ -51,7 +51,7 @@ function DeliveriesDialog({ id, onClose }: { id: string; onClose: () => void }) 
         }
       }}
     >
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent size="lg">
         <DialogHeader>
           <DialogTitle>{t(`${W}.log`)}</DialogTitle>
           <DialogDescription className="break-all">

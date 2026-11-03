@@ -3,9 +3,11 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Field } from "@/components/patterns/form-section"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -108,9 +110,10 @@ export function SegmentDialog({
       error={errorOf(field)}
       hint={hint}
     >
-      <Input
+      <NumberField
         id={`segment-${field}`}
-        inputMode={field === "minSpent" ? "decimal" : "numeric"}
+        decimals={field === "minSpent" ? 2 : 0}
+        min={0}
         value={draft[field]}
         onChange={(event) => {
           change({ [field]: event.target.value })
@@ -127,9 +130,9 @@ export function SegmentDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-6"
           onSubmit={(event) => {
             event.preventDefault()
             const result = rulesOf(draft)
@@ -145,48 +148,50 @@ export function SegmentDialog({
             <DialogTitle>{t(segment ? `${S}.dialogEdit` : `${S}.dialogNew`)}</DialogTitle>
             <DialogDescription>{t(`${S}.dialogDescription`)}</DialogDescription>
           </DialogHeader>
-          <Field label={t(`${S}.name`)} htmlFor="segment-name" error={errorOf("name")} required>
-            <Input
-              id="segment-name"
-              autoFocus
-              maxLength={100}
-              value={draft.name}
-              onChange={(event) => {
-                change({ name: event.target.value })
-              }}
-            />
-          </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {text("minSpent")}
-            {text("minOrders")}
-            {text("withinDays")}
-            {text("lapsedDays", t(`${S}.lapsedHint`))}
-            <TristateField
-              id="segment-registered"
-              label={t(`${S}.registered`)}
-              yes={t(`${S}.registeredYes`)}
-              no={t(`${S}.registeredNo`)}
-              value={draft.registered}
-              onChange={(registered) => {
-                change({ registered })
-              }}
-            />
-            <TristateField
-              id="segment-consent"
-              label={t(`${S}.consent`)}
-              yes={t(`${S}.consentYes`)}
-              no={t(`${S}.consentNo`)}
-              value={draft.consent}
-              onChange={(consent) => {
-                change({ consent })
-              }}
-            />
-          </div>
-          {error?.field === "rules" ? (
-            <p role="alert" className="text-sm text-destructive-text">
-              {error.text}
-            </p>
-          ) : null}
+          <DialogBody>
+            <Field label={t(`${S}.name`)} htmlFor="segment-name" error={errorOf("name")} required>
+              <Input
+                id="segment-name"
+                autoFocus
+                maxLength={100}
+                value={draft.name}
+                onChange={(event) => {
+                  change({ name: event.target.value })
+                }}
+              />
+            </Field>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {text("minSpent")}
+              {text("minOrders")}
+              {text("withinDays")}
+              {text("lapsedDays", t(`${S}.lapsedHint`))}
+              <TristateField
+                id="segment-registered"
+                label={t(`${S}.registered`)}
+                yes={t(`${S}.registeredYes`)}
+                no={t(`${S}.registeredNo`)}
+                value={draft.registered}
+                onChange={(registered) => {
+                  change({ registered })
+                }}
+              />
+              <TristateField
+                id="segment-consent"
+                label={t(`${S}.consent`)}
+                yes={t(`${S}.consentYes`)}
+                no={t(`${S}.consentNo`)}
+                value={draft.consent}
+                onChange={(consent) => {
+                  change({ consent })
+                }}
+              />
+            </div>
+            {error?.field === "rules" ? (
+              <p role="alert" className="text-sm text-destructive-text">
+                {error.text}
+              </p>
+            ) : null}
+          </DialogBody>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               {t(`${S}.cancel`)}

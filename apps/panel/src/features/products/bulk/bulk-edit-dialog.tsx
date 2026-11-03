@@ -87,7 +87,7 @@ export function BulkEditDialog({ action, productIds, onClose, onDone }: BulkEdit
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{action ? t(`products.bulk.actions.${action}`) : null}</DialogTitle>
           <DialogDescription>{t("products.bulk.scope", count)}</DialogDescription>

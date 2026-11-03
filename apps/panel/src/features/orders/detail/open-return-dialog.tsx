@@ -2,17 +2,19 @@ import { CircleAlert, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { NumberField } from "@/components/patterns/number-field"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogSection,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
   Select,
@@ -114,9 +116,9 @@ export function OpenReturnDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-xl">
+      <DialogContent>
         <form
-          className="flex flex-col gap-5"
+          className="flex flex-col gap-6"
           onSubmit={(event) => {
             event.preventDefault()
             submit()
@@ -126,142 +128,148 @@ export function OpenReturnDialog({
             <DialogTitle>{t(`${O}.title`)}</DialogTitle>
             <DialogDescription>{t(`${O}.description`)}</DialogDescription>
           </DialogHeader>
-          <ToggleGroup
-            type="single"
-            variant="outline"
-            value={kind}
-            aria-label={t(`${O}.kind`)}
-            onValueChange={(next) => {
-              if (next) {
-                setKind(next as Kind)
-              }
-            }}
-            className="w-full"
-          >
-            <ToggleGroupItem value="return" className="flex-1">
-              {t(`${O}.return`)}
-            </ToggleGroupItem>
-            <ToggleGroupItem value="exchange" className="flex-1">
-              {t(`${O}.exchange`)}
-            </ToggleGroupItem>
-          </ToggleGroup>
-          <ul className="flex flex-col divide-y rounded-md border">
-            {lines.map((line) => {
-              const current = picks[line.line_item_id]
-              const inputId = `return-qty-${line.line_item_id}`
-              return (
-                <li key={line.line_item_id} className="flex flex-col gap-2 px-3 py-2.5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                        <label htmlFor={inputId} className="truncate text-sm font-medium">
-                          {line.title ?? "—"}
-                        </label>
-                        {line.gift_card ? (
-                          <StatusBadge tone="info">{t(`${O}.giftBadge`)}</StatusBadge>
-                        ) : null}
-                        {line.withdrawal_excluded ? (
-                          <NonWithdrawableBadge reason={line.withdrawal_excluded_reason} />
-                        ) : null}
-                        {line.withdrawal_warning === "sealed_goods" ? <SealedGoodsBadge /> : null}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {[
-                          line.variant_title,
-                          t(line.gift_card ? `${O}.leftCards` : `${O}.left`, {
-                            count: line.returnable,
-                          }),
-                        ]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </span>
-                    </div>
-                    <Input
-                      id={inputId}
-                      type="number"
-                      inputMode="numeric"
-                      min={0}
-                      max={line.returnable}
-                      className="w-20"
-                      value={current?.quantity ?? 0}
-                      onChange={(event) => {
-                        const value = Math.trunc(Number(event.target.value))
-                        pick(line.line_item_id, {
-                          quantity: Number.isFinite(value)
-                            ? Math.min(Math.max(value, 0), line.returnable)
-                            : 0,
-                        })
-                      }}
-                    />
-                  </div>
-                  {kind === "exchange" && !line.gift_card && (current?.quantity ?? 0) > 0 ? (
-                    line.variants.length > 0 ? (
-                      <Select
-                        value={current?.variant ?? ""}
-                        onValueChange={(variant) => {
-                          pick(line.line_item_id, { variant })
-                        }}
-                      >
-                        <SelectTrigger className="w-full" aria-label={t(`${O}.variant`)}>
-                          <SelectValue placeholder={t(`${O}.variant`)} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {line.variants.map((variant) => (
-                            <SelectItem key={variant.id} value={variant.id}>
-                              {variant.title ?? variant.id}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <p className="text-xs text-warning-text">{t(`${O}.noVariant`)}</p>
-                    )
-                  ) : null}
-                </li>
-              )
-            })}
-          </ul>
-          <div className="flex flex-col gap-2">
-            <Label id="return-reason-label">{t(`${O}.reason`)}</Label>
-            <Select
-              value={reason}
+          <DialogBody list>
+            <ToggleGroup
+              type="single"
+              variant="outline"
+              value={kind}
+              aria-label={t(`${O}.kind`)}
               onValueChange={(next) => {
-                setReason(next as ReturnReason)
+                if (next) {
+                  setKind(next as Kind)
+                }
               }}
+              className="w-full"
             >
-              <SelectTrigger className="w-full" aria-labelledby="return-reason-label">
-                <SelectValue placeholder={t(`${O}.reasonPlaceholder`)} />
-              </SelectTrigger>
-              <SelectContent>
-                {RETURN_REASONS.map((key) => (
-                  <SelectItem key={key} value={key}>
-                    {t(`orders.returns.reasons.${key}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          {problem ? (
-            <p
-              role="status"
-              className="flex items-start gap-2 rounded-md bg-warning-soft px-3 py-2 text-[13px] text-warning-text"
-            >
-              <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-              {t(`${O}.${problem}`)}
-            </p>
-          ) : null}
-          {giftOnly ? <GiftReturnNote /> : null}
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="return-note">{t(`${O}.note`)}</Label>
-            <Textarea
-              id="return-note"
-              maxLength={1000}
-              value={note}
-              onChange={(event) => {
-                setNote(event.target.value)
-              }}
-            />
-          </div>
+              <ToggleGroupItem value="return" className="flex-1">
+                {t(`${O}.return`)}
+              </ToggleGroupItem>
+              <ToggleGroupItem value="exchange" className="flex-1">
+                {t(`${O}.exchange`)}
+              </ToggleGroupItem>
+            </ToggleGroup>
+            <DialogSection title={t(`${O}.lines`)}>
+              <ul className="flex flex-col divide-y rounded-md border">
+                {lines.map((line) => {
+                  const current = picks[line.line_item_id]
+                  const inputId = `return-qty-${line.line_item_id}`
+                  return (
+                    <li key={line.line_item_id} className="flex flex-col gap-2 px-3 py-1.5">
+                      <div className="flex min-h-9 items-center gap-3">
+                        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                          <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                            <label htmlFor={inputId} className="truncate text-sm font-medium">
+                              {line.title ?? "—"}
+                            </label>
+                            {line.gift_card ? (
+                              <StatusBadge tone="info">{t(`${O}.giftBadge`)}</StatusBadge>
+                            ) : null}
+                            {line.withdrawal_excluded ? (
+                              <NonWithdrawableBadge reason={line.withdrawal_excluded_reason} />
+                            ) : null}
+                            {line.withdrawal_warning === "sealed_goods" ? (
+                              <SealedGoodsBadge />
+                            ) : null}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            {[
+                              line.variant_title,
+                              t(line.gift_card ? `${O}.leftCards` : `${O}.left`, {
+                                count: line.returnable,
+                              }),
+                            ]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </span>
+                        </div>
+                        <NumberField
+                          id={inputId}
+                          plain
+                          size="compact"
+                          min={0}
+                          max={line.returnable}
+                          className="w-24 shrink-0"
+                          value={current?.quantity ?? 0}
+                          onChange={(event) => {
+                            const value = Math.trunc(Number(event.target.value))
+                            pick(line.line_item_id, {
+                              quantity: Number.isFinite(value)
+                                ? Math.min(Math.max(value, 0), line.returnable)
+                                : 0,
+                            })
+                          }}
+                        />
+                      </div>
+                      {kind === "exchange" && !line.gift_card && (current?.quantity ?? 0) > 0 ? (
+                        line.variants.length > 0 ? (
+                          <Select
+                            value={current?.variant ?? ""}
+                            onValueChange={(variant) => {
+                              pick(line.line_item_id, { variant })
+                            }}
+                          >
+                            <SelectTrigger className="w-full" aria-label={t(`${O}.variant`)}>
+                              <SelectValue placeholder={t(`${O}.variant`)} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {line.variants.map((variant) => (
+                                <SelectItem key={variant.id} value={variant.id}>
+                                  {variant.title ?? variant.id}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <p className="text-xs text-warning-text">{t(`${O}.noVariant`)}</p>
+                        )
+                      ) : null}
+                    </li>
+                  )
+                })}
+              </ul>
+            </DialogSection>
+            <div className="flex flex-col gap-2">
+              <Label id="return-reason-label">{t(`${O}.reason`)}</Label>
+              <Select
+                value={reason}
+                onValueChange={(next) => {
+                  setReason(next as ReturnReason)
+                }}
+              >
+                <SelectTrigger className="w-full" aria-labelledby="return-reason-label">
+                  <SelectValue placeholder={t(`${O}.reasonPlaceholder`)} />
+                </SelectTrigger>
+                <SelectContent>
+                  {RETURN_REASONS.map((key) => (
+                    <SelectItem key={key} value={key}>
+                      {t(`orders.returns.reasons.${key}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {problem ? (
+              <p
+                role="status"
+                className="flex items-start gap-2 rounded-md bg-warning-soft px-3 py-2 text-[13px] text-warning-text"
+              >
+                <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                {t(`${O}.${problem}`)}
+              </p>
+            ) : null}
+            {giftOnly ? <GiftReturnNote /> : null}
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="return-note">{t(`${O}.note`)}</Label>
+              <Textarea
+                id="return-note"
+                maxLength={1000}
+                value={note}
+                onChange={(event) => {
+                  setNote(event.target.value)
+                }}
+              />
+            </div>
+          </DialogBody>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               {t("common.cancel")}

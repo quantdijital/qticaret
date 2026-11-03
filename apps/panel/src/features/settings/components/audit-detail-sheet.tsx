@@ -178,7 +178,7 @@ export function AuditDetailSheet({ entry, actor, onClose }: AuditDetailSheetProp
           </SheetDescription>
         </SheetHeader>
         {entry ? (
-          <div className="flex-1 overflow-y-auto px-4 pb-6">
+          <div className="flex-1 overflow-y-auto px-6 py-6">
             <dl className="divide-y">
               <Fact label={t("settings.audit.columns.when")}>
                 <span className="tabular-nums">{formatDateTime(entry.created_at)}</span>

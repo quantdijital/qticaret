@@ -10,6 +10,7 @@ import { Field } from "@/components/patterns/form-section"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -80,53 +81,55 @@ export function AddressDialog({ order, onClose }: { order: OrderDetail; onClose:
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>{t(`${A}.title`, { number: order.display_id })}</DialogTitle>
           <DialogDescription>{t(`${A}.description`)}</DialogDescription>
         </DialogHeader>
         <form
-          className="flex flex-col gap-5"
+          className="flex flex-col gap-6"
           noValidate
           onSubmit={(event) => {
             void submit(event)
           }}
         >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field
-              label={t(`${A}.firstName`)}
-              htmlFor="order-address-first"
-              error={message(errors.first_name?.message)}
-              required
-            >
-              <Input id="order-address-first" {...form.register("first_name")} />
-            </Field>
-            <Field
-              label={t(`${A}.lastName`)}
-              htmlFor="order-address-last"
-              error={message(errors.last_name?.message)}
-              required
-            >
-              <Input id="order-address-last" {...form.register("last_name")} />
-            </Field>
-          </div>
-          <TrAddressFields
-            control={form.control}
-            idPrefix="order-address"
-            errors={{
-              address_1: message(errors.address_1?.message),
-              address_2: message(errors.address_2?.message),
-              province: message(errors.province?.message),
-              city: message(errors.city?.message),
-              postal_code: message(errors.postal_code?.message),
-              phone: message(errors.phone?.message),
-            }}
-          />
-          {failure ? (
-            <p role="alert" className="text-sm text-destructive-text">
-              {failure}
-            </p>
-          ) : null}
+          <DialogBody>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field
+                label={t(`${A}.firstName`)}
+                htmlFor="order-address-first"
+                error={message(errors.first_name?.message)}
+                required
+              >
+                <Input id="order-address-first" {...form.register("first_name")} />
+              </Field>
+              <Field
+                label={t(`${A}.lastName`)}
+                htmlFor="order-address-last"
+                error={message(errors.last_name?.message)}
+                required
+              >
+                <Input id="order-address-last" {...form.register("last_name")} />
+              </Field>
+            </div>
+            <TrAddressFields
+              control={form.control}
+              idPrefix="order-address"
+              errors={{
+                address_1: message(errors.address_1?.message),
+                address_2: message(errors.address_2?.message),
+                province: message(errors.province?.message),
+                city: message(errors.city?.message),
+                postal_code: message(errors.postal_code?.message),
+                phone: message(errors.phone?.message),
+              }}
+            />
+            {failure ? (
+              <p role="alert" className="text-sm text-destructive-text">
+                {failure}
+              </p>
+            ) : null}
+          </DialogBody>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               {t("common.cancel")}

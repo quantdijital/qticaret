@@ -38,7 +38,7 @@ export function RejectReturnDialog({
         }
       }}
     >
-      <DialogContent>
+      <DialogContent size="sm">
         <DialogHeader>
           <DialogTitle>
             {t(`${R}.rejectTitle`, { number: request.order_display_id ?? "—" })}

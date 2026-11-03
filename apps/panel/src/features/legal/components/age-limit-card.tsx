@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
-import { Input } from "@/components/ui/input"
+import { NumberField } from "@/components/patterns/number-field"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { ComplianceSettings } from "@/features/settings/api/sections"
 import { useFeature } from "@/features/settings/api/features"
@@ -62,7 +62,13 @@ function Form({ saved }: { saved: ComplianceSettings }) {
         hint={t(`${A}.minAgeHint`)}
         error={error ? t(error) : undefined}
       >
-        <Input id="age-min" inputMode="numeric" className="w-24" {...form.register("min_age")} />
+        <NumberField
+          min={18}
+          max={25}
+          id="age-min"
+          className="w-40"
+          {...form.register("min_age")}
+        />
       </Field>
     </CardForm>
   )

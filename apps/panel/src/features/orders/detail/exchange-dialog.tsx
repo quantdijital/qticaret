@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -53,53 +54,58 @@ export function ApproveExchangeDialog({
         }
       }}
     >
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>
             {t(`${R}.exchange.approveTitle`, { number: request.order_display_id ?? "—" })}
           </DialogTitle>
           <DialogDescription>{t(`${R}.exchange.approveDescription`)}</DialogDescription>
         </DialogHeader>
-        <ul className="flex flex-col divide-y rounded-md border">
-          {(request.exchange_items ?? []).map((item) => {
-            const line = byId.get(item.line_item_id)
-            return (
-              <li key={item.line_item_id} className="flex flex-col gap-0.5 px-3 py-2.5 text-sm">
-                <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
-                  <span className="truncate font-medium">
-                    {line?.title ?? "—"} × {item.quantity}
+        <DialogBody list>
+          <ul className="flex flex-col divide-y rounded-md border">
+            {(request.exchange_items ?? []).map((item) => {
+              const line = byId.get(item.line_item_id)
+              return (
+                <li
+                  key={item.line_item_id}
+                  className="flex min-h-12 flex-col justify-center gap-0.5 px-3 py-1.5 text-sm"
+                >
+                  <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="truncate font-medium">
+                      {line?.title ?? "—"} × {item.quantity}
+                    </span>
+                    {excluded.has(item.line_item_id) ? <NonWithdrawableBadge /> : null}
+                    {sealed.has(item.line_item_id) ? <SealedGoodsBadge /> : null}
                   </span>
-                  {excluded.has(item.line_item_id) ? <NonWithdrawableBadge /> : null}
-                  {sealed.has(item.line_item_id) ? <SealedGoodsBadge /> : null}
+                  <span className="text-muted-foreground">
+                    {t(`${R}.exchange.swap`, {
+                      from: line?.variant_title ?? "—",
+                      to: item.title ?? "—",
+                    })}
+                  </span>
+                </li>
+              )
+            })}
+          </ul>
+          <p className="text-sm font-medium">{differenceText(t, request.difference)}</p>
+          {owes ? (
+            <label className="flex items-start gap-3 text-sm">
+              <Checkbox
+                className="mt-0.5"
+                checked={collected}
+                onCheckedChange={(on) => {
+                  setCollected(on === true)
+                }}
+              />
+              <span className="flex flex-col gap-0.5">
+                <span className="font-medium">{t(`${R}.exchange.collected`)}</span>
+                <span className="text-xs text-muted-foreground">
+                  {t(`${R}.exchange.collectedHint`)}
                 </span>
-                <span className="text-muted-foreground">
-                  {t(`${R}.exchange.swap`, {
-                    from: line?.variant_title ?? "—",
-                    to: item.title ?? "—",
-                  })}
-                </span>
-              </li>
-            )
-          })}
-        </ul>
-        <p className="text-sm font-medium">{differenceText(t, request.difference)}</p>
-        {owes ? (
-          <label className="flex items-start gap-3 text-sm">
-            <Checkbox
-              className="mt-0.5"
-              checked={collected}
-              onCheckedChange={(on) => {
-                setCollected(on === true)
-              }}
-            />
-            <span className="flex flex-col gap-0.5">
-              <span className="font-medium">{t(`${R}.exchange.collected`)}</span>
-              <span className="text-xs text-muted-foreground">
-                {t(`${R}.exchange.collectedHint`)}
               </span>
-            </span>
-          </label>
-        ) : null}
+            </label>
+          ) : null}
+        </DialogBody>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             {t("common.cancel")}

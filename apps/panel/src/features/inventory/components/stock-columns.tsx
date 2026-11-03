@@ -2,8 +2,8 @@ import { Link } from "@tanstack/react-router"
 import { History } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import type { Column } from "@/components/patterns/data-table"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import type { StockItem } from "@/features/inventory/api/stock"
 import { AvailableBadge } from "@/features/inventory/components/available-badge"
 import { ProductThumb } from "@/features/products/components/product-thumb"
@@ -82,15 +82,16 @@ export function useStockColumns(
         const text = drafts[item.id] ?? current
         const invalid = !DIGITS.test(text)
         return (
-          <Input
+          <NumberField
+            size="compact"
+            min={0}
             value={text}
-            inputMode="numeric"
             aria-label={t("inventory.shelfOf", {
               name: item.variant?.product?.title ?? item.sku ?? item.id,
             })}
             aria-invalid={invalid || undefined}
             className={cn(
-              "ml-auto h-8 w-20 text-right tabular-nums sm:w-24",
+              "ml-auto w-24 sm:w-28",
               drafts[item.id] !== undefined && drafts[item.id] !== current && "border-primary"
             )}
             onClick={(event) => {

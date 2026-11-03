@@ -5,8 +5,8 @@ import { Field } from "@/components/patterns/form-section"
 import { SearchPicker } from "@/components/patterns/search-picker"
 import { SectionCard } from "@/components/patterns/section-card"
 import { StatusBadge } from "@/components/patterns/status-badge"
+import { NumberField } from "@/components/patterns/number-field"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { searchVariants } from "@/features/orders/api/edit"
 import { MAX_LINES, MAX_QUANTITY } from "@/features/payment-links/form"
 import type { LinkFormValues } from "@/features/payment-links/form"
@@ -77,14 +77,13 @@ export function LinesCard({ short }: { short: ReadonlySet<string> }) {
                         <StatusBadge tone="warning">{t("paymentLinks.lines.short")}</StatusBadge>
                       ) : null}
                     </span>
-                    <Input
-                      type="number"
-                      inputMode="numeric"
+                    <NumberField
+                      plain
                       min={1}
                       max={MAX_QUANTITY}
                       aria-label={t(`${L}.quantityOf`, { name: line.label })}
                       aria-invalid={error ? true : undefined}
-                      className="w-20 text-right tabular-nums"
+                      className="w-28 shrink-0"
                       {...register(`lines.${index}.quantity`, { valueAsNumber: true })}
                     />
                     <Button

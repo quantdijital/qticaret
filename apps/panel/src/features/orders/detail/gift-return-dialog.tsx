@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -61,22 +62,24 @@ export function ApproveGiftReturnDialog({
           <DialogTitle>{t(`${G}.title`, { number: request.order_display_id ?? "—" })}</DialogTitle>
           <DialogDescription>{t(`${G}.description`)}</DialogDescription>
         </DialogHeader>
-        <ul className="flex flex-col divide-y rounded-md border">
-          {request.items.map((item) => (
-            <li
-              key={item.line_item_id}
-              className="flex items-center justify-between gap-3 px-3 py-2.5 text-sm"
-            >
-              <span className="truncate font-medium">
-                {byId.get(item.line_item_id)?.title ?? "—"}
-              </span>
-              <span className="text-muted-foreground tabular-nums">
-                {t(`${G}.cards`, { count: item.quantity })}
-              </span>
-            </li>
-          ))}
-        </ul>
-        <GiftReturnNote />
+        <DialogBody list>
+          <ul className="flex flex-col divide-y rounded-md border">
+            {request.items.map((item) => (
+              <li
+                key={item.line_item_id}
+                className="flex min-h-12 items-center justify-between gap-3 px-3 py-1.5 text-sm"
+              >
+                <span className="truncate font-medium">
+                  {byId.get(item.line_item_id)?.title ?? "—"}
+                </span>
+                <span className="text-muted-foreground tabular-nums">
+                  {t(`${G}.cards`, { count: item.quantity })}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <GiftReturnNote />
+        </DialogBody>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
             {t("common.cancel")}

@@ -8,6 +8,7 @@ import { SectionCard } from "@/components/patterns/section-card"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -55,7 +56,7 @@ function EvidenceDialog({
     >
       <DialogContent>
         <form
-          className="flex flex-col gap-4"
+          className="flex flex-col gap-6"
           onSubmit={(event) => {
             event.preventDefault()
             if (evidence.trim().length < MIN_EVIDENCE) {
@@ -71,18 +72,20 @@ function EvidenceDialog({
             </DialogTitle>
             <DialogDescription>{t(`${C}.evidenceDescription`)}</DialogDescription>
           </DialogHeader>
-          <Field label={t(`${C}.evidence`)} htmlFor="consent-evidence" error={error} required>
-            <Textarea
-              id="consent-evidence"
-              autoFocus
-              maxLength={500}
-              placeholder={t(`${C}.evidencePlaceholder`)}
-              value={evidence}
-              onChange={(event) => {
-                setEvidence(event.target.value)
-              }}
-            />
-          </Field>
+          <DialogBody>
+            <Field label={t(`${C}.evidence`)} htmlFor="consent-evidence" error={error} required>
+              <Textarea
+                id="consent-evidence"
+                autoFocus
+                maxLength={500}
+                placeholder={t(`${C}.evidencePlaceholder`)}
+                value={evidence}
+                onChange={(event) => {
+                  setEvidence(event.target.value)
+                }}
+              />
+            </Field>
+          </DialogBody>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
               {t(`${C}.cancel`)}
