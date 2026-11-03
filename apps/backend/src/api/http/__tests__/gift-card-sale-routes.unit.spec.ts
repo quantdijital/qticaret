@@ -29,6 +29,8 @@ describe("a product's extension in Store fields (adr/0025 Ek 2026-11-03)", () =>
     // adr/0055: the product's own description document
     "+product_extension.description_doc",
     "id,product_extension.is_gift_card,product_extension.description_doc",
+    // adr/0052 Ek 2026-11-03: the withdrawal mark and the kind that reads it (MSY md. 5/1-h)
+    "+product_extension.withdrawal_excluded,+product_extension.kind",
   ])("lets %s through", (fields) => {
     expect(restricted(fields)).toBe("next")
   })
@@ -40,6 +42,9 @@ describe("a product's extension in Store fields (adr/0025 Ek 2026-11-03)", () =>
     "+product_extension.successor_product_id",
     "PRODUCT_EXTENSION.restriction",
     "items.product.product_extension.kind",
+    "items.product.product_extension.withdrawal_excluded",
+    "product_extension.withdrawal_excluded.x",
+    "+product_extension.restriction",
     ["id", "product_extension.is_gift_card.x"],
     "items.product.product_extension.description_doc",
     "product_extension.description_doc.content",

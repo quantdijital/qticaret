@@ -15,26 +15,33 @@ import { requireFeature } from "./require-feature"
 
 /**
  * A product's extension as the Store API shows it: its gift card mark
- * (`fields=+product_extension.is_gift_card`) and its description document
- * (adr/0055, `+product_extension.description_doc`).
+ * (`fields=+product_extension.is_gift_card`), its description document
+ * (adr/0055, `+product_extension.description_doc`) and its withdrawal mark
+ * with the kind that reads it (`+product_extension.withdrawal_excluded,
+ * +product_extension.kind`; adr/0052 Ek 2026-11-03, `productMarkOf`): on a
+ * physical product a sealed good, returnable unopened (MSY md. 15/1-ç); on
+ * a digital or service one, outside the right of withdrawal. The product
+ * page says so before the purchase (MSY md. 5/1-h, 6/2).
  */
 export const STORE_GIFT_PRODUCT_FIELDS = [
   "product_extension",
   "product_extension.is_gift_card",
   "product_extension.description_doc",
+  "product_extension.withdrawal_excluded",
+  "product_extension.kind",
 ]
 
 const EXTENSION = /product_extension/iu
 // The mark, through any relation that reaches a product (`items.product.…`)
 const GIFT_MARK = /^(?:[a-z_]+\.)*product_extension\.is_gift_card$/u
-// The description document on the product's own answer only: a cart line has no use for it
-const DESCRIPTION = /^product_extension\.description_doc$/u
+// On the product's own answer only: a cart line has no use for them
+const PRODUCT_OWN = /^product_extension\.(?:description_doc|withdrawal_excluded|kind)$/u
 
 /**
  * A product's extension in Store `fields`: its gift card mark and, on the
- * product itself, its description document. Its other columns (a
- * successor, a restriction's reason) are the shop's; any other spelling of
- * the relation, in any case, is refused.
+ * product itself, its description document, its withdrawal mark and its
+ * kind. Its other columns (a successor, a restriction's reason) are the
+ * shop's; any other spelling of the relation, in any case, is refused.
  */
 export function restrictStoreProductExtension(
   req: MedusaRequest,
@@ -42,7 +49,7 @@ export function restrictStoreProductExtension(
   next: MedusaNextFunction
 ): void {
   const refused = fieldTokens(req).some(
-    (token) => EXTENSION.test(token) && !GIFT_MARK.test(token) && !DESCRIPTION.test(token)
+    (token) => EXTENSION.test(token) && !GIFT_MARK.test(token) && !PRODUCT_OWN.test(token)
   )
   if (refused) {
     rejectRequest(
