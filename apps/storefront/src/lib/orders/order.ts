@@ -121,6 +121,54 @@ export async function orderReturns(id: string, token: string | null): Promise<Re
   }
 }
 
+/** A line as `/store/orders/:id/returnable` gives it: titles, units left, why it is out. */
+export interface ReturnableLineRow {
+  line_item_id: string
+  title: string | null
+  variant_title: string | null
+  variant_id: string | null
+  /** Units still to ask back: shipped less asked; a gift line's cards, within its period. */
+  returnable: number
+  /** Outside the right of withdrawal: back only as faulty or wrong; a spent gift card not at all. */
+  withdrawal_excluded: boolean
+  /** `product`, `personal_addon` or `gift_card_used`; null inside the right. */
+  withdrawal_excluded_reason: string | null
+  /** A gift card line: withdrawn on its own, its cards voided, nothing sent back. */
+  gift_card: boolean
+  /** The product's other variants, to exchange the line for. */
+  variants: { id: string; title: string | null }[]
+}
+
+/** What the order may still ask back (adr/0025, 2026-11-03), by the rules a request meets. */
+export interface ReturnableRow {
+  /** A request can be asked for now: the parcels' window or a gift line's open; false once cancelled. */
+  window_open: boolean
+  /** A request is open already: a new one waits for it. */
+  open_request: boolean
+  lines: ReturnableLineRow[]
+}
+
+/**
+ * What the order may ask back, as the backend counts it, fresh on every
+ * page (never cached); null when the backend will not say.
+ */
+export async function orderReturnable(
+  id: string,
+  token: string | null
+): Promise<ReturnableRow | null> {
+  try {
+    return await storeCall<ReturnableRow>(
+      `/store/orders/${encodeURIComponent(id)}/returnable`,
+      token ? { headers: { "x-order-token": token } } : {}
+    )
+  } catch (error) {
+    if (isStoreApiError(error)) {
+      return null
+    }
+    throw error
+  }
+}
+
 /** A parcel that left, as `/store/orders/:id/shipments` gives it. */
 export interface ShipmentRow {
   carrier: string | null

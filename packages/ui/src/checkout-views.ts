@@ -175,7 +175,11 @@ export type WithdrawalExclusion = "product" | "personal_addon" | "gift_card_used
 export interface ReturnableLineView {
   id: string
   title: string
-  /** Units that may be asked back: a gift line's cards not asked for yet. */
+  /**
+   * Units that may still be asked back, as the backend counts them
+   * (`GET /store/orders/:id/returnable`): a gift line's cards not asked
+   * for yet; 0 for a gift line whose cards were spent.
+   */
   quantity: number
   /**
    * Outside the right of withdrawal: back only as faulty or wrong; a gift
@@ -220,13 +224,20 @@ export interface OrderPageView {
   /** The order's key from its link, carried by its forms; null for the signed-in customer's own. */
   token: string | null
   orderId: string
-  /** Not packed yet: the shopper may cancel (the backend decides again). */
-  cancellable: boolean
   /**
-   * The lines that may be asked back; null when none may: a shipped
-   * order's lines, and a gift card line whose cards went out, whatever
-   * the parcels. A line outside the right of withdrawal comes back only
-   * for a reason in `defectReasons`; a gift line on its own (`giftReasons`).
+   * Not packed yet, and no gift card it sent was used: the shopper may
+   * cancel (the backend decides again). Untouched cards are voided with it.
+   */
+  cancellable: boolean
+  /** Above the cancel button, in words: an order with gift card lines says its cards are voided too. */
+  cancelText?: string
+  /**
+   * The lines that may be asked back, as the backend counts them
+   * (`GET /store/orders/:id/returnable`); null when none may or the
+   * window is shut: a shipped order's lines, and a gift card line whose
+   * cards went out, whatever the parcels. A line outside the right of
+   * withdrawal comes back only for a reason in `defectReasons`; a gift
+   * line on its own (`giftReasons`).
    */
   returnable: ReturnableLineView[] | null
   returnReasons: OptionView[]

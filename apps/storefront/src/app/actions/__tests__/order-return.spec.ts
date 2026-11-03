@@ -12,7 +12,7 @@ vi.mock("next/navigation", () => ({ redirect: next.redirect }))
 const api = vi.hoisted(() => ({ storeCall: vi.fn() }))
 vi.mock("@/lib/store-api/server", () => api)
 
-const { requestReturn } = await import("../order")
+const { cancelOrder, requestReturn } = await import("../order")
 
 const ORDER = "order_01K0000000000000000000ORDER"
 const GIFT = "ordli_01K0000000000000000000GIFT"
@@ -85,5 +85,46 @@ describe("requestReturn for a gift card line (adr/0025, 2026-11-03)", () => {
       error: "order.return_items_required",
     })
     expect(api.storeCall).not.toHaveBeenCalled()
+  })
+})
+
+describe("cancelOrder (F7.13; a gift order while its cards are untouched, adr/0025)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    api.storeCall.mockResolvedValue({ order_id: ORDER, canceled: true })
+  })
+
+  const cancelForm = (token = TOKEN) => {
+    const data = new FormData()
+    data.set("order_id", ORDER)
+    data.set("token", token)
+    return data
+  }
+  const back = (note: string) => `redirect:/siparis/${ORDER}?token=${TOKEN}&durum=${note}`
+
+  it("cancels with the order's key and says so", async () => {
+    await expect(cancelOrder(cancelForm())).rejects.toThrow(back("iptal"))
+    expect(api.storeCall).toHaveBeenCalledWith(`/store/orders/${ORDER}/cancel`, {
+      method: "POST",
+      body: {},
+      headers: { "x-order-token": TOKEN },
+    })
+    expect(next.revalidatePath).toHaveBeenCalledWith(`/siparis/${ORDER}`)
+  })
+
+  it.each([
+    ["orders.gift_card_used", 409, "iptal-hediye-karti"],
+    ["orders.cancel_contact_shop", 400, "iptal-magaza"],
+    ["orders.cancel_after_packing", 400, "iptal-olmadi"],
+    [null, 500, "iptal-olmadi"],
+  ])("says the backend's %s refusal in its own words", async (key, status, note) => {
+    api.storeCall.mockRejectedValue(new StoreApiError(status, key, null))
+    await expect(cancelOrder(cancelForm())).rejects.toThrow(back(note))
+  })
+
+  it("lets anything but the backend's answer through", async () => {
+    api.storeCall.mockRejectedValue(new Error("network"))
+    await expect(cancelOrder(cancelForm())).rejects.toThrow("network")
+    expect(next.redirect).not.toHaveBeenCalled()
   })
 })

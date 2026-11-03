@@ -19,8 +19,20 @@ const back = (orderId: string, token: string | undefined, note: string) =>
   `/siparis/${orderId}?${token ? `token=${encodeURIComponent(token)}&` : ""}durum=${note}`
 
 /**
+ * The backend's cancel refusals the page says in its own words (`?durum=`):
+ * a gift card the order sent was used (adr/0025, 2026-11-03); money taken
+ * by hand (a bank transfer) goes back through the shop. Any other refusal
+ * is the general one.
+ */
+const CANCEL_REFUSALS: Readonly<Record<string, string>> = {
+  "orders.gift_card_used": "iptal-hediye-karti",
+  "orders.cancel_contact_shop": "iptal-magaza",
+}
+
+/**
  * The shopper cancels their own order before it is packed (F7.13): signed
- * in, or with the order's key from its link. What was paid comes back.
+ * in, or with the order's key from its link. What was paid comes back; a
+ * gift card the order sent is voided, while none was used.
  */
 export async function cancelOrder(form: FormData): Promise<void> {
   const parsed = z.object({ order_id: ORDER_ID, token: TOKEN }).safeParse(Object.fromEntries(form))
@@ -39,7 +51,7 @@ export async function cancelOrder(form: FormData): Promise<void> {
     if (!isStoreApiError(error)) {
       throw error
     }
-    note = "iptal-olmadi"
+    note = (error.messageKey ? CANCEL_REFUSALS[error.messageKey] : undefined) ?? "iptal-olmadi"
   }
   revalidatePath(`/siparis/${order_id}`)
   redirect(back(order_id, token, note))

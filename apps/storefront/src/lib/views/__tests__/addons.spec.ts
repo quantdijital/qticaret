@@ -6,6 +6,7 @@ import type { StoreOrder } from "@/lib/orders/order"
 import { addonFieldsOf, addonFormOf, lineAddonsOf } from "../addons"
 import { cartLinesOf, withAddonForms } from "../cart"
 import { orderView } from "../order"
+import { found, row } from "@/test/order-fixtures"
 
 /** The first shop's two add-ons (adr/0052 §12), as `GET /store/products/:id/addons` gives them. */
 const ADDONS: StoreProductAddon[] = [
@@ -215,7 +216,16 @@ const order = (metadata: Record<string, unknown> | null): StoreOrder => ({
 
 describe("the order's lines", () => {
   it("show the picks as sold, and a line made to the buyer's wish comes back for a defect only", () => {
-    const view = orderView(order(RECORDED), null, false, t)
+    // Why the line is out is the backend's word (`GET /store/orders/:id/returnable`)
+    const view = orderView(order(RECORDED), null, false, t, {
+      token: null,
+      contracts: [],
+      returns: [],
+      returnable: found([row("ordli_1", 2, { reason: "personal_addon" })]),
+      shipments: [],
+      invoice: null,
+      note: null,
+    })
     expect(view.lines[0]?.addons.map((addon) => addon.value)).toEqual([
       "Ahmet Yılmaz",
       "Desenli Siyah",

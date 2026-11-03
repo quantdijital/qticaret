@@ -157,7 +157,9 @@ export function OrderPage({
             >
               <input type="hidden" name="order_id" value={view.orderId} />
               <input type="hidden" name="token" value={view.token ?? ""} />
-              <p className="mb-3 text-muted-foreground">{t("order.cancel_text")}</p>
+              <p className="mb-3 text-muted-foreground">
+                {view.cancelText ?? t("order.cancel_text")}
+              </p>
               <button
                 type="submit"
                 className="h-10 rounded-button border border-sale px-5 font-semibold text-sale hover:bg-sale/5"

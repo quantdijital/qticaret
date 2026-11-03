@@ -4,13 +4,15 @@ import { describe, expect, it } from "vitest"
 import { baseTheme } from "@qticaret/theme-base"
 import type { OrderActions, OrderPageView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
-import type { StoreOrder } from "@/lib/orders/order"
+import type { ReturnableRow, StoreOrder } from "@/lib/orders/order"
 import { orderView } from "@/lib/views/order"
+import { GIFT, KNIFE, found, giftLine, knifeLine, order, row } from "@/test/order-fixtures"
 
 /**
  * adr/0025 (2026-11-03) as the base theme prints the order page: a gift
  * card line's withdrawal on an order nothing was shipped for, in a form of
- * its own with no exchange and the right of withdrawal as its only reason.
+ * its own with no exchange and the right of withdrawal as its only reason;
+ * the order's cancel while its cards are untouched, saying they are voided.
  */
 
 const actions: OrderActions = {
@@ -18,61 +20,35 @@ const actions: OrderActions = {
   requestReturn: () => Promise.resolve({ ok: true, error: null }),
 }
 
-const GIFT = "ordli_01K0000000000000000000GIFT"
-const KNIFE = "ordli_01K000000000000000000KNIFE"
-
-const lines: StoreOrder["items"] = [
-  {
-    id: KNIFE,
-    title: "Çakı",
-    subtitle: null,
-    variant_title: "Siyah",
-    thumbnail: null,
-    quantity: 1,
-    total: 1335,
-    metadata: null,
-  },
-  {
-    id: GIFT,
-    title: "Hediye kartı",
-    subtitle: null,
-    variant_title: "500 TL",
-    thumbnail: null,
-    quantity: 1,
-    total: 500,
-    metadata: {
-      qt_gift: { recipient_email: "zeynep@example.com" },
-      qt_gift_cards: [{ id: "gc_1", last4: "AB12" }],
-    },
-  },
-]
-
-const order = (items: StoreOrder["items"], fulfillment: string): StoreOrder => ({
-  id: "order_01K0000000000000000000ORDER",
-  display_id: 1002,
-  email: "ayse@example.com",
-  created_at: "2026-11-03T10:00:00.000Z",
-  status: "pending",
-  payment_status: "captured",
-  fulfillment_status: fulfillment,
-  items,
-  original_item_total: 1835,
-  item_total: 1835,
-  shipping_total: 0,
-  total: 1835,
-  shipping_address: null,
-})
+const render = (o: StoreOrder, returnable: ReturnableRow | null) =>
+  renderToStaticMarkup(
+    createElement(baseTheme.OrderPage, {
+      t,
+      actions,
+      view: orderView(o, null, false, t, {
+        token: null,
+        contracts: [],
+        returns: [],
+        returnable,
+        shipments: [],
+        invoice: null,
+        note: null,
+      }),
+    })
+  )
 
 const page = (view: OrderPageView) =>
   renderToStaticMarkup(createElement(baseTheme.OrderPage, { t, view, actions }))
 
 const forms = (html: string) => html.split("<form").slice(1)
 
+const GIFT_CANCEL = "Gönderilen hediye kartları iptal edilir ve ödediğiniz tutar iade edilir."
+
 describe("the base theme's order page for a gift card line", () => {
   it("offers the withdrawal on an order nothing was shipped for, without an exchange or a fault reason", () => {
-    const html = page(orderView(order(lines.slice(1), "not_fulfilled"), null, false, t))
-    const [form, ...rest] = forms(html)
-    expect(rest).toHaveLength(0) // no cancel form: the cards went out
+    const html = render(order([giftLine(["AB12"])]), found([row(GIFT, 1, { gift_card: true })]))
+    const [form, cancel, ...rest] = forms(html)
+    expect(rest).toHaveLength(0)
     expect(html).toContain("Hediye kartı için cayma talep et")
     expect(form).toContain(`name="qty_${GIFT}"`)
     expect(form).toContain("Kartlar iptal edilir ve ödediğiniz tutar iade edilir")
@@ -80,11 +56,18 @@ describe("the base theme's order page for a gift card line", () => {
     expect(form).not.toContain('value="exchange"')
     expect(form).toMatch(/<option value="changed_mind" selected="">Cayma hakkı \(vazgeçtim\)/)
     expect(form).not.toContain('value="damaged"')
+    // Its cards untouched, the order may still be cancelled, and says what that does
+    expect(cancel).toContain("Siparişi iptal et")
+    expect(cancel).toContain(GIFT_CANCEL)
   })
 
   it("makes the shopper pick the gift line or the shipped lines, each in its own form", () => {
-    const html = page(orderView(order(lines, "delivered"), null, false, t))
-    const [goods, gift] = forms(html)
+    const html = render(
+      order([knifeLine, giftLine(["AB12"])], "delivered"),
+      found([row(KNIFE, 1), row(GIFT, 1, { gift_card: true })])
+    )
+    const [goods, gift, ...rest] = forms(html)
+    expect(rest).toHaveLength(0) // shipped: no cancel
     expect(html).toContain("İade ya da değişim talep et")
     expect(html).toContain("Hediye kartı diğer ürünlerle aynı talepte istenemez")
     expect(goods).toContain(`name="qty_${KNIFE}"`)
@@ -96,22 +79,38 @@ describe("the base theme's order page for a gift card line", () => {
     expect(gift).not.toContain('value="exchange"')
   })
 
-  it("says why a spent card's line cannot come back, with nothing to send", () => {
-    const view = orderView(order(lines.slice(1), "not_fulfilled"), null, false, t)
-    const html = page({
-      ...view,
-      returnable: [
-        {
-          id: GIFT,
-          title: "Hediye kartı",
-          quantity: 0,
-          excluded: "gift_card_used",
-          gift: true,
-          note: t("order.return_gift_used"),
-        },
-      ],
-    })
+  it("says why a spent card's line cannot come back, with nothing to send and no cancel", () => {
+    const html = render(
+      order([giftLine(["AB12"])]),
+      found([row(GIFT, 0, { gift_card: true, reason: "gift_card_used" })])
+    )
     expect(html).toContain("Kart kullanıldığı için cayma hakkı yok.")
     expect(forms(html)).toHaveLength(0)
+  })
+
+  it("drops the gift form once its period is over, the cancel staying while nothing was packed", () => {
+    const html = render(
+      order([giftLine(["AB12"])]),
+      found([row(GIFT, 0, { gift_card: true })], { window_open: false })
+    )
+    expect(html).not.toContain("Hediye kartı için cayma talep et")
+    const [cancel, ...rest] = forms(html)
+    expect(rest).toHaveLength(0)
+    expect(cancel).toContain(GIFT_CANCEL)
+  })
+
+  it("keeps the plain cancel words for an order without gift lines", () => {
+    const html = render(order([knifeLine]), found([row(KNIFE, 0)], { window_open: false }))
+    const [cancel, ...rest] = forms(html)
+    expect(rest).toHaveLength(0)
+    expect(cancel).toContain(t("order.cancel_text"))
+    expect(cancel).not.toContain(GIFT_CANCEL)
+  })
+
+  it("falls back to the plain words for a view that brings none of its own", () => {
+    const view = orderView(order([knifeLine]), null, false, t)
+    const bare: OrderPageView = { ...view }
+    delete bare.cancelText
+    expect(forms(page(bare))[0]).toContain(t("order.cancel_text"))
   })
 })

@@ -2,14 +2,20 @@ import "server-only"
 import { formatLira } from "@qticaret/ui"
 import type { BankTransferView, OrderPageView, Translate } from "@qticaret/ui"
 import type { PaymentMethods } from "@/lib/checkout/options"
-import type { InvoiceRow, ReturnRequestRow, ShipmentRow, StoreOrder } from "@/lib/orders/order"
+import type {
+  InvoiceRow,
+  ReturnRequestRow,
+  ReturnableRow,
+  ShipmentRow,
+  StoreOrder,
+} from "@/lib/orders/order"
 import { providersOf } from "@/lib/orders/order"
 import { lineAddonsOf } from "./addons"
 import { addressSummaryOf } from "./checkout"
 import { orderGiftOf } from "./order-gift"
 import {
   DEFECT_REASONS,
-  giftCardsSent,
+  giftCardUsed,
   giftLinesOf,
   giftReasonsOf,
   requestWordsOf,
@@ -45,6 +51,8 @@ export interface OrderExtras {
   /** The contracts kept for the order. */
   contracts: string[]
   returns: ReturnRequestRow[]
+  /** What may still be asked back, as the backend counts it; null when it did not say. */
+  returnable: ReturnableRow | null
   shipments: ShipmentRow[]
   invoice: InvoiceRow | null
   /** `?durum=` after an action. */
@@ -54,6 +62,9 @@ export interface OrderExtras {
 const NOTES: Record<string, string> = {
   iptal: "order.notice_canceled",
   "iptal-olmadi": "order.notice_cancel_refused",
+  // The backend's own refusals, in its words (`cancelOrder`)
+  "iptal-hediye-karti": "orders.gift_card_used",
+  "iptal-magaza": "orders.cancel_contact_shop",
 }
 
 // The carrier's words for where a parcel is; anything else reads as on its way
@@ -105,6 +116,7 @@ export function orderView(
     token: null,
     contracts: [],
     returns: [],
+    returnable: null,
     shipments: [],
     invoice: null,
     note: null,
@@ -124,7 +136,7 @@ export function orderView(
         }
       : null
   const discount = kurus(order.original_item_total) - kurus(order.item_total)
-  const gifts = giftLinesOf(order)
+  const gifts = giftLinesOf(order, extras.returnable)
   return {
     displayId: String(order.display_id),
     placedAt: WHEN.format(new Date(order.created_at)),
@@ -185,12 +197,13 @@ export function orderView(
     ],
     token: extras.token,
     orderId: order.id,
-    // Gift cards already sent are withdrawn from, line by line, never cancelled with the order
+    // Before packing; gift cards sent are voided with it while none was used (adr/0025)
     cancellable:
       order.status === "pending" &&
       order.fulfillment_status === "not_fulfilled" &&
-      !giftCardsSent(order),
-    returnable: returnableOf(order, extras.returns, t),
+      !giftCardUsed(extras.returnable),
+    cancelText: t(gifts.size > 0 ? "order.cancel_text_gift" : "order.cancel_text"),
+    returnable: returnableOf(extras.returnable, order, t),
     returnReasons: returnReasonsOf(t),
     defectReasons: DEFECT_REASONS,
     giftReasons: giftReasonsOf(t),

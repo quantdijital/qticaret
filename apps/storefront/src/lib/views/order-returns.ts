@@ -1,21 +1,32 @@
 import type { OptionView, ReturnableLineView, Translate, WithdrawalExclusion } from "@qticaret/ui"
-import type { ReturnRequestRow, StoreOrder } from "@/lib/orders/order"
-import { lineAddonsOf } from "./addons"
+import type {
+  ReturnRequestRow,
+  ReturnableLineRow,
+  ReturnableRow,
+  StoreOrder,
+} from "@/lib/orders/order"
 import { orderGiftOf } from "./order-gift"
 
 /*
  * What the order page offers to send back and how it words the requests
- * made (F7.9, adr/0032). A gift card line (adr/0025, 2026-11-03) is never
- * shipped: once its cards went out it may be withdrawn from, on its own and
- * as money back, its cards voided. The backend decides again every time.
+ * made (F7.9, adr/0032). Which lines may come back, how many units and
+ * why a line is out are the backend's (`GET /store/orders/:id/returnable`,
+ * adr/0025 2026-11-03): a gift card line is never shipped; once its cards
+ * went out it may be withdrawn from within the period, on its own and as
+ * money back, its cards voided. The backend decides again every time.
  */
 
 const REASONS = ["damaged", "wrong_item", "not_as_described", "changed_mind", "size_issue", "other"]
 // The shop's fault: what a line outside the right of withdrawal comes back for (backend `DEFECT_REASONS`)
 export const DEFECT_REASONS = ["damaged", "wrong_item", "not_as_described"]
-const SHIPPED = new Set(["shipped", "partially_shipped", "delivered", "partially_delivered"])
-// Requests whose lines count against what is left (backend `COUNTED_RETURN_STATUSES`)
-const COUNTED = new Set(["requested", "approved", "received", "refunded"])
+// Why a line is outside the right of withdrawal (backend `WITHDRAWAL_EXCLUSIONS`)
+const EXCLUSIONS: readonly string[] = [
+  "product",
+  "personal_addon",
+  "gift_card_used",
+] satisfies WithdrawalExclusion[]
+// The most units a request takes per line (the Server Action's own bound)
+const MAX_UNITS = 999
 
 export const returnReasonsOf = (t: Translate): OptionView[] =>
   REASONS.map((reason) => ({ value: reason, label: t(`order.reason_${reason}`) }))
@@ -25,13 +36,36 @@ export const giftReasonsOf = (t: Translate): OptionView[] => [
   { value: "changed_mind", label: t("order.reason_withdrawal") },
 ]
 
-/** The order's gift card lines, by id (their record says so: `qt_gift`, `qt_gift_cards`). */
-export const giftLinesOf = (order: StoreOrder): Set<string> =>
-  new Set(order.items.filter((line) => orderGiftOf(line.metadata)).map((line) => line.id))
+/**
+ * The order's gift card lines, by id: their own record (`qt_gift`,
+ * `qt_gift_cards`) and, when it answered, the backend's word (`gift_card`).
+ */
+export const giftLinesOf = (order: StoreOrder, found: ReturnableRow | null = null): Set<string> =>
+  new Set([
+    ...order.items.filter((line) => orderGiftOf(line.metadata)).map((line) => line.id),
+    ...(found?.lines ?? []).filter((line) => line.gift_card).map((line) => line.line_item_id),
+  ])
 
-/** Whether a gift card line's cards already went out: the order is withdrawn from, not cancelled. */
-export const giftCardsSent = (order: StoreOrder): boolean =>
-  order.items.some((line) => (orderGiftOf(line.metadata)?.cards.length ?? 0) > 0)
+/**
+ * Whether a gift card the order sent was used, as the backend says: the
+ * order is then not cancelled (`orders.gift_card_used`); untouched cards
+ * are voided with it.
+ */
+export const giftCardUsed = (found: ReturnableRow | null): boolean =>
+  (found?.lines ?? []).some(
+    (line) => line.gift_card && line.withdrawal_excluded_reason === "gift_card_used"
+  )
+
+const isExclusion = (reason: string | null): reason is WithdrawalExclusion =>
+  reason !== null && EXCLUSIONS.includes(reason)
+
+/** A line's reason as the backend gives it; one this storefront does not know reads as the product's own mark. */
+const exclusionOf = (line: ReturnableLineRow): WithdrawalExclusion | null =>
+  isExclusion(line.withdrawal_excluded_reason)
+    ? line.withdrawal_excluded_reason
+    : line.withdrawal_excluded
+      ? "product"
+      : null
 
 /**
  * Under a line on the return form, in words: why it is outside the right
@@ -54,57 +88,38 @@ export function returnNoteOf(
   }
 }
 
-/** Units each line was asked back for by the requests that count (a withdrawal receives what it asked). */
-function askedOf(returns: readonly ReturnRequestRow[]): Map<string, number> {
-  const asked = new Map<string, number>()
-  for (const request of returns.filter((each) => COUNTED.has(each.status))) {
-    for (const line of request.items ?? []) {
-      asked.set(line.line_item_id, (asked.get(line.line_item_id) ?? 0) + line.quantity)
-    }
-  }
-  return asked
-}
-
 /**
- * The lines the order page offers to send back; null when none: a shipped
- * order's lines, and each gift card line's cards that went out and were not
- * asked back yet, whatever the parcels. `reasons`: why lines are outside the
- * right of withdrawal as the backend says (`withdrawal_excluded_reason`, by
- * line id); a line's own record says `personal_addon` (adr/0052 §8).
+ * The lines the order page offers to send back, as the backend counts them
+ * (`found`); null when none may be, the window is shut (once cancelled
+ * too) or the backend did not say. A line with units left is offered; a
+ * gift line whose cards were spent stays, with nothing to choose, saying why.
  */
 export function returnableOf(
+  found: ReturnableRow | null,
   order: StoreOrder,
-  returns: readonly ReturnRequestRow[],
-  t: Translate,
-  reasons: ReadonlyMap<string, WithdrawalExclusion> = new Map()
+  t: Translate
 ): ReturnableLineView[] | null {
-  if (order.status === "canceled") {
+  if (!found?.window_open) {
     return null
   }
-  const shipped = SHIPPED.has(order.fulfillment_status)
-  const asked = askedOf(returns)
-  const lines = order.items.flatMap((line): ReturnableLineView[] => {
-    const gift = orderGiftOf(line.metadata)
-    const excluded =
-      reasons.get(line.id) ??
-      (lineAddonsOf(line.metadata).nonWithdrawable ? "personal_addon" : null)
-    const row = (quantity: number) => ({
-      id: line.id,
-      title: line.title,
-      quantity,
-      excluded,
-      gift: gift !== null,
-      note: returnNoteOf(excluded, gift !== null, t),
-    })
-    if (!gift) {
-      return shipped ? [row(line.quantity)] : []
+  const titles = new Map(order.items.map((line) => [line.id, line.title]))
+  const lines = found.lines.flatMap((line): ReturnableLineView[] => {
+    const excluded = exclusionOf(line)
+    const spent = line.gift_card && excluded === "gift_card_used"
+    const units = Math.min(Math.trunc(line.returnable), MAX_UNITS)
+    if (!spent && !(units > 0)) {
+      return []
     }
-    // A spent card's line stays, saying why it cannot come back
-    if (excluded === "gift_card_used") {
-      return gift.cards.length > 0 ? [row(0)] : []
-    }
-    const left = gift.cards.length - (asked.get(line.id) ?? 0)
-    return left > 0 ? [row(left)] : []
+    return [
+      {
+        id: line.line_item_id,
+        title: line.title ?? titles.get(line.line_item_id) ?? "",
+        quantity: spent ? 0 : units,
+        excluded,
+        gift: line.gift_card,
+        note: returnNoteOf(excluded, line.gift_card, t),
+      },
+    ]
   })
   return lines.length > 0 ? lines : null
 }

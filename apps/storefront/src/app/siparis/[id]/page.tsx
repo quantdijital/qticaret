@@ -7,6 +7,7 @@ import { t } from "@/lib/i18n"
 import {
   orderContractKinds,
   orderInvoice,
+  orderReturnable,
   orderReturns,
   orderShipments,
   orderWithToken,
@@ -46,8 +47,10 @@ export default async function OrderPage({
     }
     throw error
   })
-  const [returns, shipments, invoice, contracts] = await Promise.all([
+  // What may come back is the backend's count, read fresh (no-store) with the page
+  const [returns, returnable, shipments, invoice, contracts] = await Promise.all([
     orderReturns(order.id, token),
+    orderReturnable(order.id, token),
     orderShipments(order.id, token),
     orderInvoice(order.id, token),
     orderContractKinds(order.id, token),
@@ -65,6 +68,7 @@ export default async function OrderPage({
           token,
           contracts,
           returns,
+          returnable,
           shipments,
           invoice,
           note,
