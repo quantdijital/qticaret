@@ -91,6 +91,10 @@ function writeProduct(input: Input) {
   )
 }
 
+// adr/0055: a sheet's plain description replaces a document the product had (the plan holds it when it changes)
+const replacesDescription = (input: ImportProductInput) =>
+  input.plan.productId !== null && input.plan.product["description"] !== undefined
+
 // What the product links to and carries besides: brand, primary category, SEO fields, attributes
 function writeExtras(input: Input, productId: WorkflowData<string>) {
   when("import-brand", { input }, ({ input }) => input.plan.brandId !== undefined).then(() => {
@@ -101,7 +105,8 @@ function writeExtras(input: Input, productId: WorkflowData<string>) {
       })),
     })
   })
-  // The primary category and the unit costs (F11.4) in one catalog save: a workflow runs once as a step
+  // The primary category, the unit costs (F11.4) and a description document dropped (adr/0055)
+  // in one catalog save: a workflow runs once as a step
   const costs = resolveImportCostsStep(
     transform({ input, productId }, ({ input, productId }) => ({
       product_id: productId,
@@ -111,7 +116,10 @@ function writeExtras(input: Input, productId: WorkflowData<string>) {
   when(
     "import-catalog",
     { input, costs },
-    ({ input, costs }) => Boolean(input.plan.primaryCategoryId) || Object.keys(costs).length > 0
+    ({ input, costs }) =>
+      Boolean(input.plan.primaryCategoryId) ||
+      Object.keys(costs).length > 0 ||
+      replacesDescription(input)
   ).then(() => {
     setProductCatalogWorkflow.runAsStep({
       input: transform({ input, productId, costs }, ({ input, productId, costs }) => ({
@@ -120,6 +128,7 @@ function writeExtras(input: Input, productId: WorkflowData<string>) {
           ? { primary_category_id: input.plan.primaryCategoryId }
           : {}),
         ...(Object.keys(costs).length > 0 ? { variants: costs } : {}),
+        ...(replacesDescription(input) ? { description_doc: null } : {}),
       })),
     })
   })

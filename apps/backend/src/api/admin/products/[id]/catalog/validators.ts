@@ -1,6 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import { RESTRICTIONS } from "../../../../../lib/catalog"
 import { AddonsInput } from "../../../../../lib/catalog/addons"
+import { productDescriptionDoc } from "../../../../../lib/catalog/description"
 import { isCleanText } from "../../../../../lib/security"
 import {
   PRODUCT_CONDITIONS,
@@ -54,6 +55,8 @@ export const AdminPostProductCatalog = z
     is_gift_card: z.boolean().optional(),
     // adr/0052: up to five add-ons, priced in lira; needs catalog.addons (checked in the workflow)
     addons: AddonsInput.nullable().optional(),
+    // adr/0055: the long description as a content document; the server writes its plain text
+    description_doc: productDescriptionDoc.nullable().optional(),
     variants: z
       .record(
         id,

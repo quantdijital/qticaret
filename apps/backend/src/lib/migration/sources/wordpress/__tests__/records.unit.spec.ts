@@ -104,10 +104,61 @@ describe("a WordPress export as the common records (adr/0042 Ek 2026-11-03)", ()
     expect(pan?.image_alts).toEqual({ [upload("tava.png")]: "Döküm tava önden" })
   })
 
-  it("turns a page builder's description into plain paragraphs, its scripts and grids gone", () => {
-    expect(records.products[0]?.description).toBe(
-      "Özellikler\n\n• Döküm gövde\n\n• 24 ve 28 cm\n\nÖlçü: 28 cm\n\nAğırlık: 1,5 kg"
+  it("keeps a page builder's description as a document, its scripts and grids gone (adr/0055)", () => {
+    const [pan] = records.products
+    const cell = (type: "tableHeader" | "tableCell", text: string) => ({
+      type,
+      content: [{ type: "paragraph", content: [{ type: "text", text }] }],
+    })
+    expect(pan?.description_doc).toEqual({
+      type: "doc",
+      content: [
+        { type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: "Özellikler" }] },
+        {
+          type: "bulletList",
+          content: [
+            {
+              type: "listItem",
+              content: [
+                {
+                  type: "paragraph",
+                  content: [
+                    { type: "text", text: "Döküm " },
+                    { type: "text", text: "gövde", marks: [{ type: "bold" }] },
+                  ],
+                },
+              ],
+            },
+            {
+              type: "listItem",
+              content: [{ type: "paragraph", content: [{ type: "text", text: "24 ve 28 cm" }] }],
+            },
+          ],
+        },
+        {
+          type: "table",
+          content: [
+            {
+              type: "tableRow",
+              content: [cell("tableHeader", "Ölçü"), cell("tableCell", "28 cm")],
+            },
+            {
+              type: "tableRow",
+              content: [cell("tableHeader", "Ağırlık"), cell("tableCell", "1,5 kg")],
+            },
+          ],
+        },
+      ],
+    })
+    // The plain text is the document's: blocks apart, items and rows a line each
+    expect(pan?.description).toBe(
+      "Özellikler\n\nDöküm gövde\n24 ve 28 cm\n\nÖlçü · 28 cm\nAğırlık · 1,5 kg"
     )
+  })
+
+  it("gives a product without a body no document", () => {
+    const plain = records.products.find((product) => product.description === null)
+    expect(plain?.description_doc ?? null).toBeNull()
   })
 
   it("moves a simple product as one variant, hidden and unpublished ones as drafts", () => {

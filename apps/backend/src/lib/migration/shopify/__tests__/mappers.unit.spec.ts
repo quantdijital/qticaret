@@ -28,7 +28,23 @@ describe("Shopify's bulk files as the common records (F14.2)", () => {
     expect(pan).toMatchObject({
       handle: "dokum-tava",
       status: "published",
-      description: "Ağır döküm gövde.\n\n• Fırına girer",
+      // adr/0055: the HTML as a document, its plain text the document's
+      description: "Ağır döküm gövde.\n\nFırına girer",
+      description_doc: {
+        type: "doc",
+        content: [
+          { type: "paragraph", content: [{ type: "text", text: "Ağır döküm gövde." }] },
+          {
+            type: "bulletList",
+            content: [
+              {
+                type: "listItem",
+                content: [{ type: "paragraph", content: [{ type: "text", text: "Fırına girer" }] }],
+              },
+            ],
+          },
+        ],
+      },
       categories: [["Tavalar"], ["İndirimdekiler"]],
       brand: "Demirci",
       seo_title: "Döküm Tava | Demirci",

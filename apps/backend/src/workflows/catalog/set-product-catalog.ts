@@ -1,11 +1,17 @@
 import { Modules } from "@medusajs/framework/utils"
-import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
+import {
+  WorkflowResponse,
+  createWorkflow,
+  transform,
+  when,
+} from "@medusajs/framework/workflows-sdk"
 import {
   acquireLockStep,
   createRemoteLinkStep,
   dismissRemoteLinkStep,
   releaseLockStep,
   updateInventoryItemsStep,
+  updateProductsWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { CATALOG_EXTENSION_MODULE } from "../../modules/catalog-extension"
 import { planProductCatalogStep } from "./steps/plan-product-catalog"
@@ -16,9 +22,11 @@ const SUCCESSOR_LOCK = "catalog:successors"
 
 /**
  * Saves a product's catalog fields and its variants' MPNs (F3.1) and unit
- * costs (F11.4), and with the kind its shipping set-up (F3.2). A lock
- * per product keeps two first saves from making two extension rows; every
- * step undoes itself if a later one fails.
+ * costs (F11.4), with the kind its shipping set-up (F3.2), and with a
+ * description document its plain text as the product's description
+ * (adr/0055), through Medusa's own update so its hooks and events run. A
+ * lock per product keeps two first saves from making two extension rows;
+ * every step undoes itself if a later one fails.
  */
 export const setProductCatalogWorkflow = createWorkflow(
   "catalog-set-product-catalog",
@@ -58,6 +66,17 @@ export const setProductCatalogWorkflow = createWorkflow(
     dismissRemoteLinkStep(dismiss)
     const inventory = transform({ plan }, ({ plan }) => plan.shipping.inventory)
     updateInventoryItemsStep(inventory)
+
+    when("catalog-description-text", { plan }, ({ plan }) => plan.description !== undefined).then(
+      () => {
+        updateProductsWorkflow.runAsStep({
+          input: transform({ plan }, ({ plan }) => ({
+            selector: { id: plan.product_id },
+            update: { description: plan.description ?? "" },
+          })),
+        })
+      }
+    )
 
     releaseLockStep({ key: lockKey })
     return new WorkflowResponse({ product_id: input.product_id })

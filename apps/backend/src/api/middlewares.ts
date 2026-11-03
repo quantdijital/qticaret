@@ -242,9 +242,11 @@ export default defineMiddlewares({
       methods: ["POST"],
       middlewares: [validateAndTransformBody(AdminPostProductAttributes)],
     },
+    // A long description document is past Express's 100 kB default; its own bounds stay (adr/0055)
     {
       matcher: "/admin/products/:id/catalog",
       methods: ["POST"],
+      bodyParser: { sizeLimit: "1mb" },
       middlewares: [validateAndTransformBody(AdminPostProductCatalog)],
     },
     // F3.4, F3.5: a page's own SEO fields, redirects, the 404 log

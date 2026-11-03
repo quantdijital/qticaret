@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { CATALOG_EXTENSION_MODULE } from "../../../../modules/catalog-extension"
 import type CatalogExtensionModuleService from "../../../../modules/catalog-extension/service"
@@ -20,8 +21,15 @@ interface ProductRow {
     restriction?: string | null
     is_gift_card?: boolean | null
     addons?: unknown
+    description_doc?: unknown
   } | null
 }
+
+// A description document (adr/0055) by its digest: a change shows, the text stays out of the log
+const docDigest = (doc: unknown): string | null =>
+  doc === null || doc === undefined
+    ? null
+    : createHash("sha256").update(JSON.stringify(doc)).digest("hex").slice(0, 16)
 
 /**
  * A product's catalog fields (F3.1, adr/0011), as stored: the IDs it holds
@@ -56,6 +64,7 @@ async function catalogSnapshot(scope: Resolver, productId: string): Promise<Snap
     is_gift_card: extension?.is_gift_card ?? false,
     // adr/0052: one value, so a change shows as before and after
     addons: JSON.stringify(extension?.addons ?? null),
+    description_doc: docDigest(extension?.description_doc),
     ...Object.fromEntries(
       (product.variants ?? []).flatMap((variant): [string, string | number | null][] =>
         variant

@@ -18,6 +18,7 @@ import { plainText } from "../../lib/seo/resolve"
 import { CONTENT_DRAFTS_MODULE } from "../../modules/content-drafts"
 import type ContentDraftsModuleService from "../../modules/content-drafts/service"
 import { CONTENT_AI_DRAFTS } from "../../modules/platform-settings/features"
+import { setProductCatalogWorkflow } from "../catalog/set-product-catalog"
 import { brandOf } from "../messaging/brand"
 import { assertFeatureEnabledStep } from "../platform-settings/steps/assert-feature-enabled"
 import { textOf } from "../seo/highlight"
@@ -204,6 +205,13 @@ export const decideDraftWorkflow = createWorkflow("content-decide-draft", (input
         input: transform({ draft }, ({ draft }) => ({
           selector: { id: draft.entity_id },
           update: { description: draft.text },
+        })),
+      })
+      // adr/0055: the approved plain text replaces a description document the product had
+      setProductCatalogWorkflow.runAsStep({
+        input: transform({ draft }, ({ draft }) => ({
+          product_id: draft.entity_id,
+          description_doc: null,
         })),
       })
     }

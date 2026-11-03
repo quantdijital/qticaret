@@ -30,7 +30,7 @@ const PAGE = 20
  * themselves again.
  */
 export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
-  const { mode, weight, length, width, height, source, category_base } =
+  const { mode, weight, length, width, height, source, category_base, refresh } =
     req.validatedQuery as AdminPostMigrationFileQueryType
   const parcel = [weight, length, width, height]
   if (parcel.some((value) => value !== undefined) && parcel.includes(undefined)) {
@@ -58,6 +58,9 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
   }
   // Read whole by the job; here only what it looks like: a JSON object, a WordPress export
   const wordpress = source === "wordpress"
+  if (refresh && !wordpress) {
+    throw new ValidationError("migration.refresh_wordpress_only")
+  }
   if (
     wordpress
       ? !looksLikeWxr(buffer)
@@ -81,6 +84,7 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
       source,
       source_file_id: upload.fileKey,
       category_base: wordpress ? (category_base ?? null) : null,
+      ...(refresh ? { refresh: [refresh] } : {}),
       mode,
       defaults,
       requested_by: req.auth_context.actor_id || null,

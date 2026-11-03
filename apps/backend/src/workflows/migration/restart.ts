@@ -165,6 +165,7 @@ export const restartMigrationWorkflow = createWorkflow(
           requested_by: input.requested_by,
           ...("feed_url" in stored ? { feed_url: stored.feed_url } : {}),
           ...("category_base" in stored ? { category_base: stored.category_base } : {}),
+          ...("refresh" in stored && stored.refresh.length > 0 ? { refresh: stored.refresh } : {}),
         }
         return start
       }),

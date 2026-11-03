@@ -11,6 +11,7 @@ import { runImport } from "../catalog/import/run"
 import type { ImportHooks, ImportSummary } from "../catalog/import/run"
 import { attributeColumns, attributeHeaders, withAttributeCells } from "./attributes"
 import type { AttributePlan } from "./attributes"
+import { writeDescriptions } from "./descriptions"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -43,9 +44,10 @@ async function sheetOf(
  * and named, never written over (closing review). What each new one
  * became is kept by the source's key, its old address for a 301. A new
  * one's descriptive attributes go in its rows where `plans` give them a
- * template (attributes.ts). The keys of the ones made (would be, in a dry
- * run) and of the ones a run made before come back for the attributes'
- * counts.
+ * template (attributes.ts). A new one's description document (adr/0055)
+ * is written once the import made it, and counted. The keys of the ones
+ * made (would be, in a dry run) and of the ones a run made before come
+ * back for the attributes' counts.
  */
 export async function migrateProducts(
   container: Container,
@@ -61,6 +63,8 @@ export async function migrateProducts(
   moved: number
   problems: StepProblem[]
   keys: { made: string[]; moved: string[] }
+  /** New ones whose description is (would be) a content document. */
+  documents: number
 }> {
   const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
   const catalog = container.resolve(Modules.PRODUCT)
@@ -91,7 +95,14 @@ export async function migrateProducts(
   }
   const moved = movedKeys.length
   if (fresh.length === 0) {
-    return { summary: null, rows: [], moved, problems, keys: { made: [], moved: movedKeys } }
+    return {
+      summary: null,
+      rows: [],
+      moved,
+      problems,
+      keys: { made: [], moved: movedKeys },
+      documents: 0,
+    }
   }
   const result = await runImport(
     container as MedusaContainer,
@@ -101,6 +112,7 @@ export async function migrateProducts(
   )
   // A dry run's: every new one, as the import would make it (its own rows name a refusal)
   let made = fresh.map((product) => product.source_key)
+  let documents = fresh.filter((product) => product.description_doc).length
   if (mode === "apply") {
     // Every handle was free before the import: one held now is the product it made
     const found = await catalog.listProducts(
@@ -123,6 +135,15 @@ export async function migrateProducts(
         }
       })
     )
+    const written = await writeDescriptions(
+      container,
+      fresh.flatMap((product) => {
+        const id = ids.get(product.handle)
+        return id ? [{ product, id }] : []
+      })
+    )
+    documents = written.documents
+    problems.push(...written.problems)
   }
-  return { ...result, moved, problems, keys: { made, moved: movedKeys } }
+  return { ...result, moved, problems, keys: { made, moved: movedKeys }, documents }
 }

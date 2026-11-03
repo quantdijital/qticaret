@@ -71,6 +71,12 @@ export const CONTENT_ROUTES = [
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(StoreGetContentTerms, {})],
   },
+  // A product's description document, rendered (adr/0055)
+  {
+    matcher: "/store/products/:id/description",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(AdminGetDashboardNoQuery, {})],
+  },
   // The storefront's frame: announcement bar, header links, footer (F18 D3)
   {
     matcher: "/store/storefront",

@@ -13,24 +13,37 @@ import { rateLimit } from "./rate-limit"
 import { rejectRequest } from "./reject"
 import { requireFeature } from "./require-feature"
 
-/** A product's gift card mark as the Store API shows it (`fields=+product_extension.is_gift_card`). */
-export const STORE_GIFT_PRODUCT_FIELDS = ["product_extension", "product_extension.is_gift_card"]
+/**
+ * A product's extension as the Store API shows it: its gift card mark
+ * (`fields=+product_extension.is_gift_card`) and its description document
+ * (adr/0055, `+product_extension.description_doc`).
+ */
+export const STORE_GIFT_PRODUCT_FIELDS = [
+  "product_extension",
+  "product_extension.is_gift_card",
+  "product_extension.description_doc",
+]
 
 const EXTENSION = /product_extension/iu
 // The mark, through any relation that reaches a product (`items.product.…`)
 const GIFT_MARK = /^(?:[a-z_]+\.)*product_extension\.is_gift_card$/u
+// The description document on the product's own answer only: a cart line has no use for it
+const DESCRIPTION = /^product_extension\.description_doc$/u
 
 /**
- * A product's extension in Store `fields`: its gift card mark alone. Its
- * other columns (a successor, a restriction's reason) are the shop's; any
- * other spelling of the relation, in any case, is refused.
+ * A product's extension in Store `fields`: its gift card mark and, on the
+ * product itself, its description document. Its other columns (a
+ * successor, a restriction's reason) are the shop's; any other spelling of
+ * the relation, in any case, is refused.
  */
 export function restrictStoreProductExtension(
   req: MedusaRequest,
   res: MedusaResponse,
   next: MedusaNextFunction
 ): void {
-  const refused = fieldTokens(req).some((token) => EXTENSION.test(token) && !GIFT_MARK.test(token))
+  const refused = fieldTokens(req).some(
+    (token) => EXTENSION.test(token) && !GIFT_MARK.test(token) && !DESCRIPTION.test(token)
+  )
   if (refused) {
     rejectRequest(
       req,

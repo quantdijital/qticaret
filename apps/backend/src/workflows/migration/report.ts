@@ -28,6 +28,11 @@ export interface KindCounts {
   seo_own?: number
   /** Categories: new ones on the shop's templates, as one made in the panel. */
   seo_default?: number
+  /**
+   * Products: their description written as a content document (adr/0055),
+   * made with one or refreshed (would be, in a dry run).
+   */
+  documents?: number
 }
 
 export const emptyCounts = (): KindCounts => ({
@@ -82,6 +87,23 @@ function seoRows(mode: "check" | "apply", counts: RunCounts): SheetCell[][] {
   ]
 }
 
+// Products whose description moved as a content document (adr/0055); none for a source without
+function documentRows(mode: "check" | "apply", counts: RunCounts): SheetCell[][] {
+  const documents = counts.product.documents
+  if (documents === undefined) {
+    return []
+  }
+  return [
+    [],
+    [
+      mode === "check"
+        ? "Biçimli açıklamayla gelecek ürünler"
+        : "Biçimli açıklamayla gelen ürünler",
+      documents,
+    ],
+  ]
+}
+
 export interface ReportProblem extends StepProblem {
   kind: MigrationKind
 }
@@ -119,7 +141,7 @@ export function reportSheets(
     {
       name: "Özet",
       widths: [24, 12, 12, 12, 14, 12, 10],
-      rows: [...summaryRows(mode, counts), ...seoRows(mode, counts)],
+      rows: [...summaryRows(mode, counts), ...seoRows(mode, counts), ...documentRows(mode, counts)],
     },
     {
       name: "Ürünler",

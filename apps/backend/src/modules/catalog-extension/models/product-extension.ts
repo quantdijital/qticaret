@@ -26,6 +26,9 @@ export const PRODUCT_KINDS = ["physical", "digital", "service"] as const
  * - `addons`: up to five add-ons a shopper picks on the product page (a
  *   typed text, one of a few choices), each with its price in lira
  *   (adr/0052). The shape is `lib/catalog/addons`' schema; null: none.
+ * - `description_doc`: the long description as a content document
+ *   (adr/0055, `lib/catalog/description`); `product.description` keeps its
+ *   plain text. Null: the product has plain text only.
  */
 export const ProductExtension = model.define("product_extension", {
   id: model.id({ prefix: "pext" }).primaryKey(),
@@ -37,4 +40,5 @@ export const ProductExtension = model.define("product_extension", {
   restriction: model.enum([...RESTRICTIONS]).nullable(),
   is_gift_card: model.boolean().default(false),
   addons: model.json().nullable(),
+  description_doc: model.json().nullable(),
 })

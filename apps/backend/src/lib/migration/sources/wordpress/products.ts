@@ -1,10 +1,10 @@
 import { toSlug } from "../../../seo/slug"
+import { descriptionOf } from "../../description"
 import type { SourceVariant } from "../../types"
 import type { WordpressProduct } from "./attributes"
 import { descriptiveAttributes } from "./attributes"
 import type { WordpressContext } from "./context"
 import { measureOf, note } from "./context"
-import { bodyBlocks, plainText } from "./html"
 import type { WxrItem } from "./reader"
 import { seoFieldsOf } from "./seo"
 import { BRAND_TAXONOMIES } from "./terms"
@@ -17,12 +17,11 @@ import { attributesOf, simpleVariant, variantsOf } from "./variations"
  * not hidden from the shop, else drafts; the trash is left out. Its
  * categories (the SEO plugin's primary one first), brand, SEO fields,
  * pictures (the main one, the gallery, the variations' own, with their
- * alt texts), options and variants, descriptive attributes (for the
+ * alt texts), the body as a content document (adr/0055), options and variants, descriptive attributes (for the
  * shop's attribute template), measures and old address. Grouped
  * and external products sell nothing of their own: left out, named.
  */
 
-const MAX_DESCRIPTION = 20_000
 const MAX_IMAGES = 50
 const MAX_ALT = 300
 const PRIMARY_CATEGORY = ["rank_math_primary_product_cat", "_yoast_wpseo_primary_product_cat"]
@@ -146,11 +145,10 @@ export function productOf(
       .map((id) => id.trim())
       .filter((id) => /^\d+$/.test(id) && id !== "0")
   )
-  const body = bodyBlocks(item.content.trim() === "" ? item.excerpt : item.content, {
+  const description = descriptionOf(item.content.trim() === "" ? item.excerpt : item.content, {
     siteHost: context.siteHost,
     title: item.title,
   })
-  const description = plainText(body.blocks, MAX_DESCRIPTION)
   if (description.cut) {
     note(context, "product", key, "migration.wordpress_description_cut")
   }
@@ -163,7 +161,8 @@ export function productOf(
     source_key: key,
     handle,
     title: item.title.slice(0, 255),
-    description: description.text === "" ? null : description.text,
+    description: description.text,
+    description_doc: description.doc,
     status: item.status === "publish" && !hidden(item) && !item.password ? "published" : "draft",
     categories: categories.slice(0, 20),
     brand: brand ? (context.taxonomies.term(brand.domain, brand.slug)?.name ?? brand.name) : null,

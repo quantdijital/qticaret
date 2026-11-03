@@ -17,6 +17,8 @@ export interface StartMigrationInput {
   feed_url?: string | null
   /** A WordPress export: its product categories' address base, when the owner names one. */
   category_base?: string | null
+  /** A WordPress export: what only is refreshed of what a run moved before (adr/0055). */
+  refresh?: "descriptions"[] | undefined
   mode: "check" | "apply"
   defaults: PackageDefaults | null
   requested_by: string | null
@@ -50,6 +52,7 @@ export const startMigrationWorkflow = createWorkflow(
           ...(input.source_file_id ? { source_file_id: input.source_file_id } : {}),
           ...(input.feed_url ? { feed_url: input.feed_url } : {}),
           ...(input.category_base ? { category_base: input.category_base } : {}),
+          ...(input.refresh?.length ? { refresh: input.refresh } : {}),
           mode: input.mode,
           defaults: input.defaults,
         },

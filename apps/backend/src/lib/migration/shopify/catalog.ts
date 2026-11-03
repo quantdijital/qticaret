@@ -1,4 +1,5 @@
 import { toSlug } from "../../seo/slug"
+import { descriptionOf } from "../description"
 import { htmlToText } from "../text"
 import type { SourceBrand, SourceCategory, SourceProduct, SourceVariant } from "../types"
 import type { BulkNode } from "./bulk"
@@ -7,7 +8,8 @@ import { amount, at, childrenOf, roots, text, typeOf } from "./fields"
 /**
  * Shopify's collections and products as the common records (F14,
  * adr/0042 §1): collections are the categories, vendors the brands. Old
- * addresses are Shopify's own paths, for the 301s.
+ * addresses are Shopify's own paths, for the 301s. A product's
+ * `descriptionHtml` becomes its description document (adr/0055).
  */
 
 export function categoriesOf(nodes: readonly BulkNode[]): SourceCategory[] {
@@ -107,14 +109,17 @@ export function productsOf(nodes: readonly BulkNode[]): SourceProduct[] {
         (option) => option.name !== "" && !isDefaultOption(option.name, option.values[0] ?? "")
       )
       .slice(0, 3)
-    const description = htmlToText(text(node, "descriptionHtml", 200_000))
+    const description = descriptionOf(text(node, "descriptionHtml", 200_000) ?? "", {
+      shortcodes: false,
+    })
     const oldHandle = text(node, "handle")
     return [
       {
         source_key: node.id,
         handle,
         title,
-        description: description?.slice(0, 50_000) ?? null,
+        description: description.text,
+        description_doc: description.doc,
         status: text(node, "status") === "ACTIVE" ? ("published" as const) : ("draft" as const),
         categories: own
           .filter((child) => typeOf(child) === "Collection")

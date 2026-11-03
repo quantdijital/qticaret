@@ -9,6 +9,7 @@ import { MIGRATION_MODULE } from "../../../modules/migration"
 import type MigrationModuleService from "../../../modules/migration/service"
 import { openSource } from "../../migration/open-source"
 import { reportSheets } from "../../migration/report"
+import { runDescriptionRefresh } from "../../migration/descriptions"
 import { runMigration } from "../../migration/run"
 import type { JobType } from "./types"
 
@@ -20,6 +21,11 @@ export const CUSTOMER_FILE_PREFIX = "migration-customers-"
 export const WORDPRESS_FILE_PREFIX = "migration-wordpress-"
 /** A product category address base the owner names (`/urun-kategori/`): a path of one segment or none. */
 export const CATEGORY_BASE = /^\/?(?:[a-z0-9-]{1,60}\/?)?$/
+/**
+ * What a WordPress run may refresh alone (adr/0055): `descriptions`, the
+ * documents and their plain text of the products a run moved before.
+ */
+export const REFRESH_KINDS = ["descriptions"] as const
 
 const shared = {
   mode: z.enum(["check", "apply"]),
@@ -72,6 +78,8 @@ const input = z.discriminatedUnion("source", [
         .max(512)
         .refine((id) => id.includes(WORDPRESS_FILE_PREFIX)),
       category_base: z.string().max(64).regex(CATEGORY_BASE).nullable().default(null),
+      // adr/0055: only this, and nothing else, of what a run moved before
+      refresh: z.array(z.enum(REFRESH_KINDS)).max(REFRESH_KINDS.length).default([]),
       ...shared,
     })
     .strict(),
@@ -138,22 +146,19 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
           changes: { ...changes, source: source.id, ...(digest ? { file_sha256: digest } : {}) },
         })
       }
+      // adr/0055: a refresh run rewrites the moved products' descriptions and nothing else
+      const refresh = values.source === "wordpress" ? values.refresh : []
       if (mode === "apply") {
-        await record("started", { run_id: run.id })
+        await record("started", { run_id: run.id, ...(refresh.length > 0 ? { refresh } : {}) })
       }
-      const { counts, productRows, problems } = await runMigration(
-        container,
-        source,
-        run.id,
-        mode,
-        defaults,
-        {
-          progress: report,
-          origin: { job_id: job.id, actor_id: job.requested_by },
-          audit: (action, changes) =>
-            mode === "apply" ? record(action, changes) : Promise.resolve(),
-        }
-      )
+      const { counts, productRows, problems } = refresh.includes("descriptions")
+        ? await runDescriptionRefresh(container, source, run.id, mode, report)
+        : await runMigration(container, source, run.id, mode, defaults, {
+            progress: report,
+            origin: { job_id: job.id, actor_id: job.requested_by },
+            audit: (action, changes) =>
+              mode === "apply" ? record(action, changes) : Promise.resolve(),
+          })
       if (mode === "apply") {
         await record("finished", { run_id: run.id, counts })
       }
@@ -163,7 +168,14 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
       }
       await migration.updateMigrationRuns({ id: run.id, status: "done", finished_at: new Date() })
       // A WordPress run's block: its descriptive attributes and what does not move (the panel's)
-      return { summary: { run_id: run.id, mode, counts, ...(wordpress ? { wordpress } : {}) } }
+      return {
+        summary: {
+          run_id: run.id,
+          mode,
+          counts,
+          ...(refresh.length > 0 ? { refresh } : wordpress ? { wordpress } : {}),
+        },
+      }
     } catch (error) {
       await migration
         .updateMigrationRuns({ id: run.id, status: "failed", finished_at: new Date() })

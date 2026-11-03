@@ -234,6 +234,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "cart.line_unknown": "This line is not in the cart.",
   "cart.prices_changed":
     "The price of some items in the cart changed. Check the new total and start the payment again.",
+  "catalog.description_blocks":
+    "A product description takes no pictures or product and category cards; add pictures to the product's images.",
   "catalog.addons_disabled":
     "Add-ons are off. Turn them on in Settings > Features; remove items with add-ons from the cart.",
   "addons.id_invalid": "The add-on's id is not valid.",
@@ -836,6 +838,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The migration file could not be read or is not in the format; the field is named.",
   "migration.email_invalid": "The e-mail address is not valid; the customer was not moved.",
   "migration.product_not_written": "The product could not be written; see the Products sheet.",
+  "migration.product_description_failed":
+    "The product's formatted description could not be written; it kept its plain text description.",
+  "migration.product_gone":
+    "The product an earlier run made is gone; its description was not refreshed.",
+  "migration.description_refresh_empty":
+    "The export has no description for this product; its description here was left as it is.",
+  "migration.refresh_wordpress_only": "Descriptions are refreshed from a WordPress export only.",
   "migration.review_product_missing":
     "The review's product did not move, so the review did not either.",
   "migration.review_duplicate":
@@ -923,7 +932,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "migration.wordpress_image_missing":
     "The picture is not in the file's media library; it was not moved. You can add it to the product.",
   "migration.wordpress_description_cut":
-    "The product description is longer than 20,000 characters; it was cut at a paragraph.",
+    "The product description is longer than a page may be; it was cut at a section.",
   "migration.wordpress_body_cut": "The text is too long; it was cut at a section.",
   "migration.wordpress_body_media":
     "Pictures or widgets in the text (a product grid, a gallery) were not moved; the text was. Add pictures in the content editor.",

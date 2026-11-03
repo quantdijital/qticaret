@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { variantGtin } from "../../../../../lib/catalog"
 import { storedAddonsOf } from "../../../../../lib/catalog/addons"
+import type { ContentDoc } from "../../../../../lib/content"
 
 interface ProductRow {
   id: string
@@ -26,6 +27,7 @@ interface ProductRow {
     restriction?: string | null
     is_gift_card?: boolean | null
     addons?: unknown
+    description_doc?: unknown
   } | null
 }
 
@@ -90,6 +92,8 @@ export async function readProductCatalog(scope: MedusaContainer, productId: stri
     is_gift_card: extension?.is_gift_card ?? false,
     // adr/0052: prices in lira, as saved
     addons: storedAddonsOf(extension?.addons ?? null),
+    // adr/0055: the document as saved; null, the product has plain text only
+    description_doc: (extension?.description_doc ?? null) as ContentDoc | null,
     primary_category_id: categories.some((category) => category.id === primary) ? primary : null,
     successor: await productTitle(scope, extension?.successor_product_id ?? null),
     categories,

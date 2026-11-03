@@ -20,6 +20,8 @@ export interface BodyOptions {
   siteHost?: string | null
   /** The page's own title: a heading that only repeats it is left out. */
   title?: string | null
+  /** WordPress's shortcodes read (the default); another source's text keeps its brackets. */
+  shortcodes?: boolean
 }
 
 export interface Body {
@@ -70,7 +72,9 @@ export function hrefOf(raw: string, siteHost: string | null): string | null {
 /** The body's blocks, and what was left out of it. */
 export function bodyBlocks(html: string, options: BodyOptions = {}): Body {
   const siteHost = options.siteHost ?? null
-  const expanded = expandShortcodes(withoutHidden(html))
+  const visible = withoutHidden(html)
+  const expanded =
+    options.shortcodes === false ? { html: visible, widgets: 0 } : expandShortcodes(visible)
   const builder = new BlockBuilder(options.title ?? null)
   let images = 0
   let skipping: { tag: string; depth: number } | null = null

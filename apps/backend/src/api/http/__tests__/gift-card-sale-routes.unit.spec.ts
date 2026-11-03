@@ -26,6 +26,9 @@ describe("a product's extension in Store fields (adr/0025 Ek 2026-11-03)", () =>
     "id,title,product_extension.is_gift_card",
     "items.product.product_extension.is_gift_card",
     "id,title",
+    // adr/0055: the product's own description document
+    "+product_extension.description_doc",
+    "id,product_extension.is_gift_card,product_extension.description_doc",
   ])("lets %s through", (fields) => {
     expect(restricted(fields)).toBe("next")
   })
@@ -38,6 +41,8 @@ describe("a product's extension in Store fields (adr/0025 Ek 2026-11-03)", () =>
     "PRODUCT_EXTENSION.restriction",
     "items.product.product_extension.kind",
     ["id", "product_extension.is_gift_card.x"],
+    "items.product.product_extension.description_doc",
+    "product_extension.description_doc.content",
   ])("refuses %s", (fields) => {
     expect(restricted(fields)).toBe(400)
   })

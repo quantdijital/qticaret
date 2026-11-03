@@ -45,8 +45,14 @@ export interface SourceProduct {
   /** The handle wanted: the old slug where there was one, so URLs stay alike. */
   handle: string
   title: string
-  /** Plain text; a source's HTML is turned to text before it gets here. */
+  /** Plain text: a source's HTML turned to text, or its document's text (adr/0055). */
   description: string | null
+  /**
+   * The description as a content document, where the source's HTML gives
+   * one (WordPress, Shopify; adr/0055): written beside the plain text, which
+   * is the document's own.
+   */
+  description_doc?: ContentDoc | null | undefined
   status: "published" | "draft"
   /** Category paths, the first the product's main one. */
   categories: string[][]

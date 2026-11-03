@@ -1,5 +1,5 @@
 import { z } from "@medusajs/framework/zod"
-import { CATEGORY_BASE } from "../../../workflows/async-job/types/migration-run"
+import { CATEGORY_BASE, REFRESH_KINDS } from "../../../workflows/async-job/types/migration-run"
 import { URL_FILTERS } from "../../../workflows/migration/urls-read"
 
 /**
@@ -22,11 +22,14 @@ export type AdminPostMigrationQueryType = z.infer<typeof AdminPostMigrationQuery
 /**
  * `POST /admin/migrations`: the file is a migration bundle (the default)
  * or a WordPress export (`source=wordpress`), whose product categories'
- * address base (`category_base=/urun-kategori/`) the owner may name.
+ * address base (`category_base=/urun-kategori/`) the owner may name, and
+ * which may refresh only what a run moved before (`refresh=descriptions`,
+ * adr/0055).
  */
 export const AdminPostMigrationFileQuery = AdminPostMigrationQuery.extend({
   source: z.enum(["bundle", "wordpress"]).default("bundle"),
   category_base: z.string().trim().max(64).regex(CATEGORY_BASE).optional(),
+  refresh: z.enum(REFRESH_KINDS).optional(),
 }).strict()
 export type AdminPostMigrationFileQueryType = z.infer<typeof AdminPostMigrationFileQuery>
 

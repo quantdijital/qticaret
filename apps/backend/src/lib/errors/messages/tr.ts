@@ -242,6 +242,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "cart.line_unknown": "Bu satır sepette yok.",
   "cart.prices_changed":
     "Sepetteki bazı ürünlerin fiyatı değişti. Yeni tutarı kontrol edip ödemeyi yeniden başlatın.",
+  "catalog.description_blocks":
+    "Ürün açıklamasında görsel ve ürün ya da kategori kartı kullanılamaz; görselleri ürünün görsellerine ekleyin.",
   "catalog.addons_disabled":
     "Ek seçenekler kapalı. Açmak için Ayarlar > Özellikler'e gidin; sepette ek seçenekli ürün varsa çıkarın.",
   "addons.id_invalid": "Ek seçeneğin kimliği geçerli değil.",
@@ -842,6 +844,13 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Taşıma dosyası okunamadı ya da biçimi uymuyor; sorunlu alan belirtildi.",
   "migration.email_invalid": "E-posta adresi geçersiz; müşteri taşınmadı.",
   "migration.product_not_written": "Ürün yazılamadı; ayrıntı Ürünler sayfasında.",
+  "migration.product_description_failed":
+    "Ürünün biçimli açıklaması yazılamadı; ürün düz metin açıklamasıyla kaldı.",
+  "migration.product_gone": "Önceki taşımanın yaptığı ürün artık yok; açıklaması yenilenmedi.",
+  "migration.description_refresh_empty":
+    "Dışa aktarmada bu ürünün açıklaması yok; buradaki açıklaması olduğu gibi kaldı.",
+  "migration.refresh_wordpress_only":
+    "Açıklama yenileme yalnızca WordPress dışa aktarmasıyla yapılır.",
   "migration.review_product_missing": "Yorumun ürünü taşınmadı; yorum da taşınmadı.",
   "migration.review_duplicate": "Bu müşterinin bu ürüne yorumu zaten var; ikinci yorum taşınmadı.",
   "migration.parcel_incomplete":
@@ -919,7 +928,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "migration.wordpress_image_missing":
     "Görsel dosyanın ortam kütüphanesinde yok; taşınmadı. Ürüne elle ekleyebilirsiniz.",
   "migration.wordpress_description_cut":
-    "Ürün açıklaması 20.000 karakterden uzun; bir paragraf sınırında kesildi.",
+    "Ürün açıklaması bir sayfanın sınırından uzun; bir bölüm sınırında kesildi.",
   "migration.wordpress_body_cut": "Metin çok uzun; bir bölüm sınırında kesildi.",
   "migration.wordpress_body_media":
     "Metindeki görseller ya da ürün vitrini, galeri gibi bileşenler taşınmadı; yazı taşındı. Görselleri içerik düzenleyicide ekleyebilirsiniz.",

@@ -3,18 +3,18 @@ import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/util
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import type { Restriction } from "../../../lib/catalog"
 import type { AddonInput, StoredAddons } from "../../../lib/catalog/addons"
+import { descriptionChanges } from "../../../lib/catalog/description"
+import type { DescriptionDoc } from "../../../lib/catalog/description"
+import type { ContentDoc } from "../../../lib/content"
 import { addonsToWrite } from "../addons"
+import { giftCardKind, kindShipping } from "../kind-rules"
 import { ValidationError } from "../../../lib/errors"
 import { fromMedusaAmount } from "../../../lib/money"
 import type { PRODUCT_CONDITIONS } from "../../../modules/catalog-extension/models/product-extension"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
-import {
-  GIFT_CARDS,
-  NON_PHYSICAL_PRODUCTS,
-  RESTRICTED_PRODUCTS,
-} from "../../../modules/platform-settings/features"
+import { RESTRICTED_PRODUCTS } from "../../../modules/platform-settings/features"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
-import { NO_SHIPPING_CHANGES, SHIPPING_FIELDS, shippingChanges } from "../shipping-kind"
+import { NO_SHIPPING_CHANGES, SHIPPING_FIELDS } from "../shipping-kind"
 import type { ProductKind, ShippingChanges, ShippingRow } from "../shipping-kind"
 
 type Condition = (typeof PRODUCT_CONDITIONS)[number]
@@ -34,6 +34,12 @@ export interface SetProductCatalogInput {
   is_gift_card?: boolean | undefined
   /** Its add-ons (adr/0052); null or none clears them. */
   addons?: AddonInput[] | null | undefined
+  /**
+   * Its long description as a checked document (adr/0055): its plain text
+   * becomes `product.description`; one without text clears both; null drops
+   * the document and keeps the text.
+   */
+  description_doc?: ContentDoc | null | undefined
   /** Per variant: the MPN, and the unit cost in lira (VAT excluded, F11.4). */
   variants?:
     | Record<string, { mpn?: string | null | undefined; cost?: number | null | undefined }>
@@ -55,6 +61,7 @@ export interface ExtensionFields {
   restriction: Restriction | null
   is_gift_card: boolean
   addons: StoredAddons | null
+  description_doc: DescriptionDoc | null
 }
 
 export interface ProductCatalogPlan {
@@ -69,12 +76,15 @@ export interface ProductCatalogPlan {
   }[]
   /** Profile links and inventory items the kind asks to change (F3.2). */
   shipping: ShippingChanges
+  /** The product's own description, when the document's plain text changes it (adr/0055). */
+  description?: string | undefined
 }
 
 type ShippingVariant = NonNullable<NonNullable<ShippingRow["variants"]>[number]>
 
 interface ProductRow extends ShippingRow {
   id: string
+  description?: string | null
   categories?: ({ id: string } | null)[] | null
   variants?: (
     | (ShippingVariant & {
@@ -138,6 +148,7 @@ const EXTENSION_KEYS = [
   "restriction",
   "is_gift_card",
   "addons",
+  "description_doc",
 ] as const
 
 type ExtensionChanges = Omit<SetProductCatalogInput, "addons"> & {
@@ -157,66 +168,6 @@ function changesOf(input: ExtensionChanges, current: ExtensionFields | null) {
     }
   }
   return { set, previous }
-}
-
-/**
- * A kind change (F3.2): digital and service need the flag (a product that
- * already is one may stay so), and shipping follows the kind. Saving the
- * same kind again re-aligns profile and items too.
- */
-async function kindShipping(
-  container: MedusaContainer,
-  product: ProductRow,
-  kind: ProductKind,
-  current: ProductKind,
-  giftCard: boolean
-): Promise<ShippingChanges> {
-  // A gift card is digital under its own flag (checked when it is marked)
-  if (kind !== "physical" && kind !== current && !giftCard) {
-    const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-    if (!(await settings.isFeatureEnabled(NON_PHYSICAL_PRODUCTS))) {
-      throw new ValidationError("catalog.kind_disabled", { field: "kind" })
-    }
-  }
-  let defaultProfile: string | null = null
-  if (kind === "physical" && !product.shipping_profile?.id) {
-    const query = container.resolve(ContainerRegistrationKeys.QUERY)
-    const { data } = await query.graph({
-      entity: "shipping_profile",
-      fields: ["id", "type"],
-      filters: {},
-    })
-    const profiles = data as { id: string; type: string }[]
-    defaultProfile =
-      (profiles.find((profile) => profile.type === "default") ?? profiles[0])?.id ?? null
-  }
-  return shippingChanges(product, kind, defaultProfile)
-}
-
-/**
- * A gift card product (adr/0025 Ek 2026-11-03): marking one needs the shop's
- * gift cards on (unmarking never does); it is digital, another kind refused
- * while it is one. The kind the save writes, or undefined to keep it.
- */
-async function giftCardKind(
-  container: MedusaContainer,
-  input: SetProductCatalogInput,
-  current: ExtensionFields | null
-): Promise<ProductKind | undefined> {
-  const marking = input.is_gift_card === true && current?.is_gift_card !== true
-  if (marking) {
-    const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-    if (!(await settings.isFeatureEnabled(GIFT_CARDS))) {
-      throw new ValidationError("catalog.gift_card_disabled", { field: "is_gift_card" })
-    }
-  }
-  if (!(input.is_gift_card ?? current?.is_gift_card ?? false)) {
-    return input.kind
-  }
-  if (input.kind !== undefined && input.kind !== "digital") {
-    throw new ValidationError("catalog.gift_card_kind", { field: "kind" })
-  }
-  return input.is_gift_card === true ? "digital" : input.kind
 }
 
 /** What a variant's save changes and what it was: only fields asked for and different. */
@@ -246,6 +197,7 @@ export const planProductCatalogStep = createStep(
   async (input: SetProductCatalogInput, { container }) => {
     const product = await productRow(container, input.product_id, [
       "id",
+      "description",
       "categories.id",
       "variants.id",
       "variants.variant_extension.*",
@@ -291,7 +243,14 @@ export const planProductCatalogStep = createStep(
     const extension = product.product_extension ?? null
     const kind = await giftCardKind(container, input, extension)
     const addons = await addonsToWrite(container, input.addons)
-    const { set, previous } = changesOf({ ...input, kind, addons }, extension)
+    const description = descriptionChanges(input.description_doc, {
+      doc: extension?.description_doc ?? null,
+      description: product.description ?? null,
+    })
+    const { set, previous } = changesOf(
+      { ...input, kind, addons, description_doc: description.doc },
+      extension
+    )
     const plan: ProductCatalogPlan = {
       product_id: product.id,
       product: { id: extension?.id ?? null, set, previous },
@@ -305,6 +264,7 @@ export const planProductCatalogStep = createStep(
             input.is_gift_card === true
           )
         : NO_SHIPPING_CHANGES,
+      ...(description.description === undefined ? {} : { description: description.description }),
     }
     return new StepResponse(plan)
   }

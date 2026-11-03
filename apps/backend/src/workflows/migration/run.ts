@@ -164,6 +164,11 @@ export async function runMigration(
   }
   const productRows: SheetCell[][] = []
   const productCounts = counted({ read: products.length })
+  // adr/0055: only a source that gives documents counts them
+  const givesDocuments = products.some((product) => product.description_doc !== undefined)
+  if (givesDocuments) {
+    productCounts.documents = 0
+  }
   const made = new Set<string>()
   const moved = new Set<string>()
   const batches = batchesOf(products)
@@ -190,6 +195,9 @@ export async function runMigration(
     productCounts.found += (summary?.unchanged ?? 0) + outcome.moved
     productCounts.skipped += (summary?.problems ?? 0) + left.length
     productCounts.failed += summary?.failed ?? 0
+    if (givesDocuments) {
+      productCounts.documents = (productCounts.documents ?? 0) + outcome.documents
+    }
     productRows.push(...rows)
     problems.push(...left.map((problem) => ({ ...problem, kind: "product" as const })))
   }

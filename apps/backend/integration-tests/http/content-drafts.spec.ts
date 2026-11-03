@@ -121,6 +121,24 @@ medusaIntegrationTestRunner({
         const description = await ask(productId, "product_description")
         const meta = await ask(productId, "seo_description")
         const untouched = await page(productId)
+        // adr/0055: a description document the product had gives way to the approved text
+        const formatted = await http.post<{ description_doc: unknown }>(
+          `/admin/products/${productId}/catalog`,
+          {
+            description_doc: {
+              type: "doc",
+              content: [
+                {
+                  type: "heading",
+                  attrs: { level: 2 },
+                  content: [{ type: "text", text: "Keten" }],
+                },
+              ],
+            },
+          },
+          { headers: admin.headers }
+        )
+        expect(formatted.data.description_doc).not.toBeNull()
         const [approvedTitle, approvedText, rejected] = [
           await decide(title.data.draft?.id ?? "", "approve"),
           await decide(description.data.draft?.id ?? "", "approve"),
@@ -128,6 +146,10 @@ medusaIntegrationTestRunner({
         ]
         const again = await decide(meta.data.draft?.id ?? "", "approve")
         const after = await page(productId)
+        const catalog = await http.get<{ description_doc: unknown }>(
+          `/admin/products/${productId}/catalog`,
+          { headers: admin.headers }
+        )
         const kept = await getContainer()
           .resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE)
           .listContentDrafts({ entity_id: productId }, { select: ["prompt", "source"] })
@@ -145,6 +167,7 @@ medusaIntegrationTestRunner({
         ])
         expect(after.seo_meta?.seo_title).toBe(title.data.draft?.text)
         expect(after.description).toBe(description.data.draft?.text)
+        expect(catalog.data.description_doc).toBeNull()
         expect(again.data.message).toBe("content_drafts.not_open")
         // KK8: the prompt left without the address and the phone in the description
         expect(kept).toHaveLength(3)
