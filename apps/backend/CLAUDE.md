@@ -20,4 +20,5 @@
 - Route'larda `validateAndTransformBody` + Zod şeması zorunlu.
 - Dış API istemcileri `src/lib/clients/` altında, timeout + retry + log redaksiyonu ile.
 - Tutar dönüşümleri (ör. iyzico'nun string tutarı) sadece provider sınırında yapılır.
+- Kargo (adr/0054): ürünün ağırlığı ve ölçüleri isteğe bağlıdır; yayın ve içe aktarma onları beklemez. Eksik değer (boş ya da 0) platform-settings `shipping.default_parcel`'dan alınır (kaydedilmemişse platformun 1 kg, 30 × 20 × 10 cm paketi, mağazanın birimine çevrilir); hesap `lib/shipping/parcel.ts`'tedir. Desiyi taşıyıcı ölçer: Yurtiçi'ye ölçüsüz kolide desi/kg gönderilmez, uydurma değer yazılmaz.
 - Yeni modül → `/yeni-modul`, yeni provider → `/entegrasyon-provider` komutunu kullan.
