@@ -25,6 +25,8 @@ export const SECTIONS = [
   "/storefront/preferences",
   "/storefront/preferences?part=contact",
   "/storefront/preferences?part=swatches",
+  // When a product card says "Az kaldı"
+  "/storefront/preferences?part=stock",
   // Maintenance mode and its bypass link (adr/0053)
   "/storefront/preferences?part=maintenance",
   "/content",
@@ -53,6 +55,8 @@ export const SECTIONS = [
 export const SETTINGS = [
   "/settings",
   "/settings/store",
+  // The legal identity beside the ETBİS QR code
+  "/settings/store?part=legal",
   "/settings/payments",
   "/settings/payments/paytr",
   "/settings/payments/iyzico",

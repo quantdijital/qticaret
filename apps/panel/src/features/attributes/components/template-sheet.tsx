@@ -23,6 +23,7 @@ import type { AttributeTemplate } from "@/features/attributes/types"
 import { errorText } from "@/lib/errors"
 import { isValidSlug, toSlug } from "@/lib/slug"
 import { AddDefinitionButton, DefinitionEditor } from "./definition-editor"
+import { GroupList } from "./group-list"
 
 interface TemplateSheetProps {
   /** The template to edit; null for a new one. */
@@ -51,7 +52,7 @@ export function TemplateSheet({ template, open, onOpenChange }: TemplateSheetPro
 
   const send = (values: TemplateForm, confirm: boolean) => {
     save.mutate(
-      { id: template?.id ?? null, form: values, confirm },
+      { template, form: values, confirm },
       {
         onSuccess: () => {
           toast.success(t("attributes.saved"))
@@ -116,6 +117,7 @@ export function TemplateSheet({ template, open, onOpenChange }: TemplateSheetPro
                 {...form.register("description")}
               />
             </Field>
+            <GroupList />
             <div className="flex flex-col gap-3">
               <span className="text-sm font-medium">{t("attributes.definitions")}</span>
               {definitions.fields.length === 0 ? (

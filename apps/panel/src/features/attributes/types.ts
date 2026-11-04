@@ -26,6 +26,15 @@ export interface AttributeDefinition {
   scope: "product" | "variant"
   option_title: string | null
   varies_by: string | null
+  /** The spec table section it shows under (a group's key); none: no section. */
+  group?: string | null
+}
+
+/** A section of the template's spec table (adr/0013 Ek 2026-11-04); `rank` orders them. */
+export interface AttributeGroup {
+  key: string
+  name: string
+  rank: number
 }
 
 export interface AttributeTemplate {
@@ -33,6 +42,8 @@ export interface AttributeTemplate {
   name: string
   handle: string
   description: string | null
+  /** None or empty: the spec table is one list. Missing from a backend before it. */
+  groups?: AttributeGroup[] | null
   definitions: AttributeDefinition[]
 }
 

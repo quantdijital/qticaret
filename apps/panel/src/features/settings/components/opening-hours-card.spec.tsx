@@ -19,6 +19,7 @@ const saved = (opening_hours: OpeningRange[]): StoreSettings => ({
   whatsapp_phone: null,
   opening_hours,
   map_url: null,
+  etbis_qr_url: null,
   timezone: "Europe/Istanbul",
   weight_unit: "g",
   dimension_unit: "cm",

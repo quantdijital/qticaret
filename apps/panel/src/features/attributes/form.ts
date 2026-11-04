@@ -1,4 +1,6 @@
 import { toSlug } from "@/lib/slug"
+import { groupsApi, groupsForm } from "./groups"
+import type { GroupForm } from "./groups"
 import { isSelectType } from "./types"
 import type {
   AttributeDefinition,
@@ -24,12 +26,15 @@ export interface DefinitionForm {
   option_title: string
   /** "" for none */
   varies_by: string
+  /** The spec table section's key; "" for none. */
+  group: string
 }
 
 export interface TemplateForm {
   name: string
   handle: string
   description: string
+  groups: GroupForm[]
   definitions: DefinitionForm[]
 }
 
@@ -46,9 +51,13 @@ export const emptyDefinition = (): DefinitionForm => ({
   scope: "product",
   option_title: "",
   varies_by: "",
+  group: "",
 })
 
-const definitionForm = (definition: AttributeDefinition): DefinitionForm => ({
+const definitionForm = (
+  definition: AttributeDefinition,
+  groups: ReadonlySet<string>
+): DefinitionForm => ({
   id: definition.id,
   key: definition.key,
   label: definition.label,
@@ -62,16 +71,22 @@ const definitionForm = (definition: AttributeDefinition): DefinitionForm => ({
   scope: definition.scope,
   option_title: definition.option_title ?? "",
   varies_by: definition.varies_by ?? "",
+  group: definition.group && groups.has(definition.group) ? definition.group : "",
 })
 
-export const templateForm = (template?: AttributeTemplate | null): TemplateForm => ({
-  name: template?.name ?? "",
-  handle: template?.handle ?? "",
-  description: template?.description ?? "",
-  definitions: [...(template?.definitions ?? [])]
-    .sort((a, b) => a.rank - b.rank)
-    .map(definitionForm),
-})
+export const templateForm = (template?: AttributeTemplate | null): TemplateForm => {
+  const groups = groupsForm(template?.groups)
+  const keys = new Set(groups.map((group) => group.key))
+  return {
+    name: template?.name ?? "",
+    handle: template?.handle ?? "",
+    description: template?.description ?? "",
+    groups,
+    definitions: [...(template?.definitions ?? [])]
+      .sort((a, b) => a.rank - b.rank)
+      .map((definition) => definitionForm(definition, keys)),
+  }
+}
 
 const orNull = (text: string): string | null => (text.trim() === "" ? null : text.trim())
 
@@ -84,8 +99,12 @@ export function keyFromLabel(label: string): string {
 /** An option's value from its label: the slug facet URLs use (F3.17). */
 export const optionValue = (label: string): string => toSlug(label).slice(0, 100)
 
-/** The definitions as the API takes them; list order becomes `rank`. */
-export const definitionsApi = (definitions: DefinitionForm[]) =>
+/**
+ * The definitions as the API takes them; list order becomes `rank`. Given
+ * the template's section keys, each names its section (or none); without
+ * them `group` is left out and the server keeps what it has.
+ */
+export const definitionsApi = (definitions: DefinitionForm[], groups?: ReadonlySet<string>) =>
   definitions.map((definition, index) => {
     const variant = definition.scope === "variant"
     // A product option is always shown; a hidden attribute is no filter or title word
@@ -105,8 +124,24 @@ export const definitionsApi = (definitions: DefinitionForm[]) =>
       scope: definition.scope,
       option_title: variant ? orNull(definition.option_title) : null,
       varies_by: variant ? orNull(definition.varies_by) : null,
+      ...(groups ? { group: groups.has(definition.group) ? definition.group : null } : {}),
     }
   })
+
+/**
+ * The template as the API takes it. Its sections and each field's section
+ * go only when it has or had sections: a template without saves as before.
+ */
+export function templateBody(form: TemplateForm, saved: AttributeTemplate | null) {
+  const sections = form.groups.length > 0 || (saved?.groups?.length ?? 0) > 0
+  const keys = new Set(form.groups.map((group) => group.key))
+  return {
+    name: form.name.trim(),
+    description: orNull(form.description),
+    ...(sections ? { groups: groupsApi(form.groups) } : {}),
+    definitions: definitionsApi(form.definitions, sections ? keys : undefined),
+  }
+}
 
 /** Saved definitions the form no longer holds: their values on products go too. */
 export const removedDefinitions = (

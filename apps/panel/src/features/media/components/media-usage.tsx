@@ -31,6 +31,12 @@ function Place({ use }: { use: MediaUse }) {
           {name}
         </Link>
       )
+    case "category":
+      return (
+        <Link to="/categories" search={{ selected: id }} className={LINK}>
+          {name}
+        </Link>
+      )
     case "landing":
       return (
         <Link to="/content/landings/$id" params={{ id }} className={LINK}>
@@ -53,6 +59,12 @@ function Place({ use }: { use: MediaUse }) {
       return (
         <Link to="/settings/store" className={LINK}>
           {t(`${U}.logoLink`)}
+        </Link>
+      )
+    case "etbis_qr":
+      return (
+        <Link to="/settings/store" search={{ part: "legal" }} className={LINK}>
+          {t(`${U}.etbisQrLink`)}
         </Link>
       )
     case "share_image":

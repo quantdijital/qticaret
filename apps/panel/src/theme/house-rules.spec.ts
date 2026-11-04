@@ -35,6 +35,7 @@ const ALLOWED: Record<string, string> = {
   "features/bulk-messages/editor/email-frame.tsx bg-white": "e-mail preview",
   // Cameras read dark modules on white, whatever the theme
   "features/security/components/authenticator-link.tsx bg-white": "QR code",
+  "features/settings/components/etbis-qr-card.tsx bg-white": "QR code",
   // A photo's own colours under the buttons: a dark veil reads on any
   "features/products/components/image-uploader.tsx from-black": "photo overlay",
   // The dimmed page behind a dialog

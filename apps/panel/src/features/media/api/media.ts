@@ -37,6 +37,10 @@ export type MediaUseKind =
   | "share_image"
   | "seo"
   | "order"
+  /** A category's picture: `id` the category, `label` its name. */
+  | "category"
+  /** The shop's ETBİS QR code (Settings > Store profile > Legal); no `id`. */
+  | "etbis_qr"
 
 export interface MediaUse {
   kind: MediaUseKind

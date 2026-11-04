@@ -444,6 +444,14 @@
         "colorInvalid": "The colour must be a 6-digit code starting with # (like #0b5c99).",
         "colorDuplicate": "Each colour name can be written once.",
         "tokenUnknown": "There is an unknown detail in braces; add details from the Insert detail menu."
+      },
+      "lowStock": {
+        "title": "Low stock badge",
+        "description": "Shows a short note on the card of a product running low.",
+        "label": "Threshold",
+        "unit": "pcs",
+        "hint": "The product card says “Az kaldı” (few left) at or below this many; the number is not shown. 0: never shown.",
+        "invalid": "Enter a whole number from 0 to {{max}}."
       }
     },
     "store": {
@@ -559,6 +567,12 @@
         "placeholder": "https://instagram.com/yourshop",
         "add": "Add account",
         "hint": "Each an address starting with https://; up to {{max}} accounts."
+      },
+      "etbisQr": {
+        "title": "ETBİS QR code",
+        "hint": "The QR code ETBİS (eticaret.gov.tr) gives on registration; shown in the storefront's footer. Optional.",
+        "size": "Upload the QR code image you downloaded from ETBİS as it is.",
+        "none": "No QR code"
       }
     },
     "seo": {
@@ -4365,7 +4379,15 @@
     "deleteTitle": "Delete {{name}}?",
     "deleteDescription": "The category is deleted; products stay and only leave this category. A category with subcategories cannot be deleted.",
     "deleted": "Category deleted.",
-    "descriptionLabel": "Description"
+    "descriptionLabel": "Description",
+    "image": {
+      "title": "Category image",
+      "hint": "Shown on the storefront's category cards and in the menu. Optional; without one the category's name is enough.",
+      "none": "No image",
+      "alt": "Alt text",
+      "altHint": "Briefly describe what the image shows; screen readers and search engines read it.",
+      "saved": "Category image saved."
+    }
   },
   "inventory": {
     "description": "Sellable stock; low and sold-out items first",
@@ -5725,7 +5747,22 @@
     "productSaved": "Attributes saved.",
     "changeTemplateTitle": "Change the template?",
     "changeTemplateDescription": "The product's current attribute values are deleted when you save.",
-    "changeTemplateConfirm": "Change"
+    "changeTemplateConfirm": "Change",
+    "groups": {
+      "title": "Groups",
+      "hint": "Splits the product page's spec table into titled sections. Optional; without groups the attributes show as one list.",
+      "newName": "New group name",
+      "newPlaceholder": "E.g. Dimensions",
+      "add": "Add group",
+      "item": "Group {{number}}",
+      "nameOf": "Name of group {{number}}",
+      "nameRequired": "Give the group a name.",
+      "full": "At most {{max}} groups.",
+      "field": "Group",
+      "fieldHint": "Shown under this group in the spec table.",
+      "none": "No group",
+      "unnamed": "Unnamed group"
+    }
   },
   "brands": {
     "description": "Each brand has its own page, logo and products.",
@@ -6340,6 +6377,12 @@
         "approved": "No published questions.",
         "rejected": "No rejected questions."
       }
+    },
+    "photos": {
+      "list": "Photos in {{author}}'s review",
+      "alt": "Photo {{number}} in {{author}}'s review",
+      "title": "Photo in {{author}}'s review",
+      "position": "{{number}} / {{count}}"
     }
   },
   "staff": {
@@ -7082,7 +7125,8 @@
         "badges": "Trust badges",
         "contact": "Contact form",
         "swatches": "Colour swatches",
-        "maintenance": "Maintenance mode"
+        "maintenance": "Maintenance mode",
+        "stock": "Low stock badge"
       },
       "dark": "Shop in maintenance"
     },
@@ -7796,7 +7840,9 @@
         "logo": "Logo",
         "share_image": "Share image",
         "seo": "SEO",
-        "order": "Order"
+        "order": "Order",
+        "category": "Category image",
+        "etbis_qr": "ETBİS QR code"
       },
       "seoTypes": {
         "product": "product page",
@@ -7808,7 +7854,8 @@
         "landing": "landing page",
         "post_category": "blog category",
         "post_tag": "blog tag"
-      }
+      },
+      "etbisQrLink": "The shop's ETBİS QR code"
     }
   }
 }

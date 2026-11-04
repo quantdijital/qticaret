@@ -12,6 +12,7 @@ import type { StorefrontSettings } from "@/features/settings/api/sections"
 import { SettingsTabs } from "@/features/settings/components/settings-tabs"
 import { TrustBadgesCard } from "@/features/settings/components/storefront-badges-card"
 import { ContactFormCard } from "@/features/settings/components/storefront-contact-card"
+import { LowStockBadgeCard } from "@/features/settings/components/storefront-stock-card"
 import { SwatchesCard } from "@/features/settings/components/storefront-swatches-card"
 import { maintenanceQuery } from "@/features/storefront/api/maintenance"
 import { MaintenanceTab } from "@/features/storefront/components/maintenance-tab"
@@ -23,7 +24,8 @@ const P = "storefront.preferences"
 /**
  * Storefront > Preferences (adr/0049): what the storefront says and does
  * that is not drawn in the theme editor: the trust badges' words, the page
- * the contact form shows on, the colour names that show as swatches. One
+ * the contact form shows on, the colour names that show as swatches, when
+ * a product card says "Az kaldı". One
  * card per tab (the owner: no page of cards running down); each saves its
  * own part. The design itself (the home page, the announcement bar, the
  * theme's settings) is the theme editor's. Maintenance (adr/0053) is a tab
@@ -66,6 +68,7 @@ export function PreferencesPage() {
           tab("badges", (saved) => <TrustBadgesCard saved={saved} />),
           tab("contact", (saved) => <ContactFormCard saved={saved} />),
           tab("swatches", (saved) => <SwatchesCard saved={saved} />),
+          tab("stock", (saved) => <LowStockBadgeCard saved={saved} />),
           { key: "maintenance", label: t(`${P}.tabs.maintenance`), content: <MaintenanceTab /> },
         ]}
       />

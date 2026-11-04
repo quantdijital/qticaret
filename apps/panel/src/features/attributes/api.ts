@@ -1,6 +1,6 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
-import { definitionsApi } from "./form"
+import { templateBody } from "./form"
 import type { TemplateForm } from "./form"
 import type { AttributeTemplate, AttributeValue, ProductAttributes } from "./types"
 
@@ -18,29 +18,25 @@ export const templatesQuery = () =>
       ).attribute_templates,
   })
 
-const orNull = (text: string) => (text.trim() === "" ? null : text.trim())
-
 /**
- * Creates or updates a template. Removing attributes products have values
- * for needs `confirm`: the page asks before it sends (adr/0013).
+ * Creates (`template` null) or updates a template. Removing attributes
+ * products have values for needs `confirm`: the page asks before it sends
+ * (adr/0013).
  */
 export function useSaveTemplate() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: async ({
-      id,
+      template,
       form,
       confirm,
     }: {
-      id: string | null
+      template: AttributeTemplate | null
       form: TemplateForm
       confirm: boolean
     }) => {
-      const body = {
-        name: form.name.trim(),
-        description: orNull(form.description),
-        definitions: definitionsApi(form.definitions),
-      }
+      const id = template?.id ?? null
+      const body = templateBody(form, template)
       const { attribute_template: saved } = await sdk.client.fetch<{
         attribute_template: AttributeTemplate
       }>(

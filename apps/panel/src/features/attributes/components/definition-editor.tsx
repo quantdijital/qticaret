@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { TemplateForm } from "@/features/attributes/form"
+import { DefinitionGroupField } from "./group-list"
 import { OptionChips } from "./option-chips"
 import { ATTRIBUTE_TYPES, VARIES_BY, isSelectType } from "@/features/attributes/types"
 
@@ -179,23 +180,26 @@ export function DefinitionEditor({ index, count, onMove, onRemove }: DefinitionE
               />
             ))}
           </div>
-          <Field label={t("attributes.scope")} hint={t("attributes.scopeHint")}>
-            <Controller
-              control={control}
-              name={`${base}.scope`}
-              render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger className="w-full sm:w-72">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="product">{t("attributes.scopes.product")}</SelectItem>
-                    <SelectItem value="variant">{t("attributes.scopes.variant")}</SelectItem>
-                  </SelectContent>
-                </Select>
-              )}
-            />
-          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label={t("attributes.scope")} hint={t("attributes.scopeHint")}>
+              <Controller
+                control={control}
+                name={`${base}.scope`}
+                render={({ field }) => (
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="product">{t("attributes.scopes.product")}</SelectItem>
+                      <SelectItem value="variant">{t("attributes.scopes.variant")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </Field>
+            <DefinitionGroupField index={index} />
+          </div>
           {scope === "variant" ? (
             <div className="grid gap-4 sm:grid-cols-2">
               <Field

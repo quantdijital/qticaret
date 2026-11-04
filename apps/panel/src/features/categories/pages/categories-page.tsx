@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { categoryTreeQuery } from "@/features/categories/api/categories"
 import { CategoryEditor } from "@/features/categories/components/category-editor"
+import { CategoryImageCard } from "@/features/categories/components/category-image-card"
 import { CategoryRestrictionCard } from "@/features/categories/components/category-restriction-card"
 import { CategorySeoCard } from "@/features/categories/components/category-seo-card"
 import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
@@ -78,6 +79,7 @@ export function CategoriesPage() {
                 />
                 {current ? (
                   <>
+                    <CategoryImageCard categoryId={current.id} />
                     <AdvisorCard
                       key={`advisor-${current.id}`}
                       kind="category"

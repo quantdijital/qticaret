@@ -43,6 +43,7 @@ describe("PreferencesPage", () => {
       "Güven rozetleri",
       "İletişim formu",
       "Renk örnekleri",
+      "Az kaldı rozeti",
       "Bakım modu",
     ])
     // One card per tab: the others are not drawn below it

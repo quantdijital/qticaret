@@ -40,6 +40,8 @@ export interface StoreSettings {
   opening_hours: OpeningRange[]
   /** The shop on a map (Google Maps and the like), https; none: no link. */
   map_url: string | null
+  /** The QR code ETBİS gives (eticaret.gov.tr), from the media library; the storefront's footer shows it. */
+  etbis_qr_url: string | null
   timezone: string
   weight_unit: "g" | "kg"
   dimension_unit: "cm" | "mm"
@@ -231,6 +233,8 @@ export interface StorefrontSettings {
   contact_form_path: string | null
   /** The shop's colour names: an option or filter value that reads as one shows as a swatch. */
   color_swatches: StorefrontColorSwatch[]
+  /** A product card says "Az kaldı" at or under this many (never the number); 0: never. */
+  low_stock_threshold: number
 }
 
 /** A colour name and its colour (`#rrggbb`, lower case); names are unique in Turkish case. */

@@ -22,6 +22,15 @@ export interface ReviewRow {
   /** The version shown: an approval applies to it only. */
   updated_at: string
   product: { id: string; title: string | null; thumbnail: string | null }
+  /** The customer's photos, cleaned by the server; decided on with the review. */
+  photos: ReviewPhoto[]
+}
+
+export interface ReviewPhoto {
+  id: string
+  url: string
+  width: number
+  height: number
 }
 
 /** Reviews by state (F10.6): the waiting ones oldest first. */

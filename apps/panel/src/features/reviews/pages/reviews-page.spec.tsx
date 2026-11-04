@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -33,8 +33,14 @@ const row = (id: string, more: Partial<ReviewRow> = {}): ReviewRow => ({
   created_at: "2026-10-28T10:00:00Z",
   updated_at: "2026-10-28T10:05:00Z",
   product: { id: "prod_1", title: "Şef bıçağı", thumbnail: null },
+  photos: [],
   ...more,
 })
+
+const PHOTOS = [
+  { id: "rph_1", url: "https://cdn.ornek.com/yorum-1.webp", width: 1200, height: 900 },
+  { id: "rph_2", url: "https://cdn.ornek.com/yorum-2.webp", width: 900, height: 1200 },
+]
 
 function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -67,6 +73,28 @@ describe("ReviewsPage", () => {
     expect(screen.getAllByRole("img", { name: "5 üzerinden 4" })).toHaveLength(2)
     expect(screen.getByText("Bağlantı içeriyor")).toBeInTheDocument()
     expect(screen.getAllByText("Şef bıçağı")).toHaveLength(2)
+  })
+
+  it("shows a review's photos as thumbnails and opens one larger", async () => {
+    fetchMock.mockResolvedValue({ reviews: [row("prev_1", { photos: PHOTOS })], count: 1 })
+    renderPage()
+
+    const list = await screen.findByRole("list", { name: "Ayşe Y. yorumundaki fotoğraflar" })
+    const thumbnails = within(list).getAllByRole("img")
+    expect(thumbnails.map((image) => image.getAttribute("src"))).toEqual([
+      "https://cdn.ornek.com/yorum-1.webp",
+      "https://cdn.ornek.com/yorum-2.webp",
+    ])
+
+    await userEvent.click(
+      within(list).getByRole("button", { name: "Ayşe Y. yorumundaki fotoğraf 2" })
+    )
+    const dialog = await screen.findByRole("dialog", { name: "Ayşe Y. yorumundaki fotoğraf" })
+    expect(within(dialog).getByText("2 / 2")).toBeInTheDocument()
+    expect(within(dialog).getByRole("img")).toHaveAttribute(
+      "src",
+      "https://cdn.ornek.com/yorum-2.webp"
+    )
   })
 
   it("approves one review, and rejects the chosen ones together", async () => {

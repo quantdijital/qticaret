@@ -444,6 +444,14 @@
         "colorInvalid": "Renk, # ile başlayan 6 haneli bir kod olmalı (#0b5c99 gibi).",
         "colorDuplicate": "Her renk adı bir kez yazılabilir.",
         "tokenUnknown": "Süslü parantez içinde tanınmayan bir bilgi var; bilgileri Bilgi ekle menüsünden ekleyin."
+      },
+      "lowStock": {
+        "title": "Az kaldı rozeti",
+        "description": "Stoğu azalan ürünün kartında müşteriye kısa bir uyarı gösterir.",
+        "label": "Eşik",
+        "unit": "adet",
+        "hint": "Ürün kartında “Az kaldı” bu adet ve altında görünür; adet gösterilmez. 0: hiç gösterilmez.",
+        "invalid": "0 ile {{max}} arasında bir tam sayı yazın."
       }
     },
     "store": {
@@ -559,6 +567,12 @@
         "placeholder": "https://instagram.com/magazaniz",
         "add": "Hesap ekle",
         "hint": "Her biri https:// ile başlayan bir adres; en çok {{max}} hesap."
+      },
+      "etbisQr": {
+        "title": "ETBİS karekodu",
+        "hint": "ETBİS'e (eticaret.gov.tr) kayıt olunca verilen karekod; vitrinin altbilgisinde gösterilir. İsteğe bağlı.",
+        "size": "ETBİS'ten indirdiğiniz karekod görselini olduğu gibi yükleyin.",
+        "none": "Karekod yok"
       }
     },
     "seo": {
@@ -4365,7 +4379,15 @@
     "deleteTitle": "{{name}} silinsin mi?",
     "deleteDescription": "Kategori silinir; ürünler silinmez, yalnızca bu kategoriden çıkar. Alt kategorisi olan bir kategori silinemez.",
     "deleted": "Kategori silindi.",
-    "descriptionLabel": "Açıklama"
+    "descriptionLabel": "Açıklama",
+    "image": {
+      "title": "Kategori görseli",
+      "hint": "Vitrinde kategori kartlarında ve menüde gösterilir. İsteğe bağlı; görsel yoksa kategori adı yeterlidir.",
+      "none": "Görsel yok",
+      "alt": "Alt metin",
+      "altHint": "Görselde ne olduğunu kısaca yazın; görmeyenler ve arama motorları bunu okur.",
+      "saved": "Kategori görseli kaydedildi."
+    }
   },
   "inventory": {
     "description": "Satılabilir stok; önce azalan ve tükenen ürünler",
@@ -5725,7 +5747,22 @@
     "productSaved": "Özellikler kaydedildi.",
     "changeTemplateTitle": "Şablon değiştirilsin mi?",
     "changeTemplateDescription": "Ürünün mevcut özellik değerleri kaydettiğinizde silinecek.",
-    "changeTemplateConfirm": "Değiştir"
+    "changeTemplateConfirm": "Değiştir",
+    "groups": {
+      "title": "Gruplar",
+      "hint": "Ürün sayfasındaki özellik tablosunu başlıklı bölümlere ayırır. İsteğe bağlı; grup yoksa özellikler tek listede görünür.",
+      "newName": "Yeni grup adı",
+      "newPlaceholder": "Örn. Ölçüler",
+      "add": "Grup ekle",
+      "item": "{{number}}. grup",
+      "nameOf": "{{number}}. grubun adı",
+      "nameRequired": "Gruba bir ad verin.",
+      "full": "En çok {{max}} grup eklenebilir.",
+      "field": "Grup",
+      "fieldHint": "Özellik tablosunda bu grubun altında görünür.",
+      "none": "Grup yok",
+      "unnamed": "Adsız grup"
+    }
   },
   "brands": {
     "description": "Markaların kendi sayfası, logosu ve ürünleri olur.",
@@ -6340,6 +6377,12 @@
         "approved": "Yayında soru yok.",
         "rejected": "Reddedilen soru yok."
       }
+    },
+    "photos": {
+      "list": "{{author}} yorumundaki fotoğraflar",
+      "alt": "{{author}} yorumundaki fotoğraf {{number}}",
+      "title": "{{author}} yorumundaki fotoğraf",
+      "position": "{{number}} / {{count}}"
     }
   },
   "staff": {
@@ -7082,7 +7125,8 @@
         "badges": "Güven rozetleri",
         "contact": "İletişim formu",
         "swatches": "Renk örnekleri",
-        "maintenance": "Bakım modu"
+        "maintenance": "Bakım modu",
+        "stock": "Az kaldı rozeti"
       },
       "dark": "Mağaza bakımda"
     },
@@ -7796,7 +7840,9 @@
         "logo": "Logo",
         "share_image": "Paylaşım görseli",
         "seo": "SEO",
-        "order": "Sipariş"
+        "order": "Sipariş",
+        "category": "Kategori görseli",
+        "etbis_qr": "ETBİS karekodu"
       },
       "seoTypes": {
         "product": "ürün sayfası",
@@ -7808,7 +7854,8 @@
         "landing": "açılış sayfası",
         "post_category": "blog kategorisi",
         "post_tag": "blog etiketi"
-      }
+      },
+      "etbisQrLink": "Mağazanın ETBİS karekodu"
     }
   }
 }

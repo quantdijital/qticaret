@@ -14,6 +14,7 @@ export const STORE: StoreSettings = {
   whatsapp_phone: null,
   opening_hours: [{ day: 1, opens: "09:00", closes: "18:00" }],
   map_url: null,
+  etbis_qr_url: null,
   timezone: "Europe/Istanbul",
   weight_unit: "g",
   dimension_unit: "cm",

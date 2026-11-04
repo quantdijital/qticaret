@@ -90,6 +90,7 @@ const STOREFRONT: StorefrontSettings = {
   hero: null,
   contact_form_path: null,
   color_swatches: [],
+  low_stock_threshold: 3,
 }
 /** The theme section's defaults, as the server gives them before anything is saved. */
 export const THEME: ThemeSettings = {

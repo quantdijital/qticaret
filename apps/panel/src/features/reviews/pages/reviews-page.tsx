@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
 import { REVIEW_PAGE_SIZE, moderateReviews, reviewsQuery } from "@/features/reviews/api/reviews"
 import type { ReviewRow, ReviewStatus } from "@/features/reviews/api/reviews"
+import { ReviewPhotos } from "@/features/reviews/components/review-photos"
 import { ReviewsNav } from "@/features/reviews/components/reviews-nav"
 import { errorText } from "@/lib/errors"
 import { formatDate } from "@/lib/format"
@@ -81,6 +82,7 @@ function ReviewItem({
         </div>
         {review.title ? <p className="text-sm font-medium">{review.title}</p> : null}
         <p className="text-sm whitespace-pre-wrap">{review.body}</p>
+        <ReviewPhotos photos={review.photos} author={review.author_name} />
         <p className="text-xs text-muted-foreground">
           {review.author_name} · {formatDate(review.created_at)}
           {review.reject_reason ? ` · ${review.reject_reason}` : ""}
