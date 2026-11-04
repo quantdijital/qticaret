@@ -72,7 +72,6 @@ export const SETTINGS = [
   "/settings/integrations",
   "/settings/appearance",
   "/settings/shipping?part=locations",
-  "/settings/shipping?part=addresses",
   "/settings/seo",
   "/settings/attributes",
   "/settings/features",

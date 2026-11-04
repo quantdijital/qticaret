@@ -923,27 +923,6 @@
         "saved": "Düşük stok eşiği kaydedildi."
       }
     },
-    "addressData": {
-      "title": "Adres verisi",
-      "description": "Ödeme sayfasında ve adres formlarında seçilen il, ilçe, mahalle ve köy listeleri.",
-      "empty": "Adres verisi yüklenmedi. Müşteriler ödeme sayfasında il ve ilçe seçemez; verileri yüklemek için güncelleyin.",
-      "provinces": "İl",
-      "districts": "İlçe",
-      "neighborhoods": "Mahalle ve köy",
-      "source": "Kaynak",
-      "sourceTurkiyeApi": "TürkiyeAPI, {{version}} veri seti ({{date}})",
-      "sourceFile": "Elle yüklenen dosya",
-      "lastSync": "Son güncelleme",
-      "downloading": "TürkiyeAPI'den indiriliyor… %{{percent}}",
-      "importing": "Kaydediliyor… %{{percent}}",
-      "current": "Veriler güncel; TürkiyeAPI'de yeni bir sürüm yok.",
-      "result": "Güncellendi: {{added}} eklendi, {{updated}} değişti, {{removed}} kaldırıldı.",
-      "done": "Adres verisi güncellendi.",
-      "failed": "Adres verisi güncellenemedi; mevcut veriler değişmedi.",
-      "attribution": "Veriler TürkiyeAPI'den (turkiyeapi.dev) gelir: TÜİK ve PTT kaynaklı açık veri, MIT lisanslı. Haftada bir yeni sürüm olup olmadığına bakılır; kaldırılan yerler silinmez, listeden çıkar.",
-      "sync": "Şimdi güncelle",
-      "ownerOnly": "Adres verisini yalnızca mağaza sahibi güncelleyebilir."
-    },
     "payments": {
       "title": "Ödeme",
       "subtitle": "Müşterilerinizin nasıl ödeyeceğini buradan yönetirsiniz. Her yöntem kendi sayfasında bağlanır ve ayarlanır.",
@@ -1357,8 +1336,7 @@
         "carriers": "Kargo firmaları",
         "options": "Seçenekler ve ücretler",
         "returns": "İade",
-        "locations": "Depolar ve stok",
-        "addresses": "Adres verisi"
+        "locations": "Depolar ve stok"
       }
     },
     "integrations": {

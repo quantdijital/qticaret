@@ -35,8 +35,6 @@ export type Capability =
   | "legalTexts"
   /** Adding, renaming, removing the KDV rates and moving the default (adr/0007 Ek 2026-11-04): the owner's alone. */
   | "vatRates"
-  /** Updating the address data from TürkiyeAPI now (adr/0008 Ek 2026-11-04): the owner's alone. */
-  | "trAddressSync"
 
 export interface StaffMe {
   user_id: string

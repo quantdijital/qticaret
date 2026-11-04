@@ -10,7 +10,6 @@ import { providerAccountsQuery } from "@/features/settings/api/payments"
 import type { ProviderAccount } from "@/features/settings/api/payments"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { ShippingSettings } from "@/features/settings/api/sections"
-import { AddressDataCard } from "@/features/settings/components/address-data-card"
 import { DefaultParcelCard } from "@/features/settings/components/default-parcel-card"
 import { ShippingOptionsCard } from "@/features/settings/components/shipping-options-card"
 import { DeliveryCard, RatesCard } from "@/features/settings/components/shipping-rules-cards"
@@ -73,9 +72,10 @@ function CarriersCard({ accounts }: { accounts: readonly ProviderAccount[] }) {
  * one page for delivery, in tabs): the carriers and the size their labels
  * print at; the options shoppers choose from, the delivery days and price
  * table (F7.8) and the default parcel of a product without measures
- * (adr/0054); the return rules (F13.4); the warehouses stock ships from;
- * the address data (il, ilçe, mahalle, köy) delivery addresses are chosen
- * from (adr/0008 Ek 2026-11-04).
+ * (adr/0054); the return rules (F13.4); the warehouses stock ships from.
+ * The address data (il, ilçe, mahalle, köy) is the platform's, kept current
+ * without the shop (adr/0008 Ek 2026-11-04): no tab here, and an old
+ * `?part=addresses` link opens the first tab.
  */
 export function ShippingPage() {
   const { t } = useTranslation()
@@ -136,7 +136,6 @@ export function ShippingPage() {
           },
           { key: "returns", label: t(`${S}.tabs.returns`), content: <ReturnsCard /> },
           { key: "locations", label: t(`${S}.tabs.locations`), content: <LocationsPanel /> },
-          { key: "addresses", label: t(`${S}.tabs.addresses`), content: <AddressDataCard /> },
         ]}
       />
     </div>
