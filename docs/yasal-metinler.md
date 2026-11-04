@@ -1,7 +1,7 @@
 # Yasal metin taslakları: dayanılan mevzuat, yıllık rakamlar, açık sorular
 
 > F13.7 (adr/0041 §1). Platform her mağazaya yedi yasal metnin ayrıntılı taslağını verir. Taslaklar **3 Kasım 2026'da yürürlükteki mevzuata** göre yazıldı (kullanıcı isteği, 2026-11-03: "taslak olarak kalsınlar").
-> Her taslak bir not kutusuyla açılır: "TASLAK: Bu metin bir başlangıç iskeletidir…". Avukata sorulacaklar bu kutuda numaralıdır. Kutu metinde durduğu sürece yayım reddedilir (`legal.draft_note_present`, `hasStarterNote`). Kutunun dışındaki metin olduğu gibi yayımlanır, bu yüzden orada taslak işareti yoktur.
+> Her taslak bir not kutusuyla açılır: "TASLAK: Bu metin bir başlangıç iskeletidir…". Avukatla kontrol etmeye değer noktalar bu kutuda numaralıdır. Kutu yalnız mağaza içindir: metin yayımlanırken kendiliğinden çıkarılır (`withoutStarterNote`; kullanıcı kararı 2026-11-04, adr/0041 Ek), önizlemede de görünmez. Mağazanın onu silmesi gerekmez. Kutunun dışındaki metin olduğu gibi yayımlanır, bu yüzden orada taslak işareti yoktur.
 > Projede avukat yok (docs/12, `project-no-company-no-advisers`). Metinlerin hukuki doğruluğu mağazanın ve avukatının sorumluluğudur.
 > Kod: `apps/backend/src/lib/legal/starters/` (metin başına bir dosya; ortak maddeler `clauses.ts` ve `shared.ts`). Testler: `lib/legal/__tests__/starters.unit.spec.ts`, `withdrawal.unit.spec.ts`; HTTP `integration-tests/http/legal-documents.spec.ts`.
 

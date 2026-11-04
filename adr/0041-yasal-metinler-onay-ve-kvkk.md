@@ -130,3 +130,15 @@ Medusa 2.21.2'de doğrulananlar (Context7 `/medusajs/medusa`, v2.21.2 kaynağı)
 - **Ödeme yolu:** Yeni hata önekleri (`legal.`, `age.`) ödemesi alınmış sepeti tamamlayan yolda kalıcı sayılır ve iade akışına düşer. Onay ödeme formundan önce istendiği için bu durum yalnızca yarış ya da hile durumunda oluşur.
 - **Vitrin işi:** Vitrin sözleşme metnini göstermeli ve onay ile yaş beyanını ödeme adımından önce göndermelidir (F18). Geliştirmedeki ödeme deneme sayfası (adr/0028) onay adımını taklit eder.
 - **Silme ve anonimleştirme geri alınamaz:** Panel onay penceresi ve yeniden doğrulama ister (ADR-0040 §3).
+
+## Ek (2026-11-04): taslak notu yayımlarken kalkar
+
+Kullanıcı kararı (2026-11-04): başlangıç taslağının not kutusu yayımı engellemez.
+
+- **Önce:** Kutu metinde durdukça yayım `legal.draft_note_present` ile reddediliyordu; mağaza kutuyu elle silmek zorundaydı. Sahibi yedi kez üst üste ret aldı.
+- **Şimdi:** Yayım, `NOTE_MARK`'ı ("bir başlangıç iskeletidir") taşıyan her blok alıntıyı (not kutusunu) bütünüyle çıkarır; başka hiçbir şeye dokunmaz (`withoutStarterNote`, `lib/legal/starters/blocks.ts`). Eski sözlerle kaydedilmiş taslaklar da aynı işaretle bulunur.
+- **Taslak satırı:** Not, taslak satırının kendisinden, yayımla aynı yazımda (`publishDraft`'ın `body` alanı, tek işlem) çıkarılır. Saklanan, özeti alınan (`body_hash`) ve vitrinde gösterilen metin aynıdır. Geri alınırsa (compensation) taslak, notuyla birlikte eski haline döner.
+- **Önizleme:** "Müşterilerin göreceği biçimde" olduğu için notu göstermez.
+- **Notun sözleri:** Artık "yayımlamadan önce silin" demiyor. Kutunun yalnız mağaza için olduğunu, yayımlarken kendiliğinden kalktığını ve avukatla kontrol etmeye değer noktaları söylüyor.
+- **Panel:** Yayım onay penceresi tek pencere olarak kalır, çünkü yasal metni yayımlamak müşteriye dönüktür. Penceredeki avukat hatırlatması ve "TASLAK notu yayını engeller" uyarıları kaldırıldı. §1'deki "Yayımlarken panel bunu hatırlatır" cümlesinin yerini taslaktaki not kutusu alır.
+- **Belirteç reddi kalır:** Bilinmeyen ya da yarım belirteç sözleşmede olduğu gibi basılırdı, bu yüzden red sürüyor. `legal.token_invalid` artık hatalı belirteçlerin hepsini sayar (`values.tokens`; panelde cümlenin içinde). Böylece hepsi tek seferde düzeltilir.
