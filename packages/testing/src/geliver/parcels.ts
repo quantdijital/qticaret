@@ -24,7 +24,10 @@ export const TEST_STEPS = [
 
 export interface FakeShipment {
   id: string
+  /** As it was sent. */
   request: Record<string, unknown>
+  /** The sender address it went from: the one named, or the account's default. */
+  senderID?: string | undefined
   test: boolean
   statusCode: string
   offers: Record<string, unknown>[]
@@ -123,7 +126,7 @@ const partyOf = (address: Record<string, unknown> | undefined): LabelParty => ({
 
 /** Who sends and who receives: a return goes from the shopper back to the shop. */
 function partiesOf(shipment: FakeShipment, addresses: ReadonlyMap<string, FakeAddress>) {
-  const shop = addresses.get(text(shipment.request["senderAddressID"]))
+  const shop = addresses.get(shipment.senderID ?? text(shipment.request["senderAddressID"]))
   const shopper = shipment.request["recipientAddress"] as Record<string, unknown> | undefined
   const sender = shop ? partyOf(shop) : null
   const receiver = partyOf(shopper)

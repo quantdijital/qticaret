@@ -88,6 +88,13 @@ export function createShipments(options: ShipmentOptions) {
     moveToStep(shipment, shipment.step + 1)
   }
 
+  /**
+   * The account's default sender, as Geliver takes it when a shipment names
+   * none (the SDK's README): here its first sender address.
+   */
+  const defaultSender = (): string | null =>
+    [...options.addresses.values()].find((address) => !address.isRecipientAddress)?.id ?? null
+
   const create: Handler = ({ body }) => {
     const recipient = body["recipientAddress"] as Record<string, unknown> | undefined
     const parcel = {
@@ -96,9 +103,12 @@ export function createShipments(options: ShipmentOptions) {
       height: Number(body["height"]),
       weight: Number(body["weight"]),
     }
+    const named = body["senderAddressID"]
+    const sender = typeof named === "string" ? named : named === undefined ? defaultSender() : null
     if (
-      typeof body["senderAddressID"] !== "string" ||
+      sender === null ||
       typeof recipient?.["phone"] !== "string" ||
+      recipient["phone"] === "" ||
       Object.values(parcel).some((value) => !Number.isFinite(value) || value <= 0)
     ) {
       return failed(400, "VALIDATION_ERROR", "sender, recipient phone and parcel required")
@@ -106,6 +116,8 @@ export function createShipments(options: ShipmentOptions) {
     const shipment: FakeShipment = {
       id: randomUUID(),
       request: body,
+      // The sender it went from, named or the default, as Geliver keeps it
+      senderID: sender,
       test: body["test"] === true,
       statusCode: "GOT_OFFERS",
       offers: offersFor(options.services, fakeDesi(parcel)).map((offer) => ({

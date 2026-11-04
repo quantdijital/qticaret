@@ -5,8 +5,11 @@ import { failed, ok } from "./routes"
 /** An address as the fake keeps it: what was sent, with an id. */
 export type FakeAddress = Record<string, unknown> & { id: string; isRecipientAddress: boolean }
 
-// What Geliver asks of a sender (the SDK checks phone and zip before sending)
-const SENDER_FIELDS = ["name", "phone", "address1", "cityCode", "districtName", "zip"] as const
+// What Geliver asks of a sender (the SDK checks phone and zip before sending); the city
+// by its plate code or its name, either does (README: "cityCode ve cityName bir arada veya ayrı")
+const SENDER_FIELDS = ["name", "phone", "address1", "districtName", "zip"] as const
+
+const text = (value: unknown): boolean => typeof value === "string" && value !== ""
 
 /** `/addresses`: list (paged), create, delete. */
 export function createAddresses() {
@@ -28,9 +31,12 @@ export function createAddresses() {
 
   const create: Handler = ({ body }) => {
     const recipient = body["isRecipientAddress"] === true
-    const missing = (recipient ? ["name", "phone", "address1"] : SENDER_FIELDS).filter(
-      (field) => typeof body[field] !== "string" || body[field] === ""
+    const missing: string[] = (recipient ? ["name", "phone", "address1"] : SENDER_FIELDS).filter(
+      (field) => !text(body[field])
     )
+    if (!recipient && !text(body["cityCode"]) && !text(body["cityName"])) {
+      missing.push("cityCode")
+    }
     if (missing.length > 0) {
       return failed(400, "VALIDATION_ERROR", `missing ${missing.join(", ")}`)
     }
