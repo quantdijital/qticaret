@@ -3427,7 +3427,9 @@
       "trackingNumber": "Takip numarası",
       "trackingUrl": "Takip bağlantısı (https://…)",
       "trackingInvalid": "Firma adını ve 4–40 harf/rakamlık takip numarasını yazın.",
-      "trackingUrlInvalid": "Takip bağlantısı https:// ile başlamalı."
+      "trackingUrlInvalid": "Takip bağlantısı bir web adresi olmalı (kargotakip.ornek.com/…).",
+      "packedParcel": "Paketlenmiş koli",
+      "restTitle": "Koliye girmemiş ürünler (ayrı koliyle)"
     },
     "deliver": {
       "title": "Sipariş teslim edildi mi?",

@@ -178,8 +178,15 @@ export type OrderDetail = Awaited<ReturnType<typeof sdk.admin.order.retrieve>>["
 /** `GET /admin/order-board/:id`: the stage and what can be done next, worked out by the server. */
 export interface OrderState {
   stage: Lifecycle
-  /** A packed parcel to hand over (fulfillment_id), or what is left to pack; null: nothing. */
-  ship: { fulfillment_id: string | null; items: { id: string; quantity: number }[] } | null
+  /**
+   * A packed parcel to hand over (fulfillment_id), or what is left to pack;
+   * beside a packed parcel, the lines no parcel holds yet (`rest`). Null: nothing.
+   */
+  ship: {
+    fulfillment_id: string | null
+    items: { id: string; quantity: number }[]
+    rest?: { id: string; quantity: number }[]
+  } | null
   /** Parcels packed with a carrier's label, waiting for its pickup (adr/0031). */
   pickup: string[]
   deliver: string[]
@@ -263,23 +270,37 @@ export function useOrderMutation<T, R = unknown>(run: (input: T) => Promise<R>) 
 /**
  * Packs what is left, a part of it (F7.10), or a packed parcel, and hands
  * it over, as one step on the server; with a carrier, its label is bought.
+ * A packed parcel and the lines beside it go one after the other: the
+ * packed one first (no lines named), then a parcel of the others.
  */
 export const useShipOrder = (id: string) =>
   useOrderMutation(
-    ({
+    async ({
       notify,
+      packed = false,
       items,
       tracking,
     }: {
       notify: boolean
-      items?: { id: string; quantity: number }[]
+      /** The packed parcel goes, whole. */
+      packed?: boolean
+      /** Lines for a new parcel; none (and nothing packed): all that is left. */
+      items?: { id: string; quantity: number }[] | undefined
       /** The shop's own parcel's carrier and tracking (F18). */
-      tracking?: { carrier: string; number: string; url: string | null }
-    }) =>
-      sdk.client.fetch(`/admin/orders/${encodeURIComponent(id)}/ship`, {
-        method: "POST",
-        body: { notify, ...(items ? { items } : {}), ...(tracking ? { tracking } : {}) },
-      })
+      tracking?: { carrier: string; number: string; url: string | null } | undefined
+    }) => {
+      const send = (lines?: { id: string; quantity: number }[]) =>
+        sdk.client.fetch(`/admin/orders/${encodeURIComponent(id)}/ship`, {
+          method: "POST",
+          body: { notify, ...(lines ? { items: lines } : {}), ...(tracking ? { tracking } : {}) },
+        })
+      if (packed) {
+        await send()
+      }
+      if (!packed || items) {
+        await send(items)
+      }
+    }
   )
 
 export const useMarkDelivered = (id: string) =>

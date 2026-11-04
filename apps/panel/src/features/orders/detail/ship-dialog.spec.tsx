@@ -13,14 +13,23 @@ const order = {
   ],
 } as unknown as OrderDetail
 
-function renderDialog(onConfirm = vi.fn(), packed = false) {
+function renderDialog(
+  onConfirm = vi.fn(),
+  packed = false,
+  rest: { id: string; quantity: number }[] = []
+) {
   render(
     <ShipDialog
       order={order}
-      items={[
-        { id: "line_1", quantity: 3 },
-        { id: "line_2", quantity: 1 },
-      ]}
+      items={
+        packed
+          ? [{ id: "line_1", quantity: 1 }]
+          : [
+              { id: "line_1", quantity: 3 },
+              { id: "line_2", quantity: 1 },
+            ]
+      }
+      rest={rest}
       packed={packed}
       open
       busy={false}
@@ -40,7 +49,7 @@ describe("ShipDialog (F7.10)", () => {
 
     await userEvent.click(ship())
 
-    expect(onConfirm).toHaveBeenCalledWith(true, undefined, undefined)
+    expect(onConfirm).toHaveBeenCalledWith(true, { packed: false }, undefined)
   })
 
   it("ships fewer of a line, leaving out a line set to none", async () => {
@@ -50,7 +59,11 @@ describe("ShipDialog (F7.10)", () => {
     fireEvent.change(quantity("Bileme taşı"), { target: { value: "0" } })
     await userEvent.click(ship())
 
-    expect(onConfirm).toHaveBeenCalledWith(true, [{ id: "line_1", quantity: 1 }], undefined)
+    expect(onConfirm).toHaveBeenCalledWith(
+      true,
+      { packed: false, items: [{ id: "line_1", quantity: 1 }] },
+      undefined
+    )
   })
 
   it("ships nothing when every line is set to none, and never more than is left", () => {
@@ -64,29 +77,64 @@ describe("ShipDialog (F7.10)", () => {
     expect(ship()).toBeDisabled()
   })
 
-  it("hands a packed parcel over whole", () => {
-    renderDialog(vi.fn(), true)
+  it("hands a packed parcel over whole", async () => {
+    const onConfirm = renderDialog(vi.fn(), true)
 
     expect(screen.queryByLabelText(/gönderilecek adet/)).not.toBeInTheDocument()
+    await userEvent.click(ship())
+
+    expect(onConfirm).toHaveBeenCalledWith(true, { packed: true }, undefined)
   })
 
-  it("sends the shop's own parcel's tracking, and holds a half-typed one back", async () => {
+  it("sends a packed parcel and the lines beside it together, or either alone (adr/0054 addendum)", async () => {
+    const onConfirm = renderDialog(vi.fn(), true, [{ id: "line_2", quantity: 2 }])
+
+    await userEvent.click(ship())
+    expect(onConfirm).toHaveBeenLastCalledWith(
+      true,
+      { packed: true, items: [{ id: "line_2", quantity: 2 }] },
+      undefined
+    )
+
+    // The others first, the packed parcel later
+    await userEvent.click(screen.getByRole("checkbox", { name: "Paketlenmiş koli" }))
+    await userEvent.click(ship())
+    expect(onConfirm).toHaveBeenLastCalledWith(
+      true,
+      { packed: false, items: [{ id: "line_2", quantity: 2 }] },
+      undefined
+    )
+
+    fireEvent.change(quantity("Bileme taşı"), { target: { value: "0" } })
+    expect(ship()).toBeDisabled()
+  })
+
+  it("sends the shop's own parcel's tracking as typed, tidied, and holds a half-typed one back", async () => {
     const onConfirm = renderDialog()
 
     await userEvent.click(screen.getByText("Takip bilgisi (isteğe bağlı)"))
     await userEvent.type(screen.getByLabelText("Kargo firması"), "MNG Kargo")
     expect(ship()).toBeDisabled()
     expect(screen.getByText(/4–40 harf\/rakamlık/)).toBeInTheDocument()
-    await userEvent.type(screen.getByLabelText("Takip numarası"), "MNG-123456")
-    await userEvent.type(screen.getByLabelText("Takip bağlantısı (https://…)"), "http://x.example")
+    // Copied with spaces, a link without its https://: still the same number and page
+    await userEvent.type(screen.getByLabelText("Takip numarası"), "MNG 123 456")
+    await userEvent.type(screen.getByLabelText("Takip bağlantısı (https://…)"), "localhost")
     expect(ship()).toBeDisabled()
     await userEvent.clear(screen.getByLabelText("Takip bağlantısı (https://…)"))
+    await userEvent.type(
+      screen.getByLabelText("Takip bağlantısı (https://…)"),
+      "http://kargotakip.example.com/?no=1"
+    )
     await userEvent.click(ship())
 
-    expect(onConfirm).toHaveBeenCalledWith(true, undefined, {
-      carrier: "MNG Kargo",
-      number: "MNG-123456",
-      url: null,
-    })
+    expect(onConfirm).toHaveBeenCalledWith(
+      true,
+      { packed: false },
+      {
+        carrier: "MNG Kargo",
+        number: "MNG123456",
+        url: "https://kargotakip.example.com/?no=1",
+      }
+    )
   })
 })

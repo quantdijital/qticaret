@@ -3427,7 +3427,9 @@
       "trackingNumber": "Tracking number",
       "trackingUrl": "Tracking link (https://…)",
       "trackingInvalid": "Type the carrier and a 4–40 character tracking number.",
-      "trackingUrlInvalid": "The tracking link must start with https://."
+      "trackingUrlInvalid": "The tracking link must be a web address (tracking.example.com/…).",
+      "packedParcel": "Packed parcel",
+      "restTitle": "Products in no parcel yet (in a parcel of their own)"
     },
     "deliver": {
       "title": "Was the order delivered?",

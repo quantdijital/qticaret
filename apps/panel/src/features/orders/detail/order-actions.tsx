@@ -196,13 +196,14 @@ export function OrderActions({
         key={dialog === "ship" ? "ship-open" : "ship-closed"}
         order={order}
         items={toShip}
+        rest={state.ship?.rest}
         packed={(state.ship?.fulfillment_id ?? null) !== null}
         open={dialog === "ship"}
         busy={ship.isPending}
         onOpenChange={close}
-        onConfirm={(notify, items, tracking) => {
+        onConfirm={(notify, parcels, tracking) => {
           ship.mutate(
-            { notify, ...(items ? { items } : {}), ...(tracking ? { tracking } : {}) },
+            { notify, packed: parcels.packed, items: parcels.items, tracking },
             { onSuccess: done("orders.ship.done"), onError: failed }
           )
         }}
