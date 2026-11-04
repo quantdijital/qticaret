@@ -1,4 +1,5 @@
 import type { Open } from "@/features/orders/components/return-actions"
+import { CancelReturnDialog } from "@/features/orders/detail/cancel-return-dialog"
 import { ApproveExchangeDialog } from "@/features/orders/detail/exchange-dialog"
 import { ApproveGiftReturnDialog } from "@/features/orders/detail/gift-return-dialog"
 import { RejectReturnDialog } from "@/features/orders/detail/reject-return-dialog"
@@ -18,5 +19,7 @@ export function ReturnDialogHost({ open, onClose }: { open: Open; onClose: () =>
       return <ReceiveReturnDialog request={open.request} onClose={onClose} />
     case "gift":
       return <ApproveGiftReturnDialog request={open.request} onClose={onClose} />
+    case "cancel":
+      return <CancelReturnDialog request={open.request} onClose={onClose} />
   }
 }

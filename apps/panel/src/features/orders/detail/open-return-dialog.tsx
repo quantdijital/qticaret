@@ -25,8 +25,10 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { RETURN_REASONS, useOpenReturnRequest } from "@/features/orders/api/returns"
-import type { OpenRequest, ReturnReason, Returnable } from "@/features/orders/api/returns"
+import { lineOpen, useOpenReturnRequest } from "@/features/orders/api/returnable"
+import type { OpenRequest, Returnable } from "@/features/orders/api/returnable"
+import { RETURN_REASONS } from "@/features/orders/api/returns"
+import type { ReturnReason } from "@/features/orders/api/returns"
 import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
 import { SealedGoodsBadge } from "@/features/orders/components/return-facts"
 import { GiftReturnNote } from "@/features/orders/detail/gift-return-dialog"
@@ -64,7 +66,7 @@ export function OpenReturnDialog({
   const [reason, setReason] = useState<ReturnReason | "">("")
   const [note, setNote] = useState("")
   const [picks, setPicks] = useState<Record<string, Pick>>({})
-  const lines = returnable.lines.filter((line) => line.returnable > 0)
+  const lines = returnable.lines.filter(lineOpen)
   const chosen = lines.filter((line) => (picks[line.line_item_id]?.quantity ?? 0) > 0)
   // The server's rules (lib/orders/returns.ts, gift-returns.ts), said before it refuses
   const problem = requestProblem(chosen, kind, reason)

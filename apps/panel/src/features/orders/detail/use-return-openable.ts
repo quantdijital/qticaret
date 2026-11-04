@@ -1,12 +1,13 @@
 import { useQuery } from "@tanstack/react-query"
 import { useCan } from "@/features/auth/api/staff"
-import { returnableQuery } from "@/features/orders/api/returns"
-import type { Returnable } from "@/features/orders/api/returns"
+import { lineOpen, returnableQuery } from "@/features/orders/api/returnable"
+import type { Returnable } from "@/features/orders/api/returnable"
 
 /**
  * Whether staff can open a return or exchange for the shopper who called
  * (F12.3), by the shopper's own rules: within the window, none open, a
- * unit left to send back. The order's menu and its "İade yok" row ask it.
+ * unit left to send back inside its own line's window. The order's menu
+ * and its "İade yok" row ask it.
  */
 export function useReturnOpenable(orderId: string): {
   openable: boolean
@@ -20,6 +21,6 @@ export function useReturnOpenable(orderId: string): {
     data !== undefined &&
     data.window_open &&
     !data.open_request &&
-    data.lines.some((line) => line.returnable > 0)
+    data.lines.some(lineOpen)
   return { openable, returnable: data }
 }

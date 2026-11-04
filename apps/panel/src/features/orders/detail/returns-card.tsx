@@ -108,7 +108,12 @@ export function ReturnsCard({ orderId }: { orderId: string }) {
                 <RequestWithdrawalBadges request={row} />
               </span>
               <span className="text-xs text-muted-foreground">
-                {[t(`${R}.reasons.${row.reason}`), formatDateTime(row.created_at), row.return_code]
+                {[
+                  t(`${R}.reasons.${row.reason}`),
+                  formatDateTime(row.created_at),
+                  // A cancelled request's code was withdrawn at the carrier
+                  row.status === "canceled" ? null : row.return_code,
+                ]
                   .filter(Boolean)
                   .join(" · ")}
               </span>

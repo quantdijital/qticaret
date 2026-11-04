@@ -3,7 +3,7 @@ import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import type { Returnable } from "@/features/orders/api/returns"
+import type { Returnable } from "@/features/orders/api/returnable"
 import { OpenReturnDialog } from "./open-return-dialog"
 
 const fetchMock = vi.hoisted(() => vi.fn())

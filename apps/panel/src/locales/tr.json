@@ -1594,7 +1594,8 @@
             "requested": "İade talebi alındı",
             "approved": "İade talebi onaylandı",
             "refunded": "İade ödendi",
-            "refused": "Kabul edilmeyen iade ürünleri"
+            "refused": "Kabul edilmeyen iade ürünleri",
+            "canceled": "İade talebi iptal edildi"
           },
           "account": {
             "password_reset": "Şifre sıfırlama",
@@ -3688,7 +3689,9 @@
         "refused": "Reddedildi ({{reason}}): {{what}}",
         "units_one": "{{count}} adet",
         "units_other": "{{count}} adet",
-        "line": "{{name}} × {{count}}"
+        "line": "{{name}} × {{count}}",
+        "canceled": "İptal sebebi: {{reason}}",
+        "canceledWithOrder": "Sipariş iptal edildiği için kapandı"
       },
       "retryRefund": "Para iadesini tekrar dene",
       "label": "İade etiketini indir",
@@ -3745,7 +3748,13 @@
         "confirm": "Kartları iptal et ve parayı iade et",
         "done": "Kartlar iptal edildi, para iade edildi.",
         "refundFailed": "Kartlar iptal edildi ama para iadesi yapılamadı: {{reason}} İşlemler menüsündeki \"Para iadesini tekrar dene\" ile yeniden deneyin."
-      }
+      },
+      "cancel": "İsteği iptal et",
+      "cancelTitle": "#{{number}} iade talebi iptal edilsin mi?",
+      "cancelDescription": "Onay geri alınır: müşterinin kargo kodu geçersiz olur, ürünler yeniden iade edilebilir hâle gelir ve müşteriye e-posta gider. Ürün kargoya verildiyse iptal edilemez.",
+      "cancelReason": "İptal sebebi",
+      "cancelReasonHint": "Ekip için not; müşteri görmez.",
+      "canceled": "İade talebi iptal edildi; müşteriye e-posta gönderildi."
     },
     "edit": {
       "title": "#{{number}} siparişini düzenle",

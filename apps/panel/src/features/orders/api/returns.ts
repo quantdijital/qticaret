@@ -87,6 +87,14 @@ export interface ReturnRequest {
    * The server keeps it after the refund too.
    */
   refund_due_at: string | null
+  /**
+   * Cancelled: an approval staff took back before anything came back
+   * (`staff`, with their reason, for the team only), or a waiting request
+   * the order's cancel closed (`order_canceled`).
+   */
+  canceled_at?: string | null
+  cancel_cause?: "staff" | "order_canceled" | null
+  cancel_reason?: string | null
   created_at: string
 }
 
@@ -98,7 +106,8 @@ export const RETURN_STATUSES: readonly ReturnStatus[] = [
   "rejected",
 ]
 
-const KEY = ["returns"] as const
+/** Every return query's key starts with it. */
+export const KEY = ["returns"] as const
 
 export const RETURN_PAGE_SIZE = 50
 
@@ -135,7 +144,7 @@ export const returnLinesQuery = (orderId: string) =>
       ).order.items,
   })
 
-function useReturnMutation<T, R = unknown>(run: (input: T) => Promise<R>) {
+export function useReturnMutation<T, R = unknown>(run: (input: T) => Promise<R>) {
   const client = useQueryClient()
   return useMutation({
     mutationFn: run,
@@ -170,6 +179,19 @@ export const useApproveReturn = () =>
 export const useRejectReturn = () =>
   useReturnMutation(({ id, note }: { id: string; note: string }) =>
     sdk.client.fetch(url(id, "reject"), { method: "POST", body: { note } })
+  )
+
+/**
+ * Takes an approval back while nothing has come back (order #691): the
+ * carrier's code withdrawn, the lines open again, the shopper told. The
+ * reason stays with the team.
+ */
+export const useCancelReturn = () =>
+  useReturnMutation(({ id, reason }: { id: string; reason: string }) =>
+    sdk.client.fetch<{ return_request: ReturnRequest }>(url(id, "cancel"), {
+      method: "POST",
+      body: { reason },
+    })
   )
 
 export interface ReceiveInput {
@@ -218,37 +240,6 @@ export const RETURN_REASONS: readonly ReturnReason[] = [
 /** Reasons a product outside the right of withdrawal still comes back for (F13.4). */
 export const DEFECT_REASONS: readonly ReturnReason[] = ["damaged", "wrong_item", "not_as_described"]
 
-/** What staff may ask back for the shopper (F12.3), by the shopper's own rules. */
-export interface Returnable {
-  window_open: boolean
-  /** A request is open: one at a time. */
-  open_request: boolean
-  lines: {
-    line_item_id: string
-    title: string | null
-    variant_title: string | null
-    variant_id: string | null
-    /** Units left; a gift card line's are its cards, none once one was spent. */
-    returnable: number
-    /** Outside the right of withdrawal (F13.4): back only as faulty, never exchanged. */
-    withdrawal_excluded: boolean
-    withdrawal_excluded_reason: WithdrawalExclusion | null
-    /** A sealed good: asked back, refused at receipt if opened (MSY md. 15/1-ç). */
-    withdrawal_warning: WithdrawalWarning | null
-    /** A gift card line: asked on its own, as money back; its cards voided, nothing sent back. */
-    gift_card: boolean
-    /** The product's other variants, for an exchange. */
-    variants: { id: string; title: string | null }[]
-  }[]
-}
-
-export const returnableQuery = (orderId: string) =>
-  queryOptions({
-    queryKey: [...KEY, "returnable", orderId],
-    queryFn: () =>
-      sdk.client.fetch<Returnable>(`/admin/orders/${encodeURIComponent(orderId)}/returnable`),
-  })
-
 /** The request's lines outside the right of withdrawal, by id and why, as the request carries them. */
 export const excludedLinesOf = (
   request: Pick<ReturnRequest, "items">
@@ -266,19 +257,3 @@ export const exclusionOf = (
   const line = request.items.find((item) => item.withdrawal_excluded)
   return line ? line.withdrawal_excluded_reason : undefined
 }
-
-export interface OpenRequest {
-  kind: "return" | "exchange"
-  items: { line_item_id: string; quantity: number; variant_id?: string }[]
-  reason: ReturnReason
-  note?: string
-}
-
-/** A request opened for the shopper who called (F12.3); it then waits in the queue like theirs. */
-export const useOpenReturnRequest = (orderId: string) =>
-  useReturnMutation((body: OpenRequest) =>
-    sdk.client.fetch(`/admin/orders/${encodeURIComponent(orderId)}/return-requests`, {
-      method: "POST",
-      body,
-    })
-  )

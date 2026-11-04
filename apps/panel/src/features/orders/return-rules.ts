@@ -1,5 +1,6 @@
 import { DEFECT_REASONS } from "@/features/orders/api/returns"
-import type { OpenRequest, ReturnReason, Returnable } from "@/features/orders/api/returns"
+import type { OpenRequest, Returnable } from "@/features/orders/api/returnable"
+import type { ReturnReason, ReturnRequest } from "@/features/orders/api/returns"
 import { soldAsGiftCard } from "@/features/orders/gift-lines"
 
 type Line = Returnable["lines"][number]
@@ -56,3 +57,15 @@ export function isGiftRequest(
     request.items.every((item) => item.gift_card === true || gifts.has(item.line_item_id))
   )
 }
+
+/**
+ * Whether an approved request can still be taken back (order #691): its
+ * parcel not handed to the carrier, and for an exchange nothing collected
+ * from the shopper. The server checks again (`returns.cancel_*`).
+ */
+export const requestCancellable = (
+  request: Pick<ReturnRequest, "status" | "kind" | "difference" | "handed_over_at">
+): boolean =>
+  request.status === "approved" &&
+  !request.handed_over_at &&
+  !(request.kind === "exchange" && Number(request.difference ?? 0) > 0)

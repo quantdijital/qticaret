@@ -41,7 +41,7 @@ export function RequestWithdrawalBadges({ request }: { request: Pick<ReturnReque
 
 /**
  * What the law's clock and the receipt say of a request (adr/0032 Ek
- * 2026-11-03): when the return carrier took the parcel, the last day to
+ * 2026-11-03), and why a cancelled one was: when the return carrier took the parcel, the last day to
  * pay it back while money is owed (red in its last 4 days and once past,
  * said in words too), and the units refused at receipt and why. `titles`:
  * the order's line names, to say which units; without them, how many.
@@ -57,6 +57,16 @@ export function ReturnFacts({
 }) {
   const { t } = useTranslation()
   const facts: { key: string; node: ReactNode }[] = []
+  // Why it was cancelled: staff's reason (the team's only), or the order's cancel
+  if (request.status === "canceled" && request.cancel_cause) {
+    facts.push({
+      key: "canceled",
+      node:
+        request.cancel_cause === "order_canceled"
+          ? t(`${R}.facts.canceledWithOrder`)
+          : t(`${R}.facts.canceled`, { reason: request.cancel_reason ?? "" }),
+    })
+  }
   if (request.handed_over_at) {
     facts.push({
       key: "handed",

@@ -1594,7 +1594,8 @@
             "requested": "Return requested",
             "approved": "Return approved",
             "refunded": "Return refunded",
-            "refused": "Refused return items"
+            "refused": "Refused return items",
+            "canceled": "Return request cancelled"
           },
           "account": {
             "password_reset": "Password reset",
@@ -3688,7 +3689,9 @@
         "refused": "Refused ({{reason}}): {{what}}",
         "units_one": "{{count}} unit",
         "units_other": "{{count}} units",
-        "line": "{{name}} × {{count}}"
+        "line": "{{name}} × {{count}}",
+        "canceled": "Cancelled: {{reason}}",
+        "canceledWithOrder": "Closed because the order was cancelled"
       },
       "retryRefund": "Try the refund again",
       "label": "Download return label",
@@ -3745,7 +3748,13 @@
         "confirm": "Void the cards and refund",
         "done": "Cards voided, money refunded.",
         "refundFailed": "The cards were voided but the refund failed: {{reason}} Try again with \"Try the refund again\" in the actions menu."
-      }
+      },
+      "cancel": "Cancel the request",
+      "cancelTitle": "Cancel return request #{{number}}?",
+      "cancelDescription": "The approval is taken back: the customer's carrier code stops working, the items can be returned again and the customer gets an email. A parcel already handed to the carrier cannot be cancelled.",
+      "cancelReason": "Reason",
+      "cancelReasonHint": "A note for the team; the customer does not see it.",
+      "canceled": "Return request cancelled; the customer was emailed."
     },
     "edit": {
       "title": "Edit order #{{number}}",

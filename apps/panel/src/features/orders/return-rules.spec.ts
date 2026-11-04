@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import type { Returnable } from "@/features/orders/api/returns"
+import type { Returnable } from "@/features/orders/api/returnable"
 import { giftLineIds, isGiftRequest, requestProblem } from "./return-rules"
 
 type Line = Returnable["lines"][number]

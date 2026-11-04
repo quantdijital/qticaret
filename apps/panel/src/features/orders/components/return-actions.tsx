@@ -18,14 +18,17 @@ import {
 } from "@/features/orders/api/returns"
 import type { ReturnRequest } from "@/features/orders/api/returns"
 import { allRefused } from "@/features/orders/return-facts"
-import { giftLineIds, isGiftRequest } from "@/features/orders/return-rules"
+import { giftLineIds, isGiftRequest, requestCancellable } from "@/features/orders/return-rules"
 import { errorText } from "@/lib/errors"
 
 const R = "orders.returns"
 
-/** The dialog a request's action opens; `gift`: a gift card withdrawal's approval. */
+/**
+ * The dialog a request's action opens; `gift`: a gift card withdrawal's
+ * approval; `cancel`: an approval taken back.
+ */
 export type Open = {
-  kind: "reject" | "receive" | "exchange" | "gift"
+  kind: "reject" | "receive" | "exchange" | "gift" | "cancel"
   request: ReturnRequest
 } | null
 
@@ -105,6 +108,16 @@ export function ReturnActions({
         onOpen({ kind: "receive", request })
       },
     })
+    // Taken back while the parcel has not left the shopper (order #691); the server checks again
+    if (requestCancellable(request)) {
+      items.push({
+        key: "cancel",
+        label: t(`${R}.cancel`),
+        run: () => {
+          onOpen({ kind: "cancel", request })
+        },
+      })
+    }
   }
   // A swap the shop owes nothing on is done once received; so is a return whose units were all refused
   if (
@@ -123,7 +136,8 @@ export function ReturnActions({
       },
     })
   }
-  if (request.return_label_file_id) {
+  // A cancelled request's label is for a return the carrier no longer takes
+  if (request.return_label_file_id && request.status !== "canceled") {
     items.push({
       key: "label",
       label: t(`${R}.label`),
