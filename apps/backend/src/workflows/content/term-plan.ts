@@ -3,7 +3,8 @@ import { ValidationError } from "../../lib/errors"
 import { CONTENT_MODULE } from "../../modules/content"
 import type ContentModuleService from "../../modules/content/service"
 import type { ContentTermKind, ContentTermRecord } from "../../modules/content/service"
-import { handleOf, lineOf } from "./rules"
+import { handleOf } from "./handle"
+import { lineOf } from "./rules"
 
 /**
  * What a blog category or tag may hold (adr/0019 ek 2026-11-03): a clean

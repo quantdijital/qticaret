@@ -2,7 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { EMPTY_DOC, docStats, summaryOf } from "../../lib/content"
 import type { ContentDoc } from "../../lib/content"
-import { ORIGINALITY, fingerprint } from "../../lib/content/originality"
+import { fingerprint } from "../../lib/content/originality"
 import { ValidationError } from "../../lib/errors"
 import { toSlug } from "../../lib/seo/slug"
 import { CONTENT_MODULE } from "../../modules/content"
@@ -11,7 +11,8 @@ import type { LandingPageRecord } from "../../modules/content/service"
 import { describeFacet, findFacet } from "./landing-facet"
 import type { FacetName, LandingFacet } from "./landing-facet"
 import { measuredLandings, shareAmong } from "./landing-originality"
-import { CONTENT_LIMITS, assertCards, bodyOf, canonical, handleOf, lineOf, mediaOf } from "./rules"
+import { handleOf } from "./handle"
+import { CONTENT_LIMITS, assertCards, bodyOf, canonical, lineOf, mediaOf } from "./rules"
 
 const SUMMARY_LENGTH = 300
 
@@ -202,8 +203,9 @@ async function newMedia(
 
 /**
  * The landing page as it will be stored. Its text is measured against the
- * live pages whose text went live before it (`landing-originality`); a
- * text going live with under 30% of its own is refused.
+ * live pages whose text went live before it (`landing-originality`). A low
+ * share is the advisor's warning (L-UNIQ-01), never a refusal: whether a
+ * page goes live is the shop's call (the owner, 2026-11-04).
  */
 export async function landingPlan(
   container: MedusaContainer,
@@ -223,9 +225,6 @@ export async function landingPlan(
     current?.id ?? null,
     await measuredLandings(container, { status: "published" })
   )
-  if (live.goesLive && own < ORIGINALITY.block) {
-    throw new ValidationError("content.landing_not_original", { field: "body" })
-  }
   const fields: LandingFields = {
     category_id: categoryId,
     facet_kind: facet.kind,

@@ -6,7 +6,7 @@ import type { LandingKit } from "../helpers/landings"
 
 jest.setTimeout(180 * 1000)
 
-/** F3.16 (docs/13 §7, docs/14 §3.7): facet landing pages and their originality gate (KK). */
+/** F3.16 (docs/13 §7, docs/14 §3.7): facet landing pages and their originality, measured and shown. */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
@@ -43,22 +43,23 @@ medusaIntegrationTestRunner({
       expect(products.data).toMatchObject({ count: 3 })
     })
 
-    it("does not publish a page whose text copies another's (KK: under 30% its own)", async () => {
+    it("publishes a page whose text copies another's, its low originality shown, not refused", async () => {
       const text = words("ortak", 320)
-      await kit.landing("seramik", {
+      const first = await kit.landing("seramik", {
         title: "Seramik kupalar",
         status: "published",
         body: doc(text),
       })
+      // The owner, 2026-11-04: going live is the shop's call; the advisor warns (L-UNIQ-01)
       const copy = await kit.landing("porselen", {
         title: "Porselen kupalar",
         status: "published",
         body: doc(text),
       })
-      expect([copy.status, copy.data.message]).toEqual([400, "content.landing_not_original"])
-      const draft = await kit.landing("porselen", { title: "Porselen kupalar", body: doc(text) })
-      expect(draft.status).toBe(201)
-      expect(draft.data.landing.originality).toBeLessThan(30)
+      expect(first.data.landing.originality).toBe(100)
+      expect(copy.status).toBe(201)
+      expect(copy.data.landing).toMatchObject({ status: "published" })
+      expect(copy.data.landing.originality).toBeLessThan(30)
     })
 
     it.each([

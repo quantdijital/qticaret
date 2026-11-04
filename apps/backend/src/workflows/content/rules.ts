@@ -4,13 +4,11 @@ import { EMPTY_DOC, contentDoc, docStats, summaryOf } from "../../lib/content"
 import type { ContentDoc } from "../../lib/content"
 import { ValidationError } from "../../lib/errors"
 import { isCleanText } from "../../lib/security"
-import { isValidSlug, toSlug } from "../../lib/seo"
 import { unknownDocTokens } from "../../lib/shop/tokens"
-import { CONTENT_MODULE } from "../../modules/content"
-import type ContentModuleService from "../../modules/content/service"
 import type { ContentEntryRecord, ContentKind } from "../../modules/content/service"
 import { MEDIA_MODULE } from "../../modules/media"
 import type MediaModuleService from "../../modules/media/service"
+import { assertHandleFree, freeHandleFrom, handleOf } from "./handle"
 
 /**
  * What a content save may hold (F3.16, adr/0019): clean text, a slug handle
@@ -18,6 +16,9 @@ import type MediaModuleService from "../../modules/media/service"
  * shop's media library only, and cards for products and categories that
  * exist. References are checked when the save sends them: a product
  * deleted since leaves its card out on the page, it does not lock the page.
+ * Only a title is asked for (the owner, 2026-11-04): an address typed in
+ * any form is made a slug, and one made from the title takes the first
+ * free `-2`, `-3`… when another record has it.
  */
 
 export const CONTENT_LIMITS = { title: 200, excerpt: 500, author: 120, imageAlt: 300 } as const
@@ -71,17 +72,6 @@ export function lineOf(raw: string, max: number, key: string): string {
 const optional = (raw: string | null, max: number, key: string): string | null =>
   raw === null || raw.trim() === "" ? null : lineOf(raw, max, key)
 
-export function handleOf(raw: string | undefined, title: string): string {
-  const handle = raw === undefined || raw.trim() === "" ? toSlug(title) : raw.trim()
-  if (handle === "") {
-    throw new ValidationError("catalog.handle_required", { field: "handle" })
-  }
-  if (!isValidSlug(handle)) {
-    throw new ValidationError("catalog.handle_invalid", { field: "handle" })
-  }
-  return handle
-}
-
 /** The document checked again (an import or job may skip the route), as the schema shapes it. */
 export function bodyOf(raw: unknown): ContentDoc {
   const parsed = contentDoc.safeParse(raw)
@@ -92,9 +82,15 @@ export function bodyOf(raw: unknown): ContentDoc {
       { field: "body" }
     )
   }
-  // A `{belirteç}` stands for one of the shop's details (adr/0048); a misspelt one would show as typed
-  if (unknownDocTokens(parsed.data).length > 0) {
-    throw new ValidationError("content.token_unknown", { field: "body" })
+  // A `{belirteç}` stands for one of the shop's details (adr/0048); a misspelt one would show
+  // as typed, so it is refused, named, to be fixed in one go
+  const unknown = unknownDocTokens(parsed.data)
+  if (unknown.length > 0) {
+    const tokens = unknown.slice(0, 10).map((name) => `{${name.slice(0, 40)}}`)
+    throw new ValidationError("content.token_unknown", {
+      field: "body",
+      values: { tokens: tokens.join(", ") },
+    })
   }
   return parsed.data
 }
@@ -131,19 +127,6 @@ export async function assertCards(container: MedusaContainer, doc: ContentDoc): 
   ])
   if (foundProducts.length < products.length || foundCategories.length < categories.length) {
     throw new ValidationError("content.card_unknown", { field: "body" })
-  }
-}
-
-async function assertHandleFree(
-  container: MedusaContainer,
-  fields: ContentFields,
-  id: string | null
-) {
-  const taken = await container
-    .resolve<ContentModuleService>(CONTENT_MODULE)
-    .listContentEntries({ kind: fields.kind, handle: fields.handle }, { select: ["id"] })
-  if (taken.some((entry) => entry.id !== id)) {
-    throw new ValidationError("seo.path_taken", { field: "handle" })
   }
 }
 
@@ -208,7 +191,11 @@ export async function contentPlan(
     published_at: current?.published_at ?? (status === "published" ? now : null),
     revised_at: revised ? now : (current?.revised_at ?? null),
   }
-  await assertHandleFree(container, fields, current?.id ?? null)
+  // No address typed (a new entry, or one cleared): the title's, the first free one
+  if (!input.handle?.trim() && !(input.handle === undefined && current)) {
+    fields.handle = await freeHandleFrom(container, kind, fields.handle, current?.id ?? null)
+  }
+  await assertHandleFree(container, kind, fields.handle, current?.id ?? null)
   const media: string[] = []
   if (input.body !== undefined) {
     await assertCards(container, body)

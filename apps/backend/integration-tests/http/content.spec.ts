@@ -261,12 +261,41 @@ medusaIntegrationTestRunner({
       expect(await resolve("/blog/yeni-ad")).toMatchObject({ type: "gone" })
     })
 
-    it("frees a draft's path when it is deleted, and holds a handle once per kind", async () => {
+    it("asks only a title: the handle is made from it, the next free one when taken", async () => {
       const draft = await save({ kind: "page", title: "Taslak" })
       const twice = await save({ kind: "page", title: "Taslak" })
-      expect([twice.status, twice.data.message]).toEqual([400, "seo.path_taken"])
+      // The shop's own path (`/blog`) is never a page's: the next one is free
+      const blog = await save({ kind: "page", title: "Blog" })
+      // An address typed in any form is made a slug
+      const typed = await save({ kind: "page", title: "Başka", handle: "Kargo Bilgisi" })
+      // One typed and taken is the person's choice: the save says so
+      const taken = await save({ kind: "page", title: "Başka", handle: "taslak" })
+      // Cleared, it is made from the title again
+      const cleared = await save({ handle: "" }, typed.data.entry.id)
+
+      expect([draft.status, draft.data.entry.handle]).toEqual([201, "taslak"])
+      expect([twice.status, twice.data.entry.handle]).toEqual([201, "taslak-2"])
+      expect([blog.status, blog.data.entry.handle]).toEqual([201, "blog-2"])
+      expect([typed.status, typed.data.entry.handle]).toEqual([201, "kargo-bilgisi"])
+      expect([taken.status, taken.data.message]).toEqual([400, "seo.path_taken"])
+      expect([cleared.status, cleared.data.entry.handle]).toEqual([200, "baska"])
+      // A post's handle is its own kind's: the same words are free there
+      expect((await save({ kind: "post", title: "Taslak" })).data.entry.handle).toBe("taslak")
+
       await settle(http.delete(`/admin/content/${draft.data.entry.id}`, admin))
-      expect((await save({ kind: "page", title: "Taslak" })).status).toBe(201)
+      expect((await save({ kind: "page", title: "Taslak" })).data.entry.handle).toBe("taslak")
+    })
+
+    it("names each unknown detail in a text, so it is fixed in one go", async () => {
+      const refused = await save({
+        kind: "page",
+        title: "Deneme",
+        body: doc(p(text("Bize {telefon} ya da {faks} ve {uydurma} ile ulaşın."))),
+      })
+      expect([refused.status, refused.data.message]).toEqual([400, "content.token_unknown"])
+      expect((refused.data as { values?: unknown }).values).toEqual({
+        tokens: "{faks}, {uydurma}",
+      })
     })
 
     it("uses the page's own SEO title", async () => {

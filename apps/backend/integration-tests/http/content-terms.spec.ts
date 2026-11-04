@@ -26,6 +26,7 @@ interface Term extends TermView {
 
 interface Entry {
   id: string
+  handle: string
   path: string
   category_id: string | null
   tag_ids: string[]
@@ -147,8 +148,11 @@ medusaIntegrationTestRunner({
         (await http.get<{ term: Term }>(`/admin/content/terms/${id}`, admin)).data.term
       ).toMatchObject({ id })
       expect((await settle(http.get(`/admin/content/terms/cterm_0NOPE`, admin))).status).toBe(404)
-      // A post may not take the archives' prefixes
-      const reserved = await entry({ kind: "post", title: "Kategori" })
+      // A post may not take the archives' prefixes: one titled so takes the next free
+      // handle (the owner, 2026-11-04), one typed so is refused
+      const titled = await entry({ kind: "post", title: "Kategori" })
+      expect([titled.status, titled.data.entry.handle]).toEqual([201, "kategori-2"])
+      const reserved = await entry({ kind: "post", title: "Başka", handle: "kategori" })
       expect([reserved.status, reserved.data.message]).toEqual([400, "seo.path_reserved"])
     })
 

@@ -164,7 +164,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "content.card_unknown":
     "One of the product or category cards in the content no longer exists; remove it.",
   "content.token_unknown":
-    "The text has a {…} detail that is not known. Available: {mağaza_adı}, {telefon}, {e_posta}, {adres}, {whatsapp}, {ücretsiz_kargo_eşiği}.",
+    "The text has details that are not known: {{tokens}}. Available: {mağaza_adı}, {telefon}, {e_posta}, {adres}, {whatsapp}, {ücretsiz_kargo_eşiği}.",
   "content.excerpt_invalid":
     "The summary must be at most 500 characters, without disallowed characters.",
   "content.image_alt_invalid": "The cover image's alt text must be at most 300 characters.",
@@ -175,8 +175,6 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "content.landing_exists": "A page for this category and filter already exists.",
   "content.landing_facet_unknown":
     "Filter not found: choose a brand or a filterable choice attribute.",
-  "content.landing_not_original":
-    "The text is not original enough (under 30%); it is too close to other filter pages. Make it specific to this page before publishing.",
   "content.landing_unknown": "Filter page not found.",
   "content.tags_too_many": "A post can have at most 50 tags.",
   "content.term_description_invalid":
