@@ -157,6 +157,11 @@ export function OrderPage({
             </section>
           )}
           <OrderReturns view={view} t={t} action={actions.requestReturn} />
+          {!view.cancellable && view.cancelNote && (
+            <p className="rounded-3xl border bg-card p-6 text-sm text-muted-foreground sm:p-7">
+              {view.cancelNote}
+            </p>
+          )}
           {view.cancellable && (
             <form
               action={actions.cancelOrder}

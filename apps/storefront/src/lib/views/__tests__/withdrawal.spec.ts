@@ -54,6 +54,7 @@ describe("a sealed good on the return form", () => {
         warning: "sealed_goods",
         gift: false,
         note: SEALED,
+        variants: [],
       },
     ])
   })

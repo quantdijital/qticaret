@@ -55,6 +55,7 @@ describe("a gift card line on the return form", () => {
         warning: null,
         gift: true,
         note: "Kartlar iptal edilir ve ödediğiniz tutar iade edilir; bir şey göndermeniz gerekmez.",
+        variants: [],
       },
     ])
     expect(page.giftReasons).toEqual([{ value: "changed_mind", label: "Cayma hakkı (vazgeçtim)" }])

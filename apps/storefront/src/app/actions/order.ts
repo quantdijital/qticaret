@@ -77,12 +77,21 @@ const SAID = new Set([
   "returns.gift_card_used",
   "returns.gift_card_separate",
   "returns.already_open",
+  // An exchange's variant (adr/0032 §6): out of stock, the same one, not the product's, discounted
+  "returns.exchange_out_of_stock",
+  "returns.exchange_same_variant",
+  "returns.exchange_variant_invalid",
+  "returns.exchange_discounted_price",
 ])
+
+const VARIANT_ID = /^variant_[0-9A-Za-z]{1,40}$/
 
 /**
  * Asks to send lines back (F7.9): each line with the quantity chosen, a
  * reason and a note; the shop decides. Signed in or with the order's key.
- * A gift card line's form asks for it alone, as money back (`kind=return`).
+ * An exchange (adr/0032 §6) sends each line's variant (`variant_<line>`),
+ * never a price: the backend quotes the swap. A gift card line's form asks
+ * for it alone, as money back (`kind=return`).
  */
 export async function requestReturn(
   _state: { ok: boolean; error: string | null },
@@ -111,10 +120,22 @@ export async function requestReturn(
     return { ok: false, error: "order.return_items_required" }
   }
   const { order_id, token, kind, reason, note } = parsed.data
+  // An exchange names the variant each line goes back for; a return names none
+  const variantOf = (line: string) => {
+    const value = form.get(`variant_${line}`)
+    return typeof value === "string" && VARIANT_ID.test(value) ? value : null
+  }
+  if (kind === "exchange" && items.some((item) => variantOf(item.line_item_id) === null)) {
+    return { ok: false, error: "order.return_variant_required" }
+  }
+  const lines =
+    kind === "exchange"
+      ? items.map((item) => ({ ...item, variant_id: variantOf(item.line_item_id) ?? "" }))
+      : items
   try {
     await storeCall(`/store/orders/${order_id}/returns`, {
       method: "POST",
-      body: { kind, items, reason, ...(note ? { note } : {}) },
+      body: { kind, items: lines, reason, ...(note ? { note } : {}) },
       headers: keyed(token),
     })
   } catch (error) {

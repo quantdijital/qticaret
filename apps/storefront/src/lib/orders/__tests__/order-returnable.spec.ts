@@ -112,6 +112,7 @@ describe("orderReturnable (adr/0025, 2026-11-03)", () => {
         warning: null,
         gift: true,
         note: "Kart kullanıldığı için cayma hakkı yok.",
+        variants: [],
       },
     ])
   })

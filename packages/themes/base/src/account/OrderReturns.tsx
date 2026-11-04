@@ -11,6 +11,11 @@ const ERRORS = [
   "returns.gift_card_used",
   "returns.gift_card_separate",
   "returns.already_open",
+  "order.return_variant_required",
+  "returns.exchange_out_of_stock",
+  "returns.exchange_same_variant",
+  "returns.exchange_variant_invalid",
+  "returns.exchange_discounted_price",
   "errors.too_many_requests",
 ]
 
@@ -40,6 +45,8 @@ export function OrderReturns({
     note: t("order.return_note"),
     kindReturn: t("order.return_kind_return"),
     kindExchange: t("order.return_kind_exchange"),
+    variant: t("order.exchange_variant"),
+    exchangeNote: t("order.exchange_note"),
     submit: t("order.return_submit"),
     sending: t("checkout.saving"),
     sent: t(gift ? "order.return_gift_sent" : "order.return_sent"),

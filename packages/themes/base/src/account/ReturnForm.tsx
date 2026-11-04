@@ -9,6 +9,10 @@ export interface ReturnWords {
   note: string
   kindReturn: string
   kindExchange: string
+  /** Over an exchanged line's variant choice ("Yerine"). */
+  variant: string
+  /** Under the kinds when an exchange is chosen: how a price difference is settled. */
+  exchangeNote: string
   submit: string
   sending: string
   sent: string
@@ -27,7 +31,9 @@ const FIELD = "rounded-lg border border-input bg-background px-3 py-2 text-sm"
  * offered and no exchange. A sealed good (adr/0032 Ek 2026-11-03) is chosen
  * like any other line, its warning under it. `gift`: gift card lines alone
  * (adr/0025), on the right of withdrawal and as money back only; a line
- * whose cards were spent says why and offers nothing. Below the note, what
+ * whose cards were spent says why and offers nothing. An exchange (adr/0032
+ * §6) offers only the lines with another variant, each with its variant to
+ * choose (`variant_<line id>`); never a price. Below the note, what
  * sending the goods back costs (`words.shipping`). The backend decides again.
  */
 export function ReturnForm({
@@ -54,7 +60,11 @@ export function ReturnForm({
   const reasons = defectOnly ? offered.filter((each) => defects.has(each.value)) : offered
   const only = reasons.length === 1 ? (reasons[0]?.value ?? "") : ""
   const chosenReason = reasons.some((each) => each.value === reason) ? reason : only
-  const chosenKind = defectOnly ? "return" : kind
+  // A swap goes for another variant of the same product: only lines that have one
+  const swappable = lines.some((line) => (line.variants ?? []).length > 0)
+  const chosenKind = defectOnly || !swappable ? "return" : kind
+  const shown =
+    chosenKind === "exchange" ? lines.filter((line) => (line.variants ?? []).length > 0) : lines
   if (state.ok) {
     return (
       <p role="status" className="text-sm text-success">
@@ -80,8 +90,8 @@ export function ReturnForm({
       <input type="hidden" name="order_id" value={view.orderId} />
       <input type="hidden" name="token" value={view.token ?? ""} />
       <ul className="flex flex-col gap-2">
-        {lines.map((line) => (
-          <li key={line.id} className="flex items-center justify-between gap-3">
+        {shown.map((line) => (
+          <li key={line.id} className="flex flex-wrap items-center justify-between gap-3">
             <span className="flex flex-col">
               {line.title}
               {line.note && (
@@ -93,6 +103,21 @@ export function ReturnForm({
                 </span>
               )}
             </span>
+            {chosenKind === "exchange" && line.quantity > 0 && (
+              <label className="flex items-center gap-2">
+                <span className="text-muted-foreground">{words.variant}</span>
+                <select name={`variant_${line.id}`} defaultValue="" className={FIELD}>
+                  <option value="" disabled>
+                    —
+                  </option>
+                  {(line.variants ?? []).map((variant) => (
+                    <option key={variant.value} value={variant.value}>
+                      {variant.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
             {line.quantity > 0 && (
               <label className="flex items-center gap-2">
                 <span className="text-muted-foreground">{words.quantity}</span>
@@ -146,7 +171,7 @@ export function ReturnForm({
               type="radio"
               name="kind"
               value="exchange"
-              disabled={defectOnly}
+              disabled={defectOnly || !swappable}
               checked={chosenKind === "exchange"}
               onChange={() => {
                 setKind("exchange")
@@ -156,6 +181,7 @@ export function ReturnForm({
           </label>
         </div>
       )}
+      {chosenKind === "exchange" && <p className="text-muted-foreground">{words.exchangeNote}</p>}
       <label className="flex flex-col gap-1">
         {words.reason}
         <select

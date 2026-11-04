@@ -81,5 +81,5 @@ export const row = (
 /** The route's answer: the window open and no request open unless said. */
 export const found = (
   lines: ReturnableLineRow[],
-  { window_open = true, open_request = false }: Partial<Omit<ReturnableRow, "lines">> = {}
-): ReturnableRow => ({ window_open, open_request, lines })
+  { window_open = true, open_request = false, ...more }: Partial<Omit<ReturnableRow, "lines">> = {}
+): ReturnableRow => ({ window_open, open_request, ...more, lines })

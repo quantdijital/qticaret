@@ -74,6 +74,40 @@ export const giftCardUsed = (found: ReturnableRow | null): boolean =>
     (line) => line.gift_card && line.withdrawal_excluded_reason === "gift_card_used"
   )
 
+// The refusals the shopper can act on, said where the cancel button would be (tr.json keys)
+const CANCEL_NOTES: ReadonlySet<string> = new Set([
+  "orders.cancel_contact_shop",
+  "orders.gift_card_used",
+])
+
+/**
+ * Whether the page offers the cancel (F7.13): the backend's answer by the
+ * cancel's own rule (`cancellable`), and in words why not when the shopper
+ * can act on it (money taken by hand goes back through the shop; a gift
+ * card it sent was used). An older backend that does not say: before
+ * packing, no gift card it sent used. The backend decides again.
+ */
+export function cancelOf(
+  found: ReturnableRow | null,
+  order: Pick<StoreOrder, "status" | "fulfillment_status">,
+  t: Translate
+): { cancellable: boolean; cancelNote: string | null } {
+  if (typeof found?.cancellable === "boolean") {
+    const refusal = found.cancel_refusal ?? null
+    return {
+      cancellable: found.cancellable,
+      cancelNote: refusal && CANCEL_NOTES.has(refusal) ? t(refusal) : null,
+    }
+  }
+  return {
+    cancellable:
+      order.status === "pending" &&
+      order.fulfillment_status === "not_fulfilled" &&
+      !giftCardUsed(found),
+    cancelNote: null,
+  }
+}
+
 const isExclusion = (reason: string | null): reason is WithdrawalExclusion =>
   reason !== null && EXCLUSIONS.includes(reason)
 
@@ -123,21 +157,28 @@ export function returnNoteOf(
 
 /**
  * The lines the order page offers to send back, as the backend counts them
- * (`found`); null when none may be, the window is shut (once cancelled
- * too) or the backend did not say. A line with units left is offered, a
- * sealed good's with its warning; a gift line whose cards were spent
- * stays, with nothing to choose, saying why.
+ * (`found`); null when none may be, every window is shut (once cancelled
+ * too), a request is open already (the shop decides it first: the
+ * requests list shows it) or the backend did not say. A line inside its
+ * own window (`window_open` per line: a shipped line's from its parcels,
+ * a gift line's from its cards) with units left is offered, a sealed
+ * good's with its warning, with the variants an exchange may go for; a
+ * gift line whose cards were spent stays, with nothing to choose, saying why.
  */
 export function returnableOf(
   found: ReturnableRow | null,
   order: StoreOrder,
   t: Translate
 ): ReturnableLineView[] | null {
-  if (!found?.window_open) {
+  if (!found?.window_open || found.open_request) {
     return null
   }
   const titles = new Map(order.items.map((line) => [line.id, line.title]))
   const lines = found.lines.flatMap((line): ReturnableLineView[] => {
+    // An older backend says the order's window only
+    if (line.window_open === false) {
+      return []
+    }
     const excluded = exclusionOf(line)
     // Outside the right, a line has no condition to warn of
     const warning = excluded === null && !line.gift_card ? warningOf(line) : null
@@ -155,6 +196,13 @@ export function returnableOf(
         warning,
         gift: line.gift_card,
         note: returnNoteOf(excluded, line.gift_card, t, warning),
+        // A gift line and one outside the right of withdrawal are never exchanged
+        variants:
+          line.gift_card || excluded !== null
+            ? []
+            : line.variants.flatMap((variant) =>
+                variant.title ? [{ value: variant.id, label: variant.title }] : []
+              ),
       },
     ]
   })

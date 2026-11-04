@@ -54,7 +54,12 @@ describe("the base theme's return form for a sealed good", () => {
   it("lets the line be chosen, every reason and the exchange offered, its warning tied to it", () => {
     const html = renderOrder(
       order([knifeLine], "delivered"),
-      found([row(KNIFE, 2, { warning: "sealed_goods" })])
+      found([
+        {
+          ...row(KNIFE, 2, { warning: "sealed_goods" }),
+          variants: [{ id: "variant_buyuk", title: "Büyük" }],
+        },
+      ])
     )
     const [form, ...rest] = forms(html)
     expect(rest).toHaveLength(0)
@@ -67,6 +72,14 @@ describe("the base theme's return form for a sealed good", () => {
       expect(form).toContain(`value="${reason}"`)
     }
     expect(form).toMatch(/<input type="radio" name="kind" value="exchange"(?![^>]*disabled)/)
+    // A product with no other variant has nothing to exchange for (adr/0032 §6)
+    const [single] = forms(
+      renderOrder(
+        order([knifeLine], "delivered"),
+        found([row(KNIFE, 2, { warning: "sealed_goods" })])
+      )
+    )
+    expect(single).toMatch(/<input type="radio" disabled="" name="kind" value="exchange"/)
   })
 
   it("says the return shipping is free once, on the shipped lines' form, and not on a gift card's", () => {

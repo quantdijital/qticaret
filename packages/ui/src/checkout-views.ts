@@ -205,6 +205,8 @@ export interface ReturnableLineView {
    * warning means, or what a gift line's withdrawal does.
    */
   note?: string | null
+  /** The other variants an exchange may go for (value: variant id); none: not exchanged. */
+  variants?: OptionView[]
 }
 
 export interface BankTransferView {
@@ -246,6 +248,8 @@ export interface OrderPageView {
   cancellable: boolean
   /** Above the cancel button, in words: an order with gift card lines says its cards are voided too. */
   cancelText?: string
+  /** Not cancellable, in words where the button would be (money taken by hand, a card used). */
+  cancelNote?: string | null
   /**
    * The lines that may be asked back, as the backend counts them
    * (`GET /store/orders/:id/returnable`); null when none may or the

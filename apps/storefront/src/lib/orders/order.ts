@@ -139,6 +139,13 @@ export interface ReturnableLineRow {
   variant_id: string | null
   /** Units still to ask back: shipped less asked; a gift line's cards, within its period. */
   returnable: number
+  /**
+   * This line's own window (a shipped line's from its parcels, a gift
+   * line's from its cards); the order's `window_open` when left out.
+   */
+  window_open?: boolean
+  /** Why it is shut: `not_yet`, `expired`, `order_canceled`; null while open. */
+  window_closed_reason?: string | null
   /** Outside the right of withdrawal: back only as faulty or wrong; a spent gift card not at all. */
   withdrawal_excluded: boolean
   /** `product`, `personal_addon` or `gift_card_used`; null inside the right. */
@@ -156,10 +163,17 @@ export interface ReturnableLineRow {
 
 /** What the order may still ask back (adr/0025, 2026-11-03), by the rules a request meets. */
 export interface ReturnableRow {
-  /** A request can be asked for now: the parcels' window or a gift line's open; false once cancelled. */
+  /** Some line's window is open; false once cancelled. Each line says its own. */
   window_open: boolean
   /** A request is open already: a new one waits for it. */
   open_request: boolean
+  /** Whether the shopper may cancel the order, by the cancel's own rule; left out by an older backend. */
+  cancellable?: boolean
+  /**
+   * Why not: `orders.cancel_contact_shop` (money taken by hand),
+   * `orders.gift_card_used`, `orders.cancel_after_packing`, `orders.canceled`.
+   */
+  cancel_refusal?: string | null
   lines: ReturnableLineRow[]
 }
 

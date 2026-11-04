@@ -88,6 +88,61 @@ describe("requestReturn for a gift card line (adr/0025, 2026-11-03)", () => {
   })
 })
 
+describe("requestReturn as an exchange (adr/0032 §6)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    api.storeCall.mockResolvedValue({ return_request: { id: "rr_1", status: "requested" } })
+  })
+
+  const swapForm = (extra: Record<string, string>) => {
+    const data = new FormData()
+    Object.entries({
+      order_id: ORDER,
+      token: "",
+      kind: "exchange",
+      reason: "size_issue",
+      [`qty_${KNIFE}`]: "1",
+      ...extra,
+    }).forEach(([name, value]) => {
+      data.set(name, value)
+    })
+    return data
+  }
+
+  it("sends each line with the variant it goes back for, never a price", async () => {
+    await expect(ask(swapForm({ [`variant_${KNIFE}`]: "variant_01KBUYUK" }))).resolves.toEqual({
+      ok: true,
+      error: null,
+    })
+    expect(api.storeCall).toHaveBeenCalledWith(`/store/orders/${ORDER}/returns`, {
+      method: "POST",
+      body: {
+        kind: "exchange",
+        items: [{ line_item_id: KNIFE, quantity: 1, variant_id: "variant_01KBUYUK" }],
+        reason: "size_issue",
+      },
+      headers: {},
+    })
+  })
+
+  it("asks for the variant before sending, and says the backend's exchange refusals", async () => {
+    await expect(ask(swapForm({}))).resolves.toEqual({
+      ok: false,
+      error: "order.return_variant_required",
+    })
+    await expect(ask(swapForm({ [`variant_${KNIFE}`]: "fiyat=1" }))).resolves.toEqual({
+      ok: false,
+      error: "order.return_variant_required",
+    })
+    expect(api.storeCall).not.toHaveBeenCalled()
+    api.storeCall.mockRejectedValue(new StoreApiError(400, "returns.exchange_out_of_stock", null))
+    await expect(ask(swapForm({ [`variant_${KNIFE}`]: "variant_01KBUYUK" }))).resolves.toEqual({
+      ok: false,
+      error: "returns.exchange_out_of_stock",
+    })
+  })
+})
+
 describe("cancelOrder (F7.13; a gift order while its cards are untouched, adr/0025)", () => {
   beforeEach(() => {
     vi.clearAllMocks()

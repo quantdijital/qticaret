@@ -15,7 +15,7 @@ import { addressSummaryOf } from "./checkout"
 import { orderGiftOf } from "./order-gift"
 import {
   DEFECT_REASONS,
-  giftCardUsed,
+  cancelOf,
   giftLinesOf,
   giftReasonsOf,
   refusedOf,
@@ -200,11 +200,8 @@ export function orderView(
     ],
     token: extras.token,
     orderId: order.id,
-    // Before packing; gift cards sent are voided with it while none was used (adr/0025)
-    cancellable:
-      order.status === "pending" &&
-      order.fulfillment_status === "not_fulfilled" &&
-      !giftCardUsed(extras.returnable),
+    // The cancel's own rule, from the backend; the page's guess only when it did not say
+    ...cancelOf(extras.returnable, order, t),
     cancelText: t(gifts.size > 0 ? "order.cancel_text_gift" : "order.cancel_text"),
     returnable: returnableOf(extras.returnable, order, t),
     returnReasons: returnReasonsOf(t),
