@@ -48,31 +48,9 @@ export interface Campaign {
 type Admin = Awaited<ReturnType<typeof createAdminUser>>
 type People = Record<"ayse" | "burak" | "cem" | "deniz" | "abone", string>
 
-export interface CampaignFixture {
-  readonly fake: FakeMail
-  readonly admin: Admin
-  readonly groupId: string
-  readonly people: People
-  messaging: () => MessagingModuleService
-  settings: () => PlatformSettingsModuleService
-  mailsTo: (email: string) => FakeMail["messages"]
-  post: <T>(
-    path: string,
-    body: unknown,
-    headers?: Record<string, string>
-  ) => Promise<{ status: number; data: T & { message?: string } }>
-  get: <T>(
-    path: string,
-    headers?: Record<string, string>
-  ) => Promise<{ status: number; data: T & { message?: string } }>
-  /** A draft to the group, or to `audience`. */
-  draft: (audience?: unknown[]) => Promise<Campaign>
-}
+export type CampaignFixture = ReturnType<typeof campaignFixture>
 
-export function campaignFixture(
-  http: HttpClient,
-  getContainer: () => MedusaContainer
-): CampaignFixture {
+export function campaignFixture(http: HttpClient, getContainer: () => MedusaContainer) {
   let fake: FakeMail | undefined
   let admin: Admin | undefined
   let groupId = ""
@@ -90,17 +68,13 @@ export function campaignFixture(
   }
   const headersOf = (headers?: Record<string, string>) =>
     headers ?? ready(admin, "the admin").headers
-  const post: CampaignFixture["post"] = <T>(
-    path: string,
-    body: unknown,
-    headers?: Record<string, string>
-  ) =>
+  const post = <T>(path: string, body: unknown, headers?: Record<string, string>) =>
     settle(
       http.post<T & { message?: string }>(`/admin/bulk-messages${path}`, body, {
         headers: headersOf(headers),
       })
     )
-  const get: CampaignFixture["get"] = <T>(path: string, headers?: Record<string, string>) =>
+  const get = <T>(path: string, headers?: Record<string, string>) =>
     settle(
       http.get<T & { message?: string }>(`/admin/bulk-messages${path}`, {
         headers: headersOf(headers),
@@ -207,11 +181,12 @@ export function campaignFixture(
     },
     messaging,
     settings,
-    mailsTo: (email) =>
+    mailsTo: (email: string) =>
       ready(fake, "the mail server").messages.filter(({ to }) => to.includes(email)),
     post,
     get,
-    draft: async (audience = [{ kind: "group", id: groupId }]) => {
+    /** A draft to the group, or to `audience`. */
+    draft: async (audience: unknown[] = [{ kind: "group", id: groupId }]): Promise<Campaign> => {
       const { data, status } = await post<{ campaign: Campaign }>("", {
         name: "Kış indirimi",
         channel: "email",
