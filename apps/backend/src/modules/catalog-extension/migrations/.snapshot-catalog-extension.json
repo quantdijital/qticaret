@@ -1,7 +1,5 @@
 {
-  "namespaces": [
-    "public"
-  ],
+  "namespaces": ["public"],
   "name": "public",
   "tables": [
     {
@@ -151,9 +149,7 @@
         },
         {
           "keyName": "category_image_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -211,13 +207,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": [
-            "weapon",
-            "alcohol",
-            "tobacco",
-            "adult_content",
-            "other"
-          ],
+          "enumItems": ["weapon", "alcohol", "tobacco", "adult_content", "other"],
           "mappedType": "enum"
         },
         "created_at": {
@@ -292,9 +282,7 @@
         },
         {
           "keyName": "category_restriction_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -336,12 +324,7 @@
           "scale": null,
           "default": "'new'",
           "comment": null,
-          "enumItems": [
-            "new",
-            "refurbished",
-            "used",
-            "damaged"
-          ],
+          "enumItems": ["new", "refurbished", "used", "damaged"],
           "mappedType": "enum"
         },
         "kind": {
@@ -357,11 +340,7 @@
           "scale": null,
           "default": "'physical'",
           "comment": null,
-          "enumItems": [
-            "physical",
-            "digital",
-            "service"
-          ],
+          "enumItems": ["physical", "digital", "service"],
           "mappedType": "enum"
         },
         "primary_category_id": {
@@ -425,13 +404,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": [
-            "weapon",
-            "alcohol",
-            "tobacco",
-            "adult_content",
-            "other"
-          ],
+          "enumItems": ["weapon", "alcohol", "tobacco", "adult_content", "other"],
           "mappedType": "enum"
         },
         "is_gift_card": {
@@ -545,9 +518,7 @@
         },
         {
           "keyName": "product_extension_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -671,9 +642,7 @@
         },
         {
           "keyName": "variant_extension_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,

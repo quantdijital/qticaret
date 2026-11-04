@@ -1,7 +1,5 @@
 {
-  "namespaces": [
-    "public"
-  ],
+  "namespaces": ["public"],
   "name": "public",
   "tables": [
     {
@@ -142,9 +140,7 @@
         },
         {
           "keyName": "product_rating_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -234,10 +230,7 @@
           "scale": null,
           "default": "'storefront'",
           "comment": null,
-          "enumItems": [
-            "storefront",
-            "migration"
-          ],
+          "enumItems": ["storefront", "migration"],
           "mappedType": "enum"
         },
         "source_ref": {
@@ -333,11 +326,7 @@
           "scale": null,
           "default": "'pending'",
           "comment": null,
-          "enumItems": [
-            "pending",
-            "approved",
-            "rejected"
-          ],
+          "enumItems": ["pending", "approved", "rejected"],
           "mappedType": "enum"
         },
         "has_link": {
@@ -503,9 +492,7 @@
         },
         {
           "keyName": "product_review_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -752,9 +739,7 @@
         },
         {
           "keyName": "product_review_photo_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
