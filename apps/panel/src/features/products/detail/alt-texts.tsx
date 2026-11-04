@@ -1,4 +1,4 @@
-import { CircleCheck, Loader2 } from "lucide-react"
+import { ChevronRight, CircleCheck, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { useSaveAlt } from "@/features/products/api/media"
 import type { ProductMedia } from "@/features/products/api/media"
 import { errorText } from "@/lib/errors"
+import { cn } from "@/lib/utils"
 
 // What screen readers read comfortably; the server allows no more
 const ALT_MAX = 250
@@ -89,7 +90,9 @@ function AltRow({
 /**
  * Each image's alt text (docs/13 §8): what a screen reader says and what
  * image search reads; saved on leaving the field. The state of its
- * WebP/AVIF versions and share crop beside it.
+ * WebP/AVIF versions and share crop beside it. Folded once every picture
+ * has one (the owner, 2026-11-04: the list ran the page long); open while
+ * one is missing.
  */
 export function AltTexts({
   productId,
@@ -103,11 +106,27 @@ export function AltTexts({
   const { t } = useTranslation()
   const byUrl = new Map(media.map((each) => [each.url, each]))
   const missing = images.filter((image) => !byUrl.get(image.url)?.alt?.trim()).length
+  // Every picture described: the list folds away, its state stays in sight
+  const [open, setOpen] = useState(missing > 0)
   return (
     <section className="flex flex-col gap-1 border-t pt-4" aria-labelledby="alt-texts">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 id="alt-texts" className="text-sm font-medium">
-          {t("products.media.altTitle")}
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls="alt-texts-list"
+            className="inline-flex items-center gap-1.5 rounded-sm hover:text-foreground/80"
+            onClick={() => {
+              setOpen(!open)
+            }}
+          >
+            <ChevronRight
+              className={cn("size-4 transition-transform", open && "rotate-90")}
+              aria-hidden="true"
+            />
+            {t("products.media.altTitle")}
+          </button>
         </h3>
         {missing > 0 ? (
           <span className="text-xs text-warning-text">
@@ -120,19 +139,23 @@ export function AltTexts({
           </span>
         )}
       </div>
-      <p className="text-xs text-muted-foreground">{t("products.media.altHint")}</p>
-      <ul className="flex flex-col divide-y">
-        {images.map((image, index) => (
-          <AltRow
-            // A new alt text from the server starts the field again
-            key={`${image.key}-${byUrl.get(image.url)?.alt ?? ""}`}
-            productId={productId}
-            url={image.url}
-            media={byUrl.get(image.url)}
-            position={index + 1}
-          />
-        ))}
-      </ul>
+      {open ? (
+        <div id="alt-texts-list" className="flex flex-col gap-1">
+          <p className="text-xs text-muted-foreground">{t("products.media.altHint")}</p>
+          <ul className="flex flex-col divide-y">
+            {images.map((image, index) => (
+              <AltRow
+                // A new alt text from the server starts the field again
+                key={`${image.key}-${byUrl.get(image.url)?.alt ?? ""}`}
+                productId={productId}
+                url={image.url}
+                media={byUrl.get(image.url)}
+                position={index + 1}
+              />
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </section>
   )
 }

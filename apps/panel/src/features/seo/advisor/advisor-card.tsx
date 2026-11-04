@@ -12,6 +12,7 @@ import { errorText } from "@/lib/errors"
 import { cn } from "@/lib/utils"
 import { GRADE_TEXT, SEVERITY_TONES } from "./grades"
 import { ScoreRing } from "./score-ring"
+import { scrollToTarget } from "./scroll-to-target"
 
 // Rule texts are shared by kind: "P-TITLE-01" and "C-TITLE-01" read the same
 const textKey = (ruleId: string) => ruleId.slice(ruleId.indexOf("-") + 1)
@@ -22,9 +23,11 @@ interface IssueProps {
   id: string
   /** Where each manual fix's field lives on this page (an element id). */
   targets: Readonly<Record<string, string>>
+  /** Takes the person to a field's element; by default it is scrolled to. */
+  onTarget: (target: string) => void
 }
 
-function Issue({ issue, kind, id, targets }: IssueProps) {
+function Issue({ issue, kind, id, targets, onTarget }: IssueProps) {
   const { t } = useTranslation()
   const apply = useApplyFix(kind, id)
   const key = `seo.advisor.rules.${textKey(issue.ruleId)}`
@@ -83,7 +86,7 @@ function Issue({ issue, kind, id, targets }: IssueProps) {
           variant="ghost"
           className="h-7 self-start text-xs"
           onClick={() => {
-            document.getElementById(target)?.scrollIntoView({ behavior: "smooth", block: "start" })
+            onTarget(target)
           }}
         >
           <ArrowDown />
@@ -104,6 +107,7 @@ export function AdvisorCard({
   id,
   version,
   targets = {},
+  onTarget = scrollToTarget,
   className,
 }: {
   kind: AdvisorKind
@@ -111,6 +115,8 @@ export function AdvisorCard({
   /** The page's last change: a save asks for a fresh assessment. */
   version?: string | null
   targets?: Readonly<Record<string, string>>
+  /** A page whose fields sit in tabs opens the field's tab first (a product's SEO). */
+  onTarget?: (target: string) => void
   className?: string
 }) {
   const { t } = useTranslation()
@@ -152,6 +158,7 @@ export function AdvisorCard({
                   kind={kind}
                   id={id}
                   targets={targets}
+                  onTarget={onTarget}
                 />
               ))}
             </ul>

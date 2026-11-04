@@ -10,18 +10,18 @@ import { BankTransferAlert } from "@/features/orders/detail/bank-transfer-alert"
 import { ChargebackAlert } from "@/features/orders/detail/chargeback-alert"
 import { PickupAlert } from "@/features/orders/detail/pickup-alert"
 import { orderMoneyQuery, orderQuery, orderStateQuery } from "@/features/orders/api/orders"
+import type { OrderDetail } from "@/features/orders/api/orders"
 import { orderPaymentDetailsQuery } from "@/features/orders/api/payments"
+import { returnRequestsQuery } from "@/features/orders/api/returns"
 import { StageBadge } from "@/features/orders/components/stage-badge"
-import { MessageHistoryCard } from "@/features/customers/components/message-history-card"
 import { ItemsCard } from "@/features/orders/detail/items-card"
 import { NotesCard } from "@/features/orders/detail/notes-card"
 import { OrderActions } from "@/features/orders/detail/order-actions"
 import { PaymentCard } from "@/features/orders/detail/payment-card"
-import { ContractsCard } from "@/features/orders/detail/contracts-card"
-import { InvoiceCard } from "@/features/orders/detail/invoice-card"
-import { AddressCard, CustomerCard } from "@/features/orders/detail/people-cards"
+import { InvoiceSection } from "@/features/orders/detail/invoice-card"
+import { OrderTabs } from "@/features/orders/detail/order-tabs"
+import { CustomerCard } from "@/features/orders/detail/people-cards"
 import { ProgressCard } from "@/features/orders/detail/progress-card"
-import { RefundsCard } from "@/features/orders/detail/refunds-card"
 import { ReturnsCard } from "@/features/orders/detail/returns-card"
 import {
   orderPaymentLinkId,
@@ -29,14 +29,24 @@ import {
 } from "@/features/payment-links/components/order-link"
 import { PaymentLinkChip } from "@/features/payment-links/components/payment-link-chip"
 import { errorText } from "@/lib/errors"
-import { formatLongDate } from "@/lib/format"
+import { formatLongDate, formatMoney } from "@/lib/format"
 
 const route = getRouteApi("/_auth/orders/$id")
 
+/** Who ordered, as the header names them: the customer, else the parcel's addressee. */
+function buyerOf(order: OrderDetail): string {
+  const customer = [order.customer?.first_name, order.customer?.last_name]
+  const addressee = [order.shipping_address?.first_name, order.shipping_address?.last_name]
+  return customer.filter(Boolean).join(" ") || addressee.filter(Boolean).join(" ")
+}
+
 /**
- * One order (docs/06 §4): where it stands and the next step at the top,
- * the parcel, the money and what the customer was sent on the left, the
- * customer, the contracts they accepted and the team's notes on the right.
+ * One order (docs/06 "Detay sayfası düzeni"): its number, stage, customer,
+ * total and next step at the top; how far it has come; a return waiting
+ * for a decision; then what was bought, the money and the invoice in the
+ * main column, the customer with the address and the team's notes beside
+ * them; what the customer was sent, refunds, disputes and the contracts
+ * in tabs under them.
  */
 export function OrderDetailPage() {
   const { t } = useTranslation()
@@ -47,6 +57,9 @@ export function OrderDetailPage() {
   const money = useQuery(orderMoneyQuery(id))
   // PayTR is asked when the page opens (F5 V7); the page does not wait for it either
   const details = useQuery(orderPaymentDetailsQuery(id))
+  // A return or exchange is a card at the top; none is a row in the tabs
+  const returns = useQuery(returnRequestsQuery({ order_id: id }))
+  const hasReturns = returns.data ? returns.data.return_requests.length > 0 : undefined
   const hosted = details.data?.payments[0]
   const refunds = details.data?.refunds ?? []
   const order = query.data
@@ -85,7 +98,13 @@ export function OrderDetailPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title={t("orders.detail.number", { number: order.display_id })}
-        description={t("orders.detail.placed", { date: formatLongDate(order.created_at) })}
+        description={[
+          t("orders.detail.placed", { date: formatLongDate(order.created_at) }),
+          buyerOf(order),
+          formatMoney(money.data?.net ?? order.total, order.currency_code),
+        ]
+          .filter(Boolean)
+          .join(" · ")}
         badge={
           <>
             <StageBadge stage={state.data.stage} />
@@ -117,31 +136,31 @@ export function OrderDetailPage() {
         </Alert>
       ) : null}
       <ProgressCard order={order} stage={state.data.stage} />
+      {/* A request waiting for a decision first, the width of the page */}
+      <ReturnsCard orderId={order.id} />
       <PageGrid>
         <PageColumn span={8}>
-          {/* A request waiting for a decision first: the column's last card grows, not this one */}
-          <ReturnsCard orderId={order.id} />
           <ItemsCard order={order} {...(money.data ? { money: money.data } : {})} />
-          {refunds.length > 0 ? (
-            <RefundsCard refunds={refunds} currency={order.currency_code} />
-          ) : null}
-          <MessageHistoryCard orderId={order.id} />
-        </PageColumn>
-        <PageColumn span={4}>
-          <CustomerCard order={order} />
-          <AddressCard order={order} editable={state.data.cancelable} />
           <PaymentCard
             order={order}
             {...(money.data ? { money: money.data } : {})}
             {...(money.error ? { moneyError: { onRetry: () => void money.refetch() } } : {})}
             hosted={hosted}
+            invoice={<InvoiceSection orderId={order.id} orderNumber={order.display_id} />}
           />
-          <InvoiceCard orderId={order.id} orderNumber={order.display_id} />
-          <ContractsCard orderId={order.id} />
+        </PageColumn>
+        <PageColumn span={4}>
+          <CustomerCard order={order} editable={state.data.cancelable} />
           {/* Last: the column's last card grows, and the note box sits at its foot */}
           <NotesCard orderId={order.id} />
         </PageColumn>
       </PageGrid>
+      <OrderTabs
+        orderId={order.id}
+        currency={order.currency_code}
+        refunds={refunds}
+        hasReturns={hasReturns}
+      />
     </div>
   )
 }

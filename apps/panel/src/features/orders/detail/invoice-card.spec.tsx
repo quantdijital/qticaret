@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { InvoiceRecord } from "@/features/orders/api/invoices"
-import { InvoiceCard } from "./invoice-card"
+import { InvoiceSection } from "./invoice-card"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 
@@ -44,12 +44,12 @@ const renderCard = (row: InvoiceRecord | InvoiceRecord[] | null, mayOpen = true)
   )
   return render(
     <QueryClientProvider client={new QueryClient()}>
-      <InvoiceCard orderId="order_1" />
+      <InvoiceSection orderId="order_1" />
     </QueryClientProvider>
   )
 }
 
-describe("InvoiceCard", () => {
+describe("InvoiceSection", () => {
   beforeEach(() => {
     fetchMock.mockReset()
   })

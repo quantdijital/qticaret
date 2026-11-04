@@ -68,6 +68,8 @@ interface ImageUploaderProps {
   onMakeMain: (index: number) => void
   /** A save in flight elsewhere; the grid waits for it. */
   disabled?: boolean
+  /** The grid runs the page's width: more pictures to a row. */
+  wide?: boolean
 }
 
 /** Pictures in a grid: drop or pick files, the first is the main one. */
@@ -77,6 +79,7 @@ export function ImageUploader({
   onRemove,
   onMakeMain,
   disabled = false,
+  wide = false,
 }: ImageUploaderProps) {
   const { t } = useTranslation()
   const [busy, setBusy] = useState(false)
@@ -141,7 +144,13 @@ export function ImageUploader({
         }}
       />
       {images.length > 0 ? (
-        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-6">
+        <ul
+          className={cn(
+            "grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-6",
+            // The page's width (a product's media card): more to a row, each a thumbnail's size
+            wide && "md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 2xl:grid-cols-10"
+          )}
+        >
           {images.map((image, index) => (
             <li
               key={image.key}

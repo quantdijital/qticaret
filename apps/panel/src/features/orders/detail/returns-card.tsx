@@ -1,7 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
+import { PackageOpen } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { EmptyRow } from "@/components/patterns/empty-row"
 import { SectionCard } from "@/components/patterns/section-card"
+import { Button } from "@/components/ui/button"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
 import { returnLinesQuery, returnRequestsQuery } from "@/features/orders/api/returns"
@@ -12,6 +15,8 @@ import type { Open } from "@/features/orders/components/return-actions"
 import { ReturnDialogHost } from "@/features/orders/components/return-dialog-host"
 import { differenceText } from "@/features/orders/exchange-text"
 import { formatDateTime, formatMoney } from "@/lib/format"
+import { OpenReturnDialog } from "./open-return-dialog"
+import { useReturnOpenable } from "./use-return-openable"
 
 const R = "orders.returns"
 
@@ -25,9 +30,50 @@ const TONE: Record<ReturnStatus, StatusTone> = {
 }
 
 /**
+ * An order without a return or exchange (docs/06 "Detay sayfası düzeni"):
+ * one row, not a card, with the way to open one for the shopper who called
+ * while the shopper's own rules allow it (the order's menu offers it too).
+ */
+export function NoReturnsRow({ orderId }: { orderId: string }) {
+  const { t } = useTranslation()
+  const { openable, returnable } = useReturnOpenable(orderId)
+  const [opening, setOpening] = useState(false)
+  return (
+    <>
+      <EmptyRow
+        text={t(`${R}.card.none`)}
+        action={
+          openable ? (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setOpening(true)
+              }}
+            >
+              <PackageOpen />
+              {t(`${R}.open.button`)}
+            </Button>
+          ) : null
+        }
+      />
+      {opening && returnable ? (
+        <OpenReturnDialog
+          orderId={orderId}
+          returnable={returnable}
+          onClose={() => {
+            setOpening(false)
+          }}
+        />
+      ) : null}
+    </>
+  )
+}
+
+/**
  * The order's returns and exchanges (F12.3) where the order is: each
- * request with the queue's own actions. Not shown while there is none; a
- * request for the shopper who called is opened from the order's actions.
+ * request with the queue's own actions. Not shown while there is none
+ * (the page's tabs hold the "İade yok" row then).
  */
 export function ReturnsCard({ orderId }: { orderId: string }) {
   const { t } = useTranslation()

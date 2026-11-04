@@ -1,3 +1,4 @@
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
 import { ErrorState } from "@/components/patterns/states"
@@ -5,6 +6,7 @@ import { StatusBadge } from "@/components/patterns/status-badge"
 import type { OrderDetail, OrderMoney } from "@/features/orders/api/orders"
 import type { HostedPayment } from "@/features/orders/api/payments"
 import { formatMoney } from "@/lib/format"
+import { cn } from "@/lib/utils"
 
 // The payment's state in the shop's words (docs/06 sözlük) and its tone. Taken
 // and refunded come in kuruş from the server once read: Medusa keeps digits
@@ -64,13 +66,16 @@ function Row({ label, value }: { label: string; value: string }) {
 /**
  * What the customer paid, by card and by gift card or store credit, what
  * the shop has taken and given back, and what a refund can still return
- * (from the server, F4.7).
+ * (from the server, F4.7). On the order's page its invoice is the card's
+ * last part (docs/06 "Detay sayfası düzeni"): the rows run in two columns
+ * there, the card being the main column's width.
  */
 export function PaymentCard({
   order,
   money: totals,
   moneyError,
   hosted,
+  invoice,
 }: {
   order: OrderDetail
   money?: OrderMoney
@@ -78,6 +83,8 @@ export function PaymentCard({
   moneyError?: { onRetry: () => void }
   /** The order's hosted-form payment as its provider holds it (F5 V7, V10). */
   hosted?: HostedPayment | undefined
+  /** The order's invoice part, under the payment's rows. */
+  invoice?: ReactNode
 }) {
   const { t } = useTranslation()
   const state = paymentState(order, totals)
@@ -85,7 +92,7 @@ export function PaymentCard({
   const provider = order.payment_collections[0]?.payments?.[0]?.provider_id
   return (
     <SectionCard
-      title={t("orders.detail.payment")}
+      title={t(invoice ? "orders.detail.paymentAndInvoice" : "orders.detail.payment")}
       action={
         <>
           {hosted?.test_mode ? (
@@ -95,7 +102,12 @@ export function PaymentCard({
         </>
       }
     >
-      <dl className="flex flex-col divide-y">
+      <dl
+        className={cn(
+          "grid grid-cols-1 gap-x-8 [&>div]:border-t [&>div:first-child]:border-t-0",
+          invoice ? "md:grid-cols-2 md:[&>div:nth-child(2)]:border-t-0" : ""
+        )}
+      >
         <Row label={t("orders.detail.amount")} value={money(state.amount)} />
         {totals && Number(totals.credit) > 0 ? (
           <Row label={t("orders.detail.credit")} value={money(totals.credit)} />
@@ -153,6 +165,7 @@ export function PaymentCard({
           <ErrorState text={t("orders.detail.moneyFailed")} onRetry={moneyError.onRetry} />
         </div>
       ) : null}
+      {invoice ? <div className="mt-4 border-t pt-4">{invoice}</div> : null}
     </SectionCard>
   )
 }

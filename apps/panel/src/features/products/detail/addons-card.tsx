@@ -17,6 +17,7 @@ import { AddonNotice } from "./addon-notice"
 import { AddonRow } from "./addon-row"
 import { AddonSheet } from "./addon-sheet"
 import { inputOf, valueOf } from "./addon-values"
+import { useAddonsShown } from "./use-addons-shown"
 import type { AddonValue } from "./addon-values"
 
 const A = "products.addons"
@@ -185,15 +186,12 @@ export function AddonsCard({ productId }: { productId: string }) {
   const catalog = useQuery(productCatalogQuery(productId))
   const features = useQuery(featuresQuery())
   const state = useFeatureState(ADDONS_FLAG)
+  const shown = useAddonsShown(productId)
   // Unreadable flags read as off: the product's own add-ons still show
   const flagOn = features.isError ? false : state
   // Nothing until both are known: a card that appears and goes would shift the page
-  if (!catalog.data || flagOn === undefined) {
+  if (!catalog.data || flagOn === undefined || !shown) {
     return null
   }
-  const saved = catalog.data.addons
-  if (!flagOn && saved.length === 0) {
-    return null
-  }
-  return <AddonsForm productId={productId} saved={saved} flagOn={flagOn} />
+  return <AddonsForm productId={productId} saved={catalog.data.addons} flagOn={flagOn} />
 }

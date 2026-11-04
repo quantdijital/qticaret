@@ -10,7 +10,6 @@ import {
   Truck,
   Undo2,
 } from "lucide-react"
-import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -22,10 +21,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useCan } from "@/features/auth/api/staff"
 import { useMarkDelivered, useShipOrder } from "@/features/orders/api/orders"
 import { useCapturePayment } from "@/features/orders/api/payments"
-import { returnableQuery } from "@/features/orders/api/returns"
 import type { OrderDetail, OrderMoney, OrderState } from "@/features/orders/api/orders"
 import { errorText } from "@/lib/errors"
 import { CancelOrderDialog } from "./cancel-order-dialog"
@@ -34,6 +31,7 @@ import { EditOrderDialog } from "./edit-dialog"
 import { OpenReturnDialog } from "./open-return-dialog"
 import { RefundDialog } from "./refund-dialog"
 import { ShipDialog } from "./ship-dialog"
+import { useReturnOpenable } from "./use-return-openable"
 
 type Dialog =
   "ship" | "deliver" | "cancel" | "capture" | "refund" | "chargeback" | "edit" | "return" | null
@@ -61,14 +59,7 @@ export function OrderActions({
   const deliver = useMarkDelivered(order.id)
   const capture = useCapturePayment()
   // F12.3: a request opened for the shopper who called, by the shopper's own rules
-  const returnable = useQuery(returnableQuery(order.id))
-  const mayReturn = useCan("orders")
-  const openable =
-    mayReturn &&
-    returnable.data !== undefined &&
-    returnable.data.window_open &&
-    !returnable.data.open_request &&
-    returnable.data.lines.some((line) => line.returnable > 0)
+  const { openable, returnable } = useReturnOpenable(order.id)
 
   // What the server says can be done now (`/admin/order-board/:id`)
   const toShip = state.ship?.items ?? []
@@ -191,10 +182,10 @@ export function OrderActions({
         </DropdownMenu>
       ) : null}
 
-      {dialog === "return" && returnable.data ? (
+      {dialog === "return" && returnable ? (
         <OpenReturnDialog
           orderId={order.id}
-          returnable={returnable.data}
+          returnable={returnable}
           onClose={() => {
             setDialog(null)
           }}

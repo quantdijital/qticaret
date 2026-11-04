@@ -185,6 +185,8 @@ Kurallar:
 | Desen | Ne zaman | Notlar |
 | --- | --- | --- |
 | PageGrid + PageColumn | Yan yana kartlar | 12 sütunlu ızgara; satırdaki hücreler eşit, sütunların son kartı uzar; yapışkan özet sütunu `sticky` (§2 Denge) |
+| PageTabs | Bir ayar sayfasının parçaları; detay sayfasının ikincil kartları (docs/06 "Detay sayfası düzeni", 2026-11-04) | Alt çizgili sekmeler, dar ekranda alt satıra kayar; kayıt sayısı adın yanında; açık sekme `?part=`'ta, sekme değişince sayfa yukarı atlamaz (`useOpenPart`); form tutan sekmelerde `keepMounted`. `SettingsTabs` bunun ayarlardaki adıdır |
+| EmptyRow | Detay sayfasında boş bölüm | Kart yerine tek satır: bir cümle + varsa eylem; kart içinde bir şey olunca çizilir |
 | PageHeader | Her sayfa | Başlık, bir cümle açıklama, sağda tek birincil eylem, ikincil eylemler menüde |
 | DataTable | Her veri listesi | Yapışkan başlık, satır hover, durum rozeti, seçim + toplu işlem çubuğu, sunucu sayfalama, URL'de filtre |
 | Wizard | Çok adımlı oluşturma | Numaralı adımlar, her adımda tek soru grubu, taslak olarak kaydet, geri dönülebilir, ilerleme |

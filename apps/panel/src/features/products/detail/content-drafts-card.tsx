@@ -1,4 +1,4 @@
-import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Loader2, Sparkles } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -7,35 +7,10 @@ import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import { errorText } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
+import { DRAFT_KINDS, draftsQuery } from "@/features/products/api/content-drafts"
+import type { Draft, DraftKind } from "@/features/products/api/content-drafts"
 
 const D = "products.drafts"
-const KINDS = ["product_description", "seo_title", "seo_description"] as const
-type DraftKind = (typeof KINDS)[number]
-
-interface Draft {
-  id: string
-  kind: DraftKind
-  text: string
-  status: "draft" | "approved" | "rejected" | "refused"
-  problems: { problems: string[] } | null
-}
-
-interface DraftsAnswer {
-  drafts: Draft[]
-  enabled: boolean
-  provider_ready: boolean
-  quota: { used: number; limit: number }
-}
-
-const draftsQuery = (productId: string) =>
-  queryOptions({
-    queryKey: ["products", productId, "drafts"],
-    queryFn: () =>
-      sdk.client.fetch<DraftsAnswer>("/admin/content-drafts", {
-        query: { entity_type: "product", entity_id: productId },
-      }),
-  })
-
 const TONE = {
   draft: "info",
   approved: "success",
@@ -99,7 +74,7 @@ export function ContentDraftsCard({ productId }: { productId: string }) {
     >
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap gap-2">
-          {KINDS.map((kind) => (
+          {DRAFT_KINDS.map((kind) => (
             <Button
               key={kind}
               size="sm"

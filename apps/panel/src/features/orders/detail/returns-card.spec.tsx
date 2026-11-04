@@ -1,9 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { ReturnRequest } from "@/features/orders/api/returns"
-import { ReturnsCard } from "./returns-card"
+import { NoReturnsRow, ReturnsCard } from "./returns-card"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 const retrieveMock = vi.hoisted(() => vi.fn())
@@ -88,5 +88,67 @@ describe("ReturnsCard on the order (adr/0032 Ek 2026-11-03)", () => {
 
     expect(await screen.findByText(/^Yasal son gün: /)).toBeInTheDocument()
     expect(retrieveMock).not.toHaveBeenCalled()
+  })
+})
+
+describe("NoReturnsRow (docs/06 Detay sayfası düzeni)", () => {
+  const renderRow = (returnable: { window_open: boolean; returnable: number }) => {
+    fetchMock.mockImplementation((url: string) =>
+      Promise.resolve(
+        url === "/admin/staff/me"
+          ? { role: "owner", can: { orders: true } }
+          : {
+              window_open: returnable.window_open,
+              open_request: false,
+              lines: [
+                {
+                  line_item_id: "ordli_1",
+                  title: "Diş fırçası",
+                  variant_title: null,
+                  variant_id: "variant_1",
+                  returnable: returnable.returnable,
+                  withdrawal_excluded: false,
+                  withdrawal_excluded_reason: null,
+                  withdrawal_warning: null,
+                  gift_card: false,
+                  variants: [],
+                },
+              ],
+            }
+      )
+    )
+    render(
+      <QueryClientProvider
+        client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
+      >
+        <NoReturnsRow orderId="order_1" />
+      </QueryClientProvider>
+    )
+  }
+
+  beforeEach(() => {
+    fetchMock.mockReset()
+  })
+
+  it("says there is none, with the way to open one for the shopper who called", async () => {
+    renderRow({ window_open: true, returnable: 1 })
+
+    expect(screen.getByText("Bu siparişte iade ya da değişim talebi yok.")).toBeInTheDocument()
+    expect(
+      await screen.findByRole("button", { name: "İade ya da değişim talebi aç" })
+    ).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith("/admin/orders/order_1/returnable")
+  })
+
+  it("offers no request once the window has closed", async () => {
+    renderRow({ window_open: false, returnable: 1 })
+
+    expect(screen.getByText("Bu siparişte iade ya da değişim talebi yok.")).toBeInTheDocument()
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/orders/order_1/returnable")
+    })
+    // Both answers read: still no way to open one
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(screen.queryByRole("button", { name: "İade ya da değişim talebi aç" })).toBeNull()
   })
 })

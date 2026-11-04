@@ -97,7 +97,8 @@ export function MediaField({
             )}
           />
         ) : (
-          <span className="px-4 text-center text-[13px] text-muted-foreground">
+          // On a ground of its own (a logo's dark one) the ground's text colour reads, not the card's
+          <span className={cn("px-4 text-center text-[13px]", !ground && "text-muted-foreground")}>
             {emptyText ?? t("media.field.empty")}
           </span>
         )}

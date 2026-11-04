@@ -2985,7 +2985,17 @@
       "cost": "Cost",
       "costHint": "Unit cost, VAT excluded; used in reports only, never shown to customers.",
       "description": "Description",
-      "descriptionHint": "Write with headings, lists, quotes and tables. Search engines favour at least {{suggested}} words."
+      "descriptionHint": "Write with headings, lists, quotes and tables. Search engines favour at least {{suggested}} words.",
+      "tabs": {
+        "label": "More about the product",
+        "attributes": "Attributes",
+        "catalog": "Catalog details",
+        "variantImages": "Variant images",
+        "addons": "Add-ons",
+        "priceHistory": "Price history",
+        "drafts": "Content drafts"
+      },
+      "dates": "Added {{created}} · last changed {{updated}}"
     },
     "catalog": {
       "card": "Catalog details",
@@ -3467,7 +3477,8 @@
         "recipient": "Recipient: {{email}}",
         "recipientNamed": "Recipient: {{name}} ({{email}})",
         "pending": "The card is issued and e-mailed to the recipient once payment is taken."
-      }
+      },
+      "paymentAndInvoice": "Payment and invoice"
     },
     "providers": {
       "pp_system_default": "Manual payment",
@@ -3542,7 +3553,8 @@
         "order": "Order",
         "status": "Status",
         "amount": "Amount"
-      }
+      },
+      "orderTitle": "This order's chargebacks"
     },
     "shipping": {
       "created": "Label ready",
@@ -3659,7 +3671,8 @@
       },
       "card": {
         "title": "Returns and exchanges",
-        "text": "This order's return and exchange requests."
+        "text": "This order's return and exchange requests.",
+        "none": "No return or exchange request on this order."
       },
       "open": {
         "button": "Open a return or exchange request",
@@ -4001,6 +4014,14 @@
         "short": "card used",
         "text": "A card of this gift card line has been spent; its right of withdrawal is gone."
       }
+    },
+    "detailTabs": {
+      "label": "Order history and documents",
+      "messages": "Communication history",
+      "returns": "Returns and exchanges",
+      "refunds": "Refunds",
+      "chargebacks": "Chargebacks",
+      "contracts": "Contract consent"
     }
   },
   "customers": {
@@ -4041,7 +4062,11 @@
       "noAddresses": "No saved addresses.",
       "billing": "Billing details",
       "billingHint": "The tax number is shown masked.",
-      "noBilling": "No billing details."
+      "noBilling": "No billing details.",
+      "tabs": {
+        "label": "Customer records",
+        "orders": "Orders"
+      }
     },
     "consents": {
       "title": "Message consent",
@@ -4231,7 +4256,10 @@
         "no_consent": "The customer has not agreed to marketing messages on this channel.",
         "over_quota": "The daily sending limit was reached.",
         "provider": "The sending service did not accept the message."
-      }
+      },
+      "showAll_one": "Show all ({{count}})",
+      "showAll_other": "Show all ({{count}})",
+      "showLess": "Show fewer"
     },
     "privacy": {
       "title": "KVKK requests",

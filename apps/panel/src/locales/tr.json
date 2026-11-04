@@ -2985,7 +2985,17 @@
       "cost": "Maliyet",
       "costHint": "KDV hariç birim maliyet; yalnızca raporlarda kullanılır, müşteri görmez.",
       "description": "Açıklama",
-      "descriptionHint": "Başlık, liste, alıntı ve tabloyla yazın. Arama motorları için en az {{suggested}} kelime önerilir."
+      "descriptionHint": "Başlık, liste, alıntı ve tabloyla yazın. Arama motorları için en az {{suggested}} kelime önerilir.",
+      "tabs": {
+        "label": "Ürünün diğer bölümleri",
+        "attributes": "Özellikler",
+        "catalog": "Katalog bilgileri",
+        "variantImages": "Varyant görselleri",
+        "addons": "Ek seçenekler",
+        "priceHistory": "Fiyat geçmişi",
+        "drafts": "İçerik taslakları"
+      },
+      "dates": "{{created}} tarihinde eklendi · son değişiklik {{updated}}"
     },
     "catalog": {
       "card": "Katalog bilgileri",
@@ -3467,7 +3477,8 @@
         "recipient": "Alıcı: {{email}}",
         "recipientNamed": "Alıcı: {{name}} ({{email}})",
         "pending": "Kart, ödeme alınınca üretilip alıcıya e-postayla gönderilir."
-      }
+      },
+      "paymentAndInvoice": "Ödeme ve fatura"
     },
     "providers": {
       "pp_system_default": "Manuel ödeme",
@@ -3542,7 +3553,8 @@
         "order": "Sipariş",
         "status": "Durum",
         "amount": "Tutar"
-      }
+      },
+      "orderTitle": "Siparişin ters ibrazları"
     },
     "shipping": {
       "created": "Etiket hazır",
@@ -3659,7 +3671,8 @@
       },
       "card": {
         "title": "İade ve değişim",
-        "text": "Bu siparişin iade ve değişim talepleri."
+        "text": "Bu siparişin iade ve değişim talepleri.",
+        "none": "Bu siparişte iade ya da değişim talebi yok."
       },
       "open": {
         "button": "İade ya da değişim talebi aç",
@@ -4001,6 +4014,14 @@
         "short": "kart kullanıldı",
         "text": "Hediye kartlarından birinden harcama yapıldı; bu kalemde cayma hakkı kullanılamaz."
       }
+    },
+    "detailTabs": {
+      "label": "Siparişin geçmişi ve belgeleri",
+      "messages": "İletişim geçmişi",
+      "returns": "İade ve değişim",
+      "refunds": "Para iadeleri",
+      "chargebacks": "Ters ibraz",
+      "contracts": "Sözleşme onayı"
     }
   },
   "customers": {
@@ -4041,7 +4062,11 @@
       "noAddresses": "Kayıtlı adres yok.",
       "billing": "Fatura bilgisi",
       "billingHint": "Vergi numarası gizlenerek gösterilir.",
-      "noBilling": "Fatura bilgisi girilmemiş."
+      "noBilling": "Fatura bilgisi girilmemiş.",
+      "tabs": {
+        "label": "Müşterinin kayıtları",
+        "orders": "Siparişler"
+      }
     },
     "consents": {
       "title": "İleti izinleri",
@@ -4231,7 +4256,10 @@
         "no_consent": "Müşterinin bu kanalda ticari ileti izni yok.",
         "over_quota": "Günlük gönderim sınırı doldu.",
         "provider": "Gönderim servisi iletiyi kabul etmedi."
-      }
+      },
+      "showAll_one": "Tümünü göster ({{count}})",
+      "showAll_other": "Tümünü göster ({{count}})",
+      "showLess": "Daha az göster"
     },
     "privacy": {
       "title": "KVKK talepleri",

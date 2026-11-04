@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCan } from "@/features/auth/api/staff"
 import { orderInvoicesQuery } from "@/features/orders/api/invoices"
@@ -13,9 +12,11 @@ const V = "orders.invoice"
 /**
  * The order's invoices (F8, adr/0034): its sale invoice; each exchange's
  * own sale for what it sent instead (E6b, the accountant 2026-10-31: a
- * swap is a return and a new sale); and the returns' documents.
+ * swap is a return and a new sale); and the returns' documents. A part
+ * of the payment card (docs/06 "Detay sayfası düzeni": the money and its
+ * invoice read together), under its own heading.
  */
-export function InvoiceCard({
+export function InvoiceSection({
   orderId,
   orderNumber = null,
 }: {
@@ -32,7 +33,8 @@ export function InvoiceCard({
   const returns = rows.filter((row) => row.kind === "return")
   const number = orderNumber ?? null
   return (
-    <SectionCard title={t(`${V}.title`)}>
+    <div className="flex flex-col gap-3">
+      <h3 className="text-sm font-semibold">{t(`${V}.title`)}</h3>
       {query.isPending ? (
         <Skeleton className="h-20 rounded-md" />
       ) : query.isError ? (
@@ -58,6 +60,6 @@ export function InvoiceCard({
           <ReturnDocuments records={returns} mayOpen={mayOpen} orderNumber={number} />
         </div>
       )}
-    </SectionCard>
+    </div>
   )
 }

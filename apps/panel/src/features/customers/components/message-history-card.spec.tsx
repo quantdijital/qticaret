@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { MessageHistory } from "@/features/customers/api/messages"
@@ -86,5 +87,33 @@ describe("MessageHistoryCard", () => {
     renderCard({ orderId: "order_1" })
 
     expect(await screen.findByText("Hediye kartı gönderildi")).toBeInTheDocument()
+  })
+
+  it("shows the newest three and opens the rest on request", async () => {
+    const at = (hour: number) => `2026-10-30T${String(hour).padStart(2, "0")}:00:00Z`
+    fetchMock.mockResolvedValue({
+      messages: ["order.delivered", "order.shipped", "order.placed", "return.requested"].map(
+        (template, index) => ({
+          id: `noti_${String(index)}`,
+          template,
+          channel: "email",
+          state: "sent",
+          reason: null,
+          to: "ay***@example.com",
+          at: at(12 - index),
+        })
+      ),
+      limited: false,
+    })
+    renderCard({ orderId: "order_1" })
+
+    expect(await screen.findByText("Sipariş kargoda")).toBeInTheDocument()
+    expect(screen.getAllByRole("listitem")).toHaveLength(3)
+    await userEvent.click(screen.getByRole("button", { name: "Tümünü göster (4)" }))
+    expect(screen.getAllByRole("listitem")).toHaveLength(4)
+    expect(screen.getByRole("button", { name: "Daha az göster" })).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    )
   })
 })

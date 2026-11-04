@@ -75,7 +75,10 @@ test("a product's page has no serious accessibility issue", async ({ page }) => 
   await page.goto("/products")
   await page.getByRole("table").getByRole("link").first().click()
   await expect(pageHeading(page)).toBeVisible()
-  // Its price history (F4.3) is read beside the product
+  await page.waitForLoadState("networkidle")
+  expect(await seriousIssues(page)).toEqual([])
+  // Its price history (F4.3) is a tab under the main cards (docs/06 "Detay sayfası düzeni")
+  await page.getByRole("tab", { name: "Fiyat geçmişi" }).click()
   await page.locator("#product-price-history").scrollIntoViewIfNeeded()
   await page.waitForLoadState("networkidle")
   expect(await seriousIssues(page)).toEqual([])

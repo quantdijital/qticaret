@@ -41,31 +41,22 @@ export function ProgressCard({ order, stage }: { order: OrderDetail; stage: Life
   const tracking = trackingOf(order)
 
   return (
-    <section className="rounded-lg border bg-card px-5 py-5 shadow-card">
+    <section className="rounded-lg border bg-card px-5 py-4 shadow-card">
       {canceled ? (
-        <p className="mb-4 flex items-center gap-2 rounded-md bg-destructive-soft px-3 py-2 text-sm text-destructive-text">
+        <p className="mb-3 flex items-center gap-2 rounded-md bg-destructive-soft px-3 py-2 text-sm text-destructive-text">
           <Ban className="size-4" aria-hidden="true" />
           {t("orders.detail.canceledNote")}
         </p>
       ) : null}
-      <ol className="grid grid-cols-2 gap-y-5 sm:grid-cols-4">
+      <ol className="grid grid-cols-2 gap-y-4 sm:grid-cols-4">
         {STEPS.map((step, index) => {
           const done = Boolean(when[step.key])
           const current = !canceled && index === reached
           return (
-            <li key={step.key} className="relative flex flex-col items-start gap-2 pr-4">
-              {index < STEPS.length - 1 ? (
-                <span
-                  aria-hidden="true"
-                  className={cn(
-                    "absolute top-[18px] right-0 left-11 hidden h-0.5 rounded-full sm:block",
-                    index < reached - 1 ? "bg-primary" : "bg-border"
-                  )}
-                />
-              ) : null}
+            <li key={step.key} className="flex items-center gap-3 pr-3">
               <span
                 className={cn(
-                  "flex size-9 items-center justify-center rounded-full border",
+                  "flex size-8 shrink-0 items-center justify-center rounded-full border",
                   done && "border-primary bg-primary text-primary-foreground",
                   current && "border-primary text-foreground ring-4 ring-primary/15",
                   !done && !current && "text-muted-foreground"
@@ -73,7 +64,7 @@ export function ProgressCard({ order, stage }: { order: OrderDetail; stage: Life
               >
                 <step.icon className="size-4" aria-hidden="true" />
               </span>
-              <span className="flex flex-col">
+              <span className="flex min-w-0 flex-col lg:shrink-0">
                 <span
                   className={cn(
                     "text-sm",
@@ -90,12 +81,22 @@ export function ProgressCard({ order, stage }: { order: OrderDetail; stage: Life
                       : "—"}
                 </span>
               </span>
+              {/* The way on to the next step, in the room the step leaves */}
+              {index < STEPS.length - 1 ? (
+                <span
+                  aria-hidden="true"
+                  className={cn(
+                    "hidden h-0.5 min-w-4 flex-1 rounded-full lg:block",
+                    index < reached - 1 ? "bg-primary" : "bg-border"
+                  )}
+                />
+              ) : null}
             </li>
           )
         })}
       </ol>
       {tracking.length > 0 ? (
-        <p className="mt-5 flex flex-wrap gap-x-4 gap-y-1 border-t pt-4 text-sm">
+        <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 border-t pt-3 text-sm">
           <span className="text-muted-foreground">{t("orders.progress.tracking")}</span>
           {tracking.map((each) =>
             each.url ? (

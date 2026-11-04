@@ -1,30 +1,31 @@
 import { useQuery } from "@tanstack/react-query"
 import { getRouteApi } from "@tanstack/react-router"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
+import { PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
+import { spanOf } from "@/components/patterns/page-spans"
+import type { Span } from "@/components/patterns/page-spans"
+import { useOpenPart } from "@/components/patterns/use-open-part"
 import { ErrorState } from "@/components/patterns/states"
 import { Skeleton } from "@/components/ui/skeleton"
 import { productQuery } from "@/features/products/api/products"
-import { AttributesCard } from "@/features/attributes/components/attributes-card"
-import { ProductSeoCard } from "@/features/products/detail/product-seo-card"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
-import { AddonsCard } from "@/features/products/detail/addons-card"
-import { CatalogCard } from "@/features/products/detail/catalog-card"
-import { ContentDraftsCard } from "@/features/products/detail/content-drafts-card"
 import { ProductDescriptionCard } from "@/features/products/detail/description-card"
 import { GeneralCard } from "@/features/products/detail/general-card"
 import { MediaCard } from "@/features/products/detail/media-card"
 import { OrganizeCard } from "@/features/products/detail/organize-card"
-import { PriceHistoryCard } from "@/features/products/detail/price-history-card"
 import { ProductActions } from "@/features/products/detail/product-actions"
+import { ProductSeoCard } from "@/features/products/detail/product-seo-card"
+import { ProductTabs } from "@/features/products/detail/product-tabs"
 import { ShippingCard } from "@/features/products/detail/shipping-card"
-import { InterestCard } from "@/features/products/detail/interest-card"
 import { SummaryCard } from "@/features/products/detail/summary-card"
-import { VariantImagesCard } from "@/features/products/detail/variant-images-card"
 import { VariantsCard } from "@/features/products/detail/variants-card"
 import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
+import { scrollToTarget } from "@/features/seo/advisor/scroll-to-target"
 import { errorText } from "@/lib/errors"
+import { formatDateTime } from "@/lib/format"
+import { cn } from "@/lib/utils"
 
 // Where each of the advisor's manual fixes takes the person on this page
 const ADVISOR_TARGETS = {
@@ -43,30 +44,50 @@ const ADVISOR_TARGETS = {
   edit_dimensions: "product-shipping",
 }
 
+// The tab each of the advisor's jumps lands in (`ProductTabs`); the rest are on the page itself
+const TAB_OF_TARGET: Readonly<Record<string, string>> = {
+  "product-attributes": "attributes",
+}
+
 const route = getRouteApi("/_auth/products/$id")
+
+/** A card's place in the page's grid, an anchor for the advisor; the card fills its row. */
+function Cell({ id, span, children }: { id?: string; span: Span; children: ReactNode }) {
+  return (
+    <div
+      id={id}
+      className={cn("flex min-w-0 scroll-mt-20 flex-col [&>section]:flex-1", spanOf(span))}
+    >
+      {children}
+    </div>
+  )
+}
 
 function DetailSkeleton() {
   return (
     <div className="grid gap-[var(--grid-gap)] xl:grid-cols-12">
-      <div className="flex flex-col gap-[var(--grid-gap)] xl:col-span-8">
-        <Skeleton className="h-80 rounded-lg" />
-        <Skeleton className="h-56 rounded-lg" />
-      </div>
-      <div className="flex flex-col gap-[var(--grid-gap)] xl:col-span-4">
-        <Skeleton className="h-96 rounded-lg" />
-      </div>
+      <Skeleton className="h-64 rounded-lg xl:col-span-8" />
+      <Skeleton className="h-64 rounded-lg xl:col-span-4" />
+      <Skeleton className="h-80 rounded-lg xl:col-span-8" />
+      <Skeleton className="h-80 rounded-lg xl:col-span-4" />
     </div>
   )
 }
 
 /**
- * One product (docs/06 §4): what it is on the left, how it is sold and
- * shipped on the right; every card saves on its own.
+ * One product (docs/06 "Detay sayfası düzeni"): what is edited most, in
+ * pairs of cards that end on one line (its name beside its summary, its
+ * text beside where it is listed, its prices and stock beside its
+ * parcel), its pictures the page's width, its search listing beside the
+ * SEO advisor; then its attributes, catalog details, variant pictures,
+ * add-ons, price history and drafts, one tab each. Every card saves on
+ * its own.
  */
 export function ProductDetailPage() {
   const { t } = useTranslation()
   const { id } = route.useParams()
   const query = useQuery(productQuery(id))
+  const openPart = useOpenPart()
   const product = query.data
   const back = { to: "/products", label: t("nav.products") }
 
@@ -86,66 +107,72 @@ export function ProductDetailPage() {
       </div>
     )
   }
+  // A field in a tab: its tab opens first, then the page goes to it
+  const goTo = (target: string) => {
+    const part = TAB_OF_TARGET[target]
+    if (!part) {
+      scrollToTarget(target)
+      return
+    }
+    void openPart(part).then(() => {
+      requestAnimationFrame(() => {
+        scrollToTarget(target)
+      })
+    })
+  }
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title={product.title}
+        {...(product.created_at && product.updated_at
+          ? {
+              description: t("products.detail.dates", {
+                created: formatDateTime(product.created_at),
+                updated: formatDateTime(product.updated_at),
+              }),
+            }
+          : {})}
         badge={<ProductStatusBadge status={product.status} />}
         back={back}
         action={<ProductActions product={product} />}
       />
       <PageGrid>
-        <PageColumn span={8}>
-          <div id="product-general" className="scroll-mt-20">
-            <GeneralCard product={product} />
-          </div>
-          <div id="product-description" className="scroll-mt-20">
-            <ProductDescriptionCard product={product} />
-          </div>
-          <div id="product-media" className="scroll-mt-20">
-            <MediaCard product={product} />
-          </div>
-          <div id="product-variants" className="scroll-mt-20">
-            <VariantsCard product={product} />
-          </div>
-          {/* adr/0052: under the prices; empty while the shop's add-ons are off */}
-          <div id="product-addons" className="scroll-mt-20 empty:hidden">
-            <AddonsCard productId={product.id} />
-          </div>
-          <div id="product-price-history" className="scroll-mt-20">
-            <PriceHistoryCard productId={product.id} />
-          </div>
-          {(product.variants?.length ?? 0) > 1 && (product.images?.length ?? 0) > 0 ? (
-            <div id="product-variant-images" className="scroll-mt-20">
-              <VariantImagesCard product={product} />
-            </div>
-          ) : null}
-          <div id="product-attributes" className="scroll-mt-20">
-            <AttributesCard productId={product.id} />
-          </div>
-          <div id="product-seo" className="scroll-mt-20">
-            <ProductSeoCard product={product} />
-          </div>
-          <ContentDraftsCard productId={product.id} />
-        </PageColumn>
-        <PageColumn span={4}>
+        <Cell id="product-general" span={8}>
+          <GeneralCard product={product} />
+        </Cell>
+        <Cell span={4}>
           <SummaryCard product={product} />
-          <InterestCard productId={product.id} />
+        </Cell>
+        <Cell id="product-description" span={8}>
+          <ProductDescriptionCard product={product} />
+        </Cell>
+        <Cell id="product-organize" span={4}>
+          <OrganizeCard product={product} />
+        </Cell>
+        <Cell id="product-variants" span={8}>
+          <VariantsCard product={product} />
+        </Cell>
+        <Cell id="product-shipping" span={4}>
+          <ShippingCard product={product} />
+        </Cell>
+        <Cell id="product-media" span={12}>
+          <MediaCard product={product} />
+        </Cell>
+        {/* The search listing beside its score (docs/06: the advisor is a side panel, not a tab) */}
+        <Cell id="product-seo" span={8}>
+          <ProductSeoCard product={product} />
+        </Cell>
+        <Cell span={4}>
           <AdvisorCard
             kind="product"
             id={product.id}
             version={product.updated_at}
             targets={ADVISOR_TARGETS}
+            onTarget={goTo}
           />
-          <div id="product-organize" className="scroll-mt-20">
-            <OrganizeCard product={product} />
-          </div>
-          <div id="product-shipping" className="scroll-mt-20">
-            <ShippingCard product={product} />
-          </div>
-          <CatalogCard productId={product.id} />
-        </PageColumn>
+        </Cell>
       </PageGrid>
+      <ProductTabs product={product} />
     </div>
   )
 }

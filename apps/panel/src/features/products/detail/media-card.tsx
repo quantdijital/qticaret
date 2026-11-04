@@ -46,6 +46,7 @@ export function MediaCard({ product, className }: { product: ProductDetail; clas
             url: image.url,
           }))}
           disabled={update.isPending}
+          wide
           onAdd={(stored) => {
             save([...images, ...stored.map(({ url }) => ({ url }))])
           }}
