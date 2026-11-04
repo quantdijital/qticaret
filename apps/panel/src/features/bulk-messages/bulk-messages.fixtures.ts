@@ -125,6 +125,7 @@ const CAN_ALL = {
   paymentLinks: true,
   paymentLinksManage: true,
   legalTexts: true,
+  vatRates: true,
 }
 
 export const staff = (role: "owner" | "operations"): StaffMe => ({
@@ -139,6 +140,7 @@ export const staff = (role: "owner" | "operations"): StaffMe => ({
           bulkMessages: false,
           paymentLinksManage: false,
           legalTexts: false,
+          vatRates: false,
           migration: false,
           team: false,
         },

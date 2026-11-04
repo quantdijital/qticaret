@@ -887,7 +887,8 @@
         "chargeback": "Ters ibraz",
         "payment": "Ödeme",
         "refund": "Para iadesi",
-        "legal_document": "Yasal metin"
+        "legal_document": "Yasal metin",
+        "vat_rate": "KDV oranı"
       }
     },
     "locations": {
@@ -2389,8 +2390,53 @@
       "tabs": {
         "program": "Fatura programı",
         "carriers": "Taşıyıcı bilgileri",
+        "vat": "KDV oranları",
         "accounting": "Muhasebe"
       }
+    },
+    "vatRates": {
+      "title": "KDV oranları",
+      "description": "Ürünlerinize uygulanan KDV oranları ve varsayılan oran.",
+      "howItWorks": "Fiyatlar KDV dahil girilir; oran her ürünün KDV oranı alanında seçilir. Oran seçilmeyen ürünlere varsayılan oran uygulanır. Geçmiş siparişler ve faturalar kendi oranını korur.",
+      "readOnly": "Oranları yalnızca mağaza sahibi değiştirebilir.",
+      "add": "Oran ekle",
+      "columns": {
+        "name": "Ad",
+        "rate": "Oran",
+        "products": "Ürün",
+        "actions": "İşlemler"
+      },
+      "default": "Varsayılan",
+      "removed": "Kaldırıldı",
+      "actions": "{{name}} için işlemler",
+      "rename": "Yeniden adlandır",
+      "makeDefault": "Varsayılan yap",
+      "remove": "Kaldır",
+      "restore": "Geri al",
+      "removeDefault": "Varsayılan oran kaldırılamaz; önce başka bir oranı varsayılan yapın.",
+      "removeInUse": "Bu oranda {{shown}} ürün var; önce ürünleri başka bir orana taşıyın.",
+      "removeTitle": "{{name}} kaldırılsın mı?",
+      "removeDescription": "Oran ürünlerin KDV seçeneklerinden kalkar. Geçmiş siparişler ve faturalar kendi oranını korur; oranı istediğinizde geri alabilirsiniz.",
+      "removeConfirm": "Oranı kaldır",
+      "removedDone": "{{name}} kaldırıldı.",
+      "restored": "{{name}} yeniden kullanımda.",
+      "defaultTitle": "{{name}} varsayılan olsun mu?",
+      "defaultDescription": "Oran seçilmemiş ürünler bundan sonra {{name}} ile satılır. Fiyatlar değişmez, içlerindeki KDV değişir. {{current}} ürünlerde seçilebilir bir oran olarak kalır.",
+      "defaultSet": "{{name}} artık varsayılan oran.",
+      "addTitle": "KDV oranı ekle",
+      "addDescription": "Oran, adıyla birlikte ürünlerin KDV seçeneklerine eklenir.",
+      "renameTitle": "Oranı yeniden adlandır",
+      "renameDescription": "Yeni ad, ürünlerin KDV seçeneklerinde de görünür. Oranın yüzdesi değişmez.",
+      "rate": "Oran",
+      "rateHint": "0 ile 100 arasında, en çok iki ondalık (ör. 8,5).",
+      "rateInvalid": "0 ile 100 arasında, en çok iki ondalıklı bir oran girin.",
+      "name": "Ad",
+      "nameHint": "Ürünlerin KDV seçeneklerinde bu adla görünür.",
+      "nameInvalid": "En çok 60 karakterlik bir ad girin.",
+      "addConfirm": "Oranı ekle",
+      "renameConfirm": "Adı kaydet",
+      "added": "{{name}} eklendi.",
+      "renamed": "Oranın adı değişti."
     },
     "migration": {
       "title": "Taşıma",
@@ -2830,8 +2876,10 @@
       "categoriesHint": "Ürün birden çok kategoride görünebilir.",
       "noCategories": "Henüz kategori yok. Kategorileri sonra da ekleyebilirsiniz.",
       "vat": "KDV oranı",
-      "vatHint": "Seçmezseniz mağazanın varsayılan oranı uygulanır.",
+      "vatHint": "Seçmezseniz mağazanın varsayılan oranı uygulanır. Oranlar Ayarlar > Fatura ve muhasebe > KDV oranları'nda.",
       "vatDefault": "Varsayılan oran",
+      "vatDefaultNamed": "Varsayılan ({{name}})",
+      "vatUnknown": "Kaldırılmış oran",
       "optionsCard": "Seçenekler",
       "optionsHint": "Ürün beden, renk gibi seçeneklerle satılıyorsa açın.",
       "hasOptions": "Bu ürünün seçenekleri var",

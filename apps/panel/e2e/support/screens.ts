@@ -78,6 +78,7 @@ export const SETTINGS = [
   "/settings/jobs",
   "/settings/audit",
   "/settings/einvoice?part=accounting",
+  "/settings/einvoice?part=vat",
   "/settings/einvoice",
   "/settings/migration",
   "/settings/api",

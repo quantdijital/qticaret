@@ -887,7 +887,8 @@
         "chargeback": "Chargeback",
         "payment": "Payment",
         "refund": "Refund",
-        "legal_document": "Legal text"
+        "legal_document": "Legal text",
+        "vat_rate": "VAT rate"
       }
     },
     "locations": {
@@ -2389,8 +2390,53 @@
       "tabs": {
         "program": "Invoicing program",
         "carriers": "Carrier details",
+        "vat": "VAT rates",
         "accounting": "Accounting"
       }
+    },
+    "vatRates": {
+      "title": "VAT rates",
+      "description": "The VAT rates your products are taxed at, and the default.",
+      "howItWorks": "Prices are entered with VAT included; each product's rate is chosen in its VAT rate field. Products without one are taxed at the default. Past orders and invoices keep their own rate.",
+      "readOnly": "Only the shop's owner can change the rates.",
+      "add": "Add rate",
+      "columns": {
+        "name": "Name",
+        "rate": "Rate",
+        "products": "Products",
+        "actions": "Actions"
+      },
+      "default": "Default",
+      "removed": "Removed",
+      "actions": "Actions for {{name}}",
+      "rename": "Rename",
+      "makeDefault": "Make default",
+      "remove": "Remove",
+      "restore": "Bring back",
+      "removeDefault": "The default rate cannot be removed; make another rate the default first.",
+      "removeInUse": "Products on this rate: {{shown}}. Move them to another rate first.",
+      "removeTitle": "Remove {{name}}?",
+      "removeDescription": "The rate leaves the products' VAT choices. Past orders and invoices keep their own rate; you can bring the rate back any time.",
+      "removeConfirm": "Remove rate",
+      "removedDone": "{{name}} removed.",
+      "restored": "{{name}} is in use again.",
+      "defaultTitle": "Make {{name}} the default?",
+      "defaultDescription": "Products without a rate are sold at {{name}} from now on. Prices stay the same; the VAT in them changes. {{current}} stays a rate products can be put on.",
+      "defaultSet": "{{name}} is now the default rate.",
+      "addTitle": "Add a VAT rate",
+      "addDescription": "The rate and its name are added to the products' VAT choices.",
+      "renameTitle": "Rename the rate",
+      "renameDescription": "The new name shows in the products' VAT choices too. The percentage stays the same.",
+      "rate": "Rate",
+      "rateHint": "Between 0 and 100, at most two decimals (e.g. 8.5).",
+      "rateInvalid": "Enter a rate between 0 and 100, with at most two decimals.",
+      "name": "Name",
+      "nameHint": "Products' VAT choices show it by this name.",
+      "nameInvalid": "Enter a name of at most 60 characters.",
+      "addConfirm": "Add rate",
+      "renameConfirm": "Save name",
+      "added": "{{name}} added.",
+      "renamed": "The rate is renamed."
     },
     "migration": {
       "title": "Migration",
@@ -2830,8 +2876,10 @@
       "categoriesHint": "A product can appear in several categories.",
       "noCategories": "No categories yet. You can add them later.",
       "vat": "VAT rate",
-      "vatHint": "Without a choice, the shop's default rate applies.",
+      "vatHint": "Without a choice the shop's default rate applies. Rates are under Settings > Invoices and accounting > VAT rates.",
       "vatDefault": "Default rate",
+      "vatDefaultNamed": "Default ({{name}})",
+      "vatUnknown": "Removed rate",
       "optionsCard": "Options",
       "optionsHint": "Turn on if the product comes in sizes, colours and the like.",
       "hasOptions": "This product has options",

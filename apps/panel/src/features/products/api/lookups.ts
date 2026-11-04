@@ -20,15 +20,6 @@ export type CategoryOption = Awaited<
   ReturnType<typeof sdk.admin.productCategory.list>
 >["product_categories"][number]
 
-/** KDV groups are product types (adr/0007): none means the default 20%. */
-export const vatTypesQuery = () =>
-  queryOptions({
-    queryKey: ["lookups", "vat-types"],
-    queryFn: async () =>
-      (await sdk.admin.productType.list({ fields: "id,value", limit: 50 })).product_types,
-    staleTime: 5 * 60_000,
-  })
-
 export interface ShopDefaults {
   salesChannelId: string | null
   locationId: string | null

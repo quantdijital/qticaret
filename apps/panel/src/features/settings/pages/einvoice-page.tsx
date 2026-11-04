@@ -10,6 +10,7 @@ import { EinvoiceCarriersCard } from "@/features/settings/components/einvoice-ca
 import { EinvoiceProgramCard } from "@/features/settings/components/einvoice-program-card"
 import { EinvoiceConnectionCard } from "@/features/settings/components/parasut-card"
 import { SettingsTabs } from "@/features/settings/components/settings-tabs"
+import { VatRatesCard } from "@/features/settings/components/vat-rates-card"
 
 const E = "settings.einvoice"
 
@@ -17,8 +18,9 @@ const E = "settings.einvoice"
  * Settings > Invoices and accounting (F8, F11.5; the owner, 2026-10-31:
  * one page for everything about invoices): who issues the invoices, when
  * and in which series, with the program's connection beside it; the
- * carriers an e-Arşiv names; and the accountant's monthly package (no
- * accounting program is offered until one is written, adr/0039 §5).
+ * carriers an e-Arşiv names; the KDV rates (adr/0007 Ek 2026-11-04); and
+ * the accountant's monthly package (no accounting program is offered until
+ * one is written, adr/0039 §5).
  */
 export function EinvoicePage() {
   const { t } = useTranslation()
@@ -50,6 +52,11 @@ export function EinvoicePage() {
             key: "carriers",
             label: t(`${E}.tabs.carriers`),
             content: saved ? <EinvoiceCarriersCard saved={saved} /> : loading,
+          },
+          {
+            key: "vat",
+            label: t(`${E}.tabs.vat`),
+            content: <VatRatesCard />,
           },
           {
             key: "accounting",

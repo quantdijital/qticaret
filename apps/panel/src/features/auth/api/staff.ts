@@ -33,6 +33,8 @@ export type Capability =
   | "paymentLinksManage"
   /** Writing, previewing, publishing and restarting the legal texts' drafts (F13.1): owner and admin. */
   | "legalTexts"
+  /** Adding, renaming, removing the KDV rates and moving the default (adr/0007 Ek 2026-11-04): the owner's alone. */
+  | "vatRates"
 
 export interface StaffMe {
   user_id: string
