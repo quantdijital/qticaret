@@ -1,5 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { parseEnv } from "../../lib/env"
+import type { Env } from "../../lib/env"
 import { EXCHANGE_FIELDS } from "../../lib/invoicing"
 import type { ExchangedOrder, InvoiceExchange, InvoiceProfile } from "../../lib/invoicing"
 import { carrierOf } from "../../lib/shipping/carriers"
@@ -10,6 +12,7 @@ import type BillingProfileModuleService from "../../modules/billing-profile/serv
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { CarrierIdentity, InvoicingSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
+import { storefrontUrlOf } from "../messaging/brand"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -44,8 +47,16 @@ export async function exchangesOf(container: Container, orderId: string) {
   return data as InvoiceExchange[]
 }
 
-/** The carriers as the shop named them, and the storefront's address. */
-export async function settingsOf(container: Container) {
+/**
+ * The carriers as the shop named them, and the storefront's address: its
+ * canonical host, else on a developer's machine the dev storefront, as a
+ * message's links take it (`storefrontUrlOf`). Never a stand-in deployed:
+ * a shop without a host gets `einvoice.store_url_missing`.
+ */
+export async function settingsOf(
+  container: Container,
+  env: Pick<Env, "NODE_ENV" | "STOREFRONT_ORIGIN"> = parseEnv()
+) {
   const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
   const [invoicing, seo] = await Promise.all([
     settings.readSection("invoicing"),
@@ -54,7 +65,7 @@ export async function settingsOf(container: Container) {
   const host = (seo.values as { canonical_host?: string | null }).canonical_host
   return {
     carriers: (invoicing.values as unknown as InvoicingSettings).carriers,
-    store_url: host ? `https://${host}` : null,
+    store_url: storefrontUrlOf(host, env),
   }
 }
 
