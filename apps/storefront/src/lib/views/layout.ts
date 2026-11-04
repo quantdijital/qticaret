@@ -28,4 +28,4 @@ export const layoutLink = (link: StoreLayoutLink | null, t: Translate): LinkView
 
 /** A design picture with its sizes and versions; its alt text the shop's, else the media library's. */
 export const layoutImage = (image: StoreLayoutImage, fallbackAlt: string): ImageView =>
-  imageView({ id: image.url, ...image }, fallbackAlt)
+  imageView(image, fallbackAlt)

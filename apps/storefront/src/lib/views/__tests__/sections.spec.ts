@@ -14,6 +14,12 @@ const requests = vi.hoisted(() => ({
   storefrontSettings: vi.fn(() => Promise.resolve({ storefront: { primary_color: null } })),
 }))
 vi.mock("@/lib/store-api/requests", () => requests)
+// No card facts, category pictures or customer photos: an older backend's answers (adr/0046 Ek 2026-11-04)
+vi.mock("@/lib/store-api/extras", () => ({
+  cardFacts: vi.fn(() => Promise.resolve({})),
+  categoryImages: vi.fn(() => Promise.resolve(new Map())),
+  latestReviewPhotos: vi.fn(() => Promise.resolve([])),
+}))
 
 const { byPlacement, sectionViews, showsOwnCategory } = await import("../sections")
 

@@ -1,6 +1,12 @@
 import { notFound, redirect } from "next/navigation"
 import type { Resolution, StoreProduct } from "@qticaret/types"
-import type { BreadcrumbView, LinkView, ListingPageView, SortOptionView } from "@qticaret/ui"
+import type {
+  BreadcrumbView,
+  CategoryCardView,
+  ListingPageView,
+  SortOptionView,
+} from "@qticaret/ui"
+import { addToCart } from "@/app/actions/cart"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import type { AnalyticsEvent } from "@/lib/analytics/events"
 import { listEvent } from "@/lib/analytics/payloads"
@@ -18,8 +24,10 @@ import {
   priceDisplays,
   storefrontSettings,
 } from "@/lib/store-api/requests"
+import { cardFacts, categoryImages } from "@/lib/store-api/extras"
 import { listingPage } from "@/lib/store-api/listings"
 import type { ListingAnswer, ListingType } from "@/lib/store-api/listings"
+import { categoryCard, withCardFacts } from "@/lib/views/card-extras"
 import { childrenOf } from "@/lib/views/categories"
 import { swatchLookup } from "@/lib/views/color"
 import { filterViews } from "@/lib/views/facets"
@@ -44,7 +52,7 @@ type Entity = Extract<Resolution, { type: "entity" }>
 interface Heading {
   title: string
   description: string[]
-  subcategories: LinkView[]
+  subcategories: CategoryCardView[]
 }
 
 /** Products of a list given by ids, in that order. */
@@ -61,7 +69,7 @@ async function productsByIds(ids: string[]): Promise<StoreProduct[]> {
 async function headingOf(page: Entity): Promise<Heading> {
   switch (page.entity_type) {
     case "product_category": {
-      const categories = await allCategories()
+      const [categories, pictures] = await Promise.all([allCategories(), categoryImages()])
       const category = categories.find((each) => each.id === page.entity_id)
       const children = childrenOf(categories, page.entity_id)
       const childPaths = await pathsOf(
@@ -71,9 +79,10 @@ async function headingOf(page: Entity): Promise<Heading> {
       return {
         title: category?.name ?? "",
         description: paragraphsOf(category?.description),
+        // Each with its picture when it has one (adr/0046 Ek 2026-11-04)
         subcategories: children.flatMap((child) => {
           const path = childPaths[child.id]
-          return path ? [{ label: child.name, path }] : []
+          return path ? [categoryCard({ label: child.name, path }, pictures.get(child.id))] : []
         }),
       }
     }
@@ -180,12 +189,14 @@ export async function ListingContent({
     notFound()
   }
   const products = await productsByIds(answer.product_ids)
-  const [paths, displays] = await Promise.all([
+  // One stock read for the page's cards (adr/0046 Ek 2026-11-04)
+  const [paths, displays, facts] = await Promise.all([
     pathsOf(
       "product",
       products.map((product) => product.id)
     ),
     priceDisplays(variantIdsOf(products)),
+    cardFacts(products.map((product) => product.id)),
   ])
   const href = (each: typeof state) => hrefOf(url.pathname, each)
   const sort: SortOptionView[] = [
@@ -237,6 +248,7 @@ export async function ListingContent({
       <theme.ListingPage
         t={t}
         subscribe={subscribeNewsletter}
+        quickAdd={addToCart}
         view={{
           title: heading.title,
           description: first ? heading.description : [],
@@ -244,7 +256,7 @@ export async function ListingContent({
           sectionsBottom: sections.bottom,
           breadcrumbs: breadcrumbs(heading.title),
           subcategories: heading.subcategories,
-          products: productCards(products, paths, displays, options),
+          products: withCardFacts(productCards(products, paths, displays, options), facts),
           total: answer.count,
           sort,
           ...facets,

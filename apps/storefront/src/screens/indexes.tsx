@@ -1,6 +1,7 @@
 import { t } from "@/lib/i18n"
 import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
 import { JsonLd } from "@/lib/seo/JsonLd"
+import { categoryImages } from "@/lib/store-api/extras"
 import { allBrands, allCategories, pathsOf, siteSeo } from "@/lib/store-api/requests"
 import { brandGroups } from "@/lib/views/brands"
 import { categoryTree } from "@/lib/views/categories"
@@ -32,12 +33,13 @@ async function trailOf(title: string, path: string) {
 export async function CategoriesScreen() {
   const title = t("categories.title")
   const categories = await allCategories()
-  const [paths, trail] = await Promise.all([
+  const [paths, trail, pictures] = await Promise.all([
     pathsOf(
       "product_category",
       categories.map((category) => category.id)
     ),
     trailOf(title, CATEGORIES_PATH),
+    categoryImages(),
   ])
   return (
     <>
@@ -47,7 +49,7 @@ export async function CategoriesScreen() {
         view={{
           title,
           breadcrumbs: trail.breadcrumbs,
-          categories: categoryTree(categories, paths),
+          categories: categoryTree(categories, paths, pictures),
         }}
       />
     </>

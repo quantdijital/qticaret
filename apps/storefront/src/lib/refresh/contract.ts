@@ -20,7 +20,8 @@ export type RefreshScope = (typeof REFRESH_SCOPES)[number]
 export const SCOPE_PATHS: Record<RefreshScope, readonly string[]> = {
   layout: ["/store/storefront-layout"],
   settings: ["/store/storefront", "/store/seo/site", "/store/legal-identity"],
-  menus: ["/store/storefront-menus"],
+  // The menus and category cards show the categories' pictures (adr/0046 Ek 2026-11-04)
+  menus: ["/store/storefront-menus", "/store/category-images"],
   // A legal text's link shows in the menus only while it is published
   legal: ["/store/legal/", "/store/legal-identity", "/store/storefront-menus"],
   content: ["/store/content/terms", "/store/seo/paths", "/store/storefront-menus"],

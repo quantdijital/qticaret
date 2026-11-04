@@ -93,7 +93,10 @@ describe("the scopes' caches (adr/0048 Ek 2026-11-03)", () => {
       paths: ["/store/storefront", "/store/seo/site", "/store/legal-identity"],
       edgeSite: false,
     })
-    expect(refreshPlan(["menus"]).paths).toEqual(["/store/storefront-menus"])
+    expect(refreshPlan(["menus"]).paths).toEqual([
+      "/store/storefront-menus",
+      "/store/category-images",
+    ])
     expect(refreshPlan(["legal"]).paths).toEqual([
       "/store/legal/",
       "/store/legal-identity",

@@ -1,5 +1,6 @@
 import type { CategoryTreeView, LinkView, NavCategoryView } from "@qticaret/ui"
-import type { StoreCategory } from "@qticaret/types"
+import type { StoreCategory, StoreImage } from "@qticaret/types"
+import { categoryCard } from "./card-extras"
 
 const byRank = (a: StoreCategory, b: StoreCategory) =>
   (a.rank ?? 0) - (b.rank ?? 0) || a.name.localeCompare(b.name, "tr")
@@ -23,10 +24,16 @@ export function subtreeIds(categories: readonly StoreCategory[], rootId: string)
   return ids
 }
 
-/** The menu: top categories and their children, those with a live path only. */
+/** Category pictures by id (adr/0046 Ek 2026-11-04); none: no pictures. */
+type Pictures = ReadonlyMap<string, StoreImage>
+
+const NO_PICTURES: Pictures = new Map()
+
+/** The menu: top categories (with their pictures) and their children, those with a live path only. */
 export function navigation(
   categories: readonly StoreCategory[],
-  paths: Record<string, string>
+  paths: Record<string, string>,
+  pictures: Pictures = NO_PICTURES
 ): NavCategoryView[] {
   return childrenOf(categories, null).flatMap((top) => {
     const path = paths[top.id]
@@ -37,7 +44,7 @@ export function navigation(
       const childPath = paths[child.id]
       return childPath ? [{ label: child.name, path: childPath }] : []
     })
-    return [{ label: top.name, path, children }]
+    return [{ ...categoryCard({ label: top.name, path }, pictures.get(top.id)), children }]
   })
 }
 
@@ -51,7 +58,8 @@ const TREE_DEPTH = 4
  */
 export function categoryTree(
   categories: readonly StoreCategory[],
-  paths: Record<string, string>
+  paths: Record<string, string>,
+  pictures: Pictures = NO_PICTURES
 ): CategoryTreeView[] {
   const below = (parentId: string | null, depth: number): CategoryTreeView[] =>
     depth > TREE_DEPTH
@@ -59,7 +67,12 @@ export function categoryTree(
       : childrenOf(categories, parentId).flatMap((category) => {
           const path = paths[category.id]
           return path
-            ? [{ label: category.name, path, children: below(category.id, depth + 1) }]
+            ? [
+                {
+                  ...categoryCard({ label: category.name, path }, pictures.get(category.id)),
+                  children: below(category.id, depth + 1),
+                },
+              ]
             : []
         })
   return below(null, 1)

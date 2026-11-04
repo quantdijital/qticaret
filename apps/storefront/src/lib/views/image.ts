@@ -16,8 +16,11 @@ function sourcesOf(derivatives: MediaDerivatives | null): ImageView["sources"] {
   }
 }
 
-/** One picture with its versions; the alt text the shop wrote, else the product's name. */
-export function imageView(asset: StoreMediaAsset, fallbackAlt: string): ImageView {
+/** One picture with its versions; the alt text the shop wrote, else the given name. */
+export function imageView(
+  asset: Pick<StoreMediaAsset, "url" | "alt" | "width" | "height" | "derivatives">,
+  fallbackAlt: string
+): ImageView {
   return {
     src: asset.url,
     alt: asset.alt?.trim() ? asset.alt : fallbackAlt,

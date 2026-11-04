@@ -1,5 +1,5 @@
 import type { StoreAttributeValue } from "@qticaret/types"
-import type { SpecView, Translate } from "@qticaret/ui"
+import type { SpecGroupView, SpecView, Translate } from "@qticaret/ui"
 
 const NUMBER = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 2 })
 
@@ -41,6 +41,14 @@ export function specsOf(
   attributes: readonly StoreAttributeValue[] | null | undefined,
   t: Translate
 ): SpecView[] {
+  return shownSpecs(attributes, t).map(({ spec }) => spec)
+}
+
+/** The attributes with a value, in the shop's order, each with its section's key. */
+function shownSpecs(
+  attributes: readonly StoreAttributeValue[] | null | undefined,
+  t: Translate
+): { spec: SpecView; group: string | null }[] {
   return [...(attributes ?? [])]
     .sort(
       (a, b) =>
@@ -52,11 +60,43 @@ export function specsOf(
       return value
         ? [
             {
-              label: attribute.definition.label,
-              value,
-              highlight: attribute.definition.is_seo_highlight,
+              spec: {
+                label: attribute.definition.label,
+                value,
+                highlight: attribute.definition.is_seo_highlight,
+              },
+              group: attribute.definition.group ?? null,
             },
           ]
         : []
     })
+}
+
+/**
+ * The same attributes in their template's sections (adr/0013 Ek
+ * 2026-11-04), in the sections' order; those in no section last, under no
+ * title. A template without sections gives one untitled group: the plain
+ * table. An empty section is left out.
+ */
+export function specGroupsOf(
+  attributes: readonly StoreAttributeValue[] | null | undefined,
+  t: Translate
+): SpecGroupView[] {
+  const shown = shownSpecs(attributes, t)
+  if (shown.length === 0) {
+    return []
+  }
+  const sections = [
+    ...((attributes ?? []).find((each) => each.definition.template?.groups)?.definition.template
+      ?.groups ?? []),
+  ].sort((a, b) => a.rank - b.rank)
+  const known = new Set(sections.map((section) => section.key))
+  const groups: SpecGroupView[] = sections.map((section) => ({
+    title: section.name,
+    rows: shown.filter((each) => each.group === section.key).map(({ spec }) => spec),
+  }))
+  const loose = shown.filter((each) => !each.group || !known.has(each.group))
+  return [...groups, { title: null, rows: loose.map(({ spec }) => spec) }].filter(
+    (group) => group.rows.length > 0
+  )
 }

@@ -8,7 +8,7 @@ import type {
 import type { PriceDisplay, SeoPayload, StoreProduct } from "@qticaret/types"
 import { productImages } from "./image"
 import { cardPrice, isAvailable, variantPrice } from "./price"
-import { specsOf } from "./specs"
+import { specGroupsOf, specsOf } from "./specs"
 import { paragraphsOf, pathOf } from "./text"
 
 /** A price in kuruş, for the add-ons' running total only (adr/0052); null without one. */
@@ -162,6 +162,7 @@ export function productPage({
     variants: views,
     selectedVariantId: selected?.id ?? null,
     specs: specsOf(product.attribute_values, t),
+    specGroups: specGroupsOf(product.attribute_values, t),
     trustBadges,
     withdrawalNote: withdrawalNoteOf(product, t),
   }

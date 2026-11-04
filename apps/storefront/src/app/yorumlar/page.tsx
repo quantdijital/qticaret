@@ -1,11 +1,13 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
+import type { StoreReviewPhoto } from "@qticaret/types"
 import { t } from "@/lib/i18n"
 import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { pathsOf, siteSeo } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
+import { reviewPhotos } from "@/lib/views/card-extras"
 import { theme } from "@/theme"
 
 const PAGE_SIZE = 20
@@ -27,6 +29,7 @@ interface Answer {
     author_name: string | null
     created_at: string
     verified_purchase: boolean
+    photos?: StoreReviewPhoto[]
   }[]
   count: number
 }
@@ -112,13 +115,15 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
           count: answer.count,
           reviews: answer.reviews.map((review) => {
             const path = paths[review.product_id]
+            const author = review.author_name ?? t("product.anonymous")
             return {
               rating: review.rating,
               title: review.title,
               body: review.body,
-              author: review.author_name ?? t("product.anonymous"),
+              author,
               date: DATE.format(new Date(review.created_at)),
               verified: review.verified_purchase,
+              photos: reviewPhotos(review.photos, author, t),
               product: path ? { label: review.product_title, path } : null,
             }
           }),

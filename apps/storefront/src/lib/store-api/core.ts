@@ -9,6 +9,8 @@ export interface StoreRequest {
   method?: "GET" | "POST" | "DELETE"
   query?: Record<string, QueryValue>
   body?: unknown
+  /** A file sent as it is (a review's photo), in place of a JSON body. */
+  rawBody?: { bytes: ArrayBuffer; type: string }
   /** The shopper's address, signed for the backend (adr/0046 §5). */
   visitorIp: string | null
   /** The request id to carry on, so one id follows the visit through both servers. */
@@ -65,13 +67,19 @@ export async function storeRequest<T>(
   if (method !== "GET") {
     headers["origin"] = env.STOREFRONT_ORIGIN
   }
-  if (request.body !== undefined) {
+  if (request.rawBody) {
+    headers["content-type"] = request.rawBody.type
+  } else if (request.body !== undefined) {
     headers["content-type"] = "application/json"
   }
   const response = await fetch(storeUrl(path, request.query), {
     method,
     headers,
-    body: request.body === undefined ? null : JSON.stringify(request.body),
+    body: request.rawBody
+      ? request.rawBody.bytes
+      : request.body === undefined
+        ? null
+        : JSON.stringify(request.body),
     cache: "no-store",
     redirect: "manual",
     signal: AbortSignal.timeout(request.timeoutMs ?? 8000),

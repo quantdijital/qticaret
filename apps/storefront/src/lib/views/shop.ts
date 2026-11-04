@@ -14,8 +14,11 @@ import {
   storefrontMenus,
   storefrontSettings,
 } from "@/lib/store-api/requests"
+import { categoryImages } from "@/lib/store-api/extras"
 import { bottomNavOf } from "./bottom-nav"
+import { shopMarks } from "./card-extras"
 import { miniCartOf } from "./cart"
+import { imageView } from "./image"
 import { navigation } from "./categories"
 import { cookieBannerOf } from "./cookies"
 import { identityLinesOf, legalDocument, legalPath, publishedLegalLinks } from "./legal"
@@ -55,7 +58,7 @@ export async function shopView(): Promise<ShopView> {
   const [
     site,
     categories,
-    { storefront: frame, free_shipping_threshold },
+    { storefront: frame, free_shipping_threshold, marks },
     identity,
     cart,
     cookies,
@@ -67,6 +70,7 @@ export async function shopView(): Promise<ShopView> {
     preferencesPage,
     theme,
     requestHeaders,
+    pictures,
   ] = await Promise.all([
     siteSeo(),
     allCategories(),
@@ -82,13 +86,14 @@ export async function shopView(): Promise<ShopView> {
     onCookiePreferencesPage(),
     currentTheme(),
     headers(),
+    categoryImages(),
   ])
   const paths = await pathsOf(
     "product_category",
     categories.map((category) => category.id)
   )
-  // The shop's own menu when it made one (adr/0049), else its top categories
-  const menu = mainMenu(menus, t) ?? navigation(categories, paths)
+  // The shop's own menu when it made one (adr/0049), else its top categories; pictures on both
+  const menu = mainMenu(menus, t, pictures) ?? navigation(categories, paths, pictures)
   return {
     name: site.shop.name,
     logo: site.shop.logo_url
@@ -126,5 +131,9 @@ export async function shopView(): Promise<ShopView> {
     theme: themeView(theme),
     // The page's address as the proxy set it (never the visitor's)
     bottomNav: bottomNavOf(requestHeaders.get("x-qt-url") ?? ""),
+    // The footer's identity slot and marks (adr/0046 Ek 2026-11-04)
+    etbisQr: identity.etbis_qr ? imageView(identity.etbis_qr, t("footer.etbis_qr_alt")) : null,
+    paymentMarks: shopMarks(marks?.payments, t),
+    carrierMarks: shopMarks(marks?.carriers, t),
   }
 }

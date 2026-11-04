@@ -10,6 +10,7 @@ import type {
   StoreBrandSummary,
   StoreCategory,
   StoreProduct,
+  StoreProductReviews,
   StoreRegion,
   StoreLayout,
   StoreMenu,
@@ -166,6 +167,9 @@ const PAGE_FIELDS = [
   "attribute_values.definition.rank",
   "attribute_values.definition.options",
   "attribute_values.definition.is_seo_highlight",
+  // The spec table's sections (adr/0013 Ek 2026-11-04)
+  "attribute_values.definition.group",
+  "attribute_values.definition.template.groups",
   // A gift card the shop sells (adr/0025 Ek 2026-11-03)
   "product_extension.is_gift_card",
   // Its withdrawal mark, read by its kind (adr/0052 Ek 2026-11-03): on the product's own answer only
@@ -290,18 +294,8 @@ export const collectionById = cache((id: string) =>
   )
 )
 
-export interface ReviewsAnswer {
-  rating: { average: number; count: number } | null
-  reviews: {
-    rating: number
-    title: string | null
-    body: string
-    author_name: string | null
-    created_at: string
-    verified_purchase: boolean
-  }[]
-  count: number
-}
+/** With each review's photos and the stars' spread (adr/0046 Ek 2026-11-04). */
+export type ReviewsAnswer = StoreProductReviews
 
 export const productReviews = (id: string) =>
   storeGet<ReviewsAnswer>(`/store/products/${encodeURIComponent(id)}/reviews`, { limit: 10 })

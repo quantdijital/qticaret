@@ -1,9 +1,17 @@
 import "server-only"
-import type { ProductSource, RelatedSource, StoreProduct } from "@qticaret/types"
-import type { LinkView, ProductCardView, Translate } from "@qticaret/ui"
+import type { ProductSource, RelatedSource, StoreProduct, StoreReviewPhoto } from "@qticaret/types"
+import type {
+  CategoryCardView,
+  CustomerPhotoView,
+  LinkView,
+  ProductCardView,
+  Translate,
+} from "@qticaret/ui"
 import { allCategories, listProducts, pathsOf, priceDisplays } from "@/lib/store-api/requests"
 import { isStoreApiError } from "@/lib/store-api/errors"
+import { cardFacts, categoryImages, latestReviewPhotos } from "@/lib/store-api/extras"
 import { storeGet } from "@/lib/store-api/server"
+import { categoryCard, customerPhotos, reviewPhotos, withCardFacts } from "./card-extras"
 import { childrenOf } from "./categories"
 import { productCards, variantIdsOf } from "./product"
 import { cardOptions } from "./theme-settings"
@@ -104,24 +112,26 @@ export async function relatedProducts(
   }
 }
 
-/** Cards for a rail: each product's path and live price. */
+/** Cards for a rail: each product's path, live price, stock bucket and quick add. */
 export async function railCards(products: readonly StoreProduct[]): Promise<ProductCardView[]> {
   if (products.length === 0) {
     return []
   }
-  const [paths, displays, options] = await Promise.all([
+  const [paths, displays, options, facts] = await Promise.all([
     pathsOf(
       "product",
       products.map((product) => product.id)
     ),
     priceDisplays(variantIdsOf(products)),
     cardOptions(),
+    cardFacts(products.map((product) => product.id)),
   ])
-  return productCards(products, paths, displays, options)
+  return withCardFacts(productCards(products, paths, displays, options), facts)
 }
 
-export async function categoryLinks(ids: readonly string[]): Promise<LinkView[]> {
-  const categories = await allCategories()
+/** The categories a section names (or the top ones), each with its picture when it has one. */
+export async function categoryLinks(ids: readonly string[]): Promise<CategoryCardView[]> {
+  const [categories, images] = await Promise.all([allCategories(), categoryImages()])
   const chosen =
     ids.length > 0
       ? ids.flatMap((id) => categories.find((category) => category.id === id) ?? [])
@@ -132,7 +142,7 @@ export async function categoryLinks(ids: readonly string[]): Promise<LinkView[]>
   )
   return chosen.flatMap((category) => {
     const path = paths[category.id]
-    return path ? [{ label: category.name, path }] : []
+    return path ? [categoryCard({ label: category.name, path }, images.get(category.id))] : []
   })
 }
 
@@ -162,6 +172,7 @@ interface ReviewsAnswer {
     author_name: string | null
     created_at: string
     verified_purchase: boolean
+    photos?: StoreReviewPhoto[]
   }[]
 }
 
@@ -181,14 +192,32 @@ export async function reviewViews(limit: number, t: Translate) {
   )
   return answer.reviews.map((review) => {
     const path = paths[review.product_id]
+    const author = review.author_name ?? t("product.anonymous")
     return {
       rating: review.rating,
       title: review.title,
       body: review.body,
-      author: review.author_name ?? t("product.anonymous"),
+      author,
       date: DATE.format(new Date(review.created_at)),
       verified: review.verified_purchase,
+      photos: reviewPhotos(review.photos, author, t),
       product: path ? { label: review.product_title, path } : null,
     }
   })
+}
+
+// The home page's strip of customer photos: a row's worth
+const CUSTOMER_PHOTOS = 8
+
+/** The newest customer photos on approved reviews (adr/0046 Ek 2026-11-04), each at its product. */
+export async function customerPhotoViews(t: Translate): Promise<CustomerPhotoView[]> {
+  const photos = await latestReviewPhotos(CUSTOMER_PHOTOS)
+  if (photos.length === 0) {
+    return []
+  }
+  const paths = await pathsOf(
+    "product",
+    photos.map((photo) => photo.product.id)
+  )
+  return customerPhotos(photos, paths, t)
 }

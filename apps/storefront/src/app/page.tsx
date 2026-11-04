@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { addToCart } from "@/app/actions/cart"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { faqJsonLd } from "@/lib/seo/faq"
@@ -20,7 +21,12 @@ export default async function HomePage() {
   return (
     <>
       <JsonLd blocks={[...site.home.jsonLd, ...faqJsonLd(sections)]} />
-      <theme.HomePage t={t} view={{ sections }} subscribe={subscribeNewsletter} />
+      <theme.HomePage
+        t={t}
+        view={{ sections }}
+        subscribe={subscribeNewsletter}
+        quickAdd={addToCart}
+      />
     </>
   )
 }

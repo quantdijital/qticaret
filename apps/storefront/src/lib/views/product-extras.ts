@@ -2,6 +2,7 @@ import "server-only"
 import type { ProductCardView, QuestionsView, ReviewsView, Translate } from "@qticaret/ui"
 import type { StoreProduct } from "@qticaret/types"
 import { isStoreApiError } from "@/lib/store-api/errors"
+import { cardFacts } from "@/lib/store-api/extras"
 import {
   listProducts,
   pathsOf,
@@ -9,6 +10,7 @@ import {
   productQuestions,
   productReviews,
 } from "@/lib/store-api/requests"
+import { ratingBars, reviewPhotos, withCardFacts } from "./card-extras"
 import { productCards, variantIdsOf } from "./product"
 import { cardOptions } from "./theme-settings"
 
@@ -40,14 +42,19 @@ export async function reviewsView(productId: string, t: Translate): Promise<Revi
   return {
     average: answer.rating?.average ?? null,
     count: answer.rating?.count ?? answer.count,
-    items: answer.reviews.map((review) => ({
-      rating: review.rating,
-      title: review.title,
-      body: review.body,
-      author: review.author_name ?? t("product.anonymous"),
-      date: DATE.format(new Date(review.created_at)),
-      verified: review.verified_purchase,
-    })),
+    items: answer.reviews.map((review) => {
+      const author = review.author_name ?? t("product.anonymous")
+      return {
+        rating: review.rating,
+        title: review.title,
+        body: review.body,
+        author,
+        date: DATE.format(new Date(review.created_at)),
+        verified: review.verified_purchase,
+        photos: reviewPhotos(review.photos, author, t),
+      }
+    }),
+    distribution: ratingBars(answer.rating?.distribution, t),
   }
 }
 
@@ -84,13 +91,14 @@ export async function relatedOf(product: StoreProduct): Promise<ProductCardView[
   if (others.length === 0) {
     return []
   }
-  const [paths, displays, options] = await Promise.all([
+  const [paths, displays, options, facts] = await Promise.all([
     pathsOf(
       "product",
       others.map((each) => each.id)
     ),
     priceDisplays(variantIdsOf(others)),
     cardOptions(),
+    cardFacts(others.map((each) => each.id)),
   ])
-  return productCards(others, paths, displays, options)
+  return withCardFacts(productCards(others, paths, displays, options), facts)
 }

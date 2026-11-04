@@ -40,6 +40,10 @@ const config: NextConfig = {
   // Product images come as ready-made derivatives (adr/0016); Next does not
   // re-encode them
   images: { unoptimized: true },
+  // A review's photos come through its form's action (adr/0037 §4 Ek
+  // 2026-11-04): up to three, together at most this; the backend checks
+  // each by its bytes. Every other action's body stays small by its schema
+  experimental: { serverActions: { bodySizeLimit: "10mb" } },
   // docs/13 §2.2: no trailing slash; the proxy answers with a single 301
   skipTrailingSlashRedirect: true,
   headers: () =>

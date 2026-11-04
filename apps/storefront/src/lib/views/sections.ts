@@ -10,6 +10,7 @@ import { postCards } from "./posts"
 import {
   brandLinks,
   categoryLinks,
+  customerPhotoViews,
   type ProductContext,
   railCards,
   railProducts,
@@ -133,7 +134,10 @@ async function sectionView(
         : null
     }
     case "reviews": {
-      const reviews = await reviewViews(section.limit, t)
+      const [reviews, photos] = await Promise.all([
+        reviewViews(section.limit, t),
+        customerPhotoViews(t),
+      ])
       return reviews.length > 0
         ? {
             id,
@@ -141,6 +145,8 @@ async function sectionView(
             title: section.title ?? t("home.reviews"),
             reviews,
             more: { label: t("home.all_reviews"), path: "/yorumlar" },
+            // The newest customer photos beside them (adr/0046 Ek 2026-11-04)
+            ...(photos.length > 0 ? { photos } : {}),
           }
         : null
     }

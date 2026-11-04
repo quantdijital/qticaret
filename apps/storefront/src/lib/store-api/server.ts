@@ -43,10 +43,10 @@ export async function storeDelete<T>(path: string, body?: unknown): Promise<T> {
   ).data
 }
 
-/** A call with its own method, query, body or headers (a challenge's answer, an order's key). */
+/** A call with its own method, query, body or headers (a challenge's answer, an order's key, a file). */
 export async function storeCall<T>(
   path: string,
-  options: Pick<StoreRequest, "method" | "query" | "body" | "headers">
+  options: Pick<StoreRequest, "method" | "query" | "body" | "rawBody" | "headers" | "timeoutMs">
 ): Promise<T> {
   const own = await visit()
   return (

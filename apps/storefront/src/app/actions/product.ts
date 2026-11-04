@@ -4,6 +4,7 @@ import { z } from "zod"
 import type { ActionResult, PlaceOrderResult } from "@qticaret/ui"
 import { challengeOf } from "@/lib/checkout/pay"
 import { isStoreApiError } from "@/lib/store-api/errors"
+import { reviewPhotoFiles } from "@/lib/reviews/photos"
 import { storeCall, storePost } from "@/lib/store-api/server"
 
 const PRODUCT_ID = z.string().regex(/^prod_[0-9A-Za-z]{10,64}$/)
@@ -18,6 +19,10 @@ function failure(error: unknown, fallback: string): string {
   if (error.status === 429) {
     return "errors.too_many_requests"
   }
+  // A review's photo its bytes refused: no image, too big, unreadable (adr/0037 §4 Ek 2026-11-04)
+  if (error.messageKey?.startsWith("upload.") || error.messageKey === "media.not_an_image") {
+    return "product.review_photos_invalid"
+  }
   return error.messageKey?.startsWith("reviews.") || error.messageKey?.startsWith("questions.")
     ? error.messageKey
     : fallback
@@ -30,9 +35,13 @@ const Review = z.object({
   body: z.string().trim().min(10).max(2000),
 })
 
-/** A signed-in customer's review of a product they received (F10.6); it waits for the shop. */
+/**
+ * A signed-in customer's review of a product they received (F10.6); it
+ * waits for the shop. Its photos (`photos`, adr/0037 §4 Ek 2026-11-04) go
+ * up first, one by one as their bytes; the review then names them.
+ */
 export async function writeReview(_state: ActionResult, form: FormData): Promise<ActionResult> {
-  const parsed = Review.safeParse(Object.fromEntries(form))
+  const parsed = Review.safeParse(Object.fromEntries([...form].filter(([key]) => key !== "photos")))
   if (!parsed.success) {
     const field = String(parsed.error.issues[0]?.path[0] ?? "")
     return {
@@ -40,11 +49,28 @@ export async function writeReview(_state: ActionResult, form: FormData): Promise
       error: field === "rating" ? "product.rating_required" : "product.review_too_short",
     }
   }
+  const photos = reviewPhotoFiles(form)
+  if (photos === null) {
+    return { ok: false, error: "product.review_photos_invalid" }
+  }
   const { product_id, title, ...rest } = parsed.data
   try {
+    const photoIds: string[] = []
+    for (const photo of photos) {
+      const { photo: uploaded } = await storeCall<{ photo: { id: string } }>(
+        `/store/products/${product_id}/reviews/photos`,
+        {
+          method: "POST",
+          rawBody: { bytes: await photo.arrayBuffer(), type: photo.type },
+          timeoutMs: 30_000,
+        }
+      )
+      photoIds.push(uploaded.id)
+    }
     await storePost(`/store/products/${product_id}/reviews`, {
       ...rest,
       ...(title?.trim() ? { title: title.trim() } : {}),
+      ...(photoIds.length > 0 ? { photo_ids: photoIds } : {}),
     })
   } catch (error) {
     return { ok: false, error: failure(error, "product.review_failed") }
