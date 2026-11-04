@@ -1,0 +1,71 @@
+/* Hallmark · shape: Bento Grid · genre: editorial · theme: Loom (deal 3/3, seed mobile-first-e-commerce-shop-handmade-62be·8d7a0280·2026-11-04·r0) · job: buy · draw: 30e00e
+ * hero: Index (the category bento) · nav: search-led bar over a mega menu · footer: mast · imagery: the shop's own product photographs · signature: a blade's photograph over its ruled spec rows · loom: ecru, signal the shop's own colour
+ * axes: light/roman-serif/cool · posture: committed · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R5 V4 · weakest: S, category tiles carry names only until the shop adds category pictures (adr/0013, adr/0049); the signature rows carry the shop's own facts */
+@import "./tokens.css";
+@import "./base.css" layer(base);
+
+/*
+ * Atölye's values for the contract's names (design.md § Exports; shadcn's
+ * names, wired to Tailwind in `@qticaret/ui/styles.css`), so the
+ * primitives and the base theme's pages it borrows read its paper, ink and
+ * square corners.
+ *
+ * `--primary` holds the signal's value and the signal reads it
+ * (`tokens.css`): the shop's main colour, printed over it at `:root` by
+ * the storefront (adr/0053 §B), lands in `--color-signal` that way. The
+ * fallback is the profile's `#076599`. The shop's faces, corners, buttons,
+ * page colour and accent are not taken (`src/themes/atolye.ts` in the
+ * storefront): this theme's own stand.
+ */
+:root {
+  --primary: oklch(48.6% 0.113 242.1);
+  --primary-foreground: oklch(98.5% 0.006 85);
+
+  --font-sans: var(--font-body);
+  --font-heading: var(--font-display);
+
+  --background: var(--color-paper);
+  --foreground: var(--color-text);
+  --card: var(--color-paper-2);
+  --card-foreground: var(--color-text);
+  --popover: var(--color-field);
+  --popover-foreground: var(--color-text);
+  --secondary: var(--color-paper-3);
+  --secondary-foreground: var(--color-text-2);
+  --muted: var(--color-paper-2);
+  --muted-foreground: var(--color-text-3);
+  --accent: var(--color-paper-2);
+  --accent-foreground: var(--color-text);
+  --destructive: var(--color-error);
+  --border: var(--color-rule);
+  --input: var(--color-edge);
+  --ring: var(--color-focus);
+  --sale: var(--color-discount);
+  --sale-foreground: var(--color-discount-ink);
+  --success: var(--color-ok);
+  --announcement: var(--color-signal);
+  --announcement-foreground: var(--color-signal-ink);
+  --highlight: var(--color-signal);
+  --highlight-foreground: var(--color-signal-ink);
+  --ink: var(--color-band);
+  --ink-foreground: var(--color-band-text);
+  --ink-muted: var(--color-band-text-2);
+
+  --radius: 0px;
+  --radius-scale: 0;
+  --button-radius: 0px;
+  --card-ratio: 4 / 5;
+}
+
+/* On dark paper the ring, the bar and the highlight follow the lifted
+   signal, over the shop's light-paper colour the storefront prints */
+@media (prefers-color-scheme: dark) {
+  html:root {
+    --ring: var(--color-focus);
+    --announcement: var(--color-signal);
+    --announcement-foreground: var(--color-signal-ink);
+    --highlight: var(--color-signal);
+    --highlight-foreground: var(--color-signal-ink);
+  }
+}

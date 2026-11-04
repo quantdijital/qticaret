@@ -326,6 +326,9 @@ importers:
 
   apps/storefront:
     dependencies:
+      '@qticaret/theme-atolye':
+        specifier: workspace:*
+        version: link:../../packages/themes/atolye
       '@qticaret/theme-base':
         specifier: workspace:*
         version: link:../../packages/themes/base
@@ -427,6 +430,46 @@ importers:
       eslint:
         specifier: 10.12.0
         version: 10.12.0(jiti@2.7.0)(supports-color@8.1.1)
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+
+  packages/themes/atolye:
+    dependencies:
+      '@qticaret/theme-base':
+        specifier: workspace:*
+        version: link:../base
+      '@qticaret/types':
+        specifier: workspace:*
+        version: link:../../types
+      '@qticaret/ui':
+        specifier: workspace:*
+        version: link:../../ui
+      lucide-react:
+        specifier: 1.55.0
+        version: 1.55.0(@types/react@19.3.0)(react@19.3.0)
+      radix-ui:
+        specifier: 1.7.0
+        version: 1.7.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+    devDependencies:
+      '@qticaret/config':
+        specifier: workspace:*
+        version: link:../../config
+      '@types/react':
+        specifier: 19.3.0
+        version: 19.3.0
+      eslint:
+        specifier: 10.12.0
+        version: 10.12.0(jiti@2.7.0)(supports-color@8.1.1)
+      eslint-plugin-react-hooks:
+        specifier: 7.1.1
+        version: 7.1.1(eslint@10.12.0(jiti@2.7.0)(supports-color@8.1.1))(supports-color@8.1.1)
+      globals:
+        specifier: 17.13.0
+        version: 17.13.0
+      react:
+        specifier: 19.3.0
+        version: 19.3.0
       typescript:
         specifier: 5.9.3
         version: 5.9.3

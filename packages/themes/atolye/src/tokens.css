@@ -1,0 +1,154 @@
+/*
+ * Atölye's tokens (design.md § Tokens): Hallmark's Loom, ecru colourway,
+ * scaffolded with `theme.mjs scaffold loom` and renamed where the contract's
+ * `@theme inline` names would collide (export-formats.md § shadcn):
+ * ink → text, muted → text-3, accent → signal, sale → discount, success → ok.
+ * Colours, faces, sizes, radii and eases are Tailwind utilities
+ * (`bg-paper`, `text-signal`, `font-display`, `text-section`); the rest stay
+ * plain variables.
+ *
+ * The signal is the shop's own colour (adr/0053 §B): the storefront prints
+ * `--primary` over the theme's in its nonce'd style element, and the signal
+ * reads `--primary` (`styles.css` holds the fallback, `#076599`). On dark
+ * paper the signal keeps the shop's hue at a lightness that reads there.
+ */
+@theme static {
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.25rem;
+  --text-xl: 1.5625rem;
+  --text-2xl: 1.953rem;
+  --text-3xl: 2.441rem;
+  --text-display-s: clamp(2.25rem, 4vw + 0.5rem, 3.75rem);
+  --text-display: clamp(2.5rem, 3.2vw + 1.75rem, 4.5rem);
+  --text-page: clamp(2rem, 1.6vw + 1.5rem, 3rem);
+  --text-section: clamp(2rem, 2.2vw + 1.25rem, 3.25rem);
+  --text-title: clamp(1.25rem, 0.37vw + 1.1667rem, 1.5rem);
+  --text-lead: clamp(1.125rem, 0.185vw + 1.0833rem, 1.25rem);
+  --text-price-hero: clamp(2rem, 0.74vw + 1.8333rem, 2.5rem);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --color-paper: oklch(95.5% 0.014 85);
+  --color-paper-2: oklch(92% 0.022 84);
+  --color-paper-3: oklch(85% 0.032 80);
+  --color-field: oklch(98.5% 0.006 85);
+  --color-text: oklch(21% 0.012 60);
+  --color-text-2: oklch(31% 0.012 60);
+  --color-text-3: oklch(46% 0.014 62);
+  --color-rule: oklch(83% 0.022 84);
+  --color-rule-ink: var(--color-text);
+  --color-edge: var(--color-text-3);
+  --color-signal: var(--primary);
+  --color-signal-2: color-mix(in oklab, var(--color-signal) 75%, var(--color-text));
+  --color-signal-ink: var(--primary-foreground);
+  --color-focus: var(--color-signal);
+  --color-discount: oklch(47% 0.16 27);
+  --color-discount-ink: oklch(98.5% 0.006 85);
+  --color-ok: oklch(44% 0.1 150);
+  --color-warn: oklch(47% 0.1 65);
+  --color-error: oklch(47% 0.17 27);
+  --color-band: var(--color-text);
+  --color-band-text: var(--color-paper);
+  --color-band-text-2: oklch(78% 0.016 80);
+  --color-band-focus: var(--color-paper);
+  --color-whatsapp: oklch(48% 0.12 152);
+  --color-whatsapp-ink: oklch(98.5% 0.006 85);
+  --color-scrim: oklch(21% 0.012 60 / 0.45);
+  --font-display: var(--font-caslon), Georgia, ui-serif, serif;
+  --font-body: var(--font-hanken), Arial, ui-sans-serif, system-ui, sans-serif;
+  --font-outlier: var(--font-body);
+  --radius-card: 0;
+  --radius-pill: 0;
+  --shadow-card: none;
+  --shadow-overlay: 0 8px 20px oklch(21% 0.012 60 / 0.18);
+  --tracking-display: -0.01em;
+}
+:root {
+  color-scheme: light dark;
+  --space-3xs: 2px;
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-2xl: 64px;
+  --space-3xl: 96px;
+  --space-4xl: 144px;
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+  --container: 1440px;
+  --gutter: 64px;
+  --gap-columns: 32px;
+  --section-gap-s: 120px;
+  --section-gap: 144px;
+  --section-gap-l: 176px;
+  --z-base: 1;
+  --z-raised: 10;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-sticky-nav: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+  --z-tooltip: 600;
+  --rule-hair: 1px;
+  --rule-ink: 2px;
+  --display-weight: 400;
+}
+@media (max-width: 60rem) {
+  :root {
+    --gutter: 24px;
+    --section-gap-s: 80px;
+    --section-gap: 96px;
+    --section-gap-l: 120px;
+  }
+}
+@media (max-width: 40rem) {
+  :root {
+    --gutter: 16px;
+    --section-gap-s: 56px;
+    --section-gap: 72px;
+    --section-gap-l: 96px;
+    --gap-columns: 16px;
+  }
+}
+
+/* Warm dark paper (design.md § Variants), derived, never inverted */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: oklch(17% 0.01 60);
+    --color-paper-2: oklch(21% 0.01 60);
+    --color-paper-3: oklch(26% 0.012 60);
+    --color-field: oklch(21% 0.01 60);
+    --color-text: oklch(94% 0.012 85);
+    --color-text-2: oklch(86% 0.012 85);
+    --color-text-3: oklch(72% 0.014 80);
+    --color-rule: oklch(32% 0.01 60);
+    --color-edge: oklch(62% 0.014 80);
+    --color-signal: oklch(72% 0.1 238);
+    --color-signal-2: oklch(78% 0.09 238);
+    --color-signal-ink: oklch(17% 0.01 60);
+    --color-discount: oklch(72% 0.13 27);
+    --color-discount-ink: oklch(17% 0.01 60);
+    --color-ok: oklch(76% 0.11 150);
+    --color-warn: oklch(80% 0.11 75);
+    --color-error: oklch(72% 0.14 27);
+    --color-band: oklch(26% 0.012 60);
+    --color-band-text: oklch(94% 0.012 85);
+    --color-band-text-2: oklch(76% 0.014 80);
+    --color-band-focus: oklch(72% 0.1 238);
+    --color-whatsapp: oklch(70% 0.14 152);
+    --color-whatsapp-ink: oklch(17% 0.01 60);
+    --color-scrim: oklch(8% 0.01 60 / 0.6);
+  }
+  @supports (color: oklch(from red l c h)) {
+    :root {
+      --color-signal: oklch(from var(--primary) 72% min(c, 0.12) h);
+      --color-signal-2: oklch(from var(--primary) 78% min(c, 0.11) h);
+      --color-band-focus: var(--color-signal);
+    }
+  }
+}

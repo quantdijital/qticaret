@@ -1,9 +1,10 @@
+/* The base theme's stylesheet (adr/0057: `STOREFRONT_THEME` unset or `base`) */
 @import "tailwindcss";
 /* Primitives and their token wiring, then the theme's values (docs/19 §3) */
 @import "@qticaret/ui/styles.css";
 @import "@qticaret/theme-base/styles.css";
 /* The faces' files and their variables (self-hosted, docs/21) */
-@import "./fonts.css";
+@import "../app/fonts.css";
 
 /* Workspace packages sit behind node_modules links, which Tailwind skips */
 @source "../../../../packages/ui/src";

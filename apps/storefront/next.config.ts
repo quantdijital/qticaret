@@ -1,4 +1,5 @@
 import type { NextConfig } from "next"
+import { storefrontThemeName, themeEntries } from "./src/themes/choice"
 
 /**
  * Storefront build settings (adr/0046).
@@ -13,7 +14,12 @@ import type { NextConfig } from "next"
  *   a nonce and is set in `src/proxy.ts`.
  * - `public/` (the faces) must be copied next to the standalone server in
  *   the image (F16), as `.next/static` is.
+ * - The theme is chosen here, once per build (adr/0057): `STOREFRONT_THEME`
+ *   names it (unset: `base`) and two aliases point at its entry under
+ *   `src/themes/`, its pages and its stylesheet.
  */
+const THEME = themeEntries(storefrontThemeName(process.env["STOREFRONT_THEME"]))
+
 const SECURITY_HEADERS = [
   // docs/runbooks/kenar-ve-pentest.md: HSTS comes from the application, a
   // year, in production only. Not `includeSubDomains`: the storefront lives
@@ -36,7 +42,18 @@ const config: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
-  transpilePackages: ["@qticaret/types", "@qticaret/ui", "@qticaret/theme-base"],
+  transpilePackages: [
+    "@qticaret/types",
+    "@qticaret/ui",
+    "@qticaret/theme-base",
+    "@qticaret/theme-atolye",
+  ],
+  turbopack: {
+    resolveAlias: {
+      "@qticaret/storefront-theme": THEME.pages,
+      "@qticaret/storefront-theme-styles": THEME.styles,
+    },
+  },
   // Product images come as ready-made derivatives (adr/0016); Next does not
   // re-encode them
   images: { unoptimized: true },

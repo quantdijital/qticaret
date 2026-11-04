@@ -1,0 +1,13 @@
+/* The Atölye theme's stylesheet (adr/0057: `STOREFRONT_THEME=atolye`) */
+@import "tailwindcss";
+/* Primitives and their token wiring, then the theme's values and its own rules */
+@import "@qticaret/ui/styles.css";
+@import "@qticaret/theme-atolye/styles.css";
+/* The faces' files and their variables (self-hosted, docs/21) */
+@import "../app/fonts.css";
+
+/* Workspace packages sit behind node_modules links, which Tailwind skips.
+   The base theme's pages stand in for the ones Atölye has not drawn yet. */
+@source "../../../../packages/ui/src";
+@source "../../../../packages/themes/base/src";
+@source "../../../../packages/themes/atolye/src";

@@ -4,11 +4,11 @@ import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 import { isStaticFile } from "@/lib/seo/paths"
 import { DEFAULT_THEME, THEME_FONTS } from "@/lib/views/theme"
-import { FONT_FILES, fontPreloads } from "../fonts"
+import { FONT_FILES, THEME_OWN_FONT_FILES, fontPreloads } from "../fonts"
 
 const publicDir = fileURLToPath(new URL("../../../public", import.meta.url))
 const css = readFileSync(fileURLToPath(new URL("../fonts.css", import.meta.url)), "utf8")
-const listed = Object.values(FONT_FILES).flat()
+const listed = [...Object.values(FONT_FILES), ...Object.values(THEME_OWN_FONT_FILES)].flat()
 
 describe("the self-hosted faces", () => {
   it("lists exactly the files under public/fonts, each named by its content's hash", () => {
@@ -29,6 +29,9 @@ describe("the self-hosted faces", () => {
     for (const { variable } of Object.values(THEME_FONTS)) {
       expect(css).toContain(`${variable}: "qt-`)
     }
+    // A theme's own faces (adr/0057): the Atölye theme's tokens read these
+    expect(css).toContain('--font-caslon: "qt-caslon"')
+    expect(css).toContain('--font-hanken: "qt-hanken"')
   })
 
   it("serves every file past the proxy (no resolve, no 404 report)", () => {

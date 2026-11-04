@@ -1,0 +1,61 @@
+import { describe, expect, it } from "vitest"
+import { DEFAULT_THEME, themeStyle } from "@/lib/views/theme"
+import { atolyeSettings } from "../atolye"
+import { STOREFRONT_THEMES, storefrontThemeName, themeEntries } from "../choice"
+
+describe("the theme a build is made with (adr/0057)", () => {
+  it("is base when STOREFRONT_THEME is unset or empty", () => {
+    expect(storefrontThemeName(undefined)).toBe("base")
+    expect(storefrontThemeName("")).toBe("base")
+    expect(storefrontThemeName("  ")).toBe("base")
+  })
+
+  it("takes every installed theme by its name", () => {
+    for (const name of STOREFRONT_THEMES) {
+      expect(storefrontThemeName(` ${name} `)).toBe(name)
+    }
+  })
+
+  it("stops the build on an unknown name, naming the ones it knows", () => {
+    expect(() => storefrontThemeName("atolya")).toThrow(/base, atolye.*"atolya"/)
+    expect(() => storefrontThemeName("../base")).toThrow()
+  })
+
+  it("points both aliases at the theme's own entry", () => {
+    expect(themeEntries("atolye")).toEqual({
+      pages: "./src/themes/atolye.ts",
+      styles: "./src/themes/atolye.css",
+    })
+  })
+})
+
+describe("the settings the Atölye theme takes", () => {
+  const chosen = {
+    ...DEFAULT_THEME,
+    colors: { primary: "#7a1a48", accent: "#ffcc00", background: "cool" as const },
+    typography: { heading: "playfair" as const, body: "nunito" as const },
+    radius: "round" as const,
+    buttons: "square" as const,
+    product_card: { ...DEFAULT_THEME.product_card, ratio: "1:1" as const },
+  }
+
+  it("prints the shop's main colour and the cards' shape, nothing of faces, corners or page colour", () => {
+    const style = themeStyle(atolyeSettings(chosen)) ?? ""
+
+    expect(style).toContain("--primary:#7a1a48")
+    expect(style).toContain("--card-ratio:1 / 1")
+    for (const taken of [
+      "--font-",
+      "--radius-scale",
+      "--button-radius",
+      "--background",
+      "--highlight",
+    ]) {
+      expect(style).not.toContain(taken)
+    }
+  })
+
+  it("prints nothing at the defaults", () => {
+    expect(themeStyle(atolyeSettings(DEFAULT_THEME))).toBeNull()
+  })
+})

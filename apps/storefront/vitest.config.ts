@@ -5,6 +5,8 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),
+      // adr/0057: the build's theme; unit tests run the base theme's entry
+      "@qticaret/storefront-theme": fileURLToPath(new URL("./src/themes/base.ts", import.meta.url)),
       // `server-only` throws outside a React Server environment; unit tests
       // exercise the same modules in plain Node
       "server-only": fileURLToPath(new URL("./src/test/server-only.ts", import.meta.url)),

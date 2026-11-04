@@ -7,11 +7,10 @@ import { analyticsTags } from "@/lib/analytics/tags"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { shopView } from "@/lib/views/shop"
-import { themeStyle } from "@/lib/views/theme"
 import { currentTheme } from "@/lib/views/theme-settings"
-import { theme } from "@/theme"
-import { fontPreloads } from "./fonts"
-import "./globals.css"
+import { theme, themeFontPreloads, themeSettingsStyle } from "@/theme"
+// The chosen theme's stylesheet (adr/0057; `next.config.ts` resolves it)
+import "@qticaret/storefront-theme-styles"
 
 // Every page is made per request: prices, stock and the cart are live (adr/0046 §2)
 export const dynamic = "force-dynamic"
@@ -28,9 +27,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     headers(),
     analyticsTags(),
   ])
-  // The shop's theme settings over the theme's own (adr/0053 §B): one style
-  // element with this response's nonce, so the CSP needs no 'unsafe-inline'
-  const style = themeStyle(settings)
+  // The shop's theme settings over the theme's own (adr/0053 §B), those the
+  // theme takes: one style element with this response's nonce, so the CSP
+  // needs no 'unsafe-inline'
+  const style = themeSettingsStyle(settings)
   const nonce = requestHeaders.get("x-nonce") ?? undefined
   // A design preview in the panel's frame is the shop's own look, not a visit
   const preview = (requestHeaders.get("x-qt-url") ?? "").startsWith("/onizleme/")
@@ -38,8 +38,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     <html lang="tr">
       {/* Browser extensions write attributes on <body> before React loads */}
       <body suppressHydrationWarning>
-        {/* The shop's two faces only (`app/fonts.ts`); React puts these in <head> */}
-        {fontPreloads(settings).map((href) => (
+        {/* The faces the page draws in only (`app/fonts.ts`); React puts these in <head> */}
+        {themeFontPreloads(settings).map((href) => (
           <link
             key={href}
             rel="preload"
