@@ -754,7 +754,8 @@
         "catalog.import": "Product import",
         "catalog.export": "Product export",
         "catalog.bulk_edit": "Bulk edit",
-        "customer.data_export": "Customer data export"
+        "customer.data_export": "Customer data export",
+        "tr_address.sync": "Address data update"
       }
     },
     "audit": {
@@ -888,7 +889,8 @@
         "payment": "Payment",
         "refund": "Refund",
         "legal_document": "Legal text",
-        "vat_rate": "VAT rate"
+        "vat_rate": "VAT rate",
+        "tr_address": "Address data"
       }
     },
     "locations": {
@@ -920,6 +922,27 @@
         "label": "Shop threshold (units)",
         "saved": "Low stock threshold saved."
       }
+    },
+    "addressData": {
+      "title": "Address data",
+      "description": "The province, district, neighbourhood and village lists chosen from at checkout and in address forms.",
+      "empty": "No address data is loaded. Shoppers cannot choose a province or district at checkout; update to load it.",
+      "provinces": "Provinces",
+      "districts": "Districts",
+      "neighborhoods": "Neighbourhoods and villages",
+      "source": "Source",
+      "sourceTurkiyeApi": "TürkiyeAPI, dataset {{version}} ({{date}})",
+      "sourceFile": "A file loaded by hand",
+      "lastSync": "Last updated",
+      "downloading": "Downloading from TürkiyeAPI… {{percent}}%",
+      "importing": "Saving… {{percent}}%",
+      "current": "The data is current; TürkiyeAPI has no newer version.",
+      "result": "Updated: {{added}} added, {{updated}} changed, {{removed}} removed.",
+      "done": "The address data was updated.",
+      "failed": "The address data could not be updated; the current data is unchanged.",
+      "attribution": "The data comes from TürkiyeAPI (turkiyeapi.dev): open data from TÜİK and PTT, MIT licensed. A new version is looked for weekly; removed places are not deleted, they leave the lists.",
+      "sync": "Update now",
+      "ownerOnly": "Only the shop owner can update the address data."
     },
     "payments": {
       "title": "Payment",
@@ -1334,7 +1357,8 @@
         "carriers": "Carriers",
         "options": "Options and rates",
         "returns": "Returns",
-        "locations": "Warehouses and stock"
+        "locations": "Warehouses and stock",
+        "addresses": "Address data"
       }
     },
     "integrations": {

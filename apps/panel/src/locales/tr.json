@@ -754,7 +754,8 @@
         "catalog.import": "Ürün içe aktarma",
         "catalog.export": "Ürün dışa aktarma",
         "catalog.bulk_edit": "Toplu düzenleme",
-        "customer.data_export": "Müşteri verisi dışa aktarımı"
+        "customer.data_export": "Müşteri verisi dışa aktarımı",
+        "tr_address.sync": "Adres verisi güncelleme"
       }
     },
     "audit": {
@@ -888,7 +889,8 @@
         "payment": "Ödeme",
         "refund": "Para iadesi",
         "legal_document": "Yasal metin",
-        "vat_rate": "KDV oranı"
+        "vat_rate": "KDV oranı",
+        "tr_address": "Adres verisi"
       }
     },
     "locations": {
@@ -920,6 +922,27 @@
         "label": "Mağaza eşiği (adet)",
         "saved": "Düşük stok eşiği kaydedildi."
       }
+    },
+    "addressData": {
+      "title": "Adres verisi",
+      "description": "Ödeme sayfasında ve adres formlarında seçilen il, ilçe, mahalle ve köy listeleri.",
+      "empty": "Adres verisi yüklenmedi. Müşteriler ödeme sayfasında il ve ilçe seçemez; verileri yüklemek için güncelleyin.",
+      "provinces": "İl",
+      "districts": "İlçe",
+      "neighborhoods": "Mahalle ve köy",
+      "source": "Kaynak",
+      "sourceTurkiyeApi": "TürkiyeAPI, {{version}} veri seti ({{date}})",
+      "sourceFile": "Elle yüklenen dosya",
+      "lastSync": "Son güncelleme",
+      "downloading": "TürkiyeAPI'den indiriliyor… %{{percent}}",
+      "importing": "Kaydediliyor… %{{percent}}",
+      "current": "Veriler güncel; TürkiyeAPI'de yeni bir sürüm yok.",
+      "result": "Güncellendi: {{added}} eklendi, {{updated}} değişti, {{removed}} kaldırıldı.",
+      "done": "Adres verisi güncellendi.",
+      "failed": "Adres verisi güncellenemedi; mevcut veriler değişmedi.",
+      "attribution": "Veriler TürkiyeAPI'den (turkiyeapi.dev) gelir: TÜİK ve PTT kaynaklı açık veri, MIT lisanslı. Haftada bir yeni sürüm olup olmadığına bakılır; kaldırılan yerler silinmez, listeden çıkar.",
+      "sync": "Şimdi güncelle",
+      "ownerOnly": "Adres verisini yalnızca mağaza sahibi güncelleyebilir."
     },
     "payments": {
       "title": "Ödeme",
@@ -1334,7 +1357,8 @@
         "carriers": "Kargo firmaları",
         "options": "Seçenekler ve ücretler",
         "returns": "İade",
-        "locations": "Depolar ve stok"
+        "locations": "Depolar ve stok",
+        "addresses": "Adres verisi"
       }
     },
     "integrations": {

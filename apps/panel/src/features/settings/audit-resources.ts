@@ -56,6 +56,8 @@ const GROUPS = {
     "accounting_package",
     // adr/0007 Ek 2026-11-04: the KDV rates and the default
     "vat_rate",
+    // adr/0008 Ek 2026-11-04: the address data's imports (TürkiyeAPI, a file)
+    "tr_address",
     "async_job",
     // F13.1: the contracts and policies, their drafts and publishing
     "legal_document",
