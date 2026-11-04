@@ -3,6 +3,7 @@ import {
   ChartColumnBig,
   FileText,
   FolderTree,
+  Images,
   LayoutDashboard,
   Link2,
   ListTree,
@@ -81,6 +82,8 @@ export const NAV_GROUPS: NavGroup[] = [
       { key: "themeEditor", to: "/storefront/editor", icon: Paintbrush },
       { key: "menus", to: "/storefront/menus", icon: ListTree },
       { key: "content", to: "/content", icon: FileText },
+      // Every picture the shop uploaded; the pickers of every image field open it too
+      { key: "media", to: "/media", icon: Images },
       { key: "storefrontPreferences", to: "/storefront/preferences", icon: SlidersHorizontal },
     ],
   },

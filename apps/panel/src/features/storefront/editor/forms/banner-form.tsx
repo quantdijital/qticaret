@@ -1,5 +1,7 @@
-import { ImagePlus, Loader2 } from "lucide-react"
+import { ImagePlus } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { MediaPicker } from "@/components/patterns/media-picker"
 import { Button } from "@/components/ui/button"
 import { EmptyLine, RowActions } from "@/features/settings/components/storefront-rows"
 import type { BannerSection, BannerSlide } from "@/features/storefront/api/layout"
@@ -8,7 +10,6 @@ import { F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { ImageField } from "./image-field"
-import { useImageUpload } from "./use-image-upload"
 import { LinkField } from "./link-field"
 
 const B = "storefront.editor.banner"
@@ -27,12 +28,7 @@ export function BannerForm({ section, problems, onChange }: SectionFormProps<Ban
     )
   }
   // A slide starts from its image: there is none without one
-  const upload = useImageUpload((url) => {
-    setSlides([
-      ...section.slides,
-      { image: { url, alt: null }, heading: null, text: null, link: null },
-    ])
-  })
+  const [picking, setPicking] = useState(false)
   const full = section.slides.length >= L.slides
   return (
     <div className="flex flex-col gap-4">
@@ -121,19 +117,38 @@ export function BannerForm({ section, problems, onChange }: SectionFormProps<Ban
         </p>
       ) : null}
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-        {upload.input}
         <Button
           type="button"
           size="sm"
           variant="outline"
-          disabled={full || upload.uploading}
-          onClick={upload.choose}
+          disabled={full}
+          onClick={() => {
+            setPicking(true)
+          }}
         >
-          {upload.uploading ? <Loader2 className="animate-spin" /> : <ImagePlus />}
+          <ImagePlus />
           {t(`${B}.add`)}
         </Button>
         <span className="text-xs text-muted-foreground">{t(`${B}.hint`, { max: L.slides })}</span>
       </div>
+      <MediaPicker
+        open={picking}
+        onOpenChange={setPicking}
+        multiple
+        max={Math.max(1, L.slides - section.slides.length)}
+        title={t(`${B}.add`)}
+        onSelect={(assets) => {
+          setSlides([
+            ...section.slides,
+            ...assets.map((asset) => ({
+              image: { url: asset.url, alt: asset.alt },
+              heading: null,
+              text: null,
+              link: null,
+            })),
+          ])
+        }}
+      />
     </div>
   )
 }

@@ -1,9 +1,8 @@
 import type { Editor } from "@tiptap/react"
-import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { toast } from "sonner"
 import { Field } from "@/components/patterns/form-section"
+import { MediaField } from "@/components/patterns/media-field"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -15,17 +14,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { errorText } from "@/lib/errors"
-import { IMAGE_ACCEPT, uploadContentImage } from "./upload"
 
 // Mounted on each opening: a selected image's own alt text, else a new image from scratch
 function ImageForm({ editor, onDone }: { editor: Editor; onDone: () => void }) {
   const { t } = useTranslation()
   const selected = editor.isActive("image")
-  const [file, setFile] = useState<File | null>(null)
+  const [src, setSrc] = useState<string | null>(null)
   const [alt, setAlt] = useState(selected ? String(editor.getAttributes("image")["alt"] ?? "") : "")
-  const [busy, setBusy] = useState(false)
-  const submit = async () => {
+  const submit = () => {
     if (selected) {
       editor
         .chain()
@@ -35,22 +31,30 @@ function ImageForm({ editor, onDone }: { editor: Editor; onDone: () => void }) {
       onDone()
       return
     }
-    if (!file) {
+    if (!src) {
       return
     }
-    setBusy(true)
-    try {
-      const src = await uploadContentImage(file)
-      editor.chain().focus().setImage({ src, alt: alt.trim() }).run()
-      onDone()
-    } catch (failure) {
-      toast.error(errorText(t, failure))
-    } finally {
-      setBusy(false)
-    }
+    editor.chain().focus().setImage({ src, alt: alt.trim() }).run()
+    onDone()
   }
+  const altField = (
+    <Field
+      label={t("content.editor.image.alt")}
+      htmlFor="content-image-alt"
+      hint={t("content.editor.image.altHint")}
+    >
+      <Input
+        id="content-image-alt"
+        value={alt}
+        maxLength={500}
+        onChange={(event) => {
+          setAlt(event.target.value)
+        }}
+      />
+    </Field>
+  )
   return (
-    <DialogContent size="sm">
+    <DialogContent size="md">
       <DialogHeader>
         <DialogTitle>
           {t(selected ? "content.editor.image.editTitle" : "content.editor.image.title")}
@@ -61,40 +65,31 @@ function ImageForm({ editor, onDone }: { editor: Editor; onDone: () => void }) {
         className="flex flex-col gap-6"
         onSubmit={(event) => {
           event.preventDefault()
-          void submit()
+          submit()
         }}
       >
         <DialogBody>
-          {selected ? null : (
-            <Field label={t("content.editor.image.file")} htmlFor="content-image-file" required>
-              <Input
-                id="content-image-file"
-                type="file"
-                accept={IMAGE_ACCEPT}
-                onChange={(event) => {
-                  setFile(event.target.files?.[0] ?? null)
-                }}
-              />
-            </Field>
-          )}
-          <Field
-            label={t("content.editor.image.alt")}
-            htmlFor="content-image-alt"
-            hint={t("content.editor.image.altHint")}
-          >
-            <Input
-              id="content-image-alt"
-              value={alt}
-              maxLength={500}
-              onChange={(event) => {
-                setAlt(event.target.value)
+          {selected ? (
+            altField
+          ) : (
+            <MediaField
+              id="content-image"
+              label={t("content.editor.image.file")}
+              value={src}
+              onChange={(asset) => {
+                setSrc(asset?.url ?? null)
+                // A library image's own alt text fills an empty one
+                if (asset?.alt && !alt.trim()) {
+                  setAlt(asset.alt)
+                }
               }}
-            />
-          </Field>
+            >
+              {altField}
+            </MediaField>
+          )}
         </DialogBody>
         <DialogFooter>
-          <Button type="submit" disabled={busy || (!selected && !file)}>
-            {busy ? <Loader2 className="animate-spin" /> : null}
+          <Button type="submit" disabled={!selected && !src}>
             {t(selected ? "common.save" : "content.editor.image.insert")}
           </Button>
         </DialogFooter>
@@ -104,9 +99,10 @@ function ImageForm({ editor, onDone }: { editor: Editor; onDone: () => void }) {
 }
 
 /**
- * Adds an image to the text, uploaded to the shop's media library, with
- * what it shows in words (alt text, docs/13 §8); on a selected image,
- * changes only its alt text.
+ * Adds an image to the text from the shop's media library (chosen there,
+ * uploaded from this computer or brought in from an address), with what it
+ * shows in words (alt text, docs/13 §8); on a selected image, changes only
+ * its alt text.
  */
 export function ImageDialog({
   editor,

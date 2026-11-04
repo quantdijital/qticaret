@@ -28,6 +28,8 @@ export const SECTIONS = [
   // Maintenance mode and its bypass link (adr/0053)
   "/storefront/preferences?part=maintenance",
   "/content",
+  // The media library: every picture the shop uploaded or brought in
+  "/media",
   // The blog's categories and tags (adr/0019 ek 2026-11-03)
   "/content?kind=category",
   "/content?kind=tag",

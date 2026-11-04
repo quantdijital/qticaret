@@ -59,7 +59,8 @@
     "themeEditor": "Theme editor",
     "storefrontPreferences": "Storefront preferences",
     "bulkMessages": "Bulk messages",
-    "paymentLinks": "Payment links"
+    "paymentLinks": "Payment links",
+    "media": "Media library"
   },
   "login": {
     "title": "Sign in",
@@ -445,12 +446,7 @@
         "lightHint": "Used on white or light backgrounds: the top of the storefront, e-mails and Google.",
         "dark": "Logo (dark background)",
         "darkHint": "A version that reads on dark backgrounds; optional.",
-        "none": "No logo",
-        "upload": "Upload logo",
-        "replace": "Replace",
-        "remove": "Remove",
-        "removeOf": "{{logo}}: remove",
-        "choose": "Choose {{logo}}"
+        "none": "No logo"
       },
       "region": "Region and units",
       "regionHint": "How dates and product measurements are kept.",
@@ -637,11 +633,7 @@
         "title": "Share image",
         "hint": "Shown when a link to a page without its own image is shared on WhatsApp, Instagram or X.",
         "none": "No share image",
-        "size": "1200×630 pixels recommended; your logo and shop name in the middle, with space at the edges.",
-        "choose": "Choose a share image",
-        "add": "Upload image",
-        "replace": "Replace image",
-        "remove": "Remove"
+        "size": "1200×630 pixels recommended; your logo and shop name in the middle, with space at the edges."
       },
       "home": {
         "title": "Home page",
@@ -2794,7 +2786,9 @@
       "altMissing_other": "{{count}} images have no alt text",
       "altComplete": "Every image has an alt text",
       "versionsReady": "Versions ready",
-      "versionsPending": "Preparing"
+      "versionsPending": "Preparing",
+      "fromLibrary": "Choose from library",
+      "fromLibraryHint": "Add images uploaded before to this product."
     },
     "wizard": {
       "pageTitle": "New product",
@@ -5665,9 +5659,6 @@
     "saved": "Brand saved.",
     "logo": "Logo",
     "logoHint": "A square or wide PNG, WebP or AVIF with a transparent background works best.",
-    "logoUpload": "Upload logo",
-    "logoChange": "Change logo",
-    "logoRemove": "Remove logo",
     "logoSaved": "Logo saved.",
     "logoRemoved": "Logo removed.",
     "productCount_one": "{{products}} product",
@@ -5679,7 +5670,8 @@
     "field": "Brand",
     "fieldHint": "Shown on the product page and in the search result title.",
     "pick": "Choose a brand",
-    "noneFound": "No brand found."
+    "noneFound": "No brand found.",
+    "noLogo": "No logo"
   },
   "address": {
     "province": "Province",
@@ -5846,9 +5838,6 @@
     "cover": "Cover image",
     "coverHint": "Shown in lists and when shared on social media.",
     "noCover": "No cover image",
-    "addCover": "Upload image",
-    "replaceCover": "Replace image",
-    "removeCover": "Remove",
     "coverAltHint": "Briefly describe what the image shows.",
     "saved": "Saved.",
     "publish": "Publish",
@@ -5904,7 +5893,7 @@
       "image": {
         "title": "Insert image",
         "editTitle": "Image's alt text",
-        "hint": "The image is uploaded to the shop's media library, its metadata removed.",
+        "hint": "Choose the image from the library, upload it from your computer or bring it in from an address; its metadata is removed on upload.",
         "file": "Image",
         "alt": "Alt text",
         "altHint": "Briefly describe what the image shows; screen readers and search engines read it.",
@@ -6766,12 +6755,6 @@
         "alt": "Image description",
         "altHint": "For visitors who cannot see it and for search engines: say briefly what it shows.",
         "noImage": "No image",
-        "upload": "Upload image",
-        "uploadOf": "Upload an image for {{label}}",
-        "replace": "Replace",
-        "replaceOf": "Replace the image for {{label}}",
-        "removeImage": "Remove image",
-        "chooseImage": "Choose an image file",
         "limit": "How many to show",
         "limitHint": "Between 1 and {{max}}."
       },
@@ -7623,6 +7606,115 @@
       "canceledBy": "{{who}}, {{date}}",
       "note": "Note",
       "noNote": "No note."
+    }
+  },
+  "media": {
+    "description": "Every picture the shop uploaded or brought in from an address; products, pages, logos and the storefront choose from here.",
+    "search": "Search by file name or alt text",
+    "empty": "The library has no images yet.",
+    "noMatch": "No image matches the search.",
+    "uploadAction": "Upload images",
+    "upload": {
+      "title": "Upload images",
+      "description": "Location and camera details are removed on upload; images stay in the library until you delete them.",
+      "drop": "Drag images here or click to choose",
+      "dropOne": "Drag an image here or click to choose",
+      "types": "JPG, PNG, WebP or AVIF; 10 MB each at most. SVG and GIF are not accepted.",
+      "choose": "Choose images from this computer",
+      "progress": "Upload progress",
+      "count": "{{done}} / {{total}}",
+      "done_one": "{{count}} image added to the library.",
+      "done_other": "{{count}} images added to the library.",
+      "problem": {
+        "type": "This file type cannot be uploaded",
+        "size": "Larger than 10 MB"
+      },
+      "status": {
+        "waiting": "Waiting",
+        "uploading": "Uploading",
+        "done": "Added",
+        "failed": "Not uploaded"
+      }
+    },
+    "picker": {
+      "title": "Choose an image",
+      "titleMany": "Choose images",
+      "description": "Choose from the library, upload from your computer or bring one in from an address. Uploaded and imported images stay in the library.",
+      "library": "Library",
+      "upload": "Upload from computer",
+      "addressTab": "Address",
+      "empty": "The library has no images yet; upload from your computer or bring one in from an address.",
+      "chosen_one": "{{count}} image chosen",
+      "chosen_other": "{{count}} images chosen",
+      "choose": "Choose",
+      "chooseUploaded_one": "Choose the uploaded image",
+      "chooseUploaded_other": "Choose the {{count}} uploaded images",
+      "address": "Image address",
+      "addressHint": "The image is copied from this address into the library; pages show the shop's own copy. JPG, PNG, WebP or AVIF, 10 MB at most.",
+      "import": "Bring in and choose"
+    },
+    "field": {
+      "empty": "No image chosen",
+      "choose": "Choose image",
+      "replace": "Replace",
+      "remove": "Remove",
+      "chooseOf": "{{label}}: choose an image",
+      "replaceOf": "{{label}}: replace the image",
+      "removeOf": "{{label}}: remove the image"
+    },
+    "detail": {
+      "title": "Image",
+      "filename": "File name",
+      "filenameHint": "The name shown in the library; the image's address does not change.",
+      "alt": "Alt text",
+      "altHint": "Tells people who cannot see the image, and image search, what it shows; offered to fields that choose this image.",
+      "saved": "Image saved.",
+      "uploadedBy": "Uploaded by",
+      "uploadedAt": "Uploaded",
+      "address": "Address",
+      "copy": "Copy the address",
+      "copied": "Address copied.",
+      "copyFailed": "The address could not be copied; select it and copy it by hand.",
+      "usage": "Where it is used",
+      "inUse": "An image in use cannot be deleted.",
+      "delete": "Delete image",
+      "deleteTitle": "Delete this image?",
+      "deleteDescription": "“{{name}}” and its files are deleted for good; this cannot be undone.",
+      "deleteConfirm": "Delete image",
+      "deleted": "Image deleted."
+    },
+    "usage": {
+      "none": "Not used anywhere.",
+      "unnamed": "Unnamed record",
+      "storefrontLink": "Storefront design",
+      "logoLink": "Shop logo",
+      "shareImageLink": "The shop's share image",
+      "seoPage": "Share image: {{page}}",
+      "orderText": "Past orders",
+      "kinds": {
+        "product": "Product image",
+        "product_description": "Product description",
+        "brand": "Brand logo",
+        "content": "Page or post",
+        "landing": "Landing page",
+        "bulk_message": "Bulk message",
+        "storefront": "Storefront",
+        "logo": "Logo",
+        "share_image": "Share image",
+        "seo": "SEO",
+        "order": "Order"
+      },
+      "seoTypes": {
+        "product": "product page",
+        "category": "category page",
+        "collection": "collection page",
+        "brand": "brand page",
+        "page": "page",
+        "post": "blog post",
+        "landing": "landing page",
+        "post_category": "blog category",
+        "post_tag": "blog tag"
+      }
     }
   }
 }

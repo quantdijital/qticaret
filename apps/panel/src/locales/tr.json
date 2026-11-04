@@ -59,7 +59,8 @@
     "themeEditor": "Tema düzenleyici",
     "storefrontPreferences": "Vitrin tercihleri",
     "bulkMessages": "Toplu ileti",
-    "paymentLinks": "Ödeme bağlantıları"
+    "paymentLinks": "Ödeme bağlantıları",
+    "media": "Ortam kütüphanesi"
   },
   "login": {
     "title": "Giriş yap",
@@ -445,12 +446,7 @@
         "lightHint": "Beyaz ya da açık renkli zeminde kullanılır: vitrinin üstü, e-postalar ve Google.",
         "dark": "Logo (koyu zemin)",
         "darkHint": "Koyu zeminde okunan bir sürüm; isteğe bağlı.",
-        "none": "Logo yok",
-        "upload": "Logo yükle",
-        "replace": "Değiştir",
-        "remove": "Kaldır",
-        "removeOf": "{{logo}}: kaldır",
-        "choose": "{{logo}} seç"
+        "none": "Logo yok"
       },
       "region": "Bölge ve birimler",
       "regionHint": "Tarihlerin ve ürün ölçülerinin nasıl tutulacağı.",
@@ -637,11 +633,7 @@
         "title": "Paylaşım görseli",
         "hint": "Kendi görseli olmayan bir sayfanın bağlantısı WhatsApp, Instagram ya da X'te paylaşıldığında bu görsel görünür.",
         "none": "Paylaşım görseli yok",
-        "size": "1200×630 piksel önerilir; logonuz ve mağaza adınız ortada, kenarlarda boşluk bırakın.",
-        "choose": "Paylaşım görseli seç",
-        "add": "Görsel yükle",
-        "replace": "Görseli değiştir",
-        "remove": "Kaldır"
+        "size": "1200×630 piksel önerilir; logonuz ve mağaza adınız ortada, kenarlarda boşluk bırakın."
       },
       "home": {
         "title": "Ana sayfa",
@@ -2794,7 +2786,9 @@
       "altMissing_other": "{{count}} görselin alt metni eksik",
       "altComplete": "Tüm görsellerin alt metni var",
       "versionsReady": "Sürümler hazır",
-      "versionsPending": "Hazırlanıyor"
+      "versionsPending": "Hazırlanıyor",
+      "fromLibrary": "Kütüphaneden seç",
+      "fromLibraryHint": "Daha önce yüklenen görselleri bu ürüne ekleyin."
     },
     "wizard": {
       "pageTitle": "Yeni ürün",
@@ -5665,9 +5659,6 @@
     "saved": "Marka kaydedildi.",
     "logo": "Logo",
     "logoHint": "Kare ya da yatay, şeffaf arka planlı PNG, WebP ya da AVIF önerilir.",
-    "logoUpload": "Logo yükle",
-    "logoChange": "Logoyu değiştir",
-    "logoRemove": "Logoyu kaldır",
     "logoSaved": "Logo kaydedildi.",
     "logoRemoved": "Logo kaldırıldı.",
     "productCount_one": "{{products}} ürün",
@@ -5679,7 +5670,8 @@
     "field": "Marka",
     "fieldHint": "Ürün sayfasında ve arama sonucu başlığında görünür.",
     "pick": "Marka seçin",
-    "noneFound": "Marka bulunamadı."
+    "noneFound": "Marka bulunamadı.",
+    "noLogo": "Logo yok"
   },
   "address": {
     "province": "İl",
@@ -5846,9 +5838,6 @@
     "cover": "Kapak görseli",
     "coverHint": "Listelerde ve sosyal medyada paylaşılınca görünür.",
     "noCover": "Kapak görseli yok",
-    "addCover": "Görsel yükle",
-    "replaceCover": "Görseli değiştir",
-    "removeCover": "Kaldır",
     "coverAltHint": "Görselde ne olduğunu kısaca yazın.",
     "saved": "Kaydedildi.",
     "publish": "Yayınla",
@@ -5904,7 +5893,7 @@
       "image": {
         "title": "Görsel ekle",
         "editTitle": "Görselin alt metni",
-        "hint": "Görsel mağazanın medya kütüphanesine yüklenir; meta verisi temizlenir.",
+        "hint": "Görseli kütüphaneden seçin, bilgisayarınızdan yükleyin ya da bir adresten alın; yüklenirken meta verisi temizlenir.",
         "file": "Görsel",
         "alt": "Alt metin",
         "altHint": "Görselde ne olduğunu kısaca yazın; görmeyenler ve arama motorları bunu okur.",
@@ -6766,12 +6755,6 @@
         "alt": "Görselin açıklaması",
         "altHint": "Görmeyen ziyaretçiler ve arama motorları için görselde ne olduğunu kısaca yazın.",
         "noImage": "Görsel yok",
-        "upload": "Görsel yükle",
-        "uploadOf": "{{label}} için görsel yükle",
-        "replace": "Değiştir",
-        "replaceOf": "{{label}} görselini değiştir",
-        "removeImage": "Görseli kaldır",
-        "chooseImage": "Görsel dosyası seç",
         "limit": "Gösterilecek sayı",
         "limitHint": "1 ile {{max}} arası."
       },
@@ -7623,6 +7606,115 @@
       "canceledBy": "{{who}}, {{date}}",
       "note": "Not",
       "noNote": "Not yok."
+    }
+  },
+  "media": {
+    "description": "Mağazanın yüklediği ya da adresten aldığı bütün görseller; ürünler, sayfalar, logolar ve vitrin buradan seçer.",
+    "search": "Dosya adı ya da alt metinle ara",
+    "empty": "Kütüphanede henüz görsel yok.",
+    "noMatch": "Aramaya uyan görsel yok.",
+    "uploadAction": "Görsel yükle",
+    "upload": {
+      "title": "Görsel yükle",
+      "description": "Görseller yüklenirken konum ve kamera bilgileri silinir; kütüphanede siz silene kadar kalır.",
+      "drop": "Görselleri buraya sürükleyin ya da seçmek için tıklayın",
+      "dropOne": "Görseli buraya sürükleyin ya da seçmek için tıklayın",
+      "types": "JPG, PNG, WebP ya da AVIF; her biri en çok 10 MB. SVG ve GIF kabul edilmez.",
+      "choose": "Bilgisayardan görsel seç",
+      "progress": "Yükleme durumu",
+      "count": "{{done}} / {{total}}",
+      "done_one": "{{count}} görsel kütüphaneye eklendi.",
+      "done_other": "{{count}} görsel kütüphaneye eklendi.",
+      "problem": {
+        "type": "Bu dosya türü yüklenemez",
+        "size": "10 MB'tan büyük"
+      },
+      "status": {
+        "waiting": "Sırada",
+        "uploading": "Yükleniyor",
+        "done": "Eklendi",
+        "failed": "Yüklenemedi"
+      }
+    },
+    "picker": {
+      "title": "Görsel seç",
+      "titleMany": "Görselleri seç",
+      "description": "Kütüphaneden seçin, bilgisayarınızdan yükleyin ya da bir adresten alın. Yüklenen ve alınan görseller kütüphanede kalır.",
+      "library": "Kütüphane",
+      "upload": "Bilgisayardan yükle",
+      "addressTab": "Adres",
+      "empty": "Kütüphanede henüz görsel yok; bilgisayardan yükleyin ya da bir adresten alın.",
+      "chosen_one": "{{count}} görsel seçildi",
+      "chosen_other": "{{count}} görsel seçildi",
+      "choose": "Seç",
+      "chooseUploaded_one": "Yüklenen görseli seç",
+      "chooseUploaded_other": "Yüklenen {{count}} görseli seç",
+      "address": "Görselin adresi",
+      "addressHint": "Görsel bu adresten kütüphaneye kopyalanır; sayfalar mağazanın kendi kopyasını gösterir. JPG, PNG, WebP ya da AVIF, en çok 10 MB.",
+      "import": "Kütüphaneye al ve seç"
+    },
+    "field": {
+      "empty": "Görsel seçilmedi",
+      "choose": "Görsel seç",
+      "replace": "Değiştir",
+      "remove": "Kaldır",
+      "chooseOf": "{{label}}: görsel seç",
+      "replaceOf": "{{label}}: görseli değiştir",
+      "removeOf": "{{label}}: görseli kaldır"
+    },
+    "detail": {
+      "title": "Görsel",
+      "filename": "Dosya adı",
+      "filenameHint": "Kütüphanede görünen ad; görselin adresi değişmez.",
+      "alt": "Alt metin",
+      "altHint": "Görseli göremeyenlere ve görsel aramasına ne gösterdiğini anlatır; bu görseli seçen alanlara önerilir.",
+      "saved": "Görsel kaydedildi.",
+      "uploadedBy": "Yükleyen",
+      "uploadedAt": "Yüklenme",
+      "address": "Adres",
+      "copy": "Adresi kopyala",
+      "copied": "Adres kopyalandı.",
+      "copyFailed": "Adres kopyalanamadı; elle seçip kopyalayın.",
+      "usage": "Kullanıldığı yerler",
+      "inUse": "Kullanılan görsel silinemez.",
+      "delete": "Görseli sil",
+      "deleteTitle": "Görsel silinsin mi?",
+      "deleteDescription": "“{{name}}” ve dosyaları kalıcı olarak silinir; bu işlem geri alınamaz.",
+      "deleteConfirm": "Görseli sil",
+      "deleted": "Görsel silindi."
+    },
+    "usage": {
+      "none": "Hiçbir yerde kullanılmıyor.",
+      "unnamed": "Adsız kayıt",
+      "storefrontLink": "Vitrin tasarımı",
+      "logoLink": "Mağaza logosu",
+      "shareImageLink": "Mağazanın paylaşım görseli",
+      "seoPage": "Paylaşım görseli: {{page}}",
+      "orderText": "Geçmiş siparişler",
+      "kinds": {
+        "product": "Ürün görseli",
+        "product_description": "Ürün açıklaması",
+        "brand": "Marka logosu",
+        "content": "Sayfa ya da yazı",
+        "landing": "Açılış sayfası",
+        "bulk_message": "Toplu ileti",
+        "storefront": "Vitrin",
+        "logo": "Logo",
+        "share_image": "Paylaşım görseli",
+        "seo": "SEO",
+        "order": "Sipariş"
+      },
+      "seoTypes": {
+        "product": "ürün sayfası",
+        "category": "kategori sayfası",
+        "collection": "koleksiyon sayfası",
+        "brand": "marka sayfası",
+        "page": "sayfa",
+        "post": "blog yazısı",
+        "landing": "açılış sayfası",
+        "post_category": "blog kategorisi",
+        "post_tag": "blog etiketi"
+      }
     }
   }
 }

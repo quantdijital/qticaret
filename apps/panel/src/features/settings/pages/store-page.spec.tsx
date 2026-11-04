@@ -101,7 +101,9 @@ describe("StorePage", () => {
     const brand = card("Mağaza adı ve logo")
 
     await userEvent.type(name, " Evi")
-    await userEvent.click(within(brand).getByRole("button", { name: "Logo (açık zemin): kaldır" }))
+    await userEvent.click(
+      within(brand).getByRole("button", { name: "Logo (açık zemin): görseli kaldır" })
+    )
     await userEvent.click(within(brand).getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {

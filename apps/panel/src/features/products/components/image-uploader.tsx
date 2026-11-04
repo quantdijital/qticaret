@@ -1,16 +1,16 @@
-import { ImagePlus, Loader2, Star, Trash2 } from "lucide-react"
+import { FolderOpen, ImagePlus, Loader2, Star, Trash2 } from "lucide-react"
 import { useState } from "react"
 import type { DragEvent } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { MediaPicker } from "@/components/patterns/media-picker"
 import { Button } from "@/components/ui/button"
+import { IMAGE_ACCEPT as ACCEPT } from "@/features/media/api/media"
 import { errorText } from "@/lib/errors"
 import { registerMedia } from "@/features/products/api/media"
 import { sdk } from "@/lib/sdk"
 import { cn } from "@/lib/utils"
 
-// What the server takes (docs/04 upload checks); it checks the bytes again
-const ACCEPT = "image/jpeg,image/png,image/webp,image/avif"
 export const MAX_IMAGES = 20
 
 export interface UploadedImage {
@@ -80,9 +80,10 @@ export function ImageUploader({
 }: ImageUploaderProps) {
   const { t } = useTranslation()
   const [busy, setBusy] = useState(false)
+  const [picking, setPicking] = useState(false)
+  const room = MAX_IMAGES - images.length
 
   const upload = async (files: File[]) => {
-    const room = MAX_IMAGES - images.length
     if (files.length === 0 || room <= 0) {
       return
     }
@@ -109,6 +110,36 @@ export function ImageUploader({
   return (
     <div className="flex flex-col gap-5">
       <DropZone onFiles={(files) => void upload(files)} busy={busy || disabled} />
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={busy || disabled || room <= 0}
+          onClick={() => {
+            setPicking(true)
+          }}
+        >
+          <FolderOpen />
+          {t("products.media.fromLibrary")}
+        </Button>
+        <span className="text-xs text-muted-foreground">{t("products.media.fromLibraryHint")}</span>
+      </div>
+      <MediaPicker
+        open={picking}
+        onOpenChange={setPicking}
+        multiple
+        max={Math.max(1, room)}
+        title={t("products.media.fromLibrary")}
+        onSelect={(assets) => {
+          // A picture the product has already is not added twice
+          const shown = new Set(images.map((image) => image.url))
+          const fresh = assets.filter((asset) => !shown.has(asset.url)).slice(0, room)
+          if (fresh.length > 0) {
+            onAdd(fresh.map((asset) => ({ id: asset.file_id ?? asset.id, url: asset.url })))
+          }
+        }}
+      />
       {images.length > 0 ? (
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 2xl:grid-cols-6">
           {images.map((image, index) => (

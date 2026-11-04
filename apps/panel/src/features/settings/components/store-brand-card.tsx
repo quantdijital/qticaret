@@ -1,19 +1,15 @@
 import type { AppearanceSettings } from "@qticaret/types"
-import { ImagePlus, Loader2, Trash2 } from "lucide-react"
-import { useRef, useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
-import { Button } from "@/components/ui/button"
+import { MediaField } from "@/components/patterns/media-field"
 import { Input } from "@/components/ui/input"
-import { IMAGE_ACCEPT, uploadContentImage } from "@/features/content/editor/upload"
 import { useSaveAppearance } from "@/features/settings/api/appearance"
 import { useRenameStore } from "@/features/settings/api/store"
 import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@/lib/forms"
-import { cn } from "@/lib/utils"
 
 const B = "settings.store.brand"
 
@@ -37,7 +33,7 @@ const GROUND: Record<Tone, string> = {
   dark: "bg-foreground text-background/70 dark:bg-card dark:text-muted-foreground",
 }
 
-/** One logo: what it looks like on its ground, and its upload, replace and remove. */
+/** One logo on its ground: chosen from the media library, replaced or taken off. */
 function LogoSlot({
   tone,
   url,
@@ -48,75 +44,19 @@ function LogoSlot({
   onChange: (url: string) => void
 }) {
   const { t } = useTranslation()
-  const picker = useRef<HTMLInputElement>(null)
-  const [uploading, setUploading] = useState(false)
-  const upload = async (file: File | undefined) => {
-    if (!file) {
-      return
-    }
-    setUploading(true)
-    try {
-      onChange(await uploadContentImage(file))
-    } catch (failure) {
-      toast.error(errorText(t, failure))
-    } finally {
-      setUploading(false)
-    }
-  }
   return (
-    <div className="flex min-w-0 flex-col gap-2">
-      <span className="text-sm font-medium">{t(`${B}.${tone}`)}</span>
-      <div
-        className={cn(
-          "flex h-24 items-center justify-center rounded-md border p-3 text-xs",
-          GROUND[tone]
-        )}
-      >
-        {url ? (
-          <img src={url} alt={t(`${B}.${tone}`)} className="max-h-full max-w-full object-contain" />
-        ) : (
-          t(`${B}.none`)
-        )}
-      </div>
-      <p className="text-xs text-muted-foreground">{t(`${B}.${tone}Hint`)}</p>
-      <div className="flex flex-wrap gap-2">
-        <input
-          ref={picker}
-          type="file"
-          accept={IMAGE_ACCEPT}
-          className="hidden"
-          aria-label={t(`${B}.choose`, { logo: t(`${B}.${tone}`) })}
-          onChange={(event) => {
-            void upload(event.target.files?.[0])
-            event.target.value = ""
-          }}
-        />
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          disabled={uploading}
-          onClick={() => picker.current?.click()}
-        >
-          {uploading ? <Loader2 className="animate-spin" /> : <ImagePlus />}
-          {t(url ? `${B}.replace` : `${B}.upload`)}
-        </Button>
-        {url ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            aria-label={t(`${B}.removeOf`, { logo: t(`${B}.${tone}`) })}
-            onClick={() => {
-              onChange("")
-            }}
-          >
-            <Trash2 />
-            {t(`${B}.remove`)}
-          </Button>
-        ) : null}
-      </div>
-    </div>
+    <MediaField
+      id={`store-logo-${tone}`}
+      label={t(`${B}.${tone}`)}
+      hint={t(`${B}.${tone}Hint`)}
+      value={url || null}
+      frame="logo"
+      ground={GROUND[tone]}
+      emptyText={t(`${B}.none`)}
+      onChange={(asset) => {
+        onChange(asset?.url ?? "")
+      }}
+    />
   )
 }
 
