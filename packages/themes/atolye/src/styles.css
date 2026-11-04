@@ -4,6 +4,7 @@
 /* Hallmark · pre-emit critique: P4 H4 E4 S4 R5 V4 · weakest: S, category tiles carry names only until the shop adds category pictures (adr/0013, adr/0049); the signature rows carry the shop's own facts */
 @import "./tokens.css";
 @import "./base.css" layer(base);
+@import "./controls.css";
 
 /*
  * Atölye's values for the contract's names (design.md § Exports; shadcn's

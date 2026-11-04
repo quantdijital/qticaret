@@ -13,6 +13,7 @@
  * paper the signal keeps the shop's hue at a lightness that reads there.
  */
 @theme static {
+  --text-2xs: 0.75rem;
   --text-xs: 0.8125rem;
   --text-sm: 0.875rem;
   --text-md: 1rem;
@@ -27,6 +28,8 @@
   --text-title: clamp(1.25rem, 0.37vw + 1.1667rem, 1.5rem);
   --text-lead: clamp(1.125rem, 0.185vw + 1.0833rem, 1.25rem);
   --text-price-hero: clamp(2rem, 0.74vw + 1.8333rem, 2.5rem);
+  --text-wordmark: clamp(2rem, 0.37vw + 1.9167rem, 2.25rem);
+  --text-mast: clamp(3rem, 2.22vw + 2.5rem, 4.5rem);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
@@ -53,6 +56,7 @@
   --color-band-text: var(--color-paper);
   --color-band-text-2: oklch(78% 0.016 80);
   --color-band-focus: var(--color-paper);
+  --color-band-rule: oklch(36% 0.012 60);
   --color-whatsapp: oklch(48% 0.12 152);
   --color-whatsapp-ink: oklch(98.5% 0.006 85);
   --color-scrim: oklch(21% 0.012 60 / 0.45);
@@ -139,6 +143,7 @@
     --color-band: oklch(26% 0.012 60);
     --color-band-text: oklch(94% 0.012 85);
     --color-band-text-2: oklch(76% 0.014 80);
+    --color-band-rule: oklch(36% 0.012 60);
     --color-band-focus: oklch(72% 0.1 238);
     --color-whatsapp: oklch(70% 0.14 152);
     --color-whatsapp-ink: oklch(17% 0.01 60);
