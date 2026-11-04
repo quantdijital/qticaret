@@ -82,7 +82,7 @@ test("the card form fits its frame at phone, tablet and desktop widths", async (
   test.setTimeout(120_000)
   await page.setViewportSize({ width: 1280, height: 900 })
   await toCardForm(page)
-  const frame = await (await page.locator(PAYTR_FRAME).elementHandle())?.contentFrame()
+  const frame = await (await page.locator(PAYTR_FRAME).elementHandle()).contentFrame()
   if (!frame) {
     throw new Error("the card form's frame has no page")
   }
