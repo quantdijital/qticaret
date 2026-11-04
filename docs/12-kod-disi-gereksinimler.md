@@ -21,7 +21,7 @@
 | Veri ihlali bildirimi: 72 saat Kurul bildirimi, ilgili kişi bildirimi, platform/tenant sorumluluk paylaşımı (veri işleyen sözleşmesinde) | KVKK danışmanı | F13.10 |
 | LLM/AI sağlayıcısıyla veri işleme sözleşmesi ve yerleşim (yalnızca ürün verisi gönderilse de) | KVKK danışmanı | F10.13, ADR-0005 |
 | Ters ibraz (chargeback) süreçleri ve belge gereksinimleri | Ödeme sağlayıcı + avukat | F6.7 |
-| Adres referans verisi (il/ilçe/mahalle/posta kodu) kaynağı ve kullanım lisansı: PTT/TÜİK verisinin ticari kullanımı ve tenant'lara dağıtımı | Avukat | F1.3, F16 (ADR-0008) |
+| Adres referans verisi (il/ilçe/mahalle/posta kodu) kaynağı ve kullanım lisansı: PTT/TÜİK verisinin ticari kullanımı ve tenant'lara dağıtımı. 2026-11-04'ten beri kaynak TürkiyeAPI (MIT; şartlar adres formlarında kullanımı sayıyor, docs/entegrasyonlar/turkiye-api.md); TÜİK/PTT kaynaklı verinin ticari kullanımı yine avukata | Avukat | F1.3, F16 (ADR-0008) |
 | Denetim kaydı ve erişim bilgisi (IP, user agent, okuma kayıtları) saklama süresi; öneri 2 yıl | KVKK danışmanı | F2.5, F13 (ADR-0011) |
 | Tüm kişisel veri saklama sürelerinin onayı (sipariş 10 yıl, sözleşme kopyası 3 yıl, İYS kanıtı 3 yıl, terk edilmiş sepet 30 gün, çerez yanıtı 2 yıl...); liste `docs/kvkk-envanter.md` | KVKK danışmanı + mali müşavir | F13.5 |
 
