@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { I18N_KEY } from "../../lib/errors/http"
-import { serverErrorMessage } from "../../lib/errors/messages"
+import { DEFAULT_PROVIDER_MESSAGE } from "../../lib/errors"
+import { I18N_KEY, PROVIDER_FAILED_MESSAGE, providerFailureOf } from "../../lib/errors/http"
+import { providerFailureSentence, serverErrorMessage } from "../../lib/errors/messages"
 import { errorSummary, logger } from "../../lib/logging"
 import type { CarrierName } from "../../lib/shipping/carriers"
 import { shipOrderWorkflow } from "./ship-order"
@@ -48,14 +49,17 @@ export async function shipOrders(
       })
     } catch (error) {
       logger.warn({ event: "orders.bulk_ship_failed", orderId, err: errorSummary(error) })
-      const key = keyOf(error)
+      // A carrier's refusal names the carrier and what it said, as a single "Kargoya ver" does
+      const own = keyOf(error)
+      const provider = own === DEFAULT_PROVIDER_MESSAGE ? providerFailureOf(error) : null
+      const key = provider ? PROVIDER_FAILED_MESSAGE : own
       results.push({
         order_id: orderId,
         ok: false,
         carrier: null,
         fulfillment_id: null,
         error: key,
-        message: serverErrorMessage(key, "tr"),
+        message: provider ? providerFailureSentence(provider, "tr") : serverErrorMessage(key, "tr"),
       })
     }
   }

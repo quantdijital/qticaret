@@ -28,11 +28,22 @@ const CANCELED_BEFORE = "82520"
  */
 export const LOGIN_REFUSED_CODES: ReadonlySet<string> = new Set(["error_936"])
 
-export const refused = (code: string | null) =>
+/**
+ * Yurtiçi's refusal: its code, and its own sentence for staff (`errText`,
+ * `errMessage`), the login's values masked in it (an unknown key's
+ * sentence names the user).
+ */
+export const refused = (
+  code: string | null,
+  said: string | null = null,
+  secrets: readonly (string | null | undefined)[] = []
+) =>
   new ProviderError({
     provider: YURTICI_PROVIDER,
     providerCode: code && /^-?\d{1,8}$/.test(code) ? `error_${code}` : "rejected",
     retryable: false,
+    providerMessage: said,
+    secrets,
   })
 
 export const invalid = () =>

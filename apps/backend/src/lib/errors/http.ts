@@ -8,12 +8,68 @@ import {
   isRetryableError,
   isValidationError,
 } from "./errors"
+import type { ProviderErrorShape } from "./errors"
+import { providerText } from "./provider-text"
 
 export interface HttpErrorResponse {
   status: number
   /** Same shape as Medusa's error responses; `message` is an i18n key. */
-  body: { type: string; message: string; count?: number; values?: Record<string, string> }
+  body: {
+    type: string
+    message: string
+    count?: number
+    /** What a validation error's sentence names (`ValidationError` `values`). */
+    values?: Record<string, string>
+    /** Which service failed (`aras`): the admin API only. */
+    provider?: string
+    /** What it said, made safe (`providerText`): the admin API only. */
+    provider_message?: string
+  }
   retryAfterSeconds?: number
+}
+
+export interface HttpErrorOptions {
+  /**
+   * The admin API's answer to a provider's failure (staff, not shoppers):
+   * `provider.failed` naming the service and what it said, so staff can
+   * tell "Aras refused the user name" from "try again later".
+   */
+  providerDetail?: boolean
+}
+
+/** A provider's failure on the admin API, `{ provider, provider_message? }` beside it. */
+export const PROVIDER_FAILED_MESSAGE = "provider.failed"
+
+// Our own provider names (`aras`, `yurtici`), never text from outside
+const PROVIDER_NAME = /^[a-z][a-z0-9_-]{0,31}$/
+
+export interface ProviderDetail {
+  provider: string
+  provider_message?: string
+}
+
+function providerDetail(value: ProviderErrorShape): ProviderDetail | null {
+  if (!PROVIDER_NAME.test(value.provider)) {
+    return null
+  }
+  // Made safe again: a workflow hands the error back as a plain object
+  const said = providerText(value.providerMessage)
+  return { provider: value.provider, ...(said === undefined ? {} : { provider_message: said }) }
+}
+
+/**
+ * A provider's failure as staff hear it (a report row of a bulk action):
+ * which service, what it said, whether it may answer later. Null for any
+ * other error.
+ */
+export function providerFailureOf(
+  value: unknown
+): (ProviderDetail & { retryable: boolean }) | null {
+  if (!isProviderError(value)) {
+    return null
+  }
+  const detail = providerDetail(value)
+  return detail ? { ...detail, retryable: value.retryable } : null
 }
 
 // A provider's Retry-After passes through to our clients; it is capped so a
@@ -57,9 +113,13 @@ const clientMessage = (safeMessage: string, fallback: string): string =>
 /**
  * HTTP response for the platform's own error types, or null for anything
  * else so the caller falls back to Medusa's handler. Only the i18n key
- * leaves the server: never `cause`, the log message, the provider or its code.
+ * leaves the server: never `cause`, the log message or the provider's code;
+ * the provider and its own words only with `providerDetail`.
  */
-export function toHttpError(value: unknown): HttpErrorResponse | null {
+export function toHttpError(
+  value: unknown,
+  options: HttpErrorOptions = {}
+): HttpErrorResponse | null {
   if (isValidationError(value)) {
     const message = clientMessage(value.safeMessage, DEFAULT_VALIDATION_MESSAGE)
     // Values go with the rule's own key only, never with the fallback's sentence
@@ -73,13 +133,18 @@ export function toHttpError(value: unknown): HttpErrorResponse | null {
     return { status: 409, body: { type: "conflict", message, ...count } }
   }
   if (isProviderError(value)) {
-    const message = clientMessage(value.safeMessage, DEFAULT_PROVIDER_MESSAGE)
+    const detail = options.providerDetail ? providerDetail(value) : null
+    // A call's own key stays; the default one becomes the provider's
+    const message =
+      detail && value.safeMessage === DEFAULT_PROVIDER_MESSAGE
+        ? PROVIDER_FAILED_MESSAGE
+        : clientMessage(value.safeMessage, DEFAULT_PROVIDER_MESSAGE)
     if (!value.retryable) {
-      return { status: 502, body: { type: "provider_error", message } }
+      return { status: 502, body: { type: "provider_error", message, ...detail } }
     }
     const response: HttpErrorResponse = {
       status: 503,
-      body: { type: "provider_unavailable", message },
+      body: { type: "provider_unavailable", message, ...detail },
     }
     if (value.retryAfterMs !== undefined) {
       response.retryAfterSeconds = retryAfterSecondsOf(value.retryAfterMs)

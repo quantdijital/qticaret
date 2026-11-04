@@ -41,6 +41,35 @@ describe("createHttpClient with a SOAP service's fault under HTTP 5xx", () => {
     expect(provider.requests).toHaveLength(1)
   })
 
+  it("keeps the service's own sentence for staff, the call's secrets masked in it", async () => {
+    const quoting = envelope(
+      `<S:Fault><faultcode>soap:Server</faultcode><faultstring>ws-user icin sifre gecersiz: https://ws.ornek.com.tr/x</faultstring></S:Fault>`
+    )
+    const call = (body: string) => {
+      provider.setHandler(answer(500, body))
+      return errorOf(
+        clientFor(provider).http.request({
+          method: "POST",
+          path: "/ws",
+          xml: "<Envelope/>",
+          secrets: ["ws-user", "s3cret-pw"],
+          schema: z.string(),
+        })
+      )
+    }
+
+    // The detail's sentence first, else the fault string, else SOAP 1.2's reason
+    expect(await call(JAX_WS_FAULT)).toMatchObject({
+      providerMessage: "Kullanıcı adı veya şifre hatalı",
+    })
+    expect(await call(ASMX_FAULT)).toMatchObject({ providerMessage: "Sunucu hatası: ayrıntı" })
+    expect(await call(SOAP12_FAULT)).toMatchObject({ providerMessage: "x" })
+    expect(await call(quoting)).toMatchObject({
+      providerCode: "error_Server",
+      providerMessage: "*** icin sifre gecersiz: ***",
+    })
+  })
+
   it.each([
     ["a .NET fault code", ASMX_FAULT, "text/xml", "error_Server"],
     [

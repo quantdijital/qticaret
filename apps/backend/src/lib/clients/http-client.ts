@@ -1,5 +1,6 @@
 import type { z } from "@medusajs/framework/zod"
 import { ProviderError } from "../errors"
+import type { ProviderErrorInit } from "../errors"
 import { currentRequestId, logger as platformLogger } from "../logging"
 import type { LogFields } from "../logging"
 import { CircuitBreaker, DEFAULT_CIRCUIT_BREAKER } from "./circuit-breaker"
@@ -62,6 +63,7 @@ interface Prepared {
   text: boolean
   repeatable: boolean
   fields: LogFields
+  secrets: readonly (string | null | undefined)[]
 }
 
 // What to do after one try: return a value, wait and try again, or throw (with
@@ -95,7 +97,7 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
   const failure = (
     providerCode: string,
     retryable: boolean,
-    extra: { cause?: unknown; retryAfterMs?: number } = {}
+    extra: Pick<ProviderErrorInit, "cause" | "retryAfterMs" | "providerMessage" | "secrets"> = {}
   ) => new ProviderError({ provider, providerCode, retryable, ...extra })
 
   function prepare(request: HttpRequest<unknown>): Prepared {
@@ -118,6 +120,7 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
       text: request.xml !== undefined || request.textAnswer === true,
       repeatable: request.idempotent ?? IDEMPOTENT_METHODS.has(method),
       fields: { event: "http_client.request", provider, method, path },
+      secrets: request.secrets ?? [],
     }
   }
 
@@ -146,8 +149,12 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
         ? soapFaultOf(response)
         : undefined
     if (fault !== undefined) {
-      const code = `error_${fault}`
-      return failure(fault !== "" && PROVIDER_CODE.test(code) ? code : "error_fault", false)
+      const code = `error_${fault.code}`
+      // Its sentence too, made safe of the account's own values (`secrets`)
+      return failure(fault.code !== "" && PROVIDER_CODE.test(code) ? code : "error_fault", false, {
+        providerMessage: fault.text,
+        secrets: prepared.secrets,
+      })
     }
     if (status >= 500 && status !== 503 && !prepared.repeatable) {
       return failure("outcome_unknown", false)

@@ -1,6 +1,6 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
-import { I18N_KEY } from "../../lib/errors"
-import { serverErrorMessage } from "../../lib/errors/messages"
+import { I18N_KEY, PROVIDER_FAILED_MESSAGE } from "../../lib/errors"
+import { providerFailureSentence, serverErrorMessage } from "../../lib/errors/messages"
 import type { ErrorBody } from "./error-response"
 import { routePath } from "./request-path"
 
@@ -35,9 +35,21 @@ export function forDashboard(req: MedusaRequest, body: ErrorBody): ErrorBody {
   if (!I18N_KEY.test(body.message) || !isDashboardRequest(req)) {
     return body
   }
-  return {
-    ...body,
-    code: body.message,
-    message: serverErrorMessage(body.message, "tr", body.values),
+  return { ...body, code: body.message, message: dashboardSentence(body) }
+}
+
+// A provider's failure names the service and quotes it: the session client
+// keeps nothing of a refusal but this sentence
+function dashboardSentence(body: ErrorBody): string {
+  if (body.message === PROVIDER_FAILED_MESSAGE && body.provider) {
+    return providerFailureSentence(
+      {
+        provider: body.provider,
+        provider_message: body.provider_message,
+        retryable: body.type === "provider_unavailable",
+      },
+      "tr"
+    )
   }
+  return serverErrorMessage(body.message, "tr", body.values)
 }

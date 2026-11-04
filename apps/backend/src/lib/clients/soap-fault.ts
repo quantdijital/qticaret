@@ -1,5 +1,6 @@
 import type { TransportResponse } from "./transport"
-import { findFirst, parseXml } from "./xml"
+import { findFirst, parseXml, textOf } from "./xml"
+import type { XmlNode } from "./xml"
 
 /**
  * A SOAP service's refusal sent as an HTTP 5xx (adr/0035). SOAP 1.1 sends
@@ -11,18 +12,50 @@ import { findFirst, parseXml } from "./xml"
 
 const XML_TYPE = /^(?:text\/xml|application\/soap\+xml)\s*(?:;|$)/i
 
-// A JAX-WS service exception names its code in the detail (`errorCode`, Yurtiçi)
+// A JAX-WS service exception names its code and its sentence in the detail
+// (`errorCode`, `errText`: Yurtiçi)
 const DETAIL_CODE = "errorCode"
+const DETAIL_TEXT = "errText"
 
 const localName = (code: string): string => code.slice(code.lastIndexOf(":") + 1).trim()
 
+export interface SoapFault {
+  /**
+   * The fault's code, its detail's own code first, else the fault code's
+   * local name (`soap:Server` → `Server`, SOAP 1.2's `env:Receiver` →
+   * `Receiver`); `""` for a fault naming none.
+   */
+  code: string
+  /**
+   * The service's own sentence: the detail's `errText`, else SOAP 1.1's
+   * `faultstring` or SOAP 1.2's `Reason/Text`. As sent: it is made safe
+   * (`providerText`) before anyone reads it.
+   */
+  text: string | undefined
+}
+
+/** A fault's code and sentence, from an answer already read (a fault under HTTP 200 too). */
+export function readSoapFault(fault: XmlNode): SoapFault {
+  const text =
+    textOf(fault, DETAIL_TEXT) ??
+    textOf(fault, "faultstring") ??
+    textOf(findFirst(fault, "Reason") ?? fault, "Text") ??
+    undefined
+  const detail = textOf(fault, DETAIL_CODE)
+  if (detail) {
+    return { code: detail, text }
+  }
+  // SOAP 1.1 `faultcode`; SOAP 1.2 `Code/Value`
+  const code =
+    findFirst(fault, "faultcode") ?? findFirst(findFirst(fault, "Code") ?? fault, "Value")
+  return { code: localName(code?.text ?? ""), text }
+}
+
 /**
- * The fault's code, its detail's own code first, else the fault code's
- * local name (`soap:Server` → `Server`, SOAP 1.2's `env:Receiver` →
- * `Receiver`); `""` for a fault naming none. Undefined when the answer is
- * not XML or holds no fault: then the outcome stays unknown.
+ * The fault in a 5xx answer. Undefined when the answer is not XML or
+ * holds no fault: then the outcome stays unknown.
  */
-export function soapFaultOf(response: TransportResponse): string | undefined {
+export function soapFaultOf(response: TransportResponse): SoapFault | undefined {
   if (!XML_TYPE.test((response.header("content-type") ?? "").trim())) {
     return undefined
   }
@@ -32,15 +65,5 @@ export function soapFaultOf(response: TransportResponse): string | undefined {
   } catch {
     return undefined
   }
-  if (!fault) {
-    return undefined
-  }
-  const detail = findFirst(fault, DETAIL_CODE)?.text.trim()
-  if (detail) {
-    return detail
-  }
-  // SOAP 1.1 `faultcode`; SOAP 1.2 `Code/Value`
-  const code =
-    findFirst(fault, "faultcode") ?? findFirst(findFirst(fault, "Code") ?? fault, "Value")
-  return localName(code?.text ?? "")
+  return fault ? readSoapFault(fault) : undefined
 }

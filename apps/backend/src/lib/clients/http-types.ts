@@ -50,6 +50,12 @@ export interface HttpRequest<T> {
   idempotent?: boolean
   /** Logged instead of the path when it holds secrets or identifiers (`/services/:token`). */
   logPath?: string
+  /**
+   * The account's values the provider may quote back in its refusal (a
+   * user name, a password, a customer code): masked in the text a failure
+   * keeps for staff (`providerText`), never stored.
+   */
+  secrets?: readonly (string | null | undefined)[]
   signal?: AbortSignal
   schema: z.ZodType<T>
 }

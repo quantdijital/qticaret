@@ -1,10 +1,10 @@
 import type { Executor } from "../types"
 
 /**
- * What the search index holds now (adr/0056), for the panel: counts of
- * the module's own tables in one statement. Exact counts: a shop's index
- * is small enough (a row per product, a word per distinct word) that a
- * scan of each costs milliseconds, and the panel reads it on demand.
+ * What the search index holds now (adr/0056), for the platform's operator
+ * (`search:status`): counts of the module's own tables in one statement.
+ * Exact counts: a shop's index is small enough (a row per product, a word
+ * per distinct word) that a scan of each costs milliseconds.
  */
 
 export interface IndexStatus {
@@ -43,7 +43,7 @@ const STATUS = `
          (SELECT count(*)::integer FROM search_synonym WHERE deleted_at IS NULL) AS synonyms
     FROM d`
 
-/** The row as the API gives it: numbers, and the time as ISO 8601. */
+/** The row as the operator reads it: numbers, and the time as ISO 8601. */
 export function indexStatusOf(row: StatusRow | undefined): IndexStatus {
   const at = row?.last_rebuilt_at ?? null
   return {

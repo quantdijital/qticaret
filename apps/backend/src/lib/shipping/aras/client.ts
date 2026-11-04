@@ -1,6 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import { createHttpClient, safeTransport } from "../../clients"
 import type { HttpClient, HttpClientOptions } from "../../clients"
+import { readSoapFault } from "../../clients/soap-fault"
 import { findAll, findFirst, parseXml, soapEnvelope, textOf } from "../../clients/xml"
 import type { XmlFields, XmlNode } from "../../clients/xml"
 import { parseEnv } from "../../env"
@@ -40,11 +41,25 @@ export const isArasServiceUrl = (value: string): boolean => {
   }
 }
 
-const refused = (code: string | null) =>
+// The account's own values, which a refusal may quote: masked in what staff read
+const secretsOf = (credentials: ArasCredentials) => [
+  credentials.username,
+  credentials.password,
+  credentials.customerCode,
+]
+
+/** Aras's refusal: its result code, and its own sentence for staff (made safe). */
+const refused = (
+  code: string | null,
+  said: string | null = null,
+  credentials: ArasCredentials | null = null
+) =>
   new ProviderError({
     provider: ARAS_PROVIDER,
     providerCode: code && /^-?\d{1,6}$/.test(code) ? `error_${code}` : "rejected",
     retryable: false,
+    providerMessage: said,
+    secrets: credentials ? secretsOf(credentials) : [],
   })
 
 const invalid = () =>
@@ -87,6 +102,7 @@ export function createArasApi(options: Partial<Omit<HttpClientOptions, "provider
       xml: soapEnvelope({ namespace: NAMESPACE, operation, params }),
       idempotent,
       logPath: `${PATH}#${operation}`,
+      secrets: secretsOf(credentials),
       schema: z.string(),
     })
     let tree: XmlNode
@@ -95,8 +111,9 @@ export function createArasApi(options: Partial<Omit<HttpClientOptions, "provider
     } catch {
       throw invalid()
     }
-    if (findFirst(tree, "Fault")) {
-      throw refused(null)
+    const fault = findFirst(tree, "Fault")
+    if (fault) {
+      throw refused(null, readSoapFault(fault).text ?? null, credentials)
     }
     return tree
   }
@@ -119,7 +136,7 @@ export function createArasApi(options: Partial<Omit<HttpClientOptions, "provider
     }
     const code = textOf(result, "ResultCode")
     if (code !== "0") {
-      throw refused(code)
+      throw refused(code, textOf(result, "ResultMessage"), credentials)
     }
   }
 
@@ -133,7 +150,7 @@ export function createArasApi(options: Partial<Omit<HttpClientOptions, "provider
     )
     const code = textOf(tree, "ResultCode")
     if (code !== "0") {
-      throw refused(code)
+      throw refused(code, textOf(tree, "Message"), credentials)
     }
     const pdf = findAll(findFirst(tree, "ZebraPdf") ?? tree, "string")
       .map((node) => node.text.trim())
@@ -151,7 +168,7 @@ export function createArasApi(options: Partial<Omit<HttpClientOptions, "provider
     )
     const code = textOf(tree, "ResultCode")
     if (code !== "0") {
-      throw refused(code)
+      throw refused(code, textOf(tree, "ResultMessage"), credentials)
     }
   }
 

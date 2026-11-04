@@ -1,3 +1,5 @@
+import { providerText } from "./provider-text"
+
 /**
  * Error types shared by workflows, routes and provider clients (docs/10).
  * `message` is for logs only; `safeMessage` is an i18n key that may reach
@@ -33,6 +35,8 @@ export interface ProviderErrorShape extends ErrorShape<"provider"> {
   readonly retryable: boolean
   /** How long the provider asked us to wait (its Retry-After). */
   readonly retryAfterMs?: number
+  /** The provider's own short text about the failure, made safe (`providerText`). */
+  readonly providerMessage?: string
 }
 
 export interface ConflictErrorShape extends ErrorShape<"conflict"> {
@@ -104,6 +108,13 @@ export interface ProviderErrorInit {
   safeMessage?: string
   /** Dropped unless a finite, non-negative number. */
   retryAfterMs?: number
+  /**
+   * What the provider said (a SOAP fault's text, a result message). Kept
+   * only as `providerText` leaves it: one short line, nothing secret.
+   */
+  providerMessage?: string | null | undefined
+  /** The account's values the provider may quote back (user name, password): masked, never kept. */
+  secrets?: readonly (string | null | undefined)[]
   cause?: unknown
 }
 
@@ -116,6 +127,7 @@ export class ProviderError extends Error implements ProviderErrorShape {
   readonly retryable: boolean
   readonly safeMessage: string
   readonly retryAfterMs?: number
+  readonly providerMessage?: string
 
   constructor(init: ProviderErrorInit) {
     super(`${init.provider} error ${init.providerCode}`, causeOf(init))
@@ -125,6 +137,10 @@ export class ProviderError extends Error implements ProviderErrorShape {
     this.safeMessage = init.safeMessage ?? DEFAULT_PROVIDER_MESSAGE
     if (isDelay(init.retryAfterMs)) {
       this.retryAfterMs = init.retryAfterMs
+    }
+    const said = providerText(init.providerMessage, init.secrets)
+    if (said !== undefined) {
+      this.providerMessage = said
     }
   }
 }
@@ -169,7 +185,8 @@ export function isProviderError(value: unknown): value is ProviderErrorShape {
     typeof fields["provider"] === "string" &&
     typeof fields["providerCode"] === "string" &&
     typeof fields["retryable"] === "boolean" &&
-    (fields["retryAfterMs"] === undefined || isDelay(fields["retryAfterMs"]))
+    (fields["retryAfterMs"] === undefined || isDelay(fields["retryAfterMs"])) &&
+    (fields["providerMessage"] === undefined || typeof fields["providerMessage"] === "string")
   )
 }
 

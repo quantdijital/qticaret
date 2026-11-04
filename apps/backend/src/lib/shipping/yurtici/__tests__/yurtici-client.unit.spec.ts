@@ -219,6 +219,35 @@ describe("Yurtiçi client against the fake service (adr/0035)", () => {
     expect(fake.shipments.has("QTUNITKEY000005")).toBe(false)
   })
 
+  it("keeps what Yurtiçi said of a refusal for staff, the login masked in it", async () => {
+    const answering = (status: number, text: string) =>
+      createYurticiApi({
+        baseUrl: fake.url,
+        transport: () => Promise.resolve({ status, text, header: () => "text/xml; charset=utf-8" }),
+      })
+    const login = { username: "magaza-ws", password: "gizli-ws-sifre" }
+    const failureOf = (promise: Promise<unknown>) => promise.catch((error: unknown) => error)
+
+    const wrongPassword = await failureOf(
+      api().createShipment({ ...login }, true, shipment("QTUNITKEY000011"))
+    )
+    const quoting = await failureOf(
+      answering(
+        200,
+        `<S:Envelope xmlns:S="s"><S:Body><ShippingOrderResultVO><outFlag>1</outFlag><outResult>Hata Oluştu.</outResult><shippingOrderDetailVO><cargoKey>QTUNITKEY000012</cargoKey><errCode>82519</errCode><errMessage>magaza-ws kullanıcısına ait QTUNITKEY000012 kargo anahtarı bulunmamaktadır.</errMessage></shippingOrderDetailVO></ShippingOrderResultVO></S:Body></S:Envelope>`
+      ).createShipment(login, true, shipment("QTUNITKEY000012"))
+    )
+
+    expect(wrongPassword).toMatchObject({
+      providerCode: "error_936",
+      providerMessage: "Kullanıcı adı veya şifre hatalı",
+    })
+    expect(quoting).toMatchObject({
+      providerCode: "error_82519",
+      providerMessage: "*** kullanıcısına ait QTUNITKEY000012 kargo anahtarı bulunmamaktadır.",
+    })
+  })
+
   it("says nothing of the login on a 500 without a fault or on another fault", async () => {
     const answering = (status: number, text: string) =>
       createYurticiApi({

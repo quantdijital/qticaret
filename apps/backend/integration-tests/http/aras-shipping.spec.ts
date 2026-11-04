@@ -190,5 +190,44 @@ medusaIntegrationTestRunner({
       expect(sizes(setOrderOf(1))).toEqual(["2.00", "1.00"])
       expect(sizes(setOrderOf(2))).toEqual(["8.00", "3.00"])
     })
+
+    it("tells staff what Aras said when it refuses the stored account, the account kept out", async () => {
+      const orderId = await order()
+      const stored = fake.account.password
+      // Aras's password changed; the panel still holds the old one
+      fake.account.password = "aras-yeni-sifre"
+      try {
+        const refused = await post<{ provider?: string; provider_message?: string }>(
+          `/admin/orders/${orderId}/ship`,
+          { notify: false }
+        )
+        const bulk = await post<{ results: { ok: boolean; error: string; message: string }[] }>(
+          "/admin/order-board/ship",
+          { order_ids: [orderId], notify: false }
+        )
+
+        expect(refused.status).toBe(502)
+        expect(refused.data).toMatchObject({
+          type: "provider_error",
+          message: "provider.failed",
+          provider: "aras",
+          provider_message: "Kullanıcı adı veya şifre hatalı",
+        })
+        expect(bulk.data.results[0]).toMatchObject({
+          ok: false,
+          error: "provider.failed",
+          message: "Aras Kargo yanıtı: “Kullanıcı adı veya şifre hatalı”",
+        })
+        for (const answer of [refused.data, bulk.data]) {
+          const text = JSON.stringify(answer)
+          for (const secret of [stored, fake.account.username, fake.url]) {
+            expect(text).not.toContain(secret)
+          }
+        }
+        expect(await fulfillmentsOf(orderId)).toHaveLength(0)
+      } finally {
+        fake.account.password = stored
+      }
+    })
   },
 })

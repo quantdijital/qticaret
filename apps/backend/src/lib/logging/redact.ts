@@ -61,12 +61,14 @@ const PERSONAL_EXCEPTIONS = new Set(["emailverified"])
 const REFERENCE = /ids?$/
 
 // Exact names: fields that quote request or row content (body-parser's raw
-// body, pg's `detail`, query builders' SQL and bindings) and short secrets
+// body, pg's `detail`, query builders' SQL and bindings, a provider's own
+// words about a failure, which may quote a parcel's receiver) and short secrets
 const EXACT_KEYS = new Set([
   "body",
   "rawbody",
   "rawheaders",
   "detail",
+  "providermessage",
   "query",
   "sql",
   "bindings",

@@ -22,6 +22,7 @@ export type {
   ValidationErrorShape,
 } from "./errors"
 export { lockTimeoutError, uniqueViolationKeys } from "./db"
-export { I18N_KEY, toHttpError } from "./http"
+export { I18N_KEY, PROVIDER_FAILED_MESSAGE, providerFailureOf, toHttpError } from "./http"
+export { MAX_PROVIDER_TEXT, PROVIDER_TEXT_MASK, providerText } from "./provider-text"
 export { validationErrorFromZod } from "./zod"
-export type { HttpErrorResponse } from "./http"
+export type { HttpErrorOptions, HttpErrorResponse, ProviderDetail } from "./http"

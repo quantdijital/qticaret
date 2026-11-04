@@ -325,7 +325,7 @@ const CAPABILITY_PROBES = {
   // adr/0051 §8: a link's discount, cancel and extension: owner and admin
   paymentLinksManage: ["POST", "/admin/payment-links/:id/cancel"],
   // adr/0056: writing site search's synonym groups, owner and admin; every role reads
-  // them and the index's status. Its routes decide as this does (the unit spec holds them to it)
+  // them. Its routes decide as this does (the unit spec holds them to it)
   searchSynonyms: ["POST", "/admin/search/synonyms"],
   // F13.1: writing, publishing, dropping and restarting the legal texts' drafts, owner and
   // admin; every role reads them. Its routes decide as this does (the unit spec holds them to it)

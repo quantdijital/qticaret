@@ -138,6 +138,33 @@ describe("platformErrorHandler", () => {
       )
     })
 
+    it("tells staff which provider failed and what it said; shoppers only that one did", () => {
+      const refusal = () =>
+        new ProviderError({
+          provider: "aras",
+          providerCode: "error_Server",
+          retryable: false,
+          providerMessage: "Kullanıcı adı veya şifre hatalı",
+        })
+
+      const admin = handle(refusal(), "/admin/orders/order_1/ship")
+      const store = handle(refusal(), "/store/carts/cart_1/complete")
+
+      expect(admin.status()).toBe(502)
+      expect(admin.body).toEqual({
+        type: "provider_error",
+        message: "provider.failed",
+        provider: "aras",
+        provider_message: "Kullanıcı adı veya şifre hatalı",
+        request_id: "req-12345678",
+      })
+      expect(store.body).toEqual({
+        type: "provider_error",
+        message: "errors.provider_unavailable",
+        request_id: "req-12345678",
+      })
+    })
+
     it("maps a RetryableError to 503 with Retry-After", () => {
       const { status, headers } = handle(new RetryableError(undefined, { retryAfterMs: 1500 }))
 

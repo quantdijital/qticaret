@@ -245,4 +245,60 @@ describe("Aras client (adr/0035)", () => {
     expect(faultAs200).toBe("secret_invalid")
     expect(plain).toMatchObject({ providerCode: "http_500" })
   })
+
+  it("keeps what Aras said of a refusal for staff, the account's values masked", async () => {
+    const answering = (status: number, text: string) =>
+      createArasApi({
+        baseUrl: `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`,
+        transport: () => Promise.resolve({ status, text, header: () => "text/xml; charset=utf-8" }),
+      })
+    const fault = envelope(
+      "<soap:Fault><faultcode>soap:Server</faultcode><faultstring>Kullanıcı adı veya şifre hatalı</faultstring></soap:Fault>"
+    )
+    const input = {
+      integrationCode: "QT01ABCDEF",
+      waybill: "1042",
+      receiver: receiverOf(address),
+      desi: 1,
+      kg: 1,
+      cashOnDelivery: null,
+      description: "Sipariş 1042",
+    }
+    const failureOf = (promise: Promise<unknown>) => promise.catch((error: unknown) => error)
+
+    const wrongPassword = await failureOf(answering(500, fault).setOrder(credentials, input))
+    const faultAs200 = await failureOf(answering(200, fault).cancel(credentials, "QT01ABCDEF"))
+    answer = envelope(
+      xmlElement("SetOrderResponse", {
+        SetOrderResult: {
+          OrderResultInfo: {
+            ResultCode: "1",
+            ResultMessage: "123456 müşterisi için magaza kullanıcısı yetkisiz",
+          },
+        },
+      })
+    )
+    const result = await failureOf(api().setOrder(credentials, input))
+    answer = envelope(
+      xmlElement("GetArasBarcodeResponse", {
+        GetArasBarcodeResult: { ResultCode: "1", Message: "Barkod bulunamadı" },
+      })
+    )
+    const label = await failureOf(api().label(credentials, "QT01ABCDEF"))
+
+    expect(wrongPassword).toMatchObject({
+      provider: "aras",
+      providerCode: "error_Server",
+      providerMessage: "Kullanıcı adı veya şifre hatalı",
+    })
+    expect(faultAs200).toMatchObject({
+      providerCode: "rejected",
+      providerMessage: "Kullanıcı adı veya şifre hatalı",
+    })
+    expect(result).toMatchObject({
+      providerCode: "error_1",
+      providerMessage: "*** müşterisi için *** kullanıcısı yetkisiz",
+    })
+    expect(label).toMatchObject({ providerMessage: "Barkod bulunamadı" })
+  })
 })

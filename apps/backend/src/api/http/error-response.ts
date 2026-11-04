@@ -12,6 +12,9 @@ export interface ErrorBody {
   message: string
   /** What a validation error's sentence names (`lib/errors` `ValidationError`). */
   values?: Record<string, string>
+  /** A provider's failure on the admin API (`provider.failed`): which service, what it said. */
+  provider?: string
+  provider_message?: string
 }
 
 export type DbErrorKind = "duplicate" | "invalid_reference" | "not_null" | "unknown_column"
@@ -65,6 +68,9 @@ export const INTERNAL_ERROR_BODY: Readonly<ErrorBody> = {
 // clashing SKU or handle has to be named to be fixed (F2 S2 decision).
 // Every other prefix, including future ones such as /hooks, is generalised.
 const ADMIN_PATH = /^\/admin(\/|$)/
+
+/** The admin API: staff, who also hear which provider failed and what it said. */
+export const isAdminPath = (path: string): boolean => ADMIN_PATH.test(path)
 
 export interface SanitizedError {
   status: number

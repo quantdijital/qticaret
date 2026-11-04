@@ -2,7 +2,8 @@ import { randomBytes } from "node:crypto"
 import { z } from "@medusajs/framework/zod"
 import { createHttpClient } from "../../clients"
 import type { HttpClient, HttpClientOptions } from "../../clients"
-import { findFirst, parseXml, soapEnvelope } from "../../clients/xml"
+import { readSoapFault } from "../../clients/soap-fault"
+import { findFirst, parseXml, soapEnvelope, textOf } from "../../clients/xml"
 import type { XmlFields, XmlNode } from "../../clients/xml"
 import { parseEnv } from "../../env"
 import { isProviderError } from "../../errors"
@@ -39,6 +40,12 @@ export const YURTICI_LIVE_URL = "https://ws.yurticikargo.com"
 const PATH = "/KOPSWebServices/ShippingOrderDispatcherServices"
 const NAMESPACE = "http://yurticikargo.com.tr/ShippingOrderDispatcherServices"
 
+// The login a call carries: masked in the sentence a refusal keeps for staff
+const loginOf = (params: XmlFields): string[] =>
+  [params["wsUserName"], params["wsPassword"]].filter(
+    (value): value is string => typeof value === "string"
+  )
+
 export function createYurticiApi(options: Partial<Omit<HttpClientOptions, "provider">> = {}) {
   const clients = new Map<string, HttpClient>()
   const clientFor = (testMode: boolean): HttpClient => {
@@ -57,6 +64,7 @@ export function createYurticiApi(options: Partial<Omit<HttpClientOptions, "provi
     params: XmlFields,
     extra: { idempotent: boolean; signal?: AbortSignal | undefined }
   ): Promise<XmlNode> {
+    const secrets = loginOf(params)
     const text = await clientFor(testMode).request({
       method: "POST",
       path: PATH,
@@ -66,6 +74,7 @@ export function createYurticiApi(options: Partial<Omit<HttpClientOptions, "provi
       idempotent: extra.idempotent,
       logPath: `${PATH}#${operation}`,
       ...(extra.signal ? { signal: extra.signal } : {}),
+      secrets,
       schema: z.string(),
     })
     let tree: XmlNode
@@ -76,7 +85,8 @@ export function createYurticiApi(options: Partial<Omit<HttpClientOptions, "provi
     }
     const fault = findFirst(tree, "Fault")
     if (fault) {
-      throw refused(findFirst(fault, "errorCode")?.text.trim() ?? null)
+      const { text: said } = readSoapFault(fault)
+      throw refused(textOf(fault, "errorCode"), said ?? null, secrets)
     }
     return tree
   }
@@ -105,7 +115,8 @@ export function createYurticiApi(options: Partial<Omit<HttpClientOptions, "provi
     const line = lineOf(result, "shippingOrderDetailVO", input.cargoKey)
     const code = line ? own(line, "errCode") : own(result, "errCode")
     if (own(result, "outFlag") !== "0" || !succeeded(code)) {
-      throw refused(code)
+      const said = (line ? own(line, "errMessage") : null) ?? own(result, "outResult")
+      throw refused(code, said, [login.username, login.password])
     }
   }
 

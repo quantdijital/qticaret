@@ -2,6 +2,8 @@ import { SERVER_ERROR_MESSAGES_EN } from "./en"
 import { SERVER_ERROR_MESSAGES_TR } from "./tr"
 
 export { SERVER_ERROR_MESSAGES_EN, SERVER_ERROR_MESSAGES_TR }
+export { providerFailureSentence, providerName } from "./provider"
+export type { ProviderFailure } from "./provider"
 
 export type MessageLocale = "tr" | "en"
 

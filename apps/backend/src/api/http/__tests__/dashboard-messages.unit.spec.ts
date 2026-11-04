@@ -66,6 +66,24 @@ describe("forDashboard", () => {
     expect(body.message).toContain("future.unknown_key")
   })
 
+  it("names a failed provider and quotes it, the key and its parts kept", () => {
+    const failed = {
+      type: "provider_error",
+      message: "provider.failed",
+      provider: "aras",
+      provider_message: "Kullanıcı adı veya şifre hatalı",
+    }
+    expect(forDashboard(request("/admin/orders/order_1/ship", { session: true }), failed)).toEqual({
+      ...failed,
+      code: "provider.failed",
+      message: "Aras Kargo yanıtı: “Kullanıcı adı veya şifre hatalı”",
+    })
+    const unreachable = { type: "provider_unavailable", message: "provider.failed", provider: "x" }
+    expect(forDashboard(request("/admin/x", { session: true }), unreachable).message).toBe(
+      "x hizmetine şu an ulaşılamıyor; biraz sonra tekrar deneyin."
+    )
+  })
+
   it("leaves Medusa's own sentences and API clients' bodies as they are", () => {
     const sentence = { type: "not_found", message: "Product with id: prod_1 was not found" }
     expect(forDashboard(request("/admin/products", { session: true }), sentence)).toBe(sentence)

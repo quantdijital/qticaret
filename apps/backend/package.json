@@ -27,6 +27,7 @@
     "tr-address:import": "medusa exec ./src/scripts/import-tr-address.ts",
     "messaging:samples": "medusa exec ./src/scripts/messaging-samples.ts",
     "search:rebuild": "medusa exec ./src/scripts/search-rebuild.ts",
+    "search:status": "medusa exec ./src/scripts/search-status.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "pnpm test:unit",

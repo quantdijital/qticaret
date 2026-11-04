@@ -275,7 +275,6 @@ describe("staff roles", () => {
         expect(allowed(role, method, path)).toBe(can)
       }
       expect(allowed(role, "GET", "/admin/search/synonyms")).toBe(true)
-      expect(allowed(role, "GET", "/admin/search/index")).toBe(true)
     }
   })
 

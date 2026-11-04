@@ -207,6 +207,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "errors.length_required": "İsteğin boyutu belirtilmeli.",
   "errors.limit_too_large": "Tek seferde bu kadar çok kayıt istenemez.",
   "errors.provider_unavailable": "Bağlı hizmete şu an ulaşılamıyor; biraz sonra tekrar deneyin.",
+  // The admin API's provider failure; the dashboard names the service (messages/provider.ts)
+  "provider.failed": "Bağlı hizmet işlemi tamamlamadı; biraz sonra tekrar deneyin.",
   "errors.request_too_large": "Gönderilen dosya ya da veri çok büyük.",
   "errors.temporarily_unavailable":
     "Hizmet geçici olarak kullanılamıyor; biraz sonra tekrar deneyin.",
@@ -1076,6 +1078,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "search.synonym_terms_too_few":
     "Grupta en az iki farklı terim olmalı. Büyük-küçük harf ve Türkçe karakter farkı terimi değiştirmez.",
   "search.synonym_term_too_long": "Bir terim en çok 3 kelime olabilir.",
+  "search.synonym_term_length": "Bir terim en çok 60 karakter olabilir.",
   "search.synonym_terms_too_many": "Bir grupta en çok 10 terim olabilir.",
   "search.synonyms_too_many":
     "Mağaza en çok 1000 eş anlamlı grubu tutabilir; yenisini eklemek için birini silin.",

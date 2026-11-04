@@ -8,7 +8,7 @@ import {
 } from "../../lib/errors"
 import { currentRequestId, logger } from "../../lib/logging"
 import { forDashboard } from "./dashboard-messages"
-import { INTERNAL_ERROR_BODY, sanitizeErrorResponse } from "./error-response"
+import { INTERNAL_ERROR_BODY, isAdminPath, sanitizeErrorResponse } from "./error-response"
 import type { ErrorBody } from "./error-response"
 import { logRejection } from "./reject"
 import { ensureRequestId } from "./request-id"
@@ -76,7 +76,8 @@ function unwrapValidationKey(body: ErrorBody): ErrorBody {
 }
 
 function resolveError(error: unknown, path: string): ResolvedError {
-  const own = toHttpError(lockTimeoutError(error) ?? error)
+  // Staff hear which provider failed and what it said; shoppers, only that it did
+  const own = toHttpError(lockTimeoutError(error) ?? error, { providerDetail: isAdminPath(path) })
   if (own) {
     return {
       status: own.status,

@@ -1,6 +1,7 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { SEARCH_INDEX_MODULE } from "../../src/modules/search-index"
 import type SearchIndexModuleService from "../../src/modules/search-index/service"
+import searchStatus from "../../src/scripts/search-status"
 import { createAdminUser } from "../helpers/admin"
 import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
@@ -23,17 +24,9 @@ interface Answer {
   message?: string
 }
 
-interface IndexStatus {
-  documents: number
-  pending: number
-  last_rebuilt_at: string | null
-  dictionary_words: number
-  synonyms: number
-}
-
 /**
  * adr/0056: the shop's synonym groups, managed in the panel and read by
- * every search at once; the index's status beside them.
+ * every search at once; the index's status for the operator (`search:status`).
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -61,7 +54,14 @@ medusaIntegrationTestRunner({
       expect(made.status).toBe(201)
       expect(made.data.synonym?.terms).toEqual(["tişört", "t shirt"])
 
-      expect((await post("/admin/search/synonyms", { terms: ["tek"] })).status).toBe(400)
+      // The schema's size rules answer with their keys, never Medusa's wording
+      const one = await post("/admin/search/synonyms", { terms: ["tek"] })
+      expect([one.status, one.data.message]).toEqual([400, "search.synonym_terms_too_few"])
+      const eleven = Array.from({ length: 11 }, (_, at) => `terim${String(at)}`)
+      const many = await post("/admin/search/synonyms", { terms: eleven })
+      expect([many.status, many.data.message]).toEqual([400, "search.synonym_terms_too_many"])
+      const wide = await post("/admin/search/synonyms", { terms: ["k".repeat(61), "kupa"] })
+      expect([wide.status, wide.data.message]).toEqual([400, "search.synonym_term_length"])
       const same = await post("/admin/search/synonyms", { terms: ["kupa", "KUPA"] })
       expect([same.status, same.data.message]).toEqual([400, "search.synonym_terms_too_few"])
       const long = await post("/admin/search/synonyms", { terms: ["a b c d", "e"] })
@@ -94,42 +94,36 @@ medusaIntegrationTestRunner({
       ).toEqual([["kupa", "bardak"]])
     })
 
-    it("tells every role what the index holds; only the owner and admins write synonyms", async () => {
+    it("tells the operator what the index holds; only the owner and admins write synonyms", async () => {
       const product = await kit.product({ title: "Durum Kupası" })
       const before = Date.now()
       await indexCatalogue(getContainer())
       expect((await post("/admin/search/synonyms", { terms: ["kupa", "bardak"] })).status).toBe(201)
-      const status = await eventually(
-        () => settle(http.get<IndexStatus>("/admin/search/index", { headers })),
-        (answer) => answer.data.pending === 0
-      )
+      const status = () => searchStatus({ container: getContainer(), args: [] })
+      const settled = await eventually(status, (answer) => answer.pending === 0)
       const rows = await index().documentIds("", 10_000)
       expect(rows).toContain(product)
-      expect(status.status).toBe(200)
-      expect(Object.keys(status.data).sort()).toEqual([
+      expect(Object.keys(settled).sort()).toEqual([
         "dictionary_words",
         "documents",
         "last_rebuilt_at",
         "pending",
         "synonyms",
       ])
-      expect(status.data).toMatchObject({ documents: rows.length, pending: 0, synonyms: 1 })
-      expect(status.data.dictionary_words).toBeGreaterThan(0)
+      expect(settled).toMatchObject({ documents: rows.length, pending: 0, synonyms: 1 })
+      expect(settled.dictionary_words).toBeGreaterThan(0)
       // The rebuild wrote every row again (the database's clock, a little leeway)
-      expect(Date.parse(status.data.last_rebuilt_at ?? "")).toBeGreaterThan(before - 5_000)
-
+      expect(Date.parse(settled.last_rebuilt_at ?? "")).toBeGreaterThan(before - 5_000)
       await index().markPending(["prod_waiting"])
+      expect((await status()).pending).toBe(1)
+      // The operator's, not the shop's: no admin route gives it
+      expect((await settle(http.get("/admin/search/index", { headers }))).status).toBe(404)
+
       const [admin, operations, readonly] = await Promise.all(
         (["admin", "operations", "readonly"] as const).map((role) =>
           createAdminUser(http, getContainer(), role)
         )
       )
-      for (const staff of [admin, operations, readonly]) {
-        const read = await settle(
-          http.get<IndexStatus>("/admin/search/index", { headers: staff?.headers ?? {} })
-        )
-        expect([read.status, read.data.pending]).toEqual([200, 1])
-      }
       const write = (staff: typeof admin) =>
         settle(
           http.post<Answer>(

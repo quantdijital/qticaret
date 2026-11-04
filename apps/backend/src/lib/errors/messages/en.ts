@@ -202,6 +202,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "errors.length_required": "The request size is required.",
   "errors.limit_too_large": "Too many records were asked for at once.",
   "errors.provider_unavailable": "The connected service cannot be reached; try again shortly.",
+  // The admin API's provider failure; the dashboard names the service (messages/provider.ts)
+  "provider.failed": "The connected service did not complete the request; try again shortly.",
   "errors.request_too_large": "The file or data sent is too large.",
   "errors.temporarily_unavailable": "The service is temporarily unavailable; try again shortly.",
   "errors.too_many_requests": "Too many attempts. Wait a moment and try again.",
@@ -1080,6 +1082,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "search.synonym_terms_too_few":
     "A group needs at least two different terms. Letter case and Turkish letters do not make a term different.",
   "search.synonym_term_too_long": "A term can be at most 3 words.",
+  "search.synonym_term_length": "A term can be at most 60 characters.",
   "search.synonym_terms_too_many": "A group can have at most 10 terms.",
   "search.synonyms_too_many":
     "The shop can keep at most 1,000 synonym groups; delete one to add another.",
