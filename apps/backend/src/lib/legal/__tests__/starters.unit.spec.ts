@@ -9,6 +9,7 @@ import {
   fillLegalDoc,
   hasStarterNote,
   starterOf,
+  withoutStarterNote,
   tokensFor,
   withPersonalLines,
   workingDaysText,
@@ -38,7 +39,7 @@ const filled = (body: ContentDoc): string =>
 
 /** F13.7: the drafts the shop starts each text from (docs/yasal-metinler.md). */
 describe("the legal texts' starting drafts", () => {
-  it.each(LEGAL_KINDS)("opens %s with its note, which alone keeps it unpublished", (kind) => {
+  it.each(LEGAL_KINDS)("opens %s with its note for the shop, which publishing removes", (kind) => {
     const { body } = starterOf(kind)
     const [note, ...rest] = body.content
     const quoted = renderDoc(doc(note ? [note] : []))
@@ -46,10 +47,14 @@ describe("the legal texts' starting drafts", () => {
 
     expect(note?.type).toBe("blockquote")
     expect(quoted).toContain("TASLAK")
+    // It says it is the shop's alone and goes when published; it asks nothing to be deleted
+    expect(quoted).toContain("metni yayımladığınızda kendiliğinden kaldırılır")
+    expect(quoted).not.toMatch(/notu silin|sildiğinizde/)
     // The questions for the shop's lawyer are listed in the note
     expect(quoted).toMatch(/<ol><li>/)
     expect(hasStarterNote(body)).toBe(true)
-    // Deleted, nothing of the draft is left: the rest goes live as it is
+    // Published, nothing of the draft is left: the rest goes live as it is
+    expect(withoutStarterNote(body)).toEqual(doc(rest))
     expect(hasStarterNote(doc(rest))).toBe(false)
     expect(text).not.toMatch(/taslak|avukat|\[|\.\.\./i)
   })

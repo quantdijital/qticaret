@@ -124,10 +124,18 @@ class LegalModuleService extends MedusaService({
   /**
    * Puts the draft in force and retires the version before, in one
    * transaction: the kind is never without a published text in between.
+   * A `body` replaces the draft's text in the same write (its starter's
+   * note removed), so `body_hash` is always the stored text's.
    */
   @InjectTransactionManager()
   async publishDraft(
-    input: { draft_id: string; previous_id: string | null; body_hash: string; by: string | null },
+    input: {
+      draft_id: string
+      previous_id: string | null
+      body?: Record<string, unknown>
+      body_hash: string
+      by: string | null
+    },
     @MedusaContext() sharedContext: Context = {}
   ) {
     if (input.previous_id) {
@@ -137,6 +145,7 @@ class LegalModuleService extends MedusaService({
       {
         id: input.draft_id,
         status: "published",
+        ...(input.body ? { body: input.body } : {}),
         body_hash: input.body_hash,
         published_at: new Date(),
         published_by: input.by,

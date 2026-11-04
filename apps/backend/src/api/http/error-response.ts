@@ -10,6 +10,8 @@ export interface ErrorBody {
   code?: string
   type?: string
   message: string
+  /** What a validation error's sentence names (`lib/errors` `ValidationError`). */
+  values?: Record<string, string>
 }
 
 export type DbErrorKind = "duplicate" | "invalid_reference" | "not_null" | "unknown_column"

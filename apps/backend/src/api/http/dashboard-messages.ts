@@ -27,12 +27,17 @@ export function isDashboardRequest(req: MedusaRequest): boolean {
 
 /**
  * The error body as the dashboard shows it (adr/0021): its core screens
- * print `message` as it is, so our key becomes the Turkish sentence, and the
- * key stays in `code`. Other bodies and other clients are left alone.
+ * print `message` as it is, so our key becomes the Turkish sentence, with
+ * what the error named (`values`) in it, and the key stays in `code`.
+ * Other bodies and other clients are left alone.
  */
 export function forDashboard(req: MedusaRequest, body: ErrorBody): ErrorBody {
   if (!I18N_KEY.test(body.message) || !isDashboardRequest(req)) {
     return body
   }
-  return { ...body, code: body.message, message: serverErrorMessage(body.message, "tr") }
+  return {
+    ...body,
+    code: body.message,
+    message: serverErrorMessage(body.message, "tr", body.values),
+  }
 }

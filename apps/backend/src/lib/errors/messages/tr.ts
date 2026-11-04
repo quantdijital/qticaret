@@ -577,10 +577,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "legal.draft_missing": "Bu metnin taslağı yok.",
   "legal.nothing_published":
     "Bu metnin yayında sürümü yok, taslağa kopyalanamaz. Başlangıç metninden başlayabilirsiniz.",
-  "legal.draft_note_present":
-    "Metnin başındaki taslak notu duruyor. Metni avukatınıza kontrol ettirip notu sildikten sonra yayımlayın.",
   "legal.token_invalid":
-    "Metinde tanınmayan ya da yarım kalmış bir belirteç var; belirteçler {mağaza_unvanı} biçiminde ve listedeki adlarla yazılır.",
+    "Metinde tanınmayan ya da yarım kalmış belirteç var: {{tokens}}. Belirteçler {mağaza_unvanı} biçiminde ve listedeki adlarla yazılır.",
   "legal.cookie_consent_missing": "Önce çerez tercihinizi seçin.",
   "legal.consent_missing":
     "Ödemeye geçmeden önce mesafeli satış sözleşmesini ve ön bilgilendirme formunu onaylayın.",

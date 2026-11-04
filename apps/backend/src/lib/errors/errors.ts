@@ -20,6 +20,11 @@ interface ErrorShape<K extends ErrorKind> {
 
 export interface ValidationErrorShape extends ErrorShape<"validation"> {
   readonly field?: string
+  /**
+   * What the sentence names (`{{tokens}}` in it): words the rule computed
+   * from the person's own input, so they can fix it in one go.
+   */
+  readonly values?: Readonly<Record<string, string>>
 }
 
 export interface ProviderErrorShape extends ErrorShape<"provider"> {
@@ -51,12 +56,19 @@ export class ValidationError extends Error implements ValidationErrorShape {
   readonly qtErrorKind = "validation"
   readonly safeMessage: string
   readonly field?: string
+  readonly values?: Readonly<Record<string, string>>
 
-  constructor(safeMessage: string, options: { field?: string; cause?: unknown } = {}) {
+  constructor(
+    safeMessage: string,
+    options: { field?: string; values?: Record<string, string>; cause?: unknown } = {}
+  ) {
     super(`validation failed: ${safeMessage}`, causeOf(options))
     this.safeMessage = safeMessage
     if (options.field !== undefined) {
       this.field = options.field
+    }
+    if (options.values !== undefined) {
+      this.values = options.values
     }
   }
 }

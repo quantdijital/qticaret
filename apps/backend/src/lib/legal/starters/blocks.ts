@@ -60,7 +60,8 @@ export const table = (header: readonly string[], rows: readonly (readonly string
   content: [row(header, true), ...rows.map((cells) => row(cells))],
 })
 
-// The note's own words, which no shop's text has: a draft that still holds them is not published
+// The note's own words, which no shop's text has. Drafts saved before
+// 2026-11-04 carry the note's older wording with the same words.
 const NOTE_MARK = "bir başlangıç iskeletidir"
 
 /** The day the drafts were last checked against the law in force (docs/yasal-metinler.md). */
@@ -68,25 +69,23 @@ export const CHECKED_ON = "3 Kasım 2026"
 
 /**
  * The draft note a starter opens with, its one block: it says the text is
- * a draft, the law it was checked against, and the points for the shop's
- * lawyer to settle. Deleted once a lawyer has read the text; until then
- * the text is not published (`legal.draft_note_present`).
+ * a draft, the law it was checked against, and the points worth checking
+ * with the shop's lawyer. It is for the shop alone: publishing removes it
+ * (`withoutStarterNote`; the owner, 2026-11-04), so a shopper never reads it.
  */
 export function draftNote(questions: readonly string[]): Block {
   return {
     type: "blockquote",
     content: [
       p(
-        `TASLAK: Bu metin ${NOTE_MARK}, hukuki görüş değildir. Yayımlamadan önce avukatınıza kontrol ettirin ve bu notu silin.`
+        `TASLAK: Bu metin ${NOTE_MARK}, hukuki görüş değildir. Bu kutu yalnızca mağazanız içindir: metni yayımladığınızda kendiliğinden kaldırılır, müşterileriniz görmez.`
       ),
       p(
         `Metin, ${CHECKED_ON} tarihinde yürürlükte olan mevzuata göre hazırlanmıştır. Süslü parantez içindeki belirteçler, gösterilirken mağaza ayarlarındaki ve siparişteki bilgilerle dolar; künyesi eksik olan bilgi metinde "—" olarak görünür.`
       ),
-      p("Avukatınızla karara bağlamanız gereken noktalar:"),
+      p("Avukatınızla kontrol etmeye değer noktalar:"),
       numbered(questions),
-      p(
-        "Bu kutunun tamamını sildiğinizde metin yayımlanabilir. Kutunun dışındaki metin olduğu gibi yayımlanır."
-      ),
+      p("Kutunun dışındaki metin olduğu gibi yayımlanır."),
     ],
   }
 }
@@ -110,10 +109,21 @@ function blockTexts(node: unknown): string[] {
   return content.flatMap(blockTexts)
 }
 
-/**
- * Whether a text still holds its starter's draft note (F13.7), anywhere,
- * edited or not: such a text is not published (`legal.draft_note_present`).
- */
+const holdsMark = (node: unknown): boolean =>
+  blockTexts(node).some((words) => words.includes(NOTE_MARK))
+
+/** Whether a text still holds its starter's draft note (F13.7), anywhere, edited or not. */
 export function hasStarterNote(doc: ContentDoc): boolean {
-  return blockTexts(doc).some((words) => words.includes(NOTE_MARK))
+  return holdsMark(doc)
+}
+
+/**
+ * The text as it is published (the owner, 2026-11-04): every box that
+ * holds the starter's draft note removed, whole, edited or not; nothing
+ * else changes. A box is only ever a top-level block (adr/0019). The same
+ * document comes back when there is no note box.
+ */
+export function withoutStarterNote(doc: ContentDoc): ContentDoc {
+  const content = doc.content.filter((block) => !(block.type === "blockquote" && holdsMark(block)))
+  return content.length === doc.content.length ? doc : { ...doc, content }
 }

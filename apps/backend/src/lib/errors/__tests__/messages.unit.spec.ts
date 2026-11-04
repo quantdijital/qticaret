@@ -30,4 +30,15 @@ describe("server error messages", () => {
     // Own keys only
     expect(serverErrorMessage("__proto__")).toContain("__proto__")
   })
+
+  it("puts what the error named in its sentence, and leaves the sentence's own braces", () => {
+    const tokens = { tokens: "{uydurma}, {adres" }
+    expect(serverErrorMessage("legal.token_invalid", "tr", tokens)).toBe(
+      "Metinde tanınmayan ya da yarım kalmış belirteç var: {uydurma}, {adres. Belirteçler {mağaza_unvanı} biçiminde ve listedeki adlarla yazılır."
+    )
+    expect(serverErrorMessage("legal.token_invalid", "en", tokens)).toContain(
+      "tokens: {uydurma}, {adres."
+    )
+    expect(serverErrorMessage("legal.token_invalid")).not.toContain("{{")
+  })
 })

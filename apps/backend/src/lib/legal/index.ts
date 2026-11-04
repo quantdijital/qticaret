@@ -5,7 +5,7 @@ export type { LegalValues } from "./fill"
 export { CONTRACT_PAYMENTS, linesTable, orderLegalValues } from "./order-values"
 export type { ContractPayment, OrderContractFacts, OrderLegalValues } from "./order-values"
 export { workingDaysText } from "./shipping-days"
-export { ARBITRATION_LIMIT, hasStarterNote, starterOf } from "./starters"
+export { ARBITRATION_LIMIT, hasStarterNote, starterOf, withoutStarterNote } from "./starters"
 export { personalLinesBlocks, withPersonalLines } from "./withdrawal"
 export {
   BLOCK_TOKENS,
@@ -15,6 +15,7 @@ export {
   PERSONAL_LINES_TOKEN,
   REQUIRED_KINDS,
   SHOP_TOKENS,
+  assertLegalTokens,
   checkLegalDoc,
   isLegalKind,
   tokensFor,

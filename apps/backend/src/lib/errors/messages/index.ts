@@ -16,10 +16,24 @@ const GENERIC: Readonly<Record<MessageLocale, (key: string) => string>> = {
   en: (key) => `The action could not be completed (error code: ${key}).`,
 }
 
-/** The sentence for an API error key (`catalog.handle_invalid`). */
-export function serverErrorMessage(key: string, locale: MessageLocale = "tr"): string {
+// `{{tokens}}` in a sentence; a single `{mağaza_unvanı}` is the sentence's own text
+const PLACEHOLDER = /\{\{([a-z_]+)\}\}/g
+
+/**
+ * The sentence for an API error key (`catalog.handle_invalid`), with what
+ * the error named (`values`) in its `{{name}}`s; a name without a value
+ * leaves nothing behind.
+ */
+export function serverErrorMessage(
+  key: string,
+  locale: MessageLocale = "tr",
+  values: Readonly<Record<string, string>> = {}
+): string {
   const messages = MESSAGES[locale]
-  return Object.hasOwn(messages, key)
+  const sentence = Object.hasOwn(messages, key)
     ? (messages[key] ?? GENERIC[locale](key))
     : GENERIC[locale](key)
+  return sentence.replace(PLACEHOLDER, (_, name: string) =>
+    Object.hasOwn(values, name) ? (values[name] ?? "") : ""
+  )
 }

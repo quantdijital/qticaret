@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
@@ -79,9 +80,11 @@ medusaIntegrationTestRunner({
       const unknownKind = await admin.get("/admin/legal-documents/uydurma")
 
       expect(starter.status).toBe(200)
-      expect(JSON.stringify(starter.data.starter.body)).toContain("avukat")
+      expect(JSON.stringify(starter.data.starter.body)).toContain("Avukatınızla")
       expect(unknownToken.status).toBe(400)
       expect(unknownToken.data.message).toBe("legal.token_invalid")
+      // The refusal names the token, so the shop fixes it in one go
+      expect((unknownToken.data as { values?: unknown }).values).toEqual({ tokens: "{alıcı_adı}" })
       expect(notYet.status).toBe(404)
       expect(first.data.draft.version).toBe(1)
       expect(published.data.published).toMatchObject({ version: 1 })
@@ -104,36 +107,53 @@ medusaIntegrationTestRunner({
       expect(unknownKind.status).toBe(404)
     })
 
-    it("keeps a draft with the starter's note a draft, and publishes it once the note is deleted", async () => {
-      const owner = await createAdminUser(http, getContainer())
+    it("publishes a starter draft as it is, its note for the shop removed and the rest unchanged", async () => {
+      const container = getContainer()
+      const owner = await createAdminUser(http, container)
+      const store = await createStorefront(container)
+      const get = <T>(url: string, headers = owner.headers) =>
+        settle(http.get<T & { message?: string }>(url, { headers }))
       const post = <T>(url: string, body: unknown = {}) =>
         settle(http.post<T & { message?: string }>(url, body, { headers: owner.headers }))
       const base = "/admin/legal-documents/privacy_notice"
-      const starter = await settle(
-        http.get<{ starter: { title: string; body: Doc } }>(`${base}/starter`, {
-          headers: owner.headers,
-        })
-      )
+      const starter = await get<{ starter: { title: string; body: Doc } }>(`${base}/starter`)
       const { title, body } = starter.data.starter
+      const [note, ...rest] = body.content
 
       const saved = await post(`${base}/draft`, { title, body })
-      const refused = await post(`${base}/publish`)
-      const still = await settle(
-        http.get<{ document: { draft: { version: number } | null; published: unknown } }>(base, {
-          headers: owner.headers,
-        })
+      const preview = await post<{ html: string }>(`${base}/preview`, { body })
+      const published = await post<{ published: { version: number; body_hash: string } }>(
+        `${base}/publish`
       )
-      // The owner deletes the note (the starter's first block) once a lawyer has read it
-      await post(`${base}/draft`, { title, body: { ...body, content: body.content.slice(1) } })
-      const published = await post<{ published: { version: number } }>(`${base}/publish`)
+      const detail = await get<{
+        document: { draft: unknown; published: { version: number; title: string; body: Doc } }
+      }>(base)
+      const shown = await get<{ document: { version: number; html: string } }>(
+        "/store/legal/privacy_notice",
+        store.headers
+      )
 
+      expect(note).toMatchObject({ type: "blockquote" })
+      expect(JSON.stringify(note)).toContain("bir başlangıç iskeletidir")
       expect(saved.status).toBe(200)
-      expect(refused.status).toBe(400)
-      expect(refused.data.message).toBe("legal.draft_note_present")
-      expect(still.data.document.published).toBeNull()
-      expect(still.data.document.draft?.version).toBe(1)
+      // The preview shows what customers will read: no note
+      expect(preview.status).toBe(200)
+      expect(preview.data.html).not.toContain("iskeletidir")
       expect(published.status).toBe(200)
       expect(published.data.published.version).toBe(1)
+      // The stored text is the published one, the note gone, every other block as it was
+      expect(detail.data.document.draft).toBeNull()
+      expect(detail.data.document.published).toMatchObject({ version: 1, title })
+      expect(detail.data.document.published.body).toEqual({ ...body, content: rest })
+      // Its hash is the stored text's
+      expect(published.data.published.body_hash).toBe(
+        createHash("sha256")
+          .update(JSON.stringify(detail.data.document.published.body))
+          .digest("hex")
+      )
+      expect(shown.data.document.version).toBe(1)
+      expect(shown.data.document.html).not.toContain("iskeletidir")
+      expect(shown.data.document.html).not.toContain("TASLAK")
     })
 
     it("previews a contract with a made-up order, and leaves editing to the owner and admin", async () => {

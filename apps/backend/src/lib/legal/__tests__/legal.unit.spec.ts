@@ -1,13 +1,16 @@
 import type { Block, ContentDoc } from "../../content"
 import { contentDoc, renderDoc } from "../../content"
+import { isValidationError } from "../../errors"
 import {
   LEGAL_KINDS,
+  assertLegalTokens,
   checkLegalDoc,
   fillLegalDoc,
   hasStarterNote,
   identityGaps,
   orderLegalValues,
   starterOf,
+  withoutStarterNote,
 } from ".."
 import type { OrderContractFacts } from ".."
 
@@ -20,21 +23,54 @@ describe("legal texts (adr/0041 §1)", () => {
 
     expect(title.length).toBeGreaterThan(0)
     expect(contentDoc.safeParse(body).success).toBe(true)
-    expect(checkLegalDoc(body, kind)).toEqual({ unknownTokens: [], isMalformed: false })
-    // Each says it is a draft for a lawyer to check
-    expect(renderDoc(body)).toContain("avukatınıza")
+    expect(checkLegalDoc(body, kind)).toEqual({ unknownTokens: [], isMalformed: false, broken: [] })
+    // Each says, in its note for the shop, it is a draft with points for a lawyer
+    expect(renderDoc(body)).toContain("Avukatınızla kontrol etmeye değer noktalar")
   })
 
   it("refuses an unknown token, a token split by formatting, and an order's in a policy", () => {
     expect(checkLegalDoc(doc(p("{mağaza_unvanı} {uydurma}")), "privacy_notice")).toEqual({
       unknownTokens: ["uydurma"],
       isMalformed: false,
+      broken: [],
     })
     expect(checkLegalDoc(doc(p("Ad: {alıcı_adı")), "distance_sales").isMalformed).toBe(true)
     expect(checkLegalDoc(doc(p("{alıcı_adı}")), "return_policy").unknownTokens).toEqual([
       "alıcı_adı",
     ])
     expect(checkLegalDoc(doc(p("{alıcı_adı}")), "distance_sales").unknownTokens).toEqual([])
+  })
+
+  it("names every unknown and broken token in its refusal, so all are fixed in one go", () => {
+    const refusal = (body: ContentDoc): unknown => {
+      try {
+        assertLegalTokens(body, "return_policy")
+      } catch (error) {
+        return error
+      }
+      return null
+    }
+    const thrown = refusal(
+      doc(
+        p("Süre {iade_süresi} gün, alıcı {alıcı_adı}, satıcı {uydurma}."),
+        p("Adres: {adres"),
+        p("Unvan: {mağaza unvanı} ve {}"),
+        p("Yine {uydurma}.")
+      )
+    )
+
+    expect(isValidationError(thrown)).toBe(true)
+    expect(thrown).toMatchObject({
+      safeMessage: "legal.token_invalid",
+      field: "body",
+      values: { tokens: "{alıcı_adı}, {uydurma}, {adres, {mağaza unvanı}, {}" },
+    })
+    expect(refusal(doc(p("Süre {iade_süresi} gün.")))).toBeNull()
+    // A long list is cut, saying there is more
+    const many = refusal(
+      doc(p(Array.from({ length: 12 }, (_, i) => `{yok_${String(i)}}`).join(" ")))
+    )
+    expect((many as { values: { tokens: string } }).values.tokens).toMatch(/\{yok_9\} …$/)
   })
 
   it("fills text tokens, opens a block token at the top only, and marks what has no value", () => {
@@ -76,6 +112,28 @@ describe("legal texts (adr/0041 §1)", () => {
 describe("the starter's draft note (F13.7)", () => {
   it.each(LEGAL_KINDS)("is found in the %s starter as it comes", (kind) => {
     expect(hasStarterNote(starterOf(kind).body)).toBe(true)
+  })
+
+  it("is removed whole when published, edited or not, and nothing else with it", () => {
+    const { body } = starterOf("distance_sales")
+    const [note, ...rest] = body.content
+    const quote = (...texts: string[]): Block => ({
+      type: "blockquote",
+      content: texts.map((text) => ({ type: "paragraph", content: [{ type: "text", text }] })),
+    })
+    const edited = quote("Avukatım baktı.", "TASLAK: Bu metin bir başlangıç iskeletidir, eski not.")
+    const ownQuote = quote("Mağazanın kendi alıntısı.")
+
+    expect(note?.type).toBe("blockquote")
+    expect(withoutStarterNote(body)).toEqual(doc(...rest))
+    expect(hasStarterNote(withoutStarterNote(body))).toBe(false)
+    // The older wording (drafts saved before 2026-11-04) goes the same way; the shop's own box stays
+    expect(withoutStarterNote(doc(ownQuote, edited, ...rest, edited))).toEqual(
+      doc(ownQuote, ...rest)
+    )
+    // No note: the very same document
+    const plain = doc(p("Metin."))
+    expect(withoutStarterNote(plain)).toBe(plain)
   })
 
   it("is found once edited, split by formatting or moved, and gone once deleted", () => {

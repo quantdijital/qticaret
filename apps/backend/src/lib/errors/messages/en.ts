@@ -575,10 +575,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "legal.draft_missing": "This text has no draft.",
   "legal.nothing_published":
     "This text has no published version to copy into the draft. You can start from the starter text.",
-  "legal.draft_note_present":
-    "The draft note at the top of the text is still there. Have your lawyer check the text, delete the note, then publish.",
   "legal.token_invalid":
-    "The text has an unknown or broken token; tokens are written like {mağaza_unvanı}, with the names in the list.",
+    "The text has unknown or broken tokens: {{tokens}}. Tokens are written like {mağaza_unvanı}, with the names in the list.",
   "legal.cookie_consent_missing": "Choose your cookie preferences first.",
   "legal.consent_missing":
     "Accept the distance sales contract and the pre-information form before paying.",

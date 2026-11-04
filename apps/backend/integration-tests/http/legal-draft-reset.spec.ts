@@ -67,9 +67,7 @@ medusaIntegrationTestRunner({
       const nothingToCopy = await reset("published")
       const nothingToDrop = await admin.delete(`${base}/draft`)
       const fromStarter = await reset("starter")
-      // The starter's draft note is back with it: the text stays a draft
-      const noteRefused = await admin.post(`${base}/publish`)
-      // The owner's lawyer has read it: the note goes, the text is published as v1
+      // The owner writes their own text over it and publishes it as v1
       await admin.post(`${base}/draft`, { title: "Çerez politikası", body: doc("İlk metin.") })
       await admin.post(`${base}/publish`)
       const fromPublished = await reset("published")
@@ -110,8 +108,6 @@ medusaIntegrationTestRunner({
         body: starter.data.starter.body,
         published_at: null,
       })
-      expect(noteRefused.status).toBe(400)
-      expect(noteRefused.data.message).toBe("legal.draft_note_present")
 
       // A copy of v1 as the draft v2, beside the published v1
       expect(fromPublished.status).toBe(200)

@@ -1,4 +1,5 @@
 import type { Block, ContentDoc, Inline } from "../content"
+import { ValidationError } from "../errors"
 import { checkTemplate } from "../seo/template"
 
 /**
@@ -110,6 +111,31 @@ function* textsOf(blocks: readonly Block[]): Generator<string> {
 export interface LegalTemplateCheck {
   unknownTokens: string[]
   isMalformed: boolean
+  /** Where braces do not form a `{name}`: the piece as written, to find it in the text. */
+  broken: string[]
+}
+
+// `lib/seo/template.ts`'s token and name, for the pieces it only counts as malformed
+const TOKEN = /\{([^{}]*)\}/gu
+const TOKEN_NAME = /^[\p{L}\p{N}_]+$/u
+// A brace left without its pair, with the word it sits in
+const STRAY = /\S*[{}]\S*/gu
+const MAX_PIECE = 40
+const clip = (piece: string): string =>
+  piece.length > MAX_PIECE ? `${piece.slice(0, MAX_PIECE)}…` : piece
+
+function brokenPieces(text: string): string[] {
+  const normalized = text.normalize("NFC")
+  const pieces: string[] = []
+  for (const [whole, name = ""] of normalized.matchAll(TOKEN)) {
+    if (!TOKEN_NAME.test(name)) {
+      pieces.push(whole)
+    }
+  }
+  for (const [word] of normalized.replace(TOKEN, " ").matchAll(STRAY)) {
+    pieces.push(word)
+  }
+  return pieces.map(clip)
 }
 
 /**
@@ -119,11 +145,36 @@ export interface LegalTemplateCheck {
 export function checkLegalDoc(doc: ContentDoc, kind: LegalKind): LegalTemplateCheck {
   const allowed = tokensFor(kind)
   const unknown = new Set<string>()
+  const broken = new Set<string>()
   let isMalformed = false
   for (const text of textsOf(doc.content)) {
     const check = checkTemplate(text, allowed)
     check.unknownTokens.forEach((token) => unknown.add(token))
-    isMalformed ||= check.isMalformed
+    if (check.isMalformed) {
+      isMalformed = true
+      brokenPieces(text).forEach((piece) => broken.add(piece))
+    }
   }
-  return { unknownTokens: [...unknown], isMalformed }
+  return { unknownTokens: [...unknown], isMalformed, broken: [...broken] }
+}
+
+// Enough to fix in one go without the sentence turning into the text
+const MAX_NAMED = 10
+
+/**
+ * Refuses a text with a token the kind does not fill or a broken one, a
+ * contract would otherwise print it as it is: `legal.token_invalid`, the
+ * sentence naming each (`values.tokens`) so the shop fixes them in one go.
+ */
+export function assertLegalTokens(doc: ContentDoc, kind: LegalKind): void {
+  const { unknownTokens, isMalformed, broken } = checkLegalDoc(doc, kind)
+  if (unknownTokens.length === 0 && !isMalformed) {
+    return
+  }
+  const named = [...new Set([...unknownTokens.map((name) => clip(`{${name}}`)), ...broken])]
+  const shown = named.slice(0, MAX_NAMED).join(", ")
+  throw new ValidationError("legal.token_invalid", {
+    field: "body",
+    values: { tokens: named.length > MAX_NAMED ? `${shown} …` : shown },
+  })
 }

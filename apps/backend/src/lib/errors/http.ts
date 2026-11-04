@@ -12,7 +12,7 @@ import {
 export interface HttpErrorResponse {
   status: number
   /** Same shape as Medusa's error responses; `message` is an i18n key. */
-  body: { type: string; message: string; count?: number }
+  body: { type: string; message: string; count?: number; values?: Record<string, string> }
   retryAfterSeconds?: number
 }
 
@@ -22,6 +22,26 @@ const MAX_RETRY_AFTER_SECONDS = 300
 
 const isCount = (value: unknown): value is number =>
   typeof value === "number" && Number.isSafeInteger(value) && value >= 0
+
+// A value is a few words for a sentence; anything else is not sent
+const MAX_VALUES = 5
+const MAX_VALUE_LENGTH = 500
+
+/** A validation error's sentence values that are short strings, or nothing. */
+function valuesOf(value: unknown): { values?: Record<string, string> } {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return {}
+  }
+  const entries = Object.entries(value as Record<string, unknown>).filter(
+    (entry): entry is [string, string] =>
+      /^[a-z_]+$/.test(entry[0]) &&
+      typeof entry[1] === "string" &&
+      entry[1].length <= MAX_VALUE_LENGTH
+  )
+  return entries.length > 0 && entries.length <= MAX_VALUES
+    ? { values: Object.fromEntries(entries) }
+    : {}
+}
 
 const retryAfterSecondsOf = (ms: number): number =>
   Math.min(MAX_RETRY_AFTER_SECONDS, Math.max(1, Math.ceil(ms / 1000)))
@@ -42,7 +62,9 @@ const clientMessage = (safeMessage: string, fallback: string): string =>
 export function toHttpError(value: unknown): HttpErrorResponse | null {
   if (isValidationError(value)) {
     const message = clientMessage(value.safeMessage, DEFAULT_VALIDATION_MESSAGE)
-    return { status: 400, body: { type: "invalid_data", message } }
+    // Values go with the rule's own key only, never with the fallback's sentence
+    const values = message === value.safeMessage ? valuesOf(value.values) : {}
+    return { status: 400, body: { type: "invalid_data", message, ...values } }
   }
   if (isConflictError(value)) {
     const message = clientMessage(value.safeMessage, DEFAULT_CONFLICT_MESSAGE)

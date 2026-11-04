@@ -18,12 +18,13 @@ describe("the text a draft is started again from", () => {
       const text = resetTextOf(kind, "starter", published)
 
       expect(text).toEqual(starterOf(kind))
-      // The note keeps it a draft until a lawyer has read it (legal.draft_note_present)
+      // The note for the shop comes with it; publishing removes it
       expect(hasStarterNote(text.body)).toBe(true)
       // The save step checks the tokens again: a starter passes it
       expect(checkLegalDoc(text.body, kind)).toMatchObject({
         isMalformed: false,
         unknownTokens: [],
+        broken: [],
       })
     }
   )

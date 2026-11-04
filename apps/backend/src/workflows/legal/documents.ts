@@ -10,8 +10,8 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import type { ContentDoc } from "../../lib/content"
-import { ConflictError, ValidationError } from "../../lib/errors"
-import { checkLegalDoc, hasStarterNote, starterOf } from "../../lib/legal"
+import { ConflictError } from "../../lib/errors"
+import { assertLegalTokens, starterOf, withoutStarterNote } from "../../lib/legal"
 import type { LegalKind } from "../../lib/legal"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
@@ -30,13 +30,6 @@ export interface SaveDraftInput {
   actor_id: string | null
 }
 
-function assertTokens(kind: LegalKind, body: ContentDoc): void {
-  const { unknownTokens, isMalformed } = checkLegalDoc(body, kind)
-  if (isMalformed || unknownTokens.length > 0) {
-    throw new ValidationError("legal.token_invalid", { field: "body" })
-  }
-}
-
 /** The fingerprint of what was published: the body as stored, hashed. */
 export const bodyHashOf = (body: unknown): string =>
   createHash("sha256").update(JSON.stringify(body)).digest("hex")
@@ -51,7 +44,7 @@ interface DraftUndo {
 const saveDraftStep = createStep(
   "legal-save-draft",
   async (input: SaveDraftInput, { container }) => {
-    assertTokens(input.kind, input.body)
+    assertLegalTokens(input.body, input.kind)
     const service = legal(container)
     const current = await service.versionOf(input.kind, "draft")
     if (current) {
@@ -90,11 +83,19 @@ const saveDraftStep = createStep(
   }
 )
 
+interface PublishUndo {
+  draftId: string
+  previousId: string | null
+  /** The draft's text before its note was removed; null when it had none. */
+  bodyBefore: Record<string, unknown> | null
+}
+
 /**
  * The draft published (adr/0041 §1): checked again, fixed by its hash, and
- * the version published before it retired. Undone, both go back. A draft
- * still carrying its starter's note (have a lawyer check it, then delete
- * this) is kept a draft: a shopper never reads the platform's note.
+ * the version published before it retired. The starter's draft note is for
+ * the shop alone (the owner, 2026-11-04): its box is removed from the row
+ * itself, in the same write, so the text stored, hashed and shown is one.
+ * Undone, all of it goes back, the note too.
  */
 const publishDraftStep = createStep(
   "legal-publish-draft",
@@ -104,21 +105,26 @@ const publishDraftStep = createStep(
     if (!draft) {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "legal.draft_missing")
     }
-    const body = draft.body as unknown as ContentDoc
-    assertTokens(input.kind, body)
-    if (hasStarterNote(body)) {
-      throw new ValidationError("legal.draft_note_present", { field: "body" })
-    }
+    const stored = draft.body as unknown as ContentDoc
+    assertLegalTokens(stored, input.kind)
+    const body = withoutStarterNote(stored)
+    const stripped = body !== stored
     const previous = await service.versionOf(input.kind, "published")
     const published = await service.publishDraft({
       draft_id: draft.id,
       previous_id: previous?.id ?? null,
-      body_hash: bodyHashOf(draft.body),
+      ...(stripped ? { body: body as unknown as Record<string, unknown> } : {}),
+      body_hash: bodyHashOf(body),
       by: input.actor_id,
     })
-    return new StepResponse(published, { draftId: draft.id, previousId: previous?.id ?? null })
+    const undo: PublishUndo = {
+      draftId: draft.id,
+      previousId: previous?.id ?? null,
+      bodyBefore: stripped ? draft.body : null,
+    }
+    return new StepResponse(published, undo)
   },
-  async (undo, { container }) => {
+  async (undo: PublishUndo | undefined, { container }) => {
     if (!undo) {
       return
     }
@@ -126,6 +132,7 @@ const publishDraftStep = createStep(
     await service.updateLegalDocuments({
       id: undo.draftId,
       status: "draft",
+      ...(undo.bodyBefore ? { body: undo.bodyBefore } : {}),
       body_hash: null,
       published_at: null,
       published_by: null,
@@ -142,9 +149,9 @@ export type DraftResetSource = (typeof DRAFT_RESET_SOURCES)[number]
 
 /**
  * The text a draft started again holds: the kind's starter as `GET starter`
- * gives it (its tokens, and its draft note, so it is not published before
- * a lawyer has read it), or a copy of the published text; 409 when nothing
- * is published to copy.
+ * gives it (its tokens, and its draft note for the shop, removed when it is
+ * published), or a copy of the published text; 409 when nothing is
+ * published to copy.
  */
 export function resetTextOf(
   kind: LegalKind,

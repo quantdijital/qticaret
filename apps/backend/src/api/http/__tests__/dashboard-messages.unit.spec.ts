@@ -47,6 +47,16 @@ describe("forDashboard", () => {
     })
   })
 
+  it("puts what the error named in the sentence", () => {
+    const body = forDashboard(request("/admin/legal-documents/x/draft", { session: true }), {
+      type: "invalid_data",
+      message: "legal.token_invalid",
+      values: { tokens: "{uydurma}" },
+    })
+    expect(body).toMatchObject({ code: "legal.token_invalid", values: { tokens: "{uydurma}" } })
+    expect(body.message).toContain("belirteç var: {uydurma}.")
+  })
+
   it("names an untranslated key in a generic sentence", () => {
     const body = forDashboard(request("/admin/x", { session: true }), {
       type: "invalid_data",

@@ -237,3 +237,35 @@ describe("ConflictError", () => {
     expect(toHttpError(odd)?.body).toEqual({ type: "conflict", message: "vat.rate_in_use" })
   })
 })
+
+describe("ValidationError with values for its sentence", () => {
+  it("gives them with its own key, also after a workflow's round trip", () => {
+    const error = new ValidationError("legal.token_invalid", {
+      field: "body",
+      values: { tokens: "{uydurma}, {adres" },
+    })
+    const travelled: unknown = JSON.parse(JSON.stringify(error))
+    for (const value of [error, travelled]) {
+      expect(toHttpError(value)).toEqual({
+        status: 400,
+        body: {
+          type: "invalid_data",
+          message: "legal.token_invalid",
+          values: { tokens: "{uydurma}, {adres" },
+        },
+      })
+    }
+  })
+
+  it("sends no values with a fallback key, and none that are not short strings", () => {
+    const body = (values: unknown, key = "legal.token_invalid") =>
+      toHttpError(Object.assign(new ValidationError(key), { values }))?.body
+    expect(body({ tokens: "{x}" }, "not a key")).toEqual({
+      type: "invalid_data",
+      message: "errors.invalid_data",
+    })
+    for (const odd of [["{x}"], { tokens: 3 }, { tokens: "x".repeat(501) }, { "Bad-Name": "x" }]) {
+      expect(body(odd)).toEqual({ type: "invalid_data", message: "legal.token_invalid" })
+    }
+  })
+})
