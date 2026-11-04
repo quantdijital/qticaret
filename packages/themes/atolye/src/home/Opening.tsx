@@ -38,7 +38,7 @@ export function Opening({ opening, first }: { opening: OpeningPlan; first: boole
   const quick = (categories?.categories ?? []).slice(0, OPENING_CATEGORIES)
   const headingClass = "max-w-[20ch] font-display text-display leading-[1.04]"
   return (
-    <section aria-labelledby={id} className="pt-6 pb-10 lg:pt-10">
+    <section aria-labelledby={id} className="pt-6 pb-10 lg:pb-16">
       <Container
         className={cn(
           "grid gap-6 lg:items-center lg:gap-x-(--gap-columns)",
@@ -58,12 +58,12 @@ export function Opening({ opening, first }: { opening: OpeningPlan; first: boole
           )}
           {hero.intro && <p className="lead max-w-[46ch] text-text-2">{hero.intro}</p>}
           {main && (
-            <div className="flex flex-wrap gap-2 pt-1">
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 pt-1">
               <a href={main.path} className="at-btn">
                 {main.label}
               </a>
               {second && (
-                <a href={second.path} className="at-btn at-btn--quiet">
+                <a href={second.path} className="at-link">
                   {second.label}
                 </a>
               )}
@@ -71,12 +71,12 @@ export function Opening({ opening, first }: { opening: OpeningPlan; first: boole
           )}
           {categories && quick.length > 0 && (
             <nav aria-label={categories.title} className="pt-2 lg:hidden">
-              <ul className="grid grid-cols-2 gap-x-4 border-t-2 border-rule-ink md:grid-cols-3">
+              <ul className="grid grid-cols-1 gap-x-4 border-t-2 border-rule-ink min-[360px]:grid-cols-2 md:grid-cols-3">
                 {quick.map((category) => (
                   <li key={category.path} className="border-b border-rule">
                     <a
                       href={category.path}
-                      className="at-row-link flex min-h-11 items-center py-2 font-medium"
+                      className="at-row-link flex min-h-11 items-center py-2 text-card-title font-medium"
                     >
                       {category.label}
                     </a>

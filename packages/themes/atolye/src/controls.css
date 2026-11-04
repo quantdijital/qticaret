@@ -250,3 +250,32 @@ body:has([data-sticky-buy]) [data-whatsapp] {
 details:not([open]) > :not(summary) {
   display: none;
 }
+
+/* A shelf's tabs (home/ShelfTabs): the tab row names the panels once the
+   script runs, so each panel's own heading steps back for the reader */
+.at-tab {
+  cursor: pointer;
+  transition:
+    color var(--dur-micro) var(--ease-out),
+    border-color var(--dur-micro) var(--ease-out);
+}
+.at-tab:active {
+  transform: translateY(1px);
+}
+.at-tab:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  .at-tab:hover {
+    color: var(--color-text);
+  }
+}
+[data-shelf-tabs="on"] [data-section-head] h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

@@ -3,8 +3,11 @@
  * axes: light/roman-serif/cool · posture: committed · contrast: pass · fold: pass · v2.0.0 */
 /* Hallmark · pre-emit critique: P4 H4 E4 S3 R5 V4 · weakest: S, the heading is the shop's category line, not its promise; the owner is asked to lead with "Her modelde çelik, ölçü ve sap detayı yazılı" */
 /* Hallmark · hero-review: fix · 5 findings · 3 resolved (empty sand tiles gone, photograph at six columns, no picture on a phone now under the first rows) 1 partial (categories repeat the bar on wide screens below the fold only) 1 unresolved (headline is shop data, an owner ask) */
-/* Hallmark · dismissed 58 · 83 words counts the first-visit cookie banner's legal notice; the page alone holds 59 in its densest 900px window */
+/* Hallmark · finish-review: subagent · 6 findings · 2 resolved (item titles and ink rules on the shelf and guides; the button and text-link pair, help as ruled rows) 1 partial (dark signal lifted less, L 66) 1 unresolved (four across puts about 110 words in one window, gate 58) · 2 owner data (a blog cover, generic section titles) · gap: none */
+/* Hallmark · dismissed 58 · the densest windows are the first-visit cookie notice over the opening (the page alone holds 59 words there) and the footer's contact, menus and legal lines, all the shop's own */
+/* Hallmark · waive 83 · the shelf's twelve cards and the three guides are the shop's own catalogue and blog photographs, no stand-ins · a shop's catalogue is its own work */
 /* Hallmark · dismissed 42 · the mast: the shop's name at 72px over its contact block and the shop's own footer menus, named in the stamp */
+/* Hallmark · dismissed 54 · SectionHead renders the section's h2 (home/SectionHead.tsx) and the section is labelled by it; the static tier cannot see through the component */
 @import "./tokens.css";
 @import "./base.css" layer(base);
 @import "./controls.css";

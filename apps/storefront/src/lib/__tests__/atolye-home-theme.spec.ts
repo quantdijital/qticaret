@@ -72,7 +72,7 @@ describe("the Atölye opening", () => {
     expect(html).toContain(">El yapımı ürünler</h1>")
     expect(html).toContain("Her modelde ölçü ve malzeme yazılı.")
     expect(html).toMatch(/<a href="\/kategori\/urunler" class="at-btn">Ürünleri incele<\/a>/)
-    expect(html).toMatch(/<a href="\/kategori\/koleksiyon" class="at-btn at-btn--quiet">/)
+    expect(html).toMatch(/<a href="\/kategori\/koleksiyon" class="at-link">/)
     expect(html).not.toContain("Kısa üst satır")
   })
 
@@ -98,7 +98,7 @@ describe("the Atölye opening", () => {
   it("keeps the index off a phone when the opening already lists every category", () => {
     const html = home([hero, categories(4), shelf])
 
-    expect(html).toMatch(/<div class="max-lg:hidden"><section aria-labelledby="bolum-kategoriler"/)
+    expect(html).toMatch(/<section aria-labelledby="bolum-kategoriler" class="[^"]*max-lg:hidden/)
   })
 
   it("shows the shop's first pictured product as its photograph, loaded first", () => {

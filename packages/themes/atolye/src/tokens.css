@@ -153,8 +153,8 @@
   }
   @supports (color: oklch(from red l c h)) {
     :root {
-      --color-signal: oklch(from var(--primary) 72% min(c, 0.12) h);
-      --color-signal-2: oklch(from var(--primary) 78% min(c, 0.11) h);
+      --color-signal: oklch(from var(--primary) 66% min(c, 0.14) h);
+      --color-signal-2: oklch(from var(--primary) 72% min(c, 0.13) h);
       --color-band-focus: var(--color-signal);
     }
   }
