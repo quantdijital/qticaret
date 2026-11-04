@@ -103,21 +103,28 @@ async function zoneOf(container: MedusaContainer, locationId: string, type: SetT
 /**
  * Where the shop's options live: the default warehouse's zone for
  * Türkiye of the kind asked (shipping, or pickup), and the default
- * shipping profile. Made when missing (kept if the option then fails: an
- * empty zone harms nothing).
+ * shipping profile; with none picked, the shop's only warehouse or
+ * profile. Made when missing (kept if the option then fails: an empty
+ * zone harms nothing).
  */
 export const ensureShippingZoneStep = createStep(
   "shipping-ensure-zone",
   async (input: { type: SetType }, { container }) => {
     const query = container.resolve(ContainerRegistrationKeys.QUERY)
+    // The only one of a kind stands for the default nobody picked (adr/0054, 2026-11-05 addendum)
+    const onlyOne = async (entity: "stock_location" | "shipping_profile") => {
+      const { data } = await query.graph({ entity, fields: ["id"], pagination: { take: 2 } })
+      return data.length === 1 ? (data[0] as { id: string }).id : undefined
+    }
     const [{ data: stores }, { data: profiles }] = await Promise.all([
       query.graph({ entity: "store", fields: ["default_location_id", "default_region_id"] }),
       query.graph({ entity: "shipping_profile", fields: ["id"], filters: { type: "default" } }),
     ])
     const store = stores[0] as
       { default_location_id?: string | null; default_region_id?: string | null } | undefined
-    const locationId = store?.default_location_id
-    const profileId = (profiles[0] as { id: string } | undefined)?.id
+    const locationId = store?.default_location_id ?? (await onlyOne("stock_location"))
+    const profileId =
+      (profiles[0] as { id: string } | undefined)?.id ?? (await onlyOne("shipping_profile"))
     if (!locationId || !profileId) {
       throw new ValidationError("shipping.setup_incomplete")
     }
@@ -151,7 +158,7 @@ export const ensureShippingZoneStep = createStep(
     return new StepResponse({
       service_zone_id: found.zone_id,
       shipping_profile_id: profileId,
-      region_id: store.default_region_id ?? null,
+      region_id: store?.default_region_id ?? null,
     })
   }
 )

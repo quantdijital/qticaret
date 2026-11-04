@@ -3,6 +3,9 @@ import { addShippingMethodToCartWorkflow, createCartWorkflow } from "@medusajs/m
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { startFakeGeliver } from "@qticaret/testing"
 import type { FakeGeliver } from "@qticaret/testing"
+import { DEMO_LOCATION_ADDRESS } from "../../src/scripts/seed/data"
+import { placeOrder } from "../../src/scripts/seed/orders/place"
+import { updateWarehouseWorkflow } from "../../src/workflows/stock/warehouses"
 import { geliverOrder, geliverProduct, geliverShop, shipOrder } from "../helpers/geliver"
 import type { GeliverShop } from "../helpers/geliver"
 import type { HttpClient } from "../helpers/http"
@@ -164,6 +167,109 @@ medusaIntegrationTestRunner({
       expect(label.status).toBe(200)
       expect(label.data.url).toEqual(expect.any(String))
       expect(anonymous.status).toBe(401)
+    })
+
+    it("ships to an address without a postcode: the data's postcode and plate code, the order's own untouched", async () => {
+      const orderId = await placeOrder(getContainer(), {
+        regionId: shop.regionId,
+        salesChannelId: shop.salesChannelId,
+        shippingOptionId: optionId,
+        items: [{ variant_id: variantId, quantity: 1 }],
+        address: { ...PAYTR_ADDRESS, postal_code: "", address_2: "Caferağa" },
+      })
+
+      const shipped = await ship(orderId)
+      const [shipment] = [...fake.shipments.values()]
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({
+          entity: "order",
+          fields: ["shipping_address.postal_code", "fulfillments.delivery_address.postal_code"],
+          filters: { id: orderId },
+        })
+      const row = data[0] as {
+        shipping_address: { postal_code: string | null }
+        fulfillments: { delivery_address: { postal_code: string | null } | null }[]
+      }
+
+      expect(shipped.status).toBe(200)
+      expect(shipment?.request).toMatchObject({
+        recipientAddress: {
+          zip: "34710",
+          cityCode: "34",
+          address1: "Caferağa, Atatürk Cad. No: 1",
+        },
+      })
+      // The parcel keeps the address its carrier got; the order keeps what the customer typed
+      expect(["", null]).toContain(row.shipping_address.postal_code)
+      expect(row.fulfillments[0]?.delivery_address?.postal_code).toBe("34710")
+    })
+
+    it("fills the warehouse's phone from the shop's and its postcode from the address data", async () => {
+      const container = getContainer()
+      const { data: locations } = await container
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "stock_location", fields: ["name"], filters: { id: shop.locationId } })
+      await updateWarehouseWorkflow(container).run({
+        input: {
+          id: shop.locationId,
+          name: (locations[0] as { name: string }).name,
+          address: {
+            ...DEMO_LOCATION_ADDRESS,
+            address_1: "Moda Caddesi No: 1",
+            address_2: "Caferağa",
+            phone: null,
+            postal_code: null,
+          },
+        },
+      })
+      await http.post(
+        "/admin/platform-settings/store",
+        { contact_phone: "0532 123 45 67" },
+        { headers: admin.headers }
+      )
+
+      const shipped = await ship(await order())
+      const [sender] = [...fake.addresses.values()]
+
+      expect(shipped.status).toBe(200)
+      expect(sender).toMatchObject({
+        shortName: `qt-${shop.locationId}`,
+        phone: "+905321234567",
+        zip: "34710",
+        cityCode: "34",
+      })
+    })
+
+    it("leaves the sender to the account's default when the warehouse cannot stand for it, refusing only when Geliver has none", async () => {
+      await http.post(
+        "/admin/platform-settings/store",
+        { contact_email: null },
+        { headers: admin.headers }
+      )
+
+      const refused = await ship(await order())
+      // A sender address the shop keeps in Geliver's own panel
+      fake.addresses.set("adr_panel", {
+        id: "adr_panel",
+        isRecipientAddress: false,
+        name: "Örnek Bıçak",
+        phone: "+902160000000",
+        address1: "Moda Caddesi No: 1",
+        cityCode: "34",
+        districtName: "Kadıköy",
+        zip: "34710",
+      })
+      const shipped = await ship(await order())
+      const [shipment] = [...fake.shipments.values()]
+
+      expect(refused.status).toBe(400)
+      expect(refused.data.message).toBe("shipping.sender_contact_missing")
+      expect(shipped.status).toBe(200)
+      expect(shipment?.request).not.toHaveProperty("senderAddressID")
+      expect(shipment?.senderID).toBe("adr_panel")
+      // Nothing made for the warehouse that could not stand for the sender
+      expect(fake.addresses.size).toBe(1)
     })
 
     it("uses the warehouse's sender address again, and collects at the door for cash on delivery", async () => {

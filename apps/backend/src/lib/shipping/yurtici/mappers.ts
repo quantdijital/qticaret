@@ -67,10 +67,10 @@ export function yurticiShipmentFields(input: YurticiShipmentInput): XmlFields {
     // One key per parcel for both: ours is unique already
     invoiceKey: input.cargoKey,
     receiverCustName: cut(input.receiver.name, 200),
-    // Without the il and the ilçe: they go in their own fields
+    // Without the il and the ilçe: they go in their own fields, optional (H), left out when unknown
     receiverAddress: cut(input.receiver.address, 500),
-    cityName: cut(input.receiver.city, 40),
-    townName: cut(input.receiver.town, 40),
+    cityName: input.receiver.city ? cut(input.receiver.city, 40) : null,
+    townName: input.receiver.town ? cut(input.receiver.town, 40) : null,
     // Ten digits with the area code, no leading 0 (the document's 2123652426)
     receiverPhone1: input.receiver.phone.replace(/^0/, ""),
     // Numbers the service's description requires: empty when unused, as the document sends them

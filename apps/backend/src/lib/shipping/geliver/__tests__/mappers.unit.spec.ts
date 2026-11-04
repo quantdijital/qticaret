@@ -42,9 +42,36 @@ describe("Geliver addresses (adr/0008 mapping)", () => {
     }
 
     expect(missing({ phone: "" })).toBe("phone")
-    expect(missing({ postal_code: "347" })).toBe("postal_code")
     expect(missing({ country_code: "de" })).toBe("country_code")
     expect(missing({ first_name: "", last_name: " " })).toBe("first_name")
+    expect(missing({ city: "" })).toBe("city")
+    // Geliver's SDK: a recipient's postcode is optional; no country is Türkiye; a company names it
+    expect(missing({ postal_code: "347" })).toBe("nothing")
+    expect(missing({ country_code: null })).toBe("nothing")
+    expect(missing({ first_name: "", last_name: "", company: "Örnek Ltd." })).toBe("nothing")
+  })
+
+  it("sends a recipient without a postcode by its city's plate code from the address data, else by name", () => {
+    const bare = { ...address, postal_code: null }
+
+    expect(geliverRecipientOf(bare, null, "34")).toMatchObject({
+      cityCode: "34",
+      cityName: "İstanbul",
+    })
+    expect(geliverRecipientOf(bare, null, "34")).not.toHaveProperty("zip")
+    expect(geliverRecipientOf(bare, null)).not.toHaveProperty("cityCode")
+    // The postcode's own plate wins over the data's
+    expect(geliverRecipientOf(address, null, "06").cityCode).toBe("34")
+  })
+
+  it("still asks a sender for its postcode (Geliver's SDK refuses one without)", () => {
+    const sender = () =>
+      geliverSenderOf(
+        { id: "sloc_1", name: "Ana Depo", address: { ...address, postal_code: "" } },
+        { name: "Örnek", email: "depo@example.com" }
+      )
+
+    expect(sender).toThrow("postal_code")
   })
 
   it("marks the warehouse's sender address, and knows when it no longer says the same", () => {

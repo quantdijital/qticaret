@@ -10,7 +10,7 @@ import type PlatformSettingsModuleService from "../../modules/platform-settings/
 import type { ShippingSettings, StoreSettings } from "../../modules/platform-settings/sections"
 import { parcelLinesOf } from "./geliver/mappers"
 import type { OrderItemRow } from "./geliver/mappers"
-import { InvalidMeasures, defaultParcelOf, parcelOf } from "./parcel"
+import { defaultParcelOf, parcelOf } from "./parcel"
 import type { ParcelLine, ParcelUnits } from "./parcel"
 import type { Kurus } from "../money"
 import { tablePrice } from "./rates"
@@ -50,20 +50,13 @@ export const shippingRates = async (): Promise<ShippingSettings> =>
   (await settings().getSection("shipping")) as unknown as ShippingSettings
 
 /**
- * The parcel the lines make; a line without measures takes the shop's
- * default parcel (adr/0054). Refused only for a value that cannot be a
- * measure (below zero).
+ * The parcel the lines make; a line without measures (or with one that
+ * cannot be a measure) takes the shop's default parcel (adr/0054). Never
+ * refused: the carrier measures the real parcel.
  */
 export async function parcelFor(lines: ParcelLine[]) {
   const [units, shipping] = await Promise.all([storeUnits(), shippingRates()])
-  try {
-    return parcelOf(lines, units, defaultParcelOf(shipping.default_parcel, units))
-  } catch (error) {
-    if (error instanceof InvalidMeasures) {
-      throw new ValidationError("shipping.measures_invalid", { field: "items" })
-    }
-    throw error
-  }
+  return parcelOf(lines, units, defaultParcelOf(shipping.default_parcel, units))
 }
 
 /** The parcel a fulfillment packs: the order's lines at the quantities packed. */

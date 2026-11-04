@@ -21,6 +21,7 @@ import {
   parcelLinesOf,
 } from "../../lib/shipping/geliver"
 import { tablePrice } from "../../lib/shipping/rates"
+import { receiverError } from "../../lib/shipping/receiver"
 import { packedParcelOf, parcelFor } from "../../lib/shipping/shop"
 import { shippingRates, storedGeliverAccount } from "./account"
 import { GELIVER_OPTIONS, choiceOf, isGeliverOption } from "./options"
@@ -104,26 +105,29 @@ class GeliverFulfillmentService extends AbstractFulfillmentProviderService {
     additionalData?: Record<string, unknown>
   ): Promise<CreateFulfillmentResult> {
     const ship = shipInputOf(additionalData)
-    // Geliver ships from the warehouse's sender address our route found for it
-    if (!ship?.sender_address_id) {
+    if (!ship) {
       throw new ValidationError("shipping.use_ship_route")
     }
     const credentials = await storedGeliverAccount()
     const parcel = await packedParcelOf(items, order?.items)
     let recipient
     try {
-      recipient = geliverRecipientOf(order?.shipping_address, order?.email)
+      // The delivery address our workflow filled (adr/0054 addendum), else the order's own
+      recipient = geliverRecipientOf(
+        ship.receiver ?? order?.shipping_address,
+        order?.email,
+        ship.plate
+      )
     } catch (error) {
       if (error instanceof AddressIncomplete) {
-        throw new ValidationError("shipping.address_incomplete", {
-          field: `shipping_address.${error.field}`,
-        })
+        throw receiverError(error.field)
       }
       throw error
     }
     const api = geliverApi()
     const created = await api.createShipment(credentials, {
-      senderAddressID: ship.sender_address_id,
+      // The warehouse's sender address our route found for it; none: the account's default sender
+      ...(ship.sender_address_id ? { senderAddressID: ship.sender_address_id } : {}),
       recipientAddress: recipient,
       length: parcel.length_cm.toFixed(1),
       width: parcel.width_cm.toFixed(1),

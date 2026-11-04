@@ -9,8 +9,9 @@
  *
  * Measures are optional (adr/0054): a line without a weight or a measure
  * takes that value from the shop's default parcel, per unit; the carrier
- * measures the real parcel itself. Only a value that cannot be a measure
- * (below zero, not a number) is refused.
+ * measures the real parcel itself. A value that cannot be a measure (below
+ * zero, not a number) counts as none: it no longer stops a cart or a
+ * parcel (adr/0054, 2026-11-05 addendum).
  */
 
 export interface ParcelUnits {
@@ -67,21 +68,12 @@ export function defaultParcelOf(saved: ParcelMeasures | null, units: ParcelUnits
   }
 }
 
-/** Lines with a weight or measure that cannot be one (below zero, not a number). */
-export class InvalidMeasures extends Error {
-  constructor(readonly titles: string[]) {
-    super(`parcel: ${String(titles.length)} line(s) with an invalid weight or measure`)
-  }
-}
-
 const FIELDS = ["weight", "length", "width", "height"] as const
 
-// Not entered: none, or zero (a sheet's empty cell, an old platform's "0")
-const missing = (value: number | null | undefined): value is null | undefined | 0 =>
-  value === null || value === undefined || value === 0
-
-const valid = (value: number | null | undefined) =>
-  missing(value) || (typeof value === "number" && Number.isFinite(value) && value > 0)
+// A measure: a number above zero. Anything else counts as not entered (none, zero: a sheet's
+// empty cell, an old platform's "0"; below zero, not a number)
+const usable = (value: number | null | undefined): value is number =>
+  typeof value === "number" && Number.isFinite(value) && value > 0
 
 /** Rounded up to `decimals` places, without binary fractions' tails (26.7, not 26.700000000000003). */
 const upTo = (value: number, decimals: number) => {
@@ -95,15 +87,11 @@ export function parcelOf(
   fallback: ParcelMeasures
 ): Parcel {
   const packed = lines.filter((line) => line.quantity > 0)
-  const invalid = packed.filter((line) => !FIELDS.every((field) => valid(line[field])))
-  if (invalid.length > 0) {
-    throw new InvalidMeasures([...new Set(invalid.map((line) => line.title))])
-  }
   const kg = units.weight_unit === "g" ? 1 / 1000 : 1
   const cm = units.dimension_unit === "mm" ? 1 / 10 : 1
   const own = (line: ParcelLine, field: (typeof FIELDS)[number]) => {
     const value = line[field]
-    return missing(value) ? fallback[field] : value
+    return usable(value) ? value : fallback[field]
   }
   let weight = 0
   let volume = 0
@@ -126,6 +114,6 @@ export function parcelOf(
     width_cm: box[1] ?? 0,
     height_cm: box[2] ?? 0,
     desi: upTo(Math.max(weightKg, volume / 3000), 1),
-    measured: packed.every((line) => FIELDS.every((field) => !missing(line[field]))),
+    measured: packed.every((line) => FIELDS.every((field) => usable(line[field]))),
   }
 }

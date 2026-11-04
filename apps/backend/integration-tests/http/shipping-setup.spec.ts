@@ -1,3 +1,4 @@
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { addShippingMethodToCartWorkflow, createCartWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { startFakeGeliver } from "@qticaret/testing"
@@ -100,6 +101,36 @@ medusaIntegrationTestRunner({
       })
       expect(changed).toMatchObject({ name: "Hızlı Kargo (1 gün)", amount: "59.90" })
       expect(gone).toBeUndefined()
+    })
+
+    it("adds an option at the shop's only warehouse when none was picked as the default", async () => {
+      const container = getContainer()
+      const query = container.resolve(ContainerRegistrationKeys.QUERY)
+      const { data: stores } = await query.graph({ entity: "store", fields: ["id"] })
+      const storeId = (stores[0] as { id: string }).id
+      const { data: locations } = await query.graph({ entity: "stock_location", fields: ["id"] })
+      await container.resolve(Modules.STORE).updateStores(storeId, { default_location_id: null })
+
+      const created = await send<{ id: string }>("post", "/admin/shipping-setup/options", {
+        name: "Ekonomik Kargo",
+        carrier: "manual",
+        pricing: { type: "flat", amount: 39.9 },
+      })
+      const { data: placed } = await query.graph({
+        entity: "shipping_option",
+        fields: ["service_zone.fulfillment_set.location.id"],
+        filters: { id: created.data.id },
+      })
+      await container
+        .resolve(Modules.STORE)
+        .updateStores(storeId, { default_location_id: setup.shop.locationId })
+
+      expect(locations).toHaveLength(1)
+      expect(created.status).toBe(200)
+      expect(
+        (placed[0] as { service_zone: { fulfillment_set: { location: { id: string } } } })
+          .service_zone.fulfillment_set.location.id
+      ).toBe(setup.shop.locationId)
     })
 
     it("keeps an option orders still to ship need, and lets it go once they left", async () => {

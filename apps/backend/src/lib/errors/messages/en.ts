@@ -49,8 +49,6 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The chosen lines do not match what is left to ship: at most what is left of each line can go.",
   "orders.tracking_invalid":
     "Invalid tracking: a carrier name, a 4–40 character tracking number and an https link.",
-  "orders.ship_packed_first":
-    "The packed parcel must go first; then the remaining lines can be chosen.",
   "orders.nothing_to_deliver": "No parcel of the shop's own delivery waits to be delivered.",
   "orders.deliver_failed": "The order could not be marked delivered; try again on its page.",
   "orders.note_unknown": "Note not found; it may have been removed.",
@@ -296,7 +294,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "shipping.days_order": "The fewest days cannot be more than the most.",
   "shipping.rate_table_order": "The price table's desi limits must rise, with at most one decimal.",
   "shipping.setup_incomplete":
-    "The shop has no default warehouse or shipping profile; choose a warehouse under Settings > Locations first.",
+    "The shop has several warehouses and none is the default (or none at all); choose the default warehouse under Settings > Locations.",
   "shipping.manual_flat_only": "An option the shop ships itself can only have a flat price.",
   "shipping.amount_invalid": "Enter the amount with at most two decimals.",
   "returns.unknown": "Return request not found.",
@@ -345,8 +343,6 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "shipping.carrier_unknown": "This parcel's carrier is not known; it cannot be tracked.",
   "shipping.carrier_not_connected":
     "The shipping service is not connected. Connect the account under Settings > Shipping.",
-  "shipping.measures_invalid":
-    "A product in the cart has an invalid weight or measure (below zero); shipping cannot be priced. Correct it or leave it empty.",
   "shipping.no_offer":
     "No carrier offer came for this shipment. The chosen service may not carry this parcel.",
   "shipping.option_invalid": "The shipping option does not belong to this service.",
@@ -355,12 +351,35 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "shipping.use_ship_route":
     'Shipments with this service are opened with "Ship" on the order page.',
   "shipping.address_incomplete":
-    "The delivery address is incomplete for shipping: province, district, postcode, address and phone are needed.",
+    "The delivery address is incomplete for shipping. Complete it on the order page.",
+  "shipping.receiver_abroad":
+    "The delivery address is outside Türkiye; a domestic carrier does not ship there. Correct the address or send the order as the shop's own parcel.",
+  "shipping.receiver_name_missing":
+    "The delivery address names no receiver, and neither the billing address nor the customer's account has a name. Add one to the delivery address on the order page.",
+  "shipping.receiver_name_short":
+    "Yurtiçi Kargo needs the receiver's name to be at least 5 characters with 4 letters. Complete it in the delivery address on the order page.",
+  "shipping.receiver_address_missing":
+    "The delivery address has no street address (neighbourhood, street, number). Complete it on the order page.",
+  "shipping.receiver_address_short":
+    "Yurtiçi Kargo needs at least 10 letters or digits in the street address. Add the neighbourhood, street and number on the order page.",
+  "shipping.receiver_place_missing":
+    "The delivery address has no province or district; the carrier routes the parcel by them. Complete it on the order page.",
+  "shipping.receiver_phone_missing":
+    "The delivery address has no phone a courier can dial (10 digits with the area code), and neither the billing address nor the customer's account has one. Add one on the order page.",
   "shipping.sender_address_incomplete":
-    "The warehouse's address is incomplete for shipping: province, district, postcode, address and phone are needed. Complete it under Settings > Locations.",
+    "The warehouse's address is incomplete for shipping and the Geliver account has no default sender address. Complete it under Settings > Locations.",
+  "shipping.sender_location_missing":
+    "The warehouse the parcel leaves from could not be told and the Geliver account has no default sender address. Choose the default warehouse under Settings > Locations, or add a sender address in Geliver's panel.",
+  "shipping.sender_address_missing":
+    "The warehouse has no street address (neighbourhood, street, number) and the Geliver account has no default sender address. Complete it under Settings > Locations.",
+  "shipping.sender_place_missing":
+    "The warehouse has no province or district in Türkiye and the Geliver account has no default sender address. Complete it under Settings > Locations.",
+  "shipping.sender_postal_missing":
+    "The warehouse has no postcode and none was found in the address data (no neighbourhood chosen); the Geliver account has no default sender address either. Add the postcode or the neighbourhood under Settings > Locations.",
+  "shipping.sender_phone_missing":
+    "Neither the warehouse nor the shop has a phone, and the Geliver account has no default sender address. Add the warehouse's under Settings > Locations or the shop's under Settings > Store.",
   "shipping.sender_contact_missing":
-    "The shop has no contact email; the shipping service needs one for the sender. Add it under Settings > Store.",
-  "shipping.location_unknown": "The warehouse the shipment leaves from was not found.",
+    "The shop has no contact email (Geliver needs one for the sender) and the Geliver account has no default sender address. Add it under Settings > Store, or add a sender address in Geliver's panel.",
   "shipping.fulfillment_invalid": "That shipment is not a valid one to print a label for.",
   "shipping.label_unavailable": "This shipment has no label.",
   "aras.merchant_invalid":

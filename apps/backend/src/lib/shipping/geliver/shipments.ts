@@ -11,7 +11,10 @@ import type { GeliverCredentials } from "./types"
  * the shipment is read again instead.
  */
 
-/** A recipient as Geliver takes it inline: a Turkish address with a phone. */
+/**
+ * A recipient as Geliver takes it inline: a Turkish address with a phone.
+ * The city by its plate code, its name or both; the postcode optional.
+ */
 export interface GeliverRecipient {
   name: string
   email?: string | undefined
@@ -19,13 +22,14 @@ export interface GeliverRecipient {
   address1: string
   countryCode: "TR"
   cityName: string
-  cityCode: string
+  cityCode?: string | undefined
   districtName: string
   zip?: string | undefined
 }
 
 export interface GeliverShipmentInput {
-  senderAddressID: string
+  /** The warehouse's sender address; none: Geliver takes the account's default sender. */
+  senderAddressID?: string | undefined
   recipientAddress: GeliverRecipient
   /** Centimetres and kilograms, as decimal text. */
   length: string

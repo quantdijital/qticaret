@@ -1,5 +1,6 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { Knex } from "@medusajs/framework/mikro-orm/knex"
+import { createOrderFulfillmentWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { startFakeGeliver } from "@qticaret/testing"
 import type { FakeGeliver } from "@qticaret/testing"
@@ -95,6 +96,57 @@ medusaIntegrationTestRunner({
       expect(tooMany.data.message).toBe("orders.ship_items_invalid")
       expect(rest.status).toBe(200)
       expect(state).toMatchObject({ ship: null, stage: "shipped" })
+    })
+
+    it("ships a packed parcel and the other lines in either order (adr/0054, 2026-11-05)", async () => {
+      const orderId = await placeOrder(getContainer(), {
+        regionId: setup.shop.regionId,
+        salesChannelId: setup.shop.salesChannelId,
+        shippingOptionId: setup.shop.shippingOptionId,
+        items: [{ variant_id: setup.variantId, quantity: 3 }],
+        address: PAYTR_ADDRESS,
+      })
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "order", fields: ["items.id"], filters: { id: orderId } })
+      const lineId = (data[0] as { items: { id: string }[] }).items[0]?.id ?? ""
+      // One unit packed outside "Kargoya ver" (Medusa's own route, an import), not handed over
+      const { result: packed } = await createOrderFulfillmentWorkflow(getContainer()).run({
+        input: { order_id: orderId, items: [{ id: lineId, quantity: 1 }] },
+      })
+      const stateOf = async () =>
+        (
+          await http.get<{ ship: unknown; stage: string }>(`/admin/order-board/${orderId}`, {
+            headers: setup.admin.headers,
+          })
+        ).data
+      const ship = (quantity: number) =>
+        post(`/admin/orders/${orderId}/ship`, { notify: false, items: [{ id: lineId, quantity }] })
+
+      const offered = await stateOf()
+      // The two units no parcel holds go first, in a parcel of their own
+      const rest = await ship(2)
+      const waiting = await stateOf()
+      const tooMany = await ship(2)
+      // Naming the packed parcel's own lines hands it over
+      const handedOver = await ship(1)
+      const parcels = await orderShipments(getContainer(), orderId)
+
+      expect(offered.ship).toEqual({
+        fulfillment_id: packed.id,
+        items: [{ id: lineId, quantity: 1 }],
+        rest: [{ id: lineId, quantity: 2 }],
+      })
+      expect(rest.status).toBe(200)
+      expect(waiting.ship).toEqual({
+        fulfillment_id: packed.id,
+        items: [{ id: lineId, quantity: 1 }],
+        rest: [],
+      })
+      expect(tooMany.data.message).toBe("orders.ship_items_invalid")
+      expect(handedOver.status).toBe(200)
+      expect(await stateOf()).toMatchObject({ ship: null, stage: "shipped" })
+      expect(parcels).toHaveLength(2)
     })
 
     it("keeps the carrier and tracking staff typed for a parcel the shop sends itself", async () => {

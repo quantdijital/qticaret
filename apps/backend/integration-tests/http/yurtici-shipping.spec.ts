@@ -1,4 +1,4 @@
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { addShippingMethodToCartWorkflow, createCartWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { startFakeYurtici } from "@qticaret/testing"
@@ -6,6 +6,7 @@ import type { FakeYurtici } from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
 import { ensureLocationCarriers } from "../../src/scripts/bootstrap/location-carriers"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
+import type { PlaceOrderInput } from "../../src/scripts/seed/orders/place"
 import { createAdminUser } from "../helpers/admin"
 import { geliverProduct } from "../helpers/geliver"
 import type { HttpClient } from "../helpers/http"
@@ -47,7 +48,7 @@ medusaIntegrationTestRunner({
       )
     const connect = (secrets: Partial<Record<string, string>>) =>
       post("/admin/integrations/credentials/yurtici", { settings: { test_mode: true }, secrets })
-    const order = (address: typeof PAYTR_ADDRESS = PAYTR_ADDRESS) =>
+    const order = (address: PlaceOrderInput["address"] = PAYTR_ADDRESS) =>
       placeOrder(getContainer(), {
         regionId: shop.regionId,
         salesChannelId: shop.salesChannelId,
@@ -243,11 +244,49 @@ medusaIntegrationTestRunner({
       const refused = await post(`/admin/orders/${orderId}/ship`, { notify: false })
 
       expect(refused.status).toBe(400)
-      expect(refused.data).toMatchObject({ message: "shipping.address_incomplete" })
+      expect(refused.data).toMatchObject({ message: "shipping.receiver_name_short" })
       expect(fake.requests.filter(({ operation }) => operation === "createShipment")).toHaveLength(
         0
       )
       expect(await fulfillmentsOf(orderId)).toHaveLength(0)
+    })
+
+    it("ships an address without il and ilçe, which Yurtiçi's document leaves optional", async () => {
+      const orderId = await order({
+        first_name: PAYTR_ADDRESS.first_name,
+        last_name: PAYTR_ADDRESS.last_name,
+        phone: PAYTR_ADDRESS.phone,
+        address_1: "Atatürk Cad. No: 1 Kadıköy",
+      })
+
+      const shipped = await post(`/admin/orders/${orderId}/ship`, { notify: false })
+      const body = fake.requests.find(({ operation }) => operation === "createShipment")?.body ?? ""
+
+      expect(shipped.status).toBe(200)
+      expect(body).not.toMatch(/<(cityName|townName)[\s/>]/)
+      expect(await fulfillmentsOf(orderId)).toHaveLength(1)
+    })
+
+    it("dials a phone typed oddly, and takes one from the billing address when the delivery has none", async () => {
+      const odd = await order({ ...PAYTR_ADDRESS, phone: "0090 (532) 000-00-00" })
+      const bare = await order()
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "order", fields: ["shipping_address.id"], filters: { id: bare } })
+      await getContainer()
+        .resolve(Modules.ORDER)
+        .updateOrderAddresses({
+          id: (data[0] as { shipping_address: { id: string } }).shipping_address.id,
+          phone: null,
+        })
+
+      const first = await post(`/admin/orders/${odd}/ship`, { notify: false })
+      const second = await post(`/admin/orders/${bare}/ship`, { notify: false })
+      const phones = [...fake.shipments.values()].map((sent) => sent.phone)
+
+      expect([first.status, second.status]).toEqual([200, 200])
+      // Ten digits, as Yurtiçi's document asks; the second from the billing address
+      expect(phones).toEqual(["5320000000", "5320000000"])
     })
 
     it("keeps the parcel once its document is issued: Yurtiçi takes a cancel as a return", async () => {

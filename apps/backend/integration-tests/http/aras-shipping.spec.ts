@@ -1,4 +1,4 @@
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { startFakeAras } from "@qticaret/testing"
 import type { FakeAras } from "@qticaret/testing"
@@ -151,6 +151,34 @@ medusaIntegrationTestRunner({
       expect(parcel).toMatchObject({ carrier: "Aras Kargo", status: "delivered" })
       expect(parcel?.shipped_at && parcel.delivered_at).toBeTruthy()
       expect(JSON.stringify(parcel)).not.toContain("label_file_id")
+    })
+
+    it("fills the receiver's name and phone from the billing address, and refuses only what a courier cannot do without", async () => {
+      const blank = async (orderId: string, patch: Record<string, string | null>) => {
+        const { data } = await getContainer()
+          .resolve(ContainerRegistrationKeys.QUERY)
+          .graph({ entity: "order", fields: ["shipping_address.id"], filters: { id: orderId } })
+        await getContainer()
+          .resolve(Modules.ORDER)
+          .updateOrderAddresses({
+            id: (data[0] as { shipping_address: { id: string } }).shipping_address.id,
+            ...patch,
+          })
+      }
+      const filled = await order()
+      await blank(filled, { first_name: null, last_name: null, phone: null })
+      const abroad = await order()
+      await blank(abroad, { country_code: "de" })
+
+      const shipped = await post(`/admin/orders/${filled}/ship`, { notify: false })
+      const refused = await post(`/admin/orders/${abroad}/ship`, { notify: false })
+      const [sent] = [...fake.orders.values()]
+
+      expect(shipped.status).toBe(200)
+      expect(sent).toMatchObject({ receiverName: "Ayşe Yılmaz", phone: "05320000000" })
+      expect(refused.status).toBe(400)
+      expect(refused.data.message).toBe("shipping.receiver_abroad")
+      expect(fake.orders.size).toBe(1)
     })
 
     it("withdraws the order at Aras when its label cannot be had, and packs nothing", async () => {

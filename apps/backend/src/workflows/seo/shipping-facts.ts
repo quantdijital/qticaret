@@ -1,5 +1,5 @@
 import { toMedusaAmount } from "../../lib/money"
-import { InvalidMeasures, defaultParcelOf, parcelOf } from "../../lib/shipping/parcel"
+import { defaultParcelOf, parcelOf } from "../../lib/shipping/parcel"
 import type { Parcel, ParcelUnits } from "../../lib/shipping/parcel"
 import { tablePrice } from "../../lib/shipping/rates"
 import type { ShippingSettings } from "../../modules/platform-settings/sections"
@@ -25,31 +25,24 @@ export interface MeasuredVariant {
 }
 
 /**
- * One unit's parcel, as checkout would make it: without measures, the
- * shop's default parcel (adr/0054). Null when a value cannot be a measure.
+ * One unit's parcel, as checkout would make it: without measures (or with
+ * one that cannot be a measure), the shop's default parcel (adr/0054).
  */
-export function unitParcelOf(variant: MeasuredVariant, shipping: ShippingFacts): Parcel | null {
-  try {
-    return parcelOf(
-      [
-        {
-          title: variant.id,
-          quantity: 1,
-          weight: variant.weight ?? null,
-          length: variant.length ?? null,
-          width: variant.width ?? null,
-          height: variant.height ?? null,
-        },
-      ],
-      shipping.units,
-      defaultParcelOf(shipping.settings.default_parcel, shipping.units)
-    )
-  } catch (error) {
-    if (error instanceof InvalidMeasures) {
-      return null
-    }
-    throw error
-  }
+export function unitParcelOf(variant: MeasuredVariant, shipping: ShippingFacts): Parcel {
+  return parcelOf(
+    [
+      {
+        title: variant.id,
+        quantity: 1,
+        weight: variant.weight ?? null,
+        length: variant.length ?? null,
+        width: variant.width ?? null,
+        height: variant.height ?? null,
+      },
+    ],
+    shipping.units,
+    defaultParcelOf(shipping.settings.default_parcel, shipping.units)
+  )
 }
 
 /**

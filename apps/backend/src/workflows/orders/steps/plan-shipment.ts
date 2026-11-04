@@ -11,6 +11,36 @@ import type OrderRefundsModuleService from "../../../modules/order-refunds/servi
 import { RETURN_REQUESTS_MODULE } from "../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../modules/return-requests/service"
 
+type Lines = { id: string; quantity: number }[]
+
+const sameLines = (a: Lines, b: Lines): boolean =>
+  a.length === b.length &&
+  a.every((line) => b.some((other) => other.id === line.id && other.quantity === line.quantity))
+
+/**
+ * The parcel a request names: a packed parcel's own lines hand it over
+ * whole; other lines go in a new parcel, from what no parcel holds yet,
+ * each line once and at most what is left of it. A packed parcel and the
+ * rest go in either order (adr/0054, 2026-11-05 addendum: the order was a
+ * bookkeeping habit, not a carrier's rule).
+ */
+function partOf(plan: ShipmentPlan, wanted: Lines): ShipmentPlan {
+  if (plan.fulfillment_id && sameLines(wanted, plan.items)) {
+    return plan
+  }
+  const open = plan.fulfillment_id ? plan.rest : plan.items
+  const left = new Map(open.map((item) => [item.id, item.quantity]))
+  const ids = new Set(wanted.map((item) => item.id))
+  if (
+    wanted.length === 0 ||
+    ids.size !== wanted.length ||
+    wanted.some((item) => item.quantity < 1 || item.quantity > (left.get(item.id) ?? 0))
+  ) {
+    throw new ValidationError("orders.ship_items_invalid", { field: "items" })
+  }
+  return { fulfillment_id: null, items: wanted, rest: [] }
+}
+
 /**
  * What "ship" means for the order now (lib/dashboard/order-state): a
  * packed parcel handed over, or what is left packed into a new one. The
@@ -22,23 +52,6 @@ import type ReturnRequestsModuleService from "../../../modules/return-requests/s
  * exchange still waits for the parcel coming back (adr/0032 §6: the new
  * variant goes once the old one is in). Reads only.
  */
-/** A part of what is left: each line once, at most what is left of it; a packed parcel goes whole. */
-function partOf(plan: ShipmentPlan, wanted: { id: string; quantity: number }[]): ShipmentPlan {
-  if (plan.fulfillment_id) {
-    throw new ValidationError("orders.ship_packed_first", { field: "items" })
-  }
-  const left = new Map(plan.items.map((item) => [item.id, item.quantity]))
-  const ids = new Set(wanted.map((item) => item.id))
-  if (
-    wanted.length === 0 ||
-    ids.size !== wanted.length ||
-    wanted.some((item) => item.quantity < 1 || item.quantity > (left.get(item.id) ?? 0))
-  ) {
-    throw new ValidationError("orders.ship_items_invalid", { field: "items" })
-  }
-  return { fulfillment_id: null, items: wanted }
-}
-
 export const planShipmentStep = createStep(
   "orders-plan-shipment",
   async (

@@ -1,4 +1,4 @@
-import { InvalidMeasures, PLATFORM_PARCEL, defaultParcelOf, parcelOf } from "../parcel"
+import { PLATFORM_PARCEL, defaultParcelOf, parcelOf } from "../parcel"
 
 const units = { weight_unit: "g", dimension_unit: "cm" } as const
 const fallback = defaultParcelOf(null, units)
@@ -84,25 +84,23 @@ describe("parcelOf without measures (adr/0054)", () => {
     expect(parcelOf([bare], shop, own)).toMatchObject({ weight_kg: 2, length_cm: 40, desi: 8 })
   })
 
-  it("refuses a value that cannot be a measure, naming each product once", () => {
-    const run = () =>
+  it("takes a value that cannot be a measure as not given, and never stops the parcel (2026-11-05)", () => {
+    // Below zero, not a number, endless: the default's value, as for an empty one
+    expect(parcelOf([{ ...knife, weight: -450 }], units, fallback)).toMatchObject({
+      weight_kg: 1,
+      length_cm: 35,
+      measured: false,
+    })
+    expect(
       parcelOf(
         [
-          { ...knife, weight: -450 },
-          { ...knife, quantity: 2, weight: -1 },
-          { ...knife, title: "Kılıf", height: Number.NaN },
+          { ...knife, height: Number.NaN },
+          { ...knife, title: "Kılıf", length: Number.POSITIVE_INFINITY },
           { ...knife, title: "İptal", quantity: 0, weight: -1 },
-          bare,
         ],
         units,
         fallback
       )
-
-    expect(run).toThrow(InvalidMeasures)
-    try {
-      run()
-    } catch (error) {
-      expect((error as InvalidMeasures).titles).toEqual(["Bıçak", "Kılıf"])
-    }
+    ).toMatchObject({ weight_kg: 0.9, measured: false })
   })
 })

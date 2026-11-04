@@ -12,6 +12,7 @@ import {
 } from "@medusajs/medusa/core-flows"
 import { shipLockKey } from "../../lib/orders/locks"
 import { SHIP_ROUTE_MARK } from "../../lib/shipping/carriers"
+import { fillReceiverStep } from "../shipping/steps/fill-receiver"
 import { ensureGeliverSenderStep } from "../shipping/steps/geliver-sender"
 import { planCarrierStep } from "../shipping/steps/plan-carrier"
 import { noteManualCarrierStep } from "../shipping/steps/manual-carrier"
@@ -66,6 +67,15 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
     }))
   )
 
+  // A carrier's receiver with the gaps the order can fill (adr/0054, 2026-11-05 addendum)
+  const receiver = when(
+    "shipping-carrier-receiver",
+    { carrier, plan },
+    ({ carrier, plan }) => carrier.carrier !== null && plan.fulfillment_id === null
+  ).then(() =>
+    fillReceiverStep(transform({ input }, ({ input }) => ({ order_id: input.order_id })))
+  )
+
   const sender = when(
     "shipping-geliver-sender",
     { carrier, plan },
@@ -74,26 +84,33 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
 
   const packed = when({ plan }, ({ plan }) => plan.fulfillment_id === null).then(() =>
     createOrderFulfillmentWorkflow.runAsStep({
-      input: transform({ input, plan, carrier, sender }, ({ input, plan, carrier, sender }) => ({
-        order_id: input.order_id,
-        items: plan.items,
-        no_notification: !input.notify,
-        // Kept on the parcel: a carrier hands it over later, when the customer's notice goes (F9)
-        metadata: { qt_notify: input.notify },
-        ...(input.created_by ? { created_by: input.created_by } : {}),
-        ...(carrier.location_id ? { location_id: carrier.location_id } : {}),
-        // Our route's mark: a carrier provider opens no shipment without it
-        ...(carrier.carrier
-          ? {
-              additional_data: {
-                [SHIP_ROUTE_MARK]: {
-                  sender_address_id: sender?.sender_address_id ?? null,
-                  cash_on_delivery: carrier.cash_on_delivery,
+      input: transform(
+        { input, plan, carrier, sender, receiver },
+        ({ input, plan, carrier, sender, receiver }) => ({
+          order_id: input.order_id,
+          items: plan.items,
+          no_notification: !input.notify,
+          // Kept on the parcel: a carrier hands it over later, when the customer's notice goes (F9)
+          metadata: { qt_notify: input.notify },
+          ...(input.created_by ? { created_by: input.created_by } : {}),
+          ...(carrier.location_id ? { location_id: carrier.location_id } : {}),
+          // The parcel keeps the address its carrier got; the order's own is not changed
+          ...(receiver?.filled.length ? { delivery_address: receiver.address } : {}),
+          // Our route's mark: a carrier provider opens no shipment without it
+          ...(carrier.carrier
+            ? {
+                additional_data: {
+                  [SHIP_ROUTE_MARK]: {
+                    sender_address_id: sender?.sender_address_id ?? null,
+                    cash_on_delivery: carrier.cash_on_delivery,
+                    receiver: receiver?.address ?? null,
+                    plate: receiver?.plate ?? null,
+                  },
                 },
-              },
-            }
-          : {}),
-      })),
+              }
+            : {}),
+        })
+      ),
     })
   )
 

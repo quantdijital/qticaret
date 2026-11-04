@@ -126,11 +126,18 @@ class YurticiFulfillmentService extends AbstractFulfillmentProviderService {
     const credentials = await storedYurticiAccount()
     const login = loginFor(credentials, ship.cash_on_delivery)
     const parcel = await packedParcelOf(items, order?.items)
-    const receiver = shipmentReceiverOf(order?.shipping_address)
+    // The delivery address our workflow filled (adr/0054 addendum), else the order's own.
+    // Il and ilçe are optional in Yurtiçi's document (cityName, townName: H)
+    const receiver = shipmentReceiverOf(ship.receiver ?? order?.shipping_address, {
+      place: "optional",
+    })
     // What Yurtiçi's document refuses (a name under 5 characters, an address under 10), told here
     const gap = yurticiReceiverGap(receiver)
     if (gap) {
-      throw new ValidationError("shipping.address_incomplete", { field: `shipping_address.${gap}` })
+      throw new ValidationError(
+        gap === "first_name" ? "shipping.receiver_name_short" : "shipping.receiver_address_short",
+        { field: `shipping_address.${gap}` }
+      )
     }
     const cargoKey = shipmentCode()
     const number = String(order?.display_id ?? order?.id ?? "")

@@ -34,6 +34,7 @@ describe("orderState", () => {
           { id: "item_a", quantity: 2 },
           { id: "item_b", quantity: 1 },
         ],
+        rest: [],
       },
       pickup: [],
       deliver: [],
@@ -60,10 +61,14 @@ describe("orderState", () => {
     )
 
     expect(state.pickup).toEqual(["ful_1"])
-    expect(state.ship).toEqual({ fulfillment_id: null, items: [{ id: "item_b", quantity: 1 }] })
+    expect(state.ship).toEqual({
+      fulfillment_id: null,
+      items: [{ id: "item_b", quantity: 1 }],
+      rest: [],
+    })
   })
 
-  it("hands over a packed parcel first, with its own items", () => {
+  it("offers a packed parcel with its own items, and the lines no parcel holds beside it", () => {
     const state = orderState(
       order({
         items: [
@@ -74,7 +79,11 @@ describe("orderState", () => {
       })
     )
 
-    expect(state.ship).toEqual({ fulfillment_id: "ful_1", items: [{ id: "item_a", quantity: 2 }] })
+    expect(state.ship).toEqual({
+      fulfillment_id: "ful_1",
+      items: [{ id: "item_a", quantity: 2 }],
+      rest: [{ id: "item_b", quantity: 1 }],
+    })
     expect(state.cancelable).toBe(false)
   })
 

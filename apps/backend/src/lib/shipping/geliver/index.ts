@@ -14,6 +14,7 @@ export {
   geliverRecipientOf,
   geliverSenderOf,
   parcelLinesOf,
+  postcodeOf,
   sameSender,
   senderMarker,
 } from "./mappers"

@@ -85,11 +85,40 @@ export const trackingUrlOf = (value: string | null | undefined): string | null =
  */
 export const SHIP_ROUTE_MARK = "qt_ship"
 
+const addressText = z.string().max(500).nullish()
+
+/** An address's own fields, as our workflow filled them (`lib/shipping/fill`). */
+const shipAddress = z.object({
+  first_name: addressText,
+  last_name: addressText,
+  company: addressText,
+  phone: addressText,
+  address_1: addressText,
+  address_2: addressText,
+  city: addressText,
+  province: addressText,
+  postal_code: addressText,
+  country_code: addressText,
+})
+
 export const shipInput = z.object({
-  /** Geliver's sender address for the warehouse; a contract carrier knows the shop's own. */
+  /**
+   * Geliver's sender address for the warehouse; null: the account's default
+   * sender (Geliver's own), and for a contract carrier, which knows the shop.
+   */
   sender_address_id: z.string().min(1).nullable(),
   /** Kuruş the courier collects at the door (adr/0029); null when paid already. */
   cash_on_delivery: z.number().int().positive().nullable(),
+  /**
+   * The receiver: the delivery address with its gaps filled (adr/0054,
+   * 2026-11-05 addendum); absent, the order's own. The order is not changed.
+   */
+  receiver: shipAddress.nullish(),
+  /** The receiver's province plate code, from the address data, when it has no postcode. */
+  plate: z
+    .string()
+    .regex(/^\d{2}$/)
+    .nullish(),
 })
 
 export type ShipInput = z.infer<typeof shipInput>

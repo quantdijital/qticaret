@@ -55,6 +55,12 @@ export interface ShipmentPlan {
   /** A parcel already packed is handed over first; null: a new one is packed. */
   fulfillment_id: string | null
   items: { id: string; quantity: number }[]
+  /**
+   * Beside a packed parcel, the lines not in any parcel yet: they may go
+   * in a parcel of their own, before or after it (adr/0054, 2026-11-05
+   * addendum). Empty when nothing is packed (`items` is what is left).
+   */
+  rest: { id: string; quantity: number }[]
 }
 
 export interface OrderState {
@@ -75,20 +81,20 @@ const present = <T>(rows: (T | null)[] | null | undefined): T[] =>
 function shipmentPlan(order: StateOrder): ShipmentPlan | null {
   const active = present(order.fulfillments).filter((row) => !row.canceled_at)
   const packed = active.find((row) => !row.shipped_at && !isCarrierProvider(row.provider_id))
+  // Only lines that travel in a parcel: Medusa refuses a fulfillment mixing both kinds
+  const left = shippableItems(order.items).flatMap((item) => {
+    const quantity = (item.quantity ?? 0) - (item.detail?.fulfilled_quantity ?? 0)
+    return quantity > 0 ? [{ id: item.id, quantity }] : []
+  })
   if (packed) {
     const items = present(packed.items).flatMap((item) =>
       item.line_item_id && (item.quantity ?? 0) > 0
         ? [{ id: item.line_item_id, quantity: item.quantity ?? 0 }]
         : []
     )
-    return { fulfillment_id: packed.id, items }
+    return { fulfillment_id: packed.id, items, rest: left }
   }
-  // Only lines that travel in a parcel: Medusa refuses a fulfillment mixing both kinds
-  const left = shippableItems(order.items).flatMap((item) => {
-    const quantity = (item.quantity ?? 0) - (item.detail?.fulfilled_quantity ?? 0)
-    return quantity > 0 ? [{ id: item.id, quantity }] : []
-  })
-  return left.length > 0 ? { fulfillment_id: null, items: left } : null
+  return left.length > 0 ? { fulfillment_id: null, items: left, rest: [] } : null
 }
 
 export function orderState(order: StateOrder): OrderState {

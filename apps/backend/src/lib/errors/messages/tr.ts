@@ -55,8 +55,6 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Seçilen kalemler gönderilecek olanlarla uyuşmuyor: her kalemden en çok kalan adet kadar gönderilebilir.",
   "orders.tracking_invalid":
     "Takip bilgisi geçersiz: firma adı, 4–40 harf/rakamlık takip numarası ve https ile başlayan bağlantı olmalı.",
-  "orders.ship_packed_first":
-    "Önce paketlenmiş koli kargoya verilmeli; ardından kalan kalemler seçilebilir.",
   "orders.nothing_to_deliver": "Teslim edilecek, mağazanın kendi teslimatında bir koli yok.",
   "orders.deliver_failed":
     "Sipariş teslim edildi olarak işaretlenemedi; sipariş sayfasından tekrar deneyin.",
@@ -303,7 +301,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "shipping.rate_table_order":
     "Ücret tablosunun desi sınırları artan sırada ve en fazla bir ondalıkla olmalı.",
   "shipping.setup_incomplete":
-    "Mağazanın varsayılan deposu ya da kargo profili yok; önce Ayarlar > Depolar'dan bir depo seçin.",
+    "Mağazanın birden çok deposu var ve hiçbiri varsayılan değil (ya da hiç depo yok); Ayarlar > Depolar'dan varsayılan depoyu seçin.",
   "shipping.manual_flat_only":
     "Mağazanın kendi gönderdiği seçenek yalnızca sabit ücretle fiyatlanabilir.",
   "shipping.amount_invalid": "Tutarı en çok iki ondalıkla girin.",
@@ -355,8 +353,6 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "shipping.carrier_unknown": "Bu gönderinin kargo firması tanınmıyor; takip edilemiyor.",
   "shipping.carrier_not_connected":
     "Kargo hizmeti bağlı değil. Ayarlar > Kargo'dan hesabı bağlayın.",
-  "shipping.measures_invalid":
-    "Sepetteki bir ürünün ağırlığı ya da ölçüsü geçersiz (sıfırdan küçük); kargo ücreti hesaplanamıyor. Ürünün değerlerini düzeltin ya da boş bırakın.",
   "shipping.no_offer":
     "Bu gönderi için kargo teklifi alınamadı. Seçilen kargo hizmeti bu koliyi taşımıyor olabilir.",
   "shipping.option_invalid": "Kargo seçeneği bu hizmete ait değil.",
@@ -365,12 +361,35 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "shipping.use_ship_route":
     'Bu kargo hizmetiyle gönderi, sipariş sayfasındaki "Kargoya ver" ile açılır.',
   "shipping.address_incomplete":
-    "Teslimat adresi kargo için eksik: il, ilçe, posta kodu, adres ve telefon gerekli.",
+    "Teslimat adresi kargo için eksik. Sipariş sayfasından teslimat adresini tamamlayın.",
+  "shipping.receiver_abroad":
+    "Teslimat adresi Türkiye dışında; yurt içi kargo firması bu adrese gönderi açmaz. Adresi düzeltin ya da siparişi mağazanın kendi gönderisiyle yollayın.",
+  "shipping.receiver_name_missing":
+    "Teslimat adresinde alıcının adı yok; fatura adresinde ve müşteri hesabında da bulunamadı. Sipariş sayfasından teslimat adresine ad soyad ekleyin.",
+  "shipping.receiver_name_short":
+    "Yurtiçi Kargo alıcı adını en az 5 karakter ve 4 harf olarak istiyor. Sipariş sayfasından teslimat adresindeki ad soyadı tamamlayın.",
+  "shipping.receiver_address_missing":
+    "Teslimat adresinde açık adres (mahalle, cadde, sokak, numara) yok. Sipariş sayfasından teslimat adresini tamamlayın.",
+  "shipping.receiver_address_short":
+    "Yurtiçi Kargo açık adresi en az 10 harf ya da rakam olarak istiyor. Sipariş sayfasından teslimat adresine mahalle, cadde ve numarayı ekleyin.",
+  "shipping.receiver_place_missing":
+    "Teslimat adresinde il ya da ilçe yok; kargo firması gönderiyi bunlarla yönlendiriyor. Sipariş sayfasından teslimat adresini tamamlayın.",
+  "shipping.receiver_phone_missing":
+    "Teslimat adresinde kuryenin arayabileceği bir telefon (alan koduyla 10 hane) yok; fatura adresinde ve müşteri hesabında da bulunamadı. Sipariş sayfasından teslimat adresine telefon ekleyin.",
   "shipping.sender_address_incomplete":
-    "Deponun adresi kargo için eksik: il, ilçe, posta kodu, adres ve telefon gerekli. Ayarlar > Depolar'dan tamamlayın.",
+    "Deponun adresi kargo için eksik ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Depolar'dan deponun adresini tamamlayın.",
+  "shipping.sender_location_missing":
+    "Gönderinin çıkacağı depo belirlenemedi ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Depolar'dan varsayılan depoyu seçin ya da Geliver panelinde bir gönderici adresi tanımlayın.",
+  "shipping.sender_address_missing":
+    "Deponun açık adresi (mahalle, cadde, sokak, numara) girilmemiş ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Depolar'dan deponun adresini tamamlayın.",
+  "shipping.sender_place_missing":
+    "Deponun Türkiye'deki il ya da ilçesi girilmemiş ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Depolar'dan deponun adresini tamamlayın.",
+  "shipping.sender_postal_missing":
+    "Deponun posta kodu girilmemiş, adres verisinden de bulunamadı (mahalle seçili değil); Geliver hesabında varsayılan gönderici adresi de yok. Ayarlar > Depolar'dan posta kodunu ya da mahalleyi girin.",
+  "shipping.sender_phone_missing":
+    "Deponun ve mağazanın telefonu girilmemiş; Geliver hesabında varsayılan gönderici adresi de yok. Ayarlar > Depolar'dan deponun ya da Ayarlar > Mağaza'dan mağazanın telefonunu girin.",
   "shipping.sender_contact_missing":
-    "Mağazanın iletişim e-postası girilmemiş; kargo hizmeti gönderici için istiyor. Ayarlar > Mağaza'dan ekleyin.",
-  "shipping.location_unknown": "Gönderinin çıkacağı depo bulunamadı.",
+    "Mağazanın iletişim e-postası girilmemiş (Geliver gönderici için istiyor) ve Geliver hesabında varsayılan gönderici adresi yok. Ayarlar > Mağaza'dan e-postayı ekleyin ya da Geliver panelinde bir gönderici adresi tanımlayın.",
   "shipping.fulfillment_invalid": "Etiketi istenen gönderi geçerli değil.",
   "shipping.label_unavailable": "Bu gönderinin etiketi yok.",
   "aras.merchant_invalid":

@@ -98,7 +98,8 @@ class ArasFulfillmentService extends AbstractFulfillmentProviderService {
     }
     const credentials = await storedArasAccount()
     const parcel = await packedParcelOf(items, order?.items)
-    const receiver = shipmentReceiverOf(order?.shipping_address)
+    // The delivery address our workflow filled (adr/0054 addendum), else the order's own
+    const receiver = shipmentReceiverOf(ship.receiver ?? order?.shipping_address)
     const api = arasApi()
     const code = shipmentCode()
     const number = String(order?.display_id ?? order?.id ?? "")

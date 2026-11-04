@@ -93,12 +93,24 @@ export const planCarrierStep = createStep(
       (fulfillment) =>
         fulfillment && !fulfillment.canceled_at && isCarrierProvider(fulfillment.provider_id)
     )
+    // Money at stake: a second parcel would be collected again, a part alone would be under-collected
     if (carrier && cod && (input.partial || carried)) {
       throw new ValidationError("shipping.cod_single_parcel")
     }
+    let locationId = option?.service_zone?.fulfillment_set?.location?.id ?? null
+    if (!locationId) {
+      // The option names no warehouse (or the order has none): the shop's only one (adr/0054
+      // addendum). Never a guess among several: the stock taken from it must be where it is kept
+      const { data: locations } = await query.graph({
+        entity: "stock_location",
+        fields: ["id"],
+        pagination: { take: 2 },
+      })
+      locationId = locations.length === 1 ? (locations[0] as { id: string }).id : null
+    }
     return new StepResponse<CarrierPlan>({
       carrier,
-      location_id: option?.service_zone?.fulfillment_set?.location?.id ?? null,
+      location_id: locationId,
       cash_on_delivery: cod
         ? fromMedusaAmount(cod.raw_amount ?? cod.amount ?? 0, { allowRounding: true })
         : null,

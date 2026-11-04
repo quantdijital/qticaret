@@ -138,8 +138,12 @@ export async function yurticiLabelPdf(
     pen.text(line, regular, pt(11))
     pen.gap(pt(11) + 1 * MM * k)
   }
-  pen.text(`${input.receiver.town} / ${input.receiver.city}`, bold, pt(11))
-  pen.gap(pt(11) + 1 * MM * k)
+  // Il and ilçe are optional at Yurtiçi: a label never prints a lone slash
+  const place = [input.receiver.town, input.receiver.city].filter(Boolean).join(" / ")
+  if (place) {
+    pen.text(place, bold, pt(11))
+    pen.gap(pt(11) + 1 * MM * k)
+  }
   pen.text(input.receiver.phone, regular, pt(11))
   pen.gap(pt(11) + 3 * MM * k)
 
