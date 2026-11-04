@@ -1,0 +1,84 @@
+import type { MedusaContainer } from "@medusajs/framework/types"
+import { MedusaError, Modules } from "@medusajs/framework/utils"
+import { displayName } from "../../../lib/media"
+import { containsPattern } from "../../../lib/security"
+import { MEDIA_MODULE } from "../../../modules/media"
+import type MediaModuleService from "../../../modules/media/service"
+import type { MediaAssetRecord } from "../../../modules/media/service"
+import { mediaUses } from "../../../workflows/media/usage"
+import type { AdminGetMediaType } from "./validators"
+
+/**
+ * An image as the panel sees it: its address and storage key (a brand's
+ * logo and a page's own share image hold the key), the name and size the
+ * library shows, its alt text. Versions and bookkeeping stay inside.
+ */
+export const presentMedia = (asset: MediaAssetRecord) => ({
+  id: asset.id,
+  url: asset.url,
+  file_id: asset.file_id,
+  filename: asset.filename ?? displayName(asset.file_id ?? asset.url),
+  mime_type: asset.mime_type,
+  size: asset.size,
+  width: asset.width,
+  height: asset.height,
+  alt: asset.alt,
+  created_at: asset.created_at,
+})
+
+/**
+ * The library: files in the shop's own storage, newest first, by name, alt
+ * text or storage key. An image a product holds by an outside address alone
+ * has no file here and is not listed.
+ */
+export async function readMediaList(container: MedusaContainer, query: AdminGetMediaType) {
+  const pattern = query.q ? containsPattern(query.q) : null
+  const [assets, count] = await container
+    .resolve<MediaModuleService>(MEDIA_MODULE)
+    .listAndCountMediaAssets(
+      {
+        file_id: { $ne: null },
+        ...(pattern
+          ? {
+              $or: [
+                { filename: { $ilike: pattern } },
+                { alt: { $ilike: pattern } },
+                { file_id: { $ilike: pattern } },
+              ],
+            }
+          : {}),
+      },
+      { skip: query.offset, take: query.limit, order: { created_at: "DESC", id: "DESC" } }
+    )
+  return { media: assets.map(presentMedia), count, offset: query.offset, limit: query.limit }
+}
+
+/** Who uploaded it: a team member's name, else their e-mail; null for older uploads. */
+async function uploader(container: MedusaContainer, userId: string | null) {
+  if (!userId) {
+    return null
+  }
+  const [user] = await container
+    .resolve(Modules.USER)
+    .listUsers({ id: userId }, { select: ["id", "first_name", "last_name", "email"], take: 1 })
+  if (!user) {
+    return null
+  }
+  const name = [user.first_name, user.last_name].filter(Boolean).join(" ").trim()
+  return { id: user.id, name: name || user.email }
+}
+
+/** One image with who uploaded it and everywhere the shop shows it. */
+export async function readMediaDetail(container: MedusaContainer, id: string) {
+  const [asset] = await container
+    .resolve<MediaModuleService>(MEDIA_MODULE)
+    .listMediaAssets({ id }, { take: 1 })
+  if (!asset) {
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "media.unknown")
+  }
+  const [usage, uploadedBy] = await Promise.all([
+    mediaUses(container, asset),
+    uploader(container, asset.uploaded_by),
+  ])
+  return { ...presentMedia(asset), uploaded_by: uploadedBy, usage }
+}

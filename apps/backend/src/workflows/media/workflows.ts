@@ -18,18 +18,20 @@ import { deriveMediaStep, removeMediaFilesStep } from "./steps/derive-media"
 import { planProductMediaStep } from "./steps/plan-product-media"
 import { registerMediaStep } from "./steps/register-media"
 import { removeAbandonedMediaStep } from "./steps/remove-abandoned-media"
-import { setMediaAltStep } from "./steps/set-media-alt"
+import type { RegisterMediaInput } from "./steps/register-media"
+import { saveMediaStep } from "./steps/save-media"
+import type { SaveMediaInput } from "./steps/save-media"
 import { setMediaAltsStep } from "./steps/set-media-alts"
 import type { MediaAlt } from "./steps/set-media-alts"
 
 /** Emitted after an image's alt text is saved: `{ id }` of its product, for its assessment. */
 export const MEDIA_SAVED = "media.saved"
 
-/** Product images just uploaded become media assets (F3.3). */
+/** Images just uploaded become media assets (F3.3), in the library when asked. */
 export const registerMediaWorkflow = createWorkflow(
   "media-register",
-  (input: { file_ids: string[] }) => {
-    const assets = registerMediaStep(transform({ input }, ({ input }) => input.file_ids))
+  (input: RegisterMediaInput) => {
+    const assets = registerMediaStep(input)
     return new WorkflowResponse(assets)
   }
 )
@@ -73,19 +75,17 @@ export const deriveProductMediaWorkflow = createWorkflow(
   }
 )
 
-export const setMediaAltWorkflow = createWorkflow(
-  "media-set-alt",
-  (input: { id: string; alt: string | null }) => {
-    const saved = setMediaAltStep(input)
-    when({ saved }, ({ saved }) => saved.product_id !== null).then(() => {
-      emitEventStep({
-        eventName: MEDIA_SAVED,
-        data: transform({ saved }, ({ saved }) => ({ id: saved.product_id })),
-      })
+/** An image's alt text and library name; a product image's alt text is assessed again. */
+export const saveMediaWorkflow = createWorkflow("media-set-alt", (input: SaveMediaInput) => {
+  const saved = saveMediaStep(input)
+  when({ saved }, ({ saved }) => saved.product_id !== null && saved.alt_changed).then(() => {
+    emitEventStep({
+      eventName: MEDIA_SAVED,
+      data: transform({ saved }, ({ saved }) => ({ id: saved.product_id })),
     })
-    return new WorkflowResponse(saved)
-  }
-)
+  })
+  return new WorkflowResponse(saved)
+})
 
 /** A product's images' alt texts at once (bulk edit, F3.10); its assessment once. */
 export const setProductAltsWorkflow = createWorkflow(

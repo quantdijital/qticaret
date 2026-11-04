@@ -556,8 +556,18 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "media.alt_invalid": "Alt metinde kullanılamayan karakterler var.",
   "media.file_id_invalid": "Dosya adı geçerli değil.",
   "media.file_unknown": "Dosya bulunamadı.",
+  "media.filename_invalid": "Dosya adını 1–200 karakter arasında, özel karakter kullanmadan yazın.",
+  "media.files_not_removed":
+    "Görselin dosyaları şu an silinemedi; görsel kütüphanede kaldı. Biraz sonra yeniden deneyin.",
+  "media.import_address_refused":
+    "Bu adresten görsel alınamaz. Herkese açık bir https adresi girin.",
+  "media.import_unreachable":
+    "Adresteki görsele ulaşılamadı. Adresi tarayıcıda açıp görselin göründüğünü kontrol edin.",
+  "media.in_use":
+    "Bu görsel kullanılıyor; silinemez. Önce kullanıldığı yerlerden kaldırın (ayrıntıda listelenir).",
   "media.not_an_image": "Bu dosya bir görsel değil.",
   "media.unknown": "Görsel bulunamadı.",
+  "media.update_empty": "Değiştirilecek bir alan gönderilmedi.",
   "listing.id_required": "Hangi listenin istendiği belirtilmeli.",
   "listing.search_query_invalid": "Aramak için bir kelime yazın (en çok 100 karakter).",
   "listing.search_query_unexpected": "Arama metni yalnızca aramada gönderilir.",

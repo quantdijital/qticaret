@@ -376,6 +376,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/marketing-feeds/token": false,
   "DELETE /admin/marketing-feeds/token": false,
   "POST /admin/media/:id": false,
+  "DELETE /admin/media/:id": false,
+  "POST /admin/media/import": false,
   "POST /admin/media": false,
   "POST /admin/messaging/sender-domain/check": false,
   "POST /admin/messaging/sender-domain": false,

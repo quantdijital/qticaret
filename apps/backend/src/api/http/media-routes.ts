@@ -1,18 +1,54 @@
-import { validateAndTransformBody } from "@medusajs/framework/http"
-import { AdminPostMedia, AdminPostMediaAlt } from "../admin/media/validators"
+import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
+import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
+import {
+  AdminGetMedia,
+  AdminGetMediaAsset,
+  AdminImportMedia,
+  AdminPostMedia,
+  AdminUpdateMedia,
+} from "../admin/media/validators"
+import { requireUserActor } from "./actor"
+import { rateLimit } from "./rate-limit"
 import { restrictStoreRelation } from "../validation/attribute-fields"
 
-/** F3.3: product images registered after upload, and their alt text. */
+// One image by its id; `import` is a route of its own, not an id
+const MEDIA_ENTRY = /^\/admin\/media\/(?!import$)[^/]+$/
+
+/**
+ * F3.3: images registered after upload, and their alt text. The media
+ * library (docs/06): its list, an image's detail, rename and delete, and
+ * an outside address brought in (people only, a budget of its own: each
+ * fetches from the internet).
+ */
 export const MEDIA_ROUTES = [
+  {
+    matcher: "/admin/media",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(AdminGetMedia, {})],
+  },
   {
     matcher: "/admin/media",
     methods: ["POST" as const],
     middlewares: [validateAndTransformBody(AdminPostMedia)],
   },
   {
-    matcher: "/admin/media/:id",
+    matcher: "/admin/media/import",
     methods: ["POST" as const],
-    middlewares: [validateAndTransformBody(AdminPostMediaAlt)],
+    middlewares: [
+      requireUserActor,
+      rateLimit(() => RATE_LIMIT_PROFILES.media_import),
+      validateAndTransformBody(AdminImportMedia),
+    ],
+  },
+  {
+    matcher: MEDIA_ENTRY,
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(AdminGetMediaAsset, {})],
+  },
+  {
+    matcher: MEDIA_ENTRY,
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(AdminUpdateMedia)],
   },
 ]
 

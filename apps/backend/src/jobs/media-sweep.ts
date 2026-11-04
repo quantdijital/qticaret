@@ -13,6 +13,7 @@ const ABANDONED_MS = 24 * 60 * 60 * 1000
 interface AssetRow {
   id: string
   attached_at: string | Date | null
+  in_library?: boolean | null
   created_at: string | Date
   product?: { id: string } | null
 }
@@ -25,13 +26,17 @@ async function readAssets(container: MedusaContainer) {
   for (let skip = 0; ; skip += PAGE) {
     const { data } = await query.graph({
       entity: "media_asset",
-      fields: ["id", "attached_at", "created_at", "product.id"],
+      fields: ["id", "attached_at", "in_library", "created_at", "product.id"],
       pagination: { skip, take: PAGE, order: { id: "ASC" } },
     })
     for (const asset of data as AssetRow[]) {
       if (asset.product?.id) {
         products.add(asset.product.id)
-      } else if (!asset.attached_at && new Date(asset.created_at).getTime() < before) {
+      } else if (
+        !asset.attached_at &&
+        !asset.in_library &&
+        new Date(asset.created_at).getTime() < before
+      ) {
         abandoned.push(asset.id)
       }
     }
@@ -45,7 +50,8 @@ async function readAssets(container: MedusaContainer) {
  * Keeps product images tidy each night (F3.3): every product with images
  * is brought in line again (a missed save, a failed version; nothing to do
  * costs a query), and uploads no product ever took go after a day. An image
- * a product once had stays: orders and emails may show it.
+ * a product once had stays: orders and emails may show it. So does one put
+ * in the media library: it goes only when deleted there.
  */
 export default async function mediaSweep(container: MedusaContainer) {
   const { products, abandoned } = await readAssets(container)

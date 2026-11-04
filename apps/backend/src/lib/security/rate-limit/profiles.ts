@@ -89,6 +89,8 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 30, windowMs: 10 * MINUTE },
     perIdentity: { max: 20, windowMs: 10 * MINUTE },
   },
+  // The media library bringing in an image by its address: each is a fetch from the internet
+  media_import: { name: "media_import", perIp: { max: 60, windowMs: 10 * MINUTE } },
   // F10.8 (adr/0038 §3): Google, Meta and the like fetching a feed; a guess finds nothing
   feed: { name: "feed", perIp: { max: 60, windowMs: 15 * MINUTE } },
   // F10.7 (adr/0038 §1): a cart reminder's link back to the cart; a guess finds nothing

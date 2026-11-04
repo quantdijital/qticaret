@@ -554,8 +554,18 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "media.alt_invalid": "The alt text has characters that cannot be used.",
   "media.file_id_invalid": "The file id is not valid.",
   "media.file_unknown": "File not found.",
+  "media.filename_invalid": "Write a file name of 1–200 characters, without special characters.",
+  "media.files_not_removed":
+    "The image's files could not be deleted just now; the image stays in the library. Try again shortly.",
+  "media.import_address_refused":
+    "An image cannot be fetched from this address. Enter a public https address.",
+  "media.import_unreachable":
+    "The image at this address could not be reached. Open the address in a browser and check that the image shows.",
+  "media.in_use":
+    "This image is in use and cannot be deleted. Remove it from where it is used first (listed in its detail).",
   "media.not_an_image": "This file is not an image.",
   "media.unknown": "Image not found.",
+  "media.update_empty": "No field to change was sent.",
   "listing.id_required": "Say which listing is asked for.",
   "listing.search_query_invalid": "Type a word to search for (100 characters at most).",
   "listing.search_query_unexpected": "A search text is sent with a search only.",

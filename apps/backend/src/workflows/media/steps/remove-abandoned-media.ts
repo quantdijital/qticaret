@@ -1,32 +1,23 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { MEDIA_MODULE } from "../../../modules/media"
 import type MediaModuleService from "../../../modules/media/service"
 import type { MediaAssetRecord } from "../../../modules/media/service"
 import { removeFiles } from "../files"
+import { mediaUses } from "../usage"
 
-// Still unused: never attached, linked to nothing, and no product image has the URL.
-// Read again here: a content page (F3.16) may have taken it since the sweep's list
+// Still unused: never attached, not kept in the library, and shown nowhere (a
+// product, a brand's logo, a page, the shop's logos; docs/06 Ortam kütüphanesi).
+// Read again here: a content page (F3.16) may have taken it since the sweep's
+// list, a picker may have chosen it for a brand that does not mark it
 async function isAbandoned(container: MedusaContainer, asset: MediaAssetRecord): Promise<boolean> {
   const [fresh] = await container
     .resolve<MediaModuleService>(MEDIA_MODULE)
-    .listMediaAssets({ id: asset.id }, { select: ["id", "attached_at"], take: 1 })
-  if (!fresh || fresh.attached_at) {
+    .listMediaAssets({ id: asset.id }, { select: ["id", "attached_at", "in_library"], take: 1 })
+  if (!fresh || fresh.attached_at || fresh.in_library) {
     return false
   }
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  const [{ data: linked }, { data: images }] = await Promise.all([
-    query.graph({ entity: "media_asset", fields: ["product.id"], filters: { id: asset.id } }),
-    query.graph({
-      entity: "product_image",
-      fields: ["id"],
-      filters: { url: asset.url },
-      pagination: { take: 1 },
-    }),
-  ])
-  const product = (linked[0] as { product?: { id: string } | null } | undefined)?.product
-  return !product && images.length === 0
+  return (await mediaUses(container, asset)).length === 0
 }
 
 /**

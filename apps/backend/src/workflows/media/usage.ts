@@ -1,0 +1,228 @@
+import type { Knex } from "@medusajs/framework/mikro-orm/knex"
+import type { MedusaContainer } from "@medusajs/framework/types"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { BRANDS_MODULE } from "../../modules/brands"
+import type BrandsModuleService from "../../modules/brands/service"
+import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
+import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
+
+/** Where a library image can be in use; the panel names each. */
+export type MediaUseKind =
+  | "product"
+  | "product_description"
+  | "brand"
+  | "content"
+  | "landing"
+  | "bulk_message"
+  | "storefront"
+  | "logo"
+  | "share_image"
+  | "seo"
+  | "order"
+
+export interface MediaUse {
+  kind: MediaUseKind
+  /** The record to open, where there is one. */
+  id: string | null
+  label: string | null
+}
+
+export interface MediaTarget {
+  id: string
+  url: string
+  file_id: string | null
+}
+
+// Enough to say where; the delete is refused at the first anyway
+const LIMIT = 10
+
+type Container = Pick<MedusaContainer, "resolve">
+
+interface Named {
+  id: string
+  title?: string | null
+  name?: string | null
+}
+
+const uses = (kind: MediaUseKind, rows: readonly Named[]): MediaUse[] =>
+  rows.map((row) => ({ kind, id: row.id, label: row.title ?? row.name ?? null }))
+
+/** Products showing it: linked to its record, among their images, or as the thumbnail. */
+async function products(container: Container, target: MediaTarget): Promise<MediaUse[]> {
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const [{ data: linked }, { data: images }, { data: thumbnails }] = await Promise.all([
+    query.graph({
+      entity: "media_asset",
+      fields: ["product.id", "product.title"],
+      filters: { id: target.id },
+    }),
+    query.graph({
+      entity: "product_image",
+      fields: ["product.id", "product.title"],
+      filters: { url: target.url },
+      pagination: { take: LIMIT },
+    }),
+    query.graph({
+      entity: "product",
+      fields: ["id", "title"],
+      filters: { thumbnail: target.url },
+      pagination: { take: LIMIT },
+    }),
+  ])
+  const found = new Map<string, Named>()
+  for (const row of [...linked, ...images] as { product?: Named | null }[]) {
+    if (row.product) {
+      found.set(row.product.id, row.product)
+    }
+  }
+  for (const row of thumbnails as Named[]) {
+    found.set(row.id, row)
+  }
+  return uses("product", [...found.values()].slice(0, LIMIT))
+}
+
+async function brands(container: Container, target: MediaTarget): Promise<MediaUse[]> {
+  const service = container.resolve<BrandsModuleService>(BRANDS_MODULE)
+  const rows = await service.listBrands(
+    {
+      $or: [
+        { logo_url: target.url },
+        ...(target.file_id ? [{ logo_file_id: target.file_id }] : []),
+      ],
+    },
+    { select: ["id", "name"], take: LIMIT }
+  )
+  return uses("brand", rows)
+}
+
+/** A page's own share image (adr/0015) holds the file's id. */
+async function seoImages(container: Container, target: MediaTarget): Promise<MediaUse[]> {
+  if (!target.file_id) {
+    return []
+  }
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "seo_meta",
+    fields: ["id", "entity_type"],
+    filters: { og_image_override: target.file_id },
+    pagination: { take: LIMIT },
+  })
+  return (data as { id: string; entity_type: string }[]).map((row) => ({
+    kind: "seo",
+    id: row.id,
+    label: row.entity_type,
+  }))
+}
+
+/** The shop's logos (appearance) and its share image (seo). */
+async function settings(container: Container, target: MediaTarget): Promise<MediaUse[]> {
+  const service = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+  const [appearance, seo] = (await Promise.all([
+    service.getSection("appearance"),
+    service.getSection("seo"),
+  ])) as unknown as [
+    { logo_light_url?: string | null; logo_dark_url?: string | null },
+    { default_og_image?: string | null },
+  ]
+  return [
+    ...(appearance.logo_light_url === target.url || appearance.logo_dark_url === target.url
+      ? [{ kind: "logo" as const, id: null, label: null }]
+      : []),
+    ...(seo.default_og_image === target.url
+      ? [{ kind: "share_image" as const, id: null, label: null }]
+      : []),
+  ]
+}
+
+/**
+ * Documents holding the address as one of their values: pages and posts,
+ * landing pages, bulk messages, the storefront's design (draft and live)
+ * and products' descriptions. Read straight from their tables, read only:
+ * no module can search inside a JSON document, and an address is a whole
+ * string there (`"https://…"`), so its quoted form matches only itself.
+ */
+async function documents(container: Container, target: MediaTarget): Promise<MediaUse[]> {
+  const knex = container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
+  const quoted = JSON.stringify(target.url)
+  const holds = (column: string) => knex.raw("position(? in ??::text) > 0", [quoted, column])
+  const [entries, landings, messages, layouts, descriptions] = await Promise.all([
+    knex("content_entry")
+      .select("id", "title")
+      .whereNull("deleted_at")
+      .andWhereRaw("(image_url = ? or position(? in body::text) > 0)", [target.url, quoted])
+      .limit(LIMIT) as Promise<Named[]>,
+    knex("landing_page")
+      .select("id", "title")
+      .whereNull("deleted_at")
+      .andWhere(holds("body"))
+      .limit(LIMIT) as Promise<Named[]>,
+    knex("bulk_message")
+      .select("id", "name")
+      .whereNull("deleted_at")
+      .andWhere(holds("body"))
+      .limit(LIMIT) as Promise<Named[]>,
+    knex("storefront_layout")
+      .select("id")
+      .whereNull("deleted_at")
+      .andWhereRaw(
+        "(position(? in draft::text) > 0 or position(? in coalesce(published::text, '')) > 0)",
+        [quoted, quoted]
+      )
+      .limit(1) as Promise<Named[]>,
+    knex("product_extension")
+      .select("id")
+      .whereNull("deleted_at")
+      .andWhere(holds("description_doc"))
+      .limit(LIMIT) as Promise<Named[]>,
+  ])
+  return [
+    ...uses("content", entries),
+    ...uses("landing", landings),
+    ...uses("bulk_message", messages),
+    ...layouts.map(() => ({ kind: "storefront" as const, id: null, label: null })),
+    ...(await describedProducts(
+      container,
+      descriptions.map((row) => row.id)
+    )),
+  ]
+}
+
+/** The products whose description documents show it, through their extension's link. */
+async function describedProducts(container: Container, ids: string[]): Promise<MediaUse[]> {
+  if (ids.length === 0) {
+    return []
+  }
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "product_extension",
+    fields: ["product.id", "product.title"],
+    filters: { id: ids },
+  })
+  return (data as { product?: Named | null }[]).flatMap((row) =>
+    row.product ? uses("product_description", [row.product]) : []
+  )
+}
+
+/** Orders placed with it as a line's picture: their pages and e-mails show it for good. */
+async function orders(container: Container, target: MediaTarget): Promise<MediaUse[]> {
+  const knex = container.resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
+  const row = (await knex("order_line_item")
+    .first("id")
+    .where("thumbnail", target.url)
+    .whereNull("deleted_at")) as { id: string } | undefined
+  return row ? [{ kind: "order", id: null, label: null }] : []
+}
+
+/**
+ * Everywhere the shop shows the image: what keeps it from being deleted
+ * (docs/06 Ortam kütüphanesi) and what its detail lists.
+ */
+export async function mediaUses(container: Container, target: MediaTarget): Promise<MediaUse[]> {
+  const found = await Promise.all([
+    products(container, target),
+    documents(container, target),
+    brands(container, target),
+    seoImages(container, target),
+    settings(container, target),
+    orders(container, target),
+  ])
+  return found.flat()
+}
