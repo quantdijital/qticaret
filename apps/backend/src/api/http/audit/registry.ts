@@ -18,6 +18,7 @@ import { SEO_RESOURCES } from "./resources/seo"
 import { SETTINGS_RESOURCES } from "./resources/settings"
 import { STAFF_RESOURCES } from "./resources/staff"
 import { STOCK_RESOURCES } from "./resources/stock"
+import { TAX_RESOURCES } from "./resources/tax"
 import type { AuditedResource } from "./types"
 import { ID } from "./types"
 
@@ -46,6 +47,7 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...CHARGEBACK_RESOURCES,
   ...STAFF_RESOURCES,
   ...LEGAL_RESOURCES,
+  ...TAX_RESOURCES,
 ]
 
 export interface ResourceMatch {

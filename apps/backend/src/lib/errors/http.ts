@@ -12,13 +12,16 @@ import {
 export interface HttpErrorResponse {
   status: number
   /** Same shape as Medusa's error responses; `message` is an i18n key. */
-  body: { type: string; message: string }
+  body: { type: string; message: string; count?: number }
   retryAfterSeconds?: number
 }
 
 // A provider's Retry-After passes through to our clients; it is capped so a
 // provider cannot set what we tell them
 const MAX_RETRY_AFTER_SECONDS = 300
+
+const isCount = (value: unknown): value is number =>
+  typeof value === "number" && Number.isSafeInteger(value) && value >= 0
 
 const retryAfterSecondsOf = (ms: number): number =>
   Math.min(MAX_RETRY_AFTER_SECONDS, Math.max(1, Math.ceil(ms / 1000)))
@@ -43,7 +46,9 @@ export function toHttpError(value: unknown): HttpErrorResponse | null {
   }
   if (isConflictError(value)) {
     const message = clientMessage(value.safeMessage, DEFAULT_CONFLICT_MESSAGE)
-    return { status: 409, body: { type: "conflict", message } }
+    // A count is a number the rule computed, never input: it passes through
+    const count = isCount(value.count) ? { count: value.count } : {}
+    return { status: 409, body: { type: "conflict", message, ...count } }
   }
   if (isProviderError(value)) {
     const message = clientMessage(value.safeMessage, DEFAULT_PROVIDER_MESSAGE)

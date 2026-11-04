@@ -1,37 +1,38 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import {
-  createProductTypesWorkflow,
-  createTaxRatesWorkflow,
-  createTaxRegionsWorkflow,
-} from "@medusajs/medusa/core-flows"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { createProductTypesWorkflow, createTaxRatesWorkflow } from "@medusajs/medusa/core-flows"
 import { logger } from "../../lib/logging"
-import {
-  DEFAULT_VAT_RATE,
-  REDUCED_VAT_RATES,
-  SYSTEM_TAX_PROVIDER_ID,
-  TR_COUNTRY_CODE,
-} from "./constants"
+import { sameVatRate } from "../../lib/tax"
+import { ensureVatRegion } from "../../workflows/tax/region"
+import { REDUCED_VAT_RATES } from "./constants"
+import type { ReducedVatRate } from "./constants"
 
 /**
- * Sets up KDV for Turkey (adr/0007): a country-level tax region whose default
- * rate is 20%, plus one rate per reduced group bound to a product type.
- * Only missing records are created; rates the tenant has edited stay as they
- * are.
+ * Sets up KDV for Turkey (adr/0007): a country-level tax region whose
+ * default rate is 20%, plus one rate per reduced group bound to a product
+ * type. The shop manages its rates in the panel afterwards (adr/0007 Ek
+ * 2026-11-04), so a rate is known by its code: one the shop renamed, made
+ * the default or removed (the tax module keeps it soft-deleted) is never
+ * made again, nor its product type.
  */
 export async function ensureVatRates(container: MedusaContainer): Promise<void> {
-  const productTypeIds = await ensureVatProductTypes(container)
-  const taxRegion = await ensureTrTaxRegion(container)
+  const regionId = await ensureVatRegion(container)
+  const known = await knownRates(container, regionId)
 
-  const missing = REDUCED_VAT_RATES.filter((vat) => !taxRegion.rateCodes.has(vat.code))
+  // Nor one whose percentage the shop charges under a rate of its own
+  const missing = REDUCED_VAT_RATES.filter(
+    (vat) =>
+      !known.codes.has(vat.code) && !known.percentages.some((rate) => sameVatRate(rate, vat.rate))
+  )
   if (missing.length === 0) {
     logger.info({ event: "bootstrap.vat_rates_kept" }, "reduced KDV rates exist, keeping them")
     return
   }
 
+  const productTypeIds = await ensureVatProductTypes(container, missing)
   await createTaxRatesWorkflow(container).run({
     input: missing.map((vat) => ({
-      tax_region_id: taxRegion.id,
+      tax_region_id: regionId,
       code: vat.code,
       name: vat.name,
       rate: vat.rate,
@@ -46,12 +47,30 @@ export async function ensureVatRates(container: MedusaContainer): Promise<void> 
   )
 }
 
-/** Returns product type ids keyed by value, creating the missing VAT types. */
-async function ensureVatProductTypes(container: MedusaContainer): Promise<Map<string, string>> {
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  const values = REDUCED_VAT_RATES.map((vat) => vat.productType)
+/** The region's rate codes, the removed ones' too, and the percentages in use. */
+async function knownRates(
+  container: MedusaContainer,
+  regionId: string
+): Promise<{ codes: Set<string>; percentages: number[] }> {
+  const rates = await container
+    .resolve(Modules.TAX)
+    .listTaxRates(
+      { tax_region_id: regionId },
+      { select: ["code", "rate", "deleted_at"], withDeleted: true, take: 500 }
+    )
+  return {
+    codes: new Set(rates.flatMap((rate) => (rate.code ? [rate.code] : []))),
+    percentages: rates.flatMap((rate) => (rate.deleted_at ? [] : [rate.rate ?? 0])),
+  }
+}
 
-  const { data: existing } = await query.graph({
+/** Product type ids keyed by value, for the rates about to be made: a standing one, or a new one. */
+async function ensureVatProductTypes(
+  container: MedusaContainer,
+  rates: readonly ReducedVatRate[]
+): Promise<Map<string, string>> {
+  const values = rates.map((vat) => vat.productType)
+  const { data: existing } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product_type",
     fields: ["id", "value"],
     filters: { value: values },
@@ -68,60 +87,6 @@ async function ensureVatProductTypes(container: MedusaContainer): Promise<Map<st
     }
   }
   return ids
-}
-
-interface TrTaxRegion {
-  id: string
-  rateCodes: Set<string>
-}
-
-async function ensureTrTaxRegion(container: MedusaContainer): Promise<TrTaxRegion> {
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
-
-  const { data: regions } = await query.graph({
-    entity: "tax_region",
-    fields: ["id", "province_code", "tax_rates.code", "tax_rates.is_default"],
-    filters: { country_code: TR_COUNTRY_CODE },
-  })
-  // Province-level regions are children; KDV lives on the country level.
-  const region = regions.find((candidate) => !candidate.province_code)
-
-  if (region) {
-    const rates = region.tax_rates.filter((rate) => rate !== null)
-    if (!rates.some((rate) => rate.is_default)) {
-      await createTaxRatesWorkflow(container).run({
-        input: [{ tax_region_id: region.id, ...DEFAULT_VAT_RATE, is_default: true }],
-      })
-      logger.info(
-        {
-          event: "bootstrap.default_vat_rate_added",
-          taxRegionId: region.id,
-          code: DEFAULT_VAT_RATE.code,
-        },
-        "added default KDV rate"
-      )
-    }
-    return { id: region.id, rateCodes: new Set(rates.map((rate) => rate.code)) }
-  }
-
-  const { result } = await createTaxRegionsWorkflow(container).run({
-    input: [
-      {
-        country_code: TR_COUNTRY_CODE,
-        provider_id: SYSTEM_TAX_PROVIDER_ID,
-        default_tax_rate: { ...DEFAULT_VAT_RATE },
-      },
-    ],
-  })
-  const created = result[0]
-  if (!created) {
-    throw new Error("bootstrap: createTaxRegionsWorkflow returned no tax region")
-  }
-  logger.info(
-    { event: "bootstrap.tax_region_created", taxRegionId: created.id, code: DEFAULT_VAT_RATE.code },
-    "created tax region"
-  )
-  return { id: created.id, rateCodes: new Set([DEFAULT_VAT_RATE.code]) }
 }
 
 function requireId(ids: Map<string, string>, value: string): string {

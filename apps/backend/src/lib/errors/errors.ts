@@ -30,7 +30,10 @@ export interface ProviderErrorShape extends ErrorShape<"provider"> {
   readonly retryAfterMs?: number
 }
 
-export type ConflictErrorShape = ErrorShape<"conflict">
+export interface ConflictErrorShape extends ErrorShape<"conflict"> {
+  /** How many records stand in the way (products on a VAT rate), when the client shows it. */
+  readonly count?: number
+}
 
 export interface RetryableErrorShape extends ErrorShape<"retryable"> {
   readonly retryAfterMs?: number
@@ -67,10 +70,14 @@ export class ConflictError extends Error implements ConflictErrorShape {
   override readonly name = "ConflictError"
   readonly qtErrorKind = "conflict"
   readonly safeMessage: string
+  readonly count?: number
 
-  constructor(safeMessage: string, options: { cause?: unknown } = {}) {
+  constructor(safeMessage: string, options: { cause?: unknown; count?: number } = {}) {
     super(`conflict: ${safeMessage}`, causeOf(options))
     this.safeMessage = safeMessage
+    if (options.count !== undefined) {
+      this.count = options.count
+    }
   }
 }
 

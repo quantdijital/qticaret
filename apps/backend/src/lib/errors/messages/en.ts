@@ -1083,4 +1083,17 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "search.synonym_unknown": "Synonym group not found.",
   "search.synonym_term_invalid":
     "Each term must contain a letter or a digit, with no hidden characters.",
+  // adr/0007 Ek 2026-11-04: the KDV rates
+  "vat.rate_unknown": "VAT rate not found.",
+  "vat.rate_invalid": "Enter a rate between 0 and 100, with at most two decimals.",
+  "vat.rate_exists": "A VAT rate in use already has this percentage.",
+  "vat.rate_in_use":
+    "Products are on this VAT rate. Move them to another rate first, then remove it.",
+  "vat.rate_is_default": "The default rate cannot be removed. Make another rate the default first.",
+  "vat.rate_inactive": "This VAT rate is removed. Bring it back first.",
+  "vat.name_invalid": "Enter a name of at most 60 characters, without hidden characters.",
+  "vat.name_taken": "Another VAT rate already has this name.",
+  "vat.code_invalid": "The code takes letters, digits, _ and - only, at most 20.",
+  "vat.code_taken": "Another VAT rate already has this code.",
+  "vat.too_many": "A shop keeps at most 20 VAT rates in use. Remove one to add another.",
 }

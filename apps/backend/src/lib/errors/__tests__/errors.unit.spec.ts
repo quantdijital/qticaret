@@ -223,4 +223,17 @@ describe("ConflictError", () => {
       body: { type: "conflict", message: "errors.conflict" },
     })
   })
+
+  it("gives the count of what stands in the way, also after a workflow's round trip", () => {
+    const error = new ConflictError("vat.rate_in_use", { count: 3 })
+    const travelled: unknown = JSON.parse(JSON.stringify(error))
+    for (const value of [error, travelled]) {
+      expect(toHttpError(value)).toEqual({
+        status: 409,
+        body: { type: "conflict", message: "vat.rate_in_use", count: 3 },
+      })
+    }
+    const odd = Object.assign(JSON.parse(JSON.stringify(error)) as object, { count: "3" })
+    expect(toHttpError(odd)?.body).toEqual({ type: "conflict", message: "vat.rate_in_use" })
+  })
 })

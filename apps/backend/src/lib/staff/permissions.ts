@@ -64,6 +64,11 @@ const REPLACED: readonly Rule[] = [
   // A file under a media record (a product's image, the logo, the share image) deleted
   // round it would leave the record pointing at nothing; the media cleanup removes them
   { methods: ["DELETE"], path: "/admin/uploads/:id" },
+  // KDV rates and the product types that carry them (adr/0007): `/admin/vat-rates`
+  // keeps a rate products are on and the default, which these would delete
+  { methods: WRITES, path: "/admin/tax-rates*" },
+  { methods: WRITES, path: "/admin/tax-regions*" },
+  { methods: WRITES, path: "/admin/product-types*" },
 ]
 
 /** The owner's alone (adr/0027, adr/0040 §1). */
@@ -75,6 +80,8 @@ const OWNER_ONLY: readonly Rule[] = [
   { methods: "*", path: "/admin/api-keys*" },
   { methods: WRITES, path: "/admin/webhooks*" },
   { methods: WRITES, path: "/admin/platform-settings/accounting" },
+  // The KDV rates the shop charges and declares (adr/0007 Ek 2026-11-04)
+  { methods: WRITES, path: "/admin/vat-rates*" },
   // Which program issues the invoices: the buyers' details go to it (adr/0034)
   { methods: WRITES, path: "/admin/platform-settings/invoicing" },
   // Connecting the company; checking it stays the admin's, as with provider accounts
@@ -323,6 +330,9 @@ const CAPABILITY_PROBES = {
   // F13.1: writing, publishing, dropping and restarting the legal texts' drafts, owner and
   // admin; every role reads them. Its routes decide as this does (the unit spec holds them to it)
   legalTexts: ["POST", "/admin/legal-documents/:kind/publish"],
+  // adr/0007 Ek 2026-11-04: adding, renaming, removing the KDV rates and moving the
+  // default, the owner's alone; every role reads them
+  vatRates: ["POST", "/admin/vat-rates"],
 } as const satisfies Record<string, readonly [Method, string]>
 
 export type Capability = keyof typeof CAPABILITY_PROBES

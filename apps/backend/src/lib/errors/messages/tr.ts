@@ -1079,4 +1079,17 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "search.synonym_unknown": "Eş anlamlı grubu bulunamadı.",
   "search.synonym_term_invalid":
     "Her terim en az bir harf ya da rakam içermeli; görünmeyen karakterler kullanılamaz.",
+  // adr/0007 Ek 2026-11-04: KDV oranları
+  "vat.rate_unknown": "KDV oranı bulunamadı.",
+  "vat.rate_invalid": "0 ile 100 arasında, en çok iki ondalıklı bir oran girin.",
+  "vat.rate_exists": "Bu yüzdeyle kullanımda bir KDV oranı zaten var.",
+  "vat.rate_in_use":
+    "Bu KDV oranında ürünler var. Önce ürünleri başka bir orana taşıyın, sonra kaldırın.",
+  "vat.rate_is_default": "Varsayılan oran kaldırılamaz. Önce başka bir oranı varsayılan yapın.",
+  "vat.rate_inactive": "Bu KDV oranı kaldırılmış. Önce geri alın.",
+  "vat.name_invalid": "En çok 60 karakterlik, görünmeyen karakter içermeyen bir ad girin.",
+  "vat.name_taken": "Bu adla başka bir KDV oranı var.",
+  "vat.code_invalid": "Kod yalnızca harf, rakam, _ ve - içerebilir; en çok 20 karakter.",
+  "vat.code_taken": "Bu kodla başka bir KDV oranı var.",
+  "vat.too_many": "Bir mağaza en çok 20 KDV oranı kullanabilir. Yenisi için birini kaldırın.",
 }

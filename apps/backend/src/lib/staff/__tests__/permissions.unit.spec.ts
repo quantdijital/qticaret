@@ -24,6 +24,15 @@ describe("staff roles", () => {
     ["DELETE", "/admin/invites/invite_1"],
     ["DELETE", "/admin/customers/cus_1"],
     ["DELETE", "/admin/uploads/media-1.webp"],
+    ["POST", "/admin/tax-rates"],
+    ["POST", "/admin/tax-rates/txr_1"],
+    ["DELETE", "/admin/tax-rates/txr_1"],
+    ["POST", "/admin/tax-rates/txr_1/rules"],
+    ["POST", "/admin/tax-regions"],
+    ["DELETE", "/admin/tax-regions/txreg_1"],
+    ["POST", "/admin/product-types"],
+    ["POST", "/admin/product-types/ptyp_1"],
+    ["DELETE", "/admin/product-types/ptyp_1"],
   ] as const)(
     "keeps Medusa's %s %s from everyone: our own routes do it with their guards",
     (method, path) => {
@@ -200,6 +209,7 @@ describe("staff roles", () => {
       paymentLinksManage: true,
       searchSynonyms: true,
       legalTexts: true,
+      vatRates: true,
     })
     expect(capabilitiesOf("admin")).toMatchObject({
       settings: true,
@@ -220,6 +230,7 @@ describe("staff roles", () => {
       paymentLinksManage: true,
       searchSynonyms: true,
       legalTexts: true,
+      vatRates: false,
     })
     expect(capabilitiesOf("operations")).toEqual({
       settings: false,
@@ -246,6 +257,7 @@ describe("staff roles", () => {
       paymentLinksManage: false,
       searchSynonyms: false,
       legalTexts: false,
+      vatRates: false,
     })
     expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
     expect(Object.values(capabilitiesOf(null)).every((can) => !can)).toBe(true)
@@ -282,6 +294,23 @@ describe("staff roles", () => {
       }
       expect(allowed(role, "GET", "/admin/legal-documents/return_policy")).toBe(true)
       expect(allowed(role, "GET", "/admin/legal-documents/return_policy/starter")).toBe(true)
+    }
+  })
+
+  it("decides the KDV rates' writes as the vatRates capability says: the owner's; every role reads", () => {
+    for (const role of STAFF_ROLES) {
+      const can = capabilitiesOf(role).vatRates
+      expect(can).toBe(role === "owner")
+      for (const [method, path] of [
+        ["POST", "/admin/vat-rates"],
+        ["POST", "/admin/vat-rates/txr_1"],
+        ["POST", "/admin/vat-rates/default"],
+      ] as const) {
+        expect(allowed(role, method, path)).toBe(can)
+      }
+      expect(allowed(role, "GET", "/admin/vat-rates")).toBe(true)
+      // Medusa's own lists stay readable; the panel reads the rates from ours
+      expect(allowed(role, "GET", "/admin/product-types")).toBe(true)
     }
   })
 })
@@ -470,6 +499,10 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/storefront-layout/preview": false,
   "POST /admin/storefront-layout/publish": false,
   "POST /admin/storefront-layout/revisions/:revision/restore": false,
+  // adr/0007 Ek 2026-11-04: the KDV rates, the owner's
+  "POST /admin/vat-rates": false,
+  "POST /admin/vat-rates/:id": false,
+  "POST /admin/vat-rates/default": false,
   "POST /admin/storefront-menus": false,
   "POST /admin/storefront-menus/:id": false,
   "DELETE /admin/storefront-menus/:id": false,
