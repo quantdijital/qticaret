@@ -7,7 +7,7 @@ import type { SheetCell } from "../../../lib/sheets"
 import { sheetContext } from "../../catalog/export/context"
 import { HELP_ROWS, HELP_WIDTHS } from "../../catalog/export/help"
 import { EXPORT_FIELDS, productRows, sheetHeader, sheetWidths } from "../../catalog/export/rows"
-import type { ExportProductRow } from "../../catalog/export/rows"
+import type { ExportProductRow, VatNames } from "../../catalog/export/rows"
 import type { JobContext, JobType } from "./types"
 
 const PAGE = 100
@@ -21,7 +21,8 @@ async function* sheetRows(
   header: string[],
   attributeKeys: readonly string[],
   locationId: string | null,
-  totals: { products: number; rows: number; cut: boolean }
+  totals: { products: number; rows: number; cut: boolean },
+  vatNames?: VatNames
 ): AsyncGenerator<SheetCell[]> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   yield header
@@ -32,7 +33,7 @@ async function* sheetRows(
       pagination: { skip, take: PAGE, order: { created_at: "ASC", id: "ASC" } },
     })
     for (const product of data as ExportProductRow[]) {
-      const rows = productRows(product, attributeKeys, locationId)
+      const rows = productRows(product, attributeKeys, locationId, vatNames)
       if (totals.rows + rows.length > MAX_EXPORT_ROWS) {
         totals.cut = true
         return
@@ -70,7 +71,8 @@ export const catalogExport: JobType<z.infer<typeof input>> = {
       header,
       context.attributeKeys,
       context.locationId,
-      totals
+      totals,
+      context.vatNames
     )
     const file = await resultFile(
       `katalog-${randomUUID()}.${format}`,

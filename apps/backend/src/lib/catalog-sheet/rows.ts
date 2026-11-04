@@ -1,11 +1,12 @@
 import { isCleanText } from "../security"
 import type { SheetRow } from "../sheets"
-import { SEO_META_LIMITS } from "../seo/meta"
 import { toSlug } from "../seo/slug"
-import { decimalCell, handleCell, handleListCell, statusCell, textCell } from "./cells"
-import type { Cell } from "./cells"
+import { handleCell, textCell } from "./cells"
 import { OPTION_KEYS, cellAt, layoutOf, readHeader } from "./columns"
 import type { ColumnKey, SheetLayout } from "./columns"
+import { PRODUCT_PARSERS, SHEET_LIMITS, VARIANT_PARSERS } from "./parsers"
+
+export { SHEET_LIMITS } from "./parsers"
 
 /**
  * The sheet's rows as products (F3.9): rows with the same `Tanıtıcı` are
@@ -15,19 +16,6 @@ import type { ColumnKey, SheetLayout } from "./columns"
  * is a problem. An empty cell changes nothing. A product with a problem
  * in any of its rows is left out whole; the problems say where.
  */
-
-export const SHEET_LIMITS = {
-  title: 255,
-  description: 20_000,
-  option: 100,
-  sku: 100,
-  barcode: 64,
-  attribute: 500,
-} as const
-
-const MAX_AMOUNT = 1_000_000_000
-// As the product page takes a unit cost
-const MAX_COST = 10_000_000
 
 export interface SheetProblem {
   line: number
@@ -51,6 +39,8 @@ export interface ProductFields {
   seo_description?: string
   focus_keyword?: string
   template?: string
+  /** The KDV rate as written: its name or percentage (adr/0007). */
+  vat?: string
 }
 
 export interface SheetVariant {
@@ -76,39 +66,6 @@ export interface SheetProduct {
   attributes: Record<string, string>
   variants: SheetVariant[]
 }
-
-type Parse = (raw: string) => Cell<unknown>
-
-const decimal =
-  (decimals: number, key: string): Parse =>
-  (raw) =>
-    decimalCell(raw, { max: MAX_AMOUNT, decimals, key })
-
-const PRODUCT_PARSERS: Partial<Record<ColumnKey, Parse>> = {
-  title: (raw) => textCell(raw, SHEET_LIMITS.title),
-  status: statusCell,
-  description: (raw) => textCell(raw, SHEET_LIMITS.description, { multiline: true }),
-  categories: handleListCell,
-  collection: handleCell,
-  brand: handleCell,
-  weight: decimal(3, "catalog_import.dimension_invalid"),
-  length: decimal(3, "catalog_import.dimension_invalid"),
-  width: decimal(3, "catalog_import.dimension_invalid"),
-  height: decimal(3, "catalog_import.dimension_invalid"),
-  seo_title: (raw) => textCell(raw, SEO_META_LIMITS.seo_title),
-  seo_description: (raw) => textCell(raw, SEO_META_LIMITS.seo_description),
-  focus_keyword: (raw) => textCell(raw, SEO_META_LIMITS.focus_keyword),
-  template: handleCell,
-}
-
-const VARIANT_PARSERS = {
-  sku: (raw: string) => textCell(raw, SHEET_LIMITS.sku),
-  barcode: (raw: string) => textCell(raw, SHEET_LIMITS.barcode),
-  price: decimal(2, "catalog_import.price_invalid"),
-  cost: (raw: string) =>
-    decimalCell(raw, { max: MAX_COST, decimals: 2, key: "catalog_import.cost_invalid" }),
-  stock: decimal(0, "catalog_import.stock_invalid"),
-} as const
 
 /** The product a row belongs to, by handle, else by title; null with a problem. */
 function productKey(row: SheetRow, layout: SheetLayout, problems: SheetProblem[]) {

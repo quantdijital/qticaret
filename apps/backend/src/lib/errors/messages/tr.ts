@@ -106,6 +106,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "catalog_import.attribute_required": "Şablonun zorunlu özelliklerinden biri boş.",
   "catalog_import.attribute_unknown": "Bu özellik ürünün şablonunda yok.",
   "catalog_import.brand_unknown": "Bu tanıtıcıyla bir marka yok.",
+  "catalog_import.vat_unknown":
+    "Bu adla ya da oranla bir KDV oranı yok; KDV oranları ekranındaki adı (ör. KDV %10) ya da oranı (ör. 10) yazın.",
+  "catalog_import.vat_ambiguous":
+    "Bu oranda birden çok KDV oranı var; oranın adını KDV oranları ekranındaki gibi yazın.",
   "catalog_import.category_unknown": "Kategorilerden biri bu tanıtıcıyla yok.",
   "catalog_import.collection_unknown": "Bu tanıtıcıyla bir koleksiyon yok.",
   "catalog_import.column_repeated": "Bu sütun dosyada iki kez var; ikincisi okunmadı.",

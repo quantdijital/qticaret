@@ -1,4 +1,9 @@
-import { attributeHeader, attributeValueOf } from "../../../lib/catalog-sheet"
+import {
+  attributeHeader,
+  attributeValueOf,
+  vatRateOf,
+  vatTypeChange,
+} from "../../../lib/catalog-sheet"
 import type { SheetProblem, SheetProduct, SheetVariant } from "../../../lib/catalog-sheet"
 import type { AttributeInputValue } from "../../../modules/product-attributes/validation"
 import type { ExistingProduct, ExistingVariant, ImportReferences } from "./references"
@@ -35,11 +40,17 @@ const COLUMNS = {
   collection: "Koleksiyon",
   brand: "Marka",
   template: "Özellik şablonu",
+  vat: "KDV",
 } as const
 
 type Problems = SheetProblem[]
 
-function references(sheet: SheetProduct, refs: ImportReferences, problems: Problems) {
+function references(
+  sheet: SheetProduct,
+  refs: ImportReferences,
+  problems: Problems,
+  current: ExistingProduct["current"] | undefined
+) {
   const { fields, line } = sheet
   const unknown = (key: string, column: string) => problems.push({ line, key, column })
   const categories = fields.categories?.map((handle) => refs.categories.get(handle)?.id)
@@ -54,7 +65,19 @@ function references(sheet: SheetProduct, refs: ImportReferences, problems: Probl
   if (fields.brand && !brand) {
     unknown("catalog_import.brand_unknown", COLUMNS.brand)
   }
-  return { categories: categories as string[] | undefined, collection, brand }
+  // The rate's product type (adr/0007); a product taxed at it already stays as it is
+  const vat = fields.vat ? vatRateOf(fields.vat, refs.vatRates) : null
+  if (vat && !vat.ok) {
+    unknown(vat.key, COLUMNS.vat)
+  }
+  return {
+    categories: categories as string[] | undefined,
+    collection,
+    brand,
+    vatTypeId: vat?.ok
+      ? vatTypeChange(vat.rate, refs.vatRates, current?.typeId ?? null)
+      : undefined,
+  }
 }
 
 function attributesPlan(
@@ -153,7 +176,7 @@ export function planImport(
   if (!existing && !sheet.fields.title) {
     problems.push({ line: sheet.line, key: "catalog_import.title_required" })
   }
-  const found = references(sheet, refs, problems)
+  const found = references(sheet, refs, problems, existing?.current)
   const attributes = attributesPlan(sheet, existing, refs, problems)
   skuProblems(sheet.variants, sheet.handle, refs, problems)
   const variants = variantsPlan(sheet, existing, refs, problems)

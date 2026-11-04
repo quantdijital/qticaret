@@ -3,6 +3,9 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { AUDIT_LOG_MODULE } from "../../src/modules/audit-log"
 import type AuditLogModuleService from "../../src/modules/audit-log/service"
 import type { SheetCell } from "../../src/lib/sheets"
+import { ensureVatRegion } from "../../src/workflows/tax/region"
+import { createVatRateWorkflow } from "../../src/workflows/tax/vat-rates"
+import { vatStateOf } from "../../src/workflows/tax/vat-state"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -155,6 +158,47 @@ medusaIntegrationTestRunner({
       expect(checked.result_summary).toMatchObject({ create: 1, problems: 0 })
       const report = await sheets.fileOf(checked)
       expect(report.find((cells) => cells[1] === "celik-tava")?.[2]).toBe("Eklenecek")
+    })
+
+    it("takes a product's KDV rate by name or percentage, and stops a row with an unknown one", async () => {
+      const container = getContainer()
+      const regionId = await ensureVatRegion(container)
+      // A shop's bootstrap may have made the reduced rates already
+      const { rates } = await vatStateOf(container, regionId)
+      if (!rates.some((rate) => rate.active && rate.rate === 10)) {
+        await createVatRateWorkflow(container).run({ input: { region_id: regionId, rate: 10 } })
+      }
+      const sheet = await xlsxOf([
+        row({ handle: "kdv-adiyla", title: "Adıyla", vat: "KDV %10", price: 10 }),
+        row({ handle: "kdv-oraniyla", title: "Oranıyla", vat: "10", price: 10 }),
+        row({ handle: "kdv-varsayilan", title: "Varsayılan", vat: "%20", price: 10 }),
+        row({ handle: "kdv-bilinmeyen", title: "Bilinmeyen", vat: "18", price: 10 }),
+      ])
+
+      const applied = await upload(sheet, "apply")
+      const report = await sheets.fileOf(applied)
+      const { data } = await query().graph({
+        entity: "product",
+        fields: ["handle", "type.value"],
+        filters: { handle: ["kdv-adiyla", "kdv-oraniyla", "kdv-varsayilan", "kdv-bilinmeyen"] },
+      })
+      const types = new Map(
+        (data as { handle: string; type: { value: string } | null }[]).map((product) => [
+          product.handle,
+          product.type?.value ?? null,
+        ])
+      )
+
+      expect(applied.result_summary).toMatchObject({ create: 3, problems: 1, failed: 0 })
+      expect(report.find((cells) => cells[1] === "kdv-bilinmeyen")?.[4]).toMatch(
+        /^Bu adla ya da oranla bir KDV oranı yok/
+      )
+      expect(Object.fromEntries(types)).toEqual({
+        "kdv-adiyla": "KDV %10",
+        "kdv-oraniyla": "KDV %10",
+        // The default taxes products on no VAT type
+        "kdv-varsayilan": null,
+      })
     })
 
     it("takes only sheets, through its own route, and keeps the uploads to itself", async () => {

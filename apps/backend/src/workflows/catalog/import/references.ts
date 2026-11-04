@@ -13,6 +13,9 @@ import type {
   AttributeOption,
   DefinitionShape,
 } from "../../../modules/product-attributes/validation"
+import type { VatRate } from "../../../lib/tax"
+import { findVatRegion } from "../../tax/region"
+import { vatStateOf } from "../../tax/vat-state"
 import { existingProducts } from "./existing-products"
 import type { ExistingProduct } from "./existing-products"
 
@@ -42,6 +45,8 @@ export interface ImportReferences {
   products: Map<string, ExistingProduct>
   /** SKU (lower case) → the product handle that holds it. */
   skus: Map<string, string>
+  /** The shop's KDV rates (adr/0007), read only when a row names one; none without a KDV region. */
+  vatRates: VatRate[]
   shop: {
     locationId: string | null
     salesChannelId: string | null
@@ -120,33 +125,35 @@ export async function importReferences(
   const categoryHandles = unique(fields.flatMap((each) => each.categories ?? []))
   const collectionHandles = unique(fields.map((each) => each.collection))
   const brandHandles = unique(fields.map((each) => each.brand))
-  const [categories, collections, brands, templates, existing, skus, shop] = await Promise.all([
-    categoryHandles.length
-      ? product.listProductCategories(
-          { handle: categoryHandles },
-          { select: ["id", "handle", "name"] }
-        )
-      : [],
-    collectionHandles.length
-      ? product.listProductCollections(
-          { handle: collectionHandles },
-          { select: ["id", "handle", "title"] }
-        )
-      : [],
-    brandHandles.length
-      ? container
-          .resolve<BrandsModuleService>(BRANDS_MODULE)
-          .listBrands({ handle: brandHandles }, { select: ["id", "handle", "name"] })
-      : [],
-    templatesOf(container, unique(fields.map((each) => each.template))),
-    // A title's handle may be taken too: such a row must name the product it updates
-    existingProducts(container, unique(products.map((each) => each.handle))),
-    skusOf(
-      container,
-      unique(products.flatMap((each) => each.variants.map((variant) => variant.sku)))
-    ),
-    shopOf(container),
-  ])
+  const [categories, collections, brands, templates, existing, skus, shop, vatRates] =
+    await Promise.all([
+      categoryHandles.length
+        ? product.listProductCategories(
+            { handle: categoryHandles },
+            { select: ["id", "handle", "name"] }
+          )
+        : [],
+      collectionHandles.length
+        ? product.listProductCollections(
+            { handle: collectionHandles },
+            { select: ["id", "handle", "title"] }
+          )
+        : [],
+      brandHandles.length
+        ? container
+            .resolve<BrandsModuleService>(BRANDS_MODULE)
+            .listBrands({ handle: brandHandles }, { select: ["id", "handle", "name"] })
+        : [],
+      templatesOf(container, unique(fields.map((each) => each.template))),
+      // A title's handle may be taken too: such a row must name the product it updates
+      existingProducts(container, unique(products.map((each) => each.handle))),
+      skusOf(
+        container,
+        unique(products.flatMap((each) => each.variants.map((variant) => variant.sku)))
+      ),
+      shopOf(container),
+      fields.some((each) => each.vat) ? vatRatesOf(container) : Promise.resolve([]),
+    ])
   return {
     categories: new Map(categories.map((row) => [row.handle, { id: row.id, name: row.name }])),
     collections: new Map(collections.map((row) => [row.handle, { id: row.id, name: row.title }])),
@@ -155,7 +162,14 @@ export async function importReferences(
     products: existing,
     skus,
     shop,
+    vatRates,
   }
+}
+
+/** The KDV region's rates (adr/0007); none while the shop has no KDV region yet. */
+async function vatRatesOf(container: MedusaContainer): Promise<VatRate[]> {
+  const region = await findVatRegion(container)
+  return region ? [...(await vatStateOf(container, region.id)).rates] : []
 }
 
 export type {

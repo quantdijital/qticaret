@@ -28,6 +28,10 @@ export const HELP_ROWS: readonly SheetCell[][] = [
     'Şablonun tanıtıcısı. "Özellik: anahtar" sütunları bu şablonun özellikleridir; seçenek adı ya da değeri, birden çoğu | ile, Evet/Hayır, sayı.',
   ],
   [
+    "KDV",
+    "Ürünün KDV oranı: KDV oranları ekranındaki adı (ör. KDV %10) ya da oranı (ör. 10). Boşsa oran değişmez; yeni ürün varsayılan orana girer. Mağazada olmayan oran o ürünü durdurur. Bu sütun olmayan eski tablolar da yüklenir.",
+  ],
+  [
     "Seçenek 1–3 adı ve değeri",
     "Varyantın seçenekleri (ör. Beden = M). Seçeneksiz üründe boş kalır. Var olan üründe yeni seçenek değerleri panelden eklenir.",
   ],

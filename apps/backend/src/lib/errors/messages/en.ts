@@ -102,6 +102,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "catalog_import.attribute_required": "A required attribute of the template is empty.",
   "catalog_import.attribute_unknown": "The product's template has no such attribute.",
   "catalog_import.brand_unknown": "No brand has this handle.",
+  "catalog_import.vat_unknown":
+    "No VAT rate has this name or percentage; write its name as the VAT rates screen lists it (e.g. KDV %10) or its percentage (e.g. 10).",
+  "catalog_import.vat_ambiguous":
+    "Several VAT rates have this percentage; write the rate's name as the VAT rates screen lists it.",
   "catalog_import.category_unknown": "One of the categories has no such handle.",
   "catalog_import.collection_unknown": "No collection has this handle.",
   "catalog_import.column_repeated": "This column is in the file twice; the second was not read.",

@@ -47,6 +47,8 @@ export interface CurrentFields {
   seo: { seo_title: string | null; seo_description: string | null; focus_keyword: string | null }
   /** F3.2: a digital or service product has no parcel to measure. */
   physical: boolean
+  /** Its product type: its KDV rate's (adr/0007); null on the default. */
+  typeId: string | null
 }
 
 export interface ExistingProduct {
@@ -62,10 +64,11 @@ export interface ExistingProduct {
 
 interface ProductRow extends Omit<
   CurrentFields,
-  "categoryIds" | "brandId" | "primaryCategoryId" | "seo" | "physical"
+  "categoryIds" | "brandId" | "primaryCategoryId" | "seo" | "physical" | "typeId"
 > {
   id: string
   handle: string
+  type_id?: string | null
   categories?: ({ id: string } | null)[] | null
   brand?: { id: string } | null
   product_extension?: { primary_category_id?: string | null; kind?: string | null } | null
@@ -109,6 +112,7 @@ const FIELDS = [
   "description",
   "status",
   "collection_id",
+  "type_id",
   "weight",
   "length",
   "width",
@@ -175,6 +179,7 @@ function currentOf(row: ProductRow): CurrentFields {
       focus_keyword: row.seo_meta?.focus_keyword ?? null,
     },
     physical: (row.product_extension?.kind ?? "physical") === "physical",
+    typeId: row.type_id ?? null,
   }
 }
 

@@ -25,6 +25,7 @@ const refs = (overrides: Partial<ImportReferences> = {}): ImportReferences => ({
   ]),
   products: new Map(),
   skus: new Map(),
+  vatRates: [],
   shop: {
     locationId: "sloc_1",
     salesChannelId: "sc_1",
@@ -63,6 +64,7 @@ const existing: ExistingProduct = {
     primaryCategoryId: null,
     seo: { seo_title: null, seo_description: null, focus_keyword: null },
     physical: true,
+    typeId: null,
   },
   options: [{ id: "opt_1", title: "Beden", values: ["S", "M"] }],
   variants: [

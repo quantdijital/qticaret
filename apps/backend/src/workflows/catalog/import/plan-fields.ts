@@ -12,6 +12,8 @@ export interface Found {
   categories: string[] | undefined
   collection: string | undefined
   brand: string | undefined
+  /** The KDV rate's product type (adr/0007); null: the default on none; undefined: left as it is. */
+  vatTypeId?: string | null | undefined
 }
 
 const sameIds = (a: readonly string[], b: readonly string[]) =>
@@ -47,7 +49,9 @@ export function productFields(
     found.categories && (!current || !sameIds(found.categories, current.categoryIds))
       ? { categories: found.categories.map((id) => ({ id })) }
       : {}
-  return { ...Object.fromEntries(scalar), ...categories }
+  // The KDV rate is the product's type (`vatTypeChange`: undefined when taxed at it already)
+  const vat = found.vatTypeId !== undefined ? { type_id: found.vatTypeId } : {}
+  return { ...Object.fromEntries(scalar), ...categories, ...vat }
 }
 
 /** The SEO fields the row fills that the product does not have already. */

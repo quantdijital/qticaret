@@ -29,6 +29,8 @@ export const EXPORT_FIELDS = [
   "seo_meta.seo_description",
   "seo_meta.focus_keyword",
   "attribute_template.handle",
+  // Its KDV rate's product type (adr/0007)
+  "type_id",
   "attribute_values.value_text",
   "attribute_values.value_number",
   "attribute_values.value_boolean",
@@ -107,6 +109,7 @@ export interface ExportProductRow {
     focus_keyword?: string | null
   } | null
   attribute_template?: { handle: string } | null
+  type_id?: string | null
   attribute_values?: (AttributeValueRow | null)[] | null
   product_extension?: { primary_category_id?: string | null } | null
   options?: { id: string; title: string; values?: { value: string }[] | null }[] | null
@@ -154,8 +157,21 @@ function categoriesCell(product: ExportProductRow): string | null {
   return categories.length > 0 ? categories.map((each) => each.handle).join("|") : null
 }
 
-function productCells(product: ExportProductRow): Partial<Record<ColumnKey, SheetCell>> {
+/** The KDV rates' names by product type, and the default's for any other product. */
+export interface VatNames {
+  byType: ReadonlyMap<string, string>
+  fallback: string | null
+}
+
+const NO_VAT_NAMES: VatNames = { byType: new Map(), fallback: null }
+
+function productCells(
+  product: ExportProductRow,
+  vat: VatNames
+): Partial<Record<ColumnKey, SheetCell>> {
   return {
+    // The rate it is taxed at: its type's, else the default (what an import reads back)
+    vat: (product.type_id ? vat.byType.get(product.type_id) : undefined) ?? vat.fallback,
     title: product.title,
     status: product.status === "published" ? "Yayında" : "Taslak",
     // An empty description is no text to write
@@ -225,12 +241,13 @@ const costInLira = (kurus: number | null) => (kurus === null ? null : kurus / 10
 export function productRows(
   product: ExportProductRow,
   attributeKeys: readonly string[],
-  locationId: string | null
+  locationId: string | null,
+  vat: VatNames = NO_VAT_NAMES
 ): SheetCell[][] {
   const variants = (product.variants ?? [])
     .flatMap((variant) => (variant ? [variant] : []))
     .sort((a, b) => (a.variant_rank ?? 0) - (b.variant_rank ?? 0))
-  const own = productCells(product)
+  const own = productCells(product, vat)
   const attributes = new Map(
     (product.attribute_values ?? []).flatMap((value) =>
       value?.definition ? [[value.definition.key, attributeCell(value)]] : []

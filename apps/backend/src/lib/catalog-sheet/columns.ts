@@ -29,6 +29,7 @@ export type ColumnKey =
   | "seo_description"
   | "focus_keyword"
   | "template"
+  | "vat"
   | `option${1 | 2 | 3}_name`
   | `option${1 | 2 | 3}_value`
   | "sku"
@@ -79,6 +80,8 @@ export const SHEET_COLUMNS: readonly ColumnSpec[] = [
   { key: "seo_description", header: "SEO açıklaması", scope: "product", width: 48 },
   { key: "focus_keyword", header: "Odak kelime", scope: "product", width: 18 },
   { key: "template", header: "Özellik şablonu", scope: "product", width: 18 },
+  // adr/0007: the product's KDV rate, by its name or its percentage; a sheet without it still imports
+  { key: "vat", header: "KDV", scope: "product", width: 12 },
   ...option(1),
   ...option(2),
   ...option(3),
