@@ -35,8 +35,8 @@ Belgedeki sınırlar ve bizim gönderdiğimiz (`mappers.ts`). E: zorunlu, H: ist
 | `invoiceKey` | String(20) | E | Gönderi başına tekil | `cargoKey` ile aynı (fatura bazlı çalışma, belgedeki örnek de aynı) |
 | `receiverCustName` | String(200) | E | En az 5 karakter, en az 4 harf | Ad + soyad; kural gönderimden önce denetlenir |
 | `receiverAddress` | String(500) | E | İl/ilçe ayrı alanlarda gönderiliyorsa adreste olmaz; en az 10 harf/rakam | Mahalle + `address_1`, il ve ilçesiz; ≥10 harf/rakam denetlenir, 500'de kesilir |
-| `cityName` / `townName` | String(40) | H | | İl `province`, ilçe `city` (ADR-0008) |
-| `receiverPhone1` | String(20) | E | Alan koduyla **10 rakam** | Baştaki 0 atılarak 10 rakam |
+| `cityName` / `townName` | String(40) | H | | İl `province`, ilçe `city` (ADR-0008); adreste yoksa öğe gönderilmez, gönderi durmaz (ADR-0054 ek 2026-11-05) |
+| `receiverPhone1` | String(20) | E | Alan koduyla **10 rakam** | Baştaki 0 atılarak 10 rakam; `+90`, `0090`, boşluk/tire okunur, teslimat adresindeki aranamıyorsa fatura adresinden ya da hesaptan (ADR-0054 ek) |
 | `receiverPhone2/3` | String(20) | H | 10 rakam | Gönderilmiyor |
 | `desi` / `kg` | Double(9,3) | H | Yalnızca kullanıcının yetkisi varsa kaydedilir; yoksa şube ölçer | Desi = hacim / 3000 (bir ondalık yukarı), kg ayrı; nokta ile, 3 ondalık. Kolideki bir ürünün kendi ölçüsü yoksa ikisi de gönderilmez (öğe yok), şube ölçer; etikette de yazmaz (ADR-0054) |
 | `cargoCount` | Integer(4) | H | | 1 |
@@ -132,7 +132,7 @@ Yurtiçi etiket ucu vermez: taşıma belgesini ve barkod etiketini şube, bizim 
 |---|---|---|
 | getFulfillmentOptions | — | `yurtici-flat`, `yurtici-table` |
 | calculatePrice | — | Mağazanın desi tablosu (desi = max(kg, hacim/3000)) |
-| createFulfillment | `createShipment` | Alıcı kuralı önce denetlenir (`shipping.address_incomplete`); yanıt gelmezse aynı anahtarla `cancelShipment` |
+| createFulfillment | `createShipment` | Alıcı kuralı önce denetlenir (`shipping.receiver_name_short`, `shipping.receiver_address_short`, `shipping.receiver_*_missing`); yanıt gelmezse aynı anahtarla `cancelShipment` |
 | cancelFulfillment | `cancelShipment` | Yalnızca CNL/ISC/82520 başarı |
 | takip işi | `queryShipment` | Ana hesap, bulunmazsa (82519) kapıda ödeme hesabı |
 | hesap kontrolü | `queryShipment` (rastgele anahtar) | Giriş fault'u (`errorCode` 936) ya da satırsız yanıt → `secret_invalid`; fault'suz 500 ulaşılamadı, başka fault doğrulanamadı |

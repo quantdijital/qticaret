@@ -64,3 +64,77 @@ Sahibin kararı (2026-11-03):
 - Kargo ücretinin doğruluğu artık mağazanın varsayılan paketine bağlıdır. Panel bu paketin kaç desi ettiğini gösterir.
 - Gösterge panelindeki "ağırlığı ya da ölçüsü eksik" sayacı bilgi olarak kalır.
 - Önceden "ölçüsüz, taslak" gelmiş ürünler kendiliğinden yayına alınmaz. Sahip isterse yayınlar.
+
+## Ek (2026-11-05): Önce gönder, eksikleri kendin doldur
+
+Sahibin sözü (2026-11-04): "her şeye engel engel kargo çıkamıyoruz … düzelt şunları biraz özgür bırak bizi."
+
+### Kural
+
+"Kargoya ver" yolunda sert engel yalnız üç durumda kalır:
+
+1. Taşıyıcının gerçek API'si o bilgi olmadan gönderiyi reddeder.
+2. Müşteri bozuk bir çıktı görür (yanlış adrese giden koli, boş etiket).
+3. Para ya da güvenlik söz konusudur.
+
+Geri kalan her şey ya bildiğimiz yerden otomatik doldurulur ya da geçirilir. Siparişin kendi adresi değişmez: doldurulan adres koliye (`fulfillment.delivery_address`) ve taşıyıcıya gider. Onay penceresi yalnız geri alınamayan iş, para hareketi ve müşteriye giden mesaj içindir.
+
+### Kendiliğinden doldurulanlar
+
+- **Alıcı** (`workflows/shipping/steps/fill-receiver.ts`, `lib/shipping/fill.ts`):
+  - Ad: teslimat adresinde yoksa fatura adresinden, o da yoksa müşteri hesabından. Şirket adı da alıcı adı sayılır.
+  - Telefon: kuryenin arayabileceği biçime (0 ve 10 hane) çevrilir. `+90`, `0090`, `+90 0532…`, boşluk, parantez, tire ve tek alana yazılmış iki numara okunur. Teslimat adresindeki aranamıyorsa fatura adresinden, o da yoksa hesaptan alınır.
+  - Ülke: boşsa Türkiye.
+  - Posta kodu: yoksa adres verisinden (TürkiyeAPI; il + ilçe + mahalle/köy). Hiçbir taşıyıcıda alıcı için zorunlu değil.
+  - Plaka kodu (Geliver `cityCode`): posta kodundan, yoksa adres verisindeki ilden. O da yoksa yalnız il adı gider.
+- **Gönderici** (Geliver, `geliver-sender.ts`):
+  - Depo: seçeneğin deposu, yoksa mağazanın varsayılanı, yoksa tek depo.
+  - Telefon: deponun yoksa Ayarlar > Mağaza'daki iletişim telefonu.
+  - Posta kodu: yoksa adres verisinden.
+  - Depo yine eksikse Geliver hesabındaki varsayılan gönderici kullanılır: gönderiye `senderAddressID` konmaz (Geliver SDK README'si böyle diyor). Hesapta hiç gönderici adresi yoksa reddedilir; hata eksik parçayı ve ayar sayfasını adıyla söyler.
+- **Depo ve profil**:
+  - Kargo seçeneği eklerken varsayılan depo yoksa tek depo, varsayılan kargo profili yoksa tek profil kullanılır.
+  - Kargoya verirken seçenek bir depo göstermiyorsa tek depo kullanılır. Birden çok depo varsa tahmin edilmez: stok yanlış depodan düşmesin.
+- **Ölçü**: sıfırdan küçük ya da sayı olmayan değer artık "girilmemiş" sayılır. Varsayılan paket kullanılır, sepet ve koli durmaz. `shipping.measures_invalid` silindi.
+- **Paketlenmiş koli**: paketlenmiş (Medusa'nın kendi yolu, içe aktarma) ama teslim edilmemiş koli ile koliye girmemiş ürünler birlikte ya da herhangi sırayla gider. Paketlenmiş kolinin kalemlerini adlandıran istek o koliyi teslim eder. Başka kalemler ayrı koliyle gider. `orders.ship_packed_first` silindi. Panelde ikisi aynı pencerede seçilir.
+- **Panel takip bilgisi**: takip numarasındaki boşluklar atılır. Şemasız ya da `http://` bağlantı `https://` olur.
+
+### Kalan engeller ve nedenleri
+
+| Anahtar | Nerede | Neden kalıyor | Kaynak |
+|---|---|---|---|
+| `orders.test_payment_not_shippable` | `lib/payments/shippable.ts` | Para: test ödemesiyle gerçek koli çıkmaz. Test modundaki taşıyıcıyla gider | ADR-0027 |
+| `orders.payment_awaited` | aynı | Para: havalesi gelmemiş sipariş | ADR-0029 |
+| `orders.ship_canceled_refund` | `plan-shipment.ts` | Para: iptalde parası iade edilmiş sipariş | güvenlik incelemesi 2026-10-28 |
+| `returns.exchange_awaiting_return` | `plan-shipment.ts` | Para: eski ürün dönmeden yenisi gitmez | ADR-0032 §6 |
+| `fraud.review_*` | `fraud/steps/not-held.ts` | Güvenlik: incelemedeki sipariş | ADR-0044 |
+| `orders.nothing_to_ship`, `orders.ship_items_invalid` | `plan-shipment.ts` | Gönderilecek ürün yok ya da kalandan fazlası istendi | — |
+| `shipping.cod_single_parcel` | `plan-carrier.ts` | Para: kurye tutarın tamamını bir kolide tahsil eder. İkinci koli yeniden tahsil eder, parça eksik tahsil eder | ADR-0029 |
+| `yurtici.cod_account_missing` | Yurtiçi sağlayıcısı | Taşıyıcı reddeder: ödeme tipi kullanıcıdır, ana hesapla tahsilatlı gönderi 82512 alır | Yurtiçi V3, docs/entegrasyonlar/yurtici.md |
+| `shipping.carrier_not_connected` | `lib/shipping/shop.ts`, `geliver-sender.ts` | Taşıyıcı çağrılamaz | ADR-0035 §6 |
+| `shipping.use_ship_route`, `shipping.additional_data_reserved` | sağlayıcılar, ara katman | Güvenlik: Medusa'nın kendi yolu gönderi açamaz | ADR-0031 |
+| `shipping.no_offer` | Geliver sağlayıcısı | Taşıyıcı reddeder: teklif yoksa etiket alınamaz | Geliver |
+| `shipping.receiver_abroad` | `lib/shipping/receiver.ts` | Yurt içi taşıyıcı yurt dışına gönderi açmaz (Aras `IsWorldWide=0`) | — |
+| `shipping.receiver_name_missing` | aynı | Taşıyıcı reddeder: Yurtiçi `receiverCustName` (E, 60018), Geliver `name`, Aras `ReceiverName` | Yurtiçi V3, Geliver SDK `requests.ts` |
+| `shipping.receiver_address_missing` | aynı | Taşıyıcı reddeder: Yurtiçi `receiverAddress` (E, 60019), Geliver `address1` | aynı |
+| `shipping.receiver_phone_missing` | aynı | Taşıyıcı reddeder: Yurtiçi `receiverPhone1` (E, 10 hane, 82516), Geliver telefon zorunlu | Yurtiçi V3, Geliver README |
+| `shipping.receiver_place_missing` | aynı (Geliver, Aras) | Geliver `cityName`/`districtName` istiyor. Aras'ın belgesi açık değil, kurye il/ilçeyle yönlendiriyor. **Yurtiçi'de yok:** `cityName`/`townName` isteğe bağlı (H), gönderilmez | Geliver SDK, Yurtiçi V3 |
+| `shipping.receiver_name_short`, `shipping.receiver_address_short` | Yurtiçi sağlayıcısı | Taşıyıcı reddeder: ad en az 5 karakter ve 4 harf, adres en az 10 harf/rakam (82502) | Yurtiçi V3 |
+| `shipping.sender_*_missing`, `shipping.sender_contact_missing` | `geliver-sender.ts` | Yalnız Geliver hesabında hiç gönderici adresi yokken: Geliver göndericinin telefonu, posta kodu ve e-postası olmadan adres açmıyor | Geliver SDK README, `requests.ts` |
+| `shipping.setup_incomplete` | `shipping-options.ts` | Yalnız birden çok depo varken ve hiçbiri varsayılan değilken | — |
+| Medusa: stok kaydı (rezervasyon) yok, profil uyuşmazlığı, depo yok | `createOrderFulfillmentWorkflow` | Medusa çekirdeği; çekirdek değişmez (CLAUDE.md kural 2). Depo yokken tek depo verilir | Medusa 2.21.2 kaynağı |
+
+Aras'ın `SetOrder` belgesi herkese açık değil (servis tanımında her alan `minOccurs=0`). Bu yüzden Aras için kurye açısından gerekli olan (ad, adres, il/ilçe, telefon) korunur. Sahte Aras yalnız alıcı adı yokken reddeder. Gerçek hesapla denenecek.
+
+### Sahte taşıyıcılar
+
+- **Sahte Geliver**:
+  - `senderAddressID`'siz gönderiyi hesabın ilk gönderici adresinden açar, adres yoksa reddeder.
+  - Gönderici adresinde il için `cityCode` ya da `cityName`'den biri yeter. Eskiden yalnız `cityCode` kabul ediliyordu; bu gerçeğinden katıydı.
+  - Alıcıda yalnız telefon zorunlu.
+- **Sahte Yurtiçi**: belgeyle aynı kalır. Boş il/ilçe gönderilmediği için sorun yok.
+- **Sahte Aras**: belgeyle aynı kalır.
+
+### Hata mesajları
+
+`shipping.address_incomplete` ve `shipping.sender_address_incomplete` genel yedek olarak kalır. Taşıyıcı kuralları artık eksik parçayı kendi anahtarıyla söyler (`shipping.receiver_*`, `shipping.sender_*`). Her mesaj nereden düzeltileceğini yazar: sipariş sayfası, Ayarlar > Depolar, Ayarlar > Mağaza ya da Geliver paneli. `shipping.location_unknown` silindi.
