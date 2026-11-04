@@ -8,6 +8,7 @@ import {
 } from "../admin/privacy-requests/validators"
 import {
   AdminPostLegalDraft,
+  AdminPostLegalDraftReset,
   AdminPostLegalPreview,
   AdminPostLegalPublish,
 } from "../admin/legal-documents/validators"
@@ -58,6 +59,12 @@ export const LEGAL_ROUTES = [
     matcher: "/admin/legal-documents/:kind/draft",
     methods: ["DELETE" as const],
     middlewares: [requireUserActor],
+  },
+  // The draft started again from the starter or the published text (the owner, 2026-11-04)
+  {
+    matcher: "/admin/legal-documents/:kind/draft/reset",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostLegalDraftReset)],
   },
   {
     matcher: "/admin/legal-documents/:kind/publish",

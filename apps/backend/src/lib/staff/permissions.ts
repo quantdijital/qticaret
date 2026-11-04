@@ -320,6 +320,9 @@ const CAPABILITY_PROBES = {
   // adr/0056: writing site search's synonym groups, owner and admin; every role reads
   // them and the index's status. Its routes decide as this does (the unit spec holds them to it)
   searchSynonyms: ["POST", "/admin/search/synonyms"],
+  // F13.1: writing, publishing, dropping and restarting the legal texts' drafts, owner and
+  // admin; every role reads them. Its routes decide as this does (the unit spec holds them to it)
+  legalTexts: ["POST", "/admin/legal-documents/:kind/publish"],
 } as const satisfies Record<string, readonly [Method, string]>
 
 export type Capability = keyof typeof CAPABILITY_PROBES

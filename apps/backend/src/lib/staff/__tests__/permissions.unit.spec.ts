@@ -199,6 +199,7 @@ describe("staff roles", () => {
       paymentLinks: true,
       paymentLinksManage: true,
       searchSynonyms: true,
+      legalTexts: true,
     })
     expect(capabilitiesOf("admin")).toMatchObject({
       settings: true,
@@ -218,6 +219,7 @@ describe("staff roles", () => {
       paymentLinks: true,
       paymentLinksManage: true,
       searchSynonyms: true,
+      legalTexts: true,
     })
     expect(capabilitiesOf("operations")).toEqual({
       settings: false,
@@ -243,6 +245,7 @@ describe("staff roles", () => {
       paymentLinks: true,
       paymentLinksManage: false,
       searchSynonyms: false,
+      legalTexts: false,
     })
     expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
     expect(Object.values(capabilitiesOf(null)).every((can) => !can)).toBe(true)
@@ -261,6 +264,24 @@ describe("staff roles", () => {
       }
       expect(allowed(role, "GET", "/admin/search/synonyms")).toBe(true)
       expect(allowed(role, "GET", "/admin/search/index")).toBe(true)
+    }
+  })
+
+  it("decides the legal texts' writes as the legalTexts capability says; every role reads", () => {
+    for (const role of STAFF_ROLES) {
+      const can = capabilitiesOf(role).legalTexts
+      expect(can).toBe(role === "owner" || role === "admin")
+      for (const [method, path] of [
+        ["POST", "/admin/legal-documents/return_policy/draft"],
+        ["DELETE", "/admin/legal-documents/return_policy/draft"],
+        ["POST", "/admin/legal-documents/return_policy/draft/reset"],
+        ["POST", "/admin/legal-documents/return_policy/publish"],
+        ["POST", "/admin/legal-documents/return_policy/preview"],
+      ] as const) {
+        expect(allowed(role, method, path)).toBe(can)
+      }
+      expect(allowed(role, "GET", "/admin/legal-documents/return_policy")).toBe(true)
+      expect(allowed(role, "GET", "/admin/legal-documents/return_policy/starter")).toBe(true)
     }
   })
 })
@@ -345,6 +366,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/maintenance/bypass": false,
   "POST /admin/legal-documents/:kind/draft": false,
   "DELETE /admin/legal-documents/:kind/draft": false,
+  "POST /admin/legal-documents/:kind/draft/reset": false,
   "POST /admin/legal-documents/:kind/publish": false,
   "POST /admin/legal-documents/:kind/preview": false,
   "POST /admin/landings/:id": false,

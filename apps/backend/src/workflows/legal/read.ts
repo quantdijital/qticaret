@@ -112,6 +112,12 @@ const summaryOf = (row: {
   published_at: row.published_at ? new Date(row.published_at).toISOString() : null,
 })
 
+/** A version as the panel's editor takes it: its summary and its document. */
+export const fullVersionOf = (row: Parameters<typeof summaryOf>[0] & { body: unknown }) => ({
+  ...summaryOf(row),
+  body: row.body as ContentDoc,
+})
+
 /** Each kind's published version and draft, for the panel's list (F13.1). */
 export async function legalOverview(container: Container) {
   const rows = await legal(container).listLegalDocuments(
@@ -144,8 +150,7 @@ export async function legalKind(container: Container, kind: LegalKind) {
       }
     ),
   ])
-  const full = (row: typeof published) =>
-    row ? { ...summaryOf(row), body: row.body as unknown as ContentDoc } : null
+  const full = (row: typeof published) => (row ? fullVersionOf(row) : null)
   return {
     kind,
     published: full(published),

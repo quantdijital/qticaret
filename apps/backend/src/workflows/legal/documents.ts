@@ -10,8 +10,8 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import type { ContentDoc } from "../../lib/content"
-import { ValidationError } from "../../lib/errors"
-import { checkLegalDoc, hasStarterNote } from "../../lib/legal"
+import { ConflictError, ValidationError } from "../../lib/errors"
+import { checkLegalDoc, hasStarterNote, starterOf } from "../../lib/legal"
 import type { LegalKind } from "../../lib/legal"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
@@ -136,6 +136,48 @@ const publishDraftStep = createStep(
   }
 )
 
+/** Where a draft started again takes its text: the platform's starter, or the text in force. */
+export const DRAFT_RESET_SOURCES = ["starter", "published"] as const
+export type DraftResetSource = (typeof DRAFT_RESET_SOURCES)[number]
+
+/**
+ * The text a draft started again holds: the kind's starter as `GET starter`
+ * gives it (its tokens, and its draft note, so it is not published before
+ * a lawyer has read it), or a copy of the published text; 409 when nothing
+ * is published to copy.
+ */
+export function resetTextOf(
+  kind: LegalKind,
+  source: DraftResetSource,
+  published: { title: string; body: unknown } | null
+): { title: string; body: ContentDoc } {
+  if (source === "starter") {
+    return starterOf(kind)
+  }
+  if (!published) {
+    throw new ConflictError("legal.nothing_published")
+  }
+  return { title: published.title, body: published.body as ContentDoc }
+}
+
+export interface ResetDraftInput {
+  kind: LegalKind
+  source: DraftResetSource
+  actor_id: string | null
+}
+
+/** Reads only, so nothing to undo: the save step after it writes the draft and undoes itself. */
+const resetTextStep = createStep(
+  "legal-reset-text",
+  async (input: ResetDraftInput, { container }) => {
+    const published =
+      input.source === "published"
+        ? await legal(container).versionOf(input.kind, "published")
+        : null
+    return new StepResponse(resetTextOf(input.kind, input.source, published))
+  }
+)
+
 /** A draft dropped: it was never published, so nothing refers to it. */
 const discardDraftStep = createStep(
   "legal-discard-draft",
@@ -192,5 +234,28 @@ export const discardLegalDraftWorkflow = createWorkflow(
     const dropped = discardDraftStep(input)
     releaseLockStep({ key })
     return new WorkflowResponse(dropped)
+  }
+)
+
+/**
+ * A legal text's draft started again (the owner, 2026-11-04): from the
+ * platform's starter or a copy of the published text, in place of the
+ * draft there is or as a new one. The published text stays in force.
+ */
+export const resetLegalDraftWorkflow = createWorkflow(
+  "legal-reset-draft",
+  (input: ResetDraftInput) => {
+    const key = transform({ input }, ({ input }) => lockKeyOf(input.kind))
+    acquireLockStep({ key, timeout: 10, ttl: 30 })
+    const text = resetTextStep(input)
+    const save = transform({ input, text }, ({ input, text }) => ({
+      kind: input.kind,
+      title: text.title,
+      body: text.body,
+      actor_id: input.actor_id,
+    }))
+    const draft = saveDraftStep(save)
+    releaseLockStep({ key })
+    return new WorkflowResponse(draft)
   }
 )

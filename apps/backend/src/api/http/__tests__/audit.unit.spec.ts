@@ -134,6 +134,29 @@ describe("audit registry", () => {
     expect(matchAuditedResource(method, path)?.resource.route).toBe(route)
   })
 
+  it.each([
+    [
+      "POST",
+      "/admin/legal-documents/return_policy/publish",
+      "POST /admin/legal-documents/:kind/publish",
+    ],
+    [
+      "DELETE",
+      "/admin/legal-documents/return_policy/draft",
+      "DELETE /admin/legal-documents/:kind/draft",
+    ],
+    [
+      "POST",
+      "/admin/legal-documents/return_policy/draft/reset",
+      "POST /admin/legal-documents/:kind/draft/reset",
+    ],
+  ])("records a legal text's %s %s by its kind", (method, path, route) => {
+    expect(matchAuditedResource(method, path)).toMatchObject({
+      resource: { route, resourceType: "legal_document" },
+      params: { kind: "return_policy" },
+    })
+  })
+
   it("leaves other routes to the generic entry", () => {
     expect(matchAuditedResource("POST", "/admin/regions/reg_01ABC")).toBeNull()
   })

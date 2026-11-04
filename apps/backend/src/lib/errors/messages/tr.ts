@@ -565,6 +565,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "legal.unknown": "Böyle bir yasal metin türü yok.",
   "legal.not_published": "Bu metin henüz yayımlanmadı.",
   "legal.draft_missing": "Bu metnin taslağı yok.",
+  "legal.nothing_published":
+    "Bu metnin yayında sürümü yok, taslağa kopyalanamaz. Başlangıç metninden başlayabilirsiniz.",
   "legal.draft_note_present":
     "Metnin başındaki taslak notu duruyor. Metni avukatınıza kontrol ettirip notu sildikten sonra yayımlayın.",
   "legal.token_invalid":
