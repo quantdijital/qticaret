@@ -48,22 +48,29 @@ Vitrin sözleşmesi değişmedi: adreste `province` = il adı, `city` = ilçe ad
 ## Senkron
 - **Akış (`importTrAddressWorkflow`):** `/meta` → beş veri seti dosyası → tamlık denetimi (her koleksiyon `/meta`'daki sayı kadar, 81 il) → `/meta` yeniden (indirme sırasında sürüm değiştiyse iptal) → tek transaction'da içe aktarma + `tr_address_sync` kaydı → denetim kaydı (`tr_address.imported`).
 - **Fark:** önce TürkiyeAPI kimliği, yoksa doğal anahtar (il plakası / ilçe adı / mahalle adı). Adı değişen ya da başka ilçeye taşınan yer güncellenir; veri setinde artık olmayan yer `is_active=false` olur, silinmez. Aynı veriyle ikinci senkron hiçbir şeyi değiştirmez.
-- **Giriş noktaları:**
-  - Panel: Ayarlar > Kargo ve teslimat > Adres verisi > "Şimdi güncelle" (yalnız sahip) → `POST /admin/tr-address/sync` → `tr_address.sync` işi; ilerleme ve rapor `GET /admin/tr-address/status` ile.
-  - Haftalık iş (`tr-address-sync`, pazartesi 05:10): `/meta`'yı okur, mağazadaki sürümden farklıysa işi kuyruğa koyar.
+- **Giriş noktaları** (hepsi platformun; panelde yüzey yok, aşağıda "İşletim"):
+  - Haftalık iş (`tr-address-sync`, pazartesi 05:10): `/meta`'yı okur, mağazadaki sürümden farklıysa `tr_address.sync` işini kuyruğa koyar.
   - Komut: `pnpm --filter @qticaret/backend tr-address:import source=turkiyeapi [if-changed]`.
   - Kurulum: `tenant:bootstrap` ve `seed:demo` hiç içe aktarma yapılmamış mağazada çalıştırır; ağ yoksa uyarıyla atlar.
 - **Sıklık:** TürkiyeAPI veri setini yılda bir yeniler. Haftalık kontrol tek bir `/meta` isteğidir. Medusa'nın süreç içi zamanlayıcısı bir sonraki çalışmayı zamanlayıcıyla bekler; Node 24,8 günden uzun zamanlayıcıyı hemen çalıştırır, bu yüzden aylık zamanlama döngüye girer. Kontrol bu nedenle haftalıktır.
 
+## İşletim
+Adres verisi her mağazada aynıdır ve platformundur: mağaza sahibi onunla anlamlı bir şey yapamaz. Kullanıcı (2026-11-04): "bu adres verisi vs gibi yerleri niye mağaza sahibinin göreceği bir panele ekliyorsun ne gereği var?" Bu yüzden panelde adres verisi sekmesi, durum kartı ya da güncelleme düğmesi yok; `GET /admin/tr-address/status` ve `POST /admin/tr-address/sync` kaldırıldı, `tr_address.sync` işi genel iş ucundan (`POST /admin/async-jobs`) başlatılamaz. Panelin kapsam ilkesi: docs/06 İlkeler 10. Veriyi platform kendiliğinden güncel tutar; operatör (biz) log, alarm ve komutla izler.
+
+- **Kendiliğinden:** haftalık iş yeni sürümü görünce işi kuyruğa koyar; iş indirir, denetler, tek transaction'da yazar. Başarılı her içe aktarma `tr_address_sync` tablosuna (kaynak, sürüm, tarih, sayılar) ve denetim kaydına (`tr_address.imported`, aktör `system`) düşer.
+- **Hata:** iki olay `error` düzeyinde loglanır, operatör alarmı bunlara bağlanır: `tr_address.check_failed` (haftalık `/meta` kontrolü; `code`: `tr_address.source_unavailable` vb.) ve `tr_address.sync_failed` (iş; `jobId`, `code`). İşin genel `async_job.failed` satırı da yazılır. Hiçbirinde mağazanın verisi değişmez; bir sonraki hafta yeniden denenir. Kurulumda ağ yoksa `tr_address.data_not_loaded` (`warn`) yazılır, haftalık iş tamamlar.
+- **Elle (operatör):** geliştirmede `NODE_ENV=development pnpm --filter @qticaret/backend tr-address:import source=turkiyeapi` (`NODE_ENV` olmadan env doğrulaması sahte sağlayıcı adreslerini reddeder); `if-changed` eklenirse mağazada aynı sürüm varken indirmez. Canlıda aynı komut mağazanın instance'ında. Sonuç `tr_address.import_completed` ya da `tr_address.import_skipped` olarak loglanır.
+- **Durumu okumak:** `tr_address_sync` tablosundaki son kayıt (kaynak, `dataset_version`, `dataset_last_updated`) ve logdaki olaylar. Panel uç noktası yok.
+
 ## Sınırlar ve hata durumları
 - **Hız sınırı:** istemci başına dakikada 300, 5 dakikada 1.000 istek (README). Senkron 7 istek; yedek yol yaklaşık 60. 429 gelirse istemci `Retry-After`'a uyar.
 - **İstemci:** platformun HTTP istemcisi (`src/lib/clients`): 60 sn zaman aşımı, yeniden deneme, devre kesici, sorgu ve gövde loglanmaz, en çok 64 MB yanıt. En büyük dosya mahalleninki; belediye dosyasından (1.377 kayıt, ~300 KB) tahminen 7-9 MB.
-- **Hata kodları (panelde ve işin raporunda):** `tr_address.source_unavailable` (ulaşılamadı), `tr_address.dataset_incomplete` (eksik veri), `tr_address.dataset_changed` (indirme sırasında güncellendi). Hepsinde mağazanın verisi değişmez.
+- **Hata kodları (işin raporunda ve `tr_address.sync_failed` / `tr_address.check_failed` logunda):** `tr_address.source_unavailable` (ulaşılamadı), `tr_address.dataset_incomplete` (eksik veri), `tr_address.dataset_changed` (indirme sırasında güncellendi). Hepsinde mağazanın verisi değişmez.
 
 ## Lisans ve şartlar
 - **Lisans:** proje MIT (github.com/ubeydeozdmr/turkiye-api, `LICENSE`; OpenAPI `info.license`). Verinin ayrı bir lisansı yazılı değil.
 - **Şartlar (docs.turkiyeapi.dev/tr/v2/guide/terms):** ücretsiz, anahtarsız. İzin verilen kullanım örnekleri arasında adres formları, konum seçicileri ve iç veri akışları sayılıyor. Yasak olanlar: aşırı yük, hız sınırını aşmaya çalışmak, istekte kişisel veri ya da secret göndermek, servisi resmi bir devlet hizmeti gibi sunmak. Yüksek hacim için veri seti indirmesi öneriliyor. Veri "olduğu gibi" verilir: SLA yok, doğruluk garantisi yok. Proje hiçbir kurumla bağlantılı değil.
-- **Sonuç:** veriyi kendi veritabanımızda tutmak şartlarla uyumlu: haftada bir `/meta`, değişince bir kez indirme. Panelde kaynak adıyla belirtilir. İsteklere adres ya da kişi bilgisi girmez: yalnız sabit uç adresleri çağrılır.
+- **Sonuç:** veriyi kendi veritabanımızda tutmak şartlarla uyumlu: haftada bir `/meta`, değişince bir kez indirme. Kaynak bu belgede ve adr/0008'de adıyla belirtilir (panelde adres verisi yüzeyi yok). İsteklere adres ya da kişi bilgisi girmez: yalnız sabit uç adresleri çağrılır.
 - **Açık:** TÜİK/PTT kaynaklı verinin ticari kullanımı docs/12'deki avukat kalemi olarak kalır (kurulmuş şirket ve danışman yok, 2026-10-31).
 
 ## KVKK
@@ -71,5 +78,5 @@ Referans veri; kişi verisi değil. `docs/kvkk-envanter.md` değişmedi.
 
 ## Test
 - Gerçek API'ye test isteği gitmez. `packages/testing/src/turkiyeapi/`: sahte TürkiyeAPI (aynı zarflar, `/meta`, veri seti dosyaları, sayfalı listeler; servis kapalı ve dosya hatası senaryoları) ve küçük sentetik veri seti (81 il, ilçe başına bir kayıt, belde ve köy örnekleri).
-- Birim: eşleme, tamlık/sürüm denetimi, istemcinin yedek yolu, fark planı, komut argümanları. Modül: ad değişikliği, ad takası, taşınma, kaldırılıp aynı adla yeniden gelen yer, elle yüklenmiş örneğin devralınması. HTTP: `tr-address-sync.spec.ts`.
+- Birim: eşleme, tamlık/sürüm denetimi, istemcinin yedek yolu, fark planı, komut argümanları. Modül: ad değişikliği, ad takası, taşınma, kaldırılıp aynı adla yeniden gelen yer, elle yüklenmiş örneğin devralınması. Birim: haftalık işin ve `tr_address.sync` işinin hata logları (`src/jobs/__tests__/tr-address-sync.unit.spec.ts`). HTTP: `tr-address-sync.spec.ts` (iş, rapor, ikinci senkron, servis kapalıyken log ve korunan veri, yedek yol, haftalık kontrol, posta kodu; mağazanın admin API'sinde durum ya da senkron ucu olmadığı).
 - Geliştirmede gerçek API kullanılır (herkese açık); `pnpm dev:turkiyeapi` yok.
