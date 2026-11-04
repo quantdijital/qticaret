@@ -55,6 +55,13 @@ export interface StoreProductOption {
   values?: { id: string; value: string }[] | null
 }
 
+/** A section of a template's spec table (adr/0013 Ek 2026-11-04): a definition names it by `key`. */
+export interface StoreAttributeGroup {
+  key: string
+  name: string
+  rank: number
+}
+
 /** A public product attribute (adr/0013): the value sits in its type's column. */
 export interface StoreAttributeValue {
   id: string
@@ -71,7 +78,39 @@ export interface StoreAttributeValue {
     rank: number
     options: { value: string; label: string }[] | null
     is_seo_highlight: boolean
+    /** Its spec table section's key, when asked (`definition.group`); null: none. */
+    group?: string | null
+    /** Its template's sections, when asked (`definition.template.groups`); null: one table. */
+    template?: { groups: StoreAttributeGroup[] | null } | null
   }
+}
+
+/**
+ * An image of the shop's media library as a Store answer gives it (a
+ * category's picture, the ETBİS QR code): its size and versions where the
+ * library knows them.
+ */
+export interface StoreImage {
+  url: string
+  alt: string | null
+  width: number | null
+  height: number | null
+  derivatives: MediaDerivatives | null
+}
+
+/** `GET /store/category-images` (adr/0046 Ek 2026-11-04): a live category's picture. */
+export interface StoreCategoryImage extends StoreImage {
+  category_id: string
+}
+
+/** What a card says of its stock (adr/0046 Ek 2026-11-04): a bucket, never the number. */
+export type StoreStockBucket = "in_stock" | "low" | "out"
+
+/** `GET /store/card-facts?id=`: a published product's card facts, by product id. */
+export interface StoreCardFacts {
+  stock: StoreStockBucket
+  /** The one variant a card may put in the cart; null: the product's page first. */
+  quick_add: { variant_id: string } | null
 }
 
 export interface StoreProduct {

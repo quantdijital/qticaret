@@ -3,6 +3,7 @@
  * `GET /store/legal-identity`. A copy of the backend's section type: the
  * backend's build does not compile workspace TypeScript (adr/0046 §8).
  */
+import type { StoreImage } from "./catalog.js"
 
 export type TrustIcon =
   "truck" | "clock" | "shield" | "card" | "refresh" | "award" | "gift" | "phone"
@@ -104,7 +105,19 @@ export interface StorefrontAnswer {
    * codes (F4.8) and product add-ons (adr/0052); their routes answer 404 while off.
    */
   features?: { gift_cards: boolean; product_addons: boolean }
+  /**
+   * The footer's ways to pay and carriers (adr/0046 Ek 2026-11-04), derived
+   * from what the shop set up; absent from a backend before it: none.
+   */
+  marks?: { payments: StorePaymentMark[]; carriers: StoreCarrierMark[] }
 }
+
+/** A way to pay the shop offers: card networks with a card provider, the provider, transfer, at the door. */
+export type StorePaymentMark =
+  "visa" | "mastercard" | "troy" | "paytr" | "iyzico" | "bank_transfer" | "cash_on_delivery"
+
+/** A carrier whose contract the shop connected. */
+export type StoreCarrierMark = "aras" | "yurtici"
 
 /** The shop's legal identity and how it is reached (F13.9, adr/0048); what is missing is null. */
 export interface LegalIdentity {
@@ -115,6 +128,8 @@ export interface LegalIdentity {
   address: string | null
   kep: string | null
   etbis: string | null
+  /** The ETBİS registration's QR code (adr/0046 Ek 2026-11-04); absent or null: none. */
+  etbis_qr?: StoreImage | null
   /** The shop's social profiles. */
   same_as: string[]
   email: string | null

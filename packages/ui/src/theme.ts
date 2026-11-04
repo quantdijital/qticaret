@@ -54,7 +54,11 @@ export interface ThemeActions {
   applyGiftCard?: FormAction
   /** A plain form: `code`, the gift card taken off the cart. */
   removeGiftCard?: (form: FormData) => Promise<void>
-  /** Fields: `product_id`, `rating` (1–5), `title`, `body`. */
+  /**
+   * Fields: `product_id`, `rating` (1–5), `title`, `body`, and `photos`:
+   * up to 3 image files (JPEG, PNG, WebP, AVIF; adr/0037 §4 Ek 2026-11-04),
+   * so the form is `multipart/form-data`.
+   */
   writeReview: FormAction
   /** Fields: `product_id`, `body`. */
   askQuestion: FormAction
@@ -156,6 +160,8 @@ export interface StorefrontTheme {
     Page<HomePageView> & {
       /** Fields: `email`, `challenge`: a newsletter section's box (double opt-in). */
       subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
+      /** A card's quick add (adr/0046 Ek 2026-11-04): `addToCart`'s fields, quantity 1. */
+      quickAdd?: FormAction
     }
   >
   ProductPage: ComponentType<
@@ -169,6 +175,8 @@ export interface StorefrontTheme {
     Page<ListingPageView> & {
       /** A newsletter section's box among the page's sections. */
       subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
+      /** A card's quick add (adr/0046 Ek 2026-11-04): `addToCart`'s fields, quantity 1. */
+      quickAdd?: FormAction
     }
   >
   ContentPage: ComponentType<Page<ContentPageView> & { actions?: ContactActions }>

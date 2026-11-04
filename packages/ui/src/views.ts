@@ -1,5 +1,15 @@
 import type { TrustIcon } from "@qticaret/types"
 import type { AddonFieldView, AddonFormView, LineAddonView } from "./addon-views"
+import type {
+  CategoryCardView,
+  CustomerPhotoView,
+  QuickAddView,
+  RatingBarView,
+  ReviewPhotoView,
+  ShopMarkView,
+  SpecGroupView,
+  StockLevel,
+} from "./card-views"
 import type { BottomNavView, ThemeView } from "./frame-views"
 
 /**
@@ -37,7 +47,8 @@ export interface LinkView {
   path: string
 }
 
-export interface NavCategoryView extends LinkView {
+/** A mega menu entry: its picture when the category has one (adr/0046 Ek 2026-11-04). */
+export interface NavCategoryView extends CategoryCardView {
   children: LinkView[]
 }
 
@@ -128,6 +139,12 @@ export interface ShopView {
   theme: ThemeView
   /** The phone's bottom bar; null where it stays away (checkout, a preview). */
   bottomNav: BottomNavView | null
+  /** The ETBİS registration's QR code for the footer (adr/0046 Ek 2026-11-04); none: no slot. */
+  etbisQr?: ImageView | null
+  /** The ways to pay the shop offers now, in words (derived, never typed in). */
+  paymentMarks?: ShopMarkView[]
+  /** The carriers whose contract the shop connected, in words. */
+  carrierMarks?: ShopMarkView[]
 }
 
 export interface CookieBannerView {
@@ -159,6 +176,10 @@ export interface ProductCardView {
   available: boolean
   /** The product's reviews in short, when the storefront has them for a card; shown when the shop asks. */
   rating?: CardRatingView | null
+  /** Its stock as a bucket (adr/0046 Ek 2026-11-04): "few left" on `low`; never the number. */
+  stock?: StockLevel
+  /** Put in the cart from the card (`addToCart` with this variant, quantity 1); none: its page first. */
+  quickAdd?: QuickAddView | null
 }
 
 /** A card's stars: the average and how many reviews, formatted, and in words for a screen reader. */
@@ -221,6 +242,12 @@ export interface ProductPageView {
   selectedVariantId: string | null
   /** The product's public attributes, in the shop's order, ready to read. */
   specs: SpecView[]
+  /**
+   * The same attributes in the template's sections (adr/0013 Ek
+   * 2026-11-04), in the sections' order; without sections one group whose
+   * title is null holds them all. None: no attributes.
+   */
+  specGroups?: SpecGroupView[]
   /** The shop's promises (shipping, returns…), beside the cart form. */
   trustBadges: TrustBadgeView[]
   /** Approved reviews and the average (F10.6). */
@@ -266,12 +293,16 @@ export interface ReviewView {
   /** "1 Kasım 2026". */
   date: string
   verified: boolean
+  /** The photos the customer put on it, in their order (adr/0037 §4 Ek 2026-11-04). */
+  photos?: ReviewPhotoView[]
 }
 
 export interface ReviewsView {
   average: number | null
   count: number
   items: ReviewView[]
+  /** How many gave each number of stars, 5 to 1 (adr/0046 Ek 2026-11-04); none without reviews. */
+  distribution?: RatingBarView[] | null
 }
 
 export interface QuestionView {
@@ -352,7 +383,8 @@ export interface ListingPageView {
   title: string
   description: string[]
   breadcrumbs: BreadcrumbView[]
-  subcategories: LinkView[]
+  /** Each with its picture when it has one (adr/0046 Ek 2026-11-04). */
+  subcategories: CategoryCardView[]
   products: ProductCardView[]
   total: number
   pagination: PaginationView
@@ -385,8 +417,8 @@ export interface SearchHelpView {
   brands: LinkView[]
 }
 
-/** A category in the index (`/kategoriler`): its page and the categories below it. */
-export interface CategoryTreeView extends LinkView {
+/** A category in the index (`/kategoriler`): its page, its picture, the categories below it. */
+export interface CategoryTreeView extends CategoryCardView {
   children: CategoryTreeView[]
 }
 
@@ -439,7 +471,7 @@ export type HomeSectionView =
         link: LinkView | null
       }[]
     }
-  | { id: string; type: "categories"; title: string; categories: LinkView[] }
+  | { id: string; type: "categories"; title: string; categories: CategoryCardView[] }
   | {
       id: string
       type: "products"
@@ -457,6 +489,8 @@ export type HomeSectionView =
       title: string
       reviews: (ReviewView & { product: LinkView | null })[]
       more: LinkView
+      /** The newest customer photos on approved reviews (adr/0046 Ek 2026-11-04); none: no strip. */
+      photos?: CustomerPhotoView[]
     }
   | { id: string; type: "rich_text"; title: string | null; html: string }
   | { id: string; type: "trust_badges"; badges: TrustBadgeView[] }
