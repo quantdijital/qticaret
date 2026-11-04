@@ -35,6 +35,47 @@ const text = (max: number) =>
     .max(max)
     .refine((value) => isCleanText(value), cleanText)
 
+// A spec table section's key (adr/0013 Ek 2026-11-04): the panel makes it, definitions name it
+const GROUP_KEY = /^[a-z0-9][a-z0-9_-]{0,39}$/
+const MAX_GROUPS = 30
+const groupKey = z.string().regex(GROUP_KEY, { message: "product_attributes.group_key_invalid" })
+
+/** A section of a template's spec table: its key, its name, its place. */
+export const groupInput = z
+  .object({
+    key: groupKey,
+    name: text(100),
+    rank: z.number().int().min(0).max(10_000),
+  })
+  .strict()
+
+export type AttributeGroup = z.infer<typeof groupInput>
+
+/** A template's sections; a key once. */
+export const groupsInput = z
+  .array(groupInput)
+  .max(MAX_GROUPS)
+  .refine((groups) => new Set(groups.map((group) => group.key)).size === groups.length, {
+    message: "product_attributes.groups_duplicate",
+  })
+
+/** The stored sections as they read; anything that does not read as them is none. */
+export function groupsOf(value: unknown): AttributeGroup[] {
+  const parsed = z.array(groupInput).safeParse(value)
+  return parsed.success ? parsed.data : []
+}
+
+/** The definitions that name a section the template does not have. */
+export const strayGroups = (
+  definitions: readonly { group?: string | null | undefined }[],
+  groups: readonly AttributeGroup[]
+): string[] => {
+  const keys = new Set(groups.map((group) => group.key))
+  return definitions.flatMap((definition) =>
+    definition.group && !keys.has(definition.group) ? [definition.group] : []
+  )
+}
+
 const option = z
   .object({
     value: z
@@ -65,6 +106,8 @@ export const definitionInput = z
     scope: z.enum(["product", "variant"]).optional(),
     option_title: text(200).nullable().optional(),
     varies_by: z.enum(VARIES_BY).nullable().optional(),
+    // Its spec table section; left out: as it was (adr/0013 Ek 2026-11-04)
+    group: groupKey.nullable().optional(),
   })
   .strict()
   .superRefine((definition, ctx) => {

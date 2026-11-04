@@ -19,12 +19,17 @@ export const STORE_ATTRIBUTE_LEAVES = [
   "attribute_values.definition.rank",
   "attribute_values.definition.options",
   "attribute_values.definition.is_seo_highlight",
+  // The spec table's sections (adr/0013 Ek 2026-11-04): the definition's key into
+  // its template's list, and the list alone (names and order; nothing of other products)
+  "attribute_values.definition.group",
+  "attribute_values.definition.template.groups",
 ] as const
 
 // Medusa's allowed list needs the relations named for the leaves to resolve
 export const STORE_ATTRIBUTE_FIELDS = [
   "attribute_values",
   "attribute_values.definition",
+  "attribute_values.definition.template",
   ...STORE_ATTRIBUTE_LEAVES,
 ]
 

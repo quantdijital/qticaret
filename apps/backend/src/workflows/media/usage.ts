@@ -3,6 +3,8 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { BRANDS_MODULE } from "../../modules/brands"
 import type BrandsModuleService from "../../modules/brands/service"
+import { CATALOG_EXTENSION_MODULE } from "../../modules/catalog-extension"
+import type CatalogExtensionModuleService from "../../modules/catalog-extension/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 
@@ -19,6 +21,9 @@ export type MediaUseKind =
   | "share_image"
   | "seo"
   | "order"
+  // adr/0046 Ek 2026-11-04: a category's picture, the footer's ETBİS QR code
+  | "category"
+  | "etbis_qr"
 
 export interface MediaUse {
   kind: MediaUseKind
@@ -113,15 +118,17 @@ async function seoImages(container: Container, target: MediaTarget): Promise<Med
   }))
 }
 
-/** The shop's logos (appearance) and its share image (seo). */
+/** The shop's logos (appearance), its share image (seo) and its ETBİS QR code (store). */
 async function settings(container: Container, target: MediaTarget): Promise<MediaUse[]> {
   const service = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  const [appearance, seo] = (await Promise.all([
+  const [appearance, seo, store] = (await Promise.all([
     service.getSection("appearance"),
     service.getSection("seo"),
+    service.getSection("store"),
   ])) as unknown as [
     { logo_light_url?: string | null; logo_dark_url?: string | null },
     { default_og_image?: string | null },
+    { etbis_qr_url?: string | null },
   ]
   return [
     ...(appearance.logo_light_url === target.url || appearance.logo_dark_url === target.url
@@ -130,7 +137,31 @@ async function settings(container: Container, target: MediaTarget): Promise<Medi
     ...(seo.default_og_image === target.url
       ? [{ kind: "share_image" as const, id: null, label: null }]
       : []),
+    ...(store.etbis_qr_url === target.url
+      ? [{ kind: "etbis_qr" as const, id: null, label: null }]
+      : []),
   ]
+}
+
+/** Categories showing it as their picture (adr/0046 Ek 2026-11-04), by name. */
+async function categories(container: Container, target: MediaTarget): Promise<MediaUse[]> {
+  const rows = await container
+    .resolve<CatalogExtensionModuleService>(CATALOG_EXTENSION_MODULE)
+    .listCategoryImages({ url: target.url }, { select: ["category_id"], take: LIMIT })
+  if (rows.length === 0) {
+    return []
+  }
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "product_category",
+    fields: ["id", "name"],
+    filters: { id: rows.map((row) => row.category_id) },
+  })
+  const names = new Map((data as Named[]).map((row) => [row.id, row.name ?? null]))
+  return rows.map((row) => ({
+    kind: "category",
+    id: row.category_id,
+    label: names.get(row.category_id) ?? null,
+  }))
 }
 
 /**
@@ -222,6 +253,7 @@ export async function mediaUses(container: Container, target: MediaTarget): Prom
     brands(container, target),
     seoImages(container, target),
     settings(container, target),
+    categories(container, target),
     orders(container, target),
   ])
   return found.flat()

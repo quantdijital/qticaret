@@ -152,6 +152,12 @@ export async function customerData(container: Container, customerId: string) {
   const contact = await contactMessagesFor(container, customerId, email ? [email] : [])
   const campaigns = await campaignMessagesFor(container, customerId, email ? [email] : [])
   const paymentLinks = await paymentLinksFor(container, customerId, email ? [email] : [])
+  // The photos they put on reviews (adr/0037 §4 Ek 2026-11-04), by their addresses
+  const reviewPhotos = await container
+    .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
+    .listReviewImages(byCustomer, {
+      select: ["product_id", "review_id", "url", "created_at"],
+    })
   const { addresses, billing_profile: billing, ...profile } = customer
   return {
     hazırlanma: new Date().toISOString(),
@@ -172,6 +178,7 @@ export async function customerData(container: Container, customerId: string) {
     })),
     iade_talepleri: returns,
     yorumlar: reviews,
+    yorum_fotoğrafları: reviewPhotos,
     sorular: questions,
     stok_bildirimleri: alerts,
     favoriler: saved,

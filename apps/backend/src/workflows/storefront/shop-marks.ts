@@ -1,0 +1,62 @@
+import type { MedusaContainer } from "@medusajs/framework/types"
+import { connectedCardProviders } from "../../lib/payments/card-providers"
+import { bankTransferSettings } from "../../lib/payments/settings"
+import { arasCredentialsOf } from "../../lib/shipping/aras/credentials"
+import { yurticiCredentialsOf } from "../../lib/shipping/yurtici/credentials"
+import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
+import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
+import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
+import { CASH_ON_DELIVERY } from "../../modules/platform-settings/features"
+import type { CashOnDeliverySettings } from "../../modules/platform-settings/sections"
+import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
+
+/**
+ * The ways to pay the footer may name (adr/0046 Ek 2026-11-04): the card
+ * networks the connected card providers take (both PayTR and iyzico take
+ * Visa, Mastercard and Troy), the provider itself, a bank transfer, cash
+ * at the door. Keys; the storefront writes their names.
+ */
+export type PaymentMark =
+  "visa" | "mastercard" | "troy" | "paytr" | "iyzico" | "bank_transfer" | "cash_on_delivery"
+
+/** The carriers whose contract the shop connected; an aggregator (Geliver) names none ahead. */
+export type CarrierMark = "aras" | "yurtici"
+
+export interface ShopMarks {
+  payments: PaymentMark[]
+  carriers: CarrierMark[]
+}
+
+const CARD_NETWORKS: readonly PaymentMark[] = ["visa", "mastercard", "troy"]
+
+/**
+ * What the shop offers now, as marks for the storefront's footer: derived
+ * from its stored provider accounts and payment settings, never typed in,
+ * so the footer never promises a way to pay the checkout does not offer.
+ */
+export async function shopMarks(container: MedusaContainer): Promise<ShopMarks> {
+  const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+  const accounts = container.resolve<IntegrationCredentialsModuleService>(
+    INTEGRATION_CREDENTIALS_MODULE
+  )
+  const [cards, bank, codOn, cod, aras, yurtici] = await Promise.all([
+    connectedCardProviders(container),
+    bankTransferSettings(container),
+    settings.isFeatureEnabled(CASH_ON_DELIVERY),
+    settings.getSection("cash_on_delivery") as unknown as Promise<CashOnDeliverySettings>,
+    accounts.read("aras"),
+    accounts.read("yurtici"),
+  ])
+  const payments: PaymentMark[] = [
+    ...(cards.length > 0 ? CARD_NETWORKS : []),
+    ...cards,
+    ...(bank.enabled && bank.iban ? (["bank_transfer"] as const) : []),
+    // Offered only with a courier that collects at the door
+    ...(codOn && cod.shipping_option_ids.length > 0 ? (["cash_on_delivery"] as const) : []),
+  ]
+  const carriers: CarrierMark[] = [
+    ...(arasCredentialsOf(aras) ? (["aras"] as const) : []),
+    ...(yurticiCredentialsOf(yurtici) ? (["yurtici"] as const) : []),
+  ]
+  return { payments, carriers }
+}

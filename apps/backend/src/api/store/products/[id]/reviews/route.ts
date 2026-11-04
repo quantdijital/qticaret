@@ -5,12 +5,15 @@ import type {
 } from "@medusajs/framework/http"
 import { PRODUCT_REVIEWS_MODULE } from "../../../../../modules/product-reviews"
 import type ProductReviewsModuleService from "../../../../../modules/product-reviews/service"
-import { writeReview } from "../../../../../workflows/customers/reviews"
+import { photosByReview } from "../../../../../workflows/customers/review-photo-reads"
+import { writeReviewWorkflow } from "../../../../../workflows/customers/review-photos"
 import type { StoreGetReviewsType, StorePostReviewType } from "./validators"
 
 /**
  * GET /store/products/:id/reviews (F10.6, KK1): the approved reviews,
- * newest first, and the product's average; nothing waiting or rejected.
+ * newest first, each with its photos, and the product's average with how
+ * many reviews gave each number of stars (adr/0046 Ek 2026-11-04);
+ * nothing waiting or rejected.
  */
 export async function GET(
   req: MedusaRequest<unknown, StoreGetReviewsType>,
@@ -31,8 +34,16 @@ export async function GET(
     ),
     reviews.ratingsOf([productId]),
   ])
+  const rating = ratings.get(productId) ?? null
+  const [photos, distribution] = await Promise.all([
+    photosByReview(
+      req.scope,
+      rows.map((row) => row.id)
+    ),
+    rating ? reviews.ratingDistribution(productId) : null,
+  ])
   res.json({
-    rating: ratings.get(productId) ?? null,
+    rating: rating ? { ...rating, distribution } : null,
     reviews: rows.map((row) => ({
       id: row.id,
       rating: row.rating,
@@ -42,6 +53,7 @@ export async function GET(
       created_at: row.created_at,
       // Only a customer who received the product writes one here; one migrated was not checked here
       verified_purchase: row.origin === "storefront",
+      photos: photos.get(row.id) ?? [],
     })),
     count,
     offset,
@@ -49,18 +61,24 @@ export async function GET(
   })
 }
 
-/** POST /store/products/:id/reviews: a signed-in customer reviews a product they received. */
+/**
+ * POST /store/products/:id/reviews: a signed-in customer reviews a product
+ * they received, with the photos they uploaded for it (`photo_ids`).
+ */
 export async function POST(
   req: AuthenticatedMedusaRequest<StorePostReviewType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { rating, title, body } = req.validatedBody
-  const { id } = await writeReview(req.scope, {
-    customer_id: req.auth_context.actor_id,
-    product_id: req.params["id"] ?? "",
-    rating,
-    title: title && title !== "" ? title : null,
-    body,
+  const { rating, title, body, photo_ids } = req.validatedBody
+  const { result } = await writeReviewWorkflow(req.scope).run({
+    input: {
+      customer_id: req.auth_context.actor_id,
+      product_id: req.params["id"] ?? "",
+      rating,
+      title: title && title !== "" ? title : null,
+      body,
+      ...(photo_ids === undefined ? {} : { photo_ids }),
+    },
   })
-  res.status(201).json({ review: { id, status: "pending" } })
+  res.status(201).json({ review: { id: result.id, status: "pending" } })
 }

@@ -1,5 +1,5 @@
 import { z } from "@medusajs/framework/zod"
-import { isHttpsUrl } from "../../../lib/security/https-url"
+import { isHttpsUrl, isStorageUrl } from "../../../lib/security/https-url"
 import { isCleanText } from "../../../lib/security/text"
 import { openingHours } from "../../../lib/shop/hours"
 import type { OpeningRange } from "../../../lib/shop/hours"
@@ -30,6 +30,11 @@ export interface StoreSettings {
   opening_hours: OpeningRange[]
   /** The shop's place on a map (Google Maps and the like), https; none: no link. */
   map_url: string | null
+  /**
+   * The ETBİS registration's QR code (adr/0046 Ek 2026-11-04), an image of
+   * the media library by its address, shown in the storefront's footer.
+   */
+  etbis_qr_url: string | null
   timezone: string
   weight_unit: "g" | "kg"
   dimension_unit: "cm" | "mm"
@@ -77,6 +82,19 @@ export const storeSection = defineSection<StoreSettings>(
         message: "platform_settings.url_invalid",
       })
       .nullable(),
+    // Our own storage (http on a developer's machine, https deployed) or a path on this
+    // host; never a script-capable source or `//host`
+    etbis_qr_url: z
+      .string()
+      .trim()
+      .max(2048)
+      .refine(
+        (value) =>
+          isCleanText(value) &&
+          (isStorageUrl(value) || (value.startsWith("/") && !value.startsWith("//"))),
+        { message: "platform_settings.url_invalid" }
+      )
+      .nullable(),
     timezone: z
       .string()
       .max(64)
@@ -90,6 +108,7 @@ export const storeSection = defineSection<StoreSettings>(
     whatsapp_phone: null,
     opening_hours: [],
     map_url: null,
+    etbis_qr_url: null,
     timezone: "Europe/Istanbul",
     weight_unit: "g",
     dimension_unit: "cm",

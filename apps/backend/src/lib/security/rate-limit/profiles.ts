@@ -77,6 +77,12 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 20, windowMs: HOUR },
     perIdentity: { max: 10, windowMs: HOUR },
   },
+  // A review's photos (adr/0037 §4 Ek 2026-11-04): three a review, a few tries over
+  review_photo: {
+    name: "review_photo",
+    perIp: { max: 30, windowMs: HOUR },
+    perIdentity: { max: 20, windowMs: HOUR },
+  },
   // F10.5 (adr/0037 §4): a stock alert may mail a confirmation; per IP and per address
   stock_alert: {
     name: "stock_alert",

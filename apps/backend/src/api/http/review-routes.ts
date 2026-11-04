@@ -13,7 +13,12 @@ import {
   StorePostQaText,
 } from "../admin/product-questions/validators"
 import { AdminGetReviews, AdminPostModerateReviews } from "../admin/product-reviews/validators"
-import { StoreGetReviews, StorePostReview } from "../store/products/[id]/reviews/validators"
+import {
+  StoreGetReviewPhotos,
+  StoreGetReviews,
+  StorePostReview,
+  StorePostReviewPhotoQuery,
+} from "../store/products/[id]/reviews/validators"
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
 
@@ -46,6 +51,25 @@ export const REVIEW_ROUTES = [
     matcher: "/store/products/:id/reviews",
     methods: ["POST" as const],
     middlewares: [...customerWrites(), validateAndTransformBody(StorePostReview)],
+  },
+  // adr/0046 Ek 2026-11-04: the newest customer photos, for the home page
+  {
+    matcher: "/store/reviews/photos",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(StoreGetReviewPhotos, {})],
+  },
+  // adr/0037 §4 Ek 2026-11-04: a review's photo, its bytes as the body (read by the route)
+  {
+    matcher: "/store/products/:id/reviews/photos",
+    methods: ["POST" as const],
+    bodyParser: false as const,
+    middlewares: [
+      authenticate("customer", ["session", "bearer"]),
+      rateLimit(() => RATE_LIMIT_PROFILES.review_photo, {
+        identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
+      }),
+      validateAndTransformQuery(StorePostReviewPhotoQuery, {}),
+    ],
   },
   // F10.10: questions read by anyone, asked and answered by signed-in customers
   {

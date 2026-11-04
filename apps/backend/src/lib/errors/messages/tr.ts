@@ -400,6 +400,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "stock_alerts.in_stock": "Bu ürün şu an stokta; hemen sipariş verebilirsiniz.",
   "stock_alerts.email_required": "Haber verebilmemiz için e-posta adresinizi yazın.",
   "reviews.not_purchased": "Yalnızca teslim aldığınız ürünlere yorum yazabilirsiniz.",
+  "reviews.photo_unknown": "Fotoğraflardan biri bulunamadı; yeniden ekleyin.",
+  "reviews.photos_too_many": "Bir yoruma en çok 3 fotoğraf eklenebilir.",
+  "reviews.photo_uploads_full":
+    "Henüz bir yoruma eklenmemiş çok fazla fotoğraf yüklediniz; yarın yeniden deneyin.",
   "questions.unknown": "Soru bulunamadı.",
   "questions.answer_purchasers_only": "Yalnızca ürünü teslim almış müşteriler cevap yazabilir.",
   "messaging.no_address": "Müşterinin bu kanal için kayıtlı adresi ya da telefonu yok.",
@@ -589,6 +593,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "catalog.restriction_disabled":
     "Ürün ya da kategoriyi yaş sınırlı işaretlemek için önce Ayarlar > Özellikler'den “Kısıtlı ürünler” özelliğini açın.",
   "catalog.category_unknown": "Kategori bulunamadı.",
+  "catalog.category_image_unknown":
+    "Kategori görseli mağazanın yüklediği dosyalardan olmalı; ortam kütüphanesinden seçin.",
   "age.declaration_missing":
     "Sepetinizde yaş sınırlı ürün var; ödemeye geçmeden önce yaşınızı beyan edin.",
   "age.under_limit": "Bu ürünler yalnızca yaş sınırını geçenlere satılabilir.",
@@ -686,6 +692,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "product_attributes.values_exist": "Kaldırılan özelliklerin ürünlerde değerleri var.",
   "product_attributes.variant_only":
     "variesBy ve seçenek adı yalnızca varyant özelliklerinde kullanılır.",
+  "product_attributes.group_unknown": "Bir özellik, şablonda olmayan bir gruba bağlı.",
+  "product_attributes.group_key_invalid":
+    "Grup anahtarı 1–40 küçük harf, rakam, tire ya da alt çizgiden oluşur.",
+  "product_attributes.groups_duplicate": "Bir grup anahtarı şablonda bir kez kullanılabilir.",
   "promotions.code_invalid":
     "Kod 3 ile 40 karakter arasında olmalı; harf, rakam, tire ve alt çizgi kullanılabilir.",
   "promotions.too_many_codes": "Bir istekte en çok 5 kod gönderilebilir.",

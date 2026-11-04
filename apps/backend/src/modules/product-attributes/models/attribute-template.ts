@@ -7,5 +7,10 @@ export const AttributeTemplate = model.define("attribute_template", {
   name: model.text(),
   handle: model.text().unique(),
   description: model.text().nullable(),
+  /**
+   * The spec table's sections (adr/0013 Ek 2026-11-04): `{ key, name, rank }[]`;
+   * a definition names its section by `key`. None: one plain table.
+   */
+  groups: model.json().nullable(),
   definitions: model.hasMany(() => AttributeDefinition, { mappedBy: "template" }),
 })

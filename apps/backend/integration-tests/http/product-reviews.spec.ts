@@ -142,7 +142,12 @@ medusaIntegrationTestRunner({
       expect(written.status).toBe(201)
       expect(beforeApproval.data).toMatchObject({ rating: null, reviews: [] })
       expect(queue.reviews.map((each) => each.id)).toContain(written.data.review?.id)
-      expect(afterApproval.data.rating).toEqual({ average: 4, count: 1 })
+      // How many gave each number of stars (adr/0046 Ek 2026-11-04)
+      expect(afterApproval.data.rating).toEqual({
+        average: 4,
+        count: 1,
+        distribution: { "5": 0, "4": 1, "3": 0, "2": 0, "1": 0 },
+      })
       expect(afterApproval.data.reviews[0]).toMatchObject({
         rating: 4,
         body: "Çok keskin, sapı rahat.",

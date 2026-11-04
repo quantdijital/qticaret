@@ -42,6 +42,7 @@ import { COMMUNICATION_ROUTES } from "./http/communication-routes"
 import { CONTACT_ROUTES } from "./http/contact-routes"
 import { EMAIL_LINK_ROUTES } from "./http/email-link-routes"
 import { STOREFRONT_MENU_ROUTES } from "./http/storefront-menu-routes"
+import { STOREFRONT_CARD_ROUTES } from "./http/storefront-card-routes"
 import { LEGAL_ROUTES } from "./http/legal-routes"
 import { MAINTENANCE_ROUTES } from "./http/maintenance-routes"
 import { CORE_RETURN_ROUTES } from "./http/core-return-routes"
@@ -295,6 +296,8 @@ export default defineMiddlewares({
     ...PAYMENT_LINK_ROUTES,
     // F3.11: brands
     ...BRAND_ROUTES,
+    // adr/0046 Ek 2026-11-04: category pictures, product cards' stock and quick add
+    ...STOREFRONT_CARD_ROUTES,
     // adr/0056: site search's synonym groups
     ...SEARCH_ROUTES,
     // adr/0007 Ek 2026-11-04: the KDV rates

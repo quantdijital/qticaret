@@ -16,6 +16,7 @@ import type MessagingModuleService from "../../../modules/messaging/service"
 import { erasedKeyOf } from "../../../lib/migration/erased"
 import { eraseCampaignRecipients } from "../../campaigns/customer-data"
 import { eraseContactMessages } from "../../contact/customer-data"
+import { removeReviewPhotos } from "../../customers/review-photos"
 import { erasePaymentLinks } from "../../payment-links/retention"
 import { MIGRATION_MODULE } from "../../../modules/migration"
 import type MigrationModuleService from "../../../modules/migration/service"
@@ -112,10 +113,12 @@ async function eraseMessages(container: Container, customerId: string, addresses
 
 /**
  * What the customer wrote in public keeps its text under an erased name:
- * reviews and questions belong to the products' pages. Their stock alerts
- * and saved products go.
+ * reviews and questions belong to the products' pages. The photos they
+ * put on reviews go, files and all (adr/0037 §4 Ek 2026-11-04: a photo can
+ * show the person or their home). Their stock alerts and saved products go.
  */
 async function eraseContributions(container: Container, customerId: string) {
+  await removeReviewPhotos(container, { customer_id: customerId })
   const reviews = container.resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
   const qa = container.resolve<ProductQaModuleService>(PRODUCT_QA_MODULE)
   const byCustomer = { customer_id: customerId }

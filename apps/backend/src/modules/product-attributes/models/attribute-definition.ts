@@ -36,6 +36,8 @@ export const AttributeDefinition = model
      */
     is_public: model.boolean().default(true),
     scope: model.enum(["product", "variant"]).default("product"),
+    // Its section of the spec table: a key of its template's `groups` (adr/0013 Ek 2026-11-04)
+    group: model.text().nullable(),
     option_title: model.text().nullable(),
     varies_by: model.enum([...VARIES_BY]).nullable(),
     template: model.belongsTo(() => AttributeTemplate, { mappedBy: "definitions" }),

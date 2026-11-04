@@ -61,4 +61,25 @@ describe("store section", () => {
     }
     expect(patch.safeParse({ whatsapp_phone: "12" }).success).toBe(false)
   })
+
+  it("takes the ETBİS QR code from our storage, never a script or another host's path", () => {
+    expect(defaults.etbis_qr_url).toBeNull()
+    for (const etbis_qr_url of [
+      "https://cdn.example.com/etbis.png",
+      // A developer machine's storage is plain http
+      "http://localhost:8333/qticaret/etbis.png",
+      "/static/etbis.png",
+      null,
+    ]) {
+      expect(patch.safeParse({ etbis_qr_url }).success).toBe(true)
+    }
+    for (const etbis_qr_url of [
+      "javascript:alert(1)",
+      "//evil.example/x.png",
+      "https://user:pass@x.example/y.png",
+      "data:image/png;base64,AAAA",
+    ]) {
+      expect(patch.safeParse({ etbis_qr_url }).success).toBe(false)
+    }
+  })
 })

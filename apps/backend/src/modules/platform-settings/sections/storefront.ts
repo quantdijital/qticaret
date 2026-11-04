@@ -44,6 +44,11 @@ export interface StorefrontSettings {
    * a filter value that reads as one of these names shows as a swatch.
    */
   color_swatches: { label: string; hex: string }[]
+  /**
+   * A product card says "few left" at this many units or fewer
+   * (adr/0046 Ek 2026-11-04); never the number itself. 0: never says so.
+   */
+  low_stock_threshold: number
 }
 
 export interface StorefrontHero {
@@ -144,6 +149,7 @@ export const storefrontSection = defineSection<StorefrontSettings>(
         message: "platform_settings.url_invalid",
       })
       .nullable(),
+    low_stock_threshold: z.number().int().min(0).max(1000),
   },
   {
     announcements: [],
@@ -152,5 +158,6 @@ export const storefrontSection = defineSection<StorefrontSettings>(
     hero: null,
     contact_form_path: "/iletisim",
     color_swatches: [],
+    low_stock_threshold: 3,
   }
 )

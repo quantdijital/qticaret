@@ -12,7 +12,16 @@ describe("storefront section", () => {
       hero: null,
       contact_form_path: "/iletisim",
       color_swatches: [],
+      low_stock_threshold: 3,
     })
+  })
+
+  it("says few left at a whole number of units, 0 never (adr/0046 Ek 2026-11-04)", () => {
+    expect(patch.parse({ low_stock_threshold: 0 }).low_stock_threshold).toBe(0)
+    expect(patch.parse({ low_stock_threshold: 10 }).low_stock_threshold).toBe(10)
+    for (const value of [-1, 2.5, 1001, "3"]) {
+      expect(patch.safeParse({ low_stock_threshold: value }).success).toBe(false)
+    }
   })
 
   it("takes colour names with their colours, each name once", () => {
@@ -48,6 +57,7 @@ describe("storefront section", () => {
       trust_badges: [{ icon: "truck", title: "Ücretsiz kargo", text: "1500 TL ve üzeri" }],
       contact_form_path: "/iletisim",
       color_swatches: [],
+      low_stock_threshold: 3,
       primary_color: " #0B5C99 ",
       hero: {
         eyebrow: "Yatağan el işçiliği",

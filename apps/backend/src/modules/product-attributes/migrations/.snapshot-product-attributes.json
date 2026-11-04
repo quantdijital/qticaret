@@ -1,5 +1,7 @@
 {
-  "namespaces": ["public"],
+  "namespaces": [
+    "public"
+  ],
   "name": "public",
   "tables": [
     {
@@ -67,6 +69,22 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "text"
+        },
+        "groups": {
+          "name": "groups",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "json"
         },
         "created_at": {
           "name": "created_at",
@@ -140,7 +158,9 @@
         },
         {
           "keyName": "attribute_template_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -214,7 +234,13 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["text", "number", "boolean", "select", "multi_select"],
+          "enumItems": [
+            "text",
+            "number",
+            "boolean",
+            "select",
+            "multi_select"
+          ],
           "mappedType": "enum"
         },
         "unit": {
@@ -342,8 +368,27 @@
           "scale": null,
           "default": "'product'",
           "comment": null,
-          "enumItems": ["product", "variant"],
+          "enumItems": [
+            "product",
+            "variant"
+          ],
           "mappedType": "enum"
+        },
+        "group": {
+          "name": "group",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
         },
         "option_title": {
           "name": "option_title",
@@ -374,7 +419,14 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["color", "size", "suggestedAge", "suggestedGender", "material", "pattern"],
+          "enumItems": [
+            "color",
+            "size",
+            "suggestedAge",
+            "suggestedGender",
+            "material",
+            "pattern"
+          ],
           "mappedType": "enum"
         },
         "template_id": {
@@ -474,7 +526,9 @@
         },
         {
           "keyName": "attribute_definition_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -485,9 +539,13 @@
       "foreignKeys": {
         "attribute_definition_template_id_foreign": {
           "constraintName": "attribute_definition_template_id_foreign",
-          "columnNames": ["template_id"],
+          "columnNames": [
+            "template_id"
+          ],
           "localTableName": "public.attribute_definition",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.attribute_template",
           "updateRule": "cascade"
         }
@@ -698,7 +756,9 @@
         },
         {
           "keyName": "attribute_value_pkey",
-          "columnNames": ["id"],
+          "columnNames": [
+            "id"
+          ],
           "composite": false,
           "constraint": true,
           "primary": true,
@@ -709,9 +769,13 @@
       "foreignKeys": {
         "attribute_value_definition_id_foreign": {
           "constraintName": "attribute_value_definition_id_foreign",
-          "columnNames": ["definition_id"],
+          "columnNames": [
+            "definition_id"
+          ],
           "localTableName": "public.attribute_value",
-          "referencedColumnNames": ["id"],
+          "referencedColumnNames": [
+            "id"
+          ],
           "referencedTableName": "public.attribute_definition",
           "updateRule": "cascade"
         }

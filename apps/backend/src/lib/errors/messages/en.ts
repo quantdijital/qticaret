@@ -392,6 +392,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "stock_alerts.in_stock": "This product is in stock now; you can order it.",
   "stock_alerts.email_required": "Write your e-mail address so we can tell you.",
   "reviews.not_purchased": "You can review only products you have received.",
+  "reviews.photo_unknown": "One of the photos was not found; add it again.",
+  "reviews.photos_too_many": "A review takes at most 3 photos.",
+  "reviews.photo_uploads_full":
+    "You have uploaded too many photos that are not on a review yet; try again tomorrow.",
   "questions.unknown": "The question was not found.",
   "questions.answer_purchasers_only": "Only customers who received the product can answer.",
   "messaging.no_address": "The customer has no address or phone for this channel.",
@@ -587,6 +591,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "catalog.restriction_disabled":
     "Turn on “Restricted products” in Settings > Features before marking a product or category adults only.",
   "catalog.category_unknown": "The category was not found.",
+  "catalog.category_image_unknown":
+    "The category's picture must be one of the shop's uploads; choose it from the media library.",
   "age.declaration_missing":
     "Your cart holds an adults-only product; declare your age before paying.",
   "age.under_limit": "These products are sold only to buyers over the age limit.",
@@ -685,6 +691,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "product_attributes.values_exist": "Products have values for the attributes being removed.",
   "product_attributes.variant_only":
     "variesBy and the option name apply to variant attributes only.",
+  "product_attributes.group_unknown": "An attribute names a group the template does not have.",
+  "product_attributes.group_key_invalid":
+    "A group's key is 1–40 lower-case letters, digits, dashes or underscores.",
+  "product_attributes.groups_duplicate": "A group key can be used once per template.",
   "promotions.code_invalid": "A code is 3 to 40 letters, digits, dashes or underscores.",
   "promotions.too_many_codes": "A request may send at most 5 codes.",
   "promotions.unknown": "Promotion not found.",

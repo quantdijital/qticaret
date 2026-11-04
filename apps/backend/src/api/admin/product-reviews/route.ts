@@ -2,6 +2,7 @@ import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/frame
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { PRODUCT_REVIEWS_MODULE } from "../../../modules/product-reviews"
 import type ProductReviewsModuleService from "../../../modules/product-reviews/service"
+import { photosByReview } from "../../../workflows/customers/review-photo-reads"
 import type { AdminGetReviewsType } from "./validators"
 
 const PAGE = 20
@@ -29,6 +30,11 @@ export async function GET(
       product,
     ])
   )
+  // Staff judge the photos with the text: an approval shows both (adr/0037 §4 Ek 2026-11-04)
+  const photos = await photosByReview(
+    req.scope,
+    rows.map((row) => row.id)
+  )
   res.json({
     reviews: rows.map((row) => ({
       id: row.id,
@@ -46,6 +52,7 @@ export async function GET(
       // The version staff see: moderation applies to it only
       updated_at: row.updated_at,
       product: products.get(row.product_id) ?? { id: row.product_id, title: null, thumbnail: null },
+      photos: photos.get(row.id) ?? [],
     })),
     count,
     limit: PAGE,

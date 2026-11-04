@@ -86,7 +86,23 @@ async function categoryRestrictionSnapshot(scope: Resolver, categoryId: string):
   return { restriction: row?.restriction ?? null }
 }
 
+/** A category's picture (adr/0046 Ek 2026-11-04): its address and alt text, or none. */
+async function categoryImageSnapshot(scope: Resolver, categoryId: string): Promise<Snapshot> {
+  const [row] = await (
+    scope.resolve(CATALOG_EXTENSION_MODULE) as CatalogExtensionModuleService
+  ).listCategoryImages({ category_id: categoryId }, { take: 1, select: ["url", "alt"] })
+  return { image_url: row?.url ?? null, image_alt: row?.alt ?? null }
+}
+
 export const CATALOG_RESOURCES: readonly AuditedResource[] = [
+  {
+    method: "POST",
+    route: "POST /admin/category-images/:category_id",
+    pattern: new RegExp(`^/admin/category-images/(?<category_id>${ID})$`, "i"),
+    resourceType: "product_category",
+    resourceId: (params) => params["category_id"] ?? null,
+    snapshot: ({ scope, params }) => categoryImageSnapshot(scope, params["category_id"] ?? ""),
+  },
   {
     method: "POST",
     route: "POST /admin/products/:id/catalog",

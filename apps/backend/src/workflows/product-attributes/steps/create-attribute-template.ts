@@ -2,14 +2,33 @@ import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { ValidationError, uniqueViolationKeys } from "../../../lib/errors"
 import { PRODUCT_ATTRIBUTES_MODULE } from "../../../modules/product-attributes"
 import type ProductAttributesModuleService from "../../../modules/product-attributes/service"
-import { duplicateKeys } from "../../../modules/product-attributes/validation"
-import type { DefinitionInput } from "../../../modules/product-attributes/validation"
+import { duplicateKeys, strayGroups } from "../../../modules/product-attributes/validation"
+import type {
+  AttributeGroup,
+  DefinitionInput,
+} from "../../../modules/product-attributes/validation"
 
 export interface CreateAttributeTemplateInput {
   name: string
   handle: string
   description?: string | null | undefined
+  /** The spec table's sections (adr/0013 Ek 2026-11-04); none: one plain table. */
+  groups?: AttributeGroup[] | undefined
   definitions: DefinitionInput[]
+}
+
+/** A json column is typed as an object; it holds the sections' list, none as null. */
+export const groupsColumn = (groups: readonly AttributeGroup[]) =>
+  (groups.length > 0 ? groups : null) as unknown as Record<string, unknown> | null
+
+/** Every definition's section must be one of the template's. */
+export function checkGroups(
+  definitions: readonly DefinitionInput[],
+  groups: readonly AttributeGroup[]
+): void {
+  if (strayGroups(definitions, groups).length > 0) {
+    throw new ValidationError("product_attributes.group_unknown", { field: "definitions" })
+  }
 }
 
 export const definitionRow = (definition: DefinitionInput, templateId: string) => ({
@@ -28,6 +47,8 @@ export const definitionRow = (definition: DefinitionInput, templateId: string) =
   scope: definition.scope ?? "product",
   option_title: definition.option_title ?? null,
   varies_by: definition.varies_by ?? null,
+  // Left out, it stays as it was (none when new)
+  ...(definition.group === undefined ? {} : { group: definition.group }),
   template_id: templateId,
 })
 
@@ -49,6 +70,7 @@ export const createAttributeTemplateStep = createStep(
     if (duplicateKeys(input.definitions).length > 0) {
       throw new ValidationError("product_attributes.key_taken", { field: "definitions" })
     }
+    checkGroups(input.definitions, input.groups ?? [])
     const service = container.resolve<ProductAttributesModuleService>(PRODUCT_ATTRIBUTES_MODULE)
     let templateId: string | undefined
     try {
@@ -56,6 +78,7 @@ export const createAttributeTemplateStep = createStep(
         name: input.name,
         handle: input.handle,
         description: input.description ?? null,
+        groups: groupsColumn(input.groups ?? []),
       })
       templateId = template.id
       if (input.definitions.length > 0) {

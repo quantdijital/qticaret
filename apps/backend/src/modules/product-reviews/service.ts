@@ -9,6 +9,9 @@ import {
 import { uniqueViolationKeys } from "../../lib/errors"
 import { ProductRating } from "./models/product-rating"
 import { ProductReview } from "./models/product-review"
+import { ProductReviewPhoto } from "./models/product-review-photo"
+import { setReviewPhotos } from "./photos"
+import type { RemovedPhoto } from "./photos"
 
 export interface ReviewInput {
   product_id: string
@@ -19,6 +22,8 @@ export interface ReviewInput {
   body: string
   author_name: string
   has_link: boolean
+  /** The author's uploads to show with it, in order; left out: its photos stay. */
+  photo_ids?: string[] | undefined
 }
 
 /** A review the shop's old platform showed (F14), as it was. */
@@ -45,10 +50,23 @@ export interface Rating {
   count: number
 }
 
-/** Product reviews (F10.6, adr/0037 §4): written, moderated, summed. */
-class ProductReviewsModuleService extends MedusaService({ ProductReview, ProductRating }) {
-  /** Writes the customer's review of the product, or changes it; either way it waits for the shop. */
-  async writeReview(input: ReviewInput): Promise<{ id: string }> {
+/** How many approved reviews gave each number of stars, 5 to 1. */
+export type RatingDistribution = Record<"1" | "2" | "3" | "4" | "5", number>
+
+/** Product reviews (F10.6, adr/0037 §4): written, moderated, summed; their photos. */
+class ProductReviewsModuleService extends MedusaService({
+  ProductReview,
+  ProductRating,
+  // Named for its methods (`listReviewImages`): Medusa would pluralise "Photo" as "Photoes"
+  ReviewImage: ProductReviewPhoto,
+}) {
+  /**
+   * Writes the customer's review of the product, or changes it; either way
+   * it waits for the shop. `photo_ids`, when given, become its photos in
+   * the same transaction (left out: the photos stay); the ones it drops
+   * come back for their files to be removed.
+   */
+  async writeReview(input: ReviewInput): Promise<{ id: string; removed: RemovedPhoto[] }> {
     try {
       return await this.writeReview_(input)
     } catch (error) {
@@ -61,14 +79,27 @@ class ProductReviewsModuleService extends MedusaService({ ProductReview, Product
 
   @InjectTransactionManager()
   protected async writeReview_(
-    input: ReviewInput,
+    { photo_ids: photoIds, ...input }: ReviewInput,
     @MedusaContext() sharedContext: Context = {}
-  ): Promise<{ id: string }> {
+  ): Promise<{ id: string; removed: RemovedPhoto[] }> {
     const [existing] = await this.listProductReviews(
       { product_id: input.product_id, customer_id: input.customer_id },
       { take: 1, select: ["id", "status"] },
       sharedContext
     )
+    const photos = (reviewId: string) =>
+      photoIds === undefined
+        ? Promise.resolve([])
+        : setReviewPhotos(
+            this,
+            {
+              review_id: reviewId,
+              product_id: input.product_id,
+              customer_id: input.customer_id,
+              photo_ids: photoIds,
+            },
+            sharedContext
+          )
     const values = {
       ...input,
       // One migrated, written again here, is now the purchase verified here
@@ -80,14 +111,15 @@ class ProductReviewsModuleService extends MedusaService({ ProductReview, Product
     }
     if (!existing) {
       const created = await this.createProductReviews(values, sharedContext)
-      return { id: created.id }
+      return { id: created.id, removed: await photos(created.id) }
     }
     await this.updateProductReviews({ id: existing.id, ...values }, sharedContext)
+    const removed = await photos(existing.id)
     // A changed review leaves the stars until the shop approves it again
     if (existing.status === "approved") {
       await this.recountRating_(input.product_id, sharedContext)
     }
-    return { id: existing.id }
+    return { id: existing.id, removed }
   }
 
   /**
@@ -216,6 +248,33 @@ class ProductReviewsModuleService extends MedusaService({ ProductReview, Product
           },
         ])
     )
+  }
+
+  /**
+   * How many approved reviews of the product gave each number of stars
+   * (adr/0046 Ek 2026-11-04): one grouped count over the product's
+   * approved reviews (indexed by product and status).
+   */
+  @InjectManager()
+  async ratingDistribution(
+    productId: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<RatingDistribution> {
+    const manager = sharedContext.manager as EntityManager
+    const rows = await manager.execute<{ rating: number; count: string | number }[]>(
+      `SELECT rating, count(*) AS count FROM product_review
+       WHERE product_id = ? AND status = 'approved' AND deleted_at IS NULL
+       GROUP BY rating`,
+      [productId]
+    )
+    const counts: RatingDistribution = { "5": 0, "4": 0, "3": 0, "2": 0, "1": 0 }
+    for (const row of rows) {
+      const stars = String(row.rating) as keyof RatingDistribution
+      if (stars in counts) {
+        counts[stars] = Number(row.count)
+      }
+    }
+    return counts
   }
 
   @InjectTransactionManager()

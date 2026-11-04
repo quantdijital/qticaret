@@ -3,17 +3,25 @@ import { ConflictError, ValidationError } from "../../../lib/errors"
 import { PRODUCT_ATTRIBUTES_MODULE } from "../../../modules/product-attributes"
 import type ProductAttributesModuleService from "../../../modules/product-attributes/service"
 import type { AttributeDefinitionRecord } from "../../../modules/product-attributes/service"
-import { duplicateKeys } from "../../../modules/product-attributes/validation"
+import { duplicateKeys, groupsOf } from "../../../modules/product-attributes/validation"
 import type {
+  AttributeGroup,
   AttributeOption,
   DefinitionInput,
 } from "../../../modules/product-attributes/validation"
-import { attributeConflict, definitionRow } from "./create-attribute-template"
+import {
+  attributeConflict,
+  checkGroups,
+  definitionRow,
+  groupsColumn,
+} from "./create-attribute-template"
 
 export interface UpdateAttributeTemplateInput {
   id: string
   name?: string | undefined
   description?: string | null | undefined
+  /** The full list of spec table sections (adr/0013 Ek 2026-11-04); left out: as they are. */
+  groups?: AttributeGroup[] | undefined
   /** The full list: entries with an `id` change that definition, others are new, missing ones go. */
   definitions?: DefinitionInput[] | undefined
   /** Required to remove definitions that products have values for; those values go too. */
@@ -21,7 +29,12 @@ export interface UpdateAttributeTemplateInput {
 }
 
 interface Undo {
-  template: { id: string; name: string; description: string | null }
+  template: {
+    id: string
+    name: string
+    description: string | null
+    groups: Record<string, unknown> | null
+  }
   definitions: AttributeDefinitionRecord[]
   createdIds: string[]
   removedDefinitionIds: string[]
@@ -185,17 +198,35 @@ export const updateAttributeTemplateStep = createStep(
       relations: ["definitions"],
     })
     const undo: Undo = {
-      template: { id: template.id, name: template.name, description: template.description },
+      template: {
+        id: template.id,
+        name: template.name,
+        description: template.description,
+        groups: template.groups,
+      },
       definitions: template.definitions.map((definition) => ({ ...definition })),
       createdIds: [],
       removedDefinitionIds: [],
       removedValueIds: [],
+    }
+    const groups = input.groups ?? groupsOf(template.groups)
+    if (input.definitions) {
+      // A definition that leaves `group` out keeps its own
+      const before = new Map(template.definitions.map((each) => [each.id, each.group]))
+      checkGroups(
+        input.definitions.map((each) => ({
+          ...each,
+          group: each.group === undefined ? (before.get(each.id ?? "") ?? null) : each.group,
+        })),
+        groups
+      )
     }
     try {
       await service.updateAttributeTemplates({
         id: input.id,
         ...(input.name === undefined ? {} : { name: input.name }),
         ...(input.description === undefined ? {} : { description: input.description }),
+        ...(input.groups === undefined ? {} : { groups: groupsColumn(input.groups) }),
       })
       if (input.definitions) {
         await applyDefinitions(
@@ -204,6 +235,8 @@ export const updateAttributeTemplateStep = createStep(
           template.definitions,
           undo
         )
+      } else if (input.groups) {
+        await dropStrayGroups(service, template.definitions, groups)
       }
     } catch (error) {
       await undoUpdate(service, undo)
@@ -217,6 +250,19 @@ export const updateAttributeTemplateStep = createStep(
     }
   }
 )
+
+/** Sections removed without the definitions sent: their definitions show in no section. */
+async function dropStrayGroups(
+  service: Service,
+  definitions: AttributeDefinitionRecord[],
+  groups: readonly AttributeGroup[]
+): Promise<void> {
+  const keys = new Set(groups.map((group) => group.key))
+  const stray = definitions.filter((each) => each.group && !keys.has(each.group))
+  if (stray.length > 0) {
+    await service.updateAttributeDefinitions(stray.map((each) => ({ id: each.id, group: null })))
+  }
+}
 
 async function undoUpdate(service: Service, undo: Undo): Promise<void> {
   if (undo.createdIds.length > 0) {
@@ -245,6 +291,7 @@ async function undoUpdate(service: Service, undo: Undo): Promise<void> {
         scope: definition.scope,
         option_title: definition.option_title,
         varies_by: definition.varies_by,
+        group: definition.group,
       }))
     )
   }

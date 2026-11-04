@@ -3,6 +3,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
 import { readsAsLink } from "../../lib/text/link-like"
 import { PRODUCT_REVIEWS_MODULE } from "../../modules/product-reviews"
+import type { RemovedPhoto } from "../../modules/product-reviews/photos"
 import type ProductReviewsModuleService from "../../modules/product-reviews/service"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -50,20 +51,25 @@ export function authorNameOf(customer: { first_name: string | null; last_name: s
   return name === "" ? "Müşteri" : name.slice(0, 60)
 }
 
+export interface WriteReviewInput {
+  customer_id: string
+  product_id: string
+  rating: number
+  title: string | null
+  body: string
+  /** The author's photo uploads to show with it (adr/0037 §4 Ek 2026-11-04); left out: kept. */
+  photo_ids?: string[] | undefined
+}
+
 /**
  * A signed-in customer's review of a product (F10.6, KK1): only for one
- * they received; written or changed, it waits for the shop.
+ * they received; written or changed, it waits for the shop, its photos
+ * with it. The photos it drops come back for their files to go.
  */
 export async function writeReview(
   container: Container,
-  input: {
-    customer_id: string
-    product_id: string
-    rating: number
-    title: string | null
-    body: string
-  }
-): Promise<{ id: string }> {
+  input: WriteReviewInput
+): Promise<{ id: string; removed: RemovedPhoto[] }> {
   const orderId = await deliveredOrderOf(container, input.customer_id, input.product_id)
   if (!orderId) {
     throw new ValidationError("reviews.not_purchased", { field: "product_id" })
@@ -86,5 +92,6 @@ export async function writeReview(
     body: input.body,
     author_name: authorNameOf(customer),
     has_link: readsAsLink(`${input.title ?? ""} ${input.body}`),
+    ...(input.photo_ids === undefined ? {} : { photo_ids: input.photo_ids }),
   })
 }
