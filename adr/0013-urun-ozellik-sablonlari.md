@@ -81,3 +81,16 @@ Medusa 2.21.2'de doğrulananlar (F2 planlaması):
   - Seçenek değeri slug biçimindedir; metinler kontrol karakteri içeremez.
   - Değer metni 500 karakterdir (btree satır sınırının altında).
 
+
+## Ek (2026-11-04): özellik tablosunun bölümleri (otonom, gözden geçir)
+
+İkinci vitrin teması (denetim 2026-11-04 §7, `design.md` "Teknik özellikler tablosu") ürün sayfasında gruplu bir teknik özellik tablosu istiyor: "Bıçak", "Sap" gibi bölümler, her birinin altında kendi satırları.
+
+- **Veri:** `attribute_template.groups` (jsonb, boş olabilir) `{ key, name, rank }[]`; `attribute_definition.group` (metin, boş olabilir) şablonun bir bölümünün `key`'i. Migration `Migration20261104210344` (iki kolon; veri taşıma yok).
+- **Kurallar:** en çok 30 bölüm; anahtar `^[a-z0-9][a-z0-9_-]{0,39}$`, şablonda bir kez (`product_attributes.groups_duplicate`); ad 1–100 karakter, kontrol karakteri yok; `rank` 0–10000. Tanımın bölümü şablonda olmalı (`product_attributes.group_unknown`). İkisi de isteğe bağlıdır: bölümsüz şablon önceki gibi kaydedilir.
+- **API:** `POST /admin/attribute-templates` ve `/:id` `groups`'u (tam liste) tanımların yanında alır. Tanım `group`'u göndermezse kendi bölümü kalır (eski istemci bölümleri silmez). `groups` tanımlar olmadan gönderilip bir bölüm kaldırılırsa o bölümün tanımları bölümsüz kalır. Geri alma şablonun bölümlerini ve tanımların bölümünü eski hâline getirir.
+- **Store API:** `fields`'ta iki yeni yaprak açıldı: `attribute_values.definition.group` ve `attribute_values.definition.template.groups` (yalnız bölüm listesi; şablonun başka alanı ve öteki ürünlere giden yollar `restrictStoreAttributeFields` ile hâlâ 400). `attribute_values.definition.template` ilişkisi Medusa'nın izin listesine yalnızca bu yaprak çözülsün diye eklendi.
+- **Vitrin:** `ProductPageView.specGroups?: SpecGroupView[]` (`{ title: string | null, rows: SpecView[] }`), bölümlerin sırasıyla; bölümü olmayanlar sonda başlıksız grupta; bölümsüz şablonda tek başlıksız grup (düz tablo). `specs` düz liste olarak kalır.
+- **Panel:** şablon düzenleyicide bölüm ekleme, yeniden adlandırma, sıralama, silme ve her alana bölüm seçimi.
+- **Etkilenmeyen:** katalog tablosu (içe/dışa aktarma), facet'ler, başlık sözcüğü, JSON-LD.
+- **Testler:** `modules/product-attributes/__tests__/groups.unit.spec.ts`, `integration-tests/http/attribute-groups.spec.ts`, vitrin `lib/views/__tests__/spec-groups.spec.ts`.

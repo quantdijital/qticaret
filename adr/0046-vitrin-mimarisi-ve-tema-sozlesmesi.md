@@ -156,3 +156,27 @@ docs/20 "arama kalitesi": Meilisearch kararına (§11, D10) kadar ara çözüm. 
 - Ziyaretçiden bağımsızlık denetlendi: backend rotası yalnız `path`'i okur; oturum, çerez ya da ziyaretçi adresi yanıtı değiştirmez ve rota `Cache-Control: public, max-age=60` döner.
 - Yalnız `entity` ve `not_found` tutulur. `redirect` her sorguda kuralın vuruş sayısını artırdığı için tutulmaz; `gone` ve `redirect`'i zaten proxy yanıtlar.
 - Yenileme sinyali (adr/0048 Ek) kapsamı ne olursa olsun hepsini siler. En çok 500 yol.
+
+## Ek (2026-11-04): ikinci temanın istediği isteğe bağlı sözleşme alanları (otonom, gözden geçir)
+
+Atölye teması (`packages/themes/atolye`, `design.md` § Components) temanın tek başına çizemeyeceği alanlar istedi (denetim 2026-11-04 §7). Hepsi **isteğe bağlı ve eklemelidir**: alanı vermeyen vitrin ya da eski backend aynı sayfayı çizer; taban tema hepsini çizer, iki tema tek sözleşmeyi paylaşır. Yeni görünüm tipleri `packages/ui/src/card-views.ts`'te.
+
+| Alan (görünüm modeli) | Şekli | Kaynak (Store API) |
+| --- | --- | --- |
+| `NavCategoryView.image?`, `CategoryTreeView.image?`, `ListingPageView.subcategories[].image?`, `categories` bölümünün `categories[].image?` | `CategoryCardView extends LinkView { image?: ImageView \| null }` | `GET /store/category-images` → `{ images: { category_id, url, alt, width, height, derivatives }[] }` (yalnız etkin ve iç olmayan kategoriler; `max-age=300`; vitrinde 60 sn, `menus` yenile kapsamı). Ana menüde yalnız `kind: "category"` bağlantıları resim taşır. |
+| `ProductCardView.stock?` | `"in_stock" \| "low" \| "out"` (adet asla) | `GET /store/card-facts?id=` (en çok 100) → `{ facts: { [product_id]: { stock, quick_add: { variant_id } \| null } } }`; yalnız yayındaki ve anahtarın kanalındaki ürünler; `no-store`. Sayfa başına bir ürün ve bir stok okuması (`getVariantAvailability`). "Az" eşiği `storefront.low_stock_threshold` (varsayılan 3, 0: hiç) |
+| `ProductCardView.quickAdd?` | `{ variantId } \| null` | aynı uç: tek varyant, stokta, hediye kartı değil, mağaza ekleri açıkken zorunlu eki yok; vitrin ayrıca fiyatı olmayan ve satın alınamayan kartta kaldırır |
+| `ListingPage`/`HomePage` `quickAdd?` prop | `FormAction` (`addToCart`'ın alanları, adet 1) | vitrinin `addToCart` Server Action'ı |
+| `ReviewsView.distribution?` | `RatingBarView[]` (5→1: `{ stars, count, percent, label }`) | `GET /store/products/:id/reviews` → `rating.distribution: { "5": n, … "1": n }` |
+| `ReviewView.photos?` | `ReviewPhotoView[]` (`{ image: ImageView }`) | aynı uç ve `GET /store/reviews` → `reviews[].photos: { id, url, width, height }[]` |
+| `reviews` bölümünün `photos?` | `CustomerPhotoView[]` (`{ image, product: LinkView \| null, rating, author }`) | `GET /store/reviews/photos?limit=` (1–24) |
+| `ThemeActions.writeReview` | alanlara `photos` (en çok 3 dosya) eklendi; form `multipart/form-data` | eylem fotoğrafları önce `POST /store/products/:id/reviews/photos`'a (baytlar gövde), sonra yorumu `photo_ids` ile gönderir (adr/0037 Ek 2026-11-04) |
+| `ProductPageView.specGroups?` | `SpecGroupView[]` (`{ title: string \| null, rows: SpecView[] }`) | ürün `fields`'ına `attribute_values.definition.group` ve `.definition.template.groups` (adr/0013 Ek 2026-11-04) |
+| `ShopView.etbisQr?` | `ImageView \| null` | `GET /store/legal-identity` → `identity.etbis_qr: { url, alt, width, height, derivatives } \| null`; panel: Ayarlar > Mağaza, `store.etbis_qr_url` |
+| `ShopView.paymentMarks?`, `carrierMarks?` | `ShopMarkView[]` (`{ key, label }`) | `GET /store/storefront` → `marks: { payments, carriers }`; anahtarlar: `visa`, `mastercard`, `troy` (bir kart sağlayıcısı bağlıyken; PayTR ve iyzico üçünü de alır), `paytr`, `iyzico`, `bank_transfer` (açık ve IBAN'lı), `cash_on_delivery` (bayrak açık ve kapıda tahsil eden bir kargo seçeneği varken); `aras`, `yurtici` (hesabı kayıtlı). Adlar vitrinin `tr.json`'unda (`marks.*`). |
+
+- **İşaretler (logolar):** depoda sağlayıcıların resmî işaretleri yok; taban tema metin rozeti çizer. Resmî işaret kullanımı sağlayıcının marka kurallarına bağlıdır (sahibin işi); tema yalnız `key`'e bakıp kendi işaretini koyabilir.
+- **Geliver:** bir toplayıcıdır, etiketi aldığı kargo firması önceden belli değildir; işaret listesine girmez.
+- **Vitrin:** `lib/store-api/extras.ts` (üç yeni çağrı, backend yanıt vermezse alan çıkar), `lib/views/card-extras.ts` (saf görünüm yardımcıları, testli). Kart, liste, arama, ana sayfa rafları ve benzer ürünler kart bilgisini sayfa başına tek çağrıyla alır.
+- **Migration'lar:** `catalogExtension` `Migration20261104210343` (`category_image`), `productAttributes` `Migration20261104210344`, `product_reviews` `Migration20261104210345`.
+- **Ortam kütüphanesi:** kategori resmi ve ETBİS karekodu "kullanımda" sayılır (`media.in_use`); ayrıntıda `category` ve `etbis_qr` türleri.

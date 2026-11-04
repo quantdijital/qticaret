@@ -246,3 +246,16 @@ Karar (`api/http/password-change.ts`):
 - Başlık Medusa'nın okuduğu gibi okunur: `Bearer` sonrasındaki ilk kelime, ardından ne gelirse gelsin. Okunamayan bir bearer token bu üç yerde 401 alır (`account.session_invalid`). Güvenlik incelemesi 2026-10-31: katı okuma `Bearer <token> x` başlığını denetimden kaçırıyordu.
 
 Test: `integration-tests/http/account-verification.spec.ts`.
+
+## Ek (2026-11-04): yorum fotoğrafları ve puan dağılımı (otonom, gözden geçir)
+
+İkinci vitrin teması yorum kartında fotoğraf ve puan dağılımı istiyor (denetim 2026-11-04 §7); eski sitede yorum fotoğrafı vardı. Müşterinin fotoğraf ekleme yolu yoktu; eklendi.
+
+- **Yükleme:** `POST /store/products/:id/reviews/photos`, gövde fotoğrafın baytları (JPEG, PNG, WebP, AVIF; en çok 10 MB). Yalnız oturum açmış ve ürünü teslim almış müşteri (yorumla aynı kanıt, `reviews.not_purchased`). Baytlarına göre denetlenir ve temizlenerek saklanır (docs/04, F3.3: EXIF/GPS yok). Yanıt `{ photo: { id } }`. İş akışı `review-photo-upload`: denetim → dosya (geri alınınca silinir) → kayıt (geri alınınca silinir).
+- **Sınırlar:** yorum başına 3 fotoğraf (`reviews.photos_too_many`); müşteri başına bir ürün için yoruma bağlanmamış en çok 6 yükleme (`reviews.photo_uploads_full`); hız profili `review_photo` (IP başına saatte 30, müşteri başına 20). Vitrinin form eylemi en çok 10 MB gövde alır (`next.config` `serverActions.bodySizeLimit`).
+- **Yoruma bağlama:** `POST /store/products/:id/reviews` `photo_ids` alır (sıralı; gönderilmezse yorumun fotoğrafları kalır). Fotoğraflar yazarın bu ürün için yüklediği ve başka yoruma bağlı olmayanlar olmalı (`reviews.photo_unknown`). Bağlama yorumun yazıldığı aynı işlemdedir: personel yorumu gördüğü sürümüyle onaylar (`updated_at` kuralı), fotoğraflar da o sürümle gider. Listeden çıkarılan fotoğraflar kaydıyla silinir, dosyaları işlem bitince kaldırılır.
+- **Moderasyon:** fotoğraf yorumla birlikte onaylanır ya da reddedilir; onaylanmamış yorumun fotoğrafı vitrinde hiçbir yerde görünmez. Panel bekleyen yorumda fotoğrafları gösterir (`GET /admin/product-reviews` satırında `photos`).
+- **Okuma:** `GET /store/products/:id/reviews` ve `GET /store/reviews` her yorumda `photos: { id, url, width, height }[]`; ürün yanıtında `rating.distribution` (`{ "5": n, "4": n, "3": n, "2": n, "1": n }`, onaylı yorumlar üzerinde tek gruplu sayım). `GET /store/reviews/photos?limit=` (1–24, varsayılan 12): görünür ürünlerin onaylı yorumlarındaki en yeni fotoğraflar, yorumun yıldızı, yazarı ve ürünüyle (ana sayfanın müşteri fotoğrafları).
+- **KVKK:** fotoğraf kişisel veridir (kişiyi ya da evini gösterebilir). Yoruma bağlanmayan yükleme 1 gün sonra dosyasıyla silinir (`review-photo-sweep`, her gece 04:15). Müşteri silindiğinde (L9) yorum metni "Anonim" adıyla kalır, fotoğrafları dosyalarıyla silinir. Veri kopyasında `yorum_fotoğrafları`. docs/kvkk-envanter.md §3.
+- **Migration:** `Migration20261104210345` (`product_review_photo`). Servis yöntemleri `listReviewImages` vb. (Medusa "Photo"yu "Photoes" diye çoğullaştırdığı için model `ReviewImage` adıyla kayıtlı; tablo `product_review_photo`).
+- **Testler:** `modules/product-reviews/__tests__/photos.unit.spec.ts`, `integration-tests/http/review-photos.spec.ts`, `product-reviews.spec.ts` (dağılım).
