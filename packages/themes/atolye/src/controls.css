@@ -92,7 +92,8 @@
   .at-row-link,
   .at-nav-item,
   .at-band-link,
-  .at-bar-item {
+  .at-bar-item,
+  .at-tile {
     text-decoration-line: underline;
     text-decoration-color: transparent;
     text-decoration-thickness: 2px;
@@ -114,7 +115,8 @@
   .at-row-link:active,
   .at-nav-item:active,
   .at-band-link:active,
-  .at-bar-item:active {
+  .at-bar-item:active,
+  .at-tile:active {
     transform: translateY(1px);
   }
 
@@ -199,7 +201,8 @@
   .at-row-link:hover,
   .at-nav-item:hover,
   .at-band-link:hover,
-  .at-bar-item:hover {
+  .at-bar-item:hover,
+  .at-tile:hover {
     text-decoration-color: currentColor;
   }
 }
@@ -213,6 +216,7 @@
 .at-row-link:focus-visible,
 .at-nav-item:focus-visible,
 .at-bar-item:focus-visible,
+.at-tile:focus-visible,
 .at-whatsapp:focus-visible {
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
@@ -238,5 +242,11 @@
    fixed buy bar (the product page's, design.md § Mobile sticky add) */
 body:has([data-drawer][data-state="open"]) [data-whatsapp],
 body:has([data-sticky-buy]) [data-whatsapp] {
+  display: none;
+}
+
+/* A closed disclosure's content takes no layout at all (some engines only
+   skip painting it), so it is never measured, read or tabbed into */
+details:not([open]) > :not(summary) {
   display: none;
 }

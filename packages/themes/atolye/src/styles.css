@@ -1,7 +1,10 @@
-/* Hallmark · shape: Bento Grid · genre: editorial · theme: Loom (deal 3/3, seed mobile-first-e-commerce-shop-handmade-62be·8d7a0280·2026-11-04·r0) · job: buy · draw: 30e00e
- * hero: Index (the category bento) · nav: search-led bar over a mega menu · footer: mast · imagery: the shop's own product photographs · signature: a blade's photograph over its ruled spec rows · loom: ecru, signal the shop's own colour
+/* Hallmark · shape: Index-First (from Bento Grid, draw 30e00e; the bento waits for category pictures) · genre: editorial · theme: Loom (deal 3/3, seed mobile-first-e-commerce-shop-handmade-62be·8d7a0280·2026-11-04·r0) · job: buy
+ * hero: Stage (the shop's own blade photograph on half the container beside its heading; the first categories as ruled rows under 1024 px) · nav: search-led bar over a mega menu · footer: mast · imagery: the shop's own product photographs · signature: a blade's photograph over its ruled spec rows · loom: ecru, signal the shop's own colour
  * axes: light/roman-serif/cool · posture: committed · contrast: pass · fold: pass · v2.0.0 */
-/* Hallmark · pre-emit critique: P4 H4 E4 S4 R5 V4 · weakest: S, category tiles carry names only until the shop adds category pictures (adr/0013, adr/0049); the signature rows carry the shop's own facts */
+/* Hallmark · pre-emit critique: P4 H4 E4 S3 R5 V4 · weakest: S, the heading is the shop's category line, not its promise; the owner is asked to lead with "Her modelde çelik, ölçü ve sap detayı yazılı" */
+/* Hallmark · hero-review: fix · 5 findings · 3 resolved (empty sand tiles gone, photograph at six columns, no picture on a phone now under the first rows) 1 partial (categories repeat the bar on wide screens below the fold only) 1 unresolved (headline is shop data, an owner ask) */
+/* Hallmark · dismissed 58 · 83 words counts the first-visit cookie banner's legal notice; the page alone holds 59 in its densest 900px window */
+/* Hallmark · dismissed 42 · the mast: the shop's name at 72px over its contact block and the shop's own footer menus, named in the stamp */
 @import "./tokens.css";
 @import "./base.css" layer(base);
 @import "./controls.css";
