@@ -15,12 +15,20 @@ Storefront: POST /store/carts/:id/payment-session (kendi ucumuz, adr/0026)
   → sunucu: sepet hazır mı + sepet/alıcı/IP/dönüş adresleri sunucudaki sepetten
   → createPaymentSessionsWorkflow → initiatePayment → POST /odeme/api/get-token → iframe token
   → oturumda: token, merchant_oid, beklenen tutar (kuruş), para birimi
-Storefront: iframe https://www.paytr.com/odeme/guvenli/{token}
+Storefront: iframe https://www.paytr.com/odeme/guvenli/{token} (yüksekliği iframeResizer mesajlarıyla, aşağıda)
 PayTR → Bildirim URL (POST /hooks/paytr)
   → hash (sabit zamanlı) → webhook-events kaydı (tekil) → durum sorgusu (authorizePayment)
   → tutar/para birimi oturumla eşleşiyor mu → cart complete (sepet kilidi) → düz metin "OK"
 PayTR → tarayıcı: merchant_ok_url / merchant_fail_url (yalnızca bilgilendirme; sipariş onaylamaz)
 ```
+
+## Çerçevenin yüksekliği (iframeResizer, 2026-11-05)
+- **PayTR'ın istediği** (dev.paytr.com, iFrame API 1. adım, 2026-11-05'te okundu): `<script src="https://www.paytr.com/js/iframeResizer.min.js">`, `<iframe src="https://www.paytr.com/odeme/guvenli/{token}" id="paytriframe" frameborder="0" scrolling="no" style="width: 100%;">` ve `iFrameResize({},'#paytriframe')`. PayTR'ın sayfaları iframe-resizer'ın içerik betiğini çalıştırır; mağaza sayfası "ev sahibi" tarafı çalıştırmazsa çerçeve sabit kalır (telefonda 735 px'lik form 640 px'lik çerçevede içeriden kayıyordu).
+- **Neden PayTR'ın dosyası yüklenmedi:** vitrin CSP'si `script-src`'i kendi nonce'lı koduna bırakır (`strict-dynamic`); `www.paytr.com`'u eklemek o hostun her betiğine izin vermek olur. Dosyanın kendisi (2026-11-05'te okundu) iframe-resizer'ın iki ayrı kopyasını taşır (`checkOrigin` varsayılanı kapalı) ve kaynağını denetlemeden `shrink`, `fastpay`, `shrink_iframe`, `pay_drawer_open` mesajlarını dinleyen bir `window.onmessage` kurar. Bu yüzden ev sahibi tarafı kendi kodumuzda: `@qticaret/ui` `lib/frame-resizer.ts` (protokol) + `components/payment-frame.tsx` (çerçeve); her tema bunu kullanır.
+- **Protokol (iframe-resizer 2–3, PayTR'ın dosyası bu sürüm):** her sayfa yüklenince (`load`) ve bileşen bağlanınca çerçeveye `[iFrameSizer]paytriframe:8:false:false:32:true:true:null:bodyOffset:null:null:0:false:parent:scroll` gönderilir (PayTR'ın `iFrameResize({})` çağrısının gönderdiği varsayılanlar; içerik betiği bunu alana kadar susar). Çerçevenin genişliği değişince `[iFrameSizer]resize`. Sayfa `[iFrameSizer]paytriframe:<yükseklik>:<genişlik>:<tür>` yollar; yalnız bu çerçevenin penceresinden (`event.source`) ve çerçeve adresinin origin'inden gelen, boy bildiren mesaj alınır (`close`, `scrollTo`, `pageInfo`, `inPageLink`, `message`, `reset` yok sayılır). Bizim mesajlarımız yalnız PayTR'ın origin'ine gider (`postMessage` hedef origin'i); çerçeve bankanın sayfasındayken ona bir şey gitmez.
+- **Sınırlar:** varsayılan 640 px (ilk mesajdan önce ve boy bildirmeyen sayfada: bankanın 3D Secure sayfası; her yüklemede buna döner, o sayfa gerekirse içeriden kayar), en az 360, en çok 4000 px. Yükseklik öğenin `style` nesnesiyle yazılır, `style` özniteliğiyle değil (CSP `style-src-attr` satır içi stili reddeder). CSP değişmedi: yalnız `frame-src` PayTR.
+- **Sahte PayTR** (`packages/testing/src/paytr/page-parts.ts` `paytrPage`): kart formu ve PayTR'ın kendi sayfaları (sonuçlanmış/bulunmayan ödeme) aynı içerik tarafını çalıştırır: init'e kadar susar, sonra `init`, değişiklikte `mutationObserver`, pencere genişliğinde `resize`, ev sahibi sorunca `resizeParent`; yükseklik `bodyOffset` (gövde + kenar boşlukları). Bankanın 3D Secure sayfası (gerçekte bankanın) çalıştırmaz.
+- **Doğrulama:** `apps/storefront/e2e/paytr-frame.e2e.ts` "the card form fits its frame…": 1280, 768 ve 390 px'te çerçeve sayfasının boyunda (içeride kaydırma yok), kart değişince (taksit listesi) çerçeve de değişir. 2026-11-05 ölçümü (sahte PayTR, test modu, Axess test kartıyla dolu form): 1280 ve 768'de 635 px, 390'da 1045 px.
 
 ## Ödeme başlatma (F5 V2, 2026-10-27)
 - Sağlayıcı `pp_paytr_paytr` (`src/modules/payment-paytr`, medusa-config'te `id: "paytr"`). Hesap çağrı anında `@medusajs/framework`'ün paylaşılan `container`'ından okunur (adr/0027); kurucuda okunmaz, modüller o sırada henüz kayıtlı değil.

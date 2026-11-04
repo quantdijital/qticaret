@@ -93,7 +93,7 @@ sıra: stokta olan önce, sonra skor, sonra yeni, sonra id
   - `POST /admin/search/synonyms/:id`
   - `DELETE /admin/search/synonyms/:id`
 - **Yetki (ek, 2026-11-04):** yazma kendi yeteneğidir: `searchSynonyms` (`lib/staff/permissions.ts`, sahip ve yönetici). `/admin/staff/me` `can` içinde döner. Uçlar bu yeteneğin örnek ucu gibi karar verir; birim testi üç yazma ucunu her rol için yetenekle eşit tutar. Okuma her rolündür.
-- **Terim denetimi (ek, 2026-11-04):** şema yalnız biçim ve boy denetler (dizi 2–10, terim en çok 60 karakter). Terimin içeriği `synonymTerms`'tedir (`lib/search/synonyms.ts`, workflow adımı çağırır). Her ret istemciye kendi anahtarıyla gider, `field` terimin yeridir (`terms.2`):
+- **Terim denetimi (ek, 2026-11-04):** şema yalnız biçim ve boy denetler (dizi 2–10, terim en çok 60 karakter). Boy kuralları da anahtarla döner (ek, 2026-11-05): `search.synonym_terms_too_few`, `search.synonym_terms_too_many`, `search.synonym_term_length`. Medusa `min`/`max` ihlalini mesajı ne olursa olsun kendi cümlesiyle yazdığından kurallar `refine`'dır; dizi için 100'lük üst sınır (yalnız okunacak miktarın sınırı) Medusa'nın cümlesiyle kalır. Panel bu anahtarları kendi tr/en metniyle gösterir. Terimin içeriği `synonymTerms`'tedir (`lib/search/synonyms.ts`, workflow adımı çağırır). Her ret istemciye kendi anahtarıyla gider, `field` terimin yeridir (`terms.2`):
   - Harf ya da rakam içermeyen terim (`!!!`, boş) ve kontrol karakteri ya da tek vekil (lone surrogate) içeren terim: `search.synonym_term_invalid`. Böyle terim sessizce atılmaz; atılsaydı geçerli görünen grup `synonym_terms_too_few` olurdu.
   - 3 kelimeden uzun terim: `search.synonym_term_too_long`.
   - Karşılaştırma biçimine göre 2'den az farklı terim: `search.synonym_terms_too_few`; 10'dan çok: `search.synonym_terms_too_many`.
@@ -125,12 +125,13 @@ sıra: stokta olan önce, sonra skor, sonra yeni, sonra id
   - Tüm ürünler yeniden indekslenir (kaçan olay, şablon değişikliği, satış kanalı bağı).
   - Sözlük sayıları kesinleşir, eski kelimeler düşer.
 - `pnpm --filter @qticaret/backend search:rebuild`: aynısı, elle.
-- **Durum ucu (ek, 2026-11-04):** `GET /admin/search/index` → `{ documents, pending, last_rebuilt_at, dictionary_words, synonyms }`. Her rol okur (yalnız sayılar, ürün bilgisi yok). Modülün kendi tablolarından tek SQL (`sql/status.ts`), kesin sayımlar:
+- **Durum (ek, 2026-11-04; ek 2026-11-05):** `pnpm --filter @qticaret/backend search:status` (`scripts/search-status.ts`, `medusa exec`, `search:rebuild`'in yanında) → `{ documents, pending, last_rebuilt_at, dictionary_words, synonyms }`, `search_index.status` log satırı olarak. Yalnız okur. Modülün kendi tablolarından tek SQL (`sql/status.ts`), kesin sayımlar:
   - `documents`: `search_document` satırları (yayında olsun olmasın).
   - `pending`: `search_pending` satırları.
   - `last_rebuilt_at`: en eski satırın `indexed_at`'i. Yeniden kurulum her satırı yeniden yazar, yani her satır en az bu kadar tazedir. İndekslenemeyen ürün bu tarihi geride tutar (görünür olması istenen durum). İndeks boşsa `null`. Ayrı bir "son kurulum" kaydı tutulmaz.
   - `dictionary_words`: `search_word` satırları.
   - `synonyms`: silinmemiş `search_synonym` grupları.
+  - **Neden admin ucu değil (kullanıcı kararı, 2026-11-05):** dizin sağlığı, adres verisi senkronu, kuyruk ve altyapı durumu platform işletmecisinindir, mağaza sahibinin paneline girmez. Dizin kendi bakımını yapar (olaylar, dakikalık ve gece işleri); işletmeci logları/uyarıları ve bu iki komutu kullanır. 2026-11-04'te eklenen `GET /admin/search/index` kaldırıldı (panel kullanmıyordu, her personel rolüne açıktı); yerine bu komut.
 - **Popülerlik:** `order.placed` siparişin ürünlerine anında +1 yazar (geri alınabilir adım). Ürün görüntülenmesi platformda izlenmiyor.
 - **Yorum değişikliği tetiklemez:** yorum metni aranmaz, puan sıralamaya girmez (eski ürünü kayırır).
 
@@ -181,7 +182,7 @@ Execution Time: 2.077 ms
 - **Vitrin değişikliği gerekmez:** `GET /store/listings/products` sözleşmesi aynı.
 - **Eklenen alan:** `facets.stock` `{ count, selected }`.
 - **Eklenen sorgu değeri:** `query` içinde `stok=var`.
-- Panel için yeni ekran: eş anlamlı grupları ve indeks durumu (yukarıdaki uçlar). Panel yazma düğmelerini `can.searchSynonyms` ile açar.
+- Panel için yeni ekran: eş anlamlı grupları (yukarıdaki uçlar). Panel yazma düğmelerini `can.searchSynonyms` ile açar; dizin durumu panelde yok (işletmecinin `search:status` komutu).
 - **Riskler:**
   - Olay ile indeks arasında milisaniyeler var.
   - Sözlük sayıları gece kesinleşir. Yeni kelime yazımda hemen eklenir; silinen ürünün kelimesi gece düşer. Öneri yine de ürün denetiminden geçer.
