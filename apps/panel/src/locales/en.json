@@ -2260,7 +2260,7 @@
       },
       "publish": {
         "title": "Publish version {{version}}?",
-        "text": "Make sure your lawyer has checked the text. A published version cannot be changed; customers see and accept this text from now on. Customers at the payment step at that moment are asked to accept the new text again; an order whose card payment is under way at that very moment is refunded. Publish at a quiet hour.",
+        "text": "A published version cannot be changed; customers see and accept this text from now on. Customers at the payment step at that moment are asked to accept the new text again; an order whose card payment is under way at that very moment is refunded. Publish at a quiet hour.",
         "done": "Text published."
       },
       "discard": {
@@ -2276,14 +2276,14 @@
       },
       "starter": {
         "title": "Start from the starter text?",
-        "text": "The platform's starter text is loaded as the draft; its DRAFT note blocks publishing until a lawyer approves it. The published text stays as it is.",
-        "textDraft": "Your draft is deleted and the platform's starter text is loaded; its DRAFT note blocks publishing until a lawyer approves it.",
+        "text": "The platform's starter text is loaded as the draft. The published text stays as it is.",
+        "textDraft": "Your draft is deleted and the platform's starter text is loaded.",
         "done": "Starter text loaded as the draft."
       },
       "unsaved": "The editor has unsaved changes; they are deleted too.",
       "start": {
         "title": "This text is not written yet",
-        "text": "The starting draft has the headings such texts usually have and your shop's tokens. It is not legal advice; have your lawyer check it before publishing.",
+        "text": "The starting draft has the headings such texts usually have and your shop's tokens. It is not legal advice; the box at its top lists the points worth checking with your lawyer and is removed when you publish.",
         "starter": "Start from the draft",
         "blank": "Start blank",
         "readOnly": "Writing and publishing this text is for the shop's owner and admins."

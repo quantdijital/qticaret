@@ -153,16 +153,14 @@ describe("LegalStateCard", () => {
     ).toBeInTheDocument()
   })
 
-  it("asks before the starter replaces a draft, naming the lawyer's note", async () => {
+  it("asks before the starter replaces a draft, saying the draft goes", async () => {
     const user = userEvent.setup()
     renderCard(detailWith({ published: PUBLISHED, draft: DRAFT }))
 
     await user.click(screen.getByRole("button", { name: "Başlangıç metninden başla" }))
     const dialog = screen.getByRole("alertdialog")
     expect(
-      within(dialog).getByText(
-        "Taslağınız silinir ve platformun başlangıç metni yüklenir; TASLAK notu avukat onayına kadar yayını engeller."
-      )
+      within(dialog).getByText("Taslağınız silinir ve platformun başlangıç metni yüklenir.")
     ).toBeInTheDocument()
     await user.click(within(dialog).getByRole("button", { name: "Başlangıç metninden başla" }))
 

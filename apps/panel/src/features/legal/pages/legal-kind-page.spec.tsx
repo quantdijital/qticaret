@@ -98,7 +98,7 @@ describe("LegalKindPage", () => {
     })
   })
 
-  it("asks before it publishes a draft, reminding of the lawyer", async () => {
+  it("asks once before it publishes a draft, about what publishing does, not the note", async () => {
     const user = userEvent.setup()
     serve({
       kind: "distance_sales",
@@ -110,7 +110,9 @@ describe("LegalKindPage", () => {
 
     await user.click(await screen.findByRole("button", { name: "Yayımla" }))
     const dialog = screen.getByRole("alertdialog")
-    expect(within(dialog).getByText(/avukatınıza/)).toBeInTheDocument()
+    expect(within(dialog).getByText(/Yayımlanan sürüm değiştirilemez/)).toBeInTheDocument()
+    // The starter's note goes by itself when published: nothing to delete or remember
+    expect(dialog.textContent).not.toMatch(/avukat|TASLAK|notu/i)
     await user.click(within(dialog).getByRole("button", { name: "Yayımla" }))
 
     expect(fetchMock).toHaveBeenCalledWith("/admin/legal-documents/distance_sales/publish", {

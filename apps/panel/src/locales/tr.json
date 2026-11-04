@@ -2260,7 +2260,7 @@
       },
       "publish": {
         "title": "Sürüm {{version}} yayımlansın mı?",
-        "text": "Metni avukatınıza kontrol ettirdiğinizden emin olun. Yayımlanan sürüm değiştirilemez; müşteriler bundan sonra bu metni görür ve siparişte onaylar. O sırada ödeme adımında olan müşterilerden yeni metni yeniden onaylamaları istenir; kartla ödemesi tam o anda süren bir siparişin parası iade edilir. Yoğun olmayan bir saatte yayımlayın.",
+        "text": "Yayımlanan sürüm değiştirilemez; müşteriler bundan sonra bu metni görür ve siparişte onaylar. O sırada ödeme adımında olan müşterilerden yeni metni yeniden onaylamaları istenir; kartla ödemesi tam o anda süren bir siparişin parası iade edilir. Yoğun olmayan bir saatte yayımlayın.",
         "done": "Metin yayımlandı."
       },
       "discard": {
@@ -2276,14 +2276,14 @@
       },
       "starter": {
         "title": "Başlangıç metninden başlansın mı?",
-        "text": "Platformun başlangıç metni taslak olarak yüklenir; TASLAK notu avukat onayına kadar yayını engeller. Yayındaki metin olduğu gibi kalır.",
-        "textDraft": "Taslağınız silinir ve platformun başlangıç metni yüklenir; TASLAK notu avukat onayına kadar yayını engeller.",
+        "text": "Platformun başlangıç metni taslak olarak yüklenir. Yayındaki metin olduğu gibi kalır.",
+        "textDraft": "Taslağınız silinir ve platformun başlangıç metni yüklenir.",
         "done": "Başlangıç metni taslak olarak yüklendi."
       },
       "unsaved": "Düzenleyicide kaydedilmemiş değişiklikleriniz var; bunlar da silinir.",
       "start": {
         "title": "Bu metin henüz yazılmadı",
-        "text": "Başlangıç taslağı, bu tür metinlerde olağan başlıkları ve mağazanızın belirteçlerini içerir. Hukuki görüş değildir; yayımlamadan önce avukatınıza kontrol ettirin.",
+        "text": "Başlangıç taslağı, bu tür metinlerde olağan başlıkları ve mağazanızın belirteçlerini içerir. Hukuki görüş değildir; başındaki kutu avukatınızla kontrol etmeye değer noktaları listeler ve metni yayımladığınızda kendiliğinden kalkar.",
         "starter": "Başlangıç taslağıyla başla",
         "blank": "Boş başla",
         "readOnly": "Bu metni yazmak ve yayımlamak mağaza sahibinin ve yöneticilerin işidir."
