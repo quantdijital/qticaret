@@ -1,7 +1,7 @@
 import { BIN_TABLE, FAMILY_NAMES, PREFILLED_CARD, digitsOf, familyOf } from "./cards"
 import type { CardFamily } from "./cards"
 import type { FakePayment } from "./handlers"
-import { escape, lira, lockIcon, page, scriptJson } from "./page-parts"
+import { escape, lira, lockIcon, paytrPage, scriptJson } from "./page-parts"
 import { allowedCounts, chargedAmount } from "./rates"
 import type { InstallmentRates } from "./rates"
 
@@ -116,5 +116,5 @@ export function cardFormPage(view: CardFormView): string {
   </form>
   <footer><p>Ödemeyi onaylamanız için bankanız 3D Secure şifresi isteyecek. Kart bilgileriniz mağazayla paylaşılmaz.</p><p class="brands">PayTR güvencesiyle · VISA · MASTERCARD · TROY · AMEX</p></footer>
 </main><script type="application/json" id="installments-data">${scriptJson(data)}</script>`
-  return page("Güvenli ödeme | PayTR", body, SCRIPT)
+  return paytrPage("Güvenli ödeme | PayTR", body, SCRIPT)
 }

@@ -10,6 +10,8 @@
 
 Son kullanma tarihi ileri bir tarih olmalı (ör. `12/30`), CVV herhangi 3 hane (American Express 4).
 
+Kart formu ve PayTR'ın kendi sayfaları, PayTR'ınkiler gibi iframe-resizer'ın içerik tarafını çalıştırır: vitrinin çerçevesi `[iFrameSizer]…` init mesajını gönderince sayfanın yüksekliğini bildirir, çerçeve sayfanın boyunu alır (`docs/entegrasyonlar/paytr.md`, "Çerçevenin yüksekliği"). Bankanın 3D Secure sayfası bildirmez; çerçeve orada 640 px kalır.
+
 ## Kartlar
 
 | Numara              | Sonuç                                    | Program                           |

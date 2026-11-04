@@ -13,7 +13,8 @@ import { storeGet } from "./catalog"
  */
 
 const PROVIDER = "pp_paytr_paytr"
-const FRAME = 'iframe[title="Güvenli kart ödeme formu"]'
+/** The card form's frame on `/odeme/kart`. */
+export const PAYTR_FRAME = 'iframe[title="Güvenli kart ödeme formu"]'
 
 /**
  * Numbers the local PayTR answers by (its README's table, `cards.ts`
@@ -48,7 +49,7 @@ const DEFAULT_CARD: TestCard = {
  */
 export async function payWithTestCard(page: Page, card: Partial<TestCard> = {}): Promise<void> {
   const { number, owner, expiry, cvv } = { ...DEFAULT_CARD, ...card }
-  const frame = page.frameLocator(FRAME)
+  const frame = page.frameLocator(PAYTR_FRAME)
   await frame.getByLabel("Kart üzerindeki ad soyad", { exact: true }).fill(owner)
   await frame.getByLabel("Kart numarası", { exact: true }).fill(number)
   await frame.getByLabel("Son kullanma tarihi", { exact: true }).fill(expiry)

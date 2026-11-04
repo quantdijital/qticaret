@@ -1,6 +1,6 @@
 import { FAMILY_NAMES, secureSchemeOf, spacedPan } from "./cards"
 import type { FakePayment, SecureStep } from "./handlers"
-import { escape, lira, lockIcon, maskedPhone, page, turkishTime } from "./page-parts"
+import { escape, lira, lockIcon, maskedPhone, page, paytrPage, turkishTime } from "./page-parts"
 
 /**
  * The card bank's 3-D Secure page, which PayTR's form opens before it
@@ -71,7 +71,7 @@ export function securePage(view: SecurePageView): string {
 export function finishedPage(payment: FakePayment): string {
   const paid = payment.status === "success"
   const back = paid ? payment.okUrl : payment.failUrl
-  return page(
+  return paytrPage(
     "Ödeme sonucu | PayTR",
     `<main><div class="top"><div><small>Ödeme tutarı</small><strong>${lira(payment.totalAmount)}</strong></div></div>
   <p>Bu ödeme sonuçlandı: <strong>${paid ? "ödemeniz alındı" : "ödeme onaylanmadı"}</strong>.</p>
@@ -81,7 +81,7 @@ export function finishedPage(payment: FakePayment): string {
 
 /** A form address that is not (or no longer) a payment's. */
 export function missingPage(): string {
-  return page(
+  return paytrPage(
     "Ödeme sayfası | PayTR",
     "<main><p>Bu ödeme sayfasının süresi dolmuş ya da sayfa bulunamadı. Mağazaya dönüp ödemeyi yeniden başlatın.</p></main>"
   )
