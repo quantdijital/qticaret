@@ -19,7 +19,7 @@ export function LandingStandingCard({ landing }: { landing: LandingDetail }) {
   const update = useUpdateLanding(landing.id)
   const value = landing.originality
   const bar =
-    value < ORIGINALITY.block
+    value < ORIGINALITY.low
       ? "bg-destructive"
       : value < ORIGINALITY.warn
         ? "bg-warning"

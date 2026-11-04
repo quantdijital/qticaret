@@ -5994,7 +5994,7 @@
       }
     },
     "landing": {
-      "addHint": "Kategori ve filtre sayfa oluşunca değişmez. Metni ve arama görünümünü açılan sayfada yazarsınız; yayına almak için metnin en az %30'u bu sayfaya özgü olmalı.",
+      "addHint": "Kategori ve filtre sayfa oluşunca değişmez. Metni ve arama görünümünü açılan sayfada yazarsınız; bu sayfaya özgü bir metin aramada öne çıkmasına yardım eder.",
       "category": "Kategori",
       "pickCategory": "Kategori seçin",
       "facet": "Filtre",
@@ -6010,11 +6010,10 @@
       "standingHint": "Programatik sayfaların kendi başına değerli olması gerekir.",
       "originality": "Özgünlük",
       "percent": "%{{value}}",
-      "originalityHint": "Metnin diğer filtre sayfalarında geçmeyen kısmı. %{{warn}} altında uyarı verilir, %{{block}} altında yayına alınamaz.",
+      "originalityHint": "Metnin diğer filtre sayfalarında geçmeyen kısmı. %{{warn}} altında arama motorları sayfayı diğerlerinin kopyası sayabilir; yine de yayına alabilirsiniz.",
       "products": "Listelenen ürün",
       "reviewed": "İnsan inceledi",
-      "reviewedHint": "Sayfa bir kişi tarafından okunup onaylandı. Yeni yayınlanan sayfaların en az %5'i incelenmeli.",
-      "blocked": "Son kayıtta metnin %30'dan azı özgündü; yayına alma reddedilebilir. Metni bu sayfaya özgü hâle getirin."
+      "reviewedHint": "Sayfa bir kişi tarafından okunup onaylandı. Yeni yayınlanan sayfaların en az %5'i incelenmeli."
     },
     "preview": "Önizle",
     "previewReady": "Önizleme yeni sekmede açıldı; bağlantı panoya kopyalandı ve 24 saat geçerli.",

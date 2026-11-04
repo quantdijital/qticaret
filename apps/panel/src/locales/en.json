@@ -5994,7 +5994,7 @@
       }
     },
     "landing": {
-      "addHint": "The category and filter are fixed once the page is made. You write its text and search appearance on its page next; to publish it, at least 30% of the text must be its own.",
+      "addHint": "The category and filter are fixed once the page is made. You write its text and search appearance on its page next; a text specific to this page helps it stand out in search.",
       "category": "Category",
       "pickCategory": "Choose a category",
       "facet": "Filter",
@@ -6010,11 +6010,10 @@
       "standingHint": "Programmatic pages must be worth reading on their own.",
       "originality": "Originality",
       "percent": "{{value}}%",
-      "originalityHint": "The share of the text not found on other filter pages. Under {{warn}}% it warns, under {{block}}% it cannot be published.",
+      "originalityHint": "The share of the text not found on other filter pages. Under {{warn}}% search engines may take the page for a copy of the others; you can still publish it.",
       "products": "Products listed",
       "reviewed": "Reviewed by a person",
-      "reviewedHint": "A person read the page through and approved it. At least 5% of newly published pages should be reviewed.",
-      "blocked": "At the last save less than 30% of the text was original; publishing may be refused. Make it specific to this page."
+      "reviewedHint": "A person read the page through and approved it. At least 5% of newly published pages should be reviewed."
     },
     "preview": "Preview",
     "previewReady": "The preview opened in a new tab; its link is copied and works for 24 hours.",

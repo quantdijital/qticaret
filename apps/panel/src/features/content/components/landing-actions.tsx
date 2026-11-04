@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { ORIGINALITY, useDeleteLanding, useUpdateLanding } from "@/features/content/api/landings"
+import { useDeleteLanding, useUpdateLanding } from "@/features/content/api/landings"
 import type { LandingDetail } from "@/features/content/api/landings"
 import { errorText } from "@/lib/errors"
 
@@ -19,13 +19,10 @@ function PublishButton({ landing }: { landing: LandingDetail }) {
   const { t } = useTranslation()
   const update = useUpdateLanding(landing.id)
   const live = landing.status === "published"
-  // Measured at the last save: the server measures again and may still let it go live
-  const low = !live && landing.originality < ORIGINALITY.block
   return (
     <Button
       variant={live ? "outline" : "default"}
       disabled={update.isPending}
-      title={low ? t("content.landing.blocked") : undefined}
       onClick={() => {
         update.mutate(
           { status: live ? "draft" : "published" },

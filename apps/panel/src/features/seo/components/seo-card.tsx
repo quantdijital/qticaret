@@ -29,6 +29,8 @@ import { cn } from "@/lib/utils"
 // What search results show before cutting (docs/13 §3)
 const TITLE_LIMIT = 60
 const DESCRIPTION_LIMIT = 155
+// The longest the server keeps (SEO_META_LIMITS): typing stops there, the save is never refused
+const MAX = { title: 150, description: 320, keyword: 100 } as const
 const DEFAULT_ROBOTS = "__default__"
 
 interface Values {
@@ -177,6 +179,7 @@ function SeoForm({
         <div className="flex flex-col gap-1">
           <Input
             id={`seo-title-${id}`}
+            maxLength={MAX.title}
             placeholder={renderSample(titleTemplate, storeName, context.tokens)}
             {...form.register("seo_title")}
           />
@@ -194,6 +197,7 @@ function SeoForm({
           <Textarea
             id={`seo-description-${id}`}
             className="min-h-20"
+            maxLength={MAX.description}
             {...form.register("seo_description")}
           />
           <div className="flex justify-end">
@@ -207,7 +211,11 @@ function SeoForm({
           htmlFor={`seo-keyword-${id}`}
           hint={t("seo.card.focusKeywordHint")}
         >
-          <Input id={`seo-keyword-${id}`} {...form.register("focus_keyword")} />
+          <Input
+            id={`seo-keyword-${id}`}
+            maxLength={MAX.keyword}
+            {...form.register("focus_keyword")}
+          />
         </Field>
         <Field label={t("seo.card.robots")} htmlFor={`seo-robots-${id}`}>
           <Controller
