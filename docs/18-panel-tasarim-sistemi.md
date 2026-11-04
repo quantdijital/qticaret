@@ -179,6 +179,7 @@ Kurallar:
 
 ## 7. Desenler
 
+- `components/patterns/media-picker.tsx` + `media-field.tsx` (2026-11-04): paneldeki her görsel alanı `MediaField` ile (önizleme çerçevesi `wide` / `share` / `square` / `logo`, "Görsel seç / Değiştir / Kaldır", alt metin alanı `children` olarak görselin yanında). Seçim `MediaPicker` diyaloğunda (`size="xl"`), üç sekme: Kütüphane (arama, sayfa, tek ya da `multiple` + `max`), Bilgisayardan yükle (sürükle-bırak, dosya dosya durum ve ilerleme; hepsi yüklenince seçer, hata varsa nedenleri kalır), Adres (sunucu adresten kütüphaneye alır, sonra seçer). Yüklenen ve alınan her görsel önce kütüphaneye girer; sayfa yalnızca mağazanın kendi kopyasını gösterir. Kütüphaneden seçilen görselin alt metni boş alt metni doldurur. Kullananlar: vitrin düzenleyicisinin açılış ve kayan görselleri, içerik kapağı ve metindeki görsel, mağaza logoları, paylaşım görseli, marka logosu; ürün galerisi kendi sürükle-bırakını korur, yanında "Kütüphaneden seç". Ortam kütüphanesi sayfası (`/media`) ve seçici küçük resim ızgarası kullanır: görseller göze göre ayırt edilir, §3'teki "tablo yerine kart ızgarası" yasağının bilinçli istisnası.
 - `components/patterns/chip-input.tsx` (2026-11-04): etiket/terim girişi — Enter ya da virgül ekler, boş alanda Backspace sonuncuyu siler, yinelenen (Türkçe harf ve büyük/küçük duyarsız) reddedilir, `n / en çok` sayacı; eş anlamlı gruplar, özellik seçenekleri ve ürün sihirbazı seçenek değerleri bunu kullanır.
 
 | Desen | Ne zaman | Notlar |
@@ -191,6 +192,7 @@ Kurallar:
 | EmptyState | Boş liste | Bir cümle + bir eylem |
 | StatusBadge | Sipariş/ödeme/kargo durumu | Yalnızca durum renkleri; metin sözlükten |
 | ConfirmDialog | Geri alınamaz işlem | Özet + açık eylem adı ("Siparişi iptal et"), "Tamam" değil |
+| MediaField + MediaPicker | Görsel tutan her form alanı | Önizleme + seç/değiştir/kaldır; seçici üç sekme (Kütüphane, Bilgisayardan yükle, Adres); alt metin görselin yanında; adres alanı tek başına yok (2026-11-04) |
 | FormSection | Formlar | Başlık + açıklama solda, alanlar sağda (geniş ekranda); doğrulama satır altında |
 | Toast | Sonuç bildirimi | Kısa, eylem bağlantılı; hata toast'ı kalıcı, başarı 4 sn |
 | FilterTabs + SearchInput + Pagination | Liste üstü ve altı | Hızlı görünümler sayılarıyla; arama 300 ms sonra; durum URL'de (`?status=&q=&page=`, sayfa 1 tabanlı) |

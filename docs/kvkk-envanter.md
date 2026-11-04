@@ -84,13 +84,14 @@
 | `staff_role`, `user` (staff, Medusa)            | personel adı, e-posta                                                                                                 | yetki                            | Personel çalıştıkça                                                            | Personel çıkarılınca giriş kaldırılır. |
 | `platform_settings_section` (platform-settings) | Şahıs işletmesinde unvan (kişi adı), TCKN, adres, KEP; banka hesap sahibi ve IBAN; iletişim e-postası ve telefonu (D) | mağaza künyesi ve ödeme          | Mağaza süresince                                                               | Mağazanın kendi verisi.                |
 | `content_entry` (content)                       | yazar adı (D)                                                                                                         | blog ve sayfa                    | Yayında kaldıkça                                                               | —                                      |
+| `media_asset` (media)                           | `uploaded_by`: görseli yükleyen ya da adresten alan personelin kullanıcı kimliği (2026-11-04). Görselin kendisinde konum ve kamera bilgisi tutulmaz (yüklenirken EXIF/GPS silinir, F3.3). Ortam kütüphanesinin ayrıntısında personelin adı (yoksa e-postası) gösterilir. | ortam kütüphanesi: kimin yüklediği | Görsel kütüphanede kaldıkça; silinince kayıt yumuşak silinir, dosyaları kaldırılır | Personel çıkarılınca kimlik kalır, ad gösterilemez (kullanıcı yoksa "—"). Görselin içeriğinde bir kişi varsa (fotoğraf) silme kütüphaneden yapılır; kullanılan görsel önce kullanıldığı yerden kaldırılır. |
 
 **Gözlemlenebilirlik (ADR-0045, F16'da kurulur):**
 - **GlitchTip hata olayları:** olay adı, hata türü ve mesajı (log redaksiyonundan geçmiş; e-postanın yerel kısmı maskeli), kod kareleri, istek kimliği, metot, yol, durum. Saklama önerisi 30 gün.
 - **İzler:** rota, iş akışı adımı, SQL'in biçimi. ORM değerleri SQL metnine gömüyor; izler dışa aktarılırken değişmezler `?` olur, diğer metinler log redaksiyonundan geçer (F15 güvenlik incelemesi, sahte toplayıcıyla doğrulandı). Saklama önerisi 7 gün.
 - **Postgres yavaş sorgular:** `pg_stat_statements` (değerler olmadan biçim ve süre). Sorgu metni loglanmaz.
 
-**Kişisel veri tutmayan, kontrol edilmiş tablolar:** katalog, fiyat, SEO, stok, medya, feed, kargo olayları, webhook ve muhasebe tabloları (tam liste L8 taramasında).
+**Kişisel veri tutmayan, kontrol edilmiş tablolar:** katalog, fiyat, SEO, stok, medya (yükleyen personel kimliği dışında, yukarıda), feed, kargo olayları, webhook ve muhasebe tabloları (tam liste L8 taramasında).
 
 **Bellekte tutulanlar:** Sayaçlarda kullanılan ziyaretçi IP özetleri (Ö) veritabanında değil, hız sınırı deposunda durur ve pencere bitince düşer. Bu sayaçlar arama, hız sınırı ve yeniden doğrulama içindir.
 
