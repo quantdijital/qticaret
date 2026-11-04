@@ -1,10 +1,11 @@
 /**
  * A synonym group's terms as site search keeps them (adr/0056), checked
- * here as the server checks them so the dialog says what is wrong before
- * saving. Turkish lower case; anything that is not a letter or a digit
- * separates words; a term is one to three words; a group holds each term
- * once as search compares it (`Tişört` and `tisort` are one), two to ten
- * of them.
+ * here as the server checks them so the dialog says what the server would
+ * refuse before saving. Turkish lower case; anything that is not a letter
+ * or a digit separates words; a term is one to three words and at most 60
+ * characters; a group holds each term once as search compares it
+ * (`Tişört` and `tisort` are one: a repeat is passed over), two to ten of
+ * them.
  */
 
 export const MIN_GROUP_TERMS = 2
@@ -29,12 +30,14 @@ export function termWords(text: string): string[] {
 /** A term as search compares it, to find the same term written twice. */
 export const comparedTerm = (text: string): string => termWords(text).map(fold).join(" ")
 
-export type TermProblem = "noWords" | "words" | "length" | "duplicate" | "full"
+/** What the server would refuse: only these stop a term. */
+export type TermProblem = "noWords" | "words" | "length" | "full"
 
 export type TermCheck =
-  { ok: true; term: string } | { ok: false; problem: TermProblem; term?: string }
+  /** `already`: the group has it as search compares it; nothing to add, nothing wrong. */
+  { ok: true; term: string; already?: true } | { ok: false; problem: TermProblem }
 
-/** One typed term against the group so far: the term as kept, or why it is refused. */
+/** One typed term against the group so far: the term as kept, or why the server would refuse it. */
 export function checkTerm(text: string, group: readonly string[]): TermCheck {
   const words = termWords(text)
   if (words.length === 0) {
@@ -49,8 +52,9 @@ export function checkTerm(text: string, group: readonly string[]): TermCheck {
   }
   const compared = comparedTerm(term)
   const same = group.find((kept) => comparedTerm(kept) === compared)
+  // The server keeps each term once anyway: a repeat is let through, not refused
   if (same !== undefined) {
-    return { ok: false, problem: "duplicate", term: same }
+    return { ok: true, term: same, already: true }
   }
   if (group.length >= MAX_GROUP_TERMS) {
     return { ok: false, problem: "full" }
@@ -62,12 +66,13 @@ export interface Added {
   group: string[]
   /** What stays in the field: the refused term and anything typed after it. */
   rest: string
-  problem: { problem: TermProblem; term?: string } | null
+  problem: TermProblem | null
 }
 
 /**
  * The typed text (one term, or several split by commas) added to the
- * group in order; the first refused term stops it and stays to be fixed.
+ * group in order; a term the group already has is passed over; the first
+ * term the server would refuse stops it and stays to be fixed.
  */
 export function addTerms(text: string, group: readonly string[]): Added {
   const pieces = text
@@ -78,13 +83,11 @@ export function addTerms(text: string, group: readonly string[]): Added {
   for (const [index, piece] of pieces.entries()) {
     const checked = checkTerm(piece, next)
     if (!checked.ok) {
-      return {
-        group: next,
-        rest: pieces.slice(index).join(", "),
-        problem: { problem: checked.problem, ...(checked.term ? { term: checked.term } : {}) },
-      }
+      return { group: next, rest: pieces.slice(index).join(", "), problem: checked.problem }
     }
-    next.push(checked.term)
+    if (!checked.already) {
+      next.push(checked.term)
+    }
   }
   return { group: next, rest: "", problem: null }
 }
@@ -92,6 +95,7 @@ export function addTerms(text: string, group: readonly string[]): Added {
 const SERVER_KEYS: Readonly<Record<string, string>> = {
   "search.synonym_terms_too_few": "tooFew",
   "search.synonym_term_too_long": "words",
+  "search.synonym_term_length": "length",
   "search.synonym_terms_too_many": "full",
   "search.synonyms_too_many": "groupsFull",
   "search.synonym_unknown": "unknown",

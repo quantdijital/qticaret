@@ -35,6 +35,8 @@ export type Capability =
   | "legalTexts"
   /** Adding, renaming, removing the KDV rates and moving the default (adr/0007 Ek 2026-11-04): the owner's alone. */
   | "vatRates"
+  /** Adding, changing and deleting site search's synonym groups (adr/0056): owner and admin. */
+  | "searchSynonyms"
 
 export interface StaffMe {
   user_id: string

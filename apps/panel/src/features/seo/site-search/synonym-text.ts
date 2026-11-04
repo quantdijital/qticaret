@@ -10,23 +10,28 @@ import {
   synonymProblemOf,
 } from "./terms"
 
-const S = "seo.siteSearch.problems"
+const S = "seo.siteSearch"
 
-/** A group's problems in words: one found while typing, or the server's refusal. */
+/** The group's rules as the texts take them: 2–10 terms, 3 words, 60 characters. */
+export const SYNONYM_RULES = {
+  min: MIN_GROUP_TERMS,
+  max: MAX_GROUP_TERMS,
+  words: MAX_TERM_WORDS,
+  length: MAX_TERM_LENGTH,
+} as const
+
+/**
+ * A group's rules and problems in the panel's own words: one found while
+ * typing, or the server's refusal by its key (never the server's wording).
+ */
 export function useSynonymText() {
   const { t } = useTranslation()
-  const problemText = (name: string, term?: string): string =>
-    t(`${S}.${name}`, {
-      term: term ?? "",
-      min: MIN_GROUP_TERMS,
-      max: MAX_GROUP_TERMS,
-      words: MAX_TERM_WORDS,
-      length: MAX_TERM_LENGTH,
-      groups: formatCount(MAX_SYNONYM_GROUPS),
-    })
+  const problemText = (name: string): string =>
+    t(`${S}.problems.${name}`, { ...SYNONYM_RULES, groups: formatCount(MAX_SYNONYM_GROUPS) })
   const failureText = (error: unknown): string => {
     const name = synonymProblemOf(error)
     return name ? problemText(name) : errorText(t, error)
   }
-  return { problemText, failureText }
+  const ruleText = (key: "description" | "hint"): string => t(`${S}.form.${key}`, SYNONYM_RULES)
+  return { problemText, failureText, ruleText }
 }

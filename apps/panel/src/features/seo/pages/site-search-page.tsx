@@ -31,13 +31,13 @@ const S = "seo.siteSearch"
 /**
  * Site search (adr/0056): the shop's synonym groups, any term of which
  * finds the others in the storefront's search. The owner and admins keep
- * them (a catalogue setting); the other roles read them.
+ * them (`searchSynonyms`, as the API decides); the other roles read them.
  */
 export function SiteSearchPage() {
   const { t } = useTranslation()
   const search = route.useSearch()
   const navigate = useNavigate()
-  const canWrite = useCan("catalog")
+  const canWrite = useCan("searchSynonyms")
   const q = search.q ?? ""
   const page = (search.page ?? 1) - 1
   const list = useQuery(synonymsQuery({ q, page }))

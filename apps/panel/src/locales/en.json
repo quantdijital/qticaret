@@ -29,7 +29,25 @@
   },
   "errors": {
     "generic": "The action could not be completed. Try again in a moment.",
-    "loadFailed": "The information could not be loaded."
+    "loadFailed": "The information could not be loaded.",
+    "provider": {
+      "said": "{{provider}} answered: “{{message}}”",
+      "unreachable": "{{provider}} cannot be reached right now; try again shortly.",
+      "failed": "The request to {{provider}} could not be completed; try again shortly."
+    },
+    "providerNames": {
+      "aras": "Aras Kargo",
+      "yurtici": "Yurtiçi Kargo",
+      "geliver": "Geliver",
+      "netgsm": "Netgsm",
+      "parasut": "Paraşüt",
+      "paytr": "PayTR",
+      "iyzico": "iyzico",
+      "google": "Google",
+      "meta": "Meta",
+      "shopify": "Shopify",
+      "turkiyeapi": "TürkiyeAPI"
+    }
   },
   "nav": {
     "label": "Main menu",
@@ -4978,11 +4996,11 @@
       "form": {
         "title": "Add a synonym group",
         "editTitle": "Edit the synonym group",
-        "description": "Write 2–10 terms that should find the same products in search.",
+        "description": "Write {{min}}–{{max}} terms that should find the same products in search.",
         "terms": "Terms",
         "count": "{{shown}} / {{max}}",
         "placeholder": "t-shirt, tee",
-        "hint": "Add with Enter or a comma. Each term is at most three words; case and Turkish letters are ignored.",
+        "hint": "Add with Enter or a comma. Each term is at most {{words}} words and {{length}} characters; case and Turkish letters are ignored, and a term is kept once.",
         "remove": "Remove “{{term}}”",
         "add": "Add group",
         "created": "Synonym group added; it reaches the storefront within a minute.",
@@ -4992,7 +5010,6 @@
         "noWords": "A term needs at least one letter or digit.",
         "words": "A term can be at most {{words}} words; shorten the phrase.",
         "length": "A term can be at most {{length}} characters.",
-        "duplicate": "“{{term}}” is already in the group; case and Turkish letters do not make a different term.",
         "full": "A group holds at most {{max}} terms; remove one to add another.",
         "tooFew": "Add at least {{min}} terms to the group.",
         "groupsFull": "A shop keeps at most {{groups}} synonym groups; delete one you no longer use to add another.",

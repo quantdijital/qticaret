@@ -1,4 +1,5 @@
 import { useOrderMutation } from "@/features/orders/api/orders"
+import { responseFailure } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
 
 /** One order's outcome of "Kargoya ver" for several (F7.7). */
@@ -60,11 +61,8 @@ export async function bulkLabels(fulfillmentIds: readonly string[]) {
     credentials: "same-origin",
   })
   if (!response.ok) {
-    const body = (await response.json().catch(() => null)) as { message?: string } | null
-    throw Object.assign(new Error("labels failed"), {
-      status: response.status,
-      message: body?.message ?? "",
-    })
+    // The body's key and a carrier's own words kept, for `errorText`
+    throw await responseFailure(response)
   }
   const missing = Number(response.headers.get("x-labels-missing") ?? "0")
   return { url: URL.createObjectURL(await response.blob()), missing }

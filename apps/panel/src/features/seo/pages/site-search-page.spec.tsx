@@ -2,21 +2,22 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { SynonymGroup } from "@/features/seo/api/synonyms"
+import { answerWritesWith } from "@/features/seo/site-search/synonyms.fixtures"
 import { SiteSearchPage } from "./site-search-page"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
-const staff = vi.hoisted(() => ({ catalog: true }))
+const staff = vi.hoisted(() => ({ searchSynonyms: true }))
 const search = vi.hoisted<{ q?: string; page?: number }>(() => ({}))
 const navigate = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast }))
 vi.mock("@/features/auth/api/staff", () => ({
-  useCan: (capability: string) => capability === "catalog" && staff.catalog,
+  useCan: (capability: string) => capability === "searchSynonyms" && staff.searchSynonyms,
 }))
 // Links as plain anchors, the address's search as each test sets it: rendered without a router
 vi.mock("@tanstack/react-router", () => ({
@@ -77,9 +78,14 @@ describe("SiteSearchPage", () => {
     fetchMock.mockReset()
     toast.success.mockReset()
     navigate.mockReset()
-    staff.catalog = true
+    staff.searchSynonyms = true
     delete search.q
     delete search.page
+    answerWritesWith(fetchMock)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
   it("lists the groups, their terms side by side and when each changed", async () => {
@@ -148,7 +154,7 @@ describe("SiteSearchPage", () => {
   })
 
   it("shows a role that only reads the groups, without a way to change them", async () => {
-    staff.catalog = false
+    staff.searchSynonyms = false
     answers()
     renderPage()
     expect(await screen.findByText("tişört")).toBeInTheDocument()

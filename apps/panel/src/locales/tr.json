@@ -29,7 +29,25 @@
   },
   "errors": {
     "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
-    "loadFailed": "Bilgiler yüklenemedi."
+    "loadFailed": "Bilgiler yüklenemedi.",
+    "provider": {
+      "said": "{{provider}} yanıtı: “{{message}}”",
+      "unreachable": "{{provider}} hizmetine şu an ulaşılamıyor; biraz sonra tekrar deneyin.",
+      "failed": "{{provider}} ile işlem tamamlanamadı; biraz sonra tekrar deneyin."
+    },
+    "providerNames": {
+      "aras": "Aras Kargo",
+      "yurtici": "Yurtiçi Kargo",
+      "geliver": "Geliver",
+      "netgsm": "Netgsm",
+      "parasut": "Paraşüt",
+      "paytr": "PayTR",
+      "iyzico": "iyzico",
+      "google": "Google",
+      "meta": "Meta",
+      "shopify": "Shopify",
+      "turkiyeapi": "TürkiyeAPI"
+    }
   },
   "nav": {
     "label": "Ana menü",
@@ -4978,11 +4996,11 @@
       "form": {
         "title": "Eş anlamlı grup ekle",
         "editTitle": "Eş anlamlı grubu düzenle",
-        "description": "Aramada aynı ürünleri bulması gereken 2–10 terim yazın.",
+        "description": "Aramada aynı ürünleri bulması gereken {{min}}–{{max}} terim yazın.",
         "terms": "Terimler",
         "count": "{{shown}} / {{max}}",
         "placeholder": "tişört, t shirt",
-        "hint": "Enter ya da virgülle ekleyin. Her terim en çok üç kelime; büyük-küçük harf ve Türkçe karakter farkı yok sayılır.",
+        "hint": "Enter ya da virgülle ekleyin. Her terim en çok {{words}} kelime ve {{length}} karakter; büyük-küçük harf ve Türkçe karakter farkı yok sayılır, aynı terim bir kez tutulur.",
         "remove": "“{{term}}” terimini çıkar",
         "add": "Grubu ekle",
         "created": "Eş anlamlı grup eklendi; bir dakika içinde vitrine yansır.",
@@ -4992,7 +5010,6 @@
         "noWords": "Terim en az bir harf ya da rakam içermeli.",
         "words": "Bir terim en çok {{words}} kelime olabilir; daha uzun ifadeyi kısaltın.",
         "length": "Bir terim en çok {{length}} karakter olabilir.",
-        "duplicate": "“{{term}}” zaten grupta; büyük-küçük harf ve Türkçe karakter farkı aynı terim sayılır.",
         "full": "Bir grupta en çok {{max}} terim olabilir; yeni terim için birini çıkarın.",
         "tooFew": "Grup için en az {{min}} terim ekleyin.",
         "groupsFull": "Mağazada en çok {{groups}} eş anlamlı grup olabilir; yenisini eklemek için kullanmadığınız bir grubu silin.",

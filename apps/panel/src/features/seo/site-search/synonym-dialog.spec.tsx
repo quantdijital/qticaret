@@ -1,10 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { SynonymGroup } from "@/features/seo/api/synonyms"
 import { SynonymDialog } from "./synonym-dialog"
+import { answerWritesWith } from "./synonyms.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
@@ -39,11 +40,22 @@ describe("SynonymDialog", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     toast.success.mockReset()
+    answerWritesWith(fetchMock)
+  })
+
+  afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
   it("takes terms with Enter and a comma, as the server keeps them, and adds the group", async () => {
     fetchMock.mockResolvedValue({ synonym: { ...GROUP, terms: ["çakı", "bıçak", "cep bıçağı"] } })
     const { onOpenChange, field } = renderDialog()
+
+    // The group's rules, in the panel's own words
+    expect(
+      screen.getByText("Aramada aynı ürünleri bulması gereken 2–10 terim yazın.")
+    ).toBeInTheDocument()
+    expect(screen.getByText(/Her terim en çok 3 kelime ve 60 karakter/)).toBeInTheDocument()
 
     await userEvent.type(field, "Çakı{Enter}")
     await userEvent.type(field, "BIÇAK, Cep  Bıçağı,")
@@ -74,14 +86,13 @@ describe("SynonymDialog", () => {
     expect(field).toHaveValue("kısa olmayan bir ifade")
     expect(field).toHaveAttribute("aria-invalid", "true")
 
+    // A repeat is no refusal: the server keeps a term once anyway, so it is passed over
     await userEvent.clear(field)
     await userEvent.type(field, "Kupa{Enter}KUPA{Enter}")
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "“kupa” zaten grupta; büyük-küçük harf ve Türkçe karakter farkı aynı terim sayılır."
-    )
+    expect(screen.queryByRole("alert")).toBeNull()
+    expect(field).toHaveValue("")
     expect(chips()).toEqual(["kupa"])
 
-    await userEvent.clear(field)
     await userEvent.click(screen.getByRole("button", { name: "Grubu ekle" }))
     expect(screen.getByRole("alert")).toHaveTextContent("Grup için en az 2 terim ekleyin.")
     expect(fetchMock).not.toHaveBeenCalled()
@@ -139,5 +150,34 @@ describe("SynonymDialog", () => {
     await userEvent.click(screen.getByRole("button", { name: "Grubu ekle" }))
     expect(await screen.findByText(/Bu grup artık yok/)).toBeInTheDocument()
     expect(screen.queryByText(/search\./)).toBeNull()
+  })
+
+  it("says the server's size rules in the panel's own words, by their key", async () => {
+    // As the backend answers the panel's session: its own sentence, the key beside it
+    fetchMock.mockRejectedValueOnce({
+      status: 400,
+      type: "invalid_data",
+      code: "search.synonym_term_length",
+      message: "Sunucunun cümlesi",
+    })
+    const { field } = renderDialog()
+    await userEvent.type(field, "çakı, bıçak{Enter}")
+    await userEvent.click(screen.getByRole("button", { name: "Grubu ekle" }))
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Bir terim en çok 60 karakter olabilir."
+    )
+    expect(screen.queryByText("Sunucunun cümlesi")).toBeNull()
+
+    fetchMock.mockRejectedValueOnce({
+      status: 400,
+      code: "search.synonym_terms_too_many",
+      message: "Sunucunun cümlesi",
+    })
+    await userEvent.click(screen.getByRole("button", { name: "Grubu ekle" }))
+    expect(
+      await screen.findByText(
+        "Bir grupta en çok 10 terim olabilir; yeni terim için birini çıkarın."
+      )
+    ).toBeInTheDocument()
   })
 })

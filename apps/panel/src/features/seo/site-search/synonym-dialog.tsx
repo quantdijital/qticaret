@@ -37,7 +37,7 @@ function SynonymForm({
   onDone: () => void
 }) {
   const { t } = useTranslation()
-  const { problemText, failureText } = useSynonymText()
+  const { problemText, failureText, ruleText } = useSynonymText()
   const save = useSaveSynonym()
   const [terms, setTerms] = useState<string[]>(group?.terms ?? [])
   const [text, setText] = useState("")
@@ -49,7 +49,7 @@ function SynonymForm({
     const added = addTerms(text, terms)
     setTerms(added.group)
     setText(added.rest)
-    setProblem(added.problem ? problemText(added.problem.problem, added.problem.term) : null)
+    setProblem(added.problem ? problemText(added.problem) : null)
     return added.problem ? null : added.group
   }
 
@@ -116,7 +116,7 @@ function SynonymForm({
             </p>
           ) : (
             <p id={`${FIELD}-note`} className="text-xs text-muted-foreground">
-              {t(`${S}.form.hint`)}
+              {ruleText("hint")}
             </p>
           )}
         </div>
@@ -144,17 +144,19 @@ function SynonymForm({
 
 /**
  * Adds a synonym group or changes one (adr/0056): two to ten terms, each
- * one to three words, typed as chips. Each term is checked as the server
- * checks it; what the server still refuses is said in words.
+ * one to three words and at most 60 characters, typed as chips. Each term
+ * is checked as the server checks it; a repeat is passed over; what the
+ * server still refuses is said in the panel's own words.
  */
 export function SynonymDialog({ open, onOpenChange, group }: SynonymDialogProps) {
   const { t } = useTranslation()
+  const { ruleText } = useSynonymText()
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent size="md">
         <DialogHeader>
           <DialogTitle>{t(group ? `${S}.form.editTitle` : `${S}.form.title`)}</DialogTitle>
-          <DialogDescription>{t(`${S}.form.description`)}</DialogDescription>
+          <DialogDescription>{ruleText("description")}</DialogDescription>
         </DialogHeader>
         {/* Mounted per opening, so a closed dialog forgets what was typed */}
         {open ? (

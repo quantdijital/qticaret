@@ -1,4 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { responseFailure } from "@/lib/errors"
 import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
@@ -118,12 +119,8 @@ export const useWriteBackInvoice = () =>
   )
 
 async function failed(response: Response): Promise<never> {
-  const body = (await response.json().catch(() => null)) as { message?: string } | null
-  // The shape `errorText` reads from the SDK's errors
-  throw Object.assign(new Error(body?.message ?? "invoice request failed"), {
-    status: response.status,
-    message: body?.message ?? "",
-  })
+  // The shape `errorText` reads from the SDK's errors, the key and a provider's words kept
+  throw await responseFailure(response)
 }
 
 /** A return's document entered by staff: a gider pusulası's serial or a company's return invoice number. */

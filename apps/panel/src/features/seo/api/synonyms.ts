@@ -1,4 +1,5 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { responseFailure } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
 
 /** Site search's synonym groups (adr/0056, `/admin/search/synonyms`). */
@@ -50,14 +51,36 @@ function useSynonymsInvalidation() {
   return () => client.invalidateQueries({ queryKey: SYNONYMS_KEY })
 }
 
+/**
+ * A write, not through the SDK: its error keeps only the server's
+ * sentence, and the screen says a refusal (two to ten terms, 60
+ * characters…) in the panel's own words by its key (`code`, adr/0021).
+ */
+async function write<T>(path: string, method: "POST" | "DELETE", body?: unknown): Promise<T> {
+  const response = await fetch(path, {
+    method,
+    credentials: "same-origin",
+    headers: {
+      accept: "application/json",
+      ...(body === undefined ? {} : { "content-type": "application/json" }),
+    },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  })
+  if (!response.ok) {
+    throw await responseFailure(response)
+  }
+  return (await response.json()) as T
+}
+
 /** A new group, or a group's terms replaced. */
 export function useSaveSynonym() {
   const invalidate = useSynonymsInvalidation()
   return useMutation({
     mutationFn: ({ id, terms }: { id?: string | undefined; terms: string[] }) =>
-      sdk.client.fetch<{ synonym: SynonymGroup }>(
+      write<{ synonym: SynonymGroup }>(
         id ? `/admin/search/synonyms/${encodeURIComponent(id)}` : "/admin/search/synonyms",
-        { method: "POST", body: { terms } }
+        "POST",
+        { terms }
       ),
     onSettled: invalidate,
   })
@@ -67,9 +90,9 @@ export function useDeleteSynonym() {
   const invalidate = useSynonymsInvalidation()
   return useMutation({
     mutationFn: (id: string) =>
-      sdk.client.fetch<{ id: string; object: "search_synonym"; deleted: true }>(
+      write<{ id: string; object: "search_synonym"; deleted: true }>(
         `/admin/search/synonyms/${encodeURIComponent(id)}`,
-        { method: "DELETE" }
+        "DELETE"
       ),
     onSettled: invalidate,
   })
