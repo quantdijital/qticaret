@@ -1,6 +1,6 @@
 # Design: My L'arte vitrini, ikinci tema (TASLAK)
 
-> **Durum: taslak, onay bekliyor (2026-11-04).** Hallmark `design-md.md` biçimi. Sahip onaylayınca §System–§Exports depo köküne `design.md` olarak kopyalanır ve sonraki her Hallmark koşusu önce onu okur; §Deal ve §Picks kopyalanmaz.
+> **Durum: onaylandı (2026-11-04, sahip: "önerine uyarım … başla yolda revize veririm"); kilitli kopya depo kökünde `design.md`.** Hallmark `design-md.md` biçimi. Sahip onaylayınca §System–§Exports depo köküne `design.md` olarak kopyalanır ve sonraki her Hallmark koşusu önce onu okur; §Deal ve §Picks kopyalanmaz.
 > Dayanak: `docs/tema/denetim-2026-11-04.md`. Önerilen tema **Loom**; sahip başka temayı seçerse §Tokens ve §Type o temanın değerleriyle yeniden yazılır, bileşen ve sektör kuralları aynen kalır.
 > Platform kuralı: tema sektörden bağımsızdır. Bıçağa özgü her şey veri (özellik şablonu, bölüm, ek seçenek, bayrak) olarak gelir; tema yalnız genel bileşen çizer. Yeni tema `packages/themes/<slug>`, sözleşme `@qticaret/ui` (adr/0046 §7); base tema yerinde kalır.
 
