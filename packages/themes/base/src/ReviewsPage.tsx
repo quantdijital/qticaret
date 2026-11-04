@@ -3,6 +3,7 @@ import type { ReviewsPageView, Translate } from "@qticaret/ui"
 import { Breadcrumbs } from "./components/Breadcrumbs"
 import { PageContainer } from "./components/Container"
 import { Pages } from "./components/Pages"
+import { ReviewPhotos } from "./components/ReviewExtras"
 
 /** The shop's approved reviews, newest first, each with its product's link. */
 export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }) {
@@ -42,6 +43,7 @@ export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }
               </span>
               {review.title && <p className="font-semibold">{review.title}</p>}
               <p>{review.body}</p>
+              <ReviewPhotos photos={review.photos ?? []} label={t("reviews.photos")} />
               <p className="text-xs text-muted-foreground">
                 {review.author} · {review.date}
                 {review.verified && ` · ${t("product.verified")}`}

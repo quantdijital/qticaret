@@ -1,6 +1,7 @@
 "use client"
 
 import { ArrowRight } from "lucide-react"
+import { ResponsiveImage } from "@qticaret/ui"
 import type { NavCategoryView } from "@qticaret/ui"
 import {
   NavigationMenu,
@@ -67,8 +68,18 @@ export function CategoryNav({
                   <NavigationMenuLink asChild>
                     <a
                       href={category.path}
-                      className="group m-2 flex flex-col justify-between rounded-xl bg-muted p-4"
+                      className="group m-2 flex flex-col justify-between gap-3 rounded-xl bg-muted p-4"
                     >
+                      {/* The category's picture when it has one (adr/0046 Ek 2026-11-04); its name says what it is */}
+                      {category.image && (
+                        <span className="aspect-square overflow-hidden rounded-lg bg-background">
+                          <ResponsiveImage
+                            image={{ ...category.image, alt: "" }}
+                            sizes="128px"
+                            className="size-full object-cover"
+                          />
+                        </span>
+                      )}
                       <span className="font-heading text-lg leading-snug">{category.label}</span>
                       <span className="flex items-center gap-1.5 text-xs font-semibold">
                         {allIn[category.path]}

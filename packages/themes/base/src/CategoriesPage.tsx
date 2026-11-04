@@ -1,4 +1,5 @@
 import { ArrowUpRight } from "lucide-react"
+import { ResponsiveImage } from "@qticaret/ui"
 import type { CategoriesPageView, CategoryTreeView, Translate } from "@qticaret/ui"
 import { Breadcrumbs } from "./components/Breadcrumbs"
 import { PageContainer } from "./components/Container"
@@ -46,6 +47,16 @@ export function CategoriesPage({ view, t }: { view: CategoriesPageView; t: Trans
               key={top.path}
               className="flex min-w-0 flex-col gap-3 rounded-2xl border bg-card p-5"
             >
+              {/* Its picture when it has one (adr/0046 Ek 2026-11-04); the heading names it */}
+              {top.image && (
+                <div className="aspect-[4/3] overflow-hidden rounded-xl bg-muted">
+                  <ResponsiveImage
+                    image={{ ...top.image, alt: "" }}
+                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    className="size-full object-cover"
+                  />
+                </div>
+              )}
               <h2 className="font-heading text-2xl leading-tight">
                 <a
                   href={top.path}

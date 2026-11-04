@@ -1,6 +1,8 @@
 import { Star } from "lucide-react"
+import { ResponsiveImage } from "@qticaret/ui"
 import type { HomeSectionView, PlaceOrderResult, Translate } from "@qticaret/ui"
 import { PostCard } from "../components/PostCard"
+import { ReviewPhotos } from "../components/ReviewExtras"
 import { TrustStrip } from "../components/TrustStrip"
 import { NewsletterForm } from "../layout/NewsletterForm"
 import { newsletterWords } from "../layout/newsletter-words"
@@ -51,6 +53,7 @@ export function ReviewsSection({ section, t }: { section: Of<"reviews">; t: Tran
             </p>
             {review.title && <p className="font-semibold">{review.title}</p>}
             <p className="line-clamp-5 text-sm text-foreground/85">{review.body}</p>
+            <ReviewPhotos photos={review.photos ?? []} label={t("reviews.photos")} />
             <p className="mt-auto text-xs text-muted-foreground">
               {review.author} · {review.date}
               {review.product && (
@@ -65,7 +68,50 @@ export function ReviewsSection({ section, t }: { section: Of<"reviews">; t: Tran
           </li>
         ))}
       </ul>
+      {section.photos && section.photos.length > 0 && (
+        <CustomerPhotos photos={section.photos} title={t("reviews.customer_photos")} />
+      )}
     </section>
+  )
+}
+
+/**
+ * The newest photos customers put on their approved reviews (adr/0046 Ek
+ * 2026-11-04): a row of squares, each at its product's page.
+ */
+function CustomerPhotos({
+  photos,
+  title,
+}: {
+  photos: NonNullable<Of<"reviews">["photos"]>
+  title: string
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <h3 className="text-sm font-semibold text-muted-foreground">{title}</h3>
+      <ul className="grid grid-cols-4 gap-2 sm:grid-cols-6 lg:grid-cols-8">
+        {photos.map((photo) => {
+          const image = (
+            <ResponsiveImage
+              image={photo.image}
+              sizes="(min-width: 1024px) 12vw, (min-width: 640px) 16vw, 25vw"
+              className="size-full object-cover"
+            />
+          )
+          return (
+            <li key={photo.image.src} className="aspect-square overflow-hidden rounded-xl bg-muted">
+              {photo.product ? (
+                <a href={photo.product.path} className="block size-full">
+                  {image}
+                </a>
+              ) : (
+                image
+              )}
+            </li>
+          )
+        })}
+      </ul>
+    </div>
   )
 }
 

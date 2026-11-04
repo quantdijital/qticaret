@@ -3,6 +3,7 @@ import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../components/Container"
 import { TrustStrip } from "../components/TrustStrip"
 import { CookiePreferencesLink } from "./CookiePreferencesLink"
+import { FooterMarks } from "./FooterMarks"
 import { NewsletterForm } from "./NewsletterForm"
 import { newsletterWords } from "./newsletter-words"
 
@@ -143,6 +144,7 @@ export function SiteFooter({
               </ul>
             </nav>
             {shop.identityLines.length > 0 && <p>{shop.identityLines.join(" · ")}</p>}
+            <FooterMarks shop={shop} t={t} />
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <p>{t("footer.rights", { year, name: shop.companyTitle ?? shop.name })}</p>
               <p>{t("footer.secure_payment")}</p>

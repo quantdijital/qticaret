@@ -1,5 +1,6 @@
 import { SlidersHorizontal, X } from "lucide-react"
-import type { ListingPageView, Translate } from "@qticaret/ui"
+import { ResponsiveImage } from "@qticaret/ui"
+import type { FormAction, ListingPageView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Breadcrumbs } from "./components/Breadcrumbs"
 import { PageContainer } from "./components/Container"
@@ -45,10 +46,13 @@ export function ListingPage({
   view,
   t,
   subscribe,
+  quickAdd,
 }: {
   view: ListingPageView
   t: Translate
   subscribe?: Subscribe | undefined
+  /** A card's quick add (adr/0046 Ek 2026-11-04). */
+  quickAdd?: FormAction | undefined
 }) {
   const { pagination } = view
   const stock = view.stock ?? null
@@ -76,8 +80,21 @@ export function ListingPage({
                   <li key={link.path}>
                     <a
                       href={link.path}
-                      className="inline-flex h-10 items-center rounded-button border bg-card px-5 text-sm font-medium whitespace-nowrap transition-colors hover:border-foreground hover:bg-foreground hover:text-background"
+                      className={cn(
+                        "inline-flex h-10 items-center gap-2 rounded-button border bg-card px-5 text-sm font-medium whitespace-nowrap transition-colors hover:border-foreground hover:bg-foreground hover:text-background",
+                        link.image && "pl-1.5"
+                      )}
                     >
+                      {/* Its picture, small, when it has one (adr/0046 Ek 2026-11-04) */}
+                      {link.image && (
+                        <span className="size-7 shrink-0 overflow-hidden rounded-full bg-muted">
+                          <ResponsiveImage
+                            image={{ ...link.image, alt: "" }}
+                            sizes="28px"
+                            className="size-full object-cover"
+                          />
+                        </span>
+                      )}
                       {link.label}
                     </a>
                   </li>
@@ -163,6 +180,7 @@ export function ListingPage({
               t={t}
               eager={pagination.page === 1 ? 4 : 0}
               columns={hasFilters ? 3 : 4}
+              quickAdd={quickAdd}
             />
           ) : (
             view.description.length === 0 && (

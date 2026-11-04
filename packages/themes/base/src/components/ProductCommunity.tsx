@@ -4,6 +4,7 @@ import { Star } from "lucide-react"
 import { useActionState } from "react"
 import type { ActionResult, FormAction, QuestionsView, ReviewsView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
+import { RatingBars, ReviewPhotos } from "./ReviewExtras"
 
 const INITIAL: ActionResult = { ok: false, error: null }
 
@@ -28,6 +29,13 @@ export interface CommunityWords {
   average: string
   errors: Record<string, string>
   fallback: string
+  /** The stars' spread and a review's photos (adr/0046 Ek 2026-11-04); left out: not drawn. */
+  distribution?: string
+  barStars?: Record<number, string>
+  photos?: string
+  /** The review form's photo field: its label and what it takes. */
+  addPhotos?: string
+  photosHint?: string
 }
 
 function Stars({ value, label }: { value: number; label: string }) {
@@ -107,6 +115,13 @@ export function ProductCommunity({
             <span className="font-semibold">{reviews.average}</span>
           </p>
         )}
+        {reviews.distribution && words.distribution && words.barStars && (
+          <RatingBars
+            bars={reviews.distribution}
+            label={words.distribution}
+            starsLabel={words.barStars}
+          />
+        )}
         {reviews.items.length === 0 ? (
           <p className="text-sm text-muted-foreground">{words.noReviews}</p>
         ) : (
@@ -116,6 +131,7 @@ export function ProductCommunity({
                 <Stars value={review.rating} label={String(review.rating)} />
                 {review.title && <p className="font-semibold">{review.title}</p>}
                 <p>{review.body}</p>
+                <ReviewPhotos photos={review.photos ?? []} label={words.photos ?? ""} />
                 <p className="text-xs text-muted-foreground">
                   {review.author} · {review.date}
                   {review.verified && ` · ${words.verified}`}
@@ -154,6 +170,22 @@ export function ProductCommunity({
                 placeholder={words.reviewBody}
                 className={FIELD}
               />
+              {words.addPhotos && (
+                <label className="flex flex-col gap-1 text-sm">
+                  {words.addPhotos}
+                  <input
+                    type="file"
+                    name="photos"
+                    multiple
+                    accept="image/jpeg,image/png,image/webp,image/avif"
+                    className="text-xs"
+                    aria-describedby="yorum-foto-ipucu"
+                  />
+                  <span id="yorum-foto-ipucu" className="text-xs text-muted-foreground">
+                    {words.photosHint}
+                  </span>
+                </label>
+              )}
               <button
                 type="submit"
                 disabled={reviewPending}

@@ -1,4 +1,4 @@
-import type { HomeSectionView, PlaceOrderResult, Translate } from "@qticaret/ui"
+import type { FormAction, HomeSectionView, PlaceOrderResult, Translate } from "@qticaret/ui"
 import { BannerSection } from "./BannerSection"
 import { BrandsSection, CategoriesSection, ProductsSection } from "./CatalogSections"
 import { FaqSection } from "./FaqSection"
@@ -20,12 +20,14 @@ function Section({
   atTop,
   t,
   subscribe,
+  quickAdd,
 }: {
   section: HomeSectionView
   index: number
   atTop: boolean
   t: Translate
   subscribe?: Subscribe | undefined
+  quickAdd?: FormAction | undefined
 }) {
   switch (section.type) {
     case "hero":
@@ -36,7 +38,14 @@ function Section({
       return <CategoriesSection section={section} />
     case "products":
       // The first rail near the top loads its first row at once
-      return <ProductsSection section={section} t={t} eager={atTop && index < 3 ? 4 : 0} />
+      return (
+        <ProductsSection
+          section={section}
+          t={t}
+          eager={atTop && index < 3 ? 4 : 0}
+          quickAdd={quickAdd}
+        />
+      )
     case "brands":
       return <BrandsSection section={section} />
     case "posts":
@@ -66,11 +75,14 @@ export function Sections({
   sections,
   t,
   subscribe,
+  quickAdd,
   atTop = false,
 }: {
   sections: readonly HomeSectionView[]
   t: Translate
   subscribe?: Subscribe | undefined
+  /** A rail card's quick add (adr/0046 Ek 2026-11-04); none: cards link to their pages only. */
+  quickAdd?: FormAction | undefined
   atTop?: boolean
 }) {
   return sections.map((section, index) => (
@@ -81,6 +93,7 @@ export function Sections({
       atTop={atTop}
       t={t}
       subscribe={subscribe}
+      quickAdd={quickAdd}
     />
   ))
 }

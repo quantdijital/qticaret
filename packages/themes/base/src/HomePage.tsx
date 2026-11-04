@@ -1,4 +1,4 @@
-import type { HomePageView, Translate } from "@qticaret/ui"
+import type { FormAction, HomePageView, Translate } from "@qticaret/ui"
 import { Container } from "./components/Container"
 import { Sections, type Subscribe } from "./home/Sections"
 
@@ -11,10 +11,13 @@ export function HomePage({
   view,
   t,
   subscribe,
+  quickAdd,
 }: {
   view: HomePageView
   t: Translate
   subscribe?: Subscribe | undefined
+  /** A rail card's quick add (adr/0046 Ek 2026-11-04). */
+  quickAdd?: FormAction | undefined
 }) {
   const opens = view.sections[0]?.type === "hero"
   return (
@@ -25,7 +28,7 @@ export function HomePage({
         </p>
       )}
       {!opens && <h1 className="sr-only">{t("home.label")}</h1>}
-      <Sections sections={view.sections} t={t} subscribe={subscribe} atTop />
+      <Sections sections={view.sections} t={t} subscribe={subscribe} quickAdd={quickAdd} atTop />
     </Container>
   )
 }

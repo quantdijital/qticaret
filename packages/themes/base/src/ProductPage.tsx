@@ -185,6 +185,7 @@ export function ProductPage({
           description={view.description}
           descriptionHtml={view.descriptionHtml}
           specs={view.specs}
+          specGroups={view.specGroups}
           t={t}
         />
         <ProductCommunity
@@ -214,6 +215,13 @@ export function ProductPage({
             signIn: t("account.login_link"),
             signInToWrite: t("product.sign_in_to_write"),
             average: t("product.average"),
+            distribution: t("reviews.distribution"),
+            barStars: Object.fromEntries(
+              [5, 4, 3, 2, 1].map((stars) => [stars, t("reviews.bar_stars", { stars })])
+            ),
+            photos: t("reviews.photos"),
+            addPhotos: t("reviews.photos_label"),
+            photosHint: t("reviews.photos_hint"),
             errors: Object.fromEntries(
               [
                 "product.sign_in_first",
@@ -222,6 +230,10 @@ export function ProductPage({
                 "product.question_too_short",
                 "reviews.not_purchased",
                 "reviews.already_reviewed",
+                "reviews.photo_unknown",
+                "reviews.photos_too_many",
+                "reviews.photo_uploads_full",
+                "product.review_photos_invalid",
                 "errors.too_many_requests",
               ].map((key) => [key, t(key)])
             ),
@@ -233,7 +245,7 @@ export function ProductPage({
             <h2 id="benzer" className="text-2xl">
               {t("product.related")}
             </h2>
-            <ProductGrid products={view.related} t={t} />
+            <ProductGrid products={view.related} t={t} quickAdd={actions.addToCart} />
           </section>
         )}
       </article>

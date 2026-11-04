@@ -1,26 +1,32 @@
 import { ArrowUpRight, Star } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
-import type { ProductCardView, Translate } from "@qticaret/ui"
+import type { FormAction, ProductCardView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Price } from "./Price"
+import { QuickAddButton } from "./QuickAddButton"
 
 /**
  * One product in a grid or a rail: one link around the picture and the
- * name; the discount and "sold out" as labels on the picture, a quiet
- * "view" cue that rises on hover. The picture's shape is the shop's
- * (`--card-ratio`, adr/0053 §B); the brand and the stars show when the
- * storefront put them in the view.
+ * name; the discount, "sold out" and "few left" (a bucket, never the
+ * number) as labels on the picture, a quiet "view" cue that rises on
+ * hover. The picture's shape is the shop's (`--card-ratio`, adr/0053 §B);
+ * the brand and the stars show when the storefront put them in the view;
+ * quick add when the card has a variant for it and the page an action.
  */
 export function ProductCard({
   product,
   t,
   priority = false,
+  quickAdd,
 }: {
   product: ProductCardView
   t: Translate
   priority?: boolean
+  /** The storefront's add-to-cart (adr/0046 Ek 2026-11-04); none: no quick add. */
+  quickAdd?: FormAction | undefined
 }) {
   const discount = product.price?.discount ?? null
+  const fewLeft = product.available && product.stock === "low"
   return (
     <article className="group relative flex h-full flex-col gap-3.5">
       <div className="relative aspect-card overflow-hidden rounded-2xl border bg-card">
@@ -52,6 +58,11 @@ export function ProductCard({
           {!product.available && (
             <span className="rounded-full bg-background/90 px-2.5 py-1 text-[11px] font-semibold backdrop-blur">
               {t("product.out_of_stock")}
+            </span>
+          )}
+          {fewLeft && (
+            <span className="rounded-full bg-background/90 px-2.5 py-1 text-[11px] font-semibold backdrop-blur">
+              {t("product.few_left")}
             </span>
           )}
         </div>
@@ -87,6 +98,18 @@ export function ProductCard({
           </p>
         )}
         {product.price && <Price price={product.price} t={t} className="mt-auto pt-1.5" />}
+        {product.quickAdd && quickAdd && (
+          <QuickAddButton
+            variantId={product.quickAdd.variantId}
+            action={quickAdd}
+            words={{
+              add: t("product.quick_add"),
+              label: t("product.quick_add_label", { title: product.title }),
+              added: t("product.quick_added"),
+              failed: t("cart.add_failed"),
+            }}
+          />
+        )}
       </div>
     </article>
   )
@@ -97,12 +120,14 @@ export function ProductGrid({
   t,
   eager = 0,
   columns = 4,
+  quickAdd,
 }: {
   products: ProductCardView[]
   t: Translate
   eager?: number
   /** Columns on wide screens: three beside a filter panel. */
   columns?: 3 | 4
+  quickAdd?: FormAction | undefined
 }) {
   return (
     <ul
@@ -113,7 +138,7 @@ export function ProductGrid({
     >
       {products.map((product, index) => (
         <li key={product.id}>
-          <ProductCard product={product} t={t} priority={index < eager} />
+          <ProductCard product={product} t={t} priority={index < eager} quickAdd={quickAdd} />
         </li>
       ))}
     </ul>

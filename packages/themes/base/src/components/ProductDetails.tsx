@@ -1,23 +1,39 @@
-import type { SpecView, Translate } from "@qticaret/ui"
+import type { SpecGroupView, SpecView, Translate } from "@qticaret/ui"
 import { RichText } from "./RichText"
+
+function SpecRows({ rows }: { rows: SpecView[] }) {
+  return rows.map((spec) => (
+    <div
+      key={spec.label}
+      className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4 border-b px-4 py-3 last:border-b-0"
+    >
+      <dt className="text-muted-foreground">{spec.label}</dt>
+      <dd className="font-medium">{spec.value}</dd>
+    </div>
+  ))
+}
 
 /**
  * The product's description and its attributes, side by side on wide
  * screens, all in the first HTML: the description's content document as
  * the backend renders it (adr/0055), else its plain text paragraphs; the
- * attributes a definition list.
+ * attributes a definition list, in their template's sections when it has
+ * them (adr/0013 Ek 2026-11-04), a section's name above its rows.
  */
 export function ProductDetails({
   description,
   descriptionHtml,
   specs,
+  specGroups,
   t,
 }: {
   description: string[]
   descriptionHtml: string | null
   specs: SpecView[]
+  specGroups?: SpecGroupView[] | undefined
   t: Translate
 }) {
+  const titled = (specGroups ?? []).some((group) => group.title !== null)
   const described = descriptionHtml !== null || description.length > 0
   if (!described && specs.length === 0) {
     return null
@@ -46,17 +62,24 @@ export function ProductDetails({
           <h2 id="urun-ozellikleri" className="text-3xl leading-tight">
             {t("product.specs")}
           </h2>
-          <dl className="overflow-hidden rounded-2xl border bg-card text-sm">
-            {specs.map((spec) => (
-              <div
-                key={spec.label}
-                className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4 border-b px-4 py-3 last:border-b-0"
-              >
-                <dt className="text-muted-foreground">{spec.label}</dt>
-                <dd className="font-medium">{spec.value}</dd>
+          {titled ? (
+            (specGroups ?? []).map((group, index) => (
+              <div key={group.title ?? `-${String(index)}`} className="flex flex-col gap-2">
+                {group.title !== null && (
+                  <h3 className="text-sm font-semibold tracking-wide text-muted-foreground">
+                    {group.title}
+                  </h3>
+                )}
+                <dl className="overflow-hidden rounded-2xl border bg-card text-sm">
+                  <SpecRows rows={group.rows} />
+                </dl>
               </div>
-            ))}
-          </dl>
+            ))
+          ) : (
+            <dl className="overflow-hidden rounded-2xl border bg-card text-sm">
+              <SpecRows rows={specs} />
+            </dl>
+          )}
         </section>
       )}
     </div>

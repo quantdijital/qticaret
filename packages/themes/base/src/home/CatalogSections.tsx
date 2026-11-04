@@ -1,5 +1,6 @@
 import { ArrowUpRight } from "lucide-react"
-import type { HomeSectionView, Translate } from "@qticaret/ui"
+import { ResponsiveImage } from "@qticaret/ui"
+import type { FormAction, HomeSectionView, Translate } from "@qticaret/ui"
 import { ProductGrid } from "../components/ProductCard"
 import { SectionHead, headingId } from "./SectionHead"
 
@@ -7,7 +8,11 @@ type Of<T extends HomeSectionView["type"]> = Extract<HomeSectionView, { type: T 
 
 const number = (index: number) => String(index + 1).padStart(2, "0")
 
-/** Categories as a numbered index in columns: any number fills it without gaps. */
+/**
+ * Categories as a numbered index in columns: any number fills it without
+ * gaps. A category with a picture (adr/0046 Ek 2026-11-04) shows it small
+ * in place of its number; the picture is decoration, the name the link.
+ */
 export function CategoriesSection({ section }: { section: Of<"categories"> }) {
   const id = headingId(section.id)
   return (
@@ -17,9 +22,19 @@ export function CategoriesSection({ section }: { section: Of<"categories"> }) {
         {section.categories.map((category, index) => (
           <li key={category.path} className="break-inside-avoid border-b last:border-0">
             <a href={category.path} className="group flex items-center gap-4 py-4">
-              <span className="tabular w-6 text-xs font-medium text-muted-foreground">
-                {number(index)}
-              </span>
+              {category.image ? (
+                <span className="size-11 shrink-0 overflow-hidden rounded-xl bg-muted">
+                  <ResponsiveImage
+                    image={{ ...category.image, alt: "" }}
+                    sizes="44px"
+                    className="size-full object-cover"
+                  />
+                </span>
+              ) : (
+                <span className="tabular w-6 text-xs font-medium text-muted-foreground">
+                  {number(index)}
+                </span>
+              )}
               <span className="font-heading flex-1 text-xl leading-tight transition-transform duration-300 group-hover:translate-x-1 lg:text-[1.375rem]">
                 {category.label}
               </span>
@@ -39,17 +54,19 @@ export function ProductsSection({
   section,
   t,
   eager,
+  quickAdd,
 }: {
   section: Of<"products">
   t: Translate
   eager: number
+  quickAdd?: FormAction | undefined
 }) {
   const id = headingId(section.id)
   return (
     <section aria-labelledby={id} className="flex flex-col gap-8">
       <SectionHead id={id} title={section.title} more={section.more} />
       {section.products.length > 0 ? (
-        <ProductGrid products={section.products} t={t} eager={eager} />
+        <ProductGrid products={section.products} t={t} eager={eager} quickAdd={quickAdd} />
       ) : (
         <p className="rounded-2xl border bg-card py-16 text-center text-muted-foreground">
           {section.empty}
