@@ -96,7 +96,14 @@ packages/themes/base/src/
 ├── layout/                    # çerçeve: AnnouncementBar, SiteHeader, CategoryNav, MobileMenu, SearchForm, SiteFooter (FooterMarks: ETBİS karekodu, ödeme ve kargo rozetleri), WhatsAppButton, BottomNav
 ├── components/                # ProductCard (QuickAddButton), Price, Breadcrumbs, Pages, ProductGallery, PurchasePanel, OptionPicker, QuantityField, AddonFields, LineAddons, ProductDetails (bölümlü özellikler), ProductCommunity (ReviewExtras: puan dağılımı, yorum fotoğrafları), TrustStrip, Container
 └── styles.css                 # temanın token değerleri
+packages/themes/atolye/src/    # ikinci tema (Hallmark Loom; kök `design.md`), adr/0057
+├── index.ts                   # { ...baseTheme, Layout, HomePage }: çizilmeyen sayfalar base'in, Atölye token'larıyla
+├── Layout.tsx, HomePage.tsx
+├── layout/, home/, components/
+└── styles.css                 # damga + sözleşme adları; tokens.css, base.css, controls.css
 apps/storefront/src/
+├── theme.ts                   # seçilen temanın tek okuyucusu (`@qticaret/storefront-theme`)
+├── themes/                    # tema girişleri: <ad>.ts (sayfalar, önyükleme, alınan ayarlar), <ad>.css (Tailwind girişi), choice.ts
 ├── app/                       # rotalar (sistem sayfaları sabit, gerisi [...path])
 ├── screens/                   # varlık türüne göre sayfa verisi
 ├── lib/views/                 # Store yanıtı → görünüm modeli (saf, testli); theme.ts tema ayarı → CSS
@@ -189,3 +196,11 @@ Mevcut sitenin (WooCommerce) sayfa sayfa envanteri `docs/gecis/mylarte/envanter.
 - [ ] LCP görseli `priority`, diğerleri tembel; CLS yok (görsel kutusu sabit oranlı)
 - [ ] SEO verisi ilk HTML'de; gizli kalan içerik yok
 - [ ] Konsolda CSP ihlali yok
+
+## 10. Temalar ve seçim (adr/0057, 2026-11-04)
+
+- **Seçim derleme anında:** `STOREFRONT_THEME` (`base` varsayılan, boş da `base`; `atolye`). `src/themes/choice.ts` adı okur, bilinmeyen adda derleme durur; `next.config.ts` Turbopack takma adlarıyla `@qticaret/storefront-theme` → `src/themes/<ad>.ts` ve `@qticaret/storefront-theme-styles` → `src/themes/<ad>.css`. `src/theme.ts` dışında hiçbir dosya tema paketi adlandırmaz. Birim testleri takma adla base temayı; temaya özel testler paketi doğrudan çizer (`src/test/theme-render.ts`: `renderPage(tema, "HomePage", …)`, `renderFrame`, `shopFixture`).
+- **Yerelde Atölye:** `STOREFRONT_THEME=atolye pnpm --filter @qticaret/storefront dev` (ya da başka portta `STOREFRONT_THEME=atolye npx next dev -p 8001`, `apps/storefront`'tan). Değişken `next dev` başlarken ve `next build`'te okunur; tema değiştirmek yeniden başlatma ister.
+- **Tema girişi (`ThemeEntry`):** sayfalar, önyüklenen yüz dosyaları, mağazanın tema ayarlarından alınanlar. Base: hepsi (bugünkü davranış). Atölye: ana renk (`--primary` → `--color-signal`; koyu kâğıtta aynı ton açılarak) ve kart görsel oranı; yazı tipi, köşe, düğme, zemin ve vurgu ayarı basılmaz (sahip, 2026-11-04). Atölye'nin yüzleri Libre Caslon Display 400 ve Hanken Grotesk 400/500, `latin` + Türkçe harf dosyaları (`THEME_OWN_FONT_FILES`, önyükleme ~58 KB).
+- **Atölye bugün:** çerçeve (duyuru bandı satırsız telefonda çizilmez, arama öncelikli yapışkan üst bilgi 106 px, mega menü HTML'de, çekmeceler, alt gezinme, WhatsApp ödeme/sepet/çekmecede yok, çerez bandı telefonun üçte birinden az, mast alt bilgi, kimlik satırları ayrı satırda) ve ana sayfa (açılış: başlık + mağazanın kendi ürün fotoğrafı; 1024 altında ilk altı kategori; kategoriler kum bandında cetvelli dizin; yan yana ürün bölümleri sekmeli raf; rehberler cetvelli satırlar; yorum, SSS, USP, e-bülten, afiş, marka bölümleri mağaza yerleştirince). Öteki sayfalar base'in, Atölye token'larıyla (kare köşe, ecru, Caslon/Hanken), sırayla çizilecek.
+- **Sözleşme bekleyenleri (⚑, denetim §7):** kategori görseli (görselli bento ve mega menü kartı), ürün kartında hızlı ekle ve stok kovası, kart puanı, yorum özeti/dağılımı ve fotoğrafı, gruplu `SpecView` (yakın plan bölümü), ETBİS karekodu ve izinli ödeme/kargo işaretleri. Bileşenler boş hâlde; alan gelince çizilir.
