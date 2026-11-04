@@ -71,6 +71,8 @@ Sürümler `apps/panel/package.json`'da exact ve ≥14 gün kuralıyla (docs/04)
 
 ---
 
+**Giriş sayfaları istisnası (kullanıcı kararı, 2026-11-04):** `/login`, `/reset-password`, `/invite`, `/security/setup` ve rolsüz sayfa `AuthShell` ile lg+'da iki sütun: solda ürün tanıtımı (`AuthIntro`: menü renk belirteçleri, solan ızgara çizgileri + hafif marka tonu, ad, vaat, dört değer satırı — başka yerde yasak olan tanıtım dili yalnız burada), sağda kenarlıksız kart üzerinde form; dar ekranda üstte ~70 px şerit; form kaynakta önce (klavye sırası). Mağaza logosu giriş öncesi herkese açık bir uç olmadığından gösterilmez.
+
 ## 4. Token katmanları
 
 Tek kaynak: `apps/panel/src/theme/tokens.css`. Üç katman; bileşenler yalnızca anlamsal ve bileşen token'larını kullanır, ham palete dokunmaz.

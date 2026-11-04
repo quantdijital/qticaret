@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { AuthHeading, AuthShell } from "@/features/auth/components/auth-shell"
+import { PasswordInput } from "@/features/auth/components/password-input"
 import { passwordRuleText } from "@/features/auth/password-rule"
 import { sdk } from "@/lib/sdk"
 import { linkParams } from "@/lib/link-params"
@@ -20,11 +22,11 @@ function RequestForm() {
     mutationFn: (identifier: string) => sdk.auth.resetPassword("user", "emailpass", { identifier }),
   })
   if (request.isSuccess) {
-    return <p className="mt-6 text-sm">{t("reset.sent")}</p>
+    return <p className="mt-8 text-sm">{t("reset.sent")}</p>
   }
   return (
     <form
-      className="mt-6 flex flex-col gap-4"
+      className="mt-8 flex flex-col gap-5"
       onSubmit={(event) => {
         event.preventDefault()
         request.mutate(email.trim())
@@ -65,7 +67,7 @@ function NewPasswordForm({ token }: { token: string }) {
   })
   if (change.isSuccess) {
     return (
-      <div className="mt-6 flex flex-col gap-4">
+      <div className="mt-8 flex flex-col gap-5">
         <p className="text-sm">{t("reset.changed")}</p>
         <Button asChild>
           <Link to="/login">{t("reset.toLogin")}</Link>
@@ -75,7 +77,7 @@ function NewPasswordForm({ token }: { token: string }) {
   }
   return (
     <form
-      className="mt-6 flex flex-col gap-4"
+      className="mt-8 flex flex-col gap-5"
       onSubmit={(event) => {
         event.preventDefault()
         change.mutate(password)
@@ -84,9 +86,8 @@ function NewPasswordForm({ token }: { token: string }) {
     >
       <div className="flex flex-col gap-2">
         <Label htmlFor="new-password">{t("reset.newPassword")}</Label>
-        <Input
+        <PasswordInput
           id="new-password"
-          type="password"
           autoComplete="new-password"
           aria-describedby="new-password-hint"
           value={password}
@@ -120,17 +121,15 @@ export function ResetPasswordPage() {
   // From the link's fragment; an older link's query still works
   const [token] = useState(() => linkParams().get("token") ?? search.token)
   return (
-    <div className="flex min-h-svh items-center justify-center bg-background p-6">
-      <div className="w-full max-w-sm rounded-lg border bg-card p-6">
-        <h1 className="text-lg font-semibold">{t(token ? "reset.newTitle" : "reset.title")}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {t(token ? "reset.newSubtitle" : "reset.subtitle")}
-        </p>
-        {token ? <NewPasswordForm token={token} /> : <RequestForm />}
-        <Button asChild variant="link" className="mt-4 h-auto px-0">
-          <Link to="/login">{t("reset.back")}</Link>
-        </Button>
-      </div>
-    </div>
+    <AuthShell>
+      <AuthHeading
+        title={t(token ? "reset.newTitle" : "reset.title")}
+        subtitle={t(token ? "reset.newSubtitle" : "reset.subtitle")}
+      />
+      {token ? <NewPasswordForm token={token} /> : <RequestForm />}
+      <Button asChild variant="link" className="mt-4 h-auto px-0">
+        <Link to="/login">{t("reset.back")}</Link>
+      </Button>
+    </AuthShell>
   )
 }

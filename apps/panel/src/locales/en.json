@@ -1,6 +1,7 @@
 {
   "app": {
     "name": "Panel",
+    "product": "Quant Ticaret",
     "skipToContent": "Skip to content",
     "subtitle": "Admin panel"
   },
@@ -81,7 +82,30 @@
       "useApp": "Use the app's code",
       "wrong": "The code is not right or has expired; try again."
     },
-    "forgot": "Forgot password"
+    "forgot": "Forgot password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "noAccount": "No account? Ask the shop's owner for an invitation.",
+    "intro": {
+      "promise": "Run your shop from one panel.",
+      "orders": {
+        "title": "Orders and shipping",
+        "text": "Every step from the order to its shipping label and return, in one flow."
+      },
+      "catalog": {
+        "title": "Catalog and SEO",
+        "text": "Get products, categories and brands ready to publish with SEO advice."
+      },
+      "marketing": {
+        "title": "Marketing and reports",
+        "text": "See how your promotions, coupons and bulk messages do in the reports."
+      },
+      "security": {
+        "title": "Security",
+        "text": "Two-step verification, role-based access and an audit log."
+      },
+      "footer": "For the shop team's authorised accounts only."
+    }
   },
   "dashboard": {
     "title": "Overview",

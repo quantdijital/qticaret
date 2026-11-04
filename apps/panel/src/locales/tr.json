@@ -1,6 +1,7 @@
 {
   "app": {
     "name": "Panel",
+    "product": "Quant Ticaret",
     "skipToContent": "İçeriğe geç",
     "subtitle": "Yönetim paneli"
   },
@@ -81,7 +82,30 @@
       "useApp": "Uygulamadaki kodu kullan",
       "wrong": "Kod doğru değil ya da süresi geçti; yeniden deneyin."
     },
-    "forgot": "Şifremi unuttum"
+    "forgot": "Şifremi unuttum",
+    "showPassword": "Şifreyi göster",
+    "hidePassword": "Şifreyi gizle",
+    "noAccount": "Hesabınız yoksa mağaza sahibinden davet isteyin.",
+    "intro": {
+      "promise": "Mağazanızı tek panelden yönetin.",
+      "orders": {
+        "title": "Siparişler ve kargo",
+        "text": "Siparişten kargo etiketine ve iadeye kadar her adım tek akışta."
+      },
+      "catalog": {
+        "title": "Katalog ve SEO",
+        "text": "Ürün, kategori ve markalarınızı SEO önerileriyle yayına hazırlayın."
+      },
+      "marketing": {
+        "title": "Pazarlama ve raporlar",
+        "text": "Kampanya, kupon ve toplu mesajlarınızın sonucunu raporlarda görün."
+      },
+      "security": {
+        "title": "Güvenlik",
+        "text": "İki adımlı doğrulama, rollere göre yetki ve denetim kaydı."
+      },
+      "footer": "Yalnızca mağaza ekibinin yetkili hesapları içindir."
+    }
   },
   "dashboard": {
     "title": "Genel bakış",

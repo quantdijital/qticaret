@@ -9,7 +9,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useLogin } from "@/features/auth/api/me"
 import type { MfaChallenge } from "@/features/auth/api/me"
+import { AuthHeading, AuthShell } from "@/features/auth/components/auth-shell"
 import { CodeStep } from "@/features/auth/components/code-step"
+import { PasswordInput } from "@/features/auth/components/password-input"
 import { errorText, isUnauthorized } from "@/lib/errors"
 
 const schema = z.object({
@@ -49,71 +51,72 @@ export function LoginPage() {
     : null
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-background p-6">
-      <div className="w-full max-w-sm rounded-lg border bg-card p-6">
-        <h1 className="text-lg font-semibold">
-          {t(challenge ? "login.mfa.title" : "login.title")}
-        </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          {t(challenge ? "login.mfa.subtitle" : "login.subtitle")}
-        </p>
-        {challenge ? (
-          <CodeStep
-            challenge={challenge}
-            onPassed={done}
-            onBack={() => {
-              setChallenge(null)
-              login.reset()
-            }}
-          />
-        ) : (
-          <form
-            className="mt-6 flex flex-col gap-4"
-            onSubmit={(event) => {
-              void submit(event)
-            }}
-            noValidate
-          >
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email">{t("login.email")}</Label>
-              <Input
-                id="email"
-                type="email"
-                autoComplete="username"
-                aria-invalid={errors.email ? true : undefined}
-                {...form.register("email")}
-              />
-              {errors.email?.message ? (
-                <p className="text-xs text-destructive">{t(errors.email.message)}</p>
-              ) : null}
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password">{t("login.password")}</Label>
-              <Input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                aria-invalid={errors.password ? true : undefined}
-                {...form.register("password")}
-              />
-              {errors.password?.message ? (
-                <p className="text-xs text-destructive">{t(errors.password.message)}</p>
-              ) : null}
-            </div>
-            {failure ? (
-              <p role="alert" className="text-sm text-destructive">
-                {failure}
-              </p>
+    <AuthShell
+      after={
+        challenge ? null : (
+          <p className="text-center text-[13px] text-muted-foreground">{t("login.noAccount")}</p>
+        )
+      }
+    >
+      <AuthHeading
+        title={t(challenge ? "login.mfa.title" : "login.title")}
+        subtitle={t(challenge ? "login.mfa.subtitle" : "login.subtitle")}
+      />
+      {challenge ? (
+        <CodeStep
+          challenge={challenge}
+          onPassed={done}
+          onBack={() => {
+            setChallenge(null)
+            login.reset()
+          }}
+        />
+      ) : (
+        <form
+          className="mt-8 flex flex-col gap-5"
+          onSubmit={(event) => {
+            void submit(event)
+          }}
+          noValidate
+        >
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="email">{t("login.email")}</Label>
+            <Input
+              id="email"
+              type="email"
+              autoComplete="username"
+              aria-invalid={errors.email ? true : undefined}
+              {...form.register("email")}
+            />
+            {errors.email?.message ? (
+              <p className="text-xs text-destructive">{t(errors.email.message)}</p>
             ) : null}
-            <Button type="submit" className="mt-2" disabled={login.isPending}>
-              {t("login.submit")}
-            </Button>
-            <Button asChild variant="link" className="h-auto self-start px-0">
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="password">{t("login.password")}</Label>
+            <PasswordInput
+              id="password"
+              autoComplete="current-password"
+              aria-invalid={errors.password ? true : undefined}
+              {...form.register("password")}
+            />
+            {errors.password?.message ? (
+              <p className="text-xs text-destructive">{t(errors.password.message)}</p>
+            ) : null}
+            <Button asChild variant="link" className="h-auto self-end px-0 text-[13px]">
               <Link to="/reset-password">{t("login.forgot")}</Link>
             </Button>
-          </form>
-        )}
-      </div>
-    </div>
+          </div>
+          {failure ? (
+            <p role="alert" className="text-sm text-destructive">
+              {failure}
+            </p>
+          ) : null}
+          <Button type="submit" className="w-full" disabled={login.isPending}>
+            {t("login.submit")}
+          </Button>
+        </form>
+      )}
+    </AuthShell>
   )
 }

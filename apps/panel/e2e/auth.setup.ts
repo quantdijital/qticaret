@@ -16,7 +16,8 @@ setup("signs a temporary admin in", async ({ page }) => {
   const signIn = async (code?: string) => {
     await page.goto("/login")
     await page.getByLabel("E-posta").fill(admin.email)
-    await page.getByLabel("Şifre").fill(admin.password)
+    // Exact: the field's own button is "Şifreyi göster"
+    await page.getByLabel("Şifre", { exact: true }).fill(admin.password)
     await page.getByRole("button", { name: "Giriş yap" }).click()
     if (code !== undefined) {
       await page.getByLabel("Doğrulama kodu").fill(code)

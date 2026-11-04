@@ -43,6 +43,25 @@ for (const path of SCREENS) {
   })
 }
 
+test.describe("signed out", () => {
+  test.use({ storageState: { cookies: [], origins: [] } })
+
+  // Before sign-in the colours are the defaults, whose mode follows the system's
+  for (const path of ["/login", "/reset-password", "/invite"]) {
+    test(`${path} has no serious accessibility issue, light or dark`, async ({ page }) => {
+      for (const mode of MODES) {
+        await test.step(mode, async () => {
+          await page.emulateMedia({ colorScheme: mode })
+          await page.goto(path)
+          await expect(pageHeading(page)).toBeVisible()
+          await page.waitForLoadState("networkidle")
+          expect(await seriousIssues(page)).toEqual([])
+        })
+      }
+    })
+  }
+})
+
 test("an order's page has no serious accessibility issue", async ({ page }) => {
   await page.goto("/orders")
   await page.getByRole("table").getByRole("link").first().click()

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -84,6 +84,39 @@ describe("LoginPage", () => {
       headers: { Authorization: "Bearer token" },
     })
     vi.unstubAllGlobals()
+  })
+
+  it("puts the form first and the product's introduction beside it, with nothing to focus", () => {
+    renderPage()
+
+    const form = screen.getByRole("main")
+    const intro = screen.getByRole("complementary", { name: "Quant Ticaret" })
+    expect(form.compareDocumentPosition(intro) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(within(form).getByRole("heading", { level: 1, name: "Giriş yap" })).toBeInTheDocument()
+    expect(within(intro).queryAllByRole("link")).toEqual([])
+    expect(within(intro).queryAllByRole("button")).toEqual([])
+  })
+
+  it("shows the typed password on request, and hides it again", async () => {
+    renderPage()
+    const password = screen.getByLabelText("Şifre")
+    expect(password).toHaveAttribute("type", "password")
+
+    await userEvent.click(screen.getByRole("button", { name: "Şifreyi göster" }))
+    expect(password).toHaveAttribute("type", "text")
+    await userEvent.click(screen.getByRole("button", { name: "Şifreyi gizle" }))
+
+    expect(password).toHaveAttribute("type", "password")
+  })
+
+  it("says the address or the password is wrong, and stays", async () => {
+    auth.login.mockRejectedValue(Object.assign(new Error("Unauthorized"), { status: 401 }))
+    renderPage()
+
+    await signIn()
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("E-posta ya da şifre hatalı.")
+    expect(navigate).not.toHaveBeenCalled()
   })
 
   it("signs in at once when no code is asked", async () => {

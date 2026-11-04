@@ -129,6 +129,32 @@
   }
 }
 
+/*
+ * The sign-in pages' introduction (features/auth/components/auth-intro.tsx;
+ * the owner, 2026-11-04): hairlines in the menu's border colour fading out
+ * from the top right, and the brand's colour faint in the bottom right,
+ * away from the text. Still, no movement; the menu's tokens, so every
+ * shop's colours and both modes draw it.
+ */
+@layer components {
+  .qt-auth-lines {
+    background-image:
+      linear-gradient(to right, var(--sidebar-border) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--sidebar-border) 1px, transparent 1px);
+    background-size: 3rem 3rem;
+    background-position: -1px -1px;
+    mask-image: radial-gradient(ellipse 75% 65% at 100% 0%, black 15%, transparent 75%);
+  }
+
+  .qt-auth-wash {
+    background-image: radial-gradient(
+      ellipse 60% 45% at 100% 100%,
+      color-mix(in oklch, var(--sidebar-primary) 14%, transparent),
+      transparent 75%
+    );
+  }
+}
+
 /* The content editor's text (F3.16): readable defaults, the theme's colours */
 @layer components {
   .qt-prose {

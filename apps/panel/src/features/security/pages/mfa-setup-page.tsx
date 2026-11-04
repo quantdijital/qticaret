@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useConfirmFactor, useRecoveryCodes, useStartFactor } from "@/features/auth/api/mfa"
 import { useCurrentUser, useLogout } from "@/features/auth/api/me"
+import { AuthHeading, AuthShell } from "@/features/auth/components/auth-shell"
+import { PasswordInput } from "@/features/auth/components/password-input"
 import { AuthenticatorLink } from "@/features/security/components/authenticator-link"
 import { RecoveryCodes } from "@/features/security/components/recovery-codes"
 import { errorText } from "@/lib/errors"
@@ -46,12 +48,12 @@ export function MfaSetupPage() {
   const failure = confirm.error ?? recovery.error
 
   return (
-    <div className="flex min-h-svh items-center justify-center bg-background p-6">
-      <div className="flex w-full max-w-lg flex-col gap-5 rounded-lg border bg-card p-6">
-        <div>
-          <h1 className="text-lg font-semibold">{t(`security.setup.${step}.title`)}</h1>
-          <p className="mt-1 text-sm text-muted-foreground">{t(`security.setup.${step}.text`)}</p>
-        </div>
+    <AuthShell wide>
+      <div className="flex flex-col gap-6">
+        <AuthHeading
+          title={t(`security.setup.${step}.title`)}
+          subtitle={t(`security.setup.${step}.text`)}
+        />
         {step === "app" ? (
           factor ? (
             <form
@@ -89,9 +91,8 @@ export function MfaSetupPage() {
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="setup-password">{t("security.setup.password")}</Label>
-                <Input
+                <PasswordInput
                   id="setup-password"
-                  type="password"
                   autoComplete="current-password"
                   value={password}
                   onChange={(event) => {
@@ -188,6 +189,6 @@ export function MfaSetupPage() {
           </Button>
         ) : null}
       </div>
-    </div>
+    </AuthShell>
   )
 }
