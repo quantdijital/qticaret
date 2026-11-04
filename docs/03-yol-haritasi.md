@@ -173,7 +173,7 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 - [x] Advisor skoru deterministik, p95 < 50 ms; eksik alt metin/GTIN/birincil kategori bulguları doğru (fixture'lı) — F3 T11 (`engine.unit.spec`; p95 ölçümü T16'da eklendi, yerelde ~4 ms)
 - [x] 404 günlüğündeki yol için doğru 301 hedefi öneriliyor; tek tıkla kural oluşuyor — F3 T3/T12 (`seo-resolve.spec`, `seo-audit.spec`)
 - [x] Sitemap 50.000'de bölünüyor, taslak/noindex dışarıda; robots facet parametrelerini engelliyor, landing yolunu engellemiyor — F3 T10/T14b (`robots-sitemap.unit.spec`, `seo-sitemap.spec`, `seo-facets.spec`)
-- [x] Özgünlük < %30 olan landing sayfası yayımlanamıyor (testli) — F3 T14a (`landings.spec`)
+- [x] Özgünlük < %30 olan landing sayfası yayımlanamıyor (testli) — F3 T14a (`landings.spec`). **2026-11-04 kullanıcı kararıyla değişti:** özgünlük ölçülür ve kırmızı gösterilir, advisor uyarır (L-UNIQ-01); yayın engellenmez (adr/0019 Ek 2026-11-04).
 - [x] Dışa aktarılan Excel'de formül başlangıçlı hücre kaçışlanmış — F3 T15 (`catalog-sheets-roundtrip.spec`)
 
 ---

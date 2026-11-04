@@ -102,3 +102,20 @@
 - **Açık:**
   - Fiyat listesinin başlaması ya da bitmesi resolve önbelleğini düşürmez (en çok 30 sn bayat kalır). Sitemap'i de kirli işaretlemez; değişiklik günlük tam yenilemede girer.
   - Vitrin menü eşlemesi (`workflows/storefront/menu-hrefs.ts`) `/kampanyalar`'ı henüz tanımıyor.
+
+## Ek (2026-11-04): içerik yayımında yalnız başlık istenir
+
+Kullanıcı kararı (2026-11-04): sert engel yalnız sağlayıcı ya da yasa reddettiğinde, müşteri bozuk çıktı göreceğinde ya da para veya güvenlik söz konusu olduğunda kalır. Gerisi ya bildiklerimizden kendiliğinden doldurulur ya da geçer (en çok sessiz bir ipucu).
+
+- **Adres (handle):** Sayfa ve yazıda istenen tek şey başlıktır.
+  - Elle yazılan adres, başlık gibi slug'a çevrilir (`Kargo Bilgisi` → `kargo-bilgisi`). Artık `catalog.handle_invalid` ile reddedilmez. Harf içermiyorsa başlığın slug'ı kullanılır.
+  - Adres yazılmamışsa ya da silinmişse başlıktan üretilir. Başka bir kayıt kullanıyorsa ilk boş `-2`, `-3`… alınır (en çok 50). Başka kayıt: aynı türden başka girdi, mağazanın kendi yolu (`/blog`) ya da URL kayıt defterinde başka bir kaydın yolu (silinmiş sayfanın 410'u).
+  - Elle yazılıp dolu çıkan adres kişinin seçimidir: `seo.path_taken` kalır.
+  - Bu kurallar `handleOf`'u kullanan filtre sayfalarında ve blog terimlerinde de geçerli. Ek sonek yalnız sayfa ve yazıda var.
+- **Belirteç:** Bilinmeyen `{belirteç}` vitrinde olduğu gibi görüneceği için red kalır. `content.token_unknown` artık hepsini sayar (`values.tokens`).
+- **Filtre sayfası özgünlüğü:** Özgünlük %30'un altındaysa yayın artık reddedilmez (`content.landing_not_original` kaldırıldı). Özgünlük yine ölçülür ve saklanır. Panel %30 altını kırmızı gösterir, advisor %40 altında uyarır (L-UNIQ-01). Yayına alıp almamak mağazanın kararı.
+- **Değişmeyenler:**
+  - Yayımla/yayından kaldır geri alınabilir olduğu için onay penceresi zaten yoktu. Onay yalnız silmede (geri alınamaz) var.
+  - Ürünlerin `seo.publish_gate` bayrağı mağazanın kendi seçimi olarak duruyor.
+  - Görsel yalnız mağazanın ortam kütüphanesinden gelebilir (güvenlik). Uzunluk sınırları veriyi aklı başında tutmak için duruyor.
+- **SEO alanları:** Hepsi isteğe bağlı; aynı başlık ya da açıklama yalnız uyarı. Panel girişleri sunucunun sınırında (başlık 150, açıklama 320, anahtar kelime 100) yazmayı durdurur. Böylece kayıt uzunluk yüzünden hiç reddedilmez.

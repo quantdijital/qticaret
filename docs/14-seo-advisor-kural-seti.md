@@ -121,7 +121,7 @@ Ad değişiklikleri (panel kuralı adının son kısmından tanır): L-EMPTY-01 
 
 | ID | Kural | Önem |
 |---|---|---|
-| L-UNIQ-01 | Diğer landing sayfalarıyla özgün içerik ≥ %40 (< %30 yayın engeli, kayıtta reddedilir) | K |
+| L-UNIQ-01 | Diğer landing sayfalarıyla özgün içerik ≥ %40 (< %30 kırmızı gösterilir; 2026-11-04'ten beri yayını engellemez, kullanıcı kararı) | K |
 | L-TEXT-01 | ≥ 300 kelime özgün metin | Y |
 | L-BATCH-01 | Son 14 günde ≤ 100 yeni landing yayını; sonraki parti için 2 hafta bekleme önerisi | Y |
 | L-REVIEW-01 | Son 14 günün partisinin ≥ %5'i "insan inceledi" işaretli (incelenmemiş sayfada uyarır) | O |
