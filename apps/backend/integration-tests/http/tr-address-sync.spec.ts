@@ -3,7 +3,12 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { TURKIYEAPI_IDS, fakeTurkiyeApiDataset, startFakeTurkiyeApi } from "@qticaret/testing"
 import type { FakeTurkiyeApi } from "@qticaret/testing"
 import trAddressSyncJob from "../../src/jobs/tr-address-sync"
+import { logger } from "../../src/lib/logging"
+import { ASYNC_JOB_MODULE } from "../../src/modules/async-job"
+import type AsyncJobModuleService from "../../src/modules/async-job/service"
 import { validateTrAddress } from "../../src/modules/tr-address/validation"
+import { enqueueAsyncJobWorkflow } from "../../src/workflows/async-job/enqueue-async-job"
+import { TR_ADDRESS_SYNC_JOB } from "../../src/workflows/async-job/types/tr-address-sync"
 import { createAdminUser } from "../helpers/admin"
 import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
@@ -24,22 +29,15 @@ interface Job {
   error_message: string | null
 }
 
-interface Status {
-  provinces: number
-  districts: number
-  neighborhoods: number
-  villages: number
-  source: string | null
-  dataset_version: string | null
-  last_updated: string | null
-  last_sync_at: string | null
-  job: Job | null
-}
-
 const finished = (job: Job | undefined) =>
   job !== undefined && job.status !== "queued" && job.status !== "running"
 
-/** adr/0008 Ek 2026-11-04: the address data from TürkiyeAPI (a fake one here; never the real API). */
+/**
+ * adr/0008 Ek 2026-11-04: the address data from TürkiyeAPI (a fake one
+ * here; never the real API), kept by the platform: the weekly check
+ * queues the sync job, the CLI imports by hand. The shop's panel has no
+ * surface for it (the owner's ruling, 2026-11-04).
+ */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
@@ -66,19 +64,40 @@ medusaIntegrationTestRunner({
       owner = await createAdminUser(http, getContainer())
       storefront = await createStorefront(getContainer())
     })
+    afterEach(() => {
+      jest.restoreAllMocks()
+    })
 
-    const status = async (headers = owner.headers) =>
-      (await http.get<Status>("/admin/tr-address/status", { headers })).data
+    // What the operator reads (the module, the newest sync record): no admin route says it
+    const data = async () => {
+      const service = trAddressService(getContainer())
+      const latest = await service.latestSync()
+      return {
+        ...(await service.countActive()),
+        source: latest?.source ?? null,
+        dataset_version: latest?.dataset_version ?? null,
+        last_updated: latest?.dataset_last_updated ?? null,
+      }
+    }
+    const latestJobId = async () => {
+      const [job] = await getContainer()
+        .resolve<AsyncJobModuleService>(ASYNC_JOB_MODULE)
+        .listAsyncJobs(
+          { type: TR_ADDRESS_SYNC_JOB },
+          { order: { created_at: "DESC", id: "DESC" }, take: 1 }
+        )
+      return job?.id ?? null
+    }
     const job = async (id: string) =>
       (await http.get<{ async_job: Job }>(`/admin/async-jobs/${id}`, { headers: owner.headers }))
         .data.async_job
     const waitFor = (id: string) => eventually(() => job(id), finished, 150)
+    // The job as the weekly check queues it, without its version check: a sync now
     const sync = async () => {
-      const started = await settle(
-        http.post<{ async_job: Job }>("/admin/tr-address/sync", {}, { headers: owner.headers })
-      )
-      expect(started.status).toBe(202)
-      return waitFor(started.data.async_job.id)
+      const { result } = await enqueueAsyncJobWorkflow(getContainer()).run({
+        input: { type: TR_ADDRESS_SYNC_JOB, input: { only_if_changed: false }, requested_by: null },
+      })
+      return waitFor(result.id)
     }
     const districtId = async (container: MedusaContainer, externalId: number) =>
       (
@@ -94,8 +113,8 @@ medusaIntegrationTestRunner({
         )
       ).data.neighborhoods
 
-    it("the owner syncs: a job with a report, the status, the lists and the audit log", async () => {
-      expect(await status()).toMatchObject({ provinces: 0, dataset_version: null, job: null })
+    it("syncs as a job with a report: the data, the store lists and the audit log", async () => {
+      expect(await data()).toMatchObject({ provinces: 0, dataset_version: null })
 
       const done = await sync()
 
@@ -110,7 +129,7 @@ medusaIntegrationTestRunner({
         neighborhoods: { created: 13 },
         rejected: 0,
       })
-      expect(await status()).toMatchObject({
+      expect(await data()).toEqual({
         provinces: 81,
         districts: 83,
         neighborhoods: 13,
@@ -118,7 +137,6 @@ medusaIntegrationTestRunner({
         source: "turkiyeapi",
         dataset_version: "2025",
         last_updated: "2026-05-21",
-        job: { id: done.id, status: "succeeded" },
       })
       // The storefront's contract is as before: names it writes into the address
       const sandikli = await neighborhoodsOf(TURKIYEAPI_IDS.sandikli)
@@ -132,11 +150,12 @@ medusaIntegrationTestRunner({
       expect(Object.keys(sandikli[0] ?? {}).sort()).toEqual(["id", "name", "postal_code"])
       expect(fake.requests).toContain("/v2/datasets/neighborhoods.json")
 
-      const audit = await http.get<{ audit_entries: { action: string; changes: unknown }[] }>(
-        "/admin/audit-log?resource_type=tr_address&limit=10",
-        { headers: owner.headers }
+      const audit = await http.get<{
+        audit_entries: { action: string; actor_type: string }[]
+      }>("/admin/audit-log?resource_type=tr_address&limit=10", { headers: owner.headers })
+      expect(audit.data.audit_entries).toContainEqual(
+        expect.objectContaining({ action: "tr_address.imported", actor_type: "system" })
       )
-      expect(audit.data.audit_entries.map((entry) => entry.action)).toContain("tr_address.imported")
     })
 
     it("changes nothing the second time; a renamed and a removed place come through", async () => {
@@ -164,26 +183,34 @@ medusaIntegrationTestRunner({
       ])
     })
 
-    it("is the owner's to start; every role reads the status", async () => {
-      const admin = await createAdminUser(http, getContainer(), "admin")
-      const readonly = await createAdminUser(http, getContainer(), "readonly")
+    it("offers the shop no way to read or start it: the platform keeps it", async () => {
+      const status = await settle(http.get("/admin/tr-address/status", { headers: owner.headers }))
+      const start = await settle(
+        http.post("/admin/tr-address/sync", {}, { headers: owner.headers })
+      )
+      const viaJobs = await settle(
+        http.post<{ message?: string }>(
+          "/admin/async-jobs",
+          { type: TR_ADDRESS_SYNC_JOB },
+          { headers: owner.headers }
+        )
+      )
 
-      const refused = await settle(
-        http.post("/admin/tr-address/sync", {}, { headers: admin.headers })
-      )
-      expect(refused.status).toBe(403)
+      expect(status.status).toBe(404)
+      expect(start.status).toBe(404)
+      expect(viaJobs.status).toBe(400)
+      expect(viaJobs.data.message).toBe("async_job.type_unknown")
+      expect(await latestJobId()).toBeNull()
+      // The warehouse forms' lists stay
       expect(
-        (await settle(http.get("/admin/tr-address/status", { headers: readonly.headers }))).status
+        (await settle(http.get("/admin/tr-address/provinces", { headers: owner.headers }))).status
       ).toBe(200)
-      const extra = await settle(
-        http.post("/admin/tr-address/sync", { source: "file" }, { headers: owner.headers })
-      )
-      expect(extra.status).toBe(400)
     })
 
-    it("fails with its reason when TürkiyeAPI is down, and leaves the data as it was", async () => {
+    it("fails with its reason when TürkiyeAPI is down, logs it for the operator, keeps the data", async () => {
       await loadTrAddressFixture(getContainer())
       fake.down = true
+      const errors = jest.spyOn(logger, "error")
 
       const failed = await sync()
 
@@ -192,28 +219,31 @@ medusaIntegrationTestRunner({
         error_code: "tr_address.source_unavailable",
       })
       expect(failed.error_message).toContain("TürkiyeAPI")
-      expect(await status()).toMatchObject({ provinces: 6, source: null })
+      expect(errors).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: "tr_address.sync_failed",
+          jobId: failed.id,
+          code: "tr_address.source_unavailable",
+        })
+      )
+      expect(await data()).toMatchObject({ provinces: 6, source: null })
     })
 
     it("pages through the lists when the dataset files fail", async () => {
       fake.failFiles = true
 
       expect(await sync()).toMatchObject({ status: "succeeded" })
-      expect((await status()).neighborhoods).toBe(13)
+      expect((await data()).neighborhoods).toBe(13)
       expect(fake.requests).toContain("/v2/neighborhoods")
     })
 
     it("checks weekly and queues a sync only for a dataset the shop does not have", async () => {
       // The scheduled job's run: the sync it queued, finished, or none
       const weekly = async () => {
-        const before = (await status()).job?.id ?? null
+        const before = await latestJobId()
         await trAddressSyncJob(getContainer())
-        const after = await eventually(
-          () => status(),
-          (now) => now.job === null || now.job.id === before || finished(now.job),
-          150
-        )
-        return after.job?.id === before ? null : after.job
+        const after = await latestJobId()
+        return after === null || after === before ? null : waitFor(after)
       }
 
       // No data yet: synced
@@ -229,7 +259,22 @@ medusaIntegrationTestRunner({
         last_updated: "2026-11-01",
         neighborhoods: { created: 0, updated: 0, unchanged: 13 },
       })
-      expect(await status()).toMatchObject({ last_updated: "2026-11-01" })
+      expect(await data()).toMatchObject({ last_updated: "2026-11-01" })
+    })
+
+    it("logs a failed weekly check for the operator and queues nothing", async () => {
+      fake.down = true
+      const errors = jest.spyOn(logger, "error")
+
+      await trAddressSyncJob(getContainer())
+
+      expect(errors).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: "tr_address.check_failed",
+          code: "tr_address.source_unavailable",
+        })
+      )
+      expect(await latestJobId()).toBeNull()
     })
 
     it("holds a postal code to the neighbourhood's only when it is PTT's own", async () => {

@@ -210,7 +210,6 @@ describe("staff roles", () => {
       searchSynonyms: true,
       legalTexts: true,
       vatRates: true,
-      trAddressSync: true,
     })
     expect(capabilitiesOf("admin")).toMatchObject({
       settings: true,
@@ -232,7 +231,6 @@ describe("staff roles", () => {
       searchSynonyms: true,
       legalTexts: true,
       vatRates: false,
-      trAddressSync: false,
     })
     expect(capabilitiesOf("operations")).toEqual({
       settings: false,
@@ -260,7 +258,6 @@ describe("staff roles", () => {
       searchSynonyms: false,
       legalTexts: false,
       vatRates: false,
-      trAddressSync: false,
     })
     expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
     expect(Object.values(capabilitiesOf(null)).every((can) => !can)).toBe(true)
@@ -314,15 +311,6 @@ describe("staff roles", () => {
       expect(allowed(role, "GET", "/admin/vat-rates")).toBe(true)
       // Medusa's own lists stay readable; the panel reads the rates from ours
       expect(allowed(role, "GET", "/admin/product-types")).toBe(true)
-    }
-  })
-
-  it("leaves the address data's sync to the owner (trAddressSync); every role reads its state", () => {
-    for (const role of STAFF_ROLES) {
-      const can = capabilitiesOf(role).trAddressSync
-      expect(can).toBe(role === "owner")
-      expect(allowed(role, "POST", "/admin/tr-address/sync")).toBe(can)
-      expect(allowed(role, "GET", "/admin/tr-address/status")).toBe(true)
     }
   })
 })
@@ -515,8 +503,6 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/vat-rates": false,
   "POST /admin/vat-rates/:id": false,
   "POST /admin/vat-rates/default": false,
-  // adr/0008 Ek 2026-11-04: the address data's TürkiyeAPI sync, the owner's
-  "POST /admin/tr-address/sync": false,
   "POST /admin/storefront-menus": false,
   "POST /admin/storefront-menus/:id": false,
   "DELETE /admin/storefront-menus/:id": false,

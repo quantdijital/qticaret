@@ -13,10 +13,10 @@ export type { ImportTrAddressInput, TrAddressImportSummary, TrAddressSource } fr
 
 /**
  * Imports the Turkish address reference data (adr/0008, Ek 2026-11-04):
- * from TürkiyeAPI (`POST /admin/tr-address/sync`'s job, the weekly
- * check, the CLI, provisioning) or from a file (the CLI). With
- * `only_if_changed`, a dataset the shop already has is not downloaded.
- * The import is recorded in the audit log with its counts.
+ * from TürkiyeAPI (the weekly check's job, the CLI, provisioning) or
+ * from a file (the CLI). With `only_if_changed`, a dataset the shop
+ * already has is not downloaded. The import is recorded in the audit log
+ * with its counts.
  */
 export const importTrAddressWorkflow = createWorkflow(
   "tr-address-import",

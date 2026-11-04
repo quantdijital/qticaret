@@ -80,7 +80,6 @@ import { PRICING_ROUTES } from "./http/pricing-routes"
 import { PROMOTION_ROUTES } from "./http/promotion-routes"
 import { SEO_ROUTES } from "./http/seo-routes"
 import { STOCK_ROUTES } from "./http/stock-routes"
-import { TR_ADDRESS_ROUTES } from "./http/tr-address-routes"
 import { uploadValidator } from "./http/upload-validator"
 import { StorePostPrivacyRequest } from "./store/customers/me/privacy-requests/validators"
 import { StorePostBillingProfile } from "./store/customers/me/billing-profile/validators"
@@ -308,8 +307,6 @@ export default defineMiddlewares({
     ...FRAUD_ROUTES,
     // F3.7: warehouses
     ...STOCK_ROUTES,
-    // adr/0008 Ek 2026-11-04: the address data's state and its TürkiyeAPI sync
-    ...TR_ADDRESS_ROUTES,
     // F3.3: product images
     ...MEDIA_ROUTES,
     // F4.4/F4.6: promotion codes

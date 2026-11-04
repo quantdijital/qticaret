@@ -11,6 +11,12 @@ import { checkTrAddressVersionWorkflow } from "../workflows/tr-address/check-tr-
  * queues the sync job, which checks again and downloads. A shop without
  * any data gets it. TürkiyeAPI publishes about once a year.
  *
+ * Self-sufficient: the shop's panel has no address data surface (the
+ * owner's ruling, 2026-11-04). A failed check is logged at error level as
+ * `tr_address.check_failed`, a failed sync by its job as
+ * `tr_address.sync_failed`; the operator's alerting watches both and the
+ * CLI (`tr-address:import source=turkiyeapi`) is the manual way.
+ *
  * Weekly, not monthly: Medusa's in-process scheduler (development, tests)
  * waits for the next run with a timer, and Node fires a timer longer than
  * 24.8 days at once, so a monthly schedule would run in a loop.
@@ -26,10 +32,10 @@ export default async function trAddressSync(container: MedusaContainer) {
     })
   } catch (error) {
     if (isConflictError(error)) {
-      // A sync (the owner's) is already queued or running
+      // A sync is already queued or running (an earlier check's, still downloading)
       return
     }
-    logger.warn({
+    logger.error({
       event: "tr_address.check_failed",
       code: isValidationError(error) ? error.safeMessage : "failed",
       err: errorSummary(error),

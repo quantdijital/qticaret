@@ -9,9 +9,9 @@ import { importTrAddressWorkflow } from "../../workflows/tr-address/import-tr-ad
  * A new shop gets the whole country's address data from TürkiyeAPI
  * (adr/0008 Ek 2026-11-04) when it never had an import: provisioning and
  * the demo seed call this. Without the network it is skipped with a
- * warning, never failing the command: the panel's card then says no data
- * is loaded and offers the button, and the weekly check fills it in. An
- * import done before (TürkiyeAPI's or an operator's file) is kept.
+ * warning, never failing the command: the weekly check fills it in, or
+ * the operator runs `tr-address:import source=turkiyeapi`. An import
+ * done before (TürkiyeAPI's or an operator's file) is kept.
  */
 export async function ensureTrAddressData(container: MedusaContainer): Promise<void> {
   const service = container.resolve<TrAddressModuleService>(TR_ADDRESS_MODULE)
@@ -40,7 +40,7 @@ export async function ensureTrAddressData(container: MedusaContainer): Promise<v
         event: "tr_address.data_not_loaded",
         code: isValidationError(error) ? error.safeMessage : "failed",
       },
-      "address data not loaded (is the network up?): use Settings > Shipping > Address data, or tr-address:import source=turkiyeapi"
+      "address data not loaded (is the network up?): the weekly check retries, or run tr-address:import source=turkiyeapi"
     )
   }
 }

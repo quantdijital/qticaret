@@ -14,8 +14,10 @@ import { parseImportArgs } from "./tr-address/args"
  * neighbourhood and village), checked complete before anything is written;
  * places it no longer has are marked inactive, never deleted. A file is an
  * operator's own data (never committed); `deactivate-missing` only with a
- * complete national file. Runs the same workflow as the panel's button,
- * so the import is recorded and audited the same way.
+ * complete national file. Runs the same workflow as the weekly check's
+ * job, so the import is recorded and audited the same way. The
+ * operator's tool: the shop's panel has no address data surface
+ * (adr/0008 Ek 2026-11-04, the owner's ruling).
  */
 export default async function run({ container, args }: ExecArgs): Promise<void> {
   const input = parseImportArgs(args)

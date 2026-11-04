@@ -38,7 +38,7 @@ describe("job types", () => {
     })
   })
 
-  it("syncs the address data one run at a time, through its own route only", () => {
+  it("syncs the address data one run at a time, never through the jobs route", () => {
     expect(jobType("tr_address.sync")).toMatchObject({
       singleton: true,
       internal: true,
