@@ -59,6 +59,7 @@ Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, ta
 | Ayarlar > Özellikler | Sayfa | Feature flag'ler |
 | Ayarlar > Yasal metinler | Sayfa | Sürümlü sözleşme editörü |
 | Ayarlar > Mağaza künyesi | Sayfa | Unvan, MERSİS, VKN, KEP, ETBİS; eksik alan uyarısı (F13) |
+| Ayarlar > Fatura ve muhasebe > KDV oranları (`?part=vat`; 2026-11-04, adr/0007 Ek) | Sekme: kart içinde tablo | Ad (varsayılan ve kaldırılmış rozeti), oran, bağlı ürün sayısı (varsayılanın: oran seçilmemiş ürünler). Bir cümle: fiyatlar KDV dahil girilir, oran ürün başına seçilir. "Oran ekle" (küçük diyalog: `NumberField` % ekli, 2 ondalık; ad "KDV %X" olarak dolar, elle yazılınca yüzdeyi izlemez); satır menüsü: yeniden adlandır, varsayılan yap (onayla; ne değiştiğini söyler), kaldır (varsayılan ya da ürünü olan oranda kapalı, neden menüde yazar; diğerinde onayla), kaldırılmışı geri al. Yalnızca sahip yazar (`vatRates`); diğer roller tabloyu eylemsiz görür. Ürün formundaki KDV seçimi bu oranları "Varsayılan (KDV %20)" ile listeler |
 | Denetim kaydı | Sayfa | Tür sekmeleri; kişi, kaynak (gruplu) ve tarih süzgeçleri adreste; satır yan panelde açılır (sonuç, istek kimliği, IP, tarayıcı, alan alan değişiklik); dışa aktarım aynı süzgeçlerle (F12.5) |
 | İçe/dışa aktarma | Sayfa | Şablon indir, dosya yükle, ilerleme, satır bazlı hata raporu (F3) |
 | Toplu düzenleme | Ürün listesi (seçim çubuğu + pencere) | Fiyat, stok, yayın durumu, kategori, SEO şablonu, eksik alt metin; iş olarak koşar, rapor indirilir (F3.10) |

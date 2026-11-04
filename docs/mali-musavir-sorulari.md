@@ -50,6 +50,7 @@ numarası girmiyor.
 **2.5 KDV oranları.** Ürünlerde %20, %10 ve %1 oranları seçilebiliyor. Oranı mağaza ürün bazında giriyor.
 - _Soru:_ Mağazanın sattığı ürün grupları için doğru oranları sizden almamız gerekiyor. Listeyi paylaşabilir misiniz?
 - _Cevap:_ Ürün gruplarına göre farklı; mağaza oranı ürün bazında girer.
+- _Not (2026-11-04):_ Oranlar panelden yönetilir (Ayarlar > Fatura ve muhasebe > KDV oranları; adr/0007 Ek): mağaza sahibi yeni oran ekler, kullanılmayanı kaldırır, varsayılan oranı değiştirir. Fiyat KDV dahil kalır; fatura her satırın oranını o satırın vergi satırından okur, geçmiş faturalar kendi oranını korur.
 
 ## 3. Ödeme yolu ve internet satışı bilgileri
 
