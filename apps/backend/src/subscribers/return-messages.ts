@@ -3,6 +3,7 @@ import type { MessageTemplateName } from "../lib/messaging/templates"
 import { sendMessageWorkflow } from "../workflows/messaging/send-message"
 import {
   RETURN_REQUEST_APPROVED,
+  RETURN_REQUEST_CANCELED,
   RETURN_REQUEST_CREATED,
   RETURN_REQUEST_REFUSED,
 } from "../workflows/returns/events"
@@ -13,11 +14,13 @@ const TEMPLATES: Readonly<Record<string, MessageTemplateName>> = {
   [RETURN_REQUEST_APPROVED]: "return.approved",
   [RETURN_REFUNDED]: "return.refunded",
   [RETURN_REQUEST_REFUSED]: "return.refused",
+  [RETURN_REQUEST_CANCELED]: "return.canceled",
 }
 
 /**
  * A return or exchange request's messages (F9.4): received, approved,
- * refunded, and units refused at receipt (adr/0032 Ek 2026-11-03).
+ * refunded, units refused at receipt (adr/0032 Ek 2026-11-03), and an
+ * approval staff took back (order #691).
  */
 export default async function returnMessages({
   event: { name, data },
@@ -30,5 +33,11 @@ export default async function returnMessages({
 }
 
 export const config: SubscriberConfig = {
-  event: [RETURN_REQUEST_CREATED, RETURN_REQUEST_APPROVED, RETURN_REFUNDED, RETURN_REQUEST_REFUSED],
+  event: [
+    RETURN_REQUEST_CREATED,
+    RETURN_REQUEST_APPROVED,
+    RETURN_REFUNDED,
+    RETURN_REQUEST_REFUSED,
+    RETURN_REQUEST_CANCELED,
+  ],
 }

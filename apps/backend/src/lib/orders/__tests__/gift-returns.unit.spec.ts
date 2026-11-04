@@ -5,6 +5,7 @@ import {
   giftReturnProblem,
   giftReturnable,
   giftWindowOpen,
+  giftWindowState,
   untouchedCard,
   voidingDebits,
 } from "../gift-returns"
@@ -37,6 +38,12 @@ describe("withdrawing from a gift card", () => {
     expect(giftReturnProblem(asked(2), unused, back, later(13), 14)).toBeNull()
     expect(giftReturnable(line([card("a"), card("b")]), 0, 0)).toBe(2)
     expect(giftWindowOpen(line([card("a")]), later(14), 14)).toBe(true)
+  })
+
+  it("says why the line's window is shut: no card sent yet, or its period over", () => {
+    expect(giftWindowState(line([]), later(1), 14)).toBe("not_yet")
+    expect(giftWindowState(line([card("a")]), later(14), 14)).toBe("open")
+    expect(giftWindowState(line([card("a")]), later(15), 14)).toBe("expired")
   })
 
   it("is out once any card of the line was spent, whatever was left on it", () => {

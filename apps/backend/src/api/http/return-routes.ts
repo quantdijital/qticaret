@@ -3,6 +3,7 @@ import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import {
   AdminGetReturnRequests,
   AdminPostReturnApprove,
+  AdminPostReturnCancel,
   AdminPostReturnReceive,
   AdminPostReturnRefund,
   AdminPostReturnReject,
@@ -59,6 +60,12 @@ export const RETURN_ROUTES = [
     matcher: "/admin/return-requests/:id/reject",
     methods: ["POST" as const],
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostReturnReject)],
+  },
+  // An approval taken back before anything came back (order #691)
+  {
+    matcher: "/admin/return-requests/:id/cancel",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostReturnCancel)],
   },
   {
     matcher: "/admin/return-requests/:id/receive",

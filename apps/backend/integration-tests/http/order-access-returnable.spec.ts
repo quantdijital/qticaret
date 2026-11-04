@@ -21,6 +21,8 @@ jest.setTimeout(240 * 1000)
 interface Returnable {
   window_open: boolean
   open_request: boolean
+  cancellable: boolean
+  cancel_refusal: string | null
   lines: Record<string, unknown>[]
   message?: string
 }
@@ -33,6 +35,8 @@ const LINE_FIELDS = [
   "variant_id",
   "variant_title",
   "variants",
+  "window_closed_reason",
+  "window_open",
   "withdrawal_excluded",
   "withdrawal_excluded_reason",
   "withdrawal_warning",
@@ -151,8 +155,20 @@ medusaIntegrationTestRunner({
       const found = await read(orderId, "returnable")
 
       expect(found.status).toBe(200)
-      expect(Object.keys(found.data).sort()).toEqual(["lines", "open_request", "window_open"])
-      expect(found.data).toMatchObject({ window_open: true, open_request: false })
+      expect(Object.keys(found.data).sort()).toEqual([
+        "cancel_refusal",
+        "cancellable",
+        "lines",
+        "open_request",
+        "window_open",
+      ])
+      // A card it sent was spent: the order is not cancelled, by the cancel's own rule
+      expect(found.data).toMatchObject({
+        window_open: true,
+        open_request: false,
+        cancellable: false,
+        cancel_refusal: "orders.gift_card_used",
+      })
       for (const line of found.data.lines) {
         expect(Object.keys(line).sort()).toEqual(LINE_FIELDS)
       }
@@ -168,6 +184,9 @@ medusaIntegrationTestRunner({
         gift_card: true,
         withdrawal_excluded: false,
         withdrawal_excluded_reason: null,
+        // A gift line's window runs from its cards, whatever the parcels
+        window_open: true,
+        window_closed_reason: null,
       })
     })
 

@@ -1,8 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
-import { RETURN_ORDER_FIELDS, counted, returnable, windowOpen } from "../../lib/orders/returns"
-import type { ReturnOrderFacts } from "../../lib/orders/returns"
-import { giftReturnable, giftWindowOpen } from "../../lib/orders/gift-returns"
+import { RETURN_ORDER_FIELDS, counted, returnable, windowState } from "../../lib/orders/returns"
+import type { ReturnOrderFacts, WindowState } from "../../lib/orders/returns"
+import { giftReturnable, giftWindowOpen, giftWindowState } from "../../lib/orders/gift-returns"
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
@@ -10,6 +10,9 @@ import type ReturnRequestsModuleService from "../../modules/return-requests/serv
 import { COUNTED_RETURN_STATUSES, OPEN_RETURN_STATUSES } from "../../modules/return-requests/states"
 import { giftLinesOf } from "./gift-lines"
 import { returnPolicy, withdrawalFactsOf } from "./policy"
+
+const closedReason = (state: WindowState): Exclude<WindowState, "open"> | null =>
+  state === "open" ? null : state
 
 interface LineFacts {
   id: string
@@ -22,8 +25,9 @@ interface LineFacts {
 /**
  * What staff may ask back for a shopper (F12.3): each line's units left
  * to return, by the same rules a shopper's request meets (`requestReturn`),
- * the product's variants to exchange it for, whether the window is open
- * and whether a request is already open, and why a line is outside the
+ * the product's variants to exchange it for, whether its window is open
+ * (each line by its own kind and dates, and why not) and whether a
+ * request is already open, and why a line is outside the
  * right of withdrawal or what it warns of (a sealed good, adr/0032 Ek
  * 2026-11-03). A gift card line's units are its cards, while none
  * was spent and within the period from the day they were sent (adr/0025,
@@ -103,10 +107,18 @@ export async function returnableLines(
       ),
     ])
   )
+  // Each line by its own kind: the parcels' window for goods, its cards' for a gift line
+  const parcels = windowState(order, now, policy.withdrawal_days)
+  const windowOf = (id: string): WindowState => {
+    if (order.status === "canceled") {
+      return "order_canceled"
+    }
+    const gift = gifts.get(id)
+    return gift ? giftWindowState(gift, now, policy.withdrawal_days) : parcels
+  }
   return {
-    window_open:
-      order.status !== "canceled" &&
-      (windowOpen(order, now, policy.withdrawal_days) || giftOpen.length > 0),
+    /** Any line's window open (the request's own check is per line, `requestReturn`). */
+    window_open: order.status !== "canceled" && (parcels === "open" || giftOpen.length > 0),
     open_request: earlier.some((request) =>
       (OPEN_RETURN_STATUSES as readonly string[]).includes(request.status)
     ),
@@ -116,6 +128,10 @@ export async function returnableLines(
       variant_title: item.variant_title ?? null,
       variant_id: item.variant_id ?? null,
       returnable: left.get(item.id) ?? 0,
+      /** This line's window, by its kind and dates: what `requestReturn` checks it by. */
+      window_open: windowOf(item.id) === "open",
+      /** Why it is shut: `not_yet`, `expired`, `order_canceled`; null while open. */
+      window_closed_reason: closedReason(windowOf(item.id)),
       // Outside the right of withdrawal: back only as faulty or wrong (F13.6)
       withdrawal_excluded: excluded.has(item.id),
       /** `product`, `personal_addon` or `gift_card_used`; null inside the right. */

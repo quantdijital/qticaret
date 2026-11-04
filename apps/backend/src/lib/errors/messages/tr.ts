@@ -345,6 +345,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "returns.use_return_requests":
     "İade, değişim ve talepler yalnızca iade talepleri ekranından yürütülür.",
   "returns.carrier_refused": "Kargo firması iade gönderisini açmadı; birazdan tekrar deneyin.",
+  "returns.cancel_handed_over":
+    "Müşteri ürünü kargoya vermiş; talep iptal edilemez. Ürün depoya ulaşınca teslim alın.",
+  "returns.cancel_received": "Bu talepte teslim alınmış ürün var; talep iptal edilemez.",
+  "returns.cancel_exchange_collected":
+    "Bu değişimde müşteriden fark tahsil edildi; talep buradan iptal edilemez. Ürünü teslim alın ya da farkı müşteriye elle iade edip mağaza yöneticisine başvurun.",
   "returns.refund_failed":
     'Ürünler teslim alındı ama para iadesi yapılamadı; "Para iadesini tekrar dene" ile yineleyin.',
   "aras.customer_code_invalid": "Müşteri kodu en çok 20 harf ve rakam olabilir.",

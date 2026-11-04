@@ -229,6 +229,7 @@ medusaIntegrationTestRunner({
           withdrawal_excluded: false,
           withdrawal_excluded_reason: null,
           withdrawal_warning: "sealed_goods",
+          gift_card: false,
         },
       ])
       const sealed = { withdrawal_excluded: false, withdrawal_warning: "sealed_goods" }
@@ -245,6 +246,7 @@ medusaIntegrationTestRunner({
           withdrawal_excluded: false,
           withdrawal_excluded_reason: null,
           withdrawal_warning: null,
+          gift_card: false,
         },
       ])
     })

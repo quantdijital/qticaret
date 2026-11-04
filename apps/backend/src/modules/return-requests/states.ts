@@ -23,6 +23,14 @@ export const RETURN_STATUSES = [
 ] as const
 export type ReturnStatus = (typeof RETURN_STATUSES)[number]
 
+/**
+ * Why a request was cancelled: staff withdrew an approval before anything
+ * came back (the shopper gave up, or it was a mistake), or the order's
+ * cancel closed a request still waiting (a gift card line's, adr/0025).
+ */
+export const RETURN_CANCEL_CAUSES = ["staff", "order_canceled"] as const
+export type ReturnCancelCause = (typeof RETURN_CANCEL_CAUSES)[number]
+
 /** Still being dealt with: an order has at most one request in these. */
 export const OPEN_RETURN_STATUSES = ["requested", "approved"] as const
 

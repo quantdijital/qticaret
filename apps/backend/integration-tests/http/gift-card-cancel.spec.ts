@@ -1,6 +1,8 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { debitAccountsWorkflow } from "@medusajs/loyalty-plugin/workflows"
+import { RETURN_REQUESTS_MODULE } from "../../src/modules/return-requests"
+import type ReturnRequestsModuleService from "../../src/modules/return-requests/service"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { issueOrderGiftCards } from "../../src/workflows/gift-cards/issue-and-send"
 import { createAdminUser } from "../helpers/admin"
@@ -32,11 +34,18 @@ interface Answer {
   message?: string
 }
 
+interface Returnable {
+  cancellable: boolean
+  cancel_refusal: string | null
+  lines: { window_open: boolean; window_closed_reason: string | null }[]
+}
+
 /**
  * adr/0025, 2026-11-03: an order of gift cards is cancelled only while
  * every card it sent is untouched; those cards are voided before the money
  * goes back. Once one was spent the cancel is refused, for the shopper and
- * for staff alike.
+ * for staff alike. A withdrawal still waiting closes with the cancel, and
+ * no card gives more than its balance.
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -91,13 +100,14 @@ medusaIntegrationTestRunner({
         .reduce((sum, refund) => sum + Number(refund.amount), 0)
       return { status: row.status, refunded }
     }
-    const spend = async (lineId: string) => {
+    /** Spends `amount` lira off the line's first card, as a checkout does. */
+    const spend = async (lineId: string, amount = 100) => {
       const [card] = await cardsOf(lineId)
       await debitAccountsWorkflow(getContainer()).run({
         input: [
           {
             account_id: card?.store_credit_account.id ?? "",
-            amount: 100,
+            amount,
             reference: "cart",
             reference_id: "cart_test",
           },
@@ -219,6 +229,54 @@ medusaIntegrationTestRunner({
           .flatMap((card) => card.store_credit_account.transactions)
           .map((move) => move.reference)
       ).not.toContain("order_cancel")
+    })
+
+    it("closes a withdrawal still waiting, and the page then offers neither cancel nor return", async () => {
+      const { orderId, lineId } = await giftOrder(1)
+      const returnable = () =>
+        http.get<Returnable>(`/store/orders/${orderId}/returnable`, { headers: customer.headers })
+      const asked = await settle(
+        http.post<{ return_request: { id: string } }>(
+          `/store/orders/${orderId}/returns`,
+          { items: [{ line_item_id: lineId, quantity: 1 }], reason: "changed_mind" },
+          { headers: customer.headers }
+        )
+      )
+      const before = (await returnable()).data
+
+      const canceled = await cancel(orderId)
+      const [request] = await getContainer()
+        .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
+        .listReturnRequests({ id: asked.data.return_request.id })
+      const after = (await returnable()).data
+
+      expect(asked.status).toBe(200)
+      expect(before).toMatchObject({ cancellable: true, cancel_refusal: null })
+      expect(before.lines[0]).toMatchObject({ window_open: true, window_closed_reason: null })
+      expect(canceled.status).toBe(200)
+      expect(request).toMatchObject({
+        status: "canceled",
+        cancel_cause: "order_canceled",
+        canceled_by: null,
+      })
+      expect(after).toMatchObject({ cancellable: false, cancel_refusal: "orders.canceled" })
+      expect(after.lines[0]).toMatchObject({
+        window_open: false,
+        window_closed_reason: "order_canceled",
+      })
+    })
+
+    // The loyalty plugin (2.21.2) refuses it ("Insufficient balance"), whatever debits it
+    it("cannot take more off a card than its balance", async () => {
+      const { lineId } = await giftOrder(1)
+      // A workflow rejects with its error's fields, not an Error: read its message
+      const outcome = await spend(lineId, 600).then(
+        () => "debited",
+        (error: unknown) => (error as { message?: string }).message
+      )
+
+      expect(outcome).toBe("Insufficient balance")
+      expect(await balancesOf(lineId)).toEqual([500])
     })
 
     it("holds staff's cancel to the same rule", async () => {

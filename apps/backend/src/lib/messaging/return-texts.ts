@@ -57,4 +57,16 @@ export const RETURN_TEXTS: Readonly<Record<string, string>> = {
     "Bu ürünler sizindir. Ücreti mağazaya ait olmak üzere adresinize geri gönderilebilir ya da mağazadan teslim alabilirsiniz. Hangisini istediğinizi bize bildirin.",
   "return_refused.rest.return": "Kabul ettiğimiz diğer ürünlerin ödemesi ayrıca iade edilecek.",
   "return_refused.rest.exchange": "Kabul ettiğimiz diğer ürünler için değişim sürüyor.",
+  // An approval taken back before anything came back (order #691)
+  "return_canceled.subject.return": "İade talebiniz iptal edildi (#{{number}})",
+  "return_canceled.subject.exchange": "Değişim talebiniz iptal edildi (#{{number}})",
+  "return_canceled.preheader": "{{shop}} talebinizi iptal etti; ürün göndermenize gerek yok.",
+  "return_canceled.heading.return": "{{name}}, iade talebiniz iptal edildi",
+  "return_canceled.heading.exchange": "{{name}}, değişim talebiniz iptal edildi",
+  "return_canceled.intro.return":
+    "#{{number}} numaralı siparişinizdeki iade talebiniz iptal edildi. Ürünleri geri göndermenize gerek yok; size verilen kargo kodu artık geçerli değil.",
+  "return_canceled.intro.exchange":
+    "#{{number}} numaralı siparişinizdeki değişim talebiniz iptal edildi. Ürünleri geri göndermenize gerek yok; size verilen kargo kodu artık geçerli değil.",
+  "return_canceled.again":
+    "Ürünleri yine de iade etmek ya da değiştirmek isterseniz süre içinde sipariş sayfanızdan yeni talep oluşturabilirsiniz. Bu iptal size bir hata gibi geldiyse bizimle iletişime geçin.",
 }

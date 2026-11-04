@@ -4,6 +4,7 @@ import {
   linesProblem,
   returnable,
   windowOpen,
+  windowState,
   withdrawalProblem,
 } from "../returns"
 
@@ -76,6 +77,24 @@ describe("returns (adr/0032)", () => {
       windowOpen({ ...order, fulfillments: [{ shipped_at: ago(20), delivered_at: null }] }, now)
     ).toBe(true)
     expect(windowOpen({ ...order, fulfillments: [] }, now)).toBe(false)
+  })
+
+  it("says why the parcels' window is shut: nothing shipped yet, or over", () => {
+    expect(windowState(order, now)).toBe("open")
+    expect(windowState({ ...order, fulfillments: [] }, now)).toBe("not_yet")
+    // A cancelled parcel is none
+    expect(
+      windowState(
+        {
+          ...order,
+          fulfillments: [{ shipped_at: ago(2), delivered_at: null, canceled_at: ago(1) }],
+        },
+        now
+      )
+    ).toBe("not_yet")
+    expect(
+      windowState({ ...order, fulfillments: [{ shipped_at: ago(20), delivered_at: ago(15) }] }, now)
+    ).toBe("expired")
   })
 
   it("keeps the shop's own longer period (F13.6)", () => {

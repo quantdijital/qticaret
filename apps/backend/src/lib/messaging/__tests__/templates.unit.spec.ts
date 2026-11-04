@@ -143,3 +143,21 @@ describe("return.refused (adr/0032 Ek 2026-11-03)", () => {
     ).toContain(note)
   })
 })
+
+describe("return.canceled (order #691)", () => {
+  const template = MESSAGE_TEMPLATES["return.canceled"]
+
+  it("says the request is off, nothing need be sent and a new one may be made, by kind", () => {
+    const mail = template.email?.(template.sample, brand)
+    expect(template.channels).toEqual(["email"])
+    expect(mail?.subject).toBe("İade talebiniz iptal edildi (#1042)")
+    expect(mail?.text).toContain("Örnek ürün")
+    expect(mail?.text).toContain("geri göndermenize gerek yok")
+    expect(mail?.text).toContain("kargo kodu artık geçerli değil")
+    expect(mail?.text).toContain("yeni talep oluşturabilirsiniz")
+    // The code given on approval is not repeated
+    expect(mail?.text).not.toContain("GLV12345678")
+    const swap = template.email?.({ ...template.sample, kind: "exchange" }, brand)
+    expect(swap?.subject).toBe("Değişim talebiniz iptal edildi (#1042)")
+  })
+})

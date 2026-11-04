@@ -73,8 +73,20 @@ export function giftLineIssuedAt(line: GiftLineFacts): Date | null {
 
 /** Whether the line can still be withdrawn from: its cards sent, within the period. */
 export function giftWindowOpen(line: GiftLineFacts, now: Date, days: number): boolean {
+  return giftWindowState(line, now, days) === "open"
+}
+
+/** The line's window (`giftWindowOpen`) with why it is shut: no card sent yet, or over. */
+export function giftWindowState(
+  line: GiftLineFacts,
+  now: Date,
+  days: number
+): "open" | "not_yet" | "expired" {
   const issued = giftLineIssuedAt(line)
-  return issued !== null && now.getTime() - issued.getTime() <= days * DAY
+  if (issued === null) {
+    return "not_yet"
+  }
+  return now.getTime() - issued.getTime() <= days * DAY ? "open" : "expired"
 }
 
 /**

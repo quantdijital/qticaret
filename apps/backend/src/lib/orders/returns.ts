@@ -154,18 +154,36 @@ export function returnable(
   return left
 }
 
+/**
+ * Where a line stands against its window: open; `not_yet` (nothing shipped,
+ * or a gift line's cards not sent); `expired`; or `order_canceled`. Each
+ * line by its own kind: the parcels' window for goods, the cards' for a
+ * gift line (adr/0025, 2026-11-03).
+ */
+export const WINDOW_STATES = ["open", "not_yet", "expired", "order_canceled"] as const
+export type WindowState = (typeof WINDOW_STATES)[number]
+
 /** Whether a return can still be asked for: something shipped, and within the window once arrived. */
 export function windowOpen(
   order: ReturnOrderFacts,
   now: Date,
   days: number = RETURN_WINDOW_DAYS
 ): boolean {
+  return windowState(order, now, days) === "open"
+}
+
+/** The parcels' window (`windowOpen`) with why it is shut: nothing shipped yet, or over. */
+export function windowState(
+  order: ReturnOrderFacts,
+  now: Date,
+  days: number = RETURN_WINDOW_DAYS
+): Exclude<WindowState, "order_canceled"> {
   const live = (order.fulfillments ?? []).filter(
     (fulfillment): fulfillment is NonNullable<typeof fulfillment> =>
       Boolean(fulfillment?.shipped_at) && !fulfillment?.canceled_at
   )
   if (live.length === 0) {
-    return false
+    return "not_yet"
   }
   // From the last parcel to arrive; one on its way keeps it open, but not for ever
   const last = Math.max(
@@ -175,7 +193,7 @@ export function windowOpen(
         : new Date(fulfillment.shipped_at ?? 0).getTime() + UNMARKED_ARRIVAL_DAYS * DAY
     )
   )
-  return now.getTime() - last <= days * DAY
+  return now.getTime() - last <= days * DAY ? "open" : "expired"
 }
 
 /**

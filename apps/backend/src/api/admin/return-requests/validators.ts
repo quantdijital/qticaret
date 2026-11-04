@@ -67,6 +67,12 @@ export type AdminPostReturnApproveType = z.infer<typeof AdminPostReturnApprove>
 export const AdminPostReturnReject = z.object({ note: z.string().trim().min(1).max(1000) }).strict()
 export type AdminPostReturnRejectType = z.infer<typeof AdminPostReturnReject>
 
+/** An approval taken back before anything came back: why, in staff's words, for the team. */
+export const AdminPostReturnCancel = z
+  .object({ reason: z.string().trim().min(1).max(1000) })
+  .strict()
+export type AdminPostReturnCancelType = z.infer<typeof AdminPostReturnCancel>
+
 /**
  * What reached the warehouse: sound (back in stock), damaged (not) and
  * refused (a sealed good opened, MSY md. 15/1-ç: not refunded, sent back),

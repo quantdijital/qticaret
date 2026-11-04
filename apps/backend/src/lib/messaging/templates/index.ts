@@ -9,7 +9,13 @@ import { orderLink } from "./order-link"
 import { orderPlaced } from "./order-placed"
 import { paymentFailed } from "./payment"
 import { paymentLinkSent } from "./payment-link"
-import { returnApproved, returnRefunded, returnRefused, returnRequested } from "./returns"
+import {
+  returnApproved,
+  returnCanceled,
+  returnRefunded,
+  returnRefused,
+  returnRequested,
+} from "./returns"
 import { orderDelivered, orderShipped } from "./shipping"
 import { backInStock, stockAlertConfirm } from "./stock"
 import {
@@ -65,6 +71,8 @@ export const MESSAGE_TEMPLATES = {
   "return.refunded": returnRefunded,
   // adr/0032 Ek 2026-11-03: units refused at receipt, a sealed good opened
   "return.refused": returnRefused,
+  // An approved request staff took back before anything came back (order #691)
+  "return.canceled": returnCanceled,
   "account.password_reset": passwordReset,
   "account.verify_email": verifyEmail,
   // F14.5 (adr/0042 §6): a moved customer asked to open their account here

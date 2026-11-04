@@ -1,5 +1,5 @@
 import { model } from "@medusajs/framework/utils"
-import { RETURN_KINDS, RETURN_REASONS, RETURN_STATUSES } from "../states"
+import { RETURN_CANCEL_CAUSES, RETURN_KINDS, RETURN_REASONS, RETURN_STATUSES } from "../states"
 
 /**
  * A shopper's request to send an order back (F7.9, adr/0032), from the
@@ -65,6 +65,17 @@ export const ReturnRequest = model
     refund_alerted_at: model.dateTime().nullable(),
     refund_amount: model.number().nullable(),
     refund_reference: model.text().nullable(),
+    /**
+     * Cancelled: an approval staff withdrew before anything came back, or a
+     * waiting request the order's cancel closed (`cancel_cause`). The
+     * approval's own note stays as it was.
+     */
+    canceled_at: model.dateTime().nullable(),
+    /** The staff member who cancelled it; null when the order's cancel closed it. */
+    canceled_by: model.text().nullable(),
+    cancel_cause: model.enum([...RETURN_CANCEL_CAUSES]).nullable(),
+    /** Staff's own words on why, for the team; never shown to the shopper. */
+    cancel_reason: model.text().nullable(),
   })
   .indexes([
     { on: ["order_id"] },

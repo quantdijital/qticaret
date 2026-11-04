@@ -335,6 +335,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "returns.use_return_requests":
     "Returns, exchanges and claims are handled from the return requests screen only.",
   "returns.carrier_refused": "The carrier did not open the return; try again shortly.",
+  "returns.cancel_handed_over":
+    "The customer has handed the parcel to the carrier; the request cannot be cancelled. Receive it once it arrives.",
+  "returns.cancel_received":
+    "Items of this request have been received; the request cannot be cancelled.",
+  "returns.cancel_exchange_collected":
+    "The customer paid a difference on this exchange; it cannot be cancelled here. Receive the item, or refund the difference by hand and ask the shop's admin.",
   "returns.refund_failed":
     'The items were received but the refund failed; use "Try the refund again".',
   "aras.customer_code_invalid": "The customer code may hold up to 20 letters and digits.",

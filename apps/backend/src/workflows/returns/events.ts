@@ -10,6 +10,12 @@ export const RETURN_REQUEST_APPROVED = "return_request.approved"
  */
 export const RETURN_REQUEST_REFUSED = "return_request.refused"
 
+/**
+ * Staff cancelled an approved request before anything came back: the
+ * shopper hears it is off and that nothing need be sent.
+ */
+export const RETURN_REQUEST_CANCELED = "return_request.canceled"
+
 export interface ReturnRequestEvent {
   id: string
   order_id: string

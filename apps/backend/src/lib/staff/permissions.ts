@@ -159,8 +159,10 @@ const OPERATIONS_WRITES: readonly Rule[] = [
   { methods: ["DELETE"], path: "/admin/orders/:id/notes/:note_id" },
   { methods: ["POST"], path: "/admin/orders/:id/fulfillments*" },
   { methods: ["POST"], path: "/admin/fulfillments*" },
-  // A return asked for: taken in, approved or refused; giving money back is the admin's
+  // A return asked for: taken in, approved or refused, an approval taken back; giving
+  // money back is the admin's
   { methods: ["POST"], path: "/admin/return-requests/:id/approve" },
+  { methods: ["POST"], path: "/admin/return-requests/:id/cancel" },
   { methods: ["POST"], path: "/admin/return-requests/:id/receive" },
   { methods: ["POST"], path: "/admin/return-requests/:id/reject" },
   // Stock on the shelf

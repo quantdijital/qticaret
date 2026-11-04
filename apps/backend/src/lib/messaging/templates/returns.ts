@@ -119,6 +119,17 @@ export const returnRefunded = template("return.refunded", "return_refunded", (va
 ])
 
 /**
+ * "Talebiniz iptal edildi": staff took an approval back before anything
+ * came back (order #691). Nothing need be sent, the code no longer works,
+ * and a new request may be made within the period. Staff's reason is
+ * the team's, never in it.
+ */
+export const returnCanceled = template("return.canceled", "return_canceled", (vars) => [
+  lines(vars),
+  { kind: "note", text: messageText("return_canceled.again") },
+])
+
+/**
  * "Kabul edilmeyen ürünler" (adr/0032 Ek 2026-11-03): sent as the parcel
  * is received with units refused, a sealed good opened (MSY md. 15/1-ç).
  * Each unit and why, that its money is not paid back, and that the goods

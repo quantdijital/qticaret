@@ -41,10 +41,16 @@ medusaIntegrationTestRunner({
       const preview = await get<Preview>(`${PATH}/order.placed/preview`)
 
       expect(list.status).toBe(200)
-      expect(list.data.templates).toHaveLength(29)
+      expect(list.data.templates).toHaveLength(30)
       // Units refused at receipt, a sealed good opened (adr/0032 Ek 2026-11-03)
       expect(list.data.templates).toContainEqual({
         name: "return.refused",
+        kind: "transactional",
+        channels: ["email"],
+      })
+      // An approved request staff took back before anything came back (order #691)
+      expect(list.data.templates).toContainEqual({
+        name: "return.canceled",
         kind: "transactional",
         channels: ["email"],
       })

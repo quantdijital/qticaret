@@ -447,6 +447,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/promotions/:id/offer": false,
   "POST /admin/reports/statements": false,
   "POST /admin/return-requests/:id/approve": true,
+  // An approval taken back before anything came back (order #691): as the decision itself
+  "POST /admin/return-requests/:id/cancel": true,
   "POST /admin/return-requests/:id/receive": true,
   "POST /admin/return-requests/:id/refund": false,
   "POST /admin/return-requests/:id/reject": true,

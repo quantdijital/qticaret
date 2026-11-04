@@ -18,6 +18,7 @@ import {
 import type { CardDebit } from "../../lib/orders/gift-returns"
 import { giftIssueLockKey, returnsLockKey } from "../../lib/orders/locks"
 import { giftLinesOf } from "../returns/gift-lines"
+import { closeWaitingRequestsStep } from "../returns/steps/cancel"
 import { refundOrderWorkflow } from "./refund-order"
 import type { RefundOrderInput } from "./steps/order-refund"
 
@@ -79,7 +80,10 @@ const cancelRefundsStep = createStep(
  * order whose gift cards went out is cancelled only while every card is
  * untouched. Those cards are voided as a withdrawal voids them (the
  * loyalty plugin's `debitAccountsWorkflow`, undone by deleting its debits),
- * then the money goes back. Under the order's returns lock, so a
+ * then the money goes back. A return request still waiting for the
+ * shop's decision (a gift line's withdrawal, asked before shipping) is
+ * closed as cancelled by the order's cancel; a refund that fails opens it
+ * again. Under the order's returns lock, so a
  * withdrawal and a cancel never void at once, and its gift card issue
  * lock, so no card is issued meanwhile: once the refund is written the
  * issue finds the order refunded and makes none. The shopper's cancel and
@@ -98,6 +102,8 @@ export const cancelGiftCardsWorkflow = createWorkflow(
     const debits = planCancelVoidStep(
       transform({ input }, ({ input }) => ({ order_id: input.order_id }))
     )
+    // A gift line's withdrawal still waiting has nothing left to withdraw once the cancel voids
+    closeWaitingRequestsStep(transform({ input }, ({ input }) => ({ order_id: input.order_id })))
     when("orders-cancel-void-gift-cards", { debits }, ({ debits }) => debits.length > 0).then(
       () => {
         debitAccountsWorkflow.runAsStep({ input: debits })
