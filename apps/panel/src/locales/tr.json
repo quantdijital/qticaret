@@ -894,7 +894,8 @@
         "invite": "Davet",
         "chargeback": "Ters ibraz",
         "payment": "Ödeme",
-        "refund": "Para iadesi"
+        "refund": "Para iadesi",
+        "legal_document": "Yasal metin"
       }
     },
     "locations": {
@@ -2191,6 +2192,19 @@
         "none": "Yayında değil",
         "draft": "Taslak var"
       },
+      "state": {
+        "title": "Durum",
+        "description": "Müşteriler yayındaki metni görür ve onaylar. Taslak, siz yayımlayana kadar yalnızca burada durur.",
+        "published": "Yayında",
+        "draft": "Taslak",
+        "version": "v{{version}}",
+        "none": "Yok",
+        "editing": "Düzenleyicide",
+        "publishedAt": "{{date}} tarihinde yayımlandı.",
+        "savedAt": "Son kayıt: {{date}}.",
+        "noPublished": "Henüz yayımlanmadı; müşteriler bu metni görmüyor.",
+        "noDraft": "Taslak yok. Düzenleyicide yayındaki metin var; değiştirip kaydettiğinizde taslak açılır."
+      },
       "editor": {
         "title": "Metin",
         "draftHint": "Taslak: kaydettikleriniz yayımlanana kadar müşterilere gösterilmez.",
@@ -2245,7 +2259,9 @@
       "actions": {
         "preview": "Önizle",
         "publish": "Yayımla",
-        "discard": "Taslağı at"
+        "discard": "Taslağı at",
+        "editPublished": "Yayındakini düzenle",
+        "starter": "Başlangıç metninden başla"
       },
       "publish": {
         "title": "Sürüm {{version}} yayımlansın mı?",
@@ -2254,14 +2270,28 @@
       },
       "discard": {
         "title": "Taslak atılsın mı?",
-        "text": "Kaydedilmiş taslak silinir; yayındaki metin olduğu gibi kalır.",
+        "text": "Taslak silinir; yayındaki metin olduğu gibi kalır.",
+        "textNothingPublished": "Taslak silinir. Bu metnin yayında sürümü yok; sonra başlangıç metninden ya da boş başlayabilirsiniz.",
         "done": "Taslak atıldı."
       },
+      "editPublished": {
+        "title": "Yayındaki metinden taslak açılsın mı?",
+        "text": "Taslak, yayındaki metnin kopyasıyla açılır; yayındaki metin siz yayımlayana kadar aynı kalır.",
+        "done": "Yayındaki metinden taslak açıldı."
+      },
+      "starter": {
+        "title": "Başlangıç metninden başlansın mı?",
+        "text": "Platformun başlangıç metni taslak olarak yüklenir; TASLAK notu avukat onayına kadar yayını engeller. Yayındaki metin olduğu gibi kalır.",
+        "textDraft": "Taslağınız silinir ve platformun başlangıç metni yüklenir; TASLAK notu avukat onayına kadar yayını engeller.",
+        "done": "Başlangıç metni taslak olarak yüklendi."
+      },
+      "unsaved": "Düzenleyicide kaydedilmemiş değişiklikleriniz var; bunlar da silinir.",
       "start": {
         "title": "Bu metin henüz yazılmadı",
         "text": "Başlangıç taslağı, bu tür metinlerde olağan başlıkları ve mağazanızın belirteçlerini içerir. Hukuki görüş değildir; yayımlamadan önce avukatınıza kontrol ettirin.",
         "starter": "Başlangıç taslağıyla başla",
-        "blank": "Boş başla"
+        "blank": "Boş başla",
+        "readOnly": "Bu metni yazmak ve yayımlamak mağaza sahibinin ve yöneticilerin işidir."
       },
       "preview": {
         "hint": "Müşterilerin göreceği biçimde; sözleşmelerde örnek bir siparişle doldurulmuştur.",

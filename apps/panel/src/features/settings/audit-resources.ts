@@ -55,6 +55,8 @@ const GROUPS = {
     "webhook",
     "accounting_package",
     "async_job",
+    // F13.1: the contracts and policies, their drafts and publishing
+    "legal_document",
   ],
   people: ["staff", "staff_role", "user", "auth_identity", "invite", "audit_log"],
 } as const

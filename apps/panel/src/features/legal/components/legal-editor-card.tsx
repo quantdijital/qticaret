@@ -1,9 +1,10 @@
 import type { JSONContent } from "@tiptap/react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
+import { LeaveGuard } from "@/components/patterns/leave-guard"
 import { Input } from "@/components/ui/input"
 import { sameDoc } from "@/features/content/editor/normalize"
 import { RichEditor } from "@/features/content/editor/rich-editor"
@@ -16,17 +17,20 @@ const E = "settings.legal.editor"
 /**
  * The text being written: the draft, or the published text to start a new
  * version from. Saving keeps it as the draft; customers see it only once
- * it is published.
+ * it is published. Whether it holds unsaved changes goes up to the page,
+ * which asks before dropping or restarting the draft would lose them.
  */
 export function LegalEditorCard({
   kind,
   stored,
   isDraft,
+  onDirtyChange,
 }: {
   kind: LegalKind
   stored: { title: string; body: JSONContent }
   /** Whether `stored` is the draft (else the published text a save starts a draft from). */
   isDraft: boolean
+  onDirtyChange?: (dirty: boolean) => void
 }) {
   const { t } = useTranslation()
   const save = useSaveLegalDraft(kind)
@@ -34,6 +38,11 @@ export function LegalEditorCard({
   const [body, setBody] = useState<JSONContent | null>(null)
   const dirty =
     (title !== null && title !== stored.title) || (body !== null && !sameDoc(body, stored.body))
+  useEffect(() => {
+    onDirtyChange?.(dirty)
+  }, [dirty, onDirtyChange])
+  // Replaced (another version, a reset) or gone: nothing of it is left unsaved
+  useEffect(() => () => onDirtyChange?.(false), [onDirtyChange])
   return (
     <CardForm
       title={t(`${E}.title`)}
@@ -58,6 +67,7 @@ export function LegalEditorCard({
         setBody(null)
       }}
     >
+      <LeaveGuard when={dirty && !save.isPending} />
       <Field label={t(`${E}.titleLabel`)} htmlFor="legal-title">
         <Input
           id="legal-title"

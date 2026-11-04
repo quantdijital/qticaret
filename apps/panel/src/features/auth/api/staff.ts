@@ -31,6 +31,8 @@ export type Capability =
   | "paymentLinks"
   /** A payment link's discount, cancelling and extending it (adr/0051 §8): owner and admin. */
   | "paymentLinksManage"
+  /** Writing, previewing, publishing and restarting the legal texts' drafts (F13.1): owner and admin. */
+  | "legalTexts"
 
 export interface StaffMe {
   user_id: string

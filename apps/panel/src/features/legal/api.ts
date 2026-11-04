@@ -86,8 +86,18 @@ export const usePublishLegal = (kind: LegalKind) =>
     sdk.client.fetch(`${pathOf(kind)}/publish`, { method: "POST", body: {} })
   )
 
+/** The draft dropped; the published text, if any, stays as it is. */
 export const useDiscardLegalDraft = (kind: LegalKind) =>
   useLegalMutation(kind, () => sdk.client.fetch(`${pathOf(kind)}/draft`, { method: "DELETE" }))
+
+/** Where a draft started again takes its text: the platform's starter, or the published text. */
+export type DraftResetSource = "starter" | "published"
+
+/** The draft started again (in place of the one there is): the starter, or a copy of the published text. */
+export const useResetLegalDraft = (kind: LegalKind) =>
+  useLegalMutation(kind, (source: DraftResetSource) =>
+    sdk.client.fetch(`${pathOf(kind)}/draft/reset`, { method: "POST", body: { source } })
+  )
 
 /** The text as customers will read it; nothing is saved. */
 export const usePreviewLegal = (kind: LegalKind) =>

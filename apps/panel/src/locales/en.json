@@ -894,7 +894,8 @@
         "invite": "Invite",
         "chargeback": "Chargeback",
         "payment": "Payment",
-        "refund": "Refund"
+        "refund": "Refund",
+        "legal_document": "Legal text"
       }
     },
     "locations": {
@@ -2191,6 +2192,19 @@
         "none": "Not published",
         "draft": "Draft waiting"
       },
+      "state": {
+        "title": "State",
+        "description": "Customers read and accept the published text. A draft stays here until you publish it.",
+        "published": "Published",
+        "draft": "Draft",
+        "version": "v{{version}}",
+        "none": "None",
+        "editing": "In the editor",
+        "publishedAt": "Published on {{date}}.",
+        "savedAt": "Last saved: {{date}}.",
+        "noPublished": "Not published yet; customers do not see this text.",
+        "noDraft": "No draft. The editor holds the published text; change it and save to open a draft."
+      },
       "editor": {
         "title": "Text",
         "draftHint": "Draft: what you save is not shown to customers until it is published.",
@@ -2245,7 +2259,9 @@
       "actions": {
         "preview": "Preview",
         "publish": "Publish",
-        "discard": "Discard draft"
+        "discard": "Discard draft",
+        "editPublished": "Edit the published text",
+        "starter": "Start from the starter text"
       },
       "publish": {
         "title": "Publish version {{version}}?",
@@ -2254,14 +2270,28 @@
       },
       "discard": {
         "title": "Discard the draft?",
-        "text": "The saved draft is deleted; the published text stays as it is.",
+        "text": "The draft is deleted; the published text stays as it is.",
+        "textNothingPublished": "The draft is deleted. This text has no published version; you can then start from the starter text or blank.",
         "done": "Draft discarded."
       },
+      "editPublished": {
+        "title": "Open a draft from the published text?",
+        "text": "The draft opens as a copy of the published text; the published text stays the same until you publish.",
+        "done": "Draft opened from the published text."
+      },
+      "starter": {
+        "title": "Start from the starter text?",
+        "text": "The platform's starter text is loaded as the draft; its DRAFT note blocks publishing until a lawyer approves it. The published text stays as it is.",
+        "textDraft": "Your draft is deleted and the platform's starter text is loaded; its DRAFT note blocks publishing until a lawyer approves it.",
+        "done": "Starter text loaded as the draft."
+      },
+      "unsaved": "The editor has unsaved changes; they are deleted too.",
       "start": {
         "title": "This text is not written yet",
         "text": "The starting draft has the headings such texts usually have and your shop's tokens. It is not legal advice; have your lawyer check it before publishing.",
         "starter": "Start from the draft",
-        "blank": "Start blank"
+        "blank": "Start blank",
+        "readOnly": "Writing and publishing this text is for the shop's owner and admins."
       },
       "preview": {
         "hint": "As customers will see it; contracts are filled with a made-up order.",
