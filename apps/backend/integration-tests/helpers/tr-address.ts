@@ -2,7 +2,7 @@ import { resolve } from "node:path"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { TR_ADDRESS_MODULE } from "../../src/modules/tr-address"
 import type TrAddressModuleService from "../../src/modules/tr-address/service"
-import { readAddressRows } from "../../src/scripts/tr-address/read-rows"
+import { readAddressRows } from "../../src/lib/tr-address/file/read-rows"
 
 export const TR_ADDRESS_FIXTURE = resolve(__dirname, "../fixtures/tr-address.csv")
 

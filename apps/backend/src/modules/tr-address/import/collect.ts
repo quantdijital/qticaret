@@ -1,4 +1,4 @@
-import type { RejectedRow } from "./rows"
+import type { NeighborhoodKind, PostalCodeStatus, RejectedRow } from "./rows"
 import { parseTrAddressRow } from "./rows"
 
 export interface DesiredProvince {
@@ -10,6 +10,7 @@ export interface DesiredDistrict {
   provinceCode: string
   name: string
   key: string
+  externalId?: string
 }
 
 export interface DesiredNeighborhood {
@@ -18,6 +19,9 @@ export interface DesiredNeighborhood {
   name: string
   key: string
   postalCode: string
+  externalId?: string
+  kind?: NeighborhoodKind
+  postalCodeStatus?: PostalCodeStatus
 }
 
 export interface DesiredTree {
@@ -71,15 +75,20 @@ export function collectDesiredTree(rawRows: unknown[]): DesiredTree {
         provinceCode: row.provinceCode,
         name: row.districtName,
         key: row.districtKey,
+        ...(row.districtExternalId ? { externalId: row.districtExternalId } : {}),
       })
     }
     if (row.neighborhood && neighborhoodId && !existingNeighborhood) {
+      const { name, key, postalCode, externalId, kind, postalCodeStatus } = row.neighborhood
       tree.neighborhoods.set(neighborhoodId, {
         provinceCode: row.provinceCode,
         districtKey: row.districtKey,
-        name: row.neighborhood.name,
-        key: row.neighborhood.key,
-        postalCode: row.neighborhood.postalCode,
+        name,
+        key,
+        postalCode,
+        ...(externalId ? { externalId } : {}),
+        ...(kind ? { kind } : {}),
+        ...(postalCodeStatus ? { postalCodeStatus } : {}),
       })
     }
   })

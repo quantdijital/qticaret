@@ -24,6 +24,7 @@ describe("job types", () => {
       "seo.audit",
       "seo.sitemap",
       "seo.url_style",
+      "tr_address.sync",
     ])
     expect(jobType("__proto__")).toBeUndefined()
     expect(jobType("constructor")).toBeUndefined()
@@ -35,6 +36,16 @@ describe("job types", () => {
       containsPersonalData: true,
       resultTtlDays: 7,
     })
+  })
+
+  it("syncs the address data one run at a time, through its own route only", () => {
+    expect(jobType("tr_address.sync")).toMatchObject({
+      singleton: true,
+      internal: true,
+      containsPersonalData: false,
+    })
+    expect(jobType("tr_address.sync")?.input.safeParse({}).success).toBe(true)
+    expect(jobType("tr_address.sync")?.input.safeParse({ source: "file" }).success).toBe(false)
   })
 
   it("moves URL styles one run at a time, with nothing personal", () => {

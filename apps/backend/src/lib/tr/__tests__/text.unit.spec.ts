@@ -44,6 +44,15 @@ describe("trSortKey", () => {
     ])
   })
 
+  it("leaves punctuation out: a town's neighbourhood sorts by its letters", () => {
+    expect(sortTr(["Fatih Köyü", "Fatih (Kırka)", "Fatih", "Fatih (Akın)"])).toEqual([
+      "Fatih",
+      "Fatih (Akın)",
+      "Fatih (Kırka)",
+      "Fatih Köyü",
+    ])
+  })
+
   it("is case-insensitive and made of digits only", () => {
     expect(trSortKey("İZMİR")).toBe(trSortKey("izmir"))
     expect(trSortKey("Çağlayan 2. Sokak")).toMatch(/^\d+$/)

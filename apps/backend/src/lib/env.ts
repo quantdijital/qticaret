@@ -173,6 +173,9 @@ const envSchema = z.object({
   // F10.9: fake Meta Graph and GA4 Measurement Protocol in tests; refused when deployed
   META_GRAPH_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   GA4_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // adr/0008 Ek 2026-11-04: a fake TürkiyeAPI (address reference data) in tests,
+  // its root with `/v2`; the real API is public and used everywhere else
+  TURKIYEAPI_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // Medusa's own admin screens (/app): off; the shop works in our panel
   // (adr/0022 §3). "on" opens them for the platform team for a while (a
   // staff invite until F12 brings it to the panel)
@@ -364,6 +367,7 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
     "SHOPIFY_BASE_URL",
     "META_GRAPH_BASE_URL",
     "GA4_BASE_URL",
+    "TURKIYEAPI_BASE_URL",
     "CONTENT_DRAFT_PROVIDER",
   ] as const) {
     if (env[name] !== undefined && !isLocalEnv(env)) {

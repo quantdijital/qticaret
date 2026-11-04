@@ -1,52 +1,80 @@
-import type { Context } from "@medusajs/framework/types"
+import type { Context, InferTypeOf } from "@medusajs/framework/types"
 import {
   InjectManager,
   InjectTransactionManager,
   MedusaContext,
   MedusaService,
 } from "@medusajs/framework/utils"
-import { trMatchKey, trNeighborhoodMatchKey, trSortKey } from "../../lib/tr/text"
-import type { LevelSummary } from "./import/batch"
-import { chunk, required, summarize } from "./import/batch"
+import { trMatchKey, trNeighborhoodMatchKey } from "../../lib/tr/text"
+import type { LevelSummary, LevelWriter } from "./import/batch"
+import { applyPlan, required, summarize } from "./import/batch"
 import type { DesiredTree } from "./import/collect"
 import { collectDesiredTree, districtKeyOf } from "./import/collect"
-import type { LevelPlan } from "./import/diff"
+import type { PlanValues } from "./import/diff"
 import { planLevel } from "./import/diff"
+import { districtLevel, neighborhoodLevel, provinceLevel } from "./import/levels"
 import type { RejectedRow } from "./import/rows"
 import { matchByKey } from "./match"
 import { TrDistrict } from "./models/district"
 import { TrNeighborhood } from "./models/neighborhood"
 import { TrProvince } from "./models/province"
+import { TrAddressSync } from "./models/sync"
 
 const ALL = { take: null } as const
 
 export type { LevelSummary }
+export type TrAddressSyncRecord = InferTypeOf<typeof TrAddressSync>
 
 export interface TrAddressImportReport {
   provinces: LevelSummary
   districts: LevelSummary
   neighborhoods: LevelSummary
   rejected: RejectedRow[]
+  /** The import's record, when one was asked for (`sync`). */
+  sync_id?: string
+}
+
+export interface TrAddressSyncInput {
+  source: "turkiyeapi" | "file"
+  dataset_version: string | null
+  dataset_last_updated: string | null
 }
 
 export interface TrAddressImportOptions {
   /** Mark places absent from the input inactive; only for complete datasets. */
   shouldDeactivateMissing?: boolean
+  /** Recorded with the import, in its transaction (the status and the weekly check read it). */
+  sync?: TrAddressSyncInput
 }
 
 export interface TrAddressLookup {
   province?: { id: string; code: string; name: string }
   district?: { id: string; name: string }
-  neighborhood?: { id: string; name: string; postal_code: string }
+  neighborhood?: {
+    id: string
+    name: string
+    postal_code: string
+    /** Null for a file's data, which counts as official. */
+    postal_code_status: "official" | "derived" | "estimated" | null
+  }
   /** False when no neighborhood data is loaded for the district. */
   districtHasNeighborhoods: boolean
 }
 
-interface LevelOptions {
-  shouldDeactivateMissing: boolean
+export interface TrAddressCounts {
+  provinces: number
+  districts: number
+  /** Neighbourhoods and villages together: what an address form lists. */
+  neighborhoods: number
+  villages: number
 }
 
-class TrAddressModuleService extends MedusaService({ TrProvince, TrDistrict, TrNeighborhood }) {
+class TrAddressModuleService extends MedusaService({
+  TrProvince,
+  TrDistrict,
+  TrNeighborhood,
+  TrAddressSync,
+}) {
   /**
    * Idempotent upsert of reference data from normalized rows (adr/0008).
    * Runs in one transaction: a failure leaves the previous data intact.
@@ -70,12 +98,58 @@ class TrAddressModuleService extends MedusaService({ TrProvince, TrDistrict, TrN
       sharedContext
     )
 
-    return {
+    const report: TrAddressImportReport = {
       provinces: summarize(provinces.plan),
       districts: summarize(districts.plan),
       neighborhoods: summarize(neighborhoods),
       rejected: tree.rejected,
     }
+    if (options.sync) {
+      const sync = await this.createTrAddressSyncs(
+        {
+          ...options.sync,
+          report: {
+            provinces: report.provinces,
+            districts: report.districts,
+            neighborhoods: report.neighborhoods,
+            rejected: report.rejected.length,
+          },
+        },
+        sharedContext
+      )
+      report.sync_id = sync.id
+    }
+    return report
+  }
+
+  /** The newest import that went through, if any. */
+  @InjectManager()
+  async latestSync(
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<TrAddressSyncRecord | undefined> {
+    const [latest] = await this.listTrAddressSyncs(
+      {},
+      { order: { created_at: "DESC" }, take: 1 },
+      sharedContext
+    )
+    return latest
+  }
+
+  /** How many places an address form offers, by level. */
+  @InjectManager()
+  async countActive(@MedusaContext() sharedContext: Context = {}): Promise<TrAddressCounts> {
+    // One after another: the queries share this call's entity manager
+    const one = { select: ["id"], take: 1 }
+    const active = { is_active: true }
+    const [, provinces] = await this.listAndCountTrProvinces(active, one, sharedContext)
+    const [, districts] = await this.listAndCountTrDistricts(active, one, sharedContext)
+    const [, neighborhoods] = await this.listAndCountTrNeighborhoods(active, one, sharedContext)
+    const [, villages] = await this.listAndCountTrNeighborhoods(
+      { ...active, kind: "village" },
+      one,
+      sharedContext
+    )
+    return { provinces, districts, neighborhoods, villages }
   }
 
   /**
@@ -126,7 +200,7 @@ class TrAddressModuleService extends MedusaService({ TrProvince, TrDistrict, TrN
 
     const neighborhoods = await this.listTrNeighborhoods(
       { district_id: district.id, is_active: true },
-      { select: ["id", "name", "postal_code", "match_key"], ...ALL },
+      { select: ["id", "name", "postal_code", "postal_code_status", "match_key"], ...ALL },
       sharedContext
     )
     lookup.districtHasNeighborhoods = neighborhoods.length > 0
@@ -138,36 +212,22 @@ class TrAddressModuleService extends MedusaService({ TrProvince, TrDistrict, TrN
         id: neighborhood.id,
         name: neighborhood.name,
         postal_code: neighborhood.postal_code,
+        postal_code_status: neighborhood.postal_code_status,
       }
     }
     return lookup
   }
 
+  // A plan's rows are the field maps levels.ts builds for each model; the
+  // generated create/update methods take them as their DTOs (`as never[]`)
   private async upsertProvinces(tree: DesiredTree, options: LevelOptions, sharedContext: Context) {
-    const existing = await this.listTrProvinces({}, ALL, sharedContext)
-    const plan = planLevel(
-      existing.map((p) => ({
-        id: p.id,
-        key: p.code,
-        is_active: p.is_active,
-        values: { code: p.code, name: p.name, match_key: p.match_key, sort_key: p.sort_key },
-      })),
-      [...tree.provinces.values()].map((p) => ({
-        key: p.code,
-        values: {
-          code: p.code,
-          name: p.name,
-          match_key: trMatchKey(p.name),
-          sort_key: trSortKey(p.name),
-        },
-      })),
-      options
-    )
-    await this.applyPlan(plan, {
-      create: (data) => this.createTrProvinces(data, sharedContext),
-      update: (data) => this.updateTrProvinces(data, sharedContext),
-    })
-    const all = await this.listTrProvinces({}, ALL, sharedContext)
+    const level = provinceLevel(await this.listTrProvinces({}, ALL, sharedContext), tree)
+    const plan = planLevel(level.existing, level.desired, options)
+    await applyPlan(plan, {
+      create: (data) => this.createTrProvinces(data as never[], sharedContext),
+      update: (data) => this.updateTrProvinces(data as never[], sharedContext),
+    } satisfies LevelWriter<PlanValues>)
+    const all = await this.listTrProvinces({ is_active: true }, ALL, sharedContext)
     return { plan, ids: new Map(all.map((p) => [p.code, p.id])) }
   }
 
@@ -177,38 +237,15 @@ class TrAddressModuleService extends MedusaService({ TrProvince, TrDistrict, TrN
     options: LevelOptions,
     sharedContext: Context
   ) {
-    const existing = await this.listTrDistricts({}, ALL, sharedContext)
-    const plan = planLevel(
-      existing.map((d) => ({
-        id: d.id,
-        key: districtKeyOf(d.province_id, d.match_key),
-        is_active: d.is_active,
-        values: {
-          province_id: d.province_id,
-          name: d.name,
-          match_key: d.match_key,
-          sort_key: d.sort_key,
-        },
-      })),
-      [...tree.districts.values()].map((d) => {
-        const provinceId = required(provinceIds.get(d.provinceCode))
-        return {
-          key: districtKeyOf(provinceId, d.key),
-          values: {
-            province_id: provinceId,
-            name: d.name,
-            match_key: d.key,
-            sort_key: trSortKey(d.name),
-          },
-        }
-      }),
-      options
-    )
-    await this.applyPlan(plan, {
-      create: (data) => this.createTrDistricts(data, sharedContext),
-      update: (data) => this.updateTrDistricts(data, sharedContext),
-    })
-    const all = await this.listTrDistricts({}, ALL, sharedContext)
+    const stored = await this.listTrDistricts({}, ALL, sharedContext)
+    const level = districtLevel(stored, tree, provinceIds)
+    const plan = planLevel(level.existing, level.desired, options)
+    await applyPlan(plan, {
+      create: (data) => this.createTrDistricts(data as never[], sharedContext),
+      update: (data) => this.updateTrDistricts(data as never[], sharedContext),
+    } satisfies LevelWriter<PlanValues>)
+    // Active only: a removed district may share its name with a new one
+    const all = await this.listTrDistricts({ is_active: true }, ALL, sharedContext)
     return { plan, ids: new Map(all.map((d) => [districtKeyOf(d.province_id, d.match_key), d.id])) }
   }
 
@@ -218,56 +255,19 @@ class TrAddressModuleService extends MedusaService({ TrProvince, TrDistrict, TrN
     options: LevelOptions,
     sharedContext: Context
   ) {
-    const existing = await this.listTrNeighborhoods({}, ALL, sharedContext)
-    const plan = planLevel(
-      existing.map((n) => ({
-        id: n.id,
-        key: `${n.district_id}|${n.match_key}`,
-        is_active: n.is_active,
-        values: {
-          district_id: n.district_id,
-          name: n.name,
-          postal_code: n.postal_code,
-          match_key: n.match_key,
-          sort_key: n.sort_key,
-        },
-      })),
-      [...tree.neighborhoods.values()].map((n) => {
-        const districtId = required(districtIdOf(n.provinceCode, n.districtKey))
-        return {
-          key: `${districtId}|${n.key}`,
-          values: {
-            district_id: districtId,
-            name: n.name,
-            postal_code: n.postalCode,
-            match_key: n.key,
-            sort_key: trSortKey(n.name),
-          },
-        }
-      }),
-      options
-    )
-    await this.applyPlan(plan, {
-      create: (data) => this.createTrNeighborhoods(data, sharedContext),
-      update: (data) => this.updateTrNeighborhoods(data, sharedContext),
-    })
+    const stored = await this.listTrNeighborhoods({}, ALL, sharedContext)
+    const level = neighborhoodLevel(stored, tree, districtIdOf)
+    const plan = planLevel(level.existing, level.desired, options)
+    await applyPlan(plan, {
+      create: (data) => this.createTrNeighborhoods(data as never[], sharedContext),
+      update: (data) => this.updateTrNeighborhoods(data as never[], sharedContext),
+    } satisfies LevelWriter<PlanValues>)
     return plan
   }
+}
 
-  private async applyPlan<T>(
-    plan: LevelPlan<T>,
-    write: { create: (data: T[]) => Promise<unknown>; update: (data: object[]) => Promise<unknown> }
-  ): Promise<void> {
-    for (const batch of chunk(plan.create)) {
-      await write.create(batch)
-    }
-    for (const batch of chunk(plan.update)) {
-      await write.update(batch)
-    }
-    for (const batch of chunk(plan.deactivate)) {
-      await write.update(batch.map((id) => ({ id, is_active: false })))
-    }
-  }
+interface LevelOptions {
+  shouldDeactivateMissing: boolean
 }
 
 export default TrAddressModuleService

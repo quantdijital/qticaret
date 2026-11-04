@@ -1,47 +1,42 @@
 import type { ExecArgs } from "@medusajs/framework/types"
 import { logger } from "../lib/logging"
-import { TR_ADDRESS_MODULE } from "../modules/tr-address"
-import type TrAddressModuleService from "../modules/tr-address/service"
-import { readAddressRows } from "./tr-address/read-rows"
+import { importTrAddressWorkflow } from "../workflows/tr-address/import-tr-address"
+import { parseImportArgs } from "./tr-address/args"
 
 /**
- * Loads address reference data supplied at provisioning (adr/0008; the data
- * file is never committed).
+ * Loads the Turkish address reference data (adr/0008, Ek 2026-11-04).
  *
- * Usage: pnpm --filter @qticaret/backend tr-address:import <file.csv|json> [--deactivate-missing]
+ * Usage:
+ *   pnpm --filter @qticaret/backend tr-address:import source=turkiyeapi [if-changed]
+ *   pnpm --filter @qticaret/backend tr-address:import <file.csv|json> [deactivate-missing]
  *
- * --deactivate-missing marks places absent from the file inactive; use it
- * only with a complete national dataset.
+ * TürkiyeAPI's dataset is the whole country (81 provinces, every district,
+ * neighbourhood and village), checked complete before anything is written;
+ * places it no longer has are marked inactive, never deleted. A file is an
+ * operator's own data (never committed); `deactivate-missing` only with a
+ * complete national file. Runs the same workflow as the panel's button,
+ * so the import is recorded and audited the same way.
  */
 export default async function run({ container, args }: ExecArgs): Promise<void> {
-  const filePath = args.find((arg) => !arg.startsWith("--"))
-  if (!filePath) {
-    throw new Error("tr-address import: pass the data file path")
-  }
-
-  const rows = await readAddressRows(filePath)
-  const service = container.resolve<TrAddressModuleService>(TR_ADDRESS_MODULE)
+  const input = parseImportArgs(args)
   const startedAt = Date.now()
-  const report = await service.importReferenceData(rows, {
-    shouldDeactivateMissing: args.includes("--deactivate-missing"),
+  const { result } = await importTrAddressWorkflow(container).run({
+    input: { ...input, actor_id: null },
   })
-
   logger.info(
     {
-      event: "tr_address.import_completed",
-      rows: rows.length,
+      event: result.skipped ? "tr_address.import_skipped" : "tr_address.import_completed",
+      source: result.source,
+      datasetVersion: result.dataset_version,
+      lastUpdated: result.last_updated,
       durationMs: Date.now() - startedAt,
-      provinces: report.provinces,
-      districts: report.districts,
-      neighborhoods: report.neighborhoods,
-      rejected: report.rejected.length,
+      provinces: result.provinces,
+      districts: result.districts,
+      neighborhoods: result.neighborhoods,
+      rejected: result.rejected,
+      rejectedReasons: result.rejected_reasons,
+      orphans: result.orphans,
     },
-    "tr-address import completed"
+    result.skipped ? "tr-address data is current, nothing imported" : "tr-address import completed"
   )
-  for (const rejected of report.rejected.slice(0, 50)) {
-    logger.warn(
-      { event: "tr_address.row_rejected", row: rejected.row, reason: rejected.reason },
-      "row rejected"
-    )
-  }
 }

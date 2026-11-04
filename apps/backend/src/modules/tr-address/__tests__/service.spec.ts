@@ -1,6 +1,6 @@
 import { resolve } from "node:path"
 import { moduleIntegrationTestRunner } from "@medusajs/test-utils"
-import { readAddressRows } from "../../../scripts/tr-address/read-rows"
+import { readAddressRows } from "../../../lib/tr-address/file/read-rows"
 import { TR_ADDRESS_MODULE } from ".."
 import type TrAddressModuleService from "../service"
 

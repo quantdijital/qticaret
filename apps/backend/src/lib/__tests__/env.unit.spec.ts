@@ -345,6 +345,7 @@ describe("parseEnv", () => {
     "SHOPIFY_BASE_URL",
     "META_GRAPH_BASE_URL",
     "GA4_BASE_URL",
+    "TURKIYEAPI_BASE_URL",
   ])("refuses a fake %s with NODE_ENV unset, which counts as live", (name) => {
     const fake = { [name]: "http://127.0.0.1:9100" }
 

@@ -23,6 +23,7 @@ export const FAKE_PROVIDER_ADDRESSES = {
   GOOGLE_BASE_URL: "Google",
   META_GRAPH_BASE_URL: "Meta",
   GA4_BASE_URL: "GA4",
+  TURKIYEAPI_BASE_URL: "TürkiyeAPI",
 } as const satisfies Partial<Record<keyof Env, string>>
 
 export type FakeAddressVariable = keyof typeof FAKE_PROVIDER_ADDRESSES

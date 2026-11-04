@@ -3,7 +3,7 @@ import { evaluateTrAddress } from "../validation"
 
 const istanbul = { id: "p34", code: "34", name: "İstanbul" }
 const kadikoy = { id: "d1", name: "Kadıköy" }
-const caferaga = { id: "n1", name: "Caferağa", postal_code: "34710" }
+const caferaga = { id: "n1", name: "Caferağa", postal_code: "34710", postal_code_status: null }
 
 const full: TrAddressLookup = {
   province: istanbul,
@@ -85,6 +85,29 @@ describe("evaluateTrAddress", () => {
         full
       )
     ).toEqual([expected])
+  })
+
+  it("holds the postal code to the neighborhood's only when that code is PTT's own", () => {
+    const address = {
+      province: "İstanbul",
+      city: "Kadıköy",
+      address_2: "Caferağa",
+      postal_code: "34726",
+    }
+    const withStatus = (status: "official" | "derived" | "estimated"): TrAddressLookup => ({
+      ...full,
+      neighborhood: { ...caferaga, postal_code_status: status },
+    })
+
+    expect(codes(address, withStatus("official"))).toEqual([
+      "postal_code:tr_address.postal_code_neighborhood_mismatch",
+    ])
+    expect(codes(address, withStatus("derived"))).toEqual([])
+    expect(codes(address, withStatus("estimated"))).toEqual([])
+    // Still the province's: an estimate does not open other provinces' codes
+    expect(codes({ ...address, postal_code: "06420" }, withStatus("estimated"))).toEqual([
+      "postal_code:tr_address.postal_code_province_mismatch",
+    ])
   })
 
   it("flags a non-Turkish phone number", () => {

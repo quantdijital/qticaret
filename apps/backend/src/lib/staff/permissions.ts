@@ -82,6 +82,8 @@ const OWNER_ONLY: readonly Rule[] = [
   { methods: WRITES, path: "/admin/platform-settings/accounting" },
   // The KDV rates the shop charges and declares (adr/0007 Ek 2026-11-04)
   { methods: WRITES, path: "/admin/vat-rates*" },
+  // Replacing the address data every checkout reads (adr/0008 Ek 2026-11-04)
+  { methods: WRITES, path: "/admin/tr-address/sync" },
   // Which program issues the invoices: the buyers' details go to it (adr/0034)
   { methods: WRITES, path: "/admin/platform-settings/invoicing" },
   // Connecting the company; checking it stays the admin's, as with provider accounts
@@ -333,6 +335,9 @@ const CAPABILITY_PROBES = {
   // adr/0007 Ek 2026-11-04: adding, renaming, removing the KDV rates and moving the
   // default, the owner's alone; every role reads them
   vatRates: ["POST", "/admin/vat-rates"],
+  // adr/0008 Ek 2026-11-04: updating the address data from TürkiyeAPI, the owner's alone;
+  // every role reads its state
+  trAddressSync: ["POST", "/admin/tr-address/sync"],
 } as const satisfies Record<string, readonly [Method, string]>
 
 export type Capability = keyof typeof CAPABILITY_PROBES

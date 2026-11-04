@@ -28,16 +28,23 @@ const ALPHABET = Array.from("abcçdefgğhıijklmnoöpqrsştuüvwxyz")
 const SPACE_CODE = "00"
 const UNKNOWN_CODE = "99"
 
+// Punctuation and symbols: "Fatih (Akın)" sorts as "Fatih Akın"
+const PUNCTUATION = /[\p{P}\p{S}]/u
+
 /**
  * Sort key made of two-digit codes: space < digits < letters in Turkish
- * order. Digit-only keys sort the same under every collation, so plain
- * `ORDER BY sort_key` is correct even on a non-Turkish database.
+ * order; punctuation is left out, as dictionaries do. Digit-only keys sort
+ * the same under every collation, so plain `ORDER BY sort_key` is correct
+ * even on a non-Turkish database.
  */
 export function trSortKey(value: string): string {
   return Array.from(normalizeName(value).toLocaleLowerCase(TR_LOCALE))
     .map((char) => {
       if (char === " ") {
         return SPACE_CODE
+      }
+      if (PUNCTUATION.test(char)) {
+        return ""
       }
       if (char >= "0" && char <= "9") {
         return String(Number(char) + 1).padStart(2, "0")

@@ -42,6 +42,10 @@ export const isTrAddress = (address: AddressFields): boolean =>
 
 const present = (value: string | null | undefined): value is string => !!value?.trim()
 
+/** PTT's own code, or a file's (which counts as official). */
+const isExactPostalCode = (status: string | null): boolean =>
+  status === null || status === "official"
+
 /**
  * Checks what the address states, without demanding completeness: a cart
  * may carry only a country while the shopper is still typing. Missing
@@ -81,8 +85,10 @@ export function evaluateTrAddress(
       add("postal_code", "postal_code_province_mismatch")
     } else if (
       lookup.neighborhood &&
+      isExactPostalCode(lookup.neighborhood.postal_code_status) &&
       address.postal_code.trim() !== lookup.neighborhood.postal_code
     ) {
+      // A derived or estimated code (TürkiyeAPI) may be wrong: the shopper's is taken
       add("postal_code", "postal_code_neighborhood_mismatch")
     }
   }

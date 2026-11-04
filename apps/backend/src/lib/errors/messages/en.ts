@@ -794,6 +794,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "tr_address.postal_code_province_mismatch": "The postal code is not in the chosen province.",
   "tr_address.province_code_invalid": "The province is not valid.",
   "tr_address.province_not_found": "Province not found.",
+  "tr_address.source_unavailable":
+    "TürkiyeAPI could not be reached; the address data is unchanged. Try again shortly.",
+  "tr_address.dataset_incomplete":
+    "TürkiyeAPI sent incomplete data; the address data is unchanged. Try again shortly.",
+  "tr_address.dataset_changed":
+    "TürkiyeAPI's data changed during the download; the address data is unchanged. Try again.",
+  "tr_address.file_required": "Name the file to import.",
   "upload.file_too_large": "The file is too big; upload 10 MB at most.",
   "upload.sheet_empty": "The file has no header row.",
   "upload.sheet_invalid": "The file could not be read; save it as Excel (xlsx) or CSV.",

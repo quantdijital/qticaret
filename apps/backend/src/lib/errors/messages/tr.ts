@@ -799,6 +799,13 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "tr_address.postal_code_province_mismatch": "Posta kodu seçilen ile ait değil.",
   "tr_address.province_code_invalid": "İl seçimi geçerli değil.",
   "tr_address.province_not_found": "İl bulunamadı.",
+  "tr_address.source_unavailable":
+    "TürkiyeAPI'ye ulaşılamadı; adres verisi değişmedi. Biraz sonra yeniden deneyin.",
+  "tr_address.dataset_incomplete":
+    "TürkiyeAPI'den gelen veri eksik; adres verisi değişmedi. Biraz sonra yeniden deneyin.",
+  "tr_address.dataset_changed":
+    "TürkiyeAPI verisi indirilirken güncellendi; adres verisi değişmedi. Yeniden deneyin.",
+  "tr_address.file_required": "İçe aktarılacak dosyayı belirtin.",
   "upload.file_too_large": "Dosya çok büyük; en fazla 10 MB yükleyin.",
   "upload.sheet_empty": "Dosyada başlık satırı yok.",
   "upload.sheet_invalid": "Dosya okunamadı; Excel (xlsx) ya da CSV olarak kaydedin.",
