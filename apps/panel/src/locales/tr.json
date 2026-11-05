@@ -7178,7 +7178,15 @@
         "altHint": "Görmeyen ziyaretçiler ve arama motorları için görselde ne olduğunu kısaca yazın.",
         "noImage": "Görsel yok",
         "limit": "Gösterilecek sayı",
-        "limitHint": "1 ile {{max}} arası."
+        "limitHint": "1 ile {{max}} arası.",
+        "columns": "Satırda ürün",
+        "columnsOption": "Satırda {{n}} ürün",
+        "columnsHint": {
+          "3": "Geniş ekranda yan yana 3 ürün, iki sıra ({{total}} ürün); telefonda 2.",
+          "4": "Geniş ekranda yan yana 4 ürün, iki sıra ({{total}} ürün); tablette 3, telefonda 2.",
+          "5": "Geniş ekranda yan yana 5 ürün, iki sıra ({{total}} ürün); daha dar ekranda 4 ve 3, telefonda 2."
+        },
+        "columnsShort": "Vitrin yalnız dolu sıraları gösterir: iki tam sıra için gösterilecek sayıyı en az {{total}} yapın."
       },
       "hero": {
         "eyebrowPlaceholder": "Yeni sezon",

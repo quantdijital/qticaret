@@ -7178,7 +7178,15 @@
         "altHint": "For visitors who cannot see it and for search engines: say briefly what it shows.",
         "noImage": "No image",
         "limit": "How many to show",
-        "limitHint": "Between 1 and {{max}}."
+        "limitHint": "Between 1 and {{max}}.",
+        "columns": "Products per row",
+        "columnsOption": "{{n}} products per row",
+        "columnsHint": {
+          "3": "3 products side by side on a wide screen, two rows ({{total}} products); 2 on a phone.",
+          "4": "4 products side by side on a wide screen, two rows ({{total}} products); 3 on a tablet, 2 on a phone.",
+          "5": "5 products side by side on a wide screen, two rows ({{total}} products); 4 and 3 on narrower screens, 2 on a phone."
+        },
+        "columnsShort": "The storefront shows full rows only: set the number to show to at least {{total}} for two full rows."
       },
       "hero": {
         "eyebrowPlaceholder": "New season",

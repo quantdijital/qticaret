@@ -177,6 +177,7 @@ describe("editorReducer", () => {
       title: null,
       source: { kind: "same_category" },
       limit: 8,
+      columns: 3,
     })
     let full = initialEditorState({ ...DOC, product: [] })
     for (let at = 0; at < 13; at++) {

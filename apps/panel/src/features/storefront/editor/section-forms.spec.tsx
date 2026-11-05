@@ -174,6 +174,32 @@ describe("the section forms", () => {
     }
   )
 
+  it(
+    "lays a product list five across, saying what narrower screens show and a count that falls short",
+    HEAVY,
+    async () => {
+      await open("Ürün listesi")
+      const three = screen.getByRole("radio", { name: "Satırda 3 ürün" })
+      expect(three).toBeChecked()
+      expect(screen.getByText(/yan yana 3 ürün, iki sıra \(6 ürün\)/)).toBeVisible()
+
+      await user.click(screen.getByRole("radio", { name: "Satırda 5 ürün" }))
+      expect(screen.getByRole("radio", { name: "Satırda 5 ürün" })).toBeChecked()
+      expect(three).not.toBeChecked()
+      expect(screen.getByText(/yan yana 5 ürün, iki sıra \(10 ürün\)/)).toBeVisible()
+      // Twelve fill two rows of five: nothing to suggest
+      expect(screen.queryByText(/yalnız dolu sıraları/)).toBeNull()
+
+      fireEvent.change(screen.getByRole("spinbutton", { name: "Gösterilecek sayı" }), {
+        target: { value: "8" },
+      })
+      expect(screen.getByText(/sayıyı en az 10 yapın/)).toBeVisible()
+      await saved((doc) => {
+        expect(doc.home[1]).toMatchObject({ type: "products", columns: 5, limit: 8 })
+      })
+    }
+  )
+
   it("schedules a section in local time, refusing an end before its start", HEAVY, async () => {
     await open("Blog yazıları")
     const starts = screen.getByLabelText("Başlangıç")

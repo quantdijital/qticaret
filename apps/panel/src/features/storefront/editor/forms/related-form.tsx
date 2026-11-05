@@ -3,6 +3,7 @@ import { Field } from "@/components/patterns/form-section"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { RelatedProductsSection, RelatedSource } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import { ColumnsField } from "./columns-field"
 import { CountField, F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
@@ -100,6 +101,14 @@ export function RelatedForm({
           }}
         />
       )}
+      <ColumnsField
+        id={`${section.id}-columns`}
+        value={section.columns}
+        limit={section.limit}
+        onChange={(columns) => {
+          set({ columns })
+        }}
+      />
       <CountField
         id={`${section.id}-limit`}
         label={t(`${F}.limit`)}

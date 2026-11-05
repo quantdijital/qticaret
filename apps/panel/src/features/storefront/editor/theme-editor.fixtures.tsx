@@ -30,6 +30,7 @@ export const DOC: LayoutDocument = {
       title: null,
       source: { kind: "newest" },
       limit: 12,
+      columns: 3,
       more: { kind: "system", target: "shop", label: null },
     },
     { id: "blogyazilari", type: "posts", ...ALWAYS, title: null, limit: 3 },
@@ -43,6 +44,7 @@ export const DOC: LayoutDocument = {
       title: null,
       source: { kind: "same_category" },
       limit: 8,
+      columns: 3,
     },
   ],
   category: [

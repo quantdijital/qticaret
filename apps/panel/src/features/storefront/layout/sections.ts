@@ -140,6 +140,7 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
         title: null,
         source: { kind: "newest" },
         limit: 12,
+        columns: 3,
         more: { kind: "system", target: "shop", label: null },
       }
     case "featured_product":
@@ -172,7 +173,14 @@ export function newBodySection(
 ): BodySection {
   if (type === "related_products") {
     const base = { id, ...ALWAYS }
-    return { ...base, type, title: null, source: { kind: "same_category" }, limit: 8 }
+    return {
+      ...base,
+      type,
+      title: null,
+      source: { kind: "same_category" },
+      limit: 8,
+      columns: 3,
+    }
   }
   const section = newHomeSection(type, id)
   return group === "category" ? ({ ...section, placement } as CategorySection) : section

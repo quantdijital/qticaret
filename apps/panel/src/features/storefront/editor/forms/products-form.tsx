@@ -3,6 +3,7 @@ import { Field } from "@/components/patterns/form-section"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { ProductSource, ProductsSection } from "@/features/storefront/api/layout"
 import { BEST_SELLER_DAYS, LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import { ColumnsField } from "./columns-field"
 import { CountField, F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
@@ -140,6 +141,14 @@ export function ProductsForm({ section, problems, onChange }: SectionFormProps<P
           }}
         />
       ) : null}
+      <ColumnsField
+        id="products-columns"
+        value={section.columns}
+        limit={section.limit}
+        onChange={(columns) => {
+          set({ columns })
+        }}
+      />
       <CountField
         id="products-limit"
         label={t(`${F}.limit`)}

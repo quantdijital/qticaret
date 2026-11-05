@@ -1,5 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
-import type { ProductSource } from "@qticaret/types"
+import type { ProductSource, ShelfColumns } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
 import type { LinkInput } from "@/features/storefront/api/menus"
 import { sdk } from "@/lib/sdk"
@@ -38,9 +38,12 @@ export const LAYOUT_LIMITS = {
 /** A best-seller rail's window in days (adr/0049 Ek 2026-11-05): a week to a year, 90 by default. */
 export const BEST_SELLER_DAYS = { min: 7, max: 365, default: 90 } as const
 
+/** A product rail's cards in a row on a wide screen (adr/0049 Ek 2026-11-05); 3 by default. */
+export const SHELF_COLUMNS: readonly ShelfColumns[] = [3, 4, 5]
+
 /** A button's or a slide's target: the menus' link (a record, a legal text, a page or an address). */
 export type LayoutLink = LinkInput
-export type { ProductSource }
+export type { ProductSource, ShelfColumns }
 
 export interface LayoutImage {
   url: string
@@ -90,6 +93,8 @@ export interface ProductsSection extends SectionBase {
   title: string | null
   source: ProductSource
   limit: number
+  /** Cards in a row on a wide screen; the theme steps down on narrower ones. */
+  columns: ShelfColumns
   /** A "see all" link under the rail. */
   more: LayoutLink | null
 }
@@ -159,6 +164,7 @@ export interface RelatedProductsSection extends SectionBase {
   title: string | null
   source: RelatedSource
   limit: number
+  columns: ShelfColumns
 }
 
 export type HomeSection =
