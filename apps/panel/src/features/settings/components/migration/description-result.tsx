@@ -1,4 +1,4 @@
-import { FileText } from "lucide-react"
+import { FileText, ListChecks } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { documentsOf } from "@/features/settings/api/migration"
 import type { KindCounts, MigrationMode } from "@/features/settings/api/migration"
@@ -25,6 +25,40 @@ export function DocumentsLine({ mode, documents }: { mode: MigrationMode; docume
           })}
         </span>
         <span className="text-muted-foreground">{t(`${D}.documentsHint`)}</span>
+      </span>
+    </p>
+  )
+}
+
+/**
+ * The facts the new products' descriptions stated (adr/0013 Ek
+ * 2026-11-05): how many went to their template's fields, and how many
+ * rows wait for the shop on the products list's "Açıklamadaki
+ * özellikleri aktar".
+ */
+export function FactsLine({
+  mode,
+  facts,
+}: {
+  mode: MigrationMode
+  facts: { written: number; left: number }
+}) {
+  const { t } = useTranslation()
+  return (
+    <p className="flex items-start gap-2 rounded-md border bg-card px-3 py-2.5 text-[13px]">
+      <ListChecks className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+      <span className="flex flex-col gap-0.5">
+        <span className="font-medium">
+          {t(mode === "apply" ? `${D}.facts` : `${D}.plannedFacts`, {
+            count: facts.written,
+            formatted: formatCount(facts.written),
+          })}
+        </span>
+        {facts.left > 0 ? (
+          <span className="text-muted-foreground">
+            {t(`${D}.factsLeft`, { count: facts.left, formatted: formatCount(facts.left) })}
+          </span>
+        ) : null}
       </span>
     </p>
   )

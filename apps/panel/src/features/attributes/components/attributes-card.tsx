@@ -1,11 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
+import { ListChecks } from "lucide-react"
 import { useState } from "react"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { CardForm } from "@/components/patterns/card-form"
 import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
 import { Field } from "@/components/patterns/form-section"
+import { Button } from "@/components/ui/button"
 import {
   Select,
   SelectContent,
@@ -19,13 +22,24 @@ import {
   templatesQuery,
   useSaveProductAttributes,
 } from "@/features/attributes/api"
+import { FactsDialog } from "@/features/attributes/facts/facts-dialog"
 import type { AttributeValue, ProductAttributes } from "@/features/attributes/types"
+import { useCan } from "@/features/auth/api/staff"
 import { errorText } from "@/lib/errors"
 import { AttributeInput } from "./attribute-input"
 
 const NONE = "__none__"
 
-function AttributesForm({ productId, saved }: { productId: string; saved: ProductAttributes }) {
+function AttributesForm({
+  productId,
+  saved,
+  action,
+}: {
+  productId: string
+  saved: ProductAttributes
+  /** Beside the title: bringing the description's facts over. */
+  action?: ReactNode
+}) {
   const { t } = useTranslation()
   const templates = useQuery(templatesQuery())
   const save = useSaveProductAttributes(productId)
@@ -67,6 +81,7 @@ function AttributesForm({ productId, saved }: { productId: string; saved: Produc
     <CardForm
       title={t("attributes.productCard")}
       description={t("attributes.productHint")}
+      action={action}
       dirty={dirty}
       saving={save.isPending}
       onSubmit={() => {
@@ -146,9 +161,48 @@ function AttributesForm({ productId, saved }: { productId: string; saved: Produc
 
 /** The product's attributes by its template (adr/0013): material, length, origin… whatever the shop defines. */
 export function AttributesCard({ productId }: { productId: string }) {
+  const { t } = useTranslation()
   const query = useQuery(productAttributesQuery(productId))
+  const canEdit = useCan("catalog")
+  const [facts, setFacts] = useState(false)
+  // The form starts again from the values a facts run wrote
+  const [round, setRound] = useState(0)
   if (!query.data) {
     return <Skeleton className="h-40 rounded-lg" />
   }
-  return <AttributesForm productId={productId} saved={query.data} />
+  return (
+    <>
+      <AttributesForm
+        key={round}
+        productId={productId}
+        saved={query.data}
+        action={
+          canEdit ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setFacts(true)
+              }}
+            >
+              <ListChecks />
+              {t("attributes.facts.action")}
+            </Button>
+          ) : undefined
+        }
+      />
+      <FactsDialog
+        productIds={facts ? [productId] : []}
+        onClose={() => {
+          setFacts(false)
+        }}
+        onDone={() => {
+          void query.refetch().then(() => {
+            setRound((was) => was + 1)
+          })
+        }}
+      />
+    </>
+  )
 }

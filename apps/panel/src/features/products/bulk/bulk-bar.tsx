@@ -13,6 +13,7 @@ import {
 import { MAX_BULK_PRODUCTS, matchingProductIds } from "@/features/products/api/bulk"
 import type { BulkAction } from "@/features/products/api/bulk"
 import type { ProductListParams } from "@/features/products/api/products"
+import { useCan } from "@/features/auth/api/staff"
 import { errorText } from "@/lib/errors"
 import { formatCount } from "@/lib/format"
 
@@ -27,6 +28,8 @@ interface BulkBarProps {
   /** How many products the list holds. */
   total: number
   onAction: (action: BulkAction) => void
+  /** Bringing the facts in the picked products' descriptions over (adr/0013 Ek 2026-11-05). */
+  onFacts: () => void
 }
 
 /**
@@ -34,9 +37,10 @@ interface BulkBarProps {
  * every one the search holds (up to the limit a run takes), letting go,
  * and the changes that can be made to them at once.
  */
-export function BulkBar({ selected, onSelect, filters, total, onAction }: BulkBarProps) {
+export function BulkBar({ selected, onSelect, filters, total, onAction, onFacts }: BulkBarProps) {
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
+  const canEdit = useCan("catalog")
   // Picked one by one across pages, past what a run takes
   const tooMany = selected.size > MAX_BULK_PRODUCTS
   const selectAll = async () => {
@@ -114,6 +118,12 @@ export function BulkBar({ selected, onSelect, filters, total, onAction }: BulkBa
           {CATALOG_ACTIONS.map(item)}
           <DropdownMenuSeparator />
           {SEO_ACTIONS.map(item)}
+          {canEdit ? (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={onFacts}>{t("attributes.facts.action")}</DropdownMenuItem>
+            </>
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

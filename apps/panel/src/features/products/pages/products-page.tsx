@@ -14,6 +14,7 @@ import type { BulkAction } from "@/features/products/api/bulk"
 import { PAGE_SIZE, productCountsQuery, productsQuery } from "@/features/products/api/products"
 import { BulkBar } from "@/features/products/bulk/bulk-bar"
 import { BulkEditDialog } from "@/features/products/bulk/bulk-edit-dialog"
+import { FactsDialog } from "@/features/attributes/facts/facts-dialog"
 import { useProductColumns } from "@/features/products/components/product-columns"
 import { SheetExportMenu } from "@/features/products/components/sheet-export-menu"
 import { SheetImportDialog } from "@/features/products/components/sheet-import-dialog"
@@ -42,6 +43,8 @@ export function ProductsPage() {
   // Picks stay across pages and searches until a bulk change is made or they are let go
   const [selected, setSelected] = useState<Set<string>>(() => new Set())
   const [bulkAction, setBulkAction] = useState<BulkAction | null>(null)
+  // The products whose descriptions' facts are being brought over; none while closed
+  const [factsFor, setFactsFor] = useState<string[]>([])
   const setSearch = (next: { q?: string; status?: typeof status; page?: number }) => {
     void navigate({
       to: "/products",
@@ -91,6 +94,15 @@ export function ProductsPage() {
           setSelected(new Set())
         }}
       />
+      <FactsDialog
+        productIds={factsFor}
+        onClose={() => {
+          setFactsFor([])
+        }}
+        onDone={() => {
+          setSelected(new Set())
+        }}
+      />
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs
           label={t("products.views")}
@@ -124,6 +136,9 @@ export function ProductsPage() {
             filters={{ q, status }}
             total={list.data?.count ?? 0}
             onAction={setBulkAction}
+            onFacts={() => {
+              setFactsFor([...selected])
+            }}
           />
         ) : null}
         {list.isError ? (

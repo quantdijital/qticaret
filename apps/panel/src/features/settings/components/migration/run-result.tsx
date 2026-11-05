@@ -12,9 +12,10 @@ import {
   wordpressReportOf,
 } from "@/features/settings/api/migration-wordpress"
 import { JobDownloadButton } from "@/features/settings/components/job-download-button"
-import { documentsOf } from "@/features/settings/api/migration"
+import { documentsOf, factsOf } from "@/features/settings/api/migration"
 import {
   DocumentsLine,
+  FactsLine,
   RefreshResult,
 } from "@/features/settings/components/migration/description-result"
 import { WordpressReport } from "@/features/settings/components/migration/wordpress-report"
@@ -105,10 +106,12 @@ export function RunResult({ job, source }: { job: MigrationJob; source: Migratio
   // ADR-0055: a run that only rewrote the descriptions of products moved before
   const refresh = source === "wordpress" && isDescriptionRefresh(job.result_summary)
   const documents = documentsOf(summary.counts)
+  const facts = factsOf(summary.counts)
   const table = (
     <div className="flex flex-col gap-3">
       <CountsTable mode={summary.mode} counts={summary.counts} />
       {documents !== null ? <DocumentsLine mode={summary.mode} documents={documents} /> : null}
+      {facts !== null ? <FactsLine mode={summary.mode} facts={facts} /> : null}
     </div>
   )
   const heading = refresh

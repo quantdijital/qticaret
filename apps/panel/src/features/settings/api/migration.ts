@@ -25,6 +25,9 @@ export type KindCounts = Record<
 > & {
   /** Products: those whose description moved (would move) as a formatted document (ADR-0055). */
   documents?: number
+  /** Attributes: values the descriptions stated, written to fields; rows left for the panel (adr/0013 Ek 2026-11-05). */
+  facts?: number
+  facts_left?: number
 }
 
 const documentCount = z.number().int().min(0)
@@ -32,6 +35,16 @@ const documentCount = z.number().int().min(0)
 /** Products whose description moved (would move) as a formatted document, when the run counted them. */
 export const documentsOf = (counts: Partial<Record<string, KindCounts>>): number | null =>
   documentCount.safeParse(counts["product"]?.documents).data ?? null
+
+/** The facts the new products' descriptions stated, when the run counted them. */
+export function factsOf(
+  counts: Partial<Record<string, KindCounts>>
+): { written: number; left: number } | null {
+  const written = documentCount.safeParse(counts["attribute"]?.facts).data
+  return written === undefined
+    ? null
+    : { written, left: documentCount.safeParse(counts["attribute"]?.facts_left).data ?? 0 }
+}
 
 export interface MigrationRun {
   id: string

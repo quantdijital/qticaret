@@ -8,6 +8,8 @@ import { cn } from "@/lib/utils"
 interface CardFormProps {
   title: string
   description?: string
+  /** Right of the title: an action of its own, apart from the card's save. */
+  action?: ReactNode
   className?: string | undefined
   dirty: boolean
   saving: boolean
@@ -24,6 +26,7 @@ interface CardFormProps {
 export function CardForm({
   title,
   description,
+  action,
   className,
   dirty,
   saving,
@@ -33,7 +36,12 @@ export function CardForm({
 }: CardFormProps) {
   const { t } = useTranslation()
   return (
-    <SectionCard title={title} {...(description ? { description } : {})} className={className}>
+    <SectionCard
+      title={title}
+      {...(description ? { description } : {})}
+      action={action}
+      className={className}
+    >
       <form
         noValidate
         className="flex flex-col gap-5"

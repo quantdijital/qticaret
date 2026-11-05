@@ -28,6 +28,8 @@ export interface DefinitionForm {
   varies_by: string
   /** The spec table section's key; "" for none. */
   group: string
+  /** Other names the facts in descriptions call it by. */
+  aliases: string[]
 }
 
 export interface TemplateForm {
@@ -52,6 +54,7 @@ export const emptyDefinition = (): DefinitionForm => ({
   option_title: "",
   varies_by: "",
   group: "",
+  aliases: [],
 })
 
 const definitionForm = (
@@ -72,6 +75,7 @@ const definitionForm = (
   option_title: definition.option_title ?? "",
   varies_by: definition.varies_by ?? "",
   group: definition.group && groups.has(definition.group) ? definition.group : "",
+  aliases: definition.aliases ?? [],
 })
 
 export const templateForm = (template?: AttributeTemplate | null): TemplateForm => {
@@ -125,6 +129,8 @@ export const definitionsApi = (definitions: DefinitionForm[], groups?: ReadonlyS
       option_title: variant ? orNull(definition.option_title) : null,
       varies_by: variant ? orNull(definition.varies_by) : null,
       ...(groups ? { group: groups.has(definition.group) ? definition.group : null } : {}),
+      // A product option is named by its option title
+      aliases: variant ? [] : definition.aliases,
     }
   })
 

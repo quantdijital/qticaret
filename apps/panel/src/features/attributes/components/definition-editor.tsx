@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { TemplateForm } from "@/features/attributes/form"
+import { AliasChips } from "./alias-chips"
 import { DefinitionGroupField } from "./group-list"
 import { OptionChips } from "./option-chips"
 import { ATTRIBUTE_TYPES, VARIES_BY, isSelectType } from "@/features/attributes/types"
@@ -152,6 +153,15 @@ export function DefinitionEditor({ index, count, onMove, onRemove }: DefinitionE
                 render={({ field }) => (
                   <OptionChips value={field.value} onChange={field.onChange} />
                 )}
+              />
+            </Field>
+          ) : null}
+          {scope === "product" ? (
+            <Field label={t("attributes.aliases")} hint={t("attributes.aliasesHint")}>
+              <Controller
+                control={control}
+                name={`${base}.aliases`}
+                render={({ field }) => <AliasChips value={field.value} onChange={field.onChange} />}
               />
             </Field>
           ) : null}

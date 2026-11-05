@@ -28,6 +28,8 @@ export interface AttributeDefinition {
   varies_by: string | null
   /** The spec table section it shows under (a group's key); none: no section. */
   group?: string | null
+  /** Other names a description's facts call it by (adr/0013 Ek 2026-11-05). */
+  aliases?: string[] | null
 }
 
 /** A section of the template's spec table (adr/0013 Ek 2026-11-04); `rank` orders them. */
