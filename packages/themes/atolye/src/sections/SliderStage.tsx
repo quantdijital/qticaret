@@ -1,6 +1,5 @@
 "use client"
 
-import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react"
 import {
   Children,
   type ReactNode,
@@ -12,20 +11,10 @@ import {
 } from "react"
 import { useHydrated } from "@qticaret/ui/hooks/use-hydrated"
 import { cn } from "@qticaret/ui/lib/utils"
+import { SliderArrows, SliderDots, type SliderWords } from "./SliderControls"
 import { type PlayChoice, isPlaying, wrapIndex } from "./slider-play"
 
-/** The carousel's words, in the shopper's language (the server's `t`). */
-export interface SliderWords {
-  label: string
-  previous: string
-  next: string
-  play: string
-  pause: string
-  /** Each slide's name ("1 / 4"). */
-  slides: string[]
-  /** Each dot's name ("1. slayta geç"). */
-  goTo: string[]
-}
+export type { SliderWords } from "./SliderControls"
 
 const REDUCED = "(prefers-reduced-motion: reduce)"
 const reduced = () => window.matchMedia(REDUCED).matches
@@ -165,8 +154,6 @@ export function SliderStage({
   }
 
   const controls = hydrated && count > 1
-  const round =
-    "absolute top-1/2 z-10 hidden size-12 -translate-y-1/2 items-center justify-center rounded-pill bg-stage/70 text-stage-text transition-colors hover:bg-stage lg:inline-flex"
   return (
     <div
       className="gf-stage relative overflow-hidden rounded-tile"
@@ -234,74 +221,27 @@ export function SliderStage({
         ))}
       </div>
       {controls && arrows && (
-        <>
-          <button
-            type="button"
-            aria-label={words.previous}
-            className={cn(round, "left-4")}
-            onClick={() => {
-              step(index - 1)
-            }}
-          >
-            <ChevronLeft aria-hidden="true" className="size-6" strokeWidth={1.75} />
-          </button>
-          <button
-            type="button"
-            aria-label={words.next}
-            className={cn(round, "right-4")}
-            onClick={() => {
-              step(index + 1)
-            }}
-          >
-            <ChevronRight aria-hidden="true" className="size-6" strokeWidth={1.75} />
-          </button>
-        </>
+        <SliderArrows
+          words={words}
+          onStep={(by) => {
+            step(index + by)
+          }}
+        />
       )}
       {controls && (dots || autoplay) && (
-        <div className="absolute inset-x-0 bottom-3 z-10 flex justify-center sm:bottom-5">
-          <div className="flex items-center rounded-pill bg-stage/70 px-1 text-stage-text backdrop-blur-sm">
-            {autoplay && (
-              <button
-                type="button"
-                aria-label={playing ? words.pause : words.play}
-                className="inline-flex size-11 items-center justify-center rounded-pill"
-                onClick={() => {
-                  setChoice(playing ? "stop" : "play")
-                  setHeld((was) => ({ ...was, pointer: false, focus: false }))
-                }}
-              >
-                {playing ? (
-                  <Pause aria-hidden="true" className="size-4" strokeWidth={2} />
-                ) : (
-                  <Play aria-hidden="true" className="size-4" strokeWidth={2} />
-                )}
-              </button>
-            )}
-            {dots &&
-              slides.map((_, at) => (
-                <button
-                  key={at}
-                  type="button"
-                  aria-label={words.goTo[at]}
-                  aria-current={at === index ? "true" : undefined}
-                  className="group inline-flex h-11 min-w-11 items-center justify-center pointer-fine:min-w-7"
-                  onClick={() => {
-                    step(at)
-                  }}
-                >
-                  <span
-                    aria-hidden="true"
-                    className={cn(
-                      "h-2 rounded-pill transition-colors",
-                      at === index
-                        ? "w-6 bg-stage-text"
-                        : "w-2 bg-stage-text/45 group-hover:bg-stage-text/80"
-                    )}
-                  />
-                </button>
-              ))}
-          </div>
-        </div>
+        <SliderDots
+          words={words}
+          count={count}
+          index={index}
+          dots={dots}
+          playControl={autoplay}
+          playing={playing}
+          onPick={step}
+          onPlay={() => {
+            setChoice(playing ? "stop" : "play")
+            setHeld((was) => ({ ...was, pointer: false, focus: false }))
+          }}
+        />
       )}
     </div>
   )
