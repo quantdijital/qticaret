@@ -3,7 +3,8 @@ import { storeProductDescription } from "./read"
 
 /**
  * GET /store/products/:id/description (adr/0055): the product's
- * description document as HTML, or null for plain text only.
+ * description document as HTML, or null for plain text only, and its
+ * short description's (adr/0055 Ek 2026-11-06), or null without one.
  */
 export async function GET(req: MedusaStoreRequest, res: MedusaResponse): Promise<void> {
   const answer = await storeProductDescription(

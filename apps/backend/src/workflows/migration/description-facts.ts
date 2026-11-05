@@ -51,32 +51,22 @@ const isDoc = (value: unknown): value is { content: Parameters<typeof factsFromB
   (value as { type?: unknown }).type === "doc" &&
   Array.isArray((value as { content?: unknown }).content)
 
-type Blocks = Parameters<typeof factsFromBlocks>[0]
-
 /**
  * The facts of a source product's description document and of its short
- * description's lines read as a list ("Namlu: 9 cm"; adr/0055 Ek
- * 2026-11-05); none without either.
+ * description's document ("Namlu: 9 cm" in a list or in lines; adr/0055
+ * Ek 2026-11-06), read apart (a heading at the description's end is no
+ * section of the short one); a row both state counts once. None without
+ * either.
  */
-export function descriptionFactsOf(doc: unknown, summary?: readonly string[] | null): FactRow[] {
+export function descriptionFactsOf(doc: unknown, summary?: unknown): FactRow[] {
   const own = isDoc(doc) ? factsFromBlocks(doc.content) : []
-  if (!summary?.length) {
+  if (!isDoc(summary)) {
     return own
   }
-  // Read apart: a heading at the document's end is no section of the lines
-  const list: Blocks = [
-    {
-      type: "bulletList",
-      content: summary.map((line) => ({
-        type: "listItem",
-        content: [{ type: "paragraph", content: [{ type: "text", text: line }] }],
-      })),
-    },
-  ]
   const said = new Set(own.map((row) => `${row.label}\u0000${row.value}`))
   return [
     ...own,
-    ...factsFromBlocks(list, "summary").filter(
+    ...factsFromBlocks(summary.content, "summary").filter(
       (row) => !said.has(`${row.label}\u0000${row.value}`)
     ),
   ]

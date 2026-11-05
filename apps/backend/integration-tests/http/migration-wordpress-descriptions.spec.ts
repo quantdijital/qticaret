@@ -6,6 +6,12 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import sharp from "sharp"
 import { wordpressRecords } from "../../src/lib/migration/sources/wordpress"
 import { wxrFixture } from "../../src/lib/migration/sources/wordpress/__tests__/wxr"
+import {
+  legacySummaries,
+  legacySummaryDoc,
+} from "../../src/lib/migration/sources/wordpress/legacy-summary"
+import { readWxr } from "../../src/lib/migration/sources/wordpress/reader"
+import { setProductCatalogWorkflow } from "../../src/workflows/catalog/set-product-catalog"
 import { fillSummaries } from "../../src/workflows/migration/summaries"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
@@ -161,49 +167,72 @@ medusaIntegrationTestRunner({
       expect(again.counts["product"]).toMatchObject({ updated: 0, found: 2, skipped: 2 })
     })
 
-    it("moves the excerpt as the short description, and fills an empty one later", async () => {
+    it("moves the excerpt as written, and writes it over the old bullet lists only", async () => {
       const wxr = wxrFixture(site)
       const applied = await run(wxr, "mode=apply")
-      // adr/0055 Ek 2026-11-05: one product of the export has an excerpt
+      // adr/0055 Ek 2026-11-06: one product of the export has an excerpt
       expect(applied.counts["product"]).toMatchObject({ created: 4, summaries: 1 })
+      const container = getContainer()
       const spoon = async () => {
-        const { data } = await getContainer()
-          .resolve(ContainerRegistrationKeys.QUERY)
-          .graph({
-            entity: "product",
-            fields: ["id", "product_extension.summary"],
-            filters: { handle: "ahsap-kasik" },
-          })
-        return data[0] as unknown as { id: string; product_extension: { summary: string[] | null } }
+        const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+          entity: "product",
+          fields: ["id", "product_extension.summary_doc"],
+          filters: { handle: "ahsap-kasik" },
+        })
+        return data[0] as unknown as { id: string; product_extension: { summary_doc: unknown } }
       }
       const moved = await spoon()
-      expect(moved.product_extension.summary).toEqual(["El yapımı kaşık"])
+      const asWritten = {
+        type: "doc",
+        content: [{ type: "paragraph", content: [{ type: "text", text: "El yapımı kaşık." }] }],
+      }
+      expect(moved.product_extension.summary_doc).toEqual(asWritten)
 
-      // A shop whose products moved before the excerpt was read: the lines are not there
-      await http.post(
-        `/admin/products/${moved.id}/catalog`,
-        { summary: null },
-        { headers: owner.headers }
-      )
+      // What the 2026-11-05 build wrote (as the column's change turned it into a list)
+      const bullets = legacySummaryDoc(["El yapımı kaşık"])
+      const writeDirectly = (summary_doc: unknown) =>
+        setProductCatalogWorkflow(container).run({
+          input: { product_id: moved.id, summary_doc: summary_doc as never },
+        })
+      await writeDirectly(bullets)
       const records = wordpressRecords(wxr)
-      const container = getContainer()
-      const dry = await fillSummaries(container, records.id, records.products, false)
-      expect(dry).toMatchObject({ read: 4, updated: 1, found: 0, empty: 3, failed: 0 })
-      expect((await spoon()).product_extension.summary ?? []).toEqual([])
+      const legacy = legacySummaries(readWxr(wxr))
+      const fill = (apply: boolean) =>
+        fillSummaries(container, records.id, records.products, legacy, apply)
+      expect(await fill(false)).toMatchObject({
+        read: 4,
+        replaced: 1,
+        filled: 0,
+        kept: 0,
+        empty: 3,
+        failed: 0,
+      })
+      expect((await spoon()).product_extension.summary_doc).toEqual(bullets)
+      expect(await fill(true)).toMatchObject({ replaced: 1, failed: 0 })
+      expect((await spoon()).product_extension.summary_doc).toEqual(asWritten)
+      // Again: the same, nothing written
+      expect(await fill(true)).toMatchObject({ replaced: 0, filled: 0, same: 1 })
 
-      const filled = await fillSummaries(container, records.id, records.products, true)
-      expect(filled).toMatchObject({ updated: 1, failed: 0 })
-      expect((await spoon()).product_extension.summary).toEqual(["El yapımı kaşık"])
+      // None at all (moved before the excerpt was read): filled
+      await writeDirectly(null)
+      expect(await fill(true)).toMatchObject({ filled: 1 })
+      expect((await spoon()).product_extension.summary_doc).toEqual(asWritten)
 
-      // Again: found, and the shop's own lines are never written over
-      await http.post(
-        `/admin/products/${moved.id}/catalog`,
-        { summary: ["Kayın ağacı"] },
-        { headers: owner.headers }
-      )
-      const again = await fillSummaries(container, records.id, records.products, true)
-      expect(again).toMatchObject({ updated: 0, found: 1 })
-      expect((await spoon()).product_extension.summary).toEqual(["Kayın ağacı"])
+      // The shop's own is never written over, even one it later set back to the old list
+      const own = (summary_doc: unknown) =>
+        http.post(
+          `/admin/products/${moved.id}/catalog`,
+          { summary_doc },
+          { headers: owner.headers }
+        )
+      await own({
+        type: "doc",
+        content: [{ type: "paragraph", content: [{ type: "text", text: "Kayın ağacı" }] }],
+      })
+      expect(await fill(true)).toMatchObject({ kept: 1, replaced: 0, filled: 0 })
+      await own(bullets)
+      expect(await fill(true)).toMatchObject({ kept: 1, replaced: 0 })
+      expect((await spoon()).product_extension.summary_doc).toEqual(bullets)
     })
 
     it("refreshes from a WordPress export only", async () => {
