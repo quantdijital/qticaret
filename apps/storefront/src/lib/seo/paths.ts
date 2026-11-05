@@ -83,6 +83,47 @@ export function isSystemPath(pathname: string): boolean {
   return (SYSTEM_ROOTS as readonly string[]).includes(first)
 }
 
+/**
+ * The query addresses an old platform answered at the home page and on
+ * its lists (adr/0059; WordPress's `/?p=12`, `/?s=`, `/blog?paged=2`).
+ * Only with one of them do the home page and the storefront's own lists
+ * ask resolve, so the backend can send the visitor on; never otherwise.
+ */
+const OLD_HOME_QUERY = new Set([
+  "p",
+  "page_id",
+  "post",
+  "paged",
+  "product-page",
+  "product",
+  "product_cat",
+  "product_tag",
+  "tag",
+  "category_name",
+  "cat",
+  "s",
+  "post_type",
+  "attachment_id",
+  "feed",
+  "m",
+  "author",
+  "year",
+  "monthnum",
+])
+const OLD_LIST_QUERY = new Set(["paged", "product-page"])
+
+/** Whether the proxy asks resolve about a page view at this address (docs/13 §4). */
+export function resolvesAt(pathname: string, search: string): boolean {
+  if (isSystemPath(pathname)) {
+    return false
+  }
+  if (pathname !== "/" && !isStorefrontIndex(pathname)) {
+    return true
+  }
+  const old = pathname === "/" ? OLD_HOME_QUERY : OLD_LIST_QUERY
+  return [...new URLSearchParams(search).keys()].some((key) => old.has(key))
+}
+
 /** Files the backend makes and the storefront serves at its root (docs/13 §6, F15.9). */
 export function backendFile(pathname: string): string | null {
   if (pathname === "/robots.txt") {

@@ -10,9 +10,8 @@ import {
   canonicalHostRedirect,
   indexNowFile,
   isStaticFile,
-  isStorefrontIndex,
-  isSystemPath,
   normalizedPath,
+  resolvesAt,
 } from "./lib/seo/paths"
 import {
   backendFileResponse,
@@ -38,7 +37,8 @@ const isPaymentReturn = (pathname: string) =>
 /**
  * Before every page (adr/0046 §4): in production one 301 to the shop's
  * canonical host, the backend's files at the root (and the IndexNow key
- * file while the shop announces), one 301 to the normalised address, a
+ * file while the shop announces), one 301 to the normalised address (or
+ * straight to where resolve sends that address, adr/0059), a
  * nonce'd CSP, the dark shop's 503 (adr/0053: but for its open paths and
  * a bypass cookie), the backend's redirects and 410s with
  * their own codes, 404s reported, and `noindex` on an
@@ -86,9 +86,18 @@ export async function proxy(request: NextRequest): Promise<Response> {
     return backendFileResponse(file, visitor)
   }
 
+  const isPageView = request.method === "GET" || request.method === "HEAD"
   const normalized = normalizedPath(pathname)
   if (normalized !== null) {
-    return NextResponse.redirect(new URL(`${normalized}${search}`, request.url), 301)
+    // One hop (docs/13 §4, adr/0059): an old address the backend sends on (`/eski-yol/`,
+    // `/wp-content/uploads/X.JPG`) goes straight to its page, not through its clean form first
+    const onward =
+      isPageView && resolvesAt(normalized, search)
+        ? await resolveForProxy(`${normalized}${search}`, visitor)
+        : null
+    return onward?.type === "redirect"
+      ? NextResponse.redirect(new URL(onward.location, request.url), onward.status)
+      : NextResponse.redirect(new URL(`${normalized}${search}`, request.url), 301)
   }
 
   const nonce = newNonce()
@@ -128,14 +137,8 @@ export async function proxy(request: NextRequest): Promise<Response> {
   headers.set("content-security-policy", csp)
   headers.set(URL_HEADER, `${pathname}${search}`)
 
-  const isPageView = request.method === "GET" || request.method === "HEAD"
-  if (
-    isPageView &&
-    pathname !== "/" &&
-    pathname !== GONE_PAGE_PATH &&
-    !isSystemPath(pathname) &&
-    !isStorefrontIndex(pathname)
-  ) {
+  // The home page and the storefront's own lists only for an old platform's query (adr/0059)
+  if (isPageView && pathname !== GONE_PAGE_PATH && resolvesAt(pathname, search)) {
     const resolution = await resolveForProxy(`${pathname}${search}`, visitor)
     if (resolution?.type === "redirect") {
       return NextResponse.redirect(new URL(resolution.location, request.url), resolution.status)
@@ -144,8 +147,12 @@ export async function proxy(request: NextRequest): Promise<Response> {
       // The theme's removed page in the shop's frame, the 410 kept (adr/0046 Ek 2026-11-05)
       return goneResponse(request.url, headers, csp)
     }
-    // A prefetch is not a visit
-    if (resolution?.type === "not_found" && !request.headers.has("next-router-prefetch")) {
+    // A prefetch is not a visit; the home page and a list render whatever their query
+    if (
+      resolution?.type === "not_found" &&
+      !request.headers.has("next-router-prefetch") &&
+      resolvesAt(pathname, "")
+    ) {
       reportNotFound(`${pathname}${search}`, request.headers.get("referer"), visitor)
     }
   }

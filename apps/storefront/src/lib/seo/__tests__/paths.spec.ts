@@ -8,7 +8,31 @@ import {
   isStorefrontIndex,
   isSystemPath,
   normalizedPath,
+  resolvesAt,
 } from "../paths"
+
+describe("resolvesAt (adr/0059)", () => {
+  it("asks about every page but the storefront's own", () => {
+    expect(resolvesAt("/urun/keten-gomlek", "")).toBe(true)
+    expect(resolvesAt("/wp-login.php", "")).toBe(true)
+    expect(resolvesAt("/sepet", "?p=1")).toBe(false)
+    expect(resolvesAt("/hesap/siparisler", "")).toBe(false)
+  })
+
+  it("asks about the home page and the lists only for an old platform's query", () => {
+    expect(resolvesAt("/", "")).toBe(false)
+    expect(resolvesAt("/", "?utm_source=x&gclid=y")).toBe(false)
+    for (const search of ["?p=12", "?page_id=7", "?s=tava", "?product_cat=x", "?paged=2"]) {
+      expect(resolvesAt("/", search)).toBe(true)
+    }
+    expect(resolvesAt("/blog", "?sayfa=2")).toBe(false)
+    expect(resolvesAt("/magaza", "?marka=x")).toBe(false)
+    // A list reads its own filters; only an old page number is the old platform's
+    expect(resolvesAt("/magaza", "?s=x")).toBe(false)
+    expect(resolvesAt("/blog", "?paged=2")).toBe(true)
+    expect(resolvesAt("/magaza", "?product-page=3")).toBe(true)
+  })
+})
 
 describe("normalizedPath", () => {
   it("leaves a clean path alone", () => {
