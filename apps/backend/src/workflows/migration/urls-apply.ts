@@ -13,7 +13,7 @@ import type UrlRegistryModuleService from "../../modules/url-registry/service"
 import { CATALOG_LOCALE } from "../catalog/entity-paths"
 import type { ImportRow } from "../seo/redirects/csv"
 import { importRedirectsWorkflow } from "../seo/redirects/workflows"
-import { actionOf, stateOf } from "./urls"
+import { actionOf, askedAs, stateOf } from "./urls"
 import type { AddressAction } from "./urls"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -141,7 +141,7 @@ export async function reserveRecordPaths(
     )) as Row[]
     const outcomes: { id: string; outcome: string; applied_at: Date }[] = []
     for (const row of rows) {
-      if (actionOf(row, await stateOf(container, row.path)) !== "reserve") {
+      if (actionOf(row, await stateOf(container, ...askedAs(row))) !== "reserve") {
         continue
       }
       const outcome = await reserve(container, row)
@@ -210,7 +210,7 @@ export async function applyUrls(
     const outcomes = new Map<string, string>()
     const rules: Row[] = []
     for (const row of rows) {
-      const action = actionOf(row, await stateOf(container, row.path))
+      const action = actionOf(row, await stateOf(container, ...askedAs(row)))
       counts[action] += 1
       if (action === "reserve") {
         const outcome = await reserve(container, row)

@@ -7,6 +7,7 @@ import {
 } from "@medusajs/framework/utils"
 import { LegacyOrder } from "./models/legacy-order"
 import { MigrationCutover } from "./models/migration-cutover"
+import { MigrationFile } from "./models/migration-file"
 import { MigrationItem } from "./models/migration-item"
 import type { ITEM_STATUSES } from "./models/migration-item"
 import { MigrationRun } from "./models/migration-run"
@@ -35,6 +36,13 @@ export interface LegacyOrderInput {
   lines: { title: string; sku: string | null; quantity: number; total: string }[]
 }
 
+/** An old file and the media asset it became (adr/0059). */
+export interface KeptFile {
+  path: string
+  stem: string
+  media_id: string
+}
+
 export interface InventoryUrl {
   address: string
   path: string
@@ -59,6 +67,7 @@ class MigrationModuleService extends MedusaService({
   LegacyOrder,
   MigrationUrl,
   MigrationCutover,
+  MigrationFile,
 }) {
   /** What a source's records became here, by their keys: the ones a run met before. */
   async targetsOf(source: string, kind: string, keys: readonly string[]) {
@@ -113,6 +122,42 @@ class MigrationModuleService extends MedusaService({
         ])
       )
     }
+  }
+
+  /**
+   * Keeps which media asset each old file became (adr/0059); a path met
+   * again takes the later run's asset. How many were new.
+   */
+  @InjectTransactionManager()
+  async keepFiles(
+    source: string,
+    files: readonly KeptFile[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<number> {
+    const manager = sharedContext.transactionManager as Executor
+    // One statement may not touch a row twice: a path met twice keeps its last asset
+    const lines = [...new Map(files.map((file) => [file.path, file])).values()]
+    let added = 0
+    for (let start = 0; start < lines.length; start += CHUNK) {
+      const chunk = lines.slice(start, start + CHUNK)
+      const rows = (await manager.execute(
+        `INSERT INTO migration_file (id, source, path, stem, media_id, created_at, updated_at)
+         VALUES ${chunk.map(() => "(?, ?, ?, ?, ?, now(), now())").join(", ")}
+         ON CONFLICT (path) WHERE deleted_at IS NULL DO UPDATE
+           SET source = EXCLUDED.source, stem = EXCLUDED.stem, media_id = EXCLUDED.media_id,
+               updated_at = now()
+         RETURNING (xmax = 0) AS inserted`,
+        chunk.flatMap((file) => [
+          generateEntityId(undefined, "mfile"),
+          source,
+          file.path,
+          file.stem,
+          file.media_id,
+        ])
+      )) as { inserted: boolean }[]
+      added += rows.filter((row) => row.inserted).length
+    }
+    return added
   }
 
   /**

@@ -5,6 +5,8 @@ import type MigrationModuleService from "../../modules/migration/service"
 import { linkRows } from "../content/link-report"
 import { rewriteContentLinks } from "../content/link-rewrite"
 import type { LinkRewriteResult } from "../content/link-rewrite"
+import { recordLegacyAddresses } from "./legacy-addresses"
+import type { LegacyCounts } from "./legacy-addresses"
 import { reserveRecordPaths } from "./urls-apply"
 
 /**
@@ -13,7 +15,8 @@ import { reserveRecordPaths } from "./urls-apply"
  * brought (pages, posts, products' descriptions) get their links to the
  * old site pointed at the pages that answer them here. The shop's other
  * texts are its own: the content link job (`content.link_rewrite`) takes
- * those when asked.
+ * those when asked. First the old platform's own addresses the source
+ * knows (adr/0059): subcategories' short paths and the pictures' files.
  */
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -21,6 +24,8 @@ type Container = Pick<MedusaContainer, "resolve">
 export interface MigrationLinks extends LinkRewriteResult {
   /** Old paths kept for their records now (an apply's `reserve`). */
   reserved: number
+  /** The old platform's own addresses written as entries (adr/0059). */
+  legacy: LegacyCounts
 }
 
 const DOCUMENT_KINDS = ["post", "page", "product"]
@@ -29,6 +34,7 @@ export async function settleMigratedLinks(
   container: Container,
   source: string
 ): Promise<MigrationLinks> {
+  const legacy = await recordLegacyAddresses(container, source, true)
   const { reserved } = await reserveRecordPaths(container)
   const items = await container
     .resolve<MigrationModuleService>(MIGRATION_MODULE)
@@ -47,12 +53,14 @@ export async function settleMigratedLinks(
       products: idsOf((kind) => kind === "product"),
     },
   })
-  return { reserved, ...result }
+  return { reserved, legacy, ...result }
 }
 
 /** The counts as the run's summary and audit entry keep them. */
 export const linkCounts = (links: MigrationLinks) => ({
   reserved: links.reserved,
+  short_paths: links.legacy.short_paths.added,
+  files: links.legacy.files.added,
   documents: links.documents,
   rewritten: links.rewritten,
   changed: links.changed.length,
@@ -69,6 +77,8 @@ export function migrationLinkSheet(links: MigrationLinks): {
     summary: [
       [],
       ["Eski adresinden yeni sayfasına 301 alan kayıtlar", links.reserved],
+      ["Kısa yoluyla da 301 alan alt kategoriler", links.legacy.short_paths.added],
+      ["Eski dosya adresinden yeni görsele 301 alan görseller", links.legacy.files.added],
       ["Metinlerde düzeltilen iç bağlantılar", links.changed.length],
       ["Metinlerde çözülemeyen iç bağlantılar", links.unresolved.length],
     ],

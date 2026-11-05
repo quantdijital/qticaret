@@ -46,7 +46,8 @@ export type ListingAnswer =
   | { kind: "not_found" }
   | { kind: "listing"; query: ListingQuery }
 
-const LISTING_TYPES: ReadonlySet<string> = new Set([
+/** The records whose page lists products, a page at a time. */
+export const LISTING_TYPES: ReadonlySet<string> = new Set([
   CATALOG_ENTITY_TYPES.category,
   CATALOG_ENTITY_TYPES.brand,
   CATALOG_ENTITY_TYPES.collection,

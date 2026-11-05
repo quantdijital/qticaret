@@ -19,6 +19,8 @@ import { SALE_LISTING } from "../../pricing/sale-products"
 import { CATALOG_LOCALE } from "../../catalog/entity-paths"
 import { pageWithQuery, redirectThroughListing } from "../listing-resolution"
 import type { ListingView } from "../listing-resolution"
+import { legacyResolution } from "./legacy"
+import type { Follow } from "./legacy"
 import { activePathOf, ownerState, successorPath } from "./owners"
 import type { OwnerState } from "./owners"
 
@@ -115,6 +117,12 @@ async function answer(container: MedusaContainer, request: RequestPath): Promise
   return entry && state ? ownerAnswer(container, entry, state, request) : { type: "not_found" }
 }
 
+/** Where a path leads, its hits uncounted: what an old address's rule asks (adr/0059). */
+const followed =
+  (container: MedusaContainer): Follow =>
+  async (request) =>
+    (await followPath(container, request, { countHits: false })).resolution
+
 export interface Followed {
   resolution: Resolution
   /** Every path the chain went through, the first included (loop checks). */
@@ -126,12 +134,14 @@ export interface Followed {
 /**
  * Follows the chain from `request` to its end, so the storefront answers
  * with one redirect: permanent only when every hop is. A loop (a rule set
- * changed under another) answers not found and is logged.
+ * changed under another) answers not found and is logged. A path nothing
+ * here holds may still be an old platform's own address (adr/0059): its
+ * rule answers last, unless `legacy` is false.
  */
 export async function followPath(
   container: MedusaContainer,
   request: RequestPath,
-  { countHits = true }: { countHits?: boolean } = {}
+  { countHits = true, legacy = true }: { countHits?: boolean; legacy?: boolean } = {}
 ): Promise<Followed> {
   const redirects = container.resolve<SeoRedirectsModuleService>(SEO_REDIRECTS_MODULE)
   const path = request.path
@@ -157,7 +167,11 @@ export async function followPath(
         return done({ type: "gone", path })
       }
       if (redirect === null) {
-        return done(next.type === "entity" ? { ...next, path } : { type: "not_found", path })
+        if (next.type === "entity") {
+          return done({ ...next, path })
+        }
+        const old = legacy ? await legacyResolution(container, request, followed(container)) : null
+        return done(old ? { ...old, path } : { type: "not_found", path })
       }
       return done({ type: "redirect", path, ...redirect })
     }

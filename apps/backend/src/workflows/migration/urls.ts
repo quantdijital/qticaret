@@ -1,11 +1,12 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { oldAddressOf } from "../../lib/migration/addresses"
+import { isStorefrontPage } from "../../lib/seo/internal-links"
 import { parseRequestPath } from "../../lib/seo/redirects"
 import { MIGRATION_MODULE } from "../../modules/migration"
 import type MigrationModuleService from "../../modules/migration/service"
 import type { InventoryUrl } from "../../modules/migration/service"
-import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
 import { followPath } from "../seo/redirects/resolve"
+import { entityOf } from "./entities"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -13,17 +14,6 @@ type Container = Pick<MedusaContainer, "resolve">
  * The old site's addresses (F14.7, adr/0042 §8): an inventory, what each
  * answers here today, and what an apply would do with it.
  */
-
-// What a migrated record's old address belongs to here
-const ENTITY_OF: Readonly<Record<string, string>> = {
-  product: CATALOG_ENTITY_TYPES.product,
-  category: CATALOG_ENTITY_TYPES.category,
-  brand: CATALOG_ENTITY_TYPES.brand,
-  page: CATALOG_ENTITY_TYPES.page,
-  post: CATALOG_ENTITY_TYPES.post,
-  post_category: CATALOG_ENTITY_TYPES.post_category,
-  post_tag: CATALOG_ENTITY_TYPES.post_tag,
-}
 
 const PAGE = 1000
 
@@ -44,7 +34,7 @@ export async function inventoryFromItems(container: Container, source: string): 
     const urls: InventoryUrl[] = []
     for (const item of items) {
       const old = item.old_url ? oldAddressOf(item.old_url) : null
-      const entity = item.status === "done" && item.target_id ? ENTITY_OF[item.kind] : undefined
+      const entity = item.status === "done" && item.target_id ? entityOf(item.kind) : undefined
       if (old) {
         urls.push({
           ...old,
@@ -67,25 +57,57 @@ export type AddressState =
   | { state: "gone" }
   | { state: "not_found" }
 
-/** What the address answers here today, as a storefront request would get it. */
-export async function stateOf(container: Container, path: string): Promise<AddressState> {
+/**
+ * An inventory row as the storefront would ask for it: its path and its
+ * query (`/?p=12`), which only an old platform's address rule answers.
+ * A row tied to its record, or one the owner decided, is asked without
+ * those rules: the record's path is kept for it, the owner's 301 or 410
+ * is written.
+ */
+export const askedAs = (row: {
+  path: string
+  query: string | null
+  entity_id: string | null
+  decision: string
+}): [string, { legacy: boolean }] => [
+  row.query ? `${row.path}?${row.query}` : row.path,
+  { legacy: row.entity_id === null && row.decision === "auto" },
+]
+
+/**
+ * What the address answers here today, as a storefront request would get
+ * it. `legacy: false` leaves out the old platform's own address rules
+ * (adr/0059): a record's old path is kept for the record even where such
+ * a rule would answer it.
+ */
+export async function stateOf(
+  container: Container,
+  path: string,
+  { legacy = true }: { legacy?: boolean } = {}
+): Promise<AddressState> {
   const request = parseRequestPath(path)
   if (!request) {
     return { state: "not_found" }
   }
   const { resolution } = await followPath(container as MedusaContainer, request, {
     countHits: false,
+    legacy,
   })
   switch (resolution.type) {
     case "entity":
       return { state: "live" }
     case "redirect": {
-      // A chain that ends where nothing answers answers nothing either
+      // A chain that ends where nothing answers answers nothing either; the
+      // storefront's own pages and a moved file's address (adr/0059) answer
       const end = parseRequestPath(resolution.location)
-      const last = end
-        ? (await followPath(container as MedusaContainer, end, { countHits: false })).resolution
-        : null
-      return last?.type === "entity" || last?.type === "gone"
+      if (end === null || isStorefrontPage(end.path)) {
+        return /^(?:https?:\/\/|\/)/i.test(resolution.location)
+          ? { state: "redirected", location: resolution.location }
+          : { state: "not_found" }
+      }
+      const last = (await followPath(container as MedusaContainer, end, { countHits: false }))
+        .resolution
+      return last.type === "entity" || last.type === "gone"
         ? { state: "redirected", location: resolution.location }
         : { state: "not_found" }
     }

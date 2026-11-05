@@ -3,7 +3,7 @@ import { ValidationError } from "../../lib/errors"
 import { isBackendPath, normalizePath } from "../../lib/seo/redirects"
 import { MIGRATION_MODULE } from "../../modules/migration"
 import type MigrationModuleService from "../../modules/migration/service"
-import { actionOf, stateOf } from "./urls"
+import { actionOf, askedAs, stateOf } from "./urls"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -48,7 +48,7 @@ export async function urlPage(container: Container, filter: UrlFilter, offset: n
   })
   const urls = []
   for (const row of rows) {
-    const state = await stateOf(container, row.path)
+    const state = await stateOf(container, ...askedAs(row))
     urls.push({ ...row, ...state, action: actionOf(row, state) })
   }
   return { urls, count, offset, limit: PAGE }
@@ -68,7 +68,7 @@ export async function urlSummary(container: Container) {
   const top = await migration.listMigrationUrls(
     { clicks: { $gt: 0 } },
     {
-      select: ["address", "path", "query", "decision", "clicks"],
+      select: ["address", "path", "query", "entity_id", "decision", "clicks"],
       take: TOP_ADDRESSES,
       order: { clicks: "DESC" },
     }
@@ -77,7 +77,7 @@ export async function urlSummary(container: Container) {
   for (const row of top) {
     // A query address no rule can take counts once the owner has seen it (a server rule's)
     const seen = row.query !== null && row.decision !== "auto"
-    if (!seen && (await stateOf(container, row.path)).state === "not_found") {
+    if (!seen && (await stateOf(container, ...askedAs(row))).state === "not_found") {
       unanswered.push({ address: row.address, clicks: row.clicks })
     }
   }

@@ -92,6 +92,7 @@ export async function migrateContent(
     page: { read: pages.length, created: 0, found: 0, skipped: 0 },
   }
   const remembered: Record<"post" | "page", RememberedItem[]> = { post: [], page: [] }
+  const covers: RememberedItem[] = []
   const found = await existingEntries(container, source, entries)
   for (const [index, entry] of entries.entries()) {
     const own = counts[entry.kind]
@@ -125,6 +126,14 @@ export async function migrateContent(
       if (written.id) {
         own.created += 1
         kept({ target_id: written.id, status: "done" })
+        // The cover's old file answers with its new address (adr/0059), as products' pictures do
+        if (written.coverId && entry.content.cover) {
+          covers.push({
+            source_key: `${entry.source_key} ${entry.content.cover.url}`,
+            target_id: written.coverId,
+            status: "done",
+          })
+        }
       } else {
         own.skipped += 1
         kept({ target_id: null, status: "skipped", error_code: written.problems[0] ?? null })
@@ -135,6 +144,7 @@ export async function migrateContent(
   if (apply) {
     await migration.remember(source, "post", remembered.post)
     await migration.remember(source, "page", remembered.page)
+    await migration.remember(source, "image", covers)
   }
   return {
     counts: { ...counts, post_category: categories.counts, post_tag: tags.counts },
@@ -186,7 +196,7 @@ async function existingEntries(
 /**
  * One post or page through the content workflow: its cover fetched first
  * (one refused leaves it without), its old publishing date kept, its SEO
- * fields after. Its id, or none with why.
+ * fields after. Its id (and its cover's), or none with why.
  */
 async function writeEntry(
   container: Container,
@@ -194,13 +204,13 @@ async function writeEntry(
   title: string,
   content: SourceContent,
   terms: PostTermsInput | undefined
-): Promise<{ id: string | null; problems: string[] }> {
+): Promise<{ id: string | null; coverId?: string; problems: string[] }> {
   const problems: string[] = []
-  let cover: { url: string; alt: string | null } | null = null
+  let cover: { id: string; url: string; alt: string | null } | null = null
   if (content.cover) {
     try {
       const asset = await storeImage(container, content.cover.url)
-      cover = { url: asset.url, alt: content.cover.alt }
+      cover = { id: asset.id, url: asset.url, alt: content.cover.alt }
     } catch (error) {
       if (!(error instanceof ImageRefused)) {
         throw error
@@ -242,5 +252,9 @@ async function writeEntry(
     focus_keyword: content.focus_keyword,
     robots_override: content.robots,
   })
-  return { id, problems: seo ? [...problems, seo] : problems }
+  return {
+    id,
+    ...(cover ? { coverId: cover.id } : {}),
+    problems: seo ? [...problems, seo] : problems,
+  }
 }
