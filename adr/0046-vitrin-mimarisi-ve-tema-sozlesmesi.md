@@ -244,3 +244,27 @@ Atölye giriş, kayıt, şifre sıfırlama, doğrulama ve hesap sayfalarını ke
 
 - **Atölye:** `AuthPage`'in bütün kipleri (sipariş takibi dahil) ve `AccountPage` artık temanın; satın alma ekinin "giriş kipleri taban temanın" notu kapandı. `checkout/AddressForm` `withEmail` aldı (hesabın adres defteri e-postasız), `order/Progress` "sırada ne var" sözlerini (`NEXT`) dışa verir.
 - **Kapsam dışı (sözleşmede yok, çizilmez):** sosyal giriş (backend'de `auth-apple` var, `AuthActions`'ta yok), adres düzenleme (yalnız ekleme ve silme), hesapta ayrı iade talepleri listesi (talepler siparişin sayfasında), mağaza kredisi ve kayıtlı hediye kartları.
+
+## Ek (2026-11-05, içerik sayfaları): mağazanın sayfaları, blog, yorumlar ve 404 için isteğe bağlı alanlar (otonom, gözden geçir)
+
+Atölye mağazanın içerik sayfalarını, blogu ve yazıyı, `/yorumlar`'ı ve 404'ü kendisi çizdi (`design.md` § İçerik sayfaları). Alanlar **isteğe bağlı ve eklemelidir**: taban tema bugünkü gibi çizer; `html` her zaman metnin tamamıdır. Görünüm tipleri `packages/ui/src/content-views.ts`'te.
+
+| Alan | Şekli | Kaynak |
+| --- | --- | --- |
+| `ContentPageView.image?` | `ImageView \| null` | içeriğin kapağı (`image_url`, medya kaydının boyu ve türevleri; `coverOf`, `lib/views/posts.ts`). Liste kartları da artık boy ve `srcset` taşır (`StoreContentSummary.image_width/height/derivatives`, backend zaten veriyordu) |
+| `ContentPageView.outline?` | `OutlineItemView[]` | metnin `h2`'leri, `html`'de kimlikleriyle (`withOutline`, yasal metnin yardımcısı); soru-cevap sayfasında yok |
+| `ContentPageView.post?` | `PostMetaView` (`date`, `dateTime`, `reading`, `author`) | yazının `published_at`, `reading_minutes`, `author_name`'i (`postMeta`) |
+| `ContentPageView.related?` | `PostCardView[]` | aynı kategorinin en yeni yazıları, sonra blogun en yenileri; en çok 3, yazının kendisi hiç (`relatedPosts`) |
+| `ContentPageView.products?` | `ProductCardView[]` | metnin ürün kısa kodları (`data-product-id`, adr/0019), sırayla en çok 8; `productsInOrder` + `railCards` |
+| `ContentPageView.share?` | `SocialLinkView[]` | WhatsApp, X, Facebook, e-posta paylaşım adresleri; yalnız sayfanın kanonik adresi ve başlığı gider; kanonik adres yoksa boş |
+| `ContentPageView.faq?` | `FaqView` (`intro`, `groups[]`: `id`, `title`, `lead`, `items[]` `{ question, html }`) | sayfanın HTML'i soru-cevap biçimindeyse (`lib/views/faq.ts`, saf): tamamı kalın ve "?" ile biten satırlar en az üçse sorular onlar, başlıklar grup; yoksa "?" ile biten başlıklar soru; daha azı sıradan sayfa. Yanıtlar backend'in HTML'i olduğu gibi |
+| `ContentPageView.help?` | `ContactView` | soru-cevap sayfasında iletişim yolları (`contactOf`) |
+| `ContentPageView.identity?` | `IdentityRowView[]` | iletişim sayfasında künye: unvan, adres, MERSİS, vergi dairesi/no, KEP, ETBİS; yalnız girilmiş olanlar (`identityRows`) |
+| `ContentPageView.payments?` | `PaymentFactsView` (`marks`, `installments: InstallmentRatesView[]`, `maxInstallments`) | ödeme sayfasında `storefront.marks.payments` ve `GET /store/payment/installments` (en yeni ürünün ilk varyantı için; yalnız oranlar gösterilir, tutarlar değil: PayTR'de oran tutara bağlı değil); aile adı kartın yazdığı gibi (`familyName`) |
+| `ContentPageView.shipping?` | `ShippingFactsView` (`carriers`, `promises`) | kargo sayfasında `storefront.marks.carriers` ve `storefront.trust_badges` |
+| `ReviewsPageView.reviews[].product.image?` | `ImageView \| null` (`ReviewedProductView`) | sayfanın ürünleri tek çağrıda `products?id[]=`, ilk fotoğrafları |
+| `NotFoundPage` `view?` | `NotFoundPageView` (`categories: CategoryCardView[]`) | `categoryTiles([])` (ana sayfanın reyon kartları); yanıt yoksa boş, 404 hiç düşmez |
+
+- **Ödeme ve kargo sayfası hangisi:** bugün vitrin adrese bakar (`/odeme-secenekleri`, `/kargo-ve-teslimat`; `screens/content-data.ts` `INFO_PAGES`). İletişim sayfasının seçimi gibi (`storefront.contact_form_path`, adr/0047) bir ayar gelince o okunur; o zamana kadar başka adı olan sayfa bilgileri almaz, yalnız metnini gösterir.
+- **Tablolar:** tema metnin tablolarını kendi kaydırma kutusuna alır (`withTableBoxes`, adlı tek sekme durağı, docs/19 §6.9); backend'in HTML'inde başka hiçbir şey değişmez.
+- **Kapsam dışı (backend gerekir):** `/yorumlar`'da yıldıza göre süzme (`GET /store/reviews` `rating` süzgeci almıyor; eklenince vitrin `?puan=` ile geçirir), temalı 410 sayfası (vekilin kısa sayfası), yazılara yorum.
