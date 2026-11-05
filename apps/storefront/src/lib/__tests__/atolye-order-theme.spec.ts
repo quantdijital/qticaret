@@ -108,6 +108,18 @@ describe("the theme's order page", () => {
     })
     expect(html.match(/IBAN/g)).toHaveLength(1)
     expect(html).toContain("TR33 0006 1005 1978 6457 8413 26")
+    // The opening's one button leads down to the account to pay to, shopping on beside it
+    expect(html).toMatch(/<a href="#havale" class="gf-btn">[\s\S]*?Havale bilgilerine geçin<\/a>/)
+    expect(html).toContain('id="havale"')
+    expect(html).toMatch(/<a href="\/" class="gf-link">Alışverişe devam et<\/a>/)
+  })
+
+  it("keeps a line's total under its name on a phone, beside it from 640 px", () => {
+    const html = renderPage(atolyeTheme, "OrderPage", { view: view(), actions })
+    expect(html).toMatch(/class="[^"]*sm:hidden[^"]*">314,30 TL</)
+    expect(html).toMatch(/class="[^"]*max-sm:hidden[^"]*">314,30 TL</)
+    // No transfer waits: the opening's button is the way back to the shop
+    expect(html).not.toContain('href="#havale"')
   })
 
   it("links each parcel to its carrier's own tracking page", () => {

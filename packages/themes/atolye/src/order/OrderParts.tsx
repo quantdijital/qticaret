@@ -4,10 +4,11 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { OrderPageView, Translate } from "@qticaret/ui"
 import { LineAddons } from "../parts/LineAddons"
 import { LineName, LinePhoto } from "../parts/LineLink"
+import { CopyIban } from "./CopyIban"
 
 const WELL = "flex flex-col gap-5 rounded-tile bg-paper-2 p-5 sm:p-7"
 
-/** A transfer not paid yet: the account, the amount and the reference, the IBAN large to copy. */
+/** A transfer not paid yet: the account, the amount and the reference, the IBAN large with a button that copies it. */
 export function BankTransfer({ view, t }: { view: OrderPageView; t: Translate }) {
   const bank = view.bankTransfer
   if (!bank) {
@@ -34,8 +35,18 @@ export function BankTransfer({ view, t }: { view: OrderPageView; t: Translate })
       <dl className="grid gap-x-6 gap-y-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1 sm:col-span-2">
           <dt className="text-sm text-text-2">IBAN</dt>
-          <dd className="tabular text-md font-extrabold tracking-[0.02em] break-words select-all sm:text-lg">
-            {bank.iban}
+          <dd className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span className="tabular text-md font-extrabold tracking-[0.02em] break-words select-all sm:text-lg">
+              {bank.iban}
+            </span>
+            <CopyIban
+              iban={bank.iban}
+              words={{
+                copy: t("order.bank_copy"),
+                label: t("order.bank_copy_iban"),
+                copied: t("order.bank_copied"),
+              }}
+            />
           </dd>
         </div>
         {facts.map(([term, value]) => (
@@ -110,7 +121,8 @@ export function Parcels({ view, t }: { view: OrderPageView; t: Translate }) {
 
 /**
  * What was bought: each line's photograph and name (a link to the
- * product's page while the shop still shows it), variant, count, picks and total.
+ * product's page while the shop still shows it), variant, count, picks and
+ * total (beside it from 640 px, under the name on a phone).
  */
 export function OrderLines({ view, t }: { view: OrderPageView; t: Translate }) {
   return (
@@ -149,8 +161,12 @@ export function OrderLines({ view, t }: { view: OrderPageView; t: Translate }) {
                 note={line.nonWithdrawable ? t("addons.line_non_withdrawable") : null}
                 className="mt-1"
               />
+              {/* On a phone the total stands under the name: a long name keeps the line's width */}
+              <span className="tabular mt-1 text-md font-extrabold sm:hidden">{line.total}</span>
             </div>
-            <span className="tabular shrink-0 text-md font-extrabold">{line.total}</span>
+            <span className="tabular shrink-0 text-md font-extrabold max-sm:hidden">
+              {line.total}
+            </span>
           </li>
         ))}
       </ul>

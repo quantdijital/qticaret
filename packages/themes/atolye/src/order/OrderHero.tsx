@@ -1,4 +1,4 @@
-import { CircleCheck } from "lucide-react"
+import { ArrowDown, CircleCheck } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { OrderPageView, Translate } from "@qticaret/ui"
 
@@ -6,7 +6,9 @@ import type { OrderPageView, Translate } from "@qticaret/ui"
  * The order's opening, a graphite stage: fresh from checkout it thanks
  * the shopper, later it names the order; the order's number, date, way
  * of paying as plain facts, the confirmation's address, and
- * the first thing bought as a photograph sinking into the stage.
+ * the first thing bought as a photograph sinking into the stage. While a
+ * transfer waits, its one button leads down to the account to pay to
+ * (below the first screen on a phone and a laptop), shopping on beside it.
  */
 export function OrderHero({ view, t }: { view: OrderPageView; t: Translate }) {
   const picture = view.lines.find((line) => line.image)?.image ?? null
@@ -41,9 +43,22 @@ export function OrderHero({ view, t }: { view: OrderPageView; t: Translate }) {
         <p className="text-sm text-stage-text-2">
           {t("order.confirmation_sent", { email: view.email })}
         </p>
-        <a href="/" className="gf-btn self-start">
-          {t("cart.continue")}
-        </a>
+        {view.bankTransfer ? (
+          // A transfer waits: the shopper's next step is the account to pay to, below the stage
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+            <a href="#havale" className="gf-btn">
+              <ArrowDown className="size-4.5" aria-hidden="true" strokeWidth={2} />
+              {t("order.bank_jump")}
+            </a>
+            <a href="/" className="gf-link">
+              {t("cart.continue")}
+            </a>
+          </div>
+        ) : (
+          <a href="/" className="gf-btn self-start">
+            {t("cart.continue")}
+          </a>
+        )}
       </div>
       {picture && (
         <div className="relative min-h-40 max-lg:order-first after:absolute after:inset-0 after:bg-linear-to-t after:from-stage after:via-stage/0 after:via-40% after:to-transparent sm:min-h-56 lg:min-h-full lg:after:bg-linear-to-r lg:after:via-30%">
