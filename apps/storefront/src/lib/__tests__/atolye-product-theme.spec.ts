@@ -13,9 +13,10 @@ import { renderPage } from "@/test/theme-render"
  * The Grafit theme's product page: the photographs in a soft well with
  * their thumbnails under them, the buy column (name, stars, price with
  * its rules, options, add-ons, the one buy form the phone's bar also
- * submits), the description and the ruled spec table as two tabs, the
- * reviews right after, the questions, the related products. Prices are
- * the storefront's words; nothing is computed here.
+ * submits), the description and the one spec table as two tabs with
+ * the shipping card beside them, the reviews right after, the questions,
+ * the related products. Prices are the storefront's words; nothing is
+ * computed here.
  */
 
 const picture = (name: string): ImageView => ({
@@ -290,6 +291,53 @@ describe("the theme's product page", () => {
     expect(html).toContain("WhatsApp&#x27;tan sor")
   })
 
+  it("sets the shipping card beside the tabs and keeps the buy column short", () => {
+    const html = page({
+      trustBadges: [
+        { icon: "clock", title: "Aynı gün kargo", text: "Hafta içi 16:00'a kadar" },
+        { icon: "award", title: "2 yıl garanti", text: "Marka garantili ürünler" },
+      ],
+      shipping: {
+        facts: [
+          { icon: "truck", title: "Ücretsiz kargo", text: "1.500,00 TL ve üzeri siparişlerde" },
+          { icon: "clock", title: "Aynı gün kargo", text: "Hafta içi 16:00'a kadar" },
+          {
+            icon: "refresh",
+            title: "14 gün içinde iade",
+            text: "Anlaşmalı kargoyla iade ücretsiz",
+          },
+        ],
+        carriers: [
+          {
+            key: "aras",
+            label: "Aras Kargo",
+            logo: { src: "/marks/aras.svg", width: 120, height: 32 },
+          },
+        ],
+        links: [
+          { label: "Kargo ve teslimat ayrıntıları", path: "/kargo-ve-teslimat" },
+          { label: "İade ve Değişim Politikası", path: "/yasal/iade-politikasi" },
+        ],
+      },
+    })
+    const at = (needle: string) => html.indexOf(needle)
+    expect(html).toContain(
+      '<h2 id="kargo-ve-teslimat-baslik" class="text-title">Kargo ve Teslimat</h2>'
+    )
+    // Beside the panels, whichever is open: after both, before the reviews
+    expect(at('id="kargo-ve-teslimat"')).toBeGreaterThan(at('id="ozellikler"'))
+    expect(at('id="kargo-ve-teslimat"')).toBeLessThan(at('id="degerlendirmeler"'))
+    expect(html).toContain("14 gün içinde iade")
+    expect(html).toContain('alt="Aras Kargo"')
+    expect(html).toContain('href="/yasal/iade-politikasi"')
+    // The buy column says only what the card does not: the warranty and the question
+    expect(html).not.toContain(">Teslimat ve iade</h2>")
+    expect(html).not.toContain("1.500,00 TL ve üzeri siparişlerde kargo ücretsiz.")
+    expect(html.match(/Aynı gün kargo/g)).toHaveLength(1)
+    expect(at("2 yıl garanti")).toBeLessThan(at('role="tablist"'))
+    expect(html).toContain("WhatsApp&#x27;tan sor")
+  })
+
   it("tabs the description and the spec tables, both panels in the first HTML", () => {
     const html = page()
     expect(html).toContain('role="tablist" aria-label="Ürün bilgileri"')
@@ -308,31 +356,35 @@ describe("the theme's product page", () => {
       '<h2 id="urun-ozellikleri" class="gf-info-head text-section">Ürün özellikleri</h2>'
     )
     expect(html).toContain("<h2>Namlu</h2><p>Elmax çelik namlu.</p>")
-    // A table per group, its name the caption; a number keeps its unit on its line
-    expect(html).toMatch(/<caption class="[^"]*">Ölçü ve ağırlık<\/caption>/)
-    expect(html).toMatch(/<th scope="row"[^>]*>Toplam boy<\/th><td[^>]*>21\u00a0cm<\/td>/)
+    // One table, a group's name its row group's head; a number keeps its unit on its line
+    expect(html).toContain('<th scope="rowgroup" colSpan="2">Ölçü ve ağırlık</th>')
+    expect(html).toMatch(/<th scope="row">Toplam boy<\/th><td[^>]*>21\u00a0cm<\/td>/)
   })
 
-  it("sets the specs in one soft tile, two columns from three groups, empty values left out", () => {
+  it("sets the specs as one table, its groups one under another, empty values left out", () => {
     const row = (label: string, value: string) => ({ label, value, highlight: false })
-    const two = page()
-    const tile = /<div class="(rounded-tile bg-paper-2[^"]*)"><div class="break-inside-avoid">/
-    expect(tile.exec(two)?.[1]).toContain("max-w-3xl")
-    expect(two.match(/<table /g)).toHaveLength(2)
-    const three = page({
+    const html = page({
       specGroups: [
         { title: "Namlu", rows: [row("Namlu çeliği", "Elmax"), row("Sertlik", "58-59 HRC")] },
         { title: "Kabza", rows: [row("Kabza", "Mikarta"), row("Renk", "  ")] },
         { title: "Kılıf", rows: [row("Kılıf", "")] },
-        { title: "Ölçü ve ağırlık", rows: [row("Toplam boy", "21 cm")] },
+        { title: "Ölçü ve ağırlık", rows: [row("Toplam boy (kılıfıyla birlikte)", "21 cm")] },
       ],
     })
-    expect(tile.exec(three)?.[1]).toContain("lg:columns-2")
+    // No tile, no columns: one table whose groups follow in the template's order
+    expect(html.match(/<table /g)).toHaveLength(1)
+    expect(html).not.toContain("columns-2")
+    expect(html.match(/<tbody>/g)).toHaveLength(3)
+    const at = (needle: string) => html.indexOf(needle)
+    expect(at(">Namlu</th>")).toBeLessThan(at(">Kabza</th>"))
+    expect(at(">Kabza</th>")).toBeLessThan(at(">Ölçü ve ağırlık</th>"))
     // A group with no value draws nothing; a row with none is left out
-    expect(three.match(/<table /g)).toHaveLength(3)
-    expect(three).not.toContain(">Kılıf</caption>")
-    expect(three).not.toMatch(/<th scope="row"[^>]*>Renk<\/th>/)
-    expect(three).toContain(">58-59\u00a0HRC</td>")
+    expect(html).not.toContain(">Kılıf</th>")
+    expect(html).not.toContain(">Renk</th>")
+    expect(html).toContain(">58-59\u00a0HRC</td>")
+    // A long label is marked to stand above its value on a phone, a short one is not
+    expect(html).toContain('<tr data-long=""><th scope="row">Toplam boy (kılıfıyla birlikte)</th>')
+    expect(html).toContain('<tr><th scope="row">Sertlik</th>')
   })
 
   it("draws no tabs with only one of the two", () => {
@@ -362,7 +414,7 @@ describe("the theme's product page", () => {
   it("falls back to one untitled spec table and the plain paragraphs", () => {
     const html = page({ specGroups: [], descriptionHtml: null })
     expect(html).toContain("<p>Düz metin açıklama.</p>")
-    expect(html).not.toContain("<caption")
+    expect(html).not.toContain('scope="rowgroup"')
     expect(html.match(/<table /g)).toHaveLength(1)
     expect(html).toContain(">Elmax</td>")
   })

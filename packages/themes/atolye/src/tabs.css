@@ -120,7 +120,7 @@
   }
 }
 @media (scripting: enabled) {
-  .gf-info > [data-inactive] {
+  .gf-info [role="tabpanel"][data-inactive] {
     display: none;
   }
   .gf-info .gf-info-head {
@@ -132,5 +132,69 @@
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+  }
+}
+
+/* The product's specs (product/Specs; owner 2026-11-05: "tablo gibi alt alta"):
+   one table, its groups one under another, each opened by a small semibold
+   row; label | value rows on hairlines, the label muted in two fifths, about
+   44px a row; no tile. On a phone a long label stands above its value */
+.gf-specs {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+.gf-specs th,
+.gf-specs td {
+  padding: var(--space-sm) 0;
+  text-align: left;
+  vertical-align: top;
+}
+.gf-specs th[scope="rowgroup"] {
+  padding: var(--space-lg) 0 var(--space-xs);
+  border-bottom: 1px solid var(--color-rule);
+  color: var(--color-text);
+  font-weight: 600;
+}
+.gf-specs > tbody:first-of-type th[scope="rowgroup"] {
+  padding-top: 0;
+}
+.gf-specs tr:has(> td) {
+  border-bottom: 1px solid var(--color-rule);
+}
+.gf-specs th[scope="row"] {
+  padding-right: var(--space-md);
+  color: var(--color-text-3);
+  font-weight: 400;
+}
+.gf-specs td {
+  color: var(--color-text);
+  overflow-wrap: anywhere;
+}
+@media (max-width: 40rem) {
+  .gf-specs,
+  .gf-specs tbody {
+    display: block;
+  }
+  .gf-specs colgroup {
+    display: none;
+  }
+  .gf-specs tr {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  }
+  .gf-specs th[scope="rowgroup"] {
+    grid-column: 1 / -1;
+  }
+  .gf-specs tr[data-long] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .gf-specs tr[data-long] > th {
+    padding-bottom: var(--space-3xs);
+  }
+  .gf-specs tr[data-long] > td {
+    padding-top: 0;
   }
 }

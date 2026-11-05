@@ -22,8 +22,11 @@ import { storefrontEnv } from "@/lib/env"
 import { whatsappHref } from "@/lib/views/frame"
 import { currentLayout } from "@/lib/views/layout"
 import { addonFieldsOf } from "@/lib/views/addons"
+import { shopMarks } from "@/lib/views/card-extras"
+import { legalDocument, legalPath } from "@/lib/views/legal"
 import { shownAmount } from "@/lib/views/price"
 import { productPage, variantIdsOf } from "@/lib/views/product"
+import { productShipping } from "@/lib/views/product-shipping"
 import { questionsView, relatedOf, reviewsView } from "@/lib/views/product-extras"
 import { swatchLookup } from "@/lib/views/color"
 import { sectionViews, showsOwnCategory } from "@/lib/views/sections"
@@ -50,7 +53,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     displays,
     installments,
     brandPaths,
-    { storefront, free_shipping_threshold, features },
+    { storefront, free_shipping_threshold, features, marks },
     reviews,
     questions,
     related,
@@ -78,8 +81,12 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     // A gift card takes no add-ons; none while the shop has them off (`features`: not asked then)
     product.product_extension?.is_gift_card ? Promise.resolve([]) : productAddonsOrNone(product.id),
   ])
-  // The shop's WhatsApp number comes with its contact details (adr/0048)
-  const { whatsapp } = await legalIdentity()
+  // The shop's WhatsApp number comes with its contact details (adr/0048); the return
+  // policy's page for the shipping card, the frame asked for it already (kept a minute)
+  const [{ whatsapp }, returnPolicy] = await Promise.all([
+    legalIdentity(),
+    legalDocument("return_policy"),
+  ])
   const here = `${url.pathname}${url.search}`
   // What the shopper pays, an automatic promotion included (adr/0023 Ek 2026-11-05)
   const amounts = (product.variants ?? []).flatMap((variant) => {
@@ -114,6 +121,18 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
       free_shipping_threshold && free_shipping_threshold > 0
         ? t("product.free_shipping_from", { amount: formatLira(free_shipping_threshold) })
         : null,
+    // "Kargo ve Teslimat" beside the specs (owner 2026-11-05): only what the shop set and wrote
+    shipping: productShipping({
+      product,
+      threshold: free_shipping_threshold,
+      badges: storefront.trust_badges,
+      carriers: shopMarks(marks?.carriers, t),
+      shippingPath: storefront.shipping_info_path ?? null,
+      returnPolicy: returnPolicy
+        ? { label: returnPolicy.title, path: legalPath("return_policy") }
+        : null,
+      t,
+    }),
     loginPath: `/hesap/giris?sonra=${encodeURIComponent(here)}`,
     whatsappHref: whatsapp
       ? `${whatsappHref(whatsapp)}?text=${encodeURIComponent(

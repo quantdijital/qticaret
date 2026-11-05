@@ -64,12 +64,54 @@ export function Headline({ view, t }: { view: ProductPageView; t: Translate }) {
   )
 }
 
+/** Asking about this product on WhatsApp, when the shop gave a number. */
+function AskOnWhatsApp({ href, t }: { href: string; t: Translate }) {
+  return (
+    <a href={href} target="_blank" rel="noopener" className="gf-link self-start text-sm">
+      <WhatsAppGlyph className="size-4 text-whatsapp" />
+      {t("product.ask_whatsapp")}
+    </a>
+  )
+}
+
 /**
- * Delivery and returns as plain facts on a filled well: the shop's free
- * shipping line, its promises (the trust badges it wrote), and a chat
- * about this product on WhatsApp when the shop gave a number.
+ * The shop's assurances beside the buy form. With the "Kargo ve Teslimat"
+ * card below (a shipped product, owner 2026-11-05) the delivery and return
+ * facts live there only: here, short, the shop's other promises (warranty,
+ * safe payment), two to a row where the column allows, and the WhatsApp
+ * question. Without the card, delivery and returns as plain facts on a
+ * filled well: the free shipping line, every promise, the question.
  */
 export function Delivery({ view, t }: { view: ProductPageView; t: Translate }) {
+  const card = view.shipping ?? null
+  if (card) {
+    const told = new Set(card.facts.map((fact) => `${fact.icon} ${fact.title}`))
+    const rest = view.trustBadges.filter((badge) => !told.has(`${badge.icon} ${badge.title}`))
+    if (rest.length === 0 && !view.whatsappHref) {
+      return null
+    }
+    return (
+      <div className="flex flex-col gap-2 rounded-media bg-paper-2 px-4 pt-4 pb-2">
+        {rest.length > 0 && (
+          <ul
+            aria-label={t("product.assurances")}
+            className="grid gap-3 pb-2 text-sm @sm:grid-cols-2"
+          >
+            {rest.map((badge) => (
+              <li key={badge.title} className="flex items-start gap-3">
+                <TrustIcon icon={badge.icon} className="size-5 shrink-0" />
+                <span className="min-w-0">
+                  <span className="font-semibold">{badge.title}</span>
+                  {badge.text && <span className="block text-text-2">{badge.text}</span>}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {view.whatsappHref && <AskOnWhatsApp href={view.whatsappHref} t={t} />}
+      </div>
+    )
+  }
   if (!view.shippingNote && view.trustBadges.length === 0 && !view.whatsappHref) {
     return null
   }
@@ -98,17 +140,7 @@ export function Delivery({ view, t }: { view: ProductPageView; t: Translate }) {
           </li>
         ))}
       </ul>
-      {view.whatsappHref && (
-        <a
-          href={view.whatsappHref}
-          target="_blank"
-          rel="noopener"
-          className="gf-link self-start text-sm"
-        >
-          <WhatsAppGlyph className="size-4 text-whatsapp" />
-          {t("product.ask_whatsapp")}
-        </a>
-      )}
+      {view.whatsappHref && <AskOnWhatsApp href={view.whatsappHref} t={t} />}
     </section>
   )
 }

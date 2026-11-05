@@ -3,6 +3,7 @@ import type {
   QuickAddView,
   RatingBarView,
   ReviewPhotoView,
+  ShopMarkView,
   SpecGroupView,
   StockLevel,
 } from "./card-views"
@@ -132,6 +133,14 @@ export interface ProductPageView {
   /** The shop's free shipping line ("1.500,00 TL ve üzeri kargo ücretsiz"), in words; null without one. */
   shippingNote: string | null
   /**
+   * "Kargo ve Teslimat" beside the description and the specs (owner
+   * 2026-11-05): a shipped product's delivery and return facts from the
+   * shop's settings and its own promises, its carriers and the pages that
+   * say more. Null or left out: the product is not shipped (digital,
+   * service, gift card), the buy column keeps the facts.
+   */
+  shipping?: ProductShippingView | null
+  /**
    * A physical product the shop marked as a sealed hygiene good, in words
    * near the cart form: its right of withdrawal ends once the seal is
    * opened, told before the purchase (MSY md. 5/1-h, 6/2, 15/1-ç).
@@ -182,6 +191,20 @@ export interface QuestionView {
 export interface QuestionsView {
   count: number
   items: QuestionView[]
+}
+
+/** A shipped product's delivery and returns, in words; nothing is promised the shop did not set. */
+export interface ProductShippingView {
+  /**
+   * The facts in order, each with its icon: free shipping from the shop's
+   * threshold, the shop's own shipping promises (same-day dispatch…), the
+   * return window. A promise here is not repeated in the buy column.
+   */
+  facts: TrustBadgeView[]
+  /** The carriers whose contract the shop connected, their own marks. */
+  carriers: ShopMarkView[]
+  /** The shop's shipping page and its return policy, those it published. */
+  links: LinkView[]
 }
 
 /** One attribute as a shopper reads it: "Bıçak uzunluğu" — "21 cm". */

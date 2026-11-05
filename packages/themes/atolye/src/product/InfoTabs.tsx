@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import type { KeyboardEvent, ReactNode } from "react"
 import { useHydrated } from "@qticaret/ui/hooks/use-hydrated"
+import { Beside } from "./Beside"
 
 export interface InfoTab {
   /** The panel's id (its tab is `{id}-sekme`). */
@@ -21,9 +22,18 @@ export interface InfoTab {
  * headings and no tabs (`tabs.css`, `scripting: none`); with it the
  * stylesheet shows the first panel from the first paint, so nothing
  * moves when the script arrives. A link to a heading in the other panel
- * opens that panel.
+ * opens that panel. `aside` (the shipping card) stands beside the panels
+ * whichever is open, under them on a phone.
  */
-export function InfoTabs({ label, tabs }: { label: string; tabs: InfoTab[] }) {
+export function InfoTabs({
+  label,
+  tabs,
+  aside,
+}: {
+  label: string
+  tabs: InfoTab[]
+  aside?: ReactNode
+}) {
   const [active, setActive] = useState(0)
   const buttons = useRef<(HTMLButtonElement | null)[]>([])
   const hydrated = useHydrated()
@@ -87,23 +97,25 @@ export function InfoTabs({ label, tabs }: { label: string; tabs: InfoTab[] }) {
           </button>
         ))}
       </div>
-      {tabs.map((tab, n) => (
-        <section
-          key={tab.id}
-          id={tab.id}
-          role="tabpanel"
-          aria-labelledby={`${tab.id}-sekme`}
-          tabIndex={0}
-          data-inactive={n === active ? undefined : ""}
-          hidden={hydrated && n !== active}
-          className="flex min-w-0 scroll-mt-40 flex-col gap-5"
-        >
-          <h2 id={tab.headingId} className="gf-info-head text-section">
-            {tab.title}
-          </h2>
-          {tab.content}
-        </section>
-      ))}
+      <Beside aside={aside}>
+        {tabs.map((tab, n) => (
+          <section
+            key={tab.id}
+            id={tab.id}
+            role="tabpanel"
+            aria-labelledby={`${tab.id}-sekme`}
+            tabIndex={0}
+            data-inactive={n === active ? undefined : ""}
+            hidden={hydrated && n !== active}
+            className="flex min-w-0 scroll-mt-40 flex-col gap-5"
+          >
+            <h2 id={tab.headingId} className="gf-info-head text-section">
+              {tab.title}
+            </h2>
+            {tab.content}
+          </section>
+        ))}
+      </Beside>
     </div>
   )
 }
