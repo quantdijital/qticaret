@@ -1841,7 +1841,7 @@
         "disconnected": "Google bağlantısı kaldırıldı.",
         "confirm": {
           "title": "Google bağlantısı kaldırılsın mı?",
-          "description": "Erişim Google'da da sonlandırılır ve ürünler artık gönderilmez. Merchant Center'daki ürünler, siz silene ya da süreleri dolana kadar orada kalır.",
+          "description": "Erişim Google'da da sonlandırılır, ürünler artık gönderilmez ve vitrindeki Google yorumları kaldırılır. Merchant Center'daki ürünler, siz silene ya da süreleri dolana kadar orada kalır.",
           "action": "Bağlantıyı kaldır"
         },
         "outcome": {
@@ -6530,6 +6530,7 @@
     "sections": "Müşteri yazıları",
     "sectionReviews": "Yorumlar",
     "sectionQuestions": "Sorular",
+    "sectionGoogle": "Google yorumları",
     "questions": {
       "description": "Müşterilerin ürünler hakkındaki soruları. Mağaza adına verdiğiniz cevap hemen görünür; ürünü teslim almış müşterilerin cevapları onayınızı bekler.",
       "views": "Soru durumu",
@@ -6560,6 +6561,50 @@
       "alt": "{{author}} yorumundaki fotoğraf {{number}}",
       "title": "{{author}} yorumundaki fotoğraf",
       "position": "{{number}} / {{count}}"
+    },
+    "google": {
+      "title": "Google yorumları",
+      "pageDescription": "Google İşletme Profilinizdeki yorumlar her gün okunur ve vitrinin Yorumlar sayfasında Google'ın puanı ve bağlantısıyla, kendi yorumlarınızdan ayrı gösterilir.",
+      "description": "Google'daki işletme profilinizin puanı, yorum sayısı ve en yeni yorumları vitrinde Google adıyla görünür. Yorumlar Google'ındır; burada düzenlenmez.",
+      "notConfigured": "Google bağlantısı bu mağaza için henüz kurulmadı.",
+      "notConnected": "İşletme profilinizin sahibi ya da yöneticisi olan Google hesabıyla bağlanın. İzni Google'ın kendi ekranında verirsiniz; şifreniz bizimle paylaşılmaz.",
+      "notGranted": "Google hesabınız bağlı, ama İşletme Profili izni verilmemiş. Yorumları okuyabilmemiz için Google'ın ekranında bu izni de verin.",
+      "connect": "Google yorumlarını bağla",
+      "reconnect": "Yeniden bağla",
+      "connected": "Google yorumları bağlandı.",
+      "noLocations": "Bu Google hesabının yönettiği bir işletme profili yok. Profilin sahibi ya da yöneticisi olan hesapla yeniden bağlayın.",
+      "location": "İşletme konumu",
+      "chooseLocation": "Konum seçin",
+      "useLocation": "Bu konumu kullan",
+      "locationSaved": "Konum kaydedildi, yorumlar Google'dan okundu.",
+      "changeLocation": "Konumu değiştir",
+      "figures": "Google'da {{rating}} · {{count}} yorum",
+      "noFigures": "Google'da henüz yorum yok",
+      "syncedAgo": "son eşitleme {{when}}",
+      "errorReconnect": "Google bağlantısı yorumları okuyamıyor; yeniden bağlayın.",
+      "errorLost": "Bağlı Google hesabı bu işletme profiline artık erişemiyor; konumu yeniden seçin ya da profilin sahibi olan hesapla bağlayın.",
+      "errorLater": "Son eşitleme Google'dan yanıt alamadı; vitrinde son okunan yorumlar görünüyor. Ertesi gün kendiliğinden yeniden denenir.",
+      "syncNow": "Şimdi eşitle",
+      "synced": "Yorumlar Google'dan okundu.",
+      "syncFailed": "Google'dan yanıt alınamadı; daha sonra yeniden deneyin.",
+      "remove": "Bağlantıyı kaldır",
+      "removed": "Google yorumları vitrinden kaldırıldı.",
+      "confirm": {
+        "title": "Google yorumları kaldırılsın mı?",
+        "description": "Vitrindeki Google yorumları kaldırılır ve burada tutulan kopyaları silinir. Yorumlar Google'da kalır. Google hesabı bağlantısı (Merchant Center, Search Console) sürer.",
+        "action": "Kaldır"
+      },
+      "listTitle": "Yorumlar",
+      "listDescription": "Google'dan okunan yorumlar, en yeniden. Vitrinde göstermek istemediğiniz yorumu kapatın; Google'daki puan ve yorum sayısı değişmez.",
+      "empty": "Bu konumun Google'da yorumu yok.",
+      "anonymous": "Google kullanıcısı",
+      "noText": "Yalnızca puan verilmiş.",
+      "replied": "Yanıtlandı",
+      "hiddenBadge": "Vitrinde gizli",
+      "shown": "Vitrinde",
+      "showReview": "{{author}} yorumu vitrinde görünsün",
+      "shownDone": "Yorum vitrinde gösteriliyor.",
+      "hiddenDone": "Yorum vitrinde gizlendi."
     }
   },
   "staff": {

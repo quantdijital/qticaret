@@ -1841,7 +1841,7 @@
         "disconnected": "Google disconnected.",
         "confirm": {
           "title": "Disconnect Google?",
-          "description": "Access ends at Google too and products are no longer sent. The products in Merchant Center stay there until you remove them or they lapse.",
+          "description": "Access ends at Google too, products are no longer sent and the Google reviews leave the storefront. The products in Merchant Center stay there until you remove them or they lapse.",
           "action": "Disconnect"
         },
         "outcome": {
@@ -6530,6 +6530,7 @@
     "sections": "Customers' words",
     "sectionReviews": "Reviews",
     "sectionQuestions": "Questions",
+    "sectionGoogle": "Google reviews",
     "questions": {
       "description": "Customers' questions about products. An answer in the shop's name shows at once; answers from customers who received the product wait for you.",
       "views": "Question state",
@@ -6560,6 +6561,50 @@
       "alt": "Photo {{number}} in {{author}}'s review",
       "title": "Photo in {{author}}'s review",
       "position": "{{number}} / {{count}}"
+    },
+    "google": {
+      "title": "Google reviews",
+      "pageDescription": "The reviews on your Google Business Profile are read every day and shown on the storefront's reviews page with Google's rating and link, apart from your own reviews.",
+      "description": "Your business profile's rating, review count and newest reviews appear on the storefront under Google's name. The reviews are Google's; they are not edited here.",
+      "notConfigured": "The Google connection is not set up for this shop yet.",
+      "notConnected": "Connect with the Google account that owns or manages your business profile. You allow it on Google's own screen; your password is not shared with us.",
+      "notGranted": "Your Google account is connected, but without Business Profile access. Allow it too on Google's screen so we can read the reviews.",
+      "connect": "Connect Google reviews",
+      "reconnect": "Connect again",
+      "connected": "Google reviews connected.",
+      "noLocations": "This Google account manages no business profile. Connect again with the account that owns or manages it.",
+      "location": "Business location",
+      "chooseLocation": "Choose a location",
+      "useLocation": "Use this location",
+      "locationSaved": "Location saved; the reviews were read from Google.",
+      "changeLocation": "Change location",
+      "figures": "{{rating}} on Google · {{count}} reviews",
+      "noFigures": "No reviews on Google yet",
+      "syncedAgo": "last synced {{when}}",
+      "errorReconnect": "The Google connection cannot read the reviews; connect again.",
+      "errorLost": "The connected Google account no longer reaches this business profile; choose the location again or connect with the profile's owner.",
+      "errorLater": "The last sync got no answer from Google; the storefront shows the reviews last read. It is tried again the next day.",
+      "syncNow": "Sync now",
+      "synced": "The reviews were read from Google.",
+      "syncFailed": "No answer from Google; try again later.",
+      "remove": "Disconnect",
+      "removed": "Google reviews removed from the storefront.",
+      "confirm": {
+        "title": "Remove Google reviews?",
+        "description": "The Google reviews leave the storefront and the copies kept here are deleted. The reviews stay on Google. The Google account connection (Merchant Center, Search Console) stays.",
+        "action": "Remove"
+      },
+      "listTitle": "Reviews",
+      "listDescription": "The reviews read from Google, newest first. Turn off a review you do not want on the storefront; Google's rating and count do not change.",
+      "empty": "This location has no reviews on Google.",
+      "anonymous": "Google user",
+      "noText": "A rating only.",
+      "replied": "Replied",
+      "hiddenBadge": "Hidden on the storefront",
+      "shown": "On the storefront",
+      "showReview": "Show {{author}}'s review on the storefront",
+      "shownDone": "The review is shown on the storefront.",
+      "hiddenDone": "The review is hidden on the storefront."
     }
   },
   "staff": {

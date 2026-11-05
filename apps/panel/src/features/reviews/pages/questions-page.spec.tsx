@@ -10,6 +10,8 @@ import { QuestionsPage } from "./questions-page"
 const fetchMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
+// The section tabs read the Google reviews status: not what this page is about
+vi.mock("@/features/reviews/components/reviews-nav", () => ({ ReviewsNav: () => null }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: ReactNode }) => <a href="/">{children}</a>,

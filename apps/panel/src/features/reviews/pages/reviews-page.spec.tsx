@@ -10,6 +10,8 @@ import { ReviewsPage } from "./reviews-page"
 const fetchMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
+// The section tabs read the Google reviews status: not what this page is about
+vi.mock("@/features/reviews/components/reviews-nav", () => ({ ReviewsNav: () => null }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 // The page reads its tab from the address; here it is always the waiting ones
 vi.mock("@tanstack/react-router", () => ({
