@@ -199,3 +199,22 @@ Kararın 6.3 adımı ("diğer sayfa şablonlarının bölümleri"), backend tara
   - Başlık boşsa ya da önceki kaynağın adıysa, yeni kaynağın adını alır.
 - Migration yok.
 - Kanıt: `lib/storefront/__tests__/rails.unit.spec.ts` ve `layout.unit.spec.ts`, `workflows/storefront/__tests__/best-sellers.unit.spec.ts`, `integration-tests/http/storefront-rails.spec.ts`; panelde `section-forms.spec.tsx`, `problems.spec.ts`; vitrinde `picked-rails.spec.ts`.
+
+## Ek (2026-11-05): ürün raflarında satırda ürün sayısı (otonom, gözden geçir)
+
+İstek (sahip): "ürün bileşenlerinde, çok satanlar örneğin, … grid olarak ürün sayısını seçebilmeliyiz. şu anda 3'lü gösterim var default; müşteri isterse bunu 5'li, isterse 4'lü yapabilsin ve responsive'e göre ayarlansın."
+
+- **Ayar.** Ana sayfanın `products` bölümü (bütün kaynaklar: `newest`, `best_sellers`, `on_sale`, `category`, `collection`, `manual`) ve ürün sayfasının `related_products` bölümü `columns: 3 | 4 | 5` alır; varsayılan 3 (ayardan önceki görünüm). Şema `lib/storefront/layout-fields.ts` (`layout-sections.ts` 300 satıra yaklaştığı için ortak parçalar oraya bölündü). Başka bir değer `storefront_layout.section_invalid` (panel yalnız üçünü sunar; başka değer bozuk ya da eski bir istemcidir).
+  - Eski taslak ve yayınlar okunurken 3 gelir; "değişiklik var" karşılaştırması etkilenmez.
+  - `GET /store/storefront-layout` ve önizleme iki bölümde de `columns` verir (`@qticaret/types` `ShelfColumns`); vitrin bunu bölümün görünümüne (`HomeSectionView` `products.columns`) taşır.
+- **Tema (Atölye).** Seçilen sayı 1280 px'ten sütun sayısıdır; dar ekranda kendiliğinden azalır (`parts/shelf-grid.ts`):
+  - 5 → 1024–1279 px'te 4, 768–1023 px'te 3, telefonda 2;
+  - 4 → 768–1279 px'te 3, telefonda 2;
+  - 3 → 768 px'ten 3, telefonda 2.
+
+  Sekmeli rafta her sekme kendi bölümünün ayarını izler. Kart küçülmez; ad ve fiyat 1024 px'ten büyük boylarını yalnız kart 256 px ve daha genişse alır (kartın kendisi kap, container query): beşli rafta 1440 px'te kart ~250 px, ad 14 px, fiyat 16 px, üstü çizili fiyat aynı satırda. Bu kural kartı her yerde izler: filtre panelinin yanındaki liste 1024–1250 px arasında (kart ~200–215 px) da küçük boyu alır.
+- **Kaç ürün.** Her genişlik iki tam sıra gösterir (telefonda ayardan önceki gibi ikişerli üç sıra): 3 → 6, 4 → 8, 5 → 10. Ürünler iki sırayı doldurmuyorsa **her genişlikte yalnız dolu sıralar** görünür (bir sıradan azsa hepsi); hiçbir genişlikte görünmeyecek kart HTML'e yazılmaz. Fazlası "Tümünü gör"de. Panel sınırı değiştirmez, öneri verir (aşağıda).
+- **Panel.** Ürün listesi ve benzer ürünler formunda "Satırda ürün" bölümlü denetimi (3 · 4 · 5; her seçenekte sırasının küçük çizimi), altında dar ekranlarda ne olduğu; "Gösterilecek sayı" iki sırayı doldurmuyorsa "iki tam sıra için gösterilecek sayıyı en az N yapın" uyarısı (engel değil).
+- **Base tema** ayarı yok sayar (kendi 4 sütunu).
+- Migration yok.
+- Kanıt: `lib/storefront/__tests__/layout.unit.spec.ts`, `integration-tests/http/storefront-layout.spec.ts`, `storefront-rails.spec.ts`; panelde `section-forms.spec.tsx`; vitrinde `atolye-home-theme.spec.ts`, `picked-rails.spec.ts`, `sections.spec.ts`.
