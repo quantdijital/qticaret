@@ -11,6 +11,7 @@ import {
   text,
   title,
 } from "./layout-fields"
+import { heroSlider } from "./layout-slider"
 import { storefrontLink } from "./menus"
 
 /**
@@ -196,6 +197,7 @@ export const pageSection = z.discriminatedUnion(
   "type",
   [
     hero,
+    heroSlider,
     banner,
     categories,
     products,

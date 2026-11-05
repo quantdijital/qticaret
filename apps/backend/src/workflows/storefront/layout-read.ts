@@ -8,20 +8,16 @@ import { createTtlCache } from "../../lib/cache/ttl-cache"
 import { shopInfoValues } from "../shop/info-values"
 import { layoutRow } from "./layout"
 import { defaultLayout } from "./layout-default"
-import { linksOf } from "./layout-check"
+import { imagesOf, linksOf } from "./layout-check"
 import { fill, hydrateSection } from "./layout-hydrate"
 import type { HydrateContext } from "./layout-hydrate"
 import { liveRecords } from "./layout-live"
 import { resolveLinks } from "./menu-links"
 import { railPicks } from "./rails"
 
-/** The addresses of the images shown with their sizes: openings and slides. */
+/** The addresses of the images shown with their sizes: openings and slides (not rich text's). */
 const imageUrls = (section: BodySection): string[] =>
-  section.type === "hero" && section.image
-    ? [section.image.url]
-    : section.type === "banner"
-      ? section.slides.map((slide) => slide.image.url)
-      : []
+  section.type === "rich_text" ? [] : imagesOf(section)
 
 /**
  * The design as the storefront shows it at a moment (adr/0049): only the

@@ -74,6 +74,30 @@ export async function hydrateSection(section: BodySection, at: HydrateContext): 
           link: link(slide.link),
         })),
       }
+    case "hero_slider":
+      return {
+        id,
+        type,
+        slides: section.slides.map((slide) => ({
+          image: { ...image(slide.image.url, slide.image.alt), alt: slide.image.alt },
+          mobile_image: slide.mobile_image
+            ? {
+                ...image(slide.mobile_image.url, slide.mobile_image.alt),
+                alt: slide.mobile_image.alt,
+              }
+            : null,
+          heading: fill(slide.heading, at.values),
+          text: fill(slide.text, at.values),
+          link: link(slide.link),
+          position: slide.position,
+          tone: slide.tone,
+        })),
+        height: section.height,
+        autoplay: section.autoplay,
+        interval: section.interval,
+        dots: section.dots,
+        arrows: section.arrows,
+      }
     case "products":
       return {
         id,

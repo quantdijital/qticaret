@@ -3,6 +3,7 @@ import { docStats } from "../../lib/content"
 import { ValidationError } from "../../lib/errors"
 import { bodySections } from "../../lib/storefront/layout"
 import type { BodySection, LayoutDocument } from "../../lib/storefront/layout"
+import { sliderImages } from "../../lib/storefront/layout-slider"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import { unknownDocTokens } from "../../lib/shop/tokens"
 import type { MenuLinkKind } from "../../modules/storefront-menus/service"
@@ -14,7 +15,7 @@ export function linksOf(section: BodySection): MenuLinkInput[] {
   if (section.type === "hero") {
     return section.links
   }
-  if (section.type === "banner") {
+  if (section.type === "banner" || section.type === "hero_slider") {
     return section.slides.flatMap((slide) => (slide.link ? [slide.link] : []))
   }
   if (section.type === "products") {
@@ -50,9 +51,12 @@ function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }
 }
 
 /** The addresses of every image the design shows: openings, slides, rich text. */
-function imagesOf(section: BodySection): string[] {
+export function imagesOf(section: BodySection): string[] {
   if (section.type === "hero") {
     return section.image ? [section.image.url] : []
+  }
+  if (section.type === "hero_slider") {
+    return sliderImages(section)
   }
   if (section.type === "banner") {
     return section.slides.map((slide) => slide.image.url)
