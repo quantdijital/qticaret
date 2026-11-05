@@ -1,5 +1,6 @@
 import { baseTheme } from "@qticaret/theme-base"
 import type { StorefrontTheme } from "@qticaret/ui"
+import { CartPage } from "./cart/CartPage"
 import { HomePage } from "./HomePage"
 import { Layout } from "./Layout"
 import { LegalPage } from "./LegalPage"
@@ -22,6 +23,7 @@ export const atolyeTheme: StorefrontTheme = {
   Layout,
   HomePage,
   LegalPage,
+  CartPage,
   ListingPage,
   ProductPage,
 }

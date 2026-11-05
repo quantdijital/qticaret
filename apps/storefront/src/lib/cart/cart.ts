@@ -19,6 +19,8 @@ export interface CartLine {
   /** Before discounts, KDV included. */
   original_total: number
   product_id?: string | null
+  /** The line's variant, for its price display's cart offer (adr/0046 Ek 2026-11-05). */
+  variant_id?: string | null
   /** The server's records on the line: its add-on picks (`qt_addons`, adr/0052) among them. */
   metadata?: Record<string, unknown> | null
 }
@@ -60,6 +62,7 @@ const CART_FIELDS = [
   "items.total",
   "items.original_total",
   "items.product_id",
+  "items.variant_id",
   "items.metadata",
   "promotions.code",
   "promotions.is_automatic",

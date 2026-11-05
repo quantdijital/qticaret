@@ -1,6 +1,6 @@
 import type { AddonFormView, LineAddonView } from "./addon-views"
-import type { BreadcrumbView } from "./product-views"
-import type { ImageView, LinkView } from "./views"
+import type { BreadcrumbView, ProductCardView } from "./product-views"
+import type { ImageView, LinkView, TrustBadgeView } from "./views"
 
 /**
  * The cart and what follows it as a theme shows them (adr/0046 §7):
@@ -64,6 +64,21 @@ export interface CartPageView {
    * discount are fixed, so no quantity, remove, code or add-on controls.
    */
   locked?: string | null
+  /**
+   * Shipping before an address, in words (adr/0046 Ek 2026-11-05): the
+   * cheapest option the backend offers this cart now ("Ücretsiz",
+   * "85,00 TL"); null or left out: "at checkout".
+   */
+  shipping?: string | null
+  /**
+   * The shop's automatic offers the cart reaches by its total, in words
+   * ("2.000,00 TL ve üzeri sepette %10 indirim"), each once; none: no line.
+   */
+  offers?: string[]
+  /** The shop's promises (its trust badges), beside the totals; none: no strip. */
+  trust?: TrustBadgeView[]
+  /** Products to add, never one already in the cart: the shop's best sellers or newest. */
+  upsell?: { title: string; products: ProductCardView[] } | null
 }
 
 export interface FreeShippingView {

@@ -10,6 +10,7 @@ import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { storefrontSettings } from "@/lib/store-api/requests"
 import { LINK_CART_LOCKED } from "@/lib/cart/payment-link"
+import { cartExtras } from "@/lib/views/cart-extras"
 import {
   cartLinesOf,
   differs,
@@ -56,12 +57,14 @@ export default async function CartPage({
     typeof query["hata"] === "string" && CART_ERRORS.has(query["hata"]) ? t(query["hata"]) : null
   // A payment link's cart (adr/0051): its lines as they are, no code, no picks to edit
   const locked = lockedNoteOf(cart, t)
-  const [gifts, addons] = await Promise.all([
+  const [gifts, addons, extras] = await Promise.all([
     shopperGiftLines(cart?.id),
     // Each product's add-ons, for its lines' picks form (none, and not asked, while the shop has them off)
     locked
       ? new Map<string, StoreProductAddon[]>()
       : addonsOfProducts((cart?.items ?? []).flatMap((line) => line.product_id ?? [])),
+    // Shipping before an address, the shop's cart offers, products to add (adr/0046 Ek 2026-11-05)
+    cartExtras(cart, t),
   ])
   // A gift card line takes no add-ons (its product page offers none)
   const giftLines = new Set(gifts.map((gift) => gift.line_id))
@@ -97,6 +100,11 @@ export default async function CartPage({
         freeShipping: freeShippingOf(subtotal, settings.free_shipping_threshold, t),
         error,
         locked,
+        shipping: extras.shipping ?? null,
+        offers: extras.offers ?? [],
+        trust: settings.storefront.trust_badges,
+        // A payment link's cart takes nothing more (adr/0051)
+        upsell: locked ? null : (extras.upsell ?? null),
       }}
     />
   )

@@ -51,3 +51,13 @@ export const baseTheme: StorefrontTheme = {
 
 /** A section another theme may borrow until it draws its own (adr/0046 Ek 2026-11-05). */
 export { FeaturedProductSection } from "./home/FeaturedProductSection"
+
+/**
+ * Parts another theme may borrow for flows it does not draw yet
+ * (adr/0046 Ek 2026-11-05): a gift line's recipient and a line's add-on
+ * picks in the cart, the order's return request.
+ */
+export { AddonEditor } from "./cart/AddonEditor"
+export { GiftRecipient } from "./cart/GiftRecipient"
+export { OrderReturns } from "./account/OrderReturns"
+export { OrderGift } from "./checkout/OrderGift"

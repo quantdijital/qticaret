@@ -17,6 +17,7 @@
 /* Hallmark · dismissed F4 · one primary control: the shop-colour pill, which on a graphite stage turns to the stage's own light ink so it reads there */
 /* Hallmark · dismissed F24 · the live search's panel takes the mega panel's one floating recipe (rule edge and --shadow-float): on the graphite counter in dark mode the shadow does not show, the edge holds it */
 /* Hallmark · waive 79 · the listing and product pages open on their goods, never a hero: under the title stand the category tiles, or the gallery stage beside its buy column, which fill the first screen · a shop's aisle and counter pages lead with the catalogue, not a statement */
+/* Hallmark · dismissed 77 · the buying pages (cart, checkout, the order and its lookup) are a shopper's working screens: the page's own title over its tinted wells and totals, the checkout's basket and the order's opening its one graphite stage, no hero · a cart is a form, not a story */
 @import "./tokens.css";
 @import "./base.css" layer(base);
 @import "./ui.css";
