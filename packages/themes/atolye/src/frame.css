@@ -87,3 +87,9 @@ body:has(
   [data-whatsapp] {
   display: none;
 }
+
+/* The checkout's header does not stick: a step or a field scrolled to stands
+   just under the window's top, not under the room a sticky header needs */
+html:has([data-gf-checkout]) {
+  scroll-padding-top: var(--space-md);
+}

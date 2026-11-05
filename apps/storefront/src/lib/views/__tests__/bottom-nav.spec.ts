@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { bottomNavOf } from "../bottom-nav"
+import { bottomNavOf, isCheckoutPage } from "../bottom-nav"
 
 describe("bottomNavOf", () => {
   it.each([
@@ -32,5 +32,20 @@ describe("bottomNavOf", () => {
     expect(bottomNavOf("/bakim/gir?t=x")).toBeNull()
     // A shop page whose slug only starts like one keeps the bar
     expect(bottomNavOf("/odemeler-hakkinda")).toEqual({ current: null })
+  })
+})
+
+describe("isCheckoutPage", () => {
+  it.each(["/odeme", "/odeme?adim=kargo", "/odeme/kart", "/odeme/durum?d=hata"])(
+    "draws %s in the checkout's frame",
+    (url) => {
+      expect(isCheckoutPage(url)).toBe(true)
+    }
+  )
+
+  it("leaves the cart, a payment link's page and look-alike slugs in the shop's frame", () => {
+    for (const url of ["/sepet", "/ode/pl_x.y.z", "/odemeler-hakkinda", "/", ""]) {
+      expect(isCheckoutPage(url)).toBe(false)
+    }
   })
 })

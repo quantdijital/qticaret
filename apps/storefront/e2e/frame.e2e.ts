@@ -68,10 +68,16 @@ test.describe("the phone's bottom bar", () => {
     await expect(categories).toBeFocused()
   })
 
-  test("stays away from the checkout", async ({ page }) => {
+  test("stays away from the checkout, whose own header has no search, only the way back", async ({
+    page,
+  }) => {
     await page.goto("/odeme/durum?d=gecikti")
     await expect(page.locator("h1").first()).toBeVisible()
     await expect(bottomBar(page)).toHaveCount(0)
+    await expect(page.getByRole("searchbox")).toHaveCount(0)
+    await expect(
+      page.getByRole("banner").getByRole("link", { name: "Sepete dön" })
+    ).toHaveAttribute("href", "/sepet")
 
     // A cart, made at desktop width where the purchase form stands free
     await page.setViewportSize({ width: 1280, height: 800 })
@@ -83,7 +89,10 @@ test.describe("the phone's bottom bar", () => {
     expect(checkout?.status()).toBe(200)
     await expect(page).toHaveURL(/\/odeme$/)
     await expect(bottomBar(page)).toHaveCount(0)
+    await expect(page.getByRole("searchbox")).toHaveCount(0)
     await page.goto("/sepet")
+    // The cart keeps the shop's frame
+    await expect(page.getByRole("searchbox")).not.toHaveCount(0)
     await expect(
       bottomBar(page).getByRole("link", { name: /^Sepet, [1-9]\d* ürün$/ })
     ).toHaveAttribute("aria-current", "page")

@@ -283,3 +283,13 @@ Atölye mağazanın içerik sayfalarını, blogu ve yazıyı, `/yorumlar`'ı ve 
 - **Hata sayfası:** `error.tsx` (çerçeve ayaktayken) ve yeni `global-error.tsx` (kök düzen kurulamazsa, ör. backend kapalı: çerçevesiz, `<html>`/`<body>` ve temanın stil dosyası kendisinde) temanın `ErrorPage`'ini çizer; veri almaz, kategori karosu ve arama yok. "Tekrar dene" Next'in `unstable_retry`'ını (sunucuya yeniden sorar), yoksa `reset`'i çağırır. Durum kodu 500 (Next'in).
 - **Ödeme ve kargo sayfaları:** `storefront` ayar bölümünde `payment_info_path`, `shipping_info_path` (`contact_form_path`'in kuralı: mağaza yolu, ana sayfa değil, küçük harfe çevrilir; `null` = hiçbiri; varsayılan `/odeme-secenekleri`, `/kargo-ve-teslimat`), `GET /store/storefront` verir, vitrin `infoPageOf(yol, ayar)` ile karar verir (alanı vermeyen eski backend: eski sabit adresler). Panel: Vitrin > Tercihler > "Ödeme ve kargo sayfaları" sekmesi (boş alan = hiçbiri).
 - **Testler:** vitrin `lib/seo/__tests__/gone.spec.ts`, `app/__tests__/gone-page.spec.ts`, `lib/__tests__/error-page-theme.spec.ts`, `atolye-reviews-theme.spec.ts`, `themes/__tests__/choice.spec.ts`, `lib/views/__tests__/content-extras.spec.ts`; backend `storefront-section.unit.spec.ts`, HTTP `storefront-frame.spec.ts`; panel `preferences-info-pages.spec.tsx`.
+
+## Ek (2026-11-05, ödeme çerçevesi): ödeme sayfalarının sade çerçevesi (otonom, gözden geçir)
+
+UX denetimi 2026-11-05 (`docs/tema/ux-denetim-2026-11-05-sayfalar.md` § 4): ödeme, kart ve sonuç sayfaları mağazanın tam başlığıyla (arama, reyon satırı, duyuru) çiziliyordu. Tema hangi sayfada olduğunu bilmediğinden çerçeve görünümüne bir alan eklendi; **isteğe bağlı ve eklemelidir**, alanı okumayan taban tema bugünkü çerçeveyi çizer.
+
+| Alan | Şekli | Kaynak |
+| --- | --- | --- |
+| `ShopView.checkout?` | `boolean` | vekilin `x-qt-url`'i `/odeme` ya da `/odeme/…` (`lib/views/bottom-nav.ts` `isCheckoutPage`); sepet (`/sepet`) ve ödeme bağlantısının sayfası (`/ode/…`) hayır |
+
+- Atölye bu sayfalarda sade başlık ve yalnız küçük yazılı alt bilgi çizer (`design.md` § Satın alma sayfaları, "Ödeme çerçevesi"); alt gezinme zaten yoktu (`bottomNav: null`).

@@ -142,6 +142,12 @@ export interface ShopView {
   theme: ThemeView
   /** The phone's bottom bar; null where it stays away (checkout, a preview). */
   bottomNav: BottomNavView | null
+  /**
+   * The page is a step of paying (`/odeme`, its card form, the payment's
+   * result): a theme may draw a focused frame without the shop's ways out
+   * (search, menus, the announcement); none or false: the shop's frame.
+   */
+  checkout?: boolean
   /** The ETBİS registration's QR code for the footer (adr/0046 Ek 2026-11-04); none: no slot. */
   etbisQr?: ImageView | null
   /** The ways to pay the shop offers now, in words (derived, never typed in). */

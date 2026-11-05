@@ -2,6 +2,7 @@ import type { ReactNode } from "react"
 import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Announcement } from "./frame/Announcement"
 import { BottomBar } from "./frame/BottomBar"
+import { CheckoutFooter, CheckoutHeader } from "./frame/CheckoutFrame"
 import { Consent } from "./frame/Consent"
 import { Footer } from "./frame/Footer"
 import { Header } from "./frame/Header"
@@ -16,7 +17,9 @@ import { WhatsAppClear } from "./frame/WhatsAppClear"
  * The WhatsApp button stays away from the checkout and the cart, and
  * while the cookie question waits. `ScrollCue` tells the stylesheet
  * which way the page scrolls (the header folds, WhatsApp steps aside).
- * Each page sets its own width.
+ * Each page sets its own width. The pages of paying (`shop.checkout`)
+ * have a focused frame instead: the checkout's header and the small
+ * print, nothing else to leave by (`frame/CheckoutFrame`).
  */
 export function Layout({
   shop,
@@ -35,6 +38,27 @@ export function Layout({
   searchSuggest?: string
   changeCartLine?: (form: FormData) => Promise<void>
 }) {
+  const skip = (
+    <a href="#icerik" className="gf-skip">
+      {t("nav.skip_to_content")}
+    </a>
+  )
+  const consent = shop.cookieBanner && (
+    <Consent banner={shop.cookieBanner} save={saveCookies} t={t} />
+  )
+  if (shop.checkout) {
+    return (
+      <div className="flex min-h-dvh flex-col">
+        {skip}
+        <CheckoutHeader shop={shop} t={t} />
+        <main id="icerik" className="flex-1">
+          {children}
+        </main>
+        <CheckoutFooter shop={shop} t={t} />
+        {consent}
+      </div>
+    )
+  }
   const whatsapp =
     shop.contact.whatsappHref !== null &&
     shop.bottomNav !== null &&
@@ -42,9 +66,7 @@ export function Layout({
     shop.cookieBanner?.due !== true
   return (
     <div className="flex min-h-dvh flex-col">
-      <a href="#icerik" className="gf-skip">
-        {t("nav.skip_to_content")}
-      </a>
+      {skip}
       <Announcement
         lines={shop.announcements}
         links={shop.topLinks}
@@ -81,7 +103,7 @@ export function Layout({
           <WhatsAppClear />
         </>
       )}
-      {shop.cookieBanner && <Consent banner={shop.cookieBanner} save={saveCookies} t={t} />}
+      {consent}
       <ScrollCue />
     </div>
   )

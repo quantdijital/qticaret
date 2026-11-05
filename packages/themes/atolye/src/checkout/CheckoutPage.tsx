@@ -1,4 +1,4 @@
-import { Lock, ReceiptText } from "lucide-react"
+import { ReceiptText } from "lucide-react"
 import type { CheckoutActions, CheckoutPageView, CheckoutStep, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { placeholderWords } from "../parts/placeholders"
@@ -58,13 +58,7 @@ export function CheckoutPage({
   const address = view.addressSummary
   return (
     <Container className="flex flex-col gap-6 pt-6 lg:gap-8 lg:pt-12">
-      <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
-        <h1 className="text-section">{t("checkout.title")}</h1>
-        <p className="flex items-center gap-2 text-sm text-text-2">
-          <Lock className="size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
-          {t("checkout.secure_note")}
-        </p>
-      </div>
+      <h1 className="text-section">{t("checkout.title")}</h1>
       {view.error && (
         <p role="alert" className="rounded-media bg-paper-2 p-4 text-sm font-semibold text-error">
           {view.error}

@@ -17,9 +17,11 @@ const ITEMS: readonly { item: BottomNavItem; root: string }[] = [
 
 const under = (path: string, root: string) => path === root || path.startsWith(`${root}/`)
 
+const pathOf = (url: string) => url.split(/[?#]/, 1)[0] ?? ""
+
 /** The bar for the page at `url` (path and query, as the proxy set it); null where it stays away. */
 export function bottomNavOf(url: string): BottomNavView | null {
-  const path = url.split(/[?#]/, 1)[0] ?? ""
+  const path = pathOf(url)
   if (WITHOUT_BAR.some((root) => under(path, root))) {
     return null
   }
@@ -28,3 +30,11 @@ export function bottomNavOf(url: string): BottomNavView | null {
   }
   return { current: ITEMS.find(({ root }) => under(path, root))?.item ?? null }
 }
+
+/**
+ * The pages of paying (`/odeme`, its card form, the payment's result):
+ * the theme draws them in its focused frame, no search or menus to wander
+ * off to (UX denetimi 2026-11-05). The cart and a payment link's own page
+ * (`/ode/…`) keep the shop's frame.
+ */
+export const isCheckoutPage = (url: string): boolean => under(pathOf(url), "/odeme")

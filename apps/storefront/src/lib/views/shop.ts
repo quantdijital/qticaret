@@ -15,7 +15,7 @@ import {
   storefrontSettings,
 } from "@/lib/store-api/requests"
 import { categoryImages } from "@/lib/store-api/extras"
-import { bottomNavOf } from "./bottom-nav"
+import { bottomNavOf, isCheckoutPage } from "./bottom-nav"
 import { shopMarks } from "./card-extras"
 import { miniCartOf } from "./cart"
 import { productPathsOf } from "./line-paths"
@@ -105,6 +105,8 @@ export async function shopView(): Promise<ShopView> {
     categories,
     paths
   )
+  // The page's address as the proxy set it (never the visitor's)
+  const url = requestHeaders.get("x-qt-url") ?? ""
   return {
     name: site.shop.name,
     logo: site.shop.logo_url
@@ -140,8 +142,8 @@ export async function shopView(): Promise<ShopView> {
       : null,
     identityLines: identityLinesOf(identity, t),
     theme: themeView(theme),
-    // The page's address as the proxy set it (never the visitor's)
-    bottomNav: bottomNavOf(requestHeaders.get("x-qt-url") ?? ""),
+    bottomNav: bottomNavOf(url),
+    checkout: isCheckoutPage(url),
     // The footer's identity slot and marks (adr/0046 Ek 2026-11-04)
     etbisQr: identity.etbis_qr ? imageView(identity.etbis_qr, t("footer.etbis_qr_alt")) : null,
     paymentMarks: shopMarks(marks?.payments, t),

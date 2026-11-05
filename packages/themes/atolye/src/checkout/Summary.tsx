@@ -97,7 +97,7 @@ export function Summary({
     <aside
       aria-labelledby="odeme-ozeti"
       className={cn(
-        "gf-stage flex h-fit flex-col gap-6 rounded-tile p-6 lg:sticky lg:top-44 lg:p-7",
+        "gf-stage flex h-fit flex-col gap-6 rounded-tile p-6 lg:sticky lg:top-6 lg:p-7",
         className
       )}
     >

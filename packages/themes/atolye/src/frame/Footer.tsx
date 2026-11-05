@@ -1,14 +1,12 @@
 import { Mail, MapPin, Phone } from "lucide-react"
 import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
-import { CookiePreferencesLink } from "./CookiePreferencesLink"
 import { FooterLinks } from "./FooterLinks"
 import { FooterMarks } from "./FooterMarks"
 import { NewsletterForm } from "./NewsletterForm"
 import { newsletterWords } from "./newsletter-words"
+import { SmallPrint } from "./SmallPrint"
 
-const SMALL_LINK =
-  "inline-flex min-h-11 items-center whitespace-nowrap text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
 const LINE =
   "inline-flex min-h-11 items-center gap-3 text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-9"
 
@@ -90,8 +88,6 @@ export function Footer({
   t: Translate
   subscribe?: ((state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>) | undefined
 }) {
-  const year = new Date().getFullYear()
-  const title = shop.companyTitle ?? shop.name
   return (
     <footer data-gf-clear="" className="mt-(--footer-gap) border-t border-rule bg-paper-2">
       <Container className="grid gap-10 pt-12 pb-8 lg:grid-cols-12 lg:gap-x-(--gap-columns) lg:gap-y-12 lg:pt-16">
@@ -119,30 +115,7 @@ export function Footer({
         </div>
         <div className="flex flex-col gap-6 border-t border-rule pt-8 lg:col-span-12">
           <FooterMarks shop={shop} t={t} />
-          <nav aria-label={t("footer.legal")}>
-            <ul className="flex flex-wrap gap-x-6 text-sm">
-              {shop.legalLinks.map((link) => (
-                <li key={link.path}>
-                  <a href={link.path} className={SMALL_LINK}>
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-              <li>
-                <CookiePreferencesLink label={t("cookies.preferences")} className={SMALL_LINK} />
-              </li>
-            </ul>
-          </nav>
-          {shop.identityLines.length > 0 && (
-            <ul className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-text-3">
-              {shop.identityLines.map((line) => (
-                <li key={line}>{line}</li>
-              ))}
-            </ul>
-          )}
-          <p className="border-t border-rule pt-6 text-xs text-text-3">
-            {t("footer.copyright", { year, name: title })}
-          </p>
+          <SmallPrint shop={shop} t={t} />
         </div>
       </Container>
     </footer>

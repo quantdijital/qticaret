@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
-import type { PlaceOrderResult } from "@qticaret/ui"
+import { createElement } from "react"
+import type { PlaceOrderResult, ShopView } from "@qticaret/ui"
 import { renderFrame, renderPage, shopFixture } from "@/test/theme-render"
 
 /**
@@ -177,5 +178,72 @@ describe("the theme's frame", () => {
     const html = renderFrame(atolyeTheme, shopFixture())
     expect(html).toMatch(/<a href="\/arama"[^>]*>(?:(?!<\/a>).)*Ara<\/a>/)
     expect(html).toMatch(/id="arama-dar"[^>]*class="gf-field pr-14"/)
+  })
+})
+
+describe("the checkout's frame", () => {
+  const checkout = (over: Partial<ShopView> = {}) =>
+    renderPage(atolyeTheme, "Layout", {
+      shop: shopFixture({
+        checkout: true,
+        bottomNav: null,
+        announcements: ["1.500 TL üzeri kargo bedava"],
+        newsletter: { title: "E-bülten", text: "Onay metni." },
+        ...over,
+      }),
+      children: createElement("p", null, "Sayfa"),
+      saveCookies: () => Promise.resolve(),
+      subscribe,
+    })
+
+  it("heads the page with the wordmark, the lock, the shop's WhatsApp and the way back to the cart", () => {
+    const html = checkout()
+    expect(html).toMatch(/<header data-gf-checkout=""/)
+    expect(html).toMatch(/<a href="\/"[^>]*>(?:(?!<\/a>).)*Örnek Atölye/)
+    expect(html).toContain("Güvenli ödeme")
+    expect(html).toMatch(
+      /<a href="https:\/\/wa.me\/905320000000" target="_blank" rel="noopener"[^>]*>(?:(?!<\/a>).)*WhatsApp&#x27;tan yazın<\/span><\/a>/
+    )
+    expect(html).toMatch(/<a href="\/sepet"[^>]*>(?:(?!<\/a>).)*Sepete dön<\/span><\/a>/)
+  })
+
+  it("leaves out the search, the aisle, the announcement, the bottom bar and the floating WhatsApp", () => {
+    const html = checkout()
+    expect(html).not.toContain('type="search"')
+    expect(html).not.toContain("data-gf-aisle")
+    expect(html).not.toContain("data-gf-head")
+    expect(html).not.toContain("1.500 TL üzeri kargo bedava")
+    expect(html).not.toContain("Hızlı gezinme")
+    expect(html).not.toContain("data-whatsapp")
+    // The cart is a page away, not a drawer
+    expect(html).not.toContain("data-drawer")
+  })
+
+  it("closes on the small print only: the legal texts, the cookie choices, the identity lines and the year", () => {
+    const html = checkout()
+    expect(html).toMatch(/<nav aria-label="Yasal metinler">/)
+    expect(html).toContain('href="/yasal/mesafeli-satis-sozlesmesi"')
+    expect(html).toContain('href="/cerez-tercihleri"')
+    expect(html).toContain("<li>MERSİS: 0000000000000000</li>")
+    expect(html).toMatch(/© \d{4} Örnek Atölye Ltd. Şti.<\/p>/)
+    expect(html).not.toContain("E-bülten")
+    expect(html).not.toContain('href="/iletisim"')
+    expect(html).not.toContain("bilgi@example.com")
+  })
+
+  it("offers the phone without a WhatsApp number, and no help link without either", () => {
+    const contact = shopFixture().contact
+    const phone = checkout({ contact: { ...contact, whatsappHref: null } })
+    expect(phone).toMatch(/<a href="tel:\+905320000000"[^>]*>(?:(?!<\/a>).)*Bizi arayın:/)
+    expect(phone).not.toContain("wa.me")
+    const none = checkout({ contact: { ...contact, whatsappHref: null, phoneHref: null } })
+    expect(none).not.toContain("tel:")
+    expect(none).toContain("Sepete dön")
+  })
+
+  it("is the shop's frame wherever the storefront does not say checkout", () => {
+    const html = renderFrame(atolyeTheme, shopFixture({ checkout: false }))
+    expect(html).toContain("data-gf-head")
+    expect(html).not.toContain("data-gf-checkout")
   })
 })
