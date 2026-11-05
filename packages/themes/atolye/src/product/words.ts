@@ -138,9 +138,22 @@ export const galleryWords = (t: Translate) => ({
   position: t("product.image_position"),
   /** "Görsel {n}". */
   show: t("product.image_show"),
+  thumbsPrevious: t("product.thumbs_previous"),
+  thumbsNext: t("product.thumbs_next"),
 })
 
 export type GalleryWords = ReturnType<typeof galleryWords>
+
+/** The description and specs block: its tabs' name and the description's own toggle. */
+export const infoWords = (t: Translate) => ({
+  tabs: t("product.info_tabs"),
+  description: t("product.description"),
+  specs: t("product.specs"),
+  more: t("product.read_more"),
+  less: t("product.read_less"),
+})
+
+export type InfoWords = ReturnType<typeof infoWords>
 
 export const communityWords = (t: Translate) => ({
   rating: t("product.rating"),

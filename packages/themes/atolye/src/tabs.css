@@ -61,3 +61,67 @@
     display: none;
   }
 }
+
+/* The product's description and specs (product/InfoTabs): two heading-sized
+   tabs over a hairline, the chosen one in ink on a 2px rule. Without the
+   script both panels stand with their own headings and no tabs; with it
+   the first panel alone shows from the first paint */
+.gf-info-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-lg);
+  border-bottom: 1px solid var(--color-rule);
+}
+.gf-info-tab {
+  min-height: 3rem;
+  margin-bottom: -1px;
+  padding: var(--space-xs) 0 var(--space-sm);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--color-text-3);
+  font-family: var(--font-display);
+  font-size: clamp(1.125rem, 1.2vw + 0.85rem, 2rem);
+  font-weight: var(--display-weight);
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color var(--dur-micro) var(--ease-out),
+    border-color var(--dur-micro) var(--ease-out);
+}
+.gf-info-tab[aria-selected="true"] {
+  border-bottom-color: var(--color-text);
+  color: var(--color-text);
+}
+@media (hover: hover) {
+  .gf-info-tab:hover:not([aria-selected="true"]) {
+    color: var(--color-text-2);
+  }
+}
+@media (min-width: 64rem) {
+  .gf-info-tabs {
+    column-gap: var(--space-xl);
+  }
+}
+@media (scripting: none) {
+  .gf-info > [role="tablist"] {
+    display: none;
+  }
+}
+@media (scripting: enabled) {
+  .gf-info > [data-inactive] {
+    display: none;
+  }
+  .gf-info .gf-info-head {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

@@ -10,11 +10,12 @@ import type {
 import { renderPage } from "@/test/theme-render"
 
 /**
- * The Grafit theme's product page: the photographs on a graphite stage,
- * the buy column (name, stars, price with its rules, options, add-ons,
- * the one buy form the phone's bar also submits), the ruled spec table
- * beside the description, reviews and questions, the related products.
- * Prices are the storefront's words; nothing is computed here.
+ * The Grafit theme's product page: the photographs in a soft well with
+ * their thumbnails under them, the buy column (name, stars, price with
+ * its rules, options, add-ons, the one buy form the phone's bar also
+ * submits), the description and the ruled spec table as two tabs, the
+ * reviews right after, the questions, the related products. Prices are
+ * the storefront's words; nothing is computed here.
  */
 
 const picture = (name: string): ImageView => ({
@@ -148,15 +149,25 @@ describe("the theme's product page", () => {
     expect(html).toMatch(/<a href="\/kategori\/cakilar" class="[^"]*sm:hidden"/)
   })
 
-  it("puts the photographs on the stage: the first eager, thumbnails as anchors, the zoom only with the script", () => {
+  it("puts the photographs in a well over their thumbnails: the first eager, anchors before the script", () => {
     const html = page()
-    expect(html).toContain("gf-stage relative overflow-hidden rounded-tile")
+    expect(html).toContain("relative overflow-hidden rounded-tile bg-paper-2")
+    expect(html).not.toContain("gf-stage relative overflow-hidden rounded-tile")
     expect(html.match(/fetchPriority="high"/g)).toHaveLength(1)
+    expect(html).toContain('id="gorsel-kucukleri"')
     expect(html).toContain('href="#gorsel-2"')
     expect(html).toContain('id="gorsel-3"')
     expect(html).toContain("1 / 3")
-    // Buttons that need the script are not in the first HTML
+    // Buttons that need the script are not in the first HTML; three thumbnails never slide
     expect(html).not.toContain("Görseli büyüt")
+    expect(html).not.toContain("grid-cols-[2rem_minmax(0,1fr)_2rem]")
+  })
+
+  it("lets more than four thumbnails slide, their arrows only with the script", () => {
+    const html = page({ images: [1, 2, 3, 4, 5, 6].map((n) => picture(`foto-${String(n)}`)) })
+    expect(html.match(/<a href="#gorsel-\d"/g)).toHaveLength(6)
+    expect(html).toContain("grid-cols-[2rem_minmax(0,1fr)_2rem]")
+    expect(html).not.toContain("Sonraki görseller")
   })
 
   it("links the stars to the reviews and shows the shop's headline facts", () => {
@@ -251,11 +262,50 @@ describe("the theme's product page", () => {
     expect(html).toContain("WhatsApp&#x27;tan sor")
   })
 
-  it("prints the description's own HTML beside the ruled spec table, by the template's groups", () => {
+  it("tabs the description and the ruled spec table, both panels in the first HTML", () => {
     const html = page()
+    expect(html).toContain('role="tablist" aria-label="Ürün bilgileri"')
+    expect(html).toMatch(
+      /<button type="button" role="tab" id="aciklama-sekme" aria-selected="true" aria-controls="aciklama" tabindex="0"[^>]*>Ürün açıklaması<\/button>/
+    )
+    expect(html).toMatch(
+      /<button type="button" role="tab" id="ozellikler-sekme" aria-selected="false" aria-controls="ozellikler" tabindex="-1"[^>]*>Ürün özellikleri<\/button>/
+    )
+    // The specs panel is closed by the stylesheet only with the script, never hidden in the HTML
+    expect(html).toMatch(
+      /<section id="ozellikler" role="tabpanel" aria-labelledby="ozellikler-sekme" tabindex="0" data-inactive=""/
+    )
+    expect(html).not.toMatch(/<section id="ozellikler"[^>]*hidden/)
+    expect(html).toContain(
+      '<h2 id="urun-ozellikleri" class="gf-info-head text-section">Ürün özellikleri</h2>'
+    )
     expect(html).toContain("<h2>Namlu</h2><p>Elmax çelik namlu.</p>")
     expect(html).toMatch(/<th scope="rowgroup" colSpan="2"[^>]*>Ölçü ve ağırlık<\/th>/)
     expect(html).toMatch(/<th scope="row"[^>]*>Toplam boy<\/th><td[^>]*>21 cm<\/td>/)
+  })
+
+  it("draws no tabs with only one of the two", () => {
+    const described = page({ specs: [], specGroups: [] })
+    expect(described).not.toContain('role="tablist"')
+    expect(described).toContain(
+      '<h2 id="urun-aciklamasi" class="text-section">Ürün açıklaması</h2>'
+    )
+    const specified = page({ description: [], descriptionHtml: null })
+    expect(specified).not.toContain('role="tablist"')
+    expect(specified).toContain(
+      '<h2 id="urun-ozellikleri" class="text-section">Ürün özellikleri</h2>'
+    )
+  })
+
+  it("opens a long description at about half with its real toggle, a short one whole", () => {
+    const long = page({ descriptionHtml: `<p>${"Elmax çelik namlu, el yapımı. ".repeat(40)}</p>` })
+    expect(long).toContain('data-open="false"')
+    expect(long).toMatch(
+      /<button type="button" class="gf-btn gf-btn--quiet gf-btn--small gf-more-toggle self-start" aria-expanded="false" aria-controls="aciklama-metni">Devamını oku/
+    )
+    const short = page()
+    expect(short).toContain('data-open="true"')
+    expect(short).not.toContain("Devamını oku")
   })
 
   it("falls back to one flat spec table and the plain paragraphs", () => {
@@ -263,6 +313,15 @@ describe("the theme's product page", () => {
     expect(html).toContain("<p>Düz metin açıklama.</p>")
     expect(html).not.toContain('scope="rowgroup"')
     expect(html).toContain(">Elmax</td>")
+  })
+
+  it("puts the reviews right after the tabs, then the questions and the related products", () => {
+    const html = page()
+    const at = (needle: string) => html.indexOf(needle)
+    expect(at('role="tablist"')).toBeGreaterThan(at('id="sepet-formu"'))
+    expect(at('id="degerlendirmeler"')).toBeGreaterThan(at('id="ozellikler"'))
+    expect(at('id="sorular"')).toBeGreaterThan(at('id="degerlendirmeler"'))
+    expect(at(">Benzer ürünler</h2>")).toBeGreaterThan(at('id="sorular"'))
   })
 
   it("shows the reviews with the spread and the photos, the questions with the shop's answer", () => {

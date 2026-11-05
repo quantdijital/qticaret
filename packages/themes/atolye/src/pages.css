@@ -61,6 +61,87 @@
     scroll-snap-stop: always;
   }
 
+  /* From 1024 px the square and its thumbnails fit the first screen under the trail */
+  @media (min-width: 64rem) {
+    .gf-pictures {
+      max-width: max(22rem, calc(100dvh - 26rem));
+    }
+  }
+
+  /* The thumbnails under it: four at once (three on a narrow phone), sliding */
+  .gf-thumbs {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc((100% - 3 * var(--space-xs)) / 4);
+    gap: var(--space-xs);
+    margin: 0;
+    padding: var(--space-2xs);
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--space-2xs);
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .gf-thumbs::-webkit-scrollbar {
+    display: none;
+  }
+  .gf-thumbs > * {
+    scroll-snap-align: start;
+  }
+  @media (width < 22.5rem) {
+    .gf-thumbs {
+      grid-auto-columns: calc((100% - 2 * var(--space-xs)) / 3);
+    }
+  }
+  .gf-thumbs-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-block: var(--space-2xs);
+    border-radius: var(--radius-inner);
+    background: var(--color-paper-2);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: background-color var(--dur-micro) var(--ease-out);
+  }
+  .gf-thumbs-arrow:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  .gf-thumbs-arrow:disabled {
+    color: var(--color-text-3);
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  @media (hover: hover) {
+    .gf-thumbs-arrow:hover:not(:disabled) {
+      background: var(--color-paper-3);
+    }
+  }
+
+  /* A long description closed at about half, fading out over its toggle
+     (product/ReadMore); without the script it stays whole, no toggle */
+  @media (scripting: enabled) {
+    .gf-more[data-open="false"] > .gf-more-body {
+      max-height: 26rem;
+      overflow: hidden;
+      mask-image: linear-gradient(to bottom, var(--color-text) calc(100% - 6rem), transparent);
+    }
+    .gf-more[data-open="false"] > .gf-more-body[data-cut] {
+      max-height: none;
+      overflow: visible;
+    }
+    /* Over the description's own list and table utilities */
+    .gf-more[data-open="false"] [data-more-hidden] {
+      display: none !important;
+    }
+  }
+  @media (scripting: none) {
+    .gf-more-toggle {
+      display: none;
+    }
+  }
+
   /* The zoom: the picture follows the pointer once enlarged */
   .gf-zoom {
     touch-action: pinch-zoom;

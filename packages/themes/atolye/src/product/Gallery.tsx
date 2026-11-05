@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { ImageView } from "@qticaret/ui"
 import { useHydrated } from "@qticaret/ui/hooks/use-hydrated"
-import { cn } from "@qticaret/ui/lib/utils"
+import { Thumbs } from "./Thumbs"
 import type { GalleryWords } from "./words"
 import { Zoom } from "./Zoom"
 
@@ -15,13 +15,15 @@ const smooth = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"
 
 /**
- * The product's photographs on a graphite stage (the signature: the
- * shop's own dark-ground photographs merging into it). One picture a
- * screen in a rail that snaps: a phone swipes it, a keyboard scrolls it,
- * from 640 px the thumbnails below choose (anchors before the script),
- * from 1024 px two round arrows step through. A press on the picture or
- * the round zoom button opens it full screen. Only the first loads
- * eagerly (LCP). Without a photograph the stage holds the name's first letter.
+ * The product's photographs (sahip 2026-11-05: smaller, every photograph
+ * in sight): one square in a soft tinted well (the shop's dark-ground
+ * photographs read on the light page without a graphite stage), its
+ * thumbnails in a row right under it. The square is still a rail that
+ * snaps: a phone swipes it, a keyboard scrolls it, from 1024 px two round
+ * arrows step through, a thumbnail swaps it (anchors before the script).
+ * A press on the picture or the round zoom button opens it full screen.
+ * Only the first loads eagerly (LCP). Without a photograph the well holds
+ * the name's first letter.
  */
 export function Gallery({
   images,
@@ -64,17 +66,19 @@ export function Gallery({
     }
   }, [count])
 
+  // A step slides; a jump (a thumbnail, the last to the first) swaps at once
   const go = (to: number) => {
     const list = rail.current
     const next = (to + count) % count
-    list?.scrollTo({ left: next * list.clientWidth, behavior: smooth() })
+    const step = Math.abs(next - index) === 1
+    list?.scrollTo({ left: next * list.clientWidth, behavior: step ? smooth() : "auto" })
     setIndex(next)
   }
 
   if (count === 0) {
     return (
-      <div className="gf-stage flex aspect-square flex-col items-center justify-center gap-3 rounded-tile text-sm text-stage-text-2">
-        <span aria-hidden="true" className="text-[10rem] leading-none font-extrabold text-stage-2">
+      <div className="gf-pictures flex aspect-square flex-col items-center justify-center gap-3 rounded-tile bg-paper-2 text-sm text-text-2">
+        <span aria-hidden="true" className="text-[10rem] leading-none font-extrabold text-paper-3">
           {initial}
         </span>
         <span className="flex items-center gap-2">
@@ -89,8 +93,8 @@ export function Gallery({
     .replace("{n}", String(index + 1))
     .replace("{count}", String(count))
   return (
-    <section aria-label={words.label} className="flex flex-col gap-3">
-      <div className="gf-stage relative overflow-hidden rounded-tile">
+    <section aria-label={words.label} className="gf-pictures flex flex-col gap-3">
+      <div className="relative overflow-hidden rounded-tile bg-paper-2">
         <ul
           ref={rail}
           className="gf-gallery flex overflow-x-auto"
@@ -109,9 +113,9 @@ export function Gallery({
             >
               <ResponsiveImage
                 image={image}
-                sizes="(min-width: 1024px) 56vw, 100vw"
+                sizes="(min-width: 1440px) 546px, (min-width: 1024px) 38vw, 100vw"
                 priority={n === 0}
-                className="absolute inset-0 h-full w-full cursor-zoom-in object-cover"
+                className="absolute inset-0 h-full w-full cursor-zoom-in object-contain"
               />
             </li>
           ))}
@@ -127,7 +131,7 @@ export function Gallery({
         {hydrated && (
           <button
             type="button"
-            className="gf-icon-btn absolute top-3 right-3 bg-stage/80 text-stage-text hover:bg-stage-2"
+            className="gf-icon-btn absolute top-3 right-3 bg-stage/80 text-stage-text hover:bg-stage-2 focus-visible:outline-signal-on-stage"
             aria-label={words.zoom}
             onClick={() => {
               setZoom(index)
@@ -140,7 +144,7 @@ export function Gallery({
           <>
             <button
               type="button"
-              className="gf-icon-btn absolute top-1/2 left-3 -translate-y-1/2 bg-stage/80 text-stage-text hover:bg-stage-2 max-lg:hidden"
+              className="gf-icon-btn absolute top-1/2 left-3 -translate-y-1/2 bg-stage/80 text-stage-text hover:bg-stage-2 focus-visible:outline-signal-on-stage max-lg:hidden"
               aria-label={words.previous}
               onClick={() => {
                 go(index - 1)
@@ -150,7 +154,7 @@ export function Gallery({
             </button>
             <button
               type="button"
-              className="gf-icon-btn absolute top-1/2 right-3 -translate-y-1/2 bg-stage/80 text-stage-text hover:bg-stage-2 max-lg:hidden"
+              className="gf-icon-btn absolute top-1/2 right-3 -translate-y-1/2 bg-stage/80 text-stage-text hover:bg-stage-2 focus-visible:outline-signal-on-stage max-lg:hidden"
               aria-label={words.next}
               onClick={() => {
                 go(index + 1)
@@ -162,31 +166,7 @@ export function Gallery({
         )}
       </div>
       {count > 1 && (
-        <ul className="flex gap-2 overflow-x-auto p-0.5 max-sm:hidden">
-          {images.map((image, n) => (
-            <li key={image.src} className="shrink-0">
-              <a
-                href={`#${slideId(n + 1)}`}
-                aria-current={n === index ? "true" : undefined}
-                aria-label={words.show.replace("{n}", String(n + 1))}
-                onClick={(event) => {
-                  event.preventDefault()
-                  go(n)
-                }}
-                className={cn(
-                  "gf-stage relative block size-18 overflow-hidden rounded-inner outline-offset-2 transition-opacity duration-(--dur-micro)",
-                  n === index ? "outline-2 outline-text" : "opacity-70 hover:opacity-100"
-                )}
-              >
-                <ResponsiveImage
-                  image={{ ...image, alt: "" }}
-                  sizes="72px"
-                  className="absolute inset-0 h-full w-full object-cover"
-                />
-              </a>
-            </li>
-          ))}
-        </ul>
+        <Thumbs images={images} index={index} slideId={slideId} onChoose={go} words={words} />
       )}
       {zoom !== null && (
         <Zoom
