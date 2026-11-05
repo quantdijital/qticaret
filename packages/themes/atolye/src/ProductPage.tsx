@@ -22,7 +22,7 @@ import { SectionHead } from "./sections/SectionHead"
 
 /**
  * A product (docs/tema/yon-2026-11-05.md, Grafit; sahip 2026-11-05): the
- * trail, then the photographs (from 1024 px five columns, a square in a
+ * trail, then the photographs (from 1024 px six columns, a square in a
  * soft well with its thumbnails under it, both staying in view) beside
  * the buy column: the name and its stars, the price, the options and
  * add-ons, "add to cart" with the favourite heart, the instalments, the
@@ -62,7 +62,7 @@ export function ProductPage({
         <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} compact />
       </Container>
       <Container className="mt-4 grid gap-8 lg:mt-6 lg:grid-cols-12 lg:gap-(--gap-columns)">
-        <div className="min-w-0 lg:col-span-5">
+        <div className="min-w-0 lg:col-span-6">
           <div className="lg:sticky lg:top-40">
             <Gallery
               images={view.images}
@@ -71,7 +71,7 @@ export function ProductPage({
             />
           </div>
         </div>
-        <div className="min-w-0 lg:col-span-7 lg:pl-(--space-lg)">
+        <div className="min-w-0 lg:col-span-6 lg:pl-(--space-lg)">
           <div className="flex flex-col gap-6 lg:sticky lg:top-40">
             <Headline view={view} t={t} />
             <Buy

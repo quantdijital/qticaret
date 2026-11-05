@@ -61,10 +61,11 @@
     scroll-snap-stop: always;
   }
 
-  /* From 1024 px the square and its thumbnails fit the first screen under the trail */
+  /* From 1024 px the square fills its six columns, short of the screen's
+     height so the thumbnails' top shows on the first screen, 680 px at most */
   @media (min-width: 64rem) {
     .gf-pictures {
-      max-width: max(22rem, calc(100dvh - 26rem));
+      max-width: clamp(22rem, calc(100dvh - 20rem), 42.5rem);
     }
   }
 

@@ -113,7 +113,7 @@ export function Gallery({
             >
               <ResponsiveImage
                 image={image}
-                sizes="(min-width: 1440px) 546px, (min-width: 1024px) 38vw, 100vw"
+                sizes="(min-width: 1440px) 680px, (min-width: 1024px) 46vw, 100vw"
                 priority={n === 0}
                 className="absolute inset-0 h-full w-full cursor-zoom-in object-contain"
               />
