@@ -2,10 +2,11 @@ import { Star } from "lucide-react"
 import type { ReviewsPageView, Translate } from "@qticaret/ui"
 import { Breadcrumbs } from "./components/Breadcrumbs"
 import { PageContainer } from "./components/Container"
+import { GoogleReviews } from "./components/GoogleReviews"
 import { Pages } from "./components/Pages"
 import { RatingSummary, ReviewPhotos } from "./components/ReviewExtras"
 
-/** The shop's approved reviews, newest first, each with its product's link. */
+/** The shop's approved reviews, newest first, each with its product's link; then its Google reviews. */
 export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }) {
   return (
     <PageContainer className="flex flex-col gap-6">
@@ -65,6 +66,7 @@ export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }
         </ul>
       )}
       <Pages pagination={view.pagination} t={t} />
+      {view.google && <GoogleReviews google={view.google} t={t} />}
     </PageContainer>
   )
 }

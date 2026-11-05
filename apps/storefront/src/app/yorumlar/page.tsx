@@ -8,14 +8,17 @@ import { JsonLd } from "@/lib/seo/JsonLd"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { pathsOf, siteSeo } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
-import { reviewSummary } from "@/lib/store-api/extras"
+import { googleReviews, reviewSummary } from "@/lib/store-api/extras"
 import { reviewPhotos, shopRatingView } from "@/lib/views/card-extras"
+import { googleReviewsView } from "@/lib/views/google-reviews"
 import { productImages } from "@/lib/views/image"
 import { reviewFilterView, reviewsPath, starsOf } from "@/lib/views/review-filter"
 import { productsInOrder } from "@/lib/views/section-data"
 import { theme } from "@/theme"
 
 const PAGE_SIZE = 20
+/** Google reviews shown beside the shop's own (adr/0058); the rest on Google. */
+const GOOGLE_REVIEWS = 6
 const DATE = new Intl.DateTimeFormat("tr-TR", {
   day: "numeric",
   month: "long",
@@ -121,14 +124,17 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
     notFound()
   }
   const ids = [...new Set(answer.reviews.map((review) => review.product_id))]
-  const [paths, rating, pictures] = await Promise.all([
+  const [paths, rating, pictures, fromGoogle] = await Promise.all([
     pathsOf("product", ids),
     // The shop-wide average and spread (adr/0046 Ek 2026-11-05), not this page's
     reviewSummary(),
     productPictures(ids),
+    // adr/0058: the shop's Google reviews, apart from its own, on the first page only
+    page === 1 && stars === null ? googleReviews(GOOGLE_REVIEWS) : Promise.resolve(null),
   ])
   const summary = shopRatingView(rating, t)
   const filter = reviewFilterView(summary, stars, t)
+  const google = googleReviewsView(fromGoogle, t)
   return (
     <>
       <JsonLd
@@ -150,6 +156,7 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
           count: rating?.count ?? (stars === null ? answer.count : 0),
           ...(summary ? { summary } : {}),
           ...(filter ? { filter } : {}),
+          ...(google ? { google } : {}),
           reviews: answer.reviews.map((review) => {
             const path = paths[review.product_id]
             const author = review.author_name ?? t("product.anonymous")

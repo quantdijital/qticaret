@@ -3,6 +3,7 @@ import { cache } from "react"
 import type {
   StoreCardFacts,
   StoreCategoryImage,
+  StoreGoogleReviews,
   StoreLatestReviewPhoto,
   StoreReviewSummary,
 } from "@qticaret/types"
@@ -66,6 +67,19 @@ export const reviewSummary = cache(
         rating: null,
       })
     ).rating
+)
+
+/**
+ * The shop's Google reviews (adr/0058): Google's figures and the newest
+ * reviews, shop-wide, kept a minute; none without an answer.
+ */
+export const googleReviews = cache(
+  async (limit: number): Promise<StoreGoogleReviews["google_reviews"]> =>
+    (
+      await orNone(() => storePublicGet<StoreGoogleReviews>("/store/google-reviews", { limit }), {
+        google_reviews: null,
+      })
+    ).google_reviews
 )
 
 /** The newest photos on approved reviews, for the home page's reviews section. */

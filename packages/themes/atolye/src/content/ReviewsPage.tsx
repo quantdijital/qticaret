@@ -6,6 +6,7 @@ import { Container } from "../parts/Container"
 import { Stars } from "../parts/Stars"
 import { Trail } from "../parts/Trail"
 import { Summary } from "../sections/Reviews"
+import { GoogleReviews } from "./GoogleReviews"
 
 type Review = ReviewsPageView["reviews"][number]
 
@@ -91,10 +92,11 @@ function Card({ review, t }: { review: Review; t: Translate }) {
  * average set large, the stars, the count, the spread), the reviews in
  * two columns on the right, each card as tall as its own words (newest
  * first down each column), whole with its photos and the product it is
- * about; then the pages. With the star filter (adr/0037 Ek 2026-11-05)
- * the summary's bars are its links, and the stars shown stand above the
- * reviews as a dark pill that takes them off. Nothing is written for the
- * shop.
+ * about; then the pages; then, on the first unfiltered page, the shop's
+ * Google reviews in a section of their own (adr/0058). With the star
+ * filter (adr/0037 Ek 2026-11-05) the summary's bars are its links, and
+ * the stars shown stand above the reviews as a dark pill that takes them
+ * off. Nothing is written for the shop.
  */
 export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }) {
   const summary = view.summary ?? null
@@ -143,6 +145,7 @@ export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }
         </div>
       </div>
       <Pager pagination={view.pagination} t={t} />
+      {view.google && <GoogleReviews google={view.google} t={t} />}
     </Container>
   )
 }
