@@ -105,6 +105,8 @@ describe("the theme's account pages", () => {
     expect(html).toContain(t("account.earlier_orders"))
     // The hub leads to the sections, never to the overview itself
     expect(html).not.toMatch(/<a href="\/hesap"/)
+    // On a phone the hub is the account's menu: it leads, over the latest order
+    expect(html).toMatch(/<nav aria-label="[^"]*" class="[^"]*max-lg:order-first/)
   })
 
   it("offers the shop's categories as picture tiles when there is no order yet", () => {

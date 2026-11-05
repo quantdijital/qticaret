@@ -120,16 +120,21 @@ export function Hub({
   view,
   t,
   actions,
+  className,
 }: {
   view: AccountPageView
   t: Translate
   actions: AccountActions
+  className?: string
 }) {
   const row =
     "flex min-h-16 w-full items-center gap-4 rounded-media px-3 py-3 text-left no-underline transition-colors duration-(--dur-micro) hover:bg-paper-3"
   const links = view.nav.filter((link) => link.section !== "overview" && !link.current)
   return (
-    <nav aria-label={t("account.menu")} className="flex flex-col rounded-tile bg-paper-2 p-2">
+    <nav
+      aria-label={t("account.menu")}
+      className={cn("flex flex-col rounded-tile bg-paper-2 p-2", className)}
+    >
       <ul className="flex flex-col">
         {links.map((link) => {
           const hint = link.section ? HINTS[link.section] : undefined

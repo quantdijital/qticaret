@@ -36,8 +36,9 @@ function Notice({ text }: { text: string }) {
 /**
  * The overview (`/hesap`): the greeting, the latest order on a graphite
  * stage with its steps (none yet: the way to the shop), beside it from
- * 1024 px the sections as rows (on a phone, under it: the account's menu
- * there), then the other recent orders, or the shop's categories.
+ * 1024 px the sections as rows (on a phone, above it: the account's menu
+ * there, in the first screen), then the other recent orders, or the
+ * shop's categories.
  */
 function Overview({ view, t, actions }: Page) {
   const [latest, ...earlier] = view.orders
@@ -51,7 +52,8 @@ function Overview({ view, t, actions }: Page) {
       {view.notice && <Notice text={view.notice} />}
       <div className="grid gap-6 lg:grid-cols-[minmax(0,8fr)_minmax(0,4fr)]">
         {latest ? <LatestOrder order={latest} t={t} /> : <NoOrders t={t} />}
-        <Hub view={view} t={t} actions={actions} />
+        {/* On a phone the menu leads: it is the account's only one there, the order under it */}
+        <Hub view={view} t={t} actions={actions} className="max-lg:order-first" />
       </div>
       {earlier.length > 0 && (
         <section aria-labelledby="onceki-siparisler" className="flex flex-col gap-5">
