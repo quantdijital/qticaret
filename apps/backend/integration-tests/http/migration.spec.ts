@@ -86,6 +86,9 @@ medusaIntegrationTestRunner({
           length: number | null
         }[]
       expect(await productsOf()).toHaveLength(0)
+      const liveOrders = async () =>
+        (await query.graph({ entity: "order", fields: ["id"] })).data.length
+      const ordersBefore = await liveOrders()
 
       const applied = await run("apply")
       expect(applied).toMatchObject({
@@ -130,6 +133,8 @@ medusaIntegrationTestRunner({
         ["1001", ayse?.id],
         ["1002", null],
       ])
+      // An old order is no live order (adr/0042 §4): nothing offers it for shipping again
+      expect(await liveOrders()).toBe(ordersBefore)
 
       const reviews = getContainer().resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
       const moved = await reviews.listProductReviews(
@@ -150,7 +155,11 @@ medusaIntegrationTestRunner({
       }>(`/store/products/${pan?.id ?? ""}/reviews`, {
         headers: { "x-publishable-api-key": await publishableKey() },
       })
-      expect(shown.data.rating).toEqual({ average: 2, count: 1 })
+      expect(shown.data.rating).toEqual({
+        average: 2,
+        count: 1,
+        distribution: { "1": 0, "2": 1, "3": 0, "4": 0, "5": 0 },
+      })
       expect(shown.data.reviews).toMatchObject([{ verified_purchase: false }])
 
       const again = await run("apply")
