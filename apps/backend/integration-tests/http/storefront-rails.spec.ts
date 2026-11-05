@@ -111,6 +111,8 @@ medusaIntegrationTestRunner({
         title: null,
         source: { kind: "on_sale" },
         limit: 4,
+        // Saved without it: three in a row (adr/0049 Ek 2026-11-05, grid columns)
+        columns: 3,
         more: null,
         product_ids: [deep.productId, shallow.productId],
         filled_with_newest: false,

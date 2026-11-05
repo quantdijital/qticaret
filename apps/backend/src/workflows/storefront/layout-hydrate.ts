@@ -81,12 +81,20 @@ export async function hydrateSection(section: BodySection, at: HydrateContext): 
         title: section.title,
         source: section.source,
         limit: section.limit,
+        columns: section.columns,
         more: link(section.more),
         // A sale or best-seller rail: its products in order, and whether the newest made it up
         ...at.picks?.get(id),
       }
     case "related_products":
-      return { id, type, title: section.title, source: section.source, limit: section.limit }
+      return {
+        id,
+        type,
+        title: section.title,
+        source: section.source,
+        limit: section.limit,
+        columns: section.columns,
+      }
     case "featured_product":
       return {
         id,

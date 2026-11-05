@@ -54,6 +54,7 @@ describe("storefront layout document (adr/0049)", () => {
         title: null,
         source: { kind: "same_category" },
         limit: 8,
+        columns: 3,
       },
       { ...faq("sss001"), ...ALWAYS, title: null },
     ])
@@ -131,6 +132,30 @@ describe("storefront layout document (adr/0049)", () => {
         product: [{ id: "benzer01", type: "related_products", source: { kind: "on_sale" } }],
       }).success
     ).toBe(false)
+  })
+
+  it("takes 3, 4 or 5 cards in a row on a product rail, 3 by default (adr/0049 Ek 2026-11-05)", () => {
+    const rail = (id: string, more: Record<string, unknown> = {}) => ({
+      id,
+      type: "products",
+      source: { kind: "newest" },
+      ...more,
+    })
+    const doc = layoutDocument.parse({
+      home: [rail("raf00001"), rail("raf00002", { columns: 4 }), rail("raf00003", { columns: 5 })],
+      product: [{ id: "benzer01", type: "related_products", source: { kind: "same_category" } }],
+    })
+    expect(doc.home.map((section) => "columns" in section && section.columns)).toEqual([3, 4, 5])
+    expect(doc.product[0]).toMatchObject({ columns: 3 })
+    for (const columns of [2, 6, 4.5, "4", null]) {
+      const refused = layoutDocument.safeParse({ home: [rail("raf00004", { columns })] })
+      expect(refused.error?.issues[0]?.message).toBe("storefront_layout.section_invalid")
+    }
+    expect(
+      layoutDocument.safeParse({
+        product: [{ ...related("benzer02", ["prod_1"]), columns: 5 }],
+      }).success
+    ).toBe(true)
   })
 
   it("takes up to twelve chosen related products", () => {

@@ -37,6 +37,13 @@ export type ProductSource =
   | { kind: "collection"; collection_id: string }
   | { kind: "manual"; product_ids: string[] }
 
+/**
+ * How many cards a product rail stands in a row on a wide screen (adr/0049
+ * Ek 2026-11-05, grid columns); 3 by default. The theme steps down on
+ * narrower screens.
+ */
+export type ShelfColumns = 3 | 4 | 5
+
 export type StoreLayoutSection =
   | {
       id: string
@@ -65,6 +72,7 @@ export type StoreLayoutSection =
       title: string | null
       source: ProductSource
       limit: number
+      columns: ShelfColumns
       more: StoreLayoutLink | null
       /** A sale or best-seller rail's products, picked in order; absent for the other sources. */
       product_ids?: string[]
@@ -122,6 +130,7 @@ export type StoreProductSection =
       title: string | null
       source: RelatedSource
       limit: number
+      columns: ShelfColumns
     }
 
 /** A section of every category page: above the product grid (`top`) or below it. */

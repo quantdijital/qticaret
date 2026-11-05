@@ -283,6 +283,7 @@ medusaIntegrationTestRunner({
         title: "Bunlara da bakın",
         source,
         limit: 4,
+        columns: 5,
       })
       const faq: Section = {
         id: "sikcasorulan",
@@ -345,6 +346,8 @@ medusaIntegrationTestRunner({
           title: "Bunlara da bakın",
           source: { kind: "manual", product_ids: [liveProduct] },
           limit: 4,
+          // The shop's cards in a row reach the storefront (adr/0049 Ek 2026-11-05)
+          columns: 5,
         },
         {
           id: "sikcasorulan",
