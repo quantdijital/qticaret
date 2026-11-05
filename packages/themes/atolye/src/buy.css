@@ -13,3 +13,25 @@
     background: var(--color-paper-2);
   }
 }
+
+/* A contract as the backend renders it (adr/0019): its heads and tables in the box's own small type */
+.gf-contract :where(h1, h2, h3) {
+  max-width: none;
+  margin: var(--space-sm) 0 var(--space-2xs);
+  font-size: var(--text-sm);
+  letter-spacing: 0;
+  line-height: 1.4;
+  color: var(--color-text);
+}
+.gf-contract :where(p, ul, ol) {
+  margin: var(--space-xs) 0 0;
+}
+.gf-contract :where(table) {
+  width: 100%;
+  border-collapse: collapse;
+}
+.gf-contract :where(th, td) {
+  padding: var(--space-2xs);
+  border: 1px solid var(--color-rule);
+  text-align: left;
+}
