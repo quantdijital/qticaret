@@ -9,7 +9,7 @@ import type {
 import { addToCart } from "@/app/actions/cart"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import type { AnalyticsEvent } from "@/lib/analytics/events"
-import { listEvent } from "@/lib/analytics/payloads"
+import { listEvent, listItems } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { t } from "@/lib/i18n"
 import { faqJsonLd } from "@/lib/seo/faq"
@@ -232,16 +232,23 @@ export async function ListingContent({
     swatchLookup(storefront.color_swatches)
   )
   const first = current === 1 && facets.active.length === 0
-  // A search is one when asked, not again for each page or filter (as the backend counts it)
+  const cards = withCardFacts(productCards(products, paths, displays, options), facts)
+  // A search is one when asked, not again for each page or filter (as the backend counts it).
+  // Prices are the cards' own, an automatic promotion included (adr/0023 Ek 2026-11-05)
   const measured: AnalyticsEvent[] = [
     ...(isSearch && state.q && first ? [{ name: "search" as const, term: state.q }] : []),
     ...(products.length > 0
-      ? [listEvent(type, isSearch ? t("search.title") : heading.title, products)]
+      ? [listEvent(type, isSearch ? t("search.title") : heading.title, products, displays)]
       : []),
   ]
+  // What a card's quick add puts in the cart, for its "added to cart"
+  const quick = cards.flatMap((card) => (card.quickAdd ? [card.quickAdd.variantId] : []))
   return (
     <>
-      <TrackEvents events={measured} />
+      <TrackEvents
+        events={measured}
+        context={quick.length > 0 ? { items: listItems(products, displays, quick) } : null}
+      />
       <JsonLd
         blocks={[...jsonLd, ...(first ? faqJsonLd([...sections.top, ...sections.bottom]) : [])]}
       />
@@ -256,7 +263,7 @@ export async function ListingContent({
           sectionsBottom: sections.bottom,
           breadcrumbs: breadcrumbs(heading.title),
           subcategories: heading.subcategories,
-          products: withCardFacts(productCards(products, paths, displays, options), facts),
+          products: cards,
           total: answer.count,
           sort,
           ...facets,

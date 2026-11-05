@@ -118,7 +118,8 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
         )}`
       : null,
   }
-  const measured = productEvents(product, base.selectedVariantId)
+  // The price the page shows, an automatic promotion included, is the one measured
+  const measured = productEvents(product, base.selectedVariantId, displays)
   return (
     <>
       <TrackEvents events={measured.events} context={measured.context} />

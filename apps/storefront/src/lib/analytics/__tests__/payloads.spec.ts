@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest"
-import type { StoreProduct } from "@qticaret/types"
-import { checkoutEvents, listEvent, productEvents, purchaseEvent } from "../payloads"
+import type { PriceDisplay, StoreProduct } from "@qticaret/types"
+import { eventOf } from "../client"
+import { ga4Event } from "../events"
+import { checkoutEvents, listEvent, listItems, productEvents, purchaseEvent } from "../payloads"
 
 const product = {
   id: "prod_1",
@@ -30,9 +32,27 @@ const product = {
   ],
 } as unknown as StoreProduct
 
+const display = (current: string, before: string | null = null): PriceDisplay => ({
+  current,
+  regular: before ?? current,
+  before,
+  on_sale: before !== null,
+  since: null,
+  basis: before ? "history" : null,
+  rule_version: "tr-10d-1",
+  cart_offer: null,
+})
+
+// The shop's 30% automatic promotion every shopper gets, as the backend's display reads it
+// (adr/0023 Ek 2026-11-05): what the page shows, not Medusa's calculated price
+const promoted = {
+  variant_s: display("629.93", "899.90"),
+  variant_m: display("559.93", "799.90"),
+}
+
 describe("the pages' events", () => {
   it("views the variant shown, and keeps every variant for the theme's 'added to cart'", () => {
-    const { events, context } = productEvents(product, "variant_m")
+    const { events, context } = productEvents(product, "variant_m", {})
     expect(events).toEqual([
       {
         name: "view_item",
@@ -50,11 +70,32 @@ describe("the pages' events", () => {
       },
     ])
     expect(Object.keys(context.items ?? {})).toEqual(["variant_s", "variant_m"])
-    expect(productEvents(product, null).events[0]).toMatchObject({ value: 899.9 })
+    expect(productEvents(product, null, {}).events[0]).toMatchObject({ value: 899.9 })
   })
 
-  it("lists each product once at its lowest price; a category's name is the items' category", () => {
-    const event = listEvent("product_category", "Gömlekler", [product])
+  it("sends the promoted price the page shows, to view_item and the later add_to_cart", () => {
+    const { events, context } = productEvents(product, "variant_m", promoted)
+    expect(events[0]).toMatchObject({
+      name: "view_item",
+      value: 559.93,
+      items: [{ id: "variant_m", price: 559.93 }],
+    })
+    expect(ga4Event(events[0] as never)[1]).toMatchObject({
+      value: 559.93,
+      items: [{ item_id: "variant_m", price: 559.93 }],
+    })
+    // The theme's "added to cart" reads the page's context: two at the promoted price
+    expect(eventOf({ type: "add_to_cart", variantId: "variant_s", quantity: 2 }, context)).toEqual(
+      expect.objectContaining({
+        name: "add_to_cart",
+        value: 1259.86,
+        items: [expect.objectContaining({ id: "variant_s", price: 629.93, quantity: 2 })],
+      })
+    )
+  })
+
+  it("lists each product once at its lowest shown price; a category's name is the items' category", () => {
+    const event = listEvent("product_category", "Gömlekler", [product], {})
     expect(event).toEqual({
       name: "view_item_list",
       listId: "product_category",
@@ -70,7 +111,17 @@ describe("the pages' events", () => {
         },
       ],
     })
-    expect(listEvent("search", "Arama", [product]).items[0]).not.toHaveProperty("category")
+    expect(listEvent("search", "Arama", [product], {}).items[0]).not.toHaveProperty("category")
+    expect(listEvent("sale", "Kampanyalı ürünler", [product], promoted).items[0]).toMatchObject({
+      price: 559.93,
+    })
+  })
+
+  it("keeps a list's quick-add variants at their shown price for 'added to cart'", () => {
+    const items = listItems([product], { variant_m: promoted.variant_m }, ["variant_m"])
+    expect(Object.keys(items)).toEqual(["variant_m"])
+    expect(items["variant_m"]).toMatchObject({ price: 559.93, quantity: 1 })
+    expect(listItems([product], promoted, [])).toEqual({})
   })
 
   it("begins the checkout with the cart's items after discounts", () => {
@@ -83,12 +134,39 @@ describe("the pages' events", () => {
           title: "M",
           variant_title: "M",
           unit_price: 799.9,
+          total: 1599.8,
           quantity: 2,
         },
       ],
     })
     expect(events[0]).toMatchObject({ name: "begin_checkout", value: 1599.8 })
-    expect(context.checkout?.items[0]).toMatchObject({ id: "variant_m", quantity: 2 })
+    expect(context.checkout?.items[0]).toMatchObject({ id: "variant_m", quantity: 2, price: 799.9 })
+  })
+
+  it("prices a checkout line as the cart charges it, the automatic promotion taken off", () => {
+    // 2 × 799,90 with 30% off: the line's total is the server's, per unit 559,93
+    const { events } = checkoutEvents({
+      item_total: 1119.86,
+      items: [
+        {
+          variant_id: "variant_m",
+          product_title: "Keten gömlek",
+          title: "M",
+          unit_price: 799.9,
+          total: 1119.86,
+          quantity: 2,
+        },
+        // A line without its total falls back to its unit price
+        { variant_id: "variant_s", title: "S", unit_price: 899.9, quantity: 1 },
+      ],
+    })
+    expect(events[0]).toMatchObject({
+      value: 1119.86,
+      items: [
+        { id: "variant_m", price: 559.93, quantity: 2 },
+        { id: "variant_s", price: 899.9, quantity: 1 },
+      ],
+    })
   })
 
   it("names the purchase by the order's id, its total and shipping as the server's event does", () => {
