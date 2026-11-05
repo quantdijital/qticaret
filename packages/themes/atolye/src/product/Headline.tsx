@@ -1,8 +1,6 @@
-import { Check, Truck } from "lucide-react"
+import { Check } from "lucide-react"
 import type { ProductPageView, Translate } from "@qticaret/ui"
 import { Stars } from "../parts/Stars"
-import { TrustIcon } from "../parts/TrustIcon"
-import { WhatsAppGlyph } from "../parts/WhatsAppGlyph"
 
 /** A rating as the shop's language writes it: "4,6". */
 export const ratingText = (average: number) => average.toFixed(1).replace(".", ",")
@@ -79,86 +77,5 @@ export function Headline({ view, t }: { view: ProductPageView; t: Translate }) {
         </dl>
       )}
     </header>
-  )
-}
-
-/** Asking about this product on WhatsApp, when the shop gave a number. */
-function AskOnWhatsApp({ href, t }: { href: string; t: Translate }) {
-  return (
-    <a href={href} target="_blank" rel="noopener" className="gf-link self-start text-sm">
-      <WhatsAppGlyph className="size-4 text-whatsapp" />
-      {t("product.ask_whatsapp")}
-    </a>
-  )
-}
-
-/**
- * The shop's assurances beside the buy form. With the "Kargo ve Teslimat"
- * card below (a shipped product, owner 2026-11-05) the delivery and return
- * facts live there only: here, short, the shop's other promises (warranty,
- * safe payment), two to a row where the column allows, and the WhatsApp
- * question. Without the card, delivery and returns as plain facts on a
- * filled well: the free shipping line, every promise, the question.
- */
-export function Delivery({ view, t }: { view: ProductPageView; t: Translate }) {
-  const card = view.shipping ?? null
-  if (card) {
-    const told = new Set(card.facts.map((fact) => `${fact.icon} ${fact.title}`))
-    const rest = view.trustBadges.filter((badge) => !told.has(`${badge.icon} ${badge.title}`))
-    if (rest.length === 0 && !view.whatsappHref) {
-      return null
-    }
-    return (
-      <div className="flex flex-col gap-2 rounded-media bg-paper-2 px-4 pt-4 pb-2">
-        {rest.length > 0 && (
-          <ul
-            aria-label={t("product.assurances")}
-            className="grid gap-3 pb-2 text-sm @sm:grid-cols-2"
-          >
-            {rest.map((badge) => (
-              <li key={badge.title} className="flex items-start gap-3">
-                <TrustIcon icon={badge.icon} className="size-5 shrink-0" />
-                <span className="min-w-0">
-                  <span className="font-semibold">{badge.title}</span>
-                  {badge.text && <span className="block text-text-2">{badge.text}</span>}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-        {view.whatsappHref && <AskOnWhatsApp href={view.whatsappHref} t={t} />}
-      </div>
-    )
-  }
-  if (!view.shippingNote && view.trustBadges.length === 0 && !view.whatsappHref) {
-    return null
-  }
-  return (
-    <section
-      aria-labelledby="teslimat"
-      className="flex flex-col gap-4 rounded-media bg-paper-2 p-4 lg:p-5"
-    >
-      <h2 id="teslimat" className="text-md tracking-[-0.01em]">
-        {t("product.delivery")}
-      </h2>
-      <ul className="flex flex-col gap-3 text-sm">
-        {view.shippingNote && (
-          <li className="flex items-start gap-3">
-            <Truck className="size-5 shrink-0" aria-hidden="true" strokeWidth={1.75} />
-            <span className="font-semibold">{view.shippingNote}</span>
-          </li>
-        )}
-        {view.trustBadges.map((badge) => (
-          <li key={badge.title} className="flex items-start gap-3">
-            <TrustIcon icon={badge.icon} className="size-5 shrink-0" />
-            <span>
-              <span className="font-semibold">{badge.title}</span>
-              {badge.text && <span className="block text-text-2">{badge.text}</span>}
-            </span>
-          </li>
-        ))}
-      </ul>
-      {view.whatsappHref && <AskOnWhatsApp href={view.whatsappHref} t={t} />}
-    </section>
   )
 }

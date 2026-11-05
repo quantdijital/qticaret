@@ -504,6 +504,13 @@ describe("the theme's product page", () => {
     expect(some).not.toContain('id="yorum-sirasi"')
   })
 
+  it("asks on WhatsApp with a full-width button carrying the product, in a new tab", () => {
+    const html = page()
+    expect(html).toMatch(
+      /<a href="https:\/\/wa.me\/905320000000\?text=x" target="_blank" rel="noopener" class="flex min-h-12 w-full[^"]*"><svg[^>]*>.*?<\/svg>WhatsApp&#x27;tan sorun/
+    )
+    expect(html).toContain('<span class="sr-only">(yeni sekmede açılır)</span>')
+  })
 
   it("ends on the category's other products", () => {
     const html = page()

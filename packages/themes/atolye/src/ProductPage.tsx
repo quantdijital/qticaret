@@ -3,11 +3,12 @@ import type { ProductPageView, ThemeActions, Translate } from "@qticaret/ui"
 import { Container } from "./parts/Container"
 import { ProductGrid } from "./parts/ProductCard"
 import { Trail } from "./parts/Trail"
+import { Assurances } from "./product/Assurances"
 import { Buy } from "./product/Buy"
 import { Community } from "./product/Community"
 import { Details } from "./product/Details"
 import { Gallery } from "./product/Gallery"
-import { Delivery, Headline } from "./product/Headline"
+import { Headline } from "./product/Headline"
 import {
   addonWords,
   alertWords,
@@ -112,7 +113,7 @@ export function ProductPage({
                 {view.withdrawalNote}
               </p>
             )}
-            <Delivery view={view} t={t} />
+            <Assurances view={view} t={t} />
           </div>
         </div>
       </Container>
