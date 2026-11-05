@@ -225,6 +225,19 @@ body:has([data-sticky-buy]) [data-whatsapp] {
   display: none;
 }
 
+/* A sale price on a graphite stage reads in the lifted red (WCAG 1.4.3) */
+.gf-stage .text-deal {
+  color: var(--color-deal-on-stage);
+}
+
+/* The footer's newsletter (`NewsletterForm` quiet): its consent shows once the
+   visitor starts on it, the field focused or filled; the box stays required */
+@supports selector(:has(*)) {
+  .gf-news:not(:focus-within):has(input[type="email"]:placeholder-shown) .gf-news-more {
+    display: none;
+  }
+}
+
 /* A closed disclosure's content takes no layout at all */
 details:not([open]) > :not(summary) {
   display: none;

@@ -1,6 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { contentDoc } from "../content"
-import { isHttpsUrl } from "../security/https-url"
+import { isStorageUrl } from "../security/https-url"
 import { isCleanText } from "../security/text"
 import { unknownShopTokens } from "../shop/tokens"
 import { isShopPath, storefrontLink } from "./menus"
@@ -46,13 +46,17 @@ const recordId = z.string().regex(/^[a-z]+_[0-9A-Za-z]{1,40}$/, {
   message: "storefront_layout.target_invalid",
 })
 
-/** An image of the shop's media library; the save checks it is one of its uploads. */
+/**
+ * An image of the shop's media library: its storage's address (plain http
+ * on a developer's machine, https deployed) or a path on the shop; the
+ * save checks it is one of its uploads.
+ */
 const image = z
   .object({
     url: z
       .string()
       .trim()
-      .refine((value) => isCleanText(value) && (isHttpsUrl(value) || isShopPath(value)), {
+      .refine((value) => isCleanText(value) && (isStorageUrl(value) || isShopPath(value)), {
         message: "storefront_layout.image_invalid",
       }),
     alt: optional(text(300)),

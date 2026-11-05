@@ -111,12 +111,37 @@ describe("the theme's home page: opening, promises, aisles", () => {
     expect(html).toContain("1.500,00 TL ve üzeri")
   })
 
-  it("draws eight categories as tiles, the rest as pills, and every category page", () => {
-    const html = home([hero, categories(11, 3)])
-    expect(html.match(/href="\/kategori\/k\d+"/g)).toHaveLength(11)
-    expect(html).toContain('class="gf-chip"')
-    expect(html.match(/src="\/media\/k\d\.jpg"/g)).toHaveLength(3)
+  it("draws every category as a tile of one size, no pills, and the link to every category", () => {
+    const html = home([hero, categories(13, 13)])
+    expect(html.match(/href="\/kategori\/k\d+"/g)).toHaveLength(13)
+    expect(html.match(/aspect-\[4\/5\]/g)).toHaveLength(13)
+    expect(html).not.toContain("gf-chip")
+    expect(html.match(/src="\/media\/k\d+\.jpg"/g)).toHaveLength(13)
     expect(html).toContain('href="/kategoriler"')
+  })
+
+  it("lays the tiles in a row that scrolls on a phone and in columns that fit the count from 1024 px", () => {
+    const thirteen = home([hero, categories(13, 13)])
+    expect(thirteen).toContain("grid-flow-col")
+    expect(thirteen).toContain("lg:grid-cols-5")
+    expect(thirteen).toContain("xl:grid-cols-7")
+    const eight = home([hero, categories(8, 8)])
+    expect(eight).toContain("lg:grid-cols-4")
+    expect(eight).toContain("xl:grid-cols-4")
+    // Six fill two rows of three, then one row of six; seven, four over three, then one row
+    const six = home([hero, categories(6, 6)])
+    expect(six).toContain("lg:grid-cols-3")
+    expect(six).toContain("xl:grid-cols-6")
+    const seven = home([hero, categories(7, 7)])
+    expect(seven).toContain("lg:grid-cols-4")
+    expect(seven).toContain("xl:grid-cols-7")
+  })
+
+  it("keeps a category without any picture a tile of the same size, its name on the graphite", () => {
+    const html = home([hero, categories(4, 0)])
+    expect(html.match(/aspect-\[4\/5\]/g)).toHaveLength(4)
+    expect(html).not.toContain('src="/media/k')
+    expect(html).toContain(">Kategori 4</span>")
   })
 })
 

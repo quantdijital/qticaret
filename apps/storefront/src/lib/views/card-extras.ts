@@ -153,5 +153,28 @@ export function customerPhotos(
 }
 
 /** The footer's ways to pay or carriers, by key, in the storefront's words. */
+/**
+ * The providers' own marks the storefront serves from `public/marks/`
+ * (their sources in its README), by the backend's key, with each file's
+ * size. A way to pay with no company's mark (a bank transfer, cash at the
+ * door) has none: the theme draws its name.
+ */
+const MARK_LOGOS: Readonly<Record<string, { file: string; width: number; height: number }>> = {
+  visa: { file: "visa.png", width: 208, height: 68 },
+  mastercard: { file: "mastercard.svg", width: 41, height: 26 },
+  troy: { file: "troy.svg", width: 298, height: 137 },
+  paytr: { file: "paytr.png", width: 270, height: 48 },
+  iyzico: { file: "iyzico.svg", width: 108, height: 38 },
+  aras: { file: "aras.svg", width: 148, height: 40 },
+  yurtici: { file: "yurtici.svg", width: 178, height: 44 },
+}
+
 export const shopMarks = (keys: readonly string[] | undefined, t: Translate): ShopMarkView[] =>
-  (keys ?? []).map((key) => ({ key, label: t(`marks.${key}`) }))
+  (keys ?? []).map((key) => {
+    const logo = MARK_LOGOS[key]
+    return {
+      key,
+      label: t(`marks.${key}`),
+      logo: logo ? { src: `/marks/${logo.file}`, width: logo.width, height: logo.height } : null,
+    }
+  })

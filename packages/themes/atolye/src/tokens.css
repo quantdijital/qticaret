@@ -33,6 +33,8 @@
   --color-paper-2: oklch(95.6% 0.005 250);
   --color-paper-3: oklch(91.6% 0.007 250);
   --color-field: oklch(99.4% 0.002 250);
+  /* A provider's mark sits on this in both modes: its own colours need a light ground */
+  --color-chip: oklch(98.6% 0.002 250);
   --color-text: oklch(20% 0.012 255);
   --color-text-2: oklch(35% 0.012 255);
   --color-text-3: oklch(46% 0.012 255);
@@ -51,6 +53,8 @@
   --color-focus: var(--primary);
   --color-deal: oklch(52% 0.19 27);
   --color-deal-ink: oklch(99% 0.003 27);
+  /* The deal's red on a graphite stage (a close-up's sale price): lifted to read there */
+  --color-deal-on-stage: oklch(72% 0.15 27);
   --color-ok: oklch(46% 0.11 150);
   --color-error: oklch(50% 0.18 27);
   --color-star: oklch(70% 0.15 75);

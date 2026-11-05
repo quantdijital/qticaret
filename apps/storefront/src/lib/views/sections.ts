@@ -1,11 +1,17 @@
 import "server-only"
-import type { StoreCategorySection, StoreLayoutSection, StoreProductSection } from "@qticaret/types"
+import type {
+  ProductSource,
+  StoreCategorySection,
+  StoreLayoutSection,
+  StoreProductSection,
+} from "@qticaret/types"
 import type { HomeSectionView, LinkView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
 import { legalIdentity, siteSeo, storefrontSettings } from "@/lib/store-api/requests"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
+import { categoryTiles } from "./category-tiles"
 import { featuredView } from "./featured"
 import { layoutImage, layoutLink } from "./layout"
 import { legalDocument, legalPath } from "./legal"
@@ -13,7 +19,6 @@ import { postCards } from "./posts"
 import {
   brandLinks,
   categoryLinks,
-  categoryTiles,
   customerPhotoViews,
   type ProductContext,
   railCards,
@@ -24,6 +29,12 @@ import {
 import { contactOf } from "./shop"
 
 export type { ProductContext } from "./section-data"
+
+/** An untitled rail's name by where its products come from; the rest are "Yeni ürünler". */
+const RAIL_TITLES: Partial<Record<ProductSource["kind"], string>> = {
+  best_sellers: "home.best_sellers",
+  on_sale: "home.on_sale",
+}
 
 /** Any section of the design's page groups: the home page's, a product page's, a category page's. */
 export type BodySection = StoreLayoutSection | StoreProductSection | StoreCategorySection
@@ -122,7 +133,7 @@ async function sectionView(
       return {
         id,
         type: "products",
-        title: section.title ?? t("home.products"),
+        title: section.title ?? t(RAIL_TITLES[section.source.kind] ?? "home.products"),
         products,
         more: layoutLink(section.more, t),
         empty: t("home.no_products"),

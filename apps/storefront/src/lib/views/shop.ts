@@ -20,6 +20,7 @@ import { shopMarks } from "./card-extras"
 import { miniCartOf } from "./cart"
 import { imageView } from "./image"
 import { navigation } from "./categories"
+import { withNavPictures } from "./nav-pictures"
 import { cookieBannerOf } from "./cookies"
 import { identityLinesOf, legalDocument, legalPath, publishedLegalLinks } from "./legal"
 import { displayPhone, footerGroups, socialLinks, whatsappHref } from "./frame"
@@ -93,7 +94,12 @@ export async function shopView(): Promise<ShopView> {
     categories.map((category) => category.id)
   )
   // The shop's own menu when it made one (adr/0049), else its top categories; pictures on both
-  const menu = mainMenu(menus, t, pictures) ?? navigation(categories, paths, pictures)
+  // Each top entry without the shop's own picture shows its newest product's photo
+  const menu = await withNavPictures(
+    mainMenu(menus, t, pictures) ?? navigation(categories, paths, pictures),
+    categories,
+    paths
+  )
   return {
     name: site.shop.name,
     logo: site.shop.logo_url

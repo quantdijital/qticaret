@@ -56,4 +56,9 @@ export interface SpecGroupView {
 export interface ShopMarkView {
   key: string
   label: string
+  /**
+   * The provider's own mark, a file the storefront serves (`/marks/`), with
+   * its size for the box it is drawn in; none: the name stands alone.
+   */
+  logo?: { src: string; width: number; height: number } | null
 }

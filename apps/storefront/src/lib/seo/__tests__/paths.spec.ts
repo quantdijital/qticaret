@@ -131,6 +131,8 @@ describe("isStaticFile", () => {
       "/favicon.ico",
       "/fonts/inter-latin.c940764593.woff2",
       "/fonts/source-sans-tr.2739d40613.woff2",
+      "/marks/visa.png",
+      "/marks/bank_transfer.svg",
     ]) {
       expect(isStaticFile(path)).toBe(true)
     }
@@ -147,6 +149,10 @@ describe("isStaticFile", () => {
       "/fonts/inter-latin.c940764593.woff2/x",
       "/kategori/fonts/inter-latin.c940764593.woff2",
       "/manifest.json",
+      "/marks",
+      "/marks/../sepet",
+      "/marks/visa.png/x",
+      "/kategori/marks/visa.png",
     ]) {
       expect(isStaticFile(path)).toBe(false)
     }

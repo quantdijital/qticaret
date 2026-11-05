@@ -7,18 +7,74 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { NavCategoryView } from "@qticaret/ui"
 
 const ITEM =
-  "group inline-flex min-h-11 items-center gap-1 rounded-pill px-3 text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text data-[state=open]:bg-paper-2 data-[state=open]:text-text"
+  "group inline-flex min-h-11 items-center gap-1 rounded-pill px-3 text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text data-[state=open]:bg-text data-[state=open]:text-paper"
+
+/** A category's panel: its children in short columns beside its picture tile. */
+function Panel({ category, allIn }: { category: NavCategoryView; allIn: string }) {
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,18rem)] gap-(--space-xl) xl:grid-cols-[minmax(0,1fr)_minmax(0,21rem)]">
+      <div className="flex min-w-0 flex-col gap-4">
+        <div className="flex items-baseline justify-between gap-6 border-b border-rule pb-4">
+          <p className="text-title leading-tight font-extrabold tracking-(--tracking-display)">
+            {category.label}
+          </p>
+          <NavigationMenu.Link asChild>
+            <a href={category.path} className="gf-link shrink-0 text-sm">
+              {allIn}
+            </a>
+          </NavigationMenu.Link>
+        </div>
+        <ul className="columns-3 gap-x-(--gap-columns) xl:columns-4">
+          {category.children.map((child) => (
+            <li key={child.path} className="break-inside-avoid">
+              <NavigationMenu.Link asChild>
+                <a
+                  href={child.path}
+                  className="-mx-3 flex min-h-10 items-center rounded-inner px-3 py-2 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+                >
+                  {child.label}
+                </a>
+              </NavigationMenu.Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+      {category.image && (
+        // The same page as the link above, by its picture: one stop for the keyboard
+        <a
+          href={category.path}
+          tabIndex={-1}
+          aria-hidden="true"
+          className="gf-stage group/tile relative flex aspect-[4/3] flex-col justify-end self-start overflow-hidden rounded-media no-underline after:absolute after:inset-0 after:bg-linear-to-t after:from-stage after:from-5% after:via-stage/0 after:via-55% after:to-transparent"
+        >
+          <ResponsiveImage
+            image={{ ...category.image, alt: "" }}
+            sizes="(min-width: 1280px) 336px, 288px"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+          <span className="relative z-(--z-raised) p-4 text-md font-extrabold underline-offset-4 group-hover/tile:underline">
+            {category.label}
+          </span>
+        </a>
+      )}
+    </div>
+  )
+}
 
 /**
  * The category aisle from 1024 px: one line of the shop's top
- * categories; one with children opens a floating panel the container's
- * width, by click or after a 150 ms hover, Escape closing it. Every panel
- * is in the first HTML, closed (`forceMount`), so each link reaches a
- * crawler without a script (docs/13). A closed panel still listens for
- * presses outside it; it lets them pass, or a press inside the open panel
- * would close the menu before its link is followed. The panel: the category's picture
- * when it has one over "Tümünü gör", then its children in three columns
- * of 44 px rows.
+ * categories; a category with children opens its panel, after a 150 ms
+ * hover or by a press, Enter or Space; Escape, a press outside it or
+ * leaving it closes it, the focus back on its button (Radix: the button
+ * says whether it is open and which panel it opens; the arrow keys move
+ * along the line). The panel floats over the page the container's width,
+ * so nothing below moves: the category's name and "Tümünü gör" over its
+ * children in short columns, its picture tile (the shop's own, else its
+ * newest product's photo) beside them. Every panel is in the first HTML,
+ * closed (`forceMount`), so each link reaches a crawler without a script
+ * (docs/13). A closed panel still listens for presses outside it; it lets
+ * them pass, or a press inside the open panel would close the menu before
+ * its link is followed.
  */
 export function Aisle({
   categories,
@@ -66,41 +122,9 @@ export function Aisle({
                     event.preventDefault()
                   }
                 }}
-                className="absolute top-full -right-3 -left-3 z-(--z-dropdown) rounded-tile bg-field p-6 shadow-float data-[state=closed]:hidden"
+                className="absolute top-full -right-3 -left-3 z-(--z-dropdown) rounded-tile border border-rule bg-field p-6 shadow-float data-[state=closed]:hidden xl:p-8"
               >
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] gap-(--gap-columns)">
-                  <NavigationMenu.Link asChild>
-                    <a
-                      href={category.path}
-                      className="flex flex-col gap-3 self-start rounded-media font-semibold underline-offset-4 hover:underline"
-                    >
-                      {category.image && (
-                        <span className="block aspect-[4/3] overflow-hidden rounded-media bg-paper-2">
-                          <ResponsiveImage
-                            image={{ ...category.image, alt: "" }}
-                            sizes="320px"
-                            className="h-full w-full object-cover"
-                          />
-                        </span>
-                      )}
-                      {allIn[category.path]}
-                    </a>
-                  </NavigationMenu.Link>
-                  <ul className="columns-3 gap-(--gap-columns)">
-                    {category.children.map((child) => (
-                      <li key={child.path} className="break-inside-avoid">
-                        <NavigationMenu.Link asChild>
-                          <a
-                            href={child.path}
-                            className="flex min-h-11 items-center rounded-inner px-3 text-text-2 hover:bg-paper-2 hover:text-text"
-                          >
-                            {child.label}
-                          </a>
-                        </NavigationMenu.Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <Panel category={category} allIn={allIn[category.path] ?? category.label} />
               </NavigationMenu.Content>
             </NavigationMenu.Item>
           )

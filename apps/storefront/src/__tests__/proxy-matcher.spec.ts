@@ -20,6 +20,8 @@ describe("the proxy's matcher", () => {
       "/manifest.webmanifest",
       "/fonts/inter-latin.c940764593.woff2",
       "/fonts/fraunces-tr.001f80ce8b.woff2",
+      "/marks/visa.png",
+      "/marks/yurtici.svg",
     ]) {
       expect(proxied(path)).toBe(false)
     }
@@ -37,6 +39,10 @@ describe("the proxy's matcher", () => {
       "/fonts",
       "/fonts/rehber",
       "/fonts/inter.woff2",
+      "/marks",
+      "/marks/visa.png/x",
+      "/marks/Visa.svg",
+      "/marks/visa.jpg",
       "/kategori/icon.svg",
       "/_next/imagex",
     ]) {
@@ -53,6 +59,8 @@ describe("the proxy's matcher", () => {
       "/fonts/nunito-latin.20fc9b6fc6.woff2",
       "/icon.svgx",
       "/fonts/inter.woff2",
+      "/marks/troy.svg",
+      "/marks/troy.svgx",
       "/magaza",
     ]) {
       expect(proxied(path)).toBe(!isStaticFile(path))

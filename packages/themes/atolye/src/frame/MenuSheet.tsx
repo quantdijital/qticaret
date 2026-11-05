@@ -2,6 +2,7 @@
 
 import { ChevronDown, Menu, MessageCircle, Phone } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
+import { ResponsiveImage } from "@qticaret/ui"
 import type { ContactView, LinkView, NavCategoryView } from "@qticaret/ui"
 import { OPEN_MENU_EVENT } from "./events"
 import { Sheet } from "./Sheet"
@@ -16,13 +17,30 @@ export interface MenuSheetWords {
 }
 
 const ROW =
-  "flex min-h-13 w-full items-center justify-between gap-3 rounded-media px-4 text-md font-semibold hover:bg-paper-2"
+  "flex min-h-14 w-full items-center gap-3 rounded-media px-2 text-md font-semibold hover:bg-paper-2"
 const SUB =
   "flex min-h-11 items-center rounded-inner px-4 text-text-2 hover:bg-paper-2 hover:text-text"
 
+/** A row's picture, 40 px square; the name beside it says what it is. */
+function Thumb({ category }: { category: NavCategoryView }) {
+  return (
+    <span className="block size-10 shrink-0 overflow-hidden rounded-inner bg-paper-3">
+      {category.image && (
+        <ResponsiveImage
+          image={{ ...category.image, alt: "" }}
+          sizes="40px"
+          className="h-full w-full object-cover"
+        />
+      )}
+    </span>
+  )
+}
+
 /**
  * The menu under 1024 px: a sheet from the left; the top categories as
- * 52 px rows, one with children a native disclosure; then the shop's
+ * 56 px rows, each with its picture (the shop's own, else its newest
+ * product's photo) as a small rounded square, one with children a native
+ * disclosure that opens on "Tümünü gör" and its children; then the shop's
  * small links and its phone and WhatsApp as quiet pills. The same links
  * are in the page's HTML through the aisle, so the sheet hides nothing
  * from a crawler. The bottom bar's "Kategoriler" opens it too, and gets
@@ -89,19 +107,21 @@ export function MenuSheet({
               <li key={category.path}>
                 {category.children.length === 0 ? (
                   <a href={category.path} className={ROW}>
+                    <Thumb category={category} />
                     {category.label}
                   </a>
                 ) : (
                   <details className="group">
                     <summary className={`${ROW} cursor-pointer`}>
-                      {category.label}
+                      <Thumb category={category} />
+                      <span className="flex-1">{category.label}</span>
                       <ChevronDown
-                        className="size-5 shrink-0 group-open:rotate-180 motion-safe:transition-transform"
+                        className="mr-2 size-5 shrink-0 group-open:rotate-180 motion-safe:transition-transform"
                         aria-hidden="true"
                         strokeWidth={2}
                       />
                     </summary>
-                    <ul className="mb-2 ml-4 border-l-2 border-rule pl-2">
+                    <ul className="mb-2 ml-7 border-l-2 border-rule pl-2">
                       <li>
                         <a href={category.path} className={`${SUB} font-semibold text-text`}>
                           {words.allIn[category.path]}

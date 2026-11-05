@@ -22,6 +22,7 @@ import type {
   InstallmentFamilyView,
   ContentPageView,
   HomePageView,
+  LegalPageView,
   ListingPageView,
   ProductPageView,
   ReviewsPageView,
@@ -180,6 +181,8 @@ export interface StorefrontTheme {
     }
   >
   ContentPage: ComponentType<Page<ContentPageView> & { actions?: ContactActions }>
+  /** `/yasal/{tür}`: one legal text with its table of contents and the others beside it. */
+  LegalPage: ComponentType<Page<LegalPageView>>
   BlogIndexPage: ComponentType<Page<BlogIndexPageView>>
   /** `/kategoriler`: every category as a tree. */
   CategoriesPage: ComponentType<Page<CategoriesPageView>>

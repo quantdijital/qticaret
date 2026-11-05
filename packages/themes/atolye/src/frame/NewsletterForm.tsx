@@ -11,19 +11,24 @@ import { useChallengeForm } from "./useChallengeForm"
  * e-mail): a 48 px pill field with its label and the button beside it,
  * then the consent box, unticked and required, its label the shop's own
  * sentence with the privacy notice's link. The answer and any error are
- * said under it. `id` keeps two forms on a page apart.
+ * said under it. `id` keeps two forms on a page apart. `quiet` (the
+ * footer's) shows the consent once the visitor starts on the form, its
+ * field focused or filled (`ui.css` `.gf-news`); before that the field
+ * and the button stand alone. Without `:has()` the consent always shows.
  */
 export function NewsletterForm({
   action,
   privacyPath,
   words,
   id,
+  quiet = false,
   className,
 }: {
   action: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
   privacyPath: string | null
   words: NewsletterWords
   id: string
+  quiet?: boolean
   className?: string
 }) {
   const [sent, setSent] = useState(false)
@@ -42,7 +47,7 @@ export function NewsletterForm({
     )
   }
   return (
-    <form onSubmit={onSubmit} className={cn("flex flex-col gap-3", className)}>
+    <form onSubmit={onSubmit} className={cn("flex flex-col gap-3", quiet && "gf-news", className)}>
       <label htmlFor={`${id}-eposta`} className="text-sm font-semibold">
         {words.email}
       </label>
@@ -55,6 +60,8 @@ export function NewsletterForm({
           maxLength={254}
           autoComplete="email"
           inputMode="email"
+          // Blank: `:placeholder-shown` tells an empty field from a filled one
+          placeholder=" "
           aria-invalid={error ? true : undefined}
           aria-describedby={`${id}-durum`}
           className="gf-field min-w-0 flex-1"
@@ -68,26 +75,28 @@ export function NewsletterForm({
           {words.submit}
         </button>
       </div>
-      <label className="flex cursor-pointer items-start gap-3 text-xs leading-relaxed">
-        <input
-          type="checkbox"
-          name="consent"
-          value="1"
-          required
-          className="mt-0.5 size-5 shrink-0 accent-(--color-signal)"
-        />
-        <span>
-          {words.consent}{" "}
-          {privacyPath && (
-            <a href={privacyPath} className="font-semibold underline">
-              {words.privacyLink}
-            </a>
-          )}
-        </span>
-      </label>
-      <p id={`${id}-durum`} role="alert" className="min-h-[1lh] text-sm font-semibold">
-        {error ? (words.errors[error] ?? words.fallback) : null}
-      </p>
+      <div className="gf-news-more flex flex-col gap-3">
+        <label className="flex cursor-pointer items-start gap-3 text-xs leading-relaxed">
+          <input
+            type="checkbox"
+            name="consent"
+            value="1"
+            required
+            className="mt-0.5 size-5 shrink-0 accent-(--color-signal)"
+          />
+          <span>
+            {words.consent}{" "}
+            {privacyPath && (
+              <a href={privacyPath} className="font-semibold underline">
+                {words.privacyLink}
+              </a>
+            )}
+          </span>
+        </label>
+        <p id={`${id}-durum`} role="alert" className="min-h-[1lh] text-sm font-semibold">
+          {error ? (words.errors[error] ?? words.fallback) : null}
+        </p>
+      </div>
     </form>
   )
 }

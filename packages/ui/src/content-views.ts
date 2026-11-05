@@ -131,6 +131,26 @@ export interface ContentPageView {
   tags?: LinkView[]
 }
 
+/** One heading of a long text, for its table of contents: the anchor it carries and its words. */
+export interface OutlineItemView {
+  id: string
+  label: string
+}
+
+/** One of the shop's legal texts on a page of its own (`/yasal/{tür}`, adr/0041). */
+export interface LegalPageView {
+  title: string
+  breadcrumbs: BreadcrumbView[]
+  /** The backend's own HTML (adr/0019), its `h2`s carrying the outline's ids. */
+  html: string
+  /** When this version came into force, in words ("5 Kasım 2026") and for `<time>`. */
+  updated: { label: string; dateTime: string } | null
+  /** The text's `h2`s in order; fewer than two: no table of contents. */
+  outline: OutlineItemView[]
+  /** The shop's other published legal texts. */
+  others: LinkView[]
+}
+
 /** The storefront's contact form (adr/0047): a signed-in customer's name and address filled in. */
 export interface ContactFormView {
   subjects: { value: string; label: string }[]

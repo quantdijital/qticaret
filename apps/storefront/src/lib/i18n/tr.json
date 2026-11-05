@@ -807,5 +807,13 @@
   "home.featured_facts": "Öne çıkan özellikler",
   "reviews.count": "{count} değerlendirme",
   "product.discount_short": "%{percent}",
-  "nav.favorites": "Favoriler"
+  "nav.favorites": "Favoriler",
+  "legal.contents": "İçindekiler",
+  "legal.sections": "{count} bölüm",
+  "legal.updated": "Son güncelleme:",
+  "legal.others": "Diğer yasal metinler",
+  "home.best_sellers": "Çok satanlar",
+  "home.on_sale": "İndirimde",
+  "footer.marks_payment": "Ödeme",
+  "footer.marks_carrier": "Kargo"
 }

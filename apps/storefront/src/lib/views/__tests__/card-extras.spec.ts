@@ -172,9 +172,13 @@ describe("review photos and marks", () => {
 
   it("writes the ways to pay and carriers in the storefront's words", () => {
     expect(shopMarks(["visa", "bank_transfer", "aras"], t)).toEqual([
-      { key: "visa", label: "Visa" },
-      { key: "bank_transfer", label: "Havale / EFT" },
-      { key: "aras", label: "Aras Kargo" },
+      { key: "visa", label: "Visa", logo: { src: "/marks/visa.png", width: 208, height: 68 } },
+      { key: "bank_transfer", label: "Havale / EFT", logo: null },
+      {
+        key: "aras",
+        label: "Aras Kargo",
+        logo: { src: "/marks/aras.svg", width: 148, height: 40 },
+      },
     ])
     expect(shopMarks(undefined, t)).toEqual([])
   })

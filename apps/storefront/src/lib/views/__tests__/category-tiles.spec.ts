@@ -42,9 +42,17 @@ const extras = vi.hoisted(() => ({
   latestReviewPhotos: vi.fn(() => Promise.resolve([])),
 }))
 vi.mock("@/lib/store-api/extras", () => extras)
-vi.mock("@/lib/store-api/server", () => ({ storeGet: vi.fn() }))
+const server = vi.hoisted(() => ({ storeGet: vi.fn(), storePublicGet: vi.fn() }))
+vi.mock("@/lib/store-api/server", () => server)
 
-const { categoryLinks, categoryTiles } = await import("../section-data")
+const { categoryLinks } = await import("../section-data")
+const { categoryTiles } = await import("../category-tiles")
+
+/** The category ids a photo was asked for, in the order asked. */
+const asked = () =>
+  server.storePublicGet.mock.calls.map(
+    ([, query]) => (query as { category_id: string[] }).category_id
+  )
 
 describe("categoryTiles", () => {
   beforeEach(() => {
@@ -58,11 +66,11 @@ describe("categoryTiles", () => {
         ],
       ])
     )
-    requests.listProducts.mockImplementation(({ categoryIds }: { categoryIds: string[] }) =>
-      Promise.resolve({
-        products: categoryIds.includes("pcat_a") ? [product("p1", "/media/caki.jpg")] : [],
-        count: 0,
-      })
+    server.storePublicGet.mockImplementation(
+      (_path: string, { category_id }: { category_id: string[] }) =>
+        Promise.resolve({
+          products: category_id.includes("pcat_a") ? [product("p1", "/media/caki.jpg")] : [],
+        })
     )
   })
 
@@ -70,26 +78,52 @@ describe("categoryTiles", () => {
     const tiles = await categoryTiles([])
     expect(tiles.map((tile) => tile.label)).toEqual(["Çakılar", "Kılıçlar", "Aksesuar"])
     expect(tiles[0]?.image).toMatchObject({ src: "/media/caki.jpg", alt: "" })
-    expect(requests.listProducts).toHaveBeenCalledWith({
-      limit: 1,
-      order: "-created_at",
-      categoryIds: ["pcat_a", "pcat_a1"],
-    })
+    // The same answer for every visitor, kept a minute: no price, no session
+    expect(server.storePublicGet).toHaveBeenCalledWith(
+      "/store/products",
+      expect.objectContaining({
+        category_id: ["pcat_a", "pcat_a1"],
+        limit: 1,
+        order: "-created_at",
+      })
+    )
+    expect(requests.listProducts).not.toHaveBeenCalled()
   })
 
   it("keeps the shop's own picture and asks nothing for it", async () => {
     const tiles = await categoryTiles([])
     expect(tiles[1]?.image?.src).toBe("/media/kilic.jpg")
-    expect(requests.listProducts).not.toHaveBeenCalledWith(
-      expect.objectContaining({ categoryIds: ["pcat_b"] })
+    expect(asked()).not.toContainEqual(["pcat_b"])
+  })
+
+  it("gives every tile its photo, past eight too, a few requests at a time", async () => {
+    const many = Array.from({ length: 13 }, (_, index) =>
+      category(`pcat_${String(index)}`, `K${String(index)}`, index)
     )
+    requests.allCategories.mockResolvedValue(many)
+    extras.categoryImages.mockResolvedValue(new Map())
+    let open = 0
+    let most = 0
+    server.storePublicGet.mockImplementation(async () => {
+      open++
+      most = Math.max(most, open)
+      await new Promise((resolve) => setTimeout(resolve, 1))
+      open--
+      return { products: [product("p", "/media/x.jpg")] }
+    })
+    const tiles = await categoryTiles([])
+    expect(tiles).toHaveLength(13)
+    expect(tiles.every((tile) => tile.image?.src === "/media/x.jpg")).toBe(true)
+    expect(most).toBeLessThanOrEqual(6)
+    expect(most).toBeGreaterThan(1)
   })
 
   it("leaves a category with no pictured product, or an unanswered one, without a picture", async () => {
-    requests.listProducts.mockImplementation(({ categoryIds }: { categoryIds: string[] }) =>
-      categoryIds.includes("pcat_a")
-        ? Promise.reject(new StoreApiError(503, "unavailable", null))
-        : Promise.resolve({ products: [], count: 0 })
+    server.storePublicGet.mockImplementation(
+      (_path: string, { category_id }: { category_id: string[] }) =>
+        category_id.includes("pcat_a")
+          ? Promise.reject(new StoreApiError(503, "unavailable", null))
+          : Promise.resolve({ products: [] })
     )
     const tiles = await categoryTiles([])
     expect(tiles[0]?.image).toBeUndefined()

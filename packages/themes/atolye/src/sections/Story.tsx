@@ -2,7 +2,7 @@ import { Container } from "../parts/Container"
 import { type Of, headingId } from "./plan"
 
 const PROSE =
-  "flex max-w-[65ch] flex-col gap-4 text-md leading-[1.7] text-text-2 lg:text-lg [&_a]:font-semibold [&_a]:text-text [&_a]:underline [&_h3]:mt-4 [&_h3]:text-title [&_h3]:text-text [&_li]:ml-5 [&_ol]:list-decimal [&_strong]:text-text [&_ul]:list-disc"
+  "flex max-w-[65ch] flex-col gap-4 text-md leading-[1.7] text-text-2 lg:text-lg [&_a]:font-semibold [&_a]:text-text [&_a]:underline [&_h3]:mt-4 [&_h3]:text-title [&_h3]:text-text [&_li]:ml-5 [&_ol]:list-decimal [&_strong]:font-semibold [&_strong]:text-text [&_ul]:list-disc"
 
 /**
  * The shop's own text (`rich_text`: its story, "Neden biz?"): the heading

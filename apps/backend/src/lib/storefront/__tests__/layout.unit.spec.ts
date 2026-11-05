@@ -73,6 +73,20 @@ describe("storefront layout document (adr/0049)", () => {
     expect(doc.category[0]).toMatchObject({ type: "faq", placement: "bottom" })
   })
 
+  it("takes an image at the shop's storage address, plain http on a developer's machine", () => {
+    for (const url of [
+      "http://localhost:9000/static/kapak.webp",
+      "https://cdn.magaza.example/kapak.webp",
+      "/static/kapak.webp",
+    ]) {
+      const hero = { id: "giris01", type: "hero", image: { url, alt: null } }
+      expect(layoutDocument.safeParse({ home: [hero] }).success).toBe(true)
+    }
+    const slide = { image: { url: "http://localhost:9000/static/afis.webp", alt: "Afiş" } }
+    const banner = { id: "afis0001", type: "banner", slides: [slide] }
+    expect(layoutDocument.safeParse({ home: [banner] }).success).toBe(true)
+  })
+
   it("takes one featured product on the home page only (adr/0046 Ek 2026-11-05)", () => {
     const featured = { id: "yakin001", type: "featured_product", product_id: "prod_1" }
     expect(layoutDocument.parse({ home: [featured] }).home).toEqual([

@@ -12,6 +12,7 @@ import { ContentPage } from "./ContentPage"
 import { CookiePreferencesPage } from "./CookiePreferencesPage"
 import { GiftCardBalancePage } from "./GiftCardBalancePage"
 import { HomePage } from "./HomePage"
+import { LegalPage } from "./LegalPage"
 import { Layout } from "./Layout"
 import { ListingPage } from "./ListingPage"
 import { NotFoundPage } from "./NotFoundPage"
@@ -29,6 +30,7 @@ export const baseTheme: StorefrontTheme = {
   ProductPage,
   ListingPage,
   ContentPage,
+  LegalPage,
   BlogIndexPage,
   CategoriesPage,
   BrandsPage,

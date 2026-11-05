@@ -100,4 +100,29 @@ describe("picked rails (adr/0049 Ek 2026-11-05)", () => {
     )
     expect(views.map((view) => view.id)).toEqual(["coksatan"])
   })
+
+  it("names an untitled rail by where its products come from", async () => {
+    requests.pathsOf.mockResolvedValue({
+      prod_a: "/urun/prod_a",
+      prod_b: "/urun/prod_b",
+      prod_c: "/urun/prod_c",
+    })
+    requests.storefrontSettings.mockResolvedValue({
+      theme: {},
+      storefront: { primary_color: null },
+    })
+    const views = await sectionViews(
+      [
+        rail({ kind: "best_sellers", days: 90 }, { id: "coksatan", product_ids: ["prod_a"] }),
+        rail({ kind: "on_sale" }, { id: "indirim1", product_ids: ["prod_b"] }),
+        rail({ kind: "on_sale" }, { id: "indirim2", title: "Kasım", product_ids: ["prod_c"] }),
+      ],
+      t
+    )
+    expect(views.map((view) => ("title" in view ? view.title : null))).toEqual([
+      "home.best_sellers",
+      "home.on_sale",
+      "Kasım",
+    ])
+  })
 })
