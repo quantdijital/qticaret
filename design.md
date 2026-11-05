@@ -1,166 +1,67 @@
-# Design: Atölye teması (`packages/themes/atolye`)
+# Design: Grafit (`packages/themes/atolye`, `STOREFRONT_THEME=atolye`)
 
-> Kilitli sistem (sahip onayı 2026-11-04: "önerine uyarım … başla yolda revize veririm"). Kaynak ve gerekçe: `docs/tema/design.md`, denetim `docs/tema/denetim-2026-11-04.md`. Hallmark her koşuda önce bunu okur.
-> Sahip kararları: vurgu rengi mağazanın tema ayarındaki birincil renktir (adr/0053 `--primary` ezmesi `--color-signal`'e akar; `#076599` yalnız yedek); logo dosyası yok → tipografik yazı markası; köşe/düğme/font ayarları bu temada uygulanmaz; koyu mod açılışta var; sözleşme ekleri bu işin parçası; müşteri fotoğrafları yorum görsellerinden; ödeme ve kargo işaretleri gösterilir.
+> **Kilitli sistem.** Sahip onayı 2026-11-05: "anasayfa tasarımını beğendim, diğer e-ticaret sayfalarımızın tasarımlarını da yapmaya başla." Hallmark her koşuda önce bunu okur; her yeni sayfa bu token'lara ve bileşen kurallarına uyar, sayfa sayfa genişletilir. Kaynak: `docs/tema/yon-2026-11-05.md` (aynı içerik, gerekçeleriyle). Reddedilen eski sistem (Loom): `docs/tema/design-loom-2026-11-04.md`.
+> Sahip kararları: vurgu = mağazanın tema ayarındaki birincil renk (`--primary`); logo yerine tipografik yazı markası; kategoriler her yerde fotoğraflı karo, çip yok; koyu mod sistem ayarını izler; müşteri fotoğrafları yorum görsellerinden; ödeme/kargo için firmaların resmi logoları; dev mağazada eksik metinleri mylarte.com'a uygun olarak biz yazarız (uydurma olgu/rakam yok).
 
-## System
-- Genre: editorial
-- Shape of the first page: Bento Grid (draw 30e00e), hero Index; sepet, ödeme, giriş ve hesap uygulama ekranı
-- Theme: Loom (deal 3/3, seed `mobile-first-e-commerce-shop-handmade-62be·8d7a0280·2026-11-04·r0`), colourway `ecru`; vurgu Loom çividi yerine markanın `#076599`'u
-- Axes: light/roman-serif/cool · posture: committed (vurgu yalnız birincil düğme, duyuru şeridi, odak, seçili durum)
+> Sahibin 2026-11-05 isteği: "bir anasayfayı tasarla bakalım hemen görelim", sıfırdan, eski Atölye/Loom görünümüyle ortak noktası olmadan.
+> Sahip ana sayfayı onayladı (2026-11-05: "anasayfa tasarımını beğendim, diğer e-ticaret sayfalarımızın tasarımlarını da yapmaya başla"). Kilitli kopya depo kökünde `design.md`; eski Loom sistemi `docs/tema/design-loom-2026-11-04.md`.
+> Kod: `packages/themes/atolye` (paket adı ve bağlantısı aynı: `STOREFRONT_THEME=atolye`), şimdilik çerçeve + ana sayfa.
 
-## Tokens
-Rol adları Hallmark'ınki; `packages/ui`'nin `@theme inline` adlarıyla (`--color-accent`, `--color-muted`, `--color-ink`, `--color-sale`, `--color-success`) çakışmasın diye beşi yeniden adlandırıldı (`export-formats.md` § shadcn): ink → `text`, muted → `text-3`, accent → `signal`, sale → `discount`, success → `ok`.
+## Fikir
 
-```css
-:root {
-  --color-paper: oklch(95.5% 0.014 85);  --color-paper-2: oklch(92% 0.022 84);  --color-paper-3: oklch(85% 0.032 80);  --color-field: oklch(98.5% 0.006 85);
-  --color-text: oklch(21% 0.012 60);  --color-text-2: oklch(31% 0.012 60);  --color-text-3: oklch(46% 0.014 62);
-  --color-rule: oklch(83% 0.022 84);  --color-rule-ink: var(--color-text);  --color-edge: var(--color-text-3);
-  --color-signal: oklch(48.6% 0.113 242.1);  --color-signal-2: oklch(41% 0.105 242);  --color-signal-ink: oklch(98.5% 0.006 85);  --color-focus: var(--color-signal);
-  --color-discount: oklch(47% 0.16 27);  --color-discount-ink: oklch(98.5% 0.006 85);  --color-ok: oklch(44% 0.10 150);  --color-warn: oklch(47% 0.10 65);  --color-error: oklch(47% 0.17 27);
-  --color-band: var(--color-text);  --color-band-text: var(--color-paper);  --color-band-text-2: oklch(78% 0.016 80);  --color-band-focus: var(--color-paper);
-  --color-whatsapp: oklch(48% 0.12 152);  --color-whatsapp-ink: oklch(98.5% 0.006 85);  --color-scrim: oklch(21% 0.012 60 / 0.45);
-  --font-display: "Libre Caslon Display", Georgia, ui-serif, serif;  --font-body: "Hanken Grotesk", Arial, ui-sans-serif, system-ui, sans-serif;  --font-outlier: var(--font-body);
-  --radius-card: 0;  --radius-pill: 0;  --rule-hair: 1px;  --rule-ink: 2px;  --shadow-card: none;  --shadow-overlay: 0 8px 20px oklch(21% 0.012 60 / 0.18);
-  --tracking-display: -0.01em;  --display-weight: 400;
-}
-@media (prefers-color-scheme: dark) { :root {
-  --color-paper: oklch(17% 0.010 60);  --color-paper-2: oklch(21% 0.010 60);  --color-paper-3: oklch(26% 0.012 60);  --color-field: oklch(21% 0.010 60);
-  --color-text: oklch(94% 0.012 85);  --color-text-2: oklch(86% 0.012 85);  --color-text-3: oklch(72% 0.014 80);
-  --color-rule: oklch(32% 0.010 60);  --color-edge: oklch(62% 0.014 80);
-  --color-signal: oklch(72% 0.10 238);  --color-signal-2: oklch(78% 0.09 238);  --color-signal-ink: oklch(17% 0.010 60);
-  --color-discount: oklch(72% 0.13 27);  --color-discount-ink: oklch(17% 0.010 60);  --color-ok: oklch(76% 0.11 150);  --color-warn: oklch(80% 0.11 75);  --color-error: oklch(72% 0.14 27);
-  --color-band: oklch(26% 0.012 60);  --color-band-text: oklch(94% 0.012 85);  --color-band-text-2: oklch(76% 0.014 80);  --color-band-focus: oklch(72% 0.10 238);
-  --color-whatsapp: oklch(70% 0.14 152);  --color-whatsapp-ink: oklch(17% 0.010 60);
-} }
-```
-Aralık, tip ölçeği, yumuşatmalar ve süreler scaffold'unkidir (`theme.mjs scaffold loom`), `tokens.css`'e yazılır.
+Mağazanın kendi koyu zeminli bıçak fotoğrafları **grafit sahnelerde** durur, fotoğrafın koyu kenarı sahneye karışır; sahnelerin çevresi **soğuk, çelik beyazı bir tezgâh**tır. Tek, ağır bir grotesk (Manrope) bütün sesi taşır. Kategoriler her ekranın omurgasıdır: başlıkta reyon satırı, ilk ekranın hemen altında fotoğraflı reyon kartları.
 
-**Kontrast (WCAG 2.2, ölçüldü; metin 4,5:1, büyük metin, simge, halka, alan kenarı 3:1):**
+Loom'dan farkı (sahibin reddettiği görünüm): ekru kâğıt yerine soğuk beyaz + grafit; Caslon serif yerine ağır grotesk; kare köşe ve her yerde ince çizgi yerine yuvarlak kartlar, dolgu yüzeyler ve hap (pill) kontroller; kum bantlar yerine iki grafit sahne.
 
-| Çift | Açık | Koyu | Kullanım |
-| --- | --- | --- | --- |
-| text / paper · paper-2 · paper-3 · field | 15,57 · 14,00 · 11,21 · 17,00 | 16,05 · 14,88 · 13,06 · 14,88 | gövde, kuyular, alanlar |
-| text-2 / paper · paper-2 | 11,57 · 10,41 | 12,50 · 11,59 | ikincil metin |
-| text-3 / paper · paper-2 · paper-3 · field | 6,27 · 5,64 · **4,52** · 6,85 | 7,71 · 7,15 · 6,27 · 7,15 | etiket, meta, eski fiyat, yer tutucu |
-| signal / paper · paper-2 · field | 5,52 · 4,97 · 6,03 | 7,84 · 7,27 · 7,27 | bağlantı metni |
-| signal-ink / signal · signal-2 | 6,03 · 8,31 | 7,84 · 9,70 | birincil düğme, duyuru şeridi |
-| discount / paper · field; discount-ink / discount | 6,50 · 7,10; 7,10 | 7,30 · 6,77; 7,30 | indirimli fiyat, indirim rozeti |
-| ok · warn · error / paper | 6,50 · 6,15 · 6,54 | 9,31 · 10,11 · 7,27 | stokta, az kaldı, hata |
-| band-text · band-text-2 / band | 15,57 · 8,86 | 13,06 · 7,25 | alt bilgi |
-| focus / paper · paper-2 · paper-3 | 5,52 · 4,97 · 3,98 | 7,84 · 7,27 · 6,38 | odak halkası |
-| band-focus / band; signal-ink / signal (şeritte halka) | 15,57; 6,03 | 6,38; 7,84 | koyu bant ve duyuru şeridinde halka |
-| edge / field · paper | 6,85 · 6,27 | 4,87 · 5,25 | alan kenarı |
-| whatsapp-ink / whatsapp; whatsapp / paper | 5,91; 5,42 | 7,59; 7,59 | sabit düğme |
+Hallmark: deste (Dose / Manifesto / Loom) reddedildi, yön özel (custom). Loom reddedilen görünüm; Manifesto'nun çift tonlu karanlık sayfası ve Dose'un eczane plastiği bir mağazanın renkli ürün fotoğraflarını taşımaz. Manifesto'nun "koyu sahne + ağır başlık" fikri alındı.
 
-Yasaklar (ölçümden): `signal` metni `paper-3` üstünde (3,98) ve açık modda koyu bantta (2,81) kullanılmaz; orada bağlantı `band-text` + alt çizgi. `text-3` `paper-3` üstünde yalnız 14 px ve üstü. Duyuru şeridindeki odak halkası `signal-ink`'tir (bugünkü 1,00:1 hatası, denetim §3.2). Sahip mürdüm `#7a1a48`'i seçerse: paper üstünde 8,90, field-ink onun üstünde 9,72 (geçer); ama Loom'un "ecru yanında sıcak vurgu yok" kuralına yakın düşer, §Deal'de yeniden bakılır.
+## Token'lar (`src/tokens.css`)
 
-## Type
-İki aile, üç ağırlık (Caslon 400; Hanken 400, 500). Mono yok (Loom'un DM Mono'su performans bütçesi için alındı, §Variants). Büyük harf dönüşümü ve harf aralığı açma yok; etiketler cümle düzeninde (`lang="tr"` zaten var).
-
-| Rol | Yüz | 360 px | 1440 px | Satır | Not |
-| --- | --- | --- | --- | --- | --- |
-| display: ana sayfa h1 | Caslon 400 | 40 | 72 | 1,04 | `clamp(2.5rem, 3.2vw + 1.75rem, 4.5rem)`, ≤ 7 kelime |
-| page: kategori, ürün, içerik h1 | Caslon 400 | 32 | 48 | 1,08 | `clamp(2rem, 1.6vw + 1.5rem, 3rem)` |
-| section: bölüm h2 | Caslon 400 | 32 | 52 | 1,08 | `clamp(2rem, 2.2vw + 1.25rem, 3.25rem)` |
-| price-hero: ürün fiyatı | Caslon 400 | 32 | 40 | 1,1 | Caslon hiçbir yerde 32 px altına inmez |
-| title: h3, panel başı (filtre, özet, adım) | Hanken 500 | 20 | 24 | 1,25 | |
-| lead | Hanken 400 | 18 | 20 | 1,45 | |
-| body | Hanken 400 | 16 | 16 | 1,55 | ölçü 45–75ch |
-| card-title | Hanken 500 | 15 | 16 | 1,35 | 2 satır |
-| price: kart, sepet, özet | Hanken 500 tabular | 16 | 17 | 1,3 | `1.299,90 TL` (biçim storefront'ta) |
-| label, meta, tablo başı, alt bilgi bağlantısı | Hanken 500/400 | 14 | 14 | 1,4 | |
-| caption, küçük yazı | Hanken 400 | 13 | 13 | 1,45 | 12 px altı yok |
-
-**Türkçe ve barındırma:** iki yüz de OFL; Google Fonts ikisi için `latin-ext` listeliyor (Ğ ğ İ ı Ş ş Ö ö Ü ü Ç ç). Glif denetimi inşadan önce fontTools ile yapılır (docs/21 yöntemi: `latin` + Türkçe alt küme, içerik özetli ad, `public/fonts`, `FONT_FILES`); Caslon Display'de bir harf eksikse yüz değiştirilmeden önce sahibe sorulur. ₺ gerekmez (para `TL` ile yazılır). Yedek yüzler ölçü ayarlı (Georgia, Arial), `font-display: swap`. Önyükleme bütçesi ≤ 125 KB (bugün 122 KB).
-
-## Spacing, radii, borders, shadows
-- **Aralık:** 2 · 4 · 8 · 12 · 16 · 24 · 40 · 64 · 96 · 144 px (`--space-3xs` … `--space-4xl`); ham `padding`/`gap` yok.
-- **Kenar boşluğu:** 16 px (< 640), 24 px (< 960), 64 px; kap 1440 px, 1920'de yalnız boşluk büyür. Bölüm aralığı telefonda 56/72/96, masaüstünde 120/144/176.
-- **Köşe:** her yerde 0 (kart, görsel, alan, düğme, rozet, çekmece). Panelin köşe ve düğme ayarı bu temada uygulanmaz (§Variants, sahip sorusu S8).
-- **Çizgi:** `--rule-hair` 1 px `--color-rule` satır ve bölmelerde (alanın tek sınırı olamaz); `--rule-ink` 2 px `--color-text` nav altında, tablo başı altında, listenin ilk satırı üstünde. Alan kenarı 1 px `--color-edge`.
-- **Gölge:** yüzeylerde yok; derinlik kâğıt basamağıyla. Yalnız üst katmanlar (çekmece, alt sayfa, mega menü, bildirim) `--shadow-overlay`, kenarlıksız; arkada `--color-scrim`.
-
-## Breakpoints, touch, motion
-| Ad | min | Değişen |
+| Rol | Açık | Koyu |
 | --- | --- | --- |
-| base | 360 | 2'li ürün ızgarası, 2'li kategori kartı, alt gezinme, filtre alt sayfada, üründe yapışkan sepete ekle |
-| xs | 390 | yalnız boşluk; düzen aynı |
-| md | 768 | 3'lü ızgara, kategori bentosu 3 sütun |
-| lg | 1024 | masaüstü üst bilgi ve mega menü, filtre yan panel (280 px), ürün sayfası 7/5 iki sütun ve yapışkan satın alma kutusu, alt gezinme kalkar |
-| xl | 1280 | 4'lü ızgara (filtre yanında 3) |
-| 2xl | 1440 | kap; ızgara sütun eklemez |
+| Tezgâh `--color-paper` | `oklch(98.4% 0.003 250)` soğuk beyaz | `oklch(17% 0.011 255)` grafit |
+| Kuyu `paper-2` / `paper-3` | `95.6%` / `91.6%`, kroma 0.005–0.007 | `21.5%` / `26%` |
+| Mürekkep `text` / `text-2` / `text-3` | `20%` / `35%` / `46%` (hepsi zeminde ≥ 4.5:1) | `95.5%` / `84%` / `73%` |
+| Sahne `stage` (her iki modda koyu) | `oklch(19.5% 0.012 255)`, yazısı `96.5%` / `80%` | `12.5%` (tezgâhtan bir adım derin) |
+| Sinyal `signal` | mağazanın rengi (`--primary`, adr/0053), yazısı `--primary-foreground` | aynı ton, L 72'ye kaldırılmış, yazısı grafit |
+| İndirim `deal`, stokta `ok`, yıldız `star`, hata `error` | kırmızı 27°, yeşil 150°, amber 75° | kaldırılmış tonlar |
 
-- **Dokunma:** her etkileşimli öğe ≥ 44×44 (alt bilgi bağlantısı, kırıntı, çip, adet, sil, arama gönder dahil); komşu hedefler arası ≥ 8 px. Metin içi bağlantı istisna (WCAG 2.5.8), satır yüksekliği 1,55.
-- **Sabit çerçeve bütçesi (telefon):** yapışkan üst bilgi ≤ 112 px + alt çubuk 56 px + güvenli alan; 360×780'de ≤ %22. Duyuru şeridi yapışkan değildir ve satırı yoksa çizilmez.
-- **Hareket:** yalnız durum; `transform` ve `opacity`; 120 ms (mikro), 220 ms (çekmece, alt sayfa), `--ease-out`. Kendiliğinden kayan içerik yok. `prefers-reduced-motion: reduce` altında her şey anında biter, çekmece kaymadan açılır.
+- **Duruş:** ölçülü. Sinyal yalnız eylemde (birincil düğme, sepet sayacı, odak halkası). Grafit sahne bir yüzey rengidir, vurgu sayılmaz; sayfada en çok iki sahne (açılış, yakın plan) + alt bilgi.
+- **Yazı:** Manrope (değişken, kendi sunucumuzdan; `latin` + Türkçe harf dosyası ≈ 27 KB, önyüklenir). Ağırlıklar 400 / 600 / 800. Başlıklar 800, harf aralığı −0.035em, satır 1.02–1.06; gövde 16 px / 1.6; etiketler 14 px 600, cümle düzeni, büyük harf ya da harf aralığı yok.
+- **Ölçek:** `--text-display` 32→68 px, `--text-section` 28→44 px, `--text-title` 18→21 px, `--text-figure` 48→72 px (puan), `--text-mast` 44→104 px (alt bilgi adı).
+- **Köşeler:** sahne ve kart `--radius-tile` 20 px, fotoğraf `--radius-media` 14 px, iç parça 10 px, kontroller `--radius-pill`.
+- **Gölge:** yalnız açılır katmanlarda (mega panel, çekmece, çerez kartı, hızlı ekle) tek `--shadow-float`.
+- **Izgara:** kap 1440 px, kenar boşluğu 16 / 24 / 48 px, kolon arası 12 / 24 px; bölüm arası 48→120 px (telefon → masaüstü), söz öbeği ekranı başına ~80 kelime.
 
-## Controls
-- Primary: `--color-signal` dolgu, `--color-signal-ink` yazı, köşe 0, yükseklik 48 px, Hanken 500 16 px, yatay 24 px; üzerine gelince `--color-signal-2`; basınca 1 px aşağı.
-- Secondary: aynı ölçüde 1 px `--color-text` çerçeve, saydam; metin bağlantısı 2 px alt çizgi, üzerine gelince `--color-signal`.
-- Alan: 48 px, `--color-field` dolgu, 1 px `--color-edge`, köşe 0; odakta `outline` (kenar kalınlığı değişmez).
-- Sayfa başına tek birincil düğme biçimi; iki dolgulu düğme yan yana gelmez. Düğme metnine ok eklenmez.
+## Bileşen kuralları
 
-## Motion
-- Character: still; tek gösterim yok; azaltılmış harekette her şey anında biter.
+- **Düğme:** tek birincil: mağaza renginde hap, 48 px. Grafit sahnede aynı düğme sahnenin açık mürekkebine döner (koyu üstünde okunur). İkincil: çizgili hap. Sekiz durum: dinlenme, üzerine gelme (bir ton koyu), odak (anında 2 px halka), basma (1 px), devre dışı (opaklık + imleç + öznitelik), meşgul (`aria-busy`).
+- **Arama:** her ekranda görünür, 48 px hap, kenarı 3:1, betiksiz GET `/arama`. Betikle canlı panel (2026-11-05, sahip: "arama kutusunda aratıyorum hemen ajax şekilde göstermiyor"): alanın altında alanın genişliğinde yüzen yuvarlak yüzey (`--shadow-float`, çizgi kenar), masaüstünde solda ürün satırları (48 px görsel, ad, fiyat; satır ≥ 44 px), sağda kategori ve marka hapları, altta "Tüm sonuçları gör (n)"; telefonda tek sütun, ekran klavyesinin üstünde biter, içinde kayar. Yüklenirken satır boyunda iskelet ya da önceki yanıt soluk; sonuç yoksa mağazanın kategorileri. Temizle düğmesi lucide X, 44 px, yalnız alan doluyken.
+- **Kart (ürün):** fotoğraf yuvarlak kuyuda (mağazanın oranı), üstte hap rozetler (indirim kırmızı, "Az kaldı", "Tükendi"), köşede yuvarlak "+" hızlı ekle; marka küçük, ad iki satır, fiyat 800 ağırlıkta, indirimde üstü çizili eski fiyat. Bütün kart tek bağlantı.
+- **Reyon kartı (kategori):** her kategori aynı boyda 4:5 kart, hap yok (sahip 2026-11-05: "hepsi görselli olsun"); fotoğraf mağazanın kategori resmi, yoksa kategorinin en yeni ürün fotoğrafı (vitrin sunucusu seçer, istekler altışar altışar, bir dakika herkes için saklanır); ad kartın grafit ayağında 800. Telefonda ve tablette yana kayan tek sıra (2,2 / 3,3 kart görünür); 1024 px'ten ızgara, sütun sayısı kategori sayısından: önce dolu satırlar, sonra en az boş yer, son satırda hiçbir zaman tek kart kalmaz (1024: 3–6, 1280: 4–7; 13 kategori 5 ve 7+6).
+- **Sekmeler:** betiksiz radyo hapları (ok tuşlarıyla gezilir), her panel HTML'de; `:has()` yoksa paneller alt alta.
+- **Sahne:** grafit, 20 px köşe; fotoğraf iç kenarda grafite karışır (degrade yalnız fotoğrafın üstünde katman).
+- **Çekmece, mega panel, çerez kartı:** yüzen yuvarlak yüzey, tek gölge, odak içeride, Escape kapatır.
+- **Mega panel:** reyon satırındaki düğme 150 ms üzerinde durunca ya da basınca/Enter ile açar (açıkken grafit hap); panel kabın genişliğinde sayfanın üstünde yüzer (altındaki hiçbir şey kaymaz): solda kategorinin adı ve "Tümünü gör: {ad}", altında çocukları kısa sütunlarda (1024'te 3, 1280'de 4), sağda kategorinin resim kartı (yoksa en yeni ürün fotoğrafı; aynı sayfaya gider, klavyede ikinci durak değildir). Escape, dışarı basmak ya da ayrılmak kapatır. Kapalı paneller içeriden basışı yok sayar (2026-11-05 hata: basış paneli bağlantı izlenmeden kapatıyordu).
+- **Çekmece (telefon):** her üst kategori 56 px satır, solunda 40 px yuvarlak kare resmi; çocukluysa yerel açılır: önce "Tümünü gör", sonra çocukları.
 
-## Components
-Ortak sekiz durum: **varsayılan** · **üzerine gelme** (yalnız `@media (hover: hover)`, kapta tek sinyal: alt çizgi kalınlaşır ya da dolgu bir basamak koyulaşır; görsel büyümez) · **odak** (`:focus-visible`, 2 px `--color-focus`, 2 px boşluk, anında; vurgu ve koyu bant üstünde `signal-ink`/`band-focus`; kenara dayalı şeritte içe) · **basılı** (1 px aşağı) · **devre dışı** (yerel `disabled` + `aria-disabled` + opaklık 0,55 + `not-allowed`) · **yükleniyor** (`aria-busy`, etiket yerinde kalır, genişlik sabit, çift gönderim yok) · **boş** (burada ne olacağı + tek eylem) · **hata** (`--color-error` + simge, renk tek başına değil; alanda `aria-invalid` + `aria-describedby`, form düzeyinde `role="alert"`). Aşağıda yalnız farklar. Dosya: base temadaki karşılığı; ⚑ sözleşme eki gerekir (denetim §7).
+## Ana sayfa (brief sırası)
 
-- **Duyuru şeridi** (`storefront.announcements`; `layout/AnnouncementBar.tsx`): vurgu bandı, 14 px, en az 36 px; telefonda ilk satır, masaüstünde satırlar solda, üst bağlantılar ve telefon sağda. Boş: hiç çizilmez. Kendiliğinden dönmez; satırlar arasında nokta yok, ayrı `li`.
-- **Yapışkan üst bilgi** (`ShopView`; `layout/SiteHeader.tsx`, `SearchForm.tsx`): telefonda 56 px satır (menü 44, ad/logo, sepet 44 sayaçlı) + 48 px arama satırı (alan 44, gönder 44) + 2 px ink çizgi = 106 px. Masaüstü: logo solda, geniş arama ortada, hesap ve sepet sağda; altında mega menü tetikleri (44 px). Sepet sayacı kare, `signal` dolgu, `aria-live="polite"`. Arama boş gönderilirse `/arama` ipucu sayfası (bugünkü `SearchHelp`).
-- **Mega menü** (`categories`; `layout/CategoryNav.tsx`): tıklamayla ve 150 ms gecikmeli üzerine gelmeyle açılır, Esc kapatır, içerik HTML'de (`forceMount`). Kap genişliğinde panel, üstte 2 px ink çizgi; alt kategoriler 44 px satır sütunlarda; "Tümünü gör: {kategori}" (oksuz). Kategori görseli varsa bir kare kart ⚑; yoksa hiçbir kutu çizilmez (bugünkü boş gri kutu gider).
-- **Mobil çekmece** (`layout/MobileMenu.tsx`): soldan tam yükseklik, 360'ta tam genişlik; üst kategoriler 56 px satır, açılır alt liste (akordeon), sonra üst bağlantılar, telefon, WhatsApp. Odak tuzağı, perde, Esc.
-- **USP şeridi** (`trustBadges`; `components/TrustStrip.tsx`): hero'nun hemen altında; telefonda 2×2, masaüstünde 4'lü; simge 20 px metin renginde (renkli halka yok), başlık 14/500, satır 13. Etkileşimsiz: üzerine gelme yok. Boş: çizilmez. Para `1.500,00 TL` biçiminde (bugünkü `₺1.500` belirteç çıktısı düzeltilir).
-- **Kategori kartı** (⚑ `image`): fotoğraf 1:1 (telefonda 2 sütun), masaüstünde bento; ad fotoğrafın altında Hanken 500 18 (fotoğraf üstüne yazı yok); kartın tamamı tek bağlantı. Üzerine gelme: ad altı çizilir. Görselsiz: `paper-2` üstünde yalnız ad.
-- **Ürün kartı** (`ProductCardView`; `components/ProductCard.tsx`): görsel kuyusu `paper-2`, mağazanın oranı; ürün görseline asla filtre uygulanmaz ve tükendiğinde griye çevrilmez (sap rengi seçeneğin kendisi). Sol üstte rozet: indirim (`discount`), "Tükendi", "Az kaldı" ⚑ (adet değil kova). Marka 13 px `text-3` cümle düzeni; ad 2 satır; puan görünüm modelinde varsa ⚑; fiyat, indirimde eski fiyat üstü çizili `text-3` + yeni fiyat `discount`. Hızlı ekle ⚑: yalnız tek varyantlı ve stoktaki üründe, kartın altında tam genişlik 44 px ikincil düğme; çok varyantlıda "Seçenekleri gör" bağlantısı. Yükleniyor: düğme `aria-busy`; hata: düğmenin altında satır içi ileti + ürüne bağlantı; başarı: mini sepet açılır (bildirim yok).
-- **Filtre ve sıralama** (`ListingPageView.filters`, `stock`, `sort`; `components/Filters.tsx`): telefonda "Filtrele (N)" ve "Sırala" 44 px iki düğme; filtre formu HTML'de, betik onu alt sayfaya çevirir (betiksiz bugünkü `<details>` çalışır); gruplar akordeon, seçenek satırı 44 px, sayılar tabular; altta "Uygula" birincil. Masaüstünde 280 px yan panel, grup başında 2 px ink çizgi. Seçili filtreler kaldırılabilir 44 px çipler + "Tümünü temizle". Sayısı 0 olan seçenek devre dışı. Boş: "Bu filtrelerle ürün yok." + "Filtreleri temizle". Hata: fiyatta en az > en çok ise alan hatası.
-- **Galeri** (`images`; `components/ProductGallery.tsx`): telefonda yakalamalı yatay şerit 1:1, altında "3 / 9" durum metni (`role="status"`, süs değil); masaüstünde büyük görsel + 72 px kare küçük resimler. Dokununca tam ekran görüntüleyici: yerel iki parmak yakınlaştırma (`touch-action: pinch-zoom`, `user-scalable=no` asla), en büyük türev, Esc ve 44 px kapat. Ölçek görseli ⚑ (`ImageView` rolü): altında "Elde, ölçü için" açıklaması. Yükleniyor: sabit oranlı `paper-2` kutu (CLS yok). Boş: adın ilk harfi.
-- **Teknik özellikler tablosu** (`specs` ⚑ `group`; `components/ProductDetails.tsx`): gerçek `<table>`, başlık "Teknik özellikler" (title düzeyi); her grup bir `<tbody>`, grup başı 14/500 `text-3` ve üstünde 2 px ink çizgi; satır: etiket solda Hanken 400 15 `text-2`, değer sağda Hanken 500 16 tabular, birim değerle birlikte ("15 cm", "58 HRC"). Grup gelmezse tek düz grup. `highlight` olanlar başlığın altında kısa liste. Boş: tablo yok.
-- **Varyant seçici** (`options`, `variants`; `components/OptionPicker.tsx`, `Swatch.tsx`): gerçek radyo; 44 px kare çipler; renk değeri 44 px kare örnek + görünür ad ("Sap rengi: Kiremit"); seçili: 2 px `text` çerçeve + onay simgesi; tükenen değer çapraz çizgi + "(tükendi)" ve devre dışı.
-- **Adet seçici** (`components/QuantityField.tsx`): − [n] + üçü de 44×44, `inputmode="numeric"`; sınırda düğme devre dışı; stok veya ek sınırı aşılınca alan hatası.
-- **Mobil yapışkan sepete ekle çubuğu** (yalnız tema): < 1024'te ürün sayfasında satır içi "Sepete ekle" görünümden çıkınca belirir (betiksiz gösterilmez, satır içi düğme yeter). 64 px + güvenli alan, `paper`, üstte 2 px ink çizgi; solda fiyat (16/500) ve seçili varyant, sağda 48 px birincil. Ürün sayfasında alt gezinme ve WhatsApp düğmesi gizlenir; tek sabit alt öğe budur. Tükendi: "Gelince haber ver" (stok bildirimi formuna kaydırır).
-- **Mini sepet çekmecesi** (`MiniCartView`; `layout/CartDrawer.tsx`, `cart/FreeShippingBar.tsx`): sağdan, masaüstünde 420 px, telefonda tam genişlik; başlık "Sepetim (N)" + 44 px kapat; ücretsiz kargo: "Ücretsiz kargo için 1.325,70 TL daha ekleyin" + 8 px çubuk (`signal` / `paper-3`, %5 adımlı sınıflar, satır içi `style` yok); eşik aşılınca `ok` renginde "Kargo ücretsiz". Satırlar salt okunur; ara toplam; "Ödemeye geç" birincil + "Sepete git" bağlantısı. Boş: "Sepetiniz boş." + "Alışverişe devam et".
-- **Yorum kartı ve puan dağılımı** (`ReviewsView`; `components/ProductCommunity.tsx`, `ReviewsPage.tsx`): özet: ortalama Caslon 40 + yıldızlar (ekran okuyucuya "5 üzerinden 4,9") + "N değerlendirme"; dağılım 5→1 satır, 8 px çubuk, sayı tabular ⚑. Kart: yıldız, başlık 16/500, metin 6 satır + "Devamını oku" (44 px), ad, tarih, "Doğrulanmış alıcı" metni (nokta değil), fotoğraf ⚑. Yorum yoksa ana sayfa bölümü çizilmez; üründe "Henüz değerlendirme yok." + yazma/giriş bağlantısı. Yorum uydurulmaz: `[YORUM]` yalnız tasarım örneğinde.
-- **Taksit tablosu** (`installments`; `components/InstallmentTable.tsx`): `<details>` özeti 44 px; açılınca sorulur: yükleniyor "Taksitler getiriliyor…"; tablo kart ailesi başına (Taksit · Aylık · Toplam, sağa yaslı tabular); hata "Taksit bilgisi şu an alınamadı." + "Yeniden dene"; boş "Bu ürün için taksit seçeneği yok."
-- **Akordeon**: `<details>`/`<summary>` (içerik HTML'de), özet 48 px, artı/eksi simgesi, aralarda 1 px çizgi.
-- **Kırıntı** (`breadcrumbs`; `components/Breadcrumbs.tsx`): masaüstünde tam yol, 14 px `text-3`; telefonda yalnız üst seviye "‹ El Yapımı Çakı" 44 px geri bağlantısı; son öğe bağlantı değil.
-- **Sayfalama / daha fazla** (`pagination`; `components/Pages.tsx`): numaralı `?sayfa=N` bağlantıları 44 px kare (SEO, betiksiz); altında "Daha fazla ürün göster" bir sonraki sayfanın bağlantısıdır, betik varsa ekler (sonsuz kaydırma yok) ve "58 üründen 24'ü" der. Hata: "Ürünler yüklenemedi." + bağlantı.
-- **Bildirim (toast)**: yalnız hata ve görünmeyen etki için (Hallmark 16): "Sepete eklendi" yok (çekmece açılır). Alt gezinmenin üstünde, bilgi `role="status"`, hata `role="alert"`, 5 sn, üzerine gelince ve odakta durur, 44 px kapat.
-- **Form alanları ve doğrulama** (`checkout/fields.tsx`, `AddressForm.tsx`): etiket üstte (14/500), yer tutucu etiket değildir; yardım metni için `min-height: 1lh` ayrılır; isteğe bağlı alanlar "(isteğe bağlı)" yazar. Hata sunucu yanıtıyla aynı anahtardan; kenar 1 px kalır, rengi `error` olur. İl/ilçe/mahalle seçimleri yüklenirken "Yükleniyor…" ve devre dışı. Onay kutusu ve radyo 24 px kutu, 44 px satır.
-- **Sabit WhatsApp düğmesi** (`whatsappHref`; `layout/WhatsAppButton.tsx`): 56×56 kare, `--color-whatsapp` (bugünkü `#1f9d55` literali gider), 24 px işaret, ad "WhatsApp'tan yazın"; sağ 16 px, alt gezinmenin 16 px üstü. `/odeme*`, `/sepet`, ürün sayfası ve açık çekmece/alt sayfada gizli (bugün ödeme ve sepet alanlarını örtüyor). Numara yoksa çizilmez.
-- **Alt gezinme** (`bottomNav`; `layout/BottomNav.tsx`): 56 px + güvenli alan, 5 öğe, etiket 12 px; bulunulan öğe 2 px ink üst çizgi + 500 + `aria-current`. Cam bulanıklığı yok, düz `paper`.
-- **Çerez bandı** (`cookieBanner`; `layout/CookieBanner.tsx`): telefonda ekranın ≤ %35'i; "Tümünü kabul et" ve "Yalnızca zorunlu" aynı biçimde; sunucuda çizilir.
-- **Alt bilgi** (`ShopView`; `layout/SiteFooter.tsx`): mast: koyu bant, büyük ad/logo (Caslon 48–72) bağlantıların üstünde; sütunlar alt bilgi menülerinden, başlıklar 14/500 cümle düzeni; telefonda 2 sütun, bağlantılar 44 px; iletişim (telefon, e-posta, adres, saatler), sosyal (yazıyla), e-bülten kutusu (açıksa, İYS çift onay metniyle). Alt şerit: kimlik satırları her biri kendi satırında (nokta yok), ETBİS karekodu yuvası ⚑, izinli ödeme işaretleri ⚑, yasal bağlantılar, "© 2026 My L'arte". Doğrulanmamış "256-bit SSL" cümlesi kalkar.
+1. Duyuru şeridi (grafit, tek mesaj) → 2. Yapışkan iki satırlı başlık → 3. Açılış sahnesi (Banner duruşu: masaüstünde ekranın %58'i, telefonda yarım ekrandan az) → 4. Güvenceler şeridi → 5. Reyon kartları → 6. Sekmeli raf (yan yana ürün bölümleri; 3 sütun, 6 kart) → 7. Kampanya afişi ya da yakın plan ürün → 8. Yorumlar ve mağaza puanı → 9. Müşteri fotoğrafları → 10. Hikâye ("Neden biz?", `rich_text`) → 11. Rehberler (3 yazı) → 12. SSS (yanında yardım) → 13. E-bülten (alt bilginin içinde küçük kutu, İYS onay kutusu) → 14. Alt bilgi (çelik kuyu, sade defter).
 
-## Sector rules (generic)
-- **Teknik özellikler** şablondan gelir; tema yalnız `SpecView` gruplarını çizer. İlk müşterinin şablonu (panelde veri, kod değil): *Namlu*: Çelik türü (seçim; eski sitedeki terimler: 4116, N690, M390, Elmax, Damascus, CK…), Sertlik (sayı, HRC), Namlu uzunluğu (cm), Namlu kalınlığı (mm) · *Ölçü ve ağırlık*: Toplam uzunluk (cm), Ağırlık (g) · *Sap ve kılıf*: Sap malzemesi (seçim), Kılıf (seçim) · *Üretim*: Menşei / üretici (metin). Filtre: çelik türü, sap malzemesi, namlu uzunluğu; SEO öne çıkan: çelik türü, namlu uzunluğu. Bugün bu değerler açıklama HTML'inde; taşımada özniteliğe çevrilir.
-- **Bakım ve kullanım notu**: `paper-2` kuyu, üstte 2 px ink çizgi, başlık "Bakım ve kullanım", gövde sahibin metni (kategori `rich_text` bölümü ya da ürün içerik belgesi; görünüm ⚑ `variant: notice`). Yan renk şeridi yok. Metin yoksa çizilmez.
-- **Yasal uyarı yuvası**: 14 px `text-2`, üstte 1 px çizgi; metin sahibinden `[YASAL METİN]` ⚑, kısıtlı üründe sepete ekle altında ve ödemede yaş kutusunun üstünde. Biz yazmayız; metin yoksa çizilmez.
-- **Yaş / yasal beyan kutusu** (var: `checkout/PaymentForm.tsx`; `AGE_VERIFICATION` + kısıtlı ürün): ödeme adımında "Siparişi onayla"dan önce doğum tarihi + 44 px onay satırı, zorunlu; hata `checkout.age_required`.
-- **Hediye paketi ve gravür** (adr/0052 ek seçenekleri; gravür bugün yazı eki olarak çalışıyor): seçim eki "İstemiyorum / Hediye paketi +X TL", yazı eki karakter sayacıyla ("12/50"), izinli karakter kuralı yazılı, "+35,00 TL" görünüm modelinden, cayma dışı uyarısı satın almadan önce. Mağaza tanımlamadıkça pasif.
+Bölümler mağazanın düzenindeki sırayla çizilir (adr/0049); tema sırayı değiştirmez, yalnız yan yana ürün bölümlerini sekmelere, SSS'nin hemen arkasındaki yardım bölümünü SSS'nin yanına alır.
 
-## Variants
-- Loom'dan sapmalar: vurgu marka mavisi; DM Mono yok (iki aile, yazı tipi bütçesi); değerler Caslon değil Hanken (Caslon 32 px altına inmez); ürün görsellerine Loom'un fotoğraf işlemi (`natural sat=-12 con=-4`) uygulanmaz, yalnız editoryal fotoğraflara; koyu mod Loom'un `indigo` renk yolu değil, sıcak koyu kâğıt (mavi vurguyla çakışmasın diye); semantik indirim kırmızısı yalnız fiyat ve rozette (Loom'un "sıcak vurgu yok" kuralı süs için).
+## Alt bilgi (sahip 2026-11-05: "bu kadar footer'ı beğenmedim")
 
-## Exports
-`tokens.css` tema paketinde. Sözleşme adlarına bağlantı (temanın `styles.css`'i):
-```css
-:root {
-  --background: var(--color-paper); --foreground: var(--color-text);
-  --card: var(--color-paper-2); --card-foreground: var(--color-text);
-  --popover: var(--color-field); --popover-foreground: var(--color-text);
-  --primary: var(--color-signal); --primary-foreground: var(--color-signal-ink);
-  --secondary: var(--color-paper-3); --secondary-foreground: var(--color-text-2);
-  --muted: var(--color-paper-2); --muted-foreground: var(--color-text-3);
-  --accent: var(--color-paper-2); --accent-foreground: var(--color-text);
-  --destructive: var(--color-error); --border: var(--color-rule); --input: var(--color-edge); --ring: var(--color-focus);
-  --sale: var(--color-discount); --sale-foreground: var(--color-discount-ink); --success: var(--color-ok);
-  --announcement: var(--color-signal); --announcement-foreground: var(--color-signal-ink);
-  --highlight: var(--color-signal); --highlight-foreground: var(--color-signal-ink);
-  --ink: var(--color-band); --ink-foreground: var(--color-band-text); --ink-muted: var(--color-band-text-2);
-  --radius: 0px; --radius-scale: 0; --button-radius: 0px;
-}
-```
-Mağazanın `--primary` ezmesi (adr/0053 §B) `--color-signal`'e akar; koyu mod ezmesi yok (S9).
+Koyu duvar ve dev ad yok: tam genişlik çelik kuyu (`paper-2`), 1024 px'ten iki sütunlu defter. Önce ince bir e-bülten satırı: başlık solda, alan ve düğme sağda; onay kutusu ve metni ziyaretçi alana girince ya da yazınca görünür (kutu yine zorunlu, `:has()` yoksa hep görünür). Sonra solda mağazanın adı (yazı markası boyunda), adres, telefon, e-posta, sosyal haplar; sağda mağazanın alt bilgi menüleri kısa sütunlarda. Çizginin altında işaretler: "Ödeme" ve "Kargo" satırları, her işaret sağlayıcının kendi logosu (vitrinin `public/marks/`, kaynakları README'de) iki modda da açık bir çipte, tek boy (20 px); havale ve kapıda ödeme simge + ad; ETBİS karekodu sağda kendi açık plakasında. Küçük yazıda yasal metinler ve çerez tercihleri tek akan satır, kimlik satırları, en altta ayrı satırda © yıl unvan. Telefonda menü grupları kapalı satırlar (52 px, 44 px bağlantılar).
+
+## Yasal metin
+
+`/yasal/{tür}` tek okuma şablonu: iz, başlık (`--text-section`), "Son güncelleme: {tarih}" (`<time>`), metin 68 karakter ölçüde (16→17 px, satır 1,75; h2 `--text-title` 800, üstünde altının iki katından fazla boşluk; listeler işaretli). İçindekiler metnin h2'lerinden (vitrin sunucusu kimlik verir): telefonda metnin üstünde kapalı kuyu ("İçindekiler · N bölüm"), 1024 px'ten metnin solunda yapışkan liste. Sonda mağazanın diğer yayımlanmış metinleri.
+
+## Açık işler (sahibin verisi)
+
+- Sekmeler dev düzende "Çok satanlar / Yeni gelenler / İndirimde" (b667b4de kaynakları); kategori rafları düzende gizli duruyor.
+- Kampanya afişi, hikâye, duyuru ve yakın plan satırı dev düzende mylarte.com'un kendi sözlerinden yazıldı (2026-11-05); sahip panelden düzeltir.
+- Müşteri fotoğrafı: onaylı yorumlarda fotoğraf yok; gelince bölüm kendiliğinden çıkar.
+- Logo dosyası gelene kadar ad, 800 ağırlıkta yazı markası.
