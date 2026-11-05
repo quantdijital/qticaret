@@ -28,6 +28,7 @@
     "messaging:samples": "medusa exec ./src/scripts/messaging-samples.ts",
     "search:rebuild": "medusa exec ./src/scripts/search-rebuild.ts",
     "search:status": "medusa exec ./src/scripts/search-status.ts",
+    "links:rewrite": "medusa exec ./src/scripts/content-links.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "pnpm test:unit",

@@ -10,6 +10,7 @@ import type MigrationModuleService from "../../../modules/migration/service"
 import { openSource } from "../../migration/open-source"
 import { reportSheets } from "../../migration/report"
 import { runDescriptionRefresh } from "../../migration/descriptions"
+import { linkCounts, migrationLinkSheet, settleMigratedLinks } from "../../migration/links"
 import { runMigration } from "../../migration/run"
 import type { JobType } from "./types"
 
@@ -159,11 +160,36 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
             audit: (action, changes) =>
               mode === "apply" ? record(action, changes) : Promise.resolve(),
           })
+      // adr/0042 Ek 2026-11-05: the records' old paths answer at once, the moved texts' links
+      // to the old site point here (a refresh rewrote descriptions from the source again)
+      // Not the run's to fail: what moved stays, and the content link job can be run later
+      const links =
+        mode === "apply"
+          ? await settleMigratedLinks(container, source.id).catch((error: unknown) => {
+              logger.warn({
+                event: "migration.links_failed",
+                jobId: job.id,
+                err: errorSummary(error),
+              })
+              return null
+            })
+          : null
       if (mode === "apply") {
-        await record("finished", { run_id: run.id, counts })
+        await record("finished", {
+          run_id: run.id,
+          counts,
+          ...(links ? { links: linkCounts(links) } : {}),
+        })
       }
       const file = await resultFile(`gecis-rapor-${randomUUID()}.xlsx`, XLSX_MIME)
-      for await (const chunk of writeXlsx(reportSheets(mode, counts, productRows, problems))) {
+      const sheets = reportSheets(
+        mode,
+        counts,
+        productRows,
+        problems,
+        links ? migrationLinkSheet(links) : null
+      )
+      for await (const chunk of writeXlsx(sheets)) {
         await file.write(chunk as Buffer)
       }
       await migration.updateMigrationRuns({ id: run.id, status: "done", finished_at: new Date() })
@@ -173,6 +199,7 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
           run_id: run.id,
           mode,
           counts,
+          ...(links ? { links: linkCounts(links) } : {}),
           ...(refresh.length > 0 ? { refresh } : wordpress ? { wordpress } : {}),
         },
       }

@@ -1,5 +1,7 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import type { ContentDoc } from "../../src/lib/content/doc"
+import { docHrefs } from "../../src/lib/content/links"
 import { CONTENT_MODULE } from "../../src/modules/content"
 import type ContentModuleService from "../../src/modules/content/service"
 import { MEDIA_MODULE } from "../../src/modules/media"
@@ -194,6 +196,22 @@ medusaIntegrationTestRunner({
       expect(tied.get("/hakkimizda")).toBe("page")
       expect(tied.has("/satis-sozlesmesi")).toBe(true)
       expect(tied.get("/satis-sozlesmesi")).toBeNull()
+
+      // adr/0042 Ek 2026-11-05: the records' old paths answer at once, and the moved post's
+      // links to the old site point at the pages here (the product and brand's paths are the
+      // same here; the category's moved under the URL style's prefix)
+      const { data: oldCategory } = await http.get<{ resolution: { type: string } }>(
+        `/admin/seo/resolve?path=${encodeURIComponent("/mutfak/tavalar")}`,
+        { headers: wp.headers() }
+      )
+      expect(oldCategory.resolution.type).toBe("redirect")
+      const postLinks = docHrefs(post?.body as unknown as ContentDoc)
+      expect(postLinks).toEqual(expect.arrayContaining(["/urun/dokum-tava", "/marka/demirci"]))
+      expect(postLinks).not.toContain("/mutfak/tavalar")
+      expect(postLinks.some((href) => href.startsWith("/kategori/"))).toBe(true)
+      expect(applied.job.result_summary).toMatchObject({
+        links: { changed: 1, unresolved: 0 },
+      })
 
       const again = await wp.run("apply")
       expect(again.counts).toMatchObject({

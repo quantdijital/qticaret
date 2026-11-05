@@ -83,11 +83,17 @@ medusaIntegrationTestRunner({
         }))
       )
 
+      // A moved record's old path answers as the run ends, before any apply (adr/0042 Ek
+      // 2026-11-05): no decision of the owner's
       expect(await byAddress("/urun/dokum-tava")).toMatchObject({
-        action: "reserve",
-        state: "not_found",
+        action: "covered",
+        state: "redirected",
+        outcome: "reserved",
       })
-      expect(await byAddress("/kategori/tavalar")).toMatchObject({ action: "reserve" })
+      expect(await byAddress("/kategori/tavalar")).toMatchObject({
+        action: "covered",
+        outcome: "reserved",
+      })
       // The brand's old path is its path here too: it answers already
       expect(await byAddress("/marka/demirci")).toMatchObject({ action: "covered", state: "live" })
       expect(await byAddress("/hakkimizda")).toMatchObject({ action: "undecided" })
@@ -95,7 +101,6 @@ medusaIntegrationTestRunner({
       const before = (await get<{ summary: Summary }>("/admin/migrations/urls/summary")).summary
       expect(before.ready).toBe(false)
       expect(before.top.unanswered.map((row) => row.address)).toEqual([
-        "/urun/dokum-tava",
         "/eski-kampanya",
         "/urun.php?id=12",
       ])
@@ -138,7 +143,8 @@ medusaIntegrationTestRunner({
       const job = await settled(queued.data.async_job.id)
       expect(job.status).toBe("succeeded")
       expect((job.result_summary as { counts: Record<string, number> }).counts).toMatchObject({
-        reserve: 3,
+        // The records' paths were kept as the run ended: only the home page is left to try
+        reserve: 1,
         redirect: 1,
         gone: 1,
         unsupported: 1,

@@ -115,6 +115,54 @@ async function writeRules(
   return outcomes
 }
 
+/**
+ * The moved records' old paths kept for them at once (adr/0042 Ek
+ * 2026-11-05), as an apply would: an address tied to the record it moved
+ * as is no decision of the owner's, and a link or a bookmark to it should
+ * never meet a 404 while the rest waits for one. Addresses that answer
+ * already are left; the owner's 301s and 410s wait for the apply. Each
+ * address kept says so; the storefront forgets its cached answers.
+ */
+export async function reserveRecordPaths(
+  container: Container
+): Promise<{ reserved: number; taken: number; refused: number }> {
+  const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
+  const counts = { reserved: 0, taken: 0, refused: 0 }
+  const now = new Date()
+  for (let skip = 0; ; skip += PAGE) {
+    const rows = (await migration.listMigrationUrls(
+      { entity_id: { $ne: null } },
+      {
+        select: ["id", "path", "query", "entity_type", "entity_id", "decision", "target"],
+        skip,
+        take: PAGE,
+        order: { id: "ASC" },
+      }
+    )) as Row[]
+    const outcomes: { id: string; outcome: string; applied_at: Date }[] = []
+    for (const row of rows) {
+      if (actionOf(row, await stateOf(container, row.path)) !== "reserve") {
+        continue
+      }
+      const outcome = await reserve(container, row)
+      counts.reserved += outcome === "reserved" ? 1 : 0
+      counts.taken += outcome === "migration.url_path_taken" ? 1 : 0
+      counts.refused += outcome === "migration.url_path_reserved" ? 1 : 0
+      outcomes.push({ id: row.id, outcome, applied_at: now })
+    }
+    if (outcomes.length > 0) {
+      await migration.updateMigrationUrls(outcomes)
+    }
+    if (rows.length < PAGE) {
+      break
+    }
+  }
+  if (counts.reserved > 0) {
+    await container.resolve<SeoRedirectsModuleService>(SEO_REDIRECTS_MODULE).invalidateResolutions()
+  }
+  return counts
+}
+
 export type ApplyCounts = Record<AddressAction | "taken" | "refused", number>
 
 /**
@@ -144,12 +192,21 @@ export async function applyUrls(
     const rows = (await migration.listMigrationUrls(
       {},
       {
-        select: ["id", "path", "query", "entity_type", "entity_id", "decision", "target"],
+        select: [
+          "id",
+          "path",
+          "query",
+          "entity_type",
+          "entity_id",
+          "decision",
+          "target",
+          "outcome",
+        ],
         skip,
         take: PAGE,
         order: { id: "ASC" },
       }
-    )) as Row[]
+    )) as (Row & { outcome: string | null })[]
     const outcomes = new Map<string, string>()
     const rules: Row[] = []
     for (const row of rows) {
@@ -163,7 +220,11 @@ export async function applyUrls(
       } else if (action === "redirect" || action === "gone") {
         rules.push(row)
       } else {
-        outcomes.set(row.id, action)
+        // A path the migration kept for its record already answers through that: still its 301
+        outcomes.set(
+          row.id,
+          action === "covered" && row.outcome === "reserved" ? "reserved" : action
+        )
       }
     }
     for (const [id, outcome] of await writeRules(container, rules)) {

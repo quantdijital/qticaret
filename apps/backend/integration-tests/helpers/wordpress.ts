@@ -111,6 +111,8 @@ export function wordpressFixture(http: HttpClient, getContainer: () => MedusaCon
     site: () => state.site,
     /** The pictures the old site served, by file name, in order. */
     pictures: state.pictures,
+    /** The owner's headers, for the suite's own admin calls. */
+    headers,
     start,
     run,
     settled,

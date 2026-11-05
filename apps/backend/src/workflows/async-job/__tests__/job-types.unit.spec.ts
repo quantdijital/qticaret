@@ -22,6 +22,7 @@ describe("job types", () => {
       "catalog.description_facts",
       "catalog.export",
       "catalog.import",
+      "content.link_rewrite",
       "customer.data_export",
       "migration.invites",
       "migration.run",
@@ -85,6 +86,7 @@ describe("job types", () => {
       "catalog.bulk_edit",
       "catalog.description_facts",
       "catalog.import",
+      "content.link_rewrite",
       "migration.run",
       "migration.sitemap",
       "migration.urls",
@@ -115,6 +117,28 @@ describe("job types", () => {
     expect(
       type?.input.safeParse({ product_ids: ["prod_1"], fields: [{ label: "x" }] }).success
     ).toBe(false)
+  })
+
+  it("rewrites the texts' links as a catalog write, owner and admin through the jobs route", () => {
+    const type = jobType("content.link_rewrite")
+    expect(type).toMatchObject({ singleton: true, containsPersonalData: false, resultTtlDays: 7 })
+    expect(type?.internal).toBeUndefined()
+    expect(type?.ownerOnly).toBeUndefined()
+    expect(queueLockKey("content.link_rewrite")).toBe(queueLockKey("migration.run"))
+    expect(type?.input.safeParse({}).data).toEqual({ dry_run: false, hosts: [] })
+    expect(type?.input.safeParse({ hosts: [" WWW.Eski-Site.com "] }).data).toEqual({
+      dry_run: false,
+      hosts: ["www.eski-site.com"],
+    })
+    for (const wrong of [
+      { hosts: ["https://eski.com"] },
+      { hosts: ["eski"] },
+      { hosts: Array(6).fill("eski.com") },
+      { dry_run: "yes" },
+      { scope: { entries: [] } },
+    ]) {
+      expect(type?.input.safeParse(wrong).success).toBe(false)
+    }
   })
 
   it.each([

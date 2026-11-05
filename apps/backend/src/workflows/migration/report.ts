@@ -155,12 +155,17 @@ function summaryRows(mode: "check" | "apply", counts: RunCounts): SheetCell[][] 
   ]
 }
 
-/** The report's sheets: the summary, the products (the catalog import's rows, by handle), the problems. */
+/**
+ * The report's sheets: the summary, the products (the catalog import's
+ * rows, by handle), the problems; after an apply, the texts' links
+ * (`links`, adr/0042 Ek 2026-11-05: its summary lines and its sheet).
+ */
 export function reportSheets(
   mode: "check" | "apply",
   counts: RunCounts,
   productRows: readonly SheetCell[][],
-  problems: readonly ReportProblem[]
+  problems: readonly ReportProblem[],
+  links: { summary: SheetCell[][]; sheet: SheetSpec } | null = null
 ): SheetSpec[] {
   return [
     {
@@ -171,8 +176,10 @@ export function reportSheets(
         ...seoRows(mode, counts),
         ...documentRows(mode, counts),
         ...factsRows(mode, counts),
+        ...(links?.summary ?? []),
       ],
     },
+    ...(links ? [links.sheet] : []),
     {
       name: "Ürünler",
       widths: REPORT_WIDTHS.slice(1),
