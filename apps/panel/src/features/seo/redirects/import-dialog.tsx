@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -47,7 +48,7 @@ function Report({ report }: { report: ImportReport }) {
         <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
         {t("seo.redirects.import.problems", { count: report.problems.length })}
       </p>
-      <ul className="flex max-h-60 flex-col divide-y overflow-y-auto rounded-md border text-[13px]">
+      <ul className="flex flex-col divide-y rounded-md border text-[13px]">
         {report.problems.slice(0, SHOWN_PROBLEMS).map((problem) => (
           <li key={`${String(problem.line)}-${problem.code}`} className="flex gap-3 px-3 py-2">
             <span className="w-16 shrink-0 text-muted-foreground tabular-nums">
@@ -129,52 +130,56 @@ export function ImportDialog({
         }
       }}
     >
-      <DialogContent>
+      <DialogContent pane>
         <DialogHeader>
           <DialogTitle>{t("seo.redirects.import.title")}</DialogTitle>
           <DialogDescription>{t("seo.redirects.import.description")}</DialogDescription>
         </DialogHeader>
-        <input
-          ref={input}
-          type="file"
-          accept=".csv,text/csv"
-          className="sr-only"
-          onChange={(event) => {
-            const chosen = event.target.files?.[0]
-            event.target.value = ""
-            if (chosen) {
-              void check(chosen)
-            }
-          }}
-        />
-        <button
-          type="button"
-          onClick={() => input.current?.click()}
-          className="flex flex-col items-center gap-2 rounded-lg border border-dashed px-4 py-6 text-center transition-colors hover:bg-muted/50"
-        >
-          <FileUp className="size-6 text-muted-foreground" aria-hidden="true" />
-          <span className="text-sm font-medium">
-            {file ? file.name : t("seo.redirects.import.choose")}
-          </span>
-          <span className="text-xs text-muted-foreground">{t("seo.redirects.import.columns")}</span>
-        </button>
-        <Button
-          variant="link"
-          size="sm"
-          className="h-auto self-start p-0 text-xs"
-          onClick={() => {
-            downloadCsv("yonlendirme-sablonu.csv", TEMPLATE)
-          }}
-        >
-          {t("seo.redirects.import.template")}
-        </Button>
-        {run.isPending && !report ? (
-          <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
-            <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            {t("seo.redirects.import.checking")}
-          </p>
-        ) : null}
-        {report ? <Report report={report} /> : null}
+        <DialogBody>
+          <input
+            ref={input}
+            type="file"
+            accept=".csv,text/csv"
+            className="sr-only"
+            onChange={(event) => {
+              const chosen = event.target.files?.[0]
+              event.target.value = ""
+              if (chosen) {
+                void check(chosen)
+              }
+            }}
+          />
+          <button
+            type="button"
+            onClick={() => input.current?.click()}
+            className="flex flex-col items-center gap-2 rounded-lg border border-dashed px-4 py-6 text-center transition-colors hover:bg-muted/50"
+          >
+            <FileUp className="size-6 text-muted-foreground" aria-hidden="true" />
+            <span className="text-sm font-medium">
+              {file ? file.name : t("seo.redirects.import.choose")}
+            </span>
+            <span className="text-xs text-muted-foreground">
+              {t("seo.redirects.import.columns")}
+            </span>
+          </button>
+          <Button
+            variant="link"
+            size="sm"
+            className="h-auto self-start p-0 text-xs"
+            onClick={() => {
+              downloadCsv("yonlendirme-sablonu.csv", TEMPLATE)
+            }}
+          >
+            {t("seo.redirects.import.template")}
+          </Button>
+          {run.isPending && !report ? (
+            <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
+              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              {t("seo.redirects.import.checking")}
+            </p>
+          ) : null}
+          {report ? <Report report={report} /> : null}
+        </DialogBody>
         <DialogFooter>
           <Button
             variant="outline"

@@ -125,8 +125,13 @@ describe("RefundDialog", () => {
         />
       </QueryClientProvider>
     )
-    // The box's one column never grows to the name's width: the name truncates instead
-    expect(screen.getByRole("dialog")).toHaveClass("grid-cols-[minmax(0,1fr)]", "overflow-y-auto")
+    // The box's one column never grows to the name's width: the name truncates instead; its
+    // body scrolls between the header and the footer (a pane, 2026-11-05)
+    const box = screen.getByRole("dialog")
+    expect(box).toHaveClass("grid-cols-[minmax(0,1fr)]", "overflow-hidden")
+    expect(box.querySelector("[data-slot=dialog-body]")).toHaveClass(
+      "group-data-[pane]/pane:overflow-y-auto"
+    )
     const name = screen.getByText(long)
     expect(name).toHaveClass("truncate")
     expect(name.parentElement).toHaveClass("min-w-0", "flex-1")

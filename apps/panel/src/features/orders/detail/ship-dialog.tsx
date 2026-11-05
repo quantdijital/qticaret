@@ -161,11 +161,11 @@ export function ShipDialog({
       </li>
     )
   }
-  const list = "relative flex max-h-72 flex-col divide-y overflow-y-auto rounded-md border"
+  const list = "relative flex flex-col divide-y rounded-md border"
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent pane>
         <DialogHeader>
           <DialogTitle>{t("orders.ship.title", { number: order.display_id })}</DialogTitle>
           <DialogDescription>{t("orders.ship.description")}</DialogDescription>

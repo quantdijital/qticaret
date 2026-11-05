@@ -8107,5 +8107,10 @@
       },
       "etbisQrLink": "Mağazanın ETBİS karekodu"
     }
+  },
+  "formDialog": {
+    "discardTitle": "Kaydedilmemiş değişiklikler atılsın mı?",
+    "discardText": "Bu penceredeki değişiklikler kaydedilmedi; devam ederseniz kaybolur.",
+    "discard": "Değişiklikleri at"
   }
 }

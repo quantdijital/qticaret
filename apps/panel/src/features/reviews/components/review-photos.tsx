@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -54,22 +55,24 @@ export function ReviewPhotos({ photos, author }: { photos: ReviewPhoto[]; author
           }
         }}
       >
-        <DialogContent size="lg">
+        <DialogContent size="lg" pane className="sm:h-(--dialog-max-height)">
           <DialogHeader>
             <DialogTitle>{t(`${R}.title`, { author })}</DialogTitle>
             <DialogDescription>
               {t(`${R}.position`, { number: (open ?? 0) + 1, count: photos.length })}
             </DialogDescription>
           </DialogHeader>
-          {shown ? (
-            <img
-              src={shown.url}
-              alt={t(`${R}.alt`, { author, number: (open ?? 0) + 1 })}
-              width={shown.width}
-              height={shown.height}
-              className="mx-auto max-h-[70vh] w-auto max-w-full rounded-md object-contain"
-            />
-          ) : null}
+          <DialogBody className="items-center justify-center">
+            {shown ? (
+              <img
+                src={shown.url}
+                alt={t(`${R}.alt`, { author, number: (open ?? 0) + 1 })}
+                width={shown.width}
+                height={shown.height}
+                className="max-h-full w-auto max-w-full min-h-0 rounded-md object-contain"
+              />
+            ) : null}
+          </DialogBody>
         </DialogContent>
       </Dialog>
     </>

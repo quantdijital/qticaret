@@ -40,7 +40,7 @@ export function LegalPreviewDialog({
         }
       }}
     >
-      <DialogContent size="xl">
+      <DialogContent size="xl" pane className="sm:h-(--dialog-max-height)">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description ?? t("settings.legal.preview.hint")}</DialogDescription>
@@ -49,7 +49,8 @@ export function LegalPreviewDialog({
           title={t("settings.legal.preview.frame", { title })}
           sandbox=""
           srcDoc={`<!doctype html><meta charset="utf-8"><style>${FRAME_STYLE}</style>${html}`}
-          className="h-[65vh] w-full rounded-md border"
+          // The box's height minus its title; a phone's sheet gives it most of the screen
+          className="h-[65dvh] w-full shrink-0 rounded-md border sm:h-auto sm:min-h-0 sm:flex-1"
         />
       </DialogContent>
     </Dialog>

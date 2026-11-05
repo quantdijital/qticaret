@@ -7,8 +7,9 @@ export const SHEET_BELOW = 640
  * The open dialog measured as drawn (the owner, 2026-11-03: the refund
  * dialog spilled out of its box). Reported: a box off the screen, anything
  * wider than the box (a row pushed out by a long name), a footer that
- * cannot be reached, footer buttons of different heights, and on a phone
- * a box that is not a full-width sheet along the screen's bottom (or top) edge.
+ * cannot be reached, footer buttons of different heights, a box taller than
+ * 85% of the screen from `sm` up, and on a phone a box that is not a
+ * full-width sheet along the screen's bottom (or top) edge.
  */
 export async function dialogIssues(page: Page): Promise<string[]> {
   return page.evaluate((sheetBelow) => {
@@ -65,6 +66,11 @@ export async function dialogIssues(page: Page): Promise<string[]> {
       }
     }
     const sheet = box.getAttribute("data-slot") === "sheet-content"
+    // From `sm` up a dialog is at most `--dialog-max-height` (85% of the screen) tall and
+    // scrolls inside (the owner, 2026-11-05: "o modal niye bu kadar yüksek?")
+    if (!sheet && width >= sheetBelow && rect.height > height * 0.85 + 1) {
+      issues.push(`box ${String(Math.round(rect.height))}px tall, past 85% of the screen`)
+    }
     // A sheet along the bottom edge (the command menu hangs from the top, clear of the keyboard)
     const edge = rect.bottom >= height - 1 || rect.top <= 1
     if (!sheet && width < sheetBelow && (rect.left > 1 || rect.right < width - 1 || !edge)) {

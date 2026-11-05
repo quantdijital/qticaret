@@ -94,6 +94,9 @@
   --dialog-width-md: 32rem;
   --dialog-width-lg: 42rem;
   --dialog-width-xl: 48rem;
+  /* How tall a dialog grows from `sm` up before it scrolls inside (the owner, 2026-11-05: "o modal
+     niye bu kadar yüksek?"); a picker keeps this height, its header and footer fixed */
+  --dialog-max-height: 85dvh;
   --overlay: oklch(0.145 0.006 262 / 40%);
   --shadow-overlay: 0 12px 32px -8px oklch(0.145 0.006 262 / 22%);
 }

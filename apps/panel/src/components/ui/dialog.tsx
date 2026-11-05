@@ -41,15 +41,17 @@ function DialogOverlay({
 /**
  * The panel's dialog box (docs/18 §4.3). Its one column never grows past
  * the box (`minmax(0,1fr)`): a long name that truncates stays inside
- * instead of pushing every row out of the dialog. A box taller than the
- * screen scrolls inside, its footer pinned at the bottom. On a phone it is
+ * instead of pushing every row out of the dialog. From `sm` up it is at
+ * most `--dialog-max-height` (85% of the screen) tall and scrolls inside,
+ * its footer pinned at the bottom (the owner, 2026-11-05: "o modal niye
+ * bu kadar yüksek?"). On a phone it is
  * a sheet from the bottom edge, as tall as its content and at most the
  * whole screen, so its actions stay in reach. Header, body and footer sit
  * 24 px apart inside 24 px (phone) or 32 px of padding (the owner,
  * 2026-11-03: "biraz yüksekliğini artırarak daha ferah").
  */
 export const DIALOG_CONTENT_CLASS =
-  "fixed inset-x-0 bottom-0 z-50 grid max-h-dvh w-full grid-cols-[minmax(0,1fr)] gap-6 overflow-y-auto overscroll-contain rounded-t-lg border-t bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:inset-x-auto sm:top-[50%] sm:bottom-auto sm:left-[50%] sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100%-2rem)] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border sm:p-8"
+  "fixed inset-x-0 bottom-0 z-50 grid max-h-dvh w-full grid-cols-[minmax(0,1fr)] gap-6 overflow-y-auto overscroll-contain rounded-t-lg border-t bg-background p-6 shadow-lg duration-200 outline-none data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 sm:inset-x-auto sm:top-[50%] sm:bottom-auto sm:left-[50%] sm:max-h-(--dialog-max-height) sm:w-[calc(100%-2rem)] sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:border sm:p-8"
 
 /**
  * How wide a dialog is from `sm` up (tokens `--dialog-width-*`): `sm` a
@@ -65,6 +67,18 @@ export const DIALOG_SIZE_CLASS = {
 
 export type DialogSize = keyof typeof DIALOG_SIZE_CLASS
 
+/**
+ * `pane`: the header and the footer stay where they are and only the body
+ * scrolls (a picker's grid, a long list), the box at its full height so a
+ * tab or a page of results does not make it jump.
+ */
+export const DIALOG_PANE_CLASS =
+  "group/pane flex flex-col overflow-hidden sm:h-(--dialog-max-height)"
+
+/** The body of a `pane` dialog: what scrolls, running to the box's edges so its scrollbar does. */
+export const DIALOG_PANE_BODY_CLASS =
+  "group-data-[pane]/pane:-mx-6 group-data-[pane]/pane:min-h-0 group-data-[pane]/pane:flex-1 group-data-[pane]/pane:overflow-y-auto group-data-[pane]/pane:overscroll-contain group-data-[pane]/pane:px-6 sm:group-data-[pane]/pane:-mx-8 sm:group-data-[pane]/pane:px-8"
+
 /** Pinned to the box's bottom edge over what scrolls under it; the box's own padding kept around it. */
 export const DIALOG_FOOTER_CLASS =
   "sticky -bottom-6 z-10 -mx-6 -mt-4 -mb-6 flex flex-col-reverse gap-2 bg-background px-6 pt-4 pb-6 sm:-bottom-8 sm:-mx-8 sm:-mb-8 sm:flex-row sm:justify-end sm:px-8 sm:pb-8"
@@ -77,10 +91,13 @@ function DialogContent({
   className,
   children,
   size = "md",
+  pane = false,
   showCloseButton = true,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   size?: DialogSize
+  /** Header and footer fixed, the body scrolling between them (`DIALOG_PANE_CLASS`). */
+  pane?: boolean
   showCloseButton?: boolean
 }) {
   const { t } = useTranslation()
@@ -90,7 +107,13 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         data-size={size}
-        className={cn(DIALOG_CONTENT_CLASS, DIALOG_SIZE_CLASS[size], className)}
+        data-pane={pane ? "" : undefined}
+        className={cn(
+          DIALOG_CONTENT_CLASS,
+          DIALOG_SIZE_CLASS[size],
+          pane && DIALOG_PANE_CLASS,
+          className
+        )}
         {...props}
       >
         {children}
@@ -119,7 +142,8 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
 /**
  * What sits between the header and the footer, its parts 20 px apart.
  * `list`: a dialog over a list of lines, held at a calm height from `sm`
- * up so a one-line list does not leave a strip.
+ * up so a one-line list does not leave a strip. In a `pane` dialog it is
+ * the part that scrolls.
  */
 function DialogBody({
   className,
@@ -129,7 +153,12 @@ function DialogBody({
   return (
     <div
       data-slot="dialog-body"
-      className={cn("flex min-w-0 flex-col gap-5", list && "sm:min-h-44", className)}
+      className={cn(
+        "flex min-w-0 flex-col gap-5",
+        list && "sm:min-h-44",
+        DIALOG_PANE_BODY_CLASS,
+        className
+      )}
       {...props}
     />
   )
@@ -171,7 +200,12 @@ function DialogFooter({
 }) {
   const { t } = useTranslation()
   return (
-    <div data-slot="dialog-footer" className={cn(DIALOG_FOOTER_CLASS, className)} {...props}>
+    <div
+      data-slot="dialog-footer"
+      // A pane's footer under what scrolls: a line between them
+      className={cn(DIALOG_FOOTER_CLASS, "group-data-[pane]/pane:border-t", className)}
+      {...props}
+    >
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>

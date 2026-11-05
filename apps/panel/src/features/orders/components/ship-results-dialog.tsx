@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -84,7 +85,7 @@ export function ShipResultsDialog({
         }
       }}
     >
-      <DialogContent>
+      <DialogContent pane>
         <DialogHeader>
           <DialogTitle>{t(`${S}.resultsTitle`)}</DialogTitle>
           <DialogDescription>
@@ -94,28 +95,35 @@ export function ShipResultsDialog({
             })}
           </DialogDescription>
         </DialogHeader>
-        <ul className="flex max-h-80 flex-col divide-y overflow-y-auto rounded-md border">
-          {(results ?? []).map((result) => (
-            <li key={result.order_id} className="flex items-center gap-3 px-3 py-2.5">
-              {result.ok ? (
-                <CircleCheck className="size-4 shrink-0 text-success-text" aria-hidden="true" />
-              ) : (
-                <CircleAlert className="size-4 shrink-0 text-destructive-text" aria-hidden="true" />
-              )}
-              <span className="flex min-w-0 flex-1 flex-col">
-                <span className="text-sm font-medium tabular-nums">
-                  #{orders.get(result.order_id)?.display_id ?? "—"}
-                </span>
-                {result.ok ? null : (
-                  <span className="text-xs text-muted-foreground">
-                    {result.message ?? t(`${S}.failed`)}
-                  </span>
+        <DialogBody>
+          <ul className="flex flex-col divide-y rounded-md border">
+            {(results ?? []).map((result) => (
+              <li key={result.order_id} className="flex items-center gap-3 px-3 py-2.5">
+                {result.ok ? (
+                  <CircleCheck className="size-4 shrink-0 text-success-text" aria-hidden="true" />
+                ) : (
+                  <CircleAlert
+                    className="size-4 shrink-0 text-destructive-text"
+                    aria-hidden="true"
+                  />
                 )}
-              </span>
-              {result.fulfillment_id ? <LabelButton fulfillmentId={result.fulfillment_id} /> : null}
-            </li>
-          ))}
-        </ul>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="text-sm font-medium tabular-nums">
+                    #{orders.get(result.order_id)?.display_id ?? "—"}
+                  </span>
+                  {result.ok ? null : (
+                    <span className="text-xs text-muted-foreground">
+                      {result.message ?? t(`${S}.failed`)}
+                    </span>
+                  )}
+                </span>
+                {result.fulfillment_id ? (
+                  <LabelButton fulfillmentId={result.fulfillment_id} />
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </DialogBody>
         <DialogFooter>
           {labelled.length > 1 ? <PrintAllButton fulfillmentIds={labelled} /> : null}
           <Button onClick={onClose}>{t("common.close")}</Button>

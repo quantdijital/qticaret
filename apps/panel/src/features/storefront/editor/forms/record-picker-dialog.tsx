@@ -7,6 +7,7 @@ import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
+  DialogBody,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -59,7 +60,7 @@ export function RecordPickerDialog({
         }
       }}
     >
-      <DialogContent>
+      <DialogContent pane>
         <DialogHeader>
           <DialogTitle>{t(`${R}.pick.${kind}`)}</DialogTitle>
           <DialogDescription>{t(multiple ? `${R}.pickMany` : `${R}.pickOne`)}</DialogDescription>
@@ -68,62 +69,64 @@ export function RecordPickerDialog({
           value={q}
           onChange={setQ}
           placeholder={t("storefront.menus.picker.search")}
-          className="sm:max-w-none"
+          className="shrink-0 sm:max-w-none"
         />
-        {options.isError ? (
-          <ErrorState text={errorText(t, options.error)} onRetry={() => void options.refetch()} />
-        ) : options.isPending ? (
-          <div aria-label={t("common.loading")} className="flex justify-center py-8">
-            <Loader2 className="size-4 animate-spin text-muted-foreground" aria-hidden="true" />
-          </div>
-        ) : rows.length === 0 ? (
-          <p className="px-1 py-6 text-center text-sm text-muted-foreground">
-            {t(q ? "storefront.menus.picker.noMatch" : "storefront.menus.picker.none")}
-          </p>
-        ) : (
-          <ul
-            aria-label={t(`storefront.menus.kinds.${kind}`)}
-            className="flex max-h-80 flex-col overflow-y-auto rounded-md border"
-          >
-            {rows.map((option) => {
-              const ticked = chosen.includes(option.id)
-              return (
-                <li key={option.id} className="border-t first:border-t-0">
-                  <button
-                    type="button"
-                    aria-pressed={multiple ? ticked : undefined}
-                    disabled={multiple && full && !ticked}
-                    className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-muted/60 disabled:opacity-50"
-                    onClick={() => {
-                      onToggle(option)
-                      if (!multiple) {
-                        onClose()
-                      }
-                    }}
-                  >
-                    <Check
-                      aria-hidden="true"
-                      className={cn("size-4 shrink-0", ticked ? "opacity-100" : "opacity-0")}
-                    />
-                    <span className="flex min-w-0 flex-1 flex-col">
-                      <span className="truncate">{option.name}</span>
-                      {option.detail ? (
-                        <span className="truncate text-xs text-muted-foreground">
-                          {option.detail}
-                        </span>
-                      ) : null}
-                    </span>
-                    {option.live ? null : (
-                      <StatusBadge tone="warning">
-                        {t("storefront.menus.picker.notLive")}
-                      </StatusBadge>
-                    )}
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-        )}
+        <DialogBody list>
+          {options.isError ? (
+            <ErrorState text={errorText(t, options.error)} onRetry={() => void options.refetch()} />
+          ) : options.isPending ? (
+            <div aria-label={t("common.loading")} className="flex justify-center py-8">
+              <Loader2 className="size-4 animate-spin text-muted-foreground" aria-hidden="true" />
+            </div>
+          ) : rows.length === 0 ? (
+            <p className="px-1 py-6 text-center text-sm text-muted-foreground">
+              {t(q ? "storefront.menus.picker.noMatch" : "storefront.menus.picker.none")}
+            </p>
+          ) : (
+            <ul
+              aria-label={t(`storefront.menus.kinds.${kind}`)}
+              className="flex flex-col rounded-md border"
+            >
+              {rows.map((option) => {
+                const ticked = chosen.includes(option.id)
+                return (
+                  <li key={option.id} className="border-t first:border-t-0">
+                    <button
+                      type="button"
+                      aria-pressed={multiple ? ticked : undefined}
+                      disabled={multiple && full && !ticked}
+                      className="flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors hover:bg-muted/60 disabled:opacity-50"
+                      onClick={() => {
+                        onToggle(option)
+                        if (!multiple) {
+                          onClose()
+                        }
+                      }}
+                    >
+                      <Check
+                        aria-hidden="true"
+                        className={cn("size-4 shrink-0", ticked ? "opacity-100" : "opacity-0")}
+                      />
+                      <span className="flex min-w-0 flex-1 flex-col">
+                        <span className="truncate">{option.name}</span>
+                        {option.detail ? (
+                          <span className="truncate text-xs text-muted-foreground">
+                            {option.detail}
+                          </span>
+                        ) : null}
+                      </span>
+                      {option.live ? null : (
+                        <StatusBadge tone="warning">
+                          {t("storefront.menus.picker.notLive")}
+                        </StatusBadge>
+                      )}
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </DialogBody>
         {multiple ? (
           <DialogFooter>
             <Button type="button" onClick={onClose}>

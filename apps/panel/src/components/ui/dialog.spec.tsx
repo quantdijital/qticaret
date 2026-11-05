@@ -48,8 +48,8 @@ function renderDialog(size?: DialogSize) {
 function expectHeld(box: HTMLElement) {
   // One column that never grows past the box: a long truncated name stays inside
   expect(box).toHaveClass("grid", "grid-cols-[minmax(0,1fr)]")
-  // Taller than the screen: it scrolls inside instead of running off it
-  expect(box).toHaveClass("overflow-y-auto", "max-h-dvh", "sm:max-h-[calc(100dvh-2rem)]")
+  // Taller than 85% of the screen: it scrolls inside instead of running off it
+  expect(box).toHaveClass("overflow-y-auto", "max-h-dvh", "sm:max-h-(--dialog-max-height)")
   // A phone: a sheet along the bottom edge, its actions in reach
   expect(box).toHaveClass("inset-x-0", "bottom-0", "sm:top-[50%]", "sm:bottom-auto")
 }
@@ -84,6 +84,35 @@ describe("DialogContent", () => {
     // `-bottom-6`: the browser sticks it inside the box's padding, which it covers
     expect(footer).toHaveClass("sticky", "-bottom-6", "-mb-6", "pb-6", "bg-background")
     expect(footer).toHaveClass("sm:-bottom-8", "sm:-mb-8", "sm:pb-8")
+  })
+})
+
+describe("a pane dialog", () => {
+  it("keeps its header and footer where they are and scrolls only its body (the owner, 2026-11-05)", () => {
+    render(
+      <Dialog open>
+        <DialogContent size="xl" pane>
+          <DialogTitle>Görsel seçin</DialogTitle>
+          <DialogDescription>Kütüphane</DialogDescription>
+          <DialogBody>
+            <p>Izgara</p>
+          </DialogBody>
+          <DialogFooter>
+            <button type="button">Seç</button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    )
+    const box = screen.getByRole("dialog")
+    expect(box).toHaveAttribute("data-pane")
+    // One height on the size scale, whatever the tab or the page shows
+    expect(box).toHaveClass("flex", "flex-col", "overflow-hidden", "sm:h-(--dialog-max-height)")
+    expect(box).not.toHaveClass("grid", "overflow-y-auto")
+    expect(box).toHaveClass("sm:max-w-(--dialog-width-xl)")
+    expect(box.querySelector("[data-slot=dialog-body]")).toHaveClass(
+      "group-data-[pane]/pane:flex-1",
+      "group-data-[pane]/pane:overflow-y-auto"
+    )
   })
 })
 

@@ -8107,5 +8107,10 @@
       },
       "etbisQrLink": "The shop's ETBİS QR code"
     }
+  },
+  "formDialog": {
+    "discardTitle": "Discard unsaved changes?",
+    "discardText": "The changes in this window are not saved; they are lost if you go on.",
+    "discard": "Discard changes"
   }
 }
