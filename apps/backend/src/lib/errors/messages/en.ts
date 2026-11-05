@@ -454,6 +454,11 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This Search Console property is not one the connected Google account can read.",
   "google.not_configured": "The Google connection is not set up for this shop yet.",
   "google.not_connected": "Connect the Google account first.",
+  "google.reviews_scope":
+    "The Google account was connected without Business Profile; connect it again for Google reviews.",
+  "google.location_invalid":
+    "This business location is not one the connected Google account manages; refresh the list.",
+  "google.review_not_found": "This Google review is gone; it may have been removed on Google.",
   "reports.range_invalid":
     "The date range is not valid: it cannot start after it ends, lie in the future or run over 366 days.",
   "catalog_import.cost_invalid":

@@ -8,7 +8,9 @@ import { backendUrl } from "../../lib/env"
 import { ValidationError } from "../../lib/errors"
 import { googleApi } from "../../lib/google/client"
 import {
+  BUSINESS_PROFILE_SCOPE,
   GOOGLE_CALLBACK_PATH,
+  REVIEWS_STATE_PREFIX,
   authorizationUrl,
   googleClientOf,
   pkcePair,
@@ -35,23 +37,35 @@ const requireClient = () => {
  * (F10 M13, adr/0038 §5): a new `state` and PKCE verifier, kept on the
  * server for ten minutes. Nothing to undo: an unused state expires.
  */
+interface StartInput {
+  user_id: string
+  /** `reviews`: Business Profile's scope asked on top, back to the panel's Google reviews (adr/0058). */
+  purpose?: "reviews"
+}
+
 const startGoogleConnectStep = createStep(
   "google-start-connect",
-  async (input: { user_id: string }, { container }) => {
+  async (input: StartInput, { container }) => {
     const client = requireClient()
+    const reviews = input.purpose === "reviews"
     const { verifier, challenge } = pkcePair()
     const state = await container
       .resolve<GoogleMerchantModuleService>(GOOGLE_MERCHANT_MODULE)
-      .startState(input.user_id, verifier)
+      .startState(input.user_id, verifier, reviews ? REVIEWS_STATE_PREFIX : "")
     return new StepResponse({
-      url: authorizationUrl(client, { state, challenge, redirectUri: redirectUri() }),
+      url: authorizationUrl(client, {
+        state,
+        challenge,
+        redirectUri: redirectUri(),
+        ...(reviews ? { extraScopes: [BUSINESS_PROFILE_SCOPE] } : {}),
+      }),
     })
   }
 )
 
 export const startGoogleConnectWorkflow = createWorkflow(
   "google-start-connect",
-  (input: { user_id: string }) => new WorkflowResponse(startGoogleConnectStep(input))
+  (input: StartInput) => new WorkflowResponse(startGoogleConnectStep(input))
 )
 
 interface FinishInput {

@@ -20,6 +20,7 @@ import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-creden
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
 import { catalogItems, feedShopOf } from "../marketing/feed-catalog"
 import { brandOf } from "../messaging/brand"
+import { forgetGoogleReviewsStep } from "./reviews"
 
 /** Calls to Merchant API in one run at most; the rest go in the next. */
 const MAX_CALLS = 1000
@@ -197,6 +198,7 @@ export const syncMerchantProductsWorkflow = createWorkflow(
  * Disconnects the shop's Google account: its access ends at Google, the
  * refresh token and what we sent are forgotten here. The products stay in
  * Merchant Center until Google lets them lapse or the shop removes them.
+ * The Google reviews kept go too (adr/0058), in the workflow's last step.
  * Undone by putting the account back; a revoked token stays revoked.
  */
 const disconnectGoogleStep = createStep(
@@ -224,5 +226,9 @@ const disconnectGoogleStep = createStep(
 
 export const disconnectGoogleWorkflow = createWorkflow(
   "google-disconnect",
-  (input: { user_id: string }) => new WorkflowResponse(disconnectGoogleStep(input))
+  (input: { user_id: string }) => {
+    const result = disconnectGoogleStep(input)
+    forgetGoogleReviewsStep({})
+    return new WorkflowResponse(result)
+  }
 )

@@ -29,6 +29,24 @@ export const GOOGLE_SCOPES = [
 /** Search Console's scope: a connection made before F10.11 lacks it and is made again. */
 export const SEARCH_CONSOLE_SCOPE = "https://www.googleapis.com/auth/webmasters"
 
+/**
+ * Business Profile's scope, for the shop's Google reviews (adr/0058): asked
+ * only when the shop connects its reviews, on top of what it allowed
+ * before (incremental authorization), not of every shop that connects.
+ */
+export const BUSINESS_PROFILE_SCOPE = "https://www.googleapis.com/auth/business.manage"
+
+/** A `state` started from the panel's Google reviews: the callback goes back there. */
+export const REVIEWS_STATE_PREFIX = "r."
+
+/** The panel page Google's callback returns to, by the state's prefix (adr/0022 §4). */
+export const panelPathOfState = (state: string | undefined): string =>
+  state?.startsWith(REVIEWS_STATE_PREFIX) ? "/reviews/google" : "/settings/marketing"
+
+/** Whether the scopes Google granted (space-separated, as kept) include one. */
+export const hasScope = (granted: unknown, scope: string): boolean =>
+  typeof granted === "string" && granted.split(" ").includes(scope)
+
 export interface GoogleClient {
   clientId: string
   clientSecret: string
@@ -51,6 +69,9 @@ export function googleHosts(env: Env = parseEnv()) {
     webmasters: fake ?? "https://www.googleapis.com",
     searchConsole: fake ?? "https://searchconsole.googleapis.com",
     crux: fake ?? "https://chromeuxreport.googleapis.com",
+    accountManagement: fake ?? "https://mybusinessaccountmanagement.googleapis.com",
+    businessInformation: fake ?? "https://mybusinessbusinessinformation.googleapis.com",
+    myBusiness: fake ?? "https://mybusiness.googleapis.com",
   }
 }
 
@@ -63,18 +84,20 @@ export function pkcePair(): { verifier: string; challenge: string } {
 /**
  * The address the shop is sent to, to let the platform's client reach its
  * Merchant Center: offline access and the consent screen every time, so
- * Google hands over a refresh token again.
+ * Google hands over a refresh token again. `extraScopes` are asked on top
+ * (Business Profile's); with `include_granted_scopes` the new token keeps
+ * what the shop allowed before.
  */
 export function authorizationUrl(
   client: GoogleClient,
-  input: { state: string; challenge: string; redirectUri: string },
+  input: { state: string; challenge: string; redirectUri: string; extraScopes?: readonly string[] },
   accountsHost: string = googleHosts().accounts
 ): string {
   const query = new URLSearchParams({
     client_id: client.clientId,
     redirect_uri: input.redirectUri,
     response_type: "code",
-    scope: GOOGLE_SCOPES.join(" "),
+    scope: [...GOOGLE_SCOPES, ...(input.extraScopes ?? [])].join(" "),
     access_type: "offline",
     prompt: "consent",
     include_granted_scopes: "true",

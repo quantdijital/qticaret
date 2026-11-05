@@ -245,6 +245,8 @@ module.exports = defineConfig({
       resolve: "./src/modules/google-merchant",
       options: { encryptionKey: env.PII_ENCRYPTION_KEY },
     },
+    // adr/0058: the shop's Google reviews from its Business Profile, for the storefront
+    { resolve: "./src/modules/google-reviews" },
     // F10.8 (adr/0038 §3): product feeds, their token hashed and encrypted, files private
     {
       resolve: "./src/modules/marketing-feeds",

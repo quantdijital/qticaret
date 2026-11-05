@@ -87,6 +87,7 @@ const OWNER_ONLY: readonly Rule[] = [
   // Connecting the company; checking it stays the admin's, as with provider accounts
   { methods: WRITES, path: "/admin/einvoice/parasut" },
   { methods: ["POST"], path: "/admin/google/connect" },
+  { methods: ["POST"], path: "/admin/google/reviews/connect" },
   { methods: ["DELETE"], path: "/admin/google" },
   // Where shoppers' transfers go
   { methods: WRITES, path: "/admin/platform-settings/bank_transfer" },
@@ -174,6 +175,8 @@ const OPERATIONS_WRITES: readonly Rule[] = [
   { methods: ["POST"], path: "/admin/product-questions/moderate" },
   { methods: ["POST"], path: "/admin/product-answers/moderate" },
   { methods: ["POST"], path: "/admin/product-questions/:id/answer" },
+  // A Google review taken off the storefront or put back (adr/0058)
+  { methods: ["POST"], path: "/admin/google/reviews/items/:id" },
   // Contact form messages marked answered (adr/0047); deleting one is the admin's
   { methods: ["POST"], path: "/admin/contact-messages/:id" },
   // A payment link for a customer in the DMs, without a discount (the workflow refuses

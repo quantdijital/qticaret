@@ -1,21 +1,23 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { errorSummary, logger } from "../../../lib/logging"
 import { isValidationError } from "../../../lib/errors"
+import { REVIEWS_STATE_PREFIX, panelPathOfState } from "../../../lib/google/oauth"
 import {
   dropGoogleStateWorkflow,
   finishGoogleConnectWorkflow,
 } from "../../../workflows/google/connect"
+import { adoptOnlyGoogleLocation } from "../../../workflows/google/reviews-sync"
 import type { GoogleCallbackQueryType } from "../../admin/google/validators"
-
-/** The panel's page the staff member returns to, on the same host (adr/0022 §4). */
-const BACK = "/settings/marketing"
 
 /**
  * GET /google/callback (F10 M13): where Google sends the staff member back
  * from its consent screen. The `state` names the connection under way
  * (used once, by the staff member signed in who started it); the code
  * becomes the shop's refresh token. Whatever happens, the browser goes
- * back to the panel with one word of outcome.
+ * back to the panel page the connection started from (the state's prefix:
+ * Google reviews, adr/0058; else Settings > Marketing) with one word of
+ * outcome. Connected for its reviews, a shop with one location has it
+ * picked and read at once.
  */
 export async function GET(
   req: MedusaRequest<unknown, GoogleCallbackQueryType>,
@@ -23,7 +25,8 @@ export async function GET(
 ): Promise<void> {
   const { state, code, error } = req.validatedQuery as GoogleCallbackQueryType
   const back = (outcome: string) => {
-    res.redirect(303, `${BACK}?${new URLSearchParams({ google: outcome }).toString()}`)
+    const page = panelPathOfState(state)
+    res.redirect(303, `${page}?${new URLSearchParams({ google: outcome }).toString()}`)
   }
   if (!state) {
     back("failed")
@@ -45,9 +48,13 @@ export async function GET(
         user_id: actor?.actor_type === "user" ? (actor.actor_id ?? null) : null,
       },
     })
-    back("connected")
   } catch (failure) {
     logger.warn({ event: "google.connect_failed", err: errorSummary(failure) })
     back(isValidationError(failure) ? failure.safeMessage.replace(/^google\./, "") : "failed")
+    return
   }
+  if (state.startsWith(REVIEWS_STATE_PREFIX)) {
+    await adoptOnlyGoogleLocation(req.scope)
+  }
+  back("connected")
 }

@@ -461,6 +461,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu Search Console mülkü bağlı Google hesabının okuyabildikleri arasında değil.",
   "google.not_configured": "Google bağlantısı bu mağaza için henüz kurulmadı.",
   "google.not_connected": "Önce Google hesabını bağlayın.",
+  "google.reviews_scope":
+    "Google hesabı İşletme Profili izni verilmeden bağlanmış; Google yorumları için yeniden bağlayın.",
+  "google.location_invalid":
+    "Bu işletme konumu bağlı Google hesabının yönettikleri arasında değil; listeyi yenileyin.",
+  "google.review_not_found": "Bu Google yorumu artık yok; Google'da silinmiş olabilir.",
   "reports.range_invalid":
     "Tarih aralığı geçersiz: başlangıç bitişten sonra, gelecekte ya da 366 günden uzun olamaz.",
   "catalog_import.cost_invalid": "Maliyet 0 ile 10.000.000 arasında, en fazla 2 ondalıklı olmalı.",
