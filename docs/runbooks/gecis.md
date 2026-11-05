@@ -19,7 +19,7 @@ Shopify için ayrıntı: `docs/entegrasyonlar/shopify.md`; WordPress için `docs
 ## Bilinmesi gerekenler
 
 - **Fiyatlar çevrilmez.** Kaynak Türk lirası dışında satıyorsa taşıma reddedilir.
-- **Üstü çizili fiyat taşınmaz.** İndirim öncesi fiyat son 30 günün en düşük fiyatı olmalı; fiyat geçmişi taşımayla başlar.
+- **Üstü çizili fiyat taşınmaz.** İndirim öncesi fiyat indirimden önceki 10 günün en düşük fiyatı (adr/0023 Ek 2026-11-05) olmalı; fiyat geçmişi taşımayla başlar.
 - **Ölçüsü olmayan ürün.** Ölçüler isteğe bağlıdır (ADR-0054): ürün kaynaktaki durumuyla gelir, kargo ücreti mağazanın varsayılan paketine göre (Ayarlar > Kargo; girilmemişse 1 kg, 30 × 20 × 10 cm) hesaplanır, kargo firması gerçek paketi kendisi ölçer. Taşımada verilen paket isteğe bağlıdır ve ürünün kendi ölçüsü olarak yazılır. Raporun Notlar sayfası her ölçüsüz ürünü "kargo varsayılan paketle hesaplanır" diye adlandırır.
 - **Şifreler taşınmaz.** Müşterilere hesap açma daveti gider (aşağıda).
 - **İleti izinleri.** Yalnızca kaynak tarihiyle veriyorsa taşınır; İYS'ye bildirilir.

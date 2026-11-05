@@ -20,7 +20,7 @@ Müşterilerimiz (tenant'lar) kendi mağazalarını bu altyapı üzerinde işlet
 ## Bu aşamanın kapsamı (Backend + Admin) — F0–F17
 Hedef: eksiksiz bir e-ticaret altyapısı. Dahil:
 - **Ticaret:** Medusa çekirdek, TR lokalizasyon, katalog + markalar + **SEO motoru** (URL/301/sitemap/JSON-LD/advisor/içerik sayfaları), stok/depo/rezervasyon,
-  toplu içe/dışa aktarma, fiyat listeleri, fiyat geçmişi (son 30 gün kuralı), kupon/kampanya, hediye kartı
+  toplu içe/dışa aktarma, fiyat listeleri, fiyat geçmişi (indirimden önceki 10 günün en düşüğü), kupon/kampanya, hediye kartı
 - **Ödeme:** iyzico, PayTR, havale/EFT, kapıda ödeme, ödeme yönlendirici
 - **Operasyon:** kargo (Geliver + doğrudan taşıyıcı), sipariş düzenleme, iade (RMA) ve değişim, ters ibraz, e-fatura/e-arşiv (UBL bizde), e-posta/SMS bildirimleri
 - **Büyüme:** müşteri hesabı, sosyal giriş, favoriler, stok bildirimi, yorumlar, Soru-Cevap, terk edilmiş sepet,

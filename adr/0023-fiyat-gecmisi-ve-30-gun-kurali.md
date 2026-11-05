@@ -76,3 +76,25 @@ Medusa 2.21.2'de doğrulananlar (F4 planlaması, kaynak kodu):
 - **Okuma sırası:** Son fiyat, geçmişin her okuması gibi önce kayıt zamanına, sonra yazılış sırasına göre bulunur (geriye tarihli içe aktarım satırları için).
 - **Store ucu:** `/store/price-display` yalnızca yayındaki ve publishable key'in satış kanalındaki ürünlerin varyantlarına cevap verir.
 
+
+## Ek (2026-11-05): 10 gün ve otomatik kampanyalar (otonom, gözden geçir)
+
+**Neden:** Atölye teması dev'de bir ürünü hızlı ekledi: kart 1.749,00 TL, sepet çekmecesi 1.224,30 TL gösterdi. Sebep dev mağazasındaki **%30 otomatik kampanya** (kodsuz, koşulsuz, `is_automatic`; PROGRESS'te D6 denemesinde de görülmüştü: 899,00 → 629,30 TL). Kampanyayı Medusa yalnız sepette uyguluyordu; kart ve ürün sayfası Medusa'nın `calculated_price`'ını (fiyat listesi dahil, kampanya hariç) gösteriyordu. Fiyat listesi, müşteri grubu ya da eski sepet satırı değildi: sepet fiyatı tam 1.749 × 0,70.
+
+**Hukuk (2026-11-05'te metinden okundu):**
+
+- Fiyat Etiketi Yönetmeliği md. 11/1 (RG 11.10.2025, sayı 33044, değişiklik md. 5; yayımında yürürlükte): "İndirimli satışa konu edilen mal veya hizmetin indirimden önceki satış fiyatının tespitinde, mal satışlarında indirimin uygulandığı tarihten önceki **on gün** içinde uygulanan en düşük fiyatı esas alınır." Çabuk bozulan mallar ve hizmetlerde indirimli fiyattan bir önceki fiyat.
+- Ticari Reklam ve Haksız Ticari Uygulamalar Yönetmeliği md. 14/3 (RG 1.7.2026, sayı 33297, değişiklik md. 4; yürürlük 1.8.2026): mal satışı reklamında indirimin başlangıç tarihinden önceki **on gün** içinde uygulanan en düşük fiyat. Md. 14/5: farklı satış kanallarında yalnız indirimin yapıldığı kanalın fiyatı esas alınır. Md. 14/7: indirimi belirli miktar, tutar ya da işleme bağlayan **koşullu satış** reklamlarına da bu madde uygulanır.
+- Karardaki 30 gün (2022 metinleri) eskidi. **Kural sürümü `tr-10d-1`, pencere 10 gün** (`lib/pricing/discount.ts`, karardaki "tek yer"). Avukat teyidi docs/12'de sürüyor.
+
+**Karar:**
+
+- **Herkese uygulanan otomatik kampanya fiyattır.** Kodsuz (`is_automatic`), etkin, standart (X al Y öde değil), sipariş ya da kalem hedefli; kuralı yok ya da yalnız mağazanın para birimi; kampanya bütçesi kişi başı değil; birim başına aynı (yüzde, birim sınırı yok; ya da KDV dahil "her birimden N TL"). Böyle bir kampanya kartta, ürün sayfasında, JSON-LD'de, ürün akışında ve e-posta kampanyalarında fiyatın kendisidir; üstü çizili fiyat indirim öncesi kuralından gelir.
+- **Hangi ürüne uygulandığına Medusa karar verir:** `promotion` modülünün `computeActions`'ı, her varyanttan bir birim tutan müşterisiz bir sepet bağlamıyla çağrılır (`workflows/pricing/automatic-offers.ts`). Durum, tarih, kullanım sınırı, bütçe ve hedef ürün/kategori/koleksiyon kuralları sepetteki gibi işler. Tutar Medusa'nın düzeltme tutarıdır (kuruşa bir kez yuvarlanır).
+- **Geçmiş:** kampanyanın en erken başlayabileceği an (`created_at` ile kampanyanın `starts_at`'ının geç olanı) "indirimin başlangıcı" sayılır; o andan sonraki satış fiyatları kampanyalı hâliyle hesaba girer, başlangıçta yürürlükteki fiyat bir nokta olur (`lib/pricing/offers.ts` `pricesWithOffers`). Erken başlangıç üstü çizili fiyatı hiçbir zaman yükseltmez (pencere yalnız daha düşük fiyatlar görebilir).
+- **Koşullu kampanya sepettedir.** En az sepet tutarı (`item_total gte`) tek koşulsa ürün sayfasında fiyatın yanında söylenir: "2.000,00 TL ve üzeri sepette %10 indirim" (`cart_offer`); sepet bütününden tutar indirimi (`across`) de böyle. Müşteri grubu, bölge, adres, "sepette şu ürün varsa", kişi başı sınır ve kodlu kampanya gösterilmez.
+- **Store API:** `GET /store/price-display` aynı uç; `current` artık kampanya dahil, yeni alan `cart_offer: { type: "percentage" | "fixed", value, minimum } | null` (eklemeli).
+
+**Kanıt:** `lib/pricing/__tests__/offers.unit.spec.ts` (sınıflama, birleşik indirim, 10 günlük pencere kampanyayla), `integration-tests/http/price-promotion.spec.ts` (%30 otomatik kampanya: görünen fiyat = sepetin kalem toplamı = JSON-LD fiyatı; en az sepetli kampanya yalnız `cart_offer`; kodlu, müşteri gruplu ve başka ürüne hedefli kampanya fiyatı değiştirmez; başlamamış kampanya beklenir).
+
+**Açık kalanlar:** `/kampanyalar` sayfası yalnız fiyat listesindeki indirimleri tarar (kampanyalı ürünler henüz listelenmez); GA4 `view_item` fiyatı Medusa'nın fiyatıdır; hizmet ve çabuk bozulan mal için "bir önceki fiyat" kuralı ayrı tutulmuyor (platformda hepsi mal kuralıyla).

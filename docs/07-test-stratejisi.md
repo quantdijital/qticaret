@@ -60,7 +60,7 @@
 
 ## Zorunlu senaryolar (fiyat ve promosyon)
 - Kupon limiti eşzamanlı kullanımda aşılmaz; süresi geçmiş/kapsam dışı kupon reddedilir
-- Son 30 gün en düşük fiyat: fiyat artışı, indirim, zamanlı fiyat geçişlerinde doğru
+- İndirimden önceki 10 günün en düşük fiyatı (2025–2026 değişiklikleri; adr/0023 Ek 2026-11-05): fiyat artışı, indirim, zamanlı fiyat geçişlerinde doğru
 - İndirimli siparişte kısmi iade: kalem indirim payı düşülür, kuruş farkı oluşmaz
 - İstemciden gelen indirim/ek ücret tutarı etkisiz
 
@@ -68,7 +68,7 @@
 - Slug: Türkçe karakter tablosu, uzunluk kesme, benzersizlik çakışması, değişimde otomatik 301, rezerve slug'ın yeniden kullanılamaması
 - Redirect motoru: zincir düzleştirme, döngü reddi, regex zaman aşımı, sorgu parametresi davranışı, 410
 - `seo` payload contract: her varlık türünde zorunlu alanlar, mutlak URL, canonical host, noindex kuralları (taslak, boş kategori, filtre parametresi)
-- JSON-LD: her blok JSON şemadan geçer; `StrikethroughPrice` 30 gün kuralıyla tutarlı; `aggregateRating` yorumsuz üründe yok
+- JSON-LD: her blok JSON şemadan geçer; `StrikethroughPrice` indirim öncesi fiyat kuralıyla tutarlı; `aggregateRating` yorumsuz üründe yok
 - Sitemap: 50.000 bölme, `lastmod` yalnızca anlamlı değişimde, taslak/noindex dışarıda; robots facet parametresini engelliyor, landing yolunu engellemiyor
 - Advisor: her kural pozitif/negatif fixture; skor deterministik; p95 < 50 ms; 404 hedef önerisi doğruluğu; landing özgünlük kapısı
 - İçe aktarma: SEO sütunları, satır bazlı advisor özeti

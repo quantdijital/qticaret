@@ -164,3 +164,10 @@ Kararın 6.3 adımı ("diğer sayfa şablonlarının bölümleri"), backend tara
 
     Belirteçler doldurulur. Zengin metin HTML olarak, görseller boyutlarıyla gelir. Kategori bölümleri yerlerini korur.
 - **Uçların biçimi.** `GET /store/storefront-layout` ve önizleme `product` ile `category` dizilerini de verir. Yayındaki düzenin süreç önbelleği eskisi gibi sürüm numarasıyla anahtarlanır. Varsayılan belgede iki grup boş.
+
+## Ek (2026-11-05): öne çıkan ürün bölümü (otonom, gözden geçir)
+
+- Ana sayfaya bir bölüm türü daha: `featured_product` (`title`, `text` — mağaza bilgisi belirteçleri olabilir, en çok 240 —, `product_id`). Yalnız ana sayfada; ürün ve kategori sayfası almaz.
+- Kayıtta ürün var mı denetlenir (`storefront_layout.target_unknown`); yayında olmayan ürünün bölümü vitrine gitmez (L8: taslak ürünün kimliği backend'den çıkmaz). Görseller, öne çıkan özellikler, fiyat ve özellik tablosu ürünün kendisinden, vitrinde okunur (adr/0046 Ek 2026-11-05).
+- Panel: Bölüm ekle > "Öne çıkan ürün"; ürün seçilene kadar kayıt bekler ("Bir ürün seçin.").
+- Kanıt: `lib/storefront/__tests__/layout.unit.spec.ts`, `integration-tests/http/storefront-layout.spec.ts`, panelde `section-forms.spec.tsx`, `problems.spec.ts`.

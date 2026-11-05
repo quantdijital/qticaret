@@ -68,7 +68,7 @@ Mağazanın kendi sağlayıcı hesapları (PayTR, iyzico, sonra Geliver, e-fatur
 | `content` | Custom modül | İçerik sayfaları, blog, facet landing sayfaları; SEO alanlı (F3) |
 | `product-qa` | Custom modül | Ürün Soru-Cevap, moderasyon, `QAPage` şeması (F10) |
 | `seo-insights` | Custom modül | Search Console / CrUX / IndexNow entegrasyonları, SEO paneli verisi (F10) |
-| `price-history` | Custom modül | Fiyat değişim geçmişi, son 30 gün en düşük fiyat; JSON-LD üstü çizili fiyat kaynağı (F4) |
+| `price-history` | Custom modül | Fiyat değişim geçmişi, indirimden önceki 10 günün en düşük fiyatı (adr/0023 Ek 2026-11-05); JSON-LD üstü çizili fiyat kaynağı (F4) |
 | `wishlist` | Custom modül | Favori listesi (F10) |
 | `back-in-stock` | Custom modül | Stok gelince haber ver abonelikleri (F10) |
 | `product-reviews` | Custom modül | Satın alan müşteri yorumları + moderasyon (F10) |
