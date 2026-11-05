@@ -31,45 +31,71 @@ const lengthOf = (view: ProductPageView) =>
     ? view.descriptionHtml.replace(/<[^>]*>/g, "").length
     : view.description.join(" ").length
 
+/** A number and its unit stay on one line ("22 cm", "58-59 HRC"): the space after a digit never breaks. */
+const keptTogether = (value: string) => value.trim().replace(/(\d)\s+(?=\S)/g, "$1\u00a0")
+
 /**
- * The specs as one real table, ruled: each of the template's groups a
- * `<tbody>` headed by its name (a heavy row over a dark rule), each row
- * the label on the left and the value on the right, a hairline between
- * rows; without groups one flat body.
+ * One group of specs as its own table: the group's name a small bold
+ * caption in sentence case with room above it, then the rows on hairlines, the
+ * label muted in two fifths of the width, the value in regular weight; a
+ * long value wraps in its own column. Without a name, no caption. Never
+ * split between two columns.
  */
-function Specs({ groups }: { groups: SpecGroupView[] }) {
+function SpecTable({ group }: { group: SpecGroupView }) {
+  const rows = group.rows.filter((spec) => spec.value.trim() !== "")
+  if (rows.length === 0) {
+    return null
+  }
   return (
-    <table className="w-full max-w-3xl border-collapse text-sm">
-      {groups.map((group, index) => (
-        <tbody key={group.title ?? `grup-${String(index)}`}>
-          {group.title !== null && (
-            <tr>
-              <th
-                scope="rowgroup"
-                colSpan={2}
-                className={cn(
-                  "border-b-2 border-text pb-2 text-left text-md font-extrabold tracking-[-0.01em]",
-                  index > 0 ? "pt-8" : "pt-0"
-                )}
-              >
-                {group.title}
-              </th>
-            </tr>
-          )}
-          {group.rows.map((spec) => (
-            <tr key={spec.label} className="border-b border-rule">
+    <div className="break-inside-avoid">
+      <table className="w-full table-fixed border-collapse text-sm">
+        {group.title !== null && (
+          <caption className="pt-5 pb-1 text-left text-sm font-bold text-text">
+            {group.title}
+          </caption>
+        )}
+        <tbody>
+          {rows.map((spec) => (
+            <tr key={spec.label} className="border-t border-rule first:border-t-0">
               <th
                 scope="row"
                 className="w-2/5 py-3 pr-4 text-left align-top font-normal text-text-2"
               >
                 {spec.label}
               </th>
-              <td className="tabular py-3 align-top font-semibold">{spec.value}</td>
+              <td className="tabular py-3 align-top [overflow-wrap:anywhere] text-text">
+                {keptTogether(spec.value)}
+              </td>
             </tr>
           ))}
         </tbody>
+      </table>
+    </div>
+  )
+}
+
+/**
+ * The specs (owner 2026-11-05: "the specs look very rough, make them a
+ * refined table"): one soft `paper-2` tile, a table per group in it; one
+ * or two groups in a 48rem tile, from 1024 px three or more flow into two
+ * balanced columns with a hairline between them, the tile's edge one
+ * clean rectangle. On a phone the groups stack.
+ */
+function Specs({ groups }: { groups: SpecGroupView[] }) {
+  const shown = groups.filter((group) => group.rows.some((spec) => spec.value.trim() !== ""))
+  return (
+    <div
+      className={cn(
+        "rounded-tile bg-paper-2 px-5 pt-1 pb-3 sm:px-6",
+        shown.length >= 3
+          ? "lg:columns-2 lg:gap-12 lg:[column-rule:1px_solid_var(--color-rule)]"
+          : "max-w-3xl"
+      )}
+    >
+      {shown.map((group, index) => (
+        <SpecTable key={group.title ?? `grup-${String(index)}`} group={group} />
       ))}
-    </table>
+    </div>
   )
 }
 
@@ -77,7 +103,7 @@ function Specs({ groups }: { groups: SpecGroupView[] }) {
  * The product's description and its specs right under the buy area, every
  * word in the first HTML (docs/19 §6.5): one block of two tabs (sahip
  * 2026-11-05), "Ürün açıklaması" first, opening at about half when long,
- * then "Ürün özellikleri", the ruled table. The description is its
+ * then "Ürün özellikleri", the spec tables in their tile. The description is its
  * content document as the backend renders it (adr/0055, its allow-listed
  * HTML, its own spec table kept inside as the shop wrote it), else its
  * plain paragraphs. With only one of the two there are no tabs: that one

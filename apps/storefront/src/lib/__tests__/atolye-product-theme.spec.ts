@@ -290,7 +290,7 @@ describe("the theme's product page", () => {
     expect(html).toContain("WhatsApp&#x27;tan sor")
   })
 
-  it("tabs the description and the ruled spec table, both panels in the first HTML", () => {
+  it("tabs the description and the spec tables, both panels in the first HTML", () => {
     const html = page()
     expect(html).toContain('role="tablist" aria-label="Ürün bilgileri"')
     expect(html).toMatch(
@@ -308,8 +308,31 @@ describe("the theme's product page", () => {
       '<h2 id="urun-ozellikleri" class="gf-info-head text-section">Ürün özellikleri</h2>'
     )
     expect(html).toContain("<h2>Namlu</h2><p>Elmax çelik namlu.</p>")
-    expect(html).toMatch(/<th scope="rowgroup" colSpan="2"[^>]*>Ölçü ve ağırlık<\/th>/)
-    expect(html).toMatch(/<th scope="row"[^>]*>Toplam boy<\/th><td[^>]*>21 cm<\/td>/)
+    // A table per group, its name the caption; a number keeps its unit on its line
+    expect(html).toMatch(/<caption class="[^"]*">Ölçü ve ağırlık<\/caption>/)
+    expect(html).toMatch(/<th scope="row"[^>]*>Toplam boy<\/th><td[^>]*>21\u00a0cm<\/td>/)
+  })
+
+  it("sets the specs in one soft tile, two columns from three groups, empty values left out", () => {
+    const row = (label: string, value: string) => ({ label, value, highlight: false })
+    const two = page()
+    const tile = /<div class="(rounded-tile bg-paper-2[^"]*)"><div class="break-inside-avoid">/
+    expect(tile.exec(two)?.[1]).toContain("max-w-3xl")
+    expect(two.match(/<table /g)).toHaveLength(2)
+    const three = page({
+      specGroups: [
+        { title: "Namlu", rows: [row("Namlu çeliği", "Elmax"), row("Sertlik", "58-59 HRC")] },
+        { title: "Kabza", rows: [row("Kabza", "Mikarta"), row("Renk", "  ")] },
+        { title: "Kılıf", rows: [row("Kılıf", "")] },
+        { title: "Ölçü ve ağırlık", rows: [row("Toplam boy", "21 cm")] },
+      ],
+    })
+    expect(tile.exec(three)?.[1]).toContain("lg:columns-2")
+    // A group with no value draws nothing; a row with none is left out
+    expect(three.match(/<table /g)).toHaveLength(3)
+    expect(three).not.toContain(">Kılıf</caption>")
+    expect(three).not.toMatch(/<th scope="row"[^>]*>Renk<\/th>/)
+    expect(three).toContain(">58-59\u00a0HRC</td>")
   })
 
   it("draws no tabs with only one of the two", () => {
@@ -336,10 +359,11 @@ describe("the theme's product page", () => {
     expect(short).not.toContain("Devamını oku")
   })
 
-  it("falls back to one flat spec table and the plain paragraphs", () => {
+  it("falls back to one untitled spec table and the plain paragraphs", () => {
     const html = page({ specGroups: [], descriptionHtml: null })
     expect(html).toContain("<p>Düz metin açıklama.</p>")
-    expect(html).not.toContain('scope="rowgroup"')
+    expect(html).not.toContain("<caption")
+    expect(html.match(/<table /g)).toHaveLength(1)
     expect(html).toContain(">Elmax</td>")
   })
 
