@@ -202,3 +202,30 @@ export const communityWords = (t: Translate) => ({
 })
 
 export type CommunityWords = ReturnType<typeof communityWords>
+
+/** The reviews' list on the product page: the spread as filters, the order, the rest on demand. */
+export const reviewListWords = (t: Translate) => ({
+  stars: Object.fromEntries(
+    [1, 2, 3, 4, 5].map((n) => [n, t("reviews.stars", { rating: n })])
+  ) as Record<number, string>,
+  verified: t("product.verified"),
+  photos: t("reviews.photos"),
+  /** "{author} adlı müşterinin fotoğrafı {n}". */
+  photoAlt: t("reviews.photo_alt"),
+  distribution: t("reviews.distribution"),
+  filterLabel: t("reviews.filter_label"),
+  /** "{stars} yıldız". */
+  barStars: t("reviews.bar_stars"),
+  filterShown: t("reviews.filter_shown"),
+  /** "Filtreyi kaldır: {label}". */
+  filterClear: t("reviews.filter_clear"),
+  filterAll: t("reviews.filter_all"),
+  filterEmpty: t("reviews.filter_empty"),
+  sort: t("reviews.sort"),
+  newest: t("reviews.sort_newest"),
+  highest: t("reviews.sort_highest"),
+  lowest: t("reviews.sort_lowest"),
+  more: t("product.reviews_more"),
+})
+
+export type ReviewListWords = ReturnType<typeof reviewListWords>

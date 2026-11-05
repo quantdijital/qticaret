@@ -98,10 +98,10 @@ export function Installments({
         />
       </Dialog.Trigger>
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-scrim duration-(--dur-short) data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
+        <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-scrim duration-(--dur-short) motion-safe:data-[state=closed]:animate-out data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:animate-in data-[state=open]:fade-in-0" />
         <Dialog.Content
           data-installments=""
-          className="fixed inset-x-0 bottom-0 z-(--z-modal) flex max-h-[88dvh] flex-col rounded-t-tile bg-paper text-text shadow-float outline-none duration-(--dur-short) data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0 max-sm:data-[state=closed]:slide-out-to-bottom max-sm:data-[state=open]:slide-in-from-bottom sm:inset-0 sm:m-auto sm:h-fit sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100%-2rem)] sm:max-w-120 sm:rounded-tile sm:data-[state=open]:zoom-in-95"
+          className="fixed inset-x-0 bottom-0 z-(--z-modal) flex max-h-[88dvh] flex-col rounded-t-tile bg-paper text-text shadow-float outline-none duration-(--dur-short) motion-safe:data-[state=closed]:animate-out data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:animate-in data-[state=open]:fade-in-0 max-sm:data-[state=closed]:slide-out-to-bottom max-sm:data-[state=open]:slide-in-from-bottom sm:inset-0 sm:m-auto sm:h-fit sm:max-h-[calc(100dvh-2rem)] sm:w-[calc(100%-2rem)] sm:max-w-120 sm:rounded-tile sm:data-[state=open]:zoom-in-95"
         >
           <div className="flex h-16 shrink-0 items-center justify-between gap-4 pr-2 pl-5 sm:pl-6">
             <Dialog.Title className="max-w-none text-title">{words.title}</Dialog.Title>

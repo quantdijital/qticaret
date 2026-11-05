@@ -436,17 +436,74 @@ describe("the theme's product page", () => {
     expect(html).toContain('src="/media/yorum.jpg"')
     expect(html).toContain("Deri kılıfıyla gelir.")
     expect(html).toContain("Mağaza yanıtı")
+    expect(html).toContain("Doğrulanmış alışveriş")
     // A guest is offered the way to sign in, never a form
     expect(html).not.toContain('name="rating"')
-    expect(html).toContain("Giriş yapın")
+    expect(html).toContain(
+      '<a href="/hesap/giris?sonra=%2Furun%2Fcaki" class="gf-btn gf-btn--quiet w-full">'
+    )
+    expect(html).toContain("Değerlendirmek için giriş yapın")
+    expect(html).toContain("Soru sormak için giriş yapın")
   })
 
-  it("lets a signed-in customer rate with five real radios and ask a question", () => {
+  it("opens the review and the question forms in dialogs for a signed-in customer", () => {
     const html = page({ signedIn: true })
-    expect(html.match(/name="rating"/g)).toHaveLength(5)
-    expect(html).toContain('name="photos"')
-    expect(html).toContain('id="soru-metin"')
+    // The buttons are in the first HTML, the forms only once a dialog opens
+    expect(html).toMatch(
+      /<button type="button" aria-haspopup="dialog"[^>]*>.*?Değerlendirme yaz<\/button>/
+    )
+    expect(html).toMatch(/<button type="button" aria-haspopup="dialog"[^>]*>.*?Soru sor<\/button>/)
+    expect(html).not.toContain('name="rating"')
+    expect(html).not.toContain('id="soru-metin"')
+    expect(html).not.toContain("giriş yapın")
   })
+
+  it("says there is nothing yet in one calm block each, with the one thing to do", () => {
+    const html = page({
+      reviews: { average: null, count: 0, items: [], distribution: null },
+      questions: { count: 0, items: [] },
+    })
+    expect(html).toContain("Bu ürün için henüz değerlendirme yok")
+    expect(html).toContain("İlk değerlendiren siz olun.")
+    expect(html).toContain("Henüz soru sorulmadı")
+    // No "(0)" beside the headings, no spread without reviews
+    expect(html).toContain(
+      '<h2 id="degerlendirmeler-baslik" class="text-section">Değerlendirmeler</h2>'
+    )
+    expect(html).not.toContain("Puan dağılımı")
+  })
+
+  it("shows five reviews first, the rest after a press; filters and order only with every review here", () => {
+    const review = (n: number) => ({
+      rating: n % 2 === 0 ? 5 : 3,
+      title: null,
+      body: `Yorum ${String(n)} metni burada.`,
+      author: `Müşteri ${String(n)}`,
+      date: "1 Kasım 2026",
+      verified: false,
+    })
+    const items = [1, 2, 3, 4, 5, 6, 7].map(review)
+    const all = page({
+      reviews: {
+        average: 4.1,
+        count: 7,
+        items,
+        distribution: [
+          { stars: 5, count: 3, percent: 43, label: "5 yıldız: 3 değerlendirme" },
+          { stars: 3, count: 4, percent: 57, label: "3 yıldız: 4 değerlendirme" },
+        ],
+      },
+    })
+    expect(all.match(/data-later=""/g)).toHaveLength(2)
+    expect(all).toContain("Daha fazla değerlendirme göster")
+    expect(all).toContain('aria-pressed="false"')
+    expect(all).toContain('id="yorum-sirasi"')
+    // Only the newest of many: the spread is a picture, the order the newest
+    const some = page({ reviews: { average: 4.1, count: 30, items, distribution: [] } })
+    expect(some).not.toContain("aria-pressed")
+    expect(some).not.toContain('id="yorum-sirasi"')
+  })
+
 
   it("ends on the category's other products", () => {
     const html = page()

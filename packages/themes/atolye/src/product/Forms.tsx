@@ -1,7 +1,8 @@
 "use client"
 
-import { Star } from "lucide-react"
+import { CircleCheck, Star } from "lucide-react"
 import { useActionState } from "react"
+import type { ReactNode } from "react"
 import type { ActionResult, FormAction } from "@qticaret/ui"
 import type { CommunityWords } from "./words"
 
@@ -9,27 +10,40 @@ const INITIAL: ActionResult = { ok: false, error: null }
 
 const FIELD = "gf-field rounded-inner"
 
-function Result({
+/** A refusal under the button, in the shop's words for it. */
+function Refusal({
   state,
-  ok,
   failed,
   words,
 }: {
   state: ActionResult
-  ok: string
   failed: string
   words: CommunityWords
 }) {
   return (
     <p role="status" className="text-sm empty:hidden">
-      {state.error ? (
-        <span className="text-error">{words.errors[state.error] ?? failed}</span>
-      ) : state.ok ? (
-        <span className="font-semibold text-ok">{ok}</span>
-      ) : null}
+      {state.error && <span className="text-error">{words.errors[state.error] ?? failed}</span>}
     </p>
   )
 }
+
+/** Sent: the form gives way to what happens next, and the way out (`done`). */
+function Sent({ text, done }: { text: string; done?: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-5">
+      <p
+        role="status"
+        className="flex items-start gap-3 rounded-media bg-paper-2 p-4 font-semibold"
+      >
+        <CircleCheck className="size-5 shrink-0 text-ok" aria-hidden="true" strokeWidth={2} />
+        {text}
+      </p>
+      {done}
+    </div>
+  )
+}
+
+const SEND = "gf-btn w-full sm:w-auto sm:self-start"
 
 /**
  * A signed-in customer's review: the stars as five real radios (arrow
@@ -42,16 +56,22 @@ export function ReviewForm({
   write,
   words,
   placeholders,
+  done,
 }: {
   productId: string
   write: FormAction
   words: CommunityWords
   /** The examples inside the title and the text. */
   placeholders: { title: string; body: string }
+  /** Shown under the thanks once it is sent (the dialog's "Kapat"). */
+  done?: ReactNode
 }) {
   const [state, send, pending] = useActionState(write, INITIAL)
+  if (state.ok) {
+    return <Sent text={words.reviewSent} done={done} />
+  }
   return (
-    <form action={send} className="flex flex-col gap-4">
+    <form action={send} className="flex flex-col gap-5">
       <input type="hidden" name="product_id" value={productId} />
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 text-sm font-semibold">{words.rating}</legend>
@@ -119,15 +139,10 @@ export function ReviewForm({
           {words.photosHint}
         </p>
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        aria-busy={pending}
-        className="gf-btn gf-btn--quiet self-start"
-      >
+      <button type="submit" disabled={pending} aria-busy={pending} className={SEND}>
         {pending ? words.sending : words.send}
       </button>
-      <Result state={state} ok={words.reviewSent} failed={words.reviewFailed} words={words} />
+      <Refusal state={state} failed={words.reviewFailed} words={words} />
     </form>
   )
 }
@@ -138,14 +153,20 @@ export function QuestionForm({
   ask,
   words,
   placeholder,
+  done,
 }: {
   productId: string
   ask: FormAction
   words: CommunityWords
   /** The nudge inside the question's box. */
   placeholder: string
+  /** Shown under the thanks once it is sent (the dialog's "Kapat"). */
+  done?: ReactNode
 }) {
   const [state, send, pending] = useActionState(ask, INITIAL)
+  if (state.ok) {
+    return <Sent text={words.questionSent} done={done} />
+  }
   return (
     <form action={send} className="flex flex-col gap-3">
       <input type="hidden" name="product_id" value={productId} />
@@ -158,19 +179,14 @@ export function QuestionForm({
         required
         minLength={5}
         maxLength={1000}
-        rows={3}
+        rows={4}
         placeholder={placeholder}
-        className="gf-field min-h-24 rounded-inner"
+        className="gf-field min-h-32 rounded-inner"
       />
-      <button
-        type="submit"
-        disabled={pending}
-        aria-busy={pending}
-        className="gf-btn gf-btn--quiet self-start"
-      >
+      <button type="submit" disabled={pending} aria-busy={pending} className={`${SEND} mt-2`}>
         {pending ? words.sending : words.ask}
       </button>
-      <Result state={state} ok={words.questionSent} failed={words.questionFailed} words={words} />
+      <Refusal state={state} failed={words.questionFailed} words={words} />
     </form>
   )
 }

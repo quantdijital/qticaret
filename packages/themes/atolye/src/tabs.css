@@ -198,3 +198,20 @@
     padding-top: 0;
   }
 }
+
+/*
+ * The product's reviews and questions past the first few (owner
+ * 2026-11-06): with the script they wait for "Daha fazla … göster" from
+ * the first paint, so nothing moves when it arrives; without it every one
+ * shows and the button is not drawn.
+ */
+@media (scripting: enabled) {
+  .gf-later[data-later] {
+    display: none;
+  }
+}
+@media (scripting: none) {
+  .gf-later-toggle {
+    display: none;
+  }
+}

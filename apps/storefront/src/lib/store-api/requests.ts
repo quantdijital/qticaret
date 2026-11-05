@@ -301,8 +301,16 @@ export const collectionById = cache((id: string) =>
 /** With each review's photos and the stars' spread (adr/0046 Ek 2026-11-04). */
 export type ReviewsAnswer = StoreProductReviews
 
+/**
+ * As many as the backend gives at once (50), so the page can filter and
+ * sort them all and show more without asking again (owner 2026-11-06).
+ */
+const COMMUNITY_PAGE = 50
+
 export const productReviews = (id: string) =>
-  storeGet<ReviewsAnswer>(`/store/products/${encodeURIComponent(id)}/reviews`, { limit: 10 })
+  storeGet<ReviewsAnswer>(`/store/products/${encodeURIComponent(id)}/reviews`, {
+    limit: COMMUNITY_PAGE,
+  })
 
 export interface QuestionsAnswer {
   questions: {
@@ -315,4 +323,6 @@ export interface QuestionsAnswer {
 }
 
 export const productQuestions = (id: string) =>
-  storeGet<QuestionsAnswer>(`/store/products/${encodeURIComponent(id)}/questions`, { limit: 10 })
+  storeGet<QuestionsAnswer>(`/store/products/${encodeURIComponent(id)}/questions`, {
+    limit: COMMUNITY_PAGE,
+  })
