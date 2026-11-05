@@ -797,7 +797,8 @@
         "catalog.export": "Product export",
         "catalog.bulk_edit": "Bulk edit",
         "customer.data_export": "Customer data export",
-        "catalog.description_facts": "Facts from descriptions"
+        "catalog.description_facts": "Facts from descriptions",
+        "content.link_rewrite": "Fixing links in texts"
       }
     },
     "audit": {
@@ -2715,6 +2716,22 @@
         "confirmText": "Mark it if the domain shows the new site; the 404 watch starts today.",
         "watching": "Cut over on {{date}}; 404s are watched until {{until}}.",
         "none": "No cutover yet."
+      },
+      "links": {
+        "title": "Old links in your texts",
+        "description": "Points the links in posts, pages and product descriptions that lead to your old site at the pages here. Links to other sites are left alone.",
+        "check": "Check",
+        "apply": "Fix the links",
+        "confirmTitle": "Fix the links?",
+        "confirmText": "Links to old addresses get the addresses of the pages their redirects lead to. Those that lead nowhere stay as they are and are listed in the report.",
+        "none": "Not run yet. A migration does this itself; run it here for texts moved before.",
+        "running": "Reading the links…",
+        "checked": "Check of {{date}}: {{changed}} links in {{documents}} texts would be fixed, {{unresolved}} links lead nowhere.",
+        "applied": "{{date}}: {{changed}} links fixed in {{documents}} texts, {{unresolved}} links lead nowhere.",
+        "failed": "The last run did not finish. Try again.",
+        "report": "Download the report",
+        "downloadFailed": "The report could not be downloaded.",
+        "hint": "For links that lead nowhere, decide and apply their old addresses or edit the text, then run it again."
       },
       "invites": {
         "title": "Customer invitations",

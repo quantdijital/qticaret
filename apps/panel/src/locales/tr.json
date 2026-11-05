@@ -797,7 +797,8 @@
         "catalog.export": "Ürün dışa aktarma",
         "catalog.bulk_edit": "Toplu düzenleme",
         "customer.data_export": "Müşteri verisi dışa aktarımı",
-        "catalog.description_facts": "Açıklamadan özellik aktarma"
+        "catalog.description_facts": "Açıklamadan özellik aktarma",
+        "content.link_rewrite": "Metinlerdeki bağlantıları düzeltme"
       }
     },
     "audit": {
@@ -2715,6 +2716,22 @@
         "confirmText": "Alan adı yeni siteyi gösteriyorsa işaretleyin; 404 izlemesi bugünden başlar.",
         "watching": "{{date}} tarihinde kesim yapıldı; 404'ler {{until}} tarihine kadar izleniyor.",
         "none": "Henüz kesim yapılmadı."
+      },
+      "links": {
+        "title": "Metinlerdeki eski bağlantılar",
+        "description": "Yazı, sayfa ve ürün açıklamalarında eski sitenize giden bağlantıları buradaki sayfalara çevirir. Başka sitelere giden bağlantılara dokunmaz.",
+        "check": "Kontrol et",
+        "apply": "Bağlantıları düzelt",
+        "confirmTitle": "Bağlantılar düzeltilsin mi?",
+        "confirmText": "Eski adreslere giden bağlantılar, yönlendirmelerinin gösterdiği sayfaların adresleriyle değiştirilir. Karşılığı olmayanlar olduğu gibi kalır ve raporda listelenir.",
+        "none": "Henüz çalıştırılmadı. Taşıma bunu kendisi yapar; daha önce taşınan metinler için buradan çalıştırın.",
+        "running": "Bağlantılar okunuyor…",
+        "checked": "{{date}} kontrolü: {{documents}} metinde {{changed}} bağlantı düzeltilecek, {{unresolved}} bağlantının karşılığı yok.",
+        "applied": "{{date}}: {{documents}} metinde {{changed}} bağlantı düzeltildi, {{unresolved}} bağlantının karşılığı yok.",
+        "failed": "Son çalıştırma tamamlanamadı. Yeniden deneyin.",
+        "report": "Raporu indir",
+        "downloadFailed": "Rapor indirilemedi.",
+        "hint": "Karşılığı olmayan bağlantılar için eski adreslerde karar verip uygulayın ya da metni düzenleyin, sonra yeniden çalıştırın."
       },
       "invites": {
         "title": "Müşteri davetleri",
