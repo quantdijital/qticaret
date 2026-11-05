@@ -118,6 +118,7 @@ Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, ta
 | Havale onayları | Sayfa | Ödeme bekleyen siparişler, onay/iptal, kalan süre (F6) |
 | İade talepleri | Sayfa | Talep listesi, onay/ret, depoya varış kontrolü (F7) |
 | Yorum moderasyonu | Sayfa | Onay bekleyen yorumlar, toplu onay/ret (F10) |
+| Google yorumları | Sayfa (Yorumlar sekmesi) | Google'a bağlanma, konum, tek satır durum, Şimdi eşitle, Bağlantıyı kaldır; yorumlar ve "Vitrinde" anahtarı (adr/0058). Platformun Google istemcisi yoksa sekme yok |
 | Raporlar | Sayfa | Satış, finans/KDV, stok raporları, dışa aktarma (F11) |
 | Muhasebe aktarımı | Sayfa | Aktarım durumu, hatalılar, yeniden dene (F11) |
 | API ve webhook'lar | Sayfa | API anahtarları, webhook abonelikleri, teslim logu (F11) |

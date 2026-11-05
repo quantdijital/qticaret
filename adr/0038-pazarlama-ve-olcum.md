@@ -226,7 +226,7 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
 ## Uygulama notları (M13, Google bağlantısı ve Merchant API, 2026-10-29)
 - **Platform OAuth istemcisi:**
   - `GOOGLE_OAUTH_CLIENT_ID` ve `GOOGLE_OAUTH_CLIENT_SECRET` platformun tek Google Cloud web istemcisidir; her mağaza onunla bağlanır.
-  - Yönlendirme adresi `BACKEND_URL/google/callback`. Panel ve backend aynı adreste (adr/0022 §4), dönüş panelin `/settings/marketing?google=<sonuç>` sayfasına.
+  - Yönlendirme adresi `BACKEND_URL/google/callback`. Panel ve backend aynı adreste (adr/0022 §4), dönüş panelin `/settings/marketing?google=<sonuç>` sayfasına. Google yorumları için başlatılan bağlantı (`state` öneki `r.`, `business.manage` kapsamı üstüne) `/reviews/google?google=<sonuç>`'a döner; bağlantı kesilince Google yorumları da silinir (adr/0058).
   - İkisi tanımlı değilse bağlantı sunulmaz.
   - `GOOGLE_BASE_URL` sahte Google içindir; canlıda reddedilir.
 - **Akış** (Google OAuth 2.0 web sunucusu akışı, resmî belgeden):
