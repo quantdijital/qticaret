@@ -455,9 +455,9 @@
           "enumItems": [],
           "mappedType": "json"
         },
-        "summary": {
-          "name": "summary",
-          "type": "text[]",
+        "summary_doc": {
+          "name": "summary_doc",
+          "type": "jsonb",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
@@ -469,7 +469,7 @@
           "default": null,
           "comment": null,
           "enumItems": [],
-          "mappedType": "array"
+          "mappedType": "json"
         },
         "created_at": {
           "name": "created_at",

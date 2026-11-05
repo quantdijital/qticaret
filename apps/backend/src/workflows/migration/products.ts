@@ -65,7 +65,7 @@ export async function migrateProducts(
   keys: { made: string[]; moved: string[] }
   /** New ones whose description is (would be) a content document. */
   documents: number
-  /** New ones with a short description (would be; adr/0055 Ek 2026-11-05). */
+  /** New ones with a short description (would be; adr/0055 Ek 2026-11-06). */
   summaries: number
 }> {
   const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
@@ -116,7 +116,7 @@ export async function migrateProducts(
   // A dry run's: every new one, as the import would make it (its own rows name a refusal)
   let made = fresh.map((product) => product.source_key)
   let documents = fresh.filter((product) => product.description_doc).length
-  let summaries = fresh.filter((product) => product.summary?.length).length
+  let summaries = fresh.filter((product) => product.summary_doc).length
   if (mode === "apply") {
     // Every handle was free before the import: one held now is the product it made
     const found = await catalog.listProducts(
