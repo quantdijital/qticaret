@@ -23,24 +23,31 @@ type Container = Pick<MedusaContainer, "resolve">
 /**
  * Products' description documents (adr/0055) as a migration writes them:
  * through the catalog save the panel uses, so the plain text the product
- * keeps is the document's own. New products get theirs after the catalog
- * import made them; a refresh run (`refresh: ["descriptions"]`) rewrites
- * only the documents and their text of the products a run moved before.
+ * keeps is the document's own. New products get theirs, and their short
+ * description (adr/0055 Ek 2026-11-05), after the catalog import made
+ * them; a refresh run (`refresh: ["descriptions"]`) rewrites only the
+ * documents and their text of the products a run moved before.
  */
 
 // Products read at once with their documents
 const READ_CHUNK = 200
 
-/** Writes one product's document; a refusal is the record's problem, not the run's. */
-async function writeDocument(
+/** What a migration writes of a product's texts: its document, its short description. */
+export interface TextFields {
+  description_doc?: ContentDoc
+  summary?: string[]
+}
+
+/** Writes one product's texts; a refusal is the record's problem, not the run's. */
+export async function writeTexts(
   container: Container,
   productId: string,
-  doc: ContentDoc,
+  fields: TextFields,
   sourceKey: string
 ): Promise<StepProblem | null> {
   try {
     await setProductCatalogWorkflow(container as MedusaContainer).run({
-      input: { product_id: productId, description_doc: doc },
+      input: { product_id: productId, ...fields },
     })
     return null
   } catch (error) {
@@ -53,25 +60,36 @@ async function writeDocument(
   }
 }
 
-/** The documents of the products a run just made, by their new ids. */
+const writeDocument = (container: Container, id: string, doc: ContentDoc, sourceKey: string) =>
+  writeTexts(container, id, { description_doc: doc }, sourceKey)
+
+/** The documents and short descriptions of the products a run just made, one save each. */
 export async function writeDescriptions(
   container: Container,
   made: readonly { product: SourceProduct; id: string }[]
-): Promise<{ documents: number; problems: StepProblem[] }> {
+): Promise<{ documents: number; summaries: number; problems: StepProblem[] }> {
   let documents = 0
+  let summaries = 0
   const problems: StepProblem[] = []
   for (const { product, id } of made) {
-    if (!product.description_doc) {
+    const doc = product.description_doc ?? null
+    const summary = product.summary?.length ? product.summary : null
+    if (!doc && !summary) {
       continue
     }
-    const problem = await writeDocument(container, id, product.description_doc, product.source_key)
+    const fields: TextFields = {
+      ...(doc ? { description_doc: doc } : {}),
+      ...(summary ? { summary } : {}),
+    }
+    const problem = await writeTexts(container, id, fields, product.source_key)
     if (problem) {
       problems.push(problem)
     } else {
-      documents += 1
+      documents += doc ? 1 : 0
+      summaries += summary ? 1 : 0
     }
   }
-  return { documents, problems }
+  return { documents, summaries, problems }
 }
 
 // A JSON value with its keys in order: Postgres keeps a jsonb's keys in its own order

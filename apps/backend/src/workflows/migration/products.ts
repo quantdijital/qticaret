@@ -45,7 +45,7 @@ async function sheetOf(
  * became is kept by the source's key, its old address for a 301. A new
  * one's descriptive attributes go in its rows where `plans` give them a
  * template (attributes.ts). A new one's description document (adr/0055)
- * is written once the import made it, and counted. The keys of the ones
+ * and short description are written once the import made it, and counted. The keys of the ones
  * made (would be, in a dry run) and of the ones a run made before come
  * back for the attributes' counts.
  */
@@ -65,6 +65,8 @@ export async function migrateProducts(
   keys: { made: string[]; moved: string[] }
   /** New ones whose description is (would be) a content document. */
   documents: number
+  /** New ones with a short description (would be; adr/0055 Ek 2026-11-05). */
+  summaries: number
 }> {
   const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
   const catalog = container.resolve(Modules.PRODUCT)
@@ -102,6 +104,7 @@ export async function migrateProducts(
       problems,
       keys: { made: [], moved: movedKeys },
       documents: 0,
+      summaries: 0,
     }
   }
   const result = await runImport(
@@ -113,6 +116,7 @@ export async function migrateProducts(
   // A dry run's: every new one, as the import would make it (its own rows name a refusal)
   let made = fresh.map((product) => product.source_key)
   let documents = fresh.filter((product) => product.description_doc).length
+  let summaries = fresh.filter((product) => product.summary?.length).length
   if (mode === "apply") {
     // Every handle was free before the import: one held now is the product it made
     const found = await catalog.listProducts(
@@ -143,7 +147,8 @@ export async function migrateProducts(
       })
     )
     documents = written.documents
+    summaries = written.summaries
     problems.push(...written.problems)
   }
-  return { ...result, moved, problems, keys: { made, moved: movedKeys }, documents }
+  return { ...result, moved, problems, keys: { made, moved: movedKeys }, documents, summaries }
 }

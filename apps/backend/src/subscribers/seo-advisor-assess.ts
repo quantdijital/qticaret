@@ -8,6 +8,8 @@ const KINDS: Readonly<Record<string, PageKind>> = {
   "product.created": "product",
   "product.updated": "product",
   "product.deleted": "product",
+  // Catalog fields Medusa's own event misses: the short description (P-CONT-09), attributes
+  "catalog.product_saved": "product",
   "product-category.created": "category",
   "product-category.updated": "category",
   "product-category.deleted": "category",

@@ -1,3 +1,4 @@
+import { summaryText } from "../catalog/summary"
 import { formatLira } from "../money/format"
 import { articleJsonLd, breadcrumbJsonLd, listingJsonLd, productJsonLd } from "./jsonld"
 import type { ArticleFacts, JsonLd, ProductFacts } from "./jsonld"
@@ -80,6 +81,8 @@ export interface SeoSubject {
   listing?: { name: string; path: string }[] | undefined
   /** A content page's or blog post's facts (F3.16); the description and publisher are filled in. */
   article?: Omit<ArticleFacts, "description" | "publisher"> | undefined
+  /** A product's short description's lines (adr/0055 Ek 2026-11-05): the meta's first fallback. */
+  summary?: readonly string[] | undefined
 }
 
 export interface SeoShop {
@@ -221,7 +224,9 @@ function descriptionOf(subject: SeoSubject, shop: SeoShop): string {
     }
   }
   // A listing without text of its own still describes itself (docs/21 §8)
-  const text = excerpt(subject.description, DESCRIPTION_EXCERPT)
+  const text =
+    summaryText(subject.summary ?? [], DESCRIPTION_EXCERPT) ||
+    excerpt(subject.description, DESCRIPTION_EXCERPT)
   return (
     text || excerpt(listingDescription(subject.kind, subject.name, shop.name), DESCRIPTION_EXCERPT)
   )

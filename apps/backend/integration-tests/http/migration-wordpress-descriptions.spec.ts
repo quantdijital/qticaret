@@ -4,7 +4,9 @@ import type { AddressInfo } from "node:net"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import sharp from "sharp"
+import { wordpressRecords } from "../../src/lib/migration/sources/wordpress"
 import { wxrFixture } from "../../src/lib/migration/sources/wordpress/__tests__/wxr"
+import { fillSummaries } from "../../src/workflows/migration/summaries"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -157,6 +159,51 @@ medusaIntegrationTestRunner({
       // Again, the same export: already the same
       const again = await run(changed, "mode=apply&refresh=descriptions")
       expect(again.counts["product"]).toMatchObject({ updated: 0, found: 2, skipped: 2 })
+    })
+
+    it("moves the excerpt as the short description, and fills an empty one later", async () => {
+      const wxr = wxrFixture(site)
+      const applied = await run(wxr, "mode=apply")
+      // adr/0055 Ek 2026-11-05: one product of the export has an excerpt
+      expect(applied.counts["product"]).toMatchObject({ created: 4, summaries: 1 })
+      const spoon = async () => {
+        const { data } = await getContainer()
+          .resolve(ContainerRegistrationKeys.QUERY)
+          .graph({
+            entity: "product",
+            fields: ["id", "product_extension.summary"],
+            filters: { handle: "ahsap-kasik" },
+          })
+        return data[0] as unknown as { id: string; product_extension: { summary: string[] | null } }
+      }
+      const moved = await spoon()
+      expect(moved.product_extension.summary).toEqual(["El yapımı kaşık"])
+
+      // A shop whose products moved before the excerpt was read: the lines are not there
+      await http.post(
+        `/admin/products/${moved.id}/catalog`,
+        { summary: null },
+        { headers: owner.headers }
+      )
+      const records = wordpressRecords(wxr)
+      const container = getContainer()
+      const dry = await fillSummaries(container, records.id, records.products, false)
+      expect(dry).toMatchObject({ read: 4, updated: 1, found: 0, empty: 3, failed: 0 })
+      expect((await spoon()).product_extension.summary ?? []).toEqual([])
+
+      const filled = await fillSummaries(container, records.id, records.products, true)
+      expect(filled).toMatchObject({ updated: 1, failed: 0 })
+      expect((await spoon()).product_extension.summary).toEqual(["El yapımı kaşık"])
+
+      // Again: found, and the shop's own lines are never written over
+      await http.post(
+        `/admin/products/${moved.id}/catalog`,
+        { summary: ["Kayın ağacı"] },
+        { headers: owner.headers }
+      )
+      const again = await fillSummaries(container, records.id, records.products, true)
+      expect(again).toMatchObject({ updated: 0, found: 1 })
+      expect((await spoon()).product_extension.summary).toEqual(["Kayın ağacı"])
     })
 
     it("refreshes from a WordPress export only", async () => {

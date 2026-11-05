@@ -16,7 +16,8 @@ import { requireFeature } from "./require-feature"
 /**
  * A product's extension as the Store API shows it: its gift card mark
  * (`fields=+product_extension.is_gift_card`), its description document
- * (adr/0055, `+product_extension.description_doc`) and its withdrawal mark
+ * (adr/0055, `+product_extension.description_doc`), its short description
+ * (adr/0055 Ek 2026-11-05, `+product_extension.summary`) and its withdrawal mark
  * with the kind that reads it (`+product_extension.withdrawal_excluded,
  * +product_extension.kind`; adr/0052 Ek 2026-11-03, `productMarkOf`): on a
  * physical product a sealed good, returnable unopened (MSY md. 15/1-ç); on
@@ -27,6 +28,7 @@ export const STORE_GIFT_PRODUCT_FIELDS = [
   "product_extension",
   "product_extension.is_gift_card",
   "product_extension.description_doc",
+  "product_extension.summary",
   "product_extension.withdrawal_excluded",
   "product_extension.kind",
 ]
@@ -35,13 +37,14 @@ const EXTENSION = /product_extension/iu
 // The mark, through any relation that reaches a product (`items.product.…`)
 const GIFT_MARK = /^(?:[a-z_]+\.)*product_extension\.is_gift_card$/u
 // On the product's own answer only: a cart line has no use for them
-const PRODUCT_OWN = /^product_extension\.(?:description_doc|withdrawal_excluded|kind)$/u
+const PRODUCT_OWN = /^product_extension\.(?:description_doc|summary|withdrawal_excluded|kind)$/u
 
 /**
  * A product's extension in Store `fields`: its gift card mark and, on the
- * product itself, its description document, its withdrawal mark and its
- * kind. Its other columns (a successor, a restriction's reason) are the
- * shop's; any other spelling of the relation, in any case, is refused.
+ * product itself, its description document, its short description, its
+ * withdrawal mark and its kind. Its other columns (a successor, a
+ * restriction's reason) are the shop's; any other spelling of the
+ * relation, in any case, is refused.
  */
 export function restrictStoreProductExtension(
   req: MedusaRequest,

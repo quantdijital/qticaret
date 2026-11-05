@@ -79,6 +79,19 @@ const insecureLinks = forProduct((facts) =>
     : null
 )
 
+// adr/0055 Ek 2026-11-05: a hint, never a block; a sheet's row says nothing of it (left out)
+const shortDescription = forProduct((_facts, product) =>
+  product.summary === 0
+    ? {
+        ruleId: "P-CONT-09",
+        severity: "info",
+        category: "content",
+        params: {},
+        fix: { kind: "manual", action: "edit_summary" },
+      }
+    : null
+)
+
 const imageCount = forProduct((_facts, product) => {
   if (product.images === 0) {
     return {
@@ -191,6 +204,7 @@ export const PRODUCT_RULES: readonly Rule[] = [
   requiredAttributes,
   headingOrder,
   insecureLinks,
+  shortDescription,
   imageCount,
   imageAlt,
   prices,

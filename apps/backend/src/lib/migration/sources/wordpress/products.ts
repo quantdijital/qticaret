@@ -5,6 +5,7 @@ import type { WordpressProduct } from "./attributes"
 import { descriptiveAttributes } from "./attributes"
 import type { WordpressContext } from "./context"
 import { measureOf, note } from "./context"
+import { summaryFromExcerpt } from "./excerpt"
 import type { WxrItem } from "./reader"
 import { seoFieldsOf } from "./seo"
 import { BRAND_TAXONOMIES } from "./terms"
@@ -17,7 +18,9 @@ import { attributesOf, simpleVariant, variantsOf } from "./variations"
  * not hidden from the shop, else drafts; the trash is left out. Its
  * categories (the SEO plugin's primary one first), brand, SEO fields,
  * pictures (the main one, the gallery, the variations' own, with their
- * alt texts), the body as a content document (adr/0055), options and variants, descriptive attributes (for the
+ * alt texts), the body as a content document (adr/0055), the excerpt as
+ * the short description (adr/0055 Ek 2026-11-05; the body too when there is
+ * none), options and variants, descriptive attributes (for the
  * shop's attribute template), measures and old address. Grouped
  * and external products sell nothing of their own: left out, named.
  */
@@ -152,6 +155,14 @@ export function productOf(
   if (description.cut) {
     note(context, "product", key, "migration.wordpress_description_cut")
   }
+  // adr/0055 Ek 2026-11-05: the excerpt is the short description too, whatever the body
+  const summary = summaryFromExcerpt(item.excerpt, {
+    siteHost: context.siteHost,
+    title: item.title,
+  })
+  if (summary?.partial) {
+    note(context, "product", key, "migration.wordpress_summary_partial")
+  }
   const categories = ordered(context, item, ["product_cat"], PRIMARY_CATEGORY).map((term) =>
     context.taxonomies.categoryPath(term.slug, term.name)
   )
@@ -163,6 +174,7 @@ export function productOf(
     title: item.title.slice(0, 255),
     description: description.text,
     description_doc: description.doc,
+    summary: summary?.lines ?? null,
     status: item.status === "publish" && !hidden(item) && !item.password ? "published" : "draft",
     categories: categories.slice(0, 20),
     brand: brand ? (context.taxonomies.term(brand.domain, brand.slug)?.name ?? brand.name) : null,

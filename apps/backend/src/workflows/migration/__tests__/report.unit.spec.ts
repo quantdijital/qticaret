@@ -55,5 +55,12 @@ describe("a migration's report summary (adr/0042 §9, Ek 2026-11-03)", () => {
     expect(summaryOf("apply", counts()).some((row) => String(row[0]).startsWith("Biçimli"))).toBe(
       false
     )
+    // adr/0055 Ek 2026-11-05: and those with a short description, for a source that keeps them
+    withDocuments.product.summaries = 3
+    expect(summaryOf("check", withDocuments).slice(-2)).toEqual([
+      ["Biçimli açıklamayla gelecek ürünler", 2],
+      ["Kısa açıklamayla gelecek ürünler", 3],
+    ])
+    expect(summaryOf("apply", withDocuments).at(-1)).toEqual(["Kısa açıklamayla gelen ürünler", 3])
   })
 })

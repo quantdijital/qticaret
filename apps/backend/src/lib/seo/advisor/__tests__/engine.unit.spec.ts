@@ -97,6 +97,21 @@ describe("the advisor", () => {
     expect(result.categories).toMatchObject({ structured: 0, images: 0 })
   })
 
+  it("hints at a missing short description without costing the score (adr/0055 Ek 2026-11-05)", () => {
+    const empty = good({ product: { ...PRODUCT, summary: 0 } })
+    expect(findIssues(empty)).toEqual([
+      expect.objectContaining({
+        ruleId: "P-CONT-09",
+        severity: "info",
+        fix: { kind: "manual", action: "edit_summary" },
+      }),
+    ])
+    expect(assess(empty).score).toBe(100)
+    expect(ids(good({ product: { ...PRODUCT, summary: 3 } }))).not.toContain("P-CONT-09")
+    // A sheet's row does not say: no hint
+    expect(ids(good())).not.toContain("P-CONT-09")
+  })
+
   it("scores the same page the same way every time", () => {
     const facts = good({ product: { ...PRODUCT, images: 1 } })
     expect(assess(facts)).toEqual(assess(facts))

@@ -3,7 +3,8 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { deepestCategory } from "../../lib/catalog"
 import { feedItemsOf } from "../../lib/feeds"
 import type { FeedItem, FeedPlace, FeedShop } from "../../lib/feeds"
-import { plainText } from "../../lib/seo/resolve"
+import { summaryOf } from "../../lib/catalog/summary"
+import { productText } from "../../lib/seo/product-text"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type {
   MarketingSettings,
@@ -36,7 +37,11 @@ interface FeedProductRow extends Omit<FactRow, "product_extension"> {
   brand?: { name: string } | null
   categories?: (CategoryRow | null)[] | null
   product_extension?:
-    (NonNullable<FactRow["product_extension"]> & { primary_category_id?: string | null }) | null
+    | (NonNullable<FactRow["product_extension"]> & {
+        primary_category_id?: string | null
+        summary?: string[] | null
+      })
+    | null
 }
 
 const chainOf = (row: CategoryRow): string[] => (row.mpath ?? row.id).split(".").filter(Boolean)
@@ -91,6 +96,7 @@ export async function catalogItems(
         "categories.id",
         "categories.mpath",
         "product_extension.primary_category_id",
+        "product_extension.summary",
         ...PRODUCT_FACT_FIELDS,
       ],
       filters: { status: "published" },
@@ -120,7 +126,8 @@ export async function catalogItems(
         const facts = productFacts(
           row,
           row.brand?.name ?? null,
-          plainText(row.description ?? ""),
+          // adr/0055 Ek 2026-11-05: without a description, the short description's lines
+          productText(row.description ?? "", summaryOf(row.product_extension?.summary)),
           displays,
           shipping,
           undefined,

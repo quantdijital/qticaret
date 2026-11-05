@@ -40,6 +40,11 @@ export interface SetProductCatalogInput {
    * the document and keeps the text.
    */
   description_doc?: ContentDoc | null | undefined
+  /**
+   * Its short description's lines, tidied by the request's schema
+   * (adr/0055 Ek 2026-11-05, `lib/catalog/summary`); none or null clears it.
+   */
+  summary?: string[] | null | undefined
   /** Per variant: the MPN, and the unit cost in lira (VAT excluded, F11.4). */
   variants?:
     | Record<string, { mpn?: string | null | undefined; cost?: number | null | undefined }>
@@ -62,6 +67,7 @@ export interface ExtensionFields {
   is_gift_card: boolean
   addons: StoredAddons | null
   description_doc: DescriptionDoc | null
+  summary: string[] | null
 }
 
 export interface ProductCatalogPlan {
@@ -149,6 +155,7 @@ const EXTENSION_KEYS = [
   "is_gift_card",
   "addons",
   "description_doc",
+  "summary",
 ] as const
 
 type ExtensionChanges = Omit<SetProductCatalogInput, "addons"> & {
@@ -247,8 +254,11 @@ export const planProductCatalogStep = createStep(
       doc: extension?.description_doc ?? null,
       description: product.description ?? null,
     })
+    // No lines are kept as none
+    const summary =
+      input.summary === undefined ? undefined : input.summary?.length ? input.summary : null
     const { set, previous } = changesOf(
-      { ...input, kind, addons, description_doc: description.doc },
+      { ...input, kind, addons, description_doc: description.doc, summary },
       extension
     )
     const plan: ProductCatalogPlan = {

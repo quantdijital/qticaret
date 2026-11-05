@@ -238,6 +238,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The price of some items in the cart changed. Check the new total and start the payment again.",
   "catalog.description_blocks":
     "A product description takes no pictures or product and category cards; add pictures to the product's images.",
+  "catalog.summary_too_many": "A short description has 5 lines at most.",
+  "catalog.summary_too_long": "Each line of the short description has 90 characters at most.",
+  "catalog.summary_invalid":
+    "The short description holds an invisible or control character; type the line again.",
   "catalog.addons_disabled":
     "Add-ons are off. Turn them on in Settings > Features; remove items with add-ons from the cart.",
   "addons.id_invalid": "The add-on's id is not valid.",
@@ -1018,6 +1022,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The picture is not in the file's media library; it was not moved. You can add it to the product.",
   "migration.wordpress_description_cut":
     "The product description is longer than a page may be; it was cut at a section.",
+  "migration.wordpress_summary_partial":
+    "The short description did not split into 5 short lines; its first sentence came as one line (or its first 5 items). Complete it on the product's page.",
   "migration.wordpress_body_cut": "The text is too long; it was cut at a section.",
   "migration.wordpress_body_media":
     "Pictures or widgets in the text (a product grid, a gallery) were not moved; the text was. Add pictures in the content editor.",

@@ -51,9 +51,36 @@ const isDoc = (value: unknown): value is { content: Parameters<typeof factsFromB
   (value as { type?: unknown }).type === "doc" &&
   Array.isArray((value as { content?: unknown }).content)
 
-/** The facts of a source product's description document; none without one. */
-export const descriptionFactsOf = (doc: unknown): FactRow[] =>
-  isDoc(doc) ? factsFromBlocks(doc.content) : []
+type Blocks = Parameters<typeof factsFromBlocks>[0]
+
+/**
+ * The facts of a source product's description document and of its short
+ * description's lines read as a list ("Namlu: 9 cm"; adr/0055 Ek
+ * 2026-11-05); none without either.
+ */
+export function descriptionFactsOf(doc: unknown, summary?: readonly string[] | null): FactRow[] {
+  const own = isDoc(doc) ? factsFromBlocks(doc.content) : []
+  if (!summary?.length) {
+    return own
+  }
+  // Read apart: a heading at the document's end is no section of the lines
+  const list: Blocks = [
+    {
+      type: "bulletList",
+      content: summary.map((line) => ({
+        type: "listItem",
+        content: [{ type: "paragraph", content: [{ type: "text", text: line }] }],
+      })),
+    },
+  ]
+  const said = new Set(own.map((row) => `${row.label}\u0000${row.value}`))
+  return [
+    ...own,
+    ...factsFromBlocks(list, "summary").filter(
+      (row) => !said.has(`${row.label}\u0000${row.value}`)
+    ),
+  ]
+}
 
 const matchTemplate = (template: FactTemplate): MatchTemplate => ({
   id: template.handle,

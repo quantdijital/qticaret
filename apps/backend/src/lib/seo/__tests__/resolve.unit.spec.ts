@@ -177,6 +177,35 @@ describe("resolveSeoPayload", () => {
     })
     expect(payload.description).toBe("Yıkanmış ketenden rahat kesim gömlek.")
   })
+
+  it("falls back to the short description first, within 155 characters (adr/0055 Ek 2026-11-05)", () => {
+    const empty = { ...shop, descriptionTemplates: { product: "{fiyat_cümlesi}" } }
+    const summary = ["Yıkanmış keten", "Rahat kesim", "Sedef düğmeli;"]
+    const payload = resolveSeoPayload(product({ tokens: {}, summary }), empty)
+    expect(payload.description).toBe("Yıkanmış keten. Rahat kesim. Sedef düğmeli.")
+    expect(payload.openGraph.description).toBe(payload.description)
+    expect(payload.twitter.description).toBe(payload.description)
+    // Whole lines only: the fifth would pass 155
+    const long = Array.from({ length: 5 }, (_, index) => `${String(index + 1)}. ${"x".repeat(40)}`)
+    const cut = resolveSeoPayload(product({ tokens: {}, summary: long }), empty).description
+    expect(cut.length).toBeLessThanOrEqual(155)
+    expect(cut.endsWith(`${"x".repeat(40)}.`)).toBe(true)
+    // The shop's own SEO description still wins
+    const own = resolveSeoPayload(
+      product({
+        summary,
+        overrides: {
+          seo_title: null,
+          seo_description: "Kendi açıklaması.",
+          canonical_override: null,
+          robots_override: null,
+          og_image_alt: null,
+        },
+      }),
+      shop
+    )
+    expect(own.description).toBe("Kendi açıklaması.")
+  })
 })
 
 describe("content pages (F3.16)", () => {

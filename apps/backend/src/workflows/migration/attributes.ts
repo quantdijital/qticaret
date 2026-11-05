@@ -207,7 +207,10 @@ export async function planProductAttributes(
   products: readonly AttributedProduct[]
 ): Promise<Map<string, AttributePlan>> {
   const read = products
-    .map((product) => ({ product, facts: descriptionFactsOf(product.description_doc) }))
+    .map((product) => ({
+      product,
+      facts: descriptionFactsOf(product.description_doc, product.summary),
+    }))
     .filter(({ product, facts }) => (product.attributes?.length ?? 0) > 0 || facts.length > 0)
   const templates = read.length > 0 ? await attributeTemplates(container) : []
   return new Map(

@@ -30,6 +30,7 @@
     "search:rebuild": "medusa exec ./src/scripts/search-rebuild.ts",
     "search:status": "medusa exec ./src/scripts/search-status.ts",
     "links:rewrite": "medusa exec ./src/scripts/content-links.ts",
+    "summary:backfill": "medusa exec ./src/scripts/summary-backfill.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "pnpm test:unit",

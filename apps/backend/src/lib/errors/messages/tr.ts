@@ -246,6 +246,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Sepetteki bazı ürünlerin fiyatı değişti. Yeni tutarı kontrol edip ödemeyi yeniden başlatın.",
   "catalog.description_blocks":
     "Ürün açıklamasında görsel ve ürün ya da kategori kartı kullanılamaz; görselleri ürünün görsellerine ekleyin.",
+  "catalog.summary_too_many": "Kısa açıklama en çok 5 madde olabilir.",
+  "catalog.summary_too_long": "Kısa açıklamanın her maddesi en çok 90 karakter olabilir.",
+  "catalog.summary_invalid":
+    "Kısa açıklamada görünmeyen ya da denetim karakteri var; maddeyi yeniden yazın.",
   "catalog.addons_disabled":
     "Ek seçenekler kapalı. Açmak için Ayarlar > Özellikler'e gidin; sepette ek seçenekli ürün varsa çıkarın.",
   "addons.id_invalid": "Ek seçeneğin kimliği geçerli değil.",
@@ -1013,6 +1017,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Görsel dosyanın ortam kütüphanesinde yok; taşınmadı. Ürüne elle ekleyebilirsiniz.",
   "migration.wordpress_description_cut":
     "Ürün açıklaması bir sayfanın sınırından uzun; bir bölüm sınırında kesildi.",
+  "migration.wordpress_summary_partial":
+    "Kısa açıklama 5 kısa maddeye bölünemedi; ilk cümlesi tek madde olarak alındı (ya da ilk 5 maddesi). Ürün sayfasında tamamlayın.",
   "migration.wordpress_body_cut": "Metin çok uzun; bir bölüm sınırında kesildi.",
   "migration.wordpress_body_media":
     "Metindeki görseller ya da ürün vitrini, galeri gibi bileşenler taşınmadı; yazı taşındı. Görselleri içerik düzenleyicide ekleyebilirsiniz.",

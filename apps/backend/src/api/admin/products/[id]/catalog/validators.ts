@@ -2,6 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import { RESTRICTIONS } from "../../../../../lib/catalog"
 import { AddonsInput } from "../../../../../lib/catalog/addons"
 import { productDescriptionDoc } from "../../../../../lib/catalog/description"
+import { productSummary } from "../../../../../lib/catalog/summary"
 import { isCleanText } from "../../../../../lib/security"
 import {
   PRODUCT_CONDITIONS,
@@ -57,6 +58,8 @@ export const AdminPostProductCatalog = z
     addons: AddonsInput.nullable().optional(),
     // adr/0055: the long description as a content document; the server writes its plain text
     description_doc: productDescriptionDoc.nullable().optional(),
+    // adr/0055 Ek 2026-11-05: the short description, up to five plain lines; none or null clears it
+    summary: productSummary.nullable().optional(),
     variants: z
       .record(
         id,

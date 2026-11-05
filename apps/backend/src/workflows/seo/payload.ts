@@ -1,13 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import {
-  SHORT_EXCERPT,
-  excerpt,
-  plainText,
-  priceSentence,
-  resolveSeoPayload,
-  shippingSentence,
-} from "../../lib/seo/resolve"
+import { priceSentence, resolveSeoPayload, shippingSentence } from "../../lib/seo/resolve"
 import { deepestCategory } from "../../lib/catalog"
+import { summaryOf } from "../../lib/catalog/summary"
+import { productText, shortDescription } from "../../lib/seo/product-text"
 import type { SeoPayload, SeoSubject } from "../../lib/seo/resolve"
 import type { UrlOwner } from "../../modules/url-registry/validation"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
@@ -52,7 +47,11 @@ interface ProductRow extends Omit<FactRow, "product_extension"> {
   subtitle?: string | null
   description?: string | null
   categories?: (CategoryRow | null)[] | null
-  product_extension?: { primary_category_id?: string | null; condition?: Condition | null } | null
+  product_extension?: {
+    primary_category_id?: string | null
+    condition?: Condition | null
+    summary?: string[] | null
+  } | null
   attribute_values?: (HighlightValue | null)[] | null
   brand?: { name: string } | null
   media_assets?: (MediaRow | null)[] | null
@@ -99,6 +98,7 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
       "categories.name",
       "categories.mpath",
       "product_extension.primary_category_id",
+      "product_extension.summary",
       ...PRODUCT_FACT_FIELDS,
       "variants.prices.amount",
       "variants.prices.currency_code",
@@ -117,6 +117,8 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
   const category = primaryCategory(product)
   const description = product.description ?? ""
   const subtitle = product.subtitle?.trim() ?? ""
+  // adr/0055 Ek 2026-11-05: the short description's lines, the text's stand-in where it says less
+  const summary = summaryOf(product.product_extension?.summary)
   // The price the shopper pays now and, where the 30-day rule allows, the one struck through
   const displays = await priceDisplays(
     container,
@@ -132,7 +134,7 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
     ...productFacts(
       product,
       product.brand?.name ?? null,
-      plainText(description),
+      productText(description, summary),
       displays,
       shipping,
       returns,
@@ -153,7 +155,7 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
     description,
     tokens: {
       kategori: category?.name ?? null,
-      kısa_açıklama: subtitle !== "" ? subtitle : excerpt(description, SHORT_EXCERPT),
+      kısa_açıklama: shortDescription(summary, subtitle, description),
       fiyat_cümlesi: priceSentence(facts.variants.flatMap((variant) => variant.price ?? [])),
       öne_çıkan_attribute: highlightText(product.attribute_values ?? []),
       marka: product.brand?.name ?? null,
@@ -170,6 +172,7 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
     ),
     trail: category ? await trailOf(container, category, true) : [],
     product: facts,
+    summary,
   }
   return subject
 }

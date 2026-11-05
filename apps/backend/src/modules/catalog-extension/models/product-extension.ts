@@ -32,6 +32,9 @@ export const PRODUCT_KINDS = ["physical", "digital", "service"] as const
  * - `description_doc`: the long description as a content document
  *   (adr/0055, `lib/catalog/description`); `product.description` keeps its
  *   plain text. Null: the product has plain text only.
+ * - `summary`: the short description as up to five short plain-text lines
+ *   (`lib/catalog/summary`), shown as a list under the product's name above
+ *   its price, and the meta description's fallback. Null: none.
  */
 export const ProductExtension = model.define("product_extension", {
   id: model.id({ prefix: "pext" }).primaryKey(),
@@ -44,4 +47,5 @@ export const ProductExtension = model.define("product_extension", {
   is_gift_card: model.boolean().default(false),
   addons: model.json().nullable(),
   description_doc: model.json().nullable(),
+  summary: model.array().nullable(),
 })

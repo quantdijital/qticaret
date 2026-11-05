@@ -59,6 +59,12 @@ export interface SourceProduct {
    * is the document's own.
    */
   description_doc?: ContentDoc | null | undefined
+  /**
+   * The short description's lines (adr/0055 Ek 2026-11-05), where the
+   * source keeps one (WooCommerce's excerpt): null for a product without;
+   * left out by a source that never has one.
+   */
+  summary?: string[] | null | undefined
   status: "published" | "draft"
   /** Category paths, the first the product's main one. */
   categories: string[][]

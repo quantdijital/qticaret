@@ -33,6 +33,8 @@ export interface KindCounts {
    * made with one or refreshed (would be, in a dry run).
    */
   documents?: number
+  /** Products: with a short description (adr/0055 Ek 2026-11-05), made (would be). */
+  summaries?: number
   /**
    * Attributes: values the new products' descriptions stated, written to
    * their template's fields (would be), and rows left for the panel
@@ -96,7 +98,7 @@ function seoRows(mode: "check" | "apply", counts: RunCounts): SheetCell[][] {
 
 // Products whose description moved as a content document (adr/0055); none for a source without
 function documentRows(mode: "check" | "apply", counts: RunCounts): SheetCell[][] {
-  const documents = counts.product.documents
+  const { documents, summaries } = counts.product
   if (documents === undefined) {
     return []
   }
@@ -108,6 +110,17 @@ function documentRows(mode: "check" | "apply", counts: RunCounts): SheetCell[][]
         : "Biçimli açıklamayla gelen ürünler",
       documents,
     ],
+    // adr/0055 Ek 2026-11-05: a source that keeps short descriptions (WooCommerce's excerpt)
+    ...(summaries === undefined
+      ? []
+      : [
+          [
+            mode === "check"
+              ? "Kısa açıklamayla gelecek ürünler"
+              : "Kısa açıklamayla gelen ürünler",
+            summaries,
+          ],
+        ]),
   ]
 }
 

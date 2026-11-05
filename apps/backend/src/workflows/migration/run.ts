@@ -170,6 +170,11 @@ export async function runMigration(
   if (givesDocuments) {
     productCounts.documents = 0
   }
+  // adr/0055 Ek 2026-11-05: likewise a source that keeps short descriptions
+  const givesSummaries = products.some((product) => product.summary !== undefined)
+  if (givesSummaries) {
+    productCounts.summaries = 0
+  }
   const made = new Set<string>()
   const moved = new Set<string>()
   const batches = batchesOf(products)
@@ -198,6 +203,9 @@ export async function runMigration(
     productCounts.failed += summary?.failed ?? 0
     if (givesDocuments) {
       productCounts.documents = (productCounts.documents ?? 0) + outcome.documents
+    }
+    if (givesSummaries) {
+      productCounts.summaries = (productCounts.summaries ?? 0) + outcome.summaries
     }
     productRows.push(...rows)
     problems.push(...left.map((problem) => ({ ...problem, kind: "product" as const })))

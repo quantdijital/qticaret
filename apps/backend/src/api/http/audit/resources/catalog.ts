@@ -22,6 +22,7 @@ interface ProductRow {
     is_gift_card?: boolean | null
     addons?: unknown
     description_doc?: unknown
+    summary?: string[] | null
   } | null
 }
 
@@ -65,6 +66,8 @@ async function catalogSnapshot(scope: Resolver, productId: string): Promise<Snap
     // adr/0052: one value, so a change shows as before and after
     addons: JSON.stringify(extension?.addons ?? null),
     description_doc: docDigest(extension?.description_doc),
+    // adr/0055 Ek 2026-11-05: the short description's lines, one value (shop's text, no person's)
+    summary: (extension?.summary ?? []).join(" | ") || null,
     ...Object.fromEntries(
       (product.variants ?? []).flatMap((variant): [string, string | number | null][] =>
         variant
