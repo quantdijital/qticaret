@@ -1,19 +1,29 @@
-import { createHash, randomBytes } from "node:crypto"
+import { randomBytes } from "node:crypto"
 import { createServer } from "node:http"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import type { AddressInfo, Socket } from "node:net"
+import { businessProfileData } from "./business-data"
+import { answerBusinessProfile, letterPhoto } from "./business-profile"
+import type { FakeBusinessProfile } from "./business-profile"
+import { approvalOf, consentPage } from "./consent-page"
+import { oauthFlow } from "./oauth-flow"
+import type { OauthClient } from "./oauth-flow"
+import { answerSearchConsole } from "./search-console"
+import type { SearchConsoleState } from "./search-console"
 
 /**
  * A stand-in for Google (F10 M13): the OAuth web server flow with PKCE
- * (`/o/oauth2/v2/auth`, `/token`, `/revoke`) and the Merchant API calls the
- * shop makes (`accounts/v1`, `datasources/v1`, `products/v1`). It keeps
- * what it was sent, and checks what Google checks: the client, the code's
- * verifier and redirect, the bearer token, the data source.
+ * (`/o/oauth2/v2/auth` as a page for a browser, `/token`, `/revoke`), the
+ * Merchant API calls the shop makes (`accounts/v1`, `datasources/v1`,
+ * `products/v1`), Search Console and CrUX (F10.11) and Business Profile's
+ * accounts, locations and reviews (adr/0058). It keeps what it was sent,
+ * and checks what Google checks: the client, the code's verifier and
+ * redirect, the bearer token and its scopes, the data source.
  */
 
-export interface FakeGoogle {
+export interface FakeGoogle extends SearchConsoleState {
   url: string
-  client: { clientId: string; clientSecret: string }
+  client: OauthClient
   /** The Merchant Center account the connected Google account reaches. */
   merchantId: string
   email: string
@@ -23,25 +33,8 @@ export interface FakeGoogle {
   inserts: { count: number }
   dataSources: string[]
   revoked: string[]
-  /** Search Console (F10.11): the properties the account reaches, with its permission. */
-  sites: { siteUrl: string; permissionLevel: string }[]
-  /** Search Analytics' rows by page for a period; none unless a test says. */
-  searchRows: (range: { startDate: string; endDate: string }) => {
-    keys: string[]
-    clicks: number
-    impressions: number
-    ctr: number
-    position: number
-  }[]
-  /** URL Inspection's verdict by URL; PASS when not named. */
-  inspections: Map<string, { verdict: string; coverageState: string }>
-  /** URLs inspected, in order. */
-  inspected: string[]
-  /** Sitemaps submitted, as `<property> <sitemap>`. */
-  sitemaps: string[]
-  /** CrUX: the API key it takes, and p75 per form factor (none: no data). */
-  cruxKey: string
-  crux: Map<string, { lcp: number; inp: number; cls: string }>
+  /** Business Profile (adr/0058): its accounts, locations and reviews, as tests change them. */
+  business: FakeBusinessProfile
   /**
    * Plays the consent screen: the address Google sends the browser back to.
    * `scopes`: what the shop allows (all asked for, unless a test says less).
@@ -54,32 +47,46 @@ export interface FakeGoogle {
   close: () => Promise<void>
 }
 
-const WEBMASTERS = "https://www.googleapis.com/auth/webmasters"
+export interface FakeGoogleOptions {
+  /** 0 (any free port) unless a developer's runner names one. */
+  port?: number
+  /** The platform's OAuth client; a random one unless fixed (a developer's `.env` keeps it). */
+  client?: OauthClient
+  email?: string
+  /** The business's name and city on its Business Profile. */
+  business?: { title?: string; city?: string; district?: string }
+  /** Where refresh tokens and grants are kept between runs (a developer's runner). */
+  stateFile?: string
+}
 
 const randomId = (bytes = 16) => randomBytes(bytes).toString("base64url")
 
-export async function startFakeGoogle(): Promise<FakeGoogle> {
-  const client = { clientId: `${randomId(8)}.apps.googleusercontent.com`, clientSecret: randomId() }
+export async function startFakeGoogle(options: FakeGoogleOptions = {}): Promise<FakeGoogle> {
+  const client = options.client ?? {
+    clientId: `${randomId(8)}.apps.googleusercontent.com`,
+    clientSecret: randomId(),
+  }
   const merchantId = String(100_000_000 + Math.floor(Math.random() * 800_000_000))
-  const email = `magaza-${randomId(4).toLowerCase()}@example.com`
-  const codes = new Map<string, { challenge: string; redirectUri: string; scope: string }>()
-  // Each token with the scopes the shop allowed
-  const refreshTokens = new Map<string, string>()
-  const accessTokens = new Map<string, string>()
-  const fake = {
+  const email = options.email ?? `magaza-${randomId(4).toLowerCase()}@example.com`
+  const flow = oauthFlow(client, email, options.stateFile)
+  const searchConsole: SearchConsoleState = {
     sites: [{ siteUrl: "sc-domain:magaza.example.com", permissionLevel: "siteOwner" }],
-    searchRows: (() => []) as FakeGoogle["searchRows"],
-    inspections: new Map<string, { verdict: string; coverageState: string }>(),
-    inspected: [] as string[],
-    sitemaps: [] as string[],
+    searchRows: () => [],
+    inspections: new Map(),
+    inspected: [],
+    sitemaps: [],
     cruxKey: randomId(),
-    crux: new Map<string, { lcp: number; inp: number; cls: string }>(),
+    crux: new Map(),
   }
   const products = new Map<string, Record<string, unknown>>()
   const inserts = { count: 0 }
   const dataSources: string[] = []
-  const revoked: string[] = []
   const sockets = new Set<Socket>()
+  // Filled once the port is known: the reviewers' photos are served here
+  const business = {
+    approved: true,
+    reviewPages: { count: 0 },
+  } as FakeBusinessProfile
 
   const json = (res: ServerResponse, status: number, body: unknown) => {
     res.writeHead(status, { "content-type": "application/json" }).end(JSON.stringify(body))
@@ -95,138 +102,57 @@ export async function startFakeGoogle(): Promise<FakeGoogle> {
         resolve(body)
       })
     })
-  const idToken = () =>
-    [
-      Buffer.from(JSON.stringify({ alg: "none" })).toString("base64url"),
-      Buffer.from(JSON.stringify({ email, email_verified: true })).toString("base64url"),
-      "",
-    ].join(".")
 
   const server = createServer((req, res) => {
     void (async () => {
       const url = new URL(req.url ?? "/", "http://fake")
       const body = await bodyOf(req)
       const bearer = (req.headers.authorization ?? "").replace(/^Bearer /, "")
+      if (req.method === "GET" && url.pathname === "/o/oauth2/v2/auth") {
+        res
+          .writeHead(200, { "content-type": "text/html; charset=utf-8" })
+          .end(consentPage(url.search.slice(1), email))
+        return
+      }
+      if (req.method === "POST" && url.pathname === "/o/oauth2/v2/approve") {
+        const { query, answer, scopes } = approvalOf(body)
+        const back = flow.consent(`${url.origin}/o/oauth2/v2/auth?${query}`, answer, scopes, true)
+        res.writeHead(303, { location: back }).end()
+        return
+      }
+      if (req.method === "GET" && url.pathname.startsWith("/a/")) {
+        const id = url.pathname.slice(3).split("=")[0] ?? ""
+        const review = [...business.reviews.values()]
+          .flat()
+          .find((each) => each.reviewer.profilePhotoUrl?.includes(`/a/${id}=`))
+        res
+          .writeHead(review ? 200 : 404, { "content-type": "image/svg+xml" })
+          .end(review ? letterPhoto(id, review.reviewer.displayName) : "")
+        return
+      }
       if (req.method === "POST" && url.pathname === "/token") {
-        const form = new URLSearchParams(body)
-        if (
-          form.get("client_id") !== client.clientId ||
-          form.get("client_secret") !== client.clientSecret
-        ) {
-          json(res, 401, { error: "invalid_client" })
-          return
-        }
-        if (form.get("grant_type") === "authorization_code") {
-          const code = codes.get(form.get("code") ?? "")
-          codes.delete(form.get("code") ?? "")
-          const verifier = form.get("code_verifier") ?? ""
-          const challenge = createHash("sha256").update(verifier).digest("base64url")
-          if (code?.challenge !== challenge || code.redirectUri !== form.get("redirect_uri")) {
-            json(res, 400, { error: "invalid_grant" })
-            return
-          }
-          const refresh = `1//${randomId(24)}`
-          const access = `ya29.${randomId(24)}`
-          refreshTokens.set(refresh, code.scope)
-          accessTokens.set(access, code.scope)
-          json(res, 200, {
-            access_token: access,
-            expires_in: 3599,
-            refresh_token: refresh,
-            scope: code.scope,
-            token_type: "Bearer",
-            id_token: idToken(),
-          })
-          return
-        }
-        const granted = refreshTokens.get(form.get("refresh_token") ?? "")
-        if (form.get("grant_type") === "refresh_token" && granted !== undefined) {
-          const access = `ya29.${randomId(24)}`
-          accessTokens.set(access, granted)
-          json(res, 200, { access_token: access, expires_in: 3599, token_type: "Bearer" })
-          return
-        }
-        json(res, 400, { error: "invalid_grant" })
+        const answer = flow.token(new URLSearchParams(body))
+        json(res, answer.status, answer.body)
         return
       }
       if (req.method === "POST" && url.pathname === "/revoke") {
-        const token = new URLSearchParams(body).get("token") ?? ""
-        refreshTokens.delete(token)
-        revoked.push(token)
+        flow.revoke(new URLSearchParams(body).get("token") ?? "")
         json(res, 200, {})
         return
       }
       if (req.method === "POST" && url.pathname === "/v1/records:queryRecord") {
-        if (url.searchParams.get("key") !== fake.cruxKey) {
-          apiError(res, 400, "INVALID_ARGUMENT")
-          return
-        }
-        const asked = JSON.parse(body) as { formFactor?: string }
-        const metrics = fake.crux.get(asked.formFactor ?? "")
-        if (!metrics) {
-          apiError(res, 404, "NOT_FOUND")
-          return
-        }
-        json(res, 200, {
-          record: {
-            key: asked,
-            metrics: {
-              largest_contentful_paint: { percentiles: { p75: metrics.lcp } },
-              interaction_to_next_paint: { percentiles: { p75: metrics.inp } },
-              cumulative_layout_shift: { percentiles: { p75: metrics.cls } },
-            },
-          },
-        })
+        answerSearchConsole(searchConsole, req.method, url, body, "", json, res)
         return
       }
-      const scope = accessTokens.get(bearer)
+      const scope = flow.scopeOf(bearer)
       if (scope === undefined) {
         apiError(res, 401, "UNAUTHENTICATED")
         return
       }
-      const consoleCall =
-        url.pathname.startsWith("/webmasters/v3/") || url.pathname.startsWith("/v1/urlInspection/")
-      if (consoleCall && !scope.split(" ").includes(WEBMASTERS)) {
-        apiError(res, 403, "PERMISSION_DENIED")
+      if (answerSearchConsole(searchConsole, req.method ?? "GET", url, body, scope, json, res)) {
         return
       }
-      if (req.method === "GET" && url.pathname === "/webmasters/v3/sites") {
-        json(res, 200, { siteEntry: fake.sites })
-        return
-      }
-      const sitePath = /^\/webmasters\/v3\/sites\/([^/]+)\/(.+)$/.exec(url.pathname)
-      const site = sitePath?.[1] ? decodeURIComponent(sitePath[1]) : ""
-      const known = fake.sites.some((each) => each.siteUrl === site)
-      if (sitePath && !known) {
-        apiError(res, 403, "PERMISSION_DENIED")
-        return
-      }
-      if (req.method === "PUT" && sitePath?.[2]?.startsWith("sitemaps/")) {
-        fake.sitemaps.push(`${site} ${decodeURIComponent(sitePath[2].slice("sitemaps/".length))}`)
-        res.writeHead(204).end()
-        return
-      }
-      if (req.method === "POST" && sitePath?.[2] === "searchAnalytics/query") {
-        const asked = JSON.parse(body) as { startDate: string; endDate: string }
-        json(res, 200, { rows: fake.searchRows(asked), responseAggregationType: "byPage" })
-        return
-      }
-      if (req.method === "POST" && url.pathname === "/v1/urlInspection/index:inspect") {
-        const asked = JSON.parse(body) as { inspectionUrl: string; siteUrl: string }
-        if (!fake.sites.some((each) => each.siteUrl === asked.siteUrl)) {
-          apiError(res, 403, "PERMISSION_DENIED")
-          return
-        }
-        fake.inspected.push(asked.inspectionUrl)
-        const verdict = fake.inspections.get(asked.inspectionUrl) ?? {
-          verdict: "PASS",
-          coverageState: "Submitted and indexed",
-        }
-        json(res, 200, {
-          inspectionResult: {
-            indexStatusResult: { ...verdict, lastCrawlTime: new Date().toISOString() },
-          },
-        })
+      if (answerBusinessProfile(business, req.method ?? "GET", url, scope, json, res)) {
         return
       }
       const account = /^\/(?:accounts|datasources|products)\/v1\/accounts\/(\d+)/.exec(
@@ -292,59 +218,23 @@ export async function startFakeGoogle(): Promise<FakeGoogle> {
     sockets.add(socket)
     socket.on("close", () => sockets.delete(socket))
   })
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
+  await new Promise<void>((resolve) => server.listen(options.port ?? 0, "127.0.0.1", resolve))
   const address = server.address() as AddressInfo
+  const url = `http://127.0.0.1:${String(address.port)}`
+  Object.assign(business, businessProfileData({ ...options.business, photoBase: url }))
 
-  return {
-    url: `http://127.0.0.1:${String(address.port)}`,
+  return Object.assign(searchConsole, {
+    url,
     client,
     merchantId,
     email,
     products,
     inserts,
     dataSources,
-    revoked,
-    get sites() {
-      return fake.sites
-    },
-    set sites(value) {
-      fake.sites = value
-    },
-    get searchRows() {
-      return fake.searchRows
-    },
-    set searchRows(value) {
-      fake.searchRows = value
-    },
-    inspections: fake.inspections,
-    inspected: fake.inspected,
-    sitemaps: fake.sitemaps,
-    cruxKey: fake.cruxKey,
-    crux: fake.crux,
-    consent: (authorizationUrl, answer = "allow", scopes) => {
-      const asked = new URL(authorizationUrl)
-      const params = asked.searchParams
-      const redirect = new URL(params.get("redirect_uri") ?? "")
-      redirect.searchParams.set("state", params.get("state") ?? "")
-      const valid =
-        params.get("client_id") === client.clientId &&
-        params.get("response_type") === "code" &&
-        params.get("code_challenge_method") === "S256" &&
-        params.get("access_type") === "offline" &&
-        (params.get("scope") ?? "").split(" ").includes("https://www.googleapis.com/auth/content")
-      if (answer === "deny" || !valid) {
-        redirect.searchParams.set("error", valid ? "access_denied" : "invalid_request")
-        return Promise.resolve(redirect.toString())
-      }
-      const code = `4/${randomId(24)}`
-      codes.set(code, {
-        challenge: params.get("code_challenge") ?? "",
-        redirectUri: params.get("redirect_uri") ?? "",
-        scope: (scopes ?? (params.get("scope") ?? "").split(" ")).join(" "),
-      })
-      redirect.searchParams.set("code", code)
-      return Promise.resolve(redirect.toString())
-    },
+    revoked: flow.revoked,
+    business,
+    consent: (authorizationUrl: string, answer?: "allow" | "deny", scopes?: string[]) =>
+      Promise.resolve(flow.consent(authorizationUrl, answer, scopes)),
     close: async () => {
       for (const socket of sockets) {
         socket.destroy()
@@ -355,5 +245,5 @@ export async function startFakeGoogle(): Promise<FakeGoogle> {
         })
       )
     },
-  }
+  })
 }
