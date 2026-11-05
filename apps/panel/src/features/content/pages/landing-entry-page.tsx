@@ -1,17 +1,19 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
-import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
+import { revealSection } from "@/components/patterns/use-section-open"
 import { landingQuery, useUpdateLanding } from "@/features/content/api/landings"
 import type { LandingDetail } from "@/features/content/api/landings"
 import { ContentStatusBadge } from "@/features/content/components/content-status"
 import { DocumentCard } from "@/features/content/components/document-card"
+import { EditorLayout } from "@/features/content/components/editor-layout"
 import { LandingActions } from "@/features/content/components/landing-actions"
 import { LandingGeneralCard } from "@/features/content/components/landing-general-card"
 import { LandingStandingCard } from "@/features/content/components/landing-standing-card"
 import { docText } from "@/features/content/doc-text"
+import { findingsNote, useSectionFindings } from "@/features/content/section-findings"
 import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
 import { SeoCard } from "@/features/seo/components/seo-card"
 import { DESCRIPTION_EXCERPT, excerpt } from "@/features/seo/seo-text"
@@ -19,22 +21,32 @@ import { errorText } from "@/lib/errors"
 
 const route = getRouteApi("/_auth/content/landings/$id")
 
+// The advisor's "go to field" targets (a folded section opens)
 const TARGETS = {
   edit_title: "landing-seo",
   edit_description: "landing-seo",
   edit_robots: "landing-seo",
+  use_template_title: "landing-seo",
+  use_template_description: "landing-seo",
   edit_body: "landing-body",
   edit_handle: "landing-general",
   mark_reviewed: "landing-standing",
 }
 
-// The page's name, address and facet, its text and its search appearance
+// The page's name, address and facet, its text, and its search appearance folded under them
 function LandingMain({ data }: { data: LandingDetail }) {
   const { t } = useTranslation()
   const client = useQueryClient()
   const update = useUpdateLanding(data.id)
+  const findings = useSectionFindings({
+    kind: "landing",
+    id: data.id,
+    version: data.updated_at,
+    targets: TARGETS,
+  })
+  const seo = findings("landing-seo")
   return (
-    <PageColumn span={8}>
+    <>
       <div id="landing-general" className="scroll-mt-20">
         <LandingGeneralCard landing={data} />
       </div>
@@ -50,22 +62,30 @@ function LandingMain({ data }: { data: LandingDetail }) {
           }}
         />
       </div>
-      <div id="landing-seo" className="scroll-mt-20">
-        <SeoCard
-          type="landing"
-          id={data.id}
-          context={{
-            path: data.path ?? "",
-            tokens: { başlık: data.title, kategori: data.category?.name ?? "" },
-            fallbackDescription: excerpt(docText(data.body), DESCRIPTION_EXCERPT),
-          }}
-        />
-      </div>
-    </PageColumn>
+      <SeoCard
+        type="landing"
+        id={data.id}
+        context={{
+          path: data.path ?? "",
+          tokens: { başlık: data.title, kategori: data.category?.name ?? "" },
+          fallbackDescription: excerpt(docText(data.body), DESCRIPTION_EXCERPT),
+        }}
+        collapse={{
+          id: "landing-seo",
+          name: "content.seo",
+          note: findingsNote(t, seo),
+          attention: seo.attention,
+        }}
+      />
+    </>
   )
 }
 
-/** A facet landing page (F3.16): its text, how much of it is its own, its search appearance. */
+/**
+ * A facet landing page (F3.16): its title and text first, its search
+ * appearance folded under them; how much of it is its own and the SEO
+ * advisor beside them, following the scroll.
+ */
 export function LandingEntryPage() {
   const { t } = useTranslation()
   const { id } = route.useParams()
@@ -86,15 +106,23 @@ export function LandingEntryPage() {
         badge={<ContentStatusBadge status={data.status} />}
         action={<LandingActions landing={data} />}
       />
-      <PageGrid>
-        <LandingMain data={data} />
-        <PageColumn span={4}>
-          <AdvisorCard kind="landing" id={data.id} version={data.updated_at} targets={TARGETS} />
-          <div id="landing-standing" className="scroll-mt-20">
-            <LandingStandingCard landing={data} />
-          </div>
-        </PageColumn>
-      </PageGrid>
+      <EditorLayout
+        main={<LandingMain data={data} />}
+        side={
+          <>
+            <div id="landing-standing" className="scroll-mt-20">
+              <LandingStandingCard landing={data} />
+            </div>
+            <AdvisorCard
+              kind="landing"
+              id={data.id}
+              version={data.updated_at}
+              targets={TARGETS}
+              onTarget={revealSection}
+            />
+          </>
+        }
+      />
     </div>
   )
 }

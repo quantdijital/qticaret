@@ -1,18 +1,21 @@
 import { useQuery } from "@tanstack/react-query"
 import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
-import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
+import { revealSection } from "@/components/patterns/use-section-open"
 import { contentQuery } from "@/features/content/api/content"
 import type { ContentDetail } from "@/features/content/api/content"
 import { ContentActions } from "@/features/content/components/content-actions"
 import { ContentBodyCard } from "@/features/content/components/content-body-card"
 import { ContentCoverCard } from "@/features/content/components/content-cover-card"
 import { ContentGeneralCard } from "@/features/content/components/content-general-card"
+import { ContentSummaryCard } from "@/features/content/components/content-summary-card"
+import { EditorLayout } from "@/features/content/components/editor-layout"
 import { PostTermsCard } from "@/features/content/components/post-terms-card"
 import { ContentStatusBadge } from "@/features/content/components/content-status"
 import { docText } from "@/features/content/doc-text"
+import { findingsNote, useSectionFindings } from "@/features/content/section-findings"
 import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
 import { SeoCard } from "@/features/seo/components/seo-card"
 import { DESCRIPTION_EXCERPT, excerpt } from "@/features/seo/seo-text"
@@ -21,15 +24,17 @@ import { formatDateTime } from "@/lib/format"
 
 const route = getRouteApi("/_auth/content/$id")
 
-// The advisor's "go to field" targets: the sections below by their ids
+// The advisor's "go to field" targets: the sections below by their ids (a folded one opens)
 const TARGETS = {
   edit_title: "content-seo",
   edit_description: "content-seo",
   edit_robots: "content-seo",
+  use_template_title: "content-seo",
+  use_template_description: "content-seo",
   edit_body: "content-body",
   edit_handle: "content-general",
-  edit_author: "content-general",
-  add_image: "content-cover",
+  edit_author: "content-summary",
+  add_image: "content-cover-section",
 }
 
 function Dates({ entry }: { entry: ContentDetail }) {
@@ -50,7 +55,47 @@ function Dates({ entry }: { entry: ContentDetail }) {
   )
 }
 
-/** A content page or blog post (F3.16): its text, cover and search appearance. */
+// The page's secondary parts, folded under its text: each a line until opened
+function Sections({ data }: { data: ContentDetail }) {
+  const { t } = useTranslation()
+  const findings = useSectionFindings({
+    kind: data.kind,
+    id: data.id,
+    version: data.updated_at,
+    targets: TARGETS,
+  })
+  const seo = findings("content-seo")
+  return (
+    <>
+      <SeoCard
+        type={data.kind}
+        id={data.id}
+        context={{
+          path: data.path,
+          tokens: { başlık: data.title },
+          fallbackDescription: excerpt(data.excerpt ?? docText(data.body), DESCRIPTION_EXCERPT),
+        }}
+        collapse={{
+          id: "content-seo",
+          name: "content.seo",
+          note: findingsNote(t, seo),
+          attention: seo.attention,
+        }}
+      />
+      <ContentSummaryCard entry={data} findings={findings("content-summary")} />
+      <ContentCoverCard entry={data} findings={findings("content-cover-section")} />
+      {data.kind === "post" ? (
+        <PostTermsCard entry={data} findings={findings("content-terms")} />
+      ) : null}
+    </>
+  )
+}
+
+/**
+ * A content page or blog post (F3.16): its title and text first, its
+ * search appearance, summary, cover and filing folded under them, its
+ * dates and the SEO advisor beside them, following the scroll.
+ */
 export function ContentEntryPage() {
   const { t } = useTranslation()
   const { id } = route.useParams()
@@ -75,38 +120,31 @@ export function ContentEntryPage() {
         badge={<ContentStatusBadge status={data.status} />}
         action={<ContentActions entry={data} />}
       />
-      <PageGrid>
-        <PageColumn span={8}>
-          <div id="content-general" className="scroll-mt-20">
-            <ContentGeneralCard entry={data} />
-          </div>
-          <div id="content-body" className="scroll-mt-20">
-            <ContentBodyCard entry={data} />
-          </div>
-          <div id="content-seo" className="scroll-mt-20">
-            <SeoCard
-              type={data.kind}
+      <EditorLayout
+        main={
+          <>
+            <div id="content-general" className="scroll-mt-20">
+              <ContentGeneralCard entry={data} />
+            </div>
+            <div id="content-body" className="scroll-mt-20">
+              <ContentBodyCard entry={data} />
+            </div>
+            <Sections data={data} />
+          </>
+        }
+        side={
+          <>
+            <Dates entry={data} />
+            <AdvisorCard
+              kind={data.kind}
               id={data.id}
-              context={{
-                path: data.path,
-                tokens: { başlık: data.title },
-                fallbackDescription: excerpt(
-                  data.excerpt ?? docText(data.body),
-                  DESCRIPTION_EXCERPT
-                ),
-              }}
+              version={data.updated_at}
+              targets={TARGETS}
+              onTarget={revealSection}
             />
-          </div>
-        </PageColumn>
-        <PageColumn span={4}>
-          <AdvisorCard kind={data.kind} id={data.id} version={data.updated_at} targets={TARGETS} />
-          <Dates entry={data} />
-          {data.kind === "post" ? <PostTermsCard entry={data} /> : null}
-          <div id="content-cover" className="scroll-mt-20">
-            <ContentCoverCard entry={data} />
-          </div>
-        </PageColumn>
-      </PageGrid>
+          </>
+        }
+      />
     </div>
   )
 }

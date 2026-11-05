@@ -4,7 +4,6 @@ import { toast } from "sonner"
 import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { useUpdateContent } from "@/features/content/api/content"
 import type { ContentDetail } from "@/features/content/api/content"
 import { errorText } from "@/lib/errors"
@@ -13,20 +12,16 @@ import { FULL_RESET } from "@/lib/forms"
 interface Values {
   title: string
   handle: string
-  excerpt: string
-  author_name: string
 }
 
 const valuesOf = (entry: ContentDetail): Values => ({
   title: entry.title,
   handle: entry.handle,
-  excerpt: entry.excerpt ?? "",
-  author_name: entry.author_name ?? "",
 })
 
 const pathPrefix = (kind: ContentDetail["kind"]) => (kind === "post" ? "/blog/" : "/")
 
-/** The title, page address, summary and (for a post) its author. */
+/** The title and the page's address, above its text; the summary and author fold below it. */
 export function ContentGeneralCard({ entry }: { entry: ContentDetail }) {
   const { t } = useTranslation()
   const update = useUpdateContent(entry.id)
@@ -38,8 +33,6 @@ export function ContentGeneralCard({ entry }: { entry: ContentDetail }) {
       {
         ...(dirtyFields.title ? { title: values.title } : {}),
         ...(dirtyFields.handle ? { handle: values.handle.trim() } : {}),
-        ...(dirtyFields.excerpt ? { excerpt: values.excerpt.trim() || null } : {}),
-        ...(dirtyFields.author_name ? { author_name: values.author_name.trim() || null } : {}),
       },
       {
         onSuccess: (result) => {
@@ -80,27 +73,6 @@ export function ContentGeneralCard({ entry }: { entry: ContentDetail }) {
           />
         </div>
       </Field>
-      <Field
-        label={t("content.fields.excerpt")}
-        htmlFor="content-excerpt"
-        hint={t("content.excerptHint")}
-      >
-        <Textarea
-          id="content-excerpt"
-          maxLength={500}
-          className="min-h-20"
-          {...form.register("excerpt")}
-        />
-      </Field>
-      {entry.kind === "post" ? (
-        <Field
-          label={t("content.fields.author")}
-          htmlFor="content-author"
-          hint={t("content.authorHint")}
-        >
-          <Input id="content-author" maxLength={120} {...form.register("author_name")} />
-        </Field>
-      ) : null}
     </CardForm>
   )
 }

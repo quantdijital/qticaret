@@ -84,6 +84,28 @@ test("a product's page has no serious accessibility issue", async ({ page }) => 
   expect(await seriousIssues(page)).toEqual([])
 })
 
+test("a blog post's page, its parts folded and open, has no serious accessibility issue", async ({
+  page,
+}) => {
+  await page.goto("/content?kind=post")
+  await page.waitForLoadState("networkidle")
+  const first = page.getByRole("table").getByRole("link").first()
+  test.skip((await first.count()) === 0, "no blog post in this database")
+  await first.click()
+  await expect(pageHeading(page)).toBeVisible()
+  await page.waitForLoadState("networkidle")
+  expect(await seriousIssues(page)).toEqual([])
+  // Its search appearance, summary, cover and filing fold under the text (docs/06 "Metin sayfaları")
+  for (const part of await page.locator("main section > header button[aria-expanded]").all()) {
+    if ((await part.getAttribute("aria-expanded")) === "false") {
+      await part.click()
+    }
+    await expect(part).toHaveAttribute("aria-expanded", "true")
+  }
+  await page.waitForLoadState("networkidle")
+  expect(await seriousIssues(page)).toEqual([])
+})
+
 test("bulk edit's bar and dialog have no serious accessibility issue", async ({ page }) => {
   await page.goto("/products")
   await page.getByRole("table").getByRole("checkbox").nth(1).check()

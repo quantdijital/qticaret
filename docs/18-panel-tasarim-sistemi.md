@@ -158,7 +158,7 @@ apps/panel/
 │   │   └── <alan>/{api,components,pages,detail,wizard}/
 │   ├── components/
 │   │   ├── ui/               # shadcn üretimi, bizim sahipliğimizde
-│   │   ├── patterns/         # PageHeader, DataTable, FilterTabs, SearchInput, Pagination, Wizard, CardForm, LeaveGuard, SectionCard, KpiTile, StatusBadge, ConfirmDialog, FormSection
+│   │   ├── patterns/         # PageHeader, DataTable, FilterTabs, SearchInput, Pagination, Wizard, CardForm, LeaveGuard, SectionCard, KpiTile, StatusBadge, ConfirmDialog, FormSection, CollapsibleSection
 │   │   └── layout/           # AppShell, Sidebar, Topbar, PageContainer
 │   ├── theme/                # tokens.css, engine.ts, presets.ts, schema.ts
 │   ├── lib/                  # sdk, auth, i18n, format (para, tarih, tr), errors
@@ -187,6 +187,7 @@ Kurallar:
 | PageGrid + PageColumn | Yan yana kartlar | 12 sütunlu ızgara; satırdaki hücreler eşit, sütunların son kartı uzar; yapışkan özet sütunu `sticky` (§2 Denge) |
 | PageTabs | Bir ayar sayfasının parçaları; detay sayfasının ikincil kartları (docs/06 "Detay sayfası düzeni", 2026-11-04) | Alt çizgili sekmeler, dar ekranda alt satıra kayar; kayıt sayısı adın yanında; açık sekme `?part=`'ta, sekme değişince sayfa yukarı atlamaz (`useOpenPart`); form tutan sekmelerde `keepMounted`. `SettingsTabs` bunun ayarlardaki adıdır |
 | EmptyRow | Detay sayfasında boş bölüm | Kart yerine tek satır: bir cümle + varsa eylem; kart içinde bir şey olunca çizilir |
+| CollapsibleSection | Metin sayfasının ikincil bölümleri (docs/06 "Metin sayfaları", 2026-11-05); ana içeriği aşağı iten uzun ikincil kartlar | Kart başlığının tamamı açar/kapar (`aria-expanded`; klavyede kartın içinde ince çizgi); kapalıyken başlık + tek satır özet (telefonda iki satır), açıkken açıklama; `attention` (acil bulgu, boş zorunlu alan) açar, açmak tercih sayılmaz; kişinin seçimi `localStorage`'da kullanıcı başına (`qt.panel.section:<kullanıcı>:<ad>`, okunamazsa varsayılan); kapalıyken içerik DOM'da kalır, kaydedilmemiş düzenleme varsa satırda söylenir. Kaydeden kart `CardForm collapse` ile katlanır; `revealSection(id)` kapalıyı açıp ona kaydırır (SEO danışmanının "Alana git"i) |
 | PageHeader | Her sayfa | Başlık, bir cümle açıklama, sağda tek birincil eylem, ikincil eylemler menüde |
 | DataTable | Her veri listesi | Yapışkan başlık, satır hover, durum rozeti, seçim + toplu işlem çubuğu, sunucu sayfalama, URL'de filtre |
 | Wizard | Çok adımlı oluşturma | Numaralı adımlar, her adımda tek soru grubu, taslak olarak kaydet, geri dönülebilir, ilerleme |

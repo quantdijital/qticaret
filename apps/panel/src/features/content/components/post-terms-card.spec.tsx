@@ -89,23 +89,38 @@ function serve() {
   })
 }
 
-function renderCard() {
+// Folded under the post's text: opened as a person would
+async function renderCard() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return render(
+  render(
     <QueryClientProvider client={client}>
       <PostTermsCard entry={POST} />
     </QueryClientProvider>
   )
+  await userEvent.click(screen.getByRole("button", { name: "Kategori ve etiketler" }))
 }
 
 describe("PostTermsCard", () => {
   beforeEach(() => {
     fetchMock.mockReset()
+    localStorage.clear()
     serve()
   })
 
+  it("folds to a line naming the category and tags", () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <PostTermsCard entry={POST} />
+      </QueryClientProvider>
+    )
+    const toggle = screen.getByRole("button", { name: "Kategori ve etiketler" })
+    expect(toggle).toHaveAttribute("aria-expanded", "false")
+    expect(toggle).toHaveAccessibleDescription("Bıçak bakımı · Çelik")
+    expect(screen.queryByRole("combobox", { name: "Kategori" })).not.toBeInTheDocument()
+  })
+
   it("files the post under another category, an existing tag and a new one, saved with the post", async () => {
-    renderCard()
+    await renderCard()
     expect(screen.getByRole("combobox", { name: "Kategori" })).toHaveTextContent("Bıçak bakımı")
     const tags = screen.getByRole("list", { name: "Etiketler" })
     expect(
@@ -149,7 +164,7 @@ describe("PostTermsCard", () => {
   })
 
   it("takes the post out of its category", async () => {
-    renderCard()
+    await renderCard()
 
     await userEvent.click(screen.getByRole("combobox", { name: "Kategori" }))
     await userEvent.click(await screen.findByRole("option", { name: "— Kategorisiz —" }))

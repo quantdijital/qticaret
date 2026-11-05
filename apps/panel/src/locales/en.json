@@ -25,7 +25,8 @@
     "notifications": "Notifications",
     "previous": "Previous",
     "increase": "Increase",
-    "decrease": "Decrease"
+    "decrease": "Decrease",
+    "unsaved": "Unsaved changes"
   },
   "errors": {
     "generic": "The action could not be completed. Try again in a moment.",
@@ -4982,6 +4983,13 @@
     "card": {
       "title": "Search appearance",
       "hint": "Fields left empty come from the shop's SEO templates.",
+      "summary": {
+        "title": "Title {{length}}/{{limit}}",
+        "titleAuto": "Title (automatic) {{length}}/{{limit}}",
+        "description": "Description {{length}}/{{limit}}",
+        "descriptionAuto": "Description (automatic) {{length}}/{{limit}}",
+        "noDescription": "No description"
+      },
       "noDescription": "No description; the search engine picks a snippet from the page.",
       "seoTitle": "SEO title",
       "seoTitleHint": "Made from the template when empty. Search results show about 60 characters.",
@@ -6053,6 +6061,18 @@
     "handleHint": "Changing a live page's address redirects the old one to the new one.",
     "excerptHint": "Shown in lists and search results; the start of the text is used when empty.",
     "authorHint": "Who wrote the post: it builds trust with readers and search engines.",
+    "summary": "Summary",
+    "summaryAndAuthor": "Summary and author",
+    "summaryHint": "The short introduction shown in lists, search results and shares.",
+    "sections": {
+      "excerptEmpty": "No summary written; the text's opening is used",
+      "author": "Author: {{name}}",
+      "noAuthor": "No author",
+      "coverAlt": "Image chosen · alt text written",
+      "coverNoAlt": "Image chosen · no alt text",
+      "noCategory": "No category",
+      "noTags": "No tags"
+    },
     "body": "Text",
     "bodyHint": "Write with headings, lists, tables, images and product or category cards.",
     "cover": "Cover image",

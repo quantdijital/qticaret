@@ -42,6 +42,14 @@ Kullanıcı (2026-11-04): "sipariş detay sayfası çok karmaşık duruyor, ilet
 
 Yeni detay sayfası bu sırayı izler; `e2e/layout.e2e.ts`, `shell.e2e.ts` ve `phone.e2e.ts` listelerin ilk kaydını açıp ölçer.
 
+### Metin sayfaları (2026-11-05)
+Kullanıcı (2026-11-05): "içerik yönetim detaylarında seo alanlarını ve uzun olabilecek alanları açılır kapanır yap; her şey full açık olduğunda ana içerik göz önünden kayboluyor." Bir metnin yazıldığı sayfa (içerik sayfası, blog yazısı, filtre sayfası) tek düzendedir (`features/content/components/editor-layout.tsx`):
+
+- **Ana sütun** (8): önce başlık ve sayfa adresi ("Genel bilgiler"; filtre sayfasında filtresi, kategorisi ya da filtre değeri silinmişse uyarısı), hemen altında metin düzenleyicisi. Sayfa açılınca başlık ve metin görünür.
+- **Katlanan bölümler** (`CollapsibleSection`, metnin altında; her biri kendi kaydeder): arama motoru görünümü, özet (yazıda "Özet ve yazar"), kapak görseli, kategori ve etiketler (yalnız yazı); filtre sayfasında yalnız arama motoru görünümü. Kapalıyken başlık ve tek satır: "Başlık 56/60 · Açıklama (otomatik) 133/155 · 2 öneri", "Yazar: … · özetin başı", "Görsel seçili · alt metni yok", "Çelikler · Etiket yok"; danışmanın o bölüme düşen bulguları sayıyla satırın sonunda. Varsayılan kapalı; kritik ya da yüksek bulgusu olan bölüm açık gelir. Kişinin açıp kapattığı, tarayıcıda kişi başına hatırlanır (yazı, sayfa ve filtre sayfası aynı tercihi paylaşır). Kapalı bölümün alanları yerinde durur: kaydedilmemiş düzenleme kaybolmaz, satırda "Kaydedilmemiş değişiklik var" yazar. Uzun metin alanları (özet, meta açıklama) yazıldıkça birkaç satıra kadar uzar, sonra içinde kayar.
+- **Yan sütun** (4, yapışkan): kısa bilgiler (yayın ve güncelleme tarihi; filtre sayfasında özgünlük, ürün sayısı ve "İnsan inceledi") ve SEO danışmanı; sayfa kaydırılırken görünür kalır, pencereden uzunsa kendi içinde kayar. Danışmanın "Alana git"i kapalı bölümü önce açar, sonra ona gider. Dar ekranda (xl altı) tek sütun: başlık, metin, bölümler, bilgiler, danışman.
+- Neden sekme ya da adım adım değil: katlanan bölümler birbirini gizlemez ve kapalıyken de durumlarını söyler; sekme bir seferde tek bölüm gösterir, gerisinin durumu görünmez; adım adım düzen var olan bir metni düzeltmeye uymaz (yeni içerik zaten yalnız başlıkla açılır, `NewContentDialog`).
+
 ## Terim sözlüğü (tr)
 | Kavram | Kullan | Kullanma |
 |---|---|---|
@@ -92,7 +100,7 @@ Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, ta
 | SEO ve paylaşım | Ürün/kategori/marka sayfasında yan panel (F3) | Skor, bulgular + "neden önemli", tek tık düzeltmeler, SERP/WhatsApp/Instagram önizleme, UTM'li paylaşım bağlantısı |
 | SEO paneli | Sayfa | Başta kurulum kontrol listesi (yalnızca eksikler; tamamlanan kalkar, hepsi bitince kart gider; F12.10); mağaza skoru, en düşük varlıklar, 404 + 301 oluştur, zincir/mükerrer/öksüz, GSC/CWV kartları, denetim raporu (F3, F10, F12) |
 | Markalar | Sayfa | Marka listesi/detay, SEO alanları (F3) |
-| İçerik | Sayfa | Sayfalar, blog, facet landing (özgünlük göstergesi, parti yayını) (F3) |
+| İçerik | Sayfa + Metin sayfaları düzeni | Sayfalar, blog, facet landing (özgünlük göstergesi, parti yayını) (F3); tek kayıt başlık ve metinle açılır, gerisi altında katlanır (yukarıda "Metin sayfaları") |
 | Ortam kütüphanesi (`/media`, Vitrin grubu; 2026-11-04) | Küçük resim ızgarası + yan panel | Mağazanın yüklediği ya da adresten aldığı bütün görseller, en yenisi önce; dosya adı/alt metinle arama, sayfalama. "Görsel yükle": sürükle-bırak ya da dosya seçimi, çoklu, dosya dosya durum ve ilerleme çubuğu (JPG, PNG, WebP, AVIF; ≤ 10 MB; SVG ve GIF reddedilir). Bir görsel yan panelde açılır: önizleme, dosya adı (yalnızca görünen ad; adres değişmez) ve alt metin, yükleyen ve tarih, adresi kopyala, kullanıldığı yerler (ürün, ürün açıklaması, marka logosu, sayfa/yazı, açılış sayfası, toplu ileti, vitrin tasarımı, mağaza logosu, paylaşım görseli, sayfanın kendi paylaşım görseli, geçmiş siparişler; açılabilenler bağlantılı). Kullanılan görsel silinmez (409 `media.in_use`); kullanılmayan onayla dosyalarıyla silinir. Yükleme/silme/yeniden adlandırma sahip ve yönetici (`catalog` yetkisi). Vitrin grubunda: görselleri en çok vitrin, sayfalar ve logolar kullanır. Görsel alanlarının hepsi (`MediaField` → `MediaPicker`: Kütüphane / Bilgisayardan yükle / Adres) buradan seçer; ürün galerisi kendi sürükle-bırakını korur, yanında "Kütüphaneden seç" |
 | Soru-Cevap moderasyonu | Sayfa | Bekleyen sorular/cevaplar, toplu onay (F10) |
 | Değişim ve sipariş düzenleme | Sayfa (F7) | Değişim talepleri, fark tutarı, sipariş düzenleme geçmişi |

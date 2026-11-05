@@ -25,7 +25,8 @@
     "notifications": "Bildirimler",
     "previous": "Önceki",
     "increase": "Artır",
-    "decrease": "Azalt"
+    "decrease": "Azalt",
+    "unsaved": "Kaydedilmemiş değişiklik var"
   },
   "errors": {
     "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
@@ -4982,6 +4983,13 @@
     "card": {
       "title": "Arama motoru görünümü",
       "hint": "Boş bıraktığınız alanlar mağazanın SEO şablonlarından oluşur.",
+      "summary": {
+        "title": "Başlık {{length}}/{{limit}}",
+        "titleAuto": "Başlık (otomatik) {{length}}/{{limit}}",
+        "description": "Açıklama {{length}}/{{limit}}",
+        "descriptionAuto": "Açıklama (otomatik) {{length}}/{{limit}}",
+        "noDescription": "Açıklama yok"
+      },
       "noDescription": "Açıklama yok; arama motoru sayfadan bir parça seçer.",
       "seoTitle": "SEO başlığı",
       "seoTitleHint": "Boşsa şablondan oluşur. Arama sonucunda yaklaşık 60 karakter görünür.",
@@ -6053,6 +6061,18 @@
     "handleHint": "Yayındaki sayfanın adresini değiştirirseniz eski adres yeni adrese yönlendirilir.",
     "excerptHint": "Listelerde ve arama sonucunda görünür; boşsa metnin başı kullanılır.",
     "authorHint": "Yazıyı kimin yazdığı: okura ve arama motorlarına güven verir.",
+    "summary": "Özet",
+    "summaryAndAuthor": "Özet ve yazar",
+    "summaryHint": "Listelerde, arama sonucunda ve paylaşılınca görünen kısa tanıtım.",
+    "sections": {
+      "excerptEmpty": "Özet yazılmadı; metnin başı kullanılıyor",
+      "author": "Yazar: {{name}}",
+      "noAuthor": "Yazar yok",
+      "coverAlt": "Görsel seçili · alt metni var",
+      "coverNoAlt": "Görsel seçili · alt metni yok",
+      "noCategory": "Kategori yok",
+      "noTags": "Etiket yok"
+    },
     "body": "Metin",
     "bodyHint": "Başlıklar, listeler, tablolar, görseller ve ürün ya da kategori kartlarıyla yazın.",
     "cover": "Kapak görseli",

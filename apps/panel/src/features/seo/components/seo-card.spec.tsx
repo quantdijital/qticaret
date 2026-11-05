@@ -81,4 +81,35 @@ describe("SeoCard", () => {
     })
     expect(toast.error).not.toHaveBeenCalled()
   })
+
+  it("folds on a content page to the fields' lengths and the advisor's findings", async () => {
+    const user = userEvent.setup()
+    localStorage.clear()
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+    })
+    client.setQueryData(["seo-meta", "page", "cent_1"], {
+      ...EMPTY,
+      seo_title: "Kupa seçme rehberi",
+    })
+    render(
+      <QueryClientProvider client={client}>
+        <SeoCard
+          type="page"
+          id="cent_1"
+          context={{ path: "/kupa", tokens: {}, fallbackDescription: "Kupalar hakkında" }}
+          collapse={{ id: "content-seo", name: "content.seo", note: "2 öneri" }}
+        />
+      </QueryClientProvider>
+    )
+    const toggle = screen.getByRole("button", { name: "Arama motoru görünümü" })
+    expect(toggle).toHaveAttribute("aria-expanded", "false")
+    expect(toggle).toHaveAccessibleDescription(
+      "Başlık 18/60 · Açıklama (otomatik) 16/155 · 2 öneri"
+    )
+    expect(screen.queryByRole("textbox", { name: "SEO başlığı" })).not.toBeInTheDocument()
+
+    await user.click(toggle)
+    expect(screen.getByRole("textbox", { name: "SEO başlığı" })).toHaveValue("Kupa seçme rehberi")
+  })
 })

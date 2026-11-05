@@ -25,6 +25,8 @@ import { useStoreName } from "@/features/settings/api/store"
 import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@/lib/forms"
 import { cn } from "@/lib/utils"
+import { seoSummary } from "./seo-summary"
+import type { SeoCollapse } from "./seo-summary"
 
 // What search results show before cutting (docs/13 §3)
 const TITLE_LIMIT = 60
@@ -69,11 +71,13 @@ function SeoForm({
   id,
   saved,
   context,
+  collapse,
 }: {
   type: SeoEntityType
   id: string
   saved: SeoMeta
   context: SeoContext
+  collapse?: SeoCollapse | undefined
 }) {
   const { t } = useTranslation()
   const save = useSaveSeoMeta(type, id)
@@ -150,6 +154,18 @@ function SeoForm({
       onReset={() => {
         form.reset(values, FULL_RESET)
       }}
+      collapse={
+        collapse && {
+          id: collapse.id,
+          name: collapse.name,
+          attention: Boolean(collapse.attention),
+          summary: seoSummary(t, {
+            title: { own: title, shown: shownTitle, limit: TITLE_LIMIT },
+            description: { own: description, shown: shownDescription, limit: DESCRIPTION_LIMIT },
+            note: collapse.note,
+          }),
+        }
+      }
     >
       <div className="flex flex-col gap-1 rounded-lg border bg-background p-4">
         <span className="flex items-center gap-2 truncate text-xs text-muted-foreground">
@@ -196,7 +212,8 @@ function SeoForm({
         <div className="flex flex-col gap-1">
           <Textarea
             id={`seo-description-${id}`}
-            className="min-h-20"
+            // Grows with the text, up to a few lines; longer scrolls inside
+            className="max-h-60 min-h-20"
             maxLength={MAX.description}
             {...form.register("seo_description")}
           />
@@ -276,14 +293,17 @@ export function SeoCard({
   type,
   id,
   context,
+  collapse,
 }: {
   type: SeoEntityType
   id: string
   context: SeoContext
+  /** Folds to a line with the fields' lengths (content pages). */
+  collapse?: SeoCollapse
 }) {
   const query = useQuery(seoMetaQuery(type, id))
   if (!query.data) {
-    return <Skeleton className="h-64 rounded-lg" />
+    return <Skeleton className={collapse ? "h-14 rounded-lg" : "h-64 rounded-lg"} />
   }
-  return <SeoForm type={type} id={id} saved={query.data} context={context} />
+  return <SeoForm type={type} id={id} saved={query.data} context={context} collapse={collapse} />
 }
