@@ -228,3 +228,19 @@ Atölye sepet çekmecesini, sepeti, ödemeyi, siparişi ve sipariş takibini ken
 
 - **Taban temadan ödünç (geçici):** `@qticaret/theme-base` artık `AddonEditor`, `GiftRecipient`, `OrderReturns`, `OrderGift`'i de dışa verir; Atölye sepette ek seçimi ve hediye alıcısı formunu, siparişte iade talebini kendi çizene kadar bunlarla gösterir. `AuthPage`'in giriş, kayıt, doğrulama ve şifre kipleri taban temanındır; Atölye yalnız `lookup`'ı çizer.
 - **Kapsam dışı (backend gerekir):** misafirin kurumsal faturası (vergi no; e-fatura bugün yalnız üyenin fatura profilini okur), mağaza içinde kargo takip numarasıyla sorgu.
+
+## Ek (2026-11-05, hesap): giriş ve hesap sayfalarının istediği isteğe bağlı alanlar (otonom, gözden geçir)
+
+Atölye giriş, kayıt, şifre sıfırlama, doğrulama ve hesap sayfalarını kendisi çizdi (`design.md` § Hesap). Alanlar **isteğe bağlı ve eklemelidir**: alanı vermeyen vitrin ya da taban tema aynı sayfayı çizer.
+
+| Alan | Şekli | Kaynak |
+| --- | --- | --- |
+| `AuthPageView.privacyPath?` | `string \| null` | `/hesap/kayit`: KVKK aydınlatma metni yayımlanmışsa (`legal/privacy_notice`) `/yasal/kvkk-aydinlatma-metni`; kayıt formunun altında bağlantı |
+| `AccountPageView.nav[].section?` | `AccountSection` | vitrinin bölüm listesi; tema her bölüme simge verir |
+| `AccountOrderView.images?` | `ImageView[]` (en çok 3) | `GET /store/orders` aynı çağrıda `items.title`, `items.thumbnail` |
+| `AccountOrderView.progress?` | `OrderStepView[] \| null` | aynı çağrıda `+fulfillment_status` ve `*payment_collections.payment_sessions`; sipariş sayfasının `orderProgress`'i koli tarihleri olmadan (kapıda ödemede ödeme adımı yok, iptalde `null`); alan gelmezse yok |
+| `AccountPageView.favorites[].card?` | `ProductCardView \| null` | favorilerin ürünleri `products?id[]=` ve rafların `railCards`'ı (fiyat, stok kovası); satışta olmayan ya da katalog yanıt vermezse `null` |
+| `AccountPageView.categories?` | `CategoryCardView[]` | ana sayfanın `categoryTiles([])`'i; yalnız boş listede (sipariş ya da favori yok), katalog yanıt vermezse boş |
+
+- **Atölye:** `AuthPage`'in bütün kipleri (sipariş takibi dahil) ve `AccountPage` artık temanın; satın alma ekinin "giriş kipleri taban temanın" notu kapandı. `checkout/AddressForm` `withEmail` aldı (hesabın adres defteri e-postasız), `order/Progress` "sırada ne var" sözlerini (`NEXT`) dışa verir.
+- **Kapsam dışı (sözleşmede yok, çizilmez):** sosyal giriş (backend'de `auth-apple` var, `AuthActions`'ta yok), adres düzenleme (yalnız ekleme ve silme), hesapta ayrı iade talepleri listesi (talepler siparişin sayfasında), mağaza kredisi ve kayıtlı hediye kartları.
