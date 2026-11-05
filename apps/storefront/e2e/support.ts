@@ -27,6 +27,25 @@ export async function dismissCookies(page: Page): Promise<void> {
   }
 }
 
+/**
+ * A button of the page's own content, by its name: inside its form or
+ * beside it, tied to the form by `form="…"` (Atölye's buy row and phone
+ * bar), as a theme draws it. Only the page's `main` is asked, so the cart
+ * drawer's and the frame's buttons never match.
+ */
+export const mainButton = (page: Page, name: string) =>
+  page.getByRole("main").getByRole("button", { name, exact: true })
+
+/**
+ * Puts the product page's variant in the cart with the page's own "Sepete
+ * ekle" and waits for the cart drawer. At a desktop width, where the
+ * phone's buy bar is not drawn, the page has the one button.
+ */
+export async function addToCart(page: Page): Promise<void> {
+  await mainButton(page, "Sepete ekle").click()
+  await expect(page.getByRole("dialog")).toBeVisible()
+}
+
 /** Who checks out: the address step's contact fields. */
 export interface Shopper {
   email: string
@@ -50,8 +69,8 @@ export async function addressAndShipping(page: Page, shopper: Shopper): Promise<
   await expect(page.locator("#neighborhood option")).not.toHaveCount(1)
   await page.selectOption("#neighborhood", { index: 1 })
   await page.fill("#address_1", "Deneme Sokak No: 1")
-  await page.locator("main form button[type=submit]").click()
+  await mainButton(page, "Kargo seçeneklerine geç").click()
   await expect(page).toHaveURL(/adim=kargo/)
-  await page.locator("main form button[type=submit]").click()
+  await mainButton(page, "Ödemeye geç").click()
   await expect(page).toHaveURL(/\/odeme$/)
 }

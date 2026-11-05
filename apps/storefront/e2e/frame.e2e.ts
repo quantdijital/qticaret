@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright"
 import { expect, test } from "@playwright/test"
 import type { Page } from "@playwright/test"
 import { pathOf, PRODUCT_PAGE, purchasePath, searchPath, stockedProduct } from "./catalog"
-import { dismissCookies } from "./support"
+import { addToCart, dismissCookies } from "./support"
 
 /**
  * The frame's newer parts (docs/19 §4, §7): the phone's bottom bar and
@@ -77,8 +77,7 @@ test.describe("the phone's bottom bar", () => {
     await page.setViewportSize({ width: 1280, height: 800 })
     await page.goto(purchasePath(await stockedProduct()))
     await dismissCookies(page)
-    await page.locator("main form button[type=submit]").filter({ hasText: "Sepete ekle" }).click()
-    await expect(page.getByRole("dialog")).toBeVisible()
+    await addToCart(page)
     await page.setViewportSize(PHONE)
     const checkout = await page.goto("/odeme")
     expect(checkout?.status()).toBe(200)

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 import { pathOf, PRODUCT_PAGE, SEARCH_PAGE, stockedProduct } from "./catalog"
-import { collectErrors, cookieBanner, dismissCookies } from "./support"
+import { collectErrors, cookieBanner, dismissCookies, mainButton } from "./support"
 
 const PAGES = [
   "/",
@@ -52,9 +52,7 @@ test.describe("storefront pages", () => {
   }) => {
     await page.goto((await stockedProduct()).path)
     await expect(page.locator("h1").first()).toBeVisible()
-    await expect(
-      page.locator("main form button[type=submit]").filter({ hasText: "Sepete ekle" })
-    ).toBeVisible()
+    await expect(mainButton(page, "Sepete ekle")).toBeVisible()
     // However many FAQ sections the shop places, the page has one FAQPage at most
     const data = await page.locator('script[type="application/ld+json"]').allTextContents()
     expect(data.filter((block) => block.includes('"FAQPage"')).length).toBeLessThanOrEqual(1)
@@ -74,9 +72,12 @@ test.describe("storefront pages", () => {
 
   test("the footer offers the newsletter, with what subscribing consents to", async ({ page }) => {
     await page.goto("/")
-    const box = page.locator("#bulten").locator("..")
-    await expect(box.getByRole("textbox", { name: "E-posta adresiniz" })).toBeVisible()
-    await expect(box.getByText(/ticari elektronik ileti/)).toBeVisible()
+    const footer = page.getByRole("contentinfo")
+    const email = footer.getByRole("textbox", { name: "E-posta adresiniz" })
+    await expect(email).toBeVisible()
+    // Before anyone subscribes: a theme may show it once the visitor starts on the form (Atölye's)
+    await email.focus()
+    await expect(footer.getByText(/ticari elektronik ileti/)).toBeVisible()
   })
 
   test("an unknown address is a 404 page", async ({ page }) => {

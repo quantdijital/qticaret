@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 import { purchasePath, stockedProduct } from "./catalog"
-import { collectErrors, dismissCookies } from "./support"
+import { addToCart, collectErrors, dismissCookies } from "./support"
 
 /**
  * Product add-ons (adr/0052): the dev shop has the `catalog.addons` flag
@@ -17,13 +17,12 @@ test("a product without add-ons asks none and still goes into the cart", async (
   await dismissCookies(page)
   await expect(page.locator('main [name^="addon_"]')).toHaveCount(0)
   await expect(page.locator('main input[name="product_id"]')).toHaveCount(0)
-  await page.locator("main form button[type=submit]").filter({ hasText: "Sepete ekle" }).click()
-  await expect(page.getByRole("dialog")).toBeVisible()
+  await addToCart(page)
 
   await page.goto("/sepet")
   await expect(page.locator("main h1")).toHaveText("Sepetim")
   // A plain line: no picks under it, no picks form
-  await expect(page.locator('main form [name^="addon_"]')).toHaveCount(0)
+  await expect(page.locator('main [name^="addon_"]')).toHaveCount(0)
   await expect(page.getByText("Seçenek ekle")).toHaveCount(0)
   expect(errors).toEqual([])
 })

@@ -184,7 +184,7 @@ describe("the theme's product page", () => {
     expect(radios.find((radio) => radio.includes('value="Yeşil"'))).toContain('checked=""')
     expect(html).toContain('name="variant_id" value="v_yesil"')
     expect(html.match(/form="sepet-formu"/g)?.length).toBeGreaterThanOrEqual(2)
-    expect(html.match(/<input[^>]*name="quantity"[^>]*>/)?.[0]).toContain('form="sepet-formu"')
+    expect(/<input[^>]*name="quantity"[^>]*>/.exec(html)?.[0]).toContain('form="sepet-formu"')
     expect(html).toContain('data-sticky-buy=""')
     expect(html).toContain('data-open="false"')
     // A guest's heart is the way to sign in

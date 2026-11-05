@@ -112,8 +112,11 @@ test.describe("in stock only (stok=var, adr/0056)", () => {
     expect(await robotsOf(page)).toMatch(/^noindex/)
     await expect(toggle).toHaveAttribute("aria-current", "true")
     await expect(toggle).toHaveAttribute("href", "/magaza")
-    const sorts = page.getByRole("navigation", { name: "Sıralama" }).getByRole("link")
-    await expect(sorts.nth(1)).toHaveAttribute("href", "/magaza?stok=var&sirala=yeni")
+    // A theme may fold the sorts into a menu (Atölye's <details>): its links stay in the page, shut
+    const newest = page
+      .getByRole("main")
+      .getByRole("link", { name: "En yeniler", exact: true, includeHidden: true })
+    await expect(newest).toHaveAttribute("href", "/magaza?stok=var&sirala=yeni")
     await page.getByRole("link", { name: "Filtreyi kaldır: Yalnızca stokta olanlar" }).click()
     await expect(page).toHaveURL(/\/magaza$/)
     await fitsThePhone(page)

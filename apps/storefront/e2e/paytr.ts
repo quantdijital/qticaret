@@ -3,6 +3,7 @@ import type { Page } from "@playwright/test"
 import { createTemporaryAdmin, removeTemporaryAdmin, signInAdmin } from "./admin"
 import type { AdminApi } from "./admin"
 import { storeGet } from "./catalog"
+import { mainButton } from "./support"
 
 /**
  * Paying by card in the local PayTR's frame (`pnpm dev:paytr`, adr/0028;
@@ -68,10 +69,7 @@ export async function startCardPayment(page: Page): Promise<void> {
   if (await accept.count()) {
     await accept.check()
   }
-  await page
-    .locator("main form button[type=submit]")
-    .filter({ hasText: "Kart bilgilerine geç" })
-    .click()
+  await mainButton(page, "Kart bilgilerine geç").click()
   await expect(page).toHaveURL(/\/odeme\/kart$/)
 }
 

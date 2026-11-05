@@ -8,15 +8,14 @@ import {
   payWithTestCard,
   startCardPayment,
 } from "./paytr"
-import { addressAndShipping, dismissCookies } from "./support"
+import { addressAndShipping, addToCart, dismissCookies } from "./support"
 
 /** From a product to the framed card form (`/odeme/kart`), as a guest. */
 async function toCardForm(page: Page): Promise<void> {
   await ensureFakePaytr()
   await page.goto(purchasePath(await stockedProduct()))
   await dismissCookies(page)
-  await page.locator("main form button[type=submit]").filter({ hasText: "Sepete ekle" }).click()
-  await expect(page.getByRole("dialog")).toBeVisible()
+  await addToCart(page)
   await page.getByRole("dialog").getByRole("link", { name: "Ödemeye geç" }).click()
   await expect(page).toHaveURL(/\/odeme/)
   await addressAndShipping(page, {
