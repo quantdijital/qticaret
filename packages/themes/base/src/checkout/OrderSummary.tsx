@@ -3,6 +3,7 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { CheckoutSummaryView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { LineAddons } from "../components/LineAddons"
+import { LineName } from "../components/LineName"
 
 /** The basket beside the checkout: lines with their pictures and counts, then the totals. */
 export function OrderSummary({
@@ -49,7 +50,9 @@ export function OrderSummary({
               </span>
             </div>
             <div className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate font-medium">{line.title}</span>
+              <span className="truncate font-medium">
+                <LineName path={line.path} title={line.title} />
+              </span>
               {line.detail && (
                 <span className="truncate text-xs text-muted-foreground">{line.detail}</span>
               )}

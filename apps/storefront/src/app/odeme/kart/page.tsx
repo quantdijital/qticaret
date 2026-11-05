@@ -5,6 +5,7 @@ import { paymentFrame } from "@/lib/checkout/payment-cookie"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { summaryOf } from "@/lib/views/checkout"
+import { productPathsOf } from "@/lib/views/line-paths"
 import { theme } from "@/theme"
 
 export const metadata: Metadata = robotsOnly("noindex,nofollow", t("checkout.card_title"))
@@ -20,10 +21,11 @@ export default async function CardPage() {
   if (!frameUrl || !cart) {
     redirect("/odeme")
   }
+  const paths = await productPathsOf(cart.items)
   return (
     <theme.PaymentFramePage
       t={t}
-      view={{ frameUrl, summary: summaryOf(cart, t), backPath: "/odeme" }}
+      view={{ frameUrl, summary: summaryOf(cart, t, paths), backPath: "/odeme" }}
     />
   )
 }

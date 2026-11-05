@@ -6,6 +6,7 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { CartLineView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { LineAddons } from "../parts/LineAddons"
+import { LineName, LinePhoto } from "../parts/LineLink"
 import { LinePrice } from "../parts/LinePrice"
 import { MAX_QUANTITY, Stepper } from "../parts/Stepper"
 
@@ -72,7 +73,10 @@ function Controls({
 
 function Picture({ line }: { line: CartLineView }) {
   return (
-    <div className="size-20 shrink-0 overflow-hidden rounded-inner bg-paper-3">
+    <LinePhoto
+      path={line.path}
+      className="size-20 shrink-0 overflow-hidden rounded-inner bg-paper-3"
+    >
       {line.image && (
         <ResponsiveImage
           image={{ ...line.image, alt: "" }}
@@ -80,14 +84,16 @@ function Picture({ line }: { line: CartLineView }) {
           className="h-full w-full object-cover"
         />
       )}
-    </div>
+    </LinePhoto>
   )
 }
 
 function Words({ line, words }: { line: CartLineView; words: SheetLineWords }) {
   return (
     <div className="flex min-w-0 flex-col gap-1 text-sm">
-      <span className="line-clamp-2 leading-snug font-semibold">{line.title}</span>
+      <span className="line-clamp-2 leading-snug font-semibold">
+        <LineName path={line.path} title={line.title} />
+      </span>
       {line.detail && line.detail.trim() !== line.title.trim() && (
         <span className="text-text-3">{line.detail}</span>
       )}
@@ -97,7 +103,8 @@ function Words({ line, words }: { line: CartLineView; words: SheetLineWords }) {
 }
 
 /**
- * A line in the cart drawer: its photograph, name, variant and picks; the
+ * A line in the cart drawer: its photograph and name (one link to its
+ * product's page, when it has one), variant and picks; the
  * quantity pill and the bin as the line form's own buttons (the
  * storefront's `changeCartLine`), its price on the right, struck price
  * above it. Without the action, or for a payment link's line, the line

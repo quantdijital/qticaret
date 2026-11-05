@@ -3,12 +3,16 @@ import { AddonEditor, GiftRecipient } from "@qticaret/theme-base"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CartLineView, ThemeActions, Translate } from "@qticaret/ui"
 import { LineAddons } from "../parts/LineAddons"
+import { LineName, LinePhoto } from "../parts/LineLink"
 import { LinePrice } from "../parts/LinePrice"
 import { MAX_QUANTITY, Stepper } from "../parts/Stepper"
 
 function Picture({ line }: { line: CartLineView }) {
   return (
-    <div className="size-24 shrink-0 overflow-hidden rounded-media bg-paper-3 sm:size-32">
+    <LinePhoto
+      path={line.path}
+      className="size-24 shrink-0 overflow-hidden rounded-media bg-paper-3 sm:size-32"
+    >
       {line.image && (
         <ResponsiveImage
           image={{ ...line.image, alt: "" }}
@@ -16,14 +20,16 @@ function Picture({ line }: { line: CartLineView }) {
           className="h-full w-full object-cover"
         />
       )}
-    </div>
+    </LinePhoto>
   )
 }
 
 function Words({ line, t }: { line: CartLineView; t: Translate }) {
   return (
     <div className="flex min-w-0 flex-col gap-1">
-      <p className="text-md leading-snug font-semibold lg:text-lg">{line.title}</p>
+      <p className="text-md leading-snug font-semibold lg:text-lg">
+        <LineName path={line.path} title={line.title} />
+      </p>
       {line.detail && line.detail.trim() !== line.title.trim() && (
         <p className="text-sm text-text-3">{line.detail}</p>
       )}
@@ -56,8 +62,9 @@ function Extras({ line, t, actions }: { line: CartLineView; t: Translate; action
 }
 
 /**
- * One line on the cart page, a tinted well: the photograph large, the
- * name, variant and picks, then the quantity pill, the bin and the price.
+ * One line on the cart page, a tinted well: the photograph large and the
+ * name (one link to the product's page, when it has one), variant and
+ * picks, then the quantity pill, the bin and the price.
  * The pill's minus and plus and the bin are the line form's own submit
  * buttons (`changeCartLine`), so it works before the script loads. A
  * payment link's line (`locked`, adr/0051) shows its count in words.

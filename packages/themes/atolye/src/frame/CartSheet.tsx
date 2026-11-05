@@ -208,10 +208,24 @@ export function CartSheet({
         description={said ? `${said}. ${words.label}` : words.label}
         closeLabel={words.close}
       >
-        <p role="status" className="sr-only">
-          {said}
-        </p>
-        <CartSheetBody cart={cart} categories={categories} change={change} words={words} />
+        {/* A link followed from inside (a line's product, checkout, the cart) shuts it: back here, it is closed */}
+        <div
+          className="contents"
+          onClick={(event) => {
+            if (
+              !isOwnClick(event) &&
+              event.target instanceof Element &&
+              event.target.closest("a[href]")
+            ) {
+              setOpen(false)
+            }
+          }}
+        >
+          <p role="status" className="sr-only">
+            {said}
+          </p>
+          <CartSheetBody cart={cart} categories={categories} change={change} words={words} />
+        </div>
       </Sheet>
     </>
   )

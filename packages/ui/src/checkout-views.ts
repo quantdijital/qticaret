@@ -76,6 +76,8 @@ export interface CheckoutLineView {
   quantity: number
   total: string
   image: ImageView | null
+  /** The product's page with the line's variant chosen; null or absent: plain text (as the cart's). */
+  path?: string | null
   /** The line's add-on picks (adr/0052). */
   addons?: LineAddonView[]
 }
@@ -154,6 +156,8 @@ export interface OrderLineView {
   quantity: number
   total: string
   image: ImageView | null
+  /** The product's page with the line's variant chosen; null or absent: gone or hidden, plain text. */
+  path?: string | null
   /** A gift card line (adr/0025 Ek 2026-11-03): its cards' last four and the recipient's address. */
   gift?: OrderGiftView | null
   /** The line's add-on picks as sold (adr/0052). */

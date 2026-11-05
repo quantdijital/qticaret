@@ -6,6 +6,7 @@ import { BankTransfer } from "./checkout/BankTransfer"
 import { OrderGift } from "./checkout/OrderGift"
 import { Breadcrumbs } from "./components/Breadcrumbs"
 import { LineAddons } from "./components/LineAddons"
+import { LineName } from "./components/LineName"
 import { PageContainer } from "./components/Container"
 
 /**
@@ -76,7 +77,9 @@ export function OrderPage({
                     )}
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col text-sm">
-                    <span className="font-medium">{line.title}</span>
+                    <span className="font-medium">
+                      <LineName path={line.path} title={line.title} />
+                    </span>
                     <span className="text-muted-foreground">
                       {[line.detail, t("order.quantity", { count: line.quantity })]
                         .filter(Boolean)

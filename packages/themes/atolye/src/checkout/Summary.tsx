@@ -3,6 +3,7 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { CheckoutSummaryView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { LineAddons } from "../parts/LineAddons"
+import { LineName, LinePhoto } from "../parts/LineLink"
 
 function Lines({ summary, t }: { summary: CheckoutSummaryView; t: Translate }) {
   return (
@@ -10,7 +11,10 @@ function Lines({ summary, t }: { summary: CheckoutSummaryView; t: Translate }) {
       {summary.lines.map((line) => (
         <li key={line.id} className="flex items-start gap-3">
           <div className="relative size-16 shrink-0">
-            <div className="size-16 overflow-hidden rounded-inner bg-stage-2">
+            <LinePhoto
+              path={line.path}
+              className="size-16 overflow-hidden rounded-inner bg-stage-2"
+            >
               {line.image && (
                 <ResponsiveImage
                   image={{ ...line.image, alt: "" }}
@@ -18,14 +22,16 @@ function Lines({ summary, t }: { summary: CheckoutSummaryView; t: Translate }) {
                   className="h-full w-full object-cover"
                 />
               )}
-            </div>
+            </LinePhoto>
             <span className="tabular absolute -top-1.5 -right-1.5 flex size-6 items-center justify-center rounded-pill bg-stage-text text-xs font-extrabold text-stage">
               <span className="sr-only">{t("cart.quantity")}: </span>
               {line.quantity}
             </span>
           </div>
           <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-sm">
-            <span className="line-clamp-2 leading-snug font-semibold">{line.title}</span>
+            <span className="line-clamp-2 leading-snug font-semibold">
+              <LineName path={line.path} title={line.title} />
+            </span>
             {line.detail && line.detail.trim() !== line.title.trim() && (
               <span className="text-stage-text-2">{line.detail}</span>
             )}

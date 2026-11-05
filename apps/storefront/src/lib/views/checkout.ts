@@ -5,7 +5,6 @@ import type {
   AddressSummaryView,
   CheckoutPageView,
   CheckoutStep,
-  CheckoutSummaryView,
   ContractView,
   PaymentKind,
   PaymentMethodView,
@@ -29,8 +28,11 @@ import {
   shippingOptions,
 } from "@/lib/checkout/options"
 import type { PaymentMethods } from "@/lib/checkout/options"
-import { lineAddonsOf } from "./addons"
+import { summaryOf } from "./checkout-summary"
 import { displayPhone } from "./frame"
+import { productPathsOf } from "./line-paths"
+
+export { summaryOf } from "./checkout-summary"
 
 /** The text version of the marketing consent the checkout offers (F10). */
 export const MARKETING_TEXT_VERSION = "checkout-1"
@@ -58,41 +60,6 @@ export function stepOf(cart: CheckoutCart, asked: string | undefined): CheckoutS
       : "payment"
   const wanted = (asked ? STEP_OF[asked] : undefined) ?? reachable
   return ORDER.indexOf(wanted) <= ORDER.indexOf(reachable) ? wanted : reachable
-}
-
-const kurus = (lira: number) => Math.round(lira * 100)
-
-export function summaryOf(cart: CheckoutCart, t: Translate): CheckoutSummaryView {
-  const discount = kurus(cart.original_item_total) - kurus(cart.item_total)
-  return {
-    lines: cart.items.map((line) => ({
-      id: line.id,
-      title: line.title,
-      detail: line.variant_title ?? line.subtitle,
-      quantity: line.quantity,
-      total: formatLira(line.total),
-      image: line.thumbnail
-        ? {
-            src: line.thumbnail,
-            alt: line.title,
-            width: null,
-            height: null,
-            sources: { avif: null, webp: null },
-          }
-        : null,
-      addons: lineAddonsOf(line.metadata).addons,
-    })),
-    items: formatLira(cart.original_item_total),
-    discount: discount > 0 ? formatLira(discount / 100) : null,
-    credit: cart.credit_line_total ? formatLira(cart.credit_line_total) : null,
-    shipping:
-      cart.shipping_methods.length === 0
-        ? null
-        : cart.shipping_total > 0
-          ? formatLira(cart.shipping_total)
-          : t("checkout.free"),
-    total: formatLira(cart.total),
-  }
 }
 
 export function addressSummaryOf(
@@ -247,7 +214,7 @@ export async function checkoutView(
   const selects = known ? await selectsOf(known) : { province: "", district: "", neighborhood: "" }
   const complete = addressComplete(cart)
   const chosen = cart.shipping_methods[0] ?? null
-  const [provinces, districts, neighborhoods, options, payment] = await Promise.all([
+  const [provinces, districts, neighborhoods, options, payment, paths] = await Promise.all([
     provinceOptions(),
     selects.province ? districtOptions(selects.province) : [],
     selects.district ? neighborhoodOptions(selects.district) : [],
@@ -255,6 +222,7 @@ export async function checkoutView(
     complete && chosen
       ? paymentStep(cart, t)
       : { paymentMethods: [], contracts: {}, ageLimit: null },
+    productPathsOf(cart.items),
   ])
   return {
     step,
@@ -292,7 +260,7 @@ export async function checkoutView(
       : null,
     ...payment,
     marketingVersion: MARKETING_TEXT_VERSION,
-    summary: summaryOf(cart, t),
+    summary: summaryOf(cart, t, paths),
     error,
     editPaths: STEP_PATHS,
     invoice: invoiceNoteOf(t, customer !== null, billing),

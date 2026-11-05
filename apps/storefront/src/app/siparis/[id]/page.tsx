@@ -15,6 +15,7 @@ import {
 } from "@/lib/orders/order"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { isStoreApiError } from "@/lib/store-api/errors"
+import { productPathsOf } from "@/lib/views/line-paths"
 import { orderView } from "@/lib/views/order"
 import { orderActions } from "@/lib/theme-actions"
 import { theme } from "@/theme"
@@ -49,13 +50,15 @@ export default async function OrderPage({
     throw error
   })
   // What may come back is the backend's count, read fresh (no-store) with the page
-  const [returns, returnable, shipments, invoice, contracts, session] = await Promise.all([
+  const [returns, returnable, shipments, invoice, contracts, session, paths] = await Promise.all([
     orderReturns(order.id, token),
     orderReturnable(order.id, token),
     orderShipments(order.id, token),
     orderInvoice(order.id, token),
     orderContractKinds(order.id, token),
     sessionToken(),
+    // Each line's product page; a product gone or hidden since reads as text
+    productPathsOf(order.items),
   ])
   const note = typeof query["durum"] === "string" ? query["durum"] : null
   const fresh = query["yeni"] === "1"
@@ -75,6 +78,7 @@ export default async function OrderPage({
           invoice,
           note,
           guest: session === null,
+          paths,
         })}
       />
     </>

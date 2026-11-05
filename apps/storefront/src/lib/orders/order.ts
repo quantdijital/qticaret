@@ -22,6 +22,8 @@ export interface StoreOrder {
     total: number
     /** For the purchase event (docs/20): the item as the backend's server events name it. */
     variant_id?: string | null
+    /** The line's product, for its page (`productPathsOf`); a product gone since reads as text. */
+    product_id?: string | null
     product_title?: string | null
     unit_price?: number | null
     /** A gift card line's recipient (`qt_gift`) and issued cards' last four (`qt_gift_cards`). */
@@ -54,6 +56,7 @@ const FIELDS = [
   "items.quantity",
   "items.total",
   "items.variant_id",
+  "items.product_id",
   "items.product_title",
   "items.unit_price",
   "items.metadata",

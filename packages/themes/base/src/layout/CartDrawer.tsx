@@ -14,6 +14,7 @@ import {
 } from "@qticaret/ui/components/sheet"
 import { FreeShippingBar } from "../cart/FreeShippingBar"
 import { LineAddons } from "../components/LineAddons"
+import { LineName } from "../components/LineName"
 
 /** Sent by the purchase form when a line went in: the drawer opens to show it. */
 export const CART_ADDED_EVENT = "qt:cart-added"
@@ -109,7 +110,15 @@ export function CartDrawer({
                       )}
                     </div>
                     <div className="flex min-w-0 flex-1 flex-col text-sm">
-                      <span className="truncate font-medium">{line.title}</span>
+                      <span className="truncate font-medium">
+                        <LineName
+                          path={line.path}
+                          title={line.title}
+                          onFollow={() => {
+                            setOpen(false)
+                          }}
+                        />
+                      </span>
                       <span className="text-muted-foreground">
                         {[line.detail, words.quantity.replace("{count}", String(line.quantity))]
                           .filter(Boolean)

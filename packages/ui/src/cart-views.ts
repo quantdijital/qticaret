@@ -16,6 +16,12 @@ export interface CartLineView {
   /** The line before its discount, only when one applies. */
   original: string | null
   image: ImageView | null
+  /**
+   * The product's page with the line's variant chosen (`?variant=`), for
+   * its photo and name; null or absent: the shop no longer shows the
+   * product, and the line reads as text.
+   */
+  path?: string | null
   /** A gift card line's recipient (adr/0025 Ek 2026-11-03); absent on any other line. */
   gift?: GiftLineView | null
   /** The line's add-on picks (adr/0052), one under another; none on a plain line. */

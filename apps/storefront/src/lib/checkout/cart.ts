@@ -21,6 +21,8 @@ export interface CheckoutCartLine {
   variant_id?: string | null
   product_title?: string | null
   unit_price?: number | null
+  /** The line's product, for its page in the summary (`productPathsOf`). */
+  product_id?: string | null
   title: string
   subtitle: string | null
   variant_title: string | null
@@ -72,6 +74,7 @@ const FIELDS = [
   "shipping_methods.total",
   "items.id",
   "items.variant_id",
+  "items.product_id",
   "items.product_title",
   "items.unit_price",
   "items.title",

@@ -3,6 +3,7 @@ import { OrderGift } from "@qticaret/theme-base"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { OrderPageView, Translate } from "@qticaret/ui"
 import { LineAddons } from "../parts/LineAddons"
+import { LineName, LinePhoto } from "../parts/LineLink"
 
 const WELL = "flex flex-col gap-5 rounded-tile bg-paper-2 p-5 sm:p-7"
 
@@ -107,7 +108,10 @@ export function Parcels({ view, t }: { view: OrderPageView; t: Translate }) {
   )
 }
 
-/** What was bought: each line's photograph, name, variant, count, picks and total. */
+/**
+ * What was bought: each line's photograph and name (a link to the
+ * product's page while the shop still shows it), variant, count, picks and total.
+ */
 export function OrderLines({ view, t }: { view: OrderPageView; t: Translate }) {
   return (
     <section aria-labelledby="urunler" className={WELL}>
@@ -117,7 +121,10 @@ export function OrderLines({ view, t }: { view: OrderPageView; t: Translate }) {
       <ul className="flex flex-col gap-4">
         {view.lines.map((line, index) => (
           <li key={`${String(index)}:${line.title}`} className="flex items-start gap-4">
-            <div className="size-18 shrink-0 overflow-hidden rounded-inner bg-paper-3 sm:size-20">
+            <LinePhoto
+              path={line.path}
+              className="size-18 shrink-0 overflow-hidden rounded-inner bg-paper-3 sm:size-20"
+            >
               {line.image && (
                 <ResponsiveImage
                   image={{ ...line.image, alt: "" }}
@@ -125,9 +132,11 @@ export function OrderLines({ view, t }: { view: OrderPageView; t: Translate }) {
                   className="h-full w-full object-cover"
                 />
               )}
-            </div>
+            </LinePhoto>
             <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-sm">
-              <span className="text-md leading-snug font-semibold">{line.title}</span>
+              <span className="text-md leading-snug font-semibold">
+                <LineName path={line.path} title={line.title} />
+              </span>
               {line.detail && line.detail.trim() !== line.title.trim() && (
                 <span className="text-text-2">{line.detail}</span>
               )}

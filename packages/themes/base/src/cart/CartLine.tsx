@@ -2,6 +2,7 @@ import { Minus, Plus, X } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CartLineView, ThemeActions, Translate } from "@qticaret/ui"
 import { LineAddons } from "../components/LineAddons"
+import { LineName } from "../components/LineName"
 import { AddonEditor } from "./AddonEditor"
 import { GiftRecipient } from "./GiftRecipient"
 
@@ -30,7 +31,9 @@ function LineImage({ line }: { line: CartLineView }) {
 function LineTitle({ line, t }: { line: CartLineView; t: Translate }) {
   return (
     <div className="flex flex-col gap-1">
-      <p className="leading-snug font-medium">{line.title}</p>
+      <p className="leading-snug font-medium">
+        <LineName path={line.path} title={line.title} />
+      </p>
       {line.detail && <p className="text-sm text-muted-foreground">{line.detail}</p>}
       <LineAddons
         addons={line.addons}

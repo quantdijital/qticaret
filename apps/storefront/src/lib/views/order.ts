@@ -12,6 +12,7 @@ import type {
 import { providersOf } from "@/lib/orders/order"
 import { lineAddonsOf } from "./addons"
 import { addressSummaryOf } from "./checkout"
+import { linePathOf } from "./line-paths"
 import { orderGiftOf } from "./order-gift"
 import { orderProgress, paymentWordsOf } from "./order-progress"
 import {
@@ -62,6 +63,8 @@ export interface OrderExtras {
   note: string | null
   /** Opened by a shopper not signed in (adr/0046 Ek 2026-11-05): the page may offer an account. */
   guest?: boolean
+  /** The lines' product pages (`productPathsOf`); none: the lines read as text. */
+  paths?: ReadonlyMap<string, string>
 }
 
 const NOTES: Record<string, string> = {
@@ -166,6 +169,7 @@ export function orderView(
             sources: { avif: null, webp: null },
           }
         : null,
+      path: extras.paths ? linePathOf(extras.paths, line) : null,
       gift: orderGiftOf(line.metadata),
       // The picks as sold: the line's own copy, whatever the product's add-ons are now
       ...picksOf(line.metadata),

@@ -5,6 +5,7 @@ import type { Cart } from "@/lib/cart/cart"
 import type { GiftLine } from "@/lib/cart/gift"
 import { isPaymentLinkCart } from "@/lib/cart/payment-link"
 import { addonFormOf, lineAddonsOf } from "./addons"
+import { linePathOf } from "./line-paths"
 
 /** Kuruş, so float noise never says "0,00 TL more". */
 const kurus = (lira: number): number => Math.round(lira * 100)
@@ -36,8 +37,14 @@ export function freeShippingOf(
 /** Discounts in kuruş are compared rounded: no "−0,00 TL" from float noise. */
 export const differs = (a: number, b: number) => kurus(a) !== kurus(b)
 
-/** The cart's lines as the cart page and the drawer show them, each with its add-on picks (adr/0052). */
-export function cartLinesOf(cart: Cart | null): CartLineView[] {
+/**
+ * The cart's lines as the cart page and the drawer show them, each with its
+ * add-on picks (adr/0052) and its product's page (`productPathsOf`).
+ */
+export function cartLinesOf(
+  cart: Cart | null,
+  paths: ReadonlyMap<string, string> = new Map()
+): CartLineView[] {
   return (cart?.items ?? []).map((line) => ({
     ...lineAddonsOf(line.metadata),
     id: line.id,
@@ -55,6 +62,7 @@ export function cartLinesOf(cart: Cart | null): CartLineView[] {
           sources: { avif: null, webp: null },
         }
       : null,
+    path: linePathOf(paths, line),
   }))
 }
 
@@ -62,13 +70,14 @@ export function cartLinesOf(cart: Cart | null): CartLineView[] {
 export function miniCartOf(
   cart: Cart | null,
   threshold: number | null,
-  t: Translate
+  t: Translate,
+  paths: ReadonlyMap<string, string> = new Map()
 ): MiniCartView | null {
   if (!cart || cart.items.length === 0) {
     return null
   }
   return {
-    lines: cartLinesOf(cart),
+    lines: cartLinesOf(cart, paths),
     subtotal: formatLira(cart.item_total),
     freeShipping: freeShippingOf(cart.item_total, threshold, t),
     locked: lockedNoteOf(cart, t),
