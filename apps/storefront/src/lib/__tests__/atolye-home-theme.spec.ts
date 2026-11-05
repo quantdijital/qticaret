@@ -109,6 +109,10 @@ describe("the theme's home page: opening, promises, aisles", () => {
     ])
     expect(html).toContain("Ücretsiz kargo")
     expect(html).toContain("1.500,00 TL ve üzeri")
+    // On a phone equal cards, the icon over the title; from 640 px beside it
+    expect(html).toContain("auto-rows-fr")
+    expect(html).toContain("flex-col items-start")
+    expect(html).toContain("sm:flex-row")
   })
 
   it("draws every category as a tile of one size, no pills, and the link to every category", () => {
