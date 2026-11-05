@@ -30,7 +30,7 @@ interface Display {
   rule_version: string
 }
 
-/** F4.3 (ADR-0023, KK): a discount shown struck through only as the 30-day rule allows. */
+/** F4.3 (ADR-0023, KK): a discount shown struck through only as the price-before rule allows. */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
@@ -98,13 +98,13 @@ medusaIntegrationTestRunner({
         before: "100.00",
         on_sale: true,
         basis: "history",
-        rule_version: "tr-30d-1",
+        rule_version: "tr-10d-1",
       })
       // When the sale began: the list's price, as recorded
       expect(Number.isNaN(Date.parse(shown?.since ?? ""))).toBe(false)
     })
 
-    it("does not show a cut back to a price of the last 30 days as a discount", async () => {
+    it("does not show a cut back to a price of the last 10 days as a discount", async () => {
       const { variantId } = await stockedProduct(getContainer(), shop, "gosterim-geri", 5, 80)
       await recorded(variantId, 1)
       // Raised to 100, then a "sale" back to the 80 it sold at days ago

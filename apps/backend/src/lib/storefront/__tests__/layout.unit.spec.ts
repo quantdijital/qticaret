@@ -73,6 +73,20 @@ describe("storefront layout document (adr/0049)", () => {
     expect(doc.category[0]).toMatchObject({ type: "faq", placement: "bottom" })
   })
 
+  it("takes one featured product on the home page only (adr/0046 Ek 2026-11-05)", () => {
+    const featured = { id: "yakin001", type: "featured_product", product_id: "prod_1" }
+    expect(layoutDocument.parse({ home: [featured] }).home).toEqual([
+      { ...featured, ...ALWAYS, title: null, text: null },
+    ])
+    expect(layoutDocument.safeParse({ product: [featured] }).success).toBe(false)
+    expect(layoutDocument.safeParse({ home: [{ ...featured, product_id: "" }] }).success).toBe(
+      false
+    )
+    expect(
+      layoutDocument.safeParse({ home: [{ ...featured, text: "{bilinmeyen}" }] }).success
+    ).toBe(false)
+  })
+
   it("takes up to twelve chosen related products", () => {
     const ids = Array.from({ length: 12 }, (_, index) => `prod_${String(index)}`)
     const doc = layoutDocument.parse({ product: [related("benzer01", ids)] })

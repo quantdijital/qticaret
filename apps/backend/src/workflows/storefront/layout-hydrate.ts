@@ -82,6 +82,14 @@ export async function hydrateSection(section: BodySection, at: HydrateContext): 
       }
     case "related_products":
       return { id, type, title: section.title, source: section.source, limit: section.limit }
+    case "featured_product":
+      return {
+        id,
+        type,
+        title: section.title,
+        text: fill(section.text, at.values),
+        product_id: section.product_id,
+      }
     case "rich_text": {
       const body = fillShopDoc(section.body, at.values)
       return {

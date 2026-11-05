@@ -36,3 +36,6 @@ export type StoreGetReviewPhotosType = z.infer<typeof StoreGetReviewPhotos>
 
 /** A photo's upload: its bytes are the body; nothing in the address. */
 export const StorePostReviewPhotoQuery = z.object({}).strict()
+
+/** The shop's reviews in short (adr/0046 Ek 2026-11-05): nothing to ask. */
+export const StoreGetReviewSummary = z.object({}).strict()

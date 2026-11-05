@@ -16,7 +16,7 @@ const live = (amount: number, original = amount) => ({
 })
 
 describe("how a price is shown (F4.3, ADR-0023)", () => {
-  it("shows a discount struck through at the lowest price of the 30 days before it", () => {
+  it("shows a discount struck through at the lowest price of the 10 days before it", () => {
     const shown = priceDisplay(
       [point(60, 10000), point(20, 9500), point(5, 8000, 10000)],
       live(8000, 10000),
@@ -34,7 +34,7 @@ describe("how a price is shown (F4.3, ADR-0023)", () => {
     })
   })
 
-  it("shows no discount when the price was as low within 30 days", () => {
+  it("shows no discount when the price was as low within 10 days", () => {
     // Raised to 100 a week ago, then "discounted" back to 80: nothing to advertise
     const shown = priceDisplay(
       [point(40, 8000), point(7, 10000), point(2, 8000, 10000)],

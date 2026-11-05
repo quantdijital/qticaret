@@ -1,15 +1,22 @@
 import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/http"
 import { toMedusaAmount } from "../../../lib/money"
+import type { CartOffer } from "../../../lib/pricing/offers"
 import { priceDisplays } from "../../../workflows/pricing/price-display"
 import { shopperVariantIds } from "../../../workflows/pricing/selling-prices"
 import type { StoreGetPriceDisplayType } from "./validators"
 
+const offerValue = (offer: CartOffer) =>
+  offer.method.type === "percentage" ? offer.method.value : toMedusaAmount(offer.method.value)
+
 /**
  * `GET /store/price-display` (F4.3, ADR-0023): how each variant's price is
- * shown: the price now and, only when the 30-day rule lets it be shown as
- * a discount, the price before it, struck through. The same reading feeds
- * the product page's structured data. Amounts are lira ("80.00"). Only
- * variants of published products in the key's sales channels answer.
+ * shown: the price now (an automatic promotion every shopper gets on it
+ * included, adr/0023 Ek 2026-11-05) and, only when the price-before rule
+ * lets it be shown as a discount, the price before it, struck through;
+ * and an automatic promotion the cart applies past a minimum, to name
+ * beside the price (`cart_offer`). The same reading feeds the product
+ * page's structured data. Amounts are lira ("80.00"). Only variants of
+ * published products in the key's sales channels answer.
  */
 export async function GET(
   req: MedusaStoreRequest<unknown, StoreGetPriceDisplayType>,
@@ -37,6 +44,15 @@ export async function GET(
           since: display.since,
           basis: display.basis,
           rule_version: display.rule_version,
+          cart_offer: display.cart_offer && {
+            type: display.cart_offer.method.type,
+            // A percentage as a number (30), an amount as lira ("50.00")
+            value: offerValue(display.cart_offer),
+            minimum:
+              display.cart_offer.minimum === null
+                ? null
+                : toMedusaAmount(display.cart_offer.minimum),
+          },
         },
       ])
     ),

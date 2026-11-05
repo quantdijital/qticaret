@@ -277,6 +277,23 @@ class ProductReviewsModuleService extends MedusaService({
     return counts
   }
 
+  /** How many approved reviews each product has per number of stars: the shop-wide spread's rows. */
+  @InjectManager()
+  async approvedRatingCounts(
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<{ product_id: string; rating: number; count: number }[]> {
+    const manager = sharedContext.manager as EntityManager
+    const rows = await manager.execute<
+      { product_id: string; rating: number; count: string | number }[]
+    >(
+      `SELECT product_id, rating, count(*) AS count FROM product_review
+       WHERE status = 'approved' AND deleted_at IS NULL
+       GROUP BY product_id, rating`
+    )
+    // `count(*)` comes back as a string from Postgres
+    return rows.map((row) => ({ ...row, count: Number(row.count) }))
+  }
+
   @InjectTransactionManager()
   protected async recountRating_(
     productId: string,

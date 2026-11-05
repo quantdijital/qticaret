@@ -22,33 +22,35 @@ describe("the price before a discount (ADR-0023)", () => {
     expect(discountView([])).toBeNull()
   })
 
-  it("takes the lowest price of the 30 days before the discount began", () => {
+  it("takes the lowest price of the 10 days before the discount began", () => {
+    expect(DISCOUNT_RULE).toEqual({ version: "tr-10d-1", windowDays: 10 })
     const view = discountView([
-      point(60, 9000), // in force when the window opened (10 days before it)
-      point(35, 12000),
-      point(20, 11000),
-      point(10, 8000, 12000),
+      point(20, 9000), // in force when the window opened (14 days ago)
+      point(12, 12000),
+      point(7, 11000),
+      point(4, 8000, 12000),
     ])
     expect(view).toMatchObject({
       current: 8000,
       regular: 12000,
       discounted: true,
-      since: at(10),
+      since: at(4),
       before: 9000,
       basis: "history",
     })
   })
 
   it("leaves out a price whose time ended before the window", () => {
-    const view = discountView([point(80, 7000), point(45, 12000), point(5, 9000, 12000)])
+    // 70 ended 16 days ago, six days before the window opened
+    const view = discountView([point(25, 7000), point(16, 12000), point(5, 9000, 12000)])
     expect(view?.before).toBe(12000)
   })
 
   it("counts an earlier discount inside the window", () => {
     const view = discountView([
-      point(50, 12000),
-      point(25, 9500, 12000),
       point(20, 12000),
+      point(9, 9500, 12000),
+      point(7, 12000),
       point(3, 10000, 12000),
     ])
     expect(view).toMatchObject({ since: at(3), before: 9500 })

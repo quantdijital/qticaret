@@ -128,6 +128,13 @@ medusaIntegrationTestRunner({
       const shopWide = await http.get<{
         reviews: { id: string; product_id: string; product_title: string }[]
       }>("/store/reviews", { headers: storefront.headers })
+      // …and the shop's reviews in short (adr/0046 Ek 2026-11-05)
+      const summary = await http.get<{ rating: unknown }>("/store/reviews/summary", {
+        headers: storefront.headers,
+      })
+      const unknownParam = await settle(
+        http.get("/store/reviews/summary?limit=5", { headers: storefront.headers })
+      )
       // Structured data needs absolute URLs: the shop's domain
       await getContainer()
         .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
@@ -154,6 +161,12 @@ medusaIntegrationTestRunner({
         author_name: "Ayşe Y.",
       })
       expect(product?.["aggregateRating"]).toMatchObject({ ratingValue: "4.0", reviewCount: 1 })
+      expect(summary.data.rating).toEqual({
+        average: 4,
+        count: 1,
+        distribution: { "5": 0, "4": 1, "3": 0, "2": 0, "1": 0 },
+      })
+      expect(unknownParam.status).toBe(400)
       expect(
         shopWide.data.reviews.find((each) => each.id === written.data.review?.id)
       ).toMatchObject({

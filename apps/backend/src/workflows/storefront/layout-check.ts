@@ -32,6 +32,9 @@ function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }
   if (section.type === "brands") {
     return section.brand_ids.map(as("brand"))
   }
+  if (section.type === "featured_product") {
+    return [as("product")(section.product_id)]
+  }
   // A rail's or a product page's related products: their category, collection or choice
   if (section.type === "products" || section.type === "related_products") {
     const { source } = section

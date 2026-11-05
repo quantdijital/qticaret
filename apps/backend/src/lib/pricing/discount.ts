@@ -2,14 +2,18 @@ import type { Kurus } from "../money"
 
 /**
  * The price shown before a discount (F4.3, ADR-0023): the lowest price that
- * applied in the 30 days before the discount began. A discount that only
- * deepens (100 → 90 → 80) is one discount that began at its first step, so
- * the price before it stays what it was before the first (the reading the
- * EU's Omnibus rule gives progressive reductions). The Turkish price label
- * rule is to be confirmed by a lawyer (docs/12); the version names the
- * reading in force, and this file is the one place it changes.
+ * applied in the days before the discount began. For goods that is ten
+ * days since the 2025–2026 amendments (Fiyat Etiketi Yönetmeliği md. 11/1,
+ * RG 11.10.2025/33044; Ticari Reklam ve Haksız Ticari Uygulamalar
+ * Yönetmeliği md. 14/3, RG 1.7.2026/33297, in force 1.8.2026); it was
+ * thirty before them (`tr-30d-1`). A discount that only deepens
+ * (100 → 90 → 80) is one discount that began at its first step, so the
+ * price before it stays what it was before the first (the reading the
+ * EU's Omnibus rule gives progressive reductions). The rule is to be
+ * confirmed by a lawyer (docs/12); the version names the reading in
+ * force, and this file is the one place it changes.
  */
-export const DISCOUNT_RULE = { version: "tr-30d-1", windowDays: 30 } as const
+export const DISCOUNT_RULE = { version: "tr-10d-1", windowDays: 10 } as const
 
 const DAY_MS = 24 * 60 * 60 * 1000
 

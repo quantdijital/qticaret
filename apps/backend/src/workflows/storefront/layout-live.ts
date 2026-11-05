@@ -36,6 +36,8 @@ export async function liveRecords(
       section.category_ids.forEach((id) => want("category", id))
     } else if (section.type === "brands") {
       section.brand_ids.forEach((id) => want("brand", id))
+    } else if (section.type === "featured_product") {
+      want("product", section.product_id)
     } else if (section.type === "products" || section.type === "related_products") {
       const { source } = section
       if (source.kind === "category") want("category", source.category_id)
@@ -53,6 +55,10 @@ export async function liveRecords(
     if (section.type === "categories" && section.category_ids.length > 0) {
       const ids = section.category_ids.filter(live("category"))
       return ids.length > 0 ? [{ ...section, category_ids: ids }] : []
+    }
+    // A featured product that is not live now: no close-up of nothing
+    if (section.type === "featured_product") {
+      return live("product")(section.product_id) ? [section] : []
     }
     if (section.type === "brands" && section.brand_ids.length > 0) {
       const ids = section.brand_ids.filter(live("brand"))

@@ -100,7 +100,7 @@ describe("productFacts", () => {
     expect(facts.variesBy).toEqual([])
   })
 
-  it("prices offers as the shopper pays now, struck through only as the 30-day rule allows", () => {
+  it("prices offers as the shopper pays now, struck through only as the price-before rule allows", () => {
     const display = (current: number, before: number | null): PriceDisplay => ({
       current: kurus(current),
       regular: kurus(89_900),

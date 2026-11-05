@@ -15,6 +15,7 @@ import {
 import { AdminGetReviews, AdminPostModerateReviews } from "../admin/product-reviews/validators"
 import {
   StoreGetReviewPhotos,
+  StoreGetReviewSummary,
   StoreGetReviews,
   StorePostReview,
   StorePostReviewPhotoQuery,
@@ -57,6 +58,12 @@ export const REVIEW_ROUTES = [
     matcher: "/store/reviews/photos",
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(StoreGetReviewPhotos, {})],
+  },
+  // adr/0046 Ek 2026-11-05: the shop's average, count and stars' spread
+  {
+    matcher: "/store/reviews/summary",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(StoreGetReviewSummary, {})],
   },
   // adr/0037 §4 Ek 2026-11-04: a review's photo, its bytes as the body (read by the route)
   {

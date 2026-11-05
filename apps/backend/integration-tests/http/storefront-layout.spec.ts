@@ -375,5 +375,70 @@ medusaIntegrationTestRunner({
         "sikcasorulan",
       ])
     })
+
+    it("features one live product on the home page, its line's details filled (adr/0046 Ek 2026-11-05)", async () => {
+      const container = getContainer()
+      const owner = await createAdminUser(http, container)
+      const store = await createStorefront(container)
+      const asOwner = { headers: owner.headers }
+      await settle(
+        http.post("/admin/platform-settings/store", { contact_phone: "0532 123 45 67" }, asOwner)
+      )
+      const product = async (title: string, status: "draft" | "published") =>
+        (
+          await settle(
+            http.post<{ product: { id: string } }>(
+              "/admin/products",
+              productBody(title, status),
+              asOwner
+            )
+          )
+        ).data.product.id
+      const live = await product("Şef Bıçağı", "published")
+      const draft = await product("Taslak Şef", "draft")
+      const featured = (id: string, productId: string): Section => ({
+        id,
+        type: "featured_product",
+        ...ALWAYS,
+        title: "Yakından",
+        text: "Sorularınız için {telefon}",
+        product_id: productId,
+      })
+      const save = (home: Section[]) =>
+        settle(
+          http.post<AdminLayout>(
+            "/admin/storefront-layout",
+            { document: { header: [], home, footer: [], product: [], category: [] } },
+            asOwner
+          )
+        )
+
+      const unknown = await save([featured("yakinyok1", "prod_yok")])
+      const saved = await save([featured("yakincanli", live), featured("yakintaslak", draft)])
+      expect(unknown.status).toBe(400)
+      expect(unknown.data.message).toBe("storefront_layout.target_unknown")
+      expect(saved.status).toBe(200)
+
+      // The draft as the storefront shows it (a publication's is held a minute per revision)
+      const preview = await settle(
+        http.post<{ path: string }>("/admin/storefront-layout/preview", {}, asOwner)
+      )
+      const token = preview.data.path.split("/").pop() ?? ""
+      const shown = await settle(
+        http.get<StoreLayout>(`/store/storefront-layout/preview/${token}`, {
+          headers: store.headers,
+        })
+      )
+      // The draft's close-up is left out: its id never leaves the backend
+      expect(shown.data.layout.home).toEqual([
+        {
+          id: "yakincanli",
+          type: "featured_product",
+          title: "Yakından",
+          text: "Sorularınız için 0532 123 45 67",
+          product_id: live,
+        },
+      ])
+    })
   },
 })
