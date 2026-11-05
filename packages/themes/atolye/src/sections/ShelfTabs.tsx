@@ -25,7 +25,7 @@ export function ShelfTabs({
     <div className="gf-tabs flex flex-col gap-6">
       <fieldset className="gf-tab-row min-w-0 border-0 p-0">
         <legend className="sr-only">{label}</legend>
-        <div className="gf-rail -mx-(--gutter) flex gap-2 overflow-x-auto px-(--gutter) py-1">
+        <div className="gf-rail -mx-(--gutter) flex scroll-px-(--gutter) gap-2 overflow-x-auto px-(--gutter) py-1">
           {tabs.map((tab, index) => (
             <label key={tab} className="gf-tab">
               <input

@@ -81,6 +81,8 @@ describe("the theme's home sections", () => {
     expect(html).toContain("Müşteri fotoğrafları")
     expect(html).toContain('alt="Ayşe K. adlı müşterinin fotoğrafı: Çakı"')
     expect(html).toMatch(/src="\/media\/musteri\.jpg"[^>]*loading="lazy"/)
+    // Their phone rail runs to the screen's edges but snaps at the page's gutter
+    expect(html).toMatch(/class="gf-rail -mx-\(--gutter\)[^"]* scroll-px-\(--gutter\) /)
   })
 
   it("draws no reviews section without reviews or a summary", () => {

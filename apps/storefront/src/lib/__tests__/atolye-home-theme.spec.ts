@@ -163,6 +163,24 @@ describe("the theme's home page: the shelf", () => {
     expect(html).toContain('href="/kategori/caki"')
   })
 
+  it("starts the tabs and the tiles on the page's left line, though their rows run to the screen's edges", () => {
+    const html = home([
+      hero,
+      categories(8, 8),
+      shelf("cok", "Çok satanlar", [product("a")]),
+      shelf("yeni", "Yeni gelenler", [product("b")]),
+    ])
+    const rails = html.match(/class="gf-rail [^"]*"/g) ?? []
+    expect(rails).toHaveLength(2)
+    // Past the container by the gutter, padded and snapping at the gutter: the
+    // mandatory snap would otherwise pull the first pill onto the screen's edge
+    for (const rail of rails) {
+      expect(rail).toContain("-mx-(--gutter)")
+      expect(rail).toContain("px-(--gutter)")
+      expect(rail).toContain("scroll-px-(--gutter)")
+    }
+  })
+
   it("keeps a lone product section a plain grid under its heading, six cards at most", () => {
     const products = Array.from({ length: 8 }, (_, index) => product(`p${String(index)}`))
     const html = home([hero, shelf("yeni", "Yeni ürünler", products)])

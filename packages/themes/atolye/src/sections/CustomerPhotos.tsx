@@ -25,7 +25,7 @@ export function CustomerPhotos({
     <section aria-labelledby={id} className="pt-(--section-gap-s)">
       <Container className="flex flex-col gap-6">
         <h2 id={id}>{t("reviews.customer_photos")}</h2>
-        <ul className="gf-rail -mx-(--gutter) flex gap-(--gap-columns) overflow-x-auto px-(--gutter) lg:mx-0 lg:grid lg:grid-cols-[repeat(6,minmax(0,1fr))] lg:overflow-visible lg:px-0">
+        <ul className="gf-rail -mx-(--gutter) flex scroll-px-(--gutter) gap-(--gap-columns) overflow-x-auto px-(--gutter) lg:mx-0 lg:grid lg:grid-cols-[repeat(6,minmax(0,1fr))] lg:overflow-visible lg:px-0">
           {photos.slice(0, 12).map((photo, index) => {
             const name = photo.product?.label ?? ""
             const alt = t("reviews.customer_photo_by", { author: photo.author, product: name })

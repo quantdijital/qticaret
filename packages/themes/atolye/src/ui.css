@@ -306,7 +306,10 @@ summary::-webkit-details-marker {
   display: none;
 }
 
-/* Rails scroll sideways by touch and keys, their bar hidden; a fade marks the cut edge */
+/* Rails scroll sideways by touch and keys, their bar hidden; a fade marks the cut edge.
+   A rail that runs past the container (-mx/px of the gutter) also takes
+   scroll-px of the gutter: without it the mandatory snap pulls the first
+   item onto the screen's edge on load, off the page's left line */
 .gf-rail {
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
