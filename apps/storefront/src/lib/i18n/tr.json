@@ -805,5 +805,6 @@
   "home.featured": "Öne çıkan ürün",
   "home.featured_view": "Ürünü incele",
   "home.featured_facts": "Öne çıkan özellikler",
-  "reviews.count": "{count} değerlendirme"
+  "reviews.count": "{count} değerlendirme",
+  "product.discount_short": "%{percent}"
 }

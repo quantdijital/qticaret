@@ -28,18 +28,23 @@ const INITIAL: ActionResult = { ok: false, error: null }
  * busy and closed to a second press; once in, the cart drawer opens and
  * its live region says so (no toast); refused, the reason under the
  * button in words and the error colour, with the product's page as the
- * way on. It sits above the card's own link, which covers the card.
+ * way on. It sits above the card's own link, which covers the card. The
+ * home page's close-up (`home/CloseUp`) sends the same form from the
+ * page's filled button, its one action there.
  */
 export function QuickAdd({
   variantId,
   path,
   action,
   words,
+  primary = false,
 }: {
   variantId: string
   path: string
   action: FormAction
   words: QuickAddWords
+  /** The filled button at its full 48 px (the close-up), not a card's quiet 44 px one. */
+  primary?: boolean
 }) {
   const [state, submit, pending] = useActionState(action, INITIAL)
   const sent = useRef(false)
@@ -67,7 +72,7 @@ export function QuickAdd({
       <input type="hidden" name="quantity" value="1" />
       <button
         type="submit"
-        className="at-btn at-btn--quiet min-h-11 w-full px-4"
+        className={primary ? "at-btn w-full" : "at-btn at-btn--quiet min-h-11 w-full px-4"}
         aria-label={words.label}
         aria-busy={pending}
         aria-disabled={pending}

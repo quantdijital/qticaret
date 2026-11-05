@@ -1,7 +1,7 @@
 import type { FormAction, HomePageView, Translate } from "@qticaret/ui"
 import { Container } from "./components/Container"
 import { CategoryIndex } from "./home/CategoryIndex"
-import { Opening, headingId } from "./home/Opening"
+import { Opening, headingId, photoOf } from "./home/Opening"
 import { OPENING_CATEGORIES, planHome } from "./home/plan"
 import { Sections, type Subscribe } from "./home/Sections"
 
@@ -49,7 +49,13 @@ export function HomePage({
           skipOnPhone={OPENING_CATEGORIES}
         />
       )}
-      <Sections sections={sections} t={t} subscribe={subscribe} quickAdd={quickAdd} />
+      <Sections
+        sections={sections}
+        t={t}
+        subscribe={subscribe}
+        quickAdd={quickAdd}
+        openingPhoto={opening ? (photoOf(opening)?.image.src ?? null) : null}
+      />
     </>
   )
 }

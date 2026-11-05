@@ -7,7 +7,8 @@ import { OPENING_CATEGORIES, type Opening as OpeningPlan } from "./plan"
 /** A heading's id from the section's own: unique on the page, stable across requests. */
 export const headingId = (sectionId: string) => `bolum-${sectionId}`
 
-const photoOf = (opening: OpeningPlan): { image: ImageView; link: LinkView } | null => {
+/** The opening's photograph and where it leads; none: the opening is its words. */
+export const photoOf = (opening: OpeningPlan): { image: ImageView; link: LinkView } | null => {
   const [action] = opening.hero.actions
   // The shop's own opening picture first, else its newest pictured product
   if (opening.hero.image && action) {

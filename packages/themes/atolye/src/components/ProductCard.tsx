@@ -13,9 +13,14 @@ const QUICK_ADD_ERRORS = [
   "errors.too_many_requests",
 ] as const
 
-const quickAddWords = (t: Translate, title: string): QuickAddWords => ({
+/** A quick add's words for a product; `add` is the button's own (a card's one verb by default). */
+export const quickAddWords = (
+  t: Translate,
+  title: string,
   // The plus and one verb: twelve cards say it, the name says which (Hallmark 58)
-  add: t("product.quick_add_short"),
+  add = t("product.quick_add_short")
+): QuickAddWords => ({
+  add,
   label: t("product.quick_add_label", { title }),
   added: t("product.quick_added"),
   errors: {
@@ -25,6 +30,20 @@ const quickAddWords = (t: Translate, title: string): QuickAddWords => ({
   },
   openPage: t("product.quick_add_open"),
 })
+
+/**
+ * A discount's share as the figure ("%30") beside a struck-through price
+ * that already says it is one; the reader hears the words ("%30
+ * indirim"). Twelve cards each saying "indirim" fill a window (Hallmark 58).
+ */
+export function DiscountBadge({ percent, t }: { percent: number; t: Translate }) {
+  return (
+    <>
+      <span aria-hidden="true">{t("product.discount_short", { percent })}</span>
+      <span className="sr-only">{t("product.discount", { percent })}</span>
+    </>
+  )
+}
 
 /** Sold out, by the card's own word or its stock bucket. */
 const isOut = (product: ProductCardView) => !product.available || product.stock === "out"
@@ -94,7 +113,7 @@ export function ProductCard({
             ) : (
               discount !== null && (
                 <li className="tabular bg-discount px-2 py-1 text-xs font-medium text-discount-ink">
-                  {t("product.discount", { percent: discount })}
+                  <DiscountBadge percent={discount} t={t} />
                 </li>
               )
             )}

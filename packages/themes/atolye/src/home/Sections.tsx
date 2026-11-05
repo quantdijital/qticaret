@@ -1,4 +1,3 @@
-import { FeaturedProductSection } from "@qticaret/theme-base"
 import type { FormAction, HomeSectionView, PlaceOrderResult, Translate } from "@qticaret/ui"
 import {
   BannerSection,
@@ -10,6 +9,7 @@ import {
   TrustSection,
 } from "./Blocks"
 import { CategoryIndex } from "./CategoryIndex"
+import { CloseUp } from "./CloseUp"
 import { Opening, headingId } from "./Opening"
 import type { Of } from "./plan"
 import { ReviewsSection } from "./Reviews"
@@ -40,10 +40,14 @@ function Section({
   section,
   t,
   subscribe,
+  quickAdd,
+  shownPhotos,
 }: {
   section: HomeSectionView
   t: Translate
   subscribe?: Subscribe | undefined
+  quickAdd?: FormAction | undefined
+  shownPhotos: ReadonlySet<string>
 }) {
   switch (section.type) {
     case "hero":
@@ -63,8 +67,7 @@ function Section({
       // Products always stand in a shelf run (`runs`)
       return null
     case "featured_product":
-      // The close-up (design.md) is the theme's own next step; until drawn, the base one in Atölye's tokens
-      return <FeaturedProductSection section={section} t={t} />
+      return <CloseUp section={section} t={t} quickAdd={quickAdd} shownPhotos={shownPhotos} />
     case "brands":
       return <BrandsSection section={section} />
     case "posts":
@@ -87,24 +90,45 @@ function Section({
 /**
  * The shop's sections after the opening, in its order, each drawn by its
  * type (adr/0049); neighbouring product sections become one tabbed shelf,
- * its cards with the quick add when the page passed one.
+ * its cards (and the close-up) with the quick add when the page passed one.
  */
 export function Sections({
   sections,
   t,
   subscribe,
   quickAdd,
+  openingPhoto,
 }: {
   sections: readonly HomeSectionView[]
   t: Translate
   subscribe?: Subscribe | undefined
   quickAdd?: FormAction | undefined
+  /** The opening's photograph (`home/Opening`), which the close-up does not show again. */
+  openingPhoto?: string | null | undefined
 }) {
+  // The pictures the page already shows, so the close-up shows another of its product's
+  const shownPhotos = new Set<string>(openingPhoto ? [openingPhoto] : [])
+  for (const section of sections) {
+    if (section.type === "products") {
+      for (const product of section.products) {
+        if (product.image) {
+          shownPhotos.add(product.image.src)
+        }
+      }
+    }
+  }
   return runs(sections).map((run) =>
     run.kind === "shelf" ? (
       <Shelf key={run.sections[0]?.id} sections={run.sections} t={t} quickAdd={quickAdd} />
     ) : (
-      <Section key={run.section.id} section={run.section} t={t} subscribe={subscribe} />
+      <Section
+        key={run.section.id}
+        section={run.section}
+        t={t}
+        subscribe={subscribe}
+        quickAdd={quickAdd}
+        shownPhotos={shownPhotos}
+      />
     )
   )
 }

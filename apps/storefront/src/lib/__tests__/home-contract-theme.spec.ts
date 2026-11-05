@@ -86,9 +86,10 @@ describe("the home page's new optional sections and fields", () => {
     expect(html).toContain("Mutfağın en çok kullanılanı.")
     expect(html).toContain(">Bıçak</h3>")
     expect(html).toContain("Ürünü incele")
-    // Atölye borrows the base close-up until it draws its own
+    // Atölye draws its own close-up from the same view (atolye-closeup-theme.spec.ts)
     const atolye = renderPage(atolyeTheme, "HomePage", { view: { sections: [featured] } })
     expect(atolye).toContain("N690")
+    expect(atolye).not.toContain("Öne çıkan ürün")
   })
 
   it("puts the shop's rating above the reviews only when the view has it", () => {
