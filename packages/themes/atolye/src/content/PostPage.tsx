@@ -7,6 +7,7 @@ import { hasOutline, OutlineAside, OutlineWell } from "./Outline"
 import { Notice } from "./PageHead"
 import { PostCard } from "./PostCard"
 import { Prose } from "./Prose"
+import { readingGrid } from "./reading"
 
 /** Who wrote the post, when, and how long it reads: side by side, never joined by a dot. */
 function Facts({ meta, t }: { meta: PostMetaView; t: Translate }) {
@@ -73,10 +74,12 @@ function Closing({ view, t }: { view: ContentPageView; t: Translate }) {
 /**
  * A blog post (adr/0019, adr/0046 Ek 2026-11-05 içerik sayfaları): the
  * category as a pill, the title, who wrote it, when and how long it
- * reads; the cover on a graphite stage across the page; the text in a
- * reading measure with its contents beside it from 1024 px (a closed
- * well on a phone) when it is long; its tags and share links; then the
- * products its text names as the shop's cards, and three posts to read next.
+ * reads, and the cover, all in the one reading column (owner 2026-11-05:
+ * the title flush with the text, nothing across the page); the text in
+ * that column's measure with its contents beside it from 1024 px (a
+ * closed well on a phone) when it is long; its tags and share links; then
+ * the products its text names as the shop's cards, and three posts to
+ * read next.
  */
 export function PostPage({ view, t }: { view: ContentPageView; t: Translate }) {
   const meta = view.post ?? null
@@ -84,41 +87,48 @@ export function PostPage({ view, t }: { view: ContentPageView; t: Translate }) {
   const products = view.products ?? []
   const related = view.related ?? []
   const image = view.image ?? null
+  const reading = readingGrid({ outline: outline.length > 0, tablet: true })
   return (
     <div>
       <Container className="flex flex-col gap-6 pt-6 lg:pt-10">
         <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} compact />
         <Notice text={view.notice} />
-        <header className="grid lg:grid-cols-12 lg:gap-(--gap-columns)">
-          <div className="flex flex-col items-start gap-5 lg:col-span-8 lg:col-start-5">
-            {view.category && (
-              <a href={view.category.path} className="gf-chip">
-                {view.category.label}
-              </a>
-            )}
-            <h1 className="max-w-[26ch] text-section">{view.title}</h1>
-            {meta && <Facts meta={meta} t={t} />}
-          </div>
+      </Container>
+      <Container className={`mt-6 grid gap-6 sm:gap-8 ${reading.grid}`}>
+        <header className={`flex min-w-0 flex-col items-start gap-4 ${reading.column}`}>
+          {view.category && (
+            <a href={view.category.path} className="gf-chip">
+              {view.category.label}
+            </a>
+          )}
+          <h1 className="max-w-[22ch] text-section leading-[1.12]">{view.title}</h1>
+          {meta && <Facts meta={meta} t={t} />}
         </header>
         {image && (
-          <div className="gf-stage relative mt-2 aspect-[16/10] overflow-hidden rounded-tile sm:aspect-[2/1] lg:aspect-[21/9]">
+          <div
+            className={`gf-stage relative aspect-[16/10] overflow-hidden rounded-tile sm:aspect-[2/1] lg:aspect-[21/9] ${reading.column}`}
+          >
             <ResponsiveImage
               image={{ ...image, alt: "" }}
-              sizes="(min-width: 1440px) 1344px, 100vw"
+              sizes="(min-width: 1024px) 544px, (min-width: 640px) 512px, 100vw"
               priority
               className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
         )}
-      </Container>
-      <Container className="mt-8 grid gap-8 lg:mt-12 lg:grid-cols-12 lg:gap-(--gap-columns)">
         {outline.length > 0 && (
           <>
-            <OutlineWell outline={outline} t={t} />
-            <OutlineAside id="icindekiler" outline={outline} t={t} className="lg:col-span-3" />
+            <OutlineWell outline={outline} t={t} className={reading.column} />
+            {/* Beside the title, the cover and the text alike: the left of the first screen is never empty */}
+            <OutlineAside
+              id="icindekiler"
+              outline={outline}
+              t={t}
+              className={`${reading.side} ${image ? "lg:row-span-3" : "lg:row-span-2"}`}
+            />
           </>
         )}
-        <article className="min-w-0 lg:col-span-8 lg:col-start-5">
+        <article className={`min-w-0 ${reading.column}`}>
           <Prose html={view.html} tableLabel={(n) => t("content.table", { n })} />
           <Closing view={view} t={t} />
         </article>

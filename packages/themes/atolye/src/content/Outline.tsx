@@ -31,9 +31,17 @@ function Links({
 }
 
 /** On a phone: the contents as a closed well above the text ("İçindekiler · N bölüm"). */
-export function OutlineWell({ outline, t }: { outline: readonly OutlineItemView[]; t: Translate }) {
+export function OutlineWell({
+  outline,
+  t,
+  className,
+}: {
+  outline: readonly OutlineItemView[]
+  t: Translate
+  className?: string
+}) {
   return (
-    <details className="group rounded-tile bg-paper-2 lg:hidden">
+    <details className={`group rounded-tile bg-paper-2 lg:hidden ${className ?? ""}`}>
       <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-4 px-5 font-semibold">
         <span>{t("legal.contents")}</span>
         <span className="flex items-center gap-2 text-sm font-normal text-text-3">
@@ -69,7 +77,7 @@ export function OutlineAside({
 }) {
   return (
     <aside aria-labelledby={id} className={`max-lg:hidden ${className ?? ""}`}>
-      <div className="sticky top-40 flex max-h-[calc(100dvh-11rem)] flex-col gap-3 overflow-y-auto pb-4">
+      <div className="sticky top-40 flex max-h-[calc(100dvh-11rem)] max-w-64 flex-col gap-3 overflow-y-auto pb-4">
         <h2 id={id} className="text-md tracking-normal text-text">
           {t("legal.contents")}
         </h2>

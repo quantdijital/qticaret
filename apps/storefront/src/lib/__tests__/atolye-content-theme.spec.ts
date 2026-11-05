@@ -74,6 +74,13 @@ describe("the theme's content page", () => {
     expect(page({ outline: outline.slice(0, 2) })).not.toContain("İçindekiler")
   })
 
+  it("sets a long text in the post's reading column, its contents on the left from 1024 px", () => {
+    const html = page({ outline })
+    expect(html).toContain("lg:grid-cols-[minmax(13rem,1fr)_minmax(0,34rem)_minmax(0,1fr)]")
+    expect(html).toMatch(/<aside[^>]*class="[^"]*lg:col-start-1 lg:row-start-1/)
+    expect(html).toMatch(/<article class="min-w-0 lg:col-start-2">/)
+  })
+
   it("draws the payment page's ways to pay and one table of the families' rates", () => {
     const html = page({
       payments: {
@@ -252,6 +259,20 @@ describe("the theme's blog post", () => {
     expect(html).toContain("Yazan: Usta")
     expect(html).toContain('<time dateTime="2026-10-30T09:00:00.000Z">30 Ekim 2026</time>')
     expect(html).not.toContain(" · ")
+  })
+
+  it("sets the title, the cover and the text in one reading column, never across the page", () => {
+    const html = post()
+    const column = "sm:col-start-2"
+    expect(html).toContain("sm:grid-cols-[minmax(0,1fr)_minmax(0,32rem)_minmax(0,1fr)]")
+    expect(html).toMatch(new RegExp(`<header class="[^"]*${column}`))
+    expect(html).toMatch(new RegExp(`<article class="min-w-0 ${column}">`))
+    expect(html).toMatch(new RegExp(`class="gf-stage [^"]*${column}"`))
+    expect(html).toContain('sizes="(min-width: 1024px) 544px, (min-width: 640px) 512px, 100vw"')
+    expect(html).not.toContain("text-center")
+    // The contents stand beside the title, the cover and the text alike
+    expect(html).toMatch(/<aside[^>]*class="[^"]*lg:col-start-1 lg:row-start-1 lg:row-span-3/)
+    expect(post({ image: null })).toMatch(/<aside[^>]*class="[^"]*lg:row-span-2/)
   })
 
   it("closes with the tags, the share links in a new tab, the products and the next reads", () => {
