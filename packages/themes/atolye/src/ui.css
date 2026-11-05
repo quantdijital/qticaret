@@ -274,11 +274,11 @@
   }
 }
 
-/* The WhatsApp button stays clear of an open drawer, the live search's open
-   panel and a page's own fixed buy bar (the product page's `[data-sticky-buy]`) */
+/* The WhatsApp button stays clear of an open drawer and the live search's open
+   panel; the product page's buy bar (`[data-sticky-buy]`) takes the bottom
+   bar's place, under the button */
 body:has([data-drawer][data-state="open"]) [data-whatsapp],
-body:has(.gf-suggest:not([hidden])) [data-whatsapp],
-body:has([data-sticky-buy]) [data-whatsapp] {
+body:has(.gf-suggest:not([hidden])) [data-whatsapp] {
   display: none;
 }
 
