@@ -4,6 +4,9 @@ import type { HomeSectionView, LinkView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
 import { legalIdentity, siteSeo, storefrontSettings } from "@/lib/store-api/requests"
 import { isStoreApiError } from "@/lib/store-api/errors"
+import { reviewSummary } from "@/lib/store-api/extras"
+import { shopRatingView } from "./card-extras"
+import { featuredView } from "./featured"
 import { layoutImage, layoutLink } from "./layout"
 import { legalDocument, legalPath } from "./legal"
 import { postCards } from "./posts"
@@ -133,11 +136,15 @@ async function sectionView(
           }
         : null
     }
+    case "featured_product":
+      return featuredView(section, t)
     case "reviews": {
-      const [reviews, photos] = await Promise.all([
+      const [reviews, photos, rating] = await Promise.all([
         reviewViews(section.limit, t),
         customerPhotoViews(t),
+        reviewSummary(),
       ])
+      const summary = shopRatingView(rating, t)
       return reviews.length > 0
         ? {
             id,
@@ -147,6 +154,8 @@ async function sectionView(
             more: { label: t("home.all_reviews"), path: "/yorumlar" },
             // The newest customer photos beside them (adr/0046 Ek 2026-11-04)
             ...(photos.length > 0 ? { photos } : {}),
+            // The shop's average, count and spread (adr/0046 Ek 2026-11-05)
+            ...(summary ? { summary } : {}),
           }
         : null
     }

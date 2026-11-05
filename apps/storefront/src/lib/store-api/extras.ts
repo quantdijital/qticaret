@@ -1,6 +1,11 @@
 import "server-only"
 import { cache } from "react"
-import type { StoreCardFacts, StoreCategoryImage, StoreLatestReviewPhoto } from "@qticaret/types"
+import type {
+  StoreCardFacts,
+  StoreCategoryImage,
+  StoreLatestReviewPhoto,
+  StoreReviewSummary,
+} from "@qticaret/types"
 import { isStoreApiError } from "./errors"
 import { storeGet, storePublicGet } from "./server"
 
@@ -52,6 +57,16 @@ export async function cardFacts(
   }
   return found
 }
+
+/** The shop's approved reviews in short (adr/0046 Ek 2026-11-05); null without one or an answer. */
+export const reviewSummary = cache(
+  async (): Promise<StoreReviewSummary["rating"]> =>
+    (
+      await orNone(() => storeGet<StoreReviewSummary>("/store/reviews/summary"), {
+        rating: null,
+      })
+    ).rating
+)
 
 /** The newest photos on approved reviews, for the home page's reviews section. */
 export const latestReviewPhotos = cache(

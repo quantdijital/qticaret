@@ -7,6 +7,7 @@ import type {
   RatingBarView,
   ReviewPhotoView,
   ShopMarkView,
+  ShopRatingView,
   Translate,
 } from "@qticaret/ui"
 import type {
@@ -15,6 +16,7 @@ import type {
   StoreLatestReviewPhoto,
   StoreRatingDistribution,
   StoreReviewPhoto,
+  StoreReviewSummary,
 } from "@qticaret/types"
 import { imageView } from "./image"
 
@@ -82,6 +84,33 @@ export function ratingBars(
       label: t("reviews.bar_label", { stars, count }),
     }
   })
+}
+
+const AVERAGE = new Intl.NumberFormat("tr-TR", {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+})
+
+/**
+ * The shop's reviews in short (adr/0046 Ek 2026-11-05): the average in
+ * Turkish ("4,6"), the count, the line a screen reader hears and the bars.
+ * None without an approved review.
+ */
+export function shopRatingView(
+  rating: StoreReviewSummary["rating"] | undefined,
+  t: Translate
+): ShopRatingView | null {
+  const bars = ratingBars(rating?.distribution, t)
+  if (!rating || !bars || !(rating.count > 0) || !Number.isFinite(rating.average)) {
+    return null
+  }
+  const average = AVERAGE.format(rating.average)
+  return {
+    average,
+    count: rating.count,
+    label: t("product.card_rating", { average, count: rating.count }),
+    distribution: bars,
+  }
 }
 
 /** A photo on a review, its size known: no box jumps while it loads. */

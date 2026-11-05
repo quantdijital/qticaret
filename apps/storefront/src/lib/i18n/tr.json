@@ -509,7 +509,7 @@
   "home.brands": "Markalar",
   "home.reviews": "Müşterilerimiz ne diyor?",
   "home.all_reviews": "Tüm yorumlar",
-  "reviews.summary": "Bu sayfadaki yorumların ortalaması 5 üzerinden {average} · toplam {count} yorum",
+  "reviews.summary": "Ortalama 5 üzerinden {average} · toplam {count} yorum",
   "home.all_products": "Tüm ürünler",
   "faq.title": "Sık sorulan sorular",
   "menu.system.home": "Ana sayfa",
@@ -797,5 +797,13 @@
   "marks.bank_transfer": "Havale / EFT",
   "marks.cash_on_delivery": "Kapıda ödeme",
   "marks.aras": "Aras Kargo",
-  "marks.yurtici": "Yurtiçi Kargo"
+  "marks.yurtici": "Yurtiçi Kargo",
+  "price.cart_offer_percent": "Sepette %{percent} indirim",
+  "price.cart_offer_percent_min": "{minimum} ve üzeri sepette %{percent} indirim",
+  "price.cart_offer_amount": "Sepette {amount} indirim",
+  "price.cart_offer_amount_min": "{minimum} ve üzeri sepette {amount} indirim",
+  "home.featured": "Öne çıkan ürün",
+  "home.featured_view": "Ürünü incele",
+  "home.featured_facts": "Öne çıkan özellikler",
+  "reviews.count": "{count} değerlendirme"
 }

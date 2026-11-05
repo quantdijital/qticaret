@@ -21,6 +21,7 @@ import { storefrontEnv } from "@/lib/env"
 import { whatsappHref } from "@/lib/views/frame"
 import { currentLayout } from "@/lib/views/layout"
 import { addonFieldsOf } from "@/lib/views/addons"
+import { shownAmount } from "@/lib/views/price"
 import { productPage, variantIdsOf } from "@/lib/views/product"
 import { questionsView, relatedOf, reviewsView } from "@/lib/views/product-extras"
 import { swatchLookup } from "@/lib/views/color"
@@ -75,9 +76,10 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
   // The shop's WhatsApp number comes with its contact details (adr/0048)
   const { whatsapp } = await legalIdentity()
   const here = `${url.pathname}${url.search}`
+  // What the shopper pays, an automatic promotion included (adr/0023 Ek 2026-11-05)
   const amounts = (product.variants ?? []).flatMap((variant) => {
-    const amount = variant.calculated_price?.calculated_amount
-    return typeof amount === "number" ? [amount] : []
+    const amount = shownAmount(variant, displays)
+    return amount === null ? [] : [amount]
   })
   const lowest = amounts.length > 0 ? Math.min(...amounts) : null
   const base = productPage({

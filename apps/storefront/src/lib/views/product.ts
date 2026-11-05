@@ -7,7 +7,7 @@ import type {
 } from "@qticaret/ui"
 import type { PriceDisplay, SeoPayload, StoreProduct } from "@qticaret/types"
 import { productImages } from "./image"
-import { cardPrice, isAvailable, variantPrice } from "./price"
+import { cardPrice, isAvailable, shownAmount, variantPrice } from "./price"
 import { specGroupsOf, specsOf } from "./specs"
 import { paragraphsOf, pathOf } from "./text"
 
@@ -142,8 +142,8 @@ export function productPage({
         return optionId ? [[optionId, value.value]] : []
       })
     ),
-    price: variantPrice(variant, displays),
-    kurus: kurusOf(variant.calculated_price?.calculated_amount),
+    price: variantPrice(variant, displays, t),
+    kurus: kurusOf(shownAmount(variant, displays)),
     available: isAvailable(variant),
     sku: variant.sku,
   }))

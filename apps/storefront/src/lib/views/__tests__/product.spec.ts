@@ -1,8 +1,18 @@
 import { describe, expect, it } from "vitest"
 import type { StoreProduct } from "@qticaret/types"
 import { t } from "@/lib/i18n"
-import { percentOff } from "../price"
+import { cardPrice, cartOfferText, percentOff } from "../price"
 import { productPage } from "../product"
+
+const displayOf = (current: string) => ({
+  current,
+  regular: "999.00",
+  before: "999.00",
+  on_sale: true,
+  since: null,
+  basis: "history",
+  rule_version: "tr-10d-1",
+})
 
 const product: StoreProduct = {
   id: "prod_1",
@@ -56,8 +66,8 @@ const page = (requestedVariant: string | null) =>
         before: "1199.00",
         on_sale: true,
         since: null,
-        basis: "30d",
-        rule_version: 1,
+        basis: "history",
+        rule_version: "tr-10d-1",
       },
     },
     brandPath: null,
@@ -80,7 +90,62 @@ describe("productPage", () => {
     expect(page("variant_unknown").selectedVariantId).toBe("variant_m")
   })
 
-  it("strikes through only what the 30-day rule allows and reads the description as text", () => {
+  it("shows the price an automatic promotion gives, and a cart offer beside it (adr/0023 Ek 2026-11-05)", () => {
+    const view = productPage({
+      product,
+      seo: null,
+      displays: {
+        // The backend's display: 30% off for everyone, and 10% more past 2.000 TL
+        variant_m: {
+          current: "699.30",
+          regular: "999.00",
+          before: "999.00",
+          on_sale: true,
+          since: "2026-11-02T00:00:00.000Z",
+          basis: "history",
+          rule_version: "tr-10d-1",
+          cart_offer: { type: "percentage", value: 10, minimum: "2000.00" },
+        },
+      },
+      brandPath: null,
+      requestedVariant: null,
+      t,
+      trustBadges: [],
+    })
+    expect(view.variants[1]?.price).toEqual({
+      current: "699,30 TL",
+      before: "999,00 TL",
+      from: false,
+      discount: 30,
+      saving: "299,70 TL",
+      cartOffer: "2.000,00 TL ve üzeri sepette %10 indirim",
+    })
+    // The add-ons' running total starts from the price shown
+    expect(view.variants[1]?.kurus).toBe(69930)
+    // A variant the display does not know keeps Medusa's price
+    expect(view.variants[0]?.price?.current).toBe("899,00 TL")
+    // A card's "from" price is the lowest the shopper pays: the promoted one here
+    expect(cardPrice(product.variants ?? [], { variant_m: displayOf("699.30") })).toMatchObject({
+      current: "699,30 TL",
+      from: true,
+    })
+  })
+
+  it("words a cart offer by its kind and minimum, and none it cannot read", () => {
+    expect(cartOfferText({ type: "percentage", value: 12.5, minimum: null }, t)).toBe(
+      "Sepette %12,5 indirim"
+    )
+    expect(cartOfferText({ type: "fixed", value: "50.00", minimum: null }, t)).toBe(
+      "Sepette 50,00 TL indirim"
+    )
+    expect(cartOfferText({ type: "fixed", value: "50.00", minimum: "750.00" }, t)).toBe(
+      "750,00 TL ve üzeri sepette 50,00 TL indirim"
+    )
+    expect(cartOfferText({ type: "percentage", value: "x", minimum: null }, t)).toBeNull()
+    expect(cartOfferText(null, t)).toBeNull()
+  })
+
+  it("strikes through only what the price-before rule allows and reads the description as text", () => {
     const view = page(null)
     expect(view.variants[1]?.price).toEqual({
       current: "999,00 TL",

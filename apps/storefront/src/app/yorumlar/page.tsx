@@ -7,7 +7,8 @@ import { JsonLd } from "@/lib/seo/JsonLd"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { pathsOf, siteSeo } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
-import { reviewPhotos } from "@/lib/views/card-extras"
+import { reviewSummary } from "@/lib/store-api/extras"
+import { reviewPhotos, shopRatingView } from "@/lib/views/card-extras"
 import { theme } from "@/theme"
 
 const PAGE_SIZE = 20
@@ -84,17 +85,15 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
   if (page > pages) {
     notFound()
   }
-  const paths = await pathsOf(
-    "product",
-    answer.reviews.map((review) => review.product_id)
-  )
-  const average =
-    answer.reviews.length > 0
-      ? Math.round(
-          (answer.reviews.reduce((sum, review) => sum + review.rating, 0) / answer.reviews.length) *
-            10
-        ) / 10
-      : null
+  const [paths, rating] = await Promise.all([
+    pathsOf(
+      "product",
+      answer.reviews.map((review) => review.product_id)
+    ),
+    // The shop-wide average and spread (adr/0046 Ek 2026-11-05), not this page's
+    reviewSummary(),
+  ])
+  const summary = shopRatingView(rating, t)
   return (
     <>
       <JsonLd
@@ -111,8 +110,9 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
             { label: t("home.label"), path: "/" },
             { label: t("reviews.title"), path: null },
           ],
-          average,
-          count: answer.count,
+          average: rating?.average ?? null,
+          count: rating?.count ?? answer.count,
+          ...(summary ? { summary } : {}),
           reviews: answer.reviews.map((review) => {
             const path = paths[review.product_id]
             const author = review.author_name ?? t("product.anonymous")
