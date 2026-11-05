@@ -6,6 +6,7 @@ import { saveCookieChoice } from "@/app/actions/cookies"
 import { analyticsTags } from "@/lib/analytics/tags"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
+import { SUGGEST_PATH } from "@/lib/views/search-suggest"
 import { shopView } from "@/lib/views/shop"
 import { currentTheme } from "@/lib/views/theme-settings"
 import { theme, themeFontPreloads, themeSettingsStyle } from "@/theme"
@@ -62,6 +63,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           t={t}
           saveCookies={saveCookieChoice}
           subscribe={subscribeNewsletter}
+          searchSuggest={SUGGEST_PATH}
         >
           {children}
         </theme.Layout>

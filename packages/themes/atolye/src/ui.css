@@ -173,6 +173,59 @@
     color: var(--color-stage-text-2);
   }
 
+  /* The live search's panel: floats under the field over the page (nothing below
+     moves), scrolls inside, and on a phone ends above the on-screen keyboard
+     (the field's script sets --gf-suggest-room from the visual viewport) */
+  .gf-suggest {
+    position: absolute;
+    top: calc(100% + var(--space-xs));
+    left: 0;
+    right: 0;
+    z-index: var(--z-dropdown);
+    max-height: min(36rem, var(--gf-suggest-room, 70dvh));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-tile);
+    background: var(--color-field);
+    color: var(--color-text);
+    box-shadow: var(--shadow-float);
+  }
+  /* An option: a link the field's arrow keys reach (`aria-selected`), 44 px or more */
+  .gf-option {
+    display: flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-xs);
+    border-radius: var(--radius-inner);
+    color: var(--color-text);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color var(--dur-micro) var(--ease-out);
+  }
+  .gf-option[aria-selected="true"] {
+    background: var(--color-paper-2);
+    outline: 2px solid var(--color-focus);
+    outline-offset: -2px;
+  }
+  .gf-option-all {
+    justify-content: center;
+    min-height: 3rem;
+    border-top: 1px solid var(--color-rule);
+    border-radius: 0 0 var(--radius-inner) var(--radius-inner);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+  /* A chip in the panel reads as one on the field's ground in both modes */
+  .gf-option-chip:not([aria-selected="true"]) {
+    background: color-mix(in oklab, var(--color-text) 7%, var(--color-field));
+  }
+  .gf-option-chip[aria-selected="true"] {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
   .gf-count {
     position: absolute;
     top: 2px;
@@ -207,6 +260,9 @@
   .gf-icon-btn:hover {
     background: var(--color-paper-2);
   }
+  .gf-option:hover {
+    background: var(--color-paper-2);
+  }
   .gf-stage .gf-icon-btn:hover {
     background: var(--color-stage-2);
   }
@@ -218,9 +274,10 @@
   }
 }
 
-/* The WhatsApp button stays clear of an open drawer and of a page's own
-   fixed buy bar (the product page's `[data-sticky-buy]`) */
+/* The WhatsApp button stays clear of an open drawer, the live search's open
+   panel and a page's own fixed buy bar (the product page's `[data-sticky-buy]`) */
 body:has([data-drawer][data-state="open"]) [data-whatsapp],
+body:has(.gf-suggest:not([hidden])) [data-whatsapp],
 body:has([data-sticky-buy]) [data-whatsapp] {
   display: none;
 }

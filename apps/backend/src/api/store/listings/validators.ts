@@ -54,3 +54,23 @@ export const StoreGetListingProducts = z
     }
   })
 export type StoreGetListingProductsType = z.infer<typeof StoreGetListingProducts>
+
+/**
+ * `GET /store/listings/suggest`: the words typed so far (as a search's
+ * `q`, punctuation alone refused) and the prices' region and currency.
+ */
+export const StoreGetListingSuggest = z
+  .object({
+    q: z
+      .string()
+      .trim()
+      .min(1)
+      .max(MAX_QUERY_LENGTH)
+      .refine((text) => isCleanText(text) && queryWords(text).length > 0, {
+        message: "listing.search_query_invalid",
+      }),
+    region_id: z.string().regex(/^reg_[0-9A-Za-z]{1,40}$/),
+    currency_code: z.string().regex(/^[a-z]{3}$/),
+  })
+  .strict()
+export type StoreGetListingSuggestType = z.infer<typeof StoreGetListingSuggest>

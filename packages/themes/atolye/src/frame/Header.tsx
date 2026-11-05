@@ -17,16 +17,46 @@ const LABELLED =
  * search pill, 112 px in all. From 1024 px: the wordmark, a wide search
  * in the middle, account, favourites and cart with their names under
  * them; the category aisle below, each category with children opening
- * its panel.
+ * its panel. Both searches show their live panel as the shopper types
+ * once the storefront gives its address.
  */
-export function Header({ shop, t }: { shop: ShopView; t: Translate }) {
+export function Header({
+  shop,
+  t,
+  searchSuggest,
+}: {
+  shop: ShopView
+  t: Translate
+  /** The storefront's live search address; none: the plain search form. */
+  searchSuggest?: string | undefined
+}) {
   const allIn = Object.fromEntries(
     shop.categories.map((category) => [category.path, t("nav.see_all", { name: category.label })])
   )
   const search = {
-    label: t("search.label"),
-    placeholder: t("search.placeholder"),
-    submit: t("search.submit"),
+    words: {
+      label: t("search.label"),
+      placeholder: t("search.placeholder"),
+      submit: t("search.submit"),
+      clear: t("search.clear"),
+      results: t("search.help"),
+      products: t("search.suggest.products"),
+      categories: t("search.suggest.categories"),
+      brands: t("search.suggest.brands"),
+      phrases: t("search.suggest.phrases"),
+      // Filled in the browser with the answer's own numbers and words
+      all: t("search.suggest.all"),
+      none: t("search.suggest.none"),
+      browse: t("search.suggest.browse"),
+      loading: t("search.suggest.loading"),
+      error: t("search.suggest.error"),
+      found: t("search.suggest.found"),
+      priceBefore: t("price.before"),
+      from: t("price.from"),
+    },
+    suggest: searchSuggest,
+    // A search that finds nothing offers the shop's own top categories
+    browse: shop.categories.slice(0, 6).map(({ label, path }) => ({ label, path })),
   }
   const account = shop.customerName
     ? t("nav.account_of", { name: shop.customerName })

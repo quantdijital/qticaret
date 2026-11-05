@@ -1,4 +1,4 @@
-import { StoreGetListingProducts } from "../validators"
+import { StoreGetListingProducts, StoreGetListingSuggest } from "../validators"
 
 const base = { region_id: "reg_01TEST", currency_code: "try" }
 
@@ -29,5 +29,27 @@ describe("listing search query", () => {
     expect(issueOf({ type: "all", id: "all" })).toBeNull()
     expect(issueOf({ type: "all" })).toBe("listing.id_required")
     expect(issueOf({ type: "all", id: "all", q: "kupa" })).toBe("listing.search_query_unexpected")
+  })
+})
+
+describe("live search query", () => {
+  const suggestIssue = (input: Record<string, unknown>) => {
+    const parsed = StoreGetListingSuggest.safeParse({ ...base, ...input })
+    return parsed.success ? null : parsed.error.issues[0]?.message
+  }
+
+  it("takes the words typed so far, trimmed", () => {
+    expect(StoreGetListingSuggest.parse({ ...base, q: " ça " })).toEqual({ ...base, q: "ça" })
+  })
+
+  it.each([
+    ["missing", {}],
+    ["blank", { q: "  " }],
+    ["punctuation only", { q: "?!" }],
+    ["too long", { q: "a".repeat(101) }],
+    ["a control character", { q: "ça\u0007" }],
+    ["a listing's own query", { q: "çakı", query: "sayfa=2" }],
+  ])("refuses words that are %s", (_, input) => {
+    expect(suggestIssue(input)).not.toBeNull()
   })
 })

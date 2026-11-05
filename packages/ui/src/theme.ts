@@ -156,6 +156,13 @@ export interface StorefrontTheme {
     saveCookies: (form: FormData) => Promise<void>
     /** Fields: `email`, `challenge`; the footer's newsletter box (double opt-in). */
     subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
+    /**
+     * The live search's address on the storefront (never the backend's,
+     * adr/0046 §5): `GET {searchSuggest}?q=…` answers a `SearchSuggestView`.
+     * None: the header's search is the plain form to `/arama` alone, as it
+     * is anyway before the page's script runs.
+     */
+    searchSuggest?: string
   }>
   HomePage: ComponentType<
     Page<HomePageView> & {

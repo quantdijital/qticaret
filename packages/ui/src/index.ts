@@ -1,5 +1,14 @@
 export { formatLira } from "./money"
 export { ResponsiveImage } from "./ResponsiveImage"
+export {
+  IDLE,
+  SUGGEST_DELAY_MS,
+  SUGGEST_MIN_LENGTH,
+  createSuggester,
+  moveActive,
+  suggestWords,
+} from "./search-suggest"
+export type { SuggestState, Suggester } from "./search-suggest"
 export type {
   ActionResult,
   CheckoutActions,

@@ -24,6 +24,9 @@ export const SYSTEM_ROOTS = [
   "hediye-karti",
   // A payment link's page, `/ode/<token>` (adr/0051): its token's case matters
   "ode",
+  // The storefront's own route handlers (`/api/yenile`, the live search's `/api/search/suggest`):
+  // never a record (the backend reserves `api`), never a 404 to report
+  "api",
 ] as const
 
 /**

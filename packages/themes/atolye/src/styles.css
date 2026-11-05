@@ -15,6 +15,7 @@
 /* Hallmark · dismissed 77 · the legal page is one document: the trail and title, then the text with its contents and the shop's other texts, then the footer */
 /* Hallmark · waive 49b · a legal text's own title or article heading in its contents list wraps to two lines at most, the law's names cannot shorten · the legal page lists them whole */
 /* Hallmark · dismissed F4 · one primary control: the shop-colour pill, which on a graphite stage turns to the stage's own light ink so it reads there */
+/* Hallmark · dismissed F24 · the live search's panel takes the mega panel's one floating recipe (rule edge and --shadow-float): on the graphite counter in dark mode the shadow does not show, the edge holds it */
 @import "./tokens.css";
 @import "./base.css" layer(base);
 @import "./ui.css";

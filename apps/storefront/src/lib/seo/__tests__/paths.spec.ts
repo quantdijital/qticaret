@@ -36,6 +36,8 @@ describe("isSystemPath and backendFile", () => {
     expect(isSystemPath("/hesap/siparisler")).toBe(true)
     expect(isSystemPath("/sepetler-ve-kutular")).toBe(false)
     expect(isSystemPath("/")).toBe(false)
+    // The storefront's route handlers: the live search is no page to resolve
+    expect(isSystemPath("/api/search/suggest")).toBe(true)
   })
 
   it("keeps a message's token links and the cookie choices as its own, token case and all", () => {

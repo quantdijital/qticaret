@@ -28,6 +28,7 @@ export function SiteHeader({ shop, t }: { shop: ShopView; t: Translate }) {
     label: t("search.label"),
     placeholder: t("search.placeholder"),
     submit: t("search.submit"),
+    clear: t("search.clear"),
   }
   const logo = (
     <a

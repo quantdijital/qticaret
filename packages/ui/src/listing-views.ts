@@ -100,6 +100,31 @@ export interface SearchHelpView {
   brands: LinkView[]
 }
 
+/** A product in the live search's panel: its page, picture and the price its card shows. */
+export type SuggestProductView = Pick<ProductCardView, "id" | "title" | "path" | "image" | "price">
+
+/**
+ * The header's live search (as the shopper types): the storefront's JSON
+ * answer at the theme's `searchSuggest` address, every item already a
+ * link, every price formatted on the server.
+ */
+export interface SearchSuggestView {
+  /** The words as searched. */
+  q: string
+  /** How many products the search finds in all. */
+  total: number
+  /** `/arama?q=…`: every result. */
+  allPath: string
+  /** The most relevant few (six at most). */
+  products: SuggestProductView[]
+  /** The categories most results are in, at their pages. */
+  categories: LinkView[]
+  /** The brands most results are in, each narrowing the search to it. */
+  brands: LinkView[]
+  /** "Bunu mu demek istediniz": phrases the catalogue spells, each its own search. */
+  suggestions: LinkView[]
+}
+
 /** A category in the index (`/kategoriler`): its page, its picture, the categories below it. */
 export interface CategoryTreeView extends CategoryCardView {
   children: CategoryTreeView[]

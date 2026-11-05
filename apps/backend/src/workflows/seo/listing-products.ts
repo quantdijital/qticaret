@@ -35,6 +35,8 @@ export interface ListingProductsInput {
   currency_code: string
   region_id: string | null
   sales_channel_ids: readonly string[]
+  /** A page this long, not a listing page's (the live search's few, `/store/listings/suggest`). */
+  limit?: number
 }
 
 export interface ListingProductsAnswer {
@@ -98,6 +100,7 @@ export async function listingProducts(
     definitionsCache("definitions", () => filterDefinitions(container)),
   ])
   const { query } = input
+  const size = input.limit ?? LISTING_PAGE_SIZE
   const base: ListingPlan = {
     channels: [...input.sales_channel_ids],
     scope: scope ?? {},
@@ -109,7 +112,7 @@ export async function listingProducts(
       max: query.price?.max ?? null,
     },
     sort: planSort(query.sort, isSearch),
-    page: { offset: (query.page - 1) * LISTING_PAGE_SIZE, limit: LISTING_PAGE_SIZE },
+    page: { offset: (query.page - 1) * size, limit: size },
   }
   const index = container.resolve<SearchIndexModuleService>(SEARCH_INDEX_MODULE)
   const searched = isSearch ? await searchListing(container, base, input.search ?? "") : null
@@ -122,7 +125,7 @@ export async function listingProducts(
     product_ids: result.ids,
     count: result.count,
     page: query.page,
-    page_size: LISTING_PAGE_SIZE,
+    page_size: size,
     facets: facetsOf(result, query, definitions),
   }
   if (searched) {

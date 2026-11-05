@@ -71,6 +71,9 @@ export const RATE_LIMIT_PROFILES = {
   // F18 D4: a listing's filtered page reads its whole listing once a cache
   // window; per the shopper's address, signed by the storefront or not
   listing: { name: "listing", perIp: { max: 120, windowMs: MINUTE } },
+  // The header's live search (2026-11-05): a read as the shopper types, after a
+  // pause; the storefront keeps each answer a minute, so a word asked again is free
+  search_suggest: { name: "search_suggest", perIp: { max: 240, windowMs: MINUTE } },
   // F10.6 (adr/0037 §4): a customer writing reviews; per IP and per customer
   review_write: {
     name: "review_write",

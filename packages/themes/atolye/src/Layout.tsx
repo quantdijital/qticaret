@@ -20,12 +20,14 @@ export function Layout({
   children,
   saveCookies,
   subscribe,
+  searchSuggest,
 }: {
   shop: ShopView
   t: Translate
   children: ReactNode
   saveCookies: (form: FormData) => Promise<void>
   subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
+  searchSuggest?: string
 }) {
   const whatsapp =
     shop.contact.whatsappHref !== null &&
@@ -43,7 +45,7 @@ export function Layout({
         contact={shop.contact}
         words={{ announcements: t("nav.announcements"), links: t("nav.top_links") }}
       />
-      <Header shop={shop} t={t} />
+      <Header shop={shop} t={t} searchSuggest={searchSuggest} />
       <main id="icerik" className="flex-1">
         {children}
       </main>

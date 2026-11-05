@@ -1,7 +1,7 @@
 import "server-only"
 import { cache } from "react"
 import { liraRegion } from "./requests"
-import { storeGet } from "./server"
+import { storeGet, storePublicGet } from "./server"
 
 // A listing's products a page at a time (D4), and the site search over them (adr/0046 ek 2026-11-03)
 
@@ -74,3 +74,27 @@ export const searchPage = cache(async (q: string, query: string): Promise<Listin
     query,
   })
 })
+
+/** The live search's read (`/store/listings/suggest`): the first few hits as ids, and its help. */
+export interface SuggestAnswer {
+  product_ids: string[]
+  count: number
+  suggestions: string[]
+  related: NonNullable<ListingAnswer["search"]>["related"]
+}
+
+/**
+ * The header's live search, as the shopper types: the same search as
+ * `/arama`, never counted for the report. Shop-wide (the sales channel is
+ * the shop's key, no customer's), so each set of words is kept a minute
+ * in this process for everyone: a word asked again, or by the next
+ * shopper, costs the backend nothing.
+ */
+export async function suggestPage(q: string): Promise<SuggestAnswer> {
+  const region = await liraRegion()
+  return storePublicGet<SuggestAnswer>("/store/listings/suggest", {
+    q,
+    region_id: region.id,
+    currency_code: region.currency_code,
+  })
+}

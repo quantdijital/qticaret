@@ -15,7 +15,7 @@ import {
 } from "../admin/landings/validators"
 import { StoreGetContent, StoreGetContentTerms } from "../store/content/validators"
 import { StoreGetLandingProducts } from "../store/landings/validators"
-import { StoreGetListingProducts } from "../store/listings/validators"
+import { StoreGetListingProducts, StoreGetListingSuggest } from "../store/listings/validators"
 import { rateLimit } from "./rate-limit"
 
 // An entry's own route: `/admin/content/terms` is the blog terms', not an entry called "terms"
@@ -124,6 +124,15 @@ export const CONTENT_ROUTES = [
     middlewares: [
       rateLimit(() => RATE_LIMIT_PROFILES.listing),
       validateAndTransformQuery(StoreGetListingProducts, {}),
+    ],
+  },
+  // The header's live search: a few hits as the shopper types (never counted for the report)
+  {
+    matcher: "/store/listings/suggest",
+    methods: ["GET" as const],
+    middlewares: [
+      rateLimit(() => RATE_LIMIT_PROFILES.search_suggest),
+      validateAndTransformQuery(StoreGetListingSuggest, {}),
     ],
   },
 ]
