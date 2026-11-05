@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import { t } from "@/lib/i18n"
 import { filterViews } from "../facets"
 import { hrefOf, listingQueryOf, searchOf, withPage, withSort } from "../listing"
-import { searchHelp, searchPath, searchStateOf } from "../search"
+import { searchHelp, searchPath, searchStateOf, withTiles } from "../search"
 
 const read = (query: string) => searchStateOf(new URLSearchParams(query))
 
@@ -106,5 +106,45 @@ describe("the search's help", () => {
         {}
       )
     ).toBeNull()
+  })
+})
+
+describe("the search's help as picture tiles", () => {
+  const picture = {
+    src: "/media/sef.jpg",
+    alt: "",
+    width: 800,
+    height: 1000,
+    sources: { avif: null, webp: null },
+  }
+  const help = searchHelp(read("q=bicak"), related, { pcat_1: "/kategori/sef-bicaklari" })
+
+  it("gives each related category its picture, by its page, in the same order", () => {
+    const tiled = withTiles(
+      help,
+      [{ label: "Şef bıçakları", path: "/kategori/sef-bicaklari", image: picture }],
+      undefined
+    )
+    expect(tiled?.categories).toEqual([
+      { label: "Şef bıçakları", path: "/kategori/sef-bicaklari", image: picture },
+    ])
+    expect(tiled?.brands).toEqual(help?.brands)
+    expect(tiled && "popular" in tiled).toBe(false)
+  })
+
+  it("keeps a category whose tile is missing as it was", () => {
+    expect(withTiles(help, [], undefined)?.categories).toEqual(help?.categories)
+  })
+
+  it("offers the shop's categories where nothing was found, even with no help of its own", () => {
+    const popular = [{ label: "Çakılar", path: "/kategori/cakilar", image: picture }]
+    expect(withTiles(null, [], popular)).toEqual({
+      suggestions: [],
+      categories: [],
+      brands: [],
+      popular,
+    })
+    expect(withTiles(null, [], [])).toBeNull()
+    expect(withTiles(null, [], undefined)).toBeNull()
   })
 })

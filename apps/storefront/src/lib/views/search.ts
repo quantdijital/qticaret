@@ -1,4 +1,4 @@
-import type { SearchHelpView } from "@qticaret/ui"
+import type { CategoryCardView, SearchHelpView } from "@qticaret/ui"
 import type { ListingAnswer } from "@/lib/store-api/listings"
 import { hrefOf, stateFromSearch, toggled } from "./listing"
 import type { ListingState } from "./listing"
@@ -59,4 +59,28 @@ export function searchHelp(
       })),
   }
   return help.suggestions.length + help.categories.length + help.brands.length > 0 ? help : null
+}
+
+/**
+ * A search's help with its related categories as picture tiles (the same
+ * categories in the same order, each with its picture when the shop's
+ * catalogue has one; adr/0046 Ek 2026-11-05) and, where the search found
+ * nothing, the shop's categories to start from. Null when there is still
+ * nothing to offer.
+ */
+export function withTiles(
+  help: SearchHelpView | null,
+  tiles: readonly CategoryCardView[],
+  popular: CategoryCardView[] | undefined
+): SearchHelpView | null {
+  if (!help && !popular?.length) {
+    return null
+  }
+  const base = help ?? { suggestions: [], categories: [], brands: [] }
+  const byPath = new Map(tiles.map((tile) => [tile.path, tile]))
+  return {
+    ...base,
+    categories: base.categories.map((link) => byPath.get(link.path) ?? link),
+    ...(popular && popular.length > 0 ? { popular } : {}),
+  }
 }

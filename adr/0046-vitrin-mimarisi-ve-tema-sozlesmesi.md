@@ -196,3 +196,16 @@ Atölye ana sayfası için istenen iki alan ve kart/sepet fiyat farkının düze
 - **Atölye:** kart `price.before` varken üstü çizili fiyatı zaten çiziyordu; kampanyalı fiyat oraya kendiliğinden geldi. `featured_product` Atölye'nin kendi yakın planı çizilene kadar taban temanın bileşeniyle (`@qticaret/theme-base` `FeaturedProductSection`, Atölye token'larıyla) çizilir; yorumlar bölümünün `summary`'si Atölye'de henüz çizilmez (temanın sıradaki adımı). Faz 2c'den beri ikisini de Atölye kendisi çizer (`home/CloseUp.tsx`, `home/RatingSummary.tsx`); `PriceView.cartOffer` kart görünümlerinde yok, Atölye kartları ona dokunmaz.
 - **Taban tema:** yakın plan bölümü (görsel, ad, fiyat, öne çıkan özellik çipleri, satır, "Ürünü incele", bölümlü özellik tabloları), yorumlar bölümünde ve `/yorumlar`'da büyük ortalama + yıldız + sayı + 5→1 çubuklar (`RatingSummary`).
 - **Vitrin:** `lib/views/featured.ts`, `lib/store-api/extras.ts` `reviewSummary`, `lib/views/card-extras.ts` `shopRatingView`, `lib/views/price.ts` `shownAmount`/`cartOfferText`; sözler `tr.json` (`price.cart_offer_*`, `home.featured*`, `reviews.count`).
+
+## Ek (2026-11-05, liste ve ürün sayfaları): aramanın fotoğraflı kategorileri (otonom, gözden geçir)
+
+Atölye'nin liste, arama ve ürün sayfaları (`design.md` § Liste sayfası, § Arama sonuçları, § Ürün sayfası). Sahip kuralı: kategoriler her yerde fotoğraflı karo, çip yok. Alanlar **isteğe bağlı ve eklemelidir**; taban tema bugünkü gibi çizer.
+
+| Alan (görünüm modeli) | Şekli | Kaynak |
+| --- | --- | --- |
+| `SearchHelpView.categories` | `LinkView[]` → `CategoryCardView[]` (resim isteğe bağlı; `LinkView` olarak okuyan tema değişmeden çalışır) | aramanın ilgili kategorileri, `categoryTiles(ids)` ile: mağazanın kategori resmi, yoksa kategorinin (alt ağacıyla) en yeni ürün fotoğrafı; aynı sıra, aynı yollar (`withTiles`, `lib/views/search.ts`) |
+| `SearchHelpView.popular?` | `CategoryCardView[]` | arama hiçbir şey bulmadıysa ya da hiç arama yoksa mağazanın üst kategorileri (`categoryTiles([])`); taban tema çizmez |
+| `ListingPageView.subcategories[].image` (anlam genişledi) | değişmedi | kategori sayfasında alt kategoriler ve `/magaza`'da üst kategoriler artık `categoryTiles` ile: kendi resmi yoksa en yeni ürün fotoğrafı (ana sayfanın reyon kartlarıyla aynı kaynak, istekler altışar, bir dakika herkes için saklanır) |
+
+- **Taban tema:** `SearchHelp` gösterecek öneri, kategori ya da marka yoksa hiçbir şey çizmez (boş bölge kalmaz); `popular`'ı çizmez.
+- **Atölye:** sözleşmenin `ProductPageView`'unda ölçek görseli, ayrı bakım notu ve yasal uyarı alanı yok; tema bunları uydurmaz, açıklama belgesinde ne varsa o görünür.

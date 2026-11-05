@@ -6,7 +6,8 @@ import { searchPage } from "@/lib/store-api/listings"
 import type { ListingAnswer } from "@/lib/store-api/listings"
 import { pathsOf } from "@/lib/store-api/requests"
 import { hrefOf, listingQueryOf, priceAsked, withPrice } from "@/lib/views/listing"
-import { SEARCH_PATH, searchHelp, searchStateOf } from "@/lib/views/search"
+import { categoryTiles } from "@/lib/views/category-tiles"
+import { SEARCH_PATH, searchHelp, searchStateOf, withTiles } from "@/lib/views/search"
 import { theme } from "@/theme"
 import { ListingContent } from "./listing"
 import { type Query, toSearch } from "./shop"
@@ -17,11 +18,14 @@ const breadcrumbs = (): BreadcrumbView[] => [
 ]
 
 /** A search page with no list: nothing asked yet, or words the search cannot read. */
-function SearchMessage({ title, words }: { title: string; words: string }) {
+async function SearchMessage({ title, words }: { title: string; words: string }) {
+  // The shop's categories to start from instead (adr/0046 Ek 2026-11-05)
+  const popular = await categoryTiles([])
   return (
     <theme.ListingPage
       t={t}
       view={{
+        search: { suggestions: [], categories: [], brands: [], popular },
         title,
         description: [words],
         breadcrumbs: breadcrumbs(),
@@ -81,10 +85,16 @@ export async function SearchScreen({ query }: { query: Query }) {
     return <SearchMessage title={title} words={t("search.invalid")} />
   }
   const related = answer.search?.related.categories ?? []
-  const categoryPaths = await pathsOf(
-    "product_category",
-    related.map((category) => category.id)
-  )
+  // The related categories as picture tiles; nothing found: the shop's own categories to start from
+  const [categoryPaths, tiles, popular] = await Promise.all([
+    pathsOf(
+      "product_category",
+      related.map((category) => category.id)
+    ),
+    categoryTiles(related.map((category) => category.id)),
+    answer.count === 0 ? categoryTiles([]) : Promise.resolve(undefined),
+  ])
+  const help = searchHelp(state, answer.search, categoryPaths)
   return (
     <ListingContent
       type="search"
@@ -95,7 +105,7 @@ export async function SearchScreen({ query }: { query: Query }) {
       breadcrumbs={breadcrumbs}
       jsonLd={[]}
       extra={{
-        search: searchHelp(state, answer.search, categoryPaths),
+        search: withTiles(help, tiles, popular),
         empty: t("search.none", { q }),
       }}
     />
