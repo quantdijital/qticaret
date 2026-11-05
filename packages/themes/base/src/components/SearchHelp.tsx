@@ -37,6 +37,10 @@ function ChipRow({
  * search (a filter: nofollow).
  */
 export function SearchHelp({ help, t }: { help: SearchHelpView; t: Translate }) {
+  // The shop's categories to start from (`popular`) are another theme's to draw
+  if (help.suggestions.length + help.categories.length + help.brands.length === 0) {
+    return null
+  }
   return (
     <section aria-label={t("search.help")} className="flex flex-col gap-4">
       {help.suggestions.length > 0 && (

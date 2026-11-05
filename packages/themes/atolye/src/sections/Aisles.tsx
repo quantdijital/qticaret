@@ -1,6 +1,6 @@
-import { ResponsiveImage } from "@qticaret/ui"
 import type { CategoryCardView, LinkView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
+import { CategoryTile } from "../parts/CategoryTile"
 import { Container } from "../parts/Container"
 import { aisleColumns } from "./aisle-grid"
 import { SectionHead } from "./SectionHead"
@@ -38,21 +38,10 @@ export function Aisles({
         >
           {categories.map((category) => (
             <li key={category.path} className="min-w-0">
-              <a
-                href={category.path}
-                className="gf-stage group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-tile no-underline after:absolute after:inset-0 after:bg-linear-to-t after:from-stage after:from-5% after:via-stage/0 after:via-55% after:to-transparent"
-              >
-                {category.image && (
-                  <ResponsiveImage
-                    image={{ ...category.image, alt: "" }}
-                    sizes="(min-width: 1280px) 15vw, (min-width: 1024px) 19vw, (min-width: 640px) 30vw, 44vw"
-                    className="absolute inset-0 h-full w-full object-cover"
-                  />
-                )}
-                <span className="relative z-(--z-raised) px-3 pb-3 text-md leading-tight font-extrabold tracking-[-0.01em] text-balance underline-offset-4 group-hover:underline sm:px-4 sm:pb-4">
-                  {category.label}
-                </span>
-              </a>
+              <CategoryTile
+                category={category}
+                sizes="(min-width: 1280px) 15vw, (min-width: 1024px) 19vw, (min-width: 640px) 30vw, 44vw"
+              />
             </li>
           ))}
         </ul>

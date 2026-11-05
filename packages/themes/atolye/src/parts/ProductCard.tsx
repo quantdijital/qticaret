@@ -39,10 +39,13 @@ export function ProductCard({
   product,
   t,
   quickAdd,
+  priority = false,
 }: {
   product: ProductCardView
   t: Translate
   quickAdd?: FormAction | undefined
+  /** A first-row card on a listing: its photo loads at once (LCP). */
+  priority?: boolean
 }) {
   const out = isOut(product)
   const discount = product.price?.discount ?? null
@@ -54,6 +57,7 @@ export function ProductCard({
           <ResponsiveImage
             image={product.image}
             sizes="(min-width: 768px) 30vw, 46vw"
+            priority={priority}
             className="h-full w-full object-cover"
           />
         )}
@@ -85,10 +89,11 @@ export function ProductCard({
       </div>
       <div className="flex flex-1 flex-col gap-1">
         {product.brand && <p className="text-xs text-text-3">{product.brand}</p>}
-        <h3 className="line-clamp-2 text-sm leading-snug font-semibold tracking-normal lg:text-md">
+        <h3 className="text-sm leading-snug font-semibold tracking-normal lg:text-md">
+          {/* Clamped on the link itself: its box ends with the two lines shown, over nothing else */}
           <a
             href={product.path}
-            className="no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-['']"
+            className="line-clamp-2 no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-['']"
           >
             {product.title}
           </a>
@@ -106,25 +111,35 @@ export function ProductCard({
   )
 }
 
-/** Cards in a grid: two across on a phone, three from 768 px, each photograph large. */
+/**
+ * Cards in a grid: two across on a phone, three from 768 px, each
+ * photograph large; `wide` (a listing without its side panel) four from
+ * 1024 px. The first `eager` cards load their photos at once (a
+ * listing's first row, its LCP).
+ */
 export function ProductGrid({
   products,
   t,
   quickAdd,
+  wide = false,
+  eager = 0,
 }: {
   products: readonly ProductCardView[]
   t: Translate
   quickAdd?: FormAction | undefined
+  wide?: boolean
+  eager?: number
 }) {
   return (
     <ul
       className={cn(
-        "grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-(--gap-columns) gap-y-8 md:grid-cols-[repeat(3,minmax(0,1fr))] lg:gap-y-10"
+        "grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-(--gap-columns) gap-y-8 md:grid-cols-[repeat(3,minmax(0,1fr))] lg:gap-y-10",
+        wide && "lg:grid-cols-[repeat(4,minmax(0,1fr))]"
       )}
     >
-      {products.map((product) => (
+      {products.map((product, index) => (
         <li key={product.id} className="min-w-0">
-          <ProductCard product={product} t={t} quickAdd={quickAdd} />
+          <ProductCard product={product} t={t} quickAdd={quickAdd} priority={index < eager} />
         </li>
       ))}
     </ul>

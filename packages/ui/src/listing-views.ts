@@ -94,10 +94,20 @@ export interface ListingPageView {
 export interface SearchHelpView {
   /** "Bunu mu demek istediniz": phrases the catalogue spells, each its own search. */
   suggestions: LinkView[]
-  /** The categories most results are in, at their pages. */
-  categories: LinkView[]
+  /**
+   * The categories most results are in, at their pages, each with its
+   * picture when it has one (adr/0046 Ek 2026-11-05: the shop's own, else
+   * its newest product's photo).
+   */
+  categories: CategoryCardView[]
   /** The brands most results are in, each narrowing this search to it (a filter, nofollow). */
   brands: LinkView[]
+  /**
+   * The shop's top categories with their pictures, offered where a search
+   * found nothing or nothing was asked yet (adr/0046 Ek 2026-11-05); none:
+   * the theme offers none.
+   */
+  popular?: CategoryCardView[]
 }
 
 /** A product in the live search's panel: its page, picture and the price its card shows. */

@@ -1,0 +1,89 @@
+/*
+ * The listing's and the product page's own surfaces (docs/tema/yon-2026-11-05.md):
+ * the phone's filter sheet, the gallery's rail and zoom, the sticky buy
+ * bar. Floating surfaces take the one shadow; motion is transform and
+ * opacity only, and stops under reduced motion (base.css).
+ */
+@layer components {
+  /* The filter sheet: a modal <dialog> from the bottom of a phone's screen */
+  .gf-sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    display: none;
+    width: 100%;
+    max-width: 100%;
+    max-height: min(88dvh, 52rem);
+    margin: 0;
+    padding: 0;
+    flex-direction: column;
+    overflow: hidden;
+    border: 0;
+    border-radius: var(--radius-tile) var(--radius-tile) 0 0;
+    background: var(--color-paper);
+    color: var(--color-text);
+    box-shadow: var(--shadow-float);
+  }
+  .gf-sheet[open] {
+    display: flex;
+    transform: none;
+    transition: transform var(--dur-long) var(--ease-out);
+  }
+  @starting-style {
+    .gf-sheet[open] {
+      transform: translateY(100%);
+    }
+  }
+  .gf-sheet::backdrop {
+    background: var(--color-scrim);
+  }
+  /* Before the script, the "Filtrele" anchor shows the same panel in place */
+  .gf-sheet:target:not([data-ready]) {
+    position: static;
+    display: flex;
+    max-height: none;
+    margin-top: var(--space-lg);
+    border-radius: var(--radius-tile);
+    box-shadow: none;
+    outline: 1px solid var(--color-rule);
+  }
+
+  /* The gallery's rail: one picture a screen, snapping; its bar hidden */
+  .gf-gallery {
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    overscroll-behavior-x: contain;
+  }
+  .gf-gallery::-webkit-scrollbar {
+    display: none;
+  }
+  .gf-gallery > * {
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+  }
+
+  /* The zoom: the picture follows the pointer once enlarged */
+  .gf-zoom {
+    touch-action: pinch-zoom;
+    cursor: zoom-in;
+    transition: transform var(--dur-short) var(--ease-out);
+  }
+  .gf-zoom[data-zoomed] {
+    touch-action: none;
+    cursor: zoom-out;
+    transform: scale(2.5);
+  }
+
+  /* The phone's buy bar: over the bottom bar once the page's own button scrolled away */
+  .gf-buybar {
+    transform: translateY(110%);
+    transition: transform var(--dur-short) var(--ease-out);
+  }
+  .gf-buybar[data-open="true"] {
+    transform: none;
+  }
+}
+
+/* A sheet open: the page under it stays still */
+html:has(.gf-sheet[open]) {
+  overflow: hidden;
+}

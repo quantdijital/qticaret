@@ -3,6 +3,7 @@ import { t } from "@/lib/i18n"
 import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
 import { listingPage } from "@/lib/store-api/listings"
 import { siteSeo } from "@/lib/store-api/requests"
+import { categoryTiles } from "@/lib/views/category-tiles"
 import { searchOf, stateFromSearch } from "@/lib/views/listing"
 import { ListingContent } from "./listing"
 
@@ -50,9 +51,12 @@ export async function ShopScreen({ query }: { query: Query }) {
       load={(listing) => listingPage("all", "all", listing)}
       state={state}
       url={url}
-      heading={() =>
-        Promise.resolve({ title: t("listing.all_products"), description: [], subcategories: [] })
-      }
+      heading={async () => ({
+        title: t("listing.all_products"),
+        description: [],
+        // The shop's top categories as the catalogue's aisles, each with its picture
+        subcategories: await categoryTiles([]),
+      })}
       breadcrumbs={(title) => [
         { label: t("home.label"), path: "/" },
         { label: title, path: null },

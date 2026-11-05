@@ -24,11 +24,12 @@ import {
   priceDisplays,
   storefrontSettings,
 } from "@/lib/store-api/requests"
-import { cardFacts, categoryImages } from "@/lib/store-api/extras"
+import { cardFacts } from "@/lib/store-api/extras"
 import { listingPage } from "@/lib/store-api/listings"
 import type { ListingAnswer, ListingType } from "@/lib/store-api/listings"
-import { categoryCard, withCardFacts } from "@/lib/views/card-extras"
+import { withCardFacts } from "@/lib/views/card-extras"
 import { childrenOf } from "@/lib/views/categories"
+import { categoryTiles } from "@/lib/views/category-tiles"
 import { swatchLookup } from "@/lib/views/color"
 import { filterViews } from "@/lib/views/facets"
 import { currentLayout } from "@/lib/views/layout"
@@ -69,21 +70,14 @@ async function productsByIds(ids: string[]): Promise<StoreProduct[]> {
 async function headingOf(page: Entity): Promise<Heading> {
   switch (page.entity_type) {
     case "product_category": {
-      const [categories, pictures] = await Promise.all([allCategories(), categoryImages()])
+      const categories = await allCategories()
       const category = categories.find((each) => each.id === page.entity_id)
       const children = childrenOf(categories, page.entity_id)
-      const childPaths = await pathsOf(
-        "product_category",
-        children.map((child) => child.id)
-      )
       return {
         title: category?.name ?? "",
         description: paragraphsOf(category?.description),
-        // Each with its picture when it has one (adr/0046 Ek 2026-11-04)
-        subcategories: children.flatMap((child) => {
-          const path = childPaths[child.id]
-          return path ? [categoryCard({ label: child.name, path }, pictures.get(child.id))] : []
-        }),
+        // Each with its picture: the shop's own, else its newest product's photo (adr/0046 Ek 2026-11-05)
+        subcategories: await categoryTiles(children.map((child) => child.id)),
       }
     }
     case "brand": {

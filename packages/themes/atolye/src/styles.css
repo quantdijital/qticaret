@@ -16,10 +16,12 @@
 /* Hallmark · waive 49b · a legal text's own title or article heading in its contents list wraps to two lines at most, the law's names cannot shorten · the legal page lists them whole */
 /* Hallmark · dismissed F4 · one primary control: the shop-colour pill, which on a graphite stage turns to the stage's own light ink so it reads there */
 /* Hallmark · dismissed F24 · the live search's panel takes the mega panel's one floating recipe (rule edge and --shadow-float): on the graphite counter in dark mode the shadow does not show, the edge holds it */
+/* Hallmark · waive 79 · the listing and product pages open on their goods, never a hero: under the title stand the category tiles, or the gallery stage beside its buy column, which fill the first screen · a shop's aisle and counter pages lead with the catalogue, not a statement */
 @import "./tokens.css";
 @import "./base.css" layer(base);
 @import "./ui.css";
 @import "./tabs.css";
+@import "./pages.css";
 
 /*
  * The theme's values for the contract's names (shadcn's names, wired to

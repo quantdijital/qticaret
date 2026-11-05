@@ -20,12 +20,9 @@ export function Price({
   const current = price.from ? t("price.from", { price: price.current }) : price.current
   return (
     <p className={cn("flex flex-wrap items-baseline gap-x-2", className)}>
+      {/* Joined by hand: tailwind-merge reads the theme's size names as colours */}
       <span
-        className={cn(
-          "tabular font-extrabold tracking-[-0.01em]",
-          size === "large" ? "text-section" : "text-md lg:text-lg",
-          price.before && "text-deal"
-        )}
+        className={`tabular font-extrabold tracking-[-0.01em] ${size === "large" ? "text-section" : "text-md lg:text-lg"} ${price.before ? "text-deal" : ""}`}
       >
         {current}
       </span>
