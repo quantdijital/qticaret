@@ -292,6 +292,7 @@ async function undoUpdate(service: Service, undo: Undo): Promise<void> {
         option_title: definition.option_title,
         varies_by: definition.varies_by,
         group: definition.group,
+        aliases: definition.aliases,
       }))
     )
   }

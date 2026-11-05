@@ -435,6 +435,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/product-questions/moderate": true,
   "POST /admin/product-reviews/moderate": true,
   "POST /admin/products/:id/attributes": false,
+  // adr/0013 Ek 2026-11-05: a preview of the facts in descriptions, the catalog roles'
+  "POST /admin/description-facts/preview": false,
   "POST /admin/products/:id/brand": false,
   "POST /admin/products/:id/catalog": false,
   "POST /admin/category-restrictions/:category_id": false,

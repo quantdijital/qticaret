@@ -33,6 +33,13 @@ export interface KindCounts {
    * made with one or refreshed (would be, in a dry run).
    */
   documents?: number
+  /**
+   * Attributes: values the new products' descriptions stated, written to
+   * their template's fields (would be), and rows left for the panel
+   * (adr/0013 Ek 2026-11-05). Only a source that gives documents counts them.
+   */
+  facts?: number
+  facts_left?: number
 }
 
 export const emptyCounts = (): KindCounts => ({
@@ -104,6 +111,24 @@ function documentRows(mode: "check" | "apply", counts: RunCounts): SheetCell[][]
   ]
 }
 
+// The facts the new products' descriptions stated (adr/0013 Ek 2026-11-05); none for a source without
+function factsRows(mode: "check" | "apply", counts: RunCounts): SheetCell[][] {
+  const { facts, facts_left: left } = counts.attribute
+  if (facts === undefined) {
+    return []
+  }
+  return [
+    [],
+    [
+      mode === "check"
+        ? "Açıklamalardan özellik alanlarına yazılacak değerler"
+        : "Açıklamalardan özellik alanlarına yazılan değerler",
+      facts,
+    ],
+    ["Açıklamalarda panelde karar bekleyen satırlar", left ?? 0],
+  ]
+}
+
 export interface ReportProblem extends StepProblem {
   kind: MigrationKind
 }
@@ -141,7 +166,12 @@ export function reportSheets(
     {
       name: "Özet",
       widths: [24, 12, 12, 12, 14, 12, 10],
-      rows: [...summaryRows(mode, counts), ...seoRows(mode, counts), ...documentRows(mode, counts)],
+      rows: [
+        ...summaryRows(mode, counts),
+        ...seoRows(mode, counts),
+        ...documentRows(mode, counts),
+        ...factsRows(mode, counts),
+      ],
     },
     {
       name: "Ürünler",

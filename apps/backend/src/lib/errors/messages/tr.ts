@@ -724,6 +724,13 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "product_attributes.group_key_invalid":
     "Grup anahtarı 1–40 küçük harf, rakam, tire ya da alt çizgiden oluşur.",
   "product_attributes.groups_duplicate": "Bir grup anahtarı şablonda bir kez kullanılabilir.",
+  "product_attributes.aliases_duplicate": "Bir alanın başka adları birbirini tekrar edemez.",
+  "description_facts.template_unknown": "Seçilen özellik şablonu bulunamadı.",
+  "description_facts.no_template":
+    "Ürünün özellik şablonu yok; önizlemede şablonu olmayan ürünler için bir şablon seçin.",
+  "description_facts.none": "Açıklamada aktarılacak özellik bulunmadı.",
+  "description_facts.required_missing":
+    "Şablonun zorunlu alanı boş kalıyor ({{fields}}); ürün sayfasından doldurup yeniden aktarın.",
   "promotions.code_invalid":
     "Kod 3 ile 40 karakter arasında olmalı; harf, rakam, tire ve alt çizgi kullanılabilir.",
   "promotions.too_many_codes": "Bir istekte en çok 5 kod gönderilebilir.",
@@ -1024,6 +1031,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Ürün etiketleri taşınmadı (vitrinde ürün etiketi sayfası yok; eski etiket adresleri noindex'ti).",
   "migration.wordpress_attribute_not_moved":
     "Ürün özelliği taşınmadı: özellik şablonunda bu anahtarla bir alan açılınca ürünlere yazılabilir (kimlik sütununda ürün ve değer sayısı).",
+  "migration.description_facts_left":
+    "Açıklamadaki bu özellik ürünlere kendiliğinden yazılmadı (alanı yok, birden çok alana uyuyor ya da değeri okunamadı); Ürünler > Açıklamadaki özellikleri aktar ile karar verin (kimlik sütununda ürün sayısı).",
   "account.verification_session_required":
     "Adresinizi doğrulamak için önce hesabınıza giriş yapın; bağlantı ancak oturumunuzda çalışır.",
   "account.session_invalid": "Oturum geçersiz; yeniden giriş yapın.",

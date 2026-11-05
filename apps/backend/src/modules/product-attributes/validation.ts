@@ -76,6 +76,23 @@ export const strayGroups = (
   )
 }
 
+const MAX_ALIASES = 20
+
+/** A field's other names (adr/0013 Ek 2026-11-05): each once, as many as a long list needs. */
+export const aliasesInput = z
+  .array(text(100))
+  .max(MAX_ALIASES)
+  .refine(
+    (names) => new Set(names.map((name) => name.toLocaleLowerCase("tr"))).size === names.length,
+    { message: "product_attributes.aliases_duplicate" }
+  )
+
+/** The stored names as they read; anything else is none. */
+export function aliasesOf(value: unknown): string[] {
+  const parsed = z.array(z.string()).safeParse(value)
+  return parsed.success ? parsed.data : []
+}
+
 const option = z
   .object({
     value: z
@@ -108,6 +125,8 @@ export const definitionInput = z
     varies_by: z.enum(VARIES_BY).nullable().optional(),
     // Its spec table section; left out: as it was (adr/0013 Ek 2026-11-04)
     group: groupKey.nullable().optional(),
+    // Other names descriptions call it by; left out: as they were (adr/0013 Ek 2026-11-05)
+    aliases: aliasesInput.nullable().optional(),
   })
   .strict()
   .superRefine((definition, ctx) => {

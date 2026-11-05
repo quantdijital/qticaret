@@ -38,6 +38,11 @@ export const AttributeDefinition = model
     scope: model.enum(["product", "variant"]).default("product"),
     // Its section of the spec table: a key of its template's `groups` (adr/0013 Ek 2026-11-04)
     group: model.text().nullable(),
+    /**
+     * Other names a description's facts call it by (`string[]`, adr/0013 Ek
+     * 2026-11-05): "Üretim yeri" for "Menşei". None: its label and key only.
+     */
+    aliases: model.json().nullable(),
     option_title: model.text().nullable(),
     varies_by: model.enum([...VARIES_BY]).nullable(),
     template: model.belongsTo(() => AttributeTemplate, { mappedBy: "definitions" }),

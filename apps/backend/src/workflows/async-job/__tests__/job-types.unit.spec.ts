@@ -19,6 +19,7 @@ describe("job types", () => {
       "accounting.package",
       "audit_log.export",
       "catalog.bulk_edit",
+      "catalog.description_facts",
       "catalog.export",
       "catalog.import",
       "customer.data_export",
@@ -82,6 +83,7 @@ describe("job types", () => {
     // Never beside an import: both write products
     expect(exclusiveTypes("catalog.bulk_edit")).toEqual([
       "catalog.bulk_edit",
+      "catalog.description_facts",
       "catalog.import",
       "migration.run",
       "migration.sitemap",
@@ -95,6 +97,24 @@ describe("job types", () => {
         change: { action: "price", mode: "percent", value: 10 },
       }).success
     ).toBe(true)
+  })
+
+  it("writes the facts in descriptions as a catalog write, through the generic jobs route", () => {
+    const type = jobType("catalog.description_facts")
+    expect(type).toMatchObject({ singleton: true, containsPersonalData: false, resultTtlDays: 7 })
+    expect(type?.internal).toBeUndefined()
+    expect(queueLockKey("catalog.description_facts")).toBe(queueLockKey("catalog.import"))
+    const parsed = type?.input.safeParse({ product_ids: ["prod_1"] })
+    expect(parsed?.data).toEqual({
+      product_ids: ["prod_1"],
+      overwrite: false,
+      fields: [],
+      aliases: [],
+    })
+    expect(type?.input.safeParse({ product_ids: ["prod_1", "prod_1"] }).success).toBe(false)
+    expect(
+      type?.input.safeParse({ product_ids: ["prod_1"], fields: [{ label: "x" }] }).success
+    ).toBe(false)
   })
 
   it.each([

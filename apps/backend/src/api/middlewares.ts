@@ -24,6 +24,7 @@ import { REAUTH_ROUTES } from "./http/reauth-routes"
 import { STAFF_ROUTES } from "./http/staff-routes"
 import { WEBHOOK_ROUTES } from "./http/webhook-routes"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
+import { AdminPostDescriptionFactsPreview } from "./admin/description-facts/preview/validators"
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
@@ -244,6 +245,12 @@ export default defineMiddlewares({
       matcher: "/admin/products/:id/attributes",
       methods: ["POST"],
       middlewares: [validateAndTransformBody(AdminPostProductAttributes)],
+    },
+    // adr/0013 Ek 2026-11-05: the facts in products' descriptions, previewed
+    {
+      matcher: "/admin/description-facts/preview",
+      methods: ["POST"],
+      middlewares: [validateAndTransformBody(AdminPostDescriptionFactsPreview)],
     },
     // A long description document is past Express's 100 kB default; its own bounds stay (adr/0055)
     {

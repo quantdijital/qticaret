@@ -49,6 +49,15 @@ export const definitionRow = (definition: DefinitionInput, templateId: string) =
   varies_by: definition.varies_by ?? null,
   // Left out, it stays as it was (none when new)
   ...(definition.group === undefined ? {} : { group: definition.group }),
+  // Left out, they stay as they were; a json column is typed as an object
+  ...(definition.aliases === undefined
+    ? {}
+    : {
+        aliases: (definition.aliases?.length ? definition.aliases : null) as unknown as Record<
+          string,
+          unknown
+        > | null,
+      }),
   template_id: templateId,
 })
 

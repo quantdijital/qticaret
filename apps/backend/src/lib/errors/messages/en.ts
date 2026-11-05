@@ -724,6 +724,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "product_attributes.group_key_invalid":
     "A group's key is 1–40 lower-case letters, digits, dashes or underscores.",
   "product_attributes.groups_duplicate": "A group key can be used once per template.",
+  "product_attributes.aliases_duplicate": "A field's other names cannot repeat.",
+  "description_facts.template_unknown": "The chosen attribute template was not found.",
+  "description_facts.no_template":
+    "The product has no attribute template; pick one for such products in the preview.",
+  "description_facts.none": "No facts to bring over were found in the description.",
+  "description_facts.required_missing":
+    "A required field of the template stays empty ({{fields}}); fill it on the product page and bring the facts over again.",
   "promotions.code_invalid": "A code is 3 to 40 letters, digits, dashes or underscores.",
   "promotions.too_many_codes": "A request may send at most 5 codes.",
   "promotions.unknown": "Promotion not found.",
@@ -1033,6 +1040,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Product tags were not moved (the storefront has no product tag pages; the old tag pages were noindex).",
   "migration.wordpress_attribute_not_moved":
     "A product attribute was not moved: once the attribute template has a field with this key it can be written to the products (the ID column gives the product and value counts).",
+  "migration.description_facts_left":
+    "This fact in the descriptions was not written to the products by itself (no field, more than one field, or a value that does not read); decide in Products > Bring over facts from the description (the ID column gives the product count).",
   "account.verification_session_required":
     "Sign in to your account first to confirm your address; the link works only in your session.",
   "account.session_invalid": "The session is not valid; sign in again.",

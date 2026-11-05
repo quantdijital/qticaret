@@ -11,6 +11,7 @@ import type PlatformSettingsModuleService from "../../modules/platform-settings/
 import type { ImportHooks } from "../catalog/import/run"
 import { attributeOutcome } from "./attribute-report"
 import { planProductAttributes } from "./attributes"
+import { factsOutcome } from "./description-facts"
 import type { AttributedProduct } from "./attributes"
 import { migrateBrands } from "./brands"
 import { migrateCategories } from "./categories"
@@ -203,8 +204,18 @@ export async function runMigration(
   }
   await keep("product", productCounts)
   const attributes = attributeOutcome(products, attributePlans, made, moved)
-  problems.push(...attributes.problems)
-  await keep("attribute", attributes.counts)
+  // adr/0013 Ek 2026-11-05: what the descriptions stated, for a source that gives documents
+  const facts = givesDocuments
+    ? factsOutcome(
+        products.map((product) => ({
+          source_key: product.source_key,
+          facts: attributePlans.get(product.source_key)?.facts,
+        })),
+        made
+      )
+    : null
+  problems.push(...attributes.problems, ...(facts?.problems ?? []))
+  await keep("attribute", { ...attributes.counts, ...facts?.counts })
 
   const images = await migrateImages(
     container,

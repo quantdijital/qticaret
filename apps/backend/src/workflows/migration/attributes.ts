@@ -6,6 +6,10 @@ import type { SheetCell } from "../../lib/sheets"
 import { PRODUCT_ATTRIBUTES_MODULE } from "../../modules/product-attributes"
 import type ProductAttributesModuleService from "../../modules/product-attributes/service"
 import type { AttributeOption, DefinitionShape } from "../../modules/product-attributes/validation"
+import { aliasesOf, groupsOf } from "../../modules/product-attributes/validation"
+import type { FactRow } from "../../lib/catalog/facts"
+import { descriptionFactsOf, factCells } from "./description-facts"
+import type { FactCells } from "./description-facts"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -20,6 +24,9 @@ type Container = Pick<MedusaContainer, "resolve">
  * options (none is made here), a text field takes the values joined. A
  * product takes one template: the one that takes most of its attributes
  * and whose required fields it fills. What is not written is reported.
+ * The facts its description states fill the chosen template's empty
+ * fields where they match one unambiguously (description-facts.ts,
+ * adr/0013 Ek 2026-11-05).
  */
 
 /** A descriptive attribute as a source gives it (WordPress: `ProductAttribute`). */
@@ -39,11 +46,15 @@ export type AttributedProduct = SourceProduct & {
 
 interface Field extends DefinitionShape {
   label: string
+  unit?: string | null | undefined
+  group?: string | null | undefined
+  aliases?: string[] | undefined
 }
 
 /** A template's product fields (a variant field takes no values: it is an option). */
 export interface TemplateFields {
   handle: string
+  groups?: { key: string; name: string }[] | undefined
   fields: Field[]
 }
 
@@ -62,6 +73,8 @@ export interface AttributePlan {
   elsewhere: string[]
   /** A template takes some, but a field it requires is left empty: none written. */
   requiredMissing: boolean
+  /** What the description's facts came to; none for a product whose description states none. */
+  facts?: FactCells | undefined
 }
 
 /** The shop's templates with their product fields, by handle. */
@@ -72,6 +85,7 @@ export async function attributeTemplates(container: Container): Promise<Template
   return templates
     .map((template) => ({
       handle: template.handle,
+      groups: groupsOf(template.groups),
       fields: template.definitions
         .filter((definition) => definition.scope === "product")
         .map((definition) => ({
@@ -81,6 +95,9 @@ export async function attributeTemplates(container: Container): Promise<Template
           scope: definition.scope,
           is_required: definition.is_required,
           options: definition.options as AttributeOption[] | null,
+          unit: definition.unit,
+          group: definition.group,
+          aliases: aliasesOf(definition.aliases),
         })),
     }))
     .sort((a, b) => a.handle.localeCompare(b.handle))
@@ -105,8 +122,16 @@ function cellOf(field: Field, values: readonly string[]): string | null {
   return values.length === 1 ? (values[0] ?? null) : null
 }
 
-/** The cells a template takes; two attributes one field matches (a global one and a product's own) give it their values together. */
-function fill(template: TemplateFields, attributes: readonly SourceAttribute[]) {
+/**
+ * The cells a template takes; two attributes one field matches (a global
+ * one and a product's own) give it their values together. The facts fill
+ * the fields the attributes leave empty.
+ */
+function fill(
+  template: TemplateFields,
+  attributes: readonly SourceAttribute[],
+  facts: readonly FactRow[]
+) {
   const byField = new Map<string, { field: Field; attributes: SourceAttribute[] }>()
   for (const attribute of attributes) {
     const field = fieldFor(template, attribute)
@@ -125,17 +150,20 @@ function fill(template: TemplateFields, attributes: readonly SourceAttribute[]) 
       written.push(...own.map((attribute) => attribute.key))
     }
   }
-  const complete = template.fields.every((field) => !field.is_required || field.key in cells)
-  return { template, cells, written, complete }
+  const described = factCells(template, facts, cells)
+  const all = { ...described.cells, ...cells }
+  const complete = template.fields.every((field) => !field.is_required || field.key in all)
+  return { template, cells: all, written, complete, facts: described }
 }
 
 /** What of the product's attributes the shop's templates take, and why the rest stay. */
 export function planAttributes(
   attributes: readonly SourceAttribute[],
-  templates: readonly TemplateFields[]
+  templates: readonly TemplateFields[],
+  facts: readonly FactRow[] = []
 ): AttributePlan {
   const candidates = templates
-    .map((template) => fill(template, attributes))
+    .map((template) => fill(template, attributes, facts))
     .filter((candidate) => candidate.written.length > 0)
     .sort((a, b) => b.written.length - a.written.length)
   const chosen = candidates.find((candidate) => candidate.complete)
@@ -147,6 +175,16 @@ export function planAttributes(
     unfit: [],
     elsewhere: [],
     requiredMissing: !chosen && candidates.length > 0,
+    // Without a template the facts wait for the panel, which gives one
+    ...(facts.length === 0
+      ? {}
+      : {
+          facts: chosen?.facts ?? {
+            cells: {},
+            written: 0,
+            left: facts.map((fact) => fact.label),
+          },
+        }),
   }
   for (const attribute of attributes) {
     if (plan.written.includes(attribute.key)) {
@@ -168,12 +206,14 @@ export async function planProductAttributes(
   container: Container,
   products: readonly AttributedProduct[]
 ): Promise<Map<string, AttributePlan>> {
-  const withAttributes = products.filter((product) => (product.attributes?.length ?? 0) > 0)
-  const templates = withAttributes.length > 0 ? await attributeTemplates(container) : []
+  const read = products
+    .map((product) => ({ product, facts: descriptionFactsOf(product.description_doc) }))
+    .filter(({ product, facts }) => (product.attributes?.length ?? 0) > 0 || facts.length > 0)
+  const templates = read.length > 0 ? await attributeTemplates(container) : []
   return new Map(
-    withAttributes.map((product) => [
+    read.map(({ product, facts }) => [
       product.source_key,
-      planAttributes(product.attributes ?? [], templates),
+      planAttributes(product.attributes ?? [], templates, facts),
     ])
   )
 }

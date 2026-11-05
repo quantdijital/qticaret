@@ -1,6 +1,7 @@
 import { accountingPackage } from "./accounting-package"
 import { auditLogExport } from "./audit-log-export"
 import { catalogBulkEdit } from "./catalog-bulk-edit"
+import { catalogDescriptionFacts } from "./catalog-description-facts"
 import { catalogExport } from "./catalog-export"
 import { catalogImport } from "./catalog-import"
 import { customerDataExport } from "./customer-data-export"
@@ -27,6 +28,7 @@ const JOB_TYPES: Readonly<Record<string, JobType>> = Object.freeze({
   "accounting.package": erase(accountingPackage),
   "audit_log.export": erase(auditLogExport),
   "catalog.bulk_edit": erase(catalogBulkEdit),
+  "catalog.description_facts": erase(catalogDescriptionFacts),
   "catalog.export": erase(catalogExport),
   "catalog.import": erase(catalogImport),
   "customer.data_export": erase(customerDataExport),
