@@ -258,6 +258,16 @@ export interface ReviewsPageView {
   count: number
   /** The shop's reviews in short, shop-wide (adr/0046 Ek 2026-11-05); none: `average` and `count` only. */
   summary?: ShopRatingView | null
-  reviews: (ReviewView & { product: LinkView | null })[]
+  reviews: (ReviewView & { product: ReviewedProductView | null })[]
   pagination: PaginationView
+}
+
+/** The product a review is about, at its page; its picture when it has one (adr/0046 Ek 2026-11-05). */
+export interface ReviewedProductView extends LinkView {
+  image?: ImageView | null
+}
+
+/** The 404 page's ways on: the shop's top categories as picture tiles (adr/0046 Ek 2026-11-05). */
+export interface NotFoundPageView {
+  categories: CategoryCardView[]
 }

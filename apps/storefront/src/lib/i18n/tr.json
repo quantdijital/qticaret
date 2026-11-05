@@ -940,5 +940,8 @@
   "content.promises": "Güvencelerimiz",
   "content.faq_topics": "Konular",
   "content.help_title": "Sorunuzun yanıtı burada yok mu?",
-  "content.help_text": "Bize yazın, en kısa sürede dönelim."
+  "content.help_text": "Bize yazın, en kısa sürede dönelim.",
+  "not_found.lead": "Adres değişmiş ya da sayfa kaldırılmış olabilir. Aradığınızı buradan bulun.",
+  "not_found.categories": "Kategorilere göz atın",
+  "reviews.about": "Değerlendirilen ürün"
 }

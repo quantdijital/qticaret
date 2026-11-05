@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import type { StoreReviewPhoto } from "@qticaret/types"
+import type { ImageView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
 import { JsonLd } from "@/lib/seo/JsonLd"
@@ -9,6 +10,8 @@ import { pathsOf, siteSeo } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
 import { reviewSummary } from "@/lib/store-api/extras"
 import { reviewPhotos, shopRatingView } from "@/lib/views/card-extras"
+import { productImages } from "@/lib/views/image"
+import { productsInOrder } from "@/lib/views/section-data"
 import { theme } from "@/theme"
 
 const PAGE_SIZE = 20
@@ -36,6 +39,27 @@ interface Answer {
 }
 
 type Query = Record<string, string | string[] | undefined>
+
+/**
+ * Each reviewed product's first picture, for the review's card (adr/0046
+ * Ek 2026-11-05): one call for the page; without an answer, no pictures.
+ */
+async function productPictures(ids: readonly string[]): Promise<Map<string, ImageView>> {
+  try {
+    const products = await productsInOrder(ids)
+    return new Map(
+      products.flatMap((product) => {
+        const [first] = productImages(product)
+        return first ? [[product.id, first] as const] : []
+      })
+    )
+  } catch (error) {
+    if (!isStoreApiError(error)) {
+      throw error
+    }
+    return new Map()
+  }
+}
 
 function pageOf(query: Query): number | null {
   const raw = query["sayfa"]
@@ -85,13 +109,12 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
   if (page > pages) {
     notFound()
   }
-  const [paths, rating] = await Promise.all([
-    pathsOf(
-      "product",
-      answer.reviews.map((review) => review.product_id)
-    ),
+  const ids = [...new Set(answer.reviews.map((review) => review.product_id))]
+  const [paths, rating, pictures] = await Promise.all([
+    pathsOf("product", ids),
     // The shop-wide average and spread (adr/0046 Ek 2026-11-05), not this page's
     reviewSummary(),
+    productPictures(ids),
   ])
   const summary = shopRatingView(rating, t)
   return (
@@ -124,7 +147,13 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
               date: DATE.format(new Date(review.created_at)),
               verified: review.verified_purchase,
               photos: reviewPhotos(review.photos, author, t),
-              product: path ? { label: review.product_title, path } : null,
+              product: path
+                ? {
+                    label: review.product_title,
+                    path,
+                    image: pictures.get(review.product_id) ?? null,
+                  }
+                : null,
             }
           }),
           pagination: {

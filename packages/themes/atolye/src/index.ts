@@ -7,6 +7,8 @@ import { CheckoutPage } from "./checkout/CheckoutPage"
 import { CheckoutResultPage } from "./checkout/CheckoutResultPage"
 import { BlogIndexPage } from "./content/BlogIndexPage"
 import { ContentPage } from "./content/ContentPage"
+import { NotFoundPage } from "./content/NotFoundPage"
+import { ReviewsPage } from "./content/ReviewsPage"
 import { PaymentFramePage } from "./checkout/PaymentFramePage"
 import { OrderPage } from "./order/OrderPage"
 import { HomePage } from "./HomePage"
@@ -44,4 +46,6 @@ export const atolyeTheme: StorefrontTheme = {
   ProductPage,
   ContentPage,
   BlogIndexPage,
+  ReviewsPage,
+  NotFoundPage,
 }

@@ -24,6 +24,7 @@ import type {
   HomePageView,
   LegalPageView,
   ListingPageView,
+  NotFoundPageView,
   ProductPageView,
   ReviewsPageView,
   ShopView,
@@ -212,7 +213,8 @@ export interface StorefrontTheme {
   AuthPage: ComponentType<Page<AuthPageView> & { actions: AuthActions }>
   /** The signed-in customer's pages: overview, orders, details (D8). */
   AccountPage: ComponentType<Page<AccountPageView> & { actions: AccountActions }>
-  NotFoundPage: ComponentType<{ t: Translate }>
+  /** A 404; with `view`, the shop's categories to go on to (adr/0046 Ek 2026-11-05). */
+  NotFoundPage: ComponentType<{ t: Translate; view?: NotFoundPageView }>
   /** The shop's approved reviews across its products (D10). */
   ReviewsPage: ComponentType<Page<ReviewsPageView>>
   /**

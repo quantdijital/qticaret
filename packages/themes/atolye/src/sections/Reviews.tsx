@@ -23,7 +23,8 @@ export function quoteOf(body: string): string {
   return `${cut.slice(0, cut.lastIndexOf(" ")).replace(/[,;:.]$/, "")}…`
 }
 
-function Summary({ summary, t }: { summary: ShopRatingView; t: Translate }) {
+/** The shop's average set large, the stars, the count and the spread 5 to 1, on a tinted panel. */
+export function Summary({ summary, t }: { summary: ShopRatingView; t: Translate }) {
   return (
     <div className="flex flex-col gap-5 rounded-tile bg-paper-2 p-6 lg:p-8">
       <p className="flex items-end gap-3">
