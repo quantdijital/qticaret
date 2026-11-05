@@ -50,7 +50,7 @@ function EmptyCart({ view, t, actions }: Omit<Page, "note">) {
   return (
     <Container className="flex flex-col gap-(--section-gap-s) pt-8 lg:pt-12">
       <div className="flex flex-col gap-6">
-        <h1 className="text-section">{t("cart.title")}</h1>
+        <h1>{t("cart.title")}</h1>
         {view.error && <Note text={view.error} error />}
         <div className="flex flex-col items-start gap-5 rounded-tile bg-paper-2 p-6 sm:flex-row sm:items-center sm:p-8">
           <span className="flex size-14 shrink-0 items-center justify-center rounded-pill bg-paper">
@@ -101,7 +101,7 @@ export function CartPage({
     <Container className="flex flex-col gap-(--section-gap-s) pt-8 lg:pt-12">
       <div className="flex flex-col gap-6 lg:gap-8">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-          <h1 className="text-section">{t("cart.title")}</h1>
+          <h1>{t("cart.title")}</h1>
           <p className="tabular text-md text-text-2">{t("cart.item_count", { count })}</p>
         </div>
         {view.error && <Note text={view.error} error />}

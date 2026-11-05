@@ -37,9 +37,7 @@ export function LookupPage({
           aria-labelledby="siparis-bul"
           className="flex flex-col gap-6 rounded-tile bg-paper-2 p-5 sm:p-8 lg:p-10"
         >
-          <h1 id="siparis-bul" className="text-section">
-            {t("account.lookup_title")}
-          </h1>
+          <h1 id="siparis-bul">{t("account.lookup_title")}</h1>
           <p className="max-w-[56ch] text-lg text-text-2">{t("account.lookup_text")}</p>
           {view.notice && (
             <p

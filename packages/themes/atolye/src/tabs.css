@@ -81,10 +81,10 @@
   background: none;
   color: var(--color-text-3);
   font-family: var(--font-display);
-  font-size: clamp(1.125rem, 1.2vw + 0.85rem, 2rem);
+  font-size: var(--text-section);
   font-weight: var(--display-weight);
-  letter-spacing: -0.025em;
-  line-height: 1.1;
+  letter-spacing: var(--tracking-head);
+  line-height: 1.2;
   white-space: nowrap;
   cursor: pointer;
   transition:

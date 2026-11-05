@@ -21,7 +21,7 @@ export function Price({
       <p className="flex flex-wrap items-center gap-x-3 gap-y-1">
         {/* Joined by hand: tailwind-merge reads the theme's size names as colours */}
         <span
-          className={`tabular text-section leading-none font-extrabold tracking-[-0.02em] ${price.before ? "text-deal" : ""}`}
+          className={`tabular text-price leading-none font-extrabold tracking-[-0.02em] ${price.before ? "text-deal" : ""}`}
         >
           {price.current}
         </span>

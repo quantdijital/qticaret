@@ -194,7 +194,7 @@ export function AuthPage({
                 <MailCheck className="size-6" aria-hidden="true" strokeWidth={1.75} />
               </span>
             )}
-            <h1 className="text-section">{t(`account.${mode}_title`)}</h1>
+            <h1>{t(`account.${mode}_title`)}</h1>
             <p className="max-w-[40ch] text-md text-stage-text-2 lg:text-lead">
               {t(`account.${mode}_text`)}
             </p>

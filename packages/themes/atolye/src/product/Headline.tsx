@@ -28,7 +28,7 @@ export function Headline({ view, t }: { view: ProductPageView; t: Translate }) {
           {view.brand.label}
         </a>
       )}
-      <h1 className="max-w-[24ch] text-[clamp(1.75rem,1.1vw+1.45rem,2.5rem)] leading-[1.08]">
+      <h1 className="max-w-none">
         {name}
         {detail.length > 0 && (
           <span className="mt-2 block text-title leading-snug tracking-[-0.01em]">

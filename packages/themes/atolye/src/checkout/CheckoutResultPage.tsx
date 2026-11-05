@@ -33,7 +33,7 @@ export function CheckoutResultPage({ view, t }: { view: CheckoutResultPageView; 
             strokeWidth={1.75}
           />
         </span>
-        <h1 className="text-section">{t(`checkout.result_${view.state}`)}</h1>
+        <h1>{t(`checkout.result_${view.state}`)}</h1>
         <p role="status" className="max-w-[52ch] text-lg text-text-2">
           {t(`checkout.result_${view.state}_text`)}
         </p>

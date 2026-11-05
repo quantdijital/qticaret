@@ -38,7 +38,7 @@ export function PageHead({ view, t }: { view: ContentPageView; t: Translate }) {
           </div>
         </div>
       ) : (
-        <h1 className="max-w-[20ch]">{view.title}</h1>
+        <h1 className="max-w-[28ch]">{view.title}</h1>
       )}
     </div>
   )

@@ -38,7 +38,7 @@ function MissingPage({
       >
         <p
           aria-hidden="true"
-          className="tabular text-[clamp(5rem,12vw,11rem)] leading-[0.85] font-extrabold tracking-(--tracking-display) text-transparent [-webkit-text-stroke:2px_var(--color-stage-text-2)] lg:order-2 lg:col-span-5 lg:self-end lg:text-right"
+          className="tabular text-[clamp(4rem,7vw,7.5rem)] leading-[0.85] font-extrabold tracking-(--tracking-display) text-transparent [-webkit-text-stroke:2px_var(--color-stage-text-2)] lg:order-2 lg:col-span-5 lg:self-end lg:text-right"
         >
           {words.number}
         </p>

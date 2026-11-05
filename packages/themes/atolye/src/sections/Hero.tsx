@@ -64,7 +64,10 @@ export function Hero({
             </div>
           )}
           <div className="flex flex-col justify-center gap-4 p-5 pt-3 sm:p-8 sm:pt-4 lg:col-span-5 lg:row-start-1 lg:gap-6 lg:p-14">
-            <Heading id={id} className="text-display text-stage-text">
+            <Heading
+              id={id}
+              className="max-w-[18ch] text-hero leading-[1.05] tracking-(--tracking-display) text-stage-text"
+            >
               {hero.heading}
             </Heading>
             {hero.intro && (

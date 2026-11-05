@@ -39,7 +39,7 @@ export function Campaign({ section, label }: { section: Of<"banner">; label: str
                 className="absolute inset-0 -z-10 h-full w-full object-cover"
               />
               <div className="flex max-w-xl flex-col gap-3 p-5 sm:p-8 lg:p-12">
-                {slide.heading && <h2 className="text-section">{slide.heading}</h2>}
+                {slide.heading && <h2 className="text-display">{slide.heading}</h2>}
                 {slide.text && <p className="text-stage-text-2">{slide.text}</p>}
                 {slide.link && (
                   <div className="pt-1">

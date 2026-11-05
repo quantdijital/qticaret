@@ -29,7 +29,7 @@ export function OrderHero({ view, t }: { view: OrderPageView; t: Translate }) {
             {t("order.received")}
           </p>
         )}
-        <h1 id="siparis-baslik" className="max-w-[16ch]">
+        <h1 id="siparis-baslik" className="max-w-[24ch]">
           {view.fresh ? t("order.thanks") : t("order.title", { id: view.displayId })}
         </h1>
         <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">

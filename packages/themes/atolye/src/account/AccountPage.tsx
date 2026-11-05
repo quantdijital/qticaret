@@ -46,7 +46,7 @@ function Overview({ view, t, actions }: Page) {
   return (
     <div className="flex flex-col gap-8 lg:gap-10">
       <header className="flex flex-col gap-1">
-        <h1 className="text-section">{t("account.hello", { name: view.name })}</h1>
+        <h1>{t("account.hello", { name: view.name })}</h1>
         <p className="text-md break-all text-text-2">{view.email}</p>
       </header>
       {view.notice && <Notice text={view.notice} />}
@@ -142,7 +142,7 @@ export function AccountPage({ view, t, actions }: Page) {
                 {t("account.title")}
               </a>
             )}
-            <h1 className="text-section">{current?.label ?? t("account.title")}</h1>
+            <h1>{current?.label ?? t("account.title")}</h1>
           </header>
           {view.notice && <Notice text={view.notice} />}
           {view.section === "orders" && <Orders view={view} t={t} actions={actions} />}

@@ -60,7 +60,7 @@ function Lead({ post }: { post: PostCardView }) {
         {post.category && (
           <p className="text-sm font-semibold text-stage-text-2">{post.category.label}</p>
         )}
-        <h2 className="text-section">
+        <h2 className="text-display">
           <a
             href={post.path}
             className="no-underline underline-offset-4 group-hover:underline after:absolute after:inset-0 after:content-['']"

@@ -58,7 +58,7 @@ export function CheckoutPage({
   const address = view.addressSummary
   return (
     <Container className="flex flex-col gap-6 pt-6 lg:gap-8 lg:pt-12">
-      <h1 className="text-section">{t("checkout.title")}</h1>
+      <h1>{t("checkout.title")}</h1>
       {view.error && (
         <p role="alert" className="rounded-media bg-paper-2 p-4 text-sm font-semibold text-error">
           {view.error}

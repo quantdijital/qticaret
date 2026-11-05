@@ -60,7 +60,7 @@ export function Spotlight({
             </div>
           )}
           <div className="flex flex-col justify-center gap-5 px-2 pb-4 lg:col-span-5 lg:px-8 lg:py-10">
-            <h2 id={id} className="text-[clamp(1.625rem,1.1vw+1.25rem,2.375rem)] text-stage-text">
+            <h2 id={id} className="text-display text-stage-text">
               {section.title ?? product.title}
             </h2>
             {section.title && <h3 className="text-title text-stage-text">{product.title}</h3>}

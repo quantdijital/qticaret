@@ -36,7 +36,7 @@ export function Guides({ section }: { section: Of<"posts"> }) {
                   )}
                   <h3
                     className={
-                      post.image ? "text-title" : "text-title lg:text-[1.625rem] lg:leading-tight"
+                      post.image ? "text-title" : "text-title lg:text-section lg:leading-tight"
                     }
                   >
                     <a

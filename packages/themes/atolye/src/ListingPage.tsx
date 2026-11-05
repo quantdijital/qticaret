@@ -17,7 +17,7 @@ const RESULTS = "sonuclar"
 /**
  * A category, brand, collection or landing page, `/magaza`, the sale
  * page or a site search (docs/tema/yon-2026-11-05.md, Grafit): the trail,
- * the heavy title with the shop's short intro beside it, the
+ * the title with the shop's short intro under it, the
  * subcategories (or a search's related categories) as one row of picture
  * tiles, then the list: from 1024 px the filters in filled wells on the
  * left, on a phone in a sheet from the bottom; the count and the sort
@@ -48,10 +48,10 @@ export function ListingPage({
     <>
       <Container className="pt-4 lg:pt-6">
         <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} />
-        <header className="mt-4 grid gap-4 lg:mt-6 lg:grid-cols-12 lg:items-end lg:gap-(--gap-columns)">
-          <h1 className="lg:col-span-7">{view.title}</h1>
+        <header className="mt-4 flex flex-col gap-3 lg:mt-6">
+          <h1>{view.title}</h1>
           {!search && view.description.length > 0 && (
-            <div className="flex flex-col gap-3 text-md text-text-2 lg:col-span-5 lg:pb-2 lg:text-lead">
+            <div className="flex max-w-[72ch] flex-col gap-3 text-md text-text-2 lg:text-lead">
               {view.description.map((paragraph, index) => (
                 <p key={String(index)}>{paragraph}</p>
               ))}

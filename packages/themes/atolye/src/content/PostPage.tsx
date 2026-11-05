@@ -102,7 +102,7 @@ export function PostPage({ view, t }: { view: ContentPageView; t: Translate }) {
               {view.category.label}
             </a>
           )}
-          <h1 className="max-w-[22ch] text-section leading-[1.12]">{view.title}</h1>
+          <h1 className="max-w-[32ch]">{view.title}</h1>
           {meta && <Facts meta={meta} t={t} />}
         </header>
         {image && (

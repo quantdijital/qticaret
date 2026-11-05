@@ -48,7 +48,7 @@ export function LegalPage({ view, t }: { view: LegalPageView; t: Translate }) {
       <Container className="pt-6 lg:pt-10">
         <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} />
         <header className="mt-6 flex flex-col gap-3 lg:mt-10">
-          <h1 className="max-w-[24ch] text-section">{view.title}</h1>
+          <h1 className="max-w-[32ch]">{view.title}</h1>
           {view.updated && (
             <p className="text-sm text-text-3">
               {t("legal.updated")}{" "}
