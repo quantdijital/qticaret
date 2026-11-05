@@ -41,10 +41,13 @@ export function ReviewForm({
   productId,
   write,
   words,
+  placeholders,
 }: {
   productId: string
   write: FormAction
   words: CommunityWords
+  /** The examples inside the title and the text. */
+  placeholders: { title: string; body: string }
 }) {
   const [state, send, pending] = useActionState(write, INITIAL)
   return (
@@ -76,7 +79,13 @@ export function ReviewForm({
         <label htmlFor="yorum-baslik" className="text-sm font-semibold">
           {words.reviewTitle}
         </label>
-        <input id="yorum-baslik" name="title" maxLength={100} className={FIELD} />
+        <input
+          id="yorum-baslik"
+          name="title"
+          maxLength={100}
+          placeholder={placeholders.title}
+          className={FIELD}
+        />
       </div>
       <div className="flex flex-col gap-2">
         <label htmlFor="yorum-metin" className="text-sm font-semibold">
@@ -89,6 +98,7 @@ export function ReviewForm({
           minLength={10}
           maxLength={2000}
           rows={4}
+          placeholder={placeholders.body}
           className="gf-field min-h-28 rounded-inner"
         />
       </div>
@@ -127,10 +137,13 @@ export function QuestionForm({
   productId,
   ask,
   words,
+  placeholder,
 }: {
   productId: string
   ask: FormAction
   words: CommunityWords
+  /** The nudge inside the question's box. */
+  placeholder: string
 }) {
   const [state, send, pending] = useActionState(ask, INITIAL)
   return (
@@ -146,6 +159,7 @@ export function QuestionForm({
         minLength={5}
         maxLength={1000}
         rows={3}
+        placeholder={placeholder}
         className="gf-field min-h-24 rounded-inner"
       />
       <button

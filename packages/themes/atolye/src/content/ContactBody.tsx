@@ -1,4 +1,4 @@
-import { Mail, MapPin, MessageCircle, Phone } from "lucide-react"
+import { Mail, MapPin, Phone } from "lucide-react"
 import type {
   ContactActions,
   ContactView,
@@ -6,6 +6,8 @@ import type {
   IdentityRowView,
   Translate,
 } from "@qticaret/ui"
+import { placeholderWords } from "../parts/placeholders"
+import { WhatsAppGlyph } from "../parts/WhatsAppGlyph"
 import { ContactForm } from "./ContactForm"
 import type { ContactWords } from "./ContactForm"
 import { Prose } from "./Prose"
@@ -34,6 +36,7 @@ const contactWords = (t: Translate): ContactWords => ({
   sent: t("contact.sent"),
   errors: Object.fromEntries(CONTACT_ERRORS.map((key) => [key, t(key)])),
   fallback: t("contact.failed"),
+  placeholders: placeholderWords(t),
 })
 
 /**
@@ -54,7 +57,7 @@ function Reach({ contact, t }: { contact: ContactView; t: Translate }) {
         {contact.whatsappHref && (
           <li>
             <a href={contact.whatsappHref} target="_blank" rel="noopener" className="gf-btn w-full">
-              <MessageCircle className="size-5" aria-hidden="true" strokeWidth={1.75} />
+              <WhatsAppGlyph className="text-whatsapp" />
               {t("contact.info_whatsapp")}
             </a>
           </li>

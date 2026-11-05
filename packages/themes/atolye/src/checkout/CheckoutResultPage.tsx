@@ -19,7 +19,7 @@ const ICONS: Record<CheckoutResultPageView["state"], LucideIcon> = {
 export function CheckoutResultPage({ view, t }: { view: CheckoutResultPageView; t: Translate }) {
   const Icon = ICONS[view.state]
   return (
-    <Container className="pt-8 pb-(--section-gap) lg:pt-16">
+    <Container className="pt-8 lg:pt-16">
       <div className="mx-auto flex max-w-2xl flex-col items-start gap-6 rounded-tile bg-paper-2 p-6 sm:p-10">
         <span
           className={cn(
@@ -30,7 +30,7 @@ export function CheckoutResultPage({ view, t }: { view: CheckoutResultPageView; 
           <Icon
             className={cn("size-7", view.state === "pending" && "animate-spin")}
             aria-hidden="true"
-            strokeWidth={2}
+            strokeWidth={1.75}
           />
         </span>
         <h1 className="text-section">{t(`checkout.result_${view.state}`)}</h1>

@@ -129,7 +129,7 @@ export function CartLine({
                 aria-label={t("cart.remove_line", { title: line.title })}
                 className="gf-icon-btn gap-1.5 px-3 text-sm font-semibold text-text-2"
               >
-                <Trash2 className="size-4.5" aria-hidden="true" strokeWidth={1.75} />
+                <Trash2 className="size-4.5" aria-hidden="true" strokeWidth={2} />
                 <span className="max-sm:sr-only">{t("cart.remove")}</span>
               </button>
             </div>

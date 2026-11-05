@@ -60,8 +60,8 @@ export function NewsletterForm({
           maxLength={254}
           autoComplete="email"
           inputMode="email"
-          // Blank: `:placeholder-shown` tells an empty field from a filled one
-          placeholder=" "
+          // `:placeholder-shown` also tells an empty field from a filled one
+          placeholder={words.placeholder}
           aria-invalid={error ? true : undefined}
           aria-describedby={`${id}-durum`}
           className="gf-field min-w-0 flex-1"

@@ -4,6 +4,7 @@ import { Check, CircleAlert } from "lucide-react"
 import { useActionState } from "react"
 import type { AccountPageView, ActionResult, FormAction } from "@qticaret/ui"
 import { CheckField, TextField } from "../checkout/fields"
+import type { PlaceholderWords } from "../parts/placeholders"
 
 const INITIAL: ActionResult = { ok: false, error: null }
 
@@ -34,7 +35,7 @@ export function SaveStatus({
     <p role="status" className="flex items-center gap-1.5 text-sm font-semibold empty:hidden">
       {general ? (
         <span className="flex items-start gap-1.5 text-error">
-          <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2.25} />
+          <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
           {words.errors[general] ?? words.fallback}
         </span>
       ) : state.ok ? (
@@ -74,6 +75,7 @@ export interface ProfileWords extends SaveWords {
   lastName: string
   phone: string
   phoneHint: string
+  placeholders: PlaceholderWords
 }
 
 /** The customer's name and phone; a refusal said under its field. */
@@ -94,6 +96,7 @@ export function ProfileForm({
         id="first_name"
         name="first_name"
         label={words.firstName}
+        placeholder={words.placeholders.firstName}
         defaultValue={profile.first_name}
         error={fieldError("checkout.name_required")}
         autoComplete="given-name"
@@ -104,6 +107,7 @@ export function ProfileForm({
         id="last_name"
         name="last_name"
         label={words.lastName}
+        placeholder={words.placeholders.lastName}
         defaultValue={profile.last_name}
         autoComplete="family-name"
         required
@@ -114,6 +118,7 @@ export function ProfileForm({
         name="phone"
         type="tel"
         label={words.phone}
+        placeholder={words.placeholders.phone}
         hint={words.phoneHint}
         defaultValue={profile.phone}
         error={fieldError("checkout.phone_invalid")}

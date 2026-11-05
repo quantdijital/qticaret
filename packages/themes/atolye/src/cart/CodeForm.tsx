@@ -8,6 +8,8 @@ const INITIAL: ActionResult = { ok: false, error: null }
 
 export interface CodeWords {
   label: string
+  /** What goes in the field, inside it: "Kampanya kodunuzu yazın". */
+  placeholder: string
   apply: string
   remove: string
   applied: string
@@ -53,9 +55,10 @@ export function CodeForm({
             autoComplete="off"
             autoCapitalize="characters"
             spellCheck={false}
+            placeholder={words.placeholder}
             aria-invalid={message ? true : undefined}
             aria-describedby={`${id}-durum`}
-            className="gf-field min-w-0 flex-1 uppercase"
+            className="gf-field min-w-0 flex-1 uppercase placeholder:normal-case"
           />
           <button
             type="submit"

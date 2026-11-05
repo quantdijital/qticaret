@@ -59,9 +59,9 @@ export function PasswordField({
           className="gf-icon-btn absolute top-1/2 right-1 -translate-y-1/2 text-text-2"
         >
           {visible ? (
-            <EyeOff className="size-5" aria-hidden="true" strokeWidth={2} />
+            <EyeOff className="size-5" aria-hidden="true" strokeWidth={1.75} />
           ) : (
-            <Eye className="size-5" aria-hidden="true" strokeWidth={2} />
+            <Eye className="size-5" aria-hidden="true" strokeWidth={1.75} />
           )}
         </button>
       </div>

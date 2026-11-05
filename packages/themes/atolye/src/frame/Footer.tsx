@@ -28,14 +28,14 @@ function Contact({ shop, t }: { shop: ShopView; t: Translate }) {
         {title !== shop.name && <li className="pb-1 font-semibold text-text">{title}</li>}
         {contact.address && (
           <li className="flex items-start gap-3 py-2 text-text-2">
-            <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={1.75} />
+            <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
             <span className="max-w-[36ch]">{contact.address}</span>
           </li>
         )}
         {contact.phone && contact.phoneHref && (
           <li>
             <a href={contact.phoneHref} className={`${LINE} tabular`}>
-              <Phone className="size-4 shrink-0" aria-hidden="true" strokeWidth={1.75} />
+              <Phone className="size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
               {contact.phone}
             </a>
           </li>
@@ -43,7 +43,7 @@ function Contact({ shop, t }: { shop: ShopView; t: Translate }) {
         {contact.email && (
           <li>
             <a href={`mailto:${contact.email}`} className={`${LINE} break-all`}>
-              <Mail className="size-4 shrink-0" aria-hidden="true" strokeWidth={1.75} />
+              <Mail className="size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
               {contact.email}
             </a>
           </li>
@@ -93,7 +93,7 @@ export function Footer({
   const year = new Date().getFullYear()
   const title = shop.companyTitle ?? shop.name
   return (
-    <footer className="mt-(--section-gap) border-t border-rule bg-paper-2">
+    <footer className="mt-(--footer-gap) border-t border-rule bg-paper-2">
       <Container className="grid gap-10 pt-12 pb-8 lg:grid-cols-12 lg:gap-x-(--gap-columns) lg:gap-y-12 lg:pt-16">
         {subscribe && shop.newsletter && (
           <section

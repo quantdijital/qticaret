@@ -135,7 +135,7 @@ export function FilterSheet({
           className="gf-icon-btn bg-paper-2"
           onClick={closeTo}
         >
-          <X className="size-5" aria-hidden="true" strokeWidth={2} />
+          <X className="size-5" aria-hidden="true" strokeWidth={1.75} />
         </a>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4">{children}</div>

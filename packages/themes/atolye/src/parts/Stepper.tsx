@@ -48,7 +48,7 @@ export function Stepper({
         aria-label={words.decrease}
         className={STEP}
       >
-        <Minus className="size-4" aria-hidden="true" strokeWidth={2.25} />
+        <Minus className="size-4" aria-hidden="true" strokeWidth={2} />
       </button>
       <span aria-live="polite" className="tabular w-7 text-center text-md font-extrabold">
         {quantity}
@@ -61,7 +61,7 @@ export function Stepper({
         aria-label={words.increase}
         className={STEP}
       >
-        <Plus className="size-4" aria-hidden="true" strokeWidth={2.25} />
+        <Plus className="size-4" aria-hidden="true" strokeWidth={2} />
       </button>
     </div>
   )

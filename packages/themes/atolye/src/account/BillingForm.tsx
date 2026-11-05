@@ -5,6 +5,7 @@ import { useActionState, useState } from "react"
 import type { AccountPageView, ActionResult, FormAction } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { TextField } from "../checkout/fields"
+import type { PlaceholderWords } from "../parts/placeholders"
 import { SaveRow, type SaveWords } from "./ProfileForms"
 
 export interface BillingWords extends SaveWords {
@@ -17,6 +18,7 @@ export interface BillingWords extends SaveWords {
   tckn: string
   vkn: string
   current: string
+  placeholders: PlaceholderWords
 }
 
 const FIELD_ERRORS = ["billing_profile.tax_id_invalid", "billing_profile.tax_office_required"]
@@ -86,6 +88,7 @@ export function BillingForm({
           id="legal_name"
           name="legal_name"
           label={person ? words.name : words.company}
+          placeholder={person ? words.placeholders.fullName : words.placeholders.company}
           required
           minLength={2}
           maxLength={200}
@@ -98,6 +101,7 @@ export function BillingForm({
             id="tax_office"
             name="tax_office"
             label={words.taxOffice}
+            placeholder={words.placeholders.taxOffice}
             error={fieldError("billing_profile.tax_office_required")}
             required
             maxLength={100}
@@ -108,6 +112,7 @@ export function BillingForm({
           id="tax_id"
           name="tax_id"
           label={person ? words.tckn : words.vkn}
+          placeholder={person ? words.placeholders.tckn : words.placeholders.vkn}
           error={fieldError("billing_profile.tax_id_invalid")}
           required
           inputMode="numeric"

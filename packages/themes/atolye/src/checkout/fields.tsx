@@ -8,7 +8,7 @@ export function FieldError({ id, message }: { id: string; message: string | null
     <p id={id} className="flex items-start gap-1.5 text-sm font-semibold text-error empty:hidden">
       {message && (
         <>
-          <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2.25} />
+          <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
           {message}
         </>
       )}

@@ -14,7 +14,7 @@ import { Container } from "../parts/Container"
 export function NotFoundPage({ t, view }: { t: Translate; view?: NotFoundPageView }) {
   const categories = view?.categories ?? []
   return (
-    <Container className="flex flex-col gap-(--section-gap-s) pt-6 pb-(--section-gap-s) lg:pt-10">
+    <Container className="flex flex-col gap-(--section-gap-s) pt-6 lg:pt-10">
       <section
         aria-labelledby="bulunamadi"
         className="gf-stage grid gap-8 overflow-hidden rounded-tile p-6 sm:p-10 lg:grid-cols-12 lg:gap-(--gap-columns) lg:p-16"
@@ -48,7 +48,7 @@ export function NotFoundPage({ t, view }: { t: Translate; view?: NotFoundPageVie
               className="gf-field min-w-0 sm:flex-1"
             />
             <button type="submit" className="gf-btn">
-              <Search className="size-5" aria-hidden="true" strokeWidth={2} />
+              <Search className="size-5" aria-hidden="true" strokeWidth={1.75} />
               {t("search.submit")}
             </button>
           </form>

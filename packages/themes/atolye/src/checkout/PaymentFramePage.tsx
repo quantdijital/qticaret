@@ -13,7 +13,7 @@ import { FoldedSummary, Summary } from "./Summary"
  */
 export function PaymentFramePage({ view, t }: { view: PaymentFramePageView; t: Translate }) {
   return (
-    <Container className="flex flex-col gap-6 pt-6 pb-(--section-gap-s) lg:gap-8 lg:pt-12">
+    <Container className="flex flex-col gap-6 pt-6 lg:gap-8 lg:pt-12">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
         <h1 className="text-section">{t("checkout.card_title")}</h1>
         <a href={view.backPath} className="gf-link text-sm">

@@ -102,7 +102,7 @@ export function Consents({
         >
           <legend className="sr-only">{words.ageTitle}</legend>
           <p aria-hidden="true" className="flex items-center gap-2 text-md font-extrabold">
-            <ShieldCheck className="size-5 shrink-0" aria-hidden="true" strokeWidth={2} />
+            <ShieldCheck className="size-5 shrink-0" aria-hidden="true" strokeWidth={1.75} />
             {words.ageTitle}
           </p>
           <TextField

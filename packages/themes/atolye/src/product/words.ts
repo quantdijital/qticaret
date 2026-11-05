@@ -83,6 +83,13 @@ export const giftWords = (t: Translate) => ({
   message: t("gift.message"),
   messageHint: t("gift.message_hint"),
   sender: t("gift.sender_name"),
+  /** The examples inside the fields. */
+  placeholders: {
+    email: t("placeholder.email"),
+    name: t("placeholder.gift_name"),
+    message: t("placeholder.gift_message"),
+    sender: t("placeholder.sender_name"),
+  },
 })
 
 export type GiftWords = ReturnType<typeof giftWords>

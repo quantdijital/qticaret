@@ -28,7 +28,7 @@ function Option({ option, hash }: { option: FilterOptionView; hash: string }) {
         option.selected ? "border-text bg-text text-paper" : "border-edge bg-field"
       )}
     >
-      {option.selected && <Check className="size-3.5" strokeWidth={3} />}
+      {option.selected && <Check className="size-3.5" aria-hidden="true" strokeWidth={3} />}
     </span>
   )
   const body = (
@@ -184,7 +184,7 @@ function PriceRange({
             min={0}
             placeholder={`${t("listing.price_min")} ${String(price.min)}`}
             defaultValue={price.currentMin ?? undefined}
-            className="gf-field tabular px-4 text-sm"
+            className="gf-field tabular px-4 text-md lg:text-sm"
           />
           <label htmlFor={`${id}-en-cok`} className="sr-only">
             {t("listing.price_max")}
@@ -197,7 +197,7 @@ function PriceRange({
             min={0}
             placeholder={`${t("listing.price_max")} ${String(price.max)}`}
             defaultValue={price.currentMax ?? undefined}
-            className="gf-field tabular px-4 text-sm"
+            className="gf-field tabular px-4 text-md lg:text-sm"
           />
         </div>
         <button type="submit" className="gf-btn gf-btn--quiet gf-btn--small w-full">

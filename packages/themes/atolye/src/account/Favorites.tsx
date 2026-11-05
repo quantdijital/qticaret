@@ -85,7 +85,7 @@ export function Favorites({
                 aria-label={t("account.remove_favorite", { title: item.title })}
                 className="gf-icon-btn bg-field text-deal hover:bg-paper-2"
               >
-                <Heart className="size-5 fill-current" aria-hidden="true" strokeWidth={2} />
+                <Heart className="size-5 fill-current" aria-hidden="true" strokeWidth={1.75} />
               </button>
             </form>
           </li>

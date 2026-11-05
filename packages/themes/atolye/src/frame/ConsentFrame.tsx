@@ -86,7 +86,7 @@ export function ConsentFrame({
             aria-label={closeLabel}
             className="gf-icon-btn absolute top-2 right-2"
           >
-            <X className="size-5" aria-hidden="true" strokeWidth={2} />
+            <X className="size-5" aria-hidden="true" strokeWidth={1.75} />
           </button>
         )}
         {children}

@@ -14,7 +14,7 @@ function Questions({ group }: { group: FaqGroupView }) {
             <Plus
               className="size-5 shrink-0 group-open:rotate-45 motion-safe:transition-transform"
               aria-hidden="true"
-              strokeWidth={2}
+              strokeWidth={1.75}
             />
           </summary>
           <Prose html={item.html} className="gf-prose--small px-5 pb-5" />

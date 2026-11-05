@@ -1,6 +1,7 @@
 import { Lock, ReceiptText } from "lucide-react"
 import type { CheckoutActions, CheckoutPageView, CheckoutStep, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
+import { placeholderWords } from "../parts/placeholders"
 import { AddressForm } from "./AddressForm"
 import { CART_FIX_ERRORS, CHECKOUT_ERRORS, LINK_ERRORS } from "./errors"
 import { PaymentForm } from "./PaymentForm"
@@ -56,7 +57,7 @@ export function CheckoutPage({
   const edit = t("checkout.edit")
   const address = view.addressSummary
   return (
-    <Container className="flex flex-col gap-6 pt-6 pb-(--section-gap-s) lg:gap-8 lg:pt-12">
+    <Container className="flex flex-col gap-6 pt-6 lg:gap-8 lg:pt-12">
       <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
         <h1 className="text-section">{t("checkout.title")}</h1>
         <p className="flex items-center gap-2 text-sm text-text-2">
@@ -106,7 +107,6 @@ export function CheckoutPage({
                 province: t("checkout.province"),
                 district: t("checkout.district"),
                 neighborhood: t("checkout.neighborhood"),
-                choose: t("checkout.choose"),
                 loading: t("checkout.loading"),
                 street: t("checkout.street"),
                 streetHint: t("checkout.street_hint"),
@@ -114,6 +114,7 @@ export function CheckoutPage({
                 saving: t("checkout.saving"),
                 errors,
                 fallback: t("checkout.address_invalid"),
+                placeholders: placeholderWords(t),
               }}
             />
           </Step>

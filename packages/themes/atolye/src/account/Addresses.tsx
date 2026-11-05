@@ -1,6 +1,7 @@
 import { ChevronDown, MapPin, Plus, Trash2 } from "lucide-react"
 import type { AccountActions, AccountPageView, Translate } from "@qticaret/ui"
 import { AddressForm } from "../checkout/AddressForm"
+import { placeholderWords } from "../parts/placeholders"
 
 const ERRORS = [
   "checkout.address_invalid",
@@ -105,13 +106,13 @@ export function Addresses({
         <details id="yeni-adres" open={empty} className="group rounded-tile bg-paper-2">
           <summary className="flex min-h-16 cursor-pointer items-center gap-3 px-5 text-md font-extrabold sm:px-6">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-pill bg-text text-paper">
-              <Plus className="size-4.5" aria-hidden="true" strokeWidth={2.5} />
+              <Plus className="size-4.5" aria-hidden="true" strokeWidth={2} />
             </span>
             {t("account.add_address")}
             <ChevronDown
               className="ml-auto size-5 shrink-0 text-text-2 transition-transform duration-(--dur-short) group-open:rotate-180"
               aria-hidden="true"
-              strokeWidth={2}
+              strokeWidth={1.75}
             />
           </summary>
           <div className="max-w-[48rem] px-5 pt-2 pb-6 sm:px-6 sm:pb-8">
@@ -131,7 +132,6 @@ export function Addresses({
                 province: t("checkout.province"),
                 district: t("checkout.district"),
                 neighborhood: t("checkout.neighborhood"),
-                choose: t("checkout.choose"),
                 loading: t("checkout.loading"),
                 street: t("checkout.street"),
                 streetHint: t("checkout.street_hint"),
@@ -139,6 +139,7 @@ export function Addresses({
                 saving: t("checkout.saving"),
                 errors: Object.fromEntries(ERRORS.map((key) => [key, t(key)])),
                 fallback: t("checkout.address_invalid"),
+                placeholders: placeholderWords(t),
               }}
             />
           </div>

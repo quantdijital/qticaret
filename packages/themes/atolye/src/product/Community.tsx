@@ -145,7 +145,15 @@ export function Community({
                   {t("product.write_review")}
                 </summary>
                 <div className="px-5 pt-1 pb-5">
-                  <ReviewForm productId={view.id} write={actions.writeReview} words={words} />
+                  <ReviewForm
+                    productId={view.id}
+                    write={actions.writeReview}
+                    words={words}
+                    placeholders={{
+                      title: t("placeholder.review_title"),
+                      body: t("placeholder.review_body"),
+                    }}
+                  />
                 </div>
               </details>
             ) : (
@@ -211,7 +219,12 @@ export function Community({
           <div className="lg:col-span-4">
             {view.signedIn ? (
               <div className="rounded-tile bg-paper-2 p-5">
-                <QuestionForm productId={view.id} ask={actions.askQuestion} words={words} />
+                <QuestionForm
+                  productId={view.id}
+                  ask={actions.askQuestion}
+                  words={words}
+                  placeholder={t("placeholder.question")}
+                />
               </div>
             ) : (
               signIn

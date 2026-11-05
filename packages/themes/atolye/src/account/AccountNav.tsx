@@ -146,7 +146,7 @@ export function Hub({
                 <ChevronRight
                   className="size-5 shrink-0 text-text-3"
                   aria-hidden="true"
-                  strokeWidth={2}
+                  strokeWidth={1.75}
                 />
               </a>
             </li>

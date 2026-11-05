@@ -5,6 +5,8 @@ export interface NewsletterWords {
   consent: string
   privacyLink: string
   email: string
+  /** An example address inside the field, under the label. */
+  placeholder: string
   submit: string
   sent: string
   errors: Record<string, string>
@@ -22,6 +24,7 @@ export const newsletterWords = (t: Translate, consent: string): NewsletterWords 
   consent,
   privacyLink: t("newsletter.privacy_link"),
   email: t("newsletter.email"),
+  placeholder: t("placeholder.email"),
   submit: t("newsletter.submit"),
   sent: t("newsletter.sent"),
   errors: Object.fromEntries(NEWSLETTER_ERRORS.map((key) => [key, t(key)])),

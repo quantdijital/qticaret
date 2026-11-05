@@ -2,6 +2,7 @@
 
 import type { AuthAction } from "@qticaret/ui"
 import { FieldError, TextField } from "../checkout/fields"
+import type { PlaceholderWords } from "../parts/placeholders"
 import { useChallengeForm } from "../frame/useChallengeForm"
 
 export interface LookupWords {
@@ -13,6 +14,7 @@ export interface LookupWords {
   checking: string
   errors: Record<string, string>
   fallback: string
+  placeholders: PlaceholderWords
 }
 
 /**
@@ -30,6 +32,7 @@ export function LookupForm({ action, words }: { action: AuthAction; words: Looku
         id="display_id"
         name="display_id"
         label={words.orderNumber}
+        placeholder={words.placeholders.orderNumber}
         hint={words.orderHint}
         inputMode="numeric"
         autoComplete="off"
@@ -41,6 +44,7 @@ export function LookupForm({ action, words }: { action: AuthAction; words: Looku
         name="email"
         type="email"
         label={words.email}
+        placeholder={words.placeholders.email}
         autoComplete="email"
         inputMode="email"
         required

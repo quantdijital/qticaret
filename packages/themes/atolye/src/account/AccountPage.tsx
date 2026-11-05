@@ -23,7 +23,11 @@ function Notice({ text }: { text: string }) {
       role="status"
       className="flex items-start gap-3 rounded-media bg-paper-2 p-4 text-md font-semibold"
     >
-      <CircleCheck className="mt-0.5 size-5 shrink-0 text-ok" aria-hidden="true" strokeWidth={2} />
+      <CircleCheck
+        className="mt-0.5 size-5 shrink-0 text-ok"
+        aria-hidden="true"
+        strokeWidth={1.75}
+      />
       {text}
     </p>
   )
@@ -114,7 +118,7 @@ function Orders({ view, t }: Page) {
 export function AccountPage({ view, t, actions }: Page) {
   if (view.section === "overview") {
     return (
-      <Container className="pt-6 pb-(--section-gap) lg:pt-10">
+      <Container className="pt-6 lg:pt-10">
         <Overview view={view} t={t} actions={actions} />
       </Container>
     )
@@ -122,7 +126,7 @@ export function AccountPage({ view, t, actions }: Page) {
   const current = view.nav.find((link) => link.current)
   const home = view.nav.find((link) => link.section === "overview")
   return (
-    <Container className="pt-4 pb-(--section-gap) lg:pt-10">
+    <Container className="pt-4 lg:pt-10">
       <div className="grid gap-6 lg:grid-cols-[17.5rem_minmax(0,1fr)] lg:gap-12">
         <SideNav view={view} t={t} actions={actions} />
         <div className="flex min-w-0 flex-col gap-6 lg:gap-8">

@@ -93,6 +93,13 @@ select,
 textarea {
   font: inherit;
 }
+/* A field never reads under 16px: iOS Safari zooms into one that does, and the page stays
+   zoomable (the viewport sets no maximum-scale). A smaller utility on a field is set from
+   1024 px only (owner 2026-11-05) */
+input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"], [type="file"]),
+:is(select, textarea):not([hidden]) {
+  font-size: max(var(--text-md), 1em);
+}
 .tabular {
   font-variant-numeric: tabular-nums;
 }

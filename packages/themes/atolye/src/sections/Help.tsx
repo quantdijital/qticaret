@@ -1,6 +1,7 @@
-import { Mail, MessageCircle, Phone } from "lucide-react"
+import { Mail, Phone } from "lucide-react"
 import type { ContactView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
+import { WhatsAppGlyph } from "../parts/WhatsAppGlyph"
 import { type Of, headingId } from "./plan"
 
 /** The ways to reach the shop as quiet pills: WhatsApp, the phone, the e-mail; each only when given. */
@@ -29,7 +30,7 @@ export function Reach({
             rel="noopener"
             className="gf-btn gf-btn--quiet w-full"
           >
-            <MessageCircle className="size-5" aria-hidden="true" strokeWidth={1.75} />
+            <WhatsAppGlyph className="text-whatsapp" />
             {t("home.help_whatsapp")}
           </a>
         </li>

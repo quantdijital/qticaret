@@ -64,6 +64,7 @@ export function CartSummary({
             remove={actions.removePromotion}
             words={{
               label: t("cart.promotion_label"),
+              placeholder: t("placeholder.promo_code"),
               apply: t("cart.promotion_apply"),
               remove: t("cart.promotion_remove"),
               applied: t("cart.promotion_applied"),
@@ -80,6 +81,7 @@ export function CartSummary({
             remove={actions.removeGiftCard}
             words={{
               label: t("cart.gift_card_label"),
+              placeholder: t("placeholder.gift_card_code"),
               apply: t("cart.promotion_apply"),
               remove: t("cart.promotion_remove"),
               applied: t("cart.gift_card_applied"),

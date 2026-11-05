@@ -84,7 +84,7 @@ export function QuickAdd({
         <Icon
           className={cn("size-5 shrink-0", pending && "motion-safe:animate-spin")}
           aria-hidden="true"
-          strokeWidth={2}
+          strokeWidth={1.75}
         />
         {wide && words.add}
       </button>

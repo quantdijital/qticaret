@@ -1,9 +1,10 @@
 "use client"
 
-import { ChevronDown, Menu, MessageCircle, Phone } from "lucide-react"
+import { ChevronDown, Menu, Phone } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { ContactView, LinkView, NavCategoryView } from "@qticaret/ui"
+import { WhatsAppGlyph } from "../parts/WhatsAppGlyph"
 import { OPEN_MENU_EVENT } from "./events"
 import { Sheet } from "./Sheet"
 
@@ -118,7 +119,7 @@ export function MenuSheet({
                       <ChevronDown
                         className="mr-2 size-5 shrink-0 group-open:rotate-180 motion-safe:transition-transform"
                         aria-hidden="true"
-                        strokeWidth={2}
+                        strokeWidth={1.75}
                       />
                     </summary>
                     <ul className="mb-2 ml-7 border-l-2 border-rule pl-2">
@@ -169,7 +170,7 @@ export function MenuSheet({
                     rel="noopener"
                     className="gf-btn gf-btn--quiet w-full"
                   >
-                    <MessageCircle className="size-5" aria-hidden="true" strokeWidth={1.75} />
+                    <WhatsAppGlyph className="text-whatsapp" />
                     {words.whatsapp}
                   </a>
                 </li>

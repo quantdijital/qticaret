@@ -48,7 +48,7 @@ interface Page {
 /** No lines yet: the empty well, the way back to the shop, then what sells. */
 function EmptyCart({ view, t, actions }: Omit<Page, "note">) {
   return (
-    <Container className="flex flex-col gap-(--section-gap-s) pt-8 pb-(--section-gap) lg:pt-12">
+    <Container className="flex flex-col gap-(--section-gap-s) pt-8 lg:pt-12">
       <div className="flex flex-col gap-6">
         <h1 className="text-section">{t("cart.title")}</h1>
         {view.error && <Note text={view.error} error />}
@@ -98,7 +98,7 @@ export function CartPage({
   const locked = Boolean(view.locked)
   const offers = view.offers ?? []
   return (
-    <Container className="flex flex-col gap-(--section-gap-s) pt-8 pb-(--section-gap) lg:pt-12">
+    <Container className="flex flex-col gap-(--section-gap-s) pt-8 lg:pt-12">
       <div className="flex flex-col gap-6 lg:gap-8">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
           <h1 className="text-section">{t("cart.title")}</h1>

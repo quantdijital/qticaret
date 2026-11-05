@@ -23,7 +23,7 @@ export function OrderHero({ view, t }: { view: OrderPageView; t: Translate }) {
       <div className="flex flex-col gap-6 p-6 sm:p-10 lg:py-12">
         {view.fresh && (
           <p role="status" className="flex items-center gap-2 text-md font-semibold">
-            <CircleCheck className="size-5 shrink-0" aria-hidden="true" strokeWidth={2} />
+            <CircleCheck className="size-5 shrink-0" aria-hidden="true" strokeWidth={1.75} />
             {t("order.received")}
           </p>
         )}

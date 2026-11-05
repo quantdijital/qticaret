@@ -45,7 +45,7 @@ function Controls({
         aria-label={named(words.remove, line.title)}
         className="gf-icon-btn -mt-2 -mr-2 size-11 shrink-0 self-start text-text-3 disabled:opacity-40"
       >
-        <Trash2 className="size-4.5" aria-hidden="true" strokeWidth={1.75} />
+        <Trash2 className="size-4.5" aria-hidden="true" strokeWidth={2} />
       </button>
       <div
         aria-busy={pending || undefined}

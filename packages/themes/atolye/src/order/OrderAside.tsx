@@ -94,7 +94,7 @@ export function OrderAside({ view, t }: { view: OrderPageView; t: Translate }) {
             {view.documents.map((document) => (
               <li key={document.path}>
                 <a href={document.path} className="gf-link text-md">
-                  <FileText className="size-4.5 shrink-0" aria-hidden="true" strokeWidth={1.75} />
+                  <FileText className="size-4.5 shrink-0" aria-hidden="true" strokeWidth={2} />
                   {document.label}
                 </a>
               </li>

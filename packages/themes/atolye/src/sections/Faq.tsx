@@ -35,7 +35,7 @@ export function Faq({
                 <Plus
                   className="size-5 shrink-0 group-open:rotate-45 motion-safe:transition-transform"
                   aria-hidden="true"
-                  strokeWidth={2}
+                  strokeWidth={1.75}
                 />
               </summary>
               <p className="max-w-[65ch] px-5 pb-5 text-text-2">{item.answer}</p>

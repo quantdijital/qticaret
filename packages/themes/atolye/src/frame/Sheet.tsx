@@ -50,7 +50,7 @@ export function Sheet({
           <div className="flex h-16 shrink-0 items-center justify-between gap-4 pr-2 pl-4 sm:pl-6">
             <Dialog.Title className="max-w-none text-title">{title}</Dialog.Title>
             <Dialog.Close className="gf-icon-btn bg-paper-2" aria-label={closeLabel}>
-              <X className="size-5" aria-hidden="true" strokeWidth={2} />
+              <X className="size-5" aria-hidden="true" strokeWidth={1.75} />
             </Dialog.Close>
           </div>
           {description && (

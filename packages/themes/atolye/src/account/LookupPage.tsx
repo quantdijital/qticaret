@@ -1,6 +1,7 @@
 import { CircleCheck, ExternalLink } from "lucide-react"
 import type { AuthActions, AuthPageView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
+import { placeholderWords } from "../parts/placeholders"
 import { LookupForm } from "./LookupForm"
 
 const LOOKUP_ERRORS = [
@@ -30,7 +31,7 @@ export function LookupPage({
 }) {
   const carriers = view.carriers ?? []
   return (
-    <Container className="pt-8 pb-(--section-gap) lg:pt-12">
+    <Container className="pt-8 lg:pt-12">
       <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-6">
         <section
           aria-labelledby="siparis-bul"
@@ -48,7 +49,7 @@ export function LookupPage({
               <CircleCheck
                 className="mt-0.5 size-5 shrink-0 text-ok"
                 aria-hidden="true"
-                strokeWidth={2}
+                strokeWidth={1.75}
               />
               {view.notice}
             </p>
@@ -65,6 +66,7 @@ export function LookupPage({
                 checking: t("checkout.checking"),
                 errors: Object.fromEntries(LOOKUP_ERRORS.map((key) => [key, t(key)])),
                 fallback: t("account.lookup_failed"),
+                placeholders: placeholderWords(t),
               }}
             />
           </div>

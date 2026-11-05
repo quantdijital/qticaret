@@ -1,6 +1,7 @@
 import { Download, KeyRound, Trash2 } from "lucide-react"
 import type { ReactNode } from "react"
 import type { AccountActions, AccountPageView, Translate } from "@qticaret/ui"
+import { placeholderWords } from "../parts/placeholders"
 import { BillingForm } from "./BillingForm"
 import { ConsentForm, ProfileForm, type SaveWords } from "./ProfileForms"
 
@@ -104,6 +105,7 @@ export function Profile({
             lastName: t("checkout.last_name"),
             phone: t("checkout.phone"),
             phoneHint: t("checkout.phone_hint"),
+            placeholders: placeholderWords(t),
           }}
         />
       </Part>
@@ -131,6 +133,7 @@ export function Profile({
             tckn: t("account.billing_tckn"),
             vkn: t("account.billing_vkn"),
             current: t("account.billing_current"),
+            placeholders: placeholderWords(t),
           }}
         />
       </Part>

@@ -131,7 +131,6 @@ export function ListingPage({
       {bottom.length > 0 && (
         <Blocks sections={bottom} t={t} subscribe={subscribe} quickAdd={quickAdd} />
       )}
-      <div aria-hidden="true" className="h-(--section-gap-s)" />
     </>
   )
 }

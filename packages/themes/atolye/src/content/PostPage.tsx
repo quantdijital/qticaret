@@ -85,7 +85,7 @@ export function PostPage({ view, t }: { view: ContentPageView; t: Translate }) {
   const related = view.related ?? []
   const image = view.image ?? null
   return (
-    <div className="pb-(--section-gap-s)">
+    <div>
       <Container className="flex flex-col gap-6 pt-6 lg:pt-10">
         <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} compact />
         <Notice text={view.notice} />

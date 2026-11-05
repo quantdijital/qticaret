@@ -96,7 +96,7 @@ function Card({ review, t }: { review: Review; t: Translate }) {
 export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }) {
   const summary = view.summary ?? null
   return (
-    <Container className="flex flex-col gap-8 pt-6 pb-(--section-gap-s) lg:gap-10 lg:pt-10">
+    <Container className="flex flex-col gap-8 pt-6 lg:gap-10 lg:pt-10">
       <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} />
       <h1>{view.title}</h1>
       <div className="grid gap-(--gap-columns) lg:grid-cols-12">

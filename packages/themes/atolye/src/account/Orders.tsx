@@ -103,7 +103,7 @@ export function OrderRow({ order, t }: { order: AccountOrderView; t: Translate }
           <ChevronRight
             className="size-5 shrink-0 text-text-3 max-sm:hidden"
             aria-hidden="true"
-            strokeWidth={2}
+            strokeWidth={1.75}
           />
         </span>
         <span className="flex items-center gap-3">

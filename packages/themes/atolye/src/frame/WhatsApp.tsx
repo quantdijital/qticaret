@@ -1,8 +1,9 @@
-import { MessageCircle } from "lucide-react"
 import { cn } from "@qticaret/ui/lib/utils"
+import { WhatsAppGlyph } from "../parts/WhatsAppGlyph"
 
 /**
  * A chat with the shop on WhatsApp: a 56 px round button in the WhatsApp
+ * green with WhatsApp's own white glyph, named "WhatsApp'tan yazın"; the
  * token, 16 px from the right, above the bottom bar on a phone. The
  * layout leaves it out where it would cover the work; the stylesheet
  * hides it while a sheet is open or a page has its own fixed buy bar.
@@ -28,7 +29,7 @@ export function WhatsApp({
         aboveBottomBar ? "bottom-[calc(5rem+env(safe-area-inset-bottom))]" : "bottom-4"
       )}
     >
-      <MessageCircle className="size-6" aria-hidden="true" strokeWidth={2} />
+      <WhatsAppGlyph className="size-7" />
     </a>
   )
 }

@@ -134,7 +134,7 @@
     font-size: var(--text-md);
   }
   .gf-field::placeholder {
-    color: var(--color-text-3);
+    color: var(--color-placeholder);
     opacity: 1;
   }
   .gf-field:focus-visible {

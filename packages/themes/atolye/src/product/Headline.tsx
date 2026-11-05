@@ -1,7 +1,8 @@
-import { MessageCircle, Truck } from "lucide-react"
+import { Truck } from "lucide-react"
 import type { ProductPageView, Translate } from "@qticaret/ui"
 import { Stars } from "../parts/Stars"
 import { TrustIcon } from "../parts/TrustIcon"
+import { WhatsAppGlyph } from "../parts/WhatsAppGlyph"
 
 /** A rating as the shop's language writes it: "4,6". */
 export const ratingText = (average: number) => average.toFixed(1).replace(".", ",")
@@ -104,7 +105,7 @@ export function Delivery({ view, t }: { view: ProductPageView; t: Translate }) {
           rel="noopener"
           className="gf-link self-start text-sm"
         >
-          <MessageCircle className="size-4" aria-hidden="true" strokeWidth={2} />
+          <WhatsAppGlyph className="size-4 text-whatsapp" />
           {t("product.ask_whatsapp")}
         </a>
       )}

@@ -56,7 +56,9 @@ export function Progress({ steps, t }: { steps: readonly OrderStepView[]; t: Tra
                   step.state === "ahead" && "bg-paper-3"
                 )}
               >
-                {step.state === "done" && <Check className="size-4" strokeWidth={3} />}
+                {step.state === "done" && (
+                  <Check className="size-4" aria-hidden="true" strokeWidth={3} />
+                )}
                 {step.state === "current" && <span className="size-2.5 rounded-pill bg-signal" />}
               </span>
               <span className="flex min-w-0 flex-col pt-1">

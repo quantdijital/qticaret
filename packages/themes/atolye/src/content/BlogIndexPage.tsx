@@ -93,7 +93,7 @@ export function BlogIndexPage({ view, t }: { view: BlogIndexPageView; t: Transla
   // Under the lead, two (or four) posts half wide, so the rows of three come out full
   const pair = first && lead ? pairCount(cards.length) : 0
   return (
-    <Container className="flex flex-col gap-8 pt-6 pb-(--section-gap-s) lg:gap-10 lg:pt-10">
+    <Container className="flex flex-col gap-8 pt-6 lg:gap-10 lg:pt-10">
       <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} />
       <header className="flex flex-col gap-4">
         <h1>{view.title}</h1>

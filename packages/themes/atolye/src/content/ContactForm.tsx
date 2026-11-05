@@ -4,6 +4,7 @@ import { CircleCheck } from "lucide-react"
 import { useState } from "react"
 import type { ContactFormView, PlaceOrderResult } from "@qticaret/ui"
 import { FieldError, SelectField, TextField } from "../checkout/fields"
+import type { PlaceholderWords } from "../parts/placeholders"
 import { useChallengeForm } from "../frame/useChallengeForm"
 
 export interface ContactWords {
@@ -22,6 +23,7 @@ export interface ContactWords {
   sent: string
   errors: Record<string, string>
   fallback: string
+  placeholders: PlaceholderWords
 }
 
 /**
@@ -49,6 +51,7 @@ export function ContactForm({
     return result
   })
   const optional = (label: string) => `${label} (${words.optional})`
+  const ph = words.placeholders
   return (
     <section
       aria-labelledby="iletisim-formu"
@@ -68,6 +71,7 @@ export function ContactForm({
             id="iletisim-ad"
             name="name"
             label={words.name}
+            placeholder={ph.nameExample}
             required
             minLength={2}
             maxLength={100}
@@ -79,6 +83,7 @@ export function ContactForm({
             type="email"
             name="email"
             label={words.email}
+            placeholder={ph.email}
             required
             maxLength={254}
             autoComplete="email"
@@ -89,6 +94,7 @@ export function ContactForm({
             type="tel"
             name="phone"
             label={optional(words.phone)}
+            placeholder={ph.phone}
             maxLength={20}
             autoComplete="tel"
             inputMode="tel"
@@ -100,7 +106,9 @@ export function ContactForm({
             required
             defaultValue=""
           >
-            <option value="" disabled />
+            <option value="" disabled>
+              {ph.subject}
+            </option>
             {view.subjects.map((subject) => (
               <option key={subject.value} value={subject.value}>
                 {subject.label}
@@ -111,6 +119,7 @@ export function ContactForm({
             id="iletisim-siparis"
             name="order_number"
             label={optional(words.orderNumber)}
+            placeholder={ph.orderNumber}
             maxLength={13}
             inputMode="numeric"
             pattern="#?[0-9]{1,12}"
@@ -127,6 +136,7 @@ export function ContactForm({
               minLength={10}
               maxLength={3000}
               rows={6}
+              placeholder={ph.message}
               className="gf-field min-h-40 rounded-media py-3"
             />
           </div>

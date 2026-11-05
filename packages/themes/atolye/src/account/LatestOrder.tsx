@@ -41,7 +41,9 @@ function StageSteps({ steps, t }: { steps: readonly OrderStepView[]; t: Translat
                 step.state === "ahead" && "bg-stage-2"
               )}
             >
-              {step.state === "done" && <Check className="size-4" strokeWidth={3} />}
+              {step.state === "done" && (
+                <Check className="size-4" aria-hidden="true" strokeWidth={3} />
+              )}
               {step.state === "current" && (
                 <span className="size-2.5 rounded-pill bg-signal-on-stage" />
               )}

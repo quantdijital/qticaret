@@ -55,7 +55,7 @@ export function LegalPage({ view, t }: { view: LegalPageView; t: Translate }) {
           )}
         </header>
       </Container>
-      <Container className="mt-8 grid gap-8 pb-(--section-gap-s) lg:mt-12 lg:grid-cols-12 lg:gap-(--gap-columns)">
+      <Container className="mt-8 grid gap-8 lg:mt-12 lg:grid-cols-12 lg:gap-(--gap-columns)">
         {contents && (
           <>
             <details className="group rounded-tile bg-paper-2 lg:hidden">

@@ -98,7 +98,7 @@ export function Toolbar({
                   className="inline-flex min-h-11 items-center gap-2 rounded-pill bg-text pr-3 pl-4 text-sm font-semibold whitespace-nowrap text-paper no-underline transition-colors duration-(--dur-micro) hover:bg-text-2 active:translate-y-px"
                 >
                   {chip.label}
-                  <X className="size-4" aria-hidden="true" strokeWidth={2.25} />
+                  <X className="size-4" aria-hidden="true" strokeWidth={2} />
                 </a>
               </li>
             ))}

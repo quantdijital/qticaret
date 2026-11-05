@@ -176,6 +176,7 @@ export function GiftRecipientFields({ words }: { words: GiftWords }) {
           required
           maxLength={254}
           autoComplete="off"
+          placeholder={words.placeholders.email}
           className={FIELD}
         />
       )}
@@ -187,6 +188,7 @@ export function GiftRecipientFields({ words }: { words: GiftWords }) {
           name="recipient_name"
           maxLength={60}
           autoComplete="off"
+          placeholder={words.placeholders.name}
           className={FIELD}
         />
       )}
@@ -199,6 +201,7 @@ export function GiftRecipientFields({ words }: { words: GiftWords }) {
           name="message"
           rows={3}
           maxLength={300}
+          placeholder={words.placeholders.message}
           aria-describedby="hediye-mesaj-ipucu"
           className="gf-field min-h-24 rounded-inner"
         />
@@ -214,6 +217,7 @@ export function GiftRecipientFields({ words }: { words: GiftWords }) {
           name="sender_name"
           maxLength={60}
           autoComplete="name"
+          placeholder={words.placeholders.sender}
           className={FIELD}
         />
       )}

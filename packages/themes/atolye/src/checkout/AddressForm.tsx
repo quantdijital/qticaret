@@ -3,6 +3,7 @@
 import { startTransition, useActionState, useEffect, useRef, useState } from "react"
 import type { ActionResult, AddressStepView, CheckoutActions, OptionView } from "@qticaret/ui"
 import { FIELD_OF_ERROR, firstProblem, type AddressField } from "./address-check"
+import type { PlaceholderWords } from "../parts/placeholders"
 import { SelectField, TextField } from "./fields"
 
 const INITIAL: ActionResult = { ok: false, error: null }
@@ -19,7 +20,6 @@ export interface AddressWords {
   province: string
   district: string
   neighborhood: string
-  choose: string
   loading: string
   street: string
   streetHint: string
@@ -27,6 +27,7 @@ export interface AddressWords {
   saving: string
   errors: Record<string, string>
   fallback: string
+  placeholders: PlaceholderWords
 }
 
 const LEGEND = "mb-4 text-md font-extrabold tracking-[-0.01em]"
@@ -101,8 +102,9 @@ export function AddressForm({
     }
   }
 
+  const ph = words.placeholders
   const placeholder = (kind: "district" | "neighborhood") =>
-    loading === kind ? words.loading : words.choose
+    loading === kind ? words.loading : ph[kind]
 
   return (
     <form
@@ -140,6 +142,7 @@ export function AddressForm({
             name="email"
             type="email"
             label={words.email}
+            placeholder={ph.email}
             hint={words.emailHint}
             error={errorOf("email")}
             autoComplete="email"
@@ -154,6 +157,7 @@ export function AddressForm({
           name="phone"
           type="tel"
           label={words.phone}
+          placeholder={ph.phone}
           hint={words.phoneHint}
           error={errorOf("phone")}
           autoComplete="tel-national"
@@ -168,6 +172,7 @@ export function AddressForm({
           id="first_name"
           name="first_name"
           label={words.firstName}
+          placeholder={ph.firstName}
           error={errorOf("first_name")}
           autoComplete="given-name"
           required
@@ -178,6 +183,7 @@ export function AddressForm({
           id="last_name"
           name="last_name"
           label={words.lastName}
+          placeholder={ph.lastName}
           error={errorOf("last_name")}
           autoComplete="family-name"
           required
@@ -193,7 +199,9 @@ export function AddressForm({
           value={province}
           onChange={(event) => void chooseProvince(event.target.value)}
         >
-          <option value="">{words.choose}</option>
+          <option value="" disabled>
+            {ph.province}
+          </option>
           {step.provinces.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -211,7 +219,9 @@ export function AddressForm({
           value={district}
           onChange={(event) => void chooseDistrict(event.target.value)}
         >
-          <option value="">{placeholder("district")}</option>
+          <option value="" disabled>
+            {placeholder("district")}
+          </option>
           {districts.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -230,7 +240,9 @@ export function AddressForm({
           key={district}
           className="sm:col-span-2"
         >
-          <option value="">{placeholder("neighborhood")}</option>
+          <option value="" disabled>
+            {placeholder("neighborhood")}
+          </option>
           {neighborhoods.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}
@@ -241,6 +253,7 @@ export function AddressForm({
           id="address_1"
           name="address_1"
           label={words.street}
+          placeholder={ph.street}
           hint={words.streetHint}
           error={errorOf("address_1")}
           autoComplete="street-address"

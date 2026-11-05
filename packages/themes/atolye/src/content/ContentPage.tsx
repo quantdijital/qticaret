@@ -76,7 +76,7 @@ export function ContentPage({
     return <PostPage view={view} t={t} />
   }
   return (
-    <Container className="flex flex-col gap-8 pt-6 pb-(--section-gap-s) lg:gap-12 lg:pt-10">
+    <Container className="flex flex-col gap-8 pt-6 lg:gap-12 lg:pt-10">
       <PageHead view={view} t={t} />
       {view.contactForm || view.contact || (view.identity?.length ?? 0) > 0 ? (
         <ContactBody view={view} t={t} actions={actions} />

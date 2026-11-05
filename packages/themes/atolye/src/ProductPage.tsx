@@ -125,7 +125,6 @@ export function ProductPage({
       {sections.length > 0 && (
         <Blocks sections={sections} t={t} subscribe={subscribe} quickAdd={actions.addToCart} />
       )}
-      <div aria-hidden="true" className="h-(--section-gap-s)" />
     </>
   )
 }

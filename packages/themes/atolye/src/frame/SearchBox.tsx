@@ -237,7 +237,7 @@ export function SearchBox({
           className="gf-icon-btn absolute top-0.5 right-12 text-text-2"
           onClick={clear}
         >
-          <X className="size-5" aria-hidden="true" strokeWidth={2} />
+          <X className="size-5" aria-hidden="true" strokeWidth={1.75} />
         </button>
       )}
       <button
@@ -245,7 +245,7 @@ export function SearchBox({
         aria-label={words.submit}
         className="gf-icon-btn absolute top-0.5 right-1 text-text"
       >
-        <Search className="size-5" aria-hidden="true" strokeWidth={2} />
+        <Search className="size-5" aria-hidden="true" strokeWidth={1.75} />
       </button>
       {live && (
         <>

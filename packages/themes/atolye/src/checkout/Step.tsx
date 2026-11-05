@@ -42,7 +42,11 @@ export function Step({
             state === "ahead" && "bg-paper-3 text-text-2"
           )}
         >
-          {state === "done" ? <Check className="size-4" strokeWidth={3} /> : number}
+          {state === "done" ? (
+            <Check className="size-4" aria-hidden="true" strokeWidth={3} />
+          ) : (
+            number
+          )}
         </span>
         <h2 id={id} className="max-w-none flex-1 text-title">
           {title}

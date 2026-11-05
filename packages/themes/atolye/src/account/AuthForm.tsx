@@ -4,6 +4,7 @@ import { ChevronDown, CircleAlert } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import type { AuthAction, AuthPageView } from "@qticaret/ui"
 import { CheckField, FieldError, TextField } from "../checkout/fields"
+import type { PlaceholderWords } from "../parts/placeholders"
 import { useChallengeForm } from "../frame/useChallengeForm"
 import { FIELD_OF_AUTH_ERROR, firstAuthProblem, type AuthField } from "./auth-check"
 import { PasswordField } from "./PasswordField"
@@ -30,6 +31,7 @@ export interface AuthFormWords {
   checking: string
   errors: Record<string, string>
   fallback: string
+  placeholders: PlaceholderWords
 }
 
 /**
@@ -111,6 +113,7 @@ export function AuthForm({
             id="first_name"
             name="first_name"
             label={words.firstName}
+            placeholder={words.placeholders.firstName}
             error={errorOf("first_name")}
             autoComplete="given-name"
             required
@@ -120,6 +123,7 @@ export function AuthForm({
             id="last_name"
             name="last_name"
             label={words.lastName}
+            placeholder={words.placeholders.lastName}
             error={errorOf("last_name")}
             autoComplete="family-name"
             required
@@ -133,6 +137,7 @@ export function AuthForm({
           name="email"
           type="email"
           label={words.email}
+          placeholder={words.placeholders.email}
           error={errorOf("email")}
           autoComplete={mode === "register" ? "email" : "username"}
           inputMode="email"
@@ -159,6 +164,7 @@ export function AuthForm({
           name="phone"
           type="tel"
           label={words.phone}
+          placeholder={words.placeholders.phone}
           hint={words.phoneHint}
           error={errorOf("phone")}
           autoComplete="tel-national"
@@ -171,6 +177,7 @@ export function AuthForm({
             id="password"
             name="password"
             label={mode === "reset" ? words.newPassword : words.password}
+            placeholder={newPassword ? words.placeholders.newPassword : words.placeholders.password}
             hint={newPassword ? words.passwordHint : undefined}
             error={errorOf("password")}
             autoComplete={newPassword ? "new-password" : "current-password"}
@@ -192,6 +199,7 @@ export function AuthForm({
           id="code"
           name="code"
           label={words.code}
+          placeholder={words.placeholders.code}
           error={errorOf("code")}
           autoComplete="one-time-code"
           autoCapitalize="none"
@@ -256,11 +264,7 @@ export function AuthForm({
             role="alert"
             className="flex items-start gap-2 rounded-media bg-field p-4 text-sm font-semibold text-error"
           >
-            <CircleAlert
-              className="mt-0.5 size-4.5 shrink-0"
-              aria-hidden="true"
-              strokeWidth={2.25}
-            />
+            <CircleAlert className="mt-0.5 size-4.5 shrink-0" aria-hidden="true" strokeWidth={2} />
             {message}
           </p>
         )}

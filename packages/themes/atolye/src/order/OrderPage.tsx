@@ -84,7 +84,7 @@ export function OrderPage({
   actions: OrderActions
 }) {
   return (
-    <Container className="flex flex-col gap-3 pt-6 pb-(--section-gap) lg:gap-6 lg:pt-10">
+    <Container className="flex flex-col gap-3 pt-6 lg:gap-6 lg:pt-10">
       <OrderHero view={view} t={t} />
       {view.notice && (
         <p role="status" className="rounded-media bg-paper-2 p-4 text-md font-semibold">

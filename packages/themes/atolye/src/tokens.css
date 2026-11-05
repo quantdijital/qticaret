@@ -38,6 +38,8 @@
   --color-text: oklch(20% 0.012 255);
   --color-text-2: oklch(35% 0.012 255);
   --color-text-3: oklch(46% 0.012 255);
+  /* A field's example text: lighter than any label so it never reads as typed, 4.9:1 on the field */
+  --color-placeholder: oklch(54% 0.01 255);
   --color-rule: oklch(89.5% 0.006 250);
   --color-edge: oklch(58% 0.01 255);
   --color-stage: oklch(19.5% 0.012 255);
@@ -95,6 +97,8 @@
   --section-gap-s: 96px;
   --section-gap: 120px;
   --section-gap-l: 144px;
+  /* The last section to the footer, the same on every page (owner 2026-11-05): pages add none */
+  --footer-gap: 64px;
   --z-base: 1;
   --z-raised: 10;
   --z-dropdown: 100;
@@ -112,6 +116,7 @@
     --section-gap-s: 64px;
     --section-gap: 80px;
     --section-gap-l: 96px;
+    --footer-gap: 48px;
   }
 }
 @media (max-width: 40rem) {
@@ -121,6 +126,7 @@
     --section-gap-s: 48px;
     --section-gap: 56px;
     --section-gap-l: 64px;
+    --footer-gap: 40px;
   }
 }
 

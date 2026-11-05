@@ -25,7 +25,7 @@ function Chip({ mark }: { mark: ShopMarkView }) {
         />
       ) : (
         <>
-          {Icon && <Icon className="size-4" aria-hidden="true" strokeWidth={1.75} />}
+          {Icon && <Icon className="size-4" aria-hidden="true" strokeWidth={2} />}
           {mark.label}
         </>
       )}
