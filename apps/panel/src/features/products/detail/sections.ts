@@ -22,6 +22,9 @@ export const PRODUCT_SECTIONS = {
 
 export type ProductSection = keyof typeof PRODUCT_SECTIONS
 
+/** The barcode field of the first variant without one, in the variants card's codes view. */
+export const VARIANT_CODES_TARGET = "product-variant-codes"
+
 /**
  * Where each of the advisor's manual fixes takes the person on the
  * product's page: a main card by its anchor, or a folded section, which
@@ -36,7 +39,8 @@ export const PRODUCT_TARGETS: Readonly<Record<string, string>> = {
   add_images: "product-media",
   add_alt_text: "product-media",
   edit_prices: "product-variants",
-  edit_codes: "product-variants",
+  // The codes view opens, the caret in the first missing barcode (`VariantsCard`)
+  edit_codes: VARIANT_CODES_TARGET,
   edit_attributes: PRODUCT_SECTIONS.attributes,
   edit_brand: PRODUCT_SECTIONS.organize,
   edit_categories: PRODUCT_SECTIONS.organize,

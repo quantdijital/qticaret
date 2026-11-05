@@ -88,6 +88,10 @@ test("a product's page has no serious accessibility issue", async ({ page }) => 
   await page.locator("#product-price-history").scrollIntoViewIfNeeded()
   await page.waitForLoadState("networkidle")
   expect(await seriousIssues(page)).toEqual([])
+  // The variants' second view: their SKU, barcode and MPN fields
+  await page.locator("#product-variants").getByRole("radio", { name: "Kodlar" }).click()
+  await expect(page.locator("#product-variants input[name$='.gtin']").first()).toBeVisible()
+  expect(await seriousIssues(page)).toEqual([])
 })
 
 test("a blog post's page, its parts folded and open, has no serious accessibility issue", async ({

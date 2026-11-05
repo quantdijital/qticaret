@@ -76,6 +76,14 @@ export function useSaveCatalog(id: string) {
   })
 }
 
+/** A variant's own codes as Medusa keeps them: absent leaves one alone, null clears it. */
+export interface VariantCodes {
+  sku?: string | null
+  ean?: string | null
+  upc?: string | null
+  barcode?: string | null
+}
+
 export interface VariantEdit {
   variantId: string
   /** The variant's prices as stored; the TRY one is replaced, the rest kept. */
@@ -88,6 +96,10 @@ export interface VariantEdit {
   backorder: boolean | null
   /** The unit cost in lira (F11.4); null clears it, undefined leaves it alone. */
   cost?: number | null
+  /** Its SKU and barcode (GTIN); null leaves them alone. */
+  codes?: VariantCodes | null
+  /** Its manufacturer part number, kept by the catalog; null clears it, undefined leaves it alone. */
+  mpn?: string | null
 }
 
 const CURRENCY = "try"
@@ -103,9 +115,10 @@ function nextPrices(edit: VariantEdit) {
 
 /**
  * Stock at the shop's default location in one level batch (a level that is
- * there is updated, a missing one made), then prices and preorder in one
- * variant batch. Stock goes first: a variant turned to preorder gets an
- * empty level from the server, which would collide with a level made here.
+ * there is updated, a missing one made), then prices, preorder and codes
+ * in one variant batch, then unit costs and MPNs in the catalog. Stock
+ * goes first: a variant turned to preorder gets an empty level from the
+ * server, which would collide with a level made here.
  */
 export function useSaveVariants(productId: string) {
   const client = useQueryClient()
@@ -130,34 +143,49 @@ export function useSaveVariants(productId: string) {
         })
       }
       const update = edits.flatMap((edit) =>
-        edit.amount === null && edit.backorder === null
+        edit.amount === null && edit.backorder === null && !edit.codes
           ? []
           : [
               {
                 id: edit.variantId,
                 ...(edit.amount === null ? {} : { prices: nextPrices(edit) }),
                 ...(edit.backorder === null ? {} : { allow_backorder: edit.backorder }),
+                ...edit.codes,
               },
             ]
       )
       if (update.length > 0) {
         await sdk.admin.product.batchVariants(productId, { update })
       }
-      // Unit costs are the catalog's (F11.4), saved last: a refused price leaves them as they were
-      const costs = edits.flatMap((edit) =>
-        edit.cost === undefined ? [] : [[edit.variantId, { cost: edit.cost }] as const]
+      // Unit costs (F11.4) and MPNs are the catalog's, saved last: a refused price leaves them
+      const catalog = edits.flatMap((edit) =>
+        edit.cost === undefined && edit.mpn === undefined
+          ? []
+          : [
+              [
+                edit.variantId,
+                {
+                  ...(edit.cost === undefined ? {} : { cost: edit.cost }),
+                  ...(edit.mpn === undefined ? {} : { mpn: edit.mpn }),
+                },
+              ] as const,
+            ]
       )
-      if (costs.length > 0) {
+      if (catalog.length > 0) {
         await sdk.client.fetch(catalogUrl(productId), {
           method: "POST",
-          body: { variants: Object.fromEntries(costs) },
+          body: { variants: Object.fromEntries(catalog) },
         })
       }
     },
-    // A save that failed half-way (stock written, prices refused) still changed the product
+    // A save that failed half-way (stock written, prices refused) still changed the product;
+    // prices and codes change what the SEO advisor finds
     onSettled: async () => {
-      await client.invalidateQueries({ queryKey: ["products"] })
-      await client.invalidateQueries({ queryKey: ["dashboard"] })
+      await Promise.all([
+        client.invalidateQueries({ queryKey: ["products"] }),
+        client.invalidateQueries({ queryKey: ["dashboard"] }),
+        client.invalidateQueries({ queryKey: ["seo"] }),
+      ])
     },
   })
 }

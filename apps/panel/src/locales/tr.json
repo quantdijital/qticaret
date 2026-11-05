@@ -2871,7 +2871,11 @@
       "stock": "Stok 0 ya da daha büyük bir tam sayı olmalı.",
       "measure": "Sıfırdan büyük bir sayı girin ya da boş bırakın.",
       "sku": "Stok kodu en çok 64 karakter olabilir.",
-      "ean": "Barkod 8 ile 14 rakam arasında olmalı.",
+      "gtin": {
+        "format": "Barkod 8, 12, 13 ya da 14 rakamdan oluşur.",
+        "check": "Barkodun son rakamı tutmuyor; yanlış yazılmış olabilir."
+      },
+      "mpn": "Üretici kodu en çok 70 karakter olabilir.",
       "optionTitle": "Seçeneğe bir ad verin.",
       "optionValues": "Her seçeneğe en az bir değer ekleyin.",
       "tooManyVariants": "Bir üründe en çok 100 varyant olabilir.",
@@ -3051,6 +3055,21 @@
       "backorder": "Stoksuz satış",
       "cost": "Maliyet",
       "costHint": "KDV hariç birim maliyet; yalnızca raporlarda kullanılır, müşteri görmez.",
+      "codes": {
+        "view": "Varyant görünümü",
+        "views": {
+          "prices": "Fiyat ve stok",
+          "codes": "Kodlar"
+        },
+        "hint": "Google Alışveriş ürünü barkoddan (GTIN) tanır; barkodu olmayan üründe marka ile üretici kodu (MPN) yeter. Hepsi boş bırakılabilir.",
+        "sku": "Stok kodu (SKU)",
+        "gtin": "Barkod (GTIN)",
+        "mpn": "Üretici kodu (MPN)",
+        "stored": {
+          "format": "Bu kod bir GTIN barkodu değil; Google ürünü bununla tanımaz.",
+          "check": "Barkodun son rakamı tutmuyor; Google bu barkodu kullanmaz."
+        }
+      },
       "description": "Açıklama",
       "descriptionHint": "Başlık, liste, alıntı ve tabloyla yazın. Arama motorları için en az {{suggested}} kelime önerilir.",
       "organize": "Kategori, marka ve KDV"

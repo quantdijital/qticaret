@@ -1,5 +1,5 @@
 import { ChevronDown } from "lucide-react"
-import { useId } from "react"
+import { createContext, useContext, useId } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
@@ -28,6 +28,17 @@ interface CollapsibleSectionProps extends CollapseOptions {
   dirty?: boolean
   className?: string | undefined
   children: ReactNode
+}
+
+// Whether the section around is open; outside one, always
+const OpenContext = createContext(true)
+
+/**
+ * Drawn only while the section around it is open: a chart sizes itself
+ * to its box, and a closed section's box has no size.
+ */
+export function WhileOpen({ children }: { children: ReactNode }) {
+  return useContext(OpenContext) ? children : null
 }
 
 /**
@@ -111,7 +122,7 @@ export function CollapsibleSection({
         />
       </header>
       <div id={body} hidden={!open} className="flex min-w-0 flex-1 flex-col px-5 pb-5">
-        {children}
+        <OpenContext value={open}>{children}</OpenContext>
       </div>
     </section>
   )

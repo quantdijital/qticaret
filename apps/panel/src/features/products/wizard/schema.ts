@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { gtinProblem } from "@/lib/gtin"
 import { parseMeasureInput, parseMoneyInput } from "@/lib/money-input"
 import { isValidSlug } from "@/lib/slug"
 
@@ -38,10 +39,16 @@ export const variantSchema = z.object({
   price,
   stock,
   sku: z.string().trim().max(64, { message: "products.errors.sku" }),
+  // A barcode is a GTIN whose check digit fits, as on the product page (lib/gtin); none is fine
   ean: z
     .string()
     .trim()
-    .refine((text) => text === "" || /^\d{8,14}$/.test(text), { message: "products.errors.ean" }),
+    .superRefine((text, ctx) => {
+      const problem = gtinProblem(text)
+      if (problem) {
+        ctx.addIssue({ code: "custom", message: `products.errors.gtin.${problem}` })
+      }
+    }),
 })
 
 export const optionSchema = z.object({

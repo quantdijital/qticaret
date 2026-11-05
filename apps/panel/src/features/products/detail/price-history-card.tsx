@@ -4,6 +4,7 @@ import { CircleCheck, Info, TriangleAlert } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { StepChart } from "@/components/charts/step-chart"
+import { WhileOpen } from "@/components/patterns/collapsible-section"
 import { SectionCard } from "@/components/patterns/section-card"
 import { EmptyState, ErrorState } from "@/components/patterns/states"
 import type { SectionFindings } from "@/features/content/section-findings"
@@ -199,24 +200,27 @@ export function PriceHistoryCard({
       ) : (
         <div className="flex flex-col gap-4">
           <RuleNotice display={variant.display} days={days} />
-          <StepChart
-            data={steps.map((step) => ({
-              at: step.at,
-              value: step.paid,
-              reference: step.regular,
-            }))}
-            domain={[start, now.getTime()]}
-            names={{
-              value: t("products.priceHistory.paid"),
-              reference: t("products.priceHistory.regular"),
-            }}
-            formatValue={(value) => formatMoney(value, CURRENCY)}
-            formatTick={(value) => formatCompactMoney(value, CURRENCY)}
-            formatTime={(at) => formatBucket(new Date(at).toISOString(), "day")}
-            tableCaption={t("products.priceHistory.table", {
-              from: formatDate(new Date(start)),
-            })}
-          />
+          {/* Folded, the chart waits: it sizes itself to a box a closed section does not have */}
+          <WhileOpen>
+            <StepChart
+              data={steps.map((step) => ({
+                at: step.at,
+                value: step.paid,
+                reference: step.regular,
+              }))}
+              domain={[start, now.getTime()]}
+              names={{
+                value: t("products.priceHistory.paid"),
+                reference: t("products.priceHistory.regular"),
+              }}
+              formatValue={(value) => formatMoney(value, CURRENCY)}
+              formatTick={(value) => formatCompactMoney(value, CURRENCY)}
+              formatTime={(at) => formatBucket(new Date(at).toISOString(), "day")}
+              tableCaption={t("products.priceHistory.table", {
+                from: formatDate(new Date(start)),
+              })}
+            />
+          </WhileOpen>
         </div>
       )}
     </SectionCard>

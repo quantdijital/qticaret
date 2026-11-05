@@ -109,6 +109,7 @@ const DETAIL_FIELDS = [
   "variants.created_at",
   "variants.sku",
   "variants.ean",
+  "variants.upc",
   "variants.barcode",
   "variants.manage_inventory",
   "variants.allow_backorder",

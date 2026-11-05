@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { normalizeGtin } from "@/lib/gtin"
 import { sdk } from "@/lib/sdk"
 import { parseMeasureInput, parseMoneyInput } from "@/lib/money-input"
 import type { ShopDefaults } from "@/features/products/api/lookups"
@@ -53,7 +54,7 @@ function productBody({ values, publish, defaults, defaultOption }: CreateInput) 
       // The order the options were typed in (S, M, L), kept on the product page
       variant_rank: index,
       ...(variant.sku.trim() ? { sku: variant.sku.trim() } : {}),
-      ...(variant.ean.trim() ? { ean: variant.ean.trim() } : {}),
+      ...(variant.ean.trim() ? { ean: normalizeGtin(variant.ean) } : {}),
       manage_inventory: values.manage_inventory,
       allow_backorder: values.allow_backorder,
       prices: [{ currency_code: CURRENCY, amount: parseMoneyInput(variant.price) ?? 0 }],

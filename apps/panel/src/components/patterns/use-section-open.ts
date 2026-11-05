@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query"
-import { useEffect, useState } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import { flushSync } from "react-dom"
 import { CURRENT_USER_KEY } from "@/features/auth/api/me"
 import type { CurrentUser } from "@/features/auth/api/me"
@@ -40,6 +40,29 @@ export function revealSection(id: string): void {
     flushSync(open)
   }
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
+}
+
+/**
+ * A place that is not a section but is shown only on demand (a card's
+ * other view): the advisor's jump to `id` runs `reveal` first, then
+ * scrolls to the element with that id.
+ */
+export function useRevealTarget(id: string, reveal: () => void): void {
+  const latest = useRef(reveal)
+  useLayoutEffect(() => {
+    latest.current = reveal
+  })
+  useEffect(() => {
+    const opener = () => {
+      latest.current()
+    }
+    openers.set(id, opener)
+    return () => {
+      if (openers.get(id) === opener) {
+        openers.delete(id)
+      }
+    }
+  }, [id])
 }
 
 interface SectionOpenOptions {

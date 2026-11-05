@@ -2871,7 +2871,11 @@
       "stock": "Stock must be a whole number, 0 or more.",
       "measure": "Enter a number above zero, or leave it empty.",
       "sku": "The SKU can be at most 64 characters.",
-      "ean": "The barcode must be 8 to 14 digits.",
+      "gtin": {
+        "format": "A barcode has 8, 12, 13 or 14 digits.",
+        "check": "The barcode's last digit does not fit; it may be mistyped."
+      },
+      "mpn": "The manufacturer part number can be at most 70 characters.",
       "optionTitle": "Give the option a name.",
       "optionValues": "Add at least one value to each option.",
       "tooManyVariants": "A product can have at most 100 variants.",
@@ -3051,6 +3055,21 @@
       "backorder": "Sell past stock",
       "cost": "Cost",
       "costHint": "Unit cost, VAT excluded; used in reports only, never shown to customers.",
+      "codes": {
+        "view": "Variant view",
+        "views": {
+          "prices": "Price and stock",
+          "codes": "Codes"
+        },
+        "hint": "Google Shopping recognises a product by its barcode (GTIN); without one, the brand with the manufacturer part number (MPN) will do. All may be left empty.",
+        "sku": "SKU",
+        "gtin": "Barcode (GTIN)",
+        "mpn": "Manufacturer part number (MPN)",
+        "stored": {
+          "format": "This code is not a GTIN barcode; Google does not recognise the product by it.",
+          "check": "The barcode's last digit does not fit; Google does not use it."
+        }
+      },
       "description": "Description",
       "descriptionHint": "Write with headings, lists, quotes and tables. Search engines favour at least {{suggested}} words.",
       "organize": "Categories, brand and VAT"

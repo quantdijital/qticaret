@@ -1,7 +1,10 @@
+import type { UseFormReturn } from "react-hook-form"
 import { z } from "zod"
 import type { VariantEdit } from "@/features/products/api/product-edit"
 import type { ProductDetail } from "@/features/products/api/products"
 import { formatMoneyInput, parseMoneyInput } from "@/lib/money-input"
+import { codeEdits, MPN_MAX, savedCodes, SKU_MAX, typedGtinError } from "./variant-codes"
+import type { CatalogVariant } from "./variant-codes"
 
 const CURRENCY = "try"
 const MAX_COST = 10_000_000
@@ -25,11 +28,40 @@ const rowSchema = z.object({
     },
     { message: "products.errors.cost" }
   ),
+  // The identifiers (variant-codes.ts): all may be empty; a typed barcode is checked below
+  sku: z.string().trim().max(SKU_MAX, { message: "products.errors.sku" }),
+  gtin: z.string(),
+  mpn: z.string().trim().max(MPN_MAX, { message: "products.errors.mpn" }),
 })
-export const variantsSchema = z.object({ rows: z.array(rowSchema) })
+const variantsSchema = z.object({ rows: z.array(rowSchema) })
 export type VariantValues = z.infer<typeof variantsSchema>
 
+/**
+ * The rows' rules against what is stored: a barcode typed here must be a
+ * GTIN (its check digit fits); one already stored is not refused, so an
+ * in-house code never holds up a price change.
+ */
+export function variantsSchemaFor(saved: VariantValues) {
+  return variantsSchema.superRefine((values, ctx) => {
+    values.rows.forEach((row, index) => {
+      const message = typedGtinError(row, saved.rows[index])
+      if (message) {
+        ctx.addIssue({ code: "custom", path: ["rows", index, "gtin"], message })
+      }
+    })
+  })
+}
+
 export type Variant = NonNullable<ProductDetail["variants"]>[number]
+
+/** A row's fields in the order its refused values are told: the prices view's, then the codes'. */
+export const ROW_FIELDS = ["price", "cost", "stock", "sku", "gtin", "mpn"] as const
+
+/** The row's first refused value, as an i18n key, whichever view its field is in. */
+export function rowError(form: UseFormReturn<VariantValues>, index: number): string | undefined {
+  const errors = form.formState.errors.rows?.[index]
+  return ROW_FIELDS.map((field) => errors?.[field]?.message).find(Boolean)
+}
 
 /** The variant's level at the shop's default location: what is on the shelf, what is held for orders. */
 export function levelAt(variant: Variant, locationId: string | null) {
@@ -43,11 +75,14 @@ export function levelAt(variant: Variant, locationId: string | null) {
   }
 }
 
-/** The form's rows as stored: TRY price, stock at the default location, preorder, unit cost. */
+/**
+ * The form's rows as stored: TRY price, stock at the default location,
+ * preorder, and from the catalog the unit cost and MPN; the codes.
+ */
 export function savedRows(
   variants: Variant[],
   locationId: string | null,
-  costs: ReadonlyMap<string, number | null> = new Map()
+  catalog: ReadonlyMap<string, CatalogVariant> = new Map()
 ): VariantValues {
   return {
     rows: variants.map((variant) => {
@@ -56,7 +91,8 @@ export function savedRows(
         price: typeof amount === "number" ? formatMoneyInput(amount) : "",
         stock: String(levelAt(variant, locationId).stocked),
         backorder: Boolean(variant.allow_backorder),
-        cost: costInput(costs.get(variant.id) ?? null),
+        cost: costInput(catalog.get(variant.id)?.cost ?? null),
+        ...savedCodes(variant, catalog.get(variant.id)),
       }
     }),
   }
@@ -83,7 +119,18 @@ export function variantEdits(
     const stockChanged = Boolean(changed?.stock) && locationId !== null
     const backorderChanged = Boolean(changed?.backorder)
     const costChanged = Boolean(changed?.cost)
-    if (!row || (!priceChanged && !stockChanged && !backorderChanged && !costChanged)) {
+    if (!row) {
+      return []
+    }
+    const { codes, ...mpn } = codeEdits(variant, row, changed)
+    if (
+      !priceChanged &&
+      !stockChanged &&
+      !backorderChanged &&
+      !costChanged &&
+      !codes &&
+      !("mpn" in mpn)
+    ) {
       return []
     }
     const level = levelAt(variant, locationId)
@@ -106,6 +153,8 @@ export function variantEdits(
             : null,
         backorder: backorderChanged ? row.backorder : null,
         ...(costChanged ? { cost: parseMoneyInput(row.cost) } : {}),
+        codes,
+        ...mpn,
       },
     ]
   })
