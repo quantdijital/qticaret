@@ -17,7 +17,7 @@ import {
 import { currentCustomer } from "@/lib/account/auth"
 import { productAddonsOrNone } from "@/lib/cart/addons"
 import { installmentSummaries } from "@/lib/store-api/installments"
-import { productDescriptionHtml } from "@/lib/store-api/product-description"
+import { productTexts } from "@/lib/store-api/product-description"
 import { storefrontEnv } from "@/lib/env"
 import { whatsappHref } from "@/lib/views/frame"
 import { currentLayout } from "@/lib/views/layout"
@@ -41,11 +41,11 @@ type Entity = Extract<Resolution, { type: "entity" }>
  * place of the storefront's fixed "similar products".
  */
 export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
-  // The description's document as the backend renders it (adr/0055): asked beside the product
-  const [product, layout, descriptionHtml] = await Promise.all([
+  // The description's and short description's documents as the backend renders them (adr/0055)
+  const [product, layout, texts] = await Promise.all([
     productById(page.entity_id),
     currentLayout(),
-    productDescriptionHtml(page.entity_id),
+    productTexts(page.entity_id),
   ])
   const ownRail = showsOwnCategory(layout.product)
   const asked = priceDisplays(variantIdsOf([product]))
@@ -103,7 +103,8 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     t,
     trustBadges: storefront.trust_badges,
     swatchOf: swatchLookup(storefront.color_swatches),
-    descriptionHtml,
+    descriptionHtml: texts.description,
+    summaryHtml: texts.summary,
     installments,
   })
   const view = {

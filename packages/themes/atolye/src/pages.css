@@ -133,9 +133,13 @@
      (product/ReadMore); without the script it stays whole, no toggle */
   @media (scripting: enabled) {
     .gf-more[data-open="false"] > .gf-more-body {
-      max-height: 26rem;
+      max-height: var(--more-limit, 26rem);
       overflow: hidden;
-      mask-image: linear-gradient(to bottom, var(--color-text) calc(100% - 6rem), transparent);
+      mask-image: linear-gradient(
+        to bottom,
+        var(--color-text) calc(100% - var(--more-fade, 6rem)),
+        transparent
+      );
     }
     .gf-more[data-open="false"] > .gf-more-body[data-cut] {
       max-height: none;
@@ -144,6 +148,20 @@
     /* Over the description's own list and table utilities */
     .gf-more[data-open="false"] [data-more-hidden] {
       display: none !important;
+    }
+  }
+  /* The short description closes on a phone only (adr/0055 Ek 2026-11-06): whole beside the gallery */
+  @media (min-width: 48rem) {
+    .gf-more[data-phone-only] > .gf-more-body {
+      max-height: none !important;
+      overflow: visible !important;
+      mask-image: none !important;
+    }
+    .gf-more[data-phone-only] [data-more-hidden] {
+      display: revert !important;
+    }
+    .gf-more[data-phone-only] .gf-more-toggle {
+      display: none;
     }
   }
   @media (scripting: none) {

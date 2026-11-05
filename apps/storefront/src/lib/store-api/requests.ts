@@ -177,8 +177,6 @@ const PAGE_FIELDS = [
   // Its withdrawal mark, read by its kind (adr/0052 Ek 2026-11-03): on the product's own answer only
   "product_extension.withdrawal_excluded",
   "product_extension.kind",
-  // Its short description in up to five lines (adr/0055 Ek 2026-11-05): the product's own answer only
-  "product_extension.summary",
 ]
 
 export interface ProductQuery {

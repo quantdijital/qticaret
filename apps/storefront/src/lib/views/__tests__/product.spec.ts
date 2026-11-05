@@ -182,37 +182,24 @@ describe("productPage", () => {
     expect(view.description).toEqual(["Yıkanmış keten.", "Rahat kesim & yazlık."])
   })
 
-  it("carries the short description's lines, trimmed, five at most (adr/0055 Ek 2026-11-05)", () => {
-    const withSummary = (summary: unknown) =>
+  it("carries the short description's HTML as the backend wrote it (adr/0055 Ek 2026-11-06)", () => {
+    const withSummary = (summaryHtml: string | null | undefined) =>
       productPage({
-        product: {
-          ...product,
-          product_extension: { summary: summary as string[] | null },
-        },
+        product,
         seo: null,
         displays: {},
         brandPath: null,
         requestedVariant: null,
         t,
         trustBadges: [],
+        ...(summaryHtml === undefined ? {} : { summaryHtml }),
       })
-    expect(
-      withSummary([
-        " Yıkanmış keten ",
-        "",
-        "Rahat kesim",
-        7,
-        "Yazlık",
-        "Elde yıkama",
-        "Türkiye",
-        "Fazla",
-      ]).summary
-    ).toEqual(["Yıkanmış keten", "Rahat kesim", "Yazlık", "Elde yıkama", "Türkiye"])
-    // None, empty or not a list: the key is left out and the theme shows the headline facts
-    for (const summary of [null, [], ["  "], "Yıkanmış keten"]) {
-      expect(withSummary(summary)).not.toHaveProperty("summary")
+    const html = "<p>Yıkanmış <strong>keten</strong>.</p><ul><li><p>Rahat kesim</p></li></ul>"
+    expect(withSummary(html).summaryHtml).toBe(html)
+    // None: the key is left out and the theme shows the headline facts
+    for (const none of [null, undefined, ""]) {
+      expect(withSummary(none)).not.toHaveProperty("summaryHtml")
     }
-    expect(page(null)).not.toHaveProperty("summary")
   })
 })
 

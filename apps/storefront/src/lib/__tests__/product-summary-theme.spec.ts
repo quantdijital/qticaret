@@ -5,10 +5,10 @@ import type { ActionResult, ProductPageView, StorefrontTheme, ThemeActions } fro
 import { renderPage } from "@/test/theme-render"
 
 /**
- * The product's short description (adr/0055 Ek 2026-11-05) as both
- * themes print it: up to five plain lines in a list under the name and
- * the stars, above the price, in place of the headline facts; without
- * one, the facts as before.
+ * The product's short description (adr/0055 Ek 2026-11-06) as both
+ * themes print it: as the shop wrote it (the backend's HTML of its
+ * document), under the name and the stars, above the price, in place of
+ * the headline facts; without one, the facts as before.
  */
 
 const ok = (): Promise<ActionResult> => Promise.resolve({ ok: true, error: null })
@@ -25,7 +25,9 @@ const actions: ThemeActions = {
   installments: () => Promise.resolve(null),
 }
 
-const SUMMARY = ["N690 çelik, 58-59 HRC", "Geyik boynuzu sap", "Sırttan kilitli", "2 yıl <garanti>"]
+const SUMMARY =
+  "<p>El yapımı, <strong>günlük</strong> kullanım için.<br>Kutusuyla gelir.</p>" +
+  "<ul><li><p>Sırttan kilitli</p></li><li><p>2 yıl garanti</p></li></ul>"
 
 const view = (over: Partial<ProductPageView> = {}): ProductPageView => ({
   id: "prod_1",
@@ -65,43 +67,43 @@ const THEMES: [string, StorefrontTheme][] = [
   ["base", baseTheme],
 ]
 
-// The list the page labels as its short description
-const summaryOf = (html: string) =>
-  /<ul aria-label="Öne çıkan özellikler"[^>]*>[\s\S]*?<\/ul>/.exec(html)?.[0] ?? null
-
 describe.each(THEMES)("the %s theme's short description", (_name, theme) => {
   const page = (over: Partial<ProductPageView> = {}) =>
     renderPage(theme, "ProductPage", { view: view(over), actions })
 
-  it("lists its lines as text, in place of the headline facts, before the price", () => {
-    const html = page({ summary: SUMMARY })
-    const list = summaryOf(html) ?? ""
-    expect(list.match(/<li/g)).toHaveLength(4)
-    expect(list).toContain("N690 çelik, 58-59 HRC")
-    // Plain text, never markup
-    expect(list).toContain("2 yıl &lt;garanti&gt;")
+  it("prints it as written, in place of the headline facts, before the price", () => {
+    const html = page({ summaryHtml: SUMMARY })
+    expect(html).toContain(SUMMARY)
     expect(html).not.toContain("Namlu çeliği: ")
-    expect(html.indexOf("Sırttan kilitli")).toBeLessThan(html.indexOf("1.837,50 TL"))
+    expect(html.indexOf("Kutusuyla gelir.")).toBeLessThan(html.indexOf("1.837,50 TL"))
+    // Never split into the old checked lines
+    expect(html).not.toContain('aria-label="Öne çıkan özellikler"><li')
   })
 
   it("keeps the headline facts without one", () => {
-    for (const summary of [undefined, []]) {
-      const html = page(summary ? { summary } : {})
+    for (const summaryHtml of [undefined, null]) {
+      const html = page(summaryHtml === undefined ? {} : { summaryHtml })
       expect(html).toContain("Namlu çeliği: ")
-      expect(html).not.toContain("N690")
+      expect(html).not.toContain("Kutusuyla")
     }
   })
 })
 
 describe("the atolye theme's short description", () => {
-  it("checks each line with a quiet icon under the stars", () => {
+  it("sits under the stars in the body's size, closing on a phone only, lists as the description's", () => {
     const html = renderPage(atolyeTheme, "ProductPage", {
-      view: view({ summary: SUMMARY }),
+      view: view({ summaryHtml: SUMMARY }),
       actions,
     })
-    const list = summaryOf(html) ?? ""
-    expect(list.match(/<svg[^>]*aria-hidden="true"/g)).toHaveLength(4)
-    expect(list).toContain("text-text-2")
-    expect(html.indexOf('href="#degerlendirmeler"')).toBeLessThan(html.indexOf(list))
+    // About six lines on a phone, then "Devamını oku"; whole beside the gallery
+    const block = /<div class="gf-more[^"]*"[^>]*data-phone-only=""[^>]*>/.exec(html)?.[0] ?? ""
+    expect(block).toContain("--more-limit:8.75rem")
+    expect(html).toContain('id="kisa-aciklama"')
+    expect(html.indexOf('href="#degerlendirmeler"')).toBeLessThan(html.indexOf("Kutusuyla"))
+    const prose = /<div class="([^"]*)"><p>El yapımı/.exec(html)?.[1] ?? ""
+    expect(prose).toContain("text-md")
+    expect(prose).toContain("[&amp;_ul]:list-disc")
+    // No card: no surface or border of its own
+    expect(prose).not.toMatch(/\bbg-|\bborder\b|rounded/)
   })
 })

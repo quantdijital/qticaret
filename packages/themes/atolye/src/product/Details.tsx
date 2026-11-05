@@ -1,6 +1,7 @@
 import type { ProductPageView, SpecGroupView, Translate } from "@qticaret/ui"
 import { Beside } from "./Beside"
 import { InfoTabs } from "./InfoTabs"
+import { PROSE_INLINE, PROSE_LISTS } from "./prose"
 import { ReadMore } from "./ReadMore"
 import { ShippingCard } from "./Shipping"
 import { Specs } from "./Specs"
@@ -15,8 +16,8 @@ const PROSE = [
   "flex max-w-[46rem] min-w-0 flex-col gap-4 text-md leading-[1.75] text-text-2 lg:text-[1.0625rem] [&_p]:max-w-none",
   "[&_h2]:mt-8 [&_h2]:max-w-none [&_h2]:text-title [&_h2]:leading-snug [&_h2]:text-text [&_h2:first-child]:mt-0",
   "[&_h3]:mt-4 [&_h3]:text-md [&_h3]:text-text [&_h4]:font-semibold [&_h4]:text-text",
-  "[&_ul]:flex [&_ul]:list-disc [&_ul]:flex-col [&_ul]:gap-2 [&_ul]:pl-5 [&_ol]:flex [&_ol]:list-decimal [&_ol]:flex-col [&_ol]:gap-2 [&_ol]:pl-5 [&_li]:pl-1 [&_li::marker]:text-text-3",
-  "[&_strong]:font-semibold [&_strong]:text-text [&_a]:font-semibold [&_a]:text-text [&_a]:underline [&_a]:underline-offset-4",
+  PROSE_LISTS,
+  PROSE_INLINE,
   "[&_blockquote]:rounded-media [&_blockquote]:bg-paper-2 [&_blockquote]:p-4",
   "[&_table]:w-full [&_table]:border-collapse [&_table]:text-sm [&_td]:border-b [&_td]:border-rule [&_td]:py-2 [&_td]:pr-3 [&_th]:border-b [&_th]:border-rule [&_th]:py-2 [&_th]:pr-3 [&_th]:text-left [&_th]:font-semibold [&_th]:text-text [&_b]:font-semibold",
 ].join(" ")

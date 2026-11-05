@@ -3,21 +3,31 @@ import { cache } from "react"
 import type { StoreProductDescription } from "@qticaret/types"
 import { storeGet } from "./server"
 
+export interface ProductTexts {
+  /** The long description's HTML; null: the page shows the plain text paragraphs. */
+  description: string | null
+  /** The short description's HTML (adr/0055 Ek 2026-11-06); null: none, the headline facts instead. */
+  summary: string | null
+}
+
+const htmlOf = (value: unknown): string | null =>
+  typeof value === "string" && value.trim() !== "" ? value : null
+
 /**
- * A product's long description as the backend renders its content
- * document (adr/0055, adr/0019): HTML from the allow-listed schema, safe
- * to print as it is. Asked fresh with the product (a save in the panel
- * shows at once), once per request. Null when the product has no
- * document, or the answer did not come (a 404, a timeout): the page then
- * shows the plain text paragraphs, never nothing.
+ * A product's long and short descriptions as the backend renders their
+ * content documents (adr/0055, adr/0019): HTML from the allow-listed
+ * schema, safe to print as it is. Asked fresh with the product (a save in
+ * the panel shows at once), once per request. Null for a product without
+ * one, or when the answer did not come (a 404, a timeout): the page then
+ * shows the plain text paragraphs and the headline facts, never nothing.
  */
-export const productDescriptionHtml = cache(async (id: string): Promise<string | null> => {
+export const productTexts = cache(async (id: string): Promise<ProductTexts> => {
   try {
-    const { html } = await storeGet<StoreProductDescription>(
+    const answer = await storeGet<StoreProductDescription>(
       `/store/products/${encodeURIComponent(id)}/description`
     )
-    return typeof html === "string" && html.trim() !== "" ? html : null
+    return { description: htmlOf(answer.html), summary: htmlOf(answer.summary_html) }
   } catch {
-    return null
+    return { description: null, summary: null }
   }
 })

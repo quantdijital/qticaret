@@ -97,13 +97,15 @@ export interface ProductPageView {
    */
   descriptionHtml: string | null
   /**
-   * The shop's short description as up to five plain-text lines, each a
-   * bullet (adr/0055 Ek 2026-11-05): shown under the title, subtitle and
-   * rating, above the price. None or empty: the theme shows the headline
-   * facts (`specs` with `highlight`) there instead. A theme never prints
-   * it as HTML.
+   * The shop's short description as it wrote it (adr/0055 Ek 2026-11-06):
+   * the backend's own HTML of its document, from the description's
+   * allow-list held to the short slot (paragraphs, line breaks, h3–h4,
+   * lists, bold, italic, links): safe to print as it is. Shown under the
+   * title, subtitle and rating, above the price, in the body's size.
+   * Left out or null: none, and the theme shows the headline facts
+   * (`specs` with `highlight`) there instead.
    */
-  summary?: string[]
+  summaryHtml?: string | null
   brand: LinkView | null
   breadcrumbs: BreadcrumbView[]
   images: ImageView[]

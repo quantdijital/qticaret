@@ -92,6 +92,8 @@ interface ProductPageInput {
   swatchOf?: (value: string) => string | null
   /** The backend's HTML of the product's content document (adr/0055); null or left out: none. */
   descriptionHtml?: string | null
+  /** The backend's HTML of its short description (adr/0055 Ek 2026-11-06); null or left out: none. */
+  summaryHtml?: string | null
   /** Each variant's installments in one line, by its id (`installmentSummaries`); none: no line. */
   installments?: Readonly<Record<string, InstallmentSummaryView>>
 }
@@ -112,6 +114,7 @@ export function productPage({
   trustBadges,
   swatchOf,
   descriptionHtml = null,
+  summaryHtml = null,
   installments = {},
 }: ProductPageInput): ProductPageBase {
   const variants = product.variants ?? []
@@ -162,7 +165,8 @@ export function productPage({
     subtitle: product.subtitle,
     description: paragraphsOf(product.description),
     descriptionHtml,
-    ...summaryOf(product),
+    // Left out without one: the theme shows the headline facts there instead
+    ...(summaryHtml ? { summaryHtml } : {}),
     brand: product.brand && brandPath ? { label: product.brand.name, path: brandPath } : null,
     breadcrumbs: breadcrumbsOf(seo, t("home.label"), product.title),
     images: productImages(product),
@@ -176,23 +180,6 @@ export function productPage({
     trustBadges,
     withdrawalNote: withdrawalNoteOf(product, t),
   }
-}
-
-// The contract's at most: five lines (adr/0055 Ek 2026-11-05)
-const SUMMARY_LINES = 5
-
-/**
- * The shop's short description as the page's lines (adr/0055 Ek
- * 2026-11-05): strings only, trimmed, empty ones dropped, five at most.
- * Left out with none, so the theme shows the headline facts instead.
- */
-export function summaryOf(product: StoreProduct): { summary?: string[] } {
-  const stored: unknown = product.product_extension?.summary
-  const lines = (Array.isArray(stored) ? stored : [])
-    .flatMap((line: unknown) => (typeof line === "string" ? [line.trim()] : []))
-    .filter((line) => line !== "")
-    .slice(0, SUMMARY_LINES)
-  return lines.length > 0 ? { summary: lines } : {}
 }
 
 /**

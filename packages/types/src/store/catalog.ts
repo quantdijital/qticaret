@@ -147,10 +147,12 @@ export interface StoreProduct {
     withdrawal_excluded?: boolean | null
     kind?: string | null
     /**
-     * The shop's short description: up to five plain-text lines, each a
-     * bullet (adr/0055 Ek 2026-11-05); on the product's own answer only.
+     * The shop's short description as a content document (adr/0055 Ek
+     * 2026-11-06), with `+product_extension.summary_doc`, on the product's
+     * own answer only. The storefront prints the backend's HTML of it
+     * (`StoreProductDescription.summary_html`) instead.
      */
-    summary?: string[] | null
+    summary_doc?: Record<string, unknown> | null
   } | null
 }
 
@@ -161,6 +163,8 @@ export interface StoreProduct {
  */
 export interface StoreProductDescription {
   html: string | null
+  /** Its short description's HTML (adr/0055 Ek 2026-11-06); null without one. */
+  summary_html: string | null
 }
 
 export interface StoreCategory {
