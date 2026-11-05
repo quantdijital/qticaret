@@ -1257,7 +1257,7 @@
       },
       "rules": {
         "deliveryTitle": "Teslim süresi",
-        "deliveryDescription": "Siparişin ne zaman kargoya verildiği ve kaç günde ulaştığı. Ürün sayfalarındaki kargo cümlesi ve arama motorlarına verilen teslim bilgisi buradan gelir.",
+        "deliveryDescription": "Siparişin ne zaman kargoya verildiği ve kaç günde ulaştığı. Ürün sayfalarındaki Kargo ve Teslimat kartı, kargo cümlesi ve arama motorlarına verilen teslim bilgisi buradan gelir. Aynı gün kargo saati Pazarlama > Ürün akışları > Feed kuralları'ndadır.",
         "handling": "Kargoya verme",
         "handlingHint": "Sipariş gününden sonra iş günü.",
         "transit": "Taşıma",
@@ -1815,11 +1815,11 @@
       },
       "feedRules": {
         "title": "Feed kuralları",
-        "description": "Hangi feed'in hangi kategorileri dışarıda bıraktığı ve Akakçe'de gösterilen aynı gün kargo saati. Kargo ücreti kargo ayarlarınızdan (desi tablosu ya da sabit ücret, ücretsiz kargo sınırıyla), hazırlık süresi gönderim gününüzden alınır.",
+        "description": "Hangi feed'in hangi kategorileri dışarıda bıraktığı ve Akakçe'de, ürün sayfalarınızda gösterilen aynı gün kargo saati. Kargo ücreti kargo ayarlarınızdan (desi tablosu ya da sabit ücret, ücretsiz kargo sınırıyla), hazırlık süresi gönderim gününüzden alınır.",
         "exclusions": "Dışarıda bırakılan kategoriler",
         "exclusionsHint": "İşaretlediğiniz kategori ve altındaki tüm kategorilerdeki ürünler {{target}} feed'ine girmez.",
         "cutoff": "Aynı gün kargo saati",
-        "cutoffHint": "Bu saate kadar verilen siparişler aynı gün kargoya veriliyorsa seçin; Akakçe ürünlerinizde gösterir.",
+        "cutoffHint": "Bu saate kadar verilen siparişler aynı gün kargoya veriliyorsa seçin; ürün sayfalarınızın Kargo ve Teslimat kartında ve Akakçe'de gösterilir.",
         "noCutoff": "Aynı gün kargo yok",
         "until": "{{hour}} öncesi siparişler",
         "saved": "Feed kuralları kaydedildi; feed'ler bir sonraki güncellemede bunlara göre oluşur."

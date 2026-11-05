@@ -1257,7 +1257,7 @@
       },
       "rules": {
         "deliveryTitle": "Delivery time",
-        "deliveryDescription": "When an order ships and how many days it takes. The shipping sentence on product pages and the delivery details given to search engines come from here.",
+        "deliveryDescription": "When an order ships and how many days it takes. The Shipping and Delivery card on product pages, their shipping sentence and the delivery details given to search engines come from here. The same-day dispatch hour is under Marketing > Product feeds > Feed rules.",
         "handling": "Shipping out",
         "handlingHint": "Working days after the order.",
         "transit": "In transit",
@@ -1815,11 +1815,11 @@
       },
       "feedRules": {
         "title": "Feed rules",
-        "description": "Which categories each feed leaves out, and the same-day dispatch hour Akakçe shows. Shipping comes from your shipping settings (the desi table or a flat rate, with the free shipping threshold), handling time from your dispatch days.",
+        "description": "Which categories each feed leaves out, and the same-day dispatch hour Akakçe and your product pages show. Shipping comes from your shipping settings (the desi table or a flat rate, with the free shipping threshold), handling time from your dispatch days.",
         "exclusions": "Categories left out",
         "exclusionsHint": "Products in the categories you tick, and in every category under them, stay out of the {{target}} feed.",
         "cutoff": "Same-day dispatch until",
-        "cutoffHint": "Pick it if orders placed before this hour leave the same day; Akakçe shows it on your products.",
+        "cutoffHint": "Pick it if orders placed before this hour leave the same day; your product pages' Shipping and Delivery card and Akakçe show it.",
         "noCutoff": "No same-day dispatch",
         "until": "Orders before {{hour}}",
         "saved": "Feed rules saved; the feeds follow them from their next refresh."

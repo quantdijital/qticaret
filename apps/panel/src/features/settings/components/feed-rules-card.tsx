@@ -28,7 +28,8 @@ const NONE = "none"
 /**
  * Settings > Marketing: what each feed leaves out, by category (a
  * category takes the ones under it along), and the hour until which an
- * order leaves the same day, as Akakçe shows it (F10.8).
+ * order leaves the same day, as Akakçe (F10.8) and the product page's
+ * "Kargo ve Teslimat" card (adr/0046 Ek 2026-11-06) show it.
  */
 export function FeedRulesCard() {
   const { t } = useTranslation()
