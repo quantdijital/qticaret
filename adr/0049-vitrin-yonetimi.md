@@ -218,3 +218,39 @@ Kararın 6.3 adımı ("diğer sayfa şablonlarının bölümleri"), backend tara
 - **Base tema** ayarı yok sayar (kendi 4 sütunu).
 - Migration yok.
 - Kanıt: `lib/storefront/__tests__/layout.unit.spec.ts`, `integration-tests/http/storefront-layout.spec.ts`, `storefront-rails.spec.ts`; panelde `section-forms.spec.tsx`; vitrinde `atolye-home-theme.spec.ts`, `picked-rails.spec.ts`, `sections.spec.ts`.
+
+## Ek (2026-11-06): giriş slaytı (`hero_slider`; otonom, gözden geçir)
+
+İstek (sahip): "hero alanına yeni bileşen olarak slider tasarım ekle. mevcut tasarımı silme, ekstra bileşen olsun sadece." Sahibin ilk brief'i "otomatik slider yok" diyordu; bu yüzden kendiliğinden geçiş **varsayılan kapalı** ve isteğe bağlı.
+
+- **Yeni bölüm türü, yalnız ana sayfada.** Durağan `hero` değişmedi; ikisi aynı sayfada birlikte durabilir. Şema `lib/storefront/layout-slider.ts` (`layout-sections.ts` 300 satıra yakın). Ürün ve kategori sayfası almaz (`storefront_layout.section_invalid`).
+  - `slides`: 2–6 slayt. Her slayt:
+    - `image`: geniş görsel, zorunlu;
+    - `mobile_image`: telefon görseli, isteğe bağlı (640 px altında geniş görselin yerine);
+    - `heading` (90), `text` (160): isteğe bağlı, `{belirteç}` alır;
+    - `link`: tek düğme, isteğe bağlı (`storefrontLink`: kayıt, sayfa, yasal metin, mağaza yolu ya da adres);
+    - `position`: `left` | `center` | `right` (varsayılan `left`);
+    - `tone`: `light` (koyu görselde açık yazı, varsayılan) | `dark` (açık görselde koyu yazı).
+
+    Üst satır (`eyebrow`) yok: Hallmark tabanı yasaklıyor.
+  - Bölüm seçenekleri:
+    - `height`: `compact` | `regular` (varsayılan);
+    - `autoplay`: varsayılan `false`;
+    - `interval`: 5–10 sn, varsayılan 6;
+    - `dots`, `arrows`: varsayılan `true`.
+- **Denetim ve okuma.** `checkLayout` iki görseli de medya kütüphanesinde arar ve "bağlı" işaretler; düğmenin kaydı var mı bakılır. `storeLayout` görsellere boyut ve türev ekler, belirteçleri doldurur, kırık bağlantıyı `null` yapar; slayt kalır. Okuma ve yayın eskisi gibi; sürüm geçmişi değişmedi.
+- **Tema sözleşmesi** (`@qticaret/ui` `HeroSliderSectionView`). Vitrin `lib/views/hero-slider.ts` ile çevirir.
+  - Base tema slider çizmez: ilk slaytı başlığı varsa durağan giriş olarak gösterir.
+  - Atölye kendi sliderını çizer (`sections/HeroSlider.tsx`, `sections/SliderStage.tsx`, `slider.css`; kurallar `design.md` § Bileşen kuralları).
+- **Panel.** Bölüm ekle > "Giriş slaytı".
+  - Slaytlar satır satır (küçük görsel + başlık), yukarı/aşağı taşı ve kaldır düğmeleriyle. "Slayt ekle" medya kütüphanesini açar.
+  - Satıra tıklamak standart `FormDialog`'u açar (`lg`): görseller, yazılar, görünüm. Başlıkta önceki/sonraki slayt okları ("2 / 3") var; kaydedilmemiş değişiklikle geçmek ya da kapatmak önce sorar. "Kaydet" slaydı taslağa koyar.
+  - Seçenekler: yükseklik (Kısa/Standart), "Kendiliğinden geçsin" anahtarı (açıkken "Her slayt kaç saniye", 5–10), noktalar, oklar.
+  - İkiden az slaytla kayıt bekler ("En az iki slayt ekleyin.").
+- **Dev verisi.** Dev mağazanın ana sayfa **taslağının** başına üç slaytlı bir `girisslayti` eklendi. Yayın değişmedi.
+  - Slaytlar mağazanın kendi fotoğraflarıyla: Damascus çakı, mutfak, kamp.
+  - Bağlantılar El Yapımı Çakı, Mutfak & Şef Serisi ve Outdoor & Kamp kategorilerine.
+  - Telefon görseli olarak girişin ürün fotoğrafı.
+  - Kendiliğinden geçiş kapalı.
+- Migration yok.
+- Kanıt: `lib/storefront/__tests__/layout-slider.unit.spec.ts`, `integration-tests/http/storefront-slider.spec.ts`; panelde `forms/hero-slider-form.spec.tsx`, `problems.spec.ts`; vitrinde `atolye-slider-theme.spec.ts`.
