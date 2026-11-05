@@ -22,7 +22,7 @@ import { SectionHead } from "./sections/SectionHead"
 
 /**
  * A product (docs/tema/yon-2026-11-05.md, Grafit; sahip 2026-11-05): the
- * trail, then the photographs (from 1024 px half the row, from 1280 px
+ * trail, then the photographs (from 768 px half the row, from 1280 px
  * seven twelfths and 680 px at most: a square in a soft well filling its
  * column's width, its thumbnails right under it) beside
  * the buy column: the name and its stars, the price, the options and
@@ -62,9 +62,9 @@ export function ProductPage({
       <Container className="pt-4 lg:pt-6">
         <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} compact />
       </Container>
-      <Container className="gf-product-top mt-4 grid gap-8 lg:mt-6 lg:gap-(--gap-columns)">
+      <Container className="gf-product-top mt-4 grid gap-8 md:gap-(--gap-columns) lg:mt-6">
         <div className="min-w-0">
-          <div className="lg:sticky lg:top-40">
+          <div className="md:sticky md:top-40">
             <Gallery
               images={view.images}
               initial={view.title.trim().charAt(0).toLocaleUpperCase("tr")}
@@ -72,8 +72,8 @@ export function ProductPage({
             />
           </div>
         </div>
-        <div className="min-w-0 lg:pl-(--space-lg)">
-          <div className="flex flex-col gap-6 lg:sticky lg:top-40">
+        <div className="@container min-w-0 lg:pl-(--space-lg)">
+          <div className="gf-buy-stack flex flex-col gap-6 md:sticky md:top-40">
             <Headline view={view} t={t} />
             <Buy
               productId={view.id}

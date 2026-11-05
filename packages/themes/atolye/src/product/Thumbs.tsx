@@ -128,7 +128,7 @@ export function Thumbs({
             >
               <ResponsiveImage
                 image={{ ...image, alt: "" }}
-                sizes="(min-width: 1024px) 128px, 25vw"
+                sizes="(min-width: 768px) 128px, 25vw"
                 className="absolute inset-0 h-full w-full object-cover"
               />
             </a>

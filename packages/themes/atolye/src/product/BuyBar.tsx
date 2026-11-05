@@ -5,7 +5,8 @@ import type { ImageView, PriceView } from "@qticaret/ui"
 
 /**
  * The phone's buy bar: once the page's own "add to cart" has scrolled
- * away above, a bar slides over the bottom bar with the photo, the price
+ * away above, a bar slides over the bottom bar with the photo, the
+ * choice that goes in (the product's name when it has none), the price
  * and the same action (it submits the page's buy form, so the chosen
  * variant, quantity and add-ons go with it); a variant to choose or one
  * out of stock leads back to the form instead. Hidden it is inert. Not
@@ -16,6 +17,7 @@ export function BuyBar({
   label,
   image,
   title,
+  detail,
   price,
   before,
   action,
@@ -25,6 +27,8 @@ export function BuyBar({
   label: string
   image: ImageView | null
   title: string
+  /** The chosen options in words ("Sap rengi: Kahverengi"), shown over the price instead of the name; none: the name. */
+  detail: string | null
   price: PriceView | null
   before: string
   /** The add button (submits `form`), or a link back to the form. */
@@ -51,7 +55,7 @@ export function BuyBar({
           </span>
         )}
         <div className="flex min-w-0 flex-1 flex-col">
-          <p className="truncate text-xs text-text-2">{title}</p>
+          <p className="truncate text-xs text-text-2">{detail ?? title}</p>
           {price && (
             <p className="flex flex-wrap items-baseline gap-x-2">
               <span

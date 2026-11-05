@@ -203,6 +203,23 @@ describe("the theme's product page", () => {
     expect(html).toContain("Taksit seçenekleri")
   })
 
+  it("marks a value sold out before it is chosen, and the phone's bar says the choice", () => {
+    const html = page({
+      variants: [variant("v_yesil", "Yeşil"), variant("v_mavi", "Mavi", { available: false })],
+    })
+    // The sold-out value stays a choice (its stock alert), its words struck and read as sold out
+    const label =
+      /<label[^>]*for="secenek-opt_renk-Mavi"[^>]*>[\s\S]*?<\/label>/.exec(html)?.[0] ?? ""
+    expect(label).toContain("line-through")
+    expect(label).toContain("Tükendi")
+    const kept =
+      /<label[^>]*for="secenek-opt_renk-Yeşil"[^>]*>[\s\S]*?<\/label>/.exec(html)?.[0] ?? ""
+    expect(kept).not.toContain("line-through")
+    // The bar names what goes in: the choice, not the name again
+    const bar = /<aside[^>]*data-sticky-buy=""[\s\S]*?<\/aside>/.exec(html)?.[0] ?? ""
+    expect(bar).toContain("Renk: Yeşil")
+  })
+
   it("draws no choice for an option of one value", () => {
     const html = page({
       options: [{ id: "opt_renk", title: "Seçenek", values: ["Standart"] }],

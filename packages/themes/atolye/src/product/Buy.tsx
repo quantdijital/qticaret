@@ -17,6 +17,7 @@ import { emitShopEvent } from "@qticaret/ui/lib/shop-events"
 import { cn } from "@qticaret/ui/lib/utils"
 import { announceCartAdded } from "../frame/events"
 import { BuyBar } from "./BuyBar"
+import { choiceText, matching, soldOutOf } from "./choices"
 import { AddonPicks, GiftRecipientFields, picksKurus, picksLimit, picksOf } from "./Extras"
 import { Favorite } from "./Favorite"
 import { Installments } from "./Installments"
@@ -36,15 +37,6 @@ import type {
 const FORM = "sepet-formu"
 const ALERT = "stok-bildirimi"
 const INITIAL: ActionResult = { ok: false, error: null }
-
-const matching = (
-  variants: VariantView[],
-  options: ProductOptionView[],
-  chosen: Record<string, string>
-) =>
-  variants.find((each) =>
-    options.every((option) => each.options[option.id] === chosen[option.id])
-  ) ?? null
 
 /**
  * The buy column's working part: the chosen variant's price (with the
@@ -170,7 +162,7 @@ export function Buy({
         : words.chooseOptions
   const error = !stale && state.error ? (words.errors[state.error] ?? words.fallback) : null
   return (
-    <div className="flex flex-col gap-6">
+    <div className="gf-buy-stack flex flex-col gap-6">
       {price && <Price price={price} words={words} />}
       <p
         className={cn(
@@ -204,7 +196,13 @@ export function Buy({
         }}
         className="flex scroll-mt-40 flex-col gap-6 [&:not(:has(fieldset))]:hidden"
       >
-        <Options options={options} chosen={chosen} choose={choose} />
+        <Options
+          options={options}
+          chosen={chosen}
+          choose={choose}
+          soldOut={soldOutOf(variants, options, chosen)}
+          soldOutLabel={words.outOfStock}
+        />
         <input type="hidden" name="variant_id" value={variant?.id ?? ""} />
         {gift && <GiftRecipientFields words={gift.words} />}
         {addons && !gift && (
@@ -241,7 +239,7 @@ export function Buy({
           form={FORM}
           disabled={!available || pending}
           aria-busy={pending}
-          className="gf-btn order-last min-w-0 basis-full min-[26rem]:order-none min-[26rem]:basis-0 min-[26rem]:flex-1"
+          className="gf-btn order-last min-w-0 basis-full @min-[24rem]:order-none @min-[24rem]:basis-0 @min-[24rem]:flex-1"
         >
           {label}
         </button>
@@ -289,6 +287,7 @@ export function Buy({
         label={words.bar}
         image={image}
         title={title}
+        detail={choiceText(options, chosen)}
         price={price}
         before={words.before}
         action={

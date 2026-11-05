@@ -7,7 +7,7 @@ import { cn } from "@qticaret/ui/lib/utils"
 import type { FavoriteWords } from "./words"
 
 const ROUND =
-  "gf-icon-btn ml-auto size-12 shrink-0 min-[26rem]:ml-0 bg-paper-2 text-text hover:bg-paper-3 disabled:cursor-not-allowed"
+  "gf-icon-btn ml-auto size-12 shrink-0 @min-[24rem]:ml-0 bg-paper-2 text-text hover:bg-paper-3 disabled:cursor-not-allowed"
 
 /**
  * The favourite heart beside "add to cart": a 48 px round button that
@@ -36,7 +36,7 @@ export function Favorite({
     )
   }
   return (
-    <form action={submit} className="relative ml-auto min-[26rem]:ml-0">
+    <form action={submit} className="relative ml-auto @min-[24rem]:ml-0">
       <input type="hidden" name="product_id" value={productId} />
       <button
         type="submit"

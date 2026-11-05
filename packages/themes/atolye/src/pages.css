@@ -62,10 +62,12 @@
   }
 
   /* The product's top row: the square fills the gallery's width, never
-     sized by the screen's height. From 1024 px gallery and buy column halve
-     the row; from 1280 px the gallery takes seven twelfths, 680 px at most,
-     and the buy column the rest (no empty well beside the photo) */
-  @media (min-width: 64rem) {
+     sized by the screen's height. From 768 px (a tablet, a phone on its
+     side) gallery and buy column halve the row, so the name, price and
+     button stand in the first screen beside the photo, not under a
+     screen-wide square; from 1280 px the gallery takes seven twelfths,
+     680 px at most, and the buy column the rest (no empty well beside the photo) */
+  @media (min-width: 48rem) {
     .gf-product-top {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -170,9 +172,26 @@
   .gf-buybar[data-open="true"] {
     transform: none;
   }
+  /* Typing on a touch screen (a review, a question, the search): the bar
+     steps aside, so it never rides the on-screen keyboard over the field */
+  @media (pointer: coarse) {
+    body:has(:is(input:not([type="checkbox"], [type="radio"]), textarea):focus) .gf-buybar {
+      transform: translateY(110%);
+    }
+  }
 }
 
 /* A sheet open: the page under it stays still */
 html:has(.gf-sheet[open]) {
   overflow: hidden;
+}
+
+/* A short laptop (1366×768, 1440×800, a MacBook Air's 1470×820): the buy
+   column's seams close a step (24 → 16 px), so a product with two rows of
+   options still shows its "Sepete ekle" in the first screen. Unlayered,
+   over the column's own gap utility */
+@media (min-width: 64rem) and (max-height: 52rem) {
+  .gf-buy-stack {
+    row-gap: var(--space-md);
+  }
 }
