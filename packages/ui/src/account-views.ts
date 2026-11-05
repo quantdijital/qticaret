@@ -32,6 +32,11 @@ export interface AuthPageView {
    * 2026-11-05), for a shopper who holds a tracking number; none: no list.
    */
   carriers?: LinkView[]
+  /**
+   * register: the shop's published KVKK notice (adr/0046 Ek 2026-11-05,
+   * hesap), linked beside the form; none: no line.
+   */
+  privacyPath?: string | null
   /** The other forms' addresses (login, register, forgot). */
   links: Record<"login" | "register" | "forgot", string>
 }

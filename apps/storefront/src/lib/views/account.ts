@@ -42,6 +42,7 @@ export function authView(
     terms: options.terms ?? null,
     next: options.next ?? null,
     invite: options.invite ?? null,
+    ...(options.privacyPath === undefined ? {} : { privacyPath: options.privacyPath }),
     links: AUTH_LINKS,
   }
 }

@@ -34,7 +34,7 @@ describe("the theme's order lookup", () => {
     expect(html).toContain('href="https://kargotakip.araskargo.com.tr/"')
   })
 
-  it("keeps the other sign-in pages the base theme's", () => {
+  it("keeps the order fields off the other sign-in pages", () => {
     const html = renderPage(atolyeTheme, "AuthPage", { view: authView("login"), actions: auth })
     expect(html).toContain('name="password"')
     expect(html).not.toContain('name="display_id"')
