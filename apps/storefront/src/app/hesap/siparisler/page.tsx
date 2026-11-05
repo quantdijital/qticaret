@@ -4,7 +4,7 @@ import { requireCustomer } from "@/lib/account/guard"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { accountActions } from "@/lib/theme-actions"
-import { accountView, customerOrders } from "@/lib/views/account"
+import { accountView, customerOrders, startingCategories } from "@/lib/views/account"
 import { theme } from "@/theme"
 
 export const metadata: Metadata = robotsOnly("noindex,nofollow", t("account.orders"))
@@ -27,12 +27,14 @@ export default async function OrdersPage({
   if (page > pages) {
     notFound()
   }
+  const categories = count === 0 ? await startingCategories() : []
   return (
     <theme.AccountPage
       t={t}
       actions={accountActions}
       view={accountView("orders", customer, t, {
         orders,
+        categories,
         pagination: {
           page,
           pages,

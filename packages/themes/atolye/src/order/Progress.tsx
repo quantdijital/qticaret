@@ -2,8 +2,8 @@ import { Check } from "lucide-react"
 import type { OrderStepView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 
-/** What happens next, by the step the order stands at; none current: it arrived. */
-const NEXT: Record<OrderStepView["key"], string> = {
+/** What happens next, by the step the order stands at; none current: it arrived (`order.next_done`). */
+export const NEXT: Record<OrderStepView["key"], string> = {
   placed: "order.next_paid",
   paid: "order.next_paid",
   packed: "order.next_packed",

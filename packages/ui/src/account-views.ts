@@ -1,4 +1,12 @@
-import type { AddressStepView, ContractView, OptionView, PlaceOrderResult } from "./checkout-views"
+import type { CategoryCardView } from "./card-views"
+import type {
+  AddressStepView,
+  ContractView,
+  OptionView,
+  OrderStepView,
+  PlaceOrderResult,
+} from "./checkout-views"
+import type { ProductCardView } from "./product-views"
 import type { FormAction } from "./theme"
 import type { ImageView, LinkView, PaginationView } from "./views"
 
@@ -68,13 +76,21 @@ export interface AccountOrderView {
   total: string
   itemCount: number
   path: string
+  /** Up to three of its lines' photos, in order (adr/0046 Ek 2026-11-05, hesap); none: no pictures. */
+  images?: ImageView[]
+  /**
+   * Where it stands, the order page's steps read from its statuses alone
+   * (no parcel dates); null: cancelled; none: not known.
+   */
+  progress?: OrderStepView[] | null
 }
 
 export interface AccountPageView {
   section: AccountSection
   name: string
   email: string
-  nav: (LinkView & { current: boolean })[]
+  /** The sections' links; `section` names each (adr/0046 Ek 2026-11-05, hesap), so a theme may give it an icon. */
+  nav: (LinkView & { current: boolean; section?: AccountSection })[]
   notice: string | null
   orders: AccountOrderView[]
   /** The orders' pages (orders section). */
@@ -83,8 +99,22 @@ export interface AccountPageView {
   addresses: { id: string; name: string; lines: string[] }[]
   /** The empty form for one more address, its province list filled (addresses section). */
   newAddress?: AddressStepView | null
-  /** The customer's saved products (favorites section). */
-  favorites: { id: string; title: string; path: string; image: ImageView | null }[]
+  /**
+   * The customer's saved products (favorites section); `card`, the
+   * product's live card (price, stock), when it is on sale here.
+   */
+  favorites: {
+    id: string
+    title: string
+    path: string
+    image: ImageView | null
+    card?: ProductCardView | null
+  }[]
+  /**
+   * The shop's top categories as picture tiles, for a list with nothing in
+   * it yet (no orders, no favourites) to start from; none: no tiles.
+   */
+  categories?: CategoryCardView[]
   /** The customer's KVKK requests, in words (profile section). */
   privacyRequests: { kind: string; status: string; received: string; due: string }[]
   /** The invoice details (F8): who the invoice is for; the tax id shown masked. */

@@ -6,15 +6,20 @@ import type {
   AccountSection,
   AuthMode,
   AuthPageView,
+  CategoryCardView,
   ContractView,
+  ImageView,
   Translate,
 } from "@qticaret/ui"
 import type { StoreCustomer } from "@/lib/account/auth"
 import { isStoreApiError } from "@/lib/store-api/errors"
-import { pathsOf } from "@/lib/store-api/requests"
+import { listProducts, pathsOf } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
+import { categoryTiles } from "./category-tiles"
 import { displayPhone } from "./frame"
 import { MARKETING_TEXT_VERSION } from "./checkout"
+import { orderProgress } from "./order-progress"
+import { railCards } from "./section-data"
 
 const DATE = new Intl.DateTimeFormat("tr-TR", {
   day: "numeric",
@@ -74,8 +79,48 @@ interface StoreOrderRow {
   created_at: string
   status: string
   payment_status: string
+  fulfillment_status?: string
   total: number
-  items?: { quantity: number }[]
+  items?: { quantity: number; title?: string | null; thumbnail?: string | null }[]
+  payment_collections?: { payment_sessions?: { provider_id: string }[] }[]
+}
+
+/** An order line's photo as a picture, its title the words. */
+const thumbnailOf = (src: string, alt: string): ImageView => ({
+  src,
+  alt,
+  width: null,
+  height: null,
+  sources: { avif: null, webp: null },
+})
+
+/** Up to three of the order's lines' photos, in order (the list's small stack). */
+function orderImages(order: StoreOrderRow): ImageView[] {
+  return (order.items ?? [])
+    .flatMap((item) => (item.thumbnail ? [thumbnailOf(item.thumbnail, item.title ?? "")] : []))
+    .slice(0, 3)
+}
+
+/** The order page's steps from the row's statuses: no parcel dates in a list. */
+function rowProgress(order: StoreOrderRow, t: Translate): AccountOrderView["progress"] {
+  if (order.fulfillment_status === undefined) {
+    return undefined
+  }
+  const providers = (order.payment_collections ?? []).flatMap((collection) =>
+    (collection.payment_sessions ?? []).map((session) => session.provider_id)
+  )
+  return orderProgress(
+    {
+      status: order.status,
+      payment_status: order.payment_status,
+      fulfillment_status: order.fulfillment_status,
+      created_at: order.created_at,
+    },
+    [],
+    { cashOnDelivery: providers.includes("pp_cod_cod") },
+    t,
+    (date) => DATE.format(date)
+  )
 }
 
 function said(t: Translate, prefix: string, value: string): string {
@@ -93,7 +138,20 @@ export async function customerOrders(
   const { orders, count } = await storeGet<{ orders: StoreOrderRow[]; count: number }>(
     "/store/orders",
     {
-      fields: "id,display_id,created_at,status,+payment_status,total,items.quantity",
+      fields: [
+        "id",
+        "display_id",
+        "created_at",
+        "status",
+        "+payment_status",
+        "+fulfillment_status",
+        "total",
+        "items.quantity",
+        "items.title",
+        "items.thumbnail",
+        // Only the provider is read (cash on delivery has no payment step)
+        "*payment_collections.payment_sessions",
+      ].join(","),
       order: "-created_at",
       offset,
       limit,
@@ -101,15 +159,20 @@ export async function customerOrders(
   )
   return {
     count,
-    orders: orders.map((order) => ({
-      displayId: String(order.display_id),
-      placedAt: DATE.format(new Date(order.created_at)),
-      status: said(t, "order.status_", order.status),
-      paymentStatus: said(t, "order.payment_", order.payment_status),
-      total: formatLira(order.total),
-      itemCount: (order.items ?? []).reduce((sum, item) => sum + item.quantity, 0),
-      path: `/siparis/${encodeURIComponent(order.id)}`,
-    })),
+    orders: orders.map((order) => {
+      const progress = rowProgress(order, t)
+      return {
+        displayId: String(order.display_id),
+        placedAt: DATE.format(new Date(order.created_at)),
+        status: said(t, "order.status_", order.status),
+        paymentStatus: said(t, "order.payment_", order.payment_status),
+        total: formatLira(order.total),
+        itemCount: (order.items ?? []).reduce((sum, item) => sum + item.quantity, 0),
+        path: `/siparis/${encodeURIComponent(order.id)}`,
+        images: orderImages(order),
+        ...(progress === undefined ? {} : { progress }),
+      }
+    }),
   }
 }
 
@@ -148,6 +211,7 @@ export function accountView(
       | "privacyRequests"
       | "addresses"
       | "newAddress"
+      | "categories"
     >
   > & {
     marketing?: { email: boolean; sms: boolean }
@@ -162,6 +226,7 @@ export function accountView(
       label: t(each.key),
       path: each.path,
       current: each.section === section,
+      section: each.section,
     })),
     notice: rest.notice ?? null,
     orders: rest.orders ?? [],
@@ -171,6 +236,7 @@ export function accountView(
     privacyRequests: rest.privacyRequests ?? [],
     billing: rest.billing ?? null,
     pagination: rest.pagination ?? null,
+    ...(rest.categories ? { categories: rest.categories } : {}),
     profile: {
       first_name: customer.first_name ?? "",
       last_name: customer.last_name ?? "",
@@ -186,13 +252,34 @@ interface WishlistAnswer {
   items: { id: string; product: { id: string; title: string; thumbnail: string | null } }[]
 }
 
-/** The customer's saved products with their pages. */
+/** Null for a Store API refusal; anything else is a fault and is thrown. */
+const quiet = <T>(promise: Promise<T>): Promise<T | null> =>
+  promise.catch((error: unknown) => {
+    if (isStoreApiError(error)) {
+      return null
+    }
+    throw error
+  })
+
+/**
+ * The live cards of the saved products on sale here (price, stock, as
+ * every rail draws them), by product id; none when the catalogue does not
+ * answer: the list then shows names and photos only.
+ */
+async function favoriteCards(ids: readonly string[]) {
+  if (ids.length === 0) {
+    return new Map<string, NonNullable<AccountPageView["favorites"][number]["card"]>>()
+  }
+  const listed = await quiet(listProducts({ limit: ids.length, ids }))
+  const cards = await railCards(listed?.products ?? [])
+  return new Map(cards.map((card) => [card.id, card]))
+}
+
+/** The customer's saved products with their pages and, when on sale, their cards. */
 export async function customerFavorites(): Promise<AccountPageView["favorites"]> {
   const { items } = await storeGet<WishlistAnswer>("/store/customers/me/wishlist")
-  const paths = await pathsOf(
-    "product",
-    items.map((item) => item.product.id)
-  )
+  const ids = items.map((item) => item.product.id)
+  const [paths, cards] = await Promise.all([pathsOf("product", ids), favoriteCards(ids)])
   return items.flatMap((item) => {
     const path = paths[item.product.id]
     return path
@@ -202,18 +289,21 @@ export async function customerFavorites(): Promise<AccountPageView["favorites"]>
             title: item.product.title,
             path,
             image: item.product.thumbnail
-              ? {
-                  src: item.product.thumbnail,
-                  alt: item.product.title,
-                  width: null,
-                  height: null,
-                  sources: { avif: null, webp: null },
-                }
+              ? thumbnailOf(item.product.thumbnail, item.product.title)
               : null,
+            card: cards.get(item.product.id) ?? null,
           },
         ]
       : []
   })
+}
+
+/**
+ * The shop's top categories as picture tiles, for an empty list to start
+ * from; none when the catalogue does not answer.
+ */
+export async function startingCategories(): Promise<CategoryCardView[]> {
+  return (await quiet(categoryTiles([]))) ?? []
 }
 
 interface BillingAnswer {

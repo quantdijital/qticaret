@@ -44,10 +44,13 @@ export function AddressForm({
   step,
   actions,
   words,
+  withEmail = true,
 }: {
   step: AddressStepView
   actions: Pick<CheckoutActions, "saveAddress" | "districts" | "neighborhoods">
   words: AddressWords
+  /** The account's address book: the account's own e-mail stands in, the field is not asked. */
+  withEmail?: boolean
 }) {
   const [state, dispatch, pending] = useActionState(actions.saveAddress, INITIAL)
   const [local, setLocal] = useState<{ field: AddressField; error: string } | null>(null)
@@ -131,19 +134,21 @@ export function AddressForm({
     >
       <fieldset className="grid gap-4">
         <legend className={LEGEND}>{words.contact}</legend>
-        <TextField
-          id="email"
-          name="email"
-          type="email"
-          label={words.email}
-          hint={words.emailHint}
-          error={errorOf("email")}
-          autoComplete="email"
-          inputMode="email"
-          required
-          maxLength={254}
-          defaultValue={step.values.email}
-        />
+        {withEmail && (
+          <TextField
+            id="email"
+            name="email"
+            type="email"
+            label={words.email}
+            hint={words.emailHint}
+            error={errorOf("email")}
+            autoComplete="email"
+            inputMode="email"
+            required
+            maxLength={254}
+            defaultValue={step.values.email}
+          />
+        )}
         <TextField
           id="phone"
           name="phone"
