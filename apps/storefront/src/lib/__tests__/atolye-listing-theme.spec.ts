@@ -198,6 +198,18 @@ describe("the theme's search results", () => {
     expect(html).not.toContain("/kategori/cakilar/katlanir")
   })
 
+  it("stands the brands beside a short row of tiles from 1024 px, under a full one", () => {
+    const html = page({ title: "“caki” için sonuçlar", description: [], search: help })
+    expect(html).toMatch(/<section aria-labelledby="ilgili-kategoriler" class="[^"]*lg:col-span-1"/)
+    expect(html).toMatch(/<section aria-labelledby="ilgili-markalar" class="[^"]*lg:col-span-7"/)
+    const many = Array.from({ length: 7 }, (_, index) => ({
+      label: `Reyon ${String(index)}`,
+      path: `/kategori/reyon-${String(index)}`,
+    }))
+    const full = page({ description: [], search: { ...help, categories: many } })
+    expect(full).not.toMatch(/aria-labelledby="ilgili-markalar" class="[^"]*lg:col-span/)
+  })
+
   it("found nothing: the words, the phrases, the shop's categories as tiles and the catalogue", () => {
     const html = page({
       title: "“zzz” için sonuçlar",

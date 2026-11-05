@@ -1,5 +1,6 @@
 import { Fragment } from "react"
 import type { LinkView, ListingPageView, SearchHelpView, Translate } from "@qticaret/ui"
+import { cn } from "@qticaret/ui/lib/utils"
 import { TileGrid, TileRail } from "./CategoryTiles"
 
 /** "Bunu mu demek istediniz: çakı, bıçak": each phrase its own search. */
@@ -25,38 +26,61 @@ export function DidYouMean({ suggestions, t }: { suggestions: LinkView[]; t: Tra
   )
 }
 
+/** Brand pills beside the category tiles from 1024 px: the columns of eight the tiles leave. */
+const BRANDS_BESIDE: Record<number, string> = {
+  1: "lg:col-span-7",
+  2: "lg:col-span-6",
+  3: "lg:col-span-5",
+  4: "lg:col-span-4",
+  5: "lg:col-span-3",
+  6: "lg:col-span-2",
+}
+
 /**
  * A search's help above its results: "did you mean" phrases, the
  * categories most results are in as picture tiles (owner: categories are
  * never chips), and the brands that narrow the search (a filter, so
- * nofollow) as quiet pills.
+ * nofollow) as quiet pills, one row that scrolls sideways on a phone.
+ * From 1024 px the pills stand in the columns the tiles leave free (six
+ * tiles or fewer), so the first results come up into the first screen.
  */
 export function SearchHelp({ help, t }: { help: SearchHelpView; t: Translate }) {
+  const tiles = help.categories.length
+  const beside = help.brands.length > 0 && tiles > 0 ? BRANDS_BESIDE[tiles] : undefined
   return (
     <div className="flex flex-col gap-8">
       <DidYouMean suggestions={help.suggestions} t={t} />
-      <TileRail
-        id="ilgili-kategoriler"
-        title={t("search.related_categories")}
-        categories={help.categories}
-        visibleTitle
-      />
-      {help.brands.length > 0 && (
-        <section aria-labelledby="ilgili-markalar" className="flex flex-col gap-3">
-          <h2 id="ilgili-markalar" className="text-title">
-            {t("search.related_brands")}
-          </h2>
-          <ul className="flex flex-wrap gap-2">
-            {help.brands.map((brand) => (
-              <li key={brand.path}>
-                <a href={brand.path} rel="nofollow" className="gf-chip">
-                  {brand.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <div
+        className={
+          beside
+            ? "flex flex-col gap-8 empty:hidden lg:grid lg:grid-cols-8 lg:gap-x-(--gap-columns)"
+            : "flex flex-col gap-8 empty:hidden"
+        }
+      >
+        <TileRail
+          id="ilgili-kategoriler"
+          title={t("search.related_categories")}
+          categories={help.categories}
+          visibleTitle
+          span={beside ? tiles : undefined}
+        />
+        {help.brands.length > 0 && (
+          <section aria-labelledby="ilgili-markalar" className={cn("flex flex-col gap-3", beside)}>
+            <h2 id="ilgili-markalar" className="text-title">
+              {t("search.related_brands")}
+            </h2>
+            <ul className="gf-rail -mx-(--gutter) -my-1 flex gap-2 overflow-x-auto scroll-px-(--gutter) px-(--gutter) py-1 lg:mx-0 lg:flex-wrap lg:overflow-visible lg:px-0">
+              {help.brands.map((brand) => (
+                <li key={brand.path} className="shrink-0">
+                  <a href={brand.path} rel="nofollow" className="gf-chip">
+                    {brand.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
     </div>
   )
 }

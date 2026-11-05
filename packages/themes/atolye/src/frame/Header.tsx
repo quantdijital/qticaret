@@ -7,6 +7,7 @@ import { CartSheet } from "./CartSheet"
 import { cartSheetWords } from "./cart-sheet-words"
 import { MenuSheet } from "./MenuSheet"
 import { SearchBox } from "./SearchBox"
+import { PHONE_SEARCH } from "./SearchLink"
 import { Wordmark } from "./Wordmark"
 
 const LABELLED =
@@ -117,7 +118,7 @@ export function Header({
         </nav>
       </Container>
       <Container className="pb-2 lg:hidden">
-        <SearchBox {...search} id="arama-dar" />
+        <SearchBox {...search} id={PHONE_SEARCH} />
       </Container>
       {shop.categories.length > 0 && (
         <Container data-gf-aisle="" className="hidden lg:block">

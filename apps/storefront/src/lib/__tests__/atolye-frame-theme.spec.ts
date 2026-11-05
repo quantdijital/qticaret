@@ -170,4 +170,10 @@ describe("the theme's frame", () => {
     still.theme = { ...still.theme, header: { ...still.theme.header, sticky: false } }
     expect(renderFrame(atolyeTheme, still)).not.toContain("gf-head sticky")
   })
+
+  it("keeps the bottom bar's search a link to /arama before the script, and the field's example whole", () => {
+    const html = renderFrame(atolyeTheme, shopFixture())
+    expect(html).toMatch(/<a href="\/arama"[^>]*>(?:(?!<\/a>).)*Ara<\/a>/)
+    expect(html).toMatch(/id="arama-dar"[^>]*class="gf-field pr-14"/)
+  })
 })

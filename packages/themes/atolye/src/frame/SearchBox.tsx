@@ -1,7 +1,7 @@
 "use client"
 
 import { Search, X } from "lucide-react"
-import { useEffect, useId, useRef, useState } from "react"
+import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react"
 import type { ChangeEvent, KeyboardEvent } from "react"
 import { IDLE, createSuggester, moveActive } from "@qticaret/ui"
 import type { LinkView, SuggestState } from "@qticaret/ui"
@@ -24,6 +24,16 @@ function fitAboveKeyboard(panel: HTMLElement, view: VisualViewport): void {
   panel.style.setProperty("--gf-suggest-room", `${String(Math.max(160, Math.floor(room)))}px`)
 }
 
+/** The results page's own search, for the field to keep it ("" anywhere else). */
+function searched(): string {
+  return window.location.pathname === "/arama"
+    ? (new URLSearchParams(window.location.search).get("q") ?? "").trim().slice(0, 100)
+    : ""
+}
+
+/** The address does not change under a page; there is nothing to listen to. */
+const still = () => () => undefined
+
 /**
  * The header's search (wide screens, phones; told apart by `id`): a GET
  * form to `/arama`, a 48 px pill with its magnifier as the submit, so it
@@ -36,7 +46,9 @@ function fitAboveKeyboard(panel: HTMLElement, view: VisualViewport): void {
  * on (or searches), Escape closes the panel (then clears the field), a
  * press outside closes it; the focus stays in the field. The browser's
  * own clear glyph is hidden; an X button clears the words and gives the
- * field its focus back.
+ * field its focus back. On the results page the field keeps the search,
+ * ready to change; empty, it leaves its example whole (no room held for
+ * the clear button).
  */
 export function SearchBox({
   id,
@@ -58,7 +70,9 @@ export function SearchBox({
   const form = useRef<HTMLFormElement>(null)
   const field = useRef<HTMLInputElement>(null)
   const panel = useRef<HTMLDivElement>(null)
-  const [text, setText] = useState("")
+  const asked = useSyncExternalStore(still, searched, () => "")
+  const [typed, setText] = useState<string | null>(null)
+  const text = typed ?? asked
   const [state, setState] = useState<SuggestState>(IDLE)
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1)
@@ -212,7 +226,8 @@ export function SearchBox({
         autoComplete="off"
         enterKeyHint="search"
         maxLength={100}
-        className="gf-field pr-24"
+        defaultValue={asked}
+        className={cn("gf-field", text === "" ? "pr-14" : "pr-24")}
         onChange={change}
         onKeyDown={keyDown}
         onFocus={() => {

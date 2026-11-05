@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react"
 import type { BottomNavItem, BottomNavView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { MenuLink } from "./MenuLink"
+import { SearchLink } from "./SearchLink"
 
 export interface BottomBarWords {
   label: string
@@ -23,7 +24,8 @@ const ITEM =
  * counter's colour, five items with 12 px names; the page's own item sits
  * on a tinted pill in the ink, `aria-current`. Its height is held at the
  * page's foot from the first paint, so nothing moves and the footer's
- * last line stays clear.
+ * last line stays clear. "Kategoriler" opens the menu sheet and "Ara"
+ * the header's search field where the visitor is (links without script).
  */
 export function BottomBar({
   nav,
@@ -61,10 +63,10 @@ export function BottomBar({
             </MenuLink>
           </li>
           <li>
-            <a href="/arama" aria-current={current("search")} className={style("search")}>
+            <SearchLink current={nav.current === "search"} className={style("search")}>
               {icon(Search)}
               {words.search}
-            </a>
+            </SearchLink>
           </li>
           <li>
             <a
