@@ -39,7 +39,19 @@ export interface GoogleReviewRow {
   created_at: string
   replied: boolean
   hidden: boolean
+  /** Why it was taken off the storefront; null while shown. */
+  hidden_reason: HideReason | null
+  /** Who took it off (their name or address) and when. */
+  hidden_by: string | null
+  hidden_at: string | null
 }
+
+/**
+ * The only reasons a Google review may leave the storefront (adr/0058 Ek,
+ * the owner 2026-11-05): never its stars.
+ */
+export const HIDE_REASONS = ["personal_data", "abusive", "off_topic"] as const
+export type HideReason = (typeof HIDE_REASONS)[number]
 
 export const GOOGLE_REVIEW_PAGE_SIZE = 20
 
@@ -99,14 +111,16 @@ export function useGoogleReviewsAction() {
   })
 }
 
-/** A Google review taken off the storefront, or put back. */
+/** One Google review taken off the storefront with its reason, or put back. */
 export function useHideGoogleReview() {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: (input: { id: string; hidden: boolean }) =>
+    mutationFn: (
+      input: { id: string; hidden: true; reason: HideReason } | { id: string; hidden: false }
+    ) =>
       sdk.client.fetch(`/admin/google/reviews/items/${encodeURIComponent(input.id)}`, {
         method: "POST",
-        body: { hidden: input.hidden },
+        body: input.hidden ? { hidden: true, reason: input.reason } : { hidden: false },
       }),
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ["google-reviews", "items"] })

@@ -6595,16 +6595,27 @@
         "action": "Remove"
       },
       "listTitle": "Reviews",
-      "listDescription": "The reviews read from Google, newest first. Turn off a review you do not want on the storefront; Google's rating and count do not change.",
+      "listDescription": "The reviews read from Google, newest first. A review can be taken off the storefront only for personal data, abuse or being off topic; Google's rating and count do not change.",
       "empty": "This location has no reviews on Google.",
       "anonymous": "Google user",
       "noText": "A rating only.",
       "replied": "Replied",
-      "hiddenBadge": "Hidden on the storefront",
-      "shown": "On the storefront",
-      "showReview": "Show {{author}}'s review on the storefront",
-      "shownDone": "The review is shown on the storefront.",
-      "hiddenDone": "The review is hidden on the storefront."
+      "hiddenBadge": "Off the storefront",
+      "shownDone": "The review is back on the storefront.",
+      "hiddenDone": "The review is off the storefront.",
+      "hide": "Take off the storefront",
+      "hideFor": "Take {{author}}'s review off the storefront",
+      "hideTitle": "Take the review off the storefront?",
+      "hideDescription": "{{author}}'s review stays on Google; it is only left off the storefront. Choose the reason.",
+      "hideReason": "Reason",
+      "hideRule": "A negative review cannot be taken off for its rating; only for one of these three reasons.",
+      "reasons": {
+        "personal_data": "Contains personal data",
+        "abusive": "Insults, profanity or hate speech",
+        "off_topic": "Off topic or spam"
+      },
+      "hiddenWhy": "Reason: {{reason}}",
+      "restore": "Put back on the storefront"
     }
   },
   "staff": {

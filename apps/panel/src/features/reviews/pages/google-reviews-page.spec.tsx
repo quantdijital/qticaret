@@ -50,6 +50,9 @@ const REVIEWS = {
       created_at: "2026-11-02T10:00:00Z",
       replied: true,
       hidden: false,
+      hidden_reason: null,
+      hidden_by: null,
+      hidden_at: null,
     },
     {
       id: "grev_2",
@@ -59,6 +62,9 @@ const REVIEWS = {
       created_at: "2026-10-20T10:00:00Z",
       replied: false,
       hidden: true,
+      hidden_reason: "personal_data",
+      hidden_by: "Ayşe Yılmaz",
+      hidden_at: "2026-11-04T09:30:00Z",
     },
   ],
   count: 2,
@@ -156,7 +162,7 @@ describe("GoogleReviewsPage", () => {
     expect(toastMock.success).toHaveBeenCalledWith("Konum kaydedildi, yorumlar Google'dan okundu.")
   })
 
-  it("shows Google's figures and the last sync in a line, and the reviews with their switch", async () => {
+  it("shows Google's figures in a line, the reviews, and a hidden one's reason, who and when", async () => {
     answer(status())
     renderPage()
 
@@ -165,29 +171,64 @@ describe("GoogleReviewsPage", () => {
     expect(await screen.findByText("Şam çeliği av bıçağı aldım.")).toBeInTheDocument()
     expect(screen.getByText("Yanıtlandı")).toBeInTheDocument()
     expect(screen.getByText("Yalnızca puan verilmiş.")).toBeInTheDocument()
+    expect(screen.getByText("Vitrinden kaldırıldı")).toBeInTheDocument()
+    expect(screen.getByText(/Gerekçe: Kişisel veri içeriyor · Ayşe Yılmaz/)).toBeInTheDocument()
     expect(
-      screen.getByRole("switch", { name: "Mehmet Kaya yorumu vitrinde görünsün" })
-    ).toBeChecked()
-    expect(
-      screen.getByRole("switch", { name: "Google kullanıcısı yorumu vitrinde görünsün" })
-    ).not.toBeChecked()
+      screen.getByRole("button", { name: "Mehmet Kaya yorumunu vitrinden kaldır" })
+    ).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Vitrine geri al" })).toBeInTheDocument()
+    // No switch to flip, no way to pick many
+    expect(screen.queryByRole("switch")).not.toBeInTheDocument()
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument()
   })
 
-  it("takes a review off the storefront with its switch", async () => {
+  it("takes a review off only after one of the three reasons is chosen", async () => {
     answer(status())
     renderPage()
 
     await userEvent.click(
-      await screen.findByRole("switch", { name: "Mehmet Kaya yorumu vitrinde görünsün" })
+      await screen.findByRole("button", { name: "Mehmet Kaya yorumunu vitrinden kaldır" })
     )
+    const dialog = await screen.findByRole("dialog")
+    const reasons = within(dialog).getAllByRole("radio")
+    const confirm = within(dialog).getByRole("button", { name: "Vitrinden kaldır" })
+
+    expect(reasons).toHaveLength(3)
+    expect(within(dialog).getByText("Kişisel veri içeriyor")).toBeInTheDocument()
+    expect(within(dialog).getByText("Hakaret, küfür ya da nefret söylemi")).toBeInTheDocument()
+    expect(within(dialog).getByText("Konu dışı ya da spam")).toBeInTheDocument()
+    expect(
+      within(dialog).getByText(
+        "Olumsuz yorumlar puanı nedeniyle kaldırılamaz; yalnızca bu üç gerekçeyle kaldırabilirsiniz."
+      )
+    ).toBeInTheDocument()
+    expect(confirm).toBeDisabled()
+
+    await userEvent.click(within(dialog).getByText("Hakaret, küfür ya da nefret söylemi"))
+    await userEvent.click(confirm)
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/google/reviews/items/grev_1", {
         method: "POST",
-        body: { hidden: true },
+        body: { hidden: true, reason: "abusive" },
       })
     })
-    expect(toastMock.success).toHaveBeenCalledWith("Yorum vitrinde gizlendi.")
+    expect(toastMock.success).toHaveBeenCalledWith("Yorum vitrinden kaldırıldı.")
+  })
+
+  it("puts a hidden review back on the storefront without a reason", async () => {
+    answer(status())
+    renderPage()
+
+    await userEvent.click(await screen.findByRole("button", { name: "Vitrine geri al" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/google/reviews/items/grev_2", {
+        method: "POST",
+        body: { hidden: false },
+      })
+    })
+    expect(toastMock.success).toHaveBeenCalledWith("Yorum vitrine geri alındı.")
   })
 
   it("asks to connect again when Google no longer takes the connection", async () => {

@@ -6595,16 +6595,27 @@
         "action": "Kaldır"
       },
       "listTitle": "Yorumlar",
-      "listDescription": "Google'dan okunan yorumlar, en yeniden. Vitrinde göstermek istemediğiniz yorumu kapatın; Google'daki puan ve yorum sayısı değişmez.",
+      "listDescription": "Google'dan okunan yorumlar, en yeniden. Bir yorumu yalnızca kişisel veri, hakaret ya da konu dışı olduğu için vitrinden kaldırabilirsiniz; Google'daki puan ve yorum sayısı değişmez.",
       "empty": "Bu konumun Google'da yorumu yok.",
       "anonymous": "Google kullanıcısı",
       "noText": "Yalnızca puan verilmiş.",
       "replied": "Yanıtlandı",
-      "hiddenBadge": "Vitrinde gizli",
-      "shown": "Vitrinde",
-      "showReview": "{{author}} yorumu vitrinde görünsün",
-      "shownDone": "Yorum vitrinde gösteriliyor.",
-      "hiddenDone": "Yorum vitrinde gizlendi."
+      "hiddenBadge": "Vitrinden kaldırıldı",
+      "shownDone": "Yorum vitrine geri alındı.",
+      "hiddenDone": "Yorum vitrinden kaldırıldı.",
+      "hide": "Vitrinden kaldır",
+      "hideFor": "{{author}} yorumunu vitrinden kaldır",
+      "hideTitle": "Yorum vitrinden kaldırılsın mı?",
+      "hideDescription": "{{author}} yorumu Google'da kalır; yalnızca vitrinde görünmez. Gerekçeyi seçin.",
+      "hideReason": "Kaldırma gerekçesi",
+      "hideRule": "Olumsuz yorumlar puanı nedeniyle kaldırılamaz; yalnızca bu üç gerekçeyle kaldırabilirsiniz.",
+      "reasons": {
+        "personal_data": "Kişisel veri içeriyor",
+        "abusive": "Hakaret, küfür ya da nefret söylemi",
+        "off_topic": "Konu dışı ya da spam"
+      },
+      "hiddenWhy": "Gerekçe: {{reason}}",
+      "restore": "Vitrine geri al"
     }
   },
   "staff": {
