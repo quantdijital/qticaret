@@ -16,6 +16,11 @@ interface Frame {
     hero: unknown
   }
   free_shipping_threshold: number | null
+  delivery?: {
+    handling_days: { min: number; max: number }
+    transit_days: { min: number; max: number }
+    same_day_cutoff_hour: number | null
+  }
 }
 
 /** F18 D3 (docs/19 §4): the shop writes the storefront's frame; the storefront reads it. */
@@ -139,6 +144,47 @@ medusaIntegrationTestRunner({
       })
       // The low-stock threshold stays inside: the card facts apply it
       expect(after.data.storefront).not.toHaveProperty("low_stock_threshold")
+    })
+
+    it("says when an order leaves and arrives and the same-day hour, as the shop set them (adr/0046 Ek 2026-11-06)", async () => {
+      const container = getContainer()
+      const owner = await createAdminUser(http, container)
+      const store = await createStorefront(container)
+      const frame = () => settle(http.get<Frame>("/store/storefront", { headers: store.headers }))
+      const save = (section: string, body: unknown) =>
+        settle(http.post(`/admin/platform-settings/${section}`, body, { headers: owner.headers }))
+
+      const before = await frame()
+      const days = await save("shipping", {
+        handling_days_min: 0,
+        handling_days_max: 1,
+        transit_days_min: 2,
+        transit_days_max: 4,
+      })
+      const hour = await save("marketing", { feed_same_day_cutoff_hour: 15 })
+      const after = await frame()
+      // Settings outlive the database reset between tests (their cache)
+      await save("shipping", {
+        handling_days_min: 1,
+        handling_days_max: 2,
+        transit_days_min: 1,
+        transit_days_max: 3,
+      })
+      await save("marketing", { feed_same_day_cutoff_hour: null })
+
+      // A shop that set nothing: the platform's days, the products' shipping details say the same
+      expect(before.data.delivery).toEqual({
+        handling_days: { min: 1, max: 2 },
+        transit_days: { min: 1, max: 3 },
+        same_day_cutoff_hour: null,
+      })
+      expect(days.status).toBe(200)
+      expect(hour.status).toBe(200)
+      expect(after.data.delivery).toEqual({
+        handling_days: { min: 0, max: 1 },
+        transit_days: { min: 2, max: 4 },
+        same_day_cutoff_hour: 15,
+      })
     })
 
     it("says whether the shop sells product add-ons, so the storefront skips their calls when off", async () => {

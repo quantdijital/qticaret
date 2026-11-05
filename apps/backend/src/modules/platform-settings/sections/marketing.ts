@@ -10,7 +10,10 @@ export interface MarketingSettings {
   abandoned_cart_delay_minutes: number
   /** Categories (and those under them) each feed leaves out (F10.8). */
   feed_exclusions: Record<FeedTarget, string[]>
-  /** An order placed before this hour leaves the same day, as Akakçe shows it; null: not promised. */
+  /**
+   * An order placed before this hour leaves the same day, as Akakçe and the
+   * product page's shipping card (adr/0046 Ek 2026-11-06) show it; null: not promised.
+   */
   feed_same_day_cutoff_hour: number | null
   /** One bulk message (adr/0050) a recipient in 24 hours at most. */
   campaign_frequency_cap: boolean

@@ -2,7 +2,9 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import { GIFT_CARDS, PRODUCT_ADDONS } from "../../../modules/platform-settings/features"
 import type {
+  MarketingSettings,
   PromotionSettings,
+  ShippingSettings,
   StorefrontSettings,
   ThemeSettings,
 } from "../../../modules/platform-settings/sections"
@@ -10,6 +12,7 @@ import type PlatformSettingsModuleService from "../../../modules/platform-settin
 import { fillShopText } from "../../../lib/shop/tokens"
 import type { ShopInfoValues } from "../../../lib/shop/tokens"
 import { shopInfoValues } from "../../../workflows/shop/info-values"
+import { storefrontDelivery } from "../../../workflows/storefront/delivery"
 import { shopMarks } from "../../../workflows/storefront/shop-marks"
 import type { ShopMarks } from "../../../workflows/storefront/shop-marks"
 
@@ -21,7 +24,8 @@ import type { ShopMarks } from "../../../workflows/storefront/shop-marks"
  * cart's "this much more" line; and the flags of what the storefront offers
  * only while on (gift card codes, F4.8; product add-ons, adr/0052); the
  * footer's payment and carrier marks (adr/0046 Ek 2026-11-04), derived from
- * what the shop has set up. The shop's contact and legal details come
+ * what the shop has set up; when an order leaves and arrives and the
+ * same-day dispatch hour (adr/0046 Ek 2026-11-06). The shop's contact and legal details come
  * from `/store/legal-identity`. A `{belirteç}` in the shop's lines stands for
  * its details as they are now (adr/0048).
  */
@@ -72,29 +76,36 @@ const themeOf = (theme: ThemeSettings, storefront: StorefrontSettings): ThemeSet
 
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const settings = req.scope.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  const [storefront, promotions, theme, giftCards, addons, values, marks] = (await Promise.all([
-    settings.getSection("storefront"),
-    settings.getSection("promotions"),
-    settings.getSection("theme"),
-    settings.isFeatureEnabled(GIFT_CARDS),
-    settings.isFeatureEnabled(PRODUCT_ADDONS),
-    shopInfoValues(req.scope),
-    shopMarks(req.scope),
-  ])) as unknown as [
-    StorefrontSettings,
-    PromotionSettings,
-    ThemeSettings,
-    boolean,
-    boolean,
-    ShopInfoValues,
-    ShopMarks,
-  ]
+  const [storefront, promotions, theme, shipping, marketing, giftCards, addons, values, marks] =
+    (await Promise.all([
+      settings.getSection("storefront"),
+      settings.getSection("promotions"),
+      settings.getSection("theme"),
+      settings.getSection("shipping"),
+      settings.getSection("marketing"),
+      settings.isFeatureEnabled(GIFT_CARDS),
+      settings.isFeatureEnabled(PRODUCT_ADDONS),
+      shopInfoValues(req.scope),
+      shopMarks(req.scope),
+    ])) as unknown as [
+      StorefrontSettings,
+      PromotionSettings,
+      ThemeSettings,
+      ShippingSettings,
+      MarketingSettings,
+      boolean,
+      boolean,
+      ShopInfoValues,
+      ShopMarks,
+    ]
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=3600")
   res.vary("x-publishable-api-key")
   res.json({
     storefront: filled(storefront, values),
     theme: themeOf(theme, storefront),
     free_shipping_threshold: promotions.free_shipping_threshold,
+    // The product page's "Kargo ve Teslimat" card says these (adr/0046 Ek 2026-11-06)
+    delivery: storefrontDelivery(shipping, marketing),
     // What the storefront offers only while the shop has it on (its routes answer 404 otherwise)
     features: { gift_cards: giftCards, product_addons: addons },
     // The footer's ways to pay and carriers, as the shop has them set up (adr/0046 Ek 2026-11-04)
