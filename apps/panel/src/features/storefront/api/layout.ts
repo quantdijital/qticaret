@@ -35,6 +35,9 @@ export const LAYOUT_LIMITS = {
   reviews: 12,
 } as const
 
+/** A best-seller rail's window in days (adr/0049 Ek 2026-11-05): a week to a year, 90 by default. */
+export const BEST_SELLER_DAYS = { min: 7, max: 365, default: 90 } as const
+
 /** A button's or a slide's target: the menus' link (a record, a legal text, a page or an address). */
 export type LayoutLink = LinkInput
 export type { ProductSource }

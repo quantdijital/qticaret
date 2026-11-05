@@ -87,36 +87,50 @@ export function TextField({
   )
 }
 
-/** A whole number within bounds; a value out of them is pulled back in. */
+/**
+ * A whole number within bounds; a value out of them is pulled back in:
+ * past the most at once, under the least (above 1) once the field is
+ * left, so "30" can be typed on the way past "3" (`error` says why meanwhile).
+ */
 export function CountField({
   id,
   label,
   value,
   onChange,
   max,
+  min = 1,
   hint,
+  error,
 }: {
   id: string
   label: string
   value: number
   onChange: (value: number) => void
   max: number
+  min?: number
   hint?: string
+  error?: string | undefined
 }) {
   return (
-    <Field label={label} htmlFor={id} hint={hint}>
+    <Field label={label} htmlFor={id} hint={hint} error={error}>
       <NumberField
         plain
         id={id}
-        min={1}
+        min={min}
         max={max}
         step={1}
         value={value}
         className="w-40"
+        aria-invalid={Boolean(error)}
         onChange={(event) => {
           const next = Math.trunc(Number(event.target.value))
           if (Number.isFinite(next) && event.target.value !== "") {
             onChange(Math.max(1, Math.min(max, next)))
+          }
+        }}
+        onBlur={() => {
+          if (value < min) {
+            onChange(min)
           }
         }}
       />

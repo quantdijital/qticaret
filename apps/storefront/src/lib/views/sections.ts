@@ -113,15 +113,21 @@ async function sectionView(
         ? { id, type: "categories", title: section.title ?? t("home.shop_categories"), categories }
         : null
     }
-    case "products":
+    case "products": {
+      const products = await railCards(await railProducts(section))
+      // Nothing on sale now: no sale rail, rather than an empty one
+      if (products.length === 0 && section.source.kind === "on_sale") {
+        return null
+      }
       return {
         id,
         type: "products",
         title: section.title ?? t("home.products"),
-        products: await railCards(await railProducts(section.source, section.limit)),
+        products,
         more: layoutLink(section.more, t),
         empty: t("home.no_products"),
       }
+    }
     case "related_products":
       return relatedView(section, t, context)
     case "brands": {

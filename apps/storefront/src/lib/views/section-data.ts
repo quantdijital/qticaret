@@ -1,5 +1,10 @@
 import "server-only"
-import type { ProductSource, RelatedSource, StoreProduct, StoreReviewPhoto } from "@qticaret/types"
+import type {
+  RelatedSource,
+  StoreLayoutSection,
+  StoreProduct,
+  StoreReviewPhoto,
+} from "@qticaret/types"
 import type {
   CategoryCardView,
   CustomerPhotoView,
@@ -39,9 +44,26 @@ async function productsInOrder(ids: readonly string[]): Promise<StoreProduct[]> 
   return ids.flatMap((id) => byId.get(id) ?? [])
 }
 
-/** A rail's products from the source the shop chose; a hand-picked rail keeps its order. */
-export async function railProducts(source: ProductSource, limit: number): Promise<StoreProduct[]> {
+type RailSection = Pick<
+  Extract<StoreLayoutSection, { type: "products" }>,
+  "source" | "limit" | "product_ids"
+>
+
+/**
+ * A rail's products from the source the shop chose; a hand-picked rail
+ * keeps its order. A sale or best-seller rail's products were picked by
+ * the backend (adr/0049 Ek 2026-11-05) and keep its order; one no longer
+ * live here is skipped.
+ */
+export async function railProducts({
+  source,
+  limit,
+  product_ids,
+}: RailSection): Promise<StoreProduct[]> {
   switch (source.kind) {
+    case "on_sale":
+    case "best_sellers":
+      return productsInOrder((product_ids ?? []).slice(0, limit))
     case "newest":
       return (await listProducts({ limit, order: "-created_at" })).products
     case "category":

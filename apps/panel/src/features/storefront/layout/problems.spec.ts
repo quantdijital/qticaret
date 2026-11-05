@@ -44,6 +44,14 @@ describe("sectionProblems", () => {
     expect(sectionProblems({ ...products, source: { kind: "category", category_id: "" } })).toEqual(
       { source: "categoryRequired" }
     )
+    // A best-seller window of a week to a year; a sale list needs nothing chosen
+    for (const days of [7, 90, 365]) {
+      expect(sectionProblems({ ...products, source: { kind: "best_sellers", days } })).toEqual({})
+    }
+    expect(sectionProblems({ ...products, source: { kind: "best_sellers", days: 6 } })).toEqual({
+      days: "daysRange",
+    })
+    expect(sectionProblems({ ...products, source: { kind: "on_sale" } })).toEqual({})
     expect(
       sectionProblems({
         ...products,

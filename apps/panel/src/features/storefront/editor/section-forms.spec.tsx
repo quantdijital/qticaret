@@ -134,6 +134,46 @@ describe("the section forms", () => {
     }
   )
 
+  it(
+    "picks the best sellers over a window of days, then what is on sale, naming the list after each",
+    HEAVY,
+    async () => {
+      await open("Ürün listesi")
+      const title = screen.getByRole("textbox", { name: "Başlık" })
+
+      await user.click(screen.getByRole("radio", { name: "Çok satanlar" }))
+      expect(title).toHaveValue("Çok satanlar")
+      const days = screen.getByRole("spinbutton", { name: "Kaç günün satışı" })
+      expect(days).toHaveValue(90)
+      expect(screen.getByText(/en yeni ürünlerle tamamlanır/)).toBeVisible()
+
+      // On the way to "30": too few days hold the save until it is
+      fireEvent.change(days, { target: { value: "3" } })
+      expect(screen.getByRole("alert")).toHaveTextContent("En az 7, en çok 365 gün yazın.")
+      fireEvent.change(days, { target: { value: "30" } })
+      expect(screen.queryByRole("alert")).toBeNull()
+      await saved((doc) => {
+        expect(doc.home[1]).toMatchObject({
+          title: "Çok satanlar",
+          source: { kind: "best_sellers", days: 30 },
+        })
+      })
+      // Left too few, the field takes the least
+      fireEvent.change(days, { target: { value: "2" } })
+      fireEvent.blur(days)
+      expect(days).toHaveValue(7)
+
+      // The list's name follows its source while the shop has not written its own
+      await user.click(screen.getByRole("radio", { name: "İndirimde" }))
+      expect(title).toHaveValue("İndirimde")
+      expect(screen.queryByRole("spinbutton", { name: "Kaç günün satışı" })).toBeNull()
+      expect(screen.getByText(/indirimi en büyük olan önce/)).toBeVisible()
+      await saved((doc) => {
+        expect(doc.home[1]).toMatchObject({ title: "İndirimde", source: { kind: "on_sale" } })
+      })
+    }
+  )
+
   it("schedules a section in local time, refusing an end before its start", HEAVY, async () => {
     await open("Blog yazıları")
     const starts = screen.getByLabelText("Başlangıç")

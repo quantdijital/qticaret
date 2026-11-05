@@ -1,5 +1,5 @@
 import type { AnySection, LayoutDocument, LayoutLink } from "@/features/storefront/api/layout"
-import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import { BEST_SELLER_DAYS, LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
 import { allSections } from "./sections"
@@ -22,6 +22,7 @@ export type Problem =
   | "productRequired"
   | "categoryRequired"
   | "collectionRequired"
+  | "daysRange"
   | "scheduleOrder"
 
 /** A section's problems by field (`heading`, `lines.0`, `slides.1.text`, `schedule`). */
@@ -104,6 +105,13 @@ function fieldsOf(section: AnySection): Found[] {
               : source.kind === "collection" && source.collection_id === ""
                 ? "collectionRequired"
                 : null,
+        ],
+        [
+          "days",
+          source.kind === "best_sellers" &&
+          (source.days < BEST_SELLER_DAYS.min || source.days > BEST_SELLER_DAYS.max)
+            ? "daysRange"
+            : null,
         ],
         ["more", linkProblem(section.more)],
       ]

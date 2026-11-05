@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { ProductSource, ProductsSection } from "@/features/storefront/api/layout"
-import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import { BEST_SELLER_DAYS, LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import { CountField, F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
@@ -12,13 +12,26 @@ import { RecordField, RecordListField } from "./record-fields"
 const P = "storefront.editor.products"
 
 type SourceKind = ProductSource["kind"]
-const SOURCE_KINDS: readonly SourceKind[] = ["newest", "category", "collection", "manual"]
+const SOURCE_KINDS: readonly SourceKind[] = [
+  "newest",
+  "best_sellers",
+  "on_sale",
+  "category",
+  "collection",
+  "manual",
+]
+
+// The sources whose name is the rail's title until the shop writes its own
+const NAMED: readonly SourceKind[] = ["best_sellers", "on_sale"]
 
 /** A source of another kind, nothing chosen in it yet. */
 function sourceOf(kind: SourceKind): ProductSource {
   switch (kind) {
     case "newest":
+    case "on_sale":
       return { kind }
+    case "best_sellers":
+      return { kind, days: BEST_SELLER_DAYS.default }
     case "category":
       return { kind, category_id: "" }
     case "collection":
@@ -28,7 +41,11 @@ function sourceOf(kind: SourceKind): ProductSource {
   }
 }
 
-/** A rail of products: the newest, a category's, a collection's or the shop's own picks. */
+/**
+ * A rail of products: the newest, the best sellers, those on sale, a
+ * category's, a collection's or the shop's own picks. The best sellers
+ * and those on sale are picked by the server (adr/0049 Ek 2026-11-05).
+ */
 export function ProductsForm({ section, problems, onChange }: SectionFormProps<ProductsSection>) {
   const { t } = useTranslation()
   const problem = useProblemText()
@@ -37,6 +54,12 @@ export function ProductsForm({ section, problems, onChange }: SectionFormProps<P
   }
   const { source } = section
   const sourceError = problem(problems["source"])
+  const nameOf = (kind: SourceKind) => (NAMED.includes(kind) ? t(`${P}.sources.${kind}`) : null)
+  /** Another source; an empty title, or the last source's name, becomes the new one's name. */
+  const switchTo = (kind: SourceKind) => {
+    const named = section.title === null || section.title === nameOf(source.kind)
+    set({ source: sourceOf(kind), ...(named ? { title: nameOf(kind) } : {}) })
+  }
   return (
     <div className="flex flex-col gap-5">
       <TextField
@@ -58,7 +81,7 @@ export function ProductsForm({ section, problems, onChange }: SectionFormProps<P
           className="gap-2"
           onValueChange={(kind) => {
             if (kind !== source.kind) {
-              set({ source: sourceOf(kind as SourceKind) })
+              switchTo(kind as SourceKind)
             }
           }}
         >
@@ -90,6 +113,21 @@ export function ProductsForm({ section, problems, onChange }: SectionFormProps<P
             set({ source: { kind: "collection", collection_id: id } })
           }}
         />
+      ) : source.kind === "best_sellers" ? (
+        <CountField
+          id="products-days"
+          label={t(`${P}.days`)}
+          hint={t(`${P}.daysHint`, { min: BEST_SELLER_DAYS.min, max: BEST_SELLER_DAYS.max })}
+          value={source.days}
+          min={BEST_SELLER_DAYS.min}
+          max={BEST_SELLER_DAYS.max}
+          error={problem(problems["days"], BEST_SELLER_DAYS.max)}
+          onChange={(days) => {
+            set({ source: { kind: "best_sellers", days } }, "days")
+          }}
+        />
+      ) : source.kind === "on_sale" ? (
+        <p className="-mt-3 text-xs text-muted-foreground">{t(`${P}.onSaleHint`)}</p>
       ) : source.kind === "manual" ? (
         <RecordListField
           kind="product"

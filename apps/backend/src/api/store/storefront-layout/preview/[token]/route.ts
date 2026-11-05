@@ -1,4 +1,4 @@
-import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/http"
 import { MedusaError } from "@medusajs/framework/utils"
 import { layoutPreview } from "../../../../../lib/content/preview-token"
 import { layoutDocument } from "../../../../../lib/storefront/layout"
@@ -11,7 +11,7 @@ import { storeLayout } from "../../../../../workflows/storefront/layout-read"
  * storefront would show it, for a signed link made for the draft as it is
  * saved now. Anything else is a 404, as if there were no such page.
  */
-export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
+export async function GET(req: MedusaStoreRequest, res: MedusaResponse): Promise<void> {
   // A draft is no one's to keep, whatever the answer
   res.setHeader("Cache-Control", "private, no-store")
   const parts = layoutPreview.parts(req.params["token"] ?? "")
@@ -24,5 +24,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "storefront_layout.preview_unknown")
   }
   // Through today's schema: a draft saved before a group existed shows it empty
-  res.json({ layout: await storeLayout(req.scope, layoutDocument.parse(row.draft)) })
+  const channels = req.publishable_key_context.sales_channel_ids
+  res.json({ layout: await storeLayout(req.scope, layoutDocument.parse(row.draft), channels) })
 }

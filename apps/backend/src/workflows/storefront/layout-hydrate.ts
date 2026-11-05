@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { renderDoc } from "../../lib/content"
 import type { BodySection } from "../../lib/storefront/layout"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
+import type { RailPick } from "../../lib/storefront/rails"
 import { fillShopDoc, fillShopText } from "../../lib/shop/tokens"
 import type { ShopInfoValues } from "../../lib/shop/tokens"
 import { cardTargets } from "../../api/store/content/cards"
@@ -33,6 +34,8 @@ export interface HydrateContext {
   links: Map<MenuLinkInput, StoreLayoutLink | null>
   images: Map<string, StoreLayoutImage>
   container: MedusaContainer
+  /** The sale and best-seller rails' products, picked for the shopper's channels, by section id. */
+  picks?: ReadonlyMap<string, RailPick>
 }
 
 export const fill = (text: string | null, values: ShopInfoValues) =>
@@ -79,6 +82,8 @@ export async function hydrateSection(section: BodySection, at: HydrateContext): 
         source: section.source,
         limit: section.limit,
         more: link(section.more),
+        // A sale or best-seller rail: its products in order, and whether the newest made it up
+        ...at.picks?.get(id),
       }
     case "related_products":
       return { id, type, title: section.title, source: section.source, limit: section.limit }

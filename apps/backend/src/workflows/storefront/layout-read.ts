@@ -13,6 +13,7 @@ import { fill, hydrateSection } from "./layout-hydrate"
 import type { HydrateContext } from "./layout-hydrate"
 import { liveRecords } from "./layout-live"
 import { resolveLinks } from "./menu-links"
+import { railPicks } from "./rails"
 
 /** The addresses of the images shown with their sizes: openings and slides. */
 const imageUrls = (section: BodySection): string[] =>
@@ -29,11 +30,14 @@ const imageUrls = (section: BodySection): string[] =>
  * their sizes, rich text as the backend's HTML. The home, product and
  * category pages' sections alike; a category page's keep their place.
  * Products, categories, brands, posts and reviews are the storefront's to
- * fetch (prices and stock on every request).
+ * fetch (prices and stock on every request); a sale or best-seller rail's
+ * products are picked here, for the shopper's sales channels (`channels`,
+ * the publishable key's; null: any), and named by id.
  */
 export async function storeLayout(
   container: MedusaContainer,
   doc: LayoutDocument,
+  channels: readonly string[] | null = null,
   now = new Date()
 ) {
   const showing = <T extends Parameters<typeof isShowing>[0]>(group: readonly T[]) =>
@@ -56,7 +60,7 @@ export async function storeLayout(
   const body: BodySection[] = [...home, ...product, ...category]
   const links = body.flatMap(linksOf)
   const urls = body.flatMap(imageUrls)
-  const [values, resolved, assets] = await Promise.all([
+  const [values, resolved, assets, picks] = await Promise.all([
     shopInfoValues(container),
     resolveLinks(
       container,
@@ -78,10 +82,12 @@ export async function storeLayout(
             { select: ["url", "alt", "width", "height", "derivatives"] }
           )
       : Promise.resolve([]),
+    railPicks(container, home, channels),
   ])
   const at: HydrateContext = {
     values,
     container,
+    picks,
     images: new Map(
       assets.map((asset) => [
         asset.url,
@@ -137,17 +143,25 @@ export async function storeLayout(
 type Shown = Awaited<ReturnType<typeof storeLayout>>
 
 // The live design, hydrated once a minute per process at most (security review
-// 2026-11-02, L2): the public endpoint's cost is not the visitor's to choose
-const shownCache = createTtlCache<Shown>({ ttlMs: 60_000, maxEntries: 4 })
+// 2026-11-02, L2): the public endpoint's cost is not the visitor's to choose. One
+// per publishable key's sales channels (the shop's keys, not the visitor's words)
+const shownCache = createTtlCache<Shown>({ ttlMs: 60_000, maxEntries: 8 })
 
-/** The published design (else the default) as shown now; a new publication is seen at once. */
-export async function publishedLayout(container: MedusaContainer): Promise<Shown> {
+/**
+ * The published design (else the default) as shown now in these sales
+ * channels (the rails' picks are theirs); a new publication is seen at once.
+ */
+export async function publishedLayout(
+  container: MedusaContainer,
+  channels: readonly string[] | null = null
+): Promise<Shown> {
   const row = await layoutRow(container)
-  const key = row?.published ? `revision:${String(row.revision)}` : "default"
+  const doc = row?.published ? `revision:${String(row.revision)}` : "default"
+  const key = `${doc}|${channels ? [...new Set(channels)].sort().join(",") : "*"}`
   return shownCache(key, async () => {
-    const doc = row?.published
+    const shown = row?.published
       ? layoutDocument.parse(row.published)
       : await defaultLayout(container)
-    return storeLayout(container, doc)
+    return storeLayout(container, shown, channels)
   })
 }

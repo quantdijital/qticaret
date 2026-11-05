@@ -171,3 +171,31 @@ Kararın 6.3 adımı ("diğer sayfa şablonlarının bölümleri"), backend tara
 - Kayıtta ürün var mı denetlenir (`storefront_layout.target_unknown`); yayında olmayan ürünün bölümü vitrine gitmez (L8: taslak ürünün kimliği backend'den çıkmaz). Görseller, öne çıkan özellikler, fiyat ve özellik tablosu ürünün kendisinden, vitrinde okunur (adr/0046 Ek 2026-11-05).
 - Panel: Bölüm ekle > "Öne çıkan ürün"; ürün seçilene kadar kayıt bekler ("Bir ürün seçin.").
 - Kanıt: `lib/storefront/__tests__/layout.unit.spec.ts`, `integration-tests/http/storefront-layout.spec.ts`, panelde `section-forms.spec.tsx`, `problems.spec.ts`.
+
+## Ek (2026-11-05): çok satanlar ve indirimde rafları (otonom, gözden geçir)
+
+İstek: ana sayfanın sekmeli ürün alanında "Çok Satanlar / Yeni Gelenler / İndirimde". Sekmeleri tema çizer (yan yana `products` bölümleri); backend iki kaynak ekler.
+
+- **İki kaynak daha.** Ana sayfanın `products` bölümünde (`lib/storefront/layout-sections.ts`). Ürün sayfasının ilgili ürünleri bunları almaz.
+  - `on_sale`: `/kampanyalar`'ın listelediği ürünlerin tamamı, yani arama dizininde `on_sale` olanlar (fiyat listesi ya da herkese uygulanan otomatik kampanya; adr/0023 Ek 2026-11-05, adr/0056).
+    - Sıra: en büyük indirim önce. İndirim, ürünün herhangi bir varyantında üstü çizili fiyata göre oran; kartın gösterdiği `price-display`'den. Eşitlerde en yeni ürün önce.
+    - Tartılan, kampanyadaki en yeni 96 ürün (`SALE_POOL`). Daha büyük kampanyada raf yine kampanyalı ürünlerden oluşur; yalnız en eskiler tartılmaz.
+  - `best_sellers` (`days`: 7–365, varsayılan 90): son `days` günde satılan adet. Tek SQL toplamı, Medusa'nın sipariş tablolarında (`workflows/storefront/best-sellers.ts`):
+    - sipariş taslak, arşiv ya da iptal değil, silinmemiş;
+    - ödemesi alınmış ya da tutulmuş (panelin "ödendi"si: `authorized`, `partially_authorized`, `partially_captured`, `completed`) ve tamamı iade edilmemiş; ya da sipariş `completed`;
+    - satırın adedi siparişin güncel sürümünden (`order_item.version = order.version`); teslim alınan iadeler düşülür;
+    - yalnız yayında, silinmemiş ve anahtarın satış kanalındaki ürünler;
+    - en çok adet önce; eşitlerde en son satılan.
+
+    Sıralama pencere ve satış kanalı başına 5 dakika süreç önbelleğinde. Sipariş olayıyla boşaltılmaz, süresi dolar.
+  - **Tamamlama.** Satış rafı dolduramıyorsa kalanı en yeni ürünler (arama dizini, aynı kanal) tamamlar; bölüm `filled_with_newest: true` söyler. Satış sayısı hiçbir yerde gösterilmez, uydurulmaz.
+- **Okuma.** `storeLayout` iki kaynağın ürünlerini anahtarın satış kanalları için seçer. Bölüme `product_ids` (sıralı) ve `filled_with_newest` eklenir; öteki kaynaklarda bu alanlar yok.
+  - Yayındaki düzenin süreç önbelleği artık sürüm + satış kanalları anahtarlı (en çok 8 kayıt). Önizleme de seçer.
+  - Seçilemeyen raf günlüğe yazılır (`storefront.best_sellers_failed`, `storefront.rail_failed`). Çok satanlar en yenilerle gelir, indirimde boş.
+- **Vitrin.** Ürünleri kimlikle, backend'in sırasıyla yükler (`railProducts`); artık yayında olmayan atlanır. İndirimde ürün yokken bölüm çizilmez.
+  - Başlık boşsa vitrin `home.products` ("Yeni ürünler") yazar. **Açık iş:** `tr.json`'a `home.best_sellers` ve `home.on_sale` gelince varsayılan başlık kaynağa göre olmalı (tema işi).
+- **Panel.** Kaynak seçiminde "Çok satanlar" ve "İndirimde".
+  - Çok satanlarda "Kaç günün satışı" alanı (7–365). 7'nin altı yazılırken kayıt bekler ("En az 7, en çok 365 gün yazın."); alan bırakılınca 7 olur.
+  - Başlık boşsa ya da önceki kaynağın adıysa, yeni kaynağın adını alır.
+- Migration yok.
+- Kanıt: `lib/storefront/__tests__/rails.unit.spec.ts` ve `layout.unit.spec.ts`, `workflows/storefront/__tests__/best-sellers.unit.spec.ts`, `integration-tests/http/storefront-rails.spec.ts`; panelde `section-forms.spec.tsx`, `problems.spec.ts`; vitrinde `picked-rails.spec.ts`.

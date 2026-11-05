@@ -47,9 +47,13 @@ export async function productsShown(
   return shownByProduct(variants, displays)
 }
 
-// The sale listing read from the index, in any sales channel, newest first
-const salePlan = (limit: number, countOnly: boolean): ListingPlan => ({
-  channels: null,
+// The sale listing read from the index, in these sales channels (null: any), newest first
+const salePlan = (
+  limit: number,
+  countOnly: boolean,
+  channels: string[] | null = null
+): ListingPlan => ({
+  channels,
   scope: SALE_SCOPE,
   text: null,
   filters: { brands: null, options: [], in_stock: false },
@@ -62,9 +66,17 @@ const salePlan = (limit: number, countOnly: boolean): ListingPlan => ({
 const indexOf = (container: MedusaContainer) =>
   container.resolve<SearchIndexModuleService>(SEARCH_INDEX_MODULE)
 
-/** The newest published products on sale now, at most `limit` (the sale page's structured data). */
-export async function saleProductIds(container: MedusaContainer, limit: number): Promise<string[]> {
-  return (await indexOf(container).listing(salePlan(limit, false))).ids
+/**
+ * The newest published products on sale now, at most `limit`: the sale
+ * page's structured data, and a home sale rail's (only those in the
+ * shopper's sales channels).
+ */
+export async function saleProductIds(
+  container: MedusaContainer,
+  limit: number,
+  channels: readonly string[] | null = null
+): Promise<string[]> {
+  return (await indexOf(container).listing(salePlan(limit, false, channels && [...channels]))).ids
 }
 
 /** Whether a published product is on sale now: the sale page is indexed and in the sitemap. */

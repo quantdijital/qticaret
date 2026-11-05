@@ -23,8 +23,16 @@ export interface StoreLayoutImage {
   derivatives: MediaDerivatives | null
 }
 
+/**
+ * Where a rail takes its products from. `on_sale` (what `/kampanyalar`
+ * lists, the deepest discount first) and `best_sellers` (the most units
+ * sold in paid orders over the last `days`, 7–365) are picked by the
+ * backend (adr/0049 Ek 2026-11-05); the storefront fetches the others.
+ */
 export type ProductSource =
   | { kind: "newest" }
+  | { kind: "on_sale" }
+  | { kind: "best_sellers"; days: number }
   | { kind: "category"; category_id: string }
   | { kind: "collection"; collection_id: string }
   | { kind: "manual"; product_ids: string[] }
@@ -58,6 +66,10 @@ export type StoreLayoutSection =
       source: ProductSource
       limit: number
       more: StoreLayoutLink | null
+      /** A sale or best-seller rail's products, picked in order; absent for the other sources. */
+      product_ids?: string[]
+      /** A best-seller rail with too few sales, its rest the newest products; no counts shown. */
+      filled_with_newest?: boolean
     }
   | StoreFeaturedProductSection
   | { id: string; type: "brands"; title: string | null; brand_ids: string[] }

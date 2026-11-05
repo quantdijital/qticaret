@@ -7011,6 +7011,8 @@
         "source": "Which products",
         "sources": {
           "newest": "The newest products",
+          "best_sellers": "Best sellers",
+          "on_sale": "On sale",
           "category": "A category's products",
           "collection": "A collection's products",
           "manual": "Products I pick"
@@ -7019,6 +7021,9 @@
         "collection": "Collection",
         "products": "Products",
         "manualEmpty": "Pick at least one product.",
+        "days": "Days of sales",
+        "daysHint": "The best sellers of the last so many days ({{min}}–{{max}}). Paid orders count, cancellations and returns are taken off. With too few sales the list is made up with the newest products.",
+        "onSaleHint": "The products on the campaigns page, the deepest discount first. While nothing is on sale the section does not show in the storefront.",
         "more": "See all link",
         "moreHint": "The link under the list; removed, it does not show."
       },
@@ -7088,6 +7093,7 @@
         "productRequired": "Choose a product.",
         "categoryRequired": "Choose a category.",
         "collectionRequired": "Choose a collection.",
+        "daysRange": "Enter at least 7 and at most {{max}} days.",
         "scheduleOrder": "The end must come after the start.",
         "questionRequired": "Write the question.",
         "answerRequired": "Write the answer."

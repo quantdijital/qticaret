@@ -87,6 +87,38 @@ describe("storefront layout document (adr/0049)", () => {
     ).toBe(false)
   })
 
+  it("takes a sale rail and a best-seller rail over 7 to 365 days, 90 by default", () => {
+    const rail = (id: string, source: Record<string, unknown>) => ({ id, type: "products", source })
+    const doc = layoutDocument.parse({
+      home: [
+        rail("indirim01", { kind: "on_sale" }),
+        rail("coksatan1", { kind: "best_sellers" }),
+        rail("coksatan2", { kind: "best_sellers", days: 7 }),
+        rail("coksatan3", { kind: "best_sellers", days: 365 }),
+      ],
+    })
+    expect(doc.home.map((section) => "source" in section && section.source)).toEqual([
+      { kind: "on_sale" },
+      { kind: "best_sellers", days: 90 },
+      { kind: "best_sellers", days: 7 },
+      { kind: "best_sellers", days: 365 },
+    ])
+    for (const source of [
+      { kind: "best_sellers", days: 6 },
+      { kind: "best_sellers", days: 366 },
+      { kind: "best_sellers", days: 30.5 },
+      { kind: "on_sale", days: 30 },
+    ]) {
+      expect(layoutDocument.safeParse({ home: [rail("raf00001", source)] }).success).toBe(false)
+    }
+    // A page's related rail takes neither
+    expect(
+      layoutDocument.safeParse({
+        product: [{ id: "benzer01", type: "related_products", source: { kind: "on_sale" } }],
+      }).success
+    ).toBe(false)
+  })
+
   it("takes up to twelve chosen related products", () => {
     const ids = Array.from({ length: 12 }, (_, index) => `prod_${String(index)}`)
     const doc = layoutDocument.parse({ product: [related("benzer01", ids)] })

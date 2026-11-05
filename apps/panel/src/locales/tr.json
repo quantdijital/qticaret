@@ -7011,6 +7011,8 @@
         "source": "Hangi ürünler",
         "sources": {
           "newest": "En yeni ürünler",
+          "best_sellers": "Çok satanlar",
+          "on_sale": "İndirimde",
           "category": "Bir kategorinin ürünleri",
           "collection": "Bir koleksiyonun ürünleri",
           "manual": "Elle seçtiğim ürünler"
@@ -7019,6 +7021,9 @@
         "collection": "Koleksiyon",
         "products": "Ürünler",
         "manualEmpty": "En az bir ürün seçin.",
+        "days": "Kaç günün satışı",
+        "daysHint": "Son kaç günde en çok satılanlar ({{min}}–{{max}} gün). Ödenmiş siparişler sayılır, iptal ve iadeler düşülür. Satış az olduğunda liste en yeni ürünlerle tamamlanır.",
+        "onSaleHint": "Kampanyalar sayfasındaki ürünler, indirimi en büyük olan önce. İndirimde ürün yokken bölüm vitrinde görünmez.",
         "more": "Tümünü gör bağlantısı",
         "moreHint": "Listenin altındaki bağlantı; kaldırırsanız görünmez."
       },
@@ -7088,6 +7093,7 @@
         "productRequired": "Bir ürün seçin.",
         "categoryRequired": "Bir kategori seçin.",
         "collectionRequired": "Bir koleksiyon seçin.",
+        "daysRange": "En az 7, en çok {{max}} gün yazın.",
         "scheduleOrder": "Bitiş, başlangıçtan sonra olmalı.",
         "questionRequired": "Soruyu yazın.",
         "answerRequired": "Cevabı yazın."
