@@ -1,5 +1,9 @@
 import type { AnySection, LayoutDocument, LayoutLink } from "@/features/storefront/api/layout"
-import { BEST_SELLER_DAYS, LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import {
+  BEST_SELLER_DAYS,
+  LAYOUT_LIMITS as L,
+  SLIDER_LIMITS,
+} from "@/features/storefront/api/layout"
 import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
 import { allSections } from "./sections"
@@ -18,6 +22,7 @@ export type Problem =
   | "tokenUnknown"
   | "linkLabel"
   | "slidesRequired"
+  | "slidesTwo"
   | "productsRequired"
   | "productRequired"
   | "categoryRequired"
@@ -86,6 +91,20 @@ function fieldsOf(section: AnySection): Found[] {
           const at = `slides.${String(index)}`
           return [
             [`${at}.image`, textProblem(slide.image.alt, L.alt)],
+            [`${at}.heading`, textProblem(slide.heading, L.heading, true)],
+            [`${at}.text`, textProblem(slide.text, L.slideText, true)],
+            [`${at}.link`, linkProblem(slide.link)],
+          ]
+        }),
+      ]
+    case "hero_slider":
+      return [
+        ["slides", section.slides.length < SLIDER_LIMITS.slides.min ? "slidesTwo" : null],
+        ...section.slides.flatMap((slide, index): Found[] => {
+          const at = `slides.${String(index)}`
+          return [
+            [`${at}.image`, textProblem(slide.image.alt, L.alt)],
+            [`${at}.mobile_image`, textProblem(slide.mobile_image?.alt ?? null, L.alt)],
             [`${at}.heading`, textProblem(slide.heading, L.heading, true)],
             [`${at}.text`, textProblem(slide.text, L.slideText, true)],
             [`${at}.link`, linkProblem(slide.link)],

@@ -5,6 +5,7 @@ import type {
   FaqSection,
   FeaturedProductSection,
   HeroSection,
+  HeroSliderSection,
   LayoutDocument,
   ProductSection,
   ProductsSection,
@@ -32,6 +33,31 @@ describe("sectionProblems", () => {
     ).toEqual({ heading: "tooLong", "links.0": "linkLabel" })
     expect(sectionProblems(newHomeSection("banner", "kampanya"))).toEqual({
       slides: "slidesRequired",
+    })
+  })
+
+  it("asks a hero slider for two slides and checks each slide's words (adr/0049 Ek 2026-11-06)", () => {
+    const slider = newHomeSection("hero_slider", "kayangiris") as HeroSliderSection
+    expect(slider).toMatchObject({ autoplay: false, interval: 6, height: "regular" })
+    expect(sectionProblems(slider)).toEqual({ slides: "slidesTwo" })
+    const slide = {
+      image: { url: "/static/bir.webp", alt: null },
+      mobile_image: { url: "/static/dar.webp", alt: "x".repeat(301) },
+      heading: "{kargo} bedava",
+      text: null,
+      link: { kind: "url" as const, url: "https://example.com", label: "" },
+      position: "left" as const,
+      tone: "light" as const,
+    }
+    expect(
+      sectionProblems({
+        ...slider,
+        slides: [slide, { ...slide, mobile_image: null, heading: null, link: null }],
+      })
+    ).toEqual({
+      "slides.0.mobile_image": "tooLong",
+      "slides.0.heading": "tokenUnknown",
+      "slides.0.link": "linkLabel",
     })
   })
 

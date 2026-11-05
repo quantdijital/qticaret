@@ -35,6 +35,12 @@ export const LAYOUT_LIMITS = {
   reviews: 12,
 } as const
 
+/** A hero slider's slides and seconds a slide stays while it plays (adr/0049 Ek 2026-11-06). */
+export const SLIDER_LIMITS = {
+  slides: { min: 2, max: 6 },
+  interval: { min: 5, max: 10, default: 6 },
+} as const
+
 /** A best-seller rail's window in days (adr/0049 Ek 2026-11-05): a week to a year, 90 by default. */
 export const BEST_SELLER_DAYS = { min: 7, max: 365, default: 90 } as const
 
@@ -67,6 +73,33 @@ export interface HeroSection extends SectionBase {
   text: string | null
   links: LayoutLink[]
   image: LayoutImage | null
+}
+
+/** One slide of the home page's sliding opening. */
+export interface HeroSlide {
+  image: LayoutImage
+  /** A phone's own picture (a closer crop); none: the wide one. */
+  mobile_image: LayoutImage | null
+  heading: string | null
+  text: string | null
+  /** The slide's one action. */
+  link: LayoutLink | null
+  position: "left" | "center" | "right"
+  /** `light`: light words on a dark picture; `dark`: dark words on a light one. */
+  tone: "light" | "dark"
+}
+
+/** The home page's sliding opening (adr/0049 Ek 2026-11-06), an extra to the still hero. */
+export interface HeroSliderSection extends SectionBase {
+  type: "hero_slider"
+  slides: HeroSlide[]
+  height: "compact" | "regular"
+  /** Off by default: nothing moves by itself unless the shop turns it on. */
+  autoplay: boolean
+  /** Seconds a slide stays while it plays (5–10). */
+  interval: number
+  dots: boolean
+  arrows: boolean
 }
 
 export interface BannerSlide {
@@ -169,6 +202,7 @@ export interface RelatedProductsSection extends SectionBase {
 
 export type HomeSection =
   | HeroSection
+  | HeroSliderSection
   | BannerSection
   | CategoriesSection
   | ProductsSection

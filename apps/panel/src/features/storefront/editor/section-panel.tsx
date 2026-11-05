@@ -10,6 +10,7 @@ import { BannerForm } from "./forms/banner-form"
 import { FaqForm } from "./forms/faq-form"
 import { FeaturedForm } from "./forms/featured-form"
 import { HeroForm } from "./forms/hero-form"
+import { HeroSliderForm } from "./forms/hero-slider-form"
 import { ProductsForm } from "./forms/products-form"
 import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
@@ -52,6 +53,8 @@ function FormOf({
       return <AnnouncementForm section={section} {...props} />
     case "hero":
       return <HeroForm section={section} {...props} />
+    case "hero_slider":
+      return <HeroSliderForm section={section} {...props} />
     case "banner":
       return <BannerForm section={section} {...props} />
     case "categories":

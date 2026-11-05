@@ -5,6 +5,7 @@ import {
   Boxes,
   CircleHelp,
   GalleryHorizontal,
+  GalleryHorizontalEnd,
   LayoutGrid,
   LifeBuoy,
   Mail,
@@ -25,6 +26,7 @@ export type SectionKind = BodySectionType | "announcement_bar" | "footer_newslet
 export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   announcement_bar: Megaphone,
   hero: PanelTop,
+  hero_slider: GalleryHorizontalEnd,
   banner: GalleryHorizontal,
   categories: LayoutGrid,
   products: ShoppingBag,
@@ -51,6 +53,7 @@ function ownTitle(section: AnySection): string | null {
     case "hero":
       return section.heading
     case "banner":
+    case "hero_slider":
       return section.slides[0]?.heading ?? null
     case "categories":
     case "products":

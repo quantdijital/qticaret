@@ -7102,6 +7102,10 @@
           "name": "Hero",
           "description": "The page's opening: a heading, a short text, up to two buttons and an optional image."
         },
+        "hero_slider": {
+          "name": "Hero slider",
+          "description": "2–6 slides shown in turn at the top of the page, each with a picture, a heading, a short line and a button."
+        },
         "banner": {
           "name": "Image slider",
           "description": "1–6 images shown in turn, each with its own heading, line and link."
@@ -7318,7 +7322,8 @@
         "daysRange": "Enter at least 7 and at most {{max}} days.",
         "scheduleOrder": "The end must come after the start.",
         "questionRequired": "Write the question.",
-        "answerRequired": "Write the answer."
+        "answerRequired": "Write the answer.",
+        "slidesTwo": "Add at least two slides."
       },
       "theme": {
         "title": "Theme settings",
@@ -7443,6 +7448,61 @@
       "drawer": {
         "title": "The page's sections",
         "description": "Pick a section to open its settings."
+      },
+      "slider": {
+        "slides": "Slides",
+        "slidesHint": "{{min}}–{{max}} slides, shown in turn. Click a slide to edit it.",
+        "empty": "No slides yet. The section saves with at least {{min}} slides.",
+        "slide": "Slide {{number}}",
+        "open": "Edit {{item}}",
+        "noHeading": "No heading",
+        "flawed": "Has a field to fix",
+        "add": "Add slides",
+        "options": "Options",
+        "height": "Height",
+        "heights": {
+          "compact": "Compact",
+          "regular": "Regular"
+        },
+        "heightHint": {
+          "compact": "A low strip on wide screens; more of the sections below fit the first screen.",
+          "regular": "As tall as the hero; the picture leads on wide screens."
+        },
+        "autoplay": "Play automatically",
+        "autoplayHint": "Off: a slide changes only when the visitor moves on. On: it waits on hover or focus and stops once the visitor steps on their own; it does not play for visitors who ask for reduced motion, and a pause button shows.",
+        "interval": "Seconds per slide",
+        "intervalHint": "Between {{min}} and {{max}} seconds.",
+        "dots": "Show dots",
+        "dotsHint": "Under the slides; they show which slide is on and go to one when clicked.",
+        "arrows": "Show arrows",
+        "arrowsHint": "On wide screens (1024 px and up), either side of the slide. Phones swipe.",
+        "editSlide": "Edit slide",
+        "previous": "Previous slide",
+        "next": "Next slide",
+        "position": "{{at}} / {{total}}",
+        "pictures": "Pictures",
+        "image": "Picture",
+        "imageHint": "A landscape picture at least 1600 px wide. Phones show its middle, cropped.",
+        "mobileImage": "Phone picture",
+        "mobileImageHint": "Optional. Shown instead of the wide one on screens narrower than 640 px.",
+        "words": "Words",
+        "headingHint": "Optional; the first slide's heading is the home page's main heading.",
+        "textHint": "A short line; not shown on phones.",
+        "button": "Button",
+        "buttonHint": "The slide's one button; optional.",
+        "look": "Look",
+        "positionLabel": "Where the words stand",
+        "positions": {
+          "left": "Left",
+          "center": "Centre",
+          "right": "Right"
+        },
+        "toneLabel": "Text colour",
+        "tones": {
+          "light": "Light text, dark picture",
+          "dark": "Dark text, light picture"
+        },
+        "toneHint": "A shade that suits the picture goes behind the words. On phones the words sit under the picture on a dark ground."
       }
     },
     "preferences": {

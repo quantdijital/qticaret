@@ -13,7 +13,7 @@ import type {
   Placement,
   ProductSection,
 } from "@/features/storefront/api/layout"
-import { LAYOUT_LIMITS } from "@/features/storefront/api/layout"
+import { LAYOUT_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
 
 /** The groups in the order the storefront draws them (a page's body between header and footer). */
 export const LAYOUT_GROUPS: readonly LayoutGroup[] = [
@@ -30,6 +30,7 @@ export const isBodyGroup = (group: LayoutGroup): group is BodyGroup =>
 /** The home page's section types, in the order the chooser offers them. */
 export const HOME_TYPES: readonly HomeSectionType[] = [
   "hero",
+  "hero_slider",
   "banner",
   "categories",
   "products",
@@ -129,6 +130,17 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
       return { ...base, type, title: null, items: [{ question: "", answer: "" }] }
     case "hero":
       return { ...base, type, eyebrow: null, heading: null, text: null, links: [], image: null }
+    case "hero_slider":
+      return {
+        ...base,
+        type,
+        slides: [],
+        height: "regular",
+        autoplay: false,
+        interval: SLIDER_LIMITS.interval.default,
+        dots: true,
+        arrows: true,
+      }
     case "banner":
       return { ...base, type, slides: [] }
     case "categories":

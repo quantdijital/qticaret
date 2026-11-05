@@ -7102,6 +7102,10 @@
           "name": "Giriş",
           "description": "Sayfanın başında başlık, kısa bir metin, en çok iki düğme ve isteğe bağlı bir görsel."
         },
+        "hero_slider": {
+          "name": "Giriş slaytı",
+          "description": "Sayfanın başında sırayla gösterilen 2–6 slayt; her birinin görseli, başlığı, kısa metni ve düğmesi olur."
+        },
         "banner": {
           "name": "Görsel slayt",
           "description": "Sırayla kayan 1–6 görsel; her birinin başlığı, satırı ve bağlantısı olabilir."
@@ -7318,7 +7322,8 @@
         "daysRange": "En az 7, en çok {{max}} gün yazın.",
         "scheduleOrder": "Bitiş, başlangıçtan sonra olmalı.",
         "questionRequired": "Soruyu yazın.",
-        "answerRequired": "Cevabı yazın."
+        "answerRequired": "Cevabı yazın.",
+        "slidesTwo": "En az iki slayt ekleyin."
       },
       "theme": {
         "title": "Tema ayarları",
@@ -7443,6 +7448,61 @@
       "drawer": {
         "title": "Sayfanın bölümleri",
         "description": "Ayarlarını açmak için bir bölüm seçin."
+      },
+      "slider": {
+        "slides": "Slaytlar",
+        "slidesHint": "{{min}}–{{max}} slayt; sırayla gösterilir. Düzenlemek için bir slayta tıklayın.",
+        "empty": "Henüz slayt yok. Bölüm en az {{min}} slaytla kaydedilir.",
+        "slide": "{{number}}. slayt",
+        "open": "{{item}}: düzenle",
+        "noHeading": "Başlık yok",
+        "flawed": "Düzeltilecek alan var",
+        "add": "Slayt ekle",
+        "options": "Seçenekler",
+        "height": "Yükseklik",
+        "heights": {
+          "compact": "Kısa",
+          "regular": "Standart"
+        },
+        "heightHint": {
+          "compact": "Geniş ekranda alçak bir şerit; altındaki bölümler ilk ekrana daha çok girer.",
+          "regular": "Giriş bölümüyle aynı boy; geniş ekranda görsel öne çıkar."
+        },
+        "autoplay": "Kendiliğinden geçsin",
+        "autoplayHint": "Kapalıyken slayt yalnız ziyaretçi geçince değişir. Açıkken üzerine gelince ya da odaklanınca bekler, ziyaretçi kendisi geçince durur; hareketi azaltmayı seçen ziyaretçide oynamaz ve durdurma düğmesi görünür.",
+        "interval": "Her slayt kaç saniye",
+        "intervalHint": "{{min}} ile {{max}} saniye arası.",
+        "dots": "Noktaları göster",
+        "dotsHint": "Slaytların altında; hangi slaytta olunduğunu gösterir ve tıklanınca o slayta geçer.",
+        "arrows": "Okları göster",
+        "arrowsHint": "Geniş ekranda (1024 px ve üstü) slaydın iki yanında. Telefonda kaydırarak geçilir.",
+        "editSlide": "Slaydı düzenle",
+        "previous": "Önceki slayt",
+        "next": "Sonraki slayt",
+        "position": "{{at}} / {{total}}",
+        "pictures": "Görseller",
+        "image": "Görsel",
+        "imageHint": "Yatay, en az 1600 px genişliğinde bir görsel. Telefonda bunun ortası kırpılarak gösterilir.",
+        "mobileImage": "Telefon görseli",
+        "mobileImageHint": "İsteğe bağlı. 640 px'ten dar ekranlarda geniş görselin yerine gösterilir.",
+        "words": "Yazılar",
+        "headingHint": "İsteğe bağlı; ilk slaydın başlığı ana sayfanın ana başlığı olur.",
+        "textHint": "Kısa bir satır; telefonda gösterilmez.",
+        "button": "Düğme",
+        "buttonHint": "Slaydın tek düğmesi; isteğe bağlı.",
+        "look": "Görünüm",
+        "positionLabel": "Yazının yeri",
+        "positions": {
+          "left": "Solda",
+          "center": "Ortada",
+          "right": "Sağda"
+        },
+        "toneLabel": "Yazı rengi",
+        "tones": {
+          "light": "Açık yazı, koyu görsel",
+          "dark": "Koyu yazı, açık görsel"
+        },
+        "toneHint": "Yazının arkasına görsele uygun bir gölge eklenir. Telefonda yazı görselin altında, koyu zeminde durur."
       }
     },
     "preferences": {
