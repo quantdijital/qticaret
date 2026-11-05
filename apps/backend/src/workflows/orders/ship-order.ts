@@ -19,6 +19,8 @@ import { noteManualCarrierStep } from "../shipping/steps/manual-carrier"
 import { forgetLabelSourceStep, storeShipmentLabelStep } from "../shipping/steps/store-label"
 import { trackShipmentStep } from "../shipping/steps/track"
 import { assertNotHeldStep } from "../fraud/steps/not-held"
+import { fillReservationsWorkflow } from "./fill-reservations"
+import { noteFilledReservationsStep } from "./steps/note-reservations"
 import { planShipmentStep } from "./steps/plan-shipment"
 
 export interface ShipOrderInput {
@@ -49,6 +51,12 @@ export interface ShipOrderInput {
  * gets its label and keeps it privately; the order is handed over when
  * the carrier picks the parcel up (its tracking), not here: such a parcel
  * is not offered for shipping again (`orderState().pickup`).
+ *
+ * Packing takes the units out of the lines' stock reservations; a tracked
+ * line holding none or too few (tracking turned on after the order, a
+ * reservation deleted or cut down) is held first, at the parcel's
+ * warehouse, and that hold is undone with the rest if the parcel does not
+ * go (adr/0054, 2026-11-05 addendum).
  */
 export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: ShipOrderInput) => {
   const lockKey = transform({ input }, ({ input }) => shipLockKey(input.order_id))
@@ -81,6 +89,21 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
     { carrier, plan },
     ({ carrier, plan }) => carrier.carrier === "geliver" && plan.fulfillment_id === null
   ).then(() => ensureGeliverSenderStep({ location_id: carrier.location_id }))
+
+  // Medusa packs only held stock: a tracked line without (enough of) a reservation is held first
+  const filled = when(
+    "orders-ship-fill-reservations",
+    { carrier, plan },
+    ({ carrier, plan }) => plan.fulfillment_id === null && carrier.location_id !== null
+  ).then(() =>
+    fillReservationsWorkflow.runAsStep({
+      input: transform({ input, plan, carrier }, ({ input, plan, carrier }) => ({
+        order_id: input.order_id,
+        items: plan.items,
+        location_id: carrier.location_id ?? "",
+      })),
+    })
+  )
 
   const packed = when({ plan }, ({ plan }) => plan.fulfillment_id === null).then(() =>
     createOrderFulfillmentWorkflow.runAsStep({
@@ -162,6 +185,19 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
         : {}),
     }))
     createOrderShipmentWorkflow.runAsStep({ input: shipment })
+  })
+
+  // Last: only a hold the parcel kept is recorded
+  when("orders-ship-note-reservations", { filled }, ({ filled }) =>
+    Boolean(filled && filled.levels.length + filled.lines.length > 0)
+  ).then(() => {
+    noteFilledReservationsStep(
+      transform({ input, filled }, ({ input, filled }) => ({
+        order_id: input.order_id,
+        actor_id: input.created_by ?? null,
+        filled: filled ?? { location_id: "", levels: [], lines: [] },
+      }))
+    )
   })
 
   releaseLockStep({ key: lockKey })
