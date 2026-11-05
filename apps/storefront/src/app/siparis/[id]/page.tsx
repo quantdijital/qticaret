@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { purchaseEvent } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
+import { sessionToken } from "@/lib/account/session"
 import { paymentMethods } from "@/lib/checkout/options"
 import { t } from "@/lib/i18n"
 import {
@@ -48,12 +49,13 @@ export default async function OrderPage({
     throw error
   })
   // What may come back is the backend's count, read fresh (no-store) with the page
-  const [returns, returnable, shipments, invoice, contracts] = await Promise.all([
+  const [returns, returnable, shipments, invoice, contracts, session] = await Promise.all([
     orderReturns(order.id, token),
     orderReturnable(order.id, token),
     orderShipments(order.id, token),
     orderInvoice(order.id, token),
     orderContractKinds(order.id, token),
+    sessionToken(),
   ])
   const note = typeof query["durum"] === "string" ? query["durum"] : null
   const fresh = query["yeni"] === "1"
@@ -72,6 +74,7 @@ export default async function OrderPage({
           shipments,
           invoice,
           note,
+          guest: session === null,
         })}
       />
     </>

@@ -4,6 +4,7 @@ import { CartPage } from "./cart/CartPage"
 import { CheckoutPage } from "./checkout/CheckoutPage"
 import { CheckoutResultPage } from "./checkout/CheckoutResultPage"
 import { PaymentFramePage } from "./checkout/PaymentFramePage"
+import { OrderPage } from "./order/OrderPage"
 import { HomePage } from "./HomePage"
 import { Layout } from "./Layout"
 import { LegalPage } from "./LegalPage"
@@ -30,6 +31,7 @@ export const atolyeTheme: StorefrontTheme = {
   CheckoutPage,
   PaymentFramePage,
   CheckoutResultPage,
+  OrderPage,
   ListingPage,
   ProductPage,
 }

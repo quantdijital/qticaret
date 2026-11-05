@@ -285,6 +285,27 @@ export interface OrderPageView {
   }[]
   /** A message already in words after an action (cancelled, request received, refused). */
   notice: string | null
+  /**
+   * Where the order stands, step by step (adr/0046 Ek 2026-11-05): placed,
+   * paid (none for cash on delivery), packed, shipped, delivered. Null or
+   * left out: a cancelled order, or a storefront that does not say.
+   */
+  progress?: OrderStepView[] | null
+  /** How it is paid, in words ("Kredi / banka kartı", "Havale / EFT"); null when unknown. */
+  payment?: string | null
+  /** Opened by a shopper not signed in: the page may offer an account. */
+  guest?: boolean
+}
+
+export type OrderStepKey = "placed" | "paid" | "packed" | "shipped" | "delivered"
+
+/** One step of an order's way: its words, whether it is behind, now or ahead, and when it happened. */
+export interface OrderStepView {
+  key: OrderStepKey
+  label: string
+  state: "done" | "current" | "ahead"
+  /** "2 Kasım 2026 14:05" once done, when the backend knows; else null. */
+  at: string | null
 }
 
 export interface OrderActions {

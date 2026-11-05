@@ -13,6 +13,7 @@ import { providersOf } from "@/lib/orders/order"
 import { lineAddonsOf } from "./addons"
 import { addressSummaryOf } from "./checkout"
 import { orderGiftOf } from "./order-gift"
+import { orderProgress, paymentWordsOf } from "./order-progress"
 import {
   DEFECT_REASONS,
   cancelOf,
@@ -59,6 +60,8 @@ export interface OrderExtras {
   invoice: InvoiceRow | null
   /** `?durum=` after an action. */
   note: string | null
+  /** Opened by a shopper not signed in (adr/0046 Ek 2026-11-05): the page may offer an account. */
+  guest?: boolean
 }
 
 const NOTES: Record<string, string> = {
@@ -215,6 +218,15 @@ export function orderView(
     })),
     shipments: extras.shipments.map((parcel) => shipmentOf(parcel, t)),
     notice: extras.note && NOTES[extras.note] ? t(NOTES[extras.note] ?? "") : null,
+    progress: orderProgress(
+      order,
+      extras.shipments,
+      { cashOnDelivery: providers.includes("pp_cod_cod") },
+      t,
+      (date) => WHEN.format(date)
+    ),
+    payment: paymentWordsOf(providers, t),
+    guest: extras.guest ?? false,
     breadcrumbs: [
       { label: t("home.label"), path: "/" },
       { label: t("order.title", { id: order.display_id }), path: null },
