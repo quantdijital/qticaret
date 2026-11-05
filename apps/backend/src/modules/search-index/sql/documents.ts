@@ -19,7 +19,7 @@ export const TEXT_ARRAY = "ARRAY(SELECT jsonb_array_elements_text(?::jsonb))"
 
 const COLUMNS = `product_id, published, title, fields, vocabulary, sales_channel_ids,
   category_ids, categories, collection_id, brand_id, brand_handle, brand_name, options,
-  prices, in_stock, product_created_at`
+  prices, in_stock, on_sale, product_created_at`
 
 /** Writes the rows (new or again); popularity stays unless a row gives it. */
 export async function upsertDocuments(db: Executor, docs: readonly DocumentInput[]) {
@@ -32,7 +32,8 @@ export async function upsertDocuments(db: Executor, docs: readonly DocumentInput
        SELECT * FROM jsonb_to_recordset(?::jsonb) AS r(
          product_id text, published boolean, title text, fields jsonb, vocabulary jsonb,
          sales_channel_ids jsonb, category_ids jsonb, categories jsonb, collection_id text,
-         brand jsonb, options jsonb, prices jsonb, in_stock boolean, product_created_at timestamptz)
+         brand jsonb, options jsonb, prices jsonb, in_stock boolean, on_sale boolean,
+         product_created_at timestamptz)
      )
      INSERT INTO search_document AS d (${COLUMNS}, document, indexed_at)
      SELECT i.product_id, i.published, i.title, i.fields, i.vocabulary,
@@ -41,7 +42,7 @@ export async function upsertDocuments(db: Executor, docs: readonly DocumentInput
             i.categories, i.collection_id,
             i.brand->>'id', i.brand->>'handle', i.brand->>'name',
             ARRAY(SELECT jsonb_array_elements_text(i.options)),
-            i.prices, i.in_stock, i.product_created_at,
+            i.prices, i.in_stock, coalesce(i.on_sale, false), i.product_created_at,
             search_index_document(i.fields), now()
        FROM input i
      ON CONFLICT (product_id) DO UPDATE SET
@@ -51,8 +52,8 @@ export async function upsertDocuments(db: Executor, docs: readonly DocumentInput
        collection_id = EXCLUDED.collection_id, brand_id = EXCLUDED.brand_id,
        brand_handle = EXCLUDED.brand_handle, brand_name = EXCLUDED.brand_name,
        options = EXCLUDED.options, prices = EXCLUDED.prices, in_stock = EXCLUDED.in_stock,
-       product_created_at = EXCLUDED.product_created_at, document = EXCLUDED.document,
-       indexed_at = now()`,
+       on_sale = EXCLUDED.on_sale, product_created_at = EXCLUDED.product_created_at,
+       document = EXCLUDED.document, indexed_at = now()`,
     [rows]
   )
   const popular = docs.filter((doc) => doc.popularity !== undefined)
@@ -99,6 +100,7 @@ interface Row {
   options: string[]
   prices: Record<string, number>
   in_stock: boolean
+  on_sale: boolean
   popularity: number
   product_created_at: Date | string
 }
@@ -132,6 +134,7 @@ export async function readDocuments(
     options: row.options,
     prices: row.prices,
     in_stock: row.in_stock,
+    on_sale: row.on_sale,
     popularity: row.popularity,
     product_created_at: new Date(row.product_created_at).toISOString(),
   }))

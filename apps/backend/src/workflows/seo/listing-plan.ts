@@ -1,5 +1,4 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { createTtlCache } from "../../lib/cache"
 import { LISTING_PAGE_SIZE, LISTING_PARAMS } from "../../lib/seo/facets"
 import type { ListingQuery } from "../../lib/seo/facets"
 import { CONTENT_MODULE } from "../../modules/content"
@@ -9,16 +8,16 @@ import type SearchIndexModuleService from "../../modules/search-index/service"
 import type { ListingPlan } from "../../modules/search-index/types"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
 import { categoryRows, subtreeIn } from "../content/landing-facet"
-import { SALE_LISTING, saleProductIds } from "../pricing/sale-products"
+import { SALE_LISTING, SALE_SCOPE } from "../pricing/sale-products"
 
 /**
  * What a listing asks of the search index (adr/0056): its scope (a
  * category's shown subtree, a collection, a brand, a landing page's
  * category and facet, what is on sale now, or the whole catalogue), the
- * query's filters, price range, sort and page. What is on sale is worked
- * out from the price lists and the 30-day rule, kept 30 seconds per
- * region, as listings kept their rows before; the category tree is read
- * each time (a shop keeps hundreds at most).
+ * query's filters, price range, sort and page. What is on sale is a fact
+ * of each row, worked out when the product is indexed (price lists and
+ * automatic promotions, the price-before rule; sale-products.ts); the
+ * category tree is read each time (a shop keeps hundreds at most).
  */
 
 /** The whole catalogue's listing (`/magaza`): every published product. */
@@ -29,16 +28,13 @@ export interface Listed {
   entity_id: string
 }
 
-const onSale = createTtlCache<string[]>({ ttlMs: 30_000, maxEntries: 20 })
-
 const subtree = async (container: MedusaContainer, categoryId: string) =>
   subtreeIn(await categoryRows(container), categoryId, true)
 
 /** What the listing lists before its filters; null for a listing gone since or none known. */
 export async function listingScope(
   container: MedusaContainer,
-  listed: Listed,
-  regionId: string | null = null
+  listed: Listed
 ): Promise<ListingPlan["scope"] | null> {
   switch (listed.entity_type) {
     case ALL_PRODUCTS:
@@ -50,7 +46,7 @@ export async function listingScope(
     case CATALOG_ENTITY_TYPES.brand:
       return { brand_id: listed.entity_id }
     case SALE_LISTING:
-      return { product_ids: await onSale(regionId ?? "", () => saleProductIds(container)) }
+      return { ...SALE_SCOPE }
     case CATALOG_ENTITY_TYPES.landing:
       break
     default:

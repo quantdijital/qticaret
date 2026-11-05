@@ -26,6 +26,11 @@ export interface DocumentInput {
   /** The lowest selling price per `region_id:currency`, whole units with decimals. */
   prices: Record<string, number>
   in_stock: boolean
+  /**
+   * Shown as a discount now in the shop's currency (adr/0023 Ek 2026-11-05):
+   * a price list's or an automatic promotion's, by the price-before rule.
+   */
+  on_sale: boolean
   product_created_at: string
   /** Kept as it is when left out: orders count it, not the catalogue. */
   popularity?: number
@@ -51,6 +56,8 @@ export interface ListingPlan {
     product_ids?: string[]
     /** A landing page's attribute facet, `key=value`. */
     option?: string
+    /** Only the products on sale now (`/kampanyalar`). */
+    on_sale?: true
   }
   text: {
     /** What a product must match. */

@@ -1,17 +1,18 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, QueryContext } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { searchFields } from "../../lib/search/document"
 import type { DocumentInput } from "../../modules/search-index/types"
 import { textOf } from "../seo/highlight"
 import type { HighlightValue } from "../seo/highlight"
+import { indexedPrices } from "./prices"
 
 /**
  * A product as the search index reads it (adr/0056): its words (title,
  * codes, brand, shown categories, public attribute values, options,
  * variant titles, tags, type, description) and the facts listings filter
  * and sort by (published, channels, categories, collection, brand, choice
- * options, lowest price per region, stock, age). Read through Query, the
- * prices once per region; never a module's service directly.
+ * options, prices (prices.ts), stock, on sale, age). Read through
+ * Query; never a module's service directly.
  */
 
 export const SOURCE_FIELDS = [
@@ -42,6 +43,7 @@ export const SOURCE_FIELDS = [
   "attribute_values.definition.unit",
   "attribute_values.definition.options",
   "attribute_values.definition.is_public",
+  "variants.id",
   "variants.title",
   "variants.sku",
   "variants.barcode",
@@ -57,6 +59,7 @@ export const SOURCE_FIELDS = [
 type Maybe<T> = T | null | undefined
 
 interface Variant {
+  id?: Maybe<string>
   title?: Maybe<string>
   sku?: Maybe<string>
   barcode?: Maybe<string>
@@ -135,10 +138,11 @@ function optionsOf(product: ProductSource): string[] {
   return [...options]
 }
 
-/** The product's row; `prices` by `region_id:currency`. */
+/** The product's row; `prices` by `region_id:currency`; `onSale`: shown as a discount now. */
 export function documentOf(
   product: ProductSource,
-  prices: Readonly<Record<string, number>>
+  prices: Readonly<Record<string, number>>,
+  onSale = false
 ): DocumentInput {
   const variants = present(product.variants)
   const categories = present(product.categories)
@@ -191,57 +195,10 @@ export function documentOf(
     options: optionsOf(product),
     prices: { ...prices },
     in_stock: variants.some(inStock),
+    // A draft is listed nowhere: its prices are not worked out
+    on_sale: onSale && product.status === "published",
     product_created_at: new Date(product.created_at).toISOString(),
   }
-}
-
-interface PricedProduct {
-  id: string
-  variants?: Maybe<Maybe<{ calculated_price?: Maybe<{ calculated_amount?: Maybe<number> }> }>[]>
-}
-
-/**
- * Each product's lowest selling price per region, for a shopper with no
- * customer group (what listings filtered and sorted by before).
- */
-async function pricesOf(
-  container: MedusaContainer,
-  ids: string[]
-): Promise<Map<string, Record<string, number>>> {
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  const { data: regions } = await query.graph({
-    entity: "region",
-    fields: ["id", "currency_code"],
-  })
-  const prices = new Map<string, Record<string, number>>()
-  // An empty id filter is no filter: every product would be read
-  for (const region of ids.length > 0 ? (regions as { id: string; currency_code: string }[]) : []) {
-    const { data } = await query.graph({
-      entity: "product",
-      fields: ["id", "variants.calculated_price.calculated_amount"],
-      filters: { id: ids },
-      context: {
-        variants: {
-          calculated_price: QueryContext({
-            currency_code: region.currency_code,
-            region_id: region.id,
-          }),
-        },
-      },
-    })
-    for (const product of data as PricedProduct[]) {
-      const amounts = present(product.variants).flatMap((variant) => {
-        const amount = variant.calculated_price?.calculated_amount
-        return typeof amount === "number" ? [amount] : []
-      })
-      if (amounts.length > 0) {
-        const own = prices.get(product.id) ?? {}
-        own[`${region.id}:${region.currency_code}`] = Math.min(...amounts)
-        prices.set(product.id, own)
-      }
-    }
-  }
-  return prices
 }
 
 /** The rows of these products; those gone from the catalogue listed apart. */
@@ -259,13 +216,20 @@ export async function readSearchDocuments(
     filters: { id: unique },
   })
   const products = data as ProductSource[]
-  const prices = await pricesOf(
+  const priced = await indexedPrices(
     container,
-    products.map((product) => product.id)
+    products.map((product) => ({
+      id: product.id,
+      published: product.status === "published",
+      variant_ids: present(product.variants).flatMap((variant) => (variant.id ? [variant.id] : [])),
+    }))
   )
   const found = new Set(products.map((product) => product.id))
   return {
-    documents: products.map((product) => documentOf(product, prices.get(product.id) ?? {})),
+    documents: products.map((product) => {
+      const own = priced.get(product.id)
+      return documentOf(product, own?.prices ?? {}, own?.on_sale ?? false)
+    }),
     gone: unique.filter((id) => !found.has(id)),
   }
 }

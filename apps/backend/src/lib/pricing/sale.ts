@@ -1,45 +1,45 @@
+import { kurus } from "../money"
+import type { Kurus } from "../money"
+
 /**
- * Which products are on sale now (adr/0019 ek 2026-11-03, `/kampanyalar`).
- * A variant is marked down when Medusa prices it below its original amount
- * (a sale price list; an override list sets both alike, a promotion only
- * applies in a cart). The page lists only what the storefront shows as a
- * discount: the 30-day rule's `on_sale` (ADR-0023), so a price raised and
- * cut back is no campaign. Pure: the caller prices the variants.
+ * What the storefront shows of each product's price (adr/0019 ek
+ * 2026-11-03, adr/0023 Ek 2026-11-05), for the search index's listings:
+ * whether it is on sale now (`/kampanyalar`) and its lowest price. On sale
+ * is a variant whose display is `on_sale` (a sale price list, or an
+ * automatic promotion every shopper gets), by the price-before rule, so a
+ * price raised and cut back is no campaign. The lowest is the lowest
+ * `current`, the price the cards show, so listings filter and sort by it.
+ * Pure: the caller works out the variants' displays.
  */
 
-export interface CalculatedPrice {
-  calculated_amount?: number | string | null
-  original_amount?: number | string | null
-}
-
-const amountOf = (value: number | string | null | undefined): number | null => {
-  if (value === null || value === undefined) {
-    return null
-  }
-  const amount = Number(value)
-  return Number.isFinite(amount) ? amount : null
-}
-
-/** Whether a variant sells below its original price now; a missing amount is no sale. */
-export function isMarkedDown(price: CalculatedPrice | null | undefined): boolean {
-  const current = amountOf(price?.calculated_amount)
-  const original = amountOf(price?.original_amount)
-  return current !== null && original !== null && current < original
+export interface ProductShown {
+  on_sale: boolean
+  /** The lowest shown price; null when no variant has one in the currency. */
+  lowest: Kurus | null
 }
 
 /**
- * The products with a variant shown as a discount, each once, in the
- * order their variants come; a variant without a display is not on sale.
+ * Each product with a display, from its variants' displays; a variant
+ * without one (no price in the currency) adds nothing.
  */
-export function saleProducts(
+export function shownByProduct(
   variants: readonly { id: string; product_id: string }[],
-  displays: ReadonlyMap<string, { on_sale: boolean }>
-): string[] {
-  const products = new Set<string>()
+  displays: ReadonlyMap<string, { on_sale: boolean; current: Kurus }>
+): Map<string, ProductShown> {
+  const products = new Map<string, ProductShown>()
   for (const variant of variants) {
-    if (displays.get(variant.id)?.on_sale) {
-      products.add(variant.product_id)
+    const display = displays.get(variant.id)
+    if (!display) {
+      continue
     }
+    const known = products.get(variant.product_id)
+    products.set(variant.product_id, {
+      on_sale: (known?.on_sale ?? false) || display.on_sale,
+      lowest:
+        known?.lowest === null || known?.lowest === undefined
+          ? display.current
+          : kurus(Math.min(known.lowest, display.current)),
+    })
   }
-  return [...products]
+  return products
 }

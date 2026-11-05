@@ -97,4 +97,10 @@ describe("a product's search row (adr/0056)", () => {
     expect(row.fields.a.f).toBe("sef bicagi kupa 01 kupa01 8690000000001 mx 5 mx5")
     expect(row.fields.c.m).toBe("kırmızı")
   })
+
+  it("keeps whether it is on sale now; a draft is listed nowhere (adr/0023 Ek 2026-11-05)", () => {
+    expect(documentOf(product(), {}).on_sale).toBe(false)
+    expect(documentOf(product(), {}, true).on_sale).toBe(true)
+    expect(documentOf(product({ status: "draft" }), {}, true).on_sale).toBe(false)
+  })
 })

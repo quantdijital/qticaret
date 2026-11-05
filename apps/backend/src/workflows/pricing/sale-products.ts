@@ -1,68 +1,73 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { chunksOf } from "../../lib/catalog"
-import { isMarkedDown, saleProducts } from "../../lib/pricing"
+import { shownByProduct } from "../../lib/pricing"
+import type { ProductShown } from "../../lib/pricing"
+import { SEARCH_INDEX_MODULE } from "../../modules/search-index"
+import type SearchIndexModuleService from "../../modules/search-index/service"
+import type { ListingPlan } from "../../modules/search-index/types"
 import { CURRENCY } from "../catalog/prices"
 import { priceDisplays } from "./price-display"
-import { variantsOfPriceSets } from "./priced-variants"
-import { sellingPrices } from "./selling-prices"
 
 /** The sale listing's type and id (`/kampanyalar`; `GET /store/listings/products?type=sale&id=sale`). */
 export const SALE_LISTING = "sale"
 
-interface VariantRow {
+/** The sale listing in the search index: the rows marked on sale when they were indexed. */
+export const SALE_SCOPE: ListingPlan["scope"] = { on_sale: true }
+
+/** A product and its variants, as the indexing workflow reads them. */
+export interface ProductVariants {
   id: string
-  product_id: string
-  product?: { status?: string | null } | null
+  variant_ids: readonly string[]
 }
 
 /**
- * The published products on sale now (adr/0019 ek 2026-11-03): a variant
- * of theirs sells below its original price for a shopper with no customer
- * group, in the shop's currency, and the 30-day rule shows it as a
- * discount (ADR-0023), as the storefront's price does. Only variants an
- * active price list prices can be marked down, so the catalogue is not
- * scanned. The callers keep the answer (the listing's rows, resolve's
- * answers) for their own 30 seconds.
+ * How these products' prices are shown now in the shop's currency, exactly
+ * as the storefront's price is (`priceDisplays`: a sale price list, or an
+ * automatic promotion every shopper gets, struck through only by the
+ * price-before rule; adr/0019 ek 2026-11-03, adr/0023 Ek 2026-11-05):
+ * whether each is on sale, and its lowest price. Worked out when a product
+ * is indexed (search-index `on_sale`, `prices`), so the sale listing is one
+ * statement however much of the catalogue a promotion covers, no request
+ * scans it, and listings filter and sort by the price the cards show.
  */
-export async function saleProductIds(container: MedusaContainer): Promise<string[]> {
-  const pricing = container.resolve(Modules.PRICING)
-  const lists = await pricing.listPriceLists({ status: ["active"] }, { select: ["id"], take: null })
-  if (lists.length === 0) {
-    return []
-  }
-  const prices = await pricing.listPrices(
-    { price_list_id: lists.map((list) => list.id) },
-    { select: ["price_set_id"], take: null }
+export async function productsShown(
+  container: MedusaContainer,
+  products: readonly ProductVariants[]
+): Promise<Map<string, ProductShown>> {
+  const variants = products.flatMap((product) =>
+    product.variant_ids.map((id) => ({ id, product_id: product.id }))
   )
-  const listed = await variantsOfPriceSets(
+  if (variants.length === 0) {
+    return new Map()
+  }
+  const displays = await priceDisplays(
     container,
-    prices.flatMap((price) => (price.price_set_id ? [price.price_set_id] : []))
+    variants.map((variant) => variant.id),
+    CURRENCY
   )
-  const markedDown: string[] = []
-  for (const chunk of chunksOf([...new Set(listed)])) {
-    for (const variant of await sellingPrices(container, chunk, CURRENCY)) {
-      if (isMarkedDown(variant.calculated_price)) {
-        markedDown.push(variant.id)
-      }
-    }
-  }
-  if (markedDown.length === 0) {
-    return []
-  }
-  const displays = await priceDisplays(container, markedDown, CURRENCY)
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  const variants: VariantRow[] = []
-  for (const chunk of chunksOf(markedDown)) {
-    const { data } = await query.graph({
-      entity: "product_variant",
-      fields: ["id", "product_id", "product.status"],
-      filters: { id: chunk },
-    })
-    variants.push(...(data as VariantRow[]))
-  }
-  return saleProducts(
-    variants.filter((variant) => variant.product?.status === "published"),
-    displays
-  )
+  return shownByProduct(variants, displays)
+}
+
+// The sale listing read from the index, in any sales channel, newest first
+const salePlan = (limit: number, countOnly: boolean): ListingPlan => ({
+  channels: null,
+  scope: SALE_SCOPE,
+  text: null,
+  filters: { brands: null, options: [], in_stock: false },
+  price: { key: "", min: null, max: null },
+  sort: "newest",
+  page: { offset: 0, limit },
+  countOnly,
+})
+
+const indexOf = (container: MedusaContainer) =>
+  container.resolve<SearchIndexModuleService>(SEARCH_INDEX_MODULE)
+
+/** The newest published products on sale now, at most `limit` (the sale page's structured data). */
+export async function saleProductIds(container: MedusaContainer, limit: number): Promise<string[]> {
+  return (await indexOf(container).listing(salePlan(limit, false))).ids
+}
+
+/** Whether a published product is on sale now: the sale page is indexed and in the sitemap. */
+export async function isAnythingOnSale(container: MedusaContainer): Promise<boolean> {
+  return (await indexOf(container).listing(salePlan(1, true))).count > 0
 }

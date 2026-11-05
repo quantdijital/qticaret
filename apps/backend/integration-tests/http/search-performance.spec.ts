@@ -153,6 +153,7 @@ function catalogue(channel: string, priceKey: string): DocumentInput[] {
       ],
       prices: { [priceKey]: Math.round(50 + random() * 4950) },
       in_stock: random() > 0.1,
+      on_sale: false,
       popularity: Math.floor(random() * 20),
       product_created_at: new Date(Date.UTC(2026, 0, 1) + at * 60_000).toISOString(),
     }

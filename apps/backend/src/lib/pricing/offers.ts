@@ -35,9 +35,9 @@ export interface CartOffer {
 
 export type Offer = PriceOffer | CartOffer
 
-type When = string | Date | null | undefined
+export type When = string | Date | null | undefined
 
-interface RuleRow {
+export interface RuleRow {
   attribute?: string | null
   operator?: string | null
   values?: ({ value?: string | null } | null)[] | null

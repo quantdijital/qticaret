@@ -6,13 +6,16 @@ import { priceSetsOfLists, variantsOfPriceSets } from "../pricing/priced-variant
 import { productsOfVariants } from "./affected"
 import { buildIfEmpty, drainSearchIndex, queueSearchProducts, rebuildSearchIndex } from "./drain"
 import { recentOrderCounts } from "./popularity"
+import { queueOnOfferChange } from "./promotion-state"
 
 /**
  * The index's upkeep (adr/0056): what no event tells of. Each minute: a
  * price list that began or ended (its products' prices changed with no
- * write), claims a stopped process left, and the first build of a shop's
- * index. Each night: every product indexed again (what a missed event or
- * a template's change left behind), the popularity of the last 30 days
+ * write), the automatic promotions changed (a campaign began or ended, a
+ * budget ran out: every product's `on_sale` again, promotion-state.ts),
+ * claims a stopped process left, and the first build of a shop's index.
+ * Each night: every product indexed again (what a missed event or a
+ * template's change left behind), the popularity of the last 30 days
  * counted again, and the word dictionary's counts made exact.
  */
 
@@ -46,6 +49,7 @@ export async function searchIndexMinute(
 ): Promise<number> {
   await buildIfEmpty(container)
   await queueSearchProducts(container, await productsAtListBoundaries(container, now))
+  await queueOnOfferChange(container, now)
   return drainSearchIndex(container)
 }
 

@@ -191,9 +191,9 @@ async function listingFilters(
     const ids = await landingListing(container, owner.entity_id)
     return ids ? { id: ids } : null
   }
-  // The products on sale now (`/kampanyalar`)
+  // The newest products on sale now (`/kampanyalar`), from the search index
   if (owner.entity_type === SALE_LISTING) {
-    const ids = await saleProductIds(container)
+    const ids = await saleProductIds(container, LISTING_SIZE)
     return ids.length > 0 ? { id: ids } : null
   }
   return null

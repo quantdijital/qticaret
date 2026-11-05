@@ -94,7 +94,7 @@ export async function listingProducts(
   const started = performance.now()
   const isSearch = input.listed.entity_type === SEARCH_LISTING
   const [scope, definitions] = await Promise.all([
-    isSearch ? Promise.resolve({}) : listingScope(container, input.listed, input.region_id),
+    isSearch ? Promise.resolve({}) : listingScope(container, input.listed),
     definitionsCache("definitions", () => filterDefinitions(container)),
   ])
   const { query } = input

@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { SeoSubject } from "../../lib/seo/resolve"
-import { SALE_LISTING, saleProductIds } from "../pricing/sale-products"
+import { SALE_LISTING, isAnythingOnSale } from "../pricing/sale-products"
 import { imageOf, listingItems, shopOf } from "./payload-sources"
 
 // Its name follows the shop's language once there are more (F19), as the blog's does
@@ -23,28 +23,26 @@ export async function saleSubject(
   _id: string,
   path: string
 ): Promise<SeoSubject> {
-  const [ids, shop] = await Promise.all([saleProductIds(container), shopOf(container)])
+  const [onSale, shop] = await Promise.all([isAnythingOnSale(container), shopOf(container)])
   return {
     kind: "sale",
     path,
     name: SALE_NAME,
     description: describe(shop.name),
     tokens: {},
-    overrides:
-      ids.length === 0
-        ? {
-            seo_title: null,
-            seo_description: null,
-            canonical_override: null,
-            robots_override: "noindex_follow",
-            og_image_alt: null,
-          }
-        : null,
+    overrides: onSale
+      ? null
+      : {
+          seo_title: null,
+          seo_description: null,
+          canonical_override: null,
+          robots_override: "noindex_follow",
+          og_image_alt: null,
+        },
     image: await imageOf(container, null, null),
     trail: [],
-    listing:
-      ids.length > 0
-        ? await listingItems(container, { entity_type: SALE_LISTING, entity_id: SALE_LISTING })
-        : [],
+    listing: onSale
+      ? await listingItems(container, { entity_type: SALE_LISTING, entity_id: SALE_LISTING })
+      : [],
   }
 }

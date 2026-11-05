@@ -26,6 +26,7 @@ import {
 } from "./sql/documents"
 import { listingResult, listingStatement } from "./sql/listing"
 import { claimPending, finishPending, markPending, pendingCount } from "./sql/pending"
+import { readState, writeState } from "./sql/state"
 import { indexStatus } from "./sql/status"
 import type { IndexStatus } from "./sql/status"
 import type {
@@ -165,6 +166,17 @@ class SearchIndexModuleService extends MedusaService({ SearchSynonym }) {
   @InjectManager()
   async pendingCount(@MedusaContext() context: Context = {}): Promise<number> {
     return pendingCount(run(context))
+  }
+
+  /** What the upkeep compared last under `key`; null before the first time. */
+  @InjectManager()
+  async readState(key: string, @MedusaContext() context: Context = {}): Promise<string | null> {
+    return readState(run(context), key)
+  }
+
+  @InjectTransactionManager()
+  async writeState(key: string, value: string, @MedusaContext() context: Context = {}) {
+    await writeState(run(context, true), key, value)
   }
 
   /** What the index holds now: rows, the queue, the dictionary, the synonyms (the panel). */

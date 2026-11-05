@@ -13,7 +13,7 @@ import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
 import { liveLandingFilters } from "../content/landing-facet"
 import { shopOf } from "./payload-sources"
 import { SALE_PATH } from "../../lib/seo/url-patterns"
-import { saleProductIds } from "../pricing/sale-products"
+import { isAnythingOnSale } from "../pricing/sale-products"
 import { termSitemapPaths } from "./sitemap-terms"
 
 /**
@@ -237,7 +237,7 @@ async function siteEntries(container: MedusaContainer, origin: string): Promise<
     container
       .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
       .listProductReviews({ status: "approved" }, { select: ["id"], take: 1 }),
-    saleProductIds(container),
+    isAnythingOnSale(container),
   ])
   return [
     { loc: `${origin}/`, lastmod: null },
@@ -247,7 +247,7 @@ async function siteEntries(container: MedusaContainer, origin: string): Promise<
     ...(posts.length > 0 ? [{ loc: `${origin}/blog`, lastmod: null }] : []),
     ...(reviews.length > 0 ? [{ loc: `${origin}/yorumlar`, lastmod: null }] : []),
     // Noindex while nothing is on sale (adr/0019 ek 2026-11-03)
-    ...(sale.length > 0 ? [{ loc: `${origin}${SALE_PATH}`, lastmod: null }] : []),
+    ...(sale ? [{ loc: `${origin}${SALE_PATH}`, lastmod: null }] : []),
   ]
 }
 

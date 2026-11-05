@@ -6,8 +6,9 @@ import { searchIndexMinute } from "../workflows/search/upkeep"
 
 /**
  * The search index's minute (adr/0056): price lists that began or ended,
- * products left pending by a stopped process, the first build of a new
- * shop's index. One run at a time across processes.
+ * automatic promotions that changed, products left pending by a stopped
+ * process, the first build of a new shop's index. One run at a time
+ * across processes.
  */
 export default async function searchIndexMinuteJob(container: MedusaContainer) {
   try {

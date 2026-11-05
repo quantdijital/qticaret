@@ -52,6 +52,9 @@ function scopeOf(plan: ListingPlan, sql: Statement): string {
   if (scope.option !== undefined) {
     where.push(`d.options @> ARRAY[${sql.param(scope.option)}]::text[]`)
   }
+  if (scope.on_sale) {
+    where.push("d.on_sale")
+  }
   if (plan.text) {
     where.push(`d.document @@ ${sql.param(plan.text.match)}::tsquery`)
   }
