@@ -198,6 +198,10 @@ export function PurchasePanel({
                 {labels.discount[price.discount]}
               </Badge>
             )}
+            {/* A cart offer past a minimum (adr/0046 Ek 2026-11-05): beside the price, not in it */}
+            {price.cartOffer && (
+              <p className="basis-full text-sm font-medium text-sale">{price.cartOffer}</p>
+            )}
           </div>
         )}
         <p className="flex items-center gap-2 text-sm font-medium">

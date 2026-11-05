@@ -2,7 +2,7 @@ import { Star } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { HomeSectionView, PlaceOrderResult, Translate } from "@qticaret/ui"
 import { PostCard } from "../components/PostCard"
-import { ReviewPhotos } from "../components/ReviewExtras"
+import { RatingSummary, ReviewPhotos } from "../components/ReviewExtras"
 import { TrustStrip } from "../components/TrustStrip"
 import { NewsletterForm } from "../layout/NewsletterForm"
 import { newsletterWords } from "../layout/newsletter-words"
@@ -32,6 +32,7 @@ export function ReviewsSection({ section, t }: { section: Of<"reviews">; t: Tran
   return (
     <section aria-labelledby={id} className="flex flex-col gap-8">
       <SectionHead id={id} title={section.title} more={section.more} />
+      {section.summary && <RatingSummary summary={section.summary} t={t} />}
       <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {section.reviews.map((review, index) => (
           <li

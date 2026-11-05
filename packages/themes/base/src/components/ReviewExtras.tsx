@@ -1,4 +1,5 @@
-import type { RatingBarView, ReviewPhotoView } from "@qticaret/ui"
+import { Star } from "lucide-react"
+import type { RatingBarView, ReviewPhotoView, ShopRatingView, Translate } from "@qticaret/ui"
 import { ResponsiveImage } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { fillOf } from "../cart/FreeShippingBar"
@@ -35,6 +36,44 @@ export function RatingBars({
         </li>
       ))}
     </ul>
+  )
+}
+
+/**
+ * The shop's reviews in short (adr/0046 Ek 2026-11-05): the average large
+ * with its stars and count, the spread beside it; read out as one line.
+ */
+export function RatingSummary({ summary, t }: { summary: ShopRatingView; t: Translate }) {
+  const filled = Math.round(Number(summary.average.replace(",", ".")))
+  return (
+    <div className="grid gap-6 rounded-2xl border bg-card p-6 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-center sm:gap-10">
+      <div className="flex flex-col gap-1">
+        <p className="sr-only">{summary.label}</p>
+        <p aria-hidden="true" className="tabular text-5xl font-semibold leading-none">
+          {summary.average}
+        </p>
+        <p aria-hidden="true" className="flex gap-0.5">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              className={
+                star <= filled ? "size-4 fill-current text-primary" : "size-4 text-muted-foreground"
+              }
+            />
+          ))}
+        </p>
+        <p aria-hidden="true" className="text-sm text-muted-foreground">
+          {t("reviews.count", { count: summary.count })}
+        </p>
+      </div>
+      <RatingBars
+        bars={summary.distribution}
+        label={t("reviews.distribution")}
+        starsLabel={Object.fromEntries(
+          [5, 4, 3, 2, 1].map((stars) => [stars, t("reviews.bar_stars", { stars })])
+        )}
+      />
+    </div>
   )
 }
 

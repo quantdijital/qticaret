@@ -1,3 +1,4 @@
+import { FeaturedProductSection } from "@qticaret/theme-base"
 import type { FormAction, HomeSectionView, PlaceOrderResult, Translate } from "@qticaret/ui"
 import {
   BannerSection,
@@ -61,6 +62,9 @@ function Section({
     case "products":
       // Products always stand in a shelf run (`runs`)
       return null
+    case "featured_product":
+      // The close-up (design.md) is the theme's own next step; until drawn, the base one in Atölye's tokens
+      return <FeaturedProductSection section={section} t={t} />
     case "brands":
       return <BrandsSection section={section} />
     case "posts":

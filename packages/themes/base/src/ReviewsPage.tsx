@@ -3,7 +3,7 @@ import type { ReviewsPageView, Translate } from "@qticaret/ui"
 import { Breadcrumbs } from "./components/Breadcrumbs"
 import { PageContainer } from "./components/Container"
 import { Pages } from "./components/Pages"
-import { ReviewPhotos } from "./components/ReviewExtras"
+import { RatingSummary, ReviewPhotos } from "./components/ReviewExtras"
 
 /** The shop's approved reviews, newest first, each with its product's link. */
 export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }) {
@@ -11,10 +11,14 @@ export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }
     <PageContainer className="flex flex-col gap-6">
       <Breadcrumbs items={view.breadcrumbs} t={t} />
       <h1 className="text-4xl">{view.title}</h1>
-      {view.average !== null && (
-        <p className="text-muted-foreground">
-          {t("reviews.summary", { average: view.average, count: view.count })}
-        </p>
+      {view.summary ? (
+        <RatingSummary summary={view.summary} t={t} />
+      ) : (
+        view.average !== null && (
+          <p className="text-muted-foreground">
+            {t("reviews.summary", { average: view.average, count: view.count })}
+          </p>
+        )
       )}
       {view.reviews.length === 0 ? (
         <p className="rounded-2xl border bg-card p-8 text-center text-muted-foreground">

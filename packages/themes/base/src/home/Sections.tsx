@@ -2,6 +2,7 @@ import type { FormAction, HomeSectionView, PlaceOrderResult, Translate } from "@
 import { BannerSection } from "./BannerSection"
 import { BrandsSection, CategoriesSection, ProductsSection } from "./CatalogSections"
 import { FaqSection } from "./FaqSection"
+import { FeaturedProductSection } from "./FeaturedProductSection"
 import { HelpBand } from "./HelpBand"
 import { HeroSection } from "./HeroSection"
 import {
@@ -46,6 +47,8 @@ function Section({
           quickAdd={quickAdd}
         />
       )
+    case "featured_product":
+      return <FeaturedProductSection section={section} t={t} />
     case "brands":
       return <BrandsSection section={section} />
     case "posts":

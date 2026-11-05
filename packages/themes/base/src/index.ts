@@ -46,3 +46,6 @@ export const baseTheme: StorefrontTheme = {
   GiftCardBalancePage,
   PaymentLinkPage,
 }
+
+/** A section another theme may borrow until it draws its own (adr/0046 Ek 2026-11-05). */
+export { FeaturedProductSection } from "./home/FeaturedProductSection"
