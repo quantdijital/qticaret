@@ -1040,5 +1040,12 @@
   "placeholder.choose_subject": "Konu seçin",
   "placeholder.promo_code": "Kampanya kodunuzu yazın",
   "placeholder.gift_card_code": "Karttaki kodu yazın",
-  "placeholder.name_example": "Örn. Ayşe Yılmaz"
+  "placeholder.name_example": "Örn. Ayşe Yılmaz",
+  "home.slider": "Öne çıkan seçkiler",
+  "home.slider_previous": "Önceki slayt",
+  "home.slider_next": "Sonraki slayt",
+  "home.slider_go": "{n}. slayta geç",
+  "home.slider_slide": "{n} / {total}",
+  "home.slider_play": "Slaytları oynat",
+  "home.slider_pause": "Slaytları durdur"
 }

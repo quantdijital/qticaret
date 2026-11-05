@@ -13,6 +13,7 @@ import { reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
 import { categoryTiles } from "./category-tiles"
 import { featuredView } from "./featured"
+import { heroSliderView } from "./hero-slider"
 import { layoutImage, layoutLink } from "./layout"
 import { legalDocument, legalPath } from "./legal"
 import { postCards } from "./posts"
@@ -105,6 +106,8 @@ async function sectionView(
         image: section.image ? layoutImage(section.image, section.heading ?? site.shop.name) : null,
       }
     }
+    case "hero_slider":
+      return heroSliderView(section, t)
     case "banner":
       return {
         id,

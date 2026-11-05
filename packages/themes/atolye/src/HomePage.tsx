@@ -23,7 +23,12 @@ export function HomePage({
   quickAdd?: FormAction | undefined
 }) {
   const [head] = blocksOf(view.sections)
-  const opensWithHero = head?.kind === "one" && head.section.type === "hero"
+  const opening = head?.kind === "one" ? head.section : null
+  const opensWithHero = opening?.type === "hero" || opening?.type === "hero_slider"
+  // A sliding opening heads the page with its first slide's heading, when it has one
+  const ownsH1 =
+    opening?.type === "hero" ||
+    (opening?.type === "hero_slider" && Boolean(opening.slides[0]?.heading))
   return (
     <>
       {view.notice && (
@@ -33,7 +38,7 @@ export function HomePage({
           </p>
         </Container>
       )}
-      {!opensWithHero && <h1 className="sr-only">{t("home.label")}</h1>}
+      {!ownsH1 && <h1 className="sr-only">{t("home.label")}</h1>}
       <Blocks
         sections={view.sections}
         t={t}

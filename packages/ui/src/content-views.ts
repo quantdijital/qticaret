@@ -1,6 +1,10 @@
 import type { ShelfColumns } from "@qticaret/types"
 import type { CategoryCardView, CustomerPhotoView, ShopMarkView } from "./card-views"
-import type { FeaturedProductSectionView, ShopRatingView } from "./home-views"
+import type {
+  FeaturedProductSectionView,
+  HeroSliderSectionView,
+  ShopRatingView,
+} from "./home-views"
 import type { PaginationView } from "./listing-views"
 import type { BreadcrumbView, ProductCardView, ReviewView } from "./product-views"
 import type { ContactView, ImageView, LinkView, SocialLinkView, TrustBadgeView } from "./views"
@@ -30,6 +34,7 @@ export type HomeSectionView =
       actions: LinkView[]
       image: ImageView | null
     }
+  | HeroSliderSectionView
   | {
       id: string
       type: "banner"

@@ -6,6 +6,30 @@ import { cn } from "@qticaret/ui/lib/utils"
 import { headingId } from "./SectionHead"
 
 type Hero = Extract<HomeSectionView, { type: "hero" }>
+type Slider = Extract<HomeSectionView, { type: "hero_slider" }>
+
+/**
+ * This theme has no slider (adr/0049 Ek 2026-11-06): a sliding opening
+ * shows its first slide as the still one, when that slide has a heading.
+ */
+export function firstSlide(section: Slider): Hero | null {
+  const [slide] = section.slides
+  return slide?.heading
+    ? {
+        id: section.id,
+        type: "hero",
+        eyebrow: null,
+        heading: slide.heading,
+        intro: slide.text,
+        actions: slide.link ? [slide.link] : [],
+        image: slide.image,
+      }
+    : null
+}
+
+/** Whether the section opens the page with a heading of its own (the page's h1). */
+export const opensPage = (section: HomeSectionView | undefined): boolean =>
+  section?.type === "hero" || (section?.type === "hero_slider" && firstSlide(section) !== null)
 
 /** The opening: the shop's line and buttons, beside its picture when it chose one. */
 export function HeroSection({ section, first }: { section: Hero; first: boolean }) {

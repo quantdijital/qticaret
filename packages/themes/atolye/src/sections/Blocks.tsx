@@ -13,6 +13,7 @@ import { Faq } from "./Faq"
 import { Guides } from "./Guides"
 import { Help } from "./Help"
 import { Hero } from "./Hero"
+import { HeroSlider } from "./HeroSlider"
 import { type Block, blocksOf, headingId } from "./plan"
 import { Promises } from "./Promises"
 import { Reviews } from "./Reviews"
@@ -58,6 +59,8 @@ function BlockView({
   switch (section.type) {
     case "hero":
       return <Hero hero={section} product={first ? context.opening : null} first={first} />
+    case "hero_slider":
+      return <HeroSlider section={section} first={first} t={t} />
     case "trust_badges":
       return <Promises badges={section.badges} label={t("footer.trust")} />
     case "categories":

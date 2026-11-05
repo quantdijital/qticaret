@@ -1,5 +1,5 @@
 import type { RatingBarView, SpecGroupView } from "./card-views"
-import type { CardRatingView, ImageView, ProductCardView, SpecView } from "./views"
+import type { CardRatingView, ImageView, LinkView, ProductCardView, SpecView } from "./views"
 
 /**
  * Optional home page sections and fields a theme may draw (adr/0046 Ek
@@ -7,6 +7,39 @@ import type { CardRatingView, ImageView, ProductCardView, SpecView } from "./vie
  * shop's reviews in short. A storefront or backend before them leaves
  * them out and the theme draws what it drew before.
  */
+
+/**
+ * The home page's sliding opening (`hero_slider`, adr/0049 Ek 2026-11-06),
+ * an extra to the still hero: 2–6 slides in the shop's order. Nothing
+ * moves by itself unless `autoplay`; the theme stops it on hover, focus,
+ * a visitor's own step and reduced motion. A theme without a slider draws
+ * the first slide as its opening.
+ */
+export interface HeroSliderSectionView {
+  id: string
+  type: "hero_slider"
+  slides: HeroSlideView[]
+  /** `compact` a lower stage, `regular` the opening's own. */
+  height: "compact" | "regular"
+  autoplay: boolean
+  /** Seconds a slide stays while it plays (5–10). */
+  interval: number
+  dots: boolean
+  arrows: boolean
+}
+
+export interface HeroSlideView {
+  image: ImageView
+  /** A phone's own picture (under 640 px); null: the wide one. */
+  mobileImage: ImageView | null
+  heading: string | null
+  text: string | null
+  /** The slide's one action; null: none. */
+  link: LinkView | null
+  position: "left" | "center" | "right"
+  /** `light`: light words on a dark picture; `dark`: dark words on a light one. */
+  tone: "light" | "dark"
+}
 
 /**
  * One product up close (`featured_product`): the shop chose it in the

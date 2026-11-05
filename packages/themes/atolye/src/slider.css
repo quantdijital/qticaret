@@ -1,0 +1,21 @@
+/*
+ * The sliding opening's dark words (`sections/HeroSlider`, adr/0049 Ek
+ * 2026-11-06): from 640 px a `dark` slide's words stand on a light veil
+ * over its picture, so its action is the shop-colour pill again (not the
+ * graphite stage's light ink) and its focus ring the counter's. On a phone
+ * every slide's words sit on the graphite under the picture: no change.
+ */
+@media (min-width: 40rem) {
+  .gf-stage .gf-slide--dark .gf-btn:not(.gf-btn--quiet) {
+    background: var(--color-signal);
+    color: var(--color-signal-ink);
+  }
+  .gf-stage .gf-slide--dark :focus-visible {
+    outline-color: var(--color-focus);
+  }
+}
+@media (min-width: 40rem) and (hover: hover) {
+  .gf-stage .gf-slide--dark .gf-btn:not(.gf-btn--quiet):hover:not(:disabled) {
+    background: var(--color-signal-deep);
+  }
+}

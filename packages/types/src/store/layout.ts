@@ -65,6 +65,7 @@ export type StoreLayoutSection =
         link: StoreLayoutLink | null
       }[]
     }
+  | StoreHeroSliderSection
   | { id: string; type: "categories"; title: string | null; category_ids: string[] }
   | {
       id: string
@@ -86,6 +87,35 @@ export type StoreLayoutSection =
   | { id: string; type: "trust_badges" }
   | { id: string; type: "newsletter" | "help"; title: string | null; text: string | null }
   | StoreFaqSection
+
+/**
+ * The home page's sliding opening (adr/0049 Ek 2026-11-06), an extra to
+ * the still `hero`: 2–6 slides, still unless `autoplay` (every
+ * `interval` seconds, 5–10).
+ */
+export interface StoreHeroSliderSection {
+  id: string
+  type: "hero_slider"
+  slides: StoreHeroSlide[]
+  height: "compact" | "regular"
+  autoplay: boolean
+  interval: number
+  dots: boolean
+  arrows: boolean
+}
+
+export interface StoreHeroSlide {
+  image: StoreLayoutImage
+  /** A phone's own picture; null: the wide one. */
+  mobile_image: StoreLayoutImage | null
+  heading: string | null
+  text: string | null
+  /** The slide's one action; a broken one is null. */
+  link: StoreLayoutLink | null
+  position: "left" | "center" | "right"
+  /** `light`: light words on a dark picture; `dark`: dark words on a light one. */
+  tone: "light" | "dark"
+}
 
 /** One live product up close on the home page (adr/0046 Ek 2026-11-05); the storefront reads it. */
 export interface StoreFeaturedProductSection {

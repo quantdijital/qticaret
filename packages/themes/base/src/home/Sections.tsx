@@ -4,7 +4,7 @@ import { BrandsSection, CategoriesSection, ProductsSection } from "./CatalogSect
 import { FaqSection } from "./FaqSection"
 import { FeaturedProductSection } from "./FeaturedProductSection"
 import { HelpBand } from "./HelpBand"
-import { HeroSection } from "./HeroSection"
+import { HeroSection, firstSlide } from "./HeroSection"
 import {
   NewsletterSection,
   PostsSection,
@@ -33,6 +33,10 @@ function Section({
   switch (section.type) {
     case "hero":
       return <HeroSection section={section} first={atTop && index === 0} />
+    case "hero_slider": {
+      const hero = firstSlide(section)
+      return hero ? <HeroSection section={hero} first={atTop && index === 0} /> : null
+    }
     case "banner":
       return <BannerSection section={section} label={t("home.banner")} />
     case "categories":
