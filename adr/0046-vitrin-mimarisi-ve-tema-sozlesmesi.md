@@ -293,3 +293,18 @@ UX denetimi 2026-11-05 (`docs/tema/ux-denetim-2026-11-05-sayfalar.md` § 4): öd
 | `ShopView.checkout?` | `boolean` | vekilin `x-qt-url`'i `/odeme` ya da `/odeme/…` (`lib/views/bottom-nav.ts` `isCheckoutPage`); sepet (`/sepet`) ve ödeme bağlantısının sayfası (`/ode/…`) hayır |
 
 - Atölye bu sayfalarda sade başlık ve yalnız küçük yazılı alt bilgi çizer (`design.md` § Satın alma sayfaları, "Ödeme çerçevesi"); alt gezinme zaten yoktu (`bottomNav: null`).
+
+## Ek (2026-11-06, ürün sayfası): "Kargo ve Teslimat" kartının teslim süresi ve aynı gün kargo saati (otonom, gözden geçir)
+
+Kart teslim sözünü mağazanın rozet satırlarından (kamyon ve saat simgeli `trust_badges`) kuruyordu; `GET /store/storefront` teslim süresini ve aynı gün kargo saatini ayrı alan olarak vermiyordu. İkisi de ayarlarda zaten vardı, yeni alan ve migration yok:
+
+- **Kargoya verme ve taşıma günleri:** `shipping.handling_days_min/max`, `shipping.transit_days_min/max` (Ayarlar > Kargo > Seçenekler > "Teslim süresi"; ürünlerin `shippingDetails`'i ve `kargo_cümlesi` aynılarını söyler).
+- **Aynı gün kargo saati:** `marketing.feed_same_day_cutoff_hour` (1–23 ya da `null`; Ayarlar > Pazarlama > Ürün akışları > "Feed kuralları"; Akakçe'nin `expressDeliveryTime`'ı). Panelin iki kartındaki açıklama artık ürün sayfasını da söyler.
+
+| Alan | Şekli | Kaynak |
+| --- | --- | --- |
+| `StorefrontAnswer.delivery?` (`@qticaret/types`) | `StoreDelivery` (`handling_days: { min, max }`, `transit_days: { min, max }`, `same_day_cutoff_hour: number \| null`) | `GET /store/storefront` `delivery` (`workflows/storefront/delivery.ts`, saf); alanı vermeyen eski backend: kart rozet satırlarını söyler |
+
+- **Vitrin:** `productShipping` `delivery` alır (`lib/views/product-shipping.ts`, `deliveryFacts`): kamyonla "1–2 iş gününde kargoda" (0–0: "Aynı gün kargoda"), altında "Tahmini teslimat 2–5 iş günü" (kargoya verme + taşıma); saat ayarlıysa saatle "Saat 15:00'e kadar verilen siparişler aynı gün kargoda" (yönelme eki saatin okunuşuna göre: 'a, 'e, 'ye, 'ya). Sıra: ücretsiz kargo, teslim, aynı gün, iade. Ayar gelince mağazanın kamyon ve saat simgeli satırları kartta söylenmez (ücretsiz kargo eşiğini adıyla anan satırı yine ücretsiz kargo olgusudur). Geri sayım, hafta sonu ve tatil kuralı yok: mağazanın kargo sayfası söyler.
+- **Atölye:** kart varken satın alma sütunu kamyon, saat ve iade simgeli rozetleri hiç göstermez (önceden yalnız kartta aynen geçenleri çıkarıyordu); kartsız ürün bugünkü gibi.
+- **Testler:** backend `workflows/storefront/__tests__/delivery.unit.spec.ts`, HTTP `storefront-frame.spec.ts`; vitrin `lib/views/__tests__/product-shipping.spec.ts`, `lib/__tests__/atolye-product-theme.spec.ts`; panel `feed-rules-card.spec.tsx`.
