@@ -14,14 +14,6 @@
   }
 }
 
-/* Dark: the field and the well are one step (21.5%), so a row, pill or note filled with the
-   field inside a well takes the next step up and still reads as filled */
-@media (prefers-color-scheme: dark) {
-  .bg-paper-2 .bg-field:not(input) {
-    background-color: var(--color-paper-3);
-  }
-}
-
 /* A contract as the backend renders it (adr/0019): its heads and tables in the box's own small type */
 .gf-contract :where(h1, h2, h3) {
   max-width: none;

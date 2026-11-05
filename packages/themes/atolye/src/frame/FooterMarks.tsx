@@ -8,7 +8,7 @@ const ICONS: Record<string, typeof Landmark> = {
   cash_on_delivery: Banknote,
 }
 
-/** One mark on its light chip (light in the dark too, so a provider's colours read): never a link. */
+/** One mark on its light chip (so a provider's colours read): never a link. */
 function Chip({ mark }: { mark: ShopMarkView }) {
   const Icon = ICONS[mark.key]
   return (

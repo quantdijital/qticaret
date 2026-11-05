@@ -33,7 +33,7 @@
   --color-paper-2: oklch(95.6% 0.005 250);
   --color-paper-3: oklch(91.6% 0.007 250);
   --color-field: oklch(99.4% 0.002 250);
-  /* A provider's mark sits on this in both modes: its own colours need a light ground */
+  /* A provider's mark sits on this: its own colours need a light ground */
   --color-chip: oklch(98.6% 0.002 250);
   --color-text: oklch(20% 0.012 255);
   --color-text-2: oklch(35% 0.012 255);
@@ -73,7 +73,9 @@
 }
 
 :root {
-  color-scheme: light dark;
+  /* Always light, whatever the visitor's system says (owner 2026-11-05): native controls,
+     scrollbars and framed pages draw light, and a browser's forced dark leaves it alone */
+  color-scheme: only light;
   --space-3xs: 2px;
   --space-2xs: 4px;
   --space-xs: 8px;
@@ -126,44 +128,5 @@
 @supports (color: oklch(from red l c h)) {
   :root {
     --color-signal-on-stage: oklch(from var(--primary) 78% min(c, 0.13) h);
-  }
-}
-
-/* Dark: the counter turns graphite, the stages one step deeper; derived, never inverted */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-paper: oklch(17% 0.011 255);
-    --color-paper-2: oklch(21.5% 0.012 255);
-    --color-paper-3: oklch(26% 0.013 255);
-    --color-field: oklch(21.5% 0.012 255);
-    --color-text: oklch(95.5% 0.004 250);
-    --color-text-2: oklch(84% 0.007 250);
-    --color-text-3: oklch(73% 0.009 250);
-    --color-rule: oklch(30% 0.012 255);
-    --color-edge: oklch(60% 0.01 250);
-    --color-stage: oklch(12.5% 0.01 255);
-    --color-stage-2: oklch(19% 0.012 255);
-    --color-stage-rule: oklch(30% 0.012 255);
-    --color-signal: oklch(70% 0.12 350);
-    --color-signal-ink: oklch(15% 0.012 255);
-    --color-signal-deep: oklch(76% 0.11 350);
-    --color-signal-soft: oklch(25% 0.03 350);
-    --color-focus: var(--color-signal);
-    --color-deal: oklch(72% 0.15 27);
-    --color-deal-ink: oklch(15% 0.012 255);
-    --color-ok: oklch(76% 0.12 150);
-    --color-error: oklch(73% 0.15 27);
-    --color-star: oklch(80% 0.14 80);
-    --color-whatsapp: oklch(72% 0.14 152);
-    --color-whatsapp-ink: oklch(15% 0.012 255);
-    --color-scrim: oklch(5% 0.01 255 / 0.65);
-    --shadow-float: 0 12px 32px oklch(5% 0.01 255 / 0.5);
-  }
-  @supports (color: oklch(from red l c h)) {
-    :root {
-      --color-signal: oklch(from var(--primary) 72% min(c, 0.13) h);
-      --color-signal-deep: oklch(from var(--primary) 78% min(c, 0.12) h);
-      --color-signal-soft: oklch(from var(--primary) 26% min(c, 0.04) h);
-    }
   }
 }

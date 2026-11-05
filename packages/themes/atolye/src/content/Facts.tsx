@@ -15,7 +15,7 @@ const ICONS: Record<string, typeof Landmark> = {
   cash_on_delivery: Banknote,
 }
 
-/** The providers' own marks, each on a light chip of one height (light in the dark too). */
+/** The providers' own marks, each on a light chip of one height. */
 function Marks({ marks }: { marks: readonly ShopMarkView[] }) {
   return (
     <ul className="flex flex-wrap gap-2">

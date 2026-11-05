@@ -8,8 +8,8 @@ import { FoldedSummary, Summary } from "./Summary"
  * The card provider's hosted form, framed on the shop (PayTR iFrame,
  * adr/0026): the card never touches our pages. The frame takes its page's
  * height (PayTR's resizer messages), so a phone scrolls the page, never a
- * box inside it; it sits on a light field in both modes, the provider's
- * own colours. The way back to the payment step stays above it.
+ * box inside it; it sits on a light field, the provider's own colours.
+ * The way back to the payment step stays above it.
  */
 export function PaymentFramePage({ view, t }: { view: PaymentFramePageView; t: Translate }) {
   return (

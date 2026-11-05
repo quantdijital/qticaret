@@ -217,7 +217,7 @@
     font-size: var(--text-sm);
     font-weight: 600;
   }
-  /* A chip in the panel reads as one on the field's ground in both modes */
+  /* A chip in the panel reads as one on the field's ground */
   .gf-option-chip:not([aria-selected="true"]) {
     background: color-mix(in oklab, var(--color-text) 7%, var(--color-field));
   }
