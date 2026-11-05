@@ -6,7 +6,7 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { MiniCartView } from "@qticaret/ui"
 import { FreeShippingBar } from "../components/FreeShippingBar"
 import { Drawer } from "./Drawer"
-import { CART_ADDED_EVENT, isOwnClick } from "./events"
+import { CART_ADDED_EVENT, cartAddedMessage, isOwnClick } from "./events"
 
 export interface CartDrawerWords {
   /** "Sepet, 2 ürün": the header link's name. */
@@ -29,7 +29,9 @@ export interface CartDrawerWords {
  * the script runs, opens a drawer from the right with the lines (read
  * only), free shipping's distance and the subtotal; "Ödemeye geç" is the
  * one filled button, "Sepete git" a link. It opens by itself when the
- * purchase form put a line in, so no toast says so.
+ * purchase form put a line in, so no toast says so; a card's quick add
+ * also has its words said in the cart's live region and in the drawer's
+ * description, which a screen reader reads as the drawer opens.
  */
 export function CartDrawer({
   cart,
@@ -41,8 +43,10 @@ export function CartDrawer({
   words: CartDrawerWords
 }) {
   const [open, setOpen] = useState(false)
+  const [said, setSaid] = useState("")
   useEffect(() => {
-    const show = () => {
+    const show = (event: Event) => {
+      setSaid(cartAddedMessage(event))
       setOpen(true)
     }
     window.addEventListener(CART_ADDED_EVENT, show)
@@ -61,6 +65,7 @@ export function CartDrawer({
             return
           }
           event.preventDefault()
+          setSaid("")
           setOpen(true)
         }}
       >
@@ -77,9 +82,12 @@ export function CartDrawer({
         onOpenChange={setOpen}
         side="right"
         title={words.title}
-        description={words.label}
+        description={said ? `${said}. ${words.label}` : words.label}
         closeLabel={words.close}
       >
+        <p role="status" className="sr-only">
+          {said}
+        </p>
         {cart && cart.lines.length > 0 ? (
           <>
             <ul className="flex-1 overflow-y-auto px-4 sm:px-6">
@@ -96,7 +104,10 @@ export function CartDrawer({
                   </div>
                   <div className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
                     <span className="line-clamp-2 font-medium">{line.title}</span>
-                    {line.detail && <span className="text-text-3">{line.detail}</span>}
+                    {/* A variant named like its product (its only one) says nothing new */}
+                    {line.detail && line.detail.trim() !== line.title.trim() && (
+                      <span className="text-text-3">{line.detail}</span>
+                    )}
                     <span className="text-text-3">
                       {words.quantity.replace("{count}", String(line.quantity))}
                     </span>

@@ -221,8 +221,11 @@
   outline: 2px solid var(--color-focus);
   outline-offset: 2px;
 }
+/* Rows edge to edge, and a drawer's close button in the window's corner:
+   the ring goes inside, never cut off */
 .at-row-link:focus-visible,
-.at-bar-item:focus-visible {
+.at-bar-item:focus-visible,
+[data-drawer] .at-icon-btn:focus-visible {
   outline-offset: -2px;
 }
 .at-band :focus-visible {

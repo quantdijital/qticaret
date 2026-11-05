@@ -1,4 +1,4 @@
-import type { HomeSectionView, PlaceOrderResult, Translate } from "@qticaret/ui"
+import type { FormAction, HomeSectionView, PlaceOrderResult, Translate } from "@qticaret/ui"
 import {
   BannerSection,
   BrandsSection,
@@ -11,8 +11,9 @@ import {
 import { CategoryIndex } from "./CategoryIndex"
 import { Opening, headingId } from "./Opening"
 import type { Of } from "./plan"
+import { ReviewsSection } from "./Reviews"
 import { Shelf } from "./Shelf"
-import { PostsSection, ReviewsSection } from "./Stories"
+import { PostsSection } from "./Stories"
 
 export type Subscribe = (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
 
@@ -58,7 +59,8 @@ function Section({
         />
       )
     case "products":
-      return <Shelf sections={[section]} t={t} />
+      // Products always stand in a shelf run (`runs`)
+      return null
     case "brands":
       return <BrandsSection section={section} />
     case "posts":
@@ -80,20 +82,23 @@ function Section({
 
 /**
  * The shop's sections after the opening, in its order, each drawn by its
- * type (adr/0049); neighbouring product sections become one tabbed shelf.
+ * type (adr/0049); neighbouring product sections become one tabbed shelf,
+ * its cards with the quick add when the page passed one.
  */
 export function Sections({
   sections,
   t,
   subscribe,
+  quickAdd,
 }: {
   sections: readonly HomeSectionView[]
   t: Translate
   subscribe?: Subscribe | undefined
+  quickAdd?: FormAction | undefined
 }) {
   return runs(sections).map((run) =>
     run.kind === "shelf" ? (
-      <Shelf key={run.sections[0]?.id} sections={run.sections} t={t} />
+      <Shelf key={run.sections[0]?.id} sections={run.sections} t={t} quickAdd={quickAdd} />
     ) : (
       <Section key={run.section.id} section={run.section} t={t} subscribe={subscribe} />
     )

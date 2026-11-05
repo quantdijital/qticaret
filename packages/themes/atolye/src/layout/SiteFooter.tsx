@@ -3,6 +3,7 @@ import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../components/Container"
 import { TrustStrip } from "../components/TrustStrip"
 import { CookiePreferencesLink } from "./CookiePreferencesLink"
+import { FooterMarks } from "./FooterMarks"
 import { NewsletterForm, newsletterWords } from "./NewsletterForm"
 
 const HEAD = "max-w-none font-body text-sm font-medium tracking-normal text-band-text-2"
@@ -14,7 +15,9 @@ const LINK = "at-band-link min-h-11 py-2"
  * large over its contact details, its link columns (the footer menus),
  * its profiles in words and the newsletter box when the shop keeps one;
  * then the small print: the legal pages, each identity line on a line of
- * its own (6563, ETBİS) and the year with the registered name.
+ * its own (6563, ETBİS), the ETBİS QR code and the ways to pay and the
+ * carriers as text badges when the shop has them, and the year with the
+ * registered name.
  */
 export function SiteFooter({
   shop,
@@ -154,8 +157,7 @@ export function SiteFooter({
                 ))}
               </ul>
             )}
-            {/* TODO(adr/0013 ek, denetim §7): the ETBİS code and the payment and carrier
-                marks the shop may show take this row once the contract carries them */}
+            <FooterMarks shop={shop} t={t} />
             <p>{t("footer.copyright", { year, name: shop.companyTitle ?? shop.name })}</p>
           </Container>
         </div>
