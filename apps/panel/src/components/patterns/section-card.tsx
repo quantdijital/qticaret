@@ -1,4 +1,6 @@
 import type { ReactNode } from "react"
+import { CollapsibleSection } from "@/components/patterns/collapsible-section"
+import type { CollapseOptions } from "@/components/patterns/collapsible-section"
 import { cn } from "@/lib/utils"
 
 interface SectionCardProps {
@@ -10,6 +12,8 @@ interface SectionCardProps {
   /** Body without padding, for tables and lists that run edge to edge. */
   flush?: boolean
   className?: string | undefined
+  /** Folds to its title and a one-line summary (a page's secondary parts, docs/18 §7). */
+  collapse?: CollapseOptions | undefined
   children: ReactNode
 }
 
@@ -20,8 +24,22 @@ export function SectionCard({
   action,
   flush = false,
   className,
+  collapse,
   children,
 }: SectionCardProps) {
+  if (collapse) {
+    return (
+      <CollapsibleSection
+        {...collapse}
+        title={title}
+        description={description}
+        action={action}
+        className={className}
+      >
+        {children}
+      </CollapsibleSection>
+    )
+  }
   return (
     <section
       className={cn(

@@ -77,8 +77,14 @@ test("a product's page has no serious accessibility issue", async ({ page }) => 
   await expect(pageHeading(page)).toBeVisible()
   await page.waitForLoadState("networkidle")
   expect(await seriousIssues(page)).toEqual([])
-  // Its price history (F4.3) is a tab under the main cards (docs/06 "Detay sayfası düzeni")
-  await page.getByRole("tab", { name: "Fiyat geçmişi" }).click()
+  // Its search appearance, attributes, parcel… and price history (F4.3) fold under the main
+  // cards (docs/06 "Ürün sayfası"); a section's own control (a variant picker) is not its toggle
+  for (const part of await page.locator("main section > header h2 button[aria-expanded]").all()) {
+    if ((await part.getAttribute("aria-expanded")) === "false") {
+      await part.click()
+    }
+    await expect(part).toHaveAttribute("aria-expanded", "true")
+  }
   await page.locator("#product-price-history").scrollIntoViewIfNeeded()
   await page.waitForLoadState("networkidle")
   expect(await seriousIssues(page)).toEqual([])

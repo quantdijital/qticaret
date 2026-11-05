@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
+import type { TFunction } from "i18next"
 import { CircleCheck, Info, TriangleAlert } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { StepChart } from "@/components/charts/step-chart"
 import { SectionCard } from "@/components/patterns/section-card"
 import { EmptyState, ErrorState } from "@/components/patterns/states"
+import type { SectionFindings } from "@/features/content/section-findings"
 import {
   Select,
   SelectContent,
@@ -14,10 +16,15 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { priceHistoryQuery } from "@/features/products/api/price-history"
-import type { PriceDisplayView, VariantPriceHistory } from "@/features/products/api/price-history"
+import type {
+  PriceDisplayView,
+  PriceHistory,
+  VariantPriceHistory,
+} from "@/features/products/api/price-history"
 import { priceSteps, ruleState } from "@/features/products/price-history"
 import { errorText } from "@/lib/errors"
 import { formatBucket, formatCompactMoney, formatDate, formatMoney } from "@/lib/format"
+import { productFold } from "./sections"
 
 const CURRENCY = "try"
 
@@ -83,6 +90,38 @@ function RuleNotice({ display, days }: { display: PriceDisplayView | null; days:
   )
 }
 
+/**
+ * What the price-before rule makes of today's prices, in one line: the
+ * variants whose discount is struck through and those whose is not.
+ */
+function historyLine(t: TFunction, history: PriceHistory | undefined): string | undefined {
+  if (!history) {
+    return undefined
+  }
+  const states = history.variants.flatMap((variant) =>
+    variant.display ? [ruleState(variant.display)] : []
+  )
+  if (states.length === 0) {
+    return t("products.sections.unpriced")
+  }
+  const one = history.variants.length === 1
+  const struck = states.filter((state) => state === "struck").length
+  const blocked = states.filter((state) => state === "blocked").length
+  const parts = [
+    struck > 0
+      ? one
+        ? t("products.sections.struck")
+        : t("products.sections.struckIn", { count: struck })
+      : undefined,
+    blocked > 0
+      ? one
+        ? t("products.sections.blocked")
+        : t("products.sections.blockedIn", { count: blocked })
+      : undefined,
+  ].filter(Boolean)
+  return parts.length > 0 ? parts.join(" · ") : t("products.sections.noDiscount")
+}
+
 function VariantPicker({
   variants,
   value,
@@ -113,9 +152,17 @@ function VariantPicker({
  * A product's price over the last 90 days (F4.3, ADR-0023): what was paid
  * against the price without a sale, and whether today's discount may be
  * struck through in the storefront under the price-before rule (the
- * lowest price of the days before it), and why not.
+ * lowest price of the days before it), and why not. With `fold`, folded
+ * under the product page's main parts to that rule's verdict.
  */
-export function PriceHistoryCard({ productId }: { productId: string }) {
+export function PriceHistoryCard({
+  productId,
+  fold,
+}: {
+  productId: string
+  /** The advisor's findings for it: folded, counted in its line, an urgent one opens it. */
+  fold?: SectionFindings
+}) {
   const { t } = useTranslation()
   const history = useQuery(priceHistoryQuery(productId, CURRENCY))
   const [picked, setPicked] = useState<string | null>(null)
@@ -135,6 +182,7 @@ export function PriceHistoryCard({ productId }: { productId: string }) {
           <VariantPicker variants={variants} value={variant.id} onChange={setPicked} />
         ) : null
       }
+      collapse={fold && productFold(t, "priceHistory", fold, [historyLine(t, history.data)])}
     >
       {history.isError && !history.data ? (
         <ErrorState text={errorText(t, history.error)} onRetry={() => void history.refetch()} />

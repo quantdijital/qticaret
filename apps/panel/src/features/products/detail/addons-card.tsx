@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { ADDONS_FLAG, ADDON_LIMITS } from "@/features/products/api/addons"
 import type { ProductAddon } from "@/features/products/api/addons"
 import { productCatalogQuery, useSaveCatalog } from "@/features/products/api/product-edit"
+import type { SectionFindings } from "@/features/content/section-findings"
 import { featuresQuery, useFeatureState } from "@/features/settings/api/features"
 import { FULL_RESET } from "@/lib/forms"
 import { addonsFailureOf } from "./addon-failure"
@@ -17,6 +18,7 @@ import { AddonNotice } from "./addon-notice"
 import { AddonRow } from "./addon-row"
 import { AddonSheet } from "./addon-sheet"
 import { inputOf, valueOf } from "./addon-values"
+import { productFold, someNames } from "./sections"
 import { useAddonsShown } from "./use-addons-shown"
 import type { AddonValue } from "./addon-values"
 
@@ -35,10 +37,12 @@ function AddonsForm({
   productId,
   saved,
   flagOn,
+  fold,
 }: {
   productId: string
   saved: readonly ProductAddon[]
   flagOn: boolean
+  fold?: SectionFindings | undefined
 }) {
   const { t } = useTranslation()
   const client = useQueryClient()
@@ -94,6 +98,28 @@ function AddonsForm({
       <CardForm
         title={t(`${A}.title`)}
         description={t(`${A}.description`)}
+        collapse={
+          fold &&
+          productFold(
+            t,
+            "addons",
+            fold,
+            [
+              saved.length > 0
+                ? t("products.sections.addons", { count: saved.length })
+                : t("products.sections.noAddons"),
+              saved.length > 0
+                ? someNames(
+                    saved.map((addon) => addon.label),
+                    3
+                  )
+                : undefined,
+              flagOn ? undefined : t("products.sections.addonsOff"),
+            ],
+            // A save refused: it opens to say why
+            failure !== null
+          )
+        }
         dirty={form.formState.isDirty}
         saving={save.isPending && editing === null}
         onSubmit={() => {
@@ -180,9 +206,17 @@ function AddonsForm({
 /**
  * Add-ons a shopper picks beside the variant (adr/0052 §11): a typed text
  * or one of a few choices, priced on the server. Shown while the shop's
- * add-ons are on, or while this product still has some.
+ * add-ons are on, or while this product still has some. With `fold`,
+ * folded under the product page's main parts to their count and names.
  */
-export function AddonsCard({ productId }: { productId: string }) {
+export function AddonsCard({
+  productId,
+  fold,
+}: {
+  productId: string
+  /** The advisor's findings for it: folded, counted in its line, an urgent one opens it. */
+  fold?: SectionFindings
+}) {
   const catalog = useQuery(productCatalogQuery(productId))
   const features = useQuery(featuresQuery())
   const state = useFeatureState(ADDONS_FLAG)
@@ -193,5 +227,7 @@ export function AddonsCard({ productId }: { productId: string }) {
   if (!catalog.data || flagOn === undefined || !shown) {
     return null
   }
-  return <AddonsForm productId={productId} saved={catalog.data.addons} flagOn={flagOn} />
+  return (
+    <AddonsForm productId={productId} saved={catalog.data.addons} flagOn={flagOn} fold={fold} />
+  )
 }

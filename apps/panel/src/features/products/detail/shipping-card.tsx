@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
+import type { TFunction } from "i18next"
 import { PackageX } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -7,6 +8,8 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
+import { Skeleton } from "@/components/ui/skeleton"
+import type { SectionFindings } from "@/features/content/section-findings"
 import { productCatalogQuery } from "@/features/products/api/product-edit"
 import { useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
@@ -16,6 +19,7 @@ import { FULL_RESET } from "@/lib/forms"
 import { formatMeasureInput, parseMeasureInput } from "@/lib/money-input"
 import { CardForm } from "@/components/patterns/card-form"
 import { NumberField } from "@/components/patterns/number-field"
+import { productFold } from "./sections"
 
 const FIELDS = [
   { name: "weight", unit: "weight" },
@@ -45,12 +49,38 @@ const valuesOf = (product: Pick<ProductDetail, Name>): Values => ({
   height: asText(product.height),
 })
 
+// What is saved in one line: "450 g · 30 × 10 × 5 cm"; none, the shop's default parcel
+function parcelLine(
+  t: TFunction,
+  product: Pick<ProductDetail, Name>,
+  units: { weight: string; dimension: string }
+): string {
+  const text = (value: number | null | undefined) => asText(value) || "—"
+  const sizes = [product.length, product.width, product.height]
+  const parts = [
+    asText(product.weight) ? `${text(product.weight)} ${units.weight}` : undefined,
+    sizes.some((value) => asText(value))
+      ? `${sizes.map(text).join(" × ")} ${units.dimension}`
+      : undefined,
+  ].filter(Boolean)
+  return parts.length > 0 ? parts.join(" · ") : t("products.sections.defaultParcel")
+}
+
 /**
  * The parcel's weight and size at product level; variants without their
  * own take these. Optional, published or not (adr/0054): without them
- * shipping is priced by the shop's default parcel.
+ * shipping is priced by the shop's default parcel. With `fold`, folded
+ * under the page's main parts to its measures, and not drawn for a
+ * digital product or a service (nothing to measure).
  */
-export function ShippingCard({ product }: { product: ProductDetail }) {
+export function ShippingCard({
+  product,
+  fold,
+}: {
+  product: ProductDetail
+  /** The advisor's findings for it: folded, counted in its line, an urgent one opens it. */
+  fold?: SectionFindings
+}) {
   const { t } = useTranslation()
   const update = useUpdateProduct(product.id)
   const units = useStoreUnits()
@@ -76,7 +106,13 @@ export function ShippingCard({ product }: { product: ProductDetail }) {
     })
   })
 
+  if (fold && !catalog.data) {
+    return <Skeleton className="h-14 rounded-lg" />
+  }
   // F3.2: a digital or service product has no parcel to measure
+  if (fold && catalog.data?.kind !== "physical") {
+    return null
+  }
   if (catalog.data && catalog.data.kind !== "physical") {
     return (
       <SectionCard title={t("products.wizard.shippingCard")}>
@@ -92,6 +128,17 @@ export function ShippingCard({ product }: { product: ProductDetail }) {
     <CardForm
       title={t("products.wizard.shippingCard")}
       description={t("products.detail.shippingHint")}
+      collapse={
+        fold &&
+        productFold(
+          t,
+          "shipping",
+          fold,
+          [parcelLine(t, product, units)],
+          // A measure the form refused: it opens to show it
+          Object.keys(errors).length > 0
+        )
+      }
       dirty={form.formState.isDirty}
       saving={update.isPending}
       onSubmit={() => void submit()}

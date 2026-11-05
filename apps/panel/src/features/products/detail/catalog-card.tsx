@@ -26,12 +26,14 @@ import type {
 } from "@/features/products/api/product-edit"
 import type { Restriction } from "@/features/categories/api/restrictions"
 import { RestrictionSelect } from "@/features/categories/components/restriction-select"
+import type { SectionFindings } from "@/features/content/section-findings"
 import { GIFT_CARDS_FLAG } from "@/features/gift-cards/api/gift-cards"
 import { useFeature } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@/lib/forms"
 import { CardForm } from "@/components/patterns/card-form"
 import { GiftCardField } from "./gift-card-field"
+import { productFold } from "./sections"
 
 // Radix Select has no empty value; this one stands for "none chosen"
 const NONE = "__none__"
@@ -47,7 +49,15 @@ interface Values {
 
 const refused = (failure: unknown) => (failure as { status?: unknown } | null)?.status === 400
 
-function CatalogForm({ productId, catalog }: { productId: string; catalog: ProductCatalog }) {
+function CatalogForm({
+  productId,
+  catalog,
+  fold,
+}: {
+  productId: string
+  catalog: ProductCatalog
+  fold?: SectionFindings | undefined
+}) {
   const { t } = useTranslation()
   const save = useSaveCatalog(productId)
   // The kind shows once the shop sells digital or service products, or this one is one
@@ -69,6 +79,18 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
   const { dirtyFields } = form.formState
   // A gift card is digital: its kind is the server's while it is one
   const gift = useWatch({ control: form.control, name: "is_gift_card" })
+  // Closed, the line says what is saved ("Fiziksel ürün · Yeni · Ana kategori: Çakılar")
+  const primary = catalog.categories.find((category) => category.id === saved.primary_category_id)
+  const summary = [
+    kinds ? t(`products.catalog.kinds.${saved.kind}`) : undefined,
+    t(`products.catalog.conditions.${saved.condition}`),
+    primary
+      ? t("products.sections.primary", { name: primary.name })
+      : t("products.sections.noPrimary"),
+    saved.restriction ? t(`restrictions.options.${saved.restriction}`) : undefined,
+    saved.is_gift_card ? t("products.catalog.giftCard") : undefined,
+    saved.withdrawal_excluded ? t("products.catalog.withdrawalExcluded") : undefined,
+  ]
   // The switch shows once the shop sells gift cards, or this product is (or is being made) one
   const giftShown = giftCards || catalog.is_gift_card || gift || giftFailure !== null
 
@@ -109,6 +131,17 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
     <CardForm
       title={t("products.catalog.card")}
       description={t("products.catalog.hint")}
+      collapse={
+        fold &&
+        productFold(
+          t,
+          "catalog",
+          fold,
+          summary,
+          // Marking it a gift card refused: it opens to say why
+          giftFailure !== null
+        )
+      }
       dirty={form.formState.isDirty}
       saving={save.isPending}
       onSubmit={() => void submit()}
@@ -263,12 +296,20 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
  * Condition and primary category, the fields search results and feeds read
  * (F3.1), whether the product is sold to adults only and is outside the
  * right of withdrawal (F13.4, F13.6), and whether it sells gift cards
- * (adr/0025 Ek 2026-11-03).
+ * (adr/0025 Ek 2026-11-03). With `fold`, folded under the product page's
+ * main parts to a line of them.
  */
-export function CatalogCard({ productId }: { productId: string }) {
+export function CatalogCard({
+  productId,
+  fold,
+}: {
+  productId: string
+  /** The advisor's findings for it: folded, counted in its line, an urgent one opens it. */
+  fold?: SectionFindings
+}) {
   const catalog = useQuery(productCatalogQuery(productId))
   if (!catalog.data) {
-    return <Skeleton className="h-56 w-full rounded-lg" />
+    return <Skeleton className={fold ? "h-14 w-full rounded-lg" : "h-56 w-full rounded-lg"} />
   }
-  return <CatalogForm productId={productId} catalog={catalog.data} />
+  return <CatalogForm productId={productId} catalog={catalog.data} fold={fold} />
 }

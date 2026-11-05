@@ -1,13 +1,26 @@
+import { useTranslation } from "react-i18next"
+import { findingsNote } from "@/features/content/section-findings"
+import type { SectionFindings } from "@/features/content/section-findings"
 import type { ProductDetail } from "@/features/products/api/products"
 import { useProductPathPrefix } from "@/features/products/use-product-path"
 import { SeoCard } from "@/features/seo/components/seo-card"
 import { DESCRIPTION_EXCERPT, SHORT_EXCERPT, excerpt, priceSentence } from "@/features/seo/seo-text"
+import { PRODUCT_SECTIONS } from "./sections"
 
 /**
  * The product's SEO fields, previewed with what the storefront fills the
  * templates with (adr/0015): its name, category, short text and prices.
+ * With `fold`, folded under the page's main parts to the fields' lengths.
  */
-export function ProductSeoCard({ product }: { product: ProductDetail }) {
+export function ProductSeoCard({
+  product,
+  fold,
+}: {
+  product: ProductDetail
+  /** The advisor's findings for it: folded, counted in its line, an urgent one opens it. */
+  fold?: SectionFindings
+}) {
+  const { t } = useTranslation()
   const prefix = useProductPathPrefix()
   const subtitle = product.subtitle?.trim() ?? ""
   const liras = (product.variants ?? []).flatMap((variant) =>
@@ -29,6 +42,16 @@ export function ProductSeoCard({ product }: { product: ProductDetail }) {
         },
         fallbackDescription: excerpt(product.description, DESCRIPTION_EXCERPT),
       }}
+      {...(fold
+        ? {
+            collapse: {
+              id: PRODUCT_SECTIONS.seo,
+              name: "product.seo",
+              note: findingsNote(t, fold),
+              attention: fold.attention,
+            },
+          }
+        : {})}
     />
   )
 }

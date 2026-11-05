@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils"
 
 /**
  * A text's page (content page, blog post, filter page; docs/06 "Metin
- * sayfaları"): the main column leads with the title and the editor, its
- * secondary parts folded under them; the narrow column beside holds the
+ * sayfaları") and a product's ("Ürün sayfası"): the main column leads
+ * with what is edited most, its secondary parts folded under it; the narrow column beside holds the
  * short facts and the SEO advisor and follows the scroll, scrolling
  * inside when it is taller than the window. Folding a part never leaves
  * a stretched card: the main column ends where its last card does.

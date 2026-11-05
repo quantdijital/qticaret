@@ -66,9 +66,10 @@ export function CollapsibleSection({
         className
       )}
     >
-      {/* The title's button covers the whole header, so a click anywhere on it opens or closes */}
-      <header className="group relative flex min-h-14 items-center gap-x-4 px-5 py-3">
-        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+      {/* The title's button covers the whole header, so a click anywhere on it opens or closes;
+          an action that does not fit beside the title goes under it (a phone) */}
+      <header className="group relative flex min-h-14 flex-wrap items-center gap-x-4 gap-y-2 px-5 py-3">
+        <div className="flex min-w-0 flex-[1_1_12rem] flex-col gap-0.5">
           <h2 className="text-[15px] leading-6 font-semibold">
             <button
               type="button"
@@ -97,7 +98,9 @@ export function CollapsibleSection({
           ) : null}
         </div>
         {open && action ? (
-          <div className="relative flex shrink-0 flex-wrap items-center gap-2">{action}</div>
+          <div className="relative order-last flex shrink-0 basis-full flex-wrap items-center gap-2 sm:order-none sm:basis-auto">
+            {action}
+          </div>
         ) : null}
         <ChevronDown
           aria-hidden="true"

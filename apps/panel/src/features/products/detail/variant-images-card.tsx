@@ -4,10 +4,12 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SectionCard } from "@/components/patterns/section-card"
 import { StatusBadge } from "@/components/patterns/status-badge"
+import type { SectionFindings } from "@/features/content/section-findings"
 import type { ProductDetail } from "@/features/products/api/products"
 import { errorText } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
 import { cn } from "@/lib/utils"
+import { productFold } from "./sections"
 
 function useToggleImageVariant(productId: string) {
   const client = useQueryClient()
@@ -28,31 +30,43 @@ function useToggleImageVariant(productId: string) {
  * Which variants each picture shows (Medusa's variant images): a picture
  * tied to no variant shows with all of them; tied to some, only with those.
  * A storefront brings a variant's pictures forward when it is chosen.
+ * With `fold`, folded under the product page's main parts to how many
+ * pictures are tied.
  */
 export function VariantImagesCard({
   product,
   className,
+  fold,
 }: {
   product: ProductDetail
   className?: string
+  /** The advisor's findings for it: folded, counted in its line, an urgent one opens it. */
+  fold?: SectionFindings
 }) {
   const { t } = useTranslation()
   const toggle = useToggleImageVariant(product.id)
   const images = [...(product.images ?? [])].sort((a, b) => a.rank - b.rank)
   const variants = product.variants ?? []
+  const tiedTo = (image: (typeof images)[number]) =>
+    ((image as { variants?: { id: string }[] | null }).variants ?? []).map((variant) => variant.id)
+  const tiedCount = images.filter((image) => tiedTo(image).length > 0).length
   return (
     <SectionCard
       title={t("products.variantImages.title")}
       description={t("products.variantImages.hint")}
       {...(className ? { className } : {})}
+      collapse={
+        fold &&
+        productFold(t, "variantImages", fold, [
+          tiedCount === 0
+            ? t("products.sections.imagesAll")
+            : t("products.sections.imagesTied", { count: tiedCount, total: images.length }),
+        ])
+      }
     >
       <ul className="flex flex-col divide-y">
         {images.map((image, index) => {
-          const tied = new Set(
-            ((image as { variants?: { id: string }[] | null }).variants ?? []).map(
-              (variant) => variant.id
-            )
-          )
+          const tied = new Set(tiedTo(image))
           return (
             <li key={image.id} className="flex items-center gap-3 py-3">
               <img

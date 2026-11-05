@@ -1,17 +1,21 @@
+import { useQuery } from "@tanstack/react-query"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Field } from "@/components/patterns/form-section"
+import type { SectionFindings } from "@/features/content/section-findings"
 import { useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
 import { CategoryTree } from "@/features/products/components/category-tree"
 import { VatSelect } from "@/features/products/components/vat-select"
+import { vatLabelOf, vatRatesQuery } from "@/features/settings/api/vat-rates"
 import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@/lib/forms"
 import { CardForm } from "@/components/patterns/card-form"
 import { SearchPicker } from "@/components/patterns/search-picker"
 import type { PickerOption } from "@/components/patterns/search-picker"
 import { brandOptions, useSetProductBrand } from "@/features/brands/api/brands"
+import { productFold, someNames } from "./sections"
 
 interface Values {
   category_ids: string[]
@@ -25,17 +29,34 @@ const brandOf = (product: ProductDetail): PickerOption | null => {
   return brand ? { id: brand.id, label: brand.name } : null
 }
 
-/** Where the product is listed, under which brand, and which KDV group it is taxed in. */
-export function OrganizeCard({ product }: { product: ProductDetail }) {
+/**
+ * Where the product is listed, under which brand, and which KDV group it
+ * is taxed in. With `fold`, folded under the page's main parts to a line
+ * of them ("N690 Çakılar · My L'arte · KDV %20").
+ */
+export function OrganizeCard({
+  product,
+  fold,
+}: {
+  product: ProductDetail
+  /** The advisor's findings for it: folded, counted in its line, an urgent one opens it. */
+  fold?: SectionFindings
+}) {
   const { t } = useTranslation()
   const update = useUpdateProduct(product.id)
   const setBrand = useSetProductBrand(product.id)
+  const rates = useQuery(vatRatesQuery()).data
   const saved: Values = {
     category_ids: (product.categories ?? []).map((category) => category.id),
     type_id: product.type?.id ?? "",
     brand: brandOf(product),
   }
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
+  // Closed, the line says what is saved (an edit not saved is said as such)
+  const rate = saved.type_id
+    ? rates?.rates.find((each) => each.product_type_id === saved.type_id)
+    : rates?.default
+  const categories = (product.categories ?? []).map((category) => category.name)
 
   const submit = form.handleSubmit(async (values) => {
     const { dirtyFields } = form.formState
@@ -59,7 +80,15 @@ export function OrganizeCard({ product }: { product: ProductDetail }) {
 
   return (
     <CardForm
-      title={t("products.wizard.organize")}
+      title={t("products.detail.organize")}
+      collapse={
+        fold &&
+        productFold(t, "organize", fold, [
+          categories.length > 0 ? someNames(categories) : t("products.sections.noCategory"),
+          saved.brand?.label ?? t("products.sections.noBrand"),
+          rate ? vatLabelOf(rate) : undefined,
+        ])
+      }
       dirty={form.formState.isDirty}
       saving={update.isPending || setBrand.isPending}
       onSubmit={() => void submit()}
