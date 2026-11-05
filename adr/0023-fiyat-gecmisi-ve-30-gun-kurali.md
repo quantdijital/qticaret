@@ -98,3 +98,9 @@ Medusa 2.21.2'de doğrulananlar (F4 planlaması, kaynak kodu):
 **Kanıt:** `lib/pricing/__tests__/offers.unit.spec.ts` (sınıflama, birleşik indirim, 10 günlük pencere kampanyayla), `integration-tests/http/price-promotion.spec.ts` (%30 otomatik kampanya: görünen fiyat = sepetin kalem toplamı = JSON-LD fiyatı; en az sepetli kampanya yalnız `cart_offer`; kodlu, müşteri gruplu ve başka ürüne hedefli kampanya fiyatı değiştirmez; başlamamış kampanya beklenir).
 
 **Açık kalanlar:** `/kampanyalar` sayfası yalnız fiyat listesindeki indirimleri tarar (kampanyalı ürünler henüz listelenmez); GA4 `view_item` fiyatı Medusa'nın fiyatıdır; hizmet ve çabuk bozulan mal için "bir önceki fiyat" kuralı ayrı tutulmuyor (platformda hepsi mal kuralıyla).
+
+## Ek (2026-11-05, devam): `/kampanyalar` ve GA4 kampanyalı fiyatla
+
+- **`/kampanyalar`:** herkese uygulanan otomatik kampanyanın indirdiği ürünler de listelenir; ölçüt kartla aynı (`priceDisplays` `on_sale`, 10 gün kuralı). Kampanya başladıktan sonra zamlanıp indirimi gösterilemeyen ürün listelenmez. Hesap ürün indekslenirken yapılır (adr/0056 Ek 2026-11-05); dizin listelerinde fiyat süzgeci ve sıralama da kampanyalı fiyatla.
+- **GA4 / Meta:** `view_item`, `view_item_list` ve `add_to_cart` sayfanın gösterdiği fiyatı (`price-display` `current`, kampanya dahil) gönderir; liste kartındaki hızlı ekle de `add_to_cart` gönderir. `begin_checkout` ve `add_payment_info` kalemleri sepet satırının sunucu toplamı / adet (kampanya düşülmüş). `purchase` değişmedi (birim fiyat, backend sunucu olayıyla aynı).
+- Açık kalanlar: hizmet ve çabuk bozulan mal için "bir önceki fiyat" kuralı; kanal başına referans fiyat (md. 14/5); harcama bütçesi kısmen dolmuş kampanya dizine geç yansır (adr/0056 Ek).

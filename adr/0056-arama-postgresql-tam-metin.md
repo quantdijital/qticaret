@@ -187,3 +187,15 @@ Execution Time: 2.077 ms
   - Olay ile indeks arasında milisaniyeler var.
   - Sözlük sayıları gece kesinleşir. Yeni kelime yazımda hemen eklenir; silinen ürünün kelimesi gece düşer. Öneri yine de ürün denetiminden geçer.
   - Uzantı kurulumu veritabanı sahibinin `CREATE` yetkisini ister.
+
+## Ek (2026-11-05): `on_sale` ve gösterilen fiyat (otonom, gözden geçir)
+
+- **Neden:** adr/0023 Ek 2026-11-05 herkese uygulanan otomatik kampanyayı fiyat yaptı. `/kampanyalar` yalnız fiyat listelerini tarıyordu; tüm ürünlere uygulanan bir kampanyada istek başına katalog taranamaz.
+- **Karar: dizinin mevcut düzeneği** (önbellek + geçersizleştirme değil). Ürün indekslenirken fiyatı vitrindeki fiyatla aynı kaynaktan okunur (`priceDisplays`: fiyat listesi, otomatik kampanya, 10 gün kuralı):
+  - `search_document.on_sale` (yeni sütun, kısmi indeks): mağazanın para biriminde varyantlarından biri indirimli gösteriliyorsa doğru. Taslak hiçbir yerde listelenmez, `false`.
+  - `prices`: mağazanın para birimindeki anahtarlarda vitrinin gösterdiği en düşük fiyat (`current`, kampanya dahil); fiyat süzgeci, aralığı ve sıralaması kartın fiyatıyla aynı. Diğer para birimleri Medusa'nın fiyatı.
+  - Satış listesinin kapsamı `{ on_sale: true }`: tek SQL, sayfalama veritabanında, katalog büyüklüğünden bağımsız. 30 sn'lik bölge önbelleği kalktı. SEO çözümü (noindex), site haritası ve JSON-LD listesi de dizinden okur (`workflows/pricing/sale-products.ts`).
+- **Bakım:** fiyat, fiyat listesi ve ürün olayları zaten ürünü kuyruğa koyuyor. Kampanya için olay beklenmez: dakikalık iş otomatik kampanyaları okur (birkaç satır) ve "şu an nasıl uygulandıkları"nın özetini (`lib/pricing/offer-state.ts`: kod, oran/tutar, başlangıç, hedef kuralları, şu an uygulanıyor mu — kampanya tarihleri, kampanya ve kampanya bütçesi limitleri) `search_index_state`'teki son okumayla karşılaştırır. Fark varsa tüm ürünler kuyruğa girer (kampanya tüm kataloğu kapsayabilir). Bir siparişin kullanımı, limit dolmadıkça fark yaratmaz. En geç bir dakika + boşaltma süresi.
+- **Migration:** `Migration20261105120000` sütunu, kısmi indeksi ve `search_index_state`'i ekler; dizindeki her ürünü kuyruğa koyar (ilk dakikalık iş hesaplar; o zamana dek `on_sale` yanlış okunur).
+- **Bilinen sınır:** harcama bütçeli kampanyada kalan bütçe bir ürünün indiriminden azaldığında Medusa o ürüne uygulamaz; dizin bunu bütçe tümüyle dolana ya da ürünün kendi olayına / gece yeniden kurulumuna dek bilmez.
+- **Kanıt:** `integration-tests/http/listing-sale-promotion.spec.ts` (otomatik kampanyalı ürün listelenir, kodlu ve sepet alt sınırlı listelenmez, kampanya başladıktan sonra zamlanan ürün 10 gün kuralıyla listelenmez, fiyat süzgeci kampanyalı fiyatla; tüm kataloğa kampanyada liste `/magaza` ile aynı; dakikalık iş yeni kampanyayı yeniden kurulum olmadan yakalar), birim: `offer-state`, `sale`, `sale-products`, `search/prices`.
