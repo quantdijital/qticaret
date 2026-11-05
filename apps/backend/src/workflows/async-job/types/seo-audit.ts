@@ -21,11 +21,13 @@ const COLUMNS = [
 /**
  * The store-wide SEO audit (docs/14 §3.9): its findings in the summary for
  * the panel, every listed item in a `;`-separated CSV (formula-safe, F2.9)
- * to work through. Paths and page names only: no personal data.
+ * to work through. Paths and page names only: no personal data. Run each
+ * night after the assessments, and from the SEO page on request.
  */
 export const seoAudit: JobType<Record<string, never>> = {
   input: z.object({}).strict(),
   singleton: true,
+  scheduled: true,
   resultTtlDays: 30,
   containsPersonalData: false,
   execute: async ({ container, progress, resultFile }) => {

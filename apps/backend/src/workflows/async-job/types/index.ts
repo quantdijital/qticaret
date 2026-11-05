@@ -54,6 +54,9 @@ export const PRIVATE_JOB_TYPES = JOB_TYPE_KEYS.filter((key) => JOB_TYPES[key]?.p
 /** The platform's own kinds (the address data sync): never in the shop's panel. */
 export const PLATFORM_JOB_TYPES = JOB_TYPE_KEYS.filter((key) => JOB_TYPES[key]?.platform)
 
+/** The kinds the platform also runs on its schedule: those runs stay out of the shop's list. */
+export const SCHEDULED_JOB_TYPES = JOB_TYPE_KEYS.filter((key) => JOB_TYPES[key]?.scheduled)
+
 /** The kinds only an owner sees (a migration's). */
 export const OWNER_JOB_TYPES = JOB_TYPE_KEYS.filter((key) => JOB_TYPES[key]?.ownerOnly)
 

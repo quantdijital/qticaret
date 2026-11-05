@@ -63,5 +63,14 @@ export interface JobType<Input = unknown> {
    * the operator watches its logs. Implies `internal`.
    */
   platform?: boolean
+  /**
+   * The platform also runs it on its own schedule (the nightly SEO audit,
+   * the sitemap refresh). Those runs, asked for by no one in the shop
+   * (`requested_by` null), are its upkeep: left out of the shop's job list
+   * and out of reach by id (docs/06 principle 10); the page that shows the
+   * result reads it its own way (the SEO page, `/admin/seo/audit`). A run
+   * a staff member started shows as any other.
+   */
+  scheduled?: boolean
   execute: (context: JobContext, input: Input) => Promise<JobResult>
 }

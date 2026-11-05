@@ -1,5 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { emailTransport } from "../../../../lib/messaging/email"
 import {
   addSenderDomainWorkflow,
   currentSenderDomain,
@@ -12,11 +13,17 @@ import type { AdminPostSenderDomainType } from "./validators"
 /** Resend gives no DMARC record; this policy only reports, so nothing is lost while it is set up. */
 const DMARC = { record: "DMARC", name: "_dmarc", type: "TXT", value: "v=DMARC1; p=none;" }
 
+/**
+ * Whether the shop's e-mail goes out and from which address; `available`,
+ * whether the shop can verify its own domain here (through Resend only).
+ */
 export async function senderDomainView(container: MedusaContainer) {
   const domain = await currentSenderDomain(container)
+  const sender = await senderAddress(container)
   return {
+    sending: emailTransport() !== null && sender !== null,
     available: resendDomains() !== null,
-    sender: await senderAddress(container),
+    sender,
     domain: domain
       ? {
           name: domain.name,

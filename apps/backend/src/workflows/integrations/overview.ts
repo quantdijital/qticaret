@@ -2,7 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { providerFailureLog } from "../../lib/clients/failure-log"
 import { errorSummary, logger } from "../../lib/logging"
 import type { ProviderFailure } from "../../lib/clients/failure-log"
-import { parseEnv } from "../../lib/env"
+import { emailTransport } from "../../lib/messaging/email"
 import { SEARCH_CONSOLE_SCOPE, googleClientOf } from "../../lib/google/oauth"
 import { bankTransferSettings } from "../../lib/payments/settings"
 import { GOOGLE_MERCHANT_MODULE } from "../../modules/google-merchant"
@@ -16,7 +16,7 @@ import { CASH_ON_DELIVERY } from "../../modules/platform-settings/features"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import type MarketingFeedsModuleService from "../../modules/marketing-feeds/service"
 import { brandOf } from "../messaging/brand"
-import { currentSenderDomain } from "../messaging/sender-domain"
+import { currentSenderDomain, resendDomains, senderAddress } from "../messaging/sender-domain"
 import {
   accountRow,
   bankTransferRow,
@@ -54,8 +54,7 @@ const text = (value: unknown): string | null =>
  * secret, no provider is called (the health report and "test" do that).
  */
 export async function integrationOverview(container: MedusaContainer): Promise<IntegrationView[]> {
-  const env = parseEnv()
-  const [accounts, bank, cod, domain, token, brand, [sync]] = await Promise.all([
+  const [accounts, bank, cod, domain, sender, token, brand, [sync]] = await Promise.all([
     container
       .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
       .describeAll(),
@@ -64,6 +63,7 @@ export async function integrationOverview(container: MedusaContainer): Promise<I
       .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
       .isFeatureEnabled(CASH_ON_DELIVERY),
     currentSenderDomain(container),
+    senderAddress(container),
     container.resolve<MarketingFeedsModuleService>(MARKETING_FEEDS_MODULE).currentToken(),
     brandOf(container),
     container
@@ -90,7 +90,9 @@ export async function integrationOverview(container: MedusaContainer): Promise<I
       accountRow(group, account(id))
     ),
     emailRow({
-      transport: env.EMAIL_TRANSPORT ?? null,
+      sending: emailTransport() !== null,
+      ownDomain: resendDomains() !== null,
+      sender,
       domain: domain ? { status: domain.status } : null,
     }),
     googleRow({

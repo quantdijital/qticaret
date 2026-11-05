@@ -7,11 +7,13 @@ import type { JobType } from "./types"
 /**
  * Regenerates the sitemap (docs/13 §6): every file built, then swapped in
  * at once. Without a canonical host there is nothing to build (URLs must
- * be absolute) and the old files go.
+ * be absolute) and the old files go. Queued by its schedule once changes
+ * settle and daily, and from the SEO page on request.
  */
 export const seoSitemap: JobType<Record<string, never>> = {
   input: z.object({}).strict(),
   singleton: true,
+  scheduled: true,
   resultTtlDays: 7,
   containsPersonalData: false,
   execute: async ({ container, progress }) => {

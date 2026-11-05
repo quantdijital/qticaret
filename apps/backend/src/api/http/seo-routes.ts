@@ -59,6 +59,12 @@ export const SEO_ROUTES = [
   get("/admin/seo/not-found", AdminGetNotFound),
   get("/admin/seo/url-style", AdminGetUrlStyle),
   get("/admin/seo/assessments", AdminGetAssessments),
+  // The audit's report file, as a job's result: fetched by people (adr/0014)
+  {
+    matcher: "/admin/seo/audit/report",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
   // F3.13: taking a product live passes the advisor when the shop asks so
   {
     matcher: "/admin/products/:id",

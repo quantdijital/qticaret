@@ -1,4 +1,11 @@
-import { JOB_TYPE_KEYS, PLATFORM_JOB_TYPES, exclusiveTypes, jobType, queueLockKey } from "../types"
+import {
+  JOB_TYPE_KEYS,
+  PLATFORM_JOB_TYPES,
+  SCHEDULED_JOB_TYPES,
+  exclusiveTypes,
+  jobType,
+  queueLockKey,
+} from "../types"
 
 // The audit reads redirects, and the publish gate (an import's, a bulk
 // edit's) assesses products, through module links, which need a running
@@ -47,6 +54,8 @@ describe("job types", () => {
     })
     // The platform's own upkeep: the only kind no one in the shop asks for (docs/06 principle 10)
     expect(PLATFORM_JOB_TYPES).toEqual(["tr_address.sync"])
+    // Its schedule also runs these, which staff start too: only staff's runs are the shop's to see
+    expect(SCHEDULED_JOB_TYPES).toEqual(["seo.audit", "seo.sitemap"])
     expect(jobType("tr_address.sync")?.input.safeParse({}).success).toBe(true)
     expect(jobType("tr_address.sync")?.input.safeParse({ source: "file" }).success).toBe(false)
   })

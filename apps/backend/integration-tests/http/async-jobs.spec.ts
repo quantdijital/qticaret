@@ -278,6 +278,51 @@ medusaIntegrationTestRunner({
       expect((await service().retrieveAsyncJob(sync.id)).status).toBe("queued")
     })
 
+    it("keeps the runs the platform's schedule started out of the list, staff's of the same kind in", async () => {
+      // As the nightly audit and the sitemap refresh queue them: no one in the shop asked
+      const nightly = await service().createAsyncJobs({
+        type: "seo.audit",
+        requested_by: null,
+        input: {},
+      })
+      const refresh = await service().createAsyncJobs({
+        type: "seo.sitemap",
+        requested_by: null,
+        input: {},
+      })
+      // One a staff member started from the SEO page
+      const asked = await service().createAsyncJobs({
+        type: "seo.audit",
+        requested_by: "user_staff",
+        input: {},
+      })
+      const list = (query = "") =>
+        http.get<{ async_jobs: Job[]; count: number }>(`/admin/async-jobs${query}`, {
+          headers: admin.headers,
+        })
+      const all = (await list()).data
+      const audits = (await list("?type=seo.audit")).data
+      const one = await settle(
+        http.get(`/admin/async-jobs/${nightly.id}`, { headers: admin.headers })
+      )
+      const cancel = await settle(
+        http.post(`/admin/async-jobs/${refresh.id}/cancel`, {}, { headers: admin.headers })
+      )
+      const staffs = await settle(
+        http.get(`/admin/async-jobs/${asked.id}`, { headers: admin.headers })
+      )
+
+      const ids = all.async_jobs.map((job) => job.id)
+      expect(ids).toContain(asked.id)
+      expect(ids).not.toContain(nightly.id)
+      expect(ids).not.toContain(refresh.id)
+      expect(all.count).toBe(all.async_jobs.length)
+      expect(audits).toMatchObject({ async_jobs: [{ id: asked.id }], count: 1 })
+      expect([one.status, cancel.status, staffs.status]).toEqual([404, 404, 200])
+      // The records stay for the operator, untouched
+      expect((await service().retrieveAsyncJob(refresh.id)).status).toBe("queued")
+    })
+
     it("does not let a queued job that lost its event block its type", async () => {
       const lost = await service().createAsyncJobs({ type: "audit_log.export" })
       // created_at belongs to the database; the test ages a job on purpose

@@ -12,7 +12,7 @@ interface Row {
   id: string
   group: string
   state: string
-  notes: { code: string; count?: number }[]
+  notes: { code: string; count?: number; sender?: string }[]
   test: string | null
   failures: { code: string; status: number | null; method: string; path: string }[]
 }
@@ -73,9 +73,10 @@ medusaIntegrationTestRunner({
       // Nothing the shop does not use: no accounting program yet, nothing of the platform's own
       expect(rows.map(({ group }) => group)).not.toContain("accounting")
       expect(rows.map(({ group }) => group)).not.toContain("infrastructure")
+      // The shop's e-mail goes out, from the platform's address until its own domain is verified
       expect(row("resend")).toMatchObject({
         state: "connected",
-        notes: [{ code: "platform_sender" }],
+        notes: [{ code: "platform_sender", sender: "bildirim@platform.example" }],
       })
       expect(byOps.status).toBe(403)
     })
@@ -97,6 +98,28 @@ medusaIntegrationTestRunner({
       } finally {
         Reflect.deleteProperty(process.env, "GOOGLE_OAUTH_CLIENT_ID")
         Reflect.deleteProperty(process.env, "GOOGLE_OAUTH_CLIENT_SECRET")
+      }
+    })
+
+    it("says the shop's e-mail goes out through the platform's mailbox, and only that it does not without one", async () => {
+      const owner = await createAdminUser(http, getContainer())
+      const row = async () => (await overview(owner.headers)).find((each) => each.id === "resend")
+      try {
+        // A developer's local mailbox sends the shop's e-mail but verifies no domain: none offered
+        Object.assign(process.env, { EMAIL_TRANSPORT: "mailpit", MAILPIT_URL: fake.url })
+        const mailbox = await row()
+        // Nothing sends: the platform's setting, logged for the operator; the shop gets one line
+        Reflect.deleteProperty(process.env, "EMAIL_TRANSPORT")
+        const none = await row()
+
+        expect(mailbox).toMatchObject({
+          state: "connected",
+          notes: [{ code: "sending", sender: "bildirim@platform.example" }],
+        })
+        expect(none).toMatchObject({ state: "off", notes: [{ code: "not_sending" }] })
+      } finally {
+        Reflect.deleteProperty(process.env, "MAILPIT_URL")
+        process.env["EMAIL_TRANSPORT"] = "resend"
       }
     })
 

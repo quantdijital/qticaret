@@ -30,6 +30,7 @@ interface AuditFinding {
 
 interface Insights {
   search_console: boolean
+  web_vitals: boolean
   search: {
     clicks: number
     impressions: number
@@ -170,8 +171,9 @@ medusaIntegrationTestRunner({
       const cwv = findings.find((each) => each.ruleId === "S-CWV-01")
 
       expect(ran.data).toMatchObject({ search: { ran: true }, field: { ran: true } })
-      // The platform's Google client is set: the panel shows the Search Console part
+      // The platform's Google client and CrUX key are set: the panel shows both parts
       expect(data.insights.search_console).toBe(true)
+      expect(data.insights.web_vitals).toBe(true)
       expect(google.sitemaps).toEqual([`${SITE} https://${HOST}/sitemap.xml`])
       expect(google.inspected).toContain(page)
       expect(data.insights.search).toMatchObject({
@@ -201,6 +203,24 @@ medusaIntegrationTestRunner({
         ])
       )
       expect(cwv?.items).toEqual([{ reason: "lcp", subject: "PHONE", target: "3200" }])
+    })
+
+    it("says the platform reads no field data while it has no CrUX key", async () => {
+      const key = process.env["CRUX_API_KEY"]
+      Reflect.deleteProperty(process.env, "CRUX_API_KEY")
+      try {
+        const ran = await refresh()
+        const { data } = await http.get<{ insights: Insights }>("/admin/seo/insights", {
+          headers: admin.headers,
+        })
+
+        // Nothing the shop can do about it: the panel leaves the Web Vitals card out
+        expect(data.insights.web_vitals).toBe(false)
+        expect(data.insights.search_console).toBe(true)
+        expect(ran.data.field.ran).toBe(false)
+      } finally {
+        process.env["CRUX_API_KEY"] = key
+      }
     })
 
     it("asks to connect again when the account was connected without Search Console", async () => {

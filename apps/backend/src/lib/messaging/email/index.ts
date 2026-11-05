@@ -1,5 +1,6 @@
 import { parseEnv } from "../../env"
 import type { Env } from "../../env"
+import { logger } from "../../logging"
 import { createMailpitTransport, createResendTransport } from "./transports"
 import type { EmailTransport } from "./transports"
 
@@ -39,13 +40,19 @@ let shared: { key: string; transport: EmailTransport | null } | undefined
 
 /**
  * The instance's e-mail transport (adr/0036), built once per setting; null
- * when e-mail is off (`EMAIL_TRANSPORT` unset), and nothing is sent.
+ * when e-mail is off (`EMAIL_TRANSPORT` unset), and nothing is sent. That
+ * is the platform's setting, not the shop's: the operator is told by an
+ * error log with a stable event to alert on, once per setting; the shop's
+ * panel says only that its e-mails do not go out (docs/06 principle 10).
  */
 export function emailTransport(): EmailTransport | null {
   const env = parseEnv()
   const key = [env.EMAIL_TRANSPORT, env.MAILPIT_URL, env.RESEND_BASE_URL, env.BACKEND_URL].join("|")
   if (shared?.key !== key) {
     shared = { key, transport: build(env) }
+    if (!shared.transport) {
+      logger.error({ event: "messaging.email_transport_missing" })
+    }
   }
   return shared.transport
 }

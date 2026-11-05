@@ -1,5 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { googleClientOf } from "../../../../lib/google/oauth"
+import { cruxApiKey } from "../../../../lib/google/search-console"
 import { SEO_INSIGHTS_MODULE } from "../../../../modules/seo-insights"
 import type SeoInsightsModuleService from "../../../../modules/seo-insights/service"
 
@@ -10,8 +11,9 @@ const TOP = 5
  * Search beside the 28 before, the pages that lost the most clicks, how
  * many inspected pages are in the index, its Core Web Vitals, and when
  * each part last ran. `search_console` says whether the platform has
- * opened Google at all: until then the panel shows no Search Console part
- * (docs/06 principle 10).
+ * opened Google at all, `web_vitals` whether it reads Chrome's field data
+ * (its CrUX key): until then the panel shows no such part (docs/06
+ * principle 10).
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const insights = req.scope.resolve<SeoInsightsModuleService>(SEO_INSIGHTS_MODULE)
@@ -28,6 +30,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   res.json({
     insights: {
       search_console: googleClientOf() !== null,
+      web_vitals: cruxApiKey() !== null,
       search: pages.length
         ? {
             period_end: pages[0]?.period_end ?? null,

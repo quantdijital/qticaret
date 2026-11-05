@@ -7,6 +7,7 @@ import {
   OWNER_JOB_TYPES,
   PLATFORM_JOB_TYPES,
   PRIVATE_JOB_TYPES,
+  SCHEDULED_JOB_TYPES,
   jobType,
 } from "../../../workflows/async-job/types"
 import { staffRoleOf } from "../../http/staff-guard"
@@ -16,18 +17,23 @@ import type { AdminGetAsyncJobsType, AdminPostAsyncJobType } from "./validators"
 /**
  * Jobs, newest first (adr/0014); an audit log export shows only to the one
  * who asked for it and the owner, a migration's only to an owner. The
- * platform's own (the address data sync) shows to no one in the shop
- * (docs/06 principle 10): the list and its count leave them out.
+ * platform's own (the address data sync), and the runs its schedule
+ * started of the SEO audit and the sitemap, show to no one in the shop
+ * (docs/06 principle 10): the list and its count leave them out. A run
+ * staff started from the SEO page stays.
  */
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const { limit, offset, ...filters } = req.validatedQuery as AdminGetAsyncJobsType
   const service = req.scope.resolve<AsyncJobModuleService>(ASYNC_JOB_MODULE)
-  const shops = { type: { $nin: PLATFORM_JOB_TYPES } }
+  const shops = [
+    { type: { $nin: PLATFORM_JOB_TYPES } },
+    { $or: [{ type: { $nin: SCHEDULED_JOB_TYPES } }, { requested_by: { $ne: null } }] },
+  ]
   const seen =
     (await staffRoleOf(req)) === "owner"
-      ? [shops]
+      ? shops
       : [
-          shops,
+          ...shops,
           { type: { $nin: OWNER_JOB_TYPES } },
           {
             $or: [

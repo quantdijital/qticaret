@@ -23,6 +23,8 @@ export type IntegrationState = "connected" | "attention" | "not_set_up" | "off"
 export interface IntegrationNote {
   code: string
   count?: number
+  /** The address the shop's e-mail goes from, for the e-mail row's notes. */
+  sender?: string
 }
 
 export interface IntegrationRow {
@@ -112,25 +114,38 @@ export function cashOnDeliveryRow(enabled: boolean): IntegrationRow {
 }
 
 export interface EmailFacts {
-  transport: "resend" | "mailpit" | null
+  /** The platform's transport sends the shop's e-mail, and from an address (adr/0036). */
+  sending: boolean
+  /** The shop can verify its own domain there (Resend's domains; not a developer's mailbox). */
+  ownDomain: boolean
+  /** Who the e-mail is from now: the shop's verified domain, else the platform's address. */
+  sender: string | null
   domain: { status: string } | null
 }
 
 /**
- * E-mail: Resend in production; the shop's own domain once verified, else
- * the platform's. Anything else (none, or a developer's local mailbox)
- * sends the shop nothing, and says so in the shop's words.
+ * E-mail, as the shop sees it: whether its e-mails go out, and from which
+ * address. Its own domain is offered only where the shop can verify one,
+ * and while one waits on its DNS that is the shop's to act on. Nothing
+ * sending is the platform's setting (logged for the operator where the
+ * transport is resolved): the shop is told only that, in one line.
  */
-export function emailRow({ transport, domain }: EmailFacts): IntegrationRow {
-  if (transport !== "resend") {
+export function emailRow({ sending, ownDomain, sender, domain }: EmailFacts): IntegrationRow {
+  if (!sending || sender === null) {
     return row("resend", "messaging", "off", [{ code: "not_sending" }])
   }
+  if (!ownDomain) {
+    return row("resend", "messaging", "connected", [{ code: "sending", sender }])
+  }
   if (!domain) {
-    return row("resend", "messaging", "connected", [{ code: "platform_sender" }])
+    return row("resend", "messaging", "connected", [{ code: "platform_sender", sender }])
   }
   return domain.status === "verified"
-    ? row("resend", "messaging", "connected")
-    : row("resend", "messaging", "attention", [{ code: "domain_unverified" }])
+    ? row("resend", "messaging", "connected", [{ code: "sending", sender }])
+    : row("resend", "messaging", "attention", [
+        { code: "sending", sender },
+        { code: "domain_unverified" },
+      ])
 }
 
 export function feedsRow(enabled: boolean, storefrontSet: boolean): IntegrationRow {

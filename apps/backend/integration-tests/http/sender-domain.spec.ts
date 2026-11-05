@@ -14,6 +14,7 @@ import { loadTrAddressFixture } from "../helpers/tr-address"
 jest.setTimeout(120 * 1000)
 
 interface View {
+  sending: boolean
   available: boolean
   sender: string | null
   domain: { name: string; status: string; records: { record: string }[] } | null
@@ -93,6 +94,7 @@ medusaIntegrationTestRunner({
       const removed = await send<View>("delete", PATH)
 
       expect(empty.data).toMatchObject({
+        sending: true,
         available: true,
         sender: "bildirim@platform.example",
         domain: null,
@@ -109,6 +111,26 @@ medusaIntegrationTestRunner({
       expect(afterVerified).toBe('"Medusa Store" <bildirim@magaza.example.com>')
       expect(removed.data).toMatchObject({ sender: "bildirim@platform.example", domain: null })
       expect(fake.domains.size).toBe(0)
+    })
+
+    it("says the shop's e-mail goes out where no domain can be verified, and when none does", async () => {
+      try {
+        // A developer's local mailbox sends the shop's e-mail, but verifies no domain
+        Object.assign(process.env, { EMAIL_TRANSPORT: "mailpit", MAILPIT_URL: fake.url })
+        const mailbox = await send<View>("get", PATH)
+        Reflect.deleteProperty(process.env, "EMAIL_TRANSPORT")
+        const none = await send<View>("get", PATH)
+
+        expect(mailbox.data).toMatchObject({
+          sending: true,
+          available: false,
+          sender: "bildirim@platform.example",
+        })
+        expect(none.data).toMatchObject({ sending: false, available: false })
+      } finally {
+        Reflect.deleteProperty(process.env, "MAILPIT_URL")
+        process.env["EMAIL_TRANSPORT"] = "resend"
+      }
     })
 
     it("lets go of a domain Resend no longer has", async () => {

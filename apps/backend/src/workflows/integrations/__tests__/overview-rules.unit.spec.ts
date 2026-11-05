@@ -70,22 +70,32 @@ describe("integration overview rules", () => {
       "connected",
       "off",
     ])
-    expect(emailRow({ transport: null, domain: null })).toMatchObject({
+    const sender = "bildirim@platform.example"
+    const mail = { sending: true, ownDomain: true, sender, domain: null }
+    // Nothing sends: the platform's, so the shop is told only that
+    expect(emailRow({ ...mail, sending: false, sender: null })).toMatchObject({
       state: "off",
       notes: [{ code: "not_sending" }],
     })
-    // A developer's local mailbox sends the shop nothing either
-    expect(emailRow({ transport: "mailpit", domain: null })).toMatchObject({
-      state: "off",
-      notes: [{ code: "not_sending" }],
-    })
-    expect(emailRow({ transport: "resend", domain: null })).toMatchObject({
+    expect(emailRow({ ...mail, sender: null })).toMatchObject({ state: "off" })
+    // A developer's local mailbox sends the shop's e-mail, but verifies no domain: none offered
+    expect(emailRow({ ...mail, ownDomain: false })).toMatchObject({
       state: "connected",
-      notes: [{ code: "platform_sender" }],
+      notes: [{ code: "sending", sender }],
     })
-    expect(emailRow({ transport: "resend", domain: { status: "pending" } })).toMatchObject({
+    expect(emailRow(mail)).toMatchObject({
+      state: "connected",
+      notes: [{ code: "platform_sender", sender }],
+    })
+    // Still sent from the platform's address while the shop's domain waits on its DNS
+    expect(emailRow({ ...mail, domain: { status: "pending" } })).toMatchObject({
       state: "attention",
-      notes: [{ code: "domain_unverified" }],
+      notes: [{ code: "sending", sender }, { code: "domain_unverified" }],
+    })
+    const own = "bildirim@magaza.example.com"
+    expect(emailRow({ ...mail, sender: own, domain: { status: "verified" } })).toMatchObject({
+      state: "connected",
+      notes: [{ code: "sending", sender: own }],
     })
     expect(feedsRow(true, false)).toMatchObject({
       state: "attention",

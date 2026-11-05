@@ -7,6 +7,7 @@ import { SEO_REDIRECTS_MODULE } from "../../src/modules/seo-redirects"
 import type SeoRedirectsModuleService from "../../src/modules/seo-redirects/service"
 import seoAdvisorNightly from "../../src/jobs/seo-advisor-nightly"
 import { createAdminUser } from "../helpers/admin"
+import { eventually } from "../helpers/eventually"
 import { filesNamed } from "../helpers/files"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -33,6 +34,12 @@ interface Job {
   status: string
   has_result: boolean
   result_summary: { findings: Finding[] } | null
+}
+
+/** The audit as the SEO page reads it (`GET /admin/seo/audit`). */
+interface Audit {
+  latest: { id: string; status: string } | null
+  report: { id: string; findings: Finding[]; has_file: boolean } | null
 }
 
 const product = (title: string, handle: string, extra: Record<string, unknown> = {}) => ({
@@ -249,8 +256,14 @@ medusaIntegrationTestRunner({
         ])
       )
 
-      // The report lists the same, one row per item, safe for a spreadsheet
-      const result = await http.get<{ url: string }>(`/admin/async-jobs/${job.id}/result`, {
+      // The SEO page reads the same run, and its report lists it all, one row per item, safe for a spreadsheet
+      const { data: shown } = await http.get<{ audit: Audit }>("/admin/seo/audit", {
+        headers: admin.headers,
+      })
+      expect(shown.audit.latest).toMatchObject({ id: job.id, status: "succeeded" })
+      expect(shown.audit.report).toMatchObject({ id: job.id, has_file: true })
+      expect(shown.audit.report?.findings).toEqual(job.result_summary?.findings)
+      const result = await http.get<{ url: string }>("/admin/seo/audit/report", {
         headers: admin.headers,
       })
       const file = filesNamed(/seo-audit-.*\.csv$/).find((path) =>
@@ -267,18 +280,35 @@ medusaIntegrationTestRunner({
       )
     })
 
-    it("runs after the nightly assessments", async () => {
+    it("runs after the nightly assessments, on the SEO page and not among the shop's jobs", async () => {
+      const none = await settle(http.get("/admin/seo/audit/report", { headers: admin.headers }))
       const { data } = await post<{ product: { id: string } }>(
         "/admin/products",
         product("Seramik Kupa", "seramik-kupa")
       )
       await seoAdvisorNightly(getContainer())
       await assessed([data.product.id])
-      const { data: jobs } = await http.get<{ async_jobs: Job[] }>(
+      const audit = await eventually(
+        async () =>
+          (await http.get<{ audit: Audit }>("/admin/seo/audit", { headers: admin.headers })).data
+            .audit,
+        (shown) => shown.report !== null,
+        150
+      )
+      const { data: jobs } = await http.get<{ async_jobs: Job[]; count: number }>(
         "/admin/async-jobs?type=seo.audit",
         { headers: admin.headers }
       )
-      expect(jobs.async_jobs).toHaveLength(1)
+      const report = await http.get<{ url: string }>("/admin/seo/audit/report", {
+        headers: admin.headers,
+      })
+
+      expect(none.status).toBe(404)
+      expect(audit.latest).toMatchObject({ status: "succeeded" })
+      expect(audit.report).toMatchObject({ id: audit.latest?.id, has_file: true })
+      // The platform's own run (docs/06 principle 10): its result is the SEO page's
+      expect(jobs).toMatchObject({ async_jobs: [], count: 0 })
+      expect(report.data.url).toMatch(/seo-audit-[^/]+\.csv$/)
     })
   },
 })
