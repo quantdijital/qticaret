@@ -146,6 +146,11 @@ export interface StoreProduct {
     is_gift_card?: boolean | null
     withdrawal_excluded?: boolean | null
     kind?: string | null
+    /**
+     * The shop's short description: up to five plain-text lines, each a
+     * bullet (adr/0055 Ek 2026-11-05); on the product's own answer only.
+     */
+    summary?: string[] | null
   } | null
 }
 

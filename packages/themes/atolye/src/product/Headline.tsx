@@ -1,4 +1,4 @@
-import { Truck } from "lucide-react"
+import { Check, Truck } from "lucide-react"
 import type { ProductPageView, Translate } from "@qticaret/ui"
 import { Stars } from "../parts/Stars"
 import { TrustIcon } from "../parts/TrustIcon"
@@ -11,12 +11,16 @@ export const ratingText = (average: number) => average.toFixed(1).replace(".", "
  * The buy column's head: the brand small (its page), the name as the
  * page's one h1 (a name the shop wrote as "name | detail" keeps the
  * detail on a second, smaller line of the same heading), the subtitle,
- * the stars with the count leading to the reviews, and up to four facts
- * the shop marked as headline ones.
+ * the stars with the count leading to the reviews, then the shop's short
+ * description as a quiet checked list (up to five lines, adr/0055 Ek
+ * 2026-11-05) or, without one, up to four facts the shop marked as
+ * headline ones.
  */
 export function Headline({ view, t }: { view: ProductPageView; t: Translate }) {
   const [name = view.title, ...detail] = view.title.split(" | ")
-  const facts = view.specs.filter((spec) => spec.highlight).slice(0, 4)
+  const summary = view.summary ?? []
+  // The short description takes the facts' place; they stay on the spec table
+  const facts = summary.length > 0 ? [] : view.specs.filter((spec) => spec.highlight).slice(0, 4)
   const { average, count } = view.reviews
   return (
     <header className="flex flex-col gap-3">
@@ -49,6 +53,20 @@ export function Headline({ view, t }: { view: ProductPageView; t: Translate }) {
           </span>
           <span className="sr-only">{t("product.average", { value: ratingText(average) })}</span>
         </a>
+      )}
+      {summary.length > 0 && (
+        <ul aria-label={t("product.summary")} className="flex max-w-[52ch] flex-col gap-1.5 pt-1">
+          {summary.map((line, index) => (
+            <li key={`${String(index)}-${line}`} className="flex items-start gap-2 text-sm">
+              <Check
+                className="mt-[0.2em] size-4 shrink-0 text-text-2"
+                aria-hidden="true"
+                strokeWidth={1.75}
+              />
+              <span>{line}</span>
+            </li>
+          ))}
+        </ul>
       )}
       {facts.length > 0 && (
         <dl aria-label={t("product.highlights")} className="flex flex-wrap gap-2 pt-1">

@@ -86,6 +86,26 @@ export function ProductDetails({
   )
 }
 
+/**
+ * The shop's short description under the product's name (adr/0055 Ek
+ * 2026-11-05): up to five plain lines as a dotted list, in place of the
+ * headline facts.
+ */
+export function SummaryList({ lines, label }: { lines: readonly string[]; label: string }) {
+  if (lines.length === 0) {
+    return null
+  }
+  return (
+    <ul aria-label={label} className="flex max-w-prose list-disc flex-col gap-1 ps-5 text-sm">
+      {lines.map((line, index) => (
+        <li key={`${String(index)}-${line}`} className="marker:text-muted-foreground">
+          {line}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
 /** The shop's headline facts under the product's name ("N690 çelik", "21 cm"). */
 export function SpecHighlights({ specs, label }: { specs: SpecView[]; label: string }) {
   const highlights = specs.filter((spec) => spec.highlight)

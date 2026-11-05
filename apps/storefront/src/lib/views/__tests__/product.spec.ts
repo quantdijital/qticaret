@@ -181,6 +181,39 @@ describe("productPage", () => {
     // The plain text stays: the derived description a theme falls back to
     expect(view.description).toEqual(["Yıkanmış keten.", "Rahat kesim & yazlık."])
   })
+
+  it("carries the short description's lines, trimmed, five at most (adr/0055 Ek 2026-11-05)", () => {
+    const withSummary = (summary: unknown) =>
+      productPage({
+        product: {
+          ...product,
+          product_extension: { summary: summary as string[] | null },
+        },
+        seo: null,
+        displays: {},
+        brandPath: null,
+        requestedVariant: null,
+        t,
+        trustBadges: [],
+      })
+    expect(
+      withSummary([
+        " Yıkanmış keten ",
+        "",
+        "Rahat kesim",
+        7,
+        "Yazlık",
+        "Elde yıkama",
+        "Türkiye",
+        "Fazla",
+      ]).summary
+    ).toEqual(["Yıkanmış keten", "Rahat kesim", "Yazlık", "Elde yıkama", "Türkiye"])
+    // None, empty or not a list: the key is left out and the theme shows the headline facts
+    for (const summary of [null, [], ["  "], "Yıkanmış keten"]) {
+      expect(withSummary(summary)).not.toHaveProperty("summary")
+    }
+    expect(page(null)).not.toHaveProperty("summary")
+  })
 })
 
 describe("percentOff", () => {

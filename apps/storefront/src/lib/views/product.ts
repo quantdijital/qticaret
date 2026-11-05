@@ -162,6 +162,7 @@ export function productPage({
     subtitle: product.subtitle,
     description: paragraphsOf(product.description),
     descriptionHtml,
+    ...summaryOf(product),
     brand: product.brand && brandPath ? { label: product.brand.name, path: brandPath } : null,
     breadcrumbs: breadcrumbsOf(seo, t("home.label"), product.title),
     images: productImages(product),
@@ -175,6 +176,23 @@ export function productPage({
     trustBadges,
     withdrawalNote: withdrawalNoteOf(product, t),
   }
+}
+
+// The contract's at most: five lines (adr/0055 Ek 2026-11-05)
+const SUMMARY_LINES = 5
+
+/**
+ * The shop's short description as the page's lines (adr/0055 Ek
+ * 2026-11-05): strings only, trimmed, empty ones dropped, five at most.
+ * Left out with none, so the theme shows the headline facts instead.
+ */
+export function summaryOf(product: StoreProduct): { summary?: string[] } {
+  const stored: unknown = product.product_extension?.summary
+  const lines = (Array.isArray(stored) ? stored : [])
+    .flatMap((line: unknown) => (typeof line === "string" ? [line.trim()] : []))
+    .filter((line) => line !== "")
+    .slice(0, SUMMARY_LINES)
+  return lines.length > 0 ? { summary: lines } : {}
 }
 
 /**

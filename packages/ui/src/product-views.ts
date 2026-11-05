@@ -96,6 +96,14 @@ export interface ProductPageView {
    * quotes, tables): safe to print as it is. Null: show `description`.
    */
   descriptionHtml: string | null
+  /**
+   * The shop's short description as up to five plain-text lines, each a
+   * bullet (adr/0055 Ek 2026-11-05): shown under the title, subtitle and
+   * rating, above the price. None or empty: the theme shows the headline
+   * facts (`specs` with `highlight`) there instead. A theme never prints
+   * it as HTML.
+   */
+  summary?: string[]
   brand: LinkView | null
   breadcrumbs: BreadcrumbView[]
   images: ImageView[]

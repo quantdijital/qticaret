@@ -7,7 +7,7 @@ import { PageContainer } from "./components/Container"
 import { FavoriteButton } from "./components/FavoriteButton"
 import { ProductGrid } from "./components/ProductCard"
 import { ProductCommunity } from "./components/ProductCommunity"
-import { ProductDetails, SpecHighlights } from "./components/ProductDetails"
+import { ProductDetails, SpecHighlights, SummaryList } from "./components/ProductDetails"
 import { ProductGallery } from "./components/ProductGallery"
 import { PurchasePanel } from "./components/PurchasePanel"
 import { TrustStrip } from "./components/TrustStrip"
@@ -73,7 +73,12 @@ export function ProductPage({
               <h1 className="text-4xl leading-[1.08] text-balance lg:text-5xl">{view.title}</h1>
               {view.subtitle && <p className="text-lg text-muted-foreground">{view.subtitle}</p>}
             </header>
-            <SpecHighlights specs={view.specs} label={t("product.highlights")} />
+            {/* The short description takes the headline facts' place (adr/0055 Ek 2026-11-05) */}
+            {view.summary && view.summary.length > 0 ? (
+              <SummaryList lines={view.summary} label={t("product.summary")} />
+            ) : (
+              <SpecHighlights specs={view.specs} label={t("product.highlights")} />
+            )}
             <PurchasePanel
               options={view.options}
               variants={view.variants}
