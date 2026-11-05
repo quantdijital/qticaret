@@ -98,6 +98,15 @@ Geri kalan her şey ya bildiğimiz yerden otomatik doldurulur ya da geçirilir. 
 - **Ölçü**: sıfırdan küçük ya da sayı olmayan değer artık "girilmemiş" sayılır. Varsayılan paket kullanılır, sepet ve koli durmaz. `shipping.measures_invalid` silindi.
 - **Paketlenmiş koli**: paketlenmiş (Medusa'nın kendi yolu, içe aktarma) ama teslim edilmemiş koli ile koliye girmemiş ürünler birlikte ya da herhangi sırayla gider. Paketlenmiş kolinin kalemlerini adlandıran istek o koliyi teslim eder. Başka kalemler ayrı koliyle gider. `orders.ship_packed_first` silindi. Panelde ikisi aynı pencerede seçilir.
 - **Panel takip bilgisi**: takip numarasındaki boşluklar atılır. Şemasız ya da `http://` bağlantı `https://` olur.
+- **Stok rezervasyonu** (`workflows/orders/fill-reservations.ts`, plan `lib/shipping/reservations.ts`):
+  - Medusa koliyi yalnız rezerve edilmiş stoktan paketler. Stok takipli bir kalemin rezervasyonu yoksa ya da koliden azsa durur; kolinin deposunda ürünün stok satırı yoksa da durur. Bu bizim defterimizdir, gerçek bir engel değildir.
+  - Paketlemeden önce kolinin deposunda eksik rezervasyon açılır, küçük olan koli kadar büyütülür. Paketleme aynı çalıştırmada onu tüketir. Depoda ürünün stok satırı yoksa 0 ile açılır: koli elde, sayım onu izler.
+  - Sayım koliden azsa stok sıfırın altına iner. Medusa stoksuz satılan bir kalemi gönderirken de böyle yapar. Varyantın satış kuralı (`allow_backorder`, `stock.preorder` bayrağı) değişmez: vitrin sayımda olmayanı yine satmaz. Eksi sayım Stok sayfasında ve düşük stok uyarısında görünür.
+  - Stok takibi kapalı varyanta dokunulmaz. Aynı kalemin aynı ürünü birden çok rezervasyonda tutması Medusa'nın kuralında kalır.
+  - Koli gitmezse (taşıyıcı reddi, etiket alınamadı) açılan rezervasyon ve stok satırı silinir, büyütülen rezervasyon eski hâline döner. Her parça Medusa'nın kendi iş akışıdır ve kendini geri alır.
+  - Yapılan iş `order.reservation_filled` ile kaydedilir: bilgi düzeyinde günlük satırı ve siparişe sistem denetim kaydı (depo, açılan stok satırları, kalem kalem rezervasyon, sayımın altına inen adet). Yalnız giden koli kaydedilir.
+  - Bu duruma düşen siparişler: stok takibi siparişten sonra açılan varyant (panelin varyant satırı ya da Medusa yönetimi; Medusa varyanta stok kalemi açar, depo satırı açmaz), Medusa yönetiminden silinen ya da küçültülen rezervasyon, rezervasyonu silinmiş set bileşeni, satış kanalının deposundan rezerve edilip başka depodan gönderilen ürün.
+  - Vitrin ve ödeme bağlantısı (sepet tamamlama), taslak sipariş, sipariş düzenleme, değişim ve iptal edilen koli Medusa'nın kendi akışıyla rezervasyon açar. Taşınan geçmiş siparişler Medusa siparişi değildir (`legacy_order`, ADR-0042 §4): gönderilecek iş olarak hiç görünmez.
 
 ### Kalan engeller ve nedenleri
 
@@ -122,7 +131,7 @@ Geri kalan her şey ya bildiğimiz yerden otomatik doldurulur ya da geçirilir. 
 | `shipping.receiver_name_short`, `shipping.receiver_address_short` | Yurtiçi sağlayıcısı | Taşıyıcı reddeder: ad en az 5 karakter ve 4 harf, adres en az 10 harf/rakam (82502) | Yurtiçi V3 |
 | `shipping.sender_*_missing`, `shipping.sender_contact_missing` | `geliver-sender.ts` | Yalnız Geliver hesabında hiç gönderici adresi yokken: Geliver göndericinin telefonu, posta kodu ve e-postası olmadan adres açmıyor | Geliver SDK README, `requests.ts` |
 | `shipping.setup_incomplete` | `shipping-options.ts` | Yalnız birden çok depo varken ve hiçbiri varsayılan değilken | — |
-| Medusa: stok kaydı (rezervasyon) yok, profil uyuşmazlığı, depo yok | `createOrderFulfillmentWorkflow` | Medusa çekirdeği; çekirdek değişmez (CLAUDE.md kural 2). Depo yokken tek depo verilir | Medusa 2.21.2 kaynağı |
+| Medusa: profil uyuşmazlığı, depo yok | `createOrderFulfillmentWorkflow` | Medusa çekirdeği; çekirdek değişmez (CLAUDE.md kural 2). Depo yokken tek depo verilir. Eksik rezervasyon ve depodaki stok satırı artık doldurulur (yukarıda) | Medusa 2.21.2 kaynağı |
 
 Aras'ın `SetOrder` belgesi herkese açık değil (servis tanımında her alan `minOccurs=0`). Bu yüzden Aras için kurye açısından gerekli olan (ad, adres, il/ilçe, telefon) korunur. Sahte Aras yalnız alıcı adı yokken reddeder. Gerçek hesapla denenecek.
 
