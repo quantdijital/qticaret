@@ -1,5 +1,5 @@
 import { BadgeCheck } from "lucide-react"
-import type { ShopRatingView, Translate } from "@qticaret/ui"
+import type { RatingBarView, ReviewFilterView, ShopRatingView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { fillOf } from "../parts/FreeShippingMeter"
 import { Stars } from "../parts/Stars"
@@ -23,8 +23,40 @@ export function quoteOf(body: string): string {
   return `${cut.slice(0, cut.lastIndexOf(" ")).replace(/[,;:.]$/, "")}…`
 }
 
-/** The shop's average set large, the stars, the count and the spread 5 to 1, on a tinted panel. */
-export function Summary({ summary, t }: { summary: ShopRatingView; t: Translate }) {
+const BAR_ROW = "grid grid-cols-[4.5rem_minmax(0,1fr)_2.5rem] items-center gap-3 text-sm"
+
+/** One bar's parts: its stars in words, the bar, the count; the words for a screen reader apart. */
+function BarParts({ bar, label, t }: { bar: RatingBarView; label: string; t: Translate }) {
+  return (
+    <>
+      <span aria-hidden="true">{t("reviews.bar_stars", { stars: bar.stars })}</span>
+      <span aria-hidden="true" className="h-2 overflow-hidden rounded-pill bg-paper-3">
+        <span className={`block h-full rounded-pill bg-star ${fillOf(bar.percent)}`} />
+      </span>
+      <span aria-hidden="true" className="tabular text-right">
+        {bar.count}
+      </span>
+      <span className="sr-only">{label}</span>
+    </>
+  )
+}
+
+/**
+ * The shop's average set large, the stars, the count and the spread 5 to
+ * 1, on a tinted panel. With a `filter` (the reviews page, adr/0037 Ek
+ * 2026-11-05) each bar is the link that shows its stars alone: a 44 px
+ * row, the one shown lifted on the bench colour and set heavy; a number
+ * no review gave stays a faint row, no link.
+ */
+export function Summary({
+  summary,
+  t,
+  filter = null,
+}: {
+  summary: ShopRatingView
+  t: Translate
+  filter?: ReviewFilterView | null
+}) {
   return (
     <div className="flex flex-col gap-5 rounded-tile bg-paper-2 p-6 lg:p-8">
       <p className="flex items-end gap-3">
@@ -40,24 +72,40 @@ export function Summary({ summary, t }: { summary: ShopRatingView; t: Translate 
         <span className="sr-only">{summary.label}</span>
       </p>
       {summary.distribution.length > 0 && (
-        <ul aria-label={t("reviews.distribution")} className="flex flex-col gap-1.5">
-          {summary.distribution.map((bar) => (
-            <li
-              key={bar.stars}
-              className="grid grid-cols-[4.5rem_minmax(0,1fr)_2.5rem] items-center gap-3 text-sm"
-            >
-              <span aria-hidden="true" className="text-text-2">
-                {t("reviews.bar_stars", { stars: bar.stars })}
-              </span>
-              <span aria-hidden="true" className="h-2 overflow-hidden rounded-pill bg-paper-3">
-                <span className={`block h-full rounded-pill bg-star ${fillOf(bar.percent)}`} />
-              </span>
-              <span aria-hidden="true" className="tabular text-right text-text-2">
-                {bar.count}
-              </span>
-              <span className="sr-only">{bar.label}</span>
-            </li>
-          ))}
+        <ul
+          aria-label={t(filter ? "reviews.filter_label" : "reviews.distribution")}
+          className={filter ? "-mx-3 flex flex-col gap-0.5" : "flex flex-col gap-1.5"}
+        >
+          {summary.distribution.map((bar) => {
+            const option = filter?.options.find((each) => each.stars === bar.stars)
+            if (!option) {
+              return (
+                <li key={bar.stars} className={`${BAR_ROW} text-text-2`}>
+                  <BarParts bar={bar} label={bar.label} t={t} />
+                </li>
+              )
+            }
+            return (
+              <li key={bar.stars}>
+                {option.path ? (
+                  <a
+                    href={option.path}
+                    rel="nofollow"
+                    aria-current={option.active ? "true" : undefined}
+                    className={`${BAR_ROW} min-h-11 rounded-inner px-3 no-underline transition-colors duration-(--dur-micro) hover:bg-paper active:translate-y-px ${
+                      option.active ? "bg-paper font-extrabold text-text" : "text-text-2"
+                    }`}
+                  >
+                    <BarParts bar={bar} label={option.label} t={t} />
+                  </a>
+                ) : (
+                  <span className={`${BAR_ROW} min-h-11 px-3 text-text-3`}>
+                    <BarParts bar={bar} label={bar.label} t={t} />
+                  </span>
+                )}
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>

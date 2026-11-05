@@ -260,6 +260,33 @@ export interface ReviewsPageView {
   summary?: ShopRatingView | null
   reviews: (ReviewView & { product: ReviewedProductView | null })[]
   pagination: PaginationView
+  /**
+   * The star filter (adr/0037 Ek 2026-11-05): one number of stars at a
+   * time, `/yorumlar?puan=5`. None: the theme shows no filter (a backend
+   * without the shop-wide spread). `count` and `summary` stay shop-wide.
+   */
+  filter?: ReviewFilterView | null
+}
+
+export type ReviewStars = 1 | 2 | 3 | 4 | 5
+
+/** The reviews page's star filter: a link per number of stars, the one shown, the way back to all. */
+export interface ReviewFilterView {
+  /** 5 to 1, each counted shop-wide; `path` null when no review gave that many (nothing to show). */
+  options: {
+    stars: ReviewStars
+    count: number
+    path: string | null
+    /** For a screen reader: "Yalnız 5 yıldızlı değerlendirmeler (26)". */
+    label: string
+    active: boolean
+  }[]
+  /** The stars shown now; null: every review. */
+  active: ReviewStars | null
+  /** The active filter in words ("5 yıldız"); null with none. */
+  activeLabel: string | null
+  /** Every review again: `/yorumlar`. */
+  clearPath: string
 }
 
 /** The product a review is about, at its page; its picture when it has one (adr/0046 Ek 2026-11-05). */

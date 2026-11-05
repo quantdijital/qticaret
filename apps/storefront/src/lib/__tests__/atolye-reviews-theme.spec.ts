@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
-import type { ReviewsPageView } from "@qticaret/ui"
+import type { ReviewFilterView, ReviewsPageView } from "@qticaret/ui"
 import { renderPage } from "@/test/theme-render"
 
 /**
@@ -66,6 +66,76 @@ describe("the theme's reviews page", () => {
       view: reviews({ reviews: [], summary: null, average: null, count: 0 }),
     })
     expect(html).toContain("Henüz değerlendirme yok")
+  })
+})
+
+describe("the theme's star filter (adr/0037 Ek 2026-11-05)", () => {
+  const filter = (active: 5 | null): ReviewFilterView => ({
+    options: [
+      {
+        stars: 5,
+        count: 26,
+        path: "/yorumlar?puan=5",
+        label: "Yalnız 5 yıldızlı değerlendirmeler (26)",
+        active: active === 5,
+      },
+      {
+        stars: 1,
+        count: 0,
+        path: null,
+        label: "Yalnız 1 yıldızlı değerlendirmeler (0)",
+        active: false,
+      },
+    ],
+    active,
+    activeLabel: active === null ? null : `${String(active)} yıldız`,
+    clearPath: "/yorumlar",
+  })
+  const summary = {
+    average: "4,9",
+    count: 28,
+    label: "5 üzerinden 4,9 (28 değerlendirme)",
+    distribution: [
+      { stars: 5 as const, count: 26, percent: 93, label: "5 yıldız: 26 değerlendirme" },
+      { stars: 1 as const, count: 0, percent: 0, label: "1 yıldız: 0 değerlendirme" },
+    ],
+  }
+
+  it("makes each bar a link to its stars alone, out of the index; a number no one gave no link", () => {
+    const html = renderPage(atolyeTheme, "ReviewsPage", {
+      view: reviews({ summary, filter: filter(null) }),
+    })
+    expect(html).toContain('href="/yorumlar?puan=5"')
+    expect(html).toMatch(/<a href="\/yorumlar\?puan=5" rel="nofollow"/)
+    expect(html).toContain("Yalnız 5 yıldızlı değerlendirmeler (26)")
+    expect(html).not.toContain("puan=1")
+    expect(html).not.toContain('aria-current="true"')
+    expect(html).not.toContain("Filtreyi kaldır")
+  })
+
+  it("marks the stars shown, with a pill and a link that take the filter off", () => {
+    const html = renderPage(atolyeTheme, "ReviewsPage", {
+      view: reviews({ summary, filter: filter(5) }),
+    })
+    expect(html).toMatch(/href="\/yorumlar\?puan=5"[^>]*aria-current="true"/)
+    expect(html).toContain('aria-label="Filtreyi kaldır: 5 yıldız"')
+    expect(html).toContain("Tüm yorumları göster")
+    expect(html).toContain("Kaliteli ürün.")
+  })
+
+  it("says so when no review gave those stars, with the way back to all", () => {
+    const html = renderPage(atolyeTheme, "ReviewsPage", {
+      view: reviews({ summary, filter: filter(5), reviews: [] }),
+    })
+    expect(html).toContain("Bu puanla verilmiş değerlendirme yok.")
+    expect(html).not.toContain("Henüz değerlendirme yok")
+    expect(html.match(/href="\/yorumlar"/g)?.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it("leaves the home page's summary as it was: no links there", () => {
+    const html = renderPage(atolyeTheme, "ReviewsPage", { view: reviews({ summary }) })
+    expect(html).not.toContain("puan=")
+    expect(html).toContain('aria-label="Puan dağılımı"')
   })
 })
 

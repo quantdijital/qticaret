@@ -11,11 +11,11 @@ import { storeGet } from "@/lib/store-api/server"
 import { reviewSummary } from "@/lib/store-api/extras"
 import { reviewPhotos, shopRatingView } from "@/lib/views/card-extras"
 import { productImages } from "@/lib/views/image"
+import { reviewFilterView, reviewsPath, starsOf } from "@/lib/views/review-filter"
 import { productsInOrder } from "@/lib/views/section-data"
 import { theme } from "@/theme"
 
 const PAGE_SIZE = 20
-const pagePath = (page: number) => (page > 1 ? `/yorumlar?sayfa=${String(page)}` : "/yorumlar")
 const DATE = new Intl.DateTimeFormat("tr-TR", {
   day: "numeric",
   month: "long",
@@ -76,28 +76,39 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const [site, query] = await Promise.all([siteSeo(), searchParams])
   const page = pageOf(query) ?? 1
+  // A star filter narrows the page as a listing's filter does (docs/13 §7):
+  // out of the index, its links followed, the whole list its canonical
+  const filtered = starsOf(query) !== undefined
   return {
     title: { absolute: `${t("reviews.title")} | ${site.shop.name}` },
     description: t("reviews.description", { shop: site.shop.name }),
     alternates: site.canonical_host
-      ? { canonical: `https://${site.canonical_host}${pagePath(page)}` }
+      ? { canonical: `https://${site.canonical_host}${reviewsPath(filtered ? 1 : page)}` }
       : null,
-    robots: site.indexing ? "index,follow" : "noindex,nofollow",
+    robots: !site.indexing ? "noindex,nofollow" : filtered ? "noindex,follow" : "index,follow",
   }
 }
 
-/** `/yorumlar` (D10): every approved review, twenty a page, each with its product's link. */
+/**
+ * `/yorumlar` (D10): every approved review, twenty a page, each with its
+ * product's link; `?puan=5` the five-star ones alone (adr/0037 Ek
+ * 2026-11-05), the shop-wide spread its links.
+ */
 export default async function ReviewsIndex({ searchParams }: { searchParams: Promise<Query> }) {
   const [query, site] = await Promise.all([searchParams, siteSeo()])
   const page = pageOf(query)
-  if (page === null) {
+  const asked = starsOf(query)
+  if (page === null || asked === null) {
     notFound()
   }
+  const stars = asked ?? null
+  const pagePath = (number: number) => reviewsPath(number, stars)
   let answer: Answer
   try {
     answer = await storeGet<Answer>("/store/reviews", {
       offset: (page - 1) * PAGE_SIZE,
       limit: PAGE_SIZE,
+      ...(stars === null ? {} : { rating: stars }),
     })
   } catch (error) {
     if (!isStoreApiError(error)) {
@@ -117,6 +128,7 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
     productPictures(ids),
   ])
   const summary = shopRatingView(rating, t)
+  const filter = reviewFilterView(summary, stars, t)
   return (
     <>
       <JsonLd
@@ -134,8 +146,10 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
             { label: t("reviews.title"), path: null },
           ],
           average: rating?.average ?? null,
-          count: rating?.count ?? answer.count,
+          // Shop-wide: a filtered page's own count is its pages'
+          count: rating?.count ?? (stars === null ? answer.count : 0),
           ...(summary ? { summary } : {}),
+          ...(filter ? { filter } : {}),
           reviews: answer.reviews.map((review) => {
             const path = paths[review.product_id]
             const author = review.author_name ?? t("product.anonymous")

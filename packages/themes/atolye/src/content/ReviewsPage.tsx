@@ -1,6 +1,6 @@
-import { BadgeCheck } from "lucide-react"
+import { BadgeCheck, Star, X } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
-import type { ReviewsPageView, Translate } from "@qticaret/ui"
+import type { ReviewFilterView, ReviewsPageView, Translate } from "@qticaret/ui"
 import { Pager } from "../listing/Pager"
 import { Container } from "../parts/Container"
 import { Stars } from "../parts/Stars"
@@ -91,10 +91,15 @@ function Card({ review, t }: { review: Review; t: Translate }) {
  * average set large, the stars, the count, the spread), the reviews in
  * two columns on the right, each card as tall as its own words (newest
  * first down each column), whole with its photos and the product it is
- * about; then the pages. Nothing is written for the shop.
+ * about; then the pages. With the star filter (adr/0037 Ek 2026-11-05)
+ * the summary's bars are its links, and the stars shown stand above the
+ * reviews as a dark pill that takes them off. Nothing is written for the
+ * shop.
  */
 export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }) {
   const summary = view.summary ?? null
+  const filter = view.filter ?? null
+  const shown = filter && filter.active !== null ? filter : null
   return (
     <Container className="flex flex-col gap-8 pt-6 lg:gap-10 lg:pt-10">
       <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} />
@@ -103,7 +108,7 @@ export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }
         <div className="lg:col-span-4">
           <div className="lg:sticky lg:top-40">
             {summary ? (
-              <Summary summary={summary} t={t} />
+              <Summary summary={summary} t={t} filter={filter} />
             ) : (
               view.average !== null && (
                 <p className="rounded-tile bg-paper-2 p-6 text-text-2">
@@ -113,23 +118,58 @@ export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }
             )}
           </div>
         </div>
-        {view.reviews.length === 0 ? (
-          <p className="rounded-tile bg-paper-2 p-8 text-center text-text-2 lg:col-span-8">
-            {t("product.no_reviews")}
-          </p>
-        ) : (
-          <ul className="min-w-0 gap-(--gap-columns) md:columns-2 lg:col-span-8">
-            {view.reviews.map((review, index) => (
-              <Card
-                key={`${review.author}:${review.date}:${String(index)}`}
-                review={review}
-                t={t}
-              />
-            ))}
-          </ul>
-        )}
+        <div className="flex min-w-0 flex-col gap-(--gap-columns) lg:col-span-8">
+          {shown && <ActiveFilter filter={shown} t={t} />}
+          {view.reviews.length === 0 ? (
+            <div className="flex flex-col items-center gap-4 rounded-tile bg-paper-2 p-8 text-center text-text-2">
+              <p>{t(shown ? "reviews.filter_empty" : "product.no_reviews")}</p>
+              {shown && (
+                <a href={shown.clearPath} rel="nofollow" className="gf-btn">
+                  {t("reviews.filter_all")}
+                </a>
+              )}
+            </div>
+          ) : (
+            <ul className="min-w-0 gap-(--gap-columns) md:columns-2">
+              {view.reviews.map((review, index) => (
+                <Card
+                  key={`${review.author}:${review.date}:${String(index)}`}
+                  review={review}
+                  t={t}
+                />
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
       <Pager pagination={view.pagination} t={t} />
     </Container>
+  )
+}
+
+/**
+ * The stars shown now, as the listing's open filters are (design.md §
+ * Liste sayfası): a dark pill that takes the filter off, and the way back
+ * to every review beside it.
+ */
+function ActiveFilter({ filter, t }: { filter: ReviewFilterView; t: Translate }) {
+  const label = filter.activeLabel ?? ""
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <span className="text-sm text-text-2">{t("reviews.filter_shown")}</span>
+      <a
+        href={filter.clearPath}
+        rel="nofollow"
+        aria-label={t("reviews.filter_clear", { label })}
+        className="inline-flex min-h-11 items-center gap-2 rounded-pill bg-text pr-3 pl-4 text-sm font-semibold whitespace-nowrap text-paper no-underline transition-colors duration-(--dur-micro) hover:bg-text-2 active:translate-y-px"
+      >
+        <Star className="size-4 fill-current" aria-hidden="true" strokeWidth={1.5} />
+        {label}
+        <X className="size-4" aria-hidden="true" strokeWidth={2.25} />
+      </a>
+      <a href={filter.clearPath} rel="nofollow" className="gf-link px-2 text-sm">
+        {t("reviews.filter_all")}
+      </a>
+    </div>
   )
 }

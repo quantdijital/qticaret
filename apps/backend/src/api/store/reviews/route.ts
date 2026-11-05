@@ -2,7 +2,7 @@ import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/htt
 import { PRODUCT_REVIEWS_MODULE } from "../../../modules/product-reviews"
 import type ProductReviewsModuleService from "../../../modules/product-reviews/service"
 import { photosByReview } from "../../../workflows/customers/review-photo-reads"
-import type { StoreGetReviewsType } from "../products/[id]/reviews/validators"
+import type { StoreGetShopReviewsType } from "../products/[id]/reviews/validators"
 import { visibleReviewed } from "./visible"
 
 /**
@@ -10,13 +10,15 @@ import { visibleReviewed } from "./visible"
  * products, newest first, each with its product's id and title and its
  * photos (adr/0037 §4 Ek 2026-11-04), for the storefront's reviews page.
  * Only products the shopper may see count: published, in the publishable
- * key's sales channels.
+ * key's sales channels. With `rating` (1–5), only the reviews that gave
+ * that many stars (adr/0037 Ek 2026-11-05), `count` theirs; the shop-wide
+ * spread stays `/store/reviews/summary`'s.
  */
 export async function GET(
-  req: MedusaStoreRequest<unknown, StoreGetReviewsType>,
+  req: MedusaStoreRequest<unknown, StoreGetShopReviewsType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { offset, limit } = req.validatedQuery
+  const { offset, limit, rating } = req.validatedQuery
   const titles = await visibleReviewed(req.scope, req.publishable_key_context.sales_channel_ids)
   if (titles.size === 0) {
     res.json({ reviews: [], count: 0, offset, limit })
@@ -25,7 +27,11 @@ export async function GET(
   const [rows, count] = await req.scope
     .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
     .listAndCountProductReviews(
-      { status: "approved", product_id: [...titles.keys()] },
+      {
+        status: "approved",
+        product_id: [...titles.keys()],
+        ...(rating === undefined ? {} : { rating }),
+      },
       {
         skip: offset,
         take: limit,

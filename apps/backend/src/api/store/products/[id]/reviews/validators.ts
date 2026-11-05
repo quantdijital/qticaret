@@ -28,6 +28,16 @@ export const StoreGetReviews = z.object({
 })
 export type StoreGetReviewsType = z.infer<typeof StoreGetReviews>
 
+/**
+ * The shop's reviews page (`GET /store/reviews`): one number of stars to
+ * show alone (adr/0037 Ek 2026-11-05). A single value, not a list: the
+ * storefront's filter (`?puan=5`) shows one at a time. None: every review.
+ */
+export const StoreGetShopReviews = StoreGetReviews.extend({
+  rating: z.coerce.number().int().min(1).max(5).optional(),
+})
+export type StoreGetShopReviewsType = z.infer<typeof StoreGetShopReviews>
+
 /** The home page's customer photos: how many, newest first. */
 export const StoreGetReviewPhotos = z
   .object({ limit: z.coerce.number().int().min(1).max(24).default(12) })

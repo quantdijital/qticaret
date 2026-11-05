@@ -17,6 +17,7 @@ import {
   StoreGetReviewPhotos,
   StoreGetReviewSummary,
   StoreGetReviews,
+  StoreGetShopReviews,
   StorePostReview,
   StorePostReviewPhotoQuery,
 } from "../store/products/[id]/reviews/validators"
@@ -37,11 +38,11 @@ const customerWrites = () => [
  * a budget, moderated by staff.
  */
 export const REVIEW_ROUTES = [
-  // F18 D10: every approved review, the shop's reviews page
+  // F18 D10: every approved review, the shop's reviews page; one number of stars alone
   {
     matcher: "/store/reviews",
     methods: ["GET" as const],
-    middlewares: [validateAndTransformQuery(StoreGetReviews, {})],
+    middlewares: [validateAndTransformQuery(StoreGetShopReviews, {})],
   },
   {
     matcher: "/store/products/:id/reviews",

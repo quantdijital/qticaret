@@ -135,6 +135,20 @@ medusaIntegrationTestRunner({
       const unknownParam = await settle(
         http.get("/store/reviews/summary?limit=5", { headers: storefront.headers })
       )
+      // One number of stars alone (adr/0037 Ek 2026-11-05)
+      const byStars = (query: string) =>
+        settle(
+          http.get<{ reviews: { id: string; rating: number }[]; count: number }>(
+            `/store/reviews?${query}`,
+            { headers: storefront.headers }
+          )
+        )
+      const [fours, fives, tooMany, notStars] = await Promise.all([
+        byStars("rating=4"),
+        byStars("rating=5"),
+        byStars("rating=6"),
+        byStars("rating=iyi"),
+      ])
       // Structured data needs absolute URLs: the shop's domain
       await getContainer()
         .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
@@ -167,6 +181,11 @@ medusaIntegrationTestRunner({
         distribution: { "5": 0, "4": 1, "3": 0, "2": 0, "1": 0 },
       })
       expect(unknownParam.status).toBe(400)
+      expect(fours.data.reviews.map((each) => each.id)).toContain(written.data.review?.id)
+      expect(fours.data.reviews.every((each) => each.rating === 4)).toBe(true)
+      expect(fives.data.reviews.map((each) => each.id)).not.toContain(written.data.review?.id)
+      expect(fives.data.reviews.every((each) => each.rating === 5)).toBe(true)
+      expect([tooMany.status, notStars.status]).toEqual([400, 400])
       expect(
         shopWide.data.reviews.find((each) => each.id === written.data.review?.id)
       ).toMatchObject({
