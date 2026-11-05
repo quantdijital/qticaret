@@ -55,7 +55,7 @@ export function ColumnsField({
           >
             <span aria-hidden="true" className="flex w-full max-w-16 gap-0.5">
               {Array.from({ length: count }, (_, index) => (
-                <span key={index} className="h-3 flex-1 rounded-[2px] bg-current opacity-40" />
+                <span key={index} className="h-3 flex-1 rounded-sm bg-current opacity-40" />
               ))}
             </span>
             <span className="tabular-nums">{count}</span>
