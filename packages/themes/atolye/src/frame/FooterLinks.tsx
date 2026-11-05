@@ -10,7 +10,7 @@ const PHONE_LINK =
 const COLUMNS = ["grid-cols-1", "grid-cols-2", "grid-cols-3", "grid-cols-4"]
 
 const WIDE_LINK =
-  "inline-flex min-h-8 items-center text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
+  "inline-flex min-h-8 items-center pointer-coarse:min-h-11 text-sm text-text-2 no-underline hover:text-text hover:underline underline-offset-4"
 
 function Links({ group, className }: { group: FooterGroup; className: string }) {
   return (

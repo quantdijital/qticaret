@@ -30,7 +30,7 @@ function Panel({ category, allIn }: { category: NavCategoryView; allIn: string }
               <NavigationMenu.Link asChild>
                 <a
                   href={child.path}
-                  className="-mx-3 flex min-h-10 items-center rounded-inner px-3 py-2 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+                  className="-mx-3 flex min-h-10 items-center pointer-coarse:min-h-11 rounded-inner px-3 py-2 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
                 >
                   {child.label}
                 </a>

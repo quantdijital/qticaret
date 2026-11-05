@@ -99,6 +99,7 @@ export function ListingPage({
                   t={t}
                   quickAdd={quickAdd}
                   wide={!filters}
+                  beside={filters}
                   eager={view.pagination.page === 1 ? 2 : 0}
                 />
               ) : (

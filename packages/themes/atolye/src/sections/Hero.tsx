@@ -28,7 +28,9 @@ function Preload({ image }: { image: ImageView }) {
  * the shop's heading, its line and its first action beside the shop's
  * own photograph, which merges into the graphite at its inner edge. A
  * phone: the photograph over the heading and the action (the line waits
- * for 640 px), the stage under half the screen. The picture is the
+ * for 640 px), the stage under half the screen; from 1024 px 58% of the
+ * screen (28–36rem), so a 768 px laptop still sees the promises whole
+ * under it. The picture is the
  * hero's own, else the shop's newest pictured product (its card with
  * the name and price follows on the shelf). No slider; nothing moves.
  */
@@ -50,7 +52,7 @@ export function Hero({
     <section aria-labelledby={id} className="pt-3 lg:pt-6">
       {first && image && <Preload image={image} />}
       <Container>
-        <div className="gf-stage relative grid overflow-hidden rounded-tile lg:min-h-[clamp(30rem,58svh,36rem)] lg:grid-cols-12">
+        <div className="gf-stage relative grid overflow-hidden rounded-tile lg:min-h-[clamp(28rem,58svh,36rem)] lg:grid-cols-12">
           {image && (
             <div className="relative aspect-[16/10] after:absolute after:inset-0 after:bg-linear-to-t after:from-stage after:from-0% after:via-stage/0 after:via-30% after:to-transparent sm:aspect-[2/1] lg:col-span-7 lg:col-start-6 lg:row-start-1 lg:aspect-auto lg:after:bg-linear-to-r lg:after:via-25%">
               <ResponsiveImage

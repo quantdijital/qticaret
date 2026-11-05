@@ -28,6 +28,19 @@ export const quickAddWords = (t: Translate, title: string): QuickAddWords => ({
 const isOut = (product: ProductCardView) => !product.available || product.stock === "out"
 
 /**
+ * How wide a card's photo shows, for its `sizes` (the container stops at
+ * 1440 px with 48 px gutters): two across on a phone, three from 768 px;
+ * a home shelf stays three, a listing without its panel four from 1024
+ * px, one beside the 280 px filter panel three in what is left.
+ */
+const SIZES = {
+  shelf: "(min-width: 1440px) 432px, (min-width: 768px) 30vw, 46vw",
+  wide: "(min-width: 1440px) 318px, (min-width: 1024px) 22vw, (min-width: 768px) 30vw, 46vw",
+  beside:
+    "(min-width: 1440px) 325px, (min-width: 1024px) calc((100vw - 23rem) / 3), (min-width: 768px) 30vw, 46vw",
+} as const
+
+/**
  * One product: its photograph in a rounded well at the shop's ratio,
  * never filtered; pills on the photo's top for a discount ("%30", the
  * reader hears "%30 indirim"), "Tükendi" or "Az kaldı" (a stock bucket,
@@ -40,12 +53,15 @@ export function ProductCard({
   t,
   quickAdd,
   priority = false,
+  sizes = SIZES.shelf,
 }: {
   product: ProductCardView
   t: Translate
   quickAdd?: FormAction | undefined
   /** A first-row card on a listing: its photo loads at once (LCP). */
   priority?: boolean
+  /** How wide the card shows at each width (the grid's own, else a shelf's). */
+  sizes?: string
 }) {
   const out = isOut(product)
   const discount = product.price?.discount ?? null
@@ -56,7 +72,7 @@ export function ProductCard({
         {product.image && (
           <ResponsiveImage
             image={product.image}
-            sizes="(min-width: 768px) 30vw, 46vw"
+            sizes={sizes}
             priority={priority}
             className="h-full w-full object-cover"
           />
@@ -88,7 +104,7 @@ export function ProductCard({
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1">
-        {product.brand && <p className="text-xs text-text-3">{product.brand}</p>}
+        {product.brand && <p className="truncate text-xs text-text-3">{product.brand}</p>}
         <h3 className="text-sm leading-snug font-semibold tracking-normal lg:text-md">
           {/* Clamped on the link itself: its box ends with the two lines shown, over nothing else */}
           <a
@@ -114,22 +130,26 @@ export function ProductCard({
 /**
  * Cards in a grid: two across on a phone, three from 768 px, each
  * photograph large; `wide` (a listing without its side panel) four from
- * 1024 px. The first `eager` cards load their photos at once (a
- * listing's first row, its LCP).
+ * 1024 px; `beside` (next to the filter panel) three in the room left,
+ * which only sets the photos' `sizes`. The first `eager` cards load
+ * their photos at once (a listing's first row, its LCP).
  */
 export function ProductGrid({
   products,
   t,
   quickAdd,
   wide = false,
+  beside = false,
   eager = 0,
 }: {
   products: readonly ProductCardView[]
   t: Translate
   quickAdd?: FormAction | undefined
   wide?: boolean
+  beside?: boolean
   eager?: number
 }) {
+  const sizes = wide ? SIZES.wide : beside ? SIZES.beside : SIZES.shelf
   return (
     <ul
       className={cn(
@@ -139,7 +159,13 @@ export function ProductGrid({
     >
       {products.map((product, index) => (
         <li key={product.id} className="min-w-0">
-          <ProductCard product={product} t={t} quickAdd={quickAdd} priority={index < eager} />
+          <ProductCard
+            product={product}
+            t={t}
+            quickAdd={quickAdd}
+            priority={index < eager}
+            sizes={sizes}
+          />
         </li>
       ))}
     </ul>

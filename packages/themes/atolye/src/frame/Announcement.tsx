@@ -44,7 +44,7 @@ export function Announcement({
               <a
                 key={link.path}
                 href={link.path}
-                className="rounded-pill px-3 py-2 text-stage-text-2 no-underline hover:text-stage-text"
+                className="inline-flex min-h-9 items-center rounded-pill px-3 text-stage-text-2 pointer-coarse:min-h-11 no-underline hover:text-stage-text"
               >
                 {link.label}
               </a>
@@ -52,7 +52,7 @@ export function Announcement({
             {phone && (
               <a
                 href={phone.phoneHref ?? undefined}
-                className="tabular inline-flex items-center gap-2 rounded-pill px-3 py-2 font-semibold no-underline"
+                className="tabular inline-flex min-h-9 items-center gap-2 rounded-pill px-3 font-semibold pointer-coarse:min-h-11 no-underline"
               >
                 <Phone className="size-4" aria-hidden="true" strokeWidth={2} />
                 {phone.phone}

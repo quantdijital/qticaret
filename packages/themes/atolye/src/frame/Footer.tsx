@@ -8,9 +8,9 @@ import { NewsletterForm } from "./NewsletterForm"
 import { newsletterWords } from "./newsletter-words"
 
 const SMALL_LINK =
-  "inline-flex min-h-11 items-center whitespace-nowrap text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:min-h-8"
+  "inline-flex min-h-11 items-center whitespace-nowrap text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
 const LINE =
-  "inline-flex min-h-11 items-center gap-3 text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:min-h-9"
+  "inline-flex min-h-11 items-center gap-3 text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-9"
 
 /** How the shop is reached: its name, registered title when it differs, address, phone, e-mail, profiles. */
 function Contact({ shop, t }: { shop: ShopView; t: Translate }) {

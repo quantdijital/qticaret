@@ -7,10 +7,11 @@ import { cn } from "@qticaret/ui/lib/utils"
 
 /**
  * A sheet over the page: from the left (the menu) or the right (the
- * cart), full height, the whole width of a phone and 400 px from 640 px,
- * its inner edge rounded; a scrim behind, the focus held inside, Escape
- * and a 44 px button close it. It slides in 220 ms, at once under reduced
- * motion.
+ * cart), full height, 400 px from 640 px, its inner edge rounded; on a
+ * phone the cart takes the whole width and the menu leaves a 56 px strip
+ * of the scrim, where the thumb closes it; a scrim behind, the focus held
+ * inside, Escape and a 44 px button close it. It slides in 220 ms, at
+ * once under reduced motion.
  */
 export function Sheet({
   open,
@@ -43,7 +44,7 @@ export function Sheet({
           className={cn(
             "fixed inset-y-0 z-(--z-modal) flex w-full flex-col bg-paper text-text shadow-float outline-none duration-(--dur-short) data-[state=closed]:animate-out data-[state=open]:animate-in sm:max-w-100",
             side === "left"
-              ? "left-0 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:rounded-r-tile"
+              ? "left-0 max-sm:w-[calc(100%-3.5rem)] max-sm:rounded-r-tile data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:rounded-r-tile"
               : "right-0 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:rounded-l-tile"
           )}
         >

@@ -53,10 +53,10 @@ export function Consent({
       <form
         key={`${String(banner.due)}:${String(banner.analytics)}:${String(banner.marketing)}`}
         action={save}
-        className="flex flex-col gap-3"
+        className="flex flex-col gap-2.5 sm:gap-3"
       >
         <input type="hidden" name="policy_version" value={banner.policyVersion ?? ""} />
-        <div className="flex flex-col gap-1 pr-10">
+        <div className="flex flex-col gap-1 group-data-reopened/consent:pr-10">
           <h2 id="cerez-baslik" className="max-w-none text-md tracking-normal">
             {t("cookies.title")}
           </h2>
@@ -69,7 +69,7 @@ export function Consent({
             )}
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 sm:gap-2">
           <button
             type="submit"
             name="choice"

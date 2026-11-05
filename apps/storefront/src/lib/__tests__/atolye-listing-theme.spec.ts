@@ -138,6 +138,12 @@ describe("the theme's listing page", () => {
     expect(html).toContain("max-lg:contents")
   })
 
+  it("sizes the cards' photos for the grid beside the filters, and for four across without them", () => {
+    expect(page()).toContain('sizes="(min-width: 1440px) 325px')
+    const wide = page({ filters: [], price: null, stock: null, active: [], clearPath: null })
+    expect(wide).toContain('sizes="(min-width: 1440px) 318px')
+  })
+
   it("draws the home page's cards and the pages as links", () => {
     const html = page()
     expect(html).toContain('href="/urun/a"')
