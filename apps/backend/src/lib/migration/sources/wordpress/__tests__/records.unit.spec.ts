@@ -86,6 +86,8 @@ describe("a WordPress export as the common records (adr/0042 Ek 2026-11-03)", ()
         options: { Renk: "Kırmızı", Boyut: "24 cm" },
         // The product's 1.5 kg where the variation has none
         weight: 1500,
+        // Its own picture, tied to it here; the other variation has none
+        image: "https://eski.example.com/wp-content/uploads/2026/01/kirmizi.png",
       },
       {
         source_key: "variation:12",

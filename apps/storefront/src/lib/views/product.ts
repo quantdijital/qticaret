@@ -7,7 +7,7 @@ import type {
   TrustBadgeView,
 } from "@qticaret/ui"
 import type { PriceDisplay, SeoPayload, StoreProduct } from "@qticaret/types"
-import { productImages } from "./image"
+import { productImages, variantImages } from "./image"
 import { cardPrice, isAvailable, shownAmount, variantPrice } from "./price"
 import { specGroupsOf, specsOf } from "./specs"
 import { paragraphsOf, pathOf } from "./text"
@@ -137,6 +137,7 @@ export function productPage({
       (option.values ?? []).map((value) => [value.id, option.id])
     )
   )
+  const pictures = variantImages(product)
   const views = variants.map((variant) => ({
     id: variant.id,
     title: variant.title ?? product.title,
@@ -151,6 +152,7 @@ export function productPage({
     available: isAvailable(variant),
     sku: variant.sku,
     installments: installments[variant.id] ?? null,
+    ...(pictures.has(variant.id) ? { images: pictures.get(variant.id) ?? [] } : {}),
   }))
   const requested = views.find((variant) => variant.id === requestedVariant)
   const selected = requested ?? views.find((variant) => variant.available) ?? views[0] ?? null
@@ -166,6 +168,8 @@ export function productPage({
     options,
     variants: views,
     selectedVariantId: selected?.id ?? null,
+    // The gallery opens on the asked variant's own pictures (owner 2026-11-05)
+    galleryVariantId: requested && pictures.has(requested.id) ? requested.id : null,
     specs: specsOf(product.attribute_values, t),
     specGroups: specGroupsOf(product.attribute_values, t),
     trustBadges,

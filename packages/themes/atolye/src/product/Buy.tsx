@@ -25,6 +25,8 @@ import { Options } from "./Options"
 import { Price } from "./Price"
 import { Quantity } from "./Quantity"
 import { StockAlert } from "./StockAlert"
+import { useScrolledAway } from "./use-scrolled-away"
+import { announceVariant, pressedAgain } from "./variant-pictures"
 import type {
   AddonWords,
   AlertWords,
@@ -95,9 +97,10 @@ export function Buy({
   const [picks, setPicks] = useState<Record<string, string>>({})
   const [quantity, setQuantity] = useState(1)
   const [stale, setStale] = useState(false)
-  const [barOpen, setBarOpen] = useState(false)
   const sent = useRef<{ variantId: string; quantity: number } | null>(null)
   const row = useRef<HTMLDivElement>(null)
+  // The phone's bar shows once the row with the button has scrolled away above
+  const barOpen = useScrolledAway(row)
   const variant = useMemo(() => matching(variants, options, chosen), [variants, options, chosen])
 
   useEffect(() => {
@@ -108,31 +111,6 @@ export function Buy({
     }
   }, [state, words.added])
 
-  // The phone's bar shows once the row with the button has scrolled away above
-  // (read on scroll, not by an observer: a jump past the row crosses nothing)
-  useEffect(() => {
-    const target = row.current
-    if (!target) {
-      return
-    }
-    let frame = 0
-    const measure = () => {
-      frame = 0
-      setBarOpen(target.getBoundingClientRect().bottom < 0)
-    }
-    const schedule = () => {
-      frame ||= window.requestAnimationFrame(measure)
-    }
-    measure()
-    window.addEventListener("scroll", schedule, { passive: true })
-    window.addEventListener("resize", schedule, { passive: true })
-    return () => {
-      window.cancelAnimationFrame(frame)
-      window.removeEventListener("scroll", schedule)
-      window.removeEventListener("resize", schedule)
-    }
-  }, [])
-
   function choose(optionId: string, value: string) {
     const next = { ...chosen, [optionId]: value }
     setChosen(next)
@@ -142,6 +120,8 @@ export function Buy({
       const url = new URL(window.location.href)
       url.searchParams.set("variant", match.id)
       window.history.replaceState(window.history.state, "", url)
+      // Its own pictures come to the front of the gallery
+      announceVariant(match.id)
     }
   }
 
@@ -207,6 +187,12 @@ export function Buy({
           const target = event.target as { name?: unknown }
           if (typeof target.name === "string" && target.name.startsWith("addon_")) {
             setPicks(picksOf(event.currentTarget))
+          }
+        }}
+        onClick={(event) => {
+          // The choice the page opened on, pressed: its pictures come forward too (no change fires)
+          if (variant && pressedAgain(event.target, chosen)) {
+            announceVariant(variant.id)
           }
         }}
         className="flex scroll-mt-40 flex-col gap-6 [&:not(:has(fieldset))]:hidden"

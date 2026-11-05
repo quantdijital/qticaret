@@ -62,6 +62,13 @@ export interface VariantView {
    * table itself is asked when the shopper opens it (`installments`).
    */
   installments?: InstallmentSummaryView | null
+  /**
+   * Its own pictures (Medusa's variant images) as places in the page's
+   * `images`, in their order: chosen, a theme shows them first and the
+   * pictures tied to no variant after them. None or empty: none of its
+   * own (a theme keeps the pictures it shows).
+   */
+  images?: number[]
 }
 
 export interface ProductOptionView {
@@ -95,6 +102,11 @@ export interface ProductPageView {
   variants: VariantView[]
   /** From `?variant=` (docs/13 §2.3), else the first available. */
   selectedVariantId: string | null
+  /**
+   * The variant `?variant=` asked for when it has pictures of its own:
+   * the gallery opens on them. None: the product's pictures in their order.
+   */
+  galleryVariantId?: string | null
   /** The product's public attributes, in the shop's order, ready to read. */
   specs: SpecView[]
   /**

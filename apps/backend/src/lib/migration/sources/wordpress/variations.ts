@@ -12,8 +12,9 @@ import { attributeLabel } from "./terms"
  * attributes used for variations become options (three at most, in the
  * shop's order), each variation a variant (`attribute_*` meta: a term's
  * slug for a global attribute, the value itself for a product's own). A
- * variation left at "any" value stands for each of them. The other
- * attributes are the attribute template's (reported, adr/0042 Ek).
+ * variation left at "any" value stands for each of them; its own picture
+ * goes with it. The other attributes are the attribute template's
+ * (reported, adr/0042 Ek).
  */
 
 export interface Attribute {
@@ -156,6 +157,7 @@ export function variantsOf(
       continue
     }
     const sku = (variation.meta.get("_sku") ?? "").trim().slice(0, SKU_TEXT) || null
+    const image = imageOf(context, variation)
     for (const [index, pick] of picks.entries()) {
       const id = JSON.stringify(pick)
       if (seen.has(id) || variants.length >= MAX_VARIANTS) {
@@ -172,6 +174,7 @@ export function variantsOf(
         stock: picks.length > 1 ? null : stockOf(variation.meta, product.meta),
         options: Object.fromEntries(options.map((option, at) => [option.name, pick[at] ?? ""])),
         weight: gramsOf(variation.meta.get("_weight")) ?? gramsOf(product.meta.get("_weight")),
+        ...(image ? { image } : {}),
       })
     }
   }
@@ -189,6 +192,17 @@ export function variantsOf(
       .filter((option) => option.values.length > 0),
     variants,
   }
+}
+
+/**
+ * A variation's own picture (`_thumbnail_id`): its address in the media
+ * library, as the product's pictures list it; none without one.
+ */
+function imageOf(context: WordpressContext, variation: WxrItem): string | null {
+  const id = (variation.meta.get("_thumbnail_id") ?? "").trim()
+  const url =
+    /^\d+$/.test(id) && id !== "0" ? context.attachments.get(id)?.attachmentUrl : undefined
+  return url && /^https?:\/\//i.test(url) ? url : null
 }
 
 /** A GTIN WooCommerce keeps (`_global_unique_id`, 9.2+): 8 to 14 digits. */

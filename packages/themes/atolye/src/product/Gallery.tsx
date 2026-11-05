@@ -6,6 +6,7 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { ImageView } from "@qticaret/ui"
 import { useHydrated } from "@qticaret/ui/hooks/use-hydrated"
 import { Thumbs } from "./Thumbs"
+import { VARIANT_CHOSEN_EVENT, chosenVariant, pictureOrder } from "./variant-pictures"
 import type { GalleryWords } from "./words"
 import { Zoom } from "./Zoom"
 
@@ -23,14 +24,22 @@ const smooth = () =>
  * arrows step through, a thumbnail swaps it (anchors before the script).
  * A press on the picture or the round zoom button opens it full screen.
  * Only the first loads eagerly (LCP). Without a photograph the well holds
- * the name's first letter.
+ * the name's first letter. A variant chosen with pictures of its own
+ * (`variant-pictures.ts`) brings them to the front, the counter, the
+ * thumbnails and the zoom following; the square keeps its size.
  */
 export function Gallery({
-  images,
+  images: all,
+  own = {},
+  openOn = null,
   initial,
   words,
 }: {
   images: ImageView[]
+  /** Each variant's own pictures, as places in `images`. */
+  own?: Readonly<Record<string, readonly number[]>>
+  /** The variant whose pictures it opens on (`?variant=`); none: the product's order. */
+  openOn?: string | null
   /** The product's first letter, while it has no photograph. */
   initial: string
   words: GalleryWords
@@ -38,8 +47,31 @@ export function Gallery({
   const rail = useRef<HTMLUListElement>(null)
   const [index, setIndex] = useState(0)
   const [zoom, setZoom] = useState<number | null>(null)
+  const [variant, setVariant] = useState(openOn)
   const hydrated = useHydrated()
+  const order = pictureOrder(all.length, own, variant)
+  const images = order.flatMap((place) => (all[place] ? [all[place]] : []))
   const count = images.length
+  const shown = order.join()
+
+  // A variant chosen with pictures of its own: they come to the front, the first in view
+  useEffect(() => {
+    const choose = (event: Event) => {
+      const id = chosenVariant(event)
+      if ((own[id]?.length ?? 0) > 0) {
+        setVariant(id)
+        setIndex(0)
+        // Once the new order is drawn: its first picture in the square, at once
+        window.requestAnimationFrame(() => {
+          rail.current?.scrollTo({ left: 0, behavior: "auto" })
+        })
+      }
+    }
+    window.addEventListener(VARIANT_CHOSEN_EVENT, choose)
+    return () => {
+      window.removeEventListener(VARIANT_CHOSEN_EVENT, choose)
+    }
+  }, [own])
 
   // The picture in view follows the rail (a swipe, a key, an anchor)
   useEffect(() => {
@@ -64,7 +96,7 @@ export function Gallery({
     return () => {
       seen.disconnect()
     }
-  }, [count])
+  }, [count, shown])
 
   // A step slides; a jump (a thumbnail, the last to the first) swaps at once
   const go = (to: number) => {
@@ -166,7 +198,15 @@ export function Gallery({
         )}
       </div>
       {count > 1 && (
-        <Thumbs images={images} index={index} slideId={slideId} onChoose={go} words={words} />
+        // A new set starts its row at its first (the browser's scroll anchoring would keep an old one)
+        <Thumbs
+          key={shown}
+          images={images}
+          index={index}
+          slideId={slideId}
+          onChoose={go}
+          words={words}
+        />
       )}
       {zoom !== null && (
         <Zoom

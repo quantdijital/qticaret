@@ -71,6 +71,14 @@ export const STORE_MEDIA_LEAVES = [
 // Medusa's allowed list needs the relation named for the leaves to resolve
 export const STORE_MEDIA_FIELDS = ["media_assets", ...STORE_MEDIA_LEAVES]
 
+/**
+ * Which variants each picture shows with (Medusa's variant images,
+ * `fields=+images.variants.id`): the storefront brings a chosen variant's
+ * own pictures to the front of the gallery (owner 2026-11-05). The
+ * variants' ids only, which the answer gives anyway.
+ */
+export const STORE_VARIANT_IMAGE_FIELDS = ["images.variants", "images.variants.id"]
+
 export const restrictStoreMediaFields = restrictStoreRelation(
   /(^|\.)\*?media_assets\b/,
   STORE_MEDIA_LEAVES,

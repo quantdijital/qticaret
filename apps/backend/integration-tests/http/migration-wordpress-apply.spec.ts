@@ -51,6 +51,7 @@ medusaIntegrationTestRunner({
           "weight",
           "thumbnail",
           "images.url",
+          "images.variants.sku",
           "categories.handle",
           "variants.sku",
           "options.title",
@@ -69,7 +70,7 @@ medusaIntegrationTestRunner({
             status: string
             weight: number | null
             thumbnail: string | null
-            images: { url: string }[]
+            images: { url: string; variants?: { sku: string | null }[] | null }[]
             categories: { handle: string }[]
             variants: { sku: string | null }[]
             options: { title: string }[]
@@ -96,6 +97,11 @@ medusaIntegrationTestRunner({
       expect(pan?.images).toHaveLength(3)
       expect(pan?.thumbnail?.startsWith(wp.site())).toBe(false)
       expect(wp.pictures.sort()).toEqual(["kapak.png", "kirmizi.png", "tava-yan.png", "tava.png"])
+      // The red variation's own picture shows with its variant only; the others with every one
+      expect(
+        pan?.images.map((image) => (image.variants ?? []).map((variant) => variant.sku).join())
+      ).toEqual(expect.arrayContaining(["", "", "TAVA-K-24"]))
+      expect(pan?.images.filter((image) => (image.variants ?? []).length > 0)).toHaveLength(1)
       const [main] = await getContainer()
         .resolve<MediaModuleService>(MEDIA_MODULE)
         .listMediaAssets({ url: pan?.thumbnail ?? "" })

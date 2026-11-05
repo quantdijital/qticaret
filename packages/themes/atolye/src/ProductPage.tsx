@@ -71,6 +71,12 @@ export function ProductPage({
           <div className="md:sticky md:top-40">
             <Gallery
               images={view.images}
+              own={Object.fromEntries(
+                view.variants.flatMap((variant) =>
+                  variant.images && variant.images.length > 0 ? [[variant.id, variant.images]] : []
+                )
+              )}
+              openOn={view.galleryVariantId ?? null}
               initial={view.title.trim().charAt(0).toLocaleUpperCase("tr")}
               words={galleryWords(t)}
             />

@@ -17,6 +17,7 @@ import type MigrationModuleService from "../../modules/migration/service"
 import type { RememberedItem } from "../../modules/migration/service"
 import { storePublicFile } from "../media/files"
 import { registerMediaWorkflow, setProductAltsWorkflow } from "../media/workflows"
+import { tieVariantImages } from "./variant-images"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -168,7 +169,8 @@ async function inTurns<T, R>(items: readonly T[], work: (item: T) => Promise<R>)
  * The moved products' pictures here (F14.4, adr/0042 §7): each fetched
  * once (a run again fetches only the ones it had not), added after the
  * product's own in the source's order, the first its thumbnail when it
- * had none, each with the old site's alt text or one from the product's name. A picture
+ * had none, each with the old site's alt text or one from the product's name, a
+ * variation's own tied to its variant (`variant-images.ts`). A picture
  * refused or out of reach is named in the report; its product stays. A
  * dry run counts the pictures it would fetch.
  */
@@ -250,6 +252,13 @@ export async function migrateImages(
           })),
         },
       })
+      // A variation's own picture shows when its variant is chosen
+      await tieVariantImages(
+        container,
+        productId,
+        product,
+        new Map(stored.map(({ url, asset }) => [url, asset.url]))
+      )
     }
     const items: RememberedItem[] = outcomes.map((outcome) =>
       "asset" in outcome

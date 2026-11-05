@@ -38,6 +38,12 @@ export interface SourceVariant {
   options: Record<string, string>
   /** Grams. */
   weight: number | null
+  /**
+   * The variant's own picture at the source (a WooCommerce variation's
+   * image), one of the product's `images`: tied to the variant here, so
+   * choosing it shows its photo. None: the product's pictures serve it.
+   */
+  image?: string
 }
 
 export interface SourceProduct {

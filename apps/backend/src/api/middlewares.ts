@@ -71,7 +71,12 @@ import { requestContext } from "./http/request-id"
 import { rejectAmbiguousPath } from "./http/request-path"
 import { adminLimitGuard, storeLimitGuard, uploadSizeGate } from "./http/request-limits"
 import { securityHeaders } from "./http/security-headers"
-import { MEDIA_ROUTES, STORE_MEDIA_FIELDS, restrictStoreMediaFields } from "./http/media-routes"
+import {
+  MEDIA_ROUTES,
+  STORE_MEDIA_FIELDS,
+  STORE_VARIANT_IMAGE_FIELDS,
+  restrictStoreMediaFields,
+} from "./http/media-routes"
 import { GIFT_CARD_ROUTES } from "./http/gift-card-routes"
 import { GIFT_CARD_SALE_ROUTES, STORE_GIFT_PRODUCT_FIELDS } from "./http/gift-card-sale-routes"
 import { ORDER_REFUND_ROUTES } from "./http/order-refund-routes"
@@ -216,6 +221,7 @@ export default defineMiddlewares({
           ...STORE_ATTRIBUTE_FIELDS,
           ...STORE_BRAND_FIELDS,
           ...STORE_MEDIA_FIELDS,
+          ...STORE_VARIANT_IMAGE_FIELDS,
           ...STORE_GIFT_PRODUCT_FIELDS
         ),
         hidePrivateAttributes,

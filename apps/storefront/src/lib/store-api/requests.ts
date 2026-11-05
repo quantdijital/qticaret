@@ -149,6 +149,8 @@ const PAGE_FIELDS = [
   "options.title",
   "options.values.id",
   "options.values.value",
+  // Which variants each picture shows with: the gallery follows the choice (owner 2026-11-05)
+  "images.variants.id",
   "variants.title",
   "variants.sku",
   "variants.options.id",

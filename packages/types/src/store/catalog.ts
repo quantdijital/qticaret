@@ -122,7 +122,15 @@ export interface StoreProduct {
   subtitle: string | null
   description: string | null
   thumbnail: string | null
-  images?: { id: string; url: string; rank?: number | null }[] | null
+  images?:
+    | {
+        id: string
+        url: string
+        rank?: number | null
+        /** The variants it shows with (Medusa's variant images); none: every variant. */
+        variants?: ({ id: string } | null)[] | null
+      }[]
+    | null
   options?: StoreProductOption[] | null
   variants?: StoreVariant[] | null
   brand?: StoreBrand | null
