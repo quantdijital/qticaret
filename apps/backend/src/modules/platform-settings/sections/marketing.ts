@@ -11,8 +11,10 @@ export interface MarketingSettings {
   /** Categories (and those under them) each feed leaves out (F10.8). */
   feed_exclusions: Record<FeedTarget, string[]>
   /**
-   * An order placed before this hour leaves the same day, as Akakçe and the
-   * product page's shipping card (adr/0046 Ek 2026-11-06) show it; null: not promised.
+   * Legacy (adr/0046 Ek 2026-11-06): the same-day hour moved to
+   * `shipping.same_day_cutoff_hour`. Read only while that one is null
+   * (`lib/shipping/same-day.ts`); the panel no longer edits it here and
+   * clears it once the shop saves the hour under Kargo.
    */
   feed_same_day_cutoff_hour: number | null
   /** One bulk message (adr/0050) a recipient in 24 hours at most. */

@@ -29,3 +29,22 @@ describe("shipping section: the default parcel (adr/0054)", () => {
     expect(saved({ default_parcel: { ...parcel, depth: 5 } }).success).toBe(false)
   })
 })
+
+describe("shipping section: the same-day hour (adr/0046 Ek 2026-11-06)", () => {
+  it("starts unset, so the hour set under the feed rules before stands", () => {
+    expect(defaults.same_day_cutoff_hour).toBeNull()
+  })
+
+  it("takes a whole hour of the day, or none again", () => {
+    expect(saved({ same_day_cutoff_hour: 15 }).data?.same_day_cutoff_hour).toBe(15)
+    expect(saved({ same_day_cutoff_hour: null }).success).toBe(true)
+    expect(patch.safeParse({ same_day_cutoff_hour: 23 }).success).toBe(true)
+  })
+
+  it("refuses an hour outside the day or between hours", () => {
+    expect(saved({ same_day_cutoff_hour: 0 }).success).toBe(false)
+    expect(saved({ same_day_cutoff_hour: 24 }).success).toBe(false)
+    expect(saved({ same_day_cutoff_hour: 15.5 }).success).toBe(false)
+    expect(saved({ same_day_cutoff_hour: "15" }).success).toBe(false)
+  })
+})

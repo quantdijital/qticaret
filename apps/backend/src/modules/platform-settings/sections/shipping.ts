@@ -15,6 +15,12 @@ export interface ShippingSettings {
   /** Days the carrier takes to the door. */
   transit_days_min: number
   transit_days_max: number
+  /**
+   * An order placed before this hour (Turkey) leaves the same day; null: not
+   * set here, the legacy `marketing.feed_same_day_cutoff_hour` stands
+   * (`lib/shipping/same-day.ts`). The product page's card and Akakçe say it.
+   */
+  same_day_cutoff_hour: number | null
   /** The shop's own price by desi (F7.8), cheapest band first; empty: none set. */
   rate_table: ShippingRate[]
   /** Kuruş for every desi past the last band; 0: such a parcel is not offered this way. */
@@ -48,7 +54,8 @@ const measure = z.number().positive().max(1_000_000)
 
 /**
  * Shipping rules (F7.8, adr/0031): how long an order takes to leave and to
- * arrive (the storefront's promise and the products' `shippingDetails`),
+ * arrive and the same-day hour (the storefront's promise, the products'
+ * `shippingDetails`, Akakçe's `expressDeliveryTime`),
  * the shop's price table by desi for shipping options priced by it, and
  * the parcel a product without measures ships as (adr/0054).
  */
@@ -59,6 +66,7 @@ export const shippingSection = defineSection<ShippingSettings>(
     handling_days_max: days(14),
     transit_days_min: days(30),
     transit_days_max: days(30),
+    same_day_cutoff_hour: z.number().int().min(1).max(23).nullable(),
     rate_table: z
       .array(
         z
@@ -88,6 +96,7 @@ export const shippingSection = defineSection<ShippingSettings>(
     handling_days_max: 2,
     transit_days_min: 1,
     transit_days_max: 3,
+    same_day_cutoff_hour: null,
     rate_table: [],
     over_desi_price: 0,
     label_format: "100x150",

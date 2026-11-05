@@ -146,7 +146,7 @@ medusaIntegrationTestRunner({
       expect(after.data.storefront).not.toHaveProperty("low_stock_threshold")
     })
 
-    it("says when an order leaves and arrives and the same-day hour, as the shop set them (adr/0046 Ek 2026-11-06)", async () => {
+    it("says when an order leaves and arrives and the same-day hour, as the shop set them under Kargo (adr/0046 Ek 2026-11-06)", async () => {
       const container = getContainer()
       const owner = await createAdminUser(http, container)
       const store = await createStorefront(container)
@@ -155,20 +155,25 @@ medusaIntegrationTestRunner({
         settle(http.post(`/admin/platform-settings/${section}`, body, { headers: owner.headers }))
 
       const before = await frame()
+      // A shop that set the hour under the feed rules before it moved under Kargo
+      await save("marketing", { feed_same_day_cutoff_hour: 16 })
+      const legacy = await frame()
       const days = await save("shipping", {
         handling_days_min: 0,
         handling_days_max: 1,
         transit_days_min: 2,
         transit_days_max: 4,
+        same_day_cutoff_hour: 15,
       })
-      const hour = await save("marketing", { feed_same_day_cutoff_hour: 15 })
       const after = await frame()
+      const late = await save("shipping", { same_day_cutoff_hour: 24 })
       // Settings outlive the database reset between tests (their cache)
       await save("shipping", {
         handling_days_min: 1,
         handling_days_max: 2,
         transit_days_min: 1,
         transit_days_max: 3,
+        same_day_cutoff_hour: null,
       })
       await save("marketing", { feed_same_day_cutoff_hour: null })
 
@@ -178,13 +183,15 @@ medusaIntegrationTestRunner({
         transit_days: { min: 1, max: 3 },
         same_day_cutoff_hour: null,
       })
+      expect(legacy.data.delivery?.same_day_cutoff_hour).toBe(16)
       expect(days.status).toBe(200)
-      expect(hour.status).toBe(200)
+      // Kargo's hour stands over the old one
       expect(after.data.delivery).toEqual({
         handling_days: { min: 0, max: 1 },
         transit_days: { min: 2, max: 4 },
         same_day_cutoff_hour: 15,
       })
+      expect(late.status).toBe(400)
     })
 
     it("says whether the shop sells product add-ons, so the storefront skips their calls when off", async () => {
