@@ -62,7 +62,10 @@ export function ProductPage({
       <Container className="pt-4 lg:pt-6">
         <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} compact />
       </Container>
-      <Container className="gf-product-top mt-4 grid gap-8 md:gap-(--gap-columns) lg:mt-6">
+      <Container
+        data-gf-clear=""
+        className="gf-product-top mt-4 grid gap-8 md:gap-(--gap-columns) lg:mt-6"
+      >
         <div className="min-w-0">
           <div className="md:sticky md:top-40">
             <Gallery
@@ -107,7 +110,10 @@ export function ProductPage({
         </div>
       </Container>
 
-      <Container className="flex flex-col gap-(--section-gap-s) pt-(--section-gap-s)">
+      <Container
+        data-gf-clear=""
+        className="flex flex-col gap-(--section-gap-s) pt-(--section-gap-s)"
+      >
         <Details view={view} t={t} />
         <Community view={view} t={t} actions={actions} />
         {view.related.length > 0 && (

@@ -56,12 +56,16 @@ html[data-js-scroll="down"]:not(:has(.gf-head:focus-within, .gf-head [data-state
   }
 }
 
-/* WhatsApp waits while the visitor reads down the page and, on a listing, while
-   its grid passes by (a phone: under the pinned pills; from 1024 px: anywhere
-   below the top, where the right column's "+" sits under it): it would cover a
-   card's "+", a field or a button. A keyboard still reaches it, shown on focus */
+/* WhatsApp waits while the visitor reads down the page, on a listing while its
+   grid passes by (a phone: under the pinned pills; from 1024 px: anywhere below
+   the top, where the right column's "+" sits under it), and while a control of a
+   part marked `data-gf-clear` (the product page's own parts, the footer) is
+   under it (frame/WhatsAppClear sets `data-js-clear`): it would cover a card's
+   "+", the favourite heart, a field or a button. A keyboard still reaches it,
+   shown on focus */
 html[data-js-scroll="down"] [data-whatsapp]:not(:focus-visible),
-html:has(.gf-listbar[data-js-stuck]) [data-whatsapp]:not(:focus-visible) {
+html:has(.gf-listbar[data-js-stuck]) [data-whatsapp]:not(:focus-visible),
+html[data-js-clear] [data-whatsapp]:not(:focus-visible) {
   opacity: 0;
   transform: translateY(0.75rem) scale(0.9);
   pointer-events: none;

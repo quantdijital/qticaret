@@ -93,7 +93,7 @@ export function Footer({
   const year = new Date().getFullYear()
   const title = shop.companyTitle ?? shop.name
   return (
-    <footer className="mt-(--footer-gap) border-t border-rule bg-paper-2">
+    <footer data-gf-clear="" className="mt-(--footer-gap) border-t border-rule bg-paper-2">
       <Container className="grid gap-10 pt-12 pb-8 lg:grid-cols-12 lg:gap-x-(--gap-columns) lg:gap-y-12 lg:pt-16">
         {subscribe && shop.newsletter && (
           <section

@@ -203,6 +203,16 @@ describe("the theme's product page", () => {
     expect(html).toContain("Taksit seçenekleri")
   })
 
+  it("asks the floating WhatsApp to keep off its controls: the buy column with the heart, the tabs, the reviews", () => {
+    const html = page()
+    const top = /<div class="[^"]*gf-product-top[^"]*"[^>]*>/.exec(html)?.[0] ?? ""
+    expect(top).toContain('data-gf-clear=""')
+    expect(html.indexOf('data-gf-clear=""')).toBeLessThan(html.indexOf("data-buy-row"))
+    // The tabs, the reviews and the related products under it
+    expect(html.match(/data-gf-clear=""/g)).toHaveLength(2)
+    expect(html.lastIndexOf('data-gf-clear=""')).toBeLessThan(html.indexOf('role="tablist"'))
+  })
+
   it("marks a value sold out before it is chosen, and the phone's bar says the choice", () => {
     const html = page({
       variants: [variant("v_yesil", "Yeşil"), variant("v_mavi", "Mavi", { available: false })],

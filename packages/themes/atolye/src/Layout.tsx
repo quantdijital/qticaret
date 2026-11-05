@@ -7,6 +7,7 @@ import { Footer } from "./frame/Footer"
 import { Header } from "./frame/Header"
 import { ScrollCue } from "./frame/ScrollCue"
 import { WhatsApp } from "./frame/WhatsApp"
+import { WhatsAppClear } from "./frame/WhatsAppClear"
 
 /**
  * The frame every page shares (docs/tema/yon-2026-11-05.md § Frame): a
@@ -71,11 +72,14 @@ export function Layout({
         />
       )}
       {whatsapp && shop.contact.whatsappHref && (
-        <WhatsApp
-          href={shop.contact.whatsappHref}
-          label={t("whatsapp.label")}
-          aboveBottomBar={shop.bottomNav !== null}
-        />
+        <>
+          <WhatsApp
+            href={shop.contact.whatsappHref}
+            label={t("whatsapp.label")}
+            aboveBottomBar={shop.bottomNav !== null}
+          />
+          <WhatsAppClear />
+        </>
       )}
       {shop.cookieBanner && <Consent banner={shop.cookieBanner} save={saveCookies} t={t} />}
       <ScrollCue />

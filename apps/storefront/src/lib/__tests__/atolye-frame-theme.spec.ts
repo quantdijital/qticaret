@@ -109,6 +109,8 @@ describe("the theme's frame", () => {
     expect(html).toMatch(/<p class="[^"]*">© \d{4} Örnek Atölye Ltd. Şti.<\/p>/)
     expect(html).toContain('href="/cerez-tercihleri"')
     expect(html).not.toContain("·")
+    // The floating WhatsApp keeps off the footer's controls
+    expect(html).toMatch(/<footer data-gf-clear=""/)
   })
 
   it("closes each menu group on a phone, stands them open from 1024 px, the legal texts in the small print", () => {

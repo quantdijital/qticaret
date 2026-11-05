@@ -8,8 +8,10 @@ import { WhatsAppGlyph } from "../parts/WhatsAppGlyph"
  * layout leaves it out where it would cover the work; the stylesheet
  * hides it while a sheet is open or a page has its own fixed buy bar,
  * and lets it step aside while the page scrolls down, while a phone's
- * listing grid passes under its pinned pills and while a field is being
- * typed in (`frame.css`); it comes back as soon as the visitor turns.
+ * listing grid passes under its pinned pills, while a control of a part
+ * the page marks is under it (`WhatsAppClear`: the product's photographs
+ * and buy column) and while a field is being typed in (`frame.css`); it
+ * comes back as soon as the visitor turns or the control moves on.
  */
 export function WhatsApp({
   href,
