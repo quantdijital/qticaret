@@ -21,6 +21,7 @@
 @import "./base.css" layer(base);
 @import "./ui.css";
 @import "./tabs.css";
+@import "./buy.css";
 @import "./pages.css";
 
 /*

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { headers } from "next/headers"
 import type { ReactNode } from "react"
 import { AnalyticsScripts } from "@/app/AnalyticsScripts"
+import { changeCartLine } from "@/app/actions/cart"
 import { saveCookieChoice } from "@/app/actions/cookies"
 import { analyticsTags } from "@/lib/analytics/tags"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
@@ -64,6 +65,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           saveCookies={saveCookieChoice}
           subscribe={subscribeNewsletter}
           searchSuggest={SUGGEST_PATH}
+          changeCartLine={changeCartLine}
         >
           {children}
         </theme.Layout>

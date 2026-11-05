@@ -1,0 +1,15 @@
+/*
+ * The buying pages (cart drawer, cart, checkout, the order): what their
+ * utilities cannot say. Unlayered like ui.css's hover rules, so a control
+ * on a tinted well still answers the pointer one step darker.
+ */
+
+@media (hover: hover) {
+  .bg-paper-2 .gf-icon-btn:hover,
+  .bg-paper-2 .gf-chip:hover:not([aria-selected="true"]):not([aria-current="page"]) {
+    background: var(--color-paper-3);
+  }
+  .bg-field .gf-icon-btn:hover:not(:disabled) {
+    background: var(--color-paper-2);
+  }
+}

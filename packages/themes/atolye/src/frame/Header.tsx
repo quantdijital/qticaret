@@ -4,6 +4,7 @@ import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { Aisle } from "./Aisle"
 import { CartSheet } from "./CartSheet"
+import { cartSheetWords } from "./cart-sheet-words"
 import { MenuSheet } from "./MenuSheet"
 import { SearchBox } from "./SearchBox"
 import { Wordmark } from "./Wordmark"
@@ -24,11 +25,14 @@ export function Header({
   shop,
   t,
   searchSuggest,
+  changeCartLine,
 }: {
   shop: ShopView
   t: Translate
   /** The storefront's live search address; none: the plain search form. */
   searchSuggest?: string | undefined
+  /** The cart drawer's quantity and remove buttons; none: its lines read only. */
+  changeCartLine?: ((form: FormData) => Promise<void>) | undefined
 }) {
   const allIn = Object.fromEntries(
     shop.categories.map((category) => [category.path, t("nav.see_all", { name: category.label })])
@@ -99,20 +103,10 @@ export function Header({
           <CartSheet
             cart={shop.cart}
             count={shop.cartQuantity}
+            categories={shop.categories}
+            change={changeCartLine}
             buttonClass={LABELLED}
-            words={{
-              label: t("nav.cart_label", { count: shop.cartQuantity }),
-              short: t("nav.bottom.cart"),
-              title: t("cart.title_count", { count: shop.cartQuantity }),
-              empty: t("cart.empty"),
-              continue: t("cart.continue"),
-              subtotal: t("cart.subtotal"),
-              note: t("cart.drawer_note"),
-              viewCart: t("cart.view"),
-              checkout: t("cart.checkout"),
-              close: t("nav.close"),
-              quantity: t("order.quantity"),
-            }}
+            words={cartSheetWords(t, shop.cartQuantity)}
           />
         </nav>
       </Container>

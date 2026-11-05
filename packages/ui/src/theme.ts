@@ -163,6 +163,12 @@ export interface StorefrontTheme {
      * is anyway before the page's script runs.
      */
     searchSuggest?: string
+    /**
+     * The cart drawer's quantity and remove buttons (adr/0046 Ek
+     * 2026-11-05): `ThemeActions.changeCartLine`, a plain form. None: the
+     * drawer shows its lines read only.
+     */
+    changeCartLine?: (form: FormData) => Promise<void>
   }>
   HomePage: ComponentType<
     Page<HomePageView> & {

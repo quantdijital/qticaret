@@ -21,6 +21,7 @@ export function Layout({
   saveCookies,
   subscribe,
   searchSuggest,
+  changeCartLine,
 }: {
   shop: ShopView
   t: Translate
@@ -28,6 +29,7 @@ export function Layout({
   saveCookies: (form: FormData) => Promise<void>
   subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
   searchSuggest?: string
+  changeCartLine?: (form: FormData) => Promise<void>
 }) {
   const whatsapp =
     shop.contact.whatsappHref !== null &&
@@ -45,7 +47,7 @@ export function Layout({
         contact={shop.contact}
         words={{ announcements: t("nav.announcements"), links: t("nav.top_links") }}
       />
-      <Header shop={shop} t={t} searchSuggest={searchSuggest} />
+      <Header shop={shop} t={t} searchSuggest={searchSuggest} changeCartLine={changeCartLine} />
       <main id="icerik" className="flex-1">
         {children}
       </main>
