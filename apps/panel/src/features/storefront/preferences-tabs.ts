@@ -1,5 +1,12 @@
 /** Storefront preferences' tabs, in their order; `?part=` names the open one. */
-export const PREFERENCES_TABS = ["badges", "contact", "swatches", "stock", "maintenance"] as const
+export const PREFERENCES_TABS = [
+  "badges",
+  "contact",
+  "infoPages",
+  "swatches",
+  "stock",
+  "maintenance",
+] as const
 export type PreferencesTab = (typeof PREFERENCES_TABS)[number]
 
 const isPreferencesTab = (value: unknown): value is PreferencesTab =>

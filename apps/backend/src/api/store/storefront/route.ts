@@ -39,6 +39,9 @@ function filled(
   return {
     primary_color: storefront.primary_color,
     contact_form_path: storefront.contact_form_path,
+    // The pages the storefront shows the live payment and shipping facts beside
+    payment_info_path: storefront.payment_info_path,
+    shipping_info_path: storefront.shipping_info_path,
     color_swatches: storefront.color_swatches,
     announcements: storefront.announcements.map(fill),
     trust_badges: storefront.trust_badges.map((badge) => ({

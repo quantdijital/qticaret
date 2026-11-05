@@ -42,6 +42,7 @@ describe("PreferencesPage", () => {
     expect(tabs.getAllByRole("tab").map((tab) => tab.textContent)).toEqual([
       "Güven rozetleri",
       "İletişim formu",
+      "Ödeme ve kargo sayfaları",
       "Renk örnekleri",
       "Az kaldı rozeti",
       "Bakım modu",

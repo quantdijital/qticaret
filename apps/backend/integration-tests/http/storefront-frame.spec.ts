@@ -44,6 +44,9 @@ medusaIntegrationTestRunner({
       const saved = await save({
         announcements: ["{ücretsiz_kargo_eşiği} ve üzeri kargo bedava"],
         trust_badges: [{ icon: "clock", title: "Aynı gün kargo", text: "16:00'ya kadar" }],
+        // The payment page by the shop's own address, no shipping page (adr/0046 Ek 2026-11-05)
+        payment_info_path: "/Taksit-Secenekleri",
+        shipping_info_path: null,
       })
       await settle(
         http.post(
@@ -64,6 +67,8 @@ medusaIntegrationTestRunner({
         primary_color: null,
         hero: null,
         contact_form_path: "/iletisim",
+        payment_info_path: "/odeme-secenekleri",
+        shipping_info_path: "/kargo-ve-teslimat",
         color_swatches: [],
       })
       expect(before.data.free_shipping_threshold).toBeNull()
@@ -82,6 +87,8 @@ medusaIntegrationTestRunner({
         primary_color: null,
         hero: null,
         contact_form_path: "/iletisim",
+        payment_info_path: "/taksit-secenekleri",
+        shipping_info_path: null,
         color_swatches: [],
       })
       expect(after.data.free_shipping_threshold).toBe(1500)

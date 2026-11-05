@@ -424,6 +424,15 @@
         "path": "Formun gösterildiği sayfa",
         "pathHint": "Vitrindeki bir içerik sayfasının adresi, örneğin /iletisim."
       },
+      "infoPages": {
+        "title": "Ödeme ve kargo sayfaları",
+        "description": "Vitrin bu sayfaların metninin yanında güncel bilgileri gösterir: ödeme sayfasında ödeme yollarınızı ve taksit oranlarını, kargo sayfasında kargo firmalarınızı ve güvencelerinizi.",
+        "payment": "Ödeme seçenekleri sayfası",
+        "paymentHint": "Ödeme yolları ve taksit tablosu bu sayfanın yanında görünür, örneğin /odeme-secenekleri.",
+        "shipping": "Kargo ve teslimat sayfası",
+        "shippingHint": "Kargo firmaları ve güvenceler bu sayfanın yanında görünür, örneğin /kargo-ve-teslimat.",
+        "empty": "Boş bıraktığınız bilgi hiçbir sayfada gösterilmez; sayfanın metni yine görünür."
+      },
       "swatches": {
         "title": "Renk örnekleri",
         "description": "Ürün seçeneklerinde ve filtrelerde bu adlardan biri geçen değer, renkli yuvarlak olarak gösterilir (ör. Lacivert).",
@@ -7249,6 +7258,7 @@
       "tabs": {
         "badges": "Güven rozetleri",
         "contact": "İletişim formu",
+        "infoPages": "Ödeme ve kargo sayfaları",
         "swatches": "Renk örnekleri",
         "maintenance": "Bakım modu",
         "stock": "Az kaldı rozeti"

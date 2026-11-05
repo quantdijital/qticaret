@@ -40,6 +40,14 @@ export interface StorefrontSettings {
   /** The shop page that carries the contact form below its text (adr/0047); none: no form. */
   contact_form_path: string | null
   /**
+   * The shop page about its ways to pay: beside its text the storefront
+   * shows the ways the shop offers now and the card families' installment
+   * rates (adr/0046 Ek 2026-11-05). None: no page shows them.
+   */
+  payment_info_path: string | null
+  /** The shop page about shipping: its carriers and promises beside the text; none: no page. */
+  shipping_info_path: string | null
+  /**
    * The shop's colour names and their colours (F18 D5): an option value or
    * a filter value that reads as one of these names shows as a swatch.
    */
@@ -94,6 +102,16 @@ const shopText = (max: number) =>
 
 const HEX_COLOR = /^#[0-9a-f]{6}$/
 
+// One of the shop's own pages (never the home page), lower-cased as paths are kept; none: no page
+const pagePath = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .refine((value) => isCleanText(value) && isShopPath(value) && value !== "/", {
+    message: "platform_settings.url_invalid",
+  })
+  .nullable()
+
 /** The storefront's frame, as the shop writes it (F18 D3, docs/19 §4). */
 export const storefrontSection = defineSection<StorefrontSettings>(
   "storefront",
@@ -141,14 +159,9 @@ export const storefrontSection = defineSection<StorefrontSettings>(
           swatches.length,
         { message: "platform_settings.color_duplicate" }
       ),
-    contact_form_path: z
-      .string()
-      .trim()
-      .toLowerCase()
-      .refine((value) => isCleanText(value) && isShopPath(value) && value !== "/", {
-        message: "platform_settings.url_invalid",
-      })
-      .nullable(),
+    contact_form_path: pagePath,
+    payment_info_path: pagePath,
+    shipping_info_path: pagePath,
     low_stock_threshold: z.number().int().min(0).max(1000),
   },
   {
@@ -157,6 +170,9 @@ export const storefrontSection = defineSection<StorefrontSettings>(
     primary_color: null,
     hero: null,
     contact_form_path: "/iletisim",
+    // The addresses Turkish shops give these pages, as the storefront knew them before
+    payment_info_path: "/odeme-secenekleri",
+    shipping_info_path: "/kargo-ve-teslimat",
     color_swatches: [],
     low_stock_threshold: 3,
   }

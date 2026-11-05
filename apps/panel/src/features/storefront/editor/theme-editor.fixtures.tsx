@@ -89,6 +89,8 @@ const STOREFRONT: StorefrontSettings = {
   primary_color: null,
   hero: null,
   contact_form_path: null,
+  payment_info_path: null,
+  shipping_info_path: null,
   color_swatches: [],
   low_stock_threshold: 3,
 }

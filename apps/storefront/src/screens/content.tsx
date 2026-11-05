@@ -7,14 +7,15 @@ import { legalDocument, legalPath } from "@/lib/views/legal"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import { legalIdentity, storefrontSettings } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
-import { identityRows, postMeta, shareLinks } from "@/lib/views/content-extras"
+import { isStoreApiError } from "@/lib/store-api/errors"
+import { identityRows, infoPageOf, postMeta, shareLinks } from "@/lib/views/content-extras"
 import { faqOf } from "@/lib/views/faq"
 import { withOutline } from "@/lib/views/legal-outline"
 import { coverOf, postTerms } from "@/lib/views/posts"
 import { breadcrumbsOf } from "@/lib/views/product"
 import { contactOf } from "@/lib/views/shop"
 import { theme } from "@/theme"
-import { infoPageOf, paymentFacts, relatedPosts, shippingFacts, textProducts } from "./content-data"
+import { paymentFacts, relatedPosts, shippingFacts, textProducts } from "./content-data"
 
 type Entity = Extract<Resolution, { type: "entity" }>
 
@@ -82,7 +83,16 @@ async function pageExtras(entry: ContentEntry, path: string): Promise<Partial<Co
   if (faq) {
     return { faq, help: contactOf(await legalIdentity(), t) }
   }
-  const role = infoPageOf(path)
+  // The pages the shop chose for these (adr/0046 Ek 2026-11-05); unanswered, none
+  const frame = await storefrontSettings()
+    .then((answer) => answer.storefront)
+    .catch((error: unknown) => {
+      if (isStoreApiError(error)) {
+        return { payment_info_path: null, shipping_info_path: null }
+      }
+      throw error
+    })
+  const role = infoPageOf(path, frame)
   const [payments, shipping] = await Promise.all([
     role === "payments" ? paymentFacts() : null,
     role === "shipping" ? shippingFacts() : null,

@@ -28,6 +28,13 @@ export interface StorefrontFrame {
   } | null
   /** The shop page that carries the contact form (adr/0047); null: no form. */
   contact_form_path: string | null
+  /**
+   * The shop pages the live payment and shipping facts stand beside
+   * (adr/0046 Ek 2026-11-05); null: none. Absent from a backend before
+   * them: `/odeme-secenekleri` and `/kargo-ve-teslimat`.
+   */
+  payment_info_path?: string | null
+  shipping_info_path?: string | null
   /** Colour names and their `#rrggbb`: option and filter values that match show as swatches. */
   color_swatches: { label: string; hex: string }[]
 }

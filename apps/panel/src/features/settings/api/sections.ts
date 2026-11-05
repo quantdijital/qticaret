@@ -231,6 +231,13 @@ export interface StorefrontSettings {
   hero: StorefrontHero | null
   /** The shop page that carries the contact form below its text (adr/0047); none: no form. */
   contact_form_path: string | null
+  /**
+   * The shop pages the storefront shows its live payment facts (ways to
+   * pay, installment rates) and shipping facts (carriers, promises) beside
+   * (adr/0046 Ek 2026-11-05); none: no page.
+   */
+  payment_info_path: string | null
+  shipping_info_path: string | null
   /** The shop's colour names: an option or filter value that reads as one shows as a swatch. */
   color_swatches: StorefrontColorSwatch[]
   /** A product card says "Az kaldı" at or under this many (never the number); 0: never. */

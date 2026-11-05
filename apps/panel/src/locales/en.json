@@ -424,6 +424,15 @@
         "path": "Page the form shows on",
         "pathHint": "The address of a content page on the storefront, for example /iletisim."
       },
+      "infoPages": {
+        "title": "Payment and shipping pages",
+        "description": "Beside these pages' text the storefront shows what is current: your ways to pay and installment rates on the payment page, your carriers and promises on the shipping page.",
+        "payment": "Payment options page",
+        "paymentHint": "The ways to pay and the installment table show beside this page, for example /odeme-secenekleri.",
+        "shipping": "Shipping and delivery page",
+        "shippingHint": "The carriers and promises show beside this page, for example /kargo-ve-teslimat.",
+        "empty": "Information left empty shows on no page; the page's own text still shows."
+      },
       "swatches": {
         "title": "Colour swatches",
         "description": "In product options and filters, a value that reads as one of these names shows as a coloured circle (e.g. Navy).",
@@ -7249,6 +7258,7 @@
       "tabs": {
         "badges": "Trust badges",
         "contact": "Contact form",
+        "infoPages": "Payment and shipping pages",
         "swatches": "Colour swatches",
         "maintenance": "Maintenance mode",
         "stock": "Low stock badge"

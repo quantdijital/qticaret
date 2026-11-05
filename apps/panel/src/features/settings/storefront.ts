@@ -115,6 +115,19 @@ export const contactFormSchema = z
     { path: ["path"], message: `${E}.pathInvalid` }
   )
 
+// A shop page other than the home page, or empty for none (saved as none)
+const optionalPagePath = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .refine(
+    (path) => path === "" || (isCleanText(path) && isShopPath(path) && path !== "/"),
+    `${E}.pathInvalid`
+  )
+
+/** The payment and shipping pages (adr/0046 Ek 2026-11-05): a shop page each, or none. */
+export const infoPagesSchema = z.object({ payment: optionalPagePath, shipping: optionalPagePath })
+
 /** `#rrggbb` as the server keeps it. */
 export const isHexColor = (value: string): boolean => HEX_COLOR.test(value)
 

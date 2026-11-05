@@ -23,18 +23,6 @@ import { productsInOrder, railCards } from "@/lib/views/section-data"
  * leaves the extra out; the page still shows its text.
  */
 
-/**
- * The shop's payment and shipping pages, by the addresses Turkish shops
- * give them, until the shop can point at its own the way it chooses its
- * contact page (`storefront.contact_form_path`, adr/0047).
- */
-const INFO_PAGES: Record<string, "payments" | "shipping"> = {
-  "/odeme-secenekleri": "payments",
-  "/kargo-ve-teslimat": "shipping",
-}
-
-export const infoPageOf = (path: string): "payments" | "shipping" | null => INFO_PAGES[path] ?? null
-
 const RELATED = 3
 
 /** Up to three other posts: the same category's newest first, then the blog's newest. */

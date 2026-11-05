@@ -14,6 +14,8 @@ export const SAVED: StorefrontSettings = {
   primary_color: null,
   hero: null,
   contact_form_path: "/iletisim",
+  payment_info_path: "/odeme-secenekleri",
+  shipping_info_path: "/kargo-ve-teslimat",
   color_swatches: [],
   low_stock_threshold: 3,
 }

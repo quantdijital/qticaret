@@ -11,9 +11,24 @@ describe("storefront section", () => {
       primary_color: null,
       hero: null,
       contact_form_path: "/iletisim",
+      payment_info_path: "/odeme-secenekleri",
+      shipping_info_path: "/kargo-ve-teslimat",
       color_swatches: [],
       low_stock_threshold: 3,
     })
+  })
+
+  it("names the payment and shipping pages as the contact page is: a shop path or none", () => {
+    const parsed = patch.parse({
+      payment_info_path: " /Taksit-Secenekleri ",
+      shipping_info_path: null,
+    })
+    expect(parsed).toEqual({ payment_info_path: "/taksit-secenekleri", shipping_info_path: null })
+    for (const key of ["payment_info_path", "shipping_info_path"]) {
+      for (const bad of ["/", "https://evil.example", "//evil.example", "/kargo ve teslimat", ""]) {
+        expect(patch.safeParse({ [key]: bad }).success).toBe(false)
+      }
+    }
   })
 
   it("says few left at a whole number of units, 0 never (adr/0046 Ek 2026-11-04)", () => {
@@ -56,6 +71,8 @@ describe("storefront section", () => {
       announcements: ["1500 TL ve üzeri kargo bedava", "16:00'ya kadar aynı gün kargo"],
       trust_badges: [{ icon: "truck", title: "Ücretsiz kargo", text: "1500 TL ve üzeri" }],
       contact_form_path: "/iletisim",
+      payment_info_path: "/odeme-secenekleri",
+      shipping_info_path: "/kargo-ve-teslimat",
       color_swatches: [],
       low_stock_threshold: 3,
       primary_color: " #0B5C99 ",
