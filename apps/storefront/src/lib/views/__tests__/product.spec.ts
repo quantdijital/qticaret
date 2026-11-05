@@ -191,4 +191,11 @@ describe("percentOff", () => {
     expect(percentOff(100, 100)).toBeNull()
     expect(percentOff(100, 120)).toBeNull()
   })
+
+  it("says an exact cut whole, past the arithmetic's last digit", () => {
+    // (3749 - 2624.3) / 3749 * 100 is 29.999999999999993 in floating point
+    expect(percentOff(3749, 2624.3)).toBe(30)
+    expect(percentOff(1549, 1084.3)).toBe(30)
+    expect(percentOff(10000, 7001)).toBe(29)
+  })
 })

@@ -14,7 +14,9 @@ export function percentOff(before: number, amount: number): number | null {
   if (!Number.isFinite(before) || !(before > amount) || before <= 0) {
     return null
   }
-  const percent = Math.floor(((before - amount) / before) * 100)
+  // Floating point leaves an exact cut a hair short (3.749,00 → 2.624,30 TL is 29.999…%):
+  // only that noise is forgiven, a real 29.99% still says 29
+  const percent = Math.floor(((before - amount) / before) * 100 + 1e-9)
   return percent >= 1 ? percent : null
 }
 
