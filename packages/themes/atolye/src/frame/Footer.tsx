@@ -73,11 +73,12 @@ function Contact({ shop, t }: { shop: ShopView; t: Translate }) {
  * with the newsletter's heading and its field (when the shop keeps one;
  * its consent shows once the visitor starts on it), then the shop's
  * contact on the left and its footer menus as short columns on the right
- * (closed groups on a phone), then under a rule the marks (ways to pay,
- * carriers, the ETBİS code) and the small print: the legal texts in one
- * wrapping line with the cookie choices, each identity line (6563,
- * ETBİS), and the year with the title on its own line. The hours are on
- * the contact page.
+ * (closed groups on a phone), then the bottom zone under a rule (sahip
+ * 2026-11-06): one band of marks (ways to pay and carriers in one row,
+ * the ETBİS code at its end), the legal texts (a closed row on a phone,
+ * four short columns from 1024 px) and one muted line with the year, the
+ * title and the identity lines, "Yukarı çık" at its end. The hours are
+ * on the contact page.
  */
 export function Footer({
   shop,
@@ -113,7 +114,10 @@ export function Footer({
         <div className="lg:col-span-8">
           <FooterLinks groups={shop.footerGroups} />
         </div>
-        <div className="flex flex-col gap-6 border-t border-rule pt-8 lg:col-span-12">
+        <div
+          data-footer-bottom=""
+          className={`flex flex-col border-t border-rule lg:col-span-12 lg:block ${shop.footerGroups.length > 0 ? "max-lg:-mt-10 max-lg:border-t-0" : ""}`}
+        >
           <FooterMarks shop={shop} t={t} />
           <SmallPrint shop={shop} t={t} />
         </div>

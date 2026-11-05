@@ -77,14 +77,15 @@ export function CheckoutHeader({ shop, t }: { shop: ShopView; t: Translate }) {
 }
 
 /**
- * The checkout's footer: only the small print (the legal texts, the
- * cookie choices, the identity lines the law asks for, the year and
- * title); no newsletter, menus or marks to leave the payment by.
+ * The checkout's footer: the shop footer's own small print, the same
+ * part (the legal texts, the cookie choices, the year, the title and the
+ * identity lines the law asks for); no newsletter, menus or marks to
+ * leave the payment by.
  */
 export function CheckoutFooter({ shop, t }: { shop: ShopView; t: Translate }) {
   return (
     <footer className="mt-(--footer-gap) border-t border-rule bg-paper-2">
-      <Container className="flex flex-col gap-4 pt-8 pb-8">
+      <Container data-footer-bottom="" className="flex flex-col pb-8 lg:block lg:pt-2">
         <SmallPrint shop={shop} t={t} />
       </Container>
     </footer>

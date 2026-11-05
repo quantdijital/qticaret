@@ -98,8 +98,9 @@ describe("the theme's frame", () => {
     expect(html).toContain('href="tel:+905320000000"')
     expect(html).toContain('href="mailto:bilgi@example.com"')
     expect(html).toContain('href="https://www.instagram.com/ornek"')
-    expect(html).toContain(">Ödeme</dt>")
-    expect(html).toContain(">Kargo</dt>")
+    // One band of marks, the two groups named for a screen reader
+    expect(html).toContain('<ul aria-label="Ödeme seçenekleri"')
+    expect(html).toContain('<ul aria-label="Kargo firmaları"')
     // The provider's own mark, named by its alt text; a way to pay without one by its name
     expect(html).toMatch(/<img src="\/marks\/visa.png" alt="Visa" width="208" height="68"/)
     expect(html).toContain("Havale / EFT")
@@ -107,9 +108,13 @@ describe("the theme's frame", () => {
     expect(html).not.toMatch(/<a[^>]*>[^<]*<img src="\/marks/)
     expect(html).toContain('alt="ETBİS kayıt karekodu"')
     expect(html).toContain("<li>MERSİS: 0000000000000000</li>")
-    expect(html).toMatch(/<p class="[^"]*">© \d{4} Örnek Atölye Ltd. Şti.<\/p>/)
+    // One muted line: the year and title, then the identity lines; the dots between them are drawn
+    expect(html).toMatch(
+      /<li>© \d{4} Örnek Atölye Ltd. Şti.<\/li><li>MERSİS: 0000000000000000<\/li>/
+    )
     expect(html).toContain('href="/cerez-tercihleri"')
     expect(html).not.toContain("·")
+    expect(html).toContain('href="#top"')
     // The floating WhatsApp keeps off the footer's controls
     expect(html).toMatch(/<footer data-gf-clear=""/)
   })
@@ -118,13 +123,25 @@ describe("the theme's frame", () => {
     const html = renderFrame(atolyeTheme, shopFixture())
     expect(html.match(/<details class="group border-b border-rule">/g)).toHaveLength(1)
     expect(html.match(/>Yardım</g)).toHaveLength(2)
-    expect(html).toMatch(/<nav aria-label="Yasal metinler">/)
-    expect(html.match(/href="\/yasal\/mesafeli-satis-sozlesmesi"/g)).toHaveLength(1)
+    // The legal texts: a closed row on a phone, four short columns from 1024 px; one shown
+    expect(html.match(/<nav aria-label="Yasal metinler"/g)).toHaveLength(2)
+    expect(html.match(/href="\/yasal\/mesafeli-satis-sozlesmesi"/g)).toHaveLength(2)
     expect(html).not.toContain("text-mast")
   })
 
+  it("shows the KVKK notice by its short name, its full title kept on the link", () => {
+    const title = "Kişisel Verilerin Korunması Aydınlatma Metni"
+    const html = renderFrame(
+      atolyeTheme,
+      shopFixture({ legalLinks: [{ label: title, path: "/yasal/kvkk-aydinlatma-metni" }] })
+    )
+    expect(html).toContain(`title="${title}"`)
+    expect(html).toMatch(/>KVKK Aydınlatma Metni<\/a>/)
+    expect(html).not.toContain(`>${title}</a>`)
+  })
+
   it("leaves the marks out when the shop has none", () => {
-    expect(renderFrame(atolyeTheme, shopFixture())).not.toContain(">Ödeme</dt>")
+    expect(renderFrame(atolyeTheme, shopFixture())).not.toContain('aria-label="Ödeme seçenekleri"')
   })
 
   it("opens the footer with the newsletter, its consent box unticked and required", () => {
@@ -221,11 +238,11 @@ describe("the checkout's frame", () => {
 
   it("closes on the small print only: the legal texts, the cookie choices, the identity lines and the year", () => {
     const html = checkout()
-    expect(html).toMatch(/<nav aria-label="Yasal metinler">/)
+    expect(html).toMatch(/<nav aria-label="Yasal metinler"/)
     expect(html).toContain('href="/yasal/mesafeli-satis-sozlesmesi"')
     expect(html).toContain('href="/cerez-tercihleri"')
     expect(html).toContain("<li>MERSİS: 0000000000000000</li>")
-    expect(html).toMatch(/© \d{4} Örnek Atölye Ltd. Şti.<\/p>/)
+    expect(html).toMatch(/<li>© \d{4} Örnek Atölye Ltd. Şti.<\/li>/)
     expect(html).not.toContain("E-bülten")
     expect(html).not.toContain('href="/iletisim"')
     expect(html).not.toContain("bilgi@example.com")
