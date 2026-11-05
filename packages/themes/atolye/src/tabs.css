@@ -105,6 +105,15 @@
     column-gap: var(--space-xl);
   }
 }
+/* Under 360 px the two tabs stay on one line a step smaller */
+@media (width < 22.5rem) {
+  .gf-info-tabs {
+    column-gap: var(--space-md);
+  }
+  .gf-info-tab {
+    font-size: var(--text-lg);
+  }
+}
 @media (scripting: none) {
   .gf-info > [role="tablist"] {
     display: none;
