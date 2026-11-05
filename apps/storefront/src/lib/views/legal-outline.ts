@@ -19,7 +19,7 @@ const ENTITIES: Record<string, string> = {
 }
 
 /** The heading's words as a reader sees them: tags dropped, entities read. */
-function wordsOf(inner: string): string {
+export function wordsOf(inner: string): string {
   return inner
     .replace(/<[^>]*>/g, "")
     .replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (whole, name: string) => {

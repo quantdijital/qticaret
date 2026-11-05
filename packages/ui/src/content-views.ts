@@ -1,8 +1,8 @@
-import type { CategoryCardView, CustomerPhotoView } from "./card-views"
+import type { CategoryCardView, CustomerPhotoView, ShopMarkView } from "./card-views"
 import type { FeaturedProductSectionView, ShopRatingView } from "./home-views"
 import type { PaginationView } from "./listing-views"
 import type { BreadcrumbView, ProductCardView, ReviewView } from "./product-views"
-import type { ContactView, ImageView, LinkView, TrustBadgeView } from "./views"
+import type { ContactView, ImageView, LinkView, SocialLinkView, TrustBadgeView } from "./views"
 
 /**
  * The home page, the blog and content pages as a theme shows them
@@ -129,6 +129,97 @@ export interface ContentPageView {
   /** A post's category and tags, at their archives (adr/0019 ek 2026-11-03). */
   category?: LinkView | null
   tags?: LinkView[]
+  /*
+   * What the content pages' own design asks for (adr/0046 Ek 2026-11-05,
+   * içerik sayfaları). Every one optional: a theme that does not read them
+   * draws the page as before.
+   */
+  /** The page's or post's cover picture; none: no picture. */
+  image?: ImageView | null
+  /** The text's `h2`s in order, `html` carrying their ids, for a table of contents. */
+  outline?: OutlineItemView[]
+  /** A blog post's date, reading time and author; null on a page. */
+  post?: PostMetaView | null
+  /** Posts to read next: the same category's first, then the newest; never this one. */
+  related?: PostCardView[]
+  /** The products the text's product cards name (adr/0019 kısa kodlar), as the shop's cards. */
+  products?: ProductCardView[]
+  /** The page's address on the networks a reader shares with, each its own share link. */
+  share?: SocialLinkView[]
+  /**
+   * A questions-and-answers page read from its text (each question a bold
+   * line or a heading ending in "?", under its group's heading); `html`
+   * stays the whole text for a theme that draws it as it is.
+   */
+  faq?: FaqView | null
+  /** The ways to reach the shop beside its questions. */
+  help?: ContactView | null
+  /** The contact page's imprint (künye): the shop's registered identity, in words, as set. */
+  identity?: IdentityRowView[]
+  /** The payment page: the ways to pay the shop offers now and its card families' rates. */
+  payments?: PaymentFactsView | null
+  /** The shipping page: the carriers the shop connected and its own promises. */
+  shipping?: ShippingFactsView | null
+}
+
+/** A blog post's facts beside its title: when, how long a read, who wrote it. */
+export interface PostMetaView {
+  /** "1 Kasım 2026", already in words; null for an undated post. */
+  date: string | null
+  /** The machine form for `<time datetime>`. */
+  dateTime: string | null
+  /** "5 dk okuma", already in words. */
+  reading: string
+  author: string | null
+}
+
+/** A questions page as groups: the text before the first question (HTML), then each group. */
+export interface FaqView {
+  intro: string
+  groups: FaqGroupView[]
+}
+
+/** A group of a questions page: its heading (none before the first) and its questions. */
+export interface FaqGroupView {
+  /** An anchor for the group's heading. */
+  id: string
+  title: string | null
+  /** The text under the heading before its first question (HTML); "" for none. */
+  lead: string
+  /** Each answer the backend's own HTML (adr/0019). */
+  items: { question: string; html: string }[]
+}
+
+/** One line of the shop's imprint: "Unvan" and its value. */
+export interface IdentityRowView {
+  label: string
+  value: string
+}
+
+/**
+ * A card family's installment rates as the payment provider prices them
+ * now (F5): from two installments up, the provider's surcharge in words
+ * ("%3,49"), or that it adds nothing.
+ */
+export interface InstallmentRatesView {
+  family: string
+  options: { count: number; rate: string; free: boolean }[]
+}
+
+export interface PaymentFactsView {
+  /** The ways to pay the shop offers now, as in the footer (derived, never typed in). */
+  marks: ShopMarkView[]
+  /** The card families' rates; none: the shop offers no installments now. */
+  installments: InstallmentRatesView[]
+  /** The most installments a card takes; null without installments. */
+  maxInstallments: number | null
+}
+
+export interface ShippingFactsView {
+  /** The carriers whose contract the shop connected. */
+  carriers: ShopMarkView[]
+  /** The shop's own promises (its trust badges). */
+  promises: TrustBadgeView[]
 }
 
 /** One heading of a long text, for its table of contents: the anchor it carries and its words. */

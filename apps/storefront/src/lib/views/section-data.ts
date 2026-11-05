@@ -34,7 +34,7 @@ const DATE = new Intl.DateTimeFormat("tr-TR", {
 })
 
 /** Products by id in the order given; ids with no live product are skipped. */
-async function productsInOrder(ids: readonly string[]): Promise<StoreProduct[]> {
+export async function productsInOrder(ids: readonly string[]): Promise<StoreProduct[]> {
   if (ids.length === 0) {
     return []
   }

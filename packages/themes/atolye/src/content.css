@@ -1,0 +1,193 @@
+/*
+ * The shop's own text on its content pages and posts (adr/0019 HTML; the
+ * backend's allow-listed tags only): a reading measure, headings a clear
+ * step above the body in the one heavy face, lists marked quietly, tables
+ * as ruled rows, pictures rounded, a quote as a filled well (the shop's
+ * callout), a product or category card as a filled row. No lines where a
+ * fill will do; the shop's colour stays on actions.
+ */
+@layer components {
+  .gf-prose {
+    display: flex;
+    max-width: 68ch;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--space-md);
+    color: var(--color-text-2);
+    font-size: var(--text-md);
+    line-height: 1.75;
+    overflow-wrap: break-word;
+  }
+  .gf-prose > * {
+    min-width: 0;
+  }
+  .gf-prose h2,
+  .gf-prose h3,
+  .gf-prose h4 {
+    max-width: 40ch;
+    color: var(--color-text);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    scroll-margin-top: 10rem;
+  }
+  .gf-prose h2 {
+    margin-top: var(--space-xl);
+    font-size: calc(var(--text-title) * 1.2);
+  }
+  .gf-prose h3 {
+    margin-top: var(--space-lg);
+    font-size: var(--text-title);
+  }
+  .gf-prose h4 {
+    margin-top: var(--space-sm);
+    font-size: var(--text-md);
+  }
+  .gf-prose > :first-child {
+    margin-top: 0;
+  }
+  .gf-prose strong {
+    color: var(--color-text);
+    font-weight: 600;
+  }
+  .gf-prose a {
+    color: var(--color-text);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
+    text-underline-offset: 0.25em;
+    transition: text-decoration-color var(--dur-micro) var(--ease-out);
+  }
+  .gf-prose ul,
+  .gf-prose ol {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding-left: 1.375rem;
+  }
+  .gf-prose ul {
+    list-style: disc;
+  }
+  .gf-prose ol {
+    list-style: decimal;
+  }
+  .gf-prose li {
+    padding-left: var(--space-2xs);
+  }
+  .gf-prose li::marker {
+    color: var(--color-text-3);
+  }
+  .gf-prose ol > li::marker {
+    color: var(--color-text);
+    font-weight: 800;
+  }
+  .gf-prose li > p + p {
+    margin-top: var(--space-xs);
+  }
+
+  /* The shop's callout: a quote, set as a filled well in the text's own ink */
+  .gf-prose blockquote {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--radius-media);
+    background: var(--color-paper-2);
+    color: var(--color-text);
+  }
+
+  /* A table's own box: it scrolls sideways when wider than the screen, the page never does */
+  .gf-prose .gf-table {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+  }
+  .gf-prose .gf-table:focus-visible {
+    outline-offset: -2px;
+  }
+  /* Four columns or more do not squeeze into a phone: they keep a readable width and scroll */
+  .gf-prose .gf-table table:has(tr > :nth-child(4)) {
+    min-width: 36rem;
+  }
+
+  /* A table: ruled rows on the counter, the head row heavy over a dark rule */
+  .gf-prose table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--text-sm);
+    line-height: 1.5;
+  }
+  .gf-prose tr {
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .gf-prose tr:first-child:has(th) {
+    border-bottom: 2px solid var(--color-text);
+  }
+  .gf-prose th,
+  .gf-prose td {
+    padding: var(--space-sm) var(--space-xs);
+    text-align: left;
+    vertical-align: top;
+  }
+  .gf-prose th {
+    color: var(--color-text);
+    font-weight: 800;
+  }
+  .gf-prose th:first-child,
+  .gf-prose td:first-child {
+    padding-left: 0;
+  }
+
+  .gf-prose figure {
+    margin-block: var(--space-xs);
+  }
+  /* A picture keeps the measure's width and at most a short screen's height, cropped to its middle */
+  .gf-prose img {
+    width: 100%;
+    height: auto;
+    max-height: min(28rem, 70svh);
+    border-radius: var(--radius-media);
+    background: var(--color-paper-3);
+    object-fit: cover;
+  }
+
+  /* A product or category the text names: one filled row, the whole row its link */
+  .gf-prose .qt-card a {
+    display: flex;
+    min-height: 3.5rem;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-media);
+    background: var(--color-paper-2);
+    color: var(--color-text);
+    font-weight: 800;
+    line-height: 1.35;
+    text-decoration: none;
+    transition: background-color var(--dur-micro) var(--ease-out);
+  }
+
+  /* A smaller text: an answer under its question, a well's own words */
+  .gf-prose--small {
+    gap: var(--space-sm);
+    font-size: var(--text-md);
+    line-height: 1.65;
+  }
+}
+
+@media (min-width: 64rem) {
+  .gf-prose {
+    font-size: 1.0625rem;
+  }
+  .gf-prose--small {
+    font-size: var(--text-md);
+  }
+}
+
+@media (hover: hover) {
+  .gf-prose a:hover {
+    text-decoration-color: currentColor;
+  }
+  .gf-prose .qt-card a:hover {
+    background: var(--color-paper-3);
+  }
+}

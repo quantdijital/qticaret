@@ -3,7 +3,7 @@
  * `GET /store/legal-identity`. A copy of the backend's section type: the
  * backend's build does not compile workspace TypeScript (adr/0046 §8).
  */
-import type { StoreImage } from "./catalog.js"
+import type { MediaDerivatives, StoreImage } from "./catalog.js"
 
 export type TrustIcon =
   "truck" | "clock" | "shield" | "card" | "refresh" | "award" | "gift" | "phone"
@@ -169,6 +169,10 @@ export interface StoreContentSummary {
   excerpt: string
   image_url: string | null
   image_alt: string | null
+  /** The cover's size and versions from its media record; null when added by its address alone. */
+  image_width?: number | null
+  image_height?: number | null
+  image_derivatives?: MediaDerivatives | null
   author_name: string | null
   published_at: string | null
   revised_at: string | null

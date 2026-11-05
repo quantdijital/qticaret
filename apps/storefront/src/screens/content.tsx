@@ -1,5 +1,5 @@
-import type { Resolution, StoreContentTerm } from "@qticaret/types"
-import type { ContactFormView, ContactView } from "@qticaret/ui"
+import type { MediaDerivatives, Resolution, StoreContentTerm } from "@qticaret/types"
+import type { ContactFormView, ContactView, ContentPageView, IdentityRowView } from "@qticaret/ui"
 import { sendContact } from "@/app/actions/contact"
 import { currentCustomer } from "@/lib/account/auth"
 import { t } from "@/lib/i18n"
@@ -7,18 +7,30 @@ import { legalDocument, legalPath } from "@/lib/views/legal"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import { legalIdentity, storefrontSettings } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
-import { postTerms } from "@/lib/views/posts"
+import { identityRows, postMeta, shareLinks } from "@/lib/views/content-extras"
+import { faqOf } from "@/lib/views/faq"
+import { withOutline } from "@/lib/views/legal-outline"
+import { coverOf, postTerms } from "@/lib/views/posts"
 import { breadcrumbsOf } from "@/lib/views/product"
 import { contactOf } from "@/lib/views/shop"
 import { theme } from "@/theme"
+import { infoPageOf, paymentFacts, relatedPosts, shippingFacts, textProducts } from "./content-data"
 
 type Entity = Extract<Resolution, { type: "entity" }>
 
 interface ContentEntry {
   id: string
+  kind: "page" | "post"
   title: string
   html: string
   published_at: string | null
+  image_url: string | null
+  image_alt: string | null
+  image_width?: number | null
+  image_height?: number | null
+  image_derivatives?: MediaDerivatives | null
+  author_name: string | null
+  reading_minutes: number
   /** A post's, at their archives (adr/0019 ek 2026-11-03); a page has none. */
   category?: StoreContentTerm | null
   tags?: StoreContentTerm[]
@@ -29,11 +41,14 @@ const SUBJECTS = ["order", "product", "return", "payment", "kvkk", "other"] as c
 
 /**
  * On the page the shop chose for it (adr/0047): how to reach the shop, from
- * its store details (adr/0048), and the contact form; nothing elsewhere.
+ * its store details (adr/0048), its imprint, and the contact form; nothing
+ * elsewhere.
  */
-async function contactOfPage(
-  page: Entity
-): Promise<{ form: ContactFormView; contact: ContactView } | null> {
+async function contactOfPage(page: Entity): Promise<{
+  form: ContactFormView
+  contact: ContactView
+  identity: IdentityRowView[]
+} | null> {
   const { storefront } = await storefrontSettings()
   if (page.entity_type !== "page" || storefront.contact_form_path !== page.path) {
     return null
@@ -52,6 +67,38 @@ async function contactOfPage(
       privacyPath: notice ? legalPath("privacy_notice") : null,
     },
     contact: contactOf(identity, t),
+    identity: identityRows(identity, t),
+  }
+}
+
+/**
+ * A page's own extras (adr/0046 Ek 2026-11-05, içerik sayfaları): a text
+ * of questions as its groups with the ways to reach the shop beside them,
+ * the payment page's ways to pay and installment rates, the shipping
+ * page's carriers and promises; else its headings for a table of contents.
+ */
+async function pageExtras(entry: ContentEntry, path: string): Promise<Partial<ContentPageView>> {
+  const faq = faqOf(entry.html)
+  if (faq) {
+    return { faq, help: contactOf(await legalIdentity(), t) }
+  }
+  const role = infoPageOf(path)
+  const [payments, shipping] = await Promise.all([
+    role === "payments" ? paymentFacts() : null,
+    role === "shipping" ? shippingFacts() : null,
+  ])
+  return { ...withOutline(entry.html), payments, shipping }
+}
+
+/** A post's extras: its facts, a table of contents, its products, posts to read next, share links. */
+async function postExtras(entry: ContentEntry, page: Entity): Promise<Partial<ContentPageView>> {
+  const [products, related] = await Promise.all([textProducts(entry.html), relatedPosts(entry)])
+  return {
+    ...withOutline(entry.html),
+    post: postMeta(entry, t),
+    products,
+    related,
+    share: shareLinks(page.seo?.canonical ?? null, entry.title, t),
   }
 }
 
@@ -61,6 +108,8 @@ export async function ContentScreen({ page }: { page: Entity }) {
     storeGet<{ entry: ContentEntry }>(`/store/content/${encodeURIComponent(page.entity_id)}`),
     contactOfPage(page),
   ])
+  const extras =
+    entry.kind === "post" ? await postExtras(entry, page) : await pageExtras(entry, page.path)
   return (
     <>
       <JsonLd blocks={page.seo?.jsonLd ?? []} />
@@ -75,6 +124,9 @@ export async function ContentScreen({ page }: { page: Entity }) {
           contactForm: contact?.form ?? null,
           contact: contact?.contact ?? null,
           ...postTerms(entry),
+          image: coverOf(entry),
+          ...(contact ? { identity: contact.identity } : {}),
+          ...extras,
         }}
       />
     </>
