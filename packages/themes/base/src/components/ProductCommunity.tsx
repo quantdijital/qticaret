@@ -1,12 +1,10 @@
 "use client"
 
 import { Star } from "lucide-react"
-import { useActionState } from "react"
 import type { ActionResult, FormAction, QuestionsView, ReviewsView } from "@qticaret/ui"
+import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 import { cn } from "@qticaret/ui/lib/utils"
 import { RatingBars, ReviewPhotos } from "./ReviewExtras"
-
-const INITIAL: ActionResult = { ok: false, error: null }
 
 export interface CommunityWords {
   reviews: string
@@ -90,8 +88,9 @@ export function ProductCommunity({
   askQuestion: FormAction
   words: CommunityWords
 }) {
-  const [reviewState, sendReview, reviewPending] = useActionState(writeReview, INITIAL)
-  const [questionState, sendQuestion, questionPending] = useActionState(askQuestion, INITIAL)
+  // Refused, what was written stays; sent, the form empties
+  const reviewForm = useKeptForm(writeReview)
+  const questionForm = useKeptForm(askQuestion)
   const signIn = (
     <p className="text-sm text-muted-foreground">
       {words.signInToWrite}{" "}
@@ -143,7 +142,7 @@ export function ProductCommunity({
         {signedIn ? (
           <details className="rounded-xl border p-3">
             <summary className="cursor-pointer text-sm font-medium">{words.writeReview}</summary>
-            <form action={sendReview} className="mt-3 flex flex-col gap-2">
+            <form {...reviewForm.form} className="mt-3 flex flex-col gap-2">
               <input type="hidden" name="product_id" value={productId} />
               <label className="text-sm">
                 {words.rating}
@@ -188,12 +187,12 @@ export function ProductCommunity({
               )}
               <button
                 type="submit"
-                disabled={reviewPending}
+                disabled={reviewForm.pending}
                 className="h-10 rounded-button bg-foreground text-sm font-semibold text-background disabled:opacity-50"
               >
-                {reviewPending ? words.sending : words.send}
+                {reviewForm.pending ? words.sending : words.send}
               </button>
-              <Result state={reviewState} ok={words.reviewSent} words={words} />
+              <Result state={reviewForm.state} ok={words.reviewSent} words={words} />
             </form>
           </details>
         ) : (
@@ -226,7 +225,7 @@ export function ProductCommunity({
           </ul>
         )}
         {signedIn ? (
-          <form action={sendQuestion} className="flex flex-col gap-2">
+          <form {...questionForm.form} className="flex flex-col gap-2">
             <input type="hidden" name="product_id" value={productId} />
             <textarea
               name="body"
@@ -239,12 +238,12 @@ export function ProductCommunity({
             />
             <button
               type="submit"
-              disabled={questionPending}
+              disabled={questionForm.pending}
               className="h-10 rounded-button border border-foreground text-sm font-semibold disabled:opacity-50"
             >
-              {questionPending ? words.sending : words.ask}
+              {questionForm.pending ? words.sending : words.ask}
             </button>
-            <Result state={questionState} ok={words.questionSent} words={words} />
+            <Result state={questionForm.state} ok={words.questionSent} words={words} />
           </form>
         ) : (
           signIn

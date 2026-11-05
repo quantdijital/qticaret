@@ -1,7 +1,8 @@
 "use client"
 
-import { useActionState, useState } from "react"
+import { useState } from "react"
 import type { OrderActions, OrderPageView, ReturnableLineView } from "@qticaret/ui"
+import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 
 export interface ReturnWords {
   quantity: string
@@ -49,7 +50,8 @@ export function ReturnForm({
   action: OrderActions["requestReturn"]
   words: ReturnWords
 }) {
-  const [state, submit, pending] = useActionState(action, { ok: false, error: null })
+  // Refused, the counts, the reason and the note stay as chosen
+  const { state, pending, form } = useKeptForm(action)
   // The lines outside the right of withdrawal with a unit chosen, the kind and the reason as picked
   const [excluded, setExcluded] = useState<ReadonlySet<string>>(new Set())
   const [kind, setKind] = useState("return")
@@ -86,7 +88,7 @@ export function ReturnForm({
     )
   }
   return (
-    <form action={submit} className="flex flex-col gap-3 text-sm">
+    <form {...form} className="flex flex-col gap-3 text-sm">
       <input type="hidden" name="order_id" value={view.orderId} />
       <input type="hidden" name="token" value={view.token ?? ""} />
       <ul className="flex flex-col gap-2">

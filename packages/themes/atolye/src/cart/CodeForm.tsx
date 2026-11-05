@@ -1,10 +1,8 @@
 "use client"
 
 import { Tag, X } from "lucide-react"
-import { useActionState } from "react"
-import type { ActionResult, FormAction } from "@qticaret/ui"
-
-const INITIAL: ActionResult = { ok: false, error: null }
+import type { FormAction } from "@qticaret/ui"
+import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 
 export interface CodeWords {
   label: string
@@ -21,7 +19,8 @@ export interface CodeWords {
 /**
  * A code for the cart (a coupon, a gift card): its label over a 48 px
  * pill field and a quiet "Uygula" of the same height; the answer said
- * under it, the error in the field's own words. The codes already on the
+ * under it, the error in the field's own words (the code stays as typed
+ * to be put right; once taken, the field empties). The codes already on the
  * cart are chips, each its own plain form that takes it off, so they work
  * before the script loads.
  */
@@ -38,11 +37,11 @@ export function CodeForm({
   remove: (form: FormData) => Promise<void>
   words: CodeWords
 }) {
-  const [state, submit, pending] = useActionState(apply, INITIAL)
+  const { state, pending, form } = useKeptForm(apply)
   const message = state.error ? (words.errors[state.error] ?? words.fallback) : null
   return (
     <div className="flex flex-col gap-2">
-      <form action={submit} className="flex flex-col gap-2">
+      <form {...form} className="flex flex-col gap-2">
         <label htmlFor={id} className="text-sm font-semibold">
           {words.label}
         </label>

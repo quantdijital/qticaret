@@ -1,12 +1,10 @@
 "use client"
 
 import { Check, LoaderCircle } from "lucide-react"
-import { useActionState } from "react"
 import type { AccountPageView, ActionResult, FormAction } from "@qticaret/ui"
 import { Button } from "@qticaret/ui/components/button"
+import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 import { TextField } from "../checkout/fields"
-
-const INITIAL: ActionResult = { ok: false, error: null }
 
 export interface ProfileWords {
   firstName: string
@@ -37,7 +35,7 @@ function Status({ state, words }: { state: ActionResult; words: ProfileWords }) 
   )
 }
 
-/** The customer's name and phone. */
+/** The customer's name and phone; refused, as typed. */
 export function ProfileForm({
   profile,
   save,
@@ -47,9 +45,9 @@ export function ProfileForm({
   save: FormAction
   words: ProfileWords
 }) {
-  const [state, submit, pending] = useActionState(save, INITIAL)
+  const { state, pending, form } = useKeptForm(save)
   return (
-    <form action={submit} className="grid gap-4 sm:grid-cols-2">
+    <form {...form} className="grid gap-4 sm:grid-cols-2">
       <TextField
         id="first_name"
         name="first_name"
@@ -96,9 +94,9 @@ export function ConsentForm({
   save: FormAction
   words: ProfileWords
 }) {
-  const [state, submit, pending] = useActionState(save, INITIAL)
+  const { state, pending, form } = useKeptForm(save)
   return (
-    <form action={submit} className="flex flex-col gap-3">
+    <form {...form} className="flex flex-col gap-3">
       <input type="hidden" name="marketing_version" value={profile.marketingVersion} />
       <label className="flex cursor-pointer items-start gap-3 text-sm">
         <input

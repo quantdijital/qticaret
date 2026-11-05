@@ -1,12 +1,10 @@
 "use client"
 
 import { CircleCheck, Star } from "lucide-react"
-import { useActionState } from "react"
 import type { ReactNode } from "react"
 import type { ActionResult, FormAction } from "@qticaret/ui"
+import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 import type { CommunityWords } from "./words"
-
-const INITIAL: ActionResult = { ok: false, error: null }
 
 const FIELD = "gf-field rounded-inner"
 
@@ -49,7 +47,8 @@ const SEND = "gf-btn w-full sm:w-auto sm:self-start"
  * A signed-in customer's review: the stars as five real radios (arrow
  * keys move them, each star 44 px), a title, the text, up to three
  * photos (`multipart/form-data`, adr/0037 Ek 2026-11-04). It goes to the
- * shop for approval; the answer says so.
+ * shop for approval; the answer says so. Refused, every field (the photos
+ * too) stays as written.
  */
 export function ReviewForm({
   productId,
@@ -66,12 +65,12 @@ export function ReviewForm({
   /** Shown under the thanks once it is sent (the dialog's "Kapat"). */
   done?: ReactNode
 }) {
-  const [state, send, pending] = useActionState(write, INITIAL)
+  const { state, pending, form } = useKeptForm(write)
   if (state.ok) {
     return <Sent text={words.reviewSent} done={done} />
   }
   return (
-    <form action={send} className="flex flex-col gap-5">
+    <form {...form} className="flex flex-col gap-5">
       <input type="hidden" name="product_id" value={productId} />
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 text-sm font-semibold">{words.rating}</legend>
@@ -147,7 +146,10 @@ export function ReviewForm({
   )
 }
 
-/** A signed-in customer's question about the product; answered, it shows under it. */
+/**
+ * A signed-in customer's question about the product; answered, it shows
+ * under it. Refused, the question stays as written.
+ */
 export function QuestionForm({
   productId,
   ask,
@@ -163,12 +165,12 @@ export function QuestionForm({
   /** Shown under the thanks once it is sent (the dialog's "Kapat"). */
   done?: ReactNode
 }) {
-  const [state, send, pending] = useActionState(ask, INITIAL)
+  const { state, pending, form } = useKeptForm(ask)
   if (state.ok) {
     return <Sent text={words.questionSent} done={done} />
   }
   return (
-    <form action={send} className="flex flex-col gap-3">
+    <form {...form} className="flex flex-col gap-3">
       <input type="hidden" name="product_id" value={productId} />
       <label htmlFor="soru-metin" className="text-sm font-semibold">
         {words.questionBody}

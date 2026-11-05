@@ -1,11 +1,9 @@
 "use client"
 
 import { Truck } from "lucide-react"
-import { useActionState } from "react"
-import type { ActionResult, FormAction, ShippingOptionView } from "@qticaret/ui"
+import type { FormAction, ShippingOptionView } from "@qticaret/ui"
+import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 import { ChoiceRow, FieldError } from "./fields"
-
-const INITIAL: ActionResult = { ok: false, error: null }
 
 export interface ShippingWords {
   legend: string
@@ -19,7 +17,8 @@ export interface ShippingWords {
 /**
  * The carriers the backend offered this address, each a filled row with
  * its delivery promise and its price (the backend's, in words); the first
- * chosen unless the cart holds another. One button goes on to payment.
+ * chosen unless the cart holds another. One button goes on to payment;
+ * refused, the carrier picked stays picked.
  */
 export function ShippingForm({
   options,
@@ -32,12 +31,12 @@ export function ShippingForm({
   choose: FormAction
   words: ShippingWords
 }) {
-  const [state, submit, pending] = useActionState(choose, INITIAL)
+  const { state, pending, form } = useKeptForm(choose)
   if (options.length === 0) {
     return <p className="rounded-media bg-field p-4 text-sm font-semibold">{words.none}</p>
   }
   return (
-    <form action={submit} className="flex flex-col gap-6">
+    <form {...form} className="flex flex-col gap-6">
       <fieldset className="flex flex-col gap-3" aria-describedby="kargo-hata">
         <legend className="sr-only">{words.legend}</legend>
         {options.map((option, index) => (

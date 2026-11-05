@@ -1,12 +1,10 @@
 "use client"
 
 import { Check, CircleAlert } from "lucide-react"
-import { useActionState } from "react"
 import type { AccountPageView, ActionResult, FormAction } from "@qticaret/ui"
+import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 import { CheckField, TextField } from "../checkout/fields"
 import type { PlaceholderWords } from "../parts/placeholders"
-
-const INITIAL: ActionResult = { ok: false, error: null }
 
 export interface SaveWords {
   save: string
@@ -78,7 +76,7 @@ export interface ProfileWords extends SaveWords {
   placeholders: PlaceholderWords
 }
 
-/** The customer's name and phone; a refusal said under its field. */
+/** The customer's name and phone; a refusal said under its field, the fields as typed. */
 export function ProfileForm({
   profile,
   save,
@@ -88,10 +86,10 @@ export function ProfileForm({
   save: FormAction
   words: ProfileWords
 }) {
-  const [state, submit, pending] = useActionState(save, INITIAL)
+  const { state, pending, form } = useKeptForm(save)
   const fieldError = (key: string) => (state.error === key ? (words.errors[key] ?? null) : null)
   return (
-    <form action={submit} className="grid gap-5 sm:grid-cols-2 sm:gap-4">
+    <form {...form} className="grid gap-5 sm:grid-cols-2 sm:gap-4">
       <TextField
         id="first_name"
         name="first_name"
@@ -153,9 +151,9 @@ export function ConsentForm({
   save: FormAction
   words: ConsentWords
 }) {
-  const [state, submit, pending] = useActionState(save, INITIAL)
+  const { state, pending, form } = useKeptForm(save)
   return (
-    <form action={submit} className="flex flex-col gap-4">
+    <form {...form} className="flex flex-col gap-4">
       <input type="hidden" name="marketing_version" value={profile.marketingVersion} />
       <div className="flex flex-col rounded-media bg-field px-4 py-2">
         <CheckField name="marketing_email" defaultChecked={profile.marketingEmail}>

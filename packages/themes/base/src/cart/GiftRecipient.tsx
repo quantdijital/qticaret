@@ -1,5 +1,6 @@
 import { Gift } from "lucide-react"
 import type { CartLineView, GiftLineView, Translate } from "@qticaret/ui"
+import { KeptForm } from "@qticaret/ui/components/kept-form"
 import { GiftFields } from "../components/GiftFields"
 import { giftWords } from "../components/gift-words"
 
@@ -7,7 +8,8 @@ import { giftWords } from "../components/gift-words"
  * A gift card line's recipient under the line (adr/0025 Ek 2026-11-03),
  * and the form that names or changes them: open by itself while nobody is
  * named (the payment waits for it). A plain form inside `<details>`: no
- * script needed; a refusal comes back to the cart in words.
+ * script needed; a refusal comes back to the cart in words, what was
+ * typed still in the fields.
  */
 export function GiftRecipient({
   line,
@@ -41,7 +43,7 @@ export function GiftRecipient({
         <summary className="cursor-pointer font-medium underline-offset-4 hover:underline">
           {recipient ? t("gift.edit") : t("gift.add_recipient")}
         </summary>
-        <form action={save} className="mt-3 flex flex-col gap-3">
+        <KeptForm action={save} className="mt-3 flex flex-col gap-3">
           <input type="hidden" name="line_id" value={line.id} />
           <GiftFields id={`hediye-${line.id}`} words={giftWords(t)} values={recipient} />
           <button
@@ -50,7 +52,7 @@ export function GiftRecipient({
           >
             {t("gift.save")}
           </button>
-        </form>
+        </KeptForm>
       </details>
     </div>
   )

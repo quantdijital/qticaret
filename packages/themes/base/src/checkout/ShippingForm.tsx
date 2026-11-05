@@ -1,11 +1,9 @@
 "use client"
 
 import { ArrowRight, LoaderCircle, Truck } from "lucide-react"
-import { useActionState } from "react"
-import type { ActionResult, FormAction, ShippingOptionView } from "@qticaret/ui"
+import type { FormAction, ShippingOptionView } from "@qticaret/ui"
 import { Button } from "@qticaret/ui/components/button"
-
-const INITIAL: ActionResult = { ok: false, error: null }
+import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 
 export interface ShippingWords {
   none: string
@@ -27,12 +25,12 @@ export function ShippingForm({
   choose: FormAction
   words: ShippingWords
 }) {
-  const [state, submit, pending] = useActionState(choose, INITIAL)
+  const { state, pending, form } = useKeptForm(choose)
   if (options.length === 0) {
     return <p className="rounded-2xl bg-muted p-4 text-sm">{words.none}</p>
   }
   return (
-    <form action={submit} className="flex flex-col gap-4">
+    <form {...form} className="flex flex-col gap-4">
       <fieldset className="flex flex-col gap-3">
         <legend className="sr-only">{words.submit}</legend>
         {options.map((option, index) => (

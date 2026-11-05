@@ -1,10 +1,8 @@
 "use client"
 
 import { Tag, X } from "lucide-react"
-import { useActionState } from "react"
-import type { ActionResult, FormAction } from "@qticaret/ui"
-
-const INITIAL: ActionResult = { ok: false, error: null }
+import type { FormAction } from "@qticaret/ui"
+import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 
 export interface PromotionWords {
   label: string
@@ -20,7 +18,8 @@ export interface PromotionWords {
 
 /**
  * The coupon field and the codes already on the cart. The field is a
- * form of its own (its answer shown in place); each code's remove button
+ * form of its own (its answer shown in place, a refused code left to put
+ * right); each code's remove button
  * a plain form, so it works before the script loads.
  */
 export function PromotionForm({
@@ -34,10 +33,10 @@ export function PromotionForm({
   remove: (form: FormData) => Promise<void>
   words: PromotionWords
 }) {
-  const [state, submit, pending] = useActionState(apply, INITIAL)
+  const { state, pending, form } = useKeptForm(apply)
   return (
     <div className="flex flex-col gap-2.5">
-      <form action={submit} className="flex gap-2">
+      <form {...form} className="flex gap-2">
         <label htmlFor="kupon" className="sr-only">
           {words.label}
         </label>

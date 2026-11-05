@@ -1,7 +1,8 @@
 "use client"
 
-import { useActionState, useState } from "react"
-import type { AccountPageView, ActionResult, FormAction } from "@qticaret/ui"
+import { useState } from "react"
+import type { AccountPageView, FormAction } from "@qticaret/ui"
+import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 
 export interface BillingWords {
   individual: string
@@ -32,9 +33,9 @@ export function BillingForm({
   words: BillingWords
 }) {
   const [type, setType] = useState(billing?.type ?? "individual")
-  const [state, submit, pending] = useActionState(save, { ok: false, error: null } as ActionResult)
+  const { state, pending, form } = useKeptForm(save)
   return (
-    <form action={submit} className="flex flex-col gap-3 text-sm">
+    <form {...form} className="flex flex-col gap-3 text-sm">
       {billing?.taxIdMasked && (
         <p className="text-muted-foreground">
           {words.current}: {billing.legalName} · {billing.taxIdMasked}

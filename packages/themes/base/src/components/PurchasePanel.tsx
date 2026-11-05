@@ -1,10 +1,9 @@
 "use client"
 
 import { Check } from "lucide-react"
-import { useActionState, useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { formatLira } from "@qticaret/ui"
 import type {
-  ActionResult,
   AddonFieldView,
   FormAction,
   InstallmentFamilyView,
@@ -14,6 +13,7 @@ import type {
 } from "@qticaret/ui"
 import { Badge } from "@qticaret/ui/components/badge"
 import { Button } from "@qticaret/ui/components/button"
+import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 import { emitShopEvent } from "@qticaret/ui/lib/shop-events"
 import { cn } from "@qticaret/ui/lib/utils"
 import { CART_ADDED_EVENT } from "../layout/CartDrawer"
@@ -78,8 +78,6 @@ interface PurchasePanelProps {
   } | null
 }
 
-const INITIAL: ActionResult = { ok: false, error: null }
-
 const matching = (
   variants: VariantView[],
   options: ProductOptionView[],
@@ -111,10 +109,8 @@ export function PurchasePanel({
   const initial =
     variants.find((variant) => variant.id === selectedVariantId) ?? variants[0] ?? null
   const [chosen, setChosen] = useState<Record<string, string>>(initial?.options ?? {})
-  const [state, submit, pending] = useActionState(
-    gift?.action ?? addons?.action ?? addToCart,
-    INITIAL
-  )
+  // Refused, the picks, the count and a gift's words stay as they were
+  const { state, pending, form } = useKeptForm(gift?.action ?? addons?.action ?? addToCart)
   // The add-on picks as typed and the quantity, for the running total and the units allowed
   const [picks, setPicks] = useState<Record<string, string>>({})
   const [quantity, setQuantity] = useState(1)
@@ -158,14 +154,16 @@ export function PurchasePanel({
   return (
     <>
       <form
-        action={(form) => {
+        action={form.action}
+        onSubmit={(event) => {
           setStale(false)
-          const variantId = form.get("variant_id")
+          const fields = new FormData(event.currentTarget)
+          const variantId = fields.get("variant_id")
           sent.current = {
             variantId: typeof variantId === "string" ? variantId : "",
-            quantity: Number(form.get("quantity") ?? 1) || 1,
+            quantity: Number(fields.get("quantity") ?? 1) || 1,
           }
-          submit(form)
+          form.onSubmit(event)
         }}
         onChange={(event) => {
           const target = event.target as { name?: unknown }

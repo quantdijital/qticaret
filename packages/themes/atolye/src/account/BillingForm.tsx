@@ -1,8 +1,9 @@
 "use client"
 
 import { ReceiptText } from "lucide-react"
-import { useActionState, useState } from "react"
-import type { AccountPageView, ActionResult, FormAction } from "@qticaret/ui"
+import { useState } from "react"
+import type { AccountPageView, FormAction } from "@qticaret/ui"
+import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 import { cn } from "@qticaret/ui/lib/utils"
 import { TextField } from "../checkout/fields"
 import type { PlaceholderWords } from "../parts/placeholders"
@@ -27,7 +28,8 @@ const FIELD_ERRORS = ["billing_profile.tax_id_invalid", "billing_profile.tax_off
  * Who the invoice is for (F8): a person (name, T.C. kimlik no) or a
  * company (title, tax office, VKN), chosen with two pill radios. The
  * saved one shows above, its number masked by the backend; the number is
- * typed again to change it. A refusal is said under its field.
+ * typed again to change it. A refusal is said under its field, what was
+ * typed left as it was.
  */
 export function BillingForm({
   billing,
@@ -39,11 +41,11 @@ export function BillingForm({
   words: BillingWords
 }) {
   const [type, setType] = useState(billing?.type ?? "individual")
-  const [state, submit, pending] = useActionState(save, { ok: false, error: null } as ActionResult)
+  const { state, pending, form } = useKeptForm(save)
   const fieldError = (key: string) => (state.error === key ? (words.errors[key] ?? null) : null)
   const person = type === "individual"
   return (
-    <form action={submit} className="flex flex-col gap-5">
+    <form {...form} className="flex flex-col gap-5">
       {billing?.taxIdMasked && (
         <p className="flex items-start gap-3 rounded-media bg-field p-4 text-sm">
           <ReceiptText

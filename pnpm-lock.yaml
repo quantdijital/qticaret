@@ -387,6 +387,9 @@ importers:
       globals:
         specifier: 17.13.0
         version: 17.13.0
+      jsdom:
+        specifier: 30.1.2
+        version: 30.1.2
       tailwindcss:
         specifier: 4.3.3
         version: 4.3.3
@@ -562,6 +565,9 @@ importers:
       globals:
         specifier: 17.13.0
         version: 17.13.0
+      jsdom:
+        specifier: 30.1.2
+        version: 30.1.2
       react:
         specifier: 19.3.0
         version: 19.3.0
