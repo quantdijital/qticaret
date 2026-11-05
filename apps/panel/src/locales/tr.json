@@ -3032,6 +3032,24 @@
       "defaultsFailed": "Mağaza ayarları okunamadı. Biraz sonra tekrar deneyin.",
       "kindHint": "Dijital ürün ve hizmette kargo adımı atlanır."
     },
+    "summary": {
+      "label": "Öne çıkan özellikler",
+      "hint": "Ürün adının altında, fiyatın üstünde madde madde görünür. En fazla 5 kısa satır; isteğe bağlı.",
+      "count": "{{count}}/{{max}}",
+      "chars": "{{count}}/{{max}}",
+      "line": "{{n}}. madde",
+      "add": "Madde ekle",
+      "remove": "{{n}}. maddeyi kaldır",
+      "up": "{{n}}. maddeyi yukarı taşı",
+      "down": "{{n}}. maddeyi aşağı taşı",
+      "placeholders": [
+        "N690 çelik, 58-59 HRC",
+        "Geyik boynuzu sap",
+        "Sırttan kilitli",
+        "2 yıl garanti",
+        "Deri kılıfıyla gönderilir"
+      ]
+    },
     "detail": {
       "title": "Ürün",
       "general": "Genel bilgiler",
@@ -5461,6 +5479,11 @@
           "title": "Açıklamada güvensiz (http) bağlantı ya da görsel var.",
           "why": "Güvenli sayfada http içerik tarayıcı uyarısına ya da görselin hiç yüklenmemesine yol açar.",
           "how": "Bağlantıları https ile başlayacak şekilde değiştirin."
+        },
+        "CONT-09": {
+          "title": "Kısa açıklama (öne çıkan özellikler) boş.",
+          "why": "Maddeler ürün adının altında, fiyatın üstünde görünür; alıcı ürünü bir bakışta tanır. SEO açıklaması yazılmamışsa arama sonucundaki açıklama da bunlardan oluşur.",
+          "how": "Genel bilgiler kartına ürünü anlatan 3–5 kısa madde yazın."
         },
         "IMG-01": {
           "title": "{{count}} görsel var; en az {{target}} önerilir.",

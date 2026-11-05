@@ -3032,6 +3032,24 @@
       "defaultsFailed": "The shop's settings could not be read. Try again shortly.",
       "kindHint": "Digital products and services skip the shipping step."
     },
+    "summary": {
+      "label": "Key features",
+      "hint": "Shown as a list under the product's name, above the price. Up to 5 short lines; optional.",
+      "count": "{{count}}/{{max}}",
+      "chars": "{{count}}/{{max}}",
+      "line": "Line {{n}}",
+      "add": "Add a line",
+      "remove": "Remove line {{n}}",
+      "up": "Move line {{n}} up",
+      "down": "Move line {{n}} down",
+      "placeholders": [
+        "N690 steel, 58-59 HRC",
+        "Antler handle",
+        "Back lock",
+        "2-year warranty",
+        "Comes with a leather sheath"
+      ]
+    },
     "detail": {
       "title": "Product",
       "general": "General",
@@ -5461,6 +5479,11 @@
           "title": "The description has an insecure (http) link or image.",
           "why": "http content on a secure page triggers browser warnings or does not load at all.",
           "how": "Change the links to start with https."
+        },
+        "CONT-09": {
+          "title": "The short description (key features) is empty.",
+          "why": "The lines show under the product's name, above the price, so a shopper knows it at a glance. Without an SEO description of its own, the search result's description is made of them too.",
+          "how": "Write 3–5 short lines about the product in the General card."
         },
         "IMG-01": {
           "title": "{{count}} images; at least {{target}} are advised.",

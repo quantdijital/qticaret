@@ -3,6 +3,7 @@ import { normalizeGtin } from "@/lib/gtin"
 import { sdk } from "@/lib/sdk"
 import { parseMeasureInput, parseMoneyInput } from "@/lib/money-input"
 import type { ShopDefaults } from "@/features/products/api/lookups"
+import { summaryOf } from "@/features/products/summary-lines"
 import { DEFAULT_VARIANT_KEY } from "./schema"
 import type { WizardValues } from "./schema"
 
@@ -66,6 +67,22 @@ function productBody({ values, publish, defaults, defaultOption }: CreateInput) 
   }
 }
 
+/**
+ * What the new product's catalog fields take, in one save: a digital or
+ * service kind (F3.2; before it is published) and the short description's
+ * lines. Null when there is neither.
+ */
+export function catalogBody(
+  values: Pick<WizardValues, "kind" | "summary">
+): { kind?: WizardValues["kind"]; summary?: string[] } | null {
+  const lines = summaryOf(values.summary)
+  const body = {
+    ...(values.kind === "physical" ? {} : { kind: values.kind }),
+    ...(lines.length > 0 ? { summary: lines } : {}),
+  }
+  return Object.keys(body).length > 0 ? body : null
+}
+
 // The stock typed per variant, at the shop's default location. A variant made to sell
 // past stock already has its (empty) level there from the server: that one is updated.
 async function stockLevels(productId: string, values: WizardValues, locationId: string) {
@@ -109,20 +126,21 @@ export interface CreateResult {
   stockProblem: { kind: "no_location" } | { kind: "failed"; reason: unknown } | null
 }
 
-/** Creates the product, then its stock at the default location. */
+/** Creates the product, then its catalog fields (`catalogBody`) and its stock at the default location. */
 export function useCreateProduct() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: async (input: CreateInput): Promise<CreateResult> => {
       const { product } = await sdk.admin.product.create(productBody(input))
-      if (input.values.kind !== "physical") {
+      const catalog = catalogBody(input.values)
+      if (catalog) {
         await sdk.client.fetch(`/admin/products/${encodeURIComponent(product.id)}/catalog`, {
           method: "POST",
-          body: { kind: input.values.kind },
+          body: catalog,
         })
-        if (input.publish) {
-          await sdk.admin.product.update(product.id, { status: "published" })
-        }
+      }
+      if (input.values.kind !== "physical" && input.publish) {
+        await sdk.admin.product.update(product.id, { status: "published" })
       }
       if (!input.values.manage_inventory) {
         return { productId: product.id, stockProblem: null }

@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
 import { CategoryTree } from "@/features/products/components/category-tree"
+import { SummaryField } from "@/features/products/components/summary-field"
 import { VatSelect } from "@/features/products/components/vat-select"
 import { useProductPathPrefix } from "@/features/products/use-product-path"
 import { useFeature } from "@/features/settings/api/features"
@@ -129,7 +130,10 @@ function KindPicker() {
   )
 }
 
-/** Step 1: what the product is called, its URL, its story and where it belongs. */
+/**
+ * Step 1: what the product is called, its URL, its story, its key features
+ * in a few lines (optional) and where it belongs.
+ */
 export function BasicsStep() {
   const { t } = useTranslation()
   const { register, formState, control } = useFormContext<WizardValues>()
@@ -166,6 +170,11 @@ export function BasicsStep() {
               {...register("description")}
             />
           </Field>
+          <Controller
+            control={control}
+            name="summary"
+            render={({ field }) => <SummaryField value={field.value} onChange={field.onChange} />}
+          />
         </div>
       </SectionCard>
       <SectionCard title={t("products.wizard.organize")} className="xl:col-span-4">

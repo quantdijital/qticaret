@@ -83,6 +83,7 @@ const catalogOf = (doc: JSONContent | null) =>
     is_gift_card: false,
     addons: [],
     description_doc: doc,
+    summary: [],
     successor: null,
     categories: [],
     variants: [],

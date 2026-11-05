@@ -2,6 +2,7 @@ import { z } from "zod"
 import { gtinProblem } from "@/lib/gtin"
 import { parseMeasureInput, parseMoneyInput } from "@/lib/money-input"
 import { isValidSlug } from "@/lib/slug"
+import { SUMMARY_LIMITS } from "@/features/products/summary-lines"
 
 /**
  * The new-product form across its steps. Inputs stay text while typing
@@ -69,6 +70,8 @@ export const wizardSchema = z
       .trim()
       .refine((text) => text === "" || isValidSlug(text), { message: "products.errors.handle" }),
     description: z.string().max(20_000),
+    // The short description's rows as typed (optional); the editor keeps them within bounds
+    summary: z.array(z.string().max(SUMMARY_LIMITS.length)).max(SUMMARY_LIMITS.lines),
     category_ids: z.array(z.string()),
     type_id: z.string(),
     images: z.array(z.object({ id: z.string(), url: z.string() })).max(20),
@@ -115,6 +118,7 @@ export const defaultWizardValues = (): WizardValues => ({
   title: "",
   handle: "",
   description: "",
+  summary: [],
   category_ids: [],
   type_id: "",
   images: [],
@@ -133,7 +137,7 @@ export const defaultWizardValues = (): WizardValues => ({
 
 /** The fields each step checks before moving on. */
 export const STEP_FIELDS = {
-  basics: ["title", "handle", "description"],
+  basics: ["title", "handle", "description", "summary"],
   media: ["images"],
   pricing: ["options", "variants"],
   shipping: ["weight", "length", "width", "height"],
