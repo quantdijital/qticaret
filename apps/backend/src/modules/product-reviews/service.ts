@@ -12,46 +12,10 @@ import { ProductReview } from "./models/product-review"
 import { ProductReviewPhoto } from "./models/product-review-photo"
 import { setReviewPhotos } from "./photos"
 import type { RemovedPhoto } from "./photos"
+import { approvedStarCounts, decideReview, starCounts } from "./statements"
+import type { MigratedReview, Rating, RatingDistribution, ReviewInput } from "./types"
 
-export interface ReviewInput {
-  product_id: string
-  customer_id: string
-  order_id: string
-  rating: number
-  title: string | null
-  body: string
-  author_name: string
-  has_link: boolean
-  /** The author's uploads to show with it, in order; left out: its photos stay. */
-  photo_ids?: string[] | undefined
-}
-
-/** A review the shop's old platform showed (F14), as it was. */
-export interface MigratedReview {
-  /** Its source and key there: one already written is not written again. */
-  source_ref: string
-  product_id: string
-  customer_id: string | null
-  rating: number
-  title: string | null
-  body: string
-  author_name: string
-  has_link: boolean
-  /**
-   * Shown on the old site: approved here, unless it carries a link (that
-   * waits for the shop, as a new one would); one waiting there waits here.
-   */
-  published: boolean
-  created_at: Date
-}
-
-export interface Rating {
-  average: number
-  count: number
-}
-
-/** How many approved reviews gave each number of stars, 5 to 1. */
-export type RatingDistribution = Record<"1" | "2" | "3" | "4" | "5", number>
+export type { MigratedReview, Rating, RatingDistribution, ReviewInput } from "./types"
 
 /** Product reviews (F10.6, adr/0037 §4): written, moderated, summed; their photos. */
 class ProductReviewsModuleService extends MedusaService({
@@ -147,21 +111,7 @@ class ProductReviewsModuleService extends MedusaService({
     const decided: { id: string; product_id: string }[] = []
     const changed: string[] = []
     for (const review of input.reviews) {
-      const [row] = await manager.execute<{ id: string; product_id: string }[]>(
-        `UPDATE product_review
-         SET status = ?, reject_reason = ?, moderated_by = ?, moderated_at = ?, updated_at = ?
-         WHERE id = ? AND updated_at = ? AND deleted_at IS NULL
-         RETURNING id, product_id`,
-        [
-          input.status,
-          input.status === "rejected" ? (input.reason ?? null) : null,
-          input.by,
-          now,
-          now,
-          review.id,
-          new Date(review.updated_at),
-        ]
-      )
+      const row = await decideReview(manager, review, input, now)
       if (row) {
         decided.push(row)
       } else {
@@ -250,31 +200,13 @@ class ProductReviewsModuleService extends MedusaService({
     )
   }
 
-  /**
-   * How many approved reviews of the product gave each number of stars
-   * (adr/0046 Ek 2026-11-04): one grouped count over the product's
-   * approved reviews (indexed by product and status).
-   */
+  /** How many approved reviews of the product gave each number of stars (adr/0046 Ek 2026-11-04). */
   @InjectManager()
   async ratingDistribution(
     productId: string,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<RatingDistribution> {
-    const manager = sharedContext.manager as EntityManager
-    const rows = await manager.execute<{ rating: number; count: string | number }[]>(
-      `SELECT rating, count(*) AS count FROM product_review
-       WHERE product_id = ? AND status = 'approved' AND deleted_at IS NULL
-       GROUP BY rating`,
-      [productId]
-    )
-    const counts: RatingDistribution = { "5": 0, "4": 0, "3": 0, "2": 0, "1": 0 }
-    for (const row of rows) {
-      const stars = String(row.rating) as keyof RatingDistribution
-      if (stars in counts) {
-        counts[stars] = Number(row.count)
-      }
-    }
-    return counts
+    return starCounts(sharedContext.manager as EntityManager, productId)
   }
 
   /** How many approved reviews each product has per number of stars: the shop-wide spread's rows. */
@@ -282,16 +214,7 @@ class ProductReviewsModuleService extends MedusaService({
   async approvedRatingCounts(
     @MedusaContext() sharedContext: Context = {}
   ): Promise<{ product_id: string; rating: number; count: number }[]> {
-    const manager = sharedContext.manager as EntityManager
-    const rows = await manager.execute<
-      { product_id: string; rating: number; count: string | number }[]
-    >(
-      `SELECT product_id, rating, count(*) AS count FROM product_review
-       WHERE status = 'approved' AND deleted_at IS NULL
-       GROUP BY product_id, rating`
-    )
-    // `count(*)` comes back as a string from Postgres
-    return rows.map((row) => ({ ...row, count: Number(row.count) }))
+    return approvedStarCounts(sharedContext.manager as EntityManager)
   }
 
   @InjectTransactionManager()
