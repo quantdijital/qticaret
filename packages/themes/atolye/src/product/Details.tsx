@@ -6,9 +6,13 @@ import { ShippingCard } from "./Shipping"
 import { Specs } from "./Specs"
 import { infoWords } from "./words"
 
-/** The description's own type: a reading measure, its headings a step above the body. */
+/**
+ * The description's own type: the content pages' reading measure (46rem,
+ * owner 2026-11-06: "yazılı içeriklerin genişliğini artıralım"; the tab
+ * column where narrower), its headings a step above the body.
+ */
 const PROSE = [
-  "flex max-w-[68ch] min-w-0 flex-col gap-4 text-md leading-[1.75] text-text-2 lg:text-[1.0625rem]",
+  "flex max-w-[46rem] min-w-0 flex-col gap-4 text-md leading-[1.75] text-text-2 lg:text-[1.0625rem] [&_p]:max-w-none",
   "[&_h2]:mt-8 [&_h2]:max-w-none [&_h2]:text-title [&_h2]:leading-snug [&_h2]:text-text [&_h2:first-child]:mt-0",
   "[&_h3]:mt-4 [&_h3]:text-md [&_h3]:text-text [&_h4]:font-semibold [&_h4]:text-text",
   "[&_ul]:flex [&_ul]:list-disc [&_ul]:flex-col [&_ul]:gap-2 [&_ul]:pl-5 [&_ol]:flex [&_ol]:list-decimal [&_ol]:flex-col [&_ol]:gap-2 [&_ol]:pl-5 [&_li]:pl-1 [&_li::marker]:text-text-3",

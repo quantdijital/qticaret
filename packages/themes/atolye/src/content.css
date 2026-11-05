@@ -48,6 +48,10 @@
   .gf-prose > :first-child {
     margin-top: 0;
   }
+  /* The column sets the measure: the base 65ch of a bare paragraph would stop it short of 46rem */
+  .gf-prose p {
+    max-width: none;
+  }
   .gf-prose strong {
     color: var(--color-text);
     font-weight: 600;

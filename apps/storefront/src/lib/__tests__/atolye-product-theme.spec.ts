@@ -512,6 +512,12 @@ describe("the theme's product page", () => {
     expect(html).toContain('<span class="sr-only">(yeni sekmede açılır)</span>')
   })
 
+  it("sets the description at the content pages' measure", () => {
+    const html = page()
+    expect(html).toContain("max-w-[46rem]")
+    expect(html).not.toContain("max-w-[68ch]")
+  })
+
   it("ends on the category's other products", () => {
     const html = page()
     expect(html).toContain(">Benzer ürünler</h2>")
