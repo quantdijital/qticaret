@@ -172,3 +172,32 @@ describe("the theme's 404", () => {
     expect(html).not.toContain("Kategorilere göz atın")
   })
 })
+
+describe("the theme's 410 (adr/0046 Ek 2026-11-05)", () => {
+  it("is the 404's sibling: the removed page's words, the same search and tiles", () => {
+    const html = renderPage(atolyeTheme, "GonePage", {
+      view: {
+        categories: [
+          {
+            label: "Çakılar",
+            path: "/kategori/cakilar",
+            image: {
+              src: "/media/c.jpg",
+              alt: "",
+              width: 800,
+              height: 1000,
+              sources: { avif: null, webp: null },
+            },
+          },
+        ],
+      },
+    })
+    expect(html.match(/<h1/g)).toHaveLength(1)
+    expect(html).toContain("Bu sayfa kaldırıldı")
+    expect(html).toContain(">410</p>")
+    expect(html).not.toContain("Sayfa bulunamadı")
+    expect(html).toContain('action="/arama"')
+    expect(html).toContain('href="/kategori/cakilar"')
+    expect(html).toContain('class="gf-stage')
+  })
+})

@@ -17,6 +17,7 @@ export type {
   GiftCardActions,
   StorefrontTheme,
   ThemeActions,
+  ThemeErrorPage,
   Translate,
 } from "./theme"
 export type * from "./account-views"

@@ -140,6 +140,15 @@ interface Page<View> {
 }
 
 /**
+ * The page a request could not be made into (adr/0046 Ek 2026-11-05): a
+ * client component a theme exports apart from its pages (its `/error`
+ * entry), since Next draws it in the browser too, and with the backend
+ * away (no frame then: the shop's frame needs its data). It takes no
+ * data: the words, a way to try again and the way home.
+ */
+export type ThemeErrorPage = ComponentType<{ t: Translate; retry: () => void }>
+
+/**
  * A theme (adr/0046 §7): how pages look, nothing else. It fetches no data,
  * writes no SEO and decides no status code; the storefront calls it with
  * view models, the words and the actions.
@@ -215,6 +224,12 @@ export interface StorefrontTheme {
   AccountPage: ComponentType<Page<AccountPageView> & { actions: AccountActions }>
   /** A 404; with `view`, the shop's categories to go on to (adr/0046 Ek 2026-11-05). */
   NotFoundPage: ComponentType<{ t: Translate; view?: NotFoundPageView }>
+  /**
+   * A page removed for good (410, a record deleted or a rule's 410; adr/0046
+   * Ek 2026-11-05): the 404's sibling, in the shop's frame, with the same
+   * ways on. The status code is the storefront's. None: `NotFoundPage`.
+   */
+  GonePage?: ComponentType<{ t: Translate; view?: NotFoundPageView }>
   /** The shop's approved reviews across its products (D10). */
   ReviewsPage: ComponentType<Page<ReviewsPageView>>
   /**

@@ -12,9 +12,12 @@ import { t } from "@/lib/i18n"
 export function renderPage<Name extends keyof StorefrontTheme>(
   theme: StorefrontTheme,
   name: Name,
-  props: Omit<StorefrontTheme[Name] extends ComponentType<infer P> ? P : never, "t">
+  props: Omit<NonNullable<StorefrontTheme[Name]> extends ComponentType<infer P> ? P : never, "t">
 ): string {
-  const Page = theme[name] as ComponentType<Record<string, unknown>>
+  const Page = theme[name] as ComponentType<Record<string, unknown>> | undefined
+  if (!Page) {
+    throw new Error(`The theme draws no ${name}`)
+  }
   return renderToStaticMarkup(createElement(Page, { ...props, t }))
 }
 

@@ -25,3 +25,16 @@ export async function categoryTiles(ids: readonly string[]): Promise<CategoryCar
     return photo ? { ...card, image: photo } : card
   })
 }
+
+/**
+ * The shop's top categories with their pictures, the way on from a missing
+ * (404) or removed (410) page. Such a page never fails for want of them:
+ * unanswered, it has none.
+ */
+export async function waysOn(): Promise<CategoryCardView[]> {
+  try {
+    return await categoryTiles([])
+  } catch {
+    return []
+  }
+}

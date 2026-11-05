@@ -2,8 +2,8 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { LANDING_COOKIE, landingCookieValue, landingOf } from "./lib/cart/landing"
 import { panelOrigins, paymentFrameOrigins, paymentRedirectOrigins, storefrontEnv } from "./lib/env"
-import { t } from "./lib/i18n"
 import { maintenanceGate } from "./lib/maintenance/gate"
+import { GONE_HEADER, GONE_PAGE_PATH, goneResponse } from "./lib/seo/gone"
 import { contentSecurityPolicy, newNonce } from "./lib/security/csp"
 import {
   backendFile,
@@ -30,18 +30,6 @@ export const URL_HEADER = "x-qt-url"
 export const LAYOUT_PREVIEW_HEADER = "x-qt-layout-preview"
 
 const LAYOUT_PREVIEW = /^\/onizleme\/(sfl_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43})$/
-
-function gonePage(nonce: string, csp: string): NextResponse {
-  const html = `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>${t("gone.title")}</title></head><body><main><h1>${t("gone.title")}</h1><p>${t("gone.body")}</p><p><a href="/">${t("not_found.home")}</a></p></main></body></html>`
-  return new NextResponse(html, {
-    status: 410,
-    headers: {
-      "content-type": "text/html; charset=utf-8",
-      "content-security-policy": csp,
-      "x-nonce": nonce,
-    },
-  })
-}
 
 /** Where a card provider sends the shopper back (D7): possibly inside its own frame on our page. */
 const isPaymentReturn = (pathname: string) =>
@@ -127,24 +115,11 @@ export async function proxy(request: NextRequest): Promise<Response> {
   if (gate.blocked) {
     return gate.blocked
   }
-  const isPageView = request.method === "GET" || request.method === "HEAD"
-  if (isPageView && pathname !== "/" && !isSystemPath(pathname) && !isStorefrontIndex(pathname)) {
-    const resolution = await resolveForProxy(`${pathname}${search}`, visitor)
-    if (resolution?.type === "redirect") {
-      return NextResponse.redirect(new URL(resolution.location, request.url), resolution.status)
-    }
-    if (resolution?.type === "gone") {
-      return gonePage(nonce, csp)
-    }
-    // A prefetch is not a visit
-    if (resolution?.type === "not_found" && !request.headers.has("next-router-prefetch")) {
-      reportNotFound(`${pathname}${search}`, request.headers.get("referer"), visitor)
-    }
-  }
 
   const headers = new Headers(request.headers)
-  // Never the visitor's own: only a preview address sets it
+  // Never the visitor's own: only a preview address sets the one, a removed page the other
   headers.delete(LAYOUT_PREVIEW_HEADER)
+  headers.delete(GONE_HEADER)
   const preview = LAYOUT_PREVIEW.exec(pathname)?.[1]
   if (preview) {
     headers.set(LAYOUT_PREVIEW_HEADER, preview)
@@ -152,6 +127,29 @@ export async function proxy(request: NextRequest): Promise<Response> {
   headers.set("x-nonce", nonce)
   headers.set("content-security-policy", csp)
   headers.set(URL_HEADER, `${pathname}${search}`)
+
+  const isPageView = request.method === "GET" || request.method === "HEAD"
+  if (
+    isPageView &&
+    pathname !== "/" &&
+    pathname !== GONE_PAGE_PATH &&
+    !isSystemPath(pathname) &&
+    !isStorefrontIndex(pathname)
+  ) {
+    const resolution = await resolveForProxy(`${pathname}${search}`, visitor)
+    if (resolution?.type === "redirect") {
+      return NextResponse.redirect(new URL(resolution.location, request.url), resolution.status)
+    }
+    if (resolution?.type === "gone") {
+      // The theme's removed page in the shop's frame, the 410 kept (adr/0046 Ek 2026-11-05)
+      return goneResponse(request.url, headers, csp)
+    }
+    // A prefetch is not a visit
+    if (resolution?.type === "not_found" && !request.headers.has("next-router-prefetch")) {
+      reportNotFound(`${pathname}${search}`, request.headers.get("referer"), visitor)
+    }
+  }
+
   const response = NextResponse.next({ request: { headers } })
   response.headers.set("content-security-policy", csp)
   // The visit's first landing (F11.2): kept for its first cart, nothing of the person

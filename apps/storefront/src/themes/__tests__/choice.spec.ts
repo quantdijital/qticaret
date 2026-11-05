@@ -1,3 +1,6 @@
+import { existsSync } from "node:fs"
+import { dirname, join } from "node:path"
+import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 import { DEFAULT_THEME, themeStyle } from "@/lib/views/theme"
 import { atolyeSettings } from "../atolye"
@@ -21,11 +24,21 @@ describe("the theme a build is made with (adr/0057)", () => {
     expect(() => storefrontThemeName("../base")).toThrow()
   })
 
-  it("points both aliases at the theme's own entry", () => {
+  it("points every alias at the theme's own entry", () => {
     expect(themeEntries("atolye")).toEqual({
       pages: "./src/themes/atolye.ts",
       styles: "./src/themes/atolye.css",
+      error: "./src/themes/atolye-error.ts",
     })
+  })
+
+  it("has every entry for every installed theme", () => {
+    const here = dirname(fileURLToPath(import.meta.url))
+    for (const name of STOREFRONT_THEMES) {
+      for (const entry of Object.values(themeEntries(name))) {
+        expect(existsSync(join(here, "..", "..", "..", entry))).toBe(true)
+      }
+    }
   })
 })
 

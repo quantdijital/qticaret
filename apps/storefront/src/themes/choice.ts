@@ -29,8 +29,13 @@ export function storefrontThemeName(value: string | undefined): StorefrontThemeN
   return known
 }
 
-/** The chosen theme's two entries, as paths from the storefront's root (Turbopack's aliases). */
+/**
+ * The chosen theme's entries, as paths from the storefront's root
+ * (Turbopack's aliases): its pages, its stylesheet, and its error page
+ * (a client component on its own, adr/0046 Ek 2026-11-05).
+ */
 export const themeEntries = (name: StorefrontThemeName) => ({
   pages: `./src/themes/${name}.ts`,
   styles: `./src/themes/${name}.css`,
+  error: `./src/themes/${name}-error.ts`,
 })

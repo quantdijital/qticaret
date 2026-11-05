@@ -1,7 +1,6 @@
 import type { Metadata } from "next"
-import type { CategoryCardView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
-import { categoryTiles } from "@/lib/views/category-tiles"
+import { waysOn } from "@/lib/views/category-tiles"
 import { theme } from "@/theme"
 
 export const metadata: Metadata = {
@@ -9,18 +8,7 @@ export const metadata: Metadata = {
   robots: "noindex,follow",
 }
 
-/**
- * The shop's top categories with their pictures, the way on from a missing
- * page. A 404 never fails for want of them: unanswered, it has none.
- */
-async function waysOn(): Promise<CategoryCardView[]> {
-  try {
-    return await categoryTiles([])
-  } catch {
-    return []
-  }
-}
-
+/** A 404 with the shop's top categories as the way on (adr/0046 Ek 2026-11-05). */
 export default async function NotFound() {
   return <theme.NotFoundPage t={t} view={{ categories: await waysOn() }} />
 }

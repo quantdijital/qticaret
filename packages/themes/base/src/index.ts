@@ -15,7 +15,7 @@ import { HomePage } from "./HomePage"
 import { LegalPage } from "./LegalPage"
 import { Layout } from "./Layout"
 import { ListingPage } from "./ListingPage"
-import { NotFoundPage } from "./NotFoundPage"
+import { GonePage, NotFoundPage } from "./NotFoundPage"
 import { OrderPage } from "./OrderPage"
 import { PaymentFramePage } from "./PaymentFramePage"
 import { PaymentLinkPage } from "./PaymentLinkPage"
@@ -42,6 +42,7 @@ export const baseTheme: StorefrontTheme = {
   AuthPage,
   AccountPage,
   NotFoundPage,
+  GonePage,
   ConfirmPage,
   CookiePreferencesPage,
   ReviewsPage,

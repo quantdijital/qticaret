@@ -15,8 +15,9 @@ import { storefrontThemeName, themeEntries } from "./src/themes/choice"
  * - `public/` (the faces) must be copied next to the standalone server in
  *   the image (F16), as `.next/static` is.
  * - The theme is chosen here, once per build (adr/0057): `STOREFRONT_THEME`
- *   names it (unset: `base`) and two aliases point at its entry under
- *   `src/themes/`, its pages and its stylesheet.
+ *   names it (unset: `base`) and three aliases point at its entries under
+ *   `src/themes/`: its pages, its stylesheet and its error page (a client
+ *   component, adr/0046 Ek 2026-11-05).
  */
 const THEME = themeEntries(storefrontThemeName(process.env["STOREFRONT_THEME"]))
 
@@ -52,6 +53,7 @@ const config: NextConfig = {
     resolveAlias: {
       "@qticaret/storefront-theme": THEME.pages,
       "@qticaret/storefront-theme-styles": THEME.styles,
+      "@qticaret/storefront-theme-error": THEME.error,
     },
   },
   // Product images come as ready-made derivatives (adr/0016); Next does not
