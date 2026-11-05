@@ -52,7 +52,7 @@ const CATALOG: ProductCatalog = {
   is_gift_card: false,
   addons: [ENGRAVING, CASE],
   description_doc: null,
-  summary: [],
+  summary_doc: null,
   successor: null,
   categories: [],
   variants: [],

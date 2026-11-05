@@ -2866,6 +2866,7 @@
     },
     "errors": {
       "title": "Ürün adı en az 2 karakter olmalı.",
+      "summaryTooLong": "Kısa açıklama en çok {{max}} karakter olabilir.",
       "handle": "Adres yalnızca küçük harf, rakam ve tire içerebilir.",
       "price": "Sıfırdan büyük bir fiyat girin.",
       "stock": "Stok 0 ya da daha büyük bir tam sayı olmalı.",
@@ -2948,6 +2949,7 @@
       "urlHint": "Addan otomatik oluşur. Değiştirmeniz gerekmez.",
       "descriptionLabel": "Açıklama",
       "descriptionPlaceholder": "Ürünü kim, ne için kullanır? Malzemesi, ölçüleri, bakımı…",
+      "shortDescriptionHint": "İsteğe bağlı. Ürün adının altında, fiyatın üstünde yazdığınız gibi görünür.",
       "words_one": "{{count}} kelime. Arama motorları için en az {{suggested}} kelime önerilir.",
       "words_other": "{{count}} kelime. Arama motorları için en az {{suggested}} kelime önerilir.",
       "organize": "Düzen",
@@ -3032,24 +3034,6 @@
       "defaultsFailed": "Mağaza ayarları okunamadı. Biraz sonra tekrar deneyin.",
       "kindHint": "Dijital ürün ve hizmette kargo adımı atlanır."
     },
-    "summary": {
-      "label": "Öne çıkan özellikler",
-      "hint": "Ürün adının altında, fiyatın üstünde madde madde görünür. En fazla 5 kısa satır; isteğe bağlı.",
-      "count": "{{count}}/{{max}}",
-      "chars": "{{count}}/{{max}}",
-      "line": "{{n}}. madde",
-      "add": "Madde ekle",
-      "remove": "{{n}}. maddeyi kaldır",
-      "up": "{{n}}. maddeyi yukarı taşı",
-      "down": "{{n}}. maddeyi aşağı taşı",
-      "placeholders": [
-        "Örn. Malzeme ve ölçü bilgisi",
-        "Örn. Öne çıkan bir özellik",
-        "Örn. Kullanım alanı",
-        "Örn. 2 yıl garanti",
-        "Örn. Kutu içeriği"
-      ]
-    },
     "detail": {
       "title": "Ürün",
       "general": "Genel bilgiler",
@@ -3086,6 +3070,9 @@
       },
       "description": "Açıklama",
       "descriptionHint": "Başlık, liste, alıntı ve tabloyla yazın. Arama motorları için en az {{suggested}} kelime önerilir.",
+      "shortDescription": "Kısa açıklama",
+      "shortDescriptionHint": "Ürün adının altında, fiyatın üstünde yazdığınız gibi görünür. İsteğe bağlı, en çok 1.500 karakter. SEO açıklaması yazılmamışsa arama sonucundaki açıklama da buradan alınır.",
+      "shortDescriptionPlaceholder": "Örn. Ürünü birkaç cümleyle tanıtın: malzeme, ölçü, kullanım.",
       "organize": "Kategori, marka ve KDV"
     },
     "sections": {
@@ -5481,9 +5468,9 @@
           "how": "Bağlantıları https ile başlayacak şekilde değiştirin."
         },
         "CONT-09": {
-          "title": "Kısa açıklama (öne çıkan özellikler) boş.",
-          "why": "Maddeler ürün adının altında, fiyatın üstünde görünür; alıcı ürünü bir bakışta tanır. SEO açıklaması yazılmamışsa arama sonucundaki açıklama da bunlardan oluşur.",
-          "how": "Genel bilgiler kartına ürünü anlatan 3–5 kısa madde yazın."
+          "title": "Kısa açıklama boş.",
+          "why": "Kısa açıklama ürün adının altında, fiyatın üstünde görünür; alıcı ürünü bir bakışta tanır. SEO açıklaması yazılmamışsa arama sonucundaki açıklama da buradan alınır.",
+          "how": "Kısa açıklama kartına ürünü birkaç cümleyle tanıtan bir metin yazın."
         },
         "IMG-01": {
           "title": "{{count}} görsel var; en az {{target}} önerilir.",
@@ -6235,6 +6222,7 @@
       "placeholder": "Yazmaya başlayın…",
       "words_one": "{{words}} kelime",
       "words_other": "{{words}} kelime",
+      "chars": "{{count}} / {{max}} karakter",
       "blocks": {
         "paragraph": "Paragraf",
         "h2": "Başlık 2",
@@ -6265,6 +6253,8 @@
         "hint": "Mağazadaki bir sayfanın yolunu (/kategori/kupa) ya da http(s) ile başlayan bir adres yazın.",
         "address": "Adres",
         "invalid": "Geçerli bir yol ya da http(s) adresi yazın.",
+        "invalidShort": "Geçerli bir yol ya da https adresi yazın.",
+        "hintShort": "Mağazadaki bir sayfanın yolunu (/kategori/kupa) ya da https ile başlayan bir adres yazın.",
         "apply": "Uygula",
         "remove": "Bağlantıyı kaldır"
       },

@@ -42,8 +42,8 @@ export const PRODUCT_TARGETS: Readonly<Record<string, string>> = {
   edit_robots: PRODUCT_SECTIONS.seo,
   edit_body: "product-description",
   edit_handle: "product-general",
-  // The short description's lines, in the same card
-  edit_summary: "product-general",
+  // The short description, its own card under the long one
+  edit_summary: "product-short-description",
   add_images: "product-media",
   add_alt_text: MEDIA_ALT_TARGET,
   // The first variant without a price opens (`VariantsCard`)

@@ -31,6 +31,8 @@ import { ToolButton } from "./tool-button"
 
 const BLOCKS = ["paragraph", "h2", "h3", "h4"] as const
 type BlockKind = (typeof BLOCKS)[number]
+// A short text's (ADR-0055 Ek 2026-11-06): no h2
+const SHORT_BLOCKS: readonly BlockKind[] = ["paragraph", "h3", "h4"]
 
 const blockOf = (editor: Editor): BlockKind =>
   editor.isActive("heading", { level: 2 })
@@ -61,6 +63,8 @@ interface ToolbarProps {
   tokens?: boolean
   /** Tokens the menu offers besides the shop's details. */
   extraTokens?: readonly ExtraToken[] | undefined
+  /** A short text (a product's short description): h3–h4, no quotes or tables. */
+  short?: boolean
 }
 
 /** The editor's actions, each one the server allows (adr/0019). */
@@ -72,7 +76,9 @@ export function Toolbar({
   media = true,
   tokens = false,
   extraTokens,
+  short = false,
 }: ToolbarProps) {
+  const blocks = short ? SHORT_BLOCKS : BLOCKS
   const { t } = useTranslation()
   const state = useEditorState({
     editor,
@@ -99,7 +105,7 @@ export function Toolbar({
         value={state.block}
         onValueChange={(value) => {
           // Radix calls with "" while the value has no item yet
-          if (BLOCKS.includes(value as BlockKind)) {
+          if (blocks.includes(value as BlockKind)) {
             setBlock(editor, value as BlockKind)
           }
         }}
@@ -108,7 +114,7 @@ export function Toolbar({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {BLOCKS.map((block) => (
+          {blocks.map((block) => (
             <SelectItem key={block} value={block}>
               {t(`content.editor.blocks.${block}`)}
             </SelectItem>
@@ -142,20 +148,24 @@ export function Toolbar({
         active={state.orderedList}
         onClick={run((c) => c.toggleOrderedList())}
       />
-      <ToolButton
-        icon={Quote}
-        label={label("quote")}
-        active={state.quote}
-        onClick={run((c) => c.toggleBlockquote())}
-      />
-      <Separator orientation="vertical" className="mx-1 h-5" />
-      <ToolButton
-        icon={Table2}
-        label={label("table")}
-        active={state.table}
-        onClick={run((c) => c.insertTable({ rows: 3, cols: 3, withHeaderRow: true }))}
-      />
-      {media ? (
+      {short ? null : (
+        <>
+          <ToolButton
+            icon={Quote}
+            label={label("quote")}
+            active={state.quote}
+            onClick={run((c) => c.toggleBlockquote())}
+          />
+          <Separator orientation="vertical" className="mx-1 h-5" />
+          <ToolButton
+            icon={Table2}
+            label={label("table")}
+            active={state.table}
+            onClick={run((c) => c.insertTable({ rows: 3, cols: 3, withHeaderRow: true }))}
+          />
+        </>
+      )}
+      {media && !short ? (
         <>
           <ToolButton
             icon={ImagePlus}

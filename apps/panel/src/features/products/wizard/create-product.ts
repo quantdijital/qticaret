@@ -3,7 +3,8 @@ import { normalizeGtin } from "@/lib/gtin"
 import { sdk } from "@/lib/sdk"
 import { parseMeasureInput, parseMoneyInput } from "@/lib/money-input"
 import type { ShopDefaults } from "@/features/products/api/lookups"
-import { summaryOf } from "@/features/products/summary-lines"
+import type { JSONContent } from "@tiptap/react"
+import { hasSummaryText } from "@/features/products/summary-doc"
 import { DEFAULT_VARIANT_KEY } from "./schema"
 import type { WizardValues } from "./schema"
 
@@ -69,16 +70,15 @@ function productBody({ values, publish, defaults, defaultOption }: CreateInput) 
 
 /**
  * What the new product's catalog fields take, in one save: a digital or
- * service kind (F3.2; before it is published) and the short description's
- * lines. Null when there is neither.
+ * service kind (F3.2; before it is published) and the short description as
+ * written (ADR-0055 Ek 2026-11-06). Null when there is neither.
  */
 export function catalogBody(
-  values: Pick<WizardValues, "kind" | "summary">
-): { kind?: WizardValues["kind"]; summary?: string[] } | null {
-  const lines = summaryOf(values.summary)
+  values: Pick<WizardValues, "kind" | "summary_doc">
+): { kind?: WizardValues["kind"]; summary_doc?: JSONContent } | null {
   const body = {
     ...(values.kind === "physical" ? {} : { kind: values.kind }),
-    ...(lines.length > 0 ? { summary: lines } : {}),
+    ...(hasSummaryText(values.summary_doc) ? { summary_doc: values.summary_doc } : {}),
   }
   return Object.keys(body).length > 0 ? body : null
 }

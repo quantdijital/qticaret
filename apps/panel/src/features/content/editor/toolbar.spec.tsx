@@ -8,14 +8,15 @@ import { Toolbar } from "./toolbar"
 
 const editors: Editor[] = []
 
-function renderToolbar(media: boolean) {
-  const editor = new Editor({ extensions: contentExtensions("", { media }) })
+function renderToolbar(media: boolean, short = false) {
+  const editor = new Editor({ extensions: contentExtensions("", { media, short }) })
   editors.push(editor)
   render(
     <TooltipProvider>
       <Toolbar
         editor={editor}
         media={media}
+        short={short}
         onLink={() => undefined}
         onImage={() => undefined}
         onCard={() => undefined}
@@ -55,5 +56,24 @@ describe("Toolbar: the tools a text takes", () => {
     expect(editor.schema.nodes["image"]).toBeUndefined()
     expect(editor.schema.nodes["productCard"]).toBeUndefined()
     expect(editor.schema.nodes["table"]).toBeDefined()
+  })
+
+  // ADR-0055 Ek 2026-11-06: a product's short description, above the price
+  it("keeps a short text to paragraphs, h3–h4, lists, bold, italic and links", () => {
+    const editor = renderToolbar(false, true)
+    for (const tool of ["Kalın", "İtalik", "Bağlantı", "Madde listesi", "Numaralı liste"]) {
+      expect(has(tool)).toBe(true)
+    }
+    for (const tool of ["Alıntı", "Tablo ekle", "Görsel ekle", "Ürün kartı ekle"]) {
+      expect(has(tool)).toBe(false)
+    }
+    expect(editor.schema.nodes["blockquote"]).toBeUndefined()
+    expect(editor.schema.nodes["table"]).toBeUndefined()
+    expect(editor.schema.nodes["hardBreak"]).toBeDefined()
+    // A pasted h2 comes in as a paragraph; links to the shop or https only
+    editor.commands.setContent("<h2>Başlık</h2><h3>Alt</h3><p><a href='http://a.com'>eski</a></p>")
+    const json = editor.getJSON()
+    expect(json.content.map((node) => node.type)).toEqual(["paragraph", "heading", "paragraph"])
+    expect(JSON.stringify(json)).not.toContain("http://a.com")
   })
 })

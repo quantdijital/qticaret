@@ -8,6 +8,12 @@ const SITE_PATH = /^\/(?!\/)[^\s\\]*$/
 // eslint-disable-next-line no-control-regex
 const CONTROL = /[\u0000-\u001f\u007f]/
 
+/** A product's short description takes only a path on the shop or an https address (ADR-0055 Ek 2026-11-06). */
+export function isShortHref(href: string): boolean {
+  const value = href.trim()
+  return isSafeHref(value) && (value.startsWith("/") || /^https:\/\//i.test(value))
+}
+
 export function isSafeHref(href: string): boolean {
   const value = href.trim()
   return (

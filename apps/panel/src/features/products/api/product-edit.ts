@@ -32,10 +32,11 @@ export interface ProductCatalog {
    */
   description_doc: JSONContent | null
   /**
-   * The short description as up to five short lines, shown under the
-   * product's name above the price (the owner, 2026-11-05); empty: none.
+   * The short description as the shop wrote it, shown under the product's
+   * name above the price (ADR-0055 Ek 2026-11-06): paragraphs, h3–h4,
+   * lists, bold, italic, links; null while it has none.
    */
-  summary: string[]
+  summary_doc: JSONContent | null
   successor: { id: string; title: string; handle: string } | null
   categories: { id: string; name: string }[]
   variants: {
@@ -71,8 +72,8 @@ export function useSaveCatalog(id: string) {
       addons?: AddonInput[] | null
       /** The description as a document; the server writes its plain text too (ADR-0055). */
       description_doc?: JSONContent | null
-      /** The short description's lines (at most 5 of 90 characters); null or none clears it. */
-      summary?: string[] | null
+      /** The short description as a document (1,500 characters at most); null or an empty one clears it. */
+      summary_doc?: JSONContent | null
     }) => sdk.client.fetch<ProductCatalog>(catalogUrl(id), { method: "POST", body }),
     onSuccess: async (catalog) => {
       client.setQueryData(["products", "catalog", id], catalog)

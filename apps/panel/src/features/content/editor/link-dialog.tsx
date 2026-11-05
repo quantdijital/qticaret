@@ -13,19 +13,29 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import { isSafeHref } from "./href"
+import { isSafeHref, isShortHref } from "./href"
 
 // Mounted on each opening: it starts from the link under the cursor
-function LinkForm({ editor, onDone }: { editor: Editor; onDone: () => void }) {
+function LinkForm({
+  editor,
+  short,
+  onDone,
+}: {
+  editor: Editor
+  short: boolean
+  onDone: () => void
+}) {
   const { t } = useTranslation()
   const current = String(editor.getAttributes("link")["href"] ?? "")
   const [href, setHref] = useState(current)
-  const valid = isSafeHref(href)
+  const valid = short ? isShortHref(href) : isSafeHref(href)
   return (
     <DialogContent size="sm">
       <DialogHeader>
         <DialogTitle>{t("content.editor.link.title")}</DialogTitle>
-        <DialogDescription>{t("content.editor.link.hint")}</DialogDescription>
+        <DialogDescription>
+          {t(short ? "content.editor.link.hintShort" : "content.editor.link.hint")}
+        </DialogDescription>
       </DialogHeader>
       <form
         className="flex flex-col gap-6"
@@ -41,7 +51,11 @@ function LinkForm({ editor, onDone }: { editor: Editor; onDone: () => void }) {
           <Field
             label={t("content.editor.link.address")}
             htmlFor="content-link"
-            error={href.trim() && !valid ? t("content.editor.link.invalid") : undefined}
+            error={
+              href.trim() && !valid
+                ? t(short ? "content.editor.link.invalidShort" : "content.editor.link.invalid")
+                : undefined
+            }
           >
             <Input
               id="content-link"
@@ -79,21 +93,28 @@ function LinkForm({ editor, onDone }: { editor: Editor; onDone: () => void }) {
   )
 }
 
-/** Links the selected text to a page of the shop (`/kategori/kupa`) or an http(s) address. */
+/**
+ * Links the selected text to a page of the shop (`/kategori/kupa`) or an
+ * http(s) address; in a `short` text (a product's short description) an
+ * https one only.
+ */
 export function LinkDialog({
   editor,
   open,
   onOpenChange,
+  short = false,
 }: {
   editor: Editor
   open: boolean
   onOpenChange: (open: boolean) => void
+  short?: boolean
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       {open ? (
         <LinkForm
           editor={editor}
+          short={short}
           onDone={() => {
             onOpenChange(false)
           }}

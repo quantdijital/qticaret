@@ -2866,6 +2866,7 @@
     },
     "errors": {
       "title": "The product name needs at least 2 characters.",
+      "summaryTooLong": "A short description has {{max}} characters at most.",
       "handle": "The address can only hold lowercase letters, digits and hyphens.",
       "price": "Enter a price above zero.",
       "stock": "Stock must be a whole number, 0 or more.",
@@ -2948,6 +2949,7 @@
       "urlHint": "Made from the name. No need to change it.",
       "descriptionLabel": "Description",
       "descriptionPlaceholder": "Who uses it, and for what? Material, size, care…",
+      "shortDescriptionHint": "Optional. Shows as written under the product name, above the price.",
       "words_one": "{{count}} word. Search engines favour at least {{suggested}}.",
       "words_other": "{{count}} words. Search engines favour at least {{suggested}}.",
       "organize": "Organisation",
@@ -3032,24 +3034,6 @@
       "defaultsFailed": "The shop's settings could not be read. Try again shortly.",
       "kindHint": "Digital products and services skip the shipping step."
     },
-    "summary": {
-      "label": "Key features",
-      "hint": "Shown as a list under the product's name, above the price. Up to 5 short lines; optional.",
-      "count": "{{count}}/{{max}}",
-      "chars": "{{count}}/{{max}}",
-      "line": "Line {{n}}",
-      "add": "Add a line",
-      "remove": "Remove line {{n}}",
-      "up": "Move line {{n}} up",
-      "down": "Move line {{n}} down",
-      "placeholders": [
-        "E.g. Material and size",
-        "E.g. A standout feature",
-        "E.g. What it is used for",
-        "E.g. 2-year warranty",
-        "E.g. What is in the box"
-      ]
-    },
     "detail": {
       "title": "Product",
       "general": "General",
@@ -3086,6 +3070,9 @@
       },
       "description": "Description",
       "descriptionHint": "Write with headings, lists, quotes and tables. Search engines favour at least {{suggested}} words.",
+      "shortDescription": "Short description",
+      "shortDescriptionHint": "Shows as written under the product name, above the price. Optional, at most 1,500 characters. Without an SEO description of its own, the search result’s description is taken from it too.",
+      "shortDescriptionPlaceholder": "E.g. Introduce the product in a few sentences: material, size, use.",
       "organize": "Categories, brand and VAT"
     },
     "sections": {
@@ -5481,9 +5468,9 @@
           "how": "Change the links to start with https."
         },
         "CONT-09": {
-          "title": "The short description (key features) is empty.",
-          "why": "The lines show under the product's name, above the price, so a shopper knows it at a glance. Without an SEO description of its own, the search result's description is made of them too.",
-          "how": "Write 3–5 short lines about the product in the General card."
+          "title": "The short description is empty.",
+          "why": "The short description shows under the product name, above the price, so a shopper knows it at a glance. Without an SEO description of its own, the search result’s description is taken from it too.",
+          "how": "Introduce the product in a few sentences in the Short description card."
         },
         "IMG-01": {
           "title": "{{count}} images; at least {{target}} are advised.",
@@ -6235,6 +6222,7 @@
       "placeholder": "Start writing…",
       "words_one": "{{words}} word",
       "words_other": "{{words}} words",
+      "chars": "{{count}} / {{max}} characters",
       "blocks": {
         "paragraph": "Paragraph",
         "h2": "Heading 2",
@@ -6265,6 +6253,8 @@
         "hint": "Enter the path of a page on the shop (/kategori/kupa) or an address starting with http(s).",
         "address": "Address",
         "invalid": "Enter a valid path or http(s) address.",
+        "invalidShort": "Enter a valid path or https address.",
+        "hintShort": "Enter the path of a page on the shop (/kategori/kupa) or an address starting with https.",
         "apply": "Apply",
         "remove": "Remove link"
       },

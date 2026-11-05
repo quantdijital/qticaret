@@ -22,6 +22,12 @@ interface DocumentCardProps {
   media?: boolean
   /** The shop's details menu; only for a text the server fills them in (pages, posts, filter pages). */
   shopTokens?: boolean
+  /** A short text: a product's short description (ADR-0055 Ek 2026-11-06), see `RichEditor`. */
+  short?: boolean
+  /** Characters of text the server takes, counted below the editor. */
+  maxChars?: number
+  /** The empty editor's hint. */
+  placeholder?: string
 }
 
 /**
@@ -36,6 +42,9 @@ export function DocumentCard({
   save,
   media = true,
   shopTokens = true,
+  short = false,
+  maxChars,
+  placeholder,
 }: DocumentCardProps) {
   const { t } = useTranslation()
   const [draft, setDraft] = useState<JSONContent | null>(null)
@@ -72,6 +81,9 @@ export function DocumentCard({
           label={title}
           media={media}
           shopTokens={shopTokens}
+          short={short}
+          maxChars={maxChars}
+          placeholder={placeholder}
         />
       </div>
     </CardForm>

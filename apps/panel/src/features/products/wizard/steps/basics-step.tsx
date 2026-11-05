@@ -1,6 +1,7 @@
 import { Pencil } from "lucide-react"
 import { useState } from "react"
 import { Controller, useFormContext, useWatch } from "react-hook-form"
+import type { FieldError } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
@@ -9,10 +10,12 @@ import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
 import { CategoryTree } from "@/features/products/components/category-tree"
-import { SummaryField } from "@/features/products/components/summary-field"
 import { VatSelect } from "@/features/products/components/vat-select"
+import { SUMMARY_TEXT_MAX } from "@/features/products/summary-doc"
 import { useProductPathPrefix } from "@/features/products/use-product-path"
+import { RichEditor } from "@/features/content/editor/rich-editor"
 import { useFeature } from "@/features/settings/api/features"
+import { formatCount } from "@/lib/format"
 import { toSlug } from "@/lib/slug"
 import { SUGGESTED_WORDS, wordCount } from "../readiness"
 import type { WizardValues } from "../schema"
@@ -130,9 +133,41 @@ function KindPicker() {
   )
 }
 
+/** The short description (optional) in the product page's editor, short (ADR-0055 Ek 2026-11-06). */
+function ShortDescriptionField() {
+  const { t } = useTranslation()
+  const { control, formState } = useFormContext<WizardValues>()
+  // The document as a whole: its own refinement, not a nested field's
+  const error = (formState.errors.summary_doc as FieldError | undefined)?.message
+  const label = t("products.detail.shortDescription")
+  return (
+    <Field
+      label={label}
+      hint={t("products.wizard.shortDescriptionHint")}
+      error={error ? t(error, { max: formatCount(SUMMARY_TEXT_MAX) }) : undefined}
+    >
+      <Controller
+        control={control}
+        name="summary_doc"
+        render={({ field }) => (
+          <RichEditor
+            value={field.value}
+            onChange={field.onChange}
+            label={label}
+            media={false}
+            short
+            maxChars={SUMMARY_TEXT_MAX}
+            placeholder={t("products.detail.shortDescriptionPlaceholder")}
+          />
+        )}
+      />
+    </Field>
+  )
+}
+
 /**
- * Step 1: what the product is called, its URL, its story, its key features
- * in a few lines (optional) and where it belongs.
+ * Step 1: what the product is called, its URL, its story, its short
+ * description (optional) and where it belongs.
  */
 export function BasicsStep() {
   const { t } = useTranslation()
@@ -170,11 +205,7 @@ export function BasicsStep() {
               {...register("description")}
             />
           </Field>
-          <Controller
-            control={control}
-            name="summary"
-            render={({ field }) => <SummaryField value={field.value} onChange={field.onChange} />}
-          />
+          <ShortDescriptionField />
         </div>
       </SectionCard>
       <SectionCard title={t("products.wizard.organize")} className="xl:col-span-4">

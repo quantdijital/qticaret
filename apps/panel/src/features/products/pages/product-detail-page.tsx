@@ -16,6 +16,7 @@ import { MediaCard } from "@/features/products/detail/media-card"
 import { ProductActions } from "@/features/products/detail/product-actions"
 import { ProductSections, ProductSideCards } from "@/features/products/detail/product-sections"
 import { PRODUCT_TARGETS } from "@/features/products/detail/sections"
+import { ProductShortDescriptionCard } from "@/features/products/detail/short-description-card"
 import { SummaryCard } from "@/features/products/detail/summary-card"
 import { VariantsCard } from "@/features/products/detail/variants-card"
 import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
@@ -100,6 +101,10 @@ export function ProductDetailPage() {
             </Anchor>
             <Anchor id="product-description">
               <ProductDescriptionCard product={product} />
+            </Anchor>
+            {/* ADR-0055 Ek 2026-11-06: under the long description, as WordPress has it */}
+            <Anchor id="product-short-description">
+              <ProductShortDescriptionCard product={product} />
             </Anchor>
             <ProductSections product={product} />
           </>

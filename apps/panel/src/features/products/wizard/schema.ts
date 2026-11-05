@@ -2,7 +2,8 @@ import { z } from "zod"
 import { gtinProblem } from "@/lib/gtin"
 import { parseMeasureInput, parseMoneyInput } from "@/lib/money-input"
 import { isValidSlug } from "@/lib/slug"
-import { SUMMARY_LIMITS } from "@/features/products/summary-lines"
+import type { JSONContent } from "@tiptap/react"
+import { EMPTY_SUMMARY, SUMMARY_TEXT_MAX, docTextLength } from "@/features/products/summary-doc"
 
 /**
  * The new-product form across its steps. Inputs stay text while typing
@@ -70,8 +71,12 @@ export const wizardSchema = z
       .trim()
       .refine((text) => text === "" || isValidSlug(text), { message: "products.errors.handle" }),
     description: z.string().max(20_000),
-    // The short description's rows as typed (optional); the editor keeps them within bounds
-    summary: z.array(z.string().max(SUMMARY_LIMITS.length)).max(SUMMARY_LIMITS.lines),
+    // The short description as written (optional; ADR-0055 Ek 2026-11-06), the server's cap
+    summary_doc: z
+      .custom<JSONContent>((value) => typeof value === "object" && value !== null)
+      .refine((doc) => docTextLength(doc) <= SUMMARY_TEXT_MAX, {
+        message: "products.errors.summaryTooLong",
+      }),
     category_ids: z.array(z.string()),
     type_id: z.string(),
     images: z.array(z.object({ id: z.string(), url: z.string() })).max(20),
@@ -118,7 +123,7 @@ export const defaultWizardValues = (): WizardValues => ({
   title: "",
   handle: "",
   description: "",
-  summary: [],
+  summary_doc: EMPTY_SUMMARY,
   category_ids: [],
   type_id: "",
   images: [],
@@ -137,7 +142,7 @@ export const defaultWizardValues = (): WizardValues => ({
 
 /** The fields each step checks before moving on. */
 export const STEP_FIELDS = {
-  basics: ["title", "handle", "description", "summary"],
+  basics: ["title", "handle", "description", "summary_doc"],
   media: ["images"],
   pricing: ["options", "variants"],
   shipping: ["weight", "length", "width", "height"],
