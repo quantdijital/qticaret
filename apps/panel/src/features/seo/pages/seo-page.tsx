@@ -11,6 +11,7 @@ import { ErrorState } from "@/components/patterns/states"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CatalogHealthCard } from "@/features/dashboard/components/catalog-health-card"
+import { insightsQuery } from "@/features/seo/api/insights"
 import { redirectCountsQuery } from "@/features/seo/api/redirects"
 import { AdvisorSummaryCard } from "@/features/seo/advisor/summary-card"
 import { AuditCard } from "@/features/seo/audit/audit-card"
@@ -128,6 +129,9 @@ function RedirectsCard({ className }: { className?: string }) {
 export function SeoOverviewPage() {
   const { t } = useTranslation()
   const seo = useQuery(sectionQuery<SeoSettings>("seo"))
+  const insights = useQuery(insightsQuery())
+  // No Search Console part until the platform opens Google (docs/06 principle 10)
+  const searchConsole = insights.data?.insights.search_console !== false
   const storeName = useStoreName() ?? t("app.name")
   return (
     <div className="flex flex-col gap-[var(--grid-gap)]">
@@ -175,8 +179,8 @@ export function SeoOverviewPage() {
           <SiteSearchCard />
         </PageColumn>
         <SitemapCard className={spanOf(6)} />
-        <SearchConsoleCard className={spanOf(7)} />
-        <WebVitalsCard className={spanOf(5)} />
+        {searchConsole ? <SearchConsoleCard className={spanOf(7)} /> : null}
+        <WebVitalsCard className={spanOf(searchConsole ? 5 : 12)} />
         <AdvisorSummaryCard className={spanOf(12)} />
         <AuditCard className={spanOf(12)} />
       </PageGrid>

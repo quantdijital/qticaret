@@ -8,7 +8,8 @@ import type { ContentStatus } from "./content"
 export const LANDING_PAGE_SIZE = 25
 
 // How much of its own text a page has (docs/14 L-UNIQ-01): under 40% the advisor warns, under 30%
-// it shows red. Neither stops it going live: that is the shop's call (the owner, 2026-11-04)
+// it shows red and, live, is served noindex until it is more original (adr/0019 Ek 2026-11-05).
+// Neither stops it going live: that is the shop's call (the owner, 2026-11-04)
 export const ORIGINALITY = { warn: 40, low: 30 } as const
 
 export interface LandingFacet {

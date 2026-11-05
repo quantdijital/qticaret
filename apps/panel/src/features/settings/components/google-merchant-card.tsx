@@ -42,6 +42,8 @@ function useCallbackOutcome() {
  * Settings > Marketing: the shop's Google account, connected through
  * Google's own consent screen, and its Merchant Center account, where the
  * products go every two hours through Merchant API (F10 M13, adr/0038 §5).
+ * Not shown until the platform has opened Google: the shop can do nothing
+ * with it before (docs/06 principle 10).
  */
 export function GoogleMerchantCard() {
   const { t } = useTranslation()
@@ -55,12 +57,13 @@ export function GoogleMerchantCard() {
   const failed = (failure: unknown) => toast.error(errorText(t, failure))
   const typed = merchantId ?? google?.merchant_id ?? ""
   const sync = google?.last_sync
+  if (google?.configured === false) {
+    return null
+  }
   return (
     <SectionCard title={t(`${G}.title`)} description={t(`${G}.description`)}>
       {!google ? (
         <Skeleton className="h-24" />
-      ) : !google.configured ? (
-        <p className="text-[13px] text-muted-foreground">{t(`${G}.notConfigured`)}</p>
       ) : !google.connected ? (
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-[13px] text-muted-foreground">{t(`${G}.notConnected`)}</p>

@@ -12,7 +12,8 @@ import { cn } from "@/lib/utils"
 /**
  * What decides whether a landing page may stand (docs/14 §3.7): how much of
  * its text is its own, how many products it lists, and whether a person
- * read it through.
+ * read it through. A live page under 30% says in one line that it is kept
+ * out of search until it is more original (adr/0019 Ek 2026-11-05).
  */
 export function LandingStandingCard({ landing }: { landing: LandingDetail }) {
   const { t } = useTranslation()
@@ -44,6 +45,10 @@ export function LandingStandingCard({ landing }: { landing: LandingDetail }) {
           <p className="text-xs text-muted-foreground">
             {t("content.landing.originalityHint", ORIGINALITY)}
           </p>
+          {/* Live under the line: served noindex by the server until it is more original */}
+          {landing.status === "published" && value < ORIGINALITY.low ? (
+            <p className="text-[13px] text-warning-text">{t("content.landing.keptOut")}</p>
+          ) : null}
         </div>
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">{t("content.landing.products")}</span>

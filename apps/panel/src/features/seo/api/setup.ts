@@ -11,8 +11,11 @@ export type SeoSetupItem =
   | "merchant"
   | "indexnow"
 
-/** Why an open item cannot be done from the panel yet. */
-export type SeoSetupBlock = "google_platform" | "google_account"
+/**
+ * Why an open item waits on another step. Google's items are not listed
+ * until the platform has opened Google (docs/06 principle 10).
+ */
+export type SeoSetupBlock = "google_account"
 
 export interface SeoSetupEntry {
   key: SeoSetupItem

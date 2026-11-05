@@ -28,7 +28,8 @@ const C = "settings.seo.searchConsole"
  * Settings > SEO: the shop's Search Console property (F10.11), read with
  * the Google account connected under Settings > Marketing. Every night the
  * sitemap is submitted, the pages' figures read, pages inspected; the SEO
- * page and the audit show them.
+ * page and the audit show them. Not shown until the platform has opened
+ * Google (docs/06 principle 10).
  */
 export function SearchConsoleCard() {
   const { t } = useTranslation()
@@ -40,11 +41,14 @@ export function SearchConsoleCard() {
   const [chosen, setChosen] = useState<string | null>(null)
   const [leaving, setLeaving] = useState(false)
   const site = chosen ?? google?.search_console.site ?? ""
+  if (google?.configured === false) {
+    return null
+  }
   return (
     <SectionCard title={t(`${C}.title`)} description={t(`${C}.description`)}>
       {!google ? (
         <Skeleton className="h-16" />
-      ) : !google.configured || !google.connected ? (
+      ) : !google.connected ? (
         <p className="text-[13px] text-muted-foreground">
           {t(`${C}.notConnected`)}{" "}
           <Link to="/settings/marketing" className="underline underline-offset-2">

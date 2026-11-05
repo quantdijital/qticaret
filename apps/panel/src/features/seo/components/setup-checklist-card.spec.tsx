@@ -53,7 +53,7 @@ describe("SetupChecklistCard", () => {
       entry("robots", true),
       entry("share_image", false),
       entry("search_console", false, "google_account"),
-      entry("merchant", false, "google_platform"),
+      entry("merchant", false, "google_account"),
       entry("indexnow", true),
     ])
 
@@ -61,11 +61,16 @@ describe("SetupChecklistCard", () => {
     expect(screen.queryByText("Mağaza alan adı")).toBeNull()
     expect(screen.getByText("Paylaşım görseli")).toBeInTheDocument()
     expect(screen.getByText("Mağaza künyesi")).toBeInTheDocument()
-    expect(screen.getByText(/Önce Google hesabınızı bağlayın/)).toBeInTheDocument()
-    // The identity, the share image and Search Console have a way in; the platform's Google does not
+    expect(screen.getAllByText(/Önce Google hesabınızı bağlayın/)).toHaveLength(2)
+    // Every open item has its way in: Google's are listed only once the platform has opened it
     expect(
       screen.getAllByRole("link", { name: /Tamamla/ }).map((link) => link.getAttribute("href"))
-    ).toEqual(["/settings/store?part=legal", "/settings/seo", "/settings/marketing"])
+    ).toEqual([
+      "/settings/store?part=legal",
+      "/settings/seo",
+      "/settings/marketing",
+      "/settings/marketing",
+    ])
   })
 
   it("shows staff who cannot change settings what is missing, not the way in", async () => {

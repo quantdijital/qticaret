@@ -786,8 +786,7 @@
         "catalog.import": "Product import",
         "catalog.export": "Product export",
         "catalog.bulk_edit": "Bulk edit",
-        "customer.data_export": "Customer data export",
-        "tr_address.sync": "Address data update"
+        "customer.data_export": "Customer data export"
       }
     },
     "audit": {
@@ -921,8 +920,7 @@
         "payment": "Payment",
         "refund": "Refund",
         "legal_document": "Legal text",
-        "vat_rate": "VAT rate",
-        "tr_address": "Address data"
+        "vat_rate": "VAT rate"
       }
     },
     "locations": {
@@ -1440,7 +1438,6 @@
         "unverified": "Saved, but the provider could not be asked; test the connection.",
         "rejected": "The provider refused the stored details; save the account again.",
         "unreadable": "The stored details cannot be read; enter the account again.",
-        "platform_not_ready": "The platform's Google connection is not open yet.",
         "search_console_not_granted": "Search Console access was not granted; connect Google again.",
         "search_console_no_site": "No Search Console site is chosen.",
         "merchant_not_chosen": "No Merchant Center account is chosen.",
@@ -1816,7 +1813,6 @@
       "google": {
         "title": "Google Merchant Center",
         "description": "Your products are sent to your Merchant Center account through Merchant API so they show on Google Shopping: only what changed, every two hours. It can replace the feed address or run beside it.",
-        "notConfigured": "The Google connection is not open on the platform yet; once it is, you can connect here.",
         "notConnected": "Connect with the Google account that reaches your Merchant Center. You allow it on Google's own screen; your password is not shared with us.",
         "connect": "Connect Google account",
         "connectedAs": "Connected Google account:",
@@ -2366,7 +2362,7 @@
       "parasut": {
         "title": "Paraşüt connection",
         "description": "Your Paraşüt password never comes here; you paste the one-time code Paraşüt gives.",
-        "unavailable": "Paraşüt cannot be connected on this server yet. Ask the platform's administrator.",
+        "unavailable": "Paraşüt is off on this server for now; invoices cannot be issued in Paraşüt. Until it is back, you can choose \"My own program\".",
         "status": {
           "connected": "Connected",
           "broken": "Connection lost"
@@ -5638,7 +5634,6 @@
       "progress": "{{done}}/{{total}} done",
       "go": "Finish",
       "blocked": {
-        "google_platform": "Google is not enabled in this environment yet; the platform team will enable it.",
         "google_account": "Connect your Google account first; this step is then finished on the same screen."
       },
       "items": {
@@ -6075,7 +6070,8 @@
       "standingHint": "Programmatic pages must be worth reading on their own.",
       "originality": "Originality",
       "percent": "{{value}}%",
-      "originalityHint": "The share of the text not found on other filter pages. Under {{warn}}% search engines may take the page for a copy of the others; you can still publish it.",
+      "originalityHint": "The share of the text not found on other filter pages. Under {{warn}}% search engines may take the page for a copy of the others; under {{low}}% it stays live but is kept out of search engines.",
+      "keptOut": "The page is live, but kept out of search engines until it is more original.",
       "products": "Products listed",
       "reviewed": "Reviewed by a person",
       "reviewedHint": "A person read the page through and approved it. At least 5% of newly published pages should be reviewed."

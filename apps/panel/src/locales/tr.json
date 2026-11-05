@@ -786,8 +786,7 @@
         "catalog.import": "Ürün içe aktarma",
         "catalog.export": "Ürün dışa aktarma",
         "catalog.bulk_edit": "Toplu düzenleme",
-        "customer.data_export": "Müşteri verisi dışa aktarımı",
-        "tr_address.sync": "Adres verisi güncelleme"
+        "customer.data_export": "Müşteri verisi dışa aktarımı"
       }
     },
     "audit": {
@@ -921,8 +920,7 @@
         "payment": "Ödeme",
         "refund": "Para iadesi",
         "legal_document": "Yasal metin",
-        "vat_rate": "KDV oranı",
-        "tr_address": "Adres verisi"
+        "vat_rate": "KDV oranı"
       }
     },
     "locations": {
@@ -1440,7 +1438,6 @@
         "unverified": "Kaydedildi ama sağlayıcıya sorulamadı; bağlantıyı test edin.",
         "rejected": "Sağlayıcı kayıtlı bilgileri reddetti; hesabı yeniden kaydedin.",
         "unreadable": "Kayıtlı bilgiler okunamıyor; hesabı yeniden girin.",
-        "platform_not_ready": "Platformun Google bağlantısı henüz açılmadı.",
         "search_console_not_granted": "Search Console izni verilmemiş; Google'ı yeniden bağlayın.",
         "search_console_no_site": "Search Console'da site seçilmemiş.",
         "merchant_not_chosen": "Merchant Center hesabı seçilmemiş.",
@@ -1816,7 +1813,6 @@
       "google": {
         "title": "Google Merchant Center",
         "description": "Ürünleriniz Google Alışveriş'te görünsün diye Merchant API ile Merchant Center hesabınıza gönderilir: yalnızca değişenler, iki saatte bir. Feed adresi yerine ya da yanında kullanılabilir.",
-        "notConfigured": "Google bağlantısı platform tarafında henüz açılmadı; açılınca buradan bağlayabilirsiniz.",
         "notConnected": "Merchant Center hesabınıza erişimi olan Google hesabıyla bağlanın. Google'ın kendi ekranında izin verirsiniz; şifreniz bizimle paylaşılmaz.",
         "connect": "Google hesabını bağla",
         "connectedAs": "Bağlı Google hesabı:",
@@ -2366,7 +2362,7 @@
       "parasut": {
         "title": "Paraşüt bağlantısı",
         "description": "Paraşüt şifreniz buraya girilmez; Paraşüt'ün verdiği tek kullanımlık kodu yapıştırırsınız.",
-        "unavailable": "Paraşüt bağlantısı bu sunucuda henüz açılmadı. Platform yöneticisine başvurun.",
+        "unavailable": "Paraşüt bu sunucuda şu an kapalı; faturalar Paraşüt'te kesilemiyor. Açılana kadar \"Kendi programım\"ı seçebilirsiniz.",
         "status": {
           "connected": "Bağlı",
           "broken": "Bağlantı koptu"
@@ -5638,7 +5634,6 @@
       "progress": "{{done}}/{{total}} tamam",
       "go": "Tamamla",
       "blocked": {
-        "google_platform": "Google bağlantısı bu ortamda henüz açılmadı; platform ekibi açacak.",
         "google_account": "Önce Google hesabınızı bağlayın; ardından bu adım aynı ekrandan tamamlanır."
       },
       "items": {
@@ -6075,7 +6070,8 @@
       "standingHint": "Programatik sayfaların kendi başına değerli olması gerekir.",
       "originality": "Özgünlük",
       "percent": "%{{value}}",
-      "originalityHint": "Metnin diğer filtre sayfalarında geçmeyen kısmı. %{{warn}} altında arama motorları sayfayı diğerlerinin kopyası sayabilir; yine de yayına alabilirsiniz.",
+      "originalityHint": "Metnin diğer filtre sayfalarında geçmeyen kısmı. %{{warn}} altında arama motorları sayfayı diğerlerinin kopyası sayabilir; %{{low}} altında sayfa yayında kalır ama arama motorlarına kapalı tutulur.",
+      "keptOut": "Sayfa yayında; daha özgün olana kadar arama motorlarına kapalı tutuluyor.",
       "products": "Listelenen ürün",
       "reviewed": "İnsan inceledi",
       "reviewedHint": "Sayfa bir kişi tarafından okunup onaylandı. Yeni yayınlanan sayfaların en az %5'i incelenmeli."

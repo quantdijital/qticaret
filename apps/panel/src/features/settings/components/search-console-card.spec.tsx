@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen } from "@testing-library/react"
+import { render, screen, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { SearchConsoleCard } from "./search-console-card"
@@ -34,6 +34,24 @@ function renderCard() {
 describe("SearchConsoleCard", () => {
   beforeEach(() => {
     fetchMock.mockReset()
+  })
+
+  it("is not there while the platform has not opened Google, nor its way to Marketing", async () => {
+    fetchMock.mockResolvedValue({
+      google: {
+        ...google({ granted: false, site: null }).google,
+        configured: false,
+        connected: false,
+      },
+    })
+    const { container } = renderCard()
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/google")
+    })
+    await waitFor(() => {
+      expect(container).toBeEmptyDOMElement()
+    })
   })
 
   it("asks to connect again when the account was connected without Search Console", async () => {

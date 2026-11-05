@@ -43,7 +43,7 @@ function Item({ entry, mayAct }: { entry: SeoSetupEntry; mayAct: boolean }) {
         </span>
       </div>
       {/* Google's items open where its account is connected, even while that is the step */}
-      {mayAct && entry.blocked !== "google_platform" ? (
+      {mayAct ? (
         <Button asChild variant="outline" size="sm" className="ml-8 shrink-0 sm:ml-0">
           <Link
             to={where}

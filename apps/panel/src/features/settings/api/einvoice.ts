@@ -1,4 +1,4 @@
-import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
@@ -52,6 +52,14 @@ export const parasutStatusQuery = () =>
     queryFn: async () => (await sdk.client.fetch<{ parasut: ParasutStatus }>(URL)).parasut,
     staleTime: 30_000,
   })
+
+/**
+ * Whether Paraşüt is offered: only once the platform has opened it (docs/06
+ * principle 10). Unknown (loading, or a role that may not read it) is no.
+ */
+export function useParasutOffered(): boolean {
+  return useQuery(parasutStatusQuery()).data?.available === true
+}
 
 /** Connects the company with the code Paraşüt's page showed; the owner proves it again. */
 export function useConnectParasut() {

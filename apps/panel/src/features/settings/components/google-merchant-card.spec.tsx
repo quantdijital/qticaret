@@ -39,12 +39,17 @@ describe("GoogleMerchantCard", () => {
     window.history.replaceState(null, "", "/settings/marketing")
   })
 
-  it("offers nothing to press while the platform's Google client is not set up", async () => {
+  it("is not there at all while the platform has not opened Google (docs/06 principle 10)", async () => {
     fetchMock.mockResolvedValue(status({ configured: false, connected: false }))
-    renderCard()
+    const { container } = renderCard()
 
-    expect(await screen.findByText(/platform tarafında henüz açılmadı/)).toBeInTheDocument()
-    expect(screen.queryByRole("button")).not.toBeInTheDocument()
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/google")
+    })
+    await waitFor(() => {
+      expect(container).toBeEmptyDOMElement()
+    })
+    expect(screen.queryByText("Google Merchant Center")).not.toBeInTheDocument()
   })
 
   it("saves the Merchant Center number, and sends only once it is there", async () => {

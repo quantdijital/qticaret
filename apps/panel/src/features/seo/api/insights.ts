@@ -3,6 +3,8 @@ import { sdk } from "@/lib/sdk"
 
 /** What Search Console and CrUX said of the shop last (F10.11). */
 export interface SeoInsights {
+  /** Whether the platform has opened Google: until then no Search Console part is shown. */
+  search_console: boolean
   search: {
     period_end: string | null
     clicks: number

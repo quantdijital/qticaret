@@ -15,6 +15,7 @@ import {
   useCheckParasut,
   useConnectParasut,
   useDisconnectParasut,
+  useParasutOffered,
 } from "@/features/settings/api/einvoice"
 import type { InvoicingProvider } from "@/features/settings/api/einvoice"
 import { errorText } from "@/lib/errors"
@@ -105,7 +106,9 @@ function ConnectForm({
  * The shop's Paraşüt company (adr/0034 §5): the owner allows the platform
  * on Paraşüt's page, copies the code it shows and pastes it here with the
  * company number. The shop's Paraşüt password never comes here. Once
- * connected, the form folds away behind "Connect again".
+ * connected, the form folds away behind "Connect again". Paraşüt is only
+ * offered once the platform has opened it; a shop already on it when it is
+ * off is told its invoices wait, and what it can choose instead.
  */
 function ParasutConnection({ className }: { className?: string }) {
   const { t } = useTranslation()
@@ -232,9 +235,10 @@ function ExternalProgram({ className }: { className?: string }) {
   )
 }
 
-/** Nothing issued: what each program would do. */
+/** Nothing issued: what each program would do; Paraşüt once the platform has opened it. */
 function NoProgram({ className }: { className?: string }) {
   const { t } = useTranslation()
+  const parasut = useParasutOffered()
   const N = "settings.einvoice.none"
   return (
     <SectionCard
@@ -243,7 +247,7 @@ function NoProgram({ className }: { className?: string }) {
       {...(className ? { className } : {})}
     >
       <ul className="flex list-disc flex-col gap-2 pl-5 text-[13px] text-muted-foreground">
-        <li>{t(`${N}.parasut`)}</li>
+        {parasut ? <li>{t(`${N}.parasut`)}</li> : null}
         <li>{t(`${N}.external`)}</li>
         <li>{t(`${N}.manual`)}</li>
       </ul>

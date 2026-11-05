@@ -12,7 +12,11 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useSaveSection } from "@/features/settings/api/sections"
-import { INVOICING_PROVIDERS, invoicingProviderOf } from "@/features/settings/api/einvoice"
+import {
+  INVOICING_PROVIDERS,
+  invoicingProviderOf,
+  useParasutOffered,
+} from "@/features/settings/api/einvoice"
 import type { InvoicingSettings } from "@/features/settings/api/einvoice"
 import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@/lib/forms"
@@ -26,6 +30,8 @@ type Values = Pick<InvoicingSettings, "provider" | "trigger"> & { series: string
  * Who issues the shop's invoices and when (F8, adr/0034 §1, §8): Paraşüt,
  * the shop's own program writing them back, or none; when the parcel
  * leaves or once the order is placed and paid. The owner's to change.
+ * Paraşüt is offered once the platform has opened it (docs/06 principle
+ * 10); a shop already on it keeps seeing its choice.
  */
 export function EinvoiceProgramCard({
   saved,
@@ -36,11 +42,15 @@ export function EinvoiceProgramCard({
 }) {
   const { t } = useTranslation()
   const save = useSaveSection<InvoicingSettings>("invoicing")
+  const parasut = useParasutOffered()
   const values: Values = {
     provider: invoicingProviderOf(saved.provider),
     trigger: saved.trigger,
     series: saved.series ?? "",
   }
+  const offered = INVOICING_PROVIDERS.filter(
+    (each) => each !== "parasut" || parasut || values.provider === "parasut"
+  )
   const form = useForm<Values>({ values, resetOptions: { keepDirtyValues: true } })
   const provider = useWatch({ control: form.control, name: "provider" })
   const trigger = useWatch({ control: form.control, name: "trigger" })
@@ -88,7 +98,7 @@ export function EinvoiceProgramCard({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {INVOICING_PROVIDERS.map((provider) => (
+                  {offered.map((provider) => (
                     <SelectItem key={provider} value={provider}>
                       {t(`${E}.providers.${provider}`)}
                     </SelectItem>
