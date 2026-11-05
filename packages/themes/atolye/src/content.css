@@ -1,15 +1,17 @@
 /*
  * The shop's own text on its content pages and posts (adr/0019 HTML; the
- * backend's allow-listed tags only): a reading measure, headings a clear
- * step above the body in the one heavy face, lists marked quietly, tables
- * as ruled rows, pictures rounded, a quote as a filled well (the shop's
- * callout), a product or category card as a filled row. No lines where a
- * fill will do; the shop's colour stays on actions.
+ * backend's allow-listed tags only): a reading measure (at most 46rem,
+ * about 86 letters a line at 17 px; its column narrows it on a phone and a
+ * tablet), headings a clear step above the body in the one heavy face,
+ * lists marked quietly, tables as ruled rows, pictures rounded, a quote as
+ * a filled well (the shop's callout), a product or category card as a
+ * filled row. No lines where a fill will do; the shop's colour stays on
+ * actions.
  */
 @layer components {
   .gf-prose {
     display: flex;
-    max-width: 68ch;
+    max-width: 46rem;
     min-width: 0;
     flex-direction: column;
     gap: var(--space-md);
@@ -166,15 +168,16 @@
     transition: background-color var(--dur-micro) var(--ease-out);
   }
 
-  /* A smaller text: an answer under its question, a well's own words */
+  /* A smaller text: an answer under its question, a well's own words; at 16 px it keeps its 68ch */
   .gf-prose--small {
+    max-width: 68ch;
     gap: var(--space-sm);
     font-size: var(--text-md);
     line-height: 1.65;
   }
 }
 
-/* From 640 px the reading column (32–34rem) holds a table of four columns or more: no scroll */
+/* From 640 px the reading column (32rem, 46rem on a computer) holds a table of four columns or more: no scroll */
 @media (min-width: 40rem) {
   .gf-prose .gf-table table:has(tr > :nth-child(4)) {
     min-width: 0;

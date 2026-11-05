@@ -194,6 +194,12 @@ export interface FaqGroupView {
 export interface IdentityRowView {
   label: string
   value: string
+  /**
+   * A number a visitor may need to copy (MERSİS, the tax number, the KEP
+   * address): what goes to the clipboard and the copy button's name
+   * ("MERSİS numarasını kopyala"). Left out for the rest.
+   */
+  copy?: { value: string; label: string }
 }
 
 /**

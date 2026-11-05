@@ -76,7 +76,10 @@ describe("the theme's content page", () => {
 
   it("sets a long text in the post's reading column, its contents on the left from 1024 px", () => {
     const html = page({ outline })
-    expect(html).toContain("lg:grid-cols-[minmax(13rem,1fr)_minmax(0,34rem)_minmax(0,1fr)]")
+    // About 86 letters a line on a computer (owner 2026-11-05: 34rem was "aşırı dar")
+    expect(html).toContain("lg:grid-cols-[minmax(14rem,1fr)_minmax(0,46rem)_minmax(0,1fr)]")
+    expect(html).toContain("xl:grid-cols-[minmax(16rem,1fr)_minmax(0,46rem)_minmax(0,1fr)]")
+    expect(html).not.toContain("34rem")
     expect(html).toMatch(/<aside[^>]*class="[^"]*lg:col-start-1 lg:row-start-1/)
     expect(html).toMatch(/<article class="min-w-0 lg:col-start-2">/)
   })
@@ -161,6 +164,22 @@ describe("the theme's contact page", () => {
     }
     expect(html).toContain('for="iletisim-mesaj"')
     expect(html).toContain('href="/yasal/kvkk-aydinlatma-metni"')
+  })
+
+  it("sets the imprint as one compact card across the page under the form, its facts side by side", () => {
+    const html = contactPage()
+    // Owner 2026-11-05: the long list "ekranı çok uzatıyor"
+    expect(html).toMatch(/<div class="min-w-0 lg:col-span-12"><section aria-labelledby="kunye"/)
+    expect(html).toMatch(/<dl class="grid [^"]*sm:grid-cols-2[^"]*lg:grid-cols-3/)
+    expect(html).toMatch(/<dt class="text-sm text-text-3">MERSİS numarası<\/dt>/)
+    // Without a form the card stands beside the stage, two to a row
+    const alone = page({
+      title: "İletişim",
+      contact,
+      identity: [{ label: "Unvan", value: "Örnek" }],
+    })
+    expect(alone).toMatch(/<div class="min-w-0 lg:col-span-7"><section aria-labelledby="kunye"/)
+    expect(alone).not.toContain("lg:grid-cols-3")
   })
 })
 
@@ -265,10 +284,11 @@ describe("the theme's blog post", () => {
     const html = post()
     const column = "sm:col-start-2"
     expect(html).toContain("sm:grid-cols-[minmax(0,1fr)_minmax(0,32rem)_minmax(0,1fr)]")
+    expect(html).toContain("lg:grid-cols-[minmax(14rem,1fr)_minmax(0,46rem)_minmax(0,1fr)]")
     expect(html).toMatch(new RegExp(`<header class="[^"]*${column}`))
     expect(html).toMatch(new RegExp(`<article class="min-w-0 ${column}">`))
     expect(html).toMatch(new RegExp(`class="gf-stage [^"]*${column}"`))
-    expect(html).toContain('sizes="(min-width: 1024px) 544px, (min-width: 640px) 512px, 100vw"')
+    expect(html).toContain('sizes="(min-width: 1024px) 736px, (min-width: 640px) 512px, 100vw"')
     expect(html).not.toContain("text-center")
     // The contents stand beside the title, the cover and the text alike
     expect(html).toMatch(/<aside[^>]*class="[^"]*lg:col-start-1 lg:row-start-1 lg:row-span-3/)

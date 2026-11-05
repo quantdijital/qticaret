@@ -63,23 +63,33 @@ export function cardProductIds(html: string): string[] {
 /**
  * The shop's imprint (künye) for its contact page: the registered title,
  * address and numbers the e-commerce law asks a shop to show, those it
- * filled in, each on its own line.
+ * filled in, each on its own line; the MERSİS number, the tax number and
+ * the KEP address with what a copy button puts on the clipboard.
  */
 export function identityRows(identity: LegalIdentity, t: Translate): IdentityRowView[] {
-  const rows: [string, string | null][] = [
+  const copy = (key: string, value: string | null) =>
+    value?.trim() ? { value: value.trim(), label: t(key) } : undefined
+  const tax =
+    identity.tax_office && identity.tax_number
+      ? `${identity.tax_office} / ${identity.tax_number}`
+      : null
+  const rows: [string, string | null, IdentityRowView["copy"]?][] = [
     ["content.identity_title", identity.company_title],
     ["content.identity_address", identity.address],
-    ["content.identity_mersis", identity.mersis],
     [
-      "content.identity_tax",
-      identity.tax_office && identity.tax_number
-        ? `${identity.tax_office} / ${identity.tax_number}`
-        : null,
+      "content.identity_mersis",
+      identity.mersis,
+      copy("content.identity_copy_mersis", identity.mersis),
     ],
-    ["content.identity_kep", identity.kep],
+    ["content.identity_tax", tax, copy("content.identity_copy_tax", identity.tax_number)],
+    ["content.identity_kep", identity.kep, copy("content.identity_copy_kep", identity.kep)],
     ["content.identity_etbis", identity.etbis],
   ]
-  return rows.flatMap(([key, value]) => (value?.trim() ? [{ label: t(key), value }] : []))
+  return rows.flatMap(([key, value, copied]) =>
+    value?.trim()
+      ? [copied ? { label: t(key), value, copy: copied } : { label: t(key), value }]
+      : []
+  )
 }
 
 /** How a card family is written on its own cards; an unknown one as the provider names it. */

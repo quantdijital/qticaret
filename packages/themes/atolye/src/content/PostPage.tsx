@@ -7,7 +7,7 @@ import { hasOutline, OutlineAside, OutlineWell } from "./Outline"
 import { Notice } from "./PageHead"
 import { PostCard } from "./PostCard"
 import { Prose } from "./Prose"
-import { readingGrid } from "./reading"
+import { READING_WIDTH, readingGrid } from "./reading"
 
 /** Who wrote the post, when, and how long it reads: side by side, never joined by a dot. */
 function Facts({ meta, t }: { meta: PostMetaView; t: Translate }) {
@@ -75,9 +75,10 @@ function Closing({ view, t }: { view: ContentPageView; t: Translate }) {
  * A blog post (adr/0019, adr/0046 Ek 2026-11-05 içerik sayfaları): the
  * category as a pill, the title, who wrote it, when and how long it
  * reads, and the cover, all in the one reading column (owner 2026-11-05:
- * the title flush with the text, nothing across the page); the text in
- * that column's measure with its contents beside it from 1024 px (a
- * closed well on a phone) when it is long; its tags and share links; then
+ * the title flush with the text, nothing across the page; on a computer
+ * the column about 86 letters wide, never narrow); the text in that
+ * column's measure with its contents beside it from 1024 px (a closed
+ * well on a phone) when it is long; its tags and share links; then
  * the products its text names as the shop's cards, and three posts to
  * read next.
  */
@@ -110,7 +111,7 @@ export function PostPage({ view, t }: { view: ContentPageView; t: Translate }) {
           >
             <ResponsiveImage
               image={{ ...image, alt: "" }}
-              sizes="(min-width: 1024px) 544px, (min-width: 640px) 512px, 100vw"
+              sizes={`(min-width: 1024px) ${String(READING_WIDTH)}px, (min-width: 640px) 512px, 100vw`}
               priority
               className="absolute inset-0 h-full w-full object-cover"
             />

@@ -1,8 +1,7 @@
 "use client"
 
 import { Check, Copy } from "lucide-react"
-import { useEffect, useState } from "react"
-import { useHydrated } from "@qticaret/ui/hooks/use-hydrated"
+import { useCopy } from "../parts/useCopy"
 
 /**
  * The transfer's IBAN to the clipboard in one press (selecting 26 digits
@@ -19,35 +18,14 @@ export function CopyIban({
   iban: string
   words: { copy: string; label: string; copied: string }
 }) {
-  const hydrated = useHydrated()
-  const [copied, setCopied] = useState(false)
-  useEffect(() => {
-    if (!copied) {
-      return
-    }
-    const timer = window.setTimeout(() => {
-      setCopied(false)
-    }, 2500)
-    return () => {
-      window.clearTimeout(timer)
-    }
-  }, [copied])
-  if (!hydrated || typeof navigator === "undefined" || !("clipboard" in navigator)) {
+  const { available, copied, copy } = useCopy(iban)
+  if (!available) {
     return null
   }
   return (
     <button
       type="button"
-      onClick={() => {
-        void navigator.clipboard.writeText(iban.replace(/\s+/g, "")).then(
-          () => {
-            setCopied(true)
-          },
-          () => {
-            setCopied(false)
-          }
-        )
-      }}
+      onClick={copy}
       aria-label={copied ? words.copied : words.label}
       className="gf-btn gf-btn--quiet gf-btn--small self-start"
     >

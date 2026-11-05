@@ -1,11 +1,12 @@
 import { ChevronDown } from "lucide-react"
 import type { LegalPageView, OutlineItemView, Translate } from "@qticaret/ui"
+import { readingGrid } from "./content/reading"
 import { Container } from "./parts/Container"
 import { Trail } from "./parts/Trail"
 
-/** The legal text's own type: headings a step above the body, lists marked, a reading measure. */
+/** The legal text's own type: headings a step above the body, lists marked, the reading column's measure. */
 const PROSE = [
-  "flex max-w-[56ch] flex-col gap-4 text-md leading-[1.75] text-text-2 lg:text-[1.0625rem]",
+  "flex max-w-[46rem] flex-col gap-4 text-md leading-[1.75] text-text-2 lg:text-[1.0625rem]",
   "[&_h2]:mt-10 [&_h2]:max-w-none [&_h2]:scroll-mt-40 [&_h2]:text-title [&_h2]:leading-snug [&_h2]:text-text [&_h2:first-child]:mt-0",
   "[&_h3]:mt-4 [&_h3]:text-md [&_h3]:text-text [&_h4]:font-semibold [&_h4]:text-text",
   "[&_ul]:flex [&_ul]:list-disc [&_ul]:flex-col [&_ul]:gap-2 [&_ul]:pl-5 [&_ol]:flex [&_ol]:list-decimal [&_ol]:flex-col [&_ol]:gap-2 [&_ol]:pl-5 [&_li]:pl-1 [&_li::marker]:text-text-3",
@@ -34,11 +35,14 @@ function Contents({ outline, linkClass }: { outline: OutlineItemView[]; linkClas
  * text in a reading measure with its headings a clear step above the
  * body, and its table of contents: on a phone a closed well above the
  * text, from 1024 px a list that stays beside it while it scrolls. The
- * shop's other published texts close the page. The HTML is the
- * backend's, from its allow-listed schema (adr/0019).
+ * shop's other published texts close the page. On a computer the text
+ * stands in the posts' reading column (46rem, owner 2026-11-05: "aşırı
+ * dar" at 56 letters), the contents on its left at the page's edge. The
+ * HTML is the backend's, from its allow-listed schema (adr/0019).
  */
 export function LegalPage({ view, t }: { view: LegalPageView; t: Translate }) {
   const contents = view.outline.length >= 2
+  const reading = readingGrid({ outline: contents, tablet: false })
   return (
     <>
       <Container className="pt-6 lg:pt-10">
@@ -55,7 +59,7 @@ export function LegalPage({ view, t }: { view: LegalPageView; t: Translate }) {
           )}
         </header>
       </Container>
-      <Container className="mt-8 grid gap-8 lg:mt-12 lg:grid-cols-12 lg:gap-(--gap-columns)">
+      <Container className={`mt-8 grid gap-8 lg:mt-12 ${reading.grid}`}>
         {contents && (
           <>
             <details className="group rounded-tile bg-paper-2 lg:hidden">
@@ -77,10 +81,7 @@ export function LegalPage({ view, t }: { view: LegalPageView; t: Translate }) {
                 />
               </div>
             </details>
-            <aside
-              aria-labelledby="icindekiler"
-              className="max-lg:hidden lg:col-span-4 xl:col-span-3"
-            >
+            <aside aria-labelledby="icindekiler" className={`max-lg:hidden ${reading.side}`}>
               <div className="sticky top-40 flex max-h-[calc(100dvh-11rem)] flex-col gap-3 overflow-y-auto pb-4">
                 <h2 id="icindekiler" className="text-md text-text">
                   {t("legal.contents")}
@@ -93,13 +94,7 @@ export function LegalPage({ view, t }: { view: LegalPageView; t: Translate }) {
             </aside>
           </>
         )}
-        <article
-          className={
-            contents
-              ? "min-w-0 lg:col-span-8 xl:col-span-8 xl:col-start-5"
-              : "min-w-0 lg:col-span-8 lg:col-start-3"
-          }
-        >
+        <article className={`min-w-0 ${reading.column}`}>
           <div
             className={PROSE}
             // adr/0019: built by the backend from an allow-listed document schema

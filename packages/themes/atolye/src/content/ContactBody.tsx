@@ -9,6 +9,7 @@ import type {
 import { placeholderWords } from "../parts/placeholders"
 import { WhatsAppGlyph } from "../parts/WhatsAppGlyph"
 import { ContactForm } from "./ContactForm"
+import { CopyFact } from "./CopyFact"
 import type { ContactWords } from "./ContactForm"
 import { Prose } from "./Prose"
 
@@ -114,24 +115,48 @@ function Reach({ contact, t }: { contact: ContactView; t: Translate }) {
   )
 }
 
-/** The shop's imprint (künye) on a filled well: each registered fact on its own row, only those set. */
-function Imprint({ rows, t }: { rows: readonly IdentityRowView[]; t: Translate }) {
+/**
+ * The shop's imprint (künye) as one compact card (owner 2026-11-05: the
+ * long list "ekranı çok uzatıyor"): the registered facts side by side,
+ * three to a row across the page from 1024 px (two beside the stage when
+ * there is no form), two from 640 px, a tight stack on a phone; each
+ * label small and muted over its value in the body's weight, only those
+ * set. The MERSİS number, the tax number and the KEP address have a small
+ * copy button after them.
+ */
+function Imprint({
+  rows,
+  t,
+  wide,
+}: {
+  rows: readonly IdentityRowView[]
+  t: Translate
+  wide: boolean
+}) {
   return (
     <section
       aria-labelledby="kunye"
-      className="flex flex-col gap-4 rounded-tile bg-paper-2 p-6 sm:p-8"
+      className="flex flex-col gap-4 rounded-tile bg-paper-2 p-5 sm:p-6 lg:gap-5 lg:p-8"
     >
       <h2 id="kunye" className="text-title">
         {t("content.identity")}
       </h2>
-      <dl className="flex flex-col">
+      <dl
+        className={`grid gap-x-8 gap-y-3 sm:grid-cols-2 sm:gap-y-5 ${wide ? "lg:grid-cols-3" : ""}`}
+      >
         {rows.map((row) => (
-          <div
-            key={row.label}
-            className="flex flex-col gap-0.5 border-t border-rule py-3 first:border-t-0 first:pt-0 last:pb-0"
-          >
+          <div key={row.label} className="flex min-w-0 flex-col gap-0.5">
             <dt className="text-sm text-text-3">{row.label}</dt>
-            <dd className="font-semibold break-words">{row.value}</dd>
+            <dd className="flex items-center gap-1 text-text">
+              <span className="min-w-0 break-words">{row.value}</span>
+              {row.copy && (
+                <CopyFact
+                  value={row.copy.value}
+                  label={row.copy.label}
+                  copiedWord={t("content.identity_copied")}
+                />
+              )}
+            </dd>
           </div>
         ))}
       </dl>
@@ -142,7 +167,9 @@ function Imprint({ rows, t }: { rows: readonly IdentityRowView[]; t: Translate }
 /**
  * The shop's contact page (adr/0047, adr/0048): its own words first, the
  * ways to reach it on a graphite stage, the form, then its imprint; from
- * 1024 px the stage and the imprint in a column beside the form.
+ * 1024 px the words and the stage in a column beside the form, the
+ * imprint one compact card across the page under both (beside the stage
+ * when there is no form).
  */
 export function ContactBody({
   view,
@@ -156,19 +183,19 @@ export function ContactBody({
   const identity = view.identity ?? []
   const form = view.contactForm && actions ? view.contactForm : null
   return (
-    <div className="grid gap-(--gap-columns) lg:grid-cols-12 lg:grid-rows-[auto_1fr] lg:items-start">
-      <div className="flex min-w-0 flex-col gap-(--gap-columns) lg:col-span-5 lg:row-start-1">
+    <div className="grid gap-(--gap-columns) lg:grid-cols-12 lg:items-start">
+      <div className="flex min-w-0 flex-col gap-(--gap-columns) lg:col-span-5">
         <Prose html={view.html} className="mb-4" />
         {view.contact && <Reach contact={view.contact} t={t} />}
       </div>
       {form && actions && (
-        <div className="min-w-0 lg:col-span-7 lg:col-start-6 lg:row-span-2 lg:row-start-1">
+        <div className="min-w-0 lg:col-span-7">
           <ContactForm view={form} action={actions.sendContact} words={contactWords(t)} />
         </div>
       )}
       {identity.length > 0 && (
-        <div className="min-w-0 lg:col-span-5 lg:col-start-1 lg:row-start-2">
-          <Imprint rows={identity} t={t} />
+        <div className={form ? "min-w-0 lg:col-span-12" : "min-w-0 lg:col-span-7"}>
+          <Imprint rows={identity} t={t} wide={form !== null} />
         </div>
       )}
     </div>

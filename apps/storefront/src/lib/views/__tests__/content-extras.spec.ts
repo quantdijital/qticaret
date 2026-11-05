@@ -107,15 +107,35 @@ describe("identityRows", () => {
     expect(identityRows(identity(), t)).toEqual([
       { label: "Unvan", value: "Örnek Atölye Ltd. Şti." },
       { label: "Adres", value: "Örnek Mah. 1. Sok. No: 1, Denizli" },
-      { label: "MERSİS numarası", value: "0123456789000015" },
-      { label: "Vergi dairesi / numarası", value: "Pamukkale / 1234567890" },
+      {
+        label: "MERSİS numarası",
+        value: "0123456789000015",
+        copy: { value: "0123456789000015", label: "MERSİS numarasını kopyala" },
+      },
+      {
+        label: "Vergi dairesi / numarası",
+        value: "Pamukkale / 1234567890",
+        copy: { value: "1234567890", label: "Vergi numarasını kopyala" },
+      },
     ])
     expect(
       identityRows(identity({ tax_number: null, kep: "ornek@hs01.kep.tr" }), t)
     ).toContainEqual({
       label: "KEP adresi",
       value: "ornek@hs01.kep.tr",
+      copy: { value: "ornek@hs01.kep.tr", label: "KEP adresini kopyala" },
     })
+  })
+
+  it("copies the tax number alone, never the office, and gives the title and address no copy", () => {
+    const rows = identityRows(identity({ etbis: "123123123" }), t)
+    expect(rows.find((row) => row.label === "Vergi dairesi / numarası")?.copy?.value).toBe(
+      "1234567890"
+    )
+    expect(rows.filter((row) => row.copy).map((row) => row.label)).toEqual([
+      "MERSİS numarası",
+      "Vergi dairesi / numarası",
+    ])
   })
 })
 

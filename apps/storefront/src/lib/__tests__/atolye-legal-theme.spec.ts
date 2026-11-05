@@ -48,6 +48,15 @@ describe("the theme's legal page", () => {
     expect(html).toContain('<h2 id="1-taraflar">1. Taraflar</h2>')
   })
 
+  it("sets the text in the posts' reading column, its contents on the left from 1024 px", () => {
+    const html = page()
+    // Owner 2026-11-05: 56 letters was "aşırı dar" on a computer
+    expect(html).toContain("lg:grid-cols-[minmax(14rem,1fr)_minmax(0,46rem)_minmax(0,1fr)]")
+    expect(html).toMatch(/<aside[^>]*class="max-lg:hidden lg:col-start-1 lg:row-start-1"/)
+    expect(html).toMatch(/<article class="min-w-0 lg:col-start-2">/)
+    expect(html).not.toContain("56ch")
+  })
+
   it("leaves the table of contents out for a text of one heading", () => {
     const html = page({ outline: [{ id: "tek", label: "Tek" }] })
     expect(html).not.toContain("İçindekiler")
