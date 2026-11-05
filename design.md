@@ -59,6 +59,35 @@ Koyu duvar ve dev ad yok: tam genişlik çelik kuyu (`paper-2`), 1024 px'ten iki
 
 `/yasal/{tür}` tek okuma şablonu: iz, başlık (`--text-section`), "Son güncelleme: {tarih}" (`<time>`), metin 68 karakter ölçüde (16→17 px, satır 1,75; h2 `--text-title` 800, üstünde altının iki katından fazla boşluk; listeler işaretli). İçindekiler metnin h2'lerinden (vitrin sunucusu kimlik verir): telefonda metnin üstünde kapalı kuyu ("İçindekiler · N bölüm"), 1024 px'ten metnin solunda yapışkan liste. Sonda mağazanın diğer yayımlanmış metinleri.
 
+## Liste sayfası (kategori, marka, `/magaza`, kampanyalar)
+
+Sahip 2026-11-05: "diğer e-ticaret sayfalarımızın tasarımlarını da yapmaya başla". `ListingPage.tsx`, `listing/*`.
+
+- **Baş:** iz, `h1` (`--text-display`, 800), 1024 px'ten 7 sütun; mağazanın kısa tanıtımı yanında 5 sütunda (`--text-lead`, `text-2`), yalnız ilk ve daraltılmamış sayfada. Altında alt kategoriler **fotoğraflı reyon kartı** (ana sayfanın kartı, küçük ad): tek sıra, telefonda 2,5, 640 px'ten 4,5, 1024 px'ten 8 kart görünür, fazlası yana kayar. `/magaza`'da mağazanın üst kategorileri. Fotoğraf yoksa kategorinin en yeni ürün fotoğrafı (vitrin seçer).
+- **Süzgeçler:** çizgi yok, dolgu kuyular (`paper-2`, `--radius-media`): "Yalnızca stokta olanlar" anahtarı, her grup açık `<details>` (44 px satır, 20 px kare onay, sayı `text-3`; sonuç bulmayacak değer bağlantı değil, soluk), 6'dan fazlası "+N daha göster", fiyat aralığı iki alan + ikincil "Uygula". 1024 px'ten 280 px yan panel (başlığın altında yapışkan, içinde kayar); telefonda aynı panel alttan açılan sayfada (`<dialog>`, odak içeride, Escape ve perde kapatır): altta "Temizle" (ikincil) ve "N ürünü göster" (birincil). Sayfadaki her seçim `#filtreler` çapasıyla gider, yeni sayfada sayfa yeniden açılır ve düğmede yeni sayı yazar. Betiksiz: çapa paneli yerinde gösterir (`:target`).
+- **Izgaranın başı:** "N ürün" (`h2`), sıralama 44 px hap içinde küçük menü (`<details>`; Escape, dışarı basmak kapatır; bağlantılar `nofollow`); telefonda "Filtrele (n)" ve "Sırala" iki eşit hap. Açık süzgeçler koyu haplar (×, "Filtreyi kaldır: …"), yanında "Tümünü temizle".
+- **Izgara:** ana sayfanın kartları; yan panelle 3, panelsiz 4 sütun (1024 px'ten), telefonda 2. İlk sayfanın ilk iki fotoğrafı hemen yüklenir (LCP).
+- **Sayfalar:** "Sayfa 2 / 3", ikincil "Önceki"/"Sonraki" hapları, aralarında 44 px yuvarlak numaralar (bulunulan koyu); telefonda yalnız önceki/sonraki. Sözleşme sayfalama verir, "daha fazla yükle" yok.
+- **Boş:** dolgu kuyuda nedeni (süzgeçle boşsa "Bu seçimle eşleşen ürün yok." + birincil "Filtreleri temizle"; boş liste kendi sözü + "Tüm ürünlere göz atın").
+- Mağazanın kategori sayfası bölümleri (adr/0049) ana sayfanın bölümleriyle (`sections/Blocks.tsx`), ızgaranın üstünde ve altında.
+
+## Arama sonuçları (`/arama`)
+
+Liste sayfasının kendisi: başlık "“q” için sonuçlar"; altında "Bunu mu demek istediniz:" (her öneri kendi araması, 800 ağırlıkta bağlantı), "İlgili kategoriler" fotoğraflı reyon kartı sırası, "Markaya göre daralt" hapları (süzgeç, `nofollow`), sonra aynı süzgeçler ve ızgara. Sonuç yoksa: dolgu kuyuda backend'in sözü, öneriler, birincil "Tüm ürünlere göz atın", altında "Kategorilere göz atın" başlığıyla mağazanın üst kategorileri reyon ızgarasında (ana sayfanın sütun kuralı). Hiç aranmamışsa aynı ızgara, istem sözüyle. Arama kutusu başlıkta her ekranda zaten var; sayfa ikincisini çizmez.
+
+## Ürün sayfası
+
+`ProductPage.tsx`, `product/*`. İmza: ürün fotoğrafları grafit sahnede, koyu zeminleri sahneye karışır.
+
+- **Üst blok:** telefonda iz yalnız bir üst adım ("‹ Elmax Çakılar", 44 px); 640 px'ten tam iz. 1024 px'ten 7 sütun galeri + 5 sütun satın alma sütunu (sütun yapışkan, fotoğraflar kayarken görünür kalır).
+- **Galeri:** grafit sahne (`--radius-tile`), kare fotoğraflar yakalamalı tek şeritte (telefonda kaydırılır, klavyeyle kayar); "2 / 9" durum hapı; 640 px'ten altta 72 px küçük resimler (betiksiz çapa), 1024 px'ten iki yuvarlak ok; köşede yuvarlak "Görseli büyüt" (betikle). Fotoğrafa basmak da açar: tam ekran grafit, fotoğraf ekran boyunda, basınca bastığı yerden 2,5 kat büyür ve imleci izler (telefonda iki parmak da), oklar ve ok tuşları gezer, Escape kapatır. Yalnız ilk fotoğraf hemen yüklenir. Fotoğrafsız ürün: sahnede adın ilk harfi.
+- **Satın alma sütunu:** marka küçük (sayfasına), ad tek `h1` ("ad | ayrıntı" yazılmış adın ayrıntısı aynı başlığın ikinci, küçük satırı), yıldızlar + "N değerlendirme" yorumlara gider, mağazanın öne çıkan özellikleri (en çok 4) dolgu haplarda. Fiyat `--text-section` 800 (önceki fiyat varken indirim kırmızısı), üstü çizili önceki fiyat yalnız kural izin verince, "%30 indirim" kırmızı hap, "… tasarruf"; sepette uygulanan kampanyanın koşulu sinyal tonlu satırda (`cartOffer`, fiyatın yanında, yerine değil). Stok sözle ("Stokta" yeşil / "Tükendi"). Seçenekler gerçek radyolar: dolgu haplar, renk adı verilmişse 44 px daire; tek değerli seçenek çizilmez. Ek seçenekler (adr/0052) ve hediye kartının alıcısı dolgu kuyuda, satın alma formunun alanları. Sonra tek satır: adet (44 px yuvarlak −/+, arada 3:1 kenarlı alan), birincil "Sepete ekle", 48 px yuvarlak favori kalbi (misafire giriş bağlantısı); 416 px altında düğme tam genişlikte alta iner. Altında taksitler (dolgu satır, açılınca sorulur: "Kartınıza göre N taksite kadar" + aile başına tablo), tükenmiş varyantta stok bildirimi kuyusu. Cayma notu (varsa) satın almadan önce kuyuda, simgeyle. "Teslimat ve iade" kuyusu: ücretsiz kargo satırı, mağazanın güvenceleri, "WhatsApp'tan sor".
+- **Açıklama ve özellikler:** 1024 px'ten açıklama 7 sütun (backend'in izinli HTML'i, 68 karakter ölçü), özellik tablosu 5 sütun: tek gerçek tablo, şablonun her grubu bir `<tbody>`, grup adı 800 ağırlıkta, altında 2 px koyu çizgi; satırlar arasında ince çizgi (çizgili gruplar), grupsuzda tek düz tablo.
+- **Yorumlar ve sorular:** yorumlar ana sayfadaki gibi: solda ortalama büyük (`--text-figure`), yıldızlar, sayı, 5→1 çubuklar; altında açılan "Değerlendirme yaz" (beş gerçek radyo yıldız, başlık, metin, en çok 3 fotoğraf) ya da giriş bağlantısı; sağda yorum kartları (yıldız, başlık, tam metin, fotoğraflar, ad, doğrulanmış işareti, tarih). Sorular: soru, yanıt dolgu kuyuda ("Mağaza yanıtı"), yanında soru formu.
+- **Benzer ürünler:** ana sayfanın kartları 4 sütun; sonra mağazanın ürün sayfası bölümleri (adr/0049).
+- **Telefonun satın alma çubuğu:** sayfanın "Sepete ekle" satırı yukarı kaydıktan sonra alt gezinmenin yerine kayar (fotoğraf, ad, fiyat, aynı formu gönderen birincil düğme; seçenek seçilmemişse forma, tükenmişse stok bildirimine götürür); gizliyken `inert`. WhatsApp düğmesi alt gezinmenin üstündeki yerinde kalır, çubuğu örtmez.
+- **Sözleşmede olmayanlar (çizilmez):** ölçek görseli (`ImageView` rolü yok), ayrı bakım notu ve yasal uyarı alanı (mağaza bugün bunları açıklama belgesine yazıyor), soru-cevap dışında ürün başına SSS.
+
 ## Açık işler (sahibin verisi)
 
 - Sekmeler dev düzende "Çok satanlar / Yeni gelenler / İndirimde" (b667b4de kaynakları); kategori rafları düzende gizli duruyor.
