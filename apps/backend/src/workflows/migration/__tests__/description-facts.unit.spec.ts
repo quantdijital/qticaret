@@ -1,5 +1,4 @@
 import { descriptionOf } from "../../../lib/migration/description"
-import { summaryFromExcerpt } from "../../../lib/migration/sources/wordpress/excerpt"
 import { planAttributes } from "../attributes"
 import type { SourceAttribute, TemplateFields } from "../attributes"
 import { descriptionFactsOf, factsOutcome } from "../description-facts"
@@ -84,20 +83,17 @@ describe("the facts in a moved product's description (adr/0013 Ek 2026-11-05)", 
     expect(plan.facts).toEqual({ cells: {}, written: 0, left: ["Renk", "Ağırlık", "Ağırlık"] })
   })
 
-  it("reads the short description's document too, a row once (adr/0055 Ek 2026-11-06)", () => {
+  it("reads the short description's lines too, once each (adr/0055 Ek 2026-11-05)", () => {
     const doc = descriptionOf("<ul><li>Menşei: Türkiye</li><li>Renk: Koyu</li></ul>").doc
-    const summary = summaryFromExcerpt(
-      "<p>El yapımı.</p><ul><li>Menşei: Türkiye</li><li>Ağırlık: 1,2 kg</li></ul>"
-    )?.doc
-    const rows = descriptionFactsOf(doc, summary)
+    const rows = descriptionFactsOf(doc, ["Menşei: Türkiye", "Ağırlık: 1,2 kg"])
     expect(rows.map((row) => [row.label, row.value])).toEqual([
       ["Menşei", "Türkiye"],
       ["Renk", "Koyu"],
       ["Ağırlık", "1,2 kg"],
     ])
-    // Lines of one paragraph read as the description's do
-    const lines = summaryFromExcerpt("<p>Renk: Koyu<br>Ağırlık: 300 g</p>")?.doc
-    expect(descriptionFactsOf(null, lines)).toHaveLength(2)
+    // Read as a list is: every line a fact, or none of them (a sentence among them)
+    expect(descriptionFactsOf(null, ["Renk: Koyu", "Ağırlık: 300 g"])).toHaveLength(2)
+    expect(descriptionFactsOf(null, ["Renk: Koyu", "Ağırlık: 300 g", "El yapımı"])).toEqual([])
     expect(descriptionFactsOf(null, null)).toEqual([])
   })
 

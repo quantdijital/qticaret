@@ -1,7 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { descriptionTextOf } from "../../lib/catalog/description"
-import type { SummaryDoc } from "../../lib/catalog/summary"
 import { chunksOf } from "../../lib/catalog/ids"
 import { errorSummary, logger } from "../../lib/logging"
 import type { ContentDoc } from "../../lib/content"
@@ -25,7 +24,7 @@ type Container = Pick<MedusaContainer, "resolve">
  * Products' description documents (adr/0055) as a migration writes them:
  * through the catalog save the panel uses, so the plain text the product
  * keeps is the document's own. New products get theirs, and their short
- * description (adr/0055 Ek 2026-11-06), after the catalog import made
+ * description (adr/0055 Ek 2026-11-05), after the catalog import made
  * them; a refresh run (`refresh: ["descriptions"]`) rewrites only the
  * documents and their text of the products a run moved before.
  */
@@ -36,7 +35,7 @@ const READ_CHUNK = 200
 /** What a migration writes of a product's texts: its document, its short description. */
 export interface TextFields {
   description_doc?: ContentDoc
-  summary_doc?: SummaryDoc
+  summary?: string[]
 }
 
 /** Writes one product's texts; a refusal is the record's problem, not the run's. */
@@ -74,13 +73,13 @@ export async function writeDescriptions(
   const problems: StepProblem[] = []
   for (const { product, id } of made) {
     const doc = product.description_doc ?? null
-    const summary = product.summary_doc ?? null
+    const summary = product.summary?.length ? product.summary : null
     if (!doc && !summary) {
       continue
     }
     const fields: TextFields = {
       ...(doc ? { description_doc: doc } : {}),
-      ...(summary ? { summary_doc: summary } : {}),
+      ...(summary ? { summary } : {}),
     }
     const problem = await writeTexts(container, id, fields, product.source_key)
     if (problem) {
@@ -94,7 +93,7 @@ export async function writeDescriptions(
 }
 
 // A JSON value with its keys in order: Postgres keeps a jsonb's keys in its own order
-export function canonical(value: unknown): string {
+function canonical(value: unknown): string {
   if (Array.isArray(value)) {
     return `[${value.map(canonical).join(",")}]`
   }

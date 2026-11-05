@@ -75,7 +75,7 @@ export interface AdvisorFacts {
         missingDimensions: boolean
         /** Labels of required attributes left empty (from the shop's template: sector neutral). */
         missingAttributes: string[]
-        /** Characters of its short description's text (adr/0055 Ek 2026-11-06); left out where not known. */
+        /** Lines of its short description (adr/0055 Ek 2026-11-05); left out where not known. */
         summary?: number | undefined
       }
     | undefined

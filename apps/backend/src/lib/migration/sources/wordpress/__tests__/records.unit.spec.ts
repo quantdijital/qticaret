@@ -162,20 +162,17 @@ describe("a WordPress export as the common records (adr/0042 Ek 2026-11-03)", ()
     const plain = records.products.find((product) => product.description === null)
     expect(plain?.description_doc ?? null).toBeNull()
     // No excerpt: no short description either
-    expect(
-      records.products.find((product) => product.source_key === "product:10")?.summary_doc
-    ).toBe(null)
+    expect(records.products.find((product) => product.source_key === "product:10")?.summary).toBe(
+      null
+    )
   })
 
   it("moves a simple product as one variant, hidden and unpublished ones as drafts", () => {
     const byKey = new Map(records.products.map((product) => [product.source_key, product]))
     expect(byKey.get("product:20")).toMatchObject({
       description: "El yapımı kaşık.",
-      // adr/0055 Ek 2026-11-06: the excerpt is the short description too, as written
-      summary_doc: {
-        type: "doc",
-        content: [{ type: "paragraph", content: [{ type: "text", text: "El yapımı kaşık." }] }],
-      },
+      // adr/0055 Ek 2026-11-05: the excerpt is the short description too
+      summary: ["El yapımı kaşık"],
       options: [],
       variants: [{ source_key: "variant:20", sku: "KASIK-1", price: "149.90", stock: null }],
     })

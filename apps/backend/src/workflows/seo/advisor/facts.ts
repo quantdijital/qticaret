@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { missingDimensions, variantGtin } from "../../../lib/catalog"
-import { storedSummaryText } from "../../../lib/catalog/summary"
+import { summaryOf } from "../../../lib/catalog/summary"
 import type { AdvisorFacts, PageKind } from "../../../lib/seo/advisor"
 import { plainText } from "../../../lib/seo"
 import { CATALOG_ENTITY_TYPES } from "../../catalog/entity-paths"
@@ -46,7 +46,7 @@ type ProductRow = Omit<FactRow, "attribute_template" | "product_extension" | "im
   product_extension?: {
     primary_category_id?: string | null
     kind?: string | null
-    summary_doc?: unknown
+    summary?: string[] | null
   } | null
   attribute_template?: {
     definitions?:
@@ -80,7 +80,7 @@ const PRODUCT_FIELDS = [
   "brand.name",
   "product_extension.primary_category_id",
   "product_extension.kind",
-  "product_extension.summary_doc",
+  "product_extension.summary",
   "attribute_template.definitions.id",
   "attribute_template.definitions.label",
   "attribute_template.definitions.is_required",
@@ -132,7 +132,7 @@ function productFacts(row: ProductRow): NonNullable<AdvisorFacts["product"]> {
         ? [definition.label]
         : []
     ),
-    summary: storedSummaryText(row.product_extension?.summary_doc).length,
+    summary: summaryOf(row.product_extension?.summary).length,
   }
 }
 

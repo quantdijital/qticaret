@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { priceSentence, resolveSeoPayload, shippingSentence } from "../../lib/seo/resolve"
 import { deepestCategory } from "../../lib/catalog"
-import { storedSummaryText } from "../../lib/catalog/summary"
+import { summaryOf } from "../../lib/catalog/summary"
 import { productText, shortDescription } from "../../lib/seo/product-text"
 import type { SeoPayload, SeoSubject } from "../../lib/seo/resolve"
 import type { UrlOwner } from "../../modules/url-registry/validation"
@@ -50,7 +50,7 @@ interface ProductRow extends Omit<FactRow, "product_extension"> {
   product_extension?: {
     primary_category_id?: string | null
     condition?: Condition | null
-    summary_doc?: unknown
+    summary?: string[] | null
   } | null
   attribute_values?: (HighlightValue | null)[] | null
   brand?: { name: string } | null
@@ -98,7 +98,7 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
       "categories.name",
       "categories.mpath",
       "product_extension.primary_category_id",
-      "product_extension.summary_doc",
+      "product_extension.summary",
       ...PRODUCT_FACT_FIELDS,
       "variants.prices.amount",
       "variants.prices.currency_code",
@@ -117,8 +117,8 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
   const category = primaryCategory(product)
   const description = product.description ?? ""
   const subtitle = product.subtitle?.trim() ?? ""
-  // adr/0055 Ek 2026-11-06: the short description's plain text, the text's stand-in where it says less
-  const summary = storedSummaryText(product.product_extension?.summary_doc)
+  // adr/0055 Ek 2026-11-05: the short description's lines, the text's stand-in where it says less
+  const summary = summaryOf(product.product_extension?.summary)
   // The price the shopper pays now and, where the 30-day rule allows, the one struck through
   const displays = await priceDisplays(
     container,

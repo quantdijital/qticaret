@@ -5,9 +5,7 @@ import type { Restriction } from "../../../lib/catalog"
 import type { AddonInput, StoredAddons } from "../../../lib/catalog/addons"
 import { descriptionChanges } from "../../../lib/catalog/description"
 import type { DescriptionDoc } from "../../../lib/catalog/description"
-import type { SummaryDoc } from "../../../lib/catalog/summary"
 import type { ContentDoc } from "../../../lib/content"
-import { hasText } from "../../../lib/content/plain"
 import { addonsToWrite } from "../addons"
 import { giftCardKind, kindShipping } from "../kind-rules"
 import { ValidationError } from "../../../lib/errors"
@@ -43,10 +41,10 @@ export interface SetProductCatalogInput {
    */
   description_doc?: ContentDoc | null | undefined
   /**
-   * Its short description as a checked document (adr/0055 Ek 2026-11-06,
-   * `lib/catalog/summary`); one without text, or null, clears it.
+   * Its short description's lines, tidied by the request's schema
+   * (adr/0055 Ek 2026-11-05, `lib/catalog/summary`); none or null clears it.
    */
-  summary_doc?: SummaryDoc | null | undefined
+  summary?: string[] | null | undefined
   /** Per variant: the MPN, and the unit cost in lira (VAT excluded, F11.4). */
   variants?:
     | Record<string, { mpn?: string | null | undefined; cost?: number | null | undefined }>
@@ -69,7 +67,7 @@ export interface ExtensionFields {
   is_gift_card: boolean
   addons: StoredAddons | null
   description_doc: DescriptionDoc | null
-  summary_doc: SummaryDoc | null
+  summary: string[] | null
 }
 
 export interface ProductCatalogPlan {
@@ -157,7 +155,7 @@ const EXTENSION_KEYS = [
   "is_gift_card",
   "addons",
   "description_doc",
-  "summary_doc",
+  "summary",
 ] as const
 
 type ExtensionChanges = Omit<SetProductCatalogInput, "addons"> & {
@@ -256,15 +254,11 @@ export const planProductCatalogStep = createStep(
       doc: extension?.description_doc ?? null,
       description: product.description ?? null,
     })
-    // A short description without text is kept as none
+    // No lines are kept as none
     const summary =
-      input.summary_doc === undefined
-        ? undefined
-        : input.summary_doc && hasText(input.summary_doc)
-          ? input.summary_doc
-          : null
+      input.summary === undefined ? undefined : input.summary?.length ? input.summary : null
     const { set, previous } = changesOf(
-      { ...input, kind, addons, description_doc: description.doc, summary_doc: summary },
+      { ...input, kind, addons, description_doc: description.doc, summary },
       extension
     )
     const plan: ProductCatalogPlan = {

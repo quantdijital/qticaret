@@ -209,7 +209,7 @@ export async function planProductAttributes(
   const read = products
     .map((product) => ({
       product,
-      facts: descriptionFactsOf(product.description_doc, product.summary_doc),
+      facts: descriptionFactsOf(product.description_doc, product.summary),
     }))
     .filter(({ product, facts }) => (product.attributes?.length ?? 0) > 0 || facts.length > 0)
   const templates = read.length > 0 ? await attributeTemplates(container) : []

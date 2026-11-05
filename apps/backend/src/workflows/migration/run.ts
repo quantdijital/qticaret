@@ -170,8 +170,8 @@ export async function runMigration(
   if (givesDocuments) {
     productCounts.documents = 0
   }
-  // adr/0055 Ek 2026-11-06: likewise a source that keeps short descriptions
-  const givesSummaries = products.some((product) => product.summary_doc !== undefined)
+  // adr/0055 Ek 2026-11-05: likewise a source that keeps short descriptions
+  const givesSummaries = products.some((product) => product.summary !== undefined)
   if (givesSummaries) {
     productCounts.summaries = 0
   }

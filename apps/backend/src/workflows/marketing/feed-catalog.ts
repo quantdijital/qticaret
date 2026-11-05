@@ -3,7 +3,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { deepestCategory } from "../../lib/catalog"
 import { feedItemsOf } from "../../lib/feeds"
 import type { FeedItem, FeedPlace, FeedShop } from "../../lib/feeds"
-import { storedSummaryText } from "../../lib/catalog/summary"
+import { summaryOf } from "../../lib/catalog/summary"
 import { productText } from "../../lib/seo/product-text"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type {
@@ -39,7 +39,7 @@ interface FeedProductRow extends Omit<FactRow, "product_extension"> {
   product_extension?:
     | (NonNullable<FactRow["product_extension"]> & {
         primary_category_id?: string | null
-        summary_doc?: unknown
+        summary?: string[] | null
       })
     | null
 }
@@ -96,7 +96,7 @@ export async function catalogItems(
         "categories.id",
         "categories.mpath",
         "product_extension.primary_category_id",
-        "product_extension.summary_doc",
+        "product_extension.summary",
         ...PRODUCT_FACT_FIELDS,
       ],
       filters: { status: "published" },
@@ -126,8 +126,8 @@ export async function catalogItems(
         const facts = productFacts(
           row,
           row.brand?.name ?? null,
-          // adr/0055 Ek 2026-11-06: without a description, the short description's text
-          productText(row.description ?? "", storedSummaryText(row.product_extension?.summary_doc)),
+          // adr/0055 Ek 2026-11-05: without a description, the short description's lines
+          productText(row.description ?? "", summaryOf(row.product_extension?.summary)),
           displays,
           shipping,
           undefined,
