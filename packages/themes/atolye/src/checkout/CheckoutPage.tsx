@@ -158,9 +158,11 @@ export function CheckoutPage({
                 contracts={view.contracts}
                 ageLimit={view.ageLimit}
                 marketingVersion={view.marketingVersion}
+                total={view.summary.total}
                 placeOrder={actions.placeOrder}
                 words={{
                   methods: t("checkout.methods"),
+                  total: t("checkout.total"),
                   contracts: t("checkout.contracts"),
                   read: t("checkout.read"),
                   accept: t("checkout.accept"),

@@ -134,7 +134,8 @@ export function AddressForm({
       }}
       className="flex flex-col gap-8"
     >
-      <fieldset className="grid gap-4">
+      {/* Side by side from 640 px like the name: a screen-wide field reads badly on a laptop */}
+      <fieldset className="grid gap-4 sm:grid-cols-2">
         <legend className={LEGEND}>{words.contact}</legend>
         {withEmail && (
           <TextField
@@ -194,6 +195,7 @@ export function AddressForm({
           id="province"
           name="province"
           label={words.province}
+          autoComplete="address-level1"
           error={errorOf("province")}
           required
           value={province}
@@ -212,6 +214,7 @@ export function AddressForm({
           id="district"
           name="district"
           label={words.district}
+          autoComplete="address-level2"
           error={errorOf("district")}
           required
           disabled={!province || loading === "district"}
@@ -232,6 +235,7 @@ export function AddressForm({
           id="neighborhood"
           name="neighborhood"
           label={words.neighborhood}
+          autoComplete="address-level3"
           error={errorOf("neighborhood")}
           required
           disabled={!district || loading === "neighborhood"}

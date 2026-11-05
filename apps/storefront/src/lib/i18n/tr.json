@@ -245,7 +245,7 @@
   "order.payment_canceled": "Ödeme iptal edildi",
   "order.payment_requires_action": "Ödeme işlem bekliyor",
   "checkout.show_summary": "Sipariş özeti",
-  "cart.drawer_note": "Kargo ve indirim kodları ödeme adımında hesaplanır.",
+  "cart.drawer_note": "Kargo ödeme adımında hesaplanır. İndirim kodunuz varsa sepette girin.",
   "cart.view": "Sepete git",
   "cart.trust": "Alışveriş güvenceleri",
   "cart.offers": "Sepet kampanyaları",

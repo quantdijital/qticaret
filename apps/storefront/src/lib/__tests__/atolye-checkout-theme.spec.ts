@@ -127,6 +127,8 @@ describe("the theme's checkout", () => {
     }
     expect(html.match(/type="submit"/g)).toHaveLength(1)
     expect(html).toContain("Kargo seçeneklerine geç")
+    // The browser's address book can fill the province (its districts load from it)
+    expect(html).toMatch(/<select[^>]*autoComplete="address-level1"/)
     expect(html).toContain('<option value="20">Denizli</option>')
   })
 
@@ -157,6 +159,10 @@ describe("the theme's checkout", () => {
     expect(html).toContain("Kart bilgilerine geç")
     expect(html).toContain('name="marketing_email"')
     expect(html).not.toContain('name="birth_date"')
+    // Under 1024 px the total stands right over the button, the basket's bar far above by then
+    expect(html).toMatch(
+      /<p class="[^"]*lg:hidden"><span[^>]*>Toplam<\/span><span[^>]*>[^<]+<\/span><\/p><button type="submit"/
+    )
   })
 
   it("asks the age the cart needs, in its own well", () => {

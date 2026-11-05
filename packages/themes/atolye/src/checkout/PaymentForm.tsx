@@ -17,6 +17,8 @@ const ICONS: Record<PaymentKind, LucideIcon> = {
 
 export interface PaymentWords extends ConsentWords {
   methods: string
+  /** "Toplam", over the button where the basket's stage is not in sight. */
+  total: string
   payCard: string
   placeOrder: string
   working: string
@@ -33,7 +35,8 @@ export interface PaymentWords extends ConsentWords {
  * on delivery when the backend offers it), the contracts for that way,
  * the age when the cart asks it, the optional marketing consent and the
  * button. On a phone the button stays at the screen's foot in the thumb's
- * reach while the contracts scroll by. A proof of work the backend asks
+ * reach while the contracts scroll by, the total right above it (the
+ * basket's bar is far above by then; from 1024 px its stage stands beside). A proof of work the backend asks
  * for is solved here and the form sent again (adr/0044).
  */
 export function PaymentForm({
@@ -41,10 +44,13 @@ export function PaymentForm({
   contracts,
   ageLimit,
   marketingVersion,
+  total,
   placeOrder,
   words,
 }: {
   methods: PaymentMethodView[]
+  /** The backend's total in words, as the summary says it. */
+  total: string
   contracts: Partial<Record<PaymentKind, ContractView[]>>
   ageLimit: number | null
   marketingVersion: string
@@ -117,6 +123,10 @@ export function PaymentForm({
             )
           )}
         </div>
+        <p className="flex items-baseline justify-between gap-4 lg:hidden">
+          <span className="text-sm font-semibold text-text-2">{words.total}</span>
+          <span className="tabular text-lg font-extrabold">{total}</span>
+        </p>
         <button
           type="submit"
           disabled={pending || methods.length === 0}

@@ -30,7 +30,7 @@ export function PaymentFramePage({ view, t }: { view: PaymentFramePageView; t: T
           >
             <h2
               id="kart-formu"
-              className="flex items-center gap-2 px-3 pt-2 text-sm font-semibold tracking-normal text-text-2"
+              className="flex max-w-none items-center gap-2 px-3 pt-2 text-sm font-semibold tracking-normal text-text-2"
             >
               <Lock className="size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
               {t("checkout.card_note")}
