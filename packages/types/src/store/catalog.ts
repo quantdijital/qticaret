@@ -159,16 +159,32 @@ export interface StoreCategory {
   rank?: number | null
 }
 
-/** `GET /store/price-display` (F4.3): the 30-day rule's prices, lira strings ("80.00"). */
+/**
+ * `GET /store/price-display` (F4.3): the price-before rule's prices, lira
+ * strings ("80.00"). `current` is what the shopper pays, an automatic
+ * promotion every shopper gets included (adr/0023 Ek 2026-11-05).
+ */
 export interface PriceDisplay {
   current: string
   regular: string
-  /** The struck-through price, only when the 30-day rule allows showing one. */
+  /** The struck-through price, only when the price-before rule allows showing one. */
   before: string | null
   on_sale: boolean
   since: string | null
-  basis: string
-  rule_version: number
+  basis: string | null
+  /** The rule's reading in force ("tr-10d-1"). */
+  rule_version: string
+  /** An automatic promotion the cart applies past a minimum; absent from a backend before it. */
+  cart_offer?: StoreCartOffer | null
+}
+
+/** A cart offer to name beside a price: "Sepette %10 indirim", "2.000 TL ve üzeri sepette…". */
+export interface StoreCartOffer {
+  type: "percentage" | "fixed"
+  /** A percentage as a number (10); an amount as lira ("50.00"). */
+  value: number | string
+  /** The least the cart must hold, lira; null: none. */
+  minimum: string | null
 }
 
 export interface StoreRegion {

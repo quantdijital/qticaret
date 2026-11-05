@@ -11,6 +11,7 @@ import type {
   StockLevel,
 } from "./card-views"
 import type { BottomNavView, ThemeView } from "./frame-views"
+import type { FeaturedProductSectionView, ShopRatingView } from "./home-views"
 
 /**
  * What a theme is given to show (adr/0046 §7): ready-made view models.
@@ -39,6 +40,12 @@ export interface PriceView {
   discount: number | null
   /** What the struck-through price saves, formatted ("150,00 TL"); null without one. */
   saving?: string | null
+  /**
+   * An automatic promotion the cart applies once it holds enough, in words
+   * ("2.000,00 TL ve üzeri sepette %10 indirim"; adr/0046 Ek 2026-11-05):
+   * beside the price, never instead of it. None: no such offer.
+   */
+  cartOffer?: string | null
 }
 
 export interface LinkView {
@@ -481,6 +488,7 @@ export type HomeSectionView =
       /** Words when the rail has nothing to show. */
       empty: string
     }
+  | FeaturedProductSectionView
   | { id: string; type: "brands"; title: string; brands: LinkView[] }
   | { id: string; type: "posts"; title: string; posts: PostCardView[]; more: LinkView }
   | {
@@ -491,6 +499,8 @@ export type HomeSectionView =
       more: LinkView
       /** The newest customer photos on approved reviews (adr/0046 Ek 2026-11-04); none: no strip. */
       photos?: CustomerPhotoView[]
+      /** The shop's average, count and stars' spread (adr/0046 Ek 2026-11-05); none: not drawn. */
+      summary?: ShopRatingView | null
     }
   | { id: string; type: "rich_text"; title: string | null; html: string }
   | { id: string; type: "trust_badges"; badges: TrustBadgeView[] }
@@ -659,6 +669,8 @@ export interface ReviewsPageView {
   breadcrumbs: BreadcrumbView[]
   average: number | null
   count: number
+  /** The shop's reviews in short, shop-wide (adr/0046 Ek 2026-11-05); none: `average` and `count` only. */
+  summary?: ShopRatingView | null
   reviews: (ReviewView & { product: LinkView | null })[]
   pagination: PaginationView
 }

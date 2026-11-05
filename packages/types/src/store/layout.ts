@@ -59,12 +59,23 @@ export type StoreLayoutSection =
       limit: number
       more: StoreLayoutLink | null
     }
+  | StoreFeaturedProductSection
   | { id: string; type: "brands"; title: string | null; brand_ids: string[] }
   | { id: string; type: "posts" | "reviews"; title: string | null; limit: number }
   | { id: string; type: "rich_text"; title: string | null; html: string }
   | { id: string; type: "trust_badges" }
   | { id: string; type: "newsletter" | "help"; title: string | null; text: string | null }
   | StoreFaqSection
+
+/** One live product up close on the home page (adr/0046 Ek 2026-11-05); the storefront reads it. */
+export interface StoreFeaturedProductSection {
+  id: string
+  type: "featured_product"
+  title: string | null
+  /** The shop's line about it, its `{tokens}` filled; null: none. */
+  text: string | null
+  product_id: string
+}
 
 /** Questions and answers in plain text, the answers' `{tokens}` already filled (adr/0049 Ek 2026-11-03). */
 export interface StoreFaqSection {

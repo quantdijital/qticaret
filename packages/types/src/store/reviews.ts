@@ -47,6 +47,17 @@ export interface StoreLatestReviewPhoto extends StoreReviewPhoto {
   product: { id: string; title: string }
 }
 
+/** `GET /store/reviews/summary` (adr/0046 Ek 2026-11-05): the shop's approved reviews in short. */
+export interface StoreReviewSummary {
+  /** None while no review of a product the shopper may see is approved. */
+  rating: {
+    /** To one decimal. */
+    average: number
+    count: number
+    distribution: StoreRatingDistribution
+  } | null
+}
+
 /** `POST /store/products/:id/reviews/photos` (the bytes as the body): the upload's id for `photo_ids`. */
 export interface StoreReviewPhotoUpload {
   photo: { id: string }
