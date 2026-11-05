@@ -2,6 +2,7 @@
 
 import { ChevronDown } from "lucide-react"
 import { NavigationMenu } from "radix-ui"
+import { useState } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { NavCategoryView } from "@qticaret/ui"
 
@@ -13,7 +14,9 @@ const ITEM =
  * categories; one with children opens a floating panel the container's
  * width, by click or after a 150 ms hover, Escape closing it. Every panel
  * is in the first HTML, closed (`forceMount`), so each link reaches a
- * crawler without a script (docs/13). The panel: the category's picture
+ * crawler without a script (docs/13). A closed panel still listens for
+ * presses outside it; it lets them pass, or a press inside the open panel
+ * would close the menu before its link is followed. The panel: the category's picture
  * when it has one over "Tümünü gör", then its children in three columns
  * of 44 px rows.
  */
@@ -27,8 +30,15 @@ export function Aisle({
   /** "Tümünü gör: {name}" for each category path, in words. */
   allIn: Record<string, string>
 }) {
+  const [open, setOpen] = useState("")
   return (
-    <NavigationMenu.Root delayDuration={150} aria-label={label} className="relative pb-2">
+    <NavigationMenu.Root
+      value={open}
+      onValueChange={setOpen}
+      delayDuration={150}
+      aria-label={label}
+      className="relative pb-2"
+    >
       <NavigationMenu.List className="-ml-3 flex flex-wrap items-center gap-x-1">
         {categories.map((category) =>
           category.children.length === 0 ? (
@@ -40,7 +50,7 @@ export function Aisle({
               </NavigationMenu.Link>
             </NavigationMenu.Item>
           ) : (
-            <NavigationMenu.Item key={category.path} className="static">
+            <NavigationMenu.Item key={category.path} value={category.path} className="static">
               <NavigationMenu.Trigger className={ITEM}>
                 {category.label}
                 <ChevronDown
@@ -51,6 +61,11 @@ export function Aisle({
               </NavigationMenu.Trigger>
               <NavigationMenu.Content
                 forceMount
+                onInteractOutside={(event) => {
+                  if (open !== category.path) {
+                    event.preventDefault()
+                  }
+                }}
                 className="absolute top-full -right-3 -left-3 z-(--z-dropdown) rounded-tile bg-field p-6 shadow-float data-[state=closed]:hidden"
               >
                 <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,3fr)] gap-(--gap-columns)">
