@@ -9,7 +9,8 @@ export const LANDING_FACETS = ["brand", "attribute"] as const
  * an address of its own (`{category path}/{handle}`), a title, its own text
  * and a place in the sitemap. The text's fingerprint (`lib/content/
  * originality`) measures how much of it is its own against the other
- * landing pages; too little and it is not published (docs/14 L-UNIQ-01).
+ * landing pages; too little and, live, it is kept out of search
+ * (docs/14 L-UNIQ-01, adr/0019 Ek 2026-11-05).
  */
 export const LandingPage = model
   .define("landing_page", {

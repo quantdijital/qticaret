@@ -1,4 +1,10 @@
-import { fingerprint, originality, sharedShare } from "../originality"
+import {
+  fingerprint,
+  keptOutOfSearch,
+  landingRobots,
+  originality,
+  sharedShare,
+} from "../originality"
 
 // Distinct words a text is made of, so overlaps are known exactly
 const words = (prefix: string, count: number) =>
@@ -66,5 +72,18 @@ describe("landing text originality", () => {
     expect(fingerprint(text(base))).toEqual(fingerprint(text(base)))
     expect(fingerprint("")).toEqual({ size: 0, signature: [] })
     expect(originality(fingerprint(""), [fingerprint(text(base))])).toBe(0)
+  })
+})
+
+describe("landing robots (adr/0019 Ek 2026-11-05)", () => {
+  it("keeps a page under 30% out of search, its links followed, and leaves the rest its own", () => {
+    expect([keptOutOfSearch(29), keptOutOfSearch(30)]).toEqual([true, false])
+    expect(landingRobots(29, null)).toBe("noindex_follow")
+    expect(landingRobots(0, "index_follow")).toBe("noindex_follow")
+    // A page already shut harder stays so
+    expect(landingRobots(10, "noindex_nofollow")).toBe("noindex_nofollow")
+    expect(landingRobots(30, null)).toBeNull()
+    expect(landingRobots(85, "index_follow")).toBe("index_follow")
+    expect(landingRobots(85, "noindex_nofollow")).toBe("noindex_nofollow")
   })
 })

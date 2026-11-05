@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ORIGINALITY } from "../../lib/content/originality"
 import { sitemapIndex, urlsetFiles } from "../../lib/seo/sitemap"
 import type { SitemapEntry, SitemapFile } from "../../lib/seo/sitemap"
 import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
@@ -17,8 +18,9 @@ import { termSitemapPaths } from "./sitemap-terms"
 
 /**
  * The sitemap's pages (docs/13 §6): live products, categories, brands and
- * collections at their paths now. Left out: pages marked noindex and pages
- * whose canonical points elsewhere (only canonical URLs belong here).
+ * collections at their paths now. Left out: pages marked noindex, landing
+ * pages served noindex for their text, and pages whose canonical points
+ * elsewhere (only canonical URLs belong here).
  */
 
 const PAGE = 1_000
@@ -96,7 +98,11 @@ const KINDS: readonly KindSpec[] = [
     entity: "landing_page",
     type: CATALOG_ENTITY_TYPES.landing,
     filters: { status: "published" },
-    filtersOf: liveLandingFilters,
+    // Under 30% of its own text a page is served noindex (adr/0019 Ek 2026-11-05): out, as any noindex page
+    filtersOf: async (container) => ({
+      ...(await liveLandingFilters(container)),
+      originality: { $gte: ORIGINALITY.noindex },
+    }),
     images: false,
     changed: ["revised_at", "published_at"],
   },

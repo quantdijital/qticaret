@@ -51,6 +51,9 @@ export const JOB_TYPE_KEYS = Object.keys(JOB_TYPES)
 /** The kinds only their asker and the owner see (an audit log export). */
 export const PRIVATE_JOB_TYPES = JOB_TYPE_KEYS.filter((key) => JOB_TYPES[key]?.privateToAsker)
 
+/** The platform's own kinds (the address data sync): never in the shop's panel. */
+export const PLATFORM_JOB_TYPES = JOB_TYPE_KEYS.filter((key) => JOB_TYPES[key]?.platform)
+
 /** The kinds only an owner sees (a migration's). */
 export const OWNER_JOB_TYPES = JOB_TYPE_KEYS.filter((key) => JOB_TYPES[key]?.ownerOnly)
 

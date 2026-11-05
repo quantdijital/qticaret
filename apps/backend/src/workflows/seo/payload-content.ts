@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { landingRobots } from "../../lib/content/originality"
 import type { SeoOverrides, SeoSubject } from "../../lib/seo/resolve"
 import { fillShopText } from "../../lib/shop/tokens"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
@@ -27,6 +28,15 @@ const iso = (value: string | Date | null | undefined): string | null =>
 // Blog posts sit under the blog's own page (docs/13 §2.2), which the storefront serves;
 // its name follows the shop's language once there are more (F19)
 const BLOG_TRAIL = [{ name: "Blog", path: "/blog" }]
+
+// A page with no SEO fields of its own, when the server sets one for it
+const NO_OVERRIDES: SeoOverrides = {
+  seo_title: null,
+  seo_description: null,
+  canonical_override: null,
+  robots_override: null,
+  og_image_alt: null,
+}
 
 /**
  * A content page's or blog post's subject (F3.16): described by its own
@@ -90,13 +100,16 @@ interface LandingRow {
   title: string
   category_id: string
   body_summary: string
+  originality: number
   seo_meta?: SeoMetaRow | null
 }
 
 /**
  * A facet landing page's subject (F3.16, docs/13 §7): a listing of its
  * products under its category's trail, described by its own text, its
- * category name at hand for the title template.
+ * category name at hand for the title template. Under 30% of its own
+ * text it is served `noindex,follow` until it is more original
+ * (adr/0019 Ek 2026-11-05); above, the page's own robots value.
  */
 export async function landingSubject(
   container: MedusaContainer,
@@ -106,12 +119,14 @@ export async function landingSubject(
   const landing = await rowOf<LandingRow>(
     container,
     "landing_page",
-    ["id", "title", "category_id", "body_summary", ...SEO_FIELDS],
+    ["id", "title", "category_id", "body_summary", "originality", ...SEO_FIELDS],
     id
   )
   if (!landing) {
     return null
   }
+  const own = landing.seo_meta ?? null
+  const robots = landingRobots(landing.originality, own?.robots_override ?? null)
   const category = await rowOf<CategoryRow>(
     container,
     "product_category",
@@ -124,7 +139,10 @@ export async function landingSubject(
     name: landing.title,
     description: fillShopText(landing.body_summary, await shopInfoValues(container)),
     tokens: { kategori: category?.name ?? null },
-    overrides: landing.seo_meta ?? null,
+    overrides:
+      robots === (own?.robots_override ?? null)
+        ? own
+        : { ...(own ?? NO_OVERRIDES), robots_override: robots },
     image: await imageOf(container, landing.seo_meta, null),
     trail: category ? await trailOf(container, category, true) : [],
     listing: await listingItems(container, {
@@ -144,14 +162,6 @@ interface TermRow {
 
 // An archive with no text of its own is described by its newest posts' titles
 const DESCRIBING_POSTS = 5
-
-const NO_OVERRIDES: SeoOverrides = {
-  seo_title: null,
-  seo_description: null,
-  canonical_override: null,
-  robots_override: null,
-  og_image_alt: null,
-}
 
 /**
  * A blog category's or tag's archive (adr/0019 ek 2026-11-03): titled as a

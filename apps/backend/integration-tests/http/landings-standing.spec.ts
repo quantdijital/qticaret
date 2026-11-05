@@ -77,6 +77,35 @@ medusaIntegrationTestRunner({
       expect([live.status, live.data.landing.originality]).toEqual([200, 100])
     })
 
+    it("serves a live copy noindex and keeps it out of the sitemap until its text is its own", async () => {
+      await getContainer()
+        .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+        .saveSection("seo", { canonical_host: "magaza.example.com" }, null)
+      const text = words("ortak", 320)
+      await published("seramik", "Seramik kupalar", text)
+      // The owner, 2026-11-05: live all the same, protected without a block
+      const copy = (await published("porselen", "Porselen kupalar", text)).data.landing
+      expect(copy).toMatchObject({ status: "published" })
+      expect(copy.originality).toBeLessThan(30)
+      const listed = async (path: string) =>
+        (await buildSitemap(getContainer()))?.files.some((file) => file.content.includes(path))
+
+      expect((await kit.resolve("/kategori/ev-ve-yasam/seramik")).seo?.robots).toBe("index,follow")
+      expect((await kit.resolve("/kategori/ev-ve-yasam/porselen")).seo?.robots).toBe(
+        "noindex,follow"
+      )
+      expect(await listed("/kategori/ev-ve-yasam/seramik")).toBe(true)
+      expect(await listed("/kategori/ev-ve-yasam/porselen")).toBe(false)
+
+      // Its own text again: the page's own robots value, back in the sitemap
+      const rewritten = await kit.post<{ landing: Landing }>(`/admin/landings/${copy.id}`, {
+        body: doc(words("porselen", 320)),
+      })
+      expect(rewritten.data.landing.originality).toBe(100)
+      expect((await kit.resolve("/kategori/ev-ve-yasam/porselen")).seo?.robots).toBe("index,follow")
+      expect(await listed("/kategori/ev-ve-yasam/porselen")).toBe(true)
+    })
+
     it("takes the handle from the option's name, or the title, when its value makes no slug", async () => {
       const steel = await kit.landing("paslanmaz_celik", { title: "Çelik kupalar" })
       expect(steel.data.landing.handle).toBe("paslanmaz-celik")

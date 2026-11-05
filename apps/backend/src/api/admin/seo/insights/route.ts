@@ -1,4 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { googleClientOf } from "../../../../lib/google/oauth"
 import { SEO_INSIGHTS_MODULE } from "../../../../modules/seo-insights"
 import type SeoInsightsModuleService from "../../../../modules/seo-insights/service"
 
@@ -8,7 +9,9 @@ const TOP = 5
  * GET /admin/seo/insights (F10.11): the shop's last 28 days in Google
  * Search beside the 28 before, the pages that lost the most clicks, how
  * many inspected pages are in the index, its Core Web Vitals, and when
- * each part last ran.
+ * each part last ran. `search_console` says whether the platform has
+ * opened Google at all: until then the panel shows no Search Console part
+ * (docs/06 principle 10).
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const insights = req.scope.resolve<SeoInsightsModuleService>(SEO_INSIGHTS_MODULE)
@@ -24,6 +27,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   const impressions = sum((row) => row.impressions)
   res.json({
     insights: {
+      search_console: googleClientOf() !== null,
       search: pages.length
         ? {
             period_end: pages[0]?.period_end ?? null,

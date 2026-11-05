@@ -62,9 +62,18 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
     return this.key !== null
   }
 
-  private requireKey(): Buffer {
+  /**
+   * Refuses a save without the key: the owner is told (the panel's alert),
+   * and the operator, whose setting it is, by an error log to alert on.
+   */
+  private keyMissing(provider: CredentialProviderName): ValidationError {
+    logger.error({ event: "integration_credentials.key_missing", provider })
+    return new ValidationError("integration_credentials.key_missing")
+  }
+
+  private requireKey(provider: CredentialProviderName): Buffer {
     if (!this.key) {
-      throw new ValidationError("integration_credentials.key_missing")
+      throw this.keyMissing(provider)
     }
     return this.key
   }
@@ -135,7 +144,7 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
     input: SaveInput,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<CredentialDraft> {
-    const key = this.requireKey()
+    const key = this.requireKey(provider)
     const [row] = await this.listIntegrationCredentials({ provider }, { take: 1 }, sharedContext)
     const current = row ? this.open(row) : null
     const plan = planSave(provider, input, row, current)
@@ -157,7 +166,7 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
   openDraft(draft: CredentialDraft): ResolvedCredentials {
     const secrets = this.open({ ...draft, key_id: this.keyId ?? "" })
     if (!secrets) {
-      throw new ValidationError("integration_credentials.key_missing")
+      throw this.keyMissing(draft.provider)
     }
     return { settings: draft.settings, secrets }
   }

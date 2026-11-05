@@ -263,6 +263,56 @@ medusaIntegrationTestRunner({
       expect(typesByOps.status).toBe(403)
     })
 
+    it("leaves the platform operator's entries out of the shop's list, filter and export", async () => {
+      const container = getContainer()
+      const log = container.resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
+      // As the weekly address sync writes it (adr/0008 Ek 2026-11-04)
+      await log.record({
+        kind: "system",
+        action: "tr_address.imported",
+        actor_type: "system",
+        resource_type: "tr_address",
+        resource_id: "trsync_1",
+      })
+      await log.record({ kind: "system", action: "shop.kept", actor_type: "system" })
+      const list = (params: Record<string, string>) =>
+        http.get<{ audit_entries: AuditEntry[]; count: number }>(
+          `/admin/audit-log?${new URLSearchParams(params).toString()}`,
+          { headers: admin.headers }
+        )
+
+      const all = (await list({ actor_type: "system" })).data
+      const asked = (await list({ resource_type: "tr_address" })).data
+      const types = await http.get<{ resource_types: string[] }>(
+        "/admin/audit-log/resource-types",
+        { headers: admin.headers }
+      )
+      const queued = await http.post<{ async_job: { id: string } }>(
+        "/admin/async-jobs",
+        { type: "audit_log.export", input: { resource_type: "tr_address" } },
+        { headers: admin.headers }
+      )
+      let summary: { rows?: number } | null = null
+      for (let attempt = 0; attempt < 50 && summary === null; attempt++) {
+        const { data } = await http.get<{
+          async_job: { status: string; result_summary: { rows?: number } | null }
+        }>(`/admin/async-jobs/${queued.data.async_job.id}`, { headers: admin.headers })
+        summary = data.async_job.status === "succeeded" ? data.async_job.result_summary : null
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+
+      const actions = all.audit_entries.map(({ action }) => action)
+      expect(actions).toContain("shop.kept")
+      expect(actions).not.toContain("tr_address.imported")
+      expect(all.count).toBe(all.audit_entries.length)
+      expect(asked).toMatchObject({ audit_entries: [], count: 0 })
+      expect(types.data.resource_types).not.toContain("tr_address")
+      expect(summary?.rows).toBe(0)
+      // The record stays for the operator
+      const [kept] = await log.listAuditEntries({ resource_type: "tr_address" })
+      expect(kept?.action).toBe("tr_address.imported")
+    })
+
     it("keeps the audit log from secret API keys", async () => {
       const { result } = await createApiKeysWorkflow(getContainer()).run({
         input: { api_keys: [{ title: "integration", type: "secret", created_by: "user_test" }] },

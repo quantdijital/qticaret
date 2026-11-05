@@ -56,5 +56,12 @@ export interface JobType<Input = unknown> {
    * sent), never through `POST /admin/async-jobs`, whose input it would trust.
    */
   internal?: boolean
+  /**
+   * The platform's own upkeep (the address reference data): queued by its
+   * schedule alone, never by anyone in the shop, who can do nothing with
+   * it. The shop's panel never lists or reaches it (docs/06 principle 10);
+   * the operator watches its logs. Implies `internal`.
+   */
+  platform?: boolean
   execute: (context: JobContext, input: Input) => Promise<JobResult>
 }

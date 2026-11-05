@@ -6,12 +6,35 @@
  * the share of one text found in the other, in constant time and the same
  * way every time; the full texts are never compared.
  */
+import type { SeoOverrides } from "../seo/resolve"
 
 // Changing it makes stored fingerprints incomparable: every page would read as its own
 export const SIGNATURE_SIZE = 128
 
-/** docs/14 L-UNIQ-01: under 40% of its own text a landing page warns; under 30% it is not published. */
-export const ORIGINALITY = { warn: 40, block: 30 } as const
+/**
+ * docs/14 L-UNIQ-01: under 40% of its own text a landing page warns; under
+ * 30% it may still go live (the shop's call, 2026-11-04), but is kept out
+ * of search until it is more original (adr/0019 Ek 2026-11-05).
+ */
+export const ORIGINALITY = { warn: 40, noindex: 30 } as const
+
+type Robots = SeoOverrides["robots_override"]
+
+/** Whether a landing page is kept out of search for its text: out of the sitemap too. */
+export const keptOutOfSearch = (share: number): boolean => share < ORIGINALITY.noindex
+
+/**
+ * The robots value a landing page is served with: its own while its text
+ * is original enough; below the line `noindex,follow` (its products'
+ * links still followed), or its own when that already says nofollow.
+ * Protects the shop without blocking it (the owner's ruling, 2026-11-05).
+ */
+export function landingRobots(share: number, own: Robots): Robots {
+  if (!keptOutOfSearch(share)) {
+    return own
+  }
+  return own === "noindex_nofollow" ? own : "noindex_follow"
+}
 const SHINGLE_WORDS = 5
 const WORD = /[\p{L}\p{N}]+/gu
 

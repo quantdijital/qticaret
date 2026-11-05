@@ -4,7 +4,8 @@ import type { AdvisorFacts, Rule, SeoIssue } from "./types"
 /**
  * Facet landing page rules (docs/14 §3.7): programmatic pages must stand
  * on their own (Google's scaled content abuse policy). Originality under
- * 30% is not published at all; under 40% is critical here. docs/14's
+ * 40% is critical here; under 30% the page, live or not, is also served
+ * noindex until it is more original (adr/0019 Ek 2026-11-05). docs/14's
  * L-EMPTY-01 is L-PRODUCTS-01: the panel words a rule by its name, and
  * EMPTY-01 says "no products" for listings.
  */

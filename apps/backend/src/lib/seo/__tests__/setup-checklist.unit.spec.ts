@@ -1,5 +1,5 @@
 import { DEFAULT_ROBOTS_TXT } from "../../../modules/platform-settings/sections/seo"
-import { robotsOpen, seoSetup } from "../setup-checklist"
+import { actionableCount, robotsOpen, seoSetup } from "../setup-checklist"
 import type { SeoSetupFacts } from "../setup-checklist"
 
 const FRESH: SeoSetupFacts = {
@@ -28,10 +28,20 @@ describe("seoSetup", () => {
       ["merchant", "google_account"],
       ["indexnow", null],
     ])
-    expect(open({ ...FRESH, google: { ...FRESH.google, platform: false } })).toContainEqual([
-      "merchant",
-      "google_platform",
+  })
+
+  it("leaves Google's items out until the platform opens Google (docs/06 principle 10)", () => {
+    const closed = seoSetup({ ...FRESH, google: { ...FRESH.google, platform: false } })
+    expect(closed.map((entry) => entry.key)).toEqual([
+      "legal_identity",
+      "legal_texts",
+      "canonical_host",
+      "robots",
+      "share_image",
+      "indexnow",
     ])
+    expect(actionableCount(closed)).toBe(5)
+    expect(actionableCount(seoSetup(FRESH))).toBe(7)
   })
 
   it("drops each item once it is done", () => {

@@ -1,4 +1,4 @@
-import { JOB_TYPE_KEYS, exclusiveTypes, jobType, queueLockKey } from "../types"
+import { JOB_TYPE_KEYS, PLATFORM_JOB_TYPES, exclusiveTypes, jobType, queueLockKey } from "../types"
 
 // The audit reads redirects, and the publish gate (an import's, a bulk
 // edit's) assesses products, through module links, which need a running
@@ -42,8 +42,11 @@ describe("job types", () => {
     expect(jobType("tr_address.sync")).toMatchObject({
       singleton: true,
       internal: true,
+      platform: true,
       containsPersonalData: false,
     })
+    // The platform's own upkeep: the only kind no one in the shop asks for (docs/06 principle 10)
+    expect(PLATFORM_JOB_TYPES).toEqual(["tr_address.sync"])
     expect(jobType("tr_address.sync")?.input.safeParse({}).success).toBe(true)
     expect(jobType("tr_address.sync")?.input.safeParse({ source: "file" }).success).toBe(false)
   })

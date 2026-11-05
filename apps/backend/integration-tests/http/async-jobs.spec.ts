@@ -237,6 +237,47 @@ medusaIntegrationTestRunner({
       expect(stopped?.status).toBe("cancelled")
     })
 
+    it("keeps the platform's own jobs out of the shop's list, its count and its reach", async () => {
+      // As the weekly address check queues it: no one in the shop asked (docs/06 principle 10)
+      const sync = await service().createAsyncJobs({
+        type: "tr_address.sync",
+        requested_by: null,
+        input: { only_if_changed: true },
+      })
+      const shops = await service().createAsyncJobs({
+        type: "report.export",
+        requested_by: "user_shop",
+        input: {},
+      })
+      const list = (query = "") =>
+        http.get<{ async_jobs: Job[]; count: number }>(`/admin/async-jobs${query}`, {
+          headers: admin.headers,
+        })
+      const all = (await list()).data
+      const byType = (await list("?type=tr_address.sync")).data
+      const one = await settle(http.get(`/admin/async-jobs/${sync.id}`, { headers: admin.headers }))
+      const cancel = await settle(
+        http.post(`/admin/async-jobs/${sync.id}/cancel`, {}, { headers: admin.headers })
+      )
+      const asked = await settle(
+        http.post<{ message?: string }>(
+          "/admin/async-jobs",
+          { type: "tr_address.sync", input: {} },
+          { headers: admin.headers }
+        )
+      )
+
+      expect(all.async_jobs.map((job) => job.id)).toContain(shops.id)
+      expect(all.async_jobs.map((job) => job.id)).not.toContain(sync.id)
+      expect(all.count).toBe(all.async_jobs.length)
+      expect(byType).toMatchObject({ async_jobs: [], count: 0 })
+      expect(one.status).toBe(404)
+      expect(cancel.status).toBe(404)
+      expect([asked.status, asked.data.message]).toEqual([400, "async_job.type_unknown"])
+      // The record stays for the operator, untouched
+      expect((await service().retrieveAsyncJob(sync.id)).status).toBe("queued")
+    })
+
     it("does not let a queued job that lost its event block its type", async () => {
       const lost = await service().createAsyncJobs({ type: "audit_log.export" })
       // created_at belongs to the database; the test ages a job on purpose

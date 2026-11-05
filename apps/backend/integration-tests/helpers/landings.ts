@@ -24,7 +24,12 @@ export interface Answer {
   status?: number
   location?: string
   entity_type?: string
-  seo?: { title: string; breadcrumbs: { name: string }[]; jsonLd: Record<string, unknown>[] } | null
+  seo?: {
+    title: string
+    robots: string
+    breadcrumbs: { name: string }[]
+    jsonLd: Record<string, unknown>[]
+  } | null
 }
 
 type Answered<T> = HttpResponse<T & { message?: string }>

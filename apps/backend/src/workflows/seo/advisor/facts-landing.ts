@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { docStats, renderDoc } from "../../../lib/content"
 import type { ContentDoc } from "../../../lib/content"
+import { keptOutOfSearch } from "../../../lib/content/originality"
 import type { AdvisorFacts } from "../../../lib/seo/advisor"
 import { BATCH_DAYS } from "../../../lib/seo/advisor/rules-landing"
 import { CONTENT_MODULE } from "../../../modules/content"
@@ -115,7 +116,12 @@ export async function landingFacts(
   const title = seo?.title ?? row.title
   const description = seo?.description ?? ""
   return {
-    isListed: row.status === "published" && !noindex && !own?.canonical_override,
+    // Kept out of search for its text (adr/0019 Ek 2026-11-05), it is no one's duplicate
+    isListed:
+      row.status === "published" &&
+      !noindex &&
+      !own?.canonical_override &&
+      !keptOutOfSearch(row.originality),
     kind: "landing",
     name: row.title,
     handle: row.handle,

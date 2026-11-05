@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto"
 import { moduleIntegrationTestRunner } from "@medusajs/test-utils"
 import { anyOf, fakeSecret } from "@qticaret/testing"
+import { logger } from "../../../lib/logging"
 import { INTEGRATION_CREDENTIALS_MODULE } from ".."
 import { CREDENTIAL_PROVIDER_NAMES } from "../providers"
 import type IntegrationCredentialsModuleService from "../service"
@@ -216,11 +217,18 @@ moduleIntegrationTestRunner<IntegrationCredentialsModuleService>({
   resolve: "./src/modules/integration-credentials",
   moduleOptions: {},
   testSuite: ({ service }) => {
-    it("saves nothing without the server's key and says so", async () => {
+    it("saves nothing without the server's key and says so, to the owner and the operator", async () => {
+      const logged = jest.spyOn(logger, "error").mockImplementation(() => undefined)
       expect(service.isKeyConfigured()).toBe(false)
       expect(await reasonOf(service.draft("paytr", { settings, secrets }))).toBe(
         "integration_credentials.key_missing"
       )
+      // The operator's setting: an error log with a stable event to alert on
+      expect(logged).toHaveBeenCalledWith({
+        event: "integration_credentials.key_missing",
+        provider: "paytr",
+      })
+      logged.mockRestore()
     })
   },
 })

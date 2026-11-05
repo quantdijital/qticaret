@@ -23,6 +23,7 @@ export const trAddressSync: JobType<z.infer<typeof input>> = {
   resultTtlDays: 30,
   containsPersonalData: false,
   internal: true,
+  platform: true,
   execute: async ({ container, job }, { only_if_changed }) => {
     try {
       const { result } = await importTrAddressWorkflow(container).run({

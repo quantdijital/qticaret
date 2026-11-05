@@ -73,10 +73,14 @@ export interface GoogleFacts {
   lastSyncFailed: boolean
 }
 
-/** Google: one account for Search Console and Merchant Center. */
-export function googleRow(facts: GoogleFacts): IntegrationRow {
+/**
+ * Google: one account for Search Console and Merchant Center. None until
+ * the platform's client is set: the shop can do nothing with a service the
+ * platform has not opened (docs/06 principle 10), so it is not offered.
+ */
+export function googleRow(facts: GoogleFacts): IntegrationRow | null {
   if (!facts.platform) {
-    return row("google", "marketing", "off", [{ code: "platform_not_ready" }])
+    return null
   }
   const base = accountRow("marketing", facts.account)
   if (base.state === "not_set_up") {

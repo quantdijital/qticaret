@@ -39,7 +39,7 @@ describe("integration overview rules", () => {
     })
   })
 
-  it("says what Google still needs: the platform, Search Console's site, Merchant Center", () => {
+  it("says what Google still needs once the platform opens it: Search Console's site, Merchant Center", () => {
     const google = (facts: Partial<Parameters<typeof googleRow>[0]> = {}) =>
       googleRow({
         platform: true,
@@ -52,10 +52,8 @@ describe("integration overview rules", () => {
       })
 
     expect(google()).toMatchObject({ state: "connected", notes: [] })
-    expect(google({ platform: false })).toMatchObject({
-      state: "off",
-      notes: [{ code: "platform_not_ready" }],
-    })
+    // Not offered at all until the platform opens it (docs/06 principle 10)
+    expect(google({ platform: false })).toBeNull()
     expect(google({ site: null, merchantId: null })).toMatchObject({
       state: "connected",
       notes: [{ code: "search_console_no_site" }, { code: "merchant_not_chosen" }],
@@ -64,7 +62,7 @@ describe("integration overview rules", () => {
       state: "attention",
       notes: [{ code: "search_console_not_granted" }, { code: "merchant_sync_failed" }],
     })
-    expect(google({ account: status("google", "not_configured") }).state).toBe("not_set_up")
+    expect(google({ account: status("google", "not_configured") })?.state).toBe("not_set_up")
   })
 
   it("reads the shop's own services: transfers, e-mail, feeds", () => {

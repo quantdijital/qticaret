@@ -80,7 +80,7 @@ export async function integrationOverview(container: MedusaContainer): Promise<I
   const google = account("google")
   const scopes = text(google.settings?.["scopes"]) ?? ""
 
-  const rows: IntegrationRow[] = [
+  const listed: (IntegrationRow | null)[] = [
     ...ACCOUNTS.filter(([group]) => group === "payments").map(([group, id]) =>
       accountRow(group, account(id))
     ),
@@ -103,6 +103,8 @@ export async function integrationOverview(container: MedusaContainer): Promise<I
     }),
     feedsRow(token !== null, brand.storefrontUrl !== null),
   ]
+  // A service the platform has not opened is not offered (Google without its client)
+  const rows = listed.filter((each): each is IntegrationRow => each !== null)
   const log = providerFailureLog()
   // The failures are a help, not the page: a slow or missing Redis (its first
   // command waits on the connection) leaves them out rather than the page

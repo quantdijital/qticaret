@@ -65,7 +65,7 @@ medusaIntegrationTestRunner({
         "meta",
         "ga4",
         "resend",
-        "google",
+        // No Google client in tests: a service the platform has not opened is not offered
         "feeds",
       ])
       expect(row("paytr")).toMatchObject({ state: "not_set_up", test: null, failures: [] })
@@ -78,6 +78,26 @@ medusaIntegrationTestRunner({
         notes: [{ code: "platform_sender" }],
       })
       expect(byOps.status).toBe(403)
+    })
+
+    it("offers Google once the platform has its client, as before", async () => {
+      const owner = await createAdminUser(http, getContainer())
+      Object.assign(process.env, {
+        GOOGLE_OAUTH_CLIENT_ID: "fake-client",
+        GOOGLE_OAUTH_CLIENT_SECRET: "fake-client-password",
+      })
+      try {
+        const rows = await overview(owner.headers)
+        expect(rows.map(({ id }) => id).slice(-2)).toEqual(["google", "feeds"])
+        expect(rows.find((each) => each.id === "google")).toMatchObject({
+          group: "marketing",
+          state: "not_set_up",
+          notes: [],
+        })
+      } finally {
+        Reflect.deleteProperty(process.env, "GOOGLE_OAUTH_CLIENT_ID")
+        Reflect.deleteProperty(process.env, "GOOGLE_OAUTH_CLIENT_SECRET")
+      }
     })
 
     it("shows a provider's last failed call by its codes, nothing of what was sent", async () => {

@@ -29,6 +29,7 @@ interface AuditFinding {
 }
 
 interface Insights {
+  search_console: boolean
   search: {
     clicks: number
     impressions: number
@@ -169,6 +170,8 @@ medusaIntegrationTestRunner({
       const cwv = findings.find((each) => each.ruleId === "S-CWV-01")
 
       expect(ran.data).toMatchObject({ search: { ran: true }, field: { ran: true } })
+      // The platform's Google client is set: the panel shows the Search Console part
+      expect(data.insights.search_console).toBe(true)
       expect(google.sitemaps).toEqual([`${SITE} https://${HOST}/sitemap.xml`])
       expect(google.inspected).toContain(page)
       expect(data.insights.search).toMatchObject({

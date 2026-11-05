@@ -3,7 +3,9 @@ import { isCrawlable, parseRobots } from "./robots-match"
 /**
  * The SEO setup checklist (docs/14 §5, F12.10): what a shop sets once so
  * search engines find, trust and show it. Each item is judged from the
- * shop's settings; a done item leaves the list.
+ * shop's settings; a done item leaves the list. Google's items are not on
+ * it until the platform has opened Google: the shop can do nothing about
+ * them before (docs/06 principle 10).
  */
 
 export const SEO_SETUP_ITEMS = [
@@ -20,10 +22,8 @@ export type SeoSetupItem = (typeof SEO_SETUP_ITEMS)[number]
 
 /** Why an open item cannot be done from the panel yet. */
 export type SeoSetupBlock =
-  /** The platform has no Google client in this environment. */
-  | "google_platform"
   /** Search Console and Merchant Center need the Google account first. */
-  | "google_account"
+  "google_account"
 
 export interface SeoSetupFacts {
   /** The shop's legal identity is complete (F13.9). */
@@ -34,7 +34,7 @@ export interface SeoSetupFacts {
   robotsTxt: string
   shareImage: string | null
   google: {
-    /** The platform's Google client is configured. */
+    /** The platform's Google client is configured; without it Google's items are left out. */
     platform: boolean
     /** The shop's Google account is connected. */
     connected: boolean
@@ -58,8 +58,7 @@ export function robotsOpen(text: string): boolean {
   return isCrawlable(parseRobots(text), "googlebot", "/") && SITEMAP_LINE.test(text)
 }
 
-const googleBlock = (google: SeoSetupFacts["google"]): SeoSetupBlock | null =>
-  !google.platform ? "google_platform" : !google.connected ? "google_account" : null
+const GOOGLE_ITEMS: readonly SeoSetupItem[] = ["search_console", "merchant"]
 
 export function seoSetup(facts: SeoSetupFacts): SeoSetupEntry[] {
   const done: Record<SeoSetupItem, boolean> = {
@@ -79,7 +78,7 @@ export function seoSetup(facts: SeoSetupFacts): SeoSetupEntry[] {
     switch (key) {
       case "search_console":
       case "merchant":
-        return googleBlock(facts.google)
+        return facts.google.connected ? null : "google_account"
       case "legal_identity":
       case "legal_texts":
       case "canonical_host":
@@ -89,9 +88,11 @@ export function seoSetup(facts: SeoSetupFacts): SeoSetupEntry[] {
         return null
     }
   }
-  return SEO_SETUP_ITEMS.map((key) => ({ key, done: done[key], blocked: blocked(key) }))
+  return SEO_SETUP_ITEMS.filter((key) => facts.google.platform || !GOOGLE_ITEMS.includes(key)).map(
+    (key) => ({ key, done: done[key], blocked: blocked(key) })
+  )
 }
 
-/** Open items the shop can take on now: not waiting for the platform. */
+/** Open items: every one is the shop's to take on. */
 export const actionableCount = (entries: readonly SeoSetupEntry[]): number =>
-  entries.filter((entry) => !entry.done && entry.blocked !== "google_platform").length
+  entries.filter((entry) => !entry.done).length

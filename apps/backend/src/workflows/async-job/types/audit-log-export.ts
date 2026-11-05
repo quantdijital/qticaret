@@ -4,6 +4,7 @@ import { CSV_BOM, toCsv } from "../../../lib/security"
 import { AUDIT_LOG_MODULE } from "../../../modules/audit-log"
 import { AUDIT_ACTOR_TYPES } from "../../../modules/audit-log/service"
 import type AuditLogModuleService from "../../../modules/audit-log/service"
+import { SHOP_ENTRIES } from "../../../modules/audit-log/shop-view"
 import type { JobType } from "./types"
 
 const PAGE = 1_000
@@ -71,6 +72,8 @@ export const auditLogExport: JobType<z.infer<typeof input>> = {
     const where = {
       ...fields,
       created_at: { ...(created_after ? { $gte: new Date(created_after) } : {}), $lte: until },
+      // As the viewer: the platform operator's entries are not the shop's (docs/06 principle 10)
+      $and: [SHOP_ENTRIES],
     }
     // Unguessable: the dev bucket is readable by URL (adr/0006)
     const file = await resultFile(`audit-log-${randomUUID()}.csv`, "text/csv")

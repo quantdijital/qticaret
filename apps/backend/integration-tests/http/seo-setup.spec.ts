@@ -48,17 +48,21 @@ medusaIntegrationTestRunner({
           })
         )
 
-      // No Google client in tests: those wait for the platform, not the shop
+      // No Google client in tests: its items are not the shop's to see (docs/06 principle 10)
       expect(await open()).toEqual([
         ["legal_identity", null],
         ["legal_texts", null],
         ["canonical_host", null],
         ["share_image", null],
-        ["search_console", "google_platform"],
-        ["merchant", "google_platform"],
         ["indexnow", null],
       ])
       expect(await tasks()).toBe(5)
+      // Nor does the SEO page show a Search Console part (docs/06 principle 10)
+      const insights = await http.get<{ insights: { search_console: boolean } }>(
+        "/admin/seo/insights",
+        { headers: admin.headers }
+      )
+      expect(insights.data.insights.search_console).toBe(false)
 
       const stranger = await saveSeo({ default_og_image: "https://evil.example/x.png" })
       expect(stranger.status).toBe(400)
@@ -83,8 +87,6 @@ medusaIntegrationTestRunner({
       expect(await open()).toEqual([
         ["legal_identity", null],
         ["legal_texts", null],
-        ["search_console", "google_platform"],
-        ["merchant", "google_platform"],
       ])
       expect(await tasks()).toBe(2)
 
