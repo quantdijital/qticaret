@@ -47,7 +47,7 @@ Mağazanın yapacakları:
 - **Eşitleme:** her gün 04:20 UTC, konum seçilince ve panelde "Şimdi eşitle"yle. Yeni yorum eklenir, değişen güncellenir, Google'da silinen silinir.
 - **30 gün:** Business Profile API politikaları saklanan içeriği en çok 30 gün sayar. Son başarılı eşitleme 30 günden eskiyse yorumlar, ortalama ve sayı silinir (`google_reviews.stale_purged`); vitrin eski içeriği göstermez.
 - **Puan Google'ındır:** ortalama ve sayı Google'ın yanıtından gelir, hesaplanmaz, kendi yorumlarımızla birleştirilmez.
-- **Gizleme:** panelde "Vitrinde" anahtarı yorumu vitrinden kaldırır; yorum Google'da ve Google'ın puanında kalır. Moderasyon yok.
+- **Vitrinden kaldırma:** yalnız üç gerekçeyle, tek tek: kişisel veri, hakaret/küfür/nefret söylemi, konu dışı/spam. Puanı nedeniyle kaldırma yok, toplu kaldırma yok. Gerekçe, kim ve ne zaman tutulur; her kaldırma ve geri alma denetim kaydına yazılır (`google_review`). Yorum Google'da ve Google'ın puanında kalır. Moderasyon yok (adr/0058 §7).
 - **Kaldırma:** "Bağlantıyı kaldır" konumu ve yorumları siler (Google bağlantısı kalır). Google bağlantısı kesilirse yorumlar da silinir.
 - **SEO:** Google yorumları hiçbir JSON-LD'ye girmez (docs/13 §5, Google'ın review snippet kuralları).
 - **Loglar (operatör için):** `google_reviews.sync_failed` (error: API kapalı, proje onaysız, Google'a ulaşılamıyor; warn: mağazanın onaracağı `invalid_grant`, `reviews_scope`), `google_reviews.stale_purged` (error), `google_reviews.synced` (info).
