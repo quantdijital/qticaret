@@ -23,7 +23,7 @@ describe("SummaryField", () => {
   it("opens on one empty row with the first example, counted as none", () => {
     render(<Harness initial={[]} />)
     expect(line(1)).toHaveValue("")
-    expect(line(1)).toHaveAttribute("placeholder", "N690 çelik, 58-59 HRC")
+    expect(line(1)).toHaveAttribute("placeholder", "Örn. Malzeme ve ölçü bilgisi")
     expect(line(1)).toHaveAttribute("maxLength", "90")
     expect(screen.getByText("0/5")).toBeInTheDocument()
     // No arrows for a single row; nothing to remove yet

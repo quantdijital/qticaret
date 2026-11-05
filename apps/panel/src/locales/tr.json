@@ -3043,11 +3043,11 @@
       "up": "{{n}}. maddeyi yukarı taşı",
       "down": "{{n}}. maddeyi aşağı taşı",
       "placeholders": [
-        "N690 çelik, 58-59 HRC",
-        "Geyik boynuzu sap",
-        "Sırttan kilitli",
-        "2 yıl garanti",
-        "Deri kılıfıyla gönderilir"
+        "Örn. Malzeme ve ölçü bilgisi",
+        "Örn. Öne çıkan bir özellik",
+        "Örn. Kullanım alanı",
+        "Örn. 2 yıl garanti",
+        "Örn. Kutu içeriği"
       ]
     },
     "detail": {

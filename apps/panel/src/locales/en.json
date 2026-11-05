@@ -3043,11 +3043,11 @@
       "up": "Move line {{n}} up",
       "down": "Move line {{n}} down",
       "placeholders": [
-        "N690 steel, 58-59 HRC",
-        "Antler handle",
-        "Back lock",
-        "2-year warranty",
-        "Comes with a leather sheath"
+        "E.g. Material and size",
+        "E.g. A standout feature",
+        "E.g. What it is used for",
+        "E.g. 2-year warranty",
+        "E.g. What is in the box"
       ]
     },
     "detail": {
