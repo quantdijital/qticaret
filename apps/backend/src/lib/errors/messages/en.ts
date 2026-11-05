@@ -459,6 +459,11 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "google.location_invalid":
     "This business location is not one the connected Google account manages; refresh the list.",
   "google.review_not_found": "This Google review is gone; it may have been removed on Google.",
+  "google.hide_reason_required":
+    "Choose a reason to take the review off the storefront: personal data, abuse or off topic.",
+  "google.hide_reason_invalid":
+    "A Google review can only be taken off for personal data, abuse or being off topic.",
+  "google.hide_reason_unexpected": "A review put back on the storefront takes no reason.",
   "reports.range_invalid":
     "The date range is not valid: it cannot start after it ends, lie in the future or run over 366 days.",
   "catalog_import.cost_invalid":

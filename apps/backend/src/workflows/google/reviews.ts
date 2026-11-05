@@ -11,6 +11,7 @@ import type { BusinessLocation } from "../../lib/google/business-profile"
 import { googleApi } from "../../lib/google/client"
 import { BUSINESS_PROFILE_SCOPE, googleClientOf, hasScope } from "../../lib/google/oauth"
 import { GOOGLE_REVIEWS_MODULE } from "../../modules/google-reviews"
+import type { HideReason } from "../../modules/google-reviews/models/google-review"
 import type GoogleReviewsModuleService from "../../modules/google-reviews/service"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -117,23 +118,40 @@ export const forgetGoogleReviewsWorkflow = createWorkflow(
   (input: Record<string, never>) => new WorkflowResponse(forgetGoogleReviewsStep(input))
 )
 
-/** Takes a Google review off the storefront, or puts it back. Undone by the opposite. */
+export type SetGoogleReviewHiddenInput =
+  | { id: string; hidden: true; reason: HideReason; user_id: string }
+  | { id: string; hidden: false; user_id: string }
+
+/**
+ * Takes one Google review off the storefront for one of the three reasons
+ * (personal data, abuse, off topic; adr/0058 Ek), with who and when, or
+ * puts it back. Never by its stars: a reason is required, and one review
+ * at a time. The route's audit entry records it (`google_review`).
+ * Undone by putting its visibility back as it was.
+ */
 const setGoogleReviewHiddenStep = createStep(
   "google-reviews-set-hidden",
-  async (input: { id: string; hidden: boolean }, { container }) => {
-    if (!(await googleReviewsOf(container).setHidden(input.id, input.hidden))) {
+  async (input: SetGoogleReviewHiddenInput, { container }) => {
+    const previous = await googleReviewsOf(container).setVisibility(
+      input.id,
+      input.hidden ? { hidden: true, reason: input.reason, by: input.user_id } : { hidden: false }
+    )
+    if (!previous) {
       throw new ValidationError("google.review_not_found")
     }
-    return new StepResponse({ id: input.id, hidden: input.hidden }, input)
+    return new StepResponse(
+      { id: input.id, hidden: input.hidden, reason: input.hidden ? input.reason : null },
+      { id: input.id, previous }
+    )
   },
   async (undo, { container }) => {
     if (undo) {
-      await googleReviewsOf(container).setHidden(undo.id, !undo.hidden)
+      await googleReviewsOf(container).restoreVisibility(undo.id, undo.previous)
     }
   }
 )
 
 export const setGoogleReviewHiddenWorkflow = createWorkflow(
   "google-reviews-set-hidden",
-  (input: { id: string; hidden: boolean }) => new WorkflowResponse(setGoogleReviewHiddenStep(input))
+  (input: SetGoogleReviewHiddenInput) => new WorkflowResponse(setGoogleReviewHiddenStep(input))
 )

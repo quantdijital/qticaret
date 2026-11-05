@@ -1,4 +1,6 @@
 import { z } from "@medusajs/framework/zod"
+import { HIDE_REASONS } from "../../../modules/google-reviews/models/google-review"
+import type { HideReason } from "../../../modules/google-reviews/models/google-review"
 
 /** The shop's Merchant Center account number. */
 export const AdminPostGoogleMerchant = z
@@ -38,9 +40,34 @@ export const AdminGetGoogleReviews = z
   .strict()
 export type AdminGetGoogleReviewsType = z.infer<typeof AdminGetGoogleReviews>
 
-/** A Google review taken off the storefront, or put back. */
-export const AdminPostGoogleReview = z.object({ hidden: z.boolean() }).strict()
+/**
+ * One Google review taken off the storefront, or put back (adr/0058 Ek):
+ * off only with one of the three reasons, never by its stars; back without
+ * one. One review a call: no list of ids, no filter.
+ */
+export const AdminPostGoogleReview = z
+  .object({
+    hidden: z.boolean(),
+    // Read as text and checked below: Medusa words an enum's refusal itself, not by our key
+    reason: z.string().max(40).optional(),
+  })
+  .strict()
+  .superRefine((body, ctx) => {
+    if (body.hidden && body.reason === undefined) {
+      ctx.addIssue({ code: "custom", path: ["reason"], message: "google.hide_reason_required" })
+    }
+    if (body.hidden && body.reason !== undefined && !isHideReason(body.reason)) {
+      ctx.addIssue({ code: "custom", path: ["reason"], message: "google.hide_reason_invalid" })
+    }
+    if (!body.hidden && body.reason !== undefined) {
+      ctx.addIssue({ code: "custom", path: ["reason"], message: "google.hide_reason_unexpected" })
+    }
+  })
 export type AdminPostGoogleReviewType = z.infer<typeof AdminPostGoogleReview>
+
+/** One of the three reasons a Google review may leave the storefront for. */
+export const isHideReason = (value: string): value is HideReason =>
+  (HIDE_REASONS as readonly string[]).includes(value)
 
 /** The storefront's Google reviews block: Google's average and count, the newest reviews. */
 export const StoreGetGoogleReviews = z

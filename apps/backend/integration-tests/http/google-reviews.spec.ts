@@ -204,7 +204,7 @@ medusaIntegrationTestRunner({
       const okan = listed.data.reviews.find((each) => each.author === "Okan Koç")
       await http.post(
         `/admin/google/reviews/items/${okan?.id ?? ""}`,
-        { hidden: true },
+        { hidden: true, reason: "personal_data" },
         { headers: admin.headers }
       )
       // Google's newest review edited, the second one removed there, a new one written

@@ -6,7 +6,7 @@ export class Migration20261105144414 extends Migration {
       `alter table if exists "google_review" drop constraint if exists "google_review_review_id_unique";`
     )
     this.addSql(
-      `create table if not exists "google_review" ("id" text not null, "review_id" text not null, "reviewer_name" text null, "reviewer_photo_url" text null, "rating" integer not null, "comment" text null, "written_at" timestamptz not null, "edited_at" timestamptz not null, "reply" text null, "replied_at" timestamptz null, "hidden" boolean not null default false, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "google_review_pkey" primary key ("id"));`
+      `create table if not exists "google_review" ("id" text not null, "review_id" text not null, "reviewer_name" text null, "reviewer_photo_url" text null, "rating" integer not null, "comment" text null, "written_at" timestamptz not null, "edited_at" timestamptz not null, "reply" text null, "replied_at" timestamptz null, "hidden" boolean not null default false, "hidden_reason" text check ("hidden_reason" in ('personal_data', 'abusive', 'off_topic')) null, "hidden_by" text null, "hidden_at" timestamptz null, "created_at" timestamptz not null default now(), "updated_at" timestamptz not null default now(), "deleted_at" timestamptz null, constraint "google_review_pkey" primary key ("id"));`
     )
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_google_review_deleted_at" ON "google_review" ("deleted_at") WHERE deleted_at IS NULL;`

@@ -466,6 +466,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "google.location_invalid":
     "Bu işletme konumu bağlı Google hesabının yönettikleri arasında değil; listeyi yenileyin.",
   "google.review_not_found": "Bu Google yorumu artık yok; Google'da silinmiş olabilir.",
+  "google.hide_reason_required":
+    "Yorumu vitrinden kaldırmak için bir gerekçe seçin: kişisel veri, hakaret ya da konu dışı.",
+  "google.hide_reason_invalid":
+    "Google yorumu yalnızca kişisel veri, hakaret ya da konu dışı olduğu için kaldırılabilir.",
+  "google.hide_reason_unexpected": "Vitrine geri alınan yorum için gerekçe gönderilmez.",
   "reports.range_invalid":
     "Tarih aralığı geçersiz: başlangıç bitişten sonra, gelecekte ya da 366 günden uzun olamaz.",
   "catalog_import.cost_invalid": "Maliyet 0 ile 10.000.000 arasında, en fazla 2 ondalıklı olmalı.",

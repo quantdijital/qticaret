@@ -1,10 +1,18 @@
 import { model } from "@medusajs/framework/utils"
 
 /**
+ * Why the shop may take a Google review off its storefront (adr/0058 Ek,
+ * the owner 2026-11-05): these three only, never its stars.
+ */
+export const HIDE_REASONS = ["personal_data", "abusive", "off_topic"] as const
+export type HideReason = (typeof HIDE_REASONS)[number]
+
+/**
  * A Google review of the shop's location (adr/0058), as Google gives it:
  * kept only to show it, changed and removed as Google changes and removes
- * it at each sync. `hidden` is the shop's alone: off the storefront, kept
- * across syncs; Google's average and count stay Google's.
+ * it at each sync. `hidden` is the shop's alone, with its reason, who and
+ * when: off the storefront, kept across syncs; Google's average and count
+ * stay Google's.
  */
 export const GoogleReview = model
   .define("google_review", {
@@ -22,6 +30,11 @@ export const GoogleReview = model
     reply: model.text().nullable(),
     replied_at: model.dateTime().nullable(),
     hidden: model.boolean().default(false),
+    /** Set with `hidden`, cleared when the review is put back. */
+    hidden_reason: model.enum([...HIDE_REASONS]).nullable(),
+    /** The staff member who took it off the storefront. */
+    hidden_by: model.text().nullable(),
+    hidden_at: model.dateTime().nullable(),
   })
   .indexes([
     { on: ["review_id"], unique: true, where: "deleted_at IS NULL" },

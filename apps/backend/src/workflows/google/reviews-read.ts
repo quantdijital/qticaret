@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { BUSINESS_PROFILE_SCOPE, googleClientOf, hasScope } from "../../lib/google/oauth"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -53,7 +54,7 @@ export async function googleReviewsStatus(container: Resolver) {
   }
 }
 
-const panelReview = (review: ReviewRow) => ({
+const panelReview = (review: ReviewRow, names: ReadonlyMap<string, string>) => ({
   id: review.id,
   author: review.reviewer_name,
   rating: review.rating,
@@ -61,12 +62,37 @@ const panelReview = (review: ReviewRow) => ({
   created_at: iso(review.written_at),
   replied: review.reply !== null,
   hidden: review.hidden,
+  // Why, by whom and when it was taken off the storefront (adr/0058 Ek)
+  hidden_reason: review.hidden ? review.hidden_reason : null,
+  hidden_by: review.hidden && review.hidden_by ? (names.get(review.hidden_by) ?? null) : null,
+  hidden_at: review.hidden ? iso(review.hidden_at) : null,
 })
 
-/** The Google reviews kept, newest first, twenty a page, with whether each is hidden. */
+/** Staff members' names (or addresses) by id, for who took a review off. */
+async function staffNames(container: Resolver, ids: string[]): Promise<Map<string, string>> {
+  if (ids.length === 0) {
+    return new Map()
+  }
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "user",
+    fields: ["id", "first_name", "last_name", "email"],
+    filters: { id: ids },
+  })
+  return new Map(
+    data.map((user) => {
+      const name = [user.first_name, user.last_name].filter(Boolean).join(" ").trim()
+      return [user.id, name === "" ? user.email : name] as const
+    })
+  )
+}
+
+/** The Google reviews kept, newest first, twenty a page, each hidden one with why and by whom. */
 export async function panelGoogleReviews(container: Resolver, offset: number) {
   const { reviews, count } = await googleReviewsOf(container).newest({ offset, limit: 20 })
-  return { reviews: reviews.map(panelReview), count, limit: 20, offset }
+  const names = await staffNames(container, [
+    ...new Set(reviews.flatMap((review) => (review.hidden_by ? [review.hidden_by] : []))),
+  ])
+  return { reviews: reviews.map((review) => panelReview(review, names)), count, limit: 20, offset }
 }
 
 /**

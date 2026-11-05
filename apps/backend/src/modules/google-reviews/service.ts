@@ -8,6 +8,7 @@ import {
 } from "@medusajs/framework/utils"
 import type { GoogleReviewInput } from "../../lib/google/business-review"
 import { GoogleReview } from "./models/google-review"
+import type { HideReason } from "./models/google-review"
 import { GoogleReviewLocation } from "./models/google-review-location"
 
 /** The location the shop picked, as the panel listed it from Google. */
@@ -48,7 +49,16 @@ export interface LocationRow extends LocationInput {
 export interface ReviewRow extends GoogleReviewInput {
   id: string
   hidden: boolean
+  hidden_reason: HideReason | null
+  hidden_by: string | null
+  hidden_at: Date | null
 }
+
+/** Off the storefront with one of the reasons and who did it, or back on it. */
+export type Visibility = { hidden: true; reason: HideReason; by: string } | { hidden: false }
+
+/** Whether a review is off the storefront, and why, by whom and since when. */
+export type VisibilityRow = Pick<ReviewRow, "hidden" | "hidden_reason" | "hidden_by" | "hidden_at">
 
 const REVIEW_FIELDS = [
   "id",
@@ -62,6 +72,9 @@ const REVIEW_FIELDS = [
   "reply",
   "replied_at",
   "hidden",
+  "hidden_reason",
+  "hidden_by",
+  "hidden_at",
 ] as const
 
 const time = (value: Date | string | null): number | null =>
@@ -226,19 +239,53 @@ class GoogleReviewsModuleService extends MedusaService({ GoogleReviewLocation, G
     return removed
   }
 
-  /** Takes a review off the storefront, or puts it back; false for one no longer kept. */
+  /**
+   * Takes one review off the storefront with its reason and who did it,
+   * or puts it back (the reason, who and when cleared). One at a time, by
+   * its id: nothing here hides by stars or in bulk. What it was before,
+   * for an undo; null for a review no longer kept.
+   */
   @InjectTransactionManager()
-  async setHidden(
+  async setVisibility(
     id: string,
-    hidden: boolean,
+    visibility: Visibility,
     @MedusaContext() sharedContext: Context = {}
-  ): Promise<boolean> {
-    const [row] = await this.listGoogleReviews({ id }, { select: ["id"], take: 1 }, sharedContext)
+  ): Promise<VisibilityRow | null> {
+    const [row] = (await this.listGoogleReviews(
+      { id },
+      { select: ["id", "hidden", "hidden_reason", "hidden_by", "hidden_at"], take: 1 },
+      sharedContext
+    )) as (VisibilityRow & { id: string })[]
     if (!row) {
-      return false
+      return null
     }
-    await this.updateGoogleReviews({ id, hidden }, sharedContext)
-    return true
+    await this.updateGoogleReviews(
+      visibility.hidden
+        ? {
+            id,
+            hidden: true,
+            hidden_reason: visibility.reason,
+            hidden_by: visibility.by,
+            hidden_at: new Date(),
+          }
+        : { id, hidden: false, hidden_reason: null, hidden_by: null, hidden_at: null },
+      sharedContext
+    )
+    const { hidden, hidden_reason, hidden_by, hidden_at } = row
+    return { hidden, hidden_reason, hidden_by, hidden_at }
+  }
+
+  /** Puts a review's visibility back as it was (a workflow's undo). */
+  @InjectTransactionManager()
+  async restoreVisibility(
+    id: string,
+    previous: VisibilityRow,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    const [row] = await this.listGoogleReviews({ id }, { select: ["id"], take: 1 }, sharedContext)
+    if (row) {
+      await this.updateGoogleReviews({ id, ...previous }, sharedContext)
+    }
   }
 
   /** The reviews kept, newest written first; the storefront's only those not hidden. */
