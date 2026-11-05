@@ -5,6 +5,8 @@ import { cn } from "@qticaret/ui/lib/utils"
  * A price as the storefront formatted it ("1.299,90 TL"): the shopper's
  * price heavy, the struck price before it small and muted, only when the
  * 30-day rule allows one (F4.3); "…'den başlayan" when variants differ.
+ * A card's price grows from 1024 px only on a card 256 px wide or more
+ * (the card is the container; `ProductCard`).
  */
 export function Price({
   price,
@@ -22,7 +24,7 @@ export function Price({
     <p className={cn("flex flex-wrap items-baseline gap-x-2", className)}>
       {/* Joined by hand: tailwind-merge reads the theme's size names as colours */}
       <span
-        className={`tabular font-extrabold tracking-[-0.01em] ${size === "large" ? "text-price" : "text-md lg:text-lg"} ${price.before ? "text-deal" : ""}`}
+        className={`tabular font-extrabold tracking-[-0.01em] ${size === "large" ? "text-price" : "text-md lg:@min-[16rem]:text-lg"} ${price.before ? "text-deal" : ""}`}
       >
         {current}
       </span>

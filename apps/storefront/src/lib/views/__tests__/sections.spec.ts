@@ -47,7 +47,14 @@ const related = (
   source: Extract<StoreProductSection, { type: "related_products" }>["source"],
   limit: number,
   title: string | null = null
-): StoreProductSection => ({ id: "rel", type: "related_products", title, source, limit })
+): StoreProductSection => ({
+  id: "rel",
+  type: "related_products",
+  title,
+  source,
+  limit,
+  columns: 3,
+})
 
 const onProduct = { product: { id: "p2", categoryIds: ["cat_knives", "cat_other"] } }
 
@@ -67,7 +74,12 @@ describe("a related products section under a product", () => {
       expect.objectContaining({ categoryIds: ["cat_knives"], limit: 4 })
     )
     expect(productIds(views)).toEqual(["p1", "p3", "p4"])
-    expect(views[0]).toMatchObject({ type: "products", title: "Benzer ürünler", more: null })
+    expect(views[0]).toMatchObject({
+      type: "products",
+      title: "Benzer ürünler",
+      more: null,
+      columns: 3,
+    })
   })
 
   it("leaves the product out of a collection's rail too, in the shop's words", async () => {

@@ -69,6 +69,7 @@ async function relatedView(
           products: cards,
           more: null,
           empty: "",
+          columns: section.columns,
         }
       : null
   } catch (error) {
@@ -137,6 +138,7 @@ async function sectionView(
         products,
         more: layoutLink(section.more, t),
         empty: t("home.no_products"),
+        columns: section.columns,
       }
     }
     case "related_products":

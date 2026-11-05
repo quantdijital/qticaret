@@ -1,13 +1,16 @@
 import type { FormAction, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { ProductGrid } from "../parts/ProductCard"
+import { shelfColumns, shelfCount } from "../parts/shelf-grid"
 import { type Of, headingId } from "./plan"
 import { SectionHead } from "./SectionHead"
 import { ShelfTabs } from "./ShelfTabs"
 
-/** Cards a panel shows: two rows of three, three of two on a phone; the rest behind "Tümünü gör". */
-const SHELF = 6
-
+/**
+ * One section's panel: two rows of the shop's cards-in-a-row (3, 4 or 5;
+ * three rows of two on a phone), whole rows only; the rest behind
+ * "Tümünü gör".
+ */
 function Rack({
   section,
   t,
@@ -20,6 +23,7 @@ function Rack({
   tabbed: boolean
 }) {
   const id = headingId(section.id)
+  const columns = shelfColumns(section.columns)
   return (
     <section aria-labelledby={id} className="flex flex-col gap-6">
       {tabbed ? (
@@ -30,7 +34,12 @@ function Rack({
         <SectionHead id={id} title={section.title} more={section.more} />
       )}
       {section.products.length > 0 ? (
-        <ProductGrid products={section.products.slice(0, SHELF)} t={t} quickAdd={quickAdd} />
+        <ProductGrid
+          products={section.products.slice(0, shelfCount(columns, section.products.length))}
+          t={t}
+          quickAdd={quickAdd}
+          columns={columns}
+        />
       ) : (
         <p className="rounded-media bg-paper-2 p-4 text-text-2">{section.empty}</p>
       )}
@@ -47,9 +56,9 @@ function Rack({
 
 /**
  * The shelf: the shop's product sections that stand next to each other,
- * six cards each; two or more become tabs (pills), every panel in the
- * HTML. In tabs each panel's own head is for the reader only (its pill
- * names it) and its "all products" link sits under its grid.
+ * each in its own cards-in-a-row; two or more become tabs (pills), every
+ * panel in the HTML. In tabs each panel's own head is for the reader only
+ * (its pill names it) and its "all products" link sits under its grid.
  */
 export function Shelf({
   sections,

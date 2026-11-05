@@ -48,14 +48,30 @@ const hero: HomeSectionView = {
   image: null,
 }
 
-const shelf = (id: string, title: string, products: ProductCardView[]): HomeSectionView => ({
+const shelf = (
+  id: string,
+  title: string,
+  products: ProductCardView[],
+  columns?: 3 | 4 | 5
+): HomeSectionView => ({
   id,
   type: "products",
   title,
   products,
   more: { label: "Tümünü gör", path: `/kategori/${id}` },
   empty: "Henüz yayında ürün yok.",
+  ...(columns ? { columns } : {}),
 })
+
+const many = (count: number, prefix = "p") =>
+  Array.from({ length: count }, (_, index) => product(`${prefix}${String(index)}`))
+
+/** Each card's `<li>` classes in a grid of cards-in-a-row, in order. */
+const cardClasses = (html: string, columns: number) => {
+  // Up to the next grid: a card holds its own list of pills
+  const grid = html.split(`data-columns="${String(columns)}"`)[1]?.split("data-columns=")[0] ?? ""
+  return [...grid.matchAll(/<li class="([^"]*)"><article/g)].map((match) => match[1])
+}
 
 const categories = (count: number, pictured: number): HomeSectionView => ({
   id: "kategoriler",
@@ -187,6 +203,62 @@ describe("the theme's home page: the shelf", () => {
     expect(html).not.toContain('type="radio"')
     expect(html).toContain(">Yeni ürünler</h2>")
     expect(html.match(/<article/g)).toHaveLength(6)
+  })
+
+  it("keeps three across, six cards, when the shop chose nothing (the look before the setting)", () => {
+    const html = home([hero, shelf("yeni", "Yeni ürünler", many(12))])
+    expect(html).toContain('data-columns="3"')
+    expect(html).not.toContain("xl:grid-cols-[repeat(")
+    expect(cardClasses(html, 3)).toEqual(Array.from({ length: 6 }, () => "min-w-0"))
+    expect(html).toContain('sizes="(min-width: 1440px) 432px, (min-width: 768px) 30vw, 46vw"')
+  })
+
+  it("lays five across from 1280 px, four from 1024, three from 768, two rows of each", () => {
+    const html = home([hero, shelf("cok", "Çok satanlar", many(12), 5)])
+    expect(html).toContain(
+      "lg:grid-cols-[repeat(4,minmax(0,1fr))] xl:grid-cols-[repeat(5,minmax(0,1fr))]"
+    )
+    // Ten drawn; a phone and a tablet show six, 1024 px eight, 1280 px ten
+    expect(cardClasses(html, 5)).toEqual([
+      ...Array.from({ length: 6 }, () => "min-w-0"),
+      "min-w-0 hidden lg:block",
+      "min-w-0 hidden lg:block",
+      "min-w-0 hidden xl:block",
+      "min-w-0 hidden xl:block",
+    ])
+    expect(html).toContain('sizes="(min-width: 1440px) 250px, (min-width: 1280px) 18vw')
+  })
+
+  it("shows whole rows only when the products do not fill two", () => {
+    // Seven at five across: one row of five, four at 1024 px, six on a tablet and a phone
+    const html = home([hero, shelf("cok", "Çok satanlar", many(7), 5)])
+    expect(cardClasses(html, 5)).toEqual([
+      "min-w-0",
+      "min-w-0",
+      "min-w-0",
+      "min-w-0",
+      "min-w-0 lg:hidden xl:block",
+      "min-w-0 lg:hidden",
+    ])
+    // Fewer than a row: all of them
+    expect(cardClasses(home([hero, shelf("az", "Az", many(2), 4)]), 4)).toHaveLength(2)
+  })
+
+  it("lets each tab keep its own cards in a row", () => {
+    const html = home([
+      hero,
+      shelf("cok", "Çok satanlar", many(12, "c"), 5),
+      shelf("yeni", "Yeni gelenler", many(12, "y"), 4),
+      shelf("indirim", "İndirimde", many(12, "i")),
+    ])
+    expect(html.match(/type="radio"/g)).toHaveLength(3)
+    expect(cardClasses(html, 5)).toHaveLength(10)
+    expect(cardClasses(html, 4)).toEqual([
+      ...Array.from({ length: 6 }, () => "min-w-0"),
+      "min-w-0 hidden xl:block",
+      "min-w-0 hidden xl:block",
+    ])
+    expect(cardClasses(html, 3)).toHaveLength(6)
   })
 
   it("marks a discount, stock and the quick add only as the card's view says", () => {

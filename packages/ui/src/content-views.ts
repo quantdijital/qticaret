@@ -1,3 +1,4 @@
+import type { ShelfColumns } from "@qticaret/types"
 import type { CategoryCardView, CustomerPhotoView, ShopMarkView } from "./card-views"
 import type { FeaturedProductSectionView, ShopRatingView } from "./home-views"
 import type { PaginationView } from "./listing-views"
@@ -48,6 +49,11 @@ export type HomeSectionView =
       more: LinkView | null
       /** Words when the rail has nothing to show. */
       empty: string
+      /**
+       * Cards in a row on a wide screen, the shop's choice (adr/0049 Ek
+       * 2026-11-05); the theme steps down on narrower ones. None: 3.
+       */
+      columns?: ShelfColumns
     }
   | FeaturedProductSectionView
   | { id: string; type: "brands"; title: string; brands: LinkView[] }

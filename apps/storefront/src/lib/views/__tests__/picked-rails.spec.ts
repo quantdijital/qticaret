@@ -42,6 +42,7 @@ const rail = (source: Rail["source"], more: Partial<Rail> = {}): Rail => ({
   title: null,
   source,
   limit: 4,
+  columns: 3,
   more: null,
   ...more,
 })
@@ -101,7 +102,7 @@ describe("picked rails (adr/0049 Ek 2026-11-05)", () => {
     expect(views.map((view) => view.id)).toEqual(["coksatan"])
   })
 
-  it("names an untitled rail by where its products come from", async () => {
+  it("names an untitled rail by where its products come from, its cards in a row passed on", async () => {
     requests.pathsOf.mockResolvedValue({
       prod_a: "/urun/prod_a",
       prod_b: "/urun/prod_b",
@@ -113,8 +114,11 @@ describe("picked rails (adr/0049 Ek 2026-11-05)", () => {
     })
     const views = await sectionViews(
       [
-        rail({ kind: "best_sellers", days: 90 }, { id: "coksatan", product_ids: ["prod_a"] }),
-        rail({ kind: "on_sale" }, { id: "indirim1", product_ids: ["prod_b"] }),
+        rail(
+          { kind: "best_sellers", days: 90 },
+          { id: "coksatan", columns: 5, product_ids: ["prod_a"] }
+        ),
+        rail({ kind: "on_sale" }, { id: "indirim1", columns: 4, product_ids: ["prod_b"] }),
         rail({ kind: "on_sale" }, { id: "indirim2", title: "Kasım", product_ids: ["prod_c"] }),
       ],
       t
@@ -124,5 +128,7 @@ describe("picked rails (adr/0049 Ek 2026-11-05)", () => {
       "home.on_sale",
       "Kasım",
     ])
+    // The shop's cards in a row on a wide screen (adr/0049 Ek 2026-11-05), 3 when it left it
+    expect(views.map((view) => ("columns" in view ? view.columns : null))).toEqual([5, 4, 3])
   })
 })
