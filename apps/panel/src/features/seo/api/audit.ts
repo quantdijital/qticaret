@@ -36,34 +36,44 @@ export interface AuditFinding {
   items: AuditItem[]
 }
 
-const latestJob = async (status?: AsyncJob["status"]) =>
-  (
-    await sdk.client.fetch<{ async_jobs: AsyncJob[] }>("/admin/async-jobs", {
-      query: { type: AUDIT_JOB, limit: 1, ...(status ? { status } : {}) },
-    })
-  ).async_jobs[0] ?? null
+/** The last run asked for, whatever its state: the night's or one staff started. */
+export interface AuditRun {
+  id: string
+  status: AsyncJob["status"]
+  progress: number | null
+  created_at: string
+  finished_at: string | null
+}
 
-export const isAuditRunning = (job: AsyncJob | null | undefined) =>
-  job?.status === "queued" || job?.status === "running"
+/** The last run that finished: its findings, and whether its report file is still kept. */
+export interface AuditReport {
+  id: string
+  created_at: string
+  finished_at: string | null
+  findings: AuditFinding[]
+  has_file: boolean
+}
 
-/** The last audit asked for, whatever its state: looked at again while it runs. */
-export const latestAuditQuery = () =>
-  queryOptions({
-    queryKey: ["seo", "audit", "latest"],
-    queryFn: () => latestJob(),
-    refetchInterval: (query) => (isAuditRunning(query.state.data) ? 3000 : false),
-  })
+export const isAuditRunning = (run: AuditRun | null | undefined) =>
+  run?.status === "queued" || run?.status === "running"
 
 /**
- * The last audit that finished, and its findings; `latestId` (the last
- * run asked for, once over) reads it again after a run.
+ * The audit as the SEO page shows it (`GET /admin/seo/audit`): the night's
+ * runs are not in the shop's jobs list (docs/06 principle 10), so the page
+ * reads its own. Looked at again while a run is on its way.
  */
-export const lastReportQuery = (latestId: string | null) =>
+export const auditQuery = () =>
   queryOptions({
-    queryKey: ["seo", "audit", "report", latestId],
-    queryFn: async () => {
-      const job = await latestJob("succeeded")
-      const summary = job?.result_summary as { findings?: AuditFinding[] } | null | undefined
-      return job ? { job, findings: summary?.findings ?? [] } : null
-    },
+    queryKey: ["seo", "audit"],
+    queryFn: async () =>
+      (
+        await sdk.client.fetch<{ audit: { latest: AuditRun | null; report: AuditReport | null } }>(
+          "/admin/seo/audit"
+        )
+      ).audit,
+    refetchInterval: (query) => (isAuditRunning(query.state.data?.latest) ? 3000 : false),
   })
+
+/** A short-lived link to the last finished audit's CSV. */
+export const auditReportUrl = async () =>
+  (await sdk.client.fetch<{ url: string }>("/admin/seo/audit/report")).url

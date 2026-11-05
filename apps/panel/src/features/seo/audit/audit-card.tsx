@@ -9,14 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { SEVERITY_TONES } from "@/features/seo/advisor/grades"
 import type { Severity } from "@/features/seo/api/advisor"
-import {
-  AUDIT_JOB,
-  isAuditRunning,
-  lastReportQuery,
-  latestAuditQuery,
-} from "@/features/seo/api/audit"
-import type { AuditFinding } from "@/features/seo/api/audit"
-import type { AsyncJob } from "@/features/settings/api/activity"
+import { AUDIT_JOB, auditQuery, auditReportUrl, isAuditRunning } from "@/features/seo/api/audit"
+import type { AuditFinding, AuditReport, AuditRun } from "@/features/seo/api/audit"
 import { useStartJob } from "@/features/settings/api/activity"
 import { JobDownloadButton } from "@/features/settings/components/job-download-button"
 import { errorText } from "@/lib/errors"
@@ -69,8 +63,9 @@ function Finding({ finding }: { finding: AuditFinding }) {
 }
 
 /** The last finished audit: when it ran, its findings by severity, each one to open. */
-function Report({ job, findings }: { job: AsyncJob; findings: AuditFinding[] }) {
+function Report({ report }: { report: AuditReport }) {
   const { t } = useTranslation()
+  const { findings } = report
   const bySeverity = SEVERITIES.map((severity) => ({
     severity,
     count: findings.filter((each) => each.severity === severity).length,
@@ -79,7 +74,7 @@ function Report({ job, findings }: { job: AsyncJob; findings: AuditFinding[] }) 
     <>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <span className="text-xs text-muted-foreground">
-          {t("seo.audit.last", { when: formatRelative(job.finished_at ?? job.created_at) })}
+          {t("seo.audit.last", { when: formatRelative(report.finished_at ?? report.created_at) })}
         </span>
         {bySeverity.length > 0 ? (
           <span className="flex flex-wrap gap-1.5">
@@ -110,8 +105,8 @@ function Report({ job, findings }: { job: AsyncJob; findings: AuditFinding[] }) 
   )
 }
 
-/** Run now and download the last report. */
-function Actions({ report, latest }: { report: AsyncJob | undefined; latest: AsyncJob | null }) {
+/** Run now and download the last report, the night's or one staff started. */
+function Actions({ report, latest }: { report: AuditReport | null; latest: AuditRun | null }) {
   const { t } = useTranslation()
   const client = useQueryClient()
   const start = useStartJob()
@@ -122,7 +117,7 @@ function Actions({ report, latest }: { report: AsyncJob | undefined; latest: Asy
       {
         onSuccess: () => {
           toast.success(t("seo.audit.queued"))
-          void client.invalidateQueries({ queryKey: ["seo", "audit", "latest"] })
+          void client.invalidateQueries({ queryKey: ["seo", "audit"] })
         },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
@@ -130,7 +125,13 @@ function Actions({ report, latest }: { report: AsyncJob | undefined; latest: Asy
   }
   return (
     <>
-      {report ? <JobDownloadButton job={report} label={t("seo.audit.download")} /> : null}
+      {report ? (
+        <JobDownloadButton
+          job={{ id: report.id, has_result: report.has_file }}
+          label={t("seo.audit.download")}
+          link={auditReportUrl}
+        />
+      ) : null}
       <Button size="sm" disabled={isBusy} onClick={run}>
         {isBusy ? <Loader2 className="animate-spin" /> : <ScanSearch />}
         {isAuditRunning(latest) ? t("seo.audit.running") : t("seo.audit.run")}
@@ -147,39 +148,29 @@ function Actions({ report, latest }: { report: AsyncJob | undefined; latest: Asy
  */
 export function AuditCard({ className }: { className?: string }) {
   const { t } = useTranslation()
-  const latest = useQuery(latestAuditQuery())
-  const finishedId = latest.data && !isAuditRunning(latest.data) ? latest.data.id : null
-  const report = useQuery({ ...lastReportQuery(finishedId), enabled: latest.isSuccess })
-  const failure = latest.error ?? report.error
+  const audit = useQuery(auditQuery())
+  const data = audit.data
   return (
     <SectionCard
       title={t("seo.audit.title")}
       description={t("seo.audit.hint")}
       className={className}
-      action={
-        latest.isSuccess ? <Actions report={report.data?.job} latest={latest.data} /> : undefined
-      }
+      action={data ? <Actions report={data.report} latest={data.latest} /> : undefined}
     >
-      {failure ? (
-        <ErrorState
-          text={errorText(t, failure)}
-          onRetry={() => {
-            void latest.refetch()
-            void report.refetch()
-          }}
-        />
-      ) : !latest.isSuccess || report.isPending ? (
+      {audit.isError ? (
+        <ErrorState text={errorText(t, audit.error)} onRetry={() => void audit.refetch()} />
+      ) : !data ? (
         <Skeleton className="h-32" />
       ) : (
         <div className="flex flex-col gap-3">
-          {latest.data?.status === "failed" ? (
+          {data.latest?.status === "failed" ? (
             <p className="flex items-start gap-2 rounded-md bg-destructive-soft px-3 py-2.5 text-[13px] text-destructive-text">
               <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
               {t("seo.audit.failed")}
             </p>
           ) : null}
-          {report.data ? (
-            <Report job={report.data.job} findings={report.data.findings} />
+          {data.report ? (
+            <Report report={data.report} />
           ) : (
             <p className="text-[13px] text-muted-foreground">{t("seo.audit.never")}</p>
           )}

@@ -67,7 +67,11 @@ const OVERVIEW: IntegrationView[] = [
   }),
   view("bank_transfer", { state: "off" }),
   view("aras", { group: "shipping", state: "connected", test: "account" }),
-  view("resend", { group: "messaging", state: "off", notes: [{ code: "not_sending" }] }),
+  view("resend", {
+    group: "messaging",
+    state: "connected",
+    notes: [{ code: "platform_sender", sender: "bildirim@platform.example" }],
+  }),
 ]
 
 const HEALTH: HealthReport = {
@@ -130,10 +134,12 @@ describe("IntegrationsPage", () => {
     )
     expect(within(await row("Aras Kargo")).getByText("120 ms")).toBeInTheDocument()
     expect(within(await row("Havale / EFT")).getByText("Kapalı")).toBeInTheDocument()
-    // E-mail not set up yet is said in the shop's words, with where it is set up
+    // E-mail says whether the shop's e-mails go out and from which address, with where it is set up
     const email = await row("E-posta (Resend)")
     expect(
-      within(email).getByText("E-posta gönderimi henüz kurulmadı; mağaza yayına alınırken açılır.")
+      within(email).getByText(
+        "E-postalarınız bildirim@platform.example adresinden gidiyor; kendi alan adınızı ekleyebilirsiniz."
+      )
     ).toBeInTheDocument()
     expect(within(email).getByRole("link", { name: "Ayarla" })).toHaveAttribute(
       "href",

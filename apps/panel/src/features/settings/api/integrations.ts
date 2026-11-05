@@ -50,7 +50,8 @@ export interface IntegrationView {
   id: string
   group: IntegrationGroup
   state: IntegrationState
-  notes: { code: string; count?: number }[]
+  /** `sender`: the address the shop's e-mail goes from, on the e-mail row. */
+  notes: { code: string; count?: number; sender?: string }[]
   /** `account`: it can be tested with the stored account. */
   test: "account" | null
   failures: ProviderFailure[]

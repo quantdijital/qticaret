@@ -44,6 +44,8 @@ export interface DnsRecord {
 }
 
 export interface SenderDomainView {
+  /** Whether the shop's e-mail goes out at all (the platform's setting, not the shop's). */
+  sending: boolean
   /** Whether e-mail goes through Resend here: only then can a domain be verified. */
   available: boolean
   /** The address the shop's e-mail goes from now. */

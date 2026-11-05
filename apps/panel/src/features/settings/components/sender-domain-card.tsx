@@ -65,7 +65,9 @@ function RecordRow({ record, suggested }: { record: DnsRecord; suggested?: boole
 /**
  * Settings > Notifications: the domain the shop's e-mail goes from (F9.6,
  * adr/0036). Until the shop's own domain is verified at Resend, e-mail
- * goes from the platform's address under the shop's name.
+ * goes from the platform's address under the shop's name. Where no domain
+ * can be verified (a transport other than Resend) the card shows only the
+ * address; where nothing sends, one line says so (docs/06 principle 10).
  */
 export function SenderDomainCard() {
   const { t } = useTranslation()
@@ -97,18 +99,26 @@ export function SenderDomainCard() {
   const remove = useMutation({ mutationFn: removeSenderDomain, onSuccess: done, onError: failed })
   const view = query.data
   const busy = add.isPending || check.isPending || remove.isPending
+  // The shop's own domain only where it can verify one; otherwise the address it sends from
+  const ownDomain = !view || (view.sending && view.available)
+  // Nothing sends: the one line in the body says it all
+  const description = ownDomain
+    ? t(`${D}.description`)
+    : view.sending
+      ? t(`${D}.senderDescription`)
+      : ""
   return (
-    <SectionCard title={t(`${D}.title`)} description={t(`${D}.description`)}>
+    <SectionCard title={t(ownDomain ? `${D}.title` : `${D}.senderTitle`)} description={description}>
       {!view ? (
         <Skeleton className="h-24" />
+      ) : !view.sending ? (
+        <p className="text-[13px] text-muted-foreground">{t(`${D}.notSending`)}</p>
       ) : (
         <div className="flex flex-col gap-4">
           <p className="text-sm">
-            {t(`${D}.sender`)} <span className="font-mono">{view.sender ?? t(`${D}.none`)}</span>
+            {t(`${D}.sender`)} <span className="font-mono">{view.sender}</span>
           </p>
-          {!view.available ? (
-            <p className="text-[13px] text-muted-foreground">{t(`${D}.unavailable`)}</p>
-          ) : !view.domain ? (
+          {!view.available ? null : !view.domain ? (
             <form
               className="grid gap-2 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)_auto]"
               onSubmit={(event) => {

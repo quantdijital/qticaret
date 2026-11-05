@@ -5,6 +5,8 @@ import { sdk } from "@/lib/sdk"
 export interface SeoInsights {
   /** Whether the platform has opened Google: until then no Search Console part is shown. */
   search_console: boolean
+  /** Whether the platform reads Chrome's field data (CrUX): until then no Web Vitals part is shown. */
+  web_vitals: boolean
   search: {
     period_end: string | null
     clicks: number

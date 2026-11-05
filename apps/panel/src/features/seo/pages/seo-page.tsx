@@ -130,8 +130,10 @@ export function SeoOverviewPage() {
   const { t } = useTranslation()
   const seo = useQuery(sectionQuery<SeoSettings>("seo"))
   const insights = useQuery(insightsQuery())
-  // No Search Console part until the platform opens Google (docs/06 principle 10)
+  // No part the platform has not opened (docs/06 principle 10): Search Console
+  // without its Google client, Web Vitals without its CrUX key; the other takes the row
   const searchConsole = insights.data?.insights.search_console !== false
+  const webVitals = insights.data?.insights.web_vitals !== false
   const storeName = useStoreName() ?? t("app.name")
   return (
     <div className="flex flex-col gap-[var(--grid-gap)]">
@@ -179,8 +181,8 @@ export function SeoOverviewPage() {
           <SiteSearchCard />
         </PageColumn>
         <SitemapCard className={spanOf(6)} />
-        {searchConsole ? <SearchConsoleCard className={spanOf(7)} /> : null}
-        <WebVitalsCard className={spanOf(searchConsole ? 5 : 12)} />
+        {searchConsole ? <SearchConsoleCard className={spanOf(webVitals ? 7 : 12)} /> : null}
+        {webVitals ? <WebVitalsCard className={spanOf(searchConsole ? 5 : 12)} /> : null}
         <AdvisorSummaryCard className={spanOf(12)} />
         <AuditCard className={spanOf(12)} />
       </PageGrid>

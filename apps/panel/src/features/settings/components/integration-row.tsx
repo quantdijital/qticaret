@@ -105,7 +105,11 @@ export function IntegrationRow({ row, health, onTest, testing }: IntegrationRowP
                 row.state === "attention" ? "text-warning-text" : "text-muted-foreground"
               )}
             >
-              {t(`${I}.notes.${note.code}`, { count: note.count ?? 0, defaultValue: note.code })}
+              {t(`${I}.notes.${note.code}`, {
+                count: note.count ?? 0,
+                sender: note.sender ?? "",
+                defaultValue: note.code,
+              })}
             </span>
           ))}
         </div>
