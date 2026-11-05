@@ -209,3 +209,22 @@ Atölye'nin liste, arama ve ürün sayfaları (`design.md` § Liste sayfası, §
 
 - **Taban tema:** `SearchHelp` gösterecek öneri, kategori ya da marka yoksa hiçbir şey çizmez (boş bölge kalmaz); `popular`'ı çizmez.
 - **Atölye:** sözleşmenin `ProductPageView`'unda ölçek görseli, ayrı bakım notu ve yasal uyarı alanı yok; tema bunları uydurmaz, açıklama belgesinde ne varsa o görünür.
+
+## Ek (2026-11-05): satın alma sayfalarının istediği isteğe bağlı alanlar (otonom, gözden geçir)
+
+Atölye sepet çekmecesini, sepeti, ödemeyi, siparişi ve sipariş takibini kendisi çizdi (`design.md` § Satın alma sayfaları). Temanın tek başına çizemeyeceği alanlar eklendi. Hepsi **isteğe bağlı ve eklemelidir**: alanı vermeyen vitrin ya da taban tema aynı sayfayı çizer.
+
+| Alan | Şekli | Kaynak |
+| --- | --- | --- |
+| `Layout` `changeCartLine?` | `(form: FormData) => Promise<void>` (`ThemeActions.changeCartLine`'ın aynısı) | çekmecedeki adet ve silme; yoksa satırlar yalnız okunur |
+| `CartPageView.shipping?` | `string \| null` ("Ücretsiz", "85,00 TL", "85,00 TL'den başlayan") | `GET /store/shipping-options?cart_id=` (adres olmadan da yanıt verir); en ucuz fiyatlı seçenek, vitrin sunucusunda seçilir |
+| `CartPageView.offers?` | `string[]` | sepet satırlarının `price-display` `cart_offer`'ı, `cartOfferText` ile sözle, tekrarsız (sepet artık `items.variant_id` ister) |
+| `CartPageView.trust?` | `TrustBadgeView[]` | `storefront.trust_badges` |
+| `CartPageView.upsell?` | `{ title, products: ProductCardView[] } \| null` | ana sayfa düzeninin `best_sellers` rafının `product_ids`'i, yoksa en yeni ürünler; sepetteki ürünler çıkar, en çok 4; kartlar `railCards` (fiyat, stok kovası, hızlı ekle); ödeme bağlantısının sepetinde yok |
+| `OrderPageView.progress?` | `OrderStepView[] \| null` (`placed`, `paid`, `packed`, `shipped`, `delivered`; `done`/`current`/`ahead`, tarih) | siparişin `payment_status`, `fulfillment_status` ve `orders/:id/shipments` (`shipped_at`, `delivered_at`); kapıda ödemede `paid` yok; iptal edilen siparişte null (`lib/views/order-progress.ts`, saf) |
+| `OrderPageView.payment?` | `string \| null` | ödeme oturumlarının sağlayıcısı → "Kredi / banka kartı", "Havale / EFT", "Kapıda ödeme" |
+| `OrderPageView.guest?` | `boolean` | müşteri oturum çerezi yok: sayfa hesap teklif eder |
+| `AuthPageView.carriers?` | `LinkView[]` | `/siparis`: `storefront.marks.carriers` (bağlı kargo hesapları) → taşıyıcının kendi herkese açık takip sayfası (`lib/views/carrier-pages.ts`; Aras, Yurtiçi; bilinmeyen anahtar çıkar) |
+
+- **Taban temadan ödünç (geçici):** `@qticaret/theme-base` artık `AddonEditor`, `GiftRecipient`, `OrderReturns`, `OrderGift`'i de dışa verir; Atölye sepette ek seçimi ve hediye alıcısı formunu, siparişte iade talebini kendi çizene kadar bunlarla gösterir. `AuthPage`'in giriş, kayıt, doğrulama ve şifre kipleri taban temanındır; Atölye yalnız `lookup`'ı çizer.
+- **Kapsam dışı (backend gerekir):** misafirin kurumsal faturası (vergi no; e-fatura bugün yalnız üyenin fatura profilini okur), mağaza içinde kargo takip numarasıyla sorgu.
