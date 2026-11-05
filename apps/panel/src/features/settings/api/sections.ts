@@ -92,6 +92,11 @@ export interface ShippingSettings {
   handling_days_max: number
   transit_days_min: number
   transit_days_max: number
+  /**
+   * An order placed before this hour leaves the same day (the product
+   * page's card, Akakçe); null: not set here, the legacy feed rule's stands.
+   */
+  same_day_cutoff_hour: number | null
   rate_table: { max_desi: number; price: number }[]
   over_desi_price: number
   /** The page labels print on: a label printer's roll, or A4 with four to a sheet. */
@@ -184,7 +189,11 @@ export interface MarketingSettings {
   abandoned_cart_delay_minutes: number
   /** Categories (and those under them) each feed leaves out (F10.8). */
   feed_exclusions: Record<FeedTargetName, string[]>
-  /** An order placed before this hour leaves the same day (Akakçe); null: not promised. */
+  /**
+   * Legacy: the same-day hour before it moved to `ShippingSettings`
+   * (adr/0046 Ek 2026-11-06). Read while Kargo's is unset; cleared when
+   * the shop saves the hour there.
+   */
   feed_same_day_cutoff_hour: number | null
   /** One bulk message (adr/0050) a recipient in 24 hours at most. */
   campaign_frequency_cap: boolean

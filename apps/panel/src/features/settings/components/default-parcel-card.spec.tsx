@@ -16,6 +16,7 @@ const SAVED: ShippingSettings = {
   handling_days_max: 2,
   transit_days_min: 1,
   transit_days_max: 3,
+  same_day_cutoff_hour: null,
   rate_table: [],
   over_desi_price: 0,
   label_format: "100x150",

@@ -1257,7 +1257,7 @@
       },
       "rules": {
         "deliveryTitle": "Teslim süresi",
-        "deliveryDescription": "Siparişin ne zaman kargoya verildiği ve kaç günde ulaştığı. Ürün sayfalarındaki Kargo ve Teslimat kartı, kargo cümlesi ve arama motorlarına verilen teslim bilgisi buradan gelir. Aynı gün kargo saati Pazarlama > Ürün akışları > Feed kuralları'ndadır.",
+        "deliveryDescription": "Siparişin ne zaman kargoya verildiği, kaç günde ulaştığı ve hangi saate kadar aynı gün kargoya verildiği. Ürün sayfalarındaki Kargo ve Teslimat kartı, kargo cümlesi, arama motorlarına ve Akakçe'ye verilen teslim bilgisi buradan gelir.",
         "handling": "Kargoya verme",
         "handlingHint": "Sipariş gününden sonra iş günü.",
         "transit": "Taşıma",
@@ -1267,6 +1267,10 @@
         "days": "gün",
         "daysInvalid": "Gün sayısını rakamla girin.",
         "daysOrder": "En az gün, en çok günden büyük olamaz.",
+        "cutoff": "Aynı gün kargo saati",
+        "cutoffHint": "Bu saate kadar verilen siparişler aynı gün kargoya veriliyorsa seçin; ürün sayfalarındaki Kargo ve Teslimat kartında ve Akakçe'de gösterilir.",
+        "noCutoff": "Aynı gün kargo yok",
+        "until": "{{hour}} öncesi siparişler",
         "ratesTitle": "Ücret tablosu",
         "ratesDescription": "\"Ücret tablosu\" ile fiyatlanan seçeneklerde kolinin desisine göre alınan ücret (KDV dahil).",
         "noRates": "Henüz satır yok.",
@@ -1815,13 +1819,9 @@
       },
       "feedRules": {
         "title": "Feed kuralları",
-        "description": "Hangi feed'in hangi kategorileri dışarıda bıraktığı ve Akakçe'de, ürün sayfalarınızda gösterilen aynı gün kargo saati. Kargo ücreti kargo ayarlarınızdan (desi tablosu ya da sabit ücret, ücretsiz kargo sınırıyla), hazırlık süresi gönderim gününüzden alınır.",
+        "description": "Hangi feed'in hangi kategorileri dışarıda bıraktığı. Kargo ücreti kargo ayarlarınızdan (desi tablosu ya da sabit ücret, ücretsiz kargo sınırıyla), hazırlık süresi ve Akakçe'de gösterilen aynı gün kargo saati Kargo ve teslimat > Seçenekler ve ücretler > Teslim süresi'nden alınır.",
         "exclusions": "Dışarıda bırakılan kategoriler",
         "exclusionsHint": "İşaretlediğiniz kategori ve altındaki tüm kategorilerdeki ürünler {{target}} feed'ine girmez.",
-        "cutoff": "Aynı gün kargo saati",
-        "cutoffHint": "Bu saate kadar verilen siparişler aynı gün kargoya veriliyorsa seçin; ürün sayfalarınızın Kargo ve Teslimat kartında ve Akakçe'de gösterilir.",
-        "noCutoff": "Aynı gün kargo yok",
-        "until": "{{hour}} öncesi siparişler",
         "saved": "Feed kuralları kaydedildi; feed'ler bir sonraki güncellemede bunlara göre oluşur."
       },
       "google": {

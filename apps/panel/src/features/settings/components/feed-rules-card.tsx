@@ -5,13 +5,6 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SectionCard } from "@/components/patterns/section-card"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { CategoryTree } from "@/features/products/components/category-tree"
@@ -21,15 +14,11 @@ import { errorText } from "@/lib/errors"
 
 const R = "settings.marketing.feedRules"
 const F = "settings.marketing.feeds"
-/** Hours a shop may promise same-day dispatch until. */
-const HOURS = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] as const
-const NONE = "none"
 
 /**
  * Settings > Marketing: what each feed leaves out, by category (a
- * category takes the ones under it along), and the hour until which an
- * order leaves the same day, as Akakçe (F10.8) and the product page's
- * "Kargo ve Teslimat" card (adr/0046 Ek 2026-11-06) show it.
+ * category takes the ones under it along). The same-day hour Akakçe shows
+ * is set under Kargo > Teslim süresi since adr/0046 Ek 2026-11-06.
  */
 export function FeedRulesCard() {
   const { t } = useTranslation()
@@ -99,37 +88,6 @@ export function FeedRulesCard() {
                 }))
               }}
             />
-          </div>
-          <div className="flex flex-col gap-2">
-            <span id="feed-cutoff-label" className="text-sm font-medium">
-              {t(`${R}.cutoff`)}
-            </span>
-            <Select
-              value={
-                values.feed_same_day_cutoff_hour === null
-                  ? NONE
-                  : String(values.feed_same_day_cutoff_hour)
-              }
-              onValueChange={(next) => {
-                setDraft((current) => ({
-                  ...current,
-                  feed_same_day_cutoff_hour: next === NONE ? null : Number(next),
-                }))
-              }}
-            >
-              <SelectTrigger className="w-full sm:w-64" aria-labelledby="feed-cutoff-label">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NONE}>{t(`${R}.noCutoff`)}</SelectItem>
-                {HOURS.map((hour) => (
-                  <SelectItem key={hour} value={String(hour)}>
-                    {t(`${R}.until`, { hour: `${String(hour)}:00` })}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <span className="text-[13px] text-muted-foreground">{t(`${R}.cutoffHint`)}</span>
           </div>
           <div className="flex justify-end">
             <Button type="submit" disabled={Object.keys(draft).length === 0 || save.isPending}>

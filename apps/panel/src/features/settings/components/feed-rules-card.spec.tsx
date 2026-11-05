@@ -64,46 +64,13 @@ describe("FeedRulesCard", () => {
     })
   })
 
-  it("saves the same-day hour the product pages and Akakçe show", async () => {
-    const user = userEvent.setup()
+  it("asks no same-day hour: it is set under Kargo > Teslim süresi (adr/0046 Ek 2026-11-06)", async () => {
     renderCard()
+
     expect(
-      await screen.findByText(/ürün sayfalarınızın Kargo ve Teslimat kartında ve Akakçe'de/)
+      await screen.findByText(/Kargo ve teslimat > Seçenekler ve ücretler > Teslim süresi/)
     ).toBeInTheDocument()
-    await user.click(screen.getByRole("combobox", { name: "Aynı gün kargo saati" }))
-    await user.click(await screen.findByRole("option", { name: "15:00 öncesi siparişler" }))
-    await user.click(screen.getByRole("button", { name: "Kaydet" }))
-
-    await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith(
-        "/admin/platform-settings/marketing",
-        expect.objectContaining({ method: "POST", body: { feed_same_day_cutoff_hour: 15 } })
-      )
-    })
-  })
-
-  it("takes the same-day hour back off", async () => {
-    const user = userEvent.setup()
-    fetchMock.mockResolvedValue({
-      section: "marketing",
-      values: {
-        abandoned_cart_enabled: false,
-        abandoned_cart_delay_minutes: 60,
-        feed_exclusions: EXCLUSIONS,
-        feed_same_day_cutoff_hour: 15,
-      },
-    })
-    renderCard()
-    await user.click(await screen.findByRole("combobox", { name: "Aynı gün kargo saati" }))
-    await user.click(await screen.findByRole("option", { name: "Aynı gün kargo yok" }))
-    await user.click(screen.getByRole("button", { name: "Kaydet" }))
-
-    await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith(
-        "/admin/platform-settings/marketing",
-        expect.objectContaining({ method: "POST", body: { feed_same_day_cutoff_hour: null } })
-      )
-    })
+    expect(screen.queryByRole("combobox")).not.toBeInTheDocument()
   })
 
   it("counts what each feed leaves out", async () => {
