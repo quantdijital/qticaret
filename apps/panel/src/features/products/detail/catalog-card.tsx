@@ -1,98 +1,53 @@
 import { useQuery } from "@tanstack/react-query"
+import type { TFunction } from "i18next"
 import { useState } from "react"
-import { Controller, useForm, useWatch } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Field } from "@/components/patterns/form-section"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { FormDialog } from "@/components/patterns/form-dialog"
+import { DialogBody } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
-import { Switch } from "@/components/ui/switch"
-import {
-  PRODUCT_CONDITIONS,
-  PRODUCT_KINDS,
-  productCatalogQuery,
-  useSaveCatalog,
-} from "@/features/products/api/product-edit"
-import type {
-  ProductCatalog,
-  ProductCondition,
-  ProductKind,
-} from "@/features/products/api/product-edit"
-import type { Restriction } from "@/features/categories/api/restrictions"
-import { RestrictionSelect } from "@/features/categories/components/restriction-select"
+import { findingsNote } from "@/features/content/section-findings"
 import type { SectionFindings } from "@/features/content/section-findings"
 import { GIFT_CARDS_FLAG } from "@/features/gift-cards/api/gift-cards"
+import { productCatalogQuery, useSaveCatalog } from "@/features/products/api/product-edit"
+import type { ProductCatalog } from "@/features/products/api/product-edit"
 import { useFeature } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@/lib/forms"
-import { CardForm } from "@/components/patterns/card-form"
-import { GiftCardField } from "./gift-card-field"
-import { productFold } from "./sections"
+import { CatalogFields } from "./catalog-fields"
+import type { CatalogShown, CatalogValues } from "./catalog-fields"
+import { PRODUCT_SECTIONS } from "./sections"
+import { SideCard } from "./side-card"
+import type { SideRow } from "./side-card"
 
-// Radix Select has no empty value; this one stands for "none chosen"
-const NONE = "__none__"
-
-interface Values {
-  condition: ProductCondition
-  kind: ProductKind
-  primary_category_id: string
-  withdrawal_excluded: boolean
-  restriction: Restriction | null
-  is_gift_card: boolean
-}
+const catalogValuesOf = (catalog: ProductCatalog): CatalogValues => ({
+  condition: catalog.condition,
+  kind: catalog.kind,
+  primary_category_id: catalog.primary_category_id ?? "",
+  withdrawal_excluded: catalog.withdrawal_excluded,
+  restriction: catalog.restriction,
+  is_gift_card: catalog.is_gift_card,
+})
 
 const refused = (failure: unknown) => (failure as { status?: unknown } | null)?.status === 400
 
-function CatalogForm({
+function CatalogDialog({
   productId,
   catalog,
-  fold,
+  shown,
+  onClose,
 }: {
   productId: string
   catalog: ProductCatalog
-  fold?: SectionFindings | undefined
+  shown: CatalogShown
+  onClose: () => void
 }) {
   const { t } = useTranslation()
   const save = useSaveCatalog(productId)
-  // The kind shows once the shop sells digital or service products, or this one is one
-  const kinds = useFeature("catalog.non_physical") || catalog.kind !== "physical"
-  // F13.4: the age limit shows once the shop sells to adults only, or this product is marked
-  const restricted = useFeature("catalog.restricted") || catalog.restriction !== null
-  const giftCards = useFeature(GIFT_CARDS_FLAG)
   // Marking it refused (the shop's gift cards off): said beside the switch, with where to turn them on
   const [giftFailure, setGiftFailure] = useState<string | null>(null)
-  const saved: Values = {
-    condition: catalog.condition,
-    kind: catalog.kind,
-    primary_category_id: catalog.primary_category_id ?? "",
-    withdrawal_excluded: catalog.withdrawal_excluded,
-    restriction: catalog.restriction,
-    is_gift_card: catalog.is_gift_card,
-  }
-  const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
+  const form = useForm<CatalogValues>({ defaultValues: catalogValuesOf(catalog) })
   const { dirtyFields } = form.formState
-  // A gift card is digital: its kind is the server's while it is one
-  const gift = useWatch({ control: form.control, name: "is_gift_card" })
-  // Closed, the line says what is saved ("Fiziksel ürün · Yeni · Ana kategori: Çakılar")
-  const primary = catalog.categories.find((category) => category.id === saved.primary_category_id)
-  const summary = [
-    kinds ? t(`products.catalog.kinds.${saved.kind}`) : undefined,
-    t(`products.catalog.conditions.${saved.condition}`),
-    primary
-      ? t("products.sections.primary", { name: primary.name })
-      : t("products.sections.noPrimary"),
-    saved.restriction ? t(`restrictions.options.${saved.restriction}`) : undefined,
-    saved.is_gift_card ? t("products.catalog.giftCard") : undefined,
-    saved.withdrawal_excluded ? t("products.catalog.withdrawalExcluded") : undefined,
-  ]
-  // The switch shows once the shop sells gift cards, or this product is (or is being made) one
-  const giftShown = giftCards || catalog.is_gift_card || gift || giftFailure !== null
 
   // Only what changed is sent; the audit log shows those fields (F3.1)
   const submit = form.handleSubmit((values) => {
@@ -111,10 +66,9 @@ function CatalogForm({
         ...(dirtyFields.is_gift_card ? { is_gift_card: values.is_gift_card } : {}),
       },
       {
-        onSuccess: (stored) => {
-          setGiftFailure(null)
-          form.reset({ ...values, kind: stored.kind }, FULL_RESET)
+        onSuccess: () => {
           toast.success(t("products.detail.saved"))
+          onClose()
         },
         onError: (failure) => {
           if (dirtyFields.is_gift_card && values.is_gift_card && refused(failure)) {
@@ -128,188 +82,122 @@ function CatalogForm({
   })
 
   return (
-    <CardForm
+    <FormDialog
+      open
+      onOpenChange={(open) => {
+        if (!open) {
+          onClose()
+        }
+      }}
       title={t("products.catalog.card")}
       description={t("products.catalog.hint")}
-      collapse={
-        fold &&
-        productFold(
-          t,
-          "catalog",
-          fold,
-          summary,
-          // Marking it a gift card refused: it opens to say why
-          giftFailure !== null
-        )
-      }
       dirty={form.formState.isDirty}
       saving={save.isPending}
       onSubmit={() => void submit()}
-      onReset={() => {
-        setGiftFailure(null)
-        form.reset(saved, FULL_RESET)
-      }}
     >
-      {kinds ? (
-        <Field
-          label={t("products.catalog.kind")}
-          htmlFor="catalog-kind"
-          hint={t(gift ? "products.catalog.kindGiftCard" : "products.catalog.kindHint")}
-        >
-          <Controller
-            control={form.control}
-            name="kind"
-            render={({ field }) => (
-              <Select
-                value={gift ? "digital" : field.value}
-                disabled={gift}
-                onValueChange={field.onChange}
-              >
-                <SelectTrigger id="catalog-kind" className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRODUCT_KINDS.map((kind) => (
-                    <SelectItem key={kind} value={kind}>
-                      {t(`products.catalog.kinds.${kind}`)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          />
-        </Field>
-      ) : null}
-      <Field label={t("products.catalog.condition")} htmlFor="catalog-condition">
-        <Controller
-          control={form.control}
-          name="condition"
-          render={({ field }) => (
-            <Select value={field.value} onValueChange={field.onChange}>
-              <SelectTrigger id="catalog-condition" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PRODUCT_CONDITIONS.map((condition) => (
-                  <SelectItem key={condition} value={condition}>
-                    {t(`products.catalog.conditions.${condition}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
+      <DialogBody>
+        <CatalogFields
+          form={form}
+          catalog={catalog}
+          shown={shown}
+          giftFailure={giftFailure}
+          onGiftChange={() => {
+            setGiftFailure(null)
+          }}
         />
-      </Field>
-      <Field
-        label={t("products.catalog.primaryCategory")}
-        htmlFor="catalog-primary"
-        hint={t("products.catalog.primaryCategoryHint")}
-      >
-        <Controller
-          control={form.control}
-          name="primary_category_id"
-          render={({ field }) => (
-            <Select
-              value={field.value || NONE}
-              disabled={catalog.categories.length === 0}
-              onValueChange={(next) => {
-                field.onChange(next === NONE ? "" : next)
-              }}
-            >
-              <SelectTrigger id="catalog-primary" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NONE}>{t("products.catalog.noPrimary")}</SelectItem>
-                {catalog.categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        />
-      </Field>
-      {restricted ? (
-        <Field
-          label={t("restrictions.label")}
-          htmlFor="catalog-restriction"
-          hint={t("restrictions.productHint")}
-        >
-          <Controller
-            control={form.control}
-            name="restriction"
-            render={({ field }) => (
-              <RestrictionSelect
-                id="catalog-restriction"
-                value={field.value}
-                onChange={field.onChange}
-              />
-            )}
-          />
-        </Field>
-      ) : null}
-      {giftShown ? (
-        <Controller
-          control={form.control}
-          name="is_gift_card"
-          render={({ field }) => (
-            <GiftCardField
-              checked={field.value}
-              onCheckedChange={(checked) => {
-                setGiftFailure(null)
-                field.onChange(checked)
-              }}
-              failure={giftFailure}
-            />
-          )}
-        />
-      ) : null}
-      <div className="flex items-start justify-between gap-4 border-t pt-4">
-        <div className="flex min-w-0 flex-col gap-0.5">
-          <label htmlFor="catalog-withdrawal" className="text-sm font-medium">
-            {t("products.catalog.withdrawalExcluded")}
-          </label>
-          <span id="catalog-withdrawal-hint" className="text-[13px] text-muted-foreground">
-            {t("products.catalog.withdrawalExcludedHint")}
-          </span>
-        </div>
-        <Controller
-          control={form.control}
-          name="withdrawal_excluded"
-          render={({ field }) => (
-            <Switch
-              id="catalog-withdrawal"
-              aria-describedby="catalog-withdrawal-hint"
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
-          )}
-        />
-      </div>
-    </CardForm>
+      </DialogBody>
+    </FormDialog>
   )
+}
+
+/** What is saved, a fact to a line: the kind (when the shop sells others), condition, primary category… */
+function catalogRows(t: TFunction, catalog: ProductCatalog, shown: CatalogShown): SideRow[] {
+  const primary = catalog.categories.find((category) => category.id === catalog.primary_category_id)
+  return [
+    ...(shown.kinds
+      ? [{ label: t("products.catalog.kind"), value: t(`products.catalog.kinds.${catalog.kind}`) }]
+      : []),
+    {
+      label: t("products.catalog.condition"),
+      value: t(`products.catalog.conditions.${catalog.condition}`),
+    },
+    {
+      label: t("products.catalog.primaryCategory"),
+      value: primary?.name ?? t("products.catalog.noPrimary"),
+      empty: !primary,
+    },
+    ...(catalog.restriction
+      ? [
+          {
+            label: t("restrictions.label"),
+            value: t(`restrictions.options.${catalog.restriction}`),
+          },
+        ]
+      : []),
+    ...(catalog.is_gift_card
+      ? [{ label: t("products.catalog.giftCard"), value: t("products.side.yes") }]
+      : []),
+    {
+      label: t("products.side.withdrawal"),
+      value: t(
+        catalog.withdrawal_excluded ? "products.side.withdrawalOut" : "products.side.withdrawalIn"
+      ),
+    },
+  ]
 }
 
 /**
  * Condition and primary category, the fields search results and feeds read
  * (F3.1), whether the product is sold to adults only and is outside the
  * right of withdrawal (F13.4, F13.6), and whether it sells gift cards
- * (adr/0025 Ek 2026-11-03). With `fold`, folded under the product page's
- * main parts to a line of them.
+ * (adr/0025 Ek 2026-11-03): a line each in the product page's narrow
+ * column, "Düzenle" opens them in a dialog.
  */
 export function CatalogCard({
   productId,
-  fold,
+  findings,
 }: {
   productId: string
-  /** The advisor's findings for it: folded, counted in its line, an urgent one opens it. */
-  fold?: SectionFindings
+  /** The advisor's findings for it, counted under its facts. */
+  findings?: SectionFindings
 }) {
+  const { t } = useTranslation()
   const catalog = useQuery(productCatalogQuery(productId))
-  if (!catalog.data) {
-    return <Skeleton className={fold ? "h-14 w-full rounded-lg" : "h-56 w-full rounded-lg"} />
+  const [open, setOpen] = useState(false)
+  const flags = {
+    kinds: useFeature("catalog.non_physical"),
+    restricted: useFeature("catalog.restricted"),
+    giftCards: useFeature(GIFT_CARDS_FLAG),
   }
-  return <CatalogForm productId={productId} catalog={catalog.data} fold={fold} />
+  if (!catalog.data) {
+    return <Skeleton className="h-44 w-full rounded-lg" />
+  }
+  // A field shows once the shop uses it, or this product already has it set
+  const shown: CatalogShown = {
+    kinds: flags.kinds || catalog.data.kind !== "physical",
+    restricted: flags.restricted || catalog.data.restriction !== null,
+    giftCard: flags.giftCards || catalog.data.is_gift_card,
+  }
+  return (
+    <SideCard
+      id={PRODUCT_SECTIONS.catalog}
+      title={t("products.catalog.card")}
+      rows={catalogRows(t, catalog.data, shown)}
+      findings={findings && findingsNote(t, findings)}
+      onEdit={() => {
+        setOpen(true)
+      }}
+    >
+      {open ? (
+        <CatalogDialog
+          productId={productId}
+          catalog={catalog.data}
+          shown={shown}
+          onClose={() => {
+            setOpen(false)
+          }}
+        />
+      ) : null}
+    </SideCard>
+  )
 }

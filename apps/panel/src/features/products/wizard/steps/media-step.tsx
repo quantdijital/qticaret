@@ -1,7 +1,7 @@
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
-import { ImageUploader, MAX_IMAGES } from "@/features/products/components/image-uploader"
+import { ImageGallery, MAX_IMAGES } from "@/features/products/components/image-gallery"
 import type { WizardValues } from "../schema"
 
 /** Step 2: the product's pictures; the first one is its main picture. */
@@ -14,7 +14,7 @@ export function MediaStep() {
       title={t("products.media.card")}
       description={t("products.media.hint", { max: MAX_IMAGES })}
     >
-      <ImageUploader
+      <ImageGallery
         images={images.fields.map((image) => ({ key: image.fieldKey, url: image.url }))}
         onAdd={(stored) => {
           images.append(stored)
@@ -24,6 +24,11 @@ export function MediaStep() {
         }}
         onMakeMain={(index) => {
           images.move(index, 0)
+        }}
+        onMove={(from, to) => {
+          if (to >= 0 && to < images.fields.length) {
+            images.move(from, to)
+          }
         }}
       />
       {images.fields.length === 0 ? (

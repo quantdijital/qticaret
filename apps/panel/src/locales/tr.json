@@ -2881,19 +2881,19 @@
       "tooManyVariants": "Bir üründe en çok 100 varyant olabilir.",
       "optionRequired": "En az bir seçenek ekleyin ya da seçenekleri kapatın.",
       "optionDuplicate": "Bu adla bir seçenek zaten var.",
-      "cost": "Maliyet 0 ile 10.000.000 ₺ arasında olmalı."
+      "cost": "Maliyet 0 ile 10.000.000 ₺ arasında olmalı.",
+      "alt": "Alt metin en çok 250 karakter olabilir."
     },
     "media": {
       "card": "Görseller",
       "hint": "İlk görsel ana görseldir; en çok {{max}} görsel ekleyebilirsiniz.",
-      "drop": "Görselleri buraya sürükleyin ya da seçmek için tıklayın",
+      "drop": "Görselleri sürükleyin ya da tıklayın",
       "types": "JPG, PNG, WebP ya da AVIF",
       "main": "Ana görsel",
       "makeMain": "Ana görsel yap",
       "remove": "Görseli kaldır",
       "optional": "Görseli şimdi eklemeyebilirsiniz, ama görselli ürünler daha çok satar.",
       "registerFailed": "Görsel yüklendi ama alt metin ve sürümler için kaydedilemedi.",
-      "altTitle": "Alt metinler",
       "altHint": "Görseli göremeyenlere ve görsel aramasına ne gösterdiğini anlatır; örneğin “Beyaz keten gömlek, önden”. Alandan çıkınca kaydedilir.",
       "altLabel": "{{position}}. görsel",
       "altPlaceholder": "Görselde ne var?",
@@ -2904,8 +2904,16 @@
       "altComplete": "Tüm görsellerin alt metni var",
       "versionsReady": "Sürümler hazır",
       "versionsPending": "Hazırlanıyor",
-      "fromLibrary": "Kütüphaneden seç",
-      "fromLibraryHint": "Daha önce yüklenen görselleri bu ürüne ekleyin."
+      "addLabel": "Görsel ekle: sürükleyin ya da tıklayın (en çok {{max}} görsel)",
+      "addShort": "Görsel ekle",
+      "pickerTitle": "Görsel ekle",
+      "tilesHint": "Sıralamak için sürükleyin; alt metin ve diğer işlemler için görsele tıklayın.",
+      "tilesHintNoAlt": "Sıralamak için sürükleyin; diğer işlemler için görsele tıklayın.",
+      "position": "{{position}}. görsel",
+      "noAlt": "Alt metin yok",
+      "versions": "Sürümler",
+      "moveEarlier": "Öne al",
+      "moveLater": "Geriye al"
     },
     "wizard": {
       "pageTitle": "Yeni ürün",
@@ -3030,9 +3038,6 @@
       "handleHint": "Yayındaki ürünün adresini değiştirirseniz eski adres saklanır, başka bir ürüne verilmez.",
       "saved": "Değişiklikler kaydedildi.",
       "mediaSaved": "Görseller güncellendi.",
-      "variants": "Varyantlar, fiyat ve stok",
-      "variantsHint": "Stok, mağazanın varsayılan depo adresindeki adettir. Maliyet KDV hariçtir ve yalnızca stok raporlarında kullanılır.",
-      "variantsSaved": "Varyantlar kaydedildi.",
       "reserved": "Siparişe ayrılan",
       "summary": "Özet",
       "available": "Satılabilir stok",
@@ -3048,19 +3053,10 @@
       "deleteDescription": "Ürün, varyantları ve stok kayıtları silinir. Bu işlem geri alınamaz.",
       "deleted": "Ürün silindi.",
       "variantsNoLocation": "Mağazanın varsayılan depo adresi yok; stok girmek için önce bir depo adresi ekleyin.",
-      "noShipping": {
-        "digital": "Dijital ürün: kargo ve paket ölçüsü gerekmez.",
-        "service": "Hizmet: kargo ve paket ölçüsü gerekmez."
-      },
       "backorder": "Stoksuz satış",
       "cost": "Maliyet",
       "costHint": "KDV hariç birim maliyet; yalnızca raporlarda kullanılır, müşteri görmez.",
       "codes": {
-        "view": "Varyant görünümü",
-        "views": {
-          "prices": "Fiyat ve stok",
-          "codes": "Kodlar"
-        },
         "hint": "Google Alışveriş ürünü barkoddan (GTIN) tanır; barkodu olmayan üründe marka ile üretici kodu (MPN) yeter. Hepsi boş bırakılabilir.",
         "sku": "Stok kodu (SKU)",
         "gtin": "Barkod (GTIN)",
@@ -3083,11 +3079,6 @@
       "noCategory": "Kategori seçilmedi",
       "noBrand": "Marka yok",
       "defaultParcel": "Girilmedi; varsayılan paket kullanılır",
-      "primary": "Ana kategori: {{name}}",
-      "noPrimary": "Ana kategori seçilmedi",
-      "imagesAll": "Her görsel tüm varyantlarda görünür",
-      "imagesTied_one": "{{count}}/{{total}} görsel belirli varyantlara bağlı",
-      "imagesTied_other": "{{count}}/{{total}} görsel belirli varyantlara bağlı",
       "addons_one": "{{count}} ek seçenek",
       "addons_other": "{{count}} ek seçenek",
       "noAddons": "Ek seçenek yok",
@@ -3213,12 +3204,6 @@
         "choiceLabel": "Seçeneğin adı 1-60 karakter olmalı.",
         "idDuplicate": "Aynı ek seçenek iki kez gönderildi. Sayfayı yenileyip yeniden deneyin."
       }
-    },
-    "variantImages": {
-      "title": "Varyant görselleri",
-      "hint": "Her görselin hangi varyantları gösterdiğini seçin. Hiçbir varyanta bağlı olmayan görsel tüm varyantlarda görünür; mağazada varyant seçilince kendi görselleri öne çıkar.",
-      "toggle": "{{variant}} için {{position}}. görsel",
-      "all": "Tüm varyantlar"
     },
     "sheets": {
       "import": "İçe aktar",
@@ -3432,7 +3417,69 @@
         "reject": "Taslak reddedildi."
       }
     },
-    "giftCardBadge": "Hediye kartı"
+    "giftCardBadge": "Hediye kartı",
+    "side": {
+      "editOf": "{{title}}: düzenle",
+      "organizeHint": "Ürünün listelendiği kategoriler, markası ve KDV oranı.",
+      "sizes": "Ölçüler",
+      "yes": "Evet",
+      "withdrawal": "Cayma hakkı",
+      "withdrawalOut": "Dışında",
+      "withdrawalIn": "Var"
+    },
+    "variant": {
+      "title": "Varyantı düzenle",
+      "listTitle": "Varyantlar",
+      "listHint": "Fiyatını, stoğunu, kodlarını ve görsellerini düzenlemek için bir varyanta tıklayın.",
+      "singleTitle": "Fiyat, stok ve kodlar",
+      "price": "Fiyat",
+      "sellingPrice": "Satış fiyatı",
+      "priceHint": "KDV dahil; vitrinde bu fiyat görünür.",
+      "applyAll_one": "Bu fiyatı diğer {{count}} varyanta da uygula",
+      "applyAll_other": "Bu fiyatı diğer {{count}} varyanta da uygula",
+      "stock": "Stok",
+      "stockHint": "Mağazanın varsayılan depo adresindeki adet.",
+      "onHand": "Stok adedi",
+      "untracked": "Bu varyantın stoğu takip edilmiyor.",
+      "backorderHint": "Stok bitince de sipariş alınır (ön sipariş).",
+      "codes": "Kodlar",
+      "measures": "Ölçüler",
+      "measuresHint": "Bu varyantın kendi paketi. Boş bıraktığınız ölçü için ürünün paket ölçüsü kullanılır.",
+      "pictures": "Görseller",
+      "picturesHint": "Bu varyant seçilince gösterilecek görsellere tıklayın. Hiçbir varyanta bağlı olmayan görsel tüm varyantlarda görünür.",
+      "pictureToggle": "{{position}}. görsel: {{state}}",
+      "pictureOwn": "Bu varyanta bağlı",
+      "pictureOthers": "Başka varyanta bağlı ({{names}})",
+      "pictureAll": "Tüm varyantlarda görünür",
+      "addPicture": "Ekle",
+      "addPictures": "Varyanta görsel ekle",
+      "ownPictures_one": "Bu varyantın görselleri ({{count}})",
+      "ownPictures_other": "Bu varyantın görselleri ({{count}})",
+      "noOwnPictures": "Bu varyanta bağlı görsel yok; mağazada ürünün bütün görselleri gösterilir.",
+      "moveUp": "{{position}}. görseli yukarı taşı",
+      "moveDown": "{{position}}. görseli aşağı taşı",
+      "untie": "{{position}}. görseli bu varyanttan çıkar",
+      "previous": "Önceki varyant",
+      "next": "Sonraki varyant",
+      "position": "{{at}} / {{total}}",
+      "tabs": {
+        "prices": "Fiyat ve stok",
+        "codes": "Kodlar ve ölçüler",
+        "pictures_one": "Görseller ({{count}})",
+        "pictures_other": "Görseller ({{count}})"
+      },
+      "tabError": "Bu sekmede düzeltilecek alan var",
+      "saved": "Varyant kaydedildi.",
+      "noSku": "Stok kodu yok",
+      "stockCount_one": "Stok: {{formatted}}",
+      "stockCount_other": "Stok: {{formatted}}",
+      "hints": {
+        "noPrice": "Fiyat yok",
+        "soldOut": "Stokta yok",
+        "preorder": "Ön sipariş",
+        "noBarcode": "Barkod yok"
+      }
+    }
   },
   "orders": {
     "nonWithdrawable": "Cayma dışı",

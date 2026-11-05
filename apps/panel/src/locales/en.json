@@ -2881,19 +2881,19 @@
       "tooManyVariants": "A product can have at most 100 variants.",
       "optionRequired": "Add at least one option, or turn options off.",
       "optionDuplicate": "An option with this name already exists.",
-      "cost": "The cost must be between 0 and 10,000,000 ₺."
+      "cost": "The cost must be between 0 and 10,000,000 ₺.",
+      "alt": "An alt text can be at most 250 characters."
     },
     "media": {
       "card": "Images",
       "hint": "The first image is the main one; up to {{max}} images.",
-      "drop": "Drag images here, or click to choose",
+      "drop": "Drag images here or click",
       "types": "JPG, PNG, WebP or AVIF",
       "main": "Main image",
       "makeMain": "Make main image",
       "remove": "Remove image",
       "optional": "You can add images later, but products with images sell better.",
       "registerFailed": "The image was uploaded, but it could not be registered for alt text and versions.",
-      "altTitle": "Alt texts",
       "altHint": "Tells people who cannot see the image, and image search, what it shows; for example “White linen shirt, front”. Saved when you leave the field.",
       "altLabel": "Image {{position}}",
       "altPlaceholder": "What is in the picture?",
@@ -2904,8 +2904,16 @@
       "altComplete": "Every image has an alt text",
       "versionsReady": "Versions ready",
       "versionsPending": "Preparing",
-      "fromLibrary": "Choose from library",
-      "fromLibraryHint": "Add images uploaded before to this product."
+      "addLabel": "Add images: drag them here or click (up to {{max}} images)",
+      "addShort": "Add image",
+      "pickerTitle": "Add images",
+      "tilesHint": "Drag to reorder; click an image for its alt text and other actions.",
+      "tilesHintNoAlt": "Drag to reorder; click an image for other actions.",
+      "position": "Image {{position}}",
+      "noAlt": "No alt text",
+      "versions": "Versions",
+      "moveEarlier": "Move earlier",
+      "moveLater": "Move later"
     },
     "wizard": {
       "pageTitle": "New product",
@@ -3030,9 +3038,6 @@
       "handleHint": "If you change a published product's address, the old one is kept and not given to another product.",
       "saved": "Changes saved.",
       "mediaSaved": "Images updated.",
-      "variants": "Variants, price and stock",
-      "variantsHint": "Stock is the quantity at the shop's default location. Cost is VAT excluded and used only in stock reports.",
-      "variantsSaved": "Variants saved.",
       "reserved": "Reserved",
       "summary": "Summary",
       "available": "Sellable stock",
@@ -3048,19 +3053,10 @@
       "deleteDescription": "The product, its variants and stock records are deleted. This cannot be undone.",
       "deleted": "Product deleted.",
       "variantsNoLocation": "The shop has no default location; add one before entering stock.",
-      "noShipping": {
-        "digital": "Digital product: no shipping or package size needed.",
-        "service": "Service: no shipping or package size needed."
-      },
       "backorder": "Sell past stock",
       "cost": "Cost",
       "costHint": "Unit cost, VAT excluded; used in reports only, never shown to customers.",
       "codes": {
-        "view": "Variant view",
-        "views": {
-          "prices": "Price and stock",
-          "codes": "Codes"
-        },
         "hint": "Google Shopping recognises a product by its barcode (GTIN); without one, the brand with the manufacturer part number (MPN) will do. All may be left empty.",
         "sku": "SKU",
         "gtin": "Barcode (GTIN)",
@@ -3083,11 +3079,6 @@
       "noCategory": "No category chosen",
       "noBrand": "No brand",
       "defaultParcel": "Not entered; the default parcel is used",
-      "primary": "Primary category: {{name}}",
-      "noPrimary": "No primary category",
-      "imagesAll": "Every picture shows with all variants",
-      "imagesTied_one": "{{count}}/{{total}} picture tied to some variants",
-      "imagesTied_other": "{{count}}/{{total}} pictures tied to some variants",
       "addons_one": "{{count}} add-on",
       "addons_other": "{{count}} add-ons",
       "noAddons": "No add-ons",
@@ -3213,12 +3204,6 @@
         "choiceLabel": "An option's name is 1-60 characters.",
         "idDuplicate": "The same add-on was sent twice. Reload the page and try again."
       }
-    },
-    "variantImages": {
-      "title": "Variant images",
-      "hint": "Choose which variants each picture shows. A picture tied to no variant shows with all of them; the storefront brings a variant's pictures forward when it is chosen.",
-      "toggle": "Image {{position}} for {{variant}}",
-      "all": "All variants"
     },
     "sheets": {
       "import": "Import",
@@ -3432,7 +3417,69 @@
         "reject": "Draft rejected."
       }
     },
-    "giftCardBadge": "Gift card"
+    "giftCardBadge": "Gift card",
+    "side": {
+      "editOf": "Edit {{title}}",
+      "organizeHint": "The categories the product is listed in, its brand and its VAT rate.",
+      "sizes": "Size",
+      "yes": "Yes",
+      "withdrawal": "Right of withdrawal",
+      "withdrawalOut": "Excluded",
+      "withdrawalIn": "Applies"
+    },
+    "variant": {
+      "title": "Edit variant",
+      "listTitle": "Variants",
+      "listHint": "Click a variant to edit its price, stock, codes and images.",
+      "singleTitle": "Price, stock and codes",
+      "price": "Price",
+      "sellingPrice": "Selling price",
+      "priceHint": "VAT included; the storefront shows this price.",
+      "applyAll_one": "Apply this price to the other {{count}} variant too",
+      "applyAll_other": "Apply this price to the other {{count}} variants too",
+      "stock": "Stock",
+      "stockHint": "The quantity at the shop's default location.",
+      "onHand": "Stock quantity",
+      "untracked": "This variant's stock is not tracked.",
+      "backorderHint": "Orders are taken after it sells out too (preorder).",
+      "codes": "Codes",
+      "measures": "Measures",
+      "measuresHint": "This variant's own parcel. A measure left empty takes the product's parcel measure.",
+      "pictures": "Images",
+      "picturesHint": "Click the images to show when this variant is chosen. An image tied to no variant shows with all of them.",
+      "pictureToggle": "Image {{position}}: {{state}}",
+      "pictureOwn": "Tied to this variant",
+      "pictureOthers": "Tied to another variant ({{names}})",
+      "pictureAll": "Shown with every variant",
+      "addPicture": "Add",
+      "addPictures": "Add images to the variant",
+      "ownPictures_one": "This variant's images ({{count}})",
+      "ownPictures_other": "This variant's images ({{count}})",
+      "noOwnPictures": "No image is tied to this variant; the storefront shows all of the product's images.",
+      "moveUp": "Move image {{position}} up",
+      "moveDown": "Move image {{position}} down",
+      "untie": "Remove image {{position}} from this variant",
+      "previous": "Previous variant",
+      "next": "Next variant",
+      "position": "{{at}} / {{total}}",
+      "tabs": {
+        "prices": "Price and stock",
+        "codes": "Codes and measures",
+        "pictures_one": "Images ({{count}})",
+        "pictures_other": "Images ({{count}})"
+      },
+      "tabError": "A field in this tab needs fixing",
+      "saved": "Variant saved.",
+      "noSku": "No stock code",
+      "stockCount_one": "Stock: {{formatted}}",
+      "stockCount_other": "Stock: {{formatted}}",
+      "hints": {
+        "noPrice": "No price",
+        "soldOut": "Out of stock",
+        "preorder": "Preorder",
+        "noBarcode": "No barcode"
+      }
+    }
   },
   "orders": {
     "nonWithdrawable": "Non-withdrawable",

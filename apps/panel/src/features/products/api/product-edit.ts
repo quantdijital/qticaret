@@ -100,6 +100,18 @@ export interface VariantEdit {
   codes?: VariantCodes | null
   /** Its manufacturer part number, kept by the catalog; null clears it, undefined leaves it alone. */
   mpn?: string | null
+  /**
+   * Its own parcel measures, in the shop's units (a variant without them
+   * takes the product's); only the changed ones, null clears one.
+   */
+  measures?: VariantMeasures | null
+}
+
+export interface VariantMeasures {
+  weight?: number | null
+  length?: number | null
+  width?: number | null
+  height?: number | null
 }
 
 const CURRENCY = "try"
@@ -115,69 +127,71 @@ function nextPrices(edit: VariantEdit) {
 
 /**
  * Stock at the shop's default location in one level batch (a level that is
- * there is updated, a missing one made), then prices, preorder and codes
- * in one variant batch, then unit costs and MPNs in the catalog. Stock
- * goes first: a variant turned to preorder gets an empty level from the
- * server, which would collide with a level made here.
+ * there is updated, a missing one made), then prices, preorder, codes and
+ * measures in one variant batch, then unit costs and MPNs in the catalog.
+ * Stock goes first: a variant turned to preorder gets an empty level from
+ * the server, which would collide with a level made here.
  */
+export async function saveVariantEdits(
+  productId: string,
+  { edits, locationId }: { edits: VariantEdit[]; locationId: string | null }
+): Promise<void> {
+  const stocked = edits.flatMap((edit) => (edit.stock ? [edit.stock] : []))
+  if (locationId && stocked.length > 0) {
+    const row = (stock: (typeof stocked)[number]) => ({
+      inventory_item_id: stock.inventoryItemId,
+      location_id: locationId,
+      stocked_quantity: stock.quantity,
+    })
+    await sdk.admin.inventoryItem.batchInventoryItemsLocationLevels({
+      create: stocked.filter((stock) => !stock.hasLevel).map(row),
+      update: stocked.filter((stock) => stock.hasLevel).map(row),
+    })
+  }
+  const update = edits.flatMap((edit) =>
+    edit.amount === null && edit.backorder === null && !edit.codes && !edit.measures
+      ? []
+      : [
+          {
+            id: edit.variantId,
+            ...(edit.amount === null ? {} : { prices: nextPrices(edit) }),
+            ...(edit.backorder === null ? {} : { allow_backorder: edit.backorder }),
+            ...edit.codes,
+            ...edit.measures,
+          },
+        ]
+  )
+  if (update.length > 0) {
+    await sdk.admin.product.batchVariants(productId, { update })
+  }
+  // Unit costs (F11.4) and MPNs are the catalog's, saved last: a refused price leaves them
+  const catalog = edits.flatMap((edit) =>
+    edit.cost === undefined && edit.mpn === undefined
+      ? []
+      : [
+          [
+            edit.variantId,
+            {
+              ...(edit.cost === undefined ? {} : { cost: edit.cost }),
+              ...(edit.mpn === undefined ? {} : { mpn: edit.mpn }),
+            },
+          ] as const,
+        ]
+  )
+  if (catalog.length > 0) {
+    await sdk.client.fetch(catalogUrl(productId), {
+      method: "POST",
+      body: { variants: Object.fromEntries(catalog) },
+    })
+  }
+}
+
+/** `saveVariantEdits` as a mutation, the product and what depends on it read again after. */
 export function useSaveVariants(productId: string) {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: async ({
-      edits,
-      locationId,
-    }: {
-      edits: VariantEdit[]
-      locationId: string | null
-    }) => {
-      const stocked = edits.flatMap((edit) => (edit.stock ? [edit.stock] : []))
-      if (locationId && stocked.length > 0) {
-        const row = (stock: (typeof stocked)[number]) => ({
-          inventory_item_id: stock.inventoryItemId,
-          location_id: locationId,
-          stocked_quantity: stock.quantity,
-        })
-        await sdk.admin.inventoryItem.batchInventoryItemsLocationLevels({
-          create: stocked.filter((stock) => !stock.hasLevel).map(row),
-          update: stocked.filter((stock) => stock.hasLevel).map(row),
-        })
-      }
-      const update = edits.flatMap((edit) =>
-        edit.amount === null && edit.backorder === null && !edit.codes
-          ? []
-          : [
-              {
-                id: edit.variantId,
-                ...(edit.amount === null ? {} : { prices: nextPrices(edit) }),
-                ...(edit.backorder === null ? {} : { allow_backorder: edit.backorder }),
-                ...edit.codes,
-              },
-            ]
-      )
-      if (update.length > 0) {
-        await sdk.admin.product.batchVariants(productId, { update })
-      }
-      // Unit costs (F11.4) and MPNs are the catalog's, saved last: a refused price leaves them
-      const catalog = edits.flatMap((edit) =>
-        edit.cost === undefined && edit.mpn === undefined
-          ? []
-          : [
-              [
-                edit.variantId,
-                {
-                  ...(edit.cost === undefined ? {} : { cost: edit.cost }),
-                  ...(edit.mpn === undefined ? {} : { mpn: edit.mpn }),
-                },
-              ] as const,
-            ]
-      )
-      if (catalog.length > 0) {
-        await sdk.client.fetch(catalogUrl(productId), {
-          method: "POST",
-          body: { variants: Object.fromEntries(catalog) },
-        })
-      }
-    },
+    mutationFn: (input: { edits: VariantEdit[]; locationId: string | null }) =>
+      saveVariantEdits(productId, input),
     // A save that failed half-way (stock written, prices refused) still changed the product;
     // prices and codes change what the SEO advisor finds
     onSettled: async () => {

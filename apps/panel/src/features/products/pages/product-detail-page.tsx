@@ -14,7 +14,7 @@ import { ProductDescriptionCard } from "@/features/products/detail/description-c
 import { GeneralCard } from "@/features/products/detail/general-card"
 import { MediaCard } from "@/features/products/detail/media-card"
 import { ProductActions } from "@/features/products/detail/product-actions"
-import { ProductSections } from "@/features/products/detail/product-sections"
+import { ProductSections, ProductSideCards } from "@/features/products/detail/product-sections"
 import { PRODUCT_TARGETS } from "@/features/products/detail/sections"
 import { SummaryCard } from "@/features/products/detail/summary-card"
 import { VariantsCard } from "@/features/products/detail/variants-card"
@@ -49,10 +49,11 @@ function DetailSkeleton() {
 
 /**
  * One product (docs/06 "Ürün sayfası"): what is edited most first (its
- * name and address, its variants with prices and stock, its pictures, its
- * description), the rest folded under them to a line each; its facts,
- * dates and the SEO advisor beside them, following the scroll. Every
- * card saves on its own.
+ * name and address, its variants, each opening in a dialog, its pictures,
+ * its description), its search appearance and seldom-edited parts folded
+ * under them to a line each; beside them, following the scroll, its
+ * facts, the SEO advisor and short cards for categories, catalog details
+ * and the parcel, each edited in a dialog. Every card saves on its own.
  */
 export function ProductDetailPage() {
   const { t } = useTranslation()
@@ -113,6 +114,7 @@ export function ProductDetailPage() {
               targets={PRODUCT_TARGETS}
               onTarget={revealSection}
             />
+            <ProductSideCards product={product} />
           </>
         }
       />

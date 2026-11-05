@@ -88,9 +88,28 @@ test("a product's page has no serious accessibility issue", async ({ page }) => 
   await page.locator("#product-price-history").scrollIntoViewIfNeeded()
   await page.waitForLoadState("networkidle")
   expect(await seriousIssues(page)).toEqual([])
-  // The variants' second view: their SKU, barcode and MPN fields
-  await page.locator("#product-variants").getByRole("radio", { name: "Kodlar" }).click()
-  await expect(page.locator("#product-variants input[name$='.gtin']").first()).toBeVisible()
+  // A variant's dialog, each of its tabs; a product of one variant has the fields in its card
+  const rows = page.locator("[data-variant-row]")
+  if ((await rows.count()) > 0) {
+    await rows.first().click()
+    const dialog = page.getByRole("dialog", { name: "Varyantı düzenle" })
+    for (const tab of ["Fiyat ve stok", "Kodlar ve ölçüler", "Görseller"]) {
+      await dialog.getByRole("tab", { name: tab }).click()
+      expect(await seriousIssues(page)).toEqual([])
+    }
+    await page.keyboard.press("Escape")
+    await expect(dialog).toBeHidden()
+  } else {
+    await expect(page.locator("#product-variant-codes")).toBeVisible()
+  }
+  // The media dialog the gallery's drop zone opens, and a narrow column card's dialog
+  await page.locator('button[aria-label^="Görsel ekle"]').first().click()
+  await expect(page.getByRole("dialog", { name: "Görsel ekle" })).toBeVisible()
+  await page.waitForLoadState("networkidle")
+  expect(await seriousIssues(page)).toEqual([])
+  await page.keyboard.press("Escape")
+  await page.getByRole("button", { name: "Katalog bilgileri: düzenle" }).click()
+  await expect(page.getByRole("dialog", { name: "Katalog bilgileri" })).toBeVisible()
   expect(await seriousIssues(page)).toEqual([])
 })
 

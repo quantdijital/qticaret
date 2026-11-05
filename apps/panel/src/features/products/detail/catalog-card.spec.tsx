@@ -30,6 +30,12 @@ const CATALOG: ProductCatalog = {
   variants: [],
 }
 
+/** The card says what is saved; its fields are in the dialog "Düzenle" opens. */
+async function openDialog() {
+  await userEvent.click(await screen.findByRole("button", { name: "Katalog bilgileri: düzenle" }))
+  return screen.getByRole("dialog", { name: "Katalog bilgileri" })
+}
+
 describe("CatalogCard", () => {
   beforeEach(() => {
     fetchMock.mockReset()
@@ -44,6 +50,7 @@ describe("CatalogCard", () => {
         <CatalogCard productId="prod_1" />
       </QueryClientProvider>
     )
+    await openDialog()
     const toggle = await screen.findByRole("switch", { name: "Cayma hakkı dışında" })
     expect(toggle).not.toBeChecked()
 
@@ -56,6 +63,11 @@ describe("CatalogCard", () => {
         body: { withdrawal_excluded: true },
       })
     })
+    // Saved, the dialog closes and the card says it
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull()
+    })
+    expect(screen.getByText("Dışında")).toBeInTheDocument()
   })
 
   it("explains the mark: a sealed good when physical, out outright when digital or a service", async () => {
@@ -64,6 +76,7 @@ describe("CatalogCard", () => {
         <CatalogCard productId="prod_1" />
       </QueryClientProvider>
     )
+    await openDialog()
     const toggle = await screen.findByRole("switch", { name: "Cayma hakkı dışında" })
 
     expect(toggle).toHaveAccessibleDescription(
@@ -100,6 +113,7 @@ describe("CatalogCard", () => {
         <CatalogCard productId="prod_1" />
       </QueryClientProvider>
     )
+    await openDialog()
 
     await userEvent.click(await screen.findByRole("combobox", { name: "Yaş sınırı" }))
     await userEvent.click(await screen.findByRole("option", { name: "Silah ve kesici alet" }))
@@ -128,22 +142,24 @@ describe("CatalogCard", () => {
         }
       )
     }
-    const renderCard = () =>
+    const renderCard = async () => {
       render(
         <QueryClientProvider client={new QueryClient()}>
           <CatalogCard productId="prod_1" />
         </QueryClientProvider>
       )
+      await openDialog()
+    }
 
     it("is not offered while the shop's gift cards are off", async () => {
-      renderCard()
+      await renderCard()
       expect(await screen.findByRole("switch", { name: "Cayma hakkı dışında" })).toBeVisible()
       expect(screen.queryByRole("switch", { name: "Hediye kartı" })).toBeNull()
     })
 
     it("marks the product a gift card, sending only that, and says what it means", async () => {
       serve({})
-      renderCard()
+      await renderCard()
       const toggle = await screen.findByRole("switch", { name: "Hediye kartı" })
       expect(toggle).toHaveAccessibleDescription(/Varyantlar kartın tutarlarıdır/)
       expect(toggle).toHaveAccessibleDescription(/stok takibini kapatmanız önerilir/)
@@ -163,7 +179,7 @@ describe("CatalogCard", () => {
       const message =
         "Hediye kartı satmak için önce Ayarlar > Özellikler'den hediye kartlarını açın."
       serve({}, () => Promise.reject(Object.assign(new Error(message), { status: 400 })))
-      renderCard()
+      await renderCard()
 
       await userEvent.click(await screen.findByRole("switch", { name: "Hediye kartı" }))
       await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
@@ -178,7 +194,7 @@ describe("CatalogCard", () => {
 
     it("locks a gift card's kind to digital, and unmarks it", async () => {
       serve({ is_gift_card: true, kind: "digital" })
-      renderCard()
+      await renderCard()
       const toggle = await screen.findByRole("switch", { name: "Hediye kartı" })
       expect(toggle).toBeChecked()
       const kind = screen.getByRole("combobox", { name: "Ürün türü" })

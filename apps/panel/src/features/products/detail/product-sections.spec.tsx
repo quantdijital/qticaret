@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, waitFor } from "@testing-library/react"
+import { act, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -13,7 +13,9 @@ import type {
 import type { ProductCatalog } from "@/features/products/api/product-edit"
 import type { ProductDetail } from "@/features/products/api/products"
 import type { Assessment, SeoIssue } from "@/features/seo/api/advisor"
-import { ProductSections } from "./product-sections"
+import { revealSection } from "@/components/patterns/use-section-open"
+import { ProductSections, ProductSideCards } from "./product-sections"
+import { PRODUCT_TARGETS } from "./sections"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: unknown) => Promise<unknown>>())
 
@@ -204,18 +206,34 @@ function answer(
   return {}
 }
 
-function renderSections(answers: Answers = {}, product: ProductDetail = PRODUCT) {
+function renderWith(
+  Part: typeof ProductSections,
+  answers: Answers = {},
+  product: ProductDetail = PRODUCT
+) {
   fetchMock.mockImplementation((url: string) => Promise.resolve(answer(url, answers)))
   return render(
     <QueryClientProvider
       client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}
     >
-      <ProductSections product={product} />
+      <Part product={product} />
     </QueryClientProvider>
   )
 }
 
+const renderSections = (answers: Answers = {}, product: ProductDetail = PRODUCT) =>
+  renderWith(ProductSections, answers, product)
+const renderSide = (answers: Answers = {}, product: ProductDetail = PRODUCT) =>
+  renderWith(ProductSideCards, answers, product)
+
 const part = (name: string) => screen.getByRole("button", { name })
+const card = (title: string): HTMLElement => {
+  const found = screen.getByRole("heading", { name: title }).closest("section")
+  if (!found) {
+    throw new Error(`no card titled ${title}`)
+  }
+  return found
+}
 
 /** The owner, 2026-11-05: the product page folds what is not edited every day, as the content editor does. */
 describe("ProductSections", () => {
@@ -225,19 +243,12 @@ describe("ProductSections", () => {
   })
 
   it("folds each part to a line that says what is in it, in the page's order", async () => {
-    renderSections({ issues: [issue("low", "edit_dimensions")] })
+    renderSections()
     // Each line once its part has loaded (a skeleton until then)
     await waitFor(() => {
       expect(
         screen.getAllByRole("button", { expanded: false }).map((button) => button.textContent)
-      ).toEqual([
-        "Arama motoru görünümü",
-        "Özellikler",
-        "Kategori, marka ve KDV",
-        "Paket ölçüleri",
-        "Katalog bilgileri",
-        "Fiyat geçmişi",
-      ])
+      ).toEqual(["Arama motoru görünümü", "Özellikler", "Fiyat geçmişi"])
     })
     await waitFor(() => {
       expect(part("Fiyat geçmişi")).toHaveAccessibleDescription("İndirim üstü çizili gösteriliyor")
@@ -246,24 +257,10 @@ describe("ProductSections", () => {
       "Başlık 21/60 · Açıklama (otomatik) 15/155"
     )
     expect(part("Özellikler")).toHaveAccessibleDescription("Bıçak şablonu · 2/2 alan dolu")
-    expect(part("Kategori, marka ve KDV")).toHaveAccessibleDescription(
-      "Çakılar · My L'arte · KDV (%20)"
-    )
-    // The advisor's finding for the parcel is counted after it
-    expect(part("Paket ölçüleri")).toHaveAccessibleDescription("450 g · 30 × — × 5 cm · 1 öneri")
-    expect(part("Katalog bilgileri")).toHaveAccessibleDescription(
-      "Yeni · Ana kategori: Çakılar · Cayma hakkı dışında"
-    )
   })
 
-  it("opens a part the advisor has an urgent finding for, and one with a required field empty", async () => {
-    renderSections({
-      issues: [issue("high", "edit_categories")],
-      attributes: { template: TEMPLATE, values: { steel: "N690" } },
-    })
-    await waitFor(() => {
-      expect(part("Kategori, marka ve KDV")).toHaveAttribute("aria-expanded", "true")
-    })
+  it("opens a part with a required field empty", async () => {
+    renderSections({ attributes: { template: TEMPLATE, values: { steel: "N690" } } })
     await waitFor(() => {
       expect(part("Özellikler")).toHaveAttribute("aria-expanded", "true")
     })
@@ -274,30 +271,7 @@ describe("ProductSections", () => {
     ).toBeInTheDocument()
   })
 
-  it("says a parcel left empty is priced by the default one, and has none for a digital product", async () => {
-    const user = userEvent.setup()
-    const bare = { ...PRODUCT, weight: null, length: null, height: null } as ProductDetail
-    const first = renderSections({}, bare)
-    await waitFor(() => {
-      expect(part("Paket ölçüleri")).toHaveAccessibleDescription(
-        "Girilmedi; varsayılan paket kullanılır"
-      )
-    })
-    // Remembered per person: opened once, it opens the next time too
-    await user.click(part("Paket ölçüleri"))
-    expect(localStorage.getItem("qt.panel.section:anyone:product.shipping")).toBe("1")
-
-    first.unmount()
-    renderSections({ catalog: { ...CATALOG, kind: "digital" } }, bare)
-    await waitFor(() => {
-      expect(part("Katalog bilgileri")).toHaveAccessibleDescription(
-        "Dijital ürün · Yeni · Ana kategori: Çakılar · Cayma hakkı dışında"
-      )
-    })
-    expect(screen.queryByRole("button", { name: "Paket ölçüleri" })).not.toBeInTheDocument()
-  })
-
-  it("adds the parts the shop uses: variant pictures, add-ons and drafts, each with its line", async () => {
+  it("adds the parts the shop uses: add-ons and drafts, each with its line", async () => {
     // The other variant's discount is not shown: its price was lower in the days before
     const unsold = { ...SALE, on_sale: false, before: null }
     renderSections(
@@ -335,15 +309,6 @@ describe("ProductSections", () => {
       {
         ...PRODUCT,
         variants: [...(PRODUCT.variants ?? []), { id: "variant_2", title: "Mor", prices: [] }],
-        images: [
-          {
-            id: "img_1",
-            url: "https://cdn.example/1.jpg",
-            rank: 0,
-            variants: [{ id: "variant_2" }],
-          },
-          { id: "img_2", url: "https://cdn.example/2.jpg", rank: 1 },
-        ],
       } as unknown as ProductDetail
     )
     await waitFor(() => {
@@ -351,9 +316,6 @@ describe("ProductSections", () => {
         "1 taslak onay bekliyor · Bu ay 3/20 taslak"
       )
     })
-    expect(part("Varyant görselleri")).toHaveAccessibleDescription(
-      "1/2 görsel belirli varyantlara bağlı"
-    )
     await waitFor(() => {
       expect(part("Ek seçenekler")).toHaveAccessibleDescription("1 ek seçenek · İsim yazdırma")
     })
@@ -362,5 +324,74 @@ describe("ProductSections", () => {
         "1 varyantta indirim üstü çizili gösteriliyor · 1 varyantta indirim üstü çizili gösterilmiyor"
       )
     })
+    // The variants' pictures are chosen in each variant's dialog now
+    expect(screen.queryByRole("button", { name: "Varyant görselleri" })).toBeNull()
+  })
+})
+
+/** The owner, 2026-11-05: "kategori, marka, kdv sağ sidebar'da … katalog bilgileri de orada olsun. paket ölçüleri de." */
+describe("ProductSideCards", () => {
+  beforeEach(() => {
+    fetchMock.mockReset()
+    localStorage.clear()
+  })
+
+  it("says what is saved a line at a time, with the advisor's findings counted", async () => {
+    renderSide({ issues: [issue("low", "edit_dimensions")] })
+    await waitFor(() => {
+      expect(card("Paket ölçüleri")).toBeInTheDocument()
+    })
+    expect(
+      screen.getAllByRole("heading", { level: 2 }).map((heading) => heading.textContent)
+    ).toEqual(["Kategori, marka ve KDV", "Katalog bilgileri", "Paket ölçüleri"])
+    const organize = within(card("Kategori, marka ve KDV"))
+    expect(organize.getByText("Çakılar")).toBeInTheDocument()
+    expect(organize.getByText("My L'arte")).toBeInTheDocument()
+    expect(organize.getByText("KDV (%20)")).toBeInTheDocument()
+    const catalog = within(card("Katalog bilgileri"))
+    await waitFor(() => {
+      expect(catalog.getByText("Yeni")).toBeInTheDocument()
+    })
+    expect(catalog.getByText("Dışında")).toBeInTheDocument()
+    const parcel = within(card("Paket ölçüleri"))
+    expect(parcel.getByText("450 g")).toBeInTheDocument()
+    expect(parcel.getByText("30 × — × 5 cm")).toBeInTheDocument()
+    await waitFor(() => {
+      expect(parcel.getByText("1 öneri")).toBeInTheDocument()
+    })
+  })
+
+  it("edits a card in its own dialog, a refused measure beside it, asking before a change is lost", async () => {
+    const user = userEvent.setup()
+    renderSide({}, { ...PRODUCT, weight: null, length: null, height: null })
+    await waitFor(() => {
+      expect(screen.getByText("Girilmedi; varsayılan paket kullanılır")).toBeInTheDocument()
+    })
+    await user.click(screen.getByRole("button", { name: "Paket ölçüleri: düzenle" }))
+    const dialog = screen.getByRole("dialog", { name: "Paket ölçüleri" })
+    expect(dialog).toHaveAttribute("data-size", "sm")
+    await user.type(within(dialog).getByLabelText("Ağırlık"), "0")
+    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+      "Sıfırdan büyük bir sayı girin"
+    )
+
+    // Leaving with the change asks first
+    await user.click(within(dialog).getByRole("button", { name: "Vazgeç" }))
+    await user.click(screen.getByRole("button", { name: "Değişiklikleri at" }))
+    expect(screen.queryByRole("dialog")).toBeNull()
+  })
+
+  it("opens the categories' dialog for the advisor's missing category, and has no parcel for a digital product", async () => {
+    renderSide({ catalog: { ...CATALOG, kind: "digital" } })
+    await waitFor(() => {
+      expect(card("Katalog bilgileri")).toHaveTextContent("Dijital ürün")
+    })
+    expect(screen.queryByRole("heading", { name: "Paket ölçüleri" })).toBeNull()
+
+    act(() => {
+      revealSection(PRODUCT_TARGETS["edit_categories"] ?? "")
+    })
+    expect(await screen.findByRole("dialog", { name: "Kategori, marka ve KDV" })).toBeVisible()
   })
 })

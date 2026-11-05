@@ -48,6 +48,26 @@ const orderAction = (action: string) => async (page: Page) => {
   return false
 }
 
+/** A product of several variants from the list's newest, then an action on its page. */
+const productAction = (open: (page: Page) => Promise<void>) => async (page: Page) => {
+  const links = await page
+    .locator("main table tbody tr a")
+    .evaluateAll((anchors) => anchors.slice(0, 10).map((anchor) => anchor.getAttribute("href")))
+  for (const href of links) {
+    if (!href) {
+      continue
+    }
+    await page.goto(href)
+    await expect(pageHeading(page)).toBeVisible()
+    await page.waitForLoadState("networkidle")
+    if ((await page.locator("[data-variant-row]").count()) > 0) {
+      await open(page)
+      return true
+    }
+  }
+  return false
+}
+
 /**
  * Dialogs that open without writing anything; each one is only looked at
  * and closed. Opening a refund asks the server for a preview, nothing more.
@@ -64,6 +84,28 @@ const CASES: Case[] = [
   { name: "new redirect", path: "/seo/redirects", open: click("Yönlendirme ekle") },
   { name: "new menu", path: "/storefront/menus", open: click("Menü ekle") },
   { name: "new location", path: "/settings/shipping?part=locations", open: click("Depo ekle") },
+  // The owner, 2026-11-05: a variant in one dialog, the media dialog on the size scale
+  {
+    name: "variant",
+    path: "/products",
+    open: productAction(async (page) => {
+      await page.locator("[data-variant-row]").first().click()
+    }),
+  },
+  {
+    name: "media picker",
+    path: "/products",
+    open: productAction(async (page) => {
+      await page.locator('button[aria-label^="Görsel ekle"]').first().click()
+    }),
+  },
+  {
+    name: "product catalog",
+    path: "/products",
+    open: productAction(async (page) => {
+      await page.getByRole("button", { name: "Katalog bilgileri: düzenle" }).click()
+    }),
+  },
 ]
 
 /**
