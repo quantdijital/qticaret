@@ -84,7 +84,7 @@ export function cardProviderOf(methods: PaymentMethods): string | null {
   return up ?? methods.card_providers[0] ?? null
 }
 
-function methodViews(
+export function methodViews(
   methods: PaymentMethods,
   installments: number,
   t: Translate
@@ -100,6 +100,8 @@ function methodViews(
         installments > 1
           ? t("checkout.pay_card_installments", { count: installments })
           : t("checkout.pay_card_single"),
+      // No table here: the provider's card form lists the bank's installments once the number is in
+      note: installments > 1 ? t("checkout.pay_card_installments_note") : null,
     })
   }
   if (methods.bank_transfer) {

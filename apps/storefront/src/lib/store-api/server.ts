@@ -87,13 +87,21 @@ async function publicRequest<T>(path: string, query?: Record<string, QueryValue>
 
 /**
  * A shop-wide GET (the frame, the category tree, paths): never with the
- * customer's key, kept a minute in this process (`shared.ts`).
+ * customer's key, kept a minute in this process (`shared.ts`). `kept`
+ * keeps it longer, under an extra key part the backend is not sent (a
+ * price the answer follows, so a new price asks again).
  */
 export async function storePublicGet<T>(
   path: string,
-  query?: Record<string, QueryValue>
+  query?: Record<string, QueryValue>,
+  kept?: { ttlMs: number; key?: string }
 ): Promise<T> {
-  return shared(`${path}?${JSON.stringify(query ?? {})}`, () => publicRequest<T>(path, query))
+  const extra = kept?.key ? `#${kept.key}` : ""
+  return shared(
+    `${path}?${JSON.stringify(query ?? {})}${extra}`,
+    () => publicRequest<T>(path, query),
+    kept?.ttlMs
+  )
 }
 
 /**

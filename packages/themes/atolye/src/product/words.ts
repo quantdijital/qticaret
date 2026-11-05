@@ -102,7 +102,16 @@ export const installmentWords = (t: Translate) => ({
   per: t("product.installments_per"),
   total: t("product.installments_total"),
   single: t("product.installments_single"),
+  /** "{count} aya varan taksit". */
   upTo: t("product.installments_up_to"),
+  /** "{count} taksit": the same in a narrow column (a phone). */
+  short: t("product.installments_short"),
+  /** "aylık {amount}'den". */
+  monthly: t("product.installments_monthly"),
+  family: t("product.installments_family"),
+  free: t("product.installments_free"),
+  note: t("product.installments_note"),
+  close: t("product.installments_close"),
 })
 
 export type InstallmentWords = ReturnType<typeof installmentWords>

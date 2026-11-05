@@ -10,6 +10,7 @@ import { iyzicoApi, iyzicoCredentialsOf, iyzicoInstallmentTable } from "../../li
 import { paytrCredentialsOf, paytrInstallmentRates } from "../../lib/payments/paytr"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
+import { priceDisplays } from "../pricing/price-display"
 
 export type InstallmentsFor = { cart_id: string } | { variant_id: string; region_id: string }
 
@@ -23,7 +24,10 @@ export interface Installments {
 
 const notFound = () => new MedusaError(MedusaError.Types.NOT_FOUND, "payments.installments_unknown")
 
-/** What is to be paid, worked out on the server: a cart's total, or a variant's price now. */
+/**
+ * What is to be paid, worked out on the server: a cart's total, or a
+ * variant's price now as its page shows it (the price display's).
+ */
 async function amountOf(
   container: MedusaContainer,
   target: InstallmentsFor,
@@ -87,7 +91,14 @@ async function amountOf(
   if (!visible || price === null || price === undefined) {
     throw notFound()
   }
-  return { amount: fromMedusaAmount(price, { allowRounding: true }), currency_code: currency }
+  // The price the page shows: an automatic promotion every shopper gets is the price (adr/0023 Ek 2026-11-05)
+  const shown = (await priceDisplays(container, [target.variant_id], currency)).get(
+    target.variant_id
+  )
+  return {
+    amount: shown?.current ?? fromMedusaAmount(price, { allowRounding: true }),
+    currency_code: currency,
+  }
 }
 
 /**

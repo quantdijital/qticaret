@@ -109,8 +109,27 @@ export interface ConfirmPageView {
 
 /** A card family's installment plans (F5): "3 × 428,78 TL", the total, in words. */
 export interface InstallmentFamilyView {
+  /** As the family is written on its own cards ("Bonus", "World"). */
   family: string
-  options: { count: number; perInstallment: string; total: string }[]
+  options: {
+    count: number
+    perInstallment: string
+    total: string
+    /** Two or more installments at the price of one payment (no surcharge): "Peşin fiyatına". */
+    free?: boolean
+  }[]
+}
+
+/**
+ * A price's installments in one line (owner 2026-11-05): the most any
+ * card family offers and the lowest monthly amount at that count,
+ * worked out on the storefront's server from the same table the dialog
+ * shows: "12 aya varan taksit · aylık 203,04 TL'den".
+ */
+export interface InstallmentSummaryView {
+  count: number
+  /** "203,04 TL". */
+  perInstallment: string
 }
 
 /** `/hediye-karti/bakiye`: a gift card's balance, asked by its code (adr/0025 Ek 2026-11-03). */

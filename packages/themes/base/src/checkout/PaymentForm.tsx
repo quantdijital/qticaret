@@ -113,6 +113,7 @@ export function PaymentForm({
                 {each.detail && (
                   <span className="text-sm text-muted-foreground">{each.detail}</span>
                 )}
+                {each.note && <span className="text-xs text-muted-foreground">{each.note}</span>}
               </span>
             </label>
           )

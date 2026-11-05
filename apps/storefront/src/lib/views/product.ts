@@ -1,5 +1,6 @@
 import type {
   BreadcrumbView,
+  InstallmentSummaryView,
   ProductCardView,
   ProductPageView,
   Translate,
@@ -91,6 +92,8 @@ interface ProductPageInput {
   swatchOf?: (value: string) => string | null
   /** The backend's HTML of the product's content document (adr/0055); null or left out: none. */
   descriptionHtml?: string | null
+  /** Each variant's installments in one line, by its id (`installmentSummaries`); none: no line. */
+  installments?: Readonly<Record<string, InstallmentSummaryView>>
 }
 
 /** What the product itself says; the page adds its reviews, questions and neighbours. */
@@ -109,6 +112,7 @@ export function productPage({
   trustBadges,
   swatchOf,
   descriptionHtml = null,
+  installments = {},
 }: ProductPageInput): ProductPageBase {
   const variants = product.variants ?? []
   const options = (product.options ?? []).map((option) => {
@@ -146,6 +150,7 @@ export function productPage({
     kurus: kurusOf(shownAmount(variant, displays)),
     available: isAvailable(variant),
     sku: variant.sku,
+    installments: installments[variant.id] ?? null,
   }))
   const requested = views.find((variant) => variant.id === requestedVariant)
   const selected = requested ?? views.find((variant) => variant.available) ?? views[0] ?? null

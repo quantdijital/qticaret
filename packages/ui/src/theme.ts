@@ -68,7 +68,11 @@ export interface ThemeActions {
   stockAlert: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
   /** Field: `product_id`; a signed-in customer saves the product. */
   addFavorite: FormAction
-  /** A variant's installment plans, asked only when the shopper opens them (a call to the provider). */
+  /**
+   * A variant's installment plans by card family, asked only when the
+   * shopper opens them (the line under the price, `VariantView.installments`,
+   * comes with the page); null: none to show.
+   */
   installments: (variantId: string) => Promise<InstallmentFamilyView[] | null>
   /**
    * A gift card into the cart with its recipient (adr/0025 Ek 2026-11-03).

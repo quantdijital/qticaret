@@ -93,6 +93,7 @@ export function PaymentForm({
               <span className="flex min-w-0 flex-col">
                 <span className="font-semibold">{each.label}</span>
                 {each.detail && <span className="text-sm text-text-2">{each.detail}</span>}
+                {each.note && <span className="mt-0.5 text-xs text-text-2">{each.note}</span>}
               </span>
             </ChoiceRow>
           )

@@ -57,6 +57,7 @@ const variant = (id: string, color: string, over: Partial<VariantView> = {}): Va
   kurus: 183750,
   available: true,
   sku: null,
+  installments: { count: 12, perInstallment: "182,78 TL" },
   ...over,
 })
 

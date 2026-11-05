@@ -25,9 +25,10 @@ import { SectionHead } from "./sections/SectionHead"
  * trail, then the photographs (from 768 px half the row, from 1280 px
  * seven twelfths and 680 px at most: a square in a soft well filling its
  * column's width, its thumbnails right under it) beside
- * the buy column: the name and its stars, the price, the options and
- * add-ons, "add to cart" with the favourite heart, the instalments, the
- * legal note before the purchase and the delivery facts. Right below:
+ * the buy column: the name and its stars, the price with its instalments
+ * in one line (the table in a dialog), the options and add-ons, "add to
+ * cart" with the favourite heart, the legal note before the purchase and
+ * the delivery facts. Right below:
  * the description and the ruled spec table as two tabs, then the reviews
  * at once, the questions, the category's other products, and the
  * sections the shop put under every product (adr/0049). On a phone a buy

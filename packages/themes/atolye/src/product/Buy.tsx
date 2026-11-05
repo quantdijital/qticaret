@@ -43,8 +43,9 @@ const INITIAL: ActionResult = { ok: false, error: null }
  * price-before rule, the saving and a cart offer's note), its stock in
  * words, the options, the add-ons or a gift card's recipient, then one
  * row: how many, "add to cart" in the shop's colour, the favourite heart.
- * The instalments open under it for a variant to be had; a variant out
- * of stock offers the stock alert instead. A choice writes `?variant=` in
+ * A variant to be had says its instalments in one line under the price
+ * (the table opens in a dialog); a variant out of stock offers the stock
+ * alert under the row. A choice writes `?variant=` in
  * place (the back button still leaves the page). Without the script the
  * form still posts the first variant. Once in, the cart sheet opens.
  */
@@ -161,9 +162,23 @@ export function Buy({
         ? words.outOfStock
         : words.chooseOptions
   const error = !stale && state.error ? (words.errors[state.error] ?? words.fallback) : null
+  const plans = variant && available ? (variant.installments ?? null) : null
   return (
     <div className="gf-buy-stack flex flex-col gap-6">
-      {price && <Price price={price} words={words} />}
+      {price && (
+        <div className="flex flex-col gap-3">
+          <Price price={price} words={words} />
+          {/* One quiet line under the price, the table in a dialog (owner 2026-11-05) */}
+          {variant && plans && (
+            <Installments
+              variantId={variant.id}
+              summary={plans}
+              load={installments.load}
+              words={installments.words}
+            />
+          )}
+        </div>
+      )}
       <p
         className={cn(
           "flex items-center gap-2 text-sm font-semibold",
@@ -268,9 +283,6 @@ export function Buy({
           </span>
         )}
       </p>
-      {variant && available && (
-        <Installments variantId={variant.id} load={installments.load} words={installments.words} />
-      )}
       {/* Outside the buy form: a form may not hold another */}
       {variant && !available && (
         <StockAlert

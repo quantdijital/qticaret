@@ -88,6 +88,39 @@ medusaIntegrationTestRunner({
       expect(rateRequests()).toHaveLength(1)
     })
 
+    it("prices a product at the price its page shows, an automatic promotion included", async () => {
+      // As the panel makes one (adr/0023 Ek 2026-11-05: every shopper gets it, so it is the price)
+      const made = await settle(
+        http.post(
+          "/admin/promotions",
+          {
+            code: "TAKSIT25",
+            type: "standard",
+            is_automatic: true,
+            is_tax_inclusive: true,
+            status: "active",
+            application_method: {
+              type: "percentage",
+              target_type: "order",
+              allocation: "across",
+              value: 25,
+            },
+          },
+          { headers: admin.headers }
+        )
+      )
+      expect(made.status).toBe(200)
+
+      const shown = await table(`variant_id=${variantId}&region_id=${shop.regionId}`)
+
+      expect(shown.data.installments).toMatchObject({ enabled: true, amount: "90.00" })
+      const bonus = shown.data.installments.families.find(({ family }) => family === "bonus")
+      expect(bonus?.options.slice(0, 2).map(({ count, total }) => [count, total])).toEqual([
+        [1, "90.00"],
+        [2, "93.14"],
+      ])
+    })
+
     it("offers no more than the shop chose, and one payment when it turned them off", async () => {
       await choose({ max_installment: 3 })
       const three = await table(`variant_id=${variantId}&region_id=${shop.regionId}`)

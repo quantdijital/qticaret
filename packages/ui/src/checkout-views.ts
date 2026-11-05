@@ -59,6 +59,12 @@ export interface PaymentMethodView {
   label: string
   /** A line under it: installments, the bank's name, the fee. */
   detail: string | null
+  /**
+   * A quieter line under the detail: where the rest is shown (the card's
+   * installments on the provider's form, once its number is in; owner
+   * 2026-11-05). None: nothing more to say.
+   */
+  note?: string | null
 }
 
 /** A contract the shopper accepts before paying, rendered by the backend (allow-listed HTML). */

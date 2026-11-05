@@ -6,6 +6,7 @@ import type {
   SpecGroupView,
   StockLevel,
 } from "./card-views"
+import type { InstallmentSummaryView } from "./cart-views"
 import type { HomeSectionView } from "./content-views"
 import type { ImageView, LinkView, PriceView, TrustBadgeView } from "./views"
 
@@ -55,6 +56,12 @@ export interface VariantView {
   kurus?: number | null
   available: boolean
   sku: string | null
+  /**
+   * Its installments in one line, for a variant to be had; none or null:
+   * the shop offers none for this price (no line, no table to open). The
+   * table itself is asked when the shopper opens it (`installments`).
+   */
+  installments?: InstallmentSummaryView | null
 }
 
 export interface ProductOptionView {

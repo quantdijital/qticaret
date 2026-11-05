@@ -16,6 +16,7 @@ import {
 } from "@/lib/store-api/requests"
 import { currentCustomer } from "@/lib/account/auth"
 import { productAddonsOrNone } from "@/lib/cart/addons"
+import { installmentSummaries } from "@/lib/store-api/installments"
 import { productDescriptionHtml } from "@/lib/store-api/product-description"
 import { storefrontEnv } from "@/lib/env"
 import { whatsappHref } from "@/lib/views/frame"
@@ -44,8 +45,10 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     productDescriptionHtml(page.entity_id),
   ])
   const ownRail = showsOwnCategory(layout.product)
+  const asked = priceDisplays(variantIdsOf([product]))
   const [
     displays,
+    installments,
     brandPaths,
     { storefront, free_shipping_threshold, features },
     reviews,
@@ -55,7 +58,9 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     sections,
     addons,
   ] = await Promise.all([
-    priceDisplays(variantIdsOf([product])),
+    asked,
+    // The line under the price, from the price the page shows (kept ten minutes a price)
+    asked.then((shown) => installmentSummaries(product, shown)),
     product.brand
       ? pathsOf("brand", [product.brand.id])
       : Promise.resolve({} as Record<string, string>),
@@ -92,6 +97,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     trustBadges: storefront.trust_badges,
     swatchOf: swatchLookup(storefront.color_swatches),
     descriptionHtml,
+    installments,
   })
   const view = {
     ...base,
