@@ -61,11 +61,18 @@
     scroll-snap-stop: always;
   }
 
-  /* From 1024 px the square fills its six columns, short of the screen's
-     height so the thumbnails' top shows on the first screen, 680 px at most */
+  /* The product's top row: the square fills the gallery's width, never
+     sized by the screen's height. From 1024 px gallery and buy column halve
+     the row; from 1280 px the gallery takes seven twelfths, 680 px at most,
+     and the buy column the rest (no empty well beside the photo) */
   @media (min-width: 64rem) {
-    .gf-pictures {
-      max-width: clamp(22rem, calc(100dvh - 20rem), 42.5rem);
+    .gf-product-top {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 80rem) {
+    .gf-product-top {
+      grid-template-columns: min(calc((100% - var(--gap-columns)) * 7 / 12), 42.5rem) minmax(0, 1fr);
     }
   }
 
