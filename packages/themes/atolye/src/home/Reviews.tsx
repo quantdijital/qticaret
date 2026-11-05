@@ -4,6 +4,8 @@ import type { CustomerPhotoView, ReviewPhotoView, Translate } from "@qticaret/ui
 import { Container } from "../components/Container"
 import { headingId } from "./Opening"
 import type { Of } from "./plan"
+import { QUOTED, QUOTED_RATED, type QuoteWords, excerpt, firstLine } from "./quote-words"
+import { RatingSummary } from "./RatingSummary"
 import { SectionHead } from "./SectionHead"
 
 /** A review's own photos as 72 px squares, each opening the full picture (adr/0037 §4 Ek 2026-11-04). */
@@ -100,25 +102,77 @@ function CustomerPhotos({
   )
 }
 
-/** How many of a review's words the home page quotes, its title's included. */
-const QUOTED_WORDS = 12
-
-/** The review's words up to `count`, cut at a word with an ellipsis: never rewritten. */
-function excerpt(text: string, count: number): string {
-  const words = text.trim().split(/\s+/)
-  return words.length <= count ? text.trim() : `${words.slice(0, count).join(" ")}…`
+/**
+ * One quoted review (`quote-words`): its stars (read as "5 üzerinden 4"),
+ * its title and first words, its photos, who and when, "a verified
+ * purchase" in words, and its product (by the first words of its name
+ * when `words.name` says so; the link names all of it to a reader).
+ */
+function Quote({
+  review,
+  words,
+  t,
+}: {
+  review: Of<"reviews">["reviews"][number]
+  words: QuoteWords
+  t: Translate
+}) {
+  const product = review.product
+  const named = product && words.name ? excerpt(product.label, words.name) : product?.label
+  // The title's words count toward the quote's
+  const left = (count: number) =>
+    Math.max(6, count - (review.title?.trim().split(/\s+/).length ?? 0))
+  const line = words.sentence
+    ? firstLine(review.body, left(words.body), left(words.sentence))
+    : excerpt(review.body, left(words.body))
+  return (
+    <>
+      <p
+        className="flex gap-0.5"
+        role="img"
+        aria-label={t("reviews.stars", { rating: review.rating })}
+      >
+        {Array.from({ length: 5 }, (_, star) => (
+          <Star
+            key={star}
+            aria-hidden="true"
+            strokeWidth={1.5}
+            className={star < review.rating ? "size-4 fill-current" : "size-4 text-text-3"}
+          />
+        ))}
+      </p>
+      {review.title && <p className="text-md font-medium">{review.title}</p>}
+      <p className="max-w-[60ch] text-md text-text-2">{line}</p>
+      {review.photos && review.photos.length > 0 && (
+        <ReviewPhotos photos={review.photos} label={t("reviews.photos")} />
+      )}
+      <p className="mt-auto flex flex-col text-sm text-text-3">
+        <span className="font-medium text-text-2">{review.author}</span>
+        <span>{review.date}</span>
+        {review.verified && <span>{t("product.verified")}</span>}
+        {product && (
+          <a
+            href={product.path}
+            aria-label={named === product.label ? undefined : product.label}
+            className="at-inline-link self-start text-text-2"
+          >
+            {named}
+          </a>
+        )}
+      </p>
+    </>
+  )
 }
 
 /**
  * The shop's newest approved reviews (design.md § Review card), never
- * made up: three across under ink rules, the stars (read as "5 üzerinden
- * 4"), the title and the first words of the text (the whole review is on
- * the reviews page, `more`), the customer's photos when the review has
- * them, who and when, "a verified purchase" in words, and the product;
- * then the customers' other photos when the shop has any. Three quotes
- * keep the screen to about eighty words (Hallmark 58). No section is
- * drawn without a review. The home section carries no average or spread
- * of the stars, so neither is drawn here.
+ * made up: three across under ink rules (`Quote`; the whole review is on
+ * the reviews page, `more`), then the customers' other photos when the
+ * shop has any. Three short quotes keep the screen to about eighty words
+ * (Hallmark 58). With the shop's rating (`summary`), the average and the
+ * spread stand under their own ink rule as the first of four columns from
+ * 1024 px (above the quotes on a phone), and each quote is a line: the
+ * rating has said how good. No section is drawn without a review.
  */
 export function ReviewsSection({ section, t }: { section: Of<"reviews">; t: Translate }) {
   if (section.reviews.length === 0) {
@@ -129,53 +183,33 @@ export function ReviewsSection({ section, t }: { section: Of<"reviews">; t: Tran
   // The strip leaves out the photos the quoted reviews already show
   const shown = new Set(quoted.flatMap((review) => (review.photos ?? []).map((p) => p.image.src)))
   const photos = (section.photos ?? []).filter((photo) => !shown.has(photo.image.src))
+  const words = section.summary ? QUOTED_RATED : QUOTED
+  const quotes = (
+    <ul className="grid gap-x-(--gap-columns) gap-y-10 md:grid-cols-3">
+      {quoted.map((review, index) => (
+        <li
+          key={`${review.author}-${review.date}-${String(index)}`}
+          className="flex flex-col gap-3 border-t-2 border-rule-ink pt-4"
+        >
+          <Quote review={review} words={words} t={t} />
+        </li>
+      ))}
+    </ul>
+  )
   return (
     <section aria-labelledby={id} className="pt-(--section-gap)">
       <Container className="flex flex-col gap-10">
         <SectionHead id={id} title={section.title} more={section.more} />
-        <ul className="grid gap-x-(--gap-columns) gap-y-10 md:grid-cols-3">
-          {quoted.map((review, index) => (
-            <li
-              key={`${review.author}-${review.date}-${String(index)}`}
-              className="flex flex-col gap-3 border-t-2 border-rule-ink pt-4"
-            >
-              <p
-                className="flex gap-0.5"
-                role="img"
-                aria-label={t("reviews.stars", { rating: review.rating })}
-              >
-                {Array.from({ length: 5 }, (_, star) => (
-                  <Star
-                    key={star}
-                    aria-hidden="true"
-                    strokeWidth={1.5}
-                    className={star < review.rating ? "size-4 fill-current" : "size-4 text-text-3"}
-                  />
-                ))}
-              </p>
-              {review.title && <p className="text-md font-medium">{review.title}</p>}
-              <p className="max-w-[60ch] text-md text-text-2">
-                {excerpt(
-                  review.body,
-                  Math.max(6, QUOTED_WORDS - (review.title?.trim().split(/\s+/).length ?? 0))
-                )}
-              </p>
-              {review.photos && review.photos.length > 0 && (
-                <ReviewPhotos photos={review.photos} label={t("reviews.photos")} />
-              )}
-              <p className="mt-auto flex flex-col text-sm text-text-3">
-                <span className="font-medium text-text-2">{review.author}</span>
-                <span>{review.date}</span>
-                {review.verified && <span>{t("product.verified")}</span>}
-                {review.product && (
-                  <a href={review.product.path} className="at-inline-link self-start text-text-2">
-                    {review.product.label}
-                  </a>
-                )}
-              </p>
-            </li>
-          ))}
-        </ul>
+        {section.summary ? (
+          <div className="grid gap-x-(--gap-columns) gap-y-10 lg:grid-cols-4">
+            <div className="border-t-2 border-rule-ink pt-4">
+              <RatingSummary summary={section.summary} t={t} />
+            </div>
+            <div className="lg:col-span-3">{quotes}</div>
+          </div>
+        ) : (
+          quotes
+        )}
         {photos.length > 0 && <CustomerPhotos id={`${id}-fotograflar`} photos={photos} t={t} />}
       </Container>
     </section>
