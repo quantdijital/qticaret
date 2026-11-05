@@ -19,7 +19,9 @@ const LABELLED =
  * in the middle, account, favourites and cart with their names under
  * them; the category aisle below, each category with children opening
  * its panel. Both searches show their live panel as the shopper types
- * once the storefront gives its address.
+ * once the storefront gives its address. Sticky, it folds while the page
+ * scrolls down (`frame.css`, `ScrollCue`): the aisle from 1024 px, the
+ * top row on a phone; the search always stays.
  */
 export function Header({
   shop,
@@ -67,12 +69,16 @@ export function Header({
     : t("nav.account")
   return (
     <header
+      data-gf-head=""
       className={cn(
         "z-(--z-sticky-nav) border-b border-rule bg-paper",
-        shop.theme.header.sticky ? "sticky top-0" : "relative"
+        shop.theme.header.sticky ? "gf-head sticky top-0" : "relative"
       )}
     >
-      <Container className="flex h-14 items-center gap-1 lg:h-20 lg:gap-(--space-xl)">
+      <Container
+        data-gf-head-row=""
+        className="gf-head-row flex h-14 items-center gap-1 lg:h-20 lg:gap-(--space-xl)"
+      >
         <MenuSheet
           categories={shop.categories}
           topLinks={shop.topLinks}
@@ -114,7 +120,7 @@ export function Header({
         <SearchBox {...search} id="arama-dar" />
       </Container>
       {shop.categories.length > 0 && (
-        <Container className="hidden lg:block">
+        <Container data-gf-aisle="" className="hidden lg:block">
           <Aisle categories={shop.categories} label={t("nav.categories")} allIn={allIn} />
         </Container>
       )}

@@ -160,4 +160,14 @@ describe("the theme's frame", () => {
     expect(html).toMatch(/<button type="submit" value="all"[^>]*name="choice"/)
     expect(html).toContain('name="policy_version" value="3"')
   })
+
+  it("marks the sticky header's folding parts, never a header the shop keeps in place", () => {
+    const html = renderFrame(atolyeTheme, shopFixture())
+    expect(html).toMatch(/<header data-gf-head="" class="[^"]*gf-head sticky top-0/)
+    expect(html).toMatch(/class="[^"]*gf-head-row[^"]*" data-gf-head-row=""/)
+    expect(html).toContain('data-gf-aisle=""')
+    const still = shopFixture()
+    still.theme = { ...still.theme, header: { ...still.theme.header, sticky: false } }
+    expect(renderFrame(atolyeTheme, still)).not.toContain("gf-head sticky")
+  })
 })

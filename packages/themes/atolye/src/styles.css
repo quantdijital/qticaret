@@ -27,6 +27,7 @@
 @import "./buy.css";
 @import "./pages.css";
 @import "./content.css";
+@import "./frame.css";
 
 /*
  * The theme's values for the contract's names (shadcn's names, wired to

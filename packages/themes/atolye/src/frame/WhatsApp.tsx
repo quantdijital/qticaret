@@ -6,7 +6,10 @@ import { WhatsAppGlyph } from "../parts/WhatsAppGlyph"
  * green with WhatsApp's own white glyph, named "WhatsApp'tan yazın"; the
  * token, 16 px from the right, above the bottom bar on a phone. The
  * layout leaves it out where it would cover the work; the stylesheet
- * hides it while a sheet is open or a page has its own fixed buy bar.
+ * hides it while a sheet is open or a page has its own fixed buy bar,
+ * and lets it step aside while the page scrolls down, while a phone's
+ * listing grid passes under its pinned pills and while a field is being
+ * typed in (`frame.css`); it comes back as soon as the visitor turns.
  */
 export function WhatsApp({
   href,

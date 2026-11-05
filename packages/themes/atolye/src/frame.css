@@ -1,0 +1,85 @@
+/*
+ * The frame as the page scrolls (frame/ScrollCue sets `data-js-scroll` on
+ * <html>, the header's height `--gf-head-h` and its folding part
+ * `--gf-head-fold`). Scrolling down past the header folds it: from 1024 px
+ * the category aisle slides behind the top row (wordmark, search, account,
+ * cart stay); on a phone the top row slides away and the search stays,
+ * the bottom bar keeping the menu, the cart and the account. Turning back
+ * opens it again; it stays open while anything in it has the focus or a
+ * category panel is open. The WhatsApp button steps aside while the page
+ * scrolls down and while a field is being typed in. Only transform and
+ * opacity move (no layout shift); reduced motion stops the slide (base.css).
+ */
+@layer components {
+  .gf-head,
+  .gf-head-row,
+  .gf-listbar {
+    transition: transform var(--dur-short) var(--ease-out);
+  }
+  /* The aisle folds behind the top row, which stays where it was */
+  @media (width >= 64rem) {
+    .gf-head-row {
+      position: relative;
+      z-index: 1;
+      background: var(--color-paper);
+    }
+  }
+  /* A listing's filter and sort pills stay under the header on a phone (Toolbar) */
+  @media (width < 64rem) {
+    .gf-listbar {
+      position: sticky;
+      top: var(--gf-head-h, 7.3125rem);
+      z-index: var(--z-sticky);
+    }
+  }
+
+  [data-whatsapp] {
+    transition:
+      opacity var(--dur-short) var(--ease-out),
+      transform var(--dur-short) var(--ease-out);
+  }
+}
+
+html[data-js-scroll="down"]:not(:has(.gf-head:focus-within, .gf-head [data-state="open"]))
+  .gf-head {
+  transform: translateY(calc(-1 * var(--gf-head-fold, 0px)));
+}
+@media (width >= 64rem) {
+  html[data-js-scroll="down"]:not(:has(.gf-head:focus-within, .gf-head [data-state="open"]))
+    .gf-head-row {
+    transform: translateY(var(--gf-head-fold, 0px));
+  }
+}
+@media (width < 64rem) {
+  html[data-js-scroll="down"]:not(:has(.gf-head:focus-within)) .gf-listbar[data-js-stuck] {
+    transform: translateY(calc(-1 * var(--gf-head-fold, 0px)));
+  }
+}
+
+/* WhatsApp waits while the visitor reads down the page and, on a listing, while
+   its grid passes by (a phone: under the pinned pills; from 1024 px: anywhere
+   below the top, where the right column's "+" sits under it): it would cover a
+   card's "+", a field or a button. A keyboard still reaches it, shown on focus */
+html[data-js-scroll="down"] [data-whatsapp]:not(:focus-visible),
+html:has(.gf-listbar[data-js-stuck]) [data-whatsapp]:not(:focus-visible) {
+  opacity: 0;
+  transform: translateY(0.75rem) scale(0.9);
+  pointer-events: none;
+}
+@media (width >= 64rem) {
+  html[data-js-scroll]:has(.gf-listbar) [data-whatsapp]:not(:focus-visible) {
+    opacity: 0;
+    transform: translateY(0.75rem) scale(0.9);
+    pointer-events: none;
+  }
+}
+body:has(
+    :is(
+      input:not([type="checkbox"], [type="radio"], [type="hidden"], [type="range"]),
+      textarea,
+      select
+    ):focus
+  )
+  [data-whatsapp] {
+  display: none;
+}

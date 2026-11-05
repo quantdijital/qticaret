@@ -5,6 +5,7 @@ import { BottomBar } from "./frame/BottomBar"
 import { Consent } from "./frame/Consent"
 import { Footer } from "./frame/Footer"
 import { Header } from "./frame/Header"
+import { ScrollCue } from "./frame/ScrollCue"
 import { WhatsApp } from "./frame/WhatsApp"
 
 /**
@@ -12,7 +13,9 @@ import { WhatsApp } from "./frame/WhatsApp"
  * skip link, the graphite announcement bar, the sticky two-row header,
  * the page, the graphite mast footer, and under 1024 px the bottom bar.
  * The WhatsApp button stays away from the checkout and the cart, and
- * while the cookie question waits. Each page sets its own width.
+ * while the cookie question waits. `ScrollCue` tells the stylesheet
+ * which way the page scrolls (the header folds, WhatsApp steps aside).
+ * Each page sets its own width.
  */
 export function Layout({
   shop,
@@ -75,6 +78,7 @@ export function Layout({
         />
       )}
       {shop.cookieBanner && <Consent banner={shop.cookieBanner} save={saveCookies} t={t} />}
+      <ScrollCue />
     </div>
   )
 }

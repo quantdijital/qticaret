@@ -132,6 +132,12 @@ describe("the theme's listing page", () => {
     expect(html).toContain('href="#filtreler"')
   })
 
+  it("pins the filter and sort pills under the header on a phone, one row of the list's column", () => {
+    const html = page()
+    expect(html).toMatch(/<div data-gf-stick="" class="[^"]*gf-listbar[^"]*lg:contents/)
+    expect(html).toContain("max-lg:contents")
+  })
+
   it("draws the home page's cards and the pages as links", () => {
     const html = page()
     expect(html).toContain('href="/urun/a"')
