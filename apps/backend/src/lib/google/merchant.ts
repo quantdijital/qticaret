@@ -1,4 +1,4 @@
-import { shippingCost } from "../feeds"
+import { feedText, shippingCost } from "../feeds"
 import type { FeedItem, FeedShop } from "../feeds"
 
 /**
@@ -54,8 +54,9 @@ export function productInputOf(item: FeedItem, shop: FeedShop): ProductInput {
     contentLanguage: CONTENT_LANGUAGE,
     feedLabel: FEED_LABEL,
     productAttributes: compact({
-      title: item.title.slice(0, 150),
-      description: item.description.slice(0, 5000),
+      // Cut as the feed file cuts them: at a word
+      title: feedText(item.title, 150),
+      description: feedText(item.description, 5000),
       link: item.link,
       imageLink: item.imageLink,
       additionalImageLinks: item.additionalImages,

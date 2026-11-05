@@ -13,6 +13,7 @@
 - Üretim worker'da, periyodik job ile; çıktı S3'e, tahmin edilemez (imzalı veya gizli token'lı) URL ile sunulur.
 - Stokta olmayan, yayında olmayan ve kısıtlı kategorideki (F13.4) ürünler varsayılan olarak dışarıda.
 - Feed'deki fiyat/stok/GTIN, ürün sayfasındaki JSON-LD (F3.12) ile **aynı kaynaktan** üretilir; Google otomatik ürün güncellemeleri bu eşleşmeye bakar (docs/13 §10).
+- Açıklama alanı ürünün açıklamasıdır; boşsa kısa açıklamanın düz metni (adr/0055 Ek 2026-11-06). Hedeflerin hiçbirinde ayrı kısa açıklama/özet alanı yok (Google, Meta, Akakçe, Cimri şemaları). Uzun metin her hedefin sınırında (Google 5000, Meta 9999, Akakçe/Cimri 5000; başlık 150/200) kelime sınırında kesilip `…` ile biter; Merchant API aynı kesimi kullanır.
 - Feed URL'leri tahmin edilemez token'lı; Merchant API push ile feed dosyasına bağımlılık azalır.
 - Görsel, fiyat ve stok değişince bir sonraki üretimde güncellenir; tam yeniden üretim yerine artımlı olabilir.
 

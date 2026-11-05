@@ -100,10 +100,24 @@ export function feedItemsOf(
 /** A lira amount as feeds write it: `1234.50 TRY`. */
 export const feedPrice = (amount: number): string => `${amount.toFixed(2)} TRY`
 
-/** A feed's text: plain, one line of spaces, at most `max` characters. */
+// A comma, colon or dash a cut would leave hanging before the ellipsis
+const DANGLING = /[\s,;:–—-]+$/u
+
+/**
+ * A feed's text: plain, one line of spaces, at most `max` characters.
+ * Longer, it is cut at the last word that fits with an ellipsis (a word
+ * longer than half the room is cut inside), never mid-word.
+ */
 export function feedText(value: string, max: number): string {
   const text = value.replace(/\s+/g, " ").trim()
-  return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text
+  if (text.length <= max) {
+    return text
+  }
+  // Cut before a space within the room: the text and its ellipsis stay within `max`
+  const room = text.slice(0, max)
+  const space = room.lastIndexOf(" ")
+  const cut = space > max / 2 ? room.slice(0, space) : text.slice(0, max - 1)
+  return `${cut.replace(DANGLING, "")}…`
 }
 
 export interface FeedShop {

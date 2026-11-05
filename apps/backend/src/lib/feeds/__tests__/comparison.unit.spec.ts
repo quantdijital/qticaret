@@ -1,6 +1,6 @@
 import type { ProductFacts, VariantFacts } from "../../seo/jsonld"
 import { productInputOf } from "../../google/merchant"
-import { excludedBy, feedItemsOf, googleFeedProblems, shippingCost } from ".."
+import { excludedBy, feedItemsOf, feedText, googleFeedProblems, shippingCost } from ".."
 import type { FeedItem, FeedShop } from ".."
 import { akakceFeed } from "../akakce"
 import { cimriFeed } from "../cimri"
@@ -143,5 +143,30 @@ describe("price comparison feeds and shipping (F10.8)", () => {
       minHandlingTime: "1",
       maxHandlingTime: "3",
     })
+  })
+
+  it("cuts a long text at a word within each feed's limit, the same in the file and the API", () => {
+    // 6,000 characters of words: past every feed's 5,000, and Meta's 9,999 not
+    const long = "Döküm, ağır tava. ".repeat(333).trim()
+    const item = itemOf({}, { description: long, name: `Döküm Tava ${"uzun ".repeat(40)}` })
+    const google = /<g:description>(.*?)<\/g:description>/.exec(googleFeed.render([item], SHOP))
+    const akakce = /<description>(.*?)<\/description>/.exec(akakceFeed.render([item], SHOP))
+    const input = productInputOf(item, SHOP).productAttributes as {
+      title: string
+      description: string
+    }
+
+    expect(feedText("Ağır döküm tava, kulplu", 18)).toBe("Ağır döküm tava…")
+    // A word longer than half the room is cut inside, as before
+    expect(feedText("Kısa çokçokçokuzunbirkelime", 12)).toBe("Kısa çokçok…")
+    expect(feedText("Kısa metin", 20)).toBe("Kısa metin")
+    for (const text of [google?.[1], akakce?.[1], input.description]) {
+      expect(text?.length).toBeLessThanOrEqual(5000)
+      // Ends on a whole word, its comma dropped: "… ağır tava. Döküm…"
+      expect(text).toMatch(/(?:Döküm|ağır|tava\.)…$/u)
+    }
+    expect(input.description).toBe(google?.[1])
+    expect(input.title.length).toBeLessThanOrEqual(150)
+    expect(input.title).toMatch(/uzun…$/u)
   })
 })
