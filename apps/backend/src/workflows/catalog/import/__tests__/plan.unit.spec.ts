@@ -53,6 +53,7 @@ const existing: ExistingProduct = {
   current: {
     title: "Kupa",
     description: null,
+    summary: "",
     status: "draft",
     collection_id: null,
     weight: null,
@@ -318,5 +319,45 @@ describe("import plan", () => {
     expect(noLocation.problems.map((problem) => problem.key)).toEqual([
       "catalog_import.no_location",
     ])
+  })
+
+  it("writes a short description's plain text as one paragraph, the text it has already not", () => {
+    const fresh = planImport(
+      product({
+        fields: { title: "Kupa", summary: "El yapımı seramik\nBulaşık makinesinde yıkanır" },
+      }),
+      refs()
+    )
+    expect(fresh.plan?.summaryDoc).toEqual({
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            { type: "text", text: "El yapımı seramik" },
+            { type: "hardBreak" },
+            { type: "text", text: "Bulaşık makinesinde yıkanır" },
+          ],
+        },
+      ],
+    })
+    // An export uploaded again: the text it reads as already (its bold and lists stay)
+    const same = { ...existing, current: { ...existing.current, summary: "El yapımı seramik." } }
+    const variants = [{ line: 2, options: [["Beden", "S"]] as [string, string][], sku: "K-S" }]
+    const kept = planImport(
+      product({ fields: { title: "Kupa", summary: "El yapımı seramik." }, variants }),
+      refs({ products: new Map([["kupa", same]]) })
+    )
+    expect(kept.problems).toEqual([])
+    expect(kept.plan).not.toHaveProperty("summaryDoc")
+    // Another text replaces it; an empty cell changes nothing
+    const changed = planImport(
+      product({ fields: { title: "Kupa", summary: "Seramik." }, variants }),
+      refs({ products: new Map([["kupa", same]]) })
+    )
+    expect(changed.plan?.summaryDoc?.content).toHaveLength(1)
+    const empty = planImport(product({ variants }), withExisting())
+    expect(empty.plan).not.toBeNull()
+    expect(empty.plan).not.toHaveProperty("summaryDoc")
   })
 })

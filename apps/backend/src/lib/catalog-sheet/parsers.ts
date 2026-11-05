@@ -1,3 +1,4 @@
+import { SUMMARY_TEXT_MAX } from "../catalog/summary"
 import { SEO_META_LIMITS } from "../seo/meta"
 import { VAT_NAME_MAX } from "../tax"
 import { decimalCell, handleCell, handleListCell, statusCell, textCell } from "./cells"
@@ -30,6 +31,8 @@ export const PRODUCT_PARSERS: Partial<Record<ColumnKey, Parse>> = {
   title: (raw) => textCell(raw, SHEET_LIMITS.title),
   status: statusCell,
   description: (raw) => textCell(raw, SHEET_LIMITS.description, { multiline: true }),
+  // Plain text, its lines kept: the short description's cap, line breaks counted too
+  summary: (raw) => textCell(raw, SUMMARY_TEXT_MAX, { multiline: true }),
   categories: handleListCell,
   collection: handleCell,
   brand: handleCell,

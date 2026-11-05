@@ -1,14 +1,10 @@
 import { missingDimensions, variantGtin } from "../../../lib/catalog"
 import type { SheetProduct } from "../../../lib/catalog-sheet"
+import { summaryDocOfText, summaryText } from "../../../lib/catalog/summary"
 import { assess } from "../../../lib/seo/advisor"
 import type { AdvisorFacts, Assessment } from "../../../lib/seo/advisor"
-import {
-  SHORT_EXCERPT,
-  excerpt,
-  plainText,
-  priceSentence,
-  resolveSeoPayload,
-} from "../../../lib/seo/resolve"
+import { shortDescription } from "../../../lib/seo/product-text"
+import { plainText, priceSentence, resolveSeoPayload } from "../../../lib/seo/resolve"
 import type { SeoShop } from "../../../lib/seo/resolve"
 import type { ImportReferences } from "./references"
 
@@ -29,6 +25,8 @@ export function sheetAssessment(
   const firstCategory = fields.categories?.[0]
   const category = firstCategory ? (refs.categories.get(firstCategory)?.name ?? null) : null
   const description = fields.description ?? ""
+  // adr/0055 Ek 2026-11-06: the short description as the product will keep it
+  const summary = summaryText(summaryDocOfText(fields.summary ?? ""))
   const payload = resolveSeoPayload(
     {
       kind: "product",
@@ -37,7 +35,7 @@ export function sheetAssessment(
       description: plainText(description),
       tokens: {
         kategori: category,
-        kısa_açıklama: excerpt(description, SHORT_EXCERPT),
+        kısa_açıklama: shortDescription(summary, "", description),
         fiyat_cümlesi: priceSentence(sheet.variants.flatMap((variant) => variant.price ?? [])),
         öne_çıkan_attribute: null,
         marka: brand,
@@ -52,6 +50,7 @@ export function sheetAssessment(
       },
       image: null,
       trail: [],
+      summary,
     },
     shop
   )
@@ -83,6 +82,8 @@ export function sheetAssessment(
       physical: true,
       missingDimensions: missingDimensions(fields).length > 0,
       missingAttributes: [],
+      // An empty cell says nothing of it (the column may not be in the file): no hint
+      ...(summary ? { summary: summary.length } : {}),
     },
   }
   return assess(facts)

@@ -5,9 +5,10 @@ import {
   vatTypeChange,
 } from "../../../lib/catalog-sheet"
 import type { SheetProblem, SheetProduct, SheetVariant } from "../../../lib/catalog-sheet"
+import type { SummaryDoc } from "../../../lib/catalog/summary"
 import type { AttributeInputValue } from "../../../modules/product-attributes/validation"
 import type { ExistingProduct, ExistingVariant, ImportReferences } from "./references"
-import { lacksMeasures, linksOf, productFields, seoFields } from "./plan-fields"
+import { lacksMeasures, linksOf, productFields, seoFields, summaryField } from "./plan-fields"
 import { variantsPlan } from "./plan-variants"
 import type { VariantsPlan } from "./plan-variants"
 
@@ -30,6 +31,8 @@ export interface ImportPlan extends VariantsPlan {
   /** The first category the row names (F3.1); undefined leaves it. */
   primaryCategoryId?: string
   seo: { seo_title?: string; seo_description?: string; focus_keyword?: string } | null
+  /** The short description the row writes (adr/0055 Ek 2026-11-06); undefined leaves it. */
+  summaryDoc?: SummaryDoc
   attributes: { template_id: string; values: Record<string, AttributeInputValue> } | null
   /** Left without weight or measures (adr/0054): a note in the report, never a refusal. */
   noMeasures?: boolean
@@ -180,6 +183,7 @@ export function planImport(
   const attributes = attributesPlan(sheet, existing, refs, problems)
   skuProblems(sheet.variants, sheet.handle, refs, problems)
   const variants = variantsPlan(sheet, existing, refs, problems)
+  const summary = summaryField(sheet, existing?.current)
   if (problems.length > 0) {
     return { plan: null, problems }
   }
@@ -194,6 +198,7 @@ export function planImport(
       },
       ...linksOf(found, existing?.current),
       seo: seoFields(sheet, existing?.current),
+      ...(summary ? { summaryDoc: summary } : {}),
       attributes,
       ...variants,
       noMeasures: lacksMeasures(sheet, existing?.current),

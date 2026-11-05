@@ -106,6 +106,27 @@ export function summaryDocOf(stored: unknown): SummaryDoc | null {
   return parsed.success && hasText(parsed.data) ? parsed.data : null
 }
 
+/**
+ * Plain text as a short description (a sheet's cell): one paragraph, its
+ * lines kept as line breaks, blank lines and runs of spaces dropped.
+ * Null for no text; the cap is the caller's to check (`summaryLength`).
+ */
+export function summaryDocOfText(text: string): SummaryDoc | null {
+  const lines = text
+    .split(/\r\n?|\n/u)
+    .map((line) => line.replace(/\s+/gu, " ").trim())
+    .filter((line) => line !== "")
+  if (lines.length === 0) {
+    return null
+  }
+  const content = lines.flatMap((line, index): Inline[] =>
+    index === 0
+      ? [{ type: "text", text: line }]
+      : [{ type: "hardBreak" }, { type: "text", text: line }]
+  )
+  return { type: "doc", content: [{ type: "paragraph", content }] }
+}
+
 const DANGLING = /[\s,;:–—-]+$/u
 const SENTENCE_END = /[.!?…:;,]$/u
 

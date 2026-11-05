@@ -28,6 +28,8 @@ export interface ProductFields {
   title?: string
   status?: "draft" | "published"
   description?: string
+  /** The short description as plain text (adr/0055 Ek 2026-11-06): one paragraph when written. */
+  summary?: string
   categories?: string[]
   collection?: string
   brand?: string

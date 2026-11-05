@@ -79,7 +79,7 @@ const insecureLinks = forProduct((facts) =>
     : null
 )
 
-// adr/0055 Ek 2026-11-06: a hint, never a block; a sheet's row says nothing of it (left out)
+// adr/0055 Ek 2026-11-06: a hint, never a block; a sheet's empty cell says nothing of it (left out)
 const shortDescription = forProduct((_facts, product) =>
   product.summary === 0
     ? {

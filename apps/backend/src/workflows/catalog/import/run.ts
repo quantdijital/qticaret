@@ -69,6 +69,7 @@ const isUnchanged = (plan: ImportPlan): boolean =>
   plan.brandId === undefined &&
   plan.primaryCategoryId === undefined &&
   plan.seo === null &&
+  plan.summaryDoc === undefined &&
   plan.attributes === null &&
   plan.stock.length === 0 &&
   plan.costs.length === 0

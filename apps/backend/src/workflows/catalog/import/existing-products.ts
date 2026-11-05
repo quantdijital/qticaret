@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { chunksOf } from "../../../lib/catalog"
+import { storedSummaryText } from "../../../lib/catalog/summary"
 import { PRICE_FIELDS, pricesOf } from "../prices"
 import type { ExistingPrice, PriceRow } from "../prices"
 
@@ -35,6 +36,8 @@ export interface ExistingVariant {
 export interface CurrentFields {
   title: string
   description: string | null
+  /** The short description's plain text as the export writes it; "" for none. */
+  summary: string
   status: string
   collection_id: string | null
   weight: number | null
@@ -64,14 +67,18 @@ export interface ExistingProduct {
 
 interface ProductRow extends Omit<
   CurrentFields,
-  "categoryIds" | "brandId" | "primaryCategoryId" | "seo" | "physical" | "typeId"
+  "categoryIds" | "brandId" | "primaryCategoryId" | "seo" | "physical" | "typeId" | "summary"
 > {
   id: string
   handle: string
   type_id?: string | null
   categories?: ({ id: string } | null)[] | null
   brand?: { id: string } | null
-  product_extension?: { primary_category_id?: string | null; kind?: string | null } | null
+  product_extension?: {
+    primary_category_id?: string | null
+    kind?: string | null
+    summary_doc?: unknown
+  } | null
   seo_meta?: Partial<CurrentFields["seo"]> | null
   options?: { id: string; title: string; values?: { value: string }[] | null }[] | null
   variants?:
@@ -121,6 +128,7 @@ const FIELDS = [
   "brand.id",
   "product_extension.primary_category_id",
   "product_extension.kind",
+  "product_extension.summary_doc",
   "seo_meta.seo_title",
   "seo_meta.seo_description",
   "seo_meta.focus_keyword",
@@ -164,6 +172,7 @@ function currentOf(row: ProductRow): CurrentFields {
   return {
     title: row.title,
     description: row.description,
+    summary: storedSummaryText(row.product_extension?.summary_doc),
     status: row.status,
     collection_id: row.collection_id,
     weight: row.weight,

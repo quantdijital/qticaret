@@ -5,6 +5,7 @@ import {
   productSummaryDoc,
   storedSummaryText,
   summaryDocOf,
+  summaryDocOfText,
   summaryText,
 } from "../summary"
 import type { SummaryDoc } from "../summary"
@@ -140,5 +141,22 @@ describe("a product's short description (adr/0055 Ek 2026-11-06)", () => {
     expect(shortDescription(summary, "", "").length).toBeLessThanOrEqual(140)
     expect(productText("<p>Kendi açıklaması</p>", summary)).toBe("Kendi açıklaması")
     expect(productText("", summary)).toBe(summary)
+  })
+
+  it("makes a sheet's plain text one paragraph, its lines as line breaks", () => {
+    const doc = summaryDocOfText("  Yıkanmış   keten\r\n\n Rahat kesim ")
+    expect(doc).toEqual({
+      type: "doc",
+      content: [
+        {
+          type: "paragraph",
+          content: [text("Yıkanmış keten"), { type: "hardBreak" }, text("Rahat kesim")],
+        },
+      ],
+    })
+    // A short description the panel takes, read back as the export writes it
+    expect(productSummaryDoc.parse(doc)).toEqual(doc)
+    expect(summaryText(doc)).toBe("Yıkanmış keten. Rahat kesim.")
+    expect(summaryDocOfText(" \n ")).toBeNull()
   })
 })

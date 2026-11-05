@@ -14,6 +14,10 @@ export const HELP_ROWS: readonly SheetCell[][] = [
   ["Durum", "Taslak ya da Yayında. Boşsa yeni ürün taslak olur."],
   ["Açıklama", "Ürün açıklaması (düz metin)."],
   [
+    "Kısa açıklama",
+    "Ürün adının altında, fiyatın üstünde görünen kısa tanıtım (düz metin, en çok 1.500 karakter). Tek paragraf olarak kaydedilir; satır sonları korunur. Panelde verilen kalın yazı, bağlantı ve listeler dışa aktarımda düz metin olur; metin değiştirilmeden yüklenirse ürün olduğu gibi kalır.",
+  ],
+  [
     "Kategoriler",
     "Kategori tanıtıcıları, | ile ayrılır (ör. mutfak|bicaklar). İlki birincil kategori olur.",
   ],

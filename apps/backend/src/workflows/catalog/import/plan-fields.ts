@@ -1,4 +1,6 @@
 import { missingDimensions } from "../../../lib/catalog"
+import { summaryDocOfText, summaryText } from "../../../lib/catalog/summary"
+import type { SummaryDoc } from "../../../lib/catalog/summary"
 import type { SheetProduct } from "../../../lib/catalog-sheet"
 import type { CurrentFields } from "./existing-products"
 
@@ -63,6 +65,20 @@ export function seoFields(sheet: SheetProduct, current: CurrentFields | undefine
     )
   )
   return Object.keys(seo).length > 0 ? seo : null
+}
+
+/**
+ * The short description a row writes (adr/0055 Ek 2026-11-06): its plain
+ * text as one paragraph, its lines as line breaks. Undefined for an empty
+ * cell, and for the text the product reads as already: an export uploaded
+ * again keeps the bold, links and lists the panel gave it.
+ */
+export function summaryField(
+  sheet: SheetProduct,
+  current: CurrentFields | undefined
+): SummaryDoc | undefined {
+  const doc = sheet.fields.summary ? summaryDocOfText(sheet.fields.summary) : null
+  return doc && summaryText(doc) !== (current?.summary ?? "") ? doc : undefined
 }
 
 /**

@@ -105,8 +105,8 @@ function writeExtras(input: Input, productId: WorkflowData<string>) {
       })),
     })
   })
-  // The primary category, the unit costs (F11.4) and a description document dropped (adr/0055)
-  // in one catalog save: a workflow runs once as a step
+  // The primary category, the unit costs (F11.4), a description document dropped (adr/0055) and
+  // the short description (adr/0055 Ek 2026-11-06) in one catalog save: a workflow runs once as a step
   const costs = resolveImportCostsStep(
     transform({ input, productId }, ({ input, productId }) => ({
       product_id: productId,
@@ -119,7 +119,8 @@ function writeExtras(input: Input, productId: WorkflowData<string>) {
     ({ input, costs }) =>
       Boolean(input.plan.primaryCategoryId) ||
       Object.keys(costs).length > 0 ||
-      replacesDescription(input)
+      replacesDescription(input) ||
+      input.plan.summaryDoc !== undefined
   ).then(() => {
     setProductCatalogWorkflow.runAsStep({
       input: transform({ input, productId, costs }, ({ input, productId, costs }) => ({
@@ -129,6 +130,7 @@ function writeExtras(input: Input, productId: WorkflowData<string>) {
           : {}),
         ...(Object.keys(costs).length > 0 ? { variants: costs } : {}),
         ...(replacesDescription(input) ? { description_doc: null } : {}),
+        ...(input.plan.summaryDoc ? { summary_doc: input.plan.summaryDoc } : {}),
       })),
     })
   })

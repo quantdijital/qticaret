@@ -139,6 +139,7 @@ describe("the import with a KDV column", () => {
       current: {
         title: "Kupa",
         description: null,
+        summary: "",
         status: "draft",
         collection_id: null,
         weight: null,

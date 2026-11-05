@@ -122,6 +122,20 @@ describe("sheet products", () => {
     ])
   })
 
+  it("reads a short description as plain text, its lines kept, up to its cap", () => {
+    const { products, problems } = productsOf(header, [
+      row(2, { handle: "kupa", title: "Kupa", summary: " El yapımı.\r\nSeramik " }),
+      row(3, { handle: "tava", title: "Tava", summary: "a".repeat(1_501) }),
+    ])
+
+    expect(products[0]?.fields.summary).toBe("El yapımı.\nSeramik")
+    expect(problems.map((problem) => [problem.line, problem.key, problem.column])).toEqual([
+      [3, "catalog_import.text_too_long", "Kısa açıklama"],
+    ])
+    // Known by its Turkish header and by its key
+    expect(readHeader(["Kısa Açıklama", "summary"]).repeated).toEqual(["summary"])
+  })
+
   it("leaves out a product with a problem in any row and says where", () => {
     const { products, problems } = productsOf(header, [
       row(2, { handle: "a", title: "A", option1_name: "Renk", option1_value: "Mavi" }),

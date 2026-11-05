@@ -18,6 +18,7 @@ export type ColumnKey =
   | "title"
   | "status"
   | "description"
+  | "summary"
   | "categories"
   | "collection"
   | "brand"
@@ -69,6 +70,8 @@ export const SHEET_COLUMNS: readonly ColumnSpec[] = [
   { key: "title", header: "Ürün adı", scope: "product", width: 36 },
   { key: "status", header: "Durum", scope: "product", width: 10 },
   { key: "description", header: "Açıklama", scope: "product", width: 48 },
+  // adr/0055 Ek 2026-11-06: as plain text; a sheet without it still imports
+  { key: "summary", header: "Kısa açıklama", scope: "product", width: 48 },
   { key: "categories", header: "Kategoriler", scope: "product", width: 28 },
   { key: "collection", header: "Koleksiyon", scope: "product", width: 18 },
   { key: "brand", header: "Marka", scope: "product", width: 18 },

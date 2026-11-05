@@ -1,6 +1,7 @@
 import { OPTION_KEYS, SHEET_COLUMNS, attributeHeader, headerOf } from "../../../lib/catalog-sheet"
 import type { ColumnKey, SheetUnits } from "../../../lib/catalog-sheet"
 import type { SheetCell } from "../../../lib/sheets"
+import { storedSummaryText } from "../../../lib/catalog/summary"
 import { DEFAULT_OPTION } from "../import/plan-variants"
 import { CURRENCY } from "../prices"
 
@@ -38,6 +39,7 @@ export const EXPORT_FIELDS = [
   "attribute_values.definition.key",
   "attribute_values.definition.type",
   "product_extension.primary_category_id",
+  "product_extension.summary_doc",
   "options.id",
   "options.title",
   "options.values.value",
@@ -111,7 +113,7 @@ export interface ExportProductRow {
   attribute_template?: { handle: string } | null
   type_id?: string | null
   attribute_values?: (AttributeValueRow | null)[] | null
-  product_extension?: { primary_category_id?: string | null } | null
+  product_extension?: { primary_category_id?: string | null; summary_doc?: unknown } | null
   options?: { id: string; title: string; values?: { value: string }[] | null }[] | null
   variants?: (VariantRow | null)[] | null
 }
@@ -176,6 +178,8 @@ function productCells(
     status: product.status === "published" ? "Yayında" : "Taslak",
     // An empty description is no text to write
     description: product.description?.trim() === "" ? null : (product.description ?? null),
+    // adr/0055 Ek 2026-11-06: its plain text, one line; uploaded again unchanged, it changes nothing
+    summary: storedSummaryText(product.product_extension?.summary_doc) || null,
     categories: categoriesCell(product),
     collection: product.collection?.handle ?? null,
     brand: product.brand?.handle ?? null,
