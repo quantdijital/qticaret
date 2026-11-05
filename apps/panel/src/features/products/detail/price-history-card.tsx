@@ -30,8 +30,11 @@ const changed = (steps: readonly { paid: number; regular: number }[]): boolean =
   )
 }
 
-/** What the 30-day rule makes of today's price, said with an icon as well as a colour. */
-function RuleNotice({ display }: { display: PriceDisplayView | null }) {
+// The rule's window when the answer does not say it (Fiyat Etiketi Yönetmeliği md. 11/1, 2025)
+const WINDOW_DAYS = 10
+
+/** What the price-before rule makes of today's price, said with an icon as well as a colour. */
+function RuleNotice({ display, days }: { display: PriceDisplayView | null; days: number }) {
   const { t } = useTranslation()
   const money = (amount: string) => formatMoney(amount, CURRENCY)
   if (!display) {
@@ -64,6 +67,7 @@ function RuleNotice({ display }: { display: PriceDisplayView | null }) {
                 price: money(display.current),
               })
             : t("products.priceHistory.blockedDetail", {
+                days,
                 lowest: money(display.lowest_before ?? display.current),
                 price: money(display.current),
               })}
@@ -108,7 +112,8 @@ function VariantPicker({
 /**
  * A product's price over the last 90 days (F4.3, ADR-0023): what was paid
  * against the price without a sale, and whether today's discount may be
- * struck through in the storefront under the 30-day rule, and why not.
+ * struck through in the storefront under the price-before rule (the
+ * lowest price of the days before it), and why not.
  */
 export function PriceHistoryCard({ productId }: { productId: string }) {
   const { t } = useTranslation()
@@ -120,10 +125,11 @@ export function PriceHistoryCard({ productId }: { productId: string }) {
   const [now] = useState(() => new Date())
   const start = history.data ? new Date(history.data.window_start).getTime() : now.getTime()
   const steps = variant ? priceSteps(variant.points, variant.display, now) : []
+  const days = history.data?.window_days ?? WINDOW_DAYS
   return (
     <SectionCard
       title={t("products.priceHistory.title")}
-      description={t("products.priceHistory.hint")}
+      description={t("products.priceHistory.hint", { days })}
       action={
         variant && variants.length > 1 ? (
           <VariantPicker variants={variants} value={variant.id} onChange={setPicked} />
@@ -139,12 +145,12 @@ export function PriceHistoryCard({ productId }: { productId: string }) {
       ) : !changed(steps) ? (
         // dataviz: a line that never moves says less than a sentence
         <div className="flex flex-col gap-2">
-          <RuleNotice display={variant.display} />
+          <RuleNotice display={variant.display} days={days} />
           <p className="text-sm text-muted-foreground">{t("products.priceHistory.unchanged")}</p>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
-          <RuleNotice display={variant.display} />
+          <RuleNotice display={variant.display} days={days} />
           <StepChart
             data={steps.map((step) => ({
               at: step.at,

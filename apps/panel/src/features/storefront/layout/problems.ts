@@ -19,6 +19,7 @@ export type Problem =
   | "linkLabel"
   | "slidesRequired"
   | "productsRequired"
+  | "productRequired"
   | "categoryRequired"
   | "collectionRequired"
   | "scheduleOrder"
@@ -147,6 +148,12 @@ function fieldsOf(section: AnySection): Found[] {
       return [
         ["title", textProblem(section.title, L.title)],
         ["text", textProblem(section.text, L.text, true)],
+      ]
+    case "featured_product":
+      return [
+        ["title", textProblem(section.title, L.title)],
+        ["text", textProblem(section.text, L.text, true)],
+        ["product_id", section.product_id === "" ? "productRequired" : null],
       ]
     case "categories":
     case "brands":

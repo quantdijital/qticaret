@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
-import { lastSaved, opened, renderEditor, serve } from "./theme-editor.fixtures"
+import { PRODUCTS, lastSaved, opened, renderEditor, serve } from "./theme-editor.fixtures"
 import type { AdminMock, Init } from "./theme-editor.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
@@ -156,6 +156,40 @@ describe("the section forms", () => {
     await user.click(screen.getByRole("button", { name: "Bölümlere dön" }))
     expect(screen.getByRole("button", { name: /Blog yazıları\s*Zamanlanmış/ })).toBeVisible()
   })
+
+  it(
+    "features one product picked in its form, holding the save until it is (adr/0046 Ek 2026-11-05)",
+    HEAVY,
+    async () => {
+      admin.product.list.mockResolvedValue({ products: PRODUCTS })
+      await opened()
+      await user.click(screen.getByRole("button", { name: "Bölüm ekle" }))
+      const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
+      await user.click(within(chooser).getByRole("button", { name: /Öne çıkan ürün/ }))
+
+      expect(await screen.findByRole("heading", { name: "Öne çıkan ürün" })).toBeVisible()
+      expect(screen.getByRole("alert")).toHaveTextContent("Bir ürün seçin.")
+      expect(screen.getByText(/ürünün kendi sayfasından gelir/)).toBeVisible()
+
+      await user.click(screen.getByRole("button", { name: "Ürün seç" }))
+      const picker = await screen.findByRole("dialog", { name: "Ürün seç" })
+      await user.click(await within(picker).findByRole("button", { name: /Şef bıçağı 20 cm/ }))
+      if (screen.queryByRole("dialog", { name: "Ürün seç" })) {
+        await user.click(within(picker).getByRole("button", { name: "Tamam" }))
+      }
+      expect(screen.queryByRole("alert")).toBeNull()
+      await user.type(screen.getByRole("textbox", { name: "Başlık" }), "Yakından")
+
+      await saved((doc) => {
+        expect(doc.home.at(-1)).toMatchObject({
+          type: "featured_product",
+          title: "Yakından",
+          text: null,
+          product_id: "prod_chef",
+        })
+      })
+    }
+  )
 
   it("asks for a written line in the announcement bar before saving it", HEAVY, async () => {
     await open("Kargo bedava")

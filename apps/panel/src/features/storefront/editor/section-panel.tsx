@@ -8,6 +8,7 @@ import { isBodyGroup } from "@/features/storefront/layout/sections"
 import { AnnouncementForm } from "./forms/announcement-form"
 import { BannerForm } from "./forms/banner-form"
 import { FaqForm } from "./forms/faq-form"
+import { FeaturedForm } from "./forms/featured-form"
 import { HeroForm } from "./forms/hero-form"
 import { ProductsForm } from "./forms/products-form"
 import { RelatedForm } from "./forms/related-form"
@@ -57,6 +58,8 @@ function FormOf({
       return <CategoriesForm section={section} {...props} />
     case "products":
       return <ProductsForm section={section} {...props} />
+    case "featured_product":
+      return <FeaturedForm section={section} {...props} />
     case "brands":
       return <BrandsForm section={section} {...props} />
     case "posts":

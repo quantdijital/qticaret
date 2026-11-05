@@ -3300,7 +3300,7 @@
     },
     "priceHistory": {
       "title": "Fiyat geçmişi",
-      "hint": "Son 90 günde satış fiyatı ve indirimsiz fiyat. Mağazada üstü çizili fiyat, indirimden önceki 30 günün en düşük fiyatıdır.",
+      "hint": "Son 90 günde satış fiyatı ve indirimsiz fiyat. Mağazada üstü çizili fiyat, indirimden önceki {{days}} günün en düşük fiyatıdır; herkese uygulanan otomatik kampanya da fiyata dahildir.",
       "variant": "Ürün çeşidi",
       "paid": "Satış fiyatı",
       "regular": "İndirimsiz fiyat",
@@ -3310,7 +3310,7 @@
       "struck": "İndirim üstü çizili gösteriliyor",
       "struckDetail": "Mağazada {{before}} üstü çizili, yanında {{price}} görünür.",
       "blocked": "Bu indirim üstü çizili gösterilmiyor",
-      "blockedDetail": "İndirimden önceki 30 günde en düşük fiyat {{lowest}}. Bugünkü {{price}} bundan düşük olmadığı için mağazada indirim olarak gösterilmez.",
+      "blockedDetail": "İndirimden önceki {{days}} günde en düşük fiyat {{lowest}}. Bugünkü {{price}} bundan düşük olmadığı için mağazada indirim olarak gösterilmez.",
       "regularBasis": "Fiyat geçmişi indirim başladıktan sonra tutulmaya başladığı için indirimsiz fiyat kullanılıyor.",
       "table": "{{from}} tarihinden bugüne fiyatlar",
       "unchanged": "Son 90 günde fiyat değişmedi."
@@ -6820,6 +6820,10 @@
           "name": "Ürün listesi",
           "description": "En yeni ürünler ya da bir kategorinin, bir koleksiyonun veya elle seçtiğiniz ürünler."
         },
+        "featured_product": {
+          "name": "Öne çıkan ürün",
+          "description": "Seçtiğiniz bir ürün yakından: görselleri, öne çıkan özellikleri ve özellik tablosu."
+        },
         "brands": {
           "name": "Markalar",
           "description": "Seçtiğiniz markalar; seçmezseniz tüm markalarınız."
@@ -6878,6 +6882,7 @@
       "defaults": {
         "heading": "Mağazanızın adı",
         "products": "Yeni ürünler",
+        "featured_product": "Öne çıkan ürün",
         "categories": "Kategorilere göz atın",
         "brands": "Markalar",
         "posts": "Blogdan",
@@ -7000,6 +7005,7 @@
         "linkLabel": "Dış adresin görünen yazısını girin.",
         "slidesRequired": "En az bir görsel ekleyin.",
         "productsRequired": "En az bir ürün seçin.",
+        "productRequired": "Bir ürün seçin.",
         "categoryRequired": "Bir kategori seçin.",
         "collectionRequired": "Bir koleksiyon seçin.",
         "scheduleOrder": "Bitiş, başlangıçtan sonra olmalı.",
@@ -7096,6 +7102,10 @@
           "manual": "Elle seçtiğim ürünler"
         },
         "sameCategoryHint": "Her ürün sayfasında, o ürünün kategorisindeki diğer ürünler gösterilir."
+      },
+      "featured": {
+        "product": "Ürün",
+        "hint": "Görseller, öne çıkan özellikler, fiyat ve özellik tablosu ürünün kendi sayfasından gelir. Ürün yayında değilken bölüm vitrinde görünmez."
       },
       "sample": {
         "label": {

@@ -33,6 +33,7 @@ export const HOME_TYPES: readonly HomeSectionType[] = [
   "banner",
   "categories",
   "products",
+  "featured_product",
   "brands",
   "posts",
   "reviews",
@@ -141,6 +142,8 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
         limit: 12,
         more: { kind: "system", target: "shop", label: null },
       }
+    case "featured_product":
+      return { ...base, type, title: null, text: null, product_id: "" }
     case "brands":
       return { ...base, type, title: null, brand_ids: [] }
     case "posts":

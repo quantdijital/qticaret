@@ -7,7 +7,7 @@ export interface PriceDisplayView {
   regular: string
   /** Struck through in the storefront; null when it is not shown as a discount. */
   before: string | null
-  /** The 30-day rule's price before the discount, shown or not. */
+  /** The price-before rule's price before the discount (lowest of `window_days`), shown or not. */
   lowest_before: string | null
   on_sale: boolean
   since: string | null
@@ -36,7 +36,7 @@ export interface PriceHistory {
   variants: VariantPriceHistory[]
 }
 
-/** `GET /admin/products/:id/price-history`: 90 days of selling prices, and the 30-day rule's reading. */
+/** `GET /admin/products/:id/price-history`: 90 days of selling prices, and the price-before rule's reading. */
 export const priceHistoryQuery = (productId: string, currency: string) =>
   queryOptions({
     queryKey: ["products", "price-history", productId, currency],

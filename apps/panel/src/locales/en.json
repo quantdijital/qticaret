@@ -3300,7 +3300,7 @@
     },
     "priceHistory": {
       "title": "Price history",
-      "hint": "The selling price and the price without a sale over the last 90 days. The price struck through in the shop is the lowest of the 30 days before a discount.",
+      "hint": "The selling price and the price without a sale over the last 90 days. The price struck through in the shop is the lowest of the {{days}} days before a discount; an automatic campaign everyone gets is part of the price.",
       "variant": "Variant",
       "paid": "Selling price",
       "regular": "Price without a sale",
@@ -3310,7 +3310,7 @@
       "struck": "The discount is shown struck through",
       "struckDetail": "The shop shows {{before}} struck through, with {{price}} beside it.",
       "blocked": "This discount is not shown struck through",
-      "blockedDetail": "The lowest price in the 30 days before the discount was {{lowest}}. Today's {{price}} is not below it, so the shop does not show it as a discount.",
+      "blockedDetail": "The lowest price in the {{days}} days before the discount was {{lowest}}. Today's {{price}} is not below it, so the shop does not show it as a discount.",
       "regularBasis": "The price history begins after the discount did, so the price without a sale is used.",
       "table": "Prices from {{from}} to today",
       "unchanged": "The price has not changed in the last 90 days."
@@ -6820,6 +6820,10 @@
           "name": "Product list",
           "description": "The newest products, or a category's, a collection's or ones you pick."
         },
+        "featured_product": {
+          "name": "Featured product",
+          "description": "One product you choose, up close: its pictures, headline facts and spec table."
+        },
         "brands": {
           "name": "Brands",
           "description": "The brands you pick; with none, all your brands."
@@ -6878,6 +6882,7 @@
       "defaults": {
         "heading": "Your shop's name",
         "products": "New products",
+        "featured_product": "Featured product",
         "categories": "Browse the categories",
         "brands": "Brands",
         "posts": "From the blog",
@@ -7000,6 +7005,7 @@
         "linkLabel": "Enter the shown text of the address.",
         "slidesRequired": "Add at least one image.",
         "productsRequired": "Pick at least one product.",
+        "productRequired": "Choose a product.",
         "categoryRequired": "Choose a category.",
         "collectionRequired": "Choose a collection.",
         "scheduleOrder": "The end must come after the start.",
@@ -7096,6 +7102,10 @@
           "manual": "Products I pick"
         },
         "sameCategoryHint": "Each product page shows other products from that product's category."
+      },
+      "featured": {
+        "product": "Product",
+        "hint": "The pictures, headline facts, price and spec table come from the product's own page. While the product is not published the section does not show."
       },
       "sample": {
         "label": {

@@ -3,6 +3,7 @@ import type {
   AnySection,
   CategorySection,
   FaqSection,
+  FeaturedProductSection,
   HeroSection,
   LayoutDocument,
   ProductSection,
@@ -92,6 +93,18 @@ describe("sectionProblems", () => {
         source: { kind: "collection", collection_id: "" },
       } as AnySection)
     ).toEqual({ source: "collectionRequired" })
+  })
+
+  it("asks a featured product section for its product, and checks its line (adr/0046 Ek 2026-11-05)", () => {
+    const featured = newHomeSection("featured_product", "yakinbakis") as FeaturedProductSection
+    expect(featured).toMatchObject({ title: null, text: null, product_id: "" })
+    expect(sectionProblems(featured)).toEqual({ product_id: "productRequired" })
+    expect(
+      sectionProblems({ ...featured, product_id: "prod_1", text: "Sorular için {telefon}" })
+    ).toEqual({})
+    expect(sectionProblems({ ...featured, product_id: "prod_1", text: "{bilinmeyen}" })).toEqual({
+      text: "tokenUnknown",
+    })
   })
 })
 

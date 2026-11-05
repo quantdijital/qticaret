@@ -91,6 +91,16 @@ export interface ProductsSection extends SectionBase {
   more: LayoutLink | null
 }
 
+/** One product up close (adr/0046 Ek 2026-11-05): the storefront adds its facts and spec table. */
+export interface FeaturedProductSection extends SectionBase {
+  type: "featured_product"
+  title: string | null
+  /** A line about it; may hold the shop's details (`{telefon}`). */
+  text: string | null
+  /** Empty: none chosen yet (the save waits for one). */
+  product_id: string
+}
+
 export interface BrandsSection extends SectionBase {
   type: "brands"
   title: string | null
@@ -153,6 +163,7 @@ export type HomeSection =
   | BannerSection
   | CategoriesSection
   | ProductsSection
+  | FeaturedProductSection
   | BrandsSection
   | CountedSection
   | RichTextSection

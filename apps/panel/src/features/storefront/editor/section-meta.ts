@@ -11,6 +11,7 @@ import {
   Megaphone,
   MessageSquareQuote,
   PanelTop,
+  ScanSearch,
   ShoppingBag,
   Tags,
   Text,
@@ -27,6 +28,7 @@ export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   banner: GalleryHorizontal,
   categories: LayoutGrid,
   products: ShoppingBag,
+  featured_product: ScanSearch,
   brands: Tags,
   posts: BookOpen,
   reviews: MessageSquareQuote,
@@ -52,6 +54,7 @@ function ownTitle(section: AnySection): string | null {
       return section.slides[0]?.heading ?? null
     case "categories":
     case "products":
+    case "featured_product":
     case "brands":
     case "posts":
     case "reviews":
