@@ -7,7 +7,8 @@ import type { Word } from "./normalize"
  * for PostgreSQL's Turkish stemmer, and as compared (marks folded) for
  * exact, prefix and code matching. A: title, SKUs, barcodes, MPNs; B:
  * brand and shown categories; C: subtitle, public attribute values,
- * option values, variant titles, tags, type; D: the plain description.
+ * option values, variant titles, tags, type, the short description's
+ * plain text (adr/0055 Ek 2026-11-06); D: the plain description.
  * Each field holds a word once, so twenty variants named "Kırmızı" count
  * as one. Pure.
  */
@@ -27,6 +28,8 @@ export interface SearchSource {
   variants: string[]
   tags: string[]
   type: string | null
+  /** The short description as one line of plain text (`lib/catalog/summary` `summaryText`). */
+  summary?: string | null
   /** Plain text or simple HTML. */
   description: string | null
 }
@@ -115,6 +118,8 @@ export function searchFields(source: SearchSource): SearchText {
     ...source.variants,
     ...source.tags,
     source.type,
+    // Last: what the shop wrote to introduce it never crowds out its attributes' words
+    source.summary,
   ])
   const d = distinctWords([plainText(source.description)])
   const vocabulary = new Map<string, [string, string, boolean]>()

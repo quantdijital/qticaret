@@ -37,6 +37,26 @@ describe("a product as the index holds it (adr/0056)", () => {
     expect(text.title).toBe("sef bicagi")
   })
 
+  it("holds the short description's words below the title's, above the description's", () => {
+    const text = searchFields(
+      source({
+        tags: ["hediye"],
+        summary: "Yıkanmış keten, rahat kesim. Sedef düğme.",
+        description: "Keten kumaş",
+      })
+    )
+    // C, after the tags: the shop's introduction ranks over the long text, never with the title
+    expect(text.fields.c).toEqual({
+      m: "hediye yıkanmış keten rahat kesim sedef düğme",
+      f: "hediye yikanmis keten rahat kesim sedef dugme",
+    })
+    expect(text.fields.a.m).toBe("şef bıçağı")
+    expect(text.fields.d.m).toBe("keten kumaş")
+    expect(text.vocabulary.map(([norm]) => norm)).toContain("dugme")
+    // None (an old row, a product without one) adds nothing
+    expect(searchFields(source({ summary: null })).fields.c).toEqual({ m: "", f: "" })
+  })
+
   it("finds a code as written and with its separators left out", () => {
     const text = searchFields(source({ codes: ["KUPA-MAVI-01", "8690000000001"] }))
     expect(text.fields.a.f).toBe("sef bicagi kupa mavi 01 kupamavi01 8690000000001")

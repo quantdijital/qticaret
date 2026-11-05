@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { storedSummaryText } from "../../lib/catalog/summary"
 import { searchFields } from "../../lib/search/document"
 import type { DocumentInput } from "../../modules/search-index/types"
 import { textOf } from "../seo/highlight"
@@ -9,10 +10,10 @@ import { indexedPrices } from "./prices"
 /**
  * A product as the search index reads it (adr/0056): its words (title,
  * codes, brand, shown categories, public attribute values, options,
- * variant titles, tags, type, description) and the facts listings filter
- * and sort by (published, channels, categories, collection, brand, choice
- * options, prices (prices.ts), stock, on sale, age). Read through
- * Query; never a module's service directly.
+ * variant titles, tags, type, short description, description) and the
+ * facts listings filter and sort by (published, channels, categories,
+ * collection, brand, choice options, prices (prices.ts), stock, on sale,
+ * age). Read through Query; never a module's service directly.
  */
 
 export const SOURCE_FIELDS = [
@@ -33,6 +34,8 @@ export const SOURCE_FIELDS = [
   "brand.id",
   "brand.name",
   "brand.handle",
+  // adr/0055 Ek 2026-11-06: the short description, below the title
+  "product_extension.summary_doc",
   "attribute_values.value_text",
   "attribute_values.value_number",
   "attribute_values.value_boolean",
@@ -95,6 +98,7 @@ export interface ProductSource {
     Maybe<HighlightValue & { definition?: Maybe<{ key?: Maybe<string> }> }>[]
   >
   variants?: Maybe<Maybe<Variant>[]>
+  product_extension?: Maybe<{ summary_doc?: unknown }>
 }
 
 const present = <T>(values: Maybe<Maybe<T>[]>): T[] =>
@@ -176,6 +180,7 @@ export function documentOf(
     variants: texts(variants.map((variant) => variant.title)),
     tags: texts(present(product.tags).map((tag) => tag.value)),
     type: product.type?.value ?? null,
+    summary: storedSummaryText(product.product_extension?.summary_doc),
     description: product.description ?? null,
   })
   return {

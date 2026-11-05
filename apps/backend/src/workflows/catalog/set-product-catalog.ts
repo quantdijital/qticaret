@@ -80,7 +80,7 @@ export const setProductCatalogWorkflow = createWorkflow(
       }
     )
 
-    // Search reads MPNs and the description (adr/0056)
+    // Search reads MPNs, the description and the short description (adr/0056)
     const saved = transform({ input }, ({ input }) => ({ id: input.product_id }))
     emitEventStep({ eventName: CATALOG_PRODUCT_SAVED, data: saved })
     releaseLockStep({ key: lockKey })

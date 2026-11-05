@@ -27,7 +27,7 @@
 
 ### Metin: iki biçim tek vektörde
 
-- Ağırlıklar: A başlık + SKU/barkod/EAN/UPC/MPN; B marka + gösterilen kategoriler; C alt başlık, açık nitelik değerleri (`textOf`: "Paslanmaz Çelik", "20 cm"), seçenek değerleri, varyant adları, etiketler, tür; D düz açıklama (ilk 4000 karakter, etiketsiz). Her alan bir kelimeyi bir kez tutar (yirmi "Kırmızı" varyant bir sayılır).
+- Ağırlıklar: A başlık + SKU/barkod/EAN/UPC/MPN; B marka + gösterilen kategoriler; C alt başlık, açık nitelik değerleri (`textOf`: "Paslanmaz Çelik", "20 cm"), seçenek değerleri, varyant adları, etiketler, tür, kısa açıklamanın düz metni (adr/0055 Ek 2026-11-06; katalog kaydı `catalog.product_saved` ile yeniden dizinlenir); D düz açıklama (ilk 4000 karakter, etiketsiz). Her alan bir kelimeyi bir kez tutar (yirmi "Kırmızı" varyant bir sayılır).
 - Her kelime iki kez yazılır:
   - **Karşılaştırma biçimi** (`simple`): Türkçe küçük harf, işaretsiz (`bıçağı` → `bicagi`), JS'te (`lib/search/normalize.ts`). Veritabanının yerel ayarına bağlı değil. Tam kelime, önek ve kod eşleşmesi bununla.
   - **Türkçe kök** (`turkish` yapılandırması, sonra `unaccent`): kök işaretli metinden çıkar (Snowball Türkçesi işaretle doğru çalışır: `bıçağı`, `bıçakları` → `bıçak`), sonra işaret atılır (`bicak`). Kökler `~` ile işaretlenir (`~bicak`): bir kelimenin öneki köke değmez. SQL işlevleri `search_index_stems`, `search_index_document`.
