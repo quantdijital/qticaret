@@ -176,3 +176,28 @@ Medusa 2.21.2'de doğrulananlar (F2 planlaması):
 **Açık:**
 - Okunamayan seçim değeri için "seçenek olarak ekle" yok; seçenek şablon düzenleyicide eklenir.
 - Önerilen sayı alanı filtre olarak işaretlenmez; şablonda açılır.
+
+## Ek (2026-11-05, liste süzgeçleri): değerli metin alanını seçimliye çevirme (otonom, gözden geçir)
+
+Sahip vitrinde çelik ve sap gibi özelliklere göre süzmek istedi (brief §4.2). Mağazanın "Bıçak" şablonunda bunlar serbest metindi; listeler yalnız seçimli ve filtrelenebilir alanlarla süzer. Ürünlerde değeri olan alanın tipi şablon güncellemesiyle değişmez (`product_attributes.type_locked`). Bu yüzden ayrı ve dar bir çevirme yolu eklendi.
+
+- **API:** `POST /admin/attribute-templates/:id/definitions/:definition_id/convert`.
+  - Gövde: `options` (`{ value, label }[]`, 1–200, şablon kuralları), `mapping` (`{ from, to }[]`, en çok 1000), isteğe bağlı `is_filterable`.
+  - `from` kayıtlı metnin aynısıdır. `to` bir seçeneğin değeridir ya da `null` (değer boşaltılır).
+  - Yanıt şablonun yeni hâlidir. Rol tablosunda şablon yazımları gibi: `operations` ve `readonly` için kapalı.
+- **Kurallar:** yalnız ürün düzeyindeki `text` alan çevrilir (`product_attributes.convert_text_only`, 409).
+  - Eşlemede olmayan her kayıtlı metin işi baştan reddeder; hiçbir şey yazılmaz. Yanıt metni adıyla söyler (`product_attributes.convert_unmapped`).
+  - Bilinmeyen seçenek `product_attributes.option_unknown` döner. Aynı metin iki kez eşlenemez (`convert_mapping_duplicate`). Zorunlu alanın değeri boşaltılamaz (`convert_required`).
+  - Yeni tanım şablonun kendi denetiminden geçer: ayrılmış anahtar, gizli alanın filtre olması.
+  - Metni olmayan değer satırı sorulmadan boşaltılır.
+- **İş akışı:** `convertAttributeDefinitionWorkflow`, şablonun kilidiyle çalışır; aynı şablonun ürün kayıtları beklesin diye.
+  - Sıra: tip `select`, seçenekler ve isteğe bağlı `is_filterable` yazılır. Her değerin `value_text`'i seçeneğin değeri olur. `null`'a eşlenenler yumuşak silinir, ürün bağlantıları kaldırılır.
+  - Değeri değişen ya da giden her ürün için `catalog.product_saved` yayılır; arama dizini ve listelerin süzgeç sayıları güncellenir (adr/0056).
+  - Adım yarıda kalırsa ya da sonraki adım düşerse geri alma tanımı, eski metinleri ve silinen değerleri geri getirir.
+- **Bilerek dar:** seçimliden metne, çoklu seçime ya da birim değişikliğine dönüş yok. Panelde ekranı yok; mağaza verisini bir kez düzeltmek içindir. Seçenekler sonra şablon düzenleyicide yönetilir.
+- **Testler:** `modules/product-attributes/__tests__/conversion.unit.spec.ts` (eşleme kuralları), `integration-tests/http/attribute-convert.spec.ts` (ret, sonraki adımda düşen akışın tam geri alınması, başarılı çevirme).
+- **Dev mağazasında yapılan (2026-11-05):** "Bıçak" şablonunda altı alan (Namlu çeliği, Kabza materyali, Kilit sistemi, Balçak, Sertlik, Üretim yeri) mağazanın kendi yazımıyla seçeneklere çevrildi ve filtrelenebilir yapıldı.
+  - Yazım farkları birleşti: "N690 Böhler", "Böhler N690", "N690 çelik" tek seçenek.
+  - Malzeme söylemeyen dört kabza değeri ("Ergonomik konfor sapı" gibi) boşaltıldı.
+  - Kabza metninde yazan balçak, balçağı boş yedi ürüne Balçak alanı olarak yazıldı.
+  - Kullanım alanı, Garanti, İşçilik, Kılıf, Ürün türü ve Model metin kaldı: değerleri küçük bir kümede toplanmıyor ya da süzgeç olarak bir şey ayırmıyor.

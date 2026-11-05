@@ -9,6 +9,7 @@ import { RATE_LIMIT_PROFILES } from "../lib/security/rate-limit"
 import {
   AdminGetAttributeTemplates,
   AdminPostAttributeTemplate,
+  AdminPostConvertDefinition,
   AdminUpdateAttributeTemplate,
 } from "./admin/attribute-templates/validators"
 import {
@@ -240,6 +241,12 @@ export default defineMiddlewares({
       matcher: "/admin/attribute-templates/:id",
       methods: ["POST"],
       middlewares: [validateAndTransformBody(AdminUpdateAttributeTemplate)],
+    },
+    // adr/0013 Ek 2026-11-05: a text attribute with values turned into a single choice
+    {
+      matcher: "/admin/attribute-templates/:id/definitions/:definition_id/convert",
+      methods: ["POST"],
+      middlewares: [validateAndTransformBody(AdminPostConvertDefinition)],
     },
     {
       matcher: "/admin/products/:id/attributes",

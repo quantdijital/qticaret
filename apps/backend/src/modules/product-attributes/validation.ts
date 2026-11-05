@@ -23,8 +23,8 @@ const isFreeKey = (key: string): boolean => !(key in Object.prototype)
 const OPTION_VALUE = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/
 // Under Postgres's btree row limit even in 4-byte characters: the
 // (definition, value_text) index refuses longer rows
-const MAX_TEXT_VALUE = 500
-const MAX_OPTIONS = 200
+export const MAX_TEXT_VALUE = 500
+export const MAX_OPTIONS = 200
 
 const cleanText = { message: "product_attributes.text_invalid" }
 const text = (max: number) =>
@@ -93,7 +93,8 @@ export function aliasesOf(value: unknown): string[] {
   return parsed.success ? parsed.data : []
 }
 
-const option = z
+/** A choice's option: its slug-like value (a facet URL's, F3.17) and its label. */
+export const optionInput = z
   .object({
     value: z
       .string()
@@ -114,7 +115,7 @@ export const definitionInput = z
     label: text(200),
     type: z.enum(ATTRIBUTE_TYPES),
     unit: text(32).nullable().optional(),
-    options: z.array(option).max(MAX_OPTIONS).nullable().optional(),
+    options: z.array(optionInput).max(MAX_OPTIONS).nullable().optional(),
     rank: z.number().int().min(0).max(10_000).optional(),
     is_required: z.boolean().optional(),
     is_filterable: z.boolean().optional(),

@@ -1,5 +1,11 @@
 import { z } from "@medusajs/framework/zod"
-import { definitionInput, groupsInput } from "../../../modules/product-attributes/validation"
+import {
+  MAX_OPTIONS,
+  MAX_TEXT_VALUE,
+  definitionInput,
+  groupsInput,
+  optionInput,
+} from "../../../modules/product-attributes/validation"
 
 const HANDLE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
 const MAX_DEFINITIONS = 100
@@ -38,3 +44,29 @@ export const AdminGetAttributeTemplates = z.object({
   offset: z.coerce.number().int().min(0).max(100_000).default(0),
 })
 export type AdminGetAttributeTemplatesType = z.infer<typeof AdminGetAttributeTemplates>
+
+// More distinct texts than a shop's catalogue holds for one field
+const MAX_MAPPING = 1_000
+
+/**
+ * A text attribute turned into a single choice (adr/0013 Ek 2026-11-05):
+ * the options, and what each stored text becomes, an option's value or
+ * `null` to clear it. `is_filterable` left out: as it was.
+ */
+export const AdminPostConvertDefinition = z
+  .object({
+    options: z.array(optionInput).min(1).max(MAX_OPTIONS),
+    mapping: z
+      .array(
+        z
+          .object({
+            from: z.string().min(1).max(MAX_TEXT_VALUE),
+            to: optionInput.shape.value.nullable(),
+          })
+          .strict()
+      )
+      .max(MAX_MAPPING),
+    is_filterable: z.boolean().optional(),
+  })
+  .strict()
+export type AdminPostConvertDefinitionType = z.infer<typeof AdminPostConvertDefinition>

@@ -725,6 +725,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "A group's key is 1–40 lower-case letters, digits, dashes or underscores.",
   "product_attributes.groups_duplicate": "A group key can be used once per template.",
   "product_attributes.aliases_duplicate": "A field's other names cannot repeat.",
+  "product_attributes.convert_text_only":
+    "Only a product-level text attribute can be turned into a single choice.",
+  "product_attributes.convert_unmapped":
+    "Products hold the value “{{value}}”, which is mapped to no option; map it or mark it to be cleared.",
+  "product_attributes.convert_mapping_duplicate": "A stored value can be mapped only once.",
+  "product_attributes.convert_required": "A required attribute's value cannot be cleared.",
   "description_facts.template_unknown": "The chosen attribute template was not found.",
   "description_facts.no_template":
     "The product has no attribute template; pick one for such products in the preview.",

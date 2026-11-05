@@ -725,6 +725,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Grup anahtarı 1–40 küçük harf, rakam, tire ya da alt çizgiden oluşur.",
   "product_attributes.groups_duplicate": "Bir grup anahtarı şablonda bir kez kullanılabilir.",
   "product_attributes.aliases_duplicate": "Bir alanın başka adları birbirini tekrar edemez.",
+  "product_attributes.convert_text_only":
+    "Yalnızca ürün düzeyindeki metin tipinde bir özellik seçimliye çevrilebilir.",
+  "product_attributes.convert_unmapped":
+    "Ürünlerde kayıtlı “{{value}}” değeri hiçbir seçeneğe eşlenmedi; eşleyin ya da boşaltılacağını belirtin.",
+  "product_attributes.convert_mapping_duplicate": "Kayıtlı bir değer yalnızca bir kez eşlenebilir.",
+  "product_attributes.convert_required": "Zorunlu bir özelliğin değeri boşaltılamaz.",
   "description_facts.template_unknown": "Seçilen özellik şablonu bulunamadı.",
   "description_facts.no_template":
     "Ürünün özellik şablonu yok; önizlemede şablonu olmayan ürünler için bir şablon seçin.",

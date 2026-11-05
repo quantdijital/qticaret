@@ -327,6 +327,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/async-jobs/:id/cancel": true,
   "POST /admin/attribute-templates/:id": false,
   "DELETE /admin/attribute-templates/:id": false,
+  "POST /admin/attribute-templates/:id/definitions/:definition_id/convert": false,
   "POST /admin/attribute-templates": false,
   "POST /admin/brands/:id": false,
   "DELETE /admin/brands/:id": false,
