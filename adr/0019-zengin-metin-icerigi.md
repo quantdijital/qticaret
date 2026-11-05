@@ -119,3 +119,12 @@ Kullanıcı kararı (2026-11-04): sert engel yalnız sağlayıcı ya da yasa red
   - Ürünlerin `seo.publish_gate` bayrağı mağazanın kendi seçimi olarak duruyor.
   - Görsel yalnız mağazanın ortam kütüphanesinden gelebilir (güvenlik). Uzunluk sınırları veriyi aklı başında tutmak için duruyor.
 - **SEO alanları:** Hepsi isteğe bağlı; aynı başlık ya da açıklama yalnız uyarı. Panel girişleri sunucunun sınırında (başlık 150, açıklama 320, anahtar kelime 100) yazmayı durdurur. Böylece kayıt uzunluk yüzünden hiç reddedilmez.
+
+## Ek (2026-11-05): özgünlüğü düşük filtre sayfası arama dışında
+
+Kullanıcı kararı (2026-11-05): "her şeye bu kadar engel atıp durma". Yayın engeli kalktı (Ek 2026-11-04); mağaza engellenmeden korunur.
+
+- **Kendiliğinden noindex:** Özgünlüğü %30'un altındaki canlı filtre sayfası `noindex,follow` sunulur (ürün bağlantıları izlenir). Sayfanın kendi robots seçimi zaten `noindex,nofollow` ise o kalır. %30 ve üstünde robots değeri sayfanın kendi seçimidir. Kural `lib/content/originality.ts` `landingRobots`'ta, `/store/seo/resolve` sayfanın SEO yükünde uygular (`workflows/seo/payload-content.ts`).
+- **Site haritası:** Bu sayfalar öbür noindex sayfalar gibi site haritasına ve SEO denetiminin beklenen sayısına girmez (`workflows/seo/sitemap-build.ts`, `originality >= 30` süzgeci). Danışmanın yinelenen başlık/açıklama karşılaştırmasında da listelenmiş sayılmaz.
+- **Eşiği geçince:** Kayıtta özgünlük yeniden ölçülür ve önbellek düşer. Gecelik yeniden ölçümde bir sayfa %30 çizgisini geçerse resolve önbelleği düşer ve site haritası yenilenmek üzere işaretlenir.
+- **Panel ve danışman:** L-UNIQ-01 uyarmaya devam eder (docs/14). Sayfanın durumu kartı canlı ve %30 altındaki sayfada tek satırla söyler: sayfa yayında, daha özgün olana kadar arama motorlarına kapalı.

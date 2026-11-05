@@ -20,6 +20,11 @@
 8. **Tutarlı dil.** Terim sözlüğü aşağıda; aynı kavram için tek kelime.
 9. **Sektör nötr.** Admin metinlerinde sektör kelimesi yok; attribute şablonları dinamik etiket üretir.
 10. **Panel mağazanındır.** Panel, mağaza sahibinin ve çalışanlarının üzerinde iş yaptığı şeyi gösterir. Platform operatörünün durumu (referans veri: il, ilçe, mahalle; arama dizininin sağlığı; kuyruklar ve işçiler; önbellek; altyapı ve sürümler) panele girmez; operatör onu log, alarm ve CLI ile izler. Kullanıcı (2026-11-04): "bu adres verisi vs gibi yerleri niye mağaza sahibinin göreceği bir panele ekliyorsun ne gereği var?" Ölçüt: mağazadaki biri bu bilgiyle bir şey yapabiliyor mu (bağlantıyı onarmak, bir kaydı düzeltmek, bir ayarı değiştirmek)? Yapamıyorsa yer panel değil (adr/0008 Ek, 2026-11-04: Adres verisi sekmesi kaldırıldı).
+    - **Gizlenenler (2026-11-05):**
+      - *İşler:* platformun kendi işleri listede, sayıda ve tek iş adresinde yok. İş türünde `platform: true` (`workflows/async-job/types`); bugün yalnızca haftalık adres verisi eşitlemesi (`tr_address.sync`). Mağazanın dışa/içe aktarmaları, iptalleri, SEO denetimi ve site haritası (panelden de başlatılır) kalır.
+      - *Denetim kaydı:* `tr_address` kayıtları listede, tür süzgecinde ve dışa aktarmada yok (`modules/audit-log/shop-view.ts`); kayıtlar veritabanında operatör için durur.
+      - *Platformun açmadığı seçenekler:* Google (Entegrasyonlar satırı, Pazarlama'daki Merchant Center kartı, Ayarlar > SEO'daki Search Console kartı, SEO sayfasının "Google Arama" kartı, SEO kurulum listesinin Search Console ve Merchant Center adımları) platformun Google istemcisi yokken çizilmez. Paraşüt, sunucuda istemcisi yokken fatura programı seçeneklerinde ve "Fatura kesilmiyor" kartında yok; zaten Paraşüt'te olan mağaza seçimini görür ve faturalarının kesilemediği söylenir. Platform açınca hepsi bugünkü gibi görünür.
+      - *Kalan:* ödeme hesaplarındaki şifreleme anahtarı eksik uyarısı (kaydı engeller, sahibin bilmesi gerekir); operatör için `integration_credentials.key_missing` olayıyla `error` düzeyinde de loglanır.
 
 ## Detay sayfası düzeni (2026-11-04)
 Kullanıcı (2026-11-04): "sipariş detay sayfası çok karmaşık duruyor, iletişim geçmişi büyük bir alan kaplıyor". Bir kaydın sayfası (sipariş, müşteri, ürün ve sonra yazılacaklar) en sık işten seyreğe doğru şu sırayla kurulur:
