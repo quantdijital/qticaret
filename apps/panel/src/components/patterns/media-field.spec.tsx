@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, within } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { useState } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -11,9 +11,12 @@ import { MediaField } from "./media-field"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 
+const uploadMock = vi.hoisted(() => vi.fn())
+
 vi.mock("@/lib/sdk", () => ({
-  sdk: { client: { fetch: fetchMock }, admin: { upload: { create: vi.fn() } } },
+  sdk: { client: { fetch: fetchMock }, admin: { upload: { create: uploadMock } } },
 }))
+vi.mock("sonner", () => ({ toast: { error: vi.fn(), success: vi.fn() } }))
 
 const CHOSEN = asset("media_1", { filename: "kapak.webp", alt: "Masa üstü" })
 
@@ -82,6 +85,27 @@ describe("MediaField", () => {
     expect(screen.getByRole("img", { name: "Kapak görseli" })).toHaveAttribute("src", CHOSEN.url)
     expect(screen.getByRole("textbox", { name: "Alt metin" })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Kapak görseli: görseli değiştir" })).toBeVisible()
+  })
+
+  it("is its own way in: a file dropped on the frame goes into the library and is chosen", async () => {
+    const onChange = renderField()
+    uploadMock.mockResolvedValue({ files: [{ id: "yeni.png", url: "https://cdn/yeni.png" }] })
+    fetchMock.mockResolvedValue({ media: [asset("media_up", { filename: "yeni.png" })] })
+    const frame = screen.getByRole("button", { name: "Kapak görseli: görsel seç" })
+    const file = new File(["a"], "yeni.png", { type: "image/png" })
+
+    fireEvent.drop(frame, { dataTransfer: { files: [file], types: ["Files"] } })
+
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith(expect.objectContaining({ id: "media_up" }))
+    })
+    expect(fetchMock).toHaveBeenCalledWith("/admin/media", {
+      method: "POST",
+      body: { file_ids: ["yeni.png"], library: true },
+    })
+    // No dialog on the way, and no second button beside the frame
+    expect(screen.queryByRole("dialog")).toBeNull()
+    expect(screen.queryByRole("button", { name: "Görsel seç" })).toBeNull()
   })
 
   it("takes a picture off", async () => {

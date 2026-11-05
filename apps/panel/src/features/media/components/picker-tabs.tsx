@@ -1,6 +1,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
+import type { Ref } from "react"
 import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
 import { Pagination } from "@/components/patterns/pagination"
@@ -13,6 +14,7 @@ import { importToLibrary, mediaListQuery, useMediaChanged } from "@/features/med
 import type { MediaAsset } from "@/features/media/api/media"
 import { MediaGrid } from "@/features/media/components/media-grid"
 import { UploadZone } from "@/features/media/components/upload-zone"
+import type { UploadZoneHandle } from "@/features/media/components/upload-zone"
 import { errorText } from "@/lib/errors"
 
 const P = "media.picker"
@@ -48,16 +50,17 @@ export function LibraryTab({ multiple, max, onChoose }: TabProps) {
   }
   return (
     <>
+      {/* The search stays above the grid, which scrolls under it */}
+      <SearchInput
+        value={q}
+        placeholder={t("media.search")}
+        className="shrink-0 sm:max-w-none"
+        onChange={(text) => {
+          setQ(text)
+          setPage(0)
+        }}
+      />
       <DialogBody list>
-        <SearchInput
-          value={q}
-          placeholder={t("media.search")}
-          className="sm:max-w-none"
-          onChange={(text) => {
-            setQ(text)
-            setPage(0)
-          }}
-        />
         {list.isError ? (
           <ErrorState text={errorText(t, list.error)} onRetry={() => void list.refetch()} />
         ) : (
@@ -105,14 +108,22 @@ export function LibraryTab({ multiple, max, onChoose }: TabProps) {
 /**
  * Files from this computer: up into the library, then chosen. A drop where
  * some failed stays open on their reasons, with the rest one click away.
+ * Files dropped anywhere on the dialog come here (`zone`).
  */
-export function UploadTab({ multiple, max, onChoose }: TabProps) {
+export function UploadTab({
+  multiple,
+  max,
+  onChoose,
+  zone,
+}: TabProps & { zone?: Ref<UploadZoneHandle> }) {
   const { t } = useTranslation()
   const [uploaded, setUploaded] = useState<MediaAsset[]>([])
   return (
     <>
       <DialogBody list>
         <UploadZone
+          ref={zone}
+          fill
           multiple={multiple}
           onUploaded={(assets, failed) => {
             const usable = assets.slice(0, multiple ? max : 1)
@@ -158,7 +169,7 @@ export function AddressTab({ onChoose }: Pick<TabProps, "onChoose">) {
   })
   return (
     <form
-      className="flex flex-col gap-6"
+      className="flex min-h-0 flex-1 flex-col gap-6"
       onSubmit={(event) => {
         event.preventDefault()
         setError(null)

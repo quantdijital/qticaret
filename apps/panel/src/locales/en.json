@@ -8043,12 +8043,12 @@
     },
     "field": {
       "empty": "No image chosen",
-      "choose": "Choose image",
       "replace": "Replace",
       "remove": "Remove",
       "chooseOf": "{{label}}: choose an image",
       "replaceOf": "{{label}}: replace the image",
-      "removeOf": "{{label}}: remove the image"
+      "removeOf": "{{label}}: remove the image",
+      "dropHint": "Drag a file here or click"
     },
     "detail": {
       "title": "Image",

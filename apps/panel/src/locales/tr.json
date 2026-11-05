@@ -8043,12 +8043,12 @@
     },
     "field": {
       "empty": "Görsel seçilmedi",
-      "choose": "Görsel seç",
       "replace": "Değiştir",
       "remove": "Kaldır",
       "chooseOf": "{{label}}: görsel seç",
       "replaceOf": "{{label}}: görseli değiştir",
-      "removeOf": "{{label}}: görseli kaldır"
+      "removeOf": "{{label}}: görseli kaldır",
+      "dropHint": "Sürükleyin ya da tıklayın"
     },
     "detail": {
       "title": "Görsel",

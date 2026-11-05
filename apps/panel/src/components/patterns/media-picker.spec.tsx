@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, waitFor, within } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
@@ -91,6 +91,41 @@ describe("MediaPicker", () => {
       expect.objectContaining({ id: "media_1" }),
       expect.objectContaining({ id: "media_2" }),
     ])
+  })
+
+  it("keeps one height on the size scale, its grid scrolling under a fixed search and footer", async () => {
+    renderPicker({ multiple: true })
+    const dialog = await screen.findByRole("dialog")
+
+    // The owner, 2026-11-05: "o modal niye bu kadar yüksek?"
+    expect(dialog).toHaveAttribute("data-size", "xl")
+    expect(dialog).toHaveAttribute("data-pane")
+    expect(dialog).toHaveClass("sm:h-(--dialog-max-height)", "overflow-hidden")
+    const grid = (await within(dialog).findByRole("button", { name: "kapak.webp" })).closest(
+      "[data-slot=dialog-body]"
+    )
+    expect(grid).toHaveClass("group-data-[pane]/pane:overflow-y-auto")
+    // The search and the choice stay out of what scrolls
+    expect(grid).not.toContainElement(within(dialog).getByRole("searchbox"))
+    expect(grid).not.toContainElement(within(dialog).getByRole("button", { name: "Seç" }))
+  })
+
+  it("takes files dropped anywhere on it up into the library, whichever tab is open", async () => {
+    uploadMock.mockResolvedValue({ files: [{ id: "yeni.png", url: "https://cdn/yeni.png" }] })
+    const { onSelect } = renderPicker({ multiple: true })
+    const dialog = await screen.findByRole("dialog")
+    await within(dialog).findByRole("button", { name: "kapak.webp" })
+
+    fireEvent.drop(dialog, {
+      dataTransfer: {
+        files: [new File(["a"], "yeni.png", { type: "image/png" })],
+        types: ["Files"],
+      },
+    })
+
+    await waitFor(() => {
+      expect(onSelect).toHaveBeenCalledWith([expect.objectContaining({ id: "media_up" })])
+    })
   })
 
   it("uploads from this computer into the library, then chooses what went up", async () => {

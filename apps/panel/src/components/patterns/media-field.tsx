@@ -1,10 +1,13 @@
 import { ImagePlus, Loader2, Trash2 } from "lucide-react"
 import { useState } from "react"
-import type { ReactNode } from "react"
+import type { DragEvent, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
 import { MediaPicker } from "@/components/patterns/media-picker"
 import { Button } from "@/components/ui/button"
+import { fileProblem, uploadToLibrary, useMediaChanged } from "@/features/media/api/media"
 import type { MediaAsset } from "@/features/media/api/media"
+import { errorText } from "@/lib/errors"
 import { cn } from "@/lib/utils"
 
 /** The picture's frame: a slide or opening, a share card, a square, a logo on its ground. */
@@ -43,10 +46,14 @@ interface MediaFieldProps {
   children?: ReactNode
 }
 
+const hasFiles = (event: DragEvent) => event.dataTransfer.types.includes("Files")
+
 /**
- * One picture of a form (docs/18 §7): what it looks like, and choosing it
- * from the media library, this computer or an address through
- * `MediaPicker`, replacing or taking it off. Its alt text stays beside it.
+ * One picture of a form (docs/18 §7, one way to add a picture): its frame
+ * is the way in. A click opens `MediaPicker` (library, upload, address); a
+ * file dropped on it goes into the library and is chosen at once. With a
+ * picture, the frame replaces it the same way and "Kaldır" takes it off;
+ * its alt text stays beside it.
  */
 export function MediaField({
   id,
@@ -65,12 +72,39 @@ export function MediaField({
   children,
 }: MediaFieldProps) {
   const { t } = useTranslation()
+  const changed = useMediaChanged()
   const [picking, setPicking] = useState(false)
+  const [over, setOver] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const working = busy || uploading
+
+  const upload = async (file: File | undefined) => {
+    if (!file) {
+      return
+    }
+    const problem = fileProblem(file)
+    if (problem) {
+      toast.error(`${file.name}: ${t(`media.upload.problem.${problem}`)}`)
+      return
+    }
+    setUploading(true)
+    try {
+      const asset = await uploadToLibrary(file)
+      await changed()
+      onChange(asset)
+    } catch (failure) {
+      toast.error(errorText(t, failure))
+    } finally {
+      setUploading(false)
+    }
+  }
+
   const title = (
     <span id={`${id}-label`} className={hideLabel ? "sr-only" : "text-sm font-medium"}>
       {label}
     </span>
   )
+  const small = frame === "square" || frame === "logo"
   return (
     <div
       role="group"
@@ -78,54 +112,82 @@ export function MediaField({
       className={cn("flex min-w-0 flex-col gap-2", inline && "sm:flex-row sm:items-start sm:gap-4")}
     >
       {inline ? null : title}
-      <div
+      <button
+        type="button"
+        disabled={working}
+        aria-label={t(value ? "media.field.replaceOf" : "media.field.chooseOf", { label })}
+        onClick={() => {
+          setPicking(true)
+        }}
+        onDragOver={(event) => {
+          if (hasFiles(event)) {
+            event.preventDefault()
+            setOver(true)
+          }
+        }}
+        onDragLeave={() => {
+          setOver(false)
+        }}
+        onDrop={(event) => {
+          if (hasFiles(event)) {
+            event.preventDefault()
+            setOver(false)
+            void upload(event.dataTransfer.files[0])
+          }
+        }}
         className={cn(
-          "flex items-center justify-center overflow-hidden rounded-md border",
+          "group relative flex items-center justify-center overflow-hidden rounded-md border outline-hidden transition-colors focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-progress",
           FRAME[frame],
           inline && frame !== "square" && "sm:w-72 sm:shrink-0",
-          value ? (ground ?? "bg-muted") : (ground ?? "border-dashed")
+          value ? (ground ?? "bg-muted") : (ground ?? "border-2 border-dashed hover:bg-muted/50"),
+          over && "border-primary bg-accent"
         )}
       >
         {value ? (
-          <img
-            src={value}
-            alt={label}
-            className={cn(
-              frame === "logo" || frame === "square"
-                ? "max-h-full max-w-full object-contain"
-                : "size-full object-cover"
-            )}
-          />
+          <>
+            <img
+              src={value}
+              alt={label}
+              className={cn(
+                small ? "max-h-full max-w-full object-contain" : "size-full object-cover"
+              )}
+            />
+            <span className="absolute right-1.5 bottom-1.5 rounded-full border bg-background/90 px-2 py-0.5 text-[11px] font-medium text-foreground">
+              {t("media.field.replace")}
+            </span>
+          </>
         ) : (
           // On a ground of its own (a logo's dark one) the ground's text colour reads, not the card's
-          <span className={cn("px-4 text-center text-[13px]", !ground && "text-muted-foreground")}>
-            {emptyText ?? t("media.field.empty")}
+          <span
+            className={cn(
+              "flex flex-col items-center gap-1.5 px-3 text-center text-[13px]",
+              !ground && "text-muted-foreground"
+            )}
+          >
+            <ImagePlus className="size-4" aria-hidden="true" />
+            <span>{emptyText ?? t("media.field.empty")}</span>
+            {small ? null : <span className="text-xs">{t("media.field.dropHint")}</span>}
           </span>
         )}
-      </div>
+        {working ? (
+          <span className="absolute inset-0 flex items-center justify-center bg-background/70">
+            <Loader2 className="size-5 animate-spin text-muted-foreground" aria-hidden="true" />
+          </span>
+        ) : null}
+      </button>
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         {inline ? title : null}
         {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
-        <div className="flex flex-wrap gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            disabled={busy}
-            aria-label={t(value ? "media.field.replaceOf" : "media.field.chooseOf", { label })}
-            onClick={() => {
-              setPicking(true)
-            }}
-          >
-            {busy ? <Loader2 className="animate-spin" /> : <ImagePlus />}
-            {t(value ? "media.field.replace" : "media.field.choose")}
-          </Button>
-          {value && removable ? (
+        {small && !value ? (
+          <p className="text-xs text-muted-foreground">{t("media.field.dropHint")}</p>
+        ) : null}
+        {value && removable ? (
+          <div className="flex flex-wrap gap-2">
             <Button
               type="button"
               variant="ghost"
               size="sm"
-              disabled={busy}
+              disabled={working}
               className="text-destructive-text"
               aria-label={t("media.field.removeOf", { label })}
               onClick={() => {
@@ -135,8 +197,8 @@ export function MediaField({
               <Trash2 />
               {t("media.field.remove")}
             </Button>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
         {value ? children : null}
       </div>
       <MediaPicker

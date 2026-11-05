@@ -1,6 +1,6 @@
 import { CircleAlert, CircleCheck, ImagePlus } from "lucide-react"
-import { useState } from "react"
-import type { DragEvent } from "react"
+import { useImperativeHandle, useState } from "react"
+import type { DragEvent, Ref } from "react"
 import { useTranslation } from "react-i18next"
 import { Progress } from "@/components/ui/progress"
 import {
@@ -25,9 +25,17 @@ interface Queued {
   error?: string
 }
 
+/** What a dialog around the zone calls for files dropped anywhere on it. */
+export interface UploadZoneHandle {
+  upload: (files: File[]) => void
+}
+
 interface UploadZoneProps {
   /** A picker for one image takes one file. */
   multiple?: boolean
+  /** The zone fills the room it is given (a dialog's tab). */
+  fill?: boolean
+  ref?: Ref<UploadZoneHandle> | undefined
   /**
    * The files that made it into the library, once the drop is through, and
    * how many did not (their reasons stay listed here).
@@ -40,7 +48,7 @@ interface UploadZoneProps {
  * once, each sent in turn with its own state, a bar for the whole drop.
  * A file of the wrong type or past 10 MB is named and skipped.
  */
-export function UploadZone({ multiple = true, onUploaded }: UploadZoneProps) {
+export function UploadZone({ multiple = true, fill = false, ref, onUploaded }: UploadZoneProps) {
   const { t } = useTranslation()
   const changed = useMediaChanged()
   const [over, setOver] = useState(false)
@@ -90,6 +98,12 @@ export function UploadZone({ multiple = true, onUploaded }: UploadZoneProps) {
     }
   }
 
+  useImperativeHandle(ref, () => ({
+    upload: (files) => {
+      void upload(files)
+    },
+  }))
+
   const drop = (event: DragEvent<HTMLLabelElement>) => {
     event.preventDefault()
     setOver(false)
@@ -97,7 +111,7 @@ export function UploadZone({ multiple = true, onUploaded }: UploadZoneProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className={cn("flex flex-col gap-4", fill && "min-h-0 flex-1")}>
       <label
         onDragOver={(event) => {
           event.preventDefault()
@@ -110,7 +124,8 @@ export function UploadZone({ multiple = true, onUploaded }: UploadZoneProps) {
         className={cn(
           "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed px-6 py-10 text-center transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-solid has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring",
           over ? "border-primary bg-accent" : "border-border hover:border-input hover:bg-muted/50",
-          busy && "pointer-events-none opacity-60"
+          busy && "pointer-events-none opacity-60",
+          fill && "min-h-48 flex-1"
         )}
       >
         <span className="flex size-12 items-center justify-center rounded-full bg-accent text-accent-foreground">
