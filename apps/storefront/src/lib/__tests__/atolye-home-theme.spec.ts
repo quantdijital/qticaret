@@ -1,30 +1,36 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
-import type { HomeSectionView, ImageView, ProductCardView } from "@qticaret/ui"
+import type {
+  ActionResult,
+  CategoryCardView,
+  HomeSectionView,
+  ImageView,
+  ProductCardView,
+} from "@qticaret/ui"
 import { renderPage } from "@/test/theme-render"
 
 /**
- * The Atölye home page (design.md: Bento Grid, hero Index) as the server
- * prints it from the shop's own sections: the opening takes the categories
- * that follow it as its bento, and nothing is drawn that the shop did not
- * give.
+ * The theme's home page (docs/tema/yon-2026-11-05.md § Home) from the
+ * shop's own sections, in its order: the opening on its graphite stage,
+ * the promises, the category tiles, one tabbed shelf for neighbouring
+ * product sections. Nothing is drawn that the shop did not give.
  */
 
-const image: ImageView = {
-  src: "/media/caki-800.jpg",
-  alt: "Ahşap saplı çakı",
+const picture = (name: string, avif = false): ImageView => ({
+  src: `/media/${name}.jpg`,
+  alt: name,
   width: 800,
   height: 800,
-  sources: { avif: "/media/caki-400.avif 400w", webp: null },
-}
+  sources: { avif: avif ? `/media/${name}-400.avif 400w` : null, webp: null },
+})
 
 const product = (id: string, over: Partial<ProductCardView> = {}): ProductCardView => ({
   id,
   title: `Ürün ${id}`,
   path: `/urun/${id}`,
   brand: null,
-  image,
-  price: { current: "449,00 TL", before: null, from: false, discount: null },
+  image: picture(id, true),
+  price: { current: "1.299,90 TL", before: null, from: false, discount: null },
   available: true,
   ...over,
 })
@@ -42,91 +48,121 @@ const hero: HomeSectionView = {
   image: null,
 }
 
-const categories = (count: number): HomeSectionView => ({
+const shelf = (id: string, title: string, products: ProductCardView[]): HomeSectionView => ({
+  id,
+  type: "products",
+  title,
+  products,
+  more: { label: "Tümünü gör", path: `/kategori/${id}` },
+  empty: "Henüz yayında ürün yok.",
+})
+
+const categories = (count: number, pictured: number): HomeSectionView => ({
   id: "kategoriler",
   type: "categories",
   title: "Kategorilere göz atın",
-  categories: Array.from({ length: count }, (_, index) => ({
+  categories: Array.from({ length: count }, (_, index): CategoryCardView => ({
     label: `Kategori ${String(index + 1)}`,
     path: `/kategori/k${String(index + 1)}`,
+    ...(index < pictured ? { image: picture(`k${String(index + 1)}`) } : {}),
   })),
 })
 
-const shelf: HomeSectionView = {
-  id: "yeni",
-  type: "products",
-  title: "Yeni ürünler",
-  products: [product("a", { image: null }), product("b")],
-  more: { label: "Tüm ürünler", path: "/magaza" },
-  empty: "Henüz ürün yok.",
-}
+const home = (sections: HomeSectionView[], quickAdd?: () => Promise<ActionResult>) =>
+  renderPage(atolyeTheme, "HomePage", { view: { sections }, ...(quickAdd ? { quickAdd } : {}) })
 
-const home = (sections: HomeSectionView[]) =>
-  renderPage(atolyeTheme, "HomePage", { view: { sections } })
-
-describe("the Atölye opening", () => {
-  it("is the page's one h1, with the shop's line and its two actions, and no eyebrow", () => {
-    const html = home([hero, categories(3), shelf])
-
+describe("the theme's home page: opening, promises, aisles", () => {
+  it("makes the hero the one h1, with its line and its first action, no eyebrow", () => {
+    const html = home([hero, shelf("yeni", "Yeni ürünler", [product("a")])])
     expect(html.match(/<h1/g)).toHaveLength(1)
     expect(html).toContain(">El yapımı ürünler</h1>")
     expect(html).toContain("Her modelde ölçü ve malzeme yazılı.")
-    expect(html).toMatch(/<a href="\/kategori\/urunler" class="at-btn">Ürünleri incele<\/a>/)
-    expect(html).toMatch(/<a href="\/kategori\/koleksiyon" class="at-link">/)
+    expect(html).toContain('href="/kategori/urunler"')
+    expect(html).not.toContain("Koleksiyon")
     expect(html).not.toContain("Kısa üst satır")
   })
 
-  it("lists the first six categories in the opening for a phone, then every one in the index", () => {
-    const html = home([hero, categories(8), shelf])
+  it("shows the shop's newest pictured product on the stage, first and preloaded", () => {
+    const html = home([
+      hero,
+      shelf("yeni", "Yeni ürünler", [product("a", { image: null }), product("b")]),
+    ])
+    expect(html).toMatch(/<link rel="preload" as="image" href="\/media\/b\.jpg"/)
+    expect(html).toContain('imageSrcSet="/media/b-400.avif 400w"')
+    expect(html).toMatch(/src="\/media\/b\.jpg"[^>]*loading="eager"[^>]*fetchPriority="high"/)
+  })
 
-    const opening = html.slice(0, html.indexOf('id="bolum-kategoriler"'))
-    for (const n of [1, 2, 3, 4, 5, 6]) {
-      expect(opening).toContain(`href="/kategori/k${String(n)}"`)
-    }
-    expect(opening).not.toContain('href="/kategori/k7"')
-    expect(html).toMatch(/<nav aria-label="Kategorilere göz atın" class="[^"]*lg:hidden/)
-    expect(html).toContain('<h2 id="bolum-kategoriler">Kategorilere göz atın</h2>')
-    const index = html.slice(html.indexOf('id="bolum-kategoriler"'))
-    for (const n of [1, 2, 3, 4, 5, 6, 7, 8]) {
-      expect(index).toContain(`href="/kategori/k${String(n)}"`)
-    }
-    // A phone has the first six in the opening already
-    expect(index.match(/max-lg:hidden/g)).toHaveLength(6)
+  it("prints the page's h1 for the reader when the shop's page opens with no hero", () => {
+    const html = home([shelf("yeni", "Yeni ürünler", [product("a")])])
+    expect(html).toContain('<h1 class="sr-only">Ana sayfa</h1>')
+    expect(html).not.toContain('rel="preload"')
+  })
+
+  it("lists the shop's promises with their own words", () => {
+    const html = home([
+      hero,
+      {
+        id: "guven",
+        type: "trust_badges",
+        badges: [{ icon: "truck", title: "Ücretsiz kargo", text: "1.500,00 TL ve üzeri" }],
+      },
+    ])
+    expect(html).toContain("Ücretsiz kargo")
+    expect(html).toContain("1.500,00 TL ve üzeri")
+  })
+
+  it("draws eight categories as tiles, the rest as pills, and every category page", () => {
+    const html = home([hero, categories(11, 3)])
+    expect(html.match(/href="\/kategori\/k\d+"/g)).toHaveLength(11)
+    expect(html).toContain('class="gf-chip"')
+    expect(html.match(/src="\/media\/k\d\.jpg"/g)).toHaveLength(3)
     expect(html).toContain('href="/kategoriler"')
-  })
-
-  it("keeps the index off a phone when the opening already lists every category", () => {
-    const html = home([hero, categories(4), shelf])
-
-    expect(html).toMatch(/<section aria-labelledby="bolum-kategoriler" class="[^"]*max-lg:hidden/)
-  })
-
-  it("shows the shop's first pictured product as its photograph, loaded first", () => {
-    const html = home([hero, categories(5), shelf])
-
-    expect(html).toMatch(/<a href="\/urun\/b" aria-label="Ürün b"/)
-    expect(html).toContain('fetchPriority="high"')
-    expect(html).not.toContain('href="/urun/a" aria-label')
-  })
-
-  it("prefers the shop's own opening picture, linked to its first action", () => {
-    const html = home([{ ...hero, image: { ...image, alt: "Atölye" } }, categories(2), shelf])
-
-    expect(html).toMatch(/<a href="\/kategori\/urunler" aria-label="Ürünleri incele"/)
-  })
-
-  it("draws no picture it was not given", () => {
-    const html = home([hero, categories(3)])
-
-    expect(html).not.toContain("<picture")
-    expect(html).not.toContain("<img")
   })
 })
 
-describe("the Atölye home page without an opening", () => {
-  it("keeps one h1 for the reader", () => {
-    const html = home([shelf])
+describe("the theme's home page: the shelf", () => {
+  it("joins neighbouring product sections into script-free tabs, every panel in the HTML", () => {
+    const html = home([
+      hero,
+      shelf("yeni", "Yeni ürünler", [product("a")]),
+      shelf("caki", "Çakılar", [product("c")]),
+    ])
+    expect(html.match(/type="radio"/g)).toHaveLength(2)
+    expect(html).toMatch(/checked="" value="0"/)
+    expect(html).toContain('data-panel="1"')
+    expect(html).toContain('href="/urun/c"')
+    expect(html).toContain('href="/kategori/caki"')
+  })
 
-    expect(html).toContain('<h1 class="sr-only">Ana sayfa</h1>')
+  it("keeps a lone product section a plain grid under its heading, six cards at most", () => {
+    const products = Array.from({ length: 8 }, (_, index) => product(`p${String(index)}`))
+    const html = home([hero, shelf("yeni", "Yeni ürünler", products)])
+    expect(html).not.toContain('type="radio"')
+    expect(html).toContain(">Yeni ürünler</h2>")
+    expect(html.match(/<article/g)).toHaveLength(6)
+  })
+
+  it("marks a discount, stock and the quick add only as the card's view says", () => {
+    const html = home(
+      [
+        hero,
+        shelf("yeni", "Yeni ürünler", [
+          product("a", {
+            price: { current: "910,00 TL", before: "1.300,00 TL", from: false, discount: 30 },
+            stock: "low",
+            quickAdd: { variantId: "variant_a" },
+          }),
+          product("b", { available: false, quickAdd: { variantId: "variant_b" } }),
+        ]),
+      ],
+      () => Promise.resolve({ ok: true, error: null })
+    )
+    expect(html).toContain("%30 indirim")
+    expect(html).toContain("1.300,00 TL")
+    expect(html).toContain("Az kaldı")
+    expect(html).toContain("Tükendi")
+    expect(html).toContain('value="variant_a"')
+    expect(html).not.toContain('value="variant_b"')
+    expect(html).toContain('aria-label="Ürün a ürününü sepete ekle"')
   })
 })

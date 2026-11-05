@@ -13,6 +13,7 @@ import { postCards } from "./posts"
 import {
   brandLinks,
   categoryLinks,
+  categoryTiles,
   customerPhotoViews,
   type ProductContext,
   railCards,
@@ -30,6 +31,8 @@ export type BodySection = StoreLayoutSection | StoreProductSection | StoreCatego
 /** What a section needs from the page it is on: the product, for its related rails. */
 export interface SectionContext {
   product?: ProductContext
+  /** The home page: its category cards take a product photo where the category has none. */
+  home?: boolean
 }
 
 const links = (items: readonly (LinkView | null)[]): LinkView[] =>
@@ -102,7 +105,10 @@ async function sectionView(
         })),
       }
     case "categories": {
-      const categories = await categoryLinks(section.category_ids)
+      // A product's photo stands in for a missing category picture on the home page only
+      const categories = await (context.home
+        ? categoryTiles(section.category_ids)
+        : categoryLinks(section.category_ids))
       return categories.length > 0
         ? { id, type: "categories", title: section.title ?? t("home.shop_categories"), categories }
         : null

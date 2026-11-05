@@ -7,4 +7,4 @@ import { sectionViews } from "./sections"
 export const homeSections = (
   sections: readonly StoreLayoutSection[],
   t: Translate
-): Promise<HomeSectionView[]> => sectionViews(sections, t)
+): Promise<HomeSectionView[]> => sectionViews(sections, t, { home: true })

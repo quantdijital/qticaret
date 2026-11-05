@@ -1,47 +1,46 @@
-/* Hallmark · shape: Index-First (from Bento Grid, draw 30e00e; the bento comes back with the shop's category pictures, the rest stay ruled rows) · genre: editorial · theme: Loom (deal 3/3, seed mobile-first-e-commerce-shop-handmade-62be·8d7a0280·2026-11-04·r0) · job: buy
- * hero: Stage (the shop's own blade photograph on half the container beside its heading; the first categories as ruled rows under 1024 px) · nav: search-led bar over a mega menu · footer: mast · imagery: the shop's own product photographs · signature: a blade's photograph over its ruled spec rows · loom: ecru, signal the shop's own colour
- * axes: light/roman-serif/cool · posture: committed · contrast: pass · fold: pass · v2.0.0 */
-/* Hallmark · pre-emit critique: P4 H4 E4 S3 R5 V4 · weakest: S, the heading is the shop's category line, not its promise; the owner is asked to lead with "Her modelde çelik, ölçü ve sap detayı yazılı" */
-/* Hallmark · hero-review: fix · 5 findings · 3 resolved (empty sand tiles gone, photograph at six columns, no picture on a phone now under the first rows) 1 partial (categories repeat the bar on wide screens below the fold only) 1 unresolved (headline is shop data, an owner ask) */
-/* Hallmark · finish-review: subagent · 6 findings · 2 resolved (item titles and ink rules on the shelf and guides; the button and text-link pair, help as ruled rows) 1 partial (dark signal lifted less, L 66) 1 unresolved (four across puts about 110 words in one window, gate 58) · 2 owner data (a blog cover, generic section titles) · gap: none */
-/* Hallmark · finish-review 2b (contract fields): subagent · fix · 8 findings · 5 resolved (tiles skip the opening's names under 1024 px; bento capped at five, the rest ruled rows; tile names in the rows' voice; the strip leaves out quoted photos; refusal in product words, drawer ring inset) 2 partial (the drawer no longer repeats a name, the cart's automatic discount is not on the card view: owner data; the QR has its own term, no ETBİS link in the contract) 1 unresolved ("Seçenekleri gör" under multi-variant cards: the shelf window reaches 98 words, gate 58; the quick add says "Ekle" for the same reason) · gap: none */
-/* Hallmark · finish-review 2c (close-up, shop rating): subagent · fix · 7 findings · 5 resolved (an exact 30% cut said "%29", now "%30"; the close-up shows a photograph the page does not show yet, on its own sand band; the name's own part as the head, no bar opening a line; each quote a first sentence or clause; a short rest of the spec rows runs on in the words' column) 2 partial (the featured product stays on the shop's shelf, with another photograph; the figure is in the ink and the red stays on the badge, the dark discount beside a warm shop colour is an owner ask) · gap: none */
-/* Hallmark · dismissed 58 · the densest window (95 at 1440 since promoted prices put a struck price and a "%30" on every card; "indirim" on the badge is for the reader only) is two rows of the shelf: six of the shop's product names, brands and two prices with "Az kaldı" and each card's "Ekle"; the first-visit cookie notice over the opening, the footer's contact, menus and legal lines, and the reviews' rating with its three one-line quotes stay under it (89 at most with the reviews right under the shelf), all the shop's own catalogue, customers and frame */
-/* Hallmark · waive 83 · the shelf's twelve cards, the close-up's one photograph, the category bento, the customers' review photos and the three guides are the shop's own catalogue, its customers' and its blog's photographs, no stand-ins · a shop's catalogue is its own work */
-/* Hallmark · dismissed 42 · the mast: the shop's name at 72px over its contact block and the shop's own footer menus, named in the stamp */
-/* Hallmark · dismissed 54 · SectionHead renders the section's h2 (home/SectionHead.tsx) and the section is labelled by it; the static tier cannot see through the component */
+/* Hallmark · shape: Counter (a shop's home: stage, promises, aisles, shelf, proof, close) · genre: editorial · theme: custom (deal 2026-11-05 Dose/Manifesto/Loom refused: Loom is the rejected look, Manifesto's duotone dark sheet and Dose's pharmacy plastic refuse a shop's colour photographs) · job: buy · idea: "the shop's own dark-ground blade photographs on graphite stages, set into a cool steel-white counter, categories as the backbone of every screen" · vibe: "graphite stage, steel counter, heavy grotesk"
+ * paper: oklch(98.4% 0.003 250) · accent: the shop's colour (--primary, adr/0053) · display: Manrope 800 · body: Manrope 400/600 · hero: Banner, a graphite stage panel 58% of the screen, the shop's heading and one action beside its own photograph, half a phone tall, the promises strip and the aisles' head above the fold · nav: two-row bar, wordmark and a wide pill search over the category aisle with mega panels · footer: graphite mast, the newsletter band, the wordmark large over contact and the shop's own footer menus, then the marks · imagery: the shop's own product photographs · signature: the blade's own dark photograph merging into the graphite stage
+ * axes: light/grotesk-heavy/shop-colour · posture: restrained (signal on actions only), two graphite stages a page · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S4 R4 V5 · weakest: P, a shop's home argues little; it argues by showing the shop's own pictures large and its aisles first */
+/* Hallmark · waive 83 · the shelf's cards, the stage photograph and the category tiles are the shop's own catalogue photographs · a shop's home is its catalogue */
+/* Hallmark · dismissed 54 · each section's h2 opens it; the small line beside a head is its link to the full list, a destination */
+/* Hallmark · waive 59 · the promises strip sits 16px under the graphite stage as the opening's own foot, every other seam is 96px or more · the shop's promises belong to its first screen */
+/* Hallmark · waive 44c · a Banner posture: the stage stops at 715px so the shop's promises and the aisles' head show above the 1440x900 fold · the brief wants categories under the first screen */
+/* Hallmark · waive 85 · the footer opens with the newsletter band the owner's brief lists as its section 13, above the shop's footer menus · the brief names the sign-up */
+/* Hallmark · dismissed 59 · eleven blocks because the owner's brief lists fourteen home sections in a fixed order; the shop's layout carries the ones it has content for */
+/* Hallmark · dismissed 42 · the footer is a graphite mast whose columns are the shop's own footer menus from the panel, named in the stamp */
+/* Hallmark · dismissed 58 · the 94-word first screen at 1440 is the frame (the shop's seven top links and seven categories), the opening's heading, line and action, the four promises and a first visit's cookie notice, which the law asks for before any other cookie */
+/* Hallmark · dismissed F4 · one primary control: the shop-colour pill, which on a graphite stage turns to the stage's own light ink so it reads there */
 @import "./tokens.css";
 @import "./base.css" layer(base);
-@import "./controls.css";
+@import "./ui.css";
+@import "./tabs.css";
 
 /*
- * Atölye's values for the contract's names (design.md § Exports; shadcn's
- * names, wired to Tailwind in `@qticaret/ui/styles.css`), so the
- * primitives and the base theme's pages it borrows read its paper, ink and
- * square corners.
+ * The theme's values for the contract's names (shadcn's names, wired to
+ * Tailwind in `@qticaret/ui/styles.css`), so the primitives and the base
+ * theme's pages it borrows read its counter, graphite and pills.
  *
- * `--primary` holds the signal's value and the signal reads it
- * (`tokens.css`): the shop's main colour, printed over it at `:root` by
- * the storefront (adr/0053 §B), lands in `--color-signal` that way. The
- * fallback is the profile's `#076599`. The shop's faces, corners, buttons,
- * page colour and accent are not taken (`src/themes/atolye.ts` in the
- * storefront): this theme's own stand.
+ * `--primary` holds the shop's colour; the storefront prints the shop's
+ * own over it at `:root` (adr/0053 §B). The fallback is a graphite-wine.
+ * The shop's faces, corners, page colour and accent are not taken
+ * (`src/themes/atolye.ts` in the storefront): this theme's own stand.
  */
 :root {
-  --primary: oklch(48.6% 0.113 242.1);
-  --primary-foreground: oklch(98.5% 0.006 85);
+  --primary: oklch(36% 0.12 350);
+  --primary-foreground: oklch(99% 0.003 350);
 
   --font-sans: var(--font-body);
   --font-heading: var(--font-display);
 
   --background: var(--color-paper);
   --foreground: var(--color-text);
-  --card: var(--color-paper-2);
+  --card: var(--color-field);
   --card-foreground: var(--color-text);
   --popover: var(--color-field);
   --popover-foreground: var(--color-text);
-  --secondary: var(--color-paper-3);
-  --secondary-foreground: var(--color-text-2);
+  --secondary: var(--color-paper-2);
+  --secondary-foreground: var(--color-text);
   --muted: var(--color-paper-2);
   --muted-foreground: var(--color-text-3);
   --accent: var(--color-paper-2);
@@ -50,30 +49,29 @@
   --border: var(--color-rule);
   --input: var(--color-edge);
   --ring: var(--color-focus);
-  --sale: var(--color-discount);
-  --sale-foreground: var(--color-discount-ink);
+  --sale: var(--color-deal);
+  --sale-foreground: var(--color-deal-ink);
   --success: var(--color-ok);
-  --announcement: var(--color-signal);
-  --announcement-foreground: var(--color-signal-ink);
+  --announcement: var(--color-stage);
+  --announcement-foreground: var(--color-stage-text);
   --highlight: var(--color-signal);
   --highlight-foreground: var(--color-signal-ink);
-  --ink: var(--color-band);
-  --ink-foreground: var(--color-band-text);
-  --ink-muted: var(--color-band-text-2);
+  --ink: var(--color-stage);
+  --ink-foreground: var(--color-stage-text);
+  --ink-muted: var(--color-stage-text-2);
 
-  --radius: 0px;
-  --radius-scale: 0;
-  --button-radius: 0px;
-  --card-ratio: 4 / 5;
+  --radius: 0.875rem;
+  --radius-scale: 1;
+  --button-radius: 999px;
+  --card-ratio: 1 / 1;
 }
 
-/* On dark paper the ring, the bar and the highlight follow the lifted
-   signal, over the shop's light-paper colour the storefront prints */
+/* Dark: the ring and the highlight follow the lifted signal, over the shop's light-counter colour */
 @media (prefers-color-scheme: dark) {
   html:root {
     --ring: var(--color-focus);
-    --announcement: var(--color-signal);
-    --announcement-foreground: var(--color-signal-ink);
+    --announcement: var(--color-stage);
+    --announcement-foreground: var(--color-stage-text);
     --highlight: var(--color-signal);
     --highlight-foreground: var(--color-signal-ink);
   }

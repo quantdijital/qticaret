@@ -1,173 +1,205 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
-import type { HomeSectionView, ProductCardView } from "@qticaret/ui"
+import type { HomeSectionView, ImageView, PlaceOrderResult } from "@qticaret/ui"
 import { renderPage } from "@/test/theme-render"
 
 /**
- * The Atölye home page's sections after the opening, drawn from the
- * shop's own sections (adr/0049): each by its type, nothing invented,
- * every panel and answer in the HTML.
+ * The theme's home sections after the shelf (docs/tema/yon-2026-11-05.md
+ * § Home): the close-up, the reviews and the customers' photos, the
+ * campaign, the story, the guides, the FAQ with the help beside it and the
+ * newsletter. Each from the shop's own data; empty data draws nothing.
  */
 
-const product = (id: string, over: Partial<ProductCardView> = {}): ProductCardView => ({
-  id,
-  title: `Ürün ${id}`,
-  path: `/urun/${id}`,
-  brand: "Atölye",
-  image: null,
-  price: { current: "449,00 TL", before: null, from: false, discount: null },
-  available: true,
-  ...over,
-})
-
-const shelf = (id: string, title: string, products: ProductCardView[]): HomeSectionView => ({
-  id,
-  type: "products",
-  title,
-  products,
-  more: { label: "Tüm ürünler", path: "/magaza" },
-  empty: "Henüz ürün yok.",
+const picture = (name: string): ImageView => ({
+  src: `/media/${name}.jpg`,
+  alt: name,
+  width: 800,
+  height: 800,
+  sources: { avif: null, webp: null },
 })
 
 const home = (sections: HomeSectionView[]) =>
-  renderPage(atolyeTheme, "HomePage", { view: { sections } })
-
-describe("the Atölye shelf", () => {
-  it("draws a product section as a grid of cards with its title and link", () => {
-    const html = home([shelf("yeni", "Yeni ürünler", [product("a"), product("b")])])
-
-    expect(html).toContain('<h2 id="bolum-yeni">Yeni ürünler</h2>')
-    expect(html).toContain('href="/magaza"')
-    expect(html.match(/<article/g)).toHaveLength(2)
-    expect(html).not.toContain('role="tablist"')
+  renderPage(atolyeTheme, "HomePage", {
+    view: { sections },
+    subscribe: (): Promise<PlaceOrderResult> =>
+      Promise.resolve({ ok: true, error: null, challenge: null }),
   })
 
-  it("puts neighbouring product sections in one shelf, every panel in the HTML", () => {
-    const html = home([
-      shelf("yeni", "Yeni ürünler", [product("a")]),
-      shelf("cok", "Çok satanlar", [product("b")]),
-    ])
-
-    expect(html).toContain('role="tablist"')
-    expect(html).toContain('aria-label="Ürün bölümleri"')
-    expect(html).toContain('href="/urun/a"')
-    expect(html).toContain('href="/urun/b"')
-    // Without script the tab row waits and both panels show, each under its heading
-    expect(html).toMatch(/<div role="tablist"[^>]*hidden=""/)
-    expect(html).not.toMatch(/id="bolum-yeni-panel-1"[^>]*hidden/)
-  })
-
-  it("marks a discount and a sold-out product in words, never greying the picture", () => {
-    const html = home([
-      shelf("yeni", "Yeni ürünler", [
-        product("a", {
-          price: { current: "300,00 TL", before: "400,00 TL", from: false, discount: 25 },
-        }),
-        product("b", { available: false }),
-      ]),
-    ])
-
-    expect(html).toContain("%25 indirim")
-    expect(html).toContain("Tükendi")
-    expect(html).toContain("<s ")
-    expect(html).not.toContain("grayscale")
-  })
-
-  it("says so in the shop's words when a section has no product", () => {
-    expect(home([shelf("yeni", "Yeni ürünler", [])])).toContain("Henüz ürün yok.")
-  })
+const review = (author: string, body: string) => ({
+  rating: 5,
+  title: null,
+  body,
+  author,
+  date: "1 Kasım 2026",
+  verified: true,
+  product: { label: "Çakı", path: "/urun/caki" },
 })
 
-describe("the Atölye story sections", () => {
-  it("lists guides as ruled rows with their date and reading time on separate lines", () => {
+const reviews: HomeSectionView = {
+  id: "yorum",
+  type: "reviews",
+  title: "Müşteri yorumları",
+  reviews: [
+    review("Ayşe K.", "Çok güzel bir çakı. Kutusu da özenliydi ve hızlı geldi."),
+    review("Mehmet A.", "Keskin geldi."),
+    review("Selin T.", "İyi."),
+    review("Can B.", "Dördüncü yorum."),
+  ],
+  more: { label: "Tüm yorumlar", path: "/yorumlar" },
+  summary: {
+    average: "4,8",
+    count: 28,
+    label: "5 üzerinden 4,8 (28 değerlendirme)",
+    distribution: [
+      { stars: 5, count: 26, percent: 93, label: "5 yıldız: 26 değerlendirme" },
+      { stars: 1, count: 2, percent: 7, label: "1 yıldız: 2 değerlendirme" },
+    ],
+  },
+  photos: [
+    {
+      image: picture("musteri"),
+      product: { label: "Çakı", path: "/urun/caki" },
+      rating: 5,
+      author: "Ayşe K.",
+    },
+  ],
+}
+
+describe("the theme's home sections", () => {
+  it("sets the shop's average large with its spread, then three quotes, first sentence each", () => {
+    const html = home([reviews])
+    expect(html).toContain(">4,8</span>")
+    expect(html).toContain("28 değerlendirme")
+    expect(html).toContain("5 yıldız: 26 değerlendirme")
+    expect(html).toContain("“Çok güzel bir çakı.”")
+    expect(html).not.toContain("Dördüncü yorum.")
+    expect(html).toContain('aria-label="Doğrulanmış alışveriş"')
+  })
+
+  it("shows the customers' photos as their own section, each named by who took it", () => {
+    const html = home([reviews])
+    expect(html).toContain("Müşteri fotoğrafları")
+    expect(html).toContain('alt="Ayşe K. adlı müşterinin fotoğrafı: Çakı"')
+    expect(html).toMatch(/src="\/media\/musteri\.jpg"[^>]*loading="lazy"/)
+  })
+
+  it("draws no reviews section without reviews or a summary", () => {
+    const html = home([{ ...reviews, reviews: [], summary: null, photos: [] }])
+    expect(html).not.toContain("Müşteri yorumları")
+  })
+
+  it("brings one product up close with its facts, price and one action", () => {
     const html = home([
       {
-        id: "blog",
-        type: "posts",
-        title: "Blogdan",
-        more: { label: "Tüm yazılar", path: "/blog" },
-        posts: [
-          {
-            title: "Bakım",
-            path: "/blog/bakim",
-            excerpt: "Kısa özet.",
-            image: null,
-            date: "1 Kasım 2026",
-            dateTime: "2026-11-01",
-            reading: "3 dk okuma",
-          },
-        ],
+        id: "yakin",
+        type: "featured_product",
+        title: null,
+        text: "Ustanın elinden.",
+        product: {
+          id: "p1",
+          title: "Şam çeliği hançer",
+          path: "/urun/hancer",
+          brand: null,
+          image: picture("hancer"),
+          price: { current: "3.850,00 TL", before: null, from: false, discount: null },
+          available: true,
+        },
+        subtitle: null,
+        images: [picture("hancer"), picture("hancer-2")],
+        facts: [{ label: "Çelik", value: "Damascus", highlight: true }],
+        specGroups: [],
       },
     ])
-
-    expect(html).toContain('<time dateTime="2026-11-01">1 Kasım 2026</time><span>3 dk okuma</span>')
-    expect(html).not.toContain("·")
+    expect(html).toContain(">Şam çeliği hançer</h2>")
+    expect(html).toContain("Ustanın elinden.")
+    expect(html).toContain("Damascus")
+    expect(html).toContain("3.850,00 TL")
+    expect(html).toContain('href="/urun/hancer"')
   })
 
-  it("draws the shop's reviews as given, and nothing when there is none", () => {
-    const reviews: HomeSectionView = {
-      id: "yorum",
-      type: "reviews",
-      title: "Müşteri yorumları",
-      more: { label: "Tüm yorumlar", path: "/yorumlar" },
-      reviews: [
-        {
-          rating: 4,
-          title: "Güzel",
-          body: "Elime ulaştı.",
-          author: "A. Y.",
-          date: "2 Kasım 2026",
-          verified: true,
-          product: { label: "Ürün a", path: "/urun/a" },
-        },
-      ],
-    }
-    const html = home([reviews])
-
-    expect(html).toContain('aria-label="5 üzerinden 4 yıldız"')
-    expect(html).toContain("Doğrulanmış alışveriş")
-    expect(home([{ ...reviews, reviews: [] }])).not.toContain("Müşteri yorumları")
-  })
-
-  it("keeps every answer of the FAQ in the HTML, in native disclosures", () => {
+  it("puts the help beside the FAQ's questions, every answer in the HTML", () => {
     const html = home([
       {
         id: "sss",
         type: "faq",
         title: null,
-        items: [
-          { question: "Kargo ne zaman?", answer: "1–3 iş günü." },
-          { question: "İade?", answer: "14 gün içinde <ücretsiz>." },
-        ],
+        items: [{ question: "İade süresi?", answer: "14 gün." }],
       },
-    ])
-
-    expect(html).toContain("Sık sorulan sorular")
-    expect(html.match(/<details/g)).toHaveLength(2)
-    expect(html).toContain("14 gün içinde &lt;ücretsiz&gt;.")
-  })
-
-  it("offers the help band's ways to reach the shop, only those it gave", () => {
-    const html = home([
       {
         id: "yardim",
         type: "help",
-        title: "Sorunuz mu var?",
+        title: "Aklınıza takılan bir şey mi var?",
         text: "Bize yazın.",
         contact: {
-          email: null,
-          phone: "0532 000 00 00",
-          phoneHref: "tel:+905320000000",
-          whatsappHref: null,
+          email: "bilgi@example.com",
+          phone: null,
+          phoneHref: null,
+          whatsappHref: "https://wa.me/905320000000",
           address: null,
           hours: [],
           mapHref: null,
         },
       },
     ])
+    expect(html).toContain("Sık sorulan sorular")
+    expect(html).toContain("14 gün.")
+    expect(html).toContain('aria-label="Aklınıza takılan bir şey mi var?"')
+    expect(html).toContain('href="https://wa.me/905320000000"')
+    expect(html.match(/bolum-yardim/g)).toBeNull()
+  })
 
-    expect(html).toContain('href="tel:+905320000000"')
-    expect(html).not.toContain("wa.me")
-    expect(html).not.toContain("mailto:")
+  it("lists the guides with their date, and shows the shop's campaign and story as given", () => {
+    const html = home([
+      {
+        id: "blog",
+        type: "posts",
+        title: "Blogdan",
+        posts: [
+          {
+            title: "Bakım",
+            path: "/blog/bakim",
+            excerpt: "Kısa",
+            image: null,
+            date: "1 Kasım 2026",
+            dateTime: "2026-11-01",
+            reading: "3 dk okuma",
+          },
+        ],
+        more: { label: "Tüm yazılar", path: "/blog" },
+      },
+      {
+        id: "kampanya",
+        type: "banner",
+        slides: [
+          {
+            image: picture("kampanya"),
+            heading: "Kış seçkisi",
+            text: null,
+            link: { label: "İncele", path: "/kis" },
+          },
+        ],
+      },
+      { id: "hikaye", type: "rich_text", title: "Neden biz?", html: "<p>Atölyemizden.</p>" },
+    ])
+    expect(html).toContain('<time dateTime="2026-11-01">1 Kasım 2026</time>')
+    expect(html).toContain("Kış seçkisi")
+    expect(html).toContain('href="/kis"')
+    expect(html).toContain("<p>Atölyemizden.</p>")
+    expect(html).not.toContain("·")
+  })
+
+  it("asks the newsletter's consent with an unticked, required box", () => {
+    const html = home([
+      {
+        id: "bulten",
+        type: "newsletter",
+        title: "Haberdar olun",
+        text: "Onay metni.",
+        privacyPath: "/yasal/kvkk",
+      },
+    ])
+    expect(html).toContain(">Haberdar olun</h2>")
+    expect(html).toMatch(/<input type="checkbox" required=""[^>]*name="consent" value="1"/)
+    expect(html).toContain('href="/yasal/kvkk"')
   })
 })

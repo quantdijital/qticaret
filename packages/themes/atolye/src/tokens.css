@@ -1,76 +1,73 @@
 /*
- * Atölye's tokens (design.md § Tokens): Hallmark's Loom, ecru colourway,
- * scaffolded with `theme.mjs scaffold loom` and renamed where the contract's
- * `@theme inline` names would collide (export-formats.md § shadcn):
- * ink → text, muted → text-3, accent → signal, sale → discount, success → ok.
- * Colours, faces, sizes, radii and eases are Tailwind utilities
- * (`bg-paper`, `text-signal`, `font-display`, `text-section`); the rest stay
- * plain variables.
+ * The theme's tokens (docs/tema/yon-2026-11-05.md § Tokens), direction
+ * "Grafit": a cool steel-white counter, graphite stages that hold the
+ * shop's own dark-ground photographs, one heavy grotesk (Manrope) for
+ * everything, the shop's own colour as the action. Colours, faces, sizes,
+ * radii and eases are Tailwind utilities (`bg-paper`, `text-stage-text`,
+ * `font-display`, `text-section`, `rounded-tile`); the rest stay plain
+ * variables. Names that would collide with the contract's `@theme inline`
+ * (primary, muted, accent, border, ink, card…) are not used here.
  *
- * The signal is the shop's own colour (adr/0053 §B): the storefront prints
- * `--primary` over the theme's in its nonce'd style element, and the signal
- * reads `--primary` (`styles.css` holds the fallback, `#076599`). On dark
- * paper the signal keeps the shop's hue at a lightness that reads there.
+ * The signal is the shop's colour (adr/0053 §B): the storefront prints
+ * `--primary` and `--primary-foreground` over the theme's at `:root`, and
+ * the signal reads them (`styles.css` holds the fallback).
  */
 @theme static {
   --text-2xs: 0.75rem;
   --text-xs: 0.8125rem;
   --text-sm: 0.875rem;
   --text-md: 1rem;
-  --text-lg: 1.25rem;
-  --text-xl: 1.5625rem;
-  --text-2xl: 1.953rem;
-  --text-3xl: 2.441rem;
-  --text-display-s: clamp(2.25rem, 4vw + 0.5rem, 3.75rem);
-  --text-display: clamp(2.5rem, 3.2vw + 1.75rem, 4.5rem);
-  --text-page: clamp(2rem, 1.6vw + 1.5rem, 3rem);
-  --text-section: clamp(2rem, 2.2vw + 1.25rem, 3.25rem);
-  --text-title: clamp(1.25rem, 0.37vw + 1.1667rem, 1.5rem);
-  --text-lead: clamp(1.125rem, 0.185vw + 1.0833rem, 1.25rem);
-  --text-price-hero: clamp(2rem, 0.74vw + 1.8333rem, 2.5rem);
-  --text-tile: 2rem;
-  --text-card-title: clamp(0.9375rem, 0.0926vw + 0.9167rem, 1rem);
-  --text-wordmark: clamp(2rem, 0.37vw + 1.9167rem, 2.25rem);
-  --text-mast: clamp(3rem, 2.22vw + 2.5rem, 4.5rem);
+  --text-lg: 1.125rem;
+  --text-title: clamp(1.125rem, 0.25vw + 1.05rem, 1.3125rem);
+  --text-lead: clamp(1rem, 0.3vw + 0.95rem, 1.25rem);
+  --text-section: clamp(1.75rem, 1.4vw + 1.35rem, 2.75rem);
+  --text-display: clamp(2rem, 3vw + 1.1rem, 4.25rem);
+  --text-figure: clamp(3rem, 3vw + 2rem, 4.5rem);
+  --text-wordmark: clamp(1.375rem, 0.5vw + 1.25rem, 1.75rem);
+  --text-mast: clamp(2.75rem, 5vw + 1.5rem, 6.5rem);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
-  --color-paper: oklch(95.5% 0.014 85);
-  --color-paper-2: oklch(92% 0.022 84);
-  --color-paper-3: oklch(85% 0.032 80);
-  --color-field: oklch(98.5% 0.006 85);
-  --color-text: oklch(21% 0.012 60);
-  --color-text-2: oklch(31% 0.012 60);
-  --color-text-3: oklch(46% 0.014 62);
-  --color-rule: oklch(83% 0.022 84);
-  --color-rule-ink: var(--color-text);
-  --color-edge: var(--color-text-3);
+
+  --color-paper: oklch(98.4% 0.003 250);
+  --color-paper-2: oklch(95.6% 0.005 250);
+  --color-paper-3: oklch(91.6% 0.007 250);
+  --color-field: oklch(99.4% 0.002 250);
+  --color-text: oklch(20% 0.012 255);
+  --color-text-2: oklch(35% 0.012 255);
+  --color-text-3: oklch(46% 0.012 255);
+  --color-rule: oklch(89.5% 0.006 250);
+  --color-edge: oklch(58% 0.01 255);
+  --color-stage: oklch(19.5% 0.012 255);
+  --color-stage-2: oklch(25% 0.013 255);
+  --color-stage-text: oklch(96.5% 0.004 250);
+  --color-stage-text-2: oklch(80% 0.008 250);
+  --color-stage-rule: oklch(34% 0.012 255);
   --color-signal: var(--primary);
-  --color-signal-2: color-mix(in oklab, var(--color-signal) 75%, var(--color-text));
   --color-signal-ink: var(--primary-foreground);
-  --color-focus: var(--color-signal);
-  --color-discount: oklch(47% 0.16 27);
-  --color-discount-ink: oklch(98.5% 0.006 85);
-  --color-ok: oklch(44% 0.1 150);
-  --color-warn: oklch(47% 0.1 65);
-  --color-error: oklch(47% 0.17 27);
-  --color-band: var(--color-text);
-  --color-band-text: var(--color-paper);
-  --color-band-text-2: oklch(78% 0.016 80);
-  --color-band-focus: var(--color-paper);
-  --color-band-rule: oklch(36% 0.012 60);
-  --color-whatsapp: oklch(48% 0.12 152);
-  --color-whatsapp-ink: oklch(98.5% 0.006 85);
-  --color-scrim: oklch(21% 0.012 60 / 0.45);
-  --font-display: var(--font-caslon), Georgia, ui-serif, serif;
-  --font-body: var(--font-hanken), Arial, ui-sans-serif, system-ui, sans-serif;
-  --font-outlier: var(--font-body);
-  --radius-card: 0;
-  --radius-pill: 0;
-  --shadow-card: none;
-  --shadow-overlay: 0 8px 20px oklch(21% 0.012 60 / 0.18);
-  --tracking-display: -0.01em;
+  --color-signal-deep: color-mix(in oklab, var(--primary) 82%, oklch(12% 0.01 255));
+  --color-signal-soft: color-mix(in oklab, var(--primary) 9%, var(--color-paper));
+  --color-signal-on-stage: oklch(78% 0.1 350);
+  --color-focus: var(--primary);
+  --color-deal: oklch(52% 0.19 27);
+  --color-deal-ink: oklch(99% 0.003 27);
+  --color-ok: oklch(46% 0.11 150);
+  --color-error: oklch(50% 0.18 27);
+  --color-star: oklch(70% 0.15 75);
+  --color-whatsapp: oklch(52% 0.13 152);
+  --color-whatsapp-ink: oklch(99% 0.003 152);
+  --color-scrim: oklch(15% 0.012 255 / 0.5);
+
+  --font-display: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-tile: 20px;
+  --radius-media: 14px;
+  --radius-inner: 10px;
+  --radius-pill: 999px;
+  --shadow-float: 0 12px 32px oklch(20% 0.012 255 / 0.14), 0 1px 2px oklch(20% 0.012 255 / 0.08);
 }
+
 :root {
   color-scheme: light dark;
   --space-3xs: 2px;
@@ -87,11 +84,11 @@
   --dur-short: 220ms;
   --dur-long: 420ms;
   --container: 1440px;
-  --gutter: 64px;
-  --gap-columns: 32px;
-  --section-gap-s: 120px;
-  --section-gap: 144px;
-  --section-gap-l: 176px;
+  --gutter: 48px;
+  --gap-columns: 24px;
+  --section-gap-s: 96px;
+  --section-gap: 120px;
+  --section-gap-l: 144px;
   --z-base: 1;
   --z-raised: 10;
   --z-dropdown: 100;
@@ -100,62 +97,69 @@
   --z-modal: 400;
   --z-toast: 500;
   --z-tooltip: 600;
-  --rule-hair: 1px;
-  --rule-ink: 2px;
-  --display-weight: 400;
+  --display-weight: 800;
+  --tracking-display: -0.035em;
 }
-@media (max-width: 60rem) {
+@media (max-width: 64rem) {
   :root {
     --gutter: 24px;
-    --section-gap-s: 80px;
-    --section-gap: 96px;
-    --section-gap-l: 120px;
+    --section-gap-s: 64px;
+    --section-gap: 80px;
+    --section-gap-l: 96px;
   }
 }
 @media (max-width: 40rem) {
   :root {
     --gutter: 16px;
-    --section-gap-s: 56px;
-    --section-gap: 72px;
-    --section-gap-l: 96px;
-    --gap-columns: 16px;
+    --gap-columns: 12px;
+    --section-gap-s: 48px;
+    --section-gap: 56px;
+    --section-gap-l: 64px;
   }
 }
 
-/* Warm dark paper (design.md § Variants), derived, never inverted */
+/* The shop's colour on graphite: its own hue, lifted to read there */
+@supports (color: oklch(from red l c h)) {
+  :root {
+    --color-signal-on-stage: oklch(from var(--primary) 78% min(c, 0.13) h);
+  }
+}
+
+/* Dark: the counter turns graphite, the stages one step deeper; derived, never inverted */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-paper: oklch(17% 0.01 60);
-    --color-paper-2: oklch(21% 0.01 60);
-    --color-paper-3: oklch(26% 0.012 60);
-    --color-field: oklch(21% 0.01 60);
-    --color-text: oklch(94% 0.012 85);
-    --color-text-2: oklch(86% 0.012 85);
-    --color-text-3: oklch(72% 0.014 80);
-    --color-rule: oklch(32% 0.01 60);
-    --color-edge: oklch(62% 0.014 80);
-    --color-signal: oklch(72% 0.1 238);
-    --color-signal-2: oklch(78% 0.09 238);
-    --color-signal-ink: oklch(17% 0.01 60);
-    --color-discount: oklch(72% 0.13 27);
-    --color-discount-ink: oklch(17% 0.01 60);
-    --color-ok: oklch(76% 0.11 150);
-    --color-warn: oklch(80% 0.11 75);
-    --color-error: oklch(72% 0.14 27);
-    --color-band: oklch(26% 0.012 60);
-    --color-band-text: oklch(94% 0.012 85);
-    --color-band-text-2: oklch(76% 0.014 80);
-    --color-band-rule: oklch(36% 0.012 60);
-    --color-band-focus: oklch(72% 0.1 238);
-    --color-whatsapp: oklch(70% 0.14 152);
-    --color-whatsapp-ink: oklch(17% 0.01 60);
-    --color-scrim: oklch(8% 0.01 60 / 0.6);
+    --color-paper: oklch(17% 0.011 255);
+    --color-paper-2: oklch(21.5% 0.012 255);
+    --color-paper-3: oklch(26% 0.013 255);
+    --color-field: oklch(21.5% 0.012 255);
+    --color-text: oklch(95.5% 0.004 250);
+    --color-text-2: oklch(84% 0.007 250);
+    --color-text-3: oklch(73% 0.009 250);
+    --color-rule: oklch(30% 0.012 255);
+    --color-edge: oklch(60% 0.01 250);
+    --color-stage: oklch(12.5% 0.01 255);
+    --color-stage-2: oklch(19% 0.012 255);
+    --color-stage-rule: oklch(30% 0.012 255);
+    --color-signal: oklch(70% 0.12 350);
+    --color-signal-ink: oklch(15% 0.012 255);
+    --color-signal-deep: oklch(76% 0.11 350);
+    --color-signal-soft: oklch(25% 0.03 350);
+    --color-focus: var(--color-signal);
+    --color-deal: oklch(72% 0.15 27);
+    --color-deal-ink: oklch(15% 0.012 255);
+    --color-ok: oklch(76% 0.12 150);
+    --color-error: oklch(73% 0.15 27);
+    --color-star: oklch(80% 0.14 80);
+    --color-whatsapp: oklch(72% 0.14 152);
+    --color-whatsapp-ink: oklch(15% 0.012 255);
+    --color-scrim: oklch(5% 0.01 255 / 0.65);
+    --shadow-float: 0 12px 32px oklch(5% 0.01 255 / 0.5);
   }
   @supports (color: oklch(from red l c h)) {
     :root {
-      --color-signal: oklch(from var(--primary) 66% min(c, 0.14) h);
-      --color-signal-2: oklch(from var(--primary) 72% min(c, 0.13) h);
-      --color-band-focus: var(--color-signal);
+      --color-signal: oklch(from var(--primary) 72% min(c, 0.13) h);
+      --color-signal-deep: oklch(from var(--primary) 78% min(c, 0.12) h);
+      --color-signal-soft: oklch(from var(--primary) 26% min(c, 0.04) h);
     }
   }
 }

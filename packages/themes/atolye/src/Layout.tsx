@@ -1,19 +1,18 @@
 import type { ReactNode } from "react"
 import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
-import { AnnouncementBar } from "./layout/AnnouncementBar"
-import { BottomNav } from "./layout/BottomNav"
-import { CookieBanner } from "./layout/CookieBanner"
-import { SiteFooter } from "./layout/SiteFooter"
-import { SiteHeader } from "./layout/SiteHeader"
-import { WhatsAppButton } from "./layout/WhatsAppButton"
+import { Announcement } from "./frame/Announcement"
+import { BottomBar } from "./frame/BottomBar"
+import { Consent } from "./frame/Consent"
+import { Footer } from "./frame/Footer"
+import { Header } from "./frame/Header"
+import { WhatsApp } from "./frame/WhatsApp"
 
 /**
- * The frame every page shares (design.md § Components): a skip link, the
- * announcement band (not sticky; not drawn without lines on a phone), the
- * search-first header, the page, the mast footer, and under 1024 px the
- * bottom bar. The WhatsApp button stays away from the checkout and the
- * cart, where it covered fields and totals (denetim §0.8), and while the
- * cookie question waits. Each page sets its own width (`Container`).
+ * The frame every page shares (docs/tema/yon-2026-11-05.md § Frame): a
+ * skip link, the graphite announcement bar, the sticky two-row header,
+ * the page, the graphite mast footer, and under 1024 px the bottom bar.
+ * The WhatsApp button stays away from the checkout and the cart, and
+ * while the cookie question waits. Each page sets its own width.
  */
 export function Layout({
   shop,
@@ -28,7 +27,6 @@ export function Layout({
   saveCookies: (form: FormData) => Promise<void>
   subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
 }) {
-  // No bottom bar: the checkout, a preview or the maintenance link's page
   const whatsapp =
     shop.contact.whatsappHref !== null &&
     shop.bottomNav !== null &&
@@ -36,22 +34,22 @@ export function Layout({
     shop.cookieBanner?.due !== true
   return (
     <div className="flex min-h-dvh flex-col">
-      <a href="#icerik" className="at-skip">
+      <a href="#icerik" className="gf-skip">
         {t("nav.skip_to_content")}
       </a>
-      <AnnouncementBar
+      <Announcement
         lines={shop.announcements}
         links={shop.topLinks}
         contact={shop.contact}
         words={{ announcements: t("nav.announcements"), links: t("nav.top_links") }}
       />
-      <SiteHeader shop={shop} t={t} />
+      <Header shop={shop} t={t} />
       <main id="icerik" className="flex-1">
         {children}
       </main>
-      <SiteFooter shop={shop} t={t} subscribe={subscribe} />
+      <Footer shop={shop} t={t} subscribe={subscribe} />
       {shop.bottomNav && (
-        <BottomNav
+        <BottomBar
           nav={shop.bottomNav}
           cartCount={shop.cartQuantity}
           words={{
@@ -66,13 +64,13 @@ export function Layout({
         />
       )}
       {whatsapp && shop.contact.whatsappHref && (
-        <WhatsAppButton
+        <WhatsApp
           href={shop.contact.whatsappHref}
           label={t("whatsapp.label")}
-          aboveBottomNav={shop.bottomNav !== null}
+          aboveBottomBar={shop.bottomNav !== null}
         />
       )}
-      {shop.cookieBanner && <CookieBanner banner={shop.cookieBanner} save={saveCookies} t={t} />}
+      {shop.cookieBanner && <Consent banner={shop.cookieBanner} save={saveCookies} t={t} />}
     </div>
   )
 }

@@ -1,9 +1,8 @@
 /*
- * What the Floor already decided (`theme.mjs scaffold loom`), on Atölye's
- * token names. Picture slots are `[data-slot][data-alt]`: shadcn marks its
- * own parts with a bare `data-slot`, which must not take a slot's wash.
- * Loom's photo treatment is for editorial pictures only; the shop's
- * product photographs are never filtered (design.md § Variants).
+ * What the Floor already decided (`theme.mjs scaffold --custom`), on the
+ * theme's token names: clipped overflow, instant focus rings, heads that
+ * break instead of overflowing, reduced motion honoured everywhere. The
+ * shop's photographs are never filtered.
  */
 *,
 *::before,
@@ -16,7 +15,7 @@ body {
 }
 html {
   scrollbar-color: var(--color-text-3) var(--color-paper);
-  scroll-padding-top: var(--space-3xl);
+  scroll-padding-top: 9rem;
 }
 body {
   margin: 0;
@@ -24,12 +23,13 @@ body {
   color: var(--color-text);
   font-family: var(--font-body);
   font-size: var(--text-md);
-  line-height: 1.55;
+  font-synthesis: none;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   caret-color: var(--color-signal);
 }
 ::selection {
-  background: color-mix(in oklab, var(--color-signal) 22%, transparent);
+  background: color-mix(in oklab, var(--color-signal) 24%, transparent);
   color: var(--color-text);
 }
 :focus-visible {
@@ -39,43 +39,34 @@ body {
 a {
   color: inherit;
   text-decoration-thickness: 1px;
-  text-underline-offset: 0.16em;
+  text-underline-offset: 0.18em;
 }
 h1,
 h2,
 h3 {
   margin: 0;
   font-family: var(--font-display);
-  font-weight: var(--display-weight, 400);
-  font-synthesis: none;
+  font-weight: var(--display-weight);
   letter-spacing: var(--tracking-display);
-  line-height: 1.05;
+  line-height: 1.06;
   overflow-wrap: break-word;
   min-width: 0;
   text-wrap: balance;
 }
 h1 {
-  max-width: 20ch;
+  max-width: 18ch;
   font-size: var(--text-display);
-  line-height: 1.04;
+  line-height: 1.02;
 }
 h2 {
-  max-width: 30ch;
+  max-width: 28ch;
   font-size: var(--text-section);
-  line-height: 1.08;
 }
 h3 {
   max-width: 40ch;
-  font-family: var(--font-body);
   font-size: var(--text-title);
-  font-weight: 500;
-  letter-spacing: 0;
+  letter-spacing: -0.015em;
   line-height: 1.3;
-}
-.lead {
-  font-size: var(--text-lead);
-  line-height: 1.45;
-  max-width: 52ch;
 }
 p {
   margin: 0;
@@ -102,42 +93,8 @@ select,
 textarea {
   font: inherit;
 }
-.container {
-  width: 100%;
-  max-width: var(--container);
-  margin-inline: auto;
-  padding-inline: var(--gutter);
-  box-sizing: border-box;
-}
-.num,
-.figure,
-td.num,
 .tabular {
   font-variant-numeric: tabular-nums;
-}
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-[data-slot][data-alt] {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(160deg, var(--color-paper-2), var(--color-paper-3));
-}
-[data-slot][data-alt] > img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 1;
-}
-[data-slot][data-alt]:has(> img) > :not(img):not([data-keep]) {
-  display: none !important;
 }
 @media (prefers-reduced-motion: reduce) {
   *:not(.keep-motion),
@@ -148,8 +105,4 @@ td.num,
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-/* photographs: natural sat=-12 con=-4, editorial pictures only */
-[data-slot][data-alt]:not([data-kind="product"]) > img {
-  filter: saturate(0.88) contrast(0.96);
 }

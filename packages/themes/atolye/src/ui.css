@@ -1,0 +1,250 @@
+/*
+ * The theme's controls (docs/tema/yon-2026-11-05.md § Components): pills,
+ * never squares; one filled action in the shop's colour; quiet controls
+ * on a tinted well. Every control has its eight states: rest, hover,
+ * focus (instant ring), active (1px press), disabled (opacity, cursor and
+ * the native attribute), busy (`aria-busy`), and on a graphite stage the
+ * lifted signal. Only colour, opacity and transform move.
+ */
+@layer components {
+  .gf-skip {
+    position: absolute;
+    left: var(--space-md);
+    top: -100px;
+    z-index: var(--z-toast);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-pill);
+    background: var(--color-text);
+    color: var(--color-paper);
+    font-weight: 600;
+  }
+  .gf-skip:focus-visible {
+    top: var(--space-xs);
+  }
+
+  .gf-btn {
+    display: inline-flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+    padding: var(--space-sm) var(--space-lg);
+    border: 1px solid transparent;
+    border-radius: var(--radius-pill);
+    background: var(--color-signal);
+    color: var(--color-signal-ink);
+    font-size: var(--text-md);
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-micro) var(--ease-out),
+      color var(--dur-micro) var(--ease-out),
+      border-color var(--dur-micro) var(--ease-out),
+      transform var(--dur-micro) var(--ease-out);
+  }
+  .gf-btn:active {
+    transform: translateY(1px);
+  }
+  .gf-btn:disabled,
+  .gf-btn[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .gf-btn[aria-busy="true"] {
+    cursor: progress;
+  }
+  .gf-btn--quiet {
+    border-color: var(--color-edge);
+    background: transparent;
+    color: var(--color-text);
+  }
+  .gf-btn--small {
+    min-height: 2.75rem;
+    padding: var(--space-xs) var(--space-md);
+    font-size: var(--text-sm);
+  }
+
+  .gf-icon-btn {
+    position: relative;
+    display: inline-flex;
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    color: inherit;
+    cursor: pointer;
+    transition: background-color var(--dur-micro) var(--ease-out);
+  }
+  .gf-icon-btn:active {
+    transform: translateY(1px);
+  }
+
+  .gf-link {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: var(--space-2xs);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: color-mix(in oklab, currentColor 35%, transparent);
+    text-underline-offset: 0.25em;
+    transition: text-decoration-color var(--dur-micro) var(--ease-out);
+  }
+
+  .gf-chip {
+    display: inline-flex;
+    min-height: 2.75rem;
+    align-items: center;
+    gap: var(--space-xs);
+    padding: var(--space-xs) var(--space-md);
+    border-radius: var(--radius-pill);
+    background: var(--color-paper-2);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+      background-color var(--dur-micro) var(--ease-out),
+      color var(--dur-micro) var(--ease-out);
+  }
+  .gf-chip:active {
+    transform: translateY(1px);
+  }
+  .gf-chip[aria-selected="true"],
+  .gf-chip[aria-current="page"] {
+    background: var(--color-text);
+    color: var(--color-paper);
+  }
+
+  .gf-field {
+    min-height: 3rem;
+    width: 100%;
+    padding: var(--space-sm) var(--space-lg);
+    border: 1px solid var(--color-edge);
+    border-radius: var(--radius-pill);
+    background: var(--color-field);
+    color: var(--color-text);
+    font-size: var(--text-md);
+  }
+  .gf-field::placeholder {
+    color: var(--color-text-3);
+    opacity: 1;
+  }
+  .gf-field:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: -2px;
+  }
+  .gf-field[aria-invalid="true"] {
+    border-color: var(--color-error);
+  }
+  .gf-field:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .gf-stage {
+    background: var(--color-stage);
+    color: var(--color-stage-text);
+  }
+  .gf-stage .gf-btn:not(.gf-btn--quiet) {
+    background: var(--color-stage-text);
+    color: var(--color-stage);
+  }
+  .gf-stage .gf-btn--quiet {
+    border-color: var(--color-stage-text-2);
+    color: var(--color-stage-text);
+  }
+  .gf-stage :focus-visible {
+    outline-color: var(--color-signal-on-stage);
+  }
+  .gf-stage .gf-field {
+    border-color: var(--color-stage-text-2);
+    background: var(--color-stage-2);
+    color: var(--color-stage-text);
+  }
+  .gf-stage .gf-field::placeholder {
+    color: var(--color-stage-text-2);
+  }
+
+  .gf-count {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    min-width: 1.25rem;
+    padding: 0 var(--space-2xs);
+    border-radius: var(--radius-pill);
+    background: var(--color-signal);
+    color: var(--color-signal-ink);
+    font-size: var(--text-2xs);
+    font-weight: 600;
+    line-height: 1.25rem;
+    text-align: center;
+  }
+}
+
+@media (hover: hover) {
+  .gf-btn:hover:not(:disabled):not([aria-disabled="true"]) {
+    background: var(--color-signal-deep);
+  }
+  .gf-btn--quiet:hover:not(:disabled):not([aria-disabled="true"]) {
+    border-color: var(--color-text);
+    background: var(--color-paper-2);
+  }
+  .gf-stage .gf-btn:not(.gf-btn--quiet):hover:not(:disabled) {
+    background: var(--color-stage-text-2);
+  }
+  .gf-stage .gf-btn--quiet:hover:not(:disabled) {
+    border-color: var(--color-stage-text);
+    background: var(--color-stage-2);
+  }
+  .gf-icon-btn:hover {
+    background: var(--color-paper-2);
+  }
+  .gf-stage .gf-icon-btn:hover {
+    background: var(--color-stage-2);
+  }
+  .gf-link:hover {
+    text-decoration-color: currentColor;
+  }
+  .gf-chip:hover:not([aria-selected="true"]):not([aria-current="page"]) {
+    background: var(--color-paper-3);
+  }
+}
+
+/* The WhatsApp button stays clear of an open drawer and of a page's own
+   fixed buy bar (the product page's `[data-sticky-buy]`) */
+body:has([data-drawer][data-state="open"]) [data-whatsapp],
+body:has([data-sticky-buy]) [data-whatsapp] {
+  display: none;
+}
+
+/* A closed disclosure's content takes no layout at all */
+details:not([open]) > :not(summary) {
+  display: none;
+}
+summary {
+  list-style: none;
+}
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Rails scroll sideways by touch and keys, their bar hidden; a fade marks the cut edge */
+.gf-rail {
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  overscroll-behavior-x: contain;
+}
+.gf-rail::-webkit-scrollbar {
+  display: none;
+}
+.gf-rail > * {
+  scroll-snap-align: start;
+}

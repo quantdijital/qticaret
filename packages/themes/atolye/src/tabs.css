@@ -1,0 +1,63 @@
+/* Shelf tabs (sections/ShelfTabs): radio pills, in flow at zero size, and
+   the checked one's panel; without :has() every panel shows, no pills */
+.gf-tab {
+  position: relative;
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  padding: var(--space-xs) var(--space-lg);
+  border-radius: var(--radius-pill);
+  background: var(--color-paper-2);
+  color: var(--color-text);
+  font-size: var(--text-md);
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-micro) var(--ease-out),
+    color var(--dur-micro) var(--ease-out);
+}
+.gf-tab > input {
+  appearance: none;
+  width: 0;
+  height: 0;
+  margin: 0;
+  opacity: 0;
+}
+.gf-tab:active {
+  transform: translateY(1px);
+}
+.gf-tab:has(> input:checked) {
+  background: var(--color-text);
+  color: var(--color-paper);
+}
+.gf-tab:has(> input:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  .gf-tab:hover:not(:has(> input:checked)) {
+    background: var(--color-paper-3);
+  }
+}
+.gf-tabs > [data-panel] {
+  display: none;
+}
+.gf-tabs:has(input[value="0"]:checked) > [data-panel="0"],
+.gf-tabs:has(input[value="1"]:checked) > [data-panel="1"],
+.gf-tabs:has(input[value="2"]:checked) > [data-panel="2"],
+.gf-tabs:has(input[value="3"]:checked) > [data-panel="3"],
+.gf-tabs:has(input[value="4"]:checked) > [data-panel="4"],
+.gf-tabs:has(input[value="5"]:checked) > [data-panel="5"],
+.gf-tabs:has(input[value="6"]:checked) > [data-panel="6"],
+.gf-tabs:has(input[value="7"]:checked) > [data-panel="7"] {
+  display: block;
+}
+@supports not selector(:has(*)) {
+  .gf-tabs > [data-panel] {
+    display: block;
+  }
+  .gf-tab-row {
+    display: none;
+  }
+}

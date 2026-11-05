@@ -12,7 +12,8 @@ import { isStoreApiError } from "@/lib/store-api/errors"
 import { cardFacts, categoryImages, latestReviewPhotos } from "@/lib/store-api/extras"
 import { storeGet } from "@/lib/store-api/server"
 import { categoryCard, customerPhotos, reviewPhotos, withCardFacts } from "./card-extras"
-import { childrenOf } from "./categories"
+import { childrenOf, subtreeIds } from "./categories"
+import { productImages } from "./image"
 import { productCards, variantIdsOf } from "./product"
 import { cardOptions } from "./theme-settings"
 
@@ -129,8 +130,11 @@ export async function railCards(products: readonly StoreProduct[]): Promise<Prod
   return withCardFacts(productCards(products, paths, displays, options), facts)
 }
 
-/** The categories a section names (or the top ones), each with its picture when it has one. */
-export async function categoryLinks(ids: readonly string[]): Promise<CategoryCardView[]> {
+/** How many of a home categories section's cards get a product photo when they have no picture. */
+export const TILE_PHOTOS = 8
+
+/** The categories a section names (or the top ones) with their live paths and pictures. */
+async function namedCategories(ids: readonly string[]) {
   const [categories, images] = await Promise.all([allCategories(), categoryImages()])
   const chosen =
     ids.length > 0
@@ -140,10 +144,57 @@ export async function categoryLinks(ids: readonly string[]): Promise<CategoryCar
     "product_category",
     chosen.map((category) => category.id)
   )
-  return chosen.flatMap((category) => {
+  const named = chosen.flatMap((category) => {
     const path = paths[category.id]
-    return path ? [categoryCard({ label: category.name, path }, images.get(category.id))] : []
+    return path
+      ? [
+          {
+            id: category.id,
+            card: categoryCard({ label: category.name, path }, images.get(category.id)),
+          },
+        ]
+      : []
   })
+  return { categories, named }
+}
+
+/** The categories a section names (or the top ones), each with its picture when it has one. */
+export async function categoryLinks(ids: readonly string[]): Promise<CategoryCardView[]> {
+  const { named } = await namedCategories(ids)
+  return named.map(({ card }) => card)
+}
+
+/**
+ * The home page's category cards: each card without the shop's own
+ * picture takes the photo of its newest product (in it or a category
+ * under it), for the first `TILE_PHOTOS` only. A category with no
+ * pictured product, or one the backend could not answer for, stays
+ * without a picture. The photos are the shop's own catalogue.
+ */
+export async function categoryTiles(ids: readonly string[]): Promise<CategoryCardView[]> {
+  const { categories, named } = await namedCategories(ids)
+  return Promise.all(
+    named.map(async ({ id, card }, index) => {
+      if (card.image || index >= TILE_PHOTOS) {
+        return card
+      }
+      try {
+        const { products } = await listProducts({
+          limit: 1,
+          order: "-created_at",
+          categoryIds: subtreeIds(categories, id),
+        })
+        const [photo] = products[0] ? productImages(products[0]) : []
+        // The name on the card says what it is
+        return photo ? { ...card, image: { ...photo, alt: "" } } : card
+      } catch (error) {
+        if (isStoreApiError(error)) {
+          return card
+        }
+        throw error
+      }
+    })
+  )
 }
 
 export async function brandLinks(ids: readonly string[]): Promise<LinkView[]> {

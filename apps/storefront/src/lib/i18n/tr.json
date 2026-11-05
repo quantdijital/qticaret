@@ -806,5 +806,6 @@
   "home.featured_view": "Ürünü incele",
   "home.featured_facts": "Öne çıkan özellikler",
   "reviews.count": "{count} değerlendirme",
-  "product.discount_short": "%{percent}"
+  "product.discount_short": "%{percent}",
+  "nav.favorites": "Favoriler"
 }
