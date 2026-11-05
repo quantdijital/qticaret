@@ -6,16 +6,18 @@ import type {
   Translate,
   TrustBadgeView,
 } from "@qticaret/ui"
-import type { StoreProduct } from "@qticaret/types"
+import type { StoreDelivery, StoreProduct } from "@qticaret/types"
 
 /**
  * The product page's "Kargo ve Teslimat" card (owner 2026-11-05: "bu ürün
  * özelliklerinin yanında genel bir kargo bilgilendirmesi alanı
  * ekleyelim"), from what the shop set and wrote, never a promise of our
- * own: the free shipping threshold (settings), the shop's promises it
- * marked with the shipping, clock or returns icon (the panel names them
- * "Kargo", "Saat", "İade ve değişim"), the return window, the carriers it
- * connected and the pages that say more. Pure: the screen fetches.
+ * own: the free shipping threshold (settings), when an order leaves and
+ * arrives and the same-day hour (settings, adr/0046 Ek 2026-11-06), else
+ * the shop's promises it marked with the shipping or clock icon (the
+ * panel names them "Kargo", "Saat"), the return window (its "İade ve
+ * değişim" promise), the carriers it connected and the pages that say
+ * more. Pure: the screen fetches.
  */
 
 /** The promise icons that speak of delivery and returns: those promises stand in the card. */
@@ -35,6 +37,48 @@ const amountsIn = (text: string): number[] =>
     Number(match.replace(/\./g, "").replace(",", "."))
   )
 
+/** Working days as Turkish writes a span: "2", "1–2". The shorter at 0 or the same: the longer alone. */
+const span = (min: number, max: number): string =>
+  min <= 0 || min === max ? String(max) : `${String(min)}–${String(max)}`
+
+/** The dative ending of an hour read aloud, by its last word: on 'a, bir 'e, iki 'ye, üç 'e… */
+const DATIVE = ["a", "e", "ye", "e", "e", "e", "ya", "ye", "e", "a"] as const
+
+/** "15:00'e", "16:00'ya", "20:00'ye" (yirmi, not on). */
+const untilHour = (hour: number): string =>
+  `${String(hour).padStart(2, "0")}:00'${hour === 20 ? "ye" : (DATIVE[hour % 10] ?? "e")}`
+
+/**
+ * The delivery facts from the shop's settings: when an order leaves (the
+ * same days the product's `shippingDetails` and `kargo_cümlesi` say), the
+ * whole wait to the door, and the same-day hour when it promises one. A
+ * plain line: no countdown, no weekend rule (the shop's page says those).
+ */
+export function deliveryFacts(delivery: StoreDelivery, t: Translate): TrustBadgeView[] {
+  const { handling_days: handling, transit_days: transit } = delivery
+  const total = { min: handling.min + transit.min, max: handling.max + transit.max }
+  const leaves: TrustBadgeView = {
+    icon: "truck",
+    title:
+      handling.max <= 0
+        ? t("product.shipping_dispatch_today")
+        : t("product.shipping_dispatch", { days: span(handling.min, handling.max) }),
+    text:
+      total.max > 0 ? t("product.shipping_arrival", { days: span(total.min, total.max) }) : null,
+  }
+  const hour = delivery.same_day_cutoff_hour
+  return hour === null
+    ? [leaves]
+    : [
+        leaves,
+        {
+          icon: "clock",
+          title: t("product.shipping_cutoff", { time: untilHour(hour) }),
+          text: null,
+        },
+      ]
+}
+
 /** A product the shop ships: physical (the backend's default kind) and not a gift card. */
 export const isShipped = (product: StoreProduct): boolean => {
   const extension = product.product_extension
@@ -45,6 +89,8 @@ export interface ProductShippingInput {
   product: StoreProduct
   /** Lira, KDV in (`free_shipping_threshold`); null or 0: no free shipping. */
   threshold: number | null
+  /** The shop's delivery settings (`delivery`); absent from an older backend: its own lines say it. */
+  delivery?: StoreDelivery | null
   /** The shop's promises (its trust badges), in its order. */
   badges: readonly TrustBadgeView[]
   carriers: ShopMarkView[]
@@ -59,6 +105,7 @@ export interface ProductShippingInput {
 export function productShipping({
   product,
   threshold,
+  delivery = null,
   badges,
   carriers,
   shippingPath,
@@ -88,7 +135,10 @@ export function productShipping({
           },
         ]
       : []
-  const delivery = promises.filter((badge) => badge !== named && badge.icon !== "refresh")
+  // The settings say when it leaves; without them, the shop's own shipping and clock lines
+  const leaves = delivery
+    ? deliveryFacts(delivery, t)
+    : promises.filter((badge) => badge !== named && badge.icon !== "refresh")
   const returns = promises.filter((badge) => badge.icon === "refresh")
   const sealed = product.product_extension?.withdrawal_excluded === true
   const withdrawal: TrustBadgeView[] =
@@ -102,7 +152,7 @@ export function productShipping({
           },
         ]
   return {
-    facts: [...free, ...delivery, ...withdrawal],
+    facts: [...free, ...leaves, ...withdrawal],
     carriers,
     links: [
       ...(shippingPath ? [{ label: t("product.shipping_more"), path: shippingPath }] : []),

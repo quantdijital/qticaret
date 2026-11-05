@@ -108,6 +108,12 @@ export interface StorefrontAnswer {
   /** Lira, KDV in, after discounts (`item_total`); null: no free shipping. */
   free_shipping_threshold: number | null
   /**
+   * When an order leaves and arrives, as the shop set them (adr/0046 Ek
+   * 2026-11-06); absent from a backend before it: the product page says
+   * the shop's own delivery lines instead.
+   */
+  delivery?: StoreDelivery
+  /**
    * What the storefront offers only while the shop has it on: gift card
    * codes (F4.8) and product add-ons (adr/0052); their routes answer 404 while off.
    */
@@ -117,6 +123,22 @@ export interface StorefrontAnswer {
    * from what the shop set up; absent from a backend before it: none.
    */
   marks?: { payments: StorePaymentMark[]; carriers: StoreCarrierMark[] }
+}
+
+/** Working days, the shorter first. */
+export interface StoreDaySpan {
+  min: number
+  max: number
+}
+
+/** The shop's delivery promise: Settings > Shipping's days, the same-day hour (Settings > Marketing). */
+export interface StoreDelivery {
+  /** Working days to get an order out of the door; 0–0: the same day. */
+  handling_days: StoreDaySpan
+  /** The carrier's working days to the door. */
+  transit_days: StoreDaySpan
+  /** An order placed before this hour (1–23, Turkey) leaves the same day; null: not promised. */
+  same_day_cutoff_hour: number | null
 }
 
 /** A way to pay the shop offers: card networks with a card provider, the provider, transfer, at the door. */

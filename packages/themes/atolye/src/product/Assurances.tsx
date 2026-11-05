@@ -43,11 +43,15 @@ function Fact({ badge }: { badge: TrustBadgeView }) {
   )
 }
 
+/** The promises of delivery and returns (shipping, clock, returns): the shipping card's to tell. */
+const CARD_ICONS: ReadonlySet<TrustBadgeView["icon"]> = new Set(["truck", "clock", "refresh"])
+
 /**
  * The shop's assurances under the buy form. With the "Kargo ve Teslimat"
  * card below (a shipped product, owner 2026-11-05) the delivery and return
- * facts live there only: here the WhatsApp question first, then the
- * shop's other promises (warranty, safe payment) as compact rows of equal
+ * facts live there only, the shop's own delivery lines too where its
+ * settings say them instead (adr/0046 Ek 2026-11-06): here the WhatsApp
+ * question first, then the shop's other promises (warranty, safe payment) as compact rows of equal
  * height, two to a row where the column allows; no well around them.
  * Without the card, delivery and returns as plain facts on a filled well
  * (the free shipping line, every promise), the WhatsApp button under it.
@@ -56,8 +60,8 @@ export function Assurances({ view, t }: { view: ProductPageView; t: Translate })
   const card = view.shipping ?? null
   const whatsapp = view.whatsappHref ? <AskOnWhatsApp href={view.whatsappHref} t={t} /> : null
   if (card) {
-    const told = new Set(card.facts.map((fact) => `${fact.icon} ${fact.title}`))
-    const rest = view.trustBadges.filter((badge) => !told.has(`${badge.icon} ${badge.title}`))
+    // The card speaks of delivery and returns: its facts, or the shop's settings in their place
+    const rest = view.trustBadges.filter((badge) => !CARD_ICONS.has(badge.icon))
     if (rest.length === 0 && !whatsapp) {
       return null
     }

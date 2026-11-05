@@ -2,14 +2,15 @@ import { describe, expect, it } from "vitest"
 import type { StoreProduct } from "@qticaret/types"
 import type { ShopMarkView, TrustBadgeView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
-import { productShipping } from "../product-shipping"
+import { deliveryFacts, productShipping } from "../product-shipping"
 import type { ProductShippingInput } from "../product-shipping"
 
 /*
  * The product page's "Kargo ve Teslimat" card (owner 2026-11-05): only
  * what the shop set and wrote. The free shipping threshold in the shop's
- * own words when one of its lines names it, its delivery and return
- * promises, the law's return window when it wrote none, its carriers and
+ * own words when one of its lines names it, when an order leaves and
+ * arrives from its settings (else its own delivery lines), its return
+ * promise, the law's return window when it wrote none, its carriers and
  * pages; nothing for a product that is not shipped.
  */
 
@@ -103,6 +104,46 @@ describe("the product's shipping card", () => {
       title: "14 gün içinde iade",
       text: "Ambalajı açılmamış üründe; anlaşmalı kargoyla ücretsiz",
     })
+  })
+
+  it("says when it leaves and arrives from the shop's settings, in place of its own delivery lines", () => {
+    const card = productShipping(
+      input({
+        delivery: {
+          handling_days: { min: 1, max: 2 },
+          transit_days: { min: 1, max: 3 },
+          same_day_cutoff_hour: null,
+        },
+      })
+    )
+    expect(card?.facts).toEqual([
+      { icon: "truck", title: "Ücretsiz kargo", text: "₺1.500 ve üzeri" },
+      { icon: "truck", title: "1–2 iş gününde kargoda", text: "Tahmini teslimat 2–5 iş günü" },
+      { icon: "refresh", title: "14 gün içinde iade", text: "Anlaşmalı kargoyla iade ücretsiz" },
+    ])
+  })
+
+  it("adds the same-day hour when the shop promises one, its ending as the hour reads", () => {
+    const facts = (hour: number, handling = { min: 0, max: 0 }) =>
+      deliveryFacts(
+        { handling_days: handling, transit_days: { min: 1, max: 2 }, same_day_cutoff_hour: hour },
+        t
+      )
+    expect(facts(15)).toEqual([
+      { icon: "truck", title: "Aynı gün kargoda", text: "Tahmini teslimat 1–2 iş günü" },
+      {
+        icon: "clock",
+        title: "Saat 15:00'e kadar verilen siparişler aynı gün kargoda",
+        text: null,
+      },
+    ])
+    expect(facts(16)[1]?.title).toBe("Saat 16:00'ya kadar verilen siparişler aynı gün kargoda")
+    expect(facts(12)[1]?.title).toContain("12:00'ye kadar")
+    expect(facts(10)[1]?.title).toContain("10:00'a kadar")
+    expect(facts(19)[1]?.title).toContain("19:00'a kadar")
+    expect(facts(20)[1]?.title).toContain("20:00'ye kadar")
+    // One day to leave, said once
+    expect(facts(14, { min: 1, max: 1 })[0]?.title).toBe("1 iş gününde kargoda")
   })
 
   it("draws no card for a product that is not shipped", () => {

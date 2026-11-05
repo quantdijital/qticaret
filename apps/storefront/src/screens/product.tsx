@@ -53,7 +53,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     displays,
     installments,
     brandPaths,
-    { storefront, free_shipping_threshold, features, marks },
+    { storefront, free_shipping_threshold, delivery, features, marks },
     reviews,
     questions,
     related,
@@ -126,6 +126,8 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     shipping: productShipping({
       product,
       threshold: free_shipping_threshold,
+      // When it leaves and arrives, the same-day hour (adr/0046 Ek 2026-11-06)
+      delivery: delivery ?? null,
       badges: storefront.trust_badges,
       carriers: shopMarks(marks?.carriers, t),
       shippingPath: storefront.shipping_info_path ?? null,

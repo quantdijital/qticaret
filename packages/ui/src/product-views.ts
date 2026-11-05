@@ -207,8 +207,10 @@ export interface QuestionsView {
 export interface ProductShippingView {
   /**
    * The facts in order, each with its icon: free shipping from the shop's
-   * threshold, the shop's own shipping promises (same-day dispatch…), the
-   * return window. A promise here is not repeated in the buy column.
+   * threshold, when an order leaves and arrives and the same-day hour from
+   * its settings (adr/0046 Ek 2026-11-06; else its own shipping promises),
+   * the return window. The shop's delivery and return promises are not
+   * repeated in the buy column.
    */
   facts: TrustBadgeView[]
   /** The carriers whose contract the shop connected, their own marks. */

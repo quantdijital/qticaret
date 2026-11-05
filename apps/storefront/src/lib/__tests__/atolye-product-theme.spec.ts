@@ -338,6 +338,34 @@ describe("the theme's product page", () => {
     expect(html).toContain("WhatsApp&#x27;tan sor")
   })
 
+  it("says when it leaves, arrives and the same-day hour in the card, the shop's delivery line nowhere else (adr/0046 Ek 2026-11-06)", () => {
+    const html = page({
+      trustBadges: [
+        { icon: "clock", title: "Hızlı gönderim", text: "Hafta içi her gün" },
+        { icon: "award", title: "2 yıl garanti", text: "Marka garantili ürünler" },
+      ],
+      shipping: {
+        facts: [
+          { icon: "truck", title: "1–2 iş gününde kargoda", text: "Tahmini teslimat 2–5 iş günü" },
+          {
+            icon: "clock",
+            title: "Saat 15:00'e kadar verilen siparişler aynı gün kargoda",
+            text: null,
+          },
+        ],
+        carriers: [],
+        links: [],
+      },
+    })
+    const card = /<section id="kargo-ve-teslimat"[\s\S]*?<\/section>/.exec(html)?.[0] ?? ""
+    expect(card).toContain("1–2 iş gününde kargoda")
+    expect(card).toContain("Tahmini teslimat 2–5 iş günü")
+    expect(card).toContain("Saat 15:00&#x27;e kadar verilen siparişler aynı gün kargoda")
+    // The settings say it now: the shop's own clock line is not told beside them
+    expect(html).not.toContain("Hızlı gönderim")
+    expect(html).toContain("2 yıl garanti")
+  })
+
   it("tabs the description and the spec tables, both panels in the first HTML", () => {
     const html = page()
     expect(html).toContain('role="tablist" aria-label="Ürün bilgileri"')
