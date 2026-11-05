@@ -296,10 +296,10 @@ UX denetimi 2026-11-05 (`docs/tema/ux-denetim-2026-11-05-sayfalar.md` § 4): öd
 
 ## Ek (2026-11-06, ürün sayfası): "Kargo ve Teslimat" kartının teslim süresi ve aynı gün kargo saati (otonom, gözden geçir)
 
-Kart teslim sözünü mağazanın rozet satırlarından (kamyon ve saat simgeli `trust_badges`) kuruyordu; `GET /store/storefront` teslim süresini ve aynı gün kargo saatini ayrı alan olarak vermiyordu. İkisi de ayarlarda zaten vardı, yeni alan ve migration yok:
+Kart teslim sözünü mağazanın rozet satırlarından (kamyon ve saat simgeli `trust_badges`) kuruyordu; `GET /store/storefront` teslim süresini ve aynı gün kargo saatini ayrı alan olarak vermiyordu. Hepsi artık Ayarlar > Kargo ve teslimat > Seçenekler ve ücretler > "Teslim süresi" kartında (mağaza sahibi saati Pazarlama'da değil Kargo'da arar):
 
-- **Kargoya verme ve taşıma günleri:** `shipping.handling_days_min/max`, `shipping.transit_days_min/max` (Ayarlar > Kargo > Seçenekler > "Teslim süresi"; ürünlerin `shippingDetails`'i ve `kargo_cümlesi` aynılarını söyler).
-- **Aynı gün kargo saati:** `marketing.feed_same_day_cutoff_hour` (1–23 ya da `null`; Ayarlar > Pazarlama > Ürün akışları > "Feed kuralları"; Akakçe'nin `expressDeliveryTime`'ı). Panelin iki kartındaki açıklama artık ürün sayfasını da söyler.
+- **Kargoya verme ve taşıma günleri:** `shipping.handling_days_min/max`, `shipping.transit_days_min/max` (zaten vardı; ürünlerin `shippingDetails`'i ve `kargo_cümlesi` aynılarını söyler).
+- **Aynı gün kargo saati:** yeni `shipping.same_day_cutoff_hour` (1–23 ya da `null`, varsayılan `null`). Ayar bölümü JSON olduğundan şema migration'ı yok. Eskiden `marketing.feed_same_day_cutoff_hour` (Pazarlama > Ürün akışları > "Feed kuralları") idi; o alan okunabilir kalır ve veri taşınmaz: okuyanlar (`lib/shipping/same-day.ts` `sameDayCutoffHour`: vitrinin `delivery`'si, Akakçe'nin `expressDeliveryTime`'ı) önce Kargo'nunkini, o `null` ise eski alanı okur. Panel saati yalnız "Teslim süresi"nde sorar, eski alan doluysa onu gösterir; mağaza kartı kaydedince saat Kargo'ya yazılır ve eski alan `null`'a çekilir (yoksa "Aynı gün kargo yok" seçimi eski saati geri getirirdi). "Feed kuralları" saati artık sormaz; açıklaması saatin Kargo > Teslim süresi'nden alındığını söyler.
 
 | Alan | Şekli | Kaynak |
 | --- | --- | --- |
@@ -307,4 +307,4 @@ Kart teslim sözünü mağazanın rozet satırlarından (kamyon ve saat simgeli 
 
 - **Vitrin:** `productShipping` `delivery` alır (`lib/views/product-shipping.ts`, `deliveryFacts`): kamyonla "1–2 iş gününde kargoda" (0–0: "Aynı gün kargoda"), altında "Tahmini teslimat 2–5 iş günü" (kargoya verme + taşıma); saat ayarlıysa saatle "Saat 15:00'e kadar verilen siparişler aynı gün kargoda" (yönelme eki saatin okunuşuna göre: 'a, 'e, 'ye, 'ya). Sıra: ücretsiz kargo, teslim, aynı gün, iade. Ayar gelince mağazanın kamyon ve saat simgeli satırları kartta söylenmez (ücretsiz kargo eşiğini adıyla anan satırı yine ücretsiz kargo olgusudur). Geri sayım, hafta sonu ve tatil kuralı yok: mağazanın kargo sayfası söyler.
 - **Atölye:** kart varken satın alma sütunu kamyon, saat ve iade simgeli rozetleri hiç göstermez (önceden yalnız kartta aynen geçenleri çıkarıyordu); kartsız ürün bugünkü gibi.
-- **Testler:** backend `workflows/storefront/__tests__/delivery.unit.spec.ts`, HTTP `storefront-frame.spec.ts`; vitrin `lib/views/__tests__/product-shipping.spec.ts`, `lib/__tests__/atolye-product-theme.spec.ts`; panel `feed-rules-card.spec.tsx`.
+- **Testler:** backend `workflows/storefront/__tests__/delivery.unit.spec.ts` (eski alana düşüş dahil), `shipping-section.unit.spec.ts`, HTTP `storefront-frame.spec.ts` (eski saat, Kargo'nunkinin önceliği, 24'ün reddi) ve `marketing-feeds.spec.ts` (eski alandan `expressDeliveryTime`); vitrin `lib/views/__tests__/product-shipping.spec.ts`, `lib/__tests__/atolye-product-theme.spec.ts`; panel `delivery-card.spec.tsx`, `feed-rules-card.spec.tsx`.

@@ -131,7 +131,7 @@ export interface StoreDaySpan {
   max: number
 }
 
-/** The shop's delivery promise: Settings > Shipping's days, the same-day hour (Settings > Marketing). */
+/** The shop's delivery promise, as set under Settings > Shipping > "Teslim süresi". */
 export interface StoreDelivery {
   /** Working days to get an order out of the door; 0–0: the same day. */
   handling_days: StoreDaySpan
