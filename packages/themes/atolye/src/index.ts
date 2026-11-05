@@ -1,5 +1,6 @@
 import { baseTheme } from "@qticaret/theme-base"
 import type { StorefrontTheme } from "@qticaret/ui"
+import { AuthPage } from "./account/AuthPage"
 import { CartPage } from "./cart/CartPage"
 import { CheckoutPage } from "./checkout/CheckoutPage"
 import { CheckoutResultPage } from "./checkout/CheckoutResultPage"
@@ -17,9 +18,10 @@ import { ProductPage } from "./ProductPage"
  * photographs on a cool steel-white counter, one heavy grotesk, the
  * shop's colour as the action. Sector-neutral; the shop's facts arrive
  * as data. Drawn so far: the frame, the home page, the legal texts, the
- * listings (category, brand, `/magaza`, sale, search) and the product
- * page; the pages it has not drawn yet are the base theme's, in this
- * theme's tokens.
+ * listings (category, brand, `/magaza`, sale, search), the product page
+ * and the buying pages (cart, checkout, card form, payment result, the
+ * order and its lookup); the pages it has not drawn yet are the base
+ * theme's, in this theme's tokens.
  */
 export const atolyeTheme: StorefrontTheme = {
   ...baseTheme,
@@ -32,6 +34,7 @@ export const atolyeTheme: StorefrontTheme = {
   PaymentFramePage,
   CheckoutResultPage,
   OrderPage,
+  AuthPage,
   ListingPage,
   ProductPage,
 }

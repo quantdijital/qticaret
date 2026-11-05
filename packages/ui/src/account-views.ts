@@ -27,6 +27,11 @@ export interface AuthPageView {
   next: string | null
   /** register: a migration invite's key from the link (`?davet=`), sent along. */
   invite: string | null
+  /**
+   * lookup: the shop's carriers' own tracking pages (adr/0046 Ek
+   * 2026-11-05), for a shopper who holds a tracking number; none: no list.
+   */
+  carriers?: LinkView[]
   /** The other forms' addresses (login, register, forgot). */
   links: Record<"login" | "register" | "forgot", string>
 }
