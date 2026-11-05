@@ -181,6 +181,7 @@ Google'ın resmi görüşü: üretken arama için optimizasyon **hâlâ SEO'dur*
 2. Eşleme: ürün/kategori/marka/sayfa/görsel URL'leri → yeni URL'ler; eşleşmeyenler raporlanır (karar: 301 hedefi / 410).
 3. Kesim öncesi kontrol: sitemap karşılaştırma sayımı, örneklem 301 testi, canonical/robots doğrulama, staging'de `/seo-audit` koşusu.
 4. Kesim sonrası 30 gün: 404 günlüğü izleme, GSC kapsam karşılaştırması, sıralama düşüşü uyarısı.
+5. İç bağlantılar (adr/0042 Ek 2026-11-05): taşınan kayıtların eski yolları taşıma biter bitmez kendi kayıtlarına 301 verir; taşınan yazı, sayfa ve ürün açıklamalarındaki eski site bağlantıları (yol ya da eski/yeni alan adıyla mutlak adres) adres kaydı ve kurallar üzerinden bugünkü yola çevrilir, böylece site içi bağlantı 301 zinciri taşımaz. Başka siteye giden bağlantıya dokunulmaz; 410 ve karşılıksız adres raporlanır. Önceden taşınmış metinler için `content.link_rewrite` işi (Ayarlar > Taşıma, sahip ve yönetici). Hâlâ 301'i olmayan sınıflar (sayfalama, ürün etiketleri, WordPress kısa yolları, sahibin kararını bekleyenler) aynı ekte listeli.
 
 ## 13. Fazlara dağılım
 | Konu | Faz |

@@ -259,3 +259,13 @@ Test: `integration-tests/http/account-verification.spec.ts`.
 - **KVKK:** fotoğraf kişisel veridir (kişiyi ya da evini gösterebilir). Yoruma bağlanmayan yükleme 1 gün sonra dosyasıyla silinir (`review-photo-sweep`, her gece 04:15). Müşteri silindiğinde (L9) yorum metni "Anonim" adıyla kalır, fotoğrafları dosyalarıyla silinir. Veri kopyasında `yorum_fotoğrafları`. docs/kvkk-envanter.md §3.
 - **Migration:** `Migration20261104210345` (`product_review_photo`). Servis yöntemleri `listReviewImages` vb. (Medusa "Photo"yu "Photoes" diye çoğullaştırdığı için model `ReviewImage` adıyla kayıtlı; tablo `product_review_photo`).
 - **Testler:** `modules/product-reviews/__tests__/photos.unit.spec.ts`, `integration-tests/http/review-photos.spec.ts`, `product-reviews.spec.ts` (dağılım).
+
+## Ek (2026-11-05): mağaza yorumlarında yıldıza göre süzme (otonom, gözden geçir)
+
+`/yorumlar` sayfasında ziyaretçi yalnız belli puandaki yorumları görmek istiyor (adr/0046 Ek 2026-11-05'te kapsam dışı bırakılmıştı: uç süzgeç almıyordu).
+
+- **Uç:** `GET /store/reviews?rating=` isteğe bağlı, **tek değer** 1–5 tam sayı (Zod, `StoreGetShopReviews`); başka değer 400. Liste değil, çünkü vitrin süzgeci tek seçimdir (`?puan=5`) ve çoklu seçim bir arayüz gerektirmeden önbellek anahtarlarını çoğaltırdı; gerekirse sonra `rating[]` eklenebilir. Ürünün kendi yorum ucu (`/store/products/:id/reviews`) değişmedi.
+- **Sayım:** yanıttaki `count` süzülmüş yorumların sayısıdır (sayfalama için). Mağaza geneli ortalama ve 5→1 dağılım `GET /store/reviews/summary`'de kalır; vitrin süzgecin bağlantılarındaki sayıları oradan alır, sayfaya göre küçülmez.
+- **Önbellek:** uç önceki gibi görünür ürün listesini (yayında ve anahtarın satış kanalında) kanal kümesi başına 30 sn tutar; süzgeç yalnız sorguya eklenir.
+- **Vitrin:** `?puan=` 1–5 dışı her şey 404 (sayfa numarası gibi); sayfa bağlantıları süzgeci korur; süzülmüş sayfa `noindex,follow`, canonical `/yorumlar` (liste süzgeçlerinin kuralı, docs/13 §7). Tema sözleşmesinde isteğe bağlı `ReviewsPageView.filter` (`options`: puan, sayı, bağlantı, seçili mi; `active`, `clearPath`); taban tema çizmez.
+- **Testler:** `integration-tests/http/product-reviews.spec.ts` (4 ve 5 yıldız, 6 ve sözcük 400), vitrin `lib/views/__tests__/review-filter.spec.ts`, `atolye-reviews-theme.spec.ts`.

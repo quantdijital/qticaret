@@ -268,3 +268,18 @@ Atölye mağazanın içerik sayfalarını, blogu ve yazıyı, `/yorumlar`'ı ve 
 - **Ödeme ve kargo sayfası hangisi:** bugün vitrin adrese bakar (`/odeme-secenekleri`, `/kargo-ve-teslimat`; `screens/content-data.ts` `INFO_PAGES`). İletişim sayfasının seçimi gibi (`storefront.contact_form_path`, adr/0047) bir ayar gelince o okunur; o zamana kadar başka adı olan sayfa bilgileri almaz, yalnız metnini gösterir.
 - **Tablolar:** tema metnin tablolarını kendi kaydırma kutusuna alır (`withTableBoxes`, adlı tek sekme durağı, docs/19 §6.9); backend'in HTML'inde başka hiçbir şey değişmez.
 - **Kapsam dışı (backend gerekir):** `/yorumlar`'da yıldıza göre süzme (`GET /store/reviews` `rating` süzgeci almıyor; eklenince vitrin `?puan=` ile geçirir), temalı 410 sayfası (vekilin kısa sayfası), yazılara yorum.
+
+## Ek (2026-11-05, cila): yorum süzgeci, temalı 410 ve hata sayfası, ödeme ve kargo sayfalarının ayarı (otonom, gözden geçir)
+
+Önceki ekin "kapsam dışı" bıraktıkları ve sabit adresleri. Alanlar yine **isteğe bağlı**; taban tema bugünkü gibi çizer.
+
+| Sözleşme | Şekli | Not |
+| --- | --- | --- |
+| `ReviewsPageView.filter?` | `ReviewFilterView` (`options[]`: `stars`, `count`, `path \| null`, `label`, `active`; `active`, `activeLabel`, `clearPath`) | `/yorumlar?puan=5`; sayılar mağaza genelinin dağılımından (`lib/views/review-filter.ts`); backend `GET /store/reviews?rating=` (adr/0037 Ek 2026-11-05). Süzülmüş sayfa `noindex,follow`, canonical `/yorumlar` |
+| `StorefrontTheme.GonePage?` | `NotFoundPage` ile aynı (`t`, `view?: NotFoundPageView`) | yoksa vitrin `NotFoundPage`'i çizer |
+| `ThemeErrorPage` | `ComponentType<{ t; retry }>` | istemci bileşeni, temanın ayrı `/error` girişi (`@qticaret/theme-*/error`); vitrin onu `@qticaret/storefront-theme-error` takma adıyla yükler (`src/themes/<tema>-error.ts`, `next.config.ts`, `vitest.config.ts`) |
+
+- **410:** vekil `gone` yanıtında artık kendi HTML'ini yazmaz; isteği `NextResponse.rewrite(…, { status: 410 })` ile `/_kaldirildi` sayfasına yeniden yazar (Next 16.4.2'de durum kodu yeniden yazmada korunuyor: geliştirme ve üretim derlemesinde denendi). Adres tarayıcıda aynı kalır; istek başlıkları (nonce, CSP, `x-qt-url`) ve yalnız vekilin koyduğu `x-qt-gone` sayfaya gider, ziyaretçinin gönderdiği `x-qt-gone` silinir. Alt çizgi hiçbir slug'da olmadığından (docs/13 §2.1) `/_kaldirildi` bir kaydın yolu olamaz; doğrudan istenirse 404. Sayfa kök düzenin içinde, yani mağazanın çerçevesiyle çizilir; `robots: noindex` ve başlık önceki kısa sayfadakiyle aynı.
+- **Hata sayfası:** `error.tsx` (çerçeve ayaktayken) ve yeni `global-error.tsx` (kök düzen kurulamazsa, ör. backend kapalı: çerçevesiz, `<html>`/`<body>` ve temanın stil dosyası kendisinde) temanın `ErrorPage`'ini çizer; veri almaz, kategori karosu ve arama yok. "Tekrar dene" Next'in `unstable_retry`'ını (sunucuya yeniden sorar), yoksa `reset`'i çağırır. Durum kodu 500 (Next'in).
+- **Ödeme ve kargo sayfaları:** `storefront` ayar bölümünde `payment_info_path`, `shipping_info_path` (`contact_form_path`'in kuralı: mağaza yolu, ana sayfa değil, küçük harfe çevrilir; `null` = hiçbiri; varsayılan `/odeme-secenekleri`, `/kargo-ve-teslimat`), `GET /store/storefront` verir, vitrin `infoPageOf(yol, ayar)` ile karar verir (alanı vermeyen eski backend: eski sabit adresler). Panel: Vitrin > Tercihler > "Ödeme ve kargo sayfaları" sekmesi (boş alan = hiçbiri).
+- **Testler:** vitrin `lib/seo/__tests__/gone.spec.ts`, `app/__tests__/gone-page.spec.ts`, `lib/__tests__/error-page-theme.spec.ts`, `atolye-reviews-theme.spec.ts`, `themes/__tests__/choice.spec.ts`, `lib/views/__tests__/content-extras.spec.ts`; backend `storefront-section.unit.spec.ts`, HTTP `storefront-frame.spec.ts`; panel `preferences-info-pages.spec.tsx`.
