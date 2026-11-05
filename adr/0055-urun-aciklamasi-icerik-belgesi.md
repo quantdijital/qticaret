@@ -88,42 +88,56 @@
 
 ## Ek (2026-11-05): Kısa açıklama, madde madde
 
-- **Bağlam:** sahip (2026-11-05): "ürünlerde kısa açıklama yok, önerilmez mi?" Ana oturum önerdi; sahip: "tamam maddeler şeklinde yap." WooCommerce'in kısa açıklaması (`excerpt:encoded`) yalnız gövde boşken açıklama oluyordu; mylarte'nin "kısa açıklama + madde listesi" (Toplam boy, Namlu, Kabza, Kilit, Garanti; `docs/gecis/mylarte/envanter.md` §4.6) taşınmıyordu.
-- **Saklama:** `product_extension.summary` (`text[] null`, `Migration20261105230000`). Yalnız maddeler; serbest paragraf yok.
-  - En çok 5 madde, maddede en çok 90 karakter. Kayıtta her madde kırpılır, iç boşluklar teke iner, boş maddeler atılır (`lib/catalog/summary`).
-  - Denetim karakteri ve görünmez karakter (`\p{Cf}`) reddedilir. Boş liste ya da `null` temizler, saklanan değer `null` olur.
-  - İsteğe bağlıdır; yayın beklemez.
-  - **Neden `text[]`:** Medusa'nın dizgi dizisi türü (`model.array()`). Biçim yok, HTML'e dönüşmez, XSS yüzeyi yok. Belge (`description_doc` gibi `jsonb`) madde listesi için fazla. Medusa'nın `subtitle`'ı zaten alt başlık; ona yüklenmez.
-- **Yazma:** `POST /admin/products/:id/catalog` `summary` alır (`productSummary`). Hata anahtarları: `catalog.summary_too_many`, `catalog.summary_too_long`, `catalog.summary_invalid`. Kayıt `setProductCatalogWorkflow` ile, uzantının öteki alanları gibi yapılır. Denetim kaydında maddeler " | " ile tek değer (mağazanın metni, kişi verisi yok). `catalog.product_saved` artık SEO danışmanını da yeniden çalıştırır.
+**Yerini Ek 2026-11-06 aldı.** Sahip (2026-11-05): "ürünlerde kısa açıklama yok, önerilmez mi?" → "tamam maddeler şeklinde yap." Kısa açıklama `product_extension.summary` (`text[]`, `Migration20261105230000`) sütununda en çok 5 düz metin madde (maddede ≤ 90 karakter) olarak tutuldu. WooCommerce excerpt'i maddelere bölündü (liste ya da tablo maddeleri; paragraflar cümlelere, sığmazsa ilk cümle; `migration.wordpress_summary_partial`). `summary:backfill` taşınmış 201 ürünü bu maddelerle doldurdu. Panelde satır başına bir alan, vitrinde tikli liste vardı. Yalnız geliştirmede kullanıldı.
+
+## Ek (2026-11-06): Kısa açıklama, yazıldığı gibi
+
+- **Bağlam:** sahip (2026-11-06): "bu kısa açıklamalar madde madde olmasın, normal nasıl ise öyle gösterelim; bu madde madde hoş olmadı." Ardından: "'Kısa açıklama' diye normal açıklama gibi bir alan aç, editör gibi; WordPress'te öyledir." Kısa açıklama mağazanın yazdığı gibi gösterilir: paragraflar, kalın ve italik, satır sonları, bağlantılar; mağaza liste yazdıysa liste. Hiçbir şey maddeye çevrilmez.
+- **Saklama:** `product_extension.summary_doc` (`jsonb null`, `Migration20261106093741`). Model ve denetim uzun açıklamanınkiyle aynı (adr/0019 belgesi, `lib/content`), kısa yuvaya göre daraltılmış (`lib/catalog/summary`):
+  - Var: paragraf, satır sonu (`hardBreak`), h3 ve h4 başlık, madde ve numaralı liste (iç içe dahil), kalın, italik, bağlantı (mağazanın kendi yolu ya da `https://`).
+  - Yok: h2, alıntı, tablo, görsel, ürün ve kategori kartı. Neden: fiyatın üstündeki dar sütunda tablo sıkışır, alıntı kutusu kart gibi durur; görsel uzun açıklamada da yoktur.
+  - En çok 1.500 karakter metin (metin düğümlerinin karakterleri; satır sonu ve blok sayılmaz; panelin sayacı da aynısını sayar).
+  - Hata anahtarları: `catalog.summary_blocks`, `catalog.summary_link`, `catalog.summary_too_long`; belgenin kendi denetimi `content.body_invalid` ve `content.too_large`.
+  - Metni olmayan belge (editörün boş paragrafı) ya da `null` temizler; saklanan değer `null` olur. İsteğe bağlıdır, yayın beklemez.
+  - Migration eski `summary` maddelerini tek madde listesine çevirip `summary_doc`'a yazar, sonra `summary` sütununu düşürür. Böylece yazılmış hiçbir şey kaybolmaz.
+- **Yazma:** `POST /admin/products/:id/catalog` `summary_doc` alır (`productSummaryDoc`), `setProductCatalogWorkflow` ile yazılır. Denetim kaydında uzun açıklama gibi özetiyle (`summary_doc`: sha256'nın ilk 16 hanesi) görünür; metin kayda girmez.
 - **Okuma:**
-  - Panel `GET /admin/products/:id/catalog`'dan alır: `summary: string[]`, yoksa boş liste.
-  - Store API `fields=+product_extension.summary`'yi yalnız ürünün kendi yanıtında verir (sepet satırı üzerinden değil).
-  - Sözleşme: `ProductPageView.summary?: string[]`.
-- **Vitrin:** ad, alt başlık ve yıldızların altında, fiyatın üstünde. Varken öne çıkan özellik çiplerinin yerini alır; yokken çipler kalır (docs/19 §7). Liste kartları değişmez.
-- **SEO** (docs/13 §3): maddeler cümle olur ("A. B. C."), hep bütün madde alınır.
-  - `{kısa_açıklama}`: önce maddeler (140 karakter), sonra alt başlık, sonra açıklama.
-  - Şablon boş çıkarsa meta açıklama: önce maddeler (155 karakter), sonra açıklama. OpenGraph ve Twitter aynısını kullanır.
-  - JSON-LD ve akışlar (Google Merchant dahil): düz metin açıklama boşsa maddeler.
-  - Danışman `P-CONT-09` (bilgi, puanı düşürmez): kısa açıklaması olmayan ürüne ipucu. Kural sürümü 6.
-- **Panel** (docs/06 "Ürün sayfası"): "Genel" kartında "Öne çıkan özellikler", madde başına bir alan; kartla birlikte kaydedilir. Ürün sihirbazında aynı alan.
-- **Geçiş (WordPress):** excerpt artık her üründe kısa açıklama olur; gövde boşsa açıklama olmaya da devam eder (`sources/wordpress/excerpt.ts`).
-  - Liste ya da etiket/değer tablosu varsa maddeleri alınır, en çok 5. Yanındaki paragraf yalnız giriş sayılır, alınmaz.
-  - Yalnız paragraf varsa satırlar (`<br>`) ve cümleler madde olur. Bu ancak en çok 5 kısa madde çıkıyorsa yapılır; çıkmıyorsa yalnız ilk cümle tek madde olur.
-  - 90'ı geçen madde kelime sınırında "…" ile kesilir. Kesilen, atlanan ya da tek cümleye inen ürün raporda `migration.wordpress_summary_partial` notuyla adlandırılır.
-  - Rapor özetinde "Kısa açıklamayla gelen ürünler" sayılır (`counts.product.summaries`).
-  - Maddeler açıklamanın özellik okuyucusuna da liste olarak girer ("Namlu: 9 cm"). Belgeden ayrı okunur; aynı satır iki kez sayılmaz.
-  - Shopify, akış ve paket kaynaklarında kısa açıklama yok.
-- **Önceden taşınmış ürünler** (`summary:backfill`): çalıştırma kaynak dosyasını iş bitince siler (içinde müşteri verisi olabilir). Bu yüzden dışa aktarma dosyası komuta verilir:
-  - `pnpm --filter @qticaret/backend summary:backfill <export.xml>` yalnız sayar.
-  - Sona `apply` eklenince yazar.
-  - Yalnız bir çalıştırmanın taşıdığı ve maddesi boş ürünlere yazar; mağazanın kendi maddelerine dokunmaz. Tekrar çalıştırmak güvenlidir.
-  - Sayılar: `updated`, `found` (zaten var), `skipped` (taşınmamış), `empty` (dışa aktarmada yok), `failed`, `partial`. Uygulama denetim kaydına `migration.summaries_filled` olarak girer.
+  - Panel: `GET /admin/products/:id/catalog` → `summary_doc` (yoksa `null`). Saklanan değer okunurken yeniden denetlenir.
+  - Store API: `fields=+product_extension.summary_doc` yalnız ürünün kendi yanıtında (sepet satırından değil).
+  - Vitrin HTML'i `GET /store/products/:id/description`'dan alır: `{ html, summary_html }`. İkisi de sunucunun `renderDoc`'uyla çizilir.
+  - Sözleşme: `ProductPageView.summaryHtml?: string | null` (yazıldığı gibi HTML; yoksa alan yok).
+- **Vitrin** (docs/19 §7): ad, alt başlık ve yıldızların altında, fiyatın üstünde; gövde metni boyunda, kart değil. Listeler uzun açıklamanınkiyle aynı stilde. Varken öne çıkan özellik çiplerinin yerini alır; yokken çipler kalır.
+  - Atölye: `product/Summary.tsx`. Telefonda (iki sütun başlamadan, < 48rem) yaklaşık 7 satırı geçerse 5–6 satırda kapanır, açıklamanın "Devamını oku"suyla (`ReadMore`'a `limit` ve `phoneOnly` eklendi). İki sütunda hep bütün görünür.
+  - Base: uzun açıklamanın `RichText`'i.
+- **SEO** (docs/13 §3): belgenin düz metni tek satır olur. Blok, liste maddesi ve satır sonları sırayla gelir; mağazanın açık bıraktığı satırın sonuna nokta eklenir. Kesme kelime sınırındadır (`summaryText`).
+  - `{kısa_açıklama}`: önce kısa açıklama (140 karakter, son nokta şablona bırakılır), yoksa alt başlık, yoksa açıklamanın ilk cümleleri.
+  - Şablon boş çıkarsa meta açıklama: önce kısa açıklama (155 karakter), yoksa açıklama. OpenGraph ve Twitter aynısını kullanır. `seo_description` yazılmışsa hep o.
+  - JSON-LD ve akışlar (Google Merchant dahil): düz metin açıklama boşsa kısa açıklama (kesilmeden).
+  - Danışman `P-CONT-09` (bilgi, puanı düşürmez) kısa açıklaması olmayan ürüne ipucudur. Olgu artık metnin karakter sayısıdır; kural ve sürüm (6) aynı kalır.
+- **Panel** (docs/06 "Ürün sayfası"): "Kısa açıklama" kendi kartıdır, uzun açıklama kartının hemen altında (WordPress'teki gibi). Uzun açıklamanın editörüdür (`DocumentCard` + `RichEditor`), `short` kipinde:
+  - Biçim seçicide Paragraf, Başlık 3, Başlık 4. Kalın, italik, bağlantı, madde ve numaralı liste. Alıntı, tablo, görsel ve kart yok.
+  - Bağlantı penceresi yalnız yol ya da https kabul eder. Enter yeni paragraf, Shift+Enter satır sonu.
+  - Kısa başlar (`min-h-32`) ve metinle uzar. Altında "120 / 1.500 karakter" sayacı; sınır aşılınca kırmızıya döner.
+  - Yer tutucu: "Örn. Ürünü birkaç cümleyle tanıtın: malzeme, ölçü, kullanım."
+  - Danışmanın "Alana git"i bu karta gider. Ürün sihirbazında aynı editör, temel bilgilerde açıklamanın altında. "Genel" kartı yine yalnız ad ve adres.
+- **Geçiş (WordPress):** excerpt `bodyBlocks` → `summaryFromBlocks` ile yazıldığı gibi `summary_doc` olur (`sources/wordpress/excerpt.ts`, `lib/catalog/summary-fit.ts`). Gövde boşsa excerpt açıklama olmaya da devam eder.
+  - Paragraf, liste, kalın, italik ve satır sonu kalır. h2 h3 olur; alıntının içi kalır, çerçevesi gider.
+  - Tablo satırları tek paragrafın satırları olur ("Ölçü: 28 cm"). Görsel gider. http bağlantının metni kalır, bağlantısı gider.
+  - Bölme ya da kısaltma yok. Yalnız 1.500 karakter sınırında (liste maddesinde ya da kelimede, "…" ile) kesilir. Kesilen ürün raporda `migration.wordpress_summary_cut` ile adlandırılır.
+  - Rapor özetinde "Kısa açıklamayla gelen ürünler" sayılır.
+  - Açıklamanın özellik okuyucusu kısa açıklamanın belgesini de okur (liste ya da satırlar; "Namlu: 9 cm"). İkisi ayrı okunur, aynı satır bir kez sayılır.
+- **Önceden taşınmış ürünler** (`summary:backfill <export.xml> [apply]`): dışa aktarma dosyası komuta verilir. Kurallar (`workflows/migration/summaries.ts`):
+  - Mağaza kısa açıklamayı panelde değiştirdiyse (denetim kaydında `POST /admin/products/:id/catalog` ile `summary`/`summary_doc` değişikliği; boşaltmak da sayılır) dokunulmaz.
+  - Değiştirmediyse: kısa açıklaması yoksa yazılır. Hâlâ dünkü yapının o excerpt'ten yazdığı madde listesinin aynısıysa yerine excerpt yazıldığı gibi yazılır. Bunu bilmek için 2026-11-05 bölme kuralı yalnız bu komut için dondurulmuş olarak tutulur (`sources/wordpress/legacy-summary.ts`); geçişte kullanılmaz.
+  - Başka her şey mağazanındır, kalır.
+  - Sayılar: `filled`, `replaced`, `same` (zaten yazıldığı gibi), `kept` (mağazanın), `skipped` (taşınmamış), `empty` (excerpt yok), `failed`, `cut`. Komut önceki `migration.summaries_filled` kayıtlarını (dünkü 201) karşılaştırma için yazar. `kept` ve `cut` ürünlerini adlarıyla listeler.
+  - `apply` denetim kaydına `migration.summaries_filled` (`as_written: true`) olarak girer. Tekrar çalıştırmak güvenlidir.
 
 | Seçenek | Artı | Eksi |
 | --- | --- | --- |
-| **`text[]` maddeler** | Medusa türü, düz metin, sınırları kolay | Paragraf yok (sahip maddeleri seçti) |
-| `{ text?, bullets? }` `jsonb` | Paragraf da olur | Sahip istemedi; iki biçimin okuyucusu |
-| Küçük içerik belgesi | Kalın, bağlantı | Fazla; HTML oluşturucu ve denetimi gerekir |
-| Medusa `subtitle` | Alan hazır | Alt başlık olarak kullanılıyor; tek satır |
+| **Uzun açıklamanın belgesi, kısa yuvaya daraltılmış** | Tek model, tek denetim, tek oluşturucu; editör aynı; WooCommerce excerpt'i olduğu gibi gelir | Belge düz metinden ağır (sahip biçimi istedi) |
+| Düz metin (paragraf ve satır sonu) | Basit | Kalın, bağlantı ve liste kaybolur; "yazıldığı gibi" olmaz |
+| HTML sütunu | Excerpt birebir | Her okuyucu temizlemeli; stored XSS |
+| `text[]` maddeler (Ek 2026-11-05) | Sınırlar kolay | Sahip istemedi |
 
-- **Açık:** katalog tablosu (dışa/içe aktarma) ve arama dizini kısa açıklamayı taşımaz. Taşınan ürünlerde dışa aktarma dosyası elde değilse `summary:backfill` çalışmaz; ürün sayfasında elle yazılır.
+- **Açık:** katalog tablosu (dışa/içe aktarma) ve arama dizini kısa açıklamayı taşımaz. Dışa aktarma dosyası elde değilse `summary:backfill` çalışmaz; ürün sayfasında elle yazılır. Dondurulmuş bölme kuralı, `summary:backfill` çalıştıktan sonra silinir.
