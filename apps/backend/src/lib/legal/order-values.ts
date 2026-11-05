@@ -1,6 +1,8 @@
 import type { Block } from "../content"
-import { fromMedusaAmount } from "../money"
 import type { MedusaAmount } from "../money"
+import { readableTrPhone } from "../tr/phone"
+import { addressLine, joined, legalDateTime, legalDiscount, legalMoney } from "./format"
+import type { AddressFacts } from "./format"
 import { PERSONAL_LINES_TOKEN } from "./tokens"
 import type { OrderToken } from "./tokens"
 import { personalLinesBlocks } from "./withdrawal"
@@ -37,21 +39,6 @@ export interface OrderContractFacts {
 export const CONTRACT_PAYMENTS = ["card", "bank_transfer", "cash_on_delivery"] as const
 export type ContractPayment = (typeof CONTRACT_PAYMENTS)[number]
 
-type AddressFacts = Partial<
-  Record<
-    | "first_name"
-    | "last_name"
-    | "company"
-    | "address_1"
-    | "address_2"
-    | "city"
-    | "province"
-    | "postal_code"
-    | "phone",
-    string | null
-  >
->
-
 export interface OrderLegalValues {
   text: Record<OrderToken, string>
   blocks: Record<string, Block[]>
@@ -63,42 +50,8 @@ const PAYMENTS: Readonly<Record<ContractPayment, string>> = {
   cash_on_delivery: "Kapıda ödeme",
 }
 
-const DATE = new Intl.DateTimeFormat("tr-TR", {
-  timeZone: "Europe/Istanbul",
-  dateStyle: "short",
-  timeStyle: "short",
-})
-
-/** Lira as a Turkish shopper reads it: `₺1.234,50`. */
-const lira = (amount: MedusaAmount): string =>
-  new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" }).format(
-    fromMedusaAmount(amount, { allowRounding: true }) / 100
-  )
-
-const joined = (parts: (string | null | undefined)[], separator: string): string =>
-  parts
-    .map((part) => part?.trim() ?? "")
-    .filter(Boolean)
-    .join(separator)
-
 const nameOf = (address: AddressFacts | null): string =>
   joined([address?.first_name, address?.last_name], " ")
-
-/** One line: street, district, city, postal code. */
-function addressText(address: AddressFacts | null): string {
-  if (!address) {
-    return ""
-  }
-  return joined(
-    [
-      address.company,
-      joined([address.address_2, address.address_1], ", "),
-      joined([address.city, address.province], " / "),
-      address.postal_code,
-    ],
-    ", "
-  )
-}
 
 const cell = (text: string, header = false) => ({
   type: header ? ("tableHeader" as const) : ("tableCell" as const),
@@ -129,16 +82,15 @@ export function linesTable(
  * or sold as gift cards (adr/0025).
  */
 export function orderLegalValues(order: OrderContractFacts): OrderLegalValues {
-  const delivery = addressText(order.shipping_address)
-  const billing = addressText(order.billing_address)
-  const discount = fromMedusaAmount(order.discount_total, { allowRounding: true })
+  const delivery = addressLine(order.shipping_address)
+  const billing = addressLine(order.billing_address)
   const lines = order.items.flatMap((item) =>
     item
       ? [
           {
             title: joined([item.product_title ?? item.title, item.variant_title], " · "),
             quantity: Number(item.quantity),
-            total: lira(item.total),
+            total: legalMoney(item.total),
             metadata: item.metadata,
             gift_card: item.gift_card === true,
           },
@@ -148,17 +100,20 @@ export function orderLegalValues(order: OrderContractFacts): OrderLegalValues {
   return {
     text: {
       alıcı_adı: nameOf(order.shipping_address) || nameOf(order.billing_address),
-      alıcı_e_posta: order.email ?? "",
-      alıcı_telefon: order.shipping_address?.phone ?? order.billing_address?.phone ?? "",
+      alıcı_e_posta: order.email?.trim() ?? "",
+      alıcı_telefon:
+        readableTrPhone(order.shipping_address?.phone) ??
+        readableTrPhone(order.billing_address?.phone) ??
+        "",
       teslimat_adresi: delivery,
       fatura_adresi: billing || delivery,
       sipariş_no: order.display_id === null ? "" : `#${String(order.display_id)}`,
-      sipariş_tarihi: order.created_at === null ? "" : DATE.format(new Date(order.created_at)),
+      sipariş_tarihi: order.created_at === null ? "" : legalDateTime(new Date(order.created_at)),
       sipariş_kalemleri: "",
-      ara_toplam: lira(order.item_total),
-      kargo_ücreti: lira(order.shipping_total),
-      indirim: discount > 0 ? `-${lira(order.discount_total)}` : lira(0),
-      toplam: lira(order.total),
+      ara_toplam: legalMoney(order.item_total),
+      kargo_ücreti: legalMoney(order.shipping_total),
+      indirim: legalDiscount(order.discount_total),
+      toplam: legalMoney(order.total),
       ödeme_yöntemi: order.payment ? PAYMENTS[order.payment] : "",
     },
     blocks: {

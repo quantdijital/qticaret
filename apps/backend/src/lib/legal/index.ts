@@ -1,4 +1,16 @@
 export { MISSING_VALUE, fillLegalDoc } from "./fill"
+export {
+  addressLine,
+  legalDate,
+  legalDateTime,
+  legalDiscount,
+  legalMoney,
+  oneLine,
+  siteAddress,
+} from "./format"
+export type { AddressFacts } from "./format"
+export { shopTokenValues } from "./shop-values"
+export type { ShopLegalFacts } from "./shop-values"
 export { IDENTITY_FIELDS, identityGaps } from "./identity"
 export type { IdentityFacts, IdentityField } from "./identity"
 export type { LegalValues } from "./fill"

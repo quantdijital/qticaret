@@ -2,8 +2,8 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { Block, ContentDoc } from "../../lib/content"
 import { renderDoc } from "../../lib/content"
-import { LEGAL_KINDS, fillLegalDoc, linesTable, workingDaysText } from "../../lib/legal"
-import type { LegalKind, OrderToken, ShopToken } from "../../lib/legal"
+import { LEGAL_KINDS, fillLegalDoc, orderLegalValues, shopTokenValues } from "../../lib/legal"
+import type { LegalKind, OrderLegalValues, ShopToken } from "../../lib/legal"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -15,17 +15,11 @@ import { legalIdentity } from "./identity"
 
 type Container = Pick<MedusaContainer, "resolve">
 
-const DATE = new Intl.DateTimeFormat("tr-TR", { timeZone: "Europe/Istanbul", dateStyle: "short" })
-
-/** The shop's domain as its texts name it; the dev storefront's on a developer's machine. */
-const domainOf = (canonicalHost: string | null): string | null => {
-  const url = storefrontUrlOf(canonicalHost)
-  return url ? new URL(url).host : null
-}
-
 /**
  * The shop's values for its texts' tokens (adr/0041 §1): its legal identity
- * and contact details, its withdrawal period and its shipping days.
+ * and contact details, its site (the canonical domain; the dev storefront's
+ * on a developer's machine), its withdrawal period and its shipping days,
+ * each as a reader reads it (`shopTokenValues`).
  */
 export async function shopLegalValues(
   container: Container
@@ -40,46 +34,43 @@ export async function shopLegalValues(
       .resolve(ContainerRegistrationKeys.QUERY)
       .graph({ entity: "store", fields: ["name"], pagination: { take: 1 } }),
   ])
-  return {
-    mağaza_adı: (stores[0] as { name?: string } | undefined)?.name ?? null,
-    mağaza_unvanı: identity.company_title,
-    mersis: identity.mersis,
-    vkn: identity.tax_number,
-    vergi_dairesi: identity.tax_office,
-    adres: identity.address,
-    kep: identity.kep,
-    etbis: identity.etbis,
-    e_posta: identity.contact_email,
-    telefon: identity.contact_phone,
-    alan_adı: domainOf(seo.canonical_host),
-    iade_süresi: String(policy.withdrawal_days),
-    hazırlama_süresi: workingDaysText(shipping.handling_days_min, shipping.handling_days_max),
-    kargo_süresi: workingDaysText(shipping.transit_days_min, shipping.transit_days_max),
-    bugün: DATE.format(new Date()),
-  }
+  return shopTokenValues({
+    ...identity,
+    store_name: (stores[0] as { name?: string } | undefined)?.name,
+    storefront_url: storefrontUrlOf(seo.canonical_host),
+    withdrawal_days: policy.withdrawal_days,
+    handling_days: { min: shipping.handling_days_min, max: shipping.handling_days_max },
+    transit_days: { min: shipping.transit_days_min, max: shipping.transit_days_max },
+    today: new Date(),
+  })
 }
 
-/** Made-up order values for a preview: never a real customer's. */
-export const SAMPLE_ORDER: { text: Record<OrderToken, string>; blocks: Record<string, Block[]> } = {
-  text: {
-    alıcı_adı: "Ayşe Yılmaz",
-    alıcı_e_posta: "ayse@ornek.com",
-    alıcı_telefon: "+90 532 000 00 00",
-    teslimat_adresi: "Örnek Mah. Örnek Sok. No: 1, Kadıköy / İstanbul",
-    fatura_adresi: "Örnek Mah. Örnek Sok. No: 1, Kadıköy / İstanbul",
-    sipariş_no: "#1001",
-    sipariş_tarihi: "01.01.2026",
-    sipariş_kalemleri: "",
-    ara_toplam: "₺500,00",
-    kargo_ücreti: "₺50,00",
-    indirim: "₺0,00",
-    toplam: "₺550,00",
-    ödeme_yöntemi: "Kredi kartı",
+/**
+ * Made-up order values for a preview, never a real customer's: filled the
+ * way an order's are, so the preview prints what a contract will.
+ */
+export const SAMPLE_ORDER: OrderLegalValues = orderLegalValues({
+  display_id: 1001,
+  created_at: "2026-01-01T07:30:00.000Z",
+  email: "ayse@ornek.com",
+  item_total: 500,
+  shipping_total: 50,
+  discount_total: 0,
+  total: 550,
+  items: [{ product_title: "Örnek ürün", quantity: 2, total: 500 }],
+  shipping_address: {
+    first_name: "Ayşe",
+    last_name: "Yılmaz",
+    address_1: "Örnek Sok. No: 1",
+    address_2: "Örnek Mah.",
+    city: "Kadıköy",
+    province: "İstanbul",
+    postal_code: "34710",
+    phone: "+905320000000",
   },
-  blocks: {
-    sipariş_kalemleri: [linesTable([{ title: "Örnek ürün", quantity: 2, total: "₺500,00" }])],
-  },
-}
+  billing_address: null,
+  payment: "card",
+})
 
 /** The text as HTML, its tokens filled: the shop's, and an order's when given. */
 export async function renderLegal(

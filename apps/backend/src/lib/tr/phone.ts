@@ -20,3 +20,17 @@ export function displayTrPhone(e164: string): string {
   const parts = MOBILE.exec(e164)
   return parts ? `0${parts.slice(1).join(" ")}` : e164
 }
+
+/**
+ * A phone as a Turkish reader writes it, however it was typed
+ * (`+905342551145`, `0534-255-11-45` → `0534 255 11 45`); a number that is
+ * not Turkish as given, trimmed; null for none.
+ */
+export function readableTrPhone(raw: string | null | undefined): string | null {
+  const text = raw?.trim() ?? ""
+  if (text === "") {
+    return null
+  }
+  const e164 = normalizeTrPhone(text)
+  return e164 ? displayTrPhone(e164) : text
+}

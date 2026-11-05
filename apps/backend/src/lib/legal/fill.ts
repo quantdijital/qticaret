@@ -14,12 +14,14 @@ export interface LegalValues {
 const TOKEN = /\{([\p{L}\p{N}_]+)\}/gu
 
 // Control and format characters (a right-to-left override in a name) would
-// make a contract read otherwise than it says: a filled value drops them
-const INVISIBLE = /[\p{Cc}\p{Cf}]/gu
+// make a contract read otherwise than it says: a filled value drops them.
+// A tab or a line break between words stays a space, so they never run together.
+const INVISIBLE = /(?!\s)[\p{Cc}\p{Cf}]/gu
+const SPACES = /\s+/gu
 
 const fillText = (text: string, values: LegalValues["text"]): string =>
   text.replace(TOKEN, (_whole, name: string) => {
-    const value = values[name]?.replace(INVISIBLE, "").trim()
+    const value = values[name]?.replace(INVISIBLE, "").replace(SPACES, " ").trim()
     if (!value) {
       return MISSING_VALUE
     }

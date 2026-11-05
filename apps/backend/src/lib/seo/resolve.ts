@@ -1,3 +1,4 @@
+import { formatLira } from "../money/format"
 import { articleJsonLd, breadcrumbJsonLd, listingJsonLd, productJsonLd } from "./jsonld"
 import type { ArticleFacts, JsonLd, ProductFacts } from "./jsonld"
 import { listingDescription } from "./listing-description"
@@ -131,9 +132,6 @@ export function excerpt(text: string, max: number): string {
   const space = cut.lastIndexOf(" ")
   return (space > max / 2 ? cut.slice(0, space) : cut).replace(/[\s,;:–—-]+$/u, "")
 }
-
-const formatLira = (amount: number): string =>
-  `${new Intl.NumberFormat("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)} TL`
 
 /**
  * The `fiyat_cümlesi` token (docs/13 §3): "899,00 TL." for one price,

@@ -142,3 +142,15 @@ Kullanıcı kararı (2026-11-04): başlangıç taslağının not kutusu yayımı
 - **Notun sözleri:** Artık "yayımlamadan önce silin" demiyor. Kutunun yalnız mağaza için olduğunu, yayımlarken kendiliğinden kalktığını ve avukatla kontrol etmeye değer noktaları söylüyor.
 - **Panel:** Yayım onay penceresi tek pencere olarak kalır, çünkü yasal metni yayımlamak müşteriye dönüktür. Penceredeki avukat hatırlatması ve "TASLAK notu yayını engeller" uyarıları kaldırıldı. §1'deki "Yayımlarken panel bunu hatırlatır" cümlesinin yerini taslaktaki not kutusu alır.
 - **Belirteç reddi kalır:** Bilinmeyen ya da yarım belirteç sözleşmede olduğu gibi basılırdı, bu yüzden red sürüyor. `legal.token_invalid` artık hatalı belirteçlerin hepsini sayar (`values.tokens`; panelde cümlenin içinde). Böylece hepsi tek seferde düzeltilir.
+
+## Ek (2026-11-05): belirteçler okunur biçimde basılır
+
+Yayındaki metinler telefonu `+905342551145`, siteyi `localhost:8000` diye saklandığı gibi basıyordu.
+
+- **Telefon** (`{telefon}`, `{alıcı_telefon}`): nasıl yazılmış olursa olsun Türkçe okunuşla, `0534 255 11 45` (`readableTrPhone`, `lib/tr/phone.ts`). Türk numarası değilse yazıldığı gibi.
+- **Site** (`{alan_adı}`): yalnız alan adı, şemasız ve sondaki eğik çizgisiz. Kanonik alan adı varsa o (`www.magaza.com`), yoksa geliştirme makinesinde vitrinin adresi (`localhost:8000`), canlıda boş (tire).
+- **Tarih** (`{bugün}`, `{sipariş_tarihi}`): Türkçe uzun biçim, İstanbul saatiyle: `5 Kasım 2026`, `30 Ekim 2026 12:15`.
+- **Tutar** (`{ara_toplam}`, `{kargo_ücreti}`, `{indirim}`, `{toplam}`, satır tablosu): fiyatların yazıldığı biçim, `1.500,00 TL` (`formatLira`, `lib/money/format.ts`; vitrin ve SEO ile aynı). İndirim vitrindeki eksiyle: `−150,00 TL`.
+- **Adres** (`{teslimat_adresi}`, `{fatura_adresi}`): zarftaki sırayla tek satır, posta kodu ilçeden önce: `Moda Mah., Atatürk Cad. No: 5, 34710 Kadıköy / İstanbul`; ilçe ile il aynıysa bir kez.
+- **Serbest metin** (`{adres}`, unvan vb.): tek satır; sekme ve satır sonu boşluk olur, sözcükler birleşmez.
+- Biçimler `lib/legal/format.ts` ve `lib/legal/shop-values.ts`'te; her belirtecin basılan biçimi birim testinde (`token-values.unit.spec.ts`). Önizlemenin örnek siparişi de aynı yoldan doldurulur.

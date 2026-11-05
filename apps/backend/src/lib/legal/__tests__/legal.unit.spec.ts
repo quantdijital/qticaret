@@ -213,14 +213,14 @@ describe("an order's contract values (F13.2)", () => {
 
     expect(text).toMatchObject({
       alıcı_adı: "Ayşe Yılmaz",
-      alıcı_telefon: "+905320000000",
-      teslimat_adresi: "Moda Mah., Atatürk Cad. No: 5, Kadıköy / İstanbul, 34710",
+      alıcı_telefon: "0532 000 00 00",
+      teslimat_adresi: "Moda Mah., Atatürk Cad. No: 5, 34710 Kadıköy / İstanbul",
       // No billing address given: the delivery one
-      fatura_adresi: "Moda Mah., Atatürk Cad. No: 5, Kadıköy / İstanbul, 34710",
+      fatura_adresi: "Moda Mah., Atatürk Cad. No: 5, 34710 Kadıköy / İstanbul",
       sipariş_no: "#1042",
-      sipariş_tarihi: "30.10.2026 12:15",
-      toplam: "₺559,90",
-      indirim: "₺0,00",
+      sipariş_tarihi: "30 Ekim 2026 12:15",
+      toplam: "559,90 TL",
+      indirim: "0,00 TL",
       ödeme_yöntemi: "Havale / EFT",
     })
     expect(JSON.stringify(blocks["sipariş_kalemleri"])).toContain("Pamuklu Tişört · M")

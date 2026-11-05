@@ -1,4 +1,4 @@
-import { normalizeTrPhone } from "../phone"
+import { normalizeTrPhone, readableTrPhone } from "../phone"
 import { normalizePlateCode, postalCodePlate } from "../postal-code"
 
 describe("normalizeTrPhone", () => {
@@ -20,6 +20,25 @@ describe("normalizeTrPhone", () => {
       expect(normalizeTrPhone(input)).toBeNull()
     }
   )
+})
+
+describe("readableTrPhone", () => {
+  it.each([
+    ["+905342551145", "0534 255 11 45"],
+    ["05342551145", "0534 255 11 45"],
+    [" +90 (534) 255-11-45 ", "0534 255 11 45"],
+    ["02163456789", "0216 345 67 89"],
+    ["0850 222 11 00", "0850 222 11 00"],
+  ])("writes %p as %p", (input, expected) => {
+    expect(readableTrPhone(input)).toBe(expected)
+  })
+
+  it("leaves a number that is not Turkish as given, and nothing as null", () => {
+    expect(readableTrPhone(" +44 20 7946 0958 ")).toBe("+44 20 7946 0958")
+    expect(readableTrPhone("  ")).toBeNull()
+    expect(readableTrPhone(null)).toBeNull()
+    expect(readableTrPhone(undefined)).toBeNull()
+  })
 })
 
 describe("postalCodePlate", () => {

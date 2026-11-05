@@ -197,7 +197,9 @@ medusaIntegrationTestRunner({
         "Yeni metin. Alıcı Ayşe Yılmaz; ödeme Kapıda ödeme."
       )
       expect(forShopper.status).toBe(200)
-      expect(forShopper.data.document.html).toContain("Atatürk Cad. No: 1, Kadıköy / İstanbul")
+      expect(forShopper.data.document.html).toContain(
+        "Atatürk Cad. No: 1, 34710 Kadıköy / İstanbul"
+      )
       expect(forStranger.status).toBe(404)
       expect(evidence).toContain("Alıcının IP adresi")
       expect(evidence).toContain("Yeni metin. Alıcı Ayşe Yılmaz")

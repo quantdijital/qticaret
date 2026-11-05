@@ -1,4 +1,5 @@
 export { allocateCappedKurus, allocateKurus } from "./allocate"
+export { formatLira } from "./format"
 export {
   BPS_PER_WHOLE,
   ZERO_KURUS,
