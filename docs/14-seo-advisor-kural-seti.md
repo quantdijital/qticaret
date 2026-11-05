@@ -71,6 +71,7 @@ Kategori ağırlıkları (claude-seo e-ticaret puanlamasıyla hizalı):
 | P-CONT-06 | Kampanya/abartı yığını yok ("en ucuz", "!!!"), fiyat metin içine gömülü değil | D | |
 | P-CONT-07 | Açıklamada bozuk bağlantı / http (karışık içerik) yok | O | https'e çevir |
 | P-CONT-08 | İlk 60 kelimede ürünün ne olduğu net (AI arama alıntı bloğu) | B | Öneri |
+| P-CONT-09 | Kısa açıklama (öne çıkan özellikler, 1–5 madde) dolu; boşken meta açıklama ve akışlar daha uzun metne düşer (adr/0055 Ek 2026-11-05; kural sürümü 6) | B | Alana git (Genel kartı); engel değil, puanı düşürmez |
 
 ### 3.3 Ürün — görseller
 | ID | Kural | Önem | Oto |

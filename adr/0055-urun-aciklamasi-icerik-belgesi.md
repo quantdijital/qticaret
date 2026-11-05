@@ -85,3 +85,45 @@
   - Advisor'ın `P-CONT-07` kuralı (gövdede `http://` bağlantı) ürünün düz metnine bakar. Belgedeki bağlantı adresi düz metinde olmadığı için belgeli üründe bu bağlantıyı görmez. Belgeyi `renderDoc` ile advisor'a vermek ayrı iş. `P-CONT-04` (gövdede h1) etkilenmez: belgede h1 yoktur.
   - Medusa'nın kendi ürün ucunun `description` yazması belgeyi düşürmez (yukarıda).
   - Ürün oluşturma sihirbazında editör yok.
+
+## Ek (2026-11-05): Kısa açıklama, madde madde
+
+- **Bağlam:** sahip (2026-11-05): "ürünlerde kısa açıklama yok, önerilmez mi?" Ana oturum önerdi; sahip: "tamam maddeler şeklinde yap." WooCommerce'in kısa açıklaması (`excerpt:encoded`) yalnız gövde boşken açıklama oluyordu; mylarte'nin "kısa açıklama + madde listesi" (Toplam boy, Namlu, Kabza, Kilit, Garanti; `docs/gecis/mylarte/envanter.md` §4.6) taşınmıyordu.
+- **Saklama:** `product_extension.summary` (`text[] null`, `Migration20261105230000`). Yalnız maddeler; serbest paragraf yok.
+  - En çok 5 madde, maddede en çok 90 karakter. Kayıtta her madde kırpılır, iç boşluklar teke iner, boş maddeler atılır (`lib/catalog/summary`).
+  - Denetim karakteri ve görünmez karakter (`\p{Cf}`) reddedilir. Boş liste ya da `null` temizler, saklanan değer `null` olur.
+  - İsteğe bağlıdır; yayın beklemez.
+  - **Neden `text[]`:** Medusa'nın dizgi dizisi türü (`model.array()`). Biçim yok, HTML'e dönüşmez, XSS yüzeyi yok. Belge (`description_doc` gibi `jsonb`) madde listesi için fazla. Medusa'nın `subtitle`'ı zaten alt başlık; ona yüklenmez.
+- **Yazma:** `POST /admin/products/:id/catalog` `summary` alır (`productSummary`). Hata anahtarları: `catalog.summary_too_many`, `catalog.summary_too_long`, `catalog.summary_invalid`. Kayıt `setProductCatalogWorkflow` ile, uzantının öteki alanları gibi yapılır. Denetim kaydında maddeler " | " ile tek değer (mağazanın metni, kişi verisi yok). `catalog.product_saved` artık SEO danışmanını da yeniden çalıştırır.
+- **Okuma:**
+  - Panel `GET /admin/products/:id/catalog`'dan alır: `summary: string[]`, yoksa boş liste.
+  - Store API `fields=+product_extension.summary`'yi yalnız ürünün kendi yanıtında verir (sepet satırı üzerinden değil).
+  - Sözleşme: `ProductPageView.summary?: string[]`.
+- **Vitrin:** ad, alt başlık ve yıldızların altında, fiyatın üstünde. Varken öne çıkan özellik çiplerinin yerini alır; yokken çipler kalır (docs/19 §7). Liste kartları değişmez.
+- **SEO** (docs/13 §3): maddeler cümle olur ("A. B. C."), hep bütün madde alınır.
+  - `{kısa_açıklama}`: önce maddeler (140 karakter), sonra alt başlık, sonra açıklama.
+  - Şablon boş çıkarsa meta açıklama: önce maddeler (155 karakter), sonra açıklama. OpenGraph ve Twitter aynısını kullanır.
+  - JSON-LD ve akışlar (Google Merchant dahil): düz metin açıklama boşsa maddeler.
+  - Danışman `P-CONT-09` (bilgi, puanı düşürmez): kısa açıklaması olmayan ürüne ipucu. Kural sürümü 6.
+- **Panel** (docs/06 "Ürün sayfası"): "Genel" kartında "Öne çıkan özellikler", madde başına bir alan; kartla birlikte kaydedilir. Ürün sihirbazında aynı alan.
+- **Geçiş (WordPress):** excerpt artık her üründe kısa açıklama olur; gövde boşsa açıklama olmaya da devam eder (`sources/wordpress/excerpt.ts`).
+  - Liste ya da etiket/değer tablosu varsa maddeleri alınır, en çok 5. Yanındaki paragraf yalnız giriş sayılır, alınmaz.
+  - Yalnız paragraf varsa satırlar (`<br>`) ve cümleler madde olur. Bu ancak en çok 5 kısa madde çıkıyorsa yapılır; çıkmıyorsa yalnız ilk cümle tek madde olur.
+  - 90'ı geçen madde kelime sınırında "…" ile kesilir. Kesilen, atlanan ya da tek cümleye inen ürün raporda `migration.wordpress_summary_partial` notuyla adlandırılır.
+  - Rapor özetinde "Kısa açıklamayla gelen ürünler" sayılır (`counts.product.summaries`).
+  - Maddeler açıklamanın özellik okuyucusuna da liste olarak girer ("Namlu: 9 cm"). Belgeden ayrı okunur; aynı satır iki kez sayılmaz.
+  - Shopify, akış ve paket kaynaklarında kısa açıklama yok.
+- **Önceden taşınmış ürünler** (`summary:backfill`): çalıştırma kaynak dosyasını iş bitince siler (içinde müşteri verisi olabilir). Bu yüzden dışa aktarma dosyası komuta verilir:
+  - `pnpm --filter @qticaret/backend summary:backfill <export.xml>` yalnız sayar.
+  - Sona `apply` eklenince yazar.
+  - Yalnız bir çalıştırmanın taşıdığı ve maddesi boş ürünlere yazar; mağazanın kendi maddelerine dokunmaz. Tekrar çalıştırmak güvenlidir.
+  - Sayılar: `updated`, `found` (zaten var), `skipped` (taşınmamış), `empty` (dışa aktarmada yok), `failed`, `partial`. Uygulama denetim kaydına `migration.summaries_filled` olarak girer.
+
+| Seçenek | Artı | Eksi |
+| --- | --- | --- |
+| **`text[]` maddeler** | Medusa türü, düz metin, sınırları kolay | Paragraf yok (sahip maddeleri seçti) |
+| `{ text?, bullets? }` `jsonb` | Paragraf da olur | Sahip istemedi; iki biçimin okuyucusu |
+| Küçük içerik belgesi | Kalın, bağlantı | Fazla; HTML oluşturucu ve denetimi gerekir |
+| Medusa `subtitle` | Alan hazır | Alt başlık olarak kullanılıyor; tek satır |
+
+- **Açık:** katalog tablosu (dışa/içe aktarma) ve arama dizini kısa açıklamayı taşımaz. Taşınan ürünlerde dışa aktarma dosyası elde değilse `summary:backfill` çalışmaz; ürün sayfasında elle yazılır.
