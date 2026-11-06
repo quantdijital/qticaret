@@ -83,6 +83,7 @@ import { Route as AuthSettingsStorefrontRouteImport } from './routes/_auth/setti
 import { Route as AuthSettingsTeamRouteImport } from './routes/_auth/settings/team'
 import { Route as AuthStorefrontMenusRouteImport } from './routes/_auth/storefront/menus'
 import { Route as AuthStorefrontPreferencesRouteImport } from './routes/_auth/storefront/preferences'
+import { Route as FullscreenPrintOrdersRouteImport } from './routes/_fullscreen/print/orders'
 import { Route as FullscreenStorefrontEditorRouteImport } from './routes/_fullscreen/storefront/editor'
 import { Route as AuthContentLandingsIdRouteImport } from './routes/_auth/content/landings/$id'
 import { Route as AuthPromotionsPriceListsIndexRouteImport } from './routes/_auth/promotions/price-lists/index'
@@ -471,6 +472,11 @@ const AuthStorefrontPreferencesRoute =
     path: '/storefront/preferences',
     getParentRoute: () => AuthRoute,
   } as any)
+const FullscreenPrintOrdersRoute = FullscreenPrintOrdersRouteImport.update({
+  id: '/print/orders',
+  path: '/print/orders',
+  getParentRoute: () => FullscreenRoute,
+} as any)
 const FullscreenStorefrontEditorRoute =
   FullscreenStorefrontEditorRouteImport.update({
     id: '/storefront/editor',
@@ -618,6 +624,7 @@ export interface FileRoutesByFullPath {
   '/settings/team': typeof AuthSettingsTeamRoute
   '/storefront/menus': typeof AuthStorefrontMenusRoute
   '/storefront/preferences': typeof AuthStorefrontPreferencesRoute
+  '/print/orders': typeof FullscreenPrintOrdersRoute
   '/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/brands/': typeof AuthBrandsIndexRoute
   '/bulk-messages/': typeof AuthBulkMessagesIndexRoute
@@ -705,6 +712,7 @@ export interface FileRoutesByTo {
   '/settings/team': typeof AuthSettingsTeamRoute
   '/storefront/menus': typeof AuthStorefrontMenusRoute
   '/storefront/preferences': typeof AuthStorefrontPreferencesRoute
+  '/print/orders': typeof FullscreenPrintOrdersRoute
   '/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/brands': typeof AuthBrandsIndexRoute
   '/bulk-messages': typeof AuthBulkMessagesIndexRoute
@@ -797,6 +805,7 @@ export interface FileRoutesById {
   '/_auth/settings/team': typeof AuthSettingsTeamRoute
   '/_auth/storefront/menus': typeof AuthStorefrontMenusRoute
   '/_auth/storefront/preferences': typeof AuthStorefrontPreferencesRoute
+  '/_fullscreen/print/orders': typeof FullscreenPrintOrdersRoute
   '/_fullscreen/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/_auth/brands/': typeof AuthBrandsIndexRoute
   '/_auth/bulk-messages/': typeof AuthBulkMessagesIndexRoute
@@ -888,6 +897,7 @@ export interface FileRouteTypes {
     | '/settings/team'
     | '/storefront/menus'
     | '/storefront/preferences'
+    | '/print/orders'
     | '/storefront/editor'
     | '/brands/'
     | '/bulk-messages/'
@@ -975,6 +985,7 @@ export interface FileRouteTypes {
     | '/settings/team'
     | '/storefront/menus'
     | '/storefront/preferences'
+    | '/print/orders'
     | '/storefront/editor'
     | '/brands'
     | '/bulk-messages'
@@ -1066,6 +1077,7 @@ export interface FileRouteTypes {
     | '/_auth/settings/team'
     | '/_auth/storefront/menus'
     | '/_auth/storefront/preferences'
+    | '/_fullscreen/print/orders'
     | '/_fullscreen/storefront/editor'
     | '/_auth/brands/'
     | '/_auth/bulk-messages/'
@@ -1625,6 +1637,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthStorefrontPreferencesRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_fullscreen/print/orders': {
+      id: '/_fullscreen/print/orders'
+      path: '/print/orders'
+      fullPath: '/print/orders'
+      preLoaderRoute: typeof FullscreenPrintOrdersRouteImport
+      parentRoute: typeof FullscreenRoute
+    }
     '/_fullscreen/storefront/editor': {
       id: '/_fullscreen/storefront/editor'
       path: '/storefront/editor'
@@ -1924,10 +1943,12 @@ const AuthRouteChildren: AuthRouteChildren = {
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 interface FullscreenRouteChildren {
+  FullscreenPrintOrdersRoute: typeof FullscreenPrintOrdersRoute
   FullscreenStorefrontEditorRoute: typeof FullscreenStorefrontEditorRoute
 }
 
 const FullscreenRouteChildren: FullscreenRouteChildren = {
+  FullscreenPrintOrdersRoute: FullscreenPrintOrdersRoute,
   FullscreenStorefrontEditorRoute: FullscreenStorefrontEditorRoute,
 }
 

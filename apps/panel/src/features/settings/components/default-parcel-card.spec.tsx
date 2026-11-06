@@ -22,6 +22,7 @@ const SAVED: ShippingSettings = {
   label_format: "100x150",
   label_custom: { width_mm: 100, height_mm: 150 },
   default_parcel: null,
+  packing_slip_prices: false,
 }
 
 const STORE = { weight_unit: "g", dimension_unit: "cm" } as StoreSettings

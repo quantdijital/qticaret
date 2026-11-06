@@ -108,6 +108,8 @@ export interface ShippingSettings {
    * (adr/0054); null: the platform's, `PLATFORM_PARCEL`.
    */
   default_parcel: { weight: number; length: number; width: number; height: number } | null
+  /** Whether packing slips print the lines' prices and the order's totals; off by default. */
+  packing_slip_prices: boolean
 }
 
 /** The platform's default parcel in grams and cm (the backend's `PLATFORM_PARCEL`, adr/0054). */

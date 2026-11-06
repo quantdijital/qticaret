@@ -1,11 +1,13 @@
-import { Loader2, PackageCheck, Truck } from "lucide-react"
+import { FileText, ListChecks, Loader2, PackageCheck, Truck } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import type { BoardOrder } from "@/features/orders/api/orders"
 import { MAX_BULK_SHIP, useDeliverOrders, useShipOrders } from "@/features/orders/api/shipping"
 import type { ShipResult } from "@/features/orders/api/shipping"
+import { MAX_PRINT_ORDERS } from "@/features/orders/api/packing"
 import { PrintAllButton } from "@/features/orders/components/ship-results-dialog"
+import { openPrint } from "@/features/orders/print/open-print"
 import { errorText } from "@/lib/errors"
 
 /**
@@ -40,6 +42,9 @@ export function BulkBar({
     (order) => order.stage === "shipped" && order.delivery?.carrier === null
   )
   const tooMany = toShip.length > MAX_BULK_SHIP
+  // Packing slips and the pick list of every picked order, newest first as listed
+  const ids = orders.map((order) => order.id)
+  const tooManyToPrint = ids.length > MAX_PRINT_ORDERS
   const busy = ship.isPending || deliver.isPending
 
   const markDelivered = () => {
@@ -81,11 +86,38 @@ export function BulkBar({
           {t("orders.bulkShip.tooMany", { max: MAX_BULK_SHIP })}
         </span>
       ) : null}
+      {tooManyToPrint ? (
+        <span className="text-destructive-text">
+          {t("orders.print.tooMany", { max: MAX_PRINT_ORDERS })}
+        </span>
+      ) : null}
       <span className="ml-auto flex w-full flex-wrap justify-end gap-2 sm:w-auto">
         <Button variant="ghost" size="sm" disabled={busy} onClick={onClear}>
           {t("orders.bulkShip.clear")}
         </Button>
         {labelled.length > 0 ? <PrintAllButton fulfillmentIds={labelled} size="sm" /> : null}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={tooManyToPrint}
+          onClick={() => {
+            openPrint("slip", ids)
+          }}
+        >
+          <FileText />
+          {t("orders.print.slips")}
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={tooManyToPrint}
+          onClick={() => {
+            openPrint("pick", ids)
+          }}
+        >
+          <ListChecks />
+          {t("orders.print.pickList")}
+        </Button>
         {toDeliver.length > 0 ? (
           <Button variant="outline" size="sm" disabled={busy} onClick={markDelivered}>
             {deliver.isPending ? <Loader2 className="animate-spin" /> : <PackageCheck />}

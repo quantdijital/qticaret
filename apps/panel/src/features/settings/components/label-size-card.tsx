@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
 import { LABEL_FORMATS, useSaveSection } from "@/features/settings/api/sections"
 import type { LabelFormat, ShippingSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
@@ -30,6 +31,7 @@ const schema = z.object({
   format: z.enum(LABEL_FORMATS),
   width: millimetres(70, 210),
   height: millimetres(70, 297),
+  prices: z.boolean(),
 })
 type Values = z.infer<typeof schema>
 
@@ -37,6 +39,7 @@ const valuesOf = (saved: ShippingSettings): Values => ({
   format: saved.label_format,
   width: String(saved.label_custom.width_mm),
   height: String(saved.label_custom.height_mm),
+  prices: saved.packing_slip_prices,
 })
 
 /** The page's size in mm and how many labels go on it, for the preview. */
@@ -82,6 +85,7 @@ export function LabelSizeCard({ saved }: { saved: ShippingSettings }) {
       {
         label_format: next.format,
         label_custom: { width_mm: Number(next.width), height_mm: Number(next.height) },
+        packing_slip_prices: next.prices,
       },
       {
         onSuccess: (result) => {
@@ -158,6 +162,29 @@ export function LabelSizeCard({ saved }: { saved: ShippingSettings }) {
             </Field>
           ) : null}
           <p className="text-[13px] text-muted-foreground">{t(`${L}.printerHint`)}</p>
+          {/* Packing slips print on A4 from the order list and the order page */}
+          <div className="flex items-start justify-between gap-4 border-t pt-4">
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <label htmlFor="packing-slip-prices" className="text-sm font-medium">
+                {t(`${L}.slipPrices`)}
+              </label>
+              <span id="packing-slip-prices-hint" className="text-[13px] text-muted-foreground">
+                {t(`${L}.slipPricesHint`)}
+              </span>
+            </div>
+            <Controller
+              control={form.control}
+              name="prices"
+              render={({ field }) => (
+                <Switch
+                  id="packing-slip-prices"
+                  aria-describedby="packing-slip-prices-hint"
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              )}
+            />
+          </div>
         </div>
         <figure className="flex flex-col items-center gap-2 rounded-md bg-muted/50 px-6 py-4">
           <div className="flex size-28 items-center justify-center" aria-hidden="true">

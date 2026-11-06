@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { getRouteApi } from "@tanstack/react-router"
+import { Printer } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { Button } from "@/components/ui/button"
+import { openPrint } from "@/features/orders/print/open-print"
 import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState } from "@/components/patterns/states"
@@ -113,12 +116,24 @@ export function OrderDetailPage() {
         }
         back={back}
         action={
-          <OrderActions
-            order={order}
-            state={state.data}
-            money={money.data}
-            testPaid={hosted?.test_mode === true}
-          />
+          <>
+            {/* The order's packing slip on A4, in a new tab that prints itself */}
+            <Button
+              variant="outline"
+              onClick={() => {
+                openPrint("slip", [order.id])
+              }}
+            >
+              <Printer />
+              {t("orders.print.button")}
+            </Button>
+            <OrderActions
+              order={order}
+              state={state.data}
+              money={money.data}
+              testPaid={hosted?.test_mode === true}
+            />
+          </>
         }
       />
       <ChargebackAlert orderId={order.id} />

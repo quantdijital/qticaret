@@ -1,0 +1,241 @@
+/*
+ * Packing slips and the pick list (docs/06 §4): a paper document, light
+ * whatever the panel's theme, A4, one order a page. The colours are the
+ * paper's own on purpose, not the theme's: a dark panel prints on white.
+ */
+
+.print-doc {
+  min-height: 100dvh;
+  background: #ffffff;
+  color: #111111;
+  font-family: "Inter Variable", system-ui, sans-serif;
+  font-size: 12px;
+  line-height: 1.45;
+  color-scheme: light;
+}
+
+.print-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #d4d4d4;
+  background: #f5f5f5;
+  font-size: 14px;
+}
+
+.print-toolbar label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.print-toolbar .spacer {
+  flex: 1;
+}
+
+.print-toolbar button {
+  border: 1px solid #a3a3a3;
+  border-radius: 6px;
+  background: #ffffff;
+  padding: 6px 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.print-toolbar button.primary {
+  border-color: #111111;
+  background: #111111;
+  color: #ffffff;
+}
+
+.print-message {
+  padding: 48px 16px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.print-sheet {
+  box-sizing: border-box;
+  width: 210mm;
+  min-height: 297mm;
+  margin: 16px auto;
+  padding: 14mm 14mm 16mm;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px #e5e5e5;
+}
+
+.print-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #111111;
+}
+
+.print-head img {
+  max-height: 44px;
+  max-width: 180px;
+  object-fit: contain;
+}
+
+.print-shop {
+  font-size: 11px;
+  color: #404040;
+}
+
+.print-shop strong {
+  display: block;
+  font-size: 14px;
+  color: #111111;
+}
+
+.print-title {
+  text-align: right;
+}
+
+.print-title h1 {
+  margin: 0;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+}
+
+.print-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 14px 0;
+}
+
+.print-box {
+  border: 1px solid #a3a3a3;
+  border-radius: 4px;
+  padding: 8px 10px;
+}
+
+.print-box h2,
+.print-section h2 {
+  margin: 0 0 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #525252;
+}
+
+.print-box p {
+  margin: 0;
+}
+
+.print-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.print-table th {
+  padding: 6px 6px;
+  border-bottom: 1px solid #111111;
+  font-size: 10px;
+  font-weight: 600;
+  text-align: left;
+  text-transform: uppercase;
+  color: #525252;
+}
+
+.print-table td {
+  padding: 7px 6px;
+  border-bottom: 1px solid #d4d4d4;
+  vertical-align: top;
+}
+
+.print-table .num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.print-table .check {
+  width: 18px;
+}
+
+.print-checkbox {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 1px solid #111111;
+}
+
+.print-addons {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.print-addons li {
+  margin-top: 2px;
+}
+
+.print-addons .value {
+  font-weight: 600;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.print-note {
+  margin-top: 4px;
+  font-size: 11px;
+  color: #404040;
+}
+
+.print-section {
+  margin-top: 14px;
+}
+
+.print-totals {
+  margin-left: auto;
+  width: 50%;
+  margin-top: 10px;
+}
+
+.print-totals div {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+
+.print-totals .grand {
+  border-top: 1px solid #111111;
+  font-weight: 700;
+}
+
+.print-muted {
+  color: #525252;
+}
+
+@page {
+  size: A4;
+  margin: 0;
+}
+
+@media print {
+  .print-toolbar {
+    display: none;
+  }
+
+  .print-sheet {
+    margin: 0;
+    box-shadow: none;
+    break-after: page;
+  }
+
+  .print-sheet:last-child {
+    break-after: auto;
+  }
+
+  .print-table tr {
+    break-inside: avoid;
+  }
+}

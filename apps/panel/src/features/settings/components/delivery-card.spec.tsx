@@ -22,6 +22,7 @@ const SHIPPING: ShippingSettings = {
   label_format: "100x150",
   label_custom: { width_mm: 100, height_mm: 150 },
   default_parcel: null,
+  packing_slip_prices: false,
 }
 
 const MARKETING = "/admin/platform-settings/marketing"

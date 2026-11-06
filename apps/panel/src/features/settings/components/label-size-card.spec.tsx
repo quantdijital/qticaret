@@ -22,6 +22,7 @@ const SAVED: ShippingSettings = {
   label_format: "100x150",
   label_custom: { width_mm: 100, height_mm: 150 },
   default_parcel: null,
+  packing_slip_prices: false,
 }
 
 const renderCard = () =>
@@ -62,7 +63,27 @@ describe("LabelSizeCard", () => {
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/platform-settings/shipping", {
         method: "POST",
-        body: { label_format: "custom", label_custom: { width_mm: 76, height_mm: 102 } },
+        body: {
+          label_format: "custom",
+          label_custom: { width_mm: 76, height_mm: 102 },
+          packing_slip_prices: false,
+        },
+      })
+    })
+  })
+
+  it("prints prices on the packing slip only when the shop turns them on", async () => {
+    renderCard()
+    const prices = screen.getByRole("switch", { name: "Paketleme fişinde fiyatları göster" })
+    expect(prices).not.toBeChecked()
+
+    await userEvent.click(prices)
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/platform-settings/shipping", {
+        method: "POST",
+        body: expect.objectContaining({ packing_slip_prices: true }) as unknown,
       })
     })
   })
