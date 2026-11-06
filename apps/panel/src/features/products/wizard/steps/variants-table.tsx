@@ -1,3 +1,4 @@
+import { SlidersHorizontal } from "lucide-react"
 import { useState } from "react"
 import { useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -8,6 +9,22 @@ import { Input } from "@/components/ui/input"
 import { parseMoneyInput } from "@/lib/money-input"
 import { cn } from "@/lib/utils"
 import type { WizardValues } from "../schema"
+import { draftName, ownImageUrls } from "../variant-draft"
+import { VariantDraftDialog } from "./variant-draft-dialog"
+
+// A row's fields in the order their refusals are told: the table's, then the dialog's
+const ROW_FIELDS = [
+  "price",
+  "stock",
+  "sku",
+  "ean",
+  "cost",
+  "mpn",
+  "weight",
+  "length",
+  "width",
+  "height",
+] as const
 
 function PriceInput({ index, label }: { index: number; label: string }) {
   const { register } = useFormContext<WizardValues>()
@@ -31,9 +48,24 @@ export function SingleVariant() {
   const errors = formState.errors.variants?.[0]
   const message = (key: string | undefined) => (key ? t(key) : undefined)
   return (
-    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
       <Field label={t("products.wizard.price")} required error={message(errors?.price?.message)}>
         <PriceInput index={0} label={t("products.wizard.price")} />
+      </Field>
+      <Field
+        label={t("products.detail.cost")}
+        htmlFor="variant-cost"
+        error={message(errors?.cost?.message)}
+        hint={t("products.detail.costHint")}
+      >
+        <NumberField
+          id="variant-cost"
+          decimals={2}
+          min={0}
+          suffix="₺"
+          placeholder="—"
+          {...register("variants.0.cost")}
+        />
       </Field>
       <Field
         label={t("products.wizard.stock")}
@@ -61,6 +93,13 @@ export function SingleVariant() {
         error={message(errors?.ean?.message)}
       >
         <Input id="variant-ean" inputMode="numeric" {...register("variants.0.ean")} />
+      </Field>
+      <Field
+        label={t("products.detail.codes.mpn")}
+        htmlFor="variant-mpn"
+        error={message(errors?.mpn?.message)}
+      >
+        <Input id="variant-mpn" spellCheck={false} {...register("variants.0.mpn")} />
       </Field>
     </div>
   )
@@ -100,18 +139,23 @@ function BulkPrice() {
   )
 }
 
-/** One row per combination: price, stock and codes side by side. */
+/**
+ * One row per combination: price, stock and codes side by side; its last
+ * button opens the variant's dialog (the product page's) for its cost,
+ * MPN, own parcel and pictures.
+ */
 export function VariantsTable() {
   const { t } = useTranslation()
   const { register, formState, control } = useFormContext<WizardValues>()
-  const [variants, manage] = useWatch({ control, name: ["variants", "manage_inventory"] })
+  const [variants, manage, images] = useWatch({
+    control,
+    name: ["variants", "manage_inventory", "images"],
+  })
+  const [open, setOpen] = useState<number | null>(null)
   const rowError = (index: number) => {
     const errors = formState.errors.variants?.[index]
-    const key =
-      errors?.price?.message ??
-      errors?.stock?.message ??
-      errors?.sku?.message ??
-      errors?.ean?.message
+    // A refused value in the dialog's fields (cost, MPN, parcel) is told here too
+    const key = ROW_FIELDS.map((field) => errors?.[field]?.message).find(Boolean)
     return key ? t(key) : null
   }
   const headClass = "px-3 py-2 text-left text-xs font-medium text-muted-foreground"
@@ -132,15 +176,26 @@ export function VariantsTable() {
               <th className={cn(headClass, "w-36")}>{t("products.wizard.stock")}</th>
               <th className={cn(headClass, "w-40")}>{t("products.wizard.sku")}</th>
               <th className={cn(headClass, "w-40")}>{t("products.wizard.ean")}</th>
+              <th className={cn(headClass, "w-36")}>
+                <span className="sr-only">{t("products.wizard.variantMore")}</span>
+              </th>
             </tr>
           </thead>
           <tbody>
             {variants.map((variant, index) => {
               const error = rowError(index)
+              const own = ownImageUrls(variant, images)
               return (
                 <tr key={variant.key} className="border-t align-top">
                   <td className="px-3 py-2">
-                    <div className="flex flex-wrap gap-1 pt-1.5">
+                    <div className="flex flex-wrap items-center gap-1 pt-1.5">
+                      {own[0] ? (
+                        <img
+                          src={own[0]}
+                          alt=""
+                          className="size-6 shrink-0 rounded border object-cover"
+                        />
+                      ) : null}
                       {Object.values(variant.options).map((value) => (
                         <span
                           key={value}
@@ -184,12 +239,40 @@ export function VariantsTable() {
                       {...register(`variants.${index}.ean`)}
                     />
                   </td>
+                  <td className="px-3 py-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full"
+                      aria-haspopup="dialog"
+                      aria-label={t("products.wizard.variantMoreLabel", {
+                        name: draftName(variant),
+                      })}
+                      onClick={() => {
+                        setOpen(index)
+                      }}
+                    >
+                      <SlidersHorizontal />
+                      {own.length > 0
+                        ? t("products.wizard.variantPictureCount", { count: own.length })
+                        : t("products.wizard.variantMore")}
+                    </Button>
+                  </td>
                 </tr>
               )
             })}
           </tbody>
         </table>
       </div>
+      {open === null ? null : (
+        <VariantDraftDialog
+          index={open}
+          onIndexChange={setOpen}
+          onClose={() => {
+            setOpen(null)
+          }}
+        />
+      )}
     </div>
   )
 }

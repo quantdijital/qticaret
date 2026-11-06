@@ -7,6 +7,7 @@ import type { JSONContent } from "@tiptap/react"
 import { hasSummaryText } from "@/features/products/summary-doc"
 import { DEFAULT_VARIANT_KEY } from "./schema"
 import type { WizardValues } from "./schema"
+import { ownImageUrls } from "./variant-draft"
 
 const CURRENCY = "try"
 
@@ -23,17 +24,45 @@ const measure = (text: string) => {
   return value && value > 0 ? value : undefined
 }
 
-function productBody({ values, publish, defaults, defaultOption }: CreateInput) {
+const MEASURES = ["weight", "length", "width", "height"] as const
+
+// The measures given (more than nothing), as numbers; an empty one is left to the product's parcel
+const measuresOf = (texts: Record<(typeof MEASURES)[number], string>) =>
+  Object.fromEntries(
+    MEASURES.flatMap((field) => {
+      const value = measure(texts[field])
+      return value === undefined ? [] : [[field, value]]
+    })
+  )
+
+type Row = WizardValues["variants"][number]
+
+/**
+ * Each variant's own pictures, sent with the product (`additional_data`):
+ * neither has an id yet, so the variant goes by its option values and the
+ * picture by its address. The server ties them in the create's own
+ * workflow; a tie it cannot make undoes the product.
+ */
+export function variantImages(
+  values: Pick<WizardValues, "images" | "variants">,
+  optionsOf: (row: Row) => Record<string, string>
+): { options: Record<string, string>; image_urls: string[] }[] {
+  return values.variants.flatMap((row) => {
+    const urls = ownImageUrls(row, values.images)
+    return urls.length > 0 ? [{ options: optionsOf(row), image_urls: urls }] : []
+  })
+}
+
+export function productBody({ values, publish, defaults, defaultOption }: CreateInput) {
   const options =
     values.has_options && values.options.length > 0
       ? values.options.map((option) => ({ title: option.title, values: option.values }))
       : [{ title: defaultOption.title, values: [defaultOption.value] }]
-  const dimensions = Object.fromEntries(
-    (["weight", "length", "width", "height"] as const).flatMap((field) => {
-      const value = measure(values[field])
-      return value === undefined ? [] : [[field, value]]
-    })
-  )
+  const optionsOf = (variant: Row) =>
+    variant.key === DEFAULT_VARIANT_KEY
+      ? { [defaultOption.title]: defaultOption.value }
+      : variant.options
+  const ties = variantImages(values, optionsOf)
   return {
     title: values.title.trim(),
     ...(values.handle.trim() ? { handle: values.handle.trim() } : {}),
@@ -49,7 +78,7 @@ function productBody({ values, publish, defaults, defaultOption }: CreateInput) 
       ? { shipping_profile_id: defaults.shippingProfileId }
       : {}),
     ...(defaults.salesChannelId ? { sales_channels: [{ id: defaults.salesChannelId }] } : {}),
-    ...dimensions,
+    ...measuresOf(values),
     options,
     variants: values.variants.map((variant, index) => ({
       title: variant.key === DEFAULT_VARIANT_KEY ? values.title.trim() : variant.title,
@@ -57,30 +86,62 @@ function productBody({ values, publish, defaults, defaultOption }: CreateInput) 
       variant_rank: index,
       ...(variant.sku.trim() ? { sku: variant.sku.trim() } : {}),
       ...(variant.ean.trim() ? { ean: normalizeGtin(variant.ean) } : {}),
+      // Its own parcel (adr/0054); a single variant's is the product's
+      ...(variant.key === DEFAULT_VARIANT_KEY ? {} : measuresOf(variant)),
       manage_inventory: values.manage_inventory,
       allow_backorder: values.allow_backorder,
       prices: [{ currency_code: CURRENCY, amount: parseMoneyInput(variant.price) ?? 0 }],
-      options:
-        variant.key === DEFAULT_VARIANT_KEY
-          ? { [defaultOption.title]: defaultOption.value }
-          : variant.options,
+      options: optionsOf(variant),
     })),
+    ...(ties.length > 0 ? { additional_data: { variant_images: ties } } : {}),
   }
+}
+
+interface CatalogBody {
+  kind?: WizardValues["kind"]
+  summary_doc?: JSONContent
+  variants?: Record<string, { cost?: number; mpn?: string }>
 }
 
 /**
  * What the new product's catalog fields take, in one save: a digital or
- * service kind (F3.2; before it is published) and the short description as
- * written (ADR-0055 Ek 2026-11-06). Null when there is neither.
+ * service kind (F3.2; before it is published), the short description as
+ * written (ADR-0055 Ek 2026-11-06) and its variants' unit costs and MPNs
+ * (F11.4), by the ids the product was saved with (`variantIds`, in the
+ * rows' order). Null when there is none of them.
  */
 export function catalogBody(
-  values: Pick<WizardValues, "kind" | "summary_doc">
-): { kind?: WizardValues["kind"]; summary_doc?: JSONContent } | null {
-  const body = {
+  values: Pick<WizardValues, "kind" | "summary_doc"> & Partial<Pick<WizardValues, "variants">>,
+  variantIds: readonly (string | undefined)[] = []
+): CatalogBody | null {
+  const variants = Object.fromEntries(
+    (values.variants ?? []).flatMap((row, index) => {
+      const id = variantIds[index]
+      const cost = row.cost.trim() === "" ? null : parseMoneyInput(row.cost)
+      const entry = {
+        ...(cost === null ? {} : { cost }),
+        ...(row.mpn.trim() ? { mpn: row.mpn.trim() } : {}),
+      }
+      return id && Object.keys(entry).length > 0 ? [[id, entry]] : []
+    })
+  )
+  const body: CatalogBody = {
     ...(values.kind === "physical" ? {} : { kind: values.kind }),
     ...(hasSummaryText(values.summary_doc) ? { summary_doc: values.summary_doc } : {}),
+    ...(Object.keys(variants).length > 0 ? { variants } : {}),
   }
   return Object.keys(body).length > 0 ? body : null
+}
+
+/** The saved variants' ids in the rows' order, found by the title each row was saved with. */
+function idsByRow(
+  values: WizardValues,
+  saved: readonly { id: string; title?: string | null }[] | null | undefined
+): (string | undefined)[] {
+  const byTitle = new Map((saved ?? []).map((variant) => [variant.title ?? "", variant.id]))
+  return values.variants.map((row) =>
+    byTitle.get(row.key === DEFAULT_VARIANT_KEY ? values.title.trim() : row.title)
+  )
 }
 
 // The stock typed per variant, at the shop's default location. A variant made to sell
@@ -132,7 +193,7 @@ export function useCreateProduct() {
   return useMutation({
     mutationFn: async (input: CreateInput): Promise<CreateResult> => {
       const { product } = await sdk.admin.product.create(productBody(input))
-      const catalog = catalogBody(input.values)
+      const catalog = catalogBody(input.values, idsByRow(input.values, product.variants))
       if (catalog) {
         await sdk.client.fetch(`/admin/products/${encodeURIComponent(product.id)}/catalog`, {
           method: "POST",

@@ -7,13 +7,12 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { DialogSection } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
-import type { ProductDetail } from "@/features/products/api/products"
 import { formatCount, formatMoney } from "@/lib/format"
 import { MEASURES, measureText } from "./measures"
+import type { MeasureName } from "./measures"
 import { VARIANT_CODES_TARGET } from "./sections"
 import { storedGtinNote } from "./variant-codes"
-import { levelAt } from "./variant-values"
-import type { Variant, VariantField, VariantValues } from "./variant-values"
+import type { StockFacts, VariantField, VariantValues } from "./variant-values"
 
 type Form = UseFormReturn<VariantValues>
 
@@ -112,14 +111,15 @@ export function PriceFields({
 export function StockFields({
   form,
   idPrefix,
-  variant,
+  stock,
   locationId,
   preorder,
   preorderOn,
 }: {
   form: Form
   idPrefix: string
-  variant: Variant
+  /** Tracked or not, what orders hold, preorder as stored (`stockFacts`). */
+  stock: StockFacts
   locationId: string | null
   /** The switch shows; `preorderOn` says whether it may be turned on. */
   preorder: boolean
@@ -127,8 +127,7 @@ export function StockFields({
 }) {
   const { t } = useTranslation()
   const error = useError(form)
-  const level = levelAt(variant, locationId)
-  if (!variant.manage_inventory) {
+  if (!stock.tracked) {
     return (
       <DialogSection title={t(`${D}.stock`)}>
         <p className="text-[13px] text-muted-foreground">{t(`${D}.untracked`)}</p>
@@ -150,12 +149,14 @@ export function StockFields({
             {...form.register("stock")}
           />
         </Field>
-        <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium">{t("products.detail.reserved")}</span>
-          <span className="flex h-9 items-center text-sm tabular-nums">
-            {formatCount(level.reserved)}
-          </span>
-        </div>
+        {stock.reserved === null ? null : (
+          <div className="flex flex-col gap-2">
+            <span className="text-sm font-medium">{t("products.detail.reserved")}</span>
+            <span className="flex h-9 items-center text-sm tabular-nums">
+              {formatCount(stock.reserved)}
+            </span>
+          </div>
+        )}
       </div>
       {preorder ? (
         <div className="flex items-start justify-between gap-4 border-t pt-4">
@@ -177,7 +178,7 @@ export function StockFields({
                 checked={field.value}
                 onCheckedChange={field.onChange}
                 // Without the flag, one already on can only be turned off
-                disabled={!preorderOn && !variant.allow_backorder}
+                disabled={!preorderOn && !stock.backorder}
               />
             )}
           />
@@ -264,12 +265,13 @@ export function CodeFields({
 export function MeasureFields({
   form,
   idPrefix,
-  product,
+  fallback,
   units,
 }: {
   form: Form
   idPrefix: string
-  product: ProductDetail
+  /** The product's measures, shown where the variant has none of its own. */
+  fallback: Partial<Record<MeasureName, number | null | undefined>>
   units: { weight: string; dimension: string }
 }) {
   const { t } = useTranslation()
@@ -290,7 +292,7 @@ export function MeasureFields({
               min={0}
               suffix={units[unit]}
               // The product's measure, used while this one is empty
-              placeholder={measureText(product[name]) || "—"}
+              placeholder={measureText(fallback[name]) || "—"}
               aria-invalid={Boolean(error(name))}
               {...form.register(name)}
             />

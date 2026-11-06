@@ -34,13 +34,41 @@ const measure = z
     message: "products.errors.measure",
   })
 
+// Unit cost, VAT excluded (F11.4), as on the product page: empty means not entered
+const cost = z
+  .string()
+  .trim()
+  .refine(
+    (text) => {
+      if (text === "") {
+        return true
+      }
+      const value = parseMoneyInput(text)
+      return value !== null && value >= 0 && value <= 10_000_000
+    },
+    { message: "products.errors.cost" }
+  )
+
 export const variantSchema = z.object({
   key: z.string(),
   title: z.string(),
   options: z.record(z.string(), z.string()),
   price,
   stock,
+  cost,
   sku: z.string().trim().max(64, { message: "products.errors.sku" }),
+  // The manufacturer part number, kept by the catalog (Google's limit)
+  mpn: z.string().trim().max(70, { message: "products.errors.mpn" }),
+  // The variant's own parcel; empty takes the product's (adr/0054)
+  weight: measure,
+  length: measure,
+  width: measure,
+  height: measure,
+  /**
+   * The product's pictures (by address) shown when this variant is chosen,
+   * picked in its dialog before the product exists; none shows them all.
+   */
+  image_urls: z.array(z.string()),
   // A barcode is a GTIN whose check digit fits, as on the product page (lib/gtin); none is fine
   ean: z
     .string()
@@ -118,6 +146,21 @@ export type VariantValues = z.infer<typeof variantSchema>
 
 export const DEFAULT_VARIANT_KEY = "default"
 
+/** What a new variant row holds before anything is typed: no price, no stock, no codes. */
+export const BLANK_VARIANT = {
+  price: "",
+  stock: "0",
+  cost: "",
+  sku: "",
+  ean: "",
+  mpn: "",
+  weight: "",
+  length: "",
+  width: "",
+  height: "",
+  image_urls: [] as string[],
+} satisfies Omit<VariantValues, "key" | "title" | "options">
+
 export const defaultWizardValues = (): WizardValues => ({
   kind: "physical",
   title: "",
@@ -129,9 +172,7 @@ export const defaultWizardValues = (): WizardValues => ({
   images: [],
   has_options: false,
   options: [],
-  variants: [
-    { key: DEFAULT_VARIANT_KEY, title: "", options: {}, price: "", stock: "0", sku: "", ean: "" },
-  ],
+  variants: [{ ...BLANK_VARIANT, key: DEFAULT_VARIANT_KEY, title: "", options: {} }],
   manage_inventory: true,
   allow_backorder: false,
   weight: "",

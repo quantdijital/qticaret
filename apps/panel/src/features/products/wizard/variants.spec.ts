@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { DEFAULT_VARIANT_KEY } from "./schema"
+import { BLANK_VARIANT, DEFAULT_VARIANT_KEY } from "./schema"
 import { combinations, syncVariants } from "./variants"
 
 const size = { title: "Beden", values: ["S", "M"] }
@@ -28,31 +28,36 @@ describe("syncVariants", () => {
   })
 
   it("falls back to one default row without options", () => {
-    const rows = syncVariants(
-      [],
-      [
-        {
-          key: DEFAULT_VARIANT_KEY,
-          title: "",
-          options: {},
-          price: "89",
-          stock: "3",
-          sku: "",
-          ean: "",
-        },
-      ],
-      false
+    const row = { ...BLANK_VARIANT, key: DEFAULT_VARIANT_KEY, title: "", options: {} }
+    const rows = syncVariants([], [{ ...row, price: "89", stock: "3" }], false)
+    expect(rows).toEqual([{ ...row, price: "89", stock: "3" }])
+  })
+
+  it("keeps a combination's cost, codes, parcel and pictures while it stays", () => {
+    const typed = syncVariants([size], [], true).map((row) =>
+      row.key === "M"
+        ? { ...row, cost: "120", mpn: "BK-M", weight: "0,4", image_urls: ["https://x/m.jpg"] }
+        : row
     )
-    expect(rows).toEqual([
-      {
-        key: DEFAULT_VARIANT_KEY,
-        title: "",
-        options: {},
-        price: "89",
-        stock: "3",
-        sku: "",
-        ean: "",
-      },
+    const kept = syncVariants([{ ...size, values: ["M", "L"] }], typed, true)
+    expect(kept.find((row) => row.key === "M")).toMatchObject({
+      cost: "120",
+      mpn: "BK-M",
+      weight: "0,4",
+      image_urls: ["https://x/m.jpg"],
+    })
+    expect(kept.find((row) => row.key === "L")).toMatchObject({ cost: "", image_urls: [] })
+  })
+
+  it("leaves a combination's own pictures and parcel behind when the options go", () => {
+    const typed = syncVariants([size], [], true).map((row) => ({
+      ...row,
+      price: "50",
+      weight: "0,4",
+      image_urls: ["https://x/s.jpg"],
+    }))
+    expect(syncVariants([], typed, false)).toEqual([
+      { ...BLANK_VARIANT, key: DEFAULT_VARIANT_KEY, title: "", options: {}, price: "50" },
     ])
   })
 })

@@ -8,46 +8,34 @@ import { Button } from "@/components/ui/button"
 import { DialogSection } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import type { MediaAsset } from "@/features/media/api/media"
-import type { ProductDetail } from "@/features/products/api/products"
 import { MAX_IMAGES } from "@/features/products/components/image-gallery"
 import { cn } from "@/lib/utils"
-import { ALT_MAX, moveTied, sortedImages, tiedTo } from "./variant-values"
+import { ALT_MAX, moveTied } from "./variant-values"
 import type { VariantImage, VariantValues } from "./variant-values"
 
 const D = "products.variant"
-
-/** The other variants each stored picture is tied to, by the picture's key. */
-function tiesOf(product: ProductDetail, variantId: string): Map<string, string[]> {
-  const titles = new Map((product.variants ?? []).map((each) => [each.id, each.title ?? ""]))
-  return new Map(
-    sortedImages(product).map((image) => [
-      image.id,
-      tiedTo(image)
-        .filter((id) => id !== variantId)
-        .map((id) => titles.get(id) ?? ""),
-    ])
-  )
-}
 
 /**
  * The variant's pictures (Medusa's variant images): picked from the
  * product's by clicking them, more added from the media library (they join
  * the product's gallery too), the variant's own put in order and each
- * described. A picture tied to no variant shows with all of them.
+ * described. A picture tied to no variant shows with all of them. The same
+ * on a new product: its pictures are the ones added in the form.
  */
 export function VariantPictures({
   form,
-  product,
-  variantId,
+  ties,
+  alts = true,
 }: {
   form: UseFormReturn<VariantValues>
-  product: ProductDetail
-  variantId: string
+  /** The other variants each picture is tied to, by the picture's key. */
+  ties: ReadonlyMap<string, readonly string[]>
+  /** Alt texts are written to the pictures' media records: a product not saved yet has none. */
+  alts?: boolean
 }) {
   const { t } = useTranslation()
   const images = useWatch({ control: form.control, name: "images" })
   const [picking, setPicking] = useState(false)
-  const ties = tiesOf(product, variantId)
   const errors = form.formState.errors.images
   const set = (next: VariantImage[]) => {
     form.setValue("images", next, { shouldDirty: true })
@@ -148,32 +136,45 @@ export function VariantPictures({
                     alt=""
                     className="size-12 shrink-0 rounded-md border object-cover"
                   />
-                  <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <label htmlFor={id} className="text-xs text-muted-foreground">
-                      {t("products.media.altLabel", { position: at + 1 })}
-                    </label>
-                    <Input
-                      id={id}
-                      value={image.alt}
-                      maxLength={ALT_MAX}
-                      disabled={image.mediaId === null}
-                      placeholder={t(
-                        image.mediaId ? "products.media.altPlaceholder" : "products.media.altLegacy"
-                      )}
-                      aria-invalid={Boolean(error)}
-                      onChange={(event) => {
-                        form.setValue(`images.${index}.alt`, event.target.value, {
-                          shouldDirty: true,
-                        })
-                      }}
-                    />
-                    {error ? (
-                      <p role="alert" className="text-xs text-destructive-text">
-                        {t(error)}
-                      </p>
-                    ) : null}
-                  </div>
-                  <div className="mt-5 flex shrink-0 items-center gap-0.5">
+                  {alts ? (
+                    <div className="flex min-w-0 flex-1 flex-col gap-1">
+                      <label htmlFor={id} className="text-xs text-muted-foreground">
+                        {t("products.media.altLabel", { position: at + 1 })}
+                      </label>
+                      <Input
+                        id={id}
+                        value={image.alt}
+                        maxLength={ALT_MAX}
+                        disabled={image.mediaId === null}
+                        placeholder={t(
+                          image.mediaId
+                            ? "products.media.altPlaceholder"
+                            : "products.media.altLegacy"
+                        )}
+                        aria-invalid={Boolean(error)}
+                        onChange={(event) => {
+                          form.setValue(`images.${index}.alt`, event.target.value, {
+                            shouldDirty: true,
+                          })
+                        }}
+                      />
+                      {error ? (
+                        <p role="alert" className="text-xs text-destructive-text">
+                          {t(error)}
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : (
+                    <span className="min-w-0 flex-1 self-center text-[13px] text-muted-foreground">
+                      {t(`${D}.picturePosition`, { position: at + 1 })}
+                    </span>
+                  )}
+                  <div
+                    className={cn(
+                      "flex shrink-0 items-center gap-0.5",
+                      alts ? "mt-5" : "self-center"
+                    )}
+                  >
                     <Button
                       type="button"
                       variant="ghost"
@@ -217,6 +218,9 @@ export function VariantPictures({
               )
             })}
           </ul>
+        )}
+        {alts || own.length === 0 ? null : (
+          <p className="text-xs text-muted-foreground">{t(`${D}.altAfterSave`)}</p>
         )}
       </div>
       <MediaPicker

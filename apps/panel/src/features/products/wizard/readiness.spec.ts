@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest"
 import { canPublish, readiness, wordCount } from "./readiness"
-import { defaultWizardValues } from "./schema"
+import { BLANK_VARIANT, defaultWizardValues } from "./schema"
 import type { WizardValues } from "./schema"
 
 const base = defaultWizardValues()
-const variant = { key: "default", title: "", options: {}, price: "", stock: "0", sku: "", ean: "" }
+const variant = { ...BLANK_VARIANT, key: "default", title: "", options: {} }
 
 const complete = (): WizardValues => ({
   ...base,

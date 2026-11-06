@@ -108,6 +108,23 @@ export function levelAt(variant: Variant, locationId: string | null) {
   }
 }
 
+/**
+ * What the stock fields show beside the count: whether it is tracked, what
+ * orders hold (none for a variant not saved yet) and whether it already
+ * sells past its stock.
+ */
+export interface StockFacts {
+  tracked: boolean
+  reserved: number | null
+  backorder: boolean
+}
+
+export const stockFacts = (variant: Variant, locationId: string | null): StockFacts => ({
+  tracked: Boolean(variant.manage_inventory),
+  reserved: levelAt(variant, locationId).reserved,
+  backorder: Boolean(variant.allow_backorder),
+})
+
 /** Its TRY price, or null when it has none. */
 export const priceOf = (variant: Variant): number | null => {
   const amount = variant.prices?.find((price) => price.currency_code === CURRENCY)?.amount

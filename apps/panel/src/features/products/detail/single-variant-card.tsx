@@ -12,7 +12,7 @@ import { variantFacts } from "./variant-facts"
 import { CodeFields, PriceFields, StockFields } from "./variant-fields"
 import { useSaveVariant } from "./variant-save"
 import { useVariantContext } from "./use-variant-context"
-import { savedVariant, variantSchemaFor } from "./variant-values"
+import { savedVariant, stockFacts, variantSchemaFor } from "./variant-values"
 import type { VariantField, VariantValues } from "./variant-values"
 
 const ID = "single"
@@ -87,7 +87,7 @@ export function SingleVariantCard({ product }: { product: ProductDetail }) {
         <StockFields
           form={form}
           idPrefix={ID}
-          variant={variant}
+          stock={stockFacts(variant, locationId)}
           locationId={locationId}
           preorder={preorder}
           preorderOn={preorderOn}

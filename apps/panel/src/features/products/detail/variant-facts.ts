@@ -51,6 +51,19 @@ export function variantThumb(product: ProductDetail, variantId: string): string 
   return own?.url ?? product.thumbnail ?? images[0]?.url ?? null
 }
 
+/** The other variants each stored picture is tied to (their titles), by the picture's id. */
+export function imageTies(product: ProductDetail, variantId: string): Map<string, string[]> {
+  const names = new Map((product.variants ?? []).map((each) => [each.id, each.title ?? ""]))
+  return new Map(
+    sortedImages(product).map((image) => [
+      image.id,
+      tiedTo(image)
+        .filter((id) => id !== variantId)
+        .map((id) => names.get(id) ?? ""),
+    ])
+  )
+}
+
 /** Today's price and the one struck through beside it, when the storefront shows a discount. */
 function saleOf(display: PriceDisplayView | null | undefined): VariantFacts["sale"] {
   if (!display || ruleState(display) !== "struck") {
