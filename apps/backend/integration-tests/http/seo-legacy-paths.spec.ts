@@ -140,7 +140,23 @@ medusaIntegrationTestRunner({
       }
       expect(await location("/cart")).toBe("/sepet")
       expect(await location("/my-account/orders")).toBe("/hesap/siparisler")
-      // A live page is never shadowed, nor a path WordPress never served
+      // Attachment pages: the moved record's page today in one hop, never the image (`tava`
+      // is a moved file's stem too), the visitor's query kept; `?attachment_id=` stays gone
+      expect(await location("/urun/dokum-tava/tava/?utm_source=x")).toBe(
+        "/urun/dokum-tava?utm_source=x"
+      )
+      expect(await location("/tava-bakimi/kapak")).toBe("/blog/tava-bakimi")
+      expect(await location("/tava-bakimi/attachment/kapak/")).toBe("/blog/tava-bakimi")
+      expect(await location("/hakkimizda/ekip")).toBe("/hakkimizda")
+      expect((await resolve("/?attachment_id=101")).type).toBe("gone")
+      // Under a category, a record never moved or nothing: no attachment page there
+      for (const raw of ["/mutfak/tavalar/tava", "/blog/yazi-1/kapak", "/hic-olmayan/tava"]) {
+        expect({ raw, type: (await resolve(raw)).type }).toEqual({ raw, type: "not_found" })
+      }
+      expect((await resolve("/blog/yazi-1")).type).toBe("entity")
+
+      // A live page is never shadowed, nor a real nested path, nor a path WordPress never served
+      expect((await resolve(category)).type).toBe("entity")
       expect((await resolve("/hakkimizda")).type).toBe("entity")
       expect((await resolve("/hic-olmayan")).type).toBe("not_found")
     })

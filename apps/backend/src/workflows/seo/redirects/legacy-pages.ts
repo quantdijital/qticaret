@@ -14,7 +14,11 @@ import type { Resolution } from "./resolve"
  * lands on the same page number while there is one, else on the first.
  */
 
-export type Follow = (request: { path: string; query: URLSearchParams }) => Promise<Resolution>
+/** Where a path leads; with `legacy: false`, without the old platform's rules (one level, no recursion). */
+export type Follow = (
+  request: { path: string; query: URLSearchParams },
+  options?: { legacy?: boolean }
+) => Promise<Resolution>
 
 /** Posts a blog list shows a page (the storefront's `screens/blog.tsx`). */
 export const BLOG_PAGE_SIZE = 12

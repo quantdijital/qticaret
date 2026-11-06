@@ -1,3 +1,5 @@
+export { attachmentPage } from "./attachments"
+export type { AttachmentPage } from "./attachments"
 export { uploadStem } from "./files"
 export type { LegacyAddress } from "./types"
 export { keptQuery, wordpressAddress } from "./wordpress"

@@ -120,8 +120,8 @@ async function answer(container: MedusaContainer, request: RequestPath): Promise
 /** Where a path leads, its hits uncounted: what an old address's rule asks (adr/0059). */
 const followed =
   (container: MedusaContainer): Follow =>
-  async (request) =>
-    (await followPath(container, request, { countHits: false })).resolution
+  async (request, { legacy = true } = {}) =>
+    (await followPath(container, request, { countHits: false, legacy })).resolution
 
 export interface Followed {
   resolution: Resolution

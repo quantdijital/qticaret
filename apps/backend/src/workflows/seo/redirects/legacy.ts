@@ -15,6 +15,7 @@ import type MigrationModuleService from "../../../modules/migration/service"
 import { SEO_REDIRECTS_MODULE } from "../../../modules/seo-redirects"
 import type SeoRedirectsModuleService from "../../../modules/seo-redirects/service"
 import { entityOf } from "../../migration/entities"
+import { attachmentTarget } from "./legacy-attachment"
 import { LIST_PAGES, pageCountOf } from "./legacy-pages"
 import type { Follow } from "./legacy-pages"
 import { activePathOf, ownerState } from "./owners"
@@ -219,8 +220,11 @@ async function wordpressAnswer(
 ): Promise<Answer> {
   const address = wordpressAddress(request)
   switch (address?.kind) {
-    case undefined:
-      return null
+    case undefined: {
+      // None of WordPress's own: maybe an attachment page under a moved record
+      const page = await attachmentTarget(container, follow, request.path)
+      return page && moved(locationOf(page.location, request), page.status)
+    }
     case "paged":
       return pagedAnswer(container, follow, address, request)
     case "record_id": {
