@@ -9,7 +9,7 @@ import type {
 import { addToCart } from "@/app/actions/cart"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import type { AnalyticsEvent } from "@/lib/analytics/events"
-import { listEvent, listItems } from "@/lib/analytics/payloads"
+import { listContext, listEvent, listItems } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { t } from "@/lib/i18n"
 import { faqJsonLd } from "@/lib/seo/faq"
@@ -230,19 +230,28 @@ export async function ListingContent({
   const cards = withCardFacts(productCards(products, paths, displays, options), facts)
   // A search is one when asked, not again for each page or filter (as the backend counts it).
   // Prices are the cards' own, an automatic promotion included (adr/0023 Ek 2026-11-05)
+  const list =
+    products.length > 0
+      ? listEvent(type, isSearch ? t("search.title") : heading.title, products, displays)
+      : null
   const measured: AnalyticsEvent[] = [
     ...(isSearch && state.q && first ? [{ name: "search" as const, term: state.q }] : []),
-    ...(products.length > 0
-      ? [listEvent(type, isSearch ? t("search.title") : heading.title, products, displays)]
-      : []),
+    ...(list ? [list] : []),
   ]
-  // What a card's quick add puts in the cart, for its "added to cart"
+  // What a card's quick add puts in the cart (its brand for "added to cart"), and where each card leads
   const quick = cards.flatMap((card) => (card.quickAdd ? [card.quickAdd.variantId] : []))
   return (
     <>
       <TrackEvents
         events={measured}
-        context={quick.length > 0 ? { items: listItems(products, displays, quick) } : null}
+        context={
+          list
+            ? {
+                list: listContext(list, paths),
+                ...(quick.length > 0 ? { items: listItems(products, displays, quick) } : {}),
+              }
+            : null
+        }
       />
       <JsonLd
         blocks={[...jsonLd, ...(first ? faqJsonLd([...sections.top, ...sections.bottom]) : [])]}

@@ -1,4 +1,5 @@
 import "server-only"
+import { cache } from "react"
 import { isNotFound, isStoreApiError } from "../store-api/errors"
 import { liraRegion, storefrontSettings } from "../store-api/requests"
 import { storeDelete, storeGet, storePost } from "../store-api/server"
@@ -116,8 +117,12 @@ export async function currentCart(): Promise<Cart | null> {
   }
 }
 
-/** The cart for the header (count and drawer); a backend hiccup shows none rather than failing the page. */
-export async function headerCart(): Promise<Cart | null> {
+/**
+ * The cart for the header (count and drawer) and the frame's conversion
+ * events, asked once per render; a backend hiccup shows none rather than
+ * failing the page.
+ */
+export const headerCart = cache(async (): Promise<Cart | null> => {
   try {
     return await currentCart()
   } catch (error) {
@@ -126,7 +131,7 @@ export async function headerCart(): Promise<Cart | null> {
     }
     throw error
   }
-}
+})
 
 async function newCart(): Promise<string> {
   const { id: region_id } = await liraRegion()

@@ -1,42 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import type * as Client from "../client"
 import type { AnalyticsEvent } from "../events"
-
-/** Just enough of a browser for the loaders: scripts appended, cookies written, a tab's storage. */
-function fakeBrowser(href = "https://shop.test/urun/gomlek") {
-  const scripts: { src: string; nonce: string; async: boolean }[] = []
-  const written: string[] = []
-  const storage = new Map<string, string>()
-  const win: Record<string, unknown> = {
-    location: { href, hostname: "shop.test" },
-    sessionStorage: {
-      getItem: (key: string) => storage.get(key) ?? null,
-      setItem: (key: string, value: string) => storage.set(key, value),
-    },
-  }
-  const doc = {
-    referrer: "",
-    head: { appendChild: (script: (typeof scripts)[number]) => scripts.push(script) },
-    createElement: () => ({ src: "", nonce: "", async: false }),
-    get cookie() {
-      return "_ga=GA1.1.1.2; _ga_ABC=x; other=1; _fbp=fb.1.1700000000000.1"
-    },
-    set cookie(value: string) {
-      written.push(value)
-    },
-  }
-  vi.stubGlobal("window", win)
-  vi.stubGlobal("document", doc)
-  return { scripts, written, win, doc }
-}
-
-/** The calls pushed to GA4's data layer, as plain arrays. */
-const layer = (win: Record<string, unknown>) =>
-  ((win["dataLayer"] as ArrayLike<unknown>[] | undefined) ?? []).map((call) => Array.from(call))
-
-/** The calls Meta's pixel queued. */
-const metaCalls = (win: Record<string, unknown>) =>
-  ((win["fbq"] as { queue: unknown[][] } | undefined)?.queue ?? []).map((call) => Array.from(call))
+import { fakeBrowser, layer, metaCalls } from "../../../test/fake-browser"
 
 const view: AnalyticsEvent = {
   name: "view_item",
@@ -199,42 +164,61 @@ describe("the tags in the browser", () => {
     expect(layer(win)).toHaveLength(before)
   })
 
-  it("counts a key once per tab", () => {
-    fakeBrowser()
-    expect(client.firstInSession("purchase:order_1")).toBe(true)
-    expect(client.firstInSession("purchase:order_1")).toBe(false)
-    expect(client.firstInSession("purchase:order_2")).toBe(true)
+  it("forgets what it kept once the visitor withdraws every tag", () => {
+    const { storage } = fakeBrowser()
+    client.configureAnalytics({ ga4: "G-ABC123", meta: null, adSignals: false }, undefined)
+    client.track(purchase, "purchase:order_1")
+    client.watchCart({ id: "cart_1", locked: false, items: [] })
+    storage.set("someone_else", "1")
+    expect([...storage.keys()].sort()).toEqual([
+      "qt_cart_seen",
+      "qt_event:purchase:order_1",
+      "someone_else",
+    ])
+    client.configureAnalytics({ ga4: null, meta: null, adSignals: false }, undefined)
+    expect([...storage.keys()]).toEqual(["someone_else"])
   })
 
-  it("sends a once-only event once, and writes nothing for a visitor who allowed nothing", () => {
-    const { win } = fakeBrowser()
-    const storage = win["sessionStorage"] as { getItem: (key: string) => string | null }
+  it("loads the scripts only once the page has loaded, the events queued meanwhile", () => {
+    const { scripts, win, load } = fakeBrowser("https://shop.test/", { loading: true })
+    client.configureAnalytics({ ga4: "G-ABC123", meta: "1234567890", adSignals: false }, "n0nce")
+    client.track(view)
+    expect(scripts).toEqual([])
+    expect(layer(win).some((call) => call[1] === "view_item")).toBe(true)
+    expect(metaCalls(win).some((call) => call[1] === "ViewContent")).toBe(true)
+    load()
+    expect(scripts.map((script) => script.src)).toEqual([
+      "https://www.googletagmanager.com/gtag/js?id=G-ABC123",
+      "https://connect.facebook.net/en_US/fbevents.js",
+    ])
+  })
+
+  it("sends a once-only event once in the browser, and writes nothing for a visitor who allowed nothing", () => {
+    const { storage, win } = fakeBrowser()
     client.track(purchase, "purchase:order_1")
     client.configureAnalytics({ ga4: null, meta: null, adSignals: false }, undefined)
-    expect(storage.getItem("qt_event:purchase:order_1")).toBeNull()
+    expect(storage.size).toBe(0)
 
     vi.resetModules()
-    return import("../client").then((fresh) => {
+    return import("../client").then(async (fresh) => {
       fresh.configureAnalytics({ ga4: "G-ABC123", meta: null, adSignals: false }, undefined)
       fresh.track(purchase, "purchase:order_1")
       fresh.track(purchase, "purchase:order_1")
-      const sent = layer(win).filter((call) => call[1] === "purchase")
-      expect(sent).toHaveLength(1)
-      expect(storage.getItem("qt_event:purchase:order_1")).toBe("1")
+      expect(storage.get("qt_event:purchase:order_1")).toBe("1")
+      // A reload, or the order's page in another tab: the browser remembers
+      vi.resetModules()
+      const reloaded = await import("../client")
+      reloaded.configureAnalytics({ ga4: "G-ABC123", meta: null, adSignals: false }, undefined)
+      reloaded.track(purchase, "purchase:order_1")
+      expect(layer(win).filter((call) => call[1] === "purchase")).toHaveLength(1)
     })
   })
 
-  it("turns the theme's signals into events with what the page knows", () => {
+  it("leaves the theme's add to cart to the cart's own look, and turns payment chosen into its event", () => {
     fakeBrowser()
     const item = { id: "variant_1", name: "A", price: 25, quantity: 1 }
-    expect(client.eventOf({ type: "add_to_cart", variantId: "variant_1", quantity: 2 })).toBeNull()
     client.setPageContext({ items: { variant_1: item } })
-    expect(client.eventOf({ type: "add_to_cart", variantId: "variant_1", quantity: 2 })).toEqual({
-      name: "add_to_cart",
-      value: 50,
-      items: [{ ...item, quantity: 2 }],
-    })
-    expect(client.eventOf({ type: "add_to_cart", variantId: "variant_x", quantity: 1 })).toBeNull()
+    expect(client.eventOf({ type: "add_to_cart", variantId: "variant_1", quantity: 2 })).toBeNull()
     expect(
       client.eventOf(
         { type: "add_payment_info", payment: "card" },

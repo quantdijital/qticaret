@@ -63,6 +63,43 @@ describe("GA4's events", () => {
     expect(params).toMatchObject({ payment_type: "bank_transfer" })
   })
 
+  it("sends the cart's and the checkout's steps as GA4's recommended events", () => {
+    for (const name of ["remove_from_cart", "view_cart"] as const) {
+      expect(ga4Event({ name, value: 1599.8, items: [shirt] })).toEqual([
+        name,
+        {
+          currency: "TRY",
+          value: 1599.8,
+          items: [expect.objectContaining({ item_id: "variant_01", quantity: 2, price: 799.9 })],
+        },
+      ])
+    }
+    expect(
+      ga4Event({ name: "add_shipping_info", value: 10, shippingTier: "Aras Kargo", items: [] })
+    ).toEqual([
+      "add_shipping_info",
+      { currency: "TRY", value: 10, shipping_tier: "Aras Kargo", items: [] },
+    ])
+  })
+
+  it("names the list a card was chosen from, the item at its place in that list", () => {
+    expect(
+      ga4Event({
+        name: "select_item",
+        listId: "product_category",
+        listName: "Gömlekler",
+        items: [{ id: "prod_9", name: "B", price: 10, quantity: 1, index: 7 }],
+      })
+    ).toEqual([
+      "select_item",
+      {
+        item_list_id: "product_category",
+        item_list_name: "Gömlekler",
+        items: [{ item_id: "prod_9", item_name: "B", index: 7, quantity: 1, price: 10 }],
+      },
+    ])
+  })
+
   it("leaves out what an item does not have, and rounds to kuruş", () => {
     const [, params] = ga4Event({
       name: "view_item_list",
@@ -105,6 +142,17 @@ describe("Meta's events", () => {
       metaEvent({ name: "page_view", location: "https://x", referrer: "", title: "" })?.name
     ).toBe("PageView")
     expect(metaEvent({ name: "view_item_list", listId: "a", listName: "A", items: [] })).toBeNull()
+    expect(metaEvent({ name: "add_to_cart", value: 1, items: [shirt] })?.name).toBe("AddToCart")
+    expect(
+      metaEvent({ name: "add_payment_info", value: 1, paymentType: "card", items: [shirt] })?.name
+    ).toBe("AddPaymentInfo")
+    // GA4 alone hears these: Meta has no standard event for them
+    expect(metaEvent({ name: "select_item", listId: "a", listName: "A", items: [] })).toBeNull()
+    expect(metaEvent({ name: "remove_from_cart", value: 1, items: [shirt] })).toBeNull()
+    expect(metaEvent({ name: "view_cart", value: 1, items: [shirt] })).toBeNull()
+    expect(
+      metaEvent({ name: "add_shipping_info", value: 1, shippingTier: "x", items: [] })
+    ).toBeNull()
   })
 })
 

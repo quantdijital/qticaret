@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { currentCustomer, customerAddresses } from "@/lib/account/auth"
+import { shippingInfoEvents } from "@/lib/analytics/cart-payloads"
 import { checkoutEvents } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { shopperGiftLines } from "@/lib/cart/gift"
@@ -71,6 +72,9 @@ export default async function CheckoutPage({
         }
       : view
   const measured = checkoutEvents(cart)
+  // The shipping chosen shows as the payment step: once per cart and option
+  const shipping = shown.step === "payment" ? shippingInfoEvents(cart) : []
+  const option = cart.shipping_methods[0]?.shipping_option_id ?? "none"
   return (
     <>
       <TrackEvents
@@ -78,6 +82,7 @@ export default async function CheckoutPage({
         context={measured.context}
         once={`begin_checkout:${cart.id}`}
       />
+      <TrackEvents events={shipping} once={`add_shipping_info:${cart.id}:${option}`} />
       <theme.CheckoutPage view={shown} t={t} actions={checkoutActions} />
     </>
   )

@@ -4,7 +4,10 @@ import type { ReactNode } from "react"
 import { AnalyticsScripts } from "@/app/AnalyticsScripts"
 import { changeCartLine } from "@/app/actions/cart"
 import { saveCookieChoice } from "@/app/actions/cookies"
+import { NO_CART } from "@/lib/analytics/cart-changes"
+import { cartSnapshotOf } from "@/lib/analytics/cart-payloads"
 import { analyticsTags } from "@/lib/analytics/tags"
+import { headerCart } from "@/lib/cart/cart"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { SUGGEST_PATH } from "@/lib/views/search-suggest"
@@ -36,6 +39,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const nonce = requestHeaders.get("x-nonce") ?? undefined
   // A design preview in the panel's frame is the shop's own look, not a visit
   const preview = (requestHeaders.get("x-qt-url") ?? "").startsWith("/onizleme/")
+  const measured = !preview && (tags.ga4 !== null || tags.meta !== null)
+  // The cart the header shows (asked once per render), for its "added" and "taken out": only to a
+  // browser whose visitor allowed a tag
+  const cart = measured ? cartSnapshotOf(await headerCart()) : NO_CART
   return (
     <html lang="tr">
       {/* Browser extensions write attributes on <body> before React loads */}
@@ -58,6 +65,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           meta={preview ? null : tags.meta}
           adSignals={tags.adSignals}
           nonce={nonce}
+          cart={cart}
         />
         <theme.Layout
           shop={shop}

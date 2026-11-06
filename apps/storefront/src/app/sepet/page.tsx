@@ -3,6 +3,8 @@ import type { StoreProductAddon } from "@qticaret/types"
 import { formatLira } from "@qticaret/ui"
 import { themeActions } from "@/lib/theme-actions"
 import { ADDON_ERROR_KEYS } from "@/lib/addons/errors"
+import { viewCartEvents } from "@/lib/analytics/cart-payloads"
+import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { addonsOfProducts } from "@/lib/cart/addons"
 import { codesOf, currentCart } from "@/lib/cart/cart"
 import { shopperGiftLines } from "@/lib/cart/gift"
@@ -89,29 +91,36 @@ export default async function CartPage({
   const items = cart?.original_item_total ?? 0
   const subtotal = cart?.item_total ?? 0
   return (
-    <theme.CartPage
-      t={t}
-      actions={themeActions}
-      view={{
-        lines,
-        items: formatLira(items),
-        discount: differs(items, subtotal) ? formatLira(items - subtotal) : null,
-        subtotal: formatLira(subtotal),
-        // A link's code is the link's own, never shown to copy
-        promotions: locked ? [] : codesOf(cart),
-        giftCards:
-          settings.features?.gift_cards && (gifts.length === 0 || codes.length > 0) ? codes : null,
-        giftNotice: gifts.length > 0 && paidByCard ? t("gift_card.not_payable_with_credit") : null,
-        credit: cart?.credit_line_total ? formatLira(cart.credit_line_total) : null,
-        freeShipping: freeShippingOf(subtotal, settings.free_shipping_threshold, t),
-        error,
-        locked,
-        shipping: extras.shipping ?? null,
-        offers: extras.offers ?? [],
-        trust: shared.trust_badges,
-        // A payment link's cart takes nothing more (adr/0051)
-        upsell: locked ? null : (extras.upsell ?? null),
-      }}
-    />
+    <>
+      {/* Once per visit to the cart, not again as its lines change (the frame tells those) */}
+      {cart && <TrackEvents events={viewCartEvents(cart)} sendOn={`view_cart:${cart.id}`} />}
+      <theme.CartPage
+        t={t}
+        actions={themeActions}
+        view={{
+          lines,
+          items: formatLira(items),
+          discount: differs(items, subtotal) ? formatLira(items - subtotal) : null,
+          subtotal: formatLira(subtotal),
+          // A link's code is the link's own, never shown to copy
+          promotions: locked ? [] : codesOf(cart),
+          giftCards:
+            settings.features?.gift_cards && (gifts.length === 0 || codes.length > 0)
+              ? codes
+              : null,
+          giftNotice:
+            gifts.length > 0 && paidByCard ? t("gift_card.not_payable_with_credit") : null,
+          credit: cart?.credit_line_total ? formatLira(cart.credit_line_total) : null,
+          freeShipping: freeShippingOf(subtotal, settings.free_shipping_threshold, t),
+          error,
+          locked,
+          shipping: extras.shipping ?? null,
+          offers: extras.offers ?? [],
+          trust: shared.trust_badges,
+          // A payment link's cart takes nothing more (adr/0051)
+          upsell: locked ? null : (extras.upsell ?? null),
+        }}
+      />
+    </>
   )
 }

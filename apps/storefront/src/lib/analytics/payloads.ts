@@ -1,6 +1,6 @@
 import type { PriceDisplay, StoreProduct } from "@qticaret/types"
 import { shownAmount } from "../views/price"
-import type { AnalyticsEvent, AnalyticsItem, PageContext } from "./events"
+import type { AnalyticsEvent, AnalyticsItem, ListContext, PageContext } from "./events"
 import { itemsValue } from "./events"
 
 /**
@@ -83,6 +83,25 @@ export function listEvent(
 }
 
 /**
+ * The list's cards by the path they lead to, each the list's item at its
+ * place (`select_item`); a product without a page of its own has no card.
+ */
+export function listContext(
+  event: Extract<AnalyticsEvent, { name: "view_item_list" }>,
+  paths: Readonly<Record<string, string>>
+): ListContext {
+  const links: Record<string, AnalyticsItem> = {}
+  event.items.forEach((item, index) => {
+    const path = paths[item.id]
+    const pathname = path ? URL.parse(path, "http://shop.invalid")?.pathname : undefined
+    if (pathname && !(pathname in links)) {
+      links[pathname] = { ...item, index }
+    }
+  })
+  return { id: event.listId, name: event.listName, links }
+}
+
+/**
  * The listed variants a card adds to the cart by itself (quick add), as
  * items by variant id: a list page's context for "added to cart".
  */
@@ -133,15 +152,19 @@ function paidUnit(line: LineFacts): number | null {
     : priceOf(line.unit_price)
 }
 
+/** A cart's lines at the unit price the cart shows (`paidUnit`). */
+export const paidItems = (lines: readonly LineFacts[]): AnalyticsItem[] =>
+  lineItems(lines).map((item, index) => {
+    const line = lines[index]
+    return line ? { ...item, price: paidUnit(line) } : item
+  })
+
 /** The checkout's `begin_checkout`, and its cart for the payment step's signal. */
 export function checkoutEvents(cart: { item_total: number; items: readonly LineFacts[] }): {
   events: AnalyticsEvent[]
   context: PageContext
 } {
-  const items = lineItems(cart.items).map((item, index) => {
-    const line = cart.items[index]
-    return line ? { ...item, price: paidUnit(line) } : item
-  })
+  const items = paidItems(cart.items)
   const value = Math.round(cart.item_total * 100) / 100
   return {
     events: [{ name: "begin_checkout", value, items }],

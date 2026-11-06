@@ -18,15 +18,22 @@ export interface AnalyticsItem {
   category?: string | null
   /** The variant's own name ("M / Mavi"). */
   variant?: string | null
+  /** Its place in the list it was shown in (a chosen card); else its place in the event. */
+  index?: number
 }
 
 export type AnalyticsEvent =
   | { name: "page_view"; location: string; referrer: string; title: string }
   | { name: "view_item"; value: number; items: AnalyticsItem[] }
   | { name: "view_item_list"; listId: string; listName: string; items: AnalyticsItem[] }
+  /** A card of a list followed to its product. */
+  | { name: "select_item"; listId: string; listName: string; items: AnalyticsItem[] }
   | { name: "search"; term: string }
   | { name: "add_to_cart"; value: number; items: AnalyticsItem[] }
+  | { name: "remove_from_cart"; value: number; items: AnalyticsItem[] }
+  | { name: "view_cart"; value: number; items: AnalyticsItem[] }
   | { name: "begin_checkout"; value: number; items: AnalyticsItem[] }
+  | { name: "add_shipping_info"; value: number; shippingTier: string; items: AnalyticsItem[] }
   | { name: "add_payment_info"; value: number; paymentType: string; items: AnalyticsItem[] }
   | {
       name: "purchase"
@@ -38,10 +45,19 @@ export type AnalyticsEvent =
     }
   | { name: "sign_up"; method: "email" }
 
-/** What a page knows for the theme's later "added to cart" and "payment chosen". */
+/** A list of products as its cards lead on: the item behind each product page's path. */
+export interface ListContext {
+  id: string
+  name: string
+  links: Record<string, AnalyticsItem>
+}
+
+/** What a page knows for later events: a card chosen, a line added, the payment chosen. */
 export interface PageContext {
-  /** The page's variants by id (the product page). */
+  /** The page's variants by id (the product page, a list's quick adds): their brand for the cart's events. */
   items?: Record<string, AnalyticsItem>
+  /** The page's list of products, for `select_item`. */
+  list?: ListContext
   /** The cart being paid (the checkout). */
   checkout?: { value: number; items: AnalyticsItem[] }
 }
@@ -56,7 +72,7 @@ function ga4Item(item: AnalyticsItem, index: number) {
   return {
     item_id: item.id,
     item_name: item.name,
-    index,
+    index: item.index ?? index,
     quantity: item.quantity,
     ...(item.price !== null ? { price: money(item.price) } : {}),
     ...(item.brand ? { item_brand: item.brand } : {}),
@@ -78,8 +94,9 @@ export function ga4Event(event: AnalyticsEvent): [string, Record<string, unknown
     case "sign_up":
       return ["sign_up", { method: event.method }]
     case "view_item_list":
+    case "select_item":
       return [
-        "view_item_list",
+        event.name,
         {
           item_list_id: event.listId,
           item_list_name: event.listName,
@@ -107,8 +124,20 @@ export function ga4Event(event: AnalyticsEvent): [string, Record<string, unknown
           items: event.items.map(ga4Item),
         },
       ]
+    case "add_shipping_info":
+      return [
+        "add_shipping_info",
+        {
+          currency: CURRENCY,
+          value: money(event.value),
+          shipping_tier: event.shippingTier,
+          items: event.items.map(ga4Item),
+        },
+      ]
     case "view_item":
     case "add_to_cart":
+    case "remove_from_cart":
+    case "view_cart":
     case "begin_checkout":
       return [
         event.name,
@@ -180,7 +209,12 @@ export function metaEvent(event: AnalyticsEvent): MetaCall | null {
       }
     case "sign_up":
       return { name: "CompleteRegistration", data: {} }
+    // Meta has no standard event for these: GA4 hears them alone
     case "view_item_list":
+    case "select_item":
+    case "remove_from_cart":
+    case "view_cart":
+    case "add_shipping_info":
       return null
   }
 }
