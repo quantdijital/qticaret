@@ -96,6 +96,22 @@
     @apply bg-background text-foreground antialiased;
   }
 
+  /*
+   * No browser spinner on any number input (the owner, 2026-11-06:
+   * "browser'a özgü kalmasın"): the panel's NumberField draws its own
+   * chevrons, and an input the panel did not write shows none at all.
+   */
+  input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
   /* Amounts, counts and codes line up */
   .tabular {
     font-variant-numeric: tabular-nums;

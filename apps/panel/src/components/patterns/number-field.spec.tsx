@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { act, fireEvent, render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { useState } from "react"
 import { useForm, useWatch } from "react-hook-form"
@@ -45,7 +45,7 @@ describe("NumberField", () => {
     expect(field()).toHaveAttribute("aria-valuenow", "1250")
   })
 
-  it("steps with − / + and the arrow keys, held between min and max", async () => {
+  it("steps with the up / down chevrons and the arrow keys, held between min and max", async () => {
     const user = userEvent.setup()
     render(<Controlled start="1" min={0} max={3} />)
     await user.click(plus())
@@ -71,7 +71,7 @@ describe("NumberField", () => {
     expect(screen.getByText("₺")).toBeInTheDocument()
   })
 
-  it("keeps the buttons out of the tab order and the caret in the field", async () => {
+  it("keeps the chevrons out of the tab order and the caret in the field", async () => {
     const user = userEvent.setup()
     render(<Controlled start="2" />)
     await user.click(field())
@@ -81,13 +81,15 @@ describe("NumberField", () => {
     expect(field()).toHaveValue("3")
   })
 
-  it("does nothing while disabled or read only", async () => {
+  it("does nothing while disabled or read only, the chevrons never shown", async () => {
     const user = userEvent.setup()
     const { rerender } = render(<Controlled start="2" disabled />)
     expect(plus()).toBeDisabled()
     expect(minus()).toBeDisabled()
+    expect(plus().parentElement).toHaveClass("invisible")
     rerender(<Controlled start="2" readOnly />)
     expect(plus()).toBeDisabled()
+    expect(plus().parentElement).toHaveClass("invisible")
     await user.click(field())
     await user.keyboard("{ArrowUp}")
     expect(field()).toHaveValue("2")
@@ -117,6 +119,62 @@ describe("NumberField", () => {
     await user.click(plus())
     expect(field()).toHaveValue(3)
     expect(seen).toHaveBeenLastCalledWith("3")
+  })
+
+  it("stacks the chevrons in the right edge, shown on hover or focus, left out on touch", () => {
+    render(<Controlled start="1" />)
+    const steps = plus().parentElement
+    expect(steps).toHaveAttribute("data-slot", "number-field-steps")
+    expect(steps?.firstElementChild).toBe(plus())
+    expect(steps?.lastElementChild).toBe(minus())
+    expect(steps).toHaveClass(
+      "opacity-0",
+      "group-hover/number:opacity-100",
+      "group-focus-within/number:opacity-100",
+      "pointer-coarse:hidden"
+    )
+    expect(field().closest("[data-slot=number-field]")?.lastElementChild).toBe(steps)
+  })
+
+  it("repeats while a chevron is held and stops at the limit or on release", () => {
+    vi.useFakeTimers()
+    try {
+      render(<Controlled start="0" max={50} />)
+      fireEvent.pointerDown(plus(), { button: 0 })
+      expect(field()).toHaveValue("1")
+      act(() => {
+        vi.advanceTimersByTime(399)
+      })
+      expect(field()).toHaveValue("1")
+      act(() => {
+        vi.advanceTimersByTime(600)
+      })
+      const held = Number((field() as HTMLInputElement).value)
+      expect(held).toBeGreaterThan(5)
+      fireEvent.pointerUp(window)
+      fireEvent.click(plus())
+      act(() => {
+        vi.advanceTimersByTime(2000)
+      })
+      expect(field()).toHaveValue(String(held))
+      fireEvent.pointerDown(plus(), { button: 0 })
+      act(() => {
+        vi.advanceTimersByTime(10_000)
+      })
+      expect(field()).toHaveValue("50")
+      expect(plus()).toBeDisabled()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it("steps once on a click without a press (a screen reader's)", () => {
+    render(<Controlled start="4" />)
+    fireEvent.click(plus())
+    expect(field()).toHaveValue("5")
+    fireEvent.click(minus())
+    fireEvent.click(minus())
+    expect(field()).toHaveValue("3")
   })
 
   it("is 36 px, or 32 px and right aligned when compact", () => {

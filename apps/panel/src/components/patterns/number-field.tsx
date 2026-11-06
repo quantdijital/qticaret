@@ -1,8 +1,9 @@
-import { Minus, Plus } from "lucide-react"
+import { ChevronDown, ChevronUp } from "lucide-react"
 import * as React from "react"
 import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
 import { readNumber, stepText } from "./number-step"
+import { useHoldStep } from "./use-hold-step"
 
 type InputProps = Omit<
   React.ComponentProps<"input">,
@@ -28,11 +29,15 @@ export interface NumberFieldProps extends InputProps {
 }
 
 /**
- * The panel's number field (docs/18 §2): the value, an optional unit and a
- * − / + pair in one 36 px box, no browser spinner. Typing and the arrow keys
- * work as before; the pair and the keys keep to min and max. Turkish text
- * ("1.250,50") unless `plain`. The buttons stay out of the tab order (the
- * arrow keys do the same) and never steal the caret.
+ * The panel's number field (docs/18 §2): the value, an optional unit and,
+ * inside the right edge, a pair of small up / down chevrons stacked in
+ * the box's height; no browser spinner. The chevrons show while the
+ * pointer is over the field or it has the focus (their room is kept, so
+ * nothing moves), icon only, muted until pointed at; held down they
+ * repeat. On a touch screen they are left out and the phone's number pad
+ * does the work. The arrow keys step as before; both keep to min and
+ * max. Turkish text ("1.250,50") unless `plain`. The chevrons stay out of
+ * the tab order (the arrow keys do the same) and never steal the caret.
  */
 export function NumberField({
   min,
@@ -83,11 +88,18 @@ export function NumberField({
   const rule = { plain, decimals, min: bound(min), max: bound(max), step }
   const current = readNumber(text, rule)
   const locked = disabled === true || readOnly === true
-  const move = (direction: 1 | -1) => {
+  /** One step; false when there was no room for it (or the field is locked). */
+  const move = (direction: 1 | -1): boolean => {
     const input = own.current
-    if (input && !locked) {
-      write(input, stepText(input.value, direction, rule))
+    if (!input || locked) {
+      return false
     }
+    const next = stepText(input.value, direction, rule)
+    if (next === input.value) {
+      return false
+    }
+    write(input, next)
+    return true
   }
   const compact = size === "compact"
   return (
@@ -95,7 +107,7 @@ export function NumberField({
       data-slot="number-field"
       data-size={size}
       className={cn(
-        "flex w-full min-w-0 items-stretch overflow-hidden rounded-md border border-input bg-transparent shadow-xs dark:bg-input/30",
+        "group/number flex w-full min-w-0 items-stretch overflow-hidden rounded-md border border-input bg-transparent shadow-xs dark:bg-input/30",
         compact ? "h-8" : "h-9",
         "has-[input[aria-invalid=true]]:border-destructive has-[input:disabled]:cursor-not-allowed has-[input:disabled]:opacity-50",
         className
@@ -122,9 +134,11 @@ export function NumberField({
         data-slot="number-field-input"
         className={cn(
           "w-full min-w-0 flex-1 bg-transparent text-base tabular-nums outline-none selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground disabled:pointer-events-none md:text-sm",
-          // No browser spinner: the pair below is the field's own
+          // No browser spinner (globals.css hides it everywhere too)
           "[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
-          compact ? "px-2 text-right" : "px-3",
+          compact ? "pl-2 text-right" : "pl-3",
+          // The chevrons' column follows; on a touch screen it is not there
+          suffix ? "pr-1.5" : "pr-1 pointer-coarse:pr-3",
           inputClassName
         )}
         onChange={(event) => {
@@ -144,69 +158,124 @@ export function NumberField({
       {suffix ? (
         <span
           aria-hidden="true"
-          className={cn(
-            "flex shrink-0 items-center text-sm text-muted-foreground",
-            compact ? "pr-2" : "pr-3"
-          )}
+          className="flex shrink-0 items-center pr-0.5 text-sm text-muted-foreground pointer-coarse:pr-3"
         >
           {suffix}
         </span>
       ) : null}
-      <StepButton
-        label={t("common.decrease")}
+      <Steps
+        locked={locked}
         compact={compact}
-        disabled={locked || (rule.min !== undefined && current !== null && current <= rule.min)}
-        onStep={() => {
-          move(-1)
+        up={{
+          label: t("common.increase"),
+          stop: rule.max !== undefined && current !== null && current >= rule.max,
+          move: () => move(1),
         }}
-      >
-        <Minus />
-      </StepButton>
-      <StepButton
-        label={t("common.increase")}
-        compact={compact}
-        disabled={locked || (rule.max !== undefined && current !== null && current >= rule.max)}
-        onStep={() => {
-          move(1)
+        down={{
+          label: t("common.decrease"),
+          stop: rule.min !== undefined && current !== null && current <= rule.min,
+          move: () => move(-1),
         }}
-      >
-        <Plus />
-      </StepButton>
+      />
+    </div>
+  )
+}
+
+interface Arrow {
+  label: string
+  /** At its limit: the arrow is off */
+  stop: boolean
+  move: () => boolean
+}
+
+/**
+ * The up / down pair, each half the field's height, in a column whose
+ * room is always kept: hidden until the pointer is over the field or it
+ * has the focus, never shown on a locked field, left out on a touch screen.
+ */
+function Steps({
+  locked,
+  compact,
+  up,
+  down,
+}: {
+  locked: boolean
+  compact: boolean
+  up: Arrow
+  down: Arrow
+}) {
+  const hold = useHoldStep()
+  return (
+    <div
+      data-slot="number-field-steps"
+      className={cn(
+        "flex shrink-0 flex-col justify-center py-0.5 pr-0.5 opacity-0 transition-opacity duration-100 pointer-coarse:hidden",
+        compact ? "w-5" : "w-6",
+        locked
+          ? "invisible"
+          : "group-focus-within/number:opacity-100 group-hover/number:opacity-100"
+      )}
+    >
+      {[
+        { arrow: up, Icon: ChevronUp, slot: "number-field-up" },
+        { arrow: down, Icon: ChevronDown, slot: "number-field-down" },
+      ].map(({ arrow, Icon, slot }) => (
+        <StepButton
+          key={slot}
+          slot={slot}
+          arrow={arrow}
+          disabled={locked || arrow.stop}
+          hold={hold}
+        >
+          <Icon />
+        </StepButton>
+      ))}
     </div>
   )
 }
 
 function StepButton({
-  label,
-  compact,
+  slot,
+  arrow,
   disabled,
-  onStep,
+  hold,
   children,
 }: {
-  label: string
-  compact: boolean
+  slot: string
+  arrow: Arrow
   disabled: boolean
-  onStep: () => void
+  hold: ReturnType<typeof useHoldStep>
   children: React.ReactNode
 }) {
+  // A press already stepped; the click that follows it does not again
+  const pressed = React.useRef(false)
   return (
     <button
       type="button"
       tabIndex={-1}
-      aria-label={label}
+      aria-label={arrow.label}
       disabled={disabled}
-      data-slot="number-field-step"
-      className={cn(
-        "flex shrink-0 items-center justify-center border-l border-input text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground disabled:pointer-events-none disabled:opacity-40 [&_svg]:pointer-events-none [&_svg]:size-3.5",
-        compact ? "w-7" : "w-8"
-      )}
+      data-slot={slot}
+      className="flex min-h-0 flex-1 items-center justify-center rounded-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground disabled:pointer-events-none disabled:opacity-30 [&_svg]:pointer-events-none [&_svg]:size-3.5 [&_svg]:stroke-[2.25]"
       // The caret stays in the field; a row's own click is not set off
       onMouseDown={(event) => {
         event.preventDefault()
       }}
+      onPointerDown={(event) => {
+        if (event.button !== 0) {
+          return
+        }
+        pressed.current = true
+        hold.start(arrow.move)
+      }}
+      onPointerLeave={hold.stop}
       onClick={(event) => {
         event.stopPropagation()
-        onStep()
+        // A click without a press (a screen reader's) steps once
+        if (!pressed.current) {
+          arrow.move()
+        }
+        pressed.current = false
       }}
     >
       {children}
