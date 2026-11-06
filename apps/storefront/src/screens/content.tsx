@@ -1,6 +1,7 @@
 import type {
   MediaDerivatives,
   Resolution,
+  StoreBodyImage,
   StoreContentAuthorDetail,
   StoreContentTerm,
 } from "@qticaret/types"
@@ -18,6 +19,7 @@ import { identityRows, infoPageOf, postMeta, shareLinks } from "@/lib/views/cont
 import { faqOf } from "@/lib/views/faq"
 import { withOutline } from "@/lib/views/legal-outline"
 import { coverOf, postTerms } from "@/lib/views/posts"
+import { withPictures } from "@/lib/views/prose-images"
 import { breadcrumbsOf } from "@/lib/views/product"
 import { contactOf } from "@/lib/views/shop"
 import { theme } from "@/theme"
@@ -36,6 +38,8 @@ interface ContentEntry {
   image_width?: number | null
   image_height?: number | null
   image_derivatives?: MediaDerivatives | null
+  /** The text's library pictures with their size and versions. */
+  images?: StoreBodyImage[]
   author_name: string | null
   /** The chosen author (adr/0060); null: none, the old written name alone if any. */
   author?: StoreContentAuthorDetail | null
@@ -126,10 +130,15 @@ async function postExtras(entry: ContentEntry, page: Entity): Promise<Partial<Co
 
 /** A content page or blog post (F3.16): the backend's sanitised HTML (adr/0019), a post's category and tags. */
 export async function ContentScreen({ page }: { page: Entity }) {
-  const [{ entry }, contact] = await Promise.all([
+  const [{ entry: read }, contact] = await Promise.all([
     storeGet<{ entry: ContentEntry }>(`/store/content/${encodeURIComponent(page.entity_id)}`),
     contactOfPage(page),
   ])
+  // The text's library pictures in their versions; the opening one eager without a cover above it
+  const entry = {
+    ...read,
+    html: withPictures(read.html, read.images, { cover: Boolean(read.image_url) }),
+  }
   const extras =
     entry.kind === "post" ? await postExtras(entry, page) : await pageExtras(entry, page.path)
   return (

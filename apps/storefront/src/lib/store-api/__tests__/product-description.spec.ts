@@ -37,6 +37,28 @@ describe("productTexts (adr/0055, Ek 2026-11-06)", () => {
     await expect(productTexts("prod_6")).resolves.toEqual({ description: HTML, summary: null })
   })
 
+  it("prints the texts' library pictures in their versions, lazily (docs/21 2026-11-06)", async () => {
+    const url = "https://cdn.example.com/kabza.jpg"
+    api.storeGet.mockResolvedValue({
+      html: `<figure><img src="${url}" alt="Kabza" loading="lazy" decoding="async"></figure>`,
+      summary_html: SUMMARY,
+      images: [
+        {
+          url,
+          width: 900,
+          height: 600,
+          derivatives: {
+            srcset: { webp: [{ width: 400, url: "https://cdn.example.com/k-400.webp" }] },
+          },
+        },
+      ],
+    })
+    const texts = await productTexts("prod_7")
+    expect(texts.description).toContain('srcset="https://cdn.example.com/k-400.webp 400w"')
+    expect(texts.description).toContain('width="900" height="600" loading="lazy"')
+    expect(texts.summary).toBe(SUMMARY)
+  })
+
   it("reads a refusal or a failed call as none: the page shows the plain text instead", async () => {
     api.storeGet.mockRejectedValueOnce(new StoreApiError(404, "catalog.product_unknown", null))
     await expect(productTexts("prod_4")).resolves.toEqual(NONE)

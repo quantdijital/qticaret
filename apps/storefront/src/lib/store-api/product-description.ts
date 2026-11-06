@@ -1,6 +1,7 @@
 import "server-only"
 import { cache } from "react"
 import type { StoreProductDescription } from "@qticaret/types"
+import { withPictures } from "@/lib/views/prose-images"
 import { storeGet } from "./server"
 
 export interface ProductTexts {
@@ -26,7 +27,12 @@ export const productTexts = cache(async (id: string): Promise<ProductTexts> => {
     const answer = await storeGet<StoreProductDescription>(
       `/store/products/${encodeURIComponent(id)}/description`
     )
-    return { description: htmlOf(answer.html), summary: htmlOf(answer.summary_html) }
+    // Pictures in the texts in their versions, all lazy: the gallery is above them
+    const pictured = (html: string | null) => (html ? withPictures(html, answer.images) : null)
+    return {
+      description: pictured(htmlOf(answer.html)),
+      summary: pictured(htmlOf(answer.summary_html)),
+    }
   } catch {
     return { description: null, summary: null }
   }

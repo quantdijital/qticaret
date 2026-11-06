@@ -1,13 +1,14 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { cache } from "react"
-import type { StoreContentTerm } from "@qticaret/types"
+import type { StoreBodyImage, StoreContentTerm } from "@qticaret/types"
 import { t } from "@/lib/i18n"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { layoutPreview } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
 import { postTerms } from "@/lib/views/posts"
 import { previewPage } from "@/lib/views/preview"
+import { withPictures } from "@/lib/views/prose-images"
 import { DesignPreviewScreen } from "@/screens/design-preview"
 import { theme } from "@/theme"
 
@@ -20,6 +21,7 @@ interface PreviewEntry {
   published_at: string | null
   category?: StoreContentTerm | null
   tags?: StoreContentTerm[]
+  images?: StoreBodyImage[]
 }
 
 const TOKEN = /^cnt_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}$/
@@ -90,7 +92,8 @@ export default async function PreviewPage({
       t={t}
       view={{
         title: entry.title,
-        html: entry.html,
+        // The preview shows no cover: the text's opening picture may be its largest
+        html: withPictures(entry.html, entry.images, { cover: false }),
         publishedAt: entry.published_at,
         breadcrumbs: [],
         notice: t("preview.notice"),

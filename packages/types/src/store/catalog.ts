@@ -10,6 +10,18 @@ export interface MediaDerivatives {
   og?: { url: string; width: number; height: number }
 }
 
+/**
+ * A picture in a text (a page, a post, a product's description) as the
+ * media library knows it: the storefront prints its size and `srcset` on
+ * the `<img>` with this address (docs/21 2026-11-06).
+ */
+export interface StoreBodyImage {
+  url: string
+  width: number | null
+  height: number | null
+  derivatives: MediaDerivatives | null
+}
+
 export interface StoreMediaAsset {
   id: string
   url: string
@@ -165,6 +177,8 @@ export interface StoreProductDescription {
   html: string | null
   /** Its short description's HTML (adr/0055 Ek 2026-11-06); null without one. */
   summary_html: string | null
+  /** The library pictures of both texts, with their size and versions. */
+  images?: StoreBodyImage[]
 }
 
 export interface StoreCategory {
