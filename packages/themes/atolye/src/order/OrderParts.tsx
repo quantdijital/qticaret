@@ -1,5 +1,5 @@
 import { ExternalLink, HandCoins, Landmark, Truck } from "lucide-react"
-import { OrderGift } from "@qticaret/theme-base"
+import { OrderGift } from "@qticaret/theme-base/borrow"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { OrderPageView, Translate } from "@qticaret/ui"
 import { LineAddons } from "../parts/LineAddons"

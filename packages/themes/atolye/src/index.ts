@@ -1,4 +1,10 @@
-import { baseTheme } from "@qticaret/theme-base"
+import {
+  BrandsPage,
+  ConfirmPage,
+  CookiePreferencesPage,
+  GiftCardBalancePage,
+  PaymentLinkPage,
+} from "@qticaret/theme-base/borrow"
 import type { StorefrontTheme } from "@qticaret/ui"
 import { AccountPage } from "./account/AccountPage"
 import { AuthPage } from "./account/AuthPage"
@@ -29,10 +35,11 @@ import { ProductPage } from "./ProductPage"
  * and the buying pages (cart, checkout, card form, payment result, the
  * order and its lookup), signing in and the customer's account; the
  * pages it has not drawn yet are the base
- * theme's, in this theme's tokens.
+ * theme's, in this theme's tokens, borrowed one by one
+ * (`@qticaret/theme-base/borrow`): taking `baseTheme` whole would ship
+ * the base frame's client parts to every page (docs/21, 2026-11-06).
  */
 export const atolyeTheme: StorefrontTheme = {
-  ...baseTheme,
   name: "atolye",
   Layout,
   HomePage,
@@ -52,4 +59,9 @@ export const atolyeTheme: StorefrontTheme = {
   ReviewsPage,
   NotFoundPage,
   GonePage,
+  BrandsPage,
+  ConfirmPage,
+  CookiePreferencesPage,
+  GiftCardBalancePage,
+  PaymentLinkPage,
 }

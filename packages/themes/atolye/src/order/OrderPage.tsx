@@ -1,4 +1,4 @@
-import { OrderReturns } from "@qticaret/theme-base"
+import { OrderReturns } from "@qticaret/theme-base/borrow"
 import type { OrderActions, OrderPageView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { OrderAside } from "./OrderAside"

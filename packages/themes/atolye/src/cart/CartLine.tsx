@@ -1,5 +1,5 @@
 import { Trash2 } from "lucide-react"
-import { AddonEditor, GiftRecipient } from "@qticaret/theme-base"
+import { AddonEditor, GiftRecipient } from "@qticaret/theme-base/borrow"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CartLineView, ThemeActions, Translate } from "@qticaret/ui"
 import { LineAddons } from "../parts/LineAddons"

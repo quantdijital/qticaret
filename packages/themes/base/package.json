@@ -7,7 +7,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./styles.css": "./src/styles.css",
-    "./error": "./src/ErrorPage.tsx"
+    "./error": "./src/ErrorPage.tsx",
+    "./borrow": "./src/borrow.ts"
   },
   "scripts": {
     "lint": "eslint .",
