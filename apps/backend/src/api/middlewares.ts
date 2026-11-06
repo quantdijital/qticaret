@@ -28,6 +28,7 @@ import { WEBHOOK_ROUTES } from "./http/webhook-routes"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
 import { AdminPostDescriptionFactsPreview } from "./admin/description-facts/preview/validators"
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
+import { VariantImagesInput } from "../lib/catalog/variant-images"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
 import { storeProfileOf } from "./http/client-ip"
@@ -265,6 +266,12 @@ export default defineMiddlewares({
       matcher: "/admin/description-facts/preview",
       methods: ["POST"],
       middlewares: [validateAndTransformBody(AdminPostDescriptionFactsPreview)],
+    },
+    // A new product's variant pictures, picked before it existed: tied within the create's workflow
+    {
+      matcher: "/admin/products",
+      methods: ["POST"],
+      additionalDataValidator: { variant_images: VariantImagesInput.optional() },
     },
     // A long description document is past Express's 100 kB default; its own bounds stay (adr/0055)
     {

@@ -157,6 +157,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "catalog.successor_loop": "This choice would create a redirect loop.",
   "catalog.successor_self": "A product cannot succeed itself.",
   "catalog.successor_unknown": "The selected product was not found.",
+  "catalog.variant_image_unknown": "A variant picture is not among the product's pictures.",
+  "catalog.variant_image_variant_unknown":
+    "A variant picture names a variant the product does not have.",
+  "catalog.variant_images_invalid": "The variant pictures could not be read.",
   "catalog.variant_unknown": "The variant does not belong to this product.",
   "catalog.variants_too_many": "At most 500 variants can be saved at once.",
   "content.author_invalid":

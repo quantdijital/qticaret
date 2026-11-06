@@ -161,6 +161,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "catalog.successor_loop": "Bu seçim bir yönlendirme döngüsü oluşturur.",
   "catalog.successor_self": "Ürün kendi yerine geçemez.",
   "catalog.successor_unknown": "Seçilen ürün bulunamadı.",
+  "catalog.variant_image_unknown": "Varyant görsellerinden biri ürünün görselleri arasında yok.",
+  "catalog.variant_image_variant_unknown":
+    "Varyant görsellerinden biri ürünün sahip olmadığı bir varyanta bağlanmış.",
+  "catalog.variant_images_invalid": "Varyant görselleri okunamadı.",
   "catalog.variant_unknown": "Varyant bu ürüne ait değil.",
   "catalog.variants_too_many": "Tek seferde en çok 500 varyant kaydedilebilir.",
   "content.author_invalid":
