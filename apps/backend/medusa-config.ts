@@ -41,10 +41,8 @@ module.exports = defineConfig({
   logger: new MedusaPinoLogger(baseLogger, env.LOG_LEVEL ?? DEFAULT_LOG_LEVEL),
   projectConfig: {
     databaseUrl: env.DATABASE_URL,
-    // Tests boot the whole app per suite and run every module's migrations at
-    // once: Medusa's ten connections ran out under load ("pool is probably
-    // full"). One app at a time, well inside Postgres's 100
-    ...(env.NODE_ENV === "test" ? { databaseDriverOptions: { pool: { min: 0, max: 20 } } } : {}),
+    // Integration tests: Medusa's test runner replaces the driver options, so
+    // the test database settings live in integration-tests/database.js
     // Session store for cookie auth (adr/0004); without it sessions live in
     // process memory, so the env schema requires it when deployed.
     ...(env.REDIS_URL ? { redisUrl: env.REDIS_URL } : {}),

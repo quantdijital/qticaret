@@ -14,6 +14,8 @@
 ## Entegrasyon testlerinin koşusu
 - Her test dosyası Medusa'yı yeniden açar; bellek birikir. Testler tek bir jest alt sürecinde koşar ve bu süreç bir dosyadan sonra 1 GB'ı geçince yenisiyle değiştirilir (`apps/backend/jest.config.js`, `workerIdleMemoryLimit`). `--runInBand` bu sınırı yok saydığı için kullanılmaz.
 - Yerelde hepsi tek komut: `pnpm --filter backend test:integration:http` (49 dosya yaklaşık 8 dakika).
+- Bir test dosyası yüzlerce veritabanı bağlantısı açar (her modülün migration'ı kendi bağlantısıyla; her testten önce şablondan geri yüklenen veritabanı açık oturumları kapatır). Node `localhost`'u önce ::1 olarak dener; Postgres yalnız 127.0.0.1:55432'de dinler ve 55432 macOS'un geçici port aralığındadır: yaklaşık 16.000 bağlantıda bir soket kendine bağlanır (`[::1]:55432 -> [::1]:55432`) ve pg sonsuza dek bekler. Eskiden bu, bir modülün migration'ını 30 sn sonra düşürüp dosyanın bütün testlerini ~36 sn'de başarısız kılıyordu. `integration-tests/database.js` testlerde önce IPv4'ü dener ve yanıtsız bağlantıyı 5 sn sonra yeniden açar. Medusa'nın test koşucusu `databaseDriverOptions`'ı yerel veritabanı için `{}` yaptığından bu ayar `medusa-config.ts`'e yazılmaz.
+- Her test dosyası Redis'te kendi ad alanındadır (`QT_TEST_RUN`: kilitler, sayaçlar, önbellek sürümleri). Aynı makinede iki koşu (başka bir worktree, başka bir ajan) birbirinin kilidini (ör. `catalog:successors`) beklemez.
 - CI'da HTTP testleri üç parçaya bölünür (`--shard=N/3`) ve modül testleriyle yan yana dört işte koşar; her işin kendi Postgres'i var.
 - CI'da typecheck ve lint, `medusa build`'in ürettiği `.medusa/types`'tan sonra koşar; yerelde bu tipleri `medusa develop` üretir.
 

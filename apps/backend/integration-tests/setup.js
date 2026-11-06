@@ -7,10 +7,14 @@ MetadataStorage.clear()
 // are (lib/security/rate-limit/profiles.ts). Unit tests see the real limits.
 if (process.env.TEST_TYPE?.startsWith("integration")) {
   process.env.RATE_LIMIT_RELAXED = "1"
-  // Each test file counts in a Redis namespace of its own: back-to-back runs
-  // would otherwise share an hour's sign-up limit and turn each other away
+  // Each test file has a Redis namespace of its own (locks, counters, cache
+  // versions): back-to-back runs would otherwise share an hour's sign-up
+  // limit, and two runs at once would wait on each other's locks
   process.env.QT_TEST_RUN = require("node:crypto").randomUUID().slice(0, 8)
   // Staff sign in with a password alone, as before 2FA; the 2FA suite turns
   // it on (adr/0040). Locally only: ignored where the shop runs
   process.env.ADMIN_MFA ??= "off"
+  // No connect to [::1]:55432, which can connect a socket to itself, and a
+  // connect left unanswered is opened again (integration-tests/database.js)
+  require("./database").setUpTestDatabaseConnections()
 }
