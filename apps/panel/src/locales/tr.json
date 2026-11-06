@@ -1585,7 +1585,10 @@
             "seo_digest": "Ekip: haftalık SEO özeti",
             "contact_message": "Ekip: iletişim mesajı",
             "invite": "Ekip: panel daveti",
-            "password_reset": "Ekip: şifre yenileme"
+            "password_reset": "Ekip: şifre yenileme",
+            "mfa_changed": "Ekip: iki adımlı doğrulama değişti",
+            "email_confirm": "Ekip: yeni e-posta onayı",
+            "account_changed": "Ekip: şifre ya da e-posta değişti"
           },
           "stock": {
             "alert_confirm": "Stok bildirimi onayı",
@@ -2068,7 +2071,7 @@
     },
     "security": {
       "title": "Güvenlik",
-      "description": "İki adımlı doğrulama, şüpheli siparişlerin incelenmesi ve kara liste.",
+      "description": "Hesabınız, iki adımlı doğrulama, şüpheli siparişlerin incelenmesi ve kara liste.",
       "mine": {
         "title": "İki adımlı doğrulamam",
         "onHint": "Girişte şifrenizin yanında uygulamadaki kod istenir.",
@@ -2136,6 +2139,62 @@
         "account": "Hesabım",
         "team": "Ekip",
         "fraud": "Sahtekârlık önleme"
+      },
+      "profile": {
+        "title": "Profilim",
+        "hint": "Ekipte görünen adınız, unvanınız ve rolünüz.",
+        "editTitle": "Profili düzenle",
+        "editHint": "Adınız ve unvanınız ekip listesinde ve panelin üst çubuğunda görünür.",
+        "firstName": "Ad",
+        "lastName": "Soyad",
+        "jobTitle": "Unvan",
+        "jobTitleHint": "İsteğe bağlı; boş bırakılabilir.",
+        "jobTitlePlaceholder": "Örn. Mağaza müdürü",
+        "noJobTitle": "Unvan girilmemiş",
+        "role": "Rol",
+        "email": "E-posta",
+        "since": "Ekipte",
+        "saved": "Profiliniz kaydedildi."
+      },
+      "signIn": {
+        "title": "Giriş bilgileri",
+        "hint": "Panele girdiğiniz e-posta adresi, şifreniz ve açık oturumlarınız.",
+        "email": "E-posta adresi",
+        "password": "Şifre",
+        "passwordHidden": "Şifre gizli",
+        "sessions": "Açık oturumlar",
+        "sessionsOpen_one": "{{count}} oturum (bu cihaz)",
+        "sessionsOpen_other": "{{count}} oturum (bu cihaz dahil)",
+        "sessionsUnknown": "Bilinmiyor",
+        "change": "Değiştir",
+        "endOthers": "Diğerlerini kapat",
+        "sessionsEnded_one": "{{count}} oturum kapatıldı.",
+        "sessionsEnded_other": "{{count}} oturum kapatıldı.",
+        "passwordTitle": "Şifreyi değiştir",
+        "passwordHint": "Mevcut şifrenizi ve yeni şifrenizi girin. Değişince diğer cihazlardaki oturumlarınız kapanır ve size e-posta ile haber verilir.",
+        "passwordSave": "Şifreyi değiştir",
+        "currentPassword": "Mevcut şifre",
+        "currentRequired": "Mevcut şifrenizi girin.",
+        "newPassword": "Yeni şifre",
+        "repeatPassword": "Yeni şifre (tekrar)",
+        "passwordIssues": {
+          "short": "Yeni şifre en az 10 karakter olmalı.",
+          "long": "Yeni şifre en fazla 256 karakter olabilir.",
+          "same": "Yeni şifre mevcut şifrenizle aynı olamaz.",
+          "mismatch": "İki şifre aynı değil."
+        },
+        "passwordChanged": "Şifreniz değiştirildi.",
+        "passwordChangedOthers": "Şifreniz değiştirildi; diğer cihazlardaki oturumlarınız kapatıldı.",
+        "emailTitle": "E-posta adresini değiştir",
+        "emailHint": "Yeni adrese bir onay bağlantısı göndeririz. Bağlantıyı açana kadar mevcut adresiniz geçerli kalır; mevcut adresinize de bilgi verilir.",
+        "emailSend": "Onay bağlantısı gönder",
+        "newEmail": "Yeni e-posta adresi",
+        "currentEmail": "Şu anki adres: {{email}}",
+        "emailIssues": {
+          "invalid": "Geçerli bir e-posta adresi girin.",
+          "same": "Bu zaten giriş adresiniz."
+        },
+        "emailSent": "Onay bağlantısı {{email}} adresine gönderildi. Bağlantı 24 saat geçerlidir."
       }
     },
     "legal": {
@@ -8284,5 +8343,17 @@
     "discardTitle": "Kaydedilmemiş değişiklikler atılsın mı?",
     "discardText": "Bu penceredeki değişiklikler kaydedilmedi; devam ederseniz kaybolur.",
     "discard": "Değişiklikleri at"
+  },
+  "confirmEmail": {
+    "title": "Yeni e-posta adresinizi onaylayın",
+    "subtitle": "Onaylayınca panele bu adresle giriş yaparsınız; şifreniz değişmez.",
+    "confirm": "Adresimi onayla",
+    "doneTitle": "E-posta adresiniz değişti",
+    "done": "Panele artık yeni adresinizle giriş yaparsınız.",
+    "toPanel": "Panele git",
+    "invalidTitle": "Bağlantı geçersiz",
+    "invalid": "Onay bağlantısı geçersiz, süresi dolmuş ya da kullanılmış. Panelde Ayarlar > Güvenlik > Hesabım'dan yeniden isteyin.",
+    "unavailable": "Bu e-posta adresi kullanılamıyor. Panelden başka bir adres deneyin.",
+    "tooMany": "Çok fazla deneme yapıldı; biraz sonra yeniden deneyin."
   }
 }

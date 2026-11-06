@@ -104,7 +104,7 @@ function TurnOffDialog({
  * (with the app's code, unless the shop requires it), new recovery codes,
  * a new phone. Any role: it is their account.
  */
-export function MyMfaCard() {
+export function MyMfaCard({ className }: { className?: string }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const staff = useStaff()
@@ -128,6 +128,7 @@ export function MyMfaCard() {
     <SectionCard
       title={t(`${S}.title`)}
       description={t(note)}
+      className={className}
       action={
         <Switch
           aria-label={t(`${S}.title`)}

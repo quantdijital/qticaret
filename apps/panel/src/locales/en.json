@@ -1585,7 +1585,10 @@
             "seo_digest": "Staff: weekly SEO digest",
             "contact_message": "Staff: contact message",
             "invite": "Team: panel invitation",
-            "password_reset": "Team: password reset"
+            "password_reset": "Team: password reset",
+            "mfa_changed": "Team: two-step verification changed",
+            "email_confirm": "Team: new e-mail confirmation",
+            "account_changed": "Team: password or e-mail changed"
           },
           "stock": {
             "alert_confirm": "Stock alert confirmation",
@@ -2068,7 +2071,7 @@
     },
     "security": {
       "title": "Security",
-      "description": "Two-step verification, review of suspicious orders and the block list.",
+      "description": "Your account, two-step verification, review of suspicious orders and the block list.",
       "mine": {
         "title": "My two-step verification",
         "onHint": "Signing in asks for the app's code besides your password.",
@@ -2136,6 +2139,62 @@
         "account": "My account",
         "team": "Team",
         "fraud": "Fraud prevention"
+      },
+      "profile": {
+        "title": "My profile",
+        "hint": "Your name, job title and role as the team sees them.",
+        "editTitle": "Edit profile",
+        "editHint": "Your name and job title show in the team list and the panel's top bar.",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "jobTitle": "Job title",
+        "jobTitleHint": "Optional; may be left empty.",
+        "jobTitlePlaceholder": "E.g. Store manager",
+        "noJobTitle": "No job title",
+        "role": "Role",
+        "email": "E-mail",
+        "since": "On the team since",
+        "saved": "Your profile was saved."
+      },
+      "signIn": {
+        "title": "Sign-in details",
+        "hint": "The e-mail address you sign in with, your password and your open sessions.",
+        "email": "E-mail address",
+        "password": "Password",
+        "passwordHidden": "Password hidden",
+        "sessions": "Open sessions",
+        "sessionsOpen_one": "{{count}} session (this device)",
+        "sessionsOpen_other": "{{count}} sessions (this device included)",
+        "sessionsUnknown": "Unknown",
+        "change": "Change",
+        "endOthers": "Sign out others",
+        "sessionsEnded_one": "{{count}} session was ended.",
+        "sessionsEnded_other": "{{count}} sessions were ended.",
+        "passwordTitle": "Change password",
+        "passwordHint": "Enter your current password and a new one. Once changed, your sessions on other devices end and you are told by e-mail.",
+        "passwordSave": "Change password",
+        "currentPassword": "Current password",
+        "currentRequired": "Enter your current password.",
+        "newPassword": "New password",
+        "repeatPassword": "New password (again)",
+        "passwordIssues": {
+          "short": "The new password must be at least 10 characters.",
+          "long": "The new password can be at most 256 characters.",
+          "same": "The new password cannot be your current one.",
+          "mismatch": "The two passwords do not match."
+        },
+        "passwordChanged": "Your password was changed.",
+        "passwordChangedOthers": "Your password was changed; your sessions on other devices were ended.",
+        "emailTitle": "Change e-mail address",
+        "emailHint": "We send a confirmation link to the new address. Your current address stays valid until the link is opened; your current address is told too.",
+        "emailSend": "Send confirmation link",
+        "newEmail": "New e-mail address",
+        "currentEmail": "Current address: {{email}}",
+        "emailIssues": {
+          "invalid": "Enter a valid e-mail address.",
+          "same": "This is already your sign-in address."
+        },
+        "emailSent": "A confirmation link was sent to {{email}}. It is valid for 24 hours."
       }
     },
     "legal": {
@@ -8284,5 +8343,17 @@
     "discardTitle": "Discard unsaved changes?",
     "discardText": "The changes in this window are not saved; they are lost if you go on.",
     "discard": "Discard changes"
+  },
+  "confirmEmail": {
+    "title": "Confirm your new e-mail address",
+    "subtitle": "Once confirmed, you sign in to the panel with this address; your password stays the same.",
+    "confirm": "Confirm my address",
+    "doneTitle": "Your e-mail address changed",
+    "done": "You now sign in to the panel with your new address.",
+    "toPanel": "Go to the panel",
+    "invalidTitle": "Link not valid",
+    "invalid": "The confirmation link is not valid, has expired or was used. Ask again from Settings > Security > My account.",
+    "unavailable": "This e-mail address cannot be used. Try another from the panel.",
+    "tooMany": "Too many tries; try again a little later."
   }
 }

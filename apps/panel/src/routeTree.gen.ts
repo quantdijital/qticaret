@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as FullscreenRouteImport } from './routes/_fullscreen'
+import { Route as ConfirmEmailRouteImport } from './routes/confirm-email'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -104,6 +105,11 @@ const AuthRoute = AuthRouteImport.update({
 } as any)
 const FullscreenRoute = FullscreenRouteImport.update({
   id: '/_fullscreen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfirmEmailRoute = ConfirmEmailRouteImport.update({
+  id: '/confirm-email',
+  path: '/confirm-email',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InviteRoute = InviteRouteImport.update({
@@ -553,6 +559,7 @@ const AuthSettingsSmsProviderRoute = AuthSettingsSmsProviderRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthIndexRoute
+  '/confirm-email': typeof ConfirmEmailRoute
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -641,6 +648,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof AuthIndexRoute
+  '/confirm-email': typeof ConfirmEmailRoute
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -729,6 +737,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteWithChildren
   '/_fullscreen': typeof FullscreenRouteWithChildren
+  '/confirm-email': typeof ConfirmEmailRoute
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -820,6 +829,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/confirm-email'
     | '/invite'
     | '/login'
     | '/reset-password'
@@ -908,6 +918,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/confirm-email'
     | '/invite'
     | '/login'
     | '/reset-password'
@@ -995,6 +1006,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_auth'
     | '/_fullscreen'
+    | '/confirm-email'
     | '/invite'
     | '/login'
     | '/reset-password'
@@ -1086,6 +1098,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   FullscreenRoute: typeof FullscreenRouteWithChildren
+  ConfirmEmailRoute: typeof ConfirmEmailRoute
   InviteRoute: typeof InviteRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -1106,6 +1119,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof FullscreenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/confirm-email': {
+      id: '/confirm-email'
+      path: '/confirm-email'
+      fullPath: '/confirm-email'
+      preLoaderRoute: typeof ConfirmEmailRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invite': {
@@ -1918,6 +1938,7 @@ const FullscreenRouteWithChildren = FullscreenRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   FullscreenRoute: FullscreenRouteWithChildren,
+  ConfirmEmailRoute: ConfirmEmailRoute,
   InviteRoute: InviteRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,
