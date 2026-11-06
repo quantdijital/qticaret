@@ -38,7 +38,7 @@ const isPaymentReturn = (pathname: string) =>
  * Before every page (adr/0046 §4): in production one 301 to the shop's
  * canonical host, the backend's files at the root (and the IndexNow key
  * file while the shop announces), one 301 to the normalised address (or
- * straight to where resolve sends that address, adr/0059), a
+ * straight to where resolve sends that address, or its 410, adr/0059), a
  * nonce'd CSP, the dark shop's 503 (adr/0053: but for its open paths and
  * a bypass cookie), the backend's redirects and 410s with
  * their own codes, 404s reported, and `noindex` on an
@@ -88,16 +88,23 @@ export async function proxy(request: NextRequest): Promise<Response> {
 
   const isPageView = request.method === "GET" || request.method === "HEAD"
   const normalized = normalizedPath(pathname)
+  // An unclean old address the backend removed: its 410 below, once the page's frame is set
+  let goneUnclean = false
   if (normalized !== null) {
     // One hop (docs/13 §4, adr/0059): an old address the backend sends on (`/eski-yol/`,
-    // `/wp-content/uploads/X.JPG`) goes straight to its page, not through its clean form first
+    // `/wp-content/uploads/X.JPG`) goes straight to its page, not through its clean form
+    // first; one it removed (`/wp-login.php/`, `/Feed/`) answers its 410 at once
     const onward =
       isPageView && resolvesAt(normalized, search)
         ? await resolveForProxy(`${normalized}${search}`, visitor)
         : null
-    return onward?.type === "redirect"
-      ? NextResponse.redirect(new URL(onward.location, request.url), onward.status)
-      : NextResponse.redirect(new URL(`${normalized}${search}`, request.url), 301)
+    if (onward?.type === "redirect") {
+      return NextResponse.redirect(new URL(onward.location, request.url), onward.status)
+    }
+    if (onward?.type !== "gone") {
+      return NextResponse.redirect(new URL(`${normalized}${search}`, request.url), 301)
+    }
+    goneUnclean = true
   }
 
   const nonce = newNonce()
@@ -137,6 +144,9 @@ export async function proxy(request: NextRequest): Promise<Response> {
   headers.set("content-security-policy", csp)
   headers.set(URL_HEADER, `${pathname}${search}`)
 
+  if (goneUnclean) {
+    return goneResponse(request.url, headers, csp)
+  }
   // The home page and the storefront's own lists only for an old platform's query (adr/0059)
   if (isPageView && pathname !== GONE_PAGE_PATH && resolvesAt(pathname, search)) {
     const resolution = await resolveForProxy(`${pathname}${search}`, visitor)

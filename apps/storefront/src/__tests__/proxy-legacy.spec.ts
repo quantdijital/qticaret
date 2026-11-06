@@ -92,6 +92,29 @@ describe("the proxy with old addresses", () => {
     expect(response.status).toBe(410)
   })
 
+  it("answers 410 at once for an unclean old address that is gone, not a 301 first", async () => {
+    edge.resolveForProxy.mockResolvedValue({ type: "gone", path: "/feed" })
+    for (const address of ["/feed/", "/Feed", "/FEED/?utm_source=x"]) {
+      const response = await visit(address)
+      expect(response.status).toBe(410)
+      expect(response.headers.get("location")).toBeNull()
+      // The theme's removed page in the shop's frame, the address kept in the browser
+      expect(response.headers.get("x-middleware-rewrite")).toBe("http://localhost:8000/_kaldirildi")
+      expect(response.headers.get("content-security-policy")).toBeTruthy()
+    }
+    // Only the clean form was asked, once per visit
+    expect(edge.resolveForProxy).toHaveBeenCalledTimes(3)
+    expect(edge.resolveForProxy).toHaveBeenNthCalledWith(1, "/feed", null)
+    expect(edge.resolveForProxy).toHaveBeenNthCalledWith(3, "/feed?utm_source=x", null)
+    expect(edge.reportNotFound).not.toHaveBeenCalled()
+  })
+
+  it("still normalises an unclean address that is not found", async () => {
+    const response = await visit("/Hic-Olmayan/")
+    expect(response.status).toBe(301)
+    expect(response.headers.get("location")).toBe("http://localhost:8000/hic-olmayan")
+  })
+
   it("reports no 404 for the home page or a list, whatever their query", async () => {
     await visit("/?p=999999")
     await visit("/magaza?paged=4")
