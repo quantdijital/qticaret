@@ -3,17 +3,19 @@ import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
-import { revealSection } from "@/components/patterns/use-section-open"
 import { contentQuery } from "@/features/content/api/content"
 import type { ContentDetail } from "@/features/content/api/content"
 import { ContentActions } from "@/features/content/components/content-actions"
 import { ContentBodyCard } from "@/features/content/components/content-body-card"
-import { ContentCoverCard } from "@/features/content/components/content-cover-card"
 import { ContentGeneralCard } from "@/features/content/components/content-general-card"
-import { ContentSummaryCard } from "@/features/content/components/content-summary-card"
+import { ContentSideCards } from "@/features/content/components/content-side-cards"
 import { EditorLayout } from "@/features/content/components/editor-layout"
-import { PostTermsCard } from "@/features/content/components/post-terms-card"
 import { ContentStatusBadge } from "@/features/content/components/content-status"
+import {
+  CONTENT_SECTIONS as S,
+  CONTENT_TARGETS,
+  revealContentTarget,
+} from "@/features/content/content-sections"
 import { docText } from "@/features/content/doc-text"
 import { findingsNote, useSectionFindings } from "@/features/content/section-findings"
 import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
@@ -23,19 +25,6 @@ import { errorText } from "@/lib/errors"
 import { formatDateTime } from "@/lib/format"
 
 const route = getRouteApi("/_auth/content/$id")
-
-// The advisor's "go to field" targets: the sections below by their ids (a folded one opens)
-const TARGETS = {
-  edit_title: "content-seo",
-  edit_description: "content-seo",
-  edit_robots: "content-seo",
-  use_template_title: "content-seo",
-  use_template_description: "content-seo",
-  edit_body: "content-body",
-  edit_handle: "content-general",
-  edit_author: "content-summary",
-  add_image: "content-cover-section",
-}
 
 function Dates({ entry }: { entry: ContentDetail }) {
   const { t } = useTranslation()
@@ -55,46 +44,42 @@ function Dates({ entry }: { entry: ContentDetail }) {
   )
 }
 
-// The page's secondary parts, folded under its text: each a line until opened
-function Sections({ data }: { data: ContentDetail }) {
+// The search appearance, folded under the text: a line until opened
+function SeoSection({ data }: { data: ContentDetail }) {
   const { t } = useTranslation()
   const findings = useSectionFindings({
     kind: data.kind,
     id: data.id,
     version: data.updated_at,
-    targets: TARGETS,
+    targets: CONTENT_TARGETS,
   })
-  const seo = findings("content-seo")
+  const seo = findings(S.seo)
   return (
-    <>
-      <SeoCard
-        type={data.kind}
-        id={data.id}
-        context={{
-          path: data.path,
-          tokens: { başlık: data.title },
-          fallbackDescription: excerpt(data.excerpt ?? docText(data.body), DESCRIPTION_EXCERPT),
-        }}
-        collapse={{
-          id: "content-seo",
-          name: "content.seo",
-          note: findingsNote(t, seo),
-          attention: seo.attention,
-        }}
-      />
-      <ContentSummaryCard entry={data} findings={findings("content-summary")} />
-      <ContentCoverCard entry={data} findings={findings("content-cover-section")} />
-      {data.kind === "post" ? (
-        <PostTermsCard entry={data} findings={findings("content-terms")} />
-      ) : null}
-    </>
+    <SeoCard
+      type={data.kind}
+      id={data.id}
+      context={{
+        path: data.path,
+        tokens: { başlık: data.title },
+        fallbackDescription: excerpt(data.excerpt ?? docText(data.body), DESCRIPTION_EXCERPT),
+      }}
+      collapse={{
+        id: S.seo,
+        name: "content.seo",
+        note: findingsNote(t, seo),
+        attention: seo.attention,
+      }}
+    />
   )
 }
 
 /**
- * A content page or blog post (F3.16): its title and text first, its
- * search appearance, summary, cover and filing folded under them, its
- * dates and the SEO advisor beside them, following the scroll.
+ * A content page or blog post (F3.16, docs/06 "Metin sayfaları"): its
+ * title and text first, its search appearance folded under them; beside
+ * them, following the scroll as the product page's column does, its
+ * dates, the SEO advisor, the cover, the summary and a post's category
+ * and tags. Below `xl` one column: the text, the dates, the cover, the
+ * summary and the filing, then the search appearance and the advisor.
  */
 export function ContentEntryPage() {
   const { t } = useTranslation()
@@ -121,27 +106,35 @@ export function ContentEntryPage() {
         action={<ContentActions entry={data} />}
       />
       <EditorLayout
+        merge
         main={
           <>
-            <div id="content-general" className="scroll-mt-20">
+            <div id={S.general} className="scroll-mt-20">
               <ContentGeneralCard entry={data} />
             </div>
-            <div id="content-body" className="scroll-mt-20">
+            <div id={S.body} className="scroll-mt-20">
               <ContentBodyCard entry={data} />
             </div>
-            <Sections data={data} />
+            {/* On a narrower screen after the cover, the summary and the filing (`merge`) */}
+            <div className="order-1 flex min-w-0 flex-col xl:order-none">
+              <SeoSection data={data} />
+            </div>
           </>
         }
         side={
           <>
             <Dates entry={data} />
-            <AdvisorCard
-              kind={data.kind}
-              id={data.id}
-              version={data.updated_at}
-              targets={TARGETS}
-              onTarget={revealSection}
-            />
+            {/* Under the dates beside the text; on a narrower screen last of all */}
+            <div className="order-2 flex min-w-0 flex-col xl:order-none">
+              <AdvisorCard
+                kind={data.kind}
+                id={data.id}
+                version={data.updated_at}
+                targets={CONTENT_TARGETS}
+                onTarget={revealContentTarget}
+              />
+            </div>
+            <ContentSideCards entry={data} />
           </>
         }
       />

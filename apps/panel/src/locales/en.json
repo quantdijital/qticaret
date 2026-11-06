@@ -6189,16 +6189,6 @@
     "authorHint": "Who wrote the post: it builds trust with readers and search engines.",
     "summary": "Summary",
     "summaryAndAuthor": "Summary and author",
-    "summaryHint": "The short introduction shown in lists, search results and shares.",
-    "sections": {
-      "excerptEmpty": "No summary written; the text's opening is used",
-      "author": "Author: {{name}}",
-      "noAuthor": "No author",
-      "coverAlt": "Image chosen · alt text written",
-      "coverNoAlt": "Image chosen · no alt text",
-      "noCategory": "No category",
-      "noTags": "No tags"
-    },
     "body": "Text",
     "bodyHint": "Write with headings, lists, tables, images and product or category cards.",
     "cover": "Cover image",

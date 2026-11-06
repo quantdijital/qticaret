@@ -89,15 +89,14 @@ function serve() {
   })
 }
 
-// Folded under the post's text: opened as a person would
-async function renderCard() {
+// In the page's narrow column: open, its pickers in sight
+function renderCard(findings = { count: 0, attention: false }) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   render(
     <QueryClientProvider client={client}>
-      <PostTermsCard entry={POST} />
+      <PostTermsCard entry={POST} findings={findings} />
     </QueryClientProvider>
   )
-  await userEvent.click(screen.getByRole("button", { name: "Kategori ve etiketler" }))
 }
 
 describe("PostTermsCard", () => {
@@ -107,20 +106,16 @@ describe("PostTermsCard", () => {
     serve()
   })
 
-  it("folds to a line naming the category and tags", () => {
-    render(
-      <QueryClientProvider client={new QueryClient()}>
-        <PostTermsCard entry={POST} />
-      </QueryClientProvider>
-    )
-    const toggle = screen.getByRole("button", { name: "Kategori ve etiketler" })
-    expect(toggle).toHaveAttribute("aria-expanded", "false")
-    expect(toggle).toHaveAccessibleDescription("Bıçak bakımı · Çelik")
-    expect(screen.queryByRole("combobox", { name: "Kategori" })).not.toBeInTheDocument()
+  it("shows the category and tags open, with the advisor's findings under them (owner, 2026-11-06)", () => {
+    renderCard({ count: 1, attention: false })
+    expect(screen.getByRole("heading", { name: "Kategori ve etiketler" })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Kategori ve etiketler" })).not.toBeInTheDocument()
+    expect(screen.getByRole("combobox", { name: "Kategori" })).toHaveTextContent("Bıçak bakımı")
+    expect(screen.getByText("1 öneri")).toBeInTheDocument()
   })
 
   it("files the post under another category, an existing tag and a new one, saved with the post", async () => {
-    await renderCard()
+    renderCard()
     expect(screen.getByRole("combobox", { name: "Kategori" })).toHaveTextContent("Bıçak bakımı")
     const tags = screen.getByRole("list", { name: "Etiketler" })
     expect(
@@ -164,7 +159,7 @@ describe("PostTermsCard", () => {
   })
 
   it("takes the post out of its category", async () => {
-    await renderCard()
+    renderCard()
 
     await userEvent.click(screen.getByRole("combobox", { name: "Kategori" }))
     await userEvent.click(await screen.findByRole("option", { name: "— Kategorisiz —" }))

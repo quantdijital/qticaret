@@ -7,10 +7,11 @@ import { MediaField } from "@/components/patterns/media-field"
 import { Input } from "@/components/ui/input"
 import { useUpdateContent } from "@/features/content/api/content"
 import type { ContentDetail } from "@/features/content/api/content"
-import { NO_FINDINGS, summaryLine } from "@/features/content/section-findings"
+import { NO_FINDINGS } from "@/features/content/section-findings"
 import type { SectionFindings } from "@/features/content/section-findings"
 import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@/lib/forms"
+import { FindingsNote } from "./findings-note"
 
 interface Values {
   image_url: string
@@ -22,20 +23,24 @@ const valuesOf = (entry: ContentDetail): Values => ({
   image_alt: entry.image_alt ?? "",
 })
 
-/** The cover: the list's and the share card's image, with its alt text (docs/13 §8); folded to a line. */
+/**
+ * The cover: the list's and the share card's image, with its alt text
+ * (docs/13 §8), in the page's narrow column (docs/06 "Metin sayfaları").
+ * The frame is the one way in: a click opens the library and upload.
+ */
 export function ContentCoverCard({
   entry,
   findings = NO_FINDINGS,
 }: {
   entry: ContentDetail
-  /** The advisor's for this section: counted in its line, an urgent one opens it. */
+  /** The advisor's for this card, counted under it. */
   findings?: SectionFindings
 }) {
   const { t } = useTranslation()
   const update = useUpdateContent(entry.id)
   const saved = valuesOf(entry)
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
-  const [url, alt] = useWatch({ control: form.control, name: ["image_url", "image_alt"] })
+  const url = useWatch({ control: form.control, name: "image_url" })
   const submit = form.handleSubmit((values) => {
     update.mutate(
       { image_url: values.image_url || null, image_alt: values.image_alt.trim() || null },
@@ -57,20 +62,6 @@ export function ContentCoverCard({
       onSubmit={() => void submit()}
       onReset={() => {
         form.reset(saved, FULL_RESET)
-      }}
-      collapse={{
-        id: "content-cover-section",
-        name: "content.cover",
-        attention: findings.attention,
-        summary: summaryLine(
-          t,
-          [
-            url
-              ? t(alt.trim() ? "content.sections.coverAlt" : "content.sections.coverNoAlt")
-              : t("content.noCover"),
-          ],
-          findings
-        ),
       }}
     >
       <MediaField
@@ -96,6 +87,7 @@ export function ContentCoverCard({
           <Input id="content-cover-alt" maxLength={300} {...form.register("image_alt")} />
         </Field>
       </MediaField>
+      <FindingsNote findings={findings} />
     </CardForm>
   )
 }

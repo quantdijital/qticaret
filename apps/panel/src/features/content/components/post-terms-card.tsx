@@ -9,9 +9,10 @@ import type { ContentDetail } from "@/features/content/api/content"
 import type { TermView } from "@/features/content/api/terms"
 import { CategoryPicker } from "@/features/content/components/category-picker"
 import { TagPicker } from "@/features/content/components/tag-picker"
-import { NO_FINDINGS, summaryLine } from "@/features/content/section-findings"
+import { NO_FINDINGS } from "@/features/content/section-findings"
 import type { SectionFindings } from "@/features/content/section-findings"
 import { errorText } from "@/lib/errors"
+import { FindingsNote } from "./findings-note"
 
 const T = "content.terms"
 
@@ -26,15 +27,15 @@ const sameTags = (a: readonly TermView[], b: readonly TermView[]) =>
 /**
  * Where a blog post is filed (adr/0019 ek 2026-11-03): one category and
  * any tags, saved with the post. A tag typed that the shop has not got
- * yet is made on the spot and joins the post with the save. Folded to a
- * line that names them.
+ * yet is made on the spot and joins the post with the save. In the
+ * page's narrow column (docs/06 "Metin sayfaları").
  */
 export function PostTermsCard({
   entry,
   findings = NO_FINDINGS,
 }: {
   entry: ContentDetail
-  /** The advisor's for this section: counted in its line, an urgent one opens it. */
+  /** The advisor's for this card, counted under it. */
   findings?: SectionFindings
 }) {
   const { t } = useTranslation()
@@ -74,21 +75,6 @@ export function PostTermsCard({
       onReset={() => {
         setDraft(null)
       }}
-      collapse={{
-        id: "content-terms",
-        name: "content.terms",
-        attention: findings.attention,
-        summary: summaryLine(
-          t,
-          [
-            shown.category?.name ?? t("content.sections.noCategory"),
-            shown.tags.length > 0
-              ? shown.tags.map((tag) => tag.name).join(", ")
-              : t("content.sections.noTags"),
-          ],
-          findings
-        ),
-      }}
     >
       <Field label={t(`${T}.category`)} htmlFor="post-category">
         <CategoryPicker
@@ -116,6 +102,7 @@ export function PostTermsCard({
       >
         {t(`${T}.manage`)}
       </Link>
+      <FindingsNote findings={findings} />
     </CardForm>
   )
 }

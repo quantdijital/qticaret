@@ -6189,16 +6189,6 @@
     "authorHint": "Yazıyı kimin yazdığı: okura ve arama motorlarına güven verir.",
     "summary": "Özet",
     "summaryAndAuthor": "Özet ve yazar",
-    "summaryHint": "Listelerde, arama sonucunda ve paylaşılınca görünen kısa tanıtım.",
-    "sections": {
-      "excerptEmpty": "Özet yazılmadı; metnin başı kullanılıyor",
-      "author": "Yazar: {{name}}",
-      "noAuthor": "Yazar yok",
-      "coverAlt": "Görsel seçili · alt metni var",
-      "coverNoAlt": "Görsel seçili · alt metni yok",
-      "noCategory": "Kategori yok",
-      "noTags": "Etiket yok"
-    },
     "body": "Metin",
     "bodyHint": "Başlıklar, listeler, tablolar, görseller ve ürün ya da kategori kartlarıyla yazın.",
     "cover": "Kapak görseli",

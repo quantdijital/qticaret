@@ -41,46 +41,41 @@ function renderCard(entry: ContentDetail, findings = { count: 0, attention: fals
   )
 }
 
-const toggle = (name: string) => screen.getByRole("button", { name })
-
-/** The owner, 2026-11-05: the summary folds under the text, saying what is written. */
+/** The owner, 2026-11-06: the summary sits open in the page's narrow column, its length counted. */
 describe("ContentSummaryCard", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     localStorage.clear()
   })
 
-  it("says a post's author and summary when folded, with the advisor's findings", () => {
+  it("shows a post's summary and author open, with the advisor's findings under them", () => {
     renderCard(POST, { count: 1, attention: false })
-    expect(toggle("Özet ve yazar")).toHaveAttribute("aria-expanded", "false")
-    expect(toggle("Özet ve yazar")).toHaveAccessibleDescription(
-      "Yazar: Ayşe Usta · Bileme taşı, açı ve son dokunuş: evde bıçağı bilemenin adımları. · 1 öneri"
-    )
+    expect(screen.getByRole("heading", { name: "Özet ve yazar" })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Özet ve yazar" })).not.toBeInTheDocument()
+    expect(screen.getByRole("textbox", { name: "Özet" })).toHaveValue(POST.excerpt)
+    expect(screen.getByRole("textbox", { name: "Yazar" })).toHaveValue("Ayşe Usta")
+    expect(screen.getByText("1 öneri")).toBeInTheDocument()
   })
 
-  it("says a page without a summary uses its text's opening", () => {
+  it("asks a page for its summary only, nothing found said nowhere", () => {
     renderCard({ ...POST, kind: "page", excerpt: null, author_name: null })
-    expect(toggle("Özet")).toHaveAccessibleDescription("Özet yazılmadı; metnin başı kullanılıyor")
+    expect(screen.getByRole("heading", { name: "Özet" })).toBeInTheDocument()
+    expect(screen.queryByRole("textbox", { name: "Yazar" })).not.toBeInTheDocument()
+    expect(screen.queryByText(/öneri/)).not.toBeInTheDocument()
   })
 
-  it("opens for an urgent finding (the post's byline)", () => {
-    renderCard({ ...POST, author_name: null }, { count: 1, attention: true })
-    expect(toggle("Özet ve yazar")).toHaveAttribute("aria-expanded", "true")
-    expect(screen.getByRole("textbox", { name: "Yazar" })).toBeVisible()
+  it("counts the summary's characters as it is written", async () => {
+    renderCard({ ...POST, excerpt: null })
+    expect(screen.getByText("0/500")).toBeInTheDocument()
+    await userEvent.type(screen.getByRole("textbox", { name: "Özet" }), "Kısa özet")
+    expect(screen.getByText("9/500")).toBeInTheDocument()
   })
 
-  it("keeps an edit while folded and saves only what changed", async () => {
+  it("saves only what changed", async () => {
     fetchMock.mockResolvedValue({ entry: { ...POST, excerpt: "Kısa özet" } })
     renderCard(POST)
-    await userEvent.click(toggle("Özet ve yazar"))
     await userEvent.clear(screen.getByRole("textbox", { name: "Özet" }))
     await userEvent.type(screen.getByRole("textbox", { name: "Özet" }), "Kısa özet")
-
-    await userEvent.click(toggle("Özet ve yazar"))
-    expect(toggle("Özet ve yazar")).toHaveAccessibleDescription("Kaydedilmemiş değişiklik var")
-
-    await userEvent.click(toggle("Özet ve yazar"))
-    expect(screen.getByRole("textbox", { name: "Özet" })).toHaveValue("Kısa özet")
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/content/cnt_1", {
