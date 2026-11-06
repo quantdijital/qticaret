@@ -41,6 +41,8 @@ export const CATALOG_ENTITY_TYPES = {
   // Blog archives (adr/0019 ek 2026-11-03)
   post_category: "post_category",
   post_tag: "post_tag",
+  // Blog authors' pages (adr/0060)
+  post_author: "post_author",
 } as const
 
 interface Handled {

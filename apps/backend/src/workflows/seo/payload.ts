@@ -17,6 +17,7 @@ import type { ShippingSettings, StoreSettings } from "../../modules/platform-set
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import type { Condition } from "../../lib/seo/jsonld"
 import { highlightText } from "./highlight"
+import { authorSubject } from "./payload-author"
 import { contentSubject, landingSubject, termSubject } from "./payload-content"
 import { SALE_LISTING } from "../pricing/sale-products"
 import { saleSubject } from "./sale-page"
@@ -274,6 +275,7 @@ const SUBJECTS: Readonly<
   [CATALOG_ENTITY_TYPES.landing]: landingSubject,
   [CATALOG_ENTITY_TYPES.post_category]: termSubject,
   [CATALOG_ENTITY_TYPES.post_tag]: termSubject,
+  [CATALOG_ENTITY_TYPES.post_author]: authorSubject,
   [SALE_LISTING]: saleSubject,
 }
 

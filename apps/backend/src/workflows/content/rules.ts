@@ -5,6 +5,8 @@ import type { ContentDoc } from "../../lib/content"
 import { ValidationError } from "../../lib/errors"
 import { isCleanText } from "../../lib/security"
 import { unknownDocTokens } from "../../lib/shop/tokens"
+import { CONTENT_MODULE } from "../../modules/content"
+import type ContentModuleService from "../../modules/content/service"
 import type { ContentEntryRecord, ContentKind } from "../../modules/content/service"
 import { MEDIA_MODULE } from "../../modules/media"
 import type MediaModuleService from "../../modules/media/service"
@@ -33,6 +35,8 @@ export interface ContentInput {
   body?: unknown
   excerpt?: string | null | undefined
   author_name?: string | null | undefined
+  /** A post's author (adr/0060); null takes them off. */
+  author_id?: string | null | undefined
   image_url?: string | null | undefined
   image_alt?: string | null | undefined
 }
@@ -47,6 +51,7 @@ export interface ContentFields {
   word_count: number
   excerpt: string | null
   author_name: string | null
+  author_id: string | null
   image_url: string | null
   image_alt: string | null
   published_at: Date | null
@@ -130,6 +135,34 @@ export async function assertCards(container: MedusaContainer, doc: ContentDoc): 
   }
 }
 
+/**
+ * A post's author as it will be stored (adr/0060): one of the shop's
+ * authors, or none. Only a post names one; clearing is harmless anywhere.
+ */
+async function authorIdOf(
+  container: MedusaContainer,
+  kind: ContentKind,
+  input: ContentInput,
+  current: ContentEntryRecord | null
+): Promise<string | null> {
+  if (input.author_id === undefined) {
+    return current?.author_id ?? null
+  }
+  if (input.author_id === null) {
+    return null
+  }
+  if (kind !== "post") {
+    throw new ValidationError("content.author_post_only", { field: "author_id" })
+  }
+  const found = await container
+    .resolve<ContentModuleService>(CONTENT_MODULE)
+    .listContentAuthors({ id: input.author_id }, { select: ["id"], take: 1 })
+  if (found.length === 0) {
+    throw new ValidationError("content.author_unknown", { field: "author_id" })
+  }
+  return input.author_id
+}
+
 /** The text fields as they will be stored: `current` filled in with what the save sends. */
 function textFields(input: ContentInput, current: ContentEntryRecord | null) {
   const title = lineOf(
@@ -184,6 +217,7 @@ export async function contentPlan(
   const fields: ContentFields = {
     kind,
     ...text,
+    author_id: await authorIdOf(container, kind, input, current),
     status,
     body,
     body_summary: summaryOf(stats.text, SUMMARY_LENGTH),

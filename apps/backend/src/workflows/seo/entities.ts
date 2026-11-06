@@ -44,6 +44,8 @@ export const SEO_ENTITIES = {
     linkKey: "content_term_id",
     kind: "tag",
   },
+  // Blog authors' pages (adr/0060)
+  post_author: { entity: "content_author", module: CONTENT_MODULE, linkKey: "content_author_id" },
 } as const
 
 export type SeoEntityType = keyof typeof SEO_ENTITIES

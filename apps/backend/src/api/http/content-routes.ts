@@ -2,6 +2,11 @@ import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/f
 import { z } from "@medusajs/framework/zod"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import {
+  AdminGetContentAuthors,
+  AdminPostContentAuthor,
+  AdminUpdateContentAuthor,
+} from "../admin/content/authors/validators"
+import {
   AdminGetContentTerms,
   AdminPostContentTerm,
   AdminUpdateContentTerm,
@@ -18,8 +23,9 @@ import { StoreGetLandingProducts } from "../store/landings/validators"
 import { StoreGetListingProducts, StoreGetListingSuggest } from "../store/listings/validators"
 import { rateLimit } from "./rate-limit"
 
-// An entry's own route: `/admin/content/terms` is the blog terms', not an entry called "terms"
-const CONTENT_ENTRY = /^\/admin\/content\/(?!terms$)[^/]+$/
+// An entry's own route: `/admin/content/terms` and `/admin/content/authors` are the blog's
+// terms' and authors', not entries called so
+const CONTENT_ENTRY = /^\/admin\/content\/(?!terms$|authors$)[^/]+$/
 
 /**
  * Content pages, blog posts and facet landing pages (F3.16): the admin's
@@ -61,10 +67,31 @@ export const CONTENT_ROUTES = [
     methods: ["POST" as const],
     middlewares: [validateAndTransformBody(AdminUpdateContentTerm)],
   },
+  // A blog's authors (adr/0060)
+  {
+    matcher: "/admin/content/authors",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(AdminGetContentAuthors, {})],
+  },
+  {
+    matcher: "/admin/content/authors",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(AdminPostContentAuthor)],
+  },
+  {
+    matcher: "/admin/content/authors/:id",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(AdminUpdateContentAuthor)],
+  },
   {
     matcher: "/store/content",
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(StoreGetContent, {})],
+  },
+  {
+    matcher: "/store/content/authors/:id",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(AdminGetDashboardNoQuery, {})],
   },
   {
     matcher: "/store/content/terms",

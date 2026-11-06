@@ -86,17 +86,33 @@ const internalLinks = forArticle((_facts, article) => {
     : null
 })
 
-const byline = forArticle((facts, article) =>
-  facts.kind === "post" && !article.author
+/**
+ * A post names its author, chosen from the shop's authors (adr/0060): none
+ * at all weighs more than a name typed before authors had records (no
+ * page, no `Person` to link) or an author with no bio (E-E-A-T: who they
+ * are and why they write).
+ */
+const byline = forArticle((facts, article) => {
+  if (facts.kind !== "post") {
+    return null
+  }
+  const problem = !article.author
+    ? "no_author"
+    : !article.authorRecord
+      ? "no_author_page"
+      : !article.authorRecord.hasBio
+        ? "no_bio"
+        : null
+  return problem
     ? {
         ruleId: "A-BYLINE-01",
-        severity: "medium",
+        severity: problem === "no_author" ? "medium" : "low",
         category: "meta",
-        params: {},
+        params: { problem },
         fix: { kind: "manual", action: "edit_author" },
       }
     : null
-)
+})
 
 const cover = forArticle((_facts, article) => {
   const problem =

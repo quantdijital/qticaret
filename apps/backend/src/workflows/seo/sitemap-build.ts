@@ -14,7 +14,7 @@ import { liveLandingFilters } from "../content/landing-facet"
 import { shopOf } from "./payload-sources"
 import { SALE_PATH } from "../../lib/seo/url-patterns"
 import { isAnythingOnSale } from "../pricing/sale-products"
-import { termSitemapPaths } from "./sitemap-terms"
+import { blogSitemapPaths } from "./sitemap-terms"
 
 /**
  * The sitemap's pages (docs/13 §6): live products, categories, brands and
@@ -218,8 +218,8 @@ export async function sitemapCounts(
       }
     }
   }
-  // The blog's archives with live posts (adr/0019 ek 2026-11-03)
-  counts.expected += (await termSitemapPaths(container)).length
+  // The blog's archives and authors with live posts (adr/0019 ek 2026-11-03, adr/0060)
+  counts.expected += (await blogSitemapPaths(container)).length
   return counts
 }
 
@@ -268,8 +268,8 @@ export async function buildSitemap(container: MedusaContainer): Promise<BuiltSit
   for (const spec of KINDS) {
     files.push(...urlsetFiles(spec.kind, await entriesOf(container, spec, origin)))
   }
-  // The blog's archives (adr/0019 ek 2026-11-03); no date: their posts change them
-  const archives = await termSitemapPaths(container)
+  // The blog's archives and authors (adr/0019 ek 2026-11-03, adr/0060); no date: posts change them
+  const archives = await blogSitemapPaths(container)
   files.push(
     ...urlsetFiles(
       "blog",

@@ -53,12 +53,17 @@ describe("WordPress addresses (adr/0059)", () => {
     expect(addressOf("/page")).toBeNull()
   })
 
-  it("sends date and author archives to the blog", () => {
+  it("sends date and author archives to the blog, an author's by name to their page", () => {
+    // The author's page when one has the slug (adr/0060), else the blog
+    expect(addressOf("/author/deniz/")).toEqual({
+      kind: "post_term",
+      taxonomy: "author",
+      slug: "deniz",
+    })
     for (const raw of [
       "/2024",
       "/2024/05/",
       "/2024/05/12",
-      "/author/deniz/",
       "/?m=202405",
       "/?author=2",
       "/?cat=7",

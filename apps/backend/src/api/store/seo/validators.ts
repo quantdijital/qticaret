@@ -33,6 +33,7 @@ export const StoreGetSeoPaths = z
       "landing",
       "post_category",
       "post_tag",
+      "post_author",
     ]),
     id: z
       .union([z.string(), z.array(z.string())])

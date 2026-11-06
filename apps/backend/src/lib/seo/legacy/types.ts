@@ -16,8 +16,11 @@ export type LegacyAddress =
   | { kind: "category_slug"; slug: string }
   /** A product tag's archive: tags do not move (adr/0042 Ek 2026-11-03 §3); a search for it. */
   | { kind: "product_tag"; slug: string }
-  /** A blog category's or tag's archive no migration kept: the blog's own, else the blog. */
-  | { kind: "post_term"; taxonomy: "category" | "tag"; slug: string }
+  /**
+   * A blog category's or tag's archive no migration kept, or an author's
+   * (adr/0060): the blog's own for the slug, else the blog.
+   */
+  | { kind: "post_term"; taxonomy: "category" | "tag" | "author"; slug: string }
   /** The old site's search (`?s=`). */
   | { kind: "search"; text: string }
   /** A file in the old media library (`/wp-content/uploads/...`). */

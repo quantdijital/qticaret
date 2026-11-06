@@ -1,5 +1,11 @@
-import { articleJsonLd, breadcrumbJsonLd, listingJsonLd, productJsonLd } from "./jsonld"
-import type { ArticleFacts, JsonLd, ProductFacts } from "./jsonld"
+import {
+  articleJsonLd,
+  breadcrumbJsonLd,
+  listingJsonLd,
+  productJsonLd,
+  profilePageJsonLd,
+} from "./jsonld"
+import type { ArticleFacts, JsonLd, PersonFacts, ProductFacts } from "./jsonld"
 import { listingDescription } from "./listing-description"
 import { renderTemplate } from "./template"
 import { DESCRIPTION_EXCERPT, excerpt } from "./text"
@@ -21,6 +27,7 @@ export type SeoPageKind =
   | "landing"
   | "post_category"
   | "post_tag"
+  | "post_author"
   | "sale"
 
 export interface SeoPayload {
@@ -80,6 +87,8 @@ export interface SeoSubject {
   listing?: { name: string; path: string }[] | undefined
   /** A content page's or blog post's facts (F3.16); the description and publisher are filled in. */
   article?: Omit<ArticleFacts, "description" | "publisher"> | undefined
+  /** A blog author's page (adr/0060): the person, their page's URL filled in. */
+  profile?: { person: PersonFacts; dateModified: string | null } | undefined
   /** A product's short description as plain text (adr/0055 Ek 2026-11-06): the meta's first fallback. */
   summary?: string | undefined
 }
@@ -130,24 +139,30 @@ const NAME_TOKEN: Record<SeoPageKind, string> = {
   landing: "başlık",
   post_category: "başlık",
   post_tag: "başlık",
+  post_author: "başlık",
   sale: "başlık",
 }
 
 // The sale page (`/kampanyalar`) has no template of the shop's: its name and the shop's
 const SALE_TITLE = "{başlık} | {mağaza}"
 
-// A blog archive (adr/0019 ek 2026-11-03) is titled as a post is, its name in the post's place
+// A blog archive (adr/0019 ek 2026-11-03) and an author's page (adr/0060) are titled as a
+// post is, the name in the post's place
+const OWN_TEMPLATE: Record<Exclude<SeoPageKind, "sale">, keyof SeoShop["titleTemplates"]> = {
+  product: "product",
+  category: "category",
+  collection: "category",
+  brand: "brand",
+  page: "page",
+  post: "post",
+  landing: "landing",
+  post_category: "post",
+  post_tag: "post",
+  post_author: "post",
+}
+
 function templateOf(kind: SeoPageKind, shop: SeoShop): string {
-  if (kind === "sale") {
-    return SALE_TITLE
-  }
-  const own =
-    kind === "collection"
-      ? "category"
-      : kind === "post_category" || kind === "post_tag"
-        ? "post"
-        : kind
-  return shop.titleTemplates[own]
+  return kind === "sale" ? SALE_TITLE : shop.titleTemplates[OWN_TEMPLATE[kind]]
 }
 
 function titleOf(subject: SeoSubject, shop: SeoShop): string {
@@ -242,19 +257,30 @@ function structuredData(
   subject: SeoSubject,
   { description, canonical, breadcrumbs, url, shop }: PageFacts
 ): JsonLd[] {
+  // A post's author's page is a path until the host is known (adr/0060)
+  const author = subject.article?.author
+  const person =
+    author && typeof author !== "string" && author.url
+      ? { ...author, url: url(author.url) }
+      : author
   const page = subject.product
     ? productJsonLd(subject.product, canonical)
     : subject.article
-      ? articleJsonLd({ ...subject.article, description, publisher: shop }, canonical)
-      : subject.listing
-        ? listingJsonLd(
-            {
-              name: subject.name,
-              description,
-              items: subject.listing.map((item) => ({ name: item.name, url: url(item.path) })),
-            },
-            canonical
-          )
-        : null
+      ? articleJsonLd(
+          { ...subject.article, author: person ?? null, description, publisher: shop },
+          canonical
+        )
+      : subject.profile
+        ? profilePageJsonLd({ ...subject.profile, name: subject.name, description }, canonical)
+        : subject.listing
+          ? listingJsonLd(
+              {
+                name: subject.name,
+                description,
+                items: subject.listing.map((item) => ({ name: item.name, url: url(item.path) })),
+              },
+              canonical
+            )
+          : null
   return [page, breadcrumbJsonLd(breadcrumbs)].filter((block): block is JsonLd => block !== null)
 }

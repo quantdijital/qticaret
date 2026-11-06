@@ -161,6 +161,19 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "catalog.variants_too_many": "At most 500 variants can be saved at once.",
   "content.author_invalid":
     "The author name must be at most 120 characters, without disallowed characters.",
+  "content.author_bio_invalid":
+    "The bio must be at most 2000 characters, without disallowed characters.",
+  "content.author_handle_taken":
+    "Another author uses this address; write a different name or address.",
+  "content.author_job_title_invalid":
+    "The job title must be at most 120 characters, without disallowed characters.",
+  "content.author_link_invalid":
+    "The link must be a valid address starting with https; LinkedIn, Instagram and X links must be on that site.",
+  "content.author_name_invalid":
+    "An author name is required, at most 120 characters, without disallowed characters.",
+  "content.author_post_only": "Authors can be added to blog posts only.",
+  "content.author_unknown": "Author not found; reload the list and choose again.",
+  "content.author_user_unknown": "The chosen staff account was not found.",
   "content.body_invalid":
     "The content holds an element or format that is not allowed; reload the page and try again.",
   "content.card_unknown":

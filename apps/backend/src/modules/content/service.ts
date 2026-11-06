@@ -1,5 +1,6 @@
 import type { Context, InferTypeOf } from "@medusajs/framework/types"
 import { InjectManager, MedusaContext, MedusaService } from "@medusajs/framework/utils"
+import { ContentAuthor } from "./models/content-author"
 import { ContentEntry } from "./models/content-entry"
 import { ContentEntryTerm, ContentTerm } from "./models/content-term"
 import { LandingPage } from "./models/landing-page"
@@ -9,6 +10,7 @@ export type ContentKind = ContentEntryRecord["kind"]
 export type LandingPageRecord = InferTypeOf<typeof LandingPage>
 export type ContentTermRecord = InferTypeOf<typeof ContentTerm>
 export type ContentTermKind = ContentTermRecord["kind"]
+export type ContentAuthorRecord = InferTypeOf<typeof ContentAuthor>
 
 interface Executor {
   execute: (sql: string, params: unknown[]) => Promise<unknown>
@@ -25,6 +27,7 @@ class ContentModuleService extends MedusaService({
   LandingPage,
   ContentTerm,
   ContentEntryTerm,
+  ContentAuthor,
 }) {
   /**
    * Stores landing pages' measured shares without touching `updated_at`: a
@@ -114,6 +117,32 @@ class ContentModuleService extends MedusaService({
         LIMIT ?`,
       [...(termIds ? [JSON.stringify(termIds)] : []), options.cap]
     )) as { term_id: string; count: number }[]
+  }
+
+  /**
+   * How many posts each author has, counted in one grouped statement: live
+   * ones only, or every post not deleted. An author with none is not in
+   * the answer. `authorIds` null: every author.
+   */
+  @InjectManager()
+  async countPostsByAuthor(
+    authorIds: readonly string[] | null,
+    options: { live: boolean },
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<{ author_id: string; count: number }[]> {
+    if (authorIds?.length === 0) {
+      return []
+    }
+    const manager = sharedContext.manager as Executor
+    return (await manager.execute(
+      `SELECT e.author_id, count(*)::int AS count
+         FROM content_entry e
+        WHERE e.deleted_at IS NULL AND e.kind = 'post' AND e.author_id IS NOT NULL
+          ${options.live ? "AND e.status = 'published'" : ""}
+          ${authorIds ? "AND e.author_id IN (SELECT jsonb_array_elements_text(?::jsonb))" : ""}
+        GROUP BY e.author_id`,
+      authorIds ? [JSON.stringify(authorIds)] : []
+    )) as { author_id: string; count: number }[]
   }
 }
 

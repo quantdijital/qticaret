@@ -23,7 +23,10 @@ export const ContentEntry = model
     word_count: model.number().default(0),
     // A summary of the writer's own; else the body's opening serves
     excerpt: model.text().nullable(),
+    // Free text from before authors had records (adr/0060): read only as the fallback
     author_name: model.text().nullable(),
+    // The post's author (`content_author`), one at most
+    author_id: model.text().nullable(),
     // A cover image from the shop's media library
     image_url: model.text().nullable(),
     image_alt: model.text().nullable(),
@@ -33,4 +36,5 @@ export const ContentEntry = model
   .indexes([
     { on: ["kind", "handle"], unique: true, where: "deleted_at IS NULL" },
     { on: ["kind", "status", "published_at"] },
+    { on: ["author_id"], where: "deleted_at IS NULL AND author_id IS NOT NULL" },
   ])

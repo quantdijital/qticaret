@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { pagePath, postPath } from "../../lib/seo"
+import { pagePath, postAuthorPath, postPath } from "../../lib/seo"
 import type { ContentKind, ContentTermKind } from "../../modules/content/service"
 import type { PathClaim } from "../../modules/url-registry/service"
 import { CATALOG_ENTITY_TYPES, claimMissing } from "../catalog/entity-paths"
@@ -69,6 +69,37 @@ export async function claimTermPaths(
         path,
         accepted: [path],
         replaced: term.was_live ? "reserve" : "free",
+      }
+    })
+  )
+}
+
+export interface PathedAuthor {
+  id: string
+  handle: string
+  /** They had live posts before this save: their page was public, so a path it leaves answers with a 301. */
+  was_live: boolean
+}
+
+/**
+ * Claims a blog author's page path (adr/0060): `/blog/yazar/{handle}`,
+ * whatever the URL style. An author who had live posts keeps a changed
+ * handle's old path for its 301; one who had none frees it.
+ */
+export async function claimAuthorPaths(
+  container: MedusaContainer,
+  authors: PathedAuthor[]
+): Promise<PathClaim[]> {
+  return claimMissing(
+    container,
+    authors.map((author) => {
+      const path = postAuthorPath(author.handle)
+      return {
+        entity_type: CATALOG_ENTITY_TYPES.post_author,
+        entity_id: author.id,
+        path,
+        accepted: [path],
+        replaced: author.was_live ? "reserve" : "free",
       }
     })
   )

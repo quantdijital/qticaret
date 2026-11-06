@@ -31,6 +31,7 @@ const fieldsOf = (entry: ContentEntryRecord): ContentFields => ({
   word_count: entry.word_count,
   excerpt: entry.excerpt,
   author_name: entry.author_name,
+  author_id: entry.author_id,
   image_url: entry.image_url,
   image_alt: entry.image_alt,
   published_at: entry.published_at,

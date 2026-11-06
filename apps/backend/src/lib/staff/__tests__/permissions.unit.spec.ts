@@ -411,6 +411,10 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/content/terms": false,
   "POST /admin/content/terms/:id": false,
   "DELETE /admin/content/terms/:id": false,
+  // A blog's authors (adr/0060): as its categories and tags
+  "POST /admin/content/authors": false,
+  "POST /admin/content/authors/:id": false,
+  "DELETE /admin/content/authors/:id": false,
   "POST /admin/customer-segments/:id/refresh": false,
   "POST /admin/customer-segments/:id": false,
   "DELETE /admin/customer-segments/:id": false,

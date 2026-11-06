@@ -4,6 +4,7 @@ import type { ContentDoc } from "../../../lib/content"
 import type { AdvisorFacts } from "../../../lib/seo/advisor"
 import { writtenDetails } from "../../../lib/shop/written-details"
 import type { ShopContact } from "../../../lib/shop/written-details"
+import { authorsByIds } from "../../content/author-reads"
 import { contentPath } from "../../content/paths"
 import { legalIdentity } from "../../legal/identity"
 import { seoPayloadFor } from "../payload"
@@ -19,6 +20,9 @@ interface ContentRow {
   status: "draft" | "published"
   body: ContentDoc
   author_name?: string | null
+  author_id?: string | null
+  /** Its author's record, read beside it (adr/0060). */
+  author?: { name: string; bio: string | null } | null
   image_url?: string | null
   image_alt?: string | null
   published_at?: string | Date | null
@@ -48,7 +52,9 @@ function articleFacts(
     images: stats.images.length + cover,
     imagesWithoutAlt:
       stats.images.filter((image) => !image.alt).length + (cover && !row.image_alt?.trim() ? 1 : 0),
-    author: row.author_name ?? null,
+    // The author's record names them (adr/0060); the old text stands in for a post without one
+    author: row.author?.name ?? row.author_name ?? null,
+    authorRecord: row.author ? { hasBio: Boolean(row.author.bio?.trim()) } : null,
     published: row.status === "published",
     ageDays: changed ? Math.floor((now.getTime() - new Date(changed).getTime()) / DAY_MS) : null,
     writtenDetails: writtenDetails(stats.text, contact),
@@ -77,6 +83,7 @@ export async function contentFacts(
       "status",
       "body",
       "author_name",
+      "author_id",
       "image_url",
       "image_alt",
       "published_at",
@@ -87,6 +94,9 @@ export async function contentFacts(
   )
   if (row?.kind !== kind) {
     return null
+  }
+  if (row.author_id) {
+    row.author = (await authorsByIds(container, [row.author_id])).get(row.author_id) ?? null
   }
   const owner = { entity_type: kind, entity_id: id }
   const path = (await activePathOf(container, owner)) ?? contentPath(row)

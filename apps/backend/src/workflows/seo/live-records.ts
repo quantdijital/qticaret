@@ -47,6 +47,8 @@ export const LIVE_RECORDS: readonly LiveSpec[] = [
     filters: fixed({ kind: "category" }),
   },
   { entity: "content_term", type: CATALOG_ENTITY_TYPES.post_tag, filters: fixed({ kind: "tag" }) },
+  // Blog authors' pages (adr/0060): there while the author is
+  { entity: "content_author", type: CATALOG_ENTITY_TYPES.post_author, filters: fixed({}) },
 ]
 
 /** Which of the owners are live, as `type:id`; one query per kind of record. */

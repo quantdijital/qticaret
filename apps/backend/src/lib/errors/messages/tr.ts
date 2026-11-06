@@ -165,6 +165,19 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "catalog.variants_too_many": "Tek seferde en çok 500 varyant kaydedilebilir.",
   "content.author_invalid":
     "Yazar adı en fazla 120 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "content.author_bio_invalid":
+    "Biyografi en fazla 2000 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "content.author_handle_taken":
+    "Bu adres başka bir yazarda kullanılıyor; farklı bir ad ya da adres yazın.",
+  "content.author_job_title_invalid":
+    "Unvan en fazla 120 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "content.author_link_invalid":
+    "Bağlantı https ile başlayan geçerli bir adres olmalı; LinkedIn, Instagram ve X bağlantısı o sitenin adresi olmalı.",
+  "content.author_name_invalid":
+    "Yazar adı gerekli; en fazla 120 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "content.author_post_only": "Yazar yalnızca blog yazılarına eklenebilir.",
+  "content.author_unknown": "Yazar bulunamadı; listeyi yenileyip yeniden seçin.",
+  "content.author_user_unknown": "Seçilen personel hesabı bulunamadı.",
   "content.body_invalid":
     "İçerikte izin verilmeyen bir öğe ya da biçim var; sayfayı yenileyip yeniden deneyin.",
   "content.card_unknown":

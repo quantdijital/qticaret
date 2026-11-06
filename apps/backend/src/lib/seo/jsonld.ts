@@ -76,9 +76,54 @@ export interface ArticleFacts {
   /** ISO dates: first published, last changed in its text. */
   datePublished: string | null
   dateModified: string | null
-  author: string | null
+  /** The author's record (adr/0060), or the name alone a post had before authors had records. */
+  author: string | PersonFacts | null
   image: string | null
   publisher: string
+}
+
+/** A person as the structured data names them (adr/0060): a post's author, a profile page's subject. */
+export interface PersonFacts {
+  name: string
+  /** Absolute: their page on the shop. */
+  url?: string | null
+  jobTitle?: string | null
+  image?: string | null
+  description?: string | null
+  /** Their own pages elsewhere (website, LinkedIn, Instagram, X). */
+  sameAs?: readonly string[]
+}
+
+/** A `Person` node, nested in another block (no `@context` of its own). */
+export function personJsonLd(person: PersonFacts): JsonLd {
+  return compact({
+    "@type": "Person",
+    name: person.name,
+    url: person.url,
+    jobTitle: person.jobTitle,
+    image: person.image,
+    description: person.description,
+    sameAs: person.sameAs ? [...person.sameAs] : undefined,
+  })
+}
+
+/**
+ * A blog author's page (adr/0060): a `ProfilePage` whose main entity is
+ * the `Person` (Google's profile page structured data).
+ */
+export function profilePageJsonLd(
+  facts: { person: PersonFacts; name: string; description: string; dateModified: string | null },
+  url: string
+): JsonLd {
+  return compact({
+    "@context": SCHEMA,
+    "@type": "ProfilePage",
+    name: facts.name,
+    description: facts.description,
+    url,
+    dateModified: facts.dateModified,
+    mainEntity: personJsonLd({ ...facts.person, url }),
+  })
 }
 
 export function articleJsonLd(facts: ArticleFacts, url: string): JsonLd {
@@ -102,7 +147,11 @@ export function articleJsonLd(facts: ArticleFacts, url: string): JsonLd {
     image: facts.image ? [facts.image] : undefined,
     datePublished: facts.datePublished,
     dateModified: facts.dateModified ?? facts.datePublished,
-    author: facts.author ? { "@type": "Person", name: facts.author } : undefined,
+    author: !facts.author
+      ? undefined
+      : typeof facts.author === "string"
+        ? { "@type": "Person", name: facts.author }
+        : personJsonLd(facts.author),
     publisher: { "@type": "Organization", name: facts.publisher },
   })
 }

@@ -17,6 +17,7 @@ const ARTICLE: Article = {
   images: 2,
   imagesWithoutAlt: 0,
   author: "Ayşe Yılmaz",
+  authorRecord: { hasBio: true },
   published: true,
   ageDays: 20,
 }
@@ -85,6 +86,25 @@ describe("content rules (docs/14 §3.8)", () => {
   it("asks a post, not a page, for its author and its opening answer", () => {
     expect(ids(post({ author: null, openingWords: 40 }))).toEqual(["A-BYLINE-01", "A-ANSWER-01"])
     expect(ids(post({ author: null, openingWords: 40 }, { kind: "page" }))).toEqual([])
+    expect(findIssues(post({ author: null, authorRecord: null }))[0]).toMatchObject({
+      ruleId: "A-BYLINE-01",
+      severity: "medium",
+      params: { problem: "no_author" },
+    })
+  })
+
+  it("asks for an author chosen from the shop's authors, with a bio (adr/0060)", () => {
+    expect(findIssues(post({ authorRecord: null }))[0]).toMatchObject({
+      ruleId: "A-BYLINE-01",
+      severity: "low",
+      params: { problem: "no_author_page" },
+    })
+    expect(findIssues(post({ authorRecord: { hasBio: false } }))[0]).toMatchObject({
+      ruleId: "A-BYLINE-01",
+      severity: "low",
+      params: { problem: "no_bio" },
+    })
+    expect(ids(post({ authorRecord: { hasBio: true } }))).toEqual([])
   })
 
   it("notes a page with no image, or images without alt text", () => {

@@ -15,6 +15,8 @@ export {
   postCategoryPath,
   postPath,
   postTagPath,
+  POST_AUTHOR_PREFIX,
+  postAuthorPath,
   productPath,
 } from "./url-patterns"
 export type { UrlStyle } from "./url-patterns"

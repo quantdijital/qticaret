@@ -7,7 +7,7 @@ import type { LegacyAddress } from "../../../lib/seo/legacy"
 import { encodePath } from "../../../lib/seo/redirects"
 import type { RequestPath } from "../../../lib/seo/redirects"
 import { toSlug } from "../../../lib/seo/slug"
-import { postCategoryPath, postTagPath } from "../../../lib/seo/url-patterns"
+import { postAuthorPath, postCategoryPath, postTagPath } from "../../../lib/seo/url-patterns"
 import { MEDIA_MODULE } from "../../../modules/media"
 import type MediaModuleService from "../../../modules/media/service"
 import { MIGRATION_MODULE } from "../../../modules/migration"
@@ -194,14 +194,22 @@ async function pagedAnswer(
   return moved(locationOf(target, request, extra), status)
 }
 
-/** A blog archive no migration kept: the blog's own for the same slug, else the blog. */
+/**
+ * A blog archive no migration kept, or an author's (adr/0060): the blog's
+ * own for the same slug, else the blog.
+ */
 async function postTermAnswer(
   follow: Follow,
   address: Extract<LegacyAddress, { kind: "post_term" }>,
   request: RequestPath
 ): Promise<Answer> {
   const handle = toSlug(address.slug)
-  const path = address.taxonomy === "tag" ? postTagPath(handle) : postCategoryPath(handle)
+  const path =
+    address.taxonomy === "tag"
+      ? postTagPath(handle)
+      : address.taxonomy === "author"
+        ? postAuthorPath(handle)
+        : postCategoryPath(handle)
   const archive = handle ? await follow({ path, query: new URLSearchParams() }) : null
   if (archive?.type === "entity") {
     return moved(locationOf(encodePath(path), request))

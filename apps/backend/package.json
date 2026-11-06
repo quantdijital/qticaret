@@ -32,6 +32,7 @@
     "links:rewrite": "medusa exec ./src/scripts/content-links.ts",
     "summary:backfill": "medusa exec ./src/scripts/summary-backfill.ts",
     "legacy:backfill": "medusa exec ./src/scripts/legacy-backfill.ts",
+    "authors:backfill": "medusa exec ./src/scripts/authors-backfill.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "pnpm test:unit",

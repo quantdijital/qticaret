@@ -5,6 +5,7 @@ import { MAX_POST_TAGS } from "../../../workflows/content/term-rules"
 
 // A term's id; whether it is a category or a tag of the shop's is the workflow's check
 const TERM_ID = z.string().regex(/^cterm_[0-9A-Za-z]{1,64}$/)
+export const AUTHOR_ID = z.string().regex(/^cauth_[0-9A-Za-z]{1,64}$/)
 
 /**
  * `?kind=post&status=draft&q=&term_id=&offset=&limit=`: entries by title,
@@ -15,6 +16,8 @@ export const AdminGetContent = z
     kind: z.enum(CONTENT_KINDS).optional(),
     status: z.enum(CONTENT_STATUSES).optional(),
     term_id: TERM_ID.optional(),
+    // An author's posts (adr/0060)
+    author_id: AUTHOR_ID.optional(),
     q: z.string().trim().max(200).optional(),
     offset: z.coerce.number().int().min(0).max(100_000).default(0),
     limit: z.coerce.number().int().min(1).max(100).default(25),
@@ -29,7 +32,10 @@ const fields = {
   status: z.enum(CONTENT_STATUSES).optional(),
   body: contentDoc.optional(),
   excerpt: z.string().max(5000).nullable().optional(),
+  // Free text from before authors had records (adr/0060); the panel sends `author_id`
   author_name: z.string().max(1000).nullable().optional(),
+  // One of the shop's authors (null: none); whether it exists is the workflow's check
+  author_id: AUTHOR_ID.nullable().optional(),
   // An upload's address (checked against the media library in the workflow); "" takes it off
   image_url: z
     .string()

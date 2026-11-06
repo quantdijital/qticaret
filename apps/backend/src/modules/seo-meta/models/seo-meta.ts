@@ -12,6 +12,8 @@ export const SEO_ENTITY_TYPES = [
   // Blog categories and tags (adr/0019 ek 2026-11-03)
   "post_category",
   "post_tag",
+  // Blog authors' pages (adr/0060)
+  "post_author",
 ] as const
 
 /** A page's robots choice when it differs from what its state implies (docs/13 §5). */

@@ -3,7 +3,8 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { chunksOf } from "../../lib/catalog"
 import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
 import type UrlRegistryModuleService from "../../modules/url-registry/service"
-import { CATALOG_LOCALE } from "../catalog/entity-paths"
+import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
+import { authorPostCounts } from "../content/author-reads"
 import { termEntityType } from "../content/paths"
 import { postCounts } from "../content/term-reads"
 
@@ -50,4 +51,51 @@ export async function termSitemapPaths(container: MedusaContainer): Promise<stri
     found.push(...paths.map((entry) => entry.path))
   }
   return found.sort()
+}
+
+/**
+ * Blog authors' pages in the sitemap (adr/0060, the `blog` file): authors
+ * with at least one live post, at their active paths, unless marked
+ * noindex or canonical elsewhere. A page with none is noindex, so it
+ * stays out.
+ */
+export async function authorSitemapPaths(container: MedusaContainer): Promise<string[]> {
+  const ids = [...(await authorPostCounts(container, null, { live: true })).keys()]
+  const found: string[] = []
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const registry = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
+  for (const chunk of chunksOf(ids)) {
+    const { data } = await query.graph({
+      entity: "content_author",
+      fields: ["id", "seo_meta.robots_override", "seo_meta.canonical_override"],
+      filters: { id: chunk },
+    })
+    const rows = (data as Omit<TermRow, "kind">[]).filter(
+      (row) =>
+        !row.seo_meta?.robots_override?.startsWith("noindex") && !row.seo_meta?.canonical_override
+    )
+    if (rows.length === 0) {
+      continue
+    }
+    const paths = await registry.listUrlEntries(
+      {
+        locale: CATALOG_LOCALE,
+        entity_type: CATALOG_ENTITY_TYPES.post_author,
+        entity_id: rows.map((row) => row.id),
+        status: "active",
+      },
+      { select: ["path"] }
+    )
+    found.push(...paths.map((entry) => entry.path))
+  }
+  return found.sort()
+}
+
+/** The blog file's pages: the archives with live posts, then the authors with them. */
+export async function blogSitemapPaths(container: MedusaContainer): Promise<string[]> {
+  const [archives, authors] = await Promise.all([
+    termSitemapPaths(container),
+    authorSitemapPaths(container),
+  ])
+  return [...archives, ...authors]
 }

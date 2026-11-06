@@ -4,6 +4,8 @@ import { containsPattern } from "../../../lib/security"
 import { CONTENT_MODULE } from "../../../modules/content"
 import type ContentModuleService from "../../../modules/content/service"
 import type { ContentEntryRecord } from "../../../modules/content/service"
+import { authorView, authorsByIds } from "../../../workflows/content/author-reads"
+import type { AuthorRow } from "../../../workflows/content/author-reads"
 import { contentPath } from "../../../workflows/content/paths"
 import { termsOfEntries } from "../../../workflows/content/term-reads"
 import type { EntryTerms } from "../../../workflows/content/term-reads"
@@ -17,6 +19,7 @@ const LIST_FIELDS = [
   "status",
   "excerpt",
   "author_name",
+  "author_id",
   "image_url",
   "published_at",
   "revised_at",
@@ -36,7 +39,17 @@ const filed = ({ category, tags }: EntryTerms) => ({
 
 const NOT_FILED: EntryTerms = { category: null, tags: [] }
 
-const listed = (entry: Listed) => ({
+// A post's author (adr/0060): its id (what a save sends) and as shown; the old text stays readable
+const listed = (entry: Listed, authors: Map<string, AuthorRow>) => {
+  const author = entry.author_id ? authors.get(entry.author_id) : undefined
+  return {
+    ...entryFields(entry),
+    author_id: author ? entry.author_id : null,
+    author: author ? authorView(author) : null,
+  }
+}
+
+const entryFields = (entry: Listed) => ({
   id: entry.id,
   kind: entry.kind,
   title: entry.title,
@@ -76,6 +89,7 @@ export async function readContentList(container: MedusaContainer, query: AdminGe
       ...(query.status ? { status: query.status } : {}),
       ...(query.q ? { title: { $ilike: containsPattern(query.q) } } : {}),
       ...(filedUnder ? { id: filedUnder } : {}),
+      ...(query.author_id ? { author_id: query.author_id } : {}),
     },
     {
       select: [...LIST_FIELDS],
@@ -84,13 +98,19 @@ export async function readContentList(container: MedusaContainer, query: AdminGe
       order: { updated_at: "DESC" },
     }
   )
-  const terms = await termsOfEntries(
-    container,
-    entries.map((entry) => entry.id)
-  )
+  const [terms, authors] = await Promise.all([
+    termsOfEntries(
+      container,
+      entries.map((entry) => entry.id)
+    ),
+    authorsByIds(
+      container,
+      entries.map((entry) => entry.author_id)
+    ),
+  ])
   return {
     entries: entries.map((entry) => ({
-      ...listed(entry),
+      ...listed(entry, authors),
       ...filed(terms.get(entry.id) ?? NOT_FILED),
     })),
     count,
@@ -106,9 +126,12 @@ export async function readContentEntry(container: MedusaContainer, id: string) {
   if (!entry) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "content.unknown")
   }
-  const terms = await termsOfEntries(container, [entry.id])
+  const [terms, authors] = await Promise.all([
+    termsOfEntries(container, [entry.id]),
+    authorsByIds(container, [entry.author_id]),
+  ])
   return {
-    ...listed(entry),
+    ...listed(entry, authors),
     ...filed(terms.get(entry.id) ?? NOT_FILED),
     body: entry.body,
     image_alt: entry.image_alt,

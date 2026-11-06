@@ -4,6 +4,7 @@ import { parseRequestPath } from "../../../lib/seo/redirects"
 import { CONTENT_MODULE } from "../../../modules/content"
 import type ContentModuleService from "../../../modules/content/service"
 import { CATALOG_ENTITY_TYPES } from "../../catalog/entity-paths"
+import { livePostsOfAuthor } from "../../content/author-reads"
 import { livePostsUnder } from "../../content/term-reads"
 import { LISTING_TYPES } from "../listing"
 import { ALL_PRODUCTS, countListing } from "../listing-plan"
@@ -68,6 +69,11 @@ export async function pageCountOf(
   }
   if (BLOG_ARCHIVES.has(page.entity_type)) {
     const { count } = await livePostsUnder(container, [page.entity_id], { skip: 0, take: 1 })
+    return pagesOf(count, BLOG_PAGE_SIZE)
+  }
+  // An author's page lists their posts as an archive does (adr/0060)
+  if (page.entity_type === CATALOG_ENTITY_TYPES.post_author) {
+    const { count } = await livePostsOfAuthor(container, page.entity_id, 1)
     return pagesOf(count, BLOG_PAGE_SIZE)
   }
   return null

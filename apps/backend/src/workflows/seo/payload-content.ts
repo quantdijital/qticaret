@@ -3,7 +3,9 @@ import { landingRobots } from "../../lib/content/originality"
 import type { SeoOverrides, SeoSubject } from "../../lib/seo/resolve"
 import { fillShopText } from "../../lib/shop/tokens"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
+import { authorsByIds } from "../content/author-reads"
 import { livePostsOfTerm } from "../content/term-reads"
+import { personOf } from "./payload-author"
 import { shopInfoValues } from "../shop/info-values"
 import { SEO_FIELDS, imageOf, listingItems, rowOf, trailOf } from "./payload-sources"
 import type { CategoryRow, SeoMetaRow } from "./payload-sources"
@@ -15,6 +17,7 @@ interface ContentRow {
   excerpt?: string | null
   body_summary: string
   author_name?: string | null
+  author_id?: string | null
   image_url?: string | null
   image_alt?: string | null
   published_at?: string | Date | null
@@ -58,6 +61,7 @@ export async function contentSubject(
       "excerpt",
       "body_summary",
       "author_name",
+      "author_id",
       "image_url",
       "image_alt",
       "published_at",
@@ -69,11 +73,15 @@ export async function contentSubject(
   if (!entry) {
     return null
   }
-  const image = await imageOf(
-    container,
-    entry.seo_meta,
-    entry.image_url ? { url: entry.image_url, alt: entry.image_alt ?? null } : null
-  )
+  const [image, authors] = await Promise.all([
+    imageOf(
+      container,
+      entry.seo_meta,
+      entry.image_url ? { url: entry.image_url, alt: entry.image_alt ?? null } : null
+    ),
+    authorsByIds(container, [entry.kind === "post" ? entry.author_id : null]),
+  ])
+  const author = entry.author_id ? authors.get(entry.author_id) : undefined
   return {
     kind: entry.kind,
     path,
@@ -89,7 +97,8 @@ export async function contentSubject(
       headline: entry.title,
       datePublished: iso(entry.published_at),
       dateModified: iso(entry.revised_at),
-      author: entry.author_name ?? null,
+      // The author's record (adr/0060), else the name a post had before authors had records
+      author: author ? personOf(author) : (entry.author_name ?? null),
       image: image?.url ?? null,
     },
   }

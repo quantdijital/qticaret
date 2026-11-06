@@ -169,10 +169,14 @@ function pathAddress(path: string): LegacyAddress | null {
   if (isMachinery(segments) || isFeed(segments)) {
     return { kind: "gone" }
   }
+  const slug = segments.at(-1) ?? ""
+  // An author's archive: their page here when the slug names one (adr/0060), else the blog
+  if (first === "author" && segments.length === 2 && SLUG.test(slug)) {
+    return { kind: "post_term", taxonomy: "author", slug }
+  }
   if (isDateArchive(segments) || (first === "author" && segments.length === 2)) {
     return { kind: "page", path: BLOG }
   }
-  const slug = segments.at(-1) ?? ""
   if ((first === "product-tag" || first === "urun-etiketi") && segments.length === 2) {
     return SLUG.test(slug) ? { kind: "product_tag", slug } : null
   }

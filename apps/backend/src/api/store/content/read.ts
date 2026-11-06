@@ -11,6 +11,8 @@ import { contentPath } from "../../../workflows/content/paths"
 import { livePostsUnder, termIdOf, termsOfEntries } from "../../../workflows/content/term-reads"
 import type { EntryTerms } from "../../../workflows/content/term-reads"
 import { shopInfoValues } from "../../../workflows/shop/info-values"
+import { authorIdOf } from "../../../workflows/content/author-reads"
+import { entryAuthor, listedAuthors } from "./authors"
 import { cardTargets } from "./cards"
 import { coverOf, coversOf } from "./covers"
 import type { StoreGetContentType } from "./validators"
@@ -30,6 +32,7 @@ const LIST_FIELDS = [
   "image_url",
   "image_alt",
   "author_name",
+  "author_id",
   "published_at",
   "revised_at",
 ] as const
@@ -104,14 +107,23 @@ async function filedPage(
  */
 export async function storeContentList(container: MedusaContainer, query: StoreGetContentType) {
   const page = { offset: query.offset, limit: query.limit }
-  const termIds = await termsNamed(container, query)
-  if (termIds?.length === 0) {
+  const [termIds, authorId] = await Promise.all([
+    termsNamed(container, query),
+    // An author's page lists their posts (adr/0060)
+    query.author ? authorIdOf(container, query.author) : Promise.resolve(undefined),
+  ])
+  // An author's posts are not read under a term (no page asks for both)
+  if (termIds?.length === 0 || authorId === null || (termIds && authorId)) {
     return { entries: [], count: 0, ...page }
   }
   const [entries, count] = termIds
     ? await filedPage(container, termIds, query)
     : await service(container).listAndCountContentEntries(
-        { status: "published", ...(query.kind ? { kind: query.kind } : {}) },
+        {
+          status: "published",
+          ...(query.kind ? { kind: query.kind } : {}),
+          ...(authorId ? { kind: "post" as const, author_id: authorId } : {}),
+        },
         {
           select: [...LIST_FIELDS],
           skip: query.offset,
@@ -119,7 +131,7 @@ export async function storeContentList(container: MedusaContainer, query: StoreG
           order: { published_at: "DESC" },
         }
       )
-  const [values, terms, covers] = await Promise.all([
+  const [values, terms, covers, authors] = await Promise.all([
     shopInfoValues(container),
     termsOfEntries(
       container,
@@ -129,15 +141,23 @@ export async function storeContentList(container: MedusaContainer, query: StoreG
       container,
       entries.map((entry) => entry.image_url)
     ),
+    listedAuthors(
+      container,
+      entries.map((entry) => entry.author_id)
+    ),
   ])
   return {
     entries: entries.map((entry) => {
       const listed = summary(entry)
+      const author = (entry.author_id ? authors.get(entry.author_id) : undefined) ?? null
       return {
         ...listed,
         ...coverOf(covers, entry.image_url),
         excerpt: fillShopText(listed.excerpt, values),
         ...(terms.get(entry.id) ?? NOT_FILED),
+        // The author's record names them; the old text stands in for a post without one
+        author,
+        author_name: author?.name ?? entry.author_name,
       }
     }),
     count,
@@ -167,14 +187,18 @@ export async function storeContentEntry(
   const values = await shopInfoValues(container)
   const body = fillShopDoc(entry.body as unknown as ContentDoc, values)
   const listed = summary(entry)
-  const [terms, covers] = await Promise.all([
+  const [terms, covers, author] = await Promise.all([
     termsOfEntries(container, [entry.id]),
     coversOf(container, [entry.image_url]),
+    entryAuthor(container, entry.author_id),
   ])
   return {
     ...listed,
     ...coverOf(covers, entry.image_url),
     excerpt: fillShopText(listed.excerpt, values),
+    // Who wrote it, whole, for the byline and the author box (adr/0060)
+    author,
+    author_name: author?.name ?? entry.author_name,
     // A post's category and tags, at their archives' paths (adr/0019 ek 2026-11-03)
     ...(terms.get(entry.id) ?? NOT_FILED),
     html: renderDoc(body, await cardTargets(container, body)),

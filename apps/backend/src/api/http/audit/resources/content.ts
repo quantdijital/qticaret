@@ -30,6 +30,7 @@ function snapshotOf(entry: ContentEntryRecord | undefined): Snapshot {
     status: entry.status,
     excerpt: entry.excerpt,
     author_name: entry.author_name,
+    author_id: entry.author_id,
     image_url: entry.image_url,
     image_alt: entry.image_alt,
     published_at: entry.published_at ? new Date(entry.published_at).toISOString() : null,

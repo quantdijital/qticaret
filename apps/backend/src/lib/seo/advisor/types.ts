@@ -103,6 +103,11 @@ export interface AdvisorFacts {
         images: number
         imagesWithoutAlt: number
         author: string | null
+        /**
+         * The author's record (adr/0060): whether it has a bio. Undefined or
+         * null: the name is only the old free text, no author page.
+         */
+        authorRecord?: { hasBio: boolean } | null
         published: boolean
         /** Days since it last changed in text (or went live); null while a draft. */
         ageDays: number | null

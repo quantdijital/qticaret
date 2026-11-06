@@ -42,7 +42,8 @@
             "post",
             "landing",
             "post_category",
-            "post_tag"
+            "post_tag",
+            "post_author"
           ],
           "mappedType": "enum"
         },

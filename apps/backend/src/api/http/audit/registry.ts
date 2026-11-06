@@ -5,6 +5,7 @@ import { BRAND_RESOURCES } from "./resources/brands"
 import { CATALOG_RESOURCES } from "./resources/catalog"
 import { CHARGEBACK_RESOURCES } from "./resources/chargebacks"
 import { CONTENT_RESOURCES } from "./resources/content"
+import { CONTENT_AUTHOR_RESOURCES } from "./resources/content-authors"
 import { GIFT_CARD_RESOURCES } from "./resources/gift-cards"
 import { GOOGLE_REVIEW_RESOURCES } from "./resources/google-reviews"
 import { INTEGRATION_RESOURCES } from "./resources/integrations"
@@ -42,6 +43,7 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...STOCK_RESOURCES,
   ...MEDIA_RESOURCES,
   ...CONTENT_RESOURCES,
+  ...CONTENT_AUTHOR_RESOURCES,
   ...GIFT_CARD_RESOURCES,
   ...INTEGRATION_RESOURCES,
   ...ORDER_RESOURCES,

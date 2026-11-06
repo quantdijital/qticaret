@@ -55,9 +55,14 @@ export const RESERVED_ROOT_SEGMENTS: ReadonlySet<string> = new Set([
 
 /**
  * Deeper paths the storefront keeps: the blog's archive prefixes (adr/0019
- * ek 2026-11-03), so no post takes `kategori` or `etiket` as its handle.
+ * ek 2026-11-03) and its authors' (adr/0060), so no post takes `kategori`,
+ * `etiket` or `yazar` as its handle.
  */
-export const RESERVED_PATHS: ReadonlySet<string> = new Set(["/blog/kategori", "/blog/etiket"])
+export const RESERVED_PATHS: ReadonlySet<string> = new Set([
+  "/blog/kategori",
+  "/blog/etiket",
+  "/blog/yazar",
+])
 
 /** Whether `path` (`/arama`) is a path the storefront keeps for itself. */
 export function isReservedPath(path: string): boolean {

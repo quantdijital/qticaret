@@ -37,5 +37,10 @@ export const postCategoryPath = (handle: string): string =>
 
 export const postTagPath = (handle: string): string => `${POST_ARCHIVE_PREFIXES.tag}/${handle}`
 
+/** A blog author's page (adr/0060): `/blog/yazar` holds no post. */
+export const POST_AUTHOR_PREFIX = "/blog/yazar"
+
+export const postAuthorPath = (handle: string): string => `${POST_AUTHOR_PREFIX}/${handle}`
+
 /** The products on sale now (`/kampanyalar`): a storefront page of its own, no record's. */
 export const SALE_PATH = "/kampanyalar"

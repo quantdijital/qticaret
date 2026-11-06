@@ -54,6 +54,8 @@ const OWNER_QUERIES: Readonly<Record<string, { entity: string; fields: string[] 
   // A blog archive shows while its term is there, its posts or none (adr/0019 ek 2026-11-03)
   [CATALOG_ENTITY_TYPES.post_category]: { entity: "content_term", fields: ["id", "deleted_at"] },
   [CATALOG_ENTITY_TYPES.post_tag]: { entity: "content_term", fields: ["id", "deleted_at"] },
+  // An author's page shows while the author is there (adr/0060)
+  [CATALOG_ENTITY_TYPES.post_author]: { entity: "content_author", fields: ["id", "deleted_at"] },
 }
 
 function isLive(type: string, row: OwnerRow): boolean {
