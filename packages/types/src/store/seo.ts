@@ -62,6 +62,8 @@ export type EntityType =
   // A blog archive (adr/0019 ek 2026-11-03): `/blog/kategori/{handle}`, `/blog/etiket/{handle}`
   | "post_category"
   | "post_tag"
+  // A blog author's page (adr/0060): `/blog/yazar/{handle}`
+  | "post_author"
   // The products on sale now (`/kampanyalar`), its id `sale`
   | "sale"
 

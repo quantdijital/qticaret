@@ -20,16 +20,29 @@ const DATE = new Intl.DateTimeFormat("tr-TR", {
   timeZone: "Europe/Istanbul",
 })
 
-/** A post's date, reading time and author, as its page says them. */
+/**
+ * A post's date, reading time and author, as its page says them: the
+ * chosen author by name, linked to their page (adr/0060); else the name
+ * written before authors were kept, unlinked.
+ */
 export function postMeta(
-  entry: { published_at: string | null; reading_minutes: number; author_name: string | null },
+  entry: {
+    published_at: string | null
+    reading_minutes: number
+    author_name: string | null
+    author?: { name: string; path: string } | null
+  },
   t: Translate
 ): PostMetaView {
+  const chosen = entry.author?.name.trim() ?? ""
+  const written = entry.author_name?.trim() ?? ""
+  const name = chosen !== "" ? chosen : written !== "" ? written : null
   return {
     date: entry.published_at ? DATE.format(new Date(entry.published_at)) : null,
     dateTime: entry.published_at,
     reading: t("blog.reading", { minutes: entry.reading_minutes }),
-    author: entry.author_name?.trim() ? entry.author_name.trim() : null,
+    author: name,
+    authorPath: entry.author && name ? entry.author.path : null,
   }
 }
 

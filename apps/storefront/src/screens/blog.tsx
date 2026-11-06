@@ -4,8 +4,9 @@ import type { BlogIndexPageView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
 import { JsonLd } from "@/lib/seo/JsonLd"
-import { blogPosts, blogTerms } from "@/lib/store-api/blog"
+import { blogAuthor, blogPosts, blogTerms } from "@/lib/store-api/blog"
 import { siteSeo } from "@/lib/store-api/requests"
+import { authorView } from "@/lib/views/authors"
 import { blogPageOf, blogPagination, blogTermBar } from "@/lib/views/blog"
 import { postCards } from "@/lib/views/posts"
 import { breadcrumbsOf } from "@/lib/views/product"
@@ -112,6 +113,42 @@ export async function BlogArchiveScreen({ page, url }: { page: Entity; url: URL 
             name,
             description: list.pagination.page === 1 ? paragraphsOf(term?.description) : [],
           },
+        }}
+      />
+    </>
+  )
+}
+
+/**
+ * A blog author's page (`/blog/yazar/{handle}`, adr/0060): who they are
+ * (photo, name, title, links on every page; the bio, like an archive's own
+ * words, on the first only), then their live posts as the blog lists
+ * them. Resolve found it; its title, robots (noindex while they have no
+ * live post) and JSON-LD (`ProfilePage` + `Person`) are the backend's.
+ */
+export async function BlogAuthorScreen({ page, url }: { page: Entity; url: URL }) {
+  const [author, categories] = await Promise.all([
+    blogAuthor(page.entity_id),
+    blogTerms("category"),
+  ])
+  const asked = url.searchParams.getAll("sayfa")
+  const list = await blogList(url.pathname, asked.length > 1 ? asked : asked[0], (offset, limit) =>
+    author.post_count > 0
+      ? blogPosts(offset, limit, "author", author.handle)
+      : Promise.resolve(NONE)
+  )
+  return (
+    <>
+      <JsonLd blocks={page.seo?.jsonLd ?? []} />
+      <theme.BlogIndexPage
+        t={t}
+        view={{
+          title: author.name,
+          breadcrumbs: breadcrumbsOf(page.seo, t("home.label"), author.name),
+          ...list,
+          terms: blogTermBar(categories, url.pathname, t),
+          activeTerm: null,
+          activeAuthor: authorView(author, t, { bio: list.pagination.page === 1 }),
         }}
       />
     </>

@@ -15,8 +15,11 @@ async function resolution() {
 export async function generateMetadata(): Promise<Metadata> {
   const { url, page } = await resolution()
   if (page.type === "entity" && page.seo) {
-    // A blog archive's later page is its own page (docs/13 §7); listings come paged from resolve
-    const isArchive = page.entity_type === "post_category" || page.entity_type === "post_tag"
+    // A blog archive's or author's later page is its own page (docs/13 §7); listings come paged from resolve
+    const isArchive =
+      page.entity_type === "post_category" ||
+      page.entity_type === "post_tag" ||
+      page.entity_type === "post_author"
     const number = isArchive ? (blogPageOf(url.searchParams.get("sayfa") ?? undefined) ?? 1) : 1
     return metadataOf(pagedSeo(page.seo, url.pathname, number, t))
   }

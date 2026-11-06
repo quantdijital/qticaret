@@ -1,4 +1,9 @@
-import type { MediaDerivatives, Resolution, StoreContentTerm } from "@qticaret/types"
+import type {
+  MediaDerivatives,
+  Resolution,
+  StoreContentAuthorDetail,
+  StoreContentTerm,
+} from "@qticaret/types"
 import type { ContactFormView, ContactView, ContentPageView, IdentityRowView } from "@qticaret/ui"
 import { sendContact } from "@/app/actions/contact"
 import { currentCustomer } from "@/lib/account/auth"
@@ -6,6 +11,7 @@ import { t } from "@/lib/i18n"
 import { legalDocument, legalPath } from "@/lib/views/legal"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import { legalIdentity, storefrontSettings } from "@/lib/store-api/requests"
+import { authorView } from "@/lib/views/authors"
 import { storeGet } from "@/lib/store-api/server"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { identityRows, infoPageOf, postMeta, shareLinks } from "@/lib/views/content-extras"
@@ -31,6 +37,8 @@ interface ContentEntry {
   image_height?: number | null
   image_derivatives?: MediaDerivatives | null
   author_name: string | null
+  /** The chosen author (adr/0060); null: none, the old written name alone if any. */
+  author?: StoreContentAuthorDetail | null
   reading_minutes: number
   /** A post's, at their archives (adr/0019 ek 2026-11-03); a page has none. */
   category?: StoreContentTerm | null
@@ -100,12 +108,16 @@ async function pageExtras(entry: ContentEntry, path: string): Promise<Partial<Co
   return { ...withOutline(entry.html), payments, shipping }
 }
 
-/** A post's extras: its facts, a table of contents, its products, posts to read next, share links. */
+/**
+ * A post's extras: its facts, a table of contents, its products, posts to
+ * read next, share links, and its author's box (adr/0060).
+ */
 async function postExtras(entry: ContentEntry, page: Entity): Promise<Partial<ContentPageView>> {
   const [products, related] = await Promise.all([textProducts(entry.html), relatedPosts(entry)])
   return {
     ...withOutline(entry.html),
     post: postMeta(entry, t),
+    author: entry.author ? authorView(entry.author, t) : null,
     products,
     related,
     share: shareLinks(page.seo?.canonical ?? null, entry.title, t),

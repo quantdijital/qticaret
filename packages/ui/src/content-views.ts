@@ -125,6 +125,23 @@ export interface BlogIndexPageView {
   terms?: BlogTermLinkView[]
   /** On a category's or tag's archive: which, and its own words; null on the index. */
   activeTerm?: { kind: "category" | "tag"; name: string; description: string[] } | null
+  /** On an author's page (`/blog/yazar/{handle}`, adr/0060): who, for the page's head; null elsewhere. */
+  activeAuthor?: AuthorView | null
+}
+
+/** A blog post's author (adr/0060): the post's closing box and the author's page head. */
+export interface AuthorView {
+  name: string
+  /** The author's page (`/blog/yazar/{handle}`). */
+  path: string
+  /** "Bıçak ustası"; null: none given. */
+  jobTitle: string | null
+  /** The bio as plain paragraphs; none: no bio. */
+  bio: string[]
+  /** The author's photo; null: none (the theme may show the initial). */
+  image: ImageView | null
+  /** The author's own profiles, each labelled ("Web sitesi", "LinkedIn"…), in a fixed order. */
+  links: SocialLinkView[]
 }
 
 export interface ContentPageView {
@@ -153,6 +170,8 @@ export interface ContentPageView {
   outline?: OutlineItemView[]
   /** A blog post's date, reading time and author; null on a page. */
   post?: PostMetaView | null
+  /** The post's author for a box at the end of the article (adr/0060); null: none chosen. */
+  author?: AuthorView | null
   /** Posts to read next: the same category's first, then the newest; never this one. */
   related?: PostCardView[]
   /** The products the text's product cards name (adr/0019 kısa kodlar), as the shop's cards. */
@@ -184,6 +203,8 @@ export interface PostMetaView {
   /** "5 dk okuma", already in words. */
   reading: string
   author: string | null
+  /** The author's page, for the byline's link (adr/0060); null: the name alone (no author chosen). */
+  authorPath?: string | null
 }
 
 /** A questions page as groups: the text before the first question (HTML), then each group. */

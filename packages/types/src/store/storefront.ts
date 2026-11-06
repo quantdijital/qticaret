@@ -188,6 +188,38 @@ export interface StoreContentTermSummary extends StoreContentTerm {
   post_count: number
 }
 
+/** A blog author's link on a network or the web: the person's own profile (`sameAs`). */
+export interface StoreContentAuthorLink {
+  kind: "website" | "linkedin" | "instagram" | "x"
+  url: string
+}
+
+/** A post's author, at the author's page (`/blog/yazar/{handle}`, adr/0060). */
+export interface StoreContentAuthor {
+  id: string
+  name: string
+  handle: string
+  /** `/blog/yazar/{handle}`. */
+  path: string
+  job_title: string | null
+}
+
+/** The author whole: on a post (`GET /store/content/:id`) and the author's page. */
+export interface StoreContentAuthorDetail extends StoreContentAuthor {
+  /** Plain text; a blank line between paragraphs. */
+  bio: string | null
+  image_url: string | null
+  image_width?: number | null
+  image_height?: number | null
+  image_derivatives?: MediaDerivatives | null
+  links: StoreContentAuthorLink[]
+}
+
+/** `GET /store/content/authors/:id`: the author's page, with how many live posts. */
+export interface StoreContentAuthorPage extends StoreContentAuthorDetail {
+  post_count: number
+}
+
 /** `GET /store/content?kind=post`: a live post as a list shows it (F3.16). */
 export interface StoreContentSummary {
   id: string
@@ -202,7 +234,10 @@ export interface StoreContentSummary {
   image_width?: number | null
   image_height?: number | null
   image_derivatives?: MediaDerivatives | null
+  /** The linked author's name, else the free text written before authors (adr/0060). */
   author_name: string | null
+  /** The post's author at the author's page; null: none chosen (only `author_name`, if any). */
+  author?: StoreContentAuthor | null
   published_at: string | null
   revised_at: string | null
   reading_minutes: number

@@ -65,11 +65,27 @@ describe("postMeta", () => {
       dateTime: "2026-10-30T09:00:00.000Z",
       reading: "9 dk okuma",
       author: "Usta",
+      // The name written before authors were kept is no link (adr/0060)
+      authorPath: null,
     })
     expect(postMeta({ published_at: null, reading_minutes: 1, author_name: "" }, t)).toMatchObject({
       date: null,
       author: null,
+      authorPath: null,
     })
+  })
+
+  it("names the chosen author and links to their page, before the old written name", () => {
+    const meta = postMeta(
+      {
+        published_at: null,
+        reading_minutes: 3,
+        author_name: "Eski ad",
+        author: { name: "Ayşe Usta", path: "/blog/yazar/ayse-usta" },
+      },
+      t
+    )
+    expect(meta).toMatchObject({ author: "Ayşe Usta", authorPath: "/blog/yazar/ayse-usta" })
   })
 })
 

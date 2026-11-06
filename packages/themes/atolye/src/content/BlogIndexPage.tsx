@@ -3,6 +3,7 @@ import type { BlogIndexPageView, BlogTermLinkView, PostCardView, Translate } fro
 import { Container } from "../parts/Container"
 import { Trail } from "../parts/Trail"
 import { Pager } from "../listing/Pager"
+import { AuthorHead } from "./Author"
 import { PostCard, PostFacts } from "./PostCard"
 
 /** The blog's categories as pills (blog terms, not the shop's product aisles), the page shown dark. */
@@ -78,8 +79,9 @@ function Lead({ post }: { post: PostCardView }) {
 }
 
 /**
- * The blog (`/blog`) and a category's or tag's archive (adr/0019 ek
- * 2026-11-03): the title (and the term's own words on its first page),
+ * The blog (`/blog`), a category's or tag's archive (adr/0019 ek
+ * 2026-11-03) and an author's page (adr/0060; their photo, title, bio and
+ * profiles in its head): the title (and the term's own words on its first page),
  * the categories as pills, the newest post large on a graphite stage on
  * the first page (the next two or four half wide, so the rows below come
  * out full), then the rest as cards three across, and the pages.
@@ -87,6 +89,7 @@ function Lead({ post }: { post: PostCardView }) {
 export function BlogIndexPage({ view, t }: { view: BlogIndexPageView; t: Translate }) {
   const terms = view.terms ?? []
   const archive = view.activeTerm ?? null
+  const author = view.activeAuthor ?? null
   const first = view.pagination.page === 1
   const [lead, ...rest] = view.posts
   const cards = first && lead ? rest : view.posts
@@ -95,18 +98,22 @@ export function BlogIndexPage({ view, t }: { view: BlogIndexPageView; t: Transla
   return (
     <Container className="flex flex-col gap-8 pt-6 lg:gap-10 lg:pt-10">
       <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} />
-      <header className="flex flex-col gap-4">
-        <h1>{view.title}</h1>
-        {archive?.description.map((paragraph, index) => (
-          <p key={String(index)} className="max-w-[60ch] text-lead text-text-2">
-            {paragraph}
-          </p>
-        ))}
-      </header>
+      {author ? (
+        <AuthorHead author={author} t={t} />
+      ) : (
+        <header className="flex flex-col gap-4">
+          <h1>{view.title}</h1>
+          {archive?.description.map((paragraph, index) => (
+            <p key={String(index)} className="max-w-[60ch] text-lead text-text-2">
+              {paragraph}
+            </p>
+          ))}
+        </header>
+      )}
       {terms.length > 0 && <Terms terms={terms} t={t} />}
       {view.posts.length === 0 ? (
         <p className="rounded-tile bg-paper-2 px-6 py-12 text-center text-text-2">
-          {t(archive ? "blog.archive_empty" : "blog.empty")}
+          {t(author ? "blog.author_empty" : archive ? "blog.archive_empty" : "blog.empty")}
         </p>
       ) : (
         <>

@@ -103,6 +103,7 @@ async function headingOf(page: Entity): Promise<Heading> {
     case "post":
     case "post_category":
     case "post_tag":
+    case "post_author":
       throw new Error(`${page.entity_type} is not a listing`)
   }
 }

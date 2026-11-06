@@ -36,6 +36,8 @@ function TermBar({ terms, t }: { terms: BlogTermLinkView[]; t: Translate }) {
 export function BlogIndexPage({ view, t }: { view: BlogIndexPageView; t: Translate }) {
   const terms = view.terms ?? []
   const archive = view.activeTerm ?? null
+  // An author's page (adr/0060): their title and bio under the name
+  const author = view.activeAuthor ?? null
   return (
     <PageContainer className="flex flex-col gap-8">
       <Breadcrumbs items={view.breadcrumbs} t={t} />
@@ -46,7 +48,8 @@ export function BlogIndexPage({ view, t }: { view: BlogIndexPageView; t: Transla
           </p>
         )}
         <h1 className="text-4xl leading-tight break-words lg:text-5xl">{view.title}</h1>
-        {archive?.description.map((paragraph, index) => (
+        {author?.jobTitle && <p className="text-lg text-muted-foreground">{author.jobTitle}</p>}
+        {(author?.bio ?? archive?.description ?? []).map((paragraph, index) => (
           <p key={String(index)} className="max-w-3xl text-lg text-muted-foreground">
             {paragraph}
           </p>
@@ -55,7 +58,7 @@ export function BlogIndexPage({ view, t }: { view: BlogIndexPageView; t: Transla
       {terms.length > 0 && <TermBar terms={terms} t={t} />}
       {view.posts.length === 0 ? (
         <p className="rounded-2xl border bg-card py-16 text-center text-muted-foreground">
-          {t(archive ? "blog.archive_empty" : "blog.empty")}
+          {t(author ? "blog.author_empty" : archive ? "blog.archive_empty" : "blog.empty")}
         </p>
       ) : (
         <ul className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">

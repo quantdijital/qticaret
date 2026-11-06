@@ -3,17 +3,34 @@ import type { ContentPageView, PostMetaView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { ProductCard } from "../parts/ProductCard"
 import { Trail } from "../parts/Trail"
+import { AuthorBox } from "./Author"
 import { hasOutline, OutlineAside, OutlineWell } from "./Outline"
 import { Notice } from "./PageHead"
 import { PostCard } from "./PostCard"
 import { Prose } from "./Prose"
 import { READING_WIDTH, readingGrid } from "./reading"
 
-/** Who wrote the post, when, and how long it reads: side by side, never joined by a dot. */
+/**
+ * Who wrote the post (linked to their page when chosen, adr/0060), when,
+ * and how long it reads: side by side, never joined by a dot.
+ */
 function Facts({ meta, t }: { meta: PostMetaView; t: Translate }) {
   return (
     <p className="flex flex-wrap gap-x-5 gap-y-1 text-sm text-text-2">
-      {meta.author && <span>{t("blog.author", { author: meta.author })}</span>}
+      {meta.author &&
+        (meta.authorPath ? (
+          <span>
+            {t("blog.author_label")}{" "}
+            <a
+              href={meta.authorPath}
+              className="font-semibold text-text underline-offset-4 hover:underline"
+            >
+              {meta.author}
+            </a>
+          </span>
+        ) : (
+          <span>{t("blog.author", { author: meta.author })}</span>
+        ))}
       {meta.date && meta.dateTime && <time dateTime={meta.dateTime}>{meta.date}</time>}
       <span>{meta.reading}</span>
     </p>
@@ -80,7 +97,7 @@ function Closing({ view, t }: { view: ContentPageView; t: Translate }) {
  * column's measure with its contents beside it from 1024 px (a closed
  * well on a phone) when it is long; its tags and share links; then
  * the products its text names as the shop's cards, and three posts to
- * read next.
+ * read next. A chosen author's box closes the article (adr/0060).
  */
 export function PostPage({ view, t }: { view: ContentPageView; t: Translate }) {
   const meta = view.post ?? null
@@ -132,6 +149,7 @@ export function PostPage({ view, t }: { view: ContentPageView; t: Translate }) {
         <article className={`min-w-0 ${reading.column}`}>
           <Prose html={view.html} tableLabel={(n) => t("content.table", { n })} />
           <Closing view={view} t={t} />
+          {view.author && <AuthorBox author={view.author} t={t} />}
         </article>
       </Container>
       {products.length > 0 && (
