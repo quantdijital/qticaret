@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { categoryImagesQuery, useSetCategoryImage } from "@/features/categories/api/images"
 import type { CategoryImage } from "@/features/categories/api/images"
 import { errorText } from "@/lib/errors"
+import { CategoryImageFallback } from "./category-image-fallback"
 import { FULL_RESET } from "@/lib/forms"
 
 const I = "categories.image"
@@ -61,6 +62,7 @@ function Form({ categoryId, saved }: { categoryId: string; saved: CategoryImage 
         inline
         hideLabel
         emptyText={t(`${I}.add`)}
+        emptyAside={<CategoryImageFallback categoryId={categoryId} />}
         onChange={(asset) => {
           form.setValue("url", asset?.url ?? "", { shouldDirty: true })
           // A library image's own alt text fills an empty one

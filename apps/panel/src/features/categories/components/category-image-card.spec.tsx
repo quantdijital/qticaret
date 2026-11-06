@@ -7,9 +7,26 @@ import { asset } from "@/features/media/media.fixtures"
 import { CategoryImageCard } from "./category-image-card"
 
 const fetchMock = vi.hoisted(() => vi.fn())
+const productList = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({
-  sdk: { client: { fetch: fetchMock }, admin: { upload: { create: vi.fn() } } },
+  sdk: {
+    client: { fetch: fetchMock },
+    admin: {
+      upload: { create: vi.fn() },
+      productCategory: {
+        list: () =>
+          Promise.resolve({
+            product_categories: [
+              { id: "pcat_1", name: "Mutfak", parent_category_id: null },
+              { id: "pcat_2", name: "Şef bıçakları", parent_category_id: "pcat_1" },
+              { id: "pcat_3", name: "Kamp", parent_category_id: null },
+            ],
+          }),
+      },
+      product: { list: productList },
+    },
+  },
 }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
@@ -37,6 +54,17 @@ function serve(saved: { url: string; alt: string | null } | null) {
   })
 }
 
+/** The newest published product under the category, as the storefront would pick it. */
+function newest(
+  product: {
+    title: string
+    thumbnail: string | null
+    images: { url: string; rank: number }[]
+  } | null
+) {
+  productList.mockResolvedValue({ products: product ? [{ id: "prod_1", ...product }] : [] })
+}
+
 function renderCard() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
@@ -49,6 +77,48 @@ function renderCard() {
 describe("CategoryImageCard", () => {
   beforeEach(() => {
     fetchMock.mockReset()
+    productList.mockReset()
+    newest(null)
+  })
+
+  it("shows beside the empty frame the newest product photo the storefront uses", async () => {
+    serve(null)
+    newest({
+      title: "Şef bıçağı 20 cm",
+      thumbnail: "https://cdn.example.com/kapak.webp",
+      images: [
+        { url: "https://cdn.example.com/ikinci.webp", rank: 1 },
+        { url: "https://cdn.example.com/ilk.webp", rank: 0 },
+      ],
+    })
+    const { container } = renderCard()
+
+    expect(
+      await screen.findByText("Vitrinde şu an: en yeni ürünün fotoğrafı (Şef bıçağı 20 cm)")
+    ).toBeInTheDocument()
+    expect(container.querySelector('img[src="https://cdn.example.com/ilk.webp"]')).toHaveClass(
+      "aspect-[4/5]"
+    )
+    expect(screen.getByText(/4:5 dikey kırpılır/)).toBeInTheDocument()
+    // The category and the ones under it, published, newest first
+    expect(productList).toHaveBeenCalledWith(
+      expect.objectContaining({
+        category_id: ["pcat_1", "pcat_2"],
+        status: ["published"],
+        limit: 1,
+        order: "-created_at",
+      })
+    )
+  })
+
+  it("says only the name shows when no product has a photo", async () => {
+    serve(null)
+    renderCard()
+
+    expect(
+      await screen.findByText("Vitrinde şu an yalnız kategori adı görünüyor; bir görsel ekleyin.")
+    ).toBeInTheDocument()
+    expect(screen.getByText("Mutfak")).toBeInTheDocument()
   })
 
   it("chooses a library image, takes its alt text and saves both", async () => {
@@ -86,6 +156,8 @@ describe("CategoryImageCard", () => {
       await screen.findByRole("button", { name: "Kategori görseli: görseli değiştir" })
     ).toHaveTextContent("Değiştir")
     expect(screen.getByRole("textbox", { name: "Alt metin" })).toHaveValue("Eski")
+    // With its own picture the storefront's fallback is not shown
+    expect(screen.queryByText(/Vitrinde şu an/)).not.toBeInTheDocument()
     await userEvent.click(
       await screen.findByRole("button", { name: "Kategori görseli: görseli kaldır" })
     )

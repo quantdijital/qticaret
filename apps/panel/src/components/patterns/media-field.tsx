@@ -51,6 +51,8 @@ interface MediaFieldProps {
   pickerTitle?: string
   /** What goes with the picture (its alt text), beside it while there is one. */
   children?: ReactNode
+  /** Beside the empty frame in place of the hint: what shows without a picture. */
+  emptyAside?: ReactNode
 }
 
 const hasFiles = (event: DragEvent) => event.dataTransfer.types.includes("Files")
@@ -77,6 +79,7 @@ export function MediaField({
   hideLabel = false,
   pickerTitle,
   children,
+  emptyAside,
 }: MediaFieldProps) {
   const { t } = useTranslation()
   const changed = useMediaChanged()
@@ -184,7 +187,10 @@ export function MediaField({
       </button>
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         {inline ? title : null}
-        {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
+        {!value && emptyAside ? emptyAside : null}
+        {hint && (value || !emptyAside) ? (
+          <p className="text-xs text-muted-foreground">{hint}</p>
+        ) : null}
         {small && !value ? (
           <p className="text-xs text-muted-foreground">{t("media.field.dropHint")}</p>
         ) : null}

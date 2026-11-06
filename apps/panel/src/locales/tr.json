@@ -4546,6 +4546,10 @@
       "hint": "Vitrinde kategori kartlarında ve menüde gösterilir. Görsel seçmezseniz kategorideki en yeni ürünün fotoğrafı kullanılır.",
       "add": "Görsel ekle",
       "frameHint": "Vitrindeki kart gibi 4:5 dikey kırpılır; ana konuyu ortaya yerleştirin.",
+      "fallback": {
+        "photo": "Vitrinde şu an: en yeni ürünün fotoğrafı ({{title}})",
+        "nameOnly": "Vitrinde şu an yalnız kategori adı görünüyor; bir görsel ekleyin."
+      },
       "alt": "Alt metin",
       "altHint": "Görselde ne olduğunu kısaca yazın; görmeyenler ve arama motorları bunu okur.",
       "saved": "Kategori görseli kaydedildi."

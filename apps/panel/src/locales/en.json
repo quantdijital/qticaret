@@ -4546,6 +4546,10 @@
       "hint": "Shown on the storefront's category cards and in the menu. Without one, the newest product photo in the category is used.",
       "add": "Add image",
       "frameHint": "Cropped to a 4:5 portrait like the storefront card; keep the subject in the middle.",
+      "fallback": {
+        "photo": "On the storefront now: the newest product's photo ({{title}})",
+        "nameOnly": "The storefront shows only the category's name now; add an image."
+      },
       "alt": "Alt text",
       "altHint": "Briefly describe what the image shows; screen readers and search engines read it.",
       "saved": "Category image saved."

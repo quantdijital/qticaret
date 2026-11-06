@@ -37,3 +37,40 @@ export function useSetCategoryImage(categoryId: string) {
     },
   })
 }
+
+/** What the storefront shows for a category without a picture of its own. */
+export interface CategoryFallback {
+  /** The newest product's title. */
+  title: string
+  /** Its first photo; null when that product has none. */
+  url: string | null
+}
+
+// A photo's fields only, as the storefront asks for them
+const FALLBACK_FIELDS = "id,title,thumbnail,images.url,images.rank"
+
+/**
+ * The storefront's fallback for a category without a picture (`newestPhoto`
+ * in apps/storefront, docs/tema/yon-2026-11-05.md § Reyon kartı): the
+ * first photo of the newest published product in it or a category under
+ * it. Null when it has no published product.
+ */
+export const categoryFallbackQuery = (categoryIds: readonly string[]) =>
+  queryOptions({
+    queryKey: [...KEY, "fallback", [...categoryIds].sort()],
+    queryFn: async (): Promise<CategoryFallback | null> => {
+      const { products } = await sdk.admin.product.list({
+        category_id: [...categoryIds],
+        status: ["published"],
+        limit: 1,
+        order: "-created_at",
+        fields: FALLBACK_FIELDS,
+      })
+      const [product] = products
+      if (!product) {
+        return null
+      }
+      const [first] = [...(product.images ?? [])].sort((a, b) => a.rank - b.rank)
+      return { title: product.title, url: first?.url ?? product.thumbnail ?? null }
+    },
+  })
