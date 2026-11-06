@@ -524,6 +524,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "staff.email_change_invalid":
     "The confirmation link is not valid, has expired or was used; ask again from the panel.",
   "staff.job_title_invalid": "The job title holds characters it cannot.",
+  "staff.name_invalid": "The first or last name holds characters it cannot.",
   "api_key.fields_not_allowed": "A key cannot pick fields; each route returns its own.",
   "api_key.scope_denied": "This key is not allowed to do this.",
   "api_key.scopes_required": "Pick at least one permission for the key.",

@@ -45,6 +45,9 @@ export const OWN: readonly Rule[] = [
   { methods: ["GET", "POST"], path: "/admin/staff/me/profile" },
   { methods: ["POST"], path: "/admin/staff/me/password" },
   { methods: ["POST"], path: "/admin/staff/me/email" },
+  { methods: ["POST"], path: "/admin/staff/me/email/cancel" },
+  { methods: ["POST"], path: "/admin/staff/me/email/confirm" },
+  { methods: ["GET"], path: "/admin/staff/me/sessions" },
   { methods: ["POST"], path: "/admin/staff/me/sessions/end-others" },
 ]
 

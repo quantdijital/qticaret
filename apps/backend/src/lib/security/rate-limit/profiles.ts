@@ -173,6 +173,25 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 1200, windowMs: MINUTE },
     perIdentityAnyIp: { max: 600, windowMs: MINUTE },
   },
+  // A staff member's own password tried (a password or an address change; the
+  // owner, 2026-11-06): per member from any address, apart from sign-ins' budget.
+  // Wrong ones also count in the step-up's tally (thirty a day, api/http/reauth.ts)
+  own_password: {
+    name: "own_password",
+    perIp: { max: 30, windowMs: 15 * MINUTE },
+    perIdentityAnyIp: { max: 10, windowMs: 15 * MINUTE },
+  },
+  // A new sign-in address asked for: each mails a stranger's inbox in the shop's name
+  staff_email_request: {
+    name: "staff_email_request",
+    perIdentityAnyIp: { max: 5, windowMs: 24 * HOUR },
+  },
+  // The link to a new address confirmed, by the member signed in
+  staff_email_confirm: {
+    name: "staff_email_confirm",
+    perIp: { max: 30, windowMs: 15 * MINUTE },
+    perIdentityAnyIp: { max: 10, windowMs: 15 * MINUTE },
+  },
   // F5 (adr/0027): saving or testing a provider account calls the provider
   // and per staff member from any address: not an oracle for other people's details
   provider_check: {

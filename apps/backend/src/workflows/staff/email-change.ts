@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import {
@@ -9,33 +10,54 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
 import { updateUsersWorkflow } from "@medusajs/medusa/core-flows"
-import { sharedRateLimitStore } from "../../api/http/rate-limit"
-import { parseKey } from "../../lib/crypto/pii"
-import { parseEnv } from "../../lib/env"
 import { ValidationError } from "../../lib/errors"
 import { errorSummary, logger } from "../../lib/logging"
-import { EMAIL_CHANGE_TTL_MS, openEmailChange, sealEmailChange } from "../../lib/staff/account"
+import { EMAIL_CHANGE_TTL_MS, newEmailChange, parseEmailChange } from "../../lib/staff/account"
 import type { EmailChangeClaim } from "../../lib/staff/account"
-import { recordAuditEntryStep } from "../audit-log/steps/record-audit-entry"
+import { staffAccountStore } from "../../lib/staff/account-store"
+import type { AccountStore } from "../../lib/staff/account-store"
+import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
+import type StaffRolesModuleService from "../../modules/staff-roles/service"
 import { sendMessageWorkflow } from "../messaging/send-message"
-import { provePasswordStep, tellAccountChanged, tellAccountChangedStep } from "./account-steps"
+import { tellAccountChanged, tellAccountChangedStep } from "./account-steps"
 
 /**
- * A member's own login address (the owner, 2026-11-06): asked with the
- * current password, confirmed by a link sent to the new address (sealed,
- * a day, once), the old address told at both ends. Only the confirmation
- * moves the user and the login together, each undone if the other fails.
+ * A member's own login address (the owner, 2026-11-06; security review
+ * 2026-11-06): asked with the current password (proved by the route), it
+ * waits as the member's one pending change (a new ask replaces it, a
+ * cancel drops it). A link goes to the new address, a notice to the old;
+ * the member confirms it signed in. Only then do the user and the login
+ * move together, each undone if the other fails. The token is made where
+ * the e-mail is (its loader): no workflow carries it, none is stored.
  */
 
 type Container = Pick<MedusaContainer, "resolve">
 
-const sealKey = () => parseKey(parseEnv().PII_ENCRYPTION_KEY, "PII_ENCRYPTION_KEY")
 const same = (a: string, b: string) => a.trim().toLowerCase() === b.trim().toLowerCase()
+
+/** The member's waiting change, or null. */
+export async function pendingEmailChange(
+  userId: string,
+  store: AccountStore = staffAccountStore()
+): Promise<EmailChangeClaim | null> {
+  const claim = parseEmailChange(await store.getPending(userId))
+  return claim && claim.expires_at > Date.now() ? claim : null
+}
+
+/** The waiting change dropped: its link opens nothing. */
+export async function cancelEmailChange(
+  userId: string,
+  store: AccountStore = staffAccountStore()
+): Promise<boolean> {
+  const had = (await pendingEmailChange(userId, store)) !== null
+  await store.clearPending(userId)
+  return had
+}
 
 /**
  * Whether another person holds the address: a staff user, an open
  * invitation, or any login (a customer's too: one address, one login).
- * The answer is one word for all, so it tells nothing more.
+ * Asked only at confirmation, with one word for all.
  */
 export async function addressInUse(
   container: Container,
@@ -59,89 +81,85 @@ export async function addressInUse(
   return logins.length > 0
 }
 
-const checkAddressStep = createStep(
-  "staff-check-new-address",
-  async (input: { user_id: string; from: string; to: string }, { container }) => {
-    if (same(input.from, input.to)) {
-      throw new ValidationError("staff.email_same", { field: "email" })
-    }
-    // Staff addresses: told now (the team list shows them anyway); a customer's stays unsaid
-    const users = container.resolve(Modules.USER)
-    const staff = await users.listUsers({ email: input.to }, { select: ["id"], take: 1 })
-    const invited = await users.listInvites({ email: input.to }, { select: ["id"], take: 1 })
-    if (staff.length > 0 || invited.length > 0) {
-      throw new ValidationError("staff.email_unavailable", { field: "email" })
-    }
-    return new StepResponse(true)
+/**
+ * The change waiting from now on, replacing any before it, the link to the
+ * new address and the notice to the old one. Nothing is said about who
+ * holds the new address: that waits for the confirmation.
+ */
+export async function askEmailChange(
+  container: MedusaContainer,
+  input: { user_id: string; from: string; to: string },
+  store: AccountStore = staffAccountStore()
+): Promise<EmailChangeClaim> {
+  if (same(input.from, input.to)) {
+    throw new ValidationError("staff.email_same", { field: "email" })
   }
-)
-
-/** The link to the new address, the notice to the old one; a send that fails is logged. */
-const sendLinkStep = createStep(
-  "staff-send-email-change",
-  async (input: { user_id: string; from: string; to: string }, { container }) => {
-    const { token, claim } = sealEmailChange(input, sealKey())
-    await sendMessageWorkflow(container)
-      .run({
-        input: {
-          template: "staff.email_confirm",
-          resource_id: input.user_id,
-          key: claim.nonce,
-          extra: { email: input.to, token },
-        },
-      })
-      .catch((error: unknown) => {
-        logger.warn({ event: "staff.email_confirm_failed", err: errorSummary(error) })
-      })
-    await tellAccountChanged(container, {
-      user_id: input.user_id,
-      change: "email_requested",
-      email: input.from,
-      to: input.to,
+  const claim = newEmailChange(input)
+  await store.setPending(input.user_id, JSON.stringify(claim), EMAIL_CHANGE_TTL_MS)
+  await sendMessageWorkflow(container)
+    .run({
+      input: {
+        template: "staff.email_confirm",
+        resource_id: input.user_id,
+        // A new ask is a new send; the nonce itself goes nowhere
+        key: createHash("sha256").update(claim.nonce).digest("hex").slice(0, 16),
+      },
     })
+    .catch((error: unknown) => {
+      logger.warn({ event: "staff.email_confirm_failed", err: errorSummary(error) })
+    })
+  await tellAccountChanged(container, {
+    user_id: input.user_id,
+    change: "email_requested",
+    email: input.from,
+    to: input.to,
+  })
+  return claim
+}
+
+const askStep = createStep(
+  "staff-ask-email-change",
+  async (input: { user_id: string; from: string; to: string }, { container }) => {
+    const claim = await askEmailChange(container, input)
     return new StepResponse({ expires_at: new Date(claim.expires_at).toISOString() })
   }
 )
 
-/** A new address asked for: the password proved, the address free, the link sent. */
+/** A new address asked for (the current password proved by the route). */
 export const requestStaffEmailChangeWorkflow = createWorkflow(
-  "staff-request-email-change",
-  (input: WorkflowData<{ user_id: string; email: string; current_password: string }>) => {
-    const login = provePasswordStep({ user_id: input.user_id, password: input.current_password })
-    const change = transform({ input, login }, ({ input, login }) => ({
-      user_id: input.user_id,
-      from: login.email,
-      to: input.email,
-    }))
-    checkAddressStep(change)
-    return new WorkflowResponse(sendLinkStep(change))
-  }
+  { name: "staff-request-email-change", store: false },
+  (input: WorkflowData<{ user_id: string; from: string; to: string }>) =>
+    new WorkflowResponse(askStep(input))
 )
 
-/** Once a link is used it is spent, also when what follows fails: a new one is asked. */
-async function spend(nonce: string): Promise<boolean> {
-  const used = await sharedRateLimitStore().hit(`staff:email-change:${nonce}`, EMAIL_CHANGE_TTL_MS)
-  return used.count === 1
-}
-
 /**
- * What a link changes: its claim, the user still at the address it was
- * asked from, the new address still free, the link not used before.
+ * What a confirmation changes. The link's claim must be the member's own
+ * (signed in), their latest ask, still at the address it was asked from,
+ * a member with a role, the new address free; then the waiting change is
+ * taken, atomically: of two confirmations at once, one moves anything.
  */
 export async function readEmailChange(
   container: Container,
-  token: string,
-  options: { key?: Buffer; spend?: (nonce: string) => Promise<boolean> } = {}
+  input: { user_id: string; claim: EmailChangeClaim },
+  store: AccountStore = staffAccountStore()
 ): Promise<EmailChangeClaim & { login_id: string }> {
-  const claim = openEmailChange(token, options.key ?? sealKey())
   const invalid = () => new ValidationError("staff.email_change_invalid")
-  if (!claim) {
+  const { claim } = input
+  if (claim.user_id !== input.user_id || claim.expires_at <= Date.now()) {
     throw invalid()
   }
+  const stored = await store.getPending(claim.user_id)
+  const pending = parseEmailChange(stored)
+  if (!stored || pending?.nonce !== claim.nonce || !same(pending.to, claim.to)) {
+    throw invalid()
+  }
+  const role = await container
+    .resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE)
+    .roleOf(claim.user_id)
   const [user] = await container
     .resolve(Modules.USER)
     .listUsers({ id: claim.user_id }, { select: ["email"], take: 1 })
-  if (!user || !same(user.email, claim.from)) {
+  if (!role || !user || !same(user.email, claim.from)) {
     throw invalid()
   }
   const [login] = await container
@@ -156,7 +174,7 @@ export async function readEmailChange(
   if (await addressInUse(container, claim.to, claim.user_id)) {
     throw new ValidationError("staff.email_unavailable")
   }
-  if (!(await (options.spend ?? spend)(claim.nonce))) {
+  if (!(await store.takePending(claim.user_id, stored))) {
     throw invalid()
   }
   return { ...claim, from: user.email, login_id: login.id }
@@ -164,26 +182,36 @@ export async function readEmailChange(
 
 const readEmailChangeStep = createStep(
   "staff-read-email-change",
-  async (token: string, { container }) => new StepResponse(await readEmailChange(container, token))
+  async (input: { user_id: string; claim: EmailChangeClaim }, { container }) =>
+    new StepResponse(await readEmailChange(container, input))
 )
 
-/** The login moved to the new address; undone, back to the old one. */
+/**
+ * The login moved to the new address, only from the address it was asked
+ * from (a race lost leaves it alone); undone, back to the old one.
+ */
 export async function moveLogin(
   container: Container,
-  input: { login_id: string; to: string }
+  input: { login_id: string; from: string; to: string }
 ): Promise<void> {
-  await container
-    .resolve(Modules.AUTH)
-    .updateProviderIdentities([{ id: input.login_id, entity_id: input.to }])
+  const auth = container.resolve(Modules.AUTH)
+  const [login] = await auth.listProviderIdentities(
+    { id: [input.login_id] },
+    { select: ["id", "entity_id"], take: 1 }
+  )
+  if (!login || !same(login.entity_id, input.from)) {
+    throw new ValidationError("staff.email_change_invalid")
+  }
+  await auth.updateProviderIdentities([{ id: input.login_id, entity_id: input.to }])
 }
 
 export const moveLoginStep = createStep(
   "staff-move-login",
   async (input: { login_id: string; from: string; to: string }, { container }) => {
     await moveLogin(container, input)
-    return new StepResponse(true, { login_id: input.login_id, to: input.from })
+    return new StepResponse(true, { login_id: input.login_id, from: input.to, to: input.from })
   },
-  async (undo: { login_id: string; to: string } | undefined, { container }) => {
+  async (undo: { login_id: string; from: string; to: string } | undefined, { container }) => {
     if (undo) {
       await moveLogin(container, undo)
     }
@@ -191,32 +219,20 @@ export const moveLoginStep = createStep(
 )
 
 /**
- * A link confirmed: the login and the user moved together (each undone if
- * the other fails), the change in the audit log (no addresses in it), the
- * old address told.
+ * A link confirmed by its member: the login and the user moved together
+ * (each undone if the other fails), the old address told. The route
+ * holds the member's lock around it and has opened the link.
  */
 export const confirmStaffEmailChangeWorkflow = createWorkflow(
-  "staff-confirm-email-change",
-  (input: WorkflowData<{ token: string }>) => {
-    const claim = readEmailChangeStep(input.token)
+  { name: "staff-confirm-email-change", store: false },
+  (input: WorkflowData<{ user_id: string; claim: EmailChangeClaim }>) => {
+    const claim = readEmailChangeStep(input)
     moveLoginStep(claim)
     updateUsersWorkflow.runAsStep({
       input: transform({ claim }, ({ claim }) => ({
         updates: [{ id: claim.user_id, email: claim.to }],
       })),
     })
-    recordAuditEntryStep(
-      transform({ claim }, ({ claim }) => ({
-        kind: "mutation" as const,
-        action: "POST /admin/staff/email/confirm",
-        actor_type: "user",
-        actor_id: claim.user_id,
-        resource_type: "user",
-        resource_id: claim.user_id,
-        outcome: 200,
-        changes: { fields: ["email"] },
-      }))
-    )
     tellAccountChangedStep(
       transform({ claim }, ({ claim }) => ({
         user_id: claim.user_id,

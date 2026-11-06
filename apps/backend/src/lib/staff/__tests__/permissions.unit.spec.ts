@@ -184,6 +184,7 @@ describe("staff roles", () => {
 
   it("lets every role read and change its own account, never another's", () => {
     for (const role of STAFF_ROLES) {
+      expect(allowed(role, "GET", "/admin/staff/me/sessions")).toBe(true)
       expect(decide(role, "GET", "/admin/staff/me/profile")).toEqual({
         allowed: true,
         reason: "own",
@@ -192,6 +193,8 @@ describe("staff roles", () => {
         "/admin/staff/me/profile",
         "/admin/staff/me/password",
         "/admin/staff/me/email",
+        "/admin/staff/me/email/cancel",
+        "/admin/staff/me/email/confirm",
         "/admin/staff/me/sessions/end-others",
       ]) {
         expect(allowed(role, "POST", path)).toBe(true)
@@ -533,9 +536,9 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/staff/me/profile": true,
   "POST /admin/staff/me/password": true,
   "POST /admin/staff/me/email": true,
+  "POST /admin/staff/me/email/cancel": true,
+  "POST /admin/staff/me/email/confirm": true,
   "POST /admin/staff/me/sessions/end-others": true,
-  // The new address's link, before a session: no role decides it
-  "POST /admin/staff/email/confirm": false,
   "POST /admin/stock-items/:id/watch": true,
   "POST /admin/warehouses/:id/default": false,
   "POST /admin/warehouses/:id": false,

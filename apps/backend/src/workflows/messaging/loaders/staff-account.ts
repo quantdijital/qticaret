@@ -2,30 +2,38 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { maskRecipient, normalizeRecipient } from "../../../lib/messaging/recipients"
 import type { StaffAccountVars, StaffEmailConfirmVars } from "../../../lib/messaging/templates"
-import { emailChangeLink } from "../../../lib/staff/account"
+import { parseKey } from "../../../lib/crypto/pii"
+import { parseEnv } from "../../../lib/env"
+import { emailChangeLink, parseEmailChange, sealEmailChange } from "../../../lib/staff/account"
+import { staffAccountStore } from "../../../lib/staff/account-store"
+import type { AccountStore } from "../../../lib/staff/account-store"
 import type { Loaded } from "./types"
 
 type Container = Pick<MedusaContainer, "resolve">
 
 /**
  * A new login address's confirmation (the owner, 2026-11-06): to the new
- * address, the panel's page with the token only the request knew.
+ * address of the member's waiting change, the panel's page with the link
+ * sealed here, as it goes (security review 2026-11-06): no workflow input
+ * carries the token. Nothing waiting, nothing sent.
  */
-export function loadStaffEmailConfirm(
+export async function loadStaffEmailConfirm(
   _container: Container,
-  _userId: string,
-  extra: Readonly<Record<string, string>>
+  userId: string,
+  _extra: Readonly<Record<string, string>>,
+  store: AccountStore = staffAccountStore(),
+  key: Buffer = parseKey(parseEnv().PII_ENCRYPTION_KEY, "PII_ENCRYPTION_KEY")
 ): Promise<Loaded<StaffEmailConfirmVars> | null> {
-  const { email, token } = extra
-  if (!email || !token) {
-    return Promise.resolve(null)
+  const claim = parseEmailChange(await store.getPending(userId))
+  if (claim?.user_id !== userId || claim.expires_at <= Date.now()) {
+    return null
   }
-  return Promise.resolve({
-    vars: { confirmUrl: emailChangeLink(token) },
-    recipients: { email },
+  return {
+    vars: { confirmUrl: emailChangeLink(sealEmailChange(claim, key)) },
+    recipients: { email: claim.to },
     receiverId: null,
     resourceType: "user",
-  })
+  }
 }
 
 const CHANGES = new Set<string>(["password", "email_requested", "email_changed"])

@@ -1,6 +1,8 @@
 import { Modules } from "@medusajs/framework/utils"
+import { sealForRequest } from "../../../lib/staff/account"
 import {
   checkNewPassword,
+  newPasswordBinding,
   notePasswordChanged,
   provePassword,
   restorePassword,
@@ -74,61 +76,90 @@ function fakeShop(options: { mfa?: boolean } = {}) {
   return { container, auth, login, identity, password }
 }
 
+const sealed = (password: string) => sealForRequest(password, newPasswordBinding("user_1"))
+const PROVE = { user_id: "user_1", auth_identity_id: "authid_1" }
+
 describe("proving one's own password", () => {
   it("gives the login's address and identity for the right password", async () => {
     const { container } = fakeShop()
     await expect(
-      provePassword(container, { user_id: "user_1", password: "Doğru-şifre-2026" })
-    ).resolves.toEqual({ email: "elif@ornek.com", auth_identity_id: "authid_1" })
+      provePassword(container, { ...PROVE, password: "Doğru-şifre-2026" })
+    ).resolves.toEqual({
+      email: "elif@ornek.com",
+      auth_identity_id: "authid_1",
+    })
   })
 
   it("takes the 2FA challenge as the right password's answer", async () => {
     const { container } = fakeShop({ mfa: true })
     await expect(
-      provePassword(container, { user_id: "user_1", password: "Doğru-şifre-2026" })
-    ).resolves.toEqual({ email: "elif@ornek.com", auth_identity_id: "authid_1" })
+      provePassword(container, { ...PROVE, password: "Doğru-şifre-2026" })
+    ).resolves.toEqual({
+      email: "elif@ornek.com",
+      auth_identity_id: "authid_1",
+    })
   })
 
-  it("refuses a wrong password and an unknown user alike", async () => {
+  it("refuses a wrong password, an unknown user, and a login that is not the caller's", async () => {
     const { container } = fakeShop({ mfa: true })
     await expect(
-      provePassword(container, { user_id: "user_1", password: "yanlis-sifre-123" })
+      provePassword(container, { ...PROVE, password: "yanlis-sifre-123" })
     ).rejects.toMatchObject({ safeMessage: "staff.password_wrong" })
     await expect(
-      provePassword(container, { user_id: "user_2", password: "Doğru-şifre-2026" })
+      provePassword(container, {
+        ...PROVE,
+        user_id: "user_2",
+        password: "Doğru-şifre-2026",
+      })
+    ).rejects.toMatchObject({ safeMessage: "staff.password_wrong" })
+    await expect(
+      provePassword(container, {
+        ...PROVE,
+        auth_identity_id: "authid_other",
+        password: "Doğru-şifre-2026",
+      })
     ).rejects.toMatchObject({ safeMessage: "staff.password_wrong" })
   })
 })
 
 describe("a new password", () => {
-  it("follows the platform's rule and differs from the current one", async () => {
-    const base = { email: "elif@ornek.com", current: "Doğru-şifre-2026" }
-    await expect(checkNewPassword({ ...base, next: "kısa" })).rejects.toMatchObject({
+  it("follows the platform's rule, opened from its sealed blob", async () => {
+    const base = { user_id: "user_1", email: "elif@ornek.com" }
+    await expect(checkNewPassword({ ...base, sealed: sealed("kısa") })).rejects.toMatchObject({
       safeMessage: "auth.password_too_short",
     })
-    await expect(checkNewPassword({ ...base, next: "elif-2026-panel" })).rejects.toMatchObject({
-      safeMessage: "auth.password_contains_email",
-    })
-    await expect(checkNewPassword({ ...base, next: base.current })).rejects.toMatchObject({
-      safeMessage: "staff.password_same",
-    })
     await expect(
-      checkNewPassword({ ...base, next: "yeni ve uzun bir parola" })
+      checkNewPassword({ ...base, sealed: sealed("elif-2026-panel") })
+    ).rejects.toMatchObject({ safeMessage: "auth.password_contains_email" })
+    await expect(
+      checkNewPassword({ ...base, sealed: sealed("yeni ve uzun bir parola") })
     ).resolves.toBeUndefined()
+    // Sealed for another member, it does not open
+    await expect(
+      checkNewPassword({
+        ...base,
+        user_id: "user_2",
+        sealed: sealed("yeni ve uzun bir parola"),
+      })
+    ).rejects.toThrow()
   })
 
-  it("is set on the login, and undone to the old hash", async () => {
+  it("is set on the login, and undone to the old hash, which travels sealed", async () => {
     const { container, auth, login } = fakeShop()
 
     const undo = await setPassword(container, {
+      user_id: "user_1",
       email: login.entity_id,
-      password: "yeni ve uzun bir parola",
+      sealed: sealed("yeni ve uzun bir parola"),
     })
     expect(auth.updateProvider).toHaveBeenCalledWith("emailpass", {
       entity_id: "elif@ornek.com",
       password: "yeni ve uzun bir parola",
     })
-    expect(login.provider_metadata).toEqual({ password: "özet:yeni ve uzun bir parola" })
+    expect(login.provider_metadata).toEqual({
+      password: "özet:yeni ve uzun bir parola",
+    })
+    expect(JSON.stringify(undo)).not.toContain("eski-özet")
 
     await restorePassword(container, undo)
     expect(login.provider_metadata).toEqual({ password: "eski-özet" })
@@ -138,10 +169,18 @@ describe("a new password", () => {
     const { container, auth } = fakeShop()
     auth.updateProvider.mockResolvedValueOnce({ success: false })
     await expect(
-      setPassword(container, { email: "elif@ornek.com", password: "yeni ve uzun bir parola" })
+      setPassword(container, {
+        user_id: "user_1",
+        email: "elif@ornek.com",
+        sealed: sealed("yeni ve uzun bir parola"),
+      })
     ).rejects.toThrow("staff.password_not_set")
     await expect(
-      setPassword(container, { email: "baska@ornek.com", password: "yeni ve uzun bir parola" })
+      setPassword(container, {
+        user_id: "user_1",
+        email: "baska@ornek.com",
+        sealed: sealed("yeni ve uzun bir parola"),
+      })
     ).rejects.toMatchObject({ safeMessage: "staff.password_wrong" })
   })
 

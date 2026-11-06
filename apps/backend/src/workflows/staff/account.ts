@@ -16,7 +16,6 @@ import type StaffRolesModuleService from "../../modules/staff-roles/service"
 import {
   checkNewPasswordStep,
   notePasswordChangedStep,
-  provePasswordStep,
   setPasswordStep,
   tellAccountChangedStep,
 } from "./account-steps"
@@ -79,7 +78,7 @@ const readMetadataStep = createStep(
  * user update (its own step undoes itself), the title in the metadata.
  */
 export const updateStaffProfileWorkflow = createWorkflow(
-  "staff-update-profile",
+  { name: "staff-update-profile", store: false },
   (
     input: WorkflowData<{
       user_id: string
@@ -105,29 +104,31 @@ export const updateStaffProfileWorkflow = createWorkflow(
 )
 
 /**
- * A member's own password (the owner, 2026-11-06): the current one proved,
- * the new one by the platform's rule, set on the login (undone to the old
- * hash), the time kept for the tokens before it (undone too), then the
- * member told. Their other sessions end in the route, where the store is.
+ * A member's own password (the owner, 2026-11-06): the current one proved
+ * by the route before this runs, the new one (sealed for the request) by
+ * the platform's rule, set on the login (undone to the old hash), the time
+ * kept for the tokens before it (undone too), then the member told. Never
+ * stored (security review 2026-11-06). Their sessions are seen to in the
+ * route, where the store is.
  */
 export const changeStaffPasswordWorkflow = createWorkflow(
-  "staff-change-password",
-  (input: WorkflowData<{ user_id: string; current_password: string; new_password: string }>) => {
-    const login = provePasswordStep({ user_id: input.user_id, password: input.current_password })
-    checkNewPasswordStep(
-      transform({ input, login }, ({ input, login }) => ({
-        email: login.email,
-        current: input.current_password,
-        next: input.new_password,
-      }))
-    )
-    setPasswordStep(
-      transform({ input, login }, ({ input, login }) => ({
-        email: login.email,
-        password: input.new_password,
-      }))
-    )
-    notePasswordChangedStep(transform({ login }, ({ login }) => login.auth_identity_id))
+  { name: "staff-change-password", store: false },
+  (
+    input: WorkflowData<{
+      user_id: string
+      auth_identity_id: string
+      email: string
+      sealed_password: string
+    }>
+  ) => {
+    const sealed = transform({ input }, ({ input }) => ({
+      user_id: input.user_id,
+      email: input.email,
+      sealed: input.sealed_password,
+    }))
+    checkNewPasswordStep(sealed)
+    setPasswordStep(sealed)
+    notePasswordChangedStep(input.auth_identity_id)
     tellAccountChangedStep(
       transform({ input }, ({ input }) => ({ user_id: input.user_id, change: "password" as const }))
     )

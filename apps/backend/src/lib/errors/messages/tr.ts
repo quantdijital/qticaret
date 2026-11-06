@@ -529,6 +529,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "staff.email_change_invalid":
     "Onay bağlantısı geçersiz, süresi dolmuş ya da kullanılmış; panelden yeniden isteyin.",
   "staff.job_title_invalid": "Unvan geçersiz karakter içeriyor.",
+  "staff.name_invalid": "Ad ya da soyad geçersiz karakter içeriyor.",
   "api_key.fields_not_allowed": "Anahtarla alan seçilemez (fields); uç kendi alanlarını döner.",
   "api_key.scope_denied": "Bu anahtar bu işlem için yetkili değil.",
   "api_key.scopes_required": "Anahtar için en az bir izin seçin.",

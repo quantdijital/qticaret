@@ -4,7 +4,12 @@ import { MAX_JOB_TITLE } from "../../../lib/staff/account"
 import { isCleanText } from "../../../lib/security/text"
 
 const token = z.string().min(16).max(4096)
-const name = z.string().trim().min(1, "staff.name_required").max(100)
+const name = z
+  .string()
+  .trim()
+  .min(1, "staff.name_required")
+  .max(100)
+  .refine((value) => isCleanText(value), "staff.name_invalid")
 
 /** A member's new role (the owner's change; the last owner keeps theirs). */
 export const AdminPostStaffRole = z.object({ role: z.enum(STAFF_ROLES) }).strict()
@@ -71,3 +76,6 @@ export type AdminPostStaffEmailConfirmType = z.infer<typeof AdminPostStaffEmailC
 
 /** One's other sessions ended: nothing but the caller. */
 export const AdminPostStaffEndSessions = z.object({}).strict()
+
+/** A waiting address change dropped: nothing but the caller. */
+export const AdminPostStaffEmailCancel = z.object({}).strict()

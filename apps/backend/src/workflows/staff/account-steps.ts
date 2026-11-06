@@ -5,26 +5,37 @@ import { newPasswordProblem } from "../../api/http/password-policy"
 import { PASSWORD_CHANGED_AT } from "../../api/http/password-change"
 import { ValidationError } from "../../lib/errors"
 import { errorSummary, logger } from "../../lib/logging"
+import { openForRequest, sealForRequest } from "../../lib/staff/account"
 import { sendMessageWorkflow } from "../messaging/send-message"
 
 /**
  * The steps of a staff member's own account (the owner, 2026-11-06): the
- * password they know proved, the new one set, the time of the change kept
- * for the tokens before it. Each part is a plain function for its tests.
+ * password they know proved (in the route, before any workflow), the new
+ * one set, the time of the change kept for the tokens before it. A
+ * workflow carries passwords and the old hash only sealed for the request
+ * (security review 2026-11-06). Each part is a plain function for its tests.
  */
 
 type Container = Pick<MedusaContainer, "resolve">
 
-/** The user's login address, and that the password given is theirs; else `staff.password_wrong`. */
+/** What binds a sealed new password to its user (associated data). */
+export const newPasswordBinding = (userId: string) => `staff.new_password:${userId}`
+const undoBinding = (userId: string) => `staff.password_undo:${userId}`
+
+/**
+ * The user's login address, and that the password given is theirs, on
+ * the caller's own login; else `staff.password_wrong`.
+ */
 export async function provePassword(
   container: Container,
-  input: { user_id: string; password: string }
+  input: { user_id: string; auth_identity_id: string; password: string }
 ): Promise<{ email: string; auth_identity_id: string }> {
+  const wrong = () => new ValidationError("staff.password_wrong", { field: "current_password" })
   const [user] = await container
     .resolve(Modules.USER)
     .listUsers({ id: input.user_id }, { select: ["email"], take: 1 })
   if (!user) {
-    throw new ValidationError("staff.password_wrong", { field: "current_password" })
+    throw wrong()
   }
   const result = await container
     .resolve(Modules.AUTH)
@@ -34,52 +45,45 @@ export async function provePassword(
   const identity = result?.success
     ? result.authIdentity?.id
     : result?.mfaChallenge?.auth_identity_id
-  if (!identity) {
-    throw new ValidationError("staff.password_wrong", { field: "current_password" })
+  // The login the password opens must be the one signed in
+  if (!identity || identity !== input.auth_identity_id) {
+    throw wrong()
   }
   return { email: user.email, auth_identity_id: identity }
 }
 
-/** The current password, proved: the step every own-account change starts with. */
-export const provePasswordStep = createStep(
-  "staff-prove-password",
-  async (input: { user_id: string; password: string }, { container }) =>
-    new StepResponse(await provePassword(container, input))
-)
-
-/** The new password by the platform's rule (adr/0043); not the one it replaces. */
+/** The new password by the platform's rule (adr/0043); opened from its sealed blob. */
 export async function checkNewPassword(input: {
+  user_id: string
   email: string
-  current: string
-  next: string
+  sealed: string
 }): Promise<void> {
-  const problem = await newPasswordProblem(input.next, input.email)
+  const next = openForRequest(input.sealed, newPasswordBinding(input.user_id))
+  const problem = await newPasswordProblem(next, input.email)
   if (problem) {
     throw new ValidationError(problem, { field: "new_password" })
-  }
-  if (input.next === input.current) {
-    throw new ValidationError("staff.password_same", { field: "new_password" })
   }
 }
 
 export const checkNewPasswordStep = createStep(
   "staff-check-new-password",
-  async (input: { email: string; current: string; next: string }) => {
+  async (input: { user_id: string; email: string; sealed: string }) => {
     await checkNewPassword(input)
     return new StepResponse(true)
   }
 )
 
-/** What setting the password undoes to: the login's stored hash before it. */
+/** What setting the password undoes to: the login's stored hash before it, sealed. */
 export interface PasswordUndo {
+  user_id: string
   provider_identity_id: string
-  provider_metadata: Record<string, unknown> | null
+  sealed_metadata: string
 }
 
 /** The new password on the login; returns what restores the old one. */
 export async function setPassword(
   container: Container,
-  input: { email: string; password: string }
+  input: { user_id: string; email: string; sealed: string }
 ): Promise<PasswordUndo> {
   const auth = container.resolve(Modules.AUTH)
   const [login] = await auth.listProviderIdentities(
@@ -91,27 +95,34 @@ export async function setPassword(
   }
   const result = await auth.updateProvider("emailpass", {
     entity_id: input.email,
-    password: input.password,
+    password: openForRequest(input.sealed, newPasswordBinding(input.user_id)),
   })
   if (!result.success) {
     throw new Error("staff.password_not_set")
   }
-  return { provider_identity_id: login.id, provider_metadata: login.provider_metadata ?? null }
+  return {
+    user_id: input.user_id,
+    provider_identity_id: login.id,
+    sealed_metadata: sealForRequest(
+      JSON.stringify(login.provider_metadata ?? {}),
+      undoBinding(input.user_id)
+    ),
+  }
 }
 
 /** The old hash back on the login: the password as it was. */
 export async function restorePassword(container: Container, undo: PasswordUndo): Promise<void> {
-  await container.resolve(Modules.AUTH).updateProviderIdentities([
-    {
-      id: undo.provider_identity_id,
-      provider_metadata: undo.provider_metadata ?? {},
-    },
-  ])
+  const metadata = JSON.parse(
+    openForRequest(undo.sealed_metadata, undoBinding(undo.user_id))
+  ) as Record<string, unknown>
+  await container
+    .resolve(Modules.AUTH)
+    .updateProviderIdentities([{ id: undo.provider_identity_id, provider_metadata: metadata }])
 }
 
 export const setPasswordStep = createStep(
   "staff-set-password",
-  async (input: { email: string; password: string }, { container }) =>
+  async (input: { user_id: string; email: string; sealed: string }, { container }) =>
     new StepResponse(true, await setPassword(container, input)),
   async (undo: PasswordUndo | undefined, { container }) => {
     if (undo) {

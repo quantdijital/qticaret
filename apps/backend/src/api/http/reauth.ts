@@ -134,6 +134,31 @@ const reject = (req: MedusaRequest, res: MedusaResponse, status: 428 | 429, mess
 }
 
 /**
+ * Whether the person gave too many wrong proofs (ten in a quarter of an
+ * hour, thirty in a day): their proofs stop for the rest of it. One's own
+ * current password counts in the same tally (security review 2026-11-06).
+ */
+export async function proofsLocked(identity: string): Promise<boolean> {
+  const store = sharedRateLimitStore()
+  const person = keyed(identity)
+  const counts = await Promise.all(
+    WRONG.map(
+      async (limit) => (await store.peek(`reauth:wrong:${limit.key}:${person}`)) >= limit.tries
+    )
+  )
+  return counts.some(Boolean)
+}
+
+/** One wrong proof more for the person: a code, a password at a step-up or a change. */
+export async function countWrongProof(identity: string): Promise<void> {
+  const store = sharedRateLimitStore()
+  const person = keyed(identity)
+  await Promise.all(
+    WRONG.map((limit) => store.hit(`reauth:wrong:${limit.key}:${person}`, limit.windowMs))
+  )
+}
+
+/**
  * Proving oneself again, in the request itself (F12.6, adr/0040 §3, the
  * "second verification" of adr/0027): the shop's accounts, a new API key,
  * an owner made or unmade, 2FA turned off, the full tax id. The proof
@@ -160,13 +185,9 @@ export function requireReauth(when?: When) {
     }
     const store = sharedRateLimitStore()
     const person = keyed(identity)
-    const wrongSoFar = await Promise.all(
-      WRONG.map(
-        async (limit) => (await store.peek(`reauth:wrong:${limit.key}:${person}`)) >= limit.tries
-      )
-    )
+    const locked = await proofsLocked(identity)
     const burst = await store.hit(`reauth:burst:${person}`, BURST.windowMs)
-    if (wrongSoFar.some(Boolean) || burst.count > BURST.tries) {
+    if (locked || burst.count > BURST.tries) {
       reject(req, res, 429, "reauth_locked")
       return
     }
@@ -180,9 +201,7 @@ export function requireReauth(when?: When) {
         return false
       }))
     if (!ok) {
-      await Promise.all(
-        WRONG.map((limit) => store.hit(`reauth:wrong:${limit.key}:${person}`, limit.windowMs))
-      )
+      await countWrongProof(identity)
       reject(req, res, 428, "reauth_failed")
       return
     }

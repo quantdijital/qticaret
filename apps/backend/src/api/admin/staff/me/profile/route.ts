@@ -1,7 +1,7 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ValidationError } from "../../../../../lib/errors"
 import { profileOf, updateStaffProfileWorkflow } from "../../../../../workflows/staff/account"
-import { openSessionCount } from "../../../../http/staff-sessions"
+import { pendingEmailChange } from "../../../../../workflows/staff/email-change"
 import type { AdminPostStaffProfileType } from "../../validators"
 
 async function answer(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
@@ -10,13 +10,20 @@ async function answer(req: AuthenticatedMedusaRequest, res: MedusaResponse) {
   if (!profile) {
     throw new ValidationError("staff.unknown")
   }
-  res.json({ profile, sessions: { open: await openSessionCount(req, userId) } })
+  const pending = await pendingEmailChange(userId)
+  res.json({
+    profile,
+    // Their own ask, to them alone: the address they typed and until when its link holds
+    pending_email: pending
+      ? { to: pending.to, expires_at: new Date(pending.expires_at).toISOString() }
+      : null,
+  })
 }
 
 /**
  * GET /admin/staff/me/profile (the owner, 2026-11-06): the signed-in
  * member's own profile, whatever their role: name, job title, role,
- * address, since when; and how many panel sessions they have open.
+ * address, since when, and an address change waiting for its link.
  */
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   await answer(req, res)

@@ -3,8 +3,12 @@ import {
   EMAIL_CHANGE_TTL_MS,
   emailChangeLink,
   jobTitleOf,
+  newEmailChange,
   openEmailChange,
+  openForRequest,
+  parseEmailChange,
   sealEmailChange,
+  sealForRequest,
   withJobTitle,
 } from "../account"
 
@@ -29,7 +33,8 @@ describe("a staff member's job title", () => {
 
 describe("an address change's link", () => {
   it("opens to what was sealed, for a day", () => {
-    const { token, claim } = sealEmailChange(CHANGE, KEY, NOW)
+    const claim = newEmailChange(CHANGE, NOW)
+    const token = sealEmailChange(claim, KEY)
 
     expect(claim).toMatchObject({ ...CHANGE, expires_at: NOW + EMAIL_CHANGE_TTL_MS })
     expect(claim.nonce).toMatch(/^[0-9a-f]{32}$/)
@@ -41,7 +46,7 @@ describe("an address change's link", () => {
   })
 
   it("does not open with another key, changed, or as anything else", () => {
-    const { token } = sealEmailChange(CHANGE, KEY, NOW)
+    const token = sealEmailChange(newEmailChange(CHANGE, NOW), KEY)
     const bytes = Buffer.from(token, "base64url")
     bytes[bytes.length - 1] = (bytes[bytes.length - 1] ?? 0) ^ 1
 
@@ -51,16 +56,44 @@ describe("an address change's link", () => {
     expect(openEmailChange("", KEY, NOW)).toBeNull()
   })
 
-  it("seals a new nonce each time: two asks are two links", () => {
-    const first = sealEmailChange(CHANGE, KEY, NOW)
-    const second = sealEmailChange(CHANGE, KEY, NOW)
-    expect(first.claim.nonce).not.toBe(second.claim.nonce)
-    expect(first.token).not.toBe(second.token)
+  it("makes a new nonce for each ask: two asks are two links", () => {
+    const first = newEmailChange(CHANGE, NOW)
+    const second = newEmailChange(CHANGE, NOW)
+    expect(first.nonce).not.toBe(second.nonce)
+    expect(sealEmailChange(first, KEY)).not.toBe(sealEmailChange(second, KEY))
+  })
+
+  it("reads the waiting change back as stored, and nothing else", () => {
+    const claim = newEmailChange(CHANGE, NOW)
+    expect(parseEmailChange(JSON.stringify(claim))).toEqual(claim)
+    expect(parseEmailChange(JSON.stringify({ user_id: "user_1" }))).toBeNull()
+    expect(parseEmailChange("{")).toBeNull()
+    expect(parseEmailChange(null)).toBeNull()
   })
 
   it("carries the token after `#`, where no log sees it", () => {
     expect(emailChangeLink("abc_-1", "https://panel.example")).toBe(
       "https://panel.example/confirm-email#token=abc_-1"
     )
+  })
+})
+
+describe("a secret sealed for the request", () => {
+  it("opens for its own binding while it holds, and never shows the secret", () => {
+    const blob = sealForRequest("yeni ve uzun parola", "staff.new_password:user_1", NOW)
+
+    expect(blob).not.toContain("parola")
+    expect(openForRequest(blob, "staff.new_password:user_1", NOW + 1000)).toBe(
+      "yeni ve uzun parola"
+    )
+    expect(() => openForRequest(blob, "staff.new_password:user_2", NOW)).toThrow()
+    expect(() => openForRequest(blob, "staff.new_password:user_1", NOW + 3 * 60 * 1000)).toThrow(
+      "staff.sealed_value_expired"
+    )
+  })
+
+  it("does not open under another process's key", () => {
+    const blob = sealForRequest("gizli", "b", NOW, randomBytes(32))
+    expect(() => openForRequest(blob, "b", NOW)).toThrow()
   })
 })
