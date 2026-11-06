@@ -1,8 +1,6 @@
 import type { StoreLayout } from "@qticaret/types"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
-import { faqJsonLd } from "@/lib/seo/faq"
-import { JsonLd } from "@/lib/seo/JsonLd"
 import { resolvePath } from "@/lib/store-api/requests"
 import { homeSections } from "@/lib/views/home"
 import type { PreviewPage } from "@/lib/views/preview"
@@ -15,14 +13,11 @@ import { queryOf, ShopScreen } from "./shop"
 async function DraftHome({ layout }: { layout: StoreLayout }) {
   const sections = await homeSections(layout.home, t)
   return (
-    <>
-      <JsonLd blocks={faqJsonLd(sections)} />
-      <theme.HomePage
-        t={t}
-        view={{ sections, notice: t("preview.design_notice") }}
-        subscribe={subscribeNewsletter}
-      />
-    </>
+    <theme.HomePage
+      t={t}
+      view={{ sections, notice: t("preview.design_notice") }}
+      subscribe={subscribeNewsletter}
+    />
   )
 }
 

@@ -162,7 +162,7 @@ const trustBadges = z.object({ ...base, type: z.literal("trust_badges") }).stric
 export const worded = (type: "newsletter" | "help") =>
   z.object({ ...base, type: z.literal(type), title, text: optional(shopText(240)) }).strict()
 
-/** Questions and answers; the storefront also gives them as `FAQPage` structured data. */
+/** Questions and answers, shown on the page; never `FAQPage` structured data (docs/13 §5). */
 const faq = z
   .object({
     ...base,

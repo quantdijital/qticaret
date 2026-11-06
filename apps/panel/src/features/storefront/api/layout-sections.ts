@@ -151,7 +151,7 @@ export interface FaqItem {
   answer: string
 }
 
-/** Questions and answers; the storefront also gives them as `FAQPage` structured data. */
+/** Questions and answers, shown on the page; never `FAQPage` structured data (docs/13 §5). */
 export interface FaqSection extends SectionBase {
   type: "faq"
   title: string | null

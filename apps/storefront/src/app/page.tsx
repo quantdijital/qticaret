@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import { addToCart } from "@/app/actions/cart"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
-import { faqJsonLd } from "@/lib/seo/faq"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import { metadataOf } from "@/lib/seo/metadata"
 import { siteSeo } from "@/lib/store-api/requests"
@@ -20,7 +19,8 @@ export default async function HomePage() {
   const sections = await homeSections(layout.home, t)
   return (
     <>
-      <JsonLd blocks={[...site.home.jsonLd, ...faqJsonLd(sections)]} />
+      {/* A FAQ section is shown, not written as `FAQPage` data (docs/13 §5, adr/0049 Ek 2026-11-06) */}
+      <JsonLd blocks={site.home.jsonLd} />
       <theme.HomePage
         t={t}
         view={{ sections }}

@@ -7,8 +7,7 @@ type Faq = Extract<HomeSectionView, { type: "faq" }>
 /**
  * The shop's questions and answers (adr/0049): native disclosures, so they
  * open without a script and every answer stays in the HTML for readers,
- * crawlers and agents (docs/19 §6.5). The storefront writes the matching
- * `FAQPage` data.
+ * crawlers and agents (docs/19 §6.5). No `FAQPage` data (docs/13 §5).
  */
 export function FaqSection({ section, t }: { section: Faq; t: Translate }) {
   const id = headingId(section.id)

@@ -154,7 +154,7 @@ Kararın 6.3 adımı ("diğer sayfa şablonlarının bölümleri"), backend tara
   - soru düz metin, en çok 160 karakter;
   - cevap düz metin, en çok 600 karakter, `{belirteç}` alabilir.
 
-  Vitrin bu bölümden `FAQPage` yapılandırılmış verisi üretir.
+  ~~Vitrin bu bölümden `FAQPage` yapılandırılmış verisi üretir.~~ Kaldırıldı: SSS yalnız sayfada görünür, `FAQPage` basılmaz (Ek 2026-11-06, aşağıda).
 - **Denetim ve okuma.** Üç grup (`home`, `product`, `category`) aynı yoldan geçer.
   - `checkLayout`: kayıtlar (ilgili ürünlerin koleksiyonu ve seçilen ürünleri dahil), görseller, zengin metnin kartları ve değişkenleri. SSS cevaplarının belirteçlerini şema denetler.
   - `storeLayout`: o anda gösterilenler süzülür ve yalnız yayındaki kayıtlar kalır:
@@ -293,3 +293,14 @@ Kararın 6.3 adımı ("diğer sayfa şablonlarının bölümleri"), backend tara
   - Şeridi olmayan sayfa: şerit bölümü eklenir. Ürün sayfası rozetleri satın alma kutusunun altında bölümsüz de çizer; bu yüzden ürün sayfası ağacında "Ürünün kendi bilgileri" satırının altında "Satın alma kutusunun altındaki rozetler, Güven rozetleri bileşeninden düzenlenir." notu ve "Rozetleri düzenle" düğmesi var; düğme aynı listeyi standart bir pencerede açar (değişiklikler yine taslağa, geri alınabilir; rozet hatalıysa düğmede işaret).
   - Renk örnekleri düz liste kaldı (sahibin kendi eklediği sırayla; renk ailesine göre gruplamak yazarken satırı yerinden oynatırdı).
 - Kanıt: backend `lib/storefront/__tests__/layout-settings.unit.spec.ts`, `layout.unit.spec.ts`, HTTP `storefront-layout-settings.spec.ts` (eski alandan açılış, taslak, yayın, `/store/storefront`, kart eşiği, ayarı olmayan eski belge); panel `editor/shared/shared-settings.spec.tsx` (şerit formunda düzenleme, geri al, her şeridin satırındaki işaret, ürün sayfasının penceresi), `layout/problems.spec.ts`, `pages/preferences-page.spec.tsx`; vitrin `lib/views/__tests__/shared-settings.spec.ts`.
+
+## Ek (2026-11-06): SSS bölümü `FAQPage` basmaz
+
+- **Çelişki.** Ek 2026-11-03 SSS bölümünden `FAQPage` üretilmesini söylüyordu; docs/13 §5 "`FAQPage` kullanılmaz" der. Vitrin denetimi (docs/21 2026-11-06, 6) ana sayfada bloğu buldu.
+- **Karar (ana oturum): docs/13 geçerli.** Google SSS zengin sonucunu Ağustos 2023'ten beri yalnız tanınmış kamu ve sağlık sitelerine gösteriyor, sonra tümden kaldırdı (docs/13 §5). Mağaza için şemanın getirisi yok; blok yalnız bakım ve tutarlılık yükü.
+- **Ne değişti.**
+  - Vitrin `FAQPage` basmaz: ana sayfa, ürün sayfası, liste sayfaları ve tema düzenleyicinin önizlemesi. `lib/seo/faq.ts` silindi.
+  - SSS bölümü sayfada olduğu gibi kalır: soru ve cevaplar `<details>` içinde, ilk HTML'de (okuyucu, tarayıcı ve ajanlar için; docs/19 §6.5).
+  - Backend, panel ve şema değişmedi: bölüm türü, sınırlar (12 soru, 160/600 karakter) ve belirteçler aynı.
+  - Advisor'da `FAQPage`'e dayanan kural yoktu; eklenmedi.
+- **Koruma.** Vitrin birim testi (`lib/seo/__tests__/seo-policy.spec.ts`) vitrin, tema ve ui kaynaklarında JSON-LD türü olarak `"FAQPage"` geçmediğini denetler; e2e duman testi ürün sayfasında `FAQPage` bloğu olmadığını.

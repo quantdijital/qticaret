@@ -53,9 +53,9 @@ test.describe("storefront pages", () => {
     await page.goto((await stockedProduct()).path)
     await expect(page.locator("h1").first()).toBeVisible()
     await expect(mainButton(page, "Sepete ekle")).toBeVisible()
-    // However many FAQ sections the shop places, the page has one FAQPage at most
+    // A FAQ section is shown, never written as FAQPage data (docs/13 §5)
     const data = await page.locator('script[type="application/ld+json"]').allTextContents()
-    expect(data.filter((block) => block.includes('"FAQPage"')).length).toBeLessThanOrEqual(1)
+    expect(data.filter((block) => block.includes('"FAQPage"'))).toEqual([])
   })
 
   test("only a preview page may be framed, and only by the panel", async ({ page }) => {

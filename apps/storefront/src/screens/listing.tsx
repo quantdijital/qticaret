@@ -12,7 +12,6 @@ import type { AnalyticsEvent } from "@/lib/analytics/events"
 import { listContext, listEvent, listItems } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { t } from "@/lib/i18n"
-import { faqJsonLd } from "@/lib/seo/faq"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import {
   allCategories,
@@ -142,9 +141,8 @@ async function listingSections() {
  * One listing's page, whatever lists it: a record resolve found, the
  * whole catalogue, or a site search. The design's category page sections
  * go on every listing (category, brand, collection, landing, sale,
- * `/magaza`), not on a search; their FAQ data only on the list's first,
- * unfiltered page, where its description shows too. A page past the last
- * is a 404 (docs/13 §7).
+ * `/magaza`), not on a search. A FAQ is shown, never written as `FAQPage`
+ * data (docs/13 §5). A page past the last is a 404 (docs/13 §7).
  */
 export async function ListingContent({
   type,
@@ -253,9 +251,7 @@ export async function ListingContent({
             : null
         }
       />
-      <JsonLd
-        blocks={[...jsonLd, ...(first ? faqJsonLd([...sections.top, ...sections.bottom]) : [])]}
-      />
+      <JsonLd blocks={jsonLd} />
       <theme.ListingPage
         t={t}
         subscribe={subscribeNewsletter}

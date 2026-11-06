@@ -10,8 +10,8 @@ const Q = "storefront.editor.faq"
 
 /**
  * Questions and their answers, in order (adr/0049 ek 2026-11-03). An
- * answer may hold the shop's details; the storefront also gives them to
- * search engines as `FAQPage` data, so both are plain text.
+ * answer may hold the shop's details. Both are plain text; the storefront
+ * shows them and writes no `FAQPage` data (docs/13 §5).
  */
 export function FaqForm({ section, problems, onChange }: SectionFormProps<FaqSection>) {
   const { t } = useTranslation()

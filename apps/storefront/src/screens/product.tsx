@@ -5,7 +5,6 @@ import { themeActions } from "@/lib/theme-actions"
 import { t } from "@/lib/i18n"
 import { productEvents } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
-import { faqJsonLd } from "@/lib/seo/faq"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import {
   legalIdentity,
@@ -154,7 +153,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
   return (
     <>
       <TrackEvents events={measured.events} context={measured.context} />
-      <JsonLd blocks={[...(page.seo?.jsonLd ?? []), ...faqJsonLd(sections)]} />
+      <JsonLd blocks={page.seo?.jsonLd ?? []} />
       {/* Open Graph's product type and price (React puts these in <head>) */}
       <meta property="og:type" content="product" />
       {lowest !== null && (
