@@ -186,6 +186,7 @@ function fieldsOf(section: AnySection): Found[] {
     case "brands":
     case "posts":
     case "reviews":
+    case "google_rating":
     case "rich_text":
       return [["title", textProblem(section.title, L.title)]]
     case "trust_badges":

@@ -31,6 +31,12 @@ interface FormDialogProps {
   guard?: ReturnType<typeof useDiscardGuard>
   /** The element (by id) the caret goes to on opening, in place of the first field. */
   initialFocus?: string | null
+  /** The submit button's words in place of "Kaydet" (`Yanıtla`). */
+  submitLabel?: string
+  /** Whether what is typed may be sent at all (within its limits); with `dirty`, it lights "Kaydet". */
+  canSubmit?: boolean
+  /** A footer action of its own on the left, apart from the two (`Yanıtı sil`). */
+  footerStart?: ReactNode
   className?: string
   children: ReactNode
 }
@@ -54,6 +60,9 @@ export function FormDialog({
   onSubmit,
   guard,
   initialFocus,
+  submitLabel,
+  canSubmit = true,
+  footerStart,
   className,
   children,
 }: FormDialogProps) {
@@ -116,12 +125,13 @@ export function FormDialog({
             </DialogHeader>
             {children}
             <DialogFooter>
+              {footerStart ? <div className="flex sm:mr-auto">{footerStart}</div> : null}
               <Button type="button" variant="outline" disabled={saving} onClick={close}>
                 {t("common.cancel")}
               </Button>
-              <Button type="submit" disabled={!dirty || saving}>
+              <Button type="submit" disabled={!dirty || !canSubmit || saving}>
                 {saving ? <Loader2 className="animate-spin" /> : null}
-                {t("common.save")}
+                {submitLabel ?? t("common.save")}
               </Button>
             </DialogFooter>
           </form>

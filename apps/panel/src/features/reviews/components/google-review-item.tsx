@@ -1,15 +1,12 @@
-import { Star } from "lucide-react"
-import { useState } from "react"
+import { ChevronRight, Star } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
-import type { GoogleReviewRow, HideReason } from "@/features/reviews/api/google-reviews"
-import { HideReviewDialog } from "@/features/reviews/components/hide-review-dialog"
+import type { GoogleReviewRow } from "@/features/reviews/api/google-reviews"
 import { formatDate, formatDateTime } from "@/lib/format"
 
 const G = "reviews.google"
 
-function Stars({ rating }: { rating: number }) {
+export function Stars({ rating }: { rating: number }) {
   const { t } = useTranslation()
   return (
     <span
@@ -30,81 +27,81 @@ function Stars({ rating }: { rating: number }) {
   )
 }
 
+/** The reply's badge: answered, waiting for Google's moderation, or refused there. */
+export function ReplyBadge({ review }: { review: GoogleReviewRow }) {
+  const { t } = useTranslation()
+  if (!review.replied) {
+    return null
+  }
+  if (review.reply_state === "pending") {
+    return <StatusBadge tone="info">{t(`${G}.replyPending`)}</StatusBadge>
+  }
+  if (review.reply_state === "rejected") {
+    return <StatusBadge tone="danger">{t(`${G}.replyRejected`)}</StatusBadge>
+  }
+  return <StatusBadge tone="neutral">{t(`${G}.replied`)}</StatusBadge>
+}
+
+/** Why, by whom and when a review was taken off the storefront. */
+export function HiddenLine({ review }: { review: GoogleReviewRow }) {
+  const { t } = useTranslation()
+  if (!review.hidden || !review.hidden_reason) {
+    return null
+  }
+  const who = [review.hidden_by, review.hidden_at ? formatDateTime(review.hidden_at) : null]
+    .filter(Boolean)
+    .join(", ")
+  return (
+    <p className="text-[13px] text-warning-text">
+      {t(`${G}.hiddenWhy`, { reason: t(`${G}.reasons.${review.hidden_reason}`) })}
+      {who ? ` · ${who}` : ""}
+    </p>
+  )
+}
+
 /**
- * One Google review as Google gives it. Shown: "Vitrinden kaldır" asks
- * for one of the three reasons (adr/0058 Ek). Taken off: the reason, who
- * and when, and "Vitrine geri al".
+ * One Google review as Google gives it, one row: the stars, whether the
+ * shop replied (or Google still moderates the reply), whether it is off
+ * the storefront and why. The whole row opens the review's dialog: the
+ * reply and the storefront in one place (docs/18, edit patterns).
  */
 export function GoogleReviewItem({
   review,
-  busy,
-  onHide,
-  onRestore,
+  onOpen,
 }: {
   review: GoogleReviewRow
-  busy: boolean
-  onHide: (reason: HideReason) => void
-  onRestore: () => void
+  onOpen: () => void
 }) {
   const { t } = useTranslation()
-  const [asking, setAsking] = useState(false)
   const author = review.author ?? t(`${G}.anonymous`)
   return (
-    <li className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:gap-4">
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <div className="flex flex-wrap items-center gap-2">
-          <Stars rating={review.rating} />
-          {review.replied ? <StatusBadge tone="neutral">{t(`${G}.replied`)}</StatusBadge> : null}
-          {review.hidden ? <StatusBadge tone="warning">{t(`${G}.hiddenBadge`)}</StatusBadge> : null}
-        </div>
-        {review.comment ? (
-          <p className="text-sm whitespace-pre-wrap">{review.comment}</p>
-        ) : (
-          <p className="text-sm text-muted-foreground">{t(`${G}.noText`)}</p>
-        )}
-        <p className="text-xs text-muted-foreground">
-          {author} · {formatDate(review.created_at)}
-        </p>
-        {review.hidden && review.hidden_reason ? (
-          <p className="text-[13px] text-warning-text">
-            {t(`${G}.hiddenWhy`, { reason: t(`${G}.reasons.${review.hidden_reason}`) })}
-            {review.hidden_by || review.hidden_at
-              ? ` · ${[review.hidden_by, review.hidden_at ? formatDateTime(review.hidden_at) : null]
-                  .filter(Boolean)
-                  .join(", ")}`
-              : ""}
-          </p>
-        ) : null}
-      </div>
-      <div className="flex shrink-0 items-start">
-        {review.hidden ? (
-          <Button size="sm" variant="outline" disabled={busy} onClick={onRestore}>
-            {t(`${G}.restore`)}
-          </Button>
-        ) : (
-          <Button
-            size="sm"
-            variant="outline"
-            disabled={busy}
-            aria-label={t(`${G}.hideFor`, { author })}
-            onClick={() => {
-              setAsking(true)
-            }}
-          >
-            {t(`${G}.hide`)}
-          </Button>
-        )}
-      </div>
-      <HideReviewDialog
-        author={author}
-        open={asking}
-        busy={busy}
-        onOpenChange={setAsking}
-        onConfirm={(reason) => {
-          setAsking(false)
-          onHide(reason)
-        }}
-      />
+    <li>
+      <button
+        type="button"
+        aria-label={t(`${G}.open`, { author })}
+        className="flex w-full items-center gap-4 px-5 py-4 text-left transition-colors hover:bg-muted/50"
+        onClick={onOpen}
+      >
+        <span className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <span className="flex flex-wrap items-center gap-2">
+            <Stars rating={review.rating} />
+            <ReplyBadge review={review} />
+            {review.hidden ? (
+              <StatusBadge tone="warning">{t(`${G}.hiddenBadge`)}</StatusBadge>
+            ) : null}
+          </span>
+          {review.comment ? (
+            <span className="line-clamp-3 text-sm whitespace-pre-wrap">{review.comment}</span>
+          ) : (
+            <span className="text-sm text-muted-foreground">{t(`${G}.noText`)}</span>
+          )}
+          <span className="text-xs text-muted-foreground">
+            {author} · {formatDate(review.created_at)}
+          </span>
+          <HiddenLine review={review} />
+        </span>
+        <ChevronRight aria-hidden className="size-4 shrink-0 text-muted-foreground" />
+      </button>
     </li>
   )
 }

@@ -9,6 +9,7 @@ import { AnnouncementForm } from "./forms/announcement-form"
 import { BannerForm } from "./forms/banner-form"
 import { FaqForm } from "./forms/faq-form"
 import { FeaturedForm } from "./forms/featured-form"
+import { GoogleRatingForm } from "./forms/google-rating-form"
 import { HeroForm } from "./forms/hero-form"
 import { HeroSliderForm } from "./forms/hero-slider-form"
 import { ProductsForm } from "./forms/products-form"
@@ -68,6 +69,8 @@ function FormOf({
     case "posts":
     case "reviews":
       return <CountedForm section={section} {...props} />
+    case "google_rating":
+      return <GoogleRatingForm section={section} {...props} />
     case "rich_text":
       return <RichTextForm section={section} {...props} />
     case "faq":

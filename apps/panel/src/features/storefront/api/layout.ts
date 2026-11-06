@@ -35,6 +35,9 @@ export const LAYOUT_LIMITS = {
   reviews: 12,
 } as const
 
+/** The Google rating badge's excerpts: none (off) to three (adr/0058 Ek 2026-11-06). */
+export const GOOGLE_RATING_LIMITS = { excerpts: { max: 3, on: 2 } } as const
+
 /** A hero slider's slides and seconds a slide stays while it plays (adr/0049 Ek 2026-11-06). */
 export const SLIDER_LIMITS = {
   slides: { min: 2, max: 6 },
@@ -155,6 +158,20 @@ export interface CountedSection extends SectionBase {
   limit: number
 }
 
+/**
+ * The home page's Google rating badge (adr/0058 Ek 2026-11-06): Google's
+ * average and count from the shop's Business Profile, shown only while
+ * the shop's Google reviews are connected and there are some.
+ */
+export interface GoogleRatingSection extends SectionBase {
+  type: "google_rating"
+  title: string | null
+  /** Recent 4–5 star excerpts under the badge: 0 (off) to 3. */
+  excerpts: number
+  /** "Google'da gör": the place on Google Maps. */
+  profile_link: boolean
+}
+
 export interface RichTextSection extends SectionBase {
   type: "rich_text"
   title: string | null
@@ -209,6 +226,7 @@ export type HomeSection =
   | FeaturedProductSection
   | BrandsSection
   | CountedSection
+  | GoogleRatingSection
   | RichTextSection
   | TrustBadgesSection
   | WordedSection

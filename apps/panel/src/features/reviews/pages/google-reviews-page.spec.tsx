@@ -49,6 +49,9 @@ const REVIEWS = {
       comment: "Şam çeliği av bıçağı aldım.",
       created_at: "2026-11-02T10:00:00Z",
       replied: true,
+      reply: "Güzel yorumunuz için teşekkür ederiz.",
+      replied_at: "2026-11-02T18:00:00Z",
+      reply_state: "approved",
       hidden: false,
       hidden_reason: null,
       hidden_by: null,
@@ -61,6 +64,9 @@ const REVIEWS = {
       comment: null,
       created_at: "2026-10-20T10:00:00Z",
       replied: false,
+      reply: null,
+      replied_at: null,
+      reply_state: null,
       hidden: true,
       hidden_reason: "personal_data",
       hidden_by: "Ayşe Yılmaz",
@@ -173,10 +179,11 @@ describe("GoogleReviewsPage", () => {
     expect(screen.getByText("Yalnızca puan verilmiş.")).toBeInTheDocument()
     expect(screen.getByText("Vitrinden kaldırıldı")).toBeInTheDocument()
     expect(screen.getByText(/Gerekçe: Kişisel veri içeriyor · Ayşe Yılmaz/)).toBeInTheDocument()
+    // Each row opens its review's dialog: nothing to act on in the list itself
+    expect(screen.getByRole("button", { name: "Mehmet Kaya yorumunu aç" })).toBeInTheDocument()
     expect(
-      screen.getByRole("button", { name: "Mehmet Kaya yorumunu vitrinden kaldır" })
+      screen.getByRole("button", { name: "Google kullanıcısı yorumunu aç" })
     ).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Vitrine geri al" })).toBeInTheDocument()
     // No switch to flip, no way to pick many
     expect(screen.queryByRole("switch")).not.toBeInTheDocument()
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument()
@@ -186,10 +193,11 @@ describe("GoogleReviewsPage", () => {
     answer(status())
     renderPage()
 
+    await userEvent.click(await screen.findByRole("button", { name: "Mehmet Kaya yorumunu aç" }))
     await userEvent.click(
       await screen.findByRole("button", { name: "Mehmet Kaya yorumunu vitrinden kaldır" })
     )
-    const dialog = await screen.findByRole("dialog")
+    const dialog = await screen.findByRole("dialog", { name: "Yorum vitrinden kaldırılsın mı?" })
     const reasons = within(dialog).getAllByRole("radio")
     const confirm = within(dialog).getByRole("button", { name: "Vitrinden kaldır" })
 
@@ -220,6 +228,9 @@ describe("GoogleReviewsPage", () => {
     answer(status())
     renderPage()
 
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Google kullanıcısı yorumunu aç" })
+    )
     await userEvent.click(await screen.findByRole("button", { name: "Vitrine geri al" }))
 
     await waitFor(() => {

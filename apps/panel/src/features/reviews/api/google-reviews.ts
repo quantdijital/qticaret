@@ -38,6 +38,11 @@ export interface GoogleReviewRow {
   comment: string | null
   created_at: string
   replied: boolean
+  /** The shop's reply as Google has it, written there or here; null for none. */
+  reply: string | null
+  replied_at: string | null
+  /** Google's moderation of the reply; null when Google gives none (shown). */
+  reply_state: ReplyState | null
   hidden: boolean
   /** Why it was taken off the storefront; null while shown. */
   hidden_reason: HideReason | null
@@ -54,6 +59,17 @@ export const HIDE_REASONS = ["personal_data", "abusive", "off_topic"] as const
 export type HideReason = (typeof HIDE_REASONS)[number]
 
 export const GOOGLE_REVIEW_PAGE_SIZE = 20
+
+/** Where Google's moderation has the shop's reply (adr/0058 Ek 2026-11-06). */
+export type ReplyState = "pending" | "approved" | "rejected"
+
+/** What Google takes as a reply: plain text, 4096 bytes in UTF-8 (a Turkish letter counts two). */
+export const MAX_REPLY_BYTES = 4096
+
+const encoder = new TextEncoder()
+
+/** A reply's length as Google counts it. */
+export const replyBytes = (text: string): number => encoder.encode(text).length
 
 export const googleReviewsQuery = () =>
   queryOptions({
@@ -107,6 +123,25 @@ export function useGoogleReviewsAction() {
           : sdk.client.fetch<ActionAnswer>("/admin/google/reviews", { method: "DELETE" }),
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ["google-reviews"] })
+    },
+  })
+}
+
+/**
+ * The shop's reply to one Google review, written at Google (created or
+ * replaced), or removed there (`comment: null`); kept as Google answered.
+ */
+export function useGoogleReviewReply() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (input: { id: string; comment: string | null }) => {
+      const path = `/admin/google/reviews/items/${encodeURIComponent(input.id)}/reply`
+      return input.comment === null
+        ? sdk.client.fetch(path, { method: "DELETE" })
+        : sdk.client.fetch(path, { method: "POST", body: { comment: input.comment } })
+    },
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: ["google-reviews", "items"] })
     },
   })
 }

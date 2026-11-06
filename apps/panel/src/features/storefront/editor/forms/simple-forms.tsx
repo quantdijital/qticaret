@@ -29,7 +29,7 @@ interface TitleFieldProps {
 }
 
 /** A section's own title; empty, the storefront's words. */
-function TitleField({ id, title, placeholder, problem, onChange }: TitleFieldProps) {
+export function TitleField({ id, title, placeholder, problem, onChange }: TitleFieldProps) {
   const { t } = useTranslation()
   const text = useProblemText()
   return (

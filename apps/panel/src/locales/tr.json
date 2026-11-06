@@ -6655,7 +6655,7 @@
         "action": "Kaldır"
       },
       "listTitle": "Yorumlar",
-      "listDescription": "Google'dan okunan yorumlar, en yeniden. Bir yorumu yalnızca kişisel veri, hakaret ya da konu dışı olduğu için vitrinden kaldırabilirsiniz; Google'daki puan ve yorum sayısı değişmez.",
+      "listDescription": "Google'dan okunan yorumlar, en yeniden. Yanıtlamak ya da vitrinden kaldırmak için bir yoruma tıklayın. Bir yorumu yalnızca kişisel veri, hakaret ya da konu dışı olduğu için vitrinden kaldırabilirsiniz; Google'daki puan ve yorum sayısı değişmez.",
       "empty": "Bu konumun Google'da yorumu yok.",
       "anonymous": "Google kullanıcısı",
       "noText": "Yalnızca puan verilmiş.",
@@ -6675,7 +6675,32 @@
         "off_topic": "Konu dışı ya da spam"
       },
       "hiddenWhy": "Gerekçe: {{reason}}",
-      "restore": "Vitrine geri al"
+      "restore": "Vitrine geri al",
+      "open": "{{author}} yorumunu aç",
+      "dialogTitle": "{{author}} yorumu",
+      "reply": "Yanıtınız",
+      "replyHint": "Düz metin. Google'da ve vitrinde yorumun altında “Mağazanın yanıtı” olarak görünür.",
+      "replyPlaceholder": "Örn. Değerlendirmeniz için teşekkür ederiz…",
+      "replyBytes": "{{used}} / {{max}} bayt",
+      "replyTooLong": "Google en çok {{max}} bayt alıyor; Türkçe harfler iki sayılır. Biraz kısaltın.",
+      "replySend": "Yanıtla",
+      "replyUpdate": "Yanıtı güncelle",
+      "replyDelete": "Yanıtı sil",
+      "replySent": "Yanıt Google'a gönderildi.",
+      "replyUpdated": "Yanıt Google'da güncellendi.",
+      "replyDeleted": "Yanıt Google'dan silindi.",
+      "repliedAt": "Son yanıt {{when}}",
+      "replyPending": "Google onayında",
+      "replyPendingNote": "Google yanıtı inceliyor; onaylayınca vitrinde de görünür.",
+      "replyRejected": "Google yayımlamadı",
+      "replyRejectedNote": "Google bu yanıtı yayımlamadı; metni düzenleyip yeniden gönderebilirsiniz.",
+      "deleteConfirm": {
+        "title": "Yanıt silinsin mi?",
+        "description": "Yanıt Google'dan ve vitrinden kaldırılır; yorum yerinde kalır.",
+        "action": "Sil"
+      },
+      "visibility": "Vitrinde",
+      "shownLine": "Bu yorum vitrinin Yorumlar sayfasında görünüyor."
     }
   },
   "staff": {
@@ -7124,6 +7149,10 @@
           "name": "Müşteri yorumları",
           "description": "Müşterilerinizin son yorumları."
         },
+        "google_rating": {
+          "name": "Google puanı",
+          "description": "Google'daki ortalama puanınız ve değerlendirme sayınız; isterseniz son 4–5 yıldızlı yorumlardan alıntılar. Google yorumları bağlı değilse ya da yorum yoksa vitrinde görünmez."
+        },
         "rich_text": {
           "name": "Metin",
           "description": "Başlık ve biçimli metin; ürün ve kategori kartı da eklenebilir."
@@ -7175,6 +7204,7 @@
         "brands": "Markalar",
         "posts": "Blogdan",
         "reviews": "Müşterilerimiz ne diyor?",
+        "google_rating": "Google'da bizi değerlendirenler",
         "newsletter": "E-bültene abone olun",
         "help": "Aklınıza takılan bir şey mi var?",
         "helpText": "Ürün, sipariş ya da kargo için bize yazın; en kısa sürede dönelim.",
@@ -7493,6 +7523,16 @@
           "dark": "Koyu yazı, açık görsel"
         },
         "toneHint": "Yazının arkasına görsele uygun bir gölge eklenir. Telefonda yazı görselin altında, koyu zeminde durur."
+      },
+      "googleRating": {
+        "excerpts": "Son yorumlardan alıntı göster",
+        "excerptsHint": "Gizlediğiniz yorumlar hiçbir zaman çıkmaz; yalnızca 4 ve 5 yıldızlı, metni olan son yorumlar.",
+        "count": "Alıntı sayısı",
+        "countHint": "1 ile {{max}} arası.",
+        "profileLink": "Google'daki sayfanıza bağlantı",
+        "profileLinkHint": "\"Google'da değerlendirmeler\" bağlantısının yanında Google Haritalar'daki sayfanız yeni sekmede açılır.",
+        "source": "Puan ve sayı Google'ındır; vitrin onları değiştirmez. Bağlantı ve yorumlar:",
+        "sourceLink": "Yorumlar > Google yorumları"
       }
     },
     "preferences": {

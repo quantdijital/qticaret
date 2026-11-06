@@ -38,6 +38,7 @@ export const HOME_TYPES: readonly HomeSectionType[] = [
   "brands",
   "posts",
   "reviews",
+  "google_rating",
   "rich_text",
   "faq",
   "trust_badges",
@@ -163,6 +164,8 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
       return { ...base, type, title: null, limit: 3 }
     case "reviews":
       return { ...base, type, title: null, limit: 6 }
+    case "google_rating":
+      return { ...base, type, title: null, excerpts: 0, profile_link: true }
     case "rich_text":
       return { ...base, type, title: null, body: { type: "doc", content: [] } }
     case "trust_badges":

@@ -6655,7 +6655,7 @@
         "action": "Remove"
       },
       "listTitle": "Reviews",
-      "listDescription": "The reviews read from Google, newest first. A review can be taken off the storefront only for personal data, abuse or being off topic; Google's rating and count do not change.",
+      "listDescription": "The reviews read from Google, newest first. Click a review to reply or take it off the storefront. A review can be taken off the storefront only for personal data, abuse or being off topic; Google's rating and count do not change.",
       "empty": "This location has no reviews on Google.",
       "anonymous": "Google user",
       "noText": "A rating only.",
@@ -6675,7 +6675,32 @@
         "off_topic": "Off topic or spam"
       },
       "hiddenWhy": "Reason: {{reason}}",
-      "restore": "Put back on the storefront"
+      "restore": "Put back on the storefront",
+      "open": "Open {{author}}'s review",
+      "dialogTitle": "{{author}}'s review",
+      "reply": "Your reply",
+      "replyHint": "Plain text. Shown under the review on Google and on the storefront as “The shop's reply”.",
+      "replyPlaceholder": "E.g. Thank you for your review…",
+      "replyBytes": "{{used}} / {{max}} bytes",
+      "replyTooLong": "Google takes at most {{max}} bytes; accented letters count as two. Shorten it a little.",
+      "replySend": "Reply",
+      "replyUpdate": "Update reply",
+      "replyDelete": "Delete reply",
+      "replySent": "Reply sent to Google.",
+      "replyUpdated": "Reply updated on Google.",
+      "replyDeleted": "Reply deleted from Google.",
+      "repliedAt": "Last reply {{when}}",
+      "replyPending": "Awaiting Google",
+      "replyPendingNote": "Google is reviewing the reply; once approved it shows on the storefront too.",
+      "replyRejected": "Not published by Google",
+      "replyRejectedNote": "Google did not publish this reply; you can edit it and send it again.",
+      "deleteConfirm": {
+        "title": "Delete the reply?",
+        "description": "The reply is removed from Google and the storefront; the review stays.",
+        "action": "Delete"
+      },
+      "visibility": "On the storefront",
+      "shownLine": "This review shows on the storefront's reviews page."
     }
   },
   "staff": {
@@ -7124,6 +7149,10 @@
           "name": "Customer reviews",
           "description": "Your customers' latest reviews."
         },
+        "google_rating": {
+          "name": "Google rating",
+          "description": "Your average rating and review count on Google, and if you like excerpts from recent 4–5 star reviews. Not shown on the storefront while Google reviews are not connected or there are none."
+        },
         "rich_text": {
           "name": "Text",
           "description": "A title and formatted text; product and category cards may be added."
@@ -7175,6 +7204,7 @@
         "brands": "Brands",
         "posts": "From the blog",
         "reviews": "What our customers say",
+        "google_rating": "Rated on Google",
         "newsletter": "Subscribe to the newsletter",
         "help": "Something on your mind?",
         "helpText": "Write to us about a product, an order or shipping; we will get back soon.",
@@ -7493,6 +7523,16 @@
           "dark": "Dark text, light picture"
         },
         "toneHint": "A shade that suits the picture goes behind the words. On phones the words sit under the picture on a dark ground."
+      },
+      "googleRating": {
+        "excerpts": "Show excerpts from recent reviews",
+        "excerptsHint": "Reviews you hid never show; only recent 4 and 5 star reviews with text.",
+        "count": "Number of excerpts",
+        "countHint": "Between 1 and {{max}}.",
+        "profileLink": "Link to your Google page",
+        "profileLinkHint": "Beside the link to the reviews, your page on Google Maps opens in a new tab.",
+        "source": "The rating and count are Google's; the storefront never changes them. Connection and reviews:",
+        "sourceLink": "Reviews > Google reviews"
       }
     },
     "preferences": {

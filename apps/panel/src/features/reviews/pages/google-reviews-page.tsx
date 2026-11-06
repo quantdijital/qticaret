@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { getRouteApi, useNavigate } from "@tanstack/react-router"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { PageHeader } from "@/components/patterns/page-header"
@@ -13,7 +14,9 @@ import {
   googleReviewsQuery,
   useHideGoogleReview,
 } from "@/features/reviews/api/google-reviews"
+import type { HideReason } from "@/features/reviews/api/google-reviews"
 import { GoogleConnectionCard } from "@/features/reviews/components/google-connection-card"
+import { GoogleReviewDialog } from "@/features/reviews/components/google-review-dialog"
 import { GoogleReviewItem } from "@/features/reviews/components/google-review-item"
 import { ReviewsNav } from "@/features/reviews/components/reviews-nav"
 import { errorText } from "@/lib/errors"
@@ -25,10 +28,11 @@ const G = "reviews.google"
  * Yorumlar > Google yorumları (adr/0058): the shop's Google reviews from
  * its Business Profile, read every day and shown on the storefront's
  * reviews page beside its own. Google's reviews are not moderated here
- * (they are Google's); one review at a time can be kept off the
- * storefront, only for personal data, abuse or being off topic, never for
- * its stars (adr/0058 Ek). Without the platform's Google client the page
- * says so in a line (docs/06 principle 10: nothing to act on).
+ * (they are Google's); a row opens the review's dialog: the shop's reply,
+ * written at Google (adr/0058 Ek 2026-11-06), and whether it shows on the
+ * storefront, kept off only for personal data, abuse or being off topic,
+ * never for its stars (adr/0058 Ek). Without the platform's Google client
+ * the page says so in a line (docs/06 principle 10: nothing to act on).
  */
 export function GoogleReviewsPage() {
   const { t } = useTranslation()
@@ -41,6 +45,15 @@ export function GoogleReviewsPage() {
   const list = useQuery(googleReviewItemsQuery(page, chosen))
   const hide = useHideGoogleReview()
   const rows = list.data?.reviews ?? []
+  const [openId, setOpenId] = useState<string | null>(null)
+  // The open review as the list reads it now: a hide or a reply shows at once
+  const open = rows.find((review) => review.id === openId) ?? null
+  const setHidden = (id: string, reason: HideReason | null) => {
+    hide.mutate(reason === null ? { id, hidden: false } : { id, hidden: true, reason }, {
+      onSuccess: () => toast.success(t(reason === null ? `${G}.shownDone` : `${G}.hiddenDone`)),
+      onError: (failure) => toast.error(errorText(t, failure)),
+    })
+  }
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("reviews.title")} description={t(`${G}.pageDescription`)} />
@@ -70,24 +83,8 @@ export function GoogleReviewsPage() {
                   <GoogleReviewItem
                     key={review.id}
                     review={review}
-                    busy={hide.isPending}
-                    onHide={(reason) => {
-                      hide.mutate(
-                        { id: review.id, hidden: true, reason },
-                        {
-                          onSuccess: () => toast.success(t(`${G}.hiddenDone`)),
-                          onError: (failure) => toast.error(errorText(t, failure)),
-                        }
-                      )
-                    }}
-                    onRestore={() => {
-                      hide.mutate(
-                        { id: review.id, hidden: false },
-                        {
-                          onSuccess: () => toast.success(t(`${G}.shownDone`)),
-                          onError: (failure) => toast.error(errorText(t, failure)),
-                        }
-                      )
+                    onOpen={() => {
+                      setOpenId(review.id)
                     }}
                   />
                 ))}
@@ -109,6 +106,22 @@ export function GoogleReviewsPage() {
             </>
           )}
         </SectionCard>
+      ) : null}
+      {open ? (
+        <GoogleReviewDialog
+          key={open.id}
+          review={open}
+          busy={hide.isPending}
+          onClose={() => {
+            setOpenId(null)
+          }}
+          onHide={(reason) => {
+            setHidden(open.id, reason)
+          }}
+          onRestore={() => {
+            setHidden(open.id, null)
+          }}
+        />
       ) : null}
     </div>
   )
