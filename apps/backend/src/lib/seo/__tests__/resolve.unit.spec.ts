@@ -161,6 +161,50 @@ describe("resolveSeoPayload", () => {
     expect(bare.description).toBe("")
   })
 
+  it("names the shop once in a title (docs/13 §3)", () => {
+    // The brand is the shop's name, and the record's name already has a joiner of its own
+    const branded = resolveSeoPayload(
+      product({
+        name: "Balta Çakı | 21 cm N690 Çelik - Kompakt Kabza",
+        tokens: { ...product().tokens, marka: "Demo Mağaza" },
+      }),
+      shop
+    )
+    expect(branded.title).toBe("Balta Çakı | 21 cm N690 Çelik - Kompakt Kabza | Demo Mağaza")
+    expect(branded.openGraph.title).toBe(branded.title)
+    expect(branded.twitter.title).toBe(branded.title)
+    // The name already ends with it
+    expect(resolveSeoPayload(product({ name: "Keten Gömlek | Demo Mağaza" }), shop).title).toBe(
+      "Keten Gömlek | Demo Mağaza"
+    )
+    // An author named as the shop is
+    const author = resolveSeoPayload(
+      {
+        ...product(),
+        kind: "post_author",
+        path: "/blog/yazar/demo",
+        name: "Demo Mağaza",
+        trail: [],
+      },
+      shop
+    )
+    expect(author.title).toBe("Demo Mağaza")
+    // The page's own title, the shop typed twice
+    const own = resolveSeoPayload(
+      product({
+        overrides: {
+          seo_title: "Keten Gömlek | Demo Mağaza | demo mağaza",
+          seo_description: null,
+          canonical_override: null,
+          robots_override: null,
+          og_image_alt: null,
+        },
+      }),
+      shop
+    )
+    expect(own.title).toBe("Keten Gömlek | Demo Mağaza")
+  })
+
   it("titles a brand from its own template", () => {
     const payload = resolveSeoPayload(
       { ...product(), kind: "brand", path: "/marka/ornek", name: "Örnek", tokens: {}, trail: [] },

@@ -7,7 +7,7 @@ import {
 } from "./jsonld"
 import type { ArticleFacts, JsonLd, PersonFacts, ProductFacts } from "./jsonld"
 import { listingDescription } from "./listing-description"
-import { renderTemplate } from "./template"
+import { renderTemplate, withoutRepeatedParts } from "./template"
 import { DESCRIPTION_EXCERPT, excerpt } from "./text"
 
 /**
@@ -165,13 +165,17 @@ function templateOf(kind: SeoPageKind, shop: SeoShop): string {
   return kind === "sale" ? SALE_TITLE : shop.titleTemplates[OWN_TEMPLATE[kind]]
 }
 
+// The shop's name once (docs/13 §3): a brand named as the shop, a record whose name or own
+// title already ends with it, an author named as the shop (docs/21 2026-11-06, 7)
 function titleOf(subject: SeoSubject, shop: SeoShop): string {
   const own = subject.overrides?.seo_title
   if (own) {
-    return own
+    return withoutRepeatedParts(own)
   }
   const values = { ...subject.tokens, [NAME_TOKEN[subject.kind]]: subject.name, mağaza: shop.name }
-  return renderTemplate(templateOf(subject.kind, shop), values) || subject.name
+  return withoutRepeatedParts(
+    renderTemplate(templateOf(subject.kind, shop), values) || subject.name
+  )
 }
 
 function descriptionOf(subject: SeoSubject, shop: SeoShop): string {

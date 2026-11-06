@@ -123,3 +123,33 @@ export function renderTemplate(
   })
   return tidy(filled)
 }
+
+// A title's parts sit between joiners with a space on each side (`A | B - C`);
+// a hyphen inside a word or a number (`N690-Böhler`, `1-2`) joins nothing
+const SPACED_JOINER = new RegExp(String.raw`(\s+${JOINER}\s+)`, "u")
+const partKey = (part: string): string =>
+  part.normalize("NFC").toLocaleLowerCase("tr-TR").replace(/\s+/gu, " ").trim()
+
+/**
+ * A title without a part that repeats an earlier one, dropped with the joiner
+ * before it (docs/13 §3): the shop's name comes once when the brand is the
+ * shop's name, the record's name already ends with it, or an author is named
+ * as the shop is (`X | My L'arte | My L'arte` → `X | My L'arte`). Only whole
+ * parts, case and spacing aside; the first of them stays where it is.
+ */
+export function withoutRepeatedParts(title: string): string {
+  const pieces = title.split(SPACED_JOINER)
+  const first = pieces[0] ?? ""
+  const seen = new Set([partKey(first)])
+  let kept = first
+  for (let index = 1; index < pieces.length; index += 2) {
+    const part = pieces[index + 1] ?? ""
+    const key = partKey(part)
+    if (seen.has(key)) {
+      continue
+    }
+    seen.add(key)
+    kept += `${pieces[index] ?? ""}${part}`
+  }
+  return kept
+}

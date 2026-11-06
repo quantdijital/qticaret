@@ -1,5 +1,10 @@
 import { ValidationError } from "../../errors"
-import { assertValidTemplate, checkTemplate, renderTemplate } from "../template"
+import {
+  assertValidTemplate,
+  checkTemplate,
+  renderTemplate,
+  withoutRepeatedParts,
+} from "../template"
 
 const PRODUCT_TOKENS = ["ürün_adı", "marka", "mağaza", "öne_çıkan_attribute"]
 
@@ -158,5 +163,25 @@ describe("renderTemplate", () => {
     renderTemplate("{kısa_açıklama};", { kısa_açıklama: long })
 
     expect(performance.now() - started).toBeLessThan(200)
+  })
+})
+
+describe("withoutRepeatedParts", () => {
+  it("drops a part that repeats an earlier one, with its joiner", () => {
+    expect(withoutRepeatedParts("Balta Çakı | 21 cm - Kabza | My L'arte | My L'arte")).toBe(
+      "Balta Çakı | 21 cm - Kabza | My L'arte"
+    )
+    expect(withoutRepeatedParts("My L'arte | My L'arte")).toBe("My L'arte")
+    expect(withoutRepeatedParts("Kılıç – İSTANBUL  BIÇAK | istanbul bıçak")).toBe(
+      "Kılıç – İSTANBUL  BIÇAK"
+    )
+  })
+
+  it("keeps parts that only look alike and hyphens inside words", () => {
+    expect(withoutRepeatedParts("N690-Böhler Çakı | N690 | Böhler")).toBe(
+      "N690-Böhler Çakı | N690 | Böhler"
+    )
+    expect(withoutRepeatedParts("Keten Gömlek | Demo Mağaza")).toBe("Keten Gömlek | Demo Mağaza")
+    expect(withoutRepeatedParts("")).toBe("")
   })
 })
