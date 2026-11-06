@@ -101,7 +101,8 @@ export function Header({
               {t("nav.account")}
             </span>
           </a>
-          <a href="/hesap/favoriler" aria-label={t("account.favorites")} className={LABELLED}>
+          {/* Named as it reads (WCAG 2.5.3): a voice user says the word on screen */}
+          <a href="/hesap/favoriler" aria-label={t("nav.favorites")} className={LABELLED}>
             <Heart className="size-6" aria-hidden="true" strokeWidth={1.75} />
             <span aria-hidden="true" className="max-lg:hidden">
               {t("nav.favorites")}
