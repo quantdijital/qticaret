@@ -156,6 +156,15 @@ export async function hydrateSection(section: BodySection, at: HydrateContext): 
     case "posts":
     case "reviews":
       return { id, type, title: section.title, limit: section.limit }
+    case "google_rating":
+      // The figures and excerpts are the storefront's to fetch (`/store/google-reviews`)
+      return {
+        id,
+        type,
+        title: section.title,
+        excerpts: section.excerpts,
+        profile_link: section.profile_link,
+      }
     case "trust_badges":
       return { id, type }
   }

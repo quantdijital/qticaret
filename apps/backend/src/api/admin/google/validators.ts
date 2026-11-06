@@ -1,4 +1,6 @@
 import { z } from "@medusajs/framework/zod"
+import { MAX_REPLY_BYTES } from "../../../lib/google/business-review"
+import { isCleanText } from "../../../lib/security/text"
 import { HIDE_REASONS } from "../../../modules/google-reviews/models/google-review"
 import type { HideReason } from "../../../modules/google-reviews/models/google-review"
 
@@ -69,8 +71,37 @@ export type AdminPostGoogleReviewType = z.infer<typeof AdminPostGoogleReview>
 export const isHideReason = (value: string): value is HideReason =>
   (HIDE_REASONS as readonly string[]).includes(value)
 
-/** The storefront's Google reviews block: Google's average and count, the newest reviews. */
+/**
+ * The owner's reply to one Google review (adr/0058 Ek 2026-11-06): plain
+ * text Google takes as it is, at most 4096 bytes in UTF-8 (Google's
+ * `ReviewReply.comment`; a Turkish letter counts two). Line breaks stay.
+ */
+export const AdminPostGoogleReviewReply = z
+  .object({
+    comment: z
+      .string()
+      .trim()
+      // A refinement, not `.min`: Medusa words a length's refusal itself, not by our key
+      .refine((value) => value.length > 0, { message: "google.reply_required" })
+      .refine((value) => Buffer.byteLength(value, "utf8") <= MAX_REPLY_BYTES, {
+        message: "google.reply_too_long",
+      })
+      .refine((value) => isCleanText(value.replace(/\r?\n/g, " ")), {
+        message: "google.reply_invalid",
+      }),
+  })
+  .strict()
+export type AdminPostGoogleReviewReplyType = z.infer<typeof AdminPostGoogleReviewReply>
+
+/**
+ * The storefront's Google reviews: Google's average and count, the newest
+ * reviews (`limit` 0: the figures alone); `min_rating`, only those with at
+ * least these stars and text (the home page's excerpts).
+ */
 export const StoreGetGoogleReviews = z
-  .object({ limit: z.coerce.number().int().min(1).max(20).default(6) })
+  .object({
+    limit: z.coerce.number().int().min(0).max(20).default(6),
+    min_rating: z.coerce.number().int().min(1).max(5).optional(),
+  })
   .strict()
 export type StoreGetGoogleReviewsType = z.infer<typeof StoreGetGoogleReviews>

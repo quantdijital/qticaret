@@ -1,5 +1,5 @@
 import { googleLink } from "../business-profile"
-import { MAX_COMMENT, photoOf, reviewOf } from "../business-review"
+import { MAX_COMMENT, photoOf, replyShown, reviewOf } from "../business-review"
 import {
   BUSINESS_PROFILE_SCOPE,
   REVIEWS_STATE_PREFIX,
@@ -41,10 +41,11 @@ describe("a Google review read", () => {
       edited_at: new Date("2026-10-31T10:00:00.123Z"),
       reply: "Teşekkür ederiz.",
       replied_at: new Date("2026-10-31T12:00:00Z"),
+      reply_state: "approved",
     })
   })
 
-  it("leaves out what Google does not show: an anonymous name and photo, a reply not approved", () => {
+  it("leaves out an anonymous name and photo; keeps a reply with Google's moderation of it", () => {
     const anonymous = reviewOf(
       review({ reviewer: { displayName: "A Google User", isAnonymous: true } })
     )
@@ -58,9 +59,24 @@ describe("a Google review read", () => {
     const plain = reviewOf(review({ reviewReply: { comment: "Sağ olun." } }))
 
     expect(anonymous).toMatchObject({ reviewer_name: null, reviewer_photo_url: null })
-    expect(pending).toMatchObject({ reply: null, replied_at: null })
-    expect(rejected).toMatchObject({ reply: null })
-    expect(plain).toMatchObject({ reply: "Sağ olun.", replied_at: null })
+    // The panel shows a waiting or refused reply to the shop (adr/0058 Ek 2026-11-06)
+    expect(pending).toMatchObject({
+      reply: "Bakıyoruz.",
+      replied_at: null,
+      reply_state: "pending",
+    })
+    expect(rejected).toMatchObject({ reply: "…", reply_state: "rejected" })
+    expect(plain).toMatchObject({ reply: "Sağ olun.", replied_at: null, reply_state: null })
+    expect(reviewOf(review({ reviewReply: undefined }))).toMatchObject({
+      reply: null,
+      reply_state: null,
+    })
+  })
+
+  it("shows on the storefront only a reply Google shows: approved, or with no state", () => {
+    expect(
+      [null, "approved", "pending", "rejected"].map((state) => replyShown(state as never))
+    ).toEqual([true, true, false, false])
   })
 
   it("reads a review without text, and the id from the name when `reviewId` is missing", () => {

@@ -86,6 +86,9 @@ export async function startFakeGoogle(options: FakeGoogleOptions = {}): Promise<
   const business = {
     approved: true,
     reviewPages: { count: 0 },
+    replyCalls: [] as FakeBusinessProfile["replyCalls"],
+    replyState: "APPROVED",
+    replyRefusal: null as FakeBusinessProfile["replyRefusal"],
   } as FakeBusinessProfile
 
   const json = (res: ServerResponse, status: number, body: unknown) => {
@@ -152,7 +155,7 @@ export async function startFakeGoogle(options: FakeGoogleOptions = {}): Promise<
       if (answerSearchConsole(searchConsole, req.method ?? "GET", url, body, scope, json, res)) {
         return
       }
-      if (answerBusinessProfile(business, req.method ?? "GET", url, scope, json, res)) {
+      if (answerBusinessProfile(business, req.method ?? "GET", url, scope, json, res, body)) {
         return
       }
       const account = /^\/(?:accounts|datasources|products)\/v1\/accounts\/(\d+)/.exec(

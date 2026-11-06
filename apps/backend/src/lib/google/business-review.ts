@@ -1,17 +1,36 @@
 import { z } from "@medusajs/framework/zod"
+import type { ReplyState } from "../../modules/google-reviews/models/google-review"
 
 /**
  * One Google review as Business Profile's v4 `Review` gives it (adr/0058),
  * made what we keep: Google's id, the reviewer as Google shows them (an
  * anonymous one without a photo), the stars 1 to 5, the text, when it was
- * written and changed, and the owner's reply once Google shows it (a reply
- * waiting for or refused by Google's moderation is not shown there either).
+ * written and changed, and the owner's reply with where Google's moderation
+ * has it (adr/0058 Ek 2026-11-06): the panel shows a waiting or refused one
+ * to the shop, the storefront only one Google shows (`replyShown`).
  */
 
 const STARS = { ONE: 1, TWO: 2, THREE: 3, FOUR: 4, FIVE: 5 } as const
 
 /** What a review's text and the owner's reply may run to here (Google: 4096 bytes a reply). */
 export const MAX_COMMENT = 5000
+
+/** What Google takes as the owner's reply: plain text, 4096 bytes in UTF-8 (`ReviewReply.comment`). */
+export const MAX_REPLY_BYTES = 4096
+
+const REPLY_STATES: Readonly<Record<string, ReplyState>> = {
+  PENDING: "pending",
+  APPROVED: "approved",
+  REJECTED: "rejected",
+}
+
+/** Google's `reviewReplyState` as kept; none (or `UNSPECIFIED`) is null: shown. */
+export const replyStateOf = (value: string | undefined): ReplyState | null =>
+  (value !== undefined && Object.hasOwn(REPLY_STATES, value) ? REPLY_STATES[value] : null) ?? null
+
+/** Whether the storefront shows a reply: Google shows it (approved, or no state given). */
+export const replyShown = (state: ReplyState | null): boolean =>
+  state === null || state === "approved"
 
 const Raw = z.looseObject({
   name: z.string().optional(),
@@ -46,6 +65,7 @@ export interface GoogleReviewInput {
   edited_at: Date
   reply: string | null
   replied_at: Date | null
+  reply_state: ReplyState | null
 }
 
 const REVIEW_ID = /^[\w.~-]{1,512}$/
@@ -93,8 +113,7 @@ export function reviewOf(value: unknown, photoOrigin?: string): GoogleReviewInpu
     return null
   }
   const reply = raw.reviewReply
-  const shown = reply && (!reply.reviewReplyState || reply.reviewReplyState === "APPROVED")
-  const replyText = shown ? textOf(reply.comment, MAX_COMMENT) : null
+  const replyText = reply ? textOf(reply.comment, MAX_COMMENT) : null
   // An anonymous reviewer's name is no name (Google fills it only for the others)
   const anonymous = raw.reviewer?.isAnonymous === true
   return {
@@ -107,5 +126,6 @@ export function reviewOf(value: unknown, photoOrigin?: string): GoogleReviewInpu
     edited_at: dateOf(raw.updateTime) ?? written,
     reply: replyText,
     replied_at: replyText ? (dateOf(reply?.updateTime) ?? null) : null,
+    reply_state: replyText ? replyStateOf(reply?.reviewReplyState) : null,
   }
 }

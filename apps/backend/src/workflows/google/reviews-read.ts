@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { replyShown } from "../../lib/google/business-review"
 import { BUSINESS_PROFILE_SCOPE, googleClientOf, hasScope } from "../../lib/google/oauth"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -61,6 +62,10 @@ const panelReview = (review: ReviewRow, names: ReadonlyMap<string, string>) => (
   comment: review.comment,
   created_at: iso(review.written_at),
   replied: review.reply !== null,
+  // The owner's reply as Google has it, waiting or refused there included (adr/0058 Ek 2026-11-06)
+  reply: review.reply,
+  replied_at: iso(review.replied_at),
+  reply_state: review.reply === null ? null : review.reply_state,
   hidden: review.hidden,
   // Why, by whom and when it was taken off the storefront (adr/0058 Ek)
   hidden_reason: review.hidden ? review.hidden_reason : null,
@@ -98,21 +103,30 @@ export async function panelGoogleReviews(container: Resolver, offset: number) {
 /**
  * The storefront's Google reviews (adr/0058): the location's name, Google's
  * own average and count, its Maps and "write a review" links, and the
- * newest reviews the shop did not hide, each with the owner's reply. Null
- * with no location, before the first sync and once what was kept is past
- * Google's 30 days.
+ * newest reviews the shop did not hide, each with the owner's reply once
+ * Google shows it. `minRating`: only reviews with at least these stars
+ * and text (the home page's excerpts, adr/0058 Ek 2026-11-06); `limit` 0,
+ * none (the figures alone). Null with no location, before the first sync
+ * and once what was kept is past Google's 30 days.
  */
 export async function storefrontGoogleReviews(
   container: Resolver,
   limit: number,
-  now = new Date()
+  now = new Date(),
+  minRating?: number
 ) {
   const reviews = googleReviewsOf(container)
   const location = await reviews.currentLocation()
   if (!location || !fresh(location, now)) {
     return null
   }
-  const shown = (await reviews.newest({ limit, shownOnly: true })).reviews
+  const shown = (
+    await reviews.newest({
+      limit,
+      shownOnly: true,
+      ...(minRating === undefined ? {} : { minRating }),
+    })
+  ).reviews
   if (!location.total_review_count && shown.length === 0) {
     return null
   }
@@ -129,7 +143,10 @@ export async function storefrontGoogleReviews(
       rating: review.rating,
       comment: review.comment,
       created_at: iso(review.written_at),
-      reply: review.reply ? { comment: review.reply, created_at: iso(review.replied_at) } : null,
+      reply:
+        review.reply && replyShown(review.reply_state)
+          ? { comment: review.reply, created_at: iso(review.replied_at) }
+          : null,
     })),
   }
 }

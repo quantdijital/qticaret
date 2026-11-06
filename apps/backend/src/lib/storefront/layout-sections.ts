@@ -11,6 +11,7 @@ import {
   text,
   title,
 } from "./layout-fields"
+import { googleRating } from "./layout-google"
 import { heroSlider } from "./layout-slider"
 import { storefrontLink } from "./menus"
 
@@ -205,6 +206,7 @@ export const pageSection = z.discriminatedUnion(
     brands,
     counted("posts", 6, 3),
     counted("reviews", 12, 6),
+    googleRating,
     richText,
     trustBadges,
     worded("newsletter"),

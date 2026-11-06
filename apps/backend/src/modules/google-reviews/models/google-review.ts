@@ -8,6 +8,14 @@ export const HIDE_REASONS = ["personal_data", "abusive", "off_topic"] as const
 export type HideReason = (typeof HIDE_REASONS)[number]
 
 /**
+ * Where Google's moderation has the owner's reply (`reviewReplyState`,
+ * lower-cased): only an approved one, or one Google gives no state for,
+ * shows on the storefront (adr/0058 Ek 2026-11-06).
+ */
+export const REPLY_STATES = ["pending", "approved", "rejected"] as const
+export type ReplyState = (typeof REPLY_STATES)[number]
+
+/**
  * A Google review of the shop's location (adr/0058), as Google gives it:
  * kept only to show it, changed and removed as Google changes and removes
  * it at each sync. `hidden` is the shop's alone, with its reason, who and
@@ -26,9 +34,11 @@ export const GoogleReview = model
     comment: model.text().nullable(),
     written_at: model.dateTime(),
     edited_at: model.dateTime(),
-    /** The owner's reply as Google shows it. */
+    /** The owner's reply as Google has it, written there or from the panel. */
     reply: model.text().nullable(),
     replied_at: model.dateTime().nullable(),
+    /** Google's moderation of the reply; null when Google gives none (shown). */
+    reply_state: model.enum([...REPLY_STATES]).nullable(),
     hidden: model.boolean().default(false),
     /** Set with `hidden`, cleared when the review is put back. */
     hidden_reason: model.enum([...HIDE_REASONS]).nullable(),

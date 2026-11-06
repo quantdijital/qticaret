@@ -164,6 +164,22 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "reply_state": {
+          "name": "reply_state",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": ["pending", "approved", "rejected"],
+          "mappedType": "enum"
+        },
         "hidden": {
           "name": "hidden",
           "type": "boolean",

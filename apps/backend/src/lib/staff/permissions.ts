@@ -175,8 +175,10 @@ const OPERATIONS_WRITES: readonly Rule[] = [
   { methods: ["POST"], path: "/admin/product-questions/moderate" },
   { methods: ["POST"], path: "/admin/product-answers/moderate" },
   { methods: ["POST"], path: "/admin/product-questions/:id/answer" },
-  // A Google review taken off the storefront or put back (adr/0058)
+  // A Google review taken off the storefront or put back (adr/0058), and the shop's
+  // reply to it, as a product question's answer (adr/0058 Ek 2026-11-06)
   { methods: ["POST"], path: "/admin/google/reviews/items/:id" },
+  { methods: ["POST", "DELETE"], path: "/admin/google/reviews/items/:id/reply" },
   // Contact form messages marked answered (adr/0047); deleting one is the admin's
   { methods: ["POST"], path: "/admin/contact-messages/:id" },
   // A payment link for a customer in the DMs, without a discount (the workflow refuses

@@ -7,7 +7,10 @@ import type { FakeBusinessProfileData, FakeBusinessReview } from "./business-dat
  * (`GET /v1/{account}/locations`, `readMask` required, 100 a page) and a
  * location's reviews with its average and count (`GET /v4/{account}/
  * {location}/reviews`, 50 a page). Each needs `business.manage`; a project
- * Google has not approved gets 429 `RESOURCE_EXHAUSTED` (its 0 QPM).
+ * Google has not approved gets 429 `RESOURCE_EXHAUSTED` (its 0 QPM). And
+ * the owner's reply to a review (adr/0058 Ek 2026-11-06): `PUT .../reviews/
+ * {id}/reply` with `{ comment }` (at most 4096 bytes) answers the
+ * `ReviewReply`; `DELETE` the same path answers `{}`.
  */
 
 export const BUSINESS_MANAGE = "https://www.googleapis.com/auth/business.manage"
@@ -17,6 +20,12 @@ export interface FakeBusinessProfile extends FakeBusinessProfileData {
   approved: boolean
   /** Review pages served, to tell a sync read them all. */
   reviewPages: { count: number }
+  /** Replies written and removed, in order (`PUT`/`DELETE` and the review id). */
+  replyCalls: { method: string; reviewId: string; comment?: string }[]
+  /** Google's moderation of the next replies (`APPROVED` by default). */
+  replyState: "APPROVED" | "PENDING"
+  /** Refuses the next reply calls with this status and word (cleared by the test). */
+  replyRefusal: { status: number; word: string } | null
 }
 
 const STARS = { ONE: 1, TWO: 2, THREE: 3, FOUR: 4, FIVE: 5 } as const
@@ -54,6 +63,69 @@ function figures(reviews: readonly FakeBusinessReview[]): {
   }
 }
 
+type Json = (res: ServerResponse, status: number, body: unknown) => void
+
+/** The owner's reply written or removed; false when the path is not a reply's. */
+function answerReply(
+  fake: FakeBusinessProfile,
+  method: string,
+  url: URL,
+  body: string,
+  json: Json,
+  res: ServerResponse
+): boolean {
+  const found = /^\/v4\/(accounts\/[^/]+)\/(locations\/[^/]+)\/reviews\/([^/]+)\/reply$/.exec(
+    url.pathname
+  )
+  if (!found || (method !== "PUT" && method !== "DELETE")) {
+    return false
+  }
+  const [, account = "", location = "", rawId = ""] = found
+  const reviewId = decodeURIComponent(rawId)
+  const refuse = (status: number, word: string) => {
+    json(res, status, { error: { code: status, status: word, message: word } })
+  }
+  if (fake.replyRefusal) {
+    refuse(fake.replyRefusal.status, fake.replyRefusal.word)
+    return true
+  }
+  const reached = fake.locations.get(account)?.some((each) => each.name === location)
+  const list = fake.reviews.get(location)
+  const at = list?.findIndex((review) => review.reviewId === reviewId) ?? -1
+  const review = list?.[at]
+  if (!reached || !list || !review) {
+    refuse(404, "NOT_FOUND")
+    return true
+  }
+  if (method === "DELETE") {
+    fake.replyCalls.push({ method, reviewId })
+    const kept: FakeBusinessReview = { ...review }
+    delete kept.reviewReply
+    list[at] = kept
+    json(res, 200, {})
+    return true
+  }
+  let comment: unknown
+  try {
+    comment = (JSON.parse(body) as { comment?: unknown }).comment
+  } catch {
+    comment = undefined
+  }
+  if (typeof comment !== "string" || comment.trim() === "" || Buffer.byteLength(comment) > 4096) {
+    refuse(400, "INVALID_ARGUMENT")
+    return true
+  }
+  fake.replyCalls.push({ method, reviewId, comment })
+  const reply = {
+    comment,
+    updateTime: new Date().toISOString(),
+    reviewReplyState: fake.replyState,
+  }
+  list[at] = { ...review, reviewReply: reply }
+  json(res, 200, reply)
+  return true
+}
+
 /**
  * Answers a Business Profile call; false when the path is not one of them.
  * `scope`: what the bearer token was granted.
@@ -63,9 +135,21 @@ export function answerBusinessProfile(
   method: string,
   url: URL,
   scope: string,
-  json: (res: ServerResponse, status: number, body: unknown) => void,
-  res: ServerResponse
+  json: Json,
+  res: ServerResponse,
+  body = ""
 ): boolean {
+  if (url.pathname.startsWith("/v4/") && url.pathname.endsWith("/reply")) {
+    if (!scope.split(" ").includes(BUSINESS_MANAGE)) {
+      json(res, 403, { error: { code: 403, status: "PERMISSION_DENIED" } })
+      return true
+    }
+    if (!fake.approved) {
+      json(res, 429, { error: { code: 429, status: "RESOURCE_EXHAUSTED" } })
+      return true
+    }
+    return answerReply(fake, method, url, body, json, res)
+  }
   const reviews = /^\/v4\/(accounts\/[^/]+)\/(locations\/[^/]+)\/reviews$/.exec(url.pathname)
   const locations = /^\/v1\/(accounts\/[^/]+)\/locations$/.exec(url.pathname)
   const accounts = url.pathname === "/v1/accounts"

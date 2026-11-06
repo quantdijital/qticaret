@@ -3,9 +3,11 @@ import { storefrontGoogleReviews } from "../../../workflows/google/reviews-read"
 import type { StoreGetGoogleReviewsType } from "../../admin/google/validators"
 
 /**
- * GET /store/google-reviews?limit= (adr/0058): the shop's Google reviews
- * for the storefront: Google's own average and count, the Maps link and
- * the newest reviews the shop did not hide. `google_reviews` is null while
+ * GET /store/google-reviews?limit=&min_rating= (adr/0058): the shop's
+ * Google reviews for the storefront: Google's own average and count, the
+ * Maps link and the newest reviews the shop did not hide (with
+ * `min_rating`, only those with at least these stars and text: the home
+ * page's rating badge, adr/0058 Ek 2026-11-06). `google_reviews` is null while
  * there is nothing to show. Never in structured data (Google's review
  * snippet guidelines): the storefront draws it as text only.
  */
@@ -13,7 +15,8 @@ export async function GET(
   req: MedusaStoreRequest<unknown, StoreGetGoogleReviewsType>,
   res: MedusaResponse
 ): Promise<void> {
-  const reviews = await storefrontGoogleReviews(req.scope, req.validatedQuery.limit)
+  const { limit, min_rating } = req.validatedQuery
+  const reviews = await storefrontGoogleReviews(req.scope, limit, new Date(), min_rating)
   res.setHeader("Cache-Control", "public, max-age=300")
   res.json({ google_reviews: reviews })
 }

@@ -395,6 +395,9 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/google/reviews/sync": false,
   "DELETE /admin/google/reviews": false,
   "POST /admin/google/reviews/items/:id": true,
+  // The shop's reply to a Google review, as a product question's answer (adr/0058 Ek 2026-11-06)
+  "POST /admin/google/reviews/items/:id/reply": true,
+  "DELETE /admin/google/reviews/items/:id/reply": true,
   "POST /admin/integrations/credentials/:provider/check": false,
   "POST /admin/integrations/credentials/:provider": false,
   "DELETE /admin/integrations/credentials/:provider": false,

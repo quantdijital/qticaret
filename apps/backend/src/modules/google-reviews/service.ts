@@ -8,57 +8,21 @@ import {
 } from "@medusajs/framework/utils"
 import type { GoogleReviewInput } from "../../lib/google/business-review"
 import { GoogleReview } from "./models/google-review"
-import type { HideReason } from "./models/google-review"
 import { GoogleReviewLocation } from "./models/google-review-location"
+import type {
+  LocationInput,
+  LocationRow,
+  NewestOptions,
+  ReplyRow,
+  ReplyTargetRow,
+  ReviewRow,
+  SyncCounts,
+  SyncInput,
+  Visibility,
+  VisibilityRow,
+} from "./types"
 
-/** The location the shop picked, as the panel listed it from Google. */
-export interface LocationInput {
-  account: string
-  location: string
-  title: string
-  address: string | null
-  maps_uri: string | null
-  new_review_uri: string | null
-}
-
-export interface SyncInput {
-  account: string
-  location: string
-  average_rating: number | null
-  total_review_count: number | null
-  reviews: GoogleReviewInput[]
-  /** Every review Google has was read: those kept and not among them are gone there. */
-  complete: boolean
-}
-
-export interface SyncCounts {
-  added: number
-  updated: number
-  removed: number
-}
-
-export interface LocationRow extends LocationInput {
-  id: string
-  average_rating: number | null
-  total_review_count: number | null
-  synced_at: Date | null
-  sync_error: string | null
-  created_at: Date
-}
-
-export interface ReviewRow extends GoogleReviewInput {
-  id: string
-  hidden: boolean
-  hidden_reason: HideReason | null
-  hidden_by: string | null
-  hidden_at: Date | null
-}
-
-/** Off the storefront with one of the reasons and who did it, or back on it. */
-export type Visibility = { hidden: true; reason: HideReason; by: string } | { hidden: false }
-
-/** Whether a review is off the storefront, and why, by whom and since when. */
-export type VisibilityRow = Pick<ReviewRow, "hidden" | "hidden_reason" | "hidden_by" | "hidden_at">
+export type * from "./types"
 
 const REVIEW_FIELDS = [
   "id",
@@ -71,6 +35,7 @@ const REVIEW_FIELDS = [
   "edited_at",
   "reply",
   "replied_at",
+  "reply_state",
   "hidden",
   "hidden_reason",
   "hidden_by",
@@ -87,6 +52,7 @@ const changed = (kept: ReviewRow, now: GoogleReviewInput): boolean =>
   kept.rating !== now.rating ||
   kept.comment !== now.comment ||
   kept.reply !== now.reply ||
+  kept.reply_state !== now.reply_state ||
   time(kept.written_at) !== time(now.written_at) ||
   time(kept.edited_at) !== time(now.edited_at) ||
   time(kept.replied_at) !== time(now.replied_at)
@@ -288,14 +254,74 @@ class GoogleReviewsModuleService extends MedusaService({ GoogleReviewLocation, G
     }
   }
 
+  /**
+   * Where a review is at Google (the location picked, Google's id) and the
+   * reply kept now; null for a review no longer kept.
+   */
+  @InjectManager()
+  async replyTarget(
+    id: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<ReplyTargetRow | null> {
+    const [row] = (await this.listGoogleReviews(
+      { id },
+      { select: ["id", "review_id", "reply", "replied_at", "reply_state"], take: 1 },
+      sharedContext
+    )) as (ReplyRow & { id: string; review_id: string })[]
+    const location = row ? await this.currentLocation(sharedContext) : null
+    if (!row || !location) {
+      return null
+    }
+    return {
+      id: row.id,
+      account: location.account,
+      location: location.location,
+      review_id: row.review_id,
+      reply: row.reply,
+      replied_at: row.replied_at,
+      reply_state: row.reply_state,
+    }
+  }
+
+  /**
+   * Keeps the owner's reply as Google now has it (all null: none). What it
+   * was before, for an undo; null for a review no longer kept.
+   */
+  @InjectTransactionManager()
+  async setReply(
+    id: string,
+    reply: ReplyRow,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<ReplyRow | null> {
+    const [row] = (await this.listGoogleReviews(
+      { id },
+      { select: ["id", "reply", "replied_at", "reply_state"], take: 1 },
+      sharedContext
+    )) as (ReplyRow & { id: string })[]
+    if (!row) {
+      return null
+    }
+    await this.updateGoogleReviews({ id, ...reply }, sharedContext)
+    return { reply: row.reply, replied_at: row.replied_at, reply_state: row.reply_state }
+  }
+
   /** The reviews kept, newest written first; the storefront's only those not hidden. */
   @InjectManager()
   async newest(
-    options: { offset?: number; limit: number; shownOnly?: boolean },
+    options: NewestOptions,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<{ reviews: ReviewRow[]; count: number }> {
+    if (options.limit < 1) {
+      // `take: 0` reads as no limit
+      return { reviews: [], count: 0 }
+    }
     const [rows, count] = await this.listAndCountGoogleReviews(
-      options.shownOnly ? { hidden: false } : {},
+      {
+        ...(options.shownOnly ? { hidden: false } : {}),
+        ...(options.minRating === undefined
+          ? {}
+          : { rating: { $gte: options.minRating }, comment: { $ne: null } }),
+      },
       {
         select: [...REVIEW_FIELDS],
         order: { written_at: "DESC", id: "ASC" },

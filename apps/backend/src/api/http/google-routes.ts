@@ -10,6 +10,7 @@ import {
   AdminPostGoogleMerchant,
   AdminPostGoogleReview,
   AdminPostGoogleReviewLocation,
+  AdminPostGoogleReviewReply,
   AdminPostSearchConsoleSite,
   GoogleCallbackQuery,
   StoreGetGoogleReviews,
@@ -67,6 +68,21 @@ export const GOOGLE_ROUTES = [
     matcher: "/admin/google/reviews/items/:id",
     methods: ["POST" as const],
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostGoogleReview)],
+  },
+  // adr/0058 Ek 2026-11-06: the shop's reply written at Google, within Google's budget
+  {
+    matcher: "/admin/google/reviews/items/:id/reply",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      googleCalls,
+      validateAndTransformBody(AdminPostGoogleReviewReply),
+    ],
+  },
+  {
+    matcher: "/admin/google/reviews/items/:id/reply",
+    methods: ["DELETE" as const],
+    middlewares: [requireUserActor, googleCalls],
   },
   // adr/0058: the storefront's Google reviews block, read by anyone
   {
