@@ -136,6 +136,12 @@ export const PANEL_ROUTES = [
     methods: ["POST" as const],
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostApiKeyRevoke)],
   },
+  // A revoked key removed from the list; an active one is refused
+  {
+    matcher: "/admin/api-access/:id",
+    methods: ["DELETE" as const],
+    middlewares: [requireUserActor],
+  },
   // F11.5: a stopped accounting record tried again (audited as every write)
   {
     matcher: "/admin/accounting/syncs/:id/retry",

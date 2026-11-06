@@ -521,6 +521,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "staff.reauth_locked": "Çok fazla deneme yapıldı; biraz sonra yeniden deneyin.",
   "staff.forbidden": "Rolünüz bu işlem için yetkili değil.",
   "staff.last_owner": "Mağazanın son sahibi rolünü bırakamaz; önce başka birini sahip yapın.",
+  "api_key.delete_active": "Etkin anahtar silinemez; önce iptal edin.",
   "api_key.fields_not_allowed": "Anahtarla alan seçilemez (fields); uç kendi alanlarını döner.",
   "api_key.scope_denied": "Bu anahtar bu işlem için yetkili değil.",
   "api_key.scopes_required": "Anahtar için en az bir izin seçin.",

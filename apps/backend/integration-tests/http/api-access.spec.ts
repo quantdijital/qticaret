@@ -1,5 +1,9 @@
 import { request as httpRequest } from "node:http"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { API_KEY_SCOPES_MODULE } from "../../src/modules/api-key-scopes"
+import type ApiKeyScopesModuleService from "../../src/modules/api-key-scopes/service"
+import { AUDIT_LOG_MODULE } from "../../src/modules/audit-log"
+import type AuditLogModuleService from "../../src/modules/audit-log/service"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -163,6 +167,62 @@ medusaIntegrationTestRunner({
       expect(again.status).toBe(200)
       expect(output).not.toContain(made.token)
       expect(output).not.toContain(made.token.slice(3))
+    })
+
+    it("deletes a revoked key with its scopes, keeps its history, refuses an active one", async () => {
+      const container = getContainer()
+      const log = container.resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
+      const active = await make(["orders:read"], "Muhasebe")
+      const old = await make(["orders:read", "catalog:read"], "Eski depo")
+      await settle(
+        http.post(`/admin/api-access/${old.key.id}/revoke`, {}, { headers: admin.headers })
+      )
+      const ops = await createAdminUser(http, container, "admin")
+
+      const refused = await settle(
+        http.delete(`/admin/api-access/${active.key.id}`, { headers: admin.headers })
+      )
+      const notOwner = await settle(
+        http.delete(`/admin/api-access/${old.key.id}`, { headers: ops.headers })
+      )
+      const byKey = await settle(
+        http.delete(`/admin/api-access/${old.key.id}`, { headers: basic(active.token) })
+      )
+      const deleted = await settle(
+        http.delete(`/admin/api-access/${old.key.id}`, { headers: admin.headers })
+      )
+      const again = await settle(
+        http.delete(`/admin/api-access/${old.key.id}`, { headers: admin.headers })
+      )
+      const listed = await http.get<{ keys: { id: string }[] }>("/admin/api-access", {
+        headers: admin.headers,
+      })
+      const scopeRows = await container
+        .resolve<ApiKeyScopesModuleService>(API_KEY_SCOPES_MODULE)
+        .listApiKeyScopes({ api_key_id: [old.key.id, active.key.id] })
+      // The middleware writes its entries once the answer has gone
+      await new Promise((resolve) => setTimeout(resolve, 200))
+      const history = await log.listAuditEntries({ resource_id: old.key.id })
+
+      expect(refused.status).toBe(400)
+      expect(refused.data).toMatchObject({ message: "api_key.delete_active" })
+      expect([notOwner.status, byKey.status]).toEqual([403, 403])
+      expect(deleted.status).toBe(200)
+      expect(again.status).toBe(404)
+      expect(listed.data.keys.map((key) => key.id)).toEqual([active.key.id])
+      expect(scopeRows.map((row) => row.api_key_id)).toEqual([active.key.id])
+      expect(history.map((entry) => entry.action)).toEqual(
+        expect.arrayContaining(["POST /admin/api-access/:id/revoke", "api_key.deleted"])
+      )
+      const entry = history.find((one) => one.action === "api_key.deleted")
+      expect(entry).toMatchObject({
+        kind: "mutation",
+        actor_type: "user",
+        resource_type: "api_key",
+        changes: { title: "Eski depo", redacted: old.key.redacted },
+      })
+      expect(entry?.actor_id).toEqual(expect.stringMatching(/^user_/))
+      expect(JSON.stringify(history)).not.toContain(old.token)
     })
 
     it("refuses a key without a scope or a name, and describes what keys reach", async () => {

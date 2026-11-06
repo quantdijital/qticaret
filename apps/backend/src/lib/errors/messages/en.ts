@@ -516,6 +516,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "staff.forbidden": "Your role does not allow this.",
   "staff.last_owner":
     "The shop's last owner cannot give up the role; make someone else owner first.",
+  "api_key.delete_active": "An active key cannot be deleted; revoke it first.",
   "api_key.fields_not_allowed": "A key cannot pick fields; each route returns its own.",
   "api_key.scope_denied": "This key is not allowed to do this.",
   "api_key.scopes_required": "Pick at least one permission for the key.",

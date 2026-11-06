@@ -51,6 +51,7 @@ describe("staff roles", () => {
     ["DELETE", "/admin/integrations/credentials/iyzico"],
     ["GET", "/admin/api-access"],
     ["POST", "/admin/api-access/key_1/revoke"],
+    ["DELETE", "/admin/api-access/key_1"],
     ["POST", "/admin/api-keys"],
     ["POST", "/admin/webhooks"],
     ["DELETE", "/admin/webhooks/whsub_1"],
@@ -323,6 +324,7 @@ describe("staff roles", () => {
 const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/accounting/syncs/:id/retry": false,
   "POST /admin/api-access/:id/revoke": false,
+  "DELETE /admin/api-access/:id": false,
   "POST /admin/api-access": false,
   "POST /admin/async-jobs": false,
   "POST /admin/async-jobs/:id/cancel": true,
