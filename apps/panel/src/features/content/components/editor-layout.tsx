@@ -7,9 +7,10 @@ import { cn } from "@/lib/utils"
  * A text's page (content page, blog post, filter page; docs/06 "Metin
  * sayfaları") and a product's ("Ürün sayfası"): the main column leads
  * with what is edited most, its secondary parts folded under it; the narrow column beside holds the
- * short facts and the SEO advisor and follows the scroll while it fits in
- * the window; taller, it scrolls with the page (never inside itself, the
- * owner 2026-11-06), so each card is reached. Folding a part never leaves
+ * short facts and the SEO advisor and follows the scroll; taller than the
+ * window, it moves with the page until its end, or scrolling back its
+ * start, is in sight and is held there (never scrolling inside itself,
+ * the owner 2026-11-06), so each card is reached and none is left behind. Folding a part never leaves
  * a stretched card: the main column ends where its last card does.
  *
  * Below `xl` the narrow column comes under the main one. With `merge`

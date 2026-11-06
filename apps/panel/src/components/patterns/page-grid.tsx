@@ -1,6 +1,6 @@
 import { useRef } from "react"
 import type { ReactNode } from "react"
-import { useFitsView } from "@/components/patterns/use-fits-view"
+import { useTwoWaySticky } from "@/components/patterns/use-two-way-sticky"
 import { cn } from "@/lib/utils"
 import { SPANS } from "@/components/patterns/page-spans"
 import type { Span } from "@/components/patterns/page-spans"
@@ -24,18 +24,23 @@ export function PageGrid({ className, children }: { className?: string; children
   )
 }
 
+const COLUMN = "flex min-w-0 flex-col gap-[var(--grid-gap)]"
+
 // The last card grows, also when it sits in an anchor wrapper (`<div id=...>`)
 const GROW_LAST =
   "[&>:last-child]:flex-1 [&>div:last-child]:flex [&>div:last-child]:flex-col [&>div:last-child>section]:flex-1"
 
-// A sticky column's offset from the window's top (`xl:top-20`) and the margin kept under it, in rem
-const STICKY_ROOM = 5 + 1.5
+// Where a sticky column is held, in rem: under the window's top (the old `xl:top-20`) and over its bottom
+const STICKY_ROOM = { top: 5, gap: 1.5 }
 
 /**
  * A column of cards in a PageGrid. A sticky column (a form's summary and
  * save button, an editor's side cards) keeps its own height instead and
- * follows the scroll while it fits in the window; taller, it scrolls with
- * the page so each of its cards is reached. It never scrolls inside.
+ * follows the scroll: one that fits the window stays under its top; a
+ * taller one moves with the page until its end is in sight, scrolling
+ * down, or its start, scrolling up, and is held there, so each of its
+ * cards is reached and none is left behind (`useTwoWaySticky`). It never
+ * scrolls inside. Below `xl` the columns stack and nothing sticks.
  */
 export function PageColumn({
   span,
@@ -48,21 +53,31 @@ export function PageColumn({
   className?: string
   children: ReactNode
 }) {
-  const ref = useRef<HTMLDivElement>(null)
-  const fits = useFitsView(ref, STICKY_ROOM, sticky)
+  const cell = useRef<HTMLDivElement>(null)
+  const body = useRef<HTMLDivElement>(null)
+  useTwoWaySticky(cell, body, STICKY_ROOM, sticky)
+  if (!sticky) {
+    return <div className={cn(COLUMN, SPANS[span], GROW_LAST, className)}>{children}</div>
+  }
   return (
     <div
-      ref={ref}
-      data-layout-free={sticky ? "" : undefined}
-      data-sticks={sticky && fits ? "" : undefined}
+      ref={cell}
+      data-layout-free=""
       className={cn(
-        "flex min-w-0 flex-col gap-[var(--grid-gap)]",
+        COLUMN,
+        "xl:block xl:min-h-[var(--sticky-height,auto)] xl:[contain:size]",
         SPANS[span],
-        sticky ? cn("xl:self-start", fits && "xl:sticky xl:top-20") : GROW_LAST,
         className
       )}
     >
-      {children}
+      <div aria-hidden className="hidden xl:block xl:h-[var(--sticky-shift,0px)]" />
+      <div
+        ref={body}
+        data-sticks=""
+        className="max-xl:contents xl:sticky xl:top-[var(--sticky-top,5rem)] xl:bottom-[var(--sticky-bottom,auto)] xl:flex xl:flex-col xl:gap-[var(--grid-gap)]"
+      >
+        {children}
+      </div>
     </div>
   )
 }
