@@ -15,6 +15,21 @@ export const AdminGetInvoices = z
 
 export type AdminGetInvoicesType = z.infer<typeof AdminGetInvoices>
 
+/** A page of the queue: the most stopped invoices tried again at once. */
+export const MAX_BULK_RETRY = 20
+
+/** `POST /admin/invoices/retry`: the stopped invoices picked on the queue. */
+export const AdminPostInvoicesRetry = z
+  .object({
+    invoice_ids: z
+      .array(z.string().regex(/^inv_[0-9A-Za-z]{1,40}$/))
+      .min(1)
+      .max(MAX_BULK_RETRY),
+  })
+  .strict()
+
+export type AdminPostInvoicesRetryType = z.infer<typeof AdminPostInvoicesRetry>
+
 /**
  * What an external program issued (adr/0034 §9): GİB's number (three
  * letters or digits, the year, nine digits), its ETTN, e-Fatura or

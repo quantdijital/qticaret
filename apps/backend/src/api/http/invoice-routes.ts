@@ -6,9 +6,11 @@ import {
   AdminGetInvoices,
   AdminPostInvoiceIssued,
   AdminPostInvoiceWaive,
+  AdminPostInvoicesRetry,
   AdminPostReturnDocument,
 } from "../admin/invoices/validators"
 import { StoreGetOrderInvoicePdf } from "../store/orders/[id]/invoice/validators"
+import { requireUserActor } from "./actor"
 import { optionalCustomer, orderAccess } from "./order-access"
 import { requireReauth } from "./reauth"
 
@@ -60,6 +62,12 @@ export const INVOICE_ROUTES = [
     matcher: "/admin/invoices/:id/retry",
     methods: ["POST" as const],
     middlewares: [emptyBody],
+  },
+  // The queue's picked stopped invoices tried again at once; people only
+  {
+    matcher: "/admin/invoices/retry",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostInvoicesRetry)],
   },
   {
     matcher: "/admin/invoices/:id/issued",
