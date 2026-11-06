@@ -1,7 +1,7 @@
 "use client"
 
 import { ErrorPage } from "@qticaret/storefront-theme-error"
-import { t } from "@/lib/i18n"
+import { errorT as t } from "@/lib/i18n/error"
 
 /**
  * A page the server could not make (the backend busy or away), inside the

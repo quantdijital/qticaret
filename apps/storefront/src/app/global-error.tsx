@@ -1,7 +1,7 @@
 "use client"
 
 import { ErrorPage } from "@qticaret/storefront-theme-error"
-import { t } from "@/lib/i18n"
+import { errorT as t } from "@/lib/i18n/error"
 // The chosen theme's stylesheet (adr/0057): this page stands in for the root layout
 import "@qticaret/storefront-theme-styles"
 
