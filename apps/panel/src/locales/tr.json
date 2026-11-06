@@ -4543,8 +4543,9 @@
     "descriptionLabel": "Açıklama",
     "image": {
       "title": "Kategori görseli",
-      "hint": "Vitrinde kategori kartlarında ve menüde gösterilir. İsteğe bağlı; görsel yoksa kategori adı yeterlidir.",
-      "none": "Görsel yok",
+      "hint": "Vitrinde kategori kartlarında ve menüde gösterilir. Görsel seçmezseniz kategorideki en yeni ürünün fotoğrafı kullanılır.",
+      "add": "Görsel ekle",
+      "frameHint": "Vitrindeki kart gibi 4:5 dikey kırpılır; ana konuyu ortaya yerleştirin.",
       "alt": "Alt metin",
       "altHint": "Görselde ne olduğunu kısaca yazın; görmeyenler ve arama motorları bunu okur.",
       "saved": "Kategori görseli kaydedildi."

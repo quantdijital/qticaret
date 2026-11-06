@@ -4543,8 +4543,9 @@
     "descriptionLabel": "Description",
     "image": {
       "title": "Category image",
-      "hint": "Shown on the storefront's category cards and in the menu. Optional; without one the category's name is enough.",
-      "none": "No image",
+      "hint": "Shown on the storefront's category cards and in the menu. Without one, the newest product photo in the category is used.",
+      "add": "Add image",
+      "frameHint": "Cropped to a 4:5 portrait like the storefront card; keep the subject in the middle.",
       "alt": "Alt text",
       "altHint": "Briefly describe what the image shows; screen readers and search engines read it.",
       "saved": "Category image saved."

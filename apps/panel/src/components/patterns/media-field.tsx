@@ -10,15 +10,22 @@ import type { MediaAsset } from "@/features/media/api/media"
 import { errorText } from "@/lib/errors"
 import { cn } from "@/lib/utils"
 
-/** The picture's frame: a slide or opening, a share card, a square, a logo on its ground. */
-export type MediaFrame = "wide" | "share" | "square" | "logo"
+/**
+ * The picture's frame: a slide or opening, a share card, a square, a logo
+ * on its ground, or a storefront tile (4:5, cropped as shoppers see it).
+ */
+export type MediaFrame = "wide" | "share" | "square" | "logo" | "tile"
 
 const FRAME: Record<MediaFrame, string> = {
   wide: "aspect-[16/9] w-full",
   share: "aspect-[1.91/1] w-full",
   square: "aspect-square w-28 shrink-0",
   logo: "h-24 w-full p-3",
+  tile: "aspect-[4/5] w-36 shrink-0",
 }
+
+/** Frames of a set size: beside their words even when inline, never stretched. */
+const FIXED: ReadonlySet<MediaFrame> = new Set(["square", "tile"])
 
 interface MediaFieldProps {
   id: string
@@ -138,7 +145,7 @@ export function MediaField({
         className={cn(
           "group relative flex items-center justify-center overflow-hidden rounded-md border outline-hidden transition-colors focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-progress",
           FRAME[frame],
-          inline && frame !== "square" && "sm:w-72 sm:shrink-0",
+          inline && !FIXED.has(frame) && "sm:w-72 sm:shrink-0",
           value ? (ground ?? "bg-muted") : (ground ?? "border-2 border-dashed hover:bg-muted/50"),
           over && "border-primary bg-accent"
         )}

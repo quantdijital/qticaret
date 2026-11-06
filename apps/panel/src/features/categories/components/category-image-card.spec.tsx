@@ -55,8 +55,14 @@ describe("CategoryImageCard", () => {
     serve(null)
     renderCard()
 
-    expect(await screen.findByText("Görsel yok")).toBeInTheDocument()
-    await userEvent.click(screen.getByRole("button", { name: "Kategori görseli: görsel seç" }))
+    const frame = await screen.findByRole("button", { name: "Kategori görseli: görsel seç" })
+    // The empty frame is the standard way in, in the storefront tile's 4:5
+    expect(frame).toHaveTextContent("Görsel ekle")
+    expect(frame).toHaveClass("aspect-[4/5]")
+    expect(
+      screen.getByText(/Görsel seçmezseniz kategorideki en yeni ürünün fotoğrafı kullanılır/)
+    ).toBeInTheDocument()
+    await userEvent.click(frame)
     const picker = await screen.findByRole("dialog")
     await userEvent.click(await within(picker).findByRole("button", { name: "mutfak.webp" }))
     await userEvent.click(within(picker).getByRole("button", { name: "Seç" }))
@@ -76,6 +82,10 @@ describe("CategoryImageCard", () => {
     serve({ url: "https://cdn.example.com/eski.webp", alt: "Eski" })
     renderCard()
 
+    expect(
+      await screen.findByRole("button", { name: "Kategori görseli: görseli değiştir" })
+    ).toHaveTextContent("Değiştir")
+    expect(screen.getByRole("textbox", { name: "Alt metin" })).toHaveValue("Eski")
     await userEvent.click(
       await screen.findByRole("button", { name: "Kategori görseli: görseli kaldır" })
     )
@@ -84,5 +94,8 @@ describe("CategoryImageCard", () => {
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(URL, { method: "POST", body: { image: null } })
     })
+    expect(
+      await screen.findByRole("button", { name: "Kategori görseli: görsel seç" })
+    ).toHaveTextContent("Görsel ekle")
   })
 })

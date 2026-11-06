@@ -56,10 +56,11 @@ function Form({ categoryId, saved }: { categoryId: string; saved: CategoryImage 
         id="category-image"
         label={t(`${I}.title`)}
         value={url || null}
-        frame="square"
+        hint={t(`${I}.frameHint`)}
+        frame="tile"
         inline
         hideLabel
-        emptyText={t(`${I}.none`)}
+        emptyText={t(`${I}.add`)}
         onChange={(asset) => {
           form.setValue("url", asset?.url ?? "", { shouldDirty: true })
           // A library image's own alt text fills an empty one
@@ -78,8 +79,10 @@ function Form({ categoryId, saved }: { categoryId: string; saved: CategoryImage 
 
 /**
  * A category's picture (adr/0046 Ek 2026-11-04): the storefront's
- * category cards and menu show it. Optional; chosen from the media
- * library with its alt text beside it, saved on its own.
+ * category cards and menu show it. Optional, as the storefront falls back
+ * to the category's newest product photo; shown in the storefront tile's
+ * own 4:5 frame, chosen through the standard media entry with its alt
+ * text beside it, saved on its own.
  */
 export function CategoryImageCard({ categoryId }: { categoryId: string }) {
   const query = useQuery(categoryImagesQuery())
