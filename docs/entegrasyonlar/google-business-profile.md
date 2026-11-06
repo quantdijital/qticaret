@@ -48,9 +48,11 @@ Mağazanın yapacakları:
 - **30 gün:** Business Profile API politikaları saklanan içeriği en çok 30 gün sayar. Son başarılı eşitleme 30 günden eskiyse yorumlar, ortalama ve sayı silinir (`google_reviews.stale_purged`); vitrin eski içeriği göstermez.
 - **Puan Google'ındır:** ortalama ve sayı Google'ın yanıtından gelir, hesaplanmaz, kendi yorumlarımızla birleştirilmez.
 - **Vitrinden kaldırma:** yalnız üç gerekçeyle, tek tek: kişisel veri, hakaret/küfür/nefret söylemi, konu dışı/spam. Puanı nedeniyle kaldırma yok, toplu kaldırma yok. Gerekçe, kim ve ne zaman tutulur; her kaldırma ve geri alma denetim kaydına yazılır (`google_review`). Yorum Google'da ve Google'ın puanında kalır. Moderasyon yok (adr/0058 §7).
+- **Yanıt (panelden, adr/0058 Ek 2026-11-06):** yoruma tıkla → "Yanıtınız" → "Yanıtla" / "Yanıtı güncelle" / "Yanıtı sil". Google'a `PUT`/`DELETE /v4/{accounts/*/locations/*/reviews/*}/reply` ile yazılır (düz metin, en çok 4096 bayt), sonra Google'ın yanıtladığı hâliyle tutulur; yerel kayıt düşerse Google'daki önceki yanıt geri yazılır. Google'ın moderasyonu (`reply_state`) panelde görünür; vitrin yalnız onaylı (ya da durumsuz) yanıtı "Mağazanın yanıtı" olarak çizer. Google'da doğrudan yazılan yanıt eşitlemeyle gelir. Her yanıt denetim kaydına yazılır (metni değil, uzunluğu ve durumu).
+- **Ana sayfa rozeti:** tema düzenleyicide "Google puanı" bölümü: ortalama, sayı, `/yorumlar` ve Google bağlantısı, isteğe bağlı 1–3 son 4–5 yıldızlı alıntı. Bağlı değilken ya da yorum yokken çizilmez.
 - **Kaldırma:** "Bağlantıyı kaldır" konumu ve yorumları siler (Google bağlantısı kalır). Google bağlantısı kesilirse yorumlar da silinir.
 - **SEO:** Google yorumları hiçbir JSON-LD'ye girmez (docs/13 §5, Google'ın review snippet kuralları).
-- **Loglar (operatör için):** `google_reviews.sync_failed` (error: API kapalı, proje onaysız, Google'a ulaşılamıyor; warn: mağazanın onaracağı `invalid_grant`, `reviews_scope`), `google_reviews.stale_purged` (error), `google_reviews.synced` (info).
+- **Loglar (operatör için):** `google_reviews.reply_failed` (error: proje onaysız `RESOURCE_EXHAUSTED`/`http_429`; warn: mağazanın ret sebepleri), `google_reviews.reply_restore_failed` (error), `google_reviews.sync_failed` (error: API kapalı, proje onaysız, Google'a ulaşılamıyor; warn: mağazanın onaracağı `invalid_grant`, `reviews_scope`), `google_reviews.stale_purged` (error), `google_reviews.synced` (info).
 
 ## Geliştirmede (sahte Google)
 

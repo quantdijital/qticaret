@@ -254,3 +254,9 @@ Kararın 6.3 adımı ("diğer sayfa şablonlarının bölümleri"), backend tara
   - Kendiliğinden geçiş kapalı.
 - Migration yok.
 - Kanıt: `lib/storefront/__tests__/layout-slider.unit.spec.ts`, `integration-tests/http/storefront-slider.spec.ts`; panelde `forms/hero-slider-form.spec.tsx`, `problems.spec.ts`; vitrinde `atolye-slider-theme.spec.ts`.
+
+## Ek (2026-11-06): Google puanı bölümü (`google_rating`; otonom, gözden geçir)
+
+- Ana sayfaya isteğe bağlı yeni bölüm türü: Google'daki ortalama ve sayı, `/yorumlar`'a ve (isteğe bağlı) Google Haritalar'a bağlantı, 0–3 son 4–5 yıldızlı alıntı. Şema `lib/storefront/layout-google.ts` (`title`, `excerpts` 0–3, `profile_link`); ürün ve kategori sayfası almaz.
+- Belge yalnız ayarları tutar; rakamları vitrin her istekte okur (`/store/google-reviews`), gösterecek bir şey yoksa bölüm çizilmez. Ayrıntı, yapılandırılmış veri kararı ve kanıtlar: adr/0058 Ek 2026-11-06.
+- Panel: Bölüm ekle > "Google puanı" (başlık, "Son yorumlardan alıntı göster" + sayı 1–3, "Google'daki sayfanıza bağlantı"). Migration yok.
