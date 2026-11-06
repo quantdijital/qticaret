@@ -260,3 +260,35 @@ Kararın 6.3 adımı ("diğer sayfa şablonlarının bölümleri"), backend tara
 - Ana sayfaya isteğe bağlı yeni bölüm türü: Google'daki ortalama ve sayı, `/yorumlar`'a ve (isteğe bağlı) Google Haritalar'a bağlantı, 0–3 son 4–5 yıldızlı alıntı. Şema `lib/storefront/layout-google.ts` (`title`, `excerpts` 0–3, `profile_link`); ürün ve kategori sayfası almaz.
 - Belge yalnız ayarları tutar; rakamları vitrin her istekte okur (`/store/google-reviews`), gösterecek bir şey yoksa bölüm çizilmez. Ayrıntı, yapılandırılmış veri kararı ve kanıtlar: adr/0058 Ek 2026-11-06.
 - Panel: Bölüm ekle > "Google puanı" (başlık, "Son yorumlardan alıntı göster" + sayı 1–3, "Google'daki sayfanıza bağlantı"). Migration yok.
+
+## Ek (2026-11-06): görünüşe ait tercihler tema düzenleyiciye (otonom, gözden geçir)
+
+İstek (sahip): "şu vitrin tercihleri ekranında da tema düzenleyici içinde olması gerekenleri oraya al, mesela rozetlerin orda ne işi var, bileşende / tema tercihlerinde yönetebilirim onu".
+
+- **Ayrım.** Vitrin tercihlerinin her alanı tek kuralla ayrıldı: vitrinin çizdiği ya da görünüşü → tema düzenleyici; mağazanın davranışı ya da durumu → Vitrin tercihlerinde kalır.
+
+  | Alan (`storefront` ayar bölümü) | Yeni yeri | Neden |
+  | --- | --- | --- |
+  | `trust_badges` (simge, başlık, açıklama) | Tema düzenleyici > Tema > **Güven rozetleri** | Çizilen şey; birden çok yer aynı listeyi gösterir (ana sayfa, ürün ve kategori sayfası `trust_badges` bölümleri, ürün sayfasının güvenceleri ve "Kargo ve Teslimat" kartı, sepet, kargo sayfası). Bölümün formu bu panele götürür. |
+  | `color_swatches` | Tema > **Stok ve renk örnekleri** > Renk örnekleri | Kartta, filtrede ve ürün sayfasında renkli yuvarlak olarak çizilir. |
+  | `low_stock_threshold` | Tema > **Stok ve renk örnekleri** > Az kaldı rozeti (aç/kapat + eşik 1–1000) | Ürün kartının çizdiği uyarı. |
+  | `contact_form_path` | Kalır | Hangi sayfanın formu taşıdığı; düzen belgesinde içerik sayfası grubu yok (ana sayfa, ürün, kategori). İçerik sayfalarına bölüm gelirse "İletişim formu" bölümü olur. |
+  | `payment_info_path`, `shipping_info_path` | Kalır | Canlı ödeme ve kargo bilgisinin hangi sayfanın yanında durduğu; içerik eşlemesi. |
+  | Bakım modu (`maintenance` bölümü) | Kalır | Mağazanın durumu. |
+- **Belge.** Düzen belgesine `settings` eklendi (`lib/storefront/layout-settings.ts`): `trust_badges` (en çok 4; başlık 40, açıklama 80, `{belirteç}` alır), `color_swatches` (en çok 100; ad 40, `#rrggbb`, Türkçe büyük/küçük harfe göre tekil), `low_stock` (`enabled`, `threshold` 1–1000, varsayılan 3). Hepsi **taslağa** yazılır, "Yayınla" ile yayına çıkar, sürüm geçmişine girer. Hata anahtarları `storefront_layout.color_invalid`, `storefront_layout.color_duplicate`.
+- **Taşıma: okuma anında, göç yok.** Her parça yazılana kadar `null`'dır; `null` olan parçanın yerine `storefront` bölümündeki eski alan okunur (`withLegacy`, `shownSettings`):
+  - panelin okuması (`GET /admin/storefront-layout`) taslağı ve yayındakini aynı biçimde doldurur: düzenleyici bugünkü değerlerle açılır, "değişiklik var" yanmaz; ilk kayıt değerleri taslağa taşır;
+  - varsayılan belge (`defaultLayout`) de eski alanlardan doldurulur;
+  - eski alanların `0` eşiği "kapalı" okunur (eşik 3'te bekler).
+
+  Göç betiği ya da migration yok: veri olduğu yerde kalır, yayınlanan ilk düzen yenisini yazar. Eski alanlar şemada ve `GET /admin/platform-settings/storefront`'ta okunabilir kalır; panel artık yazmaz.
+- **Okuyanlar.**
+  - `GET /store/storefront-layout` ve önizlemesi `settings: { trust_badges, color_swatches }` verir (rozet metinleri belirteçleri doldurulmuş). Vitrin bunları `currentShared()` ile okur (`lib/views/shared-settings.ts`); `settings` vermeyen eski backend'de çerçevenin alanlarına düşer. Önizleme taslağın rozetlerini ve renklerini gösterir.
+  - `GET /store/storefront` `storefront.trust_badges` ve `color_swatches`'ı artık **yayındaki** düzenden verir (eski vitrin derlemesi için); eşik yine yanıtta yok.
+  - Kartların "Az kaldı"sı (`/store/card-facts`) yayındaki düzenin eşiğini okur. **Bilinen sınır:** önizleme yeni eşiği göstermez (kartlar herkese açık uçtan gelir); panel bunu alanın altında söyler.
+- **Panel.**
+  - Vitrin tercihleri üç sekmeye indi: İletişim formu, Ödeme ve kargo sayfaları, Bakım modu. Açıklaması "mağazanın nasıl çalıştığı; görünüş tema düzenleyicide" der. Eski `?part=badges|swatches|stock` bağlantıları ilk sekmeyi açar.
+  - Düzenleyicinin ağacında "Tema" altında üç satır: Tema ayarları (hemen yayına giren ayar bölümü, adr/0053 §B, değişmedi), Güven rozetleri, Stok ve renk örnekleri. İkisi taslağın parçasıdır: değişiklikler kendiliğinden kaydedilir, geri al/yinele çalışır, hatalı alan kaydı bekletir ve satırda işaret çıkar.
+  - Güven rozetleri bölümünün formu "Rozetleri düzenle" ile aynı panele götürür.
+  - Renk örnekleri düz liste kaldı (sahibin kendi eklediği sırayla; renk ailesine göre gruplamak yazarken satırı yerinden oynatırdı).
+- Kanıt: backend `lib/storefront/__tests__/layout-settings.unit.spec.ts`, `layout.unit.spec.ts`, HTTP `storefront-layout-settings.spec.ts` (eski alandan açılış, taslak, yayın, `/store/storefront`, kart eşiği, ayarı olmayan eski belge); panel `editor/shared/shared-settings.spec.tsx`, `layout/problems.spec.ts`, `pages/preferences-page.spec.tsx`; vitrin `lib/views/__tests__/shared-settings.spec.ts`.
