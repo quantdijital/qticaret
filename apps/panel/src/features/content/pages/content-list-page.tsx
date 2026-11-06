@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { CONTENT_TABS } from "@/features/content/api/content"
 import type { ContentKind, ContentTab } from "@/features/content/api/content"
 import type { TermKind } from "@/features/content/api/terms"
+import { AuthorDialog } from "@/features/content/components/author-dialog"
+import { AuthorList } from "@/features/content/components/author-list"
 import { EntryList } from "@/features/content/components/entry-list"
 import { LandingList } from "@/features/content/components/landing-list"
 import { NewContentDialog } from "@/features/content/components/new-content-dialog"
@@ -26,8 +28,8 @@ const termKindOf = (tab: ContentTab): TermKind | null =>
 
 /**
  * Content pages and blog posts (F3.16, docs/06): the shop's own pages, its
- * blog with its categories and tags (adr/0019 ek 2026-11-03), and the
- * filter pages.
+ * blog with its categories, tags (adr/0019 ek 2026-11-03) and authors, and
+ * the filter pages.
  */
 export function ContentListPage() {
   const { t } = useTranslation()
@@ -36,6 +38,7 @@ export function ContentListPage() {
   const tab: ContentTab = search.kind ?? "page"
   const entryKind = entryKindOf(tab)
   const termKind = termKindOf(tab)
+  const authors = tab === "author"
   const q = search.q ?? ""
   const page = (search.page ?? 1) - 1
   const [adding, setAdding] = useState(false)
@@ -86,7 +89,7 @@ export function ContentListPage() {
         >
           <SearchInput
             value={q}
-            placeholder={t(termKind ? "content.terms.search" : "content.search")}
+            placeholder={t(termKind || authors ? "content.terms.search" : "content.search")}
             onChange={(text) => {
               setSearch({ q: text, page: 1 })
             }}
@@ -109,6 +112,8 @@ export function ContentListPage() {
         </div>
         {termKind ? (
           <TermList kind={termKind} q={q} page={page} onPage={onPage} />
+        ) : authors ? (
+          <AuthorList q={q} page={page} onPage={onPage} add={add} />
         ) : entryKind ? (
           <EntryList kind={entryKind} q={q} page={page} onPage={onPage} add={add} />
         ) : (
@@ -117,6 +122,15 @@ export function ContentListPage() {
       </section>
       {tab === "landing" ? (
         <NewLandingDialog open={adding} onOpenChange={setAdding} />
+      ) : authors ? (
+        adding ? (
+          <AuthorDialog
+            author={null}
+            onClose={() => {
+              setAdding(false)
+            }}
+          />
+        ) : null
       ) : entryKind ? (
         <NewContentDialog kind={entryKind} open={adding} onOpenChange={setAdding} />
       ) : null}

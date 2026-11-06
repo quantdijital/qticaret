@@ -5423,7 +5423,10 @@
         "no_headings": "ara başlık (H2) yok",
         "long_paragraphs": "paragraflar uzun",
         "no_image": "sayfada görsel yok",
-        "missing_alt": "alt metni eksik görsel var"
+        "missing_alt": "alt metni eksik görsel var",
+        "no_author": "yazar seçilmemiş",
+        "no_author_page": "yazar elle yazılmış, yazar sayfası yok",
+        "no_bio": "yazarın biyografisi yok"
       },
       "rules": {
         "TITLE-01": {
@@ -5578,9 +5581,9 @@
           "how": "Metinde geçen ürün ve kategorilere bağlantı ya da kart ekleyin."
         },
         "BYLINE-01": {
-          "title": "Yazının yazarı belirtilmemiş.",
-          "why": "Yazar adı güven verir; arama motorları yazıyı kimin yazdığını görmek ister.",
-          "how": "Genel bilgiler kartında yazar adını girin."
+          "title": "Yazar: {{problem}}.",
+          "why": "Yazarı, unvanı ve biyografisiyle tanınan yazı güven verir; arama motorları yazıyı kimin yazdığını ve o kişinin uzmanlığını görmek ister.",
+          "how": "“Özet ve yazar” kartında listeden bir yazar seçin; yazarın fotoğrafını, unvanını ve biyografisini İçerik › Yazarlar sekmesinden girin."
         },
         "COVER-01": {
           "title": "Görsel: {{problem}}.",
@@ -6168,7 +6171,8 @@
       "post": "Blog yazıları",
       "landing": "Filtre sayfaları",
       "category": "Blog kategorileri",
-      "tag": "Etiketler"
+      "tag": "Etiketler",
+      "author": "Yazarlar"
     },
     "search": "Başlığa göre ara",
     "noMatch": "Aramanızla eşleşen içerik yok.",
@@ -6180,7 +6184,8 @@
     "add": {
       "page": "Sayfa ekle",
       "post": "Yazı ekle",
-      "landing": "Filtre sayfası ekle"
+      "landing": "Filtre sayfası ekle",
+      "author": "Yeni yazar"
     },
     "addHint": "Başlığı yazın; metni, kapağı ve arama görünümünü açılan sayfada düzenlersiniz. Yayınlayana kadar taslak kalır.",
     "legal": {
@@ -6214,7 +6219,7 @@
     },
     "handleHint": "Yayındaki sayfanın adresini değiştirirseniz eski adres yeni adrese yönlendirilir.",
     "excerptHint": "Listelerde ve arama sonucunda görünür; boşsa metnin başı kullanılır.",
-    "authorHint": "Yazıyı kimin yazdığı: okura ve arama motorlarına güven verir.",
+    "authorHint": "Yazıyı kimin yazdığı: yazının başında ve sonundaki yazar kutusunda, yazar sayfasına bağlantıyla görünür; okura ve arama motorlarına güven verir.",
     "summary": "Özet",
     "summaryAndAuthor": "Özet ve yazar",
     "body": "Metin",
@@ -6405,6 +6410,50 @@
       "removeTag": "{{name}} etiketini çıkar",
       "tagsFull": "Bir yazıya en çok {{max}} etiket eklenebilir.",
       "manage": "Kategorileri ve etiketleri yönet"
+    },
+    "authors": {
+      "columns": {
+        "name": "Ad",
+        "jobTitle": "Unvan",
+        "posts": "Yazılar"
+      },
+      "empty": "Henüz yazar yok. Yazarı bir kez ekleyin; her yazar için blogda bir yazar sayfası oluşur ve yazılarınızda listeden seçilir.",
+      "noMatch": "Aramanızla eşleşen yazar yok.",
+      "new": "Yeni yazar",
+      "created": "“{{name}}” yazarı eklendi.",
+      "fields": {
+        "photo": "Fotoğraf",
+        "name": "Ad soyad",
+        "handle": "Yazar sayfasının adresi",
+        "jobTitle": "Unvan",
+        "bio": "Biyografi",
+        "website_url": "Web sitesi",
+        "linkedin_url": "LinkedIn",
+        "instagram_url": "Instagram",
+        "x_url": "X",
+        "user": "Personel hesabı"
+      },
+      "photoHint": "Yazar sayfasında ve yazıların sonundaki yazar kutusunda görünür; kare bir portre en iyisidir.",
+      "noPhoto": "Fotoğraf ekle",
+      "nameRequired": "Yazarın adını yazın.",
+      "handleHint": "Boş bırakırsanız addan oluşur. Yayında yazısı olan yazarın adresini değiştirirseniz eski adres yeni adrese yönlendirilir.",
+      "jobTitleHint": "Yazarın uzmanlığı: “Bıçak ustası”, “Mutfak şefi”.",
+      "bioHint": "Yazar sayfasında ve yazının sonunda görünür; arama motorları yazarın kim olduğunu buradan anlar. Boş satır yeni paragraf başlatır.",
+      "links": "Bağlantılar",
+      "linksHint": "Yazarın kendi sayfaları; arama motorlarına aynı kişi olduğunu gösterir.",
+      "userHint": "Yazar mağazanın personelindense hesabını seçin; seçmek zorunlu değil.",
+      "noUser": "Bağlı personel hesabı yok",
+      "delete": "Yazarı sil",
+      "deleteTitle": "“{{name}}” silinsin mi?",
+      "deleteText_one": "Yazarın {{count}} yazısı silinmez, yazarsız kalır. Yazar sayfası yayındaki yazıları gösterdiyse adresi “kaldırıldı” (410) yanıtı verir.",
+      "deleteText_other": "Yazarın {{count}} yazısı silinmez, yazarsız kalır. Yazar sayfası yayındaki yazıları gösterdiyse adresi “kaldırıldı” (410) yanıtı verir.",
+      "deleted": "Yazar silindi.",
+      "unlinked_one": "{{count}} yazı yazarsız kaldı.",
+      "unlinked_other": "{{count}} yazı yazarsız kaldı.",
+      "choose": "Yazar seçin",
+      "noneFound": "Bu adla bir yazar yok.",
+      "legacy": "Eski yazar adı: {{name}}. Listeden seçin ya da",
+      "legacyAdd": "yeni yazar olarak ekleyin"
     }
   },
   "priceLists": {

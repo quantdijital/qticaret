@@ -27,6 +27,8 @@ const POST: ContentDetail = {
   status: "draft",
   excerpt: "Bileme taşı, açı ve son dokunuş.",
   author_name: null,
+  author_id: null,
+  author: null,
   image_url: null,
   image_alt: null,
   published_at: null,
@@ -52,7 +54,7 @@ const ISSUES: SeoIssue[] = [
     ruleId: "A-BYLINE-01",
     severity: "medium",
     category: "meta",
-    params: {},
+    params: { problem: "no_author" },
     fix: { kind: "manual", action: "edit_author" },
   },
 ]
@@ -108,6 +110,7 @@ describe("ContentSideCards", () => {
       POST.excerpt
     )
     expect(summary && within(summary).getByText("1 öneri")).toBeTruthy()
+    expect(screen.getByText("Yazar: yazar seçilmemiş.")).toBeInTheDocument()
     expect(terms && within(terms).getByRole("combobox", { name: "Kategori" })).toBeTruthy()
     // Nothing on these cards folds: they are short
     for (const title of ["Kapak görseli", "Özet ve yazar", "Kategori ve etiketler"]) {

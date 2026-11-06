@@ -32,9 +32,10 @@ export const SECTIONS = [
   "/content",
   // The media library: every picture the shop uploaded or brought in
   "/media",
-  // The blog's categories and tags (adr/0019 ek 2026-11-03)
+  // The blog's categories, tags and authors (adr/0019 ek 2026-11-03)
   "/content?kind=category",
   "/content?kind=tag",
+  "/content?kind=author",
   "/seo",
   "/reports",
   "/reports/products",

@@ -1,6 +1,7 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import type { JSONContent } from "@tiptap/react"
 import { sdk } from "@/lib/sdk"
+import type { AuthorView } from "./authors"
 import type { TermView } from "./terms"
 
 /** Content pages and blog posts (F3.16, `/admin/content`). */
@@ -9,10 +10,10 @@ export const CONTENT_KINDS = ["page", "post"] as const
 export type ContentKind = (typeof CONTENT_KINDS)[number]
 
 /**
- * The Content screen's tabs: pages, posts, the blog's categories and tags
- * (adr/0019 ek 2026-11-03) and the facet landing pages (F3.16).
+ * The Content screen's tabs: pages, posts, the blog's categories, tags and
+ * authors (adr/0019 ek 2026-11-03) and the facet landing pages (F3.16).
  */
-export const CONTENT_TABS = ["page", "post", "category", "tag", "landing"] as const
+export const CONTENT_TABS = ["page", "post", "category", "tag", "author", "landing"] as const
 export type ContentTab = (typeof CONTENT_TABS)[number]
 export type ContentStatus = "draft" | "published"
 
@@ -27,7 +28,11 @@ export interface ContentEntry {
   path: string
   status: ContentStatus
   excerpt: string | null
+  /** The old free-text author, read only: shown until an author is chosen. */
   author_name: string | null
+  /** A post's author from the blog's authors; null: none chosen. */
+  author_id: string | null
+  author: AuthorView | null
   image_url: string | null
   published_at: string | null
   revised_at: string | null
@@ -52,7 +57,8 @@ export interface ContentInput {
   status?: ContentStatus
   body?: JSONContent
   excerpt?: string | null
-  author_name?: string | null
+  /** A post's author; null clears it. */
+  author_id?: string | null
   image_url?: string | null
   image_alt?: string | null
   /** A post's category; null clears it. */

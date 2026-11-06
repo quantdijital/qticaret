@@ -41,6 +41,8 @@ const POST: ContentDetail = {
   status: "draft",
   excerpt: null,
   author_name: null,
+  author_id: null,
+  author: null,
   image_url: null,
   image_alt: null,
   published_at: null,

@@ -5423,7 +5423,10 @@
         "no_headings": "no subheadings (H2)",
         "long_paragraphs": "paragraphs are long",
         "no_image": "no image on the page",
-        "missing_alt": "an image lacks alt text"
+        "missing_alt": "an image lacks alt text",
+        "no_author": "no author chosen",
+        "no_author_page": "author typed by hand, no author page",
+        "no_bio": "the author has no biography"
       },
       "rules": {
         "TITLE-01": {
@@ -5578,9 +5581,9 @@
           "how": "Link the products and categories the text mentions, or add their cards."
         },
         "BYLINE-01": {
-          "title": "The post's author is not named.",
-          "why": "An author name builds trust; search engines want to see who wrote the post.",
-          "how": "Enter the author in the General card."
+          "title": "Author: {{problem}}.",
+          "why": "A post by an author known by name, job title and biography builds trust; search engines want to see who wrote it and what their expertise is.",
+          "how": "Choose an author from the list in the “Summary and author” card; add the author's photo, job title and biography under Content › Authors."
         },
         "COVER-01": {
           "title": "Images: {{problem}}.",
@@ -6168,7 +6171,8 @@
       "post": "Blog posts",
       "landing": "Filter pages",
       "category": "Blog categories",
-      "tag": "Tags"
+      "tag": "Tags",
+      "author": "Authors"
     },
     "search": "Search by title",
     "noMatch": "No content matches your search.",
@@ -6180,7 +6184,8 @@
     "add": {
       "page": "Add page",
       "post": "Add post",
-      "landing": "Add filter page"
+      "landing": "Add filter page",
+      "author": "New author"
     },
     "addHint": "Enter the title; you edit the text, cover and search appearance on its page next. It stays a draft until you publish it.",
     "legal": {
@@ -6214,7 +6219,7 @@
     },
     "handleHint": "Changing a live page's address redirects the old one to the new one.",
     "excerptHint": "Shown in lists and search results; the start of the text is used when empty.",
-    "authorHint": "Who wrote the post: it builds trust with readers and search engines.",
+    "authorHint": "Who wrote the post: shown at its top and in the author box at its end, linked to the author's page; it builds trust with readers and search engines.",
     "summary": "Summary",
     "summaryAndAuthor": "Summary and author",
     "body": "Text",
@@ -6405,6 +6410,50 @@
       "removeTag": "Remove tag {{name}}",
       "tagsFull": "A post can have at most {{max}} tags.",
       "manage": "Manage categories and tags"
+    },
+    "authors": {
+      "columns": {
+        "name": "Name",
+        "jobTitle": "Job title",
+        "posts": "Posts"
+      },
+      "empty": "No authors yet. Add an author once; each gets an author page on the blog and is chosen from the list on your posts.",
+      "noMatch": "No author matches your search.",
+      "new": "New author",
+      "created": "Author “{{name}}” added.",
+      "fields": {
+        "photo": "Photo",
+        "name": "Full name",
+        "handle": "Author page address",
+        "jobTitle": "Job title",
+        "bio": "Biography",
+        "website_url": "Website",
+        "linkedin_url": "LinkedIn",
+        "instagram_url": "Instagram",
+        "x_url": "X",
+        "user": "Staff account"
+      },
+      "photoHint": "Shown on the author page and in the author box at the end of posts; a square portrait works best.",
+      "noPhoto": "Add photo",
+      "nameRequired": "Enter the author's name.",
+      "handleHint": "Left empty, it comes from the name. Changing the address of an author with live posts redirects the old address to the new one.",
+      "jobTitleHint": "The author's expertise: “Knife maker”, “Chef”.",
+      "bioHint": "Shown on the author page and at the end of posts; search engines learn who the author is from it. A blank line starts a new paragraph.",
+      "links": "Links",
+      "linksHint": "The author's own profiles; they tell search engines it is the same person.",
+      "userHint": "If the author is on the shop's staff, choose their account; optional.",
+      "noUser": "No linked staff account",
+      "delete": "Delete author",
+      "deleteTitle": "Delete “{{name}}”?",
+      "deleteText_one": "The author's {{count}} post is kept, without an author. If the author page showed live posts, its address answers “gone” (410).",
+      "deleteText_other": "The author's {{count}} posts are kept, without an author. If the author page showed live posts, its address answers “gone” (410).",
+      "deleted": "Author deleted.",
+      "unlinked_one": "{{count}} post is now without an author.",
+      "unlinked_other": "{{count}} posts are now without an author.",
+      "choose": "Choose an author",
+      "noneFound": "No author by that name.",
+      "legacy": "Old author name: {{name}}. Choose from the list or",
+      "legacyAdd": "add it as a new author"
     }
   },
   "priceLists": {

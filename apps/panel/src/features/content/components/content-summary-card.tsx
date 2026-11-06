@@ -1,9 +1,9 @@
-import { useForm, useWatch } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
-import { Input } from "@/components/ui/input"
+import type { PickerOption } from "@/components/patterns/search-picker"
 import { Textarea } from "@/components/ui/textarea"
 import { useUpdateContent } from "@/features/content/api/content"
 import type { ContentDetail } from "@/features/content/api/content"
@@ -12,25 +12,27 @@ import type { SectionFindings } from "@/features/content/section-findings"
 import { Counter } from "@/features/seo/components/seo-card"
 import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@/lib/forms"
+import { AuthorSelect } from "./author-select"
 import { FindingsNote } from "./findings-note"
 
 interface Values {
   excerpt: string
-  author_name: string
+  author: PickerOption | null
 }
 
 const valuesOf = (entry: ContentDetail): Values => ({
   excerpt: entry.excerpt ?? "",
-  author_name: entry.author_name ?? "",
+  author: entry.author ? { id: entry.author.id, label: entry.author.name } : null,
 })
 
 // The longest summary written here: counted under the field
 const EXCERPT_MAX = 500
 
 /**
- * The summary lists and search results show and, for a post, its author,
- * in the page's narrow column (docs/06 "Metin sayfaları"); the summary's
- * length is counted under it.
+ * The summary lists and search results show and, for a post, its author
+ * chosen from the blog's authors (each with a page of their own), in the
+ * page's narrow column (docs/06 "Metin sayfaları"); the summary's length
+ * is counted under it.
  */
 export function ContentSummaryCard({
   entry,
@@ -51,7 +53,7 @@ export function ContentSummaryCard({
     update.mutate(
       {
         ...(dirtyFields.excerpt ? { excerpt: values.excerpt.trim() || null } : {}),
-        ...(dirtyFields.author_name ? { author_name: values.author_name.trim() || null } : {}),
+        ...(dirtyFields.author ? { author_id: values.author?.id ?? null } : {}),
       },
       {
         onSuccess: (result) => {
@@ -96,7 +98,18 @@ export function ContentSummaryCard({
           htmlFor="content-author"
           hint={t("content.authorHint")}
         >
-          <Input id="content-author" maxLength={120} {...form.register("author_name")} />
+          <Controller
+            control={form.control}
+            name="author"
+            render={({ field }) => (
+              <AuthorSelect
+                id="content-author"
+                value={field.value}
+                onChange={field.onChange}
+                legacyName={entry.author ? null : entry.author_name}
+              />
+            )}
+          />
         </Field>
       ) : null}
       <FindingsNote findings={findings} />
