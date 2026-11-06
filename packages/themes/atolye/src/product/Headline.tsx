@@ -51,7 +51,7 @@ export function Headline({ view, t }: { view: ProductPageView; t: Translate }) {
           <span className="sr-only">{t("product.average", { value: ratingText(average) })}</span>
         </a>
       )}
-      {summary && <Summary html={summary} t={t} />}
+      {summary && <Summary html={summary} />}
       {facts.length > 0 && (
         <dl aria-label={t("product.highlights")} className="flex flex-wrap gap-2 pt-1">
           {facts.map((fact) => (

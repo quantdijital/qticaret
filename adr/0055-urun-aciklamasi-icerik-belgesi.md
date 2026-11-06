@@ -107,7 +107,7 @@
   - Vitrin HTML'i `GET /store/products/:id/description`'dan alır: `{ html, summary_html }`. İkisi de sunucunun `renderDoc`'uyla çizilir.
   - Sözleşme: `ProductPageView.summaryHtml?: string | null` (yazıldığı gibi HTML; yoksa alan yok).
 - **Vitrin** (docs/19 §7): ad, alt başlık ve yıldızların altında, fiyatın üstünde; gövde metni boyunda, kart değil. Listeler uzun açıklamanınkiyle aynı stilde. Varken öne çıkan özellik çiplerinin yerini alır; yokken çipler kalır.
-  - Atölye: `product/Summary.tsx`. Telefonda (iki sütun başlamadan, < 48rem) yaklaşık 7 satırı geçerse 5–6 satırda kapanır, açıklamanın "Devamını oku"suyla (`ReadMore`'a `limit` ve `phoneOnly` eklendi). İki sütunda hep bütün görünür.
+  - Atölye: `product/Summary.tsx`. Her genişlikte hep bütün görünür. (İlk sürümde telefonda ~6 satırda "Devamını oku" ile kapanıyordu; sahip 2026-11-06 "ona gerek yok" dedi, kaldırıldı; `ReadMore`'un `limit`/`phoneOnly` seçenekleri de silindi.)
   - Base: uzun açıklamanın `RichText`'i.
 - **SEO** (docs/13 §3): belgenin düz metni tek satır olur. Blok, liste maddesi ve satır sonları sırayla gelir; mağazanın açık bıraktığı satırın sonuna nokta eklenir. Kesme kelime sınırındadır (`summaryText`).
   - `{kısa_açıklama}`: önce kısa açıklama (140 karakter, son nokta şablona bırakılır), yoksa alt başlık, yoksa açıklamanın ilk cümleleri.

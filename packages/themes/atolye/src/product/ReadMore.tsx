@@ -2,18 +2,16 @@
 
 import { ChevronDown } from "lucide-react"
 import { useEffect, useLayoutEffect, useRef, useState } from "react"
-import type { CSSProperties, ReactNode } from "react"
+import type { ReactNode } from "react"
 import { cn } from "@qticaret/ui/lib/utils"
 
-/** The closed text's height by default (`.gf-more` in `pages.css`, 26rem). */
+/** The closed text's height (`.gf-more` in `pages.css`, 26rem). */
 const LIMIT = 416
 /** What a toggle must hide to be worth it, and how far past the height a block may end: parts of it. */
 const SLACK = 0.385
 const ROOM = 0.23
 /** A block the closed text leaves out: not laid out at all, so nothing hides under what follows. */
 const MARK = "data-more-hidden"
-/** Where the page has two columns (`md`): a `phoneOnly` text shows whole from here. */
-const WIDE = "(min-width: 48rem)"
 
 /**
  * Where the closed text ends: after the last whole block within about
@@ -22,32 +20,32 @@ const WIDE = "(min-width: 48rem)"
  * hiding; `clip`: a first block alone far taller, or one block holding
  * it all, so the stylesheet cuts it at 26rem instead.
  */
-function cut(prose: Element, limit: number): { fits: boolean; clip: boolean } {
+function cut(prose: Element): { fits: boolean; clip: boolean } {
   const blocks = [...prose.children]
   for (const block of blocks) {
     block.removeAttribute(MARK)
   }
   const top = prose.getBoundingClientRect().top
-  if (prose.getBoundingClientRect().height <= limit * (1 + SLACK)) {
+  if (prose.getBoundingClientRect().height <= LIMIT * (1 + SLACK)) {
     return { fits: true, clip: false }
   }
   const ends = blocks.map((block) => block.getBoundingClientRect().bottom - top)
   const heading = (n: number) => /^H[2-6]$/.test(blocks[n]?.tagName ?? "")
-  let keep = Math.max(1, ends.filter((end) => end <= limit * (1 + ROOM)).length)
+  let keep = Math.max(1, ends.filter((end) => end <= LIMIT * (1 + ROOM)).length)
   while (keep > 1 && heading(keep - 1)) {
     keep -= 1
   }
   // Too short a start: the next block (with its heading) too, while it ends within twice the height
-  if ((ends[keep - 1] ?? 0) < limit * 0.6) {
+  if ((ends[keep - 1] ?? 0) < LIMIT * 0.6) {
     let next = keep
     while (next < blocks.length - 1 && heading(next)) {
       next += 1
     }
-    if ((ends[next] ?? Infinity) <= limit * 2) {
+    if ((ends[next] ?? Infinity) <= LIMIT * 2) {
       keep = next + 1
     }
   }
-  if ((ends[keep - 1] ?? 0) > limit * 2 || keep >= blocks.length) {
+  if ((ends[keep - 1] ?? 0) > LIMIT * 2 || keep >= blocks.length) {
     return { fits: false, clip: true }
   }
   for (const block of blocks.slice(keep)) {
@@ -65,17 +63,12 @@ function cut(prose: Element, limit: number): { fits: boolean; clip: boolean } {
  * none`); with it the stylesheet cuts it at 26rem from the first paint
  * when the server judged it long (`long`), then the measure cuts it
  * between whole blocks. A link inside a cut part, reached by Tab, opens it.
- * The short description above the price (adr/0055 Ek 2026-11-06) closes
- * the same way at about six lines (`limit`), on phones only (`phoneOnly`):
- * beside the gallery it shows whole.
  */
 export function ReadMore({
   id,
   long,
   more,
   less,
-  limit = LIMIT,
-  phoneOnly = false,
   children,
 }: {
   id: string
@@ -83,10 +76,6 @@ export function ReadMore({
   long: boolean
   more: string
   less: string
-  /** The closed text's height in pixels; 26rem by default. */
-  limit?: number
-  /** Closed on a phone only; whole where the page has two columns. */
-  phoneOnly?: boolean
   children: ReactNode
 }) {
   const body = useRef<HTMLDivElement>(null)
@@ -111,11 +100,7 @@ export function ReadMore({
         return
       }
       width = now
-      if (phoneOnly && window.matchMedia(WIDE).matches) {
-        setFits(true)
-        return
-      }
-      const result = cut(prose, limit)
+      const result = cut(prose)
       setFits(result.fits)
       setClip(result.clip)
     }
@@ -125,7 +110,7 @@ export function ReadMore({
     return () => {
       resized.disconnect()
     }
-  }, [limit, phoneOnly])
+  }, [])
 
   // Closing: the toggle stays where it was on the screen, the page moves instead
   useLayoutEffect(() => {
@@ -140,18 +125,8 @@ export function ReadMore({
     }
   }, [open])
 
-  // A height of its own for the stylesheet, and a shorter fade over it
-  const style =
-    limit === LIMIT
-      ? undefined
-      : ({ "--more-limit": `${String(limit / 16)}rem`, "--more-fade": "3rem" } as CSSProperties)
   return (
-    <div
-      className={cn("gf-more flex flex-col", limit === LIMIT ? "gap-4" : "gap-2")}
-      data-open={open || fits ? "true" : "false"}
-      data-phone-only={phoneOnly ? "" : undefined}
-      style={style}
-    >
+    <div className="gf-more flex flex-col gap-4" data-open={open || fits ? "true" : "false"}>
       <div
         ref={body}
         id={id}

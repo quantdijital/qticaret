@@ -90,15 +90,19 @@ describe.each(THEMES)("the %s theme's short description", (_name, theme) => {
 })
 
 describe("the atolye theme's short description", () => {
-  it("sits under the stars in the body's size, closing on a phone only, lists as the description's", () => {
+  it("sits under the stars in the body's size, always whole, lists as the description's", () => {
     const html = renderPage(atolyeTheme, "ProductPage", {
-      view: view({ summaryHtml: SUMMARY }),
+      view: view({ summaryHtml: SUMMARY.repeat(6) }),
       actions,
     })
-    // About six lines on a phone, then "Devamını oku"; whole beside the gallery
-    const block = /<div class="gf-more[^"]*"[^>]*data-phone-only=""[^>]*>/.exec(html)?.[0] ?? ""
-    expect(block).toContain("--more-limit:8.75rem")
-    expect(html).toContain('id="kisa-aciklama"')
+    // Never closed behind a "Devamını oku", at any width (sahip 2026-11-06)
+    const summary = html.slice(
+      html.indexOf('href="#degerlendirmeler"'),
+      html.indexOf("1.837,50 TL")
+    )
+    expect(summary).toContain("Kutusuyla")
+    expect(summary).not.toContain("gf-more")
+    expect(summary).not.toContain("Devamını oku")
     expect(html.indexOf('href="#degerlendirmeler"')).toBeLessThan(html.indexOf("Kutusuyla"))
     const prose = /<div class="([^"]*)"><p>El yapımı/.exec(html)?.[1] ?? ""
     expect(prose).toContain("text-md")
