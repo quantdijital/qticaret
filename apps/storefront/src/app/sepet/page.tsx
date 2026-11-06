@@ -11,6 +11,7 @@ import { robotsOnly } from "@/lib/seo/metadata"
 import { storefrontSettings } from "@/lib/store-api/requests"
 import { LINK_CART_LOCKED } from "@/lib/cart/payment-link"
 import { cartExtras } from "@/lib/views/cart-extras"
+import { currentShared } from "@/lib/views/layout"
 import {
   cartLinesOf,
   differs,
@@ -49,10 +50,12 @@ export default async function CartPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const [cart, query, settings] = await Promise.all([
+  const [cart, query, settings, shared] = await Promise.all([
     currentCart(),
     searchParams,
     storefrontSettings(),
+    // The design's badges (adr/0049 Ek 2026-11-06)
+    currentShared(),
   ])
   const error =
     typeof query["hata"] === "string" && CART_ERRORS.has(query["hata"]) ? t(query["hata"]) : null
@@ -105,7 +108,7 @@ export default async function CartPage({
         locked,
         shipping: extras.shipping ?? null,
         offers: extras.offers ?? [],
-        trust: settings.storefront.trust_badges,
+        trust: shared.trust_badges,
         // A payment link's cart takes nothing more (adr/0051)
         upsell: locked ? null : (extras.upsell ?? null),
       }}

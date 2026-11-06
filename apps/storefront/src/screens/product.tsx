@@ -29,6 +29,7 @@ import { productPage, variantIdsOf } from "@/lib/views/product"
 import { productShipping } from "@/lib/views/product-shipping"
 import { questionsView, relatedOf, reviewsView } from "@/lib/views/product-extras"
 import { swatchLookup } from "@/lib/views/color"
+import { sharedSettingsOf } from "@/lib/views/shared-settings"
 import { sectionViews, showsOwnCategory } from "@/lib/views/sections"
 import { theme } from "@/theme"
 
@@ -88,6 +89,8 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     legalDocument("return_policy"),
   ])
   const here = `${url.pathname}${url.search}`
+  // The badges and colour names are the design's (adr/0049 Ek 2026-11-06): a preview shows its draft's
+  const shared = sharedSettingsOf(layout, storefront)
   // What the shopper pays, an automatic promotion included (adr/0023 Ek 2026-11-05)
   const amounts = (product.variants ?? []).flatMap((variant) => {
     const amount = shownAmount(variant, displays)
@@ -101,8 +104,8 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     brandPath: product.brand ? (brandPaths[product.brand.id] ?? null) : null,
     requestedVariant: url.searchParams.get("variant"),
     t,
-    trustBadges: storefront.trust_badges,
-    swatchOf: swatchLookup(storefront.color_swatches),
+    trustBadges: shared.trust_badges,
+    swatchOf: swatchLookup(shared.color_swatches),
     descriptionHtml: texts.description,
     summaryHtml: texts.summary,
     installments,
@@ -128,7 +131,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
       threshold: free_shipping_threshold,
       // When it leaves and arrives, the same-day hour (adr/0046 Ek 2026-11-06)
       delivery: delivery ?? null,
-      badges: storefront.trust_badges,
+      badges: shared.trust_badges,
       carriers: shopMarks(marks?.carriers, t),
       shippingPath: storefront.shipping_info_path ?? null,
       returnPolicy: returnPolicy

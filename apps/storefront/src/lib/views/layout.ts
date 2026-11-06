@@ -1,10 +1,16 @@
 import "server-only"
 import { headers } from "next/headers"
-import type { StoreLayout, StoreLayoutImage, StoreLayoutLink } from "@qticaret/types"
+import type {
+  StoreLayout,
+  StoreLayoutImage,
+  StoreLayoutLink,
+  StoreLayoutSettings,
+} from "@qticaret/types"
 import type { ImageView, LinkView, Translate } from "@qticaret/ui"
-import { layoutPreview, storefrontLayout } from "@/lib/store-api/requests"
+import { layoutPreview, storefrontLayout, storefrontSettings } from "@/lib/store-api/requests"
 import { imageView } from "./image"
 import { menuLink } from "./menus"
+import { sharedSettingsOf } from "./shared-settings"
 
 /** Set by the proxy on a design preview's address (adr/0049), never by a visitor. */
 const LAYOUT_PREVIEW_HEADER = "x-qt-layout-preview"
@@ -20,6 +26,16 @@ export async function currentLayout(): Promise<StoreLayout> {
   const token = (await headers()).get(LAYOUT_PREVIEW_HEADER)
   const preview = token && LAYOUT_TOKEN.test(token) ? await layoutPreview(token) : null
   return preview ?? (await storefrontLayout())
+}
+
+/**
+ * The trust badges and colour names this request shows (adr/0049 Ek
+ * 2026-11-06): the design's (a preview's draft on its address), else the
+ * frame's from an older backend.
+ */
+export async function currentShared(): Promise<StoreLayoutSettings> {
+  const [layout, answer] = await Promise.all([currentLayout(), storefrontSettings()])
+  return sharedSettingsOf(layout, answer.storefront)
 }
 
 /** A button's or slide's link as the theme prints it; null when it has no name or address. */

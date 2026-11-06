@@ -7,7 +7,7 @@ import type {
 } from "@qticaret/types"
 import type { HomeSectionView, LinkView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
-import { legalIdentity, siteSeo, storefrontSettings } from "@/lib/store-api/requests"
+import { legalIdentity, siteSeo } from "@/lib/store-api/requests"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { googleRatingReviews, reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
@@ -15,7 +15,7 @@ import { categoryTiles } from "./category-tiles"
 import { featuredView } from "./featured"
 import { EXCERPT_MIN_RATING, googleRatingView } from "./google-rating"
 import { heroSliderView } from "./hero-slider"
-import { layoutImage, layoutLink } from "./layout"
+import { currentShared, layoutImage, layoutLink } from "./layout"
 import { legalDocument, legalPath } from "./legal"
 import { postCards } from "./posts"
 import {
@@ -202,10 +202,9 @@ async function sectionView(
         ? { id, type: "faq", title: section.title, items: section.items }
         : null
     case "trust_badges": {
-      const { storefront } = await storefrontSettings()
-      return storefront.trust_badges.length > 0
-        ? { id, type: "trust_badges", badges: storefront.trust_badges }
-        : null
+      // The design's badges (adr/0049 Ek 2026-11-06): a preview shows its draft's
+      const { trust_badges: badges } = await currentShared()
+      return badges.length > 0 ? { id, type: "trust_badges", badges } : null
     }
     case "newsletter": {
       const [site, identity, notice] = await Promise.all([

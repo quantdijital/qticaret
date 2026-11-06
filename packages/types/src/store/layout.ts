@@ -4,7 +4,7 @@
  * shop's details in place. A copy of the backend's answer (adr/0046 §8).
  */
 import type { MediaDerivatives } from "./catalog.js"
-import type { MenuLinkKind } from "./storefront.js"
+import type { MenuLinkKind, StorefrontFrame } from "./storefront.js"
 
 export interface StoreLayoutLink {
   /** The shop's wording, else the record's name; null: the storefront's own name. */
@@ -189,4 +189,16 @@ export interface StoreLayout {
   footer: { id: string; type: "newsletter"; title: string | null; text: string | null }[]
   product: StoreProductSection[]
   category: StoreCategorySection[]
+  /**
+   * The theme's shared settings (adr/0049 Ek 2026-11-06), applied: the
+   * design's own, else the storefront settings' old fields. Absent from a
+   * backend before them: the storefront reads `StorefrontFrame`'s.
+   */
+  settings?: StoreLayoutSettings
+}
+
+/** What several pages draw alike: the trust badges (details filled) and the colour names. */
+export interface StoreLayoutSettings {
+  trust_badges: StorefrontFrame["trust_badges"]
+  color_swatches: StorefrontFrame["color_swatches"]
 }

@@ -13,6 +13,7 @@ import { liraRegion, listProducts, storefrontSettings } from "@/lib/store-api/re
 import { storeGet } from "@/lib/store-api/server"
 import { shopMarks } from "@/lib/views/card-extras"
 import { cardProductIds, installmentRates } from "@/lib/views/content-extras"
+import { currentShared } from "@/lib/views/layout"
 import { postCards } from "@/lib/views/posts"
 import { productsInOrder, railCards } from "@/lib/views/section-data"
 
@@ -134,9 +135,10 @@ export async function paymentFacts(): Promise<PaymentFactsView | null> {
 /** The shipping page's facts: the carriers the shop connected and its own promises. */
 export async function shippingFacts(): Promise<ShippingFactsView | null> {
   try {
-    const { storefront, marks } = await storefrontSettings()
+    // The promises are the design's trust badges (adr/0049 Ek 2026-11-06)
+    const [{ marks }, shared] = await Promise.all([storefrontSettings(), currentShared()])
     const carriers = shopMarks(marks?.carriers, t)
-    const promises = storefront.trust_badges
+    const promises = shared.trust_badges
     return carriers.length > 0 || promises.length > 0 ? { carriers, promises } : null
   } catch (error) {
     if (isStoreApiError(error)) {

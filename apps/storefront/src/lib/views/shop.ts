@@ -26,6 +26,7 @@ import { cookieBannerOf } from "./cookies"
 import { identityLinesOf, legalDocument, legalPath, publishedLegalLinks } from "./legal"
 import { displayPhone, footerGroups, socialLinks, whatsappHref } from "./frame"
 import { currentLayout } from "./layout"
+import { sharedSettingsOf } from "./shared-settings"
 import { footerMenus, mainMenu, topLinks } from "./menus"
 import { hoursOf } from "./hours"
 import { themeView } from "./theme"
@@ -126,7 +127,8 @@ export async function shopView(): Promise<ShopView> {
     newsletter: newsletterOf(layout, identity.company_title ?? site.shop.name),
     topLinks: topLinks(menus, t),
     footerGroups: footerGroups(footerMenus(menus, t), menu, t),
-    trustBadges: frame.trust_badges,
+    // The design's badges (adr/0049 Ek 2026-11-06); a preview shows its draft's
+    trustBadges: sharedSettingsOf(layout, frame).trust_badges,
     contact: contactOf(identity, t),
     social: socialLinks(identity.same_as),
     companyTitle: identity.company_title,

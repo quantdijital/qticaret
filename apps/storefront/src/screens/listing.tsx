@@ -22,7 +22,6 @@ import {
   listProducts,
   pathsOf,
   priceDisplays,
-  storefrontSettings,
 } from "@/lib/store-api/requests"
 import { cardFacts } from "@/lib/store-api/extras"
 import { listingPage } from "@/lib/store-api/listings"
@@ -32,7 +31,7 @@ import { childrenOf } from "@/lib/views/categories"
 import { categoryTiles } from "@/lib/views/category-tiles"
 import { swatchLookup } from "@/lib/views/color"
 import { filterViews } from "@/lib/views/facets"
-import { currentLayout } from "@/lib/views/layout"
+import { currentLayout, currentShared } from "@/lib/views/layout"
 import {
   hrefOf,
   listingQueryOf,
@@ -216,14 +215,15 @@ export async function ListingContent({
       current: state.sort === "fiyat-azalan",
     },
   ]
-  const [{ storefront }, options] = await Promise.all([storefrontSettings(), cardOptions()])
+  // The colour names are the design's (adr/0049 Ek 2026-11-06): a preview shows its draft's
+  const [shared, options] = await Promise.all([currentShared(), cardOptions()])
   const facets = filterViews(
     url.pathname,
     state,
     answer.facets,
     type === "brand",
     t,
-    swatchLookup(storefront.color_swatches)
+    swatchLookup(shared.color_swatches)
   )
   const first = current === 1 && facets.active.length === 0
   const cards = withCardFacts(productCards(products, paths, displays, options), facts)
