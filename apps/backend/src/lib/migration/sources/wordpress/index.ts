@@ -9,6 +9,7 @@ import type { WordpressProduct } from "./attributes"
 import { pageOf, postOf } from "./content"
 import type { Note, WordpressContext } from "./context"
 import { note } from "./context"
+import { categoryCoverOf } from "./covers"
 import type { AttributeUse } from "./products"
 import { productOf } from "./products"
 import type { WxrItem } from "./reader"
@@ -197,7 +198,9 @@ export function wordpressRecords(text: string, options: WordpressOptions = {}): 
   return {
     id: wxr.site ? `wordpress:${bareHost(wxr.site.hostname)}` : "wordpress",
     bases,
-    categories: categoriesOf(taxonomies, bases.category, used),
+    categories: categoriesOf(taxonomies, bases.category, used, (term, key) =>
+      categoryCoverOf(context, term, key)
+    ),
     brands: brandsOf(taxonomies, bases.brand),
     products,
     reviews: productItems.flatMap((item) => reviewsOf(context, item)),

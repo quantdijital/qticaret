@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { packageOf } from "../../lib/migration/sheet"
-import type { PackageDefaults, SourceProduct, StepProgress } from "../../lib/migration/types"
+import type { PackageDefaults, StepProgress } from "../../lib/migration/types"
 import type { MigrationSource } from "../../lib/migration/types"
 import type { SheetCell } from "../../lib/sheets"
 import { MIGRATION_MODULE } from "../../modules/migration"
@@ -15,10 +15,11 @@ import { factsOutcome } from "./description-facts"
 import type { AttributedProduct } from "./attributes"
 import { migrateBrands } from "./brands"
 import { migrateCategories } from "./categories"
+import { migrateCategoryCovers } from "./category-covers"
 import { migrateContent } from "./content"
 import { migrateCustomers, migrateOrders } from "./customers"
 import { migrateImages } from "./images"
-import { migrateProducts } from "./products"
+import { batchesOf, migrateProducts } from "./products"
 import { emptyCounts } from "./report"
 import type { KindCounts, ReportProblem, RunCounts } from "./report"
 import { migrateReviews } from "./reviews"
@@ -38,15 +39,14 @@ const SPAN = {
   category: [0, 4],
   brand: [4, 8],
   product: [8, 50],
-  image: [50, 70],
+  image: [50, 68],
+  cover: [68, 70],
   customer: [70, 82],
   order: [82, 88],
   review: [88, 93],
   content: [93, 99],
 } as const
 
-// Rows a catalog import takes at once, well within its limit (5,000)
-const PRODUCT_ROWS = 1_000
 // A list read from a source beats this often: a slow one stays alive
 const BEAT_EVERY = 100
 
@@ -65,23 +65,6 @@ async function listOf<T>(items: AsyncIterable<T>, beat: () => Promise<void>): Pr
     }
   }
   return all
-}
-
-/** Products in groups whose rows (one per variant) one catalog import takes. */
-function batchesOf(products: readonly SourceProduct[]): SourceProduct[][] {
-  const batches: SourceProduct[][] = []
-  let current: SourceProduct[] = []
-  let rows = 0
-  for (const product of products) {
-    if (current.length > 0 && rows + product.variants.length > PRODUCT_ROWS) {
-      batches.push(current)
-      current = []
-      rows = 0
-    }
-    current.push(product)
-    rows += product.variants.length
-  }
-  return current.length > 0 ? [...batches, current] : batches
 }
 
 const counted = (values: Partial<KindCounts>): KindCounts => ({ ...emptyCounts(), ...values })
@@ -234,6 +217,19 @@ export async function runMigration(
   )
   problems.push(...images.problems.map((problem) => ({ ...problem, kind: "image" as const })))
   await keep("image", images.counts)
+  // The categories' own pictures, after the products' (the same file is stored once)
+  const covers = await migrateCategoryCovers(
+    container,
+    source.id,
+    { categories, tree, products },
+    apply,
+    spanOf(hooks, SPAN.cover)
+  )
+  if (covers) {
+    problems.push(...covers.problems)
+    counts.category = { ...counts.category, ...covers.counts }
+    await migration.count(runId, "category", { ...covers.counts })
+  }
 
   const customers = await migrateCustomers(
     container,

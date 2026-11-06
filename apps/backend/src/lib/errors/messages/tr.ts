@@ -1056,6 +1056,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "migration.wordpress_variation_orphan": "Varyasyonun ana ürünü dosyada yok; taşınmadı.",
   "migration.wordpress_image_missing":
     "Görsel dosyanın ortam kütüphanesinde yok; taşınmadı. Ürüne elle ekleyebilirsiniz.",
+  "migration.wordpress_category_image_missing":
+    "Kategorinin görseli dosyanın ortam kütüphanesinde yok; taşınmadı. Kategoriye elle ekleyebilirsiniz.",
+  "migration.category_cover_no_category": "Görselin kategorisi bu mağazada yok; görsel taşınmadı.",
+  "migration.category_cover_refused":
+    "Kategori görseli kaydedilemedi; kategoriye elle ekleyebilirsiniz.",
   "migration.wordpress_description_cut":
     "Ürün açıklaması bir sayfanın sınırından uzun; bir bölüm sınırında kesildi.",
   "migration.wordpress_summary_cut":

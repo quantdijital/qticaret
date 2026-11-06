@@ -42,6 +42,17 @@ export interface KindCounts {
    */
   facts?: number
   facts_left?: number
+  /**
+   * Categories: their own pictures (adr/0042 Ek 2026-11-06) set (would
+   * be), kept (a picture here already), set with a file stored before,
+   * fetched, and not set (missing, refused, out of reach). Only a source
+   * that gives pictures counts them.
+   */
+  covers?: number
+  covers_kept?: number
+  covers_reused?: number
+  covers_uploaded?: number
+  covers_failed?: number
 }
 
 export const emptyCounts = (): KindCounts => ({
@@ -142,6 +153,25 @@ function factsRows(mode: "check" | "apply", counts: RunCounts): SheetCell[][] {
   ]
 }
 
+// The categories' own pictures (adr/0042 Ek 2026-11-06); none for a source without
+function coverRows(mode: "check" | "apply", counts: RunCounts): SheetCell[][] {
+  const own = counts.category
+  if (own.covers === undefined) {
+    return []
+  }
+  return [
+    [],
+    [mode === "check" ? "Kategori görseli eklenecek" : "Kategori görseli eklendi", own.covers],
+    ["Kendi görseli olduğu için dokunulmayan kategoriler", own.covers_kept ?? 0],
+    ["Taşınmış bir dosyası yeniden kullanılan görseller", own.covers_reused ?? 0],
+    [
+      mode === "check" ? "Eski siteden indirilecek görseller" : "Eski siteden indirilen görseller",
+      own.covers_uploaded ?? 0,
+    ],
+    ["Alınamayan kategori görselleri (Notlar'da)", own.covers_failed ?? 0],
+  ]
+}
+
 export interface ReportProblem extends StepProblem {
   kind: MigrationKind
 }
@@ -187,6 +217,7 @@ export function reportSheets(
       rows: [
         ...summaryRows(mode, counts),
         ...seoRows(mode, counts),
+        ...coverRows(mode, counts),
         ...documentRows(mode, counts),
         ...factsRows(mode, counts),
         ...(links?.summary ?? []),

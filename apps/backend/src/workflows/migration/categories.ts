@@ -24,6 +24,8 @@ export interface CategorySeo {
 export interface CategoryTree {
   /** A path ("Mutfak > Tavalar") to its handle here; null for one not made (a dry run). */
   handleOf: (path: readonly string[]) => string | null
+  /** A path to its category's id here; null for one not here (not made, or a dry run's new one). */
+  idOf: (path: readonly string[]) => string | null
   /**
    * `seo_own`: new ones with the source's own SEO title or description;
    * `seo_default`: new ones without, which take the shop's templates.
@@ -173,5 +175,10 @@ export async function migrateCategories(
       remembered.map((item) => ({ ...item, status: "done" as const }))
     )
   }
-  return { handleOf: (path) => handles.get(categoryKey(path)) ?? null, counts, problems }
+  return {
+    handleOf: (path) => handles.get(categoryKey(path)) ?? null,
+    idOf: (path) => ids.get(categoryKey(path)) ?? null,
+    counts,
+    problems,
+  }
 }

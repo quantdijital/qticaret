@@ -137,10 +137,45 @@ const attributes = serialize({
   },
 })
 
+export interface FixtureOptions {
+  /**
+   * Categories' own pictures (`thumbnail_id`): Mutfak's a file of its own
+   * (titled as its file), Tavalar's the pan's product picture, and a third
+   * category, Kaşıklar, naming an attachment the media library lacks.
+   */
+  covers?: boolean
+}
+
 /** The export of an old shop at `site`: its media on the same host. */
-export function wxrFixture(site = "https://eski.example.com"): string {
+export function wxrFixture(
+  site = "https://eski.example.com",
+  options: FixtureOptions = {}
+): string {
   const upload = (name: string) => `${site}/wp-content/uploads/2026/01/${name}`
+  const cover = (id: string): Record<string, string> => (options.covers ? { thumbnail_id: id } : {})
+  const coverItems: Item[] = options.covers
+    ? [
+        {
+          id: 105,
+          type: "attachment",
+          title: "mutfak",
+          slug: "mutfak-2",
+          status: "inherit",
+          attachment: upload("mutfak.png"),
+        },
+      ]
+    : []
+  const coverTerms = options.covers
+    ? term(
+        30,
+        "product_cat",
+        "kasiklar",
+        "Kaşıklar",
+        `<wp:term_parent>${cdata("mutfak")}</wp:term_parent>${meta({ thumbnail_id: "999" }, "wp:termmeta")}`
+      )
+    : ""
   const items: Item[] = [
+    ...coverItems,
     {
       id: 101,
       type: "attachment",
@@ -423,8 +458,9 @@ export function wxrFixture(site = "https://eski.example.com"): string {
 <wp:category><wp:term_id>6</wp:term_id><wp:category_nicename>${cdata("genel")}</wp:category_nicename><wp:category_parent>${cdata("")}</wp:category_parent><wp:cat_name>${cdata("Genel")}</wp:cat_name></wp:category>
 <wp:tag><wp:term_id>7</wp:term_id><wp:tag_slug>${cdata("dokum")}</wp:tag_slug><wp:tag_name>${cdata("döküm")}</wp:tag_name></wp:tag>
 <wp:tag><wp:term_id>8</wp:term_id><wp:tag_slug>${cdata("bakim")}</wp:tag_slug><wp:tag_name>${cdata("bakım")}</wp:tag_name></wp:tag>
-${term(20, "product_cat", "mutfak", "Mutfak &amp; Şef", `<wp:term_parent>${cdata("")}</wp:term_parent>${meta({ cat_meta: serialize({ cat_header: "", cat_footer: '[block id="mutfak-blok"]' }), rank_math_title: "%term% %sep% %sitename%" }, "wp:termmeta")}`)}
-${term(21, "product_cat", "tavalar", "Tavalar", `<wp:term_parent>${cdata("mutfak")}</wp:term_parent><wp:term_description>${cdata("<p>Döküm tavalar.</p>")}</wp:term_description>${meta({ rank_math_title: "%term% Modelleri %sep% %sitename%", rank_math_description: "Her ocağa uygun döküm tavalar.", rank_math_focus_keyword: "döküm tava,tava" }, "wp:termmeta")}`)}
+${term(20, "product_cat", "mutfak", "Mutfak &amp; Şef", `<wp:term_parent>${cdata("")}</wp:term_parent>${meta({ cat_meta: serialize({ cat_header: "", cat_footer: '[block id="mutfak-blok"]' }), rank_math_title: "%term% %sep% %sitename%", ...cover("105") }, "wp:termmeta")}`)}
+${term(21, "product_cat", "tavalar", "Tavalar", `<wp:term_parent>${cdata("mutfak")}</wp:term_parent><wp:term_description>${cdata("<p>Döküm tavalar.</p>")}</wp:term_description>${meta({ rank_math_title: "%term% Modelleri %sep% %sitename%", rank_math_description: "Her ocağa uygun döküm tavalar.", rank_math_focus_keyword: "döküm tava,tava", ...cover("101") }, "wp:termmeta")}`)}
+${coverTerms}
 ${term(22, "product_brand", "demirci", "Demirci")}
 ${term(23, "pa_renk", "kirmizi", "Kırmızı")}
 ${term(24, "pa_renk", "mavi", "Mavi")}

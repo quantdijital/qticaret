@@ -1,5 +1,6 @@
 import { toSlug } from "../../../seo/slug"
 import type { SourceBrand, SourceCategory, SourcePostTerm } from "../../types"
+import type { CategoryCover, CoverOf } from "./covers"
 import { bodyBlocks, plainText } from "./html"
 import { entryOf, textOf, unserialize } from "./php"
 import type { Wxr, WxrItem, WxrTerm } from "./reader"
@@ -24,11 +25,17 @@ const MAX_DEPTH = 10
 const MAX_CATEGORY_TEXT = 20_000
 const MAX_TERM_TEXT = 1_000
 
-/** A product category with the SEO fields its SEO plugin kept on the term. */
+/**
+ * A product category with the SEO fields its SEO plugin kept on the term,
+ * and its own picture where the shop gave one (`covers.ts`).
+ */
 export interface WordpressCategory extends SourceCategory {
   seo_title: string | null
   seo_description: string | null
   focus_keyword: string | null
+  image?: CategoryCover
+  /** The attachment id a picture named that the media library lacks (a note). */
+  image_missing?: string
 }
 
 export interface Bases {
@@ -114,7 +121,8 @@ export class Taxonomies {
 export function categoriesOf(
   taxonomies: Taxonomies,
   base: string,
-  used: ReadonlySet<string>
+  used: ReadonlySet<string>,
+  coverOf: (term: WxrTerm, sourceKey: string) => CoverOf = () => null
 ): WordpressCategory[] {
   return taxonomies
     .of("product_cat")
@@ -122,8 +130,10 @@ export function categoriesOf(
     .map((term) => {
       const slugs = taxonomies.slugPath("product_cat", term.slug)
       const seo = seoFieldsOf(term.meta, { title: term.name, site: taxonomies.wxr.siteName })
+      const sourceKey = `product_cat:${term.slug}`
       return {
-        source_key: `product_cat:${term.slug}`,
+        ...coverOf(term, sourceKey),
+        source_key: sourceKey,
         path: taxonomies.categoryPath(term.slug).map((name) => name.slice(0, 255)),
         description: taxonomies.textOf(term, MAX_CATEGORY_TEXT),
         seo_title: seo.seo_title,

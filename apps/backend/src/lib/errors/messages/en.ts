@@ -1061,6 +1061,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The variation's product is not in the file; it was not moved.",
   "migration.wordpress_image_missing":
     "The picture is not in the file's media library; it was not moved. You can add it to the product.",
+  "migration.wordpress_category_image_missing":
+    "The category's picture is not in the file's media library; it was not moved. You can add it to the category.",
+  "migration.category_cover_no_category":
+    "The picture's category is not in this shop; the picture was not moved.",
+  "migration.category_cover_refused":
+    "The category's picture could not be saved; you can add it to the category.",
   "migration.wordpress_description_cut":
     "The product description is longer than a page may be; it was cut at a section.",
   "migration.wordpress_summary_cut":

@@ -4,6 +4,7 @@ import type { AddressInfo } from "node:net"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import sharp from "sharp"
 import { wxrFixture } from "../../src/lib/migration/sources/wordpress/__tests__/wxr"
+import type { FixtureOptions } from "../../src/lib/migration/sources/wordpress/__tests__/wxr"
 import { createAdminUser } from "./admin"
 import type { HttpClient } from "./http"
 import { settle } from "./http"
@@ -42,8 +43,8 @@ export function wordpressFixture(http: HttpClient, getContainer: () => MedusaCon
         { headers: { ...headers(), "content-type": type } }
       )
     )
-  const run = async (mode: "check" | "apply") => {
-    const queued = await start(Buffer.from(wxrFixture(state.site)), `mode=${mode}`)
+  const run = async (mode: "check" | "apply", fixture: FixtureOptions = {}) => {
+    const queued = await start(Buffer.from(wxrFixture(state.site, fixture)), `mode=${mode}`)
     expect(queued.status).toBe(202)
     const job = await settled(queued.data.async_job.id)
     expect(job.status).toBe("succeeded")

@@ -15,6 +15,26 @@ import { writeDescriptions } from "./descriptions"
 
 type Container = Pick<MedusaContainer, "resolve">
 
+// Rows a catalog import takes at once, well within its limit (5,000)
+const PRODUCT_ROWS = 1_000
+
+/** Products in groups whose rows (one per variant) one catalog import takes. */
+export function batchesOf(products: readonly SourceProduct[]): SourceProduct[][] {
+  const batches: SourceProduct[][] = []
+  let current: SourceProduct[] = []
+  let rows = 0
+  for (const product of products) {
+    if (current.length > 0 && rows + product.variants.length > PRODUCT_ROWS) {
+      batches.push(current)
+      current = []
+      rows = 0
+    }
+    current.push(product)
+    rows += product.variants.length
+  }
+  return current.length > 0 ? [...batches, current] : batches
+}
+
 /** The source's products as one sheet file, as the catalog import reads one: their attributes too. */
 async function sheetOf(
   products: readonly SourceProduct[],
