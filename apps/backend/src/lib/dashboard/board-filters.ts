@@ -15,6 +15,13 @@ export type PaymentFilter = (typeof PAYMENT_FILTERS)[number]
 export const SHIPPING_FILTERS = ["none", "label", "on_the_way", "delivered", "problem"] as const
 export type ShippingFilter = (typeof SHIPPING_FILTERS)[number]
 
+/**
+ * Who carries the order, by the delivery the shopper chose: a carrier that
+ * issues labels, or `own` for the shop's own delivery and collection.
+ */
+export const CARRIER_FILTERS = ["aras", "yurtici", "geliver", "own"] as const
+export type CarrierFilter = (typeof CARRIER_FILTERS)[number]
+
 // Medusa's payment states (getLastPaymentStatus), each in one group; any other is awaited
 const PAYMENT_GROUP: Readonly<Record<string, PaymentFilter>> = {
   captured: "paid",

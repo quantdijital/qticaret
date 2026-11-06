@@ -51,6 +51,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Invalid tracking: a carrier name, a 4–40 character tracking number and an https link.",
   "orders.nothing_to_deliver": "No parcel of the shop's own delivery waits to be delivered.",
   "orders.deliver_failed": "The order could not be marked delivered; try again on its page.",
+  "orders.range_invalid":
+    "Invalid date range: days as YYYY-MM-DD, and the start cannot come after the end.",
   "orders.note_unknown": "Note not found; it may have been removed.",
   "orders.note_not_yours": "Only the note's author or the shop owner can remove it.",
   "orders.note_empty": "A note cannot be empty.",
@@ -593,6 +595,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "einvoice.pdf_invalid": "Only a PDF file can be uploaded.",
   "einvoice.pdf_missing": "This invoice has no PDF.",
   "einvoice.not_failed": "Only a stopped invoice can be tried again.",
+  "einvoice.retry_failed": "The invoice could not be tried again; try again from the invoice list.",
   "einvoice.not_pending": "An invoice's contents can be read only while it waits to be issued.",
   "einvoice.number_year": "The year in the invoice number must be the issue date's year.",
   "einvoice.company_changed":

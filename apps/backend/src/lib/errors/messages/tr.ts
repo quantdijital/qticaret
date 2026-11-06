@@ -58,6 +58,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "orders.nothing_to_deliver": "Teslim edilecek, mağazanın kendi teslimatında bir koli yok.",
   "orders.deliver_failed":
     "Sipariş teslim edildi olarak işaretlenemedi; sipariş sayfasından tekrar deneyin.",
+  "orders.range_invalid":
+    "Tarih aralığı geçersiz: günler YYYY-AA-GG biçiminde olmalı ve başlangıç bitişten sonra olamaz.",
   "orders.note_unknown": "Not bulunamadı; silinmiş olabilir.",
   "orders.note_not_yours": "Bu notu yalnızca yazan kişi ya da mağaza sahibi silebilir.",
   "orders.note_empty": "Not boş olamaz.",
@@ -597,6 +599,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "einvoice.pdf_invalid": "Yalnızca PDF dosyası yüklenebilir.",
   "einvoice.pdf_missing": "Bu faturanın PDF'i yok.",
   "einvoice.not_failed": "Yalnızca durmuş bir fatura yeniden denenebilir.",
+  "einvoice.retry_failed": "Fatura yeniden denenemedi; fatura listesinden tekrar deneyin.",
   "einvoice.not_pending": "Faturanın içeriği yalnızca kesilmeyi beklerken okunabilir.",
   "einvoice.number_year": "Fatura numarasındaki yıl, kesim tarihinin yılıyla aynı olmalı.",
   "einvoice.company_changed":
