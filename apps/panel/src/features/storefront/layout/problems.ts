@@ -7,7 +7,7 @@ import {
 import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
 import { allSections } from "./sections"
-import { SETTINGS_KEY, settingsProblems } from "./settings-problems"
+import { SETTINGS_KEY, badgeProblems, settingsProblems } from "./settings-problems"
 
 /**
  * What the server would refuse in a section, found before the save: the
@@ -206,17 +206,23 @@ export function sectionProblems(section: AnySection): SectionProblems {
 
 /**
  * The sections with a problem, by id, and the theme's shared settings'
- * under `SETTINGS_KEY`; an empty map: the draft may be saved.
+ * under `SETTINGS_KEY`; an empty map: the draft may be saved. Every trust
+ * strip section carries the badges' problems too: the one list is edited
+ * in each strip's form (adr/0049 Ek 2026-11-06).
  */
 export function documentProblems(doc: LayoutDocument): Map<string, SectionProblems> {
   const problems = new Map<string, SectionProblems>()
+  const settings = settingsProblems(doc.settings)
+  const badges = badgeProblems(settings)
   for (const section of allSections(doc)) {
-    const found = sectionProblems(section)
+    const found = {
+      ...sectionProblems(section),
+      ...(section.type === "trust_badges" ? badges : {}),
+    }
     if (Object.keys(found).length > 0) {
       problems.set(section.id, found)
     }
   }
-  const settings = settingsProblems(doc.settings)
   if (Object.keys(settings).length > 0) {
     problems.set(SETTINGS_KEY, settings)
   }

@@ -2,10 +2,14 @@ import { Copy, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import type { AnySection, LayoutGroup, Placement } from "@/features/storefront/api/layout"
+import type {
+  AnySection,
+  LayoutGroup,
+  Placement,
+  TrustBadge,
+} from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
-import type { SettingsPart } from "@/features/storefront/layout/settings-problems"
 import { AnnouncementForm } from "./forms/announcement-form"
 import { BannerForm } from "./forms/banner-form"
 import { FaqForm } from "./forms/faq-form"
@@ -18,14 +22,9 @@ import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
 import { ScheduleFields } from "./forms/schedule-fields"
 import { Panel, PanelGroup } from "./panel-header"
-import {
-  BrandsForm,
-  CategoriesForm,
-  CountedForm,
-  TrustBadgesForm,
-  WordedForm,
-} from "./forms/simple-forms"
+import { BrandsForm, CategoriesForm, CountedForm, WordedForm } from "./forms/simple-forms"
 import { SECTION_ICONS, kindOf } from "./section-meta"
+import { TrustBadgeList } from "./shared/trust-badge-list"
 
 const P = "storefront.editor.panel"
 
@@ -41,8 +40,9 @@ interface SectionPanelProps {
   onBack: () => void
   onDuplicate: () => void
   onRemove: () => void
-  /** Opens a part of the theme's shared settings (the trust badges' list). */
-  onShared: (part: SettingsPart) => void
+  /** The theme's one list of trust badges, edited in every strip's form (adr/0049 Ek 2026-11-06). */
+  badges: TrustBadge[]
+  onBadges: (badges: TrustBadge[], field?: string) => void
 }
 
 /** The form for one section type. */
@@ -50,8 +50,9 @@ function FormOf({
   section,
   problems,
   onChange,
-  onShared,
-}: Pick<SectionPanelProps, "section" | "problems" | "onChange" | "onShared">) {
+  badges,
+  onBadges,
+}: Pick<SectionPanelProps, "section" | "problems" | "onChange" | "badges" | "onBadges">) {
   const props = { problems, onChange }
   switch (section.type) {
     case "announcement_bar":
@@ -82,13 +83,8 @@ function FormOf({
     case "related_products":
       return <RelatedForm section={section} {...props} />
     case "trust_badges":
-      return (
-        <TrustBadgesForm
-          onEdit={() => {
-            onShared("trust_badges")
-          }}
-        />
-      )
+      // The strip's problems are the badges' (`trust_badges.0.title`) and its schedule
+      return <TrustBadgeList badges={badges} problems={problems} onChange={onBadges} />
     case "newsletter":
     case "help":
       return <WordedForm section={section} {...props} />
@@ -112,7 +108,8 @@ export function SectionPanel({
   onBack,
   onDuplicate,
   onRemove,
-  onShared,
+  badges,
+  onBadges,
 }: SectionPanelProps) {
   const { t } = useTranslation()
   const kind = kindOf(section, group === "footer")
@@ -142,7 +139,13 @@ export function SectionPanel({
         </PanelGroup>
       ) : null}
       <PanelGroup title={t(`${P}.content`)}>
-        <FormOf section={section} problems={problems} onChange={onChange} onShared={onShared} />
+        <FormOf
+          section={section}
+          problems={problems}
+          onChange={onChange}
+          badges={badges}
+          onBadges={onBadges}
+        />
       </PanelGroup>
       <PanelGroup title={t(`${P}.visibility`)}>
         <ScheduleFields section={section} problem={problems["schedule"]} onChange={onChange} />

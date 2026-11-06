@@ -13,11 +13,19 @@ export const SETTINGS_KEY = "@settings"
 /** "Az kaldı" at 1 to 1000 units (the server's limits). */
 export const LOW_STOCK_LIMITS = { min: 1, max: 1000, default: 3 } as const
 
-/** The two panels that edit the settings, and the fields each holds. */
+/**
+ * The two places that edit the settings, and the fields each holds: the
+ * trust badges in every trust strip section's form, the rest in the
+ * theme's "Stok ve renk örnekleri" panel.
+ */
 export type SettingsPart = "trust_badges" | "looks"
 
 export const partOf = (field: string): SettingsPart =>
   field.startsWith("trust_badges") ? "trust_badges" : "looks"
+
+/** The trust badges' problems alone, as every strip section shows them. */
+export const badgeProblems = (problems: SectionProblems): SectionProblems =>
+  Object.fromEntries(Object.entries(problems).filter(([field]) => partOf(field) === "trust_badges"))
 
 type Found = [string, Problem | null]
 

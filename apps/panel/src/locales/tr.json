@@ -7152,7 +7152,6 @@
           "top": "Üste bölüm ekle",
           "bottom": "Alta bölüm ekle"
         },
-        "trustBadges": "Güven rozetleri",
         "looks": "Stok ve renk örnekleri"
       },
       "row": {
@@ -7235,7 +7234,7 @@
         },
         "trust_badges": {
           "name": "Güven rozetleri",
-          "description": "Hızlı kargo, kolay iade gibi sözleriniz; Tema altındaki Güven rozetleri'nde yazılır."
+          "description": "Hızlı kargo, kolay iade gibi sözleriniz, sayfada bir şerit olarak."
         },
         "newsletter": {
           "name": "E-bülten",
@@ -7390,10 +7389,6 @@
         "empty": "Henüz metin yazılmadı.",
         "description": "Yazdıklarınız taslağa kendiliğinden kaydedilir; ürün ve kategori kartı, mağaza bilgisi ekleyebilirsiniz.",
         "done": "Tamam"
-      },
-      "trustBadges": {
-        "text": "Rozetlerin kendisi Tema altındaki Güven rozetleri'nde yazılır; aynı liste ana sayfa, ürün ve kategori şeritlerinde, ürün sayfasında ve sepette görünür. Bu bölüm şeridin bu sayfadaki yerini belirler.",
-        "link": "Rozetleri düzenle"
       },
       "help": {
         "contact": "İletişim yolları (telefon, e-posta, WhatsApp) Mağaza profilinden gelir; hiçbiri yoksa kutu görünmez."
@@ -7616,8 +7611,11 @@
       "shared": {
         "badges": {
           "title": "Güven rozetleri",
-          "description": "Mağazanızın sözleri. Ana sayfa, ürün ve kategori sayfalarındaki güven şeritleri, ürün sayfasındaki güvenceler ve sepet bu listeyi gösterir. Değişiklikler taslağa kaydedilir, Yayınla ile vitrine çıkar.",
-          "list": "Rozetler",
+          "description": "Değişiklikler taslağa kaydedilir, Yayınla ile vitrine çıkar.",
+          "note": "Bu rozetler sitenin her yerinde aynı görünür: ürün sayfası, sepet, kargo sayfası.",
+          "buyBox": "Satın alma kutusunun altındaki rozetler, Güven rozetleri bileşeninden düzenlenir.",
+          "edit": "Rozetleri düzenle",
+          "done": "Tamam",
           "tokens": "Bilgi ekle düğmesiyle ({}) telefon, ücretsiz kargo eşiği gibi mağaza bilgilerini ekleyebilirsiniz; bilgi değişince metin de kendiliğinden değişir.",
           "empty": "Rozet yok; vitrinde güven şeridi ve güvenceler görünmez.",
           "add": "Rozet ekle",

@@ -1,6 +1,4 @@
-import { ShieldCheck } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
 import type {
   BrandsSection,
   CategoriesSection,
@@ -167,24 +165,6 @@ export function WordedForm<T extends Worded>({ section, problems, onChange }: Se
       {help ? (
         <p className="text-xs text-muted-foreground">{t("storefront.editor.help.contact")}</p>
       ) : null}
-    </div>
-  )
-}
-
-/**
- * The badges themselves are the theme's, one list every strip shows
- * (adr/0049 Ek 2026-11-06); here only where this strip shows, and the way
- * to the list.
- */
-export function TrustBadgesForm({ onEdit }: { onEdit: () => void }) {
-  const { t } = useTranslation()
-  return (
-    <div className="flex flex-col items-start gap-3">
-      <p className="text-[13px] text-muted-foreground">{t("storefront.editor.trustBadges.text")}</p>
-      <Button type="button" variant="outline" size="sm" onClick={onEdit}>
-        <ShieldCheck />
-        {t("storefront.editor.trustBadges.link")}
-      </Button>
     </div>
   )
 }

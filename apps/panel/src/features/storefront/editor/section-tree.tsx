@@ -6,7 +6,6 @@ import {
   Contact,
   Palette,
   Plus,
-  ShieldCheck,
   Store,
   SwatchBook,
 } from "lucide-react"
@@ -21,7 +20,6 @@ import type {
   Placement,
 } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
-import type { SettingsPart } from "@/features/storefront/layout/settings-problems"
 import {
   idsOf,
   isScheduled,
@@ -140,16 +138,16 @@ interface SectionTreeProps {
   onRemove: (section: AnySection) => void
   onAddSection: (placement?: Placement) => void
   onTheme: () => void
-  /** The theme's shared settings in the draft (adr/0049 Ek 2026-11-06), and those with a mistake. */
-  onShared: (part: SettingsPart) => void
-  sharedProblems: ReadonlySet<SettingsPart>
+  /** The stock line and colour names in the draft (adr/0049 Ek 2026-11-06), and whether one is wrong. */
+  onLooks: () => void
+  looksProblem: boolean
 }
 
 /**
  * The page's parts as the storefront draws them, top to bottom: the
  * header, the chosen page's own sections, the footer; then the theme's
- * own settings and the parts every page shares (the trust badges, the
- * stock line and colour names). The menus, the logo and the contact details are edited
+ * own settings and the stock line and colour names every page shares
+ * (the trust badges are edited in each trust strip section). The menus, the logo and the contact details are edited
  * on their own screens, linked from where they show.
  */
 export function SectionTree({
@@ -161,8 +159,8 @@ export function SectionTree({
   onRemove,
   onAddSection,
   onTheme,
-  onShared,
-  sharedProblems,
+  onLooks,
+  looksProblem,
 }: SectionTreeProps) {
   const { t } = useTranslation()
   const store = t(`${T}.storeProfile`)
@@ -261,20 +259,10 @@ export function SectionTree({
       <TreeGroup title={t(`${T}.theme`)}>
         <ThemeRow icon={Palette} label={t(`${T}.themeSettings`)} onClick={onTheme} />
         <ThemeRow
-          icon={ShieldCheck}
-          label={t(`${T}.trustBadges`)}
-          problem={sharedProblems.has("trust_badges")}
-          onClick={() => {
-            onShared("trust_badges")
-          }}
-        />
-        <ThemeRow
           icon={SwatchBook}
           label={t(`${T}.looks`)}
-          problem={sharedProblems.has("looks")}
-          onClick={() => {
-            onShared("looks")
-          }}
+          problem={looksProblem}
+          onClick={onLooks}
         />
       </TreeGroup>
     </nav>

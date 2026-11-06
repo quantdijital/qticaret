@@ -7152,7 +7152,6 @@
           "top": "Add section above",
           "bottom": "Add section below"
         },
-        "trustBadges": "Trust badges",
         "looks": "Stock and colour swatches"
       },
       "row": {
@@ -7235,7 +7234,7 @@
         },
         "trust_badges": {
           "name": "Trust badges",
-          "description": "Your promises such as fast shipping or easy returns; written under Theme > Trust badges."
+          "description": "Your promises such as fast shipping or easy returns, as a strip on the page."
         },
         "newsletter": {
           "name": "Newsletter",
@@ -7390,10 +7389,6 @@
         "empty": "No text written yet.",
         "description": "What you write is saved to the draft by itself; you can add product and category cards and shop details.",
         "done": "Done"
-      },
-      "trustBadges": {
-        "text": "The badges are written under Theme > Trust badges; the same list shows in the home, product and category strips, on the product page and in the cart. This section sets where the strip stands on this page.",
-        "link": "Edit the badges"
       },
       "help": {
         "contact": "The ways to reach you (phone, e-mail, WhatsApp) come from the store profile; with none, the box does not show."
@@ -7616,8 +7611,11 @@
       "shared": {
         "badges": {
           "title": "Trust badges",
-          "description": "Your shop's promises. The trust strips on the home, product and category pages, the product page's assurances and the cart show this list. Changes go to the draft; Publish puts them live.",
-          "list": "Badges",
+          "description": "Changes go to the draft; Publish puts them live.",
+          "note": "These badges look the same everywhere on the site: the product page, the cart, the shipping page.",
+          "buyBox": "The badges under the buy box are edited in the Trust badges section.",
+          "edit": "Edit the badges",
+          "done": "Done",
           "tokens": "With Insert detail ({}) you can add shop details such as the phone or the free shipping threshold; the text follows when they change.",
           "empty": "No badges; the storefront shows no trust strip or assurances.",
           "add": "Add badge",

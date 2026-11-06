@@ -12,6 +12,7 @@ import type {
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import { groupLimit, placed } from "@/features/storefront/layout/sections"
 import { SectionList } from "./section-list"
+import { BuyBoxBadges } from "./shared/buy-box-badges"
 
 const T = "storefront.editor.tree"
 
@@ -120,7 +121,12 @@ export function PageSections({
   const label = t(`storefront.editor.page.${page}`)
   return (
     <div className="flex flex-col gap-1">
-      {page === "product" ? <FixedRow icon={Package} name={t(`${T}.productBlock`)} /> : null}
+      {page === "product" ? (
+        <>
+          <FixedRow icon={Package} name={t(`${T}.productBlock`)} />
+          <BuyBoxBadges settings={doc.settings} dispatch={dispatch} />
+        </>
+      ) : null}
       {sections.length === 0 ? (
         <p className="px-2 py-1 text-xs text-muted-foreground">{t(`${T}.empty.${page}`)}</p>
       ) : (

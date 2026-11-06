@@ -14,7 +14,7 @@ import { previewAddress } from "./preview-url"
 import { documentProblems, sectionProblems } from "./problems"
 import { fromLocalInput, toLocalInput } from "./schedule"
 import { newAnnouncementBar, newBodySection, newHomeSection } from "./sections"
-import { SETTINGS_KEY, partOf, settingsProblems } from "./settings-problems"
+import { SETTINGS_KEY, badgeProblems, partOf, settingsProblems } from "./settings-problems"
 
 describe("sectionProblems", () => {
   it("finds what the server would refuse, field by field", () => {
@@ -143,6 +143,29 @@ describe("sectionProblems", () => {
     expect(partOf("trust_badges.0.title")).toBe("trust_badges")
     expect(partOf("color_swatches.1.hex")).toBe("looks")
     expect(partOf("low_stock.threshold")).toBe("looks")
+  })
+
+  it("marks every trust strip with the badges' problems, the one list each strip edits", () => {
+    const doc: LayoutDocument = {
+      header: [],
+      home: [newHomeSection("trust_badges", "anaguven"), newHomeSection("posts", "blog")],
+      footer: [],
+      product: [newBodySection("product", "trust_badges", "urunguven") as ProductSection],
+      category: [],
+      settings: {
+        trust_badges: [{ icon: "truck", title: "", text: null }],
+        color_swatches: [{ label: "", hex: "#000000" }],
+        low_stock: { enabled: true, threshold: 3 },
+      },
+    }
+    const problems = documentProblems(doc)
+    // A colour's mistake stays the theme panel's; a badge's is each strip's too
+    expect([...problems.keys()]).toEqual(["anaguven", "urunguven", SETTINGS_KEY])
+    expect(problems.get("anaguven")).toEqual({ "trust_badges.0.title": "required" })
+    expect(problems.get("urunguven")).toEqual({ "trust_badges.0.title": "required" })
+    expect(
+      badgeProblems({ "trust_badges.0.title": "required", "color_swatches.0.label": "required" })
+    ).toEqual({ "trust_badges.0.title": "required" })
   })
 
   it("asks for each question and answer of a FAQ, its answer may hold the shop's details", () => {

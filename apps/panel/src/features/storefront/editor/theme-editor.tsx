@@ -41,7 +41,7 @@ import { SaveStatus } from "./save-status"
 import { sectionLabel } from "./section-meta"
 import { SectionPanel } from "./section-panel"
 import { SectionTree } from "./section-tree"
-import { SharedPanel } from "./shared/shared-panel"
+import { LooksPanel } from "./shared/looks-panel"
 import { ThemePanel } from "./theme-panel"
 import { useEditorActions } from "./use-editor-actions"
 import { usePreviewTarget } from "./use-preview-target"
@@ -154,18 +154,20 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
         onRemove={() => {
           remove(found.section)
         }}
-        onShared={(part) => {
-          setOpened({ kind: "shared", part })
+        badges={doc.settings.trust_badges}
+        onBadges={(trust_badges, field) => {
+          dispatch({ type: "settings", settings: { ...doc.settings, trust_badges }, merge: field })
         }}
       />
     )
-  } else if (opened?.kind === "shared") {
+  } else if (opened?.kind === "looks") {
     form = (
-      <SharedPanel
-        part={opened.part}
+      <LooksPanel
         settings={doc.settings}
         problems={problems.get(SETTINGS_KEY) ?? {}}
-        dispatch={dispatch}
+        onChange={(settings, field) => {
+          dispatch({ type: "settings", settings, merge: field })
+        }}
         onBack={() => {
           setOpened(null)
         }}
@@ -201,10 +203,12 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
       onTheme={() => {
         setOpened({ kind: "theme" })
       }}
-      onShared={(part) => {
-        setOpened({ kind: "shared", part })
+      onLooks={() => {
+        setOpened({ kind: "looks" })
       }}
-      sharedProblems={new Set(Object.keys(problems.get(SETTINGS_KEY) ?? {}).map(partOf))}
+      looksProblem={Object.keys(problems.get(SETTINGS_KEY) ?? {}).some(
+        (field) => partOf(field) === "looks"
+      )}
     />
   )
   const tools = (
