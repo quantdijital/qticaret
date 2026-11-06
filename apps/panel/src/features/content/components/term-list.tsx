@@ -1,14 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 import { Folder, Hash } from "lucide-react"
-import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { DataTable } from "@/components/patterns/data-table"
 import type { Column } from "@/components/patterns/data-table"
 import { Pagination } from "@/components/patterns/pagination"
 import { ErrorState } from "@/components/patterns/states"
+import { useRecordWalk } from "@/components/patterns/use-record-walk"
 import { TERM_PAGE_SIZE, termsQuery } from "@/features/content/api/terms"
 import type { Term, TermKind } from "@/features/content/api/terms"
-import { TermSheet } from "@/features/content/components/term-sheet"
+import { TermDialog } from "@/features/content/components/term-dialog"
 import { errorText } from "@/lib/errors"
 
 const T = "content.terms"
@@ -60,7 +60,7 @@ function useColumns(onOpen: (term: Term) => void): Column<Term>[] {
   ]
 }
 
-/** A blog's categories or tags in the shop's order, each opened in a side sheet. */
+/** A blog's categories or tags in the shop's order, each opened in a dialog. */
 export function TermList({
   kind,
   q,
@@ -74,8 +74,8 @@ export function TermList({
 }) {
   const { t } = useTranslation()
   const list = useQuery(termsQuery({ kind, q, page }))
-  const [opened, setOpened] = useState<Term | null>(null)
-  const columns = useColumns(setOpened)
+  const walk = useRecordWalk(list.data?.terms, (term) => term.id)
+  const columns = useColumns(walk.show)
   const Icon = kind === "category" ? Folder : Hash
   if (list.isError) {
     return (
@@ -92,7 +92,7 @@ export function TermList({
         rowKey={(term) => term.id}
         loading={list.isPending}
         stale={list.isPlaceholderData}
-        onRowClick={setOpened}
+        onRowClick={walk.show}
         empty={
           <div className="flex flex-col items-center gap-3 text-center">
             <Icon className="size-8 text-muted-foreground" aria-hidden="true" />
@@ -110,15 +110,9 @@ export function TermList({
           onPageChange={onPage}
         />
       ) : null}
-      {opened ? (
-        <TermSheet
-          key={opened.id}
-          // The list's copy once a save has refreshed it
-          term={list.data?.terms.find((term) => term.id === opened.id) ?? opened}
-          onClose={() => {
-            setOpened(null)
-          }}
-        />
+      {walk.open ? (
+        // The list's copy once a save has refreshed it
+        <TermDialog term={walk.open} steps={walk.steps} onClose={walk.close} />
       ) : null}
     </>
   )

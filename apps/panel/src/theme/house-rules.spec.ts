@@ -90,6 +90,17 @@ describe("the panel's house rules (docs/18 §9)", () => {
     expect(breaches(/<input\b[^>]*\btype="number"/g, own)).toEqual([])
   })
 
+  it("opens a record in the standard dialog, never in a side sheet", () => {
+    // The owner, 2026-11-06: a row opens one dialog on the size scale. The phone's menu
+    // and the full-screen theme editor's own drawers stay sheets.
+    const drawers = new Set([
+      "components/ui/sidebar.tsx",
+      "features/storefront/editor/editor-shell.tsx",
+      "features/storefront/editor/revisions-sheet.tsx",
+    ])
+    expect(breaches(/from "@\/components\/ui\/sheet"/g, (file) => drawers.has(file))).toEqual([])
+  })
+
   it("has every text in Turkish and English, Turkish without exclamation marks", () => {
     const turkish = leaves(tr)
     expect(turkish.map(([key]) => key).sort()).toEqual(

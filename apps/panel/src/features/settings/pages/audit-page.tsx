@@ -11,6 +11,7 @@ import { FilterTabs } from "@/components/patterns/filter-tabs"
 import { PageHeader } from "@/components/patterns/page-header"
 import { Pagination } from "@/components/patterns/pagination"
 import { ErrorState } from "@/components/patterns/states"
+import { useRecordWalk } from "@/components/patterns/use-record-walk"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
@@ -23,7 +24,7 @@ import {
   staffNamesQuery,
 } from "@/features/settings/api/audit"
 import type { AuditEntry, AuditSearch } from "@/features/settings/api/audit"
-import { AuditDetailSheet } from "@/features/settings/components/audit-detail-sheet"
+import { AuditDetailDialog } from "@/features/settings/components/audit-detail-dialog"
 import { AuditFilters } from "@/features/settings/components/audit-filters"
 import { errorText } from "@/lib/errors"
 import { formatDateTime } from "@/lib/format"
@@ -116,7 +117,7 @@ function useColumns(staff: Map<string, string> | undefined): Column<AuditEntry>[
 /**
  * Settings > Audit log (adr/0011, F12.5): who changed what and who read
  * personal data, newest first, by person, resource and day; an entry opens
- * in full beside the list. Reading this page is recorded too; the export
+ * in full in a dialog. Reading this page is recorded too; the export
  * runs as a job with the same filters and its file waits on the Jobs page.
  */
 export function AuditPage() {
@@ -124,8 +125,8 @@ export function AuditPage() {
   const search = route.useSearch()
   const navigate = useNavigate()
   const [page, setPage] = useState(0)
-  const [open, setOpen] = useState<AuditEntry | null>(null)
   const log = useQuery(auditQuery(search, page))
+  const walk = useRecordWalk(log.data?.audit_entries, (entry) => entry.id)
   const exportJob = useStartJob()
   const actorIds = [
     ...new Set(
@@ -202,7 +203,7 @@ export function AuditPage() {
               rowKey={(entry) => entry.id}
               loading={log.isPending}
               stale={log.isPlaceholderData}
-              onRowClick={setOpen}
+              onRowClick={walk.show}
               empty={
                 <div className="flex flex-col items-center gap-3 text-center">
                   <ScrollText className="size-8 text-muted-foreground" aria-hidden="true" />
@@ -229,12 +230,11 @@ export function AuditPage() {
           {t("settings.audit.openJobs")}
         </Link>
       </p>
-      <AuditDetailSheet
-        entry={open}
-        actor={open ? actorOf(open, staff.data, t) : ""}
-        onClose={() => {
-          setOpen(null)
-        }}
+      <AuditDetailDialog
+        entry={walk.open}
+        actor={walk.open ? actorOf(walk.open, staff.data, t) : ""}
+        steps={walk.steps}
+        onClose={walk.close}
       />
     </div>
   )

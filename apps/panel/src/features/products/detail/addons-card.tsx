@@ -14,9 +14,9 @@ import { featuresQuery, useFeatureState } from "@/features/settings/api/features
 import { FULL_RESET } from "@/lib/forms"
 import { addonsFailureOf } from "./addon-failure"
 import type { AddonsFailure } from "./addon-failure"
+import { AddonDialog } from "./addon-dialog"
 import { AddonNotice } from "./addon-notice"
 import { AddonRow } from "./addon-row"
-import { AddonSheet } from "./addon-sheet"
 import { inputOf, valueOf } from "./addon-values"
 import { productFold, someNames } from "./sections"
 import { useAddonsShown } from "./use-addons-shown"
@@ -28,7 +28,7 @@ interface Values {
   items: AddonValue[]
 }
 
-/** Which add-on the sheet edits: an index in the list, or null for a new one. */
+/** Which add-on the dialog edits: an index in the list, or null for a new one. */
 type Editing = { index: number | null } | null
 
 const valuesOf = (addons: readonly ProductAddon[]): Values => ({ items: addons.map(valueOf) })
@@ -53,7 +53,8 @@ function AddonsForm({
   const items = useWatch({ control: form.control, name: "items" })
   const [editing, setEditing] = useState<Editing>(null)
   const [failure, setFailure] = useState<AddonsFailure | null>(null)
-  const [sheetFailure, setSheetFailure] = useState<AddonsFailure | null>(null)
+  // A refusal of the open dialog's save, said in it
+  const [dialogFailure, setDialogFailure] = useState<AddonsFailure | null>(null)
   // A cart line names its add-on by id: one removed stops those carts at checkout
   const removed = saved.some((addon) => !items.some((item) => item.id === addon.id))
 
@@ -64,7 +65,7 @@ function AddonsForm({
       {
         onSuccess: (stored) => {
           setFailure(null)
-          setSheetFailure(null)
+          setDialogFailure(null)
           form.reset(valuesOf(stored.addons), FULL_RESET)
           done?.()
           toast.success(t("products.detail.saved"))
@@ -78,7 +79,7 @@ function AddonsForm({
     )
   }
 
-  const saveFromSheet = (value: AddonValue) => {
+  const saveFromDialog = (value: AddonValue) => {
     if (!editing) {
       return
     }
@@ -87,9 +88,14 @@ function AddonsForm({
       editing.index === null
         ? [...current, value]
         : current.map((item, index) => (index === editing.index ? value : item))
-    send(next, setSheetFailure, () => {
+    send(next, setDialogFailure, () => {
       setEditing(null)
     })
+  }
+
+  const edit = (index: number | null) => {
+    setDialogFailure(null)
+    setEditing({ index })
   }
 
   const full = list.fields.length >= ADDON_LIMITS.addons
@@ -148,8 +154,7 @@ function AddonsForm({
                   list.move(index, to)
                 }}
                 onEdit={() => {
-                  setSheetFailure(null)
-                  setEditing({ index })
+                  edit(index)
                 }}
                 onRemove={() => {
                   list.remove(index)
@@ -166,8 +171,7 @@ function AddonsForm({
               variant="outline"
               disabled={full}
               onClick={() => {
-                setSheetFailure(null)
-                setEditing({ index: null })
+                edit(null)
               }}
             >
               <Plus />
@@ -187,16 +191,18 @@ function AddonsForm({
         ) : null}
         {failure ? <AddonNotice tone="danger" {...failure} /> : null}
       </CardForm>
-      {/* Outside the card's form: a submit in the sheet would bubble to it through the portal */}
+      {/* Outside the card's form: a submit in a dialog would bubble to it through the portal */}
       {editing ? (
-        <AddonSheet
-          addon={editing.index === null ? null : (items[editing.index] ?? null)}
+        <AddonDialog
+          items={items}
+          index={editing.index}
+          onGo={edit}
           saving={save.isPending}
-          failure={sheetFailure}
+          failure={dialogFailure}
           onClose={() => {
             setEditing(null)
           }}
-          onSave={saveFromSheet}
+          onSave={saveFromDialog}
         />
       ) : null}
     </>

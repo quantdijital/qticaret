@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { DataTable } from "@/components/patterns/data-table"
 import type { Column } from "@/components/patterns/data-table"
@@ -8,9 +7,10 @@ import { FilterTabs } from "@/components/patterns/filter-tabs"
 import { PageHeader } from "@/components/patterns/page-header"
 import { Pagination } from "@/components/patterns/pagination"
 import { ErrorState } from "@/components/patterns/states"
+import { useRecordWalk } from "@/components/patterns/use-record-walk"
 import { CONTACT_PAGE_SIZE, contactMessagesQuery } from "@/features/customers/api/contact-messages"
 import type { ContactMessage, ContactStatus } from "@/features/customers/api/contact-messages"
-import { ContactMessageSheet } from "@/features/customers/components/contact-message-sheet"
+import { ContactMessageDialog } from "@/features/customers/components/contact-message-dialog"
 import { CustomersNav } from "@/features/customers/components/customers-nav"
 import { errorText } from "@/lib/errors"
 import { formatDateTime } from "@/lib/format"
@@ -89,7 +89,7 @@ function useColumns(onOpen: (message: ContactMessage) => void): Column<ContactMe
 /**
  * Müşteriler > İletişim mesajları (adr/0047 §6): what shoppers wrote from
  * the storefront's contact form. Waiting ones oldest first, answered ones
- * newest first; a message opens in full beside the list.
+ * newest first; a message opens in full in a dialog.
  */
 export function ContactMessagesPage() {
   const { t } = useTranslation()
@@ -98,8 +98,8 @@ export function ContactMessagesPage() {
   const status: ContactStatus = search.status ?? "new"
   const page = (search.page ?? 1) - 1
   const list = useQuery(contactMessagesQuery(status, page))
-  const [open, setOpen] = useState<ContactMessage | null>(null)
-  const columns = useColumns(setOpen)
+  const walk = useRecordWalk(list.data?.contact_messages, (message) => message.id)
+  const columns = useColumns(walk.show)
   const setSearch = (next: { status?: ContactStatus; page?: number }) => {
     const nextStatus = next.status ?? status
     void navigate({
@@ -138,7 +138,7 @@ export function ContactMessagesPage() {
               rows={list.data?.contact_messages}
               rowKey={(message) => message.id}
               loading={list.isPending}
-              onRowClick={setOpen}
+              onRowClick={walk.show}
               empty={
                 <p className="text-center text-sm text-muted-foreground">
                   {t(`${M}.empty.${status}`)}
@@ -158,12 +158,7 @@ export function ContactMessagesPage() {
           </>
         )}
       </section>
-      <ContactMessageSheet
-        message={open}
-        onClose={() => {
-          setOpen(null)
-        }}
-      />
+      <ContactMessageDialog message={walk.open} steps={walk.steps} onClose={walk.close} />
     </div>
   )
 }

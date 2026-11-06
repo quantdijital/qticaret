@@ -1,22 +1,20 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { Loader2 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { DetailDialog } from "@/components/patterns/detail-dialog"
 import { Pagination } from "@/components/patterns/pagination"
+import { RecordStepper } from "@/components/patterns/record-stepper"
+import type { RecordSteps } from "@/components/patterns/record-stepper"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
 import { NumberField } from "@/components/patterns/number-field"
+import { useDiscardGuard } from "@/components/patterns/use-discard-guard"
 import { Button } from "@/components/ui/button"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+import { DialogBody } from "@/components/ui/dialog"
 import {
   MOVEMENTS_PAGE,
   movementsQuery,
@@ -100,14 +98,26 @@ function MovementRow({ movement }: { movement: StockMovement }) {
 }
 
 /** The item's own threshold: the shop's unless set; empty goes back to the shop's. */
-function ThresholdForm({ itemId }: { itemId: string }) {
+function ThresholdForm({
+  itemId,
+  onDirtyChange,
+}: {
+  itemId: string
+  /** Whether a threshold is typed and not saved: the dialog asks before leaving it. */
+  onDirtyChange: (dirty: boolean) => void
+}) {
   const { t } = useTranslation()
   const watch = useQuery(watchQuery(itemId))
   const save = useSaveWatch(itemId)
   const stored = watch.data?.threshold
   const [draft, setDraft] = useState<string | null>(null)
-  const text = draft ?? (stored === null || stored === undefined ? "" : String(stored))
+  const storedText = stored === null || stored === undefined ? "" : String(stored)
+  const text = draft ?? storedText
   const valid = text === "" || isThreshold(text)
+  const dirty = draft !== null && draft !== storedText
+  useEffect(() => {
+    onDirtyChange(dirty)
+  }, [dirty, onDirtyChange])
   const submit = () => {
     save.mutate(text === "" ? null : Number(text), {
       onSuccess: () => {
@@ -189,33 +199,61 @@ function History({ itemId }: { itemId: string }) {
 /**
  * An item's stock history (F3.8, adr/0020): every change, why it happened
  * (an order, a return, the stock page, the nightly check), shelf and held
- * counts after it; and the item's own low-stock threshold.
+ * counts after it; and the item's own low-stock threshold. The arrows go
+ * to the stock list's next item; a threshold typed and not saved is asked
+ * about first. `pane`: the movements scroll under a fixed title, a page
+ * of them never makes the box jump.
  */
-export function StockHistorySheet({
+export function StockHistoryDialog({
   item,
-  onOpenChange,
+  steps,
+  onClose,
 }: {
   item: StockItem | null
-  onOpenChange: (open: boolean) => void
+  /** The item's place on the stock list's page. */
+  steps: RecordSteps
+  onClose: () => void
 }) {
   const { t } = useTranslation()
+  const [dirty, setDirty] = useState(false)
+  const { guard, confirm } = useDiscardGuard(dirty)
   const name = item?.variant?.product?.title ?? item?.title ?? item?.sku ?? ""
   return (
-    <Sheet open={item !== null} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col gap-0 sm:max-w-md">
-        <SheetHeader className="border-b">
-          <SheetTitle>{t("inventory.history.title")}</SheetTitle>
-          <SheetDescription>
-            {[name, item?.variant?.title, item?.sku].filter(Boolean).join(" · ")}
-          </SheetDescription>
-        </SheetHeader>
+    <>
+      <DetailDialog
+        open={item !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDirty(false)
+            onClose()
+          }
+        }}
+        onCloseRequest={guard}
+        pane
+        title={t("inventory.history.title")}
+        description={[name, item?.variant?.title, item?.sku].filter(Boolean).join(" · ")}
+        headerAction={
+          <RecordStepper
+            {...steps}
+            previousLabel={t("inventory.history.previous")}
+            nextLabel={t("inventory.history.next")}
+            onGo={(to) => {
+              guard(() => {
+                setDirty(false)
+                steps.onGo(to)
+              })
+            }}
+          />
+        }
+      >
         {item ? (
-          <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-6">
-            <ThresholdForm key={item.id} itemId={item.id} />
-            <History key={`history-${item.id}`} itemId={item.id} />
-          </div>
+          <DialogBody key={item.id}>
+            <ThresholdForm itemId={item.id} onDirtyChange={setDirty} />
+            <History itemId={item.id} />
+          </DialogBody>
         ) : null}
-      </SheetContent>
-    </Sheet>
+      </DetailDialog>
+      {confirm}
+    </>
   )
 }

@@ -1,4 +1,5 @@
 import { Loader2 } from "lucide-react"
+import { useEffect } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -43,13 +44,23 @@ function bodyOf(values: Values, dirty: Partial<Record<keyof Values, boolean>>): 
 }
 
 /** A term's name, address, text and place in the shop's order. */
-export function TermForm({ term }: { term: Term }) {
+export function TermForm({
+  term,
+  onDirtyChange,
+}: {
+  term: Term
+  /** Whether something is typed and not saved: the dialog asks before leaving it. */
+  onDirtyChange?: (dirty: boolean) => void
+}) {
   const { t } = useTranslation()
   const update = useUpdateTerm(term.id)
   const saved = valuesOf(term)
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
   const name = useWatch({ control: form.control, name: "name" })
   const { isDirty, dirtyFields } = form.formState
+  useEffect(() => {
+    onDirtyChange?.(isDirty)
+  }, [isDirty, onDirtyChange])
   const submit = form.handleSubmit((values) => {
     if (values.name.trim() === "") {
       form.setError("name", { message: t(`${T}.nameRequired`) })

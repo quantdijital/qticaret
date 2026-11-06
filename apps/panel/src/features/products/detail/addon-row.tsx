@@ -81,17 +81,31 @@ export function AddonRow({
       : t(`${A}.choiceCount`, { count: value.choices.length }),
     value.max_quantity === null ? null : t(`${A}.limitShort`, { count: value.max_quantity }),
   ]
+  const summary = (
+    <>
+      <span className="flex flex-wrap items-center gap-2 text-sm font-medium">
+        <span className="min-w-0 break-words">{value.label}</span>
+        {value.non_withdrawable ? <NonWithdrawableBadge /> : null}
+      </span>
+      <span className="text-xs text-muted-foreground tabular-nums">
+        {facts.filter(Boolean).join(" · ")}
+      </span>
+    </>
+  )
   return (
     <li className="flex items-center gap-3 px-3 py-2.5">
-      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="flex flex-wrap items-center gap-2 text-sm font-medium">
-          <span className="min-w-0 break-words">{value.label}</span>
-          {value.non_withdrawable ? <NonWithdrawableBadge /> : null}
-        </span>
-        <span className="text-xs text-muted-foreground tabular-nums">
-          {facts.filter(Boolean).join(" · ")}
-        </span>
-      </div>
+      {readOnly ? (
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">{summary}</div>
+      ) : (
+        // The row opens its dialog, as a variant's does (docs/18 §7)
+        <button
+          type="button"
+          className="flex min-w-0 flex-1 cursor-pointer flex-col items-start gap-0.5 rounded-sm text-left outline-hidden focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-solid focus-visible:outline-ring"
+          onClick={onEdit}
+        >
+          {summary}
+        </button>
+      )}
       {readOnly ? null : (
         <div className="flex shrink-0 gap-1">
           <IconButton

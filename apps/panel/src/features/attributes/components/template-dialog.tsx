@@ -1,20 +1,17 @@
-import { Loader2, Trash2 } from "lucide-react"
+import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import { FormProvider, useFieldArray, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
+import { FormDialog } from "@/components/patterns/form-dialog"
 import { Field } from "@/components/patterns/form-section"
+import { RecordStepper } from "@/components/patterns/record-stepper"
+import type { RecordSteps } from "@/components/patterns/record-stepper"
+import { useDiscardGuard } from "@/components/patterns/use-discard-guard"
 import { Button } from "@/components/ui/button"
+import { DialogBody, DialogSection } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
 import { useDeleteTemplate, useSaveTemplate } from "@/features/attributes/api"
 import { emptyDefinition, removedDefinitions, templateForm } from "@/features/attributes/form"
@@ -25,18 +22,24 @@ import { isValidSlug, toSlug } from "@/lib/slug"
 import { AddDefinitionButton, DefinitionEditor } from "./definition-editor"
 import { GroupList } from "./group-list"
 
-interface TemplateSheetProps {
+interface TemplateDialogProps {
   /** The template to edit; null for a new one. */
   template: AttributeTemplate | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  /** A saved template's place among the shop's: ‹ n / m › walks them. */
+  steps?: RecordSteps
+  /** The template the arrows go to, by its place: the form starts again from it. */
+  templateAt?: (index: number) => AttributeTemplate | undefined
+  onClose: () => void
 }
 
 /**
- * A template and its attributes in a side sheet (adr/0013). Removing an
- * attribute that products may hold values for is asked about first.
+ * A template and its attributes in one dialog (adr/0013): its name and
+ * address, the spec table's groups and each attribute. Removing an
+ * attribute that products may hold values for is asked about first; the
+ * arrows go to the shop's next template, asking first when something is
+ * not saved. `lg`: the name and the address side by side.
  */
-export function TemplateSheet({ template, open, onOpenChange }: TemplateSheetProps) {
+export function TemplateDialog({ template, steps, templateAt, onClose }: TemplateDialogProps) {
   const { t } = useTranslation()
   const form = useForm<TemplateForm>({ defaultValues: templateForm(template) })
   const definitions = useFieldArray({
@@ -47,6 +50,7 @@ export function TemplateSheet({ template, open, onOpenChange }: TemplateSheetPro
   const name = useWatch({ control: form.control, name: "name" })
   const save = useSaveTemplate()
   const remove = useDeleteTemplate()
+  const guard = useDiscardGuard(form.formState.isDirty)
   const [pending, setPending] = useState<TemplateForm | null>(null)
   const [confirmDelete, setConfirmDelete] = useState(false)
 
@@ -56,7 +60,7 @@ export function TemplateSheet({ template, open, onOpenChange }: TemplateSheetPro
       {
         onSuccess: () => {
           toast.success(t("attributes.saved"))
-          onOpenChange(false)
+          onClose()
         },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
@@ -77,21 +81,60 @@ export function TemplateSheet({ template, open, onOpenChange }: TemplateSheetPro
   })
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="flex w-full flex-col gap-0 p-0 sm:max-w-2xl">
-        <SheetHeader className="border-b">
-          <SheetTitle>{template ? template.name : t("attributes.newTemplate")}</SheetTitle>
-          <SheetDescription>{t("attributes.templateHint")}</SheetDescription>
-        </SheetHeader>
+    <>
+      <FormDialog
+        open
+        onOpenChange={(open) => {
+          if (!open) {
+            onClose()
+          }
+        }}
+        size="lg"
+        pane
+        title={template ? template.name : t("attributes.newTemplate")}
+        description={t("attributes.templateHint")}
+        headerAction={
+          template && steps ? (
+            <RecordStepper
+              {...steps}
+              previousLabel={t("attributes.previousTemplate")}
+              nextLabel={t("attributes.nextTemplate")}
+              disabled={save.isPending}
+              onGo={(to) => {
+                const next = templateAt?.(to)
+                if (next) {
+                  guard.guard(() => {
+                    form.reset(templateForm(next))
+                    steps.onGo(to)
+                  })
+                }
+              }}
+            />
+          ) : null
+        }
+        dirty={form.formState.isDirty}
+        saving={save.isPending}
+        onSubmit={() => void submit()}
+        guard={guard}
+        footerStart={
+          template ? (
+            <Button
+              type="button"
+              variant="ghost"
+              className="w-full text-destructive-text sm:w-auto"
+              onClick={() => {
+                setConfirmDelete(true)
+              }}
+            >
+              <Trash2 />
+              {t("attributes.deleteTemplate")}
+            </Button>
+          ) : undefined
+        }
+      >
         <FormProvider {...form}>
-          <form
-            id="template-form"
-            noValidate
-            onSubmit={(event) => {
-              void submit(event)
-            }}
-            className="flex flex-1 flex-col gap-5 overflow-y-auto px-6 py-6"
-          >
+          {/* Started again for another template: what the parts keep for themselves too */}
+          <DialogBody key={template?.id ?? "new"}>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label={t("attributes.templateName")} htmlFor="template-name" required>
                 <Input id="template-name" {...form.register("name")} />
@@ -118,8 +161,7 @@ export function TemplateSheet({ template, open, onOpenChange }: TemplateSheetPro
               />
             </Field>
             <GroupList />
-            <div className="flex flex-col gap-3">
-              <span className="text-sm font-medium">{t("attributes.definitions")}</span>
+            <DialogSection title={t("attributes.definitions")}>
               {definitions.fields.length === 0 ? (
                 <p className="rounded-md border border-dashed px-4 py-6 text-center text-sm text-muted-foreground">
                   {t("attributes.noDefinitions")}
@@ -146,32 +188,10 @@ export function TemplateSheet({ template, open, onOpenChange }: TemplateSheetPro
                   definitions.append(emptyDefinition())
                 }}
               />
-            </div>
-          </form>
+            </DialogSection>
+          </DialogBody>
         </FormProvider>
-        <SheetFooter className="flex-row items-center justify-between border-t">
-          {template ? (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              className="text-destructive-text"
-              onClick={() => {
-                setConfirmDelete(true)
-              }}
-            >
-              <Trash2 />
-              {t("attributes.deleteTemplate")}
-            </Button>
-          ) : (
-            <span />
-          )}
-          <Button type="submit" form="template-form" disabled={save.isPending}>
-            {save.isPending ? <Loader2 className="animate-spin" /> : null}
-            {t("common.save")}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
+      </FormDialog>
       <ConfirmDialog
         open={pending !== null}
         onOpenChange={(next) => {
@@ -208,13 +228,13 @@ export function TemplateSheet({ template, open, onOpenChange }: TemplateSheetPro
             remove.mutate(template.id, {
               onSuccess: () => {
                 toast.success(t("attributes.deleted"))
-                onOpenChange(false)
+                onClose()
               },
               onError: (failure) => toast.error(errorText(t, failure)),
             })
           }}
         />
       ) : null}
-    </Sheet>
+    </>
   )
 }

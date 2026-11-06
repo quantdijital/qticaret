@@ -1,19 +1,16 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { DetailDialog } from "@/components/patterns/detail-dialog"
+import { RecordStepper } from "@/components/patterns/record-stepper"
+import type { RecordSteps } from "@/components/patterns/record-stepper"
 import { StatusBadge } from "@/components/patterns/status-badge"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+import { DialogBody, DialogSection } from "@/components/ui/dialog"
 import type { AuditEntry } from "@/features/settings/api/audit"
 import { formatDateTime } from "@/lib/format"
 import { describeUserAgent } from "@/lib/user-agent"
 
 const A = "settings.audit.detail"
-// A value longer than this is cut in the sheet; the export keeps it whole
+// A value longer than this is cut in the dialog; the export keeps it whole
 const MAX_VALUE = 300
 
 interface FieldChange {
@@ -146,97 +143,101 @@ function Changes({ changes }: { changes: Record<string, unknown> }) {
   )
 }
 
-interface AuditDetailSheetProps {
+interface AuditDetailDialogProps {
   entry: AuditEntry | null
   /** Who did it, as the table names them. */
   actor: string
+  /** The entry's place on the log's page: ‹ n / m › walks it. */
+  steps: RecordSteps
   onClose: () => void
 }
 
 /**
  * One entry in full (F12.5): who, when, from where, with what outcome, and
- * what changed. Opening it reads nothing new: the list's row holds it all.
+ * what changed; the arrows go to the log's next entry. Opening it reads
+ * nothing new: the list's row holds it all. `lg`: the change table's
+ * before and after side by side.
  */
-export function AuditDetailSheet({ entry, actor, onClose }: AuditDetailSheetProps) {
+export function AuditDetailDialog({ entry, actor, steps, onClose }: AuditDetailDialogProps) {
   const { t } = useTranslation()
   const failed = entry?.outcome !== null && entry?.outcome !== undefined && entry.outcome >= 400
   const browser = entry?.user_agent ? describeUserAgent(entry.user_agent) : null
   return (
-    <Sheet
+    <DetailDialog
       open={entry !== null}
       onOpenChange={(open) => {
         if (!open) {
           onClose()
         }
       }}
+      size="lg"
+      title={t(`${A}.title`)}
+      description={entry?.action}
+      descriptionClassName="font-mono text-[12px] break-all"
+      headerAction={
+        <RecordStepper {...steps} previousLabel={t(`${A}.previous`)} nextLabel={t(`${A}.next`)} />
+      }
     >
-      <SheetContent className="flex w-full flex-col gap-0 sm:max-w-lg">
-        <SheetHeader className="border-b">
-          <SheetTitle>{t(`${A}.title`)}</SheetTitle>
-          <SheetDescription className="font-mono text-[12px] break-all">
-            {entry?.action}
-          </SheetDescription>
-        </SheetHeader>
-        {entry ? (
-          <div className="flex-1 overflow-y-auto px-6 py-6">
-            <dl className="divide-y">
-              <Fact label={t("settings.audit.columns.when")}>
-                <span className="tabular-nums">{formatDateTime(entry.created_at)}</span>
+      {entry ? (
+        <DialogBody>
+          <dl className="divide-y">
+            <Fact label={t("settings.audit.columns.when")}>
+              <span className="tabular-nums">{formatDateTime(entry.created_at)}</span>
+            </Fact>
+            <Fact label={t("settings.audit.columns.kind")}>
+              {t(`settings.audit.kinds.${entry.kind}`)}
+            </Fact>
+            {entry.outcome !== null ? (
+              <Fact label={t(`${A}.outcome`)}>
+                <StatusBadge tone={failed ? "danger" : "success"}>
+                  {t(failed ? `${A}.failed` : `${A}.succeeded`, { status: entry.outcome })}
+                </StatusBadge>
               </Fact>
-              <Fact label={t("settings.audit.columns.kind")}>
-                {t(`settings.audit.kinds.${entry.kind}`)}
-              </Fact>
-              {entry.outcome !== null ? (
-                <Fact label={t(`${A}.outcome`)}>
-                  <StatusBadge tone={failed ? "danger" : "success"}>
-                    {t(failed ? `${A}.failed` : `${A}.succeeded`, { status: entry.outcome })}
-                  </StatusBadge>
-                </Fact>
+            ) : null}
+            <Fact label={t("settings.audit.columns.actor")}>
+              {actor}
+              {entry.actor_id ? (
+                <span className="block font-mono text-[12px] text-muted-foreground">
+                  {entry.actor_id}
+                </span>
               ) : null}
-              <Fact label={t("settings.audit.columns.actor")}>
-                {actor}
-                {entry.actor_id ? (
+            </Fact>
+            {entry.resource_type ? (
+              <Fact label={t(`${A}.resource`)}>
+                {t(`settings.audit.resources.${entry.resource_type}`, {
+                  defaultValue: entry.resource_type,
+                })}
+                {entry.resource_id ? (
                   <span className="block font-mono text-[12px] text-muted-foreground">
-                    {entry.actor_id}
+                    {entry.resource_id}
                   </span>
                 ) : null}
               </Fact>
-              {entry.resource_type ? (
-                <Fact label={t(`${A}.resource`)}>
-                  {t(`settings.audit.resources.${entry.resource_type}`, {
-                    defaultValue: entry.resource_type,
-                  })}
-                  {entry.resource_id ? (
-                    <span className="block font-mono text-[12px] text-muted-foreground">
-                      {entry.resource_id}
-                    </span>
-                  ) : null}
-                </Fact>
+            ) : null}
+            <Fact label={t(`${A}.requestId`)}>
+              <span className="font-mono text-[12px]">{entry.request_id ?? "—"}</span>
+            </Fact>
+            <Fact label={t("settings.audit.columns.ip")}>
+              <span className="font-mono text-[12px]">{entry.ip ?? "—"}</span>
+            </Fact>
+            <Fact label={t(`${A}.browser`)}>
+              {browser ?? (entry.user_agent ? null : "—")}
+              {entry.user_agent ? (
+                <span className="block text-xs break-all text-muted-foreground">
+                  {entry.user_agent}
+                </span>
               ) : null}
-              <Fact label={t(`${A}.requestId`)}>
-                <span className="font-mono text-[12px]">{entry.request_id ?? "—"}</span>
-              </Fact>
-              <Fact label={t("settings.audit.columns.ip")}>
-                <span className="font-mono text-[12px]">{entry.ip ?? "—"}</span>
-              </Fact>
-              <Fact label={t(`${A}.browser`)}>
-                {browser ?? (entry.user_agent ? null : "—")}
-                {entry.user_agent ? (
-                  <span className="block text-xs break-all text-muted-foreground">
-                    {entry.user_agent}
-                  </span>
-                ) : null}
-              </Fact>
-            </dl>
-            <h3 className="mt-5 mb-2 text-sm font-medium">{t(`${A}.heading.${entry.kind}`)}</h3>
+            </Fact>
+          </dl>
+          <DialogSection title={t(`${A}.heading.${entry.kind}`)}>
             {hasDetails(entry.changes) ? (
               <Changes changes={entry.changes} />
             ) : (
               <p className="text-[13px] text-muted-foreground">{t(`${A}.noChanges`)}</p>
             )}
-          </div>
-        ) : null}
-      </SheetContent>
-    </Sheet>
+          </DialogSection>
+        </DialogBody>
+      ) : null}
+    </DetailDialog>
   )
 }

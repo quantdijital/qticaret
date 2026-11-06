@@ -828,7 +828,9 @@
           "mutation": "Changes",
           "sensitive_read": "What was asked",
           "system": "Details"
-        }
+        },
+        "previous": "Previous entry",
+        "next": "Next entry"
       },
       "resources": {
         "accounting_package": "Accounting package",
@@ -3236,7 +3238,10 @@
         "choices": "A choice add-on has 2-10 options.",
         "choiceLabel": "An option's name is 1-60 characters.",
         "idDuplicate": "The same add-on was sent twice. Reload the page and try again."
-      }
+      },
+      "editTitle": "Edit add-on",
+      "previous": "Previous add-on",
+      "next": "Next add-on"
     },
     "sheets": {
       "import": "Import",
@@ -4342,7 +4347,9 @@
         "customer": "Customer",
         "openCustomer": "Open the customer's record",
         "status": "Status",
-        "message": "Message"
+        "message": "Message",
+        "previous": "Previous message",
+        "next": "Next message"
       },
       "reply": "About your message: {{subject}}",
       "replyOrder": "About your message: {{subject}} (order #{{order}})",
@@ -4612,7 +4619,9 @@
         "cancel": "Cancellation",
         "reconcile": "Reconciled",
         "unknown": "Other"
-      }
+      },
+      "previous": "Previous item",
+      "next": "Next item"
     }
   },
   "promotions": {
@@ -6021,7 +6030,9 @@
       "left_one": "{{formatted}} product was skipped or could not be written; the reasons are in the report.",
       "left_other": "{{formatted}} products were skipped or could not be written; the reasons are in the report.",
       "report": "Download the report"
-    }
+    },
+    "previousTemplate": "Previous template",
+    "nextTemplate": "Next template"
   },
   "brands": {
     "description": "Each brand has its own page, logo and products.",
@@ -6415,7 +6426,15 @@
       "createTag": "Create tag “{{name}}”",
       "removeTag": "Remove tag {{name}}",
       "tagsFull": "A post can have at most {{max}} tags.",
-      "manage": "Manage categories and tags"
+      "manage": "Manage categories and tags",
+      "previous": {
+        "category": "Previous category",
+        "tag": "Previous tag"
+      },
+      "next": {
+        "category": "Next category",
+        "tag": "Next tag"
+      }
     },
     "authors": {
       "columns": {
@@ -8361,7 +8380,9 @@
       "deleteTitle": "Delete this image?",
       "deleteDescription": "“{{name}}” and its files are deleted for good; this cannot be undone.",
       "deleteConfirm": "Delete image",
-      "deleted": "Image deleted."
+      "deleted": "Image deleted.",
+      "previous": "Previous picture",
+      "next": "Next picture"
     },
     "usage": {
       "none": "Not used anywhere.",
@@ -8418,5 +8439,8 @@
     "subtitleAs": "You are signed in as {{email}}. Once confirmed, you sign in with your new address; your password stays the same.",
     "signInFirst": "Sign in with the account that asked for the change; you come back to this page afterwards.",
     "signIn": "Sign in"
+  },
+  "recordStepper": {
+    "position": "{{at}} / {{total}}"
   }
 }

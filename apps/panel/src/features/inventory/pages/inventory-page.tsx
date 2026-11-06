@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/patterns/page-header"
 import { Pagination } from "@/components/patterns/pagination"
 import { SearchInput } from "@/components/patterns/search-input"
 import { ErrorState } from "@/components/patterns/states"
+import { useRecordWalk } from "@/components/patterns/use-record-walk"
 import { Button } from "@/components/ui/button"
 import {
   STOCK_PAGE_SIZE,
@@ -20,7 +21,7 @@ import {
 } from "@/features/inventory/api/stock"
 import type { StockItem, StockView } from "@/features/inventory/api/stock"
 import { NoLocationNotice } from "@/features/inventory/components/no-location-notice"
-import { StockHistorySheet } from "@/features/inventory/components/stock-history-sheet"
+import { StockHistoryDialog } from "@/features/inventory/components/stock-history-dialog"
 import { useStockColumns } from "@/features/inventory/components/stock-columns"
 import { DIGITS } from "@/features/inventory/drafts"
 import type { Drafts } from "@/features/inventory/drafts"
@@ -62,14 +63,14 @@ export function InventoryPage() {
     return text !== undefined && text !== String(shelf(item)?.stocked_quantity ?? 0)
   })
   const invalid = changed.some((item) => !DIGITS.test(drafts[item.id] ?? ""))
-  const [historyOf, setHistoryOf] = useState<StockItem | null>(null)
+  const history = useRecordWalk(board.data?.items, (item) => item.id)
   const columns = useStockColumns(
     locationId,
     drafts,
     (id, text) => {
       setDrafts((was) => ({ ...was, [id]: text }))
     },
-    setHistoryOf
+    history.show
   )
   const setSearch = (next: { q?: string; view?: StockView; page?: number }) => {
     const nextView = next.view ?? view
@@ -190,14 +191,7 @@ export function InventoryPage() {
         )}
       </section>
       <p className="text-xs text-muted-foreground">{t("inventory.note")}</p>
-      <StockHistorySheet
-        item={historyOf}
-        onOpenChange={(open) => {
-          if (!open) {
-            setHistoryOf(null)
-          }
-        }}
-      />
+      <StockHistoryDialog item={history.open} steps={history.steps} onClose={history.close} />
     </div>
   )
 }

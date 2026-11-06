@@ -68,6 +68,26 @@ const productAction = (open: (page: Page) => Promise<void>) => async (page: Page
   return false
 }
 
+/** The list's first row, opening its record; false while the list is empty. */
+const firstRow = async (page: Page) => {
+  const rows = page.locator("main table tbody tr.cursor-pointer")
+  if ((await rows.count()) === 0) {
+    return false
+  }
+  await rows.first().click()
+  return true
+}
+
+/** The first of what the selector finds, when there is one: a card or a row's own button. */
+const firstOf = (selector: string) => async (page: Page) => {
+  const found = page.locator(selector)
+  if ((await found.count()) === 0) {
+    return false
+  }
+  await found.first().click()
+  return true
+}
+
 /**
  * Dialogs that open without writing anything; each one is only looked at
  * and closed. Opening a refund asks the server for a preview, nothing more.
@@ -106,6 +126,21 @@ const CASES: Case[] = [
       await page.getByRole("button", { name: "Katalog bilgileri: düzenle" }).click()
     }),
   },
+  // The owner, 2026-11-06: the side sheets that showed a record became the standard dialog
+  { name: "audit entry", path: "/settings/audit", open: firstRow },
+  { name: "contact message", path: "/customers/contact-messages", open: firstRow },
+  { name: "blog category", path: "/content?kind=category", open: firstRow },
+  {
+    name: "stock history",
+    path: "/inventory",
+    open: firstOf('main button[aria-label$="stok geçmişi"]'),
+  },
+  {
+    name: "attribute template",
+    path: "/settings/attributes",
+    open: firstOf("main ul > li > button"),
+  },
+  { name: "media detail", path: "/media", open: firstOf("main ul > li > button") },
 ]
 
 /**

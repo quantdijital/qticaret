@@ -2,16 +2,9 @@ import { Loader2 } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog"
 import type { DialogSize } from "@/components/ui/dialog"
-import { cn } from "@/lib/utils"
+import { DialogHeading } from "./dialog-heading"
 import { useDiscardGuard } from "./use-discard-guard"
 
 interface FormDialogProps {
@@ -19,6 +12,8 @@ interface FormDialogProps {
   onOpenChange: (open: boolean) => void
   title: string
   description?: ReactNode
+  /** The description's own type (a path in monospace). */
+  descriptionClassName?: string
   size?: DialogSize
   /** Header and footer fixed, the body scrolling between them. */
   pane?: boolean
@@ -52,6 +47,7 @@ export function FormDialog({
   onOpenChange,
   title,
   description,
+  descriptionClassName,
   size = "md",
   pane = false,
   headerAction,
@@ -106,23 +102,12 @@ export function FormDialog({
               onSubmit()
             }}
           >
-            <DialogHeader className={cn(headerAction && "sm:flex-row sm:items-start sm:pr-10")}>
-              <div className="flex min-w-0 flex-1 flex-col gap-2">
-                <DialogTitle>{title}</DialogTitle>
-                {description ? (
-                  <DialogDescription asChild={typeof description !== "string"}>
-                    {typeof description === "string" ? description : <div>{description}</div>}
-                  </DialogDescription>
-                ) : (
-                  <DialogDescription className="sr-only">{title}</DialogDescription>
-                )}
-              </div>
-              {headerAction ? (
-                <div className="flex shrink-0 items-center justify-center gap-1">
-                  {headerAction}
-                </div>
-              ) : null}
-            </DialogHeader>
+            <DialogHeading
+              title={title}
+              description={description}
+              descriptionClassName={descriptionClassName}
+              action={headerAction}
+            />
             {children}
             <DialogFooter>
               {footerStart ? <div className="flex sm:mr-auto">{footerStart}</div> : null}

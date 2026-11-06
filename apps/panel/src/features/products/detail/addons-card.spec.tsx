@@ -137,13 +137,13 @@ describe("AddonsCard (adr/0052)", () => {
     expect(screen.getByText(/Örnek: Ürün üzerine yazı, \+35 TL/)).toBeInTheDocument()
   })
 
-  it("adds one from the sheet, saving the whole list with ids kept and the new one without", async () => {
+  it("adds one from the dialog, saving the whole list with ids kept and the new one without", async () => {
     const user = userEvent.setup()
     renderCard()
     await user.click(await screen.findByRole("button", { name: "Ek seçenek ekle" }))
-    const sheet = screen.getByRole("dialog")
-    await user.type(within(sheet).getByLabelText(/^Ad\*?$/), "Hediye notu")
-    await user.click(within(sheet).getByRole("button", { name: "Kaydet" }))
+    const dialog = screen.getByRole("dialog")
+    await user.type(within(dialog).getByLabelText(/^Ad\*?$/), "Hediye notu")
+    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/products/prod_1/catalog", {
@@ -162,20 +162,20 @@ describe("AddonsCard (adr/0052)", () => {
     const user = userEvent.setup()
     renderCard()
     await user.click(await screen.findByRole("button", { name: "Ek seçenek ekle" }))
-    const sheet = screen.getByRole("dialog")
-    await user.type(within(sheet).getByLabelText(/^Ad\*?$/), "Hediye notu")
-    await user.type(within(sheet).getByLabelText("Fiyat (TL)"), "35")
-    await user.click(within(sheet).getByRole("switch", { name: "Zorunlu" }))
-    await user.click(within(sheet).getByRole("button", { name: "Kaydet" }))
+    const dialog = screen.getByRole("dialog")
+    await user.type(within(dialog).getByLabelText(/^Ad\*?$/), "Hediye notu")
+    await user.type(within(dialog).getByLabelText("Fiyat (TL)"), "35")
+    await user.click(within(dialog).getByRole("switch", { name: "Zorunlu" }))
+    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
 
-    expect(await within(sheet).findByRole("alert")).toHaveTextContent(
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
       "Ücretli ek seçenek zorunlu olamaz."
     )
     expect(posted()).toHaveLength(0)
 
     // Free, it may be required
-    await user.clear(within(sheet).getByLabelText("Fiyat (TL)"))
-    await user.click(within(sheet).getByRole("button", { name: "Kaydet" }))
+    await user.clear(within(dialog).getByLabelText("Fiyat (TL)"))
+    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
     await waitFor(() => {
       expect(posted()).toHaveLength(1)
     })
@@ -187,27 +187,29 @@ describe("AddonsCard (adr/0052)", () => {
     const user = userEvent.setup()
     renderCard()
     await user.click(await screen.findByRole("button", { name: "Ek seçenek ekle" }))
-    const sheet = screen.getByRole("dialog")
-    await user.click(within(sheet).getByRole("radio", { name: "Seçim" }))
-    await user.type(within(sheet).getByLabelText(/^Ad\*?$/), "Paket")
+    const dialog = screen.getByRole("dialog")
+    await user.click(within(dialog).getByRole("radio", { name: "Seçim" }))
+    await user.type(within(dialog).getByLabelText(/^Ad\*?$/), "Paket")
 
-    const first = within(sheet).getByRole("button", { name: "1. seçenek: kaldır" })
+    const first = within(dialog).getByRole("button", { name: "1. seçenek: kaldır" })
     expect(first).toBeDisabled()
-    expect(within(sheet).getByRole("button", { name: "2. seçenek: kaldır" })).toBeDisabled()
-    await user.click(within(sheet).getByRole("button", { name: "Seçenek ekle" }))
+    expect(within(dialog).getByRole("button", { name: "2. seçenek: kaldır" })).toBeDisabled()
+    await user.click(within(dialog).getByRole("button", { name: "Seçenek ekle" }))
     expect(first).toBeEnabled()
     await user.click(first)
-    expect(within(sheet).getByRole("button", { name: "1. seçenek: kaldır" })).toBeDisabled()
+    expect(within(dialog).getByRole("button", { name: "1. seçenek: kaldır" })).toBeDisabled()
 
     // An option without a name is refused here
-    await user.click(within(sheet).getByRole("button", { name: "Kaydet" }))
-    expect(await within(sheet).findAllByText("Seçeneğin adı 1-60 karakter olmalı.")).toHaveLength(2)
+    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
+    expect(await within(dialog).findAllByText("Seçeneğin adı 1-60 karakter olmalı.")).toHaveLength(
+      2
+    )
     expect(posted()).toHaveLength(0)
 
-    await user.type(within(sheet).getByLabelText("1. seçeneğin adı"), "Kutulu")
-    await user.type(within(sheet).getByLabelText("1. seçeneğin fiyatı"), "20")
-    await user.type(within(sheet).getByLabelText("2. seçeneğin adı"), "Kutusuz")
-    await user.click(within(sheet).getByRole("button", { name: "Kaydet" }))
+    await user.type(within(dialog).getByLabelText("1. seçeneğin adı"), "Kutulu")
+    await user.type(within(dialog).getByLabelText("1. seçeneğin fiyatı"), "20")
+    await user.type(within(dialog).getByLabelText("2. seçeneğin adı"), "Kutusuz")
+    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {
       expect(posted()).toHaveLength(1)
@@ -281,16 +283,39 @@ describe("AddonsCard (adr/0052)", () => {
     )
     renderCard()
     await user.click(await screen.findByRole("button", { name: "Ürün üzerine yazı: düzenle" }))
-    const sheet = screen.getByRole("dialog")
+    const dialog = screen.getByRole("dialog")
     // A saved add-on keeps its kind
-    expect(within(sheet).getByRole("radio", { name: "Seçim" })).toBeDisabled()
-    await user.click(within(sheet).getByRole("button", { name: "Kaydet" }))
+    expect(within(dialog).getByRole("radio", { name: "Seçim" })).toBeDisabled()
+    // Nothing changed, nothing to save
+    expect(within(dialog).getByRole("button", { name: "Kaydet" })).toBeDisabled()
+    await user.type(within(dialog).getByLabelText("Açıklama"), "İsim ya da tarih.")
+    await user.click(within(dialog).getByRole("button", { name: "Kaydet" }))
 
-    const alert = await within(sheet).findByRole("alert")
+    const alert = await within(dialog).findByRole("alert")
     expect(alert).toHaveTextContent("Açmak için Ayarlar > Özellikler'e gidin.")
     expect(within(alert).getByRole("link", { name: "Özelliklere git" })).toHaveAttribute(
       "href",
       "/settings/features"
     )
+  })
+
+  it("walks the product's add-ons in one dialog, asking before dropping a change", async () => {
+    const user = userEvent.setup()
+    renderCard()
+    // The row itself opens it, as a variant's does
+    await user.click(await screen.findByRole("button", { name: /^Ürün üzerine yazı\s*Cayma dışı/ }))
+    const dialog = screen.getByRole("dialog", { name: "Ek seçeneği düzenle" })
+    expect(within(dialog).getByText("1 / 2")).toBeInTheDocument()
+    expect(within(dialog).getByRole("button", { name: "Önceki ek seçenek" })).toBeDisabled()
+
+    await user.click(within(dialog).getByRole("button", { name: "Sonraki ek seçenek" }))
+    expect(within(dialog).getByLabelText(/^Ad\*?$/)).toHaveValue("Kılıf")
+    expect(within(dialog).getByText("2 / 2")).toBeInTheDocument()
+
+    await user.type(within(dialog).getByLabelText(/^Ad\*?$/), " seti")
+    await user.click(within(dialog).getByRole("button", { name: "Önceki ek seçenek" }))
+    await user.click(await screen.findByRole("button", { name: "Değişiklikleri at" }))
+    expect(within(dialog).getByLabelText(/^Ad\*?$/)).toHaveValue("Ürün üzerine yazı")
+    expect(posted()).toHaveLength(0)
   })
 })

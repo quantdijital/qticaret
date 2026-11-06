@@ -5,16 +5,12 @@ import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
+import { DetailDialog } from "@/components/patterns/detail-dialog"
+import { RecordStepper } from "@/components/patterns/record-stepper"
+import type { RecordSteps } from "@/components/patterns/record-stepper"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet"
+import { DialogBody, DialogSection } from "@/components/ui/dialog"
 import { useCan } from "@/features/auth/api/staff"
 import {
   CONTACT_MESSAGES_KEY,
@@ -70,16 +66,14 @@ function Actions({ message, onDone }: { message: ContactMessage; onDone: () => v
     onSuccess: () => done(t(`${M}.deleted`)),
     onError: failed,
   })
-  if (!canMark && !canDelete) {
-    return null
-  }
   const busy = mark.isPending || remove.isPending
   const next: ContactStatus = message.status === "new" ? "handled" : "new"
   return (
-    <SheetFooter className="flex-row flex-wrap justify-end border-t">
+    <>
       {canDelete ? (
         <Button
           variant="outline"
+          className="text-destructive-text sm:mr-auto"
           disabled={busy}
           onClick={() => {
             setConfirming(true)
@@ -110,109 +104,114 @@ function Actions({ message, onDone }: { message: ContactMessage; onDone: () => v
           remove.mutate()
         }}
       />
-    </SheetFooter>
+    </>
   )
 }
 
-/**
- * One contact message in full beside the list (adr/0047): who wrote, how
- * to reach them, the order they name and what they wrote, as plain text.
- * The reply goes from the shop's own mail program.
- */
-export function ContactMessageSheet({
-  message,
-  onClose,
-}: {
+interface ContactMessageDialogProps {
   message: ContactMessage | null
+  /** The message's place on the list's page: ‹ n / m › walks it. */
+  steps: RecordSteps
   onClose: () => void
-}) {
+}
+
+/**
+ * One contact message in full (adr/0047): who wrote, how to reach them,
+ * the order they name and what they wrote, as plain text; the arrows go
+ * to the list's next message. The reply goes from the shop's own mail
+ * program.
+ */
+export function ContactMessageDialog({ message, steps, onClose }: ContactMessageDialogProps) {
   const { t } = useTranslation()
+  const canMark = useCan("orders")
+  const canDelete = useCan("settings")
+  const canAct = canMark || canDelete
   const subject = message ? t(`${M}.subjects.${message.subject}`) : ""
   const reply = message?.order_number
     ? t(`${M}.replyOrder`, { subject, order: message.order_number })
     : t(`${M}.reply`, { subject })
   return (
-    <Sheet
+    <DetailDialog
       open={message !== null}
       onOpenChange={(open) => {
         if (!open) {
           onClose()
         }
       }}
+      title={t(`${M}.detail.title`)}
+      description={message ? `${subject} · ${formatDateTime(message.created_at)}` : undefined}
+      headerAction={
+        <RecordStepper
+          {...steps}
+          previousLabel={t(`${M}.detail.previous`)}
+          nextLabel={t(`${M}.detail.next`)}
+        />
+      }
+      footer={message && canAct ? <Actions message={message} onDone={onClose} /> : undefined}
     >
-      <SheetContent className="flex w-full flex-col gap-0 sm:max-w-lg">
-        <SheetHeader className="border-b">
-          <SheetTitle>{t(`${M}.detail.title`)}</SheetTitle>
-          <SheetDescription>
-            {message ? `${subject} · ${formatDateTime(message.created_at)}` : null}
-          </SheetDescription>
-        </SheetHeader>
-        {message ? (
-          <>
-            <div className="flex-1 overflow-y-auto px-6 py-6">
-              <dl className="divide-y">
-                <Fact label={t(`${M}.detail.name`)}>{message.name}</Fact>
-                <Fact label={t(`${M}.detail.email`)}>
-                  <a
-                    href={mailtoOf(message.email, reply)}
-                    className="break-all text-primary-text hover:underline"
-                  >
-                    {message.email}
-                  </a>
-                </Fact>
-                <Fact label={t(`${M}.detail.phone`)}>
-                  {message.phone ? (
-                    <a href={`tel:${message.phone}`} className="text-primary-text hover:underline">
-                      {formatPhone(message.phone)}
-                    </a>
-                  ) : (
-                    "—"
-                  )}
-                </Fact>
-                <Fact label={t(`${M}.detail.order`)}>
-                  {message.order_number ? (
-                    <Link
-                      to="/orders"
-                      search={{ q: message.order_number }}
-                      className="text-primary-text hover:underline"
-                    >
-                      #{message.order_number}
-                    </Link>
-                  ) : (
-                    "—"
-                  )}
-                </Fact>
-                {message.customer_id ? (
-                  <Fact label={t(`${M}.detail.customer`)}>
-                    <Link
-                      to="/customers/$id"
-                      params={{ id: message.customer_id }}
-                      className="text-primary-text hover:underline"
-                    >
-                      {t(`${M}.detail.openCustomer`)}
-                    </Link>
-                  </Fact>
-                ) : null}
-                <Fact label={t(`${M}.detail.status`)}>
-                  <StatusBadge tone={message.status === "new" ? "warning" : "success"}>
-                    {t(`${M}.status.${message.status}`)}
-                  </StatusBadge>
-                  {message.status === "handled" && message.handled_at ? (
-                    <span className="ml-2 text-muted-foreground tabular-nums">
-                      {formatDateTime(message.handled_at)}
-                    </span>
-                  ) : null}
-                </Fact>
-              </dl>
-              <h3 className="mt-5 mb-2 text-sm font-medium">{t(`${M}.detail.message`)}</h3>
-              <p className="rounded-md border bg-muted/40 p-3 text-sm break-words whitespace-pre-wrap">
-                {message.body}
-              </p>
-            </div>
-            <Actions message={message} onDone={onClose} />
-          </>
-        ) : null}
-      </SheetContent>
-    </Sheet>
+      {message ? (
+        <DialogBody>
+          <dl className="divide-y">
+            <Fact label={t(`${M}.detail.name`)}>{message.name}</Fact>
+            <Fact label={t(`${M}.detail.email`)}>
+              <a
+                href={mailtoOf(message.email, reply)}
+                className="break-all text-primary-text hover:underline"
+              >
+                {message.email}
+              </a>
+            </Fact>
+            <Fact label={t(`${M}.detail.phone`)}>
+              {message.phone ? (
+                <a href={`tel:${message.phone}`} className="text-primary-text hover:underline">
+                  {formatPhone(message.phone)}
+                </a>
+              ) : (
+                "—"
+              )}
+            </Fact>
+            <Fact label={t(`${M}.detail.order`)}>
+              {message.order_number ? (
+                <Link
+                  to="/orders"
+                  search={{ q: message.order_number }}
+                  className="text-primary-text hover:underline"
+                >
+                  #{message.order_number}
+                </Link>
+              ) : (
+                "—"
+              )}
+            </Fact>
+            {message.customer_id ? (
+              <Fact label={t(`${M}.detail.customer`)}>
+                <Link
+                  to="/customers/$id"
+                  params={{ id: message.customer_id }}
+                  className="text-primary-text hover:underline"
+                >
+                  {t(`${M}.detail.openCustomer`)}
+                </Link>
+              </Fact>
+            ) : null}
+            <Fact label={t(`${M}.detail.status`)}>
+              <StatusBadge tone={message.status === "new" ? "warning" : "success"}>
+                {t(`${M}.status.${message.status}`)}
+              </StatusBadge>
+              {message.status === "handled" && message.handled_at ? (
+                <span className="ml-2 text-muted-foreground tabular-nums">
+                  {formatDateTime(message.handled_at)}
+                </span>
+              ) : null}
+            </Fact>
+          </dl>
+          <DialogSection title={t(`${M}.detail.message`)}>
+            <p className="rounded-md border bg-muted/40 p-3 text-sm break-words whitespace-pre-wrap">
+              {message.body}
+            </p>
+          </DialogSection>
+        </DialogBody>
+      ) : null}
+    </DetailDialog>
   )
 }

@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/patterns/page-header"
 import { Pagination } from "@/components/patterns/pagination"
 import { SearchInput } from "@/components/patterns/search-input"
 import { ErrorState } from "@/components/patterns/states"
+import { useRecordWalk } from "@/components/patterns/use-record-walk"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -19,7 +20,7 @@ import {
 } from "@/components/ui/dialog"
 import { useCan } from "@/features/auth/api/staff"
 import { MEDIA_PAGE_SIZE, mediaListQuery } from "@/features/media/api/media"
-import { MediaDetailSheet } from "@/features/media/components/media-detail-sheet"
+import { MediaDetailDialog } from "@/features/media/components/media-detail-dialog"
 import { MediaGrid } from "@/features/media/components/media-grid"
 import { UploadZone } from "@/features/media/components/upload-zone"
 import { errorText } from "@/lib/errors"
@@ -62,7 +63,7 @@ function UploadDialog({
 /**
  * The media library (docs/06 Ortam kütüphanesi): every picture the shop
  * uploaded or brought in from an address, newest first, searchable; one
- * opens beside the grid with its words, its address and where it is used.
+ * opens in a dialog with its words, its address and where it is used.
  */
 export function MediaPage() {
   const { t } = useTranslation()
@@ -73,7 +74,7 @@ export function MediaPage() {
   const page = (search.page ?? 1) - 1
   const list = useQuery(mediaListQuery({ q, page }))
   const [uploading, setUploading] = useState(false)
-  const [open, setOpen] = useState<string | null>(null)
+  const walk = useRecordWalk(list.data?.media, (asset) => asset.id)
   const setSearch = (next: { q?: string; page?: number }) => {
     void navigate({
       to: "/media",
@@ -119,9 +120,7 @@ export function MediaPage() {
               items={list.data?.media}
               loading={list.isPending}
               stale={list.isPlaceholderData}
-              onItemClick={(asset) => {
-                setOpen(asset.id)
-              }}
+              onItemClick={walk.show}
               empty={
                 <div className="flex flex-col items-center gap-3 text-center">
                   <p className="max-w-sm text-sm text-muted-foreground">
@@ -145,12 +144,7 @@ export function MediaPage() {
         ) : null}
       </section>
       <UploadDialog open={uploading} onOpenChange={setUploading} />
-      <MediaDetailSheet
-        id={open}
-        onClose={() => {
-          setOpen(null)
-        }}
-      />
+      <MediaDetailDialog id={walk.open?.id ?? null} steps={walk.steps} onClose={walk.close} />
     </div>
   )
 }

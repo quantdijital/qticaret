@@ -4,10 +4,10 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
+import { useRecordWalk } from "@/components/patterns/use-record-walk"
 import { Button } from "@/components/ui/button"
 import { templatesQuery } from "@/features/attributes/api"
-import { TemplateSheet } from "@/features/attributes/components/template-sheet"
-import type { AttributeTemplate } from "@/features/attributes/types"
+import { TemplateDialog } from "@/features/attributes/components/template-dialog"
 import { errorText } from "@/lib/errors"
 
 /**
@@ -18,12 +18,12 @@ import { errorText } from "@/lib/errors"
 export function AttributesPage() {
   const { t } = useTranslation()
   const query = useQuery(templatesQuery())
-  // undefined: closed; null: a new template
-  const [editing, setEditing] = useState<AttributeTemplate | null | undefined>(undefined)
+  const walk = useRecordWalk(query.data, (template) => template.id)
+  const [creating, setCreating] = useState(false)
   const add = (
     <Button
       onClick={() => {
-        setEditing(null)
+        setCreating(true)
       }}
     >
       <Plus />
@@ -54,7 +54,7 @@ export function AttributesPage() {
               <button
                 type="button"
                 onClick={() => {
-                  setEditing(template)
+                  walk.show(template)
                 }}
                 className="flex w-full flex-col gap-3 rounded-lg border bg-card p-5 text-left shadow-card transition-colors hover:border-input"
               >
@@ -84,15 +84,19 @@ export function AttributesPage() {
           ))}
         </ul>
       )}
-      {editing !== undefined ? (
-        <TemplateSheet
-          key={editing?.id ?? "new"}
-          template={editing}
-          open
-          onOpenChange={(open) => {
-            if (!open) {
-              setEditing(undefined)
-            }
+      {walk.open ? (
+        <TemplateDialog
+          template={walk.open}
+          steps={walk.steps}
+          templateAt={(index) => query.data?.[index]}
+          onClose={walk.close}
+        />
+      ) : null}
+      {creating ? (
+        <TemplateDialog
+          template={null}
+          onClose={() => {
+            setCreating(false)
           }}
         />
       ) : null}

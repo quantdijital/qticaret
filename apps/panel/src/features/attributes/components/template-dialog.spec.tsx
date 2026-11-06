@@ -1,10 +1,11 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
+import { useRecordWalk } from "@/components/patterns/use-record-walk"
 import type { AttributeDefinition, AttributeTemplate } from "@/features/attributes/types"
-import { TemplateSheet } from "./template-sheet"
+import { TemplateDialog } from "./template-dialog"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 
@@ -54,16 +55,16 @@ async function savedBody(): Promise<Record<string, unknown>> {
   return init.body
 }
 
-function renderSheet(saved: AttributeTemplate) {
+function renderDialog(saved: AttributeTemplate) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <TemplateSheet template={saved} open onOpenChange={vi.fn()} />
+      <TemplateDialog template={saved} onClose={vi.fn()} />
     </QueryClientProvider>
   )
 }
 
-describe("TemplateSheet: spec table groups", () => {
+describe("TemplateDialog: spec table groups", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     fetchMock.mockImplementation((_url: string, init?: { body?: object }) =>
@@ -72,7 +73,7 @@ describe("TemplateSheet: spec table groups", () => {
   })
 
   it("adds a group by name, puts a field in it and sends both", async () => {
-    renderSheet(template())
+    renderDialog(template())
 
     await userEvent.type(screen.getByRole("textbox", { name: "Yeni grup adı" }), "Ölçüler")
     await userEvent.click(screen.getByRole("button", { name: "Grup ekle" }))
@@ -98,7 +99,7 @@ describe("TemplateSheet: spec table groups", () => {
   })
 
   it("saves a template without groups as before", async () => {
-    renderSheet(template())
+    renderDialog(template())
 
     await userEvent.type(screen.getByRole("textbox", { name: /Şablon adı/ }), " ve dekor")
     await userEvent.click(screen.getByRole("button", { name: /Genişlik/ }))
@@ -113,7 +114,7 @@ describe("TemplateSheet: spec table groups", () => {
   })
 
   it("moves a group up, and a removed group's fields fall back to none", async () => {
-    renderSheet(
+    renderDialog(
       template({
         groups: [
           { key: "olculer", name: "Ölçüler", rank: 0 },
@@ -130,5 +131,57 @@ describe("TemplateSheet: spec table groups", () => {
     const body = await savedBody()
     expect(body["groups"]).toEqual([{ key: "bakim", name: "Bakım", rank: 0 }])
     expect(body["definitions"]).toEqual([expect.objectContaining({ id: "def_1", group: null })])
+  })
+})
+
+const FIRST = template()
+const SHOP = [FIRST, template({ id: "tpl_2", name: "Bıçak", handle: "bicak", definitions: [] })]
+
+/** The settings page's part: the shop's templates, one open in the dialog. */
+function Walked() {
+  const walk = useRecordWalk(SHOP, (each) => each.id)
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          walk.show(FIRST)
+        }}
+      >
+        Aç
+      </button>
+      {walk.open ? (
+        <TemplateDialog
+          template={walk.open}
+          steps={walk.steps}
+          templateAt={(index) => SHOP[index]}
+          onClose={walk.close}
+        />
+      ) : null}
+    </>
+  )
+}
+
+describe("TemplateDialog: walking the shop's templates", () => {
+  it("goes to the next template in the same dialog, asking before dropping a change", async () => {
+    const user = userEvent.setup()
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <Walked />
+      </QueryClientProvider>
+    )
+    await user.click(screen.getByRole("button", { name: "Aç" }))
+    const dialog = screen.getByRole("dialog", { name: "Mobilya" })
+    expect(within(dialog).getByText("1 / 2")).toBeInTheDocument()
+
+    await user.click(within(dialog).getByRole("button", { name: "Sonraki şablon" }))
+    expect(screen.getByRole("dialog", { name: "Bıçak" })).toBe(dialog)
+    expect(within(dialog).getByRole("textbox", { name: /Şablon adı/ })).toHaveValue("Bıçak")
+
+    await user.type(within(dialog).getByRole("textbox", { name: /Şablon adı/ }), " seti")
+    await user.click(within(dialog).getByRole("button", { name: "Önceki şablon" }))
+    await user.click(await screen.findByRole("button", { name: "Değişiklikleri at" }))
+    expect(within(dialog).getByRole("textbox", { name: /Şablon adı/ })).toHaveValue("Mobilya")
+    expect(within(dialog).getByText("1 / 2")).toBeInTheDocument()
   })
 })
