@@ -16,6 +16,8 @@ import {
   provinceOptions,
   selectsOf,
 } from "@/lib/checkout/address"
+import { codesOf } from "@/lib/cart/cart"
+import { isPaymentLinkCart } from "@/lib/cart/payment-link"
 import { addressComplete } from "@/lib/checkout/cart"
 import { CREDIT_CHECKOUT } from "@/lib/checkout/pay"
 import type { CheckoutAddress, CheckoutCart } from "@/lib/checkout/cart"
@@ -263,6 +265,8 @@ export async function checkoutView(
     ...payment,
     marketingVersion: MARKETING_TEXT_VERSION,
     summary: summaryOf(cart, t, paths),
+    // A payment link's cart keeps the code it was made with (adr/0051): no field
+    promotions: isPaymentLinkCart(cart.metadata) ? null : codesOf(cart),
     error,
     editPaths: STEP_PATHS,
     invoice: invoiceNoteOf(t, customer !== null, billing),

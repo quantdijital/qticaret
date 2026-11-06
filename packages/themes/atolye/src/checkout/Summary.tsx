@@ -1,4 +1,5 @@
 import { ChevronDown } from "lucide-react"
+import type { ReactNode } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CheckoutSummaryView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
@@ -87,10 +88,13 @@ function Totals({ summary, t }: { summary: CheckoutSummaryView; t: Translate }) 
 export function Summary({
   summary,
   t,
+  code,
   className,
 }: {
   summary: CheckoutSummaryView
   t: Translate
+  /** The code field under the lines (the checkout's; the card form's page has none). */
+  code?: ReactNode
   className?: string
 }) {
   return (
@@ -105,6 +109,7 @@ export function Summary({
         {t("cart.summary")}
       </h2>
       <Lines summary={summary} t={t} />
+      {code}
       <Totals summary={summary} t={t} />
       <p className="text-xs text-stage-text-2">{t("checkout.tax_included")}</p>
     </aside>
@@ -113,10 +118,18 @@ export function Summary({
 
 /**
  * On a phone the basket folds above the steps, a graphite bar with the
- * total in sight; opened, its lines and totals. Closed, it takes no room
- * below its bar.
+ * total in sight; opened, its lines, the code field and totals. Closed,
+ * it takes no room below its bar.
  */
-export function FoldedSummary({ summary, t }: { summary: CheckoutSummaryView; t: Translate }) {
+export function FoldedSummary({
+  summary,
+  t,
+  code,
+}: {
+  summary: CheckoutSummaryView
+  t: Translate
+  code?: ReactNode
+}) {
   return (
     <details className="gf-stage group rounded-tile lg:hidden">
       <summary className="flex min-h-14 cursor-pointer items-center gap-3 px-5 text-sm">
@@ -130,6 +143,7 @@ export function FoldedSummary({ summary, t }: { summary: CheckoutSummaryView; t:
       </summary>
       <div className="flex flex-col gap-6 px-5 pt-2 pb-6">
         <Lines summary={summary} t={t} />
+        {code}
         <Totals summary={summary} t={t} />
       </div>
     </details>

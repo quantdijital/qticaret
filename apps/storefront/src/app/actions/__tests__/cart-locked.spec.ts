@@ -19,7 +19,8 @@ const cart = vi.hoisted(() => ({
 }))
 vi.mock("@/lib/cart/cart", () => cart)
 
-const { addToCart, applyPromotion, changeCartLine, removeCartPromotion } = await import("../cart")
+const { addToCart, applyPromotion, changeCartLine, removeCartPromotion, removeCheckoutPromotion } =
+  await import("../cart")
 
 const LOCKED = () => new StoreApiError(400, "cart.payment_link_locked", null)
 const NO_STATE = { ok: false, error: null }
@@ -65,6 +66,17 @@ describe("the cart actions on a payment link's cart", () => {
     await expect(removeCartPromotion(formOf({ code: "PL-ABCDEFGHJKMN" }))).rejects.toThrow(
       "redirect:/sepet?hata=cart.payment_link_locked"
     )
+  })
+
+  it("brings a code that would not come off the checkout's summary back to checkout", async () => {
+    cart.removePromotion.mockRejectedValue(new StoreApiError(400, "invalid_data", null))
+    await expect(removeCheckoutPromotion(formOf({ code: "YAZ10" }))).rejects.toThrow(
+      "redirect:/odeme?hata=cart.update_failed"
+    )
+    cart.removePromotion.mockResolvedValue(undefined)
+    await expect(removeCheckoutPromotion(formOf({ code: "YAZ10" }))).resolves.toBeUndefined()
+    expect(cart.removePromotion).toHaveBeenLastCalledWith("YAZ10")
+    expect(next.revalidatePath).toHaveBeenCalledWith("/", "layout")
   })
 
   it("keeps its other answers as they were", async () => {

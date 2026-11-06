@@ -1,5 +1,6 @@
 import { ReceiptText } from "lucide-react"
 import type { CheckoutActions, CheckoutPageView, CheckoutStep, Translate } from "@qticaret/ui"
+import { promotionWords } from "../cart/code-words"
 import { Container } from "../parts/Container"
 import { placeholderWords } from "../parts/placeholders"
 import { AddressForm } from "./AddressForm"
@@ -8,6 +9,7 @@ import { PaymentForm } from "./PaymentForm"
 import { ShippingForm } from "./ShippingForm"
 import { Step } from "./Step"
 import { FoldedSummary, Summary } from "./Summary"
+import { SummaryCode } from "./SummaryCode"
 
 const ORDER: CheckoutStep[] = ["address", "shipping", "payment"]
 
@@ -56,6 +58,19 @@ export function CheckoutPage({
   }
   const edit = t("checkout.edit")
   const address = view.addressSummary
+  const { promotions } = view
+  const { applyPromotion, removePromotion } = actions
+  // The summary is drawn twice (folded on a phone, a stage on a desktop): one field each, own ids
+  const code = (id: string) =>
+    promotions && applyPromotion && removePromotion ? (
+      <SummaryCode
+        id={id}
+        codes={promotions}
+        apply={applyPromotion}
+        remove={removePromotion}
+        words={promotionWords(t)}
+      />
+    ) : null
   return (
     <Container className="flex flex-col gap-6 pt-6 lg:gap-8 lg:pt-12">
       <h1>{t("checkout.title")}</h1>
@@ -66,7 +81,7 @@ export function CheckoutPage({
       )}
       <div className="grid items-start gap-(--gap-columns) lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-12">
         <div className="flex min-w-0 flex-col gap-3">
-          <FoldedSummary summary={view.summary} t={t} />
+          <FoldedSummary summary={view.summary} t={t} code={code("odeme-kod-katli")} />
           <Step
             number={1}
             title={t("checkout.step_address")}
@@ -182,7 +197,7 @@ export function CheckoutPage({
             )}
           </Step>
         </div>
-        <Summary summary={view.summary} t={t} className="hidden lg:flex" />
+        <Summary summary={view.summary} t={t} code={code("odeme-kod")} className="hidden lg:flex" />
       </div>
     </Container>
   )

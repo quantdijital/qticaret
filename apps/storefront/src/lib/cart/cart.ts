@@ -42,6 +42,8 @@ export interface Cart {
   gift_cards?: { code: string }[] | null
   /** The server's records on the cart: a payment link's mark (`qt_payment_link`, adr/0051). */
   metadata?: Record<string, unknown> | null
+  /** The shipping chosen at checkout, if any: priced again when a code comes or goes. */
+  shipping_methods?: { shipping_option_id: string | null }[] | null
 }
 
 const CART_FIELDS = [
@@ -67,6 +69,7 @@ const CART_FIELDS = [
   "promotions.code",
   "promotions.is_automatic",
   "credit_line_total",
+  "shipping_methods.shipping_option_id",
 ].join(",")
 
 // Asked only while gift cards are on: the backend refuses the relation otherwise (adr/0025)
@@ -188,10 +191,38 @@ export async function changeLine(lineId: string, quantity: number): Promise<void
 }
 
 /** The codes a shopper typed, as the cart holds them (automatic campaigns left out). */
-export const codesOf = (cart: Cart | null): string[] =>
+export const codesOf = (cart: { promotions?: Cart["promotions"] | null } | null): string[] =>
   (cart?.promotions ?? []).flatMap((promotion) =>
     promotion.code && !promotion.is_automatic ? [promotion.code] : []
   )
+
+/**
+ * The shipping already chosen, priced again for the cart as it is now
+ * (F4.5): Medusa re-prices shipping when the items change, not when a
+ * code comes or goes, so a code that takes the basket under the free
+ * shipping threshold would leave its 0 TL method behind. Each option is
+ * chosen again (Medusa replaces the method). Best effort: the backend
+ * still stops an order whose shipping went stale (`cart.shipping_changed`).
+ */
+async function repriceShipping(cart: Cart | null): Promise<void> {
+  if (!cart) {
+    return
+  }
+  const options = new Set(
+    (cart.shipping_methods ?? []).flatMap((method) =>
+      method.shipping_option_id ? [method.shipping_option_id] : []
+    )
+  )
+  for (const option_id of options) {
+    try {
+      await storePost(`/store/carts/${cart.id}/shipping-methods`, { option_id })
+    } catch (error) {
+      if (!isStoreApiError(error)) {
+        throw error
+      }
+    }
+  }
+}
 
 /**
  * Puts a coupon code on the shopper's cart. Medusa answers the cart; a
@@ -203,7 +234,12 @@ export async function addPromotion(code: string): Promise<boolean> {
     return false
   }
   await storePost(`/store/carts/${cartId}/promotions`, { promo_codes: [code] })
-  return codesOf(await currentCart()).some((each) => each.toLowerCase() === code.toLowerCase())
+  const cart = await currentCart()
+  const taken = codesOf(cart).some((each) => each.toLowerCase() === code.toLowerCase())
+  if (taken) {
+    await repriceShipping(cart)
+  }
+  return taken
 }
 
 /** Puts a gift card on the cart (F4.8); whether it took is read back from the cart. */
@@ -224,9 +260,11 @@ export async function removeGiftCard(code: string): Promise<void> {
   }
 }
 
+/** Takes a code off the shopper's cart, the shipping priced again without it. */
 export async function removePromotion(code: string): Promise<void> {
   const cartId = await cartIdFromCookie()
   if (cartId) {
     await storeDelete(`/store/carts/${cartId}/promotions`, { promo_codes: [code] })
+    await repriceShipping(await currentCart())
   }
 }

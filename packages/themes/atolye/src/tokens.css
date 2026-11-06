@@ -68,6 +68,9 @@
   --color-deal-on-stage: oklch(72% 0.15 27);
   --color-ok: oklch(46% 0.11 150);
   --color-error: oklch(50% 0.18 27);
+  /* A form's answer on a graphite stage (the checkout summary's code): lifted to read there */
+  --color-ok-on-stage: oklch(80% 0.12 150);
+  --color-error-on-stage: var(--color-deal-on-stage);
   --color-star: oklch(70% 0.15 75);
   --color-whatsapp: oklch(52% 0.13 152);
   --color-whatsapp-ink: oklch(99% 0.003 152);

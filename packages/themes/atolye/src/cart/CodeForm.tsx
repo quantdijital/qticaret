@@ -22,7 +22,8 @@ export interface CodeWords {
  * under it, the error in the field's own words (the code stays as typed
  * to be put right; once taken, the field empties). The codes already on the
  * cart are chips, each its own plain form that takes it off, so they work
- * before the script loads.
+ * before the script loads. Under a disclosure that already says what it
+ * is (the checkout's), the label is for screen readers only.
  */
 export function CodeForm({
   id,
@@ -30,19 +31,21 @@ export function CodeForm({
   apply,
   remove,
   words,
+  labelHidden = false,
 }: {
   id: string
   codes: readonly string[]
   apply: FormAction
   remove: (form: FormData) => Promise<void>
   words: CodeWords
+  labelHidden?: boolean
 }) {
   const { state, pending, form } = useKeptForm(apply)
   const message = state.error ? (words.errors[state.error] ?? words.fallback) : null
   return (
     <div className="flex flex-col gap-2">
       <form {...form} className="flex flex-col gap-2">
-        <label htmlFor={id} className="text-sm font-semibold">
+        <label htmlFor={id} className={labelHidden ? "sr-only" : "text-sm font-semibold"}>
           {words.label}
         </label>
         <div className="flex gap-2">
@@ -69,7 +72,11 @@ export function CodeForm({
           </button>
         </div>
       </form>
-      <p id={`${id}-durum`} role="status" className="text-sm font-semibold empty:hidden">
+      <p
+        id={`${id}-durum`}
+        role="status"
+        className="gf-code-note text-sm font-semibold empty:hidden"
+      >
         {message ? (
           <span className="text-error">{message}</span>
         ) : state.ok ? (

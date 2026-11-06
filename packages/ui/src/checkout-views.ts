@@ -119,6 +119,11 @@ export interface CheckoutPageView {
   /** The text version of the marketing consent offered with the order. */
   marketingVersion: string
   summary: CheckoutSummaryView
+  /**
+   * The coupon codes on the cart, each removable beside the summary; null
+   * or left out: no code field (a payment link's cart, adr/0051).
+   */
+  promotions?: string[] | null
   /** A message already in words, after a failed step. */
   error: string | null
   /** Each step's own address, to reopen it. */

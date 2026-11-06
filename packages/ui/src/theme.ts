@@ -136,6 +136,13 @@ export interface CheckoutActions {
   districts: (province: string) => Promise<OptionView[]>
   /** A district's neighbourhoods, by its id. */
   neighborhoods: (district: string) => Promise<OptionView[]>
+  /**
+   * Field: `code`; a coupon on the cart from the order summary, the cart
+   * page's own action (D6). Left out: the checkout offers no code field.
+   */
+  applyPromotion?: FormAction
+  /** A plain form, field `code`: takes a code off; a refusal comes back to checkout with its key. */
+  removePromotion?: (form: FormData) => Promise<void>
 }
 
 interface Page<View> {

@@ -2,13 +2,9 @@ import { Lock } from "lucide-react"
 import type { CartPageView, ThemeActions, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { TrustIcon } from "../parts/TrustIcon"
+import { promotionWords } from "./code-words"
 import { CodeForm } from "./CodeForm"
 
-const PROMOTION_ERRORS = [
-  "cart.promotion_invalid",
-  "cart.payment_link_locked",
-  "errors.too_many_requests",
-]
 const GIFT_CARD_ERRORS = ["cart.gift_card_invalid", "errors.too_many_requests"]
 
 function Row({
@@ -62,15 +58,7 @@ export function CartSummary({
             codes={view.promotions}
             apply={actions.applyPromotion}
             remove={actions.removePromotion}
-            words={{
-              label: t("cart.promotion_label"),
-              placeholder: t("placeholder.promo_code"),
-              apply: t("cart.promotion_apply"),
-              remove: t("cart.promotion_remove"),
-              applied: t("cart.promotion_applied"),
-              errors: Object.fromEntries(PROMOTION_ERRORS.map((key) => [key, t(key)])),
-              fallback: t("cart.promotion_invalid"),
-            }}
+            words={promotionWords(t)}
           />
         )}
         {view.giftCards && actions.applyGiftCard && actions.removeGiftCard && (

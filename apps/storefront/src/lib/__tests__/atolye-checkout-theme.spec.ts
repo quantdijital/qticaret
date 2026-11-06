@@ -142,6 +142,36 @@ describe("the theme's checkout", () => {
     expect(html).toContain("Sonraki adımda")
   })
 
+  it("offers a code in both summaries, closed until the cart holds one; none on a link's cart", () => {
+    const coded: CheckoutActions = {
+      ...actions,
+      applyPromotion: () => Promise.resolve({ ok: true, error: null }),
+      removePromotion: () => Promise.resolve(),
+    }
+    const closed = renderPage(atolyeTheme, "CheckoutPage", {
+      view: paying({ promotions: [] }),
+      actions: coded,
+    })
+    // Folded on a phone and on the stage beside the steps, each its own field
+    expect(closed).toContain('id="odeme-kod-katli"')
+    expect(closed).toContain('id="odeme-kod"')
+    expect(closed.match(/<details class="group\/code[^"]*">/g)).toHaveLength(2)
+    expect(closed).toContain("İndirim kodu")
+
+    const open = renderPage(atolyeTheme, "CheckoutPage", {
+      view: paying({ promotions: ["YAZ2026"] }),
+      actions: coded,
+    })
+    expect(open.match(/<details open="" class="group\/code/g)).toHaveLength(2)
+    expect(open).toContain('aria-label="Kodu kaldır: YAZ2026"')
+
+    const link = renderPage(atolyeTheme, "CheckoutPage", {
+      view: paying({ promotions: null }),
+      actions: coded,
+    })
+    expect(link).not.toContain("odeme-kod")
+  })
+
   it("shows the steps before as their summary with a named way back", () => {
     const html = renderPage(atolyeTheme, "CheckoutPage", { view: paying(), actions })
     expect(html).toContain("Ayşe Yılmaz")

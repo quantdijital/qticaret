@@ -32,6 +32,7 @@ import {
   changeCartLine,
   removeCartGiftCard,
   removeCartPromotion,
+  removeCheckoutPromotion,
 } from "@/app/actions/cart"
 import {
   chooseShipping,
@@ -64,13 +65,15 @@ export const themeActions: ThemeActions = {
 /** `/hediye-karti/bakiye`'s form (adr/0025 Ek 2026-11-03). */
 export const giftCardActions: GiftCardActions = { checkBalance: checkGiftCardBalance }
 
-/** The checkout's actions (D7). */
+/** The checkout's actions (D7); the code field beside its summary uses the cart's own. */
 export const checkoutActions: CheckoutActions = {
   saveAddress,
   chooseShipping,
   placeOrder,
   districts: loadDistricts,
   neighborhoods: loadNeighborhoods,
+  applyPromotion,
+  removePromotion: removeCheckoutPromotion,
 }
 
 /** Signing in and its kin (D8). */

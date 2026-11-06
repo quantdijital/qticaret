@@ -135,8 +135,8 @@ export async function applyPromotion(_state: ActionResult, form: FormData): Prom
   return { ok: true, error: null }
 }
 
-/** Takes a code off the cart; a plain form. */
-export async function removeCartPromotion(form: FormData): Promise<void> {
+/** Takes a code off the cart; a refusal goes back to the page the form was on, with its key. */
+async function takePromotionOff(form: FormData, page: "/sepet" | "/odeme"): Promise<void> {
   const parsed = PromotionCode.safeParse(form.get("code"))
   if (parsed.success) {
     try {
@@ -145,10 +145,20 @@ export async function removeCartPromotion(form: FormData): Promise<void> {
       if (!isStoreApiError(error)) {
         throw error
       }
-      redirect(`/sepet?hata=${linkCartRefusal(error) ?? "cart.update_failed"}`)
+      redirect(`${page}?hata=${linkCartRefusal(error) ?? "cart.update_failed"}`)
     }
   }
   revalidatePath("/", "layout")
+}
+
+/** Takes a code off the cart; a plain form. */
+export async function removeCartPromotion(form: FormData): Promise<void> {
+  await takePromotionOff(form, "/sepet")
+}
+
+/** The same from the checkout's order summary: a refusal comes back to `/odeme`. */
+export async function removeCheckoutPromotion(form: FormData): Promise<void> {
+  await takePromotionOff(form, "/odeme")
 }
 
 // Our codes: a prefix and four groups of four (adr/0025); typed in any case, with or without dashes

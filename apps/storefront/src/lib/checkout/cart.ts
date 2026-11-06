@@ -48,6 +48,8 @@ export interface CheckoutCart {
   total: number
   /** The server's records on the cart: a payment link's mark (`qt_payment_link`, adr/0051). */
   metadata?: Record<string, unknown> | null
+  /** The codes on the cart (automatic campaigns have none to show). */
+  promotions?: { code: string | null; is_automatic?: boolean | null }[] | null
 }
 
 const ADDRESS = [
@@ -89,6 +91,8 @@ const FIELDS = [
   "shipping_total",
   "credit_line_total",
   "total",
+  "promotions.code",
+  "promotions.is_automatic",
 ].join(",")
 
 /** The shopper's open cart with what checkout needs; null when there is none to pay. */

@@ -57,7 +57,9 @@ export function PaymentForm({
   placeOrder: CheckoutActions["placeOrder"]
   words: PaymentWords
 }) {
-  const [method, setMethod] = useState(methods[0]?.id ?? "")
+  const [picked, setMethod] = useState(methods[0]?.id ?? "")
+  // A code applied from the summary can change the ways offered (nothing left to pay: credit alone)
+  const method = methods.some((each) => each.id === picked) ? picked : (methods[0]?.id ?? "")
   const { error, checking, pending, onSubmit } = useChallengeForm(placeOrder)
   const kind = methods.find((each) => each.id === method)?.kind ?? "card"
   const message = error ? (words.errors[error] ?? words.fallback) : null
