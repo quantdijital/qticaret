@@ -84,13 +84,21 @@ medusaIntegrationTestRunner({
     it("saves a document as written, refuses what the short slot does not take, and clears it", async () => {
       const { productId } = await stockedProduct(getContainer(), shop, "ozetli-gomlek", 3)
       expect((await catalogOf(productId)).summary_doc).toBeNull()
-      expect((await storeTexts(productId)).data).toEqual({ html: null, summary_html: null })
+      expect((await storeTexts(productId)).data).toEqual({
+        html: null,
+        summary_html: null,
+        images: [],
+      })
 
       const saved = await save(productId, { summary_doc: DOC })
       expect([saved.status, saved.data.summary_doc]).toEqual([200, DOC])
       expect((await catalogOf(productId)).summary_doc).toEqual(DOC)
       // The storefront gets it rendered as the long description is
-      expect((await storeTexts(productId)).data).toEqual({ html: null, summary_html: HTML })
+      expect((await storeTexts(productId)).data).toEqual({
+        html: null,
+        summary_html: HTML,
+        images: [],
+      })
 
       const paragraph = (value: string, marks?: unknown[]) => ({
         type: "paragraph",
