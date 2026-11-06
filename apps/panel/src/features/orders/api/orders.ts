@@ -1,108 +1,12 @@
-import { keepPreviousData, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { queryOptions } from "@tanstack/react-query"
 import type { Lifecycle } from "@/features/dashboard/api/overview"
 import { cancelOrder } from "@/features/orders/api/cancel"
+import { useOrderMutation } from "@/features/orders/api/mutation"
 import { sdk } from "@/lib/sdk"
 
-export const ORDER_STAGES = [
-  "all",
-  "awaiting_payment",
-  "to_ship",
-  "shipped",
-  "delivered",
-  "canceled",
-] as const
-export type OrderStage = (typeof ORDER_STAGES)[number]
-
-/** `GET /admin/order-board` (adr/0022): a recorded read of personal data. */
-export interface BoardOrder {
-  id: string
-  display_id: number
-  created_at: string
-  currency_code: string
-  total: string
-  items: number
-  stage: Lifecycle
-  customer: { name: string | null; place: string | null }
-  /** The latest carrier parcel (adr/0031); null when none. */
-  shipping: {
-    status: ShipmentStatus
-    tracking_number: string | null
-    /** Its label's parcel, to print while it waits for the carrier. */
-    fulfillment_id: string
-  } | null
-  /** How the shopper chose it to go; null when the order has no shipping. */
-  delivery: {
-    name: string
-    /** A carrier that issues a label; null: the shop's own delivery or collection. */
-    carrier: "geliver" | "aras" | "yurtici" | null
-    pickup: boolean
-  } | null
-}
-
-/** Where a carrier's parcel stands (adr/0031), as the server names it. */
-export type ShipmentStatus =
-  | "created"
-  | "picked_up"
-  | "in_transit"
-  | "out_for_delivery"
-  | "delivered"
-  | "returned"
-  | "failed"
-  | "canceled"
-
-export interface OrderBoard {
-  orders: BoardOrder[]
-  count: number
-  counts: Record<OrderStage, number>
-  offset: number
-  limit: number
-  /** More orders than one read covers; the counts are of the newest ones. */
-  limited: boolean
-}
-
-/** Where the money stands, apart from the stage (F12.3). */
-export const PAYMENT_FILTERS = ["paid", "awaiting", "refunded"] as const
-export type PaymentFilter = (typeof PAYMENT_FILTERS)[number]
-
-/** Where the parcel stands, apart from the stage (F12.3). */
-export const SHIPPING_FILTERS = ["none", "label", "on_the_way", "delivered", "problem"] as const
-export type ShippingFilter = (typeof SHIPPING_FILTERS)[number]
-
-export interface OrderBoardParams {
-  stage: OrderStage
-  q: string
-  page: number
-  /** One customer's orders, for their page. */
-  customerId?: string | undefined
-  payment?: PaymentFilter | undefined
-  shipping?: ShippingFilter | undefined
-}
-
-export const ORDER_PAGE_SIZE = 20
-
-export const orderBoardQuery = ({
-  stage,
-  q,
-  page,
-  customerId,
-  payment,
-  shipping,
-}: OrderBoardParams) =>
-  queryOptions({
-    queryKey: ["orders", "board", { stage, q, page, customerId, payment, shipping }],
-    queryFn: () =>
-      sdk.client.fetch<OrderBoard>("/admin/order-board", {
-        query: {
-          stage,
-          offset: page * ORDER_PAGE_SIZE,
-          ...(q ? { q } : {}),
-          ...(customerId ? { customer_id: customerId } : {}),
-          ...(payment ? { payment } : {}),
-          ...(shipping ? { shipping } : {}),
-        },
-      }),
-    placeholderData: keepPreviousData,
-  })
+export * from "@/features/orders/api/board"
+export * from "@/features/orders/api/money"
+export { useOrderMutation } from "@/features/orders/api/mutation"
 
 // What the order page shows: the parcel, the money, who and where
 const DETAIL_FIELDS = [
@@ -202,71 +106,6 @@ export const orderStateQuery = (id: string) =>
     queryFn: () => sdk.client.fetch<OrderState>(`/admin/order-board/${encodeURIComponent(id)}`),
   })
 
-/** One line of `GET /admin/orders/:id/money`: amounts as exact lira ("89.99"). */
-export interface OrderMoneyLine {
-  id: string
-  kind: "item" | "shipping"
-  quantity: number
-  /** Units that came back on returns. */
-  returned: number
-  gross: string
-  /** The line's share of the order's discounts. */
-  discount: string
-  /** What the line was paid. */
-  net: string
-  returned_net: string
-  /** Units given back by money refunds (F5 V5), and what those refunds gave back. */
-  refunded_units: number
-  refunded_net: string
-}
-
-export interface MoneyTotals {
-  gross: string
-  discount: string
-  net: string
-}
-
-export interface OrderMoney extends MoneyTotals {
-  currency_code: string
-  lines: OrderMoneyLine[]
-  items: MoneyTotals
-  shipping: MoneyTotals
-  /** Paid with gift cards and store credit (F4.8), outside the payment. */
-  credit: string
-  paid: string
-  refunded: string
-  /** What a refund can still give back: taken less refunded. */
-  refundable: string
-}
-
-/**
- * `GET /admin/orders/:id/money` (F4.7): each line's discount share and
- * payment to the kuruş, worked out by the server, and what is refundable.
- */
-export const orderMoneyQuery = (id: string) =>
-  queryOptions({
-    queryKey: ["orders", "money", id],
-    queryFn: async () =>
-      (
-        await sdk.client.fetch<{ money: OrderMoney }>(
-          `/admin/orders/${encodeURIComponent(id)}/money`
-        )
-      ).money,
-  })
-
-/** A change to an order; the order lists and the dashboard read again once it settles. */
-export function useOrderMutation<T, R = unknown>(run: (input: T) => Promise<R>) {
-  const client = useQueryClient()
-  return useMutation({
-    mutationFn: run,
-    // Settled, not only succeeded: a step that half-failed must not leave the page stale
-    onSettled: async () => {
-      await client.invalidateQueries({ queryKey: ["orders"] })
-      await client.invalidateQueries({ queryKey: ["dashboard"] })
-    },
-  })
-}
-
 /**
  * Packs what is left, a part of it (F7.10), or a packed parcel, and hands
  * it over, as one step on the server; with a carrier, its label is bought.
@@ -311,37 +150,3 @@ export const useMarkDelivered = (id: string) =>
   })
 
 export const useCancelOrder = (id: string) => useOrderMutation(() => cancelOrder(id))
-
-/** A money refund: units of lines (and the shipping), or a free amount in lira. */
-export interface RefundRequest {
-  items?: { id: string; quantity: number }[]
-  shipping?: boolean
-  amount?: number
-}
-
-export interface RefundPreview {
-  /** Lira, exact ("120.00"). */
-  amount: string
-  refundable: string
-}
-
-/** What a refund would give back, worked out by the server; nothing is changed. */
-export const refundPreviewQuery = (id: string, request: RefundRequest | null) =>
-  queryOptions({
-    queryKey: ["orders", "refund-preview", id, request],
-    queryFn: async () =>
-      (
-        await sdk.client.fetch<{ refund: RefundPreview }>(
-          `/admin/orders/${encodeURIComponent(id)}/refunds/preview`,
-          { method: "POST", body: request ?? {} }
-        )
-      ).refund,
-    enabled: request !== null,
-    retry: false,
-  })
-
-/** Gives the money back; `reference` makes a refund tried again happen once. */
-export const useRefundOrder = (id: string) =>
-  useOrderMutation((body: RefundRequest & { reference: string; note?: string }) =>
-    sdk.client.fetch(`/admin/orders/${encodeURIComponent(id)}/refunds`, { method: "POST", body })
-  )
