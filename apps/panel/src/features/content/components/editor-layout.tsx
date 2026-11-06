@@ -7,8 +7,9 @@ import { cn } from "@/lib/utils"
  * A text's page (content page, blog post, filter page; docs/06 "Metin
  * sayfaları") and a product's ("Ürün sayfası"): the main column leads
  * with what is edited most, its secondary parts folded under it; the narrow column beside holds the
- * short facts and the SEO advisor and follows the scroll, scrolling
- * inside when it is taller than the window. Folding a part never leaves
+ * short facts and the SEO advisor and follows the scroll while it fits in
+ * the window; taller, it scrolls with the page (never inside itself, the
+ * owner 2026-11-06), so each card is reached. Folding a part never leaves
  * a stretched card: the main column ends where its last card does.
  *
  * Below `xl` the narrow column comes under the main one. With `merge`
@@ -36,15 +37,7 @@ export function EditorLayout({
       >
         {main}
       </div>
-      <PageColumn
-        span={4}
-        sticky
-        // A pixel under the last card, so its shadow is not cut where the column scrolls
-        className={cn(
-          "xl:max-h-[calc(100dvh-6rem)] xl:overflow-y-auto xl:overscroll-contain xl:pb-px",
-          merge && "max-xl:contents"
-        )}
-      >
+      <PageColumn span={4} sticky className={cn(merge && "max-xl:contents")}>
         {side}
       </PageColumn>
     </PageGrid>

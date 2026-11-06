@@ -29,17 +29,28 @@ function writeSectionOpen(user: string, name: string, open: boolean): void {
 // The sections on the page by their element id: a jump to a field inside a closed one opens it first
 const openers = new Map<string, () => void>()
 
+// A card in a column that follows the scroll (`PageColumn sticky`, while it fits the window)
+const inStuckColumn = (el: Element): boolean => {
+  const column = el.closest("[data-sticks]")
+  return column !== null && getComputedStyle(column).position === "sticky"
+}
+
 /**
  * Takes the person to a section (the SEO advisor's "go to field"): a
  * closed one opens first, then the page scrolls to it, its top in sight.
- * An id that is not a section is only scrolled to.
+ * An id that is not a section is only scrolled to. A card of a side
+ * column that follows the scroll is already in the window: the page
+ * moves only as far as it needs to show it whole.
  */
 export function revealSection(id: string): void {
   const open = openers.get(id)
   if (open) {
     flushSync(open)
   }
-  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" })
+  const el = document.getElementById(id)
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: inStuckColumn(el) ? "nearest" : "start" })
+  }
 }
 
 /**

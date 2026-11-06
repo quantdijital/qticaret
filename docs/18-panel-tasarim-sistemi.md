@@ -43,7 +43,7 @@ Sürümler `apps/panel/package.json`'da exact ve ≥14 gün kuralıyla (docs/04)
 - **Yerleşim:** sol menü (daraltılabilir, ikon modu), üst çubuk (arama, bildirim, hesap), içerik en çok 1280 px, sayfa başlığı deseni (başlık, bir cümle açıklama, sağda birincil eylem).
 - **Denge (2026-10-26, kullanıcı kuralı):** dengesiz görüntü hata sayılır.
   - Aynı satırdaki kartlar aynı yükseklikte. Yan yana sütunlar aynı çizgide biter: kısa sütunun son kartı uzar (`PageGrid` + `PageColumn`). Sayfa düzeninde `items-start` kullanılmaz.
-  - Yalnızca yapışkan özet sütunu (formun önizlemesi ve kaydet düğmesi; `PageColumn sticky`) kendi boyunda kalır.
+  - Yalnızca yapışkan özet sütunu (formun önizlemesi ve kaydet düğmesi, düzenleyicinin yan kartları; `PageColumn sticky`) kendi boyunda kalır. Pencereye sığdıkça kaydırırken görünür kalır; sığmıyorsa sayfayla kayar. Kendi içinde kayan yan sütun yoktur (sahip 2026-11-06).
   - Uzayan kartta içerik üstte kalır. Toplamlar gibi bir kartın sonu kartın dibine, tek cümlelik boş durum ortaya yaslanır.
   - Bir satırdaki kontroller tek boydadır: sayfa başlığında ve araç çubuklarında 36 px (düğme, segment grup, arama, seçici); kart başlığındaki eylemler 32 px (`sm`), ama aynı başlıktakiler birbirine eşit. Bir alanın yanındaki ikon düğme alanla aynı boyda.
   - Kartın içindeki iki parça (özet + liste gibi) birbirine yakın boyda tutulur: uzun liste iki sütuna bölünür ya da kısaltılır.

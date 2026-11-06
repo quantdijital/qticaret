@@ -3,6 +3,7 @@ import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
+import { revealSection } from "@/components/patterns/use-section-open"
 import { contentQuery } from "@/features/content/api/content"
 import type { ContentDetail } from "@/features/content/api/content"
 import { ContentActions } from "@/features/content/components/content-actions"
@@ -11,11 +12,7 @@ import { ContentGeneralCard } from "@/features/content/components/content-genera
 import { ContentSideCards } from "@/features/content/components/content-side-cards"
 import { EditorLayout } from "@/features/content/components/editor-layout"
 import { ContentStatusBadge } from "@/features/content/components/content-status"
-import {
-  CONTENT_SECTIONS as S,
-  CONTENT_TARGETS,
-  revealContentTarget,
-} from "@/features/content/content-sections"
+import { CONTENT_SECTIONS as S, CONTENT_TARGETS } from "@/features/content/content-sections"
 import { docText } from "@/features/content/doc-text"
 import { findingsNote, useSectionFindings } from "@/features/content/section-findings"
 import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
@@ -76,9 +73,8 @@ function SeoSection({ data }: { data: ContentDetail }) {
 /**
  * A content page or blog post (F3.16, docs/06 "Metin sayfaları"): its
  * title and text first, its search appearance folded under them; beside
- * them, following the scroll as the product page's column does, its
- * dates, the SEO advisor, the cover, the summary and a post's category
- * and tags. Below `xl` one column: the text, the dates, the cover, the
+ * them, as the product page's column has its own, its dates, the SEO
+ * advisor, the cover, the summary and a post's category and tags. Below `xl` one column: the text, the dates, the cover, the
  * summary and the filing, then the search appearance and the advisor.
  */
 export function ContentEntryPage() {
@@ -131,7 +127,7 @@ export function ContentEntryPage() {
                 id={data.id}
                 version={data.updated_at}
                 targets={CONTENT_TARGETS}
-                onTarget={revealContentTarget}
+                onTarget={revealSection}
               />
             </div>
             <ContentSideCards entry={data} />

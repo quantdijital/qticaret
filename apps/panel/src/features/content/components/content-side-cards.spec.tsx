@@ -2,12 +2,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { ContentDetail } from "@/features/content/api/content"
 import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
 import type { Assessment, SeoIssue } from "@/features/seo/api/advisor"
-import { CONTENT_TARGETS, revealContentTarget } from "@/features/content/content-sections"
+import { revealSection } from "@/components/patterns/use-section-open"
+import { CONTENT_TARGETS } from "@/features/content/content-sections"
 import { ContentSideCards } from "./content-side-cards"
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: vi.fn() } } }))
@@ -56,8 +57,8 @@ const ISSUES: SeoIssue[] = [
   },
 ]
 
-// The narrow column as the page draws it: the advisor above the cards
-function renderColumn(entry: ContentDetail) {
+// The narrow column as the page draws it: the advisor above the cards (`stuck`: following the scroll)
+function renderColumn(entry: ContentDetail, stuck = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   const assessment: Assessment = {
     score: 72,
@@ -69,35 +70,21 @@ function renderColumn(entry: ContentDetail) {
   client.setQueryData(["seo", "assessment", entry.kind, entry.id, entry.updated_at], assessment)
   render(
     <QueryClientProvider client={client}>
-      <AdvisorCard
-        kind={entry.kind}
-        id={entry.id}
-        version={entry.updated_at}
-        targets={CONTENT_TARGETS}
-        onTarget={revealContentTarget}
-      />
-      <ContentSideCards entry={entry} />
+      <div data-sticks={stuck ? "" : undefined} style={stuck ? { position: "sticky" } : {}}>
+        <AdvisorCard
+          kind={entry.kind}
+          id={entry.id}
+          version={entry.updated_at}
+          targets={CONTENT_TARGETS}
+          onTarget={revealSection}
+        />
+        <ContentSideCards entry={entry} />
+      </div>
     </QueryClientProvider>
   )
 }
 
 const scrolled = vi.fn<(this: Element, options?: ScrollIntoViewOptions) => void>()
-
-// The layout's width: from `xl` the column follows the scroll beside the text
-function setWide(wide: boolean) {
-  Object.defineProperty(window, "matchMedia", {
-    configurable: true,
-    writable: true,
-    value: (query: string) => ({
-      matches: wide && query === "(min-width: 80rem)",
-      media: query,
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-    }),
-  })
-}
-
-const original = Object.getOwnPropertyDescriptor(window, "matchMedia")
 
 /** The owner, 2026-11-06: a text's cover, summary, category and tags beside it, as a product's cards are. */
 describe("ContentSideCards", () => {
@@ -106,13 +93,6 @@ describe("ContentSideCards", () => {
     scrolled.mockReset()
     Element.prototype.scrollIntoView = function (this: Element, options) {
       scrolled.call(this, typeof options === "object" ? options : undefined)
-    }
-  })
-  afterEach(() => {
-    if (original) {
-      Object.defineProperty(window, "matchMedia", original)
-    } else {
-      Reflect.deleteProperty(window, "matchMedia")
     }
   })
 
@@ -142,27 +122,29 @@ describe("ContentSideCards", () => {
     expect(document.getElementById("content-terms")).not.toBeInTheDocument()
   })
 
-  it("brings the cover into the following column's view from the advisor, the page staying put", async () => {
-    setWide(true)
+  // The owner, 2026-11-06: the column never scrolls inside; the page is scrolled to the card
+  it("scrolls the page to the cover's top from the advisor, as to any other field", async () => {
     renderColumn(POST)
     // In the assessment's order: the cover, then the byline
-    const [toCover] = screen.getAllByRole("button", { name: "Alana git" })
-    if (toCover) {
+    const [toCover, toSummary] = screen.getAllByRole("button", { name: "Alana git" })
+    if (toCover && toSummary) {
       await userEvent.click(toCover)
+      await userEvent.click(toSummary)
     }
-    expect(scrolled).toHaveBeenCalledTimes(1)
-    expect(scrolled.mock.contexts[0]).toBe(document.getElementById("content-cover-section"))
-    expect(scrolled.mock.calls[0]?.[0]).toEqual({ behavior: "smooth", block: "nearest" })
+    expect(scrolled.mock.contexts).toEqual([
+      document.getElementById("content-cover-section"),
+      document.getElementById("content-summary"),
+    ])
+    expect(scrolled.mock.calls[0]?.[0]).toEqual({ behavior: "smooth", block: "start" })
   })
 
-  it("scrolls to the summary's top on a narrow screen, where the column is under the text", async () => {
-    setWide(false)
-    renderColumn(POST)
+  it("moves the page only as far as needed while the column follows the scroll", async () => {
+    renderColumn(POST, true)
     const [, toSummary] = screen.getAllByRole("button", { name: "Alana git" })
     if (toSummary) {
       await userEvent.click(toSummary)
     }
     expect(scrolled.mock.contexts[0]).toBe(document.getElementById("content-summary"))
-    expect(scrolled.mock.calls[0]?.[0]).toEqual({ behavior: "smooth", block: "start" })
+    expect(scrolled.mock.calls[0]?.[0]).toEqual({ behavior: "smooth", block: "nearest" })
   })
 })
