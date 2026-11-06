@@ -169,10 +169,24 @@ test("sends the old storefront settings address to the storefront preferences", 
   page,
   guard,
 }) => {
-  await page.goto("/settings/storefront?part=swatches")
-  await expect(page).toHaveURL(/\/storefront\/preferences\?part=swatches$/)
+  await page.goto("/settings/storefront?part=maintenance")
+  await expect(page).toHaveURL(/\/storefront\/preferences\?part=maintenance$/)
   await expect(pageHeading(page)).toHaveText("Vitrin tercihleri")
-  await expect(page.getByRole("tab", { name: "Renk örnekleri" })).toHaveAttribute(
+  await expect(page.getByRole("tab", { name: "Bakım modu" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  )
+  await guard.assertHealthy()
+})
+
+test("opens the first preferences tab for a part that moved to the theme editor", async ({
+  page,
+  guard,
+}) => {
+  // Colour swatches and "Az kaldı" are in the theme editor (adr/0049 Ek 2026-11-06)
+  await page.goto("/settings/storefront?part=swatches")
+  await expect(page).toHaveURL(/\/storefront\/preferences$/)
+  await expect(page.getByRole("tab", { name: "İletişim formu" })).toHaveAttribute(
     "aria-selected",
     "true"
   )

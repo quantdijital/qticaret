@@ -19,14 +19,15 @@ export const SECTIONS = [
   "/promotions/gift-cards",
   // Bulk e-mail and SMS (adr/0050): the list, or why it is closed while the flag is off
   "/bulk-messages",
-  // The theme editor opens full screen, without the panel's menu (adr/0049)
+  // The theme editor opens full screen, without the panel's menu (adr/0049); colour
+  // swatches, trust badges and when a product card says "Az kaldı" are in it (adr/0049
+  // Ek 2026-11-06)
   "/storefront/editor",
   "/storefront/menus",
   "/storefront/preferences",
   "/storefront/preferences?part=contact",
-  "/storefront/preferences?part=swatches",
-  // When a product card says "Az kaldı"
-  "/storefront/preferences?part=stock",
+  // The shop's payment and shipping pages
+  "/storefront/preferences?part=infoPages",
   // Maintenance mode and its bypass link (adr/0053)
   "/storefront/preferences?part=maintenance",
   "/content",
