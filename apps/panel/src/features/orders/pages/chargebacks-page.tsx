@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
 import { EllipsisVertical } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { DataTable } from "@/components/patterns/data-table"
@@ -26,6 +27,7 @@ import {
   useMoveChargeback,
 } from "@/features/orders/api/chargebacks"
 import type { Chargeback, ChargebackStatus } from "@/features/orders/api/chargebacks"
+import { Fact, QueueDialog } from "@/features/orders/components/queue-dialog"
 import { errorText } from "@/lib/errors"
 import { formatDateTime, formatMoney } from "@/lib/format"
 
@@ -89,6 +91,52 @@ function Actions({ chargeback }: { chargeback: Chargeback }) {
   )
 }
 
+/** A dispute opened from the queue: its facts, its evidence and its next step. */
+function ChargebackDialog({
+  chargeback,
+  onClose,
+}: {
+  chargeback: Chargeback | null
+  onClose: () => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <QueueDialog
+      open={chargeback !== null}
+      onClose={onClose}
+      title={t(`${C}.dialogTitle`, { number: chargeback?.order_display_id ?? "—" })}
+      orderId={chargeback?.order_id ?? null}
+    >
+      {chargeback ? (
+        <div className="flex flex-col gap-4">
+          <dl>
+            <Fact label={t(`${C}.columns.status`)}>
+              <StatusBadge tone={TONE[chargeback.status]}>
+                {t(`${C}.status.${chargeback.status}`)}
+              </StatusBadge>
+            </Fact>
+            <Fact label={t(`${C}.reason`)}>{t(`${C}.reasons.${chargeback.reason}`)}</Fact>
+            <Fact label={t(`${C}.columns.amount`)}>
+              {formatMoney(chargeback.amount, chargeback.currency_code)}
+            </Fact>
+            <Fact label={t(`${C}.due`)}>
+              {chargeback.due_at ? formatDateTime(chargeback.due_at) : "—"}
+            </Fact>
+            <Fact label={t(`${C}.openedAt`)}>{formatDateTime(chargeback.created_at)}</Fact>
+            {chargeback.provider_reference ? (
+              <Fact label={t(`${C}.reference`)}>{chargeback.provider_reference}</Fact>
+            ) : null}
+          </dl>
+          {chargeback.note ? (
+            <p className="text-sm whitespace-pre-wrap text-muted-foreground">{chargeback.note}</p>
+          ) : null}
+          <Actions chargeback={chargeback} />
+        </div>
+      ) : null}
+    </QueueDialog>
+  )
+}
+
 /**
  * Orders > Chargebacks (F6.7, adr/0030): the disputes, the nearest deadline
  * first, each with its evidence in one click and its next step.
@@ -100,6 +148,8 @@ export function ChargebacksPage() {
   const view: View = search.view ?? "open"
   const page = (search.page ?? 1) - 1
   const query = useQuery(chargebacksQuery(view === "all" ? { page } : { status: view, page }))
+  // The row opened in its dialog, by id: the list's fresh copy after a move
+  const [openId, setOpenId] = useState<string | null>(null)
   const setSearch = (next: { view?: View; page?: number }) => {
     const nextView = next.view ?? view
     void navigate({
@@ -120,6 +170,9 @@ export function ChargebacksPage() {
           to="/orders/$id"
           params={{ id: row.order_id }}
           className="font-medium hover:underline"
+          onClick={(event) => {
+            event.stopPropagation()
+          }}
         >
           #{row.order_display_id ?? "—"}
         </Link>
@@ -154,7 +207,21 @@ export function ChargebacksPage() {
       align: "right",
       cell: (row) => formatMoney(row.amount, row.currency_code),
     },
-    { key: "actions", header: "", align: "right", cell: (row) => <Actions chargeback={row} /> },
+    {
+      key: "actions",
+      header: "",
+      align: "right",
+      // The row opens the dispute; its buttons only act
+      cell: (row) => (
+        <span
+          onClick={(event) => {
+            event.stopPropagation()
+          }}
+        >
+          <Actions chargeback={row} />
+        </span>
+      ),
+    },
   ]
   return (
     <div className="flex flex-col gap-6">
@@ -187,6 +254,9 @@ export function ChargebacksPage() {
               rowKey={(row) => row.id}
               loading={!query.data}
               empty={t(`${C}.empty`)}
+              onRowClick={(row) => {
+                setOpenId(row.id)
+              }}
             />
             {query.data && query.data.count > 0 ? (
               <Pagination
@@ -201,6 +271,12 @@ export function ChargebacksPage() {
           </>
         )}
       </section>
+      <ChargebackDialog
+        chargeback={(query.data?.chargebacks ?? []).find((row) => row.id === openId) ?? null}
+        onClose={() => {
+          setOpenId(null)
+        }}
+      />
     </div>
   )
 }

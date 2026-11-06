@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { DataTable } from "@/components/patterns/data-table"
 import type { Column } from "@/components/patterns/data-table"
@@ -17,6 +18,8 @@ import {
   invoicesQuery,
 } from "@/features/orders/api/invoices"
 import type { InvoiceRecord, InvoiceStatus } from "@/features/orders/api/invoices"
+import { useCan } from "@/features/auth/api/staff"
+import { InvoiceBulkBar, InvoiceDialog } from "@/features/orders/components/invoice-queue-parts"
 import { errorText } from "@/lib/errors"
 import { formatDateTime, formatMoney } from "@/lib/format"
 
@@ -51,7 +54,15 @@ export function InvoicesPage() {
       limit: INVOICE_PAGE_SIZE,
     })
   )
+  // Stopped invoices picked to try again at once; trying again is the owner's and admins'
+  const mayRetry = useCan("invoices")
+  const [picked, setPicked] = useState<Map<string, InvoiceRecord>>(new Map())
+  // The row opened in its dialog, by id: the list's fresh copy after an action
+  const [openId, setOpenId] = useState<string | null>(null)
   const setSearch = (next: { view?: View; page?: number }) => {
+    if (next.view && next.view !== view) {
+      setPicked(new Map())
+    }
     const nextView = next.view ?? view
     void navigate({
       to: "/orders/invoices",
@@ -71,6 +82,9 @@ export function InvoicesPage() {
           to="/orders/$id"
           params={{ id: row.order_id }}
           className="font-medium hover:underline"
+          onClick={(event) => {
+            event.stopPropagation()
+          }}
         >
           #{row.order_display_id ?? "—"}
         </Link>
@@ -160,12 +174,46 @@ export function InvoicesPage() {
           </div>
         ) : (
           <>
+            {picked.size > 0 ? (
+              <InvoiceBulkBar
+                picked={picked}
+                onClear={() => {
+                  setPicked(new Map())
+                }}
+              />
+            ) : null}
             <DataTable
               columns={columns}
               rows={query.data?.invoices ?? []}
               rowKey={(row) => row.id}
               loading={!query.data}
               empty={t(`${V}.empty`)}
+              onRowClick={(row) => {
+                setOpenId(row.id)
+              }}
+              {...(mayRetry
+                ? {
+                    selection: {
+                      selected: new Set(picked.keys()),
+                      onChange: (next: Set<string>) => {
+                        const rows = new Map([
+                          ...picked,
+                          ...(query.data?.invoices ?? []).map((row) => [row.id, row] as const),
+                        ])
+                        setPicked(
+                          new Map(
+                            [...next].flatMap((id) => {
+                              const row = rows.get(id)
+                              return row ? [[id, row] as const] : []
+                            })
+                          )
+                        )
+                      },
+                      rowLabel: (row: InvoiceRecord) =>
+                        t(`${V}.rowLabel`, { number: row.order_display_id ?? "—" }),
+                    },
+                  }
+                : {})}
             />
             {query.data && query.data.count > 0 ? (
               <Pagination
@@ -180,6 +228,12 @@ export function InvoicesPage() {
           </>
         )}
       </section>
+      <InvoiceDialog
+        invoice={(query.data?.invoices ?? []).find((row) => row.id === openId) ?? null}
+        onClose={() => {
+          setOpenId(null)
+        }}
+      />
     </div>
   )
 }

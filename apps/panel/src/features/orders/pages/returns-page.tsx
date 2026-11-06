@@ -9,13 +9,14 @@ import { PageHeader } from "@/components/patterns/page-header"
 import { Pagination } from "@/components/patterns/pagination"
 import { ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
-import type { StatusTone } from "@/components/patterns/status-badge"
 import { RETURN_PAGE_SIZE, returnRequestsQuery } from "@/features/orders/api/returns"
 import type { ReturnRequest, ReturnStatus } from "@/features/orders/api/returns"
 import { ReturnActions } from "@/features/orders/components/return-actions"
 import { ReturnFacts, RequestWithdrawalBadges } from "@/features/orders/components/return-facts"
 import type { Open } from "@/features/orders/components/return-actions"
 import { ReturnDialogHost } from "@/features/orders/components/return-dialog-host"
+import { ReturnQueueDialog } from "@/features/orders/components/return-queue-dialog"
+import { RETURN_TONE } from "@/features/orders/return-rules"
 import { differenceText } from "@/features/orders/exchange-text"
 import { errorText } from "@/lib/errors"
 import { formatDateTime, formatMoney } from "@/lib/format"
@@ -26,14 +27,7 @@ const route = getRouteApi("/_auth/orders/returns")
 type View = Exclude<ReturnStatus, "canceled"> | "all"
 const VIEWS: readonly View[] = ["requested", "approved", "received", "refunded", "rejected", "all"]
 
-const TONE: Record<ReturnStatus, StatusTone> = {
-  requested: "warning",
-  approved: "info",
-  received: "info",
-  refunded: "success",
-  rejected: "neutral",
-  canceled: "neutral",
-}
+const TONE = RETURN_TONE
 
 /**
  * Orders > Returns (F7.9, adr/0032): shoppers' requests, those waiting for
@@ -48,6 +42,8 @@ export function ReturnsPage() {
   const page = (search.page ?? 1) - 1
   const query = useQuery(returnRequestsQuery(view === "all" ? { page } : { status: view, page }))
   const [open, setOpen] = useState<Open>(null)
+  // The row opened in its dialog, by id: the list's fresh copy after an action
+  const [openId, setOpenId] = useState<string | null>(null)
   const setSearch = (next: { view?: View; page?: number }) => {
     const nextView = next.view ?? view
     void navigate({
@@ -68,6 +64,9 @@ export function ReturnsPage() {
           to="/orders/$id"
           params={{ id: row.order_id }}
           className="font-medium hover:underline"
+          onClick={(event) => {
+            event.stopPropagation()
+          }}
         >
           #{row.order_display_id ?? "—"}
         </Link>
@@ -131,7 +130,16 @@ export function ReturnsPage() {
       key: "actions",
       header: "",
       align: "right",
-      cell: (row) => <ReturnActions request={row} onOpen={setOpen} />,
+      // The row opens the request; its menu only acts
+      cell: (row) => (
+        <span
+          onClick={(event) => {
+            event.stopPropagation()
+          }}
+        >
+          <ReturnActions request={row} onOpen={setOpen} />
+        </span>
+      ),
     },
   ]
   return (
@@ -165,6 +173,9 @@ export function ReturnsPage() {
               rowKey={(row) => row.id}
               loading={!query.data}
               empty={t(`${R}.empty`)}
+              onRowClick={(row) => {
+                setOpenId(row.id)
+              }}
             />
             {query.data && query.data.count > 0 ? (
               <Pagination
@@ -179,6 +190,13 @@ export function ReturnsPage() {
           </>
         )}
       </section>
+      <ReturnQueueDialog
+        request={(query.data?.return_requests ?? []).find((row) => row.id === openId) ?? null}
+        onClose={() => {
+          setOpenId(null)
+        }}
+        onOpen={setOpen}
+      />
       <ReturnDialogHost
         open={open}
         onClose={() => {

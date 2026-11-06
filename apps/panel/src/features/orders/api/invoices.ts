@@ -105,6 +105,32 @@ export const useRetryInvoice = () =>
     sdk.client.fetch(path(id, "retry"), { method: "POST", body: {} })
   )
 
+/** One picked invoice's outcome: retried, or why not (an i18n key and its sentence). */
+export interface RetryResult {
+  invoice_id: string
+  ok: boolean
+  error: string | null
+  message: string | null
+}
+
+/** The most stopped invoices tried again at once (the server's `MAX_BULK_RETRY`). */
+export const MAX_BULK_RETRY = 20
+
+/** The stopped invoices picked on the queue, each tried again as its own retry would. */
+export function useRetryInvoices() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: async (ids: string[]) =>
+      (
+        await sdk.client.fetch<{ results: RetryResult[] }>("/admin/invoices/retry", {
+          method: "POST",
+          body: { invoice_ids: ids },
+        })
+      ).results,
+    onSuccess: () => client.invalidateQueries({ queryKey: KEY }),
+  })
+}
+
 export interface WrittenInvoice {
   number: string
   uuid?: string | null

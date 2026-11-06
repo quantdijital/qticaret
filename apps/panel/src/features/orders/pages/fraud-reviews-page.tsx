@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { DataTable } from "@/components/patterns/data-table"
@@ -19,6 +20,7 @@ import {
   useDecideReview,
 } from "@/features/orders/api/fraud"
 import type { FraudReview, FraudReviewStatus } from "@/features/orders/api/fraud"
+import { Fact, QueueDialog } from "@/features/orders/components/queue-dialog"
 import { errorText } from "@/lib/errors"
 import { formatDateTime, formatMoney } from "@/lib/format"
 
@@ -68,6 +70,60 @@ function Decide({ review }: { review: FraudReview }) {
   )
 }
 
+/** A held order opened from the queue: its score, the rules that made it, and the decision. */
+function ReviewDialog({
+  review,
+  canDecide,
+  onClose,
+}: {
+  review: FraudReview | null
+  canDecide: boolean
+  onClose: () => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <QueueDialog
+      open={review !== null}
+      onClose={onClose}
+      title={t(`${F}.dialogTitle`, { number: review?.order?.display_id ?? "—" })}
+      orderId={review?.order?.id ?? null}
+    >
+      {review ? (
+        <div className="flex flex-col gap-4">
+          <dl>
+            <Fact label={t(`${F}.columns.score`)}>{review.score}</Fact>
+            <Fact label={t(`${F}.columns.total`)}>
+              {review.order ? formatMoney(review.order.total / 100, "try") : "—"}
+            </Fact>
+            <Fact label={t(`${F}.email`)}>{review.order?.email ?? "—"}</Fact>
+            <Fact label={t(`${F}.columns.when`)}>{formatDateTime(review.created_at)}</Fact>
+          </dl>
+          <div className="flex flex-col gap-1.5">
+            <h3 className="text-sm font-semibold">{t(`${F}.columns.reasons`)}</h3>
+            <span className="flex flex-wrap gap-1">
+              {review.reasons.map((reason) => (
+                <StatusBadge key={reason.rule} tone="neutral">
+                  {t(`${F}.rules.${reason.rule}`)} +{reason.points}
+                </StatusBadge>
+              ))}
+            </span>
+          </div>
+          {review.note ? (
+            <p className="text-sm whitespace-pre-wrap text-muted-foreground">{review.note}</p>
+          ) : null}
+          {review.status === "pending" && canDecide ? (
+            <Decide review={review} />
+          ) : (
+            <StatusBadge tone={TONE[review.status]}>
+              {t(`${F}.status.${review.status}`)}
+            </StatusBadge>
+          )}
+        </div>
+      ) : null}
+    </QueueDialog>
+  )
+}
+
 /**
  * Orders > Review (F15.6, adr/0044 §3): the orders the fraud rules held,
  * each with its score and the rules that made it. Approved, an order may
@@ -81,6 +137,8 @@ export function FraudReviewsPage() {
   const view: FraudReviewStatus = search.view ?? "pending"
   const page = (search.page ?? 1) - 1
   const query = useQuery(fraudReviewsQuery({ status: view, page }))
+  // The row opened in its dialog, by id: once decided it leaves the tab, and the dialog closes
+  const [openId, setOpenId] = useState<string | null>(null)
   const setSearch = (next: { view?: FraudReviewStatus; page?: number }) => {
     const nextView = next.view ?? view
     void navigate({
@@ -103,6 +161,9 @@ export function FraudReviewsPage() {
               to="/orders/$id"
               params={{ id: row.order.id }}
               className="font-medium hover:underline"
+              onClick={(event) => {
+                event.stopPropagation()
+              }}
             >
               #{row.order.display_id}
             </Link>
@@ -154,9 +215,16 @@ export function FraudReviewsPage() {
       key: "actions",
       header: "",
       align: "right",
+      // The row opens the review; its buttons only decide
       cell: (row) =>
         row.status === "pending" && canDecide ? (
-          <Decide review={row} />
+          <span
+            onClick={(event) => {
+              event.stopPropagation()
+            }}
+          >
+            <Decide review={row} />
+          </span>
         ) : (
           <StatusBadge tone={TONE[row.status]}>{t(`${F}.status.${row.status}`)}</StatusBadge>
         ),
@@ -190,6 +258,9 @@ export function FraudReviewsPage() {
               rowKey={(row) => row.id}
               loading={!query.data}
               empty={t(`${F}.empty.${view}`)}
+              onRowClick={(row) => {
+                setOpenId(row.id)
+              }}
             />
             {query.data && query.data.count > 0 ? (
               <Pagination
@@ -204,6 +275,13 @@ export function FraudReviewsPage() {
           </>
         )}
       </section>
+      <ReviewDialog
+        review={(query.data?.reviews ?? []).find((row) => row.id === openId) ?? null}
+        canDecide={canDecide}
+        onClose={() => {
+          setOpenId(null)
+        }}
+      />
     </div>
   )
 }

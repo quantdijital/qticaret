@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, within } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
@@ -8,7 +9,11 @@ import { InvoicesPage } from "./invoices-page"
 
 const fetchMock = vi.hoisted(() => vi.fn())
 
+const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
+
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
+vi.mock("sonner", () => ({ toast }))
+vi.mock("@/features/auth/api/staff", () => ({ useCan: () => true }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: ReactNode }) => <a href="/orders/order_1">{children}</a>,
   getRouteApi: () => ({ useSearch: () => ({ view: "all" }) }),
@@ -44,6 +49,84 @@ const rowOf = (number: number) => {
   }
   return within(row)
 }
+
+function renderPage() {
+  return render(
+    <QueryClientProvider client={new QueryClient()}>
+      <InvoicesPage />
+    </QueryClientProvider>
+  )
+}
+
+describe("InvoicesPage: the queue's rows and the stopped ones tried again", () => {
+  beforeEach(() => {
+    fetchMock.mockReset()
+    toast.success.mockReset()
+    toast.error.mockReset()
+    fetchMock.mockImplementation((path: string) =>
+      Promise.resolve(
+        path === "/admin/invoices/retry"
+          ? {
+              results: [
+                { invoice_id: "inv_1", ok: true, error: null, message: null },
+                {
+                  invoice_id: "inv_2",
+                  ok: false,
+                  error: "einvoice.not_failed",
+                  message: "Yalnızca durmuş bir fatura yeniden denenebilir.",
+                },
+              ],
+            }
+          : {
+              invoices: [
+                invoice({ id: "inv_1", status: "failed", number: null, last_error: "x" }),
+                invoice({
+                  id: "inv_2",
+                  order_id: "order_2",
+                  order_display_id: 1043,
+                  status: "failed",
+                  number: null,
+                }),
+                invoice({ id: "inv_3", order_id: "order_3", order_display_id: 1044 }),
+              ],
+              count: 3,
+              limit: 20,
+              offset: 0,
+            }
+      )
+    )
+  })
+
+  it("opens a row's invoice in one standard dialog, with the way to its order", async () => {
+    renderPage()
+    await userEvent.click(await screen.findByText("SHT2026000000042"))
+
+    const dialog = await screen.findByRole("dialog")
+    expect(within(dialog).getByText("#1044 siparişinin faturası")).toBeInTheDocument()
+    expect(within(dialog).getByRole("link", { name: "Siparişe git" })).toBeInTheDocument()
+  })
+
+  it("tries the picked stopped invoices again and says which could not be", async () => {
+    renderPage()
+    await screen.findByText("#1042")
+    await userEvent.click(screen.getByRole("checkbox", { name: "#1042 siparişinin faturası seç" }))
+    await userEvent.click(screen.getByRole("checkbox", { name: "#1043 siparişinin faturası seç" }))
+    // An issued one picked too is left out of the retry
+    await userEvent.click(screen.getByRole("checkbox", { name: "#1044 siparişinin faturası seç" }))
+    await userEvent.click(screen.getByRole("button", { name: "Yeniden dene (2)" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/invoices/retry", {
+        method: "POST",
+        body: { invoice_ids: ["inv_1", "inv_2"] },
+      })
+    })
+    expect(toast.success).toHaveBeenCalledWith("1 fatura yeniden kuyruğa alındı.")
+    expect(toast.error).toHaveBeenCalledWith(
+      "1 fatura yeniden denenemedi: Yalnızca durmuş bir fatura yeniden denenebilir."
+    )
+  })
+})
 
 describe("InvoicesPage: gift card advances (adr/0025 Ek 2026-11-03)", () => {
   beforeEach(() => {

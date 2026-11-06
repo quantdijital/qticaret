@@ -1,7 +1,18 @@
+import type { StatusTone } from "@/components/patterns/status-badge"
 import { DEFECT_REASONS } from "@/features/orders/api/returns"
 import type { OpenRequest, Returnable } from "@/features/orders/api/returnable"
-import type { ReturnReason, ReturnRequest } from "@/features/orders/api/returns"
+import type { ReturnReason, ReturnRequest, ReturnStatus } from "@/features/orders/api/returns"
 import { soldAsGiftCard } from "@/features/orders/gift-lines"
+
+/** How a request's status badge reads: waiting, under way, done, or set aside. */
+export const RETURN_TONE: Record<ReturnStatus, StatusTone> = {
+  requested: "warning",
+  approved: "info",
+  received: "info",
+  refunded: "success",
+  rejected: "neutral",
+  canceled: "neutral",
+}
 
 type Line = Returnable["lines"][number]
 
