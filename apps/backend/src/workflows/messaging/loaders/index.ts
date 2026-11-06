@@ -22,6 +22,7 @@ import {
   loadStaffPasswordReset,
   loadStaffStock,
 } from "./staff"
+import { loadStaffAccountChanged, loadStaffEmailConfirm } from "./staff-account"
 import { loadStockAlert } from "./stock"
 import type { Loaded } from "./types"
 
@@ -64,6 +65,8 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "staff.invite": loadStaffInvite,
   "staff.password_reset": loadStaffPasswordReset,
   "staff.mfa_changed": loadStaffMfaChanged,
+  "staff.email_confirm": loadStaffEmailConfirm,
+  "staff.account_changed": loadStaffAccountChanged,
   // adr/0050: the campaign in `extra.campaign_id`, the recipient's record as the resource
   "marketing.campaign": loadCampaignMessage,
   // adr/0051 §7: the link's token from its sealed copy, so a retry carries no secret

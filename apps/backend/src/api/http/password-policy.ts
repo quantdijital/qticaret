@@ -26,6 +26,31 @@ export function breachCheckOn(
 }
 
 /**
+ * What is wrong with a new password, as its error key, or null (adr/0043):
+ * the rule first, then the breach list where it is on. The list being out
+ * of reach lets it through, logged. Also a staff member's own change.
+ */
+export async function newPasswordProblem(
+  password: string,
+  email: string | null
+): Promise<string | null> {
+  const problem = passwordProblem(password, email)
+  if (problem) {
+    return `auth.password_${problem}`
+  }
+  if (breachCheckOn()) {
+    const breached = await isBreached(password)
+    if (breached) {
+      return "auth.password_breached"
+    }
+    if (breached === null) {
+      logger.warn({ event: "auth.breach_check_unavailable" })
+    }
+  }
+  return null
+}
+
+/**
  * A new password, staff or customer, at registration and at a reset link
  * (`/auth/:actor_type/emailpass/register`, `/update`; F15.1, adr/0043):
  * at least ten characters and at most 256, none people pick first, none
@@ -47,20 +72,10 @@ export async function newPasswordPolicy(
     const named = claimsOf(req)?.["entity_id"]
     const email =
       typeof body.email === "string" ? body.email : typeof named === "string" ? named : null
-    const problem = passwordProblem(body.password, email)
+    const problem = await newPasswordProblem(body.password, email)
     if (problem) {
-      next(new ValidationError(`auth.password_${problem}`, { field: "password" }))
+      next(new ValidationError(problem, { field: "password" }))
       return
-    }
-    if (breachCheckOn()) {
-      const breached = await isBreached(body.password)
-      if (breached) {
-        next(new ValidationError("auth.password_breached", { field: "password" }))
-        return
-      }
-      if (breached === null) {
-        logger.warn({ event: "auth.breach_check_unavailable" })
-      }
     }
     next()
   } catch (error) {

@@ -522,6 +522,13 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "staff.forbidden": "Rolünüz bu işlem için yetkili değil.",
   "staff.last_owner": "Mağazanın son sahibi rolünü bırakamaz; önce başka birini sahip yapın.",
   "api_key.delete_active": "Etkin anahtar silinemez; önce iptal edin.",
+  "staff.password_wrong": "Mevcut şifreniz doğru değil.",
+  "staff.password_same": "Yeni şifre mevcut şifrenizle aynı olamaz.",
+  "staff.email_same": "Bu zaten giriş adresiniz.",
+  "staff.email_unavailable": "Bu e-posta adresi kullanılamıyor; başka bir adres deneyin.",
+  "staff.email_change_invalid":
+    "Onay bağlantısı geçersiz, süresi dolmuş ya da kullanılmış; panelden yeniden isteyin.",
+  "staff.job_title_invalid": "Unvan geçersiz karakter içeriyor.",
   "api_key.fields_not_allowed": "Anahtarla alan seçilemez (fields); uç kendi alanlarını döner.",
   "api_key.scope_denied": "Bu anahtar bu işlem için yetkili değil.",
   "api_key.scopes_required": "Anahtar için en az bir izin seçin.",

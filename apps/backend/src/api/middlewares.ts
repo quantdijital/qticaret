@@ -23,6 +23,7 @@ import { PANEL_ROUTES } from "./admin/panel-routes"
 import { AdminPostRevealTaxId } from "./admin/customers/[id]/billing-profile/reveal/validators"
 import { REAUTH_ROUTES } from "./http/reauth-routes"
 import { STAFF_ROUTES } from "./http/staff-routes"
+import { STAFF_ACCOUNT_ROUTES } from "./http/staff-account-routes"
 import { WEBHOOK_ROUTES } from "./http/webhook-routes"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
 import { AdminPostDescriptionFactsPreview } from "./admin/description-facts/preview/validators"
@@ -288,6 +289,7 @@ export default defineMiddlewares({
     // F11.7: outgoing webhooks
     ...WEBHOOK_ROUTES,
     ...STAFF_ROUTES,
+    ...STAFF_ACCOUNT_ROUTES,
     ...REAUTH_ROUTES,
     {
       matcher: "/admin/customers/:id/billing-profile/reveal",

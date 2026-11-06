@@ -28,6 +28,7 @@ import {
   staffPasswordReset,
   staffSeoDigest,
 } from "./staff"
+import { staffAccountChanged, staffEmailConfirm } from "./staff-account"
 
 export type { MigrationInviteVars, ResetVars, VerifyVars } from "./account"
 export type { AnnouncementVars } from "./marketing"
@@ -56,6 +57,7 @@ export type {
   StaffSeoVars,
   StaffStockVars,
 } from "./staff"
+export type { StaffAccountVars, StaffEmailConfirmVars } from "./staff-account"
 export type { Brand, EmailContent, EmailContext, MessageKind, MessageTemplate } from "./types"
 
 /** Every template the platform sends, by name (adr/0036). */
@@ -94,6 +96,9 @@ export const MESSAGE_TEMPLATES = {
   "staff.invite": staffInvite,
   "staff.password_reset": staffPasswordReset,
   "staff.mfa_changed": staffMfaChanged,
+  // The owner, 2026-11-06: a staff member's own address confirmed, their password or address changed
+  "staff.email_confirm": staffEmailConfirm,
+  "staff.account_changed": staffAccountChanged,
   // adr/0050: a bulk e-mail or SMS, to one consented recipient
   "marketing.campaign": campaignMessage,
   // adr/0051 §7: a payment link staff made, to the customer who asked for the order

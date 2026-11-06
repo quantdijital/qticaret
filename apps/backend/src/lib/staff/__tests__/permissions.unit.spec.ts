@@ -182,6 +182,27 @@ describe("staff roles", () => {
     ).toBe(false)
   })
 
+  it("lets every role read and change its own account, never another's", () => {
+    for (const role of STAFF_ROLES) {
+      expect(decide(role, "GET", "/admin/staff/me/profile")).toEqual({
+        allowed: true,
+        reason: "own",
+      })
+      for (const path of [
+        "/admin/staff/me/profile",
+        "/admin/staff/me/password",
+        "/admin/staff/me/email",
+        "/admin/staff/me/sessions/end-others",
+      ]) {
+        expect(allowed(role, "POST", path)).toBe(true)
+      }
+      // Its own list, not a way round the team's rules
+      expect(allowed(role, "DELETE", "/admin/staff/me/profile")).toBe(role === "owner")
+      expect(allowed(role, "POST", "/admin/staff/members/user_1")).toBe(role === "owner")
+      expect(allowed(role, "POST", "/admin/users/user_1")).toBe(role === "owner")
+    }
+  })
+
   it("lets every role read who it is", () => {
     for (const role of STAFF_ROLES) {
       expect(allowed(role, "GET", "/admin/users/me")).toBe(true)
@@ -508,6 +529,13 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/staff/members/:id": false,
   "DELETE /admin/staff/members/:id": false,
   "POST /admin/staff/members/:id/reset-mfa": false,
+  // One's own account, whatever the role (the owner, 2026-11-06)
+  "POST /admin/staff/me/profile": true,
+  "POST /admin/staff/me/password": true,
+  "POST /admin/staff/me/email": true,
+  "POST /admin/staff/me/sessions/end-others": true,
+  // The new address's link, before a session: no role decides it
+  "POST /admin/staff/email/confirm": false,
   "POST /admin/stock-items/:id/watch": true,
   "POST /admin/warehouses/:id/default": false,
   "POST /admin/warehouses/:id": false,

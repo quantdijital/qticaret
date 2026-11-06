@@ -14,6 +14,7 @@
  */
 import {
   OPERATIONS_WRITES,
+  OWN,
   OWNER_ONLY,
   PRIVATE,
   READONLY_WRITES,
@@ -86,6 +87,7 @@ export interface Decision {
   /** Why, for the log: the list that decided. */
   reason:
     | "self"
+    | "own"
     | "replaced"
     | "owner"
     | "owner_only"
@@ -115,6 +117,10 @@ export function decide(
     matches(rules, verb, path, facts) || matches(rules, verb, decoded, facts)
   if (refused(REPLACED)) {
     return { allowed: false, reason: "replaced" }
+  }
+  // One's own account, whatever the role (and only one's own: the handlers read no id)
+  if (matches(OWN, verb, path, facts)) {
+    return { allowed: true, reason: "own" }
   }
   if (role === "owner") {
     return { allowed: true, reason: "owner" }

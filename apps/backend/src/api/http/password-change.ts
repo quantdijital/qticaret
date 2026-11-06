@@ -20,7 +20,9 @@ import { rejectRequest } from "./reject"
  * refreshes, opens a session nor opens a customer account.
  */
 
-const KEY = "password_changed_at"
+/** Where the identity keeps when its password last changed (app_metadata). */
+export const PASSWORD_CHANGED_AT = "password_changed_at"
+const KEY = PASSWORD_CHANGED_AT
 
 /** The bearer token's identity and when it was given (seconds). */
 function bearerOf(req: MedusaRequest): { identity: string; issued: number } | null {

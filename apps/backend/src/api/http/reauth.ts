@@ -43,6 +43,12 @@ async function hasFactor(req: MedusaRequest, identity: string): Promise<boolean>
   return factors.length > 0
 }
 
+/** Whether the signed-in person has 2FA on: their own account changes then ask its code too. */
+export async function callerHasFactor(req: MedusaRequest): Promise<boolean> {
+  const identity = authOf(req)?.auth_identity_id
+  return identity ? hasFactor(req, identity) : false
+}
+
 /**
  * Medusa takes a TOTP code again within its step: a sign-in and a step-up
  * take it once between them. True the first time the identity gives it.

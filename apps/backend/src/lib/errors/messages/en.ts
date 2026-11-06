@@ -517,6 +517,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "staff.last_owner":
     "The shop's last owner cannot give up the role; make someone else owner first.",
   "api_key.delete_active": "An active key cannot be deleted; revoke it first.",
+  "staff.password_wrong": "Your current password is not right.",
+  "staff.password_same": "The new password cannot be your current one.",
+  "staff.email_same": "This is already your sign-in address.",
+  "staff.email_unavailable": "This e-mail address cannot be used; try another.",
+  "staff.email_change_invalid":
+    "The confirmation link is not valid, has expired or was used; ask again from the panel.",
+  "staff.job_title_invalid": "The job title holds characters it cannot.",
   "api_key.fields_not_allowed": "A key cannot pick fields; each route returns its own.",
   "api_key.scope_denied": "This key is not allowed to do this.",
   "api_key.scopes_required": "Pick at least one permission for the key.",

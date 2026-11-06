@@ -35,6 +35,20 @@ export const SELF: readonly Rule[] = [
 ]
 
 /**
+ * Any role, about its own account (the owner, 2026-11-06): the profile, the
+ * password, the login address, one's other sessions. Unlike `SELF` these
+ * pass the 2FA gate first and ask for a role: someone taken off the team
+ * changes nothing. The handlers act on the caller alone, never on an id
+ * from the request.
+ */
+export const OWN: readonly Rule[] = [
+  { methods: ["GET", "POST"], path: "/admin/staff/me/profile" },
+  { methods: ["POST"], path: "/admin/staff/me/password" },
+  { methods: ["POST"], path: "/admin/staff/me/email" },
+  { methods: ["POST"], path: "/admin/staff/me/sessions/end-others" },
+]
+
+/**
  * Medusa's own ways round this layer, for no one, the owner included: a user
  * deleted here skips the last-owner guard, the step-up and the role's
  * removal; an invitation made here carries no role. `/admin/staff` does both.
