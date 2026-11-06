@@ -32,6 +32,8 @@ describe("storefront layout document (adr/0049)", () => {
       footer: [],
       product: [],
       category: [],
+      // The theme's shared settings: unset until written (adr/0049 Ek 2026-11-06)
+      settings: { trust_badges: null, color_swatches: null, low_stock: null },
     })
   })
 

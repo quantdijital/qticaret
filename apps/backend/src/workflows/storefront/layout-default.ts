@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { layoutDocument } from "../../lib/storefront/layout"
 import type { LayoutDocument } from "../../lib/storefront/layout"
+import { UNSET_SETTINGS, withLegacy } from "../../lib/storefront/layout-settings"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { StorefrontSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
@@ -13,7 +14,9 @@ const NOT_SCHEDULED = { visible: true, starts_at: null, ends_at: null }
 /**
  * The design a shop starts from, before it publishes its own (adr/0049):
  * the storefront as it was built, its announcement lines and home page
- * opening from the storefront settings. The one source of the default:
+ * opening from the storefront settings, its trust badges, colour names and
+ * "Az kaldı" line from their old fields there (adr/0049 Ek 2026-11-06).
+ * The one source of the default:
  * the storefront shows it, the theme editor opens it as the first draft.
  */
 export async function defaultLayout(container: Container): Promise<LayoutDocument> {
@@ -59,5 +62,6 @@ export async function defaultLayout(container: Container): Promise<LayoutDocumen
     // The product and category pages show only their own blocks until the shop adds sections
     product: [],
     category: [],
+    settings: withLegacy({ ...UNSET_SETTINGS }, settings),
   })
 }

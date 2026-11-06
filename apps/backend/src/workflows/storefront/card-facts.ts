@@ -3,8 +3,8 @@ import { ContainerRegistrationKeys, getVariantAvailability } from "@medusajs/fra
 import { storedAddonsOf } from "../../lib/catalog/addons"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import { PRODUCT_ADDONS } from "../../modules/platform-settings/features"
-import type { StorefrontSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
+import { liveSettings } from "./layout-shared"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -79,7 +79,8 @@ export function quickAddOf(
  * Card facts for a page of products (adr/0046 Ek 2026-11-04): the stock
  * bucket and the quick-add variant of each published product in one of
  * the shopper's sales channels; others are left out. One product read and
- * one stock read for the whole page.
+ * one stock read for the whole page. "Az kaldı" at the published design's
+ * threshold (adr/0049 Ek 2026-11-06), else the old storefront field's.
  */
 export async function cardFacts(
   container: Container,
@@ -93,7 +94,7 @@ export async function cardFacts(
   }
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  const [{ data }, storefront, addonsOn] = await Promise.all([
+  const [{ data }, shared, addonsOn] = await Promise.all([
     query.graph({
       entity: "product",
       fields: [
@@ -108,7 +109,7 @@ export async function cardFacts(
       ],
       filters: { id: ids },
     }),
-    settings.getSection("storefront") as unknown as Promise<StorefrontSettings>,
+    liveSettings(container),
     settings.isFeatureEnabled(PRODUCT_ADDONS),
   ])
   const shown = (data as ProductRow[]).filter(
@@ -126,7 +127,7 @@ export async function cardFacts(
     ? await getVariantAvailability(query, { variant_ids: counted, sales_channel_id: channel })
     : {}
   const available = (variantId: string) => availability[variantId]?.availability ?? 0
-  const lowAt = storefront.low_stock_threshold
+  const lowAt = shared.low_stock_threshold
   return Object.fromEntries(
     shown.map((product) => {
       const stock = stockBucketOf(variantsOf(product), available, lowAt)

@@ -849,6 +849,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The section was not recognised; reload the page and try again.",
   "storefront_layout.section_duplicate":
     "A section was added twice; the announcement bar and the newsletter can appear once each.",
+  "storefront_layout.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
+  "storefront_layout.color_duplicate": "Each colour name can be listed once.",
   "storefront_layout.schedule_invalid": "The section must end after it starts.",
   "storefront_layout.nothing_to_publish": "There is no draft to publish; make a change first.",
   "storefront_layout.nothing_to_preview": "Save the draft once before previewing it.",

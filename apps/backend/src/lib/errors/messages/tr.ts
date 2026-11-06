@@ -853,6 +853,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "storefront_layout.section_invalid": "Bölüm tanınmadı; sayfayı yenileyip yeniden deneyin.",
   "storefront_layout.section_duplicate":
     "Aynı bölüm iki kez eklenmiş; duyuru şeridi ve bülten birer kez olabilir.",
+  "storefront_layout.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",
+  "storefront_layout.color_duplicate": "Her renk adı bir kez yazılabilir.",
   "storefront_layout.schedule_invalid": "Bölümün bitiş zamanı başlangıçtan sonra olmalı.",
   "storefront_layout.nothing_to_publish": "Yayınlanacak bir taslak yok; önce bir değişiklik yapın.",
   "storefront_layout.nothing_to_preview": "Önizlemek için önce taslağı kaydedin.",

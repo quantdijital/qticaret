@@ -8,11 +8,13 @@ import {
   worded,
 } from "./layout-sections"
 import type { BodySection } from "./layout-sections"
+import { layoutSettings } from "./layout-settings"
 
 /**
  * The storefront's design as the theme editor writes it (adr/0049): the
  * header's, the home page's, the product and category pages' and the
- * footer's sections (`layout-sections.ts`), checked as one document.
+ * footer's sections (`layout-sections.ts`), and the theme's shared
+ * settings (`layout-settings.ts`), checked as one document.
  */
 
 export { LAYOUT_LIMITS } from "./layout-sections"
@@ -37,6 +39,8 @@ export const layoutDocument = z
     footer: z.array(worded("newsletter")).max(LAYOUT_LIMITS.footer).default([]),
     product: z.array(productSection).max(LAYOUT_LIMITS.product).default([]),
     category: z.array(categorySection).max(LAYOUT_LIMITS.category).default([]),
+    /** What several pages draw alike: trust badges, colour swatches, "Az kaldı". */
+    settings: layoutSettings,
   })
   .strict()
   .superRefine((doc, ctx) => {

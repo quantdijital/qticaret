@@ -2,11 +2,13 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import type { BodySection, LayoutDocument } from "../../lib/storefront/layout"
 import { isShowing, layoutDocument } from "../../lib/storefront/layout"
 import { fillShopText } from "../../lib/shop/tokens"
+import { shownSettings } from "../../lib/storefront/layout-settings"
 import { MEDIA_MODULE } from "../../modules/media"
 import type MediaModuleService from "../../modules/media/service"
 import { createTtlCache } from "../../lib/cache/ttl-cache"
 import { shopInfoValues } from "../shop/info-values"
 import { layoutRow } from "./layout"
+import { legacySettings } from "./layout-shared"
 import { defaultLayout } from "./layout-default"
 import { imagesOf, linksOf } from "./layout-check"
 import { fill, hydrateSection } from "./layout-hydrate"
@@ -28,7 +30,9 @@ const imageUrls = (section: BodySection): string[] =>
  * Products, categories, brands, posts and reviews are the storefront's to
  * fetch (prices and stock on every request); a sale or best-seller rail's
  * products are picked here, for the shopper's sales channels (`channels`,
- * the publishable key's; null: any), and named by id.
+ * the publishable key's; null: any), and named by id. The theme's shared
+ * settings come applied (adr/0049 Ek 2026-11-06): the badges' and the colour
+ * names' as written here, else as the old storefront fields hold them.
  */
 export async function storeLayout(
   container: MedusaContainer,
@@ -56,7 +60,7 @@ export async function storeLayout(
   const body: BodySection[] = [...home, ...product, ...category]
   const links = body.flatMap(linksOf)
   const urls = body.flatMap(imageUrls)
-  const [values, resolved, assets, picks] = await Promise.all([
+  const [values, resolved, assets, picks, legacy] = await Promise.all([
     shopInfoValues(container),
     resolveLinks(
       container,
@@ -79,6 +83,7 @@ export async function storeLayout(
           )
       : Promise.resolve([]),
     railPicks(container, home, channels),
+    legacySettings(container),
   ])
   const at: HydrateContext = {
     values,
@@ -133,6 +138,24 @@ export async function storeLayout(
         placement: section.placement,
       }))
     ),
+    settings: sharedOf(doc, legacy, values),
+  }
+}
+
+/** The shared settings as the storefront draws them: the badges' details in place. */
+function sharedOf(
+  doc: LayoutDocument,
+  legacy: Awaited<ReturnType<typeof legacySettings>>,
+  values: Awaited<ReturnType<typeof shopInfoValues>>
+) {
+  const shown = shownSettings(doc.settings, legacy)
+  return {
+    trust_badges: shown.trust_badges.map((badge) => ({
+      icon: badge.icon,
+      title: fillShopText(badge.title, values),
+      text: fill(badge.text, values),
+    })),
+    color_swatches: shown.color_swatches,
   }
 }
 
