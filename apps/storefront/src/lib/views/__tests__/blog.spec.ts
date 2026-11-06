@@ -1,7 +1,7 @@
-import type { SeoPayload, StoreContentSummary } from "@qticaret/types"
+import type { StoreContentSummary } from "@qticaret/types"
 import { describe, expect, it } from "vitest"
 import { t } from "@/lib/i18n"
-import { blogPageOf, blogPagePath, blogPagination, blogTermBar, pagedSeo } from "../blog"
+import { blogPageOf, blogPagePath, blogPagination, blogTermBar } from "../blog"
 import { postCards, postTerms } from "../posts"
 
 const ARCHIVE = "/blog/kategori/bakim"
@@ -47,25 +47,6 @@ describe("a blog list's pages (/blog, an archive)", () => {
     // A tag's archive marks nothing; a blog with no category has no bar
     expect(blogTermBar(terms, "/blog/etiket/celik", t).some((term) => term.current)).toBe(false)
     expect(blogTermBar([], "/blog", t)).toEqual([])
-  })
-
-  it("titles an archive's later page by its number, its canonical itself", () => {
-    const seo = {
-      title: "Bakım | Mağaza",
-      description: "",
-      canonical: `https://magaza.example${ARCHIVE}`,
-      robots: "index,follow",
-      openGraph: { title: "Bakım", url: `https://magaza.example${ARCHIVE}` },
-      twitter: { title: "Bakım" },
-    } as unknown as SeoPayload
-    expect(pagedSeo(seo, ARCHIVE, 1, t)).toBe(seo)
-    const second = pagedSeo(seo, ARCHIVE, 2, t)
-    expect(second.title).toBe("Bakım | Mağaza – Sayfa 2")
-    expect(second.canonical).toBe(`https://magaza.example${ARCHIVE}?sayfa=2`)
-    expect(second.openGraph.url).toBe(second.canonical)
-    // A canonical the shop pointed elsewhere stays where it points
-    const elsewhere = { ...seo, canonical: "https://magaza.example/blog" }
-    expect(pagedSeo(elsewhere, ARCHIVE, 2, t).canonical).toBe("https://magaza.example/blog")
   })
 })
 

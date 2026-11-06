@@ -1,13 +1,12 @@
-import type { SeoPayload } from "@qticaret/types"
 import type { BlogTermLinkView, PaginationView, Translate } from "@qticaret/ui"
+import { pagedPath } from "@/lib/seo/paging"
 
 export const BLOG_PATH = "/blog"
 
 const PAGE = /^[1-9]\d{0,3}$/
 
 /** A blog list's page (`/blog`, an archive): the bare address for the first. */
-export const blogPagePath = (base: string, page: number): string =>
-  page > 1 ? `${base}?sayfa=${String(page)}` : base
+export const blogPagePath = pagedPath
 
 /** `?sayfa=` as a page number; null for anything the address should not hold. */
 export function blogPageOf(raw: string | string[] | undefined): number | null {
@@ -51,33 +50,4 @@ export function blogTermBar(
     path: term.path,
     current: term.path === current,
   }))
-}
-
-const isSelf = (canonical: string, path: string): boolean => {
-  try {
-    return new URL(canonical).pathname === path
-  } catch {
-    return false
-  }
-}
-
-/**
- * An archive's later page as its own page (docs/13 §7): its title says
- * which page, its canonical is itself (when the backend's points at the
- * archive). The first page as the backend wrote it.
- */
-export function pagedSeo(seo: SeoPayload, path: string, page: number, t: Translate): SeoPayload {
-  if (page <= 1) {
-    return seo
-  }
-  const suffix = ` – ${t("listing.page_n", { page })}`
-  const canonical =
-    seo.canonical && isSelf(seo.canonical, path) ? blogPagePath(seo.canonical, page) : seo.canonical
-  return {
-    ...seo,
-    title: `${seo.title}${suffix}`,
-    canonical,
-    openGraph: { ...seo.openGraph, title: `${seo.openGraph.title}${suffix}`, url: canonical },
-    twitter: { ...seo.twitter, title: `${seo.twitter.title}${suffix}` },
-  }
 }

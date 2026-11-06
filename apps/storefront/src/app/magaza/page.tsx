@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { t } from "@/lib/i18n"
+import { pageTitle } from "@/lib/seo/paging"
 import { siteSeo } from "@/lib/store-api/requests"
 import { stateFromSearch } from "@/lib/views/listing"
 import { type Query, ShopScreen, toSearch } from "@/screens/shop"
@@ -16,7 +17,14 @@ export async function generateMetadata({
   // docs/13 §7: a narrowed list's canonical is the clean page; a plain numbered page names itself
   const path = state.page > 1 && !narrowed ? `/magaza?sayfa=${String(state.page)}` : "/magaza"
   return {
-    title: { absolute: `${t("listing.all_products")} | ${site.shop.name}` },
+    title: {
+      absolute: pageTitle(
+        `${t("listing.all_products")} | ${site.shop.name}`,
+        state.page,
+        site.shop.name,
+        t
+      ),
+    },
     description: t("listing.all_products_description", { shop: site.shop.name }),
     alternates: site.canonical_host ? { canonical: `https://${site.canonical_host}${path}` } : null,
     // docs/13 §7: a narrowed or reordered list is not indexed; its pages are

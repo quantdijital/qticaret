@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { t } from "@/lib/i18n"
+import { pageTitle } from "@/lib/seo/paging"
 import { siteSeo } from "@/lib/store-api/requests"
 import { blogPageOf, blogPagePath } from "@/lib/views/blog"
 import { BlogIndexScreen } from "@/screens/blog"
@@ -13,9 +14,10 @@ export async function generateMetadata({
   const [site, query] = await Promise.all([siteSeo(), searchParams])
   const page = blogPageOf(query["sayfa"]) ?? 1
   const path = blogPagePath("/blog", page)
-  const title = `${t("blog.title")} | ${site.shop.name}`
   return {
-    title: { absolute: page > 1 ? `${title} – ${t("listing.page_n", { page })}` : title },
+    title: {
+      absolute: pageTitle(`${t("blog.title")} | ${site.shop.name}`, page, site.shop.name, t),
+    },
     description: t("blog.description", { shop: site.shop.name }),
     // docs/13 §7: each page of a list is its own page, its own canonical
     alternates: site.canonical_host ? { canonical: `https://${site.canonical_host}${path}` } : null,

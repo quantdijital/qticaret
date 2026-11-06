@@ -67,7 +67,10 @@ medusaIntegrationTestRunner({
         listing: { page: 2, page_size: 24 },
         seo: { robots: "index,follow", canonical: `${HOST}${CATEGORY}?sayfa=2` },
       })
-      expect(second.seo?.title).toContain(" - Sayfa 2")
+      // The structured data names the page; the storefront titles it (`lib/seo/paging.ts`)
+      const collection = second.seo?.jsonLd.find((block) => block["@type"] === "CollectionPage")
+      expect(collection?.["name"]).toMatch(/ – Sayfa 2$/)
+      expect(second.seo?.title).not.toContain("Sayfa")
       expect((await resolve(`${CATEGORY}?sayfa=3`)).type).toBe("not_found")
     })
 

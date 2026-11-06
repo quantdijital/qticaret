@@ -24,11 +24,13 @@ const isSelf = (canonical: string, path: string): boolean => {
  * A listing page's `seo` object for its query (docs/13 §3, §7): a
  * filtered, priced or sorted listing is `noindex,follow`, its canonical
  * the clean page; a numbered page names itself canonical (unless the page
- * names another) and says which page it is in its title and structured
- * data. A stricter robots value stays.
+ * names another) and says which page it is in its structured data. Its
+ * title says so on the storefront (`lib/seo/paging.ts`), the one place
+ * every paginated list is titled, its own pages included. A stricter
+ * robots value stays.
  */
 export function listingSeo(payload: SeoPayload, query: ListingQuery, path: string): SeoPayload {
-  const suffix = query.page > 1 ? ` - Sayfa ${String(query.page)}` : ""
+  const suffix = query.page > 1 ? ` – Sayfa ${String(query.page)}` : ""
   const isFiltered = isNarrowed(query)
   const canonical =
     payload.canonical && suffix && !isFiltered && isSelf(payload.canonical, path)
@@ -37,15 +39,9 @@ export function listingSeo(payload: SeoPayload, query: ListingQuery, path: strin
   const robots = isFiltered && payload.robots === "index,follow" ? "noindex,follow" : payload.robots
   return {
     ...payload,
-    title: `${payload.title}${suffix}`,
     canonical,
     robots,
-    openGraph: {
-      ...payload.openGraph,
-      title: `${payload.openGraph.title}${suffix}`,
-      url: canonical,
-    },
-    twitter: { ...payload.twitter, title: `${payload.twitter.title}${suffix}` },
+    openGraph: { ...payload.openGraph, url: canonical },
     jsonLd: suffix ? pagedJsonLd(payload.jsonLd, canonical, suffix) : payload.jsonLd,
   }
 }

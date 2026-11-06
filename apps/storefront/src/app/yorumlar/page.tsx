@@ -4,6 +4,7 @@ import type { StoreReviewPhoto } from "@qticaret/types"
 import type { ImageView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
+import { pageTitle } from "@/lib/seo/paging"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { pathsOf, siteSeo } from "@/lib/store-api/requests"
@@ -83,7 +84,9 @@ export async function generateMetadata({
   // out of the index, its links followed, the whole list its canonical
   const filtered = starsOf(query) !== undefined
   return {
-    title: { absolute: `${t("reviews.title")} | ${site.shop.name}` },
+    title: {
+      absolute: pageTitle(`${t("reviews.title")} | ${site.shop.name}`, page, site.shop.name, t),
+    },
     description: t("reviews.description", { shop: site.shop.name }),
     alternates: site.canonical_host
       ? { canonical: `https://${site.canonical_host}${reviewsPath(filtered ? 1 : page)}` }

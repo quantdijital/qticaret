@@ -177,14 +177,15 @@ describe("listing seo", () => {
       "/kategori/kupalar"
     )
     expect(seo).toMatchObject({
-      title: "Kupalar | Mağaza - Sayfa 3",
+      // The storefront titles the page (`lib/seo/paging.ts`)
+      title: "Kupalar | Mağaza",
       canonical: "https://magaza.example.com/kategori/kupalar?sayfa=3",
       robots: "index,follow",
       openGraph: { url: "https://magaza.example.com/kategori/kupalar?sayfa=3" },
       jsonLd: [
         {
           "@type": "CollectionPage",
-          name: "Kupalar - Sayfa 3",
+          name: "Kupalar – Sayfa 3",
           url: "https://magaza.example.com/kategori/kupalar?sayfa=3",
         },
       ],
