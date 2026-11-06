@@ -1,11 +1,17 @@
 import { formatLira } from "@qticaret/ui"
-import type { CartLineView, FreeShippingView, MiniCartView, Translate } from "@qticaret/ui"
+import type {
+  CartLineView,
+  FreeShippingView,
+  ImageView,
+  MiniCartView,
+  Translate,
+} from "@qticaret/ui"
 import type { StoreProductAddon } from "@qticaret/types"
 import type { Cart } from "@/lib/cart/cart"
 import type { GiftLine } from "@/lib/cart/gift"
 import { isPaymentLinkCart } from "@/lib/cart/payment-link"
 import { addonFormOf, lineAddonsOf } from "./addons"
-import { linePathOf } from "./line-paths"
+import { lineImageOf, linePathOf } from "./line-paths"
 
 /** Kuruş, so float noise never says "0,00 TL more". */
 const kurus = (lira: number): number => Math.round(lira * 100)
@@ -39,11 +45,13 @@ export const differs = (a: number, b: number) => kurus(a) !== kurus(b)
 
 /**
  * The cart's lines as the cart page and the drawer show them, each with its
- * add-on picks (adr/0052) and its product's page (`productPathsOf`).
+ * add-on picks (adr/0052), its product's page (`productPathsOf`) and its
+ * picture's versions (`linePicturesOf`).
  */
 export function cartLinesOf(
   cart: Cart | null,
-  paths: ReadonlyMap<string, string> = new Map()
+  paths: ReadonlyMap<string, string> = new Map(),
+  pictures: ReadonlyMap<string, ImageView> = new Map()
 ): CartLineView[] {
   return (cart?.items ?? []).map((line) => ({
     ...lineAddonsOf(line.metadata),
@@ -53,15 +61,7 @@ export function cartLinesOf(
     quantity: line.quantity,
     total: formatLira(line.total),
     original: differs(line.original_total, line.total) ? formatLira(line.original_total) : null,
-    image: line.thumbnail
-      ? {
-          src: line.thumbnail,
-          alt: line.title,
-          width: null,
-          height: null,
-          sources: { avif: null, webp: null },
-        }
-      : null,
+    image: lineImageOf(line.thumbnail, line.title, pictures),
     path: linePathOf(paths, line),
   }))
 }
@@ -71,13 +71,14 @@ export function miniCartOf(
   cart: Cart | null,
   threshold: number | null,
   t: Translate,
-  paths: ReadonlyMap<string, string> = new Map()
+  paths: ReadonlyMap<string, string> = new Map(),
+  pictures: ReadonlyMap<string, ImageView> = new Map()
 ): MiniCartView | null {
   if (!cart || cart.items.length === 0) {
     return null
   }
   return {
-    lines: cartLinesOf(cart, paths),
+    lines: cartLinesOf(cart, paths, pictures),
     subtotal: formatLira(cart.item_total),
     freeShipping: freeShippingOf(cart.item_total, threshold, t),
     locked: lockedNoteOf(cart, t),

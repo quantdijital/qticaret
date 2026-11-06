@@ -22,7 +22,7 @@ import {
   withAddonForms,
   withGiftLines,
 } from "@/lib/views/cart"
-import { productPathsOf } from "@/lib/views/line-paths"
+import { linePicturesOf, productPathsOf } from "@/lib/views/line-paths"
 import { theme } from "@/theme"
 
 // docs/13 §7: the cart is noindex,nofollow (backend `system_pages`)
@@ -63,7 +63,7 @@ export default async function CartPage({
     typeof query["hata"] === "string" && CART_ERRORS.has(query["hata"]) ? t(query["hata"]) : null
   // A payment link's cart (adr/0051): its lines as they are, no code, no picks to edit
   const locked = lockedNoteOf(cart, t)
-  const [gifts, addons, extras, paths] = await Promise.all([
+  const [gifts, addons, extras, paths, pictures] = await Promise.all([
     shopperGiftLines(cart?.id),
     // Each product's add-ons, for its lines' picks form (none, and not asked, while the shop has them off)
     locked
@@ -73,12 +73,14 @@ export default async function CartPage({
     cartExtras(cart, t),
     // Each line's product page (a payment link's too); gone or hidden products read as text
     productPathsOf(cart?.items ?? []),
+    // Each line's picture in its small versions (the same answer as the paths)
+    linePicturesOf(cart?.items ?? []),
   ])
   // A gift card line takes no add-ons (its product page offers none)
   const giftLines = new Set(gifts.map((gift) => gift.line_id))
   const lines = withGiftLines(
     withAddonForms(
-      cartLinesOf(cart, paths),
+      cartLinesOf(cart, paths, pictures),
       cart ? { ...cart, items: cart.items.filter((line) => !giftLines.has(line.id)) } : null,
       addons,
       t

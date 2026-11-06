@@ -18,7 +18,7 @@ import { categoryImages } from "@/lib/store-api/extras"
 import { bottomNavOf, isCheckoutPage } from "./bottom-nav"
 import { shopMarks } from "./card-extras"
 import { miniCartOf } from "./cart"
-import { productPathsOf } from "./line-paths"
+import { linePicturesOf, productPathsOf } from "./line-paths"
 import { imageView } from "./image"
 import { navigation } from "./categories"
 import { withNavPictures } from "./nav-pictures"
@@ -92,12 +92,13 @@ export async function shopView(): Promise<ShopView> {
     categoryImages(),
   ])
   // The drawer's lines link to their products' pages (gone or hidden ones read as text)
-  const [paths, linePaths] = await Promise.all([
+  const [paths, linePaths, linePictures] = await Promise.all([
     pathsOf(
       "product_category",
       categories.map((category) => category.id)
     ),
     productPathsOf(cart?.items ?? []),
+    linePicturesOf(cart?.items ?? []),
   ])
   // The shop's own menu when it made one (adr/0049), else its top categories; pictures on both
   // Each top entry without the shop's own picture shows its newest product's photo
@@ -121,7 +122,7 @@ export async function shopView(): Promise<ShopView> {
       : null,
     categories: menu,
     cartQuantity: (cart?.items ?? []).reduce((sum, line) => sum + line.quantity, 0),
-    cart: miniCartOf(cart, free_shipping_threshold, t, linePaths),
+    cart: miniCartOf(cart, free_shipping_threshold, t, linePaths, linePictures),
     // The header's and footer's sections from the design (adr/0049)
     announcements: layout.header.flatMap((section) => section.lines),
     newsletter: newsletterOf(layout, identity.company_title ?? site.shop.name),

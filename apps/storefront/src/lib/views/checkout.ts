@@ -32,7 +32,7 @@ import {
 import type { PaymentMethods } from "@/lib/checkout/options"
 import { summaryOf } from "./checkout-summary"
 import { displayPhone } from "./frame"
-import { productPathsOf } from "./line-paths"
+import { linePicturesOf, productPathsOf } from "./line-paths"
 
 export { summaryOf } from "./checkout-summary"
 
@@ -218,16 +218,18 @@ export async function checkoutView(
   const selects = known ? await selectsOf(known) : { province: "", district: "", neighborhood: "" }
   const complete = addressComplete(cart)
   const chosen = cart.shipping_methods[0] ?? null
-  const [provinces, districts, neighborhoods, options, payment, paths] = await Promise.all([
-    provinceOptions(),
-    selects.province ? districtOptions(selects.province) : [],
-    selects.district ? neighborhoodOptions(selects.district) : [],
-    complete ? shippingOptions(cart.id) : [],
-    complete && chosen
-      ? paymentStep(cart, t)
-      : { paymentMethods: [], contracts: {}, ageLimit: null },
-    productPathsOf(cart.items),
-  ])
+  const [provinces, districts, neighborhoods, options, payment, paths, pictures] =
+    await Promise.all([
+      provinceOptions(),
+      selects.province ? districtOptions(selects.province) : [],
+      selects.district ? neighborhoodOptions(selects.district) : [],
+      complete ? shippingOptions(cart.id) : [],
+      complete && chosen
+        ? paymentStep(cart, t)
+        : { paymentMethods: [], contracts: {}, ageLimit: null },
+      productPathsOf(cart.items),
+      linePicturesOf(cart.items),
+    ])
   return {
     step,
     address: {
@@ -264,7 +266,7 @@ export async function checkoutView(
       : null,
     ...payment,
     marketingVersion: MARKETING_TEXT_VERSION,
-    summary: summaryOf(cart, t, paths),
+    summary: summaryOf(cart, t, paths, pictures),
     // A payment link's cart keeps the code it was made with (adr/0051): no field
     promotions: isPaymentLinkCart(cart.metadata) ? null : codesOf(cart),
     error,

@@ -6,7 +6,7 @@ import { paymentFrame } from "@/lib/checkout/payment-cookie"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { summaryOf } from "@/lib/views/checkout"
-import { productPathsOf } from "@/lib/views/line-paths"
+import { linePicturesOf, productPathsOf } from "@/lib/views/line-paths"
 import { theme } from "@/theme"
 
 export const metadata: Metadata = robotsOnly("noindex,nofollow", t("checkout.card_title"))
@@ -25,9 +25,10 @@ export default async function CardPage() {
   if (!frame || !cart) {
     redirect("/odeme")
   }
-  const [current, paths] = await Promise.all([
+  const [current, paths, pictures] = await Promise.all([
     sessionCurrent(cart.id, frame.session),
     productPathsOf(cart.items),
+    linePicturesOf(cart.items),
   ])
   if (!current) {
     redirect("/odeme?hata=payments.cart_changed")
@@ -35,7 +36,11 @@ export default async function CardPage() {
   return (
     <theme.PaymentFramePage
       t={t}
-      view={{ frameUrl: frame.url, summary: summaryOf(cart, t, paths), backPath: "/odeme" }}
+      view={{
+        frameUrl: frame.url,
+        summary: summaryOf(cart, t, paths, pictures),
+        backPath: "/odeme",
+      }}
     />
   )
 }

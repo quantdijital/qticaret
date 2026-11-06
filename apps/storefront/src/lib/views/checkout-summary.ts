@@ -1,21 +1,22 @@
 import "server-only"
 import { formatLira } from "@qticaret/ui"
-import type { CheckoutSummaryView, Translate } from "@qticaret/ui"
+import type { CheckoutSummaryView, ImageView, Translate } from "@qticaret/ui"
 import type { CheckoutCart } from "@/lib/checkout/cart"
 import { lineAddonsOf } from "./addons"
-import { linePathOf } from "./line-paths"
+import { lineImageOf, linePathOf } from "./line-paths"
 
 const kurus = (lira: number) => Math.round(lira * 100)
 
 /**
  * The basket beside the checkout and the card form: each line with its
- * picks and its product's page (`productPathsOf`; none: plain text), the
- * backend's totals in words.
+ * picks, its product's page (`productPathsOf`; none: plain text) and its
+ * picture's versions (`linePicturesOf`), the backend's totals in words.
  */
 export function summaryOf(
   cart: CheckoutCart,
   t: Translate,
-  paths: ReadonlyMap<string, string> = new Map()
+  paths: ReadonlyMap<string, string> = new Map(),
+  pictures: ReadonlyMap<string, ImageView> = new Map()
 ): CheckoutSummaryView {
   const discount = kurus(cart.original_item_total) - kurus(cart.item_total)
   return {
@@ -25,15 +26,7 @@ export function summaryOf(
       detail: line.variant_title ?? line.subtitle,
       quantity: line.quantity,
       total: formatLira(line.total),
-      image: line.thumbnail
-        ? {
-            src: line.thumbnail,
-            alt: line.title,
-            width: null,
-            height: null,
-            sources: { avif: null, webp: null },
-          }
-        : null,
+      image: lineImageOf(line.thumbnail, line.title, pictures),
       path: linePathOf(paths, line),
       addons: lineAddonsOf(line.metadata).addons,
     })),

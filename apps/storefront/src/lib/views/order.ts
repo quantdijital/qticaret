@@ -1,6 +1,6 @@
 import "server-only"
 import { formatLira } from "@qticaret/ui"
-import type { BankTransferView, OrderPageView, Translate } from "@qticaret/ui"
+import type { BankTransferView, ImageView, OrderPageView, Translate } from "@qticaret/ui"
 import type { PaymentMethods } from "@/lib/checkout/options"
 import type {
   InvoiceRow,
@@ -12,7 +12,7 @@ import type {
 import { providersOf } from "@/lib/orders/order"
 import { lineAddonsOf } from "./addons"
 import { addressSummaryOf } from "./checkout"
-import { linePathOf } from "./line-paths"
+import { lineImageOf, linePathOf } from "./line-paths"
 import { orderGiftOf } from "./order-gift"
 import { orderProgress, paymentWordsOf } from "./order-progress"
 import {
@@ -65,6 +65,8 @@ export interface OrderExtras {
   guest?: boolean
   /** The lines' product pages (`productPathsOf`); none: the lines read as text. */
   paths?: ReadonlyMap<string, string>
+  /** The lines' pictures with their versions (`linePicturesOf`); none: the thumbnails as they are. */
+  pictures?: ReadonlyMap<string, ImageView>
 }
 
 const NOTES: Record<string, string> = {
@@ -160,15 +162,7 @@ export function orderView(
       detail: line.variant_title ?? line.subtitle,
       quantity: line.quantity,
       total: formatLira(line.total),
-      image: line.thumbnail
-        ? {
-            src: line.thumbnail,
-            alt: line.title,
-            width: null,
-            height: null,
-            sources: { avif: null, webp: null },
-          }
-        : null,
+      image: lineImageOf(line.thumbnail, line.title, extras.pictures),
       path: extras.paths ? linePathOf(extras.paths, line) : null,
       gift: orderGiftOf(line.metadata),
       // The picks as sold: the line's own copy, whatever the product's add-ons are now
