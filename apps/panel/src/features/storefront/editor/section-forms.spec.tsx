@@ -1,12 +1,20 @@
-import { act, fireEvent, screen, waitFor, within } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
+import { fireEvent, screen, waitFor, within } from "@testing-library/react"
 import type { UserEvent } from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
-import { PRODUCTS, lastSaved, opened, renderEditor, serve } from "./theme-editor.fixtures"
+import {
+  PRODUCTS,
+  holdClock,
+  lastSaved,
+  opened,
+  pass,
+  releaseClock,
+  renderEditor,
+  serve,
+} from "./theme-editor.fixtures"
 import type { AdminMock, Init } from "./theme-editor.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
@@ -26,10 +34,10 @@ vi.mock("@tanstack/react-router", () => ({
   useBlocker: () => ({ status: "idle" }),
 }))
 
-// Each test types, picks and waits for a save: under a full run's load
-// that takes longer than the default 5 s, though the autosave's pause is skipped
+// Each test types and picks through the whole editor, which draws itself anew
+// on every key: CPU work a full run's load can stretch past the default 5 s.
+// Nothing waits on the wall clock (holdClock), so this bounds work, not waiting
 const HEAVY = { timeout: 15_000 }
-const SAVED = { timeout: 4000 }
 
 let user: UserEvent
 
@@ -42,165 +50,145 @@ async function open(name: string) {
 
 /** The draft once the autosave has sent it with `check` holding; its pause is not waited out. */
 async function saved(check: (doc: LayoutDocument) => void) {
-  await act(async () => {
-    await vi.advanceTimersByTimeAsync(AUTOSAVE_MS)
-  })
+  await pass(AUTOSAVE_MS)
   await waitFor(() => {
     const doc = lastSaved(fetchMock)
     expect(doc).toBeDefined()
     if (doc) check(doc)
-  }, SAVED)
+  })
 }
 
-describe("the section forms", () => {
+describe("the section forms", HEAVY, () => {
   beforeEach(() => {
-    // The clock still runs (Radix and the queries need it); the tests jump the autosave's pause
-    vi.useFakeTimers({ shouldAdvanceTime: true })
-    user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+    user = holdClock()
     fetchMock.mockReset()
     serve(fetchMock, admin)
     renderEditor()
   })
   afterEach(() => {
-    vi.useRealTimers()
+    releaseClock()
   })
 
-  it(
-    "writes the hero's heading and a button picked from the menus' link picker",
-    HEAVY,
-    async () => {
-      expect(await open("Giriş")).toHaveTextContent("Giriş")
+  it("writes the hero's heading and a button picked from the menus' link picker", async () => {
+    expect(await open("Giriş")).toHaveTextContent("Giriş")
 
-      await user.type(screen.getByRole("textbox", { name: "Başlık" }), "Yeni sezon")
-      await user.click(screen.getByRole("button", { name: "Düğme ekle" }))
-      const picker = await screen.findByRole("dialog", { name: "Bağlantı ekle" })
-      await user.click(within(picker).getByRole("tab", { name: "Mağaza sayfası" }))
-      await user.click(await within(picker).findByRole("button", { name: /Tüm ürünler/ }))
-      expect(screen.queryByRole("dialog")).toBeNull()
+    await user.type(screen.getByRole("textbox", { name: "Başlık" }), "Yeni sezon")
+    await user.click(screen.getByRole("button", { name: "Düğme ekle" }))
+    const picker = await screen.findByRole("dialog", { name: "Bağlantı ekle" })
+    await user.click(within(picker).getByRole("tab", { name: "Mağaza sayfası" }))
+    await user.click(await within(picker).findByRole("button", { name: /Tüm ürünler/ }))
+    expect(screen.queryByRole("dialog")).toBeNull()
 
-      const label = screen.getByRole("textbox", {
-        name: "Tüm ürünler bağlantısının görünen yazısı",
+    const label = screen.getByRole("textbox", {
+      name: "Tüm ürünler bağlantısının görünen yazısı",
+    })
+    expect(label).toHaveAttribute("placeholder", "Tüm ürünler")
+    await user.type(label, "Alışverişe başla")
+
+    await saved((doc) => {
+      expect(doc.home[0]).toMatchObject({
+        heading: "Yeni sezon",
+        eyebrow: null,
+        text: null,
+        links: [{ kind: "system", target: "shop", label: "Alışverişe başla" }],
       })
-      expect(label).toHaveAttribute("placeholder", "Tüm ürünler")
-      await user.type(label, "Alışverişe başla")
+    })
+    // The letters typed in a field undo as one step
+    await user.click(screen.getByRole("button", { name: "Geri al" }))
+    expect(label).toHaveValue("")
+    expect(screen.getByRole("textbox", { name: "Başlık" })).toHaveValue("Yeni sezon")
+  })
 
-      await saved((doc) => {
-        expect(doc.home[0]).toMatchObject({
-          heading: "Yeni sezon",
-          eyebrow: null,
-          text: null,
-          links: [{ kind: "system", target: "shop", label: "Alışverişe başla" }],
-        })
+  it("switches a product list's source, holding the save until its category is chosen", async () => {
+    await open("Ürün listesi")
+
+    await user.click(screen.getByRole("radio", { name: "Bir kategorinin ürünleri" }))
+    expect(screen.getByRole("alert")).toHaveTextContent("Bir kategori seçin.")
+    expect(screen.getByRole("status", { name: "Taslağın durumu" })).toHaveTextContent(
+      "Düzeltilecek alan var"
+    )
+
+    await user.click(screen.getByRole("button", { name: "Kategori seç" }))
+    const picker = await screen.findByRole("dialog", { name: "Kategori seç" })
+    await user.click(
+      await within(picker).findByRole("button", { name: /Şef bıçakları\s*Mutfak bıçakları/ })
+    )
+    expect(await screen.findByText("Şef bıçakları")).toBeVisible()
+    expect(screen.queryByRole("alert")).toBeNull()
+
+    await user.clear(screen.getByRole("spinbutton", { name: "Gösterilecek sayı" }))
+    await user.type(screen.getByRole("spinbutton", { name: "Gösterilecek sayı" }), "40")
+    await saved((doc) => {
+      expect(doc.home[1]).toMatchObject({
+        source: { kind: "category", category_id: "pcat_chefs" },
+        // Held within the server's bounds
+        limit: 24,
       })
-      // The letters typed in a field undo as one step
-      await user.click(screen.getByRole("button", { name: "Geri al" }))
-      expect(label).toHaveValue("")
-      expect(screen.getByRole("textbox", { name: "Başlık" })).toHaveValue("Yeni sezon")
-    }
-  )
+    })
 
-  it(
-    "switches a product list's source, holding the save until its category is chosen",
-    HEAVY,
-    async () => {
-      await open("Ürün listesi")
+    await user.click(screen.getByRole("radio", { name: "Elle seçtiğim ürünler" }))
+    expect(screen.getByRole("alert")).toHaveTextContent("En az bir ürün seçin.")
+  })
 
-      await user.click(screen.getByRole("radio", { name: "Bir kategorinin ürünleri" }))
-      expect(screen.getByRole("alert")).toHaveTextContent("Bir kategori seçin.")
-      expect(screen.getByRole("status", { name: "Taslağın durumu" })).toHaveTextContent(
-        "Düzeltilecek alan var"
-      )
+  it("picks the best sellers over a window of days, then what is on sale, naming the list after each", async () => {
+    await open("Ürün listesi")
+    const title = screen.getByRole("textbox", { name: "Başlık" })
 
-      await user.click(screen.getByRole("button", { name: "Kategori seç" }))
-      const picker = await screen.findByRole("dialog", { name: "Kategori seç" })
-      await user.click(
-        await within(picker).findByRole("button", { name: /Şef bıçakları\s*Mutfak bıçakları/ })
-      )
-      expect(await screen.findByText("Şef bıçakları")).toBeVisible()
-      expect(screen.queryByRole("alert")).toBeNull()
+    await user.click(screen.getByRole("radio", { name: "Çok satanlar" }))
+    expect(title).toHaveValue("Çok satanlar")
+    const days = screen.getByRole("spinbutton", { name: "Kaç günün satışı" })
+    expect(days).toHaveValue(90)
+    expect(screen.getByText(/en yeni ürünlerle tamamlanır/)).toBeVisible()
 
-      await user.clear(screen.getByRole("spinbutton", { name: "Gösterilecek sayı" }))
-      await user.type(screen.getByRole("spinbutton", { name: "Gösterilecek sayı" }), "40")
-      await saved((doc) => {
-        expect(doc.home[1]).toMatchObject({
-          source: { kind: "category", category_id: "pcat_chefs" },
-          // Held within the server's bounds
-          limit: 24,
-        })
+    // On the way to "30": too few days hold the save until it is
+    fireEvent.change(days, { target: { value: "3" } })
+    expect(screen.getByRole("alert")).toHaveTextContent("En az 7, en çok 365 gün yazın.")
+    fireEvent.change(days, { target: { value: "30" } })
+    expect(screen.queryByRole("alert")).toBeNull()
+    await saved((doc) => {
+      expect(doc.home[1]).toMatchObject({
+        title: "Çok satanlar",
+        source: { kind: "best_sellers", days: 30 },
       })
+    })
+    // Left too few, the field takes the least
+    fireEvent.change(days, { target: { value: "2" } })
+    fireEvent.blur(days)
+    expect(days).toHaveValue(7)
 
-      await user.click(screen.getByRole("radio", { name: "Elle seçtiğim ürünler" }))
-      expect(screen.getByRole("alert")).toHaveTextContent("En az bir ürün seçin.")
-    }
-  )
+    // The list's name follows its source while the shop has not written its own
+    await user.click(screen.getByRole("radio", { name: "İndirimde" }))
+    expect(title).toHaveValue("İndirimde")
+    expect(screen.queryByRole("spinbutton", { name: "Kaç günün satışı" })).toBeNull()
+    expect(screen.getByText(/indirimi en büyük olan önce/)).toBeVisible()
+    await saved((doc) => {
+      expect(doc.home[1]).toMatchObject({ title: "İndirimde", source: { kind: "on_sale" } })
+    })
+  })
 
-  it(
-    "picks the best sellers over a window of days, then what is on sale, naming the list after each",
-    HEAVY,
-    async () => {
-      await open("Ürün listesi")
-      const title = screen.getByRole("textbox", { name: "Başlık" })
+  it("lays a product list five across, saying what narrower screens show and a count that falls short", async () => {
+    await open("Ürün listesi")
+    const three = screen.getByRole("radio", { name: "Satırda 3 ürün" })
+    expect(three).toBeChecked()
+    expect(screen.getByText(/yan yana 3 ürün, iki sıra \(6 ürün\)/)).toBeVisible()
 
-      await user.click(screen.getByRole("radio", { name: "Çok satanlar" }))
-      expect(title).toHaveValue("Çok satanlar")
-      const days = screen.getByRole("spinbutton", { name: "Kaç günün satışı" })
-      expect(days).toHaveValue(90)
-      expect(screen.getByText(/en yeni ürünlerle tamamlanır/)).toBeVisible()
+    await user.click(screen.getByRole("radio", { name: "Satırda 5 ürün" }))
+    expect(screen.getByRole("radio", { name: "Satırda 5 ürün" })).toBeChecked()
+    expect(three).not.toBeChecked()
+    expect(screen.getByText(/yan yana 5 ürün, iki sıra \(10 ürün\)/)).toBeVisible()
+    // Twelve fill two rows of five: nothing to suggest
+    expect(screen.queryByText(/yalnız dolu sıraları/)).toBeNull()
 
-      // On the way to "30": too few days hold the save until it is
-      fireEvent.change(days, { target: { value: "3" } })
-      expect(screen.getByRole("alert")).toHaveTextContent("En az 7, en çok 365 gün yazın.")
-      fireEvent.change(days, { target: { value: "30" } })
-      expect(screen.queryByRole("alert")).toBeNull()
-      await saved((doc) => {
-        expect(doc.home[1]).toMatchObject({
-          title: "Çok satanlar",
-          source: { kind: "best_sellers", days: 30 },
-        })
-      })
-      // Left too few, the field takes the least
-      fireEvent.change(days, { target: { value: "2" } })
-      fireEvent.blur(days)
-      expect(days).toHaveValue(7)
+    fireEvent.change(screen.getByRole("spinbutton", { name: "Gösterilecek sayı" }), {
+      target: { value: "8" },
+    })
+    expect(screen.getByText(/sayıyı en az 10 yapın/)).toBeVisible()
+    await saved((doc) => {
+      expect(doc.home[1]).toMatchObject({ type: "products", columns: 5, limit: 8 })
+    })
+  })
 
-      // The list's name follows its source while the shop has not written its own
-      await user.click(screen.getByRole("radio", { name: "İndirimde" }))
-      expect(title).toHaveValue("İndirimde")
-      expect(screen.queryByRole("spinbutton", { name: "Kaç günün satışı" })).toBeNull()
-      expect(screen.getByText(/indirimi en büyük olan önce/)).toBeVisible()
-      await saved((doc) => {
-        expect(doc.home[1]).toMatchObject({ title: "İndirimde", source: { kind: "on_sale" } })
-      })
-    }
-  )
-
-  it(
-    "lays a product list five across, saying what narrower screens show and a count that falls short",
-    HEAVY,
-    async () => {
-      await open("Ürün listesi")
-      const three = screen.getByRole("radio", { name: "Satırda 3 ürün" })
-      expect(three).toBeChecked()
-      expect(screen.getByText(/yan yana 3 ürün, iki sıra \(6 ürün\)/)).toBeVisible()
-
-      await user.click(screen.getByRole("radio", { name: "Satırda 5 ürün" }))
-      expect(screen.getByRole("radio", { name: "Satırda 5 ürün" })).toBeChecked()
-      expect(three).not.toBeChecked()
-      expect(screen.getByText(/yan yana 5 ürün, iki sıra \(10 ürün\)/)).toBeVisible()
-      // Twelve fill two rows of five: nothing to suggest
-      expect(screen.queryByText(/yalnız dolu sıraları/)).toBeNull()
-
-      fireEvent.change(screen.getByRole("spinbutton", { name: "Gösterilecek sayı" }), {
-        target: { value: "8" },
-      })
-      expect(screen.getByText(/sayıyı en az 10 yapın/)).toBeVisible()
-      await saved((doc) => {
-        expect(doc.home[1]).toMatchObject({ type: "products", columns: 5, limit: 8 })
-      })
-    }
-  )
-
-  it("schedules a section in local time, refusing an end before its start", HEAVY, async () => {
+  it("schedules a section in local time, refusing an end before its start", async () => {
     await open("Blog yazıları")
     const starts = screen.getByLabelText("Başlangıç")
     const ends = screen.getByLabelText("Bitiş")
@@ -223,41 +211,37 @@ describe("the section forms", () => {
     expect(screen.getByRole("button", { name: /Blog yazıları\s*Zamanlanmış/ })).toBeVisible()
   })
 
-  it(
-    "features one product picked in its form, holding the save until it is (adr/0046 Ek 2026-11-05)",
-    HEAVY,
-    async () => {
-      admin.product.list.mockResolvedValue({ products: PRODUCTS })
-      await opened()
-      await user.click(screen.getByRole("button", { name: "Bölüm ekle" }))
-      const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
-      await user.click(within(chooser).getByRole("button", { name: /Öne çıkan ürün/ }))
+  it("features one product picked in its form, holding the save until it is (adr/0046 Ek 2026-11-05)", async () => {
+    admin.product.list.mockResolvedValue({ products: PRODUCTS })
+    await opened()
+    await user.click(screen.getByRole("button", { name: "Bölüm ekle" }))
+    const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
+    await user.click(within(chooser).getByRole("button", { name: /Öne çıkan ürün/ }))
 
-      expect(await screen.findByRole("heading", { name: "Öne çıkan ürün" })).toBeVisible()
-      expect(screen.getByRole("alert")).toHaveTextContent("Bir ürün seçin.")
-      expect(screen.getByText(/ürünün kendi sayfasından gelir/)).toBeVisible()
+    expect(await screen.findByRole("heading", { name: "Öne çıkan ürün" })).toBeVisible()
+    expect(screen.getByRole("alert")).toHaveTextContent("Bir ürün seçin.")
+    expect(screen.getByText(/ürünün kendi sayfasından gelir/)).toBeVisible()
 
-      await user.click(screen.getByRole("button", { name: "Ürün seç" }))
-      const picker = await screen.findByRole("dialog", { name: "Ürün seç" })
-      await user.click(await within(picker).findByRole("button", { name: /Şef bıçağı 20 cm/ }))
-      if (screen.queryByRole("dialog", { name: "Ürün seç" })) {
-        await user.click(within(picker).getByRole("button", { name: "Tamam" }))
-      }
-      expect(screen.queryByRole("alert")).toBeNull()
-      await user.type(screen.getByRole("textbox", { name: "Başlık" }), "Yakından")
-
-      await saved((doc) => {
-        expect(doc.home.at(-1)).toMatchObject({
-          type: "featured_product",
-          title: "Yakından",
-          text: null,
-          product_id: "prod_chef",
-        })
-      })
+    await user.click(screen.getByRole("button", { name: "Ürün seç" }))
+    const picker = await screen.findByRole("dialog", { name: "Ürün seç" })
+    await user.click(await within(picker).findByRole("button", { name: /Şef bıçağı 20 cm/ }))
+    if (screen.queryByRole("dialog", { name: "Ürün seç" })) {
+      await user.click(within(picker).getByRole("button", { name: "Tamam" }))
     }
-  )
+    expect(screen.queryByRole("alert")).toBeNull()
+    await user.type(screen.getByRole("textbox", { name: "Başlık" }), "Yakından")
 
-  it("asks for a written line in the announcement bar before saving it", HEAVY, async () => {
+    await saved((doc) => {
+      expect(doc.home.at(-1)).toMatchObject({
+        type: "featured_product",
+        title: "Yakından",
+        text: null,
+        product_id: "prod_chef",
+      })
+    })
+  })
+
+  it("asks for a written line in the announcement bar before saving it", async () => {
     await open("Kargo bedava")
 
     await user.click(screen.getByRole("button", { name: "Duyuru ekle" }))

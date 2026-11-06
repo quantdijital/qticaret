@@ -1,15 +1,19 @@
 import { screen, waitFor, within } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
+import type { UserEvent } from "@testing-library/user-event"
 import type { ReactNode } from "react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
+import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
 import {
   DOC,
   SETTINGS,
+  holdClock,
   lastSaved,
   layoutOf,
   opened,
+  pass,
   postsTo,
+  releaseClock,
   renderEditor,
   serve,
 } from "../theme-editor.fixtures"
@@ -33,8 +37,8 @@ vi.mock("@tanstack/react-router", () => ({
 }))
 
 const ALWAYS = { visible: true, starts_at: null, ends_at: null }
-// The autosave waits for typing to pause
-const SAVED = { timeout: 4000 }
+
+let user: UserEvent
 
 const panel = (name: string) => screen.findByRole("region", { name })
 
@@ -48,7 +52,7 @@ const withStrips = () => ({
 /** Opens the home page's trust strip: its form, where the badges are written. */
 async function openStrip(tree: HTMLElement) {
   const home = within(within(tree).getByRole("list", { name: "Ana sayfa" }))
-  await userEvent.click(home.getByRole("button", { name: "Güven rozetleri" }))
+  await user.click(home.getByRole("button", { name: "Güven rozetleri" }))
   return panel("Güven rozetleri")
 }
 
@@ -59,8 +63,12 @@ async function openStrip(tree: HTMLElement) {
  */
 describe("the theme's shared settings", () => {
   beforeEach(() => {
+    user = holdClock()
     fetchMock.mockReset()
     serve(fetchMock, admin)
+  })
+  afterEach(() => {
+    releaseClock()
   })
 
   it("edits the trust badges in a trust strip section's form, in the draft", async () => {
@@ -78,21 +86,22 @@ describe("the theme's shared settings", () => {
     ).toBeVisible()
     const title = badges.getByRole("textbox", { name: "1. rozetin başlığı" })
     expect(title).toHaveValue("Aynı gün kargo")
-    await userEvent.type(title, " bugün")
-    await userEvent.type(
+    await user.type(title, " bugün")
+    await user.type(
       badges.getByRole("textbox", { name: "1. rozetin açıklaması (isteğe bağlı)" }),
       "14.00'e kadar"
     )
-    await userEvent.click(badges.getByRole("button", { name: "Rozet ekle" }))
-    await userEvent.type(badges.getByRole("textbox", { name: "2. rozetin başlığı" }), "Kolay iade")
+    await user.click(badges.getByRole("button", { name: "Rozet ekle" }))
+    await user.type(badges.getByRole("textbox", { name: "2. rozetin başlığı" }), "Kolay iade")
 
+    await pass(AUTOSAVE_MS)
     await waitFor(() => {
       expect(lastSaved(fetchMock)?.settings.trust_badges).toEqual([
         { icon: "truck", title: "Aynı gün kargo bugün", text: "14.00'e kadar" },
         // The next icon no badge has yet
         { icon: "clock", title: "Kolay iade", text: null },
       ])
-    }, SAVED)
+    })
     expect(lastSaved(fetchMock)).toMatchObject({ product: withStrips().product })
     expect(postsTo(fetchMock, SETTINGS)).toEqual([])
   })
@@ -104,9 +113,9 @@ describe("the theme's shared settings", () => {
 
     const badges = within(await openStrip(tree))
     const title = badges.getByRole("textbox", { name: "1. rozetin başlığı" })
-    await userEvent.type(title, " bugün")
+    await user.type(title, " bugün")
     expect(title).toHaveValue("Aynı gün kargo bugün")
-    await userEvent.click(screen.getByRole("button", { name: "Geri al" }))
+    await user.click(screen.getByRole("button", { name: "Geri al" }))
     expect(title).toHaveValue("Aynı gün kargo")
   })
 
@@ -117,7 +126,7 @@ describe("the theme's shared settings", () => {
 
     const badges = within(await openStrip(tree))
     // `{{` is user-event's way to type a brace
-    await userEvent.type(badges.getByRole("textbox", { name: "1. rozetin başlığı" }), " {{kargo}")
+    await user.type(badges.getByRole("textbox", { name: "1. rozetin başlığı" }), " {{kargo}")
 
     expect(await badges.findByRole("alert")).toHaveTextContent(
       "Süslü parantez içinde tanınmayan bir bilgi var"
@@ -126,11 +135,12 @@ describe("the theme's shared settings", () => {
     const home = within(within(tree).getByRole("list", { name: "Ana sayfa" }))
     expect(home.getByRole("button", { name: marked })).toBeVisible()
     // The product page's strip shows the same list, so the same mark
-    await userEvent.click(screen.getByRole("combobox", { name: "Düzenlenen sayfa" }))
-    await userEvent.click(await screen.findByRole("option", { name: "Ürün sayfası" }))
+    await user.click(screen.getByRole("combobox", { name: "Düzenlenen sayfa" }))
+    await user.click(await screen.findByRole("option", { name: "Ürün sayfası" }))
     const product = within(within(tree).getByRole("list", { name: "Ürün sayfası" }))
     expect(product.getByRole("button", { name: marked })).toBeVisible()
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    // However long it waits
+    await pass(10 * AUTOSAVE_MS)
     expect(postsTo(fetchMock)).toEqual([])
   })
 
@@ -139,22 +149,23 @@ describe("the theme's shared settings", () => {
     const tree = await opened()
     const theme = within(tree)
 
-    await userEvent.click(theme.getByRole("button", { name: "Stok ve renk örnekleri" }))
+    await user.click(theme.getByRole("button", { name: "Stok ve renk örnekleri" }))
     const looks = within(await panel("Stok ve renk örnekleri"))
     expect(looks.getByRole("spinbutton", { name: "Kaç adet ve altında" })).toHaveValue(3)
     expect(looks.getByRole("textbox", { name: "1. rengin adı" })).toHaveValue("Siyah")
 
-    await userEvent.click(looks.getByRole("button", { name: "Renk ekle" }))
-    await userEvent.type(looks.getByRole("textbox", { name: "2. rengin adı" }), "SİYAH")
+    await user.click(looks.getByRole("button", { name: "Renk ekle" }))
+    await user.type(looks.getByRole("textbox", { name: "2. rengin adı" }), "SİYAH")
     expect(await looks.findByText("Bu renk adı listede zaten var.")).toBeVisible()
-    await userEvent.clear(looks.getByRole("textbox", { name: "2. rengin adı" }))
-    await userEvent.type(looks.getByRole("textbox", { name: "2. rengin adı" }), "Lacivert")
+    await user.clear(looks.getByRole("textbox", { name: "2. rengin adı" }))
+    await user.type(looks.getByRole("textbox", { name: "2. rengin adı" }), "Lacivert")
     const code = looks.getByRole("textbox", { name: "2. rengin kodu" })
-    await userEvent.clear(code)
-    await userEvent.type(code, "#1E3A8A")
-    await userEvent.click(looks.getByRole("switch", { name: /Az kaldı/ }))
+    await user.clear(code)
+    await user.type(code, "#1E3A8A")
+    await user.click(looks.getByRole("switch", { name: /Az kaldı/ }))
     expect(looks.queryByRole("spinbutton", { name: "Kaç adet ve altında" })).toBeNull()
 
+    await pass(AUTOSAVE_MS)
     await waitFor(() => {
       expect(lastSaved(fetchMock)?.settings).toEqual({
         trust_badges: DOC.settings.trust_badges,
@@ -162,29 +173,30 @@ describe("the theme's shared settings", () => {
         // The threshold is kept for when it is turned on again
         low_stock: { enabled: false, threshold: 3 },
       })
-    }, SAVED)
+    })
   })
 
   it("opens the one list from the product page's buy box, without a strip there", async () => {
     renderEditor()
     await opened()
-    await userEvent.click(screen.getByRole("combobox", { name: "Düzenlenen sayfa" }))
-    await userEvent.click(await screen.findByRole("option", { name: "Ürün sayfası" }))
+    await user.click(screen.getByRole("combobox", { name: "Düzenlenen sayfa" }))
+    await user.click(await screen.findByRole("option", { name: "Ürün sayfası" }))
 
     expect(
       screen.getByText(
         "Satın alma kutusunun altındaki rozetler, Güven rozetleri bileşeninden düzenlenir."
       )
     ).toBeVisible()
-    await userEvent.click(screen.getByRole("button", { name: "Rozetleri düzenle" }))
+    await user.click(screen.getByRole("button", { name: "Rozetleri düzenle" }))
     const dialog = within(await screen.findByRole("dialog", { name: "Güven rozetleri" }))
-    await userEvent.type(dialog.getByRole("textbox", { name: "1. rozetin başlığı" }), " bugün")
-    await userEvent.click(dialog.getByRole("button", { name: "Tamam" }))
+    await user.type(dialog.getByRole("textbox", { name: "1. rozetin başlığı" }), " bugün")
+    await user.click(dialog.getByRole("button", { name: "Tamam" }))
 
+    await pass(AUTOSAVE_MS)
     await waitFor(() => {
       expect(lastSaved(fetchMock)?.settings.trust_badges).toEqual([
         { icon: "truck", title: "Aynı gün kargo bugün", text: null },
       ])
-    }, SAVED)
+    })
   })
 })

@@ -1,16 +1,18 @@
 import { screen, waitFor, within } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
+import type { UserEvent } from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { toast } from "sonner"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import {
   SETTINGS,
   THEME,
   THEME_SETTINGS,
+  holdClock,
   layoutOf,
   opened,
   postsTo,
+  releaseClock,
   renderEditor,
   serve,
 } from "./theme-editor.fixtures"
@@ -33,42 +35,51 @@ vi.mock("@tanstack/react-router", () => ({
   useBlocker: () => ({ status: "idle" }),
 }))
 
-// Each test opens the editor, picks from lists and saves
-const HEAVY = { timeout: 15_000 }
 const CONTRAST = /yeterince okunmuyor/
 const save = () => screen.getByRole("button", { name: "Kaydet ve yayınla" })
+
+// Each test types and picks through the whole editor, which draws itself anew
+// on every key: CPU work a full run's load can stretch past the default 5 s.
+// Nothing waits on the wall clock (holdClock), so this bounds work, not waiting
+const HEAVY = { timeout: 15_000 }
+
+let user: UserEvent
 
 /** The editor with the theme's settings open. */
 async function openTheme(options: ServeOptions = {}) {
   serve(fetchMock, admin, layoutOf(), options)
   renderEditor()
   const tree = await opened()
-  await userEvent.click(within(tree).getByRole("button", { name: "Tema ayarları" }))
+  await user.click(within(tree).getByRole("button", { name: "Tema ayarları" }))
   return screen.findByRole("textbox", { name: "Ana renk" })
 }
 
 const themeBody = () => postsTo(fetchMock, THEME_SETTINGS).at(-1)?.[1]?.body
 
-describe("the theme settings", () => {
+describe("the theme settings", HEAVY, () => {
   beforeEach(() => {
+    user = holdClock()
     fetchMock.mockReset()
     vi.mocked(toast.success).mockReset()
     vi.mocked(toast.error).mockReset()
   })
+  afterEach(() => {
+    releaseClock()
+  })
 
-  it("saves every choice as one body, live at once, and reloads the preview", HEAVY, async () => {
+  it("saves every choice as one body, live at once, and reloads the preview", async () => {
     const primary = await openTheme()
     const preview = await screen.findByTitle("Vitrin önizlemesi")
     expect(preview).toHaveAttribute("src", expect.stringContaining("/onizleme/sfl_1"))
     expect(screen.getByText(/taslağa bağlı değildir/)).toBeVisible()
     expect(save()).toBeDisabled()
 
-    await userEvent.type(primary, "#0B5C99")
-    await userEvent.click(screen.getByRole("combobox", { name: "Başlıklar" }))
-    await userEvent.click(await screen.findByRole("option", { name: /Playfair Display/ }))
-    await userEvent.click(screen.getByRole("radio", { name: "Nötr" }))
-    await userEvent.click(screen.getByRole("switch", { name: /^Puanı göster/ }))
-    await userEvent.click(save())
+    await user.type(primary, "#0B5C99")
+    await user.click(screen.getByRole("combobox", { name: "Başlıklar" }))
+    await user.click(await screen.findByRole("option", { name: /Playfair Display/ }))
+    await user.click(screen.getByRole("radio", { name: "Nötr" }))
+    await user.click(screen.getByRole("switch", { name: /^Puanı göster/ }))
+    await user.click(save())
 
     await waitFor(() => {
       expect(postsTo(fetchMock, THEME_SETTINGS)).toHaveLength(1)
@@ -96,47 +107,46 @@ describe("the theme settings", () => {
     expect(save()).toBeDisabled()
   })
 
-  it(
-    "shows a main colour that does not read on the page under it, and the server's refusal",
-    HEAVY,
-    async () => {
-      let refuse = false
-      const primary = await openTheme({
-        refuseTheme: () =>
-          refuse
-            ? Object.assign(new Error("Bu renk yeterince okunmuyor."), {
-                status: 400,
-                code: "platform_settings.color_contrast",
-              })
-            : null,
-      })
+  it("shows a main colour that does not read on the page under it, and the server's refusal", async () => {
+    let refuse = false
+    const primary = await openTheme({
+      refuseTheme: () =>
+        refuse
+          ? Object.assign(new Error("Bu renk yeterince okunmuyor."), {
+              status: 400,
+              code: "platform_settings.color_contrast",
+            })
+          : null,
+    })
 
-      // Over 3:1 on white and on the neutral page, not on the warm one
-      await userEvent.type(primary, "#2f8dff")
-      expect(screen.getByRole("alert")).toHaveTextContent(CONTRAST)
-      expect(primary).toHaveAttribute("aria-invalid", "true")
-      await userEvent.click(save())
-      expect(postsTo(fetchMock, THEME_SETTINGS)).toEqual([])
+    // Over 3:1 on white and on the neutral page, not on the warm one
+    await user.type(primary, "#2f8dff")
+    expect(screen.getByRole("alert")).toHaveTextContent(CONTRAST)
+    expect(primary).toHaveAttribute("aria-invalid", "true")
+    await user.click(save())
+    expect(postsTo(fetchMock, THEME_SETTINGS)).toEqual([])
 
-      await userEvent.click(screen.getByRole("radio", { name: "Nötr" }))
+    await user.click(screen.getByRole("radio", { name: "Nötr" }))
+    // The field is checked again against the new page colour, which takes a moment
+    await waitFor(() => {
       expect(screen.queryByRole("alert")).toBeNull()
+    })
 
-      refuse = true
-      await userEvent.click(save())
-      expect(await screen.findByRole("alert")).toHaveTextContent(CONTRAST)
-      expect(postsTo(fetchMock, THEME_SETTINGS)).toHaveLength(1)
-      expect(toast.error).not.toHaveBeenCalled()
-    }
-  )
+    refuse = true
+    await user.click(save())
+    expect(await screen.findByRole("alert")).toHaveTextContent(CONTRAST)
+    expect(postsTo(fetchMock, THEME_SETTINGS)).toHaveLength(1)
+    expect(toast.error).not.toHaveBeenCalled()
+  })
 
-  it("moves the old main colour into the theme with the next save", HEAVY, async () => {
+  it("moves the old main colour into the theme with the next save", async () => {
     const primary = await openTheme({ storefront: { primary_color: "#0b5c99" } })
     expect(primary).toHaveValue("#0b5c99")
     expect(screen.getByText(/eski ayardan geliyor/)).toBeVisible()
 
-    await userEvent.click(screen.getByRole("combobox", { name: "Köşeler" }))
-    await userEvent.click(await screen.findByRole("option", { name: "Keskin" }))
-    await userEvent.click(save())
+    await user.click(screen.getByRole("combobox", { name: "Köşeler" }))
+    await user.click(await screen.findByRole("option", { name: "Keskin" }))
+    await user.click(save())
 
     await waitFor(() => {
       expect(themeBody()).toMatchObject({
@@ -160,52 +170,48 @@ describe("the theme settings", () => {
     expect(screen.queryByText(/eski ayardan geliyor/)).toBeNull()
   })
 
-  it(
-    "puts the main colour back to the theme's own over an old one, clearing that once",
-    HEAVY,
-    async () => {
-      const primary = await openTheme({ storefront: { primary_color: "#0b5c99" } })
-      expect(primary).toHaveValue("#0b5c99")
+  it("puts the main colour back to the theme's own over an old one, clearing that once", async () => {
+    const primary = await openTheme({ storefront: { primary_color: "#0b5c99" } })
+    expect(primary).toHaveValue("#0b5c99")
 
-      await userEvent.click(screen.getByRole("button", { name: "Varsayılan" }))
-      await userEvent.click(save())
+    await user.click(screen.getByRole("button", { name: "Varsayılan" }))
+    await user.click(save())
 
-      await waitFor(() => {
-        expect(postsTo(fetchMock, SETTINGS)).toHaveLength(1)
-      })
-      expect(themeBody()).toMatchObject({ colors: { primary: null } })
-      expect(postsTo(fetchMock, SETTINGS)[0]?.[1]?.body).toEqual({ primary_color: null })
-      // The theme's own colour shows, not the old one
-      await waitFor(() => {
-        expect(primary).toHaveValue("")
-      })
-      await waitFor(() => {
-        expect(screen.getByTitle("Vitrin önizlemesi")).toHaveAttribute(
-          "src",
-          expect.stringContaining("/onizleme/sfl_2")
-        )
-      })
-
-      // A later save leaves the storefront section alone
-      await userEvent.click(screen.getByRole("radio", { name: "Nötr" }))
-      await userEvent.click(save())
-      await waitFor(() => {
-        expect(postsTo(fetchMock, THEME_SETTINGS)).toHaveLength(2)
-      })
+    await waitFor(() => {
       expect(postsTo(fetchMock, SETTINGS)).toHaveLength(1)
-    }
-  )
+    })
+    expect(themeBody()).toMatchObject({ colors: { primary: null } })
+    expect(postsTo(fetchMock, SETTINGS)[0]?.[1]?.body).toEqual({ primary_color: null })
+    // The theme's own colour shows, not the old one
+    await waitFor(() => {
+      expect(primary).toHaveValue("")
+    })
+    await waitFor(() => {
+      expect(screen.getByTitle("Vitrin önizlemesi")).toHaveAttribute(
+        "src",
+        expect.stringContaining("/onizleme/sfl_2")
+      )
+    })
 
-  it("puts a colour back to the theme's own as none", HEAVY, async () => {
+    // A later save leaves the storefront section alone
+    await user.click(screen.getByRole("radio", { name: "Nötr" }))
+    await user.click(save())
+    await waitFor(() => {
+      expect(postsTo(fetchMock, THEME_SETTINGS)).toHaveLength(2)
+    })
+    expect(postsTo(fetchMock, SETTINGS)).toHaveLength(1)
+  })
+
+  it("puts a colour back to the theme's own as none", async () => {
     const primary = await openTheme({ theme: { colors: { ...THEME.colors, accent: "#c2410c" } } })
     const accent = screen.getByRole("textbox", { name: "Vurgu rengi" })
     expect(primary).toHaveValue("")
     expect(primary).toHaveAttribute("placeholder", "Temanın rengi")
     expect(accent).toHaveValue("#c2410c")
 
-    await userEvent.click(screen.getByRole("button", { name: "Varsayılan" }))
+    await user.click(screen.getByRole("button", { name: "Varsayılan" }))
     expect(accent).toHaveValue("")
-    await userEvent.click(save())
+    await user.click(save())
 
     await waitFor(() => {
       expect(themeBody()).toMatchObject({ colors: { primary: null, accent: null } })

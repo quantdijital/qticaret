@@ -1,15 +1,19 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
+import type { UserEvent } from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { toast } from "sonner"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
+import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
 import {
   DOC,
+  holdClock,
   lastSaved,
   layoutOf,
   opened,
+  pass,
   postsTo,
+  releaseClock,
   renderEditor,
   serve,
 } from "./theme-editor.fixtures"
@@ -38,15 +42,18 @@ const PATH = "/admin/storefront-layout"
 const frame = () => screen.findByTitle("Vitrin önizlemesi")
 const status = () => screen.getByRole("status", { name: "Taslağın durumu" })
 
+let user: UserEvent
+
 describe("ThemeEditor", () => {
   beforeEach(() => {
+    user = holdClock()
     fetchMock.mockReset()
     router.back.mockReset()
     vi.mocked(toast.success).mockReset()
     serve(fetchMock, admin)
   })
   afterEach(() => {
-    vi.useRealTimers()
+    releaseClock()
   })
 
   it("shows the page's parts top to bottom and the saved draft in the preview", async () => {
@@ -86,8 +93,6 @@ describe("ThemeEditor", () => {
   })
 
   it("saves a change once nothing changed for a moment, the whole draft, then reloads the preview", async () => {
-    vi.useFakeTimers({ shouldAdvanceTime: true })
-    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
     renderEditor()
     await opened()
     await frame()
@@ -95,14 +100,10 @@ describe("ThemeEditor", () => {
     await user.click(screen.getByRole("button", { name: "Blog yazıları bölümünü gizle" }))
     await user.click(screen.getByRole("button", { name: "Giriş bölümünü gizle" }))
     expect(status()).toHaveTextContent("Kaydediliyor…")
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(1000)
-    })
+    await pass(AUTOSAVE_MS - 1)
     expect(postsTo(fetchMock)).toEqual([])
 
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(600)
-    })
+    await pass(1)
     await waitFor(() => {
       expect(postsTo(fetchMock)).toHaveLength(1)
     })
@@ -124,20 +125,19 @@ describe("ThemeEditor", () => {
     renderEditor()
     await opened()
 
-    await userEvent.click(screen.getByRole("button", { name: "Blog yazıları bölümünü gizle" }))
+    await user.click(screen.getByRole("button", { name: "Blog yazıları bölümünü gizle" }))
     const saving = status()
-    await waitFor(
-      () => {
-        expect(saving).toHaveTextContent("Kaydedilemedi: Bilinmeyen bir hedef var.")
-      },
-      { timeout: 3000 }
-    )
+    await pass(AUTOSAVE_MS)
+    await waitFor(() => {
+      expect(saving).toHaveTextContent("Kaydedilemedi: Bilinmeyen bir hedef var.")
+    })
     // The change stays on screen; it is not sent again by itself
+    await pass(10 * AUTOSAVE_MS)
     expect(screen.getByRole("button", { name: "Blog yazıları bölümünü göster" })).toBeVisible()
     expect(postsTo(fetchMock)).toHaveLength(1)
 
     refuse = false
-    await userEvent.click(within(saving).getByRole("button", { name: "Tekrar dene" }))
+    await user.click(within(saving).getByRole("button", { name: "Tekrar dene" }))
     await waitFor(() => {
       expect(saving).toHaveTextContent(/Taslak kaydedildi/)
     })
@@ -149,11 +149,11 @@ describe("ThemeEditor", () => {
     renderEditor()
     await opened()
 
-    await userEvent.click(screen.getByRole("button", { name: "Giriş bölümünü gizle" }))
-    await userEvent.click(screen.getByRole("button", { name: "Yayınla" }))
+    await user.click(screen.getByRole("button", { name: "Giriş bölümünü gizle" }))
+    await user.click(screen.getByRole("button", { name: "Yayınla" }))
     const dialog = await screen.findByRole("alertdialog", { name: "Tasarım yayınlansın mı?" })
     expect(dialog).toHaveTextContent("Vitrinde en geç bir dakikada görünür.")
-    await userEvent.click(within(dialog).getByRole("button", { name: "Yayınla" }))
+    await user.click(within(dialog).getByRole("button", { name: "Yayınla" }))
 
     await waitFor(() => {
       expect(postsTo(fetchMock, `${PATH}/publish`)).toEqual([
@@ -176,9 +176,9 @@ describe("ThemeEditor", () => {
     const tree = await opened()
     expect(within(tree).queryByRole("button", { name: "Blog yazıları" })).toBeNull()
 
-    await userEvent.click(screen.getByRole("button", { name: "Değişiklikleri at" }))
+    await user.click(screen.getByRole("button", { name: "Değişiklikleri at" }))
     const dialog = await screen.findByRole("alertdialog")
-    await userEvent.click(within(dialog).getByRole("button", { name: "Değişiklikleri at" }))
+    await user.click(within(dialog).getByRole("button", { name: "Değişiklikleri at" }))
 
     expect(await within(tree).findByRole("button", { name: "Blog yazıları" })).toBeVisible()
     expect(postsTo(fetchMock, `${PATH}/discard`)).toHaveLength(1)
@@ -191,16 +191,14 @@ describe("ThemeEditor", () => {
     renderEditor()
     const tree = await opened()
 
-    await userEvent.click(screen.getByRole("button", { name: "Sürümler" }))
+    await user.click(screen.getByRole("button", { name: "Sürümler" }))
     const sheet = await screen.findByRole("dialog", { name: "Yayınlanan sürümler" })
     expect(within(sheet).getByText("Yayında")).toBeInTheDocument()
-    await userEvent.click(
-      within(sheet).getByRole("button", { name: "1. sürümü taslağa geri yükle" })
-    )
+    await user.click(within(sheet).getByRole("button", { name: "1. sürümü taslağa geri yükle" }))
     const confirm = await screen.findByRole("alertdialog", {
       name: "1. sürüm taslağa yüklensin mi?",
     })
-    await userEvent.click(within(confirm).getByRole("button", { name: "Taslağa yükle" }))
+    await user.click(within(confirm).getByRole("button", { name: "Taslağa yükle" }))
 
     await waitFor(() => {
       expect(postsTo(fetchMock, `${PATH}/revisions/1/restore`)).toHaveLength(1)
@@ -213,14 +211,14 @@ describe("ThemeEditor", () => {
     renderEditor()
     const tree = await opened()
 
-    await userEvent.click(screen.getByRole("button", { name: "Giriş bölümünü gizle" }))
-    await userEvent.click(screen.getByRole("button", { name: "Geri al" }))
+    await user.click(screen.getByRole("button", { name: "Giriş bölümünü gizle" }))
+    await user.click(screen.getByRole("button", { name: "Geri al" }))
     expect(screen.getByRole("button", { name: "Giriş bölümünü gizle" })).toBeVisible()
-    await userEvent.click(screen.getByRole("button", { name: "Yinele" }))
+    await user.click(screen.getByRole("button", { name: "Yinele" }))
     expect(screen.getByRole("button", { name: "Giriş bölümünü göster" })).toBeVisible()
 
-    await userEvent.click(screen.getByRole("button", { name: "Blog yazıları için işlemler" }))
-    await userEvent.click(await screen.findByRole("menuitem", { name: "Kaldır" }))
+    await user.click(screen.getByRole("button", { name: "Blog yazıları için işlemler" }))
+    await user.click(await screen.findByRole("menuitem", { name: "Kaldır" }))
     expect(within(tree).queryByRole("button", { name: "Blog yazıları" })).toBeNull()
     const [message, options] = vi.mocked(toast.success).mock.calls.at(-1) ?? []
     expect(message).toBe("Blog yazıları kaldırıldı.")
@@ -254,7 +252,7 @@ describe("ThemeEditor", () => {
     fireEvent.dragEnd(handle, { dataTransfer })
     expect(names()).toEqual(["Giriş", "Blog yazıları", "Ürün listesi"])
 
-    await userEvent.click(screen.getByRole("button", { name: "Ürün listesi bölümünü yukarı taşı" }))
+    await user.click(screen.getByRole("button", { name: "Ürün listesi bölümünü yukarı taşı" }))
     expect(names()).toEqual(["Giriş", "Ürün listesi", "Blog yazıları"])
     expect(screen.getByRole("button", { name: "Giriş bölümünü yukarı taşı" })).toBeDisabled()
   })
@@ -263,17 +261,18 @@ describe("ThemeEditor", () => {
     renderEditor()
     await opened()
 
-    await userEvent.click(screen.getByRole("button", { name: "Bölüm ekle" }))
+    await user.click(screen.getByRole("button", { name: "Bölüm ekle" }))
     const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
-    await userEvent.click(within(chooser).getByRole("button", { name: /Görsel slayt/ }))
+    await user.click(within(chooser).getByRole("button", { name: /Görsel slayt/ }))
 
     expect(await screen.findByRole("heading", { name: "Görsel slayt" })).toBeVisible()
     expect(screen.getByRole("alert")).toHaveTextContent("En az bir görsel ekleyin.")
     expect(status()).toHaveTextContent("Düzeltilecek alan var")
-    await new Promise((resolve) => setTimeout(resolve, 1700))
+    // However long it waits
+    await pass(10 * AUTOSAVE_MS)
     expect(postsTo(fetchMock)).toEqual([])
 
-    await userEvent.click(screen.getByRole("button", { name: "Bölümlere dön" }))
+    await user.click(screen.getByRole("button", { name: "Bölümlere dön" }))
     expect(
       within(screen.getByRole("list", { name: "Ana sayfa" })).getByRole("button", {
         name: /Görsel slayt\s*Düzeltilecek alan var/,
@@ -285,8 +284,8 @@ describe("ThemeEditor", () => {
     renderEditor()
     await opened()
 
-    await userEvent.click(screen.getByRole("button", { name: "Giriş bölümünü gizle" }))
-    await userEvent.click(screen.getByRole("button", { name: "Çık" }))
+    await user.click(screen.getByRole("button", { name: "Giriş bölümünü gizle" }))
+    await user.click(screen.getByRole("button", { name: "Çık" }))
 
     await waitFor(() => {
       expect(router.back).toHaveBeenCalledWith({ ignoreBlocker: true })

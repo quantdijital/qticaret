@@ -1,5 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen } from "@testing-library/react"
+import { act, render, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import type { UserEvent } from "@testing-library/user-event"
+import { vi } from "vitest"
 import type { Mock } from "vitest"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import type { AdminLayout, LayoutDocument } from "@/features/storefront/api/layout"
@@ -243,3 +246,39 @@ export function renderEditor() {
 
 /** The editor once the design is in. */
 export const opened = () => screen.findByRole("navigation", { name: "Sayfanın bölümleri" })
+
+type WithJest = typeof globalThis & { jest?: { advanceTimersByTime: (ms: number) => void } }
+
+/**
+ * A clock that moves only when the test moves it, and the user who types on
+ * it. On the wall clock the autosave's pause ran out between two keystrokes
+ * of a busy run, and a test that waited the pause out went past its 5 s;
+ * here a keystroke takes no time and a test jumps the pause (`pass`).
+ * Testing Library's waits step a fake clock only when they see Jest's, so
+ * they are shown one: `findBy` and `waitFor` then move the clock themselves
+ * and end by the number of their tries, not by the machine's speed. A
+ * `findBy` inside a `waitFor` would step it from two loops at once: use
+ * `getBy` there.
+ */
+export function holdClock(): UserEvent {
+  vi.useFakeTimers()
+  ;(globalThis as WithJest).jest = {
+    advanceTimersByTime: (ms) => {
+      vi.advanceTimersByTime(ms)
+    },
+  }
+  return userEvent.setup({ advanceTimers: vi.advanceTimersByTime })
+}
+
+/** The wall clock back, after `holdClock`. */
+export function releaseClock() {
+  Reflect.deleteProperty(globalThis, "jest")
+  vi.useRealTimers()
+}
+
+/** Lets `ms` pass on the held clock, with what it sets off (a save, its answer). */
+export async function pass(ms: number) {
+  await act(async () => {
+    await vi.advanceTimersByTimeAsync(ms)
+  })
+}

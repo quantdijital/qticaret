@@ -1,9 +1,19 @@
 import { screen, waitFor, within } from "@testing-library/react"
-import userEvent from "@testing-library/user-event"
+import type { UserEvent } from "@testing-library/user-event"
 import type { ReactNode } from "react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import { PRODUCTS, lastSaved, opened, renderEditor, serve } from "./theme-editor.fixtures"
+import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
+import {
+  PRODUCTS,
+  holdClock,
+  lastSaved,
+  opened,
+  pass,
+  releaseClock,
+  renderEditor,
+  serve,
+} from "./theme-editor.fixtures"
 import type { AdminMock, Init } from "./theme-editor.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
@@ -23,27 +33,32 @@ vi.mock("@tanstack/react-router", () => ({
   useBlocker: () => ({ status: "idle" }),
 }))
 
-const SAVED = { timeout: 4000 }
+let user: UserEvent
+
 const frame = () => screen.findByTitle("Vitrin önizlemesi")
 
 /** Picks a page in the bar's page selector. */
 async function choosePage(name: string) {
-  await userEvent.click(screen.getByRole("combobox", { name: "Düzenlenen sayfa" }))
-  await userEvent.click(await screen.findByRole("option", { name }))
+  await user.click(screen.getByRole("combobox", { name: "Düzenlenen sayfa" }))
+  await user.click(await screen.findByRole("option", { name }))
 }
 
 describe("the theme editor's pages", () => {
   beforeEach(() => {
+    user = holdClock()
     fetchMock.mockReset()
     serve(fetchMock, admin)
     admin.product.list.mockResolvedValue({ products: PRODUCTS })
+  })
+  afterEach(() => {
+    releaseClock()
   })
 
   it("offers the home, product and category pages, never one that is not ready", async () => {
     renderEditor()
     await opened()
 
-    await userEvent.click(screen.getByRole("combobox", { name: "Düzenlenen sayfa" }))
+    await user.click(screen.getByRole("combobox", { name: "Düzenlenen sayfa" }))
     const options = await screen.findAllByRole("option")
     expect(options.map((option) => option.textContent)).toEqual([
       "Ana sayfa",
@@ -67,8 +82,8 @@ describe("the theme editor's pages", () => {
     ).toEqual(["Benzer ürünler"])
     expect(within(tree).queryByRole("list", { name: "Ana sayfa" })).toBeNull()
     expect(within(tree).getByText("Ürünün kendi bilgileri")).toBeVisible()
-    await waitFor(async () => {
-      expect(await frame()).toHaveAttribute(
+    await waitFor(() => {
+      expect(screen.getByTitle("Vitrin önizlemesi")).toHaveAttribute(
         "src",
         "http://localhost:8000/onizleme/sfl_1?sayfa=%2Furun%2Fsef-bicagi-20-cm"
       )
@@ -79,10 +94,10 @@ describe("the theme editor's pages", () => {
 
     const sample = screen.getByRole("combobox", { name: "Önizlemedeki örnek ürün" })
     expect(sample).toHaveTextContent("Örnek: Şef bıçağı 20 cm")
-    await userEvent.click(sample)
-    await userEvent.click(await screen.findByRole("option", { name: /Ekmek bıçağı/ }))
-    await waitFor(async () => {
-      expect(await frame()).toHaveAttribute(
+    await user.click(sample)
+    await user.click(await screen.findByRole("option", { name: /Ekmek bıçağı/ }))
+    await waitFor(() => {
+      expect(screen.getByTitle("Vitrin önizlemesi")).toHaveAttribute(
         "src",
         "http://localhost:8000/onizleme/sfl_1?sayfa=%2Furun%2Fekmek-bicagi"
       )
@@ -94,7 +109,7 @@ describe("the theme editor's pages", () => {
     const tree = await opened()
     await choosePage("Ürün sayfası")
 
-    await userEvent.click(within(tree).getByRole("button", { name: "Bölüm ekle" }))
+    await user.click(within(tree).getByRole("button", { name: "Bölüm ekle" }))
     const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
     expect(
       within(chooser)
@@ -110,15 +125,16 @@ describe("the theme editor's pages", () => {
       "Yardım kutusu",
       "E-bülten",
     ])
-    await userEvent.click(within(chooser).getByRole("button", { name: /Yardım kutusu/ }))
+    await user.click(within(chooser).getByRole("button", { name: /Yardım kutusu/ }))
 
     expect(await screen.findByRole("heading", { name: "Yardım kutusu" })).toBeVisible()
+    await pass(AUTOSAVE_MS)
     await waitFor(() => {
       expect(lastSaved(fetchMock)?.product.map((section) => section.type)).toEqual([
         "related_products",
         "help",
       ])
-    }, SAVED)
+    })
   })
 
   it("lists a category page's sections above and below its products, and moves one across", async () => {
@@ -134,33 +150,34 @@ describe("the theme editor's pages", () => {
     expect(side("Izgaranın üstü")).toEqual(["Sık sorulan sorular"])
     expect(side("Izgaranın altı")).toEqual(["Yardım kutusu"])
     expect(within(tree).getByText("Ürün ızgarası")).toBeVisible()
-    await waitFor(async () => {
-      expect(await frame()).toHaveAttribute(
+    await waitFor(() => {
+      expect(screen.getByTitle("Vitrin önizlemesi")).toHaveAttribute(
         "src",
         "http://localhost:8000/onizleme/sfl_1?sayfa=%2Fkategori%2Fmutfak-bicaklari"
       )
     })
 
-    await userEvent.click(
+    await user.click(
       within(tree).getByRole("button", { name: "Sık sorulan sorular için işlemler" })
     )
-    await userEvent.click(await screen.findByRole("menuitem", { name: "Izgaranın altına taşı" }))
+    await user.click(await screen.findByRole("menuitem", { name: "Izgaranın altına taşı" }))
     expect(within(tree).queryByRole("list", { name: "Izgaranın üstü" })).toBeNull()
     expect(side("Izgaranın altı")).toEqual(["Sık sorulan sorular", "Yardım kutusu"])
+    await pass(AUTOSAVE_MS)
     await waitFor(() => {
       expect(lastSaved(fetchMock)?.category).toMatchObject([
         { id: "kategorisss", placement: "bottom" },
         { id: "kategoriyardim", placement: "bottom" },
       ])
-    }, SAVED)
+    })
 
     // Added above the grid from its own button
-    await userEvent.click(within(tree).getByRole("button", { name: "Üste bölüm ekle" }))
+    await user.click(within(tree).getByRole("button", { name: "Üste bölüm ekle" }))
     const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
     expect(chooser).toHaveTextContent("ürün ızgarasının üstüne eklenir")
     expect(within(chooser).queryByRole("button", { name: /Benzer ürünler/ })).toBeNull()
-    await userEvent.click(within(chooser).getByRole("button", { name: /E-bülten/ }))
-    await userEvent.click(await screen.findByRole("button", { name: "Bölümlere dön" }))
+    await user.click(within(chooser).getByRole("button", { name: /E-bülten/ }))
+    await user.click(await screen.findByRole("button", { name: "Bölümlere dön" }))
     expect(side("Izgaranın üstü")).toEqual(["E-bülten"])
   })
 
