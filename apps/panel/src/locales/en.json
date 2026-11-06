@@ -1949,6 +1949,13 @@
       "revokeTitle": "Revoke {{name}}?",
       "revokeHint": "Requests with the key are refused at once. This cannot be undone; make a new key if needed.",
       "revokedToast": "Key revoked.",
+      "revokedOn": "Revoked on {{date}}",
+      "revokedGroup": "Revoked ({{count}})",
+      "noActive": "No active keys.",
+      "delete": "Delete",
+      "deleteTitle": "Delete {{name}}?",
+      "deleteHint": "The key is removed from the list for good; this cannot be undone. What was done with it stays in the audit log.",
+      "deletedToast": "Key deleted.",
       "scopes": {
         "orders_read": {
           "name": "Read orders",

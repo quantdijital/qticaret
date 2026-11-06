@@ -1949,6 +1949,13 @@
       "revokeTitle": "{{name}} iptal edilsin mi?",
       "revokeHint": "Anahtarla gelen istekler hemen reddedilir. Bu geri alınamaz; gerekirse yeni anahtar oluşturun.",
       "revokedToast": "Anahtar iptal edildi.",
+      "revokedOn": "{{date}} tarihinde iptal edildi",
+      "revokedGroup": "İptal edilenler ({{count}})",
+      "noActive": "Etkin anahtar yok.",
+      "delete": "Sil",
+      "deleteTitle": "{{name}} silinsin mi?",
+      "deleteHint": "Anahtar listeden kalıcı olarak silinir; bu geri alınamaz. Anahtarla yapılan işlemler işlem kayıtlarında kalır.",
+      "deletedToast": "Anahtar silindi.",
       "scopes": {
         "orders_read": {
           "name": "Siparişleri okuma",

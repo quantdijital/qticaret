@@ -62,6 +62,19 @@ export function useRevokeApiKey() {
   })
 }
 
+/** `DELETE /admin/api-access/:id`: a revoked key gone for good (an active one is refused). */
+export function useDeleteApiKey() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      sdk.client.fetch<{ id: string; deleted: boolean }>(
+        `/admin/api-access/${encodeURIComponent(id)}`,
+        { method: "DELETE" }
+      ),
+    onSuccess: () => client.invalidateQueries({ queryKey: KEY }),
+  })
+}
+
 /** The OpenAPI document of what keys can reach, saved as a file. */
 export async function downloadOpenApi(): Promise<void> {
   const document = await sdk.client.fetch<unknown>("/admin/openapi.json")
