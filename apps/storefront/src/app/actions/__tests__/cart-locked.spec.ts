@@ -68,6 +68,23 @@ describe("the cart actions on a payment link's cart", () => {
     )
   })
 
+  it("never calls a code invalid for a failure that is not the backend's answer", async () => {
+    cart.addPromotion.mockRejectedValue(new TypeError("fetch failed"))
+    await expect(applyPromotion(NO_STATE, formOf({ code: "YAZ10" }))).rejects.toThrow(
+      "fetch failed"
+    )
+    cart.addPromotion.mockRejectedValue(new StoreApiError(429, "too_many_requests", null))
+    await expect(applyPromotion(NO_STATE, formOf({ code: "YAZ10" }))).resolves.toEqual({
+      ok: false,
+      error: "errors.too_many_requests",
+    })
+    cart.addPromotion.mockResolvedValue(true)
+    await expect(applyPromotion(NO_STATE, formOf({ code: "YAZ10" }))).resolves.toEqual({
+      ok: true,
+      error: null,
+    })
+  })
+
   it("brings a code that would not come off the checkout's summary back to checkout", async () => {
     cart.removePromotion.mockRejectedValue(new StoreApiError(400, "invalid_data", null))
     await expect(removeCheckoutPromotion(formOf({ code: "YAZ10" }))).rejects.toThrow(

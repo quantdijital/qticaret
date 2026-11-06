@@ -84,4 +84,23 @@ describe("a code and the shipping already chosen", () => {
     )
     await expect(addPromotion("YAZ2026")).resolves.toBe(true)
   })
+
+  it("keeps a taken code taken whatever the re-pricing's failure", async () => {
+    api.storeGet.mockResolvedValue(cartWith(["YAZ2026"], ["so_aras", "so_yurtici"]))
+    api.storePost.mockImplementation((path: string) =>
+      path.endsWith("/shipping-methods")
+        ? Promise.reject(new TypeError("fetch failed"))
+        : Promise.resolve({})
+    )
+    await expect(addPromotion("YAZ2026")).resolves.toBe(true)
+    // Each option is still tried: one failing does not leave the next unpriced
+    expect(shippingPosts()).toHaveLength(2)
+  })
+
+  it("takes a code off even when the cart cannot be read again for its shipping", async () => {
+    api.storeGet.mockRejectedValue(new TypeError("fetch failed"))
+    await expect(removePromotion("YAZ2026")).resolves.toBeUndefined()
+    expect(api.storeDelete).toHaveBeenCalledTimes(1)
+    expect(shippingPosts()).toEqual([])
+  })
 })

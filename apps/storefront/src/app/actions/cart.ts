@@ -122,13 +122,15 @@ export async function applyPromotion(_state: ActionResult, form: FormData): Prom
       return { ok: false, error: "cart.promotion_invalid" }
     }
   } catch (error) {
+    // Only the backend's answers are about the code; anything else is ours to see
+    if (!isStoreApiError(error)) {
+      throw error
+    }
     return {
       ok: false,
       error:
         linkCartRefusal(error) ??
-        (isStoreApiError(error) && error.status === 429
-          ? "errors.too_many_requests"
-          : "cart.promotion_invalid"),
+        (error.status === 429 ? "errors.too_many_requests" : "cart.promotion_invalid"),
     }
   }
   revalidatePath("/", "layout")

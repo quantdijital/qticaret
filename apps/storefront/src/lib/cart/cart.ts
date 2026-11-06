@@ -201,10 +201,13 @@ export const codesOf = (cart: { promotions?: Cart["promotions"] | null } | null)
  * (F4.5): Medusa re-prices shipping when the items change, not when a
  * code comes or goes, so a code that takes the basket under the free
  * shipping threshold would leave its 0 TL method behind. Each option is
- * chosen again (Medusa replaces the method). Best effort: the backend
- * still stops an order whose shipping went stale (`cart.shipping_changed`).
+ * chosen again (Medusa replaces the method). Best effort, whatever the
+ * failure (reading the cart or choosing again): the code stays as the
+ * backend took it or took it off, and the backend still stops an order
+ * whose shipping went stale (`cart.shipping_changed`).
  */
-async function repriceShipping(cart: Cart | null): Promise<void> {
+async function repriceShipping(read: () => Promise<Cart | null>): Promise<void> {
+  const cart = await read().catch(() => null)
   if (!cart) {
     return
   }
@@ -214,13 +217,9 @@ async function repriceShipping(cart: Cart | null): Promise<void> {
     )
   )
   for (const option_id of options) {
-    try {
-      await storePost(`/store/carts/${cart.id}/shipping-methods`, { option_id })
-    } catch (error) {
-      if (!isStoreApiError(error)) {
-        throw error
-      }
-    }
+    await storePost(`/store/carts/${cart.id}/shipping-methods`, { option_id }).catch(
+      () => undefined
+    )
   }
 }
 
@@ -237,7 +236,7 @@ export async function addPromotion(code: string): Promise<boolean> {
   const cart = await currentCart()
   const taken = codesOf(cart).some((each) => each.toLowerCase() === code.toLowerCase())
   if (taken) {
-    await repriceShipping(cart)
+    await repriceShipping(() => Promise.resolve(cart))
   }
   return taken
 }
@@ -265,6 +264,6 @@ export async function removePromotion(code: string): Promise<void> {
   const cartId = await cartIdFromCookie()
   if (cartId) {
     await storeDelete(`/store/carts/${cartId}/promotions`, { promo_codes: [code] })
-    await repriceShipping(await currentCart())
+    await repriceShipping(currentCart)
   }
 }
