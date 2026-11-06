@@ -31,6 +31,15 @@ const SUMMARY =
   "<p>El yapımı, <strong>günlük</strong> kullanım için.<br>Kutusuyla gelir.</p>" +
   "<ul><li><p>Sırttan kilitli</p></li><li><p>2 yıl garanti</p></li></ul>"
 
+const VARIANT: ProductPageView["variants"][number] = {
+  id: "v_1",
+  title: "Yeşil Saplı Çakı",
+  options: {},
+  price: { current: "1.837,50 TL", before: null, from: false, discount: null },
+  available: true,
+  sku: null,
+}
+
 const view = (over: Partial<ProductPageView> = {}): ProductPageView => ({
   id: "prod_1",
   title: "Yeşil Saplı Çakı",
@@ -41,16 +50,7 @@ const view = (over: Partial<ProductPageView> = {}): ProductPageView => ({
   breadcrumbs: [{ label: "Ana sayfa", path: "/" }],
   images: [],
   options: [],
-  variants: [
-    {
-      id: "v_1",
-      title: "Yeşil Saplı Çakı",
-      options: {},
-      price: { current: "1.837,50 TL", before: null, from: false, discount: null },
-      available: true,
-      sku: null,
-    },
-  ],
+  variants: [VARIANT],
   selectedVariantId: "v_1",
   specs: [{ label: "Namlu çeliği", value: "Elmax", highlight: true }],
   trustBadges: [],
@@ -107,7 +107,7 @@ describe("the atolye theme's short description", () => {
         summaryHtml: SUMMARY.repeat(6),
         variants: [
           {
-            ...view().variants[0]!,
+            ...VARIANT,
             installments: { count: 12, perInstallment: "195,87 TL" },
           },
         ],
