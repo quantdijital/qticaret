@@ -1,6 +1,7 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import sharp from "sharp"
 import { createAdminUser } from "../helpers/admin"
+import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { createStorefront } from "../helpers/storefront"
@@ -13,6 +14,7 @@ interface StoreImage {
   alt: string | null
   width: number | null
   height: number | null
+  derivatives: unknown
 }
 
 /** adr/0046 Ek 2026-11-04: a category's picture from the media library, for cards and the mega menu. */
@@ -68,7 +70,10 @@ medusaIntegrationTestRunner({
         image: { url: media.url, alt: "Mutfak bıçakları" },
       })
       await post(`/admin/category-images/${hidden}`, { image: { url: media.url, alt: null } })
-      const shown = await storeImages()
+      // A library picture's versions are made after its upload answers (docs/21 2026-11-06)
+      const shown = await eventually(storeImages, (answer) =>
+        Boolean(answer.data.images[0]?.derivatives)
+      )
       const listed = await http.get<{ images: { category_id: string }[] }>(
         "/admin/category-images",
         { headers: admin.headers }
@@ -99,7 +104,13 @@ medusaIntegrationTestRunner({
           alt: "Mutfak bıçakları",
           width: 64,
           height: 48,
-          derivatives: null,
+          derivatives: {
+            srcset: {
+              webp: [{ width: 64, url: expect.stringMatching(/mutfak-64\.webp$/) as string }],
+              avif: [{ width: 64, url: expect.stringMatching(/mutfak-64\.avif$/) as string }],
+            },
+            og: expect.objectContaining({ width: 1200, height: 630 }) as unknown,
+          },
         },
       ])
       expect(shown.headers["cache-control"]).toContain("max-age=300")

@@ -4,6 +4,7 @@ import {
   transform,
   when,
 } from "@medusajs/framework/workflows-sdk"
+import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
 import { Modules } from "@medusajs/framework/utils"
 import {
   acquireLockStep,
@@ -13,8 +14,10 @@ import {
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
 import { MEDIA_MODULE } from "../../modules/media"
+import type { MediaAssetRecord } from "../../modules/media/service"
 import { attachMediaStep } from "./steps/attach-media"
 import { deriveMediaStep, removeMediaFilesStep } from "./steps/derive-media"
+import { planLibraryMediaStep } from "./steps/plan-library-media"
 import { planProductMediaStep } from "./steps/plan-product-media"
 import { registerMediaStep } from "./steps/register-media"
 import { removeAbandonedMediaStep } from "./steps/remove-abandoned-media"
@@ -27,12 +30,58 @@ import type { MediaAlt } from "./steps/set-media-alts"
 /** Emitted after an image's alt text is saved: `{ id }` of its product, for its assessment. */
 export const MEDIA_SAVED = "media.saved"
 
-/** Images just uploaded become media assets (F3.3), in the library when asked. */
+/**
+ * Emitted after pictures are registered whose versions are to be made:
+ * `{ ids }` of the media assets (docs/21 2026-11-06, open item 1).
+ */
+export const MEDIA_REGISTERED = "media.registered"
+
+/** Inside a workflow: the registered pictures without versions go to `media.registered`. */
+export function askForVersions(assets: WorkflowData<MediaAssetRecord[]>) {
+  const pending = transform({ assets }, ({ assets }) =>
+    assets.filter((asset) => asset.file_id && !asset.derivatives).map((asset) => asset.id)
+  )
+  when({ pending }, ({ pending }) => pending.length > 0).then(() => {
+    emitEventStep({
+      eventName: MEDIA_REGISTERED,
+      data: transform({ pending }, ({ pending }) => ({ ids: pending })),
+    })
+  })
+}
+
+/**
+ * Images just uploaded become media assets (F3.3), in the library when
+ * asked. A library picture (a cover, a post's picture, an author's photo,
+ * a picture in a text) gets its WebP/AVIF versions as a product image does,
+ * after the answer, in the worker (docs/05 §2): the one place every such
+ * picture passes. A product's upload (`library` not set) is left to its
+ * product, which names its versions after itself (adr/0016); `versions`
+ * says otherwise (a migration's cover).
+ */
 export const registerMediaWorkflow = createWorkflow(
   "media-register",
-  (input: RegisterMediaInput) => {
+  (input: RegisterMediaInput & { versions?: boolean }) => {
     const assets = registerMediaStep(input)
+    askForVersions(
+      transform({ input, assets }, ({ input, assets }) =>
+        (input.versions ?? input.library ?? false) ? assets : []
+      )
+    )
     return new WorkflowResponse(assets)
+  }
+)
+
+/**
+ * Library pictures' versions (WebP/AVIF `srcset` and a share crop), named
+ * after each picture's own name: the ones still without versions and held
+ * by no product. Safe to run again: a picture with versions is skipped.
+ */
+export const deriveLibraryMediaWorkflow = createWorkflow(
+  "media-derive-library",
+  (input: { ids: string[] }) => {
+    const targets = planLibraryMediaStep(transform({ input }, ({ input }) => input.ids))
+    const derived = deriveMediaStep(targets)
+    return new WorkflowResponse(transform({ derived }, ({ derived }) => derived.derived))
   }
 )
 

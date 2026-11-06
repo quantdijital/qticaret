@@ -162,7 +162,9 @@ export async function setCategoryCovers(
     try {
       const reused = asset !== undefined
       if (!asset) {
-        const stored = await storeImage(container, httpsAddress(url, fake), fake)
+        const stored = await storeImage(container, httpsAddress(url, fake), fake, {
+          versions: true,
+        })
         asset = { id: stored.id, url: stored.url }
         assets.set(url, asset)
         counts.uploaded += 1

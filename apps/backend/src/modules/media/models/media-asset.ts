@@ -6,7 +6,9 @@ import { model } from "@medusajs/framework/utils"
  * product, a page or a logo holds), its size, its alt text, and the
  * versions it is served in: a WebP/AVIF `srcset` and a share crop, named
  * after the product. `derived_for` says which product slug and position
- * they were made for; a rename or a move remakes them. Linked to its
+ * they were made for; a rename or a move remakes them. A library picture
+ * no product holds gets them at upload, named after itself (`derived_for`
+ * null; docs/21 2026-11-06). Linked to its
  * product (one product, many images). An image added by its URL alone (an
  * import, Medusa's own admin) gets a record too, for its alt text; it has
  * no master to make versions of and is not in the library.

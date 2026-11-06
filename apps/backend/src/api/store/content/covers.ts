@@ -17,7 +17,7 @@ const UNKNOWN: CoverImage = { image_width: null, image_height: null, image_deriv
 
 /** The covers' records by URL, one query for a whole page. */
 export async function coversOf(
-  container: MedusaContainer,
+  container: Pick<MedusaContainer, "resolve">,
   urls: readonly (string | null)[]
 ): Promise<Map<string, CoverImage>> {
   const wanted = [...new Set(urls.filter((url): url is string => Boolean(url)))]
@@ -44,3 +44,30 @@ export async function coversOf(
 
 export const coverOf = (covers: Map<string, CoverImage>, url: string | null): CoverImage =>
   (url ? covers.get(url) : undefined) ?? UNKNOWN
+
+/** A picture in a text, as the media library knows it (docs/21 2026-11-06). */
+export interface BodyImage {
+  url: string
+  width: number | null
+  height: number | null
+  derivatives: unknown
+}
+
+/**
+ * The pictures of a text the media library knows, with their size and
+ * versions, once each: the storefront prints `width`/`height` and a
+ * `srcset` for each `<img>` of the HTML whose address is here. A picture
+ * at an address the library does not hold is left out (shown as it is).
+ */
+export async function bodyImagesOf(
+  container: Pick<MedusaContainer, "resolve">,
+  srcs: readonly string[]
+): Promise<BodyImage[]> {
+  const covers = await coversOf(container, srcs)
+  return [...covers].map(([url, cover]) => ({
+    url,
+    width: cover.image_width,
+    height: cover.image_height,
+    derivatives: cover.image_derivatives,
+  }))
+}

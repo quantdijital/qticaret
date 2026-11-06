@@ -4,8 +4,10 @@ import {
   OG_SIZE,
   derivativeName,
   deriveImages,
+  libraryVersionBase,
   sanitizeImage,
   srcsetWidths,
+  versionName,
 } from ".."
 
 /** A photo as a phone writes it: EXIF with GPS and camera, turned on its side by its orientation tag. */
@@ -94,5 +96,20 @@ describe("uploaded images (adr/0016)", () => {
     const [first] = derivatives
     expect(first && derivativeName("keten-gomlek", 2, first)).toBe("keten-gomlek-2-400.webp")
     expect(og && derivativeName("keten-gomlek", 1, og)).toBe("keten-gomlek-1-og.jpg")
+  })
+
+  it("names a library picture's versions after its own name (docs/21 2026-11-06)", () => {
+    const webp = { kind: "srcset", format: "avif", width: 800, height: 600 } as const
+    const og = { kind: "og", format: "jpeg", width: 1200, height: 630 } as const
+    const base = libraryVersionBase("Kapak Fotoğrafı Şık.JPG")
+    expect(base).toBe("kapak-fotografi-sik")
+    expect(versionName(base, { ...webp, buffer: Buffer.alloc(0) })).toBe(
+      "kapak-fotografi-sik-800.avif"
+    )
+    expect(versionName(base, { ...og, buffer: Buffer.alloc(0) })).toBe("kapak-fotografi-sik-og.jpg")
+    // Nothing left to name it by: a plain name, never an empty one
+    expect(libraryVersionBase("😀.png")).toBe("gorsel")
+    expect(libraryVersionBase(null)).toBe("gorsel")
+    expect(libraryVersionBase(`${"uzun-ad-".repeat(20)}.webp`).length).toBeLessThanOrEqual(60)
   })
 })

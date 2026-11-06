@@ -2,7 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { errorSummary, logger } from "../../../lib/logging"
-import { derivativeName, deriveImages } from "../../../lib/media"
+import { deriveImages, versionName } from "../../../lib/media"
 import type { Derivative } from "../../../lib/media"
 import { MEDIA_MODULE } from "../../../modules/media"
 import type MediaModuleService from "../../../modules/media/service"
@@ -49,7 +49,7 @@ async function storeVersions(
     for (const derivative of await deriveImages(master)) {
       const file = await storePublicFile(
         container,
-        derivativeName(target.handle, target.position, derivative),
+        versionName(target.name, derivative),
         MIME_TYPES[derivative.format],
         derivative.buffer
       )
@@ -66,10 +66,27 @@ async function storeVersions(
 }
 
 /**
+ * Still wanted once made: a library picture (`onlyIfNone`) that was deleted
+ * or got a product's versions while ours were made keeps what it has.
+ */
+async function stillWanted(media: MediaModuleService, target: DeriveTarget): Promise<boolean> {
+  if (!target.onlyIfNone) {
+    return true
+  }
+  const [now] = await media.listMediaAssets(
+    { id: target.assetId },
+    { select: ["id", "derivatives"], take: 1 }
+  )
+  return now !== undefined && !now.derivatives
+}
+
+/**
  * Makes each image's versions from its master and stores them public under
- * names of the product's slug (adr/0016). An image that fails is logged and
- * left for the nightly sweep; the others go on. The versions they replace
- * are handed on for removal once the workflow has done everything else.
+ * names of what it shows: the product's slug (adr/0016), else the picture's
+ * own name. An image that fails is logged and left for the nightly sweep (a
+ * product's) or `media:derivatives` (a library picture); the others go on.
+ * The versions they replace are handed on for removal once the workflow
+ * has done everything else.
  */
 export const deriveMediaStep = createStep(
   "media-derive",
@@ -78,9 +95,11 @@ export const deriveMediaStep = createStep(
     const created: string[] = []
     const previous: Previous[] = []
     const obsolete: string[] = []
+    // The images that got their versions this run
+    const derived: string[] = []
     for (const target of targets) {
       const [asset] = await media.listMediaAssets({ id: target.assetId }, { take: 1 })
-      if (!asset) {
+      if (!asset || (target.onlyIfNone && asset.derivatives)) {
         continue
       }
       let made: { derivative: Derivative; file: StoredFile }[]
@@ -88,6 +107,13 @@ export const deriveMediaStep = createStep(
         made = await storeVersions(container, target)
       } catch (error) {
         logger.warn({ event: "media.derive_failed", assetId: asset.id, err: errorSummary(error) })
+        continue
+      }
+      if (!(await stillWanted(media, target))) {
+        await removeFiles(
+          container,
+          made.map(({ file }) => file.id)
+        )
         continue
       }
       created.push(...made.map(({ file }) => file.id))
@@ -106,8 +132,9 @@ export const deriveMediaStep = createStep(
         derived_at: new Date(),
       })
       obsolete.push(...(asset.derivative_file_ids ?? []))
+      derived.push(asset.id)
     }
-    return new StepResponse({ obsolete }, { created, previous })
+    return new StepResponse({ obsolete, derived }, { created, previous })
   },
   async (undo, { container }) => {
     if (!undo) {

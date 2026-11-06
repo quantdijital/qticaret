@@ -96,7 +96,11 @@ medusaIntegrationTestRunner({
     it("saves a document, writes its plain text, and gives the storefront its HTML", async () => {
       const { productId } = await stockedProduct(getContainer(), shop, "dokum-tava", 3)
       // Plain text only: the storefront shows `description`
-      expect((await storeDescription(productId)).data).toEqual({ html: null, summary_html: null })
+      expect((await storeDescription(productId)).data).toEqual({
+        html: null,
+        summary_html: null,
+        images: [],
+      })
 
       const saved = await save(productId, { description_doc: DOC })
       expect(saved.status).toBe(200)

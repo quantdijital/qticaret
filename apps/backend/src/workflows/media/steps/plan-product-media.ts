@@ -2,14 +2,19 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 
-/** One of the product's images whose versions are (re)made, at its place among them. */
+/** An image whose versions are (re)made: a product's at its place, or a library picture. */
 export interface DeriveTarget {
   assetId: string
   fileId: string
-  /** `{handle}:{position}`: what the versions are named after. */
-  derivedFor: string
-  handle: string
-  position: number
+  /** `{handle}:{position}` for a product's image; null for a picture no product holds. */
+  derivedFor: string | null
+  /** What the versions' files are named after (`{handle}-{position}`, the picture's own name). */
+  name: string
+  /**
+   * Made only while the image has no versions (a library picture): one a
+   * product's run gave versions meanwhile keeps them, ours are dropped.
+   */
+  onlyIfNone?: boolean
 }
 
 export interface MediaPlan {
@@ -97,8 +102,7 @@ export const planProductMediaStep = createStep(
           assetId: asset.id,
           fileId: asset.file_id,
           derivedFor,
-          handle: product.handle,
-          position: index + 1,
+          name: `${product.handle}-${String(index + 1)}`,
         })
       }
     })

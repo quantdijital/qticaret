@@ -4,7 +4,9 @@ export {
   SRCSET_WIDTHS,
   derivativeName,
   deriveImages,
+  libraryVersionBase,
   srcsetWidths,
+  versionName,
 } from "./derive"
 export type { Derivative, SrcsetFormat } from "./derive"
 export { MASTER_MAX_SIDE, MAX_INPUT_PIXELS, readImage, sanitizeImage } from "./sanitize"

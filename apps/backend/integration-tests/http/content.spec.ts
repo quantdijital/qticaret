@@ -196,6 +196,10 @@ medusaIntegrationTestRunner({
       }
       expect(data.entry).toMatchObject(cover)
       expect(list.data.entries[0]).toMatchObject(cover)
+      // The text's pictures likewise, for the storefront's `srcset` (docs/21 2026-11-06)
+      expect((data.entry as { images?: unknown }).images).toEqual([
+        { url: COVER, width: 1600, height: 900, derivatives: COVER_DERIVATIVES },
+      ])
 
       const answer = await resolve(path)
       expect(answer.seo?.openGraph.type).toBe("article")

@@ -101,11 +101,14 @@ async function download(address: string, fake: string | undefined): Promise<Buff
  * A picture as a product image: checked by its bytes as an upload is (a
  * JPEG, PNG, WebP or AVIF within the limits), stored cleaned (upright, no
  * EXIF or GPS), and registered with the media pipeline (F3.3). Its id.
+ * A cover no product takes (`versions`) gets its versions as a library
+ * upload does; a product's picture gets them from its product.
  */
 export async function storeImage(
   container: Container,
   address: string,
-  fake: string | undefined = fakeOrigin()
+  fake: string | undefined = fakeOrigin(),
+  { versions = false }: { versions?: boolean } = {}
 ) {
   const bytes = await download(address, fake)
   const last = new URL(address).pathname.split("/").pop() ?? ""
@@ -140,7 +143,7 @@ export async function storeImage(
     clean.buffer
   )
   const { result } = await registerMediaWorkflow(container as MedusaContainer).run({
-    input: { file_ids: [file.id] },
+    input: { file_ids: [file.id], versions },
   })
   const asset = result[0]
   if (!asset) {

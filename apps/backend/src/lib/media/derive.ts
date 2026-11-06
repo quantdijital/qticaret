@@ -1,3 +1,4 @@
+import { toSlug } from "../seo/slug"
 import { readImage } from "./sanitize"
 
 /**
@@ -28,9 +29,21 @@ export function srcsetWidths(width: number): number[] {
 
 const EXTENSIONS = { webp: "webp", avif: "avif", jpeg: "jpg" } as const
 
+/** `{base}-{width}.webp`, `{base}-og.jpg`: a version's file name after what the picture is. */
+export const versionName = (base: string, derivative: Derivative): string =>
+  `${base}-${derivative.kind === "og" ? "og" : String(derivative.width)}.${EXTENSIONS[derivative.format]}`
+
 /** `{slug}-{position}-{width}.webp`, `{slug}-{position}-og.jpg`: names that say what the picture is. */
 export const derivativeName = (slug: string, position: number, derivative: Derivative): string =>
-  `${slug}-${String(position)}-${derivative.kind === "og" ? "og" : String(derivative.width)}.${EXTENSIONS[derivative.format]}`
+  versionName(`${slug}-${String(position)}`, derivative)
+
+/**
+ * The name a library picture's versions take before any product holds it
+ * (a category cover, a post's picture): its own name, as a slug
+ * (`Kapak Fotoğrafı.jpg` → `kapak-fotografi`); "gorsel" when nothing is left.
+ */
+export const libraryVersionBase = (filename: string | null | undefined): string =>
+  toSlug((filename ?? "").replace(/\.[^.]*$/, ""), 60) || "gorsel"
 
 // Upright first: a master stored before the cleaning (an import) may carry an orientation
 const upright = (master: Buffer) => readImage(master).rotate()

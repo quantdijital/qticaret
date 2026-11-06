@@ -14,7 +14,7 @@ import { shopInfoValues } from "../../../workflows/shop/info-values"
 import { authorIdOf } from "../../../workflows/content/author-reads"
 import { entryAuthor, listedAuthors } from "./authors"
 import { cardTargets } from "./cards"
-import { coverOf, coversOf } from "./covers"
+import { bodyImagesOf, coverOf, coversOf } from "./covers"
 import type { StoreGetContentType } from "./validators"
 
 // A reader's pace, for the "n min" a theme may show
@@ -187,10 +187,15 @@ export async function storeContentEntry(
   const values = await shopInfoValues(container)
   const body = fillShopDoc(entry.body as unknown as ContentDoc, values)
   const listed = summary(entry)
-  const [terms, covers, author] = await Promise.all([
+  const stats = docStats(body)
+  const [terms, covers, author, images] = await Promise.all([
     termsOfEntries(container, [entry.id]),
     coversOf(container, [entry.image_url]),
     entryAuthor(container, entry.author_id),
+    bodyImagesOf(
+      container,
+      stats.images.map((image) => image.src)
+    ),
   ])
   return {
     ...listed,
@@ -202,7 +207,9 @@ export async function storeContentEntry(
     // A post's category and tags, at their archives' paths (adr/0019 ek 2026-11-03)
     ...(terms.get(entry.id) ?? NOT_FILED),
     html: renderDoc(body, await cardTargets(container, body)),
+    // The text's library pictures: their size and versions (docs/21 2026-11-06)
+    images,
     // For a table of contents
-    headings: docStats(body).headings,
+    headings: stats.headings,
   }
 }

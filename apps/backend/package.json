@@ -34,6 +34,7 @@
     "legacy:backfill": "medusa exec ./src/scripts/legacy-backfill.ts",
     "authors:backfill": "medusa exec ./src/scripts/authors-backfill.ts",
     "category-covers:backfill": "medusa exec ./src/scripts/category-covers-backfill.ts",
+    "media:derivatives": "medusa exec ./src/scripts/media-derivatives.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "pnpm test:unit",

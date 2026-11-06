@@ -209,7 +209,7 @@ async function writeEntry(
   let cover: { id: string; url: string; alt: string | null } | null = null
   if (content.cover) {
     try {
-      const asset = await storeImage(container, content.cover.url)
+      const asset = await storeImage(container, content.cover.url, undefined, { versions: true })
       cover = { id: asset.id, url: asset.url, alt: content.cover.alt }
     } catch (error) {
       if (!(error instanceof ImageRefused)) {

@@ -6,11 +6,13 @@ import {
   storeImportedImageStep,
 } from "./steps/library"
 import { registerMediaStep } from "./steps/register-media"
+import { askForVersions } from "./workflows"
 
 /**
  * An image at an address the shop gave, brought into the media library
  * (docs/06 Ortam kütüphanesi): fetched safely, checked and cleaned as an
- * upload, stored, recorded. A failed record removes the stored file.
+ * upload, stored, recorded, its versions made after the answer. A failed
+ * record removes the stored file.
  */
 export const importMediaWorkflow = createWorkflow(
   "media-import",
@@ -23,6 +25,8 @@ export const importMediaWorkflow = createWorkflow(
         uploaded_by: input.uploaded_by,
       }))
     )
+    // A library picture: its versions as an upload's (docs/21 2026-11-06)
+    askForVersions(assets)
     return new WorkflowResponse(assets)
   }
 )
