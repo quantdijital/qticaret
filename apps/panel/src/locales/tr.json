@@ -2782,7 +2782,8 @@
     }
   },
   "topbar": {
-    "viewStore": "Mağazayı görüntüle"
+    "viewStore": "Mağazayı görüntüle",
+    "storeSettings": "Mağaza ayarları"
   },
   "delta": {
     "none": "Önceki dönemde yok",

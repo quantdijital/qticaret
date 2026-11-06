@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, useNavigate } from "@tanstack/react-router"
-import { ExternalLink, LogOut, Palette, Search, ShieldCheck } from "lucide-react"
+import { ExternalLink, LogOut, Search, Settings, ShieldCheck } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -113,9 +113,9 @@ function AccountMenu() {
         </DropdownMenuItem>
         {staff?.can.settings ? (
           <DropdownMenuItem asChild>
-            <Link to="/settings/appearance">
-              <Palette />
-              {t("command.appearance")}
+            <Link to="/settings">
+              <Settings />
+              {t("topbar.storeSettings")}
             </Link>
           </DropdownMenuItem>
         ) : null}

@@ -2782,7 +2782,8 @@
     }
   },
   "topbar": {
-    "viewStore": "View store"
+    "viewStore": "View store",
+    "storeSettings": "Store settings"
   },
   "delta": {
     "none": "None before",
