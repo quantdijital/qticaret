@@ -3,6 +3,7 @@
 import { startTransition } from "react"
 import type { ComponentProps } from "react"
 import { sentFields } from "@qticaret/ui/hooks/use-kept-form"
+import { afterPaint } from "@qticaret/ui/lib/after-paint"
 
 /**
  * A plain form for an action that answers with a page (a redirect, the
@@ -10,7 +11,8 @@ import { sentFields } from "@qticaret/ui/hooks/use-kept-form"
  * empty its fields once the action settles, so a refused gift recipient
  * or add-on pick lost what was typed. Sent in a transition instead, the
  * fields stay until the page that comes back draws them again. `action`
- * stays on the form for the page before its script runs.
+ * stays on the form for the page before its script runs. The action
+ * starts once the press's own frame is drawn (`afterPaint`, INP).
  */
 export function KeptForm({
   action,
@@ -25,8 +27,11 @@ export function KeptForm({
       onSubmit={(event) => {
         event.preventDefault()
         const fields = sentFields(event)
-        startTransition(async () => {
-          await action(fields)
+        // What the press changes (a card closing) is drawn before the action starts
+        afterPaint(() => {
+          startTransition(async () => {
+            await action(fields)
+          })
         })
       }}
     />

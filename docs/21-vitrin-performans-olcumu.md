@@ -253,6 +253,7 @@ P / A / BP / SEO / Agentic. LCP Lighthouse'un simülasyonu (Lantern), medyan.
 | Çerez bildiriminde "Tümünü kabul et" | 304–392 ms |
 
 - Son ikisi sunucu eylemli form gönderimi. 200 ms bütçesini 4x CPU'da aşıyorlar; sürenin ~%90'ı sunum gecikmesi. Aşağıda "Kalanlar" 2. madde.
+- **Düzeltme (aynı gün):** bu iki değer ölçüm tarayıcısının bir kusurundan geliyor, sayfanın işinden değil. Gerçek pencereli Chrome'da ikisi de 56–72 ms. Aşağıda "Sepete ekle ve çerez onayı: INP incelemesi".
 
 ### Yapılanlar
 
@@ -320,6 +321,7 @@ P / A / BP / SEO / Agentic. LCP Lighthouse'un simülasyonu (Lantern), medyan.
    - Yani işleyicinin kendisi hafif. Süre, işleyiciden sonra ve ilk boyamadan önce ana iş parçacığında yapılan işten geliyor: React'in form eylemini başlatırken yaptığı render.
    - Gerçek cihazda süre kabaca dörtte biri (~80–100 ms), ama bütçe p75 mobil için.
    - Bekleyen durumun (`useFormStatus`, `aria-busy`) yalnız düğmeyi yeniden çizmesi ve çerez formunun `key` değişiminin bütün formu yeniden kurmaması incelenmeli. Saha verisi (RUM) gelince öncelik ona göre verilmeli.
+   - **Kapandı (2026-11-06):** yukarıdaki açıklama yanlış çıktı. Neden bir ölçüm kusuru; aşağıda "Sepete ekle ve çerez onayı: INP incelemesi".
 3. **Temanın istemci parçası hâlâ her sayfada tek dosya.** [vitrin + tema sözleşmesi]
    - Grafit'in paylaşılan parçası 210 KB ham: ürün sayfası 48 KB, çerçeve 30 KB, ödeme 16 KB, hesap 17 KB, Radix ~35 KB.
    - Her rota temanın tüm nesnesini (`theme.ts` → `atolyeTheme`) aldığı için her sayfaya iniyor. Ana sayfada %75'i kullanılmıyor.
@@ -424,3 +426,131 @@ Yukarıdaki 4, 6, 7, 8 ve 10. maddeler. Doğrulama: worktree'den üretim derleme
    - Masaüstünde `core/config/desktop-config.js`.
    - Sepette önce ürün sayfasından ekleme ve `Network.clearBrowserCache`, `disableStorageReset: true`.
 4. **Arşiv:** ham JSON raporları oturumun geçici klasöründeydi.
+
+## Sepete ekle ve çerez onayı: INP incelemesi (2026-11-06)
+
+> Yukarıdaki tabloda "Sepete ekle" 328–360 ms, çerez bildiriminde "Tümünü kabul et" 304–392 ms idi. İkisi de 200 ms bütçesinin üstündeydi. Bu bölüm nedenini ve yapılanı anlatır. **Sonuç:** sürenin neredeyse tamamı ölçüm tarayıcısının bir kusurundan geliyor. Gerçek pencereli Chrome'da ve eski headless kabukta iki etkileşim de 32–72 ms.
+
+### Kurulum
+
+- **Vitrin:** worktree'den `STOREFRONT_THEME=atolye next build`, `next start -p 8103`. Ortam ve anahtar yukarıdaki "Tekrar üretme" ile aynı.
+- **Profil:** yukarıdaki INP ölçümünün betiğinin aynısı.
+  - puppeteer-core, Moto G Power görünümü (412×823, DPR 1,75, dokunmatik), 4x CPU (sayfa yüklenirken de).
+  - Dokunma (`tap`), Event Timing. Sıra: `/`'da menü ve "Tümünü kabul et"; ürün sayfasında adet artırma, sekme ve "Sepete ekle"; kategori sayfasında menü.
+  - 3 koşu, medyan.
+- **Üç tarayıcıda koşuldu:** üçü de aynı Chromium yapısı (Playwright `chromium-1248`):
+  - Chrome for Testing 156, yeni headless. Yukarıdaki ölçüm bununla alınmıştı.
+  - `chrome-headless-shell`, eski headless.
+  - Aynı Chrome, gerçek pencereyle (`headless: false`).
+- İzler: Chrome performans izi (`devtools.timeline`, `cc`, `viz`, `gpu`) ve V8 örnekleyicisi.
+
+### Bulgu: süre ana iş parçacığında değil, ekran birleştiricisinde
+
+İz, yeni headless'ta tıklamadan sonra şunu gösteriyor:
+
+1. **Olay ve ilk kare:**
+   - İşleyiciler bitiyor; "Ekleniyor…" etiketi ya da kapanan çerez kartı +18–43 ms'de ilk karede çiziliyor.
+   - Kare Viz'e ulaşıyor (`Surface::ActivateFrame`). Ancak ekranın `Display::DrawAndSwap` adımı **"Draw skipped / Swap skipped"** diyor: hasar yok sayılıyor ve kare ekrana basılmıyor.
+2. **Bekleme:**
+   - Ana iş parçacığı +80 ms ile sunucu yanıtı arasında neredeyse boş: sunucu eylemi yolda.
+   - Ekran bu sürede hiç kare basmıyor.
+3. **Bitiş:**
+   - Sunucu yanıtı gelince React ağacı yeniden çiziyor ve Next adresi `history.replaceState` ile yeniliyor.
+   - Tarayıcının kendi birleştiricisi bu yüzden bir kare üretiyor. Ekran ancak o zaman basıyor (+280–610 ms).
+   - Event Timing etkileşimin sunumunu bu kareye yazıyor. "Sunum gecikmesi ~290 ms" buradan geliyor.
+
+Kanıtlar:
+
+- **Görsel geri bildirim anında geliyor.** Ekran görüntülü izde (ekran görüntüsü her kareyi basmaya zorluyor) "Ekleniyor…" +59 ms'de görünüyor. INP aynı koşuda 88 ms.
+- **Tarayıcıyı dürtmek süreyi kapatıyor.**
+  - Deneme amaçlı bir sayfa betiği gönderimden hemen sonra `history.replaceState` çağırdı.
+  - Tarayıcı birleştiricisi erken kare üretti; INP 56–72 ms'ye düştü. Ana iş parçacığının işi aynıydı.
+- **Hiç görsel değişiklik getirmeyen olay da aynı kusura düşüyor.** Ölçüm betiğinin bastığı Escape tuşu, yeni headless'ta 780–890 ms "sunum" ölçtü.
+- **Etkenler tek tek denendi, hiçbiri kusuru açıklamıyor.** Adet düğmesine aynı yükü eklemek kusuru üretmedi:
+  - 12 ms'lik işleyici
+  - `fetch` POST
+  - önlenen form gönderimi
+  - odaktaki düğmeyi devre dışı bırakmak
+  - Navigation API'yi kapatmak (React 19.3'ün varsayılan geçiş göstergesi)
+  - `TreesInViz` özelliğini kapatmak
+- **Ana iş parçacığının gerçek işi küçük:**
+  - Tıklama görevi 22–48 ms; işleyicilerin payı 11–15 ms. Bunun bir kısmı React'in form eylemini başlatması: `FormData`, sunucu eylemi kodlaması, yönlendirici.
+  - Yanıttan sonraki yeniden çizim bir görevde 87–140 ms. Bunun 31–53 ms'si stil yeniden hesabı: `revalidatePath` ile bütün RSC ağacı yenileniyor.
+  - Bu görev tıklamanın INP'sine girmiyor; o anda gelen bir sonraki dokunuşu bekletebilir. Aşağıda "Kalan".
+
+### Önce / sonra (ms; medyan, kırılım girdi / işleyici / sunum)
+
+| Tarayıcı | Etkileşim | Önce | Sonra |
+|---|---|---|---|
+| Yeni headless (eski profil) | Sepete ekle | 312 (24 / 11 / 278) | 296 (23 / 4 / 268) |
+| | Tümünü kabul et | 272 (25 / 8 / 240) | 224 (23 / 3 / 198) |
+| | Sepete ekle, sekmeden hemen sonra | 592 (koşular 592–640) | 360 (koşular 280–368) |
+| Eski headless kabuk | Sepete ekle | 56 (26 / 15 / 15) | 40 (24 / 4 / 13) |
+| | Tümünü kabul et | 48 (28 / 13 / 7) | 32 (22 / 2 / 9) |
+| Gerçek pencere | Sepete ekle | 72 (22 / 9 / 41)* | 72 (24 / 5 / 43) |
+| | Tümünü kabul et | 56 (21 / 8 / 27)* | 56 (21 / 1 / 34) |
+
+\* Pencereli "önce" turunda bir koşuda sayfa yüklenmedi; değer 2 koşudan.
+
+- **Pencereli Chrome'da sunum ~30–45 ms'nin altına inmiyor.** Gerçek ekranın kare temposu bu.
+- **Yeni headless'ta iki etkileşim hâlâ 200 ms civarında ve üstünde.** Kalan süre yukarıdaki ekran kusuru. Sayfa kodu bunu kapatamaz; yalnız tarayıcıyı yapay biçimde dürtmek kapatır. O yapılmadı: gerçek kullanıcıya bir şey kazandırmaz, sadece ölçümü güzelleştirir.
+
+**Diğer etkileşimler (eski headless kabuk, önce → sonra):**
+
+| Etkileşim | Önce | Sonra |
+|---|---|---|
+| Mobil menü, `/` | 144 | 80 |
+| Mobil menü, kategori | 136 | 80 |
+| Adet artırma | 48 | 32 |
+| Sekme değiştirme | 40 | 40 |
+
+- Menünün kodu değişmedi. "Önce" turunda menünün işleyicileri 89–116 ms ölçtü; "sonra" turunda ve diğer turlarda 47–52 ms. Fark makinenin o andaki yükü, gerileme değil.
+- Pencereli Chrome'da da aynı tablo: menü 88–136 → 104–168 ms, adet 48–56 → 64 ms, sekme 56 → 56 ms. İşleyiciler aynı; fark pencereli sunumun 8 ms'lik adımları ve gürültü içinde.
+
+### Yapılanlar
+
+1. **Form eylemi, basışın karesi çizildikten sonra başlıyor.** [ui]
+   - Yeni `afterPaint` (`packages/ui/src/lib/after-paint.ts`) işi bir sonraki kareden sonraki ayrı bir görevde çalıştırır. Kare gelmeyen sayfada (gizli sekme) 100 ms sonra çalıştırır; asla iki kez çalıştırmaz.
+   - `useKeptForm`:
+     - Gönderimde düğme aynı karede "bekliyor" olur: `pending`, eylem başlamadan da doğru.
+     - Eylem `afterPaint` ile başlar. React'in sunucu eylemini başlatma işi (`FormData`, kodlama, yönlendirici) artık basışın görevinde değil.
+     - `pending` eylem başlayınca `useActionState`'inkine devredilir; arada boşluk yok.
+     - Bekleme boyunca düğme zaten `disabled`: çift gönderim olmuyor.
+   - `KeptForm` da eylemini aynı biçimde başlatır.
+   - **Etkisi:** iki temanın bütün tutulan formları (`useKeptForm` ya da `KeptForm` kullanan 13 dosya) ve çerez bildirimi.
+   - **Sonuç:** işleyiciler "Sepete ekle"de 8–17 → 3–6 ms, çerezde 7–20 → 1–5 ms (4x CPU, üç tarayıcıda).
+2. **Çerez bildirimi formu `KeptForm`.** [tema]
+   - `frame/Consent.tsx` sunucu bileşeni olarak kalıyor. Formu artık düz `form` yerine `KeptForm`.
+   - Kart, basışın karesinde kapanıyor (`ConsentFrame`'in `onSubmit`'i, eskisi gibi). Cevap o kareden sonra gidiyor.
+   - Formun `key`'i ve alan adları aynı.
+3. **Korunanlar:**
+   - **JS'siz gönderim:** iki formda da `action` yerinde. JS kapalıyken çerez cevabı ve "Sepete ekle" düz POST ile gidiyor; elle denendi.
+   - **Reddedilen gönderim:** alanlar korunuyor.
+   - **`add_to_cart`:** sepet görüntüsüyle (`watchCart`) bir kez gidiyor. Yol değişmedi: `revalidatePath` ve çerçevenin yenilenmesi aynı.
+   - **Erişilebilirlik:** `aria-busy` ve `role="status"` aynı.
+   - **CSP:** etkilenmedi; yeni betik yok.
+   - **Görünüm:** design.md'ye dokunulmadı.
+4. **Testler:**
+   - `packages/ui`: `after-paint.spec.ts` (kare sonrası, tek sefer, karesiz sayfa) ve `use-kept-form.spec.tsx`. Yeni test: basışta `pending`, eylem karenin ardından ve bir kez.
+   - Vitrin: `kept-forms-theme.spec.tsx` ve `checkout-code-theme.spec.tsx` gönderimi kare beklemesiyle yapıyor.
+   - Sonuç: `packages/ui` 21/21, vitrin 874/874 yeşil.
+
+### Kalan
+
+- **Ölçüm profili değişmeli.** Etkileşim ölçümü (INP) yeni headless Chrome 156 ile alınmamalı: hasar algılamayan kare tıklamanın sunumunu bir sonraki tarayıcı karesine kaydırıyor.
+  - Yerine `chrome-headless-shell` ya da pencereli Chrome kullanılmalı. Lighthouse (yükleme ölçümü) için yeni headless sorun değil.
+  - Asıl söz saha verisinin (RUM, p75 mobil). F16'da `web-vitals` atıflı INP toplanınca bu iki etkileşim orada izlenmeli.
+- **Sepete eklemeden sonraki yenileme tek görevde 87–140 ms (4x CPU).** [vitrin, ayrı görev]
+  - `revalidatePath("/", "layout")` sayfanın bütün RSC ağacını yeniliyor. Başlıktaki sayaç ve analitiğin sepet görüntüsü bunun için var.
+  - Tıklamanın INP'sine girmiyor. Ama yanıt geldiği anda yapılan ikinci bir dokunuşu (ör. "Sepete git") bekletebilir.
+  - Daralmak için sayacın ve sepet görüntüsünün istemcide güncellenmesi gerekir. Bu analitik sözleşmesini (docs/20 D9, sepet görüntüsü sunucudan) değiştirir; ayrı karar.
+
+### Tekrar üretme
+
+1. Derle ve başlat: yukarıdaki "Tekrar üretme" 1–2, port 8103.
+2. Ölç: puppeteer-core ile yukarıdaki profil.
+   - `executablePath` olarak `chrome-headless-shell` (`~/Library/Caches/ms-playwright/chromium_headless_shell-1248/…`) ya da `headless: false`.
+   - Sayfaya `PerformanceObserver({ type: "event", durationThreshold: 16 })`; `interactionId`'li girdiler.
+3. Kusuru görmek için:
+   - Aynı betiği yeni headless'ta koşun ve tıklamayı izleyin (`page.tracing.start`, `viz` kategorisi).
+   - `Display::DrawAndSwap` altında "Draw skipped" ve sunucu yanıtına kadar basılmayan ekran görülür.

@@ -5,6 +5,7 @@ import { createRoot, type Root } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { GiftRecipient } from "@qticaret/theme-base"
 import type { ActionResult, CartLineView, FormAction } from "@qticaret/ui"
+import { PAINTLESS_WAIT_MS } from "@qticaret/ui/lib/after-paint"
 import { t } from "@/lib/i18n"
 // The forms themselves: the themes export pages, not their parts
 import { CodeForm } from "../../../../../packages/themes/atolye/src/cart/CodeForm"
@@ -18,6 +19,9 @@ import { communityWords } from "../../../../../packages/themes/atolye/src/produc
  */
 
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+
+/** A form's action starts once the press's frame is drawn (`afterPaint`): long enough for that. */
+const painted = () => new Promise((resolve) => setTimeout(resolve, PAINTLESS_WAIT_MS + 20))
 
 let host: HTMLDivElement
 let root: Root
@@ -59,7 +63,7 @@ const value = (selector: string) => el(selector).value
 async function send() {
   await act(async () => {
     el('button[type="submit"]').click()
-    await Promise.resolve()
+    await painted()
   })
 }
 

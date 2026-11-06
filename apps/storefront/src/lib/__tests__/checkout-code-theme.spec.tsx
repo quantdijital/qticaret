@@ -4,6 +4,7 @@ import type { ReactNode } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import type { ActionResult, FormAction } from "@qticaret/ui"
+import { PAINTLESS_WAIT_MS } from "@qticaret/ui/lib/after-paint"
 import { t } from "@/lib/i18n"
 // The theme's own parts: it exports pages, not these
 import { promotionWords } from "../../../../../packages/themes/atolye/src/cart/code-words"
@@ -17,6 +18,9 @@ import { SummaryCode } from "../../../../../packages/themes/atolye/src/checkout/
  */
 
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
+
+/** A form's action starts once the press's frame is drawn (`afterPaint`): long enough for that. */
+const painted = () => new Promise((resolve) => setTimeout(resolve, PAINTLESS_WAIT_MS + 20))
 
 let host: HTMLDivElement
 let root: Root
@@ -60,7 +64,7 @@ async function apply(typed: string) {
   input.value = typed
   await act(async () => {
     host.querySelector<HTMLButtonElement>('button[type="submit"]:not([aria-label])')?.click()
-    await Promise.resolve()
+    await painted()
   })
 }
 
@@ -110,7 +114,7 @@ describe("the checkout summary's code field", () => {
     render(code(send, ["YAZ2026"], remove))
     await act(async () => {
       host.querySelector<HTMLButtonElement>(`[aria-label="${words.remove}: YAZ2026"]`)?.click()
-      await Promise.resolve()
+      await painted()
     })
     expect(remove).toHaveBeenCalledTimes(1)
     expect(remove.mock.calls[0]?.[0].get("code")).toBe("YAZ2026")

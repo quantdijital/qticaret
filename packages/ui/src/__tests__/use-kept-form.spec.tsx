@@ -5,6 +5,7 @@ import { createRoot, type Root } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { KeptForm } from "../components/kept-form"
 import { useKeptForm } from "../hooks/use-kept-form"
+import { PAINTLESS_WAIT_MS } from "../lib/after-paint"
 import type { ActionResult, FormAction } from "../theme"
 
 /**
@@ -49,9 +50,9 @@ function Fields() {
 }
 
 function Kept({ action }: { action: FormAction }) {
-  const { state, form } = useKeptForm(action)
+  const { state, pending, form } = useKeptForm(action)
   return (
-    <form {...form}>
+    <form {...form} data-pending={pending ? "" : undefined}>
       <Fields />
       <p role="status">{state.error ?? (state.ok ? "sent" : "")}</p>
     </form>
@@ -91,12 +92,24 @@ function type() {
   field('[name="reason"]').value = "damaged"
 }
 
+/** The press alone: its own frame, the action not yet started (`afterPaint`). */
+function press() {
+  act(() => {
+    field("button").click()
+  })
+}
+
+/** Long enough for `afterPaint` to start the action, with or without frames. */
+const painted = () => new Promise((resolve) => setTimeout(resolve, PAINTLESS_WAIT_MS + 20))
+
 async function send() {
   await act(async () => {
     field("button").click()
-    await Promise.resolve()
+    await painted()
   })
 }
+
+const isPending = () => host.querySelector("form")?.hasAttribute("data-pending")
 
 const typed = () => ({
   title: field('[name="title"]').value,
@@ -143,6 +156,32 @@ describe("useKeptForm", () => {
     })
   })
 
+  it("is pending from the press, and starts the action only after its frame", async () => {
+    let settle: (result: ActionResult) => void = () => undefined
+    const action = vi.fn<FormAction>(
+      () =>
+        new Promise((resolve) => {
+          settle = resolve
+        })
+    )
+    render(<Kept action={action} />)
+    type()
+    press()
+    expect(isPending()).toBe(true)
+    expect(action).not.toHaveBeenCalled()
+    await act(async () => {
+      await painted()
+    })
+    expect(action).toHaveBeenCalledTimes(1)
+    expect(isPending()).toBe(true)
+    await act(async () => {
+      settle({ ok: false, error: "product.review_too_short" })
+      await Promise.resolve()
+    })
+    expect(isPending()).toBe(false)
+    expect(typed().status).toBe("product.review_too_short")
+  })
+
   it("empties the form once the action accepts it", async () => {
     render(<Kept action={accept} />)
     type()
@@ -161,7 +200,12 @@ describe("KeptForm", () => {
       </KeptForm>
     )
     type()
-    await send()
+    press()
+    // What the press changes is drawn first: the action waits for that frame
+    expect(action).not.toHaveBeenCalled()
+    await act(async () => {
+      await painted()
+    })
     expect(action).toHaveBeenCalledTimes(1)
     expect(action.mock.calls[0]?.[0].get("body")).toBe("Kutusundan çıktığı gibi kağıt kesiyor.")
     expect(typed()).toMatchObject({ title: "Çok keskin", rating: "3", reason: "damaged" })

@@ -1,5 +1,6 @@
-import { startTransition, useActionState, useEffect, useRef } from "react"
+import { startTransition, useActionState, useEffect, useRef, useState } from "react"
 import type { SyntheticEvent } from "react"
+import { afterPaint } from "../lib/after-paint"
 import type { ActionResult, FormAction } from "../theme"
 
 const INITIAL: ActionResult = { ok: false, error: null }
@@ -21,10 +22,21 @@ export function sentFields(event: SubmitFormEvent): FormData {
  * empties the form. `action` stays on the form for the page before its
  * script runs.
  *
- * `<form {...form}>`; `state` and `pending` as `useActionState` gives them.
+ * The send is pending from the press: the button says so in the very
+ * next frame, and the action starts once that frame is drawn
+ * (`afterPaint`): starting a server action (the fields, their encoding,
+ * the router) is not part of the press's own task (INP, docs/21).
+ *
+ * `<form {...form}>`; `state` as `useActionState` gives it, `pending`
+ * from the press until the action settles.
  */
 export function useKeptForm(action: FormAction, initial: ActionResult = INITIAL) {
   const [state, dispatch, pending] = useActionState(action, initial)
+  // Pressed, its action not yet started: pending all the same
+  const [waiting, setWaiting] = useState(false)
+  if (waiting && pending) {
+    setWaiting(false)
+  }
   // The form last sent: emptied once its action accepts it
   const sent = useRef<HTMLFormElement | null>(null)
   useEffect(() => {
@@ -35,15 +47,18 @@ export function useKeptForm(action: FormAction, initial: ActionResult = INITIAL)
   }, [state])
   return {
     state,
-    pending,
+    pending: pending || waiting,
     form: {
       action: dispatch,
       onSubmit: (event: SubmitFormEvent) => {
         event.preventDefault()
         sent.current = event.currentTarget
         const fields = sentFields(event)
-        startTransition(() => {
-          dispatch(fields)
+        setWaiting(true)
+        afterPaint(() => {
+          startTransition(() => {
+            dispatch(fields)
+          })
         })
       },
     },

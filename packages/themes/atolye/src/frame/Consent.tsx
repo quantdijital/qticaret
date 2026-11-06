@@ -1,4 +1,5 @@
 import type { CookieBannerView, Translate } from "@qticaret/ui"
+import { KeptForm } from "@qticaret/ui/components/kept-form"
 import { ConsentFrame } from "./ConsentFrame"
 
 function Choice({
@@ -37,7 +38,9 @@ function Choice({
  * beyond the necessary, "Yalnızca zorunlu" and "Tümünü kabul et" side by
  * side in the same quiet style (no nudging), the categories behind
  * "Tercihleri seç", ticked as the answer in force. One plain form; it
- * answers before any script runs. The field names are the storefront's.
+ * answers before any script runs. With the script, the card closes in the
+ * press's own frame and the answer is sent after it (`KeptForm`, INP).
+ * The field names are the storefront's.
  */
 export function Consent({
   banner,
@@ -50,7 +53,7 @@ export function Consent({
 }) {
   return (
     <ConsentFrame open={banner.due} labelledBy="cerez-baslik" closeLabel={t("cookies.close")}>
-      <form
+      <KeptForm
         key={`${String(banner.due)}:${String(banner.analytics)}:${String(banner.marketing)}`}
         action={save}
         className="flex flex-col gap-2.5 sm:gap-3"
@@ -118,7 +121,7 @@ export function Consent({
             </div>
           </details>
         </div>
-      </form>
+      </KeptForm>
     </ConsentFrame>
   )
 }
