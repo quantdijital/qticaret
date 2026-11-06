@@ -9,20 +9,20 @@ const SUMMARY_PROSE = [
 ].join(" ")
 
 /**
- * The shop's short description under the name and stars, above the price
- * (adr/0055 Ek 2026-11-06), as the shop wrote it: the backend's HTML of
+ * The shop's short description under the price group (price, saving,
+ * instalments, stock) and above the options (adr/0055 Ek 2026-11-06;
+ * sahip 2026-11-06: the price block "kısa açıklamanın üstünde olsun"), with
+ * the buy column's own gap either side, as the shop wrote it: the backend's HTML of
  * its document (adr/0019, the description's allow-list), in the body's
  * size, no card. Always whole, at every width (sahip 2026-11-06: no
  * "Devamını oku" under it on a phone).
  */
 export function Summary({ html }: { html: string }) {
   return (
-    <div className="pt-1">
-      <div
-        className={SUMMARY_PROSE}
-        // adr/0019, adr/0055: built by the backend from an allow-listed document schema
-        dangerouslySetInnerHTML={{ __html: html }}
-      />
-    </div>
+    <div
+      className={SUMMARY_PROSE}
+      // adr/0019, adr/0055: built by the backend from an allow-listed document schema
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   )
 }

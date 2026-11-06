@@ -1,6 +1,6 @@
 "use client"
 
-import { Check, CircleAlert, CircleCheck, CircleSlash } from "lucide-react"
+import { Check, CircleAlert } from "lucide-react"
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { formatLira } from "@qticaret/ui"
 import type {
@@ -14,7 +14,6 @@ import type {
 } from "@qticaret/ui"
 import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 import { emitShopEvent } from "@qticaret/ui/lib/shop-events"
-import { cn } from "@qticaret/ui/lib/utils"
 import { announceCartAdded } from "../frame/events"
 import { BuyBar } from "./BuyBar"
 import { choiceText, matching, soldOutOf } from "./choices"
@@ -41,13 +40,15 @@ const ALERT = "stok-bildirimi"
 
 /**
  * The buy column's working part: the chosen variant's price (with the
- * price-before rule, the saving and a cart offer's note), its stock in
- * words, the options, the add-ons or a gift card's recipient, then one
+ * price-before rule, the saving and a cart offer's note), the shop's short
+ * description (`summary`, under the price group and above the choices),
+ * the options, the add-ons or a gift card's recipient, then one
  * row: how many, "add to cart" in the shop's colour, the favourite heart.
  * A variant to be had says its instalments in one line under the price
- * (the table opens in a dialog); a variant out of stock offers the stock
- * alert under the row. The page's WhatsApp question (`whatsapp`) closes
- * the purchase group, 12 px under the row. A choice writes `?variant=` in
+ * (the table opens in a dialog). No stock line (sahip 2026-11-06: the
+ * button already says it): a variant out of stock says so on its disabled
+ * button and offers the stock alert under the row. The page's WhatsApp
+ * question (`whatsapp`) closes the purchase group, 12 px under the row. A choice writes `?variant=` in
  * place (the back button still leaves the page). Without the script the
  * form still posts the first variant. Once in, the cart sheet opens.
  */
@@ -65,6 +66,7 @@ export function Buy({
   installments,
   stockAlert,
   signedIn,
+  summary,
   whatsapp,
   words,
 }: {
@@ -87,6 +89,7 @@ export function Buy({
     words: AlertWords
   }
   signedIn: boolean
+  summary: ReactNode
   whatsapp: ReactNode
   words: BuyWords
 }) {
@@ -159,19 +162,7 @@ export function Buy({
           )}
         </div>
       )}
-      <p
-        className={cn(
-          "flex items-center gap-2 text-sm font-semibold",
-          available ? "text-ok" : "text-text-2"
-        )}
-      >
-        {available ? (
-          <CircleCheck className="size-5" aria-hidden="true" strokeWidth={2} />
-        ) : (
-          <CircleSlash className="size-5" aria-hidden="true" strokeWidth={2} />
-        )}
-        {variant ? (available ? words.inStock : words.outOfStock) : words.chooseOptions}
-      </p>
+      {summary}
       <form
         id={FORM}
         action={form.action}

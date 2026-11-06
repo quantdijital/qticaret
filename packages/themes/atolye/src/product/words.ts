@@ -47,7 +47,6 @@ export const buyWords = (t: Translate, percents: readonly number[]) => ({
   adding: t("product.adding"),
   added: t("product.added"),
   goToCart: t("product.go_to_cart"),
-  inStock: t("product.in_stock"),
   outOfStock: t("product.out_of_stock"),
   chooseOptions: t("product.choose_options"),
   before: t("price.before"),

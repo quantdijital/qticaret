@@ -10,6 +10,7 @@ import { Community } from "./product/Community"
 import { Details } from "./product/Details"
 import { Gallery } from "./product/Gallery"
 import { Headline } from "./product/Headline"
+import { Summary } from "./product/Summary"
 import {
   addonWords,
   alertWords,
@@ -105,6 +106,7 @@ export function ProductPage({
               installments={{ load: actions.installments, words: installmentWords(t) }}
               stockAlert={{ action: actions.stockAlert, words: alertWords(t) }}
               signedIn={view.signedIn}
+              summary={view.summaryHtml ? <Summary html={view.summaryHtml} /> : null}
               whatsapp={view.whatsappHref ? <AskOnWhatsApp href={view.whatsappHref} t={t} /> : null}
               words={buyWords(t, percents)}
             />

@@ -186,7 +186,9 @@ describe("the theme's product page", () => {
     expect(html).toContain("%30 indirim")
     expect(html).toContain("787,50 TL tasarruf")
     expect(html).toContain("2.000,00 TL ve üzeri sepette %10 indirim")
-    expect(html).toContain(">Stokta</p>")
+    // No stock line: the button says it (sahip 2026-11-06)
+    expect(html).not.toContain(">Stokta</p>")
+    expect(html).not.toContain(">Tükendi</p>")
   })
 
   it("has one buy form the row's button, the quantity and the phone's bar all submit", () => {
@@ -242,11 +244,16 @@ describe("the theme's product page", () => {
     expect(html).toContain('name="variant_id" value="v_tek"')
   })
 
-  it("offers the stock alert for a variant out of stock, not the instalments", () => {
+  it("says a variant out of stock on its disabled button and offers the stock alert, not the instalments", () => {
     const html = page({
       variants: [variant("v_yesil", "Yeşil", { available: false })],
       options: [{ id: "opt_renk", title: "Renk", values: ["Yeşil"] }],
     })
+    const button =
+      /<button type="submit" form="sepet-formu"[^>]*>[^<]*<\/button>/.exec(html)?.[0] ?? ""
+    expect(button).toContain('disabled=""')
+    expect(button).toContain(">Tükendi</button>")
+    expect(html).not.toContain(">Tükendi</p>")
     expect(html).toContain('id="stok-bildirimi"')
     expect(html).not.toContain("Taksit seçenekleri")
     expect(html).toContain('href="#stok-bildirimi"')

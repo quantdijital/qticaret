@@ -1,6 +1,5 @@
 import type { ProductPageView, Translate } from "@qticaret/ui"
 import { Stars } from "../parts/Stars"
-import { Summary } from "./Summary"
 
 /** A rating as the shop's language writes it: "4,6". */
 export const ratingText = (average: number) => average.toFixed(1).replace(".", ",")
@@ -9,15 +8,15 @@ export const ratingText = (average: number) => average.toFixed(1).replace(".", "
  * The buy column's head: the brand small (its page), the name as the
  * page's one h1 (a name the shop wrote as "name | detail" keeps the
  * detail on a second, smaller line of the same heading), the subtitle,
- * the stars with the count leading to the reviews, then the shop's short
- * description as it wrote it (adr/0055 Ek 2026-11-06) or, without one, up
- * to four facts the shop marked as headline ones.
+ * the stars with the count leading to the reviews, then, without a short
+ * description, up to four facts the shop marked as headline ones. A short
+ * description (adr/0055 Ek 2026-11-06) sits lower, under the price group
+ * (`Buy`'s `summary`), and takes the facts' place.
  */
 export function Headline({ view, t }: { view: ProductPageView; t: Translate }) {
   const [name = view.title, ...detail] = view.title.split(" | ")
-  const summary = view.summaryHtml ?? null
   // The short description takes the facts' place; they stay on the spec table
-  const facts = summary ? [] : view.specs.filter((spec) => spec.highlight).slice(0, 4)
+  const facts = view.summaryHtml ? [] : view.specs.filter((spec) => spec.highlight).slice(0, 4)
   const { average, count } = view.reviews
   return (
     <header className="flex flex-col gap-3">
@@ -51,7 +50,6 @@ export function Headline({ view, t }: { view: ProductPageView; t: Translate }) {
           <span className="sr-only">{t("product.average", { value: ratingText(average) })}</span>
         </a>
       )}
-      {summary && <Summary html={summary} />}
       {facts.length > 0 && (
         <dl aria-label={t("product.highlights")} className="flex flex-wrap gap-2 pt-1">
           {facts.map((fact) => (

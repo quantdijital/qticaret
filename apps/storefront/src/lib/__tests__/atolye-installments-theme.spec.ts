@@ -89,9 +89,8 @@ describe("the product page's instalment line", () => {
     expect(line).toMatch(/<span class="[^"]*@max-\[30rem\]:sr-only">Taksit seçenekleri<\/span>/)
     // An amount never breaks from its "TL"
     expect(line).toMatch(/<span class="[^"]*whitespace-nowrap[^"]*">aylık 195,87 TL/)
-    // Under the price, above the stock and the buy row; never a long table under "add to cart"
+    // Under the price, above the buy row; never a long table under "add to cart"
     expect(html.indexOf("1.968,75 TL")).toBeLessThan(html.indexOf("12 aya varan taksit"))
-    expect(html.indexOf("12 aya varan taksit")).toBeLessThan(html.indexOf(">Stokta</p>"))
     expect(html.indexOf("12 aya varan taksit")).toBeLessThan(html.indexOf("data-buy-row"))
     expect(html).not.toContain('<details class="group/taksit')
     expect(html).not.toContain("<table")
