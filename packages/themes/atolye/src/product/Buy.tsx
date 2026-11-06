@@ -1,7 +1,7 @@
 "use client"
 
 import { Check, CircleAlert, CircleCheck, CircleSlash } from "lucide-react"
-import { useEffect, useMemo, useRef, useState } from "react"
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { formatLira } from "@qticaret/ui"
 import type {
   AddonFieldView,
@@ -46,7 +46,8 @@ const ALERT = "stok-bildirimi"
  * row: how many, "add to cart" in the shop's colour, the favourite heart.
  * A variant to be had says its instalments in one line under the price
  * (the table opens in a dialog); a variant out of stock offers the stock
- * alert under the row. A choice writes `?variant=` in
+ * alert under the row. The page's WhatsApp question (`whatsapp`) closes
+ * the purchase group, 12 px under the row. A choice writes `?variant=` in
  * place (the back button still leaves the page). Without the script the
  * form still posts the first variant. Once in, the cart sheet opens.
  */
@@ -64,6 +65,7 @@ export function Buy({
   installments,
   stockAlert,
   signedIn,
+  whatsapp,
   words,
 }: {
   productId: string
@@ -85,6 +87,7 @@ export function Buy({
     words: AlertWords
   }
   signedIn: boolean
+  whatsapp: ReactNode
   words: BuyWords
 }) {
   const first = variants.find((each) => each.id === selectedVariantId) ?? variants[0] ?? null
@@ -226,48 +229,51 @@ export function Buy({
           </>
         )}
       </form>
-      <div ref={row} data-buy-row="" className="flex flex-wrap items-center gap-2">
-        <Quantity
-          form={FORM}
-          name="quantity"
-          max={limit ?? 99}
-          words={words}
-          onValueChange={setQuantity}
-        />
-        <button
-          type="submit"
-          form={FORM}
-          disabled={!available || pending}
-          aria-busy={pending}
-          className="gf-btn order-last min-w-0 basis-full @min-[24rem]:order-none @min-[24rem]:basis-0 @min-[24rem]:flex-1"
-        >
-          {label}
-        </button>
-        <Favorite
-          productId={productId}
-          signedIn={signedIn}
-          loginPath={favorite.loginPath}
-          add={favorite.add}
-          words={favorite.words}
-        />
+      <div className="flex flex-col gap-3">
+        <div ref={row} data-buy-row="" className="flex flex-wrap items-center gap-2">
+          <Quantity
+            form={FORM}
+            name="quantity"
+            max={limit ?? 99}
+            words={words}
+            onValueChange={setQuantity}
+          />
+          <button
+            type="submit"
+            form={FORM}
+            disabled={!available || pending}
+            aria-busy={pending}
+            className="gf-btn order-last min-w-0 basis-full @min-[24rem]:order-none @min-[24rem]:basis-0 @min-[24rem]:flex-1"
+          >
+            {label}
+          </button>
+          <Favorite
+            productId={productId}
+            signedIn={signedIn}
+            loginPath={favorite.loginPath}
+            add={favorite.add}
+            words={favorite.words}
+          />
+        </div>
+        <p role="status" aria-live="polite" className="text-sm empty:hidden">
+          {!stale && state.ok && (
+            <span className="flex flex-wrap items-center gap-x-2 font-semibold text-ok">
+              <Check className="size-4" aria-hidden="true" strokeWidth={2.5} />
+              {words.added}
+              <a href="/sepet" className="gf-link min-h-0 text-text">
+                {words.goToCart}
+              </a>
+            </span>
+          )}
+          {error && (
+            <span className="flex items-start gap-2 text-error">
+              <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
+              {error}
+            </span>
+          )}
+        </p>
+        {whatsapp}
       </div>
-      <p role="status" aria-live="polite" className="-mt-3 text-sm empty:hidden">
-        {!stale && state.ok && (
-          <span className="flex flex-wrap items-center gap-x-2 font-semibold text-ok">
-            <Check className="size-4" aria-hidden="true" strokeWidth={2.5} />
-            {words.added}
-            <a href="/sepet" className="gf-link min-h-0 text-text">
-              {words.goToCart}
-            </a>
-          </span>
-        )}
-        {error && (
-          <span className="flex items-start gap-2 text-error">
-            <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
-            {error}
-          </span>
-        )}
-      </p>
       {/* Outside the buy form: a form may not hold another */}
       {variant && !available && (
         <StockAlert

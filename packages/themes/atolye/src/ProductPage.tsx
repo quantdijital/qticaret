@@ -3,6 +3,7 @@ import type { ProductPageView, ThemeActions, Translate } from "@qticaret/ui"
 import { Container } from "./parts/Container"
 import { ProductGrid } from "./parts/ProductCard"
 import { Trail } from "./parts/Trail"
+import { AskOnWhatsApp } from "./product/AskOnWhatsApp"
 import { Assurances } from "./product/Assurances"
 import { Buy } from "./product/Buy"
 import { Community } from "./product/Community"
@@ -104,6 +105,7 @@ export function ProductPage({
               installments={{ load: actions.installments, words: installmentWords(t) }}
               stockAlert={{ action: actions.stockAlert, words: alertWords(t) }}
               signedIn={view.signedIn}
+              whatsapp={view.whatsappHref ? <AskOnWhatsApp href={view.whatsappHref} t={t} /> : null}
               words={buyWords(t, percents)}
             />
             {/* Before the purchase, beside the buy form (MSY md. 5/1-h, 6/2): the storefront's words */}
