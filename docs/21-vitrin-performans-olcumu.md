@@ -331,17 +331,19 @@ P / A / BP / SEO / Agentic. LCP Lighthouse'un simülasyonu (Lantern), medyan.
    - RSC yükünde `NEXT_HTTP_ERROR_FALLBACK;404` hatası satır olarak var, yani SSR sınırı yakalamıyor.
    - `htmlLimitedBots` kaldırılarak denendi, sonuç aynı. Sahibin dev sunucusunda da aynı. Bu oturumun değişikliklerinden önce de vardı.
    - docs/03 F18 "Non-200 sayfalarda JS render'a güvenilmez" der. 404 sayfasındaki "yol göster" kategorileri JS'siz tarayıcıya ulaşmıyor.
+   - **Düzeltildi** (aşağıda "Denetim düzeltmeleri", 1): bilinmeyen adresler için. Sayfanın kendi bulduğu 404'ler (`/magaza?sayfa=999` gibi) Next sınırı olarak kalıyor.
 5. **Kanonik ve JSON-LD dev'de ölçülemedi.** [ortam]
    - `seo.canonical_host` dev'de boş. Backend kanonik yoksa `jsonLd`'yi de boş döner (`lib/seo/home.ts`; ürün, liste, içerik de öyle). `/sitemap.xml` 404, `robots.txt`'de `Sitemap:` yok.
-   - Ana sayfadaki tek blok vitrinin kendi `FAQPage`'i.
+   - Ana sayfadaki tek blok vitrinin kendi `FAQPage`'iydi (artık yok, 6. madde).
    - Bloğun biçimi backend birim testleriyle doğrulandı (`src/lib/seo`, 27 takım, 352 test yeşil).
    - `/seo-audit`, `/seo-technical`, `/seo-schema` kabulü (docs/03 F18) kanonik alan adı olan ortamda (F16 staging) koşulmalı. Dev'de alan adı ayarlamak sahibin verisini değiştireceği için yapılmadı.
-6. **Ana sayfada `FAQPage`.** [karar] Vitrin SSS bölümünü `FAQPage` olarak basıyor (`lib/seo/faq.ts`, adr/0049 Ek 2026-11-03). docs/13 §5 ise "`FAQPage` kullanılmaz" diyor: Google'ın SSS zengin sonucu Mayıs 2026'da kalktı. Zararsız ama iki belge çelişiyor; sahip kararı.
+6. **Ana sayfada `FAQPage`.** [karar] Vitrin SSS bölümünü `FAQPage` olarak basıyor (`lib/seo/faq.ts`, adr/0049 Ek 2026-11-03). docs/13 §5 ise "`FAQPage` kullanılmaz" diyor: Google'ın SSS zengin sonucu Mayıs 2026'da kalktı. Zararsız ama iki belge çelişiyor; sahip kararı. **Karar ve düzeltme:** docs/13 geçerli, `FAQPage` basılmıyor (aşağıda "Denetim düzeltmeleri", 3; adr/0049 Ek 2026-11-06).
 7. **Ürün başlığında mağaza adı iki kez.** [backend/veri]
    - `El Yapımı Balta Çakı | 21 cm … Kabza | My L'arte | My L'arte` (99 karakter). Ürünün `seo_title`'ı zaten "| My L'arte" ile bitiyor, şablon bir kez daha ekliyor.
    - Şablon, adla biten başlığa eklememeli ya da advisor uyarmalı (docs/14).
    - Yazar sayfası `My L'arte | My L'arte`: yazar adı mağaza adıyla aynı (veri).
-8. **İçerik sayfasında ölçüsüz görseller.** [backend/içerik] `/hakkimizda` gövdesinde 3 görselin `width`/`height`'ı yok. Ölçülen CLS 0, ama yavaş bağlantıda kayma riski var. Zengin metin görselleri medya kaydından ölçü almalı.
+   - **Düzeltildi** (aşağıda "Denetim düzeltmeleri", 2): backend tekrar eden başlık parçasını atar.
+8. **İçerik sayfasında ölçüsüz görseller.** [backend/içerik] `/hakkimizda` gövdesinde 3 görselin `width`/`height`'ı yok. Ölçülen CLS 0, ama yavaş bağlantıda kayma riski var. Zengin metin görselleri medya kaydından ölçü almalı. **Düzeltildi** (aşağıda "Denetim düzeltmeleri", 4; yalnız `width`/`height`, `srcset` 1. maddeyle).
 9. **Mobil alt çubukta "Ana sayfa" hedefi** (axe `target-size`, A 97).
    - İlk ziyarette çerez kartı alt çubuğun üstüne biniyor ve "Ana sayfa"nın görünen alanı 12 px kalıyor. Bildirim kapanınca sorun yok.
    - Kartın yerini değiştirmek tasarım değişikliği; design.md kilitli olduğu için yapılmadı.
@@ -350,6 +352,7 @@ P / A / BP / SEO / Agentic. LCP Lighthouse'un simülasyonu (Lantern), medyan.
     - İç bağlantı taramasında kısa sürede ~300 istek atıldı. Backend'in IP başına sınırı (`429`) doldu ve vitrin bu sayfaları 500 ile verdi: facet ve arama bağlantıları.
     - Facet adresleri `robots.txt`'de kapalı. Yine de hızlı tarayan bir bot 5xx görür; `503` + `Retry-After` daha doğru.
     - Canlıda vitrin ziyaretçi adresini imzaladığı için sınır bot başına işler.
+    - **Düzeltildi** (aşağıda "Denetim düzeltmeleri", 5): sınırdaki ziyaretçinin katalog sayfaları `503` + `Retry-After`. Sınıra çarpan ilk sayfa çizimi 500 kalabilir.
 11. **Küçük kalemler:**
     - Next çekirdeğinin eski tarayıcı polyfill'leri (14 KB).
     - `visa.png` 7 KB (6 KB tasarruf).
@@ -370,12 +373,44 @@ P / A / BP / SEO / Agentic. LCP Lighthouse'un simülasyonu (Lantern), medyan.
   - `/URUN/X` → 301 `/urun/x`.
   - `/kategoriler/` → 301 `/kategoriler`.
   - `/blog//elmax…` → 308 tek eğik çizgiye (Next'in kendi normalizasyonu; docs/13 301 diyor, etki aynı).
-- **Başlık yapısı:** her sayfada tek `h1`, düzey atlaması yok. 404'te `h1` ilk HTML'de yok (4. madde).
+- **Başlık yapısı:** her sayfada tek `h1`, düzey atlaması yok. 404'te `h1` ilk HTML'de yok (4. madde; bilinmeyen adresler için düzeltildi).
 - **Görseller:** `alt`'sız görsel yok. Boş `alt`'lar süs: adı yanında yazan kart ve satır görselleri. Ölçüsüz görsel yalnız içerik gövdesinde (8. madde).
 - **İç bağlantılar:** üst menü, alt bilgi, reyonlar, ürün ve blog bağlantılarının hepsi 200.
   - `/hesap` ve `/hesap/favoriler` girişe 307 (oturumsuz; beklenen).
   - Facet ve arama bağlantılarındaki 500'ler hız sınırından (10. madde). Tek tek açıldığında 200.
 - **Lighthouse SEO ve Agentic Browsing:** dizinlenen her sayfada 100 / 100. `/sepet` SEO 58 (bilerek `noindex`).
+
+### Denetim düzeltmeleri (2026-11-06)
+
+Yukarıdaki 4, 6, 7, 8 ve 10. maddeler. Doğrulama: worktree'den üretim derlemesi (`next build`, `next start -p 8102`, Grafit, sahibin dev backend'i), ilk HTML JS'siz okundu.
+
+1. **404 sayfası ilk HTML'de tam.** [vitrin]
+   - **Neden:** Next 16.4.2'de çizim sırasında `notFound()` atan **her** dinamik sayfa kabuk hatası sayılıyor. React sunucu çiziminde hata sınırı çalışmaz; Next 404 durumunu verir ama gövde olarak boş `<html id="__next_error__">` kabuğunu gönderir ve `not-found.tsx` yalnız istemcide çizilir.
+   - Bu, vitrine özgü değil: yalnız `layout` + `not-found` + `notFound()` atan bir sayfadan oluşan boş bir Next 16.4.2 uygulamasında da aynı kabuk geldi (iç içe `not-found.tsx` ve `generateMetadata`'lı biçimler de). Eşleşmeyen adresin `/_not-found` rotası ise tam çiziliyor; vitrinde her adresi `[...path]` yakaladığı için o rota hiç çalışmıyor.
+   - Askıya alınmış (`Suspense`) bir parçada atmak çözüm değil: gövde gelir ama durum 200 olur (soft 404).
+   - `htmlLimitedBots`, vekilin yeniden yazması ya da tema etkili değil (410 sayfası zaten tamdı).
+   - **Düzeltme:** vekil, `resolve`'un `not_found` dediği adresi `/_bulunamadi` sayfasına **404 durumuyla yeniden yazar** (410'un `/_kaldirildi`'si gibi; `lib/seo/gone.ts` `notFoundResponse`). Sayfa normal çizilir: başlık, metin, arama formu ve kategori kutuları ilk HTML'de, `<html lang="tr">`, `noindex`. Adres tarayıcıda aynı kalır; 404 günlüğüne bildirim eskisi gibi.
+   - Sayfa yalnız vekilin işaretiyle (`x-qt-not-found`) çizilir; kendi adresiyle istenince ya da ziyaretçi başlığı gönderince 404 kabuğu.
+   - Ana sayfa ve vitrinin kendi listeleri eski platform sorgusuyla `not_found` alsa da kendileri çizilir (eskisi gibi). `resolve` yanıt veremezse sayfa kendisi sorar.
+   - **Doğrulama:** `/bu-sayfa-yok`, `/urun/olmayan`, `/kategori/olmayan-kategori`, `/blog/olmayan-yazi` → 404, `h1` "Sayfa bulunamadı", `/arama` formu, kategori kutuları, `lang="tr"`, hata kabuğu yok. İstemci gezintisiyle eksik adrese gidiş tam sayfa yüklemesine düşüp aynı sayfayı gösteriyor. `/wp-login.php` → 410, tam (değişmedi).
+   - **Kalan (Next sınırı):** sayfanın kendi bulduğu 404'ler `notFound()` ile kalıyor ve gövdeleri yine yalnız istemcide: son sayfadan sonrası (`/magaza?sayfa=999`, blog arşivleri, `/yorumlar`), bilinmeyen yasal metin, filtre sınırını aşan arama, başkasının siparişi, önizleme. Durum ve `noindex` doğru. Bunlar için vekilin önceden bilmesi gerekir (sayfa sayısı); ayrı görev, Next'in sonraki sürümlerinde yeniden denenmeli.
+   - Hata sayfaları (500) da aynı kabukla gelir; JS'siz okuyucuya gidecek içerik yok, bilerek bırakıldı. Bakım sayfası (503) vekilin kendi HTML'i, tam.
+   - Testler: `app/__tests__/not-found-page.spec.ts` (Grafit'in başlığı, arama formu ve kutuları dahil), `__tests__/proxy-fallbacks.spec.ts`, `lib/seo/__tests__/gone.spec.ts`.
+2. **Mağaza adı başlıkta bir kez.** [backend]
+   - **Neden:** vitrin şablon eklemiyor (`metadataOf` `title.absolute`, layout'ta `title.template` yok). İkinci ad backend'in başlığından geliyor: ürün şablonu `{ürün_adı} | {marka} | {mağaza}` ve markası mağaza adıyla aynı (ya da adı zaten "| My L'arte" ile biten) üründe ad iki kez çıkıyor. Yazar sayfasında `{başlık} | {mağaza}`, yazarın adı mağaza adı.
+   - **Düzeltme:** `withoutRepeatedParts` (`lib/seo/template.ts`): başlık kurulduktan sonra, boşluklu ayraçlar arasındaki parçalardan öncekini tekrarlayan ayracıyla atılır (büyük/küçük harf ve boşluk farkı sayılmaz). Şablondan gelen ve elle yazılmış `seo_title` ikisine de uygulanır; OG ve Twitter başlığı aynı. docs/13 §3'e kural eklendi.
+   - Örnek: `El Yapımı Balta Çakı | 21 cm … Kabza | My L'arte` (87 karakter; 60'ın üstü advisor'ın uzunluk uyarısında kalır). Yazar sayfası `My L'arte`.
+   - Diğer sayfa türleri tarandı, hepsinde ad bir kez: ana sayfa, kategori, ürün, içerik, blog yazısı, `/blog`, `/kategoriler`, `/magaza`, `/markalar`, `/kampanyalar`, `/yorumlar`; `/arama` adı hiç taşımıyor.
+   - Dev backend'i sahibin ana checkout'undan çalıştığı için canlı başlık backend yeniden başlayınca düzelir; doğrulama birim testleriyle (`template.unit.spec.ts`, `resolve.unit.spec.ts`) ve HTTP testleriyle (`seo-resolve`, `seo-payload`, `seo-contract`).
+   - Ayrıca görüldü (düzeltilmedi): `/magaza?sayfa=2` başlığı " – Sayfa 2" almıyor (docs/13 §3 sayfalama kuralı; blog arşivleri alıyor).
+3. **`FAQPage` basılmıyor.** [vitrin, karar] Ana oturum kararı: docs/13 §5. `lib/seo/faq.ts` silindi; ana sayfa, ürün, liste ve tasarım önizlemesi artık `FAQPage` basmıyor, SSS sayfada aynen görünüyor. adr/0049 Ek 2026-11-06. Advisor'da ilgili kural yoktu. Koruma: `lib/seo/__tests__/seo-policy.spec.ts` (kaynakta `"FAQPage"` yok), e2e duman testi.
+4. **Zengin metin görsellerine ölçü.** [backend] İçerik belgesindeki görseller medya kütüphanesinden (`media_asset` `width`/`height`, blog kapaklarıyla aynı sorgu) ölçü alır ve `<img … width height>` basılır. `cardTargets` belgenin kartlarıyla birlikte görsellerin ölçülerini de getirir: içerik sayfası, blog yazısı, landing ve tema düzenleyicinin zengin metin bölümü. Ölçüsü bilinmeyen görsel eskisi gibi. `srcset` ayrı iş (Kalanlar 1). Testler: `content.unit.spec.ts`, HTTP `content.spec.ts`.
+5. **Hız sınırı 503.** [vitrin]
+   - Bir sayfa durumunu kendi seçemediği için (Next'te yalnız `notFound`/`forbidden`/`unauthorized` var) karar vekilde.
+   - `storeRequest` bir **okumanın** 429'unu ziyaretçi başına `Retry-After` süresince tutar (`lib/store-api/busy.ts`; süreç kayıt defterinde, vekil ve sayfalar aynı haritayı görür; 1–300 sn, başlık yoksa 30).
+   - Vekil o süre boyunca ziyaretçinin **katalog sayfalarına** (ana sayfa, listeler, kayıt sayfaları, `/arama`) `503`, aynı `Retry-After`, `no-store`, `noindex`'siz kısa metin döner. Vekilin kendi `resolve` çağrısı 429 aldıysa aynı istek de 503.
+   - Dışında kalanlar: sepet, ödeme ve dönüşü, hesap, token bağlantıları, rota işleyicileri, POST'lar; formların kendi sınırları ve canlı arama (`/store/listings/suggest`) sayılmaz.
+   - **Sınır:** sınıra ilk çarpan sayfa çizimi (vekil `resolve` sormadığında: listeler, `/arama`) hâlâ 500; sonraki istekler 503. Canlı ölçüm yapılmadı (sahibin dev backend'inin sınır sayaçlarını doldurmamak için); testler `busy.spec.ts`, `proxy-fallbacks.spec.ts`.
 
 ### Tekrar üretme
 

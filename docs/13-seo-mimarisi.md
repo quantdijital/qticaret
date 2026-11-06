@@ -84,6 +84,7 @@ Tenant kurulumda bir desen seti seçer; desen tokenlarla tanımlıdır ve sonrad
     - Şablon boş çıkarsa meta açıklama: önce kısa açıklama (155 karaktere kadar), yoksa açıklamanın ilk cümleleri, yoksa liste sayfasının kendi cümlesi. OpenGraph ve Twitter açıklaması meta açıklamanın aynısıdır. `seo_description` yazılmışsa hep o.
     - JSON-LD `description` ve akışların (Google Merchant, Meta, Akakçe, Cimri) açıklaması: düz metin `description`, boşsa kısa açıklama (kesilmeden), o da yoksa akışta ürün adı.
 - Şablonlar ve tenant metinleri sayfaya basılırken kaçışlanır (F18): HTML'de entity, JSON-LD içinde `<` → `\u003c` (`</script>` kapanışı olmasın). robots.txt `text/plain` + nosniff ile servis edilir. `canonical_host` alan adı doğrulaması gelene kadar yalnızca bağlantı üretiminde kullanılır; sunucu tarafı istek ve yönlendirme hedefi olmadan önce doğrulanmış alan adlarıyla sınırlanır (F16/F18).
+- **Mağaza adı başlıkta bir kez** (2026-11-06): backend başlığı kurduktan sonra (şablondan ya da elle girilmiş `seo_title`'dan) aralarında boşluklu ayraç (`|`, `-`, `–`, `·` …) olan parçalardan öncekini tekrarlayanı ayracıyla birlikte atar (büyük/küçük harf ve boşluk farkı sayılmaz; `lib/seo/template.ts` `withoutRepeatedParts`). Marka adı mağaza adıyla aynıysa, ürün adı zaten "| Mağaza" ile bitiyorsa ya da yazar mağaza adını taşıyorsa ad bir kez görünür. Kelime içindeki tire (`N690-Böhler`) ayraç sayılmaz. Vitrin şablon eklemez: başlık backend'den `title.absolute` olarak basılır (Next `title.template` yok).
 - Uzunluk hedefleri (lint): başlık 30–60 karakter (piksel genişliği tahmini ile), açıklama 70–155. Türkçe karakterler geniş; piksel tahmini font metrik tablosundan.
 - Mağaza genelinde başlık/açıklama **benzersizliği** denetlenir (hash + normalize karşılaştırma).
 - Sayfalama: `?sayfa=2` sayfaları kendi canonical'ına sahiptir (`rel=prev/next` Google tarafından kullanılmıyor); başlığa " - Sayfa 2" eklenir; 1. sayfa parametresiz canonical (`?sayfa=1` 301 ile temiz adrese gider). Son sayfadan sonrası 404.
@@ -98,6 +99,8 @@ Tenant kurulumda bir desen seti seçer; desen tokenlarla tanımlıdır ve sonrad
 - Toplu içe/dışa aktarma (CSV); geçiş aracı (F14) doğrudan bu tabloya yazar.
 - İsabet sayacı ve son isabet zamanı; 12 ay isabet almayan kurallar için "temizle" önerisi.
 - Store API çözümleme ucu: `GET /store/seo/resolve?path=` → `{ type: "entity"|"redirect"|"gone"|"not_found", ... }`. Storefront middleware her 404 öncesi bunu sorar (cache'li).
+- **404 ve 410 sayfası ilk HTML'de tam** (2026-11-06): `not_found` alan adres için vitrin vekili isteği `/_bulunamadi` sayfasına 404 durumuyla yeniden yazar (410 için `/_kaldirildi` gibi). Sayfa normal çizilir: başlık, metin, arama ve kategori kutuları JS'siz tarayıcıya ve tarayıcıya ilk HTML'de gider. Neden: Next 16, çizilirken `notFound()` atan sayfayı boş hata kabuğu (`<html id="__next_error__">`) olarak gönderir; içerik yalnız istemcide çizilir. Sayfanın kendi bulduğu 404'ler (son sayfadan sonrası, başkasının siparişi) `notFound()` ile kalır: durum ve `noindex` doğru, gövde JS ile gelir (Next sınırı; docs/21 2026-11-06).
+- **Hız sınırı 503'tür, 500 değil** (2026-11-06): backend bir ziyaretçinin okumasını 429 ile geri çevirince vitrin bunu `Retry-After` süresince tutar ve o ziyaretçinin katalog sayfalarına (ana sayfa, listeler, kayıt sayfaları, arama) `503` + aynı `Retry-After` döner. Sepet, ödeme, hesap, token bağlantıları ve rota işleyicileri bunun dışında; formların kendi sınırı ve canlı arama sayılmaz. Sınıra çarpan ilk sayfa çizimi hâlâ 500 olabilir (sayfa kendi durumunu seçemez); vekilin `resolve` çağrısı çarptıysa o istek de 503 olur.
 - **404 günlüğü:** storefront `POST /store/seo/not-found` ile yolu ve referer'ı bildirir (rate limitli, PII'siz). Günlük job toplar; advisor benzer slug / eski slug / geçiş tablosu üzerinden hedef önerir, admin tek tıkla 301 oluşturur.
 
 ## 5. Yapılandırılmış veri (JSON-LD)
@@ -110,7 +113,7 @@ Backend `jsonLd` dizisini üretir; tema değiştiremez (sadece ek blok ekleyebil
 | Ana sayfa | `OnlineStore` (Organization'ın e-ticaret alt tipi; Google en spesifik tipi önerir) — künye (F13.9): ad, logo, adres, telefon, `sameAs` sosyal hesaplar; organizasyon seviyesinde `hasMerchantReturnPolicy` ve `hasShippingService` (ürün seviyesi bunları override eder; öncelik: Merchant Center ayarı > ürün markup > organizasyon markup); `WebSite` (SearchAction **yok**, sitelinks arama kutusu Kasım 2024'te kaldırıldı) |
 | İçerik / blog | `Article`/`BlogPosting` (yazar, tarih, güncelleme tarihi, yayıncı); yazar seçilmişse `Person` (`name`, yazar sayfası `url`, `jobTitle`, `image`, `sameAs`; adr/0060) |
 | Blog yazarı | `ProfilePage` (`mainEntity` `Person`) + `BreadcrumbList` (adr/0060) |
-| Ürün Soru-Cevap (F10.10) | `QAPage` (gerçek kullanıcı soruları). **`FAQPage` kullanılmaz**: Google FAQ rich result'ı 7 Mayıs 2026'da tüm siteler için kaldırdı (doküman Haziran 2026'da silindi); `HowTo` Eylül 2023'ten beri yok. SSS içeriği kullanıcı için sayfada kalabilir, şema yatırımı yapılmaz |
+| Ürün Soru-Cevap (F10.10) | `QAPage` (gerçek kullanıcı soruları). **`FAQPage` kullanılmaz**: Google FAQ rich result'ı 7 Mayıs 2026'da tüm siteler için kaldırdı (doküman Haziran 2026'da silindi); `HowTo` Eylül 2023'ten beri yok. SSS içeriği kullanıcı için sayfada kalabilir, şema yatırımı yapılmaz. Tema düzenleyicinin SSS bölümü de (ana sayfa, ürün, kategori) yalnız sayfada görünür, `FAQPage` basılmaz (adr/0049 Ek 2026-11-06) |
 | Yetişkin ürünler | `hasAdultConsideration` (2026-05, zorunlu; değer `SexualContentConsideration`) — kısıtlı kategori bayrağıyla (F13.4) eşlenir |
 
 Kurallar:
@@ -157,6 +160,7 @@ Kurallar:
 - Dosya adı slug'dan üretilir: `{urun-slug}-{sira}.webp`; orijinal ad meta olarak saklanır.
 - `alt` zorunlu alan; boşsa öneri: `{ürün adı} {varyant/öne çıkan attribute} - {sıra açıklaması}`; lint eksik alt'ı işaretler.
 - Ana görsel ≥ 800×800 (Google Alışveriş uygunluğu), ürün başına ≥ 3 görsel hedefi; WebP + AVIF türevleri, `srcset` boyut seti; LCP görseli lazy değil (F18).
+- Zengin metin (içerik sayfası, blog, landing, tema düzenleyicinin zengin metin bölümü) görselleri medya kütüphanesinin ölçtüğü `width`/`height` ile basılır (CLS; 2026-11-06). Kütüphanenin ölçmediği görsel ölçüsüz kalır.
 - EXIF temizlenir, yeniden kodlanır (güvenlik, `docs/04`). Sıkıştırma kalite hedefi ve boyut üst sınırı tenant ayarı.
 - AI ile üretilmiş/düzenlenmiş ürün görseli yüklenirse IPTC `DigitalSourceType` etiketi (Merchant Center gereği; görsel üretim özelliği eklenirse).
 - Görsel CDN ve cache: değişmeyen URL + içerik hash'li sürümleme.
