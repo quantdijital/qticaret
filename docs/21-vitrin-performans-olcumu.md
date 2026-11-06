@@ -179,3 +179,200 @@ Yapılmadı. Nedenler:
 - `CategoryNav`'ın bağlantıları ilk HTML'de kalmalı (docs/13). "Mobilde hydrate etme" ancak hiç çözülmeyen bir Suspense sınırıyla ya da medya sorgusuna bağlı istemci yüklemesiyle olur; ikisi de hydration uyuşmazlığı ve script'siz yedek riski taşıyor.
 - Çekmece ve menünün tetikleyicileri hydration'da Radix Dialog'u zaten istiyor. Yalnız içeriği tembel yüklemek Radix'i paylaşılan parçadan çıkarmaz; kazanç tahminden küçük kalır.
 - Doğru yol ayrı bir görev: tema sözleşmesine "tembel ada" yuvası (vitrin `next/dynamic` sağlar, tema yalnız bileşeni verir) ve paylaşılan parçanın önce/sonra ölçümü.
+
+## Grafit ölçümü ve düzeltmeler (2026-11-06)
+
+> F18 D12, Grafit teması (`STOREFRONT_THEME=atolye`) ve gerçek katalogla (My L'arte verisi: görselli ürünler, dolu kategoriler, blog). Yukarıdaki 2026-11-03 tablosu `base` temasıyla ve görselsiz demo veriyle alınmıştı. Bu bölüm ondan sonraki durumu anlatır.
+
+### Kurulum
+
+- **Vitrin:** worktree'den `next build` (Next 16.4.2, Turbopack), `next start -p 8100`, `NODE_ENV=production`. Sahibin `:8000`, `:9000` ve `:5173` sunucularına dokunulmadı.
+- **Backend:** sahibin çalışan dev backend'i (`medusa develop`). TTFB dev backend'i içerir. CDN yok, HTTP/1.1, gzip.
+- **Lighthouse 13.6.0** (Node API, puppeteer-core) ve Chrome for Testing 156, headless.
+  - Mobil varsayılan profil (Moto G Power, yavaş 4G simülasyonu, 4x CPU) ve masaüstü preset.
+  - Sayfa ve kip başına 3 koşu, **medyan**.
+  - Kategoriler: Performans / Erişilebilirlik / En iyi uygulamalar / SEO / Agentic Browsing.
+- **Görseller ölçüme dahil:** dev görsel sunucusu `http://localhost:58333`, üretim CSP'si ise `img-src https:` istiyor.
+  - Bu yüzden ölçüm tarayıcısında CSP atlandı (`page.setBypassCSP(true)`). Görseller canlıdaki https CDN'den gelir gibi yüklendi.
+  - BP'de CSP konsol hatası görünmez. Canlıda görseller https olduğu için sonuç aynı olmalı.
+- **Sepet:** her koşudan önce ürün sayfasında "Sepete ekle" (1 satır), ardından HTTP önbelleği boşaltıldı. Sepet çerezi korundu (`disableStorageReset`).
+- **İlk ziyaret:** çerez bildirimi açık. Sepet dışındaki sayfalarda depolama her koşuda sıfırlandı.
+- **Gürültü:** "sonra" turu, sahibin projeyi taşıyıp sunucularını yeniden başlattığı saate denk geldi.
+  - Bazı koşularda TTFB 0,5–1,5 sn çıktı; önce turunda 20–190 ms idi.
+  - TBT de bu yüzden 10–20 ms'den 30–100 ms'ye çıktı. Kod değişikliği ana iş parçacığına iş eklemedi; aşağıdaki bayt tablosu bunu gösteriyor.
+
+### Sonuçlar: önce / sonra
+
+P / A / BP / SEO / Agentic. LCP Lighthouse'un simülasyonu (Lantern), medyan.
+
+| Sayfa | Mobil önce | Mobil sonra | Mobil LCP · CLS · TBT önce → sonra | Masaüstü P önce → sonra · LCP |
+|---|---|---|---|---|
+| `/` | 80 / 97 / 100 / 100 / 100 | 85 / 97 / 100 / 100 / 100 | 5,35 → 4,23 sn · 0 · 12 → 71 ms | 95 → 96 · 1,55 → 1,45 sn |
+| `/kategori/el-yapimi-caki` | 100 / 97 / 100 / 100 / 100 | 100 / 97 / 100 / 100 / 100 | 0,95 → 0,96 sn · 0 · 11 → 37 ms | 99 → 99 · 0,88 → 0,84 sn |
+| `/urun/el-yapimi-balta-caki-…` | 89 / 97 / 100 / 100 / 100 | 90 / 97 / 100 / 100 / 100 | 3,84 → 3,56 sn · 0 · 17 → 58 ms | 100 → 100 · 0,79 → 0,78 sn |
+| `/sepet` (1 satır) | 100 / 97 / 100 / 58* / 100 | 100 / 97 / 100 / 58* / 100 | 0,78 → 0,80 sn · 0 · 6 → 34 ms | 100 → 100 · 0,21 → 0,22 sn |
+| `/kategoriler` | 83 / 97 / 100 / 100 / 100 | 85 / 97 / 100 / 100 / 100 | 4,82 → 4,36 sn · 0 · 11 → 64 ms | 100 → 100 · 0,28 → 0,27 sn |
+| `/blog/elmax-celik-nedir` | 93 / 97 / 100 / 100 / 100 | 94 / 97 / 100 / 100 / 100 | 3,22 → 3,00 sn · 0 · 16 → 96 ms | 100 → 100 · 0,66 → 0,65 sn |
+| `/yorumlar` | 100 / 97 / 100 / 100 / 100 | 100 / 97 / 100 / 100 / 100 | 0,81 → 0,84 sn · 0 · 10 → 32 ms | 100 → 100 · 0,22 → 0,22 sn |
+| `/blog/yazar/my-l-arte` | 86 / 97 / 100 / 100 / 100 | 88 / 97 / 100 / 100 / 100 | 4,17 → 3,95 sn · 0 · 13 → 32 ms | 99 → 99 · 0,85 → 0,84 sn |
+
+\* `/sepet` bilerek `noindex,nofollow` ve meta açıklamasız (docs/13 §7). SEO 58 bundan gelir, hata değil.
+
+- Ana sayfanın mobil "sonra" değeri 2 koşudan. Üçüncü koşuda Lighthouse izi kaydedemedi (`NO_NAVSTART`).
+  - Aynı kodla ikinci bir tur da koşuldu (TTFB 0,5–1,5 sn). Beş koşu: P 80–86, LCP 4,20–4,46 sn.
+- **CLS her sayfada 0.**
+- **Gözlenen LCP** (kısıtlamasız) her sayfada 0,1–0,35 sn. Yalnız TTFB'nin 1,4 sn olduğu ana sayfa koşusunda 1,6 sn.
+  - Mobildeki 3–5 sn'lik değerler Lantern'in kötümser senaryosundan geliyor: LCP'den önce başlayan her baytı yavaş 4G'de sayıyor (yukarıdaki "Mobil puanın 83 ile 100 arasında gidip gelmesi").
+  - Bu değerleri sürükleyen, aşağıdaki türevsiz görseller.
+- **LCP öğeleri (mobil):**
+  - Ana sayfa: hero görseli (AVIF 800w, `fetchpriority=high`, önyüklü).
+  - Ürün: galerinin ilk görseli (eager, high).
+  - Blog yazısı ve yazar sayfası: kapak görseli (eager, high).
+  - `/kategoriler`: bir kategori kartının görseli.
+  - Kategori, `/yorumlar`, `/sepet`: metin (başlık altı satır, yorum, çerez bildirimi).
+  - Lighthouse'un "LCP keşfi" denetimi `/kategoriler` dışında her sayfada temiz. Orada LCP görseli `lazy`; aşağıda "Denenip geri alınan".
+
+**Sayfa başına aktarım (mobil, medyan):**
+
+| | Önce | Sonra |
+|---|---|---|
+| JS | 245–246 KB (10 dosya) | 211–212 KB (9 dosya) |
+| CSS (render'ı engelleyen tek dosya) | 31,0 KB (185 KB ham) | 24,0 KB (131 KB ham) |
+| Kullanılmayan JS (Lighthouse) | 111–113 KB | 94–96 KB |
+| Render'ı engelleme tahmini | 210–270 ms | 20–110 ms |
+| `/sepet` görselleri (1 satır) | 301 KB | 81 KB |
+| Yazı tipleri | 27 KB (Manrope `latin` + Türkçe, önyüklü, `swap`) | aynı |
+
+**INP (laboratuvar; mobil görünüm, 4x CPU, Event Timing, 3 koşu, sonra):**
+
+| Etkileşim | Süre |
+|---|---|
+| Mobil menüyü açma (`/`, kategori sayfası) | 88–128 ms |
+| Üründe adet artırma, sekme değiştirme | 32–40 ms |
+| Ürünü sepete ekleme | 328–360 ms |
+| Çerez bildiriminde "Tümünü kabul et" | 304–392 ms |
+
+- Son ikisi sunucu eylemli form gönderimi. 200 ms bütçesini 4x CPU'da aşıyorlar; sürenin ~%90'ı sunum gecikmesi. Aşağıda "Kalanlar" 2. madde.
+
+### Yapılanlar
+
+1. **Grafit artık `baseTheme`'i bütün olarak almıyor.** [tema]
+   - **Bulgu:** Turbopack bir sayfanın sunucu modül grafiğinin eriştiği her istemci bileşenini o sayfanın istemci parçasına koyuyor. Bu, render edilmeyen bileşenleri de kapsıyor.
+   - `atolyeTheme` `...baseTheme` ile başladığı için base temanın çerçevesi de her sayfaya iniyordu: `CartDrawer`, `CategoryNav`, `CookieDialog`, `MobileMenu`, `SearchForm`, `NewsletterForm` ve Radix Accordion/Checkbox/NavigationMenu. Grafit bunların hiçbirini çizmiyor.
+   - Aynı nedenle `@qticaret/theme-base`'ten alınan dört parça da base temanın tamamını getiriyordu: `AddonEditor`, `GiftRecipient`, `OrderReturns`, `OrderGift`.
+   - **Yapılan:** base pakete `@qticaret/theme-base/borrow` girişi eklendi (`src/borrow.ts`).
+     - Başka temanın ödünç alabileceği beş sayfayı verir: marka, onay, çerez tercihleri, hediye kartı bakiyesi, ödeme bağlantısı.
+     - Ayrıca bir ana sayfa bölümünü ve dört akış parçasını verir.
+     - Grafit bunları tek tek alıyor. `baseTheme`'in API'si değişmedi; base index aynı parçaları yeniden dışa veriyor.
+   - **Kazanç:** temanın paylaşılan istemci parçası 76 → 60 KB gz (288 → 210 KB ham).
+2. **Hata sayfaları sözlüğün tamamını taşımıyor.** [vitrin]
+   - `app/error.tsx` ve `app/global-error.tsx` istemci bileşeni ve her sayfa onları yüklüyor.
+   - İkisi de `@/lib/i18n`'i alıyordu. Böylece `tr.json` (64 KB ham, 19 KB gz, 1069 anahtar) her sayfanın script'ine giriyordu.
+   - Artık `lib/i18n/error.ts` yalnız dört anahtarı taşıyor: `error.title`, `error.body`, `error.retry`, `error.home`.
+   - Birim testi denetler: değerler `tr.json` ile aynı, iki temanın hata sayfası ve `global-error` başka anahtar istemiyor, iki hata sayfası sözlüğü içe aktarmıyor.
+3. **Grafit'in stil dosyası yalnız temanın eriştiği dosyaları tarıyor.** [vitrin] (2026-11-03 listesindeki 5. madde, Grafit için)
+   - `themes/atolye.css` önceden `packages/ui/src` ve `packages/themes/base/src`'nin tamamını `@source` ile tarıyordu.
+   - Artık Grafit klasörünün tamamını, ui'nin kullanılan dört bileşenini ve `hooks`/`lib`'ini, base'in ödünç alınan sayfa ve parçalarını tarıyor.
+   - **Kazanç:** CSS 185 → 131 KB ham, 31,0 → 24,0 KB gz. 548 sınıf düştü; hiçbiri erişilen kaynak dosyalarda geçmiyor (eski ve yeni derlemenin seçicileri karşılaştırılarak doğrulandı). Görünüm aynı.
+   - **Koruma:** `themes/__tests__/atolye-sources.spec.ts` temanın ve vitrinin içe aktarmalarını izler ve ulaşılan her `packages/ui` ile `packages/themes/base` dosyasının bir `@source` satırına girdiğini denetler. Grafit yeni bir ui bileşeni ya da base parçası kullanınca `@source` eklenmezse test kırmızı yanar; sessizce stilsiz kalmaz.
+   - `base` temasının stil dosyası (`themes/base.css`) değişmedi: o tema iki paketin tamamını kullanıyor.
+4. **Sepet, çekmece, ödeme özeti ve sipariş satırları görsel türevlerini kullanıyor.** [vitrin]
+   - Satırın küçük resmi (`line.thumbnail`) ürünün yüklendiği haliyle özgün dosyaydı (100–250 KB), 64–128 px'lik kutuda.
+   - `linePicturesOf` (`lib/views/line-paths.ts`) satırların ürünlerini `productPathsOf` ile aynı istekte sorar: ürünün `media_assets` alanları, dakikalık ortak önbellek.
+   - Küçük resmin adresini medya kaydıyla eşler. Satır böylece AVIF/WebP `srcset`'ini ve ölçülerini alır; kutularda zaten `sizes` vardı.
+   - Bilinmeyen küçük resim eskisi gibi gösterilir. Backend reddederse görsel yine gösterilir.
+   - **Kazanç:** `/sepet`'te tek satırda görsel 301 → 81 KB (satırın görseli 233 → ~14 KB). Ödeme ve sipariş sayfalarında da aynı.
+   - Birim testleri `line-paths.spec.ts`'te.
+5. **Favoriler bağlantısının adı göründüğü gibi.** [tema] Üst bilgideki bağlantının `aria-label`'ı "Favorilerim" idi, görünen yazı "Favoriler" (WCAG 2.5.3, axe `label-content-name-mismatch`). Artık `nav.favorites`. Görünüm aynı.
+
+### Denenip geri alınan
+
+- **`/kategoriler`'de ilk kartı öncelikli yüklemek.** Kart `lazy` olduğu için Lighthouse "LCP keşfi"ni işaretliyor.
+  - İlk karta `priority` verildi. Ancak LCP öğesi ilk kart değil, türevsiz 94 KB'lık bir kategori kapağı (eşit boyutlu kartlarda tarayıcının seçtiği).
+  - Lantern LCP'si 4,4 sn'den 4,7–5,7 sn'ye çıktı. Değişiklik geri alındı.
+  - Doğru düzeltme kapakların türevleri (aşağıda 1. madde). Ondan sonra ilk satır yeniden ölçülmeli.
+
+### Kalanlar ve nedenleri
+
+1. **Türevsiz görseller (en büyük kalem).** [backend]
+   - Kategori kapakları, blog kapakları ve içerik görselleri tek özgün WebP: `srcset` yok.
+   - Ana sayfanın reyon kartları 77–165 KB. `/kategoriler`'de kartlar 94–124 KB, 553 KB tasarruf görülüyor. Yazar sayfasında kapaklar 88–231 KB, 493 KB tasarruf.
+   - Mobildeki 3–5 sn'lik Lantern LCP'sinin ana nedeni bu.
+   - `GET /store/category-images` boyutu ve türevleri "medya kütüphanesi biliyorsa" veriyor. Taşımayla gelen kapakların (`workflows/migration/category-covers.ts`) türevi yok.
+   - İçerik görselleri için de türev ve ölçü gerekli (2026-11-03 listesinde 7. madde).
+   - Türevler gelince tema değişmeden küçük dosyayı seçer: kartlarda `sizes` doğru.
+2. **Sunucu eylemli iki etkileşim 4x CPU'da 300–390 ms.** [tema/vitrin, ayrı görev]
+   - "Sepete ekle" ve çerez bildiriminde "Tümünü kabul et".
+   - Kırılım (Event Timing): girdi gecikmesi ~25 ms, olay işleyicileri 11–15 ms, **sunum gecikmesi ~290–300 ms**.
+   - Yani işleyicinin kendisi hafif. Süre, işleyiciden sonra ve ilk boyamadan önce ana iş parçacığında yapılan işten geliyor: React'in form eylemini başlatırken yaptığı render.
+   - Gerçek cihazda süre kabaca dörtte biri (~80–100 ms), ama bütçe p75 mobil için.
+   - Bekleyen durumun (`useFormStatus`, `aria-busy`) yalnız düğmeyi yeniden çizmesi ve çerez formunun `key` değişiminin bütün formu yeniden kurmaması incelenmeli. Saha verisi (RUM) gelince öncelik ona göre verilmeli.
+3. **Temanın istemci parçası hâlâ her sayfada tek dosya.** [vitrin + tema sözleşmesi]
+   - Grafit'in paylaşılan parçası 210 KB ham: ürün sayfası 48 KB, çerçeve 30 KB, ödeme 16 KB, hesap 17 KB, Radix ~35 KB.
+   - Her rota temanın tüm nesnesini (`theme.ts` → `atolyeTheme`) aldığı için her sayfaya iniyor. Ana sayfada %75'i kullanılmıyor.
+   - Rotaya göre bölmek için sayfaların yalnız kendi tema bileşenini içe aktarması gerekir. Bu tema sözleşmesinin (adr/0046 §7, adr/0057) biçimini değiştirir; ADR'lık ayrı bir görev.
+   - Tahmini kazanç ana sayfada ~25 KB gz. Ürün, kategori ve içerik aynı yakalayıcı rotada (`[...path]`) olduğu için o rotada daha az.
+4. **404 gövdesi ilk HTML'de yok.** [vitrin, ayrı görev] **(SEO)**
+   - Durum kodu doğru: 404 ve `noindex`. Ancak `notFound()` ile biten her sayfanın HTML'i Next'in boş hata kabuğu (`<html id="__next_error__">`, `lang` yok, `h1` yok).
+   - Örnekler: `/bu-sayfa-yok`, `/urun/olmayan`, `/magaza?sayfa=999`. Sayfa yalnız JS ile istemcide çiziliyor.
+   - RSC yükünde `NEXT_HTTP_ERROR_FALLBACK;404` hatası satır olarak var, yani SSR sınırı yakalamıyor.
+   - `htmlLimitedBots` kaldırılarak denendi, sonuç aynı. Sahibin dev sunucusunda da aynı. Bu oturumun değişikliklerinden önce de vardı.
+   - docs/03 F18 "Non-200 sayfalarda JS render'a güvenilmez" der. 404 sayfasındaki "yol göster" kategorileri JS'siz tarayıcıya ulaşmıyor.
+5. **Kanonik ve JSON-LD dev'de ölçülemedi.** [ortam]
+   - `seo.canonical_host` dev'de boş. Backend kanonik yoksa `jsonLd`'yi de boş döner (`lib/seo/home.ts`; ürün, liste, içerik de öyle). `/sitemap.xml` 404, `robots.txt`'de `Sitemap:` yok.
+   - Ana sayfadaki tek blok vitrinin kendi `FAQPage`'i.
+   - Bloğun biçimi backend birim testleriyle doğrulandı (`src/lib/seo`, 27 takım, 352 test yeşil).
+   - `/seo-audit`, `/seo-technical`, `/seo-schema` kabulü (docs/03 F18) kanonik alan adı olan ortamda (F16 staging) koşulmalı. Dev'de alan adı ayarlamak sahibin verisini değiştireceği için yapılmadı.
+6. **Ana sayfada `FAQPage`.** [karar] Vitrin SSS bölümünü `FAQPage` olarak basıyor (`lib/seo/faq.ts`, adr/0049 Ek 2026-11-03). docs/13 §5 ise "`FAQPage` kullanılmaz" diyor: Google'ın SSS zengin sonucu Mayıs 2026'da kalktı. Zararsız ama iki belge çelişiyor; sahip kararı.
+7. **Ürün başlığında mağaza adı iki kez.** [backend/veri]
+   - `El Yapımı Balta Çakı | 21 cm … Kabza | My L'arte | My L'arte` (99 karakter). Ürünün `seo_title`'ı zaten "| My L'arte" ile bitiyor, şablon bir kez daha ekliyor.
+   - Şablon, adla biten başlığa eklememeli ya da advisor uyarmalı (docs/14).
+   - Yazar sayfası `My L'arte | My L'arte`: yazar adı mağaza adıyla aynı (veri).
+8. **İçerik sayfasında ölçüsüz görseller.** [backend/içerik] `/hakkimizda` gövdesinde 3 görselin `width`/`height`'ı yok. Ölçülen CLS 0, ama yavaş bağlantıda kayma riski var. Zengin metin görselleri medya kaydından ölçü almalı.
+9. **Mobil alt çubukta "Ana sayfa" hedefi** (axe `target-size`, A 97).
+   - İlk ziyarette çerez kartı alt çubuğun üstüne biniyor ve "Ana sayfa"nın görünen alanı 12 px kalıyor. Bildirim kapanınca sorun yok.
+   - Kartın yerini değiştirmek tasarım değişikliği; design.md kilitli olduğu için yapılmadı.
+   - Alt çubuktaki sepetin adı "Sepet, 1 ürün", görünen yazı "1 Sepet" (`label-content-name-mismatch`, deneysel kural, puana girmiyor). Sayacın yeri değişmeden düzeltilemiyor.
+10. **Hız sınırına takılan istek 500 dönüyor.** [vitrin/backend]
+    - İç bağlantı taramasında kısa sürede ~300 istek atıldı. Backend'in IP başına sınırı (`429`) doldu ve vitrin bu sayfaları 500 ile verdi: facet ve arama bağlantıları.
+    - Facet adresleri `robots.txt`'de kapalı. Yine de hızlı tarayan bir bot 5xx görür; `503` + `Retry-After` daha doğru.
+    - Canlıda vitrin ziyaretçi adresini imzaladığı için sınır bot başına işler.
+11. **Küçük kalemler:**
+    - Next çekirdeğinin eski tarayıcı polyfill'leri (14 KB).
+    - `visa.png` 7 KB (6 KB tasarruf).
+    - `/yorumlar`'daki yorum fotoğrafları en küçük türev 400w olduğu için küçük kutuda ~20 KB fazla.
+    - HTML 300–570 KB ham, 33–55 KB gz; büyük kısmı RSC yükü. `/magaza` en büyüğü.
+
+### Teknik SEO taraması (2026-11-06, JS kapalı ilk HTML)
+
+13 sayfa tarandı: ana sayfa, kategori, ürün, sepet, kategoriler, blog, yazı, yorumlar, yazar, mağaza, arama, 404, içerik.
+
+- **Başlık ve açıklama:** her dizinlenen sayfada var, ilk HTML'de. Açıklamalar 74–149 karakter. İstisna ürün başlığı (99 karakter, yukarıda 7. madde).
+- **Robots:**
+  - Dizinlenen sayfalar `index,follow`.
+  - `/sepet` `noindex,nofollow`, `/arama` `noindex,follow`, 404 `noindex`.
+  - `robots.txt` vitrinden geliyor: sepet, ödeme, hesap ve arama kapalı, her facet parametresi `?`/`&` desenleriyle kapalı. Kanonik alan adı yok, bu yüzden `Sitemap:` satırı da yok.
+- **Kanonik, `og:url`, JSON-LD:** dev'de yok (yukarıda 5. madde). `hreflang` yok; beklenen durum (F19).
+- **URL normalizasyonu:**
+  - `/URUN/X` → 301 `/urun/x`.
+  - `/kategoriler/` → 301 `/kategoriler`.
+  - `/blog//elmax…` → 308 tek eğik çizgiye (Next'in kendi normalizasyonu; docs/13 301 diyor, etki aynı).
+- **Başlık yapısı:** her sayfada tek `h1`, düzey atlaması yok. 404'te `h1` ilk HTML'de yok (4. madde).
+- **Görseller:** `alt`'sız görsel yok. Boş `alt`'lar süs: adı yanında yazan kart ve satır görselleri. Ölçüsüz görsel yalnız içerik gövdesinde (8. madde).
+- **İç bağlantılar:** üst menü, alt bilgi, reyonlar, ürün ve blog bağlantılarının hepsi 200.
+  - `/hesap` ve `/hesap/favoriler` girişe 307 (oturumsuz; beklenen).
+  - Facet ve arama bağlantılarındaki 500'ler hız sınırından (10. madde). Tek tek açıldığında 200.
+- **Lighthouse SEO ve Agentic Browsing:** dizinlenen her sayfada 100 / 100. `/sepet` SEO 58 (bilerek `noindex`).
+
+### Tekrar üretme
+
+1. **Derle:** worktree'de `STOREFRONT_THEME=atolye pnpm exec next build`.
+2. **Başlat:** `next start -p 8100`, ortam değişkenleriyle:
+   - `STOREFRONT_PUBLISHABLE_KEY`: dev backend `GET /dev/storefront-key`.
+   - `STOREFRONT_TRUSTED_PROXY_HOPS=0`.
+   - Diğerleri ana checkout'un `apps/storefront/.env.local`'ı; okumadan symlink.
+3. **Ölç:** Lighthouse Node API, `lighthouse(url, flags, config, page)`.
+   - `page` puppeteer sayfası, `setBypassCSP(true)`.
+   - Masaüstünde `core/config/desktop-config.js`.
+   - Sepette önce ürün sayfasından ekleme ve `Network.clearBrowserCache`, `disableStorageReset: true`.
+4. **Arşiv:** ham JSON raporları oturumun geçici klasöründeydi.
