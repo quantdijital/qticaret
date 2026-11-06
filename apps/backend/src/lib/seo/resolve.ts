@@ -1,8 +1,8 @@
-import { formatLira } from "../money/format"
 import { articleJsonLd, breadcrumbJsonLd, listingJsonLd, productJsonLd } from "./jsonld"
 import type { ArticleFacts, JsonLd, ProductFacts } from "./jsonld"
 import { listingDescription } from "./listing-description"
 import { renderTemplate } from "./template"
+import { DESCRIPTION_EXCERPT, excerpt } from "./text"
 
 /**
  * The `seo` object the Store API gives a page (docs/13 §1, adr/0015): the
@@ -100,67 +100,19 @@ export interface SeoShop {
   descriptionTemplates: { product: string }
 }
 
-// docs/13 §3: what a result shows of a description before cutting it
-export const DESCRIPTION_EXCERPT = 155
-// The `kısa_açıklama` token: a sentence or two of the description
-export const SHORT_EXCERPT = 140
+export {
+  DESCRIPTION_EXCERPT,
+  SHORT_EXCERPT,
+  excerpt,
+  plainText,
+  priceSentence,
+  shippingSentence,
+} from "./text"
 
 const ROBOTS: Record<NonNullable<SeoOverrides["robots_override"]>, RobotsValue> = {
   index_follow: "index,follow",
   noindex_follow: "noindex,follow",
   noindex_nofollow: "noindex,nofollow",
-}
-
-// A tag: `<` then a letter (or `/` and a letter), up to its `>`. "3 < 5" is text; no
-// `<` inside, so many `<` without a `>` cost one pass, not one pass each
-const TAG = /<\/?[a-z][^<>]*>/gi
-
-/** Text as one line: tags dropped, spaces collapsed. Descriptions may hold simple HTML. */
-export function plainText(text: string | null | undefined): string {
-  return (text ?? "")
-    .replace(TAG, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-}
-
-/** The text cut at a word before `max` characters, without a dangling comma or joiner. */
-export function excerpt(text: string, max: number): string {
-  const clean = plainText(text)
-  if (clean.length <= max) {
-    return clean
-  }
-  const cut = clean.slice(0, max)
-  const space = cut.lastIndexOf(" ")
-  return (space > max / 2 ? cut.slice(0, space) : cut).replace(/[\s,;:–—-]+$/u, "")
-}
-
-/**
- * The `fiyat_cümlesi` token (docs/13 §3): "899,00 TL." for one price,
- * "899,00 TL'den başlayan fiyatlarla." for a range; nothing without one.
- */
-export function priceSentence(amounts: readonly number[]): string {
-  const prices = amounts.filter((amount) => Number.isFinite(amount) && amount > 0)
-  if (prices.length === 0) {
-    return ""
-  }
-  const lowest = Math.min(...prices)
-  return lowest === Math.max(...prices)
-    ? `${formatLira(lowest)}.`
-    : `${formatLira(lowest)}'den başlayan fiyatlarla.`
-}
-
-/**
- * The `kargo_cümlesi` token (docs/13 §3, F7.8): when an order leaves, in
- * working days ("1–2 iş gününde kargoda."); "Aynı gün kargoda." for none.
- */
-export function shippingSentence(handlingMin: number, handlingMax: number): string {
-  if (handlingMax <= 0) {
-    return "Aynı gün kargoda."
-  }
-  return handlingMin === handlingMax || handlingMin <= 0
-    ? `${String(handlingMax)} iş gününde kargoda.`
-    : `${String(handlingMin)}–${String(handlingMax)} iş gününde kargoda.`
 }
 
 function absolute(host: string | null, path: string): string | null {

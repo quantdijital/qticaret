@@ -1,4 +1,4 @@
-import { SHORT_EXCERPT, excerpt, plainText } from "./resolve"
+import { SHORT_EXCERPT, excerpt, plainText } from "./text"
 
 /**
  * A product's texts where its short description (adr/0055 Ek 2026-11-06)

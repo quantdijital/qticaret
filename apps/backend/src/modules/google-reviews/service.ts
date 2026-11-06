@@ -6,9 +6,10 @@ import {
   MedusaContext,
   MedusaService,
 } from "@medusajs/framework/utils"
-import type { GoogleReviewInput } from "../../lib/google/business-review"
 import { GoogleReview } from "./models/google-review"
 import { GoogleReviewLocation } from "./models/google-review-location"
+import { newestFilters, replyTargetOf, visibilityPatch } from "./rows"
+import { REVIEW_FIELDS, diffReviews } from "./sync"
 import type {
   LocationInput,
   LocationRow,
@@ -23,39 +24,6 @@ import type {
 } from "./types"
 
 export type * from "./types"
-
-const REVIEW_FIELDS = [
-  "id",
-  "review_id",
-  "reviewer_name",
-  "reviewer_photo_url",
-  "rating",
-  "comment",
-  "written_at",
-  "edited_at",
-  "reply",
-  "replied_at",
-  "reply_state",
-  "hidden",
-  "hidden_reason",
-  "hidden_by",
-  "hidden_at",
-] as const
-
-const time = (value: Date | string | null): number | null =>
-  value === null ? null : new Date(value).getTime()
-
-/** Whether Google's review differs from the one kept, the shop's `hidden` aside. */
-const changed = (kept: ReviewRow, now: GoogleReviewInput): boolean =>
-  kept.reviewer_name !== now.reviewer_name ||
-  kept.reviewer_photo_url !== now.reviewer_photo_url ||
-  kept.rating !== now.rating ||
-  kept.comment !== now.comment ||
-  kept.reply !== now.reply ||
-  kept.reply_state !== now.reply_state ||
-  time(kept.written_at) !== time(now.written_at) ||
-  time(kept.edited_at) !== time(now.edited_at) ||
-  time(kept.replied_at) !== time(now.replied_at)
 
 /** The shop's Google reviews (adr/0058): the location picked and its reviews as Google gives them. */
 class GoogleReviewsModuleService extends MedusaService({ GoogleReviewLocation, GoogleReview }) {
@@ -126,24 +94,7 @@ class GoogleReviewsModuleService extends MedusaService({ GoogleReviewLocation, G
         )) as ReviewRow[]
       ).map((row) => [row.review_id, row])
     )
-    const seen = new Set<string>()
-    const added: GoogleReviewInput[] = []
-    const updated: (GoogleReviewInput & { id: string })[] = []
-    for (const review of input.reviews) {
-      if (seen.has(review.review_id)) {
-        continue
-      }
-      seen.add(review.review_id)
-      const row = kept.get(review.review_id)
-      if (!row) {
-        added.push(review)
-      } else if (changed(row, review)) {
-        updated.push({ ...review, id: row.id })
-      }
-    }
-    const gone = input.complete
-      ? [...kept.values()].filter((row) => !seen.has(row.review_id)).map((row) => row.id)
-      : []
+    const { added, updated, gone } = diffReviews(kept, input)
     if (added.length > 0) {
       await this.createGoogleReviews(added, sharedContext)
     }
@@ -225,18 +176,7 @@ class GoogleReviewsModuleService extends MedusaService({ GoogleReviewLocation, G
     if (!row) {
       return null
     }
-    await this.updateGoogleReviews(
-      visibility.hidden
-        ? {
-            id,
-            hidden: true,
-            hidden_reason: visibility.reason,
-            hidden_by: visibility.by,
-            hidden_at: new Date(),
-          }
-        : { id, hidden: false, hidden_reason: null, hidden_by: null, hidden_at: null },
-      sharedContext
-    )
+    await this.updateGoogleReviews(visibilityPatch(id, visibility), sharedContext)
     const { hidden, hidden_reason, hidden_by, hidden_at } = row
     return { hidden, hidden_reason, hidden_by, hidden_at }
   }
@@ -272,15 +212,7 @@ class GoogleReviewsModuleService extends MedusaService({ GoogleReviewLocation, G
     if (!row || !location) {
       return null
     }
-    return {
-      id: row.id,
-      account: location.account,
-      location: location.location,
-      review_id: row.review_id,
-      reply: row.reply,
-      replied_at: row.replied_at,
-      reply_state: row.reply_state,
-    }
+    return replyTargetOf(row, location)
   }
 
   /**
@@ -316,12 +248,7 @@ class GoogleReviewsModuleService extends MedusaService({ GoogleReviewLocation, G
       return { reviews: [], count: 0 }
     }
     const [rows, count] = await this.listAndCountGoogleReviews(
-      {
-        ...(options.shownOnly ? { hidden: false } : {}),
-        ...(options.minRating === undefined
-          ? {}
-          : { rating: { $gte: options.minRating }, comment: { $ne: null } }),
-      },
+      newestFilters(options),
       {
         select: [...REVIEW_FIELDS],
         order: { written_at: "DESC", id: "ASC" },

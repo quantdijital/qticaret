@@ -1,4 +1,4 @@
-import type { JsonLd } from "./jsonld"
+import type { JsonLd } from "./jsonld-base"
 
 /** Working days to leave and to arrive (Settings > Shipping, F7.8). */
 export interface DeliveryFacts {
