@@ -14,8 +14,9 @@ loadEnv(process.env["NODE_ENV"] ?? "development", process.cwd())
 
 const env = parseEnv()
 const auth = customerAuthProviders(env)
-// Redis keys of this tenant, a test run apart from dev (lib/redis/namespace.ts)
-const namespace = tenantNamespace(env.DATABASE_URL, env.NODE_ENV)
+// Redis keys of this tenant; a test file apart from dev and from every other
+// test file, also one of another run at the same time (lib/redis/namespace.ts)
+const namespace = tenantNamespace(env.DATABASE_URL, env.NODE_ENV, process.env["QT_TEST_RUN"])
 // Tests keep files local (CI has no object store); elsewhere S3 when set,
 // which the env schema requires once deployed (adr/0014)
 const s3 = env.NODE_ENV === "test" ? null : s3Settings(env)

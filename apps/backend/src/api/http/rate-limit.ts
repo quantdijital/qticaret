@@ -35,8 +35,7 @@ export function rateLimitPrefix(
   nodeEnv?: string,
   testRun: string | undefined = process.env["QT_TEST_RUN"]
 ): string {
-  const run = nodeEnv === "test" && testRun ? `/${testRun}` : ""
-  return `qt:rl:${tenantNamespace(databaseUrl, nodeEnv)}${run}:`
+  return `qt:rl:${tenantNamespace(databaseUrl, nodeEnv, testRun)}:`
 }
 
 /** The tenant's shared counters (Redis, or process memory while it is down): for SMS quotas too. */
