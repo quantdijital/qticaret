@@ -1,10 +1,11 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { docStats } from "../../../lib/content"
-import type { CardTarget, CardTargets, ContentDoc } from "../../../lib/content"
+import type { CardTarget, CardTargets, ContentDoc, ImageSize } from "../../../lib/content"
 import { URL_REGISTRY_MODULE } from "../../../modules/url-registry"
 import type UrlRegistryModuleService from "../../../modules/url-registry/service"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../../../workflows/catalog/entity-paths"
+import { coversOf } from "./covers"
 
 const LIVE = {
   product: { entity: "product", name: "title", filters: { status: "published" } },
@@ -53,15 +54,37 @@ async function targetsOf(
   return targets
 }
 
-/** The live records a document's cards show, at their current paths (F3.16). */
+/** The library's sizes of a document's pictures, by address; one not measured is left out. */
+async function imageSizesOf(
+  container: MedusaContainer,
+  srcs: readonly string[]
+): Promise<Map<string, ImageSize>> {
+  const sizes = new Map<string, ImageSize>()
+  for (const [url, cover] of await coversOf(container, srcs)) {
+    const { image_width: width, image_height: height } = cover
+    if (width && height && width > 0 && height > 0) {
+      sizes.set(url, { width, height })
+    }
+  }
+  return sizes
+}
+
+/**
+ * The live records a document's cards show, at their current paths (F3.16),
+ * and its pictures' sizes from the media library (docs/21 2026-11-06, 8).
+ */
 export async function cardTargets(
   container: MedusaContainer,
   doc: ContentDoc
 ): Promise<CardTargets> {
-  const { product, category } = docStats(doc).cards
-  const [products, categories] = await Promise.all([
-    targetsOf(container, "product", [...new Set(product)]),
-    targetsOf(container, "category", [...new Set(category)]),
+  const { cards, images } = docStats(doc)
+  const [products, categories, sizes] = await Promise.all([
+    targetsOf(container, "product", [...new Set(cards.product)]),
+    targetsOf(container, "category", [...new Set(cards.category)]),
+    imageSizesOf(
+      container,
+      images.map((image) => image.src)
+    ),
   ])
-  return { product: products, category: categories }
+  return { product: products, category: categories, images: sizes }
 }

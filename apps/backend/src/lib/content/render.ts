@@ -6,10 +6,22 @@ export interface CardTarget {
   path: string
 }
 
+/** A library image's measured size in pixels (its media record). */
+export interface ImageSize {
+  width: number
+  height: number
+}
+
 /** The cards' records, by id; one missing (unpublished, deleted) leaves its card out. */
 export interface CardTargets {
   product: ReadonlyMap<string, CardTarget>
   category: ReadonlyMap<string, CardTarget>
+  /**
+   * The pictures' sizes by address, from the media library: printed as
+   * `width`/`height`, so the page keeps their room before they load (CLS,
+   * docs/21 2026-11-06, 8). One the library has not measured goes without.
+   */
+  images?: ReadonlyMap<string, ImageSize>
 }
 
 export const NO_CARDS: CardTargets = { product: new Map(), category: new Map() }
@@ -123,8 +135,11 @@ function block(node: Block, cards: CardTargets): string {
       return `<table><tbody>${node.content
         .map((row) => `<tr>${row.content.map(cell).join("")}</tr>`)
         .join("")}</tbody></table>`
-    case "image":
-      return `<figure><img src="${escapeHtml(node.attrs.src)}" alt="${escapeHtml(node.attrs.alt ?? "")}" loading="lazy" decoding="async"></figure>`
+    case "image": {
+      const size = cards.images?.get(node.attrs.src)
+      const measured = size ? ` width="${String(size.width)}" height="${String(size.height)}"` : ""
+      return `<figure><img src="${escapeHtml(node.attrs.src)}" alt="${escapeHtml(node.attrs.alt ?? "")}"${measured} loading="lazy" decoding="async"></figure>`
+    }
     case "productCard":
       return card("product", node.attrs.id, cards)
     case "categoryCard":

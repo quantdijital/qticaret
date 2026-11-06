@@ -1,6 +1,6 @@
 export { DOC_LIMITS, EMPTY_DOC, contentDoc, isSafeHref } from "./doc"
 export type { Block, ContentDoc, Inline, Mark } from "./doc"
 export { NO_CARDS, escapeHtml, renderDoc } from "./render"
-export type { CardTarget, CardTargets } from "./render"
+export type { CardTarget, CardTargets, ImageSize } from "./render"
 export { countWords, docStats, summaryOf } from "./stats"
 export type { DocStats } from "./stats"

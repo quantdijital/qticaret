@@ -183,7 +183,8 @@ medusaIntegrationTestRunner({
         `/store/content/${id}`
       )
       expect(data.entry.html).toContain("<h2>Seramik mi?</h2>")
-      expect(data.entry.html).toContain(`<img src="${COVER}" alt="Kupa"`)
+      // A library picture in the body keeps its room before it loads (docs/21 2026-11-06, 8)
+      expect(data.entry.html).toContain(`<img src="${COVER}" alt="Kupa" width="1600" height="900"`)
       expect(data.entry.html).toContain('<a href="/urun/kupa-karti">kupa-karti</a>')
       const list = await storeGet<{ entries: { id: string }[] }>("/store/content?kind=post")
       expect(list.data.entries.map((entry) => entry.id)).toEqual([id])

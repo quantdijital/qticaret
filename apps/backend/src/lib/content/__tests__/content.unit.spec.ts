@@ -104,6 +104,26 @@ describe("rendering", () => {
     )
   })
 
+  it("gives a library picture its measured size, one not measured none (CLS)", () => {
+    const html = renderDoc(
+      checked(
+        doc(
+          { type: "image", attrs: { src: "https://cdn.example.com/a.webp", alt: "Atölye" } },
+          { type: "image", attrs: { src: "https://cdn.example.com/b.webp", alt: "" } }
+        )
+      ),
+      {
+        product: new Map(),
+        category: new Map(),
+        images: new Map([["https://cdn.example.com/a.webp", { width: 1600, height: 900 }]]),
+      }
+    )
+    expect(html).toBe(
+      '<figure><img src="https://cdn.example.com/a.webp" alt="Atölye" width="1600" height="900" loading="lazy" decoding="async"></figure>' +
+        '<figure><img src="https://cdn.example.com/b.webp" alt="" loading="lazy" decoding="async"></figure>'
+    )
+  })
+
   it("builds lists, tables and quotes, and skips empty paragraphs", () => {
     const html = renderDoc(
       checked(
