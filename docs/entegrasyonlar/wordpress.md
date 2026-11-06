@@ -28,6 +28,7 @@ WordPress sitesinin kendi dışa aktarma dosyası (WXR) bir kez okunur: ürün k
 | `product_cat` sırası | `rank_math_primary_product_cat` (ya da Yoast'ınki) birinci, sonra dosyadaki sıra |
 | `rank_math_title`, `rank_math_description`, `rank_math_focus_keyword` (ve Yoast karşılıkları) | SEO başlığı, açıklaması, odak kelimesi (listenin ilki). Değişkenler: bkz. ADR Ek madde 5 |
 | `_thumbnail_id`, `_product_image_gallery`, varyasyon görselleri | Ürün görselleri, bu sırayla; alt metin `_wp_attachment_image_alt` |
+| `product_cat` terim alanı `thumbnail_id` | Kategorinin kendi görseli (ADR-0042 Ek 2026-11-06): ek dosyanın `wp:attachment_url`'i, kategori görseli iş akışıyla (panelin "Kategori görseli" kartı). Aynı dosya taşımada bir ürün için indirildiyse (adres, eski dosya yolu ya da kökü) o görsel kullanılır; değilse eski siteden yalnız HTTPS ile indirilir. Alt metin `_wp_attachment_image_alt`, yoksa ek dosyanın başlığı (dosya adından ibaret değilse), yoksa kategori adı. Görseli olan kategoriye dokunulmaz. Eski dosya adresi 301 için `migration_file`'a yazılır. Ortam kütüphanesinde olmayan görsel Notlar'da (`migration.wordpress_category_image_missing`); taşıma durmaz |
 | `_product_attributes` (`is_variation=1`) | Seçenek (en çok 3); değerler: genel özellikte terim adları, ürünün kendi özelliğinde `|` ile ayrılmış değerler |
 | `_product_attributes` (diğerleri, açıklayıcı) | Mağazanın özellik şablonunda eşleşen alan varsa ürüne yazılır (aşağıda "Açıklayıcı özellikler"); yoksa raporda özellik başına değer listesiyle |
 | `product_variation` | Varyant: `attribute_*` → seçenek değerleri, `_sku`, fiyat, stok, ağırlık. Kapalı (özel), fiyatsız ve ana ürünü olmayan varyasyon taşınmaz |
@@ -100,3 +101,11 @@ Dışa aktarma dosyası şunları taşımaz; ileride WooCommerce REST API ile "B
   ```
 
   Çıktı: tür başına sayılar (kategori ve blog kategorisinde `seo_own`/`seo_default`, `attribute` satırı), okunan adres tabanları, kaynağın notlarının nedenlerine göre sayısı, katalog içe aktarmasının ürün satırları, özellikler. Kişi verisi yazmaz.
+
+- Kategori görsellerinin sonradan doldurulması (görseller okunmadan önce taşınmış mağaza; önce kuru, sonra `apply`):
+
+  ```sh
+  pnpm --filter @qticaret/backend category-covers:backfill <dosya.xml> [apply]
+  ```
+
+  Çıktı: `found` (dışa aktarmada görseli olan kategori), `set` (eklenen; kuru çalıştırmada eklenecek), `already_set` (görseli zaten olan, dokunulmadı), `reused_asset` (taşınmış dosyası kullanılan), `uploaded` (eski siteden indirilen), `failed` (ortam kütüphanesinde yok, indirilemedi ya da kategorisi bu mağazada yok; her biri `FAILED` satırıyla). İkinci çalıştırma 0 ekler.
