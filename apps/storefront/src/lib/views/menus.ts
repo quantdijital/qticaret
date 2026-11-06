@@ -1,5 +1,11 @@
 import type { StoreImage, StoreMenu, StoreMenuLink } from "@qticaret/types"
-import type { FooterGroupView, LinkView, NavCategoryView, Translate } from "@qticaret/ui"
+import type {
+  CategoryCardView,
+  FooterGroupView,
+  LinkView,
+  NavCategoryView,
+  Translate,
+} from "@qticaret/ui"
 import { categoryCard } from "./card-extras"
 import { isLegalKind, legalPath } from "./legal"
 
@@ -47,8 +53,8 @@ const menuAt = (menus: readonly StoreMenu[], location: StoreMenu["location"]) =>
 
 /**
  * The header's menu with its panels; null when the shop made none (the
- * category tree shows). A link to a category carries its picture when it
- * has one (adr/0046 Ek 2026-11-04).
+ * category tree shows). A link to a category, at the top or below it,
+ * carries its picture when it has one (adr/0046 Ek 2026-11-04).
  */
 export function mainMenu(
   menus: readonly StoreMenu[],
@@ -59,11 +65,14 @@ export function mainMenu(
   if (!main || main.items.length === 0) {
     return null
   }
-  return main.items.flatMap((item) => {
-    const view = menuLink(item, t)
-    const picture = item.kind === "category" && item.target ? pictures.get(item.target) : null
-    return view ? [{ ...categoryCard(view, picture), children: menuLinks(item.children, t) }] : []
-  })
+  const card = (link: StoreMenuLink): CategoryCardView[] => {
+    const view = menuLink(link, t)
+    const picture = link.kind === "category" && link.target ? pictures.get(link.target) : null
+    return view ? [categoryCard(view, picture)] : []
+  }
+  return main.items.flatMap((item) =>
+    card(item).map((view) => ({ ...view, children: item.children.flatMap(card) }))
+  )
 }
 
 /** The small links above the header. */

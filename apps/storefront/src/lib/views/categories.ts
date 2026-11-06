@@ -1,4 +1,4 @@
-import type { CategoryTreeView, LinkView, NavCategoryView } from "@qticaret/ui"
+import type { CategoryCardView, CategoryTreeView, NavCategoryView } from "@qticaret/ui"
 import type { StoreCategory, StoreImage } from "@qticaret/types"
 import { categoryCard } from "./card-extras"
 
@@ -29,7 +29,7 @@ type Pictures = ReadonlyMap<string, StoreImage>
 
 const NO_PICTURES: Pictures = new Map()
 
-/** The menu: top categories (with their pictures) and their children, those with a live path only. */
+/** The menu: top categories and their children, with their pictures, those with a live path only. */
 export function navigation(
   categories: readonly StoreCategory[],
   paths: Record<string, string>,
@@ -40,9 +40,11 @@ export function navigation(
     if (!path) {
       return []
     }
-    const children = childrenOf(categories, top.id).flatMap((child): LinkView[] => {
+    const children = childrenOf(categories, top.id).flatMap((child): CategoryCardView[] => {
       const childPath = paths[child.id]
-      return childPath ? [{ label: child.name, path: childPath }] : []
+      return childPath
+        ? [categoryCard({ label: child.name, path: childPath }, pictures.get(child.id))]
+        : []
     })
     return [{ ...categoryCard({ label: top.name, path }, pictures.get(top.id)), children }]
   })

@@ -50,9 +50,12 @@ export interface LinkView {
   path: string
 }
 
-/** A mega menu entry: its picture when the category has one (adr/0046 Ek 2026-11-04). */
+/**
+ * A mega menu entry: its picture when the category has one (adr/0046 Ek
+ * 2026-11-04); its children too carry one, for the phone drawer's rows.
+ */
 export interface NavCategoryView extends CategoryCardView {
-  children: LinkView[]
+  children: CategoryCardView[]
 }
 
 /** A promise in the trust strip (D3): an icon name, a title and a line. */

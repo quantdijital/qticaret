@@ -1,6 +1,6 @@
 import "server-only"
 import type { StoreCategory, StoreProduct } from "@qticaret/types"
-import type { ImageView, NavCategoryView } from "@qticaret/ui"
+import type { CategoryCardView, ImageView, NavCategoryView } from "@qticaret/ui"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { storePublicGet } from "@/lib/store-api/server"
 import { subtreeIds } from "./categories"
@@ -75,10 +75,11 @@ export async function newestPhoto(categoryIds: readonly string[]): Promise<Image
 }
 
 /**
- * The menu's top entries, each without the shop's own picture given its
+ * The menu's entries, each without the shop's own picture given its
  * category's newest product photo (adr/0046 Ek 2026-11-04: the mega
- * panel's picture, the drawer's rows). An entry that is not a category's
- * page keeps none.
+ * panel's picture, the drawer's rows): the top ones and their children
+ * in one queue, `PHOTO_REQUESTS` at a time, each answer kept a minute for
+ * every visitor. An entry that is not a category's page keeps none.
  */
 export async function withNavPictures(
   menu: readonly NavCategoryView[],
@@ -86,12 +87,21 @@ export async function withNavPictures(
   paths: Readonly<Record<string, string>>
 ): Promise<NavCategoryView[]> {
   const idByPath = new Map(Object.entries(paths).map(([id, path]) => [path, id]))
-  return mapLimited(menu, PHOTO_REQUESTS, async (entry) => {
+  const pictured = async (entry: CategoryCardView): Promise<CategoryCardView> => {
     const id = entry.image ? undefined : idByPath.get(entry.path)
     if (!id) {
       return entry
     }
     const photo = await newestPhoto(subtreeIds(categories, id))
     return photo ? { ...entry, image: photo } : entry
+  }
+  // Each top entry, then its children, flat: one limit for all of them
+  const flat = menu.flatMap((entry) => [entry, ...entry.children])
+  const done = await mapLimited(flat, PHOTO_REQUESTS, pictured)
+  let at = 0
+  return menu.map((entry) => {
+    const top = done[at++] ?? entry
+    const children = entry.children.map((child) => done[at++] ?? child)
+    return { ...top, children }
   })
 }

@@ -1,9 +1,9 @@
 "use client"
 
-import { ChevronDown, Menu, Phone } from "lucide-react"
+import { ArrowRight, ChevronDown, Menu, Phone } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
-import type { ContactView, LinkView, NavCategoryView } from "@qticaret/ui"
+import type { CategoryCardView, ContactView, LinkView, NavCategoryView } from "@qticaret/ui"
 import { WhatsAppGlyph } from "../parts/WhatsAppGlyph"
 import { OPEN_MENU_EVENT } from "./events"
 import { Sheet } from "./Sheet"
@@ -19,17 +19,20 @@ export interface MenuSheetWords {
 
 const ROW =
   "flex min-h-14 w-full items-center gap-3 rounded-media px-2 text-md font-semibold hover:bg-paper-2"
+// A child: 48 px row, its 36 px picture under the parent's name (8 + 40 + 12 px in)
 const SUB =
-  "flex min-h-11 items-center rounded-inner px-4 text-text-2 hover:bg-paper-2 hover:text-text"
+  "flex min-h-12 items-center gap-3 rounded-media px-2 py-1 leading-snug text-text-2 hover:bg-paper-2 hover:text-text active:bg-paper-3"
 
-/** A row's picture, 40 px square; the name beside it says what it is. */
-function Thumb({ category }: { category: NavCategoryView }) {
+/** A row's picture as a small rounded square; the name beside it says what it is. */
+function Thumb({ category, small = false }: { category: CategoryCardView; small?: boolean }) {
   return (
-    <span className="block size-10 shrink-0 overflow-hidden rounded-inner bg-paper-3">
+    <span
+      className={`block shrink-0 overflow-hidden rounded-inner bg-paper-3 ${small ? "size-9" : "size-10"}`}
+    >
       {category.image && (
         <ResponsiveImage
           image={{ ...category.image, alt: "" }}
-          sizes="40px"
+          sizes={small ? "36px" : "40px"}
           className="h-full w-full object-cover"
         />
       )}
@@ -41,7 +44,9 @@ function Thumb({ category }: { category: NavCategoryView }) {
  * The menu under 1024 px: a sheet from the left; the top categories as
  * 56 px rows, each with its picture (the shop's own, else its newest
  * product's photo) as a small rounded square, one with children a native
- * disclosure that opens on "Tümünü gör" and its children; then the shop's
+ * disclosure that opens on a "Tümünü gör →" text link and its children as
+ * 48 px rows with 36 px pictures, set in under the parent's name (no rule,
+ * no tree lines); then the shop's
  * small links and its phone and WhatsApp as quiet pills. The same links
  * are in the page's HTML through the aisle, so the sheet hides nothing
  * from a crawler. The bottom bar's "Kategoriler" opens it too, and gets
@@ -122,15 +127,24 @@ export function MenuSheet({
                         strokeWidth={1.75}
                       />
                     </summary>
-                    <ul className="mb-2 ml-7 border-l-2 border-rule pl-2">
+                    <ul className="ml-13 flex flex-col gap-0.5 pb-3">
                       <li>
-                        <a href={category.path} className={`${SUB} font-semibold text-text`}>
+                        <a
+                          href={category.path}
+                          className="inline-flex min-h-11 items-center gap-1.5 rounded-pill px-2 text-sm font-semibold text-text underline-offset-4 hover:underline"
+                        >
                           {words.allIn[category.path]}
+                          <ArrowRight
+                            className="size-4 shrink-0"
+                            aria-hidden="true"
+                            strokeWidth={2}
+                          />
                         </a>
                       </li>
                       {category.children.map((child) => (
                         <li key={child.path}>
                           <a href={child.path} className={SUB}>
+                            <Thumb category={child} small />
                             {child.label}
                           </a>
                         </li>

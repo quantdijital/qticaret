@@ -90,7 +90,10 @@ describe("category pictures", () => {
   })
 
   it("shows them in the category tree menu and on the shop's own menu's category links", () => {
-    const pictures = new Map([["pcat_1", picture]])
+    const pictures = new Map([
+      ["pcat_1", picture],
+      ["pcat_3", picture],
+    ])
     const tree = navigation(
       [
         {
@@ -107,8 +110,15 @@ describe("category pictures", () => {
           description: null,
           parent_category_id: null,
         },
+        {
+          id: "pcat_3",
+          name: "Bıçaklar",
+          handle: "bicaklar",
+          description: null,
+          parent_category_id: "pcat_1",
+        },
       ],
-      { pcat_1: "/kategori/mutfak", pcat_2: "/kategori/bahce" },
+      { pcat_1: "/kategori/mutfak", pcat_2: "/kategori/bahce", pcat_3: "/kategori/bicaklar" },
       pictures
     )
     const menu = mainMenu(
@@ -118,7 +128,21 @@ describe("category pictures", () => {
           location: "main",
           rank: 0,
           items: [
-            { label: "Mutfak", kind: "category", target: "pcat_1", path: "/mutfak", children: [] },
+            {
+              label: "Mutfak",
+              kind: "category",
+              target: "pcat_1",
+              path: "/mutfak",
+              children: [
+                {
+                  label: "Bıçak",
+                  kind: "category",
+                  target: "pcat_3",
+                  path: "/bicak",
+                  children: [],
+                },
+              ],
+            },
             { label: "Blog", kind: "system", target: "blog", path: null, children: [] },
           ],
         },
@@ -130,6 +154,9 @@ describe("category pictures", () => {
     expect(tree.map((each) => each.image?.src ?? null)).toEqual([null, picture.url])
     // A category link carries its picture; a storefront page's link has none
     expect(menu?.map((each) => each.image?.src ?? null)).toEqual([picture.url, null])
+    // The children too, for the phone drawer's rows
+    expect(tree[1]?.children[0]?.image?.src).toBe(picture.url)
+    expect(menu?.[0]?.children[0]?.image?.src).toBe(picture.url)
   })
 })
 

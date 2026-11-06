@@ -46,6 +46,22 @@ describe("withNavPictures", () => {
     )
   })
 
+  it("gives the children their newest photo too, in their places, from their own subtree", async () => {
+    const [first] = await withNavPictures(
+      [entry("/kategori/a", { children: [{ label: "a1", path: "/kategori/a/a1" }] })],
+      CATEGORIES,
+      PATHS
+    )
+    expect(first?.image?.src).toBe("/media/yeni.jpg")
+    expect(
+      first?.children.map((child) => [child.label, child.image?.src, child.image?.alt])
+    ).toEqual([["a1", "/media/yeni.jpg", ""]])
+    expect(server.storePublicGet).toHaveBeenCalledWith(
+      "/store/products",
+      expect.objectContaining({ category_id: ["pcat_a1"] })
+    )
+  })
+
   it("keeps the shop's own picture, and an entry that is no category's page as it is", async () => {
     const own = {
       src: "/media/kendi.jpg",
