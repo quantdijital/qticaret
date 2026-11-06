@@ -34,6 +34,8 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   // F7 (adr/0031): a parcel's label holds the recipient's address and phone
   ["/admin/orders/:id/fulfillments/:fulfillment_id/label", "order", false],
   ["/admin/shipping-labels", "order", true],
+  // The picked orders' packing slips and pick list: addresses, phones, add-on texts
+  ["/admin/packing-slips", "order", true],
   // F7.9 (adr/0032): so does a return's label; the list names shoppers and their notes
   ["/admin/return-requests", "return_request", true],
   ["/admin/return-requests/:id/label", "return_request", false],

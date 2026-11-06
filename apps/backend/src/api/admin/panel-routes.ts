@@ -9,6 +9,8 @@ import { AdminPostApiKey, AdminPostApiKeyRevoke } from "./api-access/validators"
 import { AdminGetReportRange } from "./reports/validators"
 import { AdminPostStatementCheck } from "./reports/statements/validators"
 import { AdminGetOrderBoard } from "./order-board/validators"
+import { AdminPostOrderExport } from "./order-board/export/validators"
+import { AdminGetPackingSlips } from "./packing-slips/validators"
 import { AdminGetGlobalSearch } from "./global-search/validators"
 import { AdminGetBulkLabels } from "./shipping-labels/validators"
 import { AdminPostCustomerConsent } from "./customers/[id]/consents/validators"
@@ -78,6 +80,18 @@ export const PANEL_ROUTES = [
     matcher: "/admin/order-board",
     methods: ["GET" as const],
     middlewares: [requireUserActor, validateAndTransformQuery(AdminGetOrderBoard, {})],
+  },
+  // The list's filtered orders as a file, the owner's alone (permission-rules OWNER_ONLY)
+  {
+    matcher: "/admin/order-board/export",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostOrderExport)],
+  },
+  // Packing slips and the pick list: addresses and add-on texts, a recorded read (SENSITIVE_READS)
+  {
+    matcher: "/admin/packing-slips",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor, validateAndTransformQuery(AdminGetPackingSlips, {})],
   },
   // F12.9: the search box; customers' names, a recorded read (SENSITIVE_READS)
   {

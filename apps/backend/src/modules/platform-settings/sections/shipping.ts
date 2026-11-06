@@ -35,6 +35,11 @@ export interface ShippingSettings {
    * 30 × 20 × 10 cm (adr/0054). The carrier measures the real parcel.
    */
   default_parcel: DefaultParcel | null
+  /**
+   * Whether the packing slip prints the lines' prices and the order's
+   * totals; off by default: a slip in a gift's box says no price.
+   */
+  packing_slip_prices: boolean
 }
 
 export interface DefaultParcel {
@@ -90,6 +95,7 @@ export const shippingSection = defineSection<ShippingSettings>(
       .object({ weight: measure, length: measure, width: measure, height: measure })
       .strict()
       .nullable(),
+    packing_slip_prices: z.boolean(),
   },
   {
     handling_days_min: 1,
@@ -102,6 +108,7 @@ export const shippingSection = defineSection<ShippingSettings>(
     label_format: "100x150",
     label_custom: { width_mm: 100, height_mm: 150 },
     default_parcel: null,
+    packing_slip_prices: false,
   },
   (values, ctx) => {
     if (values.handling_days_min > values.handling_days_max) {

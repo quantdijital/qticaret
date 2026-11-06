@@ -256,6 +256,7 @@ describe("staff roles", () => {
       searchSynonyms: true,
       legalTexts: true,
       vatRates: true,
+      orderExport: true,
     })
     expect(capabilitiesOf("admin")).toMatchObject({
       settings: true,
@@ -277,6 +278,7 @@ describe("staff roles", () => {
       searchSynonyms: true,
       legalTexts: true,
       vatRates: false,
+      orderExport: false,
     })
     expect(capabilitiesOf("operations")).toEqual({
       settings: false,
@@ -304,6 +306,7 @@ describe("staff roles", () => {
       searchSynonyms: false,
       legalTexts: false,
       vatRates: false,
+      orderExport: false,
     })
     expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
     expect(Object.values(capabilitiesOf(null)).every((can) => !can)).toBe(true)
@@ -475,6 +478,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/messaging/suppressions": false,
   "POST /admin/order-board/ship": true,
   "POST /admin/order-board/deliver": true,
+  // The order list as a file, every customer's details in it: the owner's alone
+  "POST /admin/order-board/export": false,
   "POST /admin/orders/:id/return-requests": true,
   "POST /admin/orders/:id/notes": true,
   "DELETE /admin/orders/:id/notes/:note_id": true,
@@ -563,6 +568,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/invoices/:id/issued": false,
   "POST /admin/invoices/:id/pdf": false,
   "POST /admin/invoices/:id/retry": false,
+  // The stopped invoices picked on the queue, each tried again as one would be
+  "POST /admin/invoices/retry": false,
   "POST /admin/invoices/:id/return-document": false,
   "POST /admin/invoices/:id/waive": false,
   // The storefront's design and menus (adr/0049): the admin's and the owner's

@@ -187,6 +187,8 @@ const CAPABILITY_PROBES = {
   // adr/0007 Ek 2026-11-04: adding, renaming, removing the KDV rates and moving the
   // default, the owner's alone; every role reads them
   vatRates: ["POST", "/admin/vat-rates"],
+  // The order list as an Excel or CSV file, every customer's details in it: the owner's alone
+  orderExport: ["POST", "/admin/order-board/export"],
 } as const satisfies Record<string, readonly [Method, string]>
 
 export type Capability = keyof typeof CAPABILITY_PROBES

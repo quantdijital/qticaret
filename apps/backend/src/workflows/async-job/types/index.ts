@@ -10,6 +10,7 @@ import { migrationInvites } from "./migration-invites"
 import { migrationRun } from "./migration-run"
 import { migrationSitemap } from "./migration-sitemap"
 import { migrationUrls } from "./migration-urls"
+import { orderExport } from "./order-export"
 import { promotionCodes } from "./promotion-codes"
 import { reportExport } from "./report-export"
 import { seoAudit } from "./seo-audit"
@@ -38,6 +39,7 @@ const JOB_TYPES: Readonly<Record<string, JobType>> = Object.freeze({
   "migration.run": erase(migrationRun),
   "migration.sitemap": erase(migrationSitemap),
   "migration.urls": erase(migrationUrls),
+  "order.export": erase(orderExport),
   "promotion.codes": erase(promotionCodes),
   "report.export": erase(reportExport),
   "seo.audit": erase(seoAudit),

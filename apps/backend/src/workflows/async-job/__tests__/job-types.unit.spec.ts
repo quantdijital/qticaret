@@ -28,6 +28,7 @@ describe("job types", () => {
       "migration.run",
       "migration.sitemap",
       "migration.urls",
+      "order.export",
       "promotion.codes",
       "report.export",
       "seo.audit",
@@ -42,6 +43,15 @@ describe("job types", () => {
   it("marks the audit log export as a single, personal data job kept 7 days", () => {
     expect(jobType("audit_log.export")).toMatchObject({
       singleton: true,
+      containsPersonalData: true,
+      resultTtlDays: 7,
+    })
+  })
+
+  it("keeps the order export the owner's: queued by its own route, personal data", () => {
+    expect(jobType("order.export")).toMatchObject({
+      internal: true,
+      ownerOnly: true,
       containsPersonalData: true,
       resultTtlDays: 7,
     })
