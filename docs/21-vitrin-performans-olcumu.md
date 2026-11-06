@@ -301,6 +301,19 @@ P / A / BP / SEO / Agentic. LCP Lighthouse'un simülasyonu (Lantern), medyan.
    - `GET /store/category-images` boyutu ve türevleri "medya kütüphanesi biliyorsa" veriyor. Taşımayla gelen kapakların (`workflows/migration/category-covers.ts`) türevi yok.
    - İçerik görselleri için de türev ve ölçü gerekli (2026-11-03 listesinde 7. madde).
    - Türevler gelince tema değişmeden küçük dosyayı seçer: kartlarda `sizes` doğru.
+   - **Yapıldı (2026-11-06, kod):**
+     - **Yüklemede tek yer:** kütüphaneye giren her görsel (`POST /admin/media` `library: true`, adresle içe aktarma, taşımanın kategori ve yazı kapakları) `registerMediaWorkflow` içinde `media.registered` olayını yayar. `media-versions` aboneliği yanıttan sonra `deriveLibraryMediaWorkflow`'u koşar (docs/05 §2: ağır iş worker'da).
+       - Ürün görselleriyle aynı türevler: WebP + AVIF 400/800/1600 (görselden geniş olmayan) ve 1200×630 paylaşım kırpması (`lib/media/derive.ts`). Ad görselin kendi adından: `kapak-fotografi-800.avif`.
+       - Ürün sihirbazının yüklemesi (`library` yok) yine ürününe bırakılır: türevleri ürün adıyla (adr/0016). Bir ürün görseli tutuyorsa kütüphane koşusu onu atlar; arada ürün türev yaptıysa kütüphanenin dosyaları silinir, ürününki kalır.
+       - Sınırlar değişmedi: ana dosya yüklemede temizlenmiş ve boyutu sınırlanmış haliyle okunur; SSRF ve bayt kontrolleri yükleme ve içe aktarmada.
+     - **Geriye dönük:** `pnpm --filter @qticaret/backend media:derivatives` (yalnız sayar), `… media:derivatives apply` (yapar).
+       - Ana dosyası olan ve türevi olmayan her kayıt, id sırasıyla 50'şer. Ürünsüz olan kendi adıyla; ürün görseli ürününün kendi koşusuyla (ürün adıyla).
+       - Türevi olan atlanır: yarıda kesilen koşu kaldığı yerden sürer, ikinci koşu 0 bulur (başaramadıkları hariç, `failed`). Uygulanınca denetim kaydı `media.versions_backfilled`.
+     - **Zengin metin:** `GET /store/content/:id` (ve önizleme) ile `GET /store/products/:id/description` artık `images` döner: metindeki kütüphane görsellerinin `url`, `width`, `height`, `derivatives`'i.
+       - Vitrin `withPictures` (`lib/views/prose-images.ts`) her bilinen `<img>`'i `<picture>` yapar: AVIF ve WebP `srcset` + `sizes="(min-width: 48rem) 46rem, 100vw"` (okuma sütunu), `width`/`height`, `loading="lazy"`.
+       - Kapaksız sayfada metnin ilk iki bloğundaki ilk görsel `loading="eager" fetchpriority="high"`. Kütüphanede olmayan görsel backend'in yazdığı gibi kalır. 8. madde (ölçüsüz içerik görselleri) de bununla kapanır.
+     - **Vitrin bileşenleri:** kategori kartları, üst bilgideki kategori paneli, `/kategoriler` başlık küçük resimleri, blog kartları, yazı kapağı, yazar kutusu ve sayfası zaten `ResponsiveImage` ile türevleri basıyordu; değişiklik gerekmedi. `atolye-picture-versions-theme.spec.ts` bunu denetler.
+     - **Kalan:** dev DB'de `media:derivatives apply` koşulup `/`, `/kategoriler`, yazar sayfası ve bir yazı yeniden ölçülmeli. `/kategoriler`'de ilk satıra `priority` o zaman yeniden denenmeli.
 2. **Sunucu eylemli iki etkileşim 4x CPU'da 300–390 ms.** [tema/vitrin, ayrı görev]
    - "Sepete ekle" ve çerez bildiriminde "Tümünü kabul et".
    - Kırılım (Event Timing): girdi gecikmesi ~25 ms, olay işleyicileri 11–15 ms, **sunum gecikmesi ~290–300 ms**.

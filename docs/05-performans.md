@@ -21,7 +21,7 @@
 5. **N+1 yok.** `query.graph` ile ihtiyaç duyulan alanlar tek seferde; `fields` parametresi dar tutulur.
 6. **İndeksler.** Özel modüllerde sorgulanan her alan (order_id, tracking_number, provider_ref, status) indeksli.
 7. **Sayfalama zorunlu.** Admin ve Store listelerinde limit/offset veya cursor.
-8. **Görseller.** Obje depolama + CDN; yüklemede boyut sınırı; varyant üretimi (storefront aşamasında genişletilir).
+8. **Görseller.** Obje depolama + CDN; yüklemede boyut sınırı; varyant üretimi: ürün görselleri ürünün adıyla (adr/0016), kütüphanenin diğer her görseli (kapak, yazar fotoğrafı, metin içi görsel) yüklemeden sonra worker'da kendi adıyla; eskiler `media:derivatives apply` ile (docs/21 2026-11-06).
 9. **Redis modülleri.** Event bus, workflow engine, cache, locking için Redis modülleri (prod).
 10. **Bağlantı havuzu.** Postgres pool boyutu süreç sayısına göre ayarlı; tenant başına üst sınır.
 
