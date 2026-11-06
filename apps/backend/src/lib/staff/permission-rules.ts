@@ -19,6 +19,8 @@ export interface RequestFacts {
   jobType?: string | undefined
   /** The `channel` a notification list asks for, when it asks for one alone. */
   notificationChannel?: string | undefined
+  /** The type of the API key a `DELETE /admin/api-keys/:id` names, when it is one we have. */
+  apiKeyType?: string | undefined
 }
 
 const WRITES: readonly Method[] = ["POST", "PUT", "PATCH", "DELETE"]
@@ -47,6 +49,13 @@ export const REPLACED: readonly Rule[] = [
   // A file under a media record (a product's image, the logo, the share image) deleted
   // round it would leave the record pointing at nothing; the media cleanup removes them
   { methods: ["DELETE"], path: "/admin/uploads/:id" },
+  // A secret key deleted round `/admin/api-access/:id` keeps its scopes and has no
+  // `api_key.deleted` entry; a publishable key (the storefront's) is Medusa's to delete
+  {
+    methods: ["DELETE"],
+    path: "/admin/api-keys/:id",
+    when: (facts) => facts.apiKeyType !== "publishable",
+  },
   // KDV rates and the product types that carry them (adr/0007): `/admin/vat-rates`
   // keeps a rate products are on and the default, which these would delete
   { methods: WRITES, path: "/admin/tax-rates*" },

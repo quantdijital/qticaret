@@ -225,6 +225,43 @@ medusaIntegrationTestRunner({
       expect(JSON.stringify(history)).not.toContain(old.token)
     })
 
+    it("deletes secret keys only here, never round it through Medusa; publishable keys stay Medusa's", async () => {
+      const old = await make(["orders:read"], "Eski depo")
+      await settle(
+        http.post(`/admin/api-access/${old.key.id}/revoke`, {}, { headers: admin.headers })
+      )
+      const storefront = await settle(
+        http.post<{ api_key: { id: string } }>(
+          "/admin/api-keys",
+          { title: "Vitrin", type: "publishable" },
+          { headers: admin.headers }
+        )
+      )
+      const publishableId = storefront.data.api_key.id
+      await settle(
+        http.post(`/admin/api-keys/${publishableId}/revoke`, {}, { headers: admin.headers })
+      )
+
+      const round = await settle(
+        http.delete(`/admin/api-keys/${old.key.id}`, { headers: admin.headers })
+      )
+      const unknown = await settle(
+        http.delete("/admin/api-keys/apk_01UNKNOWN", { headers: admin.headers })
+      )
+      const publishable = await settle(
+        http.delete(`/admin/api-keys/${publishableId}`, { headers: admin.headers })
+      )
+      const listed = await http.get<{ keys: { id: string }[] }>("/admin/api-access", {
+        headers: admin.headers,
+      })
+
+      expect(round.status).toBe(403)
+      expect(round.data).toMatchObject({ message: "staff.forbidden" })
+      expect(unknown.status).toBe(403)
+      expect(publishable.status).toBe(200)
+      expect(listed.data.keys.map((key) => key.id)).toEqual([old.key.id])
+    })
+
     it("refuses a key without a scope or a name, and describes what keys reach", async () => {
       const none = await settle(
         http.post("/admin/api-access", { title: "Boş", scopes: [] }, { headers: admin.headers })

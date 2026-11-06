@@ -33,6 +33,8 @@ describe("staff roles", () => {
     ["POST", "/admin/product-types"],
     ["POST", "/admin/product-types/ptyp_1"],
     ["DELETE", "/admin/product-types/ptyp_1"],
+    ["DELETE", "/admin/api-keys/apk_1"],
+    ["DELETE", "/admin/api-keys/apk%5F1"],
   ] as const)(
     "keeps Medusa's %s %s from everyone: our own routes do it with their guards",
     (method, path) => {
@@ -41,6 +43,24 @@ describe("staff roles", () => {
       }
     }
   )
+
+  it("deletes a secret key only through /admin/api-access, a publishable one through Medusa", () => {
+    const path = "/admin/api-keys/apk_1"
+    for (const role of STAFF_ROLES) {
+      expect(decide(role, "DELETE", path, { apiKeyType: "secret" })).toEqual({
+        allowed: false,
+        reason: "replaced",
+      })
+    }
+    expect(decide("owner", "DELETE", path, { apiKeyType: "publishable" })).toEqual({
+      allowed: true,
+      reason: "owner",
+    })
+    // Still the owner's alone
+    expect(allowed("admin", "DELETE", path, { apiKeyType: "publishable" })).toBe(false)
+    // Revoking and renaming stay Medusa's
+    expect(allowed("owner", "POST", "/admin/api-keys/apk_1/revoke")).toBe(true)
+  })
 
   it("leaves Medusa's invitation acceptance to the invited", () => {
     expect(allowed("owner", "POST", "/admin/invites/accept")).toBe(true)

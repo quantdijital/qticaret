@@ -4,6 +4,7 @@ import type {
   MedusaRequest,
   MedusaResponse,
 } from "@medusajs/framework/http"
+import { Modules } from "@medusajs/framework/utils"
 import { parseEnv } from "../../lib/env"
 import type { Env } from "../../lib/env"
 import { decide, isSelfRoute, staffMfaPolicy } from "../../lib/staff"
@@ -14,7 +15,7 @@ import type PlatformSettingsModuleService from "../../modules/platform-settings/
 import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
 import type StaffRolesModuleService from "../../modules/staff-roles/service"
 import { rejectRequest } from "./reject"
-import { routePath } from "./request-path"
+import { decodedSegment, routePath, routePathKeepingCase } from "./request-path"
 
 const userOf = (req: MedusaRequest): string | undefined => {
   const auth = (req as Partial<AuthenticatedMedusaRequest>).auth_context
@@ -41,6 +42,31 @@ export async function mfaRequired(req: MedusaRequest): Promise<boolean> {
 /** Whether this session passed its 2FA challenge (Medusa sets it when the code is verified). */
 export const mfaPassed = (req: MedusaRequest): boolean =>
   Boolean((req as Partial<AuthenticatedMedusaRequest>).auth_context?.mfa_challenge_completed_at)
+
+const API_KEY_DELETE = /^\/admin\/api-keys\/([^/]+)$/i
+
+/**
+ * The type of the key a `DELETE /admin/api-keys/:id` names (the REPLACED
+ * rule lets only a publishable one through); undefined for any other
+ * request, and for a key we do not have or cannot read: refused then.
+ */
+export async function apiKeyTypeOf(req: MedusaRequest): Promise<string | undefined> {
+  const id =
+    req.method.toUpperCase() === "DELETE"
+      ? API_KEY_DELETE.exec(routePathKeepingCase(req))?.[1]
+      : undefined
+  if (!id) {
+    return undefined
+  }
+  try {
+    const [key] = await req.scope
+      .resolve(Modules.API_KEY)
+      .listApiKeys({ id: decodedSegment(id) }, { take: 1, select: ["id", "type"] })
+    return key?.type
+  } catch {
+    return undefined
+  }
+}
 
 /**
  * The signed-in staff member's role: undefined for anyone else (a key,
@@ -96,6 +122,7 @@ export async function guardStaffRoles(
   const decision = decide(role, req.method, routePath(req), {
     jobType: typeof body?.type === "string" ? body.type : undefined,
     notificationChannel: typeof channel === "string" ? channel : undefined,
+    apiKeyType: await apiKeyTypeOf(req),
   })
   if (!decision.allowed) {
     rejectRequest(
