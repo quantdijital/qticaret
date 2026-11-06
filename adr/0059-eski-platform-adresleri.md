@@ -41,3 +41,17 @@ Karışık (c), sektörden bağımsız, yalnız WordPress taşıması uygulanmı
 - Yeni migration: `migration` modülünde `Migration20261106171523` (`migration_file`).
 - Kalıp kuralları yalnız 404 olacak istekte bir sorgu daha yapar (WordPress taşıması var mı; çözümleme önbelleğiyle). Shopify gibi başka bir kaynak aynı yapıya kendi sınıflayıcısıyla eklenir.
 - Testler: birim `lib/seo/legacy/__tests__/{wordpress,files}.unit.spec.ts`, `workflows/migration/__tests__/legacy-addresses.unit.spec.ts`; HTTP `seo-legacy-paths.spec.ts`; vitrin `src/__tests__/proxy-legacy.spec.ts`, `lib/seo/__tests__/paths.spec.ts`.
+
+## Ek (2026-11-06): Ek sayfaları ve temiz olmayan 410
+
+İlk sürümün açık bıraktığı iki şey:
+
+1. **WordPress ek sayfaları (attachment pages)** 404 veriyordu: yüklenen dosyanın bağlandığı kaydın altındaki kendi sayfası (`/urun/dokum-tava/tava/`, `/tava-bakimi/kapak/`; kaydın kalıcı bağlantısı gerektirdiğinde `/tava-bakimi/attachment/kapak/`). Karar:
+   - WordPress'in kendi adres sınıflarından hiçbiri tutmadığında en son sorulur (`lib/seo/legacy/attachments.ts` biçimi okur, `workflows/seo/redirects/legacy-attachment.ts` yanıtlar). Adres en az iki bölümlüdür, son bölüm kısa ad biçimindedir; ebeveyn son bölümsüz hâlidir (önünde `attachment` varsa o da düşer).
+   - Ebeveyn, eski platform kuralları olmadan bir kez çözülür (iç içe çağrı yok): canlı kayıtsa yolu, yönlendiriyorsa gittiği yer. Oradaki kayıt WordPress taşımasından gelmiş (`migration_item` `done`) canlı bir **ürün, yazı ya da sayfa** ise ek sayfası kaydın bugünkü sayfasına tek 301 alır; ziyaretçinin sorgusu korunur, WordPress'inki atılır.
+   - Ek sayfasının kısa adı taşınmış bir dosyanın köküyle (`migration_file.stem`) eşleşse de hedef kaydın sayfasıdır, görsel değil: ziyaretçi bir sayfa istiyordu. Dosya araması yapılmaz.
+   - Ebeveyn kategori, marka, taşınmamış kayıt, kaldırılmış ya da bilinmeyen bir yolsa kural yanıt vermez: adres eskisi gibi 404 kalır. `?attachment_id=N` 410 kalır (hangi kayda bağlı olduğu bilinmiyor).
+   - Gölgeleme yok: canlı sayfa, gerçek iç içe kategori yolu, kural ve ayrılmış yol önce yanıtlar; bu kural yalnız hiçbir şeyin yanıtlamadığı adreste sorulur. Aynı biçimdeki kaydın alt uç noktaları (`/yazi/embed`, `/yazi/amp`, `/yazi/trackback`) da kaydın sayfasına gider.
+2. **Temiz olmayan 410:** sondaki eğik çizgili ya da büyük harfli eski adres 410'a çözülüyorsa (`/wp-login.php/`, `/Feed/`) vitrin vekili önce temiz biçimine 301 veriyordu, sonra 410. Artık 301 hedefinde olduğu gibi tek atlama: vekil temiz biçimi çözer, `gone` gelirse bakım kapısından ve sayfa başlıklarından sonra doğrudan temanın kaldırıldı sayfasıyla 410 döner (adres tarayıcıda olduğu gibi kalır). Bulunamayan temiz olmayan adres eskisi gibi temiz biçimine 301 alır.
+
+Testler: birim `lib/seo/legacy/__tests__/attachments.unit.spec.ts`, `workflows/seo/redirects/__tests__/legacy-attachment.unit.spec.ts`; HTTP `seo-legacy-paths.spec.ts` (ek sayfaları, kategori altında ve taşınmamış kayıtta yanıt yok); vitrin `src/__tests__/proxy-legacy.spec.ts` (temiz olmayan 410 tek atlama).
