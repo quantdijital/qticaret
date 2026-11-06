@@ -2186,7 +2186,7 @@
         "passwordChanged": "Your password was changed.",
         "passwordChangedOthers": "Your password was changed; your sessions on other devices were ended.",
         "emailTitle": "Change e-mail address",
-        "emailHint": "We send a confirmation link to the new address. Your current address stays valid until the link is opened; your current address is told too.",
+        "emailHint": "We send a confirmation link to the new address; open it while signed in to this account. Your current address stays valid until then and is told too. A new request voids the previous link.",
         "emailSend": "Send confirmation link",
         "newEmail": "New e-mail address",
         "currentEmail": "Current address: {{email}}",
@@ -2194,7 +2194,10 @@
           "invalid": "Enter a valid e-mail address.",
           "same": "This is already your sign-in address."
         },
-        "emailSent": "A confirmation link was sent to {{email}}. It is valid for 24 hours."
+        "emailSent": "A confirmation link was sent to {{email}}. It is valid for 24 hours.",
+        "pending": "New address awaiting confirmation (link valid until {{at}})",
+        "cancelPending": "Cancel",
+        "pendingCanceled": "The pending e-mail change was cancelled."
       }
     },
     "legal": {
@@ -8346,14 +8349,16 @@
   },
   "confirmEmail": {
     "title": "Confirm your new e-mail address",
-    "subtitle": "Once confirmed, you sign in to the panel with this address; your password stays the same.",
     "confirm": "Confirm my address",
     "doneTitle": "Your e-mail address changed",
     "done": "You now sign in to the panel with your new address.",
     "toPanel": "Go to the panel",
     "invalidTitle": "Link not valid",
-    "invalid": "The confirmation link is not valid, has expired or was used. Ask again from Settings > Security > My account.",
+    "invalid": "The confirmation link is not valid, has expired, was used or was replaced by a newer one. Open it signed in to the account that asked, or ask again from Settings > Security > My account.",
     "unavailable": "This e-mail address cannot be used. Try another from the panel.",
-    "tooMany": "Too many tries; try again a little later."
+    "tooMany": "Too many tries; try again a little later.",
+    "subtitleAs": "You are signed in as {{email}}. Once confirmed, you sign in with your new address; your password stays the same.",
+    "signInFirst": "Sign in with the account that asked for the change; you come back to this page afterwards.",
+    "signIn": "Sign in"
   }
 }

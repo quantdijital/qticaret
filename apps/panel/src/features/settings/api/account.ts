@@ -16,8 +16,8 @@ export interface MyProfile {
     role: StaffRole | null
     created_at: string
   }
-  /** Panel sessions open on the account, this one counted; null when the server cannot tell. */
-  sessions: { open: number | null }
+  /** Their own address change waiting for its link: the new address, until when it holds. */
+  pending_email: { to: string; expires_at: string } | null
 }
 
 export interface ProfileInput {
@@ -33,6 +33,17 @@ export const myProfileQuery = () =>
     queryKey: KEY,
     queryFn: () => sdk.client.fetch<MyProfile>("/admin/staff/me/profile"),
     staleTime: 30_000,
+  })
+
+/**
+ * `GET /admin/staff/me/sessions`: panel sessions open on the account, this
+ * one counted; null when the server cannot tell. Asked apart, when shown.
+ */
+export const mySessionsQuery = () =>
+  queryOptions({
+    queryKey: ["auth", "sessions"] as const,
+    queryFn: () => sdk.client.fetch<{ open: number | null }>("/admin/staff/me/sessions"),
+    staleTime: 60_000,
   })
 
 // The topbar's name and address come from the same account: every "auth" read again
@@ -85,12 +96,22 @@ export const useEndOtherSessions = () =>
     )
   )
 
+/** The waiting address change dropped: its link opens nothing. */
+export const useCancelEmailChange = () =>
+  useAccountMutation(() =>
+    sdk.client.fetch<{ canceled: boolean }>("/admin/staff/me/email/cancel", {
+      method: "POST",
+      body: {},
+    })
+  )
+
 /**
- * The link from the new address's e-mail, confirmed. Maybe nobody is
- * signed in here: a plain request, the failure's key kept in `code`.
+ * The link from the new address's e-mail, confirmed by its member signed
+ * in (security review 2026-11-06). A plain request, so the failure's key
+ * stays in `code` for the page's own words.
  */
 export async function confirmEmailChange(token: string): Promise<void> {
-  const response = await fetch("/admin/staff/email/confirm", {
+  const response = await fetch("/admin/staff/me/email/confirm", {
     method: "POST",
     headers: { "content-type": "application/json" },
     credentials: "include",

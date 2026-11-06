@@ -11,7 +11,7 @@ const fetchMock = vi.hoisted(() => vi.fn())
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
-const mine = (open: number | null): MyProfile => ({
+const mine = (pending: MyProfile["pending_email"] = null): MyProfile => ({
   profile: {
     id: "user_1",
     email: "elif@ornek.com",
@@ -21,12 +21,18 @@ const mine = (open: number | null): MyProfile => ({
     role: "readonly",
     created_at: "2026-10-01T09:00:00.000Z",
   },
-  sessions: { open },
+  pending_email: pending,
 })
 
-function renderCard(open: number | null = 2) {
+function renderCard(open: number | null = 2, pending: MyProfile["pending_email"] = null) {
   fetchMock.mockImplementation((path: string) =>
-    Promise.resolve(path === "/admin/staff/me/profile" ? mine(open) : { changed: true })
+    Promise.resolve(
+      path === "/admin/staff/me/profile"
+        ? mine(pending)
+        : path === "/admin/staff/me/sessions"
+          ? { open }
+          : { changed: true }
+    )
   )
   return render(
     <QueryClientProvider
@@ -72,6 +78,19 @@ describe("MySignInCard", () => {
     renderCard(1)
     await screen.findByText("1 oturum (bu cihaz)")
     expect(screen.getByRole("button", { name: "Diğerlerini kapat" })).toBeDisabled()
+    expect(fetchMock).toHaveBeenCalledWith("/admin/staff/me/sessions")
+  })
+
+  it("shows a change waiting for its link, and cancels it", async () => {
+    renderCard(1, { to: "yeni@ornek.com", expires_at: "2026-11-07T09:00:00.000Z" })
+
+    expect(await screen.findByText("yeni@ornek.com")).toBeInTheDocument()
+    expect(screen.getByText(/^Onay bekleyen yeni adres/u)).toBeInTheDocument()
+    const cancel = screen.getByRole("button", { name: "İptal et" })
+    expect(cancel).toHaveClass("w-36")
+    await userEvent.click(cancel)
+
+    expect(posts()).toEqual([["/admin/staff/me/email/cancel", { method: "POST", body: {} }]])
   })
 
   it("checks the new password before asking the server, then sends the current and the new", async () => {

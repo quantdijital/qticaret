@@ -21,7 +21,7 @@ const MINE: MyProfile = {
     role: "operations",
     created_at: "2026-10-01T09:00:00.000Z",
   },
-  sessions: { open: 2 },
+  pending_email: null,
 }
 
 const renderCard = () =>

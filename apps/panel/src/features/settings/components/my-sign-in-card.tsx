@@ -6,8 +6,14 @@ import { toast } from "sonner"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { SectionCard } from "@/components/patterns/section-card"
 import { Button } from "@/components/ui/button"
-import { myProfileQuery, useEndOtherSessions } from "@/features/settings/api/account"
+import {
+  myProfileQuery,
+  mySessionsQuery,
+  useCancelEmailChange,
+  useEndOtherSessions,
+} from "@/features/settings/api/account"
 import { errorText } from "@/lib/errors"
+import { formatDateTime } from "@/lib/format"
 import { EmailDialog, PasswordDialog } from "./credential-dialogs"
 
 const S = "settings.security.signIn"
@@ -25,21 +31,41 @@ function Row({ label, value, action }: { label: string; value: ReactNode; action
   )
 }
 
+/** A row's one action: every row's the same size. */
+function RowButton({
+  children,
+  disabled,
+  onClick,
+}: {
+  children: ReactNode
+  disabled?: boolean
+  onClick: () => void
+}) {
+  return (
+    <Button variant="outline" size="sm" className="w-36" disabled={disabled} onClick={onClick}>
+      {children}
+    </Button>
+  )
+}
+
 /**
  * "Giriş bilgileri" (the owner, 2026-11-06): the member's sign-in address
- * and password, each changed in its own dialog, and their open sessions,
- * the others ended at once. Any role, their own account only.
+ * (and a change waiting for its link, cancelled here) and password, each
+ * changed in its own dialog, and their open sessions (asked apart), the
+ * others ended at once. Any role, their own account only.
  */
 export function MySignInCard({ className }: { className?: string }) {
   const { t } = useTranslation()
   const query = useQuery(myProfileQuery())
+  const sessionsQuery = useQuery(mySessionsQuery())
   const endOthers = useEndOtherSessions()
+  const cancel = useCancelEmailChange()
   const [open, setOpen] = useState<"email" | "password" | null>(null)
   const close = () => {
     setOpen(null)
   }
   const data = query.data
-  const sessions = data?.sessions.open ?? null
+  const sessions = sessionsQuery.data?.open ?? null
 
   return (
     <SectionCard title={t(`${S}.title`)} description={t(`${S}.hint`)} className={className}>
@@ -53,46 +79,58 @@ export function MySignInCard({ className }: { className?: string }) {
             label={t(`${S}.email`)}
             value={data.profile.email}
             action={
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-36"
+              <RowButton
                 onClick={() => {
                   setOpen("email")
                 }}
               >
                 {t(`${S}.change`)}
-              </Button>
+              </RowButton>
             }
           />
+          {data.pending_email ? (
+            <Row
+              label={t(`${S}.pending`, { at: formatDateTime(data.pending_email.expires_at) })}
+              value={data.pending_email.to}
+              action={
+                <RowButton
+                  disabled={cancel.isPending}
+                  onClick={() => {
+                    cancel.mutate(undefined, {
+                      onSuccess: () => {
+                        toast.success(t(`${S}.pendingCanceled`))
+                      },
+                      onError: (error) => toast.error(errorText(t, error)),
+                    })
+                  }}
+                >
+                  {t(`${S}.cancelPending`)}
+                </RowButton>
+              }
+            />
+          ) : null}
           <Row
             label={t(`${S}.password`)}
             value={<span aria-label={t(`${S}.passwordHidden`)}>••••••••••</span>}
             action={
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-36"
+              <RowButton
                 onClick={() => {
                   setOpen("password")
                 }}
               >
                 {t(`${S}.change`)}
-              </Button>
+              </RowButton>
             }
           />
           <Row
             label={t(`${S}.sessions`)}
             value={
               sessions === null
-                ? t(`${S}.sessionsUnknown`)
+                ? t(sessionsQuery.isPending ? "common.loading" : `${S}.sessionsUnknown`)
                 : t(`${S}.sessionsOpen`, { count: sessions })
             }
             action={
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-36"
+              <RowButton
                 disabled={sessions === null || sessions < 2 || endOthers.isPending}
                 onClick={() => {
                   endOthers.mutate(undefined, {
@@ -104,7 +142,7 @@ export function MySignInCard({ className }: { className?: string }) {
                 }}
               >
                 {t(`${S}.endOthers`)}
-              </Button>
+              </RowButton>
             }
           />
         </div>

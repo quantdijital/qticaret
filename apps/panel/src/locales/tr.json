@@ -2186,7 +2186,7 @@
         "passwordChanged": "Şifreniz değiştirildi.",
         "passwordChangedOthers": "Şifreniz değiştirildi; diğer cihazlardaki oturumlarınız kapatıldı.",
         "emailTitle": "E-posta adresini değiştir",
-        "emailHint": "Yeni adrese bir onay bağlantısı göndeririz. Bağlantıyı açana kadar mevcut adresiniz geçerli kalır; mevcut adresinize de bilgi verilir.",
+        "emailHint": "Yeni adrese bir onay bağlantısı göndeririz; bağlantıyı bu hesapla giriş yapmışken açmanız gerekir. Onaylayana kadar mevcut adresiniz geçerli kalır ve mevcut adresinize de bilgi verilir. Yeni bir istek öncekinin bağlantısını geçersiz kılar.",
         "emailSend": "Onay bağlantısı gönder",
         "newEmail": "Yeni e-posta adresi",
         "currentEmail": "Şu anki adres: {{email}}",
@@ -2194,7 +2194,10 @@
           "invalid": "Geçerli bir e-posta adresi girin.",
           "same": "Bu zaten giriş adresiniz."
         },
-        "emailSent": "Onay bağlantısı {{email}} adresine gönderildi. Bağlantı 24 saat geçerlidir."
+        "emailSent": "Onay bağlantısı {{email}} adresine gönderildi. Bağlantı 24 saat geçerlidir.",
+        "pending": "Onay bekleyen yeni adres (bağlantı {{at}} tarihine kadar geçerli)",
+        "cancelPending": "İptal et",
+        "pendingCanceled": "Bekleyen e-posta değişikliği iptal edildi."
       }
     },
     "legal": {
@@ -8346,14 +8349,16 @@
   },
   "confirmEmail": {
     "title": "Yeni e-posta adresinizi onaylayın",
-    "subtitle": "Onaylayınca panele bu adresle giriş yaparsınız; şifreniz değişmez.",
     "confirm": "Adresimi onayla",
     "doneTitle": "E-posta adresiniz değişti",
     "done": "Panele artık yeni adresinizle giriş yaparsınız.",
     "toPanel": "Panele git",
     "invalidTitle": "Bağlantı geçersiz",
-    "invalid": "Onay bağlantısı geçersiz, süresi dolmuş ya da kullanılmış. Panelde Ayarlar > Güvenlik > Hesabım'dan yeniden isteyin.",
+    "invalid": "Onay bağlantısı geçersiz, süresi dolmuş, kullanılmış ya da yerine yenisi istenmiş. Bağlantıyı değişikliği isteyen hesapla giriş yapmışken açın ya da Ayarlar > Güvenlik > Hesabım'dan yeniden isteyin.",
     "unavailable": "Bu e-posta adresi kullanılamıyor. Panelden başka bir adres deneyin.",
-    "tooMany": "Çok fazla deneme yapıldı; biraz sonra yeniden deneyin."
+    "tooMany": "Çok fazla deneme yapıldı; biraz sonra yeniden deneyin.",
+    "subtitleAs": "{{email}} hesabıyla giriş yaptınız. Onaylayınca panele yeni adresinizle giriş yaparsınız; şifreniz değişmez.",
+    "signInFirst": "Adresi değiştirmek isteyen hesapla giriş yapın; ardından bu sayfaya dönersiniz.",
+    "signIn": "Giriş yap"
   }
 }
