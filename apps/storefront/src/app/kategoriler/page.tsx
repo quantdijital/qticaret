@@ -15,7 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-/** `/kategoriler`: every category as a tree. */
+/** `/kategoriler`: every category as picture tiles, the top ones with those below them. */
 export default function Categories() {
   return <CategoriesScreen />
 }

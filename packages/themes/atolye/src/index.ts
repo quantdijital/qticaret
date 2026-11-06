@@ -3,6 +3,7 @@ import type { StorefrontTheme } from "@qticaret/ui"
 import { AccountPage } from "./account/AccountPage"
 import { AuthPage } from "./account/AuthPage"
 import { CartPage } from "./cart/CartPage"
+import { CategoriesPage } from "./CategoriesPage"
 import { CheckoutPage } from "./checkout/CheckoutPage"
 import { CheckoutResultPage } from "./checkout/CheckoutResultPage"
 import { BlogIndexPage } from "./content/BlogIndexPage"
@@ -23,7 +24,8 @@ import { ProductPage } from "./ProductPage"
  * photographs on a cool steel-white counter, one heavy grotesk, the
  * shop's colour as the action. Sector-neutral; the shop's facts arrive
  * as data. Drawn so far: the frame, the home page, the legal texts, the
- * listings (category, brand, `/magaza`, sale, search), the product page
+ * listings (category, brand, `/magaza`, sale, search), the category
+ * index (`/kategoriler`), the product page
  * and the buying pages (cart, checkout, card form, payment result, the
  * order and its lookup), signing in and the customer's account; the
  * pages it has not drawn yet are the base
@@ -43,6 +45,7 @@ export const atolyeTheme: StorefrontTheme = {
   AuthPage,
   AccountPage,
   ListingPage,
+  CategoriesPage,
   ProductPage,
   ContentPage,
   BlogIndexPage,

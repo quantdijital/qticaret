@@ -138,6 +138,8 @@ export interface SearchSuggestView {
 /** A category in the index (`/kategoriler`): its page, its picture, the categories below it. */
 export interface CategoryTreeView extends CategoryCardView {
   children: CategoryTreeView[]
+  /** How many products it and the categories below it hold; none: not counted. */
+  count?: number | null
 }
 
 /** `/kategoriler`: every live category as a tree, in the shop's order. */
@@ -145,6 +147,8 @@ export interface CategoriesPageView {
   title: string
   breadcrumbs: BreadcrumbView[]
   categories: CategoryTreeView[]
+  /** How many products the shop lists in all; none: not counted. */
+  total?: number | null
 }
 
 /** A brand in the index (`/markalar`): its page, and its logo when it has one. */

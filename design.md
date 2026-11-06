@@ -93,6 +93,18 @@ Sahip 2026-11-05: "diğer e-ticaret sayfalarımızın tasarımlarını da yapmay
 - **Boş:** dolgu kuyuda nedeni (süzgeçle boşsa "Bu seçimle eşleşen ürün yok." + birincil "Filtreleri temizle"; boş liste kendi sözü + "Tüm ürünlere göz atın").
 - Mağazanın kategori sayfası bölümleri (adr/0049) ana sayfanın bölümleriyle (`sections/Blocks.tsx`), ızgaranın üstünde ve altında.
 
+## Kategoriler sayfası (`/kategoriler`)
+
+Sahip 2026-11-06: "bu tasarımı daha iyi yapabilirsin, çok kaba görünüyor" (önce üst kategori başına büyük çizgili kutu, yatay fotoğraf, altında alt kategoriler düz yazı listesi; çocuksuz kategori yarım boş kutu; 390 px'te 7.560, 1440'ta 4.026 px). `CategoriesPage.tsx`; veri `apps/storefront/src/lib/views/category-index.ts`.
+
+- **Baş:** iz, `h1` (`--text-display`), altında tek satır `text-2` (1024 px'ten `--text-lead`): "{N} ürün, {M} kategoride." (sayı gelmezse "{M} kategori"). Kutu, çizgi, tanıtım yok.
+- **Bölümler:** alt kategorisi olan her üst kategori bir bölüm, mağazanın sırasıyla; bölüm arası 40 / 48 px, kutu ve çizgi yok. Bölüm başı tek satır: solda 48 px yuvarlak (`--radius-inner`) küçük resim + `h2` (`--text-section`, kategorinin adı) + altında "N ürün" (`text-3`), üçü kategorinin sayfasına tek bağlantı; sağda aynı satırda "Tümünü gör →" (`gf-link`, okunan adı "Tümünü gör: {ad}").
+- **Karolar:** her alt kategori **reyon kartı** (4:5, küçük ad, adın altında "N ürün" `stage-text-2`; sayı varken grafit ayak daha yukarı uzanır), fotoğraf mağazanın kategori resmi, yoksa kategorinin (alt ağacının) en yeni ürün fotoğrafı. Bölüm hep **tek sıra**: telefonda 2,5, 640 px'ten 4,5 kart görünür, 1024 px'ten 6,5, fazlası yana kayar (`.gf-rail`, liste sayfasının alt kategori sırasıyla aynı boy); 1280 px'ten 8 sütun ızgara (1440'ta ~147 px kart). Ürünü olmayan kategoride sayı yazmaz ("0 ürün" yok).
+- **Çocuksuz üst kategoriler** tek tek kutu olmaz: hepsi en sonda tek bölümde, `h2` "Diğer kategoriler", aynı karolarla. Hiçbir üst kategorinin çocuğu yoksa aynı sıra, başlığı yalnız ekran okuyucuya ("Tüm kategoriler").
+- **İstek:** sayfadaki her kategori (üst + bir alt) için tek `/store/products?limit=1` isteği hem sayıyı hem en yeni fotoğrafı verir; altışar altışar, bir dakika herkes için saklanır, ana sayfa karolarıyla aynı anahtar. Mağazanın toplamı tek ek istek. Daha derin kategoriler ağaçta kalır, çizilmez (ebeveynlerinin sayfasında).
+- **SEO:** `BreadcrumbList` + `CollectionPage` (`mainEntity` `ItemList`: sayfadaki her kategori, sayfa sırasıyla, mutlak adres; kanonik alan yoksa hiçbiri). Bölümlerin kimliği sayfanın son adımı (`#kategori-el-yapimi-caki`), çapa olarak kullanılabilir.
+- Sonuç (2026-11-06, 13 üst / 49 kategori): 390 px'te sayfa 7.560 → 3.445 px, 768'de 4.956 → 3.473, 1280'de 3.946 → 3.148, 1440'ta 4.026 → 3.330 px (`main` 2.936 → 2.240).
+
 ## Arama sonuçları (`/arama`)
 
 Liste sayfasının kendisi: başlık "“q” için sonuçlar"; altında "Bunu mu demek istediniz:" (her öneri kendi araması, 800 ağırlıkta bağlantı), "İlgili kategoriler" fotoğraflı reyon kartı sırası, "Markaya göre daralt" hapları (süzgeç, `nofollow`; telefonda tek sıra, yana kayar; 1024 px'ten karolar altı ya da daha azsa karoların sekiz sütundan bıraktığı yerde, karoların yanında: boş cep kalmaz, ilk sonuçlar 1366×768 ve 1440×800'de ilk ekrana çıkar), sonra aynı süzgeçler ve ızgara. Sonuç yoksa: dolgu kuyuda backend'in sözü, öneriler, birincil "Tüm ürünlere göz atın", altında "Kategorilere göz atın" başlığıyla mağazanın üst kategorileri reyon ızgarasında (ana sayfanın sütun kuralı). Hiç aranmamışsa aynı ızgara, istem sözüyle. Arama kutusu başlıkta her ekranda zaten var; sayfa ikincisini çizmez.

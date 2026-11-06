@@ -26,28 +26,52 @@ const PHOTO_FIELDS = [
   "media_assets.derivatives",
 ].join(",")
 
+/** A category's products at a glance: its newest product's photo and how many it holds. */
+export interface CategoryGlance {
+  photo: ImageView | null
+  /** Every product in it (and below it, as asked); null when the answer had no count. */
+  count: number | null
+}
+
 /**
- * The first photo of the newest product in these categories, the same
- * for every visitor and kept a minute (`storePublicGet`); null when none
- * has a photo or the backend could not answer. The name beside it says
- * what it is, so its own words are left out.
+ * The newest product in these categories, with their count: one request,
+ * the same for every visitor and kept a minute (`storePublicGet`); null
+ * when the backend could not answer. The photo's own words are left out:
+ * the name beside it says what it is.
  */
-export async function newestPhoto(categoryIds: readonly string[]): Promise<ImageView | null> {
+export async function categoryGlance(
+  categoryIds: readonly string[]
+): Promise<CategoryGlance | null> {
   try {
-    const { products } = await storePublicGet<{ products: StoreProduct[] }>("/store/products", {
-      category_id: [...categoryIds],
-      limit: 1,
-      order: "-created_at",
-      fields: PHOTO_FIELDS,
-    })
+    const { products, count } = await storePublicGet<{ products: StoreProduct[]; count?: number }>(
+      "/store/products",
+      {
+        category_id: [...categoryIds],
+        limit: 1,
+        order: "-created_at",
+        fields: PHOTO_FIELDS,
+      }
+    )
     const [photo] = products[0] ? productImages(products[0]) : []
-    return photo ? { ...photo, alt: "" } : null
+    return {
+      photo: photo ? { ...photo, alt: "" } : null,
+      count: typeof count === "number" && Number.isFinite(count) ? count : null,
+    }
   } catch (error) {
     if (isStoreApiError(error)) {
       return null
     }
     throw error
   }
+}
+
+/**
+ * The first photo of the newest product in these categories (the same
+ * request as `categoryGlance`, so they share the minute's answer); null
+ * when none has a photo or the backend could not answer.
+ */
+export async function newestPhoto(categoryIds: readonly string[]): Promise<ImageView | null> {
+  return (await categoryGlance(categoryIds))?.photo ?? null
 }
 
 /**

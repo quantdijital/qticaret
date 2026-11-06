@@ -1,10 +1,11 @@
 import { t } from "@/lib/i18n"
 import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
+import { categoryIndexJsonLd } from "@/lib/seo/category-index"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import { categoryImages } from "@/lib/store-api/extras"
 import { allBrands, allCategories, pathsOf, siteSeo } from "@/lib/store-api/requests"
 import { brandGroups } from "@/lib/views/brands"
-import { categoryTree } from "@/lib/views/categories"
+import { categoryIndex } from "@/lib/views/category-index"
 import { theme } from "@/theme"
 
 export const CATEGORIES_PATH = "/kategoriler"
@@ -26,30 +27,41 @@ async function trailOf(title: string, path: string) {
 }
 
 /**
- * `/kategoriler` (docs/20 "sayfalar"): every live category as a tree, top
- * ones with those below them, each at its page: a way in for shoppers
- * and crawlers to every category.
+ * `/kategoriler` (docs/20 "sayfalar"): every live category, top ones with
+ * those right below them, each a picture tile at its page with its
+ * product count: a way in for shoppers and crawlers to every category.
  */
 export async function CategoriesScreen() {
   const title = t("categories.title")
   const categories = await allCategories()
-  const [paths, trail, pictures] = await Promise.all([
+  const [paths, trail, pictures, site] = await Promise.all([
     pathsOf(
       "product_category",
       categories.map((category) => category.id)
     ),
     trailOf(title, CATEGORIES_PATH),
     categoryImages(),
+    siteSeo(),
   ])
+  const index = await categoryIndex(categories, paths, pictures)
+  const jsonLd = [
+    ...trail.jsonLd,
+    ...categoryIndexJsonLd(
+      site.canonical_host,
+      { name: title, path: CATEGORIES_PATH },
+      index.categories
+    ),
+  ]
   return (
     <>
-      <JsonLd blocks={trail.jsonLd} />
+      <JsonLd blocks={jsonLd} />
       <theme.CategoriesPage
         t={t}
         view={{
           title,
           breadcrumbs: trail.breadcrumbs,
-          categories: categoryTree(categories, paths, pictures),
+          categories: index.categories,
+          total: index.total,
         }}
       />
     </>
