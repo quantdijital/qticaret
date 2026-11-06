@@ -15,7 +15,15 @@ import { theme } from "@/theme"
 // docs/13 §7: checkout pages are noindex,nofollow (backend `system_pages`)
 export const metadata: Metadata = robotsOnly("noindex,nofollow", t("checkout.title"))
 
-const RETURN_ERRORS = new Set(["checkout.failed", "cart.shipping_changed", "legal.version_changed"])
+// The step's own refusals, a code that would not come off the summary, a card form gone stale
+const RETURN_ERRORS = new Set([
+  "checkout.failed",
+  "cart.shipping_changed",
+  "legal.version_changed",
+  "cart.update_failed",
+  "cart.payment_link_locked",
+  "payments.cart_changed",
+])
 
 /**
  * `/odeme` (D7): address, shipping and payment for the shopper's cart.

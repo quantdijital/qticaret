@@ -23,6 +23,7 @@ import {
   orderPath,
   startPayment,
 } from "@/lib/checkout/pay"
+import type { PaymentSession } from "@/lib/checkout/pay"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { storePost } from "@/lib/store-api/server"
 import { cardProviderOf } from "@/lib/views/checkout"
@@ -128,7 +129,7 @@ export async function placeOrder(
     // The purchase is measured only within the cookie answer (F10.9); a refusal costs the order nothing
     await recordTracking(cart.id).catch(() => undefined)
     const session = await startPayment(cart.id, input.provider_id, input.challenge ?? null)
-    next = await nextStep(cart.id, session.provider_id, session.data)
+    next = await nextStep(cart.id, session)
   } catch (error) {
     const challenge = challengeOf(error)
     if (challenge) {
@@ -145,11 +146,8 @@ export async function placeOrder(
 }
 
 /** Where the shopper goes once the payment started: the order, the card form, or the provider's page. */
-async function nextStep(
-  cartId: string,
-  providerId: string,
-  data: Record<string, unknown>
-): Promise<string> {
+async function nextStep(cartId: string, session: PaymentSession): Promise<string> {
+  const { provider_id: providerId, data } = session
   if (
     data["method"] === "bank_transfer" ||
     data["method"] === "cash_on_delivery" ||
@@ -168,7 +166,8 @@ async function nextStep(
     throw new Error("checkout: the provider gave no form")
   }
   if (providerId === "pp_paytr_paytr") {
-    if (!(await rememberPaymentFrame(cartId, formUrl))) {
+    // Bound to its session: the frame page shows it only while it charges the cart's total
+    if (!(await rememberPaymentFrame(cartId, session.id, formUrl))) {
       throw new Error("checkout: the card form's origin is not allowed")
     }
     return "/odeme/kart"

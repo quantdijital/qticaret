@@ -1,7 +1,7 @@
 import "server-only"
 import { storefrontEnv } from "../env"
 import { isStoreApiError } from "../store-api/errors"
-import { storeCall, storePost } from "../store-api/server"
+import { storeCall, storeGet, storePost } from "../store-api/server"
 
 /**
  * Starting and finishing a payment (D7, adr/0026, adr/0029). The amount,
@@ -69,6 +69,41 @@ export async function startPayment(
     }
   )
   return payment_session
+}
+
+/** A cart's total and its payment collection's sessions, as the store API answers them. */
+export interface SessionFacts {
+  total: number
+  payment_collection?: {
+    payment_sessions?: ({ id: string; amount: number | string } | null)[] | null
+  } | null
+}
+
+const kurus = (amount: number | string) => Math.round(Number(amount) * 100)
+
+/**
+ * Whether a started payment's session still charges what the cart owes
+ * now. A change to the cart (a code, a quantity) brings its payment
+ * collection up to the new total and can drop its sessions, so a card
+ * form made before may be for a session gone, or for an old amount; the
+ * backend would refund such a payment (adr/0026), the shopper is sent to
+ * start a new one instead.
+ */
+export function sessionMatches(cart: SessionFacts, sessionId: string): boolean {
+  const session = cart.payment_collection?.payment_sessions?.find((each) => each?.id === sessionId)
+  if (!session) {
+    return false
+  }
+  return kurus(session.amount) === kurus(cart.total)
+}
+
+/** `sessionMatches` for the cart as the backend holds it now. */
+export async function sessionCurrent(cartId: string, sessionId: string): Promise<boolean> {
+  const { cart } = await storeGet<{ cart: SessionFacts }>(`/store/carts/${cartId}`, {
+    fields:
+      "total,payment_collection.payment_sessions.id,payment_collection.payment_sessions.amount",
+  })
+  return sessionMatches(cart, sessionId)
 }
 
 export type Completion =
