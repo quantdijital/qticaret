@@ -308,3 +308,23 @@ Kart teslim sözünü mağazanın rozet satırlarından (kamyon ve saat simgeli 
 - **Vitrin:** `productShipping` `delivery` alır (`lib/views/product-shipping.ts`, `deliveryFacts`): kamyonla "1–2 iş gününde kargoda" (0–0: "Aynı gün kargoda"), altında "Tahmini teslimat 2–5 iş günü" (kargoya verme + taşıma); saat ayarlıysa saatle "Saat 15:00'e kadar verilen siparişler aynı gün kargoda" (yönelme eki saatin okunuşuna göre: 'a, 'e, 'ye, 'ya). Sıra: ücretsiz kargo, teslim, aynı gün, iade. Ayar gelince mağazanın kamyon ve saat simgeli satırları kartta söylenmez (ücretsiz kargo eşiğini adıyla anan satırı yine ücretsiz kargo olgusudur). Geri sayım, hafta sonu ve tatil kuralı yok: mağazanın kargo sayfası söyler.
 - **Atölye:** kart varken satın alma sütunu kamyon, saat ve iade simgeli rozetleri hiç göstermez (önceden yalnız kartta aynen geçenleri çıkarıyordu); kartsız ürün bugünkü gibi.
 - **Testler:** backend `workflows/storefront/__tests__/delivery.unit.spec.ts` (eski alana düşüş dahil), `shipping-section.unit.spec.ts`, HTTP `storefront-frame.spec.ts` (eski saat, Kargo'nunkinin önceliği, 24'ün reddi) ve `marketing-feeds.spec.ts` (eski alandan `expressDeliveryTime`); vitrin `lib/views/__tests__/product-shipping.spec.ts`, `lib/__tests__/atolye-product-theme.spec.ts`; panel `delivery-card.spec.tsx`, `feed-rules-card.spec.tsx`.
+
+## Ek (2026-11-06, blog yazarları): yazar sayfası, yazının yazar satırı ve yazar kutusu (otonom, gözden geçir)
+
+Blog yazısının yazarı artık serbest metin değil, mağazanın yönettiği bir kayıt (adr/0060): adı, sayfası (`/blog/yazar/{handle}`), unvanı, kısa biyografisi, fotoğrafı ve kendi profilleri (web sitesi, LinkedIn, Instagram, X). Alanlar **isteğe bağlı ve eklemelidir**: okumayan tema bugünkü gibi çizer (`post.author` adı taşımaya devam eder). Store tipleri `packages/types/src/store/storefront.ts`'te, görünüm tipleri `packages/ui/src/content-views.ts`'te.
+
+| Alan | Şekli | Kaynak |
+| --- | --- | --- |
+| `StoreContentSummary.author?` (`@qticaret/types`) | `StoreContentAuthor` (`id`, `name`, `handle`, `path`, `job_title`) \| `null` | `GET /store/content` listesi; `author_name` kalır: bağlı yazarın adı, yoksa eski serbest metin |
+| `GET /store/content/:id` `entry.author` | `StoreContentAuthorDetail` (yukarıdakiler + `bio` düz metin, `image_url`/`image_width`/`image_height`/`image_derivatives`, `links: { kind: "website" \| "linkedin" \| "instagram" \| "x"; url }[]`) \| `null` | yazının seçili yazarı |
+| `GET /store/content/authors/:id` | `{ author: StoreContentAuthorPage }` (detay + `post_count`) | yazar sayfası; `storePublicGet` (terimler gibi paylaşılan önbellek) |
+| `GET /store/content?kind=post&author={handle}` | liste | yazarın canlı yazıları, en yeni önce |
+| `EntityType` `"post_author"` | resolve | `/blog/yazar/{handle}`; `seo.jsonLd` backend'in (`ProfilePage` + `Person`, `BreadcrumbList`); canlı yazısı olmayan yazar `noindex,follow` |
+| `PostMetaView.authorPath?` | `string \| null` | seçili yazarın sayfası; yazar satırı bağlantı olur. Yazar seçilmemiş eski yazıda ad bağlantısız (`postMeta`) |
+| `ContentPageView.author?` | `AuthorView` \| `null` | yazının sonundaki yazar kutusu (`authorView`, `lib/views/authors.ts`) |
+| `BlogIndexPageView.activeAuthor?` | `AuthorView` \| `null` | yazar sayfasının başı; yalnız yazar sayfasında dolu |
+| `AuthorView` | `{ name, path, jobTitle: string \| null, bio: string[], image: ImageView \| null, links: SocialLinkView[] }` | biyografi boş satırlarla paragraflara bölünür; fotoğrafın alt metni yazarın adı; profiller sabit sırada (web sitesi, LinkedIn, Instagram, X), sözcükler vitrinin (`blog.author_link_*`), web adresi olmayan atlanır |
+
+- **Vitrin:** `BlogAuthorScreen` (`screens/blog.tsx`) arşivlerle aynı listeyi kurar: sayfa başına 12 yazı, `?sayfa=` (1 → çıplak adrese 301, sondan sonrası ve sayı olmayan 404), sonraki sayfa kendi başlığı ve kanoniğiyle (`pagedSeo`). Yazarın başı her sayfada; biyografi, arşivin kendi metni gibi yalnız ilk sayfada. Canlı yazısı olmayan yazar için liste hiç istenmez (boş). Kategori çubuğu arşivlerdeki gibi üstte.
+- **Atölye:** yazar satırı "Yazan: {ad}" adı yazar sayfasına bağlar; makalenin sonunda, etiket ve paylaşım haplarından sonra yazar kutusu (`content/Author.tsx`); yazar sayfasında `BlogIndexPage` başlığın yerine yazarın başını çizer (`AuthorHead`, tek `h1`). Taban tema yazar sayfasında unvanı ve biyografiyi başlığın altına yazar; yazıda yazar çizmediği için bağlantısı yok.
+- **Testler:** vitrin `lib/views/__tests__/authors.spec.ts`, `content-extras.spec.ts` (`postMeta`), `screens/__tests__/blog-author.spec.ts`, `lib/__tests__/atolye-author-theme.spec.ts`.

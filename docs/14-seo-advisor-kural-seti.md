@@ -133,7 +133,7 @@ Kural adları ortak ve ürün kurallarıyla çakışmasın diye farklıdır (MET
 
 | ID | Kural | Önem |
 |---|---|---|
-| A-BYLINE-01 | Blog yazısında yazar (`Person`); yayın ve güncelleme tarihi kendiliğinden tutulur | O |
+| A-BYLINE-01 | Blog yazısında Yazarlar'dan seçilmiş yazar (`Person`, yazar sayfasıyla; adr/0060): yazar yok (`no_author`, O), yalnız eski serbest metin, yazar sayfası yok (`no_author_page`, D), yazarın biyografisi yok (`no_bio`, D). Yayın ve güncelleme tarihi kendiliğinden tutulur | O |
 | A-STRUCT-01 | ≥ 300 kelimelik metinde H2 ara başlık; paragrafların en fazla üçte biri 4 cümleden uzun | O |
 | A-ANSWER-01 | Blog yazısında ilk başlıktan önce 130–170 kelimelik kendi kendine yeten cevap bloğu | B |
 | A-INLINK-01 | ≥ 300 kelimelik metinde her 1.000 kelimede en az 3 iç bağlantı (ürün/kategori bağlantısı ya da kartı) | O |

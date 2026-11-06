@@ -46,6 +46,8 @@ Tenant kurulumda bir desen seti seçer; desen tokenlarla tanımlıdır ve sonrad
 | Facet landing | `/kategori/{slug}/{facet-slug}` (ör. `/kategori/bicak/paslanmaz-celik`) | |
 | İçerik sayfası | `/{slug}` | |
 | Blog | `/blog/{slug}` | |
+| Blog kategorisi / etiketi | `/blog/kategori/{slug}`, `/blog/etiket/{slug}` (adr/0019 Ek 2026-11-03) | |
+| Blog yazarı | `/blog/yazar/{slug}` (adr/0060; canlı yazısı yoksa `noindex,follow`, site haritasında yok) | |
 | Arama | `/arama?q=` (noindex) | |
 
 - **Ürün URL'si kategori içermez.** Bir ürün birden çok kategoride olabilir; URL tek, canonical tek. (Shopify'daki `/collections/x/products/y` çoğaltması bilinçli olarak yok.)
@@ -106,7 +108,8 @@ Backend `jsonLd` dizisini üretir; tema değiştiremez (sadece ek blok ekleyebil
 | Ürün | `Product` (tek varyant) veya `ProductGroup` + `hasVariant[Product]`; her `Product` içinde `Offer` (`price`, `priceCurrency: TRY`, `availability`, `url`, `sku`, `gtin13`/`mpn`, `itemCondition`, `priceValidUntil` (zamanlı fiyat varsa), `shippingDetails`, `hasMerchantReturnPolicy`); `brand`; `image[]`; `aggregateRating` + `review[]` (F10.6'dan, yalnızca onaylı); indirimde ek `UnitPriceSpecification` `priceType: https://schema.org/StrikethroughPrice` ile eski fiyat, güncel fiyat Offer'da `priceType`'sız — üstü çizili fiyat **F4.3 indirim öncesi fiyat kuralıyla (10 gün, adr/0023 Ek 2026-11-05) aynı kaynaktan** gelir; `BreadcrumbList` |
 | Kategori / marka / koleksiyon | `CollectionPage` + `ItemList` (ilk sayfa ürünleri), `BreadcrumbList` |
 | Ana sayfa | `OnlineStore` (Organization'ın e-ticaret alt tipi; Google en spesifik tipi önerir) — künye (F13.9): ad, logo, adres, telefon, `sameAs` sosyal hesaplar; organizasyon seviyesinde `hasMerchantReturnPolicy` ve `hasShippingService` (ürün seviyesi bunları override eder; öncelik: Merchant Center ayarı > ürün markup > organizasyon markup); `WebSite` (SearchAction **yok**, sitelinks arama kutusu Kasım 2024'te kaldırıldı) |
-| İçerik / blog | `Article`/`BlogPosting` (yazar, tarih, güncelleme tarihi, yayıncı) |
+| İçerik / blog | `Article`/`BlogPosting` (yazar, tarih, güncelleme tarihi, yayıncı); yazar seçilmişse `Person` (`name`, yazar sayfası `url`, `jobTitle`, `image`, `sameAs`; adr/0060) |
+| Blog yazarı | `ProfilePage` (`mainEntity` `Person`) + `BreadcrumbList` (adr/0060) |
 | Ürün Soru-Cevap (F10.10) | `QAPage` (gerçek kullanıcı soruları). **`FAQPage` kullanılmaz**: Google FAQ rich result'ı 7 Mayıs 2026'da tüm siteler için kaldırdı (doküman Haziran 2026'da silindi); `HowTo` Eylül 2023'ten beri yok. SSS içeriği kullanıcı için sayfada kalabilir, şema yatırımı yapılmaz |
 | Yetişkin ürünler | `hasAdultConsideration` (2026-05, zorunlu; değer `SexualContentConsideration`) — kısıtlı kategori bayrağıyla (F13.4) eşlenir |
 

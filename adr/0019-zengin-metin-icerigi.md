@@ -128,3 +128,7 @@ Kullanıcı kararı (2026-11-05): "her şeye bu kadar engel atıp durma". Yayın
 - **Site haritası:** Bu sayfalar öbür noindex sayfalar gibi site haritasına ve SEO denetiminin beklenen sayısına girmez (`workflows/seo/sitemap-build.ts`, `originality >= 30` süzgeci). Danışmanın yinelenen başlık/açıklama karşılaştırmasında da listelenmiş sayılmaz.
 - **Eşiği geçince:** Kayıtta özgünlük yeniden ölçülür ve önbellek düşer. Gecelik yeniden ölçümde bir sayfa %30 çizgisini geçerse resolve önbelleği düşer ve site haritası yenilenmek üzere işaretlenir.
 - **Panel ve danışman:** L-UNIQ-01 uyarmaya devam eder (docs/14). Sayfanın durumu kartı canlı ve %30 altındaki sayfada tek satırla söyler: sayfa yayında, daha özgün olana kadar arama motorlarına kapalı.
+
+## Ek (2026-11-06): blog yazarları
+
+Yazının serbest metin yazarı (`author_name`) yerine mağazanın yönettiği yazar kaydı (`content_author`, `content_entry.author_id`) ve yazar sayfası `/blog/yazar/{handle}`: adr/0060. `author_name` okunur yedek olarak kalır; eski yazılar `authors:backfill [apply]` ile bağlanır.
