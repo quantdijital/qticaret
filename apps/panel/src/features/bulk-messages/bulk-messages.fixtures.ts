@@ -127,6 +127,7 @@ const CAN_ALL = {
   legalTexts: true,
   vatRates: true,
   searchSynonyms: true,
+  orderExport: true,
 }
 
 export const staff = (role: "owner" | "operations"): StaffMe => ({
@@ -143,6 +144,7 @@ export const staff = (role: "owner" | "operations"): StaffMe => ({
           legalTexts: false,
           vatRates: false,
           searchSynonyms: false,
+          orderExport: false,
           migration: false,
           team: false,
         },

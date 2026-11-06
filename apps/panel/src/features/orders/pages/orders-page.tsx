@@ -10,102 +10,60 @@ import { Pagination } from "@/components/patterns/pagination"
 import { SearchInput } from "@/components/patterns/search-input"
 import { ErrorState } from "@/components/patterns/states"
 import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  ORDER_PAGE_SIZE,
-  ORDER_STAGES,
-  PAYMENT_FILTERS,
-  SHIPPING_FILTERS,
-  orderBoardQuery,
-} from "@/features/orders/api/orders"
-import type { BoardOrder } from "@/features/orders/api/orders"
+import { ORDER_PAGE_SIZE, ORDER_STAGES, orderBoardQuery } from "@/features/orders/api/orders"
+import type { BoardOrder, OrderFilters as Filters } from "@/features/orders/api/orders"
 import type { ShipResult } from "@/features/orders/api/shipping"
 import { BulkBar } from "@/features/orders/components/bulk-bar"
 import { useColumns } from "@/features/orders/components/order-columns"
+import { OrderExportButton } from "@/features/orders/components/order-export"
+import { OrderFilters } from "@/features/orders/components/order-filters"
 import { ShipResultsDialog } from "@/features/orders/components/ship-results-dialog"
+import { isFiltered } from "@/features/orders/search"
 import type { OrderListSearch } from "@/features/orders/search"
 import { PaymentLinkButtons } from "@/features/payment-links/components/order-buttons"
 import { errorText } from "@/lib/errors"
 
 const route = getRouteApi("/_auth/orders/")
-const ANY = "__any"
 
-/** A filter beside the search: its choices, "any" first. */
-function FilterSelect<T extends string>({
-  label,
-  value,
-  options,
-  text,
-  onChange,
-}: {
-  label: string
-  value: T | undefined
-  options: readonly T[]
-  text: (option: T) => string
-  onChange: (next: T | undefined) => void
-}) {
-  const { t } = useTranslation()
-  return (
-    <Select
-      value={value ?? ANY}
-      onValueChange={(next) => {
-        onChange(next === ANY ? undefined : (next as T))
-      }}
-    >
-      <SelectTrigger className="w-full sm:w-80" aria-label={label}>
-        {/* The chosen value with what it filters: "Kargo: Yolda" */}
-        <SelectValue>
-          {value ? `${label}: ${text(value)}` : t("orders.filters.any", { what: label })}
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        <SelectItem value={ANY}>{t("orders.filters.any", { what: label })}</SelectItem>
-        {options.map((option) => (
-          <SelectItem key={option} value={option}>
-            {text(option)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  )
-}
+/** The address's search without its empty parts: an "all" tab, an empty search, page 1. */
+const cleanSearch = (search: OrderListSearch): OrderListSearch => ({
+  q: search.q === "" ? undefined : search.q,
+  stage: search.stage === "all" ? undefined : search.stage,
+  payment: search.payment,
+  shipping: search.shipping,
+  method: search.method,
+  carrier: search.carrier,
+  from: search.from,
+  to: search.to,
+  page: search.page && search.page > 1 ? search.page : undefined,
+})
 
 /** Every order by stage (docs/06 §4): what needs packing first, then the rest. */
 export function OrdersPage() {
   const { t } = useTranslation()
   const search = route.useSearch()
   const navigate = useNavigate()
-  const stage = search.stage ?? "all"
   const page = (search.page ?? 1) - 1
-  const q = search.q ?? ""
-  const { payment, shipping } = search
-  const board = useQuery(orderBoardQuery({ stage, q, page, payment, shipping }))
+  const filters: Filters = {
+    stage: search.stage ?? "all",
+    q: search.q ?? "",
+    payment: search.payment,
+    shipping: search.shipping,
+    method: search.method,
+    carrier: search.carrier,
+    from: search.from,
+    to: search.to,
+  }
+  const board = useQuery(orderBoardQuery({ ...filters, page }))
   const columns = useColumns()
-  // Orders picked to ship at once (F7.7), kept with their row for the results' numbers
+  // Orders picked to ship or print at once (F7.7), kept with their row for the results' numbers
   const [picked, setPicked] = useState<Map<string, BoardOrder>>(new Map())
   const [results, setResults] = useState<{
     list: ShipResult[]
     orders: Map<string, BoardOrder>
   } | null>(null)
   const setSearch = (next: OrderListSearch) => {
-    const merged = { ...search, ...next }
-    void navigate({
-      to: "/orders",
-      search: {
-        q: merged.q === "" ? undefined : merged.q,
-        stage: merged.stage === "all" ? undefined : merged.stage,
-        payment: merged.payment,
-        shipping: merged.shipping,
-        page: merged.page && merged.page > 1 ? merged.page : undefined,
-      },
-      replace: true,
-    })
+    void navigate({ to: "/orders", search: cleanSearch({ ...search, ...next }), replace: true })
   }
   // Another view: what was picked may not be in it
   const refilter = (next: OrderListSearch) => {
@@ -132,6 +90,8 @@ export function OrdersPage() {
             <Button asChild variant="outline" size="sm">
               <Link to="/orders/invoices">{t("orders.invoice.queue")}</Link>
             </Button>
+            {/* The list as it is filtered, as a file: the owner's alone */}
+            <OrderExportButton filters={filters} />
             {/* adr/0051: staff-made orders paid through a link, while the shop has them on */}
             <PaymentLinkButtons />
           </span>
@@ -140,7 +100,7 @@ export function OrdersPage() {
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs
           label={t("orders.views")}
-          value={stage}
+          value={filters.stage}
           onChange={(next) => {
             refilter({ stage: next })
           }}
@@ -150,33 +110,16 @@ export function OrdersPage() {
             count: board.data?.counts[key],
           }))}
         />
-        <div className="flex flex-wrap items-center gap-3 px-5 py-3">
+        <div className="grid grid-cols-1 gap-2 px-5 py-3 sm:flex sm:flex-wrap sm:items-center">
           <SearchInput
             className="sm:w-80 sm:max-w-none"
-            value={q}
+            value={filters.q}
             placeholder={t("orders.search")}
             onChange={(text) => {
               setSearch({ q: text, page: 1 })
             }}
           />
-          <FilterSelect
-            label={t("orders.filters.payment")}
-            value={payment}
-            options={PAYMENT_FILTERS}
-            text={(option) => t(`orders.filters.payments.${option}`)}
-            onChange={(next) => {
-              refilter({ payment: next })
-            }}
-          />
-          <FilterSelect
-            label={t("orders.filters.shipping")}
-            value={shipping}
-            options={SHIPPING_FILTERS}
-            text={(option) => t(`orders.filters.shippings.${option}`)}
-            onChange={(next) => {
-              refilter({ shipping: next })
-            }}
-          />
+          <OrderFilters search={search} onChange={refilter} />
           {board.data?.limited ? (
             <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
               <Info className="size-3.5" aria-hidden="true" />
@@ -233,9 +176,9 @@ export function OrdersPage() {
                 <div className="flex flex-col items-center gap-3 text-center">
                   <Inbox className="size-8 text-muted-foreground" aria-hidden="true" />
                   <p className="text-sm text-muted-foreground">
-                    {q || payment || shipping
+                    {filters.q || isFiltered(search)
                       ? t("orders.noMatch")
-                      : stage === "all"
+                      : filters.stage === "all"
                         ? t("orders.empty")
                         : t("orders.emptyStage")}
                   </p>

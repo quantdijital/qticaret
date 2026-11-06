@@ -36,6 +36,8 @@ export interface BoardOrder {
     carrier: "geliver" | "aras" | "yurtici" | null
     pickup: boolean
   } | null
+  /** Lines made to the buyer's wish (adr/0052): how many, and whether one is outside withdrawal. */
+  addons: { lines: number; non_withdrawable: boolean }
 }
 
 /** Where a carrier's parcel stands (adr/0031), as the server names it. */
@@ -67,38 +69,53 @@ export type PaymentFilter = (typeof PAYMENT_FILTERS)[number]
 export const SHIPPING_FILTERS = ["none", "label", "on_the_way", "delivered", "problem"] as const
 export type ShippingFilter = (typeof SHIPPING_FILTERS)[number]
 
-export interface OrderBoardParams {
+/** How it was paid: card, bank transfer, at the door, or through a payment link (adr/0051). */
+export const PAYMENT_METHODS = ["card", "bank_transfer", "cod", "payment_link"] as const
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number]
+
+/** Who carries it, by the delivery chosen: a carrier, or the shop's own delivery and collection. */
+export const CARRIER_FILTERS = ["aras", "yurtici", "geliver", "own"] as const
+export type CarrierFilter = (typeof CARRIER_FILTERS)[number]
+
+/** The list's filters as the server takes them, the export's too; days are Turkish `YYYY-MM-DD`. */
+export interface OrderFilters {
   stage: OrderStage
   q: string
-  page: number
   /** One customer's orders, for their page. */
   customerId?: string | undefined
   payment?: PaymentFilter | undefined
   shipping?: ShippingFilter | undefined
+  method?: PaymentMethod | undefined
+  carrier?: CarrierFilter | undefined
+  from?: string | undefined
+  to?: string | undefined
+}
+
+/** The filters as the server names them, empty ones left out. */
+export const filterQuery = (filters: OrderFilters): Record<string, string> => ({
+  stage: filters.stage,
+  ...(filters.q ? { q: filters.q } : {}),
+  ...(filters.customerId ? { customer_id: filters.customerId } : {}),
+  ...(filters.payment ? { payment: filters.payment } : {}),
+  ...(filters.shipping ? { shipping: filters.shipping } : {}),
+  ...(filters.method ? { method: filters.method } : {}),
+  ...(filters.carrier ? { carrier: filters.carrier } : {}),
+  ...(filters.from ? { from: filters.from } : {}),
+  ...(filters.to ? { to: filters.to } : {}),
+})
+
+export interface OrderBoardParams extends OrderFilters {
+  page: number
 }
 
 export const ORDER_PAGE_SIZE = 20
 
-export const orderBoardQuery = ({
-  stage,
-  q,
-  page,
-  customerId,
-  payment,
-  shipping,
-}: OrderBoardParams) =>
+export const orderBoardQuery = ({ page, ...filters }: OrderBoardParams) =>
   queryOptions({
-    queryKey: ["orders", "board", { stage, q, page, customerId, payment, shipping }],
+    queryKey: ["orders", "board", { page, ...filters }],
     queryFn: () =>
       sdk.client.fetch<OrderBoard>("/admin/order-board", {
-        query: {
-          stage,
-          offset: page * ORDER_PAGE_SIZE,
-          ...(q ? { q } : {}),
-          ...(customerId ? { customer_id: customerId } : {}),
-          ...(payment ? { payment } : {}),
-          ...(shipping ? { shipping } : {}),
-        },
+        query: { ...filterQuery(filters), offset: page * ORDER_PAGE_SIZE },
       }),
     placeholderData: keepPreviousData,
   })

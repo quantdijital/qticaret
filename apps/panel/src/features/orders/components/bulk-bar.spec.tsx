@@ -23,6 +23,7 @@ const order = (id: string, more: Partial<BoardOrder>): BoardOrder => ({
   customer: { name: "Ayşe Yılmaz", place: "İstanbul" },
   shipping: null,
   delivery: { name: "Standart Kargo", carrier: null, pickup: false },
+  addons: { lines: 0, non_withdrawable: false },
   ...more,
 })
 

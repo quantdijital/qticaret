@@ -37,6 +37,8 @@ export type Capability =
   | "vatRates"
   /** Adding, changing and deleting site search's synonym groups (adr/0056): owner and admin. */
   | "searchSynonyms"
+  /** The order list as an Excel or CSV file, every customer's details in it: the owner's alone. */
+  | "orderExport"
 
 export interface StaffMe {
   user_id: string

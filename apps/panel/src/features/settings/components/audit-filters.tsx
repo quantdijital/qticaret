@@ -1,10 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
-import { CalendarRange, X } from "lucide-react"
-import { useState } from "react"
+import { X } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { DayRangeFilter } from "@/components/patterns/day-range-filter"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
@@ -18,8 +16,6 @@ import { AUDIT_ACTOR_TYPES, auditResourceTypesQuery } from "@/features/settings/
 import type { AuditSearch } from "@/features/settings/api/audit"
 import { teamQuery } from "@/features/settings/api/team"
 import { groupResources } from "@/features/settings/audit-resources"
-import { turkishDay } from "@/features/reports/range"
-import { formatDate } from "@/lib/format"
 
 const F = "settings.audit.filters"
 const ALL = "__all"
@@ -27,84 +23,6 @@ const ALL = "__all"
 interface AuditFiltersProps {
   search: AuditSearch
   onChange: (next: Partial<AuditSearch>) => void
-}
-
-/** The days an entry falls in, as Turkish days; either end may stay open. */
-function RangeFilter({ search, onChange }: AuditFiltersProps) {
-  const { t } = useTranslation()
-  const today = turkishDay(new Date())
-  const [open, setOpen] = useState(false)
-  const [from, setFrom] = useState(search.from ?? "")
-  const [to, setTo] = useState(search.to ?? "")
-  const chosen = search.from ?? search.to
-  const valid = (from === "" || to === "" || from <= to) && (from !== "" || to !== "")
-  return (
-    <Popover
-      open={open}
-      onOpenChange={(next) => {
-        setOpen(next)
-        if (next) {
-          setFrom(search.from ?? "")
-          setTo(search.to ?? "")
-        }
-      }}
-    >
-      <PopoverTrigger asChild>
-        <Button
-          variant={chosen ? "secondary" : "outline"}
-          className="w-full justify-start font-normal sm:w-56"
-        >
-          <CalendarRange aria-hidden="true" />
-          {chosen
-            ? t(`${F}.range`, {
-                from: search.from ? formatDate(search.from) : "…",
-                to: search.to ? formatDate(search.to) : "…",
-              })
-            : t(`${F}.anyTime`)}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent align="end" className="w-72">
-        <form
-          className="flex flex-col gap-3"
-          onSubmit={(event) => {
-            event.preventDefault()
-            if (valid) {
-              setOpen(false)
-              onChange({ from: from || undefined, to: to || undefined })
-            }
-          }}
-        >
-          <label className="flex flex-col gap-1.5 text-sm font-medium">
-            {t("period.custom.from")}
-            <Input
-              type="date"
-              value={from}
-              max={to || today}
-              onChange={(event) => {
-                setFrom(event.target.value)
-              }}
-            />
-          </label>
-          <label className="flex flex-col gap-1.5 text-sm font-medium">
-            {t("period.custom.to")}
-            <Input
-              type="date"
-              value={to}
-              min={from || undefined}
-              max={today}
-              onChange={(event) => {
-                setTo(event.target.value)
-              }}
-            />
-          </label>
-          <p className="text-xs text-muted-foreground">{t(`${F}.rangeHint`)}</p>
-          <Button type="submit" disabled={!valid}>
-            {t("period.custom.apply")}
-          </Button>
-        </form>
-      </PopoverContent>
-    </Popover>
-  )
 }
 
 /**
@@ -190,7 +108,11 @@ export function AuditFilters({ search, onChange }: AuditFiltersProps) {
           ))}
         </SelectContent>
       </Select>
-      <RangeFilter search={search} onChange={onChange} />
+      <DayRangeFilter
+        value={{ from: search.from, to: search.to }}
+        hint={t(`${F}.rangeHint`)}
+        onChange={onChange}
+      />
       {filtered ? (
         <Button
           variant="ghost"

@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import type { Column } from "@/components/patterns/data-table"
 import type { BoardOrder } from "@/features/orders/api/orders"
+import { AddonBadge } from "@/features/orders/components/addon-badge"
 import { CustomerCell } from "@/features/orders/components/customer-cell"
 import { OrderShipping } from "@/features/orders/components/shipping-badge"
 import { StageBadge } from "@/features/orders/components/stage-badge"
@@ -59,7 +60,10 @@ export function useColumns(): Column<BoardOrder>[] {
       // On phones the total and the shipping sit under the stage; their columns come back wider
       cell: (order) => (
         <div className="flex flex-col items-start gap-1">
-          <StageBadge stage={order.stage} />
+          <span className="flex flex-wrap items-center gap-1">
+            <StageBadge stage={order.stage} />
+            <AddonBadge addons={order.addons} />
+          </span>
           <span className="tabular text-xs font-medium sm:hidden">
             {formatMoney(order.total, order.currency_code)}
           </span>

@@ -752,7 +752,8 @@
         "catalog.bulk_edit": "Bulk edit",
         "customer.data_export": "Customer data export",
         "catalog.description_facts": "Facts from descriptions",
-        "content.link_rewrite": "Fixing links in texts"
+        "content.link_rewrite": "Fixing links in texts",
+        "order.export": "Order export"
       }
     },
     "audit": {
@@ -792,8 +793,6 @@
         "others": "Other",
         "resource": "Resource",
         "anything": "All resources",
-        "anyTime": "Any time",
-        "range": "{{from}} – {{to}}",
         "rangeHint": "Turkey time; either end may stay empty.",
         "clear": "Clear",
         "groups": {
@@ -1271,7 +1270,9 @@
         "sizeInvalid": "Width 70–210 mm and height 70–297 mm, whole numbers.",
         "printerHint": "When printing, pick the same paper size in the printer settings and set scaling to 100% (actual size).",
         "preview_one": "{{width}} × {{height}} mm, {{count}} label a page",
-        "preview_other": "{{width}} × {{height}} mm, {{count}} labels a page"
+        "preview_other": "{{width}} × {{height}} mm, {{count}} labels a page",
+        "slipPrices": "Show prices on the packing slip",
+        "slipPricesHint": "Off: the slip shows products, quantities and add-ons only; a gift's box shows no price."
       },
       "aras": {
         "keys": {
@@ -2860,7 +2861,13 @@
     "next": "Next page",
     "clearSearch": "Clear search",
     "selectPage": "Select every row on this page",
-    "selectRow": "Select {{name}}"
+    "selectRow": "Select {{name}}",
+    "days": {
+      "anyTime": "Any time",
+      "range": "{{from}} – {{to}}",
+      "hint": "Turkey time; either end may stay open.",
+      "clear": "Clear"
+    }
   },
   "products": {
     "description": "Your shop's products, prices and stock",
@@ -3767,7 +3774,9 @@
         "status": "Status",
         "amount": "Amount"
       },
-      "orderTitle": "This order's chargebacks"
+      "orderTitle": "This order's chargebacks",
+      "dialogTitle": "Chargeback on order #{{number}}",
+      "openedAt": "Opened"
     },
     "shipping": {
       "created": "Label ready",
@@ -3930,7 +3939,8 @@
       "cancelDescription": "The approval is taken back: the customer's carrier code stops working, the items can be returned again and the customer gets an email. A parcel already handed to the carrier cannot be cancelled.",
       "cancelReason": "Reason",
       "cancelReasonHint": "A note for the team; the customer does not see it.",
-      "canceled": "Return request cancelled; the customer was emailed."
+      "canceled": "Return request cancelled; the customer was emailed.",
+      "dialogTitle": "Request on order #{{number}}"
     },
     "edit": {
       "title": "Edit order #{{number}}",
@@ -3976,7 +3986,25 @@
         "on_the_way": "On the way",
         "delivered": "Delivered",
         "problem": "Problem (returned, not delivered)"
-      }
+      },
+      "method": "Payment method",
+      "carrier": "Carrier",
+      "methods": {
+        "card": "Card",
+        "bank_transfer": "Bank transfer",
+        "cod": "Cash on delivery",
+        "payment_link": "Payment link",
+        "gift_card": "Gift card",
+        "other": "Other"
+      },
+      "carriers": {
+        "aras": "Aras Kargo",
+        "yurtici": "Yurtiçi Kargo",
+        "geliver": "Geliver",
+        "own": "The shop's own delivery"
+      },
+      "daysHint": "The days the order was placed, Turkey time; either end may stay open.",
+      "clear": "Clear filters"
     },
     "bulk": {
       "ship_one": "Ship ({{count}})",
@@ -4188,7 +4216,21 @@
       "advance": "Advance (gift card)",
       "advanceAmount": "Advance (gift card) {{amount}}",
       "advanceOnly": "Gift cards only: no invoice, an advance",
-      "advanceHint": "Gift card lines stay off the invoice; their money is an advance, its VAT due on the invoice of what the card buys."
+      "advanceHint": "Gift card lines stay off the invoice; their money is an advance, its VAT due on the invoice of what the card buys.",
+      "bulk": {
+        "region": "Picked invoices",
+        "selected_one": "{{count}} invoice picked",
+        "selected_other": "{{count}} invoices picked",
+        "tooMany": "At most {{max}} invoices can be tried again at once.",
+        "retry_one": "Try again ({{count}})",
+        "retry_other": "Try again ({{count}})",
+        "retried_one": "{{count}} invoice queued again.",
+        "retried_other": "{{count}} invoices queued again.",
+        "notRetried_one": "{{count}} invoice could not be tried again: {{reason}}",
+        "notRetried_other": "{{count}} invoices could not be tried again: {{reason}}"
+      },
+      "dialogTitle": "Invoice of order #{{number}}",
+      "rowLabel": "Invoice of order #{{number}}"
     },
     "fraud": {
       "queue": "Review",
@@ -4221,7 +4263,9 @@
         "phone_many_emails": "Many e-mails with one phone",
         "disposable_email": "Throwaway e-mail",
         "failed_payments": "Failed payment attempts"
-      }
+      },
+      "dialogTitle": "Order #{{number}} under review",
+      "email": "E-mail"
     },
     "nonWithdrawableReasons": {
       "product": {
@@ -4243,6 +4287,61 @@
       "refunds": "Refunds",
       "chargebacks": "Chargebacks",
       "contracts": "Contract consent"
+    },
+    "export": {
+      "button": "Export",
+      "excel": "Download as Excel",
+      "csv": "Download CSV",
+      "later": "The file is being prepared; download it from Settings > Jobs when it is ready.",
+      "failed": "The order file could not be made."
+    },
+    "addons": {
+      "badge_one": "With add-ons",
+      "badge_other": "With add-ons ({{count}} products)",
+      "personal_one": "Personalised",
+      "personal_other": "Personalised ({{count}} products)"
+    },
+    "print": {
+      "button": "Print",
+      "slips": "Packing slips",
+      "pickList": "Pick list",
+      "tooMany": "At most {{max}} orders can be printed at once.",
+      "slipTitle": "Packing slip",
+      "slipsTitle": "Packing slips",
+      "pickTitle": "Pick list",
+      "slipOf": "Packing slip #{{number}}",
+      "shipTo": "Ship to",
+      "orderFacts": "Order",
+      "payment": "Payment",
+      "delivery": "Delivery",
+      "tracking": "Tracking no",
+      "packed": "Packed",
+      "picked": "Picked",
+      "product": "Product",
+      "sku": "SKU",
+      "quantity": "Qty",
+      "unitPrice": "Unit price",
+      "lineTotal": "Amount",
+      "notShipped": "Not shipped",
+      "personalised": "Personalised product",
+      "giftFor": "Gift for {{name}}",
+      "giftFrom": "from {{name}}",
+      "itemsTotal": "Products",
+      "discount": "Discount",
+      "shipping": "Shipping",
+      "total": "Total",
+      "notes": "Team notes",
+      "perOrder": "Orders and add-ons",
+      "ordersCount_one": "{{count}} order",
+      "ordersCount_other": "{{count}} orders",
+      "nothingToPick": "The picked orders have nothing to ship.",
+      "withNotes": "Add the team's notes",
+      "close": "Close",
+      "print": "Print",
+      "noOrders": "No orders were picked to print."
+    },
+    "queueDialog": {
+      "openOrder": "Go to order"
     }
   },
   "customers": {

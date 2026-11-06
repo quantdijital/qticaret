@@ -752,7 +752,8 @@
         "catalog.bulk_edit": "Toplu düzenleme",
         "customer.data_export": "Müşteri verisi dışa aktarımı",
         "catalog.description_facts": "Açıklamadan özellik aktarma",
-        "content.link_rewrite": "Metinlerdeki bağlantıları düzeltme"
+        "content.link_rewrite": "Metinlerdeki bağlantıları düzeltme",
+        "order.export": "Sipariş dışa aktarımı"
       }
     },
     "audit": {
@@ -792,8 +793,6 @@
         "others": "Diğer",
         "resource": "Kaynak",
         "anything": "Tüm kaynaklar",
-        "anyTime": "Her zaman",
-        "range": "{{from}} – {{to}}",
         "rangeHint": "Türkiye saatiyle; bir uç boş kalabilir.",
         "clear": "Temizle",
         "groups": {
@@ -1271,7 +1270,9 @@
         "sizeInvalid": "En 70–210 mm, boy 70–297 mm arasında tam sayı olmalı.",
         "printerHint": "Yazdırırken yazıcı ayarlarında aynı kâğıt boyutunu seçin ve ölçeklemeyi %100 (gerçek boyut) yapın.",
         "preview_one": "{{width}} × {{height}} mm, sayfada {{count}} etiket",
-        "preview_other": "{{width}} × {{height}} mm, sayfada {{count}} etiket"
+        "preview_other": "{{width}} × {{height}} mm, sayfada {{count}} etiket",
+        "slipPrices": "Paketleme fişinde fiyatları göster",
+        "slipPricesHint": "Kapalıyken fişte yalnızca ürün, adet ve ek seçenekler yazar; hediye gönderilerinde fiyat görünmez."
       },
       "aras": {
         "keys": {
@@ -2860,7 +2861,13 @@
     "next": "Sonraki sayfa",
     "clearSearch": "Aramayı temizle",
     "selectPage": "Bu sayfadaki tüm satırları seç",
-    "selectRow": "{{name}} seç"
+    "selectRow": "{{name}} seç",
+    "days": {
+      "anyTime": "Her zaman",
+      "range": "{{from}} – {{to}}",
+      "hint": "Türkiye saatiyle; bir uç boş kalabilir.",
+      "clear": "Temizle"
+    }
   },
   "products": {
     "description": "Mağazanızdaki ürünler, fiyatları ve stokları",
@@ -3767,7 +3774,9 @@
         "status": "Durum",
         "amount": "Tutar"
       },
-      "orderTitle": "Siparişin ters ibrazları"
+      "orderTitle": "Siparişin ters ibrazları",
+      "dialogTitle": "#{{number}} siparişinin ters ibrazı",
+      "openedAt": "Açıldığı tarih"
     },
     "shipping": {
       "created": "Etiket hazır",
@@ -3930,7 +3939,8 @@
       "cancelDescription": "Onay geri alınır: müşterinin kargo kodu geçersiz olur, ürünler yeniden iade edilebilir hâle gelir ve müşteriye e-posta gider. Ürün kargoya verildiyse iptal edilemez.",
       "cancelReason": "İptal sebebi",
       "cancelReasonHint": "Ekip için not; müşteri görmez.",
-      "canceled": "İade talebi iptal edildi; müşteriye e-posta gönderildi."
+      "canceled": "İade talebi iptal edildi; müşteriye e-posta gönderildi.",
+      "dialogTitle": "#{{number}} siparişinin talebi"
     },
     "edit": {
       "title": "#{{number}} siparişini düzenle",
@@ -3976,7 +3986,25 @@
         "on_the_way": "Yolda",
         "delivered": "Teslim edildi",
         "problem": "Sorunlu (geri döndü, teslim edilemedi)"
-      }
+      },
+      "method": "Ödeme yöntemi",
+      "carrier": "Kargo firması",
+      "methods": {
+        "card": "Kart",
+        "bank_transfer": "Havale / EFT",
+        "cod": "Kapıda ödeme",
+        "payment_link": "Ödeme bağlantısı",
+        "gift_card": "Hediye kartı",
+        "other": "Diğer"
+      },
+      "carriers": {
+        "aras": "Aras Kargo",
+        "yurtici": "Yurtiçi Kargo",
+        "geliver": "Geliver",
+        "own": "Mağazanın kendi teslimatı"
+      },
+      "daysHint": "Siparişin verildiği günler, Türkiye saatiyle; bir uç boş kalabilir.",
+      "clear": "Filtreleri temizle"
     },
     "bulk": {
       "ship_one": "Kargoya ver ({{count}})",
@@ -4188,7 +4216,21 @@
       "advance": "Avans (hediye kartı)",
       "advanceAmount": "Avans (hediye kartı) {{amount}}",
       "advanceOnly": "Yalnız hediye kartı: fatura yok, avans",
-      "advanceHint": "Hediye kartı satırları faturaya girmez; tutarları avanstır, KDV'si kart harcanınca o alışverişin faturasında doğar."
+      "advanceHint": "Hediye kartı satırları faturaya girmez; tutarları avanstır, KDV'si kart harcanınca o alışverişin faturasında doğar.",
+      "bulk": {
+        "region": "Seçilen faturalar",
+        "selected_one": "{{count}} fatura seçildi",
+        "selected_other": "{{count}} fatura seçildi",
+        "tooMany": "Bir seferde en çok {{max}} fatura yeniden denenebilir.",
+        "retry_one": "Yeniden dene ({{count}})",
+        "retry_other": "Yeniden dene ({{count}})",
+        "retried_one": "{{count}} fatura yeniden kuyruğa alındı.",
+        "retried_other": "{{count}} fatura yeniden kuyruğa alındı.",
+        "notRetried_one": "{{count}} fatura yeniden denenemedi: {{reason}}",
+        "notRetried_other": "{{count}} fatura yeniden denenemedi: {{reason}}"
+      },
+      "dialogTitle": "#{{number}} siparişinin faturası",
+      "rowLabel": "#{{number}} siparişinin faturası"
     },
     "fraud": {
       "queue": "İnceleme",
@@ -4221,7 +4263,9 @@
         "phone_many_emails": "Aynı telefonla çok e-posta",
         "disposable_email": "Geçici e-posta",
         "failed_payments": "Başarısız ödeme denemeleri"
-      }
+      },
+      "dialogTitle": "#{{number}} siparişi incelemede",
+      "email": "E-posta"
     },
     "nonWithdrawableReasons": {
       "product": {
@@ -4243,6 +4287,61 @@
       "refunds": "Para iadeleri",
       "chargebacks": "Ters ibraz",
       "contracts": "Sözleşme onayı"
+    },
+    "export": {
+      "button": "Dışa aktar",
+      "excel": "Excel olarak indir",
+      "csv": "CSV indir",
+      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > İşler'den indirebilirsiniz.",
+      "failed": "Sipariş dosyası hazırlanamadı."
+    },
+    "addons": {
+      "badge_one": "Ek seçenekli",
+      "badge_other": "Ek seçenekli ({{count}} ürün)",
+      "personal_one": "Kişiye özel",
+      "personal_other": "Kişiye özel ({{count}} ürün)"
+    },
+    "print": {
+      "button": "Yazdır",
+      "slips": "Paketleme fişleri",
+      "pickList": "Toplama listesi",
+      "tooMany": "Bir seferde en çok {{max}} sipariş yazdırılabilir.",
+      "slipTitle": "Paketleme fişi",
+      "slipsTitle": "Paketleme fişleri",
+      "pickTitle": "Toplama listesi",
+      "slipOf": "#{{number}} paketleme fişi",
+      "shipTo": "Teslimat adresi",
+      "orderFacts": "Sipariş",
+      "payment": "Ödeme",
+      "delivery": "Teslimat",
+      "tracking": "Takip no",
+      "packed": "Pakete kondu",
+      "picked": "Raftan alındı",
+      "product": "Ürün",
+      "sku": "Stok kodu",
+      "quantity": "Adet",
+      "unitPrice": "Birim fiyat",
+      "lineTotal": "Tutar",
+      "notShipped": "Kargoya girmez",
+      "personalised": "Kişiye özel ürün",
+      "giftFor": "Hediye: {{name}}",
+      "giftFrom": "gönderen {{name}}",
+      "itemsTotal": "Ürünler",
+      "discount": "İndirim",
+      "shipping": "Kargo",
+      "total": "Toplam",
+      "notes": "Ekip notları",
+      "perOrder": "Siparişler ve ekler",
+      "ordersCount_one": "{{count}} sipariş",
+      "ordersCount_other": "{{count}} sipariş",
+      "nothingToPick": "Seçilen siparişlerde kargoya girecek ürün yok.",
+      "withNotes": "Ekip notlarını ekle",
+      "close": "Kapat",
+      "print": "Yazdır",
+      "noOrders": "Yazdırılacak sipariş seçilmedi."
+    },
+    "queueDialog": {
+      "openOrder": "Siparişe git"
     }
   },
   "customers": {
