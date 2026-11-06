@@ -19,6 +19,8 @@ export interface StoreCaches {
   edge: Map<string, CacheEntry>
   /** `resolutions.ts`: a path as the storefront sends it → its resolve answer. */
   resolve: Map<string, CacheEntry>
+  /** `busy.ts`: a visitor the backend's rate limit refused → until when its pages wait. */
+  busy: Map<string, CacheEntry>
 }
 
 const KEY = Symbol.for("qticaret.store-cache")
@@ -30,5 +32,6 @@ export function storeCaches(): StoreCaches {
   caches.shared ??= new Map()
   caches.edge ??= new Map()
   caches.resolve ??= new Map()
+  caches.busy ??= new Map()
   return caches as StoreCaches
 }

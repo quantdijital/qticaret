@@ -1,4 +1,5 @@
 import { storefrontEnv } from "../env"
+import { isPageRead, noteRateLimited } from "./busy"
 import { StoreApiError } from "./errors"
 import { publishableKey } from "./publishable-key"
 import { signedVisitorHeaders } from "./visitor"
@@ -85,6 +86,10 @@ export async function storeRequest<T>(
     signal: AbortSignal.timeout(request.timeoutMs ?? 8000),
   })
   const text = await response.text()
+  if (response.status === 429 && isPageRead(method, path)) {
+    // The visitor's next page views answer 503 until the backend takes them again (`busy.ts`)
+    noteRateLimited(request.visitorIp, response.headers.get("retry-after"))
+  }
   if (!response.ok) {
     // The backend's JSON, or a page: a feature that is off answers as a route that does not exist (adr/0012)
     const body = (jsonOrNull(text) ?? {}) as { message?: unknown; request_id?: unknown }

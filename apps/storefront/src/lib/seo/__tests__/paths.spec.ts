@@ -4,6 +4,7 @@ import {
   BLOG_ARCHIVE_PREFIXES,
   canonicalHostRedirect,
   indexNowFile,
+  isCataloguePage,
   isStaticFile,
   isStorefrontIndex,
   isSystemPath,
@@ -181,6 +182,27 @@ describe("isStaticFile", () => {
       "/kategori/marks/visa.png",
     ]) {
       expect(isStaticFile(path)).toBe(false)
+    }
+  })
+})
+
+describe("isCataloguePage (docs/21 2026-11-06, 10)", () => {
+  it("is every page a crawler reads, the site search among them", () => {
+    for (const path of [
+      "/",
+      "/magaza",
+      "/kategoriler",
+      "/urun/keten-gomlek",
+      "/blog/x",
+      "/arama",
+    ]) {
+      expect(isCataloguePage(path)).toBe(true)
+    }
+  })
+
+  it("is never the cart, checkout, account, a token link or a route handler", () => {
+    for (const path of ["/sepet", "/odeme/sonuc", "/hesap", "/ode/tok", "/api/search/suggest"]) {
+      expect(isCataloguePage(path)).toBe(false)
     }
   })
 })

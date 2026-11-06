@@ -84,6 +84,14 @@ export function isSystemPath(pathname: string): boolean {
 }
 
 /**
+ * The pages a crawler reads: the home page, the storefront's lists, every
+ * record's page and the site search. Never the cart, checkout, account,
+ * a token link or a route handler (a payment's return must always land).
+ */
+export const isCataloguePage = (pathname: string): boolean =>
+  !isSystemPath(pathname) || pathname === "/arama"
+
+/**
  * The query addresses an old platform answered at the home page and on
  * its lists (adr/0059; WordPress's `/?p=12`, `/?s=`, `/blog?paged=2`).
  * Only with one of them do the home page and the storefront's own lists
