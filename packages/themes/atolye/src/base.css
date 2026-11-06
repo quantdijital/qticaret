@@ -100,6 +100,18 @@ input:not([type="checkbox"], [type="radio"], [type="range"], [type="color"], [ty
 :is(select, textarea):not([hidden]) {
   font-size: max(var(--text-md), 1em);
 }
+/* No browser spinner on a number field (owner 2026-11-06: "browser'a özgü kalmasın"): the
+   quantity's own minus and plus, the other fields' chevrons (parts/NumberInput) */
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+}
 .tabular {
   font-variant-numeric: tabular-nums;
 }

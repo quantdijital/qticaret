@@ -296,6 +296,8 @@
   "listing.price_min": "En az",
   "listing.price_max": "En çok",
   "listing.price_apply": "Uygula",
+  "listing.price_increase": "Artır",
+  "listing.price_decrease": "Azalt",
   "listing.filters": "Filtreler",
   "listing.show_filters": "Filtrele",
   "listing.active": "Seçili filtreler",

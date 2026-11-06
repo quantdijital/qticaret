@@ -8,6 +8,8 @@ import type {
   Translate,
 } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
+import { NumberInput } from "../parts/NumberInput"
+import { roundStep, stepCeiling } from "../parts/number-step"
 import { Swatch } from "../parts/Swatch"
 
 /** Values a group shows before "+N daha göster" (a disclosure, no script). */
@@ -155,6 +157,10 @@ function PriceRange({
   hash: string
   t: Translate
 }) {
+  // The chevrons move by a round share of the listing's range, never past its top
+  const step = roundStep(price.min, price.max)
+  const rule = { min: 0, max: stepCeiling(price.max, step), step }
+  const words = { increase: t("listing.price_increase"), decrease: t("listing.price_decrease") }
   return (
     <details open className="group/filter rounded-media bg-paper-2 px-2 py-1">
       <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-inner px-2 text-md font-semibold">
@@ -176,28 +182,26 @@ function PriceRange({
           <label htmlFor={`${id}-en-az`} className="sr-only">
             {t("listing.price_min")}
           </label>
-          <input
+          <NumberInput
             id={`${id}-en-az`}
-            type="number"
             name="fiyat_en_az"
-            inputMode="numeric"
-            min={0}
+            rule={{ ...rule, start: price.min }}
+            words={words}
             placeholder={`${t("listing.price_min")} ${String(price.min)}`}
             defaultValue={price.currentMin ?? undefined}
-            className="gf-field tabular px-4 text-md lg:text-sm"
+            className="px-4 text-md lg:text-sm"
           />
           <label htmlFor={`${id}-en-cok`} className="sr-only">
             {t("listing.price_max")}
           </label>
-          <input
+          <NumberInput
             id={`${id}-en-cok`}
-            type="number"
             name="fiyat_en_cok"
-            inputMode="numeric"
-            min={0}
+            rule={{ ...rule, start: price.max }}
+            words={words}
             placeholder={`${t("listing.price_max")} ${String(price.max)}`}
             defaultValue={price.currentMax ?? undefined}
-            className="gf-field tabular px-4 text-md lg:text-sm"
+            className="px-4 text-md lg:text-sm"
           />
         </div>
         <button type="submit" className="gf-btn gf-btn--quiet gf-btn--small w-full">

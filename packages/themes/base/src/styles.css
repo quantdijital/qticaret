@@ -77,4 +77,16 @@
   h3 {
     font-family: var(--font-sans);
   }
+
+  /* No browser spinner on a number field: the quantity has its own minus and plus */
+  input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+  }
 }
