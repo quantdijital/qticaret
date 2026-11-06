@@ -66,6 +66,20 @@ export function valueOf(addon: ProductAddon): AddonValue {
       }
 }
 
+/**
+ * Another product's add-on as a new one of this product: everything but
+ * the ids, which the server gives (a cart line names its add-on by id, so
+ * two products never share one).
+ */
+export function copyOf(addon: ProductAddon): AddonValue {
+  const value = valueOf(addon)
+  return {
+    ...value,
+    id: null,
+    choices: value.choices.map((choice) => ({ ...choice, id: null })),
+  }
+}
+
 /** What the catalog save takes: ids kept, a new one without. */
 export function inputOf(value: AddonValue): AddonInput {
   const common = {

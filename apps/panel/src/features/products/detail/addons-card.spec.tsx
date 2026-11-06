@@ -9,8 +9,11 @@ import type { ProductCatalog } from "@/features/products/api/product-edit"
 import { AddonsCard } from "./addons-card"
 
 const fetchMock = vi.hoisted(() => vi.fn())
+const searchMock = vi.hoisted(() => vi.fn())
 
-vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
+vi.mock("@/lib/sdk", () => ({
+  sdk: { client: { fetch: fetchMock }, admin: { product: { list: searchMock } } },
+}))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 // Links as plain anchors: the card is rendered without a router
 vi.mock("@tanstack/react-router", () => ({
@@ -317,5 +320,56 @@ describe("AddonsCard (adr/0052)", () => {
     await user.click(await screen.findByRole("button", { name: "Değişiklikleri at" }))
     expect(within(dialog).getByLabelText(/^Ad\*?$/)).toHaveValue("Ürün üzerine yazı")
     expect(posted()).toHaveLength(0)
+  })
+
+  it("copies another product's add-ons in place of this one's, asked first, under new ids", async () => {
+    const user = userEvent.setup()
+    const GIFT: ProductAddon = { ...ENGRAVING, id: "ad_9", label: "Hediye paketi", price: 20 }
+    searchMock.mockResolvedValue({
+      products: [
+        { id: "prod_1", title: "Bu ürün" },
+        { id: "prod_2", title: "Çakı" },
+      ],
+    })
+    serve({})
+    const own = fetchMock.getMockImplementation() as
+      ((url: string, init?: Init) => Promise<unknown>) | undefined
+    fetchMock.mockImplementation((url: string, init?: Init) =>
+      url === "/admin/products/prod_2/catalog"
+        ? Promise.resolve({ ...CATALOG, addons: [GIFT, CASE] })
+        : own?.(url, init)
+    )
+    renderCard()
+    await user.click(await screen.findByRole("button", { name: "Başka üründen kopyala" }))
+    const dialog = screen.getByRole("dialog", { name: "Başka üründen kopyala" })
+    expect(within(dialog).getByRole("button", { name: "Kopyala" })).toBeDisabled()
+
+    await user.click(within(dialog).getByRole("combobox", { name: "Ürün" }))
+    // The product copied into is not offered
+    await screen.findByRole("option", { name: "Çakı" })
+    expect(screen.queryByRole("option", { name: "Bu ürün" })).toBeNull()
+    await user.click(screen.getByRole("option", { name: "Çakı" }))
+    expect(await within(dialog).findByText("Hediye paketi")).toBeInTheDocument()
+
+    await user.click(within(dialog).getByRole("button", { name: "Kopyala" }))
+    const ask = await screen.findByRole("alertdialog")
+    expect(ask).toHaveTextContent("Bu ürünün 2 ek seçeneği kaldırılır, yerine Çakı ürününün 2")
+    await user.click(within(ask).getByRole("button", { name: "Ek seçenekleri değiştir" }))
+
+    await waitFor(() => {
+      expect(posted()).toHaveLength(1)
+    })
+    const sent = (posted()[0]?.[1] as Init).body?.addons ?? []
+    expect(sent.map((addon) => addon.label)).toEqual(["Hediye paketi", "Kılıf"])
+    // New ids from the server: a cart line names its add-on by id
+    expect(sent.every((addon) => addon.id === undefined)).toBe(true)
+    const kilif = sent[1]
+    expect(kilif?.kind === "choice" && kilif.choices).toEqual([
+      { label: "Desenli", price: 300 },
+      { label: "Desensiz", price: 250 },
+    ])
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull()
+    })
   })
 })

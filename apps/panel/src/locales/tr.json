@@ -3241,7 +3241,22 @@
       },
       "editTitle": "Ek seçeneği düzenle",
       "previous": "Önceki ek seçenek",
-      "next": "Sonraki ek seçenek"
+      "next": "Sonraki ek seçenek",
+      "copy": {
+        "action": "Başka üründen kopyala",
+        "title": "Başka üründen kopyala",
+        "description": "Seçtiğiniz ürünün ek seçenekleri adları, fiyatları ve kurallarıyla bu ürüne kopyalanır.",
+        "product": "Ürün",
+        "placeholder": "Ürün adıyla arayın",
+        "noProducts": "Ürün bulunamadı.",
+        "none": "Bu üründe ek seçenek yok.",
+        "coming": "Kopyalanacak ek seçenekler",
+        "replaces": "Bu ürünün {{current}} ek seçeneğinin yerini alır.",
+        "submit": "Kopyala",
+        "replaceTitle": "Ek seçenekler değiştirilsin mi?",
+        "replaceText": "Bu ürünün {{current}} ek seçeneği kaldırılır, yerine {{name}} ürününün {{copied}} ek seçeneği gelir. Kaldırılan ek seçeneği sepetine eklemiş müşteriler, ödemeden önce seçimlerini değiştirmek zorunda kalır.",
+        "replace": "Ek seçenekleri değiştir"
+      }
     },
     "sheets": {
       "import": "İçe aktar",

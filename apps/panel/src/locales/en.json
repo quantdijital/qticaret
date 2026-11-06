@@ -3241,7 +3241,22 @@
       },
       "editTitle": "Edit add-on",
       "previous": "Previous add-on",
-      "next": "Next add-on"
+      "next": "Next add-on",
+      "copy": {
+        "action": "Copy from another product",
+        "title": "Copy from another product",
+        "description": "The chosen product's add-ons are copied to this product with their names, prices and rules.",
+        "product": "Product",
+        "placeholder": "Search by product name",
+        "noProducts": "No products found.",
+        "none": "This product has no add-ons.",
+        "coming": "Add-ons to copy",
+        "replaces": "They replace this product's {{current}} add-ons.",
+        "submit": "Copy",
+        "replaceTitle": "Replace the add-ons?",
+        "replaceText": "This product's {{current}} add-ons are removed and {{name}}'s {{copied}} add-ons take their place. Shoppers holding a removed add-on in their cart must change their choice before paying.",
+        "replace": "Replace add-ons"
+      }
     },
     "sheets": {
       "import": "Import",

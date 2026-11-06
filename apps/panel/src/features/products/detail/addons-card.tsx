@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { Plus } from "lucide-react"
+import { Copy, Plus } from "lucide-react"
 import { useState } from "react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -14,6 +14,7 @@ import { featuresQuery, useFeatureState } from "@/features/settings/api/features
 import { FULL_RESET } from "@/lib/forms"
 import { addonsFailureOf } from "./addon-failure"
 import type { AddonsFailure } from "./addon-failure"
+import { AddonCopyDialog } from "./addon-copy-dialog"
 import { AddonDialog } from "./addon-dialog"
 import { AddonNotice } from "./addon-notice"
 import { AddonRow } from "./addon-row"
@@ -52,6 +53,7 @@ function AddonsForm({
   const list = useFieldArray({ control: form.control, name: "items", keyName: "fieldKey" })
   const items = useWatch({ control: form.control, name: "items" })
   const [editing, setEditing] = useState<Editing>(null)
+  const [copying, setCopying] = useState(false)
   const [failure, setFailure] = useState<AddonsFailure | null>(null)
   // A refusal of the open dialog's save, said in it
   const [dialogFailure, setDialogFailure] = useState<AddonsFailure | null>(null)
@@ -127,7 +129,7 @@ function AddonsForm({
           )
         }
         dirty={form.formState.isDirty}
-        saving={save.isPending && editing === null}
+        saving={save.isPending && editing === null && !copying}
         onSubmit={() => {
           send(form.getValues("items"), setFailure)
         }}
@@ -177,6 +179,18 @@ function AddonsForm({
               <Plus />
               {t(`${A}.add`)}
             </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => {
+                setDialogFailure(null)
+                setCopying(true)
+              }}
+            >
+              <Copy />
+              {t(`${A}.copy.action`)}
+            </Button>
             <span className="text-xs text-muted-foreground">
               {t(`${A}.limit`, { max: ADDON_LIMITS.addons })}
             </span>
@@ -203,6 +217,22 @@ function AddonsForm({
             setEditing(null)
           }}
           onSave={saveFromDialog}
+        />
+      ) : null}
+      {copying ? (
+        <AddonCopyDialog
+          productId={productId}
+          current={saved.length}
+          saving={save.isPending}
+          failure={dialogFailure}
+          onClose={() => {
+            setCopying(false)
+          }}
+          onCopy={(copied) => {
+            send(copied, setDialogFailure, () => {
+              setCopying(false)
+            })
+          }}
         />
       ) : null}
     </>
