@@ -2,6 +2,7 @@ import type { ShelfColumns } from "@qticaret/types"
 import type { CategoryCardView, CustomerPhotoView, ShopMarkView } from "./card-views"
 import type {
   FeaturedProductSectionView,
+  GoogleRatingSectionView,
   HeroSliderSectionView,
   ShopRatingView,
 } from "./home-views"
@@ -35,6 +36,7 @@ export type HomeSectionView =
       image: ImageView | null
     }
   | HeroSliderSectionView
+  | GoogleRatingSectionView
   | {
       id: string
       type: "banner"

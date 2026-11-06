@@ -3,6 +3,7 @@ import { BannerSection } from "./BannerSection"
 import { BrandsSection, CategoriesSection, ProductsSection } from "./CatalogSections"
 import { FaqSection } from "./FaqSection"
 import { FeaturedProductSection } from "./FeaturedProductSection"
+import { GoogleRatingSection } from "./GoogleRatingSection"
 import { HelpBand } from "./HelpBand"
 import { HeroSection, firstSlide } from "./HeroSection"
 import {
@@ -59,6 +60,8 @@ function Section({
       return <PostsSection section={section} />
     case "reviews":
       return <ReviewsSection section={section} t={t} />
+    case "google_rating":
+      return <GoogleRatingSection section={section} t={t} />
     case "rich_text":
       return <RichTextSection section={section} />
     case "trust_badges":

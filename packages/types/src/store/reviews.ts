@@ -74,13 +74,14 @@ export interface StoreGoogleReview {
   /** Null for a rating without text. */
   comment: string | null
   created_at: string
-  /** The owner's reply as Google shows it. */
+  /** The owner's reply as Google shows it (one Google still moderates is not here). */
   reply: { comment: string; created_at: string | null } | null
 }
 
 /**
- * `GET /store/google-reviews?limit=` (adr/0058): the shop's Google reviews
- * from its Business Profile. Never in structured data (Google's review
+ * `GET /store/google-reviews?limit=&min_rating=` (adr/0058): the shop's
+ * Google reviews from its Business Profile (`limit` 0: the figures alone;
+ * `min_rating`: only those with at least these stars and text). Never in structured data (Google's review
  * snippet guidelines); null while there is nothing to show.
  */
 export interface StoreGoogleReviews {

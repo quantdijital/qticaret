@@ -102,7 +102,7 @@ describe("the themes' Google reviews", () => {
     expect(html).toContain("4,6")
     expect(html).toContain("Google'da 5 üzerinden 4,6, 126 yorum")
     expect(html).toContain("Şam çeliği av bıçağı aldım")
-    expect(html).toContain("İşletmenin yanıtı")
+    expect(html).toContain("Mağazanın yanıtı")
     expect(html).toContain('src="https://lh3.googleusercontent.com/a/x=s120"')
     // Google's photo asked for without the shop's address in the referrer
     expect(html).toMatch(/referrerpolicy="no-referrer"/i)
@@ -121,7 +121,7 @@ describe("the themes' Google reviews", () => {
 
     expect(html).toContain("Google yorumları")
     expect(html).toContain("Google'da 5 üzerinden 4,6, 126 yorum")
-    expect(html).toContain("İşletmenin yanıtı")
+    expect(html).toContain("Mağazanın yanıtı")
     expect(html).toContain('href="https://maps.google.com/maps?cid=1267"')
     expect(html).not.toContain("application/ld+json")
     expect(without).not.toContain("Google yorumları")

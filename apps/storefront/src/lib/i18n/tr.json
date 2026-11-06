@@ -1011,7 +1011,7 @@
   "reviews.google_count": "Google'da {count} yorum",
   "reviews.google_count_short": "{count} yorum",
   "reviews.google_anonymous": "Google kullanıcısı",
-  "reviews.google_reply": "İşletmenin yanıtı",
+  "reviews.google_reply": "Mağazanın yanıtı",
   "reviews.google_all": "Google'da tümünü gör",
   "reviews.google_write": "Google'da yorum yazın",
   "reviews.google_source": "Bu yorumlar Google'daki işletme profilimizden alınmıştır.",
@@ -1050,5 +1050,9 @@
   "home.slider_go": "{n}. slayta geç",
   "home.slider_slide": "{n} / {total}",
   "home.slider_play": "Slaytları oynat",
-  "home.slider_pause": "Slaytları durdur"
+  "home.slider_pause": "Slaytları durdur",
+  "home.google_rating": "Google'da bizi değerlendirenler",
+  "home.google_rating_reviews": "Google'da {count} değerlendirme",
+  "home.google_rating_profile": "Google'da gör",
+  "home.google_rating_excerpts": "Google'dan son değerlendirmeler"
 }

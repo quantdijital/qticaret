@@ -82,6 +82,25 @@ export const googleReviews = cache(
     ).google_reviews
 )
 
+/**
+ * Google's figures and the newest `limit` reviews of at least
+ * `minRating` stars with text, for the home page's rating badge (adr/0058
+ * Ek 2026-11-06); `limit` 0, the figures alone.
+ */
+export const googleRatingReviews = cache(
+  async (limit: number, minRating: number): Promise<StoreGoogleReviews["google_reviews"]> =>
+    (
+      await orNone(
+        () =>
+          storePublicGet<StoreGoogleReviews>("/store/google-reviews", {
+            limit,
+            min_rating: minRating,
+          }),
+        { google_reviews: null }
+      )
+    ).google_reviews
+)
+
 /** The newest photos on approved reviews, for the home page's reviews section. */
 export const latestReviewPhotos = cache(
   async (limit: number): Promise<StoreLatestReviewPhoto[]> =>

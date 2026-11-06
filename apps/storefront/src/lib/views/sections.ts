@@ -9,10 +9,11 @@ import type { HomeSectionView, LinkView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
 import { legalIdentity, siteSeo, storefrontSettings } from "@/lib/store-api/requests"
 import { isStoreApiError } from "@/lib/store-api/errors"
-import { reviewSummary } from "@/lib/store-api/extras"
+import { googleRatingReviews, reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
 import { categoryTiles } from "./category-tiles"
 import { featuredView } from "./featured"
+import { EXCERPT_MIN_RATING, googleRatingView } from "./google-rating"
 import { heroSliderView } from "./hero-slider"
 import { layoutImage, layoutLink } from "./layout"
 import { legalDocument, legalPath } from "./legal"
@@ -187,6 +188,13 @@ async function sectionView(
           }
         : null
     }
+    case "google_rating":
+      // Google's figures and excerpts at each request; nothing to show, no section
+      return googleRatingView(
+        section,
+        await googleRatingReviews(section.excerpts, EXCERPT_MIN_RATING),
+        t
+      )
     case "rich_text":
       return { id, type: "rich_text", title: section.title, html: section.html }
     case "faq":

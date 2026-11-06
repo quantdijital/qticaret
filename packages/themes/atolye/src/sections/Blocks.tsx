@@ -10,6 +10,7 @@ import { Brands } from "./Brands"
 import { Campaign } from "./Campaign"
 import { CustomerPhotos } from "./CustomerPhotos"
 import { Faq } from "./Faq"
+import { GoogleRating } from "./GoogleRating"
 import { Guides } from "./Guides"
 import { Help } from "./Help"
 import { Hero } from "./Hero"
@@ -85,6 +86,8 @@ function BlockView({
           )}
         </>
       )
+    case "google_rating":
+      return <GoogleRating section={section} t={t} />
     case "rich_text":
       return <Story section={section} />
     case "posts":
