@@ -1,5 +1,6 @@
 import type { ProductSource, ShelfColumns } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
+import type { TrustIcon } from "@/features/settings/api/sections"
 import type { LinkInput } from "@/features/storefront/api/menus"
 
 // The sections of the theme editor's document (adr/0049), by page group
@@ -216,15 +217,39 @@ export interface FooterNewsletter extends SectionBase {
   text: string | null
 }
 
+/** One of the shop's promises, with its icon (the storefront draws it). */
+export interface TrustBadge {
+  icon: TrustIcon
+  title: string
+  text: string | null
+}
+
+/**
+ * The theme's shared settings (adr/0049 Ek 2026-11-06): what several pages
+ * draw alike, drafted and published with the sections. The server fills a
+ * part not yet written here from Vitrin tercihleri's old field, so the
+ * editor always opens every part.
+ */
+export interface LayoutSettings {
+  /** The home, product and category pages' strip, the product page's assurances, the cart. */
+  trust_badges: TrustBadge[]
+  /** Colour names an option or filter value shows as a swatch for. */
+  color_swatches: { label: string; hex: string }[]
+  /** "Az kaldı" on a product card at `threshold` units or fewer, never the number. */
+  low_stock: { enabled: boolean; threshold: number }
+}
+
 export interface LayoutDocument {
   header: AnnouncementBar[]
   home: HomeSection[]
   footer: FooterNewsletter[]
   product: ProductSection[]
   category: CategorySection[]
+  settings: LayoutSettings
 }
 
-export type LayoutGroup = keyof LayoutDocument
+/** The document's section groups (its settings are not one). */
+export type LayoutGroup = Exclude<keyof LayoutDocument, "settings">
 /** The groups that make a page's body: sections are added, moved and copied in them. */
 export type BodyGroup = "home" | "product" | "category"
 export type BodySection = HomeSection | ProductSection | CategorySection

@@ -14,6 +14,7 @@ import { previewAddress } from "./preview-url"
 import { documentProblems, sectionProblems } from "./problems"
 import { fromLocalInput, toLocalInput } from "./schedule"
 import { newAnnouncementBar, newBodySection, newHomeSection } from "./sections"
+import { SETTINGS_KEY, partOf, settingsProblems } from "./settings-problems"
 
 describe("sectionProblems", () => {
   it("finds what the server would refuse, field by field", () => {
@@ -94,8 +95,54 @@ describe("sectionProblems", () => {
       footer: [],
       product: [newBodySection("product", "faq", "urunsss") as ProductSection],
       category: [newBodySection("category", "rich_text", "kategorimetni") as CategorySection],
+      settings: {
+        trust_badges: [],
+        color_swatches: [],
+        low_stock: { enabled: true, threshold: 3 },
+      },
     }
     expect([...documentProblems(doc).keys()]).toEqual(["duyurular", "urunsss"])
+  })
+
+  it("maps the theme's shared settings' problems under their own key (adr/0049 Ek 2026-11-06)", () => {
+    const doc: LayoutDocument = {
+      header: [],
+      home: [],
+      footer: [],
+      product: [],
+      category: [],
+      settings: {
+        trust_badges: [
+          { icon: "truck", title: "", text: null },
+          { icon: "clock", title: "Hızlı {kargo}", text: "x".repeat(81) },
+        ],
+        color_swatches: [
+          { label: "Işık", hex: "#ffffff" },
+          { label: "IŞIK", hex: "#fff" },
+          { label: "", hex: "#000000" },
+        ],
+        low_stock: { enabled: false, threshold: 0 },
+      },
+    }
+    expect(documentProblems(doc).get(SETTINGS_KEY)).toEqual({
+      "trust_badges.0.title": "required",
+      "trust_badges.1.title": "tokenUnknown",
+      "trust_badges.1.text": "tooLong",
+      "color_swatches.1.label": "colorDuplicate",
+      "color_swatches.1.hex": "colorInvalid",
+      "color_swatches.2.label": "required",
+      "low_stock.threshold": "thresholdRange",
+    })
+    expect(
+      settingsProblems({
+        trust_badges: [{ icon: "truck", title: "{telefon} ile sipariş", text: null }],
+        color_swatches: [{ label: "Siyah", hex: "#111111" }],
+        low_stock: { enabled: true, threshold: 1000 },
+      })
+    ).toEqual({})
+    expect(partOf("trust_badges.0.title")).toBe("trust_badges")
+    expect(partOf("color_swatches.1.hex")).toBe("looks")
+    expect(partOf("low_stock.threshold")).toBe("looks")
   })
 
   it("asks for each question and answer of a FAQ, its answer may hold the shop's details", () => {

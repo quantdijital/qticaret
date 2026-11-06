@@ -10,11 +10,8 @@ import { Button } from "@/components/ui/button"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import { SettingsTabs } from "@/features/settings/components/settings-tabs"
-import { TrustBadgesCard } from "@/features/settings/components/storefront-badges-card"
 import { ContactFormCard } from "@/features/settings/components/storefront-contact-card"
 import { InfoPagesCard } from "@/features/settings/components/storefront-info-pages-card"
-import { LowStockBadgeCard } from "@/features/settings/components/storefront-stock-card"
-import { SwatchesCard } from "@/features/settings/components/storefront-swatches-card"
 import { maintenanceQuery } from "@/features/storefront/api/maintenance"
 import { MaintenanceTab } from "@/features/storefront/components/maintenance-tab"
 import type { PreferencesTab } from "@/features/storefront/preferences-tabs"
@@ -23,15 +20,12 @@ import { errorText } from "@/lib/errors"
 const P = "storefront.preferences"
 
 /**
- * Storefront > Preferences (adr/0049): what the storefront says and does
- * that is not drawn in the theme editor: the trust badges' words, the page
- * the contact form shows on, the payment and shipping pages (adr/0046 Ek
- * 2026-11-05), the colour names that show as swatches, when
- * a product card says "Az kaldı". One
- * card per tab (the owner: no page of cards running down); each saves its
- * own part. The design itself (the home page, the announcement bar, the
- * theme's settings) is the theme editor's. Maintenance (adr/0053) is a tab
- * of its own, its state beside the title.
+ * Storefront > Preferences (adr/0049): how the store behaves, not how it
+ * looks: the page the contact form shows on, the payment and shipping
+ * pages (adr/0046 Ek 2026-11-05), maintenance (adr/0053, its state beside
+ * the title). One card per tab (the owner: no page of cards running down);
+ * each saves its own part. Everything drawn (the trust badges, the colour
+ * swatches, "Az kaldı", adr/0049 Ek 2026-11-06) is the theme editor's.
  */
 export function PreferencesPage() {
   const { t } = useTranslation()
@@ -67,11 +61,8 @@ export function PreferencesPage() {
       <SettingsTabs
         label={t("nav.storefrontPreferences")}
         tabs={[
-          tab("badges", (saved) => <TrustBadgesCard saved={saved} />),
           tab("contact", (saved) => <ContactFormCard saved={saved} />),
           tab("infoPages", (saved) => <InfoPagesCard saved={saved} />),
-          tab("swatches", (saved) => <SwatchesCard saved={saved} />),
-          tab("stock", (saved) => <LowStockBadgeCard saved={saved} />),
           { key: "maintenance", label: t(`${P}.tabs.maintenance`), content: <MaintenanceTab /> },
         ]}
       />

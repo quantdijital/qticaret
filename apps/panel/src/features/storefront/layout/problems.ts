@@ -7,6 +7,7 @@ import {
 import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
 import { allSections } from "./sections"
+import { SETTINGS_KEY, settingsProblems } from "./settings-problems"
 
 /**
  * What the server would refuse in a section, found before the save: the
@@ -29,6 +30,9 @@ export type Problem =
   | "collectionRequired"
   | "daysRange"
   | "scheduleOrder"
+  | "colorInvalid"
+  | "colorDuplicate"
+  | "thresholdRange"
 
 /** A section's problems by field (`heading`, `lines.0`, `slides.1.text`, `schedule`). */
 export type SectionProblems = Record<string, Problem>
@@ -200,7 +204,10 @@ export function sectionProblems(section: AnySection): SectionProblems {
   return Object.fromEntries(found.filter((entry): entry is [string, Problem] => entry[1] !== null))
 }
 
-/** The sections with a problem, by id; an empty map: the draft may be saved. */
+/**
+ * The sections with a problem, by id, and the theme's shared settings'
+ * under `SETTINGS_KEY`; an empty map: the draft may be saved.
+ */
 export function documentProblems(doc: LayoutDocument): Map<string, SectionProblems> {
   const problems = new Map<string, SectionProblems>()
   for (const section of allSections(doc)) {
@@ -208,6 +215,10 @@ export function documentProblems(doc: LayoutDocument): Map<string, SectionProble
     if (Object.keys(found).length > 0) {
       problems.set(section.id, found)
     }
+  }
+  const settings = settingsProblems(doc.settings)
+  if (Object.keys(settings).length > 0) {
+    problems.set(SETTINGS_KEY, settings)
   }
   return problems
 }

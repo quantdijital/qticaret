@@ -34,6 +34,7 @@ const DOC: LayoutDocument = {
     category("faq", "altsss", "bottom"),
     category("help", "altyardim", "bottom"),
   ],
+  settings: { trust_badges: [], color_swatches: [], low_stock: { enabled: true, threshold: 3 } },
 }
 
 const ids = (sections: readonly { id: string }[]) => sections.map((section) => section.id)

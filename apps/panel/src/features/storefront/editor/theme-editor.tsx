@@ -15,6 +15,7 @@ import type {
 } from "@/features/storefront/api/layout"
 import { editorReducer, initialEditorState } from "@/features/storefront/layout/editor-state"
 import { documentProblems } from "@/features/storefront/layout/problems"
+import { SETTINGS_KEY, partOf } from "@/features/storefront/layout/settings-problems"
 import {
   findSection,
   groupLimit,
@@ -29,6 +30,8 @@ import { OpenedSectionContext, editorLayoutNow, useEditorLayout } from "./editor
 import type { EditorView } from "./editor-layout"
 import { EditorShell } from "./editor-shell"
 import { EditorTopBar } from "./editor-top-bar"
+import { formKeyOf } from "./opened"
+import type { Opened } from "./opened"
 import type { Device } from "./preview-fit"
 import { PreviewFrame } from "./preview-frame"
 import { DraftTools, PublishButton } from "./publish-controls"
@@ -38,14 +41,13 @@ import { SaveStatus } from "./save-status"
 import { sectionLabel } from "./section-meta"
 import { SectionPanel } from "./section-panel"
 import { SectionTree } from "./section-tree"
+import { SharedPanel } from "./shared/shared-panel"
 import { ThemePanel } from "./theme-panel"
 import { useEditorActions } from "./use-editor-actions"
 import { usePreviewTarget } from "./use-preview-target"
 import { useUndoKeys } from "./use-undo-keys"
 
 const E = "storefront.editor"
-
-type Opened = { kind: "section"; id: string } | { kind: "theme" } | null
 
 /**
  * The theme editor (adr/0049): full screen, the page's parts, the open
@@ -152,6 +154,21 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
         onRemove={() => {
           remove(found.section)
         }}
+        onShared={(part) => {
+          setOpened({ kind: "shared", part })
+        }}
+      />
+    )
+  } else if (opened?.kind === "shared") {
+    form = (
+      <SharedPanel
+        part={opened.part}
+        settings={doc.settings}
+        problems={problems.get(SETTINGS_KEY) ?? {}}
+        dispatch={dispatch}
+        onBack={() => {
+          setOpened(null)
+        }}
       />
     )
   } else if (opened?.kind === "theme") {
@@ -167,7 +184,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
       />
     )
   }
-  const formKey = found ? found.section.id : opened?.kind === "theme" ? "theme" : null
+  const formKey = formKeyOf(opened, found ? found.section.id : null)
   const tree = (
     <SectionTree
       page={page}
@@ -184,6 +201,10 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
       onTheme={() => {
         setOpened({ kind: "theme" })
       }}
+      onShared={(part) => {
+        setOpened({ kind: "shared", part })
+      }}
+      sharedProblems={new Set(Object.keys(problems.get(SETTINGS_KEY) ?? {}).map(partOf))}
     />
   )
   const tools = (

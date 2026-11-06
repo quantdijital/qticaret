@@ -390,32 +390,6 @@
       "moveUp": "{{item}}: move up",
       "moveDown": "{{item}}: move down",
       "remove": "{{item}}: remove",
-      "badges": {
-        "title": "Trust badges",
-        "description": "Your shop's promises; shown under the header and beside the add to cart button. With the Insert detail button ({}) you can add shop details such as the phone or the free shipping threshold; the text changes when the detail does.",
-        "empty": "No badges; the storefront shows no trust strip.",
-        "add": "Add badge",
-        "item": "Badge {{number}}",
-        "icon": "Icon",
-        "iconOf": "Icon of badge {{number}}",
-        "badgeTitle": "Title",
-        "titleOf": "Title of badge {{number}}",
-        "titlePlaceholder": "Same-day shipping",
-        "text": "Description (optional)",
-        "textOf": "Description of badge {{number}}",
-        "textPlaceholder": "For orders placed before 2 pm",
-        "hint": "Up to {{max}} badges.",
-        "icons": {
-          "truck": "Shipping",
-          "clock": "Clock",
-          "shield": "Security",
-          "card": "Card",
-          "refresh": "Returns and exchanges",
-          "award": "Award",
-          "gift": "Gift",
-          "phone": "Phone"
-        }
-      },
       "contactForm": {
         "title": "Contact form",
         "description": "Messages from the form are read and answered under Customers > Contact messages.",
@@ -433,18 +407,6 @@
         "shippingHint": "The carriers and promises show beside this page, for example /kargo-ve-teslimat.",
         "empty": "Information left empty shows on no page; the page's own text still shows."
       },
-      "swatches": {
-        "title": "Colour swatches",
-        "description": "In product options and filters, a value that reads as one of these names shows as a coloured circle (e.g. Navy).",
-        "item": "Colour {{number}}",
-        "labelOf": "Name of colour {{number}}",
-        "pickerOf": "Picker of colour {{number}}",
-        "hexOf": "Code of colour {{number}}",
-        "labelPlaceholder": "Navy",
-        "hexPlaceholder": "#1e3a8a",
-        "add": "Add colour",
-        "hint": "Up to {{max}} colours; each name up to {{length}} characters, written once."
-      },
       "errors": {
         "required": "Fill in this field.",
         "tooLong": "Write {{max}} characters at most.",
@@ -454,14 +416,6 @@
         "colorInvalid": "The colour must be a 6-digit code starting with # (like #0b5c99).",
         "colorDuplicate": "Each colour name can be written once.",
         "tokenUnknown": "There is an unknown detail in braces; add details from the Insert detail menu."
-      },
-      "lowStock": {
-        "title": "Low stock badge",
-        "description": "Shows a short note on the card of a product running low.",
-        "label": "Threshold",
-        "unit": "pcs",
-        "hint": "The product card says “Az kaldı” (few left) at or below this many; the number is not shown. 0: never shown.",
-        "invalid": "Enter a whole number from 0 to {{max}}."
       }
     },
     "store": {
@@ -7075,7 +7029,9 @@
         "addTo": {
           "top": "Add section above",
           "bottom": "Add section below"
-        }
+        },
+        "trustBadges": "Trust badges",
+        "looks": "Stock and colour swatches"
       },
       "row": {
         "drag": "Drag to move",
@@ -7157,7 +7113,7 @@
         },
         "trust_badges": {
           "name": "Trust badges",
-          "description": "Your promises such as fast shipping or easy returns; written in Storefront preferences."
+          "description": "Your promises such as fast shipping or easy returns; written under Theme > Trust badges."
         },
         "newsletter": {
           "name": "Newsletter",
@@ -7314,7 +7270,7 @@
         "done": "Done"
       },
       "trustBadges": {
-        "text": "The badges are written in Storefront preferences; this section sets where they show on the page.",
+        "text": "The badges are written under Theme > Trust badges; the same list shows in the home, product and category strips, on the product page and in the cart. This section sets where the strip stands on this page.",
         "link": "Edit the badges"
       },
       "help": {
@@ -7341,7 +7297,10 @@
         "scheduleOrder": "The end must come after the start.",
         "questionRequired": "Write the question.",
         "answerRequired": "Write the answer.",
-        "slidesTwo": "Add at least two slides."
+        "slidesTwo": "Add at least two slides.",
+        "colorInvalid": "The colour must be in #rrggbb form, e.g. #1e3a8a.",
+        "colorDuplicate": "This colour name is already in the list.",
+        "thresholdRange": "Enter a whole number from 1 to {{max}}."
       },
       "theme": {
         "title": "Theme settings",
@@ -7531,18 +7490,65 @@
         "profileLinkHint": "Beside the link to the reviews, your page on Google Maps opens in a new tab.",
         "source": "The rating and count are Google's; the storefront never changes them. Connection and reviews:",
         "sourceLink": "Reviews > Google reviews"
+      },
+      "shared": {
+        "badges": {
+          "title": "Trust badges",
+          "description": "Your shop's promises. The trust strips on the home, product and category pages, the product page's assurances and the cart show this list. Changes go to the draft; Publish puts them live.",
+          "list": "Badges",
+          "tokens": "With Insert detail ({}) you can add shop details such as the phone or the free shipping threshold; the text follows when they change.",
+          "empty": "No badges; the storefront shows no trust strip or assurances.",
+          "add": "Add badge",
+          "item": "Badge {{number}}",
+          "iconOf": "Icon of badge {{number}}",
+          "titleOf": "Title of badge {{number}}",
+          "titlePlaceholder": "Same-day dispatch",
+          "textOf": "Description of badge {{number}} (optional)",
+          "textPlaceholder": "For orders placed by 14:00",
+          "hint": "At most {{max}} badges.",
+          "icons": {
+            "truck": "Shipping",
+            "clock": "Clock",
+            "shield": "Security",
+            "card": "Card",
+            "refresh": "Returns and exchanges",
+            "award": "Award",
+            "gift": "Gift",
+            "phone": "Phone"
+          }
+        },
+        "looks": {
+          "title": "Stock and colour swatches",
+          "description": "The “Az kaldı” (few left) note on product cards and the colour names shown as coloured circles. Changes go to the draft; Publish puts them live."
+        },
+        "lowStock": {
+          "title": "Low stock badge",
+          "enabled": "Say “Az kaldı” on a product running low",
+          "enabledHint": "Shown on the product card; the number left is never shown.",
+          "threshold": "At or below this many",
+          "thresholdHint": "Cards read the published threshold: a new one shows after publishing, not in the preview."
+        },
+        "swatches": {
+          "title": "Colour swatches",
+          "description": "A value that names one of these colours in product options, filters and on the product page shows as a coloured circle (e.g. Lacivert).",
+          "item": "Colour {{number}}",
+          "labelOf": "Name of colour {{number}}",
+          "pickerOf": "Picker of colour {{number}}",
+          "hexOf": "Code of colour {{number}}",
+          "labelPlaceholder": "Navy",
+          "hexPlaceholder": "#1e3a8a",
+          "add": "Add colour",
+          "hint": "At most {{max}} colours; each name at most {{length}} characters, written once."
+        }
       }
     },
     "preferences": {
-      "description": "What the theme editor does not draw: the trust badges' words, the contact form's page, the colour swatches and maintenance mode. Each tab saves its own card.",
+      "description": "How the shop works: the contact form's page, the pages that show payment and shipping facts, and maintenance mode. How the storefront looks (trust badges, colour swatches, “Az kaldı”) is in the theme editor. Each tab saves its own card.",
       "editor": "Open the theme editor",
       "tabs": {
-        "badges": "Trust badges",
         "contact": "Contact form",
         "infoPages": "Payment and shipping pages",
-        "swatches": "Colour swatches",
-        "maintenance": "Maintenance mode",
-        "stock": "Low stock badge"
+        "maintenance": "Maintenance mode"
       },
       "dark": "Shop in maintenance"
     },

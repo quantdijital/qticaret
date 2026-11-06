@@ -1,5 +1,15 @@
 import { Link } from "@tanstack/react-router"
-import { ChevronRight, Columns3, Contact, Palette, Plus, Store } from "lucide-react"
+import {
+  ChevronRight,
+  CircleAlert,
+  Columns3,
+  Contact,
+  Palette,
+  Plus,
+  ShieldCheck,
+  Store,
+  SwatchBook,
+} from "lucide-react"
 import type { Dispatch, ReactNode } from "react"
 import type { LucideIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
@@ -11,6 +21,7 @@ import type {
   Placement,
 } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
+import type { SettingsPart } from "@/features/storefront/layout/settings-problems"
 import {
   idsOf,
   isScheduled,
@@ -66,6 +77,41 @@ function ElsewhereRow({
   )
 }
 
+/** One of the theme's own panels: its settings, or a part every page shares. */
+function ThemeRow({
+  icon: Icon,
+  label,
+  problem = false,
+  onClick,
+}: {
+  icon: LucideIcon
+  label: string
+  problem?: boolean
+  onClick: () => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <Button
+      type="button"
+      variant="ghost"
+      size="sm"
+      className="w-full justify-start pl-6"
+      onClick={onClick}
+    >
+      <Icon />
+      <span className="flex-1 truncate text-left">{label}</span>
+      {problem ? (
+        <CircleAlert
+          role="img"
+          aria-label={t("storefront.editor.row.problem")}
+          className="size-3.5 shrink-0 text-destructive-text"
+        />
+      ) : null}
+      <ChevronRight className="text-muted-foreground" />
+    </Button>
+  )
+}
+
 /** A button that adds what a group lacks (the header's bar, the footer's box). */
 function AddRow({ label, onClick }: { label: string; onClick: () => void }) {
   return (
@@ -94,12 +140,16 @@ interface SectionTreeProps {
   onRemove: (section: AnySection) => void
   onAddSection: (placement?: Placement) => void
   onTheme: () => void
+  /** The theme's shared settings in the draft (adr/0049 Ek 2026-11-06), and those with a mistake. */
+  onShared: (part: SettingsPart) => void
+  sharedProblems: ReadonlySet<SettingsPart>
 }
 
 /**
  * The page's parts as the storefront draws them, top to bottom: the
  * header, the chosen page's own sections, the footer; then the theme's
- * own settings. The menus, the logo and the contact details are edited
+ * own settings and the parts every page shares (the trust badges, the
+ * stock line and colour names). The menus, the logo and the contact details are edited
  * on their own screens, linked from where they show.
  */
 export function SectionTree({
@@ -111,6 +161,8 @@ export function SectionTree({
   onRemove,
   onAddSection,
   onTheme,
+  onShared,
+  sharedProblems,
 }: SectionTreeProps) {
   const { t } = useTranslation()
   const store = t(`${T}.storeProfile`)
@@ -207,17 +259,23 @@ export function SectionTree({
         </ul>
       </TreeGroup>
       <TreeGroup title={t(`${T}.theme`)}>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="w-full justify-start pl-6"
-          onClick={onTheme}
-        >
-          <Palette />
-          <span className="flex-1 text-left">{t(`${T}.themeSettings`)}</span>
-          <ChevronRight className="text-muted-foreground" />
-        </Button>
+        <ThemeRow icon={Palette} label={t(`${T}.themeSettings`)} onClick={onTheme} />
+        <ThemeRow
+          icon={ShieldCheck}
+          label={t(`${T}.trustBadges`)}
+          problem={sharedProblems.has("trust_badges")}
+          onClick={() => {
+            onShared("trust_badges")
+          }}
+        />
+        <ThemeRow
+          icon={SwatchBook}
+          label={t(`${T}.looks`)}
+          problem={sharedProblems.has("looks")}
+          onClick={() => {
+            onShared("looks")
+          }}
+        />
       </TreeGroup>
     </nav>
   )

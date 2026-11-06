@@ -1,12 +1,9 @@
-/** Storefront preferences' tabs, in their order; `?part=` names the open one. */
-export const PREFERENCES_TABS = [
-  "badges",
-  "contact",
-  "infoPages",
-  "swatches",
-  "stock",
-  "maintenance",
-] as const
+/**
+ * Storefront preferences' tabs, in their order; `?part=` names the open one.
+ * The trust badges, colour swatches and "Az kaldı" moved to the theme
+ * editor (adr/0049 Ek 2026-11-06): an old link to them opens the first tab.
+ */
+export const PREFERENCES_TABS = ["contact", "infoPages", "maintenance"] as const
 export type PreferencesTab = (typeof PREFERENCES_TABS)[number]
 
 const isPreferencesTab = (value: unknown): value is PreferencesTab =>

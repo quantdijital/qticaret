@@ -4,6 +4,7 @@ import type { Mock } from "vitest"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import type { AdminLayout, LayoutDocument } from "@/features/storefront/api/layout"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
+import { STOREFRONT_THEME_COLOR } from "@/theme/storefront"
 import { ThemeEditorPage } from "./theme-editor-page"
 
 /** What the theme editor's specs share: the shop's design, the server and the editor. */
@@ -58,6 +59,12 @@ export const DOC: LayoutDocument = {
     },
     { id: "kategoriyardim", type: "help", ...ALWAYS, placement: "bottom", title: null, text: null },
   ],
+  // The theme's shared settings (adr/0049 Ek 2026-11-06), as the server fills them
+  settings: {
+    trust_badges: [{ icon: "truck", title: "Aynı gün kargo", text: null }],
+    color_swatches: [{ label: "Siyah", hex: STOREFRONT_THEME_COLOR }],
+    low_stock: { enabled: true, threshold: 3 },
+  },
 }
 
 /** The design as `GET /admin/storefront-layout` gives it: saved before, published once. */

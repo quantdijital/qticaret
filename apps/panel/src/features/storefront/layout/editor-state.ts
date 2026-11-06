@@ -3,6 +3,7 @@ import type {
   CategorySection,
   LayoutDocument,
   LayoutGroup,
+  LayoutSettings,
   Placement,
 } from "@/features/storefront/api/layout"
 import {
@@ -45,6 +46,11 @@ export type EditorAction =
   | { type: "duplicate"; id: string }
   | { type: "remove"; id: string }
   | { type: "toggle"; id: string }
+  /**
+   * The theme's shared settings (adr/0049 Ek 2026-11-06): the trust badges,
+   * the colour names, "Az kaldı"; `merge` names the field being typed in.
+   */
+  | { type: "settings"; settings: LayoutSettings; merge?: string | undefined }
   | { type: "undo" }
   | { type: "redo" }
 
@@ -198,6 +204,12 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
         inGroupOf(doc, action.id, (sections, index) =>
           sections.map((each, at) => (at === index ? { ...each, visible: !each.visible } : each))
         )
+      )
+    case "settings":
+      return commit(
+        state,
+        action.settings === doc.settings ? doc : { ...doc, settings: action.settings },
+        action.merge === undefined ? null : `settings:${action.merge}`
       )
     case "undo": {
       const previous = state.past.at(-1)

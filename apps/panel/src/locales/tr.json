@@ -390,32 +390,6 @@
       "moveUp": "{{item}}: yukarı taşı",
       "moveDown": "{{item}}: aşağı taşı",
       "remove": "{{item}}: kaldır",
-      "badges": {
-        "title": "Güven rozetleri",
-        "description": "Mağazanızın sözleri; başlığın altında ve sepete ekle düğmesinin yanında görünür. Bilgi ekle düğmesiyle ({}) telefon, ücretsiz kargo eşiği gibi mağaza bilgilerini ekleyebilirsiniz; bilgi değişince metin de kendiliğinden değişir.",
-        "empty": "Rozet yok; vitrinde güven şeridi görünmez.",
-        "add": "Rozet ekle",
-        "item": "{{number}}. rozet",
-        "icon": "Simge",
-        "iconOf": "{{number}}. rozetin simgesi",
-        "badgeTitle": "Başlık",
-        "titleOf": "{{number}}. rozetin başlığı",
-        "titlePlaceholder": "Aynı gün kargo",
-        "text": "Açıklama (isteğe bağlı)",
-        "textOf": "{{number}}. rozetin açıklaması",
-        "textPlaceholder": "Saat 14.00'e kadar verilen siparişlerde",
-        "hint": "En çok {{max}} rozet.",
-        "icons": {
-          "truck": "Kargo",
-          "clock": "Saat",
-          "shield": "Güvenlik",
-          "card": "Kart",
-          "refresh": "İade ve değişim",
-          "award": "Ödül",
-          "gift": "Hediye",
-          "phone": "Telefon"
-        }
-      },
       "contactForm": {
         "title": "İletişim formu",
         "description": "Formdan gelen mesajlar Müşteriler > İletişim mesajları'nda okunur ve yanıtlanır.",
@@ -433,18 +407,6 @@
         "shippingHint": "Kargo firmaları ve güvenceler bu sayfanın yanında görünür, örneğin /kargo-ve-teslimat.",
         "empty": "Boş bıraktığınız bilgi hiçbir sayfada gösterilmez; sayfanın metni yine görünür."
       },
-      "swatches": {
-        "title": "Renk örnekleri",
-        "description": "Ürün seçeneklerinde ve filtrelerde bu adlardan biri geçen değer, renkli yuvarlak olarak gösterilir (ör. Lacivert).",
-        "item": "{{number}}. renk",
-        "labelOf": "{{number}}. rengin adı",
-        "pickerOf": "{{number}}. rengin seçicisi",
-        "hexOf": "{{number}}. rengin kodu",
-        "labelPlaceholder": "Lacivert",
-        "hexPlaceholder": "#1e3a8a",
-        "add": "Renk ekle",
-        "hint": "En çok {{max}} renk; her ad en çok {{length}} karakter ve bir kez yazılır."
-      },
       "errors": {
         "required": "Bu alanı doldurun.",
         "tooLong": "En çok {{max}} karakter yazın.",
@@ -454,14 +416,6 @@
         "colorInvalid": "Renk, # ile başlayan 6 haneli bir kod olmalı (#0b5c99 gibi).",
         "colorDuplicate": "Her renk adı bir kez yazılabilir.",
         "tokenUnknown": "Süslü parantez içinde tanınmayan bir bilgi var; bilgileri Bilgi ekle menüsünden ekleyin."
-      },
-      "lowStock": {
-        "title": "Az kaldı rozeti",
-        "description": "Stoğu azalan ürünün kartında müşteriye kısa bir uyarı gösterir.",
-        "label": "Eşik",
-        "unit": "adet",
-        "hint": "Ürün kartında “Az kaldı” bu adet ve altında görünür; adet gösterilmez. 0: hiç gösterilmez.",
-        "invalid": "0 ile {{max}} arasında bir tam sayı yazın."
       }
     },
     "store": {
@@ -7075,7 +7029,9 @@
         "addTo": {
           "top": "Üste bölüm ekle",
           "bottom": "Alta bölüm ekle"
-        }
+        },
+        "trustBadges": "Güven rozetleri",
+        "looks": "Stok ve renk örnekleri"
       },
       "row": {
         "drag": "Sürükleyerek taşıyın",
@@ -7157,7 +7113,7 @@
         },
         "trust_badges": {
           "name": "Güven rozetleri",
-          "description": "Hızlı kargo, kolay iade gibi sözleriniz; Vitrin tercihlerinde yazılır."
+          "description": "Hızlı kargo, kolay iade gibi sözleriniz; Tema altındaki Güven rozetleri'nde yazılır."
         },
         "newsletter": {
           "name": "E-bülten",
@@ -7314,7 +7270,7 @@
         "done": "Tamam"
       },
       "trustBadges": {
-        "text": "Rozetlerin kendisi Vitrin tercihlerinde yazılır; bu bölüm sayfada nerede görüneceklerini belirler.",
+        "text": "Rozetlerin kendisi Tema altındaki Güven rozetleri'nde yazılır; aynı liste ana sayfa, ürün ve kategori şeritlerinde, ürün sayfasında ve sepette görünür. Bu bölüm şeridin bu sayfadaki yerini belirler.",
         "link": "Rozetleri düzenle"
       },
       "help": {
@@ -7341,7 +7297,10 @@
         "scheduleOrder": "Bitiş, başlangıçtan sonra olmalı.",
         "questionRequired": "Soruyu yazın.",
         "answerRequired": "Cevabı yazın.",
-        "slidesTwo": "En az iki slayt ekleyin."
+        "slidesTwo": "En az iki slayt ekleyin.",
+        "colorInvalid": "Renk #rrggbb biçiminde olmalı, ör. #1e3a8a.",
+        "colorDuplicate": "Bu renk adı listede zaten var.",
+        "thresholdRange": "1 ile {{max}} arasında bir tam sayı yazın."
       },
       "theme": {
         "title": "Tema ayarları",
@@ -7531,18 +7490,65 @@
         "profileLinkHint": "\"Google'da değerlendirmeler\" bağlantısının yanında Google Haritalar'daki sayfanız yeni sekmede açılır.",
         "source": "Puan ve sayı Google'ındır; vitrin onları değiştirmez. Bağlantı ve yorumlar:",
         "sourceLink": "Yorumlar > Google yorumları"
+      },
+      "shared": {
+        "badges": {
+          "title": "Güven rozetleri",
+          "description": "Mağazanızın sözleri. Ana sayfa, ürün ve kategori sayfalarındaki güven şeritleri, ürün sayfasındaki güvenceler ve sepet bu listeyi gösterir. Değişiklikler taslağa kaydedilir, Yayınla ile vitrine çıkar.",
+          "list": "Rozetler",
+          "tokens": "Bilgi ekle düğmesiyle ({}) telefon, ücretsiz kargo eşiği gibi mağaza bilgilerini ekleyebilirsiniz; bilgi değişince metin de kendiliğinden değişir.",
+          "empty": "Rozet yok; vitrinde güven şeridi ve güvenceler görünmez.",
+          "add": "Rozet ekle",
+          "item": "{{number}}. rozet",
+          "iconOf": "{{number}}. rozetin simgesi",
+          "titleOf": "{{number}}. rozetin başlığı",
+          "titlePlaceholder": "Aynı gün kargo",
+          "textOf": "{{number}}. rozetin açıklaması (isteğe bağlı)",
+          "textPlaceholder": "Saat 14.00'e kadar verilen siparişlerde",
+          "hint": "En çok {{max}} rozet.",
+          "icons": {
+            "truck": "Kargo",
+            "clock": "Saat",
+            "shield": "Güvenlik",
+            "card": "Kart",
+            "refresh": "İade ve değişim",
+            "award": "Ödül",
+            "gift": "Hediye",
+            "phone": "Telefon"
+          }
+        },
+        "looks": {
+          "title": "Stok ve renk örnekleri",
+          "description": "Ürün kartlarındaki “Az kaldı” uyarısı ve renkli yuvarlak olarak gösterilen renk adları. Değişiklikler taslağa kaydedilir, Yayınla ile vitrine çıkar."
+        },
+        "lowStock": {
+          "title": "Az kaldı rozeti",
+          "enabled": "Stoğu azalan üründe “Az kaldı” yazsın",
+          "enabledHint": "Ürün kartında gösterilir; kalan adet hiçbir zaman yazılmaz.",
+          "threshold": "Kaç adet ve altında",
+          "thresholdHint": "Kartlar yayındaki eşiği okur: yeni eşik önizlemede değil, yayınladıktan sonra görünür."
+        },
+        "swatches": {
+          "title": "Renk örnekleri",
+          "description": "Ürün seçeneklerinde, filtrelerde ve ürün sayfasında bu adlardan biri geçen değer renkli yuvarlak olarak gösterilir (ör. Lacivert).",
+          "item": "{{number}}. renk",
+          "labelOf": "{{number}}. rengin adı",
+          "pickerOf": "{{number}}. rengin seçicisi",
+          "hexOf": "{{number}}. rengin kodu",
+          "labelPlaceholder": "Lacivert",
+          "hexPlaceholder": "#1e3a8a",
+          "add": "Renk ekle",
+          "hint": "En çok {{max}} renk; her ad en çok {{length}} karakter ve bir kez yazılır."
+        }
       }
     },
     "preferences": {
-      "description": "Tema düzenleyicide çizilmeyen tercihler: güven rozetlerinin sözleri, iletişim formunun sayfası, renk örnekleri ve bakım modu. Her sekme kendi kartını kaydeder.",
+      "description": "Mağazanın nasıl çalıştığı: iletişim formunun sayfası, ödeme ve kargo bilgisinin gösterildiği sayfalar ve bakım modu. Vitrinin görünüşü (güven rozetleri, renk örnekleri, “Az kaldı”) tema düzenleyicidedir. Her sekme kendi kartını kaydeder.",
       "editor": "Tema düzenleyiciyi aç",
       "tabs": {
-        "badges": "Güven rozetleri",
         "contact": "İletişim formu",
         "infoPages": "Ödeme ve kargo sayfaları",
-        "swatches": "Renk örnekleri",
-        "maintenance": "Bakım modu",
-        "stock": "Az kaldı rozeti"
+        "maintenance": "Bakım modu"
       },
       "dark": "Mağaza bakımda"
     },

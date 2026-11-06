@@ -5,6 +5,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { AnySection, LayoutGroup, Placement } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
+import type { SettingsPart } from "@/features/storefront/layout/settings-problems"
 import { AnnouncementForm } from "./forms/announcement-form"
 import { BannerForm } from "./forms/banner-form"
 import { FaqForm } from "./forms/faq-form"
@@ -40,6 +41,8 @@ interface SectionPanelProps {
   onBack: () => void
   onDuplicate: () => void
   onRemove: () => void
+  /** Opens a part of the theme's shared settings (the trust badges' list). */
+  onShared: (part: SettingsPart) => void
 }
 
 /** The form for one section type. */
@@ -47,7 +50,8 @@ function FormOf({
   section,
   problems,
   onChange,
-}: Pick<SectionPanelProps, "section" | "problems" | "onChange">) {
+  onShared,
+}: Pick<SectionPanelProps, "section" | "problems" | "onChange" | "onShared">) {
   const props = { problems, onChange }
   switch (section.type) {
     case "announcement_bar":
@@ -78,7 +82,13 @@ function FormOf({
     case "related_products":
       return <RelatedForm section={section} {...props} />
     case "trust_badges":
-      return <TrustBadgesForm />
+      return (
+        <TrustBadgesForm
+          onEdit={() => {
+            onShared("trust_badges")
+          }}
+        />
+      )
     case "newsletter":
     case "help":
       return <WordedForm section={section} {...props} />
@@ -102,6 +112,7 @@ export function SectionPanel({
   onBack,
   onDuplicate,
   onRemove,
+  onShared,
 }: SectionPanelProps) {
   const { t } = useTranslation()
   const kind = kindOf(section, group === "footer")
@@ -131,7 +142,7 @@ export function SectionPanel({
         </PanelGroup>
       ) : null}
       <PanelGroup title={t(`${P}.content`)}>
-        <FormOf section={section} problems={problems} onChange={onChange} />
+        <FormOf section={section} problems={problems} onChange={onChange} onShared={onShared} />
       </PanelGroup>
       <PanelGroup title={t(`${P}.visibility`)}>
         <ScheduleFields section={section} problem={problems["schedule"]} onChange={onChange} />
