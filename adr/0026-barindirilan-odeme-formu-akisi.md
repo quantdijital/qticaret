@@ -122,3 +122,38 @@ Karar uygulandı; uygularken öğrenilenler ve kararın genişledikleri:
   - Query iç içe `raw_` değerlerini yalnızca düz alan da istenince dolduruyor.
 - **Sözleşme testleri:** `src/modules/__tests__/payment-providers.contract.unit.spec.ts` iki barındırılan form sağlayıcısını aynı senaryolardan geçirir (çevrim dışı havale ve kapıda ödeme `offline-providers.contract.unit.spec.ts`'te, F6 W4): yalnızca kendi ucumuzdan başlama, kişisel verisiz oturum, kuruş tutar, ödenince `captured`, değişmeyen/geri alınmayan oturum, referanssız iadenin reddi. F6.4 genişletir.
 - **Ertelenenler (kullanıcı kararı):** gerçek sağlayıcı testleri (PayTR test penceresi, `@sandbox`) sunucuya çıkışa; iyzico webhook'u gerçek firmaya. Bir iyzico sandbox ödemesi elle, deneme sayfasından yapıldı (ADR-0028).
+
+## Ek (2026-11-06): Ödenen sepet her zaman siparişe döner
+
+**Olay (dev).** Kartla ödeme alındı, PayTR bildirimi geldi; `completeCartWorkflow` "Not enough stock available for item … at location …" ile düştü (son adet bekleyen başka bir siparişin, #696, rezervasyonundaydı). `completionWillFailAgain` yalnızca `inventory` kelimesini arıyordu; Medusa'nın mesajında bu kelime yok (`iitem_…`). Hata yeniden denenebilir sayıldı: PayTR'ye 503, sonsuz yeniden deneme; alıcı "Ödemeniz onaylanıyor" sayfasında kaldı, para alınmıştı. Aynı yarış, son adede iki alıcı ödediğinde de olur.
+
+**Karar.** "Engel değil uyarı" kuralıyla (sert engel yalnız sağlayıcı/yasa reddi, para, güvenlik; burada para zaten alınmış): **ödenen sepet her zaman siparişe döner.**
+
+1. **Sınıflandırma** (`lib/payments/completion.ts`, birim testli):
+   - `stock`: Medusa'nın stok retleri, kendi sözcükleriyle (`Not enough stock available…`, `Item … is not stocked at location …`, `Sales channel … is not associated with any stock location…`, `Some variant does not have the required inventory`).
+   - `refund`: sepetin kendi kuralları (`cart.`, `payments.`, `promotions.`, `cash_on_delivery.`, `bank_transfer.`, `legal.`, `age.`, `fraud.`, `gift_card.` anahtarları). Bunlar §6'nın iade yoluna gider.
+   - `retry`: geri kalan her şey (kilit, veritabanı, sağlayıcı, bilinmeyen): 503, sağlayıcı yeniden dener. Para yalnızca sipariş kesin açılamayacaksa iade edilir.
+2. **Stok yetersizse eksik stokla sipariş** (`completePaidCartAsBackorderWorkflow`). Medusa 2.21.2'de tamamlama yalnızca rezervasyonda stok bakar. `prepareConfirmInventoryInput`, varyantın `allow_backorder`'ını sepet sorgusundan okur (`completeCartFields`: `items.variant.allow_backorder`). `reserveInventoryStep` bunu `createReservationItems`'a geçirir; envanter modülünün `ensureInventoryLevels`'ı `allow_backorder` kalemlerde stok kontrolünü atlar (core-flows ve inventory kaynağı, v2.21.2 etiketi). `completeCartWorkflow`'un girdisi yalnızca `id`, kalem düzeyinde `allow_backorder` geçirilemiyor. Bu yüzden iş akışı şunları yapar:
+   1. Mağaza genelinde tek kilit alır (`payments-complete-backorder`).
+   2. Sepetin izlenen varyantlarına tamamlama süresince `allow_backorder: true` verir. Telafisi geri alır.
+   3. Kanalın depolarında hiç seviyesi olmayan kalemlere 0 seviye açar (`createInventoryLevelsWorkflow`, kendi telafisiyle).
+   4. `completeCartWorkflow.runAsStep` çalıştırır.
+   5. Varyantları geri alır. Bu adım hata vermez, yalnızca loglar; sipariş durur.
+   6. Siparişi `metadata.stock_short` ile işaretler: `{ lines: [{ variant_id, title, sku, quantity, short }], at }`.
+   7. `order.stock_short` yayar.
+
+   Rezervasyon raf üstü yapılır (rezerve > stok). Kargo eksik rezervasyonu zaten doldurur (adr/0054 Ek 2026-11-05).
+3. **Mağazaya bildirim** (`subscribers/stock-short-alerts.ts`). Zil sipariş başına bir kez gelir: "Stok yetersiz sipariş #N — eksik: … Üretin ya da tedarik edin; edemeyecekseniz iptal edip iade edin". E-posta `staff.stock_short` şablonuyla gider. Ayrı bir ayar açılmadı: Ayarlar > Bildirimler'deki "Yeni sipariş" anahtarına bağlı. Panelde liste ve detayda "Stok yetersiz" rozeti, detayda eksik satırlar görünür. Bunlar sipariş gönderilecek durumdayken (`awaiting_payment`, `to_ship`) gösterilir.
+4. **Bekleme sayfası hiç sonsuz dönmez.** `/odeme/sonuc` artan aralıklarla yaklaşık 2 dakika sorar (2, 2, 3, 3, 4, 5, 6, 8, 10, 12, 15, 15, 15, 20 sn). Sonra şu durumlardan birini gösterir:
+   - Sipariş açıldıysa sipariş sayfası.
+   - İade ediliyorsa "iade" sayfası, sepete ve iletişime bağlantıyla.
+   - Hâlâ belirsizse "Ödemeniz alındı, siparişiniz oluşturuluyor": e-postayla bilgi verilir, "Siparişimi bul" (`/siparis`) bağlantısı vardır.
+
+   `POST /store/carts/:id/order-access` sipariş yokken, bu sepet için `completion_failed` ya da `amount_mismatch` kurtarma kaydı varsa 409 `payments.refunding` döner. Yoksa eskisi gibi 404 `orders.unknown`.
+5. **Önleme.** Medusa'nın sepete ekleme kontrolü (`confirmInventoryStep` → `confirmInventory`) zaten satılabilir adede bakar (stok − rezerve). Ödemeden önce bakan bir kontrol yoktu. İki kontrol eklendi:
+   - **Ödeme başlarken:** sepet kilidi altında, sağlayıcı token'ından hemen önce (`checkCartStockStep`, `startCartPaymentWorkflow`). Stok yetersizse 400 `cart.out_of_stock` döner, değerinde ürün adı vardır.
+   - **Ödeme adımına girerken:** vitrin `GET /store/carts/:id/stock`'u sorar. Eksik satır varsa alıcı `/sepet?hata=cart.out_of_stock` sayfasına gider ve sepet "Bu ürün az önce tükendi: …" der.
+
+   İkisi de `getVariantAvailability`'yi kullanır. Stok izlemeyen ya da eksi stokla satan varyant hiç durdurulmaz.
+
+**Bilinen sınır.** Varyantlar birkaç saniye eksi stokla satışa açık kalır. Bu sürede aynı varyanta başka bir tamamlama (havale, kapıda ödeme) da stok kontrolsüz geçebilir ve işaretsiz kalır. Kilit yalnızca ödenmiş eksik stok tamamlamalarını sıraya koyar. Kabul edildi: pencere kısa, sonuç zaten kabul ettiğimiz durumla aynı (rezerve > stok, kargo doldurur). Medusa kalem düzeyinde `allow_backorder` geçirmeye izin verirse (yükseltmede bakılır), bu açma/kapama kaldırılır.
