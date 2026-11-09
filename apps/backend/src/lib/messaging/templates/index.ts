@@ -29,6 +29,7 @@ import {
   staffSeoDigest,
 } from "./staff"
 import { staffAccountChanged, staffEmailConfirm } from "./staff-account"
+import { staffStockShort } from "./staff-stock-short"
 
 export type { MigrationInviteVars, ResetVars, VerifyVars } from "./account"
 export type { AnnouncementVars } from "./marketing"
@@ -58,6 +59,7 @@ export type {
   StaffStockVars,
 } from "./staff"
 export type { StaffAccountVars, StaffEmailConfirmVars } from "./staff-account"
+export type { StaffStockShortVars } from "./staff-stock-short"
 export type { Brand, EmailContent, EmailContext, MessageKind, MessageTemplate } from "./types"
 
 /** Every template the platform sends, by name (adr/0036). */
@@ -90,6 +92,8 @@ export const MESSAGE_TEMPLATES = {
   "staff.new_order": staffNewOrder,
   "staff.bank_transfer": staffBankTransfer,
   "staff.low_stock": staffLowStock,
+  // adr/0026 Ek 2026-11-06: a paid order placed short of stock
+  "staff.stock_short": staffStockShort,
   "staff.seo_digest": staffSeoDigest,
   // F18 D10 (adr/0047): a contact form message came
   "staff.contact_message": staffContactMessage,

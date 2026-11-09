@@ -1,6 +1,7 @@
 import type { MessageLocale } from "../errors/messages"
 import { RETURN_TEXTS } from "./return-texts"
 import { STAFF_ACCOUNT_TEXTS } from "./staff-account-texts"
+import { STOCK_SHORT_TEXTS } from "./stock-short-texts"
 
 /**
  * What messages say, by key (adr/0036; CLAUDE.md rule 9): templates take
@@ -14,6 +15,7 @@ export const MESSAGE_LOCALE: MessageLocale = "tr"
 const TR: Readonly<Record<string, string>> = {
   ...RETURN_TEXTS,
   ...STAFF_ACCOUNT_TEXTS,
+  ...STOCK_SHORT_TEXTS,
   "footer.unsubscribe": "Bu iletileri almak istemiyorum",
   "footer.stock": "Bu e-postayı, {{shop}} mağazasında stok bildirimi istediğiniz için aldınız.",
   "footer.order": "Bu e-posta, {{shop}} mağazasındaki siparişiniz için gönderildi.",

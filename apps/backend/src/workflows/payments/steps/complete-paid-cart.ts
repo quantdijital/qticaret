@@ -1,65 +1,58 @@
-import { MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { completeCartWorkflow } from "@medusajs/medusa/core-flows"
-import { RetryableError, isRetryable } from "../../../lib/errors"
+import { RetryableError } from "../../../lib/errors"
 import { errorSummary, logger } from "../../../lib/logging"
+import { completionFailureOf } from "../../../lib/payments/completion"
+import { completePaidCartAsBackorderWorkflow } from "../complete-backorder"
 import type { PaymentVerdict } from "./payment-orphan"
 
-/**
- * Whether a failed completion will fail again: the cart's own rules
- * (it changed, an address, a code, a payment fee or account no longer
- * right, a contract published again since it was accepted, an age not
- * declared, a buyer on the shop's block list, a gift line not ready) or
- * stock that ran out. Anything else (a lock, the provider unreachable) is
- * tried again: money is given back only when the order surely cannot be
- * placed.
- */
-function completionWillFailAgain(error: unknown): boolean {
-  if (isRetryable(error)) {
-    return false
-  }
-  const { safeMessage, message, type } = error as {
-    safeMessage?: unknown
-    message?: unknown
-    type?: unknown
-  }
-  if (
-    typeof safeMessage === "string" &&
-    /^(cart|payments|promotions|cash_on_delivery|bank_transfer|legal|age|fraud|gift_card)\./.test(
-      safeMessage
-    )
-  ) {
-    return true
-  }
-  return (
-    type === MedusaError.Types.NOT_ALLOWED &&
-    typeof message === "string" &&
-    /inventory/i.test(message)
-  )
+export interface PaidCartCompletion {
+  order_id: string | null
+  will_fail_again: boolean
 }
 
 /**
  * Places the order under Medusa's cart lock; a completed cart returns its
  * order. Any hosted form's verdict (PayTR's, iyzico's) of this shape.
+ * A paid cart always becomes an order (adr/0026 Ek 2026-11-06): one the
+ * shelf refuses is placed short of stock, for the shop to make good or
+ * refund. One its own rules refuse is given back (`will_fail_again`);
+ * anything else is tried again with the provider's next notice.
  */
 export const completePaidCartStep = createStep(
   "payments-complete-paid-cart",
   async (verdict: PaymentVerdict, { container }) => {
     if (verdict.kind !== "complete") {
-      return new StepResponse<{ order_id: string | null; will_fail_again: boolean }>({
-        order_id: null,
-        will_fail_again: false,
-      })
+      return new StepResponse<PaidCartCompletion>({ order_id: null, will_fail_again: false })
     }
     const { result, errors } = await completeCartWorkflow(container).run({
       input: { id: verdict.cart_id },
       throwOnError: false,
     })
-    const error: unknown = errors[0]?.error
+    let error: unknown = errors[0]?.error
     if (!error) {
-      return new StepResponse({ order_id: result.id, will_fail_again: false })
+      return new StepResponse<PaidCartCompletion>({ order_id: result.id, will_fail_again: false })
     }
-    if (!completionWillFailAgain(error)) {
+    if (completionFailureOf(error) === "stock") {
+      logger.warn({
+        event: "payments.completion_stock_short",
+        cartId: verdict.cart_id,
+        err: errorSummary(error),
+      })
+      const backorder = await completePaidCartAsBackorderWorkflow(container).run({
+        input: { cart_id: verdict.cart_id },
+        throwOnError: false,
+      })
+      error = backorder.errors[0]?.error
+      if (!error) {
+        return new StepResponse<PaidCartCompletion>({
+          order_id: backorder.result.order_id,
+          will_fail_again: false,
+        })
+      }
+    }
+    if (completionFailureOf(error) !== "refund") {
+      // The shelf again (a level gone meanwhile), a lock, the database: the next notice tries again
       throw new RetryableError("payments.completion_failed", { cause: error })
     }
     logger.warn({
@@ -67,6 +60,6 @@ export const completePaidCartStep = createStep(
       cartId: verdict.cart_id,
       err: errorSummary(error),
     })
-    return new StepResponse({ order_id: null, will_fail_again: true })
+    return new StepResponse<PaidCartCompletion>({ order_id: null, will_fail_again: true })
   }
 )

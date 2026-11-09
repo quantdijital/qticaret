@@ -96,6 +96,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "bulk_edit.stock_out_of_range": "The new stock would pass the limit.",
   "bulk_edit.stock_untracked": "This product's stock is not tracked.",
   "cart.address_required": "An address is needed to complete the order.",
+  "cart.out_of_stock":
+    "This item just sold out: {{name}}. Remove it from your cart or lower its quantity.",
   "cart.shipping_changed":
     "The shipping price changed with your basket; choose shipping again and retry.",
   "cart.shipping_not_needed": "Nothing in the cart needs shipping; remove the shipping method.",
@@ -932,6 +934,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "cart.shipping_method_required": "Choose a shipping option.",
   "cart.unknown": "Cart not found.",
   "payments.cart_changed": "The cart changed; start the payment again.",
+  "payments.refunding":
+    "Your payment was received but the order could not be placed; it is being refunded to your card.",
   "payments.amount_due": "There is an amount to pay for this cart; choose a way to pay.",
   "payments.checkout_invalid": "The payment details are missing or invalid.",
   "payments.restart_checkout": "The amount changed; start the payment again.",

@@ -13,6 +13,33 @@ const GIVE_UP_MS = 24 * 60 * 60 * 1000
 const BATCH = 100
 
 /**
+ * Asks PayTR about one payment and, when PayTR shows it paid, handles it
+ * as its notification would (same event key: handled once). False when
+ * PayTR shows no payment. Also `scripts/paytr-replay.ts`'s, for a payment
+ * past the job's day (adr/0026 Ek 2026-11-06).
+ */
+export async function replayPaytrPayment(
+  container: MedusaContainer,
+  account: NonNullable<ReturnType<typeof paytrCredentialsOf>>,
+  merchantOid: string
+): Promise<boolean> {
+  const paid = await paytrApi().queryStatus(account, merchantOid)
+  if (!paid) {
+    return false
+  }
+  await paytrNotificationWorkflow(container).run({
+    input: {
+      merchant_oid: merchantOid,
+      status: "success",
+      total_amount: paid.totalAmount,
+      test_mode: paid.testMode,
+      failed_reason_code: null,
+    },
+  })
+  return true
+}
+
+/**
  * PayTR payments whose notification never came (adr/0026 §7): open
  * sessions are asked about, and one PayTR shows paid goes through the same
  * workflow as its notification would. The event key is the same, so a
@@ -49,20 +76,9 @@ export async function reconcilePaytrSessions(
       continue
     }
     try {
-      const paid = await paytrApi().queryStatus(account, merchantOid)
-      if (!paid) {
-        continue
+      if (await replayPaytrPayment(container, account, merchantOid)) {
+        placed += 1
       }
-      await paytrNotificationWorkflow(container).run({
-        input: {
-          merchant_oid: merchantOid,
-          status: "success",
-          total_amount: paid.totalAmount,
-          test_mode: paid.testMode,
-          failed_reason_code: null,
-        },
-      })
-      placed += 1
     } catch (error) {
       logger.warn({
         event: "paytr.reconcile_failed",

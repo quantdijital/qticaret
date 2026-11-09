@@ -6,6 +6,7 @@ import { lineAddonsOf } from "../../../lib/catalog/addons"
 import { LINE_METADATA_FIELDS, lineMetadataOf } from "../../../lib/orders/line-metadata"
 import type { LineMetadataRow } from "../../../lib/orders/line-metadata"
 import { fromMedusaAmount, toMedusaAmount } from "../../../lib/money"
+import { shortUnits, stockShortOf } from "../../../lib/stock"
 import type { MedusaAmount } from "../../../lib/money"
 import { deliveriesOf, shippingOf } from "./parcels"
 import type { ShippingMethodRow } from "./parcels"
@@ -18,6 +19,7 @@ interface DisplayRow extends LifecycleOrder {
   display_id: number | string
   created_at: string | Date
   total: MedusaAmount
+  metadata?: Record<string, unknown> | null
   items?: ((LineMetadataRow & { quantity?: number | null }) | null)[] | null
   shipping_address?: {
     first_name?: string | null
@@ -68,6 +70,8 @@ export async function readOrderBoard(scope: MedusaContainer, params: AdminGetOrd
           "display_id",
           "created_at",
           "total",
+          // A paid order placed short of stock (adr/0026 Ek 2026-11-06)
+          "metadata",
           ...LIFECYCLE_FIELDS,
           "items.quantity",
           ...LINE_METADATA_FIELDS,
@@ -103,6 +107,11 @@ export async function readOrderBoard(scope: MedusaContainer, params: AdminGetOrd
               shipping: shipping.get(id) ?? null,
               delivery: deliveries.get(id) ?? null,
               addons: addonsOf(order.items),
+              // Units the shelf lacked, while there is still something to send
+              stock_short:
+                stage === "awaiting_payment" || stage === "to_ship"
+                  ? shortUnits(stockShortOf(order.metadata))
+                  : 0,
             },
           ]
         : []

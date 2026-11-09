@@ -51,6 +51,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Havale bekleniyor: #{{number}}",
       description: "{{total}} tutarındaki ödeme gelince siparişi onaylayın.",
     },
+    "orders.stock_short": {
+      title: "Stok yetersiz sipariş #{{number}}",
+      description:
+        "Eksik: {{lines}}. Üretin ya da tedarik edin; edemeyecekseniz siparişi iptal edip iade edin.",
+    },
     "orders.fraud_review": {
       title: "#{{number}} incelemede (puan {{score}})",
       description: "Şüpheli görünen sipariş kargoya verilmeden önce onayınızı bekliyor.",
@@ -158,6 +163,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "orders.bank_transfer_pending": {
       title: "Bank transfer awaited: #{{number}}",
       description: "Confirm the order once the {{total}} payment arrives.",
+    },
+    "orders.stock_short": {
+      title: "Order #{{number}} is short of stock",
+      description:
+        "Missing: {{lines}}. Make or source the units; if you cannot, cancel the order and refund it.",
     },
     "orders.fraud_review": {
       title: "#{{number}} held for review (score {{score}})",

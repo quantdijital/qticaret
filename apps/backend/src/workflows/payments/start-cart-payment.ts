@@ -15,6 +15,7 @@ import { repriceAddonLinesStep } from "../addons/checkout"
 import { paymentBasket } from "../../lib/payments/basket"
 import { HOSTED_CHECKOUT, isHostedFormProvider } from "../../lib/payments/checkout"
 import type { HostedCheckout } from "../../lib/payments/checkout"
+import { checkCartStockStep } from "./steps/cart-stock"
 import { offlineSessionDataStep } from "./steps/offline-session"
 import { readCheckoutCartStep } from "./steps/read-checkout-cart"
 import { applyPaymentFeeStep, checkPaymentFeeStep } from "./steps/payment-fee"
@@ -59,6 +60,8 @@ export const startCartPaymentWorkflow = createWorkflow(
     // change between reading its amount and starting the session for it
     acquireLockStep({ key: input.cart_id, timeout: 5, ttl: 30 })
     checkPaymentFeeStep({ cart_id: input.cart_id, fee: fee.fee })
+    // Units another order took since they were put in the cart (adr/0026 Ek 2026-11-06)
+    checkCartStockStep(input.cart_id)
     const cart = readCheckoutCartStep({
       cart_id: input.cart_id,
       sales_channel_ids: input.sales_channel_ids,
