@@ -9,6 +9,8 @@ import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useCan } from "@/features/auth/api/staff"
+import { ResendMessageButton } from "@/features/customers/components/resend-message-button"
 import { messageHistoryQuery } from "@/features/customers/api/messages"
 import type { MessageRow, MessageState } from "@/features/customers/api/messages"
 import { formatDateTime } from "@/lib/format"
@@ -26,8 +28,9 @@ const TONE: Record<MessageState, StatusTone> = {
 }
 
 /** One message on the timeline: what, whether it went, when and to whom on one line. */
-function Row({ row }: { row: MessageRow }) {
+function Row({ row, orderId }: { row: MessageRow; orderId: string | null }) {
   const { t } = useTranslation()
+  const mayResend = useCan("resendMessages")
   const Icon = row.channel === "sms" ? MessageSquare : Mail
   const why =
     row.state === "skipped" && row.reason
@@ -53,8 +56,11 @@ function Row({ row }: { row: MessageRow }) {
             </span>
             <StatusBadge tone={TONE[row.state]}>{t(`${M}.state.${row.state}`)}</StatusBadge>
           </span>
-          <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+          <span className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground tabular-nums">
             {[formatDateTime(row.at), row.to].filter(Boolean).join(" · ")}
+            {orderId && row.resendable && mayResend ? (
+              <ResendMessageButton orderId={orderId} row={row} />
+            ) : null}
           </span>
         </div>
         {why ? <span className="text-xs text-warning-text">{why}</span> : null}
@@ -63,7 +69,15 @@ function Row({ row }: { row: MessageRow }) {
   )
 }
 
-function Timeline({ rows, limited }: { rows: MessageRow[]; limited: boolean }) {
+function Timeline({
+  rows,
+  limited,
+  orderId,
+}: {
+  rows: MessageRow[]
+  limited: boolean
+  orderId: string | null
+}) {
   const { t } = useTranslation()
   const [all, setAll] = useState(false)
   const shown = all ? rows : rows.slice(0, MESSAGE_PREVIEW)
@@ -77,7 +91,7 @@ function Timeline({ rows, limited }: { rows: MessageRow[]; limited: boolean }) {
         ) : null}
         <ol className="flex flex-col">
           {shown.map((row) => (
-            <Row key={row.id} row={row} />
+            <Row key={row.id} row={row} orderId={orderId} />
           ))}
         </ol>
       </div>
@@ -122,7 +136,13 @@ export function MessageHistoryCard(props: { orderId: string } | { customerId: st
   return (
     <SectionCard title={t(`${M}.title`)} description={description} flush>
       <AsyncBody query={query} skeleton={<Skeleton className="mx-5 mb-5 h-24" />}>
-        {(data) => <Timeline rows={data.messages} limited={data.limited} />}
+        {(data) => (
+          <Timeline
+            rows={data.messages}
+            limited={data.limited}
+            orderId={"orderId" in props ? props.orderId : null}
+          />
+        )}
       </AsyncBody>
     </SectionCard>
   )

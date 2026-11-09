@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
@@ -9,6 +9,11 @@ import { MessageHistoryCard } from "./message-history-card"
 const fetchMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
+
+const staff = vi.hoisted(() => ({ resend: true }))
+vi.mock("@/features/auth/api/staff", () => ({
+  useCan: (capability: string) => capability === "resendMessages" && staff.resend,
+}))
 
 const HISTORY: MessageHistory = {
   messages: [
@@ -87,6 +92,41 @@ describe("MessageHistoryCard", () => {
     renderCard({ orderId: "order_1" })
 
     expect(await screen.findByText("Hediye kartı gönderildi")).toBeInTheDocument()
+  })
+
+  it("sends an order's message again after asking, for a role that may", async () => {
+    const user = userEvent.setup()
+    const placed = { ...HISTORY.messages[1], resendable: true }
+    fetchMock.mockImplementation((_path: string, init?: { method?: string }) =>
+      Promise.resolve(
+        init?.method === "POST"
+          ? { channel: "email", outcome: "sent" }
+          : { messages: [placed], limited: false }
+      )
+    )
+    staff.resend = true
+    renderCard({ orderId: "order_1" })
+
+    await user.click(await screen.findByRole("button", { name: "Yeniden gönder" }))
+    expect(screen.getByText("Mesaj yeniden gönderilsin mi?")).toBeInTheDocument()
+    // The confirmation's own button
+    await user.click(
+      within(screen.getByRole("alertdialog")).getByRole("button", { name: "Yeniden gönder" })
+    )
+    expect(fetchMock).toHaveBeenCalledWith("/admin/orders/order_1/messages/noti_1/resend", {
+      method: "POST",
+      body: {},
+    })
+  })
+
+  it("offers no resend on a customer's history, nor to a role that may not", async () => {
+    fetchMock.mockResolvedValue({
+      messages: [{ ...HISTORY.messages[1], resendable: true }],
+      limited: false,
+    })
+    renderCard({ customerId: "cus_1" })
+    expect(await screen.findByText("Gönderildi")).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Yeniden gönder" })).not.toBeInTheDocument()
   })
 
   it("shows the newest three and opens the rest on request", async () => {

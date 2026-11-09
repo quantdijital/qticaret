@@ -15,7 +15,22 @@ export interface MessageRow {
   /** Masked: enough to recognise the address, not to use it. */
   to: string | null
   at: string
+  /** An order's message staff may send again from its template (2026-11-06). */
+  resendable?: boolean
 }
+
+/** What a message sent again came to: `sent`, or why not (`suppressed`, `channel_off`...). */
+export interface ResendResult {
+  channel: "email" | "sms"
+  outcome: string
+}
+
+/** "Mesajı yeniden gönder": the order's message again, to its current address. */
+export const resendOrderMessage = (orderId: string, messageId: string) =>
+  sdk.client.fetch<ResendResult>(
+    `/admin/orders/${encodeURIComponent(orderId)}/messages/${encodeURIComponent(messageId)}/resend`,
+    { method: "POST", body: {} }
+  )
 
 export interface MessageHistory {
   messages: MessageRow[]
