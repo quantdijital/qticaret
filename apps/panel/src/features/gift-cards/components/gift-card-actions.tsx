@@ -7,7 +7,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { closable } from "@/features/gift-cards/api/gift-cards"
+import { closable, maskCode } from "@/features/gift-cards/api/gift-cards"
 import type { GiftCard } from "@/features/gift-cards/api/gift-cards"
 
 /** What can be done to a card: closing it while something is left on it. */
@@ -28,7 +28,7 @@ export function GiftCardActions({
         <Button
           variant="ghost"
           size="icon-sm"
-          aria-label={t("giftCards.actions", { code: card.code })}
+          aria-label={t("giftCards.actions", { code: maskCode(card.code) })}
         >
           <EllipsisVertical />
         </Button>

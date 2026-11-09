@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
 import type { Column } from "@/components/patterns/data-table"
 import { StatusBadge } from "@/components/patterns/status-badge"
-import { cardBalance } from "@/features/gift-cards/api/gift-cards"
+import { cardBalance, maskCode } from "@/features/gift-cards/api/gift-cards"
 import type { GiftCard } from "@/features/gift-cards/api/gift-cards"
 import { GiftCardActions } from "@/features/gift-cards/components/gift-card-actions"
 import { formatMoney } from "@/lib/format"
@@ -17,7 +17,7 @@ export function useGiftCardColumns(onClose: (card: GiftCard) => void): Column<Gi
     {
       key: "code",
       header: t("giftCards.columns.code"),
-      cell: (card) => <span className="font-mono text-[13px]">{card.code}</span>,
+      cell: (card) => <span className="font-mono text-[13px]">{maskCode(card.code)}</span>,
     },
     {
       key: "value",

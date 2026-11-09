@@ -7,7 +7,8 @@ import "@/lib/i18n"
 import { GiftCardsPage } from "./gift-cards-page"
 
 const fetchMock = vi.hoisted(() => vi.fn())
-const search = vi.hoisted<{ card?: string }>(() => ({}))
+const search = vi.hoisted<{ card?: string; q?: string; state?: string; page?: number }>(() => ({}))
+const navigateMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
@@ -19,6 +20,7 @@ vi.mock("@tanstack/react-router", () => ({
     </a>
   ),
   getRouteApi: () => ({ useSearch: () => search }),
+  useNavigate: () => navigateMock,
 }))
 
 const CARD = {
@@ -50,9 +52,11 @@ function answers(enabled: boolean, count = 1, card: typeof CARD = CARD) {
     if (url === "/admin/store-credit-accounts/sca_1/debit") {
       return Promise.resolve({ store_credit_account: { id: "sca_1", balance: 0 } })
     }
-    return Promise.resolve({ gift_cards: [card], count })
+    return Promise.resolve({ gift_cards: [card], count, limited: false })
   })
 }
+
+const MASKED = "GIFT-••••-••••-••••-NPQR"
 
 function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -66,23 +70,58 @@ function renderPage() {
 describe("GiftCardsPage", () => {
   beforeEach(() => {
     fetchMock.mockReset()
+    navigateMock.mockReset()
     delete search.card
+    delete search.q
+    delete search.state
+    delete search.page
   })
 
-  it("lists the cards with what each has left while the feature is on", async () => {
+  it("lists the cards with what each has left while the feature is on, codes masked", async () => {
     answers(true)
     renderPage()
-    expect(await screen.findByText("GIFT-ABCD-EFGH-JKLM-NPQR")).toBeInTheDocument()
+    expect(await screen.findByText(MASKED)).toBeInTheDocument()
+    expect(screen.queryByText(CARD.code)).toBeNull()
     expect(screen.getByRole("link", { name: "Hediye kartları" })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Hediye kartı oluştur" })).toBeInTheDocument()
+    expect(screen.getAllByRole("button", { name: "Hediye kartı oluştur" }).length).toBeGreaterThan(
+      0
+    )
+    expect(fetchMock).toHaveBeenCalledWith("/admin/gift-card-list", { query: { offset: 0 } })
   })
 
-  it("says so when the shop has more cards than one read shows", async () => {
-    answers(true, 1250)
+  it("asks a page by the code searched and the state chosen, and pages on", async () => {
+    search.q = "gift-ab"
+    search.state = "used"
+    search.page = 2
+    answers(true, 60)
     renderPage()
-    expect(
-      await screen.findByText("En yeni 1 kart gösteriliyor; mağazada toplam 1.250 kart var.")
-    ).toBeInTheDocument()
+    expect(await screen.findByText(MASKED)).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith("/admin/gift-card-list", {
+      query: { q: "gift-ab", state: "used", offset: 25 },
+    })
+    expect(screen.getByRole("tab", { name: "Kullanıldı" })).toHaveAttribute("aria-selected", "true")
+
+    await userEvent.click(screen.getByRole("button", { name: /Sonraki/ }))
+    expect(navigateMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ search: { q: "gift-ab", state: "used", page: 3 } })
+    )
+    await userEvent.click(screen.getByRole("tab", { name: "Süresi doldu" }))
+    expect(navigateMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ search: { q: "gift-ab", state: "expired", page: undefined } })
+    )
+  })
+
+  it("says nothing matched a search, without offering a new card there", async () => {
+    search.q = "YOK"
+    fetchMock.mockImplementation((url: string) =>
+      Promise.resolve(
+        url === "/admin/features"
+          ? { features: [{ key: "promotions.gift_cards", enabled: true }] }
+          : { gift_cards: [], count: 0, limited: false }
+      )
+    )
+    renderPage()
+    expect(await screen.findByText("Aramanızla eşleşen kart yok.")).toBeInTheDocument()
   })
 
   it("points to the features page while it is off, and asks the server for no cards", async () => {
@@ -100,12 +139,12 @@ describe("GiftCardsPage", () => {
     answers(true)
     renderPage()
     await userEvent.click(
-      await screen.findByRole("button", { name: "GIFT-ABCD-EFGH-JKLM-NPQR kartının işlemleri" })
+      await screen.findByRole("button", { name: `${MASKED} kartının işlemleri` })
     )
     await userEvent.click(await screen.findByRole("menuitem", { name: "Kartı kapat" }))
 
     const dialog = await screen.findByRole("dialog", { name: "Kartı kapat" })
-    expect(dialog).toHaveTextContent("GIFT-ABCD-EFGH-JKLM-NPQR kodlu kartta kalan")
+    expect(dialog).toHaveTextContent(`${MASKED} kodlu kartta kalan`)
     expect(dialog).toHaveTextContent("geri alınamaz")
     expect(fetchMock).not.toHaveBeenCalledWith(
       expect.stringContaining("/admin/store-credit-accounts"),
@@ -140,7 +179,7 @@ describe("GiftCardsPage", () => {
     search.card = "gcard_1"
     answers(true)
     renderPage()
-    expect(await screen.findByText("GIFT-ABCD-EFGH-JKLM-NPQR")).toBeInTheDocument()
+    expect(await screen.findByText(MASKED)).toBeInTheDocument()
     expect(screen.getByText("Yalnızca bir kart gösteriliyor.")).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Tüm kartlar" })).toHaveAttribute(
       "href",
@@ -149,6 +188,6 @@ describe("GiftCardsPage", () => {
     expect(fetchMock).toHaveBeenCalledWith("/admin/gift-cards/gcard_1", {
       query: { fields: expect.stringContaining("store_credit_account.id") as unknown },
     })
-    expect(fetchMock).not.toHaveBeenCalledWith("/admin/gift-cards", expect.anything())
+    expect(fetchMock).not.toHaveBeenCalledWith("/admin/gift-card-list", expect.anything())
   })
 })

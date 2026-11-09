@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input"
 import {
   CLOSE_GIFT_CARD,
   cardBalance,
+  maskCode,
   useCloseGiftCard,
 } from "@/features/gift-cards/api/gift-cards"
 import type { GiftCard } from "@/features/gift-cards/api/gift-cards"
@@ -120,7 +121,7 @@ export function CloseGiftCardDialog({
           <DialogDescription>
             {card
               ? t(`${C}.description`, {
-                  code: card.code,
+                  code: maskCode(card.code),
                   amount: formatMoney(cardBalance(card), card.currency_code),
                 })
               : null}

@@ -1,11 +1,12 @@
-import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { keepPreviousData, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import type { GiftCardState } from "@/features/gift-cards/search"
 import { sdk } from "@/lib/sdk"
 
 /** Gift cards (F4.8, ADR-0025): the loyalty plugin's routes, there while the shop's flag is on. */
 
 export const GIFT_CARDS_FLAG = "promotions.gift_cards"
-// A shop's cards fit one read for now; selling them (F9) brings paging
-const READ = 200
+/** The server's page (`GET /admin/gift-card-list`). */
+export const GIFT_CARD_PAGE = 25
 const FIELDS = [
   "id",
   "code",
@@ -32,18 +33,53 @@ export interface GiftCard {
   store_credit_account?: { id?: string; balance: number } | null
 }
 
-/** The newest cards, and how many the shop has in all. */
-export const giftCardsQuery = () =>
+export interface GiftCardListParams {
+  /** A code or its start. */
+  q: string
+  state: GiftCardState | "all"
+  /** 0-based. */
+  page: number
+}
+
+/**
+ * A page of the shop's cards, newest first, by a code or its start and by
+ * where they stand; how many match, and whether a state filter read only
+ * the newest cards (`limited`).
+ */
+export const giftCardsQuery = ({ q, state, page }: GiftCardListParams) =>
   queryOptions({
-    queryKey: ["gift-cards", "list"],
+    queryKey: ["gift-cards", "list", { q, state, page }],
     queryFn: async () => {
-      const { gift_cards: cards, count } = await sdk.client.fetch<{
+      const answer = await sdk.client.fetch<{
         gift_cards: GiftCard[]
-        count?: number
-      }>("/admin/gift-cards", { query: { fields: FIELDS, limit: READ, order: "-created_at" } })
-      return { cards, count: count ?? cards.length }
+        count: number
+        limited: boolean
+      }>("/admin/gift-card-list", {
+        query: {
+          ...(q.trim() ? { q: q.trim() } : {}),
+          ...(state === "all" ? {} : { state }),
+          offset: page * GIFT_CARD_PAGE,
+        },
+      })
+      return { cards: answer.gift_cards, count: answer.count, limited: answer.limited }
     },
+    placeholderData: keepPreviousData,
   })
+
+/**
+ * A code as the list shows it: its word and last group, the rest hidden
+ * (whoever reads a code spends the card): `GIFT-••••-••••-••••-7KQ2`.
+ */
+export function maskCode(code: string): string {
+  const parts = code.split("-")
+  if (parts.length < 3) {
+    return code.length > 4 ? `${"•".repeat(Math.min(code.length - 4, 12))}${code.slice(-4)}` : code
+  }
+  const last = parts.length - 1
+  return parts
+    .map((part, index) => (index === 0 || index === last ? part : "•".repeat(part.length)))
+    .join("-")
+}
 
 /** What is left on a card; before its account is made, its value. */
 export const cardBalance = (card: GiftCard): number =>
