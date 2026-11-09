@@ -101,6 +101,15 @@ describe("the panel's house rules (docs/18 §9)", () => {
     expect(breaches(/from "@\/components\/ui\/sheet"/g, (file) => drawers.has(file))).toEqual([])
   })
 
+  it("puts a notice's buttons in AlertAction and its icon level with the first line", () => {
+    // The owner, 2026-11-09: "ikon ile metin yatayda hizalanmamış". Words and buttons in one
+    // centred flex row put the words 6 px under the icon; `AlertAction` centres the buttons on
+    // the first line instead.
+    expect(breaches(/<AlertDescription\b[^>]*className="[^"]*items-center/g)).toEqual([])
+    // An icon pushed down by a fixed amount fits one line height only: `h-lh` fits them all
+    expect(breaches(/\[&>svg\]:translate-y-[\w.[\]-]+/g)).toEqual([])
+  })
+
   it("has every text in Turkish and English, Turkish without exclamation marks", () => {
     const turkish = leaves(tr)
     expect(turkish.map(([key]) => key).sort()).toEqual(

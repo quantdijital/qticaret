@@ -1,6 +1,6 @@
 import { Download, Truck } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { usePrintLabels } from "@/features/orders/components/print-labels"
 
@@ -17,25 +17,23 @@ export function PickupAlert({ parcels }: { parcels: string[] }) {
   return (
     <Alert>
       <Truck aria-hidden="true" />
-      <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
-        <span>{t(`${P}.waiting`, { count: parcels.length })}</span>
-        <span className="flex flex-wrap gap-2">
-          {parcels.map((id, index) => (
-            <Button
-              key={id}
-              size="sm"
-              variant="outline"
-              disabled={labels.busy}
-              onClick={() => {
-                labels.print([id])
-              }}
-            >
-              <Download aria-hidden="true" />
-              {parcels.length > 1 ? t(`${P}.labelOf`, { number: index + 1 }) : t(`${P}.label`)}
-            </Button>
-          ))}
-        </span>
-      </AlertDescription>
+      <AlertDescription>{t(`${P}.waiting`, { count: parcels.length })}</AlertDescription>
+      <AlertAction>
+        {parcels.map((id, index) => (
+          <Button
+            key={id}
+            size="sm"
+            variant="outline"
+            disabled={labels.busy}
+            onClick={() => {
+              labels.print([id])
+            }}
+          >
+            <Download aria-hidden="true" />
+            {parcels.length > 1 ? t(`${P}.labelOf`, { number: index + 1 }) : t(`${P}.label`)}
+          </Button>
+        ))}
+      </AlertAction>
     </Alert>
   )
 }

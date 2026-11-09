@@ -35,8 +35,8 @@ export function BulkJobResult({ job }: { job: SheetJob }) {
   return (
     <div className="flex flex-col gap-3" aria-live="polite">
       <div className="flex flex-col gap-1.5 text-sm">
-        <p className="flex items-center gap-2 font-medium">
-          <CircleCheck className="size-4 text-success-text" aria-hidden="true" />
+        <p className="flex items-start gap-2 font-medium">
+          <CircleCheck className="h-lh w-4 shrink-0 text-success-text" aria-hidden="true" />
           {t("products.bulk.changed", count(summary.changed))}
         </p>
         {summary.unchanged > 0 ? (

@@ -60,8 +60,8 @@ export function LinesCard({ short }: { short: ReadonlySet<string> }) {
           />
         </Field>
         {lines.fields.length === 0 ? (
-          <div className="flex items-center gap-3 rounded-md border border-dashed px-4 py-6 text-sm text-muted-foreground">
-            <PackageSearch className="size-5 shrink-0" aria-hidden="true" />
+          <div className="flex items-start gap-3 rounded-md border border-dashed px-4 py-6 text-sm text-muted-foreground">
+            <PackageSearch className="h-lh w-5 shrink-0" aria-hidden="true" />
             {t(`${L}.empty`)}
           </div>
         ) : (

@@ -42,8 +42,8 @@ function Counts({ summary }: { summary: ImportSummary }) {
   const done = summary.mode === "apply"
   return (
     <div className="flex flex-col gap-1.5 text-sm">
-      <p className="flex items-center gap-2 font-medium">
-        <CircleCheck className="size-4 text-success-text" aria-hidden="true" />
+      <p className="flex items-start gap-2 font-medium">
+        <CircleCheck className="h-lh w-4 shrink-0 text-success-text" aria-hidden="true" />
         {t(done ? "products.sheets.applied" : "products.sheets.planned", {
           create: formatCount(summary.create),
           update: formatCount(summary.update),

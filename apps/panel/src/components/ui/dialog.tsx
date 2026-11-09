@@ -69,11 +69,23 @@ export type DialogSize = keyof typeof DIALOG_SIZE_CLASS
 
 /**
  * `pane`: the header and the footer stay where they are and only the body
- * scrolls (a picker's grid, a long list), the box at its full height so a
- * tab or a page of results does not make it jump.
+ * scrolls (a long list, a long form). The box is as tall as what it holds
+ * and at most `--dialog-max-height`: a short one is not drawn 85% of the
+ * screen tall (the owner, 2026-11-09: "Kargoya ver ... modalın yüksekliği
+ * aşırı yüksek").
  */
-export const DIALOG_PANE_CLASS =
-  "group/pane flex flex-col overflow-hidden sm:h-(--dialog-max-height)"
+export const DIALOG_PANE_CLASS = "group/pane flex flex-col overflow-hidden"
+
+/**
+ * `pane="fixed"`: a pane held at `--dialog-max-height` whatever it holds,
+ * for a dialog whose height must not jump as its tab, its record or its
+ * search changes (a record window walked with ‹ n / m ›, a picker, a
+ * preview). A caller may set a lower fixed height in `className`.
+ */
+export const DIALOG_PANE_FIXED_CLASS = "sm:h-(--dialog-max-height)"
+
+/** `true`: as tall as its content, up to the max; `"fixed"`: always the max. */
+export type DialogPane = boolean | "fixed"
 
 /** The body of a `pane` dialog: what scrolls, running to the box's edges so its scrollbar does. */
 export const DIALOG_PANE_BODY_CLASS =
@@ -96,8 +108,8 @@ function DialogContent({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   size?: DialogSize
-  /** Header and footer fixed, the body scrolling between them (`DIALOG_PANE_CLASS`). */
-  pane?: boolean
+  /** Header and footer fixed, the body scrolling between them (`DIALOG_PANE_CLASS`); `"fixed"` also holds its height. */
+  pane?: DialogPane
   showCloseButton?: boolean
 }) {
   const { t } = useTranslation()
@@ -112,6 +124,7 @@ function DialogContent({
           DIALOG_CONTENT_CLASS,
           DIALOG_SIZE_CLASS[size],
           pane && DIALOG_PANE_CLASS,
+          pane === "fixed" && DIALOG_PANE_FIXED_CLASS,
           className
         )}
         {...props}

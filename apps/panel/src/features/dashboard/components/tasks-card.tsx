@@ -157,8 +157,8 @@ function TaskList({ tasks }: { tasks: DashboardTasks }) {
   const list = rows(tasks, { settings: useCan("settings"), keys: useCan("keys") })
   if (list.every((row) => row.count === 0)) {
     return (
-      <p className="flex items-center gap-2 px-5 pb-5 text-sm text-muted-foreground">
-        <CircleCheck className="size-4 text-success-text" aria-hidden="true" />
+      <p className="flex items-start gap-2 px-5 pb-5 text-sm text-muted-foreground">
+        <CircleCheck className="h-lh w-4 shrink-0 text-success-text" aria-hidden="true" />
         {t("dashboard.tasks.allClear")}
       </p>
     )

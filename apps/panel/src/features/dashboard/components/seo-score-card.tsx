@@ -34,8 +34,8 @@ function Score({ summary }: { summary: AdvisorSummary }) {
           })}
         </span>
         {summary.critical > 0 ? (
-          <span className="flex items-center gap-1.5 text-[13px] text-warning-text">
-            <TriangleAlert className="size-3.5 shrink-0" aria-hidden="true" />
+          <span className="flex items-start gap-1.5 text-[13px] text-warning-text">
+            <TriangleAlert className="h-lh w-3.5 shrink-0" aria-hidden="true" />
             {t("seo.advisor.criticalCount", {
               count: summary.critical,
               products: formatCount(summary.critical),

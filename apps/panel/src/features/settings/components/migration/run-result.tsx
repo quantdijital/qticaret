@@ -123,8 +123,8 @@ export function RunResult({ job, source }: { job: MigrationJob; source: Migratio
       : `${R}.planned`
   return (
     <div className="flex flex-col gap-3">
-      <p className="flex items-center gap-2 text-sm font-medium">
-        <CircleCheck className="size-4 text-success-text" aria-hidden="true" />
+      <p className="flex items-start gap-2 text-sm font-medium">
+        <CircleCheck className="h-lh w-4 shrink-0 text-success-text" aria-hidden="true" />
         {t(heading)}
       </p>
       {refresh ? (

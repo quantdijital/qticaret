@@ -55,7 +55,7 @@ export function ReviewPhotos({ photos, author }: { photos: ReviewPhoto[]; author
           }
         }}
       >
-        <DialogContent size="lg" pane className="sm:h-(--dialog-max-height)">
+        <DialogContent size="lg" pane="fixed">
           <DialogHeader>
             <DialogTitle>{t(`${R}.title`, { author })}</DialogTitle>
             <DialogDescription>

@@ -88,8 +88,8 @@ function PickerContent({
   return (
     <DialogContent
       size="xl"
-      pane
-      className={cn("sm:h-(--dialog-max-height)", over && "ring-2 ring-primary")}
+      pane="fixed"
+      className={cn(over && "ring-2 ring-primary")}
       onDragOver={(event) => {
         if (hasFiles(event)) {
           event.preventDefault()

@@ -90,7 +90,7 @@ export function TemplateDialog({ template, steps, templateAt, onClose }: Templat
           }
         }}
         size="lg"
-        pane
+        pane="fixed"
         title={template ? template.name : t("attributes.newTemplate")}
         description={t("attributes.templateHint")}
         headerAction={

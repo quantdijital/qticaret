@@ -60,7 +60,7 @@ export function RecordPickerDialog({
         }
       }}
     >
-      <DialogContent pane>
+      <DialogContent pane="fixed">
         <DialogHeader>
           <DialogTitle>{t(`${R}.pick.${kind}`)}</DialogTitle>
           <DialogDescription>{t(multiple ? `${R}.pickMany` : `${R}.pickOne`)}</DialogDescription>

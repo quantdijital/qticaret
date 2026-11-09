@@ -31,8 +31,8 @@ export function ShopifyConnection() {
   if (connected && !editing) {
     return (
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-md border px-3 py-2.5">
-        <p className="flex items-center gap-2 text-sm">
-          <CircleCheck className="size-4 text-success-text" aria-hidden="true" />
+        <p className="flex items-start gap-2 text-sm">
+          <CircleCheck className="h-lh w-4 shrink-0 text-success-text" aria-hidden="true" />
           {t(`${S}.connected`, { shop: account.settings?.shop_domain ?? "" })}
         </p>
         <Button

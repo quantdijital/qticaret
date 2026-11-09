@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { useConfirmBankTransfer } from "@/features/orders/api/payments"
 import type { BankTransferState } from "@/features/orders/api/payments"
@@ -30,12 +30,12 @@ export function BankTransferAlert({
   const confirm = useConfirmBankTransfer(orderId)
   return (
     <Alert>
-      <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
-        <span>
-          {state.deadline
-            ? t(`${B}.awaitingUntil`, { number: displayId, date: formatDateTime(state.deadline) })
-            : t(`${B}.awaiting`, { number: displayId })}
-        </span>
+      <AlertDescription>
+        {state.deadline
+          ? t(`${B}.awaitingUntil`, { number: displayId, date: formatDateTime(state.deadline) })
+          : t(`${B}.awaiting`, { number: displayId })}
+      </AlertDescription>
+      <AlertAction>
         <Button
           size="sm"
           disabled={confirm.isPending}
@@ -45,7 +45,7 @@ export function BankTransferAlert({
         >
           {t(`${B}.confirm`)}
         </Button>
-      </AlertDescription>
+      </AlertAction>
       <ConfirmDialog
         open={asking}
         onOpenChange={setAsking}

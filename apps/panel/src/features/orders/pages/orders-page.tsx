@@ -121,8 +121,8 @@ export function OrdersPage() {
           />
           <OrderFilters search={search} onChange={refilter} />
           {board.data?.limited ? (
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Info className="size-3.5" aria-hidden="true" />
+            <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+              <Info className="h-lh w-3.5 shrink-0" aria-hidden="true" />
               {t("orders.limited")}
             </p>
           ) : null}

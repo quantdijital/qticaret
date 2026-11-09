@@ -131,7 +131,7 @@ export function SlideDialog({
         }
       }}
       size="lg"
-      pane
+      pane="fixed"
       title={t(`${S}.editSlide`)}
       description={slide.heading ?? t(`${S}.slide`, { number: index + 1 })}
       headerAction={

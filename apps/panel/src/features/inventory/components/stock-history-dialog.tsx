@@ -201,8 +201,9 @@ function History({ itemId }: { itemId: string }) {
  * (an order, a return, the stock page, the nightly check), shelf and held
  * counts after it; and the item's own low-stock threshold. The arrows go
  * to the stock list's next item; a threshold typed and not saved is asked
- * about first. `pane`: the movements scroll under a fixed title, a page
- * of them never makes the box jump.
+ * about first. `pane="fixed"` at the variant window's height: the
+ * movements scroll under a fixed title, and neither a page of them nor
+ * the next item makes the box jump.
  */
 export function StockHistoryDialog({
   item,
@@ -229,7 +230,8 @@ export function StockHistoryDialog({
           }
         }}
         onCloseRequest={guard}
-        pane
+        pane="fixed"
+        className="sm:h-[min(var(--dialog-max-height),40rem)]"
         title={t("inventory.history.title")}
         description={[name, item?.variant?.title, item?.sku].filter(Boolean).join(" · ")}
         headerAction={

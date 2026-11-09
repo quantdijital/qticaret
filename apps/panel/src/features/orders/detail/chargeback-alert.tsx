@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { chargebacksQuery, evidenceUrl } from "@/features/orders/api/chargebacks"
 import { formatDateTime } from "@/lib/format"
@@ -20,26 +20,24 @@ export function ChargebackAlert({ orderId }: { orderId: string }) {
   }
   return (
     <Alert variant="destructive">
-      <AlertDescription className="flex flex-wrap items-center justify-between gap-3">
-        <span>
-          {open.due_at
-            ? t(`${C}.alertDue`, {
-                status: t(`${C}.status.${open.status}`),
-                date: formatDateTime(open.due_at),
-              })
-            : t(`${C}.alert`, { status: t(`${C}.status.${open.status}`) })}
-        </span>
-        <span className="flex gap-2">
-          <Button asChild size="sm" variant="outline">
-            <a href={evidenceUrl(open.id)} download>
-              {t(`${C}.evidence`)}
-            </a>
-          </Button>
-          <Button asChild size="sm" variant="outline">
-            <Link to="/orders/chargebacks">{t(`${C}.queue`)}</Link>
-          </Button>
-        </span>
+      <AlertDescription>
+        {open.due_at
+          ? t(`${C}.alertDue`, {
+              status: t(`${C}.status.${open.status}`),
+              date: formatDateTime(open.due_at),
+            })
+          : t(`${C}.alert`, { status: t(`${C}.status.${open.status}`) })}
       </AlertDescription>
+      <AlertAction>
+        <Button asChild size="sm" variant="outline">
+          <a href={evidenceUrl(open.id)} download>
+            {t(`${C}.evidence`)}
+          </a>
+        </Button>
+        <Button asChild size="sm" variant="outline">
+          <Link to="/orders/chargebacks">{t(`${C}.queue`)}</Link>
+        </Button>
+      </AlertAction>
     </Alert>
   )
 }

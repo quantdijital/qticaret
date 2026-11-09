@@ -130,7 +130,7 @@ export function AuthorDialog({
         }
       }}
       size="lg"
-      pane
+      pane="fixed"
       title={author ? author.name : t(`${A}.new`)}
       description={author ? <span className="font-mono text-xs">{author.path}</span> : undefined}
       // A new author with a name given (a post's old text) may be saved as it is

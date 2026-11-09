@@ -81,8 +81,8 @@ function RuleNotice({ display, days }: { display: PriceDisplayView | null; days:
               })}
         </p>
         {struck && display.basis === "regular" ? (
-          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Info aria-hidden="true" className="size-3.5" />
+          <p className="flex items-start gap-1.5 text-xs text-muted-foreground">
+            <Info aria-hidden="true" className="h-lh w-3.5 shrink-0" />
             {t("products.priceHistory.regularBasis")}
           </p>
         ) : null}

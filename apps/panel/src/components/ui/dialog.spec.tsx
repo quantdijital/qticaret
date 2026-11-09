@@ -105,14 +105,54 @@ describe("a pane dialog", () => {
     )
     const box = screen.getByRole("dialog")
     expect(box).toHaveAttribute("data-pane")
-    // One height on the size scale, whatever the tab or the page shows
-    expect(box).toHaveClass("flex", "flex-col", "overflow-hidden", "sm:h-(--dialog-max-height)")
+    expect(box).toHaveClass("flex", "flex-col", "overflow-hidden")
     expect(box).not.toHaveClass("grid", "overflow-y-auto")
     expect(box).toHaveClass("sm:max-w-(--dialog-width-xl)")
     expect(box.querySelector("[data-slot=dialog-body]")).toHaveClass(
       "group-data-[pane]/pane:flex-1",
+      "group-data-[pane]/pane:min-h-0",
       "group-data-[pane]/pane:overflow-y-auto"
     )
+  })
+
+  it('is as tall as what it holds, up to the max (the owner, 2026-11-09: "aşırı yüksek")', () => {
+    render(
+      <Dialog open>
+        <DialogContent pane>
+          <DialogTitle>Kargoya verin</DialogTitle>
+          <DialogDescription>Kargo firması</DialogDescription>
+          <DialogBody>
+            <p>Koli</p>
+          </DialogBody>
+        </DialogContent>
+      </Dialog>
+    )
+    const box = screen.getByRole("dialog")
+    expect(box).toHaveClass("sm:max-h-(--dialog-max-height)")
+    expect(box.className).not.toMatch(/(?:^|\s)sm:h-/)
+  })
+
+  it("holds its height when fixed, so a tab, a record or a search does not make it jump", () => {
+    render(
+      <Dialog open>
+        <DialogContent
+          size="lg"
+          pane="fixed"
+          className="sm:h-[min(var(--dialog-max-height),40rem)]"
+        >
+          <DialogTitle>Varyant</DialogTitle>
+          <DialogDescription>Kırmızı</DialogDescription>
+          <DialogBody>
+            <p>Alanlar</p>
+          </DialogBody>
+        </DialogContent>
+      </Dialog>
+    )
+    const box = screen.getByRole("dialog")
+    expect(box).toHaveAttribute("data-pane")
+    // A lower fixed height of the caller's replaces the max
+    expect(box).toHaveClass("sm:h-[min(var(--dialog-max-height),40rem)]")
+    expect(box).not.toHaveClass("sm:h-(--dialog-max-height)")
   })
 })
 

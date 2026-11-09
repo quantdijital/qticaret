@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react"
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog"
-import type { DialogSize } from "@/components/ui/dialog"
+import type { DialogPane, DialogSize } from "@/components/ui/dialog"
 import { DialogHeading } from "./dialog-heading"
 
 interface DetailDialogProps {
@@ -11,8 +11,8 @@ interface DetailDialogProps {
   /** The description's own type (an action name or a path in monospace). */
   descriptionClassName?: string
   size?: DialogSize
-  /** Header and footer fixed, the body scrolling between them. */
-  pane?: boolean
+  /** Header and footer fixed, the body scrolling between them; `"fixed"` also holds its height. */
+  pane?: DialogPane
   /** Right of the title, clear of the close button: a record's ‹ n / m ›. */
   headerAction?: ReactNode
   /** The record's own actions (delete, mark as answered); none, no footer. */

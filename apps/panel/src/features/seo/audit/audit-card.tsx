@@ -96,8 +96,8 @@ function Report({ report }: { report: AuditReport }) {
           ))}
         </ul>
       ) : (
-        <p className="flex items-center gap-2 text-sm text-success-text">
-          <CircleCheck className="size-4" aria-hidden="true" />
+        <p className="flex items-start gap-2 text-sm text-success-text">
+          <CircleCheck className="h-lh w-4 shrink-0" aria-hidden="true" />
           {t("seo.audit.clean")}
         </p>
       )}

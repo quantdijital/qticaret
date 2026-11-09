@@ -43,8 +43,8 @@ export function ProgressCard({ order, stage }: { order: OrderDetail; stage: Life
   return (
     <section className="rounded-lg border bg-card px-5 py-4 shadow-card">
       {canceled ? (
-        <p className="mb-3 flex items-center gap-2 rounded-md bg-destructive-soft px-3 py-2 text-sm text-destructive-text">
-          <Ban className="size-4" aria-hidden="true" />
+        <p className="mb-3 flex items-start gap-2 rounded-md bg-destructive-soft px-3 py-2 text-sm text-destructive-text">
+          <Ban className="h-lh w-4 shrink-0" aria-hidden="true" />
           {t("orders.detail.canceledNote")}
         </p>
       ) : null}

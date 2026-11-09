@@ -113,7 +113,7 @@ export function TermDialog({ term, steps, onClose }: TermDialogProps) {
         }}
         onCloseRequest={guard}
         size="lg"
-        pane
+        pane="fixed"
         className="sm:h-[min(var(--dialog-max-height),40rem)]"
         title={term.name}
         description={term.path}

@@ -144,7 +144,7 @@ export function VariantDialogView({
         }
       }}
       size="lg"
-      pane
+      pane="fixed"
       className="sm:h-[min(var(--dialog-max-height),40rem)]"
       title={t(`${D}.title`)}
       description={description}

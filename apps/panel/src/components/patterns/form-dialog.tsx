@@ -3,7 +3,7 @@ import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog"
-import type { DialogSize } from "@/components/ui/dialog"
+import type { DialogPane, DialogSize } from "@/components/ui/dialog"
 import { DialogHeading } from "./dialog-heading"
 import { useDiscardGuard } from "./use-discard-guard"
 
@@ -15,8 +15,8 @@ interface FormDialogProps {
   /** The description's own type (a path in monospace). */
   descriptionClassName?: string
   size?: DialogSize
-  /** Header and footer fixed, the body scrolling between them. */
-  pane?: boolean
+  /** Header and footer fixed, the body scrolling between them; `"fixed"` also holds its height. */
+  pane?: DialogPane
   /** Right of the title, clear of the close button: a record's previous/next. */
   headerAction?: ReactNode
   dirty: boolean

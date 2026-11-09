@@ -30,8 +30,8 @@ function AddressLines({ location }: { location: Location }) {
   const address = location.address
   if (!address?.address_1) {
     return (
-      <p className="flex items-center gap-2 text-[13px] text-warning-text">
-        <MapPinOff className="size-4 shrink-0" aria-hidden="true" />
+      <p className="flex items-start gap-2 text-[13px] text-warning-text">
+        <MapPinOff className="h-lh w-4 shrink-0" aria-hidden="true" />
         {t("settings.locations.noAddress")}
       </p>
     )

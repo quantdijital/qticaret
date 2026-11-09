@@ -114,7 +114,7 @@ export function AddonDialog({
         }
       }}
       size="lg"
-      pane
+      pane="fixed"
       className="sm:h-[min(var(--dialog-max-height),40rem)]"
       title={addon ? t(`${A}.editTitle`) : t(`${A}.new`)}
       description={
