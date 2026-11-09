@@ -8,6 +8,7 @@ import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { addonsOfProducts } from "@/lib/cart/addons"
 import { codesOf, currentCart } from "@/lib/cart/cart"
 import { shopperGiftLines } from "@/lib/cart/gift"
+import { OUT_OF_STOCK, cartShortLines, outOfStockText } from "@/lib/cart/stock"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { storefrontSettings } from "@/lib/store-api/requests"
@@ -59,8 +60,16 @@ export default async function CartPage({
     // The design's badges (adr/0049 Ek 2026-11-06)
     currentShared(),
   ])
+  const asked = typeof query["hata"] === "string" ? query["hata"] : null
+  // A line sold out since it was added (adr/0026 Ek 2026-11-06): named as the shelf stands now
   const error =
-    typeof query["hata"] === "string" && CART_ERRORS.has(query["hata"]) ? t(query["hata"]) : null
+    asked === OUT_OF_STOCK
+      ? cart
+        ? outOfStockText(await cartShortLines(cart.id), t)
+        : null
+      : asked && CART_ERRORS.has(asked)
+        ? t(asked)
+        : null
   // A payment link's cart (adr/0051): its lines as they are, no code, no picks to edit
   const locked = lockedNoteOf(cart, t)
   const [gifts, addons, extras, paths, pictures] = await Promise.all([

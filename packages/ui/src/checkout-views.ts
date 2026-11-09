@@ -159,6 +159,10 @@ export interface CheckoutResultPageView {
   /** Where the pending page looks again, for its refresh. */
   retryPath: string | null
   backPath: string
+  /** The way on's words; absent: the theme's own for the state. */
+  backLabel?: string
+  /** A second way, as a plain link: the order lookup, the shop's contact page. */
+  help?: { path: string; label: string } | null
 }
 
 export interface OrderLineView {

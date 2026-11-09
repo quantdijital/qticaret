@@ -2,6 +2,7 @@ import "server-only"
 import { storefrontEnv } from "../env"
 import { isStoreApiError } from "../store-api/errors"
 import { storeCall, storeGet, storePost } from "../store-api/server"
+import type { PaymentOutcome } from "./waiting"
 
 /**
  * Starting and finishing a payment (D7, adr/0026, adr/0029). The amount,
@@ -129,6 +130,27 @@ export async function orderAccess(cartId: string): Promise<{ id: string; token: 
   } catch (error) {
     if (isStoreApiError(error) && error.status === 404) {
       return null
+    }
+    throw error
+  }
+}
+
+/**
+ * What became of the cart's card payment (adr/0026 Ek 2026-11-06): its
+ * order and key; the money being given back (409 `payments.refunding`);
+ * or nothing yet, while the provider's notice has not come.
+ */
+export async function paymentOutcome(cartId: string): Promise<PaymentOutcome> {
+  try {
+    const access = await orderAccess(cartId)
+    return access ? { state: "ordered", ...access } : { state: "pending" }
+  } catch (error) {
+    if (
+      isStoreApiError(error) &&
+      error.status === 409 &&
+      error.messageKey === "payments.refunding"
+    ) {
+      return { state: "refund" }
     }
     throw error
   }

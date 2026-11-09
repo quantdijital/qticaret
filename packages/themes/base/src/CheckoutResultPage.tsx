@@ -42,9 +42,15 @@ export function CheckoutResultPage({ view, t }: { view: CheckoutResultPageView; 
         {view.state !== "pending" && (
           <Button asChild size="lg" className="h-12 rounded-button px-7">
             <a href={view.backPath}>
-              {view.state === "failed" ? t("checkout.result_try_again") : t("not_found.home")}
+              {view.backLabel ??
+                (view.state === "failed" ? t("checkout.result_try_again") : t("not_found.home"))}
             </a>
           </Button>
+        )}
+        {view.state !== "pending" && view.help && (
+          <a href={view.help.path} className="text-sm font-medium underline underline-offset-4">
+            {view.help.label}
+          </a>
         )}
       </div>
     </PageContainer>

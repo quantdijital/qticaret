@@ -44,7 +44,13 @@ export function CheckoutResultPage({ view, t }: { view: CheckoutResultPageView; 
         )}
         {view.state !== "pending" && (
           <a href={view.backPath} className="gf-btn">
-            {view.state === "failed" ? t("checkout.result_try_again") : t("not_found.home")}
+            {view.backLabel ??
+              (view.state === "failed" ? t("checkout.result_try_again") : t("not_found.home"))}
+          </a>
+        )}
+        {view.state !== "pending" && view.help && (
+          <a href={view.help.path} className="gf-link">
+            {view.help.label}
           </a>
         )}
       </div>

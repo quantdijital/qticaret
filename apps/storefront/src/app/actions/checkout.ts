@@ -7,6 +7,7 @@ import type { ActionResult, OptionView, PlaceOrderResult } from "@qticaret/ui"
 import { rememberAddress } from "@/lib/account/auth"
 import { sessionToken } from "@/lib/account/session"
 import { forgetCart } from "@/lib/cart/cookie"
+import { OUT_OF_STOCK } from "@/lib/cart/stock"
 import { districtOptions, neighborhoodOptions } from "@/lib/checkout/address"
 import { addressFromForm, addressPayload } from "@/lib/checkout/address-form"
 import { checkoutCart } from "@/lib/checkout/cart"
@@ -134,6 +135,10 @@ export async function placeOrder(
     const challenge = challengeOf(error)
     if (challenge) {
       return { ok: false, error: null, challenge }
+    }
+    if (isStoreApiError(error) && error.messageKey === OUT_OF_STOCK) {
+      // A unit another order took since it was put in the cart (adr/0026 Ek 2026-11-06): the cart names it
+      redirect(`/sepet?hata=${OUT_OF_STOCK}`)
     }
     if (pricesChanged(error)) {
       // The page comes back in this answer with the new totals; the shopper pays again, never this action

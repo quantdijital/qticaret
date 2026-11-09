@@ -5,6 +5,7 @@ import { shippingInfoEvents } from "@/lib/analytics/cart-payloads"
 import { checkoutEvents } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { shopperGiftLines } from "@/lib/cart/gift"
+import { OUT_OF_STOCK, cartShortLines } from "@/lib/cart/stock"
 import { checkoutCart } from "@/lib/checkout/cart"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
@@ -47,11 +48,17 @@ export default async function CheckoutPage({
   const asked = typeof query["adim"] === "string" ? query["adim"] : undefined
   const failed = typeof query["hata"] === "string" ? query["hata"] : null
   const error = failed && RETURN_ERRORS.has(failed) ? t(failed) : null
-  const [[saved], billing, gifts] = await Promise.all([
+  const [[saved], billing, gifts, short] = await Promise.all([
     customer ? customerAddresses() : Promise.resolve([]),
     customer ? billingOf() : Promise.resolve(null),
     shopperGiftLines(cart.id),
+    cartShortLines(cart.id),
   ])
+  // A unit another order took since it was put in the cart: seen in the cart, before paying
+  // (adr/0026 Ek 2026-11-06); the payment's start checks again
+  if (short.length > 0) {
+    redirect(`/sepet?hata=${OUT_OF_STOCK}`)
+  }
   // A gift card waits for its recipient, and is never paid with a card or credit (adr/0025 Ek 2026-11-03)
   const unnamed = gifts.some((gift) => gift.recipient === null)
   const view = await checkoutView(

@@ -241,4 +241,20 @@ describe("the theme's card form and result pages", () => {
     expect(html).toContain("Ödemeniz onaylanıyor")
     expect(html).toContain('href="/odeme/sonuc?deneme=1"')
   })
+
+  it("ends a long wait with the order lookup and a second way, never a spinner", () => {
+    const html = renderPage(atolyeTheme, "CheckoutResultPage", {
+      view: {
+        state: "late",
+        retryPath: null,
+        backPath: "/siparis",
+        backLabel: "Siparişimi bul",
+        help: { path: "/", label: "Ana sayfaya dön" },
+      },
+    })
+    expect(html).toContain("Ödemeniz alındı, siparişiniz oluşturuluyor")
+    expect(html).toMatch(/<a href="\/siparis" class="gf-btn">Siparişimi bul<\/a>/)
+    expect(html).toMatch(/<a href="\/" class="gf-link">Ana sayfaya dön<\/a>/)
+    expect(html).not.toContain("animate-spin")
+  })
 })

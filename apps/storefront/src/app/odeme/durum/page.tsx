@@ -1,21 +1,17 @@
 import type { Metadata } from "next"
+import { resultViewOf } from "@/lib/checkout/waiting"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { theme } from "@/theme"
 
 export const metadata: Metadata = robotsOnly("noindex,nofollow", t("checkout.title"))
 
-const STATES = {
-  bekliyor: "pending",
-  hata: "failed",
-  gecikti: "late",
-  iade: "refund",
-} as const
-
 /**
  * `/odeme/durum` (D7): what became of a card payment, in words. Waiting,
- * the page asks `/odeme/sonuc` again every three seconds without a script
- * (a meta refresh), so it works wherever the shopper's browser stands.
+ * the page asks `/odeme/sonuc` again without a script (a meta refresh),
+ * with growing pauses for about two minutes; then it says the order comes
+ * by e-mail and offers the order lookup. Never a spinner for ever
+ * (adr/0026 Ek 2026-11-06).
  */
 export default async function PaymentStatus({
   searchParams,
@@ -23,17 +19,14 @@ export default async function PaymentStatus({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const query = await searchParams
-  const asked = typeof query["d"] === "string" ? query["d"] : ""
-  const state = asked in STATES ? STATES[asked as keyof typeof STATES] : "late"
-  const tries = typeof query["deneme"] === "string" ? query["deneme"].replace(/\D/g, "") : "0"
-  const retryPath = state === "pending" ? `/odeme/sonuc?deneme=${tries || "0"}` : null
+  const text = (key: string) => (typeof query[key] === "string" ? query[key] : null)
+  const { view, refreshSeconds } = resultViewOf(text("d"), text("deneme"), t)
   return (
     <>
-      {retryPath && <meta httpEquiv="refresh" content={`3;url=${retryPath}`} />}
-      <theme.CheckoutResultPage
-        t={t}
-        view={{ state, retryPath, backPath: state === "failed" ? "/odeme" : "/" }}
-      />
+      {view.retryPath && refreshSeconds !== null && (
+        <meta httpEquiv="refresh" content={`${String(refreshSeconds)};url=${view.retryPath}`} />
+      )}
+      <theme.CheckoutResultPage t={t} view={view} />
     </>
   )
 }

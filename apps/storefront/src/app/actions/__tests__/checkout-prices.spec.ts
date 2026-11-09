@@ -85,4 +85,10 @@ describe("placeOrder with a price that moved", () => {
     }
     expect(next.revalidatePath).not.toHaveBeenCalled()
   })
+
+  it("sends a unit another order took to the cart, which names it (adr/0026 Ek 2026-11-06)", async () => {
+    pay.startPayment.mockRejectedValue(new StoreApiError(400, "cart.out_of_stock", null))
+    await expect(submit()).rejects.toThrow("redirect:/sepet?hata=cart.out_of_stock")
+    expect(pay.completeCart).not.toHaveBeenCalled()
+  })
 })
