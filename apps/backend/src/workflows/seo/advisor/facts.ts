@@ -4,6 +4,8 @@ import { missingDimensions, variantGtin } from "../../../lib/catalog"
 import { storedSummaryText } from "../../../lib/catalog/summary"
 import type { AdvisorFacts, PageKind } from "../../../lib/seo/advisor"
 import { plainText } from "../../../lib/seo"
+import { COLLECTION_EXTENSION_FIELDS, isCollectionShown } from "../../catalog/collection-fields"
+import type { CollectionExtensionRow } from "../../catalog/collection-fields"
 import { CATALOG_ENTITY_TYPES } from "../../catalog/entity-paths"
 import { liraOf } from "../facts"
 import type { FactRow } from "../facts"
@@ -179,6 +181,7 @@ interface ListingRow {
   is_active?: boolean
   is_internal?: boolean
   seo_meta?: Own | null
+  collection_extension?: CollectionExtensionRow | null
 }
 
 const LISTING_FIELDS: Record<
@@ -187,7 +190,7 @@ const LISTING_FIELDS: Record<
 > = {
   category: ["id", "name", "handle", "description", "mpath", "is_active", "is_internal"],
   brand: ["id", "name", "handle", "description", "logo_url", "is_active"],
-  collection: ["id", "title", "handle"],
+  collection: ["id", "title", "handle", ...COLLECTION_EXTENSION_FIELDS],
 }
 
 /** Whether the storefront shows the page: published, or an active (public) listing. */
@@ -196,7 +199,10 @@ function isLive(kind: PageKind, row: ProductRow | ListingRow): boolean {
     return (row as ProductRow).status === "published"
   }
   const listing = row as ListingRow
-  return kind === "collection" || (listing.is_active === true && listing.is_internal !== true)
+  if (kind === "collection") {
+    return isCollectionShown(listing)
+  }
+  return listing.is_active === true && listing.is_internal !== true
 }
 
 /**
@@ -231,7 +237,11 @@ export async function advisorFacts(
   const path = (await activePathOf(container, owner)) ?? `/${row.handle}`
   const seo = await seoPayloadFor(container, owner, path)
   const own = row.seo_meta ?? null
-  const html = row.description ?? ""
+  // A collection's text is its own row's (collection_extension)
+  const html =
+    kind === "collection"
+      ? ((row as ListingRow).collection_extension?.description ?? "")
+      : (row.description ?? "")
   const named = row as { title?: string | null; name?: string | null }
   const name = named.title ?? named.name ?? row.handle
   const noindex = own?.robots_override?.startsWith("noindex") ?? false

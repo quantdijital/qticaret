@@ -9,6 +9,7 @@ import { CONTENT_MODULE } from "../../modules/content"
 import type ContentModuleService from "../../modules/content/service"
 import { PRODUCT_REVIEWS_MODULE } from "../../modules/product-reviews"
 import type ProductReviewsModuleService from "../../modules/product-reviews/service"
+import { COLLECTION_LIVE_FIELDS, isCollectionShown } from "../catalog/collection-fields"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
 import { liveLandingFilters } from "../content/landing-facet"
 import { shopOf } from "./payload-sources"
@@ -42,6 +43,9 @@ interface KindSpec {
   /** Filters read at build time, in place of `filters` (a landing page's category must show). */
   filtersOf?: (container: MedusaContainer) => Promise<Record<string, unknown>>
   images: boolean
+  /** Linked fields a query cannot filter by, read and then checked (a collection's visibility). */
+  fields?: readonly string[]
+  keep?: (row: Record<string, unknown>) => boolean
   /** The fields whose date is the page's last meaningful change, first set first; else `updated_at`. */
   changed?: readonly ("revised_at" | "published_at")[]
 }
@@ -73,6 +77,9 @@ const KINDS: readonly KindSpec[] = [
     entity: "product_collection",
     type: CATALOG_ENTITY_TYPES.collection,
     filters: {},
+    // A collection the shop hid is no page (Ürünler > Koleksiyonlar)
+    fields: COLLECTION_LIVE_FIELDS,
+    keep: isCollectionShown,
     images: false,
   },
   // F3.16
@@ -115,6 +122,10 @@ const filtersOf = async (container: MedusaContainer, spec: KindSpec) =>
 const listed = (row: Row): boolean =>
   !row.seo_meta?.robots_override?.startsWith("noindex") && !row.seo_meta?.canonical_override
 
+// Listed, and live by what its query could not filter (a hidden collection)
+const kept = (spec: KindSpec, row: Row): boolean =>
+  listed(row) && (spec.keep ? spec.keep(row as unknown as Record<string, unknown>) : true)
+
 async function entriesOf(
   container: MedusaContainer,
   spec: KindSpec,
@@ -128,6 +139,7 @@ async function entriesOf(
     "seo_meta.robots_override",
     "seo_meta.canonical_override",
     ...(spec.images ? ["images.url"] : []),
+    ...(spec.fields ?? []),
   ]
   const lastmod = (row: Row): Date | null => {
     const value = spec.changed
@@ -144,7 +156,7 @@ async function entriesOf(
       filters,
       pagination: { skip, take: PAGE, order: { id: "ASC" } },
     })
-    const rows = (data as Row[]).filter(listed)
+    const rows = (data as Row[]).filter((row) => kept(spec, row))
     const paths = new Map(
       (rows.length > 0
         ? await registry.listUrlEntries(
@@ -191,11 +203,16 @@ export async function sitemapCounts(
     for (let skip = 0; ; skip += PAGE) {
       const { data } = await query.graph({
         entity: spec.entity,
-        fields: ["id", "seo_meta.robots_override", "seo_meta.canonical_override"],
+        fields: [
+          "id",
+          "seo_meta.robots_override",
+          "seo_meta.canonical_override",
+          ...(spec.fields ?? []),
+        ],
         filters,
         pagination: { skip, take: PAGE, order: { id: "ASC" } },
       })
-      const ids = (data as Row[]).filter(listed).map((row) => row.id)
+      const ids = (data as Row[]).filter((row) => kept(spec, row)).map((row) => row.id)
       const withPath = ids.length
         ? new Set(
             (

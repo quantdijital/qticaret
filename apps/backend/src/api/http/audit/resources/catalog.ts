@@ -2,6 +2,8 @@ import { createHash } from "node:crypto"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { CATALOG_EXTENSION_MODULE } from "../../../../modules/catalog-extension"
 import type CatalogExtensionModuleService from "../../../../modules/catalog-extension/service"
+import { COLLECTION_EXTENSION_FIELDS } from "../../../../workflows/catalog/collection-fields"
+import type { CollectionExtensionRow } from "../../../../workflows/catalog/collection-fields"
 import type { AuditedResource, GraphQuery, Resolver, Snapshot } from "../types"
 import { ID } from "../types"
 
@@ -97,7 +99,33 @@ async function categoryImageSnapshot(scope: Resolver, categoryId: string): Promi
   return { image_url: row?.url ?? null, image_alt: row?.alt ?? null }
 }
 
+/** A collection's text (by its digest), visibility and picture; none: public, no text or picture. */
+async function collectionDetailsSnapshot(scope: Resolver, collectionId: string): Promise<Snapshot> {
+  const query = scope.resolve(ContainerRegistrationKeys.QUERY) as GraphQuery
+  const { data } = await query.graph({
+    entity: "product_collection",
+    fields: [...COLLECTION_EXTENSION_FIELDS],
+    filters: { id: collectionId },
+  })
+  const own = (data[0] as { collection_extension?: CollectionExtensionRow | null } | undefined)
+    ?.collection_extension
+  return {
+    description: docDigest(own?.description ?? null),
+    is_active: own?.is_active !== false,
+    image_url: own?.image_url ?? null,
+    image_alt: own?.image_alt ?? null,
+  }
+}
+
 export const CATALOG_RESOURCES: readonly AuditedResource[] = [
+  {
+    method: "POST",
+    route: "POST /admin/collections/:id/details",
+    pattern: new RegExp(`^/admin/collections/(?<id>${ID})/details$`, "i"),
+    resourceType: "product_collection",
+    resourceId: (params) => params["id"] ?? null,
+    snapshot: ({ scope, params }) => collectionDetailsSnapshot(scope, params["id"] ?? ""),
+  },
   {
     method: "POST",
     route: "POST /admin/category-images/:category_id",

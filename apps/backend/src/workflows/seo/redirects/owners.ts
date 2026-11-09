@@ -6,6 +6,8 @@ import type CatalogExtensionModuleService from "../../../modules/catalog-extensi
 import { URL_REGISTRY_MODULE } from "../../../modules/url-registry"
 import type UrlRegistryModuleService from "../../../modules/url-registry/service"
 import type { UrlOwner } from "../../../modules/url-registry/validation"
+import { COLLECTION_LIVE_FIELDS, isCollectionShown } from "../../catalog/collection-fields"
+import type { CollectionExtensionRow } from "../../catalog/collection-fields"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../../catalog/entity-paths"
 
 /**
@@ -32,6 +34,7 @@ interface OwnerRow {
   // A landing page's category (F3.16)
   category_id?: string | null
   product_extension?: { successor_product_id?: string | null } | null
+  collection_extension?: CollectionExtensionRow | null
 }
 
 const OWNER_QUERIES: Readonly<Record<string, { entity: string; fields: string[] }>> = {
@@ -43,7 +46,10 @@ const OWNER_QUERIES: Readonly<Record<string, { entity: string; fields: string[] 
     entity: "product_category",
     fields: ["id", "deleted_at", "is_active", "is_internal"],
   },
-  [CATALOG_ENTITY_TYPES.collection]: { entity: "product_collection", fields: ["id", "deleted_at"] },
+  [CATALOG_ENTITY_TYPES.collection]: {
+    entity: "product_collection",
+    fields: ["id", "deleted_at", ...COLLECTION_LIVE_FIELDS],
+  },
   [CATALOG_ENTITY_TYPES.brand]: { entity: "brand", fields: ["id", "deleted_at", "is_active"] },
   [CATALOG_ENTITY_TYPES.page]: { entity: "content_entry", fields: ["id", "deleted_at", "status"] },
   [CATALOG_ENTITY_TYPES.post]: { entity: "content_entry", fields: ["id", "deleted_at", "status"] },
@@ -72,6 +78,9 @@ function isLive(type: string, row: OwnerRow): boolean {
   }
   if (type === CATALOG_ENTITY_TYPES.brand) {
     return row.is_active === true
+  }
+  if (type === CATALOG_ENTITY_TYPES.collection) {
+    return isCollectionShown(row)
   }
   return true
 }

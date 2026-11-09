@@ -699,6 +699,11 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "catalog.category_unknown": "The category was not found.",
   "catalog.category_image_unknown":
     "The category's picture must be one of the shop's uploads; choose it from the media library.",
+  "catalog.collection_unknown": "The collection was not found.",
+  "catalog.collection_description_invalid":
+    "The description is too long or holds characters that cannot be used.",
+  "catalog.collection_image_unknown":
+    "The collection's picture must be one of the shop's uploads; choose it from the media library.",
   "age.declaration_missing":
     "Your cart holds an adults-only product; declare your age before paying.",
   "age.under_limit": "These products are sold only to buyers over the age limit.",

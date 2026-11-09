@@ -6,6 +6,8 @@ import type LegalModuleService from "../../modules/legal/service"
 import type { MenuLinkKind } from "../../modules/storefront-menus/service"
 import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
 import type UrlRegistryModuleService from "../../modules/url-registry/service"
+import { COLLECTION_LIVE_FIELDS, isCollectionShown } from "../catalog/collection-fields"
+import type { CollectionExtensionRow } from "../catalog/collection-fields"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -39,6 +41,7 @@ interface Row {
   kind?: string | null
   is_active?: boolean | null
   is_internal?: boolean | null
+  collection_extension?: CollectionExtensionRow | null
 }
 
 interface RecordSpec {
@@ -65,8 +68,8 @@ const RECORDS: Readonly<Record<RecordLinkKind, RecordSpec>> = {
   collection: {
     entity: "product_collection",
     type: CATALOG_ENTITY_TYPES.collection,
-    fields: ["id", "title"],
-    live: () => true,
+    fields: ["id", "title", ...COLLECTION_LIVE_FIELDS],
+    live: (row) => isCollectionShown(row),
   },
   brand: {
     entity: "brand",

@@ -699,6 +699,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "catalog.category_unknown": "Kategori bulunamadı.",
   "catalog.category_image_unknown":
     "Kategori görseli mağazanın yüklediği dosyalardan olmalı; ortam kütüphanesinden seçin.",
+  "catalog.collection_unknown": "Koleksiyon bulunamadı.",
+  "catalog.collection_description_invalid":
+    "Açıklama çok uzun ya da kullanılamayan karakterler içeriyor.",
+  "catalog.collection_image_unknown":
+    "Koleksiyon görseli mağazanın yüklediği dosyalardan olmalı; ortam kütüphanesinden seçin.",
   "age.declaration_missing":
     "Sepetinizde yaş sınırlı ürün var; ödemeye geçmeden önce yaşınızı beyan edin.",
   "age.under_limit": "Bu ürünler yalnızca yaş sınırını geçenlere satılabilir.",

@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { chunksOf } from "../../lib/catalog"
 import type { UrlOwner } from "../../modules/url-registry/validation"
+import { COLLECTION_LIVE_FIELDS, isCollectionShown } from "../catalog/collection-fields"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
 import { liveLandingFilters } from "../content/landing-facet"
 
@@ -11,7 +12,18 @@ export interface LiveSpec {
   type: string
   /** Read when asked: a landing page shows while its category does (F3.16). */
   filters: (container: MedusaContainer) => Promise<Record<string, unknown>>
+  /**
+   * What a query cannot filter by (a linked module's field, as a
+   * collection's visibility): read as `fields`, then checked by `keep`.
+   */
+  fields?: readonly string[]
+  keep?: (row: Record<string, unknown>) => boolean
 }
+
+/** The fields to read for `spec`'s rows, and the rows it keeps. */
+export const liveFieldsOf = (spec: LiveSpec): string[] => ["id", ...(spec.fields ?? [])]
+export const keptRows = <T extends object>(spec: LiveSpec, rows: T[]): T[] =>
+  spec.keep ? rows.filter((row) => spec.keep?.(row as Record<string, unknown>)) : rows
 
 const fixed = (filters: Record<string, unknown>) => (): Promise<Record<string, unknown>> =>
   Promise.resolve(filters)
@@ -28,7 +40,13 @@ export const LIVE_RECORDS: readonly LiveSpec[] = [
     filters: fixed({ is_active: true, is_internal: false }),
   },
   { entity: "brand", type: CATALOG_ENTITY_TYPES.brand, filters: fixed({ is_active: true }) },
-  { entity: "product_collection", type: CATALOG_ENTITY_TYPES.collection, filters: fixed({}) },
+  {
+    entity: "product_collection",
+    type: CATALOG_ENTITY_TYPES.collection,
+    filters: fixed({}),
+    fields: COLLECTION_LIVE_FIELDS,
+    keep: isCollectionShown,
+  },
   {
     entity: "content_entry",
     type: CATALOG_ENTITY_TYPES.page,
@@ -66,10 +84,10 @@ export async function liveOwnerKeys(
     for (const chunk of chunksOf(ids)) {
       const { data } = await query.graph({
         entity: spec.entity,
-        fields: ["id"],
+        fields: liveFieldsOf(spec),
         filters: { ...filters, id: chunk },
       })
-      for (const row of data as { id: string }[]) {
+      for (const row of keptRows(spec, data as { id: string }[])) {
         live.add(`${spec.type}:${row.id}`)
       }
     }

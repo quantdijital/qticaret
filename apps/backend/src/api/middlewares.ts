@@ -40,6 +40,7 @@ import { CUSTOMER_ROUTES } from "./http/customer-routes"
 import { CUSTOMER_SEGMENT_ROUTES } from "./http/customer-segment-routes"
 import { CAMPAIGN_ROUTES } from "./http/campaign-routes"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
+import { COLLECTION_ROUTES } from "./http/collection-routes"
 import { SEARCH_ROUTES } from "./http/search-routes"
 import { VAT_ROUTES } from "./http/vat-routes"
 import { CATALOG_SHEET_ROUTES } from "./http/catalog-sheet-routes"
@@ -331,6 +332,8 @@ export default defineMiddlewares({
     ...PAYMENT_LINK_ROUTES,
     // F3.11: brands
     ...BRAND_ROUTES,
+    // Ürünler > Koleksiyonlar: the panel's list, a collection's text, picture and visibility
+    ...COLLECTION_ROUTES,
     // adr/0046 Ek 2026-11-04: category pictures, product cards' stock and quick add
     ...STOREFRONT_CARD_ROUTES,
     // adr/0056: site search's synonym groups

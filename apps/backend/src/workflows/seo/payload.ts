@@ -5,6 +5,8 @@ import { storedSummaryText } from "../../lib/catalog/summary"
 import { productText, shortDescription } from "../../lib/seo/product-text"
 import type { SeoPayload, SeoSubject } from "../../lib/seo/resolve"
 import type { UrlOwner } from "../../modules/url-registry/validation"
+import { COLLECTION_EXTENSION_FIELDS } from "../catalog/collection-fields"
+import type { CollectionExtensionRow } from "../catalog/collection-fields"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
 import { priceDisplays } from "../pricing/price-display"
 import { shopShippingOptions } from "../shipping/shop-options"
@@ -206,23 +208,30 @@ async function categorySubject(container: MedusaContainer, id: string, path: str
 }
 
 async function collectionSubject(container: MedusaContainer, id: string, path: string) {
-  const collection = await rowOf<{ id: string; title: string; seo_meta?: SeoMetaRow | null }>(
+  const collection = await rowOf<{
+    id: string
+    title: string
+    seo_meta?: SeoMetaRow | null
+    collection_extension?: CollectionExtensionRow | null
+  }>(
     container,
     "product_collection",
-    ["id", "title", ...SEO_FIELDS],
+    ["id", "title", ...COLLECTION_EXTENSION_FIELDS, ...SEO_FIELDS],
     id
   )
   if (!collection) {
     return null
   }
+  // Its text and picture are its own row's: the description's and the share image's fallbacks
+  const own = collection.collection_extension ?? null
   const subject: SeoSubject = {
     kind: "collection",
     path,
     name: collection.title,
-    description: "",
+    description: own?.description ?? "",
     tokens: {},
     overrides: collection.seo_meta ?? null,
-    image: await imageOf(container, collection.seo_meta, null),
+    image: await imageOf(container, collection.seo_meta, own?.image_url ?? null),
     trail: [],
     listing: await listingItems(container, {
       entity_type: CATALOG_ENTITY_TYPES.collection,

@@ -12,7 +12,7 @@ import type SeoSitemapsModuleService from "../../modules/seo-sitemaps/service"
 import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
 import type UrlRegistryModuleService from "../../modules/url-registry/service"
 import { CATALOG_LOCALE } from "../catalog/entity-paths"
-import { LIVE_RECORDS, liveOwnerKeys } from "./live-records"
+import { LIVE_RECORDS, keptRows, liveFieldsOf, liveOwnerKeys } from "./live-records"
 import type { LiveSpec } from "./live-records"
 import { shopOf } from "./payload-sources"
 
@@ -44,11 +44,11 @@ async function changedOf(
   for (let skip = 0; paths.length < room; skip += PAGE) {
     const { data } = await query.graph({
       entity: spec.entity,
-      fields: ["id"],
+      fields: liveFieldsOf(spec),
       filters,
       pagination: { skip, take: PAGE, order: { id: "ASC" } },
     })
-    const ids = (data as { id: string }[]).map((row) => row.id)
+    const ids = keptRows(spec, data as { id: string }[]).map((row) => row.id)
     if (ids.length > 0) {
       const entries = await registry.listUrlEntries(
         { locale: CATALOG_LOCALE, entity_type: spec.type, entity_id: ids, status: "active" },
@@ -56,7 +56,7 @@ async function changedOf(
       )
       paths.push(...entries.map((entry) => entry.path))
     }
-    if (ids.length < PAGE) {
+    if (data.length < PAGE) {
       break
     }
   }

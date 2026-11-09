@@ -24,6 +24,8 @@ export type MediaUseKind =
   // adr/0046 Ek 2026-11-04: a category's picture, the footer's ETBİS QR code
   | "category"
   | "etbis_qr"
+  // A collection's picture (Ürünler > Koleksiyonlar)
+  | "collection"
 
 export interface MediaUse {
   kind: MediaUseKind
@@ -164,6 +166,24 @@ async function categories(container: Container, target: MediaTarget): Promise<Me
   }))
 }
 
+/** Collections showing it as their picture, by title, through their row's link. */
+async function collections(container: Container, target: MediaTarget): Promise<MediaUse[]> {
+  const rows = await container
+    .resolve<CatalogExtensionModuleService>(CATALOG_EXTENSION_MODULE)
+    .listCollectionExtensions({ image_url: target.url }, { select: ["id"], take: LIMIT })
+  if (rows.length === 0) {
+    return []
+  }
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "collection_extension",
+    fields: ["product_collection.id", "product_collection.title"],
+    filters: { id: rows.map((row) => row.id) },
+  })
+  return (data as { product_collection?: Named | null }[]).flatMap((row) =>
+    row.product_collection ? uses("collection", [row.product_collection]) : []
+  )
+}
+
 /**
  * Documents holding the address as one of their values: pages and posts,
  * landing pages, bulk messages, the storefront's design (draft and live)
@@ -254,6 +274,7 @@ export async function mediaUses(container: Container, target: MediaTarget): Prom
     seoImages(container, target),
     settings(container, target),
     categories(container, target),
+    collections(container, target),
     orders(container, target),
   ])
   return found.flat()
