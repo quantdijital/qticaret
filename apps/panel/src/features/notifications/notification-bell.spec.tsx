@@ -110,3 +110,30 @@ describe("NotificationBell: a return's refund deadline (adr/0032 Ek 2026-11-03)"
     expect(screen.queryByText(/son gün 15 Kasım 2026/)).toBeNull()
   })
 })
+
+describe("NotificationBell: a paid order placed short of stock (adr/0026 Ek 2026-11-06)", () => {
+  beforeEach(() => {
+    fetchMock.mockReset()
+    localStorage.clear()
+  })
+
+  it("names the order and the lines the shelf lacked, and leads to the order", async () => {
+    fetchMock.mockResolvedValue({
+      notifications: [
+        alert("noti_5", {
+          kind: "stock_short",
+          order_id: "order_1",
+          number: "696",
+          lines: [{ title: "Chuby / Kahverengi", short: 1 }, { title: 3 }],
+        }),
+      ],
+    })
+    renderBell()
+
+    await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 1 yeni" }))
+
+    const title = await screen.findByText("Stok yetersiz sipariş #696")
+    expect(title.closest("a")).toHaveAttribute("href", "/orders/$id")
+    expect(screen.getByText(/Eksik: Chuby \/ Kahverengi ×1\./)).toBeInTheDocument()
+  })
+})

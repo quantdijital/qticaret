@@ -6,6 +6,7 @@ import { AddonBadge } from "@/features/orders/components/addon-badge"
 import { CustomerCell } from "@/features/orders/components/customer-cell"
 import { OrderShipping } from "@/features/orders/components/shipping-badge"
 import { StageBadge } from "@/features/orders/components/stage-badge"
+import { StockShortBadge } from "@/features/orders/components/stock-short-badge"
 import { formatDateTime, formatMoney, formatRelative } from "@/lib/format"
 
 /** The order list's columns (docs/06 §4): fewer on a phone, folded under the number and stage. */
@@ -63,6 +64,7 @@ export function useColumns(): Column<BoardOrder>[] {
           <span className="flex flex-wrap items-center gap-1">
             <StageBadge stage={order.stage} />
             <AddonBadge addons={order.addons} />
+            <StockShortBadge units={order.stock_short} />
           </span>
           <span className="tabular text-xs font-medium sm:hidden">
             {formatMoney(order.total, order.currency_code)}

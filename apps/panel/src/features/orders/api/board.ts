@@ -38,6 +38,8 @@ export interface BoardOrder {
   } | null
   /** Lines made to the buyer's wish (adr/0052): how many, and whether one is outside withdrawal. */
   addons: { lines: number; non_withdrawable: boolean }
+  /** Units a paid order was placed without (adr/0026 Ek 2026-11-06), while it is still to send. */
+  stock_short?: number
 }
 
 /** Where a carrier's parcel stands (adr/0031), as the server names it. */

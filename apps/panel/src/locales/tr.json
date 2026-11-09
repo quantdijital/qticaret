@@ -1516,7 +1516,7 @@
         "items": {
           "alert_new_order": {
             "title": "Yeni sipariş",
-            "hint": "Her sipariş verildiğinde."
+            "hint": "Her sipariş verildiğinde; ödemesi alınıp stoğu yetersiz açılan siparişler de."
           },
           "alert_bank_transfer": {
             "title": "Havale bekleyen sipariş",
@@ -1585,6 +1585,7 @@
             "new_order": "Ekip: yeni sipariş",
             "bank_transfer": "Ekip: havale bekleyen sipariş",
             "low_stock": "Ekip: stok azaldı",
+            "stock_short": "Ekip: stok yetersiz sipariş",
             "seo_digest": "Ekip: haftalık SEO özeti",
             "contact_message": "Ekip: iletişim mesajı",
             "invite": "Ekip: panel daveti",
@@ -4342,6 +4343,13 @@
     },
     "queueDialog": {
       "openOrder": "Siparişe git"
+    },
+    "stockShort": {
+      "badge_one": "Stok yetersiz",
+      "badge_other": "Stok yetersiz ({{count}} adet)",
+      "title": "Stok yetersiz: ödemesi alınan bu siparişin bazı ürünleri stokta yoktu",
+      "description": "Sipariş anında bu ürünlerin stoğu başka siparişlere ayrılmıştı. Eksikleri üretin ya da tedarik edin; edemeyecekseniz siparişi iptal edip ödemeyi iade edin.",
+      "line": "{{title}}: {{short}} adet eksik (siparişte {{quantity}})"
     }
   },
   "customers": {
@@ -6292,6 +6300,10 @@
     "paymentLinkStock": {
       "title": "Ödeme bağlantısı {{number}}: stokta olmayan ürün",
       "description": "Müşteri ödeyemedi. Stoğu güncelleyin ya da bağlantıyı iptal edip yenisini oluşturun."
+    },
+    "stockShort": {
+      "title": "Stok yetersiz sipariş #{{number}}",
+      "description": "Eksik: {{lines}}. Üretin ya da tedarik edin; edemeyecekseniz iptal edip iade edin."
     }
   },
   "content": {

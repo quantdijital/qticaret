@@ -17,6 +17,7 @@ import type { OrderDetail } from "@/features/orders/api/orders"
 import { orderPaymentDetailsQuery } from "@/features/orders/api/payments"
 import { returnRequestsQuery } from "@/features/orders/api/returns"
 import { StageBadge } from "@/features/orders/components/stage-badge"
+import { StockShortBadge } from "@/features/orders/components/stock-short-badge"
 import { ItemsCard } from "@/features/orders/detail/items-card"
 import { NotesCard } from "@/features/orders/detail/notes-card"
 import { OrderActions } from "@/features/orders/detail/order-actions"
@@ -26,6 +27,8 @@ import { OrderTabs } from "@/features/orders/detail/order-tabs"
 import { CustomerCard } from "@/features/orders/detail/people-cards"
 import { ProgressCard } from "@/features/orders/detail/progress-card"
 import { ReturnsCard } from "@/features/orders/detail/returns-card"
+import { StockShortAlert } from "@/features/orders/detail/stock-short-alert"
+import { stockShortLines } from "@/features/orders/stock-short"
 import {
   orderPaymentLinkId,
   orderPaymentLinkNumber,
@@ -69,6 +72,11 @@ export function OrderDetailPage() {
   const back = { to: "/orders", label: t("nav.orders") }
   const linkId = orderPaymentLinkId(order?.metadata)
   const linkNumber = orderPaymentLinkNumber(order?.metadata)
+  // A paid order placed short of stock (adr/0026 Ek 2026-11-06), while there is still something to send
+  const short =
+    state.data?.stage === "awaiting_payment" || state.data?.stage === "to_ship"
+      ? stockShortLines(order?.metadata)
+      : []
 
   const failed = query.error ?? state.error
   if (failed) {
@@ -111,6 +119,7 @@ export function OrderDetailPage() {
         badge={
           <>
             <StageBadge stage={state.data.stage} />
+            <StockShortBadge units={short.reduce((sum, line) => sum + line.short, 0)} />
             {linkId ? <PaymentLinkChip linkId={linkId} number={linkNumber} /> : null}
           </>
         }
@@ -137,6 +146,7 @@ export function OrderDetailPage() {
         }
       />
       <ChargebackAlert orderId={order.id} />
+      <StockShortAlert lines={short} />
       {details.data?.bank_transfer?.awaiting && order.status !== "canceled" ? (
         <BankTransferAlert
           orderId={order.id}

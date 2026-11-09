@@ -19,6 +19,7 @@ import { isContactSubject } from "@/features/customers/api/contact-messages"
 import { markSeen, notificationsQuery, seenAt } from "@/features/notifications/api"
 import type { AdminNotification } from "@/features/notifications/api"
 import { returnRefundAlert } from "@/features/notifications/return-alert"
+import { stockShortAlert } from "@/features/notifications/stock-short-alert"
 import { paymentLinkAlert } from "@/features/payment-links/components/link-alert"
 import { isConnectable } from "@/features/settings/payment-methods"
 import { formatDate, formatRelative } from "@/lib/format"
@@ -30,7 +31,7 @@ const amount = (value: unknown): number => (typeof value === "number" ? value : 
 /** What an alert says and where it leads, worded here from its data (adr/0020). */
 function useAlertText(data: Record<string, unknown>) {
   const { t } = useTranslation()
-  const alert = paymentLinkAlert(t, data) ?? returnRefundAlert(t, data)
+  const alert = paymentLinkAlert(t, data) ?? returnRefundAlert(t, data) ?? stockShortAlert(t, data)
   if (alert) {
     return alert
   }

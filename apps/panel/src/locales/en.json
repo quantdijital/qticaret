@@ -1516,7 +1516,7 @@
         "items": {
           "alert_new_order": {
             "title": "New order",
-            "hint": "Every time an order is placed."
+            "hint": "Every time an order is placed, and when a paid order is placed short of stock."
           },
           "alert_bank_transfer": {
             "title": "Bank transfer awaited",
@@ -1585,6 +1585,7 @@
             "new_order": "Staff: new order",
             "bank_transfer": "Staff: bank transfer awaited",
             "low_stock": "Staff: low stock",
+            "stock_short": "Staff: order short of stock",
             "seo_digest": "Staff: weekly SEO digest",
             "contact_message": "Staff: contact message",
             "invite": "Team: panel invitation",
@@ -4342,6 +4343,13 @@
     },
     "queueDialog": {
       "openOrder": "Go to order"
+    },
+    "stockShort": {
+      "badge_one": "Short of stock",
+      "badge_other": "Short of stock ({{count}} units)",
+      "title": "Short of stock: some items of this paid order were not on the shelf",
+      "description": "When the order was placed, these items' stock was held by other orders. Make or source the missing units; if you cannot, cancel the order and refund the payment.",
+      "line": "{{title}}: {{short}} missing (ordered {{quantity}})"
     }
   },
   "customers": {
@@ -6292,6 +6300,10 @@
     "paymentLinkStock": {
       "title": "Payment link {{number}}: a product is out of stock",
       "description": "The customer could not pay. Update the stock, or cancel the link and create a new one."
+    },
+    "stockShort": {
+      "title": "Order #{{number}} is short of stock",
+      "description": "Missing: {{lines}}. Make or source them; if you cannot, cancel and refund."
     }
   },
   "content": {
