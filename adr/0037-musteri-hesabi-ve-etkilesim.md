@@ -269,3 +269,18 @@ Test: `integration-tests/http/account-verification.spec.ts`.
 - **Önbellek:** uç önceki gibi görünür ürün listesini (yayında ve anahtarın satış kanalında) kanal kümesi başına 30 sn tutar; süzgeç yalnız sorguya eklenir.
 - **Vitrin:** `?puan=` 1–5 dışı her şey 404 (sayfa numarası gibi); sayfa bağlantıları süzgeci korur; süzülmüş sayfa `noindex,follow`, canonical `/yorumlar` (liste süzgeçlerinin kuralı, docs/13 §7). Tema sözleşmesinde isteğe bağlı `ReviewsPageView.filter` (`options`: puan, sayı, bağlantı, seçili mi; `active`, `clearPath`); taban tema çizmez.
 - **Testler:** `integration-tests/http/product-reviews.spec.ts` (4 ve 5 yıldız, 6 ve sözcük 400), vitrin `lib/views/__tests__/review-filter.spec.ts`, `atolye-reviews-theme.spec.ts`.
+
+## Ek (2026-11-10): mağazanın yoruma yanıtı (otonom, gözden geçir)
+
+Mağaza Google yorumlarına panelden yanıt verebiliyordu (adr/0058 Ek 2026-11-06), kendi ürün yorumlarına veremiyordu. Ürün sorusuna mağaza cevabı (M8) örnek alındı.
+
+- **Veri:** `product_review` üzerinde `reply` (düz metin), `replied_by` (personel), `replied_at`; ayrı tablo yok, yorum başına bir yanıt. Migration `Migration20261110183000`.
+- **Uç:** `POST /admin/product-reviews/:id/reply` `{ body }` (yazar ya da değiştirir), `DELETE` (kaldırır); ikisi de `product-review-reply` iş akışı (geri alınınca önceki yanıt yerine konur). Metin soru cevabının kuralıyla temizlenir (`plainText`: satır sonu dışındaki denetim karakterleri atılır, kırpılır; yarım vekil karakter `reviews.reply_invalid`), en çok 1.000 karakter (`reviews.reply_required`, `reviews.reply_too_long`). Yanıt **yalnız onaylı yoruma** yazılır (`reviews.reply_not_approved`; soru cevabı da yalnız yayındaki soruda görünür); kaldırmak her durumda olur, yanıt yoksa `reviews.reply_missing`.
+- **Yazar değiştirirse:** yorum yeniden onay bekler, yanıt silinmez; yeniden onaylanınca yanıtıyla görünür, mağaza pencereden günceller ya da siler.
+- **Yetki:** soruya cevap gibi: sahip, yönetici ve operasyon yazar; salt okunur yazamaz (`permission-rules`).
+- **Denetim:** `product_review` kaynağı; yanıt var mı, uzunluğu, kim, ne zaman (önce/sonra). Metnin kendisi kayda girmez.
+- **Bildirim yok:** soru cevabı da müşteriye ileti göndermiyor; yanıt için de kanal ya da şablon açılmadı.
+- **KVKK:** yanıt mağazanın metnidir, müşterinin kişisel verisi değildir; müşteri silinince yorum "Anonim" adıyla kaldığı gibi yanıt da kalır (mağaza cevapları gibi). Müşterinin veri kopyasına girmez.
+- **Okuma:** `GET /admin/product-reviews` her satırda `reply`, `replied_at`; `replied=false|true` süzgeci (panelin "Yanıtsız" sekmesi: onaylı ve yanıtsız). `GET /store/products/:id/reviews` ve `GET /store/reviews` her yorumda `reply: { body, author_name, created_at } | null`; `author_name` mağazanın adı (Medusa mağaza adı, okunurken).
+- **Vitrin:** Atölye yorumun altında Google yanıtlarının kutusunda "Mağazanın yanıtı · mağaza adı · tarih" (`parts/ReviewReply`); ürün sayfası ve `/yorumlar`. Tema sözleşmesinde isteğe bağlı `ReviewView.reply`. **JSON-LD:** yanıt bir `Review` değildir, yapılandırılmış veriye girmez; ürün JSON-LD'si yalnız `aggregateRating` taşır, değişmedi.
+- **Testler:** `workflows/customers/__tests__/review-reply.unit.spec.ts`, `integration-tests/http/product-review-replies.spec.ts`, panel `review-dialog.spec.tsx`, `reviews-page.spec.tsx`, vitrin `card-extras.spec.ts`, `atolye-product-theme.spec.ts`, `atolye-reviews-theme.spec.ts`.

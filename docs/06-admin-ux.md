@@ -123,7 +123,7 @@ Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, ta
 | Promosyonlar | Sayfa | Kupon/kampanya oluşturma, kullanım istatistiği, toplu kod üretimi (F4) |
 | Havale onayları | Sayfa | Ödeme bekleyen siparişler, onay/iptal, kalan süre (F6) |
 | İade talepleri | Sayfa | Talep listesi, onay/ret, depoya varış kontrolü (F7) |
-| Yorum moderasyonu | Sayfa | Onay bekleyen yorumlar, toplu onay/ret (F10) |
+| Yorum moderasyonu | Sayfa | Onay bekleyen yorumlar, toplu onay/ret (F10); sekmeler Onay bekleyen / Onaylanan / Yanıtsız / Reddedilen. Onaylı yorumun metnine tıklayınca standart pencere: yorum, fotoğraflar, mağazanın yanıtı (düz metin, 1.000 karakter) "Yanıtla / Yanıtı güncelle / Yanıtı sil" (Google yorumu penceresi gibi); satırda "Yanıtlandı" rozeti ve yanıtın ilk satırı (adr/0037 Ek 2026-11-10) |
 | Google yorumları | Sayfa (Yorumlar sekmesi) | Google'a bağlanma, konum, tek satır durum, Şimdi eşitle, Bağlantıyı kaldır; yorumlar; tek tek "Vitrinden kaldır" yalnız üç gerekçeyle (kişisel veri, hakaret, konu dışı), "Vitrine geri al"; toplu işlem yok (adr/0058 §7). Platformun Google istemcisi yoksa sekme yok |
 | Raporlar | Sayfa | Satış, finans/KDV, stok raporları, dışa aktarma (F11) |
 | Muhasebe aktarımı | Sayfa | Aktarım durumu, hatalılar, yeniden dene (F11) |
