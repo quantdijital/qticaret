@@ -24,7 +24,7 @@ const MINUTE = 60 * 1000
 /** A cart older than this is not reminded of: its shopper has moved on. */
 const OLDEST_MS = 7 * 24 * 60 * MINUTE
 
-interface CandidateCart {
+export interface CandidateCart {
   id: string
   email: string | null
   updated_at: string | Date
@@ -40,7 +40,7 @@ const PER_ADDRESS_MS = OLDEST_MS
 type Container = Pick<MedusaContainer, "resolve">
 
 /** Whether another cart of the address got its reminder lately (security review 2026-10-29). */
-async function remindedLately(container: Container, cart: CandidateCart, now: number) {
+export async function remindedLately(container: Container, cart: CandidateCart, now: number) {
   const others = await container.resolve(Modules.CART).listCarts(
     cartFilter({
       email: cart.email,
@@ -150,7 +150,7 @@ export const findAbandonedCartsWorkflow = createWorkflow(
  * e-mail cannot be called back: when sending throws, the claim goes so a
  * later run tries again, and nothing else is left to undo.
  */
-const remindCartStep = createStep(
+export const remindCartStep = createStep(
   "marketing-remind-cart",
   async (input: { cart_id: string }, { container }) => {
     const reminders = container.resolve<CartRemindersModuleService>(CART_REMINDERS_MODULE)
