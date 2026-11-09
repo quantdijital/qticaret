@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest"
  * not scan would ship without its classes: the page would lose part of its
  * look with no error. This walks the imports from the theme's entries and
  * the storefront's own code and checks each reached file of `packages/ui`
- * and `packages/themes/base` against the stylesheet's `@source` lines.
+ * against the stylesheet's `@source` lines.
  */
 const HERE = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(HERE, "../../../../..")
@@ -18,10 +18,6 @@ const PACKAGES: Readonly<Record<string, { dir: string; exports: Record<string, s
   "@qticaret/ui": {
     dir: "packages/ui/src",
     exports: { ".": "index.ts" },
-  },
-  "@qticaret/theme-base": {
-    dir: "packages/themes/base/src",
-    exports: { ".": "index.ts", "./error": "ErrorPage.tsx", "./borrow": "borrow.ts" },
   },
   "@qticaret/theme-atolye": {
     dir: "packages/themes/atolye/src",
@@ -117,17 +113,19 @@ const isScanned = (file: string) =>
   scanned.some((glob) => file === glob || file.startsWith(`${glob}/`) || asRegExp(glob).test(file))
 
 describe("the Atölye stylesheet's sources", () => {
-  // The storefront's code, but not the base theme's own entries (another build's theme)
-  const entries = sourceFiles(STOREFRONT).filter((file) => !/themes\/base(-error)?\.ts$/.test(file))
-  const files = [...reached(entries)]
-    .map((file) => relative(ROOT, file))
-    .filter((file) => /^packages\/(ui|themes\/base)\/src\//.test(file))
+  const reachedFiles = [...reached(sourceFiles(STOREFRONT))].map((file) => relative(ROOT, file))
+  const files = reachedFiles.filter((file) => file.startsWith("packages/ui/src/"))
 
-  it("finds the theme's borrowed parts and primitives", () => {
-    expect(files).toContain("packages/themes/base/src/BrandsPage.tsx")
+  it("finds the theme's own pages and the primitives it uses", () => {
+    expect(reachedFiles).toContain("packages/themes/atolye/src/BrandsPage.tsx")
     expect(files).toContain("packages/ui/src/ResponsiveImage.tsx")
-    // the base theme's own frame is not the Atölye theme's
-    expect(files).not.toContain("packages/themes/base/src/Layout.tsx")
+    // Nothing reaches outside the theme and the primitives (the base theme is gone, adr/0057)
+    expect(
+      reachedFiles.filter(
+        (file) =>
+          file.startsWith("packages/") && !/^packages\/(ui|themes\/atolye|types)\//.test(file)
+      )
+    ).toEqual([])
   })
 
   it("scans every workspace file the theme or the storefront reaches", () => {

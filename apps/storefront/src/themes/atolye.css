@@ -1,4 +1,4 @@
-/* The Atölye theme's stylesheet (adr/0057: `STOREFRONT_THEME=atolye`) */
+/* The Atölye theme's stylesheet (adr/0057: `STOREFRONT_THEME` unset or `atolye`) */
 @import "tailwindcss";
 /* Primitives and their token wiring, then the theme's values and its own rules */
 @import "@qticaret/ui/styles.css";
@@ -8,14 +8,11 @@
 
 /* Workspace packages sit behind node_modules links, which Tailwind skips.
    Only the files this theme reaches are scanned (docs/21, 2026-11-06): the
-   primitives it uses and the base theme's pages and parts it borrows
-   (`@qticaret/theme-base/borrow`). Scanning both packages whole put every
-   class of the base frame and of unused primitives in the one stylesheet
-   that blocks the first paint. `themes/__tests__/atolye-sources.spec.ts`
-   fails when a file the theme reaches is missing here. */
+   theme itself and the primitives it uses. Scanning the primitives whole
+   put every class of the unused ones in the one stylesheet that blocks
+   the first paint. `themes/__tests__/atolye-sources.spec.ts` fails when a
+   file the theme reaches is missing here. */
 @source "../../../../packages/themes/atolye/src";
 @source "../../../../packages/ui/src/{ResponsiveImage,index,money,search-suggest}.ts{,x}";
 @source "../../../../packages/ui/src/components/{breadcrumb,button,kept-form,payment-frame}.tsx";
 @source "../../../../packages/ui/src/{hooks,lib}/*.ts";
-@source "../../../../packages/themes/base/src/{borrow,BrandsPage,ConfirmPage,CookiePreferencesPage,GiftCardBalancePage,PaymentLinkPage}.ts{,x}";
-@source "../../../../packages/themes/base/src/{account,cart,checkout,components,home,layout,payment-link}/{OrderReturns,ReturnForm,AddonEditor,GiftRecipient,OrderGift,fields,AddonFields,Breadcrumbs,Container,GiftBalanceForm,GiftFields,Price,ProductDetails,RichText,FeaturedProductSection,SectionHead,CookieForm,LinkLines,useChallengeForm,addon-words,gift-words}.ts{,x}";

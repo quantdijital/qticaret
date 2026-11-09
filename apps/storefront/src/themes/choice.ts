@@ -5,20 +5,25 @@
  * `@qticaret/storefront-theme` (the pages) and
  * `@qticaret/storefront-theme-styles` (the stylesheet) at the chosen
  * theme's entry under `src/themes/`; nothing else names a theme package.
+ * Atölye is the only theme today (adr/0057 Ek 2026-11-09: the base theme
+ * was removed); the variable stays for the themes to come.
  */
-export const STOREFRONT_THEMES = ["base", "atolye"] as const
+export const STOREFRONT_THEMES = ["atolye"] as const
 
 export type StorefrontThemeName = (typeof STOREFRONT_THEMES)[number]
 
+/** The theme a storefront is built with when `STOREFRONT_THEME` is unset or empty. */
+export const DEFAULT_STOREFRONT_THEME: StorefrontThemeName = "atolye"
+
 /**
- * The theme `STOREFRONT_THEME` names; unset or empty is `base`, today's
- * look. An unknown name stops the build with the names it knows: a typo
- * must not ship a shop in another theme.
+ * The theme `STOREFRONT_THEME` names; unset or empty is Atölye. An
+ * unknown name stops the build with the names it knows: a typo must not
+ * ship a shop in another theme.
  */
 export function storefrontThemeName(value: string | undefined): StorefrontThemeName {
   const name = value?.trim() ?? ""
   if (name === "") {
-    return "base"
+    return DEFAULT_STOREFRONT_THEME
   }
   const known = STOREFRONT_THEMES.find((theme) => theme === name)
   if (!known) {

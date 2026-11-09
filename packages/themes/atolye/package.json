@@ -2,7 +2,7 @@
   "name": "@qticaret/theme-atolye",
   "version": "0.0.0",
   "private": true,
-  "description": "The storefront theme selected as atolye, direction Grafit: graphite stages for the shop's own photographs on a steel-white counter, one heavy grotesk, the shop's colour as the action; built only on the theme contract (adr/0046, adr/0057, docs/tema/yon-2026-11-05.md)",
+  "description": "The storefront's theme (atolye, the default), direction Grafit: graphite stages for the shop's own photographs on a steel-white counter, one heavy grotesk, the shop's colour as the action; built only on the theme contract (adr/0046, adr/0057, design.md)",
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
@@ -14,7 +14,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@qticaret/theme-base": "workspace:*",
     "@qticaret/types": "workspace:*",
     "@qticaret/ui": "workspace:*",
     "lucide-react": "1.55.0",

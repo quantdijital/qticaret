@@ -15,8 +15,6 @@ import { Summary } from "../../../../../packages/themes/atolye/src/checkout/Summ
 import { CartSheetBody } from "../../../../../packages/themes/atolye/src/frame/CartSheet"
 import { cartSheetWords } from "../../../../../packages/themes/atolye/src/frame/cart-sheet-words"
 import { OrderLines } from "../../../../../packages/themes/atolye/src/order/OrderParts"
-import { CartLine as BaseCartLine } from "../../../../../packages/themes/base/src/cart/CartLine"
-import { OrderSummary as BaseSummary } from "../../../../../packages/themes/base/src/checkout/OrderSummary"
 
 /**
  * A bought line links to its product's page (2026-11-05): in the drawer,
@@ -146,19 +144,5 @@ describe("the theme's bought lines", () => {
       })
     )
     expect(gone).not.toContain('href="/urun')
-  })
-
-  it("link the base theme's line names", () => {
-    expect(renderToStaticMarkup(createElement(BaseCartLine, { line: line(), t, actions }))).toMatch(
-      NAME
-    )
-    const summary: CheckoutSummaryView = {
-      lines: [{ ...line(), addons: [] }],
-      items: "628,60 TL",
-      discount: null,
-      shipping: null,
-      total: "628,60 TL",
-    }
-    expect(renderToStaticMarkup(createElement(BaseSummary, { summary, t }))).toMatch(NAME)
   })
 })

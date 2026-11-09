@@ -1,15 +1,15 @@
 import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
-import { baseTheme } from "@qticaret/theme-base"
+import { atolyeTheme } from "@qticaret/theme-atolye"
 import type { ListingPageView, ProductCardView, ProductPageView, ThemeActions } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 
 /**
- * adr/0046 Ek 2026-11-04 as the base theme prints it: every field
+ * adr/0046 Ek 2026-11-04 as the theme prints it: every field
  * optional, so the page without them is the page it was; with them, a
- * "few left" label, quick add, sectioned specs, the stars' spread, a
- * review's photos and its form's photo field.
+ * "few left" label, quick add, sectioned specs, the stars' spread and a
+ * review's photos.
  */
 
 const refused = () => Promise.resolve({ ok: false, error: null, challenge: null })
@@ -66,7 +66,7 @@ const listing = (products: ProductCardView[]): ListingPageView => ({
 
 const renderListing = (view: ListingPageView, quickAdd?: ThemeActions["addToCart"]) =>
   renderToStaticMarkup(
-    createElement(baseTheme.ListingPage, { t, view, ...(quickAdd ? { quickAdd } : {}) })
+    createElement(atolyeTheme.ListingPage, { t, view, ...(quickAdd ? { quickAdd } : {}) })
   )
 
 const product = (over: Partial<ProductPageView> = {}): ProductPageView => ({
@@ -97,9 +97,9 @@ const product = (over: Partial<ProductPageView> = {}): ProductPageView => ({
 })
 
 const renderProduct = (view: ProductPageView) =>
-  renderToStaticMarkup(createElement(baseTheme.ProductPage, { t, view, actions }))
+  renderToStaticMarkup(createElement(atolyeTheme.ProductPage, { t, view, actions }))
 
-describe("the base theme with the contract's optional fields", () => {
+describe("the theme with the contract's optional fields", () => {
   it("says few left on a low card and offers quick add only with both its variant and the action", () => {
     const low = card({ stock: "low", quickAdd: { variantId: "variant_1" } })
     const withAction = renderListing(listing([low]), refused)
@@ -127,13 +127,14 @@ describe("the base theme with the contract's optional fields", () => {
     )
     const plain = renderProduct(product())
 
-    expect(sectioned).toContain(">Bıçak</h3>")
-    expect(sectioned.match(/<dl /g)).toHaveLength(2)
-    expect(plain.match(/<dl /g)).toHaveLength(1)
+    expect(sectioned).toMatch(/<th scope="rowgroup"[^>]*>Bıçak<\/th>/)
+    expect(sectioned.match(/<tbody>/g)).toHaveLength(2)
+    expect(plain.match(/<tbody>/g)).toHaveLength(1)
+    expect(plain).not.toContain('scope="rowgroup"')
     expect(plain).toContain("Sap ağacı")
   })
 
-  it("draws the stars' spread, a review's photos and the form's photo field", () => {
+  it("draws the stars' spread and a review's photos", () => {
     const html = renderProduct(
       product({
         reviews: {
@@ -170,13 +171,10 @@ describe("the base theme with the contract's optional fields", () => {
       })
     )
 
-    expect(html).toContain('aria-label="Puan dağılımı"')
     expect(html).toContain("5 yıldız: 1 değerlendirme")
     // The bar's width a class, never an inline style (CSP)
-    expect(html).toContain("w-[50%]")
     expect(html).not.toMatch(/style="width/)
     expect(html).toContain('src="https://cdn.example.com/yorum-1.jpg"')
-    expect(html).toContain('type="file"')
-    expect(html).toContain('name="photos"')
+    // The review form (its photo field too) opens in a dialog, closed in the server's HTML
   })
 })

@@ -11,7 +11,6 @@ import { ERROR_MESSAGES, errorT } from "@/lib/i18n/error"
  */
 const ERROR_PAGES = [
   "../../../../../packages/themes/atolye/src/ErrorPage.tsx",
-  "../../../../../packages/themes/base/src/ErrorPage.tsx",
   "../../app/global-error.tsx",
 ].map((path) => readFileSync(fileURLToPath(new URL(path, import.meta.url)), "utf8"))
 

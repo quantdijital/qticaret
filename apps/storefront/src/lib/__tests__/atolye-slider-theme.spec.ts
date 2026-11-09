@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
-import { baseTheme } from "@qticaret/theme-base"
 import type { HeroSlideView, HomeSectionView, ImageView } from "@qticaret/ui"
 import { renderPage } from "@/test/theme-render"
 import {
@@ -49,8 +48,8 @@ const slider = (over: Partial<Extract<HomeSectionView, { type: "hero_slider" }>>
     ...over,
   }) satisfies HomeSectionView
 
-const home = (sections: HomeSectionView[], theme = atolyeTheme) =>
-  renderPage(theme, "HomePage", { view: { sections } })
+const home = (sections: HomeSectionView[]) =>
+  renderPage(atolyeTheme, "HomePage", { view: { sections } })
 
 describe("the Atölye hero slider", () => {
   it("is a named carousel of slides labelled n / total, the first heading the page's h1", () => {
@@ -150,13 +149,5 @@ describe("the Atölye hero slider", () => {
       },
     ])
     expect(html).toContain(">Atölye</h2>")
-  })
-})
-
-describe("the base theme", () => {
-  it("shows a slider's first slide as its still opening", () => {
-    const html = home([slider()], baseTheme)
-    expect(html).toMatch(/<h1[^>]*>bir başlığı<\/h1>/)
-    expect(html).not.toContain("iki başlığı")
   })
 })

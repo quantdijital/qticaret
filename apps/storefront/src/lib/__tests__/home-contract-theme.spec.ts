@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
-import { baseTheme } from "@qticaret/theme-base"
 import type {
   HomeSectionView,
   ProductCardView,
@@ -12,7 +11,7 @@ import type {
 import { renderPage } from "@/test/theme-render"
 
 /**
- * adr/0046 Ek 2026-11-05 as the themes print it: one product up close,
+ * adr/0046 Ek 2026-11-05 as the theme prints it: one product up close,
  * the shop's reviews in short, a cart offer beside the product's price.
  * Every field optional: without them the page is the page it was.
  */
@@ -76,27 +75,21 @@ const reviews = (over: Partial<Extract<HomeSectionView, { type: "reviews" }>> = 
   }) satisfies HomeSectionView
 
 describe("the home page's new optional sections and fields", () => {
-  it("draws a featured product with its price, facts, line, link and spec sections", () => {
-    const html = renderPage(baseTheme, "HomePage", { view: { sections: [featured] } })
-    expect(html).toContain("Öne çıkan ürün")
+  it("draws a featured product up close with its price, facts, line and link", () => {
+    const html = renderPage(atolyeTheme, "HomePage", { view: { sections: [featured] } })
     expect(html).toContain('href="/urun/sef-bicagi"')
     expect(html).toContain("1.224,30 TL")
     expect(html).toContain("1.749,00 TL")
     expect(html).toContain("N690")
     expect(html).toContain("Mutfağın en çok kullanılanı.")
-    expect(html).toContain(">Bıçak</h3>")
-    expect(html).toContain("Ürünü incele")
-    // Atölye draws its own close-up from the same view (atolye-closeup-theme.spec.ts)
-    const atolye = renderPage(atolyeTheme, "HomePage", { view: { sections: [featured] } })
-    expect(atolye).toContain("N690")
-    expect(atolye).not.toContain("Öne çıkan ürün")
+    expect(html).toContain('class="gf-stage')
   })
 
   it("puts the shop's rating above the reviews only when the view has it", () => {
-    const withSummary = renderPage(baseTheme, "HomePage", {
+    const withSummary = renderPage(atolyeTheme, "HomePage", {
       view: { sections: [reviews({ summary })] },
     })
-    const without = renderPage(baseTheme, "HomePage", { view: { sections: [reviews()] } })
+    const without = renderPage(atolyeTheme, "HomePage", { view: { sections: [reviews()] } })
     expect(withSummary).toContain("5 üzerinden 4,6 (5 değerlendirme)")
     expect(withSummary).toContain('aria-label="Puan dağılımı"')
     expect(without).not.toContain("Puan dağılımı")
@@ -112,10 +105,10 @@ describe("the home page's new optional sections and fields", () => {
       reviews: [],
       pagination: { page: 1, pages: 1, previous: null, next: null, pagePath: {} },
     }
-    const html = renderPage(baseTheme, "ReviewsPage", { view })
+    const html = renderPage(atolyeTheme, "ReviewsPage", { view })
     expect(html).toContain("5 değerlendirme")
     expect(html).toContain('aria-label="Puan dağılımı"')
-    const plain = renderPage(baseTheme, "ReviewsPage", { view: { ...view, summary: null } })
+    const plain = renderPage(atolyeTheme, "ReviewsPage", { view: { ...view, summary: null } })
     expect(plain).toContain("Ortalama 5 üzerinden 4.6")
   })
 })
@@ -173,10 +166,10 @@ describe("a cart offer beside the product's price", () => {
 
   it("says the offer under the price, never in its place", () => {
     const words = "2.000,00 TL ve üzeri sepette %10 indirim"
-    const html = renderPage(baseTheme, "ProductPage", { view: page(words), actions })
+    const html = renderPage(atolyeTheme, "ProductPage", { view: page(words), actions })
     expect(html).toContain(words)
     expect(html).toContain("1.749,00 TL")
-    const plain = renderPage(baseTheme, "ProductPage", { view: page(), actions })
+    const plain = renderPage(atolyeTheme, "ProductPage", { view: page(), actions })
     expect(plain).not.toContain("sepette")
   })
 })

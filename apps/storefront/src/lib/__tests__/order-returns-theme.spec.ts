@@ -1,7 +1,7 @@
 import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
-import { baseTheme } from "@qticaret/theme-base"
+import { atolyeTheme } from "@qticaret/theme-atolye"
 import type { OrderActions, OrderPageView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 import type { ReturnableRow, StoreOrder } from "@/lib/orders/order"
@@ -9,7 +9,7 @@ import { orderView } from "@/lib/views/order"
 import { GIFT, KNIFE, found, giftLine, knifeLine, order, row } from "@/test/order-fixtures"
 
 /**
- * adr/0025 (2026-11-03) as the base theme prints the order page: a gift
+ * adr/0025 (2026-11-03) as the theme prints the order page: a gift
  * card line's withdrawal on an order nothing was shipped for, in a form of
  * its own with no exchange and the right of withdrawal as its only reason;
  * the order's cancel while its cards are untouched, saying they are voided.
@@ -22,7 +22,7 @@ const actions: OrderActions = {
 
 const render = (o: StoreOrder, returnable: ReturnableRow | null) =>
   renderToStaticMarkup(
-    createElement(baseTheme.OrderPage, {
+    createElement(atolyeTheme.OrderPage, {
       t,
       actions,
       view: orderView(o, null, false, t, {
@@ -38,13 +38,13 @@ const render = (o: StoreOrder, returnable: ReturnableRow | null) =>
   )
 
 const page = (view: OrderPageView) =>
-  renderToStaticMarkup(createElement(baseTheme.OrderPage, { t, view, actions }))
+  renderToStaticMarkup(createElement(atolyeTheme.OrderPage, { t, view, actions }))
 
 const forms = (html: string) => html.split("<form").slice(1)
 
 const GIFT_CANCEL = "Gönderilen hediye kartları iptal edilir ve ödediğiniz tutar iade edilir."
 
-describe("the base theme's order page for a gift card line", () => {
+describe("the order page for a gift card line", () => {
   it("offers the withdrawal on an order nothing was shipped for, without an exchange or a fault reason", () => {
     const html = render(order([giftLine(["AB12"])]), found([row(GIFT, 1, { gift_card: true })]))
     const [form, cancel, ...rest] = forms(html)

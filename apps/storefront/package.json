@@ -17,7 +17,6 @@
   },
   "dependencies": {
     "@qticaret/theme-atolye": "workspace:*",
-    "@qticaret/theme-base": "workspace:*",
     "@qticaret/types": "workspace:*",
     "@qticaret/ui": "workspace:*",
     "next": "16.4.2",

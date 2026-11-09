@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
-import { baseTheme } from "@qticaret/theme-base"
 import type { ReviewsPageView } from "@qticaret/ui"
 import type { StoreGoogleReviews } from "@qticaret/types"
 import { t } from "@/lib/i18n"
@@ -114,17 +113,9 @@ describe("the themes' Google reviews", () => {
     expect(html).not.toContain("itemprop")
   })
 
-  it("base: the same, plain; neither theme draws a Google block without one", () => {
-    const html = words(renderPage(baseTheme, "ReviewsPage", { view: page({ google }) }))
+  it("draws no Google block without one", () => {
     const without = renderPage(atolyeTheme, "ReviewsPage", { view: page() })
-    const plainWithout = renderPage(baseTheme, "ReviewsPage", { view: page() })
 
-    expect(html).toContain("Google yorumları")
-    expect(html).toContain("Google'da 5 üzerinden 4,6, 126 yorum")
-    expect(html).toContain("Mağazanın yanıtı")
-    expect(html).toContain('href="https://maps.google.com/maps?cid=1267"')
-    expect(html).not.toContain("application/ld+json")
     expect(without).not.toContain("Google yorumları")
-    expect(plainWithout).not.toContain("Google yorumları")
   })
 })

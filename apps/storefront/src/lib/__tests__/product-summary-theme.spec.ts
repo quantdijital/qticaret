@@ -1,16 +1,15 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
-import { baseTheme } from "@qticaret/theme-base"
-import type { ActionResult, ProductPageView, StorefrontTheme, ThemeActions } from "@qticaret/ui"
+import type { ActionResult, ProductPageView, ThemeActions } from "@qticaret/ui"
 import { renderPage } from "@/test/theme-render"
 
 /**
- * The product's short description (adr/0055 Ek 2026-11-06) as both
- * themes print it: as the shop wrote it (the backend's HTML of its
+ * The product's short description (adr/0055 Ek 2026-11-06) as the
+ * theme prints it: as the shop wrote it (the backend's HTML of its
  * document), in place of the headline facts; without one, the facts as
- * before. Base keeps it above the price; Atölye sets it under the price
- * group (price, saving, instalments) and above the choices (sahip
- * 2026-11-06: the price block "kısa açıklamanın üstünde olsun").
+ * before. Atölye sets it under the price group (price, saving,
+ * instalments) and above the choices (sahip 2026-11-06: the price block
+ * "kısa açıklamanın üstünde olsun").
  */
 
 const ok = (): Promise<ActionResult> => Promise.resolve({ ok: true, error: null })
@@ -64,14 +63,9 @@ const view = (over: Partial<ProductPageView> = {}): ProductPageView => ({
   ...over,
 })
 
-const THEMES: [string, StorefrontTheme][] = [
-  ["atolye", atolyeTheme],
-  ["base", baseTheme],
-]
-
-describe.each(THEMES)("the %s theme's short description", (_name, theme) => {
+describe("the theme's short description", () => {
   const page = (over: Partial<ProductPageView> = {}) =>
-    renderPage(theme, "ProductPage", { view: view(over), actions })
+    renderPage(atolyeTheme, "ProductPage", { view: view(over), actions })
 
   it("prints it as written, in place of the headline facts", () => {
     const html = page({ summaryHtml: SUMMARY })
@@ -87,16 +81,6 @@ describe.each(THEMES)("the %s theme's short description", (_name, theme) => {
       expect(html).toContain("Namlu çeliği: ")
       expect(html).not.toContain("Kutusuyla")
     }
-  })
-})
-
-describe("the base theme's short description", () => {
-  it("sits above the price", () => {
-    const html = renderPage(baseTheme, "ProductPage", {
-      view: view({ summaryHtml: SUMMARY }),
-      actions,
-    })
-    expect(html.indexOf("Kutusuyla gelir.")).toBeLessThan(html.indexOf("1.837,50 TL"))
   })
 })
 

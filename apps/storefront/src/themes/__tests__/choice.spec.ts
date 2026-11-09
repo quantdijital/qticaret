@@ -4,13 +4,19 @@ import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 import { DEFAULT_THEME, themeStyle } from "@/lib/views/theme"
 import { atolyeSettings } from "../atolye"
-import { STOREFRONT_THEMES, storefrontThemeName, themeEntries } from "../choice"
+import {
+  DEFAULT_STOREFRONT_THEME,
+  STOREFRONT_THEMES,
+  storefrontThemeName,
+  themeEntries,
+} from "../choice"
 
 describe("the theme a build is made with (adr/0057)", () => {
-  it("is base when STOREFRONT_THEME is unset or empty", () => {
-    expect(storefrontThemeName(undefined)).toBe("base")
-    expect(storefrontThemeName("")).toBe("base")
-    expect(storefrontThemeName("  ")).toBe("base")
+  it("is Atölye when STOREFRONT_THEME is unset or empty", () => {
+    expect(DEFAULT_STOREFRONT_THEME).toBe("atolye")
+    expect(storefrontThemeName(undefined)).toBe("atolye")
+    expect(storefrontThemeName("")).toBe("atolye")
+    expect(storefrontThemeName("  ")).toBe("atolye")
   })
 
   it("takes every installed theme by its name", () => {
@@ -20,8 +26,10 @@ describe("the theme a build is made with (adr/0057)", () => {
   })
 
   it("stops the build on an unknown name, naming the ones it knows", () => {
-    expect(() => storefrontThemeName("atolya")).toThrow(/base, atolye.*"atolya"/)
-    expect(() => storefrontThemeName("../base")).toThrow()
+    expect(() => storefrontThemeName("atolya")).toThrow(/one of atolye \(got "atolya"\)/)
+    expect(() => storefrontThemeName("../atolye")).toThrow()
+    // The removed first theme (adr/0057 Ek 2026-11-09) is an unknown name now
+    expect(() => storefrontThemeName("base")).toThrow(/"base"/)
   })
 
   it("points every alias at the theme's own entry", () => {

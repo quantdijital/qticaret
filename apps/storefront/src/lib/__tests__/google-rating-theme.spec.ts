@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
-import { baseTheme } from "@qticaret/theme-base"
 import type { HomeSectionView } from "@qticaret/ui"
 import type { StoreGoogleRatingSection, StoreGoogleReviews } from "@qticaret/types"
 import { t } from "@/lib/i18n"
@@ -51,8 +50,8 @@ const answer: NonNullable<StoreGoogleReviews["google_reviews"]> = {
 
 // The page as read: React writes an apostrophe as an entity
 const words = (html: string) => html.replaceAll("&#x27;", "'")
-const home = (sections: HomeSectionView[], theme = atolyeTheme) =>
-  words(renderPage(theme, "HomePage", { view: { sections } }))
+const home = (sections: HomeSectionView[]) =>
+  words(renderPage(atolyeTheme, "HomePage", { view: { sections } }))
 
 describe("the Google rating badge's view", () => {
   it("keeps Google's figures, links to the reviews page and Google, up to the excerpts asked", () => {
@@ -145,16 +144,5 @@ describe("the themes' Google rating badge", () => {
     expect(html).toContain("Google'da 126 değerlendirme")
     expect(html).not.toContain("maps.google.com")
     expect(html).not.toContain("<blockquote")
-  })
-
-  it("base: the same words, plain", () => {
-    const html = home([badge], baseTheme)
-
-    expect(html).toContain("Google'da bizi değerlendirenler")
-    expect(html).toContain("Google'da 5 üzerinden 4,6, 126 yorum")
-    expect(html).toContain('href="/yorumlar"')
-    expect(html).toContain('href="https://maps.google.com/maps?cid=1267"')
-    expect(html).toContain("Google kullanıcısı")
-    expect(html).not.toContain("application/ld+json")
   })
 })

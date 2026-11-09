@@ -1,8 +1,8 @@
 /**
  * The theme this build was made with (adr/0057): `next.config.ts` points
  * this at `src/themes/<name>.ts` (and `-styles` at its `.css`, `-error` at
- * its `-error.ts`) from `STOREFRONT_THEME`; unit tests at the base theme
- * (`vitest.config.ts`).
+ * its `-error.ts`) from `STOREFRONT_THEME`; unit tests at the default
+ * theme, Atölye (`vitest.config.ts`).
  */
 declare module "@qticaret/storefront-theme" {
   import type { ThemeEntry } from "@/themes/entry"

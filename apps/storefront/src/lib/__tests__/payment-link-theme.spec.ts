@@ -1,12 +1,12 @@
 import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
-import { baseTheme } from "@qticaret/theme-base"
+import { atolyeTheme } from "@qticaret/theme-atolye"
 import type { CartPageView, PaymentLinkPageView, ThemeActions } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 
 /**
- * adr/0051 as the base theme prints it: the link's page in each state and
+ * adr/0051 as the theme prints it: the link's page in each state and
  * a link's cart without its controls, all without a script.
  */
 
@@ -47,9 +47,9 @@ const order: NonNullable<PaymentLinkPageView["order"]> = {
 }
 
 const linkPage = (view: PaymentLinkPageView) =>
-  renderToStaticMarkup(createElement(baseTheme.PaymentLinkPage, { t, view, action: noop }))
+  renderToStaticMarkup(createElement(atolyeTheme.PaymentLinkPage, { t, view, action: noop }))
 
-describe("the base theme's payment link page", () => {
+describe("the payment link page", () => {
   it("greets, names the order, lists it with its totals and end, and offers the button", () => {
     const html = linkPage({
       order,
@@ -108,9 +108,9 @@ const cart: CartPageView = {
 }
 
 const cartPage = (view: CartPageView) =>
-  renderToStaticMarkup(createElement(baseTheme.CartPage, { t, view, actions }))
+  renderToStaticMarkup(createElement(atolyeTheme.CartPage, { t, view, actions }))
 
-describe("the base theme's cart for a payment link's cart", () => {
+describe("the cart for a payment link's cart", () => {
   it("shows the lines as they are, with the note and the way out, and no controls", () => {
     const html = cartPage({ ...cart, locked: t("cart.payment_link_note") })
     expect(html).toContain("ödeme bağlantısından geldi")

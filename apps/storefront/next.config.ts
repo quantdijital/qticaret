@@ -15,7 +15,7 @@ import { storefrontThemeName, themeEntries } from "./src/themes/choice"
  * - `public/` (the faces) must be copied next to the standalone server in
  *   the image (F16), as `.next/static` is.
  * - The theme is chosen here, once per build (adr/0057): `STOREFRONT_THEME`
- *   names it (unset: `base`) and three aliases point at its entries under
+ *   names it (unset: `atolye`) and three aliases point at its entries under
  *   `src/themes/`: its pages, its stylesheet and its error page (a client
  *   component, adr/0046 Ek 2026-11-05).
  */
@@ -43,12 +43,7 @@ const config: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
-  transpilePackages: [
-    "@qticaret/types",
-    "@qticaret/ui",
-    "@qticaret/theme-base",
-    "@qticaret/theme-atolye",
-  ],
+  transpilePackages: ["@qticaret/types", "@qticaret/ui", "@qticaret/theme-atolye"],
   turbopack: {
     resolveAlias: {
       "@qticaret/storefront-theme": THEME.pages,
