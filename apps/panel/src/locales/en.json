@@ -1734,7 +1734,8 @@
           "sent": "Reminders sent",
           "returned": "Back to the cart",
           "ordered": "Became an order"
-        }
+        },
+        "seeCarts": "See the carts"
       },
       "feeds": {
         "title": "Product feeds",
@@ -4600,7 +4601,12 @@
       },
       "showAll_one": "Show all ({{count}})",
       "showAll_other": "Show all ({{count}})",
-      "showLess": "Show fewer"
+      "showLess": "Show fewer",
+      "resend": "Send again",
+      "resendTitle": "Send this message again?",
+      "resendText": "{{name}} ({{channel}}) is made again from its template and sent to the order's current address. The same message can go once every 10 minutes.",
+      "resent": "Message sent again.",
+      "resendNotSent": "The message was not sent."
     },
     "privacy": {
       "title": "KVKK requests",
@@ -4645,6 +4651,107 @@
         "completed": "Request answered.",
         "rejected": "Request rejected."
       }
+    },
+    "sectionAbandoned": "Abandoned carts",
+    "form": {
+      "newTitle": "New customer",
+      "newText": "Added as a guest: no account is opened, no invitation is sent.",
+      "editTitle": "Edit customer",
+      "editText": "Contact details and the team's note.",
+      "create": "Add customer",
+      "created": "Customer added.",
+      "saved": "Customer saved.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "E-mail",
+      "emailIsLogin": "The member's sign-in address; only the customer can change it from their account.",
+      "phone": "Phone",
+      "phoneHint": "For example 0532 123 45 67.",
+      "company": "Company",
+      "note": "Team note",
+      "noteHint": "Shown in the panel only; the customer never sees it.",
+      "consentTitle": "Commercial message consent",
+      "consentState": "E-mail: {{email}} · SMS: {{sms}}",
+      "consentGranted": "consented",
+      "consentNone": "no consent",
+      "consentHint": "Only the customer gives consent; it is not given from this window.",
+      "errors": {
+        "email": "Enter a valid e-mail address.",
+        "emailRequired": "Enter the e-mail address.",
+        "phone": "The phone number is not valid; for example 0532 123 45 67.",
+        "noteTooLong": "A note can be at most 2000 characters."
+      }
+    },
+    "addressForm": {
+      "add": "Add address",
+      "newTitle": "New address",
+      "editTitle": "Edit address",
+      "text": "Province, district and neighbourhood come from the Turkish address list.",
+      "name": "Address name",
+      "nameHint": "For example Home or Work.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "nameRequired": "Enter the first and last name.",
+      "saved": "Address saved.",
+      "added": "Address added.",
+      "delete": "Delete address",
+      "deleteTitle": "Delete this address?",
+      "deleteText": "The saved address leaves the customer. Addresses on orders do not change.",
+      "deleted": "Address deleted."
+    },
+    "abandoned": {
+      "title": "Abandoned carts",
+      "description": "Carts filled and left for over an hour in the last 30 days, whose shopper can be reached.",
+      "empty": "No abandoned carts in the last 30 days.",
+      "unnamed": "No name",
+      "columns": {
+        "customer": "Customer",
+        "lines": "Products",
+        "total": "Value",
+        "activity": "Last activity",
+        "reminder": "Reminder"
+      },
+      "lineSummary": "{{title}} × {{count}}",
+      "moreLines_one": "+{{count}} more product",
+      "moreLines_other": "+{{count}} more products",
+      "quantity_one": "{{count}} pc",
+      "quantity_other": "{{count}} pcs",
+      "total": "Cart value",
+      "who": "Customer",
+      "lines_one": "Products ({{count}})",
+      "lines_other": "Products ({{count}})",
+      "reminderTitle": "Reminder",
+      "lastActivity": "Last activity: {{date}}",
+      "consent": {
+        "granted": "consented to commercial messages",
+        "none": "no commercial message consent",
+        "emailYes": "E-mail consent",
+        "emailNo": "No e-mail consent"
+      },
+      "reminder": {
+        "none": "Not sent",
+        "sent": "Sent",
+        "returned": "Came back",
+        "pending": "Sending",
+        "no_consent": "No consent",
+        "not_sent": "Could not send"
+      },
+      "block": {
+        "no_email": "The cart has no e-mail address; no reminder can be sent.",
+        "reminded": "A reminder was already sent for this cart; each cart gets one.",
+        "no_consent": "The customer has not consented to commercial e-mail. A reminder is a commercial message; it goes only to those who consented (İYS).",
+        "suppressed": "Nothing is sent to this address (it is on the block list).",
+        "reminded_lately": "This address got a cart reminder in the last week.",
+        "no_storefront": "Enter the shop's domain in the SEO settings first, for the reminder's link."
+      },
+      "remind": "Remind by e-mail",
+      "reminded": "Reminder sent.",
+      "notSent": "The reminder was not sent.",
+      "whatsapp": "Write on WhatsApp",
+      "whatsappText": "Merhaba {{name}}, sepetinizde bıraktığınız ürünlerle ilgili yardımcı olabileceğimiz bir konu var mı?",
+      "whatsappTextNoName": "Merhaba, sepetinizde bıraktığınız ürünlerle ilgili yardımcı olabileceğimiz bir konu var mı?",
+      "previous": "Previous cart",
+      "next": "Next cart"
     }
   },
   "categories": {

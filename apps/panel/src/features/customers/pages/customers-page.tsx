@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
-import { UsersRound } from "lucide-react"
+import { Plus, UsersRound } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { DataTable } from "@/components/patterns/data-table"
 import type { Column } from "@/components/patterns/data-table"
@@ -11,6 +12,9 @@ import { SearchInput } from "@/components/patterns/search-input"
 import { ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Button } from "@/components/ui/button"
+import { useCan } from "@/features/auth/api/staff"
+import { CustomerDialog } from "@/features/customers/components/customer-dialog"
 import {
   CUSTOMER_PAGE_SIZE,
   customerCountsQuery,
@@ -87,6 +91,8 @@ export function CustomersPage() {
   const list = useQuery(customersQuery({ q, kind, page }))
   const counts = useQuery(customerCountsQuery())
   const columns = useColumns()
+  const mayAdd = useCan("customers")
+  const [adding, setAdding] = useState(false)
   const setSearch = (next: { q?: string; kind?: CustomerKind; page?: number }) => {
     const nextKind = next.kind ?? kind
     void navigate({
@@ -102,7 +108,23 @@ export function CustomersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={t("nav.customers")} description={t("customers.description")} />
+      <PageHeader
+        title={t("nav.customers")}
+        description={t("customers.description")}
+        action={
+          mayAdd ? (
+            <Button
+              onClick={() => {
+                setAdding(true)
+              }}
+            >
+              <Plus />
+              {t("customers.form.newTitle")}
+            </Button>
+          ) : undefined
+        }
+      />
+      {mayAdd ? <CustomerDialog customer={null} open={adding} onOpenChange={setAdding} /> : null}
       <CustomersNav />
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs

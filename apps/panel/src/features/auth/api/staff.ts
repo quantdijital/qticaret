@@ -39,6 +39,12 @@ export type Capability =
   | "searchSynonyms"
   /** The order list as an Excel or CSV file, every customer's details in it: the owner's alone. */
   | "orderExport"
+  /** Editing customers, adding a guest, their addresses and note (2026-11-06): owner, admin, operations. */
+  | "customers"
+  /** The carts left behind and their reminders (2026-11-06): owner, admin, operations. */
+  | "abandonedCarts"
+  /** An order's message sent again (2026-11-06): owner, admin, operations. */
+  | "resendMessages"
 
 export interface StaffMe {
   user_id: string

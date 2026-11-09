@@ -128,6 +128,9 @@ const CAN_ALL = {
   vatRates: true,
   searchSynonyms: true,
   orderExport: true,
+  customers: true,
+  abandonedCarts: true,
+  resendMessages: true,
 }
 
 export const staff = (role: "owner" | "operations"): StaffMe => ({

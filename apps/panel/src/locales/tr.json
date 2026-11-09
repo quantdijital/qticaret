@@ -1734,7 +1734,8 @@
           "sent": "Gönderilen hatırlatma",
           "returned": "Sepete dönen",
           "ordered": "Siparişe dönüşen"
-        }
+        },
+        "seeCarts": "Sepetleri gör"
       },
       "feeds": {
         "title": "Ürün feed'leri",
@@ -4600,7 +4601,12 @@
       },
       "showAll_one": "Tümünü göster ({{count}})",
       "showAll_other": "Tümünü göster ({{count}})",
-      "showLess": "Daha az göster"
+      "showLess": "Daha az göster",
+      "resend": "Yeniden gönder",
+      "resendTitle": "Mesaj yeniden gönderilsin mi?",
+      "resendText": "{{name}} ({{channel}}) şablonundan yeniden hazırlanıp siparişteki güncel adrese gönderilir. Aynı mesaj 10 dakikada bir gönderilebilir.",
+      "resent": "Mesaj yeniden gönderildi.",
+      "resendNotSent": "Mesaj gönderilmedi."
     },
     "privacy": {
       "title": "KVKK talepleri",
@@ -4645,6 +4651,107 @@
         "completed": "Talep yanıtlandı.",
         "rejected": "Talep reddedildi."
       }
+    },
+    "sectionAbandoned": "Terk edilen sepetler",
+    "form": {
+      "newTitle": "Yeni müşteri",
+      "newText": "Misafir müşteri olarak eklenir: hesap açılmaz, davet gönderilmez.",
+      "editTitle": "Müşteriyi düzenle",
+      "editText": "İletişim bilgileri ve ekibin notu.",
+      "create": "Müşteriyi ekle",
+      "created": "Müşteri eklendi.",
+      "saved": "Müşteri kaydedildi.",
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "email": "E-posta",
+      "emailIsLogin": "Üyenin giriş adresi; yalnızca müşteri kendi hesabından değiştirebilir.",
+      "phone": "Telefon",
+      "phoneHint": "Örneğin 0532 123 45 67.",
+      "company": "Şirket",
+      "note": "Ekibin notu",
+      "noteHint": "Yalnızca panelde görünür; müşteri görmez.",
+      "consentTitle": "Ticari ileti izni",
+      "consentState": "E-posta: {{email}} · SMS: {{sms}}",
+      "consentGranted": "izin var",
+      "consentNone": "izin yok",
+      "consentHint": "İzni yalnızca müşteri kendisi verir; bu pencereden verilmez.",
+      "errors": {
+        "email": "Geçerli bir e-posta adresi girin.",
+        "emailRequired": "E-posta adresini girin.",
+        "phone": "Telefon numarası geçerli değil; örneğin 0532 123 45 67.",
+        "noteTooLong": "Not en çok 2000 karakter olabilir."
+      }
+    },
+    "addressForm": {
+      "add": "Adres ekle",
+      "newTitle": "Yeni adres",
+      "editTitle": "Adresi düzenle",
+      "text": "İl, ilçe ve mahalle Türkiye adres listesinden seçilir.",
+      "name": "Adres adı",
+      "nameHint": "Örneğin Ev ya da İş.",
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "nameRequired": "Ad ve soyadı girin.",
+      "saved": "Adres kaydedildi.",
+      "added": "Adres eklendi.",
+      "delete": "Adresi sil",
+      "deleteTitle": "Adres silinsin mi?",
+      "deleteText": "Kayıtlı adres müşteriden kalkar. Siparişlerdeki adresler değişmez.",
+      "deleted": "Adres silindi."
+    },
+    "abandoned": {
+      "title": "Terk edilen sepetler",
+      "description": "Son 30 günde ürün eklenip bir saatten uzun süre bırakılan, sahibine ulaşılabilen sepetler.",
+      "empty": "Son 30 günde terk edilen sepet yok.",
+      "unnamed": "Adsız",
+      "columns": {
+        "customer": "Müşteri",
+        "lines": "Ürünler",
+        "total": "Tutar",
+        "activity": "Son hareket",
+        "reminder": "Hatırlatma"
+      },
+      "lineSummary": "{{title}} × {{count}}",
+      "moreLines_one": "+{{count}} ürün daha",
+      "moreLines_other": "+{{count}} ürün daha",
+      "quantity_one": "{{count}} adet",
+      "quantity_other": "{{count}} adet",
+      "total": "Sepet tutarı",
+      "who": "Müşteri",
+      "lines_one": "Ürünler ({{count}})",
+      "lines_other": "Ürünler ({{count}})",
+      "reminderTitle": "Hatırlatma",
+      "lastActivity": "Son hareket: {{date}}",
+      "consent": {
+        "granted": "ticari ileti izni var",
+        "none": "ticari ileti izni yok",
+        "emailYes": "E-posta izni var",
+        "emailNo": "E-posta izni yok"
+      },
+      "reminder": {
+        "none": "Gönderilmedi",
+        "sent": "Gönderildi",
+        "returned": "Sepete döndü",
+        "pending": "Gönderiliyor",
+        "no_consent": "İzin yok",
+        "not_sent": "Gönderilemedi"
+      },
+      "block": {
+        "no_email": "Sepette e-posta adresi yok; hatırlatma gönderilemez.",
+        "reminded": "Bu sepet için hatırlatma zaten gönderildi; her sepete bir kez gider.",
+        "no_consent": "Müşterinin ticari e-posta izni yok. Hatırlatma ticari ileti sayılır; yalnızca izin verenlere gider (İYS).",
+        "suppressed": "Bu adrese e-posta gönderilmiyor (engelleme listesinde).",
+        "reminded_lately": "Bu adrese son bir haftada sepet hatırlatması gitti.",
+        "no_storefront": "Hatırlatmadaki bağlantı için önce mağazanın alan adını SEO ayarlarından girin."
+      },
+      "remind": "E-posta ile hatırlat",
+      "reminded": "Hatırlatma gönderildi.",
+      "notSent": "Hatırlatma gönderilmedi.",
+      "whatsapp": "WhatsApp'tan yaz",
+      "whatsappText": "Merhaba {{name}}, sepetinizde bıraktığınız ürünlerle ilgili yardımcı olabileceğimiz bir konu var mı?",
+      "whatsappTextNoName": "Merhaba, sepetinizde bıraktığınız ürünlerle ilgili yardımcı olabileceğimiz bir konu var mı?",
+      "previous": "Önceki sepet",
+      "next": "Sonraki sepet"
     }
   },
   "categories": {
