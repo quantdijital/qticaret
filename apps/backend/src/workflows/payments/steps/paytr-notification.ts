@@ -84,6 +84,8 @@ export interface PaytrClaim {
   id: string | null
   state: ClaimState | "not_ours"
   cart_id: string | null
+  /** How many times this notification was taken up, this one included. */
+  attempts: number
 }
 
 /**
@@ -96,7 +98,7 @@ export const claimPaytrNotificationStep = createStep(
   async (input: { notification: PaytrNotification; target: PaytrTarget | null }, { container }) => {
     if (!input.target) {
       return new StepResponse<PaytrClaim, string | null>(
-        { id: null, state: "not_ours", cart_id: null },
+        { id: null, state: "not_ours", cart_id: null, attempts: 0 },
         null
       )
     }

@@ -5,6 +5,9 @@ import { orderAccessKey, orderAccessToken } from "../../../../../lib/orders"
 import { PAYMENT_RECOVERY_MODULE } from "../../../../../modules/payment-recovery"
 import type PaymentRecoveryModuleService from "../../../../../modules/payment-recovery/service"
 
+const timeOf = (value: unknown): number =>
+  value instanceof Date ? value.getTime() : typeof value === "string" ? Date.parse(value) || 0 : 0
+
 /** How long after checkout the cart still hands out its order's key. */
 const FRESH_MS = 24 * 60 * 60 * 1000
 
@@ -44,12 +47,40 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
   })
 }
 
-/** A payment for this cart that became no order and is given back (not one for an older session). */
+/**
+ * The cart's latest payment became no order and is given back: a refund
+ * recorded since its newest payment session started. One for an earlier
+ * attempt (paid, then the cart changed and was paid again) says nothing
+ * of the payment the shopper waits for (security review 2026-11-09).
+ */
 async function isRefunding(req: MedusaRequest, cartId: string): Promise<boolean> {
+  const { data } = await req.scope.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "cart",
+    fields: ["payment_collection.payment_sessions.created_at"],
+    filters: { id: cartId },
+  })
+  const sessions =
+    (
+      data[0] as
+        | {
+            payment_collection?: {
+              payment_sessions?: ({ created_at?: unknown } | null)[] | null
+            } | null
+          }
+        | undefined
+    )?.payment_collection?.payment_sessions ?? []
+  const latest = Math.max(0, ...sessions.map((session) => timeOf(session?.created_at)))
+  if (latest === 0) {
+    return false
+  }
   const [recovery] = await req.scope
     .resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
     .listPaymentRecoveries(
-      { cart_id: cartId, reason: ["completion_failed", "amount_mismatch"] },
+      {
+        cart_id: cartId,
+        reason: ["completion_failed", "amount_mismatch"],
+        created_at: { $gte: new Date(latest) },
+      },
       { select: ["id"], take: 1 }
     )
   return Boolean(recovery)

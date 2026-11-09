@@ -22,10 +22,10 @@ class WebhookEventsModuleService extends MedusaService({ WebhookEvent }) {
     provider: string,
     eventKey: string,
     summary: Record<string, unknown>
-  ): Promise<{ id: string; state: ClaimState }> {
+  ): Promise<{ id: string; state: ClaimState; attempts: number }> {
     try {
       const created = await this.createWebhookEvents({ provider, event_key: eventKey, summary })
-      return { id: created.id, state: "new" }
+      return { id: created.id, state: "new", attempts: 1 }
     } catch (error) {
       if (!uniqueViolationKeys(error)) {
         throw error
@@ -36,10 +36,12 @@ class WebhookEventsModuleService extends MedusaService({ WebhookEvent }) {
       throw new Error(`webhook event ${provider}:${eventKey} vanished while claimed`)
     }
     if (existing.status === "processed") {
-      return { id: existing.id, state: "done" }
+      return { id: existing.id, state: "done", attempts: existing.attempts }
     }
     const taken = await this.reclaim_(existing.id, existing.attempts)
-    return { id: existing.id, state: taken ? "retry" : "busy" }
+    return taken
+      ? { id: existing.id, state: "retry", attempts: existing.attempts + 1 }
+      : { id: existing.id, state: "busy", attempts: existing.attempts }
   }
 
   /**

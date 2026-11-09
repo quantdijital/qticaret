@@ -154,7 +154,13 @@ export function iyzicoVerdict(
   }
   return {
     outcome: "paid",
-    verdict: { kind: "complete", cart_id: target.cart_id, ...taken },
+    verdict: {
+      kind: "complete",
+      cart_id: target.cart_id,
+      ...taken,
+      provider: "iyzico",
+      reference: result.paymentId ?? target.session_id,
+    },
     payment_id: result.paymentId,
   }
 }

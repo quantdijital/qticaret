@@ -51,6 +51,20 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Havale bekleniyor: #{{number}}",
       description: "{{total}} tutarındaki ödeme gelince siparişi onaylayın.",
     },
+    "payments.completion_stuck": {
+      title: "{{provider}} ödemesi siparişe dönüşemiyor",
+      description:
+        "{{amount}} ({{reference}}, sepet {{cart}}) için sipariş açılamadı; denenmeye devam ediyor. Stok ve depo ayarlarını kontrol edin.",
+    },
+    "payments.refunded_before_order": {
+      title: "İade edilmiş {{provider}} ödemesi siparişe dönüştürülmedi",
+      description:
+        "{{amount}} ({{reference}}, sepet {{cart}}) {{provider}} panelinde iade edilmiş görünüyor.",
+    },
+    "payments.shelf_restored": {
+      title: "Geçici stok düzeltmesi geri alındı",
+      description: "Sepet {{cart}} için artırılan stok geri alındı; stok sayılarını kontrol edin.",
+    },
     "orders.stock_short": {
       title: "Stok yetersiz sipariş #{{number}}",
       description:
@@ -163,6 +177,20 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "orders.bank_transfer_pending": {
       title: "Bank transfer awaited: #{{number}}",
       description: "Confirm the order once the {{total}} payment arrives.",
+    },
+    "payments.completion_stuck": {
+      title: "A {{provider}} payment cannot become an order",
+      description:
+        "No order opened for {{amount}} ({{reference}}, cart {{cart}}); it is still being tried. Check the stock and warehouse settings.",
+    },
+    "payments.refunded_before_order": {
+      title: "A refunded {{provider}} payment was not made an order",
+      description:
+        "{{amount}} ({{reference}}, cart {{cart}}) shows as refunded in {{provider}}'s panel.",
+    },
+    "payments.shelf_restored": {
+      title: "A temporary stock raise was taken back",
+      description: "The stock raised for cart {{cart}} was lowered again; check the stock counts.",
     },
     "orders.stock_short": {
       title: "Order #{{number}} is short of stock",

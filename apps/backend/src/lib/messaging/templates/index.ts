@@ -29,6 +29,7 @@ import {
   staffSeoDigest,
 } from "./staff"
 import { staffAccountChanged, staffEmailConfirm } from "./staff-account"
+import { staffPaymentIssue } from "./staff-payment-issue"
 import { staffStockShort } from "./staff-stock-short"
 
 export type { MigrationInviteVars, ResetVars, VerifyVars } from "./account"
@@ -59,6 +60,7 @@ export type {
   StaffStockVars,
 } from "./staff"
 export type { StaffAccountVars, StaffEmailConfirmVars } from "./staff-account"
+export type { StaffPaymentIssueVars } from "./staff-payment-issue"
 export type { StaffStockShortVars } from "./staff-stock-short"
 export type { Brand, EmailContent, EmailContext, MessageKind, MessageTemplate } from "./types"
 
@@ -94,6 +96,8 @@ export const MESSAGE_TEMPLATES = {
   "staff.low_stock": staffLowStock,
   // adr/0026 Ek 2026-11-06: a paid order placed short of stock
   "staff.stock_short": staffStockShort,
+  // Security review 2026-11-09: a paid cart stuck, refunded before its order, a raise lowered back
+  "staff.payment_issue": staffPaymentIssue,
   "staff.seo_digest": staffSeoDigest,
   // F18 D10 (adr/0047): a contact form message came
   "staff.contact_message": staffContactMessage,

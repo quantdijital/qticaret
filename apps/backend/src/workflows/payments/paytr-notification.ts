@@ -15,6 +15,7 @@ import {
 import type { PaytrNotification } from "./steps/paytr-notification"
 import { recordPaymentOrphanStep } from "./steps/payment-orphan"
 import { completePaidCartStep } from "./steps/complete-paid-cart"
+import { alertRefundedPaymentStep } from "./steps/payment-issue"
 import { checkPaytrPaymentStep } from "./steps/paytr-payment-check"
 
 /** `ok`: answer "OK". Anything else gets no "OK", and PayTR sends the notification again. */
@@ -28,8 +29,10 @@ export type PaytrNotificationAnswer = "ok" | "busy" | "not_ours"
  * returns its order, so a repeat never opens a second one. A payment that
  * cannot become an order (its session gone, an amount that differs, a
  * cart that can no longer be completed) is recorded to be given back, and
- * answered "OK": PayTR refunds only acknowledged payments. A failed
- * payment changes nothing: the cart can be paid again.
+ * answered "OK": PayTR refunds only acknowledged payments. A payment
+ * PayTR shows refunded (by hand, in its panel) opens no order and is not
+ * given back again; the shop is told (security review 2026-11-09). A
+ * failed payment changes nothing: the cart can be paid again.
  */
 export const paytrNotificationWorkflow = createWorkflow(
   "payments-paytr-notification",
@@ -37,6 +40,7 @@ export const paytrNotificationWorkflow = createWorkflow(
     const target = findPaytrSessionStep(input.merchant_oid)
     const claim = claimPaytrNotificationStep({ notification: input, target })
     const verdict = checkPaytrPaymentStep({ notification: input, target, claim })
+    alertRefundedPaymentStep(verdict)
     const completion = completePaidCartStep(verdict)
     const recoveryId = recordPaymentOrphanStep({
       provider: "paytr",

@@ -13,15 +13,12 @@ import {
 } from "@medusajs/medusa/core-flows"
 import { ORDER_STOCK_SHORT } from "../../lib/stock"
 import type { StockShortLine } from "../../lib/stock"
-import {
-  allowBackorderStep,
-  markStockShortStep,
-  planBackorderStep,
-  restoreBackorderStep,
-} from "./steps/backorder"
+import { markStockShortStep } from "./steps/backorder"
+import { planBackorderStep } from "./steps/backorder-plan"
+import { lowerShelfStep, raiseShelfStep, recordBackorderLedgerStep } from "./steps/shelf-raise"
 
-// One at a time: the variants sell past the shelf only while their own order is placed
-const BACKORDER_LOCK = "payments-complete-backorder"
+/** One at a time, and the sweeper waits for it: a raise is lowered once. */
+export const BACKORDER_LOCK = "payments-complete-backorder"
 
 export interface PaidBackorder {
   order_id: string
@@ -29,28 +26,53 @@ export interface PaidBackorder {
 }
 
 /**
- * A paid cart the shelf refused, placed anyway (adr/0026 Ek 2026-11-06):
- * the money is taken, so the order is the shop's to fulfil (make or buy
- * the units) or to cancel and refund. Medusa's own completion runs with
- * the cart's tracked variants allowing backorder for its length, so its
- * reservations are made past the shelf; levels a warehouse lacks are
- * opened at 0 first. Everything before the order undoes itself if the
- * completion fails. The order is marked `stock_short` and the shop told
- * (`order.stock_short`).
+ * A paid cart the shelf refused, placed anyway (adr/0026 Ek 2026-11-06,
+ * security review 2026-11-09): the money is taken, so the order is the
+ * shop's to fulfil (make or buy the units) or to cancel and refund.
+ * Medusa reserves only what a level has free, so each level is raised by
+ * exactly what the cart lacks there (a level the channel lacks opened at
+ * 0 first), Medusa's own completion runs, and the levels are lowered by
+ * the same amounts: the order's reservation stands above the shelf. Each
+ * raise is marked on its level until lowered; one a crash leaves behind is
+ * lowered by the sweeper (`jobs/backorder-sweep.ts`). The stock ledger
+ * records the raise, the order's reservation and the lowering apart. The
+ * order is marked `stock_short` and the shop told (`order.stock_short`).
  */
 export const completePaidCartAsBackorderWorkflow = createWorkflow(
   "payments-complete-paid-cart-backorder",
   (input: { cart_id: string }) => {
-    acquireLockStep({ key: BACKORDER_LOCK, timeout: 15, ttl: 60 })
+    acquireLockStep({ key: BACKORDER_LOCK, timeout: 15, ttl: 120 })
     const plan = planBackorderStep(input.cart_id)
     when("payments-backorder-levels", { plan }, ({ plan }) => plan.levels.length > 0).then(() => {
       createInventoryLevelsWorkflow.runAsStep({
         input: transform({ plan }, ({ plan }) => ({ inventory_levels: plan.levels })),
       })
     })
-    const allowed = allowBackorderStep(transform({ plan }, ({ plan }) => plan.variant_ids))
+    const raised = raiseShelfStep(
+      transform({ plan, input }, ({ plan, input }) => ({
+        cart_id: input.cart_id,
+        raises: plan.raises,
+      }))
+    )
+    const levels = transform({ raised }, ({ raised }) =>
+      raised.raised.map(({ inventory_item_id, location_id }) => ({
+        inventory_item_id,
+        location_id,
+      }))
+    )
+    const reference = transform({ input }, ({ input }) => `backorder:${input.cart_id}`)
+    recordBackorderLedgerStep({ levels, reason: "reconcile", reference }).config({
+      name: "payments-backorder-ledger-raise",
+    })
     const order = completeCartWorkflow.runAsStep({ input: { id: input.cart_id } })
-    restoreBackorderStep(allowed)
+    recordBackorderLedgerStep({
+      levels,
+      order_id: transform({ order }, ({ order }) => order.id),
+    }).config({ name: "payments-backorder-ledger-order" })
+    lowerShelfStep(raised)
+    recordBackorderLedgerStep({ levels, reason: "reconcile", reference }).config({
+      name: "payments-backorder-ledger-lower",
+    })
     releaseLockStep({ key: BACKORDER_LOCK })
     const marked = markStockShortStep(
       transform({ order, plan }, ({ order, plan }) => ({ order_id: order.id, short: plan.short }))

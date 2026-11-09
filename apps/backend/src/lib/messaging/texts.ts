@@ -1,6 +1,7 @@
 import type { MessageLocale } from "../errors/messages"
 import { RETURN_TEXTS } from "./return-texts"
 import { STAFF_ACCOUNT_TEXTS } from "./staff-account-texts"
+import { PAYMENT_ISSUE_TEXTS } from "./payment-issue-texts"
 import { STOCK_SHORT_TEXTS } from "./stock-short-texts"
 
 /**
@@ -16,6 +17,7 @@ const TR: Readonly<Record<string, string>> = {
   ...RETURN_TEXTS,
   ...STAFF_ACCOUNT_TEXTS,
   ...STOCK_SHORT_TEXTS,
+  ...PAYMENT_ISSUE_TEXTS,
   "footer.unsubscribe": "Bu iletileri almak istemiyorum",
   "footer.stock": "Bu e-postayı, {{shop}} mağazasında stok bildirimi istediğiniz için aldınız.",
   "footer.order": "Bu e-posta, {{shop}} mağazasındaki siparişiniz için gönderildi.",

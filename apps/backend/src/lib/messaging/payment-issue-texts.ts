@@ -1,0 +1,23 @@
+/**
+ * What the shop's payment-trouble e-mail says (adr/0026 Ek 2026-11-06,
+ * security review 2026-11-09). Part of the message catalog (`texts.ts`).
+ */
+export const PAYMENT_ISSUE_TEXTS: Readonly<Record<string, string>> = {
+  "staff_payment_issue.completion_stuck.subject":
+    "Ödenen sepet siparişe dönüşemiyor ({{reference}})",
+  "staff_payment_issue.completion_stuck.intro":
+    "{{provider}} ödemesi alındı, ancak sipariş defalarca açılamadı. Otomatik olarak denenmeye devam ediyor; ödeme iade edilmedi. Stok ve depo ayarlarını kontrol edin; sipariş açılamayacaksa ödemeyi {{provider}} panelinden iade edin.",
+  "staff_payment_issue.refunded_before_order.subject":
+    "İade edilmiş ödeme siparişe dönüştürülmedi ({{reference}})",
+  "staff_payment_issue.refunded_before_order.intro":
+    "{{provider}} bu ödemeyi iade edilmiş gösteriyor; bu yüzden sipariş açılmadı. İadeyi siz yapmadıysanız {{provider}} panelinden kontrol edin.",
+  "staff_payment_issue.shelf_restored.subject": "Geçici stok düzeltmesi geri alındı ({{cart}})",
+  "staff_payment_issue.shelf_restored.intro":
+    "Ödemesi alınan bir sipariş için stok geçici olarak artırılmıştı; işlem yarıda kaldığı için artış geri alındı. Stok sayılarını ve bu sepetin siparişini kontrol edin.",
+  "staff_payment_issue.preheader": "Ödeme: {{provider}}, referans {{reference}}.",
+  "staff_payment_issue.heading": "Bir ödeme ilgi bekliyor",
+  "staff_payment_issue.provider": "Ödeme kuruluşu",
+  "staff_payment_issue.reference": "Referans",
+  "staff_payment_issue.cart": "Sepet",
+  "staff_payment_issue.amount": "Tutar",
+}

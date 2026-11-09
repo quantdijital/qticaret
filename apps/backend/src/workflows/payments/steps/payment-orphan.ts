@@ -8,7 +8,27 @@ import type { RecoveryInput } from "../../../modules/payment-recovery/service"
 /** A hosted form's verdict on a payment, as the orphan step reads it. */
 export type PaymentVerdict =
   | { kind: "skip" }
-  | { kind: "complete"; cart_id: string; amount: number; currency_code: string; test_mode: boolean }
+  | {
+      kind: "complete"
+      cart_id: string
+      amount: number
+      currency_code: string
+      test_mode: boolean
+      /** The provider and its reference, for the shop's alert when the order keeps failing. */
+      provider?: string
+      reference?: string
+      /** How many times the provider's notice was taken up, this one included. */
+      attempts?: number
+    }
+  // The provider shows the payment refunded (by hand): no order is opened (security review 2026-11-09)
+  | {
+      kind: "refunded"
+      cart_id: string | null
+      provider: string
+      reference: string
+      amount: number
+      refunded: number
+    }
   | {
       kind: "orphan"
       reason: RecoveryInput["reason"]

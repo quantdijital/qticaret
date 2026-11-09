@@ -14,6 +14,7 @@ const SWITCHES = {
   "staff.bank_transfer": "alert_bank_transfer",
   // An order alert: a paid order placed short of stock (adr/0026 Ek 2026-11-06)
   "staff.stock_short": "alert_new_order",
+  "staff.payment_issue": "alert_new_order",
   "staff.low_stock": "alert_low_stock",
   "staff.seo_digest": "alert_seo_digest",
   "staff.contact_message": "alert_contact_message",
