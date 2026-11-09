@@ -540,6 +540,10 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/description-facts/preview": false,
   "POST /admin/products/:id/brand": false,
   "POST /admin/products/:id/catalog": false,
+  // A product's copy is a catalog change; its storefront link mints a draft's preview,
+  // which stays the catalog roles' as a content draft's does
+  "POST /admin/products/:id/duplicate": false,
+  "POST /admin/products/:id/preview": false,
   "POST /admin/category-restrictions/:category_id": false,
   "POST /admin/category-images/:category_id": false,
   "POST /admin/customers/:id/privacy-requests": false,

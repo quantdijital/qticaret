@@ -89,6 +89,7 @@ import { FRAUD_ROUTES } from "./http/fraud-routes"
 import { INTEGRATION_ROUTES } from "./http/integration-routes"
 import { restrictStoreGiftCardFields } from "./http/shopper-gift-cards"
 import { PRICING_ROUTES } from "./http/pricing-routes"
+import { PRODUCT_BOARD_ROUTES } from "./http/product-board-routes"
 import { PROMOTION_ROUTES } from "./http/promotion-routes"
 import { SEO_ROUTES } from "./http/seo-routes"
 import { STOCK_ROUTES } from "./http/stock-routes"
@@ -364,6 +365,8 @@ export default defineMiddlewares({
     },
     // The panel's read models and actions (adr/0022)
     ...PANEL_ROUTES,
+    // The product list's filters, a product's copy and preview, the gift card list
+    ...PRODUCT_BOARD_ROUTES,
     // F2.8: long tasks (adr/0014); starting one and fetching its result are
     // for people: results can hold personal data (the audit log export)
     {
