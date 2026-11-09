@@ -10,7 +10,7 @@ import {
   productQuestions,
   productReviews,
 } from "@/lib/store-api/requests"
-import { ratingBars, reviewPhotos, withCardFacts } from "./card-extras"
+import { ratingBars, reviewPhotos, reviewReply, withCardFacts } from "./card-extras"
 import { productCards, variantIdsOf } from "./product"
 import { cardOptions } from "./theme-settings"
 
@@ -52,6 +52,7 @@ export async function reviewsView(productId: string, t: Translate): Promise<Revi
         date: DATE.format(new Date(review.created_at)),
         verified: review.verified_purchase,
         photos: reviewPhotos(review.photos, author, t),
+        reply: reviewReply(review.reply),
       }
     }),
     distribution: ratingBars(answer.rating?.distribution, t),

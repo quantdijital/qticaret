@@ -7,6 +7,7 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { RatingBarView, ReviewView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { fillOf } from "../parts/FreeShippingMeter"
+import { ReviewReply } from "../parts/ReviewReply"
 import { Stars } from "../parts/Stars"
 import type { ReviewListWords } from "./words"
 
@@ -74,6 +75,11 @@ function Review({ review, words }: { review: ReviewView; words: ReviewListWords 
         )}
         <span className="text-text-3">{review.date}</span>
       </p>
+      {review.reply && (
+        <div className="max-w-[46rem]">
+          <ReviewReply reply={review.reply} label={words.reply} />
+        </div>
+      )}
     </>
   )
 }
@@ -84,7 +90,8 @@ function Review({ review, words }: { review: ReviewView; words: ReviewListWords 
  * (the average set large, the stars, the count, the 5→1 spread, then
  * `action`: "Değerlendirme yaz" or the way to sign in), the reviews on
  * the right as one ruled list (the stars and the date, the title, the
- * text whole, the photos, the name with its verified mark), five at
+ * text whole, the photos, the name with its verified mark, the shop's
+ * reply under it), five at
  * first and five more a press. With every review on the page
  * (`complete`) the spread's bars filter by stars and the list sorts
  * newest, highest or lowest; with only the newest of many they stay a

@@ -209,6 +209,8 @@ export const reviewListWords = (t: Translate) => ({
   ) as Record<number, string>,
   verified: t("product.verified"),
   photos: t("reviews.photos"),
+  /** "Mağazanın yanıtı". */
+  reply: t("reviews.shop_reply"),
   /** "{author} adlı müşterinin fotoğrafı {n}". */
   photoAlt: t("reviews.photo_alt"),
   distribution: t("reviews.distribution"),

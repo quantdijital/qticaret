@@ -34,8 +34,20 @@ export interface StoreProductReviews {
     verified_purchase: boolean
     /** In the author's order; absent from a backend before it. */
     photos?: StoreReviewPhoto[]
+    /** The shop's reply under it; absent from a backend before it. */
+    reply?: StoreReviewReply | null
   }[]
   count: number
+}
+
+/**
+ * The shop's public reply under a review: its words, the shop's name,
+ * when. Text only: not a review, never in structured data.
+ */
+export interface StoreReviewReply {
+  body: string
+  author_name: string
+  created_at: string
 }
 
 /** `GET /store/reviews/photos?limit=`: the newest photos on approved reviews, with their product. */

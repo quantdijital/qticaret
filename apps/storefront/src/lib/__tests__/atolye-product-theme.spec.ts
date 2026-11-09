@@ -489,6 +489,38 @@ describe("the theme's product page", () => {
     expect(html).toContain("Soru sormak için giriş yapın")
   })
 
+  it("shows the shop's reply under its review, with the shop's name and the day", () => {
+    const reply = {
+      text: "Teşekkür ederiz!\nİyi günlerde kullanın.",
+      author: "Örnek Atölye",
+      date: { label: "3 Kasım 2026", dateTime: "2026-11-03T09:00:00.000Z" },
+    }
+    const html = page({
+      reviews: {
+        average: 5,
+        count: 1,
+        items: [
+          {
+            rating: 5,
+            title: null,
+            body: "Eline sağlık.",
+            author: "Ayşe K.",
+            date: "1 Kasım 2026",
+            verified: true,
+            reply,
+          },
+        ],
+        distribution: [],
+      },
+    })
+    expect(html).toContain("Mağazanın yanıtı")
+    expect(html).toContain("Örnek Atölye")
+    expect(html).toMatch(/<time datetime="2026-11-03T09:00:00.000Z"/i)
+    expect(html).toContain("Teşekkür ederiz!\nİyi günlerde kullanın.")
+    expect(html.indexOf("Teşekkür ederiz!")).toBeGreaterThan(html.indexOf("Eline sağlık."))
+    expect(page()).not.toContain("Mağazanın yanıtı")
+  })
+
   it("opens the review and the question forms in dialogs for a signed-in customer", () => {
     const html = page({ signedIn: true })
     // The buttons are in the first HTML, the forms only once a dialog opens

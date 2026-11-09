@@ -937,6 +937,7 @@
   "reviews.photos_hint": "En çok 3 fotoğraf; JPEG, PNG, WebP ya da AVIF, her biri en çok 10 MB. Fotoğraflar yorumunuzla birlikte onaylanınca görünür.",
   "reviews.photos": "Yorumdaki fotoğraflar",
   "reviews.photo_alt": "{author} adlı müşterinin fotoğrafı {n}",
+  "reviews.shop_reply": "Mağazanın yanıtı",
   "reviews.customer_photos": "Müşteri fotoğrafları",
   "reviews.customer_photo_alt": "Müşteri fotoğrafı: {product}",
   "reviews.customer_photo_by": "{author} adlı müşterinin fotoğrafı: {product}",

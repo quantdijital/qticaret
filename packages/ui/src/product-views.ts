@@ -186,6 +186,19 @@ export interface ReviewView {
   verified: boolean
   /** The photos the customer put on it, in their order (adr/0037 §4 Ek 2026-11-04). */
   photos?: ReviewPhotoView[]
+  /**
+   * The shop's public reply under it: its words, the shop's name, when.
+   * Text only; a reply is not a review and goes into no structured data.
+   */
+  reply?: ReviewReplyView | null
+}
+
+export interface ReviewReplyView {
+  text: string
+  /** The shop's name. */
+  author: string
+  /** "3 Kasım 2026" and its machine form. */
+  date: { label: string; dateTime: string }
 }
 
 export interface ReviewsView {

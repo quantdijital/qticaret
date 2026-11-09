@@ -3,6 +3,7 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { ReviewFilterView, ReviewsPageView, Translate } from "@qticaret/ui"
 import { Pager } from "../listing/Pager"
 import { Container } from "../parts/Container"
+import { ReviewReply } from "../parts/ReviewReply"
 import { Stars } from "../parts/Stars"
 import { Trail } from "../parts/Trail"
 import { Summary } from "../sections/Reviews"
@@ -36,7 +37,10 @@ function Product({ product, t }: { product: NonNullable<Review["product"]>; t: T
   )
 }
 
-/** One review whole: the stars, its title, the text, the customer's photos, who and when, the product. */
+/**
+ * One review whole: the stars, its title, the text, the customer's
+ * photos, who and when, the shop's reply, the product.
+ */
 function Card({ review, t }: { review: Review; t: Translate }) {
   const photos = review.photos ?? []
   return (
@@ -81,6 +85,7 @@ function Card({ review, t }: { review: Review; t: Translate }) {
         </span>
         <span className="text-text-3">{review.date}</span>
       </p>
+      {review.reply && <ReviewReply reply={review.reply} label={t("reviews.shop_reply")} />}
       {review.product && <Product product={review.product} t={t} />}
     </li>
   )

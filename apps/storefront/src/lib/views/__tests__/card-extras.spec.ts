@@ -6,6 +6,7 @@ import {
   customerPhotos,
   ratingBars,
   reviewPhotos,
+  reviewReply,
   shopMarks,
   withCardFacts,
 } from "../card-extras"
@@ -208,5 +209,28 @@ describe("review photos and marks", () => {
       },
     ])
     expect(shopMarks(undefined, t)).toEqual([])
+  })
+})
+
+describe("the shop's reply under a review", () => {
+  it("gives its words, the shop's name and the day in Turkish, with the machine form", () => {
+    expect(
+      reviewReply({
+        body: "  Teşekkür ederiz!\nYine bekleriz.  ",
+        author_name: "Örnek Atölye",
+        created_at: "2026-11-03T21:30:00.000Z",
+      })
+    ).toEqual({
+      text: "Teşekkür ederiz!\nYine bekleriz.",
+      author: "Örnek Atölye",
+      // Istanbul's day, not UTC's
+      date: { label: "4 Kasım 2026", dateTime: "2026-11-03T21:30:00.000Z" },
+    })
+  })
+
+  it("gives none for no reply, an empty one, or a backend before replies", () => {
+    expect(reviewReply(null)).toBeNull()
+    expect(reviewReply(undefined)).toBeNull()
+    expect(reviewReply({ body: "  ", author_name: "Örnek Atölye", created_at: "" })).toBeNull()
   })
 })

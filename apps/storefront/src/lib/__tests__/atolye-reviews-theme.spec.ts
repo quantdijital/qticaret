@@ -61,6 +61,41 @@ describe("the theme's reviews page", () => {
     expect(html).toContain('aria-label="Doğrulanmış alışveriş"')
   })
 
+  it("shows the shop's reply under a review, as a Google review's reply, before its product", () => {
+    const [first] = reviews().reviews
+    if (!first) {
+      throw new Error("no review")
+    }
+    const html = renderPage(atolyeTheme, "ReviewsPage", {
+      view: reviews({
+        reviews: [
+          {
+            ...first,
+            reply: {
+              text: "Teşekkür ederiz, yine bekleriz.",
+              author: "Örnek Atölye",
+              date: { label: "3 Kasım 2026", dateTime: "2026-11-03T09:00:00.000Z" },
+            },
+          },
+        ],
+      }),
+    })
+    expect(html).toContain("Mağazanın yanıtı")
+    expect(html).toContain("Örnek Atölye")
+    expect(html).toContain("3 Kasım 2026")
+    expect(html.indexOf("Teşekkür ederiz, yine bekleriz.")).toBeGreaterThan(
+      html.indexOf("Kaliteli ürün.")
+    )
+    expect(html.indexOf('href="/urun/geyik"')).toBeGreaterThan(
+      html.indexOf("Teşekkür ederiz, yine bekleriz.")
+    )
+    // A reply is not a review: no structured data of its own
+    expect(html).not.toContain('"@type":"Review"')
+    expect(renderPage(atolyeTheme, "ReviewsPage", { view: reviews() })).not.toContain(
+      "Mağazanın yanıtı"
+    )
+  })
+
   it("says so when there is no review yet", () => {
     const html = renderPage(atolyeTheme, "ReviewsPage", {
       view: reviews({ reviews: [], summary: null, average: null, count: 0 }),

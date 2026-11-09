@@ -6,6 +6,7 @@ import type {
   ProductCardView,
   RatingBarView,
   ReviewPhotoView,
+  ReviewReplyView,
   ShopMarkView,
   ShopRatingView,
   Translate,
@@ -16,6 +17,7 @@ import type {
   StoreLatestReviewPhoto,
   StoreRatingDistribution,
   StoreReviewPhoto,
+  StoreReviewReply,
   StoreReviewSummary,
 } from "@qticaret/types"
 import { imageView } from "./image"
@@ -131,6 +133,33 @@ export const reviewPhotos = (
   (photos ?? []).map((photo, index) => ({
     image: reviewPhotoImage(photo, t("reviews.photo_alt", { author, n: index + 1 })),
   }))
+
+const REPLY_DATE = new Intl.DateTimeFormat("tr-TR", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+  timeZone: "Europe/Istanbul",
+})
+
+/**
+ * The shop's reply under a review, as the themes show it: its words, the
+ * shop's name, the day; none without words. Text only: a reply is not a
+ * review and goes into no structured data.
+ */
+export function reviewReply(reply: StoreReviewReply | null | undefined): ReviewReplyView | null {
+  const text = reply?.body.trim()
+  if (!reply || !text) {
+    return null
+  }
+  const when = new Date(reply.created_at)
+  return {
+    text,
+    author: reply.author_name,
+    date: Number.isNaN(when.getTime())
+      ? { label: "", dateTime: "" }
+      : { label: REPLY_DATE.format(when), dateTime: when.toISOString() },
+  }
+}
 
 /** The newest customer photos, each at its product's page when the product has one. */
 export function customerPhotos(

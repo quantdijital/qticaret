@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import type { StoreReviewPhoto } from "@qticaret/types"
+import type { StoreReviewPhoto, StoreReviewReply } from "@qticaret/types"
 import type { ImageView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
@@ -10,7 +10,7 @@ import { isStoreApiError } from "@/lib/store-api/errors"
 import { pathsOf, siteSeo } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
 import { googleReviews, reviewSummary } from "@/lib/store-api/extras"
-import { reviewPhotos, shopRatingView } from "@/lib/views/card-extras"
+import { reviewPhotos, reviewReply, shopRatingView } from "@/lib/views/card-extras"
 import { googleReviewsView } from "@/lib/views/google-reviews"
 import { productImages } from "@/lib/views/image"
 import { reviewFilterView, reviewsPath, starsOf } from "@/lib/views/review-filter"
@@ -38,6 +38,7 @@ interface Answer {
     created_at: string
     verified_purchase: boolean
     photos?: StoreReviewPhoto[]
+    reply?: StoreReviewReply | null
   }[]
   count: number
 }
@@ -171,6 +172,7 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
               date: DATE.format(new Date(review.created_at)),
               verified: review.verified_purchase,
               photos: reviewPhotos(review.photos, author, t),
+              reply: reviewReply(review.reply),
               product: path
                 ? {
                     label: review.product_title,
