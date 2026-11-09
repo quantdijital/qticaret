@@ -1586,6 +1586,7 @@
             "bank_transfer": "Ekip: havale bekleyen sipariş",
             "low_stock": "Ekip: stok azaldı",
             "stock_short": "Ekip: stok yetersiz sipariş",
+            "payment_issue": "Ekip: ödeme sorunu",
             "seo_digest": "Ekip: haftalık SEO özeti",
             "contact_message": "Ekip: iletişim mesajı",
             "invite": "Ekip: panel daveti",
@@ -6304,6 +6305,20 @@
     "stockShort": {
       "title": "Stok yetersiz sipariş #{{number}}",
       "description": "Eksik: {{lines}}. Üretin ya da tedarik edin; edemeyecekseniz iptal edip iade edin."
+    },
+    "paymentIssue": {
+      "completion_stuck": {
+        "title": "{{provider}} ödemesi siparişe dönüşemiyor",
+        "description": "{{amount}} ({{reference}}, sepet {{cart}}) için sipariş açılamadı; denenmeye devam ediyor, iade edilmedi. Stok ve depo ayarlarını kontrol edin; açılamayacaksa ödemeyi sağlayıcının panelinden iade edin."
+      },
+      "refunded_before_order": {
+        "title": "İade edilmiş {{provider}} ödemesi siparişe dönüştürülmedi",
+        "description": "{{amount}} ({{reference}}, sepet {{cart}}) sağlayıcının panelinde iade edilmiş görünüyor; sipariş açılmadı."
+      },
+      "shelf_restored": {
+        "title": "Geçici stok düzeltmesi geri alındı",
+        "description": "Sepet {{cart}} için artırılan stok, işlem yarıda kaldığı için geri alındı. Stok sayılarını kontrol edin."
+      }
     }
   },
   "content": {

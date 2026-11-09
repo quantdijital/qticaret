@@ -1586,6 +1586,7 @@
             "bank_transfer": "Staff: bank transfer awaited",
             "low_stock": "Staff: low stock",
             "stock_short": "Staff: order short of stock",
+            "payment_issue": "Staff: payment issue",
             "seo_digest": "Staff: weekly SEO digest",
             "contact_message": "Staff: contact message",
             "invite": "Team: panel invitation",
@@ -6304,6 +6305,20 @@
     "stockShort": {
       "title": "Order #{{number}} is short of stock",
       "description": "Missing: {{lines}}. Make or source them; if you cannot, cancel and refund."
+    },
+    "paymentIssue": {
+      "completion_stuck": {
+        "title": "A {{provider}} payment cannot become an order",
+        "description": "No order opened for {{amount}} ({{reference}}, cart {{cart}}); it is still being tried and was not refunded. Check the stock and warehouse settings; if it cannot open, refund it in the provider's panel."
+      },
+      "refunded_before_order": {
+        "title": "A refunded {{provider}} payment was not made an order",
+        "description": "{{amount}} ({{reference}}, cart {{cart}}) shows as refunded in the provider's panel; no order was opened."
+      },
+      "shelf_restored": {
+        "title": "A temporary stock raise was taken back",
+        "description": "The stock raised for cart {{cart}} was lowered again after the run stopped halfway. Check the stock counts."
+      }
     }
   },
   "content": {

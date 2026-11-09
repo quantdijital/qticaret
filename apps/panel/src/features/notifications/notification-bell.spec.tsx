@@ -137,3 +137,45 @@ describe("NotificationBell: a paid order placed short of stock (adr/0026 Ek 2026
     expect(screen.getByText(/Eksik: Chuby \/ Kahverengi ×1\./)).toBeInTheDocument()
   })
 })
+
+describe("NotificationBell: a paid cart's trouble (security review 2026-11-09)", () => {
+  beforeEach(() => {
+    fetchMock.mockReset()
+    localStorage.clear()
+  })
+
+  it("names the provider, reference and cart of a payment that cannot become an order", async () => {
+    fetchMock.mockResolvedValue({
+      notifications: [
+        alert("noti_6", {
+          kind: "payment_issue",
+          issue: "completion_stuck",
+          provider: "paytr",
+          reference: "payses01ABC",
+          cart_id: "cart_01XYZ",
+          amount: 21000,
+        }),
+        alert("noti_7", {
+          kind: "payment_issue",
+          issue: "refunded_before_order",
+          provider: "paytr",
+          reference: "payses01DEF",
+          cart_id: null,
+          amount: 21000,
+        }),
+        // An issue the panel does not know is not worded as one
+        alert("noti_8", { kind: "payment_issue", issue: "other", title: "Sunucunun metni" }),
+      ],
+    })
+    renderBell()
+
+    await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 3 yeni" }))
+
+    expect(await screen.findByText("PayTR ödemesi siparişe dönüşemiyor")).toBeInTheDocument()
+    expect(screen.getByText(/payses01ABC, sepet cart_01XYZ/)).toBeInTheDocument()
+    expect(
+      screen.getByText("İade edilmiş PayTR ödemesi siparişe dönüştürülmedi")
+    ).toBeInTheDocument()
+    expect(screen.getByText(/payses01DEF, sepet —/)).toBeInTheDocument()
+  })
+})
