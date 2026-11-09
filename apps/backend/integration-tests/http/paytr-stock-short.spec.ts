@@ -66,7 +66,7 @@ medusaIntegrationTestRunner({
           fields: ["id", "display_id", "metadata", "items.id"],
           filters: { id: orderId },
         })
-      return data[0] as {
+      return data[0] as unknown as {
         id: string
         display_id: number
         metadata: Record<string, unknown> | null
