@@ -42,7 +42,7 @@ Tenant kurulumda bir desen seti seçer; desen tokenlarla tanımlıdır ve sonrad
 | Ürün | `/urun/{slug}` | `/{slug}` |
 | Kategori | `/kategori/{ata-slug'ları}/{slug}` (kökten bu kategoriye tüm zincir) | `/{slug}` |
 | Marka | `/marka/{slug}` | `/{slug}` |
-| Koleksiyon / kampanya | `/koleksiyon/{slug}` | |
+| Koleksiyon / kampanya | `/koleksiyon/{slug}` (gizlenen koleksiyon pasif kategori gibi: 404, yolu saklı, site haritasında yok; açıklaması meta açıklamanın, görseli paylaşım görselinin yedeği) | |
 | Facet landing | `/kategori/{slug}/{facet-slug}` (ör. `/kategori/bicak/paslanmaz-celik`) | |
 | İçerik sayfası | `/{slug}` | |
 | Blog | `/blog/{slug}` | |
