@@ -30,6 +30,7 @@ import { Route as AuthContentIndexRouteImport } from './routes/_auth/content/ind
 import { Route as AuthContentIdRouteImport } from './routes/_auth/content/$id'
 import { Route as AuthCustomersIndexRouteImport } from './routes/_auth/customers/index'
 import { Route as AuthCustomersIdRouteImport } from './routes/_auth/customers/$id'
+import { Route as AuthCustomersAbandonedCartsRouteImport } from './routes/_auth/customers/abandoned-carts'
 import { Route as AuthCustomersContactMessagesRouteImport } from './routes/_auth/customers/contact-messages'
 import { Route as AuthCustomersGroupsRouteImport } from './routes/_auth/customers/groups'
 import { Route as AuthOrdersIndexRouteImport } from './routes/_auth/orders/index'
@@ -203,6 +204,12 @@ const AuthCustomersIdRoute = AuthCustomersIdRouteImport.update({
   path: '/customers/$id',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthCustomersAbandonedCartsRoute =
+  AuthCustomersAbandonedCartsRouteImport.update({
+    id: '/customers/abandoned-carts',
+    path: '/customers/abandoned-carts',
+    getParentRoute: () => AuthRoute,
+  } as any)
 const AuthCustomersContactMessagesRoute =
   AuthCustomersContactMessagesRouteImport.update({
     id: '/customers/contact-messages',
@@ -579,6 +586,7 @@ export interface FileRoutesByFullPath {
   '/bulk-messages/$id': typeof AuthBulkMessagesIdRoute
   '/content/$id': typeof AuthContentIdRoute
   '/customers/$id': typeof AuthCustomersIdRoute
+  '/customers/abandoned-carts': typeof AuthCustomersAbandonedCartsRoute
   '/customers/contact-messages': typeof AuthCustomersContactMessagesRoute
   '/customers/groups': typeof AuthCustomersGroupsRoute
   '/orders/$id': typeof AuthOrdersIdRoute
@@ -667,6 +675,7 @@ export interface FileRoutesByTo {
   '/bulk-messages/$id': typeof AuthBulkMessagesIdRoute
   '/content/$id': typeof AuthContentIdRoute
   '/customers/$id': typeof AuthCustomersIdRoute
+  '/customers/abandoned-carts': typeof AuthCustomersAbandonedCartsRoute
   '/customers/contact-messages': typeof AuthCustomersContactMessagesRoute
   '/customers/groups': typeof AuthCustomersGroupsRoute
   '/orders/$id': typeof AuthOrdersIdRoute
@@ -760,6 +769,7 @@ export interface FileRoutesById {
   '/_auth/bulk-messages/$id': typeof AuthBulkMessagesIdRoute
   '/_auth/content/$id': typeof AuthContentIdRoute
   '/_auth/customers/$id': typeof AuthCustomersIdRoute
+  '/_auth/customers/abandoned-carts': typeof AuthCustomersAbandonedCartsRoute
   '/_auth/customers/contact-messages': typeof AuthCustomersContactMessagesRoute
   '/_auth/customers/groups': typeof AuthCustomersGroupsRoute
   '/_auth/orders/$id': typeof AuthOrdersIdRoute
@@ -852,6 +862,7 @@ export interface FileRouteTypes {
     | '/bulk-messages/$id'
     | '/content/$id'
     | '/customers/$id'
+    | '/customers/abandoned-carts'
     | '/customers/contact-messages'
     | '/customers/groups'
     | '/orders/$id'
@@ -940,6 +951,7 @@ export interface FileRouteTypes {
     | '/bulk-messages/$id'
     | '/content/$id'
     | '/customers/$id'
+    | '/customers/abandoned-carts'
     | '/customers/contact-messages'
     | '/customers/groups'
     | '/orders/$id'
@@ -1032,6 +1044,7 @@ export interface FileRouteTypes {
     | '/_auth/bulk-messages/$id'
     | '/_auth/content/$id'
     | '/_auth/customers/$id'
+    | '/_auth/customers/abandoned-carts'
     | '/_auth/customers/contact-messages'
     | '/_auth/customers/groups'
     | '/_auth/orders/$id'
@@ -1264,6 +1277,13 @@ declare module '@tanstack/react-router' {
       path: '/customers/$id'
       fullPath: '/customers/$id'
       preLoaderRoute: typeof AuthCustomersIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/customers/abandoned-carts': {
+      id: '/_auth/customers/abandoned-carts'
+      path: '/customers/abandoned-carts'
+      fullPath: '/customers/abandoned-carts'
+      preLoaderRoute: typeof AuthCustomersAbandonedCartsRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/customers/contact-messages': {
@@ -1857,6 +1877,7 @@ interface AuthRouteChildren {
   AuthBulkMessagesIdRoute: typeof AuthBulkMessagesIdRoute
   AuthContentIdRoute: typeof AuthContentIdRoute
   AuthCustomersIdRoute: typeof AuthCustomersIdRoute
+  AuthCustomersAbandonedCartsRoute: typeof AuthCustomersAbandonedCartsRoute
   AuthCustomersContactMessagesRoute: typeof AuthCustomersContactMessagesRoute
   AuthCustomersGroupsRoute: typeof AuthCustomersGroupsRoute
   AuthOrdersIdRoute: typeof AuthOrdersIdRoute
@@ -1904,6 +1925,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthBulkMessagesIdRoute: AuthBulkMessagesIdRoute,
   AuthContentIdRoute: AuthContentIdRoute,
   AuthCustomersIdRoute: AuthCustomersIdRoute,
+  AuthCustomersAbandonedCartsRoute: AuthCustomersAbandonedCartsRoute,
   AuthCustomersContactMessagesRoute: AuthCustomersContactMessagesRoute,
   AuthCustomersGroupsRoute: AuthCustomersGroupsRoute,
   AuthOrdersIdRoute: AuthOrdersIdRoute,

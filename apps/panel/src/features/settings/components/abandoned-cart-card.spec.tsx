@@ -9,6 +9,8 @@ const fetchMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+// The link to the carts' list is the abandonedCarts role's, and needs a router
+vi.mock("@/features/auth/api/staff", () => ({ useCan: () => false }))
 
 function renderCard() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })

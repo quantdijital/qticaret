@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { Link } from "@tanstack/react-router"
 import { Loader2, MailCheck, ShoppingBag, ShoppingCart } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -15,6 +16,7 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
+import { useCan } from "@/features/auth/api/staff"
 import { cartReminderSummaryQuery } from "@/features/settings/api/cart-reminders"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { MarketingSettings } from "@/features/settings/api/sections"
@@ -38,8 +40,19 @@ export function AbandonedCartCard() {
   const stored = section.data?.values
   const values = stored ? { ...stored, ...draft } : null
   const counts = summary.data?.summary
+  const seesCarts = useCan("abandonedCarts")
   return (
-    <SectionCard title={t(`${C}.title`)} description={t(`${C}.description`)}>
+    <SectionCard
+      title={t(`${C}.title`)}
+      description={t(`${C}.description`)}
+      action={
+        seesCarts ? (
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/customers/abandoned-carts">{t(`${C}.seeCarts`)}</Link>
+          </Button>
+        ) : undefined
+      }
+    >
       {!values ? (
         <Skeleton className="h-32" />
       ) : (
