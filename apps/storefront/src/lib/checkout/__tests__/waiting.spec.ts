@@ -64,6 +64,8 @@ describe("the payment's waiting page", () => {
     expect(t("checkout.result_late")).toBe("Ödemeniz alındı, siparişiniz oluşturuluyor")
     // An address that names no state is a late one, never a page that spins
     expect(resultViewOf("<script>", null, t).view.state).toBe("late")
+    expect(resultViewOf("toString", null, t).view.state).toBe("late")
+    expect(resultViewOf("__proto__", null, t).view.state).toBe("late")
   })
 
   it("leads a refunded payment back to the cart, with the shop's contact page", () => {

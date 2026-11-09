@@ -64,7 +64,9 @@ export function resultViewOf(
   deneme: string | null | undefined,
   t: Translate
 ): { view: CheckoutResultPageView; refreshSeconds: number | null } {
-  const state = asked && asked in STATES ? STATES[asked as keyof typeof STATES] : "late"
+  // Own keys only: `?d=toString` is no state
+  const state =
+    asked && Object.hasOwn(STATES, asked) ? STATES[asked as keyof typeof STATES] : "late"
   if (state === "pending") {
     const tries = Math.max(1, triesOf(deneme))
     const retryPath = `/odeme/sonuc?deneme=${String(tries)}`
