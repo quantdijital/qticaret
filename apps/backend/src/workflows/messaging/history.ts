@@ -6,6 +6,8 @@ import { MESSAGE_TEMPLATES } from "../../lib/messaging/templates"
 import { MESSAGING_MODULE } from "../../modules/messaging"
 import type { MessageSkipReason } from "../../modules/messaging/models/message-skip"
 import type MessagingModuleService from "../../modules/messaging/service"
+import { EINVOICE_MODULE } from "../../modules/einvoice"
+import type EinvoiceModuleService from "../../modules/einvoice/service"
 import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../modules/return-requests/service"
 
@@ -18,6 +20,18 @@ const CUSTOMER_TEMPLATES = Object.keys(MESSAGE_TEMPLATES).filter(isCustomerTempl
 
 /** What an order's history reads besides the order: its parcels' and return requests' messages. */
 export const HISTORY_RESOURCE_TYPES = new Set(["order", "fulfillment", "return_request"])
+
+/**
+ * The order's messages staff may send again (2026-11-06), from their
+ * templates only: the confirmation, the parcel's shipping and delivery,
+ * the invoice's link.
+ */
+export const RESENDABLE_TEMPLATES: ReadonlySet<string> = new Set([
+  "order.placed",
+  "order.shipped",
+  "order.delivered",
+  "order.invoiced",
+])
 
 // The latest of each kind; an order or a customer rarely has more
 const SHOWN = 50
@@ -34,6 +48,8 @@ export interface MessageRow {
   /** The address masked: enough to recognise it, not to use it. */
   to: string | null
   at: string
+  /** Whether "Mesajı yeniden gönder" is offered: an order's message, one of its templates. */
+  resendable: boolean
 }
 
 interface NotificationRow {
@@ -62,7 +78,8 @@ type Where = { resource_id: string[] } | { receiver_id: string }
 
 async function history(
   container: Container,
-  where: Where
+  where: Where,
+  resend = false
 ): Promise<{ messages: MessageRow[]; limited: boolean }> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "notification",
@@ -72,14 +89,16 @@ async function history(
   })
   const sent = (data as NotificationRow[]).map((row): MessageRow => {
     const channel = channelOf(row.channel)
+    const state = STATE[row.status ?? ""] ?? "pending"
     return {
       id: row.id,
       template: row.template ?? "",
       channel,
-      state: STATE[row.status ?? ""] ?? "pending",
+      state,
       reason: null,
       to: masked(channel, row.to),
       at: new Date(row.created_at).toISOString(),
+      resendable: resend && state !== "pending" && RESENDABLE_TEMPLATES.has(row.template ?? ""),
     }
   })
   const skips = await container.resolve<MessagingModuleService>(MESSAGING_MODULE).listMessageSkips(
@@ -98,6 +117,7 @@ async function history(
     reason: row.reason,
     to: row.recipient_masked ?? null,
     at: new Date(row.updated_at).toISOString(),
+    resendable: false,
   }))
   return {
     messages: [...sent, ...skipped].sort((a, b) => b.at.localeCompare(a.at)).slice(0, SHOWN),
@@ -112,6 +132,18 @@ async function history(
  * never stored.
  */
 export async function orderMessages(container: Container, orderId: string) {
+  return history(container, { resource_id: await orderMessageResources(container, orderId) }, true)
+}
+
+/**
+ * What an order's messages are about: the order, its parcels, its return
+ * requests and its sale invoices (the invoice's link goes under the
+ * invoice's id).
+ */
+export async function orderMessageResources(
+  container: Container,
+  orderId: string
+): Promise<string[]> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
     fields: ["id", "fulfillments.id"],
@@ -121,16 +153,20 @@ export async function orderMessages(container: Container, orderId: string) {
   if (!order) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "orders.unknown")
   }
-  const requests = await container
-    .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
-    .listReturnRequests({ order_id: orderId }, { select: ["id"] })
-  return history(container, {
-    resource_id: [
-      orderId,
-      ...(order.fulfillments ?? []).flatMap((parcel) => (parcel ? [parcel.id] : [])),
-      ...requests.map((request) => request.id),
-    ],
-  })
+  const [requests, invoices] = await Promise.all([
+    container
+      .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
+      .listReturnRequests({ order_id: orderId }, { select: ["id"] }),
+    container
+      .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
+      .listInvoices({ order_id: orderId, kind: "sale" }, { select: ["id"] }),
+  ])
+  return [
+    orderId,
+    ...(order.fulfillments ?? []).flatMap((parcel) => (parcel ? [parcel.id] : [])),
+    ...requests.map((request) => request.id),
+    ...invoices.map((invoice) => invoice.id),
+  ]
 }
 
 /** Everything the customer was sent, or not and why (F12.8), newest first. */

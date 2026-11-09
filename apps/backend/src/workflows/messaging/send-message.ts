@@ -4,6 +4,7 @@ import {
   createStep,
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
+import type { MessageChannel } from "../../lib/messaging/recipients"
 import type { MessageTemplateName } from "../../lib/messaging/templates"
 import { deliver } from "./deliver"
 import { MESSAGE_LOADERS } from "./loaders"
@@ -16,6 +17,8 @@ export interface SendMessageInput {
   key?: string
   /** What only the event knew (a reset link's token): passed to the loader, never stored. */
   extra?: Record<string, string>
+  /** Only these of the template's channels (a message sent again by staff on its channel). */
+  channels?: MessageChannel[]
 }
 
 /** Reads the template's values from its resource and sends it on its channels; nothing to undo. */
@@ -27,11 +30,15 @@ export const sendMessageStep = createStep(
     if (!loaded) {
       return new StepResponse({})
     }
+    const only = input.channels
+    const recipients = only
+      ? Object.fromEntries(only.map((channel) => [channel, loaded.recipients[channel] ?? null]))
+      : loaded.recipients
     return new StepResponse(
       await deliver(container, {
         template: input.template,
         resource: { type: loaded.resourceType, id: input.resource_id },
-        recipients: loaded.recipients,
+        recipients,
         receiverId: loaded.receiverId,
         vars: loaded.vars,
         ...(input.key ? { key: input.key } : {}),
