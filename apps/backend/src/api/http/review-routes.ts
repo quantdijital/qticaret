@@ -12,7 +12,11 @@ import {
   StoreGetQuestions,
   StorePostQaText,
 } from "../admin/product-questions/validators"
-import { AdminGetReviews, AdminPostModerateReviews } from "../admin/product-reviews/validators"
+import {
+  AdminGetReviews,
+  AdminPostModerateReviews,
+  AdminPostReviewReply,
+} from "../admin/product-reviews/validators"
 import {
   StoreGetReviewPhotos,
   StoreGetReviewSummary,
@@ -124,5 +128,16 @@ export const REVIEW_ROUTES = [
     matcher: "/admin/product-reviews/moderate",
     methods: ["POST" as const],
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostModerateReviews)],
+  },
+  // The shop's reply under a review, as a question's shop answer
+  {
+    matcher: "/admin/product-reviews/:id/reply",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostReviewReply)],
+  },
+  {
+    matcher: "/admin/product-reviews/:id/reply",
+    methods: ["DELETE" as const],
+    middlewares: [requireUserActor],
   },
 ]

@@ -30,6 +30,15 @@ export const ProductReview = model
     reject_reason: model.text().nullable(),
     moderated_by: model.text().nullable(),
     moderated_at: model.dateTime().nullable(),
+    /**
+     * The shop's public reply under the review (plain text, at most 1,000
+     * characters): written to an approved one, shown with it. The shop's
+     * words, never the customer's: an erased author leaves it as it is.
+     */
+    reply: model.text().nullable(),
+    /** The staff member who wrote the reply as it is now. */
+    replied_by: model.text().nullable(),
+    replied_at: model.dateTime().nullable(),
   })
   .indexes([
     { on: ["product_id", "customer_id"], unique: true, where: "deleted_at IS NULL" },

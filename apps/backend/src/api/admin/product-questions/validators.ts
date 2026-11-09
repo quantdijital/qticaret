@@ -1,10 +1,10 @@
 import { z } from "@medusajs/framework/zod"
 
-// Text as typed, without control characters other than line breaks
-const plain = (value: string): string => value.replace(/[^\P{Cc}\n]/gu, "").trim()
+/** Text as typed, without control characters other than line breaks (a reply to a review too). */
+export const plainText = (value: string): string => value.replace(/[^\P{Cc}\n]/gu, "").trim()
 
 /** A question or an answer: a few words to a short paragraph. */
-export const qaText = z.string().transform(plain).pipe(z.string().min(10).max(1000))
+export const qaText = z.string().transform(plainText).pipe(z.string().min(10).max(1000))
 
 export const StorePostQaText = z.object({ body: qaText }).strict()
 export type StorePostQaTextType = z.infer<typeof StorePostQaText>

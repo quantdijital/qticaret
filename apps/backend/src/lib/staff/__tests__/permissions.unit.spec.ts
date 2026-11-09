@@ -535,6 +535,9 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "DELETE /admin/contact-messages/:id": false,
   "POST /admin/product-questions/moderate": true,
   "POST /admin/product-reviews/moderate": true,
+  // The shop's reply under a review, as a question's answer
+  "POST /admin/product-reviews/:id/reply": true,
+  "DELETE /admin/product-reviews/:id/reply": true,
   "POST /admin/products/:id/attributes": false,
   // adr/0013 Ek 2026-11-05: a preview of the facts in descriptions, the catalog roles'
   "POST /admin/description-facts/preview": false,

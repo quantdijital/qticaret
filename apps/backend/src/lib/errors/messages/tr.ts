@@ -476,6 +476,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "reviews.photos_too_many": "Bir yoruma en çok 3 fotoğraf eklenebilir.",
   "reviews.photo_uploads_full":
     "Henüz bir yoruma eklenmemiş çok fazla fotoğraf yüklediniz; yarın yeniden deneyin.",
+  "reviews.unknown": "Yorum bulunamadı.",
+  "reviews.reply_required": "Yanıt boş olamaz.",
+  "reviews.reply_too_long": "Yanıt en çok 1.000 karakter olabilir.",
+  "reviews.reply_invalid": "Yanıtta görünmeyen denetim karakterleri var; metni yeniden yazın.",
+  "reviews.reply_not_approved": "Yalnızca onaylanmış yorumlara yanıt yazılabilir.",
+  "reviews.reply_missing": "Bu yorumun kaldırılacak bir yanıtı yok.",
   "questions.unknown": "Soru bulunamadı.",
   "questions.answer_purchasers_only": "Yalnızca ürünü teslim almış müşteriler cevap yazabilir.",
   "messaging.no_address": "Müşterinin bu kanal için kayıtlı adresi ya da telefonu yok.",

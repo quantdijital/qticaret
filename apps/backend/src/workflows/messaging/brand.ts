@@ -54,6 +54,14 @@ export function mailLogoUrl(
   return logo?.startsWith("http://") && isDeveloperMachine(env) ? logo : null
 }
 
+/** The shop's name alone (Medusa's store name, else "Mağaza"): its replies under reviews sign with it. */
+export async function shopNameRead(container: Pick<MedusaContainer, "resolve">): Promise<string> {
+  const { data } = await container
+    .resolve(ContainerRegistrationKeys.QUERY)
+    .graph({ entity: "store", fields: ["name"], pagination: { take: 1 } })
+  return shopNameOf((data as { name?: string }[])[0])
+}
+
 /** The shop as its messages present it (adr/0036), read when a message is sent. */
 export async function brandOf(container: Pick<MedusaContainer, "resolve">): Promise<Brand> {
   const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)

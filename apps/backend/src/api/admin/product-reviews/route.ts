@@ -7,16 +7,23 @@ import type { AdminGetReviewsType } from "./validators"
 
 const PAGE = 20
 
-/** GET /admin/product-reviews (F10.6): reviews by state, the waiting ones oldest first. */
+/**
+ * GET /admin/product-reviews (F10.6): reviews by state, the waiting ones
+ * oldest first, each with the shop's reply; `replied=false`, only those
+ * without one.
+ */
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminGetReviewsType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { status, offset } = req.validatedQuery
+  const { status, replied, offset } = req.validatedQuery
   const [rows, count] = await req.scope
     .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
     .listAndCountProductReviews(
-      { status },
+      {
+        status,
+        ...(replied === undefined ? {} : { reply: replied === "true" ? { $ne: null } : null }),
+      },
       { skip: offset, take: PAGE, order: { created_at: status === "pending" ? "ASC" : "DESC" } }
     )
   const { data } = await req.scope.resolve(ContainerRegistrationKeys.QUERY).graph({
@@ -48,6 +55,8 @@ export async function GET(
       status: row.status,
       has_link: row.has_link,
       reject_reason: row.reject_reason,
+      reply: row.reply,
+      replied_at: row.replied_at,
       created_at: row.created_at,
       // The version staff see: moderation applies to it only
       updated_at: row.updated_at,

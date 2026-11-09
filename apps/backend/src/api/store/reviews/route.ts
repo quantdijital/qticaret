@@ -3,12 +3,14 @@ import { PRODUCT_REVIEWS_MODULE } from "../../../modules/product-reviews"
 import type ProductReviewsModuleService from "../../../modules/product-reviews/service"
 import { photosByReview } from "../../../workflows/customers/review-photo-reads"
 import type { StoreGetShopReviewsType } from "../products/[id]/reviews/validators"
+import { storeRepliesOf } from "./reply"
 import { visibleReviewed } from "./visible"
 
 /**
  * GET /store/reviews (F18 D10): the shop's approved reviews across its
- * products, newest first, each with its product's id and title and its
- * photos (adr/0037 §4 Ek 2026-11-04), for the storefront's reviews page.
+ * products, newest first, each with its product's id and title, its
+ * photos (adr/0037 §4 Ek 2026-11-04) and the shop's reply, for the
+ * storefront's reviews page.
  * Only products the shopper may see count: published, in the publishable
  * key's sales channels. With `rating` (1–5), only the reviews that gave
  * that many stars (adr/0037 Ek 2026-11-05), `count` theirs; the shop-wide
@@ -45,13 +47,18 @@ export async function GET(
           "author_name",
           "origin",
           "created_at",
+          "reply",
+          "replied_at",
         ],
       }
     )
-  const photos = await photosByReview(
-    req.scope,
-    rows.map((row) => row.id)
-  )
+  const [photos, replyOf] = await Promise.all([
+    photosByReview(
+      req.scope,
+      rows.map((row) => row.id)
+    ),
+    storeRepliesOf(req.scope, rows),
+  ])
   res.json({
     reviews: rows.map((row) => ({
       id: row.id,
@@ -64,6 +71,7 @@ export async function GET(
       created_at: row.created_at,
       verified_purchase: row.origin === "storefront",
       photos: photos.get(row.id) ?? [],
+      reply: replyOf(row),
     })),
     count,
     offset,

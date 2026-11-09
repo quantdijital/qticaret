@@ -39,3 +39,10 @@ export interface Rating {
 
 /** How many approved reviews gave each number of stars, 5 to 1. */
 export type RatingDistribution = Record<"1" | "2" | "3" | "4" | "5", number>
+
+/** The shop's reply to a review as stored: the text, who wrote it and when; all null for none. */
+export interface ReviewReply {
+  reply: string | null
+  replied_by: string | null
+  replied_at: Date | null
+}

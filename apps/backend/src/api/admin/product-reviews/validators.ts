@@ -1,7 +1,14 @@
 import { z } from "@medusajs/framework/zod"
+import { isCleanText } from "../../../lib/security/text"
+import { plainText } from "../product-questions/validators"
 
+/** The longest reply the shop writes under a review. */
+export const REVIEW_REPLY_MAX = 1000
+
+/** Reviews by state; `replied=false`, only those the shop has not replied to yet. */
 export const AdminGetReviews = z.object({
   status: z.enum(["pending", "approved", "rejected"]).default("pending"),
+  replied: z.enum(["true", "false"]).optional(),
   offset: z.coerce.number().int().min(0).max(100_000).default(0),
 })
 export type AdminGetReviewsType = z.infer<typeof AdminGetReviews>
@@ -29,3 +36,23 @@ export const AdminPostModerateReviews = z
   })
   .strict()
 export type AdminPostModerateReviewsType = z.infer<typeof AdminPostModerateReviews>
+
+/**
+ * The shop's reply to a review: plain text as a question's answer is
+ * (control characters other than line breaks dropped, trimmed), at most
+ * 1,000 characters. Refinements, not `.min`/`.max`: Medusa words a
+ * length's refusal itself, not by our key.
+ */
+export const AdminPostReviewReply = z
+  .object({
+    body: z
+      .string()
+      .transform(plainText)
+      .refine((value) => value.length > 0, { message: "reviews.reply_required" })
+      .refine((value) => value.length <= REVIEW_REPLY_MAX, { message: "reviews.reply_too_long" })
+      .refine((value) => isCleanText(value.replace(/\n/g, " ")), {
+        message: "reviews.reply_invalid",
+      }),
+  })
+  .strict()
+export type AdminPostReviewReplyType = z.infer<typeof AdminPostReviewReply>

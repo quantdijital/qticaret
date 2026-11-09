@@ -7,11 +7,12 @@ import { PRODUCT_REVIEWS_MODULE } from "../../../../../modules/product-reviews"
 import type ProductReviewsModuleService from "../../../../../modules/product-reviews/service"
 import { photosByReview } from "../../../../../workflows/customers/review-photo-reads"
 import { writeReviewWorkflow } from "../../../../../workflows/customers/review-photos"
+import { storeRepliesOf } from "../../../reviews/reply"
 import type { StoreGetReviewsType, StorePostReviewType } from "./validators"
 
 /**
  * GET /store/products/:id/reviews (F10.6, KK1): the approved reviews,
- * newest first, each with its photos, and the product's average with how
+ * newest first, each with its photos and the shop's reply, and the product's average with how
  * many reviews gave each number of stars (adr/0046 Ek 2026-11-04);
  * nothing waiting or rejected.
  */
@@ -29,18 +30,29 @@ export async function GET(
         skip: offset,
         take: limit,
         order: { created_at: "DESC" },
-        select: ["id", "rating", "title", "body", "author_name", "origin", "created_at"],
+        select: [
+          "id",
+          "rating",
+          "title",
+          "body",
+          "author_name",
+          "origin",
+          "created_at",
+          "reply",
+          "replied_at",
+        ],
       }
     ),
     reviews.ratingsOf([productId]),
   ])
   const rating = ratings.get(productId) ?? null
-  const [photos, distribution] = await Promise.all([
+  const [photos, distribution, replyOf] = await Promise.all([
     photosByReview(
       req.scope,
       rows.map((row) => row.id)
     ),
     rating ? reviews.ratingDistribution(productId) : null,
+    storeRepliesOf(req.scope, rows),
   ])
   res.json({
     rating: rating ? { ...rating, distribution } : null,
@@ -54,6 +66,8 @@ export async function GET(
       // Only a customer who received the product writes one here; one migrated was not checked here
       verified_purchase: row.origin === "storefront",
       photos: photos.get(row.id) ?? [],
+      // The shop's reply, under the review (not a review itself)
+      reply: replyOf(row),
     })),
     count,
     offset,

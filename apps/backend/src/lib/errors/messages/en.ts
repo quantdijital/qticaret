@@ -470,6 +470,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "reviews.photos_too_many": "A review takes at most 3 photos.",
   "reviews.photo_uploads_full":
     "You have uploaded too many photos that are not on a review yet; try again tomorrow.",
+  "reviews.unknown": "The review was not found.",
+  "reviews.reply_required": "The reply cannot be empty.",
+  "reviews.reply_too_long": "A reply can be at most 1,000 characters.",
+  "reviews.reply_invalid": "The reply has invisible control characters; type it again.",
+  "reviews.reply_not_approved": "Only approved reviews can be replied to.",
+  "reviews.reply_missing": "This review has no reply to remove.",
   "questions.unknown": "The question was not found.",
   "questions.answer_purchasers_only": "Only customers who received the product can answer.",
   "messaging.no_address": "The customer has no address or phone for this channel.",

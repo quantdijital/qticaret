@@ -13,9 +13,9 @@ import { ProductReviewPhoto } from "./models/product-review-photo"
 import { setReviewPhotos } from "./photos"
 import type { RemovedPhoto } from "./photos"
 import { approvedStarCounts, decideReview, starCounts } from "./statements"
-import type { MigratedReview, Rating, RatingDistribution, ReviewInput } from "./types"
+import type { MigratedReview, Rating, RatingDistribution, ReviewInput, ReviewReply } from "./types"
 
-export type { MigratedReview, Rating, RatingDistribution, ReviewInput } from "./types"
+export type { MigratedReview, Rating, RatingDistribution, ReviewInput, ReviewReply } from "./types"
 
 /** Product reviews (F10.6, adr/0037 §4): written, moderated, summed; their photos. */
 class ProductReviewsModuleService extends MedusaService({
@@ -174,6 +174,29 @@ class ProductReviewsModuleService extends MedusaService({
       written.set(fresh[index]?.source_ref ?? "", row.id)
     })
     return reviews.map((review) => written.get(review.source_ref) ?? "")
+  }
+
+  /**
+   * Writes the shop's reply to a review, or removes it (all null), and
+   * gives back the reply it had: a workflow puts that back on an undo.
+   */
+  @InjectTransactionManager()
+  async setReply(
+    id: string,
+    reply: ReviewReply,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<ReviewReply> {
+    const before = await this.retrieveProductReview(
+      id,
+      { select: ["id", "reply", "replied_by", "replied_at"] },
+      sharedContext
+    )
+    await this.updateProductReviews({ id, ...reply }, sharedContext)
+    return {
+      reply: before.reply,
+      replied_by: before.replied_by,
+      replied_at: before.replied_at ? new Date(before.replied_at) : null,
+    }
   }
 
   /** Each product's average and count of approved reviews; none for a product without one. */

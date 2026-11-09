@@ -193,6 +193,8 @@ export const OPERATIONS_WRITES: readonly Rule[] = [
   { methods: ["POST"], path: "/admin/product-questions/moderate" },
   { methods: ["POST"], path: "/admin/product-answers/moderate" },
   { methods: ["POST"], path: "/admin/product-questions/:id/answer" },
+  // The shop's reply under a review, as a question's answer
+  { methods: ["POST", "DELETE"], path: "/admin/product-reviews/:id/reply" },
   // A Google review taken off the storefront or put back (adr/0058), and the shop's
   // reply to it, as a product question's answer (adr/0058 Ek 2026-11-06)
   { methods: ["POST"], path: "/admin/google/reviews/items/:id" },
