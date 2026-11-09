@@ -63,6 +63,14 @@ export function ProductPage({
       : null
   return (
     <>
+      {/* A draft's signed preview says so above everything (F18), as the home page's draft does */}
+      {view.notice && (
+        <Container className="pt-4">
+          <p role="status" className="rounded-media bg-signal-soft p-4 text-sm font-semibold">
+            {view.notice}
+          </p>
+        </Container>
+      )}
       <Container className="pt-4 lg:pt-6">
         <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} compact />
       </Container>

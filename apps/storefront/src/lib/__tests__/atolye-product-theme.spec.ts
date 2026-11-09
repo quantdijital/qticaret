@@ -146,6 +146,14 @@ describe("the theme's product page", () => {
     expect(html).toContain('href="/marka/atolye"')
   })
 
+  it("says a draft's preview is one above the page, and nothing on a live page", () => {
+    const notice = "Önizleme: bu ürün henüz yayında değil."
+    const html = page({ notice })
+    expect(html).toMatch(new RegExp(`<p role="status"[^>]*>${notice}</p>`))
+    expect(html.indexOf(notice)).toBeLessThan(html.indexOf("<h1"))
+    expect(page()).not.toContain('role="status" class="rounded-media bg-signal-soft')
+  })
+
   it("on a phone the trail is the one step back", () => {
     const html = page()
     expect(html).toMatch(/<a href="\/kategori\/cakilar" class="[^"]*sm:hidden"/)

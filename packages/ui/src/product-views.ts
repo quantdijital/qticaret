@@ -169,6 +169,11 @@ export interface ProductPageView {
    * to cart"; none while the shop has them off or the product has none.
    */
   addons?: AddonFieldView[]
+  /**
+   * A line above the page saying what is shown: a draft product's signed
+   * preview (F18), as a content page's. Null or left out: none.
+   */
+  notice?: string | null
 }
 
 export interface ReviewView {

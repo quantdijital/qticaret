@@ -657,6 +657,7 @@
   "preview.design": "Vitrin tasarımı",
   "preview.design_notice": "Bu bir önizleme: vitrinin yayınlanmamış taslağını görüyorsunuz. Ziyaretçiler bunu yayınlandıktan sonra görür.",
   "preview.notice": "Önizleme: bu sayfa yayımlanmadan önceki hâlidir ve yalnız bağlantıyı bilenler görebilir. Bağlantı 24 saat geçerlidir.",
+  "preview.product_notice": "Önizleme: bu ürün henüz yayında değil; sayfası yayımlandığında böyle görünecek. Yalnız bağlantıyı bilenler görebilir, bağlantı 24 saat geçerlidir. Önizlemede sepete eklenemez.",
   "listing.all_products_description": "{shop} mağazasındaki tüm ürünler: fiyatları ve stok durumlarıyla, filtreleyip sıralayarak inceleyin.",
   "blog.description": "{shop} blogu: ürünler, kullanım ve bakım üzerine rehberler ve haberler.",
   "reviews.description": "{shop} müşterilerinin satın aldıkları ürünler hakkındaki onaylı yorumları ve puanları.",

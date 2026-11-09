@@ -40,6 +40,9 @@ export const LAYOUT_PREVIEW_HEADER = "x-qt-layout-preview"
 
 const LAYOUT_PREVIEW = /^\/onizleme\/(sfl_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43})$/
 
+/** A signed preview's page (`/onizleme/<token>`): a draft product, content entry or design. */
+export const isPreviewPath = (pathname: string) => pathname.startsWith("/onizleme/")
+
 /** The storefront's own pages for a removed and a missing address: the proxy rewrites to them. */
 const isFallbackPage = (pathname: string) =>
   pathname === GONE_PAGE_PATH || pathname === NOT_FOUND_PAGE_PATH
@@ -214,13 +217,15 @@ export async function proxy(request: NextRequest): Promise<Response> {
       })
     }
   }
-  if (!site.indexing) {
+  // A preview (a draft's signed link, the theme editor's draft) is nobody's search result
+  // nor a page to follow links from, whatever its meta says (docs/13 §5)
+  if (!site.indexing || isPreviewPath(pathname)) {
     response.headers.set("x-robots-tag", "noindex, nofollow")
   } else if (gate.bypassed) {
     // The dark shop seen through a bypass link: nobody's search result, never stored
     response.headers.set("x-robots-tag", "noindex")
   }
-  if (gate.bypassed) {
+  if (gate.bypassed || isPreviewPath(pathname)) {
     response.headers.set("cache-control", "private, no-store")
   }
   return response

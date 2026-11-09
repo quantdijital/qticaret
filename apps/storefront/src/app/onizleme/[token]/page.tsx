@@ -4,12 +4,15 @@ import { cache } from "react"
 import type { StoreBodyImage, StoreContentTerm } from "@qticaret/types"
 import { t } from "@/lib/i18n"
 import { isStoreApiError } from "@/lib/store-api/errors"
+import { productPreview } from "@/lib/store-api/product-preview"
 import { layoutPreview } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
 import { postTerms } from "@/lib/views/posts"
 import { previewPage } from "@/lib/views/preview"
+import { isProductPreviewToken } from "@/lib/views/product-preview"
 import { withPictures } from "@/lib/views/prose-images"
 import { DesignPreviewScreen } from "@/screens/design-preview"
+import { ProductPreviewScreen } from "@/screens/product-preview"
 import { theme } from "@/theme"
 
 type Params = Promise<{ token: string }>
@@ -50,7 +53,9 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   const { token } = await params
   const found = LAYOUT_TOKEN.test(token)
     ? (await layoutPreview(token)) && t("preview.design")
-    : (await previewOf(token))?.title
+    : isProductPreviewToken(token)
+      ? (await productPreview(token))?.product.title
+      : (await previewOf(token))?.title
   return {
     title: { absolute: found ? t("preview.title", { title: found }) : t("preview.gone") },
     // A preview is nobody's search result, nor a page to follow links from
@@ -65,6 +70,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
  * editor's draft (adr/0049) with its header and footer: the home page, or
  * with `?sayfa=<path>` that storefront page (a product, a category, brand,
  * collection or landing, `/magaza`, `/blog`) with the draft's sections.
+ * Or a draft product's page as it will read (F18), `?variant=` chosen.
  * Never indexed.
  */
 export default async function PreviewPage({
@@ -82,6 +88,19 @@ export default async function PreviewPage({
     }
     const { sayfa } = await searchParams
     return <DesignPreviewScreen layout={layout} target={previewPage(sayfa)} />
+  }
+  if (isProductPreviewToken(token)) {
+    const preview = await productPreview(token)
+    if (!preview) {
+      notFound()
+    }
+    const { variant } = await searchParams
+    return (
+      <ProductPreviewScreen
+        preview={preview}
+        variant={typeof variant === "string" ? variant : null}
+      />
+    )
   }
   const entry = await previewOf(token)
   if (!entry) {
