@@ -20,8 +20,8 @@ export type HeadingFont = (typeof HEADING_FONTS)[number]
 export type BodyFont = (typeof BODY_FONTS)[number]
 
 export interface ThemeSettings {
-  /** The installed theme; one today (`base`). */
-  theme: "base"
+  /** The installed theme; one today (`atolye`, adr/0057). */
+  theme: "atolye"
   colors: {
     /** Buttons, links, the announcement bar (`#rrggbb`); none: the storefront's old main colour, then the theme's ink. */
     primary: string | null

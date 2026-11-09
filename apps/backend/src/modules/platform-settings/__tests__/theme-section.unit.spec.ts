@@ -9,7 +9,7 @@ const issueOf = (body: Record<string, unknown>) => saved(body).error?.issues[0]
 describe("theme section", () => {
   it("starts as today's look, and its defaults pass its own checks", () => {
     expect(defaults).toEqual({
-      theme: "base",
+      theme: "atolye",
       colors: { primary: null, accent: null, background: "warm" },
       typography: { heading: "fraunces", body: "inter" },
       radius: "soft",
@@ -18,8 +18,13 @@ describe("theme section", () => {
       buttons: "pill",
     })
     expect(full.safeParse(defaults).success).toBe(true)
-    // The base theme's page (packages/themes/base/src/styles.css)
+    // The first theme's page colour, still the panel's contrast check's
     expect(THEME_BACKGROUNDS.warm).toBe("#f6f4ef")
+  })
+
+  it("reads a section stored with the removed first theme as Atölye (adr/0057 Ek 2026-11-09)", () => {
+    expect(full.parse(mergePatch(defaults, { theme: "base" })).theme).toBe("atolye")
+    expect(patch.parse({ theme: "base" })).toEqual({ theme: "atolye" })
   })
 
   it("takes the shop's choices, a colour in lower case", () => {

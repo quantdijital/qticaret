@@ -18,7 +18,7 @@ import { brandDeclarations, isHexColor, readableOn } from "./color"
 
 /** Today's look (backend `themeSection`'s defaults). */
 export const DEFAULT_THEME: StoreThemeSettings = {
-  theme: "base",
+  theme: "atolye",
   colors: { primary: null, accent: null, background: "warm" },
   typography: { heading: "fraunces", body: "inter" },
   radius: "soft",
@@ -121,7 +121,7 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
   const primary = at(raw, "colors", "primary") ?? fallbackPrimary
   const accent = at(raw, "colors", "accent")
   return {
-    theme: "base",
+    theme: "atolye",
     colors: {
       primary: isHexColor(primary) ? primary : null,
       accent: isHexColor(accent) ? accent : null,

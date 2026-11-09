@@ -9,7 +9,7 @@ import {
 } from "./theme-settings"
 
 const SAVED: ThemeSettings = {
-  theme: "base",
+  theme: "atolye",
   colors: { primary: null, accent: "#C2410C", background: "warm" },
   typography: { heading: "fraunces", body: "inter" },
   radius: "soft",

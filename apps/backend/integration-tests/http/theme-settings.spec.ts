@@ -61,7 +61,7 @@ medusaIntegrationTestRunner({
 
       expect(before.status).toBe(200)
       expect(before.data.theme).toEqual({
-        theme: "base",
+        theme: "atolye",
         colors: { primary: null, accent: null, background: "warm" },
         typography: { heading: "fraunces", body: "inter" },
         radius: "soft",
@@ -76,7 +76,7 @@ medusaIntegrationTestRunner({
       expect(byOps.status).toBe(403)
       expect(saved.status).toBe(200)
       expect(after.data.theme).toEqual({
-        theme: "base",
+        theme: "atolye",
         colors: { primary: "#1e3a8a", accent: null, background: "cool" },
         typography: { heading: "playfair", body: "inter" },
         radius: "soft",

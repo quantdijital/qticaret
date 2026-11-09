@@ -10,7 +10,7 @@ const theme = (patch: Partial<StoreThemeSettings>): StoreThemeSettings => ({
 describe("themeSettings", () => {
   it("takes the backend's answer as it is when every field is a known choice", () => {
     const answer: StoreThemeSettings = {
-      theme: "base",
+      theme: "atolye",
       colors: { primary: "#0b5c99", accent: "#f5d90a", background: "cool" },
       typography: { heading: "playfair", body: "nunito" },
       radius: "round",

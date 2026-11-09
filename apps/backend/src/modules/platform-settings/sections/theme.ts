@@ -3,7 +3,15 @@ import { AA_LARGE_TEXT, contrastRatio } from "../../../lib/color/contrast"
 import { defineSection } from "./define"
 
 /** The storefront themes this build carries (adr/0046 §7); a new theme is a deploy. */
-export const INSTALLED_THEMES = ["base"] as const
+export const INSTALLED_THEMES = ["atolye"] as const
+
+/**
+ * The first theme's name, removed with it (adr/0057 Ek 2026-11-09): a
+ * section stored before then reads as Atölye and is saved so next time.
+ */
+const REMOVED_THEMES: Readonly<Record<string, (typeof INSTALLED_THEMES)[number]>> = {
+  base: "atolye",
+}
 
 /**
  * Self-hosted faces the storefront has a loader for: a name from this list,
@@ -15,7 +23,8 @@ export const BODY_FONTS = ["inter", "manrope", "source-sans", "nunito"] as const
 /**
  * The page colours a theme offers, as the storefront paints them: the
  * contrast check reads these, so the storefront must use the same values
- * (adr/0053). `warm` is the base theme's bone page.
+ * (adr/0053). `warm` is the first theme's bone page; Atölye paints its own
+ * counter and takes only the main colour from here (adr/0057).
  */
 export const THEME_BACKGROUNDS = {
   warm: "#f6f4ef",
@@ -69,7 +78,10 @@ export const primaryReadable = (primary: string, background: ThemeBackground): b
 export const themeSection = defineSection<ThemeSettings>(
   "theme",
   {
-    theme: z.enum(INSTALLED_THEMES),
+    theme: z.preprocess(
+      (value) => (typeof value === "string" ? (REMOVED_THEMES[value] ?? value) : value),
+      z.enum(INSTALLED_THEMES)
+    ),
     colors: z
       .object({
         primary: color,
@@ -91,10 +103,12 @@ export const themeSection = defineSection<ThemeSettings>(
     header: z.object({ layout: z.enum(["centered", "left"]), sticky: z.boolean() }).strict(),
     buttons: z.enum(["pill", "rounded", "square"]),
   },
-  // Today's look (packages/themes/base): Fraunces over Inter, soft corners,
-  // 4:5 cards with the brand, the logo centred over a sticky header, pill buttons
+  // The settings' starting values, the first theme's look (adr/0053): Fraunces
+  // over Inter, soft corners, 4:5 cards with the brand, the logo centred over
+  // a sticky header, pill buttons. Atölye takes the main colour and the cards'
+  // shape and stands its own for the rest (adr/0057)
   {
-    theme: "base",
+    theme: "atolye",
     colors: { primary: null, accent: null, background: "warm" },
     typography: { heading: "fraunces", body: "inter" },
     radius: "soft",

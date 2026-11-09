@@ -108,7 +108,7 @@ const STOREFRONT: StorefrontSettings = {
 }
 /** The theme section's defaults, as the server gives them before anything is saved. */
 export const THEME: ThemeSettings = {
-  theme: "base",
+  theme: "atolye",
   colors: { primary: null, accent: null, background: "warm" },
   typography: { heading: "fraunces", body: "inter" },
   radius: "soft",

@@ -85,7 +85,7 @@ export type ThemeBackground = "warm" | "neutral" | "cool"
  * lists, never CSS. The defaults are today's look.
  */
 export interface StoreThemeSettings {
-  theme: "base"
+  theme: "atolye"
   colors: {
     /** `#rrggbb`; null: the theme's own ink. Falls back to `storefront.primary_color`. */
     primary: string | null

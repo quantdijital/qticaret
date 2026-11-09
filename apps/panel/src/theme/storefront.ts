@@ -1,6 +1,6 @@
 /**
- * The storefront's main colour as its base theme paints it
- * (packages/themes/base, apps/storefront `lib/views/color.ts`): the Vitrin
+ * The storefront's main colour as its theme paints it
+ * (apps/storefront `lib/views/color.ts`): the Vitrin
  * page previews with the same colours, so what the shop sees in the panel
  * is what its customers see.
  */
