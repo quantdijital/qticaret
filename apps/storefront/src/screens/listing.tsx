@@ -3,6 +3,7 @@ import type { Resolution, StoreProduct } from "@qticaret/types"
 import type {
   BreadcrumbView,
   CategoryCardView,
+  ImageView,
   ListingPageView,
   SortOptionView,
 } from "@qticaret/ui"
@@ -22,10 +23,11 @@ import {
   pathsOf,
   priceDisplays,
 } from "@/lib/store-api/requests"
-import { cardFacts } from "@/lib/store-api/extras"
+import { cardFacts, collectionDetails } from "@/lib/store-api/extras"
 import { listingPage } from "@/lib/store-api/listings"
 import type { ListingAnswer, ListingType } from "@/lib/store-api/listings"
 import { withCardFacts } from "@/lib/views/card-extras"
+import { imageView } from "@/lib/views/image"
 import { childrenOf } from "@/lib/views/categories"
 import { categoryTiles } from "@/lib/views/category-tiles"
 import { swatchLookup } from "@/lib/views/color"
@@ -52,6 +54,8 @@ interface Heading {
   title: string
   description: string[]
   subcategories: CategoryCardView[]
+  /** The listing's own picture (a collection's). */
+  image?: ImageView | null
 }
 
 /** Products of a list given by ids, in that order. */
@@ -87,8 +91,17 @@ async function headingOf(page: Entity): Promise<Heading> {
       return { title: landing.title, description: paragraphsOf(landing.html), subcategories: [] }
     }
     case "product_collection": {
-      const { collection } = await collectionById(page.entity_id)
-      return { title: collection.title, description: [], subcategories: [] }
+      // Its intro and picture are the shop's own (Ürünler > Koleksiyonlar)
+      const [{ collection }, details] = await Promise.all([
+        collectionById(page.entity_id),
+        collectionDetails(page.entity_id),
+      ])
+      return {
+        title: collection.title,
+        description: paragraphsOf(details.description),
+        subcategories: [],
+        image: details.image ? imageView(details.image, collection.title) : null,
+      }
     }
     case "sale":
       // Its name is the backend's (the page's last crumb), as its title is
@@ -259,6 +272,7 @@ export async function ListingContent({
         view={{
           title: heading.title,
           description: first ? heading.description : [],
+          image: first ? (heading.image ?? null) : null,
           sectionsTop: sections.top,
           sectionsBottom: sections.bottom,
           breadcrumbs: breadcrumbs(heading.title),

@@ -3,6 +3,7 @@ import { cache } from "react"
 import type {
   StoreCardFacts,
   StoreCategoryImage,
+  StoreCollectionDetails,
   StoreGoogleReviews,
   StoreLatestReviewPhoto,
   StoreReviewSummary,
@@ -13,7 +14,7 @@ import { storeGet, storePublicGet } from "./server"
 /**
  * The Store API calls behind the theme contract's optional fields
  * (adr/0046 Ek 2026-11-04): category pictures, card facts, customer
- * photos. A backend that does not answer one (an older one, a failure)
+ * photos, a collection's intro and picture. A backend that does not answer one (an older one, a failure)
  * leaves the field out; the page is drawn as before.
  */
 
@@ -36,6 +37,24 @@ export const categoryImages = cache(async (): Promise<ReadonlyMap<string, StoreC
   )
   return new Map(images.map((image) => [image.category_id, image]))
 })
+
+/**
+ * A shown collection's intro and picture (Ürünler > Koleksiyonlar); none
+ * from a backend without them, or for a collection hidden since its page
+ * was resolved.
+ */
+export const collectionDetails = cache(
+  async (id: string): Promise<StoreCollectionDetails> =>
+    (
+      await orNone(
+        () =>
+          storeGet<{ details: StoreCollectionDetails }>(
+            `/store/collections/${encodeURIComponent(id)}/details`
+          ),
+        { details: { description: null, image: null } }
+      )
+    ).details
+)
 
 // The card facts route takes a hundred products at a time
 const FACTS_CHUNK = 100

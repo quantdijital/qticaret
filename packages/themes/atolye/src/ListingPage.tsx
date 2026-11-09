@@ -1,3 +1,4 @@
+import { ResponsiveImage } from "@qticaret/ui"
 import type { FormAction, ListingPageView, Translate } from "@qticaret/ui"
 import { TileRail } from "./listing/CategoryTiles"
 import { FilterPanel, hasFilters } from "./listing/FilterPanel"
@@ -17,7 +18,8 @@ const RESULTS = "sonuclar"
 /**
  * A category, brand, collection or landing page, `/magaza`, the sale
  * page or a site search (docs/tema/yon-2026-11-05.md, Grafit): the trail,
- * the title with the shop's short intro under it, the
+ * the title with the shop's short intro under it (a collection's picture
+ * wide beneath them), the
  * subcategories (or a search's related categories) as one row of picture
  * tiles, then the list: from 1024 px the filters in filled wells on the
  * left, on a phone in a sheet from the bottom; the count and the sort
@@ -43,6 +45,8 @@ export function ListingPage({
   const listed = view.total > 0 || view.active.length > 0
   const panel = filters && listed
   const top = view.sectionsTop ?? []
+  // A collection's picture is the page's largest: it alone loads first
+  const banner = search ? null : (view.image ?? null)
   const bottom = view.sectionsBottom ?? []
   return (
     <>
@@ -58,6 +62,16 @@ export function ListingPage({
             </div>
           )}
         </header>
+        {banner && (
+          <div className="gf-stage relative mt-6 aspect-[16/9] overflow-hidden rounded-tile sm:aspect-[3/1] lg:mt-8">
+            <ResponsiveImage
+              image={banner}
+              sizes="(min-width: 1440px) 1360px, 100vw"
+              priority
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          </div>
+        )}
         <div className="mt-6 flex flex-col gap-8 empty:hidden lg:mt-8">
           {search && found && help && <SearchHelp help={help} t={t} />}
           {!search && (
@@ -100,7 +114,7 @@ export function ListingPage({
                   quickAdd={quickAdd}
                   wide={!filters}
                   beside={filters}
-                  eager={view.pagination.page === 1 ? 2 : 0}
+                  eager={view.pagination.page === 1 && !banner ? 2 : 0}
                 />
               ) : (
                 <Empty view={view} t={t} />

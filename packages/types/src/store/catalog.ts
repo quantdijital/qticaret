@@ -110,6 +110,17 @@ export interface StoreImage {
   derivatives: MediaDerivatives | null
 }
 
+/**
+ * `GET /store/collections/:id/details`: what a shown collection's page
+ * carries beyond Medusa's title (Ürünler > Koleksiyonlar). A hidden one
+ * answers 404.
+ */
+export interface StoreCollectionDetails {
+  /** Plain paragraphs, a blank line between them; null: none. */
+  description: string | null
+  image: StoreImage | null
+}
+
 /** `GET /store/category-images` (adr/0046 Ek 2026-11-04): a live category's picture. */
 export interface StoreCategoryImage extends StoreImage {
   category_id: string

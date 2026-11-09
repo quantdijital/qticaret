@@ -65,6 +65,11 @@ export interface PriceFilterView {
 export interface ListingPageView {
   title: string
   description: string[]
+  /**
+   * The listing's own picture, shown with its title and intro on its
+   * first page (a collection's); none: the theme shows no picture.
+   */
+  image?: ImageView | null
   breadcrumbs: BreadcrumbView[]
   /** Each with its picture when it has one (adr/0046 Ek 2026-11-04). */
   subcategories: CategoryCardView[]

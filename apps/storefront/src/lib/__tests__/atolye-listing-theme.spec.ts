@@ -160,6 +160,21 @@ describe("the theme's listing page", () => {
     expect(page().match(/fetchPriority="high"/g)).toBeNull()
   })
 
+  it("draws a collection's picture wide under its intro, loaded first in place of the cards", () => {
+    const html = page({
+      image: picture("yaz"),
+      pagination: { ...view().pagination, page: 1 },
+    })
+    expect(html).toMatch(/aspect-\[3\/1\][^>]*><picture>/)
+    expect(html).toContain('src="/media/yaz.jpg" alt="yaz"')
+    expect(html.match(/fetchPriority="high"/g)).toHaveLength(1)
+    expect(html.indexOf("El yapımı katlanır")).toBeLessThan(html.indexOf("/media/yaz.jpg"))
+    // A search has no picture of its own
+    expect(
+      page({ image: picture("yaz"), search: { suggestions: [], categories: [], brands: [] } })
+    ).not.toContain("/media/yaz.jpg")
+  })
+
   it("leaves the filters out where the list offers none, four cards across", () => {
     const html = page({ filters: [], price: null, stock: null, active: [], clearPath: null })
     expect(html).not.toContain("<dialog")
