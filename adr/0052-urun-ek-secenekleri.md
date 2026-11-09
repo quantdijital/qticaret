@@ -235,3 +235,25 @@ Cevaplar (2026-11-03): dört soruda da öneri kabul edildi. Yazı satırın her 
    - **Dijital ya da hizmet ürünü:** teslim ya da ifa edilince kesin istisnadır (15/1-ğ, h): `withdrawal_excluded_reason: "product"`.
    - Kişiye özel ek (§8) değişmedi: satır cayma dışıdır, yalnız kusurla döner.
 3. **Açık:** Bütünü kişiye özel üretilen ama eki olmayan bir fiziksel ürünü işaretleyecek ayrı bir alan yok. Böyle üründe ücretsiz, zorunlu ve "kişiye özel" işaretli bir ek kullanılır (§2: ücretsiz ek zorunlu olabilir). Ürün düzeyinde ikinci bir işaret gerekirse ayrı karar.
+
+## Ek (2026-11-09): KVKK silmesi yazının her kopyasını siler
+
+**Bulgu (testle doğrulandı, `integration-tests/http/addon-erasure.spec.ts`):** §10'daki silme yalnız sipariş satırını (`order_line_item.metadata`) ve sepet satırını değiştiriyordu. Yazı silmeden sonra şu yerlerde kalıyordu:
+
+- **`order_item.metadata`, siparişin her sürümünde:** Medusa 2.16'dan beri sipariş kaleminin metadata'sını sürümlü kayıtta da tutar ve sipariş açılırken her sürüme kopyalar. Sipariş düzenleme ve teslim her biri yeni sürüm açar. Tutarlarıyla okunan sipariş `items.metadata`'yı bu kayıttan verir. Bu yüzden yazı panelin sipariş sayfasında (`GET /admin/orders/:id`), sipariş e-postası yükleyicisinde (`loadOrderMessage`; kargo ve iade e-postaları da aynı alanı okur) ve sözleşme metnini kuran okumada görünmeye devam ediyordu. `lineMetadataOf` ile okuyanlar (koli fişi, sipariş listesi, dışa aktarma satırları) satırın kendi kaydını öne aldığı için temizdi. Fatura yazıyı hiç yazmaz.
+- **`workflow_execution.context`:** Medusa tamamlanan `complete-cart` çalışmasını 3 gün saklar (aynı sepetin yeniden tamamlanması aynı siparişi döndürsün diye). Bağlamı bütün sepettir; e-posta, adresler ve satır metadata'sı da içindedir.
+- **Sipariş listesi dosyaları (`order.export`, 7 gün):** her dosya listelenen siparişlerin alıcısını, adresini ve ek yazılarını taşır. Hangi siparişleri içerdiği kaydedilmez.
+
+**Karar:**
+
+1. Silme her kopyayı kendi içeriğinden yeniden yazar (`workflows/legal/erasure/order-lines.ts` `rewriteOrderLines`): sipariş satırı (`listOrderLineItems` + `updateOrderLineItems`), siparişin bütün sürümlerinin kalemleri (Medusa'nın üretilmiş `listOrderItems`'ı ve `updateOrderItem` seçici biçimi `{ selector: { id }, data: { metadata } }`) ve sepet satırı. Her sürüm kendi metadata'sından yeniden yazılır; sürümler arasında farklı olan anahtarlar korunur.
+2. Yazı "—" olur (`ERASED_TEXT`). Ek adı, seçim, tutar ve `non_withdrawable` kalır; muhasebe ve cayma kuralı değişmez. Tekrar çalışınca başka bir şey değişmez.
+3. Hediye kartı alıcısı (`qt_gift`, adr/0025 Ek 2026-11-03) aynı açığa sahipti ve aynı yardımcıyla silinir.
+4. Silinen siparişlerin sepetlerinin bitmiş çalışmaları (`done`, `failed`, `reverted`) silinir (`erasure/stored-copies.ts` `eraseCheckoutRuns`). Çalışma sepeti yalnız bağlamında (`data.payload.id` ya da `cart_id`) andığı için kimlikler bu tablodan dar bir SQL okumasıyla bulunur. Silme motorun üretilmiş `deleteWorkflowExecutions`'ı ile yapılır (anahtar: `workflow_id`, `transaction_id`, `run_id`). Süren çalışmaya dokunulmaz.
+5. Bir silme, saklanmakta olan bütün sipariş listesi dosyalarını siler ve işlerini dosyasız bırakır (`expireOrderExports`). Liste panelden yeniden alınır.
+
+**Kalanlar (bilerek):**
+
+- Gönderilmiş e-postanın kendisi alıcının posta kutusundadır, platformun elinde değildir. `notification` kaydı yalnız kimlik tutar; testte de yazı orada çıkmadı.
+- Sözleşme kopyası (`legal_order_copy`, şifreli) yazıyı cayma dışı satırın adında taşır. Yasal saklama süresince kilitli kalır, süre dolunca silinir. Bu, kopyadaki ad ve adresle aynı kuraldır.
+- Vitrinin sipariş sayfası silmeden sonra açılmaz (404).
