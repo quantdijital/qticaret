@@ -1,11 +1,11 @@
-# Design: Grafit (`packages/themes/atolye`, `STOREFRONT_THEME=atolye`)
+# Design: Grafit (`packages/themes/atolye`, vitrinin tek ve varsayılan teması)
 
 > **Kilitli sistem.** Sahip onayı 2026-11-05: "anasayfa tasarımını beğendim, diğer e-ticaret sayfalarımızın tasarımlarını da yapmaya başla." Hallmark her koşuda önce bunu okur; her yeni sayfa bu token'lara ve bileşen kurallarına uyar, sayfa sayfa genişletilir. Kaynak: `docs/tema/yon-2026-11-05.md` (aynı içerik, gerekçeleriyle). Reddedilen eski sistem (Loom): `docs/tema/design-loom-2026-11-04.md`.
 > Sahip kararları: vurgu = mağazanın tema ayarındaki birincil renk (`--primary`); logo yerine tipografik yazı markası; kategoriler her yerde fotoğraflı karo, çip yok; koyu mod yok, vitrin her zaman açık (2026-11-05); müşteri fotoğrafları yorum görsellerinden; ödeme/kargo için firmaların resmi logoları; dev mağazada eksik metinleri mylarte.com'a uygun olarak biz yazarız (uydurma olgu/rakam yok).
 
 > Sahibin 2026-11-05 isteği: "bir anasayfayı tasarla bakalım hemen görelim", sıfırdan, eski Atölye/Loom görünümüyle ortak noktası olmadan.
 > Sahip ana sayfayı onayladı (2026-11-05: "anasayfa tasarımını beğendim, diğer e-ticaret sayfalarımızın tasarımlarını da yapmaya başla"). Kilitli kopya depo kökünde `design.md`; eski Loom sistemi `docs/tema/design-loom-2026-11-04.md`.
-> Kod: `packages/themes/atolye` (paket adı ve bağlantısı aynı: `STOREFRONT_THEME=atolye`), şimdilik çerçeve + ana sayfa.
+> Kod: `packages/themes/atolye` (`STOREFRONT_THEME` boş ya da `atolye`). 2026-11-09'dan beri tek tema: base tema silindi, sözleşmenin bütün sayfaları burada (sahip: "1. temamız atölye olacak"; adr/0057 Ek 2026-11-09).
 > Sahibin 2026-11-05 kararı: "temamız aydınlık olsun, dark e-ticaret mi olur." **Koyu mod yok: vitrin her zaman açık; grafit sahneler açık tasarımın parçası.** Ziyaretçinin sistemi koyu modda olsa da sayfa açık çizilir.
 
 ## Fikir
@@ -168,6 +168,18 @@ Sahip 2026-11-05: "diğer e-ticaret sayfalarımızın tasarımlarını da yapmay
 - **410 (kaldırılan sayfa):** 404'ün kardeşi, mağazanın çerçevesinde: aynı grafit sahne, köşede "410", başlık "Bu sayfa kaldırıldı", tek satır, aynı arama ve "Ana sayfaya dön", altında aynı kategori karoları. Durum kodu 410 kalır (vekil sayfaya yeniden yazar).
 - **Hata sayfası:** veri almayan tek grafit panel (en çok 3xl genişlik, ortada): başlık, tek satır, sahnenin açık "Tekrar dene" düğmesi (yenile simgesi) ve "Ana sayfa" bağlantısı; kategori karosu ve arama yok. Çerçeve ayaktayken onun içinde, backend kapalıyken çerçevesiz tezgâhta tek başına (`global-error`).
 - **Sözleşmede olmayanlar (çizilmez):** yazıda yorum.
+
+## Base'den taşınan sayfalar (2026-11-09, sahibin gözden geçirmesini bekliyor)
+
+Base tema silinince ödünç alınan sayfalar ve parçalar Atölye'ye taşındı. Kendi tasarımları yoktu: base'in düzeni korundu, yalnız Grafit token'ları ve bileşenleriyle (dolgu kuyu, hap düğme ve alan, `gf-link`, lucide simgeler) çizildi; yeni bir tasarım uydurulmadı. Sahip görünce revize verir.
+
+- **Markalar (`/markalar`, `BrandsPage.tsx`):** iz, `h1`; harfler `gf-chip` hapları (atlama bağlantıları); her harf `h2` ve altında markalar dolgu karolar (`paper-2`, `--radius-media`; logo varsa 40 px beyaz plakada), telefonda 1, 420 px'ten 2, 768'den 3, 1024'ten 4, 1280'den 5 sütun. Marka yoksa dolgu kuyuda söz.
+- **Bağlantı onayı (`ConfirmPage.tsx`; e-bülten çıkışı gibi):** ödeme sonucunun tek dolgu kuyusu: `h1`, metin, varsa uyarı sinyal tonlu kuyuda, birincil düğme ve yanında geri bağlantısı.
+- **Çerez tercihleri (`/cerez-tercihleri`, `CookiePreferencesPage.tsx`):** `h1`, kayıttan sonra yeşil tikli bildirim; dolgu kuyuda başlık, metin ve politika bağlantısı, beyaz kutuda çerez kartının üç seçimi (zorunlu kilitli), altta eşit ağırlıkta üç ikincil hap: "Seçimimi kaydet", "Yalnızca zorunlu", "Tümünü kabul et" (yönlendirme yok).
+- **Hediye kartı bakiyesi (`/hediye-karti/bakiye`, `GiftCardBalancePage.tsx`, `gift/GiftBalanceForm.tsx`):** iz, `h1` ve satır, dolgu kuyuda 48 px hap alan ("Karttaki kodu yazın") ve birincil düğme; bakiye düğmenin altında yeşil, ret kırmızı simgeli.
+- **Ödeme bağlantısı (`/ode/…`, `PaymentLinkPage.tsx`, `payment-link/LinkLines.tsx`):** selam, `h1` "Sipariş #N", satır; ret bildirimi kırmızı; dolgu kuyuda "Sipariş özeti": satırlar beyaz kutularda (fotoğraf, ad, varyant, "2 × fiyat", tükendi notu, tutar 800), ürünler/indirim/kargo, toplam beyaz kutuda büyük; son ödeme zamanı; tam genişlik birincil "Ödemeye geç" ve "Güvenli ödeme". Açılmayan bağlantı: ödeme sonucunun kuyusu, simge, `h1`, metin, "Ana sayfaya dön".
+- **Sepette ek seçimleri ve hediye alıcısı (`cart/AddonEditor.tsx`, `cart/GiftRecipient.tsx`):** satır kuyusunun içinde beyaz kutu; kapalı satır ("Düzenle" / "Seçenek ekle", "Alıcıyı düzenle" / "Alıcıyı yazın", ok simgesi), eksik zorunlu seçimde ya da alıcı yokken açık ve kırmızı simgeli not; içinde ürün sayfasının alanları (`product/Extras`), ikincil küçük "Kaydet" / "Alıcıyı kaydet"; "Seçenekleri kaldır" sessiz bağlantı.
+- **Siparişte iade talebi (`order/OrderReturns.tsx`, `order/ReturnForm.tsx`):** sayfanın öteki kuyuları gibi dolgu kuyuda kapalı satır (başlık `--text-title` 800, ok); satırlar beyaz kutularda adet (ve değişimde varyant) seçimiyle, "İade / Değişim" ödemenin 64 px seçim satırları, neden 48 px hap seçim, açıklama alanı, birincil "Talep gönder"; gönderilince yeşil tikli söz. Hediye kartı satırı ayrı formda. **Hediye kartı satırı (`order/OrderGift.tsx`):** kartın son dört hanesi ve alıcısı `text-2`, gönderildi yeşil.
 
 ## Açık işler (sahibin verisi)
 

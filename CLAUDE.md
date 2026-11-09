@@ -9,7 +9,7 @@ sektörel ihtiyaçlar feature flag ve attribute şablonlarıyla çözülür.
 Model: **instance-per-tenant** (her müşteriye ayrı Medusa instance + ayrı DB).
 
 ## Şu anki odak
-F18 vitrin (`apps/storefront`, Next.js; tema sözleşmesi `packages/ui`, ilk tema `packages/themes/base`; adr/0046), kullanıcının 2026-11-01 isteğiyle F16'dan önce. Backend + kendi yönetici panelimiz (`apps/panel`, adr/0022) sürüyor; Medusa Admin'e yeni ekran yazılmaz. Ödeme deneme sayfası (adr/0028) vitrin ödemesi çalışınca silindi (2026-11-02); ödeme `localhost:8000/odeme`.
+F18 vitrin (`apps/storefront`, Next.js; tema sözleşmesi `packages/ui`, tek ve varsayılan tema Atölye `packages/themes/atolye`, yön "Grafit" `design.md`; adr/0046, adr/0057), kullanıcının 2026-11-01 isteğiyle F16'dan önce. Backend + kendi yönetici panelimiz (`apps/panel`, adr/0022) sürüyor; Medusa Admin'e yeni ekran yazılmaz. Ödeme deneme sayfası (adr/0028) vitrin ödemesi çalışınca silindi (2026-11-02); ödeme `localhost:8000/odeme`.
 Güncel faz ve görevler: `PROGRESS.md`
 
 ## Stack

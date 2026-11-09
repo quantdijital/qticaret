@@ -39,3 +39,14 @@
 - `app/globals.css` → `src/themes/base.css` (içerik aynı, yol düzeltildi).
 - Testler: `src/themes/__tests__/choice.spec.ts` (ad okuma, bilinmeyen ad), `app/__tests__/fonts.spec.ts` (temanın kendi yüzleri), Atölye'nin sözleşme çizim testleri.
 - Bilinen sınır: Turbopack'e bağlı (`next dev`/`next build` Next 16'da varsayılan). `--webpack` ile derlenirse aynı iki takma ad `webpack.resolve.alias`'a da eklenmeli.
+
+## Ek (2026-11-09): base tema silindi, Atölye tek ve varsayılan tema
+
+Sahip (2026-11-09): "projeyi pnpm dev ile başlattığımda atölye temasından önce base diye bir tema geliyor, o taslağı silebiliriz. 1. temamız atölye olacak."
+
+- **Seçim:** `STOREFRONT_THEMES = ["atolye"]`; `STOREFRONT_THEME` boş ya da yoksa `atolye` (`DEFAULT_STOREFRONT_THEME`). Değişken ve takma ad düzeni gelecek temalar için yerinde kalır; bilinmeyen ad (artık `base` de) derlemeyi yine adlarıyla durdurur. Düz `pnpm dev` vitrini Atölye ile açar.
+- **Silinen:** `packages/themes/base` (paket, `./borrow` girişi dahil), `apps/storefront/src/themes/base.ts`, `base.css`, `base-error.ts`; vitrinin ve Atölye'nin `@qticaret/theme-base` bağımlılığı, `transpilePackages` satırı, kilit dosyasındaki girdi, `atolye.css`'teki base `@source` satırları.
+- **Atölye'ye taşınanlar** (karar 4'teki "ödünç" bitti; Grafit token'larıyla, tasarımı olmayanlar base'in düzeniyle birebir): `BrandsPage` (`/markalar`), `ConfirmPage` (bağlantı onayı), `CookiePreferencesPage` (`/cerez-tercihleri`, çerez kartının `Choice`'u), `GiftCardBalancePage` (+ `gift/GiftBalanceForm`), `PaymentLinkPage` (+ `payment-link/LinkLines`); sepette `cart/AddonEditor` ve `cart/GiftRecipient` (ürün sayfasının `product/Extras` alanları; `prefix` ve `values` eklendi), siparişte `order/OrderReturns` + `order/ReturnForm` ve `order/OrderGift`. Bu sayfalar `design.md`'de henüz tarif edilmedi; sahip görüp revize verir.
+- **Testler:** birim testleri `vitest.config.ts`'te Atölye girişiyle çalışır. Base temanın görünümüne özgü durumlar silindi; uygulama mantığını sınayanlar (iade/hediye kartı iadesi, cayma hakkı, ödeme bağlantısı, sepetteki hediye alıcısı, stok süzgeci, sözleşmenin isteğe bağlı alanları) Atölye'ye çevrildi. Yeni: `atolye-small-pages-theme.spec.ts`.
+- **Backend:** `theme` bölümünde `INSTALLED_THEMES = ["atolye"]`, varsayılan `theme: "atolye"`. Kayıtlı `"base"` değeri okunurken ve kaydedilirken `"atolye"` olarak alınır (şema ön işlemi); veri göçü gerekmez, bölüm bir sonraki kayıtta yeni adla yazılır. Diğer ayarların varsayılanları (Fraunces/Inter, sıcak zemin vb.) değişmedi: Atölye onlardan yalnız ana rengi ve kart oranını alır (karar 3). `StoreThemeSettings.theme` ve panelin `ThemeSettings.theme` tipi `"atolye"`.
+- `app/fonts.ts`'teki yüz dosyaları (Inter, Fraunces, …) ve `fontPreloads` yerinde kaldı: panelin yazı tipi seçimi ve ileride bu ayarları alan bir tema için.

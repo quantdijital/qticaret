@@ -110,7 +110,7 @@ repo/
 ├── packages/
 │   ├── types/                       # paylaşılan tipler (Store API sözleşmeleri; vitrin için `src/store/`)
 │   ├── ui/                          # tema sözleşmesi, görünüm modelleri, ortak vitrin parçaları (adr/0046 §7)
-│   ├── themes/base/                 # ilk vitrin teması: yalnızca sunum
+│   ├── themes/atolye/               # vitrin teması (tek ve varsayılan, yön "Grafit", design.md; adr/0057): yalnızca sunum
 │   ├── config/                      # eslint, tsconfig, prettier
 │   └── testing/                     # sahte sağlayıcı sunucuları (PayTR; iyzico V8, Geliver F7), TR fixture'ları (geçerli sahte TCKN/VKN), her çalıştırmada üretilen test sırları
 ├── infra/

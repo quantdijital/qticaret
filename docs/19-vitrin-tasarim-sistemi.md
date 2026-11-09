@@ -91,15 +91,12 @@ packages/ui/
 ├── src/styles.css             # token → Tailwind bağlantısı, temel katman
 ├── src/theme.ts, views.ts     # tema sözleşmesi ve görünüm modelleri (views.ts çerçeve; product-, listing-, content-, cart-views.ts konulara göre, hepsi views.ts'ten de)
 ├── src/card-views.ts          # isteğe bağlı alanlar (adr/0046 Ek 2026-11-04): kategori resmi, stok kovası, hızlı ekle, puan dağılımı, yorum fotoğrafı, özellik bölümleri, alt bilgi işaretleri
-packages/themes/base/src/
-├── Layout.tsx, *Page.tsx      # sözleşmenin sayfaları
-├── layout/                    # çerçeve: AnnouncementBar, SiteHeader, CategoryNav, MobileMenu, SearchForm, SiteFooter (FooterMarks: ETBİS karekodu, ödeme ve kargo rozetleri), WhatsAppButton, BottomNav
-├── components/                # ProductCard (QuickAddButton), Price, Breadcrumbs, Pages, ProductGallery, PurchasePanel, OptionPicker, QuantityField, AddonFields, LineAddons, ProductDetails (bölümlü özellikler), ProductCommunity (ReviewExtras: puan dağılımı, yorum fotoğrafları), TrustStrip, Container
-└── styles.css                 # temanın token değerleri
-packages/themes/atolye/src/    # ikinci tema, adr/0057; yön "Grafit" (docs/tema/yon-2026-11-05.md, onay bekliyor)
-├── index.ts                   # { ...baseTheme, Layout, HomePage }: çizilmeyen sayfalar base'in, bu temanın token'larıyla
-├── Layout.tsx, HomePage.tsx
+packages/themes/atolye/src/    # vitrinin teması (tek ve varsayılan, adr/0057 Ek 2026-11-09); yön "Grafit" (`design.md`)
+├── index.ts                   # sözleşmenin bütün sayfaları
+├── Layout.tsx, *Page.tsx      # çerçeve ve sayfalar
 ├── frame/, sections/, parts/  # çerçeve; ana sayfa bölümleri; kart, fiyat, hızlı ekle
+├── listing/, product/, cart/, checkout/, order/, account/, content/  # sayfaların parçaları
+├── gift/, payment-link/       # hediye kartı bakiyesi formu; ödeme bağlantısının satırları
 └── styles.css                 # damga + sözleşme adları; tokens.css, base.css, ui.css
 apps/storefront/src/
 ├── theme.ts                   # seçilen temanın tek okuyucusu (`@qticaret/storefront-theme`)
@@ -208,8 +205,10 @@ Mevcut sitenin (WooCommerce) sayfa sayfa envanteri `docs/gecis/mylarte/envanter.
 
 ## 10. Temalar ve seçim (adr/0057, 2026-11-04)
 
-- **Seçim derleme anında:** `STOREFRONT_THEME` (`base` varsayılan, boş da `base`; `atolye`). `src/themes/choice.ts` adı okur, bilinmeyen adda derleme durur; `next.config.ts` Turbopack takma adlarıyla `@qticaret/storefront-theme` → `src/themes/<ad>.ts` ve `@qticaret/storefront-theme-styles` → `src/themes/<ad>.css`. `src/theme.ts` dışında hiçbir dosya tema paketi adlandırmaz. Birim testleri takma adla base temayı; temaya özel testler paketi doğrudan çizer (`src/test/theme-render.ts`: `renderPage(tema, "HomePage", …)`, `renderFrame`, `shopFixture`).
-- **Yerelde Atölye:** `STOREFRONT_THEME=atolye pnpm --filter @qticaret/storefront dev` (ya da başka portta `STOREFRONT_THEME=atolye npx next dev -p 8001`, `apps/storefront`'tan). Değişken `next dev` başlarken ve `next build`'te okunur; tema değiştirmek yeniden başlatma ister.
-- **Tema girişi (`ThemeEntry`):** sayfalar, önyüklenen yüz dosyaları, mağazanın tema ayarlarından alınanlar. Base: hepsi (bugünkü davranış). Atölye: ana renk (`--primary` → `--color-signal`; koyu kâğıtta aynı ton açılarak) ve kart görsel oranı; yazı tipi, köşe, düğme, zemin ve vurgu ayarı basılmaz (sahip, 2026-11-04). Atölye'nin yüzleri Libre Caslon Display 400 ve Hanken Grotesk 400/500, `latin` + Türkçe harf dosyaları (`THEME_OWN_FONT_FILES`, önyükleme ~58 KB).
+> **2026-11-09 (adr/0057 Ek):** base tema silindi; tek ve varsayılan tema Atölye. Aşağıda base'den söz eden satırlar o günlerin kaydıdır.
+
+- **Seçim derleme anında:** `STOREFRONT_THEME` (bugün yalnız `atolye`; boş ya da yoksa `atolye`). `src/themes/choice.ts` adı okur, bilinmeyen adda derleme durur; `next.config.ts` Turbopack takma adlarıyla `@qticaret/storefront-theme` → `src/themes/<ad>.ts` ve `@qticaret/storefront-theme-styles` → `src/themes/<ad>.css`. `src/theme.ts` dışında hiçbir dosya tema paketi adlandırmaz. Birim testleri takma adla Atölye'yi; temaya özel testler paketi doğrudan çizer (`src/test/theme-render.ts`: `renderPage(tema, "HomePage", …)`, `renderFrame`, `shopFixture`).
+- **Yerelde:** düz `pnpm dev` (ya da `pnpm --filter @qticaret/storefront dev`) Atölye ile açılır. Değişken `next dev` başlarken ve `next build`'te okunur; tema değiştirmek yeniden başlatma ister.
+- **Tema girişi (`ThemeEntry`):** sayfalar, önyüklenen yüz dosyaları, mağazanın tema ayarlarından alınanlar. Base (silindi): hepsi. Atölye: ana renk (`--primary` → `--color-signal`; koyu kâğıtta aynı ton açılarak) ve kart görsel oranı; yazı tipi, köşe, düğme, zemin ve vurgu ayarı basılmaz (sahip, 2026-11-04). Atölye'nin yüzleri Libre Caslon Display 400 ve Hanken Grotesk 400/500, `latin` + Türkçe harf dosyaları (`THEME_OWN_FONT_FILES`, önyükleme ~58 KB).
 - **Atölye bugün (2026-11-05, yön "Grafit", onay bekliyor; docs/tema/yon-2026-11-05.md):** Loom görünümü sahibin isteğiyle bırakıldı; çerçeve (grafit duyuru şeridi, görünür hap aramalı iki satırlı yapışkan başlık, HTML'de mega paneller, çekmeceler, alt gezinme, yüzen çerez kartı, e-bülten bandıyla açılan grafit alt bilgi) ve ana sayfa (grafit açılış sahnesi, güvenceler, fotoğraflı reyon kartları: kategori resmi yoksa kategorinin en yeni ürün fotoğrafı, betiksiz sekmeli raf, yakın plan, puan özeti ve yorumlar, müşteri fotoğrafları, rehberler, yanında yardımla SSS) sıfırdan yazıldı. Tek yüz Manrope 400/600/800 (önyükleme ≈ 27 KB). Öteki sayfalar base'in, bu temanın token'larıyla. Kök `design.md` (Loom) onaya kadar yerinde. 2026-11-05 (onaylı Grafit): liste (kategori, marka, `/magaza`, kampanyalar), arama sonuçları ve ürün sayfası da Atölye'nin kendi bileşenleriyle (`design.md` § Liste sayfası, § Arama sonuçları, § Ürün sayfası; `ListingPage.tsx`, `listing/*`, `ProductPage.tsx`, `product/*`); arama yardımının kategorileri ve boş aramanın mağaza kategorileri fotoğraflı (adr/0046 Ek 2026-11-05, liste ve ürün sayfaları). İçerik sayfaları da (mağazanın sayfaları, SSS, iletişim, blog ve yazı, yorumlar, 404; `design.md` § İçerik sayfaları, `content/*`, `content.css`; adr/0046 Ek 2026-11-05, içerik sayfaları).
 - **Sözleşme bekleyenleri (⚑, denetim §7):** kategori görseli (görselli bento ve mega menü kartı), ürün kartında hızlı ekle ve stok kovası, kart puanı, yorum özeti/dağılımı ve fotoğrafı, gruplu `SpecView` (yakın plan bölümü), ETBİS karekodu ve izinli ödeme/kargo işaretleri. Bileşenler boş hâlde; alan gelince çizilir. 2026-11-05: yakın plan (`featured_product`) ve mağaza puanı (`reviews` bölümünün `summary`'si) sözleşmede (adr/0046 Ek 2026-11-05); Atölye yakın planı şimdilik taban temanınkiyle çizer, puan özeti Atölye'nin sıradaki işi.

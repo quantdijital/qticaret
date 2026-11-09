@@ -63,6 +63,7 @@ Next.js 16.4.2'de doğrulananlar (Context7, `/vercel/next.js/v16.2.9`; 16.4.2, 1
    - Sayfaları (`Layout`, `HomePage`, `ProductPage`, `ListingPage`, `ContentPage`, `NotFoundPage`, …) görünüm modelleriyle ve metin işleviyle (`t`) çağrılır.
    - Eylemler (sepete ekle vb.) temaya prop olarak verilen Server Action'lardır.
    - İlk tema `packages/themes/base`: sektörden bağımsız, mobil öncelikli. Temanın seçimi ve ayarları (renk, logo, yerleşim) D11'de `platform-settings`'ten JSON şemayla gelir.
+   - **Not (2026-11-09):** `packages/themes/base` silindi; tek ve varsayılan tema Atölye'dir (`packages/themes/atolye`, yön "Grafit", `design.md`). Ayrıntı adr/0057 Ek 2026-11-09. Aşağıdaki eklerde "taban tema", "base" ve `@qticaret/theme-base` geçen yerler o günün kaydıdır.
 8. **Store API sözleşmesi `@qticaret/types`'ta (`src/store/*`).**
    - `SeoPayload`, `Resolution`, `ListingView` ve vitrinin okuduğu ürün, fiyat ve sepet alanları burada.
    - Backend'deki tiplerin vitrin kopyasıdır: Medusa'nın derlemesi çalışma alanındaki TypeScript paketlerini derlemediği için backend bu pakete bağlanmaz. Sapma e2e ve sözleşme testleriyle yakalanır.
