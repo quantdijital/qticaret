@@ -546,6 +546,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/products/:id/preview": false,
   "POST /admin/category-restrictions/:category_id": false,
   "POST /admin/category-images/:category_id": false,
+  "POST /admin/collections/:id/details": false,
   "POST /admin/customers/:id/privacy-requests": false,
   "POST /admin/privacy-requests/:id/export": false,
   "POST /admin/privacy-requests/:id/close": false,
