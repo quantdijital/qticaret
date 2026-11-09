@@ -1,9 +1,9 @@
-import { OrderReturns } from "@qticaret/theme-base/borrow"
 import type { OrderActions, OrderPageView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { OrderAside } from "./OrderAside"
 import { OrderHero } from "./OrderHero"
 import { BankTransfer, CashOnDelivery, OrderLines, Parcels } from "./OrderParts"
+import { OrderReturns } from "./OrderReturns"
 import { Progress } from "./Progress"
 
 const WELL = "flex flex-col gap-4 rounded-tile bg-paper-2 p-5 sm:p-7"

@@ -10,7 +10,7 @@ const MAX_ROUNDS = 3
 
 /**
  * A form sent to an action that may answer with a proof of work
- * (adr/0044), as the base theme does it: the browser solves it and sends
+ * (adr/0044): the browser solves it and sends
  * the form once more with the answer in `challenge`, a few rounds at most.
  * The fields stay as typed.
  */

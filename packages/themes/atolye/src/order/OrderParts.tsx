@@ -1,10 +1,10 @@
 import { ExternalLink, HandCoins, Landmark, Truck } from "lucide-react"
-import { OrderGift } from "@qticaret/theme-base/borrow"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { OrderPageView, Translate } from "@qticaret/ui"
 import { LineAddons } from "../parts/LineAddons"
 import { LineName, LinePhoto } from "../parts/LineLink"
 import { CopyIban } from "./CopyIban"
+import { OrderGift } from "./OrderGift"
 
 const WELL = "flex flex-col gap-5 rounded-tile bg-paper-2 p-5 sm:p-7"
 

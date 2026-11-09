@@ -32,8 +32,8 @@
 
 /*
  * The theme's values for the contract's names (shadcn's names, wired to
- * Tailwind in `@qticaret/ui/styles.css`), so the primitives and the base
- * theme's pages it borrows read its counter, graphite and pills.
+ * Tailwind in `@qticaret/ui/styles.css`), so the primitives it uses read
+ * its counter, graphite and pills.
  *
  * `--primary` holds the shop's colour; the storefront prints the shop's
  * own over it at `:root` (adr/0053 §B). The fallback is a graphite-wine.

@@ -3,12 +3,12 @@ import { act } from "react"
 import type { ReactNode } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { GiftRecipient } from "@qticaret/theme-base"
 import type { ActionResult, CartLineView, FormAction } from "@qticaret/ui"
 import { PAINTLESS_WAIT_MS } from "@qticaret/ui/lib/after-paint"
 import { t } from "@/lib/i18n"
 // The forms themselves: the themes export pages, not their parts
 import { CodeForm } from "../../../../../packages/themes/atolye/src/cart/CodeForm"
+import { GiftRecipient } from "../../../../../packages/themes/atolye/src/cart/GiftRecipient"
 import { QuestionForm, ReviewForm } from "../../../../../packages/themes/atolye/src/product/Forms"
 import { communityWords } from "../../../../../packages/themes/atolye/src/product/words"
 

@@ -2,7 +2,8 @@ import type { CookieBannerView, Translate } from "@qticaret/ui"
 import { KeptForm } from "@qticaret/ui/components/kept-form"
 import { ConsentFrame } from "./ConsentFrame"
 
-function Choice({
+/** One cookie category with its sentence; the whole row is its label (also `/cerez-tercihleri`). */
+export function Choice({
   name,
   label,
   text,

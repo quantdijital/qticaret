@@ -1,6 +1,5 @@
 /**
- * The window events the frame's parts talk through, the same names the
- * base theme uses: the pages Atölye borrows from it send them too.
+ * The window events the frame's parts talk through.
  *
  * - `qt:open-menu`: the bottom bar asks the menu drawer to open; the
  *   drawer cancels it when it heard it, else the link goes to `/kategoriler`.
@@ -14,7 +13,7 @@ export const OPEN_MENU_EVENT = "qt:open-menu"
 export const COOKIE_PREFERENCES_EVENT = "qt:cookie-preferences"
 export const CART_ADDED_EVENT = "qt:cart-added"
 
-/** What a `qt:cart-added` event asks the cart to say; none from the base theme's pages. */
+/** What a `qt:cart-added` event asks the cart to say, when it brings words. */
 export const cartAddedMessage = (event: Event): string =>
   event instanceof CustomEvent &&
   typeof (event.detail as { message?: unknown } | null)?.message === "string"
