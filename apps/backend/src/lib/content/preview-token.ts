@@ -81,3 +81,9 @@ export const previewOpens = contentPreview.opens
 
 /** The storefront's design as last saved (adr/0049): its own context, `sfl_` ids. */
 export const layoutPreview = previewSigner("layout-preview:v1", "sfl_[0-9A-Za-z]{1,40}")
+
+/**
+ * A draft product's page as last saved (F18): its own context, `prod_` ids;
+ * a later save of the product ends the link, as with content entries.
+ */
+export const productPreview = previewSigner("product-preview:v1", "prod_[0-9A-Za-z]{1,40}")

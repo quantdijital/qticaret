@@ -43,10 +43,21 @@ export async function storeProductDescription(
   if (product?.status !== "published" || !listed) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "catalog.product_unknown")
   }
-  const stored = product.product_extension?.description_doc
+  return productTexts(container, product.product_extension)
+}
+
+/**
+ * A product's long and short descriptions as HTML (adr/0055), whatever its
+ * state: the published page's answer above, and a draft's signed preview.
+ */
+export async function productTexts(
+  container: Pick<MedusaContainer, "resolve">,
+  extension: ProductRow["product_extension"]
+): Promise<{ html: string | null; summary_html: string | null; images: BodyImage[] }> {
+  const stored = extension?.description_doc
   const doc = stored === null || stored === undefined ? null : contentDoc.safeParse(stored)
   const html = doc?.success ? renderDoc(doc.data) : ""
-  const summary = summaryDocOf(product.product_extension?.summary_doc)
+  const summary = summaryDocOf(extension?.summary_doc)
   const summaryHtml = summary ? renderDoc(summary) : ""
   const srcs = [doc?.success ? doc.data : null, summary].flatMap((each) =>
     each ? docStats(each).images.map((image) => image.src) : []
