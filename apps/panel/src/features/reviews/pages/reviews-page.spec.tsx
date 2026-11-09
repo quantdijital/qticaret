@@ -8,16 +8,18 @@ import type { ReviewRow } from "@/features/reviews/api/reviews"
 import { ReviewsPage } from "./reviews-page"
 
 const fetchMock = vi.hoisted(() => vi.fn())
+const searchMock = vi.hoisted((): { value: Record<string, unknown> } => ({ value: {} }))
+const navigateMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 // The section tabs read the Google reviews status: not what this page is about
 vi.mock("@/features/reviews/components/reviews-nav", () => ({ ReviewsNav: () => null }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
-// The page reads its tab from the address; here it is always the waiting ones
+// The page reads its tab from the address: the waiting ones unless a test says otherwise
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: ReactNode }) => <a href="/products">{children}</a>,
-  getRouteApi: () => ({ useSearch: () => ({}) }),
-  useNavigate: () => vi.fn(),
+  getRouteApi: () => ({ useSearch: () => searchMock.value }),
+  useNavigate: () => navigateMock,
 }))
 
 const row = (id: string, more: Partial<ReviewRow> = {}): ReviewRow => ({
@@ -32,6 +34,8 @@ const row = (id: string, more: Partial<ReviewRow> = {}): ReviewRow => ({
   status: "pending",
   has_link: false,
   reject_reason: null,
+  reply: null,
+  replied_at: null,
   created_at: "2026-10-28T10:00:00Z",
   updated_at: "2026-10-28T10:05:00Z",
   product: { id: "prod_1", title: "Şef bıçağı", thumbnail: null },
@@ -55,6 +59,8 @@ function renderPage() {
 
 describe("ReviewsPage", () => {
   beforeEach(() => {
+    searchMock.value = {}
+    navigateMock.mockReset()
     fetchMock.mockReset()
     fetchMock.mockImplementation((path: string) =>
       Promise.resolve(
@@ -133,5 +139,51 @@ describe("ReviewsPage", () => {
         },
       })
     })
+  })
+
+  it("marks a replied review, shows its reply in a line, and opens an approved one's dialog", async () => {
+    searchMock.value = { status: "approved" }
+    fetchMock.mockResolvedValue({
+      reviews: [
+        row("prev_1", {
+          status: "approved",
+          reply: "Teşekkür ederiz.",
+          replied_at: "2026-11-02T18:00:00Z",
+        }),
+        row("prev_2", { status: "approved", author_name: "Ali V." }),
+      ],
+      count: 2,
+    })
+    renderPage()
+
+    expect(await screen.findByText("Yanıtlandı")).toBeInTheDocument()
+    expect(screen.getByText("Mağazanın yanıtı: Teşekkür ederiz.")).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Onayla" })).not.toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith("/admin/product-reviews", {
+      query: { status: "approved", offset: 0 },
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: "Ali V. yorumunu aç" }))
+    const dialog = await screen.findByRole("dialog", { name: "Ali V. yorumu" })
+    expect(within(dialog).getByRole("button", { name: "Yanıtla" })).toBeDisabled()
+  })
+
+  it("lists the approved reviews without a reply under 'Yanıtsız'", async () => {
+    searchMock.value = { status: "unreplied" }
+    fetchMock.mockResolvedValue({ reviews: [], count: 0 })
+    renderPage()
+
+    expect(await screen.findByText("Yanıt bekleyen onaylı yorum yok.")).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith("/admin/product-reviews", {
+      query: { status: "approved", replied: "false", offset: 0 },
+    })
+    expect(screen.getByRole("tab", { name: "Yanıtsız" })).toHaveAttribute("aria-selected", "true")
+  })
+
+  it("opens no dialog from a waiting review: it is approved or rejected in its row", async () => {
+    renderPage()
+    await screen.findAllByText("Çok keskin, sapı rahat.")
+
+    expect(screen.queryByRole("button", { name: "Ayşe Y. yorumunu aç" })).not.toBeInTheDocument()
   })
 })

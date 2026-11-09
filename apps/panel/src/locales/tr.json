@@ -7037,10 +7037,34 @@
     "tabs": {
       "pending": "Onay bekleyen",
       "approved": "Onaylanan",
+      "unreplied": "Yanıtsız",
       "rejected": "Reddedilen"
     },
     "stars": "5 üzerinden {{rating}}",
     "hasLink": "Bağlantı içeriyor",
+    "replied": "Yanıtlandı",
+    "open": "{{author}} yorumunu aç",
+    "dialogTitle": "{{author}} yorumu",
+    "reply": {
+      "label": "Yanıtınız",
+      "hint": "Düz metin. Vitrinde yorumun altında mağazanızın adıyla “Mağazanın yanıtı” olarak görünür.",
+      "placeholder": "Örn. Değerlendirmeniz için teşekkür ederiz…",
+      "count": "{{used}} / {{max}} karakter",
+      "tooLong": "Yanıt en çok {{max}} karakter olabilir. Biraz kısaltın.",
+      "send": "Yanıtla",
+      "update": "Yanıtı güncelle",
+      "delete": "Yanıtı sil",
+      "sent": "Yanıt vitrinde yayında.",
+      "updated": "Yanıt güncellendi.",
+      "deleted": "Yanıt silindi.",
+      "at": "Son yanıt {{when}}",
+      "preview": "Mağazanın yanıtı: {{reply}}",
+      "deleteConfirm": {
+        "title": "Yanıt silinsin mi?",
+        "description": "Yanıt vitrinden kaldırılır; yorum yerinde kalır.",
+        "action": "Sil"
+      }
+    },
     "select": "{{author}} yorumunu seç",
     "approve": "Onayla",
     "reject": "Reddet",
@@ -7057,6 +7081,7 @@
     "empty": {
       "pending": "Onay bekleyen yorum yok.",
       "approved": "Henüz onaylanan yorum yok.",
+      "unreplied": "Yanıt bekleyen onaylı yorum yok.",
       "rejected": "Reddedilen yorum yok."
     },
     "sections": "Müşteri yazıları",

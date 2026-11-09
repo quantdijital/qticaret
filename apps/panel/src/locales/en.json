@@ -7037,10 +7037,34 @@
     "tabs": {
       "pending": "Waiting",
       "approved": "Approved",
+      "unreplied": "Unanswered",
       "rejected": "Rejected"
     },
     "stars": "{{rating}} out of 5",
     "hasLink": "Contains a link",
+    "replied": "Replied",
+    "open": "Open {{author}}'s review",
+    "dialogTitle": "{{author}}'s review",
+    "reply": {
+      "label": "Your reply",
+      "hint": "Plain text. Shown under the review on the storefront as “Shop's reply”, with your shop's name.",
+      "placeholder": "E.g. Thank you for your review…",
+      "count": "{{used}} / {{max}} characters",
+      "tooLong": "A reply can be at most {{max}} characters. Shorten it a little.",
+      "send": "Reply",
+      "update": "Update reply",
+      "delete": "Delete reply",
+      "sent": "The reply is live on the storefront.",
+      "updated": "Reply updated.",
+      "deleted": "Reply deleted.",
+      "at": "Last reply {{when}}",
+      "preview": "Shop's reply: {{reply}}",
+      "deleteConfirm": {
+        "title": "Delete the reply?",
+        "description": "The reply leaves the storefront; the review stays.",
+        "action": "Delete"
+      }
+    },
     "select": "Select {{author}}'s review",
     "approve": "Approve",
     "reject": "Reject",
@@ -7057,6 +7081,7 @@
     "empty": {
       "pending": "No reviews waiting.",
       "approved": "No approved reviews yet.",
+      "unreplied": "No approved review is waiting for a reply.",
       "rejected": "No rejected reviews."
     },
     "sections": "Customers' words",
