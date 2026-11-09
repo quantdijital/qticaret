@@ -4052,6 +4052,16 @@
     "invoice": {
       "title": "Fatura",
       "none": "Henüz fatura yok. Ayarlar > E-Fatura'daki programla, kesim anı gelince açılır.",
+      "hold": {
+        "off": "Fatura kesme kapalı (Ayarlar > E-Fatura).",
+        "canceled": "Sipariş iptal edildi; fatura kesilmez.",
+        "test_payment": "Ödeme {{provider}} test modunda alındı; test ödemelerine fatura kesilmez.",
+        "test_payment_unnamed": "Ödeme, sağlayıcının test modunda alındı; test ödemelerine fatura kesilmez.",
+        "currency": "Para birimi TL değil; e-fatura yalnızca TL satışlara kesilir.",
+        "awaiting_payment": "Fatura, ödeme alınınca kesilecek.",
+        "awaiting_shipment": "Fatura, kargoya verilince kesilecek.",
+        "awaiting_delivery": "Kapıda ödemeli siparişin faturası, teslim edilince ya da para tahsil edilince kesilecek."
+      },
       "status": {
         "pending": "Bekliyor",
         "issuing": "Kesiliyor",

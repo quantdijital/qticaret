@@ -1,13 +1,34 @@
 import { useQuery } from "@tanstack/react-query"
+import { Info } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCan } from "@/features/auth/api/staff"
 import { orderInvoicesQuery } from "@/features/orders/api/invoices"
+import type { SaleHold } from "@/features/orders/api/invoices"
 import { ReturnDocuments } from "@/features/orders/detail/return-documents"
 import { SaleInvoice } from "@/features/orders/detail/sale-invoice"
 import { errorText } from "@/lib/errors"
 
 const V = "orders.invoice"
+
+/**
+ * Why the order has no sale invoice (the server's rule): an information,
+ * not an error (a test payment, invoicing off, waiting for the parcel).
+ */
+function SaleHoldNotice({ hold }: { hold: SaleHold }) {
+  const { t } = useTranslation()
+  const provider = hold.payment_provider
+    ? t(`orders.providers.${hold.payment_provider}`, { defaultValue: "" })
+    : ""
+  const key = hold.reason === "test_payment" && !provider ? "test_payment_unnamed" : hold.reason
+  return (
+    <Alert>
+      <Info aria-hidden="true" />
+      <AlertDescription>{t(`${V}.hold.${key}`, { provider })}</AlertDescription>
+    </Alert>
+  )
+}
 
 /**
  * The order's invoices (F8, adr/0034): its sale invoice; each exchange's
@@ -40,7 +61,11 @@ export function InvoiceSection({
       ) : query.isError ? (
         <p className="text-[13px] text-muted-foreground">{errorText(t, query.error)}</p>
       ) : !invoice && exchanges.length === 0 ? (
-        <p className="text-[13px] text-muted-foreground">{t(`${V}.none`)}</p>
+        query.data.sale_hold ? (
+          <SaleHoldNotice hold={query.data.sale_hold} />
+        ) : (
+          <p className="text-[13px] text-muted-foreground">{t(`${V}.none`)}</p>
+        )
       ) : (
         <div className="flex flex-col gap-3">
           {invoice ? (

@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import type { InvoiceRecord } from "@/features/orders/api/invoices"
+import type { InvoiceRecord, SaleHold } from "@/features/orders/api/invoices"
 import { InvoiceSection } from "./invoice-card"
 
 const fetchMock = vi.hoisted(() => vi.fn())
@@ -31,12 +31,16 @@ const invoice = (changes: Partial<InvoiceRecord>): InvoiceRecord => ({
   ...changes,
 })
 
-const renderCard = (row: InvoiceRecord | InvoiceRecord[] | null, mayOpen = true) => {
+const renderCard = (
+  row: InvoiceRecord | InvoiceRecord[] | null,
+  mayOpen = true,
+  hold: SaleHold | null = null
+) => {
   const rows = row === null ? [] : Array.isArray(row) ? row : [row]
   fetchMock.mockImplementation((url: string) =>
     Promise.resolve(
       url === "/admin/invoices"
-        ? { invoices: rows, count: rows.length }
+        ? { invoices: rows, count: rows.length, sale_hold: hold }
         : url === "/admin/staff/me"
           ? { role: mayOpen ? "owner" : "operations", can: { invoices: mayOpen } }
           : {}
@@ -162,5 +166,33 @@ describe("InvoiceSection", () => {
   it("says none was opened yet", async () => {
     renderCard(null)
     expect(await screen.findByText(/Henüz fatura yok/)).toBeInTheDocument()
+  })
+
+  it("says why there is no invoice: a test payment, invoicing off, waiting for the parcel", async () => {
+    const { unmount } = renderCard(null, true, {
+      reason: "test_payment",
+      payment_provider: "pp_paytr_paytr",
+    })
+    const notice = await screen.findByRole("alert")
+    expect(notice).toHaveTextContent(
+      "Ödeme PayTR test modunda alındı; test ödemelerine fatura kesilmez."
+    )
+    expect(notice.querySelector("svg")).not.toBeNull()
+    expect(screen.queryByText(/Henüz fatura yok/)).not.toBeInTheDocument()
+    unmount()
+
+    const second = renderCard(null, true, { reason: "off", payment_provider: null })
+    expect(await screen.findByText("Fatura kesme kapalı (Ayarlar > E-Fatura).")).toBeInTheDocument()
+    second.unmount()
+
+    renderCard(null, true, { reason: "awaiting_shipment", payment_provider: null })
+    expect(await screen.findByText("Fatura, kargoya verilince kesilecek.")).toBeInTheDocument()
+  })
+
+  it("names no provider it does not know", async () => {
+    renderCard(null, true, { reason: "test_payment", payment_provider: "pp_other_other" })
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Ödeme, sağlayıcının test modunda alındı; test ödemelerine fatura kesilmez."
+    )
   })
 })

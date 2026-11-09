@@ -4052,6 +4052,16 @@
     "invoice": {
       "title": "Invoice",
       "none": "No invoice yet. It is opened with the program in Settings > E-invoice when its moment comes.",
+      "hold": {
+        "off": "Invoicing is off (Settings > E-invoice).",
+        "canceled": "The order was canceled; no invoice is issued.",
+        "test_payment": "The payment was taken in {{provider}}'s test mode; test payments are not invoiced.",
+        "test_payment_unnamed": "The payment was taken in the provider's test mode; test payments are not invoiced.",
+        "currency": "The currency is not TRY; e-invoices are issued for TRY sales only.",
+        "awaiting_payment": "The invoice is issued once the payment is taken.",
+        "awaiting_shipment": "The invoice is issued once the parcel is handed to the carrier.",
+        "awaiting_delivery": "A cash on delivery order is invoiced once delivered or once the cash is collected."
+      },
       "status": {
         "pending": "Waiting",
         "issuing": "Being issued",

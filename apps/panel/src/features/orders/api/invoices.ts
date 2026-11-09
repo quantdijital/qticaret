@@ -39,11 +39,33 @@ export interface InvoiceRecord {
   order_display_id?: number | null
 }
 
+/**
+ * Why an order has no sale invoice (the server's rule, adr/0034 §8):
+ * invoicing off, the order canceled, paid in a provider's test mode, sold
+ * in another currency; or what it waits for.
+ */
+export type SaleHoldReason =
+  | "off"
+  | "canceled"
+  | "test_payment"
+  | "currency"
+  | "awaiting_payment"
+  | "awaiting_shipment"
+  | "awaiting_delivery"
+
+export interface SaleHold {
+  reason: SaleHoldReason
+  /** The provider whose test mode took the payment (`pp_paytr_paytr`), for `test_payment`. */
+  payment_provider: string | null
+}
+
 export interface InvoicePage {
   invoices: InvoiceRecord[]
   count: number
   limit: number
   offset: number
+  /** One order's invoices without its own sale invoice: why not; null when nothing holds it. */
+  sale_hold?: SaleHold | null
 }
 
 export const INVOICE_STATUSES = [
