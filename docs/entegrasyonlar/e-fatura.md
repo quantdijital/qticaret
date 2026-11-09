@@ -75,6 +75,8 @@ Tekillik: (sipariş, tür, kaynak). Kayıtta kişisel veri yok.
 - Tutarlar sunucuda, kalem paylarından hesaplanır. Paraşüt toplamıyla kuruş farkı kayda geçer.
 - Kurumsal alıcıda VKN ve vergi dairesi zorunlu. Bireyselde TCKN yoksa `11111111111` (mali müşavir doğrulayacak).
 - VKN ve TCKN yalnızca gönderim anında açılır. Günlüklere alıcı verisi ve jeton yazılmaz.
+- **Faturanın kesilip kesilmeyeceği tek kuraldan okunur** (`lib/invoicing/hold.ts` `saleInvoiceHold`): kuyruk da sipariş sayfası da onu kullanır. Satış faturası olmayan siparişte `GET /admin/invoices?order_id=` nedenini `sale_hold` ile döner; panel fatura kartında bilgi notu olarak gösterir (fatura kapalı, iptal, test ödemesi, TL dışı, ödeme/kargo/teslim bekleniyor).
+- **Test modunda ödenen sipariş** canlıda faturalanmaz (para el değiştirmedi). Geliştirmede ve testte Paraşüt bu makinedeki sahteyse (`PARASUT_BASE_URL` loopback, `NODE_ENV` development/test) faturalanır; sahibi akışın tamamını görsün diye (`testPaymentsInvoiced`). Staging ve production'da hiçbir koşulda.
 
 ## Testler
 - **Taslak (birim):** KDV dökümü, kalemde indirim, kargo ve kapıda ödeme satırları, yuvarlama, kişi ve şirket alıcısı.

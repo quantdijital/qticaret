@@ -20,7 +20,17 @@ export {
 } from "./exchanges"
 export type { ExchangedOrder, InvoiceExchange } from "./exchanges"
 export type { ReturnedLine } from "./returns"
-export { fakeInvoicingAllowed } from "./providers"
+export { fakeInvoicingAllowed, testPaymentsInvoiced } from "./providers"
+export {
+  INVOICE_HOLDS,
+  invoiceDue,
+  invoicePaid,
+  invoicingOn,
+  isWait,
+  saleInvoiceHold,
+  testPaymentProvider,
+} from "./hold"
+export type { InvoiceFacts, InvoiceHold, InvoiceMoment, OrderRow as InvoiceOrderRow } from "./hold"
 export { SOLD_FIELDS, asSold } from "./sold"
 export type { SoldItem } from "./sold"
 export type { InvoiceItem, InvoiceShippingMethod } from "./lines"

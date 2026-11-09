@@ -209,7 +209,7 @@ const S3_REQUIRED = [
 ] as const
 
 const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"])
-const isLoopbackUrl = (value: string) => LOOPBACK_HOSTS.has(new URL(value).hostname)
+export const isLoopbackUrl = (value: string): boolean => LOOPBACK_HOSTS.has(new URL(value).hostname)
 
 const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
   // Sessions must survive restarts and be shared across instances (adr/0004)

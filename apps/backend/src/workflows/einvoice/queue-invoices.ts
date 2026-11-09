@@ -1,10 +1,15 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MathBN } from "@medusajs/framework/utils"
-import { fakeInvoicingAllowed } from "../../lib/invoicing"
-import type { MedusaAmount } from "../../lib/money"
+import {
+  fakeInvoicingAllowed,
+  invoicePaid,
+  invoicingOn,
+  isWait,
+  saleInvoiceHold,
+  testPaymentsInvoiced,
+} from "../../lib/invoicing"
+import type { InvoiceMoment, InvoiceOrderRow } from "../../lib/invoicing"
 import { errorSummary, logger } from "../../lib/logging"
-import { COD_PAYMENT_PROVIDER_ID } from "../../lib/payments/checkout"
-import { paidInTestMode } from "../../lib/payments/test-mode"
 import { EINVOICE_MODULE } from "../../modules/einvoice"
 import type EinvoiceModuleService from "../../modules/einvoice/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -14,35 +19,13 @@ import { TENANT_WEBHOOKS_MODULE } from "../../modules/tenant-webhooks"
 import type TenantWebhooksModuleService from "../../modules/tenant-webhooks/service"
 import { invoiceTotalsOf } from "./draft-source"
 
+// The rule lives in lib/invoicing/hold.ts: the queue and the order page read the same one
+export { invoiceDue } from "../../lib/invoicing"
+export type { InvoiceMoment, InvoiceOrderRow as OrderRow } from "../../lib/invoicing"
+
 type Container = Pick<MedusaContainer, "resolve">
 
-/**
- * What made an order due: placed, its payment taken (a transfer confirmed,
- * cash collected at the door), its parcel gone, or its parcel delivered.
- */
-export type InvoiceMoment = "placed" | "paid" | "shipped" | "delivered"
-
 export type QueueOutcome = "queued" | "already" | "not_due" | "off"
-
-export interface OrderRow {
-  status?: string | null
-  canceled_at?: string | Date | null
-  payment_collections?:
-    | ({
-        payments?:
-          | ({
-              provider_id?: string | null
-              captured_at?: string | Date | null
-              data?: unknown
-            } | null)[]
-          | null
-      } | null)[]
-    | null
-  /** Medusa's, the gift cards and store credit that paid it taken off. */
-  total?: MedusaAmount | null
-  version?: number | null
-  credit_lines?: ({ raw_amount?: MedusaAmount | null; version?: number | null } | null)[] | null
-}
 
 export async function invoicingOf(container: Container): Promise<InvoicingSettings> {
   const section = await container
@@ -51,65 +34,29 @@ export async function invoicingOf(container: Container): Promise<InvoicingSettin
   return section.values as unknown as InvoicingSettings
 }
 
-const paymentsOf = (order: OrderRow) =>
-  (order.payment_collections ?? []).flatMap((collection) => collection?.payments ?? [])
+/** What the rule (`saleInvoiceHold`) reads of an order. */
+export const HOLD_FIELDS = [
+  "status",
+  "canceled_at",
+  "currency_code",
+  "payment_collections.payments.provider_id",
+  "payment_collections.payments.captured_at",
+  "payment_collections.payments.data",
+  "total",
+  "version",
+  "credit_lines.raw_amount",
+  "credit_lines.version",
+]
 
 /**
- * Gift cards or store credit paid all of it (adr/0025): no payment was
- * taken, nothing is left to pay, and it is as paid as it will be.
- */
-const coveredByCredit = (order: OrderRow): boolean =>
-  (order.credit_lines ?? []).some(
-    (line) =>
-      line !== null &&
-      (order.version === undefined || line.version === order.version) &&
-      MathBN.gt(line.raw_amount ?? 0, 0)
-  ) &&
-  order.total !== undefined &&
-  order.total !== null &&
-  MathBN.lte(order.total, 0)
-
-/**
- * Its money taken: a card's capture, a transfer confirmed, cash collected
- * at the door; or nothing to take, gift cards or store credit having paid it.
- */
-const paid = (order: OrderRow): boolean =>
-  paymentsOf(order).some((payment) => Boolean(payment?.captured_at)) || coveredByCredit(order)
-
-const cashOnDelivery = (order: OrderRow): boolean =>
-  paymentsOf(order).some((payment) => payment?.provider_id === COD_PAYMENT_PROVIDER_ID)
-
-/**
- * Whether the moment makes the order due (adr/0034 §8 and its addendum of
- * 2026-10-31, the shop's accountant):
- * - cash on delivery once delivered, or once the cash is recorded as
- *   collected, whatever the shop's setting;
- * - otherwise by the setting: once placed and paid (the default), or when
- *   its parcel leaves (a delivery counts, in case the parcel's event was missed).
- */
-export function invoiceDue(
-  order: OrderRow,
-  moment: InvoiceMoment,
-  settings: Pick<InvoicingSettings, "trigger">
-): boolean {
-  if (cashOnDelivery(order)) {
-    return moment === "delivered" || (moment === "paid" && paid(order))
-  }
-  const parcel = moment === "shipped" || moment === "delivered"
-  if (parcel !== (settings.trigger === "shipped")) {
-    return false
-  }
-  return parcel || paid(order)
-}
-
-/**
- * Queues an order's sale invoice once it is due (`due`). A canceled order,
- * one paid in a provider's test mode, or one in another currency, is never
- * queued. Queuing twice is one invoice (KK3). Its gift card lines are left
- * off and kept on the record as its advance; an order of gift cards alone
- * gets no invoice, only that record (`waived`, `advance_only`), once paid
- * whatever the setting: it has no parcel to wait for
- * (docs/mali-musavir-sorulari.md 3.2, the owner 2026-11-03).
+ * Queues an order's sale invoice once it is due (`saleInvoiceHold`): a
+ * canceled order, one paid in a provider's test mode (but on a developer's
+ * machine with the fake Paraşüt, `testPaymentsInvoiced`), or one in
+ * another currency, is never queued. Queuing twice is one invoice (KK3).
+ * Its gift card lines are left off and kept on the record as its advance;
+ * an order of gift cards alone gets no invoice, only that record
+ * (`waived`, `advance_only`), once paid whatever the setting: it has no
+ * parcel to wait for (docs/mali-musavir-sorulari.md 3.2, the owner 2026-11-03).
  */
 export async function queueSaleInvoice(
   container: Container,
@@ -117,39 +64,37 @@ export async function queueSaleInvoice(
   moment: InvoiceMoment
 ): Promise<QueueOutcome> {
   const settings = await invoicingOf(container)
-  if (settings.provider === "none" || (settings.provider === "fake" && !fakeInvoicingAllowed())) {
+  const fakeAllowed = fakeInvoicingAllowed()
+  if (!invoicingOn(settings, fakeAllowed)) {
     return "off"
   }
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
-    fields: [
-      "status",
-      "canceled_at",
-      "payment_collections.payments.provider_id",
-      "payment_collections.payments.captured_at",
-      "payment_collections.payments.data",
-      "total",
-      "version",
-      "credit_lines.raw_amount",
-      "credit_lines.version",
-    ],
+    fields: HOLD_FIELDS,
     filters: { id: orderId },
   })
-  const order = data[0] as OrderRow | undefined
-  // Nothing real was sold in a provider's test mode: no tax document for it
-  if (!order || order.status === "canceled" || order.canceled_at || paidInTestMode(order)) {
+  const order = data[0] as InvoiceOrderRow | undefined
+  if (!order) {
     return "not_due"
   }
-  const due = invoiceDue(order, moment, settings)
-  if (!due && !paid(order)) {
+  const facts = {
+    settings,
+    order,
+    moments: [moment],
+    fakeAllowed,
+    testPaymentsInvoiced: testPaymentsInvoiced(settings.provider),
+  }
+  const hold = saleInvoiceHold(facts)
+  // A paid order still waiting may be gift cards alone, due once paid: its lines tell
+  if (hold && !(isWait(hold) && invoicePaid(order))) {
     return "not_due"
   }
   const lines = await invoiceTotalsOf(container, orderId)
-  if (lines?.currency.toLowerCase() !== "try") {
+  if (!lines) {
     return "not_due"
   }
   const advanceOnly = lines.lines === 0 && MathBN.gt(lines.advance, 0)
-  if (!due && !advanceOnly) {
+  if (hold && saleInvoiceHold({ ...facts, advanceOnly })) {
     return "not_due"
   }
   const { id, created } = await container.resolve<EinvoiceModuleService>(EINVOICE_MODULE).enqueue({
