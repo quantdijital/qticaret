@@ -257,6 +257,9 @@ describe("staff roles", () => {
       legalTexts: true,
       vatRates: true,
       orderExport: true,
+      customers: true,
+      abandonedCarts: true,
+      resendMessages: true,
     })
     expect(capabilitiesOf("admin")).toMatchObject({
       settings: true,
@@ -307,9 +310,37 @@ describe("staff roles", () => {
       legalTexts: false,
       vatRates: false,
       orderExport: false,
+      customers: true,
+      abandonedCarts: true,
+      resendMessages: true,
     })
     expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
     expect(Object.values(capabilitiesOf(null)).every((can) => !can)).toBe(true)
+  })
+
+  it("lets operations edit customers, follow up carts and resend messages; read-only staff do none", () => {
+    const writes = [
+      ["POST", "/admin/customers"],
+      ["POST", "/admin/customers/cus_1"],
+      ["POST", "/admin/customers/cus_1/note"],
+      ["POST", "/admin/customers/cus_1/addresses"],
+      ["POST", "/admin/customers/cus_1/addresses/cuaddr_1"],
+      ["DELETE", "/admin/customers/cus_1/addresses/cuaddr_1"],
+      ["POST", "/admin/orders/order_1/messages/noti_1/resend"],
+      ["POST", "/admin/abandoned-carts/cart_1/remind"],
+    ] as const
+    for (const role of STAFF_ROLES) {
+      for (const [method, path] of writes) {
+        expect(allowed(role, method, path)).toBe(role !== "readonly")
+      }
+      // The carts left behind name people who did not buy: not for read-only staff
+      expect(allowed(role, "GET", "/admin/abandoned-carts")).toBe(role !== "readonly")
+      expect(allowed(role, "GET", "/admin/abandoned-carts/cart_1")).toBe(role !== "readonly")
+      expect(allowed(role, "GET", "/admin/customers/cus_1")).toBe(true)
+    }
+    // Consent is the person's, recorded by owner and admin only; erasure stays a KVKK request's
+    expect(allowed("operations", "POST", "/admin/customers/cus_1/consents")).toBe(false)
+    expect(allowed("operations", "DELETE", "/admin/customers/cus_1")).toBe(false)
   })
 
   it("decides site search's synonym writes as the searchSynonyms capability says; every role reads", () => {
@@ -436,6 +467,10 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/bulk-messages/:id/copy": false,
   "POST /admin/customers/:id/consents": false,
   "POST /admin/customers/:id/billing-profile/reveal": false,
+  // 2026-11-06: the team's note on a customer, an order's message again, a cart reminded
+  "POST /admin/customers/:id/note": true,
+  "POST /admin/orders/:id/messages/:message_id/resend": true,
+  "POST /admin/abandoned-carts/:id/remind": true,
   "POST /admin/features/:key": false,
   "POST /admin/google/connect": false,
   "POST /admin/google/merchant": false,

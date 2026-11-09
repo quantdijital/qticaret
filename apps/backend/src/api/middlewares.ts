@@ -35,6 +35,7 @@ import { storeProfileOf } from "./http/client-ip"
 import { ACCOUNT_ROUTES } from "./http/account-routes"
 import { ADDON_ROUTES } from "./http/addon-routes"
 import { BANK_TRANSFER_ROUTES } from "./http/bank-transfer-routes"
+import { CUSTOMER_ROUTES } from "./http/customer-routes"
 import { CUSTOMER_SEGMENT_ROUTES } from "./http/customer-segment-routes"
 import { CAMPAIGN_ROUTES } from "./http/campaign-routes"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
@@ -305,6 +306,8 @@ export default defineMiddlewares({
     },
     ...MESSAGING_ROUTES,
     ...ACCOUNT_ROUTES,
+    // 2026-11-06: customers edited and guests added by staff
+    ...CUSTOMER_ROUTES,
     ...CUSTOMER_SEGMENT_ROUTES,
     // adr/0050: bulk e-mail and SMS, behind their flag
     ...CAMPAIGN_ROUTES,

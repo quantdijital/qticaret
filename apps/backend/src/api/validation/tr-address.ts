@@ -15,7 +15,7 @@ import { isTrAddress, validateTrAddress } from "../../modules/tr-address/validat
 /** Where an address sits in the validated body; ROOT means the body is the address. */
 export const ROOT = "$root"
 type AddressKey = typeof ROOT | "shipping_address" | "billing_address" | "address"
-type ExistingAddresses = Partial<Record<AddressKey, AddressFields | null>>
+export type ExistingAddresses = Partial<Record<AddressKey, AddressFields | null>>
 
 export const ADDRESS_FIELDS = [
   "country_code",

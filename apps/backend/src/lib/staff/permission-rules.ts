@@ -149,6 +149,13 @@ export const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/fraud/blocks*" },
 ]
 
+/**
+ * Read by `operations` but not by `readonly` (2026-11-06): the carts left
+ * behind name people who did not buy and how to reach them; they are for
+ * those who follow them up.
+ */
+export const NOT_READONLY: readonly Rule[] = [{ methods: "*", path: "/admin/abandoned-carts*" }]
+
 const readJob: Rule = {
   methods: ["POST"],
   path: "/admin/async-jobs",
@@ -197,6 +204,17 @@ export const OPERATIONS_WRITES: readonly Rule[] = [
   { methods: ["POST"], path: "/admin/payment-links" },
   { methods: ["POST"], path: "/admin/payment-links/preview" },
   { methods: ["POST"], path: "/admin/payment-links/:id/resend" },
+  // A customer's details, addresses and the team's note on them, and a guest added by
+  // hand (2026-11-06); a member's e-mail, erasure and consent are not among these
+  { methods: ["POST"], path: "/admin/customers" },
+  { methods: ["POST"], path: "/admin/customers/:id" },
+  { methods: ["POST"], path: "/admin/customers/:id/note" },
+  { methods: ["POST"], path: "/admin/customers/:id/addresses" },
+  { methods: ["POST", "DELETE"], path: "/admin/customers/:id/addresses/:address_id" },
+  // An order's message sent again, from its templates only (2026-11-06)
+  { methods: ["POST"], path: "/admin/orders/:id/messages/:message_id/resend" },
+  // A cart left behind, reminded by e-mail where its shopper consented (2026-11-06)
+  { methods: ["POST"], path: "/admin/abandoned-carts/:id/remind" },
   readJob,
   cancelJob,
 ]

@@ -432,6 +432,24 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "aras.secret_invalid":
     "Aras Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Aras'ın verdiği entegrasyon belgesinden yeniden kopyalayın; test ve canlı hesap ayrıdır.",
   "customers.unknown": "Müşteri bulunamadı.",
+  "customers.email_is_login":
+    "Üye müşterinin e-postası giriş adresidir; yalnızca müşteri kendi hesabından değiştirebilir.",
+  "customers.email_taken": "Bu e-postayla bir misafir müşteri zaten var.",
+  "customers.phone_invalid": "Telefon numarası geçerli değil; 0532 123 45 67 biçiminde yazın.",
+  "customers.guest_only": "Panelden yalnızca misafir müşteri eklenir; hesabı müşteri kendisi açar.",
+  "customers.note_too_long": "Not en çok 2000 karakter olabilir.",
+  "abandoned_carts.unknown": "Sepet bulunamadı ya da siparişe dönüştü.",
+  "abandoned_carts.no_email": "Bu sepette e-posta adresi yok.",
+  "abandoned_carts.no_consent":
+    "Müşterinin ticari e-posta izni yok; hatırlatma yalnızca izin verenlere gider.",
+  "abandoned_carts.suppressed": "Bu adrese e-posta gönderilmiyor (engelleme listesinde).",
+  "abandoned_carts.reminded": "Bu sepet için hatırlatma zaten gönderildi.",
+  "abandoned_carts.reminded_lately": "Bu adrese son bir haftada sepet hatırlatması gitti.",
+  "abandoned_carts.no_storefront":
+    "Hatırlatmadaki bağlantı için önce mağazanın alan adını SEO ayarlarından girin.",
+  "messages.unknown": "Mesaj bulunamadı.",
+  "messages.not_resendable": "Bu mesaj yeniden gönderilemez.",
+  "messages.sent_recently": "Bu mesaj az önce gönderildi; 10 dakika sonra yeniden deneyin.",
   "account.login_email_missing": "Bu oturumun bir e-posta adresi yok; hesap açılamadı.",
   "messaging.consent_evidence_required": "İznin nasıl verildiğini en az 10 karakterle yazın.",
   "carts.unknown": "Sepet bulunamadı ya da tamamlanmış.",

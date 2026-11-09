@@ -8,11 +8,13 @@
  * - `operations`: reads all but the private, writes only the operational
  *   routes listed here (orders, shipping, returns, stock, moderation).
  *   Refused by default: a new route is closed to it until listed.
- * - `readonly`: reads all but the private, writes nothing but read-only jobs.
+ * - `readonly`: reads all but the private and the carts left behind (their
+ *   shoppers' contact details), writes nothing but read-only jobs.
  * A user without a role (removed from the staff, or made outside the
  * panel) reaches nothing but who they are.
  */
 import {
+  NOT_READONLY,
   OPERATIONS_WRITES,
   OWN,
   OWNER_ONLY,
@@ -131,7 +133,7 @@ export function decide(
   if (role === "admin") {
     return { allowed: true, reason: "admin" }
   }
-  if (refused(PRIVATE)) {
+  if (refused(PRIVATE) || (role === "readonly" && refused(NOT_READONLY))) {
     return { allowed: false, reason: "private" }
   }
   if (READS.has(verb)) {
@@ -189,6 +191,13 @@ const CAPABILITY_PROBES = {
   vatRates: ["POST", "/admin/vat-rates"],
   // The order list as an Excel or CSV file, every customer's details in it: the owner's alone
   orderExport: ["POST", "/admin/order-board/export"],
+  // 2026-11-06: editing a customer, adding a guest, their addresses and the team's note on
+  // them: owner, admin, operations
+  customers: ["POST", "/admin/customers/:id"],
+  // 2026-11-06: the carts left behind and their reminders: owner, admin, operations
+  abandonedCarts: ["GET", "/admin/abandoned-carts"],
+  // 2026-11-06: an order's message sent again: owner, admin, operations
+  resendMessages: ["POST", "/admin/orders/:id/messages/:message_id/resend"],
 } as const satisfies Record<string, readonly [Method, string]>
 
 export type Capability = keyof typeof CAPABILITY_PROBES

@@ -9,6 +9,11 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   ["/admin/customers/:id/billing-profile", "customer", false],
   // F9.5: whether a customer takes commercial messages
   ["/admin/customers/:id/consents", "customer", false],
+  // 2026-11-06: the team's note may name the customer; the carts left behind name
+  // people who did not buy, with their e-mail and phone
+  ["/admin/customers/:id/note", "customer", false],
+  ["/admin/abandoned-carts", "cart", true],
+  ["/admin/abandoned-carts/:id", "cart", false],
   // F9.6: addresses no message goes to (masked, still the shoppers')
   ["/admin/messaging/suppressions", "message_suppression", true],
   ["/admin/customer-groups/:id", "customer_group", false],

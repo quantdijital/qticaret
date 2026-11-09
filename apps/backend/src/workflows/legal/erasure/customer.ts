@@ -5,6 +5,8 @@ import { erasedEmail } from "../../../lib/compliance/retention"
 import { normalizeRecipient } from "../../../lib/messaging/recipients"
 import { BILLING_PROFILE_MODULE } from "../../../modules/billing-profile"
 import type BillingProfileModuleService from "../../../modules/billing-profile/service"
+import { ORDER_NOTES_MODULE } from "../../../modules/order-notes"
+import type OrderNotesModuleService from "../../../modules/order-notes/service"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -99,6 +101,15 @@ export async function eraseCustomer(container: Container, customerId: string) {
     company_name: null,
     metadata: null,
   })
+  // The team's note may name the person (2026-11-06): its text goes with the record
+  const notes = container.resolve<OrderNotesModuleService>(ORDER_NOTES_MODULE)
+  const written = await notes.listCustomerNotes({ customer_id: customerId }, { select: ["id"] })
+  if (written.length > 0) {
+    await notes.updateCustomerNotes(
+      written.map((note) => ({ id: note.id, body: "", updated_by: "kvkk" }))
+    )
+    await notes.softDeleteCustomerNotes(written.map((note) => note.id))
+  }
   // Medusa's deletion only soft-deletes the addresses with the customer
   const addresses = await customers.listCustomerAddresses(
     { customer_id: customerId },

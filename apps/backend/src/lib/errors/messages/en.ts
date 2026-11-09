@@ -423,6 +423,25 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "aras.secret_invalid":
     "Aras Kargo did not accept this user name and password. Copy them again from Aras's integration document; test and live accounts differ.",
   "customers.unknown": "Customer not found.",
+  "customers.email_is_login":
+    "A member's e-mail is their sign-in address; only the customer can change it from their account.",
+  "customers.email_taken": "A guest customer with this e-mail already exists.",
+  "customers.phone_invalid": "The phone number is not valid; write it as 0532 123 45 67.",
+  "customers.guest_only":
+    "Only guest customers are added from the panel; the customer opens their own account.",
+  "customers.note_too_long": "A note can be at most 2000 characters.",
+  "abandoned_carts.unknown": "The cart was not found or became an order.",
+  "abandoned_carts.no_email": "This cart has no e-mail address.",
+  "abandoned_carts.no_consent":
+    "The customer has not consented to commercial e-mail; reminders go to those who did.",
+  "abandoned_carts.suppressed": "Nothing is sent to this address (it is on the block list).",
+  "abandoned_carts.reminded": "A reminder was already sent for this cart.",
+  "abandoned_carts.reminded_lately": "This address got a cart reminder in the last week.",
+  "abandoned_carts.no_storefront":
+    "Enter the shop's domain in the SEO settings first, for the reminder's link.",
+  "messages.unknown": "Message not found.",
+  "messages.not_resendable": "This message cannot be sent again.",
+  "messages.sent_recently": "This message was just sent; try again in 10 minutes.",
   "account.login_email_missing":
     "This sign-in has no e-mail address; the account could not be opened.",
   "messaging.consent_evidence_required":
