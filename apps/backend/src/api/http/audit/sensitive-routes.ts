@@ -66,6 +66,8 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   ["/admin/gift-cards", "gift_card", true],
   ["/admin/gift-cards/:id", "gift_card", false],
   ["/admin/gift-cards/:id/orders", "gift_card", false],
+  // The panel's paged list of them, by code and state
+  ["/admin/gift-card-list", "gift_card", true],
   [
     "/admin/store-credit-accounts",
     "store_credit_account",
