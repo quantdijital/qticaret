@@ -41,6 +41,8 @@ export type MediaUseKind =
   | "category"
   /** The shop's ETBİS QR code (Settings > Store profile > Legal); no `id`. */
   | "etbis_qr"
+  /** A collection's picture: `id` the collection, `label` its title. */
+  | "collection"
 
 export interface MediaUse {
   kind: MediaUseKind

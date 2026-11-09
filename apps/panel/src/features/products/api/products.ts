@@ -163,6 +163,8 @@ const DETAIL_FIELDS = [
   "categories.name",
   "brand.id",
   "brand.name",
+  "collection.id",
+  "collection.title",
   "type.id",
   "type.value",
   "options.id",

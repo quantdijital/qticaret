@@ -79,7 +79,8 @@
     "storefrontPreferences": "Storefront preferences",
     "bulkMessages": "Bulk messages",
     "paymentLinks": "Payment links",
-    "media": "Media library"
+    "media": "Media library",
+    "collections": "Collections"
   },
   "login": {
     "title": "Sign in",
@@ -6365,6 +6366,67 @@
     "noneFound": "No brand found.",
     "noLogo": "No logo"
   },
+  "collections": {
+    "description": "Collections gather products under a theme; each has its own page, picture and products.",
+    "add": "Add collection",
+    "addHint": "Enter its name first; the page address comes from it. Add the picture, text and products on the next page.",
+    "create": "Create collection",
+    "created": "Collection created.",
+    "search": "Search collections…",
+    "empty": "No collections yet. Once you add one, you can gather products and use it in promotions, menus and the storefront.",
+    "noMatch": "No collection matches your search.",
+    "columns": {
+      "collection": "Collection",
+      "products": "Products",
+      "status": "Status"
+    },
+    "active": "Live",
+    "inactive": "Hidden",
+    "general": "General",
+    "name": "Collection name",
+    "nameRequired": "Enter the collection's name.",
+    "handle": "Page address",
+    "handleHint": "If you change it, the old address redirects to the new one for good.",
+    "descriptionLabel": "Description",
+    "descriptionHint": "Shown at the top of the collection page; used in search results when the SEO description is empty. Separate paragraphs with a blank line.",
+    "activeLabel": "Collection page is live",
+    "activeHint": "While off, the page answers 404 and leaves the sitemap; menu links and storefront sections that name it are hidden. Products and promotions are untouched.",
+    "saved": "Collection saved.",
+    "productCount_one": "{{products}} product",
+    "productCount_other": "{{products}} products",
+    "delete": "Delete collection",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteText": "Products stay; they only leave this collection. The collection page answers gone for good (410); check the promotions and menus that link to it.",
+    "deleted": "Collection deleted.",
+    "field": "Collection",
+    "fieldHint": "A product is in one collection.",
+    "pick": "Choose a collection",
+    "noneFound": "No collection found.",
+    "none": "No collection",
+    "image": {
+      "title": "Picture",
+      "hint": "Shown at the top of the collection page; used in shares when the page has no share image of its own.",
+      "add": "Add picture",
+      "alt": "Alt text",
+      "altHint": "A short description for those who cannot see the picture.",
+      "saved": "Picture saved."
+    },
+    "products": {
+      "title": "Products",
+      "hint": "A product is in one collection; adding one from another collection moves it here.",
+      "add": "Add products",
+      "addTitle": "Add products to the collection",
+      "addSome_one": "Add {{products}} product",
+      "addSome_other": "Add {{products}} products",
+      "added_one": "Product added.",
+      "added_other": "{{count}} products added.",
+      "search": "Search the collection's products…",
+      "empty": "No products in this collection yet.",
+      "noMatch": "No product matches your search.",
+      "removeOf": "{{name}}: take out of the collection",
+      "removed": "Product taken out of the collection."
+    }
+  },
   "address": {
     "province": "Province",
     "district": "District",
@@ -8722,7 +8784,8 @@
         "seo": "SEO",
         "order": "Order",
         "category": "Category image",
-        "etbis_qr": "ETBİS QR code"
+        "etbis_qr": "ETBİS QR code",
+        "collection": "Collection picture"
       },
       "seoTypes": {
         "product": "product page",

@@ -5,7 +5,7 @@ import { categoryTreeQuery } from "@/features/categories/api/categories"
 import type { Category } from "@/features/categories/api/categories"
 import { contentListQuery } from "@/features/content/api/content"
 import { landingsQuery } from "@/features/content/api/landings"
-import { collectionsQuery } from "@/features/promotions/api/scope-options"
+import { collectionOptions } from "@/features/collections/api/collections"
 import type { RecordKind } from "@/features/storefront/api/menus"
 import { sdk } from "@/lib/sdk"
 
@@ -21,7 +21,7 @@ export interface LinkOption {
 }
 
 const RESULTS = 20
-// The whole tree and every collection are read once and searched here
+// The whole tree is read once and searched here
 const LOCAL_RESULTS = 50
 const KEEP_MS = 60_000
 
@@ -94,16 +94,15 @@ async function optionsFor(client: QueryClient, kind: RecordKind, q: string) {
       return categoryOptions(await client.query({ ...categoryTreeQuery(), staleTime: KEEP_MS }), q)
     case "product":
       return productOptions(q)
+    // A hidden collection's page is not live (Ürünler > Koleksiyonlar)
     case "collection":
-      return matches(await client.query(collectionsQuery()), q, (each) => each.title).map(
-        (collection): LinkOption => ({
-          id: collection.id,
-          name: collection.title,
-          detail: null,
-          path: null,
-          live: true,
-        })
-      )
+      return (await collectionOptions(q)).map((collection): LinkOption => ({
+        id: collection.id,
+        name: collection.label,
+        detail: null,
+        path: null,
+        live: !collection.inactive,
+      }))
     case "brand":
       return (await brandOptions(q)).map((brand): LinkOption => ({
         id: brand.id,

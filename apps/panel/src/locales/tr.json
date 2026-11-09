@@ -79,7 +79,8 @@
     "storefrontPreferences": "Vitrin tercihleri",
     "bulkMessages": "Toplu ileti",
     "paymentLinks": "Ödeme bağlantıları",
-    "media": "Ortam kütüphanesi"
+    "media": "Ortam kütüphanesi",
+    "collections": "Koleksiyonlar"
   },
   "login": {
     "title": "Giriş yap",
@@ -6365,6 +6366,67 @@
     "noneFound": "Marka bulunamadı.",
     "noLogo": "Logo yok"
   },
+  "collections": {
+    "description": "Koleksiyonlar ürünleri bir tema altında toplar; her birinin kendi sayfası, görseli ve ürünleri olur.",
+    "add": "Koleksiyon ekle",
+    "addHint": "Önce adını girin; sayfa adresi addan oluşur. Görseli, açıklamayı ve ürünleri sonraki sayfada ekleyin.",
+    "create": "Koleksiyonu oluştur",
+    "created": "Koleksiyon oluşturuldu.",
+    "search": "Koleksiyon ara…",
+    "empty": "Henüz koleksiyon yok. Koleksiyon ekleyince ürünleri bir araya toplayabilir, kampanyalarda, menülerde ve vitrinde kullanabilirsiniz.",
+    "noMatch": "Aramanızla eşleşen koleksiyon yok.",
+    "columns": {
+      "collection": "Koleksiyon",
+      "products": "Ürün",
+      "status": "Durum"
+    },
+    "active": "Yayında",
+    "inactive": "Gizli",
+    "general": "Genel",
+    "name": "Koleksiyon adı",
+    "nameRequired": "Koleksiyonun adını girin.",
+    "handle": "Sayfa adresi",
+    "handleHint": "Değiştirirseniz eski adres kalıcı yönlendirmeyle yenisine gider.",
+    "descriptionLabel": "Açıklama",
+    "descriptionHint": "Koleksiyon sayfasının üstünde görünür; SEO açıklaması boşsa arama sonucunda da kullanılır. Paragrafları boş satırla ayırın.",
+    "activeLabel": "Koleksiyon sayfası yayında",
+    "activeHint": "Kapalıyken sayfa 404 verir, site haritasından çıkar; menülerdeki bağlantısı ve vitrin bölümleri gizlenir. Ürünler ve kampanyalar etkilenmez.",
+    "saved": "Koleksiyon kaydedildi.",
+    "productCount_one": "{{products}} ürün",
+    "productCount_other": "{{products}} ürün",
+    "delete": "Koleksiyonu sil",
+    "deleteTitle": "{{name}} silinsin mi?",
+    "deleteText": "Ürünler kalır, yalnızca bu koleksiyondan çıkar. Koleksiyon sayfası kalıcı olarak kaldırıldı (410) yanıtı verir; kampanya ve menülerdeki bağlantıları gözden geçirin.",
+    "deleted": "Koleksiyon silindi.",
+    "field": "Koleksiyon",
+    "fieldHint": "Bir ürün tek bir koleksiyonda olur.",
+    "pick": "Koleksiyon seçin",
+    "noneFound": "Koleksiyon bulunamadı.",
+    "none": "Koleksiyon yok",
+    "image": {
+      "title": "Görsel",
+      "hint": "Koleksiyon sayfasının üstünde görünür; sayfanın kendi paylaşım görseli yoksa paylaşımlarda da kullanılır.",
+      "add": "Görsel ekle",
+      "alt": "Alternatif metin",
+      "altHint": "Görseli göremeyenler için kısa bir tarif.",
+      "saved": "Görsel kaydedildi."
+    },
+    "products": {
+      "title": "Ürünler",
+      "hint": "Bir ürün tek koleksiyonda olur; başka koleksiyondaki bir ürünü eklerseniz oradan buraya taşınır.",
+      "add": "Ürün ekle",
+      "addTitle": "Koleksiyona ürün ekle",
+      "addSome_one": "{{products}} ürünü ekle",
+      "addSome_other": "{{products}} ürünü ekle",
+      "added_one": "Ürün eklendi.",
+      "added_other": "{{count}} ürün eklendi.",
+      "search": "Koleksiyonda ürün ara…",
+      "empty": "Bu koleksiyonda henüz ürün yok.",
+      "noMatch": "Aramanızla eşleşen ürün yok.",
+      "removeOf": "{{name}}: koleksiyondan çıkar",
+      "removed": "Ürün koleksiyondan çıkarıldı."
+    }
+  },
   "address": {
     "province": "İl",
     "district": "İlçe",
@@ -8722,7 +8784,8 @@
         "seo": "SEO",
         "order": "Sipariş",
         "category": "Kategori görseli",
-        "etbis_qr": "ETBİS karekodu"
+        "etbis_qr": "ETBİS karekodu",
+        "collection": "Koleksiyon görseli"
       },
       "seoTypes": {
         "product": "ürün sayfası",

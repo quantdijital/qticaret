@@ -10,6 +10,7 @@ import type { PickerOption } from "@/components/patterns/search-picker"
 import { useRevealTarget } from "@/components/patterns/use-section-open"
 import { DialogBody } from "@/components/ui/dialog"
 import { brandOptions, useSetProductBrand } from "@/features/brands/api/brands"
+import { collectionOptions } from "@/features/collections/api/collections"
 import { findingsNote } from "@/features/content/section-findings"
 import type { SectionFindings } from "@/features/content/section-findings"
 import { useUpdateProduct } from "@/features/products/api/products"
@@ -25,6 +26,7 @@ interface Values {
   category_ids: string[]
   type_id: string
   brand: PickerOption | null
+  collection: PickerOption | null
 }
 
 // The brand comes through a link (F3.11): Medusa's product type does not name it
@@ -33,13 +35,17 @@ const brandOf = (product: ProductDetail): PickerOption | null => {
   return brand ? { id: brand.id, label: brand.name } : null
 }
 
+const collectionOf = (product: ProductDetail): PickerOption | null =>
+  product.collection ? { id: product.collection.id, label: product.collection.title } : null
+
 const savedOf = (product: ProductDetail): Values => ({
   category_ids: (product.categories ?? []).map((category) => category.id),
   type_id: product.type?.id ?? "",
   brand: brandOf(product),
+  collection: collectionOf(product),
 })
 
-/** Categories, brand and KDV group in a dialog; each saved where it is kept. */
+/** Categories, brand, collection and KDV group in a dialog; each saved where it is kept. */
 function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose: () => void }) {
   const { t } = useTranslation()
   const update = useUpdateProduct(product.id)
@@ -49,10 +55,15 @@ function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose:
   const submit = form.handleSubmit(async (values) => {
     const { dirtyFields } = form.formState
     try {
-      if (dirtyFields.category_ids || dirtyFields.type_id) {
+      if (dirtyFields.category_ids || dirtyFields.type_id || dirtyFields.collection) {
         await update.mutateAsync({
-          categories: values.category_ids.map((id) => ({ id })),
-          type_id: values.type_id || null,
+          ...(dirtyFields.category_ids || dirtyFields.type_id
+            ? {
+                categories: values.category_ids.map((id) => ({ id })),
+                type_id: values.type_id || null,
+              }
+            : {}),
+          ...(dirtyFields.collection ? { collection_id: values.collection?.id ?? null } : {}),
         })
       }
       if (dirtyFields.brand) {
@@ -106,6 +117,28 @@ function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose:
           />
         </Field>
         <Field
+          label={t("collections.field")}
+          htmlFor="detail-collection"
+          hint={t("collections.fieldHint")}
+        >
+          <Controller
+            control={form.control}
+            name="collection"
+            render={({ field }) => (
+              <SearchPicker
+                id="detail-collection"
+                value={field.value}
+                onChange={field.onChange}
+                search={collectionOptions}
+                queryKey={["collections", "options"]}
+                placeholder={t("collections.pick")}
+                empty={t("collections.noneFound")}
+                inactiveNote={t("collections.inactive")}
+              />
+            )}
+          />
+        </Field>
+        <Field
           label={t("products.wizard.vat")}
           htmlFor="detail-vat"
           hint={t("products.wizard.vatHint")}
@@ -124,9 +157,9 @@ function OrganizeDialog({ product, onClose }: { product: ProductDetail; onClose:
 }
 
 /**
- * Where the product is listed, under which brand, and which KDV group it
- * is taxed in, in the page's narrow column (docs/06 "Ürün sayfası"): a
- * line each, "Düzenle" opens them in a dialog, as does the advisor's
+ * Where the product is listed, under which brand and in which collection,
+ * and which KDV group it is taxed in, in the page's narrow column (docs/06
+ * "Ürün sayfası"): a line each, "Düzenle" opens them in a dialog, as does the advisor's
  * "Alana git" for a missing category or brand.
  */
 export function OrganizeCard({
@@ -163,6 +196,11 @@ export function OrganizeCard({
           label: t("brands.field"),
           value: saved.brand?.label ?? t("products.sections.noBrand"),
           empty: !saved.brand,
+        },
+        {
+          label: t("collections.field"),
+          value: saved.collection?.label ?? t("collections.none"),
+          empty: !saved.collection,
         },
         { label: t("products.wizard.vat"), value: rate ? vatLabelOf(rate) : "—" },
       ]}

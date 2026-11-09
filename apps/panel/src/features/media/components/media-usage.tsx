@@ -37,6 +37,12 @@ function Place({ use }: { use: MediaUse }) {
           {name}
         </Link>
       )
+    case "collection":
+      return (
+        <Link to="/collections/$id" params={{ id }} className={LINK}>
+          {name}
+        </Link>
+      )
     case "landing":
       return (
         <Link to="/content/landings/$id" params={{ id }} className={LINK}>

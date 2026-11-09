@@ -84,7 +84,7 @@ function ActionLabel({ action }: { action: string }) {
   )
 }
 
-/** The page of the record an item names; collections have no page in the panel yet. */
+/** The page of the record an item names. */
 function EntityLink({ entity }: { entity: NonNullable<AuditItem["entity"]> }) {
   switch (entity.kind) {
     case "product":
@@ -129,7 +129,13 @@ function EntityLink({ entity }: { entity: NonNullable<AuditItem["entity"]> }) {
         </GoTo>
       )
     case "collection":
-      return null
+      return (
+        <GoTo>
+          <Link to="/collections/$id" params={{ id: entity.id }}>
+            <ActionLabel action="openPage" />
+          </Link>
+        </GoTo>
+      )
   }
 }
 

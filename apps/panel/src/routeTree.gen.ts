@@ -26,6 +26,8 @@ import { Route as AuthBrandsIndexRouteImport } from './routes/_auth/brands/index
 import { Route as AuthBrandsIdRouteImport } from './routes/_auth/brands/$id'
 import { Route as AuthBulkMessagesIndexRouteImport } from './routes/_auth/bulk-messages/index'
 import { Route as AuthBulkMessagesIdRouteImport } from './routes/_auth/bulk-messages/$id'
+import { Route as AuthCollectionsIndexRouteImport } from './routes/_auth/collections/index'
+import { Route as AuthCollectionsIdRouteImport } from './routes/_auth/collections/$id'
 import { Route as AuthContentIndexRouteImport } from './routes/_auth/content/index'
 import { Route as AuthContentIdRouteImport } from './routes/_auth/content/$id'
 import { Route as AuthCustomersIndexRouteImport } from './routes/_auth/customers/index'
@@ -182,6 +184,16 @@ const AuthBulkMessagesIndexRoute = AuthBulkMessagesIndexRouteImport.update({
 const AuthBulkMessagesIdRoute = AuthBulkMessagesIdRouteImport.update({
   id: '/bulk-messages/$id',
   path: '/bulk-messages/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthCollectionsIndexRoute = AuthCollectionsIndexRouteImport.update({
+  id: '/collections/',
+  path: '/collections/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthCollectionsIdRoute = AuthCollectionsIdRouteImport.update({
+  id: '/collections/$id',
+  path: '/collections/$id',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthContentIndexRoute = AuthContentIndexRouteImport.update({
@@ -584,6 +596,7 @@ export interface FileRoutesByFullPath {
   '/security/setup': typeof SecuritySetupRoute
   '/brands/$id': typeof AuthBrandsIdRoute
   '/bulk-messages/$id': typeof AuthBulkMessagesIdRoute
+  '/collections/$id': typeof AuthCollectionsIdRoute
   '/content/$id': typeof AuthContentIdRoute
   '/customers/$id': typeof AuthCustomersIdRoute
   '/customers/abandoned-carts': typeof AuthCustomersAbandonedCartsRoute
@@ -636,6 +649,7 @@ export interface FileRoutesByFullPath {
   '/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/brands/': typeof AuthBrandsIndexRoute
   '/bulk-messages/': typeof AuthBulkMessagesIndexRoute
+  '/collections/': typeof AuthCollectionsIndexRoute
   '/content/': typeof AuthContentIndexRoute
   '/customers/': typeof AuthCustomersIndexRoute
   '/orders/': typeof AuthOrdersIndexRoute
@@ -673,6 +687,7 @@ export interface FileRoutesByTo {
   '/security/setup': typeof SecuritySetupRoute
   '/brands/$id': typeof AuthBrandsIdRoute
   '/bulk-messages/$id': typeof AuthBulkMessagesIdRoute
+  '/collections/$id': typeof AuthCollectionsIdRoute
   '/content/$id': typeof AuthContentIdRoute
   '/customers/$id': typeof AuthCustomersIdRoute
   '/customers/abandoned-carts': typeof AuthCustomersAbandonedCartsRoute
@@ -725,6 +740,7 @@ export interface FileRoutesByTo {
   '/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/brands': typeof AuthBrandsIndexRoute
   '/bulk-messages': typeof AuthBulkMessagesIndexRoute
+  '/collections': typeof AuthCollectionsIndexRoute
   '/content': typeof AuthContentIndexRoute
   '/customers': typeof AuthCustomersIndexRoute
   '/orders': typeof AuthOrdersIndexRoute
@@ -767,6 +783,7 @@ export interface FileRoutesById {
   '/_auth/': typeof AuthIndexRoute
   '/_auth/brands/$id': typeof AuthBrandsIdRoute
   '/_auth/bulk-messages/$id': typeof AuthBulkMessagesIdRoute
+  '/_auth/collections/$id': typeof AuthCollectionsIdRoute
   '/_auth/content/$id': typeof AuthContentIdRoute
   '/_auth/customers/$id': typeof AuthCustomersIdRoute
   '/_auth/customers/abandoned-carts': typeof AuthCustomersAbandonedCartsRoute
@@ -819,6 +836,7 @@ export interface FileRoutesById {
   '/_fullscreen/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/_auth/brands/': typeof AuthBrandsIndexRoute
   '/_auth/bulk-messages/': typeof AuthBulkMessagesIndexRoute
+  '/_auth/collections/': typeof AuthCollectionsIndexRoute
   '/_auth/content/': typeof AuthContentIndexRoute
   '/_auth/customers/': typeof AuthCustomersIndexRoute
   '/_auth/orders/': typeof AuthOrdersIndexRoute
@@ -860,6 +878,7 @@ export interface FileRouteTypes {
     | '/security/setup'
     | '/brands/$id'
     | '/bulk-messages/$id'
+    | '/collections/$id'
     | '/content/$id'
     | '/customers/$id'
     | '/customers/abandoned-carts'
@@ -912,6 +931,7 @@ export interface FileRouteTypes {
     | '/storefront/editor'
     | '/brands/'
     | '/bulk-messages/'
+    | '/collections/'
     | '/content/'
     | '/customers/'
     | '/orders/'
@@ -949,6 +969,7 @@ export interface FileRouteTypes {
     | '/security/setup'
     | '/brands/$id'
     | '/bulk-messages/$id'
+    | '/collections/$id'
     | '/content/$id'
     | '/customers/$id'
     | '/customers/abandoned-carts'
@@ -1001,6 +1022,7 @@ export interface FileRouteTypes {
     | '/storefront/editor'
     | '/brands'
     | '/bulk-messages'
+    | '/collections'
     | '/content'
     | '/customers'
     | '/orders'
@@ -1042,6 +1064,7 @@ export interface FileRouteTypes {
     | '/_auth/'
     | '/_auth/brands/$id'
     | '/_auth/bulk-messages/$id'
+    | '/_auth/collections/$id'
     | '/_auth/content/$id'
     | '/_auth/customers/$id'
     | '/_auth/customers/abandoned-carts'
@@ -1094,6 +1117,7 @@ export interface FileRouteTypes {
     | '/_fullscreen/storefront/editor'
     | '/_auth/brands/'
     | '/_auth/bulk-messages/'
+    | '/_auth/collections/'
     | '/_auth/content/'
     | '/_auth/customers/'
     | '/_auth/orders/'
@@ -1249,6 +1273,20 @@ declare module '@tanstack/react-router' {
       path: '/bulk-messages/$id'
       fullPath: '/bulk-messages/$id'
       preLoaderRoute: typeof AuthBulkMessagesIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/collections/': {
+      id: '/_auth/collections/'
+      path: '/collections'
+      fullPath: '/collections/'
+      preLoaderRoute: typeof AuthCollectionsIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/collections/$id': {
+      id: '/_auth/collections/$id'
+      path: '/collections/$id'
+      fullPath: '/collections/$id'
+      preLoaderRoute: typeof AuthCollectionsIdRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/content/': {
@@ -1875,6 +1913,7 @@ interface AuthRouteChildren {
   AuthIndexRoute: typeof AuthIndexRoute
   AuthBrandsIdRoute: typeof AuthBrandsIdRoute
   AuthBulkMessagesIdRoute: typeof AuthBulkMessagesIdRoute
+  AuthCollectionsIdRoute: typeof AuthCollectionsIdRoute
   AuthContentIdRoute: typeof AuthContentIdRoute
   AuthCustomersIdRoute: typeof AuthCustomersIdRoute
   AuthCustomersAbandonedCartsRoute: typeof AuthCustomersAbandonedCartsRoute
@@ -1900,6 +1939,7 @@ interface AuthRouteChildren {
   AuthStorefrontPreferencesRoute: typeof AuthStorefrontPreferencesRoute
   AuthBrandsIndexRoute: typeof AuthBrandsIndexRoute
   AuthBulkMessagesIndexRoute: typeof AuthBulkMessagesIndexRoute
+  AuthCollectionsIndexRoute: typeof AuthCollectionsIndexRoute
   AuthContentIndexRoute: typeof AuthContentIndexRoute
   AuthCustomersIndexRoute: typeof AuthCustomersIndexRoute
   AuthOrdersIndexRoute: typeof AuthOrdersIndexRoute
@@ -1923,6 +1963,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthIndexRoute: AuthIndexRoute,
   AuthBrandsIdRoute: AuthBrandsIdRoute,
   AuthBulkMessagesIdRoute: AuthBulkMessagesIdRoute,
+  AuthCollectionsIdRoute: AuthCollectionsIdRoute,
   AuthContentIdRoute: AuthContentIdRoute,
   AuthCustomersIdRoute: AuthCustomersIdRoute,
   AuthCustomersAbandonedCartsRoute: AuthCustomersAbandonedCartsRoute,
@@ -1948,6 +1989,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthStorefrontPreferencesRoute: AuthStorefrontPreferencesRoute,
   AuthBrandsIndexRoute: AuthBrandsIndexRoute,
   AuthBulkMessagesIndexRoute: AuthBulkMessagesIndexRoute,
+  AuthCollectionsIndexRoute: AuthCollectionsIndexRoute,
   AuthContentIndexRoute: AuthContentIndexRoute,
   AuthCustomersIndexRoute: AuthCustomersIndexRoute,
   AuthOrdersIndexRoute: AuthOrdersIndexRoute,

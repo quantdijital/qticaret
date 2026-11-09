@@ -32,6 +32,13 @@ interface RecordPickerDialogProps {
   full?: boolean
   onToggle: (option: LinkOption) => void
   onClose: () => void
+  /**
+   * With `multiple`, the ticks are only kept by this button (a collection's
+   * "Ekle"); closing otherwise drops them. Without it, "Tamam" closes.
+   */
+  done?: { label: string; busy?: boolean; onDone: () => void }
+  /** The title in place of the kind's own. */
+  title?: string
 }
 
 /**
@@ -46,6 +53,8 @@ export function RecordPickerDialog({
   full = false,
   onToggle,
   onClose,
+  done,
+  title,
 }: RecordPickerDialogProps) {
   const { t } = useTranslation()
   const [q, setQ] = useState("")
@@ -62,7 +71,7 @@ export function RecordPickerDialog({
     >
       <DialogContent pane="fixed">
         <DialogHeader>
-          <DialogTitle>{t(`${R}.pick.${kind}`)}</DialogTitle>
+          <DialogTitle>{title ?? t(`${R}.pick.${kind}`)}</DialogTitle>
           <DialogDescription>{t(multiple ? `${R}.pickMany` : `${R}.pickOne`)}</DialogDescription>
         </DialogHeader>
         <SearchInput
@@ -127,7 +136,21 @@ export function RecordPickerDialog({
             </ul>
           )}
         </DialogBody>
-        {multiple ? (
+        {multiple && done ? (
+          <DialogFooter>
+            <Button type="button" variant="outline" disabled={done.busy} onClick={onClose}>
+              {t("common.cancel")}
+            </Button>
+            <Button
+              type="button"
+              disabled={(done.busy ?? false) || chosen.length === 0}
+              onClick={done.onDone}
+            >
+              {done.busy ? <Loader2 className="animate-spin" /> : null}
+              {done.label}
+            </Button>
+          </DialogFooter>
+        ) : multiple ? (
           <DialogFooter>
             <Button type="button" onClick={onClose}>
               {t(`${R}.done`)}
