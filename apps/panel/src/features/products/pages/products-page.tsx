@@ -12,10 +12,14 @@ import { ErrorState } from "@/components/patterns/states"
 import { Button } from "@/components/ui/button"
 import type { BulkAction } from "@/features/products/api/bulk"
 import { PAGE_SIZE, productCountsQuery, productsQuery } from "@/features/products/api/products"
+import type { ProductFilters } from "@/features/products/api/products"
 import { BulkBar } from "@/features/products/bulk/bulk-bar"
 import { BulkEditDialog } from "@/features/products/bulk/bulk-edit-dialog"
 import { FactsDialog } from "@/features/attributes/facts/facts-dialog"
 import { useProductColumns } from "@/features/products/components/product-columns"
+import { ProductFilterBar } from "@/features/products/components/product-filters"
+import type { FilterValues } from "@/features/products/components/product-filters"
+import { useDuplicateAndOpen } from "@/features/products/use-duplicate"
 import { SheetExportMenu } from "@/features/products/components/sheet-export-menu"
 import { SheetImportDialog } from "@/features/products/components/sheet-import-dialog"
 import { productScoresQuery } from "@/features/seo/api/advisor"
@@ -31,27 +35,54 @@ export function ProductsPage() {
   const status = search.status ?? "all"
   const page = (search.page ?? 1) - 1
   const q = search.q ?? ""
-  const list = useQuery(productsQuery({ q, status, page }))
+  const values: FilterValues = {
+    category: search.category,
+    brand: search.brand,
+    stock: search.stock,
+    missing: search.missing,
+    kind: search.kind,
+    sort: search.sort,
+  }
+  const filters: ProductFilters = { q, status, ...values }
+  const list = useQuery(productsQuery({ ...filters, page }))
   const counts = useQuery(productCountsQuery())
   const scores = useQuery(
     productScoresQuery((list.data?.products ?? []).map((product) => product.id))
   )
+  const duplicate = useDuplicateAndOpen()
   const columns = useProductColumns(
-    new Map((scores.data ?? []).map((score) => [score.entity_id, score]))
+    new Map((scores.data ?? []).map((score) => [score.entity_id, score])),
+    (product) => {
+      duplicate.run(product.id)
+    }
   )
+  // A search or a filter that can leave products out: the empty list says "no match"
+  const filtered =
+    q !== "" ||
+    Boolean(values.category ?? values.brand ?? values.stock ?? values.missing ?? values.kind)
   const [importing, setImporting] = useState(false)
   // Picks stay across pages and searches until a bulk change is made or they are let go
   const [selected, setSelected] = useState<Set<string>>(() => new Set())
   const [bulkAction, setBulkAction] = useState<BulkAction | null>(null)
   // The products whose descriptions' facts are being brought over; none while closed
   const [factsFor, setFactsFor] = useState<string[]>([])
-  const setSearch = (next: { q?: string; status?: typeof status; page?: number }) => {
+  // A change of search, view or filter starts from the first page
+  const setSearch = (
+    next: { q?: string; status?: typeof status; page?: number } & Partial<FilterValues>
+  ) => {
+    const merged = { ...values, ...next }
     void navigate({
       to: "/products",
       search: {
         q: (next.q ?? q) || undefined,
         status: (next.status ?? status) === "all" ? undefined : (next.status ?? status),
         page: next.page && next.page > 1 ? next.page : undefined,
+        category: merged.category,
+        brand: merged.brand,
+        stock: merged.stock,
+        missing: merged.missing,
+        kind: merged.kind,
+        sort: merged.sort,
       },
       replace: true,
     })
@@ -120,7 +151,7 @@ export function ProductsPage() {
             { key: "draft", label: t("products.tabs.draft"), count: counts.data?.draft },
           ]}
         />
-        <div className="flex flex-wrap items-center gap-3 px-5 py-3">
+        <div className="flex flex-col gap-3 px-5 py-3">
           <SearchInput
             value={q}
             placeholder={t("products.search")}
@@ -128,12 +159,21 @@ export function ProductsPage() {
               setSearch({ q: text, page: 1 })
             }}
           />
+          <ProductFilterBar
+            values={values}
+            onChange={(next) => {
+              setSearch({ ...next, page: 1 })
+            }}
+          />
+          {list.data?.limited ? (
+            <p className="text-xs text-muted-foreground">{t("products.filters.limited")}</p>
+          ) : null}
         </div>
         {selected.size > 0 ? (
           <BulkBar
             selected={selected}
             onSelect={setSelected}
-            filters={{ q, status }}
+            filters={filters}
             total={list.data?.count ?? 0}
             onAction={setBulkAction}
             onFacts={() => {
@@ -165,9 +205,9 @@ export function ProductsPage() {
                 <div className="flex flex-col items-center gap-3 text-center">
                   <PackageOpen className="size-8 text-muted-foreground" aria-hidden="true" />
                   <p className="text-sm text-muted-foreground">
-                    {q ? t("products.noMatch") : t("products.empty")}
+                    {filtered ? t("products.noMatch") : t("products.empty")}
                   </p>
-                  {q ? null : (
+                  {filtered ? null : (
                     <Button asChild size="sm">
                       <Link to="/products/new">
                         <Plus />

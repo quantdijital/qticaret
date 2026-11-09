@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { MAX_BULK_PRODUCTS, matchingProductIds } from "@/features/products/api/bulk"
 import type { BulkAction } from "@/features/products/api/bulk"
-import type { ProductListParams } from "@/features/products/api/products"
+import type { ProductFilters } from "@/features/products/api/products"
 import { useCan } from "@/features/auth/api/staff"
 import { errorText } from "@/lib/errors"
 import { formatCount } from "@/lib/format"
@@ -24,7 +24,7 @@ interface BulkBarProps {
   selected: ReadonlySet<string>
   onSelect: (ids: Set<string>) => void
   /** The list's search and view, for "select all that match". */
-  filters: Omit<ProductListParams, "page">
+  filters: ProductFilters
   /** How many products the list holds. */
   total: number
   onAction: (action: BulkAction) => void

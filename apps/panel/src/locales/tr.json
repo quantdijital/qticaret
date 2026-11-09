@@ -2898,7 +2898,8 @@
       "variants": "Varyant",
       "category": "Kategori",
       "updated": "Son değişiklik",
-      "price": "Fiyat"
+      "price": "Fiyat",
+      "actions": "İşlemler"
     },
     "errors": {
       "title": "Ürün adı en az 2 karakter olmalı.",
@@ -3113,7 +3114,10 @@
       "shortDescription": "Kısa açıklama",
       "shortDescriptionHint": "Ürün adının altında, fiyatın üstünde yazdığınız gibi görünür. İsteğe bağlı, en çok 1.500 karakter. SEO açıklaması yazılmamışsa arama sonucundaki açıklama da buradan alınır.",
       "shortDescriptionPlaceholder": "Örn. Ürünü birkaç cümleyle tanıtın: malzeme, ölçü, kullanım.",
-      "organize": "Kategori, marka ve KDV"
+      "organize": "Kategori, marka ve KDV",
+      "viewOnStore": "Vitrinde gör",
+      "preview": "Önizle",
+      "previewReady": "Önizleme yeni sekmede açıldı ve bağlantısı kopyalandı. Bağlantı 24 saat ya da ürün yeniden kaydedilene kadar geçerli."
     },
     "sections": {
       "noTemplate": "Şablon seçilmedi",
@@ -3544,6 +3548,52 @@
         "preorder": "Ön sipariş",
         "noBarcode": "Barkod yok"
       }
+    },
+    "rowActions": "{{title}} işlemleri",
+    "duplicate": {
+      "action": "Kopyala",
+      "done": "{{title}} oluşturuldu; taslak olarak açıldı. Stok kodu, barkod ve stok boş bırakıldı."
+    },
+    "filters": {
+      "category": "Kategori",
+      "anyCategory": "Tüm kategoriler",
+      "anyBrand": "Tüm markalar",
+      "stock": "Stok",
+      "anyStock": "Tüm stok durumları",
+      "stocks": {
+        "in": "Stokta",
+        "low": "Az kaldı",
+        "out": "Tükendi"
+      },
+      "missing": "Eksik",
+      "anyMissing": "Eksik bilgi: tümü",
+      "missings": {
+        "image": "Görseli yok",
+        "price": "Fiyatı yok",
+        "description": "Açıklaması yok",
+        "seo": "SEO'su zayıf"
+      },
+      "kind": "Tür",
+      "anyKind": "Tüm ürün türleri",
+      "kinds": {
+        "physical": "Fiziksel",
+        "digital": "Dijital",
+        "service": "Hizmet"
+      },
+      "sort": "Sırala",
+      "sorts": {
+        "updated": "Son değişiklik",
+        "newest": "En yeni",
+        "oldest": "En eski",
+        "title": "Ad (A–Z)",
+        "title_desc": "Ad (Z–A)",
+        "price": "Fiyat (artan)",
+        "price_desc": "Fiyat (azalan)",
+        "stock": "Stok (az olan önce)",
+        "stock_desc": "Stok (çok olan önce)"
+      },
+      "clear": "Filtreleri temizle",
+      "limited": "Bu filtre en yeni 5.000 ürüne bakar; daha eskiler listede görünmüyor."
     }
   },
   "orders": {
@@ -6866,7 +6916,6 @@
     "copy": "Kodu kopyala",
     "copyFailed": "Kod kopyalanamadı; seçip elle kopyalayın.",
     "empty": "Henüz hediye kartı yok.",
-    "truncated": "En yeni {{shown}} kart gösteriliyor; mağazada toplam {{total}} kart var.",
     "off": "Hediye kartları kapalı. Açtığınızda müşterilere hediye kartı ve mağaza kredisi verebilirsiniz.",
     "turnOn": "Özelliklere git",
     "columns": {
@@ -6899,7 +6948,17 @@
       "noteWith": "Kart panelden kapatıldı: {{reason}}",
       "done": "Kart kapatıldı; kalan {{amount}} sıfırlandı.",
       "empty": "Kartta bakiye kalmamıştı; bir şey değişmedi."
-    }
+    },
+    "search": "Kodla ara (tamamı ya da baş harfleri)",
+    "noMatch": "Aramanızla eşleşen kart yok.",
+    "views": "Kart görünümleri",
+    "tabs": {
+      "all": "Tümü",
+      "active": "Kullanılabilir",
+      "used": "Kullanıldı",
+      "expired": "Süresi doldu"
+    },
+    "limited": "Bu görünüm en yeni 5.000 karta bakar; daha eskiler listede görünmüyor."
   },
   "storeCredit": {
     "title": "Mağaza kredisi",

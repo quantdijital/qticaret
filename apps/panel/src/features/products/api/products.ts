@@ -2,6 +2,12 @@ import { keepPreviousData, queryOptions, useMutation, useQueryClient } from "@ta
 import { sdk } from "@/lib/sdk"
 import { MEDIA_FIELDS, isMediaSettling } from "@/features/products/api/media"
 import type { ProductMedia } from "@/features/products/api/media"
+import type {
+  KindFilter,
+  MissingFilter,
+  ProductSort,
+  StockFilter,
+} from "@/features/products/search"
 
 export type ProductStatus = "draft" | "proposed" | "published" | "rejected"
 export const PAGE_SIZE = 20
@@ -25,24 +31,84 @@ const LIST_FIELDS = [
   "product_extension.is_gift_card",
 ].join(",")
 
-export interface ProductListParams {
+/** What the list shows: its search, view and filters (`search.ts`); none of them is a page. */
+export interface ProductFilters {
   q: string
   status: ProductStatus | "all"
+  category?: string | undefined
+  brand?: string | undefined
+  stock?: StockFilter | undefined
+  missing?: MissingFilter | undefined
+  kind?: KindFilter | undefined
+  sort?: ProductSort | undefined
+}
+
+export interface ProductListParams extends ProductFilters {
   page: number
 }
 
-export const productsQuery = ({ q, status, page }: ProductListParams) =>
+// The list's orders as the server names them
+const ORDER: Record<ProductSort, string> = {
+  updated: "-updated_at",
+  newest: "-created_at",
+  oldest: "created_at",
+  title: "title",
+  title_desc: "-title",
+  price: "price",
+  price_desc: "-price",
+  stock: "stock",
+  stock_desc: "-stock",
+}
+
+export interface ProductBoard {
+  ids: string[]
+  count: number
+  /** A filter over stock, prices or what is missing read only the newest products. */
+  limited: boolean
+}
+
+/**
+ * The ids of the products the filters hold, in the order asked
+ * (`GET /admin/product-board`): Medusa's own list cannot filter by brand,
+ * stock or what is missing, nor order by price or stock.
+ */
+export const productBoard = (filters: ProductFilters, offset: number, limit: number) =>
+  sdk.client.fetch<ProductBoard>("/admin/product-board", {
+    query: {
+      ...(filters.q ? { q: filters.q } : {}),
+      ...(filters.status === "all" ? {} : { status: filters.status }),
+      ...(filters.category ? { category_id: filters.category } : {}),
+      ...(filters.brand ? { brand_id: filters.brand } : {}),
+      ...(filters.stock ? { stock: filters.stock } : {}),
+      ...(filters.missing ? { missing: filters.missing } : {}),
+      ...(filters.kind ? { kind: filters.kind } : {}),
+      order: ORDER[filters.sort ?? "updated"],
+      offset,
+      limit,
+    },
+  })
+
+/** A page: the board's ids, then those products with what a row shows, in the board's order. */
+export const productsQuery = ({ page, ...filters }: ProductListParams) =>
   queryOptions({
-    queryKey: ["products", "list", { q, status, page }],
-    queryFn: () =>
-      sdk.admin.product.list({
+    queryKey: ["products", "list", { ...filters, page }],
+    queryFn: async () => {
+      const board = await productBoard(filters, page * PAGE_SIZE, PAGE_SIZE)
+      if (board.ids.length === 0) {
+        return { products: [], count: board.count, limited: board.limited }
+      }
+      const { products } = await sdk.admin.product.list({
+        id: board.ids,
         fields: LIST_FIELDS,
-        limit: PAGE_SIZE,
-        offset: page * PAGE_SIZE,
-        order: "-updated_at",
-        ...(q ? { q } : {}),
-        ...(status === "all" ? {} : { status: [status] }),
-      }),
+        limit: board.ids.length,
+      })
+      const byId = new Map(products.map((product) => [product.id, product]))
+      return {
+        products: board.ids.flatMap((id) => byId.get(id) ?? []),
+        count: board.count,
+        limited: board.limited,
+      }
+    },
     placeholderData: keepPreviousData,
   })
 
@@ -160,6 +226,41 @@ export function useUpdateProduct(id: string) {
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ["products"] })
     },
+  })
+}
+
+/** "Kopyala" (owner 2026-11-06): a draft copy on a free address; resolves with the copy. */
+export function useDuplicateProduct() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: async (id: string) =>
+      (
+        await sdk.client.fetch<{ product: { id: string; handle: string; title: string } }>(
+          `/admin/products/${encodeURIComponent(id)}/duplicate`,
+          { method: "POST" }
+        )
+      ).product,
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: ["products"] })
+      await client.invalidateQueries({ queryKey: ["dashboard"] })
+    },
+  })
+}
+
+/** Where a product is seen: its live page, or a draft's signed preview for a day (F18). */
+export interface StorefrontLink {
+  live: boolean
+  url: string
+  path: string
+  expires_at: string | null
+}
+
+export function useProductStorefrontLink(id: string) {
+  return useMutation({
+    mutationFn: () =>
+      sdk.client.fetch<StorefrontLink>(`/admin/products/${encodeURIComponent(id)}/preview`, {
+        method: "POST",
+      }),
   })
 }
 

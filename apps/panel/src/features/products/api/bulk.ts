@@ -1,6 +1,7 @@
 import { sdk } from "@/lib/sdk"
 import type { SheetJob } from "@/features/products/api/sheets"
-import type { ProductListParams } from "@/features/products/api/products"
+import { productBoard } from "@/features/products/api/products"
+import type { ProductFilters } from "@/features/products/api/products"
 
 /** Bulk edit (F3.10): one change to the products picked, run as a job on the server. */
 
@@ -39,26 +40,12 @@ export const startBulkEdit = async (productIds: string[], change: BulkChange) =>
   ).async_job
 
 /**
- * Every product the list's search and view hold, for "select all": their
- * ids and how many there are. Past the limit the ids are not read at all.
+ * Every product the list's search, view and filters hold, for "select
+ * all": their ids and how many there are. Past the limit no id is taken.
  */
-export async function matchingProductIds({
-  q,
-  status,
-}: Omit<ProductListParams, "page">): Promise<{ ids: string[]; count: number }> {
-  const filters = {
-    ...(q ? { q } : {}),
-    ...(status === "all" ? {} : { status: [status] }),
-  }
-  const { count } = await sdk.admin.product.list({ fields: "id", limit: 1, ...filters })
-  if (count > MAX_BULK_PRODUCTS) {
-    return { ids: [], count }
-  }
-  const { products } = await sdk.admin.product.list({
-    fields: "id",
-    limit: MAX_BULK_PRODUCTS,
-    order: "-updated_at",
-    ...filters,
-  })
-  return { ids: products.map((product) => product.id), count }
+export async function matchingProductIds(
+  filters: ProductFilters
+): Promise<{ ids: string[]; count: number }> {
+  const { ids, count } = await productBoard(filters, 0, MAX_BULK_PRODUCTS)
+  return { ids: count > MAX_BULK_PRODUCTS ? [] : ids, count }
 }

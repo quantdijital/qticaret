@@ -4,6 +4,7 @@ import type { Column } from "@/components/patterns/data-table"
 import { Badge } from "@/components/ui/badge"
 import { isGiftCardProduct } from "@/features/products/api/products"
 import type { ProductListItem } from "@/features/products/api/products"
+import { ProductRowMenu } from "@/features/products/components/product-row-menu"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
 import { ProductThumb } from "@/features/products/components/product-thumb"
 import { availableStock, priceRange } from "@/features/products/product-math"
@@ -17,9 +18,13 @@ const CURRENCY = "try"
 // docs/18: low stock reads amber from here down (adr/0020 brings per-item thresholds)
 const LOW_STOCK = 5
 
-/** The product list's columns: picture and name, status, stock, variants, category, SEO, price. */
+/**
+ * The product list's columns: picture and name, status, stock, variants,
+ * category, SEO, price, and the row's ⋯ menu (copying it).
+ */
 export function useProductColumns(
-  scores: ReadonlyMap<string, StoredAssessment>
+  scores: ReadonlyMap<string, StoredAssessment>,
+  onDuplicate: (product: ProductListItem) => void
 ): Column<ProductListItem>[] {
   const { t } = useTranslation()
   const prefix = useProductPathPrefix()
@@ -147,6 +152,13 @@ export function useProductColumns(
           </span>
         )
       },
+    },
+    {
+      key: "actions",
+      header: <span className="sr-only">{t("products.columns.actions")}</span>,
+      align: "right",
+      className: "w-12",
+      cell: (product) => <ProductRowMenu product={product} onDuplicate={onDuplicate} />,
     },
   ]
 }

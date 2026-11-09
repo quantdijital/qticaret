@@ -2898,7 +2898,8 @@
       "variants": "Variants",
       "category": "Category",
       "updated": "Last change",
-      "price": "Price"
+      "price": "Price",
+      "actions": "Actions"
     },
     "errors": {
       "title": "The product name needs at least 2 characters.",
@@ -3113,7 +3114,10 @@
       "shortDescription": "Short description",
       "shortDescriptionHint": "Shows as written under the product name, above the price. Optional, at most 1,500 characters. Without an SEO description of its own, the search result’s description is taken from it too.",
       "shortDescriptionPlaceholder": "E.g. Introduce the product in a few sentences: material, size, use.",
-      "organize": "Categories, brand and VAT"
+      "organize": "Categories, brand and VAT",
+      "viewOnStore": "View on storefront",
+      "preview": "Preview",
+      "previewReady": "The preview opened in a new tab and its link was copied. It works for 24 hours or until the product is saved again."
     },
     "sections": {
       "noTemplate": "No template chosen",
@@ -3544,6 +3548,52 @@
         "preorder": "Preorder",
         "noBarcode": "No barcode"
       }
+    },
+    "rowActions": "Actions for {{title}}",
+    "duplicate": {
+      "action": "Duplicate",
+      "done": "{{title}} created and opened as a draft. SKU, barcode and stock were left empty."
+    },
+    "filters": {
+      "category": "Category",
+      "anyCategory": "All categories",
+      "anyBrand": "All brands",
+      "stock": "Stock",
+      "anyStock": "Any stock",
+      "stocks": {
+        "in": "In stock",
+        "low": "Low",
+        "out": "Sold out"
+      },
+      "missing": "Missing",
+      "anyMissing": "Missing info: any",
+      "missings": {
+        "image": "No image",
+        "price": "No price",
+        "description": "No description",
+        "seo": "Weak SEO"
+      },
+      "kind": "Kind",
+      "anyKind": "All kinds",
+      "kinds": {
+        "physical": "Physical",
+        "digital": "Digital",
+        "service": "Service"
+      },
+      "sort": "Sort",
+      "sorts": {
+        "updated": "Last changed",
+        "newest": "Newest",
+        "oldest": "Oldest",
+        "title": "Name (A–Z)",
+        "title_desc": "Name (Z–A)",
+        "price": "Price (low to high)",
+        "price_desc": "Price (high to low)",
+        "stock": "Stock (lowest first)",
+        "stock_desc": "Stock (highest first)"
+      },
+      "clear": "Clear filters",
+      "limited": "This filter looks at the newest 5,000 products; older ones are not listed."
     }
   },
   "orders": {
@@ -6866,7 +6916,6 @@
     "copy": "Copy the code",
     "copyFailed": "The code could not be copied; select it and copy it by hand.",
     "empty": "No gift cards yet.",
-    "truncated": "Showing the newest {{shown}} of the shop's {{total}} cards.",
     "off": "Gift cards are off. Turn them on to give customers gift cards and store credit.",
     "turnOn": "Go to features",
     "columns": {
@@ -6899,7 +6948,17 @@
       "noteWith": "Card closed in the panel: {{reason}}",
       "done": "Card closed; the {{amount}} left went to zero.",
       "empty": "Nothing was left on the card; nothing changed."
-    }
+    },
+    "search": "Search by code (whole or its start)",
+    "noMatch": "No card matches your search.",
+    "views": "Card views",
+    "tabs": {
+      "all": "All",
+      "active": "Usable",
+      "used": "Used",
+      "expired": "Expired"
+    },
+    "limited": "This view looks at the newest 5,000 cards; older ones are not listed."
   },
   "storeCredit": {
     "title": "Store credit",

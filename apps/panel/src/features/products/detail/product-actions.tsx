@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router"
-import { EllipsisVertical, EyeOff, Loader2, Send, Trash2 } from "lucide-react"
+import { Copy, EllipsisVertical, EyeOff, Loader2, Send, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -13,19 +13,23 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useDeleteProduct, useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
+import { StorefrontButton } from "@/features/products/detail/storefront-button"
+import { useDuplicateAndOpen } from "@/features/products/use-duplicate"
 import { errorText } from "@/lib/errors"
 
 /**
- * Publish or take back, the page's one main action; deleting sits in the
- * menu behind a question (docs/06 §6). The server holds the publish rules
- * (the SEO gate; measures are optional, adr/0054), so a refusal comes
- * back as its sentence.
+ * Publish or take back, the page's one main action, with its page on the
+ * storefront beside it (live, or a draft's preview); copying and deleting
+ * sit in the menu, deleting behind a question (docs/06 §6). The server
+ * holds the publish rules (the SEO gate; measures are optional,
+ * adr/0054), so a refusal comes back as its sentence.
  */
 export function ProductActions({ product }: { product: ProductDetail }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const update = useUpdateProduct(product.id)
   const remove = useDeleteProduct()
+  const duplicate = useDuplicateAndOpen()
   const [confirmDelete, setConfirmDelete] = useState(false)
   const published = product.status === "published"
 
@@ -51,6 +55,7 @@ export function ProductActions({ product }: { product: ProductDetail }) {
 
   return (
     <>
+      <StorefrontButton product={product} />
       <Button
         variant={published ? "outline" : "default"}
         disabled={update.isPending}
@@ -72,6 +77,15 @@ export function ProductActions({ product }: { product: ProductDetail }) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            disabled={duplicate.pending}
+            onSelect={() => {
+              duplicate.run(product.id)
+            }}
+          >
+            <Copy />
+            {t("products.duplicate.action")}
+          </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
             onSelect={() => {
