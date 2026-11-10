@@ -1,6 +1,6 @@
 # 18 — Panel Tasarım Sistemi
 
-> Yönetici panelinin (`apps/panel`, adr/0022) görsel dili, token'ları, tema motoru ve klasör yapısı.
+> Yönetici panelinin (`apps/panel`, adr/0022) görsel dili, token'ları, tema motoru ve klasör yapısı. İlkel bileşenler, alan bilgisi taşımayan desenler, token'lar ve tema motoru üst panelle ortak pakettedir: `packages/admin-ui` (`@qticaret/admin-ui`, adr/0061 §1.4); bu belge ikisi için de geçerlidir.
 > Amaç: bir e-ticaret firmasının profesyonel paneli; sakin, yoğun ama ferah, mağaza sahibinin rengiyle.
 > Bu belge inceleme ölçütüdür: yeni her ekran §3 kara listesinden ve §9 kontrol listesinden geçer.
 
@@ -12,7 +12,7 @@
 | --- | --- | --- |
 | Uygulama | React 19, Vite, TypeScript strict | Hafif SPA; backend'le aynı origin'den sunulur |
 | Stil | Tailwind v4 (CSS-first `@theme`) | Token'lar CSS değişkeni; tema çalışma anında değişir |
-| Bileşen | shadcn/ui (new-york), Radix tabanlı | Kod bizde (`components/ui`), erişilebilir, token'larla boyanır |
+| Bileşen | shadcn/ui (new-york), Radix tabanlı | Kod bizde (`@qticaret/admin-ui/ui`), erişilebilir, token'larla boyanır |
 | İkon | lucide-react | Tek set, tek çizgi kalınlığı; emoji yok |
 | Yönlendirme | TanStack Router (dosya tabanlı) | Tip güvenli URL ve filtre parametreleri |
 | Veri | TanStack Query + `@medusajs/js-sdk` (session) | Backend'le aynı istemci; önbellek, yeniden deneme |
@@ -49,9 +49,9 @@ Sürümler `apps/panel/package.json`'da exact ve ≥14 gün kuralıyla (docs/04)
   - Kartın içindeki iki parça (özet + liste gibi) birbirine yakın boyda tutulur: uzun liste iki sütuna bölünür ya da kısaltılır.
   - Hiçbir kartın yanında ya da altında anlamsız boşluk kalmaz; uzun içerik kendi sekmesine taşınır (Raporlar).
   - `e2e/layout.e2e.ts` her sayfayı masaüstü genişlikte ölçer; ihlal testi kırar.
-- **İkon ve metin (2026-11-09, kullanıcı: "ikon ile metin yatayda hizalanmamış; bu gibi sorunları da gider"):** metnin yanındaki ikon metnin **ilk satırına** hizalanır, bloğun ortasına değil. İkonun kutusu bir satır boyu (`h-lh`, glif ortada; `w-4`/`w-3.5` glifin genişliği), satır `items-start`; tek satırda da çok satırda da, başlıklı ya da başlıksız aynı çizgi. Sabit kaydırma (`translate-y-0.5`, `mt-0.5`) yalnız tek bir satır boyuna uyar: yeni kodda `h-lh`. Uyarı kutusu `Alert` (`components/ui/alert.tsx`): üç sütun (ikon, sözcükler, eylemler), her satır 20 px; düğmeler `AlertAction`'da, ilk satırın ortasında (32 px düğme, satırın 6 px üstü ve altı), telefonda sözcüklerin altında. Sözcükleri ve düğmeleri `AlertDescription` içinde ortalanmış tek flex satıra koymak yasak (metin ikonun 6 px altına düşer); `alert.spec.tsx` ve `house-rules.spec.ts` korur. Tek satırlık rozet, düğme, menü öğesi, KPI başlığı `items-center` kalır.
+- **İkon ve metin (2026-11-09, kullanıcı: "ikon ile metin yatayda hizalanmamış; bu gibi sorunları da gider"):** metnin yanındaki ikon metnin **ilk satırına** hizalanır, bloğun ortasına değil. İkonun kutusu bir satır boyu (`h-lh`, glif ortada; `w-4`/`w-3.5` glifin genişliği), satır `items-start`; tek satırda da çok satırda da, başlıklı ya da başlıksız aynı çizgi. Sabit kaydırma (`translate-y-0.5`, `mt-0.5`) yalnız tek bir satır boyuna uyar: yeni kodda `h-lh`. Uyarı kutusu `Alert` (`@qticaret/admin-ui/ui/alert`): üç sütun (ikon, sözcükler, eylemler), her satır 20 px; düğmeler `AlertAction`'da, ilk satırın ortasında (32 px düğme, satırın 6 px üstü ve altı), telefonda sözcüklerin altında. Sözcükleri ve düğmeleri `AlertDescription` içinde ortalanmış tek flex satıra koymak yasak (metin ikonun 6 px altına düşer); `alert.spec.tsx` ve `house-rules.spec.ts` korur. Tek satırlık rozet, düğme, menü öğesi, KPI başlığı `items-center` kalır.
 - `e2e/shell.e2e.ts` (2026-11-03): her sayfa üç ekran boyunda sonuna kaydırılır; içeriğin bittiği yerle ekranın altı arasında sayfa arka planı dışında bir alan, yüzey–kanvas farkı ya da yatay kaydırma olamaz; listelerin ilk kaydı da açılır, kayıt yoksa atlanır. Ayarlar menüsü lg+'da yapışkan ve kendi içinde kayar (sayfa yalnız kendi içeriği kadar uzundur).
-- Diyalog ve sheet'ler (2026-11-03): paylaşılan `DialogContent` tek sütun `grid-cols-[minmax(0,1fr)]` (içerik kutuyu genişletemez), `sm` üstünde en çok `--dialog-max-height` (ekranın %85'i; 2026-11-05, kullanıcı: "o modal niye bu kadar yüksek? modal yapılarımız standart bir modaldan çekiliyordur diye düşünüyorum") boyunda, uzunsa içinde kayar, alt bilgi yapışkan; <640 px'te alt kenardan tam genişlik sheet (içeriği kadar, en çok ekran). Uzun liste ya da ızgara tutan diyalog `DialogContent pane`: başlık ve alt bilgi yerinde kalır, yalnızca `DialogBody` kayar (kaydırma çubuğu kutunun kenarında, alt bilginin üstünde ince çizgi); diyalog içinde ikinci bir kaydırma kutusu (`max-h-72 overflow-y-auto` liste) açılmaz. **Diyalog boyu içeriği kadardır** (2026-11-09, kullanıcı: "Kargoya ver butonuna bastığımda açılan modalın yüksekliği aşırı yüksek"): `pane` de içeriği kadar uzar, en çok `--dialog-max-height`, ötesinde gövde kayar. Sabit boy yalnız açık bir seçimle: `pane="fixed"` (`DIALOG_PANE_FIXED_CLASS`, `--dialog-max-height`; daha alçak sabit boy `className` ile) yalnızca sekme, kayıt (‹ n / m ›) ya da arama değişince boyu oynamaması gereken pencerede: varyant, ek seçenek, blog kategori/etiketi, stok geçmişi (bu dördü en çok 40rem), özellik şablonu, yazar, kayan görsel, ortam seçici, menü kayıt seçici (yazdıkça liste değişir), yasal metin önizlemesi ve yorum fotoğrafı (çerçeve/görsel kutunun boyunu doldurur). İçeriği kadar olanlar: kargoya verme, toplu kargoya verme sonucu, para iadesi, yönlendirme içe aktarma, web kancası teslim kaydı ve diğer tüm `FormDialog`/`DetailDialog`'lar. Kendi yüksekliğini koyan diyaloglar (2026-11-05 denetimi) bu düzene alındı: ortam seçici, yasal metin önizlemesi, yorum fotoğrafı, web kancası teslim kaydı, menü kayıt seçici, toplu kargoya verme sonucu, para iadesi, kargoya verme, yönlendirme içe aktarma. Form tutan diyalog `FormDialog` (`components/patterns/form-dialog.tsx`): alanlar gövdede, "Vazgeç" ve (değişiklik varken etkin) "Kaydet" alt bilgide, kaydedilmemiş değişiklikle kapatmak (köşedeki düğme, Esc, dışarı tık, "Vazgeç") ya da başka kayda geçmek `useDiscardGuard` ile önce sorar ("Değişiklikleri at"); reddedilen alan yanında söylenir. Bir kaydı tümüyle gösteren, kendi kaydeden parçaları ve eylemleri olan pencere `DetailDialog` (`components/patterns/detail-dialog.tsx`; başlığı `FormDialog` ile ortak `DialogHeading`): olgular gövdede, kaydın eylemleri (sil, yanıtlandı) alt bilgide, kapatırken istenirse `onCloseRequest` ile sorar. Listeden açılan her pencerenin başlığının sağında `RecordStepper` ‹ n / m › (önceki/sonraki kayıt, pencere kapanmadan; kaydedilmemiş değişiklikte önce sorar); hangi kaydın açık olduğunu ve listedeki yerini `useRecordWalk(rows, key)` tutar. Yan sheet kayıt göstermek ya da düzenlemek için kullanılmaz (sahip, 2026-11-06): iletişim mesajı (`md`), denetim kaydı (`lg`, değişiklik tablosu), ek seçenek (`FormDialog lg pane`, varyant penceresinin boyu), blog kategori/etiketi (`lg pane`, iki sekme, varyant boyu), özellik şablonu (`FormDialog lg pane`), stok geçmişi (`md pane`), ortam kütüphanesindeki görsel (`lg`, görsel ve sözcükleri yan yana) bu pencerelere alındı; `components/ui/sheet` yalnızca telefon menüsünde ve tam ekran tema düzenleyicinin kendi çekmecelerinde kalır (`house-rules.spec.ts`). Radix onay kutusu/radyo/anahtar/seçim satırı `relative` (gizli mutlak input kaydırılan listeden kaçmasın — `globals.css`). `e2e/dialogs.e2e.ts` 20 diyaloğu (varyant penceresi, ortam seçici, ürünün katalog penceresi, sheet'ten alınan kayıt pencereleri dahil) 1440 ve 390'da açıp taşma/kırpılmayı ve `sm` üstünde %85'i aşan boyu ölçer. Ferah düzen (2026-11-03, "ince ve geniş"): genişlik `size` ile (§4.3), iç boşluk 24 px (telefon) / 32 px, başlık–gövde–alt bilgi arası 24 px, gövde parçaları `DialogBody` içinde 20 px, uzun diyalogda `DialogSection` başlıkları, satırlar 48 px, satır listeli diyalog `DialogBody list` ile en az 176 px gövde; sheet'ler aynı 24 px kenar boşluğunu kullanır. Sayı alanı yalnızca `NumberField` (`components/patterns`): tarayıcı oku yok (`globals.css` her `input[type=number]`'da gizler), kutu 36 px (`compact` 32 px, satırlar için), birim eki (₺, %, cm), Türkçe ondalık; sağ kenarın içinde üst üste lucide `ChevronUp`/`ChevronDown`, her biri kutunun yarı boyu, yalnız simge (üzerine gelince hafif zemin, soluk → ön plan rengi), fare alanın üstündeyken ya da odaktayken görünür, yerleri hep ayrılı (hiçbir şey kaymaz), basılı tutunca tekrarlar, sınırda kapanır, sekme sırasında değil (ok tuşları aynı işi yapar), dokunmatikte (`pointer: coarse`) çizilmez, telefonun sayı klavyesi yeter (kullanıcı 2026-11-06: "normal artır azalt ikonları aşağı yukarı olsun, hover olunca sadece ikon"); `type="number"` kullanan çıplak input `house-rules.spec.ts`'te kırılır.
+- Diyalog ve sheet'ler (2026-11-03): paylaşılan `DialogContent` tek sütun `grid-cols-[minmax(0,1fr)]` (içerik kutuyu genişletemez), `sm` üstünde en çok `--dialog-max-height` (ekranın %85'i; 2026-11-05, kullanıcı: "o modal niye bu kadar yüksek? modal yapılarımız standart bir modaldan çekiliyordur diye düşünüyorum") boyunda, uzunsa içinde kayar, alt bilgi yapışkan; <640 px'te alt kenardan tam genişlik sheet (içeriği kadar, en çok ekran). Uzun liste ya da ızgara tutan diyalog `DialogContent pane`: başlık ve alt bilgi yerinde kalır, yalnızca `DialogBody` kayar (kaydırma çubuğu kutunun kenarında, alt bilginin üstünde ince çizgi); diyalog içinde ikinci bir kaydırma kutusu (`max-h-72 overflow-y-auto` liste) açılmaz. **Diyalog boyu içeriği kadardır** (2026-11-09, kullanıcı: "Kargoya ver butonuna bastığımda açılan modalın yüksekliği aşırı yüksek"): `pane` de içeriği kadar uzar, en çok `--dialog-max-height`, ötesinde gövde kayar. Sabit boy yalnız açık bir seçimle: `pane="fixed"` (`DIALOG_PANE_FIXED_CLASS`, `--dialog-max-height`; daha alçak sabit boy `className` ile) yalnızca sekme, kayıt (‹ n / m ›) ya da arama değişince boyu oynamaması gereken pencerede: varyant, ek seçenek, blog kategori/etiketi, stok geçmişi (bu dördü en çok 40rem), özellik şablonu, yazar, kayan görsel, ortam seçici, menü kayıt seçici (yazdıkça liste değişir), yasal metin önizlemesi ve yorum fotoğrafı (çerçeve/görsel kutunun boyunu doldurur). İçeriği kadar olanlar: kargoya verme, toplu kargoya verme sonucu, para iadesi, yönlendirme içe aktarma, web kancası teslim kaydı ve diğer tüm `FormDialog`/`DetailDialog`'lar. Kendi yüksekliğini koyan diyaloglar (2026-11-05 denetimi) bu düzene alındı: ortam seçici, yasal metin önizlemesi, yorum fotoğrafı, web kancası teslim kaydı, menü kayıt seçici, toplu kargoya verme sonucu, para iadesi, kargoya verme, yönlendirme içe aktarma. Form tutan diyalog `FormDialog` (`@qticaret/admin-ui/patterns/form-dialog`): alanlar gövdede, "Vazgeç" ve (değişiklik varken etkin) "Kaydet" alt bilgide, kaydedilmemiş değişiklikle kapatmak (köşedeki düğme, Esc, dışarı tık, "Vazgeç") ya da başka kayda geçmek `useDiscardGuard` ile önce sorar ("Değişiklikleri at"); reddedilen alan yanında söylenir. Bir kaydı tümüyle gösteren, kendi kaydeden parçaları ve eylemleri olan pencere `DetailDialog` (`@qticaret/admin-ui/patterns/detail-dialog`; başlığı `FormDialog` ile ortak `DialogHeading`): olgular gövdede, kaydın eylemleri (sil, yanıtlandı) alt bilgide, kapatırken istenirse `onCloseRequest` ile sorar. Listeden açılan her pencerenin başlığının sağında `RecordStepper` ‹ n / m › (önceki/sonraki kayıt, pencere kapanmadan; kaydedilmemiş değişiklikte önce sorar); hangi kaydın açık olduğunu ve listedeki yerini `useRecordWalk(rows, key)` tutar. Yan sheet kayıt göstermek ya da düzenlemek için kullanılmaz (sahip, 2026-11-06): iletişim mesajı (`md`), denetim kaydı (`lg`, değişiklik tablosu), ek seçenek (`FormDialog lg pane`, varyant penceresinin boyu), blog kategori/etiketi (`lg pane`, iki sekme, varyant boyu), özellik şablonu (`FormDialog lg pane`), stok geçmişi (`md pane`), ortam kütüphanesindeki görsel (`lg`, görsel ve sözcükleri yan yana) bu pencerelere alındı; `@qticaret/admin-ui/ui/sheet` yalnızca telefon menüsünde ve tam ekran tema düzenleyicinin kendi çekmecelerinde kalır (`house-rules.spec.ts`). Radix onay kutusu/radyo/anahtar/seçim satırı `relative` (gizli mutlak input kaydırılan listeden kaçmasın — admin-ui `styles.css`). `e2e/dialogs.e2e.ts` 20 diyaloğu (varyant penceresi, ortam seçici, ürünün katalog penceresi, sheet'ten alınan kayıt pencereleri dahil) 1440 ve 390'da açıp taşma/kırpılmayı ve `sm` üstünde %85'i aşan boyu ölçer. Ferah düzen (2026-11-03, "ince ve geniş"): genişlik `size` ile (§4.3), iç boşluk 24 px (telefon) / 32 px, başlık–gövde–alt bilgi arası 24 px, gövde parçaları `DialogBody` içinde 20 px, uzun diyalogda `DialogSection` başlıkları, satırlar 48 px, satır listeli diyalog `DialogBody list` ile en az 176 px gövde; sheet'ler aynı 24 px kenar boşluğunu kullanır. Sayı alanı yalnızca `NumberField` (`@qticaret/admin-ui/patterns/number-field`): tarayıcı oku yok (admin-ui `styles.css` her `input[type=number]`'da gizler), kutu 36 px (`compact` 32 px, satırlar için), birim eki (₺, %, cm), Türkçe ondalık; sağ kenarın içinde üst üste lucide `ChevronUp`/`ChevronDown`, her biri kutunun yarı boyu, yalnız simge (üzerine gelince hafif zemin, soluk → ön plan rengi), fare alanın üstündeyken ya da odaktayken görünür, yerleri hep ayrılı (hiçbir şey kaymaz), basılı tutunca tekrarlar, sınırda kapanır, sekme sırasında değil (ok tuşları aynı işi yapar), dokunmatikte (`pointer: coarse`) çizilmez, telefonun sayı klavyesi yeter (kullanıcı 2026-11-06: "normal artır azalt ikonları aşağı yukarı olsun, hover olunca sadece ikon"); `type="number"` kullanan çıplak input `house-rules.spec.ts`'te kırılır.
 
 ---
 
@@ -76,7 +76,7 @@ Sürümler `apps/panel/package.json`'da exact ve ≥14 gün kuralıyla (docs/04)
 
 ## 4. Token katmanları
 
-Tek kaynak: `apps/panel/src/theme/tokens.css`. Üç katman; bileşenler yalnızca anlamsal ve bileşen token'larını kullanır, ham palete dokunmaz.
+Tek kaynak: `packages/admin-ui/src/theme/tokens.css` (panel ve üst panel aynı dosyayı alır). Üç katman; bileşenler yalnızca anlamsal ve bileşen token'larını kullanır, ham palete dokunmaz.
 
 ### 4.1 İlkel (sabit)
 - Nötr ölçek (OKLCH, marka tonuna hafif eğimli, kroma ≤ 0,01): `--neutral-0 … --neutral-1000`.
@@ -104,13 +104,13 @@ Tek kaynak: `apps/panel/src/theme/tokens.css`. Üç katman; bileşenler yalnızc
 | `--dialog-max-height` | 85dvh | sabit; `sm` üstünde her diyaloğun en çok boyu (diyalog içeriği kadar uzar); `pane="fixed"` pencereler bu boyda sabit (2026-11-09) |
 | `--overlay` | nötr-900 %40 | sabit |
 | `--shadow-overlay` | tek gölge | sabit |
-| `--focus-ring` | marka, 2 px, 2 px ofset | sabit. Yalnızca klavyeyle (Tab) gezerken düğme benzeri kontrollerde görünür; yazı alanlarında halka ya da renkli kenarlık yok, fare/dokunmada hiç yok (`lib/input-mode.ts`, kullanıcı kararı 2026-10-28) |
+| `--focus-ring` | marka, 2 px, 2 px ofset | sabit. Yalnızca klavyeyle (Tab) gezerken düğme benzeri kontrollerde görünür; yazı alanlarında halka ya da renkli kenarlık yok, fare/dokunmada hiç yok (`@qticaret/admin-ui/lib/input-mode`, kullanıcı kararı 2026-10-28) |
 
 Bir bileşenin boyutu, çizgisi ya da köşesi sabit kodlanmaz; token'dan okunur. Yeni bir değer gerekiyorsa önce token eklenir.
 
 ---
 
-## 5. Tema motoru (`src/theme/engine.ts`)
+## 5. Tema motoru (`packages/admin-ui/src/theme/engine.ts`)
 
 Mağaza sahibi yedi şey seçer; gerisi türetilir:
 
@@ -134,13 +134,32 @@ Mağaza sahibi yedi şey seçer; gerisi türetilir:
 
 ## 6. Klasör yapısı
 
+Panelin alan bilgisi taşımayan katmanı `packages/admin-ui`'dadır (adr/0061 §1.4, C5); üst panel (`apps/control-plane-panel`) aynı paketi alır. Paket hiçbir uygulamadan içe almaz (`@/…`, `sdk`, uygulamanın i18n örneği yok); alan bilgisi isteyen yerde değeri uygulama verir (ör. `SectionOwner`: bölümlerin hatırladığı kişi, `PeriodPicker labelOf`: dönem adları).
+
 ```
+packages/admin-ui/                # @qticaret/admin-ui; kaynak TS olarak alınır (exports → src)
+├── components.json               # shadcn CLI burada çalışır
+├── src/
+│   ├── ui/                       # shadcn üretimi, bizim sahipliğimizde      → @qticaret/admin-ui/ui/<ad>
+│   ├── patterns/                 # PageHeader, PageGrid, PageTabs, DataTable, FilterTabs, SearchInput, SearchPicker, Pagination,
+│   │                             # Wizard, Stepper, CardForm, SectionCard, CollapsibleSection, FormSection, FormDialog, DetailDialog,
+│   │                             # DialogHeading, RecordStepper, ConfirmDialog, LeaveGuard, useDiscardGuard, NumberField, ChipInput,
+│   │                             # StatusBadge, EmptyRow, LoadingRows/ErrorState/EmptyState (states), KpiTile, StatCard, DeltaBadge,
+│   │                             # PeriodPicker, DayRangeFilter, SectionNav, Toaster                → …/patterns/<ad>
+│   ├── charts/                   # Sparkline, TrendChart, StepChart, StackedBar, BarList              → …/charts/<ad>
+│   ├── hooks/                    # useIsMobile, useRecordWalk, useSectionOpen (+ SectionOwner), useOpenPart, useHoldStep, useTwoWaySticky
+│   ├── lib/                      # cn (utils), format (para, tarih, tr), money-input, number-step, days, forms, input-mode, page-spans
+│   ├── theme/                    # tokens.css, engine.ts, color.ts, charts.ts, sidebar.ts, apply.ts  → @qticaret/admin-ui/theme
+│   ├── locales/                  # tr.json, en.json: `admin-ui` ad alanı                              → @qticaret/admin-ui/i18n
+│   ├── styles.css                # token'lar, @theme, temel kurallar, odak kuralı, @source           → @qticaret/admin-ui/styles.css
+│   └── test/setup.ts             # Vitest: jsdom, Testing Library, `admin-ui` metinleri
+└── package.json
+
 apps/panel/
 ├── index.html
 ├── vite.config.ts            # proxy: /admin, /auth, /store, /static → backend
-├── components.json           # shadcn
 ├── src/
-│   ├── main.tsx              # sağlayıcılar: Query, Router, Theme, i18n
+│   ├── main.tsx              # sağlayıcılar: Query, SectionOwner, Router; bootTheme, trackInputMode
 │   ├── routes/               # TanStack dosya tabanlı; ince: yalnızca feature sayfasını çağırır
 │   │   ├── __root.tsx
 │   │   ├── _auth.tsx         # giriş gerektiren kabuk
@@ -159,21 +178,26 @@ apps/panel/
 │   │   ├── settings/         # mağaza, görünüm, SEO, özellikler, işler, denetim kaydı
 │   │   └── <alan>/{api,components,pages,detail,wizard}/
 │   ├── components/
-│   │   ├── ui/               # shadcn üretimi, bizim sahipliğimizde
-│   │   ├── patterns/         # PageHeader, DataTable, FilterTabs, SearchInput, Pagination, Wizard, CardForm, LeaveGuard, SectionCard, KpiTile, StatusBadge, ConfirmDialog, FormDialog, DetailDialog, RecordStepper, FormSection, CollapsibleSection, MediaField, MediaPicker
-│   │   └── layout/           # AppShell, Sidebar, Topbar, PageContainer
-│   ├── theme/                # tokens.css, engine.ts, presets.ts, schema.ts
-│   ├── lib/                  # sdk, auth, i18n, format (para, tarih, tr), errors
-│   ├── locales/              # tr.json, en.json
-│   ├── styles/globals.css    # tailwind + tokens
+│   │   ├── patterns/         # mağazaya bağlı desenler: MediaField, MediaPicker (ortam kütüphanesi), AsyncBody (`lib/errors`)
+│   │   └── layout/           # AppShell, Sidebar, Topbar, komut menüsü, gezinme
+│   ├── theme/                # schema.ts (görünüm formu), storefront.ts (vitrin renkleri), house-rules.spec.ts
+│   ├── lib/                  # sdk, auth, i18n, errors, csv, slug, gtin, yeniden doğrulama
+│   ├── locales/              # tr.json, en.json (`translation` ad alanı)
+│   ├── styles/globals.css    # tailwind + @qticaret/admin-ui/styles.css + panelin kendi sınıfları (giriş, metin)
 │   └── test/                 # kurulum, yardımcılar
 ├── e2e/                      # Playwright
 └── package.json
 ```
 
+Paketin alınışı:
+- **Kod:** `package.json` `exports` kaynağı gösterir (`./ui/*` → `src/ui/*.tsx`, `./patterns/*`, `./charts/*`, `./hooks/*`, `./lib/*`, `./theme`, `./i18n`, `./styles.css`); Vite derler, ayrı derleme yok. Uygulama `@qticaret/admin-ui/ui/button` gibi alt yoldan alır; paketin içi göreli yollarla birbirini alır. React, i18next, TanStack Router/Query, React Hook Form ve sonner `peerDependencies`'tir (uygulamanın tek kopyası).
+- **Stil:** uygulamanın CSS'i önce `@import "tailwindcss"`, sonra `@import "@qticaret/admin-ui/styles.css"`; paket kendi `@source "./"`'u ile sınıflarını üretir.
+- **Metin:** bileşenler `useTranslation("admin-ui")` ile kendi ad alanından okur; uygulama i18next örneğine ekler: `resources: { tr: { translation: tr, [ADMIN_UI_NS]: adminUiResources.tr }, … }`, `ns: ["translation", ADMIN_UI_NS]` (`apps/panel/src/lib/i18n.ts`).
+
 Kurallar:
 - `routes/` içinde iş mantığı yok; sayfa `features/<alan>/pages` içindedir.
-- `components/ui` yalnızca shadcn CLI ile değişir; özelleştirme token'la yapılır, bileşen kodunu elle boyamak yok. CLI `cn` paketini bağımlılık olarak ekleyip `import { cn } from "cn"` yazıyor: her eklemeden sonra import `@/lib/utils`'e çevrilir, `cn` paketi ve CLI'nin indirdiği sürüm değişiklikleri (ör. recharts) geri alınır.
+- `packages/admin-ui/src/ui` yalnızca shadcn CLI ile değişir (paketin klasöründen çalıştırılır); özelleştirme token'la yapılır, bileşen kodunu elle boyamak yok. CLI `cn` paketini bağımlılık olarak ekleyip `import { cn } from "cn"` yazıyor ve paket içi yolları `@qticaret/admin-ui/…` diye yazıyor: her eklemeden sonra importlar göreli yola (`../lib/utils`) çevrilir, `cn` paketi ve CLI'nin indirdiği sürüm değişiklikleri (ör. recharts) geri alınır.
+- Pakete yalnızca alan bilgisi taşımayan kod girer; mağaza API'sine, `features/`'a ya da uygulamanın oturumuna dokunan desen uygulamada kalır.
 - Bir desen (`patterns/`) iki yerde kullanılmadan önce yazılmaz; üç yerde kopyalanmadan önce desen olur.
 - Dosya ~300 satır, fonksiyon ~50 satır (docs/10).
 
@@ -182,7 +206,7 @@ Kurallar:
 ## 7. Desenler
 
 - `components/patterns/media-picker.tsx` + `media-field.tsx` (2026-11-04; tek giriş 2026-11-05): paneldeki her görsel alanı `MediaField` ile (önizleme çerçevesi `wide` / `share` / `square` / `logo` / `tile`; `tile` vitrin kartının 4:5 kesimi, kategori görseli 2026-11-06, alt metin alanı `children` olarak görselin yanında). **Bir görsel tek yoldan girer** (kullanıcı, 2026-11-05: "kütüphaneden seç neden ayrı bir altta? direkt o 'görselleri sürükle' yazdığın box'a tıkladığım an o modal açılsa"): çerçevenin kendisi giriştir; tıklanınca `MediaPicker`, üstüne bırakılan dosya pencere açılmadan kütüphaneye yüklenip seçilir; görsel varken çerçeve aynı yolla değiştirir (köşesinde "Değiştir"), yanında yalnız "Kaldır". Ayrı "Görsel seç" ya da "Kütüphaneden seç" düğmesi yok. Ürün galerisi (`features/products/components/image-gallery.tsx`) ve varyant penceresi de böyle: bırakma alanı ya da ızgaranın son karesi "Görsel ekle" pencereyi açar, dosya bırakmak doğrudan yükler. Seçim `MediaPicker` diyaloğunda (`size="xl"`, `pane="fixed"`, `--dialog-max-height` boyunda sabit; başlık, sekmeler, arama ve "n görsel seçildi · Seç" yerinde, yalnızca ızgara kayar), üç sekme: Kütüphane (arama, sayfa, tek ya da `multiple` + `max`), Bilgisayardan yükle (sekmeyi dolduran bırakma alanı, dosya dosya durum ve ilerleme; hepsi yüklenince seçer, hata varsa nedenleri kalır), Adres (sunucu adresten kütüphaneye alır, sonra seçer). Hangi sekme açık olursa olsun pencereye bırakılan dosyalar yüklemeye gider. Yüklenen ve alınan her görsel önce kütüphaneye girer; sayfa yalnızca mağazanın kendi kopyasını gösterir. Kütüphaneden seçilen görselin alt metni boş alt metni doldurur. Kullananlar: vitrin düzenleyicisinin açılış ve kayan görselleri, içerik kapağı ve metindeki görsel, mağaza logoları, paylaşım görseli, marka logosu, kategori görseli, ETBİS karekodu, ürün galerisi, varyant penceresi. Ortam kütüphanesi sayfası (`/media`) ve seçici küçük resim ızgarası kullanır: görseller göze göre ayırt edilir, §3'teki "tablo yerine kart ızgarası" yasağının bilinçli istisnası.
-- `components/patterns/chip-input.tsx` (2026-11-04): etiket/terim girişi — Enter ya da virgül ekler, boş alanda Backspace sonuncuyu siler, yinelenen (Türkçe harf ve büyük/küçük duyarsız) reddedilir, `n / en çok` sayacı; eş anlamlı gruplar, özellik seçenekleri ve ürün sihirbazı seçenek değerleri bunu kullanır.
+- `@qticaret/admin-ui/patterns/chip-input` (2026-11-04): etiket/terim girişi — Enter ya da virgül ekler, boş alanda Backspace sonuncuyu siler, yinelenen (Türkçe harf ve büyük/küçük duyarsız) reddedilir, `n / en çok` sayacı; eş anlamlı gruplar, özellik seçenekleri ve ürün sihirbazı seçenek değerleri bunu kullanır.
 
 | Desen | Ne zaman | Notlar |
 | --- | --- | --- |
@@ -225,11 +249,11 @@ Kurallar:
 - [ ] §3 kara listesinden hiçbir öğe yok.
 - [ ] Sayfa başlığı deseni; tek birincil eylem.
 - [ ] Üç durum tasarlandı ve testli.
-- [ ] Metinler `locales/tr.json`'da; sözlüğe uygun; ünlem yok.
+- [ ] Metinler `locales/tr.json`'da (ortak bileşeninki `packages/admin-ui/src/locales`, `admin-ui` ad alanı); sözlüğe uygun; ünlem yok.
 - [ ] Klavye ve axe testi geçti.
 - [ ] Mobil genişlikte (375 px) çalışıyor.
 - [ ] Denge (§2): yan yana kartlar `PageGrid`/`PageColumn` ile; satırdaki kontroller tek boy; `e2e/layout.e2e.ts` geçti; ekran görüntüsüne bakıldı.
 - [ ] Açık ve koyu modda, keskin ve yuvarlak köşede bakıldı.
 - [ ] Diyalog içeriği kadar; sabit boy yalnız `pane="fixed"` ile (§2). Metnin yanındaki ikon ilk satıra hizalı (`h-lh`), uyarının düğmeleri `AlertAction`'da.
 
-Testle korunanlar (F12 Y12): sabit renk, hex ve px köşe yasağı, TR/EN anahtar eşleşmesi ve Türkçe metinde ünlem yok (`src/theme/house-rules.spec.ts`; bilinçli istisnalar gerekçesiyle listede). Geliştirmede bulunmayan çeviri anahtarı konsola yazılır, e2e koruyucusu bunu hata sayar. Bütün ekranlar açık ve koyu modda axe'tan (`e2e/a11y.e2e.ts`), 375 px'te taşma denetiminden (`e2e/phone.e2e.ts`, listelerin ilk kaydı dahil) ve denge ölçümünden (`e2e/layout.e2e.ts`) geçer; ekran listesi `e2e/support/screens.ts`. Tailwind'in gölge ölçeği (`shadow-xs` ile `shadow-xl` arası) tema gölgelerine bağlıdır (`--shadow-card`, `--shadow-overlay`). Yana kayan tablo kutusu yalnızca kaydığında klavyeyle odaklanır.
+Testle korunanlar (F12 Y12): sabit renk, hex ve px köşe yasağı, TR/EN anahtar eşleşmesi ve Türkçe metinde ünlem yok (panelde `src/theme/house-rules.spec.ts`, ortak pakette `packages/admin-ui/src/house-rules.spec.ts`; bilinçli istisnalar gerekçesiyle listede). Geliştirmede bulunmayan çeviri anahtarı konsola yazılır, e2e koruyucusu bunu hata sayar. Bütün ekranlar açık ve koyu modda axe'tan (`e2e/a11y.e2e.ts`), 375 px'te taşma denetiminden (`e2e/phone.e2e.ts`, listelerin ilk kaydı dahil) ve denge ölçümünden (`e2e/layout.e2e.ts`) geçer; ekran listesi `e2e/support/screens.ts`. Tailwind'in gölge ölçeği (`shadow-xs` ile `shadow-xl` arası) tema gölgelerine bağlıdır (`--shadow-card`, `--shadow-overlay`). Yana kayan tablo kutusu yalnızca kaydığında klavyeyle odaklanır.
