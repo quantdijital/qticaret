@@ -25,6 +25,20 @@ export const CP_RATE_LIMIT_PROFILES = {
   token_refresh: { name: "cp_token_refresh", perIp: { max: 60, windowMs: 15 * MINUTE } },
   auth_default: { name: "cp_auth_default", perIp: { max: 60, windowMs: 15 * MINUTE } },
   admin_default: { name: "cp_admin_default", perIp: { max: 600, windowMs: MINUTE } },
+  // A 2FA code or a password proved: per address and per member (C4); the
+  // wrong-proof lock (server-kit security/proofs) bounds guessing on top
+  step_up: {
+    name: "cp_step_up",
+    perIp: { max: 30, windowMs: 15 * MINUTE },
+    perIdentity: { max: 10, windowMs: 15 * MINUTE },
+  },
+  mfa_setup: {
+    name: "cp_mfa_setup",
+    perIp: { max: 30, windowMs: 15 * MINUTE },
+    perIdentity: { max: 10, windowMs: 15 * MINUTE },
+  },
+  // An invitation's page and its acceptance, before any account: the link is the credential
+  invite_public: { name: "cp_invite_public", perIp: { max: 20, windowMs: HOUR } },
   tenant_api: { name: "cp_tenant_api", perIp: { max: 300, windowMs: MINUTE } },
 } as const satisfies Record<string, RateLimitProfile>
 

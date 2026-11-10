@@ -100,5 +100,5 @@ done
 sync_env "$backend_template" "${backend_envs[0]}"
 sync_env "$backend_template" "${backend_envs[1]}" "$test_skipped"
 sync_env "$control_plane_template" "${control_plane_envs[0]}"
-sync_env "$control_plane_template" "${control_plane_envs[1]}"
+sync_env "$control_plane_template" "${control_plane_envs[1]}" "$test_skipped"
 sync_env "$storefront_template" "$storefront_env"

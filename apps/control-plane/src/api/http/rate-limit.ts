@@ -58,6 +58,10 @@ function defaultStore(logger: Logger | undefined): RateLimitStore {
   return sharedStore
 }
 
+/** The shared counters (rate limits, wrong proofs, codes used once). */
+export const sharedRateLimitStore = (req: MedusaRequest): RateLimitStore =>
+  defaultStore(loggerOf(req))
+
 let identityHashKey: Buffer | undefined
 
 // Never an e-mail as it is, nor a plain hash a dictionary would reverse

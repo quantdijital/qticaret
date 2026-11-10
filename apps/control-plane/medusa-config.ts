@@ -1,4 +1,9 @@
-import { defineConfig, loadEnv } from "@medusajs/framework/utils"
+import {
+  ContainerRegistrationKeys,
+  Modules,
+  defineConfig,
+  loadEnv,
+} from "@medusajs/framework/utils"
 import { disabledModules } from "./src/lib/disabled-modules"
 import { isLocalEnv, parseEnv } from "./src/lib/env"
 
@@ -28,9 +33,24 @@ module.exports = defineConfig({
       authCors: env.AUTH_CORS,
       jwtSecret: env.JWT_SECRET,
       cookieSecret: env.COOKIE_SECRET,
-      // Platform staff only, by e-mail (2FA arrives with C4)
+      // Platform staff only, by e-mail, with mandatory 2FA (C4)
       authMethodsPerActor: { user: ["emailpass"] },
     },
   },
-  modules: disabledModules(),
+  modules: [
+    ...disabledModules(),
+    // C4 (adr/0061 §3.5): configuring the module drops Medusa's default
+    // provider, so e-mail is named again; staff TOTP sealed with its own key
+    {
+      resolve: "@medusajs/medusa/auth",
+      dependencies: [Modules.CACHE, ContainerRegistrationKeys.LOGGER],
+      options: {
+        providers: [{ resolve: "@medusajs/medusa/auth-emailpass", id: "emailpass" }],
+        mfa: { encryption_key: env.AUTH_MFA_ENCRYPTION_KEY },
+      },
+    },
+    // C4: platform staff roles and the append-only audit log, the control plane's own
+    { resolve: "./src/modules/cp-staff" },
+    { resolve: "./src/modules/cp-audit" },
+  ],
 })

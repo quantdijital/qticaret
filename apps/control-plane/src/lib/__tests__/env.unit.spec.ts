@@ -8,6 +8,8 @@ const valid = {
   JWT_SECRET: "j".repeat(32),
   COOKIE_SECRET: "c".repeat(32),
   CP_HASH_KEY: "a".repeat(64),
+  AUTH_MFA_ENCRYPTION_KEY: "b".repeat(64),
+  CP_PANEL_URL: "http://localhost:5174",
 }
 
 const problems = (source: Record<string, string | undefined>): string => {
@@ -28,7 +30,14 @@ describe("parseEnv", () => {
   it("names every missing variable, never a value", () => {
     const message = problems({ NODE_ENV: "development", JWT_SECRET: "short-secret-value" })
 
-    for (const name of ["DATABASE_URL", "ADMIN_CORS", "COOKIE_SECRET", "CP_HASH_KEY"]) {
+    for (const name of [
+      "DATABASE_URL",
+      "ADMIN_CORS",
+      "COOKIE_SECRET",
+      "CP_HASH_KEY",
+      "AUTH_MFA_ENCRYPTION_KEY",
+      "CP_PANEL_URL",
+    ]) {
       expect(message).toContain(`${name}: is missing`)
     }
     expect(message).toContain("JWT_SECRET: must be at least 32 characters")
@@ -39,7 +48,12 @@ describe("parseEnv", () => {
     expect(problems({ ...valid, NODE_ENV: "production" })).toContain("REDIS_URL")
     expect(problems({ ...valid, NODE_ENV: undefined })).toContain("REDIS_URL")
     expect(
-      parseEnv({ ...valid, NODE_ENV: "production", REDIS_URL: "redis://cache:6379" }).REDIS_URL
+      parseEnv({
+        ...valid,
+        NODE_ENV: "production",
+        REDIS_URL: "redis://cache:6379",
+        CP_PANEL_URL: "https://ust.example.com",
+      }).REDIS_URL
     ).toBe("redis://cache:6379")
   })
 
@@ -54,5 +68,25 @@ describe("parseEnv", () => {
     expect(
       problems({ ...valid, NODE_ENV: "production", REDIS_URL: "redis://r", LOAD_TEST: "on" })
     ).toContain("LOAD_TEST")
+  })
+
+  it("keeps 2FA on and Mailpit local, the panel on https once deployed (adr/0061 Ek C4)", () => {
+    const live = { ...valid, NODE_ENV: "production", REDIS_URL: "redis://r" }
+
+    expect(problems({ ...live, ADMIN_MFA: "off" })).toContain("ADMIN_MFA")
+    expect(parseEnv({ ...valid, ADMIN_MFA: "off" }).ADMIN_MFA).toBe("off")
+    expect(problems(live)).toContain("CP_PANEL_URL: must be https")
+    expect(
+      problems({
+        ...live,
+        CP_PANEL_URL: "https://ust.example.com",
+        EMAIL_TRANSPORT: "mailpit",
+        MAILPIT_URL: "http://127.0.0.1:58025",
+        EMAIL_FROM: "destek@example.com",
+      })
+    ).toContain("EMAIL_TRANSPORT")
+    expect(problems({ ...valid, EMAIL_TRANSPORT: "mailpit", MAILPIT_URL: "http://m" })).toContain(
+      "EMAIL_FROM"
+    )
   })
 })
