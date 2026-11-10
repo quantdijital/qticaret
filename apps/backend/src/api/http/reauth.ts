@@ -5,7 +5,15 @@ import type {
   MedusaResponse,
 } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
-import { hashPii, parseKey } from "@qticaret/server-kit"
+import {
+  TOTP_CODE,
+  countWrongProof as countWrongProofIn,
+  firstCodeUse,
+  hashPii,
+  parseKey,
+  proofBurstExceeded,
+  proofsLocked as proofsLockedIn,
+} from "@qticaret/server-kit"
 import { parseEnv } from "../../lib/env"
 import { errorSummary, logger } from "../../lib/logging"
 import { sharedRateLimitStore } from "./rate-limit"
@@ -14,17 +22,9 @@ import { rejectRequest } from "./reject"
 const METHODS = ["totp", "recovery_code", "password"] as const
 type Method = (typeof METHODS)[number]
 
-// Wrong proofs a person may give: a code has a million values. Only wrong
-// ones count, so an owner setting up a dozen accounts is never stopped
-const WRONG = [
-  { tries: 10, windowMs: 15 * 60 * 1000, key: "quarter" },
-  { tries: 30, windowMs: 24 * 60 * 60 * 1000, key: "day" },
-] as const
-// Proofs checked at once are not yet counted as wrong: a minute's bound on them
-const BURST = { tries: 10, windowMs: 60 * 1000 }
-// A code is good for its 30-second step and one either side: once is enough
-const USED_CODE_MS = 2 * 60 * 1000
-const TOTP_CODE = /^\d{6}$/
+// The counters and their limits are shared with the control plane
+// (@qticaret/server-kit security/proofs): ten wrong proofs in a quarter of
+// an hour or thirty in a day lock, ten a minute at most, a code once
 
 let hashKey: Buffer | undefined
 const keyed = (value: string): string => {
@@ -54,11 +54,7 @@ export async function callerHasFactor(req: MedusaRequest): Promise<boolean> {
  * take it once between them. True the first time the identity gives it.
  */
 async function firstUse(identity: string, code: string): Promise<boolean> {
-  const used = await sharedRateLimitStore().hit(
-    `reauth:used:${keyed(`${identity}\n${code}`)}`,
-    USED_CODE_MS
-  )
-  return used.count === 1
+  return firstCodeUse(sharedRateLimitStore(), keyed(`${identity}\n${code}`))
 }
 
 /** Whether the proof is the person's: their app's code (once), a recovery code, or their password. */
@@ -139,23 +135,12 @@ const reject = (req: MedusaRequest, res: MedusaResponse, status: 428 | 429, mess
  * current password counts in the same tally (security review 2026-11-06).
  */
 export async function proofsLocked(identity: string): Promise<boolean> {
-  const store = sharedRateLimitStore()
-  const person = keyed(identity)
-  const counts = await Promise.all(
-    WRONG.map(
-      async (limit) => (await store.peek(`reauth:wrong:${limit.key}:${person}`)) >= limit.tries
-    )
-  )
-  return counts.some(Boolean)
+  return proofsLockedIn(sharedRateLimitStore(), keyed(identity))
 }
 
 /** One wrong proof more for the person: a code, a password at a step-up or a change. */
 export async function countWrongProof(identity: string): Promise<void> {
-  const store = sharedRateLimitStore()
-  const person = keyed(identity)
-  await Promise.all(
-    WRONG.map((limit) => store.hit(`reauth:wrong:${limit.key}:${person}`, limit.windowMs))
-  )
+  await countWrongProofIn(sharedRateLimitStore(), keyed(identity))
 }
 
 /**
@@ -183,11 +168,9 @@ export function requireReauth(when?: When) {
       reject(req, res, 428, "reauth_required")
       return
     }
-    const store = sharedRateLimitStore()
-    const person = keyed(identity)
     const locked = await proofsLocked(identity)
-    const burst = await store.hit(`reauth:burst:${person}`, BURST.windowMs)
-    if (locked || burst.count > BURST.tries) {
+    const burst = await proofBurstExceeded(sharedRateLimitStore(), keyed(identity))
+    if (locked || burst) {
       reject(req, res, 429, "reauth_locked")
       return
     }

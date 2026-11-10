@@ -67,6 +67,18 @@ export {
 export type { DocumentSignature, DocumentVerifyErrorCode } from "./signing/document"
 
 export { safeEqual } from "./security/timing-safe"
+export {
+  PROOF_BURST,
+  TOTP_CODE,
+  USED_CODE_MS,
+  WRONG_PROOF_LIMITS,
+  countWrongProof,
+  firstCodeUse,
+  proofBurstExceeded,
+  proofsLocked,
+} from "./security/proofs"
+export { STEP_UP_TTL_MS, checkStepUpProof, issueStepUpProof, stepUpKey } from "./security/step-up"
+export type { StepUpCheck } from "./security/step-up"
 export { REDACTED, isSensitiveKey, redactDeep, redactText } from "./logging/redact"
 export { errorSummary } from "./logging/error-summary"
 
