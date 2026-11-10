@@ -1,7 +1,5 @@
 {
-  "namespaces": [
-    "public"
-  ],
+  "namespaces": ["public"],
   "name": "public",
   "tables": [
     {
@@ -51,12 +49,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": [
-            "owner",
-            "operator",
-            "finance",
-            "readonly"
-          ],
+          "enumItems": ["owner", "operator", "finance", "readonly"],
           "mappedType": "enum"
         },
         "assigned_by": {
@@ -243,9 +236,7 @@
         },
         {
           "keyName": "cp_staff_member_pkey",
-          "columnNames": [
-            "id"
-          ],
+          "columnNames": ["id"],
           "composite": false,
           "constraint": true,
           "primary": true,
