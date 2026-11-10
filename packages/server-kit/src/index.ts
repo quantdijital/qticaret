@@ -69,13 +69,16 @@ export type { DocumentSignature, DocumentVerifyErrorCode } from "./signing/docum
 export { safeEqual } from "./security/timing-safe"
 export {
   PROOF_BURST,
+  SCOPED_PROOF_CEILING,
   TOTP_CODE,
   USED_CODE_MS,
   WRONG_PROOF_LIMITS,
+  countScopedWrongProof,
   countWrongProof,
   firstCodeUse,
   proofBurstExceeded,
   proofsLocked,
+  scopedProofsLocked,
 } from "./security/proofs"
 export { STEP_UP_TTL_MS, checkStepUpProof, issueStepUpProof, stepUpKey } from "./security/step-up"
 export type { StepUpCheck } from "./security/step-up"

@@ -48,6 +48,39 @@ export async function countWrongProof(store: RateLimitStore, person: string): Pr
   )
 }
 
+/**
+ * Every scope of a person together, a day: far above what one scope may
+ * reach (thirty), so a single stolen session or a sign-in guesser never
+ * shuts the person's other sessions out, while many at once still stop.
+ */
+export const SCOPED_PROOF_CEILING = { tries: 100, windowMs: 24 * 60 * 60 * 1000 } as const
+
+/**
+ * The same limits per person and scope (the session or token a proof comes
+ * from, or "sign-in"), plus the person's ceiling across scopes (the
+ * control plane, adr/0061 Ek C4): one scope's wrong proofs lock that scope.
+ */
+export async function scopedProofsLocked(
+  store: RateLimitStore,
+  person: string,
+  scope: string
+): Promise<boolean> {
+  return (
+    (await proofsLocked(store, `${person}:${scope}`)) ||
+    (await store.peek(`reauth:wrong:all:${person}`)) >= SCOPED_PROOF_CEILING.tries
+  )
+}
+
+/** One wrong proof more for the person in a scope, and towards their ceiling. */
+export async function countScopedWrongProof(
+  store: RateLimitStore,
+  person: string,
+  scope: string
+): Promise<void> {
+  await countWrongProof(store, `${person}:${scope}`)
+  await store.hit(`reauth:wrong:all:${person}`, SCOPED_PROOF_CEILING.windowMs)
+}
+
 /** Counts one proof attempt; true when the person is past a minute's bound. */
 export async function proofBurstExceeded(store: RateLimitStore, person: string): Promise<boolean> {
   const burst = await store.hit(`reauth:burst:${person}`, PROOF_BURST.windowMs)

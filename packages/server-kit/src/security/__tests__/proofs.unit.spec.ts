@@ -1,10 +1,13 @@
 import { createMemoryStore } from "../../rate-limit/store"
 import {
   PROOF_BURST,
+  SCOPED_PROOF_CEILING,
+  countScopedWrongProof,
   countWrongProof,
   firstCodeUse,
   proofBurstExceeded,
   proofsLocked,
+  scopedProofsLocked,
 } from "../proofs"
 
 let now = 0
@@ -54,6 +57,25 @@ describe("proof counters", () => {
     }
     expect(results.slice(0, PROOF_BURST.tries).every((over) => !over)).toBe(true)
     expect(results[PROOF_BURST.tries]).toBe(true)
+  })
+
+  it("locks one scope of a person, never the others, until the ceiling", async () => {
+    for (let i = 0; i < 10; i += 1) {
+      await countScopedWrongProof(store, "person-f", "stolen-session")
+    }
+
+    expect(await scopedProofsLocked(store, "person-f", "stolen-session")).toBe(true)
+    expect(await scopedProofsLocked(store, "person-f", "own-session")).toBe(false)
+    expect(await proofsLocked(store, "person-f")).toBe(false)
+
+    for (let i = 0; i < SCOPED_PROOF_CEILING.tries - 10; i += 1) {
+      await countScopedWrongProof(store, "person-f", `scope-${String(i % 9)}`)
+      if (i % 9 === 8) {
+        // Each scope stays under its own quarter-hour lock
+        now += 15 * 60 * 1000 + 1
+      }
+    }
+    expect(await scopedProofsLocked(store, "person-f", "fresh-session")).toBe(true)
   })
 
   it("takes a code once for two minutes", async () => {
