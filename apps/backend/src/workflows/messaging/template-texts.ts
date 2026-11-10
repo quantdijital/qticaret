@@ -11,6 +11,7 @@ import { checkOwnTexts, ownTextsOf } from "../../lib/messaging/editable/check"
 import type { CheckedTexts, TextsInput } from "../../lib/messaging/editable/check"
 import { EDITABLE_TEMPLATES, editableTemplate } from "../../lib/messaging/editable/registry"
 import { defaultText, tokenValues } from "../../lib/messaging/editable/texts"
+import { traitsOf } from "../../lib/messaging/editable/tokens"
 import { TEXT_FIELDS } from "../../lib/messaging/editable/types"
 import type { MessageGroup, OwnTexts, TextField } from "../../lib/messaging/editable/types"
 import { previewVars } from "../../lib/messaging/preview"
@@ -51,10 +52,25 @@ export interface CustomerMessageView {
   switch: "here" | "required" | "marketing"
   /** Whether it goes; a required one always does. */
   enabled: boolean
-  /** The `{belirteç}`s it offers, each with what it says in the preview. */
-  tokens: { name: string; sample: string }[]
-  /** Each field the shop may write: the platform's text and the shop's own, if any. */
-  fields: { field: TextField; default: string; text: string | null }[]
+  /**
+   * The `{belirteç}`s it offers: what each says in the preview, at its
+   * longest (the SMS is counted with it, as the save counts), whether it
+   * can be empty in a send, and whether a person typed it (UCS-2 risk).
+   */
+  tokens: {
+    name: string
+    sample: string
+    longest: string
+    may_be_empty: boolean
+    free_text: boolean
+  }[]
+  /** Each field the shop may write: the platform's text, the shop's own, the tokens it must keep. */
+  fields: {
+    field: TextField
+    default: string
+    text: string | null
+    required_tokens: readonly string[]
+  }[]
 }
 
 /** Every customer message, grouped, with the shop's words beside the platform's. */
@@ -81,11 +97,23 @@ export async function customerMessageViews(container: Container): Promise<Custom
       enabled:
         switched === "required" ||
         (switched === "marketing" ? marketing.abandoned_cart_enabled : (row?.enabled ?? true)),
-      tokens: Object.keys(spec.tokens).map((name) => ({ name, sample: samples[name] ?? "" })),
+      tokens: Object.keys(spec.tokens).map((name) => {
+        const value = samples[name] ?? ""
+        const traits = traitsOf(name)
+        const worst = traits.longest ?? ""
+        return {
+          name,
+          sample: value,
+          longest: worst.length > value.length ? worst : value,
+          may_be_empty: traits.mayBeEmpty ?? false,
+          free_text: traits.freeText ?? false,
+        }
+      }),
       fields: TEXT_FIELDS.filter((field) => spec.fields[field] !== undefined).map((field) => ({
         field,
         default: defaultText(spec, field, sample),
         text: row?.[field] ?? null,
+        required_tokens: spec.mustContain?.[field] ?? [],
       })),
     }
   })

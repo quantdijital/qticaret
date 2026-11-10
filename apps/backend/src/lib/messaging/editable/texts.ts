@@ -1,5 +1,8 @@
+import { SMS_MAX_PARTS, smsLength } from "../../campaigns/sms"
+import { logger } from "../../logging"
 import { messageText, rawMessageText } from "../texts"
 import type { Brand } from "../templates/types"
+import { SINGLE_LINE_FIELDS } from "./types"
 import type { EditSpec, OwnTexts, TextField } from "./types"
 
 /**
@@ -11,8 +14,9 @@ import type { EditSpec, OwnTexts, TextField } from "./types"
 
 // The shop details' own pattern (lib/shop/tokens.ts): letters, digits and `_` between braces
 const TOKEN = /\{([\p{L}\p{N}_]+)\}/gu
-// Control and format characters never reach a message through a value
-const INVISIBLE = /[\p{Cc}\p{Cf}]/gu
+// Control and format characters, and the line and paragraph separators,
+// never reach a message through a value
+const INVISIBLE = /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/gu
 const CATALOG_VALUE = /\{\{(\w+)\}\}/g
 
 /** The `{name}`s a text uses that the template does not offer: refused when it is saved. */
@@ -33,11 +37,23 @@ export function unknownTemplateTokens(text: string, allowed: Iterable<string>): 
  * dropped) stays as typed, as the shop's details do.
  */
 export function fillTemplateText(text: string, values: Readonly<Record<string, string>>): string {
-  return text
-    .normalize("NFC")
-    .replace(TOKEN, (whole, name: string) =>
-      Object.hasOwn(values, name) ? (values[name] ?? "").replace(INVISIBLE, "").trim() : whole
-    )
+  return (
+    text
+      .normalize("NFC")
+      .replace(TOKEN, (whole, name: string) =>
+        Object.hasOwn(values, name) ? (values[name] ?? "").replace(INVISIBLE, "").trim() : whole
+      )
+      // An empty value leaves no gap: spaces run together, none at a line's ends
+      .replace(/[^\S\n]+/g, " ")
+      .replace(/ ?\n ?/g, "\n")
+      .trim()
+  )
+}
+
+/** The tokens a field must keep that the text lacks (`EditSpec.mustContain`). */
+export function missingTokens<V>(spec: EditSpec<V>, field: TextField, text: string): string[] {
+  const used = new Set([...text.normalize("NFC").matchAll(TOKEN)].map(([, name = ""]) => name))
+  return (spec.mustContain?.[field] ?? []).filter((token) => !used.has(token))
 }
 
 /** Each offered token's value for this send: the catalog's values under the shop's names. */
@@ -73,7 +89,26 @@ export function defaultText<V>(spec: EditSpec<V>, field: TextField, vars: V): st
   })
 }
 
-/** The words of each field for one send: the shop's text filled in, else the catalog's. */
+/**
+ * Why the shop's filled text cannot go as it is, or null when it can: it
+ * lacks the link or code it must carry (a row saved before the rule), a
+ * one-line field came out empty, or the SMS runs past three parts.
+ */
+function unfit<V>(spec: EditSpec<V>, field: TextField, written: string, filled: string) {
+  if (missingTokens(spec, field, written).length > 0) {
+    return "token_missing"
+  }
+  if (filled === "" && SINGLE_LINE_FIELDS.has(field)) {
+    return "empty"
+  }
+  return field === "sms" && smsLength(filled).parts > SMS_MAX_PARTS ? "sms_too_long" : null
+}
+
+/**
+ * The words of each field for one send: the shop's text filled in, else
+ * the catalog's. A filled text that cannot go (`unfit`) is logged and the
+ * catalog's goes in its place: the message still reaches the customer whole.
+ */
 export function textsFor<V>(
   spec: EditSpec<V>,
   vars: V,
@@ -84,7 +119,12 @@ export function textsFor<V>(
   return (field) => {
     const written = own?.[field]
     if (written) {
-      return fillTemplateText(written, tokenValues(spec, vars, brand))
+      const filled = fillTemplateText(written, tokenValues(spec, vars, brand))
+      const reason = unfit(spec, field, written, filled)
+      if (!reason) {
+        return filled
+      }
+      logger.warn({ event: "messaging.own_text_unfit", field, reason })
     }
     return messageText(keyOf(spec, field, vars), values)
   }

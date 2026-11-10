@@ -18,7 +18,7 @@ interface View {
   switch: string
   enabled: boolean
   tokens: { name: string; sample: string }[]
-  fields: { field: string; default: string; text: string | null }[]
+  fields: { field: string; default: string; text: string | null; required_tokens: string[] }[]
 }
 
 interface Preview {
@@ -94,8 +94,19 @@ medusaIntegrationTestRunner({
         field: "subject",
         default: "Siparişiniz alındı (#{sipariş_no})",
         text: null,
+        required_tokens: [],
       })
-      expect(placed?.tokens).toContainEqual({ name: "sipariş_no", sample: "1042" })
+      expect(placed?.tokens).toContainEqual({
+        name: "sipariş_no",
+        sample: "1042",
+        longest: "PL-9999999999",
+        may_be_empty: false,
+        free_text: false,
+      })
+      const link = list.data.messages.find((each) => each.name === "payment_link.sent")
+      expect(link?.fields.find((each) => each.field === "sms")?.required_tokens).toEqual([
+        "ödeme_bağlantısı",
+      ])
       expect(list.data.messages.find((each) => each.name === "cart.reminder")).toMatchObject({
         group: "marketing",
         switch: "marketing",
@@ -195,6 +206,26 @@ medusaIntegrationTestRunner({
       const list = await get<{ messages: View[] }>(LIST)
       const placed = list.data.messages.find((each) => each.name === "order.placed")
       expect(placed?.fields.every((each) => each.text === null)).toBe(true)
+    })
+
+    it("refuses a payment link's SMS without its link, in a save and in a draft", async () => {
+      const save_ = await save("payment_link.sent", { sms: "{mağaza_adı}: siparişiniz hazır" })
+      const draft = await post<Preview>("/admin/messaging/templates/payment_link.sent/preview", {
+        sms: "Toplam {toplam}",
+      })
+      const kept = await save("payment_link.sent", {
+        sms: "{mağaza_adı}: ödeme için {ödeme_bağlantısı}",
+      })
+
+      expect(save_.status).toBe(400)
+      expect(save_.data).toMatchObject({
+        message: "messaging.template_token_missing",
+        values: { tokens: "{ödeme_bağlantısı}" },
+      })
+      expect(draft.status).toBe(400)
+      expect(draft.data.message).toBe("messaging.template_token_missing")
+      expect(kept.status).toBe(200)
+      await save("payment_link.sent", { sms: null })
     })
 
     it("previews a draft without keeping it", async () => {

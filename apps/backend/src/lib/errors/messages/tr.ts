@@ -502,12 +502,14 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "messaging.template_text_too_long": "Bu alan en fazla {{limit}} karakter olabilir.",
   "messaging.template_token_unknown":
     "Metinde tanınmayan bilgi var: {{tokens}}. Bu iletide kullanılabilenler: {{available}}.",
+  "messaging.template_token_missing":
+    "Bu metin {{tokens}} bilgisini içermeli; müşteri bağlantıya ya da koda yalnızca bu metinle ulaşır.",
   "messaging.template_required":
     "Bu ileti yasal ya da işlemsel olarak zorunlu; kapatılamaz, yalnızca metni değiştirilebilir.",
   "messaging.template_switched_elsewhere":
     "Bu ileti Ayarlar > Pazarlama > Terk edilmiş sepet'ten açılıp kapatılır.",
   "messaging.sms_too_long":
-    "SMS metni örnek bilgilerle en çok {{parts}} SMS boyunu geçmemeli; metni kısaltın.",
+    "SMS metni, bilgiler en uzun hâlleriyle dolduğunda en çok {{parts}} SMS boyunu geçmemeli; metni kısaltın.",
   "messaging.recipient_invalid": "Adres ya da telefon numarası geçerli değil.",
   "messaging.email_off": "E-posta gönderimi bu mağazada açık değil.",
   "messaging.sms_off": "SMS hesabı bağlı değil. Ayarlar > SMS'ten Netgsm hesabını girin.",

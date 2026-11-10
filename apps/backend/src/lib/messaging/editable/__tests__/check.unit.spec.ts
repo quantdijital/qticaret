@@ -138,4 +138,35 @@ describe("checkOwnTexts", () => {
       "{mağaza_adı}: #{sipariş_no} alındı"
     )
   })
+
+  it("counts the SMS with each token at its longest, not the sample's short values", () => {
+    // Five names: "Ayşe" in the preview, forty two-septet letters at most in a send
+    const names = "{müşteri_adı} ".repeat(5)
+
+    expect(refusal(() => check("order.shipped", { sms: `${names}{takip_bağlantısı}` })).key).toBe(
+      "messaging.sms_too_long"
+    )
+    expect(check("order.shipped", { sms: `{müşteri_adı} {takip_bağlantısı}` }).sms).toBe(
+      "{müşteri_adı} {takip_bağlantısı}"
+    )
+  })
+
+  it("refuses a required message's SMS without the link only it carries, naming it", () => {
+    expect(
+      refusal(() =>
+        check("payment_link.sent", { sms: "{mağaza_adı}: siparişiniz hazır, {toplam}" })
+      )
+    ).toEqual({
+      key: "messaging.template_token_missing",
+      field: "sms",
+      values: { tokens: "{ödeme_bağlantısı}" },
+    })
+    expect(check("payment_link.sent", { sms: "Ödeyin: {ödeme_bağlantısı}" }).sms).toBe(
+      "Ödeyin: {ödeme_bağlantısı}"
+    )
+    // The e-mail keeps its fixed button: its words may leave the link out
+    expect(check("payment_link.sent", { intro: "Siparişiniz hazır." }).intro).toBe(
+      "Siparişiniz hazır."
+    )
+  })
 })

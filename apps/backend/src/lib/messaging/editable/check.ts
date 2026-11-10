@@ -2,7 +2,14 @@ import { SMS_MAX_PARTS, smsLength } from "../../campaigns/sms"
 import { ValidationError } from "../../errors"
 import { isCleanText } from "../../security/text"
 import type { Brand, MessageTemplate } from "../templates/types"
-import { defaultText, unknownTemplateTokens } from "./texts"
+import {
+  defaultText,
+  fillTemplateText,
+  missingTokens,
+  tokenValues,
+  unknownTemplateTokens,
+} from "./texts"
+import { traitsOf } from "./tokens"
 import { SINGLE_LINE_FIELDS, TEXT_FIELDS, TEXT_LIMITS } from "./types"
 import type { EditSpec, TextField } from "./types"
 
@@ -76,8 +83,26 @@ function checkTokens<V>(spec: EditSpec<V>, field: TextField, text: string): void
 }
 
 /**
+ * The SMS as long as a send can make it (as `workflows/campaigns/sms-length.ts`
+ * counts a campaign): each token at its longest (`TOKEN_TRAITS`), the
+ * shop's own name, the preview's value for the rest. A name with a letter
+ * outside the GSM/TR table still turns it UCS-2: the panel warns of that.
+ */
+export function longestSms<V>(spec: EditSpec<V>, text: string, sample: V, brand: Brand): string {
+  const values = tokenValues(spec, sample, brand)
+  const longest = Object.fromEntries(
+    Object.entries(values).map(([token, value]) => {
+      const worst = traitsOf(token).longest ?? ""
+      return [token, worst.length > value.length ? worst : value]
+    })
+  )
+  return fillTemplateText(text, longest)
+}
+
+/**
  * `input` over what is kept now, checked. `sample` and `brand` stand for
- * a real send in the SMS's count: the preview's values, the shop's name.
+ * a real send in the SMS's count: the preview's values, the shop's name,
+ * each token at its longest.
  */
 export function checkOwnTexts<V>(
   template: MessageTemplate<V>,
@@ -102,6 +127,13 @@ export function checkOwnTexts<V>(
     const text = value === null ? "" : clean(field, value)
     if (text !== "") {
       checkTokens(spec, field, text)
+      const missing = missingTokens(spec, field, text)
+      if (missing.length > 0) {
+        throw new ValidationError("messaging.template_token_missing", {
+          field,
+          values: { tokens: missing.map((name) => `{${name}}`).join(", ") },
+        })
+      }
     }
     next[field] = text === "" || text === defaultText(spec, field, sample) ? null : text
   }
@@ -112,9 +144,8 @@ export function checkOwnTexts<V>(
     throw new ValidationError("messaging.template_switched_elsewhere", { field: "enabled" })
   }
   next.enabled = spec.required || spec.switchedIn ? true : (input.enabled ?? next.enabled)
-  if (next.sms !== null && template.sms) {
-    const sms = template.sms(sample, brand, { sms: next.sms })
-    if (smsLength(sms).parts > SMS_MAX_PARTS) {
+  if (next.sms !== null) {
+    if (smsLength(longestSms(spec, next.sms, sample, brand)).parts > SMS_MAX_PARTS) {
       throw new ValidationError("messaging.sms_too_long", {
         field: "sms",
         values: { parts: String(SMS_MAX_PARTS) },

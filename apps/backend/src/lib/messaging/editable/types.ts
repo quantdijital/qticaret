@@ -52,6 +52,12 @@ export interface EditSpec<V> {
    * reminder with Pazarlama's own switch (`marketing.abandoned_cart_enabled`).
    */
   switchedIn?: "marketing"
+  /**
+   * Tokens a field must keep: where the shop's text is the only carrier of
+   * the message's link or code (a payment link's SMS). A save without one
+   * is refused; a stored text without one is not sent.
+   */
+  mustContain?: Partial<Record<TextField, readonly string[]>>
   /** The `{belirteç}`s the shop may write, each with the catalog value it stands for. */
   tokens: Readonly<Record<string, string>>
   /** Each field's catalog key, by the values where the message reads two ways. */

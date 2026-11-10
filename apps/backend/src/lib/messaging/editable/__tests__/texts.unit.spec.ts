@@ -142,3 +142,50 @@ describe("the shop's own words", () => {
     expect(exchange?.subject).toBe("değişim onaylandı #1042")
   })
 })
+
+/** The security review's safety nets (adr/0036 Ek 2026-11-10). */
+describe("a filled text that cannot go as it is", () => {
+  const LINE_SEPARATOR = String.fromCharCode(0x2028)
+  const PARAGRAPH_SEPARATOR = String.fromCharCode(0x2029)
+
+  it("leaves no gap for an empty value, and drops line and paragraph separators", () => {
+    expect(fillTemplateText("{gönderen_adı}  size   bir kart. Takip: {takip_no}", {})).toBe(
+      "{gönderen_adı} size bir kart. Takip: {takip_no}"
+    )
+    expect(
+      fillTemplateText("{gönderen_adı} size bir kart.\n Takip: {takip_no} ", {
+        gönderen_adı: "",
+        takip_no: "",
+      })
+    ).toBe("size bir kart.\nTakip:")
+    expect(
+      fillTemplateText("Merhaba {müşteri_adı}", {
+        müşteri_adı: `Ay${LINE_SEPARATOR}şe${PARAGRAPH_SEPARATOR}`,
+      })
+    ).toBe("Merhaba Ayşe")
+  })
+
+  it("puts the platform's words in a one-line field that came out empty", () => {
+    const gift = editableTemplate("gift_card.issued")
+    const sample = gift?.sample as { senderName: string | null }
+
+    const mail = gift?.email?.({ ...sample, senderName: null }, brand, {
+      unsubscribeUrl: null,
+      own: { subject: "{gönderen_adı}", heading: "  {gönderen_adı}  " },
+    })
+
+    expect(mail?.subject).toBe("Atölye <b> hediye kartınız")
+    expect(mail?.text).toContain("Zeynep, size bir hediye kartı var")
+  })
+
+  it("sends the platform's SMS when a stored one lacks its link or runs past three parts", () => {
+    const link = MESSAGE_TEMPLATES["payment_link.sent"]
+
+    const without = link.sms?.(link.sample, brand, { sms: "Ödeyin: {toplam}" })
+    const long = shipped.sms?.(shipped.sample, brand, { sms: "ş".repeat(250) })
+
+    expect(without).toContain(link.sample.url)
+    expect(without).not.toBe("Ödeyin: ₺449,90")
+    expect(long).toBe(shipped.sms?.(shipped.sample, brand))
+  })
+})

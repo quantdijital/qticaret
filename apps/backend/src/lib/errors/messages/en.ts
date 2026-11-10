@@ -496,12 +496,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "messaging.template_text_too_long": "This field can be at most {{limit}} characters.",
   "messaging.template_token_unknown":
     "The text has details that are not known: {{tokens}}. Available in this message: {{available}}.",
+  "messaging.template_token_missing":
+    "This text must contain {{tokens}}; the customer reaches the link or code only through it.",
   "messaging.template_required":
     "This message is required by law or by the order itself; it cannot be turned off, only reworded.",
   "messaging.template_switched_elsewhere":
     "This message is turned on and off in Settings > Marketing > Abandoned carts.",
   "messaging.sms_too_long":
-    "With the sample details the text must not run past {{parts}} SMS; shorten it.",
+    "With each detail at its longest the text must not run past {{parts}} SMS; shorten it.",
   "messaging.recipient_invalid": "The address or phone number is not valid.",
   "messaging.email_off": "E-mail is not set up for this shop.",
   "messaging.sms_off":

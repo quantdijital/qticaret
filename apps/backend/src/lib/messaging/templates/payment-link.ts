@@ -30,6 +30,8 @@ const EDIT: EditSpec<PaymentLinkVars> = {
     geçerlilik: "validity",
     ödeme_bağlantısı: "url",
   },
+  // The e-mail keeps its fixed button; the SMS has only the shop's text to carry the link
+  mustContain: { sms: ["ödeme_bağlantısı"] },
   fields: {
     subject: "payment_link.subject",
     preheader: "payment_link.preheader",
