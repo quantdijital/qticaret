@@ -5,8 +5,11 @@ import type { CustomerMessage, TextField } from "@/features/settings/api/custome
 import {
   SMS_MAX_PARTS,
   TOKEN_KEYS,
+  emptyableTokens,
+  missingTokens,
   smsCount,
   unknownTokens,
+  usesFreeText,
 } from "@/features/settings/customer-messages"
 import { TokenSlot } from "@/features/settings/components/shop-token-menu"
 import type { ExtraToken } from "@/features/settings/components/shop-token-menu"
@@ -38,7 +41,7 @@ function useMessageTokens(message: CustomerMessage): ExtraToken[] {
   }))
 }
 
-/** The SMS's length with the preview's values, Netgsm's Turkish encoding counted. */
+/** The SMS's length with each token at its longest, Netgsm's Turkish encoding counted. */
 export function SmsMeter({ text, message }: { text: string; message: CustomerMessage }) {
   const { t } = useTranslation()
   const length = smsCount(text, message)
@@ -66,6 +69,8 @@ export function SmsMeter({ text, message }: { text: string; message: CustomerMes
       ) : null}
       {length.encoding === "ucs2" ? (
         <p className="text-xs text-warning-text">{t(`${C}.smsUcs2`)}</p>
+      ) : usesFreeText(text, message) ? (
+        <p className="text-xs text-warning-text">{t(`${C}.smsUcs2Risk`)}</p>
       ) : null}
     </div>
   )
@@ -93,9 +98,12 @@ export function MessageTextField({
   const tokens = useMessageTokens(message)
   const id = fieldId(field)
   const unknown = unknownTokens(value, message)
+  const missing = value.trim() === "" ? [] : missingTokens(value, message, field)
+  const emptyable = emptyableTokens(value, message)
+  const refused = unknown.length > 0 || missing.length > 0
   const multiline = MULTILINE.has(field)
   const hint = t(`${C}.fieldHints.${field}`, { defaultValue: "" })
-  const described = [hint ? `${id}-hint` : null, unknown.length > 0 ? `${id}-error` : null]
+  const described = [hint ? `${id}-hint` : null, refused ? `${id}-error` : null]
     .filter(Boolean)
     .join(" ")
   const common = {
@@ -104,9 +112,10 @@ export function MessageTextField({
     disabled,
     maxLength: FIELD_LIMITS[field],
     className: "pr-9",
-    "aria-invalid": unknown.length > 0 ? true : undefined,
+    "aria-invalid": refused ? true : undefined,
     "aria-describedby": described || undefined,
   }
+  const named = (names: string[]) => names.map((name) => `{${name}}`).join(", ")
   return (
     <div className="flex flex-col gap-2">
       <label htmlFor={id} className="text-sm font-medium">
@@ -141,11 +150,16 @@ export function MessageTextField({
           {hint}
         </p>
       ) : null}
-      {unknown.length > 0 ? (
+      {refused ? (
         <p id={`${id}-error`} role="alert" className="text-xs text-destructive-text">
-          {t(`${C}.unknownTokens`, {
-            tokens: unknown.map((name) => `{${name}}`).join(", "),
-          })}
+          {unknown.length > 0
+            ? t(`${C}.unknownTokens`, { tokens: named(unknown) })
+            : t(`${C}.missingTokens`, { tokens: named(missing) })}
+        </p>
+      ) : null}
+      {emptyable.length > 0 ? (
+        <p className="text-xs text-warning-text">
+          {t(`${C}.mayBeEmpty`, { tokens: named(emptyable) })}
         </p>
       ) : null}
       {field === "sms" ? <SmsMeter text={value} message={message} /> : null}

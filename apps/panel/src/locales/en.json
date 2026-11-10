@@ -1609,6 +1609,9 @@
           },
           "gift_card": {
             "issued": "Gift card sent"
+          },
+          "payment_link": {
+            "sent": "Payment link"
           }
         }
       },
@@ -1712,7 +1715,7 @@
         },
         "tokenSample": "In the sample: {{sample}}",
         "unknownTokens": "Not a detail of this message: {{tokens}}. Add details from the menu at the field's right.",
-        "smsCount": "{{chars}} characters with the sample details · {{parts}} SMS ({{perPart}} characters per SMS)",
+        "smsCount": "{{chars}} characters with each detail at its longest · {{parts}} SMS ({{perPart}} characters per SMS)",
         "smsLong": "The text goes as {{parts}} SMS and each part is charged.",
         "smsTooLong": "The text can be at most {{max}} SMS; shorten it.",
         "smsUcs2": "A character outside the Turkish alphabet (an emoji, say) is in it; only 70 characters fit an SMS.",
@@ -1722,7 +1725,10 @@
         "emailFrame": "Preview of the {{name}} e-mail",
         "fixedText": "This message's text is fixed. Below is what the customer sees.",
         "reset": "Back to default",
-        "saved": "Message saved."
+        "saved": "Message saved.",
+        "missingTokens": "This text must contain {{tokens}}: the customer reaches the link only through it.",
+        "mayBeEmpty": "{{tokens}} is empty in some sends (no sender or tracking yet); the text should read well without it.",
+        "smsUcs2Risk": "If a detail a customer typed (a name) has letters outside the Turkish alphabet (â, î, û), the SMS splits into 70-character parts."
       }
     },
     "sms": {

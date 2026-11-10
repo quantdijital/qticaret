@@ -3,15 +3,25 @@ import {
   bodyOf,
   defaultsOf,
   draftOf,
+  emptyableTokens,
   fieldsOf,
   groupMessages,
   isReworded,
+  missingTokens,
   smsCount,
   unknownTokens,
+  usesFreeText,
   valuesOf,
   withSamples,
 } from "./customer-messages"
-import { CONSENT, DELIVERED, MESSAGES, PLACED, REMINDER } from "./customer-messages.fixtures"
+import {
+  CONSENT,
+  DELIVERED,
+  MESSAGES,
+  PAYMENT_LINK,
+  PLACED,
+  REMINDER,
+} from "./customer-messages.fixtures"
 
 /** adr/0036 Ek 2026-11-10: the customer messages' words as the panel edits them. */
 describe("customer messages", () => {
@@ -19,7 +29,7 @@ describe("customer messages", () => {
     const groups = groupMessages(MESSAGES)
 
     expect(groups.map((each) => each.group)).toEqual(["order", "shipping", "account", "marketing"])
-    expect(groups[0]?.messages).toEqual([PLACED])
+    expect(groups[0]?.messages).toEqual([PLACED, PAYMENT_LINK])
     expect(isReworded(DELIVERED)).toBe(true)
     expect(isReworded(PLACED)).toBe(false)
   })
@@ -56,23 +66,37 @@ describe("customer messages", () => {
   })
 
   it("names the tokens a message does not offer", () => {
-    expect(unknownTokens("{müşteri_adı} {takip_no} {toplam}", DELIVERED)).toEqual([
-      "takip_no",
+    expect(unknownTokens("{müşteri_adı} {kargo_firması} {toplam}", DELIVERED)).toEqual([
+      "kargo_firması",
       "toplam",
     ])
     expect(unknownTokens("{müşteri_adı} #{sipariş_no}", DELIVERED)).toEqual([])
   })
 
-  it("counts the SMS with the sample's values, Turkish letters in two septets", () => {
+  it("counts the SMS with each token at its longest, Turkish letters in two septets", () => {
     expect(withSamples("{mağaza_adı}: #{sipariş_no}", PLACED)).toBe("Atölye: #1042")
-    // "Atölye: #1042" is 13 characters, each one septet (ö is in the GSM alphabet)
+    // "Atölye: #PL-9999999999" is 22 characters, each one septet (ö is in the GSM alphabet)
     expect(smsCount("{mağaza_adı}: #{sipariş_no}", PLACED)).toMatchObject({
       encoding: "gsm",
-      units: 13,
+      units: 22,
       parts: 1,
+    })
+    // "Ayşe" in the preview, forty two-septet letters at most in a send
+    expect(smsCount("{müşteri_adı} {müşteri_adı}", PLACED)).toMatchObject({
+      units: 161,
+      parts: 2,
     })
     expect(smsCount("ş".repeat(80), PLACED)).toMatchObject({ units: 160, parts: 2 })
     expect(smsCount("Merhaba 🙂", PLACED)).toMatchObject({ encoding: "ucs2", parts: 1 })
+  })
+
+  it("names the token a field must keep, those a send may leave empty, and typed ones", () => {
+    expect(missingTokens("Ödeyin {toplam}", PAYMENT_LINK, "sms")).toEqual(["ödeme_bağlantısı"])
+    expect(missingTokens("Ödeyin: {ödeme_bağlantısı}", PAYMENT_LINK, "sms")).toEqual([])
+    expect(missingTokens("Hazır", PAYMENT_LINK, "subject")).toEqual([])
+    expect(emptyableTokens("Takip: {takip_no}, {sipariş_no}", DELIVERED)).toEqual(["takip_no"])
+    expect(usesFreeText("Merhaba {müşteri_adı}", PLACED)).toBe(true)
+    expect(usesFreeText("#{sipariş_no}", PLACED)).toBe(false)
   })
 
   it("puts each field under its channel's tab", () => {

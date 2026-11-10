@@ -25,10 +25,21 @@ export interface CustomerMessage {
   /** Turned on and off here, never (required), or with Pazarlama's cart reminders. */
   switch: "here" | "required" | "marketing"
   enabled: boolean
-  /** The `{belirteç}`s it offers, each with what it says in the preview. */
-  tokens: { name: string; sample: string }[]
-  /** The platform's text and the shop's own (null: the platform's is used). */
-  fields: { field: TextField; default: string; text: string | null }[]
+  /**
+   * The `{belirteç}`s it offers: what each says in the preview and at its
+   * longest (the SMS is counted with it), whether a send may leave it
+   * empty, whether a person typed it (a letter outside the Turkish table
+   * sends the SMS as UCS-2).
+   */
+  tokens: {
+    name: string
+    sample: string
+    longest: string
+    may_be_empty: boolean
+    free_text: boolean
+  }[]
+  /** The platform's text, the shop's own (null: the platform's is used), the tokens it must keep. */
+  fields: { field: TextField; default: string; text: string | null; required_tokens: string[] }[]
 }
 
 /** A save: a field left out keeps its value, null brings the platform's back. */

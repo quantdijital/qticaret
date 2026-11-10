@@ -1609,6 +1609,9 @@
           },
           "gift_card": {
             "issued": "Hediye kartı gönderildi"
+          },
+          "payment_link": {
+            "sent": "Ödeme bağlantısı"
           }
         }
       },
@@ -1712,7 +1715,7 @@
         },
         "tokenSample": "Örnekte: {{sample}}",
         "unknownTokens": "Bu iletide olmayan bilgi: {{tokens}}. Bilgileri alanın sağındaki menüden ekleyin.",
-        "smsCount": "Örnek bilgilerle {{chars}} karakter · {{parts}} SMS (SMS başına {{perPart}} karakter)",
+        "smsCount": "Bilgiler en uzun hâlleriyle {{chars}} karakter · {{parts}} SMS (SMS başına {{perPart}} karakter)",
         "smsLong": "Metin {{parts}} SMS olarak gönderilir ve her parça ayrı ücretlendirilir.",
         "smsTooLong": "Metin en çok {{max}} SMS olabilir; kısaltın.",
         "smsUcs2": "Türkçe alfabe dışında bir karakter (ör. emoji) var; SMS başına yalnız 70 karakter sığar.",
@@ -1722,7 +1725,10 @@
         "emailFrame": "{{name}} e-postasının önizlemesi",
         "fixedText": "Bu iletinin metni sabittir. Aşağıda müşterinin göreceği hâli var.",
         "reset": "Varsayılana dön",
-        "saved": "Mesaj kaydedildi."
+        "saved": "Mesaj kaydedildi.",
+        "missingTokens": "Bu metin {{tokens}} içermeli: müşteri bağlantıya yalnızca bu metinle ulaşır.",
+        "mayBeEmpty": "{{tokens}} bazı gönderimlerde boş kalır (gönderen ya da takip bilgisi yoksa); metin onsuz da okunmalı.",
+        "smsUcs2Risk": "Müşterinin yazdığı bir bilgi (ad gibi) Türkçe alfabe dışı harf (â, î, û) içerirse SMS 70 karakterlik parçalara bölünür."
       }
     },
     "sms": {

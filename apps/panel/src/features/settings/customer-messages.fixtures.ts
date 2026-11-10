@@ -2,10 +2,28 @@ import type { CustomerMessage } from "./api/customer-messages"
 
 /** Customer messages as the backend lists them (adr/0036 Ek 2026-11-10), for the tests. */
 
+type Token = CustomerMessage["tokens"][number]
+
+const token = (name: string, sample: string, more: Partial<Token> = {}): Token => ({
+  name,
+  sample,
+  longest: sample,
+  may_be_empty: false,
+  free_text: false,
+  ...more,
+})
+
+const field = (
+  name: CustomerMessage["fields"][number]["field"],
+  text: string,
+  own: string | null = null,
+  required: string[] = []
+) => ({ field: name, default: text, text: own, required_tokens: required })
+
 const ORDER_TOKENS = [
-  { name: "mağaza_adı", sample: "Atölye" },
-  { name: "müşteri_adı", sample: "Ayşe" },
-  { name: "sipariş_no", sample: "1042" },
+  token("mağaza_adı", "Atölye"),
+  token("müşteri_adı", "Ayşe", { longest: "ş".repeat(40), free_text: true }),
+  token("sipariş_no", "1042", { longest: "PL-9999999999" }),
 ]
 
 export const PLACED: CustomerMessage = {
@@ -15,17 +33,34 @@ export const PLACED: CustomerMessage = {
   group: "order",
   switch: "required",
   enabled: true,
-  tokens: [...ORDER_TOKENS, { name: "toplam", sample: "₺389,80" }],
+  tokens: [...ORDER_TOKENS, token("toplam", "₺389,80", { longest: "₺9.999.999,99" })],
   fields: [
-    { field: "subject", default: "Siparişiniz alındı (#{sipariş_no})", text: null },
-    { field: "preheader", default: "{mağaza_adı} siparişinizi aldı.", text: null },
-    { field: "heading", default: "Teşekkürler {müşteri_adı}, siparişiniz alındı", text: null },
-    { field: "intro", default: "#{sipariş_no} numaralı siparişinizi aldık.", text: null },
-    {
-      field: "sms",
-      default: "{mağaza_adı}: #{sipariş_no} numaralı siparişiniz alındı. Toplam {toplam}.",
-      text: null,
-    },
+    field("subject", "Siparişiniz alındı (#{sipariş_no})"),
+    field("preheader", "{mağaza_adı} siparişinizi aldı."),
+    field("heading", "Teşekkürler {müşteri_adı}, siparişiniz alındı"),
+    field("intro", "#{sipariş_no} numaralı siparişinizi aldık."),
+    field("sms", "{mağaza_adı}: #{sipariş_no} numaralı siparişiniz alındı. Toplam {toplam}."),
+  ],
+}
+
+export const PAYMENT_LINK: CustomerMessage = {
+  name: "payment_link.sent",
+  kind: "transactional",
+  channels: ["email", "sms"],
+  group: "order",
+  switch: "required",
+  enabled: true,
+  tokens: [
+    ...ORDER_TOKENS,
+    token("ödeme_bağlantısı", "https://atolye.com.tr/ode/pl_1", {
+      longest: `https://${"x".repeat(112)}`,
+    }),
+  ],
+  fields: [
+    field("subject", "{mağaza_adı}: siparişiniz hazır ({sipariş_no})"),
+    field("sms", "{mağaza_adı}: Siparişiniz hazır. Ödeme: {ödeme_bağlantısı}", null, [
+      "ödeme_bağlantısı",
+    ]),
   ],
 }
 
@@ -36,12 +71,12 @@ export const DELIVERED: CustomerMessage = {
   group: "shipping",
   switch: "here",
   enabled: true,
-  tokens: ORDER_TOKENS,
+  tokens: [...ORDER_TOKENS, token("takip_no", "1234567890", { may_be_empty: true })],
   fields: [
-    { field: "subject", default: "Siparişiniz teslim edildi (#{sipariş_no})", text: "Teslim!" },
-    { field: "preheader", default: "{mağaza_adı} siparişiniz size ulaştı.", text: null },
-    { field: "heading", default: "{müşteri_adı}, siparişiniz teslim edildi", text: null },
-    { field: "intro", default: "#{sipariş_no} numaralı siparişiniz teslim edildi.", text: null },
+    field("subject", "Siparişiniz teslim edildi (#{sipariş_no})", "Teslim!"),
+    field("preheader", "{mağaza_adı} siparişiniz size ulaştı."),
+    field("heading", "{müşteri_adı}, siparişiniz teslim edildi"),
+    field("intro", "#{sipariş_no} numaralı siparişiniz teslim edildi."),
   ],
 }
 
@@ -54,8 +89,8 @@ export const REMINDER: CustomerMessage = {
   enabled: false,
   tokens: ORDER_TOKENS.slice(0, 2),
   fields: [
-    { field: "subject", default: "Sepetinizdeki ürünler sizi bekliyor", text: null },
-    { field: "intro", default: "{mağaza_adı} sepetinizi sakladı.", text: null },
+    field("subject", "Sepetinizdeki ürünler sizi bekliyor"),
+    field("intro", "{mağaza_adı} sepetinizi sakladı."),
   ],
 }
 
@@ -66,8 +101,8 @@ export const CONSENT: CustomerMessage = {
   group: "account",
   switch: "required",
   enabled: true,
-  tokens: [ORDER_TOKENS[0] ?? { name: "mağaza_adı", sample: "Atölye" }],
+  tokens: ORDER_TOKENS.slice(0, 1),
   fields: [],
 }
 
-export const MESSAGES: CustomerMessage[] = [PLACED, DELIVERED, CONSENT, REMINDER]
+export const MESSAGES: CustomerMessage[] = [PLACED, PAYMENT_LINK, DELIVERED, CONSENT, REMINDER]

@@ -110,15 +110,47 @@ export function unknownTokens(text: string, message: CustomerMessage): string[] 
   ]
 }
 
-/** The text with each token's preview value: what the SMS is counted on. */
-export function withSamples(text: string, message: CustomerMessage): string {
-  const samples = new Map(message.tokens.map((token) => [token.name, token.sample]))
+const tokensIn = (text: string): Set<string> =>
+  new Set([...text.normalize("NFC").matchAll(TOKEN)].map(([, name = ""]) => name))
+
+/** The text with each token's preview value (`"sample"`) or its longest (`"longest"`). */
+export function withSamples(
+  text: string,
+  message: CustomerMessage,
+  which: "sample" | "longest" = "sample"
+): string {
+  const samples = new Map(message.tokens.map((token) => [token.name, token[which]]))
   return text.normalize("NFC").replace(TOKEN, (whole, name: string) => samples.get(name) ?? whole)
 }
 
-/** The SMS's length with the preview's values: parts, and whether Turkish costs it room. */
+/**
+ * The SMS's length with each token at its longest, as the server counts it
+ * on save (a name of forty Turkish letters, a long link): parts, and
+ * whether Turkish costs it room.
+ */
 export const smsCount = (text: string, message: CustomerMessage): SmsLength =>
-  smsLength(withSamples(text.trim(), message))
+  smsLength(withSamples(text.trim(), message, "longest"))
+
+/** The tokens the field must keep that the text lacks (a payment link's SMS: its link). */
+export function missingTokens(text: string, message: CustomerMessage, field: TextField): string[] {
+  const used = tokensIn(text)
+  const required = message.fields.find((each) => each.field === field)?.required_tokens ?? []
+  return required.filter((name) => !used.has(name))
+}
+
+/** The text's tokens a send may leave empty (no sender, no tracking yet). */
+export const emptyableTokens = (text: string, message: CustomerMessage): string[] => {
+  const used = tokensIn(text)
+  return message.tokens
+    .filter((token) => token.may_be_empty && used.has(token.name))
+    .map((token) => token.name)
+}
+
+/** Whether the text uses a token a person typed: a letter outside the Turkish table makes it UCS-2. */
+export const usesFreeText = (text: string, message: CustomerMessage): boolean => {
+  const used = tokensIn(text)
+  return message.tokens.some((token) => token.free_text && used.has(token.name))
+}
 
 /** The fields of a channel, as the message has them. */
 export const fieldsOf = (message: CustomerMessage, channel: "email" | "sms"): TextField[] =>

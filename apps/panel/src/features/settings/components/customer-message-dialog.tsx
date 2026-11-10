@@ -19,6 +19,7 @@ import {
   draftOf,
   fieldsOf,
   smsCount,
+  missingTokens,
   unknownTokens,
   valuesOf,
 } from "@/features/settings/customer-messages"
@@ -112,6 +113,11 @@ export function CustomerMessageDialog({
   const sms = values.sms ?? ""
   const valid =
     unknownTokens(typed, message).length === 0 &&
+    // A field left empty takes the platform's text, which keeps what it must
+    message.fields.every((field) => {
+      const text = values[field.field] ?? ""
+      return text.trim() === "" || missingTokens(text, message, field.field).length === 0
+    }) &&
     (message.fields.every((field) => field.field !== "sms") ||
       smsCount(sms, message).parts <= SMS_MAX_PARTS)
   const defaults = defaultsOf(message)

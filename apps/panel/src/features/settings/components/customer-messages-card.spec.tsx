@@ -69,7 +69,7 @@ describe("CustomerMessagesCard", () => {
 
     const order = await screen.findByRole("region", { name: "Sipariş" })
     expect(within(order).getByText("Sipariş alındı")).toBeInTheDocument()
-    expect(within(order).getByText("Zorunlu")).toBeInTheDocument()
+    expect(within(order).getAllByText("Zorunlu")).toHaveLength(2)
     const shipping = screen.getByRole("region", { name: "Kargo" })
     expect(within(shipping).getByText("Özelleştirildi")).toBeInTheDocument()
     expect(within(shipping).getByText("Açık")).toBeInTheDocument()
@@ -88,11 +88,44 @@ describe("CustomerMessagesCard", () => {
     expect(sms).toHaveValue(
       "{mağaza_adı}: #{sipariş_no} numaralı siparişiniz alındı. Toplam {toplam}."
     )
-    expect(within(dialog).getByText(/1 SMS/)).toBeInTheDocument()
+    // Counted at the longest total (₺ goes as UCS-2): two parts
+    expect(within(dialog).getByText(/2 SMS olarak gönderilir/)).toBeInTheDocument()
+
+    await userEvent.clear(sms)
+    await userEvent.type(sms, "Siparişiniz alındı {{müşteri_adı}")
+    expect(within(dialog).getByText(/· 1 SMS/)).toBeInTheDocument()
+    // A name a customer typed may carry â, î: the whole SMS would go as UCS-2
+    expect(within(dialog).getByText(/Türkçe alfabe dışı harf/)).toBeInTheDocument()
 
     await userEvent.clear(sms)
     await userEvent.type(sms, "ş".repeat(80))
     expect(within(dialog).getByText(/2 SMS olarak gönderilir/)).toBeInTheDocument()
+  })
+
+  it("holds the save of a payment link's SMS without its link, naming it", async () => {
+    const dialog = await openRow(/Ödeme bağlantısı/)
+    await userEvent.click(within(dialog).getByRole("tab", { name: "SMS" }))
+    const sms = within(dialog).getByLabelText("SMS metni")
+
+    await userEvent.clear(sms)
+    await userEvent.type(sms, "Siparişiniz hazır")
+
+    expect(within(dialog).getByText(/{ödeme_bağlantısı} içermeli/)).toBeInTheDocument()
+    expect(within(dialog).getByRole("button", { name: "Kaydet" })).toBeDisabled()
+    await userEvent.type(sms, " {{ödeme_bağlantısı}")
+    expect(within(dialog).queryByText(/içermeli/)).not.toBeInTheDocument()
+    expect(within(dialog).getByRole("button", { name: "Kaydet" })).toBeEnabled()
+  })
+
+  it("warns when a token can be empty in a send", async () => {
+    const dialog = await openRow(/Sipariş teslim edildi/)
+    const intro = within(dialog).getByLabelText("Giriş metni")
+
+    await userEvent.type(intro, " Takip: {{takip_no}")
+
+    expect(
+      within(dialog).getByText(/\{takip_no\} bazı gönderimlerde boş kalır/)
+    ).toBeInTheDocument()
   })
 
   it("puts a token where the caret is, names an unknown one and holds the save", async () => {
@@ -108,8 +141,8 @@ describe("CustomerMessagesCard", () => {
     expect(subject).toHaveValue("Teslim edildi {sipariş_no}")
     expect(screen.queryByRole("menuitem", { name: /Telefon/ })).not.toBeInTheDocument()
 
-    await userEvent.type(subject, " {{takip_no}")
-    expect(within(dialog).getByRole("alert")).toHaveTextContent("{takip_no}")
+    await userEvent.type(subject, " {{kargo_firması}")
+    expect(within(dialog).getByRole("alert")).toHaveTextContent("{kargo_firması}")
     expect(within(dialog).getByRole("button", { name: "Kaydet" })).toBeDisabled()
   })
 
