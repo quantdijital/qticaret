@@ -1507,6 +1507,25 @@
           "verified": "Doğrulandı",
           "failure": "Doğrulanamadı",
           "temporary_failure": "Geçici sorun"
+        },
+        "dns": {
+          "names": {
+            "spf": "SPF",
+            "dkim": "DKIM",
+            "dmarc": "DMARC"
+          },
+          "states": {
+            "found": "Var",
+            "missing": "Yok",
+            "unknown": "Okunamadı"
+          },
+          "selector": "İmza anahtarı \"{{selector}}\" seçicisinde bulundu.",
+          "hints": {
+            "spf": "Hangi sunucuların alan adınız adına e-posta gönderebileceğini söyler.",
+            "dkim": "E-postaların imzası. Sunucunuz başka bir seçici kullanıyorsa bu satırı yok sayabilirsiniz.",
+            "dmarc": "Alıcı sunuculara SPF ya da DKIM tutmazsa ne yapacaklarını söyler."
+          },
+          "warning": "Eksik kayıtlar e-postalarınızın spam klasörüne düşmesine yol açabilir; gönderim durmaz. Kayıtları e-posta sunucunuzun panelinde gösterildiği gibi {{domain}} alan adının DNS ayarlarına ekleyin."
         }
       },
       "alerts": {
@@ -1729,6 +1748,75 @@
         "missingTokens": "Bu metin {{tokens}} içermeli: müşteri bağlantıya yalnızca bu metinle ulaşır.",
         "mayBeEmpty": "{{tokens}} bazı gönderimlerde boş kalır (gönderen ya da takip bilgisi yoksa); metin onsuz da okunmalı.",
         "smsUcs2Risk": "Müşterinin yazdığı bir bilgi (ad gibi) Türkçe alfabe dışı harf (â, î, û) içerirse SMS 70 karakterlik parçalara bölünür."
+      },
+      "smtp": {
+        "name": "E-posta sunucusu",
+        "title": "E-posta gönderimi",
+        "description": "Mağazanızın e-postaları (sipariş onayı, fatura, kargo, şifre yenileme, kampanyalar) kendi e-posta sunucunuzdan (SMTP) gitsin. Bağlı değilse e-postalar platformun gönderim hizmetinden gider.",
+        "none": "Kendi e-posta sunucunuz bağlı değil.",
+        "connect": "Sunucuyu bağla",
+        "edit": "Düzenle",
+        "server": "Sunucu",
+        "sender": "Gönderen",
+        "pace": "Kampanya hızı",
+        "paceValue": "Dakikada en çok {{count}} e-posta",
+        "rejected": "E-posta sunucusu kayıtlı bilgileri artık kabul etmiyor. Şifreyi yeniden girip kaydedin.",
+        "checks": {
+          "merchant_invalid": "Sunucuyla güvenli bağlantı kurulamadı. Güvenlik seçimini ve sunucu adının sertifikadaki adla aynı olduğunu kontrol edin.",
+          "secret_invalid": "E-posta sunucusu bu kullanıcı adı ve şifreyi kabul etmedi."
+        },
+        "dialogTitle": "E-posta sunucusu",
+        "dialogDescription": "Sunucu panelinizdeki e-posta hesabının SMTP bilgilerini girin. Kaydederken sunucuya bağlanıp giriş yapılır; e-posta gönderilmez.",
+        "save": "Bağlan ve kaydet",
+        "remove": "Bağlantıyı kaldır",
+        "removeTitle": "E-posta sunucusunun bağlantısı kaldırılsın mı?",
+        "removeDescription": "E-postalar yeniden platformun gönderim hizmetinden gider. Kayıtlı şifre silinir.",
+        "host": "Sunucu adı",
+        "hostHint": "Örneğin mail.magaza.com.tr. Sertifikadaki adla aynı olmalı.",
+        "port": "Bağlantı noktası",
+        "security": "Güvenlik",
+        "securityHint": "587 için STARTTLS, 465 için SSL/TLS. Şifrelemesiz bağlantı yalnızca aynı makinedeki sunucuya yapılır.",
+        "securities": {
+          "starttls": "STARTTLS (587)",
+          "tls": "SSL/TLS (465)",
+          "none": "Şifrelemesiz (yalnızca aynı makine)"
+        },
+        "username": "Kullanıcı adı",
+        "usernameHint": "Çoğunlukla e-posta adresinin kendisi. Girişsiz yerel sunucuda boş bırakın.",
+        "password": "Şifre",
+        "fromEmail": "Gönderen adresi",
+        "fromEmailHint": "E-postalar bu adresten gider; sunucunun bu hesaba izin verdiği adres olmalı.",
+        "fromName": "Gönderen adı",
+        "fromNameHint": "Boş bırakırsanız mağazanızın adı görünür.",
+        "rate": "Dakikada en çok kampanya e-postası",
+        "rateHint": "Toplu gönderimler bu hızla gider ki sunucunuzun adresi spam listelerine girmesin. Sipariş ve hesap e-postaları beklemez.",
+        "hostInvalid": "Sunucu adını alan adı ya da IP adresi olarak yazın.",
+        "portInvalid": "Bağlantı noktası 25, 465, 587 ya da 2525 olur.",
+        "usernameInvalid": "Kullanıcı adı tek satır olmalı.",
+        "fromEmailInvalid": "Gönderen adresini e-posta adresi olarak yazın.",
+        "fromNameInvalid": "Gönderen adı tek satır olmalı.",
+        "rateInvalid": "1 ile 300 arasında bir sayı yazın.",
+        "plainRemote": "Şifrelemesiz bağlantı yalnızca aynı makinedeki sunucuya yapılır; STARTTLS ya da SSL/TLS seçin.",
+        "test": {
+          "button": "Deneme e-postası gönder",
+          "sent": "Deneme e-postası {{to}} adresine gönderildi. Gelen kutunuzu (ve spam klasörünü) kontrol edin.",
+          "reply": "Sunucunun yanıt kodu: {{reply}}",
+          "reasons": {
+            "auth_failed": "Sunucu kullanıcı adını ya da şifreyi kabul etmedi.",
+            "tls_failed": "Güvenli bağlantı kurulamadı. Güvenlik seçimini ve sunucu adının sertifikadaki adla aynı olduğunu kontrol edin.",
+            "connection_refused": "Sunucuya bağlanılamadı: bağlantı reddedildi. Sunucu adını, bağlantı noktasını ve güvenlik duvarını kontrol edin.",
+            "dns_failed": "Sunucu adı bulunamadı. Adı kontrol edin.",
+            "timeout": "Sunucu zamanında yanıt vermedi. Bağlantı noktasını ve güvenlik duvarını kontrol edin.",
+            "aborted": "Sunucu 20 saniye içinde yanıt vermedi.",
+            "network_error": "Bağlantı yarıda kesildi. Biraz sonra yeniden deneyin.",
+            "deferred": "Sunucu e-postayı şimdilik almadı (geçici hata). Biraz sonra yeniden deneyin.",
+            "recipient_rejected": "Sunucu alıcı adresini kabul etmedi: bu adreste posta kutusu yok.",
+            "rejected": "Sunucu e-postayı reddetti. Gönderen adresinin bu hesaba ait olduğunu kontrol edin.",
+            "outcome_unknown": "Bağlantı e-posta gönderilirken kesildi; e-posta gitmiş olabilir. Gelen kutunuzu kontrol edin.",
+            "invalid_address": "Gönderen ya da alıcı adresi geçerli değil.",
+            "failed": "Sunucu beklenmeyen bir yanıt verdi."
+          }
+        }
       }
     },
     "sms": {

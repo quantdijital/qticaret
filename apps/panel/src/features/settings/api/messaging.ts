@@ -6,7 +6,7 @@ export interface Suppression {
   channel: "email" | "sms"
   recipient_masked: string
   reason: "bounce" | "complaint" | "manual"
-  source: "resend" | "netgsm" | "panel"
+  source: "resend" | "netgsm" | "panel" | "smtp"
   detail: string | null
   created_at: string
 }
@@ -43,11 +43,26 @@ export interface DnsRecord {
   priority?: number
 }
 
+export type DnsRecordState = "found" | "missing" | "unknown"
+
+/** The sender domain's records, read from DNS: a warning only (adr/0036 Ek 2026-11-10). */
+export interface SenderDns {
+  domain: string
+  spf: DnsRecordState
+  dkim: DnsRecordState
+  dkim_selector: string | null
+  dmarc: DnsRecordState
+}
+
 export interface SenderDomainView {
   /** Whether the shop's e-mail goes out at all (the platform's setting, not the shop's). */
   sending: boolean
   /** Whether e-mail goes through Resend here: only then can a domain be verified. */
   available: boolean
+  /** What the e-mail leaves by: `smtp` is the shop's own mail server. */
+  transport?: "resend" | "mailpit" | "smtp" | null
+  /** With the shop's own mail server: whether its domain publishes SPF, DKIM, DMARC. */
+  dns?: SenderDns | null
   /** The address the shop's e-mail goes from now. */
   sender: string | null
   domain: {
@@ -78,6 +93,13 @@ export const checkSenderDomain = () =>
 
 export const removeSenderDomain = () =>
   sdk.client.fetch<SenderDomainView>(DOMAIN_PATH, { method: "DELETE" })
+
+export type SmtpTestResult =
+  { ok: true; to: string } | { ok: false; reason: string; reply: string | null }
+
+/** A test e-mail through the shop's mail server to the signed-in member's own address. */
+export const sendSmtpTest = () =>
+  sdk.client.fetch<SmtpTestResult>("/admin/messaging/smtp/test", { method: "POST", body: {} })
 
 export interface MessageTemplateSummary {
   name: string

@@ -42,6 +42,17 @@ export type NetgsmAccount = ProviderAccount<{ msgheader: string; iys_brand_code?
 export type MetaAccount = ProviderAccount<{ pixel_id: string; test_event_code?: string }>
 /** GA4's web stream for server-side events (F10.9). */
 export type Ga4Account = ProviderAccount<{ measurement_id: string }>
+export type SmtpSecurity = "tls" | "starttls" | "none"
+/** The shop's own mail server (adr/0036 Ek 2026-11-10); the password is the one secret. */
+export type SmtpAccount = ProviderAccount<{
+  host: string
+  port: number
+  security: SmtpSecurity
+  username?: string
+  from_email: string
+  from_name?: string
+  rate_per_minute: number
+}>
 /** Yurtiçi Kargo on the shop's own contract, with its door account when it has one (adr/0035). */
 export type YurticiAccount = ProviderAccount<{ test_mode: boolean }>
 

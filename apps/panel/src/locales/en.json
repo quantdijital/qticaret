@@ -1507,6 +1507,25 @@
           "verified": "Verified",
           "failure": "Failed",
           "temporary_failure": "Temporary issue"
+        },
+        "dns": {
+          "names": {
+            "spf": "SPF",
+            "dkim": "DKIM",
+            "dmarc": "DMARC"
+          },
+          "states": {
+            "found": "Present",
+            "missing": "Missing",
+            "unknown": "Not read"
+          },
+          "selector": "Signing key found under the \"{{selector}}\" selector.",
+          "hints": {
+            "spf": "Says which servers may send e-mail for your domain.",
+            "dkim": "The e-mails' signature. If your server uses another selector, ignore this line.",
+            "dmarc": "Tells receiving servers what to do when SPF or DKIM fail."
+          },
+          "warning": "Missing records can send your e-mails to spam folders; sending does not stop. Add the records to the DNS of {{domain}} as your mail server's panel shows them."
         }
       },
       "alerts": {
@@ -1729,6 +1748,75 @@
         "missingTokens": "This text must contain {{tokens}}: the customer reaches the link only through it.",
         "mayBeEmpty": "{{tokens}} is empty in some sends (no sender or tracking yet); the text should read well without it.",
         "smsUcs2Risk": "If a detail a customer typed (a name) has letters outside the Turkish alphabet (â, î, û), the SMS splits into 70-character parts."
+      },
+      "smtp": {
+        "name": "Mail server",
+        "title": "E-mail sending",
+        "description": "Send your shop's e-mails (order confirmations, invoices, shipping, password resets, campaigns) through your own mail server (SMTP). When none is connected, e-mails go through the platform's sending service.",
+        "none": "Your own mail server is not connected.",
+        "connect": "Connect server",
+        "edit": "Edit",
+        "server": "Server",
+        "sender": "Sender",
+        "pace": "Campaign pace",
+        "paceValue": "At most {{count}} e-mails a minute",
+        "rejected": "The mail server no longer accepts the saved details. Enter the password again and save.",
+        "checks": {
+          "merchant_invalid": "No secure connection could be made. Check the security choice and that the server name matches its certificate.",
+          "secret_invalid": "The mail server did not accept this user name and password."
+        },
+        "dialogTitle": "Mail server",
+        "dialogDescription": "Enter the SMTP details of the e-mail account in your server's panel. Saving connects and signs in to the server; no e-mail is sent.",
+        "save": "Connect and save",
+        "remove": "Disconnect",
+        "removeTitle": "Disconnect the mail server?",
+        "removeDescription": "E-mails go through the platform's sending service again. The saved password is deleted.",
+        "host": "Server name",
+        "hostHint": "For example mail.shop.com. It must match the name on the certificate.",
+        "port": "Port",
+        "security": "Security",
+        "securityHint": "STARTTLS for 587, SSL/TLS for 465. An unencrypted connection is only made to a server on the same machine.",
+        "securities": {
+          "starttls": "STARTTLS (587)",
+          "tls": "SSL/TLS (465)",
+          "none": "Unencrypted (same machine only)"
+        },
+        "username": "User name",
+        "usernameHint": "Usually the e-mail address itself. Leave empty for a local server without login.",
+        "password": "Password",
+        "fromEmail": "Sender address",
+        "fromEmailHint": "E-mails go from this address; the server must allow it for this account.",
+        "fromName": "Sender name",
+        "fromNameHint": "Leave empty to show your shop's name.",
+        "rate": "Campaign e-mails per minute at most",
+        "rateHint": "Bulk sends go at this pace so your server's address is not listed as spam. Order and account e-mails do not wait.",
+        "hostInvalid": "Type the server as a domain name or an IP address.",
+        "portInvalid": "The port is 25, 465, 587 or 2525.",
+        "usernameInvalid": "The user name must be one line.",
+        "fromEmailInvalid": "Type the sender as an e-mail address.",
+        "fromNameInvalid": "The sender name must be one line.",
+        "rateInvalid": "Type a number between 1 and 300.",
+        "plainRemote": "An unencrypted connection is only made to a server on the same machine; choose STARTTLS or SSL/TLS.",
+        "test": {
+          "button": "Send test e-mail",
+          "sent": "A test e-mail went to {{to}}. Check your inbox (and spam folder).",
+          "reply": "Server reply code: {{reply}}",
+          "reasons": {
+            "auth_failed": "The server did not accept the user name or password.",
+            "tls_failed": "No secure connection could be made. Check the security choice and that the server name matches its certificate.",
+            "connection_refused": "Could not connect: the connection was refused. Check the server name, port and firewall.",
+            "dns_failed": "The server name was not found. Check it.",
+            "timeout": "The server did not answer in time. Check the port and firewall.",
+            "aborted": "The server did not answer within 20 seconds.",
+            "network_error": "The connection broke off. Try again shortly.",
+            "deferred": "The server did not take the e-mail for now (temporary error). Try again shortly.",
+            "recipient_rejected": "The server refused the recipient: there is no mailbox at this address.",
+            "rejected": "The server refused the e-mail. Check that the sender address belongs to this account.",
+            "outcome_unknown": "The connection broke while sending; the e-mail may have gone. Check your inbox.",
+            "invalid_address": "The sender or recipient address is not valid.",
+            "failed": "The server gave an unexpected answer."
+          }
+        }
       }
     },
     "sms": {

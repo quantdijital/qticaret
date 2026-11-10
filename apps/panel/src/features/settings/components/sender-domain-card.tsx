@@ -16,6 +16,7 @@ import {
   senderDomainQuery,
 } from "@/features/settings/api/messaging"
 import type { DnsRecord, SenderDomainView } from "@/features/settings/api/messaging"
+import { SenderDnsList } from "@/features/settings/components/sender-dns"
 import { errorText } from "@/lib/errors"
 
 const D = "settings.notifications.domain"
@@ -118,6 +119,7 @@ export function SenderDomainCard() {
           <p className="text-sm">
             {t(`${D}.sender`)} <span className="font-mono">{view.sender}</span>
           </p>
+          {view.transport === "smtp" && view.dns ? <SenderDnsList dns={view.dns} /> : null}
           {!view.available ? null : !view.domain ? (
             <form
               className="grid gap-2 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)_auto]"

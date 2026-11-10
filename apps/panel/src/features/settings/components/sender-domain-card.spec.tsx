@@ -61,6 +61,32 @@ describe("SenderDomainCard", () => {
     expect(screen.queryByRole("button")).toBeNull()
   })
 
+  it("warns of the own mail server's missing records, without a button to verify", async () => {
+    fetchMock.mockResolvedValue({
+      sending: true,
+      available: false,
+      transport: "smtp",
+      dns: {
+        domain: "magaza.com.tr",
+        spf: "found",
+        dkim: "found",
+        dkim_selector: "default",
+        dmarc: "missing",
+      },
+      sender: "bildirim@magaza.com.tr",
+      domain: null,
+      dmarc,
+    } satisfies SenderDomainView)
+    renderCard()
+
+    expect(await screen.findByText("bildirim@magaza.com.tr")).toBeInTheDocument()
+    expect(screen.getByText("Yok")).toBeInTheDocument()
+    expect(screen.getAllByText("Var")).toHaveLength(2)
+    expect(screen.getByText(/"default" seçicisinde/)).toBeInTheDocument()
+    expect(screen.getByText(/gönderim durmaz/)).toBeInTheDocument()
+    expect(screen.queryByRole("button")).toBeNull()
+  })
+
   it("offers the shop's own domain where Resend can verify it", async () => {
     fetchMock.mockResolvedValue({
       sending: true,

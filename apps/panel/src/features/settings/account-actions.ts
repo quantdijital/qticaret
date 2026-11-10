@@ -57,12 +57,15 @@ export function useAccountActions(provider: string, name: string, ns = "settings
     remove,
     failure,
     busy: save.isPending || check.isPending || remove.isPending,
-    submit: async (body: AccountSave) => {
+    /** Whether it was saved: a dialog closes on true, keeps the refusal on false. */
+    submit: async (body: AccountSave): Promise<boolean> => {
       setFailure(null)
       try {
         announce((await save.mutateAsync(body)).check, "save")
+        return true
       } catch (error) {
         setFailure(errorText(t, error))
+        return false
       }
     },
     test: () =>
