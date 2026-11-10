@@ -7,7 +7,8 @@
     "node": ">=24.11.0 <25"
   },
   "scripts": {
-    "dev": "turbo run dev",
+    "dev": "turbo run dev --filter=!@qticaret/control-plane",
+    "dev:cp": "pnpm --filter control-plane dev",
     "dev:paytr": "pnpm --filter backend dev:paytr",
     "dev:parasut": "pnpm --filter backend dev:parasut",
     "dev:shopify": "pnpm --filter backend dev:shopify",

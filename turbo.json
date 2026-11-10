@@ -9,6 +9,7 @@
     "JWT_SECRET",
     "COOKIE_SECRET",
     "PII_*",
+    "CP_*",
     "CREDENTIALS_*",
     "PAYTR_*",
     "IYZICO_*",

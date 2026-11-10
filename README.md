@@ -12,7 +12,7 @@ Medusa.js v2 tabanlı backend + admin. Mimari ve yol haritası: `docs/`, güncel
 
 ## Kurulum
 ```sh
-pnpm env:init          # infra/docker/.env, apps/backend/.env(.test) — secret'lar rastgele üretilir
+pnpm env:init          # infra/docker/.env, apps/backend/.env(.test), apps/control-plane/.env(.test) — secret'lar rastgele üretilir
 pnpm db:up             # geliştirme servisleri (aşağıdaki tablo)
 pnpm install
 pnpm --filter @qticaret/backend medusa db:migrate
@@ -49,7 +49,9 @@ yalnızca boş volume'da uygulandığı için env dosyalarını yeniden üretirk
 ## Komutlar
 | Komut | Ne yapar |
 |---|---|
-| `pnpm dev` | Tüm uygulamaları geliştirme modunda çalıştırır (Turborepo) |
+| `pnpm dev` | Tüm uygulamaları geliştirme modunda çalıştırır (Turborepo); üst panel hariç |
+| `pnpm --filter control-plane db:setup` | Üst panelin veritabanını (`qticaret_cp`) açar ve migrate eder (bir kez; sonra `db:migrate`) |
+| `pnpm dev:cp` | Üst panel arka ucu (adr/0061), http://localhost:9100; ayrı komut, `pnpm dev`'e dahil değil |
 | `pnpm build` | Tüm paketleri derler |
 | `pnpm lint` | ESLint (strict, type-checked) |
 | `pnpm typecheck` | `tsc --noEmit`; backend, Medusa'nın ürettiği tipleri (`.medusa/types`) okur: önce bir kez `pnpm dev` ya da `pnpm build` |
@@ -64,6 +66,7 @@ yalnızca boş volume'da uygulandığı için env dosyalarını yeniden üretirk
 ```
 apps/
   backend/   Medusa v2.21.2 — API, worker, admin (adr/0001); storefront F18'de gelir
+  control-plane/ üst panel arka ucu, ayrı Medusa 2.21.2 (adr/0061)
 packages/
   config/    paylaşılan tsconfig (strict), ESLint flat config, Prettier
   types/     paylaşılan tipler ve Store API sözleşmeleri
