@@ -1,4 +1,4 @@
-import { isProviderError } from "../../errors"
+import { ValidationError, isProviderError } from "../../errors"
 import { tenantTag } from "./index"
 import { createSmtpTransport } from "./smtp"
 import { smtpAccountOf } from "./smtp-account"
@@ -28,6 +28,13 @@ export async function checkSmtp(
     }
     if (isProviderError(error) && error.providerCode === "tls_failed") {
       return "merchant_invalid"
+    }
+    // The SSRF policy (smtp-target.ts): the name leads inside, or the port is not a mail port
+    if (isProviderError(error) && error.providerCode === "target_refused") {
+      throw new ValidationError("smtp.host_refused", { field: "settings.host" })
+    }
+    if (isProviderError(error) && error.providerCode === "port_refused") {
+      throw new ValidationError("smtp.port_invalid", { field: "settings.port" })
     }
     throw error
   }

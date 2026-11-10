@@ -86,26 +86,52 @@ export async function readSenderDns(
   }
 }
 
-const kept = new Map<string, { at: number; value: SenderDns }>()
+const kept = new Map<string, { until: number; value: SenderDns }>()
+const asking = new Map<string, Promise<SenderDns>>()
 
-/** The same, read again at most every ten minutes per domain: the panel reads it on each visit. */
-export async function senderDnsOf(address: string): Promise<SenderDns> {
+// A DNS that did not answer is asked again sooner
+const UNKNOWN_KEPT_MS = 60 * 1000
+
+/**
+ * The same, read again at most every ten minutes per domain (a minute when
+ * DNS did not answer), one lookup at a time: every role reads the e-mail
+ * tab, and each read would otherwise ask DNS ten times (security review).
+ */
+export async function senderDnsOf(
+  address: string,
+  resolver: TxtResolver = dns,
+  now: () => number = Date.now
+): Promise<SenderDns> {
   const domain = address.slice(address.lastIndexOf("@") + 1).toLowerCase()
   const hit = kept.get(domain)
-  if (hit && Date.now() - hit.at < KEPT_MS) {
+  if (hit && now() < hit.until) {
     return hit.value
   }
   // Names that never reach the Internet's DNS (RFC 2606, 6761): nothing to ask
   if (RESERVED.test(domain)) {
     return { domain, spf: "missing", dkim: "missing", dkim_selector: null, dmarc: "missing" }
   }
-  const value = await readSenderDns(address)
-  if (kept.size > 100) {
-    kept.clear()
+  const running = asking.get(domain)
+  if (running) {
+    return running
   }
-  // A DNS that did not answer is asked again on the next visit
-  if (![value.spf, value.dkim, value.dmarc].includes("unknown")) {
-    kept.set(domain, { at: Date.now(), value })
-  }
-  return value
+  const lookup = readSenderDns(address, resolver)
+    .then((value) => {
+      if (kept.size > 100) {
+        kept.clear()
+      }
+      const unknown = [value.spf, value.dkim, value.dmarc].includes("unknown")
+      kept.set(domain, { until: now() + (unknown ? UNKNOWN_KEPT_MS : KEPT_MS), value })
+      return value
+    })
+    .finally(() => {
+      asking.delete(domain)
+    })
+  asking.set(domain, lookup)
+  return lookup
+}
+
+/** Forgets what was read (tests). */
+export function forgetSenderDns(): void {
+  kept.clear()
 }

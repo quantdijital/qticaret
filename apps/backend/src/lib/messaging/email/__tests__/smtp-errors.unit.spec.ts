@@ -32,19 +32,39 @@ describe("an SMTP failure's meaning", () => {
       { code: "EENVELOPE", command: "RCPT TO", response: "554 5.7.1 Relay access denied" },
       "rejected",
     ],
-    [{ code: "EENVELOPE", command: "RCPT TO", response: "550 User unknown" }, "recipient_rejected"],
+    // A bare code from a server whose EHLO we did not see: not suppressed (M2)
+    [{ code: "EENVELOPE", command: "RCPT TO", response: "550 User unknown" }, "rejected"],
     [
       { code: "EENVELOPE", command: "MAIL FROM", response: "550 5.1.0 Sender rejected" },
       "rejected",
     ],
+    // The sender's own address, at RCPT: 5.1.0, 5.1.7, 5.1.8
+    [{ code: "EENVELOPE", command: "RCPT TO", response: "550 5.1.0 Address rejected" }, "rejected"],
+    [{ code: "EENVELOPE", command: "RCPT TO", response: "553 5.1.7 Bad sender" }, "rejected"],
+    [{ code: "EENVELOPE", command: "RCPT TO", response: "553 5.1.8 Bad domain" }, "rejected"],
     [
-      { code: "EMESSAGE", command: "DATA", response: "550 5.1.1 Unknown user" },
+      { code: "EENVELOPE", command: "RCPT TO", response: "550 5.1.10 Null MX" },
       "recipient_rejected",
     ],
+    // An enhanced code anywhere but at the start, or of another class, is not one
+    [{ code: "EENVELOPE", command: "RCPT TO", response: "550 see 5.1.1 doc" }, "rejected"],
+    [{ code: "EENVELOPE", command: "RCPT TO", response: "550 4.1.1 Odd" }, "rejected"],
+    // After DATA it is never the recipient's (M2)
+    [{ code: "EMESSAGE", command: "DATA", response: "550 5.1.1 Unknown user" }, "rejected"],
     [{ code: "EMESSAGE", command: "DATA", response: "554 5.7.1 Spam" }, "rejected"],
     [{ code: "EPROTOCOL" }, "failed"],
+    // Our own socket's failure (smtp-socket.ts) before nodemailer had it
+    [{ code: "ECONNREFUSED" }, "connection_refused"],
   ])("%j is %s", (fields, expected) => {
     expect(smtpFailureOf(fail(fields))).toBe(expected)
+  })
+
+  it("reads a bare 550 as the mailbox's only from a server known to give no enhanced codes", () => {
+    const bare = fail({ code: "EENVELOPE", command: "RCPT TO", response: "550 User unknown" })
+    expect(smtpFailureOf(bare, { enhancedCodes: false })).toBe("recipient_rejected")
+    expect(smtpFailureOf(bare, { enhancedCodes: true })).toBe("rejected")
+    const relay = fail({ code: "EENVELOPE", command: "RCPT TO", response: "553 Relaying denied" })
+    expect(smtpFailureOf(relay, { enhancedCodes: false })).toBe("rejected")
   })
 
   it("reads each refusal of an envelope nodemailer gathered", () => {

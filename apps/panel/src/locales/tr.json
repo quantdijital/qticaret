@@ -1790,7 +1790,7 @@
         "fromNameHint": "Boş bırakırsanız mağazanızın adı görünür.",
         "rate": "Dakikada en çok kampanya e-postası",
         "rateHint": "Toplu gönderimler bu hızla gider ki sunucunuzun adresi spam listelerine girmesin. Sipariş ve hesap e-postaları beklemez.",
-        "hostInvalid": "Sunucu adını alan adı ya da IP adresi olarak yazın.",
+        "hostInvalid": "Sunucunun tam adını (ör. mail.magaza.com.tr), localhost'u ya da IP adresini yazın.",
         "portInvalid": "Bağlantı noktası 25, 465, 587 ya da 2525 olur.",
         "usernameInvalid": "Kullanıcı adı tek satır olmalı.",
         "fromEmailInvalid": "Gönderen adresini e-posta adresi olarak yazın.",
@@ -1804,17 +1804,16 @@
           "reasons": {
             "auth_failed": "Sunucu kullanıcı adını ya da şifreyi kabul etmedi.",
             "tls_failed": "Güvenli bağlantı kurulamadı. Güvenlik seçimini ve sunucu adının sertifikadaki adla aynı olduğunu kontrol edin.",
-            "connection_refused": "Sunucuya bağlanılamadı: bağlantı reddedildi. Sunucu adını, bağlantı noktasını ve güvenlik duvarını kontrol edin.",
-            "dns_failed": "Sunucu adı bulunamadı. Adı kontrol edin.",
-            "timeout": "Sunucu zamanında yanıt vermedi. Bağlantı noktasını ve güvenlik duvarını kontrol edin.",
             "aborted": "Sunucu 20 saniye içinde yanıt vermedi.",
-            "network_error": "Bağlantı yarıda kesildi. Biraz sonra yeniden deneyin.",
             "deferred": "Sunucu e-postayı şimdilik almadı (geçici hata). Biraz sonra yeniden deneyin.",
             "recipient_rejected": "Sunucu alıcı adresini kabul etmedi: bu adreste posta kutusu yok.",
             "rejected": "Sunucu e-postayı reddetti. Gönderen adresinin bu hesaba ait olduğunu kontrol edin.",
             "outcome_unknown": "Bağlantı e-posta gönderilirken kesildi; e-posta gitmiş olabilir. Gelen kutunuzu kontrol edin.",
             "invalid_address": "Gönderen ya da alıcı adresi geçerli değil.",
-            "failed": "Sunucu beklenmeyen bir yanıt verdi."
+            "failed": "Sunucu beklenmeyen bir yanıt verdi.",
+            "unreachable": "Sunucuya ulaşılamadı. Sunucu adını, bağlantı noktasını ve güvenlik duvarını kontrol edin.",
+            "target_refused": "Bu sunucu adı yerel ya da iç ağdaki bir adrese çıkıyor; mağaza buradan bağlanamaz. Sunucunun genel adını yazın; aynı makinedeki sunucu için localhost yazın.",
+            "port_refused": "Bağlantı noktası 25, 465, 587 ya da 2525 olmalı."
           }
         }
       }

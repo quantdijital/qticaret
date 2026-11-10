@@ -129,6 +129,32 @@ describe("SmtpCard", () => {
     })
   })
 
+  it("asks for the password again for another port, and takes no numeric host", async () => {
+    serve(connected)
+    renderCard()
+    await userEvent.click(await screen.findByRole("button", { name: "Düzenle" }))
+    await userEvent.clear(field("smtp-port"))
+    await userEvent.type(field("smtp-port"), "2525")
+    await userEvent.clear(field("smtp-host"))
+    await userEvent.type(field("smtp-host"), "2130706433")
+    await userEvent.click(screen.getByRole("button", { name: "Bağlan ve kaydet" }))
+
+    expect(await screen.findByText(/Bu bilgiyi girin/)).toBeInTheDocument()
+    expect(screen.getByText(/Sunucunun tam adını/)).toBeInTheDocument()
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/admin/integrations/credentials/smtp",
+      expect.anything()
+    )
+  })
+
+  it("says only that the server could not be reached, whatever stopped it", async () => {
+    serve(connected, { ok: false, reason: "unreachable", reply: null })
+    renderCard()
+    await userEvent.click(await screen.findByRole("button", { name: "Deneme e-postası gönder" }))
+    expect(await screen.findByText(/Sunucuya ulaşılamadı/)).toBeInTheDocument()
+    expect(screen.queryByText(/yanıt kodu/)).toBeNull()
+  })
+
   it("lets an admin send a test, not change the server, and says why it failed", async () => {
     staff.accounts = false
     serve(connected, { ok: false, reason: "auth_failed", reply: "535 5.7.8" })

@@ -94,8 +94,11 @@ class EmailNotificationService extends AbstractNotificationProviderService {
           }
         : {}),
     }
-    const { id } = await suppressRefusedRecipient(container, notification.to, () =>
-      transport.send(email)
+    const { id } = await suppressRefusedRecipient(
+      container,
+      notification.to,
+      () => transport.send(email),
+      { smtp: transport.name === "smtp" }
     )
     return { id }
   }

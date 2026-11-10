@@ -511,6 +511,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "smtp.host_invalid":
     "Type the server as a domain name or an IP address, for example mail.shop.com.",
   "smtp.port_invalid": "A mail server's port is 25, 465, 587 or 2525.",
+  "smtp.host_refused":
+    "This server name leads to a local or internal address the shop cannot connect to. Type the server's public name (e.g. mail.shop.com); for a server on the same machine type localhost.",
   "smtp.plain_remote":
     "An unencrypted connection is only made to a server on the same machine. Choose SSL/TLS (465) or STARTTLS (587).",
   "smtp.from_email_invalid": "Type the sender as an e-mail address.",

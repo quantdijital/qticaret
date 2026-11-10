@@ -1,3 +1,4 @@
+import { hostname } from "node:os"
 import { isProviderError } from "../../../errors"
 import { createSmtpTransport, messageIdOf, smtpOptions } from "../smtp"
 import { isLoopbackHost, smtpAccountOf, smtpPace } from "../smtp-account"
@@ -29,8 +30,12 @@ const email = (overrides: Partial<OutgoingEmail> = {}): OutgoingEmail => ({
   ...overrides,
 })
 
-// Fast and quiet: no backoff, short waits
-const options = { tenant: "shop_example", retry: { baseDelayMs: 0, maxDelayMs: 0 } }
+// Fast and quiet: no backoff; a local server on any port, as in development
+const options = {
+  tenant: "shop_example",
+  retry: { baseDelayMs: 0, maxDelayMs: 0 },
+  target: { local: true },
+}
 
 async function failureOf(run: Promise<unknown>) {
   try {
@@ -74,17 +79,47 @@ describe("the SMTP account", () => {
     expect(smtpPace(account({ ratePerMinute: 20 }))).toEqual({ batch: 20, spacingMs: 3000 })
   })
 
-  it("requires TLS: implicit on 465, STARTTLS otherwise, with the certificate checked", () => {
-    const tls = smtpOptions(account({ host: "mail.magaza.example", port: 465, security: "tls" }))
-    expect(tls).toMatchObject({ secure: true, requireTLS: false, ignoreTLS: false })
-    expect(tls.tls).toEqual({ minVersion: "TLSv1.2", rejectUnauthorized: true })
-    const starttls = smtpOptions(account({ host: "mail.magaza.example", security: "starttls" }))
+  it("requires TLS: implicit on 465, STARTTLS otherwise, the certificate checked against the name", () => {
+    const remote = { address: "93.184.216.34", servername: "mail.magaza.example", loopback: false }
+    const local = { address: "127.0.0.1", servername: null, loopback: true }
+    const tls = smtpOptions(
+      account({ host: "mail.magaza.example", port: 465, security: "tls" }),
+      remote
+    )
+    // Connected to the address the policy allowed, the certificate read for the typed name
+    expect(tls).toMatchObject({
+      host: "93.184.216.34",
+      servername: "mail.magaza.example",
+      secure: true,
+      requireTLS: false,
+      ignoreTLS: false,
+    })
+    expect(tls.tls).toEqual({
+      minVersion: "TLSv1.2",
+      rejectUnauthorized: true,
+      servername: "mail.magaza.example",
+    })
+    const starttls = smtpOptions(
+      account({ host: "mail.magaza.example", security: "starttls" }),
+      remote
+    )
     expect(starttls).toMatchObject({ secure: false, requireTLS: true, ignoreTLS: false })
-    expect(() => smtpOptions(account({ host: "mail.magaza.example" }))).toThrow()
-    expect(smtpOptions(account())).toMatchObject({
+    expect(() => smtpOptions(account({ host: "mail.magaza.example" }), remote)).toThrow()
+    expect(smtpOptions(account(), local)).toMatchObject({
       disableFileAccess: true,
       disableUrlAccess: true,
     })
+  })
+
+  it("greets the server with a public name, never this machine's", () => {
+    const name = smtpOptions(account(), {
+      address: "127.0.0.1",
+      servername: null,
+      loopback: true,
+    }).name
+    expect(name).toMatch(/^[a-z0-9.-]+\.[a-z][a-z0-9-]*$/)
+    expect(name).not.toBe(hostname())
+    expect(name).not.toContain("127.0.0.1")
   })
 
   it("gives the same send the same Message-ID, another shop's another", () => {

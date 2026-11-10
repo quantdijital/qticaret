@@ -518,6 +518,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "smtp.host_invalid":
     "Sunucu adını alan adı ya da IP adresi olarak yazın, örneğin mail.magaza.com.tr.",
   "smtp.port_invalid": "E-posta sunucusunun bağlantı noktası 25, 465, 587 ya da 2525 olur.",
+  "smtp.host_refused":
+    "Bu sunucu adı yerel ya da iç ağdaki bir adrese çıkıyor; mağaza buradan bağlanamaz. Sunucunun genel adını (ör. mail.magaza.com.tr) yazın; aynı makinedeki sunucu için localhost yazın.",
   "smtp.plain_remote":
     "Şifrelemesiz bağlantı yalnızca aynı makinedeki sunucuya yapılır. SSL/TLS (465) ya da STARTTLS (587) seçin.",
   "smtp.from_email_invalid": "Gönderen adresini e-posta adresi olarak yazın.",

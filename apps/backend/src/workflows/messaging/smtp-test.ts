@@ -17,10 +17,24 @@ import { renderEmail } from "../../lib/messaging/templates/layout"
 import { messageText } from "../../lib/messaging/texts"
 import { brandOf } from "./brand"
 
+export type SmtpTestReason =
+  | Exclude<SmtpFailure, "connection_refused" | "dns_failed" | "timeout" | "network_error">
+  | "unreachable"
+  | "aborted"
+  | "invalid_address"
+  | "target_refused"
+  | "port_refused"
+
 /** What the panel shows: sent, or why not in words of its own and the server's numbers. */
 export type SmtpTestResult =
-  | { ok: true; to: string }
-  | { ok: false; reason: SmtpFailure | "aborted" | "invalid_address"; reply: string | null }
+  { ok: true; to: string } | { ok: false; reason: SmtpTestReason; reply: string | null }
+
+// Refused, not found, silent or cut off: one answer, so the button cannot
+// tell an open port from a closed one or a name from none (security review M1)
+const UNREACHED = new Set(["connection_refused", "dns_failed", "timeout", "network_error"])
+
+const reasonOf = (code: string): SmtpTestReason =>
+  UNREACHED.has(code) ? "unreachable" : (code as SmtpTestReason)
 
 // A person waits at the panel: one try, and no longer than this
 const TEST_TIMEOUT_MS = 20_000
@@ -82,7 +96,7 @@ const sendSmtpTestStep = createStep(
       logger.warn({ event: "messaging.smtp_test_failed", err: errorSummary(error) })
       return new StepResponse<SmtpTestResult>({
         ok: false,
-        reason: error.providerCode as SmtpFailure | "aborted" | "invalid_address",
+        reason: reasonOf(error.providerCode),
         reply: error.providerMessage ?? null,
       })
     }

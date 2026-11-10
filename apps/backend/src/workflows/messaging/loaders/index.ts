@@ -24,6 +24,7 @@ import {
 } from "./staff"
 import { loadStaffAccountChanged, loadStaffEmailConfirm } from "./staff-account"
 import { loadStaffPaymentIssue } from "./payment-issue"
+import { loadStaffSmtpRejections } from "./smtp-rejections"
 import { loadStaffStockShort } from "./stock-short"
 import { loadStockAlert } from "./stock"
 import type { Loaded } from "./types"
@@ -64,6 +65,7 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "staff.low_stock": loadStaffStock,
   "staff.stock_short": (container, id) => loadStaffStockShort(container, id),
   "staff.payment_issue": loadStaffPaymentIssue,
+  "staff.smtp_rejections": loadStaffSmtpRejections,
   "staff.seo_digest": (container) => loadSeoDigest(container),
   "staff.contact_message": (container, id) => loadStaffContact(container, id),
   "staff.invite": loadStaffInvite,

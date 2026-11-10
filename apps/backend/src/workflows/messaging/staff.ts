@@ -15,6 +15,8 @@ const SWITCHES = {
   // An order alert: a paid order placed short of stock (adr/0026 Ek 2026-11-06)
   "staff.stock_short": "alert_new_order",
   "staff.payment_issue": "alert_new_order",
+  // The orders' own e-mails are what the server refuses (adr/0036 Ek 2026-11-10)
+  "staff.smtp_rejections": "alert_new_order",
   "staff.low_stock": "alert_low_stock",
   "staff.seo_digest": "alert_seo_digest",
   "staff.contact_message": "alert_contact_message",

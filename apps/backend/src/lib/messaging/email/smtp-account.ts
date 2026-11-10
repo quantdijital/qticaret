@@ -30,11 +30,18 @@ export const SMTP_PORTS: readonly number[] = [25, 465, 587, 2525]
 export const DEFAULT_SMTP_RATE = 30
 export const MAX_SMTP_RATE = 300
 
-/** A host name (lowercase, IDNA as typed by the shop) or an IP address. */
-const HOST_NAME =
-  /^(?=.{1,253}$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/
+/**
+ * A fully qualified name (lowercase, at least one dot, the last label
+ * starting with a letter), `localhost`, or an IP address in its canonical
+ * form (`isIP`). Numbers a resolver would read as an address
+ * (`2130706433`, `127.1`, `0x0a000001`) are neither (security review M1).
+ * Whether an address may be reached is `smtp-target.ts`'s to say.
+ */
+const FQDN =
+  /^(?=.{4,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/
 
-export const isSmtpHost = (host: string): boolean => HOST_NAME.test(host) || isIP(host) !== 0
+export const isSmtpHost = (host: string): boolean =>
+  host === "localhost" || FQDN.test(host) || isIP(host) !== 0
 
 /**
  * This machine itself: `localhost`, 127.0.0.0/8 or ::1. Only there may mail

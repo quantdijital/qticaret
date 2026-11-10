@@ -47,6 +47,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "Bugün {{count}}/{{limit}} e-posta gönderildi. Sınıra ulaşınca e-posta gitmez; Ayarlar > Bildirimler'den değiştirebilirsiniz.",
     },
+    "messaging.smtp_rejections": {
+      title: "E-posta sunucunuz alıcıları reddediyor",
+      description:
+        "Son {{minutes}} dakikada {{sends}} e-postanın {{rejections}} tanesi alıcı adresi yok diye reddedildi. Bu çoğunlukla sunucu ayarı sorunudur; adresler gönderilmeyenler listesine yazılmıyor. Sunucunuzu kontrol edip Ayarlar > E-posta ve SMS'ten deneme e-postası gönderin.",
+    },
     "orders.bank_transfer_pending": {
       title: "Havale bekleniyor: #{{number}}",
       description: "{{total}} tutarındaki ödeme gelince siparişi onaylayın.",
@@ -173,6 +178,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "80% of today's e-mail limit used",
       description:
         "{{count}}/{{limit}} e-mails sent today. At the limit no e-mail goes; change it under Settings > Notifications.",
+    },
+    "messaging.smtp_rejections": {
+      title: "Your mail server is refusing recipients",
+      description:
+        "In the last {{minutes}} minutes {{rejections}} of {{sends}} e-mails were refused as having no such recipient. This is usually a server setting; the addresses are not being put on the do-not-send list. Check your server, then send a test e-mail from Settings > E-mail and SMS.",
     },
     "orders.bank_transfer_pending": {
       title: "Bank transfer awaited: #{{number}}",

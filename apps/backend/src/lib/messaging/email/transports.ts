@@ -36,10 +36,19 @@ type TransportOptions = Partial<Omit<HttpClientOptions, "provider" | "baseUrl">>
   baseUrl?: string
 }
 
-/** A header's text on one line: control characters and line separators become spaces. */
+// Invisible format characters (bidi overrides, zero-width spaces, BOM); the emoji
+// joiner stays, or a family emoji in a subject falls apart (security review 2026-11-10)
+const FORMAT_CHARACTERS = new RegExp("(?!\\u200d)\\p{Cf}", "gu")
+
+/**
+ * A header's text on one line: control characters and line separators
+ * become spaces, invisible format characters go (a name cannot read
+ * backwards in the inbox).
+ */
 export const headerText = (value: string, max: number): string =>
   value
     .replace(/[\p{Cc}\u2028\u2029]+/gu, " ")
+    .replace(FORMAT_CHARACTERS, "")
     .trim()
     .slice(0, max)
 

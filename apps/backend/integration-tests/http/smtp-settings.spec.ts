@@ -31,7 +31,7 @@ interface AuditEntry {
 
 const PATH = "/admin/integrations/credentials/smtp"
 
-// Signs in only with the account's password; says a mailbox does not exist for GONE
+// Signs in only with the account's password; says a mailbox does not exist for every "olmayan" address
 const SERVER: Partial<SMTPServerOptions> = {
   authOptional: false,
   onAuth(auth, _session, callback) {
@@ -42,7 +42,11 @@ const SERVER: Partial<SMTPServerOptions> = {
     }
   },
   onRcptTo(address, _session, callback) {
-    callback(address.address === GONE ? reply(550, "5.1.1 Recipient address rejected") : undefined)
+    callback(
+      address.address.startsWith("olmayan")
+        ? reply(550, "5.1.1 Recipient address rejected")
+        : undefined
+    )
   },
 }
 
@@ -177,7 +181,7 @@ medusaIntegrationTestRunner({
       await gone.close()
       const down = await testSend(owner.headers)
       expect(down.status).toBe(200)
-      expect(down.data).toEqual({ ok: false, reason: "connection_refused", reply: null })
+      expect(down.data).toEqual({ ok: false, reason: "unreachable", reply: null })
     })
 
     it("tells the e-mail tab the sender and its DNS, as a warning", async () => {
@@ -215,6 +219,60 @@ medusaIntegrationTestRunner({
       const [row] = await messaging.listMessageSuppressions({ channel: "email" }, { take: 5 })
       expect(row).toMatchObject({ reason: "bounce", source: "smtp", detail: "550 5.1.1" })
       expect(server.received.map((each) => each.to)).toEqual([["ayse@alici.example"]])
+    })
+
+    it("stops suppressing when the server refuses too much, takes them back and tells the shop", async () => {
+      expect((await save(owner.headers)).status).toBe(200)
+      const container = getContainer()
+      const gone = Array.from({ length: 7 }, (_, index) => `olmayan${String(index)}@alici.example`)
+      for (const to of gone) {
+        await expect(
+          container.resolve(Modules.NOTIFICATION).createNotifications({
+            to,
+            channel: "email",
+            template: "order.placed",
+            content: { subject: "Siparişiniz", html: "<p>Merhaba</p>", text: "Merhaba" },
+            provider_data: { from_email: USER, from_name: "Atölye", reply_to: null },
+            idempotency_key: `smtp-spec:${to}:${randomUUID()}`,
+          })
+        ).rejects.toThrow(/recipient_rejected/)
+      }
+
+      // Half and more refused within the window: none of them stays on the list
+      const messaging = container.resolve<MessagingModuleService>(MESSAGING_MODULE)
+      for (const to of gone) {
+        expect(await messaging.isSuppressed("email", to)).toBe(false)
+      }
+      const rows = container.resolve(Modules.NOTIFICATION) as unknown as {
+        listNotifications: (filters: Record<string, unknown>) => Promise<{ data: unknown }[]>
+      }
+      let bell: { data: unknown }[] = []
+      for (let attempt = 0; attempt < 30 && bell.length === 0; attempt++) {
+        bell = await rows.listNotifications({
+          channel: "feed",
+          trigger_type: "messaging.smtp_rejections",
+        })
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+      expect(bell[0]?.data).toMatchObject({
+        kind: "smtp_rejections",
+        title: "E-posta sunucunuz alıcıları reddediyor",
+      })
+    })
+
+    it("refuses an address inside a network typed as the server", async () => {
+      const inside = await settle(
+        http.post(
+          PATH,
+          {
+            settings: { ...settings(), host: "10.0.0.5", port: 587, security: "starttls" },
+            secrets: { password: PASSWORD },
+          },
+          { headers: owner.headers }
+        )
+      )
+      expect(inside.status).toBe(400)
+      expect(inside.data).toMatchObject({ message: "smtp.host_refused" })
     })
   },
 })

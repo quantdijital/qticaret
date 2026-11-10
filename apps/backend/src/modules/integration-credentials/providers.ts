@@ -134,8 +134,8 @@ export const CREDENTIAL_PROVIDERS = {
       .min(1)
       .max(256)
       .regex(/^[^\p{Cc}]+$/u, "integration_credentials.secret_invalid"),
-    // Another server or login: the stored password never goes to it
-    identity: ["host", "username"],
+    // Another server, port, security or login: the stored password never goes to it
+    identity: ["host", "port", "security", "username"],
     optional: ["password"],
   },
   // F10 M13 (adr/0038 §5): the shop's Google account, connected through the

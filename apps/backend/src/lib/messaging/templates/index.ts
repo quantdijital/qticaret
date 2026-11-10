@@ -30,6 +30,7 @@ import {
 } from "./staff"
 import { staffAccountChanged, staffEmailConfirm } from "./staff-account"
 import { staffPaymentIssue } from "./staff-payment-issue"
+import { staffSmtpRejections } from "./staff-smtp-rejections"
 import { staffStockShort } from "./staff-stock-short"
 
 export type { MigrationInviteVars, ResetVars, VerifyVars } from "./account"
@@ -98,6 +99,8 @@ export const MESSAGE_TEMPLATES = {
   "staff.stock_short": staffStockShort,
   // Security review 2026-11-09: a paid cart stuck, refunded before its order, a raise lowered back
   "staff.payment_issue": staffPaymentIssue,
+  // adr/0036 Ek 2026-11-10: the shop's mail server refusing too many recipients
+  "staff.smtp_rejections": staffSmtpRejections,
   "staff.seo_digest": staffSeoDigest,
   // F18 D10 (adr/0047): a contact form message came
   "staff.contact_message": staffContactMessage,

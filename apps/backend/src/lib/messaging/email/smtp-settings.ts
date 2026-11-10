@@ -1,20 +1,27 @@
+import { isIP } from "node:net"
 import { z } from "@medusajs/framework/zod"
 import { isLocalEnv, parseEnv } from "../../env"
-import { MAX_SMTP_RATE, SMTP_PORTS, isLoopbackHost, isSmtpHost } from "./smtp-account"
+import { isBlockedAddress } from "../../security/safe-fetch"
+import { MAX_SMTP_RATE, isLoopbackHost, isSmtpHost } from "./smtp-account"
+import { portAllowed } from "./smtp-target"
 
 /**
  * The SMTP account's settings as the panel saves them (adr/0036 Ek
  * 2026-11-10); the password is the one secret. Error messages are i18n keys.
  *
  * The server calls the host with the shop's password, so: mail ports only
- * (a typed host cannot reach a database or a cache on another port), and
- * plain text only to this machine. On a developer's machine and in tests a
- * local server may listen anywhere (Mailpit on 51025).
+ * (a typed host cannot reach a database or a cache on another port), an
+ * address typed in must be a public one or this machine's, and plain text
+ * only to this machine. On a developer's machine and in tests a local
+ * server may listen anywhere (Mailpit on 51025). A name is resolved and
+ * held to the same policy when the server is asked, at every save, check
+ * and send (`smtp-target.ts`).
  */
 
-// One line, nothing that could end a header
-// (a constructor: a compiler may write U+2028 out as itself, which ends a regex literal)
-const ONE_LINE = new RegExp("^[^\\p{Cc}\\u2028\\u2029]*$", "u")
+// One line, nothing that could end a header, no invisible format character (bidi,
+// zero-width) but the emoji joiner (a constructor: a compiler may write U+2028 out
+// as itself, which ends a regex literal)
+const ONE_LINE = new RegExp("^(?:(?![\\p{Cc}\\p{Cf}\\u2028\\u2029])[^]|\\u200d)*$", "u")
 
 export const smtpSettings = z
   .object({
@@ -36,11 +43,14 @@ export const smtpSettings = z
   })
   .strict()
   .superRefine((settings, ctx) => {
-    const local = isLoopbackHost(settings.host)
-    if (settings.security === "none" && !local) {
+    const loopback = isLoopbackHost(settings.host)
+    if (isIP(settings.host) !== 0 && !loopback && isBlockedAddress(settings.host)) {
+      ctx.addIssue({ code: "custom", path: ["host"], message: "smtp.host_refused" })
+    }
+    if (settings.security === "none" && !loopback) {
       ctx.addIssue({ code: "custom", path: ["security"], message: "smtp.plain_remote" })
     }
-    if (!SMTP_PORTS.includes(settings.port) && !(local && isLocalEnv(parseEnv()))) {
+    if (!portAllowed(settings.port, loopback, isLocalEnv(parseEnv()))) {
       ctx.addIssue({ code: "custom", path: ["port"], message: "smtp.port_invalid" })
     }
   })

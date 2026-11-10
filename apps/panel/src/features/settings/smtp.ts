@@ -18,13 +18,16 @@ const MAX_RATE = 300
 /** The port each security usually listens on: chosen with it, changeable. */
 export const PORT_OF: Record<SmtpSecurity, number> = { tls: 465, starttls: 587, none: 25 }
 
+// A full name with a dot, its last label starting with a letter, as the server asks
+// (security review M1): `2130706433`, `127.1` and the like are no host
 const HOST =
-  /^(?=.{1,253}$)[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*$/
-const IPV4 = /^\d{1,3}(?:\.\d{1,3}){3}$/
+  /^(?=.{4,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/
+const IPV4 = /^(?:(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)$/
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 // Any printable characters, spaces too; nothing that ends a line
 const PASSWORD = /^[^\p{Cc}]{1,256}$/u
-const ONE_LINE = /^[^\p{Cc}]*$/u
+// One line, no invisible format character (bidi, zero-width) but the emoji joiner
+const ONE_LINE = /^(?:(?![\p{Cc}\p{Cf}])[^]|‍)*$/u
 
 /** This machine itself: only there may mail go without TLS (a local Postfix). */
 export const isLoopback = (host: string): boolean =>
@@ -63,7 +66,10 @@ export function smtpFormSchema(account: SmtpAccount | undefined) {
         .string()
         .trim()
         .toLowerCase()
-        .refine((host) => HOST.test(host) || IPV4.test(host) || host === "::1", `${S}.hostInvalid`),
+        .refine(
+          (host) => host === "localhost" || HOST.test(host) || IPV4.test(host) || host === "::1",
+          `${S}.hostInvalid`
+        ),
       port: z
         .string()
         .trim()
@@ -92,10 +98,12 @@ export function smtpFormSchema(account: SmtpAccount | undefined) {
           message: "settings.payments.account.secretFormat",
         })
       }
-      // Another server or login: the stored password does not go to it
+      // Another server, port, security or login: the stored password does not go to it
       const sameAccount =
         !nothingStored(account) &&
         account?.settings?.host === values.host.trim().toLowerCase() &&
+        account.settings.port === Number(values.port) &&
+        account.settings.security === values.security &&
         (account.settings.username ?? "") === values.username.trim()
       const kept = sameAccount && account.secrets["password"] === true
       if (values.username.trim() !== "" && values.password === "" && !kept) {

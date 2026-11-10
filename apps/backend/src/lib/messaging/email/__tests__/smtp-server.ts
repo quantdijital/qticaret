@@ -1,3 +1,4 @@
+import { createServer } from "node:net"
 import type { AddressInfo } from "node:net"
 import { SMTPServer } from "smtp-server"
 import type { SMTPServerOptions } from "smtp-server"
@@ -17,6 +18,51 @@ export interface Received {
 /** An error the server answers with: `550` and its words (`5.1.1 User unknown`). */
 export const reply = (code: number, words: string): Error =>
   Object.assign(new Error(words), { responseCode: code })
+
+/**
+ * A bare SMTP server written by hand, for byte-exact replies smtp-server
+ * would rewrite: it greets, answers EHLO with `ehlo`, takes MAIL FROM and
+ * refuses every recipient with a bare `550 User unknown`.
+ */
+export async function startRawServer(ehlo: string[]) {
+  const server = createServer((socket) => {
+    socket.write("220 mail.magaza.example ESMTP\r\n")
+    let buffered = ""
+    socket.on("data", (chunk: Buffer) => {
+      buffered += chunk.toString("latin1")
+      const lines = buffered.split("\r\n")
+      buffered = lines.pop() ?? ""
+      for (const line of lines) {
+        const verb = line.slice(0, 4).toUpperCase()
+        if (verb === "EHLO") {
+          socket.write(`${ehlo.join("\r\n")}\r\n`)
+        } else if (verb === "MAIL" || verb === "RSET") {
+          socket.write("250 OK\r\n")
+        } else if (verb === "RCPT") {
+          socket.write("550 User unknown\r\n")
+        } else if (verb === "QUIT") {
+          socket.end("221 Bye\r\n")
+        } else {
+          socket.write("502 Not implemented\r\n")
+        }
+      }
+    })
+    socket.on("error", () => undefined)
+  })
+  await new Promise<void>((resolve) => {
+    server.listen(0, "127.0.0.1", resolve)
+  })
+  const { port } = server.address() as AddressInfo
+  return {
+    port,
+    close: () =>
+      new Promise<void>((resolve) => {
+        server.close(() => {
+          resolve()
+        })
+      }),
+  }
+}
 
 export async function startSmtpServer(options: Partial<SMTPServerOptions> = {}) {
   const received: Received[] = []

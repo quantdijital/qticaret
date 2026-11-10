@@ -122,6 +122,37 @@ describe("planSave", () => {
   })
 })
 
+describe("planSave for the shop's mail server", () => {
+  const password = fakeSecret()
+  const settings = {
+    host: "mail.magaza.example",
+    port: 587,
+    security: "starttls",
+    username: "bildirim@magaza.example",
+    from_email: "bildirim@magaza.example",
+    rate_per_minute: 30,
+  }
+  const saved = { settings, verification: "verified" as const }
+
+  it("keeps the password for a new pace, never for another port, security or server", () => {
+    expect(
+      planSave("smtp", { settings: { ...settings, rate_per_minute: 10 } }, saved, { password })
+        .secrets
+    ).toEqual({ password })
+    for (const changed of [
+      { port: 465, security: "tls" },
+      { security: "tls" },
+      { host: "mail.baska.example" },
+      { username: "baska@magaza.example" },
+    ]) {
+      const plan = planSave("smtp", { settings: { ...settings, ...changed } }, saved, { password })
+      // Nothing kept: the server signs in with what the shop types again, or is refused
+      expect(plan.secrets).toEqual({})
+      expect(plan.needsCheck).toBe(true)
+    }
+  })
+})
+
 describe("planSave for iyzico", () => {
   const keys = { api_key: `sandbox-${fakeSecret()}`, secret_key: `sandbox-${fakeSecret()}` }
   const sandbox = { settings: { test_mode: true }, verification: "verified" as const }

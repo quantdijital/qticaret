@@ -1790,7 +1790,7 @@
         "fromNameHint": "Leave empty to show your shop's name.",
         "rate": "Campaign e-mails per minute at most",
         "rateHint": "Bulk sends go at this pace so your server's address is not listed as spam. Order and account e-mails do not wait.",
-        "hostInvalid": "Type the server as a domain name or an IP address.",
+        "hostInvalid": "Type the server's full name (e.g. mail.shop.com), localhost or an IP address.",
         "portInvalid": "The port is 25, 465, 587 or 2525.",
         "usernameInvalid": "The user name must be one line.",
         "fromEmailInvalid": "Type the sender as an e-mail address.",
@@ -1804,17 +1804,16 @@
           "reasons": {
             "auth_failed": "The server did not accept the user name or password.",
             "tls_failed": "No secure connection could be made. Check the security choice and that the server name matches its certificate.",
-            "connection_refused": "Could not connect: the connection was refused. Check the server name, port and firewall.",
-            "dns_failed": "The server name was not found. Check it.",
-            "timeout": "The server did not answer in time. Check the port and firewall.",
             "aborted": "The server did not answer within 20 seconds.",
-            "network_error": "The connection broke off. Try again shortly.",
             "deferred": "The server did not take the e-mail for now (temporary error). Try again shortly.",
             "recipient_rejected": "The server refused the recipient: there is no mailbox at this address.",
             "rejected": "The server refused the e-mail. Check that the sender address belongs to this account.",
             "outcome_unknown": "The connection broke while sending; the e-mail may have gone. Check your inbox.",
             "invalid_address": "The sender or recipient address is not valid.",
-            "failed": "The server gave an unexpected answer."
+            "failed": "The server gave an unexpected answer.",
+            "unreachable": "The server could not be reached. Check the server name, port and firewall.",
+            "target_refused": "This server name leads to a local or internal address the shop cannot connect to. Type the server's public name; for a server on the same machine type localhost.",
+            "port_refused": "The port must be 25, 465, 587 or 2525."
           }
         }
       }
