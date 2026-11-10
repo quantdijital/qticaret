@@ -82,7 +82,7 @@ export {
 } from "./http/path"
 
 export { ipBucket } from "./rate-limit/ip"
-export { retryAfterSeconds } from "./rate-limit/limits"
+export { perIpScale, retryAfterSeconds } from "./rate-limit/limits"
 export type { Limit, RateLimitCheck, RateLimitProfile } from "./rate-limit/limits"
 export { createMemoryStore, createRedisStoreWith, withFallback } from "./rate-limit/store"
 export type {

@@ -68,3 +68,24 @@ export async function retryAfterSeconds({
   }
   return Math.max(1, Math.ceil(Math.max(...exceeded.map(({ window }) => window.resetMs)) / 1000))
 }
+
+/**
+ * How many times larger the per-IP limits are; per-identity limits never
+ * change, so the login limit stays testable:
+ * - a load test (F15.3) sends a crowd's requests from one machine: with
+ *   LOAD_TEST=on, a thousand times, on an explicit development, test or
+ *   staging environment only (the app's environment check refuses it
+ *   elsewhere, and an unset NODE_ENV is treated as live);
+ * - integration tests sign many accounts up from one address: with
+ *   RATE_LIMIT_RELAXED=1 and NODE_ENV=test, a hundred times.
+ */
+export function perIpScale(env: NodeJS.ProcessEnv = process.env): number {
+  const nodeEnv = env["NODE_ENV"]
+  if (
+    env["LOAD_TEST"] === "on" &&
+    (nodeEnv === "development" || nodeEnv === "test" || nodeEnv === "staging")
+  ) {
+    return 1000
+  }
+  return nodeEnv === "test" && env["RATE_LIMIT_RELAXED"] === "1" ? 100 : 1
+}
