@@ -75,24 +75,35 @@ function destroy(store: SessionStoreLike, sid: string): Promise<boolean> {
 /** A session's public handle: a keyed hash of its id. */
 export const sessionHandle = (sid: string): string => keyed("cp_session", sid, 24)
 
-/** Notes the session a staff member opens, once Medusa answers 200. */
+/**
+ * Notes the session a staff member opens before Medusa's answer goes (the
+ * index is what makes a session count, Ek C4). A note that cannot be
+ * written fails closed (L7): the session's sign-in is taken off it before
+ * it is saved, and the failure logged by event for alerting.
+ */
 export function noteSessionStart(
   req: MedusaRequest,
   res: MedusaResponse,
   next: MedusaNextFunction
 ) {
-  res.on("finish", () => {
+  const end = res.end.bind(res) as (...args: unknown[]) => MedusaResponse
+  res.end = ((...args: unknown[]) => {
     const { session, sessionID } = asSession(req)
     const userId = staffOf(session)
-    if (res.statusCode !== 200 || !userId || !sessionID) {
-      return
+    if (res.statusCode !== 200 || !userId || !sessionID || !session) {
+      return end(...args)
     }
     index(req)
       .add(userId, sessionID, lifetimeOf(session))
       .catch((error: unknown) => {
-        warn(req, "cp.session_note_failed", error)
+        session.auth_context = null
+        loggerOf(req)?.error(
+          `cp.session_note_failed ${JSON.stringify({ err: errorSummary(error) })}`
+        )
       })
-  })
+      .finally(() => end(...args))
+    return res
+  }) as MedusaResponse["end"]
   next()
 }
 
@@ -142,39 +153,37 @@ export async function openSessions(req: MedusaRequest, userId: string): Promise<
   }))
 }
 
-/** Ends the given sessions of the user; how many ended. Never throws. */
+/**
+ * Ends the given sessions of the user; how many. The index forgets them
+ * first (that alone ends them, Ek C4), then the store destroys them.
+ */
 export async function endSessions(
   req: MedusaRequest,
   userId: string,
   sids: readonly string[]
 ): Promise<number> {
-  const { sessionStore } = asSession(req)
-  if (!sessionStore || sids.length === 0) {
+  if (sids.length === 0) {
     return 0
   }
-  const ended = await Promise.all(sids.map((sid) => destroy(sessionStore, sid)))
-  await index(req)
-    .remove(
-      userId,
-      sids.filter((_, i) => ended[i])
-    )
-    .catch((error: unknown) => {
-      warn(req, "cp.session_note_failed", error)
-    })
-  return ended.filter(Boolean).length
+  await index(req).remove(userId, sids)
+  const { sessionStore } = asSession(req)
+  if (sessionStore) {
+    await Promise.all(sids.map((sid) => destroy(sessionStore, sid)))
+  }
+  return sids.length
 }
 
-/** Ends every session of the user (deactivated, 2FA reset); how many ended. Never throws. */
-export async function endAllSessions(req: MedusaRequest, userId: string): Promise<number> {
-  try {
-    const open = await openSessions(req, userId)
-    return await endSessions(
-      req,
-      userId,
-      open.map((each) => each.sid)
-    )
-  } catch (error) {
-    warn(req, "cp.sessions_unreadable", error)
-    return 0
-  }
+/**
+ * Ends every session of the user (2FA changed or reset, deactivated), this
+ * one kept when asked; how many ended.
+ */
+export async function endAllSessions(
+  req: MedusaRequest,
+  userId: string,
+  options: { keepCurrent?: boolean } = {}
+): Promise<number> {
+  const { sessionID } = asSession(req)
+  const noted = (await index(req).list(userId)).map((each) => each.sid)
+  const ending = options.keepCurrent ? noted.filter((sid) => sid !== sessionID) : noted
+  return endSessions(req, userId, ending)
 }

@@ -32,6 +32,9 @@ module.exports = defineConfig({
       adminCors: env.ADMIN_CORS,
       authCors: env.AUTH_CORS,
       jwtSecret: env.JWT_SECRET,
+      // Ek C4 (M1): a token only opens a session; once deployed no
+      // /admin/cp route takes one. Medusa's default is a day
+      jwtExpiresIn: "15m",
       cookieSecret: env.COOKIE_SECRET,
       // Platform staff only, by e-mail, with mandatory 2FA (C4)
       authMethodsPerActor: { user: ["emailpass"] },

@@ -1,8 +1,9 @@
 import type { Logger, MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { errorSummary } from "@qticaret/server-kit"
-import { inviteEmail, inviteLink } from "../mail/invite"
+import { enrolmentEmail, enrolmentLink, inviteEmail, inviteLink } from "../mail/invite"
 import { emailTransport } from "../mail/transport"
+import type { OutgoingEmail } from "../mail/transport"
 import type { CpStaffRole } from "./roles"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -40,6 +41,28 @@ export async function addressTaken(
     : null
 }
 
+async function mailLink(
+  container: Container,
+  email: OutgoingEmail,
+  link: string
+): Promise<{ link: string; mailed: boolean }> {
+  const transport = emailTransport()
+  if (!transport) {
+    return { link, mailed: false }
+  }
+  try {
+    await transport.send(email)
+    return { link, mailed: true }
+  } catch (error) {
+    container
+      .resolve<Logger>(ContainerRegistrationKeys.LOGGER)
+      .warn(
+        `cp.link_mail_failed ${JSON.stringify({ template: email.template, err: errorSummary(error) })}`
+      )
+    return { link, mailed: false }
+  }
+}
+
 /**
  * The invitation by e-mail, and its link for whoever made it to pass on by
  * hand when there is no e-mail to send through (`mailed: false`). A send
@@ -51,17 +74,15 @@ export async function sendInvite(
   role: CpStaffRole
 ): Promise<{ link: string; mailed: boolean }> {
   const link = inviteLink(invite.token)
-  const transport = emailTransport()
-  if (!transport) {
-    return { link, mailed: false }
-  }
-  try {
-    await transport.send(inviteEmail(invite.email, role, link))
-    return { link, mailed: true }
-  } catch (error) {
-    container
-      .resolve<Logger>(ContainerRegistrationKeys.LOGGER)
-      .warn(`cp.invite_mail_failed ${JSON.stringify({ err: errorSummary(error) })}`)
-    return { link, mailed: false }
-  }
+  return mailLink(container, inviteEmail(invite.email, role, link), link)
+}
+
+/** A 2FA reset's single-use enrolment link by e-mail, as an invitation's (M3). */
+export async function sendEnrolment(
+  container: Container,
+  to: string,
+  token: string
+): Promise<{ link: string; mailed: boolean }> {
+  const link = enrolmentLink(token)
+  return mailLink(container, enrolmentEmail(to, link), link)
 }

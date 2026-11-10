@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { Modules } from "@medusajs/framework/utils"
 import { createUserAccountWorkflow } from "@medusajs/medusa/core-flows"
 import { CP_STAFF_MODULE } from "../../src/modules/cp-staff"
 import type CpStaffModuleService from "../../src/modules/cp-staff/service"
@@ -48,11 +49,42 @@ export interface Member {
   headers: Record<string, string>
 }
 
-/** A login for the address: the registration's token (no user yet). */
-export async function registerLogin(http: HttpClient, email: string, password: string) {
-  const registration = await http.post("/auth/user/emailpass/register", { email, password })
+/** A login for the address through the API, with its invitation: the registration's token. */
+export async function registerLogin(
+  http: HttpClient,
+  email: string,
+  password: string,
+  inviteToken: string
+) {
+  const registration = await http.post(
+    "/auth/user/emailpass/register",
+    { email, password },
+    { ...anyStatus, headers: { "x-cp-invite": inviteToken } }
+  )
+  if (registration.status !== 200) {
+    throw new Error(`registration failed: ${String(registration.status)}`)
+  }
   return tokenOf(registration)
 }
+
+/** A login made on the server (the API takes one only with an invitation): its identity. */
+export async function serverLogin(
+  container: MedusaContainer,
+  email: string,
+  password: string
+): Promise<string> {
+  const made = await container
+    .resolve(Modules.AUTH)
+    .register("emailpass", { body: { email, password } })
+  if (!made.success || !made.authIdentity) {
+    throw new Error("server-side registration failed")
+  }
+  return made.authIdentity.id
+}
+
+/** The invitation token in a link (after `#`). */
+export const tokenOfLink = (link: string) =>
+  new URLSearchParams(link.split("#")[1] ?? "").get("token") ?? ""
 
 /** Setting 2FA up as the panel does: started, confirmed with the first code and the password. */
 export async function enrolTotp(
@@ -108,7 +140,7 @@ export async function makeMember(
   const email = `staff-${randomUUID()}@quant.test`
   // Throwaway credential for this test database only
   const password = randomUUID()
-  const identity = identityOf(await registerLogin(http, email, password))
+  const identity = await serverLogin(container, email, password)
   const { result: user } = await createUserAccountWorkflow(container).run({
     input: { authIdentityId: identity, userData: { email } },
   })
@@ -127,6 +159,44 @@ export async function makeMember(
     recoveryCodes,
     headers: bearer(token),
   }
+}
+
+/** The panel's origin: a cookie mutation must come from it (CSRF, Ek C4 L5). */
+export const PANEL_ORIGIN = "http://localhost:5174"
+
+/** The session cookie a sign-in sets, as a request sends it back. */
+export function cookieOf(answer: Answer): string {
+  const raw = answer.headers["set-cookie"]
+  const first = Array.isArray(raw) ? raw[0] : raw
+  return (first ?? "").split(";")[0] ?? ""
+}
+
+/** A sign-in that passed 2FA with a recovery code (an app's codes are three at a time). */
+export async function signInWithRecoveryCode(http: HttpClient, member: Member): Promise<string> {
+  const login = await http.post<{ token: string; mfa_challenge?: { id: string } }>(
+    "/auth/user/emailpass",
+    { email: member.email, password: member.password },
+    anyStatus
+  )
+  const verified = await http.post<{ token: string }>(
+    `/auth/mfa/challenges/${login.data.mfa_challenge?.id ?? ""}/verify`,
+    { method: "recovery_code", code: member.recoveryCodes.shift() ?? "" },
+    { ...anyStatus, headers: bearer(login.data.token) }
+  )
+  if (verified.status !== 200) {
+    throw new Error(`sign-in with a recovery code failed: ${String(verified.status)}`)
+  }
+  return verified.data.token
+}
+
+/** A cookie session as the panel opens one: the headers its requests carry. */
+export async function openSession(
+  http: HttpClient,
+  member: Member
+): Promise<Record<string, string>> {
+  const token = await signInWithRecoveryCode(http, member)
+  const session = await http.post("/auth/session", {}, { ...anyStatus, headers: bearer(token) })
+  return { cookie: cookieOf(session), origin: PANEL_ORIGIN }
 }
 
 /** A step-up proof for the member, proved with one of their recovery codes (each once). */

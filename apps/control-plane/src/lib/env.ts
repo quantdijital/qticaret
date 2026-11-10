@@ -61,14 +61,21 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: "is required outside development and test",
     })
   }
-  // A token and a cookie signed with one key: one leak forges both
-  if (env.JWT_SECRET === env.COOKIE_SECRET) {
-    ctx.addIssue({
-      code: "custom",
-      path: ["COOKIE_SECRET"],
-      message: "must differ from JWT_SECRET",
-    })
-  }
+  // One key for two jobs: one leak breaks both (Ek C4, L8)
+  const distinct = [
+    "JWT_SECRET",
+    "COOKIE_SECRET",
+    "CP_HASH_KEY",
+    "AUTH_MFA_ENCRYPTION_KEY",
+  ] as const
+  distinct.forEach((name, index) => {
+    const earlier = distinct
+      .slice(0, index)
+      .find((other) => env[other].toLowerCase() === env[name].toLowerCase())
+    if (earlier) {
+      ctx.addIssue({ code: "custom", path: [name], message: `must differ from ${earlier}` })
+    }
+  })
   if (env.ADMIN_MFA === "off" && deployed) {
     ctx.addIssue({
       code: "custom",

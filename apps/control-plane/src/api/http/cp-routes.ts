@@ -17,7 +17,7 @@ import {
   PostCpMfaVerify,
   PostCpStepUp,
 } from "../admin/cp/validators"
-import { userIdOf } from "./caller"
+import { credentialOf, credentialScope, userIdOf } from "./caller"
 import { rateLimit } from "./rate-limit"
 
 /**
@@ -27,9 +27,16 @@ import { rateLimit } from "./rate-limit"
  * these by the staff guard.
  */
 
-const byMember = { identity: (req: MedusaRequest) => userIdOf(req) }
-const stepUpTries = rateLimit(() => CP_RATE_LIMIT_PROFILES.step_up, byMember)
-const setupTries = rateLimit(() => CP_RATE_LIMIT_PROFILES.mfa_setup, byMember)
+// Per member and credential (Ek C4, M2): a stolen session spending its tries
+// leaves its owner's own session its full count
+const byCredential = {
+  identity: (req: MedusaRequest) => {
+    const userId = userIdOf(req)
+    return userId ? `${userId}:${credentialScope(credentialOf(req))}` : undefined
+  },
+}
+const stepUpTries = rateLimit(() => CP_RATE_LIMIT_PROFILES.step_up, byCredential)
+const setupTries = rateLimit(() => CP_RATE_LIMIT_PROFILES.mfa_setup, byCredential)
 const publicTries = rateLimit(() => CP_RATE_LIMIT_PROFILES.invite_public)
 
 const body = (schema: Parameters<typeof validateAndTransformBody>[0]) =>
@@ -48,6 +55,8 @@ const route = (
 
 const GETS = ["/admin/cp/me", "/admin/cp/me/sessions", "/admin/cp/staff"]
 
+const DELETES = ["/admin/cp/me/mfa", "/admin/cp/me/sessions/:id", "/admin/cp/staff/invites/:id"]
+
 const EMPTY_POSTS = [
   "/admin/cp/me/mfa/recovery-codes",
   "/admin/cp/me/sessions/revoke-others",
@@ -58,6 +67,7 @@ const EMPTY_POSTS = [
 
 export const CP_ROUTE_MIDDLEWARES = [
   ...GETS.map((matcher) => route(matcher, "GET", [noQuery])),
+  ...DELETES.map((matcher) => route(matcher, "DELETE", [noQuery])),
   route("/admin/cp/audit-log", "GET", [validateAndTransformQuery(GetCpAuditLog, {})]),
   route("/admin/cp/me", "POST", [body(PostCpMe)]),
   route("/admin/cp/me/mfa", "POST", [setupTries, body(NoBody)]),

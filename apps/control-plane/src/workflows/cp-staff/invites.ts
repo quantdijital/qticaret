@@ -28,7 +28,14 @@ export interface InviteFacts {
   email: string
   role: CpStaffRole
   invited_by: string | null
+  bootstrap: boolean
 }
+
+/** A bootstrap invitation holds for an hour, not Medusa's day (L2). */
+export const BOOTSTRAP_INVITE_MS = 60 * 60 * 1000
+
+/** How long a new member has to set up their first factor (M3). */
+export const ENROL_WINDOW_MS = 24 * 60 * 60 * 1000
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -45,12 +52,17 @@ export async function inviteOfToken(container: Container, token: string): Promis
     id: string
     email: string
     metadata?: Record<string, unknown> | null
+    created_at?: Date | string
   } | null
   const role = invite?.metadata?.["role"]
   const invitable = (CP_INVITABLE_ROLES as readonly unknown[]).includes(role)
+  const fresh =
+    invite?.created_at !== undefined &&
+    Date.now() - new Date(invite.created_at).getTime() < BOOTSTRAP_INVITE_MS
   const bootstrap =
     role === "owner" &&
     invite?.metadata?.["bootstrap"] === true &&
+    fresh &&
     !(await staff(container).hasActiveOwner())
   if (!invite || !(invitable || bootstrap)) {
     throw invalid()
@@ -61,6 +73,7 @@ export async function inviteOfToken(container: Container, token: string): Promis
     email: invite.email,
     role: role as CpStaffRole,
     invited_by: typeof by === "string" ? by : null,
+    bootstrap,
   }
 }
 
@@ -120,11 +133,21 @@ const readInviteStep = createStep(
   }
 )
 
-/** The invitation's role to the new member; undone, they have none. */
-const giveRoleStep = createStep(
-  "cp-staff-give-role",
-  async (input: { user_id: string; role: CpStaffRole; by: string | null }, { container }) => {
-    await staff(container).setRole(input.user_id, input.role, input.by)
+/**
+ * The new member, pending: the invitation's role is granted only once their
+ * first factor is confirmed, within a day (M3). Undone, they have none.
+ */
+const addPendingStep = createStep(
+  "cp-staff-add-pending",
+  async (
+    input: { user_id: string; role: CpStaffRole; by: string | null; bootstrap: boolean },
+    { container }
+  ) => {
+    await staff(container).addPending(input.user_id, input.role, {
+      assignedBy: input.by,
+      bootstrap: input.bootstrap,
+      enrolBy: new Date(Date.now() + ENROL_WINDOW_MS),
+    })
     return new StepResponse(input.user_id, input.user_id)
   },
   async (userId: string | undefined, { container }) => {
@@ -137,10 +160,12 @@ const giveRoleStep = createStep(
 /**
  * An invitation accepted: its role read first (Medusa deletes the
  * invitation as it makes the user), the login checked to be the invited
- * address's, the user made under that address, then the role given.
+ * address's, the user made under that address, then the member added,
+ * pending their 2FA.
  */
 export const acceptCpStaffInviteWorkflow = createWorkflow(
-  "cp-staff-accept-invite",
+  // The input holds the invitation's token: never kept as an execution
+  { name: "cp-staff-accept-invite", store: false },
   (
     input: WorkflowData<{
       token: string
@@ -161,8 +186,9 @@ export const acceptCpStaffInviteWorkflow = createWorkflow(
       user_id: users[0]?.id ?? "",
       role: invite.role,
       by: invite.invited_by,
+      bootstrap: invite.bootstrap,
     }))
-    giveRoleStep(member)
+    addPendingStep(member)
     return new WorkflowResponse(member)
   }
 )

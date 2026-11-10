@@ -1,11 +1,13 @@
 import { defineMiddlewares } from "@medusajs/framework/http"
 import { CP_RATE_LIMIT_PROFILES } from "../lib/rate-limit-profiles"
-import { auditCpRequests } from "./http/audit"
+import { auditAuth, auditCpRequests } from "./http/audit"
 import { CP_ROUTE_MIDDLEWARES } from "./http/cp-routes"
+import { csrfProtection } from "./http/csrf"
 import { rejectAmbiguousPath, requestBasics, routeAllowlist } from "./http/guards"
 import { authIdentity, authProfile, rateLimit } from "./http/rate-limit"
+import { gateRegistration } from "./http/register-gate"
 import { noteSessionEnd, noteSessionStart } from "./http/sessions"
-import { signInCodeOnce } from "./http/sign-in-code"
+import { guardSecondStep, noteSignInChallenge } from "./http/sign-in-code"
 import { guardCpStaff } from "./http/staff-guard"
 
 export default defineMiddlewares({
@@ -13,33 +15,54 @@ export default defineMiddlewares({
     // Global (no `methods`): these run before every core route middleware
     // and handler, so the allowlist answers 404 for Medusa's commerce routes
     // (adr/0061 §1.1). They run after Medusa's own global ones (body parser,
-    // CORS)
+    // CORS). C4 (L5): a cookie mutation from another origin is refused
     {
       matcher: "/*",
-      middlewares: [requestBasics, rejectAmbiguousPath, routeAllowlist],
+      middlewares: [requestBasics, rejectAmbiguousPath, routeAllowlist, csrfProtection],
     },
     {
       matcher: "/auth/*",
       methods: ["POST"],
       middlewares: [rateLimit(authProfile, { identity: authIdentity })],
     },
-    // C4: a staff member's sessions are noted as they open and close, so
-    // they can list and end them
-    { matcher: "/auth/session", methods: ["POST"], middlewares: [noteSessionStart] },
-    { matcher: "/auth/session", methods: ["DELETE"], middlewares: [noteSessionEnd] },
-    // C4: a sign-in's app code, once, and never again for a step-up
+    // C4: staff sign-in, recorded (L6); a 2FA challenge noted to its login (M4)
+    {
+      matcher: "/auth/user/emailpass",
+      methods: ["POST"],
+      middlewares: [auditAuth("cp.auth.sign_in"), noteSignInChallenge],
+    },
+    // C4 (L1): a login only for an invitation's own address
+    {
+      matcher: "/auth/user/emailpass/register",
+      methods: ["POST"],
+      middlewares: [auditAuth("cp.auth.register"), gateRegistration],
+    },
+    // C4: a staff member's sessions are noted as they open and close; the
+    // index is what makes one count
+    {
+      matcher: "/auth/session",
+      methods: ["POST"],
+      middlewares: [auditAuth("cp.auth.session_open"), noteSessionStart],
+    },
+    {
+      matcher: "/auth/session",
+      methods: ["DELETE"],
+      middlewares: [auditAuth("cp.auth.sign_out"), noteSessionEnd],
+    },
+    // C4: a sign-in's 2FA step, counted against the challenge's own login
     {
       matcher: "/auth/mfa/challenges/:id/verify",
       methods: ["POST"],
-      middlewares: [signInCodeOnce],
+      middlewares: [auditAuth("cp.auth.second_step"), guardSecondStep],
     },
     {
       matcher: "/admin/*",
       middlewares: [rateLimit(() => CP_RATE_LIMIT_PROFILES.admin_default)],
     },
     // C4 (adr/0061 §3.5): every request recorded once answered (refusals
-    // too), then the staff guard: the route table's row, 2FA, the step-up.
-    // Global, so they run before each route's own validation and handler
+    // too), then the staff guard: the route table's row, the credential,
+    // 2FA, the step-up. Global, so they run before each route's own
+    // validation and handler
     {
       matcher: "/admin/cp/*",
       middlewares: [auditCpRequests, guardCpStaff],

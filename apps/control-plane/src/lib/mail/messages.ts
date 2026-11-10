@@ -11,6 +11,12 @@ export const MAIL_MESSAGES_TR = {
   "staff_invite.action": "Daveti kabul etmek için bağlantıyı açın:",
   "staff_invite.expiry": "Bağlantı 24 saat geçerlidir ve yalnızca bir kez kullanılır.",
   "staff_invite.ignore": "Bu daveti beklemiyorsanız e-postayı yok sayın.",
+  "staff_enrol.subject": "Quant Ticaret üst paneli: iki adımlı doğrulamayı yeniden kurun",
+  "staff_enrol.intro":
+    "Üst panel hesabınızın iki adımlı doğrulaması sıfırlandı. Yeniden kurmadan panele giremezsiniz.",
+  "staff_enrol.action": "Kurulum için bağlantıyı açın:",
+  "staff_enrol.expiry": "Bağlantı 24 saat geçerlidir ve yalnızca bir kez kullanılır.",
+  "staff_enrol.ignore": "Bu sıfırlamayı beklemiyorsanız hemen platform sahibine haber verin.",
   "role.owner": "sahip",
   "role.operator": "operatör",
   "role.finance": "finans",

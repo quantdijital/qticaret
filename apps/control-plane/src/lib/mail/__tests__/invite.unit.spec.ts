@@ -1,4 +1,4 @@
-import { inviteEmail, inviteLink } from "../invite"
+import { enrolmentEmail, enrolmentLink, inviteEmail, inviteLink } from "../invite"
 import { headerText } from "../transport"
 
 describe("invitation e-mail", () => {
@@ -15,6 +15,15 @@ describe("invitation e-mail", () => {
     expect(email.html).not.toContain('"<b>')
     expect(email.html).toContain("&quot;&lt;b&gt;")
     expect(email.template).toBe("cp.staff_invite")
+  })
+
+  it("sends a reset's enrolment link to its own page, the token after #", () => {
+    const link = enrolmentLink("tok-1", "https://ust.example.com")
+    const email = enrolmentEmail("a@quant.test", link)
+
+    expect(link).toBe("https://ust.example.com/enrol#token=tok-1")
+    expect(email.text).toContain(link)
+    expect(email.template).toBe("cp.staff_enrol")
   })
 
   it("keeps a header on one line, without invisible characters", () => {

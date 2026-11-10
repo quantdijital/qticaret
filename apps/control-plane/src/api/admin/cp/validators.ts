@@ -21,7 +21,14 @@ export const PostCpMe = z.object({ first_name: name, last_name: name }).strict()
 export type PostCpMeType = z.infer<typeof PostCpMe>
 
 /** The setup's first code and the password: no session alone sets up 2FA. */
-export const PostCpMfaVerify = z.object({ code, password }).strict()
+export const PostCpMfaVerify = z
+  .object({
+    code,
+    password,
+    // After a 2FA reset: the e-mailed, single-use enrolment link's token (M3)
+    enrolment_token: z.string().min(16).max(256).optional(),
+  })
+  .strict()
 export type PostCpMfaVerifyType = z.infer<typeof PostCpMfaVerify>
 
 /** Proving oneself again: an app code or a recovery code. */

@@ -63,6 +63,15 @@ describe("parseEnv", () => {
     )
   })
 
+  it("refuses one key for two jobs, in any case (Ek C4, L8)", () => {
+    expect(
+      problems({ ...valid, AUTH_MFA_ENCRYPTION_KEY: valid.CP_HASH_KEY.toUpperCase() })
+    ).toContain("AUTH_MFA_ENCRYPTION_KEY: must differ from CP_HASH_KEY")
+    expect(problems({ ...valid, JWT_SECRET: valid.CP_HASH_KEY })).toContain(
+      "CP_HASH_KEY: must differ from JWT_SECRET"
+    )
+  })
+
   it("refuses a malformed hash key and a load test where it is live", () => {
     expect(problems({ ...valid, CP_HASH_KEY: "not-hex" })).toContain("CP_HASH_KEY")
     expect(

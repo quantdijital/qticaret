@@ -15,5 +15,18 @@ export const CpStaffMember = model
     assigned_by: model.text().nullable(),
     /** Set when an owner takes the member's access away; their row and history stay. */
     deactivated_at: model.dateTime().nullable(),
+    /**
+     * Pending: the role is not granted until the member's first factor is
+     * confirmed, by this deadline; past it they reach nothing (Ek C4, M3).
+     */
+    enrol_by: model.dateTime().nullable(),
+    /** After a 2FA reset: the keyed hash of the e-mailed, single-use enrolment token. */
+    enrol_token_hash: model.text().nullable(),
+    /** An owner from `cp:create-owner`: granted only while no other owner is active. */
+    bootstrap: model.boolean().default(false),
+    /** A sign-in's 2FA from before this does not count (factor changed, H1). */
+    mfa_valid_after: model.dateTime().nullable(),
+    /** A bearer token issued before this is refused (sessions are ended by id, M1). */
+    tokens_valid_after: model.dateTime().nullable(),
   })
   .indexes([{ on: ["user_id"], unique: true, where: "deleted_at IS NULL" }])

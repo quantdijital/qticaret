@@ -18,7 +18,8 @@
     "test": "pnpm test:unit",
     "test:unit": "TEST_TYPE=unit NODE_OPTIONS=--experimental-vm-modules jest --silent --runInBand --forceExit --passWithNoTests",
     "test:integration:http": "TEST_TYPE=integration:http NODE_OPTIONS=--experimental-vm-modules jest --silent=false --maxWorkers=1 --forceExit",
-    "cp:create-owner": "medusa exec ./src/scripts/create-owner.ts"
+    "cp:create-owner": "medusa exec ./src/scripts/create-owner.ts",
+    "cp:end-sessions": "medusa exec ./src/scripts/end-sessions.ts"
   },
   "dependencies": {
     "@medusajs/caching": "2.21.2",

@@ -314,7 +314,7 @@ Sıra bağımlılığa göredir; her görev tek kodlama ajanının bir oturumuna
   - Kurulum onayı ilk kod **ve şifre** ister (adr/0040 §3'teki gerekçe: oturum tek başına hesaba başkasının uygulamasını koyamasın); yanlış şifre ve yanlış kod kanıt sayacına girer. Onaylanan kod harcanır. Kurtarma kodları onay yanıtında bir kez gösterilir. Kurulumdan sonra kişi kodla yeniden girer.
   - 2FA işlemleri workflow değil, doğrudan auth modülü çağrısıdır: TOTP sırrı ve kurtarma kodları hiçbir workflow girdisine ya da çıktısına girmez (§4.3). Kurtarma kodu üretilemezse etken geri kapatılır.
 - **Yeniden doğrulama (sapma, adr/0040 §3'ten):** istek başına başlıkta kanıt yerine **kısa ömürlü kanıt**: `POST /admin/cp/me/step-up` (`totp` bir kez ya da kurtarma kodu) 5 dakikalık bir belirteç verir; hassas istek onu `x-cp-step-up` başlığında taşır. Yoksa 428 `cp.step_up_required`, bozuk/süresi geçmiş/başkasının ise 428 `cp.step_up_invalid`, yanlış kod 403 `cp.step_up_failed`, kilit 429 `cp.step_up_locked`.
-  - Belirteç AES-256-GCM ile mühürlüdür; anahtar `CP_HASH_KEY`'den HKDF ile türetilir (`qt.step_up.v1`). Bağ (kullanıcı, giriş kaydı, çerez oturumuysa oturum kimliği; bearer'da sabit `bearer`) ek veri olarak bağlanır: başka kişi ya da başka oturum için açılmaz (testli). Durumsuzdur: süresi içinde geri alınamaz; oturum kapanınca o oturuma bağlı belirteç işe yaramaz, pasifleştirilen kişi koruma katmanında zaten durur.
+  - Belirteç AES-256-GCM ile mühürlüdür; anahtar `CP_HASH_KEY`'den HKDF ile türetilir (`qt.step_up.v1`). Bağ (kullanıcı, giriş kaydı, çerez oturumuysa oturum kimliği, bearer'da belirtecin `jti`'si; inceleme düzeltmesi L4) ek veri olarak bağlanır: başka kişi ya da başka oturum için açılmaz (testli). Durumsuzdur: süresi içinde geri alınamaz; oturum kapanınca o oturuma bağlı belirteç işe yaramaz, pasifleştirilen kişi koruma katmanında zaten durur.
   - Neden: görev tanımı ve panelde arka arkaya birkaç değişiklik (rol değiştir, pasifleştir) tek kanıtla. Kanıt yöntemi yalnız 2FA'dır; şifre yalnız kurulum onayında.
   - İsteyenler: kendi 2FA'sını kapatma, yeni kurtarma kodları, oturum kapatma (tek ve diğerleri), davet, rol değişikliği, pasifleştirme, yeniden etkinleştirme, başkasının 2FA'sını sıfırlama. Davet geri çekme sormaz (erişimi azaltır).
 - **Davet ve ilk sahip:** davet `operator`, `finance`, `readonly` verir; `owner` yalnızca `cp:create-owner email=<adres>` (`medusa exec`) ile, `bootstrap: true` davetle ve **etkin sahip yokken** (kabulde yeniden denetlenir). Betik etkin sahip varsa ya da adresin hesabı varsa reddeder, aynı adrese açık daveti yeniler, sistem satırı yazar. E-posta gidebiliyorsa bağlantıyı yazmaz (adres maskeli); gidemiyorsa bağlantıyı bir kez yazar, saklamaz (mağazanın `tenant:invite-owner` kuralı, §5.7). Panelden davette bağlantı yanıtta bir kez döner (`mailed: false` ise elle iletilir), mağazadaki gibi. Davet bilgi ve kabul uçları oturumsuzdur, izin listesi genişlemedi (`/admin/cp/invites/*`, `AUTHENTICATE = false`).
@@ -325,4 +325,64 @@ Sıra bağımlılığa göredir; her görev tek kodlama ajanının bir oturumuna
 - **Hız sınırları:** `cp_step_up` ve `cp_mfa_setup` (IP başına 15 dakikada 30, üye başına 10), `cp_invite_public` (IP başına saatte 20); üstüne server-kit'in yanlış kanıt kilidi. Giriş ve ikinci adım C3'ün `/auth/*` profillerinde.
 - **Yeni env (Sonuçlar listesine ek):** `AUTH_MFA_ENCRYPTION_KEY` (zorunlu), `ADMIN_MFA` (yalnız yerelde `off`), `CP_PANEL_URL` (canlıda https), `EMAIL_TRANSPORT`, `MAILPIT_URL`, `EMAIL_FROM`. `pnpm env:init` mevcut dosyalara eksikleri ekler.
 - **Migration'lar:** `cp_staff` `Migration20261110205421`, `cp_audit` `Migration20261110205422` (adlar iki uygulamada tekil).
-- **Kalan riskler:** (1) Henüz 2FA kurmamış hesabın şifresini bilen kişi kendi uygulamasını kaydedebilir (ilk kullanımda güven); davet edilen kişi hemen kurduğu için pencere kısa. (2) Yeniden doğrulama kanıtı 5 dakika boyunca geri alınamaz. (3) IP özeti anahtarı bilen için IPv4'te kaba kuvvetle çözülebilir: takma addır, anonim değil. (4) Bearer belirteci (yalnız testler ve betikler; panel çerez kullanır) pasifleştirmede iptal edilmez, koruma katmanı durdurur. (5) Belirteç yenilemesi (`/auth/token/refresh`) MFA işaretini taşımayabilir (adr/0040 §2): kişi yeniden girer, güvenlik açığı değil.
+- **Kalan riskler (ilk hâli; aşağıdaki inceleme düzeltmeleri günceller):** (1) Henüz 2FA kurmamış hesabın şifresini bilen kişi kendi uygulamasını kaydedebilir (ilk kullanımda güven); davet edilen kişi hemen kurduğu için pencere kısa. (2) Yeniden doğrulama kanıtı 5 dakika boyunca geri alınamaz. (3) IP özeti anahtarı bilen için IPv4'te kaba kuvvetle çözülebilir: takma addır, anonim değil. (4) Bearer belirteci (yalnız testler ve betikler; panel çerez kullanır) pasifleştirmede iptal edilmez, koruma katmanı durdurur. (5) Belirteç yenilemesi (`/auth/token/refresh`) MFA işaretini taşımayabilir (adr/0040 §2): kişi yeniden girer, güvenlik açığı değil.
+
+### Ek: C4 güvenlik incelemesi düzeltmeleri (2026-11-11)
+
+İnceleme 1 yüksek, 4 orta, 8 düşük bulgu verdi; hepsi kapatıldı, her biri testli.
+
+- **Medusa 2.21.2'de doğrulananlar (Context7 `/medusajs/medusa` ve testler):**
+  - `POST /auth/token/refresh` geçerli herhangi bir belirteçten yeni bir belirteç üretir (üçüncü taraf girişinden sonra kullanıcı bilgisini doldurmak için). Belirteç ömrünü sınırsız uzatır ve hiçbir iptali tanımaz: izin listesinden **çıkarıldı** (404, testli).
+  - `projectConfig.http.jwtExpiresIn` varsayılanı `1d`; üst panelde `15m`.
+  - MFA meydan okuması: tek kullanımlık, ömrü `mfa.challenge_ttl_seconds` (300 sn), deneme sınırı `mfa.challenge_max_attempts` (5). Belgelerde doğrulama ucu belirteçsiz görünür; 2.21.2'de uç girişin şifre adımındaki belirteci ister (testte görüldü). Kimliği yine de istekten değil, şifre adımında bizim not ettiğimiz eşlemeden okuruz.
+  - `auth_context` alanları: `actor_id`, `actor_type`, `auth_identity_id`, `jti`, `mfa_enabled`, `mfa_challenge_completed_at` (ISO metin); `iat` yok, bearer'ın `iat`'ı doğrulanmış belirteçten okunur.
+- **H1, 2FA geçişi etkene bağlı:** `cp_staff_member.mfa_valid_after`. Oturumun 2FA'yı geçtiği an (`mfa_challenge_completed_at`, ms) bu andan eski olamaz. Değişiklik anları: kurulum onayı, kendi 2FA'sını kapatma, sahip sıfırlaması, yeniden etkinleştirme. Kapatmada ve yeni etken onayında kişinin bu istek dışındaki bütün oturumları biter. Eski oturum ve belirteç, yeniden kurulumdan sonra da ölü kalır; spec ters çevrildi (`staff-sessions` H1).
+- **M1, bearer belirteci kalıcı kimlik değil:**
+  - **Oturum dizini yetkilidir.** Çerez oturumu yalnız kişinin dizininde varsa geçer. Bir oturumu bitirmek dizinden düşürmektir, ardından depo da siler. Oturum deposuna erişemeyen CLI de böylece bitirebilir.
+  - **Bearer belirteci** `/admin/cp/*`'de yalnız `development`/`test`'te kabul edilir; yayında 401 `cp.session_required`. Panel belirteci yalnız oturum açmak için kullanır.
+  - **`tokens_valid_after`:**
+    - Kalan bearer bundan eskiyse 401 `cp.session_revoked`.
+    - Ölçü: 2FA geçmiş belirteçte geçiş anı (ms); geçmemiş, yalnız kuruluma erişen belirteçte `iat` saniyesi (aynı saniye sayılır).
+    - Öne alındığı yerler: diğer oturumları bitirme, 2FA kapatma/sıfırlama, pasifleştirme, yeniden etkinleştirme.
+    - Şifre değişikliği ucu henüz yok.
+  - **Pasifleştir → etkinleştir:** eski oturum ve belirteci geri getirmez.
+- **M2, kanıt kilidi kişiyi değil kimlik bilgisini kilitler:**
+  - Yanlış kanıtlar kişi + kimlik bilgisi kapsamında sayılır (`server-kit` `scopedProofsLocked`/`countScopedWrongProof`). Kapsam: oturum özeti ya da belirteç `jti`'si; sınırlar 15 dakikada 10, günde 30, dakikada 10.
+  - Kapsamlar üstü günlük tavan 100.
+  - Uç hız sınırı da (`cp_step_up`, `cp_mfa_setup`) üye + kimlik bilgisi başına.
+  - Son 5 dakikada kodla geçilmiş giriş, "diğer oturumları bitir" için yeniden doğrulama yerine geçer (`freshSignIn`; kurtarma kodu da sayılır).
+  - Acil durum betiği: `cp:end-sessions user=<e-posta>` dizini boşaltır, belirteçleri durdurur, sistem satırı yazar. Redis ister.
+  - Mağaza (backend) eski kişi başına sayaçla kalır; davranışı değişmedi.
+- **M3, rol 2FA ile verilir:**
+  - **Davetle gelen:** üye beklemede (`enrol_by` = kabul + 24 saat). Yalnız kurulum uçlarına geçer; rol, ilk etken onaylanınca (`activate`) verilir.
+  - **Süre dolunca:** kişi hiçbir yere geçemez (`cp.no_role`), sahip yeniden sıfırlayana dek.
+  - **Sahip sıfırlaması:** etkenleri kapatır, oturum ve belirteçleri bitirir. Tek kullanımlık kayıt bağlantısı (`/enrol#token=`, özeti `enrol_token_hash`) e-postayla gider, e-posta yoksa yanıtta döner; süre 24 saat. Kurulum onayı bu belirteci de ister (`cp.enrolment_token_invalid`).
+  - **Bekleyen sahip:** "etkin sahip" sayılmaz.
+- **M4, girişin ikinci adımı:**
+  - **Kimlik:** şifre adımı yanıtındaki meydan okuma kimliği, giriş kaydıyla eşlenip dizine yazılır (5 dk). İkinci adım kimliği buradan okur; bilinmeyen meydan okuma 401 `cp.challenge_unknown`.
+  - **Sayaç:** yanlış kodlar o giriş kaydının ayrı `sign-in` kapsamında sayılır. Kilitlenince 429 `cp.sign_in_locked`; açık oturumların kanıtları etkilenmez.
+  - **Giriş sınırı:** e-posta başına bütün adreslerden saatte 50 (`perIdentityAnyIp`). Adresi bilen kişi o saat girişi tutabilir; açık oturumlara dokunmaz. Bilinçli denge.
+- **L1, kayıt kapalı:**
+  - `POST /auth/user/emailpass/register` yalnız geçerli davetle (`x-cp-invite` başlığı) ve davetin adresiyle; yoksa 403 `cp.register_closed`.
+  - Adrese önceden açılmış, kullanıcısız giriş kaydı (ele geçirme hazırlığı) kayıttan önce silinir.
+  - `reset-password`, `update`, `callback` ve diğer sağlayıcılar 404: izin listesi artık tam yol listesidir.
+- **L2:** önyükleme daveti 1 saat (kendi denetimimiz, `created_at`'ten). Bağlantı yalnız `print-link=yes` ile ve e-posta gidemediyse yazılır. Betik ve belge, çıktısı tutulan işte çalıştırmamayı söyler.
+- **L3:** yeni önyükleme daveti açık bütün önyükleme davetlerini geri çeker. "Etkin sahip yok" denetimi bekleyen üye eklenirken ve rol verilirken sahiplerin `FOR UPDATE` kilidi altında yinelenir.
+- **L4:** yeniden doğrulama kanıtı oturum kimliğine ya da belirtecin `jti`'sine bağlıdır, sabit `bearer`'a değil.
+- **L5:** mağazanın CSRF Origin denetimi taşındı (`api/http/csrf.ts`). Çerezli mutasyon `ADMIN_CORS`/`AUTH_CORS` kökeninden gelmeli; `/admin` gövdesi JSON olmalı.
+- **L6:** rol değişikliği, pasifleştirme, yeniden etkinleştirme ve 2FA kapatma/sıfırlama `{ from, to }` yazar. `/auth/*` olayları kaydedilir: giriş, ikinci adım, kayıt, oturum açma, çıkış. Adres anahtarlı özetle, değer yok.
+- **L7:** oturum notu yanıttan önce yazılır. Yazılamazsa oturumun girişi silinir, olay günlüğe gider (`cp.session_note_failed`); dizinde olmayan oturum zaten geçmez.
+- **L8:** env `JWT_SECRET`, `COOKIE_SECRET`, `CP_HASH_KEY`, `AUTH_MFA_ENCRYPTION_KEY` ikişer ikişer farklı olmalı (büyük/küçük harf duyarsız).
+- **Bilgi notları:**
+  - Davet kabulü workflow'u `store: false`; yürütme kaydı tutulmadığı testli.
+  - Kurulum onayı kod biçimini `codeFirstUse`'dan önce denetler.
+  - DELETE uçları sorgu dizesi almaz.
+  - Gövdesi bozuk istekte de koruma önce karar verir (operatöre 403, testli).
+- **Migration:** `cp_staff` `Migration20261110212907` (`enrol_by`, `enrol_token_hash`, `bootstrap`, `mfa_valid_after`, `tokens_valid_after`).
+- **Kalan riskler (güncel):**
+  - **Bekleyen üye:** 2FA kurmamış her üye artık bekleme süresiyle (24 saat) sınırlı; o süre içinde şifresini bilen kişi kendi uygulamasını kaydedebilir (ilk kullanımda güven).
+  - **Yeniden doğrulama kanıtı:** 5 dakika geri alınamaz; bağlı olduğu oturum bitince işe yaramaz.
+  - **IP özeti:** takma addır.
+  - **Kullanıcı başına girişi tutma:** saatte 50, açık oturumlar etkilenmez.
+  - **Kurulum belirteci aynı saniyede:** 2FA geçmemiş belirteç iptalle aynı saniyede verilmişse geçer, ama yalnız kuruluma erişir.
+  - **Bellek dizini:** Redis'siz geliştirmede dizin süreç belleğindedir; `cp:end-sessions` o durumda reddeder.

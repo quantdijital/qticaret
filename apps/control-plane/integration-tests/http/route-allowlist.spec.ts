@@ -27,11 +27,11 @@ async function signInStaff(http: HttpClient, container: MedusaContainer) {
   const email = `staff-${randomUUID()}@quant.test`
   // Throwaway credential for this test database only
   const password = randomUUID()
-  const registration = await http.post("/auth/user/emailpass/register", { email, password })
-  const [, payload = ""] = tokenOf(registration).split(".")
-  const { auth_identity_id: authIdentityId } = JSON.parse(
-    Buffer.from(payload, "base64url").toString("utf8")
-  ) as { auth_identity_id: string }
+  // A login is made on the server: the API makes one only with an invitation (Ek C4, L1)
+  const made = await container
+    .resolve(Modules.AUTH)
+    .register("emailpass", { body: { email, password } })
+  const authIdentityId = made.authIdentity?.id ?? ""
   await createUserAccountWorkflow(container).run({ input: { authIdentityId, userData: { email } } })
   const login = await http.post("/auth/user/emailpass", { email, password })
   return { authorization: `Bearer ${tokenOf(login)}` }

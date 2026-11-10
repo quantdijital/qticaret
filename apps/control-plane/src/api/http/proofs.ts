@@ -3,29 +3,39 @@ import { Modules } from "@medusajs/framework/utils"
 import {
   TOTP_CODE,
   checkStepUpProof,
-  countWrongProof,
+  countScopedWrongProof,
   firstCodeUse,
   issueStepUpProof,
   proofBurstExceeded,
-  proofsLocked,
+  scopedProofsLocked,
   stepUpKey,
 } from "@qticaret/server-kit"
 import type { StepUpCheck } from "@qticaret/server-kit"
-import { appKey, authOf, keyed } from "./caller"
+import { appKey, authOf, credentialOf, credentialScope, keyed } from "./caller"
 import { sharedRateLimitStore } from "./rate-limit"
 import { loggerOf } from "./request"
 
 /**
- * Proving oneself again (adr/0061 §3.5; the shop's adr/0040 §3 rules and
- * counters, @qticaret/server-kit): a 2FA code (once), a recovery code, or
- * the password while 2FA is being set up. Ten wrong proofs in a quarter of
- * an hour, thirty in a day, lock the person's proofs; ten a minute at most.
+ * Proving oneself again (adr/0061 §3.5; the shop's adr/0040 §3 rules,
+ * @qticaret/server-kit): a 2FA code (once), a recovery code, or the
+ * password while 2FA is being set up. Counted per person and credential
+ * (Ek C4, M2): a stolen session that guesses locks itself, not its
+ * owner's own sessions; a ceiling across them still stops many at once.
+ * The sign-in's second step counts in a scope of its own (M4).
  */
 
 export type ProofMethod = "totp" | "recovery_code"
 export type ProofOutcome = "ok" | "wrong" | "locked"
 
+/** Where wrong proofs count: the credential, or the sign-in's own scope. */
+export type ProofScope = string
+
+export const SIGN_IN_SCOPE: ProofScope = "sign-in"
+
 const person = (identity: string) => keyed("cp_reauth", identity)
+
+/** The scope of the request's own credential. */
+export const scopeOf = (req: MedusaRequest): ProofScope => credentialScope(credentialOf(req))
 
 /** Whether a TOTP code is new for the identity; true once, then for two minutes never. */
 export async function codeFirstUse(
@@ -36,17 +46,27 @@ export async function codeFirstUse(
   return firstCodeUse(sharedRateLimitStore(req), keyed("cp_reauth", `${identity}\n${code}`))
 }
 
-/** Locked or past the minute's bound: no proof is checked. Counts the attempt. */
-export async function proofGate(req: MedusaRequest, identity: string): Promise<boolean> {
-  const store = sharedRateLimitStore(req)
-  const locked = await proofsLocked(store, person(identity))
-  const burst = await proofBurstExceeded(store, person(identity))
+/** Whether the scope is locked, without counting an attempt. */
+export const proofsLockedIn = (req: MedusaRequest, identity: string, scope: ProofScope) =>
+  scopedProofsLocked(sharedRateLimitStore(req), person(identity), scope)
+
+/** Locked, or past the minute's bound in this scope: no proof is checked. Counts the attempt. */
+export async function proofGate(
+  req: MedusaRequest,
+  identity: string,
+  scope: ProofScope = scopeOf(req)
+): Promise<boolean> {
+  const locked = await proofsLockedIn(req, identity, scope)
+  const burst = await proofBurstExceeded(sharedRateLimitStore(req), `${person(identity)}:${scope}`)
   return !locked && !burst
 }
 
-/** One wrong proof more for the identity. */
-export const countWrong = (req: MedusaRequest, identity: string): Promise<void> =>
-  countWrongProof(sharedRateLimitStore(req), person(identity))
+/** One wrong proof more for the identity in the scope. */
+export const countWrong = (
+  req: MedusaRequest,
+  identity: string,
+  scope: ProofScope = scopeOf(req)
+): Promise<void> => countScopedWrongProof(sharedRateLimitStore(req), person(identity), scope)
 
 async function verifies(
   req: MedusaRequest,
@@ -114,23 +134,16 @@ export async function provePassword(
   return "ok"
 }
 
-interface SessionLike {
-  session?: { auth_context?: unknown } | null
-  sessionID?: string
-}
-
 /**
- * What a step-up proof is bound to: the user, their login, and the session
- * when the request signed in with one (a bearer token has none of its own).
+ * What a step-up proof is bound to (L4): the user, their login, and the
+ * credential itself (the session's id, or the token's own id).
  */
 function bindingOf(req: MedusaRequest): string | null {
   const auth = authOf(req)
   if (auth?.actor_type !== "user" || !auth.actor_id || !auth.auth_identity_id) {
     return null
   }
-  const { session, sessionID } = req as unknown as SessionLike
-  const sid = session?.auth_context && sessionID ? sessionID : "bearer"
-  return `${auth.actor_id}\n${auth.auth_identity_id}\n${sid}`
+  return `${auth.actor_id}\n${auth.auth_identity_id}\n${scopeOf(req)}`
 }
 
 let proofKey: Buffer | undefined

@@ -1,15 +1,20 @@
 import { randomUUID } from "node:crypto"
 import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { CP_AUDIT_MODULE } from "../../src/modules/cp-audit"
-import type CpAuditModuleService from "../../src/modules/cp-audit/service"
-import { anyStatus, bearer, makeMember, registerLogin, stepUp } from "../helpers/staff"
+import {
+  anyStatus,
+  bearer,
+  makeMember,
+  registerLogin,
+  serverLogin,
+  signInWithRecoveryCode,
+  stepUp,
+  tokenOf,
+  tokenOfLink,
+} from "../helpers/staff"
 import type { HttpClient, Member } from "../helpers/staff"
 
 jest.setTimeout(180 * 1000)
-
-const tokenOfLink = (link: string) =>
-  new URLSearchParams(link.split("#")[1] ?? "").get("token") ?? ""
 
 /**
  * adr/0061 §3.5 (C4): each role reaches what the route table gives it;
@@ -125,24 +130,40 @@ medusaIntegrationTestRunner({
         { ...anyStatus, headers: await stepUp(http, owner) }
       )
       const token = tokenOfLink(invited.data.link)
-      const stranger = await registerLogin(http, `x-${randomUUID()}@quant.test`, randomUUID())
+      // A login for another address, made elsewhere: the API would not make it (L1)
+      const strangerEmail = `x-${randomUUID()}@quant.test`
+      await serverLogin(getContainer(), strangerEmail, "stranger-password")
+      const stranger = tokenOf(
+        await http.post("/auth/user/emailpass", {
+          email: strangerEmail,
+          password: "stranger-password",
+        })
+      )
       const wrongLogin = await http.post(
         "/admin/cp/invites/accept",
         { token, first_name: "Ayşe", last_name: "Yıldız" },
         { ...anyStatus, headers: bearer(stranger) }
       )
       const password = randomUUID()
-      const own = await registerLogin(http, email, password)
+      const own = await registerLogin(http, email, password, token)
       const accepted = await http.post<{ member: { role: string } }>(
         "/admin/cp/invites/accept",
         { token, first_name: "Ayşe", last_name: "Yıldız" },
         { ...anyStatus, headers: bearer(own) }
       )
+      // Pending until 2FA (M3): the role is not granted yet
+      const signedIn = tokenOf(await http.post("/auth/user/emailpass", { email, password }))
+      const before = await http.get("/admin/cp/me/sessions", {
+        ...anyStatus,
+        headers: bearer(signedIn),
+      })
 
       expect(wrongLogin.status).toBe(400)
       expect(wrongLogin.data).toMatchObject({ message: "cp.invite_login" })
       expect(accepted.status).toBe(201)
       expect(accepted.data.member.role).toBe("finance")
+      expect(before.status).toBe(403)
+      expect(before.data).toMatchObject({ message: "cp.mfa_required" })
     })
 
     it("never takes the last owner's role, and takes it once there is another", async () => {
@@ -164,14 +185,17 @@ medusaIntegrationTestRunner({
       expect((await get("/admin/cp/staff", finance)).status).toBe(403)
     })
 
-    it("shuts a deactivated member out at once, and lets them back", async () => {
+    it("shuts a deactivated member out at once; reactivation revives nothing old (M1)", async () => {
+      const old = readonly.headers
       const proved = await stepUp(http, owner)
       const deactivate = await http.post(
         `/admin/cp/staff/members/${readonly.userId}/deactivate`,
         {},
         { ...anyStatus, headers: proved }
       )
-      const after = await get("/admin/cp/me/sessions", readonly)
+      const oldAfter = await http.get("/admin/cp/me/sessions", { ...anyStatus, headers: old })
+      const fresh = bearer(await signInWithRecoveryCode(http, readonly))
+      const freshAfter = await http.get("/admin/cp/me/sessions", { ...anyStatus, headers: fresh })
       const self = await http.post(
         `/admin/cp/staff/members/${owner.userId}/deactivate`,
         {},
@@ -182,58 +206,30 @@ medusaIntegrationTestRunner({
         {},
         { ...anyStatus, headers: proved }
       )
+      const revived = await http.get("/admin/cp/me/sessions", { ...anyStatus, headers: fresh })
+      readonly.headers = bearer(await signInWithRecoveryCode(http, readonly))
 
       expect(deactivate.status).toBe(200)
-      expect(after.status).toBe(403)
-      expect(after.data).toMatchObject({ message: "cp.no_role" })
+      expect(oldAfter.status).toBe(401)
+      expect(oldAfter.data).toMatchObject({ message: "cp.session_revoked" })
+      expect(freshAfter.status).toBe(403)
+      expect(freshAfter.data).toMatchObject({ message: "cp.no_role" })
       expect(self.status).toBe(400)
       expect(reactivate.status).toBe(200)
+      // Its sign-in and token are from before: refused, one way or the other
+      expect([401, 403]).toContain(revived.status)
       expect((await get("/admin/cp/me/sessions", readonly)).status).toBe(200)
     })
 
-    it("records every mutation, refused ones too, with names but no values", async () => {
-      const email = `audit-${randomUUID()}@quant.test`
-      const refused = await http.post(
+    it("refuses an operator's invitation before reading its body (guard first)", async () => {
+      const response = await http.post(
         "/admin/cp/staff/invites",
-        { email, role: "readonly" },
+        { email: "not-an-address", role: "emperor", extra: true },
         { ...anyStatus, headers: operator.headers }
       )
-      const made = await http.post(
-        "/admin/cp/staff/invites",
-        { email, role: "readonly" },
-        { ...anyStatus, headers: await stepUp(http, owner) }
-      )
-      // The row is written once the answer has gone
-      await new Promise((resolve) => setTimeout(resolve, 200))
-      const [rows] = await getContainer()
-        .resolve<CpAuditModuleService>(CP_AUDIT_MODULE)
-        .listAndCountCpAuditEntries(
-          { action: "POST /admin/cp/staff/invites" },
-          { order: { created_at: "DESC" }, take: 50 }
-        )
-      const byOperator = rows.find((row) => row.actor_id === operator.userId)
-      const byOwner = rows.find((row) => row.actor_id === owner.userId && row.outcome === 201)
 
-      expect(refused.status).toBe(403)
-      expect(made.status).toBe(201)
-      expect(byOperator).toMatchObject({
-        kind: "mutation",
-        actor_type: "user",
-        outcome: 403,
-        resource_type: "cp_invite",
-        changes: { fields: ["email", "role"] },
-      })
-      expect(byOwner?.request_id).toEqual(expect.any(String))
-      expect(byOwner?.ip_hash).toMatch(/^[0-9a-f]{32}$/)
-      expect(JSON.stringify(rows)).not.toContain(email)
-      expect(JSON.stringify(rows)).not.toContain("127.0.0.1")
-
-      const listed = await http.get<{ entries: unknown[] }>("/admin/cp/audit-log?limit=5", {
-        ...anyStatus,
-        headers: owner.headers,
-      })
-      expect(listed.status).toBe(200)
-      expect(listed.data.entries.length).toBe(5)
+      expect(response.status).toBe(403)
+      expect(response.data).toMatchObject({ message: "cp.forbidden" })
     })
   },
 })

@@ -26,6 +26,12 @@ export interface RouteRule {
   access: Access
   /** A fresh step-up proof required (`x-cp-step-up`, adr/0061 §3.5). */
   stepUp?: true
+  /**
+   * A sign-in that passed 2FA in the last few minutes stands in for the
+   * step-up (M2: a member whose proofs a stolen session locked can still
+   * sign in again and end it).
+   */
+  freshSignIn?: true
   /** What it acts on, for the audit row: a kind and the parameter naming one. */
   resource?: { type: string; param?: string }
   /** A read of other people's data: an audit row too (`sensitive_read`). */
@@ -78,6 +84,7 @@ export const CP_ROUTES: readonly RouteRule[] = [
     path: "/admin/cp/me/sessions/revoke-others",
     access: ALL,
     stepUp: true,
+    freshSignIn: true,
     resource: { type: "cp_session" },
   },
   // The staff: the owner's alone; every change that grants or keeps access asks the proof
@@ -169,6 +176,8 @@ export interface Caller {
   role: CpStaffRole | null
   /** Whether this session passed 2FA with a factor still enabled. */
   mfaPassed: boolean
+  /** Waiting for their first factor: the setup only. */
+  pending?: boolean
 }
 
 /** Whether `caller` may call the rule's route. Closed by default. */
@@ -185,7 +194,7 @@ export function decide(rule: RouteRule | null, caller: Caller): Decision {
   if (rule.access === "setup") {
     return { allowed: true, reason: "setup" }
   }
-  if (!caller.mfaPassed) {
+  if (caller.pending === true || !caller.mfaPassed) {
     return { allowed: false, reason: "mfa_required" }
   }
   return rule.access.includes(caller.role)

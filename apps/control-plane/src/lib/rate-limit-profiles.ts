@@ -15,6 +15,10 @@ export const CP_RATE_LIMIT_PROFILES = {
     name: "cp_login",
     perIp: { max: 20, windowMs: 15 * MINUTE },
     perIdentity: { max: 5, windowMs: 15 * MINUTE },
+    // Ek C4 (M4): one account from every address together, an hour. Someone
+    // who knows the address can hold its sign-in for that hour (open
+    // sessions are untouched); a guesser spread over many addresses stops
+    perIdentityAnyIp: { max: 50, windowMs: HOUR },
   },
   password_reset: {
     name: "cp_password_reset",

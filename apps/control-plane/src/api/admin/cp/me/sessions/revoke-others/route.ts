@@ -1,17 +1,16 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { endSessions, openSessions } from "../../../../../http/sessions"
+import { cpStaff } from "../../../../../http/caller"
+import { endAllSessions } from "../../../../../http/sessions"
 
 /**
- * POST /admin/cp/me/sessions/revoke-others (step-up): ends every session of
- * the member but this one (a bearer request has none: all of them end).
+ * POST /admin/cp/me/sessions/revoke-others (step-up, or a sign-in with a
+ * code in the last five minutes, M2): ends every session of the member
+ * but this one, and every bearer token they hold (a bearer request has no
+ * session of its own: all of them end).
  */
 export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const userId = req.auth_context.actor_id
-  const others = (await openSessions(req, userId)).filter((each) => !each.current)
-  const ended = await endSessions(
-    req,
-    userId,
-    others.map((each) => each.sid)
-  )
+  const ended = await endAllSessions(req, userId, { keepCurrent: true })
+  await cpStaff(req).endTokens(userId)
   res.json({ ended })
 }

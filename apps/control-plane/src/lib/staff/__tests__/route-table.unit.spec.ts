@@ -145,4 +145,21 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       }
     }
   })
+
+  it("keeps a pending member to the setup, whatever their role (Ek C4, M3)", () => {
+    for (const rule of CP_ROUTES.filter((each) => each.access !== "public")) {
+      const decision = decide(rule, { role: "owner", mfaPassed: true, pending: true })
+
+      expect(decision.allowed).toBe(rule.access === "setup")
+    }
+  })
+
+  it("lets a fresh sign-in stand in for the step-up on ending other sessions only (M2)", () => {
+    const fresh = CP_ROUTES.filter((rule) => rule.freshSignIn).map(
+      (rule) => `${rule.method} ${rule.path}`
+    )
+
+    expect(fresh).toEqual(["POST /admin/cp/me/sessions/revoke-others"])
+    expect(CP_ROUTES.filter((rule) => rule.freshSignIn && !rule.stepUp)).toHaveLength(0)
+  })
 })
