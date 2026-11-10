@@ -1,5 +1,12 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { hashPii, parseKey } from "@qticaret/server-kit"
+import {
+  authIdentityField,
+  authRouteKind,
+  hashPii,
+  parseKey,
+  retryAfterSeconds,
+} from "@qticaret/server-kit"
+import type { AuthRouteKind } from "@qticaret/server-kit"
 import { isLocalEnv, parseEnv } from "../../lib/env"
 import { errorSummary, logger } from "../../lib/logging"
 import { tenantNamespace } from "../../lib/redis"
@@ -11,7 +18,7 @@ import {
   perIpScale,
   withFallback,
 } from "../../lib/security/rate-limit"
-import type { Limit, RateLimitProfile, RateLimitStore } from "../../lib/security/rate-limit"
+import type { RateLimitProfile, RateLimitStore } from "../../lib/security/rate-limit"
 import { rejectRequest } from "./reject"
 import { routePath } from "./request-path"
 import { clientIp } from "./client-ip"
@@ -85,36 +92,6 @@ function identityKey(identity: string): string {
 export const clientBucket = (req: MedusaRequest): string =>
   ipBucket(clientIp(req) ?? undefined) ?? "unknown"
 
-/** Seconds until the request may be tried again, or null when it is within every limit. */
-async function retryAfterSeconds(
-  store: RateLimitStore,
-  profile: RateLimitProfile,
-  ip: string,
-  identity: string | undefined,
-  scale: number
-): Promise<number | null> {
-  const checks: [string, Limit][] = []
-  if (profile.perIp) {
-    checks.push([`${profile.name}:ip:${ip}`, { ...profile.perIp, max: profile.perIp.max * scale }])
-  }
-  if (identity !== undefined && identity.trim() !== "") {
-    if (profile.perIdentity) {
-      checks.push([`${profile.name}:id:${ip}:${identityKey(identity)}`, profile.perIdentity])
-    }
-    if (profile.perIdentityAnyIp) {
-      checks.push([`${profile.name}:any:${identityKey(identity)}`, profile.perIdentityAnyIp])
-    }
-  }
-  const counts = await Promise.all(
-    checks.map(async ([key, limit]) => ({ limit, window: await store.hit(key, limit.windowMs) }))
-  )
-  const exceeded = counts.filter(({ limit, window }) => window.count > limit.max)
-  if (exceeded.length === 0) {
-    return null
-  }
-  return Math.max(1, Math.ceil(Math.max(...exceeded.map(({ window }) => window.resetMs)) / 1000))
-}
-
 export interface RateLimitOptions {
   store?: () => RateLimitStore
   /** The identity a profile counts per (an e-mail from the body). */
@@ -137,13 +114,18 @@ export function rateLimit(
     let wait: number | null
     try {
       const store = (options.store ?? defaultStore)()
-      wait = await retryAfterSeconds(
+      const identity = options.identity?.(req)
+      const countsIdentity = profile.perIdentity ?? profile.perIdentityAnyIp
+      wait = await retryAfterSeconds({
         store,
         profile,
-        clientBucket(req),
-        options.identity?.(req),
-        scale
-      )
+        ip: clientBucket(req),
+        identityKey:
+          countsIdentity && identity !== undefined && identity.trim() !== ""
+            ? identityKey(identity)
+            : undefined,
+        scale,
+      })
     } catch (error) {
       logger.error({
         event: "rate_limit.store_failed",
@@ -168,14 +150,15 @@ export function rateLimit(
   }
 }
 
-const AUTH_ROUTES: readonly [RegExp, RateLimitProfile][] = [
-  [/^\/auth\/token\/refresh$/, RATE_LIMIT_PROFILES.token_refresh],
-  [/^\/auth\/session$/, RATE_LIMIT_PROFILES.auth_default],
-  [/^\/auth\/[^/]+\/[^/]+\/register$/, RATE_LIMIT_PROFILES.register],
-  [/^\/auth\/[^/]+\/[^/]+\/reset-password$/, RATE_LIMIT_PROFILES.password_reset],
-  [/^\/auth\/[^/]+\/[^/]+\/(update|callback)$/, RATE_LIMIT_PROFILES.auth_default],
-  [/^\/auth\/[^/]+\/[^/]+$/, RATE_LIMIT_PROFILES.login],
-]
+// Each kind of /auth/* route (@qticaret/server-kit) counts in its profile
+const AUTH_PROFILES: Record<AuthRouteKind, RateLimitProfile> = {
+  token_refresh: RATE_LIMIT_PROFILES.token_refresh,
+  session: RATE_LIMIT_PROFILES.auth_default,
+  register: RATE_LIMIT_PROFILES.register,
+  password_reset: RATE_LIMIT_PROFILES.password_reset,
+  auth_default: RATE_LIMIT_PROFILES.auth_default,
+  login: RATE_LIMIT_PROFILES.login,
+}
 
 /**
  * The /auth/* profile from the path: login, registration, reset, refresh.
@@ -183,8 +166,7 @@ const AUTH_ROUTES: readonly [RegExp, RateLimitProfile][] = [
  * patterns miss must not miss the login limit with them.
  */
 export function authProfile(req: MedusaRequest): RateLimitProfile {
-  const path = routePath(req)
-  return AUTH_ROUTES.find(([pattern]) => pattern.test(path))?.[1] ?? RATE_LIMIT_PROFILES.login
+  return AUTH_PROFILES[authRouteKind(routePath(req))]
 }
 
 /**
@@ -196,12 +178,6 @@ export function authProfile(req: MedusaRequest): RateLimitProfile {
 export function authIdentity(req: MedusaRequest): string | undefined {
   const body = req.body as Record<string, unknown> | undefined
   // A verification request names its address `entity_id` (adr/0037 §1)
-  const field =
-    authProfile(req) === RATE_LIMIT_PROFILES.password_reset
-      ? "identifier"
-      : routePath(req) === "/auth/verification/request"
-        ? "entity_id"
-        : "email"
-  const value = body?.[field]
+  const value = body?.[authIdentityField(routePath(req))]
   return typeof value === "string" ? value : undefined
 }

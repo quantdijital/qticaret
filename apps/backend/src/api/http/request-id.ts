@@ -1,16 +1,10 @@
 import { randomUUID } from "node:crypto"
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { REQUEST_ID_HEADER, isValidRequestId } from "@qticaret/server-kit"
 import { runWithRequestContext } from "../../lib/logging"
 
-export const REQUEST_ID_HEADER = "X-Request-Id"
-
-// UUIDs and the usual proxy and tracing formats. Medusa copies the incoming
-// header unchecked; anything else is replaced so a caller cannot put
-// arbitrary text into logs and responses.
-const REQUEST_ID = /^[A-Za-z0-9][A-Za-z0-9._:-]{7,127}$/
-
-export const isValidRequestId = (value: unknown): value is string =>
-  typeof value === "string" && REQUEST_ID.test(value)
+// Shared with the control plane (adr/0061, C3)
+export { REQUEST_ID_HEADER, isValidRequestId } from "@qticaret/server-kit"
 
 /**
  * Validates `req.requestId` (set by Medusa from `x-request-id`), replaces it

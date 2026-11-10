@@ -8,22 +8,10 @@
  * with account lockout and its notice (docs/04 "artan gecikme + kilit").
  */
 
-export interface Limit {
-  max: number
-  windowMs: number
-}
+import type { RateLimitProfile } from "@qticaret/server-kit"
 
-export interface RateLimitProfile {
-  name: string
-  perIp?: Limit
-  perIdentity?: Limit
-  /**
-   * Per identity from every address together. Only for identities a client
-   * holds rather than names (a cart's id): counted so, an e-mail would let
-   * anyone lock its owner out; a cart's tries are not spread over addresses.
-   */
-  perIdentityAnyIp?: Limit
-}
+// The profile shape is shared with the control plane (adr/0061, C3)
+export type { Limit, RateLimitProfile } from "@qticaret/server-kit"
 
 const MINUTE = 60_000
 const HOUR = 60 * MINUTE

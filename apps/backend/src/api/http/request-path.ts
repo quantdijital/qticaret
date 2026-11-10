@@ -1,5 +1,14 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import {
+  isAmbiguousTarget,
+  routePathKeepingCaseOf,
+  routePathOf,
+  targetPath,
+} from "@qticaret/server-kit"
 import { rejectRequest } from "./reject"
+
+// The path rules themselves are shared with the control plane (adr/0061, C3)
+export { decodedSegment } from "@qticaret/server-kit"
 
 /**
  * The full request path without the query. Medusa mounts a middleware that
@@ -7,11 +16,13 @@ import { rejectRequest } from "./reject"
  * from `req.path` (under `"/*"` every path reads `/`); `originalUrl` keeps it.
  */
 export function requestPath(req: MedusaRequest): string {
-  // Typed as strings, but absent on hand-built requests
+  return targetPath(requestTarget(req))
+}
+
+// Typed as strings, but absent on hand-built requests
+function requestTarget(req: MedusaRequest): string {
   const fields = req as { originalUrl?: string; url?: string; path?: string }
-  const url = fields.originalUrl ?? fields.url ?? fields.path ?? "/"
-  const end = url.indexOf("?")
-  return end === -1 ? url : url.slice(0, end)
+  return fields.originalUrl ?? fields.url ?? fields.path ?? "/"
 }
 
 // A feed's address carries its token (F10.8): the logs keep the route, never the token
@@ -20,53 +31,18 @@ const FEED_PATH = /^\/feeds\/[^/]+/
 /** The request path as logs keep it: a path that carries a secret has it masked. */
 export const loggedPath = (path: string): string => path.replace(FEED_PATH, "/feeds/:token")
 
-// `POST http://host/path HTTP/1.1` is a valid request line; Express routes its path
-const ABSOLUTE_FORM = /^[a-z][a-z0-9+.-]*:\/\/[^/]*/i
-
 /**
- * The path as Express routes it, for deciding which rule applies. Express
- * matches without regard to case or a trailing slash, and takes the path of
- * an absolute-form target; judged by the raw path, `/AUTH/customer/emailpass/`
- * would reach the login route and dodge the login limit. Percent escapes
- * stay as they are: Express does not decode fixed segments either.
+ * The path as Express routes it, for deciding which rule applies: lower-cased,
+ * without trailing slashes, the path of an absolute-form target
+ * (`routePathOf` in @qticaret/server-kit).
  */
 export function routePath(req: MedusaRequest): string {
-  return routePathKeepingCase(req).toLowerCase()
+  return routePathOf(requestPath(req))
 }
 
 /** `routePath` with the case kept, for reading IDs: `prod_01JABC` is not `prod_01jabc`. */
 export function routePathKeepingCase(req: MedusaRequest): string {
-  const raw = requestPath(req)
-  const end = raw.indexOf("#")
-  const path = (end === -1 ? raw : raw.slice(0, end)).replace(ABSOLUTE_FORM, "")
-  return trimTrailingSlashes(path) || "/"
-}
-
-// A loop, not `/\/+$/`: that pattern rescans a long run of slashes from every
-// start, and a request line of 16 KB of them held the event loop for ~90 ms
-function trimTrailingSlashes(path: string): string {
-  let end = path.length
-  while (end > 0 && path.charCodeAt(end - 1) === 0x2f) {
-    end -= 1
-  }
-  return path.slice(0, end)
-}
-
-// A backslash or a fragment in the request line: no client sends one, and
-// when `#` is present Express's URL parser turns `\` into `/`, so the route
-// Express picks and the path our checks read would differ
-const AMBIGUOUS_TARGET = /[\\#]/
-
-/**
- * A `.` or `..` segment, as written or escaped (`%2e%2E`): Express routes
- * it as an ordinary segment (`/admin/gift-cards/../orders` runs the gift
- * card route with the id `..`), a URL parser removes it. No client sends one.
- */
-function hasDotSegment(path: string): boolean {
-  return path.split("/").some((segment) => {
-    const decoded = decodedSegment(segment)
-    return decoded === "." || decoded === ".."
-  })
+  return routePathKeepingCaseOf(requestPath(req))
 }
 
 /** Refuses request targets Express and our path checks could read differently. */
@@ -75,9 +51,7 @@ export function rejectAmbiguousPath(
   res: MedusaResponse,
   next: MedusaNextFunction
 ) {
-  const fields = req as { originalUrl?: string; url?: string }
-  const target = fields.originalUrl ?? fields.url ?? ""
-  if (AMBIGUOUS_TARGET.test(target) || hasDotSegment(requestPath(req))) {
+  if (isAmbiguousTarget(requestTarget(req))) {
     rejectRequest(
       req,
       res,
@@ -88,13 +62,4 @@ export function rejectAmbiguousPath(
     return
   }
   next()
-}
-
-/** A path segment as Express hands it to a route parameter: decoded, or as written when malformed. */
-export function decodedSegment(segment: string): string {
-  try {
-    return decodeURIComponent(segment)
-  } catch {
-    return segment
-  }
 }

@@ -1,4 +1,4 @@
-import { tenantNamespace } from ".."
+import { tenantNamespace } from "../namespace"
 
 describe("tenantNamespace", () => {
   it("names a tenant by its database server and name", () => {

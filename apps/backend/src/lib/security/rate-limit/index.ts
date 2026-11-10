@@ -1,4 +1,4 @@
-export { ipBucket } from "./ip"
+export { ipBucket } from "@qticaret/server-kit"
 export { RATE_LIMIT_PROFILES, perIpScale } from "./profiles"
 export type { Limit, RateLimitProfile, RateLimitProfileName } from "./profiles"
 export { createMemoryStore, createRedisStore, withFallback } from "./store"

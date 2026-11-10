@@ -1,3 +1,3 @@
 export { createRedisClient } from "./client"
 export { lockingModules } from "./locking"
-export { tenantNamespace } from "./namespace"
+export { tenantNamespace } from "@qticaret/server-kit"

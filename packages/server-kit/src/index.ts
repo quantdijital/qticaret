@@ -68,6 +68,32 @@ export type { DocumentSignature, DocumentVerifyErrorCode } from "./signing/docum
 
 export { safeEqual } from "./security/timing-safe"
 export { REDACTED, isSensitiveKey, redactDeep, redactText } from "./logging/redact"
+export { errorSummary } from "./logging/error-summary"
+
+export { authIdentityField, authRouteKind } from "./http/auth-routes"
+export type { AuthRouteKind } from "./http/auth-routes"
+export { HSTS_HEADER, REQUEST_ID_HEADER, SECURITY_HEADERS, isValidRequestId } from "./http/headers"
+export {
+  decodedSegment,
+  isAmbiguousTarget,
+  routePathKeepingCaseOf,
+  routePathOf,
+  targetPath,
+} from "./http/path"
+
+export { ipBucket } from "./rate-limit/ip"
+export { retryAfterSeconds } from "./rate-limit/limits"
+export type { Limit, RateLimitCheck, RateLimitProfile } from "./rate-limit/limits"
+export { createMemoryStore, createRedisStoreWith, withFallback } from "./rate-limit/store"
+export type {
+  CountingRedisClient,
+  FallbackOptions,
+  RateLimitStore,
+  WindowCount,
+} from "./rate-limit/store"
+
+export { createRedisClient } from "./redis/client"
+export { tenantNamespace } from "./redis/namespace"
 export { TAX_ID_KINDS, detectTaxIdKind, isValidTckn, isValidVkn, maskTaxId } from "./tr/tax-id"
 export type { TaxIdKind } from "./tr/tax-id"
 export {
