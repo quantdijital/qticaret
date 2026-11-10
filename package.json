@@ -7,8 +7,10 @@
     "node": ">=24.11.0 <25"
   },
   "scripts": {
-    "dev": "turbo run dev --filter=!@qticaret/control-plane",
-    "dev:cp": "pnpm --filter control-plane dev",
+    "dev": "turbo run dev --filter=!@qticaret/control-plane --filter=!@qticaret/control-plane-panel",
+    "dev:cp": "turbo run dev --filter=@qticaret/control-plane --filter=@qticaret/control-plane-panel",
+    "dev:cp-api": "pnpm --filter control-plane dev",
+    "dev:cp-panel": "pnpm --filter control-plane-panel dev",
     "dev:paytr": "pnpm --filter backend dev:paytr",
     "dev:parasut": "pnpm --filter backend dev:parasut",
     "dev:shopify": "pnpm --filter backend dev:shopify",

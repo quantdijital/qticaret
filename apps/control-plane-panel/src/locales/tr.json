@@ -1,0 +1,377 @@
+{
+  "app": {
+    "name": "Üst panel",
+    "product": "Quant Ticaret",
+    "skipToContent": "İçeriğe geç"
+  },
+  "platformBar": {
+    "label": "Üst panel: platform yönetimi",
+    "title": "Üst panel",
+    "text": "Quant Ticaret platform yönetimi. Mağaza paneli değildir."
+  },
+  "auth": {
+    "email": "E-posta",
+    "password": "Şifre",
+    "required": "Bu alan gerekli.",
+    "showPassword": "Şifreyi göster",
+    "hidePassword": "Şifreyi gizle",
+    "signIn": {
+      "title": "Üst panele giriş",
+      "subtitle": "Platform personeli hesabınızla girin.",
+      "submit": "Giriş yap",
+      "failed": "E-posta ya da şifre hatalı.",
+      "noAccount": "Hesabınız yoksa platform sahibinden davet isteyin."
+    },
+    "code": {
+      "title": "İki adımlı doğrulama",
+      "subtitle": "Doğrulama uygulamanızdaki kodu girin.",
+      "app": "Doğrulama kodu",
+      "appHint": "Uygulamadaki 6 haneli kod.",
+      "recovery": "Kurtarma kodu",
+      "recoveryHint": "Kurulumda kaydettiğiniz kodlardan biri; her kod bir kez kullanılır.",
+      "submit": "Doğrula ve gir",
+      "back": "Başka hesapla gir",
+      "useRecovery": "Kurtarma kodu kullan",
+      "useApp": "Uygulamadaki kodu kullan",
+      "wrong": "Kod doğru değil ya da kullanıldı; uygulamadaki güncel kodu girin.",
+      "expired": "Giriş adımının süresi doldu. Başka hesapla gir'e basıp yeniden girin."
+    },
+    "intro": {
+      "promise": "Bütün mağazaları ve müşterileri tek yerden yönetin.",
+      "shops": {
+        "title": "Mağazalar",
+        "text": "Yeni mağazayı bilgilerini girerek açın, mevcutları süre ve durumlarıyla izleyin."
+      },
+      "access": {
+        "title": "Personel ve roller",
+        "text": "Sahip, operasyon, finans ve izleyici rolleri; her hassas işlem yeniden doğrulamayla."
+      },
+      "audit": {
+        "title": "Denetim kaydı",
+        "text": "Her değişiklik, reddedilenler dahil, kimin yaptığıyla kayıtlı."
+      },
+      "security": {
+        "title": "Zorunlu iki adımlı doğrulama",
+        "text": "Kapatma anahtarı yok; her girişte uygulamadaki kod istenir."
+      },
+      "footer": "Yalnızca Quant Ticaret platform personeli içindir."
+    }
+  },
+  "enrol": {
+    "app": {
+      "title": "İki adımlı doğrulamayı kurun",
+      "text": "Üst panelde iki adımlı doğrulama zorunludur. Google Authenticator, Microsoft Authenticator ya da 1Password gibi bir uygulamayla aşağıdaki kodu okutun."
+    },
+    "codes": {
+      "title": "Kurtarma kodlarınızı saklayın",
+      "text": "Telefonunuz yanınızda olmadığında bu kodlardan biriyle girebilirsiniz. Kodlar bir daha gösterilmeyecek."
+    },
+    "done": {
+      "title": "Kurulum tamam",
+      "text": "Güvenlik için çıkış yapıp şifreniz ve uygulamadaki kodla yeniden girin."
+    },
+    "qr": "Doğrulama uygulaması için QR kodu",
+    "manual": "Kodu okutamıyorsanız bu anahtarı uygulamaya elle girin:",
+    "key": "Kurulum anahtarı",
+    "copyKey": "Anahtarı kopyala",
+    "code": "Uygulamadaki 6 haneli kod",
+    "password": "Şifreniz",
+    "passwordHint": "Kurulumu yalnızca hesabın sahibi yapabilsin diye şifreniz de sorulur.",
+    "confirm": "Doğrula",
+    "kept": "Kodları güvenli bir yere kaydettim",
+    "next": "Devam",
+    "signInAgain": "Yeniden giriş yap",
+    "later": "Şimdi değil, çıkış yap",
+    "signOut": "Çıkış yap",
+    "linkRequired": {
+      "title": "Kurulum bağlantısı gerekli",
+      "text": "İki adımlı doğrulamanız sıfırlandı. Kurulumu e-postanıza gelen bağlantıdan açın; bağlantı yoksa platform sahibinden yenisini isteyin."
+    },
+    "invalid": {
+      "title": "Bağlantı geçersiz",
+      "text": "Bu kurulum bağlantısı eksik ya da bozuk. E-postadaki bağlantıyı yeniden açın ya da platform sahibinden yenisini isteyin."
+    }
+  },
+  "codes": {
+    "label": "Kurtarma kodları",
+    "copy": "Kopyala",
+    "download": "İndir",
+    "file": "ust-panel-kurtarma-kodlari.txt",
+    "hint": "Her kod bir kez kullanılır. Yeni kod ürettiğinizde eskileri geçersiz olur."
+  },
+  "invite": {
+    "title": "Daveti kabul edin",
+    "subtitle": "{{email}} adresine {{role}} rolüyle davet edildiniz. Adınızı ve şifrenizi belirleyin; ardından iki adımlı doğrulamayı kuracaksınız.",
+    "firstName": "Ad",
+    "lastName": "Soyad",
+    "password": "Şifre",
+    "passwordHint": "En az {{count}} karakter. Başka bir yerde kullandığınız bir şifre seçmeyin.",
+    "repeat": "Şifre (tekrar)",
+    "submit": "Hesabı oluştur",
+    "passwordShort": "Şifre en az {{count}} karakter olmalı.",
+    "passwordMismatch": "Şifreler aynı değil.",
+    "invalid": {
+      "title": "Davet geçersiz",
+      "text": "Bu davet bağlantısı eksik ya da bozuk. E-postadaki bağlantıyı yeniden açın ya da platform sahibinden yeni davet isteyin."
+    }
+  },
+  "roles": {
+    "owner": "Sahip",
+    "operator": "Operasyon",
+    "finance": "Finans",
+    "readonly": "İzleyici"
+  },
+  "roleText": {
+    "owner": "Her şey: personel, mağaza kapatma, anahtarlar ve denetim kaydı.",
+    "operator": "Mağaza açma ve kurulum, notlar, paket atama ve istisnalar.",
+    "finance": "Ödemeler, hatırlatmalar ve paket fiyatları.",
+    "readonly": "Yalnızca görüntüler."
+  },
+  "nav": {
+    "label": "Ana menü",
+    "dashboard": "Gösterge",
+    "shops": "Mağazalar",
+    "packages": "Paketler",
+    "payments": "Ödemeler",
+    "releases": "Sürümler",
+    "staff": "Personel",
+    "audit": "Denetim kaydı",
+    "account": "Hesabım",
+    "accountMenu": "Hesap menüsü",
+    "signOut": "Çıkış yap",
+    "soon": "Yakında",
+    "groups": {
+      "platform": "Platform",
+      "admin": "Yönetim"
+    }
+  },
+  "common": {
+    "menu": "Menü",
+    "cancel": "Vazgeç",
+    "retry": "Tekrar dene",
+    "loading": "Yükleniyor",
+    "done": "Tamam",
+    "actions": "İşlemler",
+    "copyFailed": "Kopyalanamadı; metni seçip elle kopyalayın."
+  },
+  "stepUp": {
+    "title": "Kimliğinizi doğrulayın",
+    "text": "Bu işlem için doğrulama uygulamanızdaki kodu girin. Doğrulama beş dakika geçerlidir.",
+    "failed": "Kod doğru değil ya da kullanıldı; yeniden deneyin.",
+    "confirm": "Doğrula",
+    "cancelled": "İşlem yapılmadı."
+  },
+  "dashboard": {
+    "title": "Gösterge",
+    "text": "Platformun durumu bir bakışta.",
+    "summary": "Platform özeti",
+    "empty": "Mağazalar açıldıkça etkin mağaza, aylık gelir, geciken ödemeler ve sağlık durumu burada görünecek."
+  },
+  "account": {
+    "title": "Hesabım",
+    "text": "Adınız, iki adımlı doğrulamanız ve açık oturumlarınız.",
+    "profile": {
+      "title": "Profil",
+      "text": "Adınız denetim kaydında ve personel listesinde görünür.",
+      "first_name": "Ad",
+      "last_name": "Soyad",
+      "email": "E-posta",
+      "role": "Rol",
+      "saved": "Profil kaydedildi."
+    },
+    "mfa": {
+      "title": "İki adımlı doğrulama",
+      "text": "Üst panelde her zaman açıktır; kapatılamaz.",
+      "status": "Durum",
+      "on": "Açık",
+      "off": "Kurulmadı",
+      "newCodes": "Yeni kurtarma kodları",
+      "newPhone": "Yeni telefona taşı",
+      "codesTitle": "Yeni kurtarma kodlarınız",
+      "codesText": "Eski kodlar artık geçmez. Bu kodlar bir daha gösterilmeyecek.",
+      "codesDone": "Kaydettim",
+      "newPhoneTitle": "Doğrulamayı yeni telefona taşı",
+      "newPhoneText": "Mevcut doğrulama kapanır ve diğer oturumlarınız sona erer. Hemen ardından yeni telefonunuzla yeniden kurarsınız; kurulum bitene kadar üst panelin başka bir yerine geçemezsiniz.",
+      "newPhoneConfirm": "Kapat ve yeniden kur"
+    },
+    "sessions": {
+      "title": "Oturumlar",
+      "text": "Üst panelde açık oturumlarınız. Tanımadığınız bir oturumu kapatın.",
+      "endOthers": "Diğerlerini kapat",
+      "othersEnded": "Diğer oturumlar kapatıldı.",
+      "until": "{{at}} tarihine kadar",
+      "current": "Bu oturum",
+      "end": "Kapat",
+      "ended": "Oturum kapatıldı."
+    }
+  },
+  "staff": {
+    "title": "Personel",
+    "text": "Üst paneli kullanan platform personeli ve rolleri.",
+    "members": "Üyeler",
+    "invites": "Açık davetler",
+    "invitesText": "Henüz kabul edilmemiş davetler. Geri çekilen davetin bağlantısı çalışmaz.",
+    "empty": "Henüz üye yok.",
+    "noInvites": "Açık davet yok.",
+    "you": "siz",
+    "withdraw": "Geri çek",
+    "withdrawn": "Davet geri çekildi.",
+    "inviteExpired": "Süresi doldu",
+    "mfaOn": "Açık",
+    "mfaOff": "Kurulmadı",
+    "columns": {
+      "name": "Ad",
+      "email": "E-posta",
+      "role": "Rol",
+      "status": "Durum",
+      "since": "Eklenme",
+      "expires": "Son geçerlilik",
+      "mfa": "İki adımlı doğrulama"
+    },
+    "status": {
+      "active": "Etkin",
+      "setup": "Doğrulama kurulmadı",
+      "inactive": "Pasif"
+    },
+    "invite": {
+      "open": "Personel davet et",
+      "title": "Personel davet et",
+      "text": "Davet e-postayla gider. Sahip rolü davetle verilmez; mevcut bir üyeye sonradan verilir.",
+      "email": "E-posta",
+      "role": "Rol",
+      "submit": "Davet gönder"
+    },
+    "member": {
+      "previous": "Önceki üye",
+      "next": "Sonraki üye",
+      "role": "Rol",
+      "yourself": "Kendi rolünüzü ve erişiminizi değiştiremezsiniz.",
+      "saveRole": "Rolü kaydet",
+      "roleSaved": "Rol değiştirildi.",
+      "reset": "Doğrulamayı sıfırla",
+      "deactivate": "Pasifleştir",
+      "reactivate": "Yeniden etkinleştir",
+      "deactivated": "Üye pasifleştirildi.",
+      "reactivated": "Üye yeniden etkinleştirildi."
+    },
+    "confirm": {
+      "deactivate": {
+        "title": "Üyeyi pasifleştir",
+        "text": "{{name}} artık üst panele giremez; açık oturumları hemen kapanır. Hesabı ve geçmişi silinmez.",
+        "action": "Pasifleştir"
+      },
+      "reactivate": {
+        "title": "Üyeyi yeniden etkinleştir",
+        "text": "{{name}} eski rolüyle geri döner ve şifresiyle, uygulamadaki kodla yeniden girer.",
+        "action": "Yeniden etkinleştir"
+      },
+      "reset": {
+        "title": "İki adımlı doğrulamayı sıfırla",
+        "text": "{{name}} için doğrulama kapanır ve bütün oturumları biter. Yeniden kurulum için tek kullanımlık bir bağlantı gönderilir; bağlantı 24 saat geçerlidir.",
+        "action": "Sıfırla"
+      }
+    },
+    "sent": {
+      "link": "Bağlantı",
+      "copy": "Bağlantıyı kopyala",
+      "invite": {
+        "title": "Davet hazır",
+        "mailed": "Davet e-postayla gönderildi.",
+        "byHand": "E-posta gönderilemedi. Bağlantıyı kişiye güvenli bir yoldan iletin; bu pencere kapanınca bir daha gösterilmez.",
+        "expiry": "Davet süreli ve tek kullanımlıktır; süresi dolarsa yenisini gönderin."
+      },
+      "enrol": {
+        "title": "Doğrulama sıfırlandı",
+        "mailed": "Yeniden kurulum bağlantısı e-postayla gönderildi.",
+        "byHand": "E-posta gönderilemedi. Bağlantıyı kişiye güvenli bir yoldan iletin; bu pencere kapanınca bir daha gösterilmez.",
+        "expiry": "Bağlantı 24 saat geçerlidir ve bir kez kullanılır."
+      }
+    }
+  },
+  "audit": {
+    "title": "Denetim kaydı",
+    "text": "Üst paneldeki her değişiklik, reddedilenler dahil, ve hassas okumalar. Kayıtlar değiştirilemez.",
+    "entries": "Kayıtlar",
+    "empty": "Henüz kayıt yok.",
+    "done": "Yapıldı ({{status}})",
+    "refused": "Reddedildi ({{status}})",
+    "request": "İstek kimliği",
+    "place": "Adres özeti",
+    "changes": "Değişiklik",
+    "previous": "Önceki kayıt",
+    "next": "Sonraki kayıt",
+    "columns": {
+      "at": "Zaman",
+      "action": "İşlem",
+      "actor": "Yapan",
+      "outcome": "Sonuç",
+      "kind": "Tür",
+      "resource": "Kaynak"
+    },
+    "kinds": {
+      "mutation": "Değişiklik",
+      "sensitive_read": "Hassas okuma",
+      "system": "Sistem"
+    }
+  },
+  "noAccess": {
+    "title": "Erişiminiz yok",
+    "text": "Hesabınız üst panelde etkin değil: pasifleştirilmiş ya da doğrulama kurulumunun süresi dolmuş olabilir. Platform sahibiyle görüşün."
+  },
+  "errors": {
+    "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
+    "pageTitle": "Sayfa açılamadı",
+    "unreachable": "Üst panelin sunucusuna ulaşılamadı. Bağlantınızı denetleyip tekrar deneyin.",
+    "status": {
+      "400": "Gönderilen bilgiler geçerli değil; alanları denetleyin.",
+      "401": "Oturumunuz kapandı. Yeniden giriş yapın.",
+      "403": "Bu işlem için yetkiniz yok.",
+      "404": "Aranan kayıt bulunamadı.",
+      "409": "Kayıt bu arada değişti; sayfayı yenileyip yeniden deneyin.",
+      "429": "Çok fazla deneme yapıldı. Birkaç dakika bekleyip yeniden deneyin."
+    },
+    "api": {
+      "csrf_rejected": "İstek bu sayfadan gelmedi ve reddedildi. Sayfayı yenileyip yeniden deneyin.",
+      "invalid_request": "İstek geçerli değil; sayfayı yenileyip yeniden deneyin.",
+      "not_found": "Aranan kayıt bulunamadı.",
+      "too_many_requests": "Çok fazla deneme yapıldı. Birkaç dakika bekleyip yeniden deneyin."
+    },
+    "cp": {
+      "audit_kind_invalid": "Kayıt türü geçerli değil.",
+      "challenge_unknown": "Giriş adımının süresi doldu; yeniden giriş yapın.",
+      "deactivate_self": "Kendinizi pasifleştiremezsiniz.",
+      "email_invalid": "E-posta adresi geçerli değil.",
+      "enrolment_token_invalid": "Kurulum bağlantısı geçersiz ya da süresi dolmuş. Platform sahibinden yenisini isteyin.",
+      "forbidden": "Bu işlem rolünüzle yapılamaz.",
+      "invite_failed": "Davet oluşturulamadı. Biraz sonra tekrar deneyin.",
+      "invite_invalid": "Davet geçersiz ya da süresi dolmuş. Platform sahibinden yeni davet isteyin.",
+      "invite_login": "Davet bu hesapla kabul edilemez. Bağlantıyı yeniden açın.",
+      "invite_member": "Bu adresin zaten bir hesabı var.",
+      "invite_pending": "Bu adrese gönderilmiş açık bir davet var; önce onu geri çekin.",
+      "last_owner": "Son etkin sahip rolünü ya da erişimini kaybedemez. Önce başka bir üyeye sahip rolü verin.",
+      "member_unknown": "Üye bulunamadı.",
+      "mfa_already_enabled": "İki adımlı doğrulama zaten açık.",
+      "mfa_code_invalid": "Kod doğru değil; uygulamadaki güncel kodu girin.",
+      "mfa_code_used": "Bu kod az önce kullanıldı; uygulamadaki bir sonraki kodu bekleyip girin.",
+      "mfa_not_started": "Kurulum başlamamış; sayfayı yenileyip yeniden deneyin.",
+      "mfa_required": "Önce iki adımlı doğrulamayı kurun.",
+      "mfa_start_failed": "Kurulum başlatılamadı. Yeniden deneyin.",
+      "name_invalid": "Ad geçersiz karakter içeriyor.",
+      "name_required": "Ad ve soyad gerekli.",
+      "no_role": "Hesabınız üst panelde etkin değil.",
+      "not_staff": "Bu hesap platform personeli değil.",
+      "owner_exists": "Platformun etkin bir sahibi var; bu davet artık geçmez.",
+      "password_invalid": "Şifre doğru değil.",
+      "register_closed": "Hesap yalnızca geçerli bir davetle, davet edilen adresle açılır.",
+      "reset_self": "Kendi doğrulamanızı Hesabım sayfasından yenileyin.",
+      "session_required": "Oturumunuz kapandı. Yeniden giriş yapın.",
+      "session_revoked": "Oturumunuz kapatıldı. Yeniden giriş yapın.",
+      "session_unknown": "Oturum bulunamadı; zaten kapanmış olabilir.",
+      "sign_in_locked": "Çok fazla yanlış kod girildi. Bir süre bekleyip yeniden deneyin.",
+      "step_up_failed": "Kod doğru değil ya da kullanıldı.",
+      "step_up_invalid": "Doğrulamanın süresi doldu; yeniden doğrulayın.",
+      "step_up_locked": "Çok fazla yanlış kod girildi. Bir süre bekleyip yeniden deneyin.",
+      "step_up_required": "Bu işlem için kimliğinizi yeniden doğrulayın."
+    }
+  }
+}

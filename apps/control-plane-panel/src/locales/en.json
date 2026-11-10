@@ -1,0 +1,377 @@
+{
+  "app": {
+    "name": "Control plane",
+    "product": "Quant Ticaret",
+    "skipToContent": "Skip to content"
+  },
+  "platformBar": {
+    "label": "Control plane: platform administration",
+    "title": "Control plane",
+    "text": "Quant Ticaret platform administration. Not a shop's panel."
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "required": "This field is required.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "signIn": {
+      "title": "Sign in to the control plane",
+      "subtitle": "Sign in with your platform staff account.",
+      "submit": "Sign in",
+      "failed": "Wrong email or password.",
+      "noAccount": "No account? Ask the platform owner for an invitation."
+    },
+    "code": {
+      "title": "Two-step verification",
+      "subtitle": "Enter the code from your authenticator app.",
+      "app": "Verification code",
+      "appHint": "The 6-digit code in the app.",
+      "recovery": "Recovery code",
+      "recoveryHint": "One of the codes you saved at setup; each works once.",
+      "submit": "Verify and sign in",
+      "back": "Sign in with another account",
+      "useRecovery": "Use a recovery code",
+      "useApp": "Use the app's code",
+      "wrong": "The code is wrong or already used; enter the app's current code.",
+      "expired": "This sign-in step ran out. Choose another account and sign in again."
+    },
+    "intro": {
+      "promise": "Run every shop and every customer from one place.",
+      "shops": {
+        "title": "Shops",
+        "text": "Open a new shop by entering its details; follow the others with their term and state."
+      },
+      "access": {
+        "title": "Staff and roles",
+        "text": "Owner, operations, finance and viewer roles; every sensitive change verified again."
+      },
+      "audit": {
+        "title": "Audit log",
+        "text": "Every change, refusals included, recorded with who made it."
+      },
+      "security": {
+        "title": "Two-step verification, always",
+        "text": "No switch to turn it off; every sign-in asks the app's code."
+      },
+      "footer": "For Quant Ticaret platform staff only."
+    }
+  },
+  "enrol": {
+    "app": {
+      "title": "Set up two-step verification",
+      "text": "Two-step verification is required in the control plane. Scan the code below with an app such as Google Authenticator, Microsoft Authenticator or 1Password."
+    },
+    "codes": {
+      "title": "Keep your recovery codes",
+      "text": "Without your phone you can sign in with one of these codes. They will not be shown again."
+    },
+    "done": {
+      "title": "Setup complete",
+      "text": "For your security, sign out and sign in again with your password and the app's code."
+    },
+    "qr": "QR code for the authenticator app",
+    "manual": "Cannot scan it? Enter this key in the app:",
+    "key": "Setup key",
+    "copyKey": "Copy the key",
+    "code": "The 6-digit code in the app",
+    "password": "Your password",
+    "passwordHint": "Your password is asked too, so only the account's owner can set this up.",
+    "confirm": "Verify",
+    "kept": "I have saved the codes somewhere safe",
+    "next": "Continue",
+    "signInAgain": "Sign in again",
+    "later": "Not now, sign out",
+    "signOut": "Sign out",
+    "linkRequired": {
+      "title": "Setup link required",
+      "text": "Your two-step verification was reset. Open the setup from the link in your email; without one, ask the platform owner for a new link."
+    },
+    "invalid": {
+      "title": "Invalid link",
+      "text": "This setup link is incomplete or damaged. Open the link in the email again or ask the platform owner for a new one."
+    }
+  },
+  "codes": {
+    "label": "Recovery codes",
+    "copy": "Copy",
+    "download": "Download",
+    "file": "control-plane-recovery-codes.txt",
+    "hint": "Each code works once. New codes make the old ones invalid."
+  },
+  "invite": {
+    "title": "Accept the invitation",
+    "subtitle": "{{email}} is invited with the {{role}} role. Choose your name and password; two-step verification comes next.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "password": "Password",
+    "passwordHint": "At least {{count}} characters. Do not reuse a password from elsewhere.",
+    "repeat": "Password (again)",
+    "submit": "Create the account",
+    "passwordShort": "The password needs at least {{count}} characters.",
+    "passwordMismatch": "The passwords do not match.",
+    "invalid": {
+      "title": "Invalid invitation",
+      "text": "This invitation link is incomplete or damaged. Open the link in the email again or ask the platform owner for a new invitation."
+    }
+  },
+  "roles": {
+    "owner": "Owner",
+    "operator": "Operations",
+    "finance": "Finance",
+    "readonly": "Viewer"
+  },
+  "roleText": {
+    "owner": "Everything: staff, closing shops, keys and the audit log.",
+    "operator": "Opening and setting up shops, notes, packages and overrides.",
+    "finance": "Payments, reminders and package prices.",
+    "readonly": "Views only."
+  },
+  "nav": {
+    "label": "Main menu",
+    "dashboard": "Dashboard",
+    "shops": "Shops",
+    "packages": "Packages",
+    "payments": "Payments",
+    "releases": "Releases",
+    "staff": "Staff",
+    "audit": "Audit log",
+    "account": "My account",
+    "accountMenu": "Account menu",
+    "signOut": "Sign out",
+    "soon": "Soon",
+    "groups": {
+      "platform": "Platform",
+      "admin": "Administration"
+    }
+  },
+  "common": {
+    "menu": "Menu",
+    "cancel": "Cancel",
+    "retry": "Try again",
+    "loading": "Loading",
+    "done": "Done",
+    "actions": "Actions",
+    "copyFailed": "Could not copy; select the text and copy it by hand."
+  },
+  "stepUp": {
+    "title": "Verify it is you",
+    "text": "Enter the code from your authenticator app for this change. The verification holds for five minutes.",
+    "failed": "The code is wrong or already used; try again.",
+    "confirm": "Verify",
+    "cancelled": "Nothing was changed."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "text": "The platform at a glance.",
+    "summary": "Platform summary",
+    "empty": "As shops open, active shops, monthly revenue, late payments and health will show here."
+  },
+  "account": {
+    "title": "My account",
+    "text": "Your name, two-step verification and open sessions.",
+    "profile": {
+      "title": "Profile",
+      "text": "Your name shows in the audit log and the staff list.",
+      "first_name": "First name",
+      "last_name": "Last name",
+      "email": "Email",
+      "role": "Role",
+      "saved": "Profile saved."
+    },
+    "mfa": {
+      "title": "Two-step verification",
+      "text": "Always on in the control plane; it cannot be turned off.",
+      "status": "State",
+      "on": "On",
+      "off": "Not set up",
+      "newCodes": "New recovery codes",
+      "newPhone": "Move to a new phone",
+      "codesTitle": "Your new recovery codes",
+      "codesText": "The old codes no longer work. These will not be shown again.",
+      "codesDone": "Saved",
+      "newPhoneTitle": "Move verification to a new phone",
+      "newPhoneText": "The current verification is turned off and your other sessions end. You set it up again on the new phone right after; until then nothing else in the control plane opens.",
+      "newPhoneConfirm": "Turn off and set up again"
+    },
+    "sessions": {
+      "title": "Sessions",
+      "text": "Your open sessions in the control plane. End one you do not recognise.",
+      "endOthers": "End the others",
+      "othersEnded": "The other sessions ended.",
+      "until": "Until {{at}}",
+      "current": "This session",
+      "end": "End",
+      "ended": "Session ended."
+    }
+  },
+  "staff": {
+    "title": "Staff",
+    "text": "The platform staff who use the control plane, and their roles.",
+    "members": "Members",
+    "invites": "Open invitations",
+    "invitesText": "Invitations not yet accepted. A withdrawn invitation's link stops working.",
+    "empty": "No members yet.",
+    "noInvites": "No open invitations.",
+    "you": "you",
+    "withdraw": "Withdraw",
+    "withdrawn": "Invitation withdrawn.",
+    "inviteExpired": "Expired",
+    "mfaOn": "On",
+    "mfaOff": "Not set up",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "State",
+      "since": "Added",
+      "expires": "Valid until",
+      "mfa": "Two-step verification"
+    },
+    "status": {
+      "active": "Active",
+      "setup": "Verification not set up",
+      "inactive": "Inactive"
+    },
+    "invite": {
+      "open": "Invite staff",
+      "title": "Invite staff",
+      "text": "The invitation goes by email. The owner role is never given by invitation; give it to an existing member later.",
+      "email": "Email",
+      "role": "Role",
+      "submit": "Send invitation"
+    },
+    "member": {
+      "previous": "Previous member",
+      "next": "Next member",
+      "role": "Role",
+      "yourself": "You cannot change your own role or access.",
+      "saveRole": "Save role",
+      "roleSaved": "Role changed.",
+      "reset": "Reset verification",
+      "deactivate": "Deactivate",
+      "reactivate": "Reactivate",
+      "deactivated": "Member deactivated.",
+      "reactivated": "Member reactivated."
+    },
+    "confirm": {
+      "deactivate": {
+        "title": "Deactivate the member",
+        "text": "{{name}} can no longer sign in; their open sessions end at once. Their account and history stay.",
+        "action": "Deactivate"
+      },
+      "reactivate": {
+        "title": "Reactivate the member",
+        "text": "{{name}} comes back with their old role and signs in again with their password and the app's code.",
+        "action": "Reactivate"
+      },
+      "reset": {
+        "title": "Reset two-step verification",
+        "text": "Verification is turned off for {{name}} and every session of theirs ends. A single-use link to set it up again is sent; it holds for 24 hours.",
+        "action": "Reset"
+      }
+    },
+    "sent": {
+      "link": "Link",
+      "copy": "Copy the link",
+      "invite": {
+        "title": "Invitation ready",
+        "mailed": "The invitation was sent by email.",
+        "byHand": "No email could be sent. Pass the link on through a safe channel; it is not shown again once this closes.",
+        "expiry": "The invitation expires and works once; send a new one if it runs out."
+      },
+      "enrol": {
+        "title": "Verification reset",
+        "mailed": "The setup link was sent by email.",
+        "byHand": "No email could be sent. Pass the link on through a safe channel; it is not shown again once this closes.",
+        "expiry": "The link holds for 24 hours and works once."
+      }
+    }
+  },
+  "audit": {
+    "title": "Audit log",
+    "text": "Every change in the control plane, refusals included, and sensitive reads. Entries cannot be changed.",
+    "entries": "Entries",
+    "empty": "No entries yet.",
+    "done": "Done ({{status}})",
+    "refused": "Refused ({{status}})",
+    "request": "Request ID",
+    "place": "Address hash",
+    "changes": "Change",
+    "previous": "Previous entry",
+    "next": "Next entry",
+    "columns": {
+      "at": "Time",
+      "action": "Action",
+      "actor": "By",
+      "outcome": "Outcome",
+      "kind": "Kind",
+      "resource": "Resource"
+    },
+    "kinds": {
+      "mutation": "Change",
+      "sensitive_read": "Sensitive read",
+      "system": "System"
+    }
+  },
+  "noAccess": {
+    "title": "No access",
+    "text": "Your account is not active in the control plane: it may be deactivated, or its verification setup window ran out. Talk to the platform owner."
+  },
+  "errors": {
+    "generic": "That did not work. Try again in a moment.",
+    "pageTitle": "The page could not open",
+    "unreachable": "The control plane's server could not be reached. Check your connection and try again.",
+    "status": {
+      "400": "What was sent is not valid; check the fields.",
+      "401": "Your session ended. Sign in again.",
+      "403": "You are not allowed to do this.",
+      "404": "The record was not found.",
+      "409": "The record changed meanwhile; reload and try again.",
+      "429": "Too many tries. Wait a few minutes and try again."
+    },
+    "api": {
+      "csrf_rejected": "The request did not come from this page and was refused. Reload and try again.",
+      "invalid_request": "The request is not valid; reload and try again.",
+      "not_found": "The record was not found.",
+      "too_many_requests": "Too many tries. Wait a few minutes and try again."
+    },
+    "cp": {
+      "audit_kind_invalid": "The entry kind is not valid.",
+      "challenge_unknown": "The sign-in step ran out; sign in again.",
+      "deactivate_self": "You cannot deactivate yourself.",
+      "email_invalid": "The email address is not valid.",
+      "enrolment_token_invalid": "The setup link is invalid or expired. Ask the platform owner for a new one.",
+      "forbidden": "Your role cannot do this.",
+      "invite_failed": "The invitation could not be made. Try again in a moment.",
+      "invite_invalid": "The invitation is invalid or expired. Ask the platform owner for a new one.",
+      "invite_login": "The invitation cannot be accepted with this account. Open the link again.",
+      "invite_member": "This address already has an account.",
+      "invite_pending": "This address has an open invitation; withdraw it first.",
+      "last_owner": "The last active owner cannot lose the role or access. Make another member an owner first.",
+      "member_unknown": "The member was not found.",
+      "mfa_already_enabled": "Two-step verification is already on.",
+      "mfa_code_invalid": "The code is wrong; enter the app's current code.",
+      "mfa_code_used": "That code was just used; wait for the app's next code.",
+      "mfa_not_started": "The setup has not started; reload and try again.",
+      "mfa_required": "Set up two-step verification first.",
+      "mfa_start_failed": "The setup could not start. Try again.",
+      "name_invalid": "The name holds characters that are not allowed.",
+      "name_required": "First and last name are required.",
+      "no_role": "Your account is not active in the control plane.",
+      "not_staff": "This account is not platform staff.",
+      "owner_exists": "The platform has an active owner; this invitation no longer works.",
+      "password_invalid": "The password is wrong.",
+      "register_closed": "An account is made only with a valid invitation, for the invited address.",
+      "reset_self": "Renew your own verification from My account.",
+      "session_required": "Your session ended. Sign in again.",
+      "session_revoked": "Your session was ended. Sign in again.",
+      "session_unknown": "The session was not found; it may have ended already.",
+      "sign_in_locked": "Too many wrong codes. Wait a while and try again.",
+      "step_up_failed": "The code is wrong or already used.",
+      "step_up_invalid": "The verification ran out; verify again.",
+      "step_up_locked": "Too many wrong codes. Wait a while and try again.",
+      "step_up_required": "Verify it is you for this change."
+    }
+  }
+}

@@ -1,0 +1,88 @@
+import { describe, expect, it } from "vitest"
+import en from "../locales/en.json" with { type: "json" }
+import tr from "../locales/tr.json" with { type: "json" }
+import { ApiError } from "./api"
+import { API_ERROR_CODES, CP_ERROR_CODES, errorKey, errorText } from "./errors"
+import { i18next } from "./i18n"
+import { StepUpCancelled } from "./step-up"
+
+const t = i18next.getFixedT("tr")
+
+function keysOf(value: unknown, prefix = ""): string[] {
+  if (typeof value !== "object" || value === null) {
+    return [prefix]
+  }
+  return Object.entries(value).flatMap(([key, inner]) =>
+    keysOf(inner, prefix ? `${prefix}.${key}` : key)
+  )
+}
+
+function valuesOf(value: unknown): string[] {
+  if (typeof value === "string") {
+    return [value]
+  }
+  return typeof value === "object" && value !== null ? Object.values(value).flatMap(valuesOf) : []
+}
+
+describe("the control plane's refusals in words", () => {
+  it("puts a cp.* key into Turkish", () => {
+    expect(errorText(t, new ApiError(403, "cp.last_owner", "not_allowed"))).toBe(
+      "Son etkin sahip rolünü ya da erişimini kaybedemez. Önce başka bir üyeye sahip rolü verin."
+    )
+  })
+
+  it("finds the key inside a validation sentence (Medusa joins a body's failures into one)", () => {
+    const error = new ApiError(
+      400,
+      "Invalid request: Value for field 'first_name': cp.name_required",
+      "invalid_data"
+    )
+    expect(errorKey(error)).toBe("errors.cp.name_required")
+  })
+
+  it("knows the control plane's generic keys", () => {
+    expect(errorKey(new ApiError(403, "errors.csrf_rejected", "not_allowed"))).toBe(
+      "errors.api.csrf_rejected"
+    )
+  })
+
+  it("falls back on the status for Medusa's own English sentences, never showing them", () => {
+    const text = errorText(t, new ApiError(401, "Invalid email or password", "unauthorized"))
+    expect(text).toBe("Oturumunuz kapandı. Yeniden giriş yapın.")
+  })
+
+  it("keeps a server error and a network failure to the generic line", () => {
+    expect(errorText(t, new ApiError(500, "boom", null))).toBe(
+      "İşlem tamamlanamadı. Biraz sonra tekrar deneyin."
+    )
+    expect(errorText(t, new TypeError("Failed to fetch"))).toBe(
+      "İşlem tamamlanamadı. Biraz sonra tekrar deneyin."
+    )
+  })
+
+  it("says nothing went wrong when the step-up dialog was closed", () => {
+    expect(errorText(t, new StepUpCancelled())).toBe("İşlem yapılmadı.")
+  })
+
+  it("has words for every known key in both languages", () => {
+    const trKeys = new Set(keysOf(tr))
+    const enKeys = new Set(keysOf(en))
+    for (const code of CP_ERROR_CODES) {
+      expect(trKeys).toContain(`errors.cp.${code}`)
+      expect(enKeys).toContain(`errors.cp.${code}`)
+    }
+    for (const code of API_ERROR_CODES) {
+      expect(trKeys).toContain(`errors.api.${code}`)
+    }
+  })
+})
+
+describe("the locale files", () => {
+  it("hold the same keys in Turkish and English", () => {
+    expect(keysOf(en).sort()).toEqual(keysOf(tr).sort())
+  })
+
+  it("say nothing with an exclamation mark in Turkish (docs/18 §2)", () => {
+    expect(valuesOf(tr).filter((text) => text.includes("!"))).toEqual([])
+  })
+})

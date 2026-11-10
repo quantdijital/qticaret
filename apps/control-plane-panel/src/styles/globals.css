@@ -1,0 +1,28 @@
+@import "tailwindcss";
+/* Tokens, theme, base and focus rules: shared with the shop panel (adr/0061 Ek C5) */
+@import "@qticaret/admin-ui/styles.css";
+
+/*
+ * The control plane's own layout token: the permanent "Üst panel" bar
+ * (components/layout/platform-bar.tsx) above every page; the top bar and
+ * the menu are placed under it.
+ */
+:root {
+  --cp-bar-height: 2rem;
+}
+
+/*
+ * The sign-in pages' introduction (the shop panel's, docs/18 §3): hairlines
+ * in the menu's border colour fading out from the top right. Still, the
+ * menu's tokens, so both modes draw it.
+ */
+@layer components {
+  .qt-auth-lines {
+    background-image:
+      linear-gradient(to right, var(--sidebar-border) 1px, transparent 1px),
+      linear-gradient(to bottom, var(--sidebar-border) 1px, transparent 1px);
+    background-size: 3rem 3rem;
+    background-position: -1px -1px;
+    mask-image: radial-gradient(ellipse 75% 65% at 100% 0%, black 15%, transparent 75%);
+  }
+}
