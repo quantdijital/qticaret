@@ -1,5 +1,5 @@
 import { MedusaService } from "@medusajs/framework/utils"
-import { decryptPii, encryptPii, hashPii, parseKey } from "../../lib/crypto/pii"
+import { decryptPii, encryptPii, hashPii, parseKey } from "@qticaret/server-kit"
 import { ValidationError } from "../../lib/errors"
 import { normalizeRecipient } from "../../lib/messaging/recipients"
 import { CONTACT_STATUSES, CONTACT_SUBJECTS, ContactMessage } from "./models/contact-message"

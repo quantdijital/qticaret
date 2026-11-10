@@ -1,5 +1,5 @@
-import type { TaxIdKind } from "../../lib/tr/tax-id"
-import { maskTaxId } from "../../lib/tr/tax-id"
+import type { TaxIdKind } from "@qticaret/server-kit"
+import { maskTaxId } from "@qticaret/server-kit"
 
 export const BILLING_PROFILE_TYPES = ["individual", "corporate"] as const
 export type BillingProfileType = (typeof BILLING_PROFILE_TYPES)[number]

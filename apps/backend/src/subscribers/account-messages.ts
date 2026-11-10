@@ -1,7 +1,7 @@
 import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
-import { hashPii, parseKey } from "../lib/crypto/pii"
+import { hashPii, parseKey } from "@qticaret/server-kit"
 import { parseEnv } from "../lib/env"
 import { logger } from "../lib/logging"
 import { sendMessageWorkflow } from "../workflows/messaging/send-message"

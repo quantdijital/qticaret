@@ -1,6 +1,6 @@
+import { REDACTED } from "@qticaret/server-kit"
 import { runWithRequestContext } from "../context"
 import { createStructuredLogger } from "../logger"
-import { REDACTED } from "../redact"
 import { captureLogger } from "./capture"
 
 describe("createPinoLogger", () => {

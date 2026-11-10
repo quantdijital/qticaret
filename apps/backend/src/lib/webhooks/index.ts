@@ -1,5 +1,5 @@
 export { EVENT_SCOPES, WEBHOOK_EVENTS } from "./events"
 export type { WebhookEvent } from "./events"
-export { newWebhookSecret, signBody, signatureHeader } from "./signature"
+export { newWebhookSecret, signBody, signatureHeader } from "@qticaret/server-kit"
 export { webhookTransport } from "./transport"
 export { shownFailure, webhookUrlProblem } from "./url"

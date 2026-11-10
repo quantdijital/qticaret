@@ -1,5 +1,5 @@
 import { z } from "@medusajs/framework/zod"
-import { isValidTckn, isValidVkn } from "../../../lib/tr/tax-id"
+import { isValidTckn, isValidVkn } from "@qticaret/server-kit"
 import { defineSection, isCleanText } from "./define"
 
 /**

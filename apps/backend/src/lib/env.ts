@@ -1,4 +1,15 @@
 import { z } from "@medusajs/framework/zod"
+import {
+  EnvValidationError,
+  isBareOrigin,
+  isLocalEnv,
+  isLoopbackUrl,
+  key256,
+  nodeEnv,
+  originList,
+  parseEnvWith,
+  secret,
+} from "@qticaret/server-kit"
 import { parseDsn } from "./error-tracking/dsn"
 import { LOG_LEVELS } from "./logging/levels"
 
@@ -6,47 +17,15 @@ import { LOG_LEVELS } from "./logging/levels"
  * Environment schema validated once at startup (docs/04): a missing or
  * malformed variable stops the process with a message naming every problem.
  * Error messages carry variable names only, never values, so secrets cannot
- * leak into logs.
+ * leak into logs. The shared building blocks live in `@qticaret/server-kit`.
  */
 
-const SECRET_MIN_LENGTH = 32
-
-const isHttpOrigin = (value: string): boolean =>
-  z.url({ protocol: /^https?$/ }).safeParse(value).success
-
-// Nothing but the origin: no path, query, fragment or credentials
-const isBareOrigin = (value: string): boolean => {
-  if (!URL.canParse(value)) {
-    return false
-  }
-  const url = new URL(value)
-  return (
-    url.username === "" &&
-    url.password === "" &&
-    url.pathname === "/" &&
-    url.search === "" &&
-    url.hash === ""
-  )
-}
-
-const originList = z
-  .string()
-  .refine(
-    (value) => value.split(",").every((origin) => isHttpOrigin(origin.trim())),
-    "must be a comma-separated list of http(s) origins"
-  )
-
-const secret = z
-  .string()
-  .min(SECRET_MIN_LENGTH, `must be at least ${String(SECRET_MIN_LENGTH)} characters`)
-
-// 32 random bytes as hex, the form `openssl rand -hex 32` produces (adr/0009)
-const key256 = z.string().regex(/^[0-9a-fA-F]{64}$/, "must be 64 hex characters (32 bytes)")
+export { EnvValidationError, isLocalEnv, isLoopbackUrl }
 
 const envSchema = z.object({
   // No default: an unset NODE_ENV must not quietly mean "development" and
   // relax security settings (see isLocalEnv)
-  NODE_ENV: z.enum(["development", "test", "staging", "production"]).optional(),
+  NODE_ENV: nodeEnv,
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/, error: "must be a postgres:// URL" }),
   REDIS_URL: z.url({ protocol: /^rediss?$/, error: "must be a redis:// URL" }).optional(),
   STORE_CORS: originList,
@@ -207,9 +186,6 @@ const S3_REQUIRED = [
   "S3_ACCESS_KEY_ID",
   "S3_SECRET_ACCESS_KEY",
 ] as const
-
-const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"])
-export const isLoopbackUrl = (value: string): boolean => LOOPBACK_HOSTS.has(new URL(value).hostname)
 
 const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
   // Sessions must survive restarts and be shared across instances (adr/0004)
@@ -380,44 +356,16 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
   }
 })
 
-/**
- * Only an explicit development or test environment counts as local; an unset
- * NODE_ENV gets production-grade settings such as Secure cookies.
- */
 /** Whether search engines may index this instance (docs/13 §6: staging and previews stay out). */
 export function isSearchIndexingOn(env: Pick<Env, "NODE_ENV" | "SEO_INDEXING">): boolean {
   return env.SEO_INDEXING ? env.SEO_INDEXING === "on" : env.NODE_ENV !== "staging"
 }
 
-export function isLocalEnv(env: Pick<Env, "NODE_ENV">): boolean {
-  return env.NODE_ENV === "development" || env.NODE_ENV === "test"
-}
-
 export type Env = z.infer<typeof envSchema>
-
-export class EnvValidationError extends Error {
-  override readonly name = "EnvValidationError"
-}
 
 export function parseEnv(source: Record<string, string | undefined> = process.env): Env {
   // Blank values count as missing; only schema keys are read.
-  const input: Record<string, string | undefined> = {}
-  for (const key of Object.keys(envSchema.shape)) {
-    const value = source[key]?.trim()
-    input[key] = value === "" ? undefined : value
-  }
-
-  const result = deployedEnvSchema.safeParse(input)
-  if (result.success) {
-    return result.data
-  }
-
-  const problems = result.error.issues.map((issue) => {
-    const key = issue.path.join(".")
-    const missing = input[key] === undefined && issue.code !== "custom"
-    return `  - ${key}: ${missing ? "is missing" : issue.message}`
-  })
-  throw new EnvValidationError(`Invalid environment configuration:\n${problems.join("\n")}`)
+  return parseEnvWith(Object.keys(envSchema.shape), deployedEnvSchema, source)
 }
 
 export interface S3Settings {

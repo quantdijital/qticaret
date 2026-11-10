@@ -1,4 +1,4 @@
-import { parseKey } from "../../src/lib/crypto/pii"
+import { parseKey } from "@qticaret/server-kit"
 import { parseEnv } from "../../src/lib/env"
 import { BASE_BITS, issueChallenge, solveChallenge } from "../../src/lib/security/challenge"
 import type { ChallengeScope } from "../../src/lib/security/challenge"

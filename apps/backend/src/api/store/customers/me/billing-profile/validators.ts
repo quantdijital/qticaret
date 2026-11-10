@@ -1,5 +1,5 @@
 import { z } from "@medusajs/framework/zod"
-import { detectTaxIdKind } from "../../../../../lib/tr/tax-id"
+import { detectTaxIdKind } from "@qticaret/server-kit"
 
 const legalName = z.string().trim().min(2).max(200)
 // Spaces are common when typing long numbers; the rest must be digits.

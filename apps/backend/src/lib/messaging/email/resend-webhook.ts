@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto"
 import { z } from "@medusajs/framework/zod"
-import { safeEqual } from "../../security/timing-safe"
+import { safeEqual } from "@qticaret/server-kit"
 
 /**
  * Resend's delivery reports (adr/0036), signed the Svix way: HMAC-SHA256

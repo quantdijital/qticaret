@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { parseKey } from "../../lib/crypto/pii"
+import { parseKey } from "@qticaret/server-kit"
 import { parseEnv } from "../../lib/env"
 import { ValidationError } from "../../lib/errors"
 import { matchesOf } from "../../lib/fraud/block"

@@ -1,6 +1,6 @@
 import type Redis from "ioredis"
+import { canonicalJson } from "@qticaret/server-kit"
 import { createRedisVersionSource } from "../../lib/cache"
-import { canonicalJson } from "../../lib/crypto/secrets"
 import { logger } from "../../lib/logging"
 import { createRedisClient } from "../../lib/redis"
 import type {

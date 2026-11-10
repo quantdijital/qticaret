@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto"
 
 /**
  * A logged error as an error tracking event (adr/0045). Built from the log
- * line as written, after the logger's redaction (lib/logging/redact.ts), so
+ * line as written, after the logger's redaction (`@qticaret/server-kit`, logging/redact.ts), so
  * GlitchTip receives nothing a log line would not hold. Only what names the
  * failure is kept: the event, the error's kind, message and frames, and the
  * request's method, path and status; the rest of the line stays in the logs.

@@ -1,5 +1,5 @@
 import { createHmac } from "node:crypto"
-import { safeEqual } from "../security/timing-safe"
+import { safeEqual } from "@qticaret/server-kit"
 
 /**
  * A draft's preview link (F18, PROGRESS T10 "imzalı önizleme"): an HMAC

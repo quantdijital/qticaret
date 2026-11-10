@@ -1,6 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
-import { parseKey } from "../../../../../../lib/crypto/pii"
+import { parseKey } from "@qticaret/server-kit"
 import { parseEnv } from "../../../../../../lib/env"
 import { ValidationError } from "../../../../../../lib/errors"
 import { openEmailChange } from "../../../../../../lib/staff/account"

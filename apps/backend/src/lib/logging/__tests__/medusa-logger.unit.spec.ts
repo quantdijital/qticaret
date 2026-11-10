@@ -1,5 +1,5 @@
+import { REDACTED } from "@qticaret/server-kit"
 import { MedusaPinoLogger } from "../medusa-logger"
-import { REDACTED } from "../redact"
 import { captureLogger } from "./capture"
 
 const setup = (level: "http" | "info" | "silly" = "silly") => {

@@ -1,7 +1,27 @@
-import { ProviderError } from "../../errors"
 import { REDACTED, isSensitiveKey, redactDeep, redactText } from "../redact"
 
-// Passes the TCKN check digits (lib/tr/tax-id); not a real person's number
+// Shaped like the backend's ProviderError (lib/errors): enumerable fields
+// on top of the message, and the provider's answer in the cause chain
+class ProviderError extends Error {
+  override readonly name = "ProviderError"
+  readonly provider: string
+  readonly providerCode: string
+  readonly retryable: boolean
+
+  constructor(init: {
+    provider: string
+    providerCode: string
+    retryable: boolean
+    cause: unknown
+  }) {
+    super(`${init.provider} error ${init.providerCode}`, { cause: init.cause })
+    this.provider = init.provider
+    this.providerCode = init.providerCode
+    this.retryable = init.retryable
+  }
+}
+
+// Passes the TCKN check digits (tr/tax-id); not a real person's number
 const VALID_TCKN = "10000000146"
 
 describe("isSensitiveKey", () => {

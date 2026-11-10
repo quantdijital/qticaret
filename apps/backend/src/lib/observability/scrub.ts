@@ -1,5 +1,5 @@
 import type { ReadableSpan, SpanExporter } from "@opentelemetry/sdk-trace-base"
-import { redactText } from "../logging/redact"
+import { redactText } from "@qticaret/server-kit"
 
 /**
  * Traces leave as a log line does (adr/0045, the F15 security review):

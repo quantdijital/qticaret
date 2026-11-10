@@ -18,10 +18,3 @@ export const openSecret = decryptPii
 export function keyFingerprint(key: Buffer): string {
   return createHmac("sha256", key).update("qt:credentials:key-id").digest("hex").slice(0, 16)
 }
-
-/** JSON with sorted keys: the same settings always give the same associated data. */
-export function canonicalJson(value: Record<string, unknown>): string {
-  return JSON.stringify(
-    Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)))
-  )
-}

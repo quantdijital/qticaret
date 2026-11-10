@@ -1,10 +1,10 @@
 import pino from "pino"
 import type { DestinationStream, Logger as PinoLogger } from "pino"
+import { redactDeep, redactText } from "@qticaret/server-kit"
 import { errorTrackingFromEnv } from "../error-tracking"
 import { currentRequestId } from "./context"
 import { DEFAULT_LOG_LEVEL } from "./levels"
 import type { LogLevel } from "./levels"
-import { redactDeep, redactText } from "./redact"
 
 /**
  * The platform's single logger (docs/10): JSON lines on stdout, redacted

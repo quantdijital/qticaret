@@ -1,5 +1,5 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { parseKey } from "../../../../lib/crypto/pii"
+import { parseKey } from "@qticaret/server-kit"
 import { parseEnv } from "../../../../lib/env"
 import { ValidationError } from "../../../../lib/errors"
 import { blockEntryOf } from "../../../../lib/fraud/block"

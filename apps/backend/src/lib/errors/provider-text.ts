@@ -1,4 +1,4 @@
-import { REDACTED, redactText } from "../logging/redact"
+import { REDACTED, redactText } from "@qticaret/server-kit"
 
 /**
  * A provider's own words about a failed call (a SOAP fault's text, a

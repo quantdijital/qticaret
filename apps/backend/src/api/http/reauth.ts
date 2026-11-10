@@ -5,7 +5,7 @@ import type {
   MedusaResponse,
 } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
-import { hashPii, parseKey } from "../../lib/crypto/pii"
+import { hashPii, parseKey } from "@qticaret/server-kit"
 import { parseEnv } from "../../lib/env"
 import { errorSummary, logger } from "../../lib/logging"
 import { sharedRateLimitStore } from "./rate-limit"

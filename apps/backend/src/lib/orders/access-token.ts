@@ -1,7 +1,6 @@
 import { createHmac } from "node:crypto"
-import { parseKey } from "../crypto/pii"
+import { parseKey, safeEqual } from "@qticaret/server-kit"
 import { parseEnv } from "../env"
-import { safeEqual } from "../security/timing-safe"
 
 /**
  * The key to a guest's order (adr/0037 §2): an HMAC binding the order, its

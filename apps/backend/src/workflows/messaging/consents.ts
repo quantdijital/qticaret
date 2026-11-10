@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
-import { hashPii, parseKey } from "../../lib/crypto/pii"
+import { hashPii, parseKey } from "@qticaret/server-kit"
 import { parseEnv } from "../../lib/env"
 import { MESSAGING_MODULE } from "../../modules/messaging"
 import type { ConsentEvidence } from "../../modules/messaging/types"

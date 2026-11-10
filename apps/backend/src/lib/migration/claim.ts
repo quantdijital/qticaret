@@ -1,6 +1,5 @@
-import { hashPii, parseKey } from "../crypto/pii"
+import { hashPii, parseKey, safeEqual } from "@qticaret/server-kit"
 import { parseEnv } from "../env"
-import { safeEqual } from "../security/timing-safe"
 
 /**
  * The key a moved customer's invitation carries (F14.5, closing review):

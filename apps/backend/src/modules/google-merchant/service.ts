@@ -7,7 +7,7 @@ import {
   MedusaContext,
   MedusaService,
 } from "@medusajs/framework/utils"
-import { decryptPii, encryptPii, parseKey } from "../../lib/crypto/pii"
+import { decryptPii, encryptPii, parseKey } from "@qticaret/server-kit"
 import { uniqueViolationKeys } from "../../lib/errors"
 import { GoogleOauthState } from "./models/oauth-state"
 import { MerchantOffer } from "./models/merchant-offer"

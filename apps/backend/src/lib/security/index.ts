@@ -11,7 +11,7 @@ export type {
   SafeFetchOptions,
   SafeFetchResponse,
 } from "./safe-fetch"
-export { safeEqual } from "./timing-safe"
+export { safeEqual } from "@qticaret/server-kit"
 export {
   CSV_BOM,
   escapeCsvCell,

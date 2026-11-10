@@ -1,4 +1,4 @@
-import { hashPii, parseKey } from "../crypto/pii"
+import { hashPii, parseKey } from "@qticaret/server-kit"
 import { parseEnv } from "../env"
 
 /**

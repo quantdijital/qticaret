@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { parseKey } from "../../src/lib/crypto/pii"
+import { parseKey } from "@qticaret/server-kit"
 import { EMAIL_CHANGE_TTL_MS, newEmailChange, sealEmailChange } from "../../src/lib/staff/account"
 import { createAdminUser } from "../helpers/admin"
 import { eventually } from "../helpers/eventually"

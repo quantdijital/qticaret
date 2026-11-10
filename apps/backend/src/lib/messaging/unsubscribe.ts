@@ -1,7 +1,6 @@
 import { createHmac } from "node:crypto"
-import { parseKey } from "../crypto/pii"
+import { parseKey, safeEqual } from "@qticaret/server-kit"
 import { parseEnv } from "../env"
-import { safeEqual } from "../security/timing-safe"
 import { emailLinkUrl } from "./links"
 
 /**

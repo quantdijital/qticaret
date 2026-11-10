@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto"
 import { isIP } from "node:net"
-import { safeEqual } from "./timing-safe"
+import { safeEqual } from "@qticaret/server-kit"
 
 /**
  * The visitor's address as the storefront's server vouches for it (adr/0046

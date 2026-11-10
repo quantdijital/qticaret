@@ -6,9 +6,8 @@ import {
   MedusaContext,
   MedusaService,
 } from "@medusajs/framework/utils"
-import { decryptPii, encryptPii, hashPii, parseKey } from "../../lib/crypto/pii"
+import { decryptPii, encryptPii, hashPii, parseKey, safeEqual } from "@qticaret/server-kit"
 import { uniqueViolationKeys } from "../../lib/errors"
-import { safeEqual } from "../../lib/security/timing-safe"
 import { FeedAccess } from "./models/feed-access"
 import { FeedFile } from "./models/feed-file"
 

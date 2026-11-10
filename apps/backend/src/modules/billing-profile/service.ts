@@ -1,7 +1,6 @@
 import type { Context } from "@medusajs/framework/types"
 import { InjectManager, MedusaContext, MedusaError, MedusaService } from "@medusajs/framework/utils"
-import { decryptPii, encryptPii, hashPii, parseKey } from "../../lib/crypto/pii"
-import { detectTaxIdKind } from "../../lib/tr/tax-id"
+import { decryptPii, detectTaxIdKind, encryptPii, hashPii, parseKey } from "@qticaret/server-kit"
 import { BillingProfile } from "./models/billing-profile"
 import type { BillingProfileInput, BillingProfileModuleOptions } from "./types"
 

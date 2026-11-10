@@ -1,6 +1,5 @@
 import { createHash, randomBytes } from "node:crypto"
-import { hashPii } from "../../crypto/pii"
-import { safeEqual } from "../timing-safe"
+import { hashPii, safeEqual } from "@qticaret/server-kit"
 
 /**
  * A proof of work the visitor's browser does instead of a picture puzzle

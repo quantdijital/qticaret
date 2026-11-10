@@ -1,6 +1,6 @@
 import { fakeTckn, fakeVkn, seededRandom, trAddress, trPerson } from "@qticaret/testing"
+import { isValidTckn, isValidVkn } from "@qticaret/server-kit"
 import { normalizeTrPhone } from "../phone"
-import { isValidTckn, isValidVkn } from "../tax-id"
 
 /** The shared fixture factories (packages/testing) pass the platform's own checks. */
 describe("Turkish fixtures", () => {
