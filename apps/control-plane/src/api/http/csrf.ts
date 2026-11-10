@@ -1,5 +1,6 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { parseEnv } from "../../lib/env"
+import { SESSION_COOKIE } from "../../lib/session-cookie"
 import { rejectRequest, routePath } from "./request"
 
 /**
@@ -13,9 +14,6 @@ import { rejectRequest, routePath } from "./request"
  */
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"])
-// Medusa's default session cookie name (sessionOptions.name is not set)
-const SESSION_COOKIE = "connect.sid"
-
 const hasSessionCookie = (req: MedusaRequest): boolean =>
   (req.headers.cookie ?? "").split(";").some((part) => part.trim().startsWith(`${SESSION_COOKIE}=`))
 

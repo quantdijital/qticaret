@@ -6,6 +6,7 @@ import {
 } from "@medusajs/framework/utils"
 import { disabledModules } from "./src/lib/disabled-modules"
 import { isLocalEnv, parseEnv } from "./src/lib/env"
+import { SESSION_COOKIE } from "./src/lib/session-cookie"
 
 loadEnv(process.env["NODE_ENV"] ?? "development", process.cwd())
 
@@ -22,9 +23,10 @@ module.exports = defineConfig({
     ...(env.REDIS_URL ? { redisUrl: env.REDIS_URL } : {}),
     // Staff sessions: never readable by scripts, never sent from another
     // site (the panel is same-origin, adr/0061 §1.3), HTTPS-only unless
-    // explicitly local; 8 hours, a working day
+    // explicitly local; 8 hours, a working day. Its own name: the shop's
+    // panel on the same machine keeps its session (Ek C6)
     cookieOptions: { httpOnly: true, sameSite: "strict", secure: !isLocalEnv(env) },
-    sessionOptions: { ttl: 8 * 60 * 60 * 1000 },
+    sessionOptions: { name: SESSION_COOKIE, ttl: 8 * 60 * 60 * 1000 },
     http: {
       // No storefront: the allowlist answers /store with 404 whatever the
       // origin; Medusa still asks for a value
