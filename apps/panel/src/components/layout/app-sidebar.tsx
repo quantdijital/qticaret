@@ -15,6 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@qticaret/admin-ui/ui/sidebar"
 import { tasksQuery } from "@/features/dashboard/api/tasks"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
@@ -32,7 +33,8 @@ const ITEM_CLASS = cn(
   "data-[active=true]:before:opacity-100 group-data-[collapsible=icon]:before:hidden"
 )
 
-function NavLink({
+/** One menu item. On a phone the menu is a drawer: a choice closes it, so the page shows. */
+export function NavLink({
   item,
   active,
   badge,
@@ -42,11 +44,17 @@ function NavLink({
   badge?: number | undefined
 }) {
   const { t } = useTranslation()
+  const { setOpenMobile } = useSidebar()
   const label = t(`nav.${item.key}`)
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={active} tooltip={label} className={ITEM_CLASS}>
-        <Link to={item.to}>
+        <Link
+          to={item.to}
+          onClick={() => {
+            setOpenMobile(false)
+          }}
+        >
           <item.icon />
           <span>{label}</span>
         </Link>
