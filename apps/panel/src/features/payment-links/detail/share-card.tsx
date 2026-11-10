@@ -4,10 +4,10 @@ import { Loader2, Mail, MessageCircle, RefreshCw, Smartphone } from "lucide-reac
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { SectionCard } from "@/components/patterns/section-card"
-import { ErrorState, LoadingRows } from "@/components/patterns/states"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { linkShareQuery, useResendPaymentLink } from "@/features/payment-links/api/payment-links"
 import type {
   LinkShare,

@@ -1,10 +1,10 @@
 import { Check, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { SearchInput } from "@/components/patterns/search-input"
-import { ErrorState } from "@/components/patterns/states"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
+import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -13,12 +13,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { useLinkOptions } from "@/features/storefront/api/link-options"
 import type { LinkOption } from "@/features/storefront/api/link-options"
 import type { RecordKind } from "@/features/storefront/api/menus"
 import { errorText } from "@/lib/errors"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const R = "storefront.editor.records"
 

@@ -8,6 +8,8 @@ import tr from "../locales/tr.json" with { type: "json" }
  * Docs/18 §9 held by a test: colours, corners and shadows come from the
  * theme's tokens, and every text is in both languages, Turkish without
  * exclamation marks. A rule broken on purpose is listed with its reason.
+ * The shared primitives and patterns keep the same rules in their own
+ * package (packages/admin-ui `src/house-rules.spec.ts`).
  */
 
 // Tests run from the package
@@ -36,10 +38,6 @@ const ALLOWED: Record<string, string> = {
   // Cameras read dark modules on white, whatever the theme
   "features/security/components/authenticator-link.tsx bg-white": "QR code",
   "features/settings/components/etbis-qr-card.tsx bg-white": "QR code",
-  // The dimmed page behind a dialog
-  "components/ui/alert-dialog.tsx bg-black": "overlay",
-  "components/ui/dialog.tsx bg-black": "overlay",
-  "components/ui/sheet.tsx bg-black": "overlay",
   // The browser's colour input takes a hex value only
   "features/settings/components/appearance-fields.tsx #000000": "colour input",
 }
@@ -84,21 +82,21 @@ describe("the panel's house rules (docs/18 §9)", () => {
 
   it("types numbers in the panel's own field, never the browser's spinner", () => {
     // The owner, 2026-11-03: "artır azalt ikonları default ikonlar olarak geliyor"
-    const own = (file: string) =>
-      file === "components/patterns/number-field.tsx" || file.startsWith("components/charts/")
-    expect(breaches(/<Input\b[^>]*\btype="number"/g, own)).toEqual([])
-    expect(breaches(/<input\b[^>]*\btype="number"/g, own)).toEqual([])
+    // (NumberField itself is @qticaret/admin-ui's)
+    expect(breaches(/<Input\b[^>]*\btype="number"/g)).toEqual([])
+    expect(breaches(/<input\b[^>]*\btype="number"/g)).toEqual([])
   })
 
   it("opens a record in the standard dialog, never in a side sheet", () => {
     // The owner, 2026-11-06: a row opens one dialog on the size scale. The phone's menu
-    // and the full-screen theme editor's own drawers stay sheets.
+    // (admin-ui's sidebar) and the full-screen theme editor's own drawers stay sheets.
     const drawers = new Set([
-      "components/ui/sidebar.tsx",
       "features/storefront/editor/editor-shell.tsx",
       "features/storefront/editor/revisions-sheet.tsx",
     ])
-    expect(breaches(/from "@\/components\/ui\/sheet"/g, (file) => drawers.has(file))).toEqual([])
+    expect(breaches(/from "@qticaret\/admin-ui\/ui\/sheet"/g, (file) => drawers.has(file))).toEqual(
+      []
+    )
   })
 
   it("puts a notice's buttons in AlertAction and its icon level with the first line", () => {

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { Palette } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { ErrorState, LoadingRows } from "@/components/patterns/states"
+import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import { themeQuery } from "@/features/storefront/api/theme"

@@ -1,13 +1,13 @@
 import { Link } from "@tanstack/react-router"
 import { FileDown } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import type { StatusTone } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { evidenceUrl } from "@/features/orders/api/chargebacks"
 import type { Chargeback, ChargebackStatus } from "@/features/orders/api/chargebacks"
-import { formatDateTime, formatMoney } from "@/lib/format"
+import { formatDateTime, formatMoney } from "@qticaret/admin-ui/lib/format"
 
 const C = "orders.chargeback"
 

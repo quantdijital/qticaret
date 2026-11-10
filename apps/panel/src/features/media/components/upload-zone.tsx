@@ -2,7 +2,7 @@ import { CircleAlert, CircleCheck, ImagePlus } from "lucide-react"
 import { useImperativeHandle, useState } from "react"
 import type { DragEvent, Ref } from "react"
 import { useTranslation } from "react-i18next"
-import { Progress } from "@/components/ui/progress"
+import { Progress } from "@qticaret/admin-ui/ui/progress"
 import {
   IMAGE_ACCEPT,
   fileProblem,
@@ -11,7 +11,7 @@ import {
 } from "@/features/media/api/media"
 import type { MediaAsset } from "@/features/media/api/media"
 import { errorText } from "@/lib/errors"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 // One drop at a time: what a person sorts through at once
 export const MAX_FILES_PER_DROP = 20

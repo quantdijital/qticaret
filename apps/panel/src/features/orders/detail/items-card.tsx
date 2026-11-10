@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import type { OrderDetail, OrderMoney, OrderMoneyLine } from "@/features/orders/api/orders"
 import { ProductThumb } from "@/features/products/components/product-thumb"
 import { AddonLineDetails } from "./addon-line"
 import { GiftLineDetails } from "./gift-line"
-import { formatCount, formatMoney } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatCount, formatMoney } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 function TotalRow({
   label,

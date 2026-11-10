@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { ChipInput } from "@/components/patterns/chip-input"
+import { ChipInput } from "@qticaret/admin-ui/patterns/chip-input"
 
 const MAX_ALIASES = 20
 

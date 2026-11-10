@@ -13,7 +13,7 @@ import {
 } from "@/features/storefront/api/theme"
 import type { BodyFont, HeadingFont } from "@/features/storefront/api/theme"
 import type { ThemeParsed, ThemeValues } from "@/features/storefront/theme-settings"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 import { PanelGroup } from "./panel-header"
 import { ChoiceSelect, SwitchRow } from "./theme-fields"
 

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import {
   Table,
   TableBody,
@@ -7,10 +7,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@qticaret/admin-ui/ui/table"
 import type { DashboardOverview } from "@/features/dashboard/api/overview"
 import { ReportExportButton } from "@/features/reports/components/report-export"
-import { formatBucket, formatCount, formatMoney } from "@/lib/format"
+import { formatBucket, formatCount, formatMoney } from "@qticaret/admin-ui/lib/format"
 
 const average = (sales: string, orders: number) => (orders > 0 ? Number(sales) / orders : 0)
 

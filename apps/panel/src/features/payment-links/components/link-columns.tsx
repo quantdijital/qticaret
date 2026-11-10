@@ -1,10 +1,10 @@
 import { Link } from "@tanstack/react-router"
 import { BadgePercent } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import type { Column } from "@/components/patterns/data-table"
+import type { Column } from "@qticaret/admin-ui/patterns/data-table"
 import type { PaymentLinkSummary } from "@/features/payment-links/api/types"
 import { formatKurus } from "@/features/payment-links/format"
-import { formatDateTime } from "@/lib/format"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 import { LinkStatusBadge } from "./link-status"
 import { useCreatorName } from "./use-creator-name"
 

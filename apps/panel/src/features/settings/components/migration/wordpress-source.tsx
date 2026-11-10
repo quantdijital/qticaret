@@ -2,9 +2,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
-import { Field } from "@/components/patterns/form-section"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import type { MigrationMode, Parcel } from "@/features/settings/api/migration"
 import {
   CATEGORY_BASE,

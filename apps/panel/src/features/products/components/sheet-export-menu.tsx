@@ -2,13 +2,13 @@ import { Download, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@qticaret/admin-ui/ui/dropdown-menu"
 import { finishedJob, startExport } from "@/features/products/api/sheets"
 import { jobResultUrl } from "@/features/settings/api/activity"
 import { errorText } from "@/lib/errors"

@@ -6,7 +6,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import { vatLabelOf, vatRatesQuery } from "@/features/settings/api/vat-rates"
 
 // Radix Select has no empty value; this one stands for "the default rate"

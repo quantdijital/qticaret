@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { formatCount } from "@/lib/format"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 /** Sellable stock, marked when sold out or at or under the item's threshold. */
 export function AvailableBadge({ available, threshold }: { available: number; threshold: number }) {

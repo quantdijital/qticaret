@@ -1,16 +1,16 @@
 import { Link } from "@tanstack/react-router"
 import { History } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import type { Column } from "@/components/patterns/data-table"
-import { NumberField } from "@/components/patterns/number-field"
-import { Button } from "@/components/ui/button"
+import type { Column } from "@qticaret/admin-ui/patterns/data-table"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import type { StockItem } from "@/features/inventory/api/stock"
 import { AvailableBadge } from "@/features/inventory/components/available-badge"
 import { ProductThumb } from "@/features/products/components/product-thumb"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { DIGITS } from "@/features/inventory/drafts"
 import type { Drafts } from "@/features/inventory/drafts"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 /** The stock list's columns; each item is judged by its own low-stock threshold. */
 export function useStockColumns(

@@ -2,9 +2,9 @@ import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Field } from "@/components/patterns/form-section"
-import { NumberField } from "@/components/patterns/number-field"
-import { Button } from "@/components/ui/button"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -13,12 +13,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { useExtendPaymentLink } from "@/features/payment-links/api/payment-links"
 import type { PaymentLink } from "@/features/payment-links/api/types"
 import { MAX_HOURS, MIN_HOURS, hoursOf } from "@/features/payment-links/form"
 import { errorText } from "@/lib/errors"
-import { formatDateTime } from "@/lib/format"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const X = "paymentLinks.extend"
 

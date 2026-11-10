@@ -3,8 +3,8 @@ import { Loader2 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ErrorState, LoadingRows } from "@/components/patterns/states"
-import { Button } from "@/components/ui/button"
+import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -14,11 +14,11 @@ import {
   DialogHeader,
   DialogSection,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { templatesQuery } from "@/features/attributes/api"
 import { sheetJobQuery } from "@/features/products/api/sheets"
 import { errorText } from "@/lib/errors"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { factsPreviewQuery, startFactsRun } from "./api"
 import { choiceKey, hasWork, runInput, valuesToWrite } from "./choices"
 import type { Choices } from "./choices"

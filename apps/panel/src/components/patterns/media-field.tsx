@@ -4,11 +4,11 @@ import type { DragEvent, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { MediaPicker } from "@/components/patterns/media-picker"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { fileProblem, uploadToLibrary, useMediaChanged } from "@/features/media/api/media"
 import type { MediaAsset } from "@/features/media/api/media"
 import { errorText } from "@/lib/errors"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 /**
  * The picture's frame: a slide or opening, a share card, a square, a logo

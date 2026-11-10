@@ -16,13 +16,13 @@ import {
 import type { LucideIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { AsyncBody } from "@/components/patterns/async-body"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { useCan } from "@/features/auth/api/staff"
 import { tasksQuery } from "@/features/dashboard/api/tasks"
 import type { DashboardTasks } from "@/features/dashboard/api/tasks"
-import { formatCount } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 interface TaskRow {
   key:

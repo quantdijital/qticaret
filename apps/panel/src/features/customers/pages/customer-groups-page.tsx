@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { PageHeader } from "@/components/patterns/page-header"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { CustomersNav } from "@/features/customers/components/customers-nav"
 import { GroupsCard } from "@/features/customers/components/groups-card"
 import { SegmentsCard } from "@/features/customers/components/segments-card"

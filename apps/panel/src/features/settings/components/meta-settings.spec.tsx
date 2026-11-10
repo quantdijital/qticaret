@@ -9,7 +9,7 @@ const fetchMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() } }))
-vi.mock("@/components/patterns/leave-guard", () => ({ LeaveGuard: () => null }))
+vi.mock("@qticaret/admin-ui/patterns/leave-guard", () => ({ LeaveGuard: () => null }))
 
 function renderSettings() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })

@@ -1,6 +1,6 @@
 import { CircleAlert, CloudCheck, Loader2, RotateCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import type { SaveStatus as Status } from "@/features/storefront/layout/use-autosave"
 
 const S = "storefront.editor.status"

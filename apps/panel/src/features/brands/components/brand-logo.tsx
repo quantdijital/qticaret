@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 /** A brand's logo on a neutral tile, or its initial when it has none. */
 export function BrandLogo({

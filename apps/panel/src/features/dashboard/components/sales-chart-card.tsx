@@ -1,14 +1,19 @@
 import type { UseQueryResult } from "@tanstack/react-query"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { TrendChart } from "@/components/charts/trend-chart"
+import { TrendChart } from "@qticaret/admin-ui/charts/trend-chart"
 import { AsyncBody } from "@/components/patterns/async-body"
-import { DeltaBadge } from "@/components/patterns/delta-badge"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { DeltaBadge } from "@qticaret/admin-ui/patterns/delta-badge"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
+import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import type { DashboardOverview } from "@/features/dashboard/api/overview"
-import { formatBucket, formatCompactMoney, formatCount, formatMoney } from "@/lib/format"
+import {
+  formatBucket,
+  formatCompactMoney,
+  formatCount,
+  formatMoney,
+} from "@qticaret/admin-ui/lib/format"
 
 type Metric = "amount" | "count"
 

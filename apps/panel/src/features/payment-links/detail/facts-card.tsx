@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import type { PaymentLink } from "@/features/payment-links/api/types"
 import { shownStatus } from "@/features/payment-links/components/link-state"
 import { useCreatorName } from "@/features/payment-links/components/use-creator-name"
-import { formatCount, formatDateTime } from "@/lib/format"
+import { formatCount, formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const F = "paymentLinks.facts"
 

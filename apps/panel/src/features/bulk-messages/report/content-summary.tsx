@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import type { AudienceSource, BulkMessage } from "@/features/bulk-messages/api/types"
 import { customerGroupsQuery, customerSegmentsQuery } from "@/features/customers/api/groups"
 import { docText } from "@/features/content/doc-text"
-import { formatDateTime } from "@/lib/format"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const C = "bulkMessages.locked"
 

@@ -1,11 +1,11 @@
 import type { ReactNode } from "react"
-import { Field } from "@/components/patterns/form-section"
-import { NumberField } from "@/components/patterns/number-field"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { ShopTokenPreview, TokenSlot } from "@/features/settings/components/shop-token-menu"
 import { textOrNull } from "@/features/storefront/layout/sections"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 export const F = "storefront.editor.fields"
 

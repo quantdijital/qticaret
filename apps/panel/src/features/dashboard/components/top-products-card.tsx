@@ -3,10 +3,10 @@ import { ImageOff } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { AsyncBody } from "@/components/patterns/async-body"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import type { DashboardOverview } from "@/features/dashboard/api/overview"
-import { formatCount, formatMoney } from "@/lib/format"
+import { formatCount, formatMoney } from "@qticaret/admin-ui/lib/format"
 
 function Thumb({ src }: { src: string | null }) {
   return src ? (

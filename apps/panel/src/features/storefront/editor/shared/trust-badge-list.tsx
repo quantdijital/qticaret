@@ -2,14 +2,14 @@ import { Award, Clock, CreditCard, Gift, Phone, RefreshCw, ShieldCheck, Truck } 
 import type { LucideIcon } from "lucide-react"
 import { useId } from "react"
 import { useTranslation } from "react-i18next"
-import { Input } from "@/components/ui/input"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import { TRUST_ICONS } from "@/features/settings/api/sections"
 import type { TrustIcon } from "@/features/settings/api/sections"
 import { ShopTokenPreview, TokenSlot } from "@/features/settings/components/shop-token-menu"

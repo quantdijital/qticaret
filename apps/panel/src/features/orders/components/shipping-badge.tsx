@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import type { StatusTone } from "@/components/patterns/status-badge"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
 import type { BoardOrder, ShipmentStatus } from "@/features/orders/api/orders"
 
 const TONES: Record<ShipmentStatus, StatusTone> = {

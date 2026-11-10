@@ -4,8 +4,8 @@ import { useTranslation } from "react-i18next"
 import type { OrderDetail } from "@/features/orders/api/orders"
 import type { Lifecycle } from "@/features/dashboard/api/overview"
 import { milestones } from "@/features/orders/order-math"
-import { formatDateTime } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const STEPS: { key: "placed" | "paid" | "shipped" | "delivered"; icon: LucideIcon }[] = [
   { key: "placed", icon: ShoppingBag },

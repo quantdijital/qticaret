@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import type { StatusTone } from "@/components/patterns/status-badge"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
 import type { ShopRefund } from "@/features/orders/api/payments"
-import { formatDateTime, formatMoney } from "@/lib/format"
+import { formatDateTime, formatMoney } from "@qticaret/admin-ui/lib/format"
 
 const TONES: Record<ShopRefund["status"], StatusTone> = {
   done: "success",

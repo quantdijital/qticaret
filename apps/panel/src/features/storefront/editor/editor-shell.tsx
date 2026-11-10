@@ -7,8 +7,8 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"
-import { cn } from "@/lib/utils"
+} from "@qticaret/admin-ui/ui/sheet"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 import { EditorChromeContext } from "./editor-layout"
 import type { EditorLayout, EditorView } from "./editor-layout"
 

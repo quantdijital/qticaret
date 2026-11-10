@@ -1,7 +1,7 @@
 import type { LucideIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { cn } from "@/lib/utils"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@qticaret/admin-ui/ui/tooltip"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 /** One toolbar action: an icon, its name on hover and to screen readers, pressed when on. */
 export function ToolButton({

@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react"
-import { KpiTile } from "@/components/patterns/kpi-tile"
-import { Skeleton } from "@/components/ui/skeleton"
+import { KpiTile } from "@qticaret/admin-ui/patterns/kpi-tile"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 
 export interface ReportTile {
   key: string

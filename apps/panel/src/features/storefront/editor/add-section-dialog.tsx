@@ -5,7 +5,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import type { BodyGroup, BodySectionType, Placement } from "@/features/storefront/api/layout"
 import { GROUP_TYPES } from "@/features/storefront/layout/sections"
 import { SECTION_ICONS } from "./section-meta"

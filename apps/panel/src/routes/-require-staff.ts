@@ -4,7 +4,7 @@ import { currentUserQuery } from "@/features/auth/api/me"
 import { staffQuery } from "@/features/auth/api/staff"
 import { appearanceQuery } from "@/features/settings/api/appearance"
 import { sdk } from "@/lib/sdk"
-import { applyAppearance, rememberAppearance } from "@/theme"
+import { applyAppearance, rememberAppearance } from "@qticaret/admin-ui/theme"
 
 /**
  * What every signed-in screen asks before it opens (the shell's pages and

@@ -1,14 +1,14 @@
 import { X } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { DayRangeFilter } from "@/components/patterns/day-range-filter"
-import { Button } from "@/components/ui/button"
+import { DayRangeFilter } from "@qticaret/admin-ui/patterns/day-range-filter"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import {
   CARRIER_FILTERS,
   PAYMENT_FILTERS,

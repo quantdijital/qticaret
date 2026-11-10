@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { gtinProblem } from "@/lib/gtin"
-import { parseMeasureInput, parseMoneyInput } from "@/lib/money-input"
+import { parseMeasureInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 import { isValidSlug } from "@/lib/slug"
 import type { JSONContent } from "@tiptap/react"
 import { EMPTY_SUMMARY, SUMMARY_TEXT_MAX, docTextLength } from "@/features/products/summary-doc"

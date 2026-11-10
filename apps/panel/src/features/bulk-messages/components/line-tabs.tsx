@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@qticaret/admin-ui/ui/tabs"
 
 export interface LineTab<K extends string> {
   key: K

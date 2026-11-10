@@ -1,17 +1,17 @@
 import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
-import { StatusBadge } from "@/components/patterns/status-badge"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { ErrorState } from "@/components/patterns/states"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@qticaret/admin-ui/ui/select"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { messagePreviewQuery, messageTemplatesQuery } from "@/features/settings/api/messaging"
 import { errorText } from "@/lib/errors"
 

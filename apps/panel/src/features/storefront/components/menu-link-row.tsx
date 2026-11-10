@@ -11,12 +11,12 @@ import {
 } from "lucide-react"
 import type { DragEvent, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Badge } from "@qticaret/admin-ui/ui/badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import type { DropPlace, MenuRow } from "@/features/storefront/menu-rows"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const R = "storefront.menus.row"
 

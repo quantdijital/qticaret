@@ -1,0 +1,28 @@
+{
+  // React components shipped as TypeScript source; the panels' Vite builds compile them
+  "extends": "@qticaret/config/tsconfig/base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "declaration": false,
+    "sourceMap": false,
+    "types": ["node"],
+    "baseUrl": ".",
+    // One React type package: the workspace also holds Medusa Admin's React
+    // 18 types, and pnpm's hoisted copy would otherwise reach recharts and cmdk
+    // The shadcn CLI finds where to write through the package's own name
+    // (components.json); the files themselves import each other relatively
+    "paths": {
+      "@qticaret/admin-ui/*": ["./src/*"],
+      "react": ["./node_modules/@types/react"],
+      "react/*": ["./node_modules/@types/react/*"],
+      "react-dom": ["./node_modules/@types/react-dom"],
+      "react-dom/*": ["./node_modules/@types/react-dom/*"]
+    }
+  },
+  "include": ["src", "eslint.config.js", "vitest.config.ts"]
+}

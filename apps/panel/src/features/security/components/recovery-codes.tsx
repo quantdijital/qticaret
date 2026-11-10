@@ -2,7 +2,7 @@ import { Check, Copy, Download, EyeOff } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 
 /**
  * Recovery codes, shown once: to copy or to keep as a file (adr/0040 §2).

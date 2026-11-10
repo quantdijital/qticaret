@@ -2,20 +2,20 @@ import { ChevronDown, Loader2, Pencil } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@qticaret/admin-ui/ui/dropdown-menu"
 import { MAX_BULK_PRODUCTS, matchingProductIds } from "@/features/products/api/bulk"
 import type { BulkAction } from "@/features/products/api/bulk"
 import type { ProductFilters } from "@/features/products/api/products"
 import { useCan } from "@/features/auth/api/staff"
 import { errorText } from "@/lib/errors"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 const CATALOG_ACTIONS = ["price", "cost", "stock", "status", "category"] as const
 const SEO_ACTIONS = ["seo_template", "alt_text"] as const

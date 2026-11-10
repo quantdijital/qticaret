@@ -1,8 +1,8 @@
 import { useRef } from "react"
 import { useTranslation } from "react-i18next"
-import { Field } from "@/components/patterns/form-section"
-import { Input } from "@/components/ui/input"
-import { cn } from "@/lib/utils"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 import { renderSample } from "../seo-sample"
 
 interface TemplateFieldProps {

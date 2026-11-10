@@ -2,9 +2,9 @@ import { Check, Copy } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 
 const S = "paymentLinks.share"
 

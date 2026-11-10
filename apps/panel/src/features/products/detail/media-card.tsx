@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { SectionCard } from "@/components/patterns/section-card"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { useSaveAlt } from "@/features/products/api/media"
 import { useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"

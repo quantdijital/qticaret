@@ -1,7 +1,7 @@
 import { Download, Truck } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
+import { Alert, AlertAction, AlertDescription } from "@qticaret/admin-ui/ui/alert"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { usePrintLabels } from "@/features/orders/components/print-labels"
 
 const P = "orders.detail.pickup"

@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { X } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { DayRangeFilter } from "@/components/patterns/day-range-filter"
-import { Button } from "@/components/ui/button"
+import { DayRangeFilter } from "@qticaret/admin-ui/patterns/day-range-filter"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Select,
   SelectContent,
@@ -11,7 +11,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import { AUDIT_ACTOR_TYPES, auditResourceTypesQuery } from "@/features/settings/api/audit"
 import type { AuditSearch } from "@/features/settings/api/audit"
 import { teamQuery } from "@/features/settings/api/team"

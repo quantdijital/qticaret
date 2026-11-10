@@ -1,16 +1,16 @@
 import { Check, ChevronsUpDown, Loader2 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Command,
   CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
+} from "@qticaret/admin-ui/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@qticaret/admin-ui/ui/popover"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 import { usePreviewSamples } from "./use-preview-sample"
 import type { PreviewSample, SamplePage } from "./use-preview-sample"
 

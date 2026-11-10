@@ -2,10 +2,10 @@ import { RotateCcw, X } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { SectionCard } from "@/components/patterns/section-card"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -13,12 +13,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { useResendInvite, useWithdrawInvite } from "@/features/settings/api/team"
 import type { TeamInvite } from "@/features/settings/api/team"
 import { InviteLink } from "@/features/settings/components/invite-dialog"
 import { errorText } from "@/lib/errors"
-import { formatDateTime } from "@/lib/format"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const T = "settings.team"
 

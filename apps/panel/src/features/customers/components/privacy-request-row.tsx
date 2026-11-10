@@ -3,9 +3,9 @@ import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   exportJobQuery,
   useClosePrivacyRequest,
@@ -15,7 +15,7 @@ import {
 import type { PrivacyRequest } from "@/features/customers/api/privacy"
 import { JobDownloadButton } from "@/features/settings/components/job-download-button"
 import { errorText } from "@/lib/errors"
-import { formatDate } from "@/lib/format"
+import { formatDate } from "@qticaret/admin-ui/lib/format"
 import { ReauthCancelled } from "@/lib/reauth"
 
 const P = "customers.privacy"

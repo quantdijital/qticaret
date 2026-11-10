@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 
 /**
  * A queue row opened (returns, invoices, chargebacks, held orders): one

@@ -3,9 +3,9 @@ import { useNavigate } from "@tanstack/react-router"
 import { Loader2, Package, ShoppingBag, Truck, User } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { CommandGroup, CommandItem } from "@/components/ui/command"
+import { CommandGroup, CommandItem } from "@qticaret/admin-ui/ui/command"
 import { SEARCH_MIN, globalSearchQuery } from "@/features/search/api"
-import { formatMoney } from "@/lib/format"
+import { formatMoney } from "@qticaret/admin-ui/lib/format"
 
 const S = "command.search"
 

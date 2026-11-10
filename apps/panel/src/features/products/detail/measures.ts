@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { formatMeasureInput, parseMeasureInput } from "@/lib/money-input"
+import { formatMeasureInput, parseMeasureInput } from "@qticaret/admin-ui/lib/money-input"
 
 /** A parcel's measures (adr/0054), the product's or a variant's own, in the shop's units. */
 

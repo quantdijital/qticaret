@@ -1,10 +1,10 @@
 import { Loader2, Truck } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { NumberField } from "@/components/patterns/number-field"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   Dialog,
   DialogBody,
@@ -13,10 +13,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import type { OrderDetail } from "@/features/orders/api/orders"
 import { ProductThumb } from "@/features/products/components/product-thumb"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 type Lines = { id: string; quantity: number }[]
 

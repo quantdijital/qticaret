@@ -2,18 +2,18 @@ import { useQuery } from "@tanstack/react-query"
 import { Check, ChevronsUpDown } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Command,
   CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+} from "@qticaret/admin-ui/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@qticaret/admin-ui/ui/popover"
 import { allCategoriesQuery } from "@/features/content/api/terms"
 import type { TermView } from "@/features/content/api/terms"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const T = "content.terms"
 const NONE = "__none__"

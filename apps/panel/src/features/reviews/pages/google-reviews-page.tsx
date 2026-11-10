@@ -3,11 +3,11 @@ import { getRouteApi, useNavigate } from "@tanstack/react-router"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { PageHeader } from "@/components/patterns/page-header"
-import { Pagination } from "@/components/patterns/pagination"
-import { SectionCard } from "@/components/patterns/section-card"
-import { ErrorState } from "@/components/patterns/states"
-import { Skeleton } from "@/components/ui/skeleton"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import {
   GOOGLE_REVIEW_PAGE_SIZE,
   googleReviewItemsQuery,

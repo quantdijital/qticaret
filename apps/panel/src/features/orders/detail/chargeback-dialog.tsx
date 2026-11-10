@@ -4,9 +4,9 @@ import type { Control, FieldErrors, UseFormRegister } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
-import { Field } from "@/components/patterns/form-section"
-import { NumberField } from "@/components/patterns/number-field"
-import { Button } from "@/components/ui/button"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -15,20 +15,20 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+} from "@qticaret/admin-ui/ui/dialog"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
+} from "@qticaret/admin-ui/ui/select"
+import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { CHARGEBACK_REASONS, useOpenChargeback } from "@/features/orders/api/chargebacks"
 import type { ChargebackReason, OpenChargebackBody } from "@/features/orders/api/chargebacks"
 import { errorText } from "@/lib/errors"
-import { formatMoneyInput, parseMoneyInput } from "@/lib/money-input"
+import { formatMoneyInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 
 const C = "orders.chargeback"
 

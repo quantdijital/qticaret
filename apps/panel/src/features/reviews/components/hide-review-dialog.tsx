@@ -1,7 +1,7 @@
 import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -9,8 +9,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+} from "@qticaret/admin-ui/ui/dialog"
+import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import { HIDE_REASONS } from "@/features/reviews/api/google-reviews"
 import type { HideReason } from "@/features/reviews/api/google-reviews"
 

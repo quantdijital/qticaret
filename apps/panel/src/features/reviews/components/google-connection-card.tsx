@@ -3,17 +3,17 @@ import { Loader2 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@qticaret/admin-ui/ui/select"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import {
   googleLocationsQuery,
   startGoogleReviewsConnect,
@@ -21,7 +21,7 @@ import {
 } from "@/features/reviews/api/google-reviews"
 import type { GoogleReviewsStatus } from "@/features/reviews/api/google-reviews"
 import { errorText } from "@/lib/errors"
-import { formatRelative } from "@/lib/format"
+import { formatRelative } from "@qticaret/admin-ui/lib/format"
 
 const G = "reviews.google"
 const OUTCOMES = ["connected", "denied", "state_invalid", "no_refresh_token", "failed"] as const

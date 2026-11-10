@@ -2,9 +2,9 @@ import { Check, Copy, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Field } from "@/components/patterns/form-section"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -12,8 +12,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+} from "@qticaret/admin-ui/ui/dialog"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import { API_SCOPES, scopeKey, useCreateApiKey } from "@/features/settings/api/api-access"
 import type { ApiScope } from "@/features/settings/api/api-access"
 import { errorText } from "@/lib/errors"

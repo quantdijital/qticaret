@@ -1,18 +1,18 @@
 import { History, RotateCcw } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@/components/ui/sheet"
+} from "@qticaret/admin-ui/ui/sheet"
 import type { LayoutRevision } from "@/features/storefront/api/layout"
-import { formatDateTime } from "@/lib/format"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 import { BarButton } from "./bar-button"
 
 const V = "storefront.editor.revisions"

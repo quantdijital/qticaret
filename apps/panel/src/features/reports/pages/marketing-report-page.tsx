@@ -1,12 +1,12 @@
 import { BadgePercent, PackageX, Repeat, Undo2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import type { SalesReport } from "@/features/reports/api/sales"
 import { ReportTiles } from "@/features/reports/components/report-tiles"
 import type { ReportTile } from "@/features/reports/components/report-tiles"
 import { ShareTable } from "@/features/reports/components/share-table"
 import { useReport } from "@/features/reports/use-report"
-import { formatCount, formatMoney, formatPercent } from "@/lib/format"
+import { formatCount, formatMoney, formatPercent } from "@qticaret/admin-ui/lib/format"
 
 const M = "reports.marketing"
 

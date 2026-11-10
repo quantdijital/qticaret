@@ -1,7 +1,7 @@
 import type { TFunction } from "i18next"
 import type { CustomerSegment, SegmentRules } from "@/features/customers/api/groups"
-import { formatMoney } from "@/lib/format"
-import { parseCountInput, parseMoneyInput } from "@/lib/money-input"
+import { formatMoney } from "@qticaret/admin-ui/lib/format"
+import { parseCountInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 
 export type Tristate = "any" | "yes" | "no"
 

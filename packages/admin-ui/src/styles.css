@@ -1,0 +1,165 @@
+/*
+ * The admin panels' Tailwind wiring (docs/18 §4, adr/0061 §1.4): the
+ * tokens, the utilities that read them, the base rules and the focus rule.
+ * The app imports Tailwind first, then this file:
+ *   @import "tailwindcss";
+ *   @import "@qticaret/admin-ui/styles.css";
+ */
+@import "./theme/tokens.css";
+
+/* The package's own classes (components, patterns, charts) are generated too */
+@source "./";
+
+@custom-variant dark (&:is(.dark *));
+
+/* Tailwind utilities read the semantic tokens; components use utilities only */
+@theme inline {
+  --font-sans: var(--font-sans);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-text: var(--primary-text);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-destructive-text: var(--destructive-text);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-success-text: var(--success-text);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-soft: var(--warning-soft);
+  --color-warning-text: var(--warning-text);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-soft: var(--info-soft);
+  --color-info-text: var(--info-text);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-chart-1-wash: var(--chart-1-wash);
+  --color-chart-muted: var(--chart-muted);
+  --color-chart-grid: var(--chart-grid);
+  --color-chart-canceled: var(--chart-canceled);
+  --color-chart-ramp-1: var(--chart-ramp-1);
+  --color-chart-ramp-2: var(--chart-ramp-2);
+  --color-chart-ramp-3: var(--chart-ramp-3);
+  --color-chart-ramp-4: var(--chart-ramp-4);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted-foreground: var(--sidebar-muted-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --shadow-overlay: var(--shadow-overlay);
+  --shadow-card: var(--shadow-card);
+  /* docs/18 §4: the primitives' own scale reads the two theme shadows, light and dark alike */
+  --shadow-xs: var(--shadow-card);
+  --shadow-sm: var(--shadow-card);
+  --shadow-md: var(--shadow-overlay);
+  --shadow-lg: var(--shadow-overlay);
+  --shadow-xl: var(--shadow-overlay);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    font-family: var(--font-sans);
+    /* Inter's open digits and tabular numbers for amounts and tables */
+    font-feature-settings:
+      "cv11" 1,
+      "ss01" 1;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /*
+   * No browser spinner on any number input (the owner, 2026-11-06:
+   * "browser'a özgü kalmasın"): the panel's NumberField draws its own
+   * chevrons, and an input the panel did not write shows none at all.
+   */
+  input[type="number"] {
+    appearance: textfield;
+    -moz-appearance: textfield;
+  }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button {
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Amounts, counts and codes line up */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * Radix's checkbox, radio, switch and select put a hidden native input
+   * beside their button, absolutely positioned against the nearest
+   * positioned box. The control's own row is that box: in a list that
+   * scrolls inside itself the input stays clipped with its row instead of
+   * stretching the page under it (2026-11-03: /settings/marketing scrolled
+   * 1000 px past its end, one 32 px input per category of the feed list).
+   * Zero specificity, under the utilities: a row placed on purpose wins.
+   */
+  :where(
+    :has(
+      > button:is([role="checkbox"], [role="radio"], [role="switch"]) + input[aria-hidden="true"]
+    ),
+    :has(> button[role="combobox"] ~ select[aria-hidden="true"])
+  ) {
+    position: relative;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/*
+ * Focus (docs/18): fields show no ring or coloured border; controls show a
+ * thin outline to a keyboard user only. Once the mouse or a finger is used,
+ * no outline at all, even where a menu hands focus back to its button
+ * (`lib/input-mode.ts`). Outside the layers, so it wins over utilities.
+ */
+html[data-input="pointer"] :focus-visible {
+  outline: none;
+}

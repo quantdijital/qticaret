@@ -2,8 +2,8 @@ import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Field } from "@/components/patterns/form-section"
-import { Button } from "@/components/ui/button"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -12,9 +12,9 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+} from "@qticaret/admin-ui/ui/dialog"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import { MENU_LIMITS, MENU_LOCATIONS, useCreateMenu } from "@/features/storefront/api/menus"
 import type { Menu, MenuLocation } from "@/features/storefront/api/menus"
 import { titleProblem } from "@/features/storefront/menu-rows"

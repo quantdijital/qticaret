@@ -1,5 +1,5 @@
 import type { OrderMoney, RefundRequest } from "@/features/orders/api/orders"
-import { parseMoneyInput } from "@/lib/money-input"
+import { parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 
 /** How a refund is chosen: units of lines (and the shipping), or a free amount. */
 export type RefundMode = "items" | "amount"

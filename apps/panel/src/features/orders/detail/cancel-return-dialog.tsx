@@ -1,8 +1,8 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Field } from "@/components/patterns/form-section"
-import { Button } from "@/components/ui/button"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -10,8 +10,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Textarea } from "@/components/ui/textarea"
+} from "@qticaret/admin-ui/ui/dialog"
+import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { useCancelReturn } from "@/features/orders/api/returns"
 import type { ReturnRequest } from "@/features/orders/api/returns"
 import { errorText } from "@/lib/errors"

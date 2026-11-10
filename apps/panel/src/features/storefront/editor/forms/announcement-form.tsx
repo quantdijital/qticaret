@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { Input } from "@/components/ui/input"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import { ShopTokenPreview, TokenSlot } from "@/features/settings/components/shop-token-menu"
 import { ListFooter, RowActions, RowCell } from "@/features/settings/components/storefront-rows"
 import type { AnnouncementBar } from "@/features/storefront/api/layout"

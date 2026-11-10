@@ -2,13 +2,13 @@ import { getRouteApi, useNavigate } from "@tanstack/react-router"
 import { CalendarRange } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { PeriodPicker } from "@/components/patterns/period-picker"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { PeriodPicker } from "@qticaret/admin-ui/patterns/period-picker"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { Popover, PopoverContent, PopoverTrigger } from "@qticaret/admin-ui/ui/popover"
 import { DEFAULT_PERIOD, PERIODS } from "@/features/dashboard/period"
 import { turkishDay } from "@/features/reports/range"
-import { formatDate } from "@/lib/format"
+import { formatDate } from "@qticaret/admin-ui/lib/format"
 
 const route = getRouteApi("/_auth/reports")
 const P = "period.custom"
@@ -31,6 +31,7 @@ export function ReportRangePicker() {
     <div className="flex flex-wrap items-center gap-2">
       <PeriodPicker
         periods={PERIODS}
+        labelOf={(key) => t(`period.${key}`)}
         // No preset lit while a range of days is shown
         value={custom ? null : (search.period ?? DEFAULT_PERIOD)}
         onChange={(next) => {

@@ -4,11 +4,11 @@ import { Loader2, Package, Plus, X } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Pagination } from "@/components/patterns/pagination"
-import { SearchInput } from "@/components/patterns/search-input"
-import { SectionCard } from "@/components/patterns/section-card"
-import { ErrorState } from "@/components/patterns/states"
-import { Button } from "@/components/ui/button"
+import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
+import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   COLLECTION_PRODUCTS_PAGE_SIZE,
   collectionProductsQuery,
@@ -19,7 +19,7 @@ import { ProductStatusBadge } from "@/features/products/components/product-statu
 import { ProductThumb } from "@/features/products/components/product-thumb"
 import { RecordPickerDialog } from "@/features/storefront/editor/forms/record-picker-dialog"
 import { errorText } from "@/lib/errors"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 const P = "collections.products"
 

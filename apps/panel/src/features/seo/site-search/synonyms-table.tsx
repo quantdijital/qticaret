@@ -1,17 +1,17 @@
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { DataTable } from "@/components/patterns/data-table"
-import type { Column } from "@/components/patterns/data-table"
-import { Button } from "@/components/ui/button"
+import { DataTable } from "@qticaret/admin-ui/patterns/data-table"
+import type { Column } from "@qticaret/admin-ui/patterns/data-table"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@qticaret/admin-ui/ui/dropdown-menu"
 import type { SynonymGroup } from "@/features/seo/api/synonyms"
-import { formatDate, formatDateTime } from "@/lib/format"
+import { formatDate, formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const S = "seo.siteSearch"
 

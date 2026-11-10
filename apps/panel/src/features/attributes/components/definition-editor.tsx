@@ -2,17 +2,17 @@ import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { Controller, useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Field } from "@/components/patterns/form-section"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import type { TemplateForm } from "@/features/attributes/form"
 import { AliasChips } from "./alias-chips"
 import { DefinitionGroupField } from "./group-list"

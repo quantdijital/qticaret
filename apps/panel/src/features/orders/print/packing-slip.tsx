@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 import type { PackingItem, PackingOrder, PackingSlips } from "@/features/orders/api/packing"
-import { formatDate, formatMoney } from "@/lib/format"
+import { formatDate, formatMoney } from "@qticaret/admin-ui/lib/format"
 
 const P = "orders.print"
 

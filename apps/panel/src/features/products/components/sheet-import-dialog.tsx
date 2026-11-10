@@ -3,7 +3,7 @@ import { FileSpreadsheet, Loader2, Upload } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { downloadTemplate, sheetJobQuery, uploadSheet } from "@/features/products/api/sheets"
 import type { ImportSummary, SheetMode } from "@/features/products/api/sheets"
 import { SheetJobResult } from "@/features/products/components/sheet-job-result"

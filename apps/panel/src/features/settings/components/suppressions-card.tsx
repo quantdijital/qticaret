@@ -3,18 +3,18 @@ import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { SectionCard } from "@/components/patterns/section-card"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import {
   addSuppression,
   removeSuppression,
   suppressionsQuery,
 } from "@/features/settings/api/messaging"
 import { errorText } from "@/lib/errors"
-import { formatDate } from "@/lib/format"
+import { formatDate } from "@qticaret/admin-ui/lib/format"
 
 const L = "settings.notifications.suppressions"
 

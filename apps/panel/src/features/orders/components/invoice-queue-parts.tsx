@@ -1,7 +1,7 @@
 import { Loader2, RotateCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { useCan } from "@/features/auth/api/staff"
 import { MAX_BULK_RETRY, useRetryInvoices } from "@/features/orders/api/invoices"
 import type { InvoiceRecord } from "@/features/orders/api/invoices"

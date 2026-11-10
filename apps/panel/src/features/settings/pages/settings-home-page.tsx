@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { ChevronRight } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { PageHeader } from "@/components/patterns/page-header"
-import { SectionCard } from "@/components/patterns/section-card"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { useCapabilities } from "@/features/auth/api/staff"
 import { visibleGroups } from "@/features/settings/sections"
 

@@ -2,10 +2,10 @@ import { X } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { NumberField } from "@/components/patterns/number-field"
-import type { PickerOption } from "@/components/patterns/search-picker"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import type { PickerOption } from "@qticaret/admin-ui/patterns/search-picker"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
 import {
   Dialog,
   DialogBody,
@@ -15,13 +15,13 @@ import {
   DialogHeader,
   DialogSection,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { useEditOrder, useOrderEditPreview } from "@/features/orders/api/edit"
 import type { OrderEditChange } from "@/features/orders/api/edit"
 import type { OrderDetail } from "@/features/orders/api/orders"
 import { differenceText } from "@/features/orders/exchange-text"
 import { errorText } from "@/lib/errors"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 import { EditAddLine } from "./edit-add-line"
 
 const E = "orders.edit"

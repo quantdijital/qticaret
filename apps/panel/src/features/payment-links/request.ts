@@ -1,4 +1,4 @@
-import { formatMoneyInput } from "@/lib/money-input"
+import { formatMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 import type { LinkInput, PaymentLink, PreviewInput } from "./api/types"
 import { DEFAULT_HOURS, EMPTY_FORM, MAX_QUANTITY, discountNumber, hoursOf } from "./form"
 import type { FormLine, LinkFormValues } from "./form"

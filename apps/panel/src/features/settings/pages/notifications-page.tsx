@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
 import { SettingsTabs } from "@/features/settings/components/settings-tabs"
 import { SmsPanel } from "@/features/settings/pages/sms-page"
-import { PageHeader } from "@/components/patterns/page-header"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { CustomerMessagesCard } from "@/features/settings/components/customer-messages-card"
 import { EmailLimitCard } from "@/features/settings/components/email-limit-card"
 import { SenderDomainCard } from "@/features/settings/components/sender-domain-card"

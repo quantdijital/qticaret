@@ -1,4 +1,4 @@
-import type { StatusTone } from "@/components/patterns/status-badge"
+import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
 import { targetRulesFor } from "./scope"
 import type { Scope } from "./scope"
 

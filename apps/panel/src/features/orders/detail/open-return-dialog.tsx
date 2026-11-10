@@ -2,9 +2,9 @@ import { CircleAlert, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { NumberField } from "@/components/patterns/number-field"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -14,17 +14,17 @@ import {
   DialogHeader,
   DialogSection,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Label } from "@/components/ui/label"
+} from "@qticaret/admin-ui/ui/dialog"
+import { Label } from "@qticaret/admin-ui/ui/label"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+} from "@qticaret/admin-ui/ui/select"
+import { Textarea } from "@qticaret/admin-ui/ui/textarea"
+import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import { lineOpen, useOpenReturnRequest } from "@/features/orders/api/returnable"
 import type { OpenRequest, Returnable } from "@/features/orders/api/returnable"
 import { RETURN_REASONS } from "@/features/orders/api/returns"

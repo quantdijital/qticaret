@@ -2,7 +2,7 @@ import { FileText, ListChecks } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { documentsOf } from "@/features/settings/api/migration"
 import type { KindCounts, MigrationMode } from "@/features/settings/api/migration"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 const D = "settings.migration.run.descriptions"
 

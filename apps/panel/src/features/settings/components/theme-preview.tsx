@@ -1,11 +1,11 @@
 import { ChartColumn, LayoutGrid, Package, ShoppingBag, Users } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { formatMoney } from "@/lib/format"
-import { cn } from "@/lib/utils"
-import type { ResolvedMode } from "@/theme"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { formatMoney } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
+import type { ResolvedMode } from "@qticaret/admin-ui/theme"
 
 const ROWS = [
   { id: "1042", total: "1250.80", status: "paid" },

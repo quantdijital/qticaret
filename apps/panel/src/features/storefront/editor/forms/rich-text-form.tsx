@@ -1,7 +1,7 @@
 import { Pencil } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -9,7 +9,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { docText } from "@/features/content/doc-text"
 import { RichEditor } from "@/features/content/editor/rich-editor"
 import type { RichTextSection } from "@/features/storefront/api/layout"

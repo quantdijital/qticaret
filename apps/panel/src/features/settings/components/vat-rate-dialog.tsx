@@ -2,9 +2,9 @@ import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Field } from "@/components/patterns/form-section"
-import { NumberField } from "@/components/patterns/number-field"
-import { Button } from "@/components/ui/button"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -13,12 +13,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+} from "@qticaret/admin-ui/ui/dialog"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import { useAddVatRate, useUpdateVatRate, vatNameOf } from "@/features/settings/api/vat-rates"
 import type { VatRate } from "@/features/settings/api/vat-rates"
 import { errorText } from "@/lib/errors"
-import { parseDecimalInput } from "@/lib/money-input"
+import { parseDecimalInput } from "@qticaret/admin-ui/lib/money-input"
 
 const V = "settings.vatRates"
 const NAME_MAX = 60

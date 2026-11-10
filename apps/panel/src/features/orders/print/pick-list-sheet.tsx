@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next"
 import type { PackingSlips } from "@/features/orders/api/packing"
 import { LineExtras, PrintHead } from "@/features/orders/print/packing-slip"
 import { pickList } from "@/features/orders/print/pick-list"
-import { formatDate } from "@/lib/format"
+import { formatDate } from "@qticaret/admin-ui/lib/format"
 
 const P = "orders.print"
 

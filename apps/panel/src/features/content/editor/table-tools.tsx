@@ -2,7 +2,7 @@ import { useEditorState } from "@tiptap/react"
 import type { Editor } from "@tiptap/react"
 import { Columns3, Rows3, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Separator } from "@/components/ui/separator"
+import { Separator } from "@qticaret/admin-ui/ui/separator"
 import { ToolButton } from "./tool-button"
 
 // The server's bound for a table row's cells (adr/0019)

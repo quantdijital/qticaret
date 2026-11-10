@@ -3,8 +3,8 @@ import { Link, useNavigate } from "@tanstack/react-router"
 import { ExternalLink, LogOut, Search, Settings, ShieldCheck } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback } from "@qticaret/admin-ui/ui/avatar"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,10 +12,10 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Kbd, KbdGroup } from "@/components/ui/kbd"
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+} from "@qticaret/admin-ui/ui/dropdown-menu"
+import { Kbd, KbdGroup } from "@qticaret/admin-ui/ui/kbd"
+import { Separator } from "@qticaret/admin-ui/ui/separator"
+import { SidebarTrigger } from "@qticaret/admin-ui/ui/sidebar"
 import { useCurrentUser, useLogout } from "@/features/auth/api/me"
 import { useStaff } from "@/features/auth/api/staff"
 import { NotificationBell } from "@/features/notifications/notification-bell"

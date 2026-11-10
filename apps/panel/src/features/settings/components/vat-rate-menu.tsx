@@ -1,15 +1,15 @@
 import { MoreHorizontal, Pencil, RotateCcw, Star, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@qticaret/admin-ui/ui/dropdown-menu"
 import type { VatRate } from "@/features/settings/api/vat-rates"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 const V = "settings.vatRates"
 

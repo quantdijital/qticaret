@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { Hash, Lightbulb, Search, SearchX } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { ErrorState } from "@/components/patterns/states"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -11,13 +11,13 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@qticaret/admin-ui/ui/table"
 import { searchReportQuery } from "@/features/reports/api/search"
 import type { SearchReport, SearchTermRow } from "@/features/reports/api/search"
 import { ReportTiles } from "@/features/reports/components/report-tiles"
 import type { ReportTile } from "@/features/reports/components/report-tiles"
 import { useReportRange } from "@/features/reports/use-report"
-import { formatCount, formatPercent } from "@/lib/format"
+import { formatCount, formatPercent } from "@qticaret/admin-ui/lib/format"
 import { errorText } from "@/lib/errors"
 
 const S = "reports.search"

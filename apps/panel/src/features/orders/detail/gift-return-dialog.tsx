@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { Gift, Loader2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { returnLinesQuery, useApproveReturn } from "@/features/orders/api/returns"
 import type { ReturnRequest } from "@/features/orders/api/returns"
 import { errorText } from "@/lib/errors"

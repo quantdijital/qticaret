@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import type { CustomerMessage, TextField } from "@/features/settings/api/customer-messages"
 import {
   SMS_MAX_PARTS,
@@ -13,8 +13,8 @@ import {
 } from "@/features/settings/customer-messages"
 import { TokenSlot } from "@/features/settings/components/shop-token-menu"
 import type { ExtraToken } from "@/features/settings/components/shop-token-menu"
-import { formatCount } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const C = "settings.notifications.customer"
 

@@ -1,10 +1,10 @@
 import type { Editor } from "@tiptap/react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Field } from "@/components/patterns/form-section"
-import { SearchPicker } from "@/components/patterns/search-picker"
-import type { PickerOption } from "@/components/patterns/search-picker"
-import { Button } from "@/components/ui/button"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { SearchPicker } from "@qticaret/admin-ui/patterns/search-picker"
+import type { PickerOption } from "@qticaret/admin-ui/patterns/search-picker"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { sdk } from "@/lib/sdk"
 import type { CardKind } from "./card-nodes"
 

@@ -4,15 +4,19 @@ import { useFieldArray, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
-import { CardForm } from "@/components/patterns/card-form"
-import { Field } from "@/components/patterns/form-section"
-import { NumberField } from "@/components/patterns/number-field"
-import { Button } from "@/components/ui/button"
+import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { useSaveSection } from "@/features/settings/api/sections"
 import type { ShippingSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@/lib/forms"
-import { formatMoneyInput, parseDecimalInput, parseMoneyInput } from "@/lib/money-input"
+import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import {
+  formatMoneyInput,
+  parseDecimalInput,
+  parseMoneyInput,
+} from "@qticaret/admin-ui/lib/money-input"
 
 const S = "settings.shipping.rules"
 

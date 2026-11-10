@@ -1,6 +1,6 @@
 import { Mail, Smartphone } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import { BULK_CHANNELS } from "@/features/bulk-messages/api/types"
 import type { BulkChannel } from "@/features/bulk-messages/api/types"
 

@@ -1,6 +1,6 @@
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { ImageGallery, MAX_IMAGES } from "@/features/products/components/image-gallery"
 import type { WizardValues } from "../schema"
 

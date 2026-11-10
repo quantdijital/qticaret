@@ -1,15 +1,15 @@
 import { Controller, useWatch } from "react-hook-form"
 import type { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Field } from "@/components/patterns/form-section"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
+} from "@qticaret/admin-ui/ui/select"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
 import type { Restriction } from "@/features/categories/api/restrictions"
 import { RestrictionSelect } from "@/features/categories/components/restriction-select"
 import { PRODUCT_CONDITIONS, PRODUCT_KINDS } from "@/features/products/api/product-edit"

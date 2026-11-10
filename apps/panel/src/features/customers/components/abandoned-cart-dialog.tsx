@@ -4,14 +4,14 @@ import { Info, Loader2, Mail, MessageCircle, Package, Phone, User } from "lucide
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { DetailDialog } from "@/components/patterns/detail-dialog"
-import { RecordStepper } from "@/components/patterns/record-stepper"
-import type { RecordSteps } from "@/components/patterns/record-stepper"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { DialogBody, DialogSection } from "@/components/ui/dialog"
-import { Skeleton } from "@/components/ui/skeleton"
+import { DetailDialog } from "@qticaret/admin-ui/patterns/detail-dialog"
+import { RecordStepper } from "@qticaret/admin-ui/patterns/record-stepper"
+import type { RecordSteps } from "@qticaret/admin-ui/patterns/record-stepper"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Alert, AlertDescription } from "@qticaret/admin-ui/ui/alert"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { DialogBody, DialogSection } from "@qticaret/admin-ui/ui/dialog"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import {
   abandonedCartQuery,
   useRemindCart,
@@ -20,7 +20,7 @@ import {
 import type { AbandonedCartDetail } from "@/features/customers/api/abandoned-carts"
 import { ReminderBadge } from "@/features/customers/components/reminder-badge"
 import { errorText } from "@/lib/errors"
-import { formatDateTime, formatMoney, formatPhone } from "@/lib/format"
+import { formatDateTime, formatMoney, formatPhone } from "@qticaret/admin-ui/lib/format"
 
 const C = "customers.abandoned"
 

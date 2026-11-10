@@ -1,11 +1,11 @@
 import { Outlet, useRouterState } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
-import { PageHeader } from "@/components/patterns/page-header"
-import { SectionNav } from "@/components/patterns/section-nav"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { SectionNav } from "@qticaret/admin-ui/patterns/section-nav"
 import { ReportExportButton } from "@/features/reports/components/report-export"
 import { ReportRangePicker } from "@/features/reports/components/report-range-picker"
 import { useReport } from "@/features/reports/use-report"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 /**
  * Reports (docs/06 §4, F11.1–F11.4): a preset period or a range of days,

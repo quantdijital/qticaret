@@ -1,6 +1,6 @@
 import { CalendarClock } from "lucide-react"
 import type { TFunction } from "i18next"
-import { formatDate } from "@/lib/format"
+import { formatDate } from "@qticaret/admin-ui/lib/format"
 
 const text = (value: unknown): string => (typeof value === "string" ? value : "")
 

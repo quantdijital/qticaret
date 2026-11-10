@@ -3,17 +3,17 @@ import { MapPinOff, MoreHorizontal, Pencil, Plus, Star, Trash2, Warehouse } from
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { ErrorState, LoadingRows } from "@/components/patterns/states"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@qticaret/admin-ui/ui/dropdown-menu"
 import {
   locationsQuery,
   useDeleteLocation,
@@ -23,7 +23,7 @@ import type { Location } from "@/features/settings/api/locations"
 import { LocationDialog } from "@/features/settings/components/location-dialog"
 import { LowStockCard } from "@/features/settings/components/low-stock-card"
 import { errorText } from "@/lib/errors"
-import { formatPhone } from "@/lib/format"
+import { formatPhone } from "@qticaret/admin-ui/lib/format"
 
 function AddressLines({ location }: { location: Location }) {
   const { t } = useTranslation()

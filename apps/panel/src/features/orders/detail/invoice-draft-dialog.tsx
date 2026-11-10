@@ -2,7 +2,7 @@ import { Loader2 } from "lucide-react"
 import { useEffect } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -10,11 +10,11 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { useInvoiceDraft } from "@/features/orders/api/invoices"
 import type { DraftLine, InvoiceDraft } from "@/features/orders/api/invoices"
 import { errorText } from "@/lib/errors"
-import { formatDate, formatMoney } from "@/lib/format"
+import { formatDate, formatMoney } from "@qticaret/admin-ui/lib/format"
 import { isReauthCancelled } from "@/lib/reauth"
 
 const V = "orders.invoice.draft"

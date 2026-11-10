@@ -1,7 +1,7 @@
 import { FileText, ListChecks, Loader2, PackageCheck, Truck } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import type { BoardOrder } from "@/features/orders/api/orders"
 import { MAX_BULK_SHIP, useDeliverOrders, useShipOrders } from "@/features/orders/api/shipping"
 import type { ShipResult } from "@/features/orders/api/shipping"

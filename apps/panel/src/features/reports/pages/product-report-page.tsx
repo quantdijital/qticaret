@@ -1,13 +1,13 @@
 import { Boxes, Package, Tag, TrendingUp } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import type { DashboardOverview } from "@/features/dashboard/api/overview"
 import { ProductTable } from "@/features/reports/components/product-table"
 import { ReportTiles } from "@/features/reports/components/report-tiles"
 import type { ReportTile } from "@/features/reports/components/report-tiles"
 import { rankedProducts } from "@/features/reports/rank"
 import { useReport } from "@/features/reports/use-report"
-import { formatCount, formatMoney } from "@/lib/format"
+import { formatCount, formatMoney } from "@qticaret/admin-ui/lib/format"
 
 const CAP = 100
 

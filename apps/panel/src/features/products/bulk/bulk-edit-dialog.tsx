@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -11,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { startBulkEdit } from "@/features/products/api/bulk"
 import type { BulkAction } from "@/features/products/api/bulk"
 import { sheetJobQuery } from "@/features/products/api/sheets"
@@ -20,7 +20,7 @@ import { EMPTY_BULK_FORM, bulkChangeOf } from "@/features/products/bulk/bulk-for
 import type { BulkForm } from "@/features/products/bulk/bulk-form"
 import { BulkJobResult } from "@/features/products/bulk/bulk-job-result"
 import { errorText } from "@/lib/errors"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 interface BulkEditDialogProps {
   /** The change to make; null while the dialog is closed. */

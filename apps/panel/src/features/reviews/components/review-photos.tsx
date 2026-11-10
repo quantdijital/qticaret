@@ -7,7 +7,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import type { ReviewPhoto } from "@/features/reviews/api/reviews"
 
 const R = "reviews.photos"

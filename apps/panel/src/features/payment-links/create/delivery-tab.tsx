@@ -1,17 +1,17 @@
 import { useQuery } from "@tanstack/react-query"
 import { Controller, useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Field } from "@/components/patterns/form-section"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Input } from "@/components/ui/input"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
+} from "@qticaret/admin-ui/ui/select"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
 import type { LinkFormValues } from "@/features/payment-links/form"
 import { shopShippingOptionsQuery } from "@/features/settings/api/shipping-options"
 import { TrAddressFields } from "@/features/tr-address/address-fields"

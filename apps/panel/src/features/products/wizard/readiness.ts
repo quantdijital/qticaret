@@ -1,4 +1,4 @@
-import { parseMoneyInput } from "@/lib/money-input"
+import { parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 import { hasMeasures } from "./schema"
 import type { WizardValues } from "./schema"
 

@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
-import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
+import { Alert, AlertAction, AlertDescription } from "@qticaret/admin-ui/ui/alert"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { chargebacksQuery, evidenceUrl } from "@/features/orders/api/chargebacks"
-import { formatDateTime } from "@/lib/format"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const C = "orders.chargeback"
 

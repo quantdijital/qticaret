@@ -1,8 +1,8 @@
 import { ChevronRight, Star } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import type { GoogleReviewRow } from "@/features/reviews/api/google-reviews"
-import { formatDate, formatDateTime } from "@/lib/format"
+import { formatDate, formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const G = "reviews.google"
 

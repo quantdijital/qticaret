@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { Landmark, Receipt, ShieldAlert, Undo2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { ErrorState } from "@/components/patterns/states"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -11,7 +11,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@qticaret/admin-ui/ui/table"
 import { financeReportQuery } from "@/features/reports/api/finance"
 import type { FinanceReport } from "@/features/reports/api/finance"
 import { ReportExportButton } from "@/features/reports/components/report-export"
@@ -19,7 +19,7 @@ import { StatementChecksCard } from "@/features/reports/components/statement-che
 import { ReportTiles } from "@/features/reports/components/report-tiles"
 import type { ReportTile } from "@/features/reports/components/report-tiles"
 import { useReportRange } from "@/features/reports/use-report"
-import { formatCount, formatDate, formatMoney } from "@/lib/format"
+import { formatCount, formatDate, formatMoney } from "@qticaret/admin-ui/lib/format"
 import { errorText } from "@/lib/errors"
 
 const F = "reports.finance"

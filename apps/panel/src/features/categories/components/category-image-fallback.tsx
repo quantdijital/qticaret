@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { categoryTreeQuery } from "@/features/categories/api/categories"
 import { categoryFallbackQuery } from "@/features/categories/api/images"
 import { descendantsOf } from "@/features/categories/tree"

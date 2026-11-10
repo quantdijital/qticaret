@@ -7,12 +7,12 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+} from "@qticaret/admin-ui/ui/dialog"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@qticaret/admin-ui/ui/tabs"
 import type { MediaAsset } from "@/features/media/api/media"
 import { AddressTab, LibraryTab, UploadTab } from "@/features/media/components/picker-tabs"
 import type { UploadZoneHandle } from "@/features/media/components/upload-zone"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 type Source = "library" | "upload" | "address"
 

@@ -19,7 +19,7 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "@/components/ui/command"
+} from "@qticaret/admin-ui/ui/command"
 import { useLogout } from "@/features/auth/api/me"
 import { SearchResults } from "@/features/search/search-results"
 import { ALL_NAV_ITEMS } from "./navigation"

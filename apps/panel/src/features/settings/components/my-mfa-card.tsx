@@ -4,8 +4,8 @@ import { KeyRound, Smartphone } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -13,10 +13,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
+} from "@qticaret/admin-ui/ui/dialog"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { Label } from "@qticaret/admin-ui/ui/label"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { factorsQuery, useDisableFactor, useRecoveryCodes } from "@/features/auth/api/mfa"
 import { useStaff } from "@/features/auth/api/staff"
 import { RecoveryCodes } from "@/features/security/components/recovery-codes"

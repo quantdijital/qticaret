@@ -2,8 +2,8 @@ import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { CardForm } from "@/components/patterns/card-form"
-import { Field } from "@/components/patterns/form-section"
+import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import {
   categoryRestrictionsQuery,
   useSetCategoryRestriction,

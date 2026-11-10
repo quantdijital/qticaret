@@ -3,13 +3,13 @@ import { Link } from "@tanstack/react-router"
 import { FileCode2, Loader2, RefreshCw, TriangleAlert } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Button } from "@/components/ui/button"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { SITEMAP_JOB, sitemapStatusQuery } from "@/features/seo/api/sitemap"
 import { useStartJob } from "@/features/settings/api/activity"
 import { errorText } from "@/lib/errors"
-import { formatCount, formatRelative } from "@/lib/format"
+import { formatCount, formatRelative } from "@qticaret/admin-ui/lib/format"
 
 function Notice({ children }: { children: React.ReactNode }) {
   return (

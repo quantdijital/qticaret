@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import type { BoardOrder } from "@/features/orders/api/orders"
 
 /**

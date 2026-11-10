@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Alert, AlertDescription, AlertTitle } from "@qticaret/admin-ui/ui/alert"
 import type { StockShortLine } from "@/features/orders/stock-short"
 
 /**

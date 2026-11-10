@@ -1,9 +1,9 @@
 import { Plus, X } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { ChipInput } from "@/components/patterns/chip-input"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { ChipInput } from "@qticaret/admin-ui/patterns/chip-input"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import type { WizardValues } from "../schema"
 
 type Option = WizardValues["options"][number]

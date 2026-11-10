@@ -5,7 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { STAFF_KEY } from "@/features/auth/api/staff"
 import type { LegalDetail } from "@/features/legal/api"
-import { formatDateTime } from "@/lib/format"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 import { LegalStateCard } from "./legal-state-card"
 
 const fetchMock = vi.hoisted(() => vi.fn())

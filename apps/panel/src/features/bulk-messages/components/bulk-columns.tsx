@@ -1,10 +1,10 @@
 import { Link } from "@tanstack/react-router"
 import { Mail, Smartphone } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import type { Column } from "@/components/patterns/data-table"
+import type { Column } from "@qticaret/admin-ui/patterns/data-table"
 import type { BulkMessageSummary } from "@/features/bulk-messages/api/types"
 import { BulkStatusBadge } from "@/features/bulk-messages/components/bulk-status"
-import { formatCount, formatDateTime } from "@/lib/format"
+import { formatCount, formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const B = "bulkMessages"
 

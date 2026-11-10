@@ -4,20 +4,20 @@ import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
-import { CardForm } from "@/components/patterns/card-form"
-import { Field } from "@/components/patterns/form-section"
-import { NumberField } from "@/components/patterns/number-field"
+import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { MarketingSettings, ShippingSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@/lib/forms"
+import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
 
 const S = "settings.shipping.rules"
 

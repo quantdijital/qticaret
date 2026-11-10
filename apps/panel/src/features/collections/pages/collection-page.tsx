@@ -4,18 +4,18 @@ import { MoreHorizontal, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
-import { PageHeader } from "@/components/patterns/page-header"
-import { ErrorState, LoadingRows } from "@/components/patterns/states"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { PageColumn, PageGrid } from "@qticaret/admin-ui/patterns/page-grid"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@qticaret/admin-ui/ui/dropdown-menu"
 import { collectionQuery, useDeleteCollection } from "@/features/collections/api/collections"
 import { CollectionGeneralCard } from "@/features/collections/components/collection-general-card"
 import { CollectionImageCard } from "@/features/collections/components/collection-image-card"
@@ -25,7 +25,7 @@ import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
 import { SeoCard } from "@/features/seo/components/seo-card"
 import { DESCRIPTION_EXCERPT, excerpt } from "@/features/seo/seo-text"
 import { errorText } from "@/lib/errors"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 const route = getRouteApi("/_auth/collections/$id")
 

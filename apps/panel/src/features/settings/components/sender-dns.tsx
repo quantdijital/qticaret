@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import type { StatusTone } from "@/components/patterns/status-badge"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
+import { Alert, AlertDescription } from "@qticaret/admin-ui/ui/alert"
 import type { DnsRecordState, SenderDns } from "@/features/settings/api/messaging"
 
 const D = "settings.notifications.domain.dns"

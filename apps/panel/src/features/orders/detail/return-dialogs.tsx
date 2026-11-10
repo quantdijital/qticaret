@@ -2,9 +2,9 @@ import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { NumberField } from "@/components/patterns/number-field"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
 import {
   Dialog,
   DialogBody,
@@ -13,7 +13,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { excludedLinesOf, returnLinesQuery, useReceiveReturn } from "@/features/orders/api/returns"
 import type { ReturnReason, ReturnRequest } from "@/features/orders/api/returns"
 import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"

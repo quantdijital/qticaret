@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@qticaret/admin-ui/ui/avatar"
 
 const initials = (name: string | null) =>
   (name ?? "?")

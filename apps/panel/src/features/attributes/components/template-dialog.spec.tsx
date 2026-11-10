@@ -3,7 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import { useRecordWalk } from "@/components/patterns/use-record-walk"
+import { useRecordWalk } from "@qticaret/admin-ui/hooks/use-record-walk"
 import type { AttributeDefinition, AttributeTemplate } from "@/features/attributes/types"
 import { TemplateDialog } from "./template-dialog"
 

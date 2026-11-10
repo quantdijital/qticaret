@@ -1,7 +1,11 @@
 import { z } from "zod"
 import type { VariantEdit, VariantMeasures } from "@/features/products/api/product-edit"
 import type { ProductDetail } from "@/features/products/api/products"
-import { formatMoneyInput, parseMoneyInput, parseMeasureInput } from "@/lib/money-input"
+import {
+  formatMoneyInput,
+  parseMoneyInput,
+  parseMeasureInput,
+} from "@qticaret/admin-ui/lib/money-input"
 import { MEASURES, measureSchema, measureText } from "./measures"
 import { VARIANT_CODES_TARGET } from "./sections"
 import { codeEdits, MPN_MAX, savedCodes, SKU_MAX, typedGtinError } from "./variant-codes"

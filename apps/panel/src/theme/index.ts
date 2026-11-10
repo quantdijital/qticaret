@@ -1,5 +1,3 @@
-export { applyAppearance, bootTheme, paint, rememberAppearance, resolveMode } from "./apply"
-export { AA_LARGE, AA_TEXT, contrast, parseBrandColor, resolveTheme } from "./engine"
-export type { ResolvedMode, ResolvedTheme, ThemeVariables } from "./engine"
+// The engine and its tokens are @qticaret/admin-ui's (`/theme`); the panel keeps the shop's form
 export { appearanceSchema } from "./schema"
 export type { AppearanceForm } from "./schema"

@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react"
 import { Editor } from "@tiptap/react"
 import { afterEach, describe, expect, it } from "vitest"
 import "@/lib/i18n"
-import { TooltipProvider } from "@/components/ui/tooltip"
+import { TooltipProvider } from "@qticaret/admin-ui/ui/tooltip"
 import { contentExtensions } from "./extensions"
 import { Toolbar } from "./toolbar"
 

@@ -4,21 +4,21 @@ import { EllipsisVertical } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { DataTable } from "@/components/patterns/data-table"
-import type { Column } from "@/components/patterns/data-table"
-import { FilterTabs } from "@/components/patterns/filter-tabs"
-import { PageHeader } from "@/components/patterns/page-header"
-import { Pagination } from "@/components/patterns/pagination"
-import { ErrorState } from "@/components/patterns/states"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import type { StatusTone } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
+import { DataTable } from "@qticaret/admin-ui/patterns/data-table"
+import type { Column } from "@qticaret/admin-ui/patterns/data-table"
+import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@qticaret/admin-ui/ui/dropdown-menu"
 import {
   CHARGEBACK_PAGE_SIZE,
   NEXT_STATUS,
@@ -29,7 +29,7 @@ import {
 import type { Chargeback, ChargebackStatus } from "@/features/orders/api/chargebacks"
 import { Fact, QueueDialog } from "@/features/orders/components/queue-dialog"
 import { errorText } from "@/lib/errors"
-import { formatDateTime, formatMoney } from "@/lib/format"
+import { formatDateTime, formatMoney } from "@qticaret/admin-ui/lib/format"
 
 const C = "orders.chargeback"
 const route = getRouteApi("/_auth/orders/chargebacks")

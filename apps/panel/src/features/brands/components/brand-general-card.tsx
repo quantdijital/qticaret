@@ -1,16 +1,16 @@
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { CardForm } from "@/components/patterns/card-form"
-import { Field } from "@/components/patterns/form-section"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
-import { Textarea } from "@/components/ui/textarea"
+import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
+import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { useUpdateBrand } from "@/features/brands/api/brands"
 import type { Brand } from "@/features/brands/api/brands"
 import { useBrandPathPrefix } from "@/features/brands/use-brand-path"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@/lib/forms"
+import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
 
 interface Values {
   name: string

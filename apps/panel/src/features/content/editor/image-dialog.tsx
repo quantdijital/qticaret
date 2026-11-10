@@ -1,9 +1,9 @@
 import type { Editor } from "@tiptap/react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Field } from "@/components/patterns/form-section"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { MediaField } from "@/components/patterns/media-field"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -12,8 +12,8 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+} from "@qticaret/admin-ui/ui/dialog"
+import { Input } from "@qticaret/admin-ui/ui/input"
 
 // Mounted on each opening: a selected image's own alt text, else a new image from scratch
 function ImageForm({ editor, onDone }: { editor: Editor; onDone: () => void }) {

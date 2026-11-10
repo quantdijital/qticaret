@@ -2,11 +2,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import {
   createCustomerGroup,
   customerGroupsQuery,

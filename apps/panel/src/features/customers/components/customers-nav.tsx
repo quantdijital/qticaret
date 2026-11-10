@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { SectionNav } from "@/components/patterns/section-nav"
+import { SectionNav } from "@qticaret/admin-ui/patterns/section-nav"
 import { useCan } from "@/features/auth/api/staff"
 
 /**

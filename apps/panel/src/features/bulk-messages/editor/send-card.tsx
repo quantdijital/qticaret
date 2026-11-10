@@ -2,10 +2,10 @@ import { CalendarClock, Loader2, Send } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   useScheduleBulkMessage,
   useSendBulkMessage,
@@ -13,7 +13,7 @@ import {
 import type { AudiencePreview, BulkChannel } from "@/features/bulk-messages/api/types"
 import { hourText, readSchedule, withinSmsHours } from "@/features/bulk-messages/schedule"
 import { errorText } from "@/lib/errors"
-import { formatCount, formatDateTime } from "@/lib/format"
+import { formatCount, formatDateTime } from "@qticaret/admin-ui/lib/format"
 import { isReauthCancelled } from "@/lib/reauth"
 
 const S = "bulkMessages.send"

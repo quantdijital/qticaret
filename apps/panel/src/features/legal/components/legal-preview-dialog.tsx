@@ -5,7 +5,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 
 // A page of its own, as a storefront would show it: the browser's own colours
 const FRAME_STYLE =

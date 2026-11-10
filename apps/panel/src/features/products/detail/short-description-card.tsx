@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { DocumentCard } from "@/features/content/components/document-card"
 import { productCatalogQuery, useSaveCatalog } from "@/features/products/api/product-edit"
 import type { ProductDetail } from "@/features/products/api/products"

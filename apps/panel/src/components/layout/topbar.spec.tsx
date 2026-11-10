@@ -24,7 +24,7 @@ vi.mock("@/features/auth/api/staff", () => ({ useStaff: () => staff.current }))
 vi.mock("@/features/settings/api/seo", () => ({
   seoSettingsQuery: () => ({ queryKey: ["seo"], queryFn: () => ({ values: {} }) }),
 }))
-vi.mock("@/components/ui/sidebar", () => ({ SidebarTrigger: () => null }))
+vi.mock("@qticaret/admin-ui/ui/sidebar", () => ({ SidebarTrigger: () => null }))
 vi.mock("@/features/notifications/notification-bell", () => ({ NotificationBell: () => null }))
 vi.mock("./command-menu", () => ({ CommandMenu: () => null }))
 

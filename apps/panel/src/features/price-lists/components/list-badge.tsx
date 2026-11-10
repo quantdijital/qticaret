@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import type { PriceList } from "@/features/price-lists/api/price-lists"
 import { listSchedule } from "@/features/price-lists/form"
 import { SCHEDULE_TONE } from "@/features/promotions/offer"

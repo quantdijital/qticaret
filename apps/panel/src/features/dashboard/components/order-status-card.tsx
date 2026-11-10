@@ -1,11 +1,11 @@
 import type { UseQueryResult } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { StackedBar } from "@/components/charts/stacked-bar"
+import { StackedBar } from "@qticaret/admin-ui/charts/stacked-bar"
 import { AsyncBody } from "@/components/patterns/async-body"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import type { DashboardOverview, Lifecycle } from "@/features/dashboard/api/overview"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 // An order's life is ordered: an ordinal ramp of the brand hue; canceled apart, in red
 const STAGES: { key: Lifecycle; color: string }[] = [

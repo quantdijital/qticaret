@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
-import { Switch } from "@/components/ui/switch"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
 
 interface GiftCardFieldProps {
   checked: boolean

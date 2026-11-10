@@ -4,11 +4,11 @@ import { Loader2, RefreshCw } from "lucide-react"
 import { Fragment } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { SectionCard } from "@/components/patterns/section-card"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import type { StatusTone } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -16,7 +16,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@qticaret/admin-ui/ui/table"
 import { statementChecksQuery, useRecheckStatement } from "@/features/reports/api/statements"
 import type {
   StatementCheck,
@@ -25,7 +25,7 @@ import type {
 } from "@/features/reports/api/statements"
 import { useReportRange } from "@/features/reports/use-report"
 import { errorText } from "@/lib/errors"
-import { formatCount, formatMoney } from "@/lib/format"
+import { formatCount, formatMoney } from "@qticaret/admin-ui/lib/format"
 
 const S = "reports.finance.statements"
 

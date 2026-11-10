@@ -3,19 +3,19 @@ import { getRouteApi, useNavigate } from "@tanstack/react-router"
 import { Mails, Plus } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { DataTable } from "@/components/patterns/data-table"
-import { FilterTabs } from "@/components/patterns/filter-tabs"
-import { PageHeader } from "@/components/patterns/page-header"
-import { Pagination } from "@/components/patterns/pagination"
-import { ErrorState } from "@/components/patterns/states"
-import { Button } from "@/components/ui/button"
+import { DataTable } from "@qticaret/admin-ui/patterns/data-table"
+import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import { BULK_PAGE_SIZE, bulkMessagesQuery } from "@/features/bulk-messages/api/bulk-messages"
 import { BULK_CHANNELS, BULK_STATUSES } from "@/features/bulk-messages/api/types"
 import type { BulkChannel, BulkStatus } from "@/features/bulk-messages/api/types"

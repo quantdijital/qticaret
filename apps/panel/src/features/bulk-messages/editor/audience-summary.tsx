@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
-import { ErrorState } from "@/components/patterns/states"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { AudienceCount } from "@/features/bulk-messages/components/audience-count"
 import { errorText } from "@/lib/errors"
 import type { AudiencePreviewState } from "./use-audience-preview"

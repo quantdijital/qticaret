@@ -1,16 +1,16 @@
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { SectionCard } from "@/components/patterns/section-card"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Switch } from "@/components/ui/switch"
+} from "@qticaret/admin-ui/ui/select"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { PaymentSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"

@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
-import { Field } from "@/components/patterns/form-section"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import type { RelatedProductsSection, RelatedSource } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import { ColumnsField } from "./columns-field"

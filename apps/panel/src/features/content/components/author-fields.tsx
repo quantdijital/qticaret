@@ -2,18 +2,18 @@ import { useQuery } from "@tanstack/react-query"
 import { Controller, useWatch } from "react-hook-form"
 import type { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Field } from "@/components/patterns/form-section"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { MediaField } from "@/components/patterns/media-field"
-import { DialogSection } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+import { DialogSection } from "@qticaret/admin-ui/ui/dialog"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
+} from "@qticaret/admin-ui/ui/select"
+import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { AUTHOR_LIMITS, AUTHOR_LINKS, AUTHOR_PREFIX } from "@/features/content/api/authors"
 import type { Author } from "@/features/content/api/authors"
 import { Counter } from "@/features/seo/components/seo-card"

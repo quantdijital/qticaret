@@ -7,7 +7,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import type { FacetCatalog } from "@/features/content/api/landings"
 import { encodeFacet } from "@/features/content/facet-value"
 

@@ -13,7 +13,7 @@ import type {
 import type { ProductCatalog } from "@/features/products/api/product-edit"
 import type { ProductDetail } from "@/features/products/api/products"
 import type { Assessment, SeoIssue } from "@/features/seo/api/advisor"
-import { revealSection } from "@/components/patterns/use-section-open"
+import { revealSection } from "@qticaret/admin-ui/hooks/use-section-open"
 import { ProductSections, ProductSideCards } from "./product-sections"
 import { PRODUCT_TARGETS } from "./sections"
 

@@ -4,20 +4,20 @@ import { useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { CardForm } from "@/components/patterns/card-form"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { Field } from "@/components/patterns/form-section"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
-import { Textarea } from "@/components/ui/textarea"
+} from "@qticaret/admin-ui/ui/select"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
+import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import {
   useCreateCategory,
   useDeleteCategory,

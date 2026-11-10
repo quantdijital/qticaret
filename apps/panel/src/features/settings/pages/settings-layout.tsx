@@ -10,11 +10,11 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import { useCapabilities } from "@/features/auth/api/staff"
 import { revealIn } from "@/features/settings/reveal-in"
 import { inSection, visibleGroups } from "@/features/settings/sections"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 /** The groups as a list on wide screens: all open at first, each can be closed. */
 function GroupedMenu({ pathname }: { pathname: string }) {

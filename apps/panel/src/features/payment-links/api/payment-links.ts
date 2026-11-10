@@ -1,5 +1,5 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
-import type { PickerOption } from "@/components/patterns/search-picker"
+import type { PickerOption } from "@qticaret/admin-ui/patterns/search-picker"
 import { customerName } from "@/features/customers/names"
 import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"

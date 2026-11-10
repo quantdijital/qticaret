@@ -3,9 +3,9 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
-import { Field } from "@/components/patterns/form-section"
-import { NumberField } from "@/components/patterns/number-field"
-import { Button } from "@/components/ui/button"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -13,15 +13,15 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+} from "@qticaret/admin-ui/ui/dialog"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import {
   useCreateShippingOption,
   useUpdateShippingOption,
@@ -31,7 +31,7 @@ import type {
   ShopShippingOption,
 } from "@/features/settings/api/shipping-options"
 import { errorText } from "@/lib/errors"
-import { formatMoneyInput, parseMoneyInput } from "@/lib/money-input"
+import { formatMoneyInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 
 const S = "settings.shipping.options"
 const CARRIERS = ["manual", "geliver", "aras", "yurtici", "pickup"] as const

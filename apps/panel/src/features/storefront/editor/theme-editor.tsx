@@ -4,7 +4,7 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { LeaveGuard } from "@/components/patterns/leave-guard"
+import { LeaveGuard } from "@qticaret/admin-ui/patterns/leave-guard"
 import { LAYOUT_ACTION_KEY, layoutQuery } from "@/features/storefront/api/layout"
 import type {
   AdminLayout,

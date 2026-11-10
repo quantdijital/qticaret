@@ -1,9 +1,9 @@
 import { ChevronDown, ChevronUp, Pencil, Trash2 } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
-import { formatMoney } from "@/lib/format"
+import { formatMoney } from "@qticaret/admin-ui/lib/format"
 import { priceRange } from "./addon-values"
 import type { AddonValue } from "./addon-values"
 

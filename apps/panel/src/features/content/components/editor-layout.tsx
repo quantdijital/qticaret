@@ -1,7 +1,7 @@
 import type { ReactNode } from "react"
-import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
-import { spanOf } from "@/components/patterns/page-spans"
-import { cn } from "@/lib/utils"
+import { PageColumn, PageGrid } from "@qticaret/admin-ui/patterns/page-grid"
+import { spanOf } from "@qticaret/admin-ui/lib/page-spans"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 /**
  * A text's page (content page, blog post, filter page; docs/06 "Metin

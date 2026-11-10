@@ -3,23 +3,23 @@ import { ArrowRight, MoreHorizontal, Pencil, Trash2, Waypoints } from "lucide-re
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { DataTable } from "@/components/patterns/data-table"
-import type { Column } from "@/components/patterns/data-table"
-import { Pagination } from "@/components/patterns/pagination"
-import { ErrorState } from "@/components/patterns/states"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { DataTable } from "@qticaret/admin-ui/patterns/data-table"
+import type { Column } from "@qticaret/admin-ui/patterns/data-table"
+import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@qticaret/admin-ui/ui/dropdown-menu"
 import { REDIRECT_PAGE_SIZE, redirectsQuery, useDeleteRedirect } from "@/features/seo/api/redirects"
 import type { Redirect, RedirectMatch } from "@/features/seo/api/redirects"
 import { errorText } from "@/lib/errors"
-import { formatCount, formatRelative } from "@/lib/format"
+import { formatCount, formatRelative } from "@qticaret/admin-ui/lib/format"
 import { formOf } from "./form"
 import { RedirectDialog } from "./redirect-dialog"
 

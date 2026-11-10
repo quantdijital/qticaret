@@ -1,13 +1,13 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { Alert, AlertAction, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { Alert, AlertAction, AlertDescription } from "@qticaret/admin-ui/ui/alert"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { useConfirmBankTransfer } from "@/features/orders/api/payments"
 import type { BankTransferState } from "@/features/orders/api/payments"
 import { errorText } from "@/lib/errors"
-import { formatDateTime } from "@/lib/format"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const B = "orders.detail.bankTransfer"
 

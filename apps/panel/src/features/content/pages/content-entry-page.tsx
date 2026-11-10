@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
-import { PageHeader } from "@/components/patterns/page-header"
-import { ErrorState, LoadingRows } from "@/components/patterns/states"
-import { revealSection } from "@/components/patterns/use-section-open"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
+import { revealSection } from "@qticaret/admin-ui/hooks/use-section-open"
 import { contentQuery } from "@/features/content/api/content"
 import type { ContentDetail } from "@/features/content/api/content"
 import { ContentActions } from "@/features/content/components/content-actions"
@@ -19,7 +19,7 @@ import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
 import { SeoCard } from "@/features/seo/components/seo-card"
 import { DESCRIPTION_EXCERPT, excerpt } from "@/features/seo/seo-text"
 import { errorText } from "@/lib/errors"
-import { formatDateTime } from "@/lib/format"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const route = getRouteApi("/_auth/content/$id")
 

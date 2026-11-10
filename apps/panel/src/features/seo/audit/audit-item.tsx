@@ -4,13 +4,13 @@ import { useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import type { AuditItem, AuditRuleId } from "@/features/seo/api/audit"
 import { useSaveRedirect } from "@/features/seo/api/redirects"
 import { errorText } from "@/lib/errors"
-import { formatCount } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 // Rules whose items are about something with a name or a path: that leads the row
 const NAMED: ReadonlySet<AuditRuleId> = new Set([

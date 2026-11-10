@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query"
 import { X } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { SearchPicker } from "@/components/patterns/search-picker"
-import { Button } from "@/components/ui/button"
+import { SearchPicker } from "@qticaret/admin-ui/patterns/search-picker"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import { brandOptions, brandQuery } from "@/features/brands/api/brands"
 import { categoriesQuery } from "@/features/products/api/lookups"
 import { treeOrder } from "@/features/products/category-order"

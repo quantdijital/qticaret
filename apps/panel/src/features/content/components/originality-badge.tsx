@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import { ORIGINALITY } from "@/features/content/api/landings"
 
 /** How much of a landing page's text is its own: red under 30%, a warning under 40%. */

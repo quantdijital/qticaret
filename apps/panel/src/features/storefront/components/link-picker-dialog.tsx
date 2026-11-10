@@ -1,17 +1,17 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Field } from "@/components/patterns/form-section"
-import { Button } from "@/components/ui/button"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useIsMobile } from "@/hooks/use-mobile"
+} from "@qticaret/admin-ui/ui/dialog"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@qticaret/admin-ui/ui/tabs"
+import { useIsMobile } from "@qticaret/admin-ui/hooks/use-mobile"
 import { isStorefrontHref } from "@/features/settings/storefront"
 import { MENU_LIMITS, RECORD_KINDS } from "@/features/storefront/api/menus"
 import type { RecordKind } from "@/features/storefront/api/menus"

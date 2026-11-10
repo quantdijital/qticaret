@@ -2,7 +2,7 @@ import { LayoutGrid, Package, Plus } from "lucide-react"
 import type { Dispatch } from "react"
 import type { LucideIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import type {
   BodyGroup,
   BodySection,

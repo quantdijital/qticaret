@@ -3,13 +3,13 @@ import { Ban, Download, Loader2, Plus } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { Field } from "@/components/patterns/form-section"
-import { SectionCard } from "@/components/patterns/section-card"
-import { EmptyState, ErrorState, LoadingRows } from "@/components/patterns/states"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { NumberField } from "@/components/patterns/number-field"
-import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { EmptyState, ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -17,7 +17,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { sheetJobQuery } from "@/features/products/api/sheets"
 import {
   MAX_CODES,
@@ -29,7 +29,7 @@ import {
 } from "@/features/promotions/api/code-batches"
 import type { CodeBatch } from "@/features/promotions/api/code-batches"
 import { errorText } from "@/lib/errors"
-import { formatCount, formatDateTime } from "@/lib/format"
+import { formatCount, formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 /** How many codes, then the job's progress until they are written. */
 function MakeCodesDialog({

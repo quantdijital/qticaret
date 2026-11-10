@@ -2,11 +2,11 @@ import type { UseQueryResult } from "@tanstack/react-query"
 import { Boxes, Receipt, ShoppingBag, Wallet } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { AsyncBody } from "@/components/patterns/async-body"
-import { DeltaBadge } from "@/components/patterns/delta-badge"
-import { KpiTile } from "@/components/patterns/kpi-tile"
-import { Skeleton } from "@/components/ui/skeleton"
+import { DeltaBadge } from "@qticaret/admin-ui/patterns/delta-badge"
+import { KpiTile } from "@qticaret/admin-ui/patterns/kpi-tile"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import type { DashboardOverview } from "@/features/dashboard/api/overview"
-import { formatCount, formatMoney } from "@/lib/format"
+import { formatCount, formatMoney } from "@qticaret/admin-ui/lib/format"
 
 function Tiles({ overview }: { overview: DashboardOverview }) {
   const { t } = useTranslation()

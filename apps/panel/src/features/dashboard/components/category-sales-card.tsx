@@ -1,12 +1,12 @@
 import type { UseQueryResult } from "@tanstack/react-query"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { BarList } from "@/components/charts/bar-list"
+import { BarList } from "@qticaret/admin-ui/charts/bar-list"
 import { AsyncBody } from "@/components/patterns/async-body"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import type { DashboardOverview } from "@/features/dashboard/api/overview"
-import { formatMoney, formatPercent } from "@/lib/format"
+import { formatMoney, formatPercent } from "@qticaret/admin-ui/lib/format"
 
 function Categories({ overview }: { overview: DashboardOverview }) {
   const { t } = useTranslation()

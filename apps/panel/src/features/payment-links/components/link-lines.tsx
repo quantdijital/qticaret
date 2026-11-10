@@ -1,9 +1,9 @@
 import { ImageOff } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import type { LinkDiscount, LinkLine } from "@/features/payment-links/api/types"
 import { formatKurus } from "@/features/payment-links/format"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 const P = "paymentLinks.lines"
 

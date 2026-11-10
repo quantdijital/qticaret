@@ -1,7 +1,7 @@
 import { Copy, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import type {
   AnySection,
   LayoutGroup,

@@ -1,5 +1,5 @@
 import type { TFunction } from "i18next"
-import type { CollapseOptions } from "@/components/patterns/collapsible-section"
+import type { CollapseOptions } from "@qticaret/admin-ui/patterns/collapsible-section"
 import { summaryLine } from "@/features/content/section-findings"
 import type { SectionFindings } from "@/features/content/section-findings"
 

@@ -4,18 +4,18 @@ import { useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { CardForm } from "@/components/patterns/card-form"
-import { Field } from "@/components/patterns/form-section"
-import { Input } from "@/components/ui/input"
+import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Textarea } from "@/components/ui/textarea"
+} from "@qticaret/admin-ui/ui/select"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
+import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { ROBOTS_OVERRIDES, seoMetaQuery, useSaveSeoMeta } from "@/features/seo/api/seo-meta"
 import type { SeoEntityType, SeoMeta } from "@/features/seo/api/seo-meta"
 import { sectionQuery } from "@/features/settings/api/sections"
@@ -23,8 +23,8 @@ import type { SeoSettings } from "@/features/settings/api/sections"
 import { renderSample } from "@/features/settings/seo-sample"
 import { useStoreName } from "@/features/settings/api/store"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@/lib/forms"
-import { cn } from "@/lib/utils"
+import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 import { seoSummary } from "./seo-summary"
 import type { SeoCollapse } from "./seo-summary"
 

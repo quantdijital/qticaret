@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 import "@/lib/i18n"
 import type { OrderDetail, OrderMoney } from "@/features/orders/api/orders"
-import { formatMoney } from "@/lib/format"
+import { formatMoney } from "@qticaret/admin-ui/lib/format"
 import { PaymentCard } from "./payment-card"
 
 const totals = { gross: "390.00", discount: "0.00", net: "390.00" }

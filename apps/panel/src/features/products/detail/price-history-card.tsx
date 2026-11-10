@@ -3,10 +3,10 @@ import type { TFunction } from "i18next"
 import { CircleCheck, Info, TriangleAlert } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { StepChart } from "@/components/charts/step-chart"
-import { WhileOpen } from "@/components/patterns/collapsible-section"
-import { SectionCard } from "@/components/patterns/section-card"
-import { EmptyState, ErrorState } from "@/components/patterns/states"
+import { StepChart } from "@qticaret/admin-ui/charts/step-chart"
+import { WhileOpen } from "@qticaret/admin-ui/patterns/collapsible-section"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { EmptyState, ErrorState } from "@qticaret/admin-ui/patterns/states"
 import type { SectionFindings } from "@/features/content/section-findings"
 import {
   Select,
@@ -14,8 +14,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@qticaret/admin-ui/ui/select"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { priceHistoryQuery } from "@/features/products/api/price-history"
 import type {
   PriceDisplayView,
@@ -24,7 +24,12 @@ import type {
 } from "@/features/products/api/price-history"
 import { priceSteps, ruleState } from "@/features/products/price-history"
 import { errorText } from "@/lib/errors"
-import { formatBucket, formatCompactMoney, formatDate, formatMoney } from "@/lib/format"
+import {
+  formatBucket,
+  formatCompactMoney,
+  formatDate,
+  formatMoney,
+} from "@qticaret/admin-ui/lib/format"
 import { productFold } from "./sections"
 
 const CURRENCY = "try"

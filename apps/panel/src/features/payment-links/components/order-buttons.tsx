@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { useLinkAccess } from "./use-link-access"
 
 /**

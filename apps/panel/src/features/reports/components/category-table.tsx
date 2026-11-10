@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import {
   Table,
   TableBody,
@@ -7,11 +7,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@qticaret/admin-ui/ui/table"
 import type { DashboardOverview } from "@/features/dashboard/api/overview"
 import { useCategoryName } from "@/features/reports/category-name"
 import { ReportExportButton } from "@/features/reports/components/report-export"
-import { formatMoney, formatPercent } from "@/lib/format"
+import { formatMoney, formatPercent } from "@qticaret/admin-ui/lib/format"
 
 type Category = DashboardOverview["categories"][number]
 

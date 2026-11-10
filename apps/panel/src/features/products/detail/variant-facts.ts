@@ -1,4 +1,4 @@
-import type { StatusTone } from "@/components/patterns/status-badge"
+import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
 import type { PriceDisplayView } from "@/features/products/api/price-history"
 import type { ProductDetail } from "@/features/products/api/products"
 import { ruleState } from "@/features/products/price-history"

@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { SearchInput } from "@/components/patterns/search-input"
-import { SectionCard } from "@/components/patterns/section-card"
+import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import {
   Table,
   TableBody,
@@ -10,14 +10,14 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+} from "@qticaret/admin-ui/ui/table"
+import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import type { DashboardOverview } from "@/features/dashboard/api/overview"
 import { ProductThumb } from "@/features/products/components/product-thumb"
 import { rankedProducts } from "@/features/reports/rank"
 import type { ProductSort, ReportProduct } from "@/features/reports/rank"
 import { ReportExportButton } from "@/features/reports/components/report-export"
-import { formatCount, formatMoney, formatPercent } from "@/lib/format"
+import { formatCount, formatMoney, formatPercent } from "@qticaret/admin-ui/lib/format"
 
 const SORTS: readonly ProductSort[] = ["sales", "units"]
 // The server sends the period's best sellers up to this many

@@ -3,7 +3,7 @@ import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { renderSVG } from "uqr"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import type { StartedFactor } from "@/features/auth/api/mfa"
 
 /** The new factor as an authenticator app takes it: the QR code, or its key typed in. */

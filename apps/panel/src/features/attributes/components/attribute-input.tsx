@@ -1,16 +1,16 @@
 import { useTranslation } from "react-i18next"
-import { Field } from "@/components/patterns/form-section"
-import { NumberField } from "@/components/patterns/number-field"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
+} from "@qticaret/admin-ui/ui/select"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
 import type { AttributeDefinition, AttributeValue } from "@/features/attributes/types"
 
 const NONE = "__none__"

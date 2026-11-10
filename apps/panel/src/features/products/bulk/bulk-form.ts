@@ -1,5 +1,9 @@
 import type { BulkAction, BulkChange } from "@/features/products/api/bulk"
-import { parseCountInput, parseDecimalInput, parseMoneyInput } from "@/lib/money-input"
+import {
+  parseCountInput,
+  parseDecimalInput,
+  parseMoneyInput,
+} from "@qticaret/admin-ui/lib/money-input"
 
 /**
  * The bulk edit dialog's fields and the change they make (F3.10): what a

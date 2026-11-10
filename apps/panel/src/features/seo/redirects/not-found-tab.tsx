@@ -2,11 +2,11 @@ import { useQuery } from "@tanstack/react-query"
 import { Plus, SearchX, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { DataTable } from "@/components/patterns/data-table"
-import type { Column } from "@/components/patterns/data-table"
-import { Pagination } from "@/components/patterns/pagination"
-import { ErrorState } from "@/components/patterns/states"
-import { Button } from "@/components/ui/button"
+import { DataTable } from "@qticaret/admin-ui/patterns/data-table"
+import type { Column } from "@qticaret/admin-ui/patterns/data-table"
+import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   REDIRECT_PAGE_SIZE,
   notFoundQuery,
@@ -15,7 +15,7 @@ import {
 } from "@/features/seo/api/redirects"
 import type { NotFoundEntry } from "@/features/seo/api/redirects"
 import { errorText } from "@/lib/errors"
-import { formatCount, formatRelative } from "@/lib/format"
+import { formatCount, formatRelative } from "@qticaret/admin-ui/lib/format"
 import { AnswerBadge } from "./answer-badge"
 
 interface Actions {

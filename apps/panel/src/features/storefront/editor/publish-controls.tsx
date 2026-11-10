@@ -1,7 +1,7 @@
 import { ExternalLink, Loader2, Rocket, RotateCcw } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
 import { BarButton } from "./bar-button"
 import type { useEditorActions } from "./use-editor-actions"
 

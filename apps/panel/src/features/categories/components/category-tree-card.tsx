@@ -2,13 +2,13 @@ import { ChevronDown, ChevronRight, ChevronUp, EyeOff, FolderTree, Lock } from "
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { useUpdateCategory } from "@/features/categories/api/categories"
 import type { Category } from "@/features/categories/api/categories"
 import { siblingFor, treeRows } from "@/features/categories/tree"
 import { errorText } from "@/lib/errors"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 interface CategoryTreeCardProps {
   categories: Category[]

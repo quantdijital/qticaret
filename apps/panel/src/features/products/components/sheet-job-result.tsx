@@ -1,11 +1,11 @@
 import { AlertTriangle, CircleCheck, Loader2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Progress } from "@/components/ui/progress"
+import { Progress } from "@qticaret/admin-ui/ui/progress"
 import type { ImportSummary, SheetJob } from "@/features/products/api/sheets"
 import { GRADE_TEXT } from "@/features/seo/advisor/grades"
 import { JobDownloadButton } from "@/features/settings/components/job-download-button"
-import { formatCount } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const GRADES = ["excellent", "good", "needs_work", "poor"] as const
 // `P-IMG-01` → the panel's words for `IMG-01` (as the advisor card reads them)

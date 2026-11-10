@@ -2,8 +2,8 @@ import type { UseQueryResult } from "@tanstack/react-query"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { errorText } from "@/lib/errors"
-import { cn } from "@/lib/utils"
-import { ErrorState } from "./states"
+import { cn } from "@qticaret/admin-ui/lib/utils"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 
 interface AsyncBodyProps<T> {
   query: UseQueryResult<T>

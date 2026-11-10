@@ -15,7 +15,7 @@ import { TasksCard } from "@/features/dashboard/components/tasks-card"
 import { TopProductsCard } from "@/features/dashboard/components/top-products-card"
 import { DEFAULT_PERIOD } from "@/features/dashboard/period"
 import type { PeriodKey } from "@/features/dashboard/period"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 interface DashboardPageProps {
   period: PeriodKey

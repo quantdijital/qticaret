@@ -19,7 +19,7 @@ vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: ReactNode }) => <a href="/">{children}</a>,
 }))
 // Leaving the page is the router's; its guard has its own tests
-vi.mock("@/components/patterns/leave-guard", () => ({ LeaveGuard: () => null }))
+vi.mock("@qticaret/admin-ui/patterns/leave-guard", () => ({ LeaveGuard: () => null }))
 // The editor itself is ProseMirror's; its own tests cover it
 vi.mock("@/features/content/editor/rich-editor", () => ({
   RichEditor: ({ label }: { label: string }) => <div aria-label={label} />,

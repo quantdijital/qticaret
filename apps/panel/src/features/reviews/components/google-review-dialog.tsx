@@ -1,11 +1,11 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { Field } from "@/components/patterns/form-section"
-import { FormDialog } from "@/components/patterns/form-dialog"
-import { Button } from "@/components/ui/button"
-import { Textarea } from "@/components/ui/textarea"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { FormDialog } from "@qticaret/admin-ui/patterns/form-dialog"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import {
   MAX_REPLY_BYTES,
   replyBytes,
@@ -15,7 +15,7 @@ import type { GoogleReviewRow, HideReason } from "@/features/reviews/api/google-
 import { HiddenLine, ReplyBadge, Stars } from "@/features/reviews/components/google-review-item"
 import { HideReviewDialog } from "@/features/reviews/components/hide-review-dialog"
 import { errorText } from "@/lib/errors"
-import { formatDate, formatDateTime } from "@/lib/format"
+import { formatDate, formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const G = "reviews.google"
 

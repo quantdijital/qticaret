@@ -1,4 +1,4 @@
-import type { StatusTone } from "@/components/patterns/status-badge"
+import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
 import type { Grade, Severity } from "@/features/seo/api/advisor"
 
 /** A grade's text colour: the colour supports the word, never replaces it. */

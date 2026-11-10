@@ -1,0 +1,61 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "clear": "Clear",
+    "close": "Close",
+    "decrease": "Decrease",
+    "done": "Done",
+    "increase": "Increase",
+    "loading": "Loading",
+    "notifications": "Notifications",
+    "reset": "Reset",
+    "retry": "Try again",
+    "save": "Save",
+    "unsaved": "Unsaved changes"
+  },
+  "delta": {
+    "new": "New",
+    "none": "None before",
+    "up": "Up",
+    "down": "Down"
+  },
+  "formDialog": {
+    "discard": "Discard changes",
+    "discardText": "The changes in this window are not saved; they are lost if you go on.",
+    "discardTitle": "Discard unsaved changes?"
+  },
+  "leave": {
+    "confirm": "Leave without saving",
+    "description": "If you leave this page, your changes will be lost.",
+    "title": "You have unsaved changes"
+  },
+  "list": {
+    "clearSearch": "Clear search",
+    "days": {
+      "anyTime": "Any time",
+      "clear": "Clear",
+      "hint": "Turkey time; either end may stay open.",
+      "range": "{{from}} – {{to}}"
+    },
+    "next": "Next page",
+    "page": "Page {{page}} of {{pages}}",
+    "previous": "Previous page",
+    "range": "{{from}}–{{to}} of {{total}}",
+    "selectPage": "Select every row on this page",
+    "selectRow": "Select {{name}}"
+  },
+  "period": {
+    "custom": {
+      "apply": "Apply",
+      "from": "From",
+      "to": "To"
+    },
+    "label": "Period"
+  },
+  "recordStepper": {
+    "position": "{{at}} / {{total}}"
+  },
+  "wizard": {
+    "stepOf": "Step {{step}} of {{total}}"
+  }
+}

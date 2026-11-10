@@ -5,7 +5,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import { RESTRICTIONS } from "@/features/categories/api/restrictions"
 import type { Restriction } from "@/features/categories/api/restrictions"
 

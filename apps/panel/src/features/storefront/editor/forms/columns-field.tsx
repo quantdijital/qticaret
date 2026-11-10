@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import type { ShelfColumns } from "@/features/storefront/api/layout"
 import { SHELF_COLUMNS } from "@/features/storefront/api/layout"
 import { F } from "./fields"

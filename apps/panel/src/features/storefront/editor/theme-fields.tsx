@@ -1,21 +1,21 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { Field } from "@/components/patterns/form-section"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
+} from "@qticaret/admin-ui/ui/select"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { isHexColor } from "@/features/settings/storefront"
 import { BACKGROUNDS } from "@/features/storefront/api/theme"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 import { STOREFRONT_BACKGROUNDS, storefrontTextOn } from "@/theme/storefront"
 import type { StorefrontBackground } from "@/theme/storefront"
 

@@ -1,9 +1,9 @@
 import { Plus } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { SearchPicker } from "@/components/patterns/search-picker"
-import type { PickerOption } from "@/components/patterns/search-picker"
-import { Button } from "@/components/ui/button"
+import { SearchPicker } from "@qticaret/admin-ui/patterns/search-picker"
+import type { PickerOption } from "@qticaret/admin-ui/patterns/search-picker"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { searchAuthors } from "@/features/content/api/authors"
 import { AuthorDialog } from "./author-dialog"
 

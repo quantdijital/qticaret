@@ -2,20 +2,20 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { FormDialog } from "@/components/patterns/form-dialog"
-import { Field } from "@/components/patterns/form-section"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { DialogBody } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { FormDialog } from "@qticaret/admin-ui/patterns/form-dialog"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Alert, AlertDescription } from "@qticaret/admin-ui/ui/alert"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { DialogBody } from "@qticaret/admin-ui/ui/dialog"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import { NOT_A_LOGIN } from "@/features/settings/account-actions"
 import type { AccountActions } from "@/features/settings/account-actions"
 import type { SmtpAccount, SmtpSecurity } from "@/features/settings/api/payments"

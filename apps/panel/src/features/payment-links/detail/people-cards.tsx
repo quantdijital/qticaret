@@ -1,9 +1,9 @@
 import { Link } from "@tanstack/react-router"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import type { PaymentLink } from "@/features/payment-links/api/types"
-import { formatPhone } from "@/lib/format"
+import { formatPhone } from "@qticaret/admin-ui/lib/format"
 
 const C = "paymentLinks.detail"
 

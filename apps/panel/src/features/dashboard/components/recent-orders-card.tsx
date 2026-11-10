@@ -3,9 +3,9 @@ import { Link } from "@tanstack/react-router"
 import { ArrowRight, Inbox } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { AsyncBody } from "@/components/patterns/async-body"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -13,10 +13,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@qticaret/admin-ui/ui/table"
 import { recentOrdersQuery } from "@/features/dashboard/api/recent-orders"
 import type { RecentOrder } from "@/features/dashboard/api/recent-orders"
-import { formatDateTime, formatMoney, formatRelative } from "@/lib/format"
+import { formatDateTime, formatMoney, formatRelative } from "@qticaret/admin-ui/lib/format"
 import { CustomerCell } from "@/features/orders/components/customer-cell"
 import { StageBadge } from "@/features/orders/components/stage-badge"
 

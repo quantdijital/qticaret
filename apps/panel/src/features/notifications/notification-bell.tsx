@@ -13,8 +13,8 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Popover, PopoverContent, PopoverTrigger } from "@qticaret/admin-ui/ui/popover"
 import { isContactSubject } from "@/features/customers/api/contact-messages"
 import { markSeen, notificationsQuery, seenAt } from "@/features/notifications/api"
 import type { AdminNotification } from "@/features/notifications/api"
@@ -23,8 +23,8 @@ import { paymentIssueAlert } from "@/features/notifications/payment-issue-alert"
 import { stockShortAlert } from "@/features/notifications/stock-short-alert"
 import { paymentLinkAlert } from "@/features/payment-links/components/link-alert"
 import { isConnectable } from "@/features/settings/payment-methods"
-import { formatDate, formatRelative } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatDate, formatRelative } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const text = (value: unknown): string => (typeof value === "string" ? value : "")
 const amount = (value: unknown): number => (typeof value === "number" ? value : 0)

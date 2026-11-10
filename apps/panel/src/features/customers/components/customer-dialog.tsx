@@ -5,11 +5,11 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { FormDialog } from "@/components/patterns/form-dialog"
-import { Field } from "@/components/patterns/form-section"
-import { DialogBody } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { FormDialog } from "@qticaret/admin-ui/patterns/form-dialog"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { DialogBody } from "@qticaret/admin-ui/ui/dialog"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import {
   createCustomer,
   customerNoteQuery,

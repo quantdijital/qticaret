@@ -1,5 +1,5 @@
-import { PageTabs } from "@/components/patterns/page-tabs"
-import type { PageTab } from "@/components/patterns/page-tabs"
+import { PageTabs } from "@qticaret/admin-ui/patterns/page-tabs"
+import type { PageTab } from "@qticaret/admin-ui/patterns/page-tabs"
 
 export type SettingsTab = PageTab
 

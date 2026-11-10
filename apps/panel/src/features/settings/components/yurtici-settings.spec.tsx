@@ -11,7 +11,7 @@ const fetchMock = vi.hoisted(() => vi.fn())
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() } }))
 // The leave prompt needs a router; what it guards is tested in e2e
-vi.mock("@/components/patterns/leave-guard", () => ({ LeaveGuard: () => null }))
+vi.mock("@qticaret/admin-ui/patterns/leave-guard", () => ({ LeaveGuard: () => null }))
 
 const connected: YurticiAccount = {
   provider: "yurtici",

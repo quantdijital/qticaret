@@ -1,9 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Controller, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { FormSection } from "@/components/patterns/form-section"
-import { LeaveGuard } from "@/components/patterns/leave-guard"
-import { Switch } from "@/components/ui/switch"
+import { FormSection } from "@qticaret/admin-ui/patterns/form-section"
+import { LeaveGuard } from "@qticaret/admin-ui/patterns/leave-guard"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
 import type { GeliverAccount } from "@/features/settings/api/payments"
 import { useAccountActions } from "@/features/settings/account-actions"
 import {

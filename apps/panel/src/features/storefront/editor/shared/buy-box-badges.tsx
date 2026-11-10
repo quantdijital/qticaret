@@ -2,7 +2,7 @@ import { CircleAlert, ShieldCheck } from "lucide-react"
 import { useState } from "react"
 import type { Dispatch } from "react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import type { LayoutSettings } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import { badgeProblems, settingsProblems } from "@/features/storefront/layout/settings-problems"

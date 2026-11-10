@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { SettingsTabs } from "@/features/settings/components/settings-tabs"
-import { PageHeader } from "@/components/patterns/page-header"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { AbandonedCartCard } from "@/features/settings/components/abandoned-cart-card"
 import { BulkMessageSettingsCard } from "@/features/settings/components/bulk-message-settings-card"
 import { ConversionsCard } from "@/features/settings/components/conversions-card"

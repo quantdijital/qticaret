@@ -1,6 +1,6 @@
 import { AlertTriangle, CircleCheck, Loader2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Progress } from "@/components/ui/progress"
+import { Progress } from "@qticaret/admin-ui/ui/progress"
 import type {
   KindCounts,
   MigrationJob,
@@ -19,7 +19,7 @@ import {
   RefreshResult,
 } from "@/features/settings/components/migration/description-result"
 import { WordpressReport } from "@/features/settings/components/migration/wordpress-report"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 const R = "settings.migration.run"
 // The report's kinds, in the order a run takes them

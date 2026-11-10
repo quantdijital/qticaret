@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { useLogout } from "@/features/auth/api/me"
 import { useStaff } from "@/features/auth/api/staff"
 import { AuthHeading, AuthShell } from "@/features/auth/components/auth-shell"

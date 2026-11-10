@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import {
   Table,
   TableBody,
@@ -8,11 +8,11 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@qticaret/admin-ui/ui/table"
 import { ReportExportButton } from "@/features/reports/components/report-export"
 import type { ReportTable } from "@/features/reports/components/report-export"
-import { formatCount, formatMoney, formatPercent } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatCount, formatMoney, formatPercent } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 export interface ShareRow {
   key: string

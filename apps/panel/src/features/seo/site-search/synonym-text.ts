@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { errorText } from "@/lib/errors"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { MAX_SYNONYM_GROUPS } from "@/features/seo/api/synonyms"
 import {
   MAX_GROUP_TERMS,

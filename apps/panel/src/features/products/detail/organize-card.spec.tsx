@@ -3,7 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import type { PickerOption } from "@/components/patterns/search-picker"
+import type { PickerOption } from "@qticaret/admin-ui/patterns/search-picker"
 import type { ProductDetail } from "@/features/products/api/products"
 import { OrganizeCard } from "./organize-card"
 
@@ -13,7 +13,7 @@ const admin = vi.hoisted(() => ({ product: { update: vi.fn() } }))
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock }, admin } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 // The pickers search the server; here each offers one choice and a way to clear
-vi.mock("@/components/patterns/search-picker", () => ({
+vi.mock("@qticaret/admin-ui/patterns/search-picker", () => ({
   SearchPicker: ({
     id,
     value,

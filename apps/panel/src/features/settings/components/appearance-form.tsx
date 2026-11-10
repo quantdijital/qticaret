@@ -11,22 +11,22 @@ import { useEffect, useMemo } from "react"
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { PageGrid } from "@/components/patterns/page-grid"
-import { PageHeader } from "@/components/patterns/page-header"
-import { spanOf } from "@/components/patterns/page-spans"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
+import { PageGrid } from "@qticaret/admin-ui/patterns/page-grid"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { spanOf } from "@qticaret/admin-ui/lib/page-spans"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { useSaveAppearance } from "@/features/settings/api/appearance"
 import { BrandColorField, ChoiceField } from "@/features/settings/components/appearance-fields"
 import { ThemePreview } from "@/features/settings/components/theme-preview"
 import { errorText } from "@/lib/errors"
 import {
   applyAppearance,
-  appearanceSchema,
   rememberAppearance,
   resolveMode,
   resolveTheme,
-} from "@/theme"
+} from "@qticaret/admin-ui/theme"
+import { appearanceSchema } from "@/theme"
 import type { AppearanceForm as FormValues } from "@/theme"
 
 const HEX = /^#[0-9a-f]{6}$/

@@ -2,10 +2,10 @@ import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
 import { Plus, Scale } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FilterTabs } from "@/components/patterns/filter-tabs"
-import { PageHeader } from "@/components/patterns/page-header"
-import { SearchInput } from "@/components/patterns/search-input"
-import { Button } from "@/components/ui/button"
+import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { CONTENT_TABS } from "@/features/content/api/content"
 import type { ContentKind, ContentTab } from "@/features/content/api/content"
 import type { TermKind } from "@/features/content/api/terms"
@@ -17,7 +17,7 @@ import { NewContentDialog } from "@/features/content/components/new-content-dial
 import { NewLandingDialog } from "@/features/content/components/new-landing-dialog"
 import { NewTermForm } from "@/features/content/components/new-term-form"
 import { TermList } from "@/features/content/components/term-list"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const route = getRouteApi("/_auth/content/")
 

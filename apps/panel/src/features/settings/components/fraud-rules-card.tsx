@@ -3,15 +3,19 @@ import { Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { SectionCard } from "@/components/patterns/section-card"
-import { NumberField } from "@/components/patterns/number-field"
-import { Button } from "@/components/ui/button"
-import { Skeleton } from "@/components/ui/skeleton"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { useCan } from "@/features/auth/api/staff"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { SecuritySettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
-import { formatMoneyInput, parseCountInput, parseMoneyInput } from "@/lib/money-input"
+import {
+  formatMoneyInput,
+  parseCountInput,
+  parseMoneyInput,
+} from "@qticaret/admin-ui/lib/money-input"
 
 const C = "settings.security.fraud"
 

@@ -2,7 +2,7 @@ import { CircleCheck, FileUp, Loader2, TriangleAlert } from "lucide-react"
 import { useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -11,12 +11,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { useImportRedirects } from "@/features/seo/api/redirects"
 import type { ImportReport } from "@/features/seo/api/redirects"
 import { downloadCsv } from "@/lib/csv"
 import { errorText } from "@/lib/errors"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 // The server takes 1000 rows; a file far beyond that is refused before upload
 const MAX_FILE_BYTES = 1_000_000

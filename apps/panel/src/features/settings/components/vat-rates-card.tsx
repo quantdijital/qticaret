@@ -3,11 +3,11 @@ import { Plus } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { SectionCard } from "@/components/patterns/section-card"
-import { ErrorState, LoadingRows } from "@/components/patterns/states"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Table,
   TableBody,
@@ -15,7 +15,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@qticaret/admin-ui/ui/table"
 import { useCan } from "@/features/auth/api/staff"
 import {
   percentText,
@@ -27,8 +27,8 @@ import type { VatRate } from "@/features/settings/api/vat-rates"
 import { VatRateDialog } from "@/features/settings/components/vat-rate-dialog"
 import { VatRateMenu } from "@/features/settings/components/vat-rate-menu"
 import { errorText } from "@/lib/errors"
-import { formatCount } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const V = "settings.vatRates"
 

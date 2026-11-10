@@ -4,9 +4,9 @@ import { Boxes, CircleDollarSign, Hourglass, PackageX } from "lucide-react"
 import { useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { ErrorState } from "@/components/patterns/states"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import {
   Table,
   TableBody,
@@ -14,8 +14,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+} from "@qticaret/admin-ui/ui/table"
+import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import { stockReportQuery } from "@/features/reports/api/stock"
 import type { StockReport, StockRow } from "@/features/reports/api/stock"
 import { ReportExportButton } from "@/features/reports/components/report-export"
@@ -23,8 +23,8 @@ import type { ReportTable } from "@/features/reports/components/report-export"
 import { ReportTiles } from "@/features/reports/components/report-tiles"
 import type { ReportTile } from "@/features/reports/components/report-tiles"
 import { useReportRange } from "@/features/reports/use-report"
-import { formatCount, formatMoney } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatCount, formatMoney } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 import { errorText } from "@/lib/errors"
 
 const S = "reports.stock"

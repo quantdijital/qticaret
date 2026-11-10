@@ -1,6 +1,6 @@
 import { CircleAlert, CircleCheck, Download, Printer } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -9,7 +9,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import type { BoardOrder } from "@/features/orders/api/orders"
 import type { ShipResult } from "@/features/orders/api/shipping"
 import { usePrintLabels } from "@/features/orders/components/print-labels"

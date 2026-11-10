@@ -1,12 +1,12 @@
 import { ChevronDown, ChevronUp, TriangleAlert } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { MENU_LOCATIONS, useOrderFooter } from "@/features/storefront/api/menus"
 import type { AdminLink, Menu } from "@/features/storefront/api/menus"
 import { errorText } from "@/lib/errors"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const M = "storefront.menus"
 

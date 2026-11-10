@@ -1,14 +1,14 @@
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { CardForm } from "@/components/patterns/card-form"
-import { Field } from "@/components/patterns/form-section"
+import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { MediaField } from "@/components/patterns/media-field"
-import { Input } from "@/components/ui/input"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import { useSetCollectionDetails } from "@/features/collections/api/collections"
 import type { Collection, CollectionImage } from "@/features/collections/api/collections"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@/lib/forms"
+import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
 
 const I = "collections.image"
 // The media library's alt text limit (backend lib/media ALT_MAX)

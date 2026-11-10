@@ -1,13 +1,13 @@
 import { CalendarCheck, ShoppingBag, Star, Wallet } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import type { DashboardOverview } from "@/features/dashboard/api/overview"
 import { SalesChartCard } from "@/features/dashboard/components/sales-chart-card"
 import { DailyTable } from "@/features/reports/components/daily-table"
 import { ReportTiles } from "@/features/reports/components/report-tiles"
 import type { ReportTile } from "@/features/reports/components/report-tiles"
 import { useReport } from "@/features/reports/use-report"
-import { formatBucket, formatCount, formatMoney } from "@/lib/format"
+import { formatBucket, formatCount, formatMoney } from "@qticaret/admin-ui/lib/format"
 
 function useDailyTiles(report: DashboardOverview | undefined): ReportTile[] | null {
   const { t } = useTranslation()

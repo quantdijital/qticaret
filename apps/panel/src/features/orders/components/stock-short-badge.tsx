@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 
 /**
  * A paid order placed though the shelf lacked units (adr/0026 Ek

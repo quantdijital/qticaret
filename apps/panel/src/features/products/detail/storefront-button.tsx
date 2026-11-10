@@ -1,7 +1,7 @@
 import { ExternalLink, Eye } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { useProductStorefrontLink } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
 import { errorText } from "@/lib/errors"

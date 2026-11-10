@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next"
-import { Field } from "@/components/patterns/form-section"
-import { NumberField } from "@/components/patterns/number-field"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
 import { Choices } from "@/features/products/bulk/bulk-choices"
 import type { FieldsProps } from "@/features/products/bulk/bulk-fields"
 

@@ -1,13 +1,13 @@
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { CardForm } from "@/components/patterns/card-form"
-import { Field } from "@/components/patterns/form-section"
-import { Input } from "@/components/ui/input"
+import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import { useUpdateContent } from "@/features/content/api/content"
 import type { ContentDetail } from "@/features/content/api/content"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@/lib/forms"
+import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
 
 interface Values {
   title: string

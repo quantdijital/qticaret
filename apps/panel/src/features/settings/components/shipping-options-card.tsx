@@ -3,10 +3,10 @@ import { Pencil, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { SectionCard } from "@/components/patterns/section-card"
-import { ErrorState, LoadingRows } from "@/components/patterns/states"
-import { Button } from "@/components/ui/button"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   shopShippingOptionsQuery,
   useDeleteShippingOption,
@@ -14,7 +14,7 @@ import {
 import type { ShopShippingOption } from "@/features/settings/api/shipping-options"
 import { ShippingOptionDialog } from "@/features/settings/components/shipping-option-dialog"
 import { errorText } from "@/lib/errors"
-import { formatMoney } from "@/lib/format"
+import { formatMoney } from "@qticaret/admin-ui/lib/format"
 
 const S = "settings.shipping.options"
 

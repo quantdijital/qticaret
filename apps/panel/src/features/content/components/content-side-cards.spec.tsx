@@ -7,7 +7,7 @@ import "@/lib/i18n"
 import type { ContentDetail } from "@/features/content/api/content"
 import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
 import type { Assessment, SeoIssue } from "@/features/seo/api/advisor"
-import { revealSection } from "@/components/patterns/use-section-open"
+import { revealSection } from "@qticaret/admin-ui/hooks/use-section-open"
 import { CONTENT_TARGETS } from "@/features/content/content-sections"
 import { ContentSideCards } from "./content-side-cards"
 

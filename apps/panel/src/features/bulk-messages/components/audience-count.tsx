@@ -1,10 +1,10 @@
 import { Users } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { SKIP_REASONS } from "@/features/bulk-messages/api/types"
 import type { AudiencePreview, SkipCounts } from "@/features/bulk-messages/api/types"
-import { formatCount } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const A = "bulkMessages.audience.count"
 

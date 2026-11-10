@@ -15,10 +15,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-} from "@/components/ui/sidebar"
+} from "@qticaret/admin-ui/ui/sidebar"
 import { tasksQuery } from "@/features/dashboard/api/tasks"
-import { formatCount } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 import { NAV_GROUPS, SETTINGS_ITEM, itemFor } from "./navigation"
 import type { NavItem } from "./navigation"
 import { StoreMark } from "./store-mark"

@@ -1,12 +1,12 @@
 import { useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { CardForm } from "@/components/patterns/card-form"
+import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
 import { MediaField } from "@/components/patterns/media-field"
 import { useSaveSection } from "@/features/settings/api/sections"
 import type { StoreSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@/lib/forms"
+import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
 
 const Q = "settings.store.etbisQr"
 

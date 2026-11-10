@@ -1,11 +1,11 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@qticaret/admin-ui/ui/tabs"
 import type { KindCounts } from "@/features/settings/api/migration"
 import { NOT_MOVED_KINDS } from "@/features/settings/api/migration-wordpress"
 import type { WordpressReport as Report } from "@/features/settings/api/migration-wordpress"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 const W = "settings.migration.wordpress.report"
 

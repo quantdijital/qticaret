@@ -2,9 +2,9 @@ import { Link } from "@tanstack/react-router"
 import { ChevronDown, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import type { StatusTone } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import type {
   HealthCheck,
   IntegrationState,
@@ -12,8 +12,8 @@ import type {
   ProviderFailure,
 } from "@/features/settings/api/integrations"
 import { settingsLinkOf } from "@/features/settings/integrations"
-import { formatDateTime } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const I = "settings.integrations"
 

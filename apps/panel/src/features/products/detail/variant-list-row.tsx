@@ -1,7 +1,7 @@
 import { ChevronRight, ImageOff } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { formatCount, formatMoney } from "@/lib/format"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { formatCount, formatMoney } from "@qticaret/admin-ui/lib/format"
 import type { VariantFacts } from "./variant-facts"
 
 const D = "products.variant"

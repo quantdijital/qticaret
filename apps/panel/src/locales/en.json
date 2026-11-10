@@ -13,20 +13,14 @@
     "loading": "Loading",
     "back": "Back",
     "next": "Next",
-    "done": "Done",
     "open": "Open",
     "menu": "Menu",
     "close": "Close",
     "edit": "Edit",
     "actions": "Actions",
     "delete": "Delete",
-    "clear": "Clear",
     "more": "More actions",
-    "notifications": "Notifications",
-    "previous": "Previous",
-    "increase": "Increase",
-    "decrease": "Decrease",
-    "unsaved": "Unsaved changes"
+    "previous": "Previous"
   },
   "errors": {
     "generic": "The action could not be completed. Try again in a moment.",
@@ -3010,14 +3004,7 @@
     "viewStore": "View store",
     "storeSettings": "Store settings"
   },
-  "delta": {
-    "none": "None before",
-    "new": "New",
-    "up": "Up",
-    "down": "Down"
-  },
   "period": {
-    "label": "Period",
     "today": "Today",
     "7d": "7 days",
     "30d": "30 days",
@@ -3032,10 +3019,7 @@
     "custom": {
       "label": "Date range",
       "chosen": "{{from}} – {{to}}",
-      "from": "From",
-      "to": "To",
-      "hint": "In Türkiye's time; up to 366 days.",
-      "apply": "Apply"
+      "hint": "In Türkiye's time; up to 366 days."
     }
   },
   "stage": {
@@ -3044,29 +3028,6 @@
     "shipped": "In transit",
     "delivered": "Delivered",
     "canceled": "Canceled"
-  },
-  "leave": {
-    "title": "You have unsaved changes",
-    "description": "If you leave this page, your changes will be lost.",
-    "confirm": "Leave without saving"
-  },
-  "wizard": {
-    "stepOf": "Step {{step}} of {{total}}"
-  },
-  "list": {
-    "range": "{{from}}–{{to}} of {{total}}",
-    "page": "Page {{page}} of {{pages}}",
-    "previous": "Previous page",
-    "next": "Next page",
-    "clearSearch": "Clear search",
-    "selectPage": "Select every row on this page",
-    "selectRow": "Select {{name}}",
-    "days": {
-      "anyTime": "Any time",
-      "range": "{{from}} – {{to}}",
-      "hint": "Turkey time; either end may stay open.",
-      "clear": "Clear"
-    }
   },
   "products": {
     "description": "Your shop's products, prices and stock",
@@ -9024,11 +8985,6 @@
       "etbisQrLink": "The shop's ETBİS QR code"
     }
   },
-  "formDialog": {
-    "discardTitle": "Discard unsaved changes?",
-    "discardText": "The changes in this window are not saved; they are lost if you go on.",
-    "discard": "Discard changes"
-  },
   "confirmEmail": {
     "title": "Confirm your new e-mail address",
     "confirm": "Confirm my address",
@@ -9042,8 +8998,5 @@
     "subtitleAs": "You are signed in as {{email}}. Once confirmed, you sign in with your new address; your password stays the same.",
     "signInFirst": "Sign in with the account that asked for the change; you come back to this page afterwards.",
     "signIn": "Sign in"
-  },
-  "recordStepper": {
-    "position": "{{at}} / {{total}}"
   }
 }

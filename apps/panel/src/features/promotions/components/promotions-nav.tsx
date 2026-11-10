@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { SectionNav } from "@/components/patterns/section-nav"
+import { SectionNav } from "@qticaret/admin-ui/patterns/section-nav"
 import { GIFT_CARDS_FLAG } from "@/features/gift-cards/api/gift-cards"
 import { useFeature } from "@/features/settings/api/features"
 

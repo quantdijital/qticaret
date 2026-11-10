@@ -3,7 +3,7 @@ import type {
   VariantImage,
   VariantValues as DialogValues,
 } from "@/features/products/detail/variant-values"
-import { parseMeasureInput } from "@/lib/money-input"
+import { parseMeasureInput } from "@qticaret/admin-ui/lib/money-input"
 import type { WizardValues } from "./schema"
 
 /**

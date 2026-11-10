@@ -1,6 +1,6 @@
 import { TriangleAlert } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
 
 /** What can be done with a text's draft from its state card. */
 export type DraftAction = "editPublished" | "discard" | "starter"

@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { interestQuery } from "@/features/products/api/interest"
 import type { ProductDetail } from "@/features/products/api/products"
 import { availableStock, priceRange } from "@/features/products/product-math"
-import { formatCount, formatDateTime, formatMoney } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatCount, formatDateTime, formatMoney } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const I = "products.interest"
 

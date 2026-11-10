@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactNode } from "react"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 type BarButtonProps = Omit<ComponentProps<typeof Button>, "children" | "size"> & {
   icon: ReactNode

@@ -1,15 +1,15 @@
 import { useTranslation } from "react-i18next"
-import { Field } from "@/components/patterns/form-section"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import type { AttributeTemplate } from "@/features/attributes/types"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 import type { FactsCounts } from "./types"
 
 const F = "attributes.facts"

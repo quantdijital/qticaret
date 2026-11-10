@@ -3,10 +3,10 @@ import { Loader2, X } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Field } from "@/components/patterns/form-section"
-import { SearchPicker } from "@/components/patterns/search-picker"
-import { NumberField } from "@/components/patterns/number-field"
-import { Button } from "@/components/ui/button"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { SearchPicker } from "@qticaret/admin-ui/patterns/search-picker"
+import { NumberField } from "@qticaret/admin-ui/patterns/number-field"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -14,12 +14,12 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { useDiscountListProducts } from "@/features/price-lists/api/price-lists"
 import { percentOf } from "@/features/price-lists/form"
 import { productNamesQuery, searchProducts } from "@/features/promotions/api/scope-options"
 import { errorText } from "@/lib/errors"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 function PickedProducts({ ids, onChange }: { ids: string[]; onChange: (ids: string[]) => void }) {
   const { t } = useTranslation()

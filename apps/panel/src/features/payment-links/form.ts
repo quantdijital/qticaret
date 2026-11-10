@@ -1,6 +1,6 @@
 import { z } from "zod"
 import { trAddressShape } from "@/features/tr-address/schema"
-import { parseCountInput, parseMoneyInput } from "@/lib/money-input"
+import { parseCountInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 import type { DiscountType } from "./api/types"
 
 /**

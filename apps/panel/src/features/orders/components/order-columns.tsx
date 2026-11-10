@@ -1,13 +1,13 @@
 import { Link } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
-import type { Column } from "@/components/patterns/data-table"
+import type { Column } from "@qticaret/admin-ui/patterns/data-table"
 import type { BoardOrder } from "@/features/orders/api/orders"
 import { AddonBadge } from "@/features/orders/components/addon-badge"
 import { CustomerCell } from "@/features/orders/components/customer-cell"
 import { OrderShipping } from "@/features/orders/components/shipping-badge"
 import { StageBadge } from "@/features/orders/components/stage-badge"
 import { StockShortBadge } from "@/features/orders/components/stock-short-badge"
-import { formatDateTime, formatMoney, formatRelative } from "@/lib/format"
+import { formatDateTime, formatMoney, formatRelative } from "@qticaret/admin-ui/lib/format"
 
 /** The order list's columns (docs/06 §4): fewer on a phone, folded under the number and stage. */
 export function useColumns(): Column<BoardOrder>[] {

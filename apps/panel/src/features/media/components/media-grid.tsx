@@ -1,10 +1,10 @@
 import { Check } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { mediaFacts } from "@/features/media/api/media"
 import type { MediaAsset } from "@/features/media/api/media"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 interface MediaGridProps {
   items: MediaAsset[] | undefined

@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import type { ReturnRequest } from "@/features/orders/api/returns"
 import { ReturnActions } from "@/features/orders/components/return-actions"
 import type { Open } from "@/features/orders/components/return-actions"
@@ -7,7 +7,7 @@ import { ReturnFacts, RequestWithdrawalBadges } from "@/features/orders/componen
 import { Fact, QueueDialog } from "@/features/orders/components/queue-dialog"
 import { differenceText } from "@/features/orders/exchange-text"
 import { RETURN_TONE } from "@/features/orders/return-rules"
-import { formatDateTime, formatMoney } from "@/lib/format"
+import { formatDateTime, formatMoney } from "@qticaret/admin-ui/lib/format"
 
 const R = "orders.returns"
 

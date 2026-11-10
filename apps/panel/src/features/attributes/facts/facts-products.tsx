@@ -1,9 +1,9 @@
 import { ChevronRight } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import type { StatusTone } from "@/components/patterns/status-badge"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
 import type { AttributeTemplate } from "@/features/attributes/types"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { factValueText } from "./format"
 import type { FactRow, FactStatus, FactsProductPreview } from "./types"
 

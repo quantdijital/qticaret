@@ -3,18 +3,18 @@ import { Loader2, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { SectionCard } from "@/components/patterns/section-card"
-import { ErrorState } from "@/components/patterns/states"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
+} from "@qticaret/admin-ui/ui/select"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import {
   FRAUD_BLOCK_KINDS,
   fraudBlocksQuery,
@@ -23,7 +23,7 @@ import {
 } from "@/features/settings/api/fraud"
 import type { FraudBlock, FraudBlockKind } from "@/features/settings/api/fraud"
 import { errorText } from "@/lib/errors"
-import { formatDate } from "@/lib/format"
+import { formatDate } from "@qticaret/admin-ui/lib/format"
 
 const C = "settings.security.blocks"
 

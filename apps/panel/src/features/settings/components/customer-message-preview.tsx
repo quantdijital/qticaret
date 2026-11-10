@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { ErrorState } from "@/components/patterns/states"
-import { Skeleton } from "@/components/ui/skeleton"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { EmailFrame } from "@/features/bulk-messages/editor/email-frame"
 import { draftPreviewQuery } from "@/features/settings/api/customer-messages"
 import type {

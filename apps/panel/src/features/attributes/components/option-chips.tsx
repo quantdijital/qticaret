@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { ChipInput } from "@/components/patterns/chip-input"
+import { ChipInput } from "@qticaret/admin-ui/patterns/chip-input"
 import { optionValue } from "@/features/attributes/form"
 import type { AttributeOption } from "@/features/attributes/types"
 

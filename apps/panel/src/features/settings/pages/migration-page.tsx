@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next"
-import { PageHeader } from "@/components/patterns/page-header"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { AddressesCard } from "@/features/settings/components/migration/addresses-card"
 import { CutoverCard, InvitesCard } from "@/features/settings/components/migration/cutover-cards"
 import { LinksCard } from "@/features/settings/components/migration/links-card"

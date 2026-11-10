@@ -5,10 +5,10 @@ import type { FieldErrors } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
-import { CardForm } from "@/components/patterns/card-form"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
+import { CardForm } from "@qticaret/admin-ui/patterns/card-form"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { useSaveSection } from "@/features/settings/api/sections"
 import type { StoreSettings } from "@/features/settings/api/sections"
 import {
@@ -22,7 +22,7 @@ import {
 } from "@/features/settings/opening-hours"
 import type { DayHours, TimeRange } from "@/features/settings/opening-hours"
 import { errorText } from "@/lib/errors"
-import { FULL_RESET } from "@/lib/forms"
+import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
 
 const H = "settings.store.hours"
 

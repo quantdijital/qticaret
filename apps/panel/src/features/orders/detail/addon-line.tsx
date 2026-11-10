@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
 import { lineAddonsOf } from "@/features/orders/addon-lines"
 import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
-import { formatMoney } from "@/lib/format"
+import { formatMoney } from "@qticaret/admin-ui/lib/format"
 
 /**
  * Under a line with add-ons (adr/0052 §9): each pick with its price per

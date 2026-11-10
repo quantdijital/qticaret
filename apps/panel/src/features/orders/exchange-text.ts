@@ -1,5 +1,5 @@
 import type { TFunction } from "i18next"
-import { formatMoney } from "@/lib/format"
+import { formatMoney } from "@qticaret/admin-ui/lib/format"
 
 const R = "orders.returns"
 

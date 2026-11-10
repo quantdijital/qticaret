@@ -1,6 +1,6 @@
 import { Folder, Hash } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@qticaret/admin-ui/ui/badge"
 import type { TermView } from "@/features/content/api/terms"
 
 // A row stays one line high on a phone: the rest are counted

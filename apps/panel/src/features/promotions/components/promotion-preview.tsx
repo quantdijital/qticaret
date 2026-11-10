@@ -1,6 +1,6 @@
 import { useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import type { Promotion } from "@/features/promotions/api/promotions"
 import {
   ConditionLines,
@@ -10,8 +10,8 @@ import {
 import { buyGetCounts } from "@/features/promotions/form"
 import type { PromotionValues } from "@/features/promotions/form"
 import { applicationMethod, buyGetMethod } from "@/features/promotions/offer"
-import { formatCount } from "@/lib/format"
-import { parseMoneyInput } from "@/lib/money-input"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
+import { parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 
 const CURRENCY = "try"
 

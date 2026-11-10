@@ -2,7 +2,7 @@ import { Braces } from "lucide-react"
 import { useRef, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,8 +10,13 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+} from "@qticaret/admin-ui/ui/dropdown-menu"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@qticaret/admin-ui/ui/tooltip"
 import { useShopTokenValues } from "@/features/settings/api/shop-tokens"
 import {
   SHOP_TOKENS,
@@ -20,7 +25,7 @@ import {
   hasShopToken,
   insertToken,
 } from "@/features/settings/shop-tokens"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const K = "shopTokens"
 

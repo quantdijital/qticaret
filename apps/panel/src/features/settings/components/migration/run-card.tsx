@@ -2,17 +2,17 @@ import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { Field } from "@/components/patterns/form-section"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Input } from "@/components/ui/input"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import { migrationJobQuery, useStartMigration } from "@/features/settings/api/migration"
 import type {
   MigrationMode,

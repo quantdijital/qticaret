@@ -3,16 +3,16 @@ import { Hash, Loader2, Plus, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from "@qticaret/admin-ui/ui/badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Command,
   CommandEmpty,
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+} from "@qticaret/admin-ui/ui/command"
+import { Popover, PopoverContent, PopoverTrigger } from "@qticaret/admin-ui/ui/popover"
 import { MAX_POST_TAGS, searchTags, useCreateTerm } from "@/features/content/api/terms"
 import type { TermView } from "@/features/content/api/terms"
 import { errorText } from "@/lib/errors"

@@ -8,7 +8,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import { useStaff } from "@/features/auth/api/staff"
 import { teamQuery } from "@/features/settings/api/team"
 

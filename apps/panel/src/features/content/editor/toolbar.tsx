@@ -21,8 +21,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
+} from "@qticaret/admin-ui/ui/select"
+import { Separator } from "@qticaret/admin-ui/ui/separator"
 import type { ExtraToken } from "@/features/settings/components/shop-token-menu"
 import type { CardKind } from "./card-nodes"
 import { TableTools } from "./table-tools"

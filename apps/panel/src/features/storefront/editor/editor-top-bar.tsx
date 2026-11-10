@@ -1,16 +1,16 @@
 import { ArrowLeft, Eye, PencilLine, Redo2, Undo2 } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+} from "@qticaret/admin-ui/ui/select"
+import { Separator } from "@qticaret/admin-ui/ui/separator"
+import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import type { BodyGroup } from "@/features/storefront/api/layout"
 import { BarButton } from "./bar-button"
 import type { EditorLayout, EditorView } from "./editor-layout"

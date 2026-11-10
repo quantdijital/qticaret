@@ -4,12 +4,12 @@ import { Upload } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { PageHeader } from "@/components/patterns/page-header"
-import { Pagination } from "@/components/patterns/pagination"
-import { SearchInput } from "@/components/patterns/search-input"
-import { ErrorState } from "@/components/patterns/states"
-import { useRecordWalk } from "@/components/patterns/use-record-walk"
-import { Button } from "@/components/ui/button"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
+import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { useRecordWalk } from "@qticaret/admin-ui/hooks/use-record-walk"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -17,7 +17,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { useCan } from "@/features/auth/api/staff"
 import { MEDIA_PAGE_SIZE, mediaListQuery } from "@/features/media/api/media"
 import { MediaDetailDialog } from "@/features/media/components/media-detail-dialog"

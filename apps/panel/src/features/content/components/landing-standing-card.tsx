@@ -1,13 +1,13 @@
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Switch } from "@/components/ui/switch"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { ORIGINALITY, useUpdateLanding } from "@/features/content/api/landings"
 import type { LandingDetail } from "@/features/content/api/landings"
 import { OriginalityBadge } from "@/features/content/components/originality-badge"
 import { errorText } from "@/lib/errors"
-import { formatCount } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 /**
  * What decides whether a landing page may stand (docs/14 §3.7): how much of

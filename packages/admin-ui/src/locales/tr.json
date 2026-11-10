@@ -1,0 +1,61 @@
+{
+  "common": {
+    "cancel": "Vazgeç",
+    "clear": "Temizle",
+    "close": "Kapat",
+    "decrease": "Azalt",
+    "done": "Tamamlandı",
+    "increase": "Artır",
+    "loading": "Yükleniyor",
+    "notifications": "Bildirimler",
+    "reset": "Geri al",
+    "retry": "Tekrar dene",
+    "save": "Kaydet",
+    "unsaved": "Kaydedilmemiş değişiklik var"
+  },
+  "delta": {
+    "new": "Yeni",
+    "none": "Önceki dönemde yok",
+    "up": "Artış",
+    "down": "Azalış"
+  },
+  "formDialog": {
+    "discard": "Değişiklikleri at",
+    "discardText": "Bu penceredeki değişiklikler kaydedilmedi; devam ederseniz kaybolur.",
+    "discardTitle": "Kaydedilmemiş değişiklikler atılsın mı?"
+  },
+  "leave": {
+    "confirm": "Kaydetmeden çık",
+    "description": "Bu sayfadan çıkarsanız yaptığınız değişiklikler kaybolur.",
+    "title": "Kaydedilmemiş değişiklikler var"
+  },
+  "list": {
+    "clearSearch": "Aramayı temizle",
+    "days": {
+      "anyTime": "Her zaman",
+      "clear": "Temizle",
+      "hint": "Türkiye saatiyle; bir uç boş kalabilir.",
+      "range": "{{from}} – {{to}}"
+    },
+    "next": "Sonraki sayfa",
+    "page": "Sayfa {{page}} / {{pages}}",
+    "previous": "Önceki sayfa",
+    "range": "{{total}} kayıttan {{from}}–{{to}} arası",
+    "selectPage": "Bu sayfadaki tüm satırları seç",
+    "selectRow": "{{name}} seç"
+  },
+  "period": {
+    "custom": {
+      "apply": "Uygula",
+      "from": "Başlangıç",
+      "to": "Bitiş"
+    },
+    "label": "Dönem"
+  },
+  "recordStepper": {
+    "position": "{{at}} / {{total}}"
+  },
+  "wizard": {
+    "stepOf": "Adım {{step}} / {{total}}"
+  }
+}

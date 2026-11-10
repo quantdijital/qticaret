@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next"
 import type { BulkMessage } from "@/features/bulk-messages/api/types"
-import { formatDateTime } from "@/lib/format"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const B = "bulkMessages"
 

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { categoriesQuery } from "@/features/products/api/lookups"
 import { treeOrder } from "@/features/products/category-order"
 

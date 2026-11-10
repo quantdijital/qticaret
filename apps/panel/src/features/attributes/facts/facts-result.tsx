@@ -1,9 +1,9 @@
 import { AlertTriangle, CircleCheck, Loader2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Progress } from "@/components/ui/progress"
+import { Progress } from "@qticaret/admin-ui/ui/progress"
 import type { SheetJob } from "@/features/products/api/sheets"
 import { JobDownloadButton } from "@/features/settings/components/job-download-button"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 import type { FactsSummary } from "./types"
 
 const F = "attributes.facts"

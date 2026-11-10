@@ -1,5 +1,5 @@
 import { ImageOff } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 /** A product's picture in lists; a quiet placeholder when it has none. */
 export function ProductThumb({

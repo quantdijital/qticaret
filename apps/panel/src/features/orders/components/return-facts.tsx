@@ -1,13 +1,13 @@
 import { Fragment } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import { exclusionOf } from "@/features/orders/api/returns"
 import type { RefusalReason, RefusedLine, ReturnRequest } from "@/features/orders/api/returns"
 import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
 import { refundDeadline, sealedLinesOf } from "@/features/orders/return-facts"
-import { formatDate } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatDate } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const R = "orders.returns"
 

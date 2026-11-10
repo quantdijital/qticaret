@@ -3,24 +3,24 @@ import { getRouteApi, useNavigate } from "@tanstack/react-router"
 import { Download, FileUp, MoreHorizontal, Plus } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { FilterTabs } from "@/components/patterns/filter-tabs"
-import { PageHeader } from "@/components/patterns/page-header"
-import { SearchInput } from "@/components/patterns/search-input"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
+import { FilterTabs } from "@qticaret/admin-ui/patterns/filter-tabs"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@qticaret/admin-ui/ui/dropdown-menu"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import {
   REDIRECT_EXPORT_URL,
   REDIRECT_MATCHES,

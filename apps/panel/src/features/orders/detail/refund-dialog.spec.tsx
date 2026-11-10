@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { OrderDetail, OrderMoney } from "@/features/orders/api/orders"
-import { formatMoney } from "@/lib/format"
+import { formatMoney } from "@qticaret/admin-ui/lib/format"
 import { RefundDialog } from "./refund-dialog"
 
 const fetchMock = vi.hoisted(() => vi.fn())

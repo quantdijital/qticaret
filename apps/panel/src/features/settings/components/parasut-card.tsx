@@ -4,12 +4,12 @@ import { ExternalLink, Loader2, PlugZap, Unplug } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Field } from "@/components/patterns/form-section"
-import { SectionCard } from "@/components/patterns/section-card"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Skeleton } from "@/components/ui/skeleton"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Input } from "@qticaret/admin-ui/ui/input"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import {
   parasutStatusQuery,
   useCheckParasut,
@@ -19,7 +19,7 @@ import {
 } from "@/features/settings/api/einvoice"
 import type { InvoicingProvider } from "@/features/settings/api/einvoice"
 import { errorText } from "@/lib/errors"
-import { formatDateTime } from "@/lib/format"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 
 const P = "settings.einvoice.parasut"
 

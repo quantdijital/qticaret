@@ -3,9 +3,9 @@ import { useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ErrorState, LoadingRows } from "@/components/patterns/states"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
+import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   myProfileQuery,
   mySessionsQuery,
@@ -13,7 +13,7 @@ import {
   useEndOtherSessions,
 } from "@/features/settings/api/account"
 import { errorText } from "@/lib/errors"
-import { formatDateTime } from "@/lib/format"
+import { formatDateTime } from "@qticaret/admin-ui/lib/format"
 import { EmailDialog, PasswordDialog } from "./credential-dialogs"
 
 const S = "settings.security.signIn"

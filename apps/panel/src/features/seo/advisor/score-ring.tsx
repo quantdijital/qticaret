@@ -1,6 +1,6 @@
 import type { Grade } from "@/features/seo/api/advisor"
 
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const TONE: Record<Grade, string> = {
   excellent: "text-success",

@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { normalizeGtin } from "@/lib/gtin"
 import { sdk } from "@/lib/sdk"
-import { parseMeasureInput, parseMoneyInput } from "@/lib/money-input"
+import { parseMeasureInput, parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 import type { ShopDefaults } from "@/features/products/api/lookups"
 import type { JSONContent } from "@tiptap/react"
 import { hasSummaryText } from "@/features/products/summary-doc"

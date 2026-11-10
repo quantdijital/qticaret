@@ -3,9 +3,9 @@ import { NodeViewWrapper } from "@tiptap/react"
 import type { ReactNodeViewProps } from "@tiptap/react"
 import { FolderTree, Package, X } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { sdk } from "@/lib/sdk"
-import { cn } from "@/lib/utils"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 import { CARD_ID } from "./card-nodes"
 
 // The card's record by id, for its name; one gone since shows as missing

@@ -7,7 +7,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { PaymentSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"

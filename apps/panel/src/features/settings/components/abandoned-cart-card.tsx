@@ -4,24 +4,24 @@ import { Loader2, MailCheck, ShoppingBag, ShoppingCart } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { KpiTile } from "@/components/patterns/kpi-tile"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
+import { KpiTile } from "@qticaret/admin-ui/patterns/kpi-tile"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Switch } from "@/components/ui/switch"
+} from "@qticaret/admin-ui/ui/select"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { useCan } from "@/features/auth/api/staff"
 import { cartReminderSummaryQuery } from "@/features/settings/api/cart-reminders"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { MarketingSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 
 const C = "settings.marketing.abandonedCart"
 const DELAYS = [30, 60, 180, 360, 1440] as const

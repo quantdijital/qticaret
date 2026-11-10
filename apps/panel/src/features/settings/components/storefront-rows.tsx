@@ -1,8 +1,8 @@
 import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 const S = "settings.storefront"
 

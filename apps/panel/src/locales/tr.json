@@ -13,20 +13,14 @@
     "loading": "Yükleniyor",
     "back": "Geri",
     "next": "İleri",
-    "done": "Tamamlandı",
     "open": "Aç",
     "menu": "Menü",
     "close": "Kapat",
     "edit": "Düzenle",
     "actions": "İşlemler",
     "delete": "Sil",
-    "clear": "Temizle",
     "more": "Diğer işlemler",
-    "notifications": "Bildirimler",
-    "previous": "Önceki",
-    "increase": "Artır",
-    "decrease": "Azalt",
-    "unsaved": "Kaydedilmemiş değişiklik var"
+    "previous": "Önceki"
   },
   "errors": {
     "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
@@ -3010,14 +3004,7 @@
     "viewStore": "Mağazayı görüntüle",
     "storeSettings": "Mağaza ayarları"
   },
-  "delta": {
-    "none": "Önceki dönemde yok",
-    "new": "Yeni",
-    "up": "Artış",
-    "down": "Azalış"
-  },
   "period": {
-    "label": "Dönem",
     "today": "Bugün",
     "7d": "7 gün",
     "30d": "30 gün",
@@ -3032,10 +3019,7 @@
     "custom": {
       "label": "Tarih aralığı",
       "chosen": "{{from}} – {{to}}",
-      "from": "Başlangıç",
-      "to": "Bitiş",
-      "hint": "Türkiye saatiyle; en çok 366 gün.",
-      "apply": "Uygula"
+      "hint": "Türkiye saatiyle; en çok 366 gün."
     }
   },
   "stage": {
@@ -3044,29 +3028,6 @@
     "shipped": "Kargoda",
     "delivered": "Teslim edildi",
     "canceled": "İptal edildi"
-  },
-  "leave": {
-    "title": "Kaydedilmemiş değişiklikler var",
-    "description": "Bu sayfadan çıkarsanız yaptığınız değişiklikler kaybolur.",
-    "confirm": "Kaydetmeden çık"
-  },
-  "wizard": {
-    "stepOf": "Adım {{step}} / {{total}}"
-  },
-  "list": {
-    "range": "{{total}} kayıttan {{from}}–{{to}} arası",
-    "page": "Sayfa {{page}} / {{pages}}",
-    "previous": "Önceki sayfa",
-    "next": "Sonraki sayfa",
-    "clearSearch": "Aramayı temizle",
-    "selectPage": "Bu sayfadaki tüm satırları seç",
-    "selectRow": "{{name}} seç",
-    "days": {
-      "anyTime": "Her zaman",
-      "range": "{{from}} – {{to}}",
-      "hint": "Türkiye saatiyle; bir uç boş kalabilir.",
-      "clear": "Temizle"
-    }
   },
   "products": {
     "description": "Mağazanızdaki ürünler, fiyatları ve stokları",
@@ -9024,11 +8985,6 @@
       "etbisQrLink": "Mağazanın ETBİS karekodu"
     }
   },
-  "formDialog": {
-    "discardTitle": "Kaydedilmemiş değişiklikler atılsın mı?",
-    "discardText": "Bu penceredeki değişiklikler kaydedilmedi; devam ederseniz kaybolur.",
-    "discard": "Değişiklikleri at"
-  },
   "confirmEmail": {
     "title": "Yeni e-posta adresinizi onaylayın",
     "confirm": "Adresimi onayla",
@@ -9042,8 +8998,5 @@
     "subtitleAs": "{{email}} hesabıyla giriş yaptınız. Onaylayınca panele yeni adresinizle giriş yaparsınız; şifreniz değişmez.",
     "signInFirst": "Adresi değiştirmek isteyen hesapla giriş yapın; ardından bu sayfaya dönersiniz.",
     "signIn": "Giriş yap"
-  },
-  "recordStepper": {
-    "position": "{{at}} / {{total}}"
   }
 }

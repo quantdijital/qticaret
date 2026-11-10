@@ -6,7 +6,11 @@ import type {
   AddonKind,
   ProductAddon,
 } from "@/features/products/api/addons"
-import { formatMoneyInput, parseCountInput, parseMoneyInput } from "@/lib/money-input"
+import {
+  formatMoneyInput,
+  parseCountInput,
+  parseMoneyInput,
+} from "@qticaret/admin-ui/lib/money-input"
 
 /**
  * The add-ons card's values (adr/0052): one flat shape for both kinds, so

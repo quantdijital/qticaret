@@ -3,9 +3,9 @@ import type { TFunction } from "i18next"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { Field } from "@/components/patterns/form-section"
-import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -14,14 +14,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Switch } from "@/components/ui/switch"
-import { Textarea } from "@/components/ui/textarea"
+} from "@qticaret/admin-ui/ui/dialog"
+import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
+import { Switch } from "@qticaret/admin-ui/ui/switch"
+import { Textarea } from "@qticaret/admin-ui/ui/textarea"
 import { customerConsentsQuery, saveCustomerConsent } from "@/features/customers/api/customers"
 import type { ConsentChannel, ConsentState } from "@/features/customers/api/customers"
 import { errorText } from "@/lib/errors"
-import { formatDate } from "@/lib/format"
+import { formatDate } from "@qticaret/admin-ui/lib/format"
 
 const C = "customers.consents"
 const CHANNELS: readonly ConsentChannel[] = ["email", "sms"]

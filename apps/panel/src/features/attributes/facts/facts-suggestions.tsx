@@ -1,15 +1,15 @@
 import { useTranslation } from "react-i18next"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import { ATTRIBUTE_TYPES } from "@/features/attributes/types"
 import type { AttributeTemplate } from "@/features/attributes/types"
-import { formatCount } from "@/lib/format"
+import { formatCount } from "@qticaret/admin-ui/lib/format"
 import { choiceOf } from "./choices"
 import type { Choices, LabelChoice } from "./choices"
 import type { FieldSuggestion } from "./types"

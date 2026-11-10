@@ -1,12 +1,12 @@
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
-import { ErrorState } from "@/components/patterns/states"
-import { StatusBadge } from "@/components/patterns/status-badge"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import type { OrderDetail, OrderMoney } from "@/features/orders/api/orders"
 import type { HostedPayment } from "@/features/orders/api/payments"
-import { formatMoney } from "@/lib/format"
-import { cn } from "@/lib/utils"
+import { formatMoney } from "@qticaret/admin-ui/lib/format"
+import { cn } from "@qticaret/admin-ui/lib/utils"
 
 // The payment's state in the shop's words (docs/06 sözlük) and its tone. Taken
 // and refunded come in kuruş from the server once read: Medusa keeps digits

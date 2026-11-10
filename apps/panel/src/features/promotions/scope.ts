@@ -1,4 +1,4 @@
-import { formatMoneyInput } from "@/lib/money-input"
+import { formatMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 
 /**
  * Where a promotion applies and when (F4.4, ADR-0024), as Medusa's rules:

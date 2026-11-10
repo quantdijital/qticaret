@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next"
-import { SectionCard } from "@/components/patterns/section-card"
-import { StatCard } from "@/components/patterns/stat-card"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { StatCard } from "@qticaret/admin-ui/patterns/stat-card"
 import type { BulkReport } from "@/features/bulk-messages/api/types"
 import { SKIP_REASONS } from "@/features/bulk-messages/api/types"
 import { SkipList } from "@/features/bulk-messages/components/audience-count"
-import { formatCount, formatMoney, formatPercent } from "@/lib/format"
+import { formatCount, formatMoney, formatPercent } from "@qticaret/admin-ui/lib/format"
 
 const R = "bulkMessages.report"
 

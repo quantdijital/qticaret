@@ -3,15 +3,15 @@ import { useEffect } from "react"
 import { useController } from "react-hook-form"
 import type { Control, FieldValues, Path } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { Field } from "@/components/patterns/form-section"
-import { Input } from "@/components/ui/input"
+import { Field } from "@qticaret/admin-ui/patterns/form-section"
+import { Input } from "@qticaret/admin-ui/ui/input"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@qticaret/admin-ui/ui/select"
 import { districtsQuery, provincesQuery } from "./api"
 import { sameName } from "./schema"
 

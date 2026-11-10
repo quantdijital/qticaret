@@ -2,10 +2,10 @@ import { useQuery } from "@tanstack/react-query"
 import { RefreshCw } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { PageHeader } from "@/components/patterns/page-header"
-import { SectionCard } from "@/components/patterns/section-card"
-import { ErrorState, LoadingRows } from "@/components/patterns/states"
-import { Button } from "@/components/ui/button"
+import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
+import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   integrationHealthQuery,
   integrationOverviewQuery,
@@ -15,7 +15,7 @@ import type { IntegrationView } from "@/features/settings/api/integrations"
 import { IntegrationRow } from "@/features/settings/components/integration-row"
 import { INTEGRATION_GROUPS } from "@/features/settings/integrations"
 import { errorText } from "@/lib/errors"
-import { formatDateTime, formatRelative } from "@/lib/format"
+import { formatDateTime, formatRelative } from "@qticaret/admin-ui/lib/format"
 
 const I = "settings.integrations"
 

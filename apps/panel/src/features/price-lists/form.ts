@@ -1,6 +1,6 @@
 import { z } from "zod"
-import { dayEnd, dayOf, dayStart } from "@/lib/days"
-import { parseMoneyInput } from "@/lib/money-input"
+import { dayEnd, dayOf, dayStart } from "@qticaret/admin-ui/lib/days"
+import { parseMoneyInput } from "@qticaret/admin-ui/lib/money-input"
 import { scheduleOf } from "@/features/promotions/offer"
 import type { PriceList } from "./api/price-lists"
 

@@ -1,4 +1,4 @@
-import type { StatusTone } from "@/components/patterns/status-badge"
+import type { StatusTone } from "@qticaret/admin-ui/patterns/status-badge"
 import { DEFECT_REASONS } from "@/features/orders/api/returns"
 import type { OpenRequest, Returnable } from "@/features/orders/api/returnable"
 import type { ReturnReason, ReturnRequest, ReturnStatus } from "@/features/orders/api/returns"

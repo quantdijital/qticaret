@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { MediaField } from "@/components/patterns/media-field"
-import { SectionCard } from "@/components/patterns/section-card"
+import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { useUpdateBrand } from "@/features/brands/api/brands"
 import type { Brand } from "@/features/brands/api/brands"
 import { errorText } from "@/lib/errors"

@@ -1,13 +1,13 @@
 import { Link } from "@tanstack/react-router"
 import { ChevronRight } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Checkbox } from "@qticaret/admin-ui/ui/checkbox"
 import type { ReviewRow } from "@/features/reviews/api/reviews"
 import { Stars } from "@/features/reviews/components/google-review-item"
 import { ReviewPhotos } from "@/features/reviews/components/review-photos"
-import { formatDate } from "@/lib/format"
+import { formatDate } from "@qticaret/admin-ui/lib/format"
 
 const R = "reviews"
 

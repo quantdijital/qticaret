@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router"
 import { Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { PeriodPicker } from "@/components/patterns/period-picker"
-import { Button } from "@/components/ui/button"
+import { PeriodPicker } from "@qticaret/admin-ui/patterns/period-picker"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import { useCurrentUser } from "@/features/auth/api/me"
 import { PERIODS } from "@/features/dashboard/period"
 import type { PeriodKey } from "@/features/dashboard/period"
-import { formatLongDate } from "@/lib/format"
+import { formatLongDate } from "@qticaret/admin-ui/lib/format"
 
 interface DashboardHeaderProps {
   period: PeriodKey
@@ -28,7 +28,12 @@ export function DashboardHeader({ period, onPeriodChange }: DashboardHeaderProps
         </p>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <PeriodPicker periods={PERIODS} value={period} onChange={onPeriodChange} />
+        <PeriodPicker
+          periods={PERIODS}
+          value={period}
+          onChange={onPeriodChange}
+          labelOf={(key) => t(`period.${key}`)}
+        />
         <Button asChild>
           <Link to="/products/new">
             <Plus />

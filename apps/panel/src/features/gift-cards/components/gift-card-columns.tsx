@@ -1,10 +1,10 @@
 import { useTranslation } from "react-i18next"
-import type { Column } from "@/components/patterns/data-table"
-import { StatusBadge } from "@/components/patterns/status-badge"
+import type { Column } from "@qticaret/admin-ui/patterns/data-table"
+import { StatusBadge } from "@qticaret/admin-ui/patterns/status-badge"
 import { cardBalance, maskCode } from "@/features/gift-cards/api/gift-cards"
 import type { GiftCard } from "@/features/gift-cards/api/gift-cards"
 import { GiftCardActions } from "@/features/gift-cards/components/gift-card-actions"
-import { formatMoney } from "@/lib/format"
+import { formatMoney } from "@qticaret/admin-ui/lib/format"
 
 // Cards do not expire now (adr/0025); one made with a last day before still can
 const isExpired = (card: GiftCard) =>

@@ -3,8 +3,8 @@ import { useState } from "react"
 import type { SyntheticEvent } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
-import { ChipInput } from "@/components/patterns/chip-input"
-import { Button } from "@/components/ui/button"
+import { ChipInput } from "@qticaret/admin-ui/patterns/chip-input"
+import { Button } from "@qticaret/admin-ui/ui/button"
 import {
   Dialog,
   DialogBody,
@@ -13,7 +13,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
+} from "@qticaret/admin-ui/ui/dialog"
 import { useSaveSynonym } from "@/features/seo/api/synonyms"
 import type { SynonymGroup } from "@/features/seo/api/synonyms"
 import { useSynonymText } from "./synonym-text"

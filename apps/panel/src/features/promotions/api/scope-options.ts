@@ -1,5 +1,5 @@
 import { queryOptions } from "@tanstack/react-query"
-import type { PickerOption } from "@/components/patterns/search-picker"
+import type { PickerOption } from "@qticaret/admin-ui/patterns/search-picker"
 import { sdk } from "@/lib/sdk"
 
 /** What a promotion's scope picks from (F4.4): the shop's collections and products. */
