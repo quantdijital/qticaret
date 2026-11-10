@@ -1,6 +1,6 @@
 # ADR-0061: Üst panel (control plane): teknoloji, veri modeli, güvenlik sınırı ve secret şifreleme
 
-- **Durum:** Önerildi (2026-11-10; sahibin 2026-11-10 kararlarıyla yazıldı, gözden geçir)
+- **Durum:** Kabul edildi (2026-11-10, sahip "başla"; varsayılanlar: aylık ciro üst panele gelmez, ek süre 7 gün, kısıtta vitrin satmaya devam eder)
 - **Tarih:** 2026-11-10
 - **İlgili:** docs/03 §F17 ve §F16, docs/01 (genel görünüm), docs/04 (secret yönetimi, yönetici hesapları), docs/08 (tenant provisioning), adr/0001 (instance-per-tenant), adr/0003 (hosting), adr/0012 (`owner: platform` bayrakları), adr/0022 (kendi panelimiz), adr/0027 (sağlayıcı hesapları şifreli), adr/0034 (e-fatura), adr/0040 (roller, 2FA, yeniden doğrulama), adr/0053 (bakım modu), docs/18 (panel tasarım sistemi)
 
