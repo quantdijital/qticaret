@@ -9,6 +9,11 @@ import { preferencesTabSearch } from "@/features/storefront/preferences-tabs"
 export const Route = createFileRoute("/_auth/settings/storefront")({
   validateSearch: preferencesTabSearch,
   beforeLoad: ({ search }) => {
-    throw redirect({ to: "/storefront/preferences", search, replace: true })
+    // The full search keeps what no route validates: a part that moved is left out here
+    throw redirect({
+      to: "/storefront/preferences",
+      search: preferencesTabSearch(search),
+      replace: true,
+    })
   },
 })
