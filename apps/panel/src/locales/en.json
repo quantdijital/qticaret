@@ -3019,7 +3019,10 @@
     "custom": {
       "label": "Date range",
       "chosen": "{{from}} – {{to}}",
-      "hint": "In Türkiye's time; up to 366 days."
+      "from": "From",
+      "to": "To",
+      "hint": "In Türkiye's time; up to 366 days.",
+      "apply": "Apply"
     }
   },
   "stage": {

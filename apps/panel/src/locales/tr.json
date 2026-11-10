@@ -3019,7 +3019,10 @@
     "custom": {
       "label": "Tarih aralığı",
       "chosen": "{{from}} – {{to}}",
-      "hint": "Türkiye saatiyle; en çok 366 gün."
+      "from": "Başlangıç",
+      "to": "Bitiş",
+      "hint": "Türkiye saatiyle; en çok 366 gün.",
+      "apply": "Uygula"
     }
   },
   "stage": {
