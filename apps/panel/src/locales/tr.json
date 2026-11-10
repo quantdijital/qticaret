@@ -1614,7 +1614,8 @@
             "password_reset": "Ekip: şifre yenileme",
             "mfa_changed": "Ekip: iki adımlı doğrulama değişti",
             "email_confirm": "Ekip: yeni e-posta onayı",
-            "account_changed": "Ekip: şifre ya da e-posta değişti"
+            "account_changed": "Ekip: şifre ya da e-posta değişti",
+            "smtp_rejections": "Ekip: e-posta sunucusu alıcıları reddediyor"
           },
           "stock": {
             "alert_confirm": "Stok bildirimi onayı",

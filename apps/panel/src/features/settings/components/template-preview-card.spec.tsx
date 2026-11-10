@@ -15,6 +15,8 @@ const templates: MessageTemplateSummary[] = [
   { name: "order.placed", kind: "transactional", channels: ["email", "sms"] },
   { name: "staff.new_order", kind: "transactional", channels: ["email"] },
   { name: "staff.seo_digest", kind: "transactional", channels: ["email"] },
+  // The shop's own mail server refusing recipients (adr/0036 Ek 2026-11-10)
+  { name: "staff.smtp_rejections", kind: "transactional", channels: ["email"] },
 ]
 
 const previews: Record<string, MessagePreview> = {
@@ -81,6 +83,7 @@ describe("TemplatePreviewCard", () => {
     expect(options.map((option) => option.textContent)).toEqual([
       "Ekip: yeni sipariş",
       "Ekip: haftalık SEO özeti",
+      "Ekip: e-posta sunucusu alıcıları reddediyor",
     ])
     await userEvent.click(
       within(screen.getByRole("listbox")).getByRole("option", { name: "Ekip: haftalık SEO özeti" })

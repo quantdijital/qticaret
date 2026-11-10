@@ -1614,7 +1614,8 @@
             "password_reset": "Team: password reset",
             "mfa_changed": "Team: two-step verification changed",
             "email_confirm": "Team: new e-mail confirmation",
-            "account_changed": "Team: password or e-mail changed"
+            "account_changed": "Team: password or e-mail changed",
+            "smtp_rejections": "Team: mail server refusing recipients"
           },
           "stock": {
             "alert_confirm": "Stock alert confirmation",
