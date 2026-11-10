@@ -38,7 +38,7 @@ test("opens the theme editor with the draft in the preview and a section's setti
   await expect(page.getByRole("dialog", { name: "Yayınlanan sürümler" })).toBeVisible()
   await page.keyboard.press("Escape")
 
-  await page.getByRole("button", { name: "Çık" }).click()
+  await page.getByRole("button", { name: "Çık", exact: true }).click()
   await expect(page).toHaveURL(/\/storefront\/menus$/)
   await guard.assertHealthy()
 })
@@ -77,7 +77,7 @@ test("lays the theme editor out for the window it has", async ({ page, guard }) 
         .filter((width) => width > 0 && width < 159.5)
     )
   const barReady = async () => {
-    await expect(bar.getByRole("button", { name: "Çık" })).toBeVisible()
+    await expect(bar.getByRole("button", { name: "Çık", exact: true })).toBeVisible()
     await expect(bar.getByRole("combobox", { name: "Düzenlenen sayfa" })).toBeVisible()
     await expect(bar.getByRole("button", { name: "Yayınla" })).toBeVisible()
     await expect(bar.getByRole("status", { name: "Taslağın durumu" })).toBeVisible()

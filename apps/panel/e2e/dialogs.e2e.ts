@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test"
+import type { Locator, Page } from "@playwright/test"
 import { expect, pageHeading, test } from "./support/guard"
 import { dialogIssues } from "./support/dialog"
 
@@ -79,8 +79,8 @@ const firstRow = async (page: Page) => {
 }
 
 /** The first of what the selector finds, when there is one: a card or a row's own button. */
-const firstOf = (selector: string) => async (page: Page) => {
-  const found = page.locator(selector)
+const firstOf = (selector: string | ((page: Page) => Locator)) => async (page: Page) => {
+  const found = typeof selector === "string" ? page.locator(selector) : selector(page)
   if ((await found.count()) === 0) {
     return false
   }
@@ -138,7 +138,8 @@ const CASES: Case[] = [
   {
     name: "attribute template",
     path: "/settings/attributes",
-    open: firstOf("main ul > li > button"),
+    // A template's card, named by its attribute count; the settings menu beside is in main too
+    open: firstOf((page) => page.getByRole("main").getByRole("button", { name: /\d+ özellik/ })),
   },
   { name: "media detail", path: "/media", open: firstOf("main ul > li > button") },
 ]
