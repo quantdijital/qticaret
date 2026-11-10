@@ -7,7 +7,15 @@ const PER_PAGE_MS = 10_000
 const PHONE = { width: 375, height: 812 }
 
 // The lists whose first record opens a detail page
-const DETAILS = ["/orders", "/customers", "/products", "/promotions", "/brands", "/content"]
+const DETAILS = [
+  "/orders",
+  "/customers",
+  "/products",
+  "/promotions",
+  "/brands",
+  "/collections",
+  "/content",
+]
 
 /** Every screen fits a phone: nothing wider than the screen, so the page never scrolls sideways. */
 test("fits every page on a phone", async ({ page, guard }) => {

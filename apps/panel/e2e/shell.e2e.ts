@@ -19,6 +19,7 @@ const DETAILS = [
   "/promotions",
   "/promotions/price-lists",
   "/brands",
+  "/collections",
   "/content",
   "/bulk-messages",
   "/payment-links",

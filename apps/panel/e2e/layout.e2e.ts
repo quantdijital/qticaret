@@ -12,6 +12,7 @@ const DETAILS = [
   "/promotions",
   "/promotions/price-lists",
   "/brands",
+  "/collections",
   "/content",
 ]
 

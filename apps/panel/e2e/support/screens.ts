@@ -6,12 +6,17 @@ export const SECTIONS = [
   "/payment-links",
   "/payment-links/new",
   "/customers",
+  // Carts left before payment, and the reminders sent for them
+  "/customers/abandoned-carts",
   "/products",
   "/categories",
   "/brands",
+  "/collections",
   "/inventory",
   "/reviews",
   "/reviews/questions",
+  // Google reviews (adr/0058): the connection, or the reviews it brought
+  "/reviews/google",
   "/customers/groups",
   "/customers/contact-messages",
   "/promotions",
@@ -70,6 +75,9 @@ export const SETTINGS = [
   "/settings/shipping/yurtici",
   "/settings/notifications",
   "/settings/notifications?part=sms",
+  // The messages the shop sends its customers, and the staff's own alerts
+  "/settings/notifications?part=templates",
+  "/settings/notifications?part=staff",
   "/settings/sms/netgsm",
   "/orders/chargebacks",
   "/orders/review",
@@ -92,7 +100,10 @@ export const SETTINGS = [
   "/settings/marketing?part=bulk",
   "/settings/marketing/meta",
   "/settings/marketing/ga4",
+  // Opens on the member's own account (Hesabım); the team's two-step and the fraud rules beside
   "/settings/security",
+  "/settings/security?part=team",
+  "/settings/security?part=fraud",
   "/settings/team",
   "/settings/legal",
   "/settings/legal/distance_sales",
