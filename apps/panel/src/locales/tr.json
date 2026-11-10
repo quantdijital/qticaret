@@ -888,7 +888,8 @@
         "payment": "Ödeme",
         "refund": "Para iadesi",
         "legal_document": "Yasal metin",
-        "vat_rate": "KDV oranı"
+        "vat_rate": "KDV oranı",
+        "message_template": "Müşteri mesajı"
       }
     },
     "locations": {
@@ -1538,8 +1539,8 @@
         }
       },
       "templates": {
-        "title": "İleti şablonları",
-        "description": "Müşterilere ve ekibinize giden iletilerin nasıl göründüğü. Örnek değerlerle, mağazanızın adı, logosu ve rengiyle gösterilir; hiçbir şey gönderilmez.",
+        "title": "Ekibe giden iletiler",
+        "description": "Ekibinize giden uyarıların nasıl göründüğü. Örnek değerlerle, mağazanızın adı, logosu ve rengiyle gösterilir; hiçbir şey gönderilmez.",
         "choose": "Şablon",
         "email": "E-posta",
         "subject": "Konu",
@@ -1620,8 +1621,108 @@
       "tabs": {
         "email": "E-posta",
         "sms": "SMS",
-        "templates": "Şablonlar",
+        "templates": "Müşteri mesajları",
         "staff": "Personel uyarıları"
+      },
+      "customer": {
+        "title": "Müşteri mesajları",
+        "description": "Müşterilerinize giden iletilerin metinleri. Bir satıra tıklayıp konuyu, metni ve SMS'i değiştirebilir, isteğe bağlı iletileri kapatabilirsiniz; yerleşim ve yasal bölümler sabittir.",
+        "groups": {
+          "order": "Sipariş",
+          "shipping": "Kargo",
+          "returns": "İade",
+          "account": "Hesap",
+          "stock": "Stok bildirimi",
+          "marketing": "Pazarlama"
+        },
+        "channels": {
+          "email": "E-posta",
+          "sms": "SMS"
+        },
+        "kind": {
+          "transactional": "Bilgilendirme iletisi: izin gerekmez, siparişin ya da hesabın gereği gönderilir.",
+          "commercial": "Ticari ileti: yalnızca izin veren müşterilere gider."
+        },
+        "reworded": "Özelleştirildi",
+        "required": "Zorunlu",
+        "on": "Açık",
+        "off": "Kapalı",
+        "send": "Bu iletiyi gönder",
+        "sendHint": "Kapatırsanız müşterilere bu ileti gitmez.",
+        "requiredHint": {
+          "default": "Bu ileti zorunludur; kapatılamaz, yalnızca metni değiştirilebilir.",
+          "order": {
+            "placed": "Zorunlu: sipariş onayı ve mesafeli satış bilgileri müşteriye kalıcı veri saklayıcıyla iletilmelidir (6502 s. Kanun md. 48, Mesafeli Sözleşmeler Yönetmeliği). Metni değiştirebilirsiniz, iletiyi kapatamazsınız.",
+            "invoiced": "Zorunlu: internet satışında e-Arşiv fatura alıcıya elektronik ortamda iletilmelidir (VUK 509 sıra no.lu Genel Tebliğ).",
+            "access_link": "Zorunlu: müşteri bu bağlantıyı kendisi istedi; misafir siparişine başka yoldan ulaşamaz."
+          },
+          "payment_link": {
+            "sent": "Zorunlu: ödeme bağlantısını müşteri istedi ve bağlantı ona başka yoldan ulaşmaz."
+          },
+          "gift_card": {
+            "issued": "Zorunlu: hediye kartının kodu satın alınan üründür; bu ileti kartı teslim eder."
+          },
+          "return": {
+            "approved": "Zorunlu: müşteri ürünü geri göndermek için bu iletideki kargo kodunu kullanır (cayma hakkı).",
+            "refused": "Zorunlu: kabul edilmeyen ürünler ve müşterinin seçenekleri müşteriye bildirilmelidir."
+          },
+          "account": {
+            "password_reset": "Zorunlu: şifre yenileme bağlantısı yalnızca bu iletiyle gider.",
+            "verify_email": "Zorunlu: e-posta doğrulama kodu yalnızca bu iletiyle gider."
+          },
+          "consent": {
+            "confirm": "Zorunlu ve metni sabit: kampanya izninin onayı (çift onay) İYS kaydının kanıtıdır; metni değiştirilemez."
+          },
+          "stock": {
+            "alert_confirm": "Zorunlu: müşteri stok bildirimini istedi; onaylamadan ileti almaz."
+          }
+        },
+        "marketingOn": "Terk edilmiş sepet hatırlatması açık. Açıp kapatmak Pazarlama ayarlarındadır.",
+        "marketingOff": "Terk edilmiş sepet hatırlatması kapalı. Açıp kapatmak Pazarlama ayarlarındadır.",
+        "marketingLink": "Sepet hatırlatma ayarına git",
+        "fields": {
+          "subject": "Konu",
+          "preheader": "Ön izleme satırı",
+          "heading": "Başlık",
+          "intro": "Giriş metni",
+          "sms": "SMS metni"
+        },
+        "fieldHints": {
+          "preheader": "Gelen kutusunda konunun yanında görünen kısa metin.",
+          "intro": "E-postanın ilk paragrafı; satır sonları korunur. Ürünler, tutarlar ve bağlantılar altında kendiliğinden gösterilir."
+        },
+        "tokens": {
+          "shopName": "Mağaza adı",
+          "customerName": "Müşteri adı",
+          "orderNumber": "Sipariş numarası",
+          "total": "Toplam tutar",
+          "carrier": "Kargo firması",
+          "trackingNumber": "Takip numarası",
+          "trackingUrl": "Takip bağlantısı",
+          "invoiceNumber": "Fatura numarası",
+          "invoiceType": "Fatura türü",
+          "requestKind": "Talep türü (iade ya da değişim)",
+          "days": "Bağlantının geçerli olduğu gün",
+          "validity": "Bağlantının geçerlilik süresi",
+          "paymentUrl": "Ödeme bağlantısı",
+          "recipientName": "Alıcının adı",
+          "senderName": "Gönderenin adı",
+          "productName": "Ürün adı",
+          "other": "Bilgi"
+        },
+        "tokenSample": "Örnekte: {{sample}}",
+        "unknownTokens": "Bu iletide olmayan bilgi: {{tokens}}. Bilgileri alanın sağındaki menüden ekleyin.",
+        "smsCount": "Örnek bilgilerle {{chars}} karakter · {{parts}} SMS (SMS başına {{perPart}} karakter)",
+        "smsLong": "Metin {{parts}} SMS olarak gönderilir ve her parça ayrı ücretlendirilir.",
+        "smsTooLong": "Metin en çok {{max}} SMS olabilir; kısaltın.",
+        "smsUcs2": "Türkçe alfabe dışında bir karakter (ör. emoji) var; SMS başına yalnız 70 karakter sığar.",
+        "previewEmail": "Müşterinin göreceği e-posta",
+        "previewSms": "Müşterinin göreceği SMS",
+        "previewHeld": "Metinde tanınmayan bilgi ya da çok uzun SMS var; önizleme son geçerli metni gösteriyor.",
+        "emailFrame": "{{name}} e-postasının önizlemesi",
+        "fixedText": "Bu iletinin metni sabittir. Aşağıda müşterinin göreceği hâli var.",
+        "reset": "Varsayılana dön",
+        "saved": "Mesaj kaydedildi."
       }
     },
     "sms": {
@@ -7327,7 +7428,9 @@
       "address": "Adres",
       "whatsapp": "WhatsApp numarası",
       "freeShippingThreshold": "Ücretsiz kargo eşiği"
-    }
+    },
+    "ownTitle": "Bilgi ekle",
+    "ownHint": "Gönderimde müşterinin ve siparişin bilgisiyle dolar."
   },
   "storefront": {
     "menus": {

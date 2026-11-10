@@ -888,7 +888,8 @@
         "payment": "Payment",
         "refund": "Refund",
         "legal_document": "Legal text",
-        "vat_rate": "VAT rate"
+        "vat_rate": "VAT rate",
+        "message_template": "Customer message"
       }
     },
     "locations": {
@@ -1538,8 +1539,8 @@
         }
       },
       "templates": {
-        "title": "Message templates",
-        "description": "How the messages to your customers and staff read. Shown with sample values in your shop's name, logo and colour; nothing is sent.",
+        "title": "Messages to your team",
+        "description": "How the alerts your team gets look, with sample values in your shop's name, logo and colour; nothing is sent.",
         "choose": "Template",
         "email": "E-mail",
         "subject": "Subject",
@@ -1620,8 +1621,108 @@
       "tabs": {
         "email": "E-mail",
         "sms": "SMS",
-        "templates": "Templates",
+        "templates": "Customer messages",
         "staff": "Staff alerts"
+      },
+      "customer": {
+        "title": "Customer messages",
+        "description": "The texts of the messages your customers get. Click a row to change the subject, text and SMS, or turn optional messages off; the layout and legal parts stay fixed.",
+        "groups": {
+          "order": "Orders",
+          "shipping": "Shipping",
+          "returns": "Returns",
+          "account": "Account",
+          "stock": "Stock alerts",
+          "marketing": "Marketing"
+        },
+        "channels": {
+          "email": "E-mail",
+          "sms": "SMS"
+        },
+        "kind": {
+          "transactional": "Transactional message: needs no consent, sent because of the order or account.",
+          "commercial": "Commercial message: goes only to customers who consented."
+        },
+        "reworded": "Customised",
+        "required": "Required",
+        "on": "On",
+        "off": "Off",
+        "send": "Send this message",
+        "sendHint": "Turned off, customers do not get this message.",
+        "requiredHint": {
+          "default": "This message is required; it cannot be turned off, only reworded.",
+          "order": {
+            "placed": "Required: the order's confirmation and distance-sales information must reach the customer on a durable medium (Law 6502 art. 48, Distance Contracts Regulation). You can reword it, not turn it off.",
+            "invoiced": "Required: an online sale's e-Arşiv invoice must reach the buyer electronically (Tax Procedure Law General Communiqué 509).",
+            "access_link": "Required: the customer asked for this link; a guest reaches their order no other way."
+          },
+          "payment_link": {
+            "sent": "Required: the customer asked for the payment link and it reaches them no other way."
+          },
+          "gift_card": {
+            "issued": "Required: the gift card's code is what was bought; this message delivers it."
+          },
+          "return": {
+            "approved": "Required: the customer sends the goods back with the carrier code in this message (right of withdrawal).",
+            "refused": "Required: the customer must be told which goods were not accepted and what they can do."
+          },
+          "account": {
+            "password_reset": "Required: the password reset link goes only with this message.",
+            "verify_email": "Required: the e-mail verification code goes only with this message."
+          },
+          "consent": {
+            "confirm": "Required and fixed: confirming campaign consent (double opt-in) is the İYS record's proof; its text cannot be changed."
+          },
+          "stock": {
+            "alert_confirm": "Required: the customer asked for the stock alert and gets nothing until they confirm."
+          }
+        },
+        "marketingOn": "Abandoned cart reminders are on. They are turned on and off in Marketing settings.",
+        "marketingOff": "Abandoned cart reminders are off. They are turned on and off in Marketing settings.",
+        "marketingLink": "Go to cart reminder settings",
+        "fields": {
+          "subject": "Subject",
+          "preheader": "Preview line",
+          "heading": "Title",
+          "intro": "Opening text",
+          "sms": "SMS text"
+        },
+        "fieldHints": {
+          "preheader": "The short text shown next to the subject in the inbox.",
+          "intro": "The e-mail's first paragraph; line breaks are kept. Items, amounts and links follow it on their own."
+        },
+        "tokens": {
+          "shopName": "Shop name",
+          "customerName": "Customer name",
+          "orderNumber": "Order number",
+          "total": "Total",
+          "carrier": "Carrier",
+          "trackingNumber": "Tracking number",
+          "trackingUrl": "Tracking link",
+          "invoiceNumber": "Invoice number",
+          "invoiceType": "Invoice type",
+          "requestKind": "Request kind (return or exchange)",
+          "days": "Days the link works",
+          "validity": "How long the link works",
+          "paymentUrl": "Payment link",
+          "recipientName": "Recipient's name",
+          "senderName": "Sender's name",
+          "productName": "Product name",
+          "other": "Detail"
+        },
+        "tokenSample": "In the sample: {{sample}}",
+        "unknownTokens": "Not a detail of this message: {{tokens}}. Add details from the menu at the field's right.",
+        "smsCount": "{{chars}} characters with the sample details · {{parts}} SMS ({{perPart}} characters per SMS)",
+        "smsLong": "The text goes as {{parts}} SMS and each part is charged.",
+        "smsTooLong": "The text can be at most {{max}} SMS; shorten it.",
+        "smsUcs2": "A character outside the Turkish alphabet (an emoji, say) is in it; only 70 characters fit an SMS.",
+        "previewEmail": "The e-mail the customer gets",
+        "previewSms": "The SMS the customer gets",
+        "previewHeld": "The text has an unknown detail or too long an SMS; the preview shows the last valid text.",
+        "emailFrame": "Preview of the {{name}} e-mail",
+        "fixedText": "This message's text is fixed. Below is what the customer sees.",
+        "reset": "Back to default",
+        "saved": "Message saved."
       }
     },
     "sms": {
@@ -7327,7 +7428,9 @@
       "address": "Address",
       "whatsapp": "WhatsApp number",
       "freeShippingThreshold": "Free shipping threshold"
-    }
+    },
+    "ownTitle": "Add a detail",
+    "ownHint": "Filled with the customer's and order's details when it is sent."
   },
   "storefront": {
     "menus": {

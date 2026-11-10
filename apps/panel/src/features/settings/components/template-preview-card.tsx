@@ -18,15 +18,18 @@ import { errorText } from "@/lib/errors"
 const P = "settings.notifications.templates"
 
 /**
- * Settings > Notifications: how each message the shop sends reads (F9.3),
- * with made-up values in the shop's own logo, colour and name. The e-mail
- * shows in a sandboxed frame that runs nothing and opens nothing; the SMS
- * as its plain text. Nothing is sent.
+ * Settings > Notifications > Personel uyarıları: how each message the
+ * team gets reads (F9.3), with made-up values in the shop's own logo,
+ * colour and name; the customers' messages are in their own tab, to edit
+ * (adr/0036 Ek 2026-11-10). The e-mail shows in a sandboxed frame that
+ * runs nothing and opens nothing. Nothing is sent.
  */
 export function TemplatePreviewCard() {
   const { t } = useTranslation()
   const list = useQuery(messageTemplatesQuery())
-  const templates = list.data?.templates ?? []
+  const templates = (list.data?.templates ?? []).filter((template) =>
+    template.name.startsWith("staff.")
+  )
   const [chosen, setChosen] = useState<string | null>(null)
   const name = chosen ?? templates[0]?.name ?? ""
   const preview = useQuery(messagePreviewQuery(name))

@@ -41,6 +41,7 @@ const GROUPS = {
     "seo_meta",
     "seo_redirect",
     "message_suppression",
+    "message_template",
     "notification",
   ],
   settings: [

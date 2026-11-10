@@ -41,6 +41,8 @@ interface ShopTokenMenuProps {
   className?: string
   /** Offered first, above the shop's details. */
   extra?: readonly ExtraToken[] | undefined
+  /** False: `extra` alone (a customer message's own tokens, adr/0036 Ek 2026-11-10). */
+  shopDetails?: boolean | undefined
 }
 
 /**
@@ -54,10 +56,11 @@ export function ShopTokenMenu({
   variant = "field",
   className,
   extra = [],
+  shopDetails = true,
 }: ShopTokenMenuProps) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
-  const values = useShopTokenValues(open)
+  const values = useShopTokenValues(open && shopDetails)
   const label = t(`${K}.insert`)
   const trigger =
     variant === "toolbar" ? (
@@ -101,8 +104,10 @@ export function ShopTokenMenu({
         }}
       >
         <DropdownMenuLabel className="flex flex-col gap-0.5">
-          {t(`${K}.title`)}
-          <span className="text-xs font-normal text-muted-foreground">{t(`${K}.hint`)}</span>
+          {shopDetails ? t(`${K}.title`) : t(`${K}.ownTitle`)}
+          <span className="text-xs font-normal text-muted-foreground">
+            {shopDetails ? t(`${K}.hint`) : t(`${K}.ownHint`)}
+          </span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {extra.map((token) => (
@@ -117,8 +122,8 @@ export function ShopTokenMenu({
             <span className="max-w-full text-xs text-muted-foreground">{token.hint}</span>
           </DropdownMenuItem>
         ))}
-        {extra.length > 0 ? <DropdownMenuSeparator /> : null}
-        {SHOP_TOKENS.map((name) => {
+        {extra.length > 0 && shopDetails ? <DropdownMenuSeparator /> : null}
+        {(shopDetails ? SHOP_TOKENS : []).map((name) => {
           const value = values?.[name]
           return (
             <DropdownMenuItem
@@ -152,6 +157,7 @@ export function TokenSlot({
   onInsert,
   multiline = false,
   extra,
+  shopDetails,
   children,
 }: {
   /** The input's or text area's id. */
@@ -161,6 +167,8 @@ export function TokenSlot({
   multiline?: boolean
   /** Tokens besides the shop's details (ShopTokenMenu). */
   extra?: readonly ExtraToken[]
+  /** False: `extra` alone (ShopTokenMenu). */
+  shopDetails?: boolean
   children: ReactNode
 }) {
   // Where the caret was when the field lost focus (to the menu's button)
@@ -185,6 +193,7 @@ export function TokenSlot({
       <ShopTokenMenu
         className={cn("absolute right-1", multiline ? "top-1" : "top-1/2 -translate-y-1/2")}
         extra={extra}
+        shopDetails={shopDetails}
         onPick={(name) => {
           const text = field()?.value ?? ""
           const at = selection.current ?? { start: text.length, end: text.length }

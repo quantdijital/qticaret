@@ -11,26 +11,32 @@ const fetchMock = vi.hoisted(() => vi.fn())
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 
 const templates: MessageTemplateSummary[] = [
+  // A customer's message is edited in its own tab (adr/0036 Ek 2026-11-10): not listed here
   { name: "order.placed", kind: "transactional", channels: ["email", "sms"] },
-  { name: "marketing.announcement", kind: "commercial", channels: ["email", "sms"] },
+  { name: "staff.new_order", kind: "transactional", channels: ["email"] },
+  { name: "staff.seo_digest", kind: "transactional", channels: ["email"] },
 ]
 
 const previews: Record<string, MessagePreview> = {
-  "order.placed": {
-    name: "order.placed",
+  "staff.new_order": {
+    name: "staff.new_order",
     kind: "transactional",
     email: {
-      subject: "Siparişiniz alındı: #1001",
-      html: "<!doctype html><p>Merhaba Ayşe</p><script>parent.hacked = true</script>",
-      text: "Merhaba Ayşe",
+      subject: "Yeni sipariş #1001 (₺389,80)",
+      html: "<!doctype html><p>Ayşe sipariş verdi</p><script>parent.hacked = true</script>",
+      text: "Ayşe sipariş verdi",
     },
-    sms: "Örnek Mağaza: #1001 numaralı siparişiniz alındı.",
+    sms: null,
   },
-  "marketing.announcement": {
-    name: "marketing.announcement",
-    kind: "commercial",
-    email: { subject: "Yeni sezon geldi", html: "<p>Yeni sezon</p>", text: "Yeni sezon" },
-    sms: "Yeni sezon geldi. Ret için RET yazın.",
+  "staff.seo_digest": {
+    name: "staff.seo_digest",
+    kind: "transactional",
+    email: {
+      subject: "Haftalık SEO özeti: ortalama 82/100",
+      html: "<p>SEO</p>",
+      text: "SEO",
+    },
+    sms: null,
   },
 }
 
@@ -55,30 +61,31 @@ describe("TemplatePreviewCard", () => {
     })
   })
 
-  it("shows the first template's e-mail in a frame that runs nothing, and its SMS", async () => {
+  it("shows the first team message's e-mail in a frame that runs nothing", async () => {
     renderCard()
 
-    expect(await screen.findByText("Siparişiniz alındı: #1001")).toBeInTheDocument()
-    const frame = screen.getByTitle("Sipariş alındı e-postasının önizlemesi")
+    expect(await screen.findByText("Yeni sipariş #1001 (₺389,80)")).toBeInTheDocument()
+    const frame = screen.getByTitle("Ekip: yeni sipariş e-postasının önizlemesi")
     expect(frame).toHaveAttribute("sandbox", "")
-    expect(frame.getAttribute("srcdoc")).toContain("Merhaba Ayşe")
-    expect(screen.getByText("Örnek Mağaza: #1001 numaralı siparişiniz alındı.")).toBeInTheDocument()
+    expect(frame.getAttribute("srcdoc")).toContain("Ayşe sipariş verdi")
     expect(screen.getByText("Bilgilendirme")).toBeInTheDocument()
-    expect(fetchMock).toHaveBeenCalledWith("/admin/messaging/templates/order.placed/preview")
+    expect(fetchMock).toHaveBeenCalledWith("/admin/messaging/templates/staff.new_order/preview")
   })
 
-  it("previews the template chosen and says a commercial one needs consent", async () => {
+  it("lists the team's messages only, and previews the one chosen", async () => {
     renderCard()
-    await screen.findByText("Siparişiniz alındı: #1001")
+    await screen.findByText("Yeni sipariş #1001 (₺389,80)")
 
     await userEvent.click(screen.getByRole("combobox", { name: "Şablon" }))
+    const options = within(screen.getByRole("listbox")).getAllByRole("option")
+    expect(options.map((option) => option.textContent)).toEqual([
+      "Ekip: yeni sipariş",
+      "Ekip: haftalık SEO özeti",
+    ])
     await userEvent.click(
-      within(screen.getByRole("listbox")).getByRole("option", { name: "Kampanya duyurusu" })
+      within(screen.getByRole("listbox")).getByRole("option", { name: "Ekip: haftalık SEO özeti" })
     )
 
-    expect(await screen.findByText("Yeni sezon geldi")).toBeInTheDocument()
-    expect(screen.getByText("Ticari")).toBeInTheDocument()
-    expect(screen.getByText(/izin veren alıcılara/)).toBeInTheDocument()
-    expect(screen.getByText("37 karakter")).toBeInTheDocument()
+    expect(await screen.findByText("Haftalık SEO özeti: ortalama 82/100")).toBeInTheDocument()
   })
 })
