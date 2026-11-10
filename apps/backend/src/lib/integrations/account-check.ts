@@ -12,6 +12,7 @@ import { conversionsApi, metaAccountOf } from "../conversions/client"
 import { googleApi } from "../google/client"
 import { googleClientOf } from "../google/oauth"
 import { checkShopify, shopifyCredentialsOf } from "../migration/shopify/client"
+import { checkSmtp } from "../messaging/email/smtp-check"
 
 /**
  * Asks a provider whether the shop's account details work (adr/0027 §4).
@@ -139,6 +140,9 @@ const CHECKERS = {
     const credentials = shopifyCredentialsOf(account)
     return credentials ? checkShopify(credentials, signal) : "secret_invalid"
   },
+  // adr/0036 Ek 2026-11-10: a sign-in, nothing sent. `secret_invalid`: the login refused;
+  // `merchant_invalid`: no TLS the server and we agree on
+  smtp: (account, signal) => checkSmtp(account, signal),
 } satisfies Record<CredentialProviderName, Checker>
 
 export async function checkAccount(
@@ -173,4 +177,5 @@ export const CHECK_FIELDS = {
   ga4: { merchant_invalid: "settings.measurement_id", secret_invalid: "secrets.api_secret" },
   // Another organization's store is the domain's; a refused token, the secret
   shopify: { merchant_invalid: "settings.shop_domain", secret_invalid: "secrets.client_secret" },
+  smtp: { merchant_invalid: "settings.security", secret_invalid: "secrets.password" },
 } satisfies Record<CredentialProviderName, Record<"merchant_invalid" | "secret_invalid", string>>

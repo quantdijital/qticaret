@@ -104,6 +104,12 @@ medusaIntegrationTestRunner({
           state: "not_configured",
           secrets: { usercode: false, password: false },
         }),
+        // adr/0036 Ek 2026-11-10: the shop's own mail server
+        expect.objectContaining({
+          provider: "smtp",
+          state: "not_configured",
+          secrets: { password: false },
+        }),
         // F10 M13: connected through Google's consent screen, never typed
         expect.objectContaining({
           provider: "google",

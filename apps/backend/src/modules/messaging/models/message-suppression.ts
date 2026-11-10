@@ -12,7 +12,7 @@ export const MessageSuppression = model
     recipient_hash: model.text(),
     recipient_masked: model.text(),
     reason: model.enum(["bounce", "complaint", "manual"]),
-    source: model.enum(["resend", "netgsm", "panel"]),
+    source: model.enum(["resend", "netgsm", "panel", "smtp"]),
     /** The provider's short word for it (`Permanent`, `General`), never its message. */
     detail: model.text().nullable(),
     created_by: model.text().nullable(),

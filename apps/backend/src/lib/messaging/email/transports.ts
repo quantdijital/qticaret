@@ -25,7 +25,8 @@ export interface OutgoingEmail {
 }
 
 export interface EmailTransport {
-  readonly name: "resend" | "mailpit"
+  /** `smtp`: the shop's own mail server, entered in the panel (adr/0036 Ek 2026-11-10). */
+  readonly name: "resend" | "mailpit" | "smtp"
   send: (email: OutgoingEmail, signal?: AbortSignal) => Promise<{ id: string }>
 }
 

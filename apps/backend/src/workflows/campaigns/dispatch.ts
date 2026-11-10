@@ -4,6 +4,8 @@ import { overLimit, quotaDay, withinSmsHours } from "../../lib/campaigns/pause"
 import { countsOf, emptyCounts, tallied } from "../../lib/campaigns/types"
 import type { CampaignCounts } from "../../lib/campaigns/types"
 import { isValidationError } from "../../lib/errors"
+import { shopSmtpAccount } from "../../lib/messaging/email/shop-transport"
+import { smtpPace } from "../../lib/messaging/email/smtp-account"
 import { logger } from "../../lib/logging"
 import { notificationText } from "../../lib/notifications/messages"
 import { CAMPAIGNS_MODULE } from "../../modules/campaigns"
@@ -199,9 +201,13 @@ export async function dispatchCampaigns(
     logger.warn({ event: "campaigns.paused_complaints", campaign_id: campaign.id, which: passed })
     return result("paused")
   }
+  // The shop's own mail server sends at the pace it was given, so its address is not
+  // listed as a spammer's (adr/0036 Ek 2026-11-10); Resend's limit otherwise
+  const smtp = campaign.channel === "email" ? await shopSmtpAccount(container) : null
+  const pace = smtp ? smtpPace(smtp) : null
   const turn = await sendTurn(container, campaign, {
-    batch: input.batch ?? 120,
-    spacing: input.spacing_ms ?? 500,
+    batch: Math.min(input.batch ?? 120, pace?.batch ?? Infinity),
+    spacing: Math.max(input.spacing_ms ?? 500, pace?.spacingMs ?? 0),
     now,
   })
   const after = await recount(container, campaign.id, {})

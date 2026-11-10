@@ -3,6 +3,7 @@ import { RETURN_TEXTS } from "./return-texts"
 import { STAFF_ACCOUNT_TEXTS } from "./staff-account-texts"
 import { PAYMENT_ISSUE_TEXTS } from "./payment-issue-texts"
 import { STOCK_SHORT_TEXTS } from "./stock-short-texts"
+import { SMTP_TEST_TEXTS } from "./smtp-test-texts"
 
 /**
  * What messages say, by key (adr/0036; CLAUDE.md rule 9): templates take
@@ -18,6 +19,7 @@ const TR: Readonly<Record<string, string>> = {
   ...STAFF_ACCOUNT_TEXTS,
   ...STOCK_SHORT_TEXTS,
   ...PAYMENT_ISSUE_TEXTS,
+  ...SMTP_TEST_TEXTS,
   "footer.unsubscribe": "Bu iletileri almak istemiyorum",
   "footer.stock": "Bu e-postayı, {{shop}} mağazasında stok bildirimi istediğiniz için aldınız.",
   "footer.order": "Bu e-posta, {{shop}} mağazasındaki siparişiniz için gönderildi.",

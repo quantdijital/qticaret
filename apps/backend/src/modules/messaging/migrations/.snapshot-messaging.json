@@ -1366,7 +1366,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["resend", "netgsm", "panel"],
+          "enumItems": ["resend", "netgsm", "panel", "smtp"],
           "mappedType": "enum"
         },
         "detail": {

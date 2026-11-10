@@ -512,6 +512,22 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "SMS metni, bilgiler en uzun hâlleriyle dolduğunda en çok {{parts}} SMS boyunu geçmemeli; metni kısaltın.",
   "messaging.recipient_invalid": "Adres ya da telefon numarası geçerli değil.",
   "messaging.email_off": "E-posta gönderimi bu mağazada açık değil.",
+  "messaging.smtp_missing": "Önce e-posta sunucunuzun bilgilerini kaydedin.",
+  "messaging.smtp_test_address_missing":
+    "Deneme e-postası için hesabınızın e-posta adresi gerekir.",
+  "smtp.host_invalid":
+    "Sunucu adını alan adı ya da IP adresi olarak yazın, örneğin mail.magaza.com.tr.",
+  "smtp.port_invalid": "E-posta sunucusunun bağlantı noktası 25, 465, 587 ya da 2525 olur.",
+  "smtp.plain_remote":
+    "Şifrelemesiz bağlantı yalnızca aynı makinedeki sunucuya yapılır. SSL/TLS (465) ya da STARTTLS (587) seçin.",
+  "smtp.from_email_invalid": "Gönderen adresini e-posta adresi olarak yazın.",
+  "smtp.username_invalid": "Kullanıcı adı tek satır olmalı.",
+  "smtp.from_name_invalid": "Gönderen adı tek satır olmalı.",
+  "smtp.rate_invalid": "Dakikada gönderim sayısı 1 ile 300 arasında olmalı.",
+  "smtp.merchant_invalid":
+    "Sunucuyla güvenli bağlantı kurulamadı. Güvenlik seçimini (465 için SSL/TLS, 587 için STARTTLS) ve sunucu adının sertifikadaki adla aynı olduğunu kontrol edin.",
+  "smtp.secret_invalid":
+    "E-posta sunucusu bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri sunucu panelinizdeki e-posta hesabından kontrol edin.",
   "messaging.sms_off": "SMS hesabı bağlı değil. Ayarlar > SMS'ten Netgsm hesabını girin.",
   "google.merchant_id_invalid": "Merchant Center hesap numarası yalnızca rakamlardan oluşur.",
   "google.merchant_invalid":

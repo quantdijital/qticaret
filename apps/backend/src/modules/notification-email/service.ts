@@ -1,7 +1,11 @@
+import { container } from "@medusajs/framework"
 import type { NotificationTypes } from "@medusajs/framework/types"
 import { AbstractNotificationProviderService } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
 import { emailTransport } from "../../lib/messaging/email"
+import type { OutgoingEmail } from "../../lib/messaging/email"
+import { shopSmtpAccount, smtpTransportFor } from "../../lib/messaging/email/shop-transport"
+import { suppressRefusedRecipient } from "../../lib/messaging/email/smtp-bounce"
 
 /** What our send step puts in `provider_data`: who the e-mail is from, where answers go. */
 interface Sender {
@@ -31,9 +35,13 @@ const senderOf = (data: Record<string, unknown> | null | undefined): Sender | nu
 /**
  * E-mail as a Medusa notification provider (`email` channel, adr/0036).
  * It sends what our send step rendered (`content`), from the sender the
- * step chose, through the instance's transport (Resend, or Mailpit on a
- * developer's machine). The rendered content is never stored by Medusa,
- * and nothing here logs it.
+ * step chose, through the shop's own mail server when it saved one
+ * (`integration-credentials` `smtp`, read from the shared container at the
+ * time of the call, adr/0027), else the instance's transport (Resend, or
+ * Mailpit on a developer's machine). A mail server's permanent "no such
+ * mailbox" puts the address on the suppression list, as Resend's bounce
+ * report does (adr/0036 Ek 2026-11-10). The rendered content is never
+ * stored by Medusa, and nothing here logs it.
  */
 class EmailNotificationService extends AbstractNotificationProviderService {
   static override identifier = "email"
@@ -48,7 +56,8 @@ class EmailNotificationService extends AbstractNotificationProviderService {
   override async send(
     notification: NotificationTypes.ProviderSendNotificationDTO
   ): Promise<NotificationTypes.ProviderSendNotificationResultsDTO> {
-    const transport = emailTransport()
+    const smtp = await shopSmtpAccount(container)
+    const transport = smtp ? smtpTransportFor(smtp) : emailTransport()
     if (!transport) {
       throw new ValidationError("messaging.email_off")
     }
@@ -66,8 +75,9 @@ class EmailNotificationService extends AbstractNotificationProviderService {
         : typeof row.id === "string"
           ? row.id
           : ""
-    const { id } = await transport.send({
-      from: { email: sender.from_email, name: sender.from_name },
+    const email: OutgoingEmail = {
+      // The name the shop gave its mail server's sender, else the shop's
+      from: { email: sender.from_email, name: smtp?.fromName ?? sender.from_name },
       to: notification.to,
       replyTo: sender.reply_to,
       subject: content.subject,
@@ -83,7 +93,10 @@ class EmailNotificationService extends AbstractNotificationProviderService {
             },
           }
         : {}),
-    })
+    }
+    const { id } = await suppressRefusedRecipient(container, notification.to, () =>
+      transport.send(email)
+    )
     return { id }
   }
 }

@@ -126,6 +126,8 @@ export const OWNER_ONLY: readonly Rule[] = [
 export const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/audit-log*" },
   { methods: "*", path: "/admin/integrations/credentials*" },
+  // A test e-mail through the shop's own mail server, as its connection check (adr/0036 Ek 2026-11-10)
+  { methods: "*", path: "/admin/messaging/smtp*" },
   { methods: "*", path: "/admin/einvoice/parasut*" },
   // An invoice's contents: the buyer and their tax id (adr/0034 §9)
   { methods: "*", path: "/admin/invoices/:id/draft" },

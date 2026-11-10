@@ -2,7 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { providerFailureLog } from "../../lib/clients/failure-log"
 import { errorSummary, logger } from "../../lib/logging"
 import type { ProviderFailure } from "../../lib/clients/failure-log"
-import { emailTransport } from "../../lib/messaging/email"
+import { shopEmailTransport } from "../../lib/messaging/email/shop-transport"
 import { SEARCH_CONSOLE_SCOPE, googleClientOf } from "../../lib/google/oauth"
 import { bankTransferSettings } from "../../lib/payments/settings"
 import { GOOGLE_MERCHANT_MODULE } from "../../modules/google-merchant"
@@ -54,6 +54,7 @@ const text = (value: unknown): string | null =>
  * secret, no provider is called (the health report and "test" do that).
  */
 export async function integrationOverview(container: MedusaContainer): Promise<IntegrationView[]> {
+  const transport = await shopEmailTransport(container)
   const [accounts, bank, cod, domain, sender, token, brand, [sync]] = await Promise.all([
     container
       .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
@@ -90,8 +91,9 @@ export async function integrationOverview(container: MedusaContainer): Promise<I
       accountRow(group, account(id))
     ),
     emailRow({
-      sending: emailTransport() !== null,
-      ownDomain: resendDomains() !== null,
+      sending: transport !== null,
+      // The shop's own mail server has no domain to verify here (adr/0036 Ek 2026-11-10)
+      ownDomain: resendDomains() !== null && transport?.name !== "smtp",
       sender,
       domain: domain ? { status: domain.status } : null,
     }),

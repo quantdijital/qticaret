@@ -12,7 +12,8 @@ const READ_MAX = 10_000
 /**
  * The campaign's hard bounces and spam complaints (adr/0050 §6): what
  * Resend's webhook put on the suppression list since the campaign began
- * (api/hooks/resend), matched to the recipients it sent to by keyed hash.
+ * (api/hooks/resend) or the shop's mail server refused for good (`smtp`),
+ * matched to the recipients it sent to by keyed hash.
  * Texts have no such reports.
  */
 export async function reportedRates(
@@ -27,7 +28,7 @@ export async function reportedRates(
     .listMessageSuppressions(
       {
         channel: "email",
-        source: "resend",
+        source: ["resend", "smtp"],
         reason: ["bounce", "complaint"],
         created_at: { $gte: new Date(campaign.started_at) },
       },

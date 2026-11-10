@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { isArasServiceUrl } from "../../lib/shipping/aras/client"
+import { smtpSettings } from "../../lib/messaging/email/smtp-settings"
 
 /**
  * Which providers the shop can connect and what each one asks for
@@ -121,6 +122,21 @@ export const CREDENTIAL_PROVIDERS = {
       .regex(/^[\x21-\x7E]{1,128}$/, "integration_credentials.secret_invalid"),
     identity: [],
     optional: [],
+  },
+  // adr/0036 Ek 2026-11-10: the shop's own mail server; its password written once. A
+  // relay on this machine may take mail without a login: the password is optional then
+  smtp: {
+    settings: smtpSettings,
+    secrets: ["password"],
+    // Any printable characters, spaces too: what the mail server's panel set
+    secret: z
+      .string()
+      .min(1)
+      .max(256)
+      .regex(/^[^\p{Cc}]+$/u, "integration_credentials.secret_invalid"),
+    // Another server or login: the stored password never goes to it
+    identity: ["host", "username"],
+    optional: ["password"],
   },
   // F10 M13 (adr/0038 §5): the shop's Google account, connected through the
   // platform's OAuth client: the refresh token comes from Google's consent

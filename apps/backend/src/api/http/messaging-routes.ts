@@ -3,6 +3,7 @@ import type { AuthenticatedMedusaRequest } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { AdminPostTemplateTexts } from "../admin/messaging/customer-messages/validators"
 import { AdminPostSenderDomain } from "../admin/messaging/sender-domain/validators"
+import { AdminPostSmtpTest } from "../admin/messaging/smtp/test/validators"
 import {
   AdminGetSuppressions,
   AdminPostSuppression,
@@ -77,5 +78,11 @@ export const MESSAGING_ROUTES = [
     matcher: "/admin/messaging/sender-domain/check",
     methods: ["POST" as const],
     middlewares: [requireUserActor, perStaff()],
+  },
+  // adr/0036 Ek 2026-11-10: an e-mail through the shop's own mail server, to the caller
+  {
+    matcher: "/admin/messaging/smtp/test",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, perStaff(), validateAndTransformBody(AdminPostSmtpTest)],
   },
 ]

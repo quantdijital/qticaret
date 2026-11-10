@@ -9,6 +9,7 @@ import { countsOf } from "../../lib/campaigns/types"
 import type { CampaignSource } from "../../lib/campaigns/types"
 import { ConflictError, ValidationError } from "../../lib/errors"
 import { emailTransport } from "../../lib/messaging/email"
+import { shopSmtpAccount } from "../../lib/messaging/email/shop-transport"
 import { netgsmAccountOf } from "../../lib/messaging/sms/netgsm"
 import { CAMPAIGNS_MODULE } from "../../modules/campaigns"
 import type { CampaignStatus } from "../../modules/campaigns/models/campaign"
@@ -31,7 +32,7 @@ const SCHEDULE_MAX_MS = 90 * 24 * 60 * 60 * 1000
 
 /**
  * Why the channel cannot carry a campaign now, or null (adr/0050 §7): an
- * e-mail goes only from the shop's own verified domain, a text only with
+ * e-mail goes only from the shop's own verified domain or its own mail server, a text only with
  * the shop's SMS account and its opt-out line.
  */
 export async function channelBlocker(
@@ -39,6 +40,11 @@ export async function channelBlocker(
   channel: "email" | "sms"
 ): Promise<string | null> {
   if (channel === "email") {
+    // The shop's own mail server: its domain's records are a warning on the
+    // panel, never a stop (adr/0036 Ek 2026-11-10); the pace is its own
+    if (await shopSmtpAccount(container)) {
+      return null
+    }
     if (emailTransport() === null) {
       return "campaigns.channel_off"
     }

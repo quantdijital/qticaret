@@ -11,6 +11,7 @@ import { errorSummary, logger } from "../../lib/logging"
 import { isProviderError } from "../../lib/errors"
 import { platformSender } from "../../lib/messaging/email"
 import { createResendDomains } from "../../lib/messaging/email/resend-domains"
+import { shopSmtpAccount } from "../../lib/messaging/email/shop-transport"
 import type { ResendDomain, ResendDomains } from "../../lib/messaging/email/resend-domains"
 import { MESSAGING_MODULE } from "../../modules/messaging"
 import type MessagingModuleService from "../../modules/messaging/service"
@@ -50,8 +51,16 @@ export async function currentSenderDomain(container: Container) {
   return row ?? null
 }
 
-/** Who the shop's e-mail is from: its own verified domain, else the platform's address. */
+/**
+ * Who the shop's e-mail is from: the address it gave its own mail server
+ * (adr/0036 Ek 2026-11-10), else its own verified domain, else the
+ * platform's address.
+ */
 export async function senderAddress(container: Container): Promise<string | null> {
+  const smtp = await shopSmtpAccount(container)
+  if (smtp) {
+    return smtp.fromEmail
+  }
   const domain = await currentSenderDomain(container)
   return domain?.status === "verified" ? `${domain.local_part}@${domain.name}` : platformSender()
 }

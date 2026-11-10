@@ -506,6 +506,21 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "With each detail at its longest the text must not run past {{parts}} SMS; shorten it.",
   "messaging.recipient_invalid": "The address or phone number is not valid.",
   "messaging.email_off": "E-mail is not set up for this shop.",
+  "messaging.smtp_missing": "Save your mail server's details first.",
+  "messaging.smtp_test_address_missing": "A test e-mail needs your account's e-mail address.",
+  "smtp.host_invalid":
+    "Type the server as a domain name or an IP address, for example mail.shop.com.",
+  "smtp.port_invalid": "A mail server's port is 25, 465, 587 or 2525.",
+  "smtp.plain_remote":
+    "An unencrypted connection is only made to a server on the same machine. Choose SSL/TLS (465) or STARTTLS (587).",
+  "smtp.from_email_invalid": "Type the sender as an e-mail address.",
+  "smtp.username_invalid": "The user name must be one line.",
+  "smtp.from_name_invalid": "The sender name must be one line.",
+  "smtp.rate_invalid": "Sends per minute must be between 1 and 300.",
+  "smtp.merchant_invalid":
+    "No secure connection could be made to the server. Check the security choice (SSL/TLS for 465, STARTTLS for 587) and that the server name matches its certificate.",
+  "smtp.secret_invalid":
+    "The mail server did not accept this user name and password. Check them against the e-mail account in your server's panel.",
   "messaging.sms_off":
     "No SMS account is connected. Enter the Netgsm account under Settings > SMS.",
   "google.merchant_id_invalid": "The Merchant Center account number is digits only.",

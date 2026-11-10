@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../../lib/logging"
-import { emailTransport } from "../../lib/messaging/email"
+import { shopEmailTransport } from "../../lib/messaging/email/shop-transport"
 import { normalizeRecipient } from "../../lib/messaging/recipients"
 import type { MessageChannel } from "../../lib/messaging/recipients"
 import { MESSAGE_TEMPLATES } from "../../lib/messaging/templates"
@@ -101,10 +101,12 @@ async function clearSkip(messaging: MessagingModuleService, key: string): Promis
   }
 }
 
-/** Whether the channel can send at all: the instance's e-mail, the shop's SMS account. */
+/** Whether the channel can send at all: the shop's mail server or the instance's e-mail, its SMS account. */
 async function channelReady(container: Container, channel: MessageChannel): Promise<boolean> {
   if (channel === "email") {
-    return emailTransport() !== null && (await senderAddress(container)) !== null
+    return (
+      (await shopEmailTransport(container)) !== null && (await senderAddress(container)) !== null
+    )
   }
   const account = await container
     .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)

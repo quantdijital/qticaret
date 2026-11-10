@@ -511,6 +511,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "DELETE /admin/messaging/sender-domain": false,
   "DELETE /admin/messaging/suppressions/:id": false,
   "POST /admin/messaging/suppressions": false,
+  // adr/0036 Ek 2026-11-10: a test e-mail through the shop's own mail server, owner and admin
+  "POST /admin/messaging/smtp/test": false,
   // adr/0036 Ek 2026-11-10: the customer messages' words, owner and admin
   "POST /admin/messaging/customer-messages/:name": false,
   "POST /admin/messaging/templates/:name/preview": false,

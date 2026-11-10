@@ -35,7 +35,7 @@ export interface SuppressionInput {
   channel: MessageChannel
   address: string
   reason: "bounce" | "complaint" | "manual"
-  source: "resend" | "netgsm" | "panel"
+  source: "resend" | "netgsm" | "panel" | "smtp"
   detail?: string | null
   created_by?: string | null
 }

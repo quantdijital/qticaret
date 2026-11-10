@@ -1,6 +1,7 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { emailTransport } from "../../../../lib/messaging/email"
+import { senderDnsOf } from "../../../../lib/messaging/email/sender-dns"
+import { shopEmailTransport } from "../../../../lib/messaging/email/shop-transport"
 import {
   addSenderDomainWorkflow,
   currentSenderDomain,
@@ -16,13 +17,20 @@ const DMARC = { record: "DMARC", name: "_dmarc", type: "TXT", value: "v=DMARC1; 
 /**
  * Whether the shop's e-mail goes out and from which address; `available`,
  * whether the shop can verify its own domain here (through Resend only).
+ * With the shop's own mail server (`transport: "smtp"`), `dns` says
+ * whether the sender's domain publishes SPF, DKIM and DMARC: a warning
+ * only, nothing waits on it (adr/0036 Ek 2026-11-10).
  */
 export async function senderDomainView(container: MedusaContainer) {
   const domain = await currentSenderDomain(container)
   const sender = await senderAddress(container)
+  const transport = await shopEmailTransport(container)
+  const smtp = transport?.name === "smtp"
   return {
-    sending: emailTransport() !== null && sender !== null,
-    available: resendDomains() !== null,
+    sending: transport !== null && sender !== null,
+    available: resendDomains() !== null && !smtp,
+    transport: transport?.name ?? null,
+    dns: smtp && sender ? await senderDnsOf(sender) : null,
     sender,
     domain: domain
       ? {
