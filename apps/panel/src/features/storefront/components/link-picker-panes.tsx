@@ -77,7 +77,8 @@ function ChoiceList({
 function Waiting() {
   const { t } = useTranslation()
   return (
-    <div aria-busy="true" aria-label={t("common.loading")} className="flex justify-center py-8">
+    <div aria-busy="true" className="flex justify-center py-8">
+      <span className="sr-only">{t("common.loading")}</span>
       <Loader2 className="size-4 animate-spin text-muted-foreground" aria-hidden="true" />
     </div>
   )

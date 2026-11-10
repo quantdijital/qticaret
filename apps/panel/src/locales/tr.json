@@ -3752,6 +3752,7 @@
     "filters": {
       "category": "Kategori",
       "anyCategory": "Tüm kategoriler",
+      "brand": "Marka",
       "anyBrand": "Tüm markalar",
       "stock": "Stok",
       "anyStock": "Tüm stok durumları",

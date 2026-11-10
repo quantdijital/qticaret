@@ -128,6 +128,7 @@ function BrandFilter({
   return (
     <div className={CONTROL}>
       <SearchPicker
+        label={t(`${F}.brand`)}
         value={value ? { id: value, label: brand.data?.name ?? "…" } : null}
         onChange={(next) => {
           onChange(next?.id)

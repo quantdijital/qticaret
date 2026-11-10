@@ -22,6 +22,8 @@ export interface PickerOption {
 
 interface SearchPickerProps {
   id?: string
+  /** The control's name where no `<label>` points at `id` (a filter row). */
+  label?: string
   value: PickerOption | null
   onChange: (value: PickerOption | null) => void
   /** Server search; called as the text settles. */
@@ -44,6 +46,7 @@ const DELAY_MS = 250
  */
 export function SearchPicker({
   id,
+  label,
   value,
   onChange,
   search,
@@ -81,6 +84,7 @@ export function SearchPicker({
             type="button"
             variant="outline"
             role="combobox"
+            aria-label={label}
             aria-expanded={open}
             disabled={disabled}
             className={cn("min-w-0 flex-1 justify-between font-normal sm:max-w-80", className)}

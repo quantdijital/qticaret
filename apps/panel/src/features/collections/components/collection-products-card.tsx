@@ -114,7 +114,8 @@ export function CollectionProductsCard({ collection }: { collection: Collection 
           <ErrorState text={errorText(t, list.error)} onRetry={() => void list.refetch()} />
         </div>
       ) : list.isPending ? (
-        <div aria-label={t("common.loading")} className="flex justify-center py-10">
+        <div className="flex justify-center py-10">
+          <span className="sr-only">{t("common.loading")}</span>
           <Loader2 className="size-4 animate-spin text-muted-foreground" aria-hidden="true" />
         </div>
       ) : rows.length === 0 ? (

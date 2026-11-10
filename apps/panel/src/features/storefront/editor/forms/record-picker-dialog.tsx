@@ -84,7 +84,8 @@ export function RecordPickerDialog({
           {options.isError ? (
             <ErrorState text={errorText(t, options.error)} onRetry={() => void options.refetch()} />
           ) : options.isPending ? (
-            <div aria-label={t("common.loading")} className="flex justify-center py-8">
+            <div className="flex justify-center py-8">
+              <span className="sr-only">{t("common.loading")}</span>
               <Loader2 className="size-4 animate-spin text-muted-foreground" aria-hidden="true" />
             </div>
           ) : rows.length === 0 ? (

@@ -6,7 +6,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 export function LoadingRows({ rows = 3 }: { rows?: number }) {
   const { t } = useTranslation()
   return (
-    <div aria-busy="true" aria-label={t("common.loading")} className="flex flex-col gap-3">
+    <div aria-busy="true" className="flex flex-col gap-3">
+      <span className="sr-only">{t("common.loading")}</span>
       {Array.from({ length: rows }, (_, index) => (
         <Skeleton key={index} className="h-10 w-full" />
       ))}

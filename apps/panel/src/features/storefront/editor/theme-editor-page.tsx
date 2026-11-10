@@ -39,9 +39,9 @@ export function ThemeEditorPage() {
             {/* The page's parts as the editor will draw them; the preview's room beside */}
             <div
               aria-busy="true"
-              aria-label={t("common.loading")}
               className="flex w-full flex-col gap-2 bg-card px-3 py-4 lg:w-[clamp(22rem,36vw,26rem)] lg:border-r xl:w-[clamp(17rem,20vw,20rem)]"
             >
+              <span className="sr-only">{t("common.loading")}</span>
               {Array.from({ length: 8 }, (_, index) => (
                 <Skeleton key={index} className="h-9 w-full" />
               ))}

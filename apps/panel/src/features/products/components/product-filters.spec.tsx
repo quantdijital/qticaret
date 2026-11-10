@@ -65,6 +65,8 @@ describe("the product list's filters", () => {
     const onChange = renderBar({})
     expect(screen.queryByRole("button", { name: "Filtreleri temizle" })).toBeNull()
     expect(screen.getByText("Sırala: Son değişiklik")).toBeInTheDocument()
+    // Every control is named, the brand search too (axe: button-name)
+    expect(screen.getByRole("combobox", { name: "Marka" })).toHaveTextContent("Tüm markalar")
 
     await userEvent.click(screen.getByRole("combobox", { name: "Eksik" }))
     await userEvent.click(await screen.findByRole("option", { name: "Açıklaması yok" }))

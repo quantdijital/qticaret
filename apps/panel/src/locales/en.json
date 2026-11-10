@@ -3752,6 +3752,7 @@
     "filters": {
       "category": "Category",
       "anyCategory": "All categories",
+      "brand": "Brand",
       "anyBrand": "All brands",
       "stock": "Stock",
       "anyStock": "Any stock",
