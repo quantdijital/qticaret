@@ -65,6 +65,9 @@ export interface EmailBody {
 
 const e = (value: string): string => escapeXml(value)
 
+// A shop's own text keeps its line breaks (adr/0036 Ek 2026-11-10); escaped first
+const lines = (value: string): string => e(value).replace(/\r?\n/g, "<br>")
+
 const linkable = (url: string | null): url is string =>
   url !== null && /^https?:\/\/[^\s"<>]+$/.test(url)
 
@@ -186,9 +189,9 @@ function blockHtml(block: EmailBlock, color: string): string {
     case "products":
       return campaignBlockHtml(block, color)
     case "paragraph":
-      return `<p style="${FONT}font-size:15px;line-height:22px;margin:0 0 16px;color:#111827">${e(block.text)}</p>`
+      return `<p style="${FONT}font-size:15px;line-height:22px;margin:0 0 16px;color:#111827">${lines(block.text)}</p>`
     case "note":
-      return `<p style="${FONT}font-size:13px;line-height:20px;margin:0 0 16px;color:${MUTED}">${e(block.text)}</p>`
+      return `<p style="${FONT}font-size:13px;line-height:20px;margin:0 0 16px;color:${MUTED}">${lines(block.text)}</p>`
     case "button":
       return linkable(block.url)
         ? `<p style="margin:8px 0 24px"><a href="${e(block.url)}" style="${FONT}display:inline-block;background:${color};color:#ffffff;text-decoration:none;font-size:15px;font-weight:bold;padding:12px 20px;border-radius:6px">${e(block.label)}</a></p>`

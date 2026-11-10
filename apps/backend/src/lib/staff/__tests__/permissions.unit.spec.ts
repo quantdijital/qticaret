@@ -511,6 +511,9 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "DELETE /admin/messaging/sender-domain": false,
   "DELETE /admin/messaging/suppressions/:id": false,
   "POST /admin/messaging/suppressions": false,
+  // adr/0036 Ek 2026-11-10: the customer messages' words, owner and admin
+  "POST /admin/messaging/customer-messages/:name": false,
+  "POST /admin/messaging/templates/:name/preview": false,
   "POST /admin/order-board/ship": true,
   "POST /admin/order-board/deliver": true,
   // The order list as a file, every customer's details in it: the owner's alone

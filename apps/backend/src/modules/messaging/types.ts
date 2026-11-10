@@ -51,3 +51,18 @@ export interface SkipInput {
   receiver_id: string | null
   recipient_masked: string | null
 }
+
+/** A customer message as the shop worded it (adr/0036 Ek 2026-11-10); null fields read the default. */
+export interface TemplateTextValues {
+  enabled: boolean
+  subject: string | null
+  preheader: string | null
+  heading: string | null
+  intro: string | null
+  sms: string | null
+}
+
+export interface TemplateTextRow extends TemplateTextValues {
+  template: string
+  updated_by: string | null
+}

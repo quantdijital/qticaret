@@ -1,3 +1,5 @@
+import { textsFor } from "../editable/texts"
+import type { EditSpec } from "../editable/types"
 import { messageText } from "../texts"
 import { renderEmail } from "./layout"
 import type { EmailBlock } from "./layout"
@@ -14,6 +16,24 @@ export interface GiftCardVars {
   shopUrl: string | null
 }
 
+/** Required: the card is what the buyer paid for; this message delivers it. */
+const EDIT: EditSpec<GiftCardVars> = {
+  group: "order",
+  required: true,
+  tokens: { mağaza_adı: "shop", alıcı_adı: "name", gönderen_adı: "sender" },
+  fields: {
+    subject: (vars) => (vars.senderName ? "gift_card.subject_from" : "gift_card.subject"),
+    preheader: "gift_card.preheader",
+    heading: "gift_card.heading",
+    intro: (vars) => (vars.senderName ? "gift_card.intro_from" : "gift_card.intro"),
+  },
+  values: (vars, brand) => ({
+    shop: brand.shopName,
+    name: vars.recipientName ?? messageText("gift_card.greeting"),
+    sender: vars.senderName ?? "",
+  }),
+}
+
 /**
  * "Size bir hediye kartı var": the codes, their value, who sent them and
  * their words, and how to spend them. Transactional: the buyer's contract
@@ -26,16 +46,12 @@ export const giftCardIssued: MessageTemplate<GiftCardVars> = {
   channels: ["email"],
   // The loader reads the codes again from the cards: a retry carries nothing of the event's
   retry: true,
-  email: (vars, brand) => {
+  editable: EDIT,
+  email: (vars, brand, context) => {
     const shop = brand.shopName
-    const from = vars.senderName
+    const text = textsFor(EDIT, vars, brand, context?.own)
     const blocks: EmailBlock[] = [
-      {
-        kind: "paragraph",
-        text: from
-          ? messageText("gift_card.intro_from", { sender: from, shop })
-          : messageText("gift_card.intro", { shop }),
-      },
+      { kind: "paragraph", text: text("intro") },
       ...(vars.message
         ? [
             {
@@ -55,13 +71,9 @@ export const giftCardIssued: MessageTemplate<GiftCardVars> = {
       { kind: "note", text: messageText("gift_card.keep_safe") },
     ]
     return renderEmail(brand, {
-      subject: from
-        ? messageText("gift_card.subject_from", { sender: from, shop })
-        : messageText("gift_card.subject", { shop }),
-      preheader: messageText("gift_card.preheader", { shop }),
-      heading: messageText("gift_card.heading", {
-        name: vars.recipientName ?? messageText("gift_card.greeting"),
-      }),
+      subject: text("subject"),
+      preheader: text("preheader"),
+      heading: text("heading"),
       blocks,
       footer: messageText("footer.gift_card", { shop }),
     })

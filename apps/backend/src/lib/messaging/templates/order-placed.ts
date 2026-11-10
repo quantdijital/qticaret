@@ -1,3 +1,5 @@
+import { textsFor } from "../editable/texts"
+import type { EditSpec } from "../editable/types"
 import { messageText } from "../texts"
 import { renderEmail } from "./layout"
 import type { EmailBlock } from "./layout"
@@ -77,19 +79,44 @@ function paymentBlocks(vars: OrderVars): EmailBlock[] {
   ]
 }
 
+/**
+ * The confirmation the law asks for (6502 md. 48/4, MSY md. 9): required,
+ * reworded but never turned off (adr/0036 Ek 2026-11-10).
+ */
+const EDIT: EditSpec<OrderVars> = {
+  group: "order",
+  required: true,
+  tokens: { mağaza_adı: "shop", müşteri_adı: "name", sipariş_no: "number", toplam: "total" },
+  fields: {
+    subject: "order_placed.subject",
+    preheader: "order_placed.preheader",
+    heading: "order_placed.heading",
+    intro: "order_placed.intro",
+    sms: "order_placed.sms",
+  },
+  values: (vars, brand) => ({
+    shop: brand.shopName,
+    name: vars.customerName,
+    number: vars.number,
+    total: vars.total,
+  }),
+}
+
 /** "Siparişiniz alındı": card, bank transfer awaited, or paid at the door. */
 export const orderPlaced: MessageTemplate<OrderVars> = {
   name: "order.placed",
   kind: "transactional",
   channels: ["email", "sms"],
   retry: true,
-  email: (vars, brand) =>
-    renderEmail(brand, {
-      subject: messageText("order_placed.subject", { number: vars.number }),
-      preheader: messageText("order_placed.preheader", { shop: brand.shopName }),
-      heading: messageText("order_placed.heading", { name: vars.customerName }),
+  editable: EDIT,
+  email: (vars, brand, context) => {
+    const text = textsFor(EDIT, vars, brand, context?.own)
+    return renderEmail(brand, {
+      subject: text("subject"),
+      preheader: text("preheader"),
+      heading: text("heading"),
       blocks: [
-        { kind: "paragraph", text: messageText("order_placed.intro", { number: vars.number }) },
+        { kind: "paragraph", text: text("intro") },
         ...paymentBlocks(vars),
         ...orderSummary(vars),
         { kind: "button", label: messageText("order.view"), url: vars.orderUrl },
@@ -98,13 +125,9 @@ export const orderPlaced: MessageTemplate<OrderVars> = {
           : []),
       ],
       footer: messageText("footer.order", { shop: brand.shopName }),
-    }),
-  sms: (vars, brand) =>
-    messageText("order_placed.sms", {
-      shop: brand.shopName,
-      number: vars.number,
-      total: vars.total,
-    }),
+    })
+  },
+  sms: (vars, brand, own) => textsFor(EDIT, vars, brand, own)("sms"),
   sample: {
     number: "1042",
     customerName: "Ayşe",

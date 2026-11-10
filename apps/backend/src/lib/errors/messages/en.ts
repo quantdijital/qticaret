@@ -488,6 +488,20 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "messaging.local_part_invalid":
     "The part before @ may hold lower-case letters, digits, dots, dashes and underscores (up to 32).",
   "messaging.template_unknown": "There is no such message template.",
+  // adr/0036 Ek 2026-11-10: the shop's words for its customer messages
+  "messaging.template_not_editable": "This message's text cannot be changed.",
+  "messaging.template_field_unknown": "This message has no such field.",
+  "messaging.template_text_invalid":
+    "The text has a character that cannot be used. The subject, preview line and title must be one line.",
+  "messaging.template_text_too_long": "This field can be at most {{limit}} characters.",
+  "messaging.template_token_unknown":
+    "The text has details that are not known: {{tokens}}. Available in this message: {{available}}.",
+  "messaging.template_required":
+    "This message is required by law or by the order itself; it cannot be turned off, only reworded.",
+  "messaging.template_switched_elsewhere":
+    "This message is turned on and off in Settings > Marketing > Abandoned carts.",
+  "messaging.sms_too_long":
+    "With the sample details the text must not run past {{parts}} SMS; shorten it.",
   "messaging.recipient_invalid": "The address or phone number is not valid.",
   "messaging.email_off": "E-mail is not set up for this shop.",
   "messaging.sms_off":

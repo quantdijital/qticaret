@@ -1,3 +1,5 @@
+import { textsFor } from "../editable/texts"
+import type { EditSpec } from "../editable/types"
 import { messageText } from "../texts"
 import { renderEmail } from "./layout"
 import type { MessageTemplate } from "./types"
@@ -21,24 +23,49 @@ export interface VerifyVars {
   expiresAt: string | null
 }
 
+/**
+ * What the shop may reword in an account message (adr/0036 Ek 2026-11-10):
+ * its name the one value. A reset and an address check are required: the
+ * account cannot work without them.
+ */
+const accountSpec = <V>(key: string, required: boolean): EditSpec<V> => ({
+  group: "account",
+  required,
+  tokens: { mağaza_adı: "shop" },
+  fields: {
+    subject: `${key}.subject`,
+    preheader: `${key}.preheader`,
+    heading: `${key}.heading`,
+    intro: `${key}.intro`,
+  },
+  values: (_vars, brand) => ({ shop: brand.shopName }),
+})
+
+const RESET = accountSpec<ResetVars>("password_reset", true)
+const VERIFY = accountSpec<VerifyVars>("verify_email", true)
+const MIGRATION = accountSpec<MigrationInviteVars>("migration_invite", false)
+
 /** "Şifrenizi yenileyin": the storefront's reset page, good for 15 minutes. */
 export const passwordReset: MessageTemplate<ResetVars> = {
   name: "account.password_reset",
   kind: "transactional",
   channels: ["email"],
   retry: false,
-  email: (vars, brand) =>
-    renderEmail(brand, {
-      subject: messageText("password_reset.subject"),
-      preheader: messageText("password_reset.preheader", { shop: brand.shopName }),
-      heading: messageText("password_reset.heading"),
+  editable: RESET,
+  email: (vars, brand, context) => {
+    const text = textsFor(RESET, vars, brand, context?.own)
+    return renderEmail(brand, {
+      subject: text("subject"),
+      preheader: text("preheader"),
+      heading: text("heading"),
       blocks: [
-        { kind: "paragraph", text: messageText("password_reset.intro", { shop: brand.shopName }) },
+        { kind: "paragraph", text: text("intro") },
         { kind: "button", label: messageText("password_reset.button"), url: vars.resetUrl },
         { kind: "note", text: messageText("password_reset.ignore") },
       ],
       footer: messageText("footer.account", { shop: brand.shopName }),
-    }),
+    })
+  },
   sample: { resetUrl: "https://magaza.example/hesap/sifre-yenile?token=ornek" },
 }
 
@@ -48,13 +75,15 @@ export const verifyEmail: MessageTemplate<VerifyVars> = {
   kind: "transactional",
   channels: ["email"],
   retry: false,
-  email: (vars, brand) =>
-    renderEmail(brand, {
-      subject: messageText("verify_email.subject"),
-      preheader: messageText("verify_email.preheader", { shop: brand.shopName }),
-      heading: messageText("verify_email.heading"),
+  editable: VERIFY,
+  email: (vars, brand, context) => {
+    const text = textsFor(VERIFY, vars, brand, context?.own)
+    return renderEmail(brand, {
+      subject: text("subject"),
+      preheader: text("preheader"),
+      heading: text("heading"),
       blocks: [
-        { kind: "paragraph", text: messageText("verify_email.intro", { shop: brand.shopName }) },
+        { kind: "paragraph", text: text("intro") },
         ...(vars.verifyUrl
           ? [
               {
@@ -80,7 +109,8 @@ export const verifyEmail: MessageTemplate<VerifyVars> = {
         { kind: "note", text: messageText("verify_email.ignore") },
       ],
       footer: messageText("footer.account", { shop: brand.shopName }),
-    }),
+    })
+  },
   sample: {
     code: "OrnekDogrulamaKodu",
     verifyUrl: "https://magaza.example/hesap/dogrula?code=OrnekDogrulamaKodu",
@@ -99,21 +129,21 @@ export const migrationInvite: MessageTemplate<MigrationInviteVars> = {
   kind: "transactional",
   channels: ["email"],
   retry: true,
-  email: (vars, brand) =>
-    renderEmail(brand, {
-      subject: messageText("migration_invite.subject", { shop: brand.shopName }),
-      preheader: messageText("migration_invite.preheader", { shop: brand.shopName }),
-      heading: messageText("migration_invite.heading"),
+  editable: MIGRATION,
+  email: (vars, brand, context) => {
+    const text = textsFor(MIGRATION, vars, brand, context?.own)
+    return renderEmail(brand, {
+      subject: text("subject"),
+      preheader: text("preheader"),
+      heading: text("heading"),
       blocks: [
-        {
-          kind: "paragraph",
-          text: messageText("migration_invite.intro", { shop: brand.shopName }),
-        },
+        { kind: "paragraph", text: text("intro") },
         { kind: "paragraph", text: messageText("migration_invite.orders") },
         { kind: "button", label: messageText("migration_invite.button"), url: vars.registerUrl },
         { kind: "note", text: messageText("migration_invite.password") },
       ],
       footer: messageText("footer.account", { shop: brand.shopName }),
-    }),
+    })
+  },
   sample: { registerUrl: "https://magaza.example/hesap/kayit?email=ornek%40example.com" },
 }

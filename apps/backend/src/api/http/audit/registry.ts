@@ -12,6 +12,7 @@ import { INTEGRATION_RESOURCES } from "./resources/integrations"
 import { LEGAL_RESOURCES } from "./resources/legal"
 import { ORDER_RESOURCES } from "./resources/orders"
 import { MEDIA_RESOURCES } from "./resources/media"
+import { MESSAGING_RESOURCES } from "./resources/messaging"
 import { PRICE_RESOURCES } from "./resources/prices"
 import { PRODUCT_REVIEW_RESOURCES } from "./resources/product-reviews"
 import { PROMOTION_RESOURCES } from "./resources/promotions"
@@ -54,6 +55,7 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...TAX_RESOURCES,
   ...GOOGLE_REVIEW_RESOURCES,
   ...PRODUCT_REVIEW_RESOURCES,
+  ...MESSAGING_RESOURCES,
 ]
 
 export interface ResourceMatch {

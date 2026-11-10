@@ -1,3 +1,5 @@
+import { textsFor } from "../editable/texts"
+import type { EditSpec } from "../editable/types"
 import { messageText } from "../texts"
 import { renderEmail } from "./layout"
 import type { MessageTemplate } from "./types"
@@ -16,6 +18,35 @@ export interface PaymentLinkVars {
   url: string
 }
 
+/** Required: the customer asked staff for it, and the link reaches them no other way. */
+const EDIT: EditSpec<PaymentLinkVars> = {
+  group: "order",
+  required: true,
+  tokens: {
+    mağaza_adı: "shop",
+    müşteri_adı: "name",
+    sipariş_no: "number",
+    toplam: "total",
+    geçerlilik: "validity",
+    ödeme_bağlantısı: "url",
+  },
+  fields: {
+    subject: "payment_link.subject",
+    preheader: "payment_link.preheader",
+    heading: "payment_link.heading",
+    intro: "payment_link.intro",
+    sms: "payment_link.sms",
+  },
+  values: (vars, brand) => ({
+    shop: brand.shopName,
+    name: vars.customerName,
+    number: vars.number,
+    total: vars.total,
+    validity: vars.validity,
+    url: vars.url,
+  }),
+}
+
 /**
  * "Siparişiniz hazır": the order the customer asked staff for, and the
  * link to pay it. Transactional: they asked for it (adr/0051 §7); no
@@ -27,16 +58,15 @@ export const paymentLinkSent: MessageTemplate<PaymentLinkVars> = {
   kind: "transactional",
   channels: ["email", "sms"],
   retry: true,
-  email: (vars, brand) =>
-    renderEmail(brand, {
-      subject: messageText("payment_link.subject", { shop: brand.shopName, number: vars.number }),
-      preheader: messageText("payment_link.preheader", { total: vars.total }),
-      heading: messageText("payment_link.heading", { name: vars.customerName }),
+  editable: EDIT,
+  email: (vars, brand, context) => {
+    const text = textsFor(EDIT, vars, brand, context?.own)
+    return renderEmail(brand, {
+      subject: text("subject"),
+      preheader: text("preheader"),
+      heading: text("heading"),
       blocks: [
-        {
-          kind: "paragraph",
-          text: messageText("payment_link.intro", { shop: brand.shopName, number: vars.number }),
-        },
+        { kind: "paragraph", text: text("intro") },
         { kind: "items", rows: vars.items },
         {
           kind: "summary",
@@ -51,14 +81,9 @@ export const paymentLinkSent: MessageTemplate<PaymentLinkVars> = {
         { kind: "note", text: messageText("payment_link.note", { validity: vars.validity }) },
       ],
       footer: messageText("footer.order", { shop: brand.shopName }),
-    }),
-  sms: (vars, brand) =>
-    messageText("payment_link.sms", {
-      shop: brand.shopName,
-      total: vars.total,
-      validity: vars.validity,
-      url: vars.url,
-    }),
+    })
+  },
+  sms: (vars, brand, own) => textsFor(EDIT, vars, brand, own)("sms"),
   sample: {
     customerName: "Ayşe",
     number: "PL-1042",

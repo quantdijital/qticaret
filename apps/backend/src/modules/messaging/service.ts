@@ -3,7 +3,18 @@ import { InjectManager, InjectTransactionManager, MedusaContext } from "@medusaj
 import { uniqueViolationKeys } from "../../lib/errors"
 import type { MessageChannel } from "../../lib/messaging/recipients"
 import { ConsentRequests } from "./consent-requests"
-import type { SkipInput, SuppressionInput } from "./types"
+import type { SkipInput, SuppressionInput, TemplateTextRow, TemplateTextValues } from "./types"
+
+const TEMPLATE_TEXT_FIELDS = [
+  "template",
+  "enabled",
+  "subject",
+  "preheader",
+  "heading",
+  "intro",
+  "sms",
+  "updated_by",
+] as const
 
 interface Executor {
   execute: (sql: string, params: unknown[]) => Promise<unknown>
@@ -126,6 +137,65 @@ class MessagingModuleService extends ConsentRequests {
   async clearSkip(sendKey: string, @MedusaContext() sharedContext: Context = {}): Promise<void> {
     const manager = sharedContext.transactionManager as Executor
     await manager.execute(`DELETE FROM message_skip WHERE send_key = ?`, [sendKey])
+  }
+
+  /** The customer messages the shop reworded or turned off (adr/0036 Ek 2026-11-10). */
+  @InjectManager()
+  async templateTexts(@MedusaContext() sharedContext: Context = {}): Promise<TemplateTextRow[]> {
+    const rows = await this.listMessageTemplateTexts(
+      {},
+      { select: [...TEMPLATE_TEXT_FIELDS], take: null },
+      sharedContext
+    )
+    return rows
+  }
+
+  /** One template's words and switch, or null for the platform's own. */
+  @InjectManager()
+  async templateTextOf(
+    template: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<TemplateTextRow | null> {
+    const [row] = await this.listMessageTemplateTexts(
+      { template },
+      { take: 1, select: [...TEMPLATE_TEXT_FIELDS] },
+      sharedContext
+    )
+    return (row as TemplateTextRow | undefined) ?? null
+  }
+
+  /** Saves a template's words and switch, all fields at once; two saves at once keep the last. */
+  async saveTemplateText(template: string, values: TemplateTextValues, by: string | null) {
+    try {
+      await this.saveTemplateText_(template, values, by)
+    } catch (error) {
+      if (!uniqueViolationKeys(error)?.includes("template")) {
+        throw error
+      }
+      await this.saveTemplateText_(template, values, by)
+    }
+  }
+
+  @InjectTransactionManager()
+  protected async saveTemplateText_(
+    template: string,
+    values: TemplateTextValues,
+    by: string | null,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    const [row] = await this.listMessageTemplateTexts(
+      { template },
+      { take: 1, select: ["id"] },
+      sharedContext
+    )
+    if (row) {
+      await this.updateMessageTemplateTexts(
+        { id: row.id, ...values, updated_by: by },
+        sharedContext
+      )
+      return
+    }
+    await this.createMessageTemplateTexts({ template, ...values, updated_by: by }, sharedContext)
   }
 
   /** Skips last noted before `before` go; returns how many. */

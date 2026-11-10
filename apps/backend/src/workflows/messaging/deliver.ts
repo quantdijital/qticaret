@@ -22,6 +22,7 @@ import type { SkipInput } from "../../modules/messaging/types"
 import { brandOf } from "./brand"
 import { HISTORY_RESOURCE_TYPES, isCustomerTemplate } from "./history"
 import { senderAddress } from "./sender-domain"
+import { sendTextsOf } from "./template-texts"
 import { withinQuota } from "./quota"
 import type { MessageRecipients } from "./loaders/types"
 
@@ -34,6 +35,8 @@ export type SendOutcome =
   | "no_consent"
   | "over_quota"
   | "failed"
+  // The shop turned the message off (adr/0036 Ek 2026-11-10)
+  | "template_off"
 
 type Templates = typeof MESSAGE_TEMPLATES
 export type VarsOf<N extends MessageTemplateName> = Templates[N]["sample"]
@@ -122,7 +125,7 @@ function render<N extends MessageTemplateName>(
     return template.email(vars, brand, context)
   }
   if (channel === "sms" && template.sms) {
-    return { text: template.sms(vars, brand) }
+    return { text: template.sms(vars, brand, context.own) }
   }
   throw new Error(`messaging: ${name} has no ${channel} form`)
 }
@@ -144,6 +147,23 @@ export async function deliver<N extends MessageTemplateName>(
   const template = MESSAGE_TEMPLATES[input.template]
   const messaging = container.resolve<MessagingModuleService>(MESSAGING_MODULE)
   const outcomes: Partial<Record<MessageChannel, SendOutcome>> = {}
+  // The shop's own words, or the message turned off: its choice, not a story for the history
+  const texts = await sendTextsOf(container, template.name)
+  if (texts.off) {
+    for (const channel of template.channels) {
+      if (input.recipients[channel]) {
+        logger.info({
+          event: "messaging.not_sent",
+          template: template.name,
+          channel,
+          resource_id: input.resource.id,
+          reason: "template_off",
+        })
+        outcomes[channel] = "template_off"
+      }
+    }
+    return outcomes
+  }
   let brand: Brand | null = null
   for (const channel of template.channels) {
     const address = input.recipients[channel]
@@ -225,6 +245,7 @@ export async function deliver<N extends MessageTemplateName>(
       : null
     const content = render(input.template, channel, input.vars, brand, {
       unsubscribeUrl: leavePage,
+      own: texts.own,
     })
     try {
       const created = await notifications.createNotifications([

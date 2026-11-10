@@ -1,3 +1,5 @@
+import { textsFor } from "../editable/texts"
+import type { EditSpec } from "../editable/types"
 import { messageText } from "../texts"
 import { renderEmail } from "./layout"
 import type { MessageTemplate } from "./types"
@@ -22,6 +24,26 @@ const SAMPLE: StockAlertVars = {
 
 const named = (vars: StockAlertVars): string =>
   vars.variant ? `${vars.product} (${vars.variant})` : vars.product
+/**
+ * What the shop may reword (adr/0036 Ek 2026-11-10): `{ürün_adı}` is the
+ * product with its variant. The confirmation is required: the guest asked
+ * for it and nothing reaches them until they confirm.
+ */
+const stockSpec = (key: string, required: boolean): EditSpec<StockAlertVars> => ({
+  group: "stock",
+  required,
+  tokens: { mağaza_adı: "shop", ürün_adı: "product" },
+  fields: {
+    subject: `${key}.subject`,
+    preheader: `${key}.preheader`,
+    heading: `${key}.heading`,
+    intro: `${key}.intro`,
+  },
+  values: (vars, brand) => ({ shop: brand.shopName, product: named(vars) }),
+})
+
+const CONFIRM = stockSpec("stock_confirm", true)
+const BACK = stockSpec("back_in_stock", false)
 
 /**
  * "Stok bildirimini onaylayın" (F10.5): a guest asked to be told; nothing
@@ -33,18 +55,25 @@ export const stockAlertConfirm: MessageTemplate<StockAlertVars> = {
   channels: ["email"],
   // The link's token is only the event's: a lost one is asked for again
   retry: false,
-  email: (vars, brand) =>
-    renderEmail(brand, {
-      subject: messageText("stock_confirm.subject"),
-      preheader: messageText("stock_confirm.preheader", { shop: brand.shopName }),
-      heading: messageText("stock_confirm.heading"),
+  editable: CONFIRM,
+  email: (vars, brand, context) => {
+    const text = textsFor(CONFIRM, vars, brand, context?.own)
+    return renderEmail(brand, {
+      subject: text("subject"),
+      preheader: text("preheader"),
+      heading: text("heading"),
       blocks: [
-        { kind: "paragraph", text: messageText("stock_confirm.intro", { product: named(vars) }) },
-        { kind: "button", label: messageText("stock_confirm.button"), url: vars.confirmUrl },
+        { kind: "paragraph", text: text("intro") },
+        {
+          kind: "button",
+          label: messageText("stock_confirm.button"),
+          url: vars.confirmUrl,
+        },
         { kind: "note", text: messageText("stock_confirm.ignore") },
       ],
       footer: messageText("footer.account", { shop: brand.shopName }),
-    }),
+    })
+  },
   sample: SAMPLE,
 }
 
@@ -54,17 +83,24 @@ export const backInStock: MessageTemplate<StockAlertVars> = {
   kind: "transactional",
   channels: ["email"],
   retry: true,
-  email: (vars, brand) =>
-    renderEmail(brand, {
-      subject: messageText("back_in_stock.subject", { product: vars.product }),
-      preheader: messageText("back_in_stock.preheader", { shop: brand.shopName }),
-      heading: messageText("back_in_stock.heading", { product: vars.product }),
+  editable: BACK,
+  email: (vars, brand, context) => {
+    const text = textsFor(BACK, vars, brand, context?.own)
+    return renderEmail(brand, {
+      subject: text("subject"),
+      preheader: text("preheader"),
+      heading: text("heading"),
       blocks: [
-        { kind: "paragraph", text: messageText("back_in_stock.intro", { product: named(vars) }) },
-        { kind: "button", label: messageText("back_in_stock.button"), url: vars.productUrl },
+        { kind: "paragraph", text: text("intro") },
+        {
+          kind: "button",
+          label: messageText("back_in_stock.button"),
+          url: vars.productUrl,
+        },
         { kind: "note", text: messageText("back_in_stock.once") },
       ],
       footer: messageText("footer.stock", { shop: brand.shopName }),
-    }),
+    })
+  },
   sample: { ...SAMPLE, confirmUrl: null },
 }

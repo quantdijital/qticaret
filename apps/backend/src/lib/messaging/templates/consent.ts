@@ -26,6 +26,15 @@ export const consentConfirm: MessageTemplate<ConsentConfirmVars> = {
   channels: ["email", "sms"],
   // The link's token is only the request's: a lost one is asked for again
   retry: false,
+  // Listed, required and worded by the platform: the double opt-in's proof (İYS) rests
+  // on these very words (adr/0036 Ek 2026-11-10)
+  editable: {
+    group: "account",
+    required: true,
+    tokens: { mağaza_adı: "shop" },
+    fields: {},
+    values: (_vars, brand) => ({ shop: brand.shopName }),
+  },
   email: (vars, brand) =>
     renderEmail(brand, {
       subject: messageText(vars.granting ? "consent_confirm.subject" : "consent_revoke.subject"),

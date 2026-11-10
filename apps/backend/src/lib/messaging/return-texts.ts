@@ -5,6 +5,9 @@
  */
 export const RETURN_TEXTS: Readonly<Record<string, string>> = {
   "returns.lines": "Talepteki ürünler",
+  // `{talep_türü}` in a shop's own text (adr/0036 Ek 2026-11-10)
+  "returns.kind.return": "iade",
+  "returns.kind.exchange": "değişim",
   "return_requested.subject.return": "İade talebiniz alındı (#{{number}})",
   "return_requested.subject.exchange": "Değişim talebiniz alındı (#{{number}})",
   "return_requested.preheader": "{{shop}} talebinizi inceleyecek.",

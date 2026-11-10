@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { panelUrl } from "../../lib/env"
+import type { OwnTexts } from "../../lib/messaging/editable/types"
 import { emailLinkUrl } from "../../lib/messaging/links"
 import { SAMPLE_ORIGIN, previewVars } from "../../lib/messaging/preview"
 import type { PreviewFacts } from "../../lib/messaging/preview"
@@ -72,7 +73,9 @@ export interface MessagePreview {
  */
 export async function messagePreview<V>(
   container: Pick<MedusaContainer, "resolve">,
-  template: MessageTemplate<V>
+  template: MessageTemplate<V>,
+  /** The shop's words to show (kept or a draft, adr/0036 Ek 2026-11-10); none: the platform's. */
+  own?: OwnTexts
 ): Promise<MessagePreview> {
   const { brand, facts } = await previewFactsOf(container)
   const vars = previewVars(template, facts)
@@ -83,7 +86,7 @@ export async function messagePreview<V>(
       : null
   return {
     brand,
-    email: template.email ? template.email(vars, brand, { unsubscribeUrl }) : null,
-    sms: template.sms ? template.sms(vars, brand) : null,
+    email: template.email ? template.email(vars, brand, { unsubscribeUrl, own }) : null,
+    sms: template.sms ? template.sms(vars, brand, own) : null,
   }
 }

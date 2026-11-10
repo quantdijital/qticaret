@@ -1,4 +1,6 @@
 import type { RefusalReason } from "../../orders/withdrawal-rules"
+import { textsFor } from "../editable/texts"
+import type { EditSpec } from "../editable/types"
 import { messageText } from "../texts"
 import { renderEmail } from "./layout"
 import type { EmailBlock } from "./layout"
@@ -62,35 +64,63 @@ const lines = (vars: ReturnVars): EmailBlock => ({
 const said = (key: string, vars: ReturnVars, values: Record<string, string> = {}) =>
   messageText(`${key}.${vars.kind}`, { number: vars.number, name: vars.customerName, ...values })
 
+/**
+ * What the shop may reword (adr/0036 Ek 2026-11-10): one text for both
+ * kinds, `{talep_türü}` saying "iade" or "değişim"; the catalog's own
+ * reads each kind its way.
+ */
+const editSpec = (key: string, required: boolean): EditSpec<ReturnVars> => ({
+  group: "returns",
+  required,
+  tokens: { mağaza_adı: "shop", müşteri_adı: "name", sipariş_no: "number", talep_türü: "kind" },
+  fields: {
+    subject: (vars) => `${key}.subject.${vars.kind}`,
+    preheader: `${key}.preheader`,
+    heading: (vars) => `${key}.heading.${vars.kind}`,
+    intro: (vars) => `${key}.intro.${vars.kind}`,
+  },
+  values: (vars, brand) => ({
+    shop: brand.shopName,
+    name: vars.customerName,
+    number: vars.number,
+    kind: messageText(`returns.kind.${vars.kind}`),
+  }),
+})
+
 function template(
   name: string,
   key: string,
+  required: boolean,
   body: (vars: ReturnVars) => EmailBlock[]
 ): MessageTemplate<ReturnVars> {
+  const edit = editSpec(key, required)
   return {
     name,
     kind: "transactional",
     channels: ["email"],
     retry: true,
-    email: (vars, brand) =>
-      renderEmail(brand, {
-        subject: said(`${key}.subject`, vars),
-        preheader: messageText(`${key}.preheader`, { shop: brand.shopName }),
-        heading: said(`${key}.heading`, vars),
-        blocks: [{ kind: "paragraph", text: said(`${key}.intro`, vars) }, ...body(vars)],
+    editable: edit,
+    email: (vars, brand, context) => {
+      const text = textsFor(edit, vars, brand, context?.own)
+      return renderEmail(brand, {
+        subject: text("subject"),
+        preheader: text("preheader"),
+        heading: text("heading"),
+        blocks: [{ kind: "paragraph", text: text("intro") }, ...body(vars)],
         footer: messageText("footer.order", { shop: brand.shopName }),
-      }),
+      })
+    },
     sample: SAMPLE,
   }
 }
 
 /** "İade/değişim talebiniz alındı": the shop will look at it. */
-export const returnRequested = template("return.requested", "return_requested", (vars) => [
+export const returnRequested = template("return.requested", "return_requested", false, (vars) => [
   lines(vars),
 ])
 
 /** "Talebiniz onaylandı": how to send the parcel back. */
-export const returnApproved = template("return.approved", "return_approved", (vars) => [
+export const returnApproved = template("return.approved", "return_approved", true, (vars) => [
   lines(vars),
   vars.returnCode
     ? {
@@ -105,7 +135,7 @@ export const returnApproved = template("return.approved", "return_approved", (va
  * "İadeniz yapıldı": what was paid back, and when it shows; what was
  * refused at receipt is not in it (its own message said so).
  */
-export const returnRefunded = template("return.refunded", "return_refunded", (vars) => [
+export const returnRefunded = template("return.refunded", "return_refunded", false, (vars) => [
   {
     kind: "summary",
     rows: [
@@ -124,7 +154,7 @@ export const returnRefunded = template("return.refunded", "return_refunded", (va
  * and a new request may be made within the period. Staff's reason is
  * the team's, never in it.
  */
-export const returnCanceled = template("return.canceled", "return_canceled", (vars) => [
+export const returnCanceled = template("return.canceled", "return_canceled", false, (vars) => [
   lines(vars),
   { kind: "note", text: messageText("return_canceled.again") },
 ])
@@ -137,7 +167,7 @@ export const returnCanceled = template("return.canceled", "return_canceled", (va
  * choose. When everything was refused, this is the request's last message.
  */
 export const returnRefused: MessageTemplate<ReturnVars> = {
-  ...template("return.refused", "return_refused", (vars) => [
+  ...template("return.refused", "return_refused", true, (vars) => [
     {
       kind: "details",
       title: messageText("return_refused.lines"),

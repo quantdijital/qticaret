@@ -494,6 +494,20 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "messaging.local_part_invalid":
     "Adresin @ öncesi kısmı küçük harf, rakam, nokta, tire ve alt çizgiden oluşmalı (en çok 32).",
   "messaging.template_unknown": "Böyle bir ileti şablonu yok.",
+  // adr/0036 Ek 2026-11-10: the shop's words for its customer messages
+  "messaging.template_not_editable": "Bu iletinin metni değiştirilemez.",
+  "messaging.template_field_unknown": "Bu iletide bu alan yok.",
+  "messaging.template_text_invalid":
+    "Metinde kullanılamayan bir karakter var. Konu, ön izleme satırı ve başlık tek satır olmalı.",
+  "messaging.template_text_too_long": "Bu alan en fazla {{limit}} karakter olabilir.",
+  "messaging.template_token_unknown":
+    "Metinde tanınmayan bilgi var: {{tokens}}. Bu iletide kullanılabilenler: {{available}}.",
+  "messaging.template_required":
+    "Bu ileti yasal ya da işlemsel olarak zorunlu; kapatılamaz, yalnızca metni değiştirilebilir.",
+  "messaging.template_switched_elsewhere":
+    "Bu ileti Ayarlar > Pazarlama > Terk edilmiş sepet'ten açılıp kapatılır.",
+  "messaging.sms_too_long":
+    "SMS metni örnek bilgilerle en çok {{parts}} SMS boyunu geçmemeli; metni kısaltın.",
   "messaging.recipient_invalid": "Adres ya da telefon numarası geçerli değil.",
   "messaging.email_off": "E-posta gönderimi bu mağazada açık değil.",
   "messaging.sms_off": "SMS hesabı bağlı değil. Ayarlar > SMS'ten Netgsm hesabını girin.",

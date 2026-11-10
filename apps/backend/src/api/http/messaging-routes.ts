@@ -1,6 +1,7 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import type { AuthenticatedMedusaRequest } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
+import { AdminPostTemplateTexts } from "../admin/messaging/customer-messages/validators"
 import { AdminPostSenderDomain } from "../admin/messaging/sender-domain/validators"
 import {
   AdminGetSuppressions,
@@ -44,6 +45,22 @@ export const MESSAGING_ROUTES = [
     matcher: "/admin/messaging/templates*",
     methods: ["GET" as const],
     middlewares: [requireUserActor],
+  },
+  // adr/0036 Ek 2026-11-10: the shop's words for its customer messages, and a draft's preview
+  {
+    matcher: "/admin/messaging/templates/:name/preview",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostTemplateTexts)],
+  },
+  {
+    matcher: "/admin/messaging/customer-messages",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
+  {
+    matcher: "/admin/messaging/customer-messages/:name",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostTemplateTexts)],
   },
   {
     matcher: "/admin/messaging/sender-domain",

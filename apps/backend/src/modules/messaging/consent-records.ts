@@ -16,6 +16,7 @@ import { MessageConsent } from "./models/message-consent"
 import { MessageConsentEvent } from "./models/message-consent-event"
 import { MessageSkip } from "./models/message-skip"
 import { MessageSuppression } from "./models/message-suppression"
+import { MessageTemplateText } from "./models/message-template-text"
 import { SenderDomain } from "./models/sender-domain"
 import type {
   ConsentChannel,
@@ -49,6 +50,7 @@ export class ConsentRecords extends MedusaService({
   MessageConsentEvent,
   MessageSkip,
   MessageSuppression,
+  MessageTemplateText,
   SenderDomain,
 }) {
   protected readonly hashKey: Buffer

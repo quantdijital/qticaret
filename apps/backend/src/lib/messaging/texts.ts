@@ -270,15 +270,22 @@ const CATALOG: Readonly<Record<MessageLocale, Readonly<Record<string, string>>>>
   en: TR,
 }
 
+/** The text for a key as the catalog has it, `{{name}}`s unfilled; a missing key is a programming error. */
+export function rawMessageText(key: string, locale: MessageLocale = MESSAGE_LOCALE): string {
+  const text = CATALOG[locale][key]
+  if (text === undefined) {
+    throw new Error(`messaging: no text for ${key}`)
+  }
+  return text
+}
+
 /** The text for a key with its values filled in; a missing key is a programming error. */
 export function messageText(
   key: string,
   values: Readonly<Record<string, string | number>> = {},
   locale: MessageLocale = MESSAGE_LOCALE
 ): string {
-  const text = CATALOG[locale][key]
-  if (text === undefined) {
-    throw new Error(`messaging: no text for ${key}`)
-  }
-  return text.replace(/\{\{(\w+)\}\}/g, (_, name: string) => String(values[name] ?? ""))
+  return rawMessageText(key, locale).replace(/\{\{(\w+)\}\}/g, (_, name: string) =>
+    String(values[name] ?? "")
+  )
 }

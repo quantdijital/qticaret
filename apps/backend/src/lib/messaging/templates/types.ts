@@ -1,3 +1,4 @@
+import type { EditSpec, OwnTexts } from "../editable/types"
 import type { MessageChannel } from "../recipients"
 
 /**
@@ -21,10 +22,12 @@ export interface Brand {
   storefrontUrl: string | null
 }
 
-/** What a send knows of its recipient that the template does not: their way out. */
+/** What a send knows of its recipient that the template does not: their way out, the shop's words. */
 export interface EmailContext {
   /** The recipient's one-click unsubscribe link; commercial messages only (adr/0038 §1). */
   unsubscribeUrl: string | null
+  /** What the shop wrote in place of the catalog's texts (adr/0036 Ek 2026-11-10). */
+  own?: OwnTexts | undefined
 }
 
 export interface EmailContent {
@@ -44,7 +47,14 @@ export interface MessageTemplate<V> {
    */
   retry: boolean
   email?: (vars: V, brand: Brand, context?: EmailContext) => EmailContent
-  sms?: (vars: V, brand: Brand) => string
+  /** The text message; `own` is what the shop wrote in its place. */
+  sms?: (vars: V, brand: Brand, own?: OwnTexts) => string
+  /**
+   * A customer message the shop may reword and, unless it is required,
+   * turn off (adr/0036 Ek 2026-11-10); none for the team's own alerts and
+   * for messages whose body is written per send (a campaign).
+   */
+  editable?: EditSpec<V>
   /** Values for the panel's preview: made up, never a real customer's. */
   sample: V
 }
