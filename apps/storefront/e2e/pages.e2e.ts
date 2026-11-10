@@ -24,7 +24,14 @@ test.describe("index pages (docs/20 sayfalar)", () => {
     expect(response?.status()).toBe(200)
     expect(await robotsOf(page)).toMatch(indexable(response))
     await expect(page.getByRole("heading", { level: 1, name: "Kategoriler" })).toBeVisible()
-    await expect(page.locator("main h2 a").first()).toBeVisible()
+    // Each top category is a card: a link around its own heading
+    await expect(
+      page
+        .getByRole("main")
+        .getByRole("link")
+        .filter({ has: page.getByRole("heading", { level: 2 }) })
+        .first()
+    ).toBeVisible()
     await expect(
       page.getByRole("navigation", { name: "Bulunduğunuz yer" }).getByRole("link", {
         name: "Ana sayfa",
