@@ -512,16 +512,29 @@ importers:
         version: 5.9.3
 
   packages/types:
+    dependencies:
+      zod:
+        specifier: 4.6.6
+        version: 4.6.6
     devDependencies:
       '@qticaret/config':
         specifier: workspace:*
         version: link:../config
+      '@qticaret/server-kit':
+        specifier: workspace:*
+        version: link:../server-kit
+      '@types/node':
+        specifier: 24.19.2
+        version: 24.19.2
       eslint:
         specifier: 10.12.0
         version: 10.12.0(jiti@1.21.7)(supports-color@8.1.1)
       typescript:
         specifier: 5.9.3
         version: 5.9.3
+      vitest:
+        specifier: 5.0.3
+        version: 5.0.3(@opentelemetry/api@1.9.1)(@types/node@24.19.2)(jsdom@30.1.2)(vite@8.3.4(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
 
   packages/ui:
     dependencies:

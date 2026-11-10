@@ -1,0 +1,4 @@
+{
+  "//": "CommonJS so the Medusa apps load this contract from source at runtime (ts-node cannot require ES module source); bundlers read it either way. Imports here stay extensionless.",
+  "type": "commonjs"
+}

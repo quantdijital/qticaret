@@ -1,6 +1,11 @@
 {
   "extends": "@qticaret/config/tsconfig/base.json",
   "compilerOptions": {
+    // src/control-plane is CommonJS (the Medusa apps load it at runtime) and
+    // its tests import @qticaret/server-kit, also CommonJS source; both are
+    // written with import/export. `import type` is still enforced by ESLint
+    // (consistent-type-imports)
+    "verbatimModuleSyntax": false,
     "noEmit": true
   },
   "include": ["src"]
