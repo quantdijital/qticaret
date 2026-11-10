@@ -1,5 +1,6 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
+import { passwordProblem } from "@qticaret/server-kit"
 import { inviteOfToken } from "../../workflows/cp-staff/invites"
 import { rejectRequest } from "./request"
 
@@ -11,7 +12,11 @@ export const INVITE_HEADER = "x-cp-invite"
  * its own address (header `x-cp-invite`, so the token stays out of the body
  * Medusa reads). A login someone made earlier for that address with no
  * user behind it (pre-registered by whoever, to take the account over) is
- * removed first: the invitation's holder sets the password.
+ * removed first: the invitation's holder sets the password. The password
+ * meets the shop's rule (server-kit `passwordProblem`, adr/0043: 10 to 256
+ * characters, not a common one, not the address's name; Ek C6): 400
+ * `auth.password_<problem>`. The breach list is the shop's alone (it asks
+ * an outside service); here the rule is offline.
  */
 export async function gateRegistration(
   req: MedusaRequest,
@@ -37,6 +42,13 @@ export async function gateRegistration(
         { type: "not_allowed", message: "cp.register_closed" },
         "register_closed"
       )
+      return
+    }
+    const password = (req.body as { password?: unknown }).password
+    const problem = typeof password === "string" ? passwordProblem(password, email) : null
+    if (problem) {
+      const message = `auth.password_${problem}`
+      rejectRequest(req, res, 400, { type: "invalid_data", message }, message)
       return
     }
     const auth = req.scope.resolve(Modules.AUTH)

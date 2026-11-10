@@ -76,9 +76,27 @@ describe("InvitePage (adr/0061 Ek C4, L1)", () => {
     await userEvent.type(screen.getByLabelText("Şifre (tekrar)"), "baska")
     await userEvent.click(screen.getByRole("button", { name: "Hesabı oluştur" }))
 
-    expect(await screen.findByText("Şifre en az 12 karakter olmalı.")).toBeInTheDocument()
+    expect(await screen.findByText("Şifre en az 10 karakter olmalı.")).toBeInTheDocument()
     expect(screen.getByText("Şifreler aynı değil.")).toBeInTheDocument()
     expect(sent).toHaveLength(1)
+  })
+
+  it("says the server's password rule in words (auth.password_common)", async () => {
+    stubApi((call) =>
+      call.path === "/auth/user/emailpass/register"
+        ? refusal(400, "auth.password_common", "invalid_data")
+        : controlPlane(call)
+    )
+    renderWithQuery(<InvitePage />)
+
+    await userEvent.type(await screen.findByLabelText("Ad"), "Ayşe")
+    await userEvent.type(screen.getByLabelText("Soyad"), "Yılmaz")
+    await userEvent.type(screen.getByLabelText("Şifre"), "Galatasaray1905")
+    await userEvent.type(screen.getByLabelText("Şifre (tekrar)"), "Galatasaray1905")
+    await userEvent.click(screen.getByRole("button", { name: "Hesabı oluştur" }))
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("Bu şifre çok yaygın")
+    expect(navigate).not.toHaveBeenCalled()
   })
 
   it("says an invitation that no longer holds", async () => {

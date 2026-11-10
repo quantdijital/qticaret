@@ -15,8 +15,9 @@ import { inviteInfoQuery, useAcceptInvite } from "@/features/invite/api"
 import { errorText } from "@/lib/errors"
 import { takeLinkToken } from "@/lib/link-token"
 
-// The control plane takes any password; a staff account deserves a long one
-export const MIN_PASSWORD = 12
+// The shared rule's floor (server-kit `MIN_PASSWORD`, adr/0043); the control
+// plane decides the rest (common ones, the address's name), said in words
+export const MIN_PASSWORD = 10
 
 const schema = z
   .object({

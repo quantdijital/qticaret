@@ -330,6 +330,12 @@
       "409": "The record changed meanwhile; reload and try again.",
       "429": "Too many tries. Wait a few minutes and try again."
     },
+    "password": {
+      "too_short": "The password needs at least 10 characters.",
+      "too_long": "The password can have at most 256 characters.",
+      "common": "This password is too common; choose one that is hard to guess.",
+      "contains_email": "The password must not hold your email address's name."
+    },
     "api": {
       "csrf_rejected": "The request did not come from this page and was refused. Reload and try again.",
       "invalid_request": "The request is not valid; reload and try again.",

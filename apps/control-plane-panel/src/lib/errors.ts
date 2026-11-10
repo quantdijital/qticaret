@@ -53,7 +53,11 @@ export const API_ERROR_CODES = [
   "too_many_requests",
 ] as const
 
+// The password rule shared with the shop (server-kit, adr/0043): `errors.password.<problem>`
+export const PASSWORD_PROBLEMS = ["too_short", "too_long", "common", "contains_email"] as const
+
 const CP_KEY = /\bcp\.([a-z_]+)\b/
+const PASSWORD_KEY = /\bauth\.password_([a-z_]+)\b/
 const API_KEY = /^errors\.([a-z_]+)$/
 
 const known = <T extends string>(list: readonly T[], name: string | undefined): name is T =>
@@ -72,6 +76,10 @@ export function errorKey(error: unknown): string | null {
   const cp = CP_KEY.exec(error.code)?.[1]
   if (known(CP_ERROR_CODES, cp)) {
     return `errors.cp.${cp}`
+  }
+  const password = PASSWORD_KEY.exec(error.code)?.[1]
+  if (known(PASSWORD_PROBLEMS, password)) {
+    return `errors.password.${password}`
   }
   const generic = API_KEY.exec(error.code)?.[1]
   if (known(API_ERROR_CODES, generic)) {

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 import en from "../locales/en.json" with { type: "json" }
 import tr from "../locales/tr.json" with { type: "json" }
 import { ApiError } from "./api"
-import { API_ERROR_CODES, CP_ERROR_CODES, errorKey, errorText } from "./errors"
+import { API_ERROR_CODES, CP_ERROR_CODES, PASSWORD_PROBLEMS, errorKey, errorText } from "./errors"
 import { i18next } from "./i18n"
 import { StepUpCancelled } from "./step-up"
 
@@ -38,6 +38,17 @@ describe("the control plane's refusals in words", () => {
       "invalid_data"
     )
     expect(errorKey(error)).toBe("errors.cp.name_required")
+  })
+
+  it("puts the shared password rule's keys into words", () => {
+    for (const problem of PASSWORD_PROBLEMS) {
+      expect(errorKey(new ApiError(400, `auth.password_${problem}`, "invalid_data"))).toBe(
+        `errors.password.${problem}`
+      )
+    }
+    expect(errorText(t, new ApiError(400, "auth.password_too_short", "invalid_data"))).toBe(
+      "Şifre en az 10 karakter olmalı."
+    )
   })
 
   it("knows the control plane's generic keys", () => {

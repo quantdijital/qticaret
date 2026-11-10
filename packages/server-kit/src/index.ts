@@ -67,6 +67,9 @@ export {
 export type { DocumentSignature, DocumentVerifyErrorCode } from "./signing/document"
 
 export { safeEqual } from "./security/timing-safe"
+export { COMMON_PASSWORDS } from "./security/password/common"
+export { MAX_PASSWORD, MIN_PASSWORD, passwordProblem } from "./security/password/policy"
+export type { PasswordProblem } from "./security/password/policy"
 export {
   PROOF_BURST,
   SCOPED_PROOF_CEILING,

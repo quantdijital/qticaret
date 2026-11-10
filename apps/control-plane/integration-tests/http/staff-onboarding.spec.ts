@@ -204,6 +204,36 @@ medusaIntegrationTestRunner({
       expect(squatterIn.status).toBe(401)
     })
 
+    it("holds a new login's password to the shop's rule, the invitation still good (Ek C6)", async () => {
+      const email = `ayse.kaya-${randomUUID().slice(0, 8)}@quant.test`
+      const { link } = await inviteFirstOwner(getContainer(), email)
+      const token = tokenOfLink(link)
+      const register = (password: string) =>
+        http.post(
+          "/auth/user/emailpass/register",
+          { email, password },
+          { ...anyStatus, headers: { "x-cp-invite": token } }
+        )
+
+      const short = await register("kisa-sif")
+      const long = await register(`mavi kuş sabah uçar ${"x".repeat(240)}`)
+      const common = await register("Galatasaray1905")
+      const named = await register(`${email.split("@")[0] ?? ""}-2026!`)
+      const logins = await getContainer()
+        .resolve(Modules.AUTH)
+        .listProviderIdentities({ provider: "emailpass", entity_id: email }, { take: 5 })
+      const good = await register("mavi kuş sabah uçar")
+
+      expect(short.status).toBe(400)
+      expect(short.data).toMatchObject({ message: "auth.password_too_short" })
+      expect(long.data).toMatchObject({ message: "auth.password_too_long" })
+      expect(common.data).toMatchObject({ message: "auth.password_common" })
+      expect(named.data).toMatchObject({ message: "auth.password_contains_email" })
+      // Refused before any login was made
+      expect(logins).toHaveLength(0)
+      expect(good.status).toBe(200)
+    })
+
     it("refuses a token that is no invitation", async () => {
       const email = `other-${randomUUID()}@quant.test`
       const password = randomUUID()

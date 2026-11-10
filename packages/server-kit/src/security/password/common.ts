@@ -2,8 +2,9 @@
  * Passwords of ten characters and more that people pick first: the
  * world's most common long ones and Turkish favourites (teams, cities,
  * "şifre", "parola"). Shorter ones are refused by length already. The
- * offline guard; where the shop runs, the breach list (`breached.ts`)
- * covers the rest. Lower case.
+ * offline guard; where the shop runs, the breach list (the backend's
+ * `lib/security/password/breached.ts`) covers the rest. Lower case.
+ * Shared with the control plane (adr/0061 Ek C6).
  */
 export const COMMON_PASSWORDS: ReadonlySet<string> = new Set([
   "0000000000",

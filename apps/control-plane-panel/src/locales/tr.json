@@ -330,6 +330,12 @@
       "409": "Kayıt bu arada değişti; sayfayı yenileyip yeniden deneyin.",
       "429": "Çok fazla deneme yapıldı. Birkaç dakika bekleyip yeniden deneyin."
     },
+    "password": {
+      "too_short": "Şifre en az 10 karakter olmalı.",
+      "too_long": "Şifre en çok 256 karakter olabilir.",
+      "common": "Bu şifre çok yaygın; tahmin edilmesi zor bir şifre seçin.",
+      "contains_email": "Şifre e-posta adresinizin adını içermemeli."
+    },
     "api": {
       "csrf_rejected": "İstek bu sayfadan gelmedi ve reddedildi. Sayfayı yenileyip yeniden deneyin.",
       "invalid_request": "İstek geçerli değil; sayfayı yenileyip yeniden deneyin.",
