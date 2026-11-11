@@ -15,7 +15,7 @@ import {
   SIGNED_REQUEST_HEADERS,
   signedRequestHeadersSchema,
 } from "../../control-plane/signature.js"
-import { usageReportSchema } from "../../control-plane/usage-report.js"
+import { usagePeriodOf, usageReportSchema } from "../../control-plane/usage-report.js"
 import { planDocument, usageReport } from "./fixtures.js"
 
 const SIGNATURE = "A".repeat(86)
@@ -102,6 +102,12 @@ describe("usage report schema", () => {
     ["a bad commit", { ...usageReport, release: { ...usageReport.release, commit: "HEAD" } }],
   ])("refuses %s", (_case, report) => {
     expect(usageReportSchema.safeParse(report).success).toBe(false)
+  })
+
+  it("names the period by the month in Turkey (UTC+3), Ek C13", () => {
+    expect(usagePeriodOf(new Date("2026-10-31T20:59:59.999Z"))).toBe("2026-10")
+    expect(usagePeriodOf(new Date("2026-10-31T21:00:00.000Z"))).toBe("2026-11")
+    expect(usagePeriodOf(new Date("2026-12-31T21:00:00.000Z"))).toBe("2027-01")
   })
 })
 

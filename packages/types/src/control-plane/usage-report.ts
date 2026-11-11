@@ -38,3 +38,16 @@ export type UsageReport = z.infer<typeof usageReportSchema>
 
 /** A report's body is held to this before it is parsed. */
 export const USAGE_REPORT_MAX_BYTES = 4 * 1024
+
+// Turkey has kept UTC+3 all year since 2016
+const TURKEY_OFFSET_MS = 3 * 60 * 60 * 1000
+
+/**
+ * The report's `period` for a moment: the calendar month in Turkey,
+ * `YYYY-MM` (Ek C13). One rule for both ends: the shop builds the period
+ * with it, the control plane refuses a report whose period is not its own
+ * `reported_at`'s.
+ */
+export function usagePeriodOf(at: Date): string {
+  return new Date(at.getTime() + TURKEY_OFFSET_MS).toISOString().slice(0, 7)
+}
