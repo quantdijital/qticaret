@@ -58,6 +58,17 @@ class ContentDraftsModuleService extends MedusaService({ ContentDraft, DraftUsag
     )
     return row?.count ?? 0
   }
+
+  /** Drafts counted in a month's row (`YYYY-MM`): the usage report's LLM use (adr/0061 §5.4). */
+  @InjectManager()
+  async usedIn(month: string, @MedusaContext() sharedContext: Context = {}): Promise<number> {
+    const [row] = await this.listDraftUsages(
+      { month },
+      { take: 1, select: ["count"] },
+      sharedContext
+    )
+    return row?.count ?? 0
+  }
 }
 
 export default ContentDraftsModuleService
