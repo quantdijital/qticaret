@@ -1,0 +1,45 @@
+[
+  {
+    "handle": "temel-ozellikler",
+    "name": "Temel özellikler",
+    "description": "Çoğu ürünün ortak bilgileri. İhtiyacınıza göre alan ekleyip çıkarabilirsiniz.",
+    "definitions": [
+      {
+        "key": "malzeme",
+        "label": "Malzeme",
+        "type": "text",
+        "rank": 0,
+        "aliases": ["Materyal"]
+      },
+      {
+        "key": "olculer",
+        "label": "Ölçüler",
+        "type": "text",
+        "rank": 1,
+        "aliases": ["Boyutlar", "Ebatlar"]
+      },
+      {
+        "key": "agirlik",
+        "label": "Ağırlık",
+        "type": "number",
+        "unit": "g",
+        "rank": 2
+      },
+      {
+        "key": "uretim_yeri",
+        "label": "Üretim yeri",
+        "type": "text",
+        "rank": 3,
+        "aliases": ["Menşei"]
+      },
+      {
+        "key": "garanti_suresi",
+        "label": "Garanti süresi",
+        "type": "number",
+        "unit": "yıl",
+        "rank": 4,
+        "aliases": ["Garanti"]
+      }
+    ]
+  }
+]

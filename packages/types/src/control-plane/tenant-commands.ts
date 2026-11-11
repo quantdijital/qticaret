@@ -47,6 +47,30 @@ export const planImportResultSchema = z.discriminatedUnion("status", [
 ])
 export type PlanImportResult = z.infer<typeof planImportResultSchema>
 
+const count = z.number().int().min(0).max(100_000)
+
+/**
+ * `tenant:apply-pack pack=` (Ek C12): the pack and version applied and what
+ * became of its items this time: `added` new to the shop, `kept` the shop's
+ * own left as they are, `skipped` with nothing to hang on (a removed parent).
+ * Items offered before are not counted again. `unknown_pack`: this shop's
+ * build has no such pack (an older release); it exits 1.
+ */
+export const applyPackResultSchema = z.discriminatedUnion("status", [
+  z
+    .object({
+      status: z.literal("applied"),
+      pack: z.string().regex(/^[a-z][a-z0-9-]{1,39}$/),
+      version: z.number().int().min(1).max(10_000),
+      added: count,
+      kept: count,
+      skipped: count,
+    })
+    .strict(),
+  z.object({ status: z.literal("unknown_pack") }).strict(),
+])
+export type ApplyPackResult = z.infer<typeof applyPackResultSchema>
+
 /** The line a command prints for `result`. */
 export const tenantResultLine = (result: object): string =>
   `${TENANT_RESULT_PREFIX}${JSON.stringify(result)}`

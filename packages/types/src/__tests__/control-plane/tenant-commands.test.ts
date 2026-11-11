@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   TENANT_RESULT_MAX_LENGTH,
   TENANT_RESULT_PREFIX,
+  applyPackResultSchema,
   inviteOwnerResultSchema,
   planImportResultSchema,
   readTenantResult,
@@ -30,6 +31,28 @@ describe("tenant command results (adr/0061 Ek C10)", () => {
         tenantResultLine({ status: "invited", token: "x".repeat(TENANT_RESULT_MAX_LENGTH) })
       )
     ).toBeNull()
+  })
+
+  it("takes the apply-pack result strictly (Ek C12)", () => {
+    const applied = {
+      status: "applied",
+      pack: "cutlery",
+      version: 2,
+      added: 3,
+      kept: 1,
+      skipped: 0,
+    }
+    expect(applyPackResultSchema.safeParse(applied).success).toBe(true)
+    expect(applyPackResultSchema.safeParse({ status: "unknown_pack" }).success).toBe(true)
+    for (const bad of [
+      { ...applied, items: [] },
+      { ...applied, pack: "Bıçak" },
+      { ...applied, version: 0 },
+      { ...applied, added: -1 },
+      { status: "unknown_pack", pack: "cutlery" },
+    ]) {
+      expect(applyPackResultSchema.safeParse(bad).success).toBe(false)
+    }
   })
 
   it("takes the invite and import results strictly: a token, never a link", () => {

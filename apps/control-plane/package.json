@@ -32,6 +32,7 @@
     "@medusajs/draft-order": "2.21.2",
     "@medusajs/framework": "2.21.2",
     "@medusajs/medusa": "2.21.2",
+    "@qticaret/sector-packs": "workspace:*",
     "@qticaret/server-kit": "workspace:*",
     "@qticaret/types": "workspace:*",
     "zod": "4.6.6"

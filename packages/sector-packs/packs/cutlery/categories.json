@@ -1,0 +1,22 @@
+[
+  { "handle": "cakilar", "name": "Çakılar" },
+  { "handle": "av-bicaklari", "name": "Av Bıçakları" },
+  { "handle": "outdoor-ve-kamp", "name": "Outdoor ve Kamp" },
+  { "handle": "kamp-bicaklari", "name": "Kamp Bıçakları", "parent": "outdoor-ve-kamp" },
+  { "handle": "kamp-baltalari", "name": "Kamp Baltaları", "parent": "outdoor-ve-kamp" },
+  { "handle": "mutfak-ve-sef-bicaklari", "name": "Mutfak ve Şef Bıçakları" },
+  { "handle": "sef-bicaklari", "name": "Şef Bıçakları", "parent": "mutfak-ve-sef-bicaklari" },
+  {
+    "handle": "mutfak-bicak-setleri",
+    "name": "Mutfak Bıçak Setleri",
+    "parent": "mutfak-ve-sef-bicaklari"
+  },
+  { "handle": "kasap-bicaklari", "name": "Kasap Bıçakları" },
+  { "handle": "kesim-bicaklari", "name": "Kesim Bıçakları", "parent": "kasap-bicaklari" },
+  { "handle": "siyirma-bicaklari", "name": "Sıyırma Bıçakları", "parent": "kasap-bicaklari" },
+  { "handle": "yuzme-bicaklari", "name": "Yüzme Bıçakları", "parent": "kasap-bicaklari" },
+  { "handle": "masatlar", "name": "Masatlar", "parent": "kasap-bicaklari" },
+  { "handle": "kiliclar", "name": "Kılıçlar" },
+  { "handle": "bakim-ve-aksesuar", "name": "Bakım ve Aksesuar" },
+  { "handle": "hediyelik-urunler", "name": "Hediyelik Ürünler" }
+]

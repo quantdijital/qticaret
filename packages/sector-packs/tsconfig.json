@@ -1,0 +1,10 @@
+{
+  "extends": "@qticaret/config/tsconfig/base.json",
+  "compilerOptions": {
+    // CommonJS like the Medusa apps that load it from source (ts-node, Jest)
+    "verbatimModuleSyntax": false,
+    "types": ["node", "jest"],
+    "noEmit": true
+  },
+  "include": ["src"]
+}

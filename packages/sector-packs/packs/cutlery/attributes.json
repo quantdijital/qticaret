@@ -1,0 +1,402 @@
+[
+  {
+    "handle": "bicak-ve-caki",
+    "name": "Bıçak ve çakı",
+    "description": "Çakı, av, kamp, mutfak ve kasap bıçakları için teknik tablo. Ürün türü, kullanım alanı, namlu çeliği ve sap malzemesi listelerde filtre olur; namlu çeliği arama sonucu açıklamasında öne çıkar.",
+    "groups": [
+      { "key": "genel", "name": "Genel", "rank": 0 },
+      { "key": "namlu", "name": "Namlu", "rank": 1 },
+      { "key": "sap", "name": "Sap ve kabza", "rank": 2 },
+      { "key": "olcu", "name": "Ölçü ve ağırlık", "rank": 3 },
+      { "key": "kullanim", "name": "Kullanım ve bakım", "rank": 4 },
+      { "key": "uretim", "name": "Üretim ve garanti", "rank": 5 }
+    ],
+    "definitions": [
+      {
+        "key": "urun_turu",
+        "label": "Ürün türü",
+        "type": "select",
+        "group": "genel",
+        "rank": 0,
+        "is_filterable": true,
+        "aliases": ["Ürün tipi", "Tür"],
+        "options": [
+          { "value": "cep-cakisi", "label": "Cep çakısı" },
+          { "value": "sabit-namlulu-bicak", "label": "Sabit namlulu bıçak" },
+          { "value": "av-bicagi", "label": "Av bıçağı" },
+          { "value": "kamp-bicagi", "label": "Kamp bıçağı" },
+          { "value": "sef-bicagi", "label": "Şef bıçağı" },
+          { "value": "mutfak-bicagi", "label": "Mutfak bıçağı" },
+          { "value": "dilimleme-bicagi", "label": "Dilimleme bıçağı" },
+          { "value": "ekmek-bicagi", "label": "Ekmek bıçağı" },
+          { "value": "kasap-bicagi", "label": "Kasap bıçağı" },
+          { "value": "siyirma-bicagi", "label": "Sıyırma bıçağı" },
+          { "value": "yuzme-bicagi", "label": "Yüzme bıçağı" },
+          { "value": "satir", "label": "Satır" },
+          { "value": "masat", "label": "Masat" },
+          { "value": "balta", "label": "Balta" },
+          { "value": "kilic", "label": "Kılıç" },
+          { "value": "kama-ve-hancer", "label": "Kama ve hançer" },
+          { "value": "asi-cakisi", "label": "Aşı çakısı" }
+        ]
+      },
+      {
+        "key": "kullanim_alani",
+        "label": "Kullanım alanı",
+        "type": "multi_select",
+        "group": "genel",
+        "rank": 1,
+        "is_filterable": true,
+        "aliases": ["Kullanım amacı"],
+        "options": [
+          { "value": "gunluk-tasima", "label": "Günlük kullanım" },
+          { "value": "av", "label": "Av" },
+          { "value": "kamp-ve-doga", "label": "Kamp ve doğa" },
+          { "value": "mutfak", "label": "Mutfak" },
+          { "value": "kasap-ve-kurban", "label": "Kasap ve kurban" },
+          { "value": "bahce", "label": "Bahçe" },
+          { "value": "koleksiyon", "label": "Koleksiyon" },
+          { "value": "hediye", "label": "Hediye" }
+        ]
+      },
+      {
+        "key": "namlu_celigi",
+        "label": "Namlu çeliği",
+        "type": "select",
+        "group": "namlu",
+        "rank": 2,
+        "is_filterable": true,
+        "is_seo_highlight": true,
+        "aliases": ["Çelik", "Çelik türü", "Namlu malzemesi"],
+        "options": [
+          { "value": "n690", "label": "N690 (Böhler)" },
+          { "value": "elmax", "label": "Elmax" },
+          { "value": "m390", "label": "M390" },
+          { "value": "vanax", "label": "Vanax" },
+          { "value": "sleipner", "label": "Sleipner" },
+          { "value": "d2", "label": "D2" },
+          { "value": "440c", "label": "440C" },
+          { "value": "4116", "label": "4116 (Krupp)" },
+          { "value": "4034", "label": "4034" },
+          { "value": "420", "label": "420 (X30Cr13)" },
+          { "value": "ck67", "label": "CK67" },
+          { "value": "sam-celigi", "label": "Şam çeliği (Damascus)" },
+          { "value": "karbon-celik", "label": "Karbon çelik" },
+          { "value": "paslanmaz-celik", "label": "Paslanmaz çelik" },
+          { "value": "krom-vanadyum", "label": "Krom vanadyum" }
+        ]
+      },
+      {
+        "key": "sertlik",
+        "label": "Sertlik",
+        "type": "text",
+        "unit": "HRC",
+        "group": "namlu",
+        "rank": 3,
+        "aliases": ["HRC", "Sertlik (HRC)"]
+      },
+      {
+        "key": "namlu_boyu",
+        "label": "Namlu boyu",
+        "type": "number",
+        "unit": "cm",
+        "group": "namlu",
+        "rank": 4,
+        "aliases": ["Ağız boyu", "Namlu uzunluğu"]
+      },
+      {
+        "key": "namlu_kalinligi",
+        "label": "Namlu kalınlığı",
+        "type": "number",
+        "unit": "mm",
+        "group": "namlu",
+        "rank": 5,
+        "aliases": ["Sırt kalınlığı"]
+      },
+      {
+        "key": "namlu_profili",
+        "label": "Namlu profili",
+        "type": "select",
+        "group": "namlu",
+        "rank": 6,
+        "aliases": ["Uç tipi", "Namlu şekli"],
+        "options": [
+          { "value": "damla-uc", "label": "Damla uç (drop point)" },
+          { "value": "kirik-uc", "label": "Kırık uç (clip point)" },
+          { "value": "mizrak-uc", "label": "Mızrak uç (spear point)" },
+          { "value": "kalkik-uc", "label": "Kalkık uç (trailing point)" },
+          { "value": "koyun-ayagi", "label": "Koyun ayağı (sheepsfoot)" },
+          { "value": "tanto", "label": "Tanto" },
+          { "value": "bowie", "label": "Bowie" }
+        ]
+      },
+      {
+        "key": "agiz_tipi",
+        "label": "Ağız tipi",
+        "type": "select",
+        "group": "namlu",
+        "rank": 7,
+        "options": [
+          { "value": "duz", "label": "Düz ağız" },
+          { "value": "tirtikli", "label": "Tırtıklı ağız" },
+          { "value": "karma", "label": "Karma ağız" }
+        ]
+      },
+      {
+        "key": "namlu_islemesi",
+        "label": "Namlu işlemesi",
+        "type": "text",
+        "group": "namlu",
+        "rank": 8,
+        "aliases": ["Namlu yüzeyi", "Yüzey işlemi"]
+      },
+      {
+        "key": "sap_malzemesi",
+        "label": "Sap malzemesi",
+        "type": "multi_select",
+        "group": "sap",
+        "rank": 9,
+        "is_filterable": true,
+        "aliases": ["Kabza malzemesi", "Sap"],
+        "options": [
+          { "value": "stabilize-ahsap", "label": "Stabilize ahşap" },
+          { "value": "ceviz", "label": "Ceviz" },
+          { "value": "ahsap", "label": "Ahşap" },
+          { "value": "kemik", "label": "Kemik" },
+          { "value": "geyik-boynuzu", "label": "Geyik boynuzu" },
+          { "value": "koc-boynuzu", "label": "Koç boynuzu" },
+          { "value": "micarta", "label": "Micarta" },
+          { "value": "g10", "label": "G10" },
+          { "value": "epoksi", "label": "Epoksi" },
+          { "value": "polimer", "label": "Polimer" },
+          { "value": "celik", "label": "Çelik" },
+          { "value": "aluminyum", "label": "Alüminyum" },
+          { "value": "karbon-fiber", "label": "Karbon fiber" }
+        ]
+      },
+      {
+        "key": "sap_rengi",
+        "label": "Sap rengi",
+        "type": "text",
+        "scope": "variant",
+        "option_title": "Sap rengi",
+        "varies_by": "color",
+        "group": "sap",
+        "rank": 10
+      },
+      {
+        "key": "balcak",
+        "label": "Balçak",
+        "type": "text",
+        "group": "sap",
+        "rank": 11
+      },
+      {
+        "key": "kilit_sistemi",
+        "label": "Kilit sistemi",
+        "type": "select",
+        "group": "sap",
+        "rank": 12,
+        "aliases": ["Kilit"],
+        "options": [
+          { "value": "kilitsiz", "label": "Kilitsiz" },
+          { "value": "sirttan-kilitli", "label": "Sırttan kilitli (back lock)" },
+          { "value": "icten-kilitli", "label": "İçten kilitli (liner lock)" },
+          { "value": "cerceve-kilitli", "label": "Çerçeve kilitli (frame lock)" },
+          { "value": "dugmeli-kilit", "label": "Düğmeli kilit" }
+        ]
+      },
+      {
+        "key": "toplam_boy",
+        "label": "Toplam boy",
+        "type": "number",
+        "unit": "cm",
+        "group": "olcu",
+        "rank": 13,
+        "aliases": ["Toplam uzunluk", "Boy"]
+      },
+      {
+        "key": "kabza_boyu",
+        "label": "Kabza boyu",
+        "type": "number",
+        "unit": "cm",
+        "group": "olcu",
+        "rank": 14,
+        "aliases": ["Sap boyu"]
+      },
+      {
+        "key": "agirlik",
+        "label": "Ağırlık",
+        "type": "number",
+        "unit": "g",
+        "group": "olcu",
+        "rank": 15
+      },
+      {
+        "key": "kilif",
+        "label": "Kılıf",
+        "type": "text",
+        "group": "kullanim",
+        "rank": 16,
+        "aliases": ["Kılıf malzemesi"]
+      },
+      {
+        "key": "bulasik_makinesi",
+        "label": "Bulaşık makinesinde yıkanabilir",
+        "type": "boolean",
+        "group": "kullanim",
+        "rank": 17
+      },
+      {
+        "key": "uretim_sekli",
+        "label": "Üretim şekli",
+        "type": "select",
+        "group": "uretim",
+        "rank": 18,
+        "aliases": ["Üretim"],
+        "options": [
+          { "value": "el-yapimi", "label": "El yapımı" },
+          { "value": "seri-uretim", "label": "Seri üretim" },
+          { "value": "siparise-ozel", "label": "Siparişe özel" }
+        ]
+      },
+      {
+        "key": "uretim_yeri",
+        "label": "Üretim yeri",
+        "type": "text",
+        "group": "uretim",
+        "rank": 19,
+        "aliases": ["Menşei"]
+      },
+      {
+        "key": "garanti_suresi",
+        "label": "Garanti süresi",
+        "type": "number",
+        "unit": "yıl",
+        "group": "uretim",
+        "rank": 20,
+        "aliases": ["Garanti"]
+      }
+    ]
+  },
+  {
+    "handle": "bicak-seti",
+    "name": "Bıçak seti",
+    "description": "Mutfak, kasap ve kamp setleri için: kaç parça olduğu, setteki bıçaklar ve ortak özellikleri.",
+    "groups": [
+      { "key": "genel", "name": "Genel", "rank": 0 },
+      { "key": "malzeme", "name": "Namlu ve sap", "rank": 1 },
+      { "key": "uretim", "name": "Bakım, üretim ve garanti", "rank": 2 }
+    ],
+    "definitions": [
+      {
+        "key": "parca_sayisi",
+        "label": "Parça sayısı",
+        "type": "number",
+        "unit": "parça",
+        "group": "genel",
+        "rank": 0,
+        "aliases": ["Set adedi"]
+      },
+      {
+        "key": "set_icerigi",
+        "label": "Set içeriği",
+        "type": "text",
+        "group": "genel",
+        "rank": 1,
+        "aliases": ["Setteki bıçaklar", "İçerik"]
+      },
+      {
+        "key": "kullanim_alani",
+        "label": "Kullanım alanı",
+        "type": "multi_select",
+        "group": "genel",
+        "rank": 2,
+        "is_filterable": true,
+        "options": [
+          { "value": "mutfak", "label": "Mutfak" },
+          { "value": "kasap-ve-kurban", "label": "Kasap ve kurban" },
+          { "value": "kamp-ve-doga", "label": "Kamp ve doğa" },
+          { "value": "hediye", "label": "Hediye" }
+        ]
+      },
+      {
+        "key": "stand",
+        "label": "Stand veya kutu",
+        "type": "text",
+        "group": "genel",
+        "rank": 3,
+        "aliases": ["Bıçak bloğu", "Kutu"]
+      },
+      {
+        "key": "namlu_celigi",
+        "label": "Namlu çeliği",
+        "type": "select",
+        "group": "malzeme",
+        "rank": 4,
+        "is_filterable": true,
+        "is_seo_highlight": true,
+        "aliases": ["Çelik", "Çelik türü"],
+        "options": [
+          { "value": "n690", "label": "N690 (Böhler)" },
+          { "value": "4116", "label": "4116 (Krupp)" },
+          { "value": "4034", "label": "4034" },
+          { "value": "420", "label": "420 (X30Cr13)" },
+          { "value": "sam-celigi", "label": "Şam çeliği (Damascus)" },
+          { "value": "karbon-celik", "label": "Karbon çelik" },
+          { "value": "paslanmaz-celik", "label": "Paslanmaz çelik" }
+        ]
+      },
+      {
+        "key": "sertlik",
+        "label": "Sertlik",
+        "type": "text",
+        "unit": "HRC",
+        "group": "malzeme",
+        "rank": 5,
+        "aliases": ["HRC"]
+      },
+      {
+        "key": "sap_malzemesi",
+        "label": "Sap malzemesi",
+        "type": "multi_select",
+        "group": "malzeme",
+        "rank": 6,
+        "is_filterable": true,
+        "aliases": ["Kabza malzemesi"],
+        "options": [
+          { "value": "stabilize-ahsap", "label": "Stabilize ahşap" },
+          { "value": "ceviz", "label": "Ceviz" },
+          { "value": "ahsap", "label": "Ahşap" },
+          { "value": "kemik", "label": "Kemik" },
+          { "value": "polimer", "label": "Polimer" },
+          { "value": "celik", "label": "Çelik" }
+        ]
+      },
+      {
+        "key": "bulasik_makinesi",
+        "label": "Bulaşık makinesinde yıkanabilir",
+        "type": "boolean",
+        "group": "uretim",
+        "rank": 7
+      },
+      {
+        "key": "uretim_yeri",
+        "label": "Üretim yeri",
+        "type": "text",
+        "group": "uretim",
+        "rank": 8,
+        "aliases": ["Menşei"]
+      },
+      {
+        "key": "garanti_suresi",
+        "label": "Garanti süresi",
+        "type": "number",
+        "unit": "yıl",
+        "group": "uretim",
+        "rank": 9,
+        "aliases": ["Garanti"]
+      }
+    ]
+  }
+]

@@ -1,0 +1,17 @@
+{
+  // The loader compiled for a backend built with `medusa build` (adr/0061
+  // Ek C10, C12): CommonJS in dist/, reached through the `qt-compiled`
+  // export condition. The packs themselves are data read from `packs/` at
+  // run time, never compiled: a changed pack needs no build.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": ["src"],
+  "exclude": ["src/**/__tests__/**"]
+}

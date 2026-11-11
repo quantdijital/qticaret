@@ -1,0 +1,4 @@
+[
+  { "key": "catalog.restricted", "enabled": true },
+  { "key": "compliance.age_verification", "enabled": true }
+]
