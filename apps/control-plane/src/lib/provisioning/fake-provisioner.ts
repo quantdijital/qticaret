@@ -23,7 +23,7 @@ export interface FakeShop {
   secrets: RuntimeSecrets["values"] | null
   running: boolean
   healthy: boolean
-  /** Owner invitations handed out (their links), plan documents imported (their serials). */
+  /** Owner invitations handed out (their tokens), plan documents imported (their serials). */
   invites: string[]
   imported: number[]
 }
@@ -123,9 +123,9 @@ export class FakeProvisioner implements TenantProvisioner {
     }
     switch (cmd.name) {
       case "invite-owner": {
-        const link = `http://localhost:5173/invite#token=${randomBytes(24).toString("base64url")}`
-        shop.invites.push(link)
-        return await Promise.resolve(ok({ status: "invited", link }))
+        const token = randomBytes(24).toString("base64url")
+        shop.invites.push(token)
+        return await Promise.resolve(ok({ status: "invited", token }))
       }
       case "plan-import": {
         const serial = (JSON.parse(cmd.document) as { document: { serial: number } }).document

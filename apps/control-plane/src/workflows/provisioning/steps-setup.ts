@@ -82,6 +82,12 @@ export const secretsStep = provisionStep<SecretsUndo>(
     if (active) {
       throw new ProvisioningError("provisioning.secrets_lost")
     }
+    if (seen.secrets) {
+      // A store with no key this side: not made by any run that finished
+      // or was undone. Never overwritten, so a later undo never removes what
+      // this run did not make (review L1); cleared by hand
+      throw new ProvisioningError("provisioning.secrets_orphaned")
+    }
     const secrets = await issueTenantSecrets(container, target.tenant_id)
     const key = (await fleetIn(container).tenantKeys(target.tenant_id)).find(
       (each) => each.kid === secrets.signing.kid

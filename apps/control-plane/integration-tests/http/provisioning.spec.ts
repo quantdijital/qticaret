@@ -185,13 +185,14 @@ medusaIntegrationTestRunner({
       expect(fake).toMatchObject({ database: true, running: true })
       expect(fake?.imported.length).toBeGreaterThan(0)
       expect(fake?.invites).toHaveLength(1)
-      const link = fake?.invites[0] ?? ""
+      const token = fake?.invites[0] ?? ""
+      // The link is the control plane's: the shop's own panel origin (port + 1000), the token after `#`
+      const link = `http://localhost:${String((first.port ?? 0) + 1000)}/invite#token=${token}`
       expect(mailed.filter((each) => each.to === made.email)).toHaveLength(1)
       expect(mailed.find((each) => each.to === made.email)?.text).toContain(link)
 
       // Nowhere at rest, in the run's answer or in the logs: the secrets, the link, the address
       const secrets = Object.values(fake?.secrets ?? {}).flatMap(formsOf)
-      const token = new URL(link).hash.slice("#token=".length)
       expect(secrets.length).toBeGreaterThan(5)
       expect(await tablesHolding(container(), [...secrets, token])).toEqual([])
       const answer = JSON.stringify(first)
@@ -321,6 +322,25 @@ medusaIntegrationTestRunner({
       })
       expect((await start(made.id, "/stop")).status).toBe("succeeded")
       expect((await runs().runOf(made.id, open.id)).error_code).toBe("provisioning.interrupted")
+
+      // Review L7: a suspended shop is not started or invited, only stopped
+      await tenants().changeStatus(made.id, "suspended", { reason_code: "test", actor: "system" })
+      for (const action of ["/start", "/invite", ""]) {
+        const refused = await call.post(
+          `${base(made.id)}${action}`,
+          {},
+          operator,
+          await proved(http, operator)
+        )
+        expect(refused.status).toBe(action === "" ? 202 : 409)
+        if (action !== "") {
+          expect(refused.data).toMatchObject({ message: "provisioning.tenant_status" })
+        } else {
+          const run = await finished(made.id, (refused.data as { run: Run }).run.id)
+          expect(run).toMatchObject({ status: "failed", error_code: "provisioning.tenant_status" })
+        }
+      }
+      expect((await start(made.id, "/stop")).status).toBe("succeeded")
     })
 
     it("answers 404 for another shop's run and 503 without a provisioner", async () => {

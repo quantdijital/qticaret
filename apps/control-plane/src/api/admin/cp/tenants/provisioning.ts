@@ -43,7 +43,8 @@ export const runView = (run: RunView) => ({
 /**
  * A run of `kind` started for the shop the path names, answered at once
  * (202): the run's page follows it. Another run of the shop under way:
- * 409 `cp.provisioning_busy`; no provisioner here: 503
+ * 409 `cp.provisioning_busy`; a start or invitation for a shop neither
+ * being set up nor active: 409 `provisioning.tenant_status`; no provisioner here: 503
  * `cp.provisioner_unavailable`.
  */
 export async function startFromRequest(
@@ -62,6 +63,11 @@ export async function startFromRequest(
   } catch (error) {
     if (error instanceof ProvisioningError && error.code === "cp.provisioner_unavailable") {
       res.status(503).json({ type: "unavailable", message: error.code })
+      return
+    }
+    // Review L7: starting or inviting a shop that is not being set up nor active
+    if (error instanceof ProvisioningError && error.code === "provisioning.tenant_status") {
+      res.status(409).json({ type: "conflict", message: error.code })
       return
     }
     if (error instanceof MedusaError && error.message === "cp.provisioning_busy") {

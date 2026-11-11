@@ -1,17 +1,19 @@
 import { execFile, spawn } from "node:child_process"
-import { constants } from "node:fs"
-import { mkdir, open, readFile, rm } from "node:fs/promises"
+import { rm } from "node:fs/promises"
 import { connect } from "node:net"
+import { join } from "node:path"
 import { promisify } from "node:util"
 import { ProvisioningError } from "../provisioner"
 import type { ShopLayout } from "./layout"
+import { openLog, readPrivateFile, writePrivateFile } from "./private-files"
 
 /**
  * A local shop's backend process (adr/0061 §6.3, Ek C10): started
  * detached in its own process group with a pid file, so it outlives the
  * control plane; stopped only after the pid's command line is read and is
  * this shop's (`medusa start` of this backend on this shop's port). A pid
- * file pointing at anything else is never acted on.
+ * file pointing at anything else is never acted on. The pid file and the
+ * log are private files (review L5); the log is capped (review L8).
  */
 
 const run = promisify(execFile)
@@ -47,7 +49,7 @@ export const startArgs = (layout: ShopLayout, port: number): string[] => [
 
 async function pidOf(layout: ShopLayout): Promise<number | null> {
   try {
-    const pid = Number((await readFile(layout.pidFile, "utf8")).trim())
+    const pid = Number(((await readPrivateFile(layout.pidFile)) ?? "").trim())
     return Number.isSafeInteger(pid) && pid > 1 ? pid : null
   } catch {
     return null
@@ -77,6 +79,16 @@ export async function ownedPid(layout: ShopLayout, port: number): Promise<number
   return line?.endsWith(startArgs(layout, port).join(" ")) ? pid : null
 }
 
+/** A signal to the process group `pid` leads; false when no member is left. */
+function signalGroup(pid: number, signal: NodeJS.Signals | 0): boolean {
+  try {
+    process.kill(-pid, signal)
+    return true
+  } catch {
+    return false
+  }
+}
+
 /** Started detached on its port, its output to its own log (0600), its pid kept. */
 export async function startShop(
   layout: ShopLayout,
@@ -86,12 +98,8 @@ export async function startShop(
   if (!(await isPortFree(port))) {
     throw new ProvisioningError("provisioning.port_in_use")
   }
-  await mkdir(layout.logDir, { recursive: true, mode: 0o700 })
-  const log = await open(
-    `${layout.logDir}/backend.log`,
-    constants.O_WRONLY | constants.O_CREAT | constants.O_APPEND,
-    0o600
-  )
+  const log = await openLog(join(layout.logDir, "backend.log"))
+  let pid: number | undefined
   try {
     const child = spawn(process.execPath, startArgs(layout, port), {
       cwd: layout.serverDir,
@@ -100,65 +108,49 @@ export async function startShop(
       shell: false,
       stdio: ["ignore", log.fd, log.fd],
     })
-    const pid = child.pid
+    pid = child.pid
     child.unref()
-    if (pid === undefined) {
-      throw new ProvisioningError("provisioning.start_failed")
-    }
-    const file = await open(
-      layout.pidFile,
-      constants.O_WRONLY | constants.O_CREAT | constants.O_TRUNC,
-      0o600
-    )
-    try {
-      await file.writeFile(`${String(pid)}\n`)
-    } finally {
-      await file.close()
-    }
-    return pid
   } finally {
     await log.close()
   }
-}
-
-const alive = (pid: number): boolean => {
-  try {
-    process.kill(pid, 0)
-    return true
-  } catch {
-    return false
+  if (pid === undefined) {
+    throw new ProvisioningError("provisioning.start_failed")
   }
+  try {
+    await writePrivateFile(layout.pidFile, `${String(pid)}\n`)
+  } catch (error) {
+    // No pid file, no way to stop it later: it does not stay up (review L6)
+    signalGroup(pid, "SIGKILL")
+    throw error
+  }
+  return pid
 }
 
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-/** Ends the shop's process group (SIGTERM, SIGKILL after a wait); only a verified pid. */
+/**
+ * Ends the shop's process group: SIGTERM, then SIGKILL to the group if any
+ * member is left after the wait (review L6). Only a verified pid.
+ */
 export async function stopShop(layout: ShopLayout, port: number): Promise<boolean> {
   const pid = await ownedPid(layout, port)
   if (pid === null) {
     // Gone already, or the pid is not this shop's: nothing of ours to stop. A
     // pid file of a process that is gone is dropped; one naming another process is left
     const noted = await pidOf(layout)
-    if (noted !== null && !alive(noted)) {
+    if (noted !== null && !signalGroup(noted, 0) && (await commandLineOf(noted)) === null) {
       await rm(layout.pidFile, { force: true })
     }
     return false
   }
   // The group the detached start made: its leader is the verified pid
-  const signal = (name: NodeJS.Signals) => {
-    try {
-      process.kill(-pid, name)
-    } catch {
-      // Already gone
-    }
-  }
-  signal("SIGTERM")
+  signalGroup(pid, "SIGTERM")
   const until = Date.now() + STOP_WAIT_MS
-  while (alive(pid) && Date.now() < until) {
+  while (signalGroup(pid, 0) && Date.now() < until) {
     await pause(250)
   }
-  if (alive(pid)) {
-    signal("SIGKILL")
+  if (signalGroup(pid, 0)) {
+    signalGroup(pid, "SIGKILL")
     await pause(500)
   }
   await rm(layout.pidFile, { force: true })

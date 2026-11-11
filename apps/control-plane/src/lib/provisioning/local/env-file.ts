@@ -1,11 +1,8 @@
-import { randomBytes } from "node:crypto"
-import { constants } from "node:fs"
-import { chmod, lstat, mkdir, open, readFile, rename, rm } from "node:fs/promises"
-import { dirname } from "node:path"
 import type { RuntimeSecrets } from "../../vault/tenant-secrets"
 import { ProvisioningError } from "../provisioner"
 import type { ProvisionTarget } from "../provisioner"
 import { databaseNameOf } from "./layout"
+import { readPrivateFile, writePrivateFile } from "./private-files"
 
 /**
  * The local shop's secret store (adr/0061 §4.3, §6.3, Ek C10): one env
@@ -18,7 +15,7 @@ import { databaseNameOf } from "./layout"
 export interface LocalSettings {
   /** The dev Postgres the shop's database is on (host and port of the admin URL). */
   pg_host: string
-  /** The shared Redis; the shop's keys fall under a namespace its database names. */
+  /** The shops' Redis (`shopRedisUrl`); each shop's keys under a namespace its database names. */
   redis_url: string | null
   /** Mailpit's send API, when the control plane mails through it. */
   mailpit_url: string | null
@@ -111,46 +108,45 @@ export function parseEnvText(text: string): Record<string, string> {
 
 /** Written whole: a temporary 0600 file in the same 0700 folder, renamed over the old one. */
 export async function writeEnvFile(path: string, env: Record<string, string>): Promise<void> {
-  const text = envText(env)
-  const folder = dirname(path)
-  await mkdir(folder, { recursive: true, mode: 0o700 })
-  await chmod(folder, 0o700)
-  const temporary = `${path}.${randomBytes(6).toString("hex")}.tmp`
-  const handle = await open(
-    temporary,
-    constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL,
-    0o600
-  )
-  try {
-    await handle.writeFile(text, "utf8")
-    await handle.sync()
-  } finally {
-    await handle.close()
-  }
-  try {
-    await rename(temporary, path)
-  } catch (error) {
-    await rm(temporary, { force: true })
-    throw error
-  }
+  await writePrivateFile(path, envText(env))
 }
 
 /**
  * The shop's env, or null when there is none. Refused when anyone but its
- * owner could read or change it, or when it is not a plain file (a link).
+ * owner could read or change it or its folder, or when it is not a plain
+ * file (a link): `provisioning.secrets_exposed`.
  */
 export async function readEnvFile(path: string): Promise<Record<string, string> | null> {
-  let stats
-  try {
-    stats = await lstat(path)
-  } catch {
-    return null
+  const text = await readPrivateFile(path)
+  return text === null ? null : parseEnvText(text)
+}
+
+/**
+ * The shop's env when it is this shop's (review L1): a store whose
+ * `TENANT_ID` names another shop, or none, is `provisioning.foreign_shop`.
+ */
+export async function ownEnvFile(
+  path: string,
+  tenantId: string
+): Promise<Record<string, string> | null> {
+  const env = await readEnvFile(path)
+  if (env && env["TENANT_ID"] !== tenantId) {
+    throw new ProvisioningError("provisioning.foreign_shop")
   }
-  const uid = process.getuid?.()
-  if (!stats.isFile() || (stats.mode & 0o077) !== 0 || (uid !== undefined && stats.uid !== uid)) {
-    throw new ProvisioningError("provisioning.secrets_exposed")
-  }
-  return parseEnvText(await readFile(path, "utf8"))
+  return env
+}
+
+/**
+ * The shops' Redis (review L3): the control plane's server, another logical
+ * database (index 1, or 2 when the control plane's is 1), so no key a shop
+ * writes can meet one of the control plane's. Each shop's keys are still
+ * under its own namespace (its database's name).
+ */
+export function shopRedisUrl(controlPlaneRedis: string): string {
+  const url = new URL(controlPlaneRedis)
+  const index = Number(url.pathname.replace(/^\//, "") || "0")
+  url.pathname = `/${String(index === 1 ? 2 : 1)}`
+  return url.toString()
 }
 
 /** The database role's password, from the URL the store holds (never logged). */

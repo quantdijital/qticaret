@@ -42,8 +42,12 @@ export interface ShopLayout {
   backendModules: string
   /** Medusa's CLI, run with Node (no shell, no `npx`). */
   cli: string
-  /** The shared packages' compiled copies the backend loads (`qt-compiled`). */
-  compiledPackages: readonly string[]
+  /**
+   * What the shop runs, built, beside the sources it was built from: the
+   * backend and the shared packages' copies it loads (`qt-compiled`). A
+   * source newer than its build is a stale build (review, build safety).
+   */
+  builds: readonly { source: string; built: string }[]
 }
 
 /** The shop's paths; its slug checked again first, as it names folders. */
@@ -64,9 +68,19 @@ export function layoutOf(slug: string, root: string = repoRoot()): ShopLayout {
     backendDir: join(backend, ".medusa", "server"),
     backendModules: join(backend, "node_modules"),
     cli: join(backend, "node_modules", "@medusajs", "cli", "cli.js"),
-    compiledPackages: [
-      join(root, "packages", "server-kit", "dist", "index.js"),
-      join(root, "packages", "types", "dist", "control-plane", "index.js"),
+    builds: [
+      {
+        source: join(backend, "src"),
+        built: join(backend, ".medusa", "server", "medusa-config.js"),
+      },
+      {
+        source: join(root, "packages", "server-kit", "src"),
+        built: join(root, "packages", "server-kit", "dist", "index.js"),
+      },
+      {
+        source: join(root, "packages", "types", "src", "control-plane"),
+        built: join(root, "packages", "types", "dist", "control-plane", "index.js"),
+      },
     ],
   }
 }

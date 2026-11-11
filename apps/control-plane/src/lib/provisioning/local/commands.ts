@@ -1,9 +1,8 @@
 import { spawn } from "node:child_process"
-import { createWriteStream } from "node:fs"
-import type { WriteStream } from "node:fs"
 import { readTenantResult } from "@qticaret/types/control-plane"
 import { ProvisioningError } from "../provisioner"
 import type { CommandResult, TenantCommand } from "../provisioner"
+import { openLog } from "./private-files"
 
 /**
  * The closed list of shop commands (adr/0061 §3.4, Ek C10) as Medusa CLI
@@ -82,52 +81,98 @@ export interface RunOptions {
   logFile: string | null
 }
 
+/** A signal to the command's process group (it was spawned detached, its own group). */
+function signalGroup(pid: number | undefined, signal: NodeJS.Signals): void {
+  if (pid === undefined) {
+    return
+  }
+  try {
+    process.kill(-pid, signal)
+  } catch {
+    // Gone already
+  }
+}
+
 /**
  * One command: its stdout's tail read for the result line only, its
- * output appended to the shop's log (0600) unless `logFile` is null, ended
- * (SIGTERM, then SIGKILL) at its time limit.
+ * output appended to the shop's capped log (0600) unless `logFile` is
+ * null. Spawned in its own process group: at its time limit the whole
+ * group gets SIGTERM, then SIGKILL (review L8). The run ends when the
+ * process exits, whatever still holds its pipes, and at a hard deadline
+ * in any case, so no step can hang on a command.
  */
 export async function runCommand(options: RunOptions): Promise<CommandResult> {
   const started = Date.now()
-  const log: WriteStream | null = options.logFile
-    ? createWriteStream(options.logFile, { flags: "a", mode: 0o600 })
+  const log = options.logFile ? await openLog(options.logFile) : null
+  // Writes in order, one after the other; a failed write loses that chunk, not the run
+  let writing: Promise<unknown> = Promise.resolve()
+  const sink = log
+    ? {
+        write: (chunk: Buffer) => {
+          writing = writing.then(() => log.write(chunk)).catch(() => undefined)
+        },
+      }
     : null
   const tail = new Tail(CAPTURE_BYTES)
   const child = spawn(process.execPath, [options.cli, ...options.args], {
     cwd: options.cwd,
     env: options.env,
     shell: false,
+    detached: true,
     stdio: ["pipe", "pipe", "pipe"],
   })
   child.stdout.on("data", (chunk: Buffer) => {
     tail.push(chunk)
-    log?.write(chunk)
+    sink?.write(chunk)
   })
-  child.stderr.on("data", (chunk: Buffer) => log?.write(chunk))
+  child.stderr.on("data", (chunk: Buffer) => sink?.write(chunk))
   child.stdin.on("error", () => undefined)
   child.stdin.end(options.stdin ?? "")
   const state = { timedOut: false }
-  const timer = setTimeout(() => {
-    state.timedOut = true
-    child.kill("SIGTERM")
-    setTimeout(() => child.kill("SIGKILL"), KILL_GRACE_MS).unref()
-  }, options.timeoutMs)
+  const timers: NodeJS.Timeout[] = []
+  timers.push(
+    setTimeout(() => {
+      state.timedOut = true
+      signalGroup(child.pid, "SIGTERM")
+      timers.push(
+        setTimeout(() => {
+          signalGroup(child.pid, "SIGKILL")
+        }, KILL_GRACE_MS)
+      )
+    }, options.timeoutMs)
+  )
   const exitCode = await new Promise<number | null>((resolve) => {
     child.once("error", () => {
       resolve(null)
     })
-    child.once("close", (code) => {
+    child.once("exit", (code) => {
       resolve(code)
     })
+    // Past the limit and the grace: whatever the process does, the step goes on
+    timers.push(
+      setTimeout(
+        () => {
+          state.timedOut = true
+          resolve(null)
+        },
+        options.timeoutMs + KILL_GRACE_MS + 5_000
+      )
+    )
   })
-  clearTimeout(timer)
-  await new Promise<void>((resolve) => {
-    if (log) {
-      log.end(resolve)
-    } else {
-      resolve()
-    }
-  })
+  // The last output a moment to arrive; then the pipes are let go, held or not
+  await new Promise((resolve) => setTimeout(resolve, 100))
+  for (const timer of timers) {
+    clearTimeout(timer)
+  }
+  child.stdout.destroy()
+  child.stderr.destroy()
+  if (state.timedOut) {
+    signalGroup(child.pid, "SIGKILL")
+  }
+  if (log) {
+    await writing
+    await log.close()
+  }
   return {
     ok: !state.timedOut && exitCode === 0,
     exit_code: exitCode,

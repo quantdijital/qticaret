@@ -1,10 +1,10 @@
 import { z } from "@medusajs/framework/zod"
 import { parseTenantApiHosts } from "./fleet/push-target"
 import { publicDomainProblem } from "./tenants/hostname"
+import { localAdminUrlProblem } from "./provisioning/local/admin-url"
 import {
   EnvValidationError,
   isLocalEnv,
-  isLoopbackUrl,
   key256,
   nodeEnv,
   originList,
@@ -125,15 +125,9 @@ function provisionerIssues(env: Env, issue: (path: keyof Env, message: string) =
   if (admin !== undefined && !isLocalEnv(env)) {
     issue("CP_LOCAL_PG_ADMIN_URL", "is allowed on development and test only")
   }
-  const here = (url: string) => {
-    try {
-      return isLoopbackUrl(url)
-    } catch {
-      return false
-    }
-  }
-  if (admin !== undefined && !here(admin)) {
-    issue("CP_LOCAL_PG_ADMIN_URL", "must point at a database on this machine")
+  const problem = admin === undefined ? null : localAdminUrlProblem(admin)
+  if (problem) {
+    issue("CP_LOCAL_PG_ADMIN_URL", problem)
   }
 }
 

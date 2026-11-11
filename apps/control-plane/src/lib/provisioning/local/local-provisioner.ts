@@ -1,7 +1,6 @@
 import { existsSync } from "node:fs"
 import { lstat, mkdir, readdir, readlink, rm, symlink } from "node:fs/promises"
 import { join } from "node:path"
-import { isLoopbackUrl } from "@qticaret/server-kit"
 import type { RuntimeSecrets } from "../../vault/tenant-secrets"
 import { ProvisioningError } from "../provisioner"
 import type {
@@ -11,9 +10,11 @@ import type {
   TenantCommand,
   TenantProvisioner,
 } from "../provisioner"
+import { localAdminUrlProblem } from "./admin-url"
+import { assertFreshBuilds } from "./build-check"
 import { COMMAND_TIMEOUT_MS, argvOf, runCommand } from "./commands"
 import * as database from "./database"
-import { composeEnv, databasePasswordOf, readEnvFile, writeEnvFile } from "./env-file"
+import { composeEnv, databasePasswordOf, ownEnvFile, shopRedisUrl, writeEnvFile } from "./env-file"
 import type { LocalSettings } from "./env-file"
 import { databaseNameOf, layoutOf, repoRoot } from "./layout"
 import type { ShopLayout } from "./layout"
@@ -23,6 +24,7 @@ export interface LocalProvisionerOptions {
   nodeEnv: string | undefined
   /** `CP_LOCAL_PG_ADMIN_URL`. */
   adminUrl: string
+  /** The control plane's own Redis; shops get another logical database on it. */
   redisUrl: string | null
   mailpitUrl: string | null
   controlPlaneUrl: string
@@ -37,6 +39,8 @@ const OWN_ENTRIES = new Set(["static", "node_modules"])
  * shop in the dev Postgres, its secrets in a 0600 env file, the compiled
  * backend started as its own process on a port in 9200–9299. Refused
  * outside `NODE_ENV=development` and for a Postgres not on this machine.
+ * A store, folder or database marked with another shop's id, or with
+ * none, is never used or removed (review L1: `provisioning.foreign_shop`).
  */
 export class LocalProvisioner implements TenantProvisioner {
   readonly kind = "local" as const
@@ -47,19 +51,14 @@ export class LocalProvisioner implements TenantProvisioner {
     if (options.nodeEnv !== "development") {
       throw new ProvisioningError("provisioning.local_development_only")
     }
-    let here: boolean
-    try {
-      here = isLoopbackUrl(options.adminUrl)
-    } catch {
-      here = false
-    }
-    if (!here) {
+    const problem = localAdminUrlProblem(options.adminUrl)
+    if (problem) {
       throw new ProvisioningError("provisioning.local_database_elsewhere")
     }
     this.root = options.root ?? repoRoot()
     this.settings = {
       pg_host: new URL(options.adminUrl).host,
-      redis_url: options.redisUrl,
+      redis_url: options.redisUrl ? shopRedisUrl(options.redisUrl) : null,
       mailpit_url: options.mailpitUrl,
       control_plane_url: options.controlPlaneUrl,
     }
@@ -69,9 +68,9 @@ export class LocalProvisioner implements TenantProvisioner {
     return layoutOf(t.slug, this.root)
   }
 
-  /** The shop's env from its store; refused when there is none. */
-  private async shopEnv(layout: ShopLayout): Promise<Record<string, string>> {
-    const env = await readEnvFile(layout.envFile)
+  /** The shop's env from its store; refused when there is none or it is another shop's. */
+  private async shopEnv(layout: ShopLayout, t: ProvisionTarget): Promise<Record<string, string>> {
+    const env = await ownEnvFile(layout.envFile, t.tenant_id)
     if (!env) {
       throw new ProvisioningError("provisioning.secrets_missing")
     }
@@ -79,9 +78,9 @@ export class LocalProvisioner implements TenantProvisioner {
   }
 
   /** What a shop's process gets: its own env, a path and a home, the compiled packages' condition. */
-  private async processEnv(layout: ShopLayout): Promise<Record<string, string>> {
+  private async processEnv(layout: ShopLayout, t: ProvisionTarget) {
     return {
-      ...(await this.shopEnv(layout)),
+      ...(await this.shopEnv(layout, t)),
       PATH: process.env["PATH"] ?? "/usr/bin:/bin",
       HOME: process.env["HOME"] ?? layout.dir,
       // The compiled backend loads the shared packages' dist (Ek C10), no ts-node needed
@@ -89,12 +88,15 @@ export class LocalProvisioner implements TenantProvisioner {
     }
   }
 
-  /** The shop's working folder: links into the compiled backend, its own uploads. */
+  /**
+   * The shop's working folder: links into the compiled backend, its own
+   * uploads. Refused while any build is missing or older than its sources.
+   */
   private async prepareServer(layout: ShopLayout): Promise<void> {
-    const built = [join(layout.backendDir, "medusa-config.js"), ...layout.compiledPackages]
-    if (!built.every((path) => existsSync(path)) || !existsSync(layout.cli)) {
+    if (!existsSync(layout.cli)) {
       throw new ProvisioningError("provisioning.backend_not_built")
     }
+    await assertFreshBuilds(layout.builds)
     await mkdir(layout.staticDir, { recursive: true, mode: 0o700 })
     const links = (await readdir(layout.backendDir))
       .filter((entry) => !OWN_ENTRIES.has(entry) && !entry.startsWith(".env"))
@@ -113,29 +115,44 @@ export class LocalProvisioner implements TenantProvisioner {
   }
 
   async ensureDatabase(t: ProvisionTarget): Promise<{ created: boolean }> {
-    const password = databasePasswordOf(await this.shopEnv(this.layout(t)))
+    const password = databasePasswordOf(await this.shopEnv(this.layout(t), t))
     if (!password) {
       throw new ProvisioningError("provisioning.secrets_missing")
     }
     const made = await database.ensureDatabase(
       this.options.adminUrl,
       databaseNameOf(t.slug),
-      password
+      password,
+      t.tenant_id
     )
     return { created: made.database }
   }
 
   async dropDatabase(t: ProvisionTarget): Promise<void> {
-    await database.dropDatabase(this.options.adminUrl, databaseNameOf(t.slug))
+    await database.dropDatabase(this.options.adminUrl, databaseNameOf(t.slug), t.tenant_id)
   }
 
+  /** A new store only: a folder already there (any shop's, or none's) is not written into. */
   async writeRuntimeSecrets(t: ProvisionTarget, secrets: RuntimeSecrets): Promise<void> {
-    await writeEnvFile(this.layout(t).envFile, composeEnv(t, secrets.values, this.settings))
+    const layout = this.layout(t)
+    if (await lstat(layout.dir).catch(() => null)) {
+      throw new ProvisioningError("provisioning.foreign_shop")
+    }
+    await writeEnvFile(layout.envFile, composeEnv(t, secrets.values, this.settings))
   }
 
-  /** The store, and the shop's folder with it, unless a process of it still runs. */
+  /**
+   * The store and the shop's folder with it: only this shop's (its store
+   * names it), and not while a process of it runs.
+   */
   async removeRuntimeSecrets(t: ProvisionTarget): Promise<void> {
     const layout = this.layout(t)
+    if (!(await lstat(layout.dir).catch(() => null))) {
+      return
+    }
+    if (!(await ownEnvFile(layout.envFile, t.tenant_id))) {
+      throw new ProvisioningError("provisioning.foreign_shop")
+    }
     if ((await ownedPid(layout, t.port)) !== null) {
       throw new ProvisioningError("provisioning.shop_running")
     }
@@ -145,16 +162,16 @@ export class LocalProvisioner implements TenantProvisioner {
   async runTenantCommand(t: ProvisionTarget, cmd: TenantCommand): Promise<CommandResult> {
     const layout = this.layout(t)
     const args = argvOf(cmd)
+    const env = await this.processEnv(layout, t)
     await this.prepareServer(layout)
-    await mkdir(layout.logDir, { recursive: true, mode: 0o700 })
     return await runCommand({
       cli: layout.cli,
       cwd: layout.serverDir,
-      env: await this.processEnv(layout),
+      env,
       args,
       ...(cmd.name === "plan-import" ? { stdin: cmd.document } : {}),
       timeoutMs: COMMAND_TIMEOUT_MS[cmd.name],
-      // The owner's invitation link is in that output: kept nowhere
+      // The owner's invitation token is in that output: kept nowhere
       logFile: cmd.name === "invite-owner" ? null : join(layout.logDir, "commands.log"),
     })
   }
@@ -164,8 +181,9 @@ export class LocalProvisioner implements TenantProvisioner {
     if ((await ownedPid(layout, t.port)) !== null) {
       return
     }
+    const env = await this.processEnv(layout, t)
     await this.prepareServer(layout)
-    await startShop(layout, t.port, await this.processEnv(layout))
+    await startShop(layout, t.port, env)
   }
 
   async stop(t: ProvisionTarget): Promise<void> {
@@ -174,7 +192,7 @@ export class LocalProvisioner implements TenantProvisioner {
 
   async probe(t: ProvisionTarget): Promise<HealthResult> {
     const layout = this.layout(t)
-    const secrets = (await readEnvFile(layout.envFile)) !== null
+    const secrets = (await ownEnvFile(layout.envFile, t.tenant_id)) !== null
     const running = (await ownedPid(layout, t.port)) !== null
     // Another process on the port is not this shop: its answer is not asked
     const health = running ? await healthOf(t.port) : { status: null, latency_ms: null }

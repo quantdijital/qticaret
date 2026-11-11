@@ -2,7 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { errorSummary } from "@qticaret/server-kit"
 import type { RunView } from "../../modules/provisioning/service"
-import { provisioningIn } from "../../workflows/modules"
+import { provisioningIn, tenantsIn } from "../../workflows/modules"
 import { codeOf } from "../../workflows/provisioning/step"
 import { RUN_STEPS, WORKFLOW_OF } from "../../workflows/provisioning/workflows"
 import type { RunKind } from "../../workflows/provisioning/workflows"
@@ -40,6 +40,14 @@ export async function startRun(
     throw new ProvisioningError("provisioning.fail_at_local_only")
   }
   const which = provisioner()
+  // Review L7: a shop is started or invited only while it is being set up or
+  // active; stopping is always allowed (a suspended or closing shop is stopped)
+  if (input.kind === "start" || input.kind === "invite") {
+    const { status } = await tenantsIn(container).tenantOf(input.tenant_id)
+    if (status !== "provisioning" && status !== "active") {
+      throw new ProvisioningError("provisioning.tenant_status")
+    }
+  }
   const run = await provisioningIn(container).openRun({
     tenant_id: input.tenant_id,
     kind: input.kind,
