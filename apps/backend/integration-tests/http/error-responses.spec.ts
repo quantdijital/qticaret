@@ -75,17 +75,19 @@ medusaIntegrationTestRunner({
         expect(JSON.stringify(response.data)).not.toContain(email)
       })
 
+      // A customer's duplicate address is our own 409 `customers.email_taken` since
+      // 2026-11-06; a customer group's name is still Medusa's unique index
       it("keeps Medusa's database message on the admin API", async () => {
         const admin = await createAdminUser(http, getContainer())
-        const email = `admin-created-${randomUUID()}@example.com`
-        await http.post("/admin/customers", { email }, { headers: admin.headers })
+        const name = `Toptancılar ${randomUUID()}`
+        await http.post("/admin/customer-groups", { name }, { headers: admin.headers })
 
         const response = await settle(
-          http.post<ErrorBody>("/admin/customers", { email }, { headers: admin.headers })
+          http.post<ErrorBody>("/admin/customer-groups", { name }, { headers: admin.headers })
         )
 
         expect(response.status).toBe(400)
-        expect(response.data.message).toContain(email)
+        expect(response.data.message).toContain(name)
         // Outside /admin this exact text would be replaced
         expect(classifyDbMessage(response.data.message ?? "")).toBe("duplicate")
         expect(response.data.request_id).toBe(requestIdOf(response))
