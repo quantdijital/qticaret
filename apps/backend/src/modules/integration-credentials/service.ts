@@ -1,68 +1,44 @@
 import type { EntityManager } from "@medusajs/framework/mikro-orm/knex"
 import type { Context } from "@medusajs/framework/types"
-import {
-  InjectManager,
-  InjectTransactionManager,
-  MedusaContext,
-  MedusaService,
-} from "@medusajs/framework/utils"
-import { keyFingerprint, openSecret, parseKey, sealSecret } from "@qticaret/server-kit"
-import { createVersionedCache } from "../../lib/cache"
-import type { VersionedCache } from "../../lib/cache"
+import { InjectManager, InjectTransactionManager, MedusaContext } from "@medusajs/framework/utils"
+import { isSerializedEnvelope, parseEnvelope } from "@qticaret/server-kit"
+import type { CredentialKeyring } from "../../lib/integrations/credential-keys"
 import { ValidationError, uniqueViolationKeys } from "../../lib/errors"
 import { logger } from "../../lib/logging"
-import { IntegrationCredential } from "./models/integration-credential"
 import { CREDENTIAL_PROVIDER_NAMES } from "./providers"
 import type { CredentialProviderName } from "./providers"
-import { contextOf, stampOf, storedOf, versionSource } from "./rows"
+import { stampOf, storedOf } from "./rows"
 import { planSave, statusOf } from "./rules"
 import type { SaveInput } from "./rules"
+import { openSealedDraft, sealCredentials } from "./sealing"
+import type { Sealed } from "./sealing"
+import { CredentialRows } from "./service-rows"
 import type {
   CredentialDraft,
   CredentialStatus,
-  IntegrationCredentialRecord,
-  IntegrationCredentialsModuleOptions,
   ResolvedCredentials,
   StoredCredential,
   Verification,
 } from "./types"
 
 export type * from "./types"
+export type { RewrapTally } from "./service-rows"
+export type { CredentialKeyStatus } from "./key-status"
 
 /**
- * The shop's provider accounts (adr/0027). Secrets go in sealed and come
- * out only through `read` (the provider's calls) and `openDraft` (the
- * check before a save); nothing else returns them in any form.
+ * The shop's provider accounts (adr/0027; envelopes since adr/0061 Ek C17).
+ * Secrets go in sealed and come out only through `read` (the provider's
+ * calls), `readForCheck` and `openDraft` (the check before a save);
+ * nothing else returns them in any form.
  */
-class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCredential }) {
-  private readonly key: Buffer | null
-  private readonly keyId: string | null
-  private readonly cache: VersionedCache<Map<string, ResolvedCredentials>>
-
-  constructor(
-    container: Record<string, unknown>,
-    options: IntegrationCredentialsModuleOptions = {}
-  ) {
-    // eslint-disable-next-line prefer-rest-params -- MedusaService needs every constructor argument
-    super(...arguments)
-    this.key = options.encryptionKey
-      ? parseKey(options.encryptionKey, "integrationCredentials encryptionKey")
-      : null
-    this.keyId = this.key ? keyFingerprint(this.key) : null
-    this.cache = createVersionedCache({
-      name: "integration_credentials",
-      source: versionSource(options),
-      load: () => this.loadAll_(),
-    })
-  }
-
-  /** Whether the server has its key; without it the panel cannot save an account. */
+class IntegrationCredentialsModuleService extends CredentialRows {
+  /** Whether the server has a key; without one the panel cannot save an account. */
   isKeyConfigured(): boolean {
-    return this.key !== null
+    return this.keyring() !== null
   }
 
   /**
-   * Refuses a save without the key: the owner is told (the panel's alert),
+   * Refuses a save without a key: the owner is told (the panel's alert),
    * and the operator, whose setting it is, by an error log to alert on.
    */
   private keyMissing(provider: CredentialProviderName): ValidationError {
@@ -70,47 +46,17 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
     return new ValidationError("integration_credentials.key_missing")
   }
 
-  private requireKey(provider: CredentialProviderName): Buffer {
-    if (!this.key) {
+  private requireKeyring(provider: CredentialProviderName): CredentialKeyring {
+    const keyring = this.keyring()
+    if (!keyring) {
       throw this.keyMissing(provider)
     }
-    return this.key
-  }
-
-  /** The row's secrets, or null when they were sealed under another key or are damaged. */
-  private open(
-    row: Pick<IntegrationCredentialRecord, "provider" | "settings" | "secret_ciphertext" | "key_id">
-  ) {
-    if (!this.key || row.key_id !== this.keyId) {
-      return null
-    }
-    try {
-      return JSON.parse(
-        openSecret(row.secret_ciphertext, this.key, contextOf(row.provider, row.settings))
-      ) as Record<string, string>
-    } catch {
-      logger.error({ event: "integration_credentials.unreadable", provider: row.provider })
-      return null
-    }
-  }
-
-  @InjectManager()
-  protected async loadAll_(
-    @MedusaContext() sharedContext: Context = {}
-  ): Promise<Map<string, ResolvedCredentials>> {
-    const rows = await this.listIntegrationCredentials({}, {}, sharedContext)
-    const resolved = new Map<string, ResolvedCredentials>()
-    for (const row of rows) {
-      const secrets = this.open(row)
-      if (secrets) {
-        resolved.set(row.provider, { settings: row.settings, secrets })
-      }
-    }
-    return resolved
+    return keyring
   }
 
   /** The account for a provider's call (cached); null when none is usable. */
   async read(provider: CredentialProviderName): Promise<ResolvedCredentials | null> {
+    await this.followKeyring()
     return (await this.cache.get()).get(provider) ?? null
   }
 
@@ -118,10 +64,12 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
   @InjectManager()
   async describeAll(@MedusaContext() sharedContext: Context = {}): Promise<CredentialStatus[]> {
     const rows = await this.listIntegrationCredentials({}, {}, sharedContext)
-    return CREDENTIAL_PROVIDER_NAMES.map((provider) => {
+    const statuses: CredentialStatus[] = []
+    for (const provider of CREDENTIAL_PROVIDER_NAMES) {
       const row = rows.find((candidate) => candidate.provider === provider)
-      return statusOf(provider, row, row ? this.open(row) : null)
-    })
+      statuses.push(statusOf(provider, row, row ? await this.openRow(row) : null))
+    }
+    return statuses
   }
 
   @InjectManager()
@@ -130,7 +78,7 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
     @MedusaContext() sharedContext: Context = {}
   ): Promise<CredentialStatus> {
     const [row] = await this.listIntegrationCredentials({ provider }, { take: 1 }, sharedContext)
-    return statusOf(provider, row, row ? this.open(row) : null)
+    return statusOf(provider, row, row ? await this.openRow(row) : null)
   }
 
   /**
@@ -143,18 +91,15 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
     input: SaveInput,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<CredentialDraft> {
-    const key = this.requireKey(provider)
+    const keyring = this.requireKeyring(provider)
     const [row] = await this.listIntegrationCredentials({ provider }, { take: 1 }, sharedContext)
-    const current = row ? this.open(row) : null
+    const current = row ? await this.openRow(row) : null
     const plan = planSave(provider, input, row, current)
+    const sealed = await sealCredentials(keyring, provider, plan.settings, plan.secrets)
     return {
       provider,
       settings: plan.settings,
-      secret_ciphertext: sealSecret(
-        JSON.stringify(plan.secrets),
-        key,
-        contextOf(provider, plan.settings)
-      ),
+      secret_ciphertext: sealed.secret_ciphertext,
       needs_check: plan.needsCheck,
       secrets_changed: plan.secretsChanged,
       connected: row?.verification === "verified" && current !== null,
@@ -162,12 +107,33 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
   }
 
   /** A draft's account in the clear, for the check against the provider; nothing keeps it. */
-  openDraft(draft: CredentialDraft): ResolvedCredentials {
-    const secrets = this.open({ ...draft, key_id: this.keyId ?? "" })
+  async openDraft(draft: CredentialDraft): Promise<ResolvedCredentials> {
+    const keyring = this.requireKeyring(draft.provider)
+    const secrets = await openSealedDraft(
+      keyring,
+      draft.provider,
+      draft.settings,
+      draft.secret_ciphertext
+    )
     if (!secrets) {
       throw this.keyMissing(draft.provider)
     }
     return { settings: draft.settings, secrets }
+  }
+
+  /**
+   * The draft's columns: its envelope and the KEK it names; a draft sealed
+   * the old way (made before the upgrade, still in a workflow) is sealed
+   * again as new rows are.
+   */
+  private async sealedOf(draft: CredentialDraft): Promise<Sealed> {
+    if (isSerializedEnvelope(draft.secret_ciphertext)) {
+      const { kekId } = parseEnvelope(draft.secret_ciphertext)
+      return { secret_ciphertext: draft.secret_ciphertext, key_id: kekId }
+    }
+    const keyring = this.requireKeyring(draft.provider)
+    const { secrets } = await this.openDraft(draft)
+    return sealCredentials(keyring, draft.provider, draft.settings, secrets)
   }
 
   /**
@@ -180,15 +146,16 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
     verification: Verification | null,
     actorId: string | null
   ): Promise<StoredCredential | null> {
+    const sealed = await this.sealedOf(draft)
     let previous: StoredCredential | null
     try {
-      previous = await this.storeInTransaction_(draft, verification, actorId)
+      previous = await this.storeInTransaction_(draft, sealed, verification, actorId)
     } catch (error) {
       // A first save racing another inserts the provider twice; the second retries
       if (!uniqueViolationKeys(error)?.includes("provider")) {
         throw error
       }
-      previous = await this.storeInTransaction_(draft, verification, actorId)
+      previous = await this.storeInTransaction_(draft, sealed, verification, actorId)
     }
     await this.cache.invalidate()
     return previous
@@ -197,11 +164,11 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
   @InjectTransactionManager()
   protected async storeInTransaction_(
     draft: CredentialDraft,
+    sealed: Sealed,
     verification: Verification | null,
     actorId: string | null,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<StoredCredential | null> {
-    const keyId = this.keyId ?? ""
     const [row] = await this.listIntegrationCredentials(
       { provider: draft.provider },
       { take: 1 },
@@ -210,8 +177,8 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
     const checked = verification ?? row?.verification ?? "unverified"
     const values = {
       settings: draft.settings,
-      secret_ciphertext: draft.secret_ciphertext,
-      key_id: keyId,
+      secret_ciphertext: sealed.secret_ciphertext,
+      key_id: sealed.key_id,
       verification: checked,
       verified_at:
         verification === "verified" ? new Date() : verification ? null : (row?.verified_at ?? null),
@@ -244,7 +211,7 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
     provider: CredentialProviderName
   ): Promise<{ account: ResolvedCredentials; stamp: string } | null> {
     const [row] = await this.listIntegrationCredentials({ provider }, { take: 1 })
-    const secrets = row ? this.open(row) : null
+    const secrets = row ? await this.openRow(row) : null
     return row && secrets
       ? { account: { settings: row.settings, secrets }, stamp: stampOf(row) }
       : null

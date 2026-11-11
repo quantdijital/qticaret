@@ -4,9 +4,13 @@ import type { CredentialProviderName } from "./providers"
 
 export type IntegrationCredentialRecord = InferTypeOf<typeof IntegrationCredential>
 
+/**
+ * The keys are not options: they are read from the environment where they
+ * are used (`CREDENTIALS_ENCRYPTION_KEYS`, or `CREDENTIALS_ENCRYPTION_KEY`;
+ * lib/integrations/credential-keys.ts), so a rotation's key list is one
+ * value everywhere. Without a key nothing can be saved or read.
+ */
 export interface IntegrationCredentialsModuleOptions {
-  /** `CREDENTIALS_ENCRYPTION_KEY`, 64 hex characters; without it nothing can be saved or read. */
-  encryptionKey?: string
   /** Shared version counter across processes; without it each process trusts its own writes. */
   redisUrl?: string
   versionKey?: string
@@ -19,7 +23,7 @@ export type Verification = "verified" | "unverified" | "rejected"
  * - `connected`: saved and accepted by the provider
  * - `unverified`: saved, the provider could not be asked
  * - `rejected`: the provider refused the stored details when tested again
- * - `unreadable`: saved under another key; enter it again
+ * - `unreadable`: saved under a key the server no longer has, or damaged; enter it again
  */
 export type CredentialState =
   "not_configured" | "connected" | "unverified" | "rejected" | "unreadable"

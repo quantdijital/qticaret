@@ -32,7 +32,7 @@ export const checkDraftStep = createStep(
     const service = container.resolve<IntegrationCredentialsModuleService>(
       INTEGRATION_CREDENTIALS_MODULE
     )
-    const check = await checkAccount(draft.provider, service.openDraft(draft))
+    const check = await checkAccount(draft.provider, await service.openDraft(draft))
     if (check === "merchant_invalid" || check === "secret_invalid") {
       throw new ValidationError(`${draft.provider}.${check}`, {
         field: CHECK_FIELDS[draft.provider][check],

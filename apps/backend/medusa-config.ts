@@ -116,11 +116,11 @@ module.exports = defineConfig({
         versionKey: `qt:control-plane:${namespace}:version`,
       },
     },
-    // adr/0027: the shop's provider accounts, sealed with their own key
+    // adr/0027: the shop's provider accounts, sealed under their own keys
+    // (adr/0061 Ek C17: read from the environment where they are used)
     {
       resolve: "./src/modules/integration-credentials",
       options: {
-        encryptionKey: env.CREDENTIALS_ENCRYPTION_KEY,
         redisUrl: env.REDIS_URL,
         versionKey: `qt:credentials:${namespace}:version`,
       },

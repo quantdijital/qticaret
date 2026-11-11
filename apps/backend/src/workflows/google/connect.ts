@@ -119,9 +119,10 @@ const exchangeGoogleCodeStep = createStep(
     if (!draft) {
       return
     }
-    const token = container
+    const opened = await container
       .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
-      .openDraft(draft).secrets["refresh_token"]
+      .openDraft(draft)
+    const token = opened.secrets["refresh_token"]
     if (token) {
       await googleApi()
         .revoke(token)

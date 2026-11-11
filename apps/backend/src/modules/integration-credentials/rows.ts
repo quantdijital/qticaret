@@ -12,9 +12,11 @@ import type {
 /** How the service reads its rows (the sealing context, the state stamp, the copy kept for undo) and learns of others' writes. */
 
 /**
- * Associated data: the provider and its settings. A blob copied onto
- * another provider's row does not open, nor one whose settings (test mode,
- * the shop number) were changed in the database behind the panel's back.
+ * adr/0027's associated data: the provider and its settings. A blob copied
+ * onto another provider's row does not open, nor one whose settings (test
+ * mode, the shop number) were changed in the database behind the panel's
+ * back. Rows sealed before adr/0061 Ek C17 only; envelopes bind the same
+ * two (`credentialContext`).
  */
 export const contextOf = (provider: string, settings: Record<string, unknown>) =>
   `integration_credentials:${provider}:${canonicalJson(settings)}`

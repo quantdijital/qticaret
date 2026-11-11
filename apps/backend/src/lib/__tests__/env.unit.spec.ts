@@ -161,11 +161,65 @@ describe("parseEnv", () => {
     "requires the provider account key in %s (adr/0027)",
     (env) => {
       expect(errorOf({ ...validEnv, ...s3Env, NODE_ENV: env })).toContain(
-        "CREDENTIALS_ENCRYPTION_KEY: is required in production and staging"
+        "CREDENTIALS_ENCRYPTION_KEYS: is required in production and staging (or CREDENTIALS_ENCRYPTION_KEY, one key)"
       )
+      // Either form is enough (adr/0061 Ek C17)
+      for (const keys of [
+        { CREDENTIALS_ENCRYPTION_KEY: hexKey() },
+        { CREDENTIALS_ENCRYPTION_KEYS: hexKey() },
+      ]) {
+        expect(errorOf({ ...validEnv, ...s3Env, ...keys, NODE_ENV: env })).not.toContain(
+          "CREDENTIALS_ENCRYPTION"
+        )
+      }
       expect(parseEnv(validEnv).CREDENTIALS_ENCRYPTION_KEY).toBeUndefined()
+      expect(parseEnv(validEnv).CREDENTIALS_ENCRYPTION_KEYS).toBeUndefined()
     }
   )
+
+  it("reads a list of provider account keys, newest first, strictly (adr/0061 Ek C17)", () => {
+    const [newKey, oldKey] = [hexKey(), hexKey()]
+    expect(
+      parseEnv({ ...validEnv, CREDENTIALS_ENCRYPTION_KEYS: `${newKey}, ${oldKey.toUpperCase()}` })
+        .CREDENTIALS_ENCRYPTION_KEYS
+    ).toBe(`${newKey}, ${oldKey.toUpperCase()}`)
+
+    const problems: [string, string][] = [
+      [`${newKey},,${oldKey}`, "must list keys separated by single commas, with no empty entry"],
+      [`${newKey},`, "must list keys separated by single commas, with no empty entry"],
+      [`${newKey},abc`, "must list keys of 64 hex characters (32 bytes) each"],
+      [`${newKey}:${oldKey}`, "must list keys of 64 hex characters (32 bytes) each"],
+      [`${newKey},${newKey.toUpperCase()}`, "must not list the same key twice"],
+      [Array.from({ length: 6 }, hexKey).join(","), "must list at most 5 keys"],
+    ]
+    for (const [value, message] of problems) {
+      const error = errorOf({ ...validEnv, CREDENTIALS_ENCRYPTION_KEYS: value })
+      expect(error).toContain(`CREDENTIALS_ENCRYPTION_KEYS: ${message}`)
+      // The message names the variable, never a value
+      expect(error).not.toContain(newKey)
+    }
+  })
+
+  it("takes the single key beside the list only when the list holds it", () => {
+    const [newKey, oldKey] = [hexKey(), hexKey()]
+    expect(
+      parseEnv({
+        ...validEnv,
+        CREDENTIALS_ENCRYPTION_KEYS: `${newKey},${oldKey}`,
+        CREDENTIALS_ENCRYPTION_KEY: oldKey.toUpperCase(),
+      }).CREDENTIALS_ENCRYPTION_KEY
+    ).toBe(oldKey.toUpperCase())
+    // Left out of the list it would silently stop opening what it sealed
+    const error = errorOf({
+      ...validEnv,
+      CREDENTIALS_ENCRYPTION_KEYS: newKey,
+      CREDENTIALS_ENCRYPTION_KEY: oldKey,
+    })
+    expect(error).toContain(
+      "CREDENTIALS_ENCRYPTION_KEY: must be one of CREDENTIALS_ENCRYPTION_KEYS when both are set"
+    )
+    expect(error).not.toContain(oldKey)
+  })
 
   it.each(["production", "staging"])("requires the staff 2FA key in %s (adr/0040)", (env) => {
     expect(errorOf({ ...validEnv, NODE_ENV: env })).toContain(
@@ -184,6 +238,12 @@ describe("parseEnv", () => {
     expect(errorOf({ ...validEnv, CREDENTIALS_ENCRYPTION_KEY: "ab" })).toContain(
       "CREDENTIALS_ENCRYPTION_KEY: must be 64 hex characters (32 bytes)"
     )
+    expect(
+      errorOf({
+        ...validEnv,
+        CREDENTIALS_ENCRYPTION_KEYS: `${hexKey()},${validEnv.PII_ENCRYPTION_KEY}`,
+      })
+    ).toContain("CREDENTIALS_ENCRYPTION_KEYS: must differ from the PII keys")
   })
 
   it("lets a fake iyzico address on a developer's machine only", () => {

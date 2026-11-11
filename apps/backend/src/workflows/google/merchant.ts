@@ -50,7 +50,7 @@ const saveMerchantAccountStep = createStep(
       delete settings["data_source"]
     }
     const draft = await credentials.draft("google", { settings })
-    const check = await checkAccount("google", credentials.openDraft(draft))
+    const check = await checkAccount("google", await credentials.openDraft(draft))
     if (check !== "valid") {
       throw new ValidationError(
         check === "unreachable"

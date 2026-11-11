@@ -11,6 +11,7 @@ import {
   secret,
 } from "@qticaret/server-kit"
 import { CONTROL_PLANE_ENV, checkControlPlaneEnv } from "./control-plane/env"
+import { CREDENTIALS_KEYS_ENV, checkCredentialKeysEnv } from "./integrations/credential-keys"
 import { parseDsn } from "./error-tracking/dsn"
 import { LOG_LEVELS } from "./logging/levels"
 
@@ -36,9 +37,10 @@ const envSchema = z.object({
   COOKIE_SECRET: secret,
   PII_ENCRYPTION_KEY: key256,
   PII_HASH_KEY: key256,
-  // The shop's provider accounts (PayTR, iyzico) are stored encrypted with
-  // it (adr/0027); required once deployed, locally the panel cannot save them
-  CREDENTIALS_ENCRYPTION_KEY: key256.optional(),
+  // The shop's provider accounts (PayTR, iyzico) are stored encrypted under
+  // them (adr/0027, adr/0061 Ek C17: one key, or a list newest first while
+  // one rotates); required once deployed, locally the panel cannot save them
+  ...CREDENTIALS_KEYS_ENV,
   // F12.6 (adr/0040): Medusa's MFA seals each staff member's TOTP secret with it
   AUTH_MFA_ENCRYPTION_KEY: key256.optional(),
   // Local only: `off` lets a developer sign in without 2FA; ignored when deployed
@@ -250,32 +252,15 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: "must differ from PII_ENCRYPTION_KEY",
     })
   }
-  const credentialsKey = env.CREDENTIALS_ENCRYPTION_KEY?.toLowerCase()
-  if (deployed && credentialsKey === undefined) {
-    ctx.addIssue({
-      code: "custom",
-      path: ["CREDENTIALS_ENCRYPTION_KEY"],
-      message: "is required in production and staging",
-    })
-  }
+  checkCredentialKeysEnv(env, deployed, (path, message) => {
+    ctx.addIssue({ code: "custom", path: [path], message })
+  })
   // Staff 2FA is compulsory where the shop runs (adr/0040): no key, no start
   if (deployed && env.AUTH_MFA_ENCRYPTION_KEY === undefined) {
     ctx.addIssue({
       code: "custom",
       path: ["AUTH_MFA_ENCRYPTION_KEY"],
       message: "is required in production and staging",
-    })
-  }
-  // Provider secrets and personal data are kept apart: one key's loss or
-  // rotation must not touch the other (adr/0027)
-  if (
-    credentialsKey !== undefined &&
-    [env.PII_ENCRYPTION_KEY, env.PII_HASH_KEY].some((key) => key.toLowerCase() === credentialsKey)
-  ) {
-    ctx.addIssue({
-      code: "custom",
-      path: ["CREDENTIALS_ENCRYPTION_KEY"],
-      message: "must differ from the PII keys",
     })
   }
   // The refresh signal crosses the network to the storefront: over TLS once deployed

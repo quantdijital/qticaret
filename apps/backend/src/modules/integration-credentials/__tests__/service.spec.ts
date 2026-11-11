@@ -1,6 +1,10 @@
 import { randomBytes } from "node:crypto"
 import { moduleIntegrationTestRunner } from "@medusajs/test-utils"
 import { anyOf, fakeSecret } from "@qticaret/testing"
+import {
+  restoreCredentialKeys,
+  useCredentialKeys,
+} from "../../../../integration-tests/helpers/credential-keys"
 import { logger } from "../../../lib/logging"
 import { INTEGRATION_CREDENTIALS_MODULE } from ".."
 import { CREDENTIAL_PROVIDER_NAMES } from "../providers"
@@ -23,11 +27,19 @@ const secrets = { merchant_key: fakeSecret(), merchant_salt: fakeSecret() }
 const newSalt = fakeSecret()
 const SECRETS = anyOf(secrets.merchant_key, secrets.merchant_salt)
 
+// The keys are read from the environment where they are used (adr/0061 Ek C17)
+afterAll(restoreCredentialKeys)
+
 moduleIntegrationTestRunner<IntegrationCredentialsModuleService>({
   moduleName: INTEGRATION_CREDENTIALS_MODULE,
   resolve: "./src/modules/integration-credentials",
-  moduleOptions: { encryptionKey: randomBytes(32).toString("hex") },
+  moduleOptions: {},
   testSuite: ({ service }) => {
+    const key = randomBytes(32).toString("hex")
+    beforeEach(() => {
+      useCredentialKeys([key])
+    })
+
     async function connect() {
       const draft = await service.draft("paytr", { settings, secrets })
       await service.store(draft, "verified", "user_1")
@@ -184,8 +196,10 @@ moduleIntegrationTestRunner<IntegrationCredentialsModuleService>({
     it("does not open a blob moved to another provider's row", async () => {
       const draft = await connect()
 
-      expect(() => service.openDraft({ ...draft, provider: "iyzico" })).toThrow()
-      expect(service.openDraft(draft)).toEqual({ settings, secrets })
+      const logged = jest.spyOn(logger, "error").mockImplementation(() => undefined)
+      await expect(service.openDraft({ ...draft, provider: "iyzico" })).rejects.toThrow()
+      logged.mockRestore()
+      expect(await service.openDraft(draft)).toEqual({ settings, secrets })
     })
 
     it("deletes a removed account outright and puts it back on compensation", async () => {
@@ -217,6 +231,10 @@ moduleIntegrationTestRunner<IntegrationCredentialsModuleService>({
   resolve: "./src/modules/integration-credentials",
   moduleOptions: {},
   testSuite: ({ service }) => {
+    beforeEach(() => {
+      useCredentialKeys([])
+    })
+
     it("saves nothing without the server's key and says so, to the owner and the operator", async () => {
       const logged = jest.spyOn(logger, "error").mockImplementation(() => undefined)
       expect(service.isKeyConfigured()).toBe(false)
