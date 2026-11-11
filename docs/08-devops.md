@@ -28,6 +28,16 @@ Postgres, Redis, Mailpit (e-posta yakalama), SeaweedFS (S3; MinIO arşivlendi, a
 6. Health check → başarılıysa tenant kaydını "aktif" yap
 Script **idempotent** olmalı (yarıda kalırsa tekrar çalıştırılabilir).
 
+**Güncel (adr/0061 §6, Ek C10):** ayrı betik yazılmaz; adımlar üst panelin `provisioning` workflow'undadır, ortama özgü iş `TenantProvisioner`'dadır. Yerelde (`CP_PROVISIONER=local`, yalnız `development`):
+
+1. `pnpm turbo run build --filter=@qticaret/backend` (önce `@qticaret/server-kit` ve `@qticaret/types` derlenir; mağaza `.medusa/server`'dan `--conditions=qt-compiled` ile koşar).
+2. `pnpm dev:cp-api` (üst panel 9100; mağazanın 15 dakikalık çekmesi buraya gelir).
+3. `NODE_ENV=development pnpm --filter control-plane cp:tenant-create slug=<slug> name=<ad> owner-email=<adres> package=<kod>`: kayıt, sahip yetkilisi, sonra adımlar (port 9200–9299, sırlar + emanet, `qt_tenant_<slug>` veritabanı ve rolü, migration, `tenant:bootstrap`, ilk plan belgesi, başlatma, sağlık, itme adresi, sahip daveti Mailpit'e, `active`). İkinci çalıştırma hiçbir şeyi değiştirmez; hata olursa çalışmanın yarattığı her şey geri alınır.
+4. `pnpm --filter control-plane cp:tenant status|stop|start|invite|retry <slug>`. Mağazanın dosyaları `infra/tenants/local/<slug>/` (git dışı; `.env` 0600, `logs/`, `server/static`). Paneli açmak: `PANEL_BACKEND_URL=http://localhost:<port> pnpm --filter panel dev` (5173 boş olmalı).
+5. Elle temizlik (yalnız denemede): `cp:tenant stop <slug>`, sonra Postgres'te `DROP DATABASE qt_tenant_<slug> WITH (FORCE); DROP ROLE qt_tenant_<slug>;` ve klasörün silinmesi. Üst paneldeki kayıt kalır (geçmiş).
+
+F16'da aynı workflow `DockerProvisioner` ile çalışır; imaj `NODE_OPTIONS=--conditions=qt-compiled` taşır, `ts-node` gerekmez.
+
 ## Tenant işletimi (F16)
 - **Hosting ve bölge:** adr/0003 (KVKK veri yerleşimi dahil)
 - **Alan adı:** varsayılan `<slug>.<platform-domain>`; tenant domain'i DNS TXT sahiplik doğrulamasıyla bağlanır, otomatik SSL; bağlanınca platform alt alan adı 301 (SEO + güvenlik)
