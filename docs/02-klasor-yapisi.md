@@ -112,6 +112,7 @@ repo/
 │   ├── ui/                          # tema sözleşmesi, görünüm modelleri, ortak vitrin parçaları (adr/0046 §7)
 │   ├── admin-ui/                    # panellerin ortak arayüzü: shadcn ilkelleri, desenler, token ve tema motoru, `admin-ui` metinleri (adr/0061 §1.4; docs/18 §6)
 │   ├── themes/atolye/               # vitrin teması (tek ve varsayılan, yön "Grafit", design.md; adr/0057): yalnızca sunum
+│   ├── sector-packs/                # sektör paketleri, yalnız veri (adr/0061 F17.7, Ek C12): `packs/<kod>/` (manifest.json + attributes/categories/flags/seo.json); `src/` paketleri okuyan yükleyici (çalışma anında `packs/`'ten okur, `qt-compiled` ile derlenir); içeriği backend kendi Zod şemalarıyla denetler
 │   ├── config/                      # eslint, tsconfig, prettier
 │   └── testing/                     # sahte sağlayıcı sunucuları (PayTR; iyzico V8, Geliver F7), TR fixture'ları (geçerli sahte TCKN/VKN), her çalıştırmada üretilen test sırları
 ├── infra/
