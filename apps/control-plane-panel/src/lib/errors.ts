@@ -8,6 +8,7 @@ import { isStepUpCancelled } from "./step-up"
  * both languages in step with this list.
  */
 export const CP_ERROR_CODES = [
+  "amount_zero",
   "audit_kind_invalid",
   "audit_unavailable",
   "challenge_unknown",
@@ -57,6 +58,7 @@ export const CP_ERROR_CODES = [
   "package_code_taken",
   "package_unknown",
   "paid_on_future",
+  "paid_on_too_early",
   "password_invalid",
   "phone_invalid",
   "postal_code_invalid",

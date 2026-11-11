@@ -137,6 +137,11 @@ export function PaymentsPage() {
                   </p>
                 ) : null}
               </div>
+              {list.data?.search_truncated ? (
+                <p role="status" className="border-b px-5 py-2 text-[13px] text-warning-text">
+                  {t("billing.payments.searchTruncated")}
+                </p>
+              ) : null}
               <DataTable
                 columns={columns}
                 rows={list.data?.payments}

@@ -104,6 +104,8 @@ export interface PaymentList {
   total: number
   counts: Record<PaymentView, number>
   today: string
+  /** The search matched more shops than were looked at (Ek C16 review). */
+  search_truncated: boolean
 }
 
 export interface BillingSettings {

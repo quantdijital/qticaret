@@ -685,6 +685,7 @@
       "too_many_requests": "Çok fazla deneme yapıldı. Birkaç dakika bekleyip yeniden deneyin."
     },
     "cp": {
+      "amount_zero": "Tutar en az 0,01 ₺ olmalı. Borcu kaldırmak için Bağışla'yı kullanın.",
       "audit_kind_invalid": "Kayıt türü geçerli değil.",
       "audit_unavailable": "Görüntüleme kaydı yazılamadığı için bilgi gösterilmedi. Biraz sonra tekrar deneyin.",
       "challenge_unknown": "Giriş adımının süresi doldu; yeniden giriş yapın.",
@@ -734,6 +735,7 @@
       "package_code_taken": "Bu paket kodu kullanılıyor.",
       "package_unknown": "Paket bulunamadı.",
       "paid_on_future": "Ödeme tarihi bugünden sonra olamaz.",
+      "paid_on_too_early": "Ödeme tarihi dönemin başlangıcından 60 günden daha önce olamaz.",
       "password_invalid": "Şifre doğru değil.",
       "phone_invalid": "Telefon numarası geçerli değil.",
       "postal_code_invalid": "Posta kodu 5 rakam olmalı.",
@@ -1346,7 +1348,9 @@
       "referenceHelp": "Banka dekontundaki işlem numarası ya da kısa bir not. İsteğe bağlı.",
       "reason": "Gerekçe",
       "settledBy": "İşaretleyen",
-      "newAmount": "Yeni tutar"
+      "newAmount": "Yeni tutar",
+      "zeroAmount": "Tutar sıfır: kayıt açılırken kendiliğinden bağışlandı.",
+      "amountHelp": "En az 0,01 ₺. Borcu tamamen kaldırmak için Bağışla'yı kullanın."
     },
     "actions": {
       "pay": {
@@ -1434,7 +1438,8 @@
         "status": "Durum",
         "graceEnds": "Ek süre bitişi",
         "method": "Yöntem"
-      }
+      },
+      "searchTruncated": "Aramaya çok fazla mağaza uydu; yalnız ilk 10.000 mağazanın ödemeleri gösteriliyor. Aramayı daraltın."
     },
     "instruction": {
       "title": "Ödeme talimatı",

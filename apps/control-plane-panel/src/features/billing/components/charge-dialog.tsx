@@ -51,7 +51,13 @@ function ChargeFacts({ charge }: { charge: Charge }) {
     rows.push([t("billing.charge.reference"), charge.reference ?? "—"])
   }
   if (charge.settle_reason) {
-    rows.push([t("billing.charge.reason"), charge.settle_reason])
+    rows.push([
+      t("billing.charge.reason"),
+      // A charge of nothing is waived by the system as it opens (Ek C16 review M2)
+      charge.settle_reason === "billing.zero_amount"
+        ? t("billing.charge.zeroAmount")
+        : charge.settle_reason,
+    ])
   }
   if (charge.settled_by) {
     rows.push([t("billing.charge.settledBy"), charge.settled_by])
@@ -129,6 +135,10 @@ export function ChargeDialog({
     )
   }
   const cents = parseMoneyInput(amount)
+  // The control plane's bound: not more than 60 days before the period it pays for
+  const earliest = new Date(Date.parse(`${charge.period_start}T00:00:00Z`) - 60 * 86_400_000)
+    .toISOString()
+    .slice(0, 10)
   const input: ChargeAction =
     mode === "pay"
       ? { action: "pay", body: { paid_on: paidOn, method, reference: reference.trim() } }
@@ -140,8 +150,9 @@ export function ChargeDialog({
         : { action: mode, body: { reason: reason.trim() } }
   const ready =
     mode === "pay"
-      ? paidOn !== "" && paidOn <= today
-      : reason.trim().length >= REASON_MIN && (mode !== "amount" || cents !== null)
+      ? paidOn !== "" && paidOn <= today && paidOn >= earliest
+      : reason.trim().length >= REASON_MIN &&
+        (mode !== "amount" || (cents !== null && Math.round(cents * 100) >= 1))
   return (
     <FormDialog
       open
@@ -178,6 +189,7 @@ export function ChargeDialog({
               <Input
                 id="charge-paid-on"
                 type="date"
+                min={earliest}
                 max={today}
                 value={paidOn}
                 onChange={(event) => {
@@ -229,7 +241,7 @@ export function ChargeDialog({
                 <Label htmlFor="charge-amount">{t("billing.charge.newAmount")}</Label>
                 <NumberField
                   id="charge-amount"
-                  min={0}
+                  min={0.01}
                   decimals={2}
                   suffix="₺"
                   value={amount}
@@ -237,6 +249,9 @@ export function ChargeDialog({
                     setAmount(event.target.value)
                   }}
                 />
+                <p className="text-[13px] text-muted-foreground">
+                  {t("billing.charge.amountHelp")}
+                </p>
               </div>
             ) : null}
             <div className="flex flex-col gap-2">

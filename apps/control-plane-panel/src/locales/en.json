@@ -685,6 +685,7 @@
       "too_many_requests": "Too many tries. Wait a few minutes and try again."
     },
     "cp": {
+      "amount_zero": "The amount must be at least ₺0.01. To clear the debt, waive the charge.",
       "audit_kind_invalid": "The entry kind is not valid.",
       "audit_unavailable": "The view could not be recorded, so nothing was shown. Try again in a moment.",
       "challenge_unknown": "The sign-in step ran out; sign in again.",
@@ -734,6 +735,7 @@
       "package_code_taken": "This package code is in use.",
       "package_unknown": "Package not found.",
       "paid_on_future": "The payment date cannot be after today.",
+      "paid_on_too_early": "The payment date cannot be more than 60 days before the period starts.",
       "password_invalid": "The password is wrong.",
       "phone_invalid": "The phone number is not valid.",
       "postal_code_invalid": "A postal code has 5 digits.",
@@ -1346,7 +1348,9 @@
       "referenceHelp": "The bank receipt's transaction number or a short note. Optional.",
       "reason": "Reason",
       "settledBy": "Marked by",
-      "newAmount": "New amount"
+      "newAmount": "New amount",
+      "zeroAmount": "Nothing owed: waived automatically when the charge opened.",
+      "amountHelp": "At least ₺0.01. To clear the debt entirely, waive the charge."
     },
     "actions": {
       "pay": {
@@ -1434,7 +1438,8 @@
         "status": "Status",
         "graceEnds": "Grace ends",
         "method": "Method"
-      }
+      },
+      "searchTruncated": "Too many shops matched; only the first 10,000 shops' payments are shown. Narrow the search."
     },
     "instruction": {
       "title": "Payment instruction",

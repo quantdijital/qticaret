@@ -211,6 +211,56 @@ describe("a shop's Abonelik tab (adr/0061 §7, Ek C16)", () => {
     expect(corrected.at(-1)?.body).toEqual({ amount: 120_050, reason: "Sözleşmedeki indirim" })
   })
 
+  it("never offers a correction to nothing, and says a free charge was waived (review M2)", async () => {
+    stubApi((call) =>
+      call.path === `${BASE}/subscription`
+        ? {
+            status: 200,
+            body: {
+              ...DETAIL,
+              charges: [
+                ...DETAIL.charges,
+                charge({
+                  id: "chg_ucretsiz",
+                  period_start: "2027-01-01",
+                  period_end: "2027-02-01",
+                  due_on: "2027-01-01",
+                  amount: 0,
+                  list_amount: 0,
+                  status: "waived",
+                  standing: null,
+                  settle_reason: "billing.zero_amount",
+                }),
+              ],
+            },
+          }
+        : controlPlane()(call)
+    )
+    tab("finance")
+
+    await userEvent.click(await screen.findByRole("button", { name: /^1 Oca 2027/ }))
+    const free = await screen.findByRole("dialog")
+    expect(
+      within(free).getByText("Tutar sıfır: kayıt açılırken kendiliğinden bağışlandı.")
+    ).toBeInTheDocument()
+    expect(within(free).queryByRole("button", { name: "Tutarı düzelt" })).toBeNull()
+    await userEvent.keyboard("{Escape}")
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull()
+    })
+
+    await userEvent.click(screen.getByRole("button", { name: /^1 Ara 2026/ }))
+    const facts = await screen.findByRole("dialog")
+    await userEvent.click(within(facts).getByRole("button", { name: "Tutarı düzelt" }))
+    const form = await screen.findByRole("dialog", { name: "Tutarı düzelt" })
+    const amount = within(form).getByLabelText("Yeni tutar")
+    await userEvent.clear(amount)
+    await userEvent.type(amount, "0")
+    await userEvent.type(within(form).getByLabelText("Gerekçe"), "Ücretsiz ay")
+    expect(within(form).getByRole("button", { name: "Tutarı kaydet" })).toBeDisabled()
+    expect(within(form).getByText(/Borcu tamamen kaldırmak için Bağışla/)).toBeInTheDocument()
+  })
+
   it("gives the shop its own grace days with a reason", async () => {
     const sent = stubApi(controlPlane())
     tab("finance")
@@ -256,6 +306,7 @@ const LIST: PaymentList = {
   total: 149_000,
   counts: { upcoming: 3, overdue: 1, paid: 12 },
   today: "2026-12-10",
+  search_truncated: false,
 }
 
 function paymentsPlane(call: Sent): Answer {
@@ -307,6 +358,16 @@ describe("Ödemeler (adr/0061 §7, Ek C16)", () => {
       params: { id: "ten_mylarte" },
       search: { part: "subscription" },
     })
+  })
+
+  it("says when a search matched more shops than it looked at (review)", async () => {
+    stubApi((call) =>
+      call.path.startsWith("/admin/cp/payments")
+        ? { status: 200, body: { ...LIST, search_truncated: true } }
+        : paymentsPlane(call)
+    )
+    renderAs(<PaymentsPage />, "finance")
+    expect(await screen.findByText(/Aramaya çok fazla mağaza uydu/)).toBeInTheDocument()
   })
 
   it("lets the owner write the payment instruction behind the step-up", async () => {
