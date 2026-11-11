@@ -10,7 +10,9 @@ import { tenantIdSchema } from "./signature"
 
 export const USAGE_REPORT_VERSION = 1
 
-const count = z.int().min(0)
+// A Postgres integer at most (C13 review L1): a larger count is a refused report, not a 500
+export const USAGE_COUNT_MAX = 2_147_483_647
+const count = z.int().min(0).max(USAGE_COUNT_MAX)
 
 export const usageReportSchema = z.strictObject({
   version: z.literal(USAGE_REPORT_VERSION),

@@ -98,6 +98,10 @@ describe("usage report schema", () => {
   it.each([
     ["another version", { ...usageReport, version: 2 }],
     ["a negative count", { ...usageReport, counts: { ...usageReport.counts, staff: -1 } }],
+    [
+      "a count past a database integer",
+      { ...usageReport, counts: { ...usageReport.counts, products: 2_147_483_648 } },
+    ],
     ["a month out of range", { ...usageReport, period: "2026-13" }],
     ["a bad commit", { ...usageReport, release: { ...usageReport.release, commit: "HEAD" } }],
   ])("refuses %s", (_case, report) => {
