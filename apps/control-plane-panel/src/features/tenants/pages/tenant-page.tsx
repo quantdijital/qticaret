@@ -9,6 +9,7 @@ import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { formatDate } from "@qticaret/admin-ui/lib/format"
 import type { PageTab } from "@qticaret/admin-ui/patterns/page-tabs"
 import { useMe } from "@/features/auth/api"
+import { SubscriptionTab } from "@/features/billing/components/subscription-tab"
 import { UsageHealthTab } from "@/features/monitoring/components/usage-health-tab"
 import { SetupTab } from "@/features/provisioning/components/setup-tab"
 import { tenantQuery } from "@/features/tenants/api"
@@ -69,6 +70,12 @@ function TenantTabs({ shop }: { shop: TenantDetail }) {
               {shop.plan_document ? <DocumentCard state={shop.plan_document} /> : null}
             </div>
           ),
+        },
+        // Ek C16: its subscription, charges and reminders, every role's (the actions by role)
+        {
+          key: "subscription",
+          label: t("billing.tab"),
+          content: <SubscriptionTab tenantId={shop.tenant.id} />,
         },
         // Ek C13: its usage against its limits and its health, every role's
         { key: "usage", label: t("usage.tab"), content: <UsageHealthTab shop={shop} /> },

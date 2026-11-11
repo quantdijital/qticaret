@@ -153,7 +153,9 @@
     "loading": "Loading",
     "done": "Done",
     "actions": "Actions",
-    "copyFailed": "Could not copy; select the text and copy it by hand."
+    "copyFailed": "Could not copy; select the text and copy it by hand.",
+    "save": "Save",
+    "edit": "Edit"
   },
   "stepUp": {
     "title": "Verify it is you",
@@ -572,7 +574,9 @@
       "created": "new record",
       "imported": "existing shop brought in",
       "staff_suspend": "suspended by staff",
-      "staff_resume": "suspension ended by staff"
+      "staff_resume": "suspension ended by staff",
+      "payment_overdue": "the payment did not arrive within the grace",
+      "payment_settled": "payment recorded"
     },
     "actions": {
       "renamed": "Shop name changed",
@@ -590,6 +594,11 @@
       "plan": "Package changed",
       "override": "Limit exception given",
       "overrideRemoved": "Limit exception removed",
+      "chargePaid": "Payment marked paid",
+      "chargeWaived": "Payment waived",
+      "chargeVoided": "Charge voided",
+      "chargeAmount": "Payment amount corrected",
+      "grace": "Grace changed",
       "other": "Change"
     }
   },
@@ -679,8 +688,11 @@
       "audit_kind_invalid": "The entry kind is not valid.",
       "audit_unavailable": "The view could not be recorded, so nothing was shown. Try again in a moment.",
       "challenge_unknown": "The sign-in step ran out; sign in again.",
+      "charge_not_open": "This charge is no longer open; reload the page.",
+      "charge_unknown": "The charge was not found.",
       "contact_unknown": "Contact not found.",
       "contacts_full": "A shop can have at most 50 contacts; delete one first.",
+      "day_invalid": "Enter a valid date.",
       "deactivate_self": "You cannot deactivate yourself.",
       "domain_invalid": "The domain is not valid.",
       "domain_platform": "Addresses under the platform's domain are given by the platform.",
@@ -721,6 +733,7 @@
       "package_code_invalid": "The package code is not valid: it starts with a letter; lower-case letters, digits and hyphens.",
       "package_code_taken": "This package code is in use.",
       "package_unknown": "Package not found.",
+      "paid_on_future": "The payment date cannot be after today.",
       "password_invalid": "The password is wrong.",
       "phone_invalid": "The phone number is not valid.",
       "postal_code_invalid": "A postal code has 5 digits.",
@@ -747,6 +760,7 @@
       "step_up_invalid": "The verification ran out; verify again.",
       "step_up_locked": "Too many wrong codes. Wait a while and try again.",
       "step_up_required": "Verify it is you for this change.",
+      "subscription_unknown": "This shop has no subscription.",
       "tckn_company": "A Turkish ID number is entered for a sole proprietor only.",
       "tckn_invalid": "The Turkish ID number is not valid.",
       "tckn_none": "No Turkish ID number is stored.",
@@ -1253,6 +1267,185 @@
       "redirect": "Answered with a redirect (not followed)",
       "target_not_allowed": "The address is not an allowed one",
       "target_invalid": "The address is not valid"
+    }
+  },
+  "billing": {
+    "tab": "Subscription",
+    "days": "days",
+    "system": "System",
+    "period": {
+      "monthly": "month",
+      "yearly": "year"
+    },
+    "subscriptionStatus": {
+      "trialing": "In trial",
+      "active": "Up to date",
+      "past_due": "Payment late",
+      "restricted": "Restricted",
+      "cancelled": "Ended"
+    },
+    "standing": {
+      "upcoming": "Due",
+      "past_due": "In grace",
+      "overdue": "Grace over"
+    },
+    "chargeStatus": {
+      "open": "Open",
+      "paid": "Paid",
+      "waived": "Waived",
+      "void": "Voided"
+    },
+    "method": {
+      "bank_transfer": "Bank transfer",
+      "card_manual": "Card (by hand)",
+      "other": "Other"
+    },
+    "invoicing": {
+      "none": "Off (until the company is founded)"
+    },
+    "subscription": {
+      "title": "Subscription",
+      "none": "This shop has no subscription. It starts once the shop is active and on a package.",
+      "status": "Status",
+      "package": "Package",
+      "price": "This period's price",
+      "priceEach": "{{amount}} / {{period}}",
+      "started": "Started",
+      "trialEnds": "Trial ends",
+      "period": "This period",
+      "grace": "Grace",
+      "graceDays": "{{count}} days (the package's)",
+      "graceOwn": "{{count}} days (this shop's own: {{reason}})",
+      "invoicing": "E-invoice"
+    },
+    "grace": {
+      "open": "Change the grace",
+      "title": "Grace",
+      "text": "The package gives {{days}} days of grace. A shop's own grace comes with a reason; once saved, the shop's status follows it at once.",
+      "own": "This shop's own grace",
+      "days": "Grace",
+      "done": "Grace saved."
+    },
+    "charges": {
+      "title": "Charges",
+      "text": "Each period's payment, newest first. A row opens its details and actions.",
+      "empty": "No charges yet."
+    },
+    "charge": {
+      "title": "Payment: {{period}}",
+      "status": "Status",
+      "period": "Period",
+      "amount": "Amount",
+      "listAmount": "Package price",
+      "amountReason": "Correction's reason",
+      "due": "Due day",
+      "graceEnds": "Grace ends",
+      "paidOn": "Paid on",
+      "method": "Method",
+      "reference": "Receipt / reference",
+      "referenceHelp": "The bank receipt's transaction number or a short note. Optional.",
+      "reason": "Reason",
+      "settledBy": "Marked by",
+      "newAmount": "New amount"
+    },
+    "actions": {
+      "pay": {
+        "open": "Paid",
+        "title": "Mark as paid",
+        "text": "{{period}}, {{amount}}. A shop restricted for it opens at once.",
+        "submit": "Mark as paid",
+        "done": "Payment recorded."
+      },
+      "waive": {
+        "open": "Waive",
+        "title": "Waive the payment",
+        "text": "{{period}}, {{amount}} will not be collected. The reason is kept.",
+        "submit": "Waive",
+        "done": "Payment waived."
+      },
+      "amount": {
+        "open": "Correct the amount",
+        "title": "Correct the amount",
+        "text": "{{period}}, now {{amount}}. No proration; the reason is kept.",
+        "submit": "Save the amount",
+        "done": "Amount corrected."
+      },
+      "void": {
+        "open": "Void the charge",
+        "title": "Void the charge",
+        "text": "{{period}}, {{amount}}. For a charge made by mistake: the shop never owed it.",
+        "submit": "Void the charge",
+        "done": "Charge voided."
+      }
+    },
+    "reminders": {
+      "title": "Reminders sent",
+      "text": "E-mails to the billing contact. Each reminder goes once per payment.",
+      "empty": "No reminder sent yet.",
+      "kind": "Reminder",
+      "charge": "Due day",
+      "outcome": "Outcome",
+      "at": "Time"
+    },
+    "reminderKind": {
+      "before_14": "14 days before",
+      "before_7": "7 days before",
+      "before_3": "3 days before",
+      "before_1": "1 day before",
+      "due": "Due day",
+      "overdue_3": "3 days late",
+      "restricted": "Restriction notice"
+    },
+    "reminderOutcome": {
+      "pending": "Sending",
+      "sent": "Sent",
+      "skipped": "Not sent",
+      "failed": "Failed"
+    },
+    "reminderError": {
+      "mail_off": "e-mail is off",
+      "no_contact": "no billing or owner contact",
+      "mail_failed": "the mail server refused it"
+    },
+    "payments": {
+      "title": "Payments",
+      "text": "The shops' subscription payments: upcoming, overdue and paid.",
+      "list": "Payment list",
+      "tabsLabel": "Payment status",
+      "views": {
+        "upcoming": "Upcoming",
+        "overdue": "Overdue",
+        "paid": "Paid"
+      },
+      "search": "Shop name or address",
+      "total_one": "{{count}} charge · total {{amount}}",
+      "total_other": "{{count}} charges · total {{amount}}",
+      "emptySearch": "No payment matches the search.",
+      "empty": {
+        "upcoming": "No upcoming payment.",
+        "overdue": "No overdue payment.",
+        "paid": "No paid charge yet."
+      },
+      "columns": {
+        "shop": "Shop and period",
+        "due": "Due day",
+        "paidOn": "Paid on",
+        "amount": "Amount",
+        "status": "Status",
+        "graceEnds": "Grace ends",
+        "method": "Method"
+      }
+    },
+    "instruction": {
+      "title": "Payment instruction",
+      "text": "The text every shop's Subscription page and reminder e-mails show.",
+      "dialogText": "The account holder, the IBAN and what to write as the description. Once saved it reaches every shop in its signed plan document.",
+      "label": "Instruction",
+      "placeholder": "Payee: …\nIBAN: TR…\nDescription: your shop's address",
+      "help": "Plain text, up to 1000 characters. Left blank, the shops show no instruction.",
+      "none": "No payment instruction written yet.",
+      "updated": "Last changed {{at}}, {{by}}",
+      "done": "Payment instruction saved; it is on its way to the shops."
     }
   }
 }

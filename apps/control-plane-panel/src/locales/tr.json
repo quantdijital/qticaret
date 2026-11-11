@@ -153,7 +153,9 @@
     "loading": "Yükleniyor",
     "done": "Tamam",
     "actions": "İşlemler",
-    "copyFailed": "Kopyalanamadı; metni seçip elle kopyalayın."
+    "copyFailed": "Kopyalanamadı; metni seçip elle kopyalayın.",
+    "save": "Kaydet",
+    "edit": "Düzenle"
   },
   "stepUp": {
     "title": "Kimliğinizi doğrulayın",
@@ -572,7 +574,9 @@
       "created": "yeni kayıt",
       "imported": "mevcut mağaza aktarıldı",
       "staff_suspend": "personel askıya aldı",
-      "staff_resume": "personel askıyı kaldırdı"
+      "staff_resume": "personel askıyı kaldırdı",
+      "payment_overdue": "ödeme ek süre içinde gelmedi",
+      "payment_settled": "ödeme kaydedildi"
     },
     "actions": {
       "renamed": "Mağaza adı değişti",
@@ -590,6 +594,11 @@
       "plan": "Paket değişti",
       "override": "Limit istisnası verildi",
       "overrideRemoved": "Limit istisnası kaldırıldı",
+      "chargePaid": "Ödeme işaretlendi",
+      "chargeWaived": "Ödeme bağışlandı",
+      "chargeVoided": "Ödeme kaydı iptal edildi",
+      "chargeAmount": "Ödeme tutarı düzeltildi",
+      "grace": "Ek süre değişti",
       "other": "Değişiklik"
     }
   },
@@ -679,8 +688,11 @@
       "audit_kind_invalid": "Kayıt türü geçerli değil.",
       "audit_unavailable": "Görüntüleme kaydı yazılamadığı için bilgi gösterilmedi. Biraz sonra tekrar deneyin.",
       "challenge_unknown": "Giriş adımının süresi doldu; yeniden giriş yapın.",
+      "charge_not_open": "Bu ödeme kaydı artık açık değil; sayfayı yenileyin.",
+      "charge_unknown": "Ödeme kaydı bulunamadı.",
       "contact_unknown": "Yetkili bulunamadı.",
       "contacts_full": "Bir mağazada en çok 50 yetkili olabilir; önce birini silin.",
+      "day_invalid": "Geçerli bir tarih girin.",
       "deactivate_self": "Kendinizi pasifleştiremezsiniz.",
       "domain_invalid": "Alan adı geçerli değil.",
       "domain_platform": "Platformun alan adı altındaki adresler platform tarafından verilir.",
@@ -721,6 +733,7 @@
       "package_code_invalid": "Paket kodu geçerli değil: harfle başlar; küçük harf, rakam ve tire.",
       "package_code_taken": "Bu paket kodu kullanılıyor.",
       "package_unknown": "Paket bulunamadı.",
+      "paid_on_future": "Ödeme tarihi bugünden sonra olamaz.",
       "password_invalid": "Şifre doğru değil.",
       "phone_invalid": "Telefon numarası geçerli değil.",
       "postal_code_invalid": "Posta kodu 5 rakam olmalı.",
@@ -747,6 +760,7 @@
       "step_up_invalid": "Doğrulamanın süresi doldu; yeniden doğrulayın.",
       "step_up_locked": "Çok fazla yanlış kod girildi. Bir süre bekleyip yeniden deneyin.",
       "step_up_required": "Bu işlem için kimliğinizi yeniden doğrulayın.",
+      "subscription_unknown": "Bu mağazanın aboneliği yok.",
       "tckn_company": "TC kimlik no yalnızca şahıs firmasında girilir.",
       "tckn_invalid": "TC kimlik no geçerli değil.",
       "tckn_none": "Kayıtlı TC kimlik no yok.",
@@ -1253,6 +1267,185 @@
       "redirect": "Yönlendirme döndü (izlenmez)",
       "target_not_allowed": "Adres izin verilenlerden değil",
       "target_invalid": "Adres geçersiz"
+    }
+  },
+  "billing": {
+    "tab": "Abonelik",
+    "days": "gün",
+    "system": "Sistem",
+    "period": {
+      "monthly": "ay",
+      "yearly": "yıl"
+    },
+    "subscriptionStatus": {
+      "trialing": "Deneme süresinde",
+      "active": "Güncel",
+      "past_due": "Ödeme gecikti",
+      "restricted": "Kısıtlı",
+      "cancelled": "Sona erdi"
+    },
+    "standing": {
+      "upcoming": "Bekleniyor",
+      "past_due": "Ek sürede",
+      "overdue": "Ek süre doldu"
+    },
+    "chargeStatus": {
+      "open": "Açık",
+      "paid": "Ödendi",
+      "waived": "Bağışlandı",
+      "void": "İptal edildi"
+    },
+    "method": {
+      "bank_transfer": "Havale / EFT",
+      "card_manual": "Kart (elle)",
+      "other": "Diğer"
+    },
+    "invoicing": {
+      "none": "Kapalı (şirket kurulunca açılacak)"
+    },
+    "subscription": {
+      "title": "Abonelik",
+      "none": "Bu mağazanın aboneliği yok. Abonelik mağaza etkinleştiğinde ve bir pakete bağlıysa başlar.",
+      "status": "Durum",
+      "package": "Paket",
+      "price": "Bu dönemin fiyatı",
+      "priceEach": "{{amount}} / {{period}}",
+      "started": "Başlangıç",
+      "trialEnds": "Deneme süresi bitişi",
+      "period": "Bu dönem",
+      "grace": "Ek süre",
+      "graceDays": "{{count}} gün (paketin)",
+      "graceOwn": "{{count}} gün (mağazaya özel: {{reason}})",
+      "invoicing": "E-fatura"
+    },
+    "grace": {
+      "open": "Ek süreyi değiştir",
+      "title": "Ek süre",
+      "text": "Paketin ek süresi {{days}} gün. Mağazaya özel ek süre gerekçeyle verilir; kaydedince mağazanın durumu yeni ek süreye göre hemen güncellenir.",
+      "own": "Bu mağazaya özel ek süre",
+      "days": "Ek süre",
+      "done": "Ek süre kaydedildi."
+    },
+    "charges": {
+      "title": "Ödeme kayıtları",
+      "text": "Her dönemin ödemesi, en yenisi üstte. Satıra tıklayınca ayrıntılar ve işlemler açılır.",
+      "empty": "Henüz ödeme kaydı yok."
+    },
+    "charge": {
+      "title": "Ödeme: {{period}}",
+      "status": "Durum",
+      "period": "Dönem",
+      "amount": "Tutar",
+      "listAmount": "Paket fiyatı",
+      "amountReason": "Düzeltme gerekçesi",
+      "due": "Son ödeme günü",
+      "graceEnds": "Ek süre bitişi",
+      "paidOn": "Ödeme tarihi",
+      "method": "Ödeme yöntemi",
+      "reference": "Dekont / referans",
+      "referenceHelp": "Banka dekontundaki işlem numarası ya da kısa bir not. İsteğe bağlı.",
+      "reason": "Gerekçe",
+      "settledBy": "İşaretleyen",
+      "newAmount": "Yeni tutar"
+    },
+    "actions": {
+      "pay": {
+        "open": "Ödendi",
+        "title": "Ödendi olarak işaretle",
+        "text": "{{period}} dönemi, {{amount}}. Mağaza bu ödeme yüzünden kısıtlıysa hemen açılır.",
+        "submit": "Ödendi olarak işaretle",
+        "done": "Ödeme kaydedildi."
+      },
+      "waive": {
+        "open": "Bağışla",
+        "title": "Ödemeyi bağışla",
+        "text": "{{period}} dönemi, {{amount}} alınmayacak. Gerekçe kayıtta kalır.",
+        "submit": "Bağışla",
+        "done": "Ödeme bağışlandı."
+      },
+      "amount": {
+        "open": "Tutarı düzelt",
+        "title": "Tutarı düzelt",
+        "text": "{{period}} dönemi, şu anki tutar {{amount}}. Kıst hesap yapılmaz; gerekçe kayıtta kalır.",
+        "submit": "Tutarı kaydet",
+        "done": "Tutar düzeltildi."
+      },
+      "void": {
+        "open": "Kaydı iptal et",
+        "title": "Ödeme kaydını iptal et",
+        "text": "{{period}} dönemi, {{amount}}. Yanlışlıkla açılmış bir kayıt içindir; mağaza bu tutarı hiç borçlanmamış sayılır.",
+        "submit": "Kaydı iptal et",
+        "done": "Ödeme kaydı iptal edildi."
+      }
+    },
+    "reminders": {
+      "title": "Gönderilen hatırlatmalar",
+      "text": "Faturalama kişisine giden e-postalar. Her hatırlatma bir ödeme için yalnızca bir kez gider.",
+      "empty": "Henüz hatırlatma gönderilmedi.",
+      "kind": "Hatırlatma",
+      "charge": "Ödeme günü",
+      "outcome": "Sonuç",
+      "at": "Zaman"
+    },
+    "reminderKind": {
+      "before_14": "14 gün kala",
+      "before_7": "7 gün kala",
+      "before_3": "3 gün kala",
+      "before_1": "1 gün kala",
+      "due": "Ödeme günü",
+      "overdue_3": "3 gün gecikme",
+      "restricted": "Kısıtlama bildirimi"
+    },
+    "reminderOutcome": {
+      "pending": "Gönderiliyor",
+      "sent": "Gönderildi",
+      "skipped": "Gönderilmedi",
+      "failed": "Gönderilemedi"
+    },
+    "reminderError": {
+      "mail_off": "e-posta gönderimi kapalı",
+      "no_contact": "faturalama ya da sahip yetkilisi yok",
+      "mail_failed": "e-posta sunucusu kabul etmedi"
+    },
+    "payments": {
+      "title": "Ödemeler",
+      "text": "Mağazaların abonelik ödemeleri: yaklaşan, geciken ve ödenenler.",
+      "list": "Ödeme listesi",
+      "tabsLabel": "Ödeme durumu",
+      "views": {
+        "upcoming": "Yaklaşan",
+        "overdue": "Geciken",
+        "paid": "Ödenen"
+      },
+      "search": "Mağaza adı ya da adresi",
+      "total_one": "{{count}} kayıt · toplam {{amount}}",
+      "total_other": "{{count}} kayıt · toplam {{amount}}",
+      "emptySearch": "Aramaya uyan ödeme yok.",
+      "empty": {
+        "upcoming": "Yaklaşan ödeme yok.",
+        "overdue": "Geciken ödeme yok.",
+        "paid": "Henüz ödenen kayıt yok."
+      },
+      "columns": {
+        "shop": "Mağaza ve dönem",
+        "due": "Son ödeme günü",
+        "paidOn": "Ödeme tarihi",
+        "amount": "Tutar",
+        "status": "Durum",
+        "graceEnds": "Ek süre bitişi",
+        "method": "Yöntem"
+      }
+    },
+    "instruction": {
+      "title": "Ödeme talimatı",
+      "text": "Her mağazanın Abonelik sayfasında ve hatırlatma e-postalarında görünen metin.",
+      "dialogText": "Hesap sahibi, IBAN ve açıklamaya ne yazılacağı. Kaydedince bütün mağazalara imzalı plan belgesiyle gider.",
+      "label": "Talimat",
+      "placeholder": "Alıcı: …\nIBAN: TR…\nAçıklama: mağaza adresiniz",
+      "help": "Düz metin, en çok 1000 karakter. Boş bırakılırsa mağazalarda talimat görünmez.",
+      "none": "Henüz ödeme talimatı yazılmadı.",
+      "updated": "Son değişiklik {{at}}, {{by}}",
+      "done": "Ödeme talimatı kaydedildi; mağazalara gönderiliyor."
     }
   }
 }

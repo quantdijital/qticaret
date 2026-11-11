@@ -16,13 +16,13 @@ describe("the control plane's menu", () => {
     }
   })
 
-  it("opens the shops and packages to every role, the sections still to come unreachable", () => {
+  it("opens the shops, packages and payments to every role, releases still to come", () => {
     for (const role of ["owner", "operator", "finance", "readonly"] as const) {
       const platform = navFor(role).find((group) => group.key === "platform")
       expect(platform?.items.map((item) => [item.key, item.to])).toEqual([
         ["shops", "/tenants"],
         ["packages", "/packages"],
-        ["payments", undefined],
+        ["payments", "/payments"],
         ["releases", undefined],
       ])
     }
@@ -34,6 +34,7 @@ describe("the control plane's menu", () => {
     expect(activeKey("/tenants")).toBe("shops")
     expect(activeKey("/tenants/ten_01")).toBe("shops")
     expect(activeKey("/packages")).toBe("packages")
+    expect(activeKey("/payments")).toBe("payments")
     expect(activeKey("/audit-log")).toBe("audit")
     expect(activeKey("/keys")).toBe("keys")
     expect(activeKey("/account")).toBe("account")

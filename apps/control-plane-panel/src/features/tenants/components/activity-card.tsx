@@ -4,9 +4,10 @@ import { useTranslation } from "react-i18next"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
 import { ErrorState, LoadingRows } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
-import { formatDateTime } from "@qticaret/admin-ui/lib/format"
+import { formatDate, formatDateTime } from "@qticaret/admin-ui/lib/format"
 import { fetchActivity, tenantKey } from "@/features/tenants/api"
 import type { ActivityItem } from "@/features/tenants/api"
+import { money } from "@/features/billing/words"
 import { errorText } from "@/lib/errors"
 
 const T = "/admin/cp/tenants/:id"
@@ -28,6 +29,12 @@ const ACTIONS: Record<string, string> = {
   [`POST ${T}/plan`]: "plan",
   [`POST ${T}/overrides`]: "override",
   [`DELETE ${T}/overrides/:key`]: "overrideRemoved",
+  // Ek C16: what staff did to its payments
+  [`POST ${T}/charges/:charge_id/pay`]: "chargePaid",
+  [`POST ${T}/charges/:charge_id/waive`]: "chargeWaived",
+  [`POST ${T}/charges/:charge_id/void`]: "chargeVoided",
+  [`POST ${T}/charges/:charge_id/amount`]: "chargeAmount",
+  [`POST ${T}/subscription`]: "grace",
 }
 
 /** A recorded value as text: a name or a code, else a dash. */
@@ -52,6 +59,15 @@ function detailOf(t: TFunction, item: ActivityItem): string | null {
   const own = changes["override"] as { key?: string } | undefined
   if (own?.key) {
     return t(`limits.keys.${own.key}`)
+  }
+  // Ek C16: a payment's amount from and to (kuruş), else the charge's due day
+  const amount = pair(changes["amount"])
+  if (typeof amount?.from === "number" && typeof amount.to === "number") {
+    return t("activity.fromTo", { from: money(amount.from), to: money(amount.to) })
+  }
+  const charge = changes["charge"] as { due_on?: unknown } | undefined
+  if (typeof charge?.due_on === "string") {
+    return formatDate(charge.due_on)
   }
   const domain = pair(changes["domain"]) ?? pair(changes["primary_domain"])
   const host = domain?.to ?? domain?.from
