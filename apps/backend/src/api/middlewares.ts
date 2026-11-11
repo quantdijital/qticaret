@@ -63,6 +63,7 @@ import { PAYMENT_LINK_ROUTES } from "./http/payment-link-routes"
 import { RETURN_ROUTES } from "./http/return-routes"
 import { REVIEW_ROUTES } from "./http/review-routes"
 import { MESSAGING_ROUTES } from "./http/messaging-routes"
+import { CONTROL_PLANE_ROUTES } from "./http/control-plane-routes"
 import { SHIPPING_ROUTES } from "./http/shipping-routes"
 import { CONTENT_ROUTES } from "./http/content-routes"
 import { CONTENT_DRAFT_ROUTES } from "./http/content-draft-routes"
@@ -308,6 +309,8 @@ export default defineMiddlewares({
       middlewares: [validateAndTransformBody(AdminPostRevealTaxId)],
     },
     ...MESSAGING_ROUTES,
+    // adr/0061 Ek C9: the control plane's signed plan document push
+    ...CONTROL_PLANE_ROUTES,
     ...ACCOUNT_ROUTES,
     // 2026-11-06: customers edited and guests added by staff, carts left behind
     ...CUSTOMER_ROUTES,

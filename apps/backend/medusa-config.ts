@@ -5,6 +5,7 @@ import {
   loadEnv,
 } from "@medusajs/framework/utils"
 import { customerAuthProviders } from "./src/lib/auth/providers"
+import { assertControlPlaneConfigured } from "./src/lib/control-plane/env"
 import { isLocalEnv, parseEnv, s3Settings } from "./src/lib/env"
 import { warnFakeProviders } from "./src/lib/fake-providers"
 import { DEFAULT_LOG_LEVEL, MedusaPinoLogger, baseLogger, logger } from "./src/lib/logging"
@@ -13,6 +14,8 @@ import { lockingModules, tenantNamespace } from "./src/lib/redis"
 loadEnv(process.env["NODE_ENV"] ?? "development", process.cwd())
 
 const env = parseEnv()
+// adr/0061 §3.3 (Ek C9): a deployed shop starts managed by the control plane only
+assertControlPlaneConfigured(env)
 const auth = customerAuthProviders(env)
 // Redis keys of this tenant; a test file apart from dev and from every other
 // test file, also one of another run at the same time (lib/redis/namespace.ts)
@@ -99,6 +102,15 @@ module.exports = defineConfig({
       options: {
         redisUrl: env.REDIS_URL,
         versionKey: `qt:settings:${namespace}:version`,
+      },
+    },
+    // adr/0061 Ek C9: the control plane's plan document as this shop last
+    // accepted it (unmanaged without CONTROL_PLANE_PUBLIC_KEYS)
+    {
+      resolve: "./src/modules/control-plane",
+      options: {
+        redisUrl: env.REDIS_URL,
+        versionKey: `qt:control-plane:${namespace}:version`,
       },
     },
     // adr/0027: the shop's provider accounts, sealed with their own key

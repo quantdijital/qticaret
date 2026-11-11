@@ -10,6 +10,7 @@ import {
   parseEnvWith,
   secret,
 } from "@qticaret/server-kit"
+import { CONTROL_PLANE_ENV, checkControlPlaneEnv } from "./control-plane/env"
 import { parseDsn } from "./error-tracking/dsn"
 import { LOG_LEVELS } from "./logging/levels"
 
@@ -175,6 +176,8 @@ const envSchema = z.object({
     .optional(),
   S3_ACCESS_KEY_ID: z.string().min(1).optional(),
   S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
+  // adr/0061 Ek C9: the control plane's plan documents (lib/control-plane/env.ts)
+  ...CONTROL_PLANE_ENV,
 })
 
 // Without these the file provider cannot work; the endpoint is only for
@@ -200,6 +203,9 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
   // configured store would fail at the first upload
   const s3Set = S3_REQUIRED.filter((name) => env[name] !== undefined)
   const deployed = env.NODE_ENV === "production" || env.NODE_ENV === "staging"
+  checkControlPlaneEnv(env, deployed, (path, message) => {
+    ctx.addIssue({ code: "custom", path: [path], message })
+  })
   if (deployed || s3Set.length > 0) {
     for (const name of S3_REQUIRED.filter((item) => env[item] === undefined)) {
       ctx.addIssue({

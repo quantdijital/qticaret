@@ -40,4 +40,6 @@ export interface FeatureChange {
 export interface Snapshot {
   sections: Record<SectionName, SectionValues>
   overrides: Record<string, boolean>
+  /** The plan document's platform flags as stored (adr/0061 Ek C9); applied while managed. */
+  platform: Record<string, boolean>
 }

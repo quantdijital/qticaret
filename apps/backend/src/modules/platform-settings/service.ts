@@ -4,7 +4,6 @@ import {
   InjectTransactionManager,
   MedusaContext,
   MedusaError,
-  MedusaService,
 } from "@medusajs/framework/utils"
 import { createRedisVersionSource, createVersionedCache } from "../../lib/cache"
 import type { VersionedCache } from "../../lib/cache"
@@ -13,9 +12,8 @@ import { logger } from "../../lib/logging"
 import { createRedisClient } from "../../lib/redis"
 import type Redis from "ioredis"
 import { featureDefinition, featureRegistry } from "./features"
-import type { FeatureDefinition } from "./features"
-import { FeatureOverride } from "./models/feature-override"
-import { SettingsSection } from "./models/settings-section"
+import { PlatformFlagStore, effectiveValue, managedOnly } from "./service-platform-flags"
+import type { PlatformFlagSync } from "./service-platform-flags"
 import { SECTIONS, mergePatch, sectionOf } from "./sections"
 import { parseStored, toValidationError } from "./sections/stored"
 import type { SectionName } from "./sections"
@@ -39,19 +37,14 @@ export type {
   StoredSection,
 } from "./types"
 
-// Own keys only, and tenant overrides only for tenant flags
-function effectiveValue(
-  definition: FeatureDefinition,
-  overrides: Record<string, boolean>,
-  key: string
-): { enabled: boolean; overridden: boolean } {
-  const override =
-    definition.owner === "tenant" && Object.hasOwn(overrides, key) ? overrides[key] : undefined
-  return { enabled: override ?? definition.default, overridden: override !== undefined }
-}
+export type { PlatformFlagSync } from "./service-platform-flags"
 
-/** Store and SEO settings and feature flags (F2.3, adr/0012). No secrets. */
-class PlatformSettingsModuleService extends MedusaService({ SettingsSection, FeatureOverride }) {
+/**
+ * Store and SEO settings and feature flags (F2.3, adr/0012). No secrets.
+ * The platform flags' stored values are `PlatformFlagStore`'s
+ * (service-platform-flags.ts).
+ */
+class PlatformSettingsModuleService extends PlatformFlagStore {
   private readonly cache: VersionedCache<Snapshot>
 
   constructor(container: Record<string, unknown>, options: PlatformSettingsModuleOptions = {}) {
@@ -79,9 +72,10 @@ class PlatformSettingsModuleService extends MedusaService({ SettingsSection, Fea
 
   @InjectManager()
   protected async loadSnapshot_(@MedusaContext() sharedContext: Context = {}): Promise<Snapshot> {
-    const [rows, overrides] = await Promise.all([
+    const [rows, overrides, platform] = await Promise.all([
       this.listSettingsSections({}, {}, sharedContext),
       this.listFeatureOverrides({}, {}, sharedContext),
+      this.readPlatformFlags(sharedContext),
     ])
     const sections = Object.fromEntries(
       (Object.keys(SECTIONS) as SectionName[]).map((name) => [
@@ -92,6 +86,7 @@ class PlatformSettingsModuleService extends MedusaService({ SettingsSection, Fea
     return {
       sections,
       overrides: Object.fromEntries(overrides.map((row) => [row.key, row.enabled])),
+      platform,
     }
   }
 
@@ -201,7 +196,8 @@ class PlatformSettingsModuleService extends MedusaService({ SettingsSection, Fea
   /**
    * Whether the flag is on. A key the registry does not know is off, and
    * logged. A platform flag ignores any tenant override: a flag that moved
-   * from tenant to platform (a plan feature, F17) keeps no old tenant choice.
+   * from tenant to platform (a plan feature, F17) keeps no old tenant choice;
+   * it takes the plan document's value while the shop is managed (Ek C9).
    */
   async isFeatureEnabled(key: string): Promise<boolean> {
     const definition = featureDefinition(key)
@@ -209,7 +205,8 @@ class PlatformSettingsModuleService extends MedusaService({ SettingsSection, Fea
       logger.error({ event: "platform_settings.feature_unknown", key })
       return false
     }
-    return effectiveValue(definition, (await this.cache.get()).overrides, key).enabled
+    const { overrides, platform } = await this.cache.get()
+    return effectiveValue(definition, { overrides, platform: managedOnly(platform) }, key).enabled
   }
 
   /** A flag's value as stored now, bypassing the cache (audit snapshots). */
@@ -224,15 +221,17 @@ class PlatformSettingsModuleService extends MedusaService({ SettingsSection, Fea
     }
     const rows = await this.listFeatureOverrides({ key }, { take: 1 }, sharedContext)
     const overrides = Object.fromEntries(rows.map((row) => [row.key, row.enabled]))
-    return effectiveValue(definition, overrides, key).enabled
+    const platform = managedOnly(await this.readPlatformFlags(sharedContext))
+    return effectiveValue(definition, { overrides, platform }, key).enabled
   }
 
   async listFeatures(): Promise<FeatureState[]> {
-    const { overrides } = await this.cache.get()
+    const { overrides, platform } = await this.cache.get()
+    const values = { overrides, platform: managedOnly(platform) }
     return Object.entries(featureRegistry()).map(([key, definition]) => ({
       key,
       ...definition,
-      ...effectiveValue(definition, overrides, key),
+      ...effectiveValue(definition, values, key),
     }))
   }
 
@@ -258,6 +257,17 @@ class PlatformSettingsModuleService extends MedusaService({ SettingsSection, Fea
     }
     await this.cache.invalidate()
     return { before: previous ?? definition.default, after: enabled, previousOverride: previous }
+  }
+
+  /**
+   * The plan document's platform flags stored as a whole set (adr/0061
+   * Ek C9; the document's workflow, never the panel). Keys this shop does
+   * not have as `owner: platform` are left out and named back.
+   */
+  async syncPlatformFlags(values: Readonly<Record<string, boolean>>): Promise<PlatformFlagSync> {
+    const sync = await this.writePlatformFlags_(values)
+    await this.cache.invalidate()
+    return sync
   }
 
   /** Puts a tenant flag's override back as it was (workflow compensation). */

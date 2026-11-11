@@ -147,6 +147,8 @@ export const RATE_LIMIT_PROFILES = {
     perIdentity: { max: 3, windowMs: 10 * MINUTE },
   },
   webhook: { name: "webhook", perIp: { max: 600, windowMs: MINUTE } },
+  // adr/0061 Ek C9: the control plane's plan document pushes; a handful a day per shop
+  control_plane_push: { name: "control_plane_push", perIp: { max: 60, windowMs: MINUTE } },
   // F5 V9: a shopper's browser back from a hosted form (iyzico), once per payment
   payment_return: {
     name: "payment_return",
