@@ -63,6 +63,39 @@ describe("plan document schema", () => {
     expect(planDocumentSchema.safeParse(document).success).toBe(false)
   })
 
+  it("takes a billing summary with and without the package name and instruction (Ek C16)", () => {
+    const full = {
+      ...planDocument,
+      billing: {
+        ...planDocument.billing,
+        package_name: "Profesyonel Ağ",
+        payment_instruction: "Alıcı: Quant Dijital\nIBAN: TR00 0000",
+      },
+    }
+    const blank = {
+      ...planDocument,
+      billing: { ...planDocument.billing, package_name: "Başlangıç", payment_instruction: null },
+    }
+
+    expect(planDocumentSchema.parse(full)).toEqual(full)
+    expect(planDocumentSchema.parse(blank)).toEqual(blank)
+    expect(planDocumentSchema.safeParse(planDocument).success).toBe(true)
+  })
+
+  it.each([
+    ["an empty package name", { package_name: "" }],
+    ["a package name over 100", { package_name: "a".repeat(101) }],
+    ["a package name with a line break", { package_name: "a\nb" }],
+    ["an instruction with a control character", { payment_instruction: "IBAN\u0007" }],
+    ["an instruction with a bidi override", { payment_instruction: "IBAN \u202e" }],
+    ["an instruction over 1000", { payment_instruction: "a".repeat(1001) }],
+    ["an empty instruction", { payment_instruction: "" }],
+  ])("refuses %s", (_case, extra) => {
+    const document = { ...planDocument, billing: { ...planDocument.billing, ...extra } }
+
+    expect(planDocumentSchema.safeParse(document).success).toBe(false)
+  })
+
   it("takes null as unlimited", () => {
     const limits = Object.fromEntries(LIMIT_KEYS.map((key) => [key, null]))
 

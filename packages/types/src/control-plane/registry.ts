@@ -87,3 +87,31 @@ export const LIMIT_WARNING_RATIO = 0.8
  * platform` is the shop's registry; a document may name only those.
  */
 export const FEATURE_FLAG_KEY = /^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+$/
+
+/**
+ * A subscription's charge (adr/0061 §2, Ek C16): `open` until staff mark it
+ * `paid`, `waived` (forgiven) or `void` (made by mistake). Only an open
+ * charge is owed.
+ */
+export const CHARGE_STATUSES = ["open", "paid", "waived", "void"] as const
+export type ChargeStatus = (typeof CHARGE_STATUSES)[number]
+
+/** How a payment was made; the platform charges no card itself (adr/0061 §7). */
+export const PAYMENT_METHODS = ["bank_transfer", "card_manual", "other"] as const
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number]
+
+/**
+ * The payment reminders (adr/0061 §7), each sent at most once per charge:
+ * days before the due day, on it, three days after, and when the shop is
+ * restricted.
+ */
+export const REMINDER_KINDS = [
+  "before_14",
+  "before_7",
+  "before_3",
+  "before_1",
+  "due",
+  "overdue_3",
+  "restricted",
+] as const
+export type ReminderKind = (typeof REMINDER_KINDS)[number]

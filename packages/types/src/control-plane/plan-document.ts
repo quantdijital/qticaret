@@ -27,7 +27,22 @@ const limitsSchema = z.strictObject(
   >
 )
 
-/** The billing summary the shop's panel shows (adr/0061 §7); amounts in kuruş. */
+/** A package's name as the shop shows it (Ek C16): a line of plain text. */
+export const PACKAGE_NAME_MAX = 100
+
+/** How to pay, as the platform writes it (Ek C16): plain text, lines kept. */
+export const PAYMENT_INSTRUCTION_MAX = 1000
+
+// Control and invisible format characters never reach a shop's panel; line breaks may
+const PLAIN_LINE = /^[^\p{Cc}\p{Cf}\u2028\u2029]*$/u
+const PLAIN_TEXT = /^(?:[^\p{Cc}\p{Cf}\u2028\u2029]|\n)*$/u
+
+/**
+ * The billing summary the shop's panel shows (adr/0061 §7); amounts in
+ * kuruş. `package_name` and `payment_instruction` came with C16 and are
+ * optional, so a shop takes documents with and without them while the
+ * fleet is updated (Ek C16); the object stays strict.
+ */
 const billingSummarySchema = z.strictObject({
   status: z.enum(SUBSCRIPTION_STATUSES),
   /** The open charge's due date (Europe/Istanbul calendar day), if any. */
@@ -36,6 +51,14 @@ const billingSummarySchema = z.strictObject({
   grace_ends_on: z.iso.date().nullable(),
   amount: z.int().min(0).nullable(),
   currency: z.literal("TRY"),
+  package_name: z.string().min(1).max(PACKAGE_NAME_MAX).regex(PLAIN_LINE).optional(),
+  payment_instruction: z
+    .string()
+    .min(1)
+    .max(PAYMENT_INSTRUCTION_MAX)
+    .regex(PLAIN_TEXT)
+    .nullable()
+    .optional(),
 })
 
 export const planDocumentSchema = z.strictObject({
