@@ -131,22 +131,24 @@ function writeWhenAnswered(
 export function auditCpRequests(req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) {
   const read = SAFE_METHODS.has(req.method)
   const rule = routeOf(req)?.rule
-  if (read && !rule?.auditRead) {
+  const before = rule?.auditBefore === true
+  if (read && !rule?.auditRead && !before) {
     next()
     return
   }
-  // A read written before it is shown (a TCKN, Ek C4 L6) leaves only its refusals here
+  // A read written before it is shown (a TCKN, a shop's contacts; Ek C4 L6)
+  // leaves only its refusals here, as the read they refused
   writeWhenAnswered(
     req,
     res,
     {
-      kind: read ? "sensitive_read" : "mutation",
+      kind: read || before ? "sensitive_read" : "mutation",
       ...describe(req),
       request_id: req.requestId ?? null,
       ip_hash: ipHashOf(req),
-      changes: read ? null : { fields: bodyFields(req.body) },
+      changes: read || before ? null : { fields: bodyFields(req.body) },
     },
-    rule?.auditBefore === true
+    before
   )
   next()
 }

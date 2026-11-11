@@ -121,6 +121,43 @@ describe("parseEnv", () => {
         REDIS_URL: "redis://r",
         CP_PANEL_URL: "https://ust.example.com",
       })
-    ).toContain("PLATFORM_DOMAIN: must be a public domain")
+    ).toContain("PLATFORM_DOMAIN: must have two labels")
+  })
+
+  it.each([
+    ["quantticaret", "two labels"],
+    ["quant.local", "local or reserved"],
+    ["magaza.test", "local or reserved"],
+    ["cp.internal", "local or reserved"],
+    ["shop.example", "local or reserved"],
+    ["x.invalid", "local or reserved"],
+    ["a.localhost", "local or reserved"],
+    ["10.0.0.1", "alphabetic top-level"],
+    ["quant.t1", "alphabetic top-level"],
+  ])("refuses %s as the platform's domain once deployed (review L2)", (domain, why) => {
+    const live = {
+      ...valid,
+      NODE_ENV: "production",
+      REDIS_URL: "redis://r",
+      CP_PANEL_URL: "https://ust.example.com",
+      PLATFORM_DOMAIN: domain,
+    }
+
+    expect(problems(live)).toContain(why)
+  })
+
+  it("takes a public domain once deployed, and localhost on this machine", () => {
+    const live = {
+      ...valid,
+      NODE_ENV: "production",
+      REDIS_URL: "redis://r",
+      CP_PANEL_URL: "https://ust.example.com",
+    }
+
+    expect(parseEnv({ ...live, PLATFORM_DOMAIN: "quantticaret.com" }).PLATFORM_DOMAIN).toBe(
+      "quantticaret.com"
+    )
+    expect(parseEnv({ ...live, PLATFORM_DOMAIN: "magaza.quantticaret.com.tr" })).toBeTruthy()
+    expect(parseEnv({ ...valid, PLATFORM_DOMAIN: "localhost" })).toBeTruthy()
   })
 })

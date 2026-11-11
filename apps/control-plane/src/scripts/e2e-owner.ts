@@ -1,7 +1,8 @@
 import type { ExecArgs, MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { createUserAccountWorkflow } from "@medusajs/medusa/core-flows"
-import { isLocalEnv, parseEnv } from "../lib/env"
+import { parseEnv } from "../lib/env"
+import { localOnlyProblem } from "../lib/local-only"
 import { loginOf } from "../lib/staff/mfa"
 import { sessionIndex } from "../lib/staff/session-index"
 import { CP_AUDIT_MODULE } from "../modules/cp-audit"
@@ -25,8 +26,9 @@ export class E2eOwnerError extends Error {
 }
 
 export function checkE2eAddress(email: string, env = parseEnv()): void {
-  if (!isLocalEnv(env)) {
-    throw new E2eOwnerError("e2e-owner: only in development or test")
+  const problem = localOnlyProblem(env)
+  if (problem) {
+    throw new E2eOwnerError(`e2e-owner: ${problem}`)
   }
   if (!E2E_OWNER_EMAIL.test(email)) {
     throw new E2eOwnerError("e2e-owner: not an e2e owner address")

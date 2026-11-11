@@ -16,7 +16,22 @@ describe("a shop's slug (adr/0061 §2)", () => {
   )
 
   it("refuses the names the platform answers on", () => {
-    for (const slug of ["www", "api", "admin", "panel", "mail", "localhost", "control-plane"]) {
+    for (const slug of [
+      "www",
+      "api",
+      "admin",
+      "panel",
+      "mail",
+      "localhost",
+      "control-plane",
+      "mta-sts",
+      "autodiscover",
+      "webmail",
+      "aapanel",
+      "giris",
+      "fatura",
+      "smtp-relay",
+    ]) {
       expect(RESERVED_SLUGS.has(slug)).toBe(true)
       expect(slugProblem(slug)).toBe("cp.slug_reserved")
     }

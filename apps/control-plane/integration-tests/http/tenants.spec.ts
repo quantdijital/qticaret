@@ -4,7 +4,7 @@ import { TENANTS_MODULE } from "../../src/modules/tenants"
 import type TenantsModuleService from "../../src/modules/tenants/service"
 import { makeMember } from "../helpers/staff"
 import type { HttpClient, Member } from "../helpers/staff"
-import { TEST_TCKN, TEST_VKN, client, freshSlug, makeTenant } from "../helpers/tenants"
+import { TEST_TCKN, TEST_VKN, client, freshSlug, makeTenant, proved } from "../helpers/tenants"
 
 jest.setTimeout(240 * 1000)
 
@@ -54,13 +54,16 @@ medusaIntegrationTestRunner({
       "lets %s make a shop record: %i; every role reads the list",
       async (role, status) => {
         const member = { owner, operator, finance, readonly }[role]
-        const made = await call.post(
-          "/admin/cp/tenants",
-          { name: "Kalem Evi", slug: freshSlug() },
-          member
-        )
+        const body = { name: "Kalem Evi", slug: freshSlug() }
+        // A record may name its package: the step-up is asked of who may make one (review M1)
+        const unproved = await call.post("/admin/cp/tenants", body, member)
+        const made =
+          status === 200
+            ? await call.post("/admin/cp/tenants", body, member, await proved(http, member))
+            : unproved
         const list = await call.get("/admin/cp/tenants?q=kalem", member)
 
+        expect(unproved.status).toBe(status === 200 ? 428 : 403)
         expect(made.status).toBe(status)
         expect(list.status).toBe(200)
         if (status === 403) {
@@ -104,7 +107,7 @@ medusaIntegrationTestRunner({
       [{ name: "", slug: "kirtasiye" }, "name"],
       [{ name: "A", slug: "kirtasiye", status: "active" }, "status"],
     ])("refuses a record %j (400)", async (body, key) => {
-      const answer = await call.post("/admin/cp/tenants", body, owner)
+      const answer = await call.post("/admin/cp/tenants", body, owner, await proved(http, owner))
 
       expect(answer.status).toBe(400)
       expect(JSON.stringify(answer.data)).toContain(key)
@@ -114,11 +117,13 @@ medusaIntegrationTestRunner({
       const { slug } = await makeTenant(http, owner)
       const other = freshSlug()
 
-      const again = await call.post("/admin/cp/tenants", { name: "B", slug }, owner)
+      const headers = await proved(http, owner)
+      const again = await call.post("/admin/cp/tenants", { name: "B", slug }, owner, headers)
       const noPackage = await call.post(
         "/admin/cp/tenants",
         { name: "B", slug: other, package_id: "pkg_none" },
-        owner
+        owner,
+        headers
       )
 
       expect(again.status).toBe(422)
@@ -187,7 +192,7 @@ medusaIntegrationTestRunner({
       )
       const firstId = (first.data as { contact: { id: string } }).contact.id
       const secondId = (second.data as { contact: { id: string } }).contact.id
-      const both = (await detail(id)).contacts
+      const both = (await detail(id, operator)).contacts
 
       expect(both).toEqual([
         expect.objectContaining({

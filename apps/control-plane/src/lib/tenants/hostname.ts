@@ -14,6 +14,30 @@ export const platformHostname = (slug: string, platformDomain: string): string =
 export const normalizeHostname = (value: string): string =>
   value.trim().toLowerCase().replace(/\.$/, "")
 
+// Names that never reach the public internet (RFC 6761, RFC 6762, ICANN's .internal)
+const PRIVATE_SUFFIXES = ["localhost", "local", "test", "internal", "example", "invalid"]
+
+/**
+ * Why a domain cannot be the platform's once deployed (C7 review L2), or
+ * null: two labels at least, an alphabetic top-level label (so no IP
+ * literal), none of the names that never resolve publicly. Development
+ * and test keep `localhost`.
+ */
+export function publicDomainProblem(domain: string): string | null {
+  const labels = domain.split(".")
+  const top = labels[labels.length - 1] ?? ""
+  if (labels.length < 2) {
+    return "must have two labels at least"
+  }
+  if (!/^[a-z]{2,63}$/.test(top)) {
+    return "must end in an alphabetic top-level label (no IP address)"
+  }
+  if (PRIVATE_SUFFIXES.includes(top)) {
+    return "must not be a local or reserved name"
+  }
+  return null
+}
+
 export type HostnameProblem = "cp.domain_invalid" | "cp.domain_platform"
 
 /**

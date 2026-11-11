@@ -84,7 +84,7 @@ medusaIntegrationTestRunner({
     })
 
     it("answers 404 to a route the table does not list, whatever the role", async () => {
-      const response = await get("/admin/cp/tenants", owner)
+      const response = await get("/admin/cp/payments", owner)
 
       expect(response.status).toBe(404)
     })

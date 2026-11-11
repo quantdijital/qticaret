@@ -2,6 +2,7 @@ import type { MedusaRequest } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { effectiveLimits } from "../../../../lib/plans/limits"
 import { omit } from "../../../../lib/omit"
+import { maskEmail, maskPhone } from "../../../../lib/tenants/mask"
 import { maskedTckn } from "../../../../lib/tenants/tckn"
 import type { CompanyRecord, NoteRecord, TenantRecord } from "../../../../modules/tenants/types"
 import { NOTE_FIELDS } from "../../../../modules/tenants/types"
@@ -52,7 +53,11 @@ async function notesOf(req: MedusaRequest, tenantId: string) {
 }
 
 /** A shop in full (GET /admin/cp/tenants/:id): every part the detail page shows. */
-export async function tenantDetail(req: MedusaRequest, tenant: TenantRecord) {
+export async function tenantDetail(
+  req: MedusaRequest,
+  tenant: TenantRecord,
+  options: { maskContacts: boolean }
+) {
   const service = tenantsOf(req)
   const plans = plansOf(req)
   const [company, contacts, domains, notes, plan, overrides] = await Promise.all([
@@ -82,7 +87,15 @@ export async function tenantDetail(req: MedusaRequest, tenant: TenantRecord) {
       next_payment_on: null,
     },
     company: companyView(company),
-    contacts: contacts.map(bare),
+    contacts: contacts.map((contact) =>
+      options.maskContacts
+        ? {
+            ...bare(contact),
+            email: maskEmail(contact.email),
+            phone: contact.phone ? maskPhone(contact.phone) : null,
+          }
+        : bare(contact)
+    ),
     domains: domains.map(bare),
     notes: notes.map((note) => ({
       ...bare(note),

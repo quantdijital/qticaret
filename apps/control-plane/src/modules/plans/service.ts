@@ -21,6 +21,8 @@ interface Executor {
   execute: (sql: string, params: unknown[]) => Promise<unknown>
 }
 
+const PLAN_PAGE = 1000
+
 interface PackageRow extends Omit<PackageRecord, "limits"> {
   limits?: { key: LimitKey; value: number | null }[]
 }
@@ -156,12 +158,21 @@ class PlansModuleService extends MedusaService({
     filter: { tenant_id?: string[]; package_id?: string },
     @MedusaContext() sharedContext: Context = {}
   ): Promise<Map<string, string>> {
-    const rows = (await this.listTenantPlans(
-      filter,
-      { select: ["tenant_id", "package_id"], take: 10_000 },
-      sharedContext
-    )) as unknown as { tenant_id: string; package_id: string }[]
-    return new Map(rows.map((row) => [row.tenant_id, row.package_id]))
+    // Page by page: a list cut short would drop shops from a package's filter
+    const plans = new Map<string, string>()
+    for (let skip = 0; ; skip += PLAN_PAGE) {
+      const rows = (await this.listTenantPlans(
+        filter,
+        { select: ["tenant_id", "package_id"], order: { id: "ASC" }, skip, take: PLAN_PAGE },
+        sharedContext
+      )) as unknown as { tenant_id: string; package_id: string }[]
+      for (const row of rows) {
+        plans.set(row.tenant_id, row.package_id)
+      }
+      if (rows.length < PLAN_PAGE) {
+        return plans
+      }
+    }
   }
 
   /**

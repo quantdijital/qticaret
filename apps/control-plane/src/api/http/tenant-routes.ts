@@ -1,4 +1,7 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
+import { CP_RATE_LIMIT_PROFILES } from "../../lib/rate-limit-profiles"
+import { userIdOf } from "./caller"
+import { rateLimit } from "./rate-limit"
 import type { defineMiddlewares } from "@medusajs/framework/http"
 import { NoBody, NoQuery } from "../admin/cp/validators"
 import { PostPlan, PostPlanPrice, PostPlanUpdate } from "../admin/cp/plans/validators"
@@ -60,7 +63,15 @@ export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
   body(T, PostTenant),
   body(`${T}/:id`, PostTenantUpdate),
   body(`${T}/:id/company`, PostCompany),
-  body(`${T}/:id/reveal-tckn`, NoBody),
+  {
+    matcher: `${T}/:id/reveal-tckn`,
+    methods: ["POST"],
+    // Per staff member, every address together: a stolen session reads a few, not all
+    middlewares: [
+      rateLimit(() => CP_RATE_LIMIT_PROFILES.tckn_reveal, { identity: userIdOf }),
+      validateAndTransformBody(NoBody),
+    ],
+  },
   body(`${T}/:id/contacts`, PostContact),
   body(`${T}/:id/contacts/:contact_id`, PostContact),
   body(`${T}/:id/domains`, PostDomain),

@@ -44,6 +44,8 @@ export const CP_RATE_LIMIT_PROFILES = {
   // An invitation's page and its acceptance, before any account: the link is the credential
   invite_public: { name: "cp_invite_public", perIp: { max: 20, windowMs: HOUR } },
   tenant_api: { name: "cp_tenant_api", perIp: { max: 300, windowMs: MINUTE } },
+  // A sole proprietor's TCKN shown: per staff member from every address (C7 review L1)
+  tckn_reveal: { name: "cp_tckn_reveal", perIdentityAnyIp: { max: 20, windowMs: HOUR } },
 } as const satisfies Record<string, RateLimitProfile>
 
 /** Each kind of /auth/* route (`authRouteKind`) and the profile it counts in. */

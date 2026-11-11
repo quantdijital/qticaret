@@ -62,9 +62,23 @@ const shopRules = (method: Method, paths: string[], access: Access): RouteRule[]
 /** The shops (C7, adr/0061 §2): every change recorded against the shop, so its activity reads it. */
 const TENANT_ROUTES: RouteRule[] = [
   { method: "GET", path: "/admin/cp/tenants", access: ALL },
-  { method: "POST", path: "/admin/cp/tenants", access: SHOPS, resource: { type: "tenant" } },
-  // Its contacts are people's data: reading the shop is recorded
-  { method: "GET", path: "/admin/cp/tenants/:id", access: ALL, resource: TENANT, auditRead: true },
+  // A new record may name its package, which sets what the shop pays: proved again (review M1)
+  {
+    method: "POST",
+    path: "/admin/cp/tenants",
+    access: SHOPS,
+    stepUp: true,
+    resource: { type: "tenant" },
+  },
+  // Its contacts are people's data: the read is recorded before the answer (review M2)
+  {
+    method: "GET",
+    path: "/admin/cp/tenants/:id",
+    access: ALL,
+    resource: TENANT,
+    auditRead: true,
+    auditBefore: true,
+  },
   { method: "GET", path: "/admin/cp/tenants/:id/activity", access: ALL, resource: TENANT },
   ...shopRules(
     "POST",
@@ -76,11 +90,18 @@ const TENANT_ROUTES: RouteRule[] = [
       "/domains/:domain_id/primary",
       "/notes",
       "/notes/:note_id",
-      "/plan",
       "/overrides",
     ],
     SHOPS
   ),
+  // The shop's package sets what it pays: proved again, as a price change (review M1)
+  {
+    method: "POST",
+    path: "/admin/cp/tenants/:id/plan",
+    access: SHOPS,
+    stepUp: true,
+    resource: TENANT,
+  },
   ...shopRules(
     "DELETE",
     ["/contacts/:contact_id", "/domains/:domain_id", "/notes/:note_id", "/overrides/:key"],
@@ -101,7 +122,14 @@ const TENANT_ROUTES: RouteRule[] = [
 /** The packages (C7): read by all; made, changed and archived by finance; a price behind a step-up. */
 const PLAN_ROUTES: RouteRule[] = [
   { method: "GET", path: "/admin/cp/plans", access: ALL },
-  { method: "POST", path: "/admin/cp/plans", access: PACKAGES, resource: { type: "package" } },
+  // A new package sets a price: proved again, as a price change (review M1)
+  {
+    method: "POST",
+    path: "/admin/cp/plans",
+    access: PACKAGES,
+    stepUp: true,
+    resource: { type: "package" },
+  },
   ...["", "/archive", "/restore"].map((action): RouteRule => ({
     method: "POST",
     path: `/admin/cp/plans/:id${action}`,

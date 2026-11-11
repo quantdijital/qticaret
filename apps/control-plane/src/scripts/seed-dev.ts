@@ -2,7 +2,8 @@ import type { ExecArgs, MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { isValidVkn } from "@qticaret/server-kit"
 import type { TenantStatus } from "@qticaret/types/control-plane"
-import { isLocalEnv, parseEnv } from "../lib/env"
+import { parseEnv } from "../lib/env"
+import { localOnlyProblem } from "../lib/local-only"
 import { platformHostname } from "../lib/tenants/hostname"
 import { CP_AUDIT_MODULE } from "../modules/cp-audit"
 import type CpAuditModuleService from "../modules/cp-audit/service"
@@ -172,8 +173,9 @@ async function seedShop(container: MedusaContainer, shop: ShopSeed, packageId: s
 }
 
 export default async function seedDev({ container }: ExecArgs): Promise<void> {
-  if (!isLocalEnv(parseEnv())) {
-    throw new Error("seed-dev: only on a developer's machine")
+  const problem = localOnlyProblem(parseEnv())
+  if (problem) {
+    throw new Error(`seed-dev: ${problem}`)
   }
   const packages = await seedPackages(container)
   const taken = new Set(

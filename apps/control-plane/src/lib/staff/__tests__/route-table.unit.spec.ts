@@ -127,12 +127,15 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "DELETE /admin/cp/me/sessions/:id",
       "POST /admin/cp/me/mfa/recovery-codes",
       "POST /admin/cp/me/sessions/revoke-others",
+      "POST /admin/cp/plans",
       "POST /admin/cp/plans/:id/price",
       "POST /admin/cp/staff/invites",
       "POST /admin/cp/staff/members/:id",
       "POST /admin/cp/staff/members/:id/deactivate",
       "POST /admin/cp/staff/members/:id/reactivate",
       "POST /admin/cp/staff/members/:id/reset-mfa",
+      "POST /admin/cp/tenants",
+      "POST /admin/cp/tenants/:id/plan",
       "POST /admin/cp/tenants/:id/reveal-tckn",
     ])
   })
@@ -179,11 +182,14 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
   })
 
   it("records every read of a shop and the TCKN before it is shown (C7)", () => {
-    expect(matchRoute("GET", "/admin/cp/tenants/ten_1")?.rule.auditRead).toBe(true)
+    expect(matchRoute("GET", "/admin/cp/tenants/ten_1")?.rule.auditBefore).toBe(true)
     const reveal = matchRoute("POST", "/admin/cp/tenants/ten_1/reveal-tckn")?.rule
 
     expect(reveal?.auditBefore).toBe(true)
-    expect(CP_ROUTES.filter((rule) => rule.auditBefore)).toHaveLength(1)
+    expect(CP_ROUTES.filter((rule) => rule.auditBefore).map((rule) => rule.path)).toEqual([
+      "/admin/cp/tenants/:id",
+      "/admin/cp/tenants/:id/reveal-tckn",
+    ])
     // Every shop route records against the shop it names, so its activity reads it
     for (const rule of CP_ROUTES.filter((each) => each.path.startsWith("/admin/cp/tenants/"))) {
       expect(rule.resource).toEqual({ type: "tenant", param: "id" })

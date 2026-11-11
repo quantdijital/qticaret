@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { publicDomainProblem } from "./tenants/hostname"
 import {
   EnvValidationError,
   isLocalEnv,
@@ -100,11 +101,12 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: reused ? `must differ from ${reused}` : "lists the same key twice",
     })
   }
-  if (deployed && env.PLATFORM_DOMAIN === "localhost") {
+  const domainProblem = deployed ? publicDomainProblem(env.PLATFORM_DOMAIN) : null
+  if (domainProblem) {
     ctx.addIssue({
       code: "custom",
       path: ["PLATFORM_DOMAIN"],
-      message: "must be a public domain outside development and test",
+      message: `${domainProblem} outside development and test`,
     })
   }
   if (env.ADMIN_MFA === "off" && deployed) {

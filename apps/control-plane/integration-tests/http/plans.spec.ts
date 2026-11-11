@@ -1,7 +1,7 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { makeMember, stepUp } from "../helpers/staff"
+import { makeMember } from "../helpers/staff"
 import type { HttpClient, Member } from "../helpers/staff"
-import { auditRows, client, freshSlug, makeTenant } from "../helpers/tenants"
+import { auditRows, client, freshSlug, makeTenant, proved } from "../helpers/tenants"
 
 jest.setTimeout(240 * 1000)
 
@@ -45,7 +45,8 @@ medusaIntegrationTestRunner({
       readonly = await makeMember(http, getContainer(), "readonly")
     })
 
-    const newPlan = async (member: Member, body: Record<string, unknown> = {}) =>
+    // A new package sets a price: proved again (review M1)
+    const newPlan = async (member: Member, body: Record<string, unknown> = {}, proof = true) =>
       call.post(
         "/admin/cp/plans",
         {
@@ -57,7 +58,8 @@ medusaIntegrationTestRunner({
           limits: { products: 500, staff: 3 },
           ...body,
         },
-        member
+        member,
+        proof ? await proved(http, member) : member.headers
       )
 
     const planOf = (answer: { data: unknown }) => (answer.data as { plan: Plan }).plan
@@ -76,7 +78,9 @@ medusaIntegrationTestRunner({
     ] as const)("lets %s make a package: %i", async (role, status) => {
       const member = { owner, operator, finance, readonly }[role]
 
-      expect((await newPlan(member)).status).toBe(status)
+      // The step-up is asked of who may make one (review M1)
+      expect((await newPlan(member, {}, false)).status).toBe(status === 200 ? 428 : 403)
+      expect((await newPlan(member, {}, status === 200)).status).toBe(status)
       expect((await call.get("/admin/cp/plans", member)).status).toBe(200)
     })
 
@@ -106,11 +110,11 @@ medusaIntegrationTestRunner({
       const path = `/admin/cp/plans/${made.id}/price`
 
       const unproved = await call.post(path, { price: 59_000, period: "monthly" }, finance)
-      const proved = await call.post(
+      const priced = await call.post(
         path,
         { price: 59_000, period: "yearly" },
         finance,
-        await stepUp(http, finance)
+        await proved(http, finance)
       )
       const renamed = await call.post(
         `/admin/cp/plans/${made.id}`,
@@ -124,7 +128,7 @@ medusaIntegrationTestRunner({
       })
 
       expect(unproved.status).toBe(428)
-      expect(planOf(proved)).toMatchObject({ price: 59_000, period: "yearly" })
+      expect(planOf(priced)).toMatchObject({ price: 59_000, period: "yearly" })
       expect(planOf(renamed)).toMatchObject({ name: "Esnaf", limits: { products: 800 } })
       expect(rows.map((row) => row.changes)).toEqual(
         expect.arrayContaining([
@@ -151,7 +155,8 @@ medusaIntegrationTestRunner({
       const refused = await call.post(
         `/admin/cp/tenants/${second.id}/plan`,
         { package_id: made.id },
-        operator
+        operator,
+        await proved(http, operator)
       )
       expect(refused.status).toBe(400)
       expect(refused.data).toMatchObject({ message: "cp.package_archived" })
@@ -160,15 +165,22 @@ medusaIntegrationTestRunner({
           await call.post(
             "/admin/cp/tenants",
             { name: "C", slug: freshSlug(), package_id: made.id },
-            owner
+            owner,
+            await proved(http, owner)
           )
         ).data
       ).toMatchObject({ message: "cp.package_archived" })
 
       await call.post(`/admin/cp/plans/${made.id}/restore`, {}, owner)
       expect(
-        (await call.post(`/admin/cp/tenants/${second.id}/plan`, { package_id: made.id }, operator))
-          .status
+        (
+          await call.post(
+            `/admin/cp/tenants/${second.id}/plan`,
+            { package_id: made.id },
+            operator,
+            await proved(http, operator)
+          )
+        ).status
       ).toBe(200)
     })
 
@@ -180,9 +192,11 @@ medusaIntegrationTestRunner({
       expect(
         (await call.post(`/admin/cp/tenants/${id}/plan`, { package_id: made.id }, finance)).status
       ).toBe(403)
-      expect(
-        (await call.post(`/admin/cp/tenants/${id}/plan`, { package_id: made.id }, operator)).status
-      ).toBe(200)
+      const assign = (headers: Record<string, string>) =>
+        call.post(`/admin/cp/tenants/${id}/plan`, { package_id: made.id }, operator, headers)
+      // What the shop pays: proved again, as a price change (review M1)
+      expect((await assign(operator.headers)).status).toBe(428)
+      expect((await assign(await proved(http, operator))).status).toBe(200)
       const noReason = await call.post(path, { key: "products", value: 2000, reason: "" }, operator)
       const ended = await call.post(
         path,

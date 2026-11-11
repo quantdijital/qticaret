@@ -15,3 +15,11 @@ export const DOMAIN_VERIFICATIONS = ["pending", "verified", "failed"] as const
 export type DomainVerification = (typeof DOMAIN_VERIFICATIONS)[number]
 
 export const NOTE_MAX = 2000
+
+/**
+ * A shop's contacts and own domains are bounded (C7 review L5): no request
+ * grows a shop's record without end. Reads take more than these, so a
+ * full list is never cut short.
+ */
+export const MAX_CONTACTS = 50
+export const MAX_CUSTOM_DOMAINS = 50

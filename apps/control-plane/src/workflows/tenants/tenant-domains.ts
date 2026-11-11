@@ -2,6 +2,7 @@ import { MedusaError } from "@medusajs/framework/utils"
 import { WorkflowResponse, createWorkflow } from "@medusajs/framework/workflows-sdk"
 import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
 import { omit } from "../../lib/omit"
+import { MAX_CUSTOM_DOMAINS } from "../../lib/tenants/kinds"
 import type { DomainRecord } from "../../modules/tenants/types"
 import { tenantsIn } from "../modules"
 import { undoableStep } from "../undoable"
@@ -35,6 +36,10 @@ const addDomainStep = undoableStep(
   "cp-tenant-add-domain",
   async (input: { tenant_id: string; hostname: string }, container) => {
     const service = tenantsIn(container)
+    const own = (await service.domainsOf(input.tenant_id)).filter((each) => each.kind === "custom")
+    if (own.length >= MAX_CUSTOM_DOMAINS) {
+      throw refused("cp.domains_full")
+    }
     await service.refuseTakenHost(input.hostname)
     const [made] = await service.createTenantDomains([
       { tenant_id: input.tenant_id, hostname: input.hostname, kind: "custom" },

@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { CP_AUDIT_MODULE } from "../../src/modules/cp-audit"
 import type CpAuditModuleService from "../../src/modules/cp-audit/service"
-import { anyStatus } from "./staff"
+import { anyStatus, stepUp } from "./staff"
 import type { HttpClient, Member } from "./staff"
 
 /** A slug no other test takes: letters only, under 30 characters. */
@@ -32,7 +32,21 @@ export function client(http: HttpClient) {
   }
 }
 
-/** A shop record made by `member`: its id. */
+// A proof holds five minutes and is not spent: one per member, renewed before it runs out
+const proofs = new WeakMap<Member, { headers: Record<string, string>; until: number }>()
+
+/** The member's headers with a step-up proof (one recovery code per four minutes). */
+export async function proved(http: HttpClient, member: Member): Promise<Record<string, string>> {
+  const held = proofs.get(member)
+  if (held && held.until > Date.now()) {
+    return held.headers
+  }
+  const headers = await stepUp(http, member)
+  proofs.set(member, { headers, until: Date.now() + 4 * 60 * 1000 })
+  return headers
+}
+
+/** A shop record made by `member` (a step-up: a record may name its package): its id. */
 export async function makeTenant(
   http: HttpClient,
   member: Member,
@@ -42,7 +56,7 @@ export async function makeTenant(
   const made = await http.post<{ tenant: { id: string; slug: string } }>(
     "/admin/cp/tenants",
     { name: "Atölye Bıçak", slug, ...body },
-    { ...anyStatus, headers: member.headers }
+    { ...anyStatus, headers: await proved(http, member) }
   )
   if (made.status !== 200) {
     throw new Error(`tenant not made: ${String(made.status)} ${JSON.stringify(made.data)}`)

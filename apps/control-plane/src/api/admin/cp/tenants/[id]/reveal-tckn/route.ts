@@ -7,10 +7,12 @@ import { tenantParam, tenantsOf } from "../../params"
 
 /**
  * POST /admin/cp/tenants/:id/reveal-tckn (owner, operator, finance,
- * step-up): a sole proprietor's TCKN in the clear, once (adr/0061 §2,
- * §3.5). The read is recorded first and nothing is shown when it cannot
- * be (Ek C4); the answer is never cached. A refusal is recorded by the
- * audit middleware.
+ * step-up, 20 an hour per member): a sole proprietor's TCKN in the clear,
+ * once (adr/0061 §2, §3.5). Opened first, in memory only; then the read
+ * is recorded, and only then shown: when it cannot be recorded nothing is
+ * shown (503, Ek C4), and a number that cannot be opened leaves no "shown"
+ * row (review L1). Never cached. Refusals are recorded by the audit
+ * middleware, as reads.
  */
 export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const tenant = await tenantParam(req)
@@ -19,12 +21,9 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "cp.tckn_none")
   }
   res.setHeader("Cache-Control", "no-store")
-  if (!(await recordReadFirst(req))) {
-    res.status(503).json({ type: "unavailable", message: "cp.audit_unavailable" })
-    return
-  }
+  let tckn: string
   try {
-    res.json({ tckn: await openTckn(tenant.id, company.tckn_sealed) })
+    tckn = await openTckn(tenant.id, company.tckn_sealed)
   } catch (error) {
     // A wrong key or a row copied from another shop: said, never shown
     loggerOf(req)?.error(
@@ -32,4 +31,9 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
     )
     throw new MedusaError(MedusaError.Types.UNEXPECTED_STATE, "cp.tckn_unreadable")
   }
+  if (!(await recordReadFirst(req))) {
+    res.status(503).json({ type: "unavailable", message: "cp.audit_unavailable" })
+    return
+  }
+  res.json({ tckn })
 }

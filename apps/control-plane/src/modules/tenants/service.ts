@@ -1,5 +1,11 @@
 import type { Context } from "@medusajs/framework/types"
-import { InjectManager, InjectTransactionManager, MedusaContext } from "@medusajs/framework/utils"
+import {
+  InjectManager,
+  InjectTransactionManager,
+  MedusaContext,
+  MedusaError,
+} from "@medusajs/framework/utils"
+import { MAX_CONTACTS } from "../../lib/tenants/kinds"
 import { omit } from "../../lib/omit"
 import { heirOnRemoval, primaryOnSave } from "../../lib/tenants/contacts"
 import { TenantsRecords, notFound } from "./service-records"
@@ -61,6 +67,9 @@ class TenantsModuleService extends TenantsRecords {
     const before = snapshot.find((each) => each.id === contactId) ?? null
     if (contactId && !before) {
       throw notFound("cp.contact_unknown")
+    }
+    if (!before && snapshot.length >= MAX_CONTACTS) {
+      throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "cp.contacts_full")
     }
     const { primary, demote } = primaryOnSave(snapshot, contactId, fields.is_primary_billing)
     if (demote.length > 0) {

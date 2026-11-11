@@ -1,8 +1,9 @@
 import type { Env } from "../../lib/env"
 import { E2E_OWNER_EMAIL, E2eOwnerError, checkE2eAddress } from "../e2e-owner"
 
-const local = { NODE_ENV: "development" } as Env
-const live = { NODE_ENV: "production" } as Env
+const DB = "postgres://postgres:pw@localhost:55432/qticaret_cp"
+const local = { NODE_ENV: "development", DATABASE_URL: DB } as Env
+const live = { NODE_ENV: "production", DATABASE_URL: DB } as Env
 const address = "cp-e2e-1762800000000-a1b2c3@example.com"
 
 describe("the e2e owner script's guard (Ek C6)", () => {
@@ -28,6 +29,20 @@ describe("the e2e owner script's guard (Ek C6)", () => {
     expect(() => {
       checkE2eAddress(address, live)
     }).toThrow(E2eOwnerError)
+  })
+
+  it("refuses a database off this machine, without naming it (C7 review L3)", () => {
+    const remote = { ...local, DATABASE_URL: "postgres://u:secret@db.quantticaret.com:5432/cp" }
+
+    expect(() => {
+      checkE2eAddress(address, remote)
+    }).toThrow("e2e-owner: only against a database on this machine")
+    try {
+      checkE2eAddress(address, remote)
+    } catch (error) {
+      expect((error as Error).message).not.toContain("quantticaret")
+      expect((error as Error).message).not.toContain("secret")
+    }
   })
 
   it("refuses a real account's address", () => {
