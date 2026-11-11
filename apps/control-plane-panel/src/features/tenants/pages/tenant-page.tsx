@@ -31,8 +31,8 @@ const route = getRouteApi("/_app/tenants/$id")
 /**
  * The shop's people, addresses, package, setup and history: one card a
  * tab. The setup ("Kurulum", C11) is the owner's and the operator's (the
- * control plane answers no one else); a shop still being set up opens on
- * it.
+ * control plane answers no one else); it keeps one place, so the tabs do
+ * not move when the shop turns `active` (the wizard opens it by `?part=`).
  */
 function TenantTabs({ shop }: { shop: TenantDetail }) {
   const { t } = useTranslation()
@@ -40,12 +40,10 @@ function TenantTabs({ shop }: { shop: TenantDetail }) {
   const setup: PageTab[] = canManageShops(me?.role)
     ? [{ key: "setup", label: t("setup.title"), content: <SetupTab shop={shop} /> }]
     : []
-  const settingUp = shop.tenant.status === "provisioning"
   return (
     <PageTabs
       label={t("tenants.detail.tabs")}
       tabs={[
-        ...(settingUp ? setup : []),
         {
           key: "contacts",
           label: t("contacts.title"),
@@ -70,7 +68,7 @@ function TenantTabs({ shop }: { shop: TenantDetail }) {
             </div>
           ),
         },
-        ...(settingUp ? [] : setup),
+        ...setup,
         {
           key: "notes",
           label: t("notes.title"),

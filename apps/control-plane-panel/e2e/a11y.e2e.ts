@@ -1,5 +1,5 @@
-import AxeBuilder from "@axe-core/playwright"
 import type { Page } from "@playwright/test"
+import { seriousIssues } from "./support/axe"
 import { expect, pageHeading, test } from "./support/guard"
 import { SCREENS, SIGNED_OUT_SCREENS } from "./support/screens"
 
@@ -9,18 +9,6 @@ import { SCREENS, SIGNED_OUT_SCREENS } from "./support/screens"
  * runs the same at a phone's size.
  */
 const MODES = ["light", "dark"] as const
-
-async function seriousIssues(page: Page): Promise<string[]> {
-  const results = await new AxeBuilder({ page })
-    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-    .analyze()
-  return results.violations
-    .filter((violation) => violation.impact === "serious" || violation.impact === "critical")
-    .map(
-      (violation) =>
-        `${violation.id}: ${violation.nodes.map((node) => node.target.join(" ")).join(" | ")}`
-    )
-}
 
 async function check(page: Page, path: string) {
   for (const mode of MODES) {
@@ -82,6 +70,65 @@ test("the step-up dialog has no serious accessibility issue", async ({ page }) =
   await expect(page.getByRole("dialog", { name: "Kimliğinizi doğrulayın" })).toBeVisible()
   expect(await seriousIssues(page)).toEqual([])
   await page.getByRole("button", { name: "Vazgeç" }).click()
+})
+
+/** The wizard through its steps, axe at each (its inline errors shown first where it has some). */
+async function walkWizard(page: Page) {
+  const next = () => page.getByRole("button", { name: "İleri" }).click()
+  const issues = async (where: string) => {
+    expect(await seriousIssues(page), where).toEqual([])
+  }
+  await next()
+  await issues("company")
+  await page.getByLabel("Mağaza adı").fill("Kalem Atölyesi")
+  await next()
+  await next()
+  await issues("contacts")
+  await page.getByLabel("Ad soyad").fill("Ayşe Demir")
+  await page.getByLabel("E-posta").fill("ayse.demir@kalematolyesi.com")
+  await next()
+  await page.waitForLoadState("networkidle")
+  await issues("package")
+  const packages = page.getByRole("radio")
+  test.skip((await packages.count()) === 0, "no package on sale on this machine")
+  await packages.first().click()
+  await next()
+  await page.getByLabel("Alan adı").fill("kalematolyesi")
+  await expect(page.getByText("Alan adı geçerli değil.").first()).toBeVisible()
+  await issues("address")
+  await page.getByLabel("Alan adı").fill("")
+  await page.getByLabel("Platform adresi").fill(`kalem-${String(Date.now()).slice(-6)}`)
+  await expect(page.getByText("Bu adres kullanılabilir.")).toBeVisible()
+  await next()
+  await issues("sector")
+  await next()
+  await issues("review")
+}
+
+for (const mode of MODES) {
+  // One mode a run, set before the page loads: the wizard keeps its state in memory only
+  test(`the new shop wizard has no serious accessibility issue, ${mode} (C11)`, async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: mode })
+    await page.goto("/tenants/new")
+    await expect(pageHeading(page)).toHaveText("Yeni mağaza")
+    await walkWizard(page)
+  })
+}
+
+test("a shop's setup tab has no serious accessibility issue, light or dark (C11)", async ({
+  page,
+}) => {
+  await page.goto("/tenants")
+  await page.waitForLoadState("networkidle")
+  const first = page.getByRole("table").getByRole("link").first()
+  test.skip((await first.count()) === 0, "no shop on this machine")
+  await first.click()
+  await expect(page.getByRole("tab", { name: /^Yetkililer/ })).toBeVisible()
+  // The tab as it is for this shop (its runs if any; a recorded run: wizard.e2e.ts)
+  await check(page, `${new URL(page.url()).pathname}?part=setup`)
+  await expect(page.getByRole("heading", { name: "İşlemler" })).toBeVisible()
 })
 
 test.describe("signed out", () => {

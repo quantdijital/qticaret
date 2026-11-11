@@ -50,6 +50,16 @@ setup("signs a temporary owner in, setting 2FA up", async ({ page }) => {
   // The next step's code: the setup's own was just spent (each code is taken once)
   await signIn(totp(key, 1))
   await expect(page.getByRole("navigation", { name: "Ana menü" })).toBeVisible()
-  writeFileSync(OWNER_FILE, JSON.stringify({ email: owner.email, recoveryCodes: codes }))
+  // The app's key too (C11: the wizard's step-ups take its codes; the recovery
+  // codes are replaced by step-up.e2e.ts), and the last time step spent
+  writeFileSync(
+    OWNER_FILE,
+    JSON.stringify({
+      email: owner.email,
+      recoveryCodes: codes,
+      totpKey: key,
+      lastStep: Math.floor(Date.now() / 30_000) + 1,
+    })
+  )
   await page.context().storageState({ path: SESSION_FILE })
 })

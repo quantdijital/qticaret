@@ -2,6 +2,7 @@
 export const SCREENS = [
   "/",
   "/tenants",
+  "/tenants/new",
   "/packages",
   "/account",
   "/staff",

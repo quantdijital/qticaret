@@ -1,4 +1,4 @@
-import { TriangleAlert } from "lucide-react"
+import { Pencil, TriangleAlert } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { SectionCard } from "@qticaret/admin-ui/patterns/section-card"
@@ -29,11 +29,13 @@ const masked = (tckn: string) => {
 
 function Facts({ rows }: { rows: [string, ReactNode][] }) {
   return (
-    <dl className="grid gap-x-4 gap-y-2 text-sm sm:grid-cols-[9rem_minmax(0,1fr)]">
+    <dl className="grid grid-cols-[7.5rem_minmax(0,1fr)] gap-x-4 gap-y-2 text-sm">
       {rows.map(([label, value]) => (
         <div key={label} className="contents">
           <dt className="text-[13px] text-muted-foreground">{label}</dt>
-          <dd className="min-w-0 break-words">{value === "" || value === null ? "—" : value}</dd>
+          <dd className="min-w-0 [overflow-wrap:anywhere]">
+            {value === "" || value === null ? "—" : value}
+          </dd>
         </div>
       ))}
     </dl>
@@ -71,14 +73,15 @@ export function ReviewStep({
       action={
         onEdit ? (
           <Button
-            size="sm"
-            variant="outline"
+            size="icon"
+            variant="ghost"
             aria-label={t("wizard.review.editStep", { step: t(`wizard.steps.${step}.title`) })}
+            title={t("wizard.review.edit")}
             onClick={() => {
               onEdit(step)
             }}
           >
-            {t("wizard.review.edit")}
+            <Pencil aria-hidden="true" />
           </Button>
         ) : undefined
       }
@@ -129,9 +132,14 @@ export function ReviewStep({
           <Facts
             rows={people.map((who) => [
               t(`contacts.roles.${who}`),
-              [draft[who].name.trim(), draft[who].email.trim(), draft[who].phone.trim()]
-                .filter(Boolean)
-                .join(" · "),
+              <span key={who} className="flex flex-col">
+                {[draft[who].name, draft[who].email, draft[who].phone]
+                  .map((part) => part.trim())
+                  .filter(Boolean)
+                  .map((part) => (
+                    <span key={part}>{part}</span>
+                  ))}
+              </span>,
             ])}
           />
         )}

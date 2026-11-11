@@ -950,7 +950,8 @@
       "text": "A shop cannot be set up without a package: its plan document carries it.",
       "days": "Trial {{trial}} days · grace {{grace}} days",
       "none": "No package is on sale. Create one before setting a shop up.",
-      "toPackages": "Go to packages"
+      "toPackages": "Go to packages",
+      "cardTitle": "Packages on sale"
     },
     "address": {
       "title": "Platform address",

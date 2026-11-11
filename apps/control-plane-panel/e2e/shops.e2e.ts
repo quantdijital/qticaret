@@ -34,16 +34,17 @@ test("finds a shop, opens its page and walks its tabs", async ({ page, guard }) 
   await guard.assertHealthy()
 })
 
-test("opens a new shop's dialog and closes it without a record", async ({ page, guard }) => {
+test("opens the new shop wizard from the list and leaves it untouched (C11)", async ({
+  page,
+  guard,
+}) => {
   await page.goto("/tenants")
-  await page.getByRole("button", { name: "Yeni mağaza" }).click()
-  const dialog = page.getByRole("dialog", { name: "Yeni mağaza" })
-  await dialog.getByLabel("Mağaza adı").fill("Bıçak Atölyesi")
-  await expect(dialog.getByLabel("Platform adresi")).toHaveValue("bicak-atolyesi")
-  await dialog.getByRole("button", { name: "Vazgeç" }).click()
-  // Typed and not kept: the form asks first
-  await page.getByRole("button", { name: "Değişiklikleri at" }).click()
-  await expect(dialog).toBeHidden()
+  await page.getByRole("link", { name: "Yeni mağaza" }).click()
+  await expect(pageHeading(page)).toHaveText("Yeni mağaza")
+  await expect(page.getByRole("heading", { name: "Firma", level: 2 })).toBeVisible()
+  // Nothing typed: leaving asks nothing
+  await page.getByRole("link", { name: "Vazgeç" }).click()
+  await expect(pageHeading(page)).toHaveText("Mağazalar")
   await guard.assertHealthy()
 })
 

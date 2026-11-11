@@ -214,7 +214,7 @@ describe("NewTenantPage: the new shop wizard (C11)", () => {
     expect(screen.getByText("Bu alan adı başka bir mağazada kayıtlı.")).toBeInTheDocument()
     expect(sent.some((call) => call.path.endsWith("/provisioning"))).toBe(false)
     // Nothing before the review can change now: the record exists
-    expect(screen.queryByRole("button", { name: "Düzenle" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /adımını düzenle$/ })).not.toBeInTheDocument()
     await userEvent.click(screen.getByRole("button", { name: "Mağaza sayfasına git" }))
     expect(routerState.navigate).toHaveBeenCalledWith(
       expect.objectContaining({ params: { id: "ten_new" }, search: { part: "setup" } })

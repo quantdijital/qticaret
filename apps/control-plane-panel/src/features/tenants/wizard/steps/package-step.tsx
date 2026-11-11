@@ -26,7 +26,7 @@ export function PackageStep({ draft, change, problems }: StepProps) {
   const offered = (plans.data?.plans ?? []).filter((plan) => plan.archived_at === null)
   const problem = problems["package_id"]
   return (
-    <SectionCard title={t("wizard.package.title")} description={t("wizard.package.text")}>
+    <SectionCard title={t("wizard.package.cardTitle")} description={t("wizard.package.text")}>
       {plans.isError ? (
         <ErrorState text={errorText(t, plans.error)} onRetry={() => void plans.refetch()} />
       ) : plans.isPending ? (

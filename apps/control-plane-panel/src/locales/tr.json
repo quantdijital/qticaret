@@ -950,7 +950,8 @@
       "text": "Kurulum paketsiz yapılamaz: mağazanın plan belgesi paketini taşır.",
       "days": "Deneme {{trial}} gün · ek süre {{grace}} gün",
       "none": "Satışta paket yok. Kuruluma geçmeden önce bir paket oluşturulmalı.",
-      "toPackages": "Paketlere git"
+      "toPackages": "Paketlere git",
+      "cardTitle": "Satıştaki paketler"
     },
     "address": {
       "title": "Platform adresi",
