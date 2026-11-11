@@ -4,6 +4,14 @@ import { userIdOf } from "./caller"
 import { rateLimit } from "./rate-limit"
 import type { defineMiddlewares } from "@medusajs/framework/http"
 import { NoBody, NoQuery } from "../admin/cp/validators"
+import {
+  GetPayments,
+  PostBillingSettings,
+  PostChargeAmount,
+  PostChargePay,
+  PostChargeReason,
+  PostSubscriptionGrace,
+} from "../admin/cp/billing/validators"
 import { PostPlan, PostPlanPrice, PostPlanUpdate } from "../admin/cp/plans/validators"
 import {
   GetActivity,
@@ -104,4 +112,14 @@ export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
   ...["", "/stop", "/start", "/invite", "/apply-pack"].map((action) =>
     body(`${T}/:id/provisioning${action}`, NoBody)
   ),
+  // Ek C16: billing
+  query("/admin/cp/payments", GetPayments),
+  query(`${T}/:id/subscription`, NoQuery),
+  body(`${T}/:id/subscription`, PostSubscriptionGrace),
+  body(`${T}/:id/charges/:charge_id/pay`, PostChargePay),
+  body(`${T}/:id/charges/:charge_id/waive`, PostChargeReason),
+  body(`${T}/:id/charges/:charge_id/void`, PostChargeReason),
+  body(`${T}/:id/charges/:charge_id/amount`, PostChargeAmount),
+  query("/admin/cp/billing-settings", NoQuery),
+  body("/admin/cp/billing-settings", PostBillingSettings),
 ]

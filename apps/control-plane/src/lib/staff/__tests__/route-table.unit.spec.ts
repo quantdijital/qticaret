@@ -74,7 +74,7 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
 
   it("refuses everyone a route it does not list", () => {
     for (const role of [...CP_STAFF_ROLES, null]) {
-      expect(decide(matchRoute("GET", "/admin/cp/payments")?.rule ?? null, staff(role))).toEqual({
+      expect(decide(matchRoute("GET", "/admin/cp/invoices")?.rule ?? null, staff(role))).toEqual({
         allowed: false,
         reason: "unlisted",
       })
@@ -125,6 +125,7 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
     expect(stepUps.sort()).toEqual([
       "DELETE /admin/cp/me/mfa",
       "DELETE /admin/cp/me/sessions/:id",
+      "POST /admin/cp/billing-settings",
       "POST /admin/cp/keys/rewrap",
       "POST /admin/cp/keys/signing/prepare",
       "POST /admin/cp/keys/signing/retire",
@@ -139,6 +140,10 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "POST /admin/cp/staff/members/:id/reactivate",
       "POST /admin/cp/staff/members/:id/reset-mfa",
       "POST /admin/cp/tenants",
+      "POST /admin/cp/tenants/:id/charges/:charge_id/amount",
+      "POST /admin/cp/tenants/:id/charges/:charge_id/pay",
+      "POST /admin/cp/tenants/:id/charges/:charge_id/void",
+      "POST /admin/cp/tenants/:id/charges/:charge_id/waive",
       "POST /admin/cp/tenants/:id/plan",
       "POST /admin/cp/tenants/:id/provisioning",
       "POST /admin/cp/tenants/:id/provisioning/apply-pack",
@@ -147,6 +152,7 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "POST /admin/cp/tenants/:id/provisioning/stop",
       "POST /admin/cp/tenants/:id/resume",
       "POST /admin/cp/tenants/:id/reveal-tckn",
+      "POST /admin/cp/tenants/:id/subscription",
       "POST /admin/cp/tenants/:id/suspend",
     ])
   })
@@ -297,5 +303,27 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
         resource: { type: "tenant", param: "id" },
       })
     }
+  })
+
+  it("gives billing's reads to all, its money to finance and the owner, behind a step-up (C16)", () => {
+    expect(allowedRoles("GET", "/admin/cp/payments")).toEqual([...CP_STAFF_ROLES])
+    expect(allowedRoles("GET", "/admin/cp/tenants/ten_1/subscription")).toEqual([...CP_STAFF_ROLES])
+    expect(allowedRoles("GET", "/admin/cp/billing-settings")).toEqual([...CP_STAFF_ROLES])
+    for (const path of [
+      "/admin/cp/tenants/ten_1/subscription",
+      "/admin/cp/tenants/ten_1/charges/chg_1/pay",
+      "/admin/cp/tenants/ten_1/charges/chg_1/waive",
+      "/admin/cp/tenants/ten_1/charges/chg_1/amount",
+    ]) {
+      expect(allowedRoles("POST", path)).toEqual(["owner", "finance"])
+      expect(matchRoute("POST", path)?.rule).toMatchObject({
+        stepUp: true,
+        resource: { type: "tenant", param: "id" },
+      })
+    }
+    // Voiding says nothing was owed; the instruction is an account every shop pays to
+    expect(allowedRoles("POST", "/admin/cp/tenants/ten_1/charges/chg_1/void")).toEqual(["owner"])
+    expect(allowedRoles("POST", "/admin/cp/billing-settings")).toEqual(["owner"])
+    expect(matchRoute("POST", "/admin/cp/billing-settings")?.rule.stepUp).toBe(true)
   })
 })

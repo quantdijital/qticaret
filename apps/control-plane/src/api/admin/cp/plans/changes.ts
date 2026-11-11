@@ -52,7 +52,7 @@ export async function changePackage(
   })
   const after = await plansOf(req).packageOf(id)
   noteAuditChanges(req, packageChanges(before, after))
-  // Its shops' documents follow (Ek C9; bounded, review L7); a price alone changes none yet (C16)
+  // Its shops' documents follow (Ek C9; bounded, review L7): its name and the next renewal's price (C16) too
   await reissueForPackage(req.scope, id)
   res.json({ plan: after })
 }

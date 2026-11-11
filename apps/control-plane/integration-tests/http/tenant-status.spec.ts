@@ -3,6 +3,8 @@ import type { TenantStatus } from "@qticaret/types/control-plane"
 import { TENANTS_MODULE } from "../../src/modules/tenants"
 import type TenantsModuleService from "../../src/modules/tenants/service"
 import { runTenantCommand } from "../../src/scripts/tenant"
+import { startSubscriptionWorkflow } from "../../src/workflows/billing/workflows"
+import { day } from "../helpers/billing"
 import { ensureSigningKey, fleetOf } from "../helpers/fleet"
 import { makeMember } from "../helpers/staff"
 import type { HttpClient, Member } from "../helpers/staff"
@@ -101,12 +103,16 @@ medusaIntegrationTestRunner({
       expect(JSON.stringify(activity.data)).toContain(REASON)
     })
 
-    it("ends a suspension where the shop stood: active, or restricted if it was", async () => {
+    it("ends a suspension by the payments: active, or restricted while overdue (Ek C16)", async () => {
       const active = await activeShop()
       await move(active, "suspend", owner)
       const reopened = await move(active, "resume", owner)
 
       const restricted = await activeShop()
+      // Its first charge was due 20 days ago, 7 days' grace: past it today
+      await startSubscriptionWorkflow(getContainer()).run({
+        input: { tenant_id: restricted, today: day(-20) },
+      })
       await tenants().changeStatus(restricted, "restricted", {
         reason_code: "payment_overdue",
         actor: "system",

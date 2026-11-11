@@ -3,7 +3,7 @@ import { Modules } from "@medusajs/framework/utils"
 import { platformFlags } from "@qticaret/types/control-plane"
 import { effectiveFlags } from "../../../../lib/fleet/plan-content"
 import { effectiveLimits } from "../../../../lib/plans/limits"
-import { fleetIn } from "../../../../workflows/modules"
+import { billingIn, fleetIn } from "../../../../workflows/modules"
 import { omit } from "../../../../lib/omit"
 import { maskEmail, maskPhone } from "../../../../lib/tenants/mask"
 import { maskedTckn } from "../../../../lib/tenants/tckn"
@@ -93,8 +93,9 @@ export async function tenantDetail(
       sector_pack_applied_at: tenant.sector_pack_applied_at,
       created_at: tenant.created_at,
       created_by: tenant.created_by ? (names[tenant.created_by] ?? null) : null,
-      // The subscription's next due date arrives with billing (C16)
-      next_payment_on: null,
+      // Ek C16: its oldest open charge's day, else its next renewal
+      next_payment_on:
+        (await billingIn(req.scope).nextPayments([tenant.id])).get(tenant.id) ?? null,
     },
     company: companyView(company),
     contacts: contacts.map((contact) =>

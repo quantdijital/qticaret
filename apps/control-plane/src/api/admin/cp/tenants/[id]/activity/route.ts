@@ -32,7 +32,9 @@ interface Item {
  * shop, newest first (adr/0061 §2): its status changes and every change
  * staff made to it, from the audit log (done ones, and TCKN reads), with
  * who did it. The audit's place and request ids stay in the audit log.
- * Payments and setup runs join with C16 and C10.
+ * Setup runs join as their requests (C10); payments as staff marked them
+ * (paid, waived, voided, corrected) and the billing moves as status rows
+ * (`payment_overdue`, `payment_settled`; Ek C16).
  */
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, GetActivityType>,

@@ -3,7 +3,7 @@ import { parseEnv } from "../../../../lib/env"
 import { reissuePlanDocuments } from "../../../../lib/fleet/reissue"
 import { platformHostname } from "../../../../lib/tenants/hostname"
 import type { HealthTarget } from "../../../../modules/fleet/models/health"
-import { fleetIn } from "../../../../workflows/modules"
+import { billingIn, fleetIn } from "../../../../workflows/modules"
 import { createTenantWorkflow } from "../../../../workflows/tenants/create-tenant"
 import { noteAuditChanges, noteAuditResource } from "../../../http/audit"
 import { actorOf, plansOf, tenantsOf } from "./params"
@@ -74,6 +74,8 @@ export async function GET(
   const byId = new Map(packages.map((each) => [each.id, each]))
   // Ek C13: each shop's latest standing per probed target, for the list's health column
   const standings = await fleetIn(req.scope).healthOf(rows.map((row) => row.id))
+  // Ek C16: each shop's next payment day (its oldest open charge, else its next renewal)
+  const nextPayments = await billingIn(req.scope).nextPayments(rows.map((row) => row.id))
   const healthOf = (id: string, target: HealthTarget) =>
     standings.find((each) => each.tenant_id === id && each.target === target)?.state ?? null
   res.json({
@@ -88,8 +90,7 @@ export async function GET(
         created_at: row.created_at,
         primary_hostname: row.domains?.find((each) => each.is_primary)?.hostname ?? null,
         package: chosen ? { id: chosen.id, code: chosen.code, name: chosen.name } : null,
-        // The subscription's next due date arrives with billing (C16)
-        next_payment_on: null,
+        next_payment_on: nextPayments.get(row.id) ?? null,
         health: {
           backend: healthOf(row.id, "backend"),
           storefront: healthOf(row.id, "storefront"),
