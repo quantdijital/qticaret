@@ -83,6 +83,8 @@ export const SHOP: TenantDetail = {
     status: "provisioning",
     status_changed_at: "2026-11-11T09:00:00.000Z",
     sector_pack: null,
+    sector_pack_version: null,
+    sector_pack_applied_at: null,
     created_at: "2026-11-11T09:00:00.000Z",
     created_by: "Deniz Kaya",
     next_payment_on: null,

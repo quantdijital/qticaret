@@ -709,6 +709,7 @@
       "register_closed": "Hesap yalnızca geçerli bir davetle, davet edilen adresle açılır.",
       "reset_self": "Kendi doğrulamanızı Hesabım sayfasından yenileyin.",
       "run_unknown": "Çalışma bulunamadı.",
+      "sector_pack_unknown": "Böyle bir sektör paketi yok.",
       "session_required": "Oturumunuz kapandı. Yeniden giriş yapın.",
       "session_revoked": "Oturumunuz kapatıldı. Yeniden giriş yapın.",
       "session_unknown": "Oturum bulunamadı; zaten kapanmış olabilir.",
@@ -736,6 +737,7 @@
     "provisioning": {
       "api_url_refused": "Mağazanın iç adresi izin verilen adreslerden değil.",
       "apply_pack_failed": "Sektör paketi uygulanamadı.",
+      "apply_pack_result_invalid": "Mağaza sektör paketinin sonucunu okunabilir biçimde bildirmedi.",
       "apply_pack_timeout": "Sektör paketinin uygulanması süre sınırını aştı.",
       "backend_not_built": "Mağaza yazılımı derlenmemiş. Önce derleme yapılmalı.",
       "bootstrap_failed": "Mağazanın ilk ayarları yapılamadı.",
@@ -777,6 +779,7 @@
       "secrets_lost": "Mağazanın gizli değerleri bulunamadı; anahtar yenilemesi gerekir.",
       "secrets_missing": "Mağazanın gizli değerleri yazılmamış.",
       "secrets_orphaned": "Anahtarı olmayan bir gizli değer dosyası var; üzerine yazılmadı.",
+      "sector_pack_unknown": "Bu sektör paketi bu sürümde yok.",
       "shop_exited": "Mağaza sunucusu başladıktan sonra kapandı.",
       "shop_running": "Mağaza sunucusu zaten çalışıyor.",
       "slug_invalid": "Mağazanın platform adresi geçerli değil.",
@@ -967,18 +970,7 @@
     },
     "sector": {
       "title": "Sektör paketi",
-      "text": "Ürün özellikleri ve arama görünümü için başlangıç şablonları.",
-      "soon": "Yakında",
-      "packs": {
-        "general": {
-          "name": "Genel",
-          "text": "Her sektöre uygun başlangıç; şablonları mağaza kendi ihtiyacına göre ekler."
-        },
-        "sector": {
-          "name": "Sektöre özel paketler",
-          "text": "Sektöre göre hazır özellik ve arama görünümü şablonları sonraki sürümle sunulacak."
-        }
-      }
+      "text": "Mağaza hazır özellik şablonları, önerilen kategoriler, ayarlar ve arama görünümü şablonlarıyla açılır. Kurulum yalnız mağazada olmayanı ekler; mağaza sonra hepsini değiştirebilir."
     },
     "review": {
       "edit": "Düzenle",
@@ -1061,20 +1053,23 @@
       "retry": "Yeniden dene",
       "start": "Başlat",
       "stop": "Durdur",
-      "invite": "Daveti yeniden gönder"
+      "invite": "Daveti yeniden gönder",
+      "applyPack": "Paketi uygula",
+      "reapplyPack": "Paketi yeniden uygula"
     },
     "started": {
       "create": "Kurulum başladı.",
       "start": "Mağaza sunucusu başlatılıyor.",
       "stop": "Mağaza sunucusu durduruluyor.",
-      "invite": "Davet yeniden gönderiliyor."
+      "invite": "Davet yeniden gönderiliyor.",
+      "apply_pack": "Sektör paketi uygulanıyor."
     },
     "reasons": {
       "loading": "Kurulum bilgisi okunuyor.",
       "noProvisioner": "Bu ortamda kurulum yapılmıyor.",
       "busy": "Bir çalışma sürüyor; bitince işlemler açılır.",
       "status": "Mağazanın durumu bu işleme uygun değil.",
-      "notSetUp": "Başlatma, durdurma ve davet için önce kurulum tamamlanmalı.",
+      "notSetUp": "Önce kurulum tamamlanmalı.",
       "done": "Kurulum tamamlandı."
     },
     "confirmStop": {
@@ -1085,7 +1080,8 @@
       "create": "Kurulum",
       "start": "Başlatma",
       "stop": "Durdurma",
-      "invite": "Davet gönderimi"
+      "invite": "Davet gönderimi",
+      "apply_pack": "Sektör paketi"
     },
     "runStatus": {
       "running": "Sürüyor",
@@ -1125,7 +1121,12 @@
       "sentBefore": "Daha önceki bir çalışmada gönderildi",
       "ownerExists": "Mağazanın sahip hesabı zaten var",
       "notAvailableYet": "Sektör paketleri henüz sunulmuyor",
-      "alreadyRunning": "Zaten çalışıyordu"
+      "alreadyRunning": "Zaten çalışıyordu",
+      "packVersion": "Sürüm {{version}}",
+      "packAdded_one": "{{count}} öğe eklendi",
+      "packAdded_other": "{{count}} öğe eklendi",
+      "packKept_one": "{{count}} öğe mağazada zaten vardı, korundu",
+      "packKept_other": "{{count}} öğe mağazada zaten vardı, korundu"
     },
     "columns": {
       "kind": "Çalışma",
@@ -1141,6 +1142,31 @@
       "command": "Paneli açan komut",
       "copy": "Komutu kopyala",
       "copied": "Komut kopyalandı."
+    },
+    "pack": {
+      "title": "Sektör paketi",
+      "text": "Yalnız mağazada olmayan öğeleri ekler; mağazanın düzenlediği ya da sildiği hiçbir şeye dokunmaz.",
+      "name": "Paket",
+      "applied": "Uygulanan sürüm",
+      "notApplied": "Henüz uygulanmadı",
+      "appliedAt": "Uygulandığı tarih",
+      "newer": "Paketin yeni sürümü var (sürüm {{version}}). Yeniden uygulayınca yalnız yeni öğeler eklenir."
+    }
+  },
+  "sectorPacks": {
+    "version": "Sürüm {{version}}",
+    "empty": "Şablon içermez",
+    "counts": {
+      "attribute_templates_one": "{{count}} özellik şablonu",
+      "attribute_templates_other": "{{count}} özellik şablonu",
+      "attributes_one": "{{count}} özellik",
+      "attributes_other": "{{count}} özellik",
+      "categories_one": "{{count}} önerilen kategori",
+      "categories_other": "{{count}} önerilen kategori",
+      "flags_one": "{{count}} ayar",
+      "flags_other": "{{count}} ayar",
+      "seo_templates_one": "{{count}} SEO şablonu",
+      "seo_templates_other": "{{count}} SEO şablonu"
     }
   }
 }

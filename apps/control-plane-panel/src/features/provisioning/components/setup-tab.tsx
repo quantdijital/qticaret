@@ -12,6 +12,7 @@ import { errorText } from "@/lib/errors"
 import { ActionsCard } from "./actions-card"
 import { HistoryCard } from "./history-card"
 import { LocalPanelCard } from "./local-panel-card"
+import { PackCard } from "./pack-card"
 import { LatestRunCard } from "./run-card"
 
 /** The port the shop's backend was given (a setup run keeps it; later runs reuse it). */
@@ -22,7 +23,8 @@ const portOf = (state: ProvisioningState): number | null =>
  * The shop's "Kurulum" tab (owner, operator; Ek C10, C11): the latest run
  * with its steps, live while it goes (every two seconds; not while the
  * browser tab is hidden or another tab of the page is open: the card is
- * not mounted then), the actions beside it, and every run below. When a
+ * not mounted then), the actions and the sector pack (C12) beside it,
+ * and every run below. When a
  * run ends the shop's page is read again: a setup makes it `active`.
  */
 export function SetupTab({ shop }: { shop: TenantDetail }) {
@@ -55,6 +57,7 @@ export function SetupTab({ shop }: { shop: TenantDetail }) {
         </PageColumn>
         <PageColumn span={4}>
           <ActionsCard tenantId={id} status={shop.tenant.status} state={state} />
+          <PackCard tenantId={id} status={shop.tenant.status} state={state} shop={shop.tenant} />
           {port !== null ? <LocalPanelCard port={port} /> : null}
         </PageColumn>
       </PageGrid>

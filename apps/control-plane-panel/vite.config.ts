@@ -14,6 +14,9 @@ import { defineConfig } from "vitest/config"
  * src/lib/route-allowlist.ts) are proxied.
  */
 const CONTROL_PLANE_URL = process.env["CP_PANEL_BACKEND_URL"] ?? "http://localhost:9100"
+// The panel's own port (C12: a second copy, an agent's or the e2e's, beside the
+// one in use); the control plane's ADMIN_CORS/AUTH_CORS must name its origin
+const PANEL_PORT = Number(process.env["CP_PANEL_PORT"] ?? "5174")
 const API_PATHS = ["/auth", "/admin/cp", "/health"]
 // Whole path segments only (a key starting with `^` is a pattern to Vite)
 const segment = (path: string) => `^${path}(?:[/?]|$)`
@@ -22,6 +25,8 @@ export default defineConfig({
   plugins: [tanstackRouter({ target: "react", autoCodeSplitting: true }), react(), tailwindcss()],
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   server: {
+    port: PANEL_PORT,
+    strictPort: true,
     proxy: Object.fromEntries(
       API_PATHS.map((path) => [segment(path), { target: CONTROL_PLANE_URL }])
     ),

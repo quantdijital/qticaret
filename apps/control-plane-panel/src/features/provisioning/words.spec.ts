@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { i18next } from "@/lib/i18n"
 import { step } from "@/test/runs"
-import { codeText, durationText, isWarning, outputText, stepName } from "./words"
+import { codeText, durationText, isWarning, kindName, outputText, stepName } from "./words"
 
 const t = i18next.getFixedT("tr")
 
@@ -39,5 +39,24 @@ describe("a run in words (Ek C10)", () => {
     expect(outputText(t, secrets)).toEqual([])
     expect(durationText(t, "2026-11-11T10:00:00Z", "2026-11-11T10:01:05Z")).toBe("1 dk 5 sn")
     expect(durationText(t, "2026-11-11T10:00:00Z", null)).toBeNull()
+  })
+
+  it("says the sector pack's run and what it added (C12)", () => {
+    expect(kindName(t, "apply_pack")).toBe("Sektör paketi")
+    expect(
+      outputText(
+        t,
+        step("sector_pack", {
+          output: { pack: "cutlery", version: 2, added: 3, kept: 1, skipped: 0 },
+        })
+      )
+    ).toEqual(["Sürüm 2", "3 öğe eklendi", "1 öğe mağazada zaten vardı, korundu"])
+    expect(
+      outputText(
+        t,
+        step("sector_pack", { output: { pack: "general", version: 1, added: 0, kept: 0 } })
+      )
+    ).toEqual(["Sürüm 1", "0 öğe eklendi"])
+    expect(codeText(t, "provisioning.sector_pack_unknown")).toBe("Bu sektör paketi bu sürümde yok.")
   })
 })

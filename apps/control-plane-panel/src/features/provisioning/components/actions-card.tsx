@@ -13,7 +13,9 @@ import { actionRules, lastKnownRunning } from "@/features/provisioning/rules"
 import { errorText } from "@/lib/errors"
 import { isStepUpCancelled } from "@/lib/step-up"
 
-const ORDER: readonly RunAction[] = ["create", "start", "stop", "invite"]
+// The sector pack's own action is on its card (pack-card.tsx)
+const ORDER = ["create", "start", "stop", "invite"] as const satisfies readonly RunAction[]
+type CardAction = (typeof ORDER)[number]
 
 /**
  * The setup's actions (Ek C10), each behind a step-up, each offered by the
@@ -37,7 +39,7 @@ export function ActionsCard({
   const [stopping, setStopping] = useState(false)
   const rules = actionRules(state, status)
   const running = state ? lastKnownRunning(state) : null
-  const labels: Record<RunAction, { text: string; icon: LucideIcon }> = {
+  const labels: Record<CardAction, { text: string; icon: LucideIcon }> = {
     create: {
       text: t(rules.createLabel),
       icon: rules.createLabel === "setup.actions.install" ? Wrench : RotateCcw,

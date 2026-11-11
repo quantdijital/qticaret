@@ -709,6 +709,7 @@
       "register_closed": "An account is made only with a valid invitation, for the invited address.",
       "reset_self": "Renew your own verification from My account.",
       "run_unknown": "Run not found.",
+      "sector_pack_unknown": "There is no such sector pack.",
       "session_required": "Your session ended. Sign in again.",
       "session_revoked": "Your session was ended. Sign in again.",
       "session_unknown": "The session was not found; it may have ended already.",
@@ -736,6 +737,7 @@
     "provisioning": {
       "api_url_refused": "The shop's internal address is not among the allowed ones.",
       "apply_pack_failed": "The sector pack could not be applied.",
+      "apply_pack_result_invalid": "The shop did not report the sector pack's result in a readable form.",
       "apply_pack_timeout": "Applying the sector pack ran over its time limit.",
       "backend_not_built": "The shop software is not built. Build it first.",
       "bootstrap_failed": "The shop's first settings could not be made.",
@@ -777,6 +779,7 @@
       "secrets_lost": "The shop's secret values were not found; its keys must be renewed.",
       "secrets_missing": "The shop's secret values were not written.",
       "secrets_orphaned": "A secret values file without a key exists; it was not overwritten.",
+      "sector_pack_unknown": "This release has no such sector pack.",
       "shop_exited": "The shop server stopped after starting.",
       "shop_running": "The shop server is already running.",
       "slug_invalid": "The shop's platform address is not valid.",
@@ -967,18 +970,7 @@
     },
     "sector": {
       "title": "Sector pack",
-      "text": "Starting templates for product attributes and search appearance.",
-      "soon": "Coming soon",
-      "packs": {
-        "general": {
-          "name": "General",
-          "text": "A start that suits any sector; the shop adds templates as it needs them."
-        },
-        "sector": {
-          "name": "Sector packs",
-          "text": "Ready attribute and search appearance templates by sector come with a later release."
-        }
-      }
+      "text": "The shop opens with ready attribute templates, suggested categories, settings and search appearance templates. The setup adds only what the shop lacks; the shop can change all of it later."
     },
     "review": {
       "edit": "Edit",
@@ -1061,20 +1053,23 @@
       "retry": "Try again",
       "start": "Start",
       "stop": "Stop",
-      "invite": "Send the invitation again"
+      "invite": "Send the invitation again",
+      "applyPack": "Apply the pack",
+      "reapplyPack": "Apply the pack again"
     },
     "started": {
       "create": "Setup started.",
       "start": "Starting the shop server.",
       "stop": "Stopping the shop server.",
-      "invite": "Sending the invitation again."
+      "invite": "Sending the invitation again.",
+      "apply_pack": "The sector pack is being applied."
     },
     "reasons": {
       "loading": "Reading the setup.",
       "noProvisioner": "Shops are not set up in this environment.",
       "busy": "A run is in progress; the actions open when it ends.",
       "status": "The shop's status does not allow this.",
-      "notSetUp": "Starting, stopping and inviting need a finished setup first.",
+      "notSetUp": "The setup must be finished first.",
       "done": "The setup is complete."
     },
     "confirmStop": {
@@ -1085,7 +1080,8 @@
       "create": "Setup",
       "start": "Start",
       "stop": "Stop",
-      "invite": "Invitation"
+      "invite": "Invitation",
+      "apply_pack": "Sector pack"
     },
     "runStatus": {
       "running": "In progress",
@@ -1125,7 +1121,12 @@
       "sentBefore": "Sent in an earlier run",
       "ownerExists": "The shop already has an owner account",
       "notAvailableYet": "Sector packs are not offered yet",
-      "alreadyRunning": "Was already running"
+      "alreadyRunning": "Was already running",
+      "packVersion": "Version {{version}}",
+      "packAdded_one": "{{count}} item added",
+      "packAdded_other": "{{count}} items added",
+      "packKept_one": "{{count}} item was already in the shop, kept",
+      "packKept_other": "{{count}} items were already in the shop, kept"
     },
     "columns": {
       "kind": "Run",
@@ -1141,6 +1142,31 @@
       "command": "Command that opens the panel",
       "copy": "Copy the command",
       "copied": "Command copied."
+    },
+    "pack": {
+      "title": "Sector pack",
+      "text": "Adds only what the shop lacks; never touches anything the shop edited or removed.",
+      "name": "Pack",
+      "applied": "Version applied",
+      "notApplied": "Not applied yet",
+      "appliedAt": "Applied on",
+      "newer": "A newer version of the pack is out (version {{version}}). Applying it again adds only the new items."
+    }
+  },
+  "sectorPacks": {
+    "version": "Version {{version}}",
+    "empty": "No templates",
+    "counts": {
+      "attribute_templates_one": "{{count}} attribute template",
+      "attribute_templates_other": "{{count}} attribute templates",
+      "attributes_one": "{{count}} attribute",
+      "attributes_other": "{{count}} attributes",
+      "categories_one": "{{count}} suggested category",
+      "categories_other": "{{count}} suggested categories",
+      "flags_one": "{{count}} setting",
+      "flags_other": "{{count}} settings",
+      "seo_templates_one": "{{count}} SEO template",
+      "seo_templates_other": "{{count}} SEO templates"
     }
   }
 }

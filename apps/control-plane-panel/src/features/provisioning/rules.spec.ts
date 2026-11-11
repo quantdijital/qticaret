@@ -3,7 +3,9 @@ import { FAILED, RUNNING, SET_UP, run, state } from "@/test/runs"
 import { actionRules, lastKnownRunning } from "./rules"
 
 const enabled = (rules: ReturnType<typeof actionRules>) =>
-  (["create", "start", "stop", "invite"] as const).filter((action) => rules[action].enabled)
+  (["create", "start", "stop", "invite", "apply_pack"] as const).filter(
+    (action) => rules[action].enabled
+  )
 
 describe("the setup's actions by the control plane's rules (Ek C10)", () => {
   it("offers only Kur before any run", () => {
@@ -12,6 +14,7 @@ describe("the setup's actions by the control plane's rules (Ek C10)", () => {
     expect(enabled(rules)).toEqual(["create"])
     expect(rules.createLabel).toBe("setup.actions.install")
     expect(rules.start.reason).toBe("setup.reasons.notSetUp")
+    expect(rules.apply_pack.reason).toBe("setup.reasons.notSetUp")
   })
 
   it("offers nothing while a run goes, nor without a provisioner, nor before the state is read", () => {
@@ -31,7 +34,8 @@ describe("the setup's actions by the control plane's rules (Ek C10)", () => {
   it("offers start, stop and the invitation once set up; no setup again on an active shop", () => {
     const rules = actionRules(state(SET_UP, [FAILED]), "active")
 
-    expect(enabled(rules)).toEqual(["start", "stop", "invite"])
+    // C12: the sector pack again, beside them
+    expect(enabled(rules)).toEqual(["start", "stop", "invite", "apply_pack"])
     expect(rules.create.reason).toBe("setup.reasons.done")
   })
 
@@ -40,6 +44,7 @@ describe("the setup's actions by the control plane's rules (Ek C10)", () => {
 
     expect(enabled(rules)).toEqual(["stop"])
     expect(rules.start.reason).toBe("setup.reasons.status")
+    expect(rules.apply_pack.reason).toBe("setup.reasons.status")
   })
 
   it("tells the shop's last known state from its runs", () => {

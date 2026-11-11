@@ -9,7 +9,7 @@ import { withStepUp } from "@/lib/step-up"
  * serial, a duration). No secret, link or address is ever in a run.
  */
 
-export type RunKind = "create" | "start" | "stop" | "invite" | (string & {})
+export type RunKind = "create" | "start" | "stop" | "invite" | "apply_pack" | (string & {})
 export type RunStatus = "running" | "succeeded" | "failed"
 export type StepStatus = "pending" | "running" | "succeeded" | "skipped" | "failed" | "compensated"
 
@@ -74,13 +74,15 @@ export const runQuery = (id: string, runId: string) =>
       api<{ run: Run }>(tenantPath(id, `/provisioning/runs/${encodeURIComponent(runId)}`)),
   })
 
-export type RunAction = "create" | "stop" | "start" | "invite"
+export type RunAction = "create" | "stop" | "start" | "invite" | "apply_pack"
 
 const ACTION_PATHS: Record<RunAction, string> = {
   create: "/provisioning",
   stop: "/provisioning/stop",
   start: "/provisioning/start",
   invite: "/provisioning/invite",
+  // C12: the shop's sector pack again (only what it never had)
+  apply_pack: "/provisioning/apply-pack",
 }
 
 /** Starts a run (owner, operator); each acts outside the control plane, so each asks a step-up. */

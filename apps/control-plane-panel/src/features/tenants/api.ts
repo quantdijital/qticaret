@@ -137,6 +137,9 @@ export interface TenantDetail {
     status: TenantStatus
     status_changed_at: string
     sector_pack: string | null
+    /** C12: the pack's version the shop last applied, and when; null until it has. */
+    sector_pack_version: number | null
+    sector_pack_applied_at: string | null
     created_at: string
     created_by: string | null
     next_payment_on: string | null

@@ -62,6 +62,7 @@ export const CP_ERROR_CODES = [
   "register_closed",
   "reset_self",
   "run_unknown",
+  "sector_pack_unknown",
   "session_required",
   "session_revoked",
   "session_unknown",
@@ -96,6 +97,7 @@ export const CP_ERROR_CODES = [
 export const PROVISIONING_CODES = [
   "api_url_refused",
   "apply_pack_failed",
+  "apply_pack_result_invalid",
   "apply_pack_timeout",
   "backend_not_built",
   "bootstrap_failed",
@@ -137,6 +139,7 @@ export const PROVISIONING_CODES = [
   "secrets_lost",
   "secrets_missing",
   "secrets_orphaned",
+  "sector_pack_unknown",
   "shop_exited",
   "shop_running",
   "slug_invalid",

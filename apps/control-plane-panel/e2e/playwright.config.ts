@@ -3,6 +3,9 @@ import { SESSION_FILE } from "./support/paths"
 
 const baseURL = process.env["E2E_BASE_URL"] ?? "http://localhost:5174"
 const isCI = Boolean(process.env["CI"])
+// The panel the run starts listens where `baseURL` says (C12: a second copy
+// on its own ports, `E2E_BASE_URL` + `CP_PANEL_BACKEND_URL`, beside the one in use)
+const panelPort = new URL(baseURL).port || "5174"
 
 /**
  * The control plane panel's e2e (adr/0061 C6): a temporary owner signs in
@@ -50,6 +53,7 @@ export default defineConfig({
   webServer: {
     command: "pnpm dev",
     cwd: "..",
+    env: { CP_PANEL_PORT: panelPort },
     url: baseURL,
     reuseExistingServer: true,
     timeout: 120_000,

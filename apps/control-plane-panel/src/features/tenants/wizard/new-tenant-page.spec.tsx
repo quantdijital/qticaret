@@ -8,6 +8,7 @@ import { refusal, stubApi } from "@/test/api"
 import type { Answer, Sent } from "@/test/api"
 import { renderAs } from "@/test/member"
 import { routerState } from "@/test/router-mock"
+import { SECTOR_PACKS } from "@/test/sector-packs"
 import { PRO, START } from "@/test/shops"
 import { NewTenantPage } from "./new-tenant-page"
 
@@ -24,6 +25,9 @@ function controlPlane(refuse: Record<string, Answer> = {}) {
     const own = refuse[`${call.method} ${path}`]
     if (own) {
       return own
+    }
+    if (path === "/admin/cp/sector-packs") {
+      return { status: 200, body: SECTOR_PACKS }
     }
     if (path === "/admin/cp/plans") {
       return { status: 200, body: { plans: [START, PRO], platform_flags: [] } }
@@ -75,8 +79,8 @@ const page = () =>
 
 const next = () => userEvent.click(screen.getByRole("button", { name: /İleri/ }))
 
-/** Through every step to the review, the address free. */
-async function fillIn(domain = "") {
+/** Through every step to the review, the address free; a sector pack chosen if named. */
+async function fillIn(domain = "", pack = "") {
   await userEvent.type(screen.getByLabelText("Mağaza adı"), "Bıçak Atölyesi")
   await userEvent.type(screen.getByLabelText("Vergi kimlik no"), "1234567890")
   await next()
@@ -91,6 +95,11 @@ async function fillIn(domain = "") {
   }
   await screen.findByText("Bu adres kullanılabilir.")
   await next()
+  // C12: the packs the control plane offers, the general one chosen
+  expect(await screen.findByRole("radio", { name: /^Genel/ })).toBeChecked()
+  if (pack) {
+    await userEvent.click(screen.getByRole("radio", { name: new RegExp(`^${pack}`) }))
+  }
   await next()
   await screen.findByRole("heading", { name: "Özet ve kur", level: 2 })
 }
@@ -157,7 +166,9 @@ describe("NewTenantPage: the new shop wizard (C11)", () => {
   it("makes the record, saves the rest, starts the setup with one proof, opens its tab", async () => {
     const sent = stubApi(controlPlane())
     page()
-    await fillIn("bicakatolyesi.com")
+    await fillIn("bicakatolyesi.com", "Bıçak ve çatal-bıçak")
+    // The review names the pack chosen
+    expect(screen.getByText("Bıçak ve çatal-bıçak")).toBeInTheDocument()
 
     await userEvent.click(screen.getByRole("button", { name: "Kur" }))
     await userEvent.type(await screen.findByLabelText("Doğrulama kodu"), "123456")
@@ -187,7 +198,7 @@ describe("NewTenantPage: the new shop wizard (C11)", () => {
       name: "Bıçak Atölyesi",
       slug: "bicak-atolyesi",
       package_id: PRO.id,
-      sector_pack: "general",
+      sector_pack: "cutlery",
     })
   })
 

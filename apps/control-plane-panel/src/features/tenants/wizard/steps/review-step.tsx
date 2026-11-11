@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query"
 import { Pencil, TriangleAlert } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -6,6 +7,7 @@ import { Alert, AlertDescription, AlertTitle } from "@qticaret/admin-ui/ui/alert
 import { Button } from "@qticaret/admin-ui/ui/button"
 import type { Plan } from "@/features/packages/api"
 import { priceText } from "@/features/packages/format"
+import { packName, sectorPacksQuery } from "@/features/sector-packs/api"
 import { compact } from "@/features/tenants/company-rules"
 import { domainOf, missingCompanyFields, slugOf } from "../draft"
 import type { ShopDraft, WizardStep } from "../draft"
@@ -63,6 +65,7 @@ export function ReviewStep({
   onEdit: ((step: WizardStep) => void) | null
 }) {
   const { t } = useTranslation()
+  const packs = useQuery(sectorPacksQuery())
   const { company } = draft
   const sole = company.kind === "sole_proprietor"
   const missing = missingCompanyFields(company)
@@ -161,7 +164,10 @@ export function ReviewStep({
                 platformDomain ? `${slugOf(draft)}.${platformDomain}` : slugOf(draft),
               ],
               [t("wizard.address.custom"), domainOf(draft)],
-              [t("wizard.steps.sector.title"), t(`wizard.sector.packs.${draft.sector_pack}.name`)],
+              [
+                t("wizard.steps.sector.title"),
+                packName(packs.data?.sector_packs, draft.sector_pack),
+              ],
             ]}
           />
         )}

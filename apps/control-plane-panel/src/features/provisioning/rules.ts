@@ -7,8 +7,8 @@ import type { ProvisioningState, RunAction } from "./api"
  * run of a shop at a time (409 `cp.provisioning_busy`), none without a
  * provisioner (503), a start or an invitation only for a shop being set
  * up or active (409 `provisioning.tenant_status`; a stop in any status).
- * Starting, stopping and inviting need a shop that was set up once. The
- * control plane decides again.
+ * Starting, stopping, inviting and applying the sector pack again (C12)
+ * need a shop that was set up once. The control plane decides again.
  */
 
 export interface ActionRule {
@@ -55,6 +55,7 @@ export function actionRules(
     stop: rule,
     start: rule,
     invite: rule,
+    apply_pack: rule,
     createLabel,
   })
   if (!state) {
@@ -76,6 +77,7 @@ export function actionRules(
     stop: needsSetUp,
     start: needsSetUp.enabled ? needsLive(yes) : needsSetUp,
     invite: needsSetUp.enabled ? needsLive(yes) : needsSetUp,
+    apply_pack: needsSetUp.enabled ? needsLive(yes) : needsSetUp,
     createLabel,
   }
 }

@@ -32,7 +32,7 @@ export const stepName = (t: TFunction, name: string): string =>
   (STEP_NAMES as readonly string[]).includes(name) ? t(`setup.steps.${name}`) : name
 
 /** The run kinds this panel names; another is shown as written. */
-export const RUN_KINDS = ["create", "start", "stop", "invite"] as const
+export const RUN_KINDS = ["create", "start", "stop", "invite", "apply_pack"] as const
 
 export const kindName = (t: TFunction, kind: string): string =>
   (RUN_KINDS as readonly string[]).includes(kind) ? t(`setup.kinds.${kind}`) : kind
@@ -99,6 +99,16 @@ export function outputText(t: TFunction, step: RunStep): string[] {
     lines.push(t("setup.output.ownerExists"))
   } else if (typeof output["mailed"] === "boolean") {
     lines.push(t(output["mailed"] ? "setup.output.mailed" : "setup.output.notMailed"))
+  }
+  // C12: what the sector pack added this time, and what the shop's own kept
+  if (step.name === "sector_pack" && typeof output["version"] === "number") {
+    lines.push(t("setup.output.packVersion", { version: output["version"] }))
+    if (typeof output["added"] === "number") {
+      lines.push(t("setup.output.packAdded", { count: output["added"] }))
+    }
+    if (typeof output["kept"] === "number" && output["kept"] > 0) {
+      lines.push(t("setup.output.packKept", { count: output["kept"] }))
+    }
   }
   if (output["reason"] === "not_available_yet") {
     lines.push(t("setup.output.notAvailableYet"))

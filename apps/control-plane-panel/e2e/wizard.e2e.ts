@@ -9,8 +9,10 @@ import { proveStepUp } from "./support/step-up"
  * control plane. The first test writes nothing. The second sets a real
  * shop up through the panel (the control plane's local provisioner: a
  * database, a migrated and started shop backend on 9200+) until it is
- * `active`, stops it from the tab, and removes it with everything its
- * setup made (support/shops.ts; the teardown sweeps again).
+ * `active` on the knife pack (C12: its attributes, categories, flags and SEO
+ * template applied in the shop), applies the pack again (nothing added),
+ * stops it from the tab, and removes it with everything its setup made
+ * (support/shops.ts; the teardown sweeps again).
  */
 
 const next = (page: Page) => page.getByRole("button", { name: "İleri" }).click()
@@ -58,10 +60,19 @@ test("walks the wizard: says what is missing, keeps what was typed, asks before 
   await page.getByLabel("Platform adresi").fill(e2eSlug())
   await expect(page.getByText("Bu adres kullanılabilir.")).toBeVisible()
   await next(page)
-  await expect(page.getByRole("radio", { name: /Genel/ })).toBeChecked()
-  await expect(page.getByRole("radio", { name: /Sektöre özel/ })).toBeDisabled()
+  // C12: the packs the control plane has, the general one chosen, each one offered
+  await expect(page.getByRole("radio", { name: /^Genel/ })).toBeChecked()
+  const knives = page.getByRole("radio", { name: /^Bıçak ve çatal-bıçak/ })
+  await expect(knives).toBeEnabled()
+  await expect(
+    page.getByText(/2 özellik şablonu · 31 özellik · 16 önerilen kategori/)
+  ).toBeVisible()
+  // No pack is "coming soon" any more (the menu's own badges aside)
+  await expect(page.getByRole("main").getByText("Yakında")).toHaveCount(0)
+  await knives.click()
   await next(page)
   await expect(stepHeading(page, "Özet ve kur")).toBeVisible()
+  await expect(page.getByText("Bıçak ve çatal-bıçak")).toBeVisible()
   await expect(page.getByText("Fatura bilgileri eksik")).toBeVisible()
 
   // Typed and not kept: leaving asks first; staying keeps the wizard
@@ -101,6 +112,7 @@ test("@real sets a shop up through the panel until it is active, then stops it",
     await page.getByLabel("Platform adresi").fill(slug)
     await expect(page.getByText("Bu adres kullanılabilir.")).toBeVisible()
     await next(page)
+    await page.getByRole("radio", { name: /^Bıçak ve çatal-bıçak/ }).click()
     await next(page)
     await page.getByRole("button", { name: "Kur", exact: true }).click()
     await proveStepUp(page)
@@ -124,6 +136,17 @@ test("@real sets a shop up through the panel until it is active, then stops it",
     await expect(steps.getByText(/^Port 92\d\d$/).first()).toBeVisible()
     await expect(page.getByRole("link", { name: /^http:\/\/localhost:102\d\d$/ })).toBeVisible()
     await expect(actions.getByRole("button", { name: "Yeniden dene" })).toBeDisabled()
+    // C12: the pack applied in the shop, every item of it new there
+    await expect(steps.getByText("52 öğe eklendi")).toBeVisible()
+    const pack = page.locator("section", {
+      has: page.getByRole("heading", { name: "Sektör paketi" }),
+    })
+    await expect(pack.getByText("Bıçak ve çatal-bıçak")).toBeVisible()
+    await expect(pack.getByText("Sürüm 1")).toBeVisible()
+    // Again (the proof still held): a run of its own that adds nothing
+    await pack.getByRole("button", { name: "Paketi yeniden uygula" }).click()
+    await expect(steps.getByText("0 öğe eklendi")).toBeVisible({ timeout: 2 * 60_000 })
+    await expect(actions.getByRole("button", { name: "Durdur" })).toBeEnabled()
 
     // Stopped from the tab: asked first, the proof still held (no second code)
     await actions.getByRole("button", { name: "Durdur" }).click()

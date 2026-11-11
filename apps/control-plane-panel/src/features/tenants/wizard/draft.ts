@@ -20,10 +20,6 @@ export const WIZARD_STEPS = [
 ] as const
 export type WizardStep = (typeof WIZARD_STEPS)[number]
 
-/** The sector packs a shop can be set up with today (C12 brings the others). */
-export const SECTOR_PACKS = ["general"] as const
-export type SectorPack = (typeof SECTOR_PACKS)[number]
-
 export interface PersonDraft {
   name: string
   email: string
@@ -58,7 +54,8 @@ export interface ShopDraft {
   /** Null: suggested from the name until typed. */
   typed_slug: string | null
   custom_domain: string
-  sector_pack: SectorPack
+  /** A pack's code (C12: whatever the control plane offers; the general one first). */
+  sector_pack: string
 }
 
 const person = (): PersonDraft => ({ name: "", email: "", phone: "" })
