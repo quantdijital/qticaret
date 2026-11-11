@@ -38,6 +38,7 @@
     "authors:backfill": "medusa exec ./src/scripts/authors-backfill.ts",
     "category-covers:backfill": "medusa exec ./src/scripts/category-covers-backfill.ts",
     "media:derivatives": "medusa exec ./src/scripts/media-derivatives.ts",
+    "credentials:keys": "medusa exec ./src/scripts/credentials-keys.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "pnpm test:unit",
