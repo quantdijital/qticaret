@@ -174,15 +174,31 @@ export class TenantsRecords extends MedusaService({
     return { before }
   }
 
-  /** The company back as it was: removed when there was none. */
+  /**
+   * The company back as it was: removed when there was none. The sealed
+   * TCKN goes back only if the save changed it (`written`) and the row
+   * still holds what the save wrote (compare-and-swap): a KEK rewrap in
+   * between keeps its newer envelope (Ek C8, review INFO).
+   */
   @InjectTransactionManager()
   async restoreCompany(
     tenantId: string,
     before: CompanyRecord | null,
+    written?: string | null,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
     if (before) {
-      await this.updateTenantCompanies(omit(before, "tenant_id"), sharedContext)
+      await this.updateTenantCompanies(
+        omit(before, "tenant_id", "tckn_sealed", "tckn_last4"),
+        sharedContext
+      )
+      if (written !== undefined) {
+        await (sharedContext.transactionManager as Executor).execute(
+          `UPDATE tenant_company SET tckn_sealed = ?, tckn_last4 = ?, updated_at = now()
+            WHERE id = ? AND tckn_sealed IS NOT DISTINCT FROM ?`,
+          [before.tckn_sealed ?? null, before.tckn_last4 ?? null, before.id, written]
+        )
+      }
       return
     }
     const current = await this.companyOf(tenantId, sharedContext)

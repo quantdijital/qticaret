@@ -4,6 +4,8 @@
 // is right for development data. Dependency-free (node:crypto + BIP-173
 // bech32, the encoding age uses), so `pnpm env:init` runs before install.
 import { generateKeyPairSync } from "node:crypto"
+import { realpathSync } from "node:fs"
+import { pathToFileURL } from "node:url"
 
 const CHARSET = "qpzry9x8gf2tvdw0s3jn54khce6mua7l"
 const GENERATOR = [0x3b6a57b2, 0x26508e6d, 0x1ea119fa, 0x3d4233dd, 0x2a1462b3]
@@ -60,6 +62,8 @@ export function throwawayRecipient() {
   return bech32Encode("age", raw)
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+// Run directly (also from a path with spaces or through a symlink), not imported
+const invoked = process.argv[1] ? pathToFileURL(realpathSync(process.argv[1])).href : ""
+if (import.meta.url === invoked) {
   process.stdout.write(`${throwawayRecipient()}\n`)
 }

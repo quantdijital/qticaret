@@ -34,7 +34,7 @@ command -v node >/dev/null || fail "node is required"
 shared_names="$(var_names "$docker_template")"
 
 render_line() {
-  local line="$1" name
+  local line="$1" name recipient
   for name in $shared_names; do
     [[ "$line" == *"__${name}__"* ]] && line="${line//__${name}__/$(get_var "$name" "$docker_env")}"
   done
@@ -42,8 +42,11 @@ render_line() {
     line="${line/__GENERATED__/$(rand)}"
   done
   # A public age recipient whose identity is discarded (adr/0061 Ek C8)
+  # An empty value is never written: the script must print one recipient
   while [[ "$line" == *__AGE_RECIPIENT__* ]]; do
-    line="${line/__AGE_RECIPIENT__/$(node "$root/scripts/age-recipient.mjs")}"
+    recipient="$(node "$root/scripts/age-recipient.mjs")" || fail "scripts/age-recipient.mjs failed"
+    [[ "$recipient" =~ ^age1[0-9a-z]{58}$ ]] || fail "scripts/age-recipient.mjs printed no age recipient"
+    line="${line/__AGE_RECIPIENT__/$recipient}"
   done
   printf '%s\n' "$line"
 }

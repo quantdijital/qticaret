@@ -42,6 +42,39 @@ export function baseConfig(tsconfigRootDir) {
     {
       files: ["**/*.js", "**/*.mjs", "**/*.cjs"],
       extends: [tseslint.configs.disableTypeChecked],
+    },
+    {
+      // adr/0061 Ek C8 (review L4): the age library and the test-only escrow
+      // opener stay out of application code, so nothing but a test can ever
+      // open an escrow. Allowed: tests, and the one module that seals with it
+      ignores: [...TEST_FILES, "**/src/crypto/escrow.ts", "**/src/testing/**", "**/jest.age.cjs"],
+      rules: {
+        "no-restricted-imports": ["error", { patterns: [TEST_ONLY_IMPORTS] }],
+        "no-restricted-syntax": [
+          "error",
+          {
+            selector: `CallExpression[callee.name='require'][arguments.0.value=${TEST_ONLY_REQUIRE}]`,
+            message: TEST_ONLY_IMPORTS.message,
+          },
+        ],
+      },
     }
   )
 }
+
+const TEST_FILES = [
+  "**/*.spec.*",
+  "**/*.test.*",
+  "**/__tests__/**",
+  "**/integration-tests/**",
+  "**/e2e/**",
+  "**/src/test/**",
+]
+
+const TEST_ONLY_IMPORTS = {
+  group: ["age-encryption", "age-encryption/*", "@qticaret/server-kit/testing/*"],
+  message:
+    "Test-only: the escrow is opened by the offline identity alone (adr/0061 Ek C8). Seal with @qticaret/server-kit/escrow.",
+}
+
+const TEST_ONLY_REQUIRE = "/^(age-encryption|@qticaret\\/server-kit\\/testing\\/)/"

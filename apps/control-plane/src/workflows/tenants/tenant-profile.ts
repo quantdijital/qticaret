@@ -33,10 +33,17 @@ const saveCompanyStep = undoableStep(
   "cp-tenant-save-company",
   async (input: SaveCompanyInput, container) => {
     const { before } = await tenantsIn(container).saveCompany(input.tenant_id, input.fields)
-    return { output: before, undo: { tenant_id: input.tenant_id, before } }
+    return {
+      output: before,
+      // What the save sealed, if it touched the TCKN: the undo swaps it back only over that
+      undo: { tenant_id: input.tenant_id, before, written: input.fields.tckn_sealed },
+    }
   },
-  async (undo: { tenant_id: string; before: CompanyRecord | null }, container) => {
-    await tenantsIn(container).restoreCompany(undo.tenant_id, undo.before)
+  async (
+    undo: { tenant_id: string; before: CompanyRecord | null; written?: string | null | undefined },
+    container
+  ) => {
+    await tenantsIn(container).restoreCompany(undo.tenant_id, undo.before, undo.written)
   }
 )
 

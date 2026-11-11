@@ -23,7 +23,7 @@ const PUBLISHED: readonly SigningKeyView["status"][] = ["active", "next", "previ
  * keys are left out.
  */
 export async function publishedKeys(container: Container): Promise<PublishedKeys> {
-  const keys = (await vaultIn(container).signingKeys())
+  const keys = (await vaultIn(container).publishedSigningKeys())
     .filter((key) => PUBLISHED.includes(key.status))
     .sort((a, b) => PUBLISHED.indexOf(a.status) - PUBLISHED.indexOf(b.status))
     .map(({ kid, public_key, status }) => ({ kid, public_key, status }))

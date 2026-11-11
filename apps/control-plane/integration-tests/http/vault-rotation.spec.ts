@@ -3,8 +3,11 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { Modules } from "@medusajs/framework/utils"
 import { makeTestIdentity, openWithTestIdentity } from "@qticaret/server-kit/testing/age"
 import { kekFingerprint } from "@qticaret/server-kit"
-import { issueTenantSecrets } from "../../src/lib/vault/tenant-secrets"
+import { generateRuntimeSecrets, issueTenantSecrets } from "../../src/lib/vault/tenant-secrets"
 import { runKeysCommand } from "../../src/scripts/keys"
+import { sealTckn } from "../../src/lib/tenants/tckn"
+import { TENANTS_MODULE } from "../../src/modules/tenants"
+import type TenantsModuleService from "../../src/modules/tenants/service"
 import { FLEET_MODULE } from "../../src/modules/fleet"
 import type FleetModuleService from "../../src/modules/fleet/service"
 import { VAULT_MODULE } from "../../src/modules/vault"
@@ -184,6 +187,44 @@ medusaIntegrationTestRunner({
         message: "cp.tenant_unknown",
       })
       expect(await fleet().listTenantKeys({ tenant_id: "ten_unknown" })).toEqual([])
+    })
+
+    it("does not undo a company save over a TCKN rewrapped meanwhile (review INFO)", async () => {
+      const [a, b] = [hex(), hex()]
+      process.env["CP_MASTER_KEY"] = a
+      const id = await soleProprietor()
+      const tenants = getContainer().resolve<TenantsModuleService>(TENANTS_MODULE)
+      const before = await tenants.companyOf(id)
+      const written = (await sealTckn(id, "10000000078")).tckn_sealed
+      await tenants.saveCompany(id, { tckn_sealed: written, tckn_last4: "0078" })
+      process.env["CP_MASTER_KEY"] = `${b},${a}`
+      await tenants.rewrapTckns()
+      const rewrapped = (await tenants.companyOf(id))?.tckn_sealed
+
+      await tenants.restoreCompany(id, before, written)
+
+      expect(rewrapped).not.toBe(written)
+      expect((await tenants.companyOf(id))?.tckn_sealed).toBe(rewrapped)
+      // Still holding what the save wrote: put back
+      await tenants.restoreCompany(id, before, rewrapped)
+      expect((await tenants.companyOf(id))?.tckn_sealed).toBe(before?.tckn_sealed)
+    })
+
+    it("derives a shop key's kid itself and refuses one that names another key (review L3)", async () => {
+      const { id } = await makeTenant(http, owner)
+      const [first, second] = [generateRuntimeSecrets().signing, generateRuntimeSecrets().signing]
+
+      for (const input of [
+        { kid: second.kid, public_key: first.public_key },
+        { kid: first.kid, public_key: "not-a-key" },
+      ]) {
+        await expect(fleet().registerTenantKey({ tenant_id: id, ...input })).rejects.toMatchObject({
+          message: "cp.tenant_key_invalid",
+        })
+      }
+      expect(await fleet().tenantKeys(id)).toEqual([])
+      await fleet().registerTenantKey({ tenant_id: id, ...first })
+      expect((await fleet().tenantKeys(id)).map((key) => key.kid)).toEqual([first.kid])
     })
   },
 })

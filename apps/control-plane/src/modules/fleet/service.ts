@@ -6,6 +6,7 @@ import {
   MedusaError,
   MedusaService,
 } from "@medusajs/framework/utils"
+import { ed25519KeyId, publicKeyFromRaw } from "@qticaret/server-kit"
 import { TenantKey } from "./models/tenant-key"
 import type { TenantKeyStatus } from "./models/tenant-key"
 
@@ -21,6 +22,27 @@ export interface TenantKeyView {
   status: TenantKeyStatus
   retired_at: Date | null
   created_at: Date
+}
+
+const PUBLIC_KEY = /^[A-Za-z0-9_-]{43}$/
+
+/** The key id a raw Ed25519 public key (base64url) has; null when it is not one. */
+function kidOf(publicKey: string): string | null {
+  if (!PUBLIC_KEY.test(publicKey)) {
+    return null
+  }
+  try {
+    return ed25519KeyId(publicKeyFromRaw(Buffer.from(publicKey, "base64url")))
+  } catch {
+    return null
+  }
+}
+
+async function lockTenant(sharedContext: Context, tenantId: string): Promise<void> {
+  await (sharedContext.transactionManager as Executor).execute(
+    "SELECT pg_advisory_xact_lock(hashtext(?))",
+    [`tenant_key:${tenantId}`]
+  )
 }
 
 const FIELDS = [
@@ -54,17 +76,19 @@ class FleetModuleService extends MedusaService({ TenantKey }) {
 
   /**
    * A shop's new public key: `active` when it has none, `next` while a
-   * rotation moves it (refused while another `next` waits).
+   * rotation moves it (refused while another `next` waits). Its `kid` is
+   * derived here from the key itself; a caller's that differs is refused
+   * (review L3): a row can never name another key's id.
    */
   @InjectTransactionManager()
   async registerTenantKey(
     input: { tenant_id: string; kid: string; public_key: string },
     @MedusaContext() sharedContext: Context = {}
   ): Promise<TenantKeyView> {
-    await (sharedContext.transactionManager as Executor).execute(
-      "SELECT pg_advisory_xact_lock(hashtext(?))",
-      [`tenant_key:${input.tenant_id}`]
-    )
+    if (kidOf(input.public_key) !== input.kid) {
+      throw new MedusaError(MedusaError.Types.INVALID_DATA, "cp.tenant_key_invalid")
+    }
+    await lockTenant(sharedContext, input.tenant_id)
     const current = await this.tenantKeys(input.tenant_id, sharedContext)
     if (current.some((key) => key.status === "next")) {
       throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "cp.tenant_key_next_exists")
@@ -80,6 +104,8 @@ class FleetModuleService extends MedusaService({ TenantKey }) {
     tenantId: string,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<{ from: string | null; to: string }> {
+    // The same lock as a new key's: a promotion and a registration never interleave
+    await lockTenant(sharedContext, tenantId)
     const current = await this.tenantKeys(tenantId, sharedContext)
     const next = current.find((key) => key.status === "next")
     if (!next) {

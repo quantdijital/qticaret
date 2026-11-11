@@ -8,6 +8,11 @@ import type * as Age from "age-encryption" with { "resolution-mode": "import" }
  * and cannot open an escrow (adr/0061 §4.3, Ek C8).
  */
 
+// Outside a test run this module refuses to load at all (review L4)
+if (process.env["NODE_ENV"] !== "test") {
+  throw new Error("@qticaret/server-kit/testing/age is for tests only")
+}
+
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const age = require("age-encryption") as typeof Age
 

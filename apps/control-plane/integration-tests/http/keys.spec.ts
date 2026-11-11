@@ -115,9 +115,10 @@ medusaIntegrationTestRunner({
       expect(retired.data).toEqual({ retired: a.kid })
       const after = await overview()
       expect(after.published.keys.map((key) => key.kid)).toEqual([b.kid])
+      // Newest first
       expect(after.signing_keys.map((key) => [key.kid, key.status])).toEqual([
-        [a.kid, "retired"],
         [b.kid, "active"],
+        [a.kid, "retired"],
       ])
       // The retired key's private half is gone; the new one still signs
       expect(await vault().listSecretMeta("platform")).toEqual([
@@ -131,6 +132,41 @@ medusaIntegrationTestRunner({
         outcome: 200,
       })
       expect(audit[0]?.changes).toMatchObject({ active: { from: a.kid, to: b.kid } })
+    })
+
+    it("publishes the signing key however many retired keys came before it (review L2)", async () => {
+      const made = await change(`${K}/signing/prepare`)
+      const { kid } = (made.data as unknown as { signing_key: { kid: string } }).signing_key
+      // A long history, all older than the active key
+      const past = new Date(Date.now() - 86_400_000)
+      await vault().createCpSigningKeys(
+        Array.from({ length: 205 }, (_, index) => ({
+          kid: `old${String(index).padStart(13, "0")}`,
+          public_key: "A".repeat(43),
+          status: "retired" as const,
+          secret_name: `cp_signing_key.old${String(index)}`,
+          created_at: past,
+        }))
+      )
+
+      const read = await overview()
+
+      expect(read.published.keys.map((key) => key.kid)).toEqual([kid])
+      expect(read.signing_keys[0]).toMatchObject({ kid, status: "active" })
+      expect((await signPlanDocument(getContainer(), { serial: 1 })).kid).toBe(kid)
+    })
+
+    it("discards only a still unused next key and its seed (review L1)", async () => {
+      const active = (await vault().prepareSigningKey()).id
+      const next = await vault().prepareSigningKey()
+
+      await vault().discardSigningKey(active)
+      await vault().discardSigningKey(next.id)
+
+      expect((await vault().signingKeys()).map((key) => key.status)).toEqual(["active"])
+      expect((await vault().listSecretMeta("platform")).map((meta) => meta.name)).not.toContain(
+        `cp_signing_key.${next.kid}`
+      )
     })
 
     it("keeps the private key out of answers, rows, audit entries and workflow records", async () => {

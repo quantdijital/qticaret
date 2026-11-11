@@ -46,11 +46,29 @@ const LOCK = "cp_signing_key"
  * the vault: it never leaves this class.
  */
 class VaultModuleService extends VaultRecords {
+  /** The newest keys first, for the listing (a long history is cut at its old end). */
   @InjectManager()
   async signingKeys(@MedusaContext() sharedContext: Context = {}): Promise<SigningKeyView[]> {
     const rows = await this.listCpSigningKeys(
       {},
-      { select: [...KEY_FIELDS], order: { created_at: "ASC" }, take: 200 },
+      { select: [...KEY_FIELDS], order: { created_at: "DESC" }, take: 200 },
+      sharedContext
+    )
+    return rows
+  }
+
+  /**
+   * The keys the shops should trust: `active`, `next`, `previous`, by
+   * status and never through the listing's window, so no number of
+   * retired keys can push one out (review L2).
+   */
+  @InjectManager()
+  async publishedSigningKeys(
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<SigningKeyView[]> {
+    const rows = await this.listCpSigningKeys(
+      { status: ["active", "next", "previous"] },
+      { select: [...KEY_FIELDS], take: 3 },
       sharedContext
     )
     return rows
@@ -103,16 +121,20 @@ class VaultModuleService extends VaultRecords {
     return { id: (created as { id: string }).id, kid: pair.kid, status }
   }
 
-  /** The undo of `prepareSigningKey`: the key and its sealed seed gone, if still unused. */
+  /**
+   * The undo of `prepareSigningKey`: the key and its sealed seed gone, if
+   * still an unused `next`. Under the rotation's lock and conditional in
+   * the delete itself, so a switch running meanwhile cannot have it
+   * removed from under it (review L1); the seed goes only with its row.
+   */
   @InjectTransactionManager()
   async discardSigningKey(id: string, @MedusaContext() sharedContext: Context = {}) {
-    const [row] = await this.listCpSigningKeys(
-      { id },
-      { select: ["id", "status", "secret_name"], take: 1 },
-      sharedContext
-    )
-    if (row?.status === "next") {
-      await this.deleteCpSigningKeys([id], sharedContext)
+    await lockName(sharedContext, LOCK)
+    const removed = (await (sharedContext.transactionManager as Executor).execute(
+      `DELETE FROM cp_signing_key WHERE id = ? AND status = 'next' RETURNING secret_name`,
+      [id]
+    )) as { secret_name: string }[]
+    for (const row of removed) {
       await this.destroySecret(PLATFORM_OWNER, row.secret_name, sharedContext)
     }
   }
