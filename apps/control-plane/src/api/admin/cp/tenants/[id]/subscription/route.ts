@@ -1,21 +1,23 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { istanbulDay } from "../../../../../../lib/billing/days"
+import { withBillingLock } from "../../../../../../lib/billing/lock"
 import { reissuePlanDocuments } from "../../../../../../lib/fleet/reissue"
 import { setGraceWorkflow } from "../../../../../../workflows/billing/workflows"
 import { noteAuditChanges } from "../../../../../http/audit"
-import { subscriptionDetail } from "../../../billing/views"
+import { readsFreeText, subscriptionDetail } from "../../../billing/views"
 import type { PostSubscriptionGraceType } from "../../../billing/validators"
 import { actorOf, tenantParam } from "../../params"
 
 /**
  * GET /admin/cp/tenants/:id/subscription (all staff; Ek C16): the shop's
- * subscription, charges and reminders. Amounts and days only: no
- * personal data, so the read is not recorded.
+ * subscription, charges and reminders: amounts and days to every role,
+ * what staff typed (references, reasons) to the owner and finance only
+ * (review L3), so the read is not recorded.
  */
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const tenant = await tenantParam(req)
   res.setHeader("Cache-Control", "no-store")
-  res.json(await subscriptionDetail(req, tenant.id))
+  res.json(await subscriptionDetail(req, tenant.id, { freeText: await readsFreeText(req) }))
 }
 
 /**
@@ -30,19 +32,23 @@ export async function POST(
 ): Promise<void> {
   const tenant = await tenantParam(req)
   const { grace_days, reason } = req.validatedBody
-  const { result } = await setGraceWorkflow(req.scope).run({
-    input: {
-      tenant_id: tenant.id,
-      today: istanbulDay(new Date()),
-      days: grace_days,
-      reason: reason ?? null,
-      actor: actorOf(req),
-    },
-  })
+  // Review M1: under the shop's billing lock, as the hourly run
+  const { result } = await withBillingLock(req.scope, tenant.id, () =>
+    setGraceWorkflow(req.scope).run({
+      input: {
+        tenant_id: tenant.id,
+        today: istanbulDay(new Date()),
+        days: grace_days,
+        reason: reason ?? null,
+        actor: actorOf(req),
+      },
+    })
+  )
   noteAuditChanges(req, {
     grace_days_override: { from: result.before.grace_days_override, to: grace_days },
     ...(result.move.moved ? { tenant_status: { from: result.move.from, to: result.move.to } } : {}),
   })
   await reissuePlanDocuments(req.scope, [tenant.id])
-  res.json(await subscriptionDetail(req, tenant.id))
+  // Only the owner and finance reach this route
+  res.json(await subscriptionDetail(req, tenant.id, { freeText: true }))
 }

@@ -12,6 +12,21 @@ import { addDays, daysBetween } from "./days"
  * waiting.
  */
 
+/**
+ * A charge of nothing (a free package, review M2) is settled as it opens:
+ * waived by the system with the reason `billing.zero_amount`, so it is
+ * never owed, reminded or overdue.
+ */
+export const nothingOwed = (amount: number) =>
+  amount === 0
+    ? {
+        status: "waived" as const,
+        settle_reason: "billing.zero_amount",
+        settled_by: "system",
+        settled_at: new Date(),
+      }
+    : {}
+
 /** A period's charge opens this many days before it is due, so the first reminder can go. */
 export const CHARGE_LEAD_DAYS = 14
 
@@ -45,6 +60,13 @@ export interface ChargeLike {
 }
 
 /**
+ * Whether a charge is owed: open and for more than nothing. A charge of
+ * nothing is waived as it opens (review M2); one left open is still never
+ * owed, so a free package is never reminded or restricted.
+ */
+export const owed = (charge: ChargeLike): boolean => charge.status === "open" && charge.amount > 0
+
+/**
  * The subscription's state (adr/0061 §2): `restricted` while any open
  * charge is past its grace, `past_due` while one is past its day,
  * `trialing` before the trial's end, else `active`. `cancelled` is a
@@ -55,7 +77,7 @@ export function subscriptionStatus(
   today: string
 ): SubscriptionStatus {
   const standings = input.charges
-    .filter((charge) => charge.status === "open")
+    .filter(owed)
     .map((charge) => chargeStanding(charge.due_on, input.graceDays, today))
   if (standings.includes("overdue")) {
     return "restricted"
@@ -69,8 +91,7 @@ export function subscriptionStatus(
 /** Whether any open charge is past its grace (the resume rule, Ek C16). */
 export const anyOverdue = (charges: readonly ChargeLike[], graceDays: number, today: string) =>
   charges.some(
-    (charge) =>
-      charge.status === "open" && chargeStanding(charge.due_on, graceDays, today) === "overdue"
+    (charge) => owed(charge) && chargeStanding(charge.due_on, graceDays, today) === "overdue"
   )
 
 const OFFSETS: readonly [ReminderKind, number][] = [

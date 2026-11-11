@@ -65,6 +65,17 @@ export class Migration20261111203336 extends Migration {
     this.addSql(
       `CREATE INDEX IF NOT EXISTS "IDX_subscription_status" ON "subscription" ("status") WHERE deleted_at IS NULL;`
     )
+
+    // Ek C16 review: no negative money, whatever writes the row (hand-added: the DML has no checks)
+    this.addSql(
+      `alter table if exists "charge" add constraint "charge_amount_check" check ("amount" >= 0);`
+    )
+    this.addSql(
+      `alter table if exists "charge" add constraint "charge_list_amount_check" check ("list_amount" >= 0);`
+    )
+    this.addSql(
+      `alter table if exists "subscription" add constraint "subscription_price_check" check ("price" >= 0);`
+    )
   }
 
   override async down(): Promise<void> {

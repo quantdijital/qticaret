@@ -38,6 +38,24 @@ async function openCharges(container: Container, today: string): Promise<Payment
   return rows
 }
 
+/**
+ * The shops reminded (review L1): active or restricted ones only. A
+ * suspended shop's charges keep their days (the run still advances them)
+ * but no reminder goes: its storefront is closed and the e-mails' words
+ * ("vitrininiz satışa devam ediyor") would be wrong; staff talk to a
+ * suspended shop themselves. A shop being closed is not billed at all.
+ */
+async function remindedShops(container: Container, ids: string[]): Promise<Set<string>> {
+  if (ids.length === 0) {
+    return new Set()
+  }
+  const shops = await tenantsIn(container).listTenants(
+    { id: ids, status: ["active", "restricted"] },
+    { select: ["id"], take: ids.length }
+  )
+  return new Set(shops.map((shop) => shop.id))
+}
+
 /** Who a shop's reminders go to: its primary billing contact, else its owner contact. */
 async function recipientOf(container: Container, tenantId: string) {
   const contacts = await tenantsIn(container).contactsOf(tenantId)
@@ -53,7 +71,8 @@ async function recipientOf(container: Container, tenantId: string) {
  * the one its schedule says today (`reminderKindFor`), claimed first in
  * the reminder table and sent only by the claim that went in: twice in a
  * day, or two processes at once, still one e-mail. The `restricted` one
- * goes only once the subscription is restricted. A reminder that cannot
+ * goes only once the subscription is restricted; only active and
+ * restricted shops are reminded (review L1). A reminder that cannot
  * go (no contact, e-mail off, the transport failed) stays claimed with
  * its reason: at most once, never twice. No address is logged.
  */
@@ -67,9 +86,18 @@ export async function sendReminders(
   const instruction = (await billing.paymentInstruction()).value
   const transport = send ?? emailTransport()?.send
   const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
-  await eachBounded(await openCharges(container, today), CONCURRENCY, async (charge) => {
+  const charges = await openCharges(container, today)
+  const reminded = await remindedShops(container, [
+    ...new Set(charges.map((charge) => charge.tenant_id)),
+  ])
+  await eachBounded(charges, CONCURRENCY, async (charge) => {
     const kind = reminderKindFor(charge.due_on, charge.grace_days, today)
-    if (!kind || (kind === "restricted" && charge.subscription_status !== "restricted")) {
+    if (
+      !kind ||
+      charge.amount <= 0 ||
+      !reminded.has(charge.tenant_id) ||
+      (kind === "restricted" && charge.subscription_status !== "restricted")
+    ) {
       return
     }
     const claim = await billing.claimReminder(charge.id, charge.tenant_id, kind)

@@ -51,10 +51,17 @@ class BillingModuleService extends BillingSubscriptions {
     change: ChargeChange,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<ChargeRecord> {
-    await (sharedContext.transactionManager as Executor).execute(
-      "SELECT id FROM charge WHERE id = ? AND tenant_id = ? FOR UPDATE",
+    const manager = sharedContext.transactionManager as Executor
+    // The subscription first, as every change to it does (review M1), then the charge
+    await manager.execute(
+      `SELECT id FROM subscription WHERE id =
+         (SELECT subscription_id FROM charge WHERE id = ? AND tenant_id = ?) FOR UPDATE`,
       [chargeId, tenantId]
     )
+    await manager.execute("SELECT id FROM charge WHERE id = ? AND tenant_id = ? FOR UPDATE", [
+      chargeId,
+      tenantId,
+    ])
     const before = await this.chargeOf(tenantId, chargeId, sharedContext)
     if (before.status !== "open") {
       throw new MedusaError(MedusaError.Types.CONFLICT, "cp.charge_not_open")
@@ -93,9 +100,12 @@ class BillingModuleService extends BillingSubscriptions {
   }
 
   /**
-   * The claim on one reminder (insert first, Ek C16): true only for the
-   * one caller whose row went in. Two runs, or two processes, at once: one
-   * sends, the other finds the row and does not.
+   * The claim on one reminder (insert first, Ek C16): the row's id only
+   * for the one caller whose row went in. Two runs, or two processes, at
+   * once: one sends, the other finds the row and does not. Review L2: the
+   * claim holds only while the charge is still open and owes something
+   * (and, for `restricted`, the subscription is restricted), checked in
+   * the insert itself: a charge marked paid meanwhile is not reminded.
    */
   @InjectTransactionManager()
   async claimReminder(
@@ -106,10 +116,15 @@ class BillingModuleService extends BillingSubscriptions {
   ): Promise<string | null> {
     const rows = (await (sharedContext.transactionManager as Executor).execute(
       `INSERT INTO reminder (id, charge_id, tenant_id, kind, channel, outcome, created_at, updated_at)
-       VALUES (?, ?, ?, ?, 'email', 'pending', now(), now())
+       SELECT ?, ?, ?, ?, 'email', 'pending', now(), now()
+        WHERE EXISTS (
+          SELECT 1 FROM charge c JOIN subscription s ON s.id = c.subscription_id
+           WHERE c.id = ? AND c.tenant_id = ? AND c.status = 'open' AND c.amount > 0
+             AND c.deleted_at IS NULL AND s.deleted_at IS NULL
+             AND (? <> 'restricted' OR s.status = 'restricted'))
        ON CONFLICT (charge_id, kind) WHERE deleted_at IS NULL DO NOTHING
        RETURNING id`,
-      [generateEntityId(undefined, "rem"), chargeId, tenantId, kind]
+      [generateEntityId(undefined, "rem"), chargeId, tenantId, kind, chargeId, tenantId, kind]
     )) as { id: string }[]
     return rows[0]?.id ?? null
   }
@@ -159,27 +174,29 @@ class BillingModuleService extends BillingSubscriptions {
       : { value: null, updated_by: null, updated_at: null }
   }
 
-  /** The instruction set (null clears it); the one before comes back. */
+  /**
+   * The instruction set (null clears it); the one before comes back. One
+   * statement (review info): two first saves at once both succeed, the
+   * later wins, neither meets the unique key.
+   */
   @InjectTransactionManager()
   async setPaymentInstruction(
     value: string | null,
     actor: string,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<string | null> {
-    const [row] = await this.listBillingSettings(
-      { key: "payment_instruction" },
-      { select: ["id", "value"], take: 1 },
-      sharedContext
-    )
-    if (row) {
-      await this.updateBillingSettings({ id: row.id, value, updated_by: actor }, sharedContext)
-    } else {
-      await this.createBillingSettings(
-        [{ key: "payment_instruction", value, updated_by: actor }],
-        sharedContext
-      )
-    }
-    return (row as { value: string | null } | undefined)?.value ?? null
+    const rows = (await (sharedContext.transactionManager as Executor).execute(
+      `WITH prev AS (
+         SELECT value FROM billing_setting
+          WHERE key = 'payment_instruction' AND deleted_at IS NULL FOR UPDATE)
+       INSERT INTO billing_setting (id, key, value, updated_by, created_at, updated_at)
+       VALUES (?, 'payment_instruction', ?, ?, now(), now())
+       ON CONFLICT (key) WHERE deleted_at IS NULL
+       DO UPDATE SET value = EXCLUDED.value, updated_by = EXCLUDED.updated_by, updated_at = now()
+       RETURNING (SELECT value FROM prev) AS before`,
+      [generateEntityId(undefined, "bset"), value, actor]
+    )) as { before: string | null }[]
+    return rows[0]?.before ?? null
   }
 
   /**

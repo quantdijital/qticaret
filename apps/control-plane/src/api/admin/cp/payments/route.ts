@@ -10,6 +10,32 @@ import { staffNames } from "../tenants/views"
 // `%` and `_` typed into the search are letters, not patterns
 const likeOf = (q: string) => `%${q.replace(/[\\%_]/g, (char) => `\\${char}`)}%`
 
+const SEARCH_PAGE = 500
+// Beyond this many matching shops the search says it looked at the first ones only
+const SEARCH_MAX = 10_000
+
+/** The shops a search names, page by page, up to `SEARCH_MAX` (and whether there were more). */
+async function matchingShops(
+  req: AuthenticatedMedusaRequest,
+  q: string
+): Promise<{ ids: string[]; truncated: boolean }> {
+  const ids: string[] = []
+  const filter = { $or: [{ name: { $ilike: likeOf(q) } }, { slug: { $ilike: likeOf(q) } }] }
+  for (let skip = 0; skip < SEARCH_MAX; skip += SEARCH_PAGE) {
+    const page = await tenantsOf(req).listTenants(filter, {
+      select: ["id"],
+      order: { id: "ASC" },
+      skip,
+      take: SEARCH_PAGE,
+    })
+    ids.push(...page.map((tenant) => tenant.id))
+    if (page.length < SEARCH_PAGE) {
+      return { ids, truncated: false }
+    }
+  }
+  return { ids, truncated: true }
+}
+
 /**
  * GET /admin/cp/payments (all staff; adr/0061 §7 "yaklaşan / geciken",
  * Ek C16): one list (upcoming, overdue or paid) with its count and total,
@@ -23,14 +49,8 @@ export async function GET(
   const { view, q, from, to, limit, offset } = req.validatedQuery as GetPaymentsType
   const today = istanbulDay(new Date())
   const billing = billingIn(req.scope)
-  const matched = q
-    ? (
-        await tenantsOf(req).listTenants(
-          { $or: [{ name: { $ilike: likeOf(q) } }, { slug: { $ilike: likeOf(q) } }] },
-          { select: ["id"], take: 500 }
-        )
-      ).map((tenant) => tenant.id)
-    : undefined
+  const search = q ? await matchingShops(req, q) : undefined
+  const matched = search?.ids
   const scope = { today, tenant_id: matched, from, to }
   const counts = Object.fromEntries(
     await Promise.all(
@@ -44,7 +64,16 @@ export async function GET(
   ) as Record<(typeof PAYMENT_VIEWS)[number], number>
   res.setHeader("Cache-Control", "no-store")
   if (matched?.length === 0) {
-    res.json({ payments: [], count: 0, total: 0, counts, limit, offset, today })
+    res.json({
+      payments: [],
+      count: 0,
+      total: 0,
+      counts,
+      limit,
+      offset,
+      today,
+      search_truncated: false,
+    })
     return
   }
   const page = await billing.payments({ ...scope, view, limit, offset })
@@ -87,5 +116,7 @@ export async function GET(
     limit,
     offset,
     today,
+    // Review: a search matching more shops than are looked at says so, never cuts silently
+    search_truncated: search?.truncated ?? false,
   })
 }

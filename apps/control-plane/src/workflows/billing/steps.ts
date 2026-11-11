@@ -25,10 +25,19 @@ export async function termsOf(
     : null
 }
 
+/** A subscription's state written again from its charges today (a step's undo: never a stale value). */
+export async function refreshFor(container: Container, tenantId: string, today: string) {
+  const billing = billingIn(container)
+  const sub = await billing.subscriptionOf(tenantId)
+  return sub ? (await billing.refreshStatus(sub.id, today)).to : null
+}
+
 export interface TenantBillingMove {
   moved: boolean
   from: TenantStatus
   to: TenantStatus
+  /** The subscription's state the decision was taken on (null: none). */
+  status: SubscriptionStatus | null
 }
 
 interface MoveUndo {
@@ -44,18 +53,27 @@ interface MoveUndo {
  * (`payment_overdue`, by the system); a restricted shop with nothing
  * overdue left is `active` again (`payment_settled`, by whoever settled
  * it). A suspended shop is left to staff (its resume follows the payments).
- * A move made meanwhile by someone else wins: this one is skipped.
+ *
+ * Review M1: the subscription's state is computed here, from its charges
+ * as they are now (under the subscription's row lock), never taken from
+ * an earlier step; the caller holds the shop's billing lock
+ * (`withBillingLock`), so no other billing change lands between the
+ * reading and the move. A move made meanwhile outside billing wins.
  */
 export const tenantBillingStatusStep = undoableStep(
   "cp-billing-tenant-status",
   async (
-    input: { tenant_id: string; status: SubscriptionStatus; actor: string },
+    input: { tenant_id: string; today: string; actor: string },
     container
   ): Promise<{ output: TenantBillingMove; undo: MoveUndo | null }> => {
+    const status = await refreshFor(container, input.tenant_id, input.today)
     const tenants = tenantsIn(container)
     const tenant = await tenants.tenantOf(input.tenant_id)
-    const target = billingTarget(tenant.status, input.status)
-    const still = { output: { moved: false, from: tenant.status, to: tenant.status }, undo: null }
+    const target = status ? billingTarget(tenant.status, status) : null
+    const still = {
+      output: { moved: false, from: tenant.status, to: tenant.status, status },
+      undo: null,
+    }
     if (!target) {
       return still
     }
@@ -66,7 +84,7 @@ export const tenantBillingStatusStep = undoableStep(
         from: [tenant.status],
       })
       return {
-        output: { moved: true, from: moved.from, to: moved.to },
+        output: { moved: true, from: moved.from, to: moved.to, status },
         undo: { tenant_id: input.tenant_id, ...moved },
       }
     } catch (error) {
@@ -80,17 +98,5 @@ export const tenantBillingStatusStep = undoableStep(
     if (undo) {
       await tenantsIn(container).undoStatusChange(undo.tenant_id, undo)
     }
-  }
-)
-
-/** The subscription's state from its open charges today; undone by writing the old one back. */
-export const refreshSubscriptionStep = undoableStep(
-  "cp-billing-refresh",
-  async (input: { subscription_id: string; today: string }, container) => {
-    const status = await billingIn(container).refreshStatus(input.subscription_id, input.today)
-    return { output: status.to, undo: { id: input.subscription_id, status: status.from } }
-  },
-  async (undo: { id: string; status: SubscriptionStatus }, container) => {
-    await billingIn(container).updateSubscriptions(undo)
   }
 )

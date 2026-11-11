@@ -89,3 +89,19 @@ export async function chargesOf(container: MedusaContainer, tenantId: string) {
   const charges = await billingOf(container).chargesOf({ tenant_id: tenantId })
   return [...charges].sort((a, b) => a.due_on.localeCompare(b.due_on))
 }
+
+/** Retries `check` until it passes or `ms` runs out (a background reissue, review info). */
+export async function eventually(check: () => Promise<void>, ms = 10_000): Promise<void> {
+  const until = Date.now() + ms
+  for (;;) {
+    try {
+      await check()
+      return
+    } catch (error) {
+      if (Date.now() > until) {
+        throw error
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
+  }
+}

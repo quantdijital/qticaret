@@ -8,7 +8,9 @@ import {
 import { billingIn, plansIn, tenantsIn } from "../../workflows/modules"
 import { eachBounded } from "../fleet/bounded"
 import { reissuePlanDocuments } from "../fleet/reissue"
+import type { TenantStatus } from "@qticaret/types/control-plane"
 import { istanbulDay, istanbulHour } from "./days"
+import { withBillingLock } from "./lock"
 import { sendReminders } from "./reminders"
 import type { ReminderTally, SendEmail } from "./reminders"
 import { REMINDER_HOUR } from "./rules"
@@ -27,6 +29,20 @@ export interface BillingRun {
   released: number
   failed: number
   reminders: ReminderTally | null
+}
+
+/** The shop statuses billing still runs for (review L1): not one being closed or closed. */
+const BILLED_STATUSES: readonly TenantStatus[] = ["active", "restricted", "suspended"]
+
+async function billedShops(container: Container, ids: string[]): Promise<Set<string>> {
+  if (ids.length === 0) {
+    return new Set()
+  }
+  const shops = await tenantsIn(container).listTenants(
+    { id: ids, status: [...BILLED_STATUSES] },
+    { select: ["id"], take: ids.length }
+  )
+  return new Set(shops.map((shop) => shop.id))
 }
 
 /** Active shops on a package with no subscription yet: theirs starts today. The ids started. */
@@ -88,30 +104,42 @@ export async function runBilling(
       { id: ids },
       { select: ["id", "tenant_id"], take: PAGE }
     )
-    await eachBounded(subs, CONCURRENCY, async (sub) => {
-      try {
-        const { result } = await advanceSubscriptionWorkflow(container).run({
-          input: { tenant_id: sub.tenant_id, today },
-        })
-        run.advanced += 1
-        run.opened += result.advanced.opened.length
-        if (result.move.moved) {
-          run[result.move.to === "restricted" ? "restricted" : "released"] += 1
+    // Review L1: a shop being closed (or closed) is not billed any more
+    const billed = await billedShops(
+      container,
+      subs.map((sub) => sub.tenant_id)
+    )
+    await eachBounded(
+      subs.filter((sub) => billed.has(sub.tenant_id)),
+      CONCURRENCY,
+      async (sub) => {
+        try {
+          // Review M1: one billing decision at a time per shop, whoever takes it
+          const { result } = await withBillingLock(container, sub.tenant_id, () =>
+            advanceSubscriptionWorkflow(container).run({
+              input: { tenant_id: sub.tenant_id, today },
+            })
+          )
+          run.advanced += 1
+          run.opened += result.advanced.opened.length
+          if (result.move.moved) {
+            run[result.move.to === "restricted" ? "restricted" : "released"] += 1
+          }
+          if (
+            result.advanced.opened.length > 0 ||
+            result.advanced.status.from !== result.move.status ||
+            result.move.moved
+          ) {
+            touched.add(sub.tenant_id)
+          }
+        } catch (error) {
+          run.failed += 1
+          logger.error(
+            `cp.billing_advance_failed ${JSON.stringify({ tenant_id: sub.tenant_id, err: errorSummary(error) })}`
+          )
         }
-        if (
-          result.advanced.opened.length > 0 ||
-          result.advanced.status.from !== result.advanced.status.to ||
-          result.move.moved
-        ) {
-          touched.add(sub.tenant_id)
-        }
-      } catch (error) {
-        run.failed += 1
-        logger.error(
-          `cp.billing_advance_failed ${JSON.stringify({ tenant_id: sub.tenant_id, err: errorSummary(error) })}`
-        )
       }
-    })
+    )
     if (ids.length < PAGE) {
       break
     }

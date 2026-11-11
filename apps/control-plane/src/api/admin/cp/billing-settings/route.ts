@@ -1,4 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { errorSummary } from "@qticaret/server-kit"
 import { reconcilePlanDocuments } from "../../../../lib/fleet/reissue"
 import { setInstructionWorkflow } from "../../../../workflows/billing/workflows"
 import { billingIn } from "../../../../workflows/modules"
@@ -32,7 +34,8 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
  * payment instruction set or cleared. An account number shown to every
  * shop is a target: only the owner, proved again, and the audit keeps
  * that it changed (its length, not the text). Then every shop's document
- * carries it, issued in this request (the reconcile job covers a failure).
+ * carries it: issued in the background (202, `documents: "reissuing"`),
+ * the reconcile job covering a failure.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<PostBillingSettingsType>,
@@ -48,7 +51,19 @@ export async function POST(
       to: value === null ? null : { length: value.length },
     },
   })
-  // Every shop with a package, a few at a time; one that fails is the reconcile job's
-  await reconcilePlanDocuments(req.scope)
-  res.json(await settingsView(req))
+  // Review: every shop's document in the background, a few at a time, so the request does
+  // not wait on the fleet; the count is logged, each shop's Plan belgesi card shows its new
+  // serial, and the reconcile job (10 minutes) finishes whatever this run does not
+  const logger = req.scope.resolve(ContainerRegistrationKeys.LOGGER)
+  void reconcilePlanDocuments(req.scope).then(
+    (issued) => {
+      logger.info(`cp.billing_instruction_reissued ${JSON.stringify({ issued })}`)
+    },
+    (error: unknown) => {
+      logger.error(
+        `cp.billing_instruction_reissue_failed ${JSON.stringify({ err: errorSummary(error) })}`
+      )
+    }
+  )
+  res.status(202).json({ ...(await settingsView(req)), documents: "reissuing" })
 }

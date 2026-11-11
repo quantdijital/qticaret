@@ -2,7 +2,7 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { addDays } from "../../src/lib/billing/days"
 import { TENANTS_MODULE } from "../../src/modules/tenants"
 import type TenantsModuleService from "../../src/modules/tenants/service"
-import { at, billingShop, chargesOf, day, mailbox, runAt } from "../helpers/billing"
+import { at, billingShop, chargesOf, day, eventually, mailbox, runAt } from "../helpers/billing"
 import { ensureSigningKey, fleetOf } from "../helpers/fleet"
 import { makeMember } from "../helpers/staff"
 import type { HttpClient, Member } from "../helpers/staff"
@@ -270,11 +270,15 @@ medusaIntegrationTestRunner({
       expect(unproved.status).toBe(428)
       expect(bidi.status).toBe(400)
       const stored = text.replace(/\r\n/g, "\n")
-      expect(set.data).toMatchObject({ payment_instruction: stored })
-      expect((await latest(shop.id))?.billing).toMatchObject({ payment_instruction: stored })
+      // Review: the request answers at once (202); every shop's document follows in the background
+      expect(set.status).toBe(202)
+      expect(set.data).toMatchObject({ payment_instruction: stored, documents: "reissuing" })
+      await eventually(async () => {
+        expect((await latest(shop.id))?.billing).toMatchObject({ payment_instruction: stored })
+      })
       const audit = await auditRows(getContainer(), { action: "POST /admin/cp/billing-settings" })
       expect(JSON.stringify(audit)).not.toContain("TR12")
-      expect(audit.find((each) => each.outcome === 200)?.changes).toMatchObject({
+      expect(audit.find((each) => each.outcome === 202)?.changes).toMatchObject({
         payment_instruction: { from: null, to: { length: stored.length } },
       })
 
@@ -285,7 +289,9 @@ medusaIntegrationTestRunner({
         await proved(http, owner)
       )
       expect(cleared.data).toMatchObject({ payment_instruction: null })
-      expect((await latest(shop.id))?.billing).toMatchObject({ payment_instruction: null })
+      await eventually(async () => {
+        expect((await latest(shop.id))?.billing).toMatchObject({ payment_instruction: null })
+      })
     })
 
     it("lists upcoming, overdue and paid payments with their totals, and the next payment", async () => {

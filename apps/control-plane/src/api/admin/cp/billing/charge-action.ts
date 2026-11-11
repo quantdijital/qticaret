@@ -3,6 +3,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { errorSummary } from "@qticaret/server-kit"
 import { istanbulDay } from "../../../../lib/billing/days"
 import { invoiceIssuer } from "../../../../lib/billing/invoice-issuer"
+import { withBillingLock } from "../../../../lib/billing/lock"
 import { reissuePlanDocuments } from "../../../../lib/fleet/reissue"
 import type { ChargeChange, ChargeRecord } from "../../../../modules/billing/types"
 import { changeChargeWorkflow } from "../../../../workflows/billing/workflows"
@@ -45,14 +46,17 @@ export async function chargeAction(
   const change = changeOf(actorOf(req))
   let result
   try {
-    ;({ result } = await changeChargeWorkflow(req.scope).run({
-      input: {
-        tenant_id: tenant.id,
-        charge_id: chargeId,
-        change,
-        today: istanbulDay(new Date()),
-      },
-    }))
+    // Review M1: under the shop's billing lock, as the hourly run
+    ;({ result } = await withBillingLock(req.scope, tenant.id, () =>
+      changeChargeWorkflow(req.scope).run({
+        input: {
+          tenant_id: tenant.id,
+          charge_id: chargeId,
+          change,
+          today: istanbulDay(new Date()),
+        },
+      })
+    ))
   } catch (error) {
     if ((error as { message?: unknown } | null)?.message === NOT_OPEN) {
       res.status(409).json({ type: "conflict", message: NOT_OPEN })
@@ -71,7 +75,7 @@ export async function chargeAction(
   const issued = (await reissuePlanDocuments(req.scope, [tenant.id])).get(tenant.id)
   res.json({
     charge,
-    subscription_status: result.status,
+    subscription_status: result.move.status,
     tenant: { id: tenant.id, status: result.move.to },
     plan_document: issued ? { issued: issued.issued, serial: issued.serial } : null,
   })

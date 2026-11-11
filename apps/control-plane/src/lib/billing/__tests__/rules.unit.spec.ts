@@ -15,6 +15,8 @@ import {
   anyOverdue,
   billingSummary,
   chargeStanding,
+  nothingOwed,
+  owed,
   reminderKindFor,
   subscriptionStatus,
 } from "../rules"
@@ -84,6 +86,20 @@ describe("a charge's standing and the subscription's state (Ek C16)", () => {
     ).toBe("active")
     expect(anyOverdue([open("2026-11-25")], 7, "2026-12-02")).toBe(false)
     expect(anyOverdue([open("2026-11-25")], 7, "2026-12-03")).toBe(true)
+  })
+
+  it("never counts a charge of nothing as owed (review M2)", () => {
+    const free = { status: "open" as const, due_on: "2026-11-01", amount: 0 }
+
+    expect(owed(free)).toBe(false)
+    expect(owed({ ...free, amount: 1 })).toBe(true)
+    expect(owed({ ...free, amount: 1, status: "waived" })).toBe(false)
+    expect(
+      subscriptionStatus({ trial_ends_on: null, graceDays: 7, charges: [free] }, "2026-12-20")
+    ).toBe("active")
+    expect(anyOverdue([free], 7, "2026-12-20")).toBe(false)
+    expect(nothingOwed(0)).toMatchObject({ status: "waived", settle_reason: "billing.zero_amount" })
+    expect(nothingOwed(49_000)).toEqual({})
   })
 
   it("restricts an active shop, frees a restricted one, never touches the others", () => {

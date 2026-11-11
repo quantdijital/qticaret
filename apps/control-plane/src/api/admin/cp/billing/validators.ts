@@ -56,9 +56,19 @@ export type PostChargePayType = z.infer<typeof PostChargePay>
 export const PostChargeReason = z.object({ reason }).strict()
 export type PostChargeReasonType = z.infer<typeof PostChargeReason>
 
-/** A corrected amount (kuruş, no proration otherwise: adr/0061 §7) and why. */
+/**
+ * A corrected amount (kuruş, no proration otherwise: adr/0061 §7) and why.
+ * At least one kuruş (review M2): to owe nothing, staff waive the charge.
+ */
 export const PostChargeAmount = z
-  .object({ amount: z.number().int().min(0).max(100_000_000), reason })
+  .object({
+    amount: z
+      .number()
+      .int()
+      .max(100_000_000)
+      .refine((value) => value >= 1, "cp.amount_zero"),
+    reason,
+  })
   .strict()
 export type PostChargeAmountType = z.infer<typeof PostChargeAmount>
 
