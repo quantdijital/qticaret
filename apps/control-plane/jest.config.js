@@ -13,6 +13,11 @@ module.exports = {
       },
     ],
   },
+  // age-encryption (escrow, Ek C8) ships ES modules only, which Jest with
+  // --experimental-vm-modules refuses to require: Node loads it (require(esm))
+  moduleNameMapper: {
+    "^age-encryption$": "<rootDir>/../../packages/server-kit/jest.age.cjs",
+  },
   testEnvironment: "node",
   moduleFileExtensions: ["js", "ts", "json"],
   modulePathIgnorePatterns: ["dist/", "<rootDir>/.medusa/"],

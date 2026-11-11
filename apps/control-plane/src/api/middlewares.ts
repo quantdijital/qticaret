@@ -10,6 +10,7 @@ import { noteSessionEnd, noteSessionStart } from "./http/sessions"
 import { guardSecondStep, noteSignInChallenge } from "./http/sign-in-code"
 import { guardCpStaff } from "./http/staff-guard"
 import { TENANT_ROUTE_MIDDLEWARES } from "./http/tenant-routes"
+import { VAULT_ROUTE_MIDDLEWARES } from "./http/vault-routes"
 
 export default defineMiddlewares({
   routes: [
@@ -74,5 +75,6 @@ export default defineMiddlewares({
     },
     ...CP_ROUTE_MIDDLEWARES,
     ...TENANT_ROUTE_MIDDLEWARES,
+    ...VAULT_ROUTE_MIDDLEWARES,
   ],
 })

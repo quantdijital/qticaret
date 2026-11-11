@@ -145,6 +145,30 @@ const PLAN_ROUTES: RouteRule[] = [
   },
 ]
 
+/**
+ * The keys (C8, adr/0061 §3.5 "owner: key rotation"): the owner's alone.
+ * Reading them shows fingerprints, public keys and counts only; every
+ * change (a new signing key, the switch, retiring one, a rewrap) asks the
+ * proof. Other roles have no use for them and see none (Ek C8).
+ */
+const KEY_ROUTES: RouteRule[] = [
+  { method: "GET", path: "/admin/cp/keys", access: OWNER },
+  {
+    method: "POST",
+    path: "/admin/cp/keys/rewrap",
+    access: OWNER,
+    stepUp: true,
+    resource: { type: "cp_kek" },
+  },
+  ...["prepare", "switch", "retire"].map((action): RouteRule => ({
+    method: "POST",
+    path: `/admin/cp/keys/signing/${action}`,
+    access: OWNER,
+    stepUp: true,
+    resource: { type: "cp_signing_key" },
+  })),
+]
+
 export const CP_ROUTES: readonly RouteRule[] = [
   // One's own account: who they are, before 2FA too, so the panel can lead to setup
   { method: "GET", path: "/admin/cp/me", access: "setup", resource: { type: "cp_user" } },
@@ -231,6 +255,7 @@ export const CP_ROUTES: readonly RouteRule[] = [
   { method: "GET", path: "/admin/cp/audit-log", access: OWNER, auditRead: true },
   ...TENANT_ROUTES,
   ...PLAN_ROUTES,
+  ...KEY_ROUTES,
 ]
 
 const compiled = new Map<string, RegExp>()

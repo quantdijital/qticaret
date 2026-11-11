@@ -125,6 +125,10 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
     expect(stepUps.sort()).toEqual([
       "DELETE /admin/cp/me/mfa",
       "DELETE /admin/cp/me/sessions/:id",
+      "POST /admin/cp/keys/rewrap",
+      "POST /admin/cp/keys/signing/prepare",
+      "POST /admin/cp/keys/signing/retire",
+      "POST /admin/cp/keys/signing/switch",
       "POST /admin/cp/me/mfa/recovery-codes",
       "POST /admin/cp/me/sessions/revoke-others",
       "POST /admin/cp/plans",
@@ -193,6 +197,22 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
     // Every shop route records against the shop it names, so its activity reads it
     for (const rule of CP_ROUTES.filter((each) => each.path.startsWith("/admin/cp/tenants/"))) {
       expect(rule.resource).toEqual({ type: "tenant", param: "id" })
+    }
+  })
+
+  it("gives the keys to the owner alone, every change behind a step-up (C8)", () => {
+    const keys = CP_ROUTES.filter((rule) => rule.path.startsWith("/admin/cp/keys"))
+
+    expect(keys.map((rule) => `${rule.method} ${rule.path}`).sort()).toEqual([
+      "GET /admin/cp/keys",
+      "POST /admin/cp/keys/rewrap",
+      "POST /admin/cp/keys/signing/prepare",
+      "POST /admin/cp/keys/signing/retire",
+      "POST /admin/cp/keys/signing/switch",
+    ])
+    for (const rule of keys) {
+      expect(CP_STAFF_ROLES.filter((role) => decide(rule, staff(role)).allowed)).toEqual(["owner"])
+      expect(rule.stepUp === true).toBe(rule.method === "POST")
     }
   })
 

@@ -1,6 +1,10 @@
 import { EnvValidationError, parseEnv } from "../env"
 
+// A public age recipient whose identity was thrown away when it was made
+const RECIPIENT = "age13m66sfqm8l0gwzka9arej9334jfutmy3ael4cjkdukdzw8uedseq6s0qv8"
+
 const valid = {
+  CP_ESCROW_RECIPIENTS: RECIPIENT,
   NODE_ENV: "development",
   DATABASE_URL: "postgres://postgres:pw@localhost:55432/qticaret_cp",
   ADMIN_CORS: "http://localhost:5174",
@@ -99,6 +103,28 @@ describe("parseEnv", () => {
     ).toContain("EMAIL_TRANSPORT")
     expect(problems({ ...valid, EMAIL_TRANSPORT: "mailpit", MAILPIT_URL: "http://m" })).toContain(
       "EMAIL_FROM"
+    )
+  })
+
+  it("takes public age recipients for the escrow, never an identity (adr/0061 §4.3, C8)", () => {
+    const second = "age1tgyuvdlmpejqsdf847hevurz9szk7vf3j7ytfyqecgzvphvu2d8qrtaxl6"
+    // An identity's shape, made up here: refused for its prefix, never echoed
+    const identity = `AGE-SECRET-KEY-1${"Q".repeat(58)}`
+
+    expect(
+      parseEnv({ ...valid, CP_ESCROW_RECIPIENTS: `${RECIPIENT}, ${second}` }).CP_ESCROW_RECIPIENTS
+    ).toContain(second)
+    expect(problems({ ...valid, CP_ESCROW_RECIPIENTS: undefined })).toContain(
+      "CP_ESCROW_RECIPIENTS: is missing"
+    )
+    const refused = problems({ ...valid, CP_ESCROW_RECIPIENTS: identity })
+    expect(refused).toContain("CP_ESCROW_RECIPIENTS: must list public recipients only")
+    expect(refused).not.toContain(identity)
+    expect(problems({ ...valid, CP_ESCROW_RECIPIENTS: `${RECIPIENT.slice(0, -1)}x` })).toContain(
+      "CP_ESCROW_RECIPIENTS: lists an invalid age recipient"
+    )
+    expect(problems({ ...valid, CP_ESCROW_RECIPIENTS: "ssh-ed25519 AAAA" })).toContain(
+      "CP_ESCROW_RECIPIENTS"
     )
   })
 

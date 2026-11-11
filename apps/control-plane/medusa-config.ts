@@ -60,5 +60,9 @@ module.exports = defineConfig({
     // C7 (adr/0061 §2): the shops and their packages
     { resolve: "./src/modules/tenants" },
     { resolve: "./src/modules/plans" },
+    // C8 (adr/0061 §2, §4): sealed secrets, escrow and signing keys (the
+    // ADR's `secrets`, named `vault`, Ek C8); the shops' public keys
+    { resolve: "./src/modules/vault" },
+    { resolve: "./src/modules/fleet" },
   ],
 })

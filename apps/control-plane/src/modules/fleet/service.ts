@@ -1,0 +1,109 @@
+import type { Context } from "@medusajs/framework/types"
+import {
+  InjectManager,
+  InjectTransactionManager,
+  MedusaContext,
+  MedusaError,
+  MedusaService,
+} from "@medusajs/framework/utils"
+import { TenantKey } from "./models/tenant-key"
+import type { TenantKeyStatus } from "./models/tenant-key"
+
+interface Executor {
+  execute: (sql: string, params: unknown[]) => Promise<unknown>
+}
+
+export interface TenantKeyView {
+  id: string
+  tenant_id: string
+  kid: string
+  public_key: string
+  status: TenantKeyStatus
+  retired_at: Date | null
+  created_at: Date
+}
+
+const FIELDS = [
+  "id",
+  "tenant_id",
+  "kid",
+  "public_key",
+  "status",
+  "retired_at",
+  "created_at",
+] as const
+
+/**
+ * What the control plane knows of the shops it runs, beyond their records
+ * (adr/0061 §2 `fleet`). C8: the shops' public keys. Plan documents,
+ * usage and health join with C9 and C13.
+ */
+class FleetModuleService extends MedusaService({ TenantKey }) {
+  @InjectManager()
+  async tenantKeys(
+    tenantId: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<TenantKeyView[]> {
+    const rows = await this.listTenantKeys(
+      { tenant_id: tenantId },
+      { select: [...FIELDS], order: { created_at: "ASC" }, take: 100 },
+      sharedContext
+    )
+    return rows
+  }
+
+  /**
+   * A shop's new public key: `active` when it has none, `next` while a
+   * rotation moves it (refused while another `next` waits).
+   */
+  @InjectTransactionManager()
+  async registerTenantKey(
+    input: { tenant_id: string; kid: string; public_key: string },
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<TenantKeyView> {
+    await (sharedContext.transactionManager as Executor).execute(
+      "SELECT pg_advisory_xact_lock(hashtext(?))",
+      [`tenant_key:${input.tenant_id}`]
+    )
+    const current = await this.tenantKeys(input.tenant_id, sharedContext)
+    if (current.some((key) => key.status === "next")) {
+      throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "cp.tenant_key_next_exists")
+    }
+    const status = current.some((key) => key.status === "active") ? "next" : "active"
+    const [created] = await this.createTenantKeys([{ ...input, status }], sharedContext)
+    return created as unknown as TenantKeyView
+  }
+
+  /** The shop moved to its `next` key: it becomes `active`, the old one `retired`. */
+  @InjectTransactionManager()
+  async promoteTenantKey(
+    tenantId: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<{ from: string | null; to: string }> {
+    const current = await this.tenantKeys(tenantId, sharedContext)
+    const next = current.find((key) => key.status === "next")
+    if (!next) {
+      throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "cp.tenant_key_no_next")
+    }
+    const active = current.find((key) => key.status === "active")
+    const manager = sharedContext.transactionManager as Executor
+    await manager.execute(
+      `UPDATE tenant_key SET status = 'retired', retired_at = now(), updated_at = now()
+        WHERE tenant_id = ? AND status = 'active' AND deleted_at IS NULL`,
+      [tenantId]
+    )
+    await manager.execute(
+      "UPDATE tenant_key SET status = 'active', updated_at = now() WHERE id = ?",
+      [next.id]
+    )
+    return { from: active?.kid ?? null, to: next.kid }
+  }
+
+  /** The undo of `registerTenantKey` in a failed issue. */
+  @InjectTransactionManager()
+  async removeTenantKey(id: string, @MedusaContext() sharedContext: Context = {}): Promise<void> {
+    await this.deleteTenantKeys([id], sharedContext)
+  }
+}
+
+export default FleetModuleService

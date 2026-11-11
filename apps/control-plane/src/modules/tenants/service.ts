@@ -8,6 +8,9 @@ import {
 import { MAX_CONTACTS } from "../../lib/tenants/kinds"
 import { omit } from "../../lib/omit"
 import { heirOnRemoval, primaryOnSave } from "../../lib/tenants/contacts"
+import { tcknContext } from "../../lib/tenants/tckn"
+import { emptyTally, kekOf, olderKekIds, rewrapRows } from "../../lib/vault/rewrap"
+import type { RewrapTally } from "../../lib/vault/rewrap"
 import { TenantsRecords, notFound } from "./service-records"
 import { CONTACT_FIELDS } from "./types"
 import type { ContactFields, ContactRecord } from "./types"
@@ -17,6 +20,12 @@ import type { ContactFields, ContactRecord } from "./types"
  * mark taken off one row must reach the database before another row takes
  * it (one primary billing contact is a unique index).
  */
+interface Executor {
+  execute: (sql: string, params: unknown[]) => Promise<unknown>
+}
+
+const REWRAP_BATCH = 100
+
 async function flushNow(sharedContext: Context): Promise<void> {
   await (sharedContext.transactionManager as { flush: () => Promise<void> }).flush()
 }
@@ -135,6 +144,70 @@ class TenantsModuleService extends TenantsRecords {
         await this.createTenantContacts([{ ...fields, tenant_id: tenantId }], sharedContext)
       }
     }
+  }
+
+  /** How many sealed TCKNs each KEK holds (the KEK id is the envelope's second part). */
+  @InjectManager()
+  async tcknCountsByKek(
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<Map<string, number>> {
+    const rows = (await (sharedContext.manager as Executor).execute(
+      `SELECT split_part(tckn_sealed, '.', 2) AS kek_id, count(*)::int AS n
+         FROM tenant_company WHERE tckn_sealed IS NOT NULL AND deleted_at IS NULL GROUP BY 1`,
+      []
+    )) as { kek_id: string; n: number }[]
+    return new Map(rows.map((row) => [row.kek_id, row.n]))
+  }
+
+  /**
+   * One pass of the KEK rotation over the sealed TCKNs (adr/0061 §4.1,
+   * lib/vault/rewrap.ts): their data keys rewrapped, never opened.
+   */
+  @InjectManager()
+  async rewrapTckns(@MedusaContext() sharedContext: Context = {}): Promise<RewrapTally> {
+    const older = new Set(olderKekIds())
+    const tally = emptyTally()
+    let after = ""
+    while (older.size > 0) {
+      const rows = (await (sharedContext.manager as Executor).execute(
+        `SELECT id, tenant_id, tckn_sealed FROM tenant_company
+          WHERE tckn_sealed IS NOT NULL AND deleted_at IS NULL AND id > ?
+          ORDER BY id LIMIT ?`,
+        [after, REWRAP_BATCH]
+      )) as { id: string; tenant_id: string; tckn_sealed: string }[]
+      await rewrapRows(
+        rows
+          .filter((row) => older.has(kekOf(row.tckn_sealed) ?? ""))
+          .map((row) => ({
+            id: row.id,
+            sealed: row.tckn_sealed,
+            context: tcknContext(row.tenant_id),
+          })),
+        (id, from, to) => this.swapTckn(id, from, to),
+        tally
+      )
+      if (rows.length < REWRAP_BATCH) {
+        break
+      }
+      after = rows[rows.length - 1]?.id ?? after
+    }
+    return tally
+  }
+
+  /** Writes `to` only while the row still holds `from`. Whether it did. */
+  @InjectTransactionManager()
+  protected async swapTckn(
+    id: string,
+    from: string,
+    to: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    const rows = (await (sharedContext.transactionManager as Executor).execute(
+      `UPDATE tenant_company SET tckn_sealed = ?, updated_at = now()
+        WHERE id = ? AND tckn_sealed = ? AND deleted_at IS NULL RETURNING id`,
+      [to, id, from]
+    )) as unknown[]
+    return rows.length > 0
   }
 }
 

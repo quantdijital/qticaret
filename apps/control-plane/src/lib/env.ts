@@ -9,12 +9,14 @@ import {
   parseEnvWith,
   secret,
 } from "@qticaret/server-kit"
+import { EscrowError, parseAgeRecipients } from "@qticaret/server-kit/escrow"
 
 /**
  * The control plane's environment (adr/0061), validated once at startup: a
  * missing or malformed variable stops the process with a message naming
  * every problem by variable name, never by value (docs/04). Later tasks add
- * their keys here (signing key, master key, provisioner).
+ * their keys here (provisioner). The control plane's signing key is not an
+ * env value: it is made and kept sealed in the vault (Ek C8).
  */
 
 export { EnvValidationError, isLocalEnv }
@@ -45,6 +47,11 @@ const envSchema = z.object({
   CP_MASTER_KEY: z
     .string()
     .regex(/^[0-9a-fA-F]{64}(?:\s*,\s*[0-9a-fA-F]{64})*$/, "must list 64-hex-character keys"),
+  // Escrow (adr/0061 §4.3, Ek C8): the offline `age` recipients a shop's
+  // runtime secrets are sealed to, the backups' own (infra/backup). Public
+  // keys only (`age1…`, comma-separated); the identity that opens them is
+  // never on this machine: an age identity here is refused
+  CP_ESCROW_RECIPIENTS: z.string().max(40_000),
   // The platform's own domain (adr/0061 §2): a shop's subdomain is
   // `<slug>.<PLATFORM_DOMAIN>`. Not decided yet; `localhost` on this machine
   PLATFORM_DOMAIN: z
@@ -99,6 +106,17 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       code: "custom",
       path: ["CP_MASTER_KEY"],
       message: reused ? `must differ from ${reused}` : "lists the same key twice",
+    })
+  }
+  try {
+    parseAgeRecipients(env.CP_ESCROW_RECIPIENTS, "CP_ESCROW_RECIPIENTS")
+  } catch (error) {
+    // The message names the variable, never a value
+    const message = error instanceof EscrowError ? error.message : "is not a list of age recipients"
+    ctx.addIssue({
+      code: "custom",
+      path: ["CP_ESCROW_RECIPIENTS"],
+      message: message.replace(/^CP_ESCROW_RECIPIENTS /, ""),
     })
   }
   const domainProblem = deployed ? publicDomainProblem(env.PLATFORM_DOMAIN) : null

@@ -28,6 +28,7 @@ has_var() { [[ -e "$2" ]] && grep -q "^$1=" "$2"; }
 get_var() { sed -n "s/^$1=//p" "$2"; }
 
 command -v openssl >/dev/null || fail "openssl is required"
+command -v node >/dev/null || fail "node is required"
 
 # Secrets owned by infra/docker/.env; backend templates reference them as __NAME__.
 shared_names="$(var_names "$docker_template")"
@@ -39,6 +40,10 @@ render_line() {
   done
   while [[ "$line" == *__GENERATED__* ]]; do
     line="${line/__GENERATED__/$(rand)}"
+  done
+  # A public age recipient whose identity is discarded (adr/0061 Ek C8)
+  while [[ "$line" == *__AGE_RECIPIENT__* ]]; do
+    line="${line/__AGE_RECIPIENT__/$(node "$root/scripts/age-recipient.mjs")}"
   done
   printf '%s\n' "$line"
 }
