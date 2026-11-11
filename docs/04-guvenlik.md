@@ -78,6 +78,8 @@
   - **Test kancası:** `createSafeFetch` (DNS ve adres kuralı enjekte edilir) kütüphaneden export edilmez; yalnızca testler kullanır.
   - **Karşılaştırma:** Secret karşılaştırması `lib/security` `safeEqual` ile yapılır. Boş beklenen değer hiçbir zaman eşleşmez.
 
+- **Üst panelin plan belgesi itmesi (adr/0061 Ek C9):** hedef mağazanın iç ağ adresi olduğu için `safe-fetch`'in "yalnız genel adres" kuralı burada ters düşer. Kural bunun yerine izin listesidir: `CP_TENANT_API_HOSTS` (ana bilgisayar adı ya da `.sonek`), yerelde ayrıca bu makine; yalnız taban URL (kimlik bilgisi, sorgu, yol yok), `http` yalnız listedeki iç adlara, yönlendirme izlenmez, 5 sn, yanıt gövdesi okunmaz. Mağazanın çekmesi `CONTROL_PLANE_URL`'e gider (yapılandırma, kullanıcı girdisi değil): yönlendirme hata sayılır, 10 sn, yanıt 16 KB'ı geçerse okunmaz; canlıda `http` yalnız tek etiketli iç ada ya da bu makineye.
+
 ### Giden entegrasyonlar
 - Tenant API anahtarları yalnızca oluşturulurken bir kez gösterilir, hash'li saklanır (çekirdek davranışı doğrulanır).
 - Destek erişimi (break-glass) süreli, gerekçeli ve audit log'lu (F16.10).
@@ -155,6 +157,10 @@
   - Panelin kendi HTML'i (`apps/panel`, giriş, 2FA kurulumu, yeniden doğrulama penceresi, ekip ekranları) de API başlıklarını almaz. F16'da vekil sunucu panele `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` ve panel CSP'si ekler; e2e bir denetim bunu doğrular (F12 Y13 incelemesi).
   - Medusa, store preflight'ında da publishable key ister; izinli origin bile 400 alır ve allow header'ı dönmez. Vitrin (F18) Store API'yi yalnızca kendi sunucusundan çağırır; tarayıcıdan doğrudan çağrı yoktur, bu yüzden ön istek sorunu doğmaz (adr/0046 §5).
 - Hata yanıtları iç detay sızdırmaz (stack trace, SQL, sağlayıcı ham yanıtı).
+- **Üst panel ↔ mağaza (adr/0061 §3.2, Ek C9):**
+  - **Mağazanın itme ucu** `POST /hooks/control-plane/plan` oturum ve sır istemez, belge imzalıdır: gövde 16 KB (413), katı şema (bilinmeyen alan 400), `kid` ile `CONTROL_PLANE_PUBLIC_KEYS`'e karşı imza (401), `TENANT_ID` (403), `serial` kuralı (küçüğü 409, aynısı etkisiz 200), IP başına dakikada 60 (`control_plane_push`). `CONTROL_PLANE_PUBLIC_KEYS` yoksa (yönetimsiz) 404. Canlıda dört değişken açılışta zorunlu.
+  - **Üst panelin `/tenant-api/*` grubu** personel tablosunda değildir ve personel kimliği orada okunmaz; kendi rota tablosu (`lib/fleet/tenant-api-routes.ts`) listede olmayanı imzaya bakmadan 404 yapar. Her istek mağazanın `active`/`next` anahtarıyla imzalı olmalı: ±5 dk, `nonce` 10 dk tek kullanım (Redis `SET NX EX`; Redis hatası isteği 503 ile reddeder, geçirmez). Bilinmeyen anahtar, emekli anahtar, başka mağazanın kimliği ve yanlış imza aynı yanıtı alır (401 `signature.invalid`): mağazanın varlığı sızmaz. Gövde taşıyan GET reddedilir.
+
 - Toplu sorgularda sayfalama limiti zorunlu (max 100). Store API'de `fields` ile hassas alan sızdırmama testi.
 
 ### Veri ve KVKK

@@ -497,3 +497,85 @@ Sıra bağımlılığa göredir; her görev tek kodlama ajanının bir oturumuna
 - **L5, `scripts/age-recipient.mjs`:** doğrudan çalıştırma denetimi `pathToFileURL(realpathSync(argv[1]))` (boşluklu yol, sembolik bağ); `init-dev-env.sh` betik başarısız olursa ya da `age1…` basmazsa durur, boş değer yazmaz.
 - **Bilgi, firma kaydının geri alınması:** `restoreCompany` mühürlü TCKN'yi yalnız kayıt onu değiştirdiyse ve satır hâlâ kaydın yazdığı zarfı tutuyorsa geri yazar (karşılaştır-ve-değiştir); arada yeniden sarılmış zarf eski KEK'li zarfla ezilmez.
 - **Testler (düzeltmelerle):** HTTP 112, birim 213, server-kit 285, panel Vitest 76; backend `tsc` ve `turbo run typecheck lint` (23 görev) yeşil.
+
+## Ek: C9 uygulaması (2026-11-11)
+
+- **Sözleşme (`@qticaret/types/control-plane`):**
+  - **Platform bayraklarının listesi paylaşılır (karar):** `PLATFORM_FLAGS` (anahtar, varsayılan, `testOnly`), `platformFlags(nodeEnv)`, `isPlatformFlag`. Üst panel hangi bayrakları sunacağını buradan öğrenir. Mağazanın kayıt defteri (`platform-settings/features.ts`) uygulayan taraftır; backend birim testi (`platform-flags-contract.unit.spec.ts`) her `NODE_ENV` için iki tarafın anahtar ve varsayılanlarının aynı olduğunu denetler. Bugün iş bayrağı yok, yalnız testte `test.platform_sample` var (mağazanın kuralıyla aynı: yalnız `NODE_ENV=test`). Bu yüzden geliştirmede ve canlıda panel "bu sürümde özellik yok" der.
+  - **Test vektörleri dışa açıldı:** `@qticaret/types/control-plane/testing` (`TEST_ONLY_*` tohumları, `planDocument`, `PLAN_VECTOR`). `NODE_ENV` `test` değilse yüklenirken hata verir. Mağazanın alıcı testleri sözleşmenin sabit imzasını bununla doğrular.
+- **server-kit:** `RedisNonceStore` (`SET key 1 EX ttl NX`; Redis hatası fırlatılır, "görülmedi" sayılmaz). Üst panel `REDIS_URL` varsa onu kullanır (`qt:cp-nonce:<ad alanı>:`). Bellek deposu yalnız yerelde; canlıda zaten şema `REDIS_URL` ister.
+- **Üst panel: belge.**
+  - `fleet` modülünde `plan_document`: mağaza, `serial`, gövde, `content_hash`, `kid`, imza, `issued_at`, itme durumu (`pending`, `delivered`, `failed`, `superseded`), deneme sayısı, son hata kodu, `pushed_at`, `next_push_at`, `pulled_at`. Satırlar silinmez: mağazaya ne söylendiğinin geçmişi.
+  - **Serial:** mağaza başına danışma kilidi (`plan_document:<mağaza>`) altında son + 1. İmza da kilidin içinde atılır: iki yayın aynı numarayı alamaz.
+  - **Yalnız içerik değişince:** içerik (serial ve zaman hariç) kanonik JSON'un SHA-256'sı. Aynıysa yeni belge yok.
+  - **Belge:** durum, paket kodu, altı limit (paket + süresi dolmamış istisna, `null` sınırsız), bayraklar (istisna, yoksa paket, yoksa listenin varsayılanı).
+  - **Faturalama özeti C16'ya kadar nötr (karar):** `{ status: "active", due_on: null, grace_ends_on: null, amount: null, currency: "TRY" }`. Mağaza ödeme şeridi göstermez, durum bundan türemez.
+  - Belge imzadan önce sözleşmenin katı şemasından geçer. İmza `signPlanDocument` (etkin anahtar), workflow `cp-plan-document-issue` (`store: false`); telafi, belge hâlâ en yeniyse siler.
+  - **Paketsiz mağazaya belge yok (karar):** paket kodu sözleşmede zorunlu. Paketten çıkarılan mağaza son belgesiyle kalır.
+- **Ne zaman yayınlanır:** paket ataması, yeni mağazanın paketi, paketin limit/bayrak/ad/gün değişikliği (o paketteki bütün mağazalar), limit ve bayrak istisnası ekleme/kaldırma. Fiyat tek başına içeriği değiştirmez (C16'ya kadar).
+  - Yayın personel eyleminden **sonra** çalışır ve onu hiç bozmaz: hata loglanır (`cp.plan_issue_failed`).
+  - `cp-plan-reconcile` işi (10 dakikada bir) bütün paketli mağazaları yeniden hesaplar. Böylece süresi dolan istisna ve başarısız yayın telafi edilir. İmza anahtarı yoksa çalışmaz, bir kez söyler.
+  - İleride durum ve faturalama değişiklikleri (C15/C16) aynı `reissuePlanDocuments`'ı çağırır.
+- **`package_feature` ve bayrak istisnası:**
+  - `package_feature` (paket, anahtar, açık/kapalı). Satır yoksa varsayılan geçerlidir.
+  - **Sapma, ayrı tablo `tenant_feature_override`:** ADR §2 limit ve bayrak istisnasını tek `tenant_override` tablosunda gösteriyordu. Ayrı tabloda anahtar ve değer tipleri kendi kısıtını korur (limit sayı ve kayıt defteri enum'u, bayrak boolean). Limit tarafının kodu değişmedi.
+  - Kural aynı: gerekçe 3–500, isteğe bağlı bitiş geçmiş olamaz, anahtar başına bir istisna, `store: false` workflow, denetim `{ key, from, to }`.
+  - **Uçlar:**
+    - `POST /admin/cp/tenants/:id/feature-overrides` ve `DELETE …/:key`: `owner` + `operator`, yeniden doğrulama yok (limit istisnası gibi).
+    - Paket bayrakları `POST /admin/cp/plans` ve `POST /admin/cp/plans/:id` gövdesinde `features`: `owner` + `finance`. Listede olmayan anahtar 400 `cp.flag_unknown`.
+  - `GET /admin/cp/plans` `platform_flags` (anahtar + varsayılan) döner. Mağaza ayrıntısı `platform_flags`, `features` (paket/istisna/uygulanan) ve `feature_overrides` döner. `plan_document` (serial, zaman, itme, son çekme, itme hedefi) yalnız `owner` ve `operator`'a gider (finans ve okuma rolüne alan hiç gönderilmez).
+- **`GET /tenant-api/v1/plan`:**
+  - **Ayrı rota grubu (karar):** `lib/fleet/tenant-api-routes.ts` tablosu, `api/http/tenant-api.ts` koruması. İzin listesindeki `/tenant-api` öneki zaten vardı; tablo listede olmayan her yolu imzaya bakmadan 404 yapar. Personel tablosunda `/tenant-api` yoktur (birim testli), `/admin` altında değildir, personel kimliği okunmaz. Hız sınırı C3'ün `cp_tenant_api` profili.
+  - **İmza:** mağazanın `active` ya da `next` `tenant_key`'i (`trustedTenantKey`), ±5 dk, `nonce` 10 dk. Gövde taşıyan GET 400.
+  - **Ret kodları (karar):** biçim/eksik başlık 401 `signature.malformed`, zaman 401 `signature.stale`. Bilinmeyen anahtar, emekli anahtar, başka mağazanın kimliği ve yanlış imza aynı yanıtı alır: 401 `signature.invalid`, böylece mağazanın ya da anahtarın varlığı sızmaz. Tekrar 401 `signature.replayed` (yalnız geçerli imzadan sonra). Nonce deposu hatası 503 `tenant_api.unavailable`. Kesin neden yalnız logda.
+  - Yanıt: en son belge `{ document, kid, signature }`, `Cache-Control: no-store`, `pulled_at` yazılır. Belge yoksa 404 `plan.none`.
+- **İtme:**
+  - `tenant.api_base_url` (boş olabilir) eklendi. C10'un kurulumu doldurur. Geliştirmede `pnpm --filter control-plane cp:fleet set-api-url <slug> <url|none>` (yalnız yerel, politika denetimli, sistem denetim satırı). Ayrıca `cp:fleet status <slug>` ve `cp:fleet issue <slug>`.
+  - Yayından sonra beklemeden gönderilir. `cp-plan-pushes` işi her dakika vadesi gelenleri dener: 1, 2, 4… dk, en çok 60 dk, 12 deneme.
+  - 5xx/408/429/ağ hatası yeniden denenir. Diğer yanıtlar (mağazanın reddi, ör. 409 eski serial, 404 yönetimsiz) kalıcı `failed` olur. Yeni belge eskisinin bekleyen itmesini `superseded` yapar.
+  - **SSRF politikası (karar):** izin listesi `CP_TENANT_API_HOSTS` (ad ya da `.sonek`), yerelde ayrıca bu makine. Yalnız taban URL; `http` yalnız listedeki iç adlara. Yönlendirme izlenmez (`redirect: manual`, 3xx başarısız), 5 sn, yanıt gövdesi okunmaz. Canlıda liste boşsa itme yok, çekme yeter.
+  - **Sapma, iç ağda IP sabitleme yok:** hedefler platformun kendi ağındaki adlardır; mağazanın `safe-fetch`'i genel adres kuralıyla bunları zaten reddederdi. docs/04'e işlendi.
+- **Görünürlük:** mağaza sayfasında "Paket ve limitler" sekmesi limit kartının altında "Platform özellikleri" (satır → istisna penceresi) ve yalnız sahip/operatöre "Plan belgesi" kartını (sıra no, hazırlanma, gönderim durumu ve hata kodu, teslim, son çekme) gösterir. Paket penceresinde "Platform özellikleri" bölümü var (her bayrak bir onay kutusu, varsayılan yazılı). Bayrak yoksa bölüm bunu söyler, gövdeye `features` girmez.
+- **Mağaza (`apps/backend`):**
+  - **`control-plane` modülü** (`control_plane`): `control_plane_plan` tablosu (mağaza başına tek satır; `serial`, gövde, `kid`, imza, `received_at`, `confirmed_at`, `source` push/pull). Servis `planState()` sürümlü önbellekle çalışır (Redis işareti; süreçler en geç 1 sn'de görür). Durum, paket kodu, limitler, platform bayrakları, faturalama özeti, serial ve zamanları sunar. Yönetimsiz kipte `active`, limitsiz, bayrak yok.
+  - **Limitler ve durum yalnız saklanır ve sunulur:** uygulama C14, durum etkileri C15.
+  - **Doğrulama sırası** (`lib/control-plane/verify.ts`, saf): katı şema (bilinmeyen alan, bilinmeyen sürüm, eksik limit) → `kid` ile imza → `TENANT_ID`. Sonra serial kuralı servis içinde, danışma kilidi altında: itme ile çekme yarışamaz. Büyük uygulanır, aynısı yalnız `confirmed_at`'i ilerletir, küçüğü 409.
+  - **`POST /hooks/control-plane/plan`:**
+    - Gövde Medusa body-parser'ında 16 KB (413). `validateAndTransformBody(signedPlanDocumentSchema)` bilinmeyen alanda 400 verir.
+    - İmza 401 (`signature.unknown_key` / `signature.invalid` mağaza tarafında ayrı söylenir: anahtarlar herkese açık, sızan bir şey yok), başka mağaza 403, eski 409, aynı 200 `{ applied: false }`, yönetimsiz 404 `control_plane.unmanaged`.
+    - Hız sınırı `control_plane_push` (IP başına dakikada 60).
+    - Rota envanteri testi değişmeden geçer (imzasız istek 400).
+  - **Çekme:**
+    - `control-plane-pull` işi her dakika çalışır. Açılıştan sonraki ilk çalışmada, sonra 15 dakikada bir çeker ("açılışta" = ilk dakika içinde; Medusa'nın açılış kancası yerine, karar).
+    - İstek `TENANT_SIGNING_KEY` ile imzalıdır. `redirect: error`, 10 sn, yanıt 16 KB'tan büyükse okunmaz.
+    - Yanıta itmeyle aynı denetimler uygulanır. Ulaşılamazsa son belge ve durum aynen kalır, `control_plane.pull_unreachable` loglanır.
+    - **Sapma, `lib/clients` kullanılmaz:** imzalı isteğin `nonce`'u tek kullanımlıktır, istemcinin yeniden denemesi onu tekrar ederdi. Bu bir sağlayıcı değildir, Entegrasyonlar sayfasına hata yazmaz. Yeniden deneme bir sonraki çalışmadır.
+  - **Eski belge uyarısı:** 24 saattir geçerli bir belge alınmadıysa (itme ya da çekme, `confirmed_at`) `control_plane.document_stale`, hiç belge yoksa `control_plane.no_document` uyarı kodu loglanır.
+    - **Karar:** ölçü `issued_at` değil `confirmed_at`. İçerik değişmedikçe üst panel yeni belge yayınlamaz; `issued_at`'e bakılsaydı sağlıklı her mağaza bir gün sonra uyarırdı.
+  - **Platform bayraklarının kaynağı (karar):**
+    - Modüller yalıtıktır (backend CLAUDE.md). Bu yüzden `platform-settings` belge modülünü çağırmaz.
+    - `control-plane-apply-plan-document` workflow'u (`store: false`) iki adımlıdır: belgeyi saklar, sonra bayrakları `platform-settings`'in yeni `platform_flag` tablosuna bütün küme olarak yazar (`syncPlatformFlags`). Her adımın telafisi var.
+    - Mağazanın kayıt defterinde `owner: platform` olmayan anahtar yazılmaz, `control_plane.unknown_flags` ile loglanır, belge reddedilmez: yeni bir üst panel bayrağı eski bir mağazanın durumunu ve limitlerini kilitlemesin.
+    - `isFeatureEnabled`/`listFeatures`/`readFeature` platform bayrağına yalnız yönetilen kipte bu değeri, aksi hâlde varsayılanı verir. Yönetimsiz kip bugünküyle aynıdır; değişken kaldırılınca saklı değerler de etkisiz kalır.
+  - **Env:** `CONTROL_PLANE_URL`, `CONTROL_PLANE_PUBLIC_KEYS`, `TENANT_ID`, `TENANT_SIGNING_KEY` (`lib/control-plane/env.ts`). Biçim kuralları ve eşler şemadadır: anahtarlarla `TENANT_ID`, URL ile imza anahtarı birlikte, URL'de kimlik bilgisi ve sorgu yok, canlıda `http` yalnız tek etiketli iç ada ya da bu makineye. İletiler yalnız değişken adını taşır.
+    - **Sapma:** "canlıda dördü zorunlu" kuralı açılışta `medusa-config`'te `assertControlPlaneConfigured` ile uygulanır. Şemanın `superRefine`'ında olsaydı mevcut env testlerinin tam canlı ortam örnekleri kırılırdı ("mevcut testler değişmeden" şartı). Etkisi aynıdır: dördü olmadan canlı mağaza açılmaz.
+    - `env.example`'da dördü yorum satırıdır: geliştirme yönetimsiz kalır.
+- **Migration'lar (adlar iki uygulamada tekil, yeniden `db:generate` "Skipped"):** üst panel `plans` `Migration20261111032638` (`package_feature`, `tenant_feature_override`), `tenants` `Migration20261111032639` (`api_base_url`), `fleet` `Migration20261111032640` (`plan_document`); mağaza `control-plane` `Migration20261111033457` (`control_plane_plan`), `platform-settings` `Migration20261111033458` (`platform_flag`).
+- **Yeni env:** mağaza `CONTROL_PLANE_URL`, `CONTROL_PLANE_PUBLIC_KEYS`, `TENANT_ID`, `TENANT_SIGNING_KEY` (Sonuçlar listesinde zaten vardı); üst panel `CP_TENANT_API_HOSTS` (yeni, isteğe bağlı). Backend `@qticaret/types`'a bağımlı oldu (sözleşme ve paylaşılan liste).
+- **Testler:**
+  - **Backend birim:** alıcı denetimleri sözleşme vektörüyle (sahte imza, değiştirilmiş belge, bilinmeyen `kid`, başka mağaza, bilinmeyen alan/sürüm, eksik limit), env, çekme ritmi, bayrak sözleşmesi.
+  - **Backend HTTP** `control-plane-plan.spec.ts`: büyük/aynı/eski serial, bayrağın kayıt defterine ulaşması, sahte imza, bilinmeyen anahtar, başka mağaza, bilinmeyen alan, 17 KB gövde 413. Üst panel kapalıyken son belgeyle durum korunuyor, 24 saat uyarısı veriliyor. İmzalı çekme, sahte üst panelin imza doğrulamasıyla yapılıyor ve aynı denetimler uygulanıyor. Yönetimsiz kipte 404 ve varsayılan bayrak.
+  - **Üst panel birim:** içerik, hash, istisna süresi, şema; itme hedefi politikası, geri çekilme; tenant API tablosu ile dosyaları birbirini tutuyor ve personel tablosundan ayrı.
+  - **Üst panel HTTP:** `tenant-api.spec.ts`
+    - Bozuk imza, ±5 dk dışı (geçmiş ve gelecek), tekrar `nonce`, sorgu eklenmiş hedef, başka mağazanın kimliği, olmayan mağaza, emekli anahtar, `next` anahtarla geçiş.
+    - Listede olmayan yol, gövdeli GET, personel kimliği.
+    - **Tek süreçte uçtan uca:** üst panelin yayınladığı ve `/tenant-api`'den çekilen belge, mağazanın kendi `checkPlanDocument`'ıyla (`apps/backend`'den çalışma anında yüklenir) yayımlanan anahtarlarla kabul ediliyor, başka mağaza kimliğiyle reddediliyor.
+  - **Üst panel HTTP:** `plan-documents.spec.ts`: yayın ve imza, aynı içerikte yeni serial yok, istisna ve paket limitiyle yeni serial, eskinin itmesi `superseded`, bayrak istisnasının rolleri ve doğrulaması, bilinmeyen paket bayrağı, belge durumunun rol görünürlüğü, itme (hedef yok, politika dışı hedef çağrılmıyor, 503 yeniden, 200 teslim, 409 kalıcı).
+  - Panel Vitest ve Playwright (masaüstü + telefon, axe açık/koyu; paket sekmesi ayrıca denetlendi).
+- **Kalan riskler:**
+  1. İç ağ hedeflerinde DNS sabitleme yok (izin listesi ada göre).
+  2. Mağaza tarafında `signature.unknown_key` ile `signature.invalid` ayrı yanıtlanır (açık anahtarlar gizli değil).
+  3. Bir belge mağazanın bilmediği bayrağı taşırsa o bayrak varsayılanda kalır, belge yine uygulanır.
+  4. Yayın ve itme personel isteğinin içinde beklenir (yayın) ya da beklenmeden başlar (itme). Süreç itme sırasında düşerse iş dakikada bir dener, çekme 15 dakikada telafi eder.
+  5. `confirmed_at` aynı serial'in tekrar itilmesiyle ilerler: imza geçerli olmalı, saldırgan eski bir geçerli belgeyi tekrar iterek "taze" görünümünü uzatabilir. Durum yine değişmez; bu yalnız 24 saat uyarısını geciktirir.
+  6. Çekmede `TENANT_SIGNING_KEY` süreç belleğinde ayrıştırılmış durur.
