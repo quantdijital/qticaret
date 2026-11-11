@@ -1,86 +1,25 @@
 import { generateKeyPairSync } from "node:crypto"
-import { createServer } from "node:http"
-import type { Server } from "node:http"
-import type { AddressInfo } from "node:net"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import {
-  MemoryNonceStore,
-  privateKeyFromSeed,
-  rawPublicKey,
-  signDocument,
-  signerFromPrivateKey,
-  verifySignedRequest,
-} from "@qticaret/server-kit"
-import type { Ed25519Signer } from "@qticaret/server-kit"
-import { PLAN_DOCUMENT_PURPOSE } from "@qticaret/types/control-plane"
-import type { PlanDocument } from "@qticaret/types/control-plane"
-import {
-  TENANT_ID,
-  TEST_ONLY_CP_SEED,
-  TEST_ONLY_TENANT_SEED,
-  planDocument,
-} from "@qticaret/types/control-plane/testing"
-import { PLAN_PATH, pullPlanDocument, warnIfStale } from "../../src/lib/control-plane/pull"
+import { signerFromPrivateKey } from "@qticaret/server-kit"
+import { TENANT_ID } from "@qticaret/types/control-plane/testing"
+import { PLAN_PATH, pullPlanDocument } from "../../src/lib/control-plane/pull"
 import { CONTROL_PLANE_MODULE } from "../../src/modules/control-plane"
 import type ControlPlaneModuleService from "../../src/modules/control-plane/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
+import { FLAG, cp, doc, managedForThisFile, signed } from "../helpers/control-plane"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 
 jest.setTimeout(240 * 1000)
 
-const cp = signerFromPrivateKey(privateKeyFromSeed(TEST_ONLY_CP_SEED))
-const shop = signerFromPrivateKey(privateKeyFromSeed(TEST_ONLY_TENANT_SEED))
 const PUSH = "/hooks/control-plane/plan"
-const FLAG = "test.platform_sample"
-
-const doc = (serial: number, changes: Partial<PlanDocument> = {}): PlanDocument => ({
-  ...planDocument,
-  serial,
-  platform_flags: { [FLAG]: false },
-  ...changes,
-})
-
-const signed = (document: PlanDocument, signer: Ed25519Signer = cp) => ({
-  document,
-  ...signDocument(PLAN_DOCUMENT_PURPOSE, document, signer),
-})
-
-/** A stand-in control plane for the pull: checks the shop's signed request, answers `answer()`. */
-function fakeControlPlane(answer: () => { status: number; body: unknown }) {
-  const nonces = new MemoryNonceStore()
-  const seen: string[] = []
-  const server = createServer((req, res) => {
-    void verifySignedRequest(
-      { method: req.method ?? "", path: req.url ?? "", headers: req.headers, body: "" },
-      {
-        publicKey: (kid, tenantId) =>
-          kid === shop.kid && tenantId === TENANT_ID ? shop.privateKey : undefined,
-        nonces,
-      }
-    ).then((verified) => {
-      seen.push(verified.ok ? "signed" : verified.code)
-      const { status, body } = verified.ok ? answer() : { status: 401, body: {} }
-      res.writeHead(status, { "content-type": "application/json" })
-      res.end(JSON.stringify(body))
-    })
-  })
-  return { server, seen }
-}
-
-const listen = (server: Server) =>
-  new Promise<string>((resolve) => {
-    server.listen(0, "127.0.0.1", () => {
-      resolve(`http://127.0.0.1:${String((server.address() as AddressInfo).port)}`)
-    })
-  })
 
 /**
- * adr/0061 §3.2, §3.3 (C9): the control plane's plan document pushed and
- * pulled. The shop is managed only inside this file: the variables are set
- * after boot and read per call (lib/control-plane/config.ts).
+ * adr/0061 §3.2, §3.3 (C9): the control plane's plan document pushed. The
+ * shop is managed only inside this file: the variables are set after boot
+ * and read per call (lib/control-plane/config.ts).
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -90,31 +29,8 @@ medusaIntegrationTestRunner({
     const container = (): MedusaContainer => getContainer()
     const plans = () => container().resolve<ControlPlaneModuleService>(CONTROL_PLANE_MODULE)
     const flags = () => container().resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-    const saved: Record<string, string | undefined> = {}
-    const managedEnv = {
-      CONTROL_PLANE_PUBLIC_KEYS: rawPublicKey(cp.privateKey).toString("base64url"),
-      TENANT_ID,
-      TENANT_SIGNING_KEY: TEST_ONLY_TENANT_SEED.toString("base64url"),
-      // Nothing listens here: the control plane is down unless a test says otherwise
-      CONTROL_PLANE_URL: "http://127.0.0.1:9",
-    }
 
-    beforeAll(() => {
-      for (const [name, value] of Object.entries(managedEnv)) {
-        saved[name] = process.env[name]
-        process.env[name] = value
-      }
-    })
-
-    afterAll(() => {
-      for (const [name, value] of Object.entries(saved)) {
-        if (value === undefined) {
-          Reflect.deleteProperty(process.env, name)
-        } else {
-          process.env[name] = value
-        }
-      }
-    })
+    managedForThisFile()
 
     it("applies a greater serial, takes the same one as a no-op and refuses an older one", async () => {
       expect((await push(signed(doc(7)))).data).toMatchObject({ applied: true, serial: 7 })
@@ -125,6 +41,8 @@ medusaIntegrationTestRunner({
         package_code: "standart",
         limits: { products: 500, orders_per_month: null },
         source: "push",
+        // A push never makes the shop look in touch (review L3)
+        confirmed_at: null,
       })
       // Its platform flag reaches the flag registry
       expect(await flags().isFeatureEnabled(FLAG)).toBe(false)
@@ -132,7 +50,7 @@ medusaIntegrationTestRunner({
       const same = await push(signed(doc(7, { status: "suspended" })))
       expect(same.status).toBe(200)
       expect(same.data).toMatchObject({ applied: false, serial: 7 })
-      expect((await plans().planState()).status).toBe("active")
+      expect(await plans().planState()).toMatchObject({ status: "active", confirmed_at: null })
 
       expect((await push(signed(doc(8)))).data).toMatchObject({ applied: true })
       // The replay of an older document
@@ -165,38 +83,24 @@ medusaIntegrationTestRunner({
       expect(await plans().storedPlan(TENANT_ID)).toBeNull()
     })
 
-    it("keeps the last document while the control plane is down, and says so after 24 hours", async () => {
-      await push(signed(doc(5, { status: "restricted" })))
-
-      expect(await pullPlanDocument(container())).toEqual({ outcome: "unreachable" })
-      expect(await plans().planState()).toMatchObject({ serial: 5, status: "restricted" })
-      expect(await warnIfStale(container())).toBe(false)
-      expect(await warnIfStale(container(), new Date(Date.now() + 25 * 60 * 60 * 1000))).toBe(true)
-    })
-
-    it("pulls with a signed request and checks the answer as a push", async () => {
-      let answer = { status: 200, body: signed(doc(9)) as unknown }
-      const { server, seen } = fakeControlPlane(() => answer)
-      process.env["CONTROL_PLANE_URL"] = await listen(server)
-      try {
-        expect(await pullPlanDocument(container())).toEqual({ outcome: "applied", serial: 9 })
-        expect((await plans().planState()).source).toBe("pull")
-
-        // A pulled document is held to the same rules: another shop's is refused
-        answer = { status: 200, body: signed(doc(10, { tenant_id: "ten_01JOTHER00000000" })) }
-        expect(await pullPlanDocument(container())).toMatchObject({
-          outcome: "refused",
-          code: "control_plane.wrong_tenant",
-        })
-        answer = { status: 404, body: { message: "plan.none" } }
-        expect(await pullPlanDocument(container())).toEqual({ outcome: "none" })
-        expect((await plans().planState()).serial).toBe(9)
-        expect(seen.every((each) => each === "signed")).toBe(true)
-        expect(seen.length).toBe(3)
-      } finally {
-        process.env["CONTROL_PLANE_URL"] = managedEnv.CONTROL_PLANE_URL
-        server.close()
+    it("ends with the newer document's flags when two applies race (review M1)", async () => {
+      for (let round = 0; round < 4; round += 1) {
+        const base = 10 * (round + 1)
+        await Promise.all([
+          push(signed(doc(base + 5, { platform_flags: { [FLAG]: true } }))),
+          push(signed(doc(base + 6, { platform_flags: { [FLAG]: false } }))),
+        ])
+        expect((await plans().storedPlan(TENANT_ID))?.serial).toBe(base + 6)
+        expect(await flags().isFeatureEnabled(FLAG)).toBe(false)
       }
+      // A late sync of an older document writes nothing over a newer one
+      const late = await flags().syncPlatformFlags({ [FLAG]: true }, 3)
+      expect(late.written).toBe(false)
+      expect(await flags().isFeatureEnabled(FLAG)).toBe(false)
+      // The same serial again heals a store that drifted
+      await flags().syncPlatformFlags({ [FLAG]: true }, 46)
+      expect((await push(signed(doc(46, { platform_flags: { [FLAG]: false } })))).status).toBe(200)
+      expect(await flags().isFeatureEnabled(FLAG)).toBe(false)
     })
 
     it("is unmanaged without the public keys: 404, platform flags at their defaults", async () => {
@@ -204,7 +108,7 @@ medusaIntegrationTestRunner({
       expect(await flags().isFeatureEnabled(FLAG)).toBe(false)
 
       const keys = process.env["CONTROL_PLANE_PUBLIC_KEYS"]
-      delete process.env["CONTROL_PLANE_PUBLIC_KEYS"]
+      Reflect.deleteProperty(process.env, "CONTROL_PLANE_PUBLIC_KEYS")
       try {
         const answer = await push(signed(doc(6)))
         expect([answer.status, answer.data.message]).toEqual([404, "control_plane.unmanaged"])

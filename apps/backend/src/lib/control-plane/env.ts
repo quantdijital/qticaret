@@ -1,7 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import {
   EnvValidationError,
-  isLoopbackUrl,
+  isLocalEnv,
   parsePublicKeys,
   parseSigningKey,
 } from "@qticaret/server-kit"
@@ -63,37 +63,39 @@ type ControlPlaneEnv = { [K in keyof typeof CONTROL_PLANE_ENV]?: string | undefi
 
 const NAMES = Object.keys(CONTROL_PLANE_ENV) as (keyof typeof CONTROL_PLANE_ENV)[]
 
-/** A single-label host (a Docker service name) or this machine: the internal network. */
-function isInternalHost(value: string): boolean {
-  const host = new URL(value).hostname
-  return !host.includes(".") || isLoopbackUrl(value)
+// A single-label DNS name (a Docker service name, `localhost`): the internal
+// network. Never an IP literal, bracketed IPv6 included (C9 review L5)
+const INTERNAL_HOST = /^[a-z0-9-]+$/
+
+/** Whether `http:` may reach this URL once deployed: a single-label host name only. */
+export function isInternalHost(value: string): boolean {
+  return INTERNAL_HOST.test(new URL(value).hostname)
 }
 
-const isDeployed = (nodeEnv: string | undefined) =>
-  nodeEnv === "production" || nodeEnv === "staging"
-
 /**
- * Production and staging start only managed (adr/0061 §3.3): every one of
- * the four set. Called at boot after the schema; throws the schema's own
- * error, naming the missing variables.
+ * Anywhere but a developer's machine and the tests the shop starts only
+ * managed (adr/0061 §3.3): every one of the four set. An unset NODE_ENV
+ * counts as deployed, as everywhere else in the schema (C9 review M2).
+ * Called at boot after the schema; throws the schema's own error, naming
+ * the missing variables.
  */
 export function assertControlPlaneConfigured(
   env: ControlPlaneEnv & { NODE_ENV?: string | undefined }
 ): void {
-  if (!isDeployed(env.NODE_ENV)) {
+  if (isLocalEnv({ NODE_ENV: env.NODE_ENV })) {
     return
   }
   const missing = NAMES.filter((name) => env[name] === undefined)
   if (missing.length > 0) {
     throw new EnvValidationError(
       `Invalid environment configuration:\n${missing
-        .map((name) => `  - ${name}: is required in production and staging`)
+        .map((name) => `  - ${name}: is required outside development and test`)
         .join("\n")}`
     )
   }
 }
 
-/** The cross-variable rules, added to the shop's schema (lib/env.ts). */
+/** The cross-variable rules, added to the shop's schema (lib/env.ts); `deployed`: not local. */
 export function checkControlPlaneEnv(
   env: ControlPlaneEnv,
   deployed: boolean,
@@ -118,7 +120,7 @@ export function checkControlPlaneEnv(
   if (deployed && url?.startsWith("http:") && !isInternalHost(url)) {
     issue(
       "CONTROL_PLANE_URL",
-      "must be https in production and staging, unless an internal host name"
+      "must be https outside development and test, unless a single-label internal host name"
     )
   }
 }

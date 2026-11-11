@@ -203,7 +203,7 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
   // configured store would fail at the first upload
   const s3Set = S3_REQUIRED.filter((name) => env[name] !== undefined)
   const deployed = env.NODE_ENV === "production" || env.NODE_ENV === "staging"
-  checkControlPlaneEnv(env, deployed, (path, message) => {
+  checkControlPlaneEnv(env, !isLocalEnv(env), (path, message) => {
     ctx.addIssue({ code: "custom", path: [path], message })
   })
   if (deployed || s3Set.length > 0) {

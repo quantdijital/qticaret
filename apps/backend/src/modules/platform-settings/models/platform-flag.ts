@@ -12,4 +12,6 @@ export const PlatformFlag = model.define("platform_flag", {
   id: model.id({ prefix: "pflag" }).primaryKey(),
   key: model.text().unique(),
   enabled: model.boolean(),
+  /** The plan document's serial these values came from: a smaller one never overwrites them. */
+  serial: model.number().default(0),
 })

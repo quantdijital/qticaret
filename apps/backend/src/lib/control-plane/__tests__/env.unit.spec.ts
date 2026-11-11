@@ -55,7 +55,7 @@ describe("the control plane's variables (adr/0061 §3.3, Ek C9)", () => {
       message = (error as Error).message
     }
     for (const name of ["CONTROL_PLANE_URL", "CONTROL_PLANE_PUBLIC_KEYS", "TENANT_SIGNING_KEY"]) {
-      expect(message).toContain(`${name}: is required in production and staging`)
+      expect(message).toContain(`${name}: is required outside development and test`)
     }
     expect(message).not.toContain("TENANT_ID")
     expect(() => {
@@ -64,6 +64,18 @@ describe("the control plane's variables (adr/0061 §3.3, Ek C9)", () => {
     expect(() => {
       assertControlPlaneConfigured({ NODE_ENV: "development" })
     }).not.toThrow()
+  })
+
+  it("counts an unset NODE_ENV as deployed (C9 review M2)", () => {
+    expect(() => {
+      assertControlPlaneConfigured({})
+    }).toThrow(EnvValidationError)
+    expect(() => {
+      assertControlPlaneConfigured({ NODE_ENV: "test" })
+    }).not.toThrow()
+    expect(errorOf({ ...base, ...managed, CONTROL_PLANE_URL: "http://cp.example.com" })).toContain(
+      "CONTROL_PLANE_URL: must be https"
+    )
   })
 
   it("asks the shop's id with the keys, and the pull's two halves together", () => {
@@ -100,6 +112,20 @@ describe("the control plane's variables (adr/0061 §3.3, Ek C9)", () => {
     expect(errorOf({ ...deployed, CONTROL_PLANE_URL: "http://cp.example.com" })).toContain(
       "CONTROL_PLANE_URL: must be https"
     )
+    // Only a single-label name over http: no IP literal, IPv6 bracketed or not (review L5)
+    for (const url of [
+      "http://[::1]:9100",
+      "http://[fd00::1]",
+      "http://127.0.0.1:9100",
+      "http://10.0.0.5",
+    ]) {
+      expect(errorOf({ ...deployed, CONTROL_PLANE_URL: url })).toContain(
+        "CONTROL_PLANE_URL: must be https"
+      )
+    }
+    for (const url of ["http://control-plane:9100", "http://localhost:9100"]) {
+      expect(errorOf({ ...deployed, CONTROL_PLANE_URL: url })).not.toContain("CONTROL_PLANE_URL")
+    }
     expect(errorOf({ ...deployed, CONTROL_PLANE_URL: "https://cp.example.com" })).not.toContain(
       "CONTROL_PLANE_URL"
     )

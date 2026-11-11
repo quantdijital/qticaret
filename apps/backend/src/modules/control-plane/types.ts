@@ -21,7 +21,8 @@ export interface StoredPlan {
   kid: string
   signature: string
   received_at: Date
-  confirmed_at: Date
+  /** The last bound pull of this document or an older one; null before any. */
+  confirmed_at: Date | null
   source: PlanSource
 }
 
@@ -44,7 +45,7 @@ export interface PlanState {
   serial: number | null
   issued_at: string | null
   received_at: Date | null
-  /** The last time the control plane handed over this document or a newer one. */
+  /** The last pull bound to the shop's own nonce (a push never moves it). */
   confirmed_at: Date | null
   source: PlanSource | null
 }

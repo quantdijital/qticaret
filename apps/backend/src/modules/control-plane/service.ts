@@ -128,9 +128,11 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
 
   /**
    * A verified document against the stored one (`comparePlanSerial`): a
-   * greater serial replaces it, the same serial changes nothing but the
-   * time it was last confirmed, a smaller one (a replay) is `stale` and
-   * changes nothing at all.
+   * greater serial replaces it, the same serial changes nothing, a smaller
+   * one (a replay) is `stale` and changes nothing at all. Only a pull
+   * (whose answer is bound to the shop's own fresh nonce) moves
+   * `confirmed_at`: a pushed document, even the current one replayed,
+   * never makes the shop look in touch (C9 review L3).
    */
   async storePlanDocument(
     signed: SignedPlanDocument,
@@ -165,8 +167,11 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
     if (order === "stale") {
       return { outcome: "stale", previous: null }
     }
+    const pulled = source === "pull"
     if (order === "same" && row) {
-      await this.updateControlPlanePlans({ id: row.id, confirmed_at: now }, sharedContext)
+      if (pulled) {
+        await this.updateControlPlanePlans({ id: row.id, confirmed_at: now }, sharedContext)
+      }
       return { outcome: "same", previous: null }
     }
     const values = {
@@ -175,7 +180,7 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
       kid: signed.kid,
       signature: signed.signature,
       received_at: now,
-      confirmed_at: now,
+      confirmed_at: pulled ? now : (row?.confirmed_at ?? null),
       source,
     }
     if (row) {
@@ -186,24 +191,38 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
     return { outcome: "applied", previous: row ? storedOf(row) : null }
   }
 
-  /** Puts the stored document back as it was before an `applied` (workflow compensation). */
-  async restorePlanDocument(tenantId: string, previous: StoredPlan | null): Promise<void> {
-    await this.restoreInTransaction_(tenantId, previous)
+  /**
+   * Puts the stored document back as it was before an `applied` (workflow
+   * compensation), under the same lock and only while the row still holds
+   * the serial being undone (C9 review M1): a newer document stored in
+   * between is never overwritten by an older one.
+   */
+  async restorePlanDocument(
+    tenantId: string,
+    undoneSerial: number,
+    previous: StoredPlan | null
+  ): Promise<void> {
+    await this.restoreInTransaction_(tenantId, undoneSerial, previous)
     await this.cache.invalidate()
   }
 
   @InjectTransactionManager()
   protected async restoreInTransaction_(
     tenantId: string,
+    undoneSerial: number,
     previous: StoredPlan | null,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
-    const [row] = await this.listControlPlanePlans(
-      { tenant_id: tenantId },
-      { select: ["id"], take: 1 },
-      sharedContext
+    await (sharedContext.transactionManager as Executor).execute(
+      "SELECT pg_advisory_xact_lock(hashtext(?))",
+      [`control_plane_plan:${tenantId}`]
     )
-    if (!row) {
+    const [row] = (await this.listControlPlanePlans(
+      { tenant_id: tenantId },
+      { select: ["id", "serial"], take: 1 },
+      sharedContext
+    )) as unknown as { id: string; serial: number }[]
+    if (row?.serial !== undoneSerial) {
       return
     }
     if (previous === null) {

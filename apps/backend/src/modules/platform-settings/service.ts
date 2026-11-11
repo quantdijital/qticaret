@@ -260,14 +260,30 @@ class PlatformSettingsModuleService extends PlatformFlagStore {
   }
 
   /**
-   * The plan document's platform flags stored as a whole set (adr/0061
-   * Ek C9; the document's workflow, never the panel). Keys this shop does
-   * not have as `owner: platform` are left out and named back.
+   * The plan document's platform flags stored with its serial (adr/0061
+   * Ek C9; the document's workflow, never the panel). A smaller serial than
+   * the stored one writes nothing (review M1). Keys this shop does not have
+   * as `owner: platform` are left out and named back.
    */
-  async syncPlatformFlags(values: Readonly<Record<string, boolean>>): Promise<PlatformFlagSync> {
-    const sync = await this.writePlatformFlags_(values)
-    await this.cache.invalidate()
+  async syncPlatformFlags(
+    values: Readonly<Record<string, boolean>>,
+    serial: number
+  ): Promise<PlatformFlagSync> {
+    const sync = await this.writePlatformFlags_(values, serial)
+    if (sync.written) {
+      await this.cache.invalidate()
+    }
     return sync
+  }
+
+  /** Undoes a sync (workflow compensation) while nothing newer was stored over it. */
+  async undoPlatformFlagSync(
+    previous: PlatformFlagSync["previous"],
+    undoneSerial: number
+  ): Promise<void> {
+    if (await this.undoPlatformFlagSync_(previous, undoneSerial)) {
+      await this.cache.invalidate()
+    }
   }
 
   /** Puts a tenant flag's override back as it was (workflow compensation). */

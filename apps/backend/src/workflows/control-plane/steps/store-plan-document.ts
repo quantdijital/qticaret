@@ -19,17 +19,23 @@ export const storePlanDocumentStep = createStep(
     const { outcome, previous } = await service.storePlanDocument(input.signed, input.source)
     return new StepResponse(
       { outcome },
-      outcome === "applied" ? { tenant_id: input.signed.document.tenant_id, previous } : undefined
+      outcome === "applied"
+        ? {
+            tenant_id: input.signed.document.tenant_id,
+            serial: input.signed.document.serial,
+            previous,
+          }
+        : undefined
     )
   },
   async (
-    applied: { tenant_id: string; previous: StoredPlan | null } | undefined,
+    applied: { tenant_id: string; serial: number; previous: StoredPlan | null } | undefined,
     { container }
   ) => {
     if (!applied) {
       return
     }
     const service = container.resolve<ControlPlaneModuleService>(CONTROL_PLANE_MODULE)
-    await service.restorePlanDocument(applied.tenant_id, applied.previous)
+    await service.restorePlanDocument(applied.tenant_id, applied.serial, applied.previous)
   }
 )
