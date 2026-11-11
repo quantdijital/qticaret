@@ -346,15 +346,10 @@
     },
     "create": {
       "open": "Yeni mağaza",
-      "title": "Yeni mağaza",
-      "text": "Mağazanın kaydı açılır; kurulumu ayrı bir adımda yapılır.",
       "name": "Mağaza adı",
       "slug": "Platform adresi",
       "slugHelp": "Küçük harf, rakam ve tire. Mağazanın veritabanı ve alt alan adı bu adla açılır; sonradan değişmez.",
-      "slugInvalid": "3–30 karakter: harfle başlar; küçük harf, rakam ve tek tire.",
-      "package": "Paket",
-      "submit": "Kaydı aç",
-      "done": "Mağaza kaydı açıldı."
+      "slugInvalid": "3–30 karakter: harfle başlar; küçük harf, rakam ve tek tire."
     },
     "detail": {
       "title": "Mağaza",
@@ -405,8 +400,8 @@
     "country": "Ülke",
     "turkey": "Türkiye",
     "invalid": {
-      "tax_number": "Vergi kimlik no 10 rakamdır.",
-      "tckn": "TC kimlik no 11 rakamdır ve 0 ile başlamaz.",
+      "tax_number": "Vergi kimlik no geçerli değil: 10 rakam, son hanesi denetim hanesi.",
+      "tckn": "TC kimlik no geçerli değil: 11 rakam, 0 ile başlamaz, son iki hanesi denetim hanesi.",
       "postal_code": "Posta kodu 5 rakamdır."
     }
   },
@@ -708,9 +703,12 @@
       "password_invalid": "Şifre doğru değil.",
       "phone_invalid": "Telefon numarası geçerli değil.",
       "postal_code_invalid": "Posta kodu 5 rakam olmalı.",
+      "provisioner_unavailable": "Bu ortamda kurulum yapılmıyor.",
+      "provisioning_busy": "Bu mağazada bir çalışma sürüyor; bitince yeniden deneyin.",
       "reason_required": "Gerekçe yazın.",
       "register_closed": "Hesap yalnızca geçerli bir davetle, davet edilen adresle açılır.",
       "reset_self": "Kendi doğrulamanızı Hesabım sayfasından yenileyin.",
+      "run_unknown": "Çalışma bulunamadı.",
       "session_required": "Oturumunuz kapandı. Yeniden giriş yapın.",
       "session_revoked": "Oturumunuz kapatıldı. Yeniden giriş yapın.",
       "session_unknown": "Oturum bulunamadı; zaten kapanmış olabilir.",
@@ -734,6 +732,58 @@
       "tenant_unknown": "Mağaza bulunamadı.",
       "text_invalid": "Metinde kullanılamayan karakterler var.",
       "vkn_invalid": "Vergi kimlik no geçerli değil."
+    },
+    "provisioning": {
+      "api_url_refused": "Mağazanın iç adresi izin verilen adreslerden değil.",
+      "apply_pack_failed": "Sektör paketi uygulanamadı.",
+      "apply_pack_timeout": "Sektör paketinin uygulanması süre sınırını aştı.",
+      "backend_not_built": "Mağaza yazılımı derlenmemiş. Önce derleme yapılmalı.",
+      "bootstrap_failed": "Mağazanın ilk ayarları yapılamadı.",
+      "bootstrap_timeout": "Mağazanın ilk ayarları süre sınırını aştı.",
+      "build_stale": "Mağaza yazılımının derlemesi kaynağın gerisinde. Yeniden derlenmeli.",
+      "command_unavailable": "Bu işlem bu sürümde yok.",
+      "database_failed": "Veritabanı işlemi tamamlanamadı.",
+      "database_name_invalid": "Veritabanı adı geçerli değil.",
+      "env_value_invalid": "Mağazanın ayar değerlerinden biri geçerli değil.",
+      "finish_failed": "Çalışmanın sonu kaydedilemedi.",
+      "foreign_shop": "Bu adla başka bir mağazaya ait veritabanı ya da klasör var; dokunulmadı.",
+      "health_timeout": "Mağaza sunucusu süresi içinde sağlıklı yanıt vermedi.",
+      "injected_failure": "Adım geliştirme ayarıyla durduruldu.",
+      "interrupted": "Çalışma yarıda kaldı (üst panel yeniden başladı).",
+      "invite_failed": "Sahip daveti oluşturulamadı.",
+      "invite_owner_failed": "Sahip daveti oluşturulamadı.",
+      "invite_owner_timeout": "Sahip davetinin oluşturulması süre sınırını aştı.",
+      "invite_token_invalid": "Mağazanın verdiği davet geçerli değil.",
+      "local_database_elsewhere": "Yerel veritabanı bu bilgisayarda değil.",
+      "local_development_only": "Yerel kurulum yalnızca geliştirme ortamında yapılır.",
+      "mail_failed": "Davet e-postası gönderilemedi.",
+      "mail_off": "E-posta gönderimi kapalı; davet gönderilmedi.",
+      "migrate_failed": "Veritabanı şeması kurulamadı.",
+      "migrate_timeout": "Veritabanı şemasının kurulumu süre sınırını aştı.",
+      "no_owner_contact": "Mağaza sahibi yetkilisi yok; davet gönderilmedi.",
+      "no_package": "Mağazanın paketi yok. Önce paket atanmalı.",
+      "no_panel_host": "Mağaza panelinin adresi henüz yok; davet gönderilmedi.",
+      "no_plan_document": "Mağazanın plan belgesi hazırlanmadı.",
+      "no_port": "Mağazaya port ayrılmadı.",
+      "no_signing_key": "Üst panelin imza anahtarı yok. Anahtarlar sayfasından hazırlanmalı.",
+      "owner_address_taken": "Sahibin e-posta adresi mağazada başka bir hesapta kullanılıyor.",
+      "owner_email_invalid": "Sahibin e-posta adresi geçerli değil.",
+      "plan_import_failed": "Plan belgesi mağazaya aktarılamadı.",
+      "plan_import_refused": "Mağaza plan belgesini kabul etmedi.",
+      "plan_import_timeout": "Plan belgesinin aktarımı süre sınırını aştı.",
+      "port_in_use": "Mağazanın portu başka bir uygulamada kullanılıyor.",
+      "repo_unknown": "Mağaza yazılımının yeri bulunamadı.",
+      "secrets_exposed": "Mağazanın gizli değer dosyasının izinleri güvenli değil; kullanılmadı.",
+      "secrets_lost": "Mağazanın gizli değerleri bulunamadı; anahtar yenilemesi gerekir.",
+      "secrets_missing": "Mağazanın gizli değerleri yazılmamış.",
+      "secrets_orphaned": "Anahtarı olmayan bir gizli değer dosyası var; üzerine yazılmadı.",
+      "shop_exited": "Mağaza sunucusu başladıktan sonra kapandı.",
+      "shop_running": "Mağaza sunucusu zaten çalışıyor.",
+      "slug_invalid": "Mağazanın platform adresi geçerli değil.",
+      "start_failed": "Mağaza sunucusu başlatılamadı.",
+      "step_failed": "Adım tamamlanamadı.",
+      "store_name_invalid": "Mağaza adı mağaza ayarlarına yazılamadı.",
+      "tenant_status": "Mağazanın durumu bu işleme uygun değil."
     }
   },
   "keys": {
@@ -843,6 +893,253 @@
       "delivered": "Teslim edildi",
       "failed": "Teslim edilemedi",
       "superseded": "Yenisi gönderildi"
+    }
+  },
+  "wizard": {
+    "title": "Yeni mağaza",
+    "text": "Bilgileri adım adım girin; son adımda mağaza kurulur.",
+    "back": "Geri",
+    "next": "İleri",
+    "install": "Kur",
+    "installing": "Kuruluyor",
+    "done": "Mağaza kaydedildi, kurulum başladı.",
+    "steps": {
+      "company": {
+        "title": "Firma",
+        "description": "Mağazanın adı ve abonelik faturasının muhatabı."
+      },
+      "contacts": {
+        "title": "Yetkililer",
+        "description": "Mağaza adına görüştüğümüz kişiler; sahip zorunlu."
+      },
+      "package": {
+        "title": "Paket",
+        "description": "Mağazanın fiyatı, dönemi ve limitleri."
+      },
+      "address": {
+        "title": "Adres",
+        "description": "Mağazanın platformdaki adresi ve varsa kendi alan adı."
+      },
+      "sector": {
+        "title": "Sektör paketi",
+        "description": "Mağazanın başlangıç şablonları."
+      },
+      "review": {
+        "title": "Özet ve kur",
+        "description": "Bilgileri gözden geçirin, sonra mağazayı kurun."
+      }
+    },
+    "company": {
+      "shopTitle": "Mağaza",
+      "shopText": "Personelin mağazayı bildiği ad; platform adresi bu addan önerilir.",
+      "invoiceText": "Boş bırakılan alanlar sonra doldurulabilir; özet ve mağaza sayfası eksikleri gösterir.",
+      "tcknHelp": "Bir kez gönderilir; sonra yalnızca son dört hanesi görünür."
+    },
+    "contacts": {
+      "ownerTitle": "Mağaza sahibi",
+      "ownerText": "Kurulumun sonunda mağaza panelinin sahip daveti bu e-posta adresine gönderilir.",
+      "billingTitle": "Faturalama kişisi",
+      "billingText": "Ödeme hatırlatmaları bu kişiye gider. Eklenmezse mağaza sahibine gider.",
+      "billingAdd": "Ayrı bir faturalama kişisi ekle",
+      "technicalTitle": "Teknik kişi",
+      "technicalText": "Alan adı ve teknik konularda görüşülecek kişi.",
+      "technicalAdd": "Teknik kişi ekle"
+    },
+    "package": {
+      "title": "Paket",
+      "text": "Kurulum paketsiz yapılamaz: mağazanın plan belgesi paketini taşır.",
+      "days": "Deneme {{trial}} gün · ek süre {{grace}} gün",
+      "none": "Satışta paket yok. Kuruluma geçmeden önce bir paket oluşturulmalı.",
+      "toPackages": "Paketlere git"
+    },
+    "address": {
+      "title": "Platform adresi",
+      "text": "Mağazanın veritabanı ve alt alan adı bu adla açılır; sonradan değişmez.",
+      "result": "Mağazanın adresi",
+      "checking": "Adres denetleniyor…",
+      "free": "Bu adres kullanılabilir.",
+      "customTitle": "Kendi alan adı",
+      "customText": "İsteğe bağlı. Doğrulama bekler olarak eklenir; DNS ayarı yapılınca doğrulanır.",
+      "custom": "Alan adı",
+      "customHelp": "Örneğin magazam.com; boş bırakılabilir.",
+      "domainFree": "Bu alan adı başka bir mağazada yok."
+    },
+    "sector": {
+      "title": "Sektör paketi",
+      "text": "Ürün özellikleri ve arama görünümü için başlangıç şablonları.",
+      "soon": "Yakında",
+      "packs": {
+        "general": {
+          "name": "Genel",
+          "text": "Her sektöre uygun başlangıç; şablonları mağaza kendi ihtiyacına göre ekler."
+        },
+        "sector": {
+          "name": "Sektöre özel paketler",
+          "text": "Sektöre göre hazır özellik ve arama görünümü şablonları sonraki sürümle sunulacak."
+        }
+      }
+    },
+    "review": {
+      "edit": "Düzenle",
+      "editStep": "{{step}} adımını düzenle",
+      "package": "Paket",
+      "missingTitle": "Fatura bilgileri eksik",
+      "missing": "Boş alanlar: {{fields}}. Mağaza yine kurulur; eksikler mağaza sayfasından tamamlanabilir.",
+      "installTitle": "Kurulum",
+      "installText": "Kur'a basınca kimliğinizi bir kez doğrulamanız istenir.",
+      "progressLabel": "Kurulumun ilerleyişi",
+      "plan": {
+        "record": "Mağazanın kaydı paketiyle açılır.",
+        "details": "Firma, yetkililer ve alan adı kaydedilir.",
+        "setup": "Kurulum başlar: veritabanı, mağaza sunucusu ve sahip daveti.",
+        "open": "Mağaza sayfası Kurulum sekmesinde açılır; adımlar canlı izlenir."
+      }
+    },
+    "parts": {
+      "record": "Mağaza kaydı",
+      "company": "Firma bilgileri",
+      "owner": "Mağaza sahibi",
+      "billing": "Faturalama kişisi",
+      "technical": "Teknik kişi",
+      "domain": "Kendi alan adı",
+      "provisioning": "Kurulumun başlatılması"
+    },
+    "partState": {
+      "waiting": "sırada",
+      "running": "sürüyor",
+      "done": "tamam",
+      "failed": "yapılamadı"
+    },
+    "partial": {
+      "title": "Mağaza kaydedildi, bazı bilgiler kaydedilemedi",
+      "text": "Kurulum başlatılmadı. Kalanları yeniden deneyebilir ya da mağaza sayfasından devam edebilirsiniz; sayfa eksikleri gösterir, kurulum Kurulum sekmesinden başlatılır.",
+      "retry": "Kalanları yeniden dene",
+      "openShop": "Mağaza sayfasına git"
+    },
+    "summary": {
+      "title": "Yeni mağaza",
+      "text": "Girdikçe burada görünür.",
+      "invite": "Sahip daveti"
+    },
+    "errors": {
+      "shopName": "Mağaza adını yazın.",
+      "personName": "Ad soyadı yazın.",
+      "emailRequired": "E-posta adresini yazın.",
+      "tooLong": "Bu alan çok uzun.",
+      "packageRequired": "Bir paket seçin.",
+      "slugRequired": "Platform adresini yazın."
+    }
+  },
+  "setup": {
+    "title": "Kurulum",
+    "latestTitle": "Son kurulum çalışması",
+    "noneText": "Bu mağazada henüz kurulum yapılmadı. Kur ile şu adımlar çalışır:",
+    "stepsLabel": "Kurulum adımları",
+    "actionsTitle": "İşlemler",
+    "historyTitle": "Çalışma geçmişi",
+    "historyText": "Satıra tıklayınca çalışmanın adımları açılır.",
+    "historyEmpty": "Henüz çalışma yok.",
+    "stateUnknown": "Mağaza sunucusu henüz başlatılmadı.",
+    "stateRunning": "Son bilinen durum: mağaza sunucusu çalışıyor.",
+    "stateStopped": "Son bilinen durum: mağaza sunucusu durduruldu.",
+    "failedTitle": "Kurulum tamamlanamadı",
+    "failedHint": "Yapılanlar geri alındı; sorun giderilince Yeniden dene ile baştan çalışır, var olanı atlar.",
+    "warningTitle": "{{step}}: uyarı",
+    "inviteHint": "Mağaza çalışıyor; sorun giderilince Daveti yeniden gönder kullanılabilir.",
+    "compensationFailed": "Geri alma tamamlanamadı: {{reason}}",
+    "unknownCode": "Adım tamamlanamadı.",
+    "seconds_one": "{{count}} sn",
+    "seconds_other": "{{count}} sn",
+    "minutes": "{{minutes}} dk {{seconds}} sn",
+    "attempts_one": "{{count}}. deneme",
+    "attempts_other": "{{count}}. deneme",
+    "previous": "Önceki çalışma",
+    "next": "Sonraki çalışma",
+    "actions": {
+      "install": "Kur",
+      "retry": "Yeniden dene",
+      "start": "Başlat",
+      "stop": "Durdur",
+      "invite": "Daveti yeniden gönder"
+    },
+    "started": {
+      "create": "Kurulum başladı.",
+      "start": "Mağaza sunucusu başlatılıyor.",
+      "stop": "Mağaza sunucusu durduruluyor.",
+      "invite": "Davet yeniden gönderiliyor."
+    },
+    "reasons": {
+      "loading": "Kurulum bilgisi okunuyor.",
+      "noProvisioner": "Bu ortamda kurulum yapılmıyor.",
+      "busy": "Bir çalışma sürüyor; bitince işlemler açılır.",
+      "status": "Mağazanın durumu bu işleme uygun değil.",
+      "notSetUp": "Başlatma, durdurma ve davet için önce kurulum tamamlanmalı.",
+      "done": "Kurulum tamamlandı."
+    },
+    "confirmStop": {
+      "title": "Mağaza sunucusunu durdur",
+      "text": "Mağaza ve paneli Başlat ile yeniden açılana kadar erişilemez. Veriler yerinde kalır."
+    },
+    "kinds": {
+      "create": "Kurulum",
+      "start": "Başlatma",
+      "stop": "Durdurma",
+      "invite": "Davet gönderimi"
+    },
+    "runStatus": {
+      "running": "Sürüyor",
+      "succeeded": "Tamamlandı",
+      "failed": "Tamamlanamadı"
+    },
+    "stepStatus": {
+      "pending": "Sırada",
+      "running": "Sürüyor",
+      "succeeded": "Tamam",
+      "skipped": "Atlandı",
+      "failed": "Yapılamadı",
+      "compensated": "Geri alındı"
+    },
+    "steps": {
+      "allocate": "Port ayırma",
+      "secrets": "Anahtarlar ve gizli değerler",
+      "database": "Veritabanı",
+      "migrate": "Veritabanı şeması",
+      "bootstrap": "Mağazanın ilk ayarları",
+      "sector_pack": "Sektör paketi",
+      "plan_document": "Plan belgesi",
+      "start": "Mağaza sunucusunun başlatılması",
+      "health": "Sağlık denetimi",
+      "api_url": "İç adresin kaydı",
+      "owner_invite": "Sahip daveti",
+      "activate": "Etkinleştirme",
+      "stop": "Mağaza sunucusunun durdurulması",
+      "resend_invite": "Sahip davetinin yeniden gönderilmesi"
+    },
+    "output": {
+      "port": "Port {{port}}",
+      "serial": "Belge no {{serial}}",
+      "latency": "Yanıt {{ms}} ms",
+      "mailed": "E-posta gönderildi",
+      "notMailed": "E-posta gönderilmedi",
+      "sentBefore": "Daha önceki bir çalışmada gönderildi",
+      "ownerExists": "Mağazanın sahip hesabı zaten var",
+      "notAvailableYet": "Sektör paketleri henüz sunulmuyor",
+      "alreadyRunning": "Zaten çalışıyordu"
+    },
+    "columns": {
+      "kind": "Çalışma",
+      "status": "Durum",
+      "started": "Başlangıç",
+      "duration": "Süre",
+      "problem": "Sorun"
+    },
+    "local": {
+      "title": "Mağaza paneli (bu bilgisayar)",
+      "text": "Yerel kurulumda mağazanın paneli sunucusunun portunun 1000 fazlasında açılır.",
+      "address": "Adres",
+      "command": "Paneli açan komut",
+      "copy": "Komutu kopyala",
+      "copied": "Komut kopyalandı."
     }
   }
 }

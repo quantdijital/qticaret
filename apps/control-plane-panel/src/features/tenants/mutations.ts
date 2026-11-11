@@ -25,23 +25,8 @@ export interface NewTenant {
   name: string
   slug: string
   package_id: string | null
-}
-
-/**
- * A new shop as a record (owner, operator): `provisioning`, set up later
- * (C10, C11). A step-up: the record may name its package, what it pays.
- */
-export function useCreateTenant() {
-  const client = useQueryClient()
-  return useMutation({
-    mutationFn: (input: NewTenant) =>
-      withStepUp((headers) =>
-        post<{ tenant: { id: string; slug: string } }>("/admin/cp/tenants", input, headers)
-      ),
-    onSettled: async () => {
-      await client.invalidateQueries({ queryKey: TENANTS_KEY })
-    },
-  })
+  /** The sector pack it is to be set up with (C11); C12 applies it. */
+  sector_pack?: string
 }
 
 export const useRenameTenant = (id: string) =>

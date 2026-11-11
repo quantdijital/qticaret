@@ -346,15 +346,10 @@
     },
     "create": {
       "open": "New shop",
-      "title": "New shop",
-      "text": "The shop's record is opened; its setup is a separate step.",
       "name": "Shop name",
       "slug": "Platform address",
       "slugHelp": "Lower-case letters, digits and hyphens. The shop's database and subdomain take this name; it cannot change later.",
-      "slugInvalid": "3–30 characters: starts with a letter; lower-case letters, digits and single hyphens.",
-      "package": "Package",
-      "submit": "Open the record",
-      "done": "The shop's record is open."
+      "slugInvalid": "3–30 characters: starts with a letter; lower-case letters, digits and single hyphens."
     },
     "detail": {
       "title": "Shop",
@@ -405,8 +400,8 @@
     "country": "Country",
     "turkey": "Türkiye",
     "invalid": {
-      "tax_number": "A tax number has 10 digits.",
-      "tckn": "A Turkish ID number has 11 digits and does not start with 0.",
+      "tax_number": "The tax number is not valid: 10 digits, the last one a check digit.",
+      "tckn": "The TC identity number is not valid: 11 digits, no leading 0, the last two check digits.",
       "postal_code": "A postal code has 5 digits."
     }
   },
@@ -708,9 +703,12 @@
       "password_invalid": "The password is wrong.",
       "phone_invalid": "The phone number is not valid.",
       "postal_code_invalid": "A postal code has 5 digits.",
+      "provisioner_unavailable": "Shops are not set up in this environment.",
+      "provisioning_busy": "A run is in progress for this shop; try again when it ends.",
       "reason_required": "Write a reason.",
       "register_closed": "An account is made only with a valid invitation, for the invited address.",
       "reset_self": "Renew your own verification from My account.",
+      "run_unknown": "Run not found.",
       "session_required": "Your session ended. Sign in again.",
       "session_revoked": "Your session was ended. Sign in again.",
       "session_unknown": "The session was not found; it may have ended already.",
@@ -734,6 +732,58 @@
       "tenant_unknown": "Shop not found.",
       "text_invalid": "The text holds characters that cannot be used.",
       "vkn_invalid": "The tax number is not valid."
+    },
+    "provisioning": {
+      "api_url_refused": "The shop's internal address is not among the allowed ones.",
+      "apply_pack_failed": "The sector pack could not be applied.",
+      "apply_pack_timeout": "Applying the sector pack ran over its time limit.",
+      "backend_not_built": "The shop software is not built. Build it first.",
+      "bootstrap_failed": "The shop's first settings could not be made.",
+      "bootstrap_timeout": "The shop's first settings ran over their time limit.",
+      "build_stale": "The shop software's build is behind its source. Build it again.",
+      "command_unavailable": "This action does not exist in this release.",
+      "database_failed": "The database operation could not finish.",
+      "database_name_invalid": "The database name is not valid.",
+      "env_value_invalid": "One of the shop's settings is not valid.",
+      "finish_failed": "The run's end could not be recorded.",
+      "foreign_shop": "A database or folder of another shop has this name; it was left alone.",
+      "health_timeout": "The shop server did not answer healthy in time.",
+      "injected_failure": "The step was stopped by a development setting.",
+      "interrupted": "The run was cut short (the control plane restarted).",
+      "invite_failed": "The owner invitation could not be made.",
+      "invite_owner_failed": "The owner invitation could not be made.",
+      "invite_owner_timeout": "Making the owner invitation ran over its time limit.",
+      "invite_token_invalid": "The invitation the shop gave is not valid.",
+      "local_database_elsewhere": "The local database is not on this computer.",
+      "local_development_only": "Local setups happen in development only.",
+      "mail_failed": "The invitation e-mail could not be sent.",
+      "mail_off": "E-mail sending is off; the invitation was not sent.",
+      "migrate_failed": "The database schema could not be set up.",
+      "migrate_timeout": "Setting up the database schema ran over its time limit.",
+      "no_owner_contact": "The shop has no owner contact; the invitation was not sent.",
+      "no_package": "The shop has no package. Assign one first.",
+      "no_panel_host": "The shop panel has no address yet; the invitation was not sent.",
+      "no_plan_document": "The shop's plan document was not prepared.",
+      "no_port": "No port was allocated to the shop.",
+      "no_signing_key": "The control plane has no signing key. Prepare one on the Keys page.",
+      "owner_address_taken": "The owner's e-mail address is used by another account in the shop.",
+      "owner_email_invalid": "The owner's e-mail address is not valid.",
+      "plan_import_failed": "The plan document could not be imported into the shop.",
+      "plan_import_refused": "The shop refused the plan document.",
+      "plan_import_timeout": "Importing the plan document ran over its time limit.",
+      "port_in_use": "The shop's port is used by another application.",
+      "repo_unknown": "The shop software could not be found.",
+      "secrets_exposed": "The shop's secret values file is not safely permissioned; it was not used.",
+      "secrets_lost": "The shop's secret values were not found; its keys must be renewed.",
+      "secrets_missing": "The shop's secret values were not written.",
+      "secrets_orphaned": "A secret values file without a key exists; it was not overwritten.",
+      "shop_exited": "The shop server stopped after starting.",
+      "shop_running": "The shop server is already running.",
+      "slug_invalid": "The shop's platform address is not valid.",
+      "start_failed": "The shop server could not be started.",
+      "step_failed": "The step could not finish.",
+      "store_name_invalid": "The shop's name could not be written into its settings.",
+      "tenant_status": "The shop's status does not allow this."
     }
   },
   "keys": {
@@ -843,6 +893,253 @@
       "delivered": "Delivered",
       "failed": "Not delivered",
       "superseded": "Superseded"
+    }
+  },
+  "wizard": {
+    "title": "New shop",
+    "text": "Enter the details step by step; the shop is set up at the last step.",
+    "back": "Back",
+    "next": "Next",
+    "install": "Set up",
+    "installing": "Setting up",
+    "done": "Shop saved, setup started.",
+    "steps": {
+      "company": {
+        "title": "Company",
+        "description": "The shop's name and who the subscription invoice is addressed to."
+      },
+      "contacts": {
+        "title": "Contacts",
+        "description": "The people we deal with for the shop; the owner is required."
+      },
+      "package": {
+        "title": "Package",
+        "description": "The shop's price, period and limits."
+      },
+      "address": {
+        "title": "Address",
+        "description": "The shop's address on the platform and its own domain, if any."
+      },
+      "sector": {
+        "title": "Sector pack",
+        "description": "The shop's starting templates."
+      },
+      "review": {
+        "title": "Review and set up",
+        "description": "Check the details, then set the shop up."
+      }
+    },
+    "company": {
+      "shopTitle": "Shop",
+      "shopText": "The name staff know the shop by; the platform address is suggested from it.",
+      "invoiceText": "Fields left blank can be filled in later; the review and the shop's page list what is missing.",
+      "tcknHelp": "Sent once; afterwards only its last four digits are shown."
+    },
+    "contacts": {
+      "ownerTitle": "Shop owner",
+      "ownerText": "At the end of the setup the shop panel's owner invitation is sent to this e-mail address.",
+      "billingTitle": "Billing contact",
+      "billingText": "Payment reminders go to this person. Without one they go to the shop owner.",
+      "billingAdd": "Add a separate billing contact",
+      "technicalTitle": "Technical contact",
+      "technicalText": "Who to talk to about the domain and technical matters.",
+      "technicalAdd": "Add a technical contact"
+    },
+    "package": {
+      "title": "Package",
+      "text": "A shop cannot be set up without a package: its plan document carries it.",
+      "days": "Trial {{trial}} days · grace {{grace}} days",
+      "none": "No package is on sale. Create one before setting a shop up.",
+      "toPackages": "Go to packages"
+    },
+    "address": {
+      "title": "Platform address",
+      "text": "The shop's database and subdomain are named after it; it cannot change later.",
+      "result": "Shop address",
+      "checking": "Checking the address…",
+      "free": "This address is available.",
+      "customTitle": "Own domain",
+      "customText": "Optional. Added as pending; verified once its DNS is set.",
+      "custom": "Domain",
+      "customHelp": "For example myshop.com; can be left blank.",
+      "domainFree": "No other shop has this domain."
+    },
+    "sector": {
+      "title": "Sector pack",
+      "text": "Starting templates for product attributes and search appearance.",
+      "soon": "Coming soon",
+      "packs": {
+        "general": {
+          "name": "General",
+          "text": "A start that suits any sector; the shop adds templates as it needs them."
+        },
+        "sector": {
+          "name": "Sector packs",
+          "text": "Ready attribute and search appearance templates by sector come with a later release."
+        }
+      }
+    },
+    "review": {
+      "edit": "Edit",
+      "editStep": "Edit the {{step}} step",
+      "package": "Package",
+      "missingTitle": "Invoice details missing",
+      "missing": "Blank fields: {{fields}}. The shop is set up anyway; they can be completed on the shop's page.",
+      "installTitle": "Setup",
+      "installText": "When you press Set up you are asked to verify yourself once.",
+      "progressLabel": "Setup progress",
+      "plan": {
+        "record": "The shop's record is made with its package.",
+        "details": "The company, contacts and domain are saved.",
+        "setup": "The setup starts: database, shop server and owner invitation.",
+        "open": "The shop's page opens on its Setup tab; the steps are followed live."
+      }
+    },
+    "parts": {
+      "record": "Shop record",
+      "company": "Company details",
+      "owner": "Shop owner",
+      "billing": "Billing contact",
+      "technical": "Technical contact",
+      "domain": "Own domain",
+      "provisioning": "Starting the setup"
+    },
+    "partState": {
+      "waiting": "waiting",
+      "running": "in progress",
+      "done": "done",
+      "failed": "not done"
+    },
+    "partial": {
+      "title": "Shop saved, some details were not",
+      "text": "The setup was not started. Try the rest again or continue from the shop's page; it lists what is missing, and the setup starts from its Setup tab.",
+      "retry": "Try the rest again",
+      "openShop": "Go to the shop's page"
+    },
+    "summary": {
+      "title": "New shop",
+      "text": "Shown here as you fill it in.",
+      "invite": "Owner invitation"
+    },
+    "errors": {
+      "shopName": "Enter the shop's name.",
+      "personName": "Enter the full name.",
+      "emailRequired": "Enter the e-mail address.",
+      "tooLong": "This field is too long.",
+      "packageRequired": "Choose a package.",
+      "slugRequired": "Enter the platform address."
+    }
+  },
+  "setup": {
+    "title": "Setup",
+    "latestTitle": "Latest setup run",
+    "noneText": "This shop has not been set up yet. Set up runs these steps:",
+    "stepsLabel": "Setup steps",
+    "actionsTitle": "Actions",
+    "historyTitle": "Run history",
+    "historyText": "Click a row to open the run's steps.",
+    "historyEmpty": "No runs yet.",
+    "stateUnknown": "The shop server has not been started yet.",
+    "stateRunning": "Last known state: the shop server is running.",
+    "stateStopped": "Last known state: the shop server is stopped.",
+    "failedTitle": "The setup could not finish",
+    "failedHint": "What it did was undone; once the problem is solved, Try again runs from the start and skips what exists.",
+    "warningTitle": "{{step}}: warning",
+    "inviteHint": "The shop is running; once the problem is solved, use Send the invitation again.",
+    "compensationFailed": "Undoing could not finish: {{reason}}",
+    "unknownCode": "The step could not finish.",
+    "seconds_one": "{{count}} s",
+    "seconds_other": "{{count}} s",
+    "minutes": "{{minutes}} min {{seconds}} s",
+    "attempts_one": "attempt {{count}}",
+    "attempts_other": "attempt {{count}}",
+    "previous": "Previous run",
+    "next": "Next run",
+    "actions": {
+      "install": "Set up",
+      "retry": "Try again",
+      "start": "Start",
+      "stop": "Stop",
+      "invite": "Send the invitation again"
+    },
+    "started": {
+      "create": "Setup started.",
+      "start": "Starting the shop server.",
+      "stop": "Stopping the shop server.",
+      "invite": "Sending the invitation again."
+    },
+    "reasons": {
+      "loading": "Reading the setup.",
+      "noProvisioner": "Shops are not set up in this environment.",
+      "busy": "A run is in progress; the actions open when it ends.",
+      "status": "The shop's status does not allow this.",
+      "notSetUp": "Starting, stopping and inviting need a finished setup first.",
+      "done": "The setup is complete."
+    },
+    "confirmStop": {
+      "title": "Stop the shop server",
+      "text": "The shop and its panel are unreachable until started again. Its data stays."
+    },
+    "kinds": {
+      "create": "Setup",
+      "start": "Start",
+      "stop": "Stop",
+      "invite": "Invitation"
+    },
+    "runStatus": {
+      "running": "In progress",
+      "succeeded": "Completed",
+      "failed": "Not completed"
+    },
+    "stepStatus": {
+      "pending": "Waiting",
+      "running": "In progress",
+      "succeeded": "Done",
+      "skipped": "Skipped",
+      "failed": "Failed",
+      "compensated": "Undone"
+    },
+    "steps": {
+      "allocate": "Port allocation",
+      "secrets": "Keys and secret values",
+      "database": "Database",
+      "migrate": "Database schema",
+      "bootstrap": "Shop's first settings",
+      "sector_pack": "Sector pack",
+      "plan_document": "Plan document",
+      "start": "Starting the shop server",
+      "health": "Health check",
+      "api_url": "Recording the internal address",
+      "owner_invite": "Owner invitation",
+      "activate": "Activation",
+      "stop": "Stopping the shop server",
+      "resend_invite": "Sending the owner invitation again"
+    },
+    "output": {
+      "port": "Port {{port}}",
+      "serial": "Document no {{serial}}",
+      "latency": "Reply {{ms}} ms",
+      "mailed": "E-mail sent",
+      "notMailed": "E-mail not sent",
+      "sentBefore": "Sent in an earlier run",
+      "ownerExists": "The shop already has an owner account",
+      "notAvailableYet": "Sector packs are not offered yet",
+      "alreadyRunning": "Was already running"
+    },
+    "columns": {
+      "kind": "Run",
+      "status": "Status",
+      "started": "Started",
+      "duration": "Duration",
+      "problem": "Problem"
+    },
+    "local": {
+      "title": "Shop panel (this computer)",
+      "text": "In a local setup the shop's panel opens on its server's port plus 1000.",
+      "address": "Address",
+      "command": "Command that opens the panel",
+      "copy": "Copy the command",
+      "copied": "Command copied."
     }
   }
 }

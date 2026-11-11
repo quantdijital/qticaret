@@ -18,6 +18,9 @@ export const useNavigate = () => routerState.navigate
 
 export const useSearch = () => routerState.search
 
+/** No navigation happens in a test: a leave guard's blocker never blocks. */
+export const useBlocker = () => ({ status: "idle" as const })
+
 export const getRouteApi = () => ({
   useSearch: () => routerState.search,
   useParams: () => routerState.params,

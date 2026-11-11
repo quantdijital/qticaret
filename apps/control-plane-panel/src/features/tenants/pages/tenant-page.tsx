@@ -7,6 +7,9 @@ import { PageTabs } from "@qticaret/admin-ui/patterns/page-tabs"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { formatDate } from "@qticaret/admin-ui/lib/format"
+import type { PageTab } from "@qticaret/admin-ui/patterns/page-tabs"
+import { useMe } from "@/features/auth/api"
+import { SetupTab } from "@/features/provisioning/components/setup-tab"
 import { tenantQuery } from "@/features/tenants/api"
 import type { TenantDetail } from "@/features/tenants/api"
 import { ActivityCard } from "@/features/tenants/components/activity-card"
@@ -20,17 +23,29 @@ import { NotesCard } from "@/features/tenants/components/notes-card"
 import { PlanCard } from "@/features/tenants/components/plan-card"
 import { SummaryCard } from "@/features/tenants/components/summary-card"
 import { TenantStatusBadge } from "@/features/tenants/components/tenant-status"
+import { canManageShops } from "@/features/tenants/permissions"
 import { errorText } from "@/lib/errors"
 
 const route = getRouteApi("/_app/tenants/$id")
 
-/** The shop's people, addresses, package and history: one card a tab. */
+/**
+ * The shop's people, addresses, package, setup and history: one card a
+ * tab. The setup ("Kurulum", C11) is the owner's and the operator's (the
+ * control plane answers no one else); a shop still being set up opens on
+ * it.
+ */
 function TenantTabs({ shop }: { shop: TenantDetail }) {
   const { t } = useTranslation()
+  const me = useMe()
+  const setup: PageTab[] = canManageShops(me?.role)
+    ? [{ key: "setup", label: t("setup.title"), content: <SetupTab shop={shop} /> }]
+    : []
+  const settingUp = shop.tenant.status === "provisioning"
   return (
     <PageTabs
       label={t("tenants.detail.tabs")}
       tabs={[
+        ...(settingUp ? setup : []),
         {
           key: "contacts",
           label: t("contacts.title"),
@@ -55,6 +70,7 @@ function TenantTabs({ shop }: { shop: TenantDetail }) {
             </div>
           ),
         },
+        ...(settingUp ? [] : setup),
         {
           key: "notes",
           label: t("notes.title"),

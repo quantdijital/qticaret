@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest"
 import en from "../locales/en.json" with { type: "json" }
 import tr from "../locales/tr.json" with { type: "json" }
 import { ApiError } from "./api"
-import { API_ERROR_CODES, CP_ERROR_CODES, PASSWORD_PROBLEMS, errorKey, errorText } from "./errors"
+import {
+  API_ERROR_CODES,
+  CP_ERROR_CODES,
+  PASSWORD_PROBLEMS,
+  PROVISIONING_CODES,
+  errorKey,
+  errorText,
+} from "./errors"
 import { i18next } from "./i18n"
 import { StepUpCancelled } from "./step-up"
 
@@ -51,6 +58,18 @@ describe("the control plane's refusals in words", () => {
     )
   })
 
+  it("puts a setup refusal into words (Ek C10: busy, status, no provisioner)", () => {
+    expect(errorText(t, new ApiError(409, "cp.provisioning_busy", "conflict"))).toBe(
+      "Bu mağazada bir çalışma sürüyor; bitince yeniden deneyin."
+    )
+    expect(errorKey(new ApiError(409, "provisioning.tenant_status", "conflict"))).toBe(
+      "errors.provisioning.tenant_status"
+    )
+    expect(errorKey(new ApiError(503, "cp.provisioner_unavailable", "unavailable"))).toBe(
+      "errors.cp.provisioner_unavailable"
+    )
+  })
+
   it("knows the control plane's generic keys", () => {
     expect(errorKey(new ApiError(403, "errors.csrf_rejected", "not_allowed"))).toBe(
       "errors.api.csrf_rejected"
@@ -84,6 +103,10 @@ describe("the control plane's refusals in words", () => {
     }
     for (const code of API_ERROR_CODES) {
       expect(trKeys).toContain(`errors.api.${code}`)
+    }
+    for (const code of PROVISIONING_CODES) {
+      expect(trKeys).toContain(`errors.provisioning.${code}`)
+      expect(enKeys).toContain(`errors.provisioning.${code}`)
     }
   })
 })

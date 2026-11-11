@@ -23,6 +23,7 @@ import { Route as AppStaffRouteImport } from './routes/_app/staff'
 import { Route as SecuritySetupRouteImport } from './routes/security/setup'
 import { Route as AppTenantsIndexRouteImport } from './routes/_app/tenants/index'
 import { Route as AppTenantsIdRouteImport } from './routes/_app/tenants/$id'
+import { Route as AppTenantsNewRouteImport } from './routes/_app/tenants/new'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -93,6 +94,11 @@ const AppTenantsIdRoute = AppTenantsIdRouteImport.update({
   path: '/tenants/$id',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTenantsNewRoute = AppTenantsNewRouteImport.update({
+  id: '/tenants/new',
+  path: '/tenants/new',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/staff': typeof AppStaffRoute
   '/security/setup': typeof SecuritySetupRoute
   '/tenants/$id': typeof AppTenantsIdRoute
+  '/tenants/new': typeof AppTenantsNewRoute
   '/tenants/': typeof AppTenantsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/security/setup': typeof SecuritySetupRoute
   '/': typeof AppIndexRoute
   '/tenants/$id': typeof AppTenantsIdRoute
+  '/tenants/new': typeof AppTenantsNewRoute
   '/tenants': typeof AppTenantsIndexRoute
 }
 export interface FileRoutesById {
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/security/setup': typeof SecuritySetupRoute
   '/_app/': typeof AppIndexRoute
   '/_app/tenants/$id': typeof AppTenantsIdRoute
+  '/_app/tenants/new': typeof AppTenantsNewRoute
   '/_app/tenants/': typeof AppTenantsIndexRoute
 }
 export interface FileRouteTypes {
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/staff'
     | '/security/setup'
     | '/tenants/$id'
+    | '/tenants/new'
     | '/tenants/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/security/setup'
     | '/'
     | '/tenants/$id'
+    | '/tenants/new'
     | '/tenants'
   id:
     | '__root__'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/security/setup'
     | '/_app/'
     | '/_app/tenants/$id'
+    | '/_app/tenants/new'
     | '/_app/tenants/'
   fileRoutesById: FileRoutesById
 }
@@ -299,6 +311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTenantsIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/tenants/new': {
+      id: '/_app/tenants/new'
+      path: '/tenants/new'
+      fullPath: '/tenants/new'
+      preLoaderRoute: typeof AppTenantsNewRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -310,6 +329,7 @@ interface AppRouteChildren {
   AppStaffRoute: typeof AppStaffRoute
   AppIndexRoute: typeof AppIndexRoute
   AppTenantsIdRoute: typeof AppTenantsIdRoute
+  AppTenantsNewRoute: typeof AppTenantsNewRoute
   AppTenantsIndexRoute: typeof AppTenantsIndexRoute
 }
 
@@ -321,6 +341,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppStaffRoute: AppStaffRoute,
   AppIndexRoute: AppIndexRoute,
   AppTenantsIdRoute: AppTenantsIdRoute,
+  AppTenantsNewRoute: AppTenantsNewRoute,
   AppTenantsIndexRoute: AppTenantsIndexRoute,
 }
 

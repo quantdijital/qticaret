@@ -56,9 +56,12 @@ export const CP_ERROR_CODES = [
   "password_invalid",
   "phone_invalid",
   "postal_code_invalid",
+  "provisioner_unavailable",
+  "provisioning_busy",
   "reason_required",
   "register_closed",
   "reset_self",
+  "run_unknown",
   "session_required",
   "session_revoked",
   "session_unknown",
@@ -84,6 +87,65 @@ export const CP_ERROR_CODES = [
   "vkn_invalid",
 ] as const
 
+/**
+ * The control plane's `provisioning.*` codes this panel puts into words:
+ * `errors.provisioning.<name>` in the locale files (a unit test keeps both
+ * languages in step). A command's own failure is `<command>_failed` or
+ * `<command>_timeout`.
+ */
+export const PROVISIONING_CODES = [
+  "api_url_refused",
+  "apply_pack_failed",
+  "apply_pack_timeout",
+  "backend_not_built",
+  "bootstrap_failed",
+  "bootstrap_timeout",
+  "build_stale",
+  "command_unavailable",
+  "database_failed",
+  "database_name_invalid",
+  "env_value_invalid",
+  "finish_failed",
+  "foreign_shop",
+  "health_timeout",
+  "injected_failure",
+  "interrupted",
+  "invite_failed",
+  "invite_owner_failed",
+  "invite_owner_timeout",
+  "invite_token_invalid",
+  "local_database_elsewhere",
+  "local_development_only",
+  "mail_failed",
+  "mail_off",
+  "migrate_failed",
+  "migrate_timeout",
+  "no_owner_contact",
+  "no_package",
+  "no_panel_host",
+  "no_plan_document",
+  "no_port",
+  "no_signing_key",
+  "owner_address_taken",
+  "owner_email_invalid",
+  "plan_import_failed",
+  "plan_import_refused",
+  "plan_import_timeout",
+  "port_in_use",
+  "repo_unknown",
+  "secrets_exposed",
+  "secrets_lost",
+  "secrets_missing",
+  "secrets_orphaned",
+  "shop_exited",
+  "shop_running",
+  "slug_invalid",
+  "start_failed",
+  "step_failed",
+  "store_name_invalid",
+  "tenant_status",
+] as const
+
 // The control plane's generic keys (its middlewares): `errors.api.<name>`
 export const API_ERROR_CODES = [
   "csrf_rejected",
@@ -98,6 +160,7 @@ export const PASSWORD_PROBLEMS = ["too_short", "too_long", "common", "contains_e
 const CP_KEY = /\bcp\.([a-z_]+)\b/
 const PASSWORD_KEY = /\bauth\.password_([a-z_]+)\b/
 const API_KEY = /^errors\.([a-z_]+)$/
+const PROVISIONING_KEY = /^provisioning\.([a-z_]+)$/
 
 const known = <T extends string>(list: readonly T[], name: string | undefined): name is T =>
   name !== undefined && (list as readonly string[]).includes(name)
@@ -115,6 +178,10 @@ export function errorKey(error: unknown): string | null {
   const cp = CP_KEY.exec(error.code)?.[1]
   if (known(CP_ERROR_CODES, cp)) {
     return `errors.cp.${cp}`
+  }
+  const provisioning = PROVISIONING_KEY.exec(error.code)?.[1]
+  if (known(PROVISIONING_CODES, provisioning)) {
+    return `errors.provisioning.${provisioning}`
   }
   const password = PASSWORD_KEY.exec(error.code)?.[1]
   if (known(PASSWORD_PROBLEMS, password)) {

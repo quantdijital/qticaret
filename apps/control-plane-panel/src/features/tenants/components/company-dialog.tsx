@@ -9,18 +9,12 @@ import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import type { Company } from "@/features/tenants/api"
 import { useSaveCompany } from "@/features/tenants/mutations"
 import type { CompanyInput } from "@/features/tenants/mutations"
+import { companyFieldWrong, compact, isCheckedField } from "@/features/tenants/company-rules"
 import { errorText } from "@/lib/errors"
 
 type Fields = Omit<CompanyInput, "tckn"> & { tckn: string }
 
 const TEXT_FIELDS = ["legal_name", "tax_office", "address_line", "district", "city"] as const
-
-// Light checks while typing; the control plane checks the check digits
-const SHAPES: Partial<Record<keyof Fields, RegExp>> = {
-  tax_number: /^\d{10}$/,
-  tckn: /^[1-9]\d{10}$/,
-  postal_code: /^\d{5}$/,
-}
 
 const fieldsOf = (company: Company | null): Fields => ({
   kind: company?.kind ?? "company",
@@ -72,11 +66,8 @@ export function CompanyDialog({
     (key) => fields[key] !== initial[key]
   )
   const sole = fields.kind === "sole_proprietor"
-  const wrong = (key: keyof Fields) => {
-    const shape = SHAPES[key]
-    const value = fields[key].replace(/\s/g, "")
-    return shape !== undefined && value !== "" && !shape.test(value)
-  }
+  // The check digits too (company-rules.ts); the control plane checks again
+  const wrong = (key: keyof Fields) => isCheckedField(key) && companyFieldWrong(key, fields[key])
   const invalid = (sole ? ["tckn", "postal_code"] : ["tax_number", "postal_code"]).some((key) =>
     wrong(key as keyof Fields)
   )
@@ -96,7 +87,7 @@ export function CompanyDialog({
       <Input
         id={`company-${key}`}
         autoComplete="off"
-        inputMode={key in SHAPES ? "numeric" : undefined}
+        inputMode={isCheckedField(key) ? "numeric" : undefined}
         aria-invalid={wrong(key)}
         value={fields[key]}
         onChange={(event) => {
@@ -114,8 +105,8 @@ export function CompanyDialog({
     const { tckn, ...rest } = fields
     const input: CompanyInput = {
       ...rest,
-      tax_number: sole ? "" : rest.tax_number.replace(/\s/g, ""),
-      ...(sole && tckn.trim() !== "" ? { tckn: tckn.replace(/\s/g, "") } : {}),
+      tax_number: sole ? "" : compact(rest.tax_number),
+      ...(sole && tckn.trim() !== "" ? { tckn: compact(tckn) } : {}),
     }
     save.mutate(input, {
       onSuccess: () => {

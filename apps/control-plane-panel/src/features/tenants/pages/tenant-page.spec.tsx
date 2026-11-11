@@ -38,6 +38,9 @@ function controlPlane(shop: TenantDetail) {
     if (call.path === "/admin/cp/plans") {
       return { status: 200, body: { plans: [START, PRO] } }
     }
+    if (call.path === "/admin/cp/tenants/ten_kahve/provisioning" && call.method === "GET") {
+      return { status: 200, body: { provisioner: "local", latest: null, runs: [] } }
+    }
     if (call.path === "/admin/cp/me/step-up") {
       return { status: 200, body: PROOF }
     }

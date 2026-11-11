@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
-import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { TENANT_STATUSES } from "@qticaret/types/control-plane"
 import type { TenantStatus } from "@qticaret/types/control-plane"
@@ -17,7 +16,6 @@ import { formatDate } from "@qticaret/admin-ui/lib/format"
 import { useMe } from "@/features/auth/api"
 import { TENANTS_PAGE_SIZE, tenantsQuery } from "@/features/tenants/api"
 import type { TenantRow } from "@/features/tenants/api"
-import { CreateTenantDialog } from "@/features/tenants/components/create-tenant-dialog"
 import { TenantStatusBadge } from "@/features/tenants/components/tenant-status"
 import { canManageShops } from "@/features/tenants/permissions"
 import { errorText } from "@/lib/errors"
@@ -28,15 +26,14 @@ type View = TenantStatus | "all"
 
 /**
  * The platform's shops (adr/0061 §2): newest first, by status in tabs with
- * their counts, by name or address; a row opens the shop's page. A new
- * shop is a record here (owner, operator); its setup comes with C10/C11.
+ * their counts, by name or address; a row opens the shop's page. "Yeni
+ * mağaza" (owner, operator) opens the wizard (C11), the single way in.
  */
 export function TenantsPage() {
   const { t } = useTranslation()
   const me = useMe()
   const { status, q, page } = route.useSearch()
   const navigate = useNavigate({ from: "/tenants/" })
-  const [creating, setCreating] = useState(false)
   const list = useQuery(tenantsQuery({ status, q, page: page - 1 }))
   const go = (next: Partial<{ status: View; q: string; page: number }>) => {
     void navigate({ search: (prev) => ({ ...prev, page: 1, ...next }) })
@@ -104,12 +101,8 @@ export function TenantsPage() {
         description={t("tenants.text")}
         action={
           canManageShops(me?.role) ? (
-            <Button
-              onClick={() => {
-                setCreating(true)
-              }}
-            >
-              {t("tenants.create.open")}
+            <Button asChild>
+              <Link to="/tenants/new">{t("tenants.create.open")}</Link>
             </Button>
           ) : undefined
         }
@@ -162,7 +155,6 @@ export function TenantsPage() {
           />
         </SectionCard>
       )}
-      <CreateTenantDialog open={creating} onOpenChange={setCreating} />
     </div>
   )
 }

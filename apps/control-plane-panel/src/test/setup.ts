@@ -18,6 +18,9 @@ if (!("ResizeObserver" in globalThis)) {
   }
 }
 
+// jsdom only logs "not implemented" for the window's scrolling (a wizard's step change)
+window.scrollTo = () => undefined
+
 // jsdom has no pointer capture or scrolling; Radix's Select calls both when it
 // opens. A test never drags, and nothing scrolls, so the stand-ins do nothing
 const elementProto = Element.prototype as unknown as Record<string, unknown>
