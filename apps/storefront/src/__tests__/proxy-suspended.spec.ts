@@ -86,6 +86,13 @@ describe("the proxy for a suspended shop", () => {
     expect(edge.backendFileResponse).toHaveBeenCalledTimes(3)
   })
 
+  it("darkens a page whose path only starts like a sitemap, and Next's other paths (L3)", async () => {
+    for (const path of ["/sitemap-kampanya", "/sitemaps", "/_next/data/x.json"]) {
+      expect((await visit(path)).status).toBe(503)
+    }
+    expect(edge.backendFileResponse).not.toHaveBeenCalled()
+  })
+
   it("lets a card provider's return through, so a started payment settles", async () => {
     const response = await visit("/odeme/sonuc")
     expect(response.status).toBe(200)

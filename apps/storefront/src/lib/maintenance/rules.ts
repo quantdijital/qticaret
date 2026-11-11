@@ -4,6 +4,7 @@
  * token looks like. Pure: the proxy, the bypass route and the tests share
  * them. Not `server-only`: the proxy runs outside React's server environment.
  */
+import { backendFile } from "../seo/paths"
 
 /** The page that takes a bypass link (`/bakim/gir?t=<token>`) and sets its cookie. */
 export const BYPASS_PATH = "/bakim/gir"
@@ -61,13 +62,30 @@ const STATIC_FILES = new Set([
 ])
 
 /**
+ * Next's own requests that may reach the proxy: the build's files and
+ * images (the matcher leaves them out already) and the dev server's
+ * reload socket. Not every `/_next/` path: nothing else of Next's is a
+ * dark shop's business (adr/0061 Ek C15 review L3).
+ */
+const NEXT_OWN = /^\/_next\/(?:static\/|image(?:\/|$)|webpack-hmr$)/
+
+/**
+ * robots.txt, the sitemaps and security.txt, by their exact names
+ * (`backendFile`): the proxy answers them from the backend before it looks
+ * at maintenance; listed here too so a rule change cannot darken them. A
+ * page whose path only starts like one (`/sitemap-kampanya`) is a page
+ * (review L3), and the backend gives no record such a path.
+ */
+const isCrawlerFile = (path: string) => backendFile(path) !== null
+
+/**
  * The storefront's own paths that stay open while the shop is dark:
  * - a preview (the panel's theme editor and a draft's link);
  * - a card provider's return and the page it sends to (a paid shopper
  *   must not meet the maintenance page);
  * - the bypass link's page;
  * - robots.txt and the sitemaps (a 5xx robots.txt stops all crawling);
- * - Next's own requests (dev server, chunks) and static files.
+ * - Next's own files and the dev server's socket, and static files.
  * The IndexNow key file and the backend's files are answered before the
  * proxy looks at maintenance.
  */
@@ -77,9 +95,8 @@ export function isStorefrontOpenPath(path: string): boolean {
     under(path, "/odeme/sonuc") ||
     under(path, "/odeme/durum") ||
     path === BYPASS_PATH ||
-    path === "/robots.txt" ||
-    path.startsWith("/sitemap") ||
-    path.startsWith("/_next/") ||
+    isCrawlerFile(path) ||
+    NEXT_OWN.test(path) ||
     STATIC_FILES.has(path)
   )
 }
@@ -88,7 +105,7 @@ export function isStorefrontOpenPath(path: string): boolean {
  * What stays open while the platform has suspended the shop (adr/0061
  * §5.5, Ek C15): robots.txt and the sitemaps (crawlers keep the pages), a
  * card provider's return (a payment already started settles), Next's own
- * requests and static files. Narrower than maintenance: no preview, no
+ * files and static files. Narrower than maintenance: no preview, no
  * bypass link's page, none of the shop's own open paths; the shop cannot
  * open a suspended storefront.
  */
@@ -96,9 +113,8 @@ export function isOpenWhileSuspended(path: string): boolean {
   return (
     under(path, "/odeme/sonuc") ||
     under(path, "/odeme/durum") ||
-    path === "/robots.txt" ||
-    path.startsWith("/sitemap") ||
-    path.startsWith("/_next/") ||
+    isCrawlerFile(path) ||
+    NEXT_OWN.test(path) ||
     STATIC_FILES.has(path)
   )
 }

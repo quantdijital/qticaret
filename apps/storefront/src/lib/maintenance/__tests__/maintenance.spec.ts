@@ -23,7 +23,9 @@ describe("the paths a dark shop keeps open", () => {
     "/sitemap.xml",
     "/sitemap-products-1.xml",
     "/_next/webpack-hmr",
-    "/_next/data/x.json",
+    "/_next/static/chunks/a.js",
+    "/_next/image",
+    "/.well-known/security.txt",
     "/favicon.ico",
     "/icon.svg",
   ])("leaves %s open", (path) => {
@@ -42,6 +44,12 @@ describe("the paths a dark shop keeps open", () => {
     "/bakim",
     "/bakim/gir/baska",
     "/robots.txt.bak",
+    // Only the crawlers' files by their names, only Next's own files (adr/0061 Ek C15 L3)
+    "/sitemap-kampanya",
+    "/sitemaps",
+    "/sitemap.xml/x",
+    "/_next/data/x.json",
+    "/_next/x",
     "/kategoriler",
   ])("closes %s", (path) => {
     expect(isStorefrontOpenPath(path)).toBe(false)
