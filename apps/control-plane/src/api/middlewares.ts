@@ -9,6 +9,7 @@ import { gateRegistration } from "./http/register-gate"
 import { noteSessionEnd, noteSessionStart } from "./http/sessions"
 import { guardSecondStep, noteSignInChallenge } from "./http/sign-in-code"
 import { guardCpStaff } from "./http/staff-guard"
+import { TENANT_ROUTE_MIDDLEWARES } from "./http/tenant-routes"
 
 export default defineMiddlewares({
   routes: [
@@ -72,5 +73,6 @@ export default defineMiddlewares({
       middlewares: [rateLimit(() => CP_RATE_LIMIT_PROFILES.tenant_api)],
     },
     ...CP_ROUTE_MIDDLEWARES,
+    ...TENANT_ROUTE_MIDDLEWARES,
   ],
 })

@@ -10,6 +10,8 @@ const valid = {
   CP_HASH_KEY: "a".repeat(64),
   AUTH_MFA_ENCRYPTION_KEY: "b".repeat(64),
   CP_PANEL_URL: "http://localhost:5174",
+  CP_MASTER_KEY: "d".repeat(64),
+  PLATFORM_DOMAIN: "localhost",
 }
 
 const problems = (source: Record<string, string | undefined>): string => {
@@ -53,6 +55,7 @@ describe("parseEnv", () => {
         NODE_ENV: "production",
         REDIS_URL: "redis://cache:6379",
         CP_PANEL_URL: "https://ust.example.com",
+        PLATFORM_DOMAIN: "quantticaret.com",
       }).REDIS_URL
     ).toBe("redis://cache:6379")
   })
@@ -97,5 +100,27 @@ describe("parseEnv", () => {
     expect(problems({ ...valid, EMAIL_TRANSPORT: "mailpit", MAILPIT_URL: "http://m" })).toContain(
       "EMAIL_FROM"
     )
+  })
+
+  it("takes a list of master keys, each its own, and a platform domain (adr/0061 §4.1, C7)", () => {
+    expect(
+      parseEnv({ ...valid, CP_MASTER_KEY: `${"e".repeat(64)}, ${"d".repeat(64)}` })
+    ).toBeTruthy()
+    expect(problems({ ...valid, CP_MASTER_KEY: "short" })).toContain("CP_MASTER_KEY")
+    expect(problems({ ...valid, CP_MASTER_KEY: valid.CP_HASH_KEY })).toContain(
+      "CP_MASTER_KEY: must differ from CP_HASH_KEY"
+    )
+    expect(problems({ ...valid, CP_MASTER_KEY: `${"e".repeat(64)},${"E".repeat(64)}` })).toContain(
+      "CP_MASTER_KEY: lists the same key twice"
+    )
+    expect(problems({ ...valid, PLATFORM_DOMAIN: "https://x.com" })).toContain("PLATFORM_DOMAIN")
+    expect(
+      problems({
+        ...valid,
+        NODE_ENV: "production",
+        REDIS_URL: "redis://r",
+        CP_PANEL_URL: "https://ust.example.com",
+      })
+    ).toContain("PLATFORM_DOMAIN: must be a public domain")
   })
 })

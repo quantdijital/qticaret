@@ -38,6 +38,20 @@ const envSchema = z.object({
   AUTH_MFA_ENCRYPTION_KEY: key256,
   // `off` lets a developer skip 2FA on this machine; refused anywhere else
   ADMIN_MFA: z.enum(["on", "off"]).optional(),
+  // The local key-encryption key(s) of envelope encryption (adr/0061 §4.1):
+  // 64 hex characters each, comma-separated, newest first while a rotation
+  // runs. First user: a sole proprietor's TCKN (C7)
+  CP_MASTER_KEY: z
+    .string()
+    .regex(/^[0-9a-fA-F]{64}(?:\s*,\s*[0-9a-fA-F]{64})*$/, "must list 64-hex-character keys"),
+  // The platform's own domain (adr/0061 §2): a shop's subdomain is
+  // `<slug>.<PLATFORM_DOMAIN>`. Not decided yet; `localhost` on this machine
+  PLATFORM_DOMAIN: z
+    .string()
+    .regex(
+      /^(?=.{1,200}$)[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*$/,
+      "must be a lower-case host name"
+    ),
   // The control plane's panel (apps/control-plane-panel): invitation links
   CP_PANEL_URL: z.url({ protocol: /^https?$/, error: "must be an http(s) URL" }),
   // E-mail (adr/0061 Ek C4): Mailpit on a developer's machine; unset, nothing
@@ -76,6 +90,23 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       ctx.addIssue({ code: "custom", path: [name], message: `must differ from ${earlier}` })
     }
   })
+  // Each master key differs from the other keys and from each other
+  const masters = env.CP_MASTER_KEY.split(",").map((key) => key.trim().toLowerCase())
+  const reused = distinct.find((other) => masters.includes(env[other].toLowerCase()))
+  if (reused || new Set(masters).size !== masters.length) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["CP_MASTER_KEY"],
+      message: reused ? `must differ from ${reused}` : "lists the same key twice",
+    })
+  }
+  if (deployed && env.PLATFORM_DOMAIN === "localhost") {
+    ctx.addIssue({
+      code: "custom",
+      path: ["PLATFORM_DOMAIN"],
+      message: "must be a public domain outside development and test",
+    })
+  }
   if (env.ADMIN_MFA === "off" && deployed) {
     ctx.addIssue({
       code: "custom",

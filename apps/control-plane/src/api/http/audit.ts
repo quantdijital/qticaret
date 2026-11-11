@@ -35,12 +35,19 @@ interface Auditable {
   cpAuditChanges?: Record<string, unknown>
   /** Who the request turned out to be, when no actor is signed in (a sign-in). */
   cpAuditActor?: { type: string; id: string }
+  /** What a route without an id parameter made (a new shop): its id. */
+  cpAuditResourceId?: string
 }
 
 /** A handler's own summary of what it changed, merged into its audit row. */
 export function noteAuditChanges(req: MedusaRequest, changes: Record<string, unknown>): void {
   const auditable = req as unknown as Auditable
   auditable.cpAuditChanges = { ...auditable.cpAuditChanges, ...changes }
+}
+
+/** The record a route made, for a route whose path names none (`POST /admin/cp/tenants`). */
+export function noteAuditResource(req: MedusaRequest, id: string): void {
+  ;(req as unknown as Auditable).cpAuditResourceId = id
 }
 
 /** The person a request without a signed-in actor turned out to be (a sign-in's login). */
@@ -67,9 +74,10 @@ function describe(req: MedusaRequest) {
 async function write(req: MedusaRequest, res: MedusaResponse, entry: CpAuditInput) {
   // Read once answered: an invitation's acceptance signs its login in on the way
   const auth = authOf(req)
-  const { cpAuditChanges, cpAuditActor } = req as unknown as Auditable
+  const { cpAuditChanges, cpAuditActor, cpAuditResourceId } = req as unknown as Auditable
   const row: CpAuditInput = {
     ...entry,
+    resource_id: entry.resource_id ?? cpAuditResourceId ?? null,
     actor_type: present(auth?.actor_type) ?? cpAuditActor?.type ?? null,
     // Empty while an invitation is accepted: the user does not exist yet
     actor_id: present(auth?.actor_id) ?? cpAuditActor?.id ?? null,
@@ -89,12 +97,19 @@ async function write(req: MedusaRequest, res: MedusaResponse, entry: CpAuditInpu
  * Writes `entry` once the handler has answered. Tied to `end` rather than
  * "finish": a client that hangs up still made its change.
  */
-function writeWhenAnswered(req: MedusaRequest, res: MedusaResponse, entry: CpAuditInput) {
+function writeWhenAnswered(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  entry: CpAuditInput,
+  refusalsOnly = false
+) {
   let done = false
   const once = () => {
     if (!done) {
       done = true
-      setImmediate(() => void write(req, res, entry))
+      if (!refusalsOnly || res.statusCode >= 400) {
+        setImmediate(() => void write(req, res, entry))
+      }
     }
   }
   const end = res.end.bind(res) as (...args: unknown[]) => MedusaResponse
@@ -115,18 +130,56 @@ function writeWhenAnswered(req: MedusaRequest, res: MedusaResponse, entry: CpAud
  */
 export function auditCpRequests(req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) {
   const read = SAFE_METHODS.has(req.method)
-  if (read && !routeOf(req)?.rule.auditRead) {
+  const rule = routeOf(req)?.rule
+  if (read && !rule?.auditRead) {
     next()
     return
   }
-  writeWhenAnswered(req, res, {
-    kind: read ? "sensitive_read" : "mutation",
-    ...describe(req),
-    request_id: req.requestId ?? null,
-    ip_hash: ipHashOf(req),
-    changes: read ? null : { fields: bodyFields(req.body) },
-  })
+  // A read written before it is shown (a TCKN, Ek C4 L6) leaves only its refusals here
+  writeWhenAnswered(
+    req,
+    res,
+    {
+      kind: read ? "sensitive_read" : "mutation",
+      ...describe(req),
+      request_id: req.requestId ?? null,
+      ip_hash: ipHashOf(req),
+      changes: read ? null : { fields: bodyFields(req.body) },
+    },
+    rule?.auditBefore === true
+  )
   next()
+}
+
+/**
+ * A sensitive read recorded before it is shown (adr/0061 §3.5; Ek C4: "write
+ * first; unwritten, not shown"): the row as `auditCpRequests` would write
+ * it, kind `sensitive_read`, awaited. False when it could not be written:
+ * the caller answers without the data.
+ */
+export async function recordReadFirst(req: MedusaRequest): Promise<boolean> {
+  const auth = authOf(req)
+  const { action, resource_type, resource_id } = describe(req)
+  try {
+    await req.scope.resolve<CpAuditModuleService>(CP_AUDIT_MODULE).record({
+      kind: "sensitive_read",
+      action,
+      actor_type: present(auth?.actor_type),
+      actor_id: present(auth?.actor_id),
+      resource_type,
+      resource_id,
+      outcome: 200,
+      changes: null,
+      request_id: req.requestId ?? null,
+      ip_hash: ipHashOf(req),
+    })
+    return true
+  } catch (error) {
+    loggerOf(req)?.error(
+      `cp.audit_write_failed ${JSON.stringify({ action, err: errorSummary(error) })}`
+    )
+    return false
+  }
 }
 
 /**

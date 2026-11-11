@@ -1,0 +1,37 @@
+import { model } from "@medusajs/framework/utils"
+import { TENANT_STATUSES } from "@qticaret/types/control-plane"
+import { TenantCompany } from "./tenant-company"
+import { TenantContact } from "./tenant-contact"
+import { TenantDomain } from "./tenant-domain"
+import { TenantNote } from "./tenant-note"
+import { TenantStatusChange } from "./tenant-status-change"
+
+/**
+ * A shop the platform runs (adr/0061 §2): its slug (fixed once made: its
+ * database, its subdomain and its documents are named after it), the name
+ * staff know it by, and where it stands in its lifecycle. A record made in
+ * C7 waits in `provisioning` until the setup (C10) brings it up.
+ */
+export const Tenant = model
+  .define("tenant", {
+    id: model.id({ prefix: "ten" }).primaryKey(),
+    slug: model.text(),
+    name: model.text(),
+    status: model.enum([...TENANT_STATUSES]).default("provisioning"),
+    status_changed_at: model.dateTime(),
+    /** The sector pack it was set up with (C12); none yet. */
+    sector_pack: model.text().nullable(),
+    /** The staff member who made the record; null for the system (a script). */
+    created_by: model.text().nullable(),
+    company: model.hasOne(() => TenantCompany, { mappedBy: "tenant" }),
+    contacts: model.hasMany(() => TenantContact, { mappedBy: "tenant" }),
+    domains: model.hasMany(() => TenantDomain, { mappedBy: "tenant" }),
+    status_changes: model.hasMany(() => TenantStatusChange, { mappedBy: "tenant" }),
+    notes: model.hasMany(() => TenantNote, { mappedBy: "tenant" }),
+  })
+  .indexes([
+    { on: ["slug"], unique: true, where: "deleted_at IS NULL" },
+    { on: ["status"], where: "deleted_at IS NULL" },
+    { on: ["created_at"], where: "deleted_at IS NULL" },
+  ])
+  .cascades({ delete: ["company", "contacts", "domains", "status_changes", "notes"] })

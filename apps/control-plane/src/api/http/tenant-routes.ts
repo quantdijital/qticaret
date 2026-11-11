@@ -1,0 +1,77 @@
+import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
+import type { defineMiddlewares } from "@medusajs/framework/http"
+import { NoBody, NoQuery } from "../admin/cp/validators"
+import { PostPlan, PostPlanPrice, PostPlanUpdate } from "../admin/cp/plans/validators"
+import {
+  GetActivity,
+  GetTenants,
+  PostCompany,
+  PostContact,
+  PostDomain,
+  PostNote,
+  PostNoteUpdate,
+  PostOverride,
+  PostTenant,
+  PostTenantPlan,
+  PostTenantUpdate,
+} from "../admin/cp/tenants/validators"
+
+/**
+ * What each shop and package route takes (C7), strictly: its body or
+ * query. Who may call is the route table's, decided before these by the
+ * staff guard.
+ */
+
+type MiddlewareConfig = Extract<Parameters<typeof defineMiddlewares>[0], { routes?: unknown }>
+type MiddlewareRoute = NonNullable<MiddlewareConfig["routes"]>[number]
+
+type Schema = Parameters<typeof validateAndTransformBody>[0]
+
+const T = "/admin/cp/tenants"
+const P = "/admin/cp/plans"
+
+const body = (matcher: string, schema: Schema): MiddlewareRoute => ({
+  matcher,
+  methods: ["POST"],
+  middlewares: [validateAndTransformBody(schema)],
+})
+
+const query = (
+  matcher: string,
+  schema: Parameters<typeof validateAndTransformQuery>[0],
+  method: "GET" | "DELETE" = "GET"
+): MiddlewareRoute => ({
+  matcher,
+  methods: [method],
+  middlewares: [validateAndTransformQuery(schema, {})],
+})
+
+export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
+  query(T, GetTenants),
+  query(`${T}/:id`, NoQuery),
+  query(`${T}/:id/activity`, GetActivity),
+  query(P, NoQuery),
+  ...[
+    `${T}/:id/contacts/:contact_id`,
+    `${T}/:id/domains/:domain_id`,
+    `${T}/:id/notes/:note_id`,
+    `${T}/:id/overrides/:key`,
+  ].map((matcher) => query(matcher, NoQuery, "DELETE")),
+  body(T, PostTenant),
+  body(`${T}/:id`, PostTenantUpdate),
+  body(`${T}/:id/company`, PostCompany),
+  body(`${T}/:id/reveal-tckn`, NoBody),
+  body(`${T}/:id/contacts`, PostContact),
+  body(`${T}/:id/contacts/:contact_id`, PostContact),
+  body(`${T}/:id/domains`, PostDomain),
+  body(`${T}/:id/domains/:domain_id/primary`, NoBody),
+  body(`${T}/:id/notes`, PostNote),
+  body(`${T}/:id/notes/:note_id`, PostNoteUpdate),
+  body(`${T}/:id/plan`, PostTenantPlan),
+  body(`${T}/:id/overrides`, PostOverride),
+  body(P, PostPlan),
+  body(`${P}/:id`, PostPlanUpdate),
+  body(`${P}/:id/price`, PostPlanPrice),
+  body(`${P}/:id/archive`, NoBody),
+  body(`${P}/:id/restore`, NoBody),
+]

@@ -36,10 +36,86 @@ export interface RouteRule {
   resource?: { type: string; param?: string }
   /** A read of other people's data: an audit row too (`sensitive_read`). */
   auditRead?: true
+  /**
+   * The handler writes its row before it shows anything, and shows nothing
+   * when the row cannot be written (a TCKN, Ek C4 L6); the middleware then
+   * records only refusals.
+   */
+  auditBefore?: true
 }
 
 const ALL = CP_STAFF_ROLES
 const OWNER = ["owner"] as const
+// Shops (adr/0061 §3.5): the operator opens and runs them, notes, packages, exceptions
+const SHOPS = ["owner", "operator"] as const
+// A shop's company is the invoice's addressee: finance keeps it too
+const INVOICED = ["owner", "operator", "finance"] as const
+// Packages and their prices: finance's
+const PACKAGES = ["owner", "finance"] as const
+
+const TENANT = { type: "tenant", param: "id" } as const
+const PACKAGE = { type: "package", param: "id" } as const
+
+const shopRules = (method: Method, paths: string[], access: Access): RouteRule[] =>
+  paths.map((path) => ({ method, path: `/admin/cp/tenants/:id${path}`, access, resource: TENANT }))
+
+/** The shops (C7, adr/0061 §2): every change recorded against the shop, so its activity reads it. */
+const TENANT_ROUTES: RouteRule[] = [
+  { method: "GET", path: "/admin/cp/tenants", access: ALL },
+  { method: "POST", path: "/admin/cp/tenants", access: SHOPS, resource: { type: "tenant" } },
+  // Its contacts are people's data: reading the shop is recorded
+  { method: "GET", path: "/admin/cp/tenants/:id", access: ALL, resource: TENANT, auditRead: true },
+  { method: "GET", path: "/admin/cp/tenants/:id/activity", access: ALL, resource: TENANT },
+  ...shopRules(
+    "POST",
+    [
+      "",
+      "/contacts",
+      "/contacts/:contact_id",
+      "/domains",
+      "/domains/:domain_id/primary",
+      "/notes",
+      "/notes/:note_id",
+      "/plan",
+      "/overrides",
+    ],
+    SHOPS
+  ),
+  ...shopRules(
+    "DELETE",
+    ["/contacts/:contact_id", "/domains/:domain_id", "/notes/:note_id", "/overrides/:key"],
+    SHOPS
+  ),
+  ...shopRules("POST", ["/company"], INVOICED),
+  // A sole proprietor's TCKN: proved again, recorded before it is shown
+  {
+    method: "POST",
+    path: "/admin/cp/tenants/:id/reveal-tckn",
+    access: INVOICED,
+    stepUp: true,
+    auditBefore: true,
+    resource: TENANT,
+  },
+]
+
+/** The packages (C7): read by all; made, changed and archived by finance; a price behind a step-up. */
+const PLAN_ROUTES: RouteRule[] = [
+  { method: "GET", path: "/admin/cp/plans", access: ALL },
+  { method: "POST", path: "/admin/cp/plans", access: PACKAGES, resource: { type: "package" } },
+  ...["", "/archive", "/restore"].map((action): RouteRule => ({
+    method: "POST",
+    path: `/admin/cp/plans/:id${action}`,
+    access: PACKAGES,
+    resource: PACKAGE,
+  })),
+  {
+    method: "POST",
+    path: "/admin/cp/plans/:id/price",
+    access: PACKAGES,
+    stepUp: true,
+    resource: PACKAGE,
+  },
+]
 
 export const CP_ROUTES: readonly RouteRule[] = [
   // One's own account: who they are, before 2FA too, so the panel can lead to setup
@@ -125,6 +201,8 @@ export const CP_ROUTES: readonly RouteRule[] = [
   },
   // The audit log: the owner's alone, and reading it is recorded too
   { method: "GET", path: "/admin/cp/audit-log", access: OWNER, auditRead: true },
+  ...TENANT_ROUTES,
+  ...PLAN_ROUTES,
 ]
 
 const compiled = new Map<string, RegExp>()

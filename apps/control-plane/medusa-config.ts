@@ -57,5 +57,8 @@ module.exports = defineConfig({
     // C4: platform staff roles and the append-only audit log, the control plane's own
     { resolve: "./src/modules/cp-staff" },
     { resolve: "./src/modules/cp-audit" },
+    // C7 (adr/0061 §2): the shops and their packages
+    { resolve: "./src/modules/tenants" },
+    { resolve: "./src/modules/plans" },
   ],
 })

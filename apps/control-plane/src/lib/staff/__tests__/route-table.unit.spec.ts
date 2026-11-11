@@ -74,7 +74,7 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
 
   it("refuses everyone a route it does not list", () => {
     for (const role of [...CP_STAFF_ROLES, null]) {
-      expect(decide(matchRoute("GET", "/admin/cp/tenants")?.rule ?? null, staff(role))).toEqual({
+      expect(decide(matchRoute("GET", "/admin/cp/payments")?.rule ?? null, staff(role))).toEqual({
         allowed: false,
         reason: "unlisted",
       })
@@ -127,12 +127,67 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "DELETE /admin/cp/me/sessions/:id",
       "POST /admin/cp/me/mfa/recovery-codes",
       "POST /admin/cp/me/sessions/revoke-others",
+      "POST /admin/cp/plans/:id/price",
       "POST /admin/cp/staff/invites",
       "POST /admin/cp/staff/members/:id",
       "POST /admin/cp/staff/members/:id/deactivate",
       "POST /admin/cp/staff/members/:id/reactivate",
       "POST /admin/cp/staff/members/:id/reset-mfa",
+      "POST /admin/cp/tenants/:id/reveal-tckn",
     ])
+  })
+
+  const allowedRoles = (method: string, path: string) => {
+    const rule = matchRoute(method, path)?.rule ?? null
+    return CP_STAFF_ROLES.filter((role) => decide(rule, staff(role)).allowed)
+  }
+
+  it("lets every role read the shops and packages; changes are the operator's (C7)", () => {
+    expect(allowedRoles("GET", "/admin/cp/tenants")).toEqual([...CP_STAFF_ROLES])
+    expect(allowedRoles("GET", "/admin/cp/tenants/ten_1")).toEqual([...CP_STAFF_ROLES])
+    expect(allowedRoles("GET", "/admin/cp/tenants/ten_1/activity")).toEqual([...CP_STAFF_ROLES])
+    expect(allowedRoles("GET", "/admin/cp/plans")).toEqual([...CP_STAFF_ROLES])
+    for (const [method, path] of [
+      ["POST", "/admin/cp/tenants"],
+      ["POST", "/admin/cp/tenants/ten_1"],
+      ["POST", "/admin/cp/tenants/ten_1/contacts"],
+      ["DELETE", "/admin/cp/tenants/ten_1/contacts/tenct_1"],
+      ["POST", "/admin/cp/tenants/ten_1/domains/tendm_1/primary"],
+      ["POST", "/admin/cp/tenants/ten_1/notes"],
+      ["POST", "/admin/cp/tenants/ten_1/plan"],
+      ["POST", "/admin/cp/tenants/ten_1/overrides"],
+      ["DELETE", "/admin/cp/tenants/ten_1/overrides/products"],
+    ] as const) {
+      expect(allowedRoles(method, path)).toEqual(["owner", "operator"])
+    }
+  })
+
+  it("gives the company and its TCKN to finance too, packages to owner and finance (C7)", () => {
+    expect(allowedRoles("POST", "/admin/cp/tenants/ten_1/company")).toEqual([
+      "owner",
+      "operator",
+      "finance",
+    ])
+    expect(allowedRoles("POST", "/admin/cp/tenants/ten_1/reveal-tckn")).toEqual([
+      "owner",
+      "operator",
+      "finance",
+    ])
+    for (const path of ["", "/pkg_1", "/pkg_1/price", "/pkg_1/archive", "/pkg_1/restore"]) {
+      expect(allowedRoles("POST", `/admin/cp/plans${path}`)).toEqual(["owner", "finance"])
+    }
+  })
+
+  it("records every read of a shop and the TCKN before it is shown (C7)", () => {
+    expect(matchRoute("GET", "/admin/cp/tenants/ten_1")?.rule.auditRead).toBe(true)
+    const reveal = matchRoute("POST", "/admin/cp/tenants/ten_1/reveal-tckn")?.rule
+
+    expect(reveal?.auditBefore).toBe(true)
+    expect(CP_ROUTES.filter((rule) => rule.auditBefore)).toHaveLength(1)
+    // Every shop route records against the shop it names, so its activity reads it
+    for (const rule of CP_ROUTES.filter((each) => each.path.startsWith("/admin/cp/tenants/"))) {
+      expect(rule.resource).toEqual({ type: "tenant", param: "id" })
+    }
   })
 
   it("lets every role manage its own account once 2FA is passed", () => {

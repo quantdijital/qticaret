@@ -102,6 +102,24 @@
 
 ---
 
+## 5. Üst panel (`apps/control-plane`, `qticaret_cp`)
+
+Veri sorumlusu Quant Dijital'dir (kurulunca; adr/0061 §2). Burada mağazaların müşteri verisi **yoktur**; yalnızca bizim müşterimiz olan mağazaların yetkilileri ve platform personeli. Kodda saklama işi henüz yok: süreler aşağıda öneri, iş kapanış görevinde (C19) ya da F16'da yazılır.
+
+| Tablo (modül) | Kişisel veri | Amaç | Süre (öneri) | Silmede |
+| --- | --- | --- | --- | --- |
+| `tenant_contact` (tenants) | yetkilinin adı, rolü, e-postası, telefonu (D, E.164) | mağazayla iş ilişkisi; faturalama kişisine ödeme hatırlatması (C16) | Mağaza müşterimiz oldukça. Yetkili çıkarılınca satır **kalıcı silinir** (yumuşak silme yok). Mağaza kapanınca (F16.11) sözleşme ve fatura kanıtı için gerekenler dışında silinir. | Satır silinir. Denetim kaydında yalnız alan adları ve satırın kimliği kalır, değer yok. |
+| `tenant_company` (tenants) | şahıs firmasında unvan (kişinin adı), TCKN (Ş: zarf şifreleme, `CP_MASTER_KEY`, mağazaya bağlı; yalnız son 4 hane D, maske için), adres (D). Şirkette VKN kişisel veri değildir. | abonelik faturası (adr/0061 §7) | Mağaza müşterimiz oldukça; fatura kesildiyse fatura kanıtı süresince (VUK, 5 yıl; danışman onayı bekliyor) | TCKN boşaltılabilir (firma türü "şirket" yapılınca kendiliğinden silinir). Fatura kesilmişse unvan ve adres kanıt olarak korunur. |
+| `tenant_note` (tenants) | personelin serbest metni (kişi adı, telefon yazılabilir), yazan personelin kimliği | müşteri takibi | Mağaza müşterimiz oldukça | Not silinince kalıcı silinir. Notlara kişisel veri yazılmaması panelde söylenmez; yetkili bilgisi Yetkililer bölümüne girer. |
+| `tenant`, `tenant_status_change`, `tenant_domain` (tenants); `package`, `tenant_plan`, `tenant_override` (plans) | yalnız personel kimliği (açan, atayan, istisnayı veren) | kayıt ve sorumluluk | Mağaza kaldıkça | Personel çıkarılınca kimlik kalır, ad gösterilemez. |
+| `cp_audit_entry` (cp-audit) | personel kimliği; IP yerine anahtarlı özet (Ö, `CP_HASH_KEY`); değişikliklerde yalnız alan adları ve kişisel olmayan önce/sonra değerleri (ad, paket kodu, limit). TCKN görme ve mağaza ayrıntısını okuma `sensitive_read` satırıdır, değer yazılmaz. | denetim kaydı (adr/0061 §3.5) | **açık** (mağazadakiyle aynı soru); yalnız ekleme | Kayıt korunur. |
+| `cp_staff_member`, `user` (cp-staff, Medusa) | platform personelinin adı, e-postası | yetki | Personel çalıştıkça | Pasifleştirilir; giriş kaldırılabilir. |
+
+- **İş akışı girdileri:** yetkili, firma ve not iş akışları kısa ömürlüdür ve kaydedilmez (`store` kapalı, yürütme kaydı yok); geri alma için tuttukları önceki satırlar yalnız bellekte durur. TCKN iş akışına mühürlü girer (adr/0061 §4.3).
+- **Aydınlatma:** yetkililere aydınlatma metni hizmet sözleşmesiyle verilir (docs/12, hukuk taslağı bekliyor).
+
+---
+
 ## Gecelik saklama işi (`compliance-retention`)
 
 | Parça              | Ne yapar                                                                                                                                                            | Süre (`RETENTION_DAYS`) |
