@@ -26,11 +26,13 @@ export const COMMAND_TIMEOUT_MS: Readonly<Record<TenantCommand["name"], number>>
 const CAPTURE_BYTES = 64 * 1024
 const KILL_GRACE_MS = 5_000
 
+// As the sector packs' codes (packages/sector-packs PACK_CODE): never a path or an option
+const PACK = /^[a-z][a-z0-9-]{1,39}$/
 // Control and invisible format characters never make an argument
 const CLEAN = /^[^\p{Cc}\p{Cf}\u2028\u2029]+$/u
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,63}$/
 
-/** The CLI arguments of a command; `apply-pack` is C12's and not available yet. */
+/** The CLI arguments of a command. */
 export function argvOf(cmd: TenantCommand): string[] {
   switch (cmd.name) {
     case "migrate":
@@ -49,7 +51,10 @@ export function argvOf(cmd: TenantCommand): string[] {
     case "plan-import":
       return ["exec", "./src/scripts/plan-import.js"]
     case "apply-pack":
-      throw new ProvisioningError("provisioning.command_unavailable")
+      if (!PACK.test(cmd.pack)) {
+        throw new ProvisioningError("provisioning.sector_pack_unknown")
+      }
+      return ["exec", "./src/scripts/apply-pack.js", `pack=${cmd.pack}`]
   }
 }
 

@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto"
+import { sectorPack, summaryOf } from "@qticaret/sector-packs"
 import type { RuntimeSecrets } from "../vault/tenant-secrets"
 import { ProvisioningError } from "./provisioner"
 import type {
@@ -26,6 +27,8 @@ export interface FakeShop {
   /** Owner invitations handed out (their tokens), plan documents imported (their serials). */
   invites: string[]
   imported: number[]
+  /** C12: the packs applied, by code: the version, as the shop's own record of them. */
+  packs: Record<string, number>
 }
 
 export interface FakeState {
@@ -71,6 +74,7 @@ export class FakeProvisioner implements TenantProvisioner {
         healthy: false,
         invites: [],
         imported: [],
+        packs: {},
       }
       shops.set(t.tenant_id, shop)
     }
@@ -134,8 +138,30 @@ export class FakeProvisioner implements TenantProvisioner {
         shop.imported.push(serial)
         return await Promise.resolve(ok({ status, serial }))
       }
-      case "apply-pack":
-        throw new ProvisioningError("provisioning.command_unavailable")
+      case "apply-pack": {
+        // As the shop's: every item the first time, none again (a newer version: none here)
+        const pack = sectorPack(cmd.pack)
+        if (!pack) {
+          return await Promise.resolve({
+            ...ok({ status: "unknown_pack" }),
+            ok: false,
+            exit_code: 1,
+          })
+        }
+        const counts = Object.values(summaryOf(pack).counts).reduce((sum, n) => sum + n, 0)
+        const added = Object.hasOwn(shop.packs, pack.code) ? 0 : counts
+        shop.packs[pack.code] = pack.version
+        return await Promise.resolve(
+          ok({
+            status: "applied",
+            pack: pack.code,
+            version: pack.version,
+            added,
+            kept: 0,
+            skipped: 0,
+          })
+        )
+      }
       case "migrate":
       case "bootstrap":
         return await Promise.resolve(ok())

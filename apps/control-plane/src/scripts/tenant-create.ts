@@ -12,11 +12,14 @@ import { plansIn, tenantsIn } from "../workflows/modules"
 import { saveContactWorkflow } from "../workflows/tenants/tenant-contacts"
 import { createTenantWorkflow } from "../workflows/tenants/create-tenant"
 import { RUN_STEPS } from "../workflows/provisioning/workflows"
+import { isKnownSectorPack } from "../lib/tenants/sector-packs"
 
 /**
  * `NODE_ENV=development pnpm --filter control-plane cp:tenant-create
  * slug=<slug> name=<name> owner-email=<address> [package=<code>]
- * [owner-name=<name>] [fail-at=<step>]` (adr/0061 §6.4, Ek C10).
+ * [sector-pack=<code>] [owner-name=<name>] [fail-at=<step>]` (adr/0061
+ * §6.4, Ek C10; `sector-pack` C12, kept on a new record only: none, the
+ * general pack).
  *
  * The same workflow as the panel: the shop's record (when there is none
  * with that slug), its owner contact (when it has none), then a `create`
@@ -39,6 +42,7 @@ const ArgsSchema = z.object({
     .transform((value) => value.trim().toLowerCase()),
   "owner-name": z.string().trim().min(1).max(100).regex(CLEAN).optional(),
   package: z.string().trim().min(1).max(64).optional(),
+  "sector-pack": z.string().max(40).refine(isKnownSectorPack).optional(),
   "fail-at": z.enum(RUN_STEPS.create).optional(),
 })
 
@@ -100,6 +104,7 @@ async function ensureRecord(container: MedusaContainer, input: Input): Promise<s
       hostname: platformHostname(input.slug, parseEnv().PLATFORM_DOMAIN),
       created_by: null,
       package_id: await packageIdOf(container, input.package),
+      sector_pack: input["sector-pack"] ?? null,
     },
   })
   await audit(container, "tenant.created", result.id, { slug: { to: result.slug } })
@@ -111,7 +116,7 @@ export default async function tenantCreate({ container, args }: ExecArgs) {
   const input = parseArgs(args)
   if (!input) {
     out(
-      "usage: cp:tenant-create slug=<slug> name=<name> owner-email=<address> [package=<code>] [owner-name=<name>] [fail-at=<step>]"
+      "usage: cp:tenant-create slug=<slug> name=<name> owner-email=<address> [package=<code>] [sector-pack=<code>] [owner-name=<name>] [fail-at=<step>]"
     )
     process.exitCode = 2
     return

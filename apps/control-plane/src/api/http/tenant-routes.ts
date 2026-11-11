@@ -57,6 +57,8 @@ export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
   query(`${T}/:id`, NoQuery),
   query(`${T}/:id/activity`, GetActivity),
   query(P, NoQuery),
+  // C12: the sector packs this control plane offers
+  query("/admin/cp/sector-packs", NoQuery),
   ...[
     `${T}/:id/contacts/:contact_id`,
     `${T}/:id/domains/:domain_id`,
@@ -93,7 +95,7 @@ export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
   // Ek C10: a shop's setup takes nothing but the path (no failure injection over HTTP)
   query(`${T}/:id/provisioning`, NoQuery),
   query(`${T}/:id/provisioning/runs/:run_id`, NoQuery),
-  ...["", "/stop", "/start", "/invite"].map((action) =>
+  ...["", "/stop", "/start", "/invite", "/apply-pack"].map((action) =>
     body(`${T}/:id/provisioning${action}`, NoBody)
   ),
 ]

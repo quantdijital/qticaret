@@ -12,14 +12,8 @@ import {
   resendInviteStep,
   startStep,
 } from "./steps-launch"
-import {
-  allocateStep,
-  bootstrapStep,
-  databaseStep,
-  migrateStep,
-  secretsStep,
-  sectorPackStep,
-} from "./steps-setup"
+import { allocateStep, bootstrapStep, databaseStep, migrateStep, secretsStep } from "./steps-setup"
+import { sectorPackStep } from "./steps-pack"
 import { contextOf } from "./target"
 
 /**
@@ -48,6 +42,8 @@ export const RUN_STEPS = {
   start: ["start", "health", "api_url"],
   stop: ["stop"],
   invite: ["resend_invite"],
+  // C12: "Paketi yeniden uygula": the setup's own step, alone
+  apply_pack: ["sector_pack"],
 } as const
 
 export type RunKind = keyof typeof RUN_STEPS
@@ -110,9 +106,22 @@ export const inviteOwnerWorkflow = createWorkflow(
   }
 )
 
+/**
+ * The shop's sector pack applied again (C12): the setup's step alone, on
+ * a shop already set up. It only adds what the shop never had.
+ */
+export const applyPackWorkflow = createWorkflow(
+  { name: "cp-provisioning-apply-pack", store: false },
+  (input: WorkflowData<RunInput>) => {
+    sectorPackStep(input)
+    return new WorkflowResponse({ run_id: input.run_id })
+  }
+)
+
 export const WORKFLOW_OF = {
   create: provisionShopWorkflow,
   start: startShopWorkflow,
   stop: stopShopWorkflow,
   invite: inviteOwnerWorkflow,
+  apply_pack: applyPackWorkflow,
 } as const

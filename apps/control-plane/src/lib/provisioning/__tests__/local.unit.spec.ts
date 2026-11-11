@@ -156,9 +156,17 @@ describe("the closed command list (adr/0061 §3.4)", () => {
       "exec",
       "./src/scripts/plan-import.js",
     ])
-    expect(codeOf(() => argvOf({ name: "apply-pack", pack: "genel" }))).toBe(
-      "provisioning.command_unavailable"
-    )
+    // C12: a pack's code, never a path or an option
+    expect(argvOf({ name: "apply-pack", pack: "cutlery" })).toEqual([
+      "exec",
+      "./src/scripts/apply-pack.js",
+      "pack=cutlery",
+    ])
+    for (const pack of ["../general", "--help", "Bıçak", "a", "general pack"]) {
+      expect(codeOf(() => argvOf({ name: "apply-pack", pack }))).toBe(
+        "provisioning.sector_pack_unknown"
+      )
+    }
     expect(codeOf(() => argvOf({ name: "bootstrap", store_name: "a\u202eb" }))).toBe(
       "provisioning.store_name_invalid"
     )

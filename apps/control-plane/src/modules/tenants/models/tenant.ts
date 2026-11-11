@@ -19,8 +19,14 @@ export const Tenant = model
     name: model.text(),
     status: model.enum([...TENANT_STATUSES]).default("provisioning"),
     status_changed_at: model.dateTime(),
-    /** The sector pack it was set up with (C12); none yet. */
+    /** The sector pack it is set up with (C11 wizard, C12); none: the general pack. */
     sector_pack: model.text().nullable(),
+    /**
+     * The pack's version the shop last applied and when (C12, from the
+     * shop's `tenant:apply-pack` result); null until it has.
+     */
+    sector_pack_version: model.number().nullable(),
+    sector_pack_applied_at: model.dateTime().nullable(),
     /** The staff member who made the record; null for the system (a script). */
     created_by: model.text().nullable(),
     /**

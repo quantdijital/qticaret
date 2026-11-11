@@ -137,6 +137,8 @@ const TENANT_ROUTES: RouteRule[] = [
 /** The packages (C7): read by all; made, changed and archived by finance; a price behind a step-up. */
 const PLAN_ROUTES: RouteRule[] = [
   { method: "GET", path: "/admin/cp/plans", access: ALL },
+  // C12: the sector packs' manifests and counts, read by all as the packages are (no personal data)
+  { method: "GET", path: "/admin/cp/sector-packs", access: ALL },
   // A new package sets a price: proved again, as a price change (review M1)
   {
     method: "POST",

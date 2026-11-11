@@ -141,6 +141,7 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "POST /admin/cp/tenants",
       "POST /admin/cp/tenants/:id/plan",
       "POST /admin/cp/tenants/:id/provisioning",
+      "POST /admin/cp/tenants/:id/provisioning/apply-pack",
       "POST /admin/cp/tenants/:id/provisioning/invite",
       "POST /admin/cp/tenants/:id/provisioning/start",
       "POST /admin/cp/tenants/:id/provisioning/stop",
@@ -158,6 +159,9 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
     expect(allowedRoles("GET", "/admin/cp/tenants/ten_1")).toEqual([...CP_STAFF_ROLES])
     expect(allowedRoles("GET", "/admin/cp/tenants/ten_1/activity")).toEqual([...CP_STAFF_ROLES])
     expect(allowedRoles("GET", "/admin/cp/plans")).toEqual([...CP_STAFF_ROLES])
+    // C12: the sector packs are release data, read by all as the packages are
+    expect(allowedRoles("GET", "/admin/cp/sector-packs")).toEqual([...CP_STAFF_ROLES])
+    expect(matchRoute("GET", "/admin/cp/sector-packs")?.rule.stepUp).toBeUndefined()
     for (const [method, path] of [
       ["POST", "/admin/cp/tenants"],
       ["POST", "/admin/cp/tenants/ten_1"],
@@ -239,6 +243,7 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "GET /admin/cp/tenants/:id/provisioning",
       "GET /admin/cp/tenants/:id/provisioning/runs/:run_id",
       "POST /admin/cp/tenants/:id/provisioning",
+      "POST /admin/cp/tenants/:id/provisioning/apply-pack",
       "POST /admin/cp/tenants/:id/provisioning/invite",
       "POST /admin/cp/tenants/:id/provisioning/start",
       "POST /admin/cp/tenants/:id/provisioning/stop",

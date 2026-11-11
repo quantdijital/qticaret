@@ -3,7 +3,7 @@ import { LIMIT_KEYS, TENANT_STATUSES, isPlatformFlag } from "@qticaret/types/con
 import { isValidTckn, isValidVkn } from "@qticaret/server-kit"
 import { COMPANY_KINDS, CONTACT_ROLES, NOTE_MAX } from "../../../../lib/tenants/kinds"
 import { normalizePhone } from "../../../../lib/tenants/phone"
-import { SECTOR_PACKS } from "../../../../lib/tenants/sector-packs"
+import { isKnownSectorPack } from "../../../../lib/tenants/sector-packs"
 import { slugProblem } from "../../../../lib/tenants/slug"
 
 // Control and invisible format characters never make a name or an address
@@ -61,7 +61,13 @@ export const PostTenant = z
         }
       }),
     package_id: id.nullable().optional(),
-    sector_pack: z.enum(SECTOR_PACKS).nullable().optional(),
+    // C12: any pack this control plane has (packages/sector-packs)
+    sector_pack: z
+      .string()
+      .max(40)
+      .refine(isKnownSectorPack, "cp.sector_pack_unknown")
+      .nullable()
+      .optional(),
   })
   .strict()
 export type PostTenantType = z.infer<typeof PostTenant>

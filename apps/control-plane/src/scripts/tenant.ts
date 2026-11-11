@@ -18,6 +18,7 @@ import type { RunKind } from "../workflows/provisioning/workflows"
  *   started for it)
  * - `invite`: the owner's invitation again (a new link, mailed; nothing printed)
  * - `retry`: the setup again from the start, skipping what is there
+ * - `apply-pack`: the shop's sector pack again (C12): only what it never had
  *
  * Statuses and codes only: no secret, no link.
  */
@@ -29,6 +30,7 @@ const KINDS: Readonly<Record<string, RunKind>> = {
   start: "start",
   invite: "invite",
   retry: "create",
+  "apply-pack": "apply_pack",
 }
 
 async function status(container: MedusaContainer, tenantId: string): Promise<number> {
@@ -55,7 +57,7 @@ export async function runTenantCommand(
   const [tenant] = slug ? await tenantsIn(container).listTenants({ slug }, { take: 1 }) : []
   const kind = KINDS[command]
   if (!tenant || (command !== "status" && !kind)) {
-    out("usage: cp:tenant status|stop|start|invite|retry <slug>")
+    out("usage: cp:tenant status|stop|start|invite|retry|apply-pack <slug>")
     return 2
   }
   out(`tenant ${tenant.id} ${tenant.slug} (${tenant.status})`)

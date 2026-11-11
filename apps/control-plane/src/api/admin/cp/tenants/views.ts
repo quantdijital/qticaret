@@ -89,6 +89,8 @@ export async function tenantDetail(
       status: tenant.status,
       status_changed_at: tenant.status_changed_at,
       sector_pack: tenant.sector_pack,
+      sector_pack_version: tenant.sector_pack_version,
+      sector_pack_applied_at: tenant.sector_pack_applied_at,
       created_at: tenant.created_at,
       created_by: tenant.created_by ? (names[tenant.created_by] ?? null) : null,
       // The subscription's next due date arrives with billing (C16)

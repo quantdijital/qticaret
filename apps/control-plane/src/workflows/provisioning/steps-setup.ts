@@ -145,7 +145,7 @@ export const databaseStep = provisionStep<Where>(
 )
 
 /** A command of the closed list; its failure as a code, never its output. */
-async function command(
+export async function command(
   container: Container,
   tenantId: string,
   make: (name: string) => TenantCommand
@@ -174,13 +174,4 @@ export const bootstrapStep = provisionStep("bootstrap", async (input, container)
     store_name: name,
   }))
   return { status: "succeeded", created: false, output: { duration_ms: result.duration_ms } }
-})
-
-/** 6. The sector pack: C12's (`tenant:apply-pack`); skipped until then. */
-export const sectorPackStep = provisionStep("sector_pack", async () => {
-  return await Promise.resolve({
-    status: "skipped" as const,
-    created: false,
-    output: { reason: "not_available_yet" },
-  })
 })

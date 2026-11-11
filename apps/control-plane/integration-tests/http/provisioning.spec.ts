@@ -165,7 +165,8 @@ medusaIntegrationTestRunner({
         database: "succeeded",
         migrate: "succeeded",
         bootstrap: "succeeded",
-        sector_pack: "skipped",
+        // C12: no pack on the record: the general one, applied
+        sector_pack: "succeeded",
         plan_document: "succeeded",
         start: "succeeded",
         health: "succeeded",
@@ -175,6 +176,12 @@ medusaIntegrationTestRunner({
       })
       const tenant = await tenants().tenantOf(made.id)
       expect(tenant.status).toBe("active")
+      expect(tenant).toMatchObject({ sector_pack: "general", sector_pack_version: 1 })
+      expect(first.steps?.find((step) => step.name === "sector_pack")?.output).toMatchObject({
+        pack: "general",
+        version: 1,
+        added: 6,
+      })
       expect(tenant.api_base_url).toBe(`http://localhost:${String(first.port)}`)
       const keys = await fleetOf(container()).tenantKeys(made.id)
       expect(keys.map((key) => key.status)).toEqual(["active"])
@@ -211,6 +218,8 @@ medusaIntegrationTestRunner({
       expect(statusOf(again)).toMatchObject({
         secrets: "skipped",
         database: "skipped",
+        // The pack offers nothing a second time
+        sector_pack: "skipped",
         start: "skipped",
         api_url: "skipped",
         owner_invite: "skipped",

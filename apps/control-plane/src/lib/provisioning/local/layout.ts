@@ -81,6 +81,11 @@ export function layoutOf(slug: string, root: string = repoRoot()): ShopLayout {
         source: join(root, "packages", "types", "src", "control-plane"),
         built: join(root, "packages", "types", "dist", "control-plane", "index.js"),
       },
+      // C12: the packs' loader; the packs are data it reads from `packs/`, never built
+      {
+        source: join(root, "packages", "sector-packs", "src"),
+        built: join(root, "packages", "sector-packs", "dist", "index.js"),
+      },
     ],
   }
 }

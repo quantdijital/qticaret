@@ -40,9 +40,10 @@ export async function startRun(
     throw new ProvisioningError("provisioning.fail_at_local_only")
   }
   const which = provisioner()
-  // Review L7: a shop is started or invited only while it is being set up or
-  // active; stopping is always allowed (a suspended or closing shop is stopped)
-  if (input.kind === "start" || input.kind === "invite") {
+  // Review L7: a shop is started, invited or given its pack again (C12) only
+  // while it is being set up or active; stopping is always allowed (a
+  // suspended or closing shop is stopped)
+  if (input.kind === "start" || input.kind === "invite" || input.kind === "apply_pack") {
     const { status } = await tenantsIn(container).tenantOf(input.tenant_id)
     if (status !== "provisioning" && status !== "active") {
       throw new ProvisioningError("provisioning.tenant_status")
