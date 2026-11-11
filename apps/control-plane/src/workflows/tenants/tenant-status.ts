@@ -2,7 +2,7 @@ import { MedusaError } from "@medusajs/framework/utils"
 import { WorkflowResponse, createWorkflow } from "@medusajs/framework/workflows-sdk"
 import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
 import type { TenantStatus } from "@qticaret/types/control-plane"
-import { MOVE_REASON_CODES, moveTarget } from "../../lib/tenants/status-moves"
+import { MOVE_REASON_CODES, MOVE_STARTS, moveTarget } from "../../lib/tenants/status-moves"
 import type { ManualStatusMove } from "../../lib/tenants/status-moves"
 import { tenantsIn } from "../modules"
 import { undoableStep } from "../undoable"
@@ -37,6 +37,8 @@ const moveStep = undoableStep(
       reason_code: MOVE_REASON_CODES[input.move],
       actor: input.actor,
       note: input.note,
+      // Checked again under the row's lock: a move made meanwhile refuses this one
+      from: MOVE_STARTS[input.move],
     })
     return { output: moved, undo: { tenant_id: input.tenant_id, ...moved } }
   },

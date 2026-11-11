@@ -158,6 +158,34 @@ medusaIntegrationTestRunner({
       expect(audit[0]).toMatchObject({ actor_type: "system" })
     })
 
+    it("lets one of two moves at once through; the last document says the last status (L4)", async () => {
+      const id = await activeShop()
+      // Proofs first, so the two requests leave together
+      await proved(http, owner)
+      await proved(http, operator)
+      for (let round = 0; round < 3; round += 1) {
+        const answers = await Promise.all([
+          move(id, "suspend", owner),
+          move(id, "suspend", operator),
+          move(id, "resume", owner),
+        ])
+        const statuses = answers.map((answer) => answer.status).sort()
+        // Each answer is a move made or a refusal, never anything else
+        expect(statuses.every((status) => status === 200 || status === 409)).toBe(true)
+        expect(statuses.filter((status) => status === 200).length).toBeGreaterThan(0)
+        const latestDocument = await latest(id)
+        expect(latestDocument?.document).toMatchObject({ status: await statusOf(id) })
+      }
+      const moves = await tenants().listTenantStatusChanges(
+        { tenant_id: id, reason_code: ["staff_suspend", "staff_resume"] },
+        { order: { created_at: "ASC" }, take: 50 }
+      )
+      // Every row continues where the one before it ended: no move passed on a stale read
+      for (let index = 1; index < moves.length; index += 1) {
+        expect(moves[index]?.from_status).toBe(moves[index - 1]?.to_status)
+      }
+    })
+
     it("asks for a step-up, a reason and a role that runs shops", async () => {
       const id = await activeShop()
       const plain = await call.post(`/admin/cp/tenants/${id}/suspend`, { reason: REASON }, operator)

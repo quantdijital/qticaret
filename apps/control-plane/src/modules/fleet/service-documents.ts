@@ -86,20 +86,28 @@ export class FleetDocuments extends MedusaService({
   /**
    * The shop's next document, when its content (`contentHash`, without
    * serial and time) differs from the latest one's; otherwise the latest,
-   * untouched. `build` signs it inside the lock, so two issues never take
-   * one serial. A pending push of an older document is superseded.
+   * untouched. `prepare` reads what the document says (the shop's status,
+   * its package) inside the lock, and `build` signs it there: two issues
+   * never take one serial, and the last one issued says what the records
+   * said last (Ek C15 review L4: a suspension and its end in a race). Null
+   * from `prepare` (no package): nothing issued, no row. A pending push of
+   * an older document is superseded.
    */
   @InjectTransactionManager()
   async issuePlanDocument(
     tenantId: string,
-    contentHash: string,
-    build: BuildDocument,
+    prepare: () => Promise<{ contentHash: string; build: BuildDocument } | null>,
     @MedusaContext() sharedContext: Context = {}
-  ): Promise<{ issued: boolean; row: PlanDocumentRow }> {
+  ): Promise<{ issued: boolean; row: PlanDocumentRow | null }> {
     const manager = sharedContext.transactionManager as Executor
     await manager.execute("SELECT pg_advisory_xact_lock(hashtext(?))", [
       `plan_document:${tenantId}`,
     ])
+    const prepared = await prepare()
+    if (!prepared) {
+      return { issued: false, row: null }
+    }
+    const { contentHash, build } = prepared
     const latest = await this.latestPlanDocument(tenantId, sharedContext)
     if (latest?.content_hash === contentHash) {
       return { issued: false, row: latest }

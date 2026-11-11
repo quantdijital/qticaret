@@ -5,6 +5,7 @@ import {
   MedusaContext,
   MedusaError,
 } from "@medusajs/framework/utils"
+import type { TenantStatus } from "@qticaret/types/control-plane"
 import { MAX_CONTACTS } from "../../lib/tenants/kinds"
 import { omit } from "../../lib/omit"
 import { heirOnRemoval, primaryOnSave } from "../../lib/tenants/contacts"
@@ -47,6 +48,47 @@ export interface ContactChange {
  * fails.
  */
 class TenantsModuleService extends TenantsRecords {
+  /**
+   * A move taken back by its workflow's compensation (Ek C15): the status
+   * as it was and the move's row gone, only while the shop is still where
+   * the move left it (a later move is never undone).
+   */
+  @InjectTransactionManager()
+  async undoStatusChange(
+    id: string,
+    undo: { from: TenantStatus; to: TenantStatus; change_id: string },
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    const tenant = await this.tenantOf(id, sharedContext)
+    if (tenant.status !== undo.to) {
+      return
+    }
+    await this.updateTenants(
+      { id, status: undo.from, status_changed_at: new Date() },
+      sharedContext
+    )
+    if (undo.change_id) {
+      await this.deleteTenantStatusChanges([undo.change_id], sharedContext)
+    }
+  }
+
+  /**
+   * Where the shop stood when it was last suspended (Ek C15): the `from`
+   * of its latest move into `suspended`; null when it never was.
+   */
+  @InjectManager()
+  async statusBeforeSuspension(
+    id: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<TenantStatus | null> {
+    const [last] = await this.listTenantStatusChanges(
+      { tenant_id: id, to_status: "suspended" },
+      { select: ["from_status", "created_at"], order: { created_at: "DESC" }, take: 1 },
+      sharedContext
+    )
+    return last?.from_status ?? null
+  }
+
   @InjectManager()
   async contactsOf(
     tenantId: string,

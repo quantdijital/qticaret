@@ -73,25 +73,41 @@ async function moveStatus(
     out(`usage: cp:tenant ${move} <slug> reason=<3-500 characters>`)
     return 2
   }
+  let moved: { from: string; to: string }
   try {
-    const { result } = await moveTenantStatusWorkflow(container).run({
-      input: { tenant_id: tenantId, move, actor: "system", note: reason },
-    })
+    moved = (
+      await moveTenantStatusWorkflow(container).run({
+        input: { tenant_id: tenantId, move, actor: "system", note: reason },
+      })
+    ).result
+  } catch (error) {
+    out(`cp:tenant: ${(error as { message?: string }).message ?? "failed"}`)
+    return 1
+  }
+  out(`status ${moved.from} -> ${moved.to}`)
+  // The shop hears it first; each failure after the move is said on its own (review I3)
+  let failed = false
+  const issued = (await reissuePlanDocuments(container, [tenantId])).get(tenantId)
+  if (issued) {
+    out(`plan document serial ${String(issued.serial)}`)
+  } else {
+    out("cp:tenant: plan document not issued (cp.plan_issue_failed); the reconcile job retries")
+    failed = true
+  }
+  try {
     await container.resolve<CpAuditModuleService>(CP_AUDIT_MODULE).record({
       kind: "system",
       action: `tenant.${move}`,
       actor_type: "system",
       resource_type: "tenant",
       resource_id: tenantId,
-      changes: { status: { from: result.from, to: result.to } },
+      changes: { status: { from: moved.from, to: moved.to } },
     })
-    const issued = (await reissuePlanDocuments(container, [tenantId])).get(tenantId)
-    out(`status ${result.from} -> ${result.to}; plan document serial ${String(issued?.serial)}`)
-    return 0
   } catch (error) {
-    out(`cp:tenant: ${(error as { message?: string }).message ?? "failed"}`)
-    return 1
+    out(`cp:tenant: audit row not written: ${(error as { message?: string }).message ?? "failed"}`)
+    failed = true
   }
+  return failed ? 1 : 0
 }
 
 export async function runTenantCommand(

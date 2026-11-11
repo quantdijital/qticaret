@@ -56,22 +56,27 @@ const issueStep = undoableStep(
     input: { tenant_id: string },
     container
   ): Promise<{ output: IssuedPlanDocument; undo: string | null }> => {
-    const content = await planContentOf(container, input.tenant_id)
-    if (!content) {
-      return { output: { issued: false, id: null, serial: null }, undo: null }
-    }
+    // Read under the shop's document lock (Ek C15 review L4): the status a suspension
+    // or its end just wrote, never one read before another move committed
     const { issued, row } = await fleetIn(container).issuePlanDocument(
       input.tenant_id,
-      contentHash(content),
-      async (serial, issuedAt) => {
-        const document = planDocumentOf(content, serial, issuedAt)
-        // The control plane's `active` key, its seed open for this signature only (Ek C8)
-        return { document, ...(await signPlanDocument(container, document)) }
+      async () => {
+        const content = await planContentOf(container, input.tenant_id)
+        return content
+          ? {
+              contentHash: contentHash(content),
+              build: async (serial: number, issuedAt: Date) => {
+                const document = planDocumentOf(content, serial, issuedAt)
+                // The control plane's `active` key, its seed open for this signature only (Ek C8)
+                return { document, ...(await signPlanDocument(container, document)) }
+              },
+            }
+          : null
       }
     )
     return {
-      output: { issued, id: row.id, serial: row.serial },
-      undo: issued ? row.id : null,
+      output: { issued, id: row?.id ?? null, serial: row?.serial ?? null },
+      undo: issued ? (row?.id ?? null) : null,
     }
   },
   async (id: string | null, container) => {
