@@ -1,0 +1,17 @@
+{
+  // The compiled copy a backend built with `medusa build` loads without
+  // ts-node (adr/0061 Ek C10): CommonJS in dist/, reached through the
+  // `qt-compiled` export condition. Development, tests and type checks keep
+  // reading src/.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": "dist",
+    "declaration": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": ["src"],
+  "exclude": ["src/**/__tests__/**", "src/testing/**"]
+}

@@ -4,11 +4,18 @@
   "private": true,
   "description": "Server code shared by the shop backend and the control plane: crypto, envelope encryption, signatures, redaction, env helpers, request paths, rate limits (adr/0061)",
   "exports": {
-    ".": "./src/index.ts",
-    "./escrow": "./src/crypto/escrow.ts",
+    ".": {
+      "qt-compiled": "./dist/index.js",
+      "default": "./src/index.ts"
+    },
+    "./escrow": {
+      "qt-compiled": "./dist/crypto/escrow.js",
+      "default": "./src/crypto/escrow.ts"
+    },
     "./testing/age": "./src/testing/age.ts"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "jest --silent"
