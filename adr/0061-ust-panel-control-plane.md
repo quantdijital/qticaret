@@ -1026,3 +1026,52 @@ Sıra bağımlılığa göredir; her görev tek kodlama ajanının bir oturumuna
   - `pnpm turbo run typecheck lint` 25/25.
 - **C17–C19'a kalanlar:** C18 göstergesi (aylık tekrarlayan gelir abonelik fiyatlarından, geciken ödemeler `GET /admin/cp/payments?view=overdue`'dan, yaklaşan yenilemeler); C19 güvenlik incelemesi ve docs (kvkk-envanter: faturalama kişisine giden e-posta, hatırlatma satırında alıcı tutulmadığı), tam test. Sonraki aşama: aboneliği sonlandırma (`cancelled`), paket değişikliğinde dönem içi geçiş kuralı, kartla tahsilat, e-fatura (Paraşüt), Redis kilit sağlayıcısı (F16).
 - **Güvenlik incelemesine:** (1) Ödeme talimatı her mağazaya imzalı gider: sahibin oturumu ele geçirilirse IBAN değiştirilebilir (yeniden doğrulama + yalnız sahip + denetimde değişikliğin kendisi; içerik denetimde yok, bilerek). (2) Ödendi işareti kanıt istemez (dekont yüklenmez); finans rolü kısıtı kaldırabilir, denetimde iz kalır. (3) Saatlik iş bellek içi kilitle tek çalışmadır; iki süreç (yerelde iki üst panel) aynı anda koşarsa kayıt açma tekil dizin ve satır kilidiyle, hatırlatma ekle-önce ile korunur, belge yayını iki kez denenir (etkisiz). (4) Hatırlatma alıcısı yetkili e-postasıdır; yanlış girilmiş adrese ödeme bilgisi gider. (5) Gidemeyen hatırlatma tekrar denenmez (bilinçli: iki kez asla). (6) Ek süre istisnası 90 güne kadar kısıtı erteleyebilir (sahip/finans + yeniden doğrulama + gerekçe). (7) Eski sürüm mağaza yeni alanlı belgeyi reddeder (yayın sırası).
+
+### Ek: C16 güvenlik incelemesi düzeltmeleri (2026-11-12)
+
+İnceleme kritik ya da yüksek bulgu vermedi; iki orta, üç düşük ve beş bilgi bulgusu kapatıldı, her biri testli. Yukarıdaki Ek'in ilgili maddelerini bunlar günceller.
+
+- **M1, eski durumla mağaza hareketi:**
+  - **Sorun:** mağaza durumu adımı, aboneliğin önceki bir adımda (başka işlemde) hesaplanmış durumunu kullanıyordu. Ara yerde gelen bir personel eylemi atlanıyordu. Örneğin iş `restricted` hesaplar, finans ödendi işaretler, işin adımı ödenmiş mağazayı kısıtlar. Ya da iş eski ek süreyle `past_due` hesaplar, personel istisnayı kaldırınca kısıtlanan mağazayı iş yeniden açar. C15'in geri açması da ödemeleri kilitsiz okuyordu.
+  - **Mağaza başına faturalama kilidi (`withBillingLock`, `lib/billing/lock.ts`):** Postgres işlem kapsamlı danışma kilidi (`pg_advisory_xact_lock(hashtext('billing:<mağaza>'))`). Kendi bağlantısında tutulur, iş bitene dek bırakılmaz; bütün süreçlerde geçerlidir.
+    - **Karar, ayrı bağlantı:** modüller ayrı işlem yöneticileri kullandığı için kilit modüllerin işlemlerinden birine bağlanamaz. Kilidi alan herkes sırayla geçtiği için kilit yine dışlayıcıdır. Kilidi alan yollar: saatlik çalışmanın mağaza başına günü, ödeme kaydı eylemleri, ek süre ve askıyı açma (C15'in hareket adımı, askıya alma dahil).
+    - Kilit yeniden girilir değildir; içindeki iş onu bir daha almaz. Havuzdan en çok eşzamanlılık kadar (4) bağlantı tutar.
+  - **Karar kilidin altında ve taze veriyle:** mağaza durumu adımı aboneliğin durumunu artık girdiden almaz. Kayıtların o anki hâlinden, aboneliğin satır kilidi altında yeniden hesaplar (`refreshStatus`), sonra `billingTarget` ile taşır. `refreshSubscriptionStep` kaldırıldı.
+  - **Telafiler eski değeri yazmaz:** kayıt, ek süre ve dönem adımları geri alınırken kayıt yerine konur, sonra durum yeniden hesaplanır (`refreshFor`).
+  - `changeCharge` önce aboneliğin satırını, sonra kaydı kilitler (`SELECT … FROM subscription WHERE id = (SELECT subscription_id FROM charge WHERE id = ? AND tenant_id = ?) FOR UPDATE`).
+  - **Test (`billing-review.spec.ts`):**
+    - Üç turda çalışma ile ödendi aynı anda: son durum `active`, durum satırları zincir, abonelik kısıtlı değil, son belge `active`.
+    - Üç turda çalışma ile ek süre istisnasının kaldırılması aynı anda: son durum `restricted`, belge de öyle.
+    - Askıdaki mağazada ödeme ile geri açma aynı anda: ödenmiş mağaza kısıtlı kalmıyor.
+- **M2, sıfır tutarlı açık kayıt mağazayı kısıtlıyordu:**
+  - Tutarı 0 olan kayıt açılırken kendiliğinden kapanır: `waived`, gerekçe `billing.zero_amount`, işaretleyen `system`.
+  - **`owed`:** açık ve tutarı sıfırdan büyük kayıt borçtur. Durum, geri açmadaki gecikme denetimi ve hatırlatma yalnız onu sayar.
+  - Tutar düzeltme en az 1 kuruştur (400 `cp.amount_zero`); borcu kaldırmak "Bağışla"dır. Panel bunu yardım metninde söyler, 0 tutarla kaydetmeyi açmaz; sıfır kaydın penceresi "kendiliğinden bağışlandı" der.
+  - **Test:** ücretsiz paket 40 gün boyunca hatırlatılmıyor, kısıtlanmıyor, bütün kayıtları `waived`; tutarı 0'a düzeltme 400.
+- **L1, faturalama mağazanın yaşam döngüsüne bakmıyordu:**
+  - Saatlik çalışma `closing`/`closed` mağazanın gününü ilerletmez; `active`, `restricted` ve `suspended` ilerler.
+  - **Karar, askı:** askıdaki mağazanın kayıtları günlerine göre açılır ve dönemler geçer, ama hatırlatma gitmez. Vitrin kapalıyken "vitrininiz satışa devam ediyor" yanlış olurdu; askıdaki mağazayla personel kendisi konuşur.
+  - Hatırlatma yalnız `active` ve `restricted` mağazaya gider.
+  - **Test:** askıdaki mağazada dönemler sürüyor, e-posta ve hatırlatma satırı yok; kapanan mağazada ilk kayıttan sonra kayıt açılmıyor.
+- **L2, ödendi işaretinden sonra hatırlatma:**
+  - Talep satırı artık koşulla yazılır: `INSERT … SELECT … WHERE EXISTS` ile kayıt açık, tutarı sıfırdan büyük, aynı mağazanın ve silinmemiş olmalı. `restricted` türünde ayrıca abonelik o an `restricted` olmalı.
+  - **Test:** ödenmiş kayda, kısıtlı olmayan aboneliğin `restricted` türüne ve başka mağaza kimliğine talep yazılmıyor.
+- **L3, serbest metinler bütün rollere açıktı:**
+  - `GET /admin/cp/tenants/:id/subscription` dekont/referans, bağışlama/iptal/düzeltme gerekçesi ve ek süre gerekçesini yalnız sahip ve finansa döndürür. Operatör ve okuma rolü bu alanları `null` alır.
+  - Liste (`/payments`) bu alanları hiç taşımaz. Değişiklik uçları zaten yalnız sahip ve finansındır.
+  - `docs/kvkk-envanter.md` §5'e `charge` (referans ve gerekçeler), `subscription` (ek süre gerekçesi) ve `reminder` (alıcı yok) satırları ve hatırlatma e-postalarının maddesi eklendi.
+  - **Test:** sahip ve finans referansı ve gerekçeyi görüyor; operatör ve okuma rolünde ikisi de yok, alanlar `null`.
+- **Bilgi bulguları:**
+  - **Negatif para yok:** `charge.amount`, `charge.list_amount`, `subscription.price` için `CHECK (… >= 0)`. Hiçbir yerde uygulanmamış C16 migration'ına (`Migration20261111203336`) elle eklendi; DML'de kısıt tanımı yok, `db:generate` bunları görmez.
+  - **Ödeme günü sınırı:** bugünden sonra olamaz; ödenen dönemin başlangıcından 60 günden önce de olamaz (400 `cp.paid_on_too_early`, panel tarih alanında `min`). Test: 61 gün önce 400, 60 gün önce 200.
+  - **Arama sessizce kesilmez:** Ödemeler araması eşleşen mağazaları 500'lük sayfalarla en çok 10.000'e dek okur. Fazlası varsa yanıt `search_truncated: true` döner, panel "aramayı daraltın" der.
+  - **Ödeme talimatının yayını (sapma, karar: arka planda):** kayıt yanıtı 202 ve `documents: "reissuing"` döner. Bütün mağazaların belgesi arka planda 4'erli yayınlanır. Sonuç sayısı loga yazılır (`cp.billing_instruction_reissued`). Her mağazanın "Plan belgesi" kartı yeni sıra numarasını gösterir; yarıda kalanı uzlaştırma işi (10 dk) bitirir. Test belgeyi bekleyerek okur.
+  - **İlk talimat kaydı yarışı:** kayıt tek ifadelik upsert'tir (`INSERT … ON CONFLICT (key) WHERE deleted_at IS NULL DO UPDATE`, önceki değer aynı ifadede kilitlenerek okunur). Aynı anda iki ilk kayıt 500 vermez, tek satır kalır (testli).
+- **Dosya boyu:** `service-subscriptions.ts` 300 satırın altında kalsın diye okumalar `service-reads.ts`'e (`BillingReads`) taşındı; `nothingOwed` `lib/billing/rules.ts`'te.
+- **Testler (düzeltmelerle, 2026-11-12):**
+  - Üst panel birim: 27 dosya, 352 test.
+  - Üst panel HTTP: 22 dosya, 176 test (yeni `billing-review.spec.ts` 9). İkinci tam koşuda `tenant-api.spec.ts`'in "bozuk imza" testi bir kez düştü. Bu, bu işten bağımsız ve önceden var: test imzanın son iki karakterini `AA` yapar, imza zaten `AA` ile bitiyorsa değişmez. Tek başına iki koşuda yeşil.
+  - Üst panel arayüzü Vitest: 26 dosya, 140 test.
+  - `pnpm turbo run typecheck lint` 25/25.
+  - Backend ve panel koduna dokunulmadı.
+- **Kalan riskler:** yukarıdaki Ek'in 1, 2, 4, 6 ve 7. maddeleri aynen. 3. madde daraldı: iki süreç artık mağaza başına sırayla karar verir, belge yayını yine iki kez denenebilir (etkisiz).
