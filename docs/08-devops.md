@@ -33,8 +33,9 @@ Script **idempotent** olmalı (yarıda kalırsa tekrar çalıştırılabilir).
 1. `pnpm turbo run build --filter=@qticaret/backend` (önce `@qticaret/server-kit` ve `@qticaret/types` derlenir; mağaza `.medusa/server`'dan `--conditions=qt-compiled` ile koşar).
 2. `pnpm dev:cp-api` (üst panel 9100; mağazanın 15 dakikalık çekmesi buraya gelir).
 3. `NODE_ENV=development pnpm --filter control-plane cp:tenant-create slug=<slug> name=<ad> owner-email=<adres> package=<kod>`: kayıt, sahip yetkilisi, sonra adımlar (port 9200–9299, sırlar + emanet, `qt_tenant_<slug>` veritabanı ve rolü, migration, `tenant:bootstrap`, ilk plan belgesi, başlatma, sağlık, itme adresi, sahip daveti Mailpit'e, `active`). İkinci çalıştırma hiçbir şeyi değiştirmez; hata olursa çalışmanın yarattığı her şey geri alınır.
-4. `pnpm --filter control-plane cp:tenant status|stop|start|invite|retry <slug>`. Mağazanın dosyaları `infra/tenants/local/<slug>/` (git dışı; `.env` 0600, `logs/`, `server/static`). Paneli açmak: `PANEL_BACKEND_URL=http://localhost:<port> pnpm --filter panel dev` (5173 boş olmalı).
-5. Elle temizlik (yalnız denemede): `cp:tenant stop <slug>`, sonra Postgres'te `DROP DATABASE qt_tenant_<slug> WITH (FORCE); DROP ROLE qt_tenant_<slug>;` ve klasörün silinmesi. Üst paneldeki kayıt kalır (geçmiş).
+4. `pnpm --filter control-plane cp:tenant status|stop|start|invite|retry <slug>`. Mağazanın dosyaları `infra/tenants/local/<slug>/` (git dışı; klasör 0700, `.env` 0600, `logs/` 5 MB'ta döner, `server/static`).
+5. **Mağazanın paneli ve sahip daveti:** her yerel mağazanın paneli kendi portunun 1000 fazlasındadır (mağaza 9200 → panel 10200). Davet e-postasındaki bağlantı oraya gider; açmak için `PANEL_PORT=10200 PANEL_BACKEND_URL=http://localhost:9200 pnpm --filter panel dev`. 5173'teki geliştirme paneli ana mağazaya bağlıdır, daveti kabul edemez.
+6. Elle temizlik (yalnız denemede): `cp:tenant stop <slug>`, sonra Postgres'te `DROP DATABASE qt_tenant_<slug> WITH (FORCE); DROP ROLE qt_tenant_<slug>;` ve klasörün silinmesi. Üst paneldeki kayıt kalır (geçmiş). Mağazanın veritabanı ve rolü yorumunda mağaza kimliğini taşır (`COMMENT ON DATABASE`); provisioner başka mağazanınkine ya da işaretsizine dokunmaz.
 
 F16'da aynı workflow `DockerProvisioner` ile çalışır; imaj `NODE_OPTIONS=--conditions=qt-compiled` taşır, `ts-node` gerekmez.
 
