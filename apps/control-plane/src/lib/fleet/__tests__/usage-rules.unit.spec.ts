@@ -38,6 +38,8 @@ describe("checkUsageReport (adr/0061 §3.1, §5.4, Ek C13)", () => {
     ["a customer's e-mail", report({ email: "ayse@example.com" })],
     ["another version", report({ version: 2 })],
     ["a fraction", report({ counts: { ...report().counts, staff: 1.5 } })],
+    // Review L1: past a database integer, a refusal rather than a failed insert
+    ["a count too large", report({ counts: { ...report().counts, storage_mb: 2_147_483_648 } })],
   ])("refuses %s: 400 usage.invalid", (_case, body) => {
     expect(check(body)).toEqual({ ok: false, status: 400, message: "usage.invalid" })
   })

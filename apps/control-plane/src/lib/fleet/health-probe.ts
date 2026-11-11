@@ -6,6 +6,8 @@ import { fleetIn, tenantsIn } from "../../workflows/modules"
 import { eachBounded } from "./bounded"
 import { PROBE_CONCURRENCY, PROBE_TIMEOUT_MS, statusOutcome } from "./health-rules"
 import type { ProbeResult } from "./health-rules"
+import { pinPolicy, probePinned } from "./pinned-probe"
+import type { PinPolicy } from "./pinned-probe"
 import { pushPolicy, pushTargetProblem } from "./push-target"
 import type { PushPolicy } from "./push-target"
 import { storefrontPolicy, storefrontTargetProblem } from "./storefront-target"
@@ -74,7 +76,7 @@ interface Job {
 async function probeJob(
   container: Container,
   job: Job,
-  options: { fetch?: Fetch; policy: PushPolicy; timeoutMs?: number }
+  options: { fetch?: Fetch; policy: PushPolicy; pin?: PinPolicy; timeoutMs?: number }
 ): Promise<ProbeResult> {
   if (job.target === "backend") {
     const base = job.tenant.api_base_url ?? ""
@@ -88,8 +90,17 @@ async function probeJob(
   const verified = domains
     .filter((domain) => domain.verification === "verified")
     .map((domain) => domain.hostname)
-  const problem = storefrontTargetProblem(base, storefrontPolicy(verified))
-  return problem ? refused("storefront", problem) : await probeUrl(base, "storefront", options)
+  const sites = storefrontPolicy(verified)
+  const problem = storefrontTargetProblem(base, sites)
+  // A public name: resolved once, checked, connected to that address (review L2)
+  return problem
+    ? refused("storefront", problem)
+    : await probePinned(
+        base,
+        "storefront",
+        options.pin ?? pinPolicy(sites.local),
+        options.timeoutMs
+      )
 }
 
 export interface ProbeRun {
@@ -139,6 +150,8 @@ export async function probeFleet(
     fetch?: Fetch
     now?: () => Date
     policy?: PushPolicy
+    /** The storefront probe's address rule (tests); else this environment's. */
+    pin?: PinPolicy
     slugs?: readonly string[]
     timeoutMs?: number
   } = {}

@@ -9,7 +9,8 @@ import { signedBodyOf, tenantCallerOf } from "../../../http/tenant-api"
  * bytes (and spent the nonce); here the report is held to the contract's
  * strict schema, to the signer's own shop id and to a fresh time
  * (usage-rules.ts), then stored when it is newer than the shop's latest
- * snapshot: 200 `{ stored: true }`, else 409 `usage.out_of_order`. The
+ * snapshot and none came in the last ten minutes: 200 `{ stored: true }`,
+ * else 409 `usage.out_of_order` or `usage.too_soon` (review M1). The
  * report is read from the signed bytes, never from a re-parsed body.
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<void> {
@@ -30,10 +31,13 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
     return
   }
   const { result } = await recordUsageWorkflow(req.scope).run({
-    input: { report: checked.report, received_at: now },
+    input: { report: checked.report, received_at: now.toISOString() },
   })
   if (!result.stored) {
-    res.status(409).json({ type: "conflict", message: "usage.out_of_order" })
+    res.status(409).json({
+      type: "conflict",
+      message: result.reason === "too_soon" ? "usage.too_soon" : "usage.out_of_order",
+    })
     return
   }
   res.json({ stored: true })

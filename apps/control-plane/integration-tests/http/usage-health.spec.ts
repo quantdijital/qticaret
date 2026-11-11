@@ -9,7 +9,7 @@ import { parseTenantApiHosts } from "../../src/lib/fleet/push-target"
 import { pruneFleetHistory } from "../../src/jobs/fleet-retention"
 import { TENANTS_MODULE } from "../../src/modules/tenants"
 import type TenantsModuleService from "../../src/modules/tenants/service"
-import { fleetOf, shopKey, signedPost } from "../helpers/fleet"
+import { fleetOf, shopKey, signedGet, signedPost } from "../helpers/fleet"
 import { anyStatus, makeMember } from "../helpers/staff"
 import type { HttpClient, Member } from "../helpers/staff"
 import { client, makeTenant } from "../helpers/tenants"
@@ -91,21 +91,25 @@ medusaIntegrationTestRunner({
       return post(signedPost(USAGE, tenantId, signer, raw), raw)
     }
 
-    it("stores a signed report, and the shop page shows the latest", async () => {
+    it("stores a signed report, one per ten minutes, and the shop page shows the latest", async () => {
       const a = await shop()
       const first = await send(a.id, a.signer, reportOf(a.id, new Date(Date.now() - 60_000)))
       expect([first.status, first.data]).toEqual([200, { stored: true }])
       expect(first.headers["cache-control"]).toBe("no-store")
       const now = new Date()
-      expect(
-        (
-          await send(
-            a.id,
-            a.signer,
-            reportOf(a.id, now, { counts: { ...reportOf(a.id, now).counts, products: 43 } })
-          )
-        ).status
-      ).toBe(200)
+      const newer = reportOf(a.id, now, { counts: { ...reportOf(a.id, now).counts, products: 43 } })
+      // Review M1: a newer report minutes after the last is refused, nothing written
+      const soon = await send(a.id, a.signer, newer)
+      expect([soon.status, soon.data.message]).toEqual([409, "usage.too_soon"])
+      expect((await fleetOf(getContainer()).latestUsage(a.id))?.products).toBe(42)
+      // Eleven minutes on (by our clock), it is taken
+      const fleet = fleetOf(getContainer())
+      const [stored] = await fleet.listUsageSnapshots({ tenant_id: a.id }, { take: 1 })
+      await fleet.updateUsageSnapshots({
+        id: (stored as { id: string }).id,
+        received_at: new Date(Date.now() - 11 * 60_000),
+      })
+      expect((await send(a.id, a.signer, newer)).status).toBe(200)
 
       const latest = await fleetOf(getContainer()).latestUsage(a.id)
       expect(latest).toMatchObject({
@@ -194,6 +198,27 @@ medusaIntegrationTestRunner({
       expect((await post(signedPost(USAGE, a.id, a.signer, big), big)).status).toBe(413)
       expect(await fleetOf(getContainer()).latestUsage(a.id)).toBeNull()
       expect(await fleetOf(getContainer()).latestUsage(b.id)).toBeNull()
+    })
+
+    it("limits each shop to 30 signed calls a minute, apart from other shops (review M1)", async () => {
+      const a = await shop()
+      const b = await shop()
+      const plan = (who: { id: string; signer: Ed25519Signer }) =>
+        http.get<{ message?: string }>("/tenant-api/v1/plan", {
+          ...anyStatus,
+          headers: signedGet("/tenant-api/v1/plan", who.id, who.signer),
+        })
+      for (let i = 0; i < 30; i += 1) {
+        expect((await plan(a)).status).not.toBe(429)
+      }
+      const over = await plan(a)
+      expect(over.status).toBe(429)
+      expect(over.headers["retry-after"]).toBeDefined()
+      // The same address, another shop: its own bucket
+      expect((await plan(b)).status).not.toBe(429)
+      // Usage counts in the same bucket
+      const raw = JSON.stringify(reportOf(a.id, new Date()))
+      expect((await post(signedPost(USAGE, a.id, a.signer, raw), raw)).status).toBe(429)
     })
 
     describe("the health probe", () => {

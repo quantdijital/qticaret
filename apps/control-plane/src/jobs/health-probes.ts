@@ -2,10 +2,11 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { errorSummary } from "@qticaret/server-kit"
 import { probeFleet } from "../lib/fleet/health-probe"
+import { HEALTH_PROBES_LOCK } from "../lib/fleet/health-rules"
 import type { ProbeRun } from "../lib/fleet/health-probe"
 
-/** One run at a time (the C9 jobs' pattern): a run still probing makes the next one skip. */
-export const HEALTH_PROBES_LOCK = "cp-health-probes"
+// One run at a time (the C9 jobs' pattern): a run still probing makes the next one skip
+export { HEALTH_PROBES_LOCK }
 
 /**
  * The shops' health (adr/0061 §5.4, Ek C13): every five minutes, each

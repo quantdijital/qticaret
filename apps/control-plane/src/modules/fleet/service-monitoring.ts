@@ -10,6 +10,13 @@ interface Executor {
   execute: <T = unknown[]>(sql: string, params?: unknown[]) => Promise<T>
 }
 
+/** Why a report was not stored: one as new or newer is (a replay), or one came minutes ago (M1). */
+export type RecordUsageResult =
+  { stored: true; id: string } | { stored: false; reason: "out_of_order" | "too_soon" }
+
+/** The least time between two stored reports of a shop (review M1); hourly is the rhythm. */
+export const USAGE_MIN_INTERVAL_MS = 10 * 60 * 1000
+
 export interface UsageSnapshotRow {
   id: string
   tenant_id: string
@@ -69,14 +76,16 @@ const PRUNE_SLICE = 5_000
 export class FleetMonitoring extends FleetDocuments {
   /**
    * Stores a report unless one as new or newer is already stored for the
-   * shop (a replayed or out-of-order report): then nothing is written.
+   * shop (a replayed or out-of-order report), or one was received in the
+   * last ten minutes (review M1: a shop, or a stolen key, cannot fill the
+   * table): then nothing is written.
    */
   @InjectTransactionManager()
   async recordUsage(
     report: UsageReport,
     receivedAt: Date,
     @MedusaContext() sharedContext: Context = {}
-  ): Promise<{ stored: true; id: string } | { stored: false }> {
+  ): Promise<RecordUsageResult> {
     const manager = sharedContext.transactionManager as Executor
     await manager.execute("SELECT pg_advisory_xact_lock(hashtext(?))", [
       `usage_snapshot:${report.tenant_id}`,
@@ -87,7 +96,16 @@ export class FleetMonitoring extends FleetDocuments {
       [report.tenant_id, new Date(report.reported_at)]
     )
     if (newer) {
-      return { stored: false }
+      return { stored: false, reason: "out_of_order" }
+    }
+    // Review M1: one report per USAGE_MIN_INTERVAL_MS a shop, by our own clock
+    const [recent] = await manager.execute<{ id: string }[]>(
+      `SELECT id FROM usage_snapshot WHERE tenant_id = ? AND received_at > ?
+        AND deleted_at IS NULL LIMIT 1`,
+      [report.tenant_id, new Date(receivedAt.getTime() - USAGE_MIN_INTERVAL_MS)]
+    )
+    if (recent) {
+      return { stored: false, reason: "too_soon" }
     }
     const [row] = await this.createUsageSnapshots(
       [

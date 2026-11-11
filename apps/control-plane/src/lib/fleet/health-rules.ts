@@ -13,6 +13,8 @@ import type { HealthState, HealthTarget } from "../../modules/fleet/models/healt
  */
 
 export const UNHEALTHY_AFTER = 3
+/** One probe run at a time: the five-minute job and `cp:fleet probe` (review I1). */
+export const HEALTH_PROBES_LOCK = "cp-health-probes"
 export const PROBE_EVERY_MINUTES = 5
 export const PROBE_TIMEOUT_MS = 5_000
 /** Probes at once across the fleet: a slow shop holds one lane, not the run. */

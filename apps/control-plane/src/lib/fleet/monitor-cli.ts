@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { Modules } from "@medusajs/framework/utils"
 import { CP_AUDIT_MODULE } from "../../modules/cp-audit"
 import type CpAuditModuleService from "../../modules/cp-audit/service"
 import type { TenantRecord } from "../../modules/tenants/types"
@@ -6,6 +7,8 @@ import { fleetIn, tenantsIn } from "../../workflows/modules"
 import { parseEnv } from "../env"
 import { localOnlyProblem } from "../local-only"
 import { probeFleet } from "./health-probe"
+import type { ProbeRun } from "./health-probe"
+import { HEALTH_PROBES_LOCK } from "./health-rules"
 import { storefrontPolicy, storefrontTargetProblem } from "./storefront-target"
 
 /**
@@ -43,8 +46,22 @@ export async function printUsage(container: MedusaContainer, tenant: TenantRecor
   }
 }
 
+/**
+ * Probes the shop now, under the five-minute job's lock (review I1): while
+ * a run holds it, nothing is probed and the command says so.
+ */
 export async function probeNow(container: MedusaContainer, tenant: TenantRecord) {
-  const run = await probeFleet(container, { slugs: [tenant.slug] })
+  let run: ProbeRun
+  try {
+    run = await container
+      .resolve(Modules.LOCKING)
+      .execute(HEALTH_PROBES_LOCK, () => probeFleet(container, { slugs: [tenant.slug] }), {
+        timeout: 1,
+      })
+  } catch {
+    out("cp:fleet: a probe run is going on; try again in a moment")
+    return 1
+  }
   out(`probe: ${JSON.stringify(run)}`)
   await printUsage(container, tenant)
   return run.probed > 0 ? 0 : 1

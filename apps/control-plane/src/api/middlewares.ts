@@ -10,7 +10,7 @@ import { gateRegistration } from "./http/register-gate"
 import { noteSessionEnd, noteSessionStart } from "./http/sessions"
 import { guardSecondStep, noteSignInChallenge } from "./http/sign-in-code"
 import { guardCpStaff } from "./http/staff-guard"
-import { guardTenantApi } from "./http/tenant-api"
+import { guardTenantApi, tenantCallerOf } from "./http/tenant-api"
 import { TENANT_ROUTE_MIDDLEWARES } from "./http/tenant-routes"
 import { VAULT_ROUTE_MIDDLEWARES } from "./http/vault-routes"
 
@@ -75,7 +75,14 @@ export default defineMiddlewares({
     // the shop's signature, never a staff credential (lib/fleet/tenant-api-routes.ts)
     {
       matcher: "/tenant-api/*",
-      middlewares: [rateLimit(() => CP_RATE_LIMIT_PROFILES.tenant_api), guardTenantApi],
+      middlewares: [
+        rateLimit(() => CP_RATE_LIMIT_PROFILES.tenant_api),
+        guardTenantApi,
+        // C13 review M1: then per verified shop, whatever its address
+        rateLimit(() => CP_RATE_LIMIT_PROFILES.tenant_api_signer, {
+          identity: (req) => tenantCallerOf(req)?.tenantId,
+        }),
+      ],
     },
     // Ek C13: the usage report's signature covers its exact bytes; held to 4 KB (413 past it)
     {
