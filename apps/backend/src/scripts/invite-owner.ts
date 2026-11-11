@@ -26,13 +26,14 @@ export function emailArg(args: readonly string[]): string {
  * The setup's owner invitation (adr/0061 §5.7, Ek C10), one of the
  * provisioner's closed list of commands. Prints one machine-readable line
  * on stdout (`QT_TENANT_RESULT {...}`) and nothing else about it: the
- * provisioner mails the link with the control plane's own sender and
- * keeps nothing. Never run it where its output is kept: the line holds
- * the link. Running it again sends a new link and voids the old one.
+ * provisioner builds the link from the shop panel's known origin, mails it
+ * with the control plane's own sender and keeps nothing. Never run it where
+ * its output is kept: the line holds the invitation's token. Running it
+ * again makes a new one and voids the old.
  */
 export default async function inviteOwner({ container, args }: ExecArgs): Promise<void> {
   const result = await createOwnerInvite(container, emailArg(args))
-  // The status alone in the log; the link only on the result line
+  // The status alone in the log; the token only on the result line
   logger.info({ event: "staff.owner_invite", status: result.status })
   process.stdout.write(`${tenantResultLine(result)}\n`)
 }

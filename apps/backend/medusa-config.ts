@@ -5,6 +5,7 @@ import {
   loadEnv,
 } from "@medusajs/framework/utils"
 import { customerAuthProviders } from "./src/lib/auth/providers"
+import { assertCompiledPackages } from "./src/lib/control-plane/compiled-packages"
 import { assertControlPlaneConfigured } from "./src/lib/control-plane/env"
 import { isLocalEnv, parseEnv, s3Settings } from "./src/lib/env"
 import { warnFakeProviders } from "./src/lib/fake-providers"
@@ -16,6 +17,8 @@ loadEnv(process.env["NODE_ENV"] ?? "development", process.cwd())
 const env = parseEnv()
 // adr/0061 §3.3 (Ek C9): a deployed shop starts managed by the control plane only
 assertControlPlaneConfigured(env)
+// adr/0061 Ek C10: deployed, the shared packages are their compiled copies
+assertCompiledPackages(isLocalEnv(env))
 const auth = customerAuthProviders(env)
 // Redis keys of this tenant; a test file apart from dev and from every other
 // test file, also one of another run at the same time (lib/redis/namespace.ts)

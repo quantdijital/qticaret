@@ -4,7 +4,6 @@ import { createInvitesWorkflow } from "@medusajs/medusa/core-flows"
 import type { InviteOwnerResult } from "@qticaret/types/control-plane"
 import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
 import type StaffRolesModuleService from "../../modules/staff-roles/service"
-import { inviteLink } from "./invite-link"
 
 interface InviteRow {
   id: string
@@ -23,8 +22,9 @@ const isBootstrap = (invite: InviteRow) => invite.metadata?.["bootstrap"] === tr
  * invitations and that address's own, then makes a new one: "send again"
  * is the same call, and only the newest link works.
  *
- * The link goes back to the caller only (`tenant:invite-owner` prints it
- * for the provisioner, which mails it); it is never logged here.
+ * The token goes back to the caller only (`tenant:invite-owner` prints it
+ * for the provisioner, which builds the link from the shop panel's known
+ * origin and mails it, C10 review M1); it is never logged here.
  */
 export async function createOwnerInvite(
   container: MedusaContainer,
@@ -56,5 +56,5 @@ export async function createOwnerInvite(
   if (!invite?.token) {
     throw new Error("invite-owner: the invitation was not made")
   }
-  return { status: "invited", link: inviteLink(invite.token) }
+  return { status: "invited", token: invite.token }
 }

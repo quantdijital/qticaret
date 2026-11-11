@@ -15,9 +15,6 @@ import { settle } from "../helpers/http"
 
 jest.setTimeout(240 * 1000)
 
-const tokenOf = (link: string) =>
-  new URLSearchParams(new URL(link).hash.slice(1)).get("token") ?? ""
-
 /** What a script printed on stdout while `run` ran. */
 async function stdoutOf(run: () => Promise<void>): Promise<string> {
   const written: string[] = []
@@ -46,7 +43,7 @@ medusaIntegrationTestRunner({
 
     managedForThisFile()
 
-    async function accept(link: string, email: string) {
+    async function accept(token: string, email: string) {
       // Throwaway credential for this test database only
       const password = randomUUID()
       const registered = await http.post<{ token: string }>("/auth/user/emailpass/register", {
@@ -56,32 +53,33 @@ medusaIntegrationTestRunner({
       return await settle(
         http.post<{ member?: { role: string }; message?: string }>(
           "/admin/staff/invites/accept",
-          { token: tokenOf(link), first_name: "Elif", last_name: "Kaya" },
+          { token, first_name: "Elif", last_name: "Kaya" },
           { headers: { authorization: `Bearer ${registered.data.token}` } }
         )
       )
     }
 
     describe("tenant:invite-owner", () => {
-      it("prints one result line with the link; accepted, the person is the owner", async () => {
+      it("prints one result line with the token, no link; accepted, the person is the owner", async () => {
         const email = `sahip-${randomUUID().slice(0, 8)}@example.com`
         const out = await stdoutOf(() =>
           inviteOwner({ container: container(), args: [`email=${email.toUpperCase()}`] })
         )
-        const result = readTenantResult(out) as { status: string; link: string }
+        const result = readTenantResult(out) as { status: string; token: string }
+        expect(Object.keys(result).sort()).toEqual(["status", "token"])
         expect(result.status).toBe("invited")
-        expect(result.link).toMatch(/^http:\/\/localhost:5173\/invite#token=/)
-        // The link appears on the result line only
-        expect(out.split(result.link).length - 1).toBe(1)
+        expect(out).not.toContain("/invite")
+        // The token appears on the result line only
+        expect(out.split(result.token).length - 1).toBe(1)
 
         const info = await settle(
           http.post<{ email: string; role: string }>("/admin/staff/invites/info", {
-            token: tokenOf(result.link),
+            token: result.token,
           })
         )
         expect(info.data).toEqual({ email, role: "owner" })
 
-        const accepted = await accept(result.link, email)
+        const accepted = await accept(result.token, email)
         expect(accepted.status).toBe(201)
         expect(accepted.data.member?.role).toBe("owner")
 
@@ -98,16 +96,14 @@ medusaIntegrationTestRunner({
         if (first.status !== "invited" || second.status !== "invited") {
           throw new Error("no invitation")
         }
-        expect(tokenOf(first.link)).not.toBe(tokenOf(second.link))
-        expect((await accept(first.link, email)).status).toBe(400)
+        expect(first.token).not.toBe(second.token)
+        expect((await accept(first.token, email)).status).toBe(400)
 
         // Another person joins first (the first-user rule): the setup link no longer opens
         await createAdminUser(http, container())
-        const late = await accept(second.link, `sonra-${randomUUID().slice(0, 8)}@example.com`)
+        const late = await accept(second.token, `sonra-${randomUUID().slice(0, 8)}@example.com`)
         expect(late.status).toBe(400)
-        const info = await settle(
-          http.post("/admin/staff/invites/info", { token: tokenOf(second.link) })
-        )
+        const info = await settle(http.post("/admin/staff/invites/info", { token: second.token }))
         expect(info.status).toBe(400)
       })
 

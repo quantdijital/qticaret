@@ -27,20 +27,30 @@ describe("tenant command results (adr/0061 Ek C10)", () => {
     expect(readTenantResult(`${TENANT_RESULT_PREFIX}[1,2]`)).toBeNull()
     expect(
       readTenantResult(
-        tenantResultLine({ status: "invited", link: "x".repeat(TENANT_RESULT_MAX_LENGTH) })
+        tenantResultLine({ status: "invited", token: "x".repeat(TENANT_RESULT_MAX_LENGTH) })
       )
     ).toBeNull()
   })
 
-  it("takes the invite and import results strictly", () => {
+  it("takes the invite and import results strictly: a token, never a link", () => {
+    const token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6Imludml0ZSJ9.c2lnbmF0dXJlX29mX3Rva2Vu"
+    expect(inviteOwnerResultSchema.safeParse({ status: "invited", token }).success).toBe(true)
+    for (const bad of [
+      "http://evil.example/invite#token=abcdefghijklmnop",
+      "short",
+      "abcdefghijklmnop qrstu",
+      `${token}#x`,
+    ]) {
+      expect(inviteOwnerResultSchema.safeParse({ status: "invited", token: bad }).success).toBe(
+        false
+      )
+    }
     expect(
-      inviteOwnerResultSchema.safeParse({ status: "invited", link: "http://localhost:5173/invite" })
+      inviteOwnerResultSchema.safeParse({ status: "invited", token, link: "http://x/invite" })
         .success
-    ).toBe(true)
+    ).toBe(false)
     expect(inviteOwnerResultSchema.safeParse({ status: "owner_exists" }).success).toBe(true)
-    expect(inviteOwnerResultSchema.safeParse({ status: "owner_exists", link: "x" }).success).toBe(
-      false
-    )
+    expect(inviteOwnerResultSchema.safeParse({ status: "owner_exists", token }).success).toBe(false)
     expect(planImportResultSchema.safeParse({ status: "applied", serial: 3 }).success).toBe(true)
     expect(planImportResultSchema.safeParse({ status: "applied", serial: 0 }).success).toBe(false)
     expect(

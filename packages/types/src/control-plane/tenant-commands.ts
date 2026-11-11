@@ -12,9 +12,22 @@ export const TENANT_RESULT_PREFIX = "QT_TENANT_RESULT "
 /** The result line's longest form; a longer line is not read. */
 export const TENANT_RESULT_MAX_LENGTH = 8 * 1024
 
-/** `tenant:invite-owner email=`: a new invitation, or none because the shop already has staff. */
+/**
+ * An invitation token as Medusa makes it (a JWT: base64url parts and dots).
+ * Only the token crosses: the control plane builds the link itself from
+ * the shop panel's known origin (C10 review M1), so a shop's output never
+ * chooses where our e-mail points.
+ */
+export const INVITE_TOKEN = /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+){0,4}$/
+
+/** `tenant:invite-owner email=`: a new invitation's token, or none because the shop already has staff. */
 export const inviteOwnerResultSchema = z.discriminatedUnion("status", [
-  z.object({ status: z.literal("invited"), link: z.string().min(1).max(4096) }).strict(),
+  z
+    .object({
+      status: z.literal("invited"),
+      token: z.string().min(16).max(2048).regex(INVITE_TOKEN),
+    })
+    .strict(),
   z.object({ status: z.literal("owner_exists") }).strict(),
   // The address already has a user here: made outside the setup, it is not invited again
   z.object({ status: z.literal("address_taken") }).strict(),
