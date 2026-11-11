@@ -12,6 +12,8 @@
  * route files to each other.
  */
 
+import { USAGE_REPORT_MAX_BYTES } from "@qticaret/types/control-plane"
+
 export interface TenantApiRule {
   method: "GET" | "POST"
   /** Lower-cased as Express routes it. */
@@ -23,6 +25,8 @@ export interface TenantApiRule {
 export const TENANT_API_ROUTES: readonly TenantApiRule[] = [
   // The shop's latest plan document, its pull (the push's fallback)
   { method: "GET", path: "/tenant-api/v1/plan", maxBodyBytes: 0 },
+  // Ek C13: the shop's hourly usage report (totals only, the contract's strict schema)
+  { method: "POST", path: "/tenant-api/v1/usage", maxBodyBytes: USAGE_REPORT_MAX_BYTES },
 ]
 
 /** The table's row for a request (HEAD as GET), or null. */

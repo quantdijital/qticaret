@@ -2,6 +2,7 @@ import type { ExecArgs, MedusaContainer } from "@medusajs/framework/types"
 import { CP_AUDIT_MODULE } from "../modules/cp-audit"
 import type CpAuditModuleService from "../modules/cp-audit/service"
 import { parseEnv } from "../lib/env"
+import { printUsage, probeNow, setStorefrontUrl } from "../lib/fleet/monitor-cli"
 import { pushPlanDocument } from "../lib/fleet/push"
 import { tenantApiUrlProblem } from "../lib/fleet/push-target"
 import { reissuePlanDocuments } from "../lib/fleet/reissue"
@@ -18,6 +19,8 @@ import { fleetIn, tenantsIn } from "../workflows/modules"
  * - `set-api-url <slug> <url|none>`: where its document is pushed. On a
  *   developer's machine only (the provisioner sets it once deployed, C10);
  *   the URL must pass the push policy (`CP_TENANT_API_HOSTS`, loopback)
+ * - Ek C13: `usage <slug>`, `probe <slug>`, `set-storefront-url <slug>
+ *   <url|none>` (lib/fleet/monitor-cli.ts)
  *
  * Prints serials, times and error codes only; no document body.
  */
@@ -74,11 +77,22 @@ export async function runFleetCommand(
   [command = "", slug = "", value = ""]: readonly string[]
 ): Promise<number> {
   const tenant = slug ? await tenantBySlug(container, slug) : null
-  if (!tenant || !["status", "issue", "set-api-url"].includes(command)) {
-    out("usage: cp:fleet status <slug> | issue <slug> | set-api-url <slug> <url|none>")
+  const commands = ["status", "issue", "set-api-url", "usage", "probe", "set-storefront-url"]
+  if (!tenant || !commands.includes(command)) {
+    out(
+      "usage: cp:fleet status <slug> | issue <slug> | set-api-url <slug> <url|none> | " +
+        "usage <slug> | probe <slug> | set-storefront-url <slug> <url|none>"
+    )
     return 2
   }
   switch (command) {
+    case "usage":
+      await printUsage(container, tenant)
+      return 0
+    case "probe":
+      return await probeNow(container, tenant)
+    case "set-storefront-url":
+      return await setStorefrontUrl(container, tenant, value)
     case "status":
       await printStatus(container, tenant.id)
       return 0

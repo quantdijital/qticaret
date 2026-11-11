@@ -2,6 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import { parseTenantApiHosts } from "./fleet/push-target"
 import { publicDomainProblem } from "./tenants/hostname"
 import { localAdminUrlProblem } from "./provisioning/local/admin-url"
+import { localControlPlaneUrlProblem } from "./provisioning/local/control-plane-url"
 import {
   EnvValidationError,
   isLocalEnv,
@@ -97,6 +98,16 @@ const envSchema = z.object({
   CP_LOCAL_PG_ADMIN_URL: z
     .url({ protocol: /^postgres(ql)?$/, error: "must be a postgres:// URL" })
     .optional(),
+  // Ek C13: where a local shop reaches this control plane (its pull and its
+  // usage report), when it is not the default `http://localhost:9100` (a
+  // second copy on other ports, Ek C12). This machine only, a base URL; local only
+  CP_LOCAL_CONTROL_PLANE_URL: z
+    .url({ protocol: /^http$/, error: "must be an http:// URL" })
+    .refine(
+      (value) => localControlPlaneUrlProblem(value) === null,
+      "must be a base URL on this machine (localhost, 127.0.0.1)"
+    )
+    .optional(),
 })
 
 export type Env = z.infer<typeof envSchema>
@@ -124,6 +135,9 @@ function provisionerIssues(env: Env, issue: (path: keyof Env, message: string) =
   }
   if (admin !== undefined && !isLocalEnv(env)) {
     issue("CP_LOCAL_PG_ADMIN_URL", "is allowed on development and test only")
+  }
+  if (env.CP_LOCAL_CONTROL_PLANE_URL !== undefined && !isLocalEnv(env)) {
+    issue("CP_LOCAL_CONTROL_PLANE_URL", "is allowed on development and test only")
   }
   const problem = admin === undefined ? null : localAdminUrlProblem(admin)
   if (problem) {

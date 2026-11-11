@@ -42,9 +42,26 @@ const hasBody = (req: MedusaRequest): boolean => {
 }
 
 /**
+ * A POST's body as received: the bytes the body parser kept, for a JSON
+ * request only; null for any other type (or when none was kept).
+ */
+function rawBodyOf(req: MedusaRequest): Buffer | null {
+  const type = (req.headers["content-type"] ?? "").toLowerCase()
+  if (type.split(";")[0]?.trim() !== "application/json") {
+    return null
+  }
+  const raw: unknown = (req as { rawBody?: unknown }).rawBody
+  return Buffer.isBuffer(raw) ? raw : typeof raw === "string" ? Buffer.from(raw, "utf8") : null
+}
+
+/** The exact bytes a guarded POST was signed over, as text; empty for a GET. */
+export const signedBodyOf = (req: MedusaRequest): string => rawBodyOf(req)?.toString("utf8") ?? ""
+
+/**
  * The tenant API's guard (adr/0061 §3.2): the route table's row, then the
  * signed request against the shop's `active` or `next` key: ±5 minutes,
- * a nonce used once in 10 minutes (Redis once deployed). Nothing else
+ * a nonce used once in 10 minutes (Redis once deployed); a POST's
+ * signature covers its exact JSON bytes (Ek C13). Nothing else
  * authenticates here.
  */
 export async function guardTenantApi(
@@ -57,7 +74,7 @@ export async function guardTenantApi(
     rejectRequest(req, res, 404, { type: "not_found", message: "errors.not_found" }, "unlisted")
     return
   }
-  // Every route so far takes no body; a body would be signed but never read
+  // A GET takes no body: one would be signed but never read
   if (rule.maxBodyBytes === 0 && hasBody(req)) {
     rejectRequest(
       req,
@@ -68,11 +85,24 @@ export async function guardTenantApi(
     )
     return
   }
+  // A POST's signature covers the exact bytes sent (Ek C13): JSON only, as
+  // the body parser kept them (`preserveRawBody`, held to the route's size)
+  const body = rule.maxBodyBytes === 0 ? Buffer.alloc(0) : rawBodyOf(req)
+  if (body === null || body.length > rule.maxBodyBytes) {
+    rejectRequest(
+      req,
+      res,
+      body === null ? 400 : 413,
+      { type: "invalid_data", message: "errors.invalid_request" },
+      body === null ? "body_not_json" : "body_too_large"
+    )
+    return
+  }
   const fleet = fleetIn(req.scope)
   let result: Awaited<ReturnType<typeof verifySignedRequest>>
   try {
     result = await verifySignedRequest(
-      { method: req.method, path: requestTarget(req), headers: req.headers, body: "" },
+      { method: req.method, path: requestTarget(req), headers: req.headers, body },
       {
         publicKey: async (kid, tenantId) => {
           const key = await fleet.trustedTenantKey(tenantId, kid)

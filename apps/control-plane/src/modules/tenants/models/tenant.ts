@@ -35,6 +35,13 @@ export const Tenant = model
      * null: nothing is pushed, the shop pulls.
      */
     api_base_url: model.text().nullable(),
+    /**
+     * The shop's storefront home page (Ek C13): what the health probe asks
+     * for besides the backend's `/health`. Deployed, one of its verified
+     * domains (`https`); in development `cp:fleet set-storefront-url`. Null:
+     * not probed (a local shop has no storefront).
+     */
+    storefront_url: model.text().nullable(),
     company: model.hasOne(() => TenantCompany, { mappedBy: "tenant" }),
     contacts: model.hasMany(() => TenantContact, { mappedBy: "tenant" }),
     domains: model.hasMany(() => TenantDomain, { mappedBy: "tenant" }),

@@ -1,4 +1,5 @@
 import { defineMiddlewares } from "@medusajs/framework/http"
+import { USAGE_REPORT_MAX_BYTES } from "@qticaret/types/control-plane"
 import { CP_RATE_LIMIT_PROFILES } from "../lib/rate-limit-profiles"
 import { auditAuth, auditCpRequests } from "./http/audit"
 import { CP_ROUTE_MIDDLEWARES } from "./http/cp-routes"
@@ -75,6 +76,12 @@ export default defineMiddlewares({
     {
       matcher: "/tenant-api/*",
       middlewares: [rateLimit(() => CP_RATE_LIMIT_PROFILES.tenant_api), guardTenantApi],
+    },
+    // Ek C13: the usage report's signature covers its exact bytes; held to 4 KB (413 past it)
+    {
+      matcher: "/tenant-api/v1/usage",
+      methods: ["POST"],
+      bodyParser: { sizeLimit: USAGE_REPORT_MAX_BYTES, preserveRawBody: true },
     },
     ...CP_ROUTE_MIDDLEWARES,
     ...TENANT_ROUTE_MIDDLEWARES,

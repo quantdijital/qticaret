@@ -79,6 +79,8 @@ export async function removeE2eShop(container: MedusaContainer, slug: string): P
   await fleet.deletePlanDocuments(
     ids(await fleet.listPlanDocuments({ tenant_id: id }, { select: ["id"] }))
   )
+  // Ek C13: its usage snapshots, probes and standings
+  await fleet.forgetMonitoring(id)
   const vault = vaultIn(container)
   await vault.deleteSecretRecords(
     ids(await vault.listSecretRecords({ owner: id }, { select: ["id"] }))

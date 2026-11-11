@@ -8,7 +8,9 @@ import {
 import type { PlanDocument as PlanDocumentBody } from "@qticaret/types/control-plane"
 import { PlanDocument } from "./models/plan-document"
 import type { PlanPushStatus } from "./models/plan-document"
+import { HealthCheck, HealthStanding } from "./models/health"
 import { TenantKey } from "./models/tenant-key"
+import { UsageSnapshot } from "./models/usage-snapshot"
 
 interface Executor {
   execute: (sql: string, params: unknown[]) => Promise<unknown>
@@ -61,7 +63,13 @@ const PAGE = 100
  * issued again only when the content changes, their pushes and pulls
  * noted. `FleetModuleService` (service.ts) holds the shops' keys.
  */
-export class FleetDocuments extends MedusaService({ TenantKey, PlanDocument }) {
+export class FleetDocuments extends MedusaService({
+  TenantKey,
+  PlanDocument,
+  UsageSnapshot,
+  HealthCheck,
+  HealthStanding,
+}) {
   @InjectManager()
   async latestPlanDocument(
     tenantId: string,

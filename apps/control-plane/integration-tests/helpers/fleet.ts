@@ -62,6 +62,18 @@ export const signedGet = (
   extra: { now?: number; nonce?: string } = {}
 ) => signRequest({ method: "GET", path, tenantId, body: "", signer, ...extra })
 
+/** Headers of a signed `POST path` with this exact JSON body, as a shop sends them (Ek C13). */
+export const signedPost = (
+  path: string,
+  tenantId: string,
+  signer: Ed25519Signer,
+  body: string,
+  extra: { now?: number; nonce?: string } = {}
+) => ({
+  ...signRequest({ method: "POST", path, tenantId, body, signer, ...extra }),
+  "content-type": "application/json",
+})
+
 type PlanCheck = { ok: true } | { ok: false; code: string }
 
 /**

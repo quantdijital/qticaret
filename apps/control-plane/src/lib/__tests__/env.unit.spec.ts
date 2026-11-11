@@ -215,4 +215,27 @@ describe("parseEnv", () => {
     )
     expect(problems({ ...valid, CP_PROVISIONER: "docker" })).toContain("not available yet")
   })
+
+  it("lets a local shop reach a second copy on this machine only (Ek C13)", () => {
+    expect(
+      parseEnv({ ...valid, CP_LOCAL_CONTROL_PLANE_URL: "http://localhost:9110" })
+    ).toMatchObject({ CP_LOCAL_CONTROL_PLANE_URL: "http://localhost:9110" })
+    for (const url of [
+      "http://cp.example.com:9110",
+      "https://localhost:9110",
+      "http://localhost:9110/tenant-api",
+      "http://user:pw@localhost:9110",
+    ]) {
+      expect(problems({ ...valid, CP_LOCAL_CONTROL_PLANE_URL: url })).toContain(
+        "CP_LOCAL_CONTROL_PLANE_URL"
+      )
+    }
+    expect(
+      problems({
+        ...valid,
+        NODE_ENV: "production",
+        CP_LOCAL_CONTROL_PLANE_URL: "http://localhost:9110",
+      })
+    ).toContain("CP_LOCAL_CONTROL_PLANE_URL: is allowed on development and test only")
+  })
 })

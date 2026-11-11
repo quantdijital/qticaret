@@ -2,6 +2,8 @@ import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/frame
 import { parseEnv } from "../../../../lib/env"
 import { reissuePlanDocuments } from "../../../../lib/fleet/reissue"
 import { platformHostname } from "../../../../lib/tenants/hostname"
+import type { HealthTarget } from "../../../../modules/fleet/models/health"
+import { fleetIn } from "../../../../workflows/modules"
 import { createTenantWorkflow } from "../../../../workflows/tenants/create-tenant"
 import { noteAuditChanges, noteAuditResource } from "../../../http/audit"
 import { actorOf, plansOf, tenantsOf } from "./params"
@@ -28,8 +30,8 @@ async function onPackage(req: AuthenticatedMedusaRequest, packageId: string | un
 /**
  * GET /admin/cp/tenants (all staff): the shops, newest first, by name or
  * slug, status and package, with each one's primary address and package,
- * and how many are in each status (the list's tabs). No contact here: the
- * list reads no personal data.
+ * and how many are in each status (the list's tabs), and its health
+ * standing (Ek C13). No contact here: the list reads no personal data.
  */
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, GetTenantsType>,
@@ -70,6 +72,10 @@ export async function GET(
   const packageIds = [...new Set(plans.values())]
   const packages = packageIds.length > 0 ? await plansOf(req).packages({ id: packageIds }) : []
   const byId = new Map(packages.map((each) => [each.id, each]))
+  // Ek C13: each shop's latest standing per probed target, for the list's health column
+  const standings = await fleetIn(req.scope).healthOf(rows.map((row) => row.id))
+  const healthOf = (id: string, target: HealthTarget) =>
+    standings.find((each) => each.tenant_id === id && each.target === target)?.state ?? null
   res.json({
     tenants: rows.map((row) => {
       const chosen = byId.get(plans.get(row.id) ?? "")
@@ -84,6 +90,10 @@ export async function GET(
         package: chosen ? { id: chosen.id, code: chosen.code, name: chosen.name } : null,
         // The subscription's next due date arrives with billing (C16)
         next_payment_on: null,
+        health: {
+          backend: healthOf(row.id, "backend"),
+          storefront: healthOf(row.id, "storefront"),
+        },
       }
     }),
     count,

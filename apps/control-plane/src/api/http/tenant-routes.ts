@@ -56,6 +56,8 @@ export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
   query("/admin/cp/tenant-availability", GetTenantAvailability),
   query(`${T}/:id`, NoQuery),
   query(`${T}/:id/activity`, GetActivity),
+  // Ek C13: the shop's usage and health, nothing to ask for
+  query(`${T}/:id/usage-health`, NoQuery),
   query(P, NoQuery),
   // C12: the sector packs this control plane offers
   query("/admin/cp/sector-packs", NoQuery),

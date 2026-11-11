@@ -22,6 +22,7 @@ export function provisioner(): TenantProvisioner {
     env.CP_LOCAL_PG_ADMIN_URL,
     env.REDIS_URL,
     env.MAILPIT_URL,
+    env.CP_LOCAL_CONTROL_PLANE_URL,
   ].join("|")
   if (held?.key === key) {
     return held.provisioner
@@ -34,7 +35,7 @@ export function provisioner(): TenantProvisioner {
         adminUrl: env.CP_LOCAL_PG_ADMIN_URL ?? "",
         redisUrl: env.REDIS_URL ?? null,
         mailpitUrl: env.EMAIL_TRANSPORT === "mailpit" ? (env.MAILPIT_URL ?? null) : null,
-        controlPlaneUrl: LOCAL_CONTROL_PLANE_URL,
+        controlPlaneUrl: new URL(env.CP_LOCAL_CONTROL_PLANE_URL ?? LOCAL_CONTROL_PLANE_URL).origin,
       })
       break
     case "fake":
