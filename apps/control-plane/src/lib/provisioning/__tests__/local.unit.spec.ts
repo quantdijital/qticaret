@@ -61,6 +61,10 @@ describe("the local shop's env (Ek C10)", () => {
     })
     // The role's password reaches the shop inside its URL only
     expect(env["DATABASE_PASSWORD"]).toBeUndefined()
+    // A new shop's provider account keys as a list of one (Ek C17), ready for a rotation
+    expect(env["CREDENTIALS_ENCRYPTION_KEYS"]).toBe(secrets.values.CREDENTIALS_ENCRYPTION_KEYS)
+    expect(env["CREDENTIALS_ENCRYPTION_KEYS"]).toMatch(/^[0-9a-f]{64}$/)
+    expect(env["CREDENTIALS_ENCRYPTION_KEY"]).toBeUndefined()
     expect(parseEnvText(envText(env))).toEqual(env)
   })
 

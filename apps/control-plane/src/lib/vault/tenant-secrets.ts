@@ -19,7 +19,8 @@ const HEX_SECRETS = [
   "COOKIE_SECRET",
   "PII_ENCRYPTION_KEY",
   "PII_HASH_KEY",
-  "CREDENTIALS_ENCRYPTION_KEY",
+  // The shop's provider accounts' KEK list (adr/0061 Ek C17): one key, a list of one
+  "CREDENTIALS_ENCRYPTION_KEYS",
   "AUTH_MFA_ENCRYPTION_KEY",
   "STOREFRONT_IP_SECRET",
 ] as const
