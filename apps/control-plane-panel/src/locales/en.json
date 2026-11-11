@@ -541,6 +541,24 @@
       "action": "Delete note"
     }
   },
+  "statusMove": {
+    "reason": "Reason",
+    "reasonHelp": "Shown in the shop's history. 3 to 500 characters.",
+    "suspend": {
+      "open": "Suspend",
+      "title": "Suspend the shop",
+      "text": "The storefront closes to visitors and takes no new orders; the shop's panel becomes read only. Existing orders' operations, payment returns, robots.txt and the sitemap keep working. No data is deleted.",
+      "submit": "Suspend",
+      "done": "The shop is suspended."
+    },
+    "resume": {
+      "open": "Reopen",
+      "title": "End the suspension",
+      "text": "The shop returns to where it stood before the suspension: restricted if it was, active otherwise. The storefront opens again.",
+      "submit": "Reopen",
+      "done": "The shop's suspension has ended."
+    }
+  },
   "activity": {
     "title": "Activity",
     "text": "Status changes and the changes staff made, newest first.",
@@ -552,7 +570,9 @@
     "fromTo": "{{from}} → {{to}}",
     "reasons": {
       "created": "new record",
-      "imported": "existing shop brought in"
+      "imported": "existing shop brought in",
+      "staff_suspend": "suspended by staff",
+      "staff_resume": "suspension ended by staff"
     },
     "actions": {
       "renamed": "Shop name changed",

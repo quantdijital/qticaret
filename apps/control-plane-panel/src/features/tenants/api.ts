@@ -170,6 +170,8 @@ export interface ActivityItem {
   from_status?: TenantStatus | null
   to_status?: TenantStatus
   reason_code?: string
+  /** A suspension's or its end's reason, in the staff member's words (Ek C15). */
+  note?: string | null
 }
 
 export interface TenantFilters {

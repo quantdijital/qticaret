@@ -23,6 +23,7 @@ import { FlagsCard } from "@/features/tenants/components/flags-card"
 import { NotesCard } from "@/features/tenants/components/notes-card"
 import { PlanCard } from "@/features/tenants/components/plan-card"
 import { SummaryCard } from "@/features/tenants/components/summary-card"
+import { StatusActions } from "@/features/tenants/components/status-actions"
 import { TenantStatusBadge } from "@/features/tenants/components/tenant-status"
 import { canManageShops } from "@/features/tenants/permissions"
 import { errorText } from "@/lib/errors"
@@ -125,6 +126,7 @@ export function TenantPage() {
       <PageHeader
         title={shop.tenant.name}
         badge={<TenantStatusBadge status={shop.tenant.status} />}
+        action={<StatusActions tenantId={shop.tenant.id} status={shop.tenant.status} />}
         description={t("tenants.detail.line", {
           address: primary,
           date: formatDate(shop.tenant.created_at),

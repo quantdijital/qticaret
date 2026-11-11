@@ -98,6 +98,20 @@ export const useRemoveNote = (id: string) =>
     api(tenantPath(id, `/notes/${encodeURIComponent(noteId)}`), { method: "DELETE" })
   )
 
+/** A suspension or its end (Ek C15): a storefront darkened or opened, so a step-up. */
+export type StatusMove = "suspend" | "resume"
+
+export const useMoveStatus = (id: string) =>
+  useShopChange(id, ({ move, reason }: { move: StatusMove; reason: string }) =>
+    withStepUp((headers) =>
+      post<{ tenant: { id: string; status: string } }>(
+        tenantPath(id, `/${move}`),
+        { reason },
+        headers
+      )
+    )
+  )
+
 /** The shop's package: what it pays, so a step-up as a price change. */
 export const useAssignPlan = (id: string) =>
   useShopChange(id, (packageId: string | null) =>

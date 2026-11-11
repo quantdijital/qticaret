@@ -121,6 +121,10 @@ export function ActivityCard({ id }: { id: string }) {
                       ? ` · ${t(`activity.reasons.${item.reason_code}`, { defaultValue: item.reason_code })}`
                       : ""}
                   </span>
+                  {item.note ? (
+                    // A suspension's or its end's reason, in the staff member's words (Ek C15)
+                    <span className="text-xs text-muted-foreground break-words">“{item.note}”</span>
+                  ) : null}
                 </div>
               </li>
             )

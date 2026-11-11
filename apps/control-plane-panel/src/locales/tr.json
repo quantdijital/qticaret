@@ -541,6 +541,24 @@
       "action": "Notu sil"
     }
   },
+  "statusMove": {
+    "reason": "Gerekçe",
+    "reasonHelp": "Mağazanın geçmişinde görünür. En az 3, en çok 500 karakter.",
+    "suspend": {
+      "open": "Askıya al",
+      "title": "Mağazayı askıya al",
+      "text": "Vitrin ziyaretçilere kapanır ve yeni sipariş alınmaz; mağaza paneli salt okunur olur. Mevcut siparişlerin işlemleri, ödeme dönüşleri, robots.txt ve site haritası çalışmaya devam eder. Veri silinmez.",
+      "submit": "Askıya al",
+      "done": "Mağaza askıya alındı."
+    },
+    "resume": {
+      "open": "Geri aç",
+      "title": "Askıyı kaldır",
+      "text": "Mağaza askıya alınmadan önceki durumuna döner: kısıtlıydıysa kısıtlı, değilse etkin. Vitrin yeniden açılır.",
+      "submit": "Geri aç",
+      "done": "Mağazanın askısı kaldırıldı."
+    }
+  },
   "activity": {
     "title": "Etkinlik",
     "text": "Durum değişiklikleri ve personelin yaptığı değişiklikler, en yenisi üstte.",
@@ -552,7 +570,9 @@
     "fromTo": "{{from}} → {{to}}",
     "reasons": {
       "created": "yeni kayıt",
-      "imported": "mevcut mağaza aktarıldı"
+      "imported": "mevcut mağaza aktarıldı",
+      "staff_suspend": "personel askıya aldı",
+      "staff_resume": "personel askıyı kaldırdı"
     },
     "actions": {
       "renamed": "Mağaza adı değişti",
