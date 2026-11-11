@@ -112,14 +112,18 @@ medusaIntegrationTestRunner({
       expect(response.data.files?.[0]?.url).toMatch(/-logo\.png$/)
     })
 
-    // Medusa's own product import is closed (F3.9); a CSV is still a file the shop may keep
-    it("accepts a plain CSV", async () => {
+    // Images only (adr/0061 C14 M4): nothing uploads a CSV here any more (Medusa's
+    // product import is closed, F3.9; the catalog sheets read their own body)
+    it("refuses a plain CSV and stores nothing", async () => {
+      const before = storedFiles().length
+
       const response = await upload(
         form(["Product Handle,Title\nsef-bicagi,Şef Bıçağı\n", "Ürünler.csv", "text/csv"])
       )
 
-      expect(response.status).toBe(200)
-      expect(response.data.files?.[0]?.url).toMatch(/-urunler\.csv$/)
+      expect(response.status).toBe(400)
+      expect(response.data.message).toBe("upload.unsupported_type")
+      expect(storedFiles()).toHaveLength(before)
     })
 
     it("stores nothing when one file of several is refused", async () => {
