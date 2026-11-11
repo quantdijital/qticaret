@@ -1,20 +1,31 @@
 import { readdirSync, readFileSync, statSync } from "node:fs"
 import { join, relative, sep } from "node:path"
 import { CP_ROUTES } from "../../staff/route-table"
-import { PUSH_MAX_ATTEMPTS, nextPushAt, pushPolicy } from "../push"
-import { parseTenantApiHosts, pushTargetProblem, pushUrl } from "../push-target"
+import { PUSH_MAX_ATTEMPTS, nextPushAt } from "../push"
+import {
+  parseTenantApiHosts,
+  pushPolicy,
+  pushTargetProblem,
+  pushUrl,
+  tenantApiUrlProblem,
+} from "../push-target"
 import { TENANT_API_ROUTES, matchTenantApi } from "../tenant-api-routes"
 
-const deployed = { local: false, hosts: ["tenant-mylarte", ".tenants.internal"] }
+const deployed = {
+  local: false,
+  hosts: parseTenantApiHosts("tenant-mylarte, .tenants.internal, shop.local:9100"),
+}
 const local = { local: true, hosts: [] }
 
-describe("the push target policy (Ek C9)", () => {
+describe("the push target policy (Ek C9, review L4)", () => {
   it.each([
     ["http://tenant-mylarte:9000", deployed],
+    ["http://tenant-mylarte", deployed],
     ["https://a.tenants.internal", deployed],
+    ["http://shop.local:9100", deployed],
     ["http://localhost:9000/", local],
     ["http://127.0.0.1:9200", local],
-    ["http://mylarte.localhost:9000", local],
+    ["http://mylarte.localhost:9299", local],
   ])("allows %s", (url, policy) => {
     expect(pushTargetProblem(url, policy)).toBeNull()
   })
@@ -24,6 +35,11 @@ describe("the push target policy (Ek C9)", () => {
     ["http://tenants.internal", deployed, "target_not_allowed"],
     ["http://evil.example", deployed, "target_not_allowed"],
     ["http://10.0.0.5:9000", deployed, "target_not_allowed"],
+    // Only the expected ports: 9000, 80, 443, or the entry's own
+    ["http://tenant-mylarte:5432", deployed, "target_not_allowed"],
+    ["http://shop.local:9000", deployed, "target_not_allowed"],
+    ["http://localhost:6379", local, "target_not_allowed"],
+    ["http://localhost:80", local, "target_not_allowed"],
     ["http://user:pw@tenant-mylarte", deployed, "target_invalid"],
     ["http://tenant-mylarte/api", deployed, "target_invalid"],
     ["http://tenant-mylarte/?x=1", deployed, "target_invalid"],
@@ -33,15 +49,32 @@ describe("the push target policy (Ek C9)", () => {
     expect(pushTargetProblem(url, policy)).toBe(code)
   })
 
-  it("reads CP_TENANT_API_HOSTS, refusing anything but names and suffixes", () => {
-    expect(parseTenantApiHosts(" Tenant-A , .tenants.internal ,")).toEqual([
-      "tenant-a",
-      ".tenants.internal",
+  it("reads CP_TENANT_API_HOSTS: internal names and namespaces only, ports optional", () => {
+    expect(parseTenantApiHosts(" Tenant-A , .tenants.internal ,shop.local:9100")).toEqual([
+      { host: "tenant-a", port: null },
+      { host: ".tenants.internal", port: null },
+      { host: "shop.local", port: 9100 },
     ])
     expect(parseTenantApiHosts(undefined)).toEqual([])
-    expect(() => parseTenantApiHosts("http://x")).toThrow("CP_TENANT_API_HOSTS")
+    for (const bad of [
+      "http://x",
+      ".example.com",
+      "shop.example.com",
+      "10.0.0.5",
+      "a:99999",
+      ".com",
+    ]) {
+      expect(() => parseTenantApiHosts(bad)).toThrow("CP_TENANT_API_HOSTS")
+    }
     expect(pushPolicy({ NODE_ENV: "production" }).local).toBe(false)
     expect(pushPolicy({ NODE_ENV: "test" }).local).toBe(true)
+    expect(pushPolicy({}).local).toBe(false)
+  })
+
+  it("is the check the provisioner reuses, from the environment", () => {
+    const env = { NODE_ENV: "production", CP_TENANT_API_HOSTS: "tenant-mylarte" }
+    expect(tenantApiUrlProblem("http://tenant-mylarte:9000", env)).toBeNull()
+    expect(tenantApiUrlProblem("http://localhost:9000", env)).toBe("target_not_allowed")
   })
 
   it("pushes to the shop's hook under its base URL", () => {

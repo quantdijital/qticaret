@@ -1,15 +1,18 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { errorSummary, publicKeyFromRaw, verifySignedRequest } from "@qticaret/server-kit"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { publicKeyFromRaw, verifySignedRequest } from "@qticaret/server-kit"
 import type { SignedRequestErrorCode } from "@qticaret/server-kit"
 import { tenantApiNonces } from "../../lib/fleet/nonces"
 import { matchTenantApi } from "../../lib/fleet/tenant-api-routes"
 import { fleetIn } from "../../workflows/modules"
-import { loggerOf, rejectRequest, requestTarget, routePath } from "./request"
+import { rejectRequest, requestTarget, routePath } from "./request"
 
 /** Who signed a tenant API request, once the guard has checked it. */
 export interface TenantCaller {
   tenantId: string
   kid: string
+  /** The request's nonce: the answer is bound to it (review L3). */
+  nonce: string
 }
 
 const callers = new WeakMap<MedusaRequest, TenantCaller>()
@@ -75,11 +78,8 @@ export async function guardTenantApi(
           const key = await fleet.trustedTenantKey(tenantId, kid)
           return key ? publicKeyFromRaw(Buffer.from(key, "base64url")) : undefined
         },
-        nonces: tenantApiNonces((error) => {
-          loggerOf(req)?.warn(
-            `cp.tenant_api_nonce_store ${JSON.stringify({ err: errorSummary(error) })}`
-          )
-        }),
+        // The process's logger, not this request (review L7): the store outlives it
+        nonces: tenantApiNonces(req.scope.resolve(ContainerRegistrationKeys.LOGGER)),
       }
     )
   } catch {
@@ -104,6 +104,6 @@ export async function guardTenantApi(
     )
     return
   }
-  callers.set(req, { tenantId: result.tenantId, kid: result.kid })
+  callers.set(req, { tenantId: result.tenantId, kid: result.kid, nonce: result.nonce })
   next()
 }

@@ -1,5 +1,5 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { reissuePlanDocuments, tenantsOnPackage } from "../../../../lib/fleet/reissue"
+import { reissueForPackage } from "../../../../lib/fleet/reissue"
 import type { PackageRecord } from "../../../../modules/plans/types"
 import { updatePackageWorkflow } from "../../../../workflows/plans/packages"
 import type { UpdatePackageInput } from "../../../../workflows/plans/packages"
@@ -52,7 +52,7 @@ export async function changePackage(
   })
   const after = await plansOf(req).packageOf(id)
   noteAuditChanges(req, packageChanges(before, after))
-  // Its shops' documents follow (Ek C9); a price alone changes none of them yet (C16)
-  await reissuePlanDocuments(req.scope, await tenantsOnPackage(req.scope, id))
+  // Its shops' documents follow (Ek C9; bounded, review L7); a price alone changes none yet (C16)
+  await reissueForPackage(req.scope, id)
   res.json({ plan: after })
 }

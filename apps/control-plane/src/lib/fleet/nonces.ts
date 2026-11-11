@@ -1,7 +1,9 @@
+import type { Logger } from "@medusajs/framework/types"
 import {
   MemoryNonceStore,
   RedisNonceStore,
   createRedisClient,
+  errorSummary,
   isLocalEnv,
   tenantNamespace,
 } from "@qticaret/server-kit"
@@ -17,7 +19,7 @@ let shared: NonceStore | undefined
  * memory, which is allowed in development and test only. A Redis error
  * refuses the request; it never lets a nonce through unchecked.
  */
-export function tenantApiNonces(onRedisError: (error: unknown) => void = () => undefined) {
+export function tenantApiNonces(logger?: Pick<Logger, "warn">) {
   if (shared) {
     return shared
   }
@@ -25,7 +27,9 @@ export function tenantApiNonces(onRedisError: (error: unknown) => void = () => u
   if (env.REDIS_URL) {
     const namespace = tenantNamespace(env.DATABASE_URL, env.NODE_ENV, process.env["QT_TEST_RUN"])
     shared = new RedisNonceStore(
-      createRedisClient(env.REDIS_URL, onRedisError),
+      createRedisClient(env.REDIS_URL, (error) => {
+        logger?.warn(`cp.tenant_api_nonce_store ${JSON.stringify({ err: errorSummary(error) })}`)
+      }),
       `qt:cp-nonce:${namespace}:`
     )
   } else if (isLocalEnv(env)) {

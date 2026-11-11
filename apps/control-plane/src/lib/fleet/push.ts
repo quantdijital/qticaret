@@ -1,9 +1,9 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { errorSummary, isLocalEnv } from "@qticaret/server-kit"
+import { errorSummary } from "@qticaret/server-kit"
 import type { PlanDocumentRow, PushOutcome } from "../../modules/fleet/service-documents"
 import { fleetIn, tenantsIn } from "../../workflows/modules"
-import { parseTenantApiHosts, pushTargetProblem, pushUrl } from "./push-target"
+import { pushPolicy, pushTargetProblem, pushUrl } from "./push-target"
 import type { PushPolicy } from "./push-target"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -19,12 +19,6 @@ export function nextPushAt(attempts: number, now: Date): Date | null {
   }
   return new Date(now.getTime() + Math.min(2 ** Math.max(attempts - 1, 0), 60) * MINUTE)
 }
-
-/** The push policy from the environment (lib/fleet/push-target.ts). */
-export const pushPolicy = (env: NodeJS.ProcessEnv = process.env): PushPolicy => ({
-  local: isLocalEnv({ NODE_ENV: env["NODE_ENV"] }),
-  hosts: parseTenantApiHosts(env["CP_TENANT_API_HOSTS"]),
-})
 
 export type Fetch = (url: string, init: RequestInit) => Promise<Response>
 

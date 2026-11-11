@@ -4,9 +4,14 @@ import { errorSummary } from "@qticaret/server-kit"
 import { issuePlanDocumentWorkflow } from "../../workflows/fleet/plan-document"
 import type { IssuedPlanDocument } from "../../workflows/fleet/plan-document"
 import { fleetIn, plansIn, tenantsIn, vaultIn } from "../../workflows/modules"
+import { eachBounded } from "./bounded"
 import { pushPlanDocument } from "./push"
 
 type Container = MedusaContainer
+
+const CONCURRENCY = 4
+// Shops on one package issued inside the staff request; more go to a background run
+const INLINE_LIMIT = 20
 
 const logOf = (container: Container) => container.resolve(ContainerRegistrationKeys.LOGGER)
 
@@ -25,22 +30,42 @@ export async function reissuePlanDocuments(
   options: { push?: boolean } = {}
 ): Promise<Map<string, IssuedPlanDocument>> {
   const results = new Map<string, IssuedPlanDocument>()
-  for (const tenantId of new Set(tenantIds)) {
+  await eachBounded([...new Set(tenantIds)], CONCURRENCY, async (tenantId) => {
     try {
       const { result } = await issuePlanDocumentWorkflow(container).run({
         input: { tenant_id: tenantId },
       })
       results.set(tenantId, result)
-      if (result.issued && result.id && options.push !== false) {
-        void pushLatest(container, tenantId)
-      }
     } catch (error) {
       logOf(container).error(
         `cp.plan_issue_failed ${JSON.stringify({ tenant_id: tenantId, err: errorSummary(error) })}`
       )
     }
+  })
+  const issued = [...results].filter(([, result]) => result.issued).map(([id]) => id)
+  if (options.push !== false && issued.length > 0) {
+    // One background run, a few at a time; the push job retries what fails
+    void eachBounded(issued, CONCURRENCY, (tenantId) => pushLatest(container, tenantId))
   }
   return results
+}
+
+/**
+ * A package's shops after a change to it (review L7): up to `INLINE_LIMIT`
+ * in the request, a few at a time; more are left to a background run of
+ * the same, and the reconcile job (every 10 minutes) covers that run if
+ * the process stops.
+ */
+export async function reissueForPackage(container: Container, packageId: string): Promise<void> {
+  const tenants = await tenantsOnPackage(container, packageId)
+  if (tenants.length <= INLINE_LIMIT) {
+    await reissuePlanDocuments(container, tenants)
+    return
+  }
+  logOf(container).info(
+    `cp.plan_reissue_background ${JSON.stringify({ package_id: packageId, shops: tenants.length })}`
+  )
+  void reissuePlanDocuments(container, tenants)
 }
 
 /** The shop's latest document pushed now, if it still waits for a push. */

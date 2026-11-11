@@ -2,8 +2,8 @@ import type { ExecArgs, MedusaContainer } from "@medusajs/framework/types"
 import { CP_AUDIT_MODULE } from "../modules/cp-audit"
 import type CpAuditModuleService from "../modules/cp-audit/service"
 import { parseEnv } from "../lib/env"
-import { pushPlanDocument, pushPolicy } from "../lib/fleet/push"
-import { pushTargetProblem } from "../lib/fleet/push-target"
+import { pushPlanDocument } from "../lib/fleet/push"
+import { tenantApiUrlProblem } from "../lib/fleet/push-target"
 import { reissuePlanDocuments } from "../lib/fleet/reissue"
 import { localOnlyProblem } from "../lib/local-only"
 import { fleetIn, tenantsIn } from "../workflows/modules"
@@ -49,9 +49,11 @@ async function setApiUrl(container: MedusaContainer, tenantId: string, raw: stri
     return 1
   }
   const url = raw === "none" ? null : raw
-  const refused = url ? pushTargetProblem(url, pushPolicy()) : null
+  const refused = url ? tenantApiUrlProblem(url) : null
   if (refused) {
-    out(`cp:fleet: ${refused}: a base URL on this machine or in CP_TENANT_API_HOSTS`)
+    out(
+      `cp:fleet: ${refused}: a base URL on this machine (port 9000 or 9200-9299) or in CP_TENANT_API_HOSTS`
+    )
     return 1
   }
   await tenantsIn(container).updateTenants({ id: tenantId, api_base_url: url })

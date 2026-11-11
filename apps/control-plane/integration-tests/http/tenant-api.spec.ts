@@ -1,6 +1,10 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { parsePublicKeys } from "@qticaret/server-kit"
-import { signedPlanDocumentSchema } from "@qticaret/types/control-plane"
+import { parsePublicKeys, verifyDocument } from "@qticaret/server-kit"
+import {
+  PLAN_PULL_PURPOSE,
+  planPullBinding,
+  planPullResponseSchema,
+} from "@qticaret/types/control-plane"
 import { publishedKeys } from "../../src/lib/vault/signing"
 import { reissuePlanDocuments } from "../../src/lib/fleet/reissue"
 import { PLANS_MODULE } from "../../src/modules/plans"
@@ -54,22 +58,32 @@ medusaIntegrationTestRunner({
 
     it("hands a shop its latest document, which the shop's own checks accept", async () => {
       const { tenant, signer } = await shopWithDocument()
-      const answer = await get(signedGet(PLAN, tenant.id, signer))
+      const headers = signedGet(PLAN, tenant.id, signer)
+      const answer = await get(headers)
 
       expect(answer.status).toBe(200)
       expect(answer.headers["cache-control"]).toBe("no-store")
-      const signed = signedPlanDocumentSchema.parse(answer.data)
-      expect(signed.document).toMatchObject({ tenant_id: tenant.id, serial: 1 })
+      const { plan, binding } = planPullResponseSchema.parse(answer.data)
+      expect(plan.document).toMatchObject({ tenant_id: tenant.id, serial: 1 })
 
       // One process, both ends: the backend's receiver with the published keys
       const published = await publishedKeys(getContainer())
       const keys = parsePublicKeys(published.env_value, "CONTROL_PLANE_PUBLIC_KEYS")
+      const lookup = (kid: string) => keys.get(kid)
+      // The answer is bound to this request's nonce, and to no other (review L3)
+      const nonce = headers["x-qt-nonce"] ?? ""
+      expect(
+        verifyDocument(PLAN_PULL_PURPOSE, planPullBinding(nonce, plan), binding, lookup)
+      ).toMatchObject({ ok: true })
+      expect(
+        verifyDocument(PLAN_PULL_PURPOSE, planPullBinding(`${nonce}x`, plan), binding, lookup)
+      ).toEqual({ ok: false, code: "signature.invalid" })
       const { checkPlanDocument } = shopReceiver()
-      expect(checkPlanDocument(answer.data, { publicKeys: keys, tenantId: tenant.id })).toEqual({
+      expect(checkPlanDocument(plan, { publicKeys: keys, tenantId: tenant.id })).toEqual({
         ok: true,
-        signed,
+        signed: plan,
       })
-      expect(checkPlanDocument(answer.data, { publicKeys: keys, tenantId: "ten_other" })).toEqual({
+      expect(checkPlanDocument(plan, { publicKeys: keys, tenantId: "ten_other" })).toEqual({
         ok: false,
         code: "control_plane.wrong_tenant",
       })

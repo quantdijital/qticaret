@@ -3,6 +3,7 @@ import type { AddressInfo } from "node:net"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { parsePublicKeys, verifyDocument } from "@qticaret/server-kit"
 import { pushPlanDocument } from "../../src/lib/fleet/push"
+import { parseTenantApiHosts } from "../../src/lib/fleet/push-target"
 import { publishedKeys } from "../../src/lib/vault/signing"
 import { TENANTS_MODULE } from "../../src/modules/tenants"
 import type TenantsModuleService from "../../src/modules/tenants/service"
@@ -177,8 +178,11 @@ medusaIntegrationTestRunner({
           res.writeHead(status).end("{}")
         })
       })
-      await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
-      const base = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`
+      await new Promise<void>((resolve) => server.listen(0, "localhost", resolve))
+      const port = String((server.address() as AddressInfo).port)
+      const base = `http://localhost:${port}`
+      // The test server's own port, as an entry of CP_TENANT_API_HOSTS would allow it
+      const options = { policy: { local: false, hosts: parseTenantApiHosts(`localhost:${port}`) } }
       try {
         const row = async () => {
           const found = await latest(tenant.id)
@@ -188,24 +192,26 @@ medusaIntegrationTestRunner({
           return found
         }
         // No target: kept pending, tried again later
-        expect(await pushPlanDocument(getContainer(), await row())).toMatchObject({
+        expect(await pushPlanDocument(getContainer(), await row(), options)).toMatchObject({
           delivered: false,
           error: "no_target",
         })
         // A target outside the policy is never called
         await tenants.updateTenants({ id: tenant.id, api_base_url: "http://shop.example.com" })
-        expect(await pushPlanDocument(getContainer(), await row())).toMatchObject({
+        expect(await pushPlanDocument(getContainer(), await row(), options)).toMatchObject({
           error: "target_not_allowed",
         })
         expect(received).toHaveLength(0)
 
         await tenants.updateTenants({ id: tenant.id, api_base_url: base })
         status = 503
-        const later = await pushPlanDocument(getContainer(), await row())
+        const later = await pushPlanDocument(getContainer(), await row(), options)
         expect(later).toMatchObject({ delivered: false, error: "http_503" })
         expect((later as { next_push_at: Date | null }).next_push_at).not.toBeNull()
         status = 200
-        expect(await pushPlanDocument(getContainer(), await row())).toEqual({ delivered: true })
+        expect(await pushPlanDocument(getContainer(), await row(), options)).toEqual({
+          delivered: true,
+        })
         expect(await row()).toMatchObject({ push_status: "delivered", push_error: null })
         const pushed = received.at(-1) as { path: string; body: Record<string, unknown> }
         expect(pushed.path).toBe("/hooks/control-plane/plan")
@@ -222,7 +228,7 @@ medusaIntegrationTestRunner({
         await new Promise((resolve) => setTimeout(resolve, 300))
         const refused = await row()
         if (refused.push_status === "pending") {
-          await pushPlanDocument(getContainer(), refused)
+          await pushPlanDocument(getContainer(), refused, options)
         }
         expect(await row()).toMatchObject({
           serial: 2,
