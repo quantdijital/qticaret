@@ -112,6 +112,13 @@ export interface SiteSeo {
    * Absent from a backend that does not say yet: none.
    */
   tracking?: SiteTracking
+  /**
+   * The platform suspended the shop (adr/0061 §5.5, Ek C15): the storefront
+   * answers 503 with the platform's page, whatever the shop's maintenance
+   * says. Only this one fact: a restricted shop sells as usual and its
+   * payment state is nobody's business here. Absent: open.
+   */
+  suspended?: boolean
 }
 
 /** The public ids of the shop's measurement tags; the storefront loads each only with the visitor's consent. */

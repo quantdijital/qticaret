@@ -1,5 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
+import { planModeFor, shownStatusOf } from "../../../../lib/plan-guard"
 import { capabilitiesOf } from "../../../../lib/staff"
 import { mfaAvailable, mfaPassed, mfaRequired, staffRoleOf } from "../../../http/staff-guard"
 
@@ -8,7 +9,9 @@ import { mfaAvailable, mfaPassed, mfaRequired, staffRoleOf } from "../../../http
  * what the panel may offer them, and where they stand with 2FA: whether
  * this environment can ask it, whether the shop requires it, whether they
  * set it up, and whether this session passed it. The API decides again
- * on every request.
+ * on every request. And the shop's status (adr/0061 Ek C15), for every
+ * role: the panel's strip says when writes are closed. `GET /admin/plan`
+ * stays the owner's and admins' (billing is not every role's business).
  */
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const role = (await staffRoleOf(req)) ?? null
@@ -28,5 +31,6 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
       enabled: factors.length > 0,
       passed: mfaPassed(req),
     },
+    plan: { status: shownStatusOf(await planModeFor(req.scope)) },
   })
 }

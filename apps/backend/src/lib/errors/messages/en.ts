@@ -1292,6 +1292,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   // adr/0061 §5.3, Ek C14: the package's blocking limits
   "plan.limit_reached":
     "Your package's {{limit}} limit is reached ({{used}}/{{max}}). Settings > Subscription shows your package and usage.",
+  // adr/0061 §5.5, Ek C15: the restricted and the suspended shop
+  "plan.restricted":
+    "Your shop is restricted because the subscription payment is overdue: this action is closed. Order operations, stock, KVKK requests, exports and your own account stay open. The owner and admins see the details in Settings > Subscription.",
+  "plan.restricted_suspended":
+    "Your shop is suspended by the platform: this action is closed. Order operations, stock, KVKK requests, exports and your own account stay open. The owner and admins see the details in Settings > Subscription.",
+  "plan.suspended": "This shop is not taking orders right now. Please try again later.",
   "catalog_import.plan_limit":
     "Not added: your package's product limit is reached. Upload the file again once the limit allows more.",
   "migration.product_plan_limit":

@@ -14,6 +14,7 @@ import type { FeeCart } from "../../lib/payments/cod"
 import { guardCheckout, guardPaymentStart } from "./checkout-guard"
 import { holdFloodingCheckoutSms } from "./checkout-sms"
 import { requireMailDomain } from "./mail-domain"
+import { refuseSuspendedCheckout } from "./plan-guard"
 import { rateLimit } from "./rate-limit"
 
 const FEE_LINE_FIELDS = ["items.id", "items.metadata", "items.variant_id", "items.is_custom_price"]
@@ -199,8 +200,15 @@ export const PAYMENT_ROUTES = [
   },
   {
     matcher: "/store/carts/:id/complete",
-    // F15.6 (adr/0044): the block list once more before the order is made
-    middlewares: [checkoutLimit, requireCheckoutPayment, guardCheckout, holdFloodingCheckoutSms],
+    // adr/0061 Ek C15: a suspended shop takes no order; F15.6 (adr/0044): the block list
+    // once more before the order is made
+    middlewares: [
+      refuseSuspendedCheckout,
+      checkoutLimit,
+      requireCheckoutPayment,
+      guardCheckout,
+      holdFloodingCheckoutSms,
+    ],
   },
   // PayTR's notifications (adr/0026 §5): its retries stay well inside the budget
   {

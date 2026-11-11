@@ -17,8 +17,12 @@ export const storePlanDocumentStep = createStep(
   async (input: StorePlanDocumentInput, { container }) => {
     const service = container.resolve<ControlPlaneModuleService>(CONTROL_PLANE_MODULE)
     const { outcome, previous } = await service.storePlanDocument(input.signed, input.source)
+    // adr/0061 Ek C15: a new status reaches the storefront at once (a suspension's 503)
+    const statusChanged =
+      outcome === "applied" &&
+      (previous?.document.status ?? "active") !== input.signed.document.status
     return new StepResponse(
-      { outcome },
+      { outcome, status_changed: statusChanged },
       outcome === "applied"
         ? {
             tenant_id: input.signed.document.tenant_id,

@@ -16,6 +16,7 @@ import { storefrontTracking } from "../../../../workflows/conversions/tracking"
 import { legalIdentity } from "../../../../workflows/legal/identity"
 import type { LegalIdentity } from "../../../../workflows/legal/identity"
 import { shopOf } from "../../../../workflows/seo/payload-sources"
+import { planModeFor } from "../../../../lib/plan-guard"
 import { siteMaintenance } from "../../../../workflows/storefront/maintenance"
 
 const identityOf = (identity: LegalIdentity) => ({
@@ -47,13 +48,17 @@ const identityOf = (identity: LegalIdentity) => ({
  * `Retry-After` and this page but for its system paths, the paths left
  * open and visitors holding a bypass link. And the browser tags' public
  * ids from the connected GA4 and Meta accounts, nothing else of them.
+ * And whether the platform suspended the shop (adr/0061 Ek C15): the
+ * storefront's 503 then, which no bypass link or open path of the shop's
+ * opens.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
-  const [shop, identity, maintenance, tracking] = await Promise.all([
+  const [shop, identity, maintenance, tracking, mode] = await Promise.all([
     shopOf(req.scope),
     legalIdentity(req.scope),
     siteMaintenance(req.scope),
     storefrontTracking(req.scope),
+    planModeFor(req.scope),
   ])
   const settings = req.scope.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
   const [appearanceSection, seoSection, announcing] = await Promise.all([
@@ -82,5 +87,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     home: homeSeo({ shop, home: seo.home, ogImage: seo.default_og_image, jsonLd }),
     maintenance,
     tracking,
+    // adr/0061 Ek C15: only whether the platform suspended it; a restricted shop sells
+    suspended: mode === "suspended",
   })
 }

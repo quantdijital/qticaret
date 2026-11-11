@@ -112,6 +112,7 @@ import { rejectSensitiveFields } from "./validation/sensitive-fields"
 import { guardApiKeys } from "./http/api-key-guard"
 import { hidePrivateAttributes } from "./http/attribute-visibility"
 import { guardStaffRoles } from "./http/staff-guard"
+import { guardPlanStatus } from "./http/plan-guard"
 import { recordSearchTerms } from "./http/search-terms"
 import { closePresignedUploads, hideJobResultFiles } from "./validation/upload-routes"
 import {
@@ -161,7 +162,9 @@ export default defineMiddlewares({
     // F2.5: admin mutations are recorded once answered (adr/0011); tax ids
     // are never expanded through `fields`. F11.6: a secret API key reaches
     // only its scopes' routes, F12.6: a staff member only their role's
-    // (Medusa's own authentication has run by now)
+    // (Medusa's own authentication has run by now). adr/0061 Ek C15: a
+    // restricted or suspended shop writes only its allow-list
+    // (lib/plan-guard)
     {
       matcher: "/admin/*",
       middlewares: [
@@ -169,6 +172,7 @@ export default defineMiddlewares({
         adminLimitGuard,
         guardApiKeys,
         guardStaffRoles,
+        guardPlanStatus,
         rejectSensitiveFields,
         auditMutations,
       ],

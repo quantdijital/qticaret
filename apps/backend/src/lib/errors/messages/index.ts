@@ -74,3 +74,18 @@ export function planLimitSentence(
     max: `${String(refusal.max ?? "")}${unit}`,
   })
 }
+
+/**
+ * `plan.restricted` in words (adr/0061 Ek C15): why the write is closed
+ * (an overdue subscription, or the platform's suspension), what stays
+ * open, and where to look.
+ */
+export function planRestrictedSentence(
+  status: string | undefined,
+  locale: MessageLocale = "tr"
+): string {
+  return serverErrorMessage(
+    status === "suspended" ? "plan.restricted_suspended" : "plan.restricted",
+    locale
+  )
+}

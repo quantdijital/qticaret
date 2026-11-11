@@ -72,7 +72,13 @@ function decodedPath(path: string): string {
     .toLowerCase()
 }
 
-const matches = (rules: readonly Rule[], method: string, path: string, facts: RequestFacts) =>
+/** Whether one of `rules` takes `method` on `path` (the plan guard reads the same rule shape). */
+export const matches = (
+  rules: readonly Rule[],
+  method: string,
+  path: string,
+  facts: RequestFacts
+): boolean =>
   rules.some(
     (rule) =>
       (rule.methods === "*" || rule.methods.includes(method as Method)) &&

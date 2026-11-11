@@ -1285,6 +1285,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   // adr/0061 §5.3, Ek C14: paketin engelleyen limitleri
   "plan.limit_reached":
     "Paketinizin {{limit}} limitine ulaştınız ({{used}}/{{max}}). Paketinizi ve kullanımınızı Ayarlar > Abonelik sayfasında görebilirsiniz.",
+  // adr/0061 §5.5, Ek C15: kısıtlı ve askıdaki mağaza
+  "plan.restricted":
+    "Abonelik ödemesi geciktiği için mağazanız kısıtlandı: bu işlem kapalı. Siparişlerin işlemleri, stok, KVKK talepleri, dışa aktarma ve kendi hesabınız açık. Mağaza sahibi ve yöneticiler ayrıntıları Ayarlar > Abonelik sayfasında görebilir.",
+  "plan.restricted_suspended":
+    "Mağazanız platform tarafından askıya alındı: bu işlem kapalı. Siparişlerin işlemleri, stok, KVKK talepleri, dışa aktarma ve kendi hesabınız açık. Mağaza sahibi ve yöneticiler ayrıntıları Ayarlar > Abonelik sayfasında görebilir.",
+  "plan.suspended": "Bu mağaza şu anda sipariş almıyor. Lütfen daha sonra yeniden deneyin.",
   "catalog_import.plan_limit":
     "Eklenmedi: paketinizin ürün limiti doldu. Limit yükselince dosyayı yeniden yükleyin.",
   "migration.product_plan_limit":

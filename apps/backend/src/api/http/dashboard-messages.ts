@@ -1,8 +1,10 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { I18N_KEY, PROVIDER_FAILED_MESSAGE } from "../../lib/errors"
 import { PLAN_LIMIT_MESSAGE } from "../../lib/errors/plan-limit"
+import { PLAN_RESTRICTED_MESSAGE } from "../../lib/plan-guard/decide"
 import {
   planLimitSentence,
+  planRestrictedSentence,
   providerFailureSentence,
   serverErrorMessage,
 } from "../../lib/errors/messages"
@@ -59,6 +61,10 @@ function dashboardSentence(body: ErrorBody): string {
   // A plan limit names which one, how much is used and allowed (adr/0061 Ek C14)
   if (body.message === PLAN_LIMIT_MESSAGE) {
     return planLimitSentence(body, "tr")
+  }
+  // A write the shop's status closes: why, and where to look (adr/0061 Ek C15)
+  if (body.message === PLAN_RESTRICTED_MESSAGE) {
+    return planRestrictedSentence(body.status, "tr")
   }
   return serverErrorMessage(body.message, "tr", body.values)
 }

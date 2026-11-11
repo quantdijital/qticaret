@@ -19,6 +19,8 @@ export interface ErrorBody {
   limit?: string
   used?: number
   max?: number
+  /** A write the shop's status closes (`plan.restricted`, adr/0061 Ek C15): `restricted` or `suspended`. */
+  status?: string
 }
 
 export type DbErrorKind = "duplicate" | "invalid_reference" | "not_null" | "unknown_column"
