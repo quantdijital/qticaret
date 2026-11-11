@@ -104,7 +104,7 @@
 
 ## 5. Üst panel (`apps/control-plane`, `qticaret_cp`)
 
-Veri sorumlusu Quant Dijital'dir (kurulunca; adr/0061 §2). Burada mağazaların müşteri verisi **yoktur**; yalnızca bizim müşterimiz olan mağazaların yetkilileri ve platform personeli. Kodda saklama işi henüz yok: süreler aşağıda öneri, iş kapanış görevinde (C19) ya da F16'da yazılır.
+Veri sorumlusu Quant Dijital'dir (kurulunca; adr/0061 §2). Burada mağazaların müşteri verisi **yoktur**; yalnızca bizim müşterimiz olan mağazaların yetkilileri ve platform personeli. Mağazalardan gelen tek veri kişisel olmayan toplamlardır (aşağıda, C13). Kodda saklama işi henüz yok: süreler aşağıda öneri, iş kapanış görevinde (C19) ya da F16'da yazılır.
 
 | Tablo (modül) | Kişisel veri | Amaç | Süre (öneri) | Silmede |
 | --- | --- | --- | --- | --- |
@@ -116,6 +116,7 @@ Veri sorumlusu Quant Dijital'dir (kurulunca; adr/0061 §2). Burada mağazaların
 | `cp_staff_member`, `user` (cp-staff, Medusa) | platform personelinin adı, e-postası | yetki | Personel çalıştıkça | Pasifleştirilir; giriş kaldırılabilir. |
 
 - **Kurulum (C10, `provisioning_run`, `provisioning_step`):** kişisel veri tutmaz. Çalışmada yalnız isteyen personelin kimliği, port, durum ve hata kodları var; adımların çıktısı kişisel olmayan özetlerdir (port, sıra no, "e-posta gitti mi"). Sahibin e-postası çalışmaya yazılmaz: davet adımı onu o an mağazanın `owner` rollü yetkilisinden (`tenant_contact`) okur. Davet bağlantısı yalnız bellekte durur, Mailpit/e-postayla sahibe gider; tabloya, loga, denetim kaydına girmez (testli). Mağazanın kendi veritabanında Medusa'nın davet kaydı (e-posta, belirteç) mağazanın kendi verisidir (backend envanteri).
+- **Mağazalardan gelen veri (C13, `fleet`: `usage_snapshot`, `health_check`, `health_standing`): kişisel veri yok, yalnız toplamlar.** Mağazanın saatlik imzalı raporu yalnız şunları taşır: ürün sayısı, bu ayki sipariş sayısı, personel sayısı, depolama (MB), bu ayki içerik taslağı sayısı, son siparişin zamanı, çalışan sürüm (semver + commit). Kişi, ad, adres, e-posta, telefon, sipariş satırı, tutar ve aylık ciro **gelmez**: sözleşmenin katı şeması bilinmeyen her alanı reddeder (400 `usage.invalid`, testli), mağaza da raporu göndermeden önce aynı şemadan geçirir. Sağlık yoklamaları yalnız mağazanın kendi adreslerine yapılır ve yalnız zaman, HTTP durumu, yanıt süresi ve hata kodu yazılır; yanıtın gövdesi okunmaz. Süreler: kullanım anlık görüntüsü 90 gün, yoklama geçmişi 24 saat (saatlik `cp-fleet-retention` işi kalıcı siler); son durum satırı mağaza kaldıkça. Mağaza kaldırılınca üçü de silinir.
 - **İş akışı girdileri:** yetkili, firma ve not iş akışları kısa ömürlüdür ve kaydedilmez (`store` kapalı, yürütme kaydı yok); geri alma için tuttukları önceki satırlar yalnız bellekte durur. TCKN iş akışına mühürlü girer (adr/0061 §4.3).
 - **Aydınlatma:** yetkililere aydınlatma metni hizmet sözleşmesiyle verilir (docs/12, hukuk taslağı bekliyor).
 
