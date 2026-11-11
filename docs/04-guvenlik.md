@@ -93,9 +93,10 @@
   - **İmza anahtarı:** üst panel üretir, gizli yarısı depoda mühürlü; döndürme üç adım (hazırla → geç → kaldır), kaldırılanın gizli yarısı silinir.
   - **Mağazanın çalışma sırları:** üretilir, çağırana verilir, saklanmaz; yalnız açık anahtar (`tenant_key`) ve `CP_ESCROW_RECIPIENTS`'teki çevrimdışı `age` alıcılarına mühürlü emanet kopyası (`secret_escrow`) kalır. Üst panel emaneti açamaz: kimlik (identity) hiçbir yerde yok, env'de verilirse açılış reddeder.
   - Anahtar uçları yalnız sahibin, her değişiklik yeniden doğrulamayla; yanıtlarda yalnız `kid`, açık anahtar, parmak izi ve sayılar.
-- Mağazanın sağlayıcı hesapları (PayTR, iyzico, ...) panelden girilir ve `integration-credentials` modülünde AES-256-GCM ile şifreli durur (adr/0027):
-  - Anahtar `CREDENTIALS_ENCRYPTION_KEY`; PII anahtarlarından ayrıdır ve canlıda zorunludur.
-  - Blok sağlayıcıya bağlıdır (AAD). Anahtar değişirse kayıt "yeniden girilmeli" olur.
+- Mağazanın sağlayıcı hesapları (PayTR, iyzico, ...) panelden girilir ve `integration-credentials` modülünde zarf şifreli durur (adr/0027, adr/0061 Ek C17):
+  - **Zarf:** her hesap kendi veri anahtarıyla AES-256-GCM; veri anahtarı mağazanın KEK'i altında sarılı (`qtenv1.<kek_id>.…`, `key_id` sütunu KEK'in parmak izi). C17'den önceki kayıtlar (anahtarın altında doğrudan blok) okunur ve okunduğunda zarfa geçer.
+  - **Anahtarlar:** `CREDENTIALS_ENCRYPTION_KEYS` (64 hex, virgülle, en yeni başta; en çok 5) ya da tek anahtarlı `CREDENTIALS_ENCRYPTION_KEY`. İkisi birlikteyse tek anahtar listede olmalıdır (yoksa açılış durur). PII anahtarlarından ayrıdır ve canlıda biri zorunludur. Döndürme kesintisizdir: docs/08 "Sağlayıcı hesabı anahtarının döndürülmesi".
+  - Blok sağlayıcıya ve ayarlarına bağlıdır (AAD). KEK'i yapılandırılmamış kayıt "yeniden girilmeli" olur; panel, `credentials:keys status` ve saatlik iş bunu açıkça söyler (`integration_credentials.kek_missing`, yalnız parmak izi ve sayı).
   - Gizli alanlar yalnızca yazılır: yanıt, log ve denetim kaydında değer ya da parçası yer almaz; denetimde yalnızca sürüm numarası görünür.
   - Workflow girdisi ve adımları yalnızca şifreli bloğu taşır.
   - Uçlar personele açık (secret API anahtarı reddedilir) ve sağlayıcıyı çağıran kayıt ile test uçları `provider_check` hız profilinde. Hesabı yalnızca sahip (owner) değiştirir (adr/0040); bağlantı testi yöneticiye de açık.
