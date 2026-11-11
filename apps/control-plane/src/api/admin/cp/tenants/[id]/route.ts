@@ -18,7 +18,11 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
   const role = await cpStaff(req).roleOf(actorOf(req))
   // Only the roles that call and bill see a contact in full; anything else, masked
   const full = role === "owner" || role === "operator" || role === "finance"
-  const detail = await tenantDetail(req, tenant, { maskContacts: !full })
+  const detail = await tenantDetail(req, tenant, {
+    maskContacts: !full,
+    // The plan document's state and push target (Ek C9): who runs shops
+    fleet: role === "owner" || role === "operator",
+  })
   res.setHeader("Cache-Control", "no-store")
   if (!(await recordReadFirst(req))) {
     res.status(503).json({ type: "unavailable", message: "cp.audit_unavailable" })

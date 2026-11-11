@@ -2,6 +2,7 @@ import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/frame
 import { MedusaError } from "@medusajs/framework/utils"
 import { LIMIT_KEYS } from "@qticaret/types/control-plane"
 import type { LimitKey } from "@qticaret/types/control-plane"
+import { reissuePlanDocuments } from "../../../../../../../lib/fleet/reissue"
 import { setOverrideWorkflow } from "../../../../../../../workflows/plans/tenant-plan"
 import { noteAuditChanges } from "../../../../../../http/audit"
 import { paramOf, tenantParam } from "../../../params"
@@ -23,5 +24,6 @@ export async function DELETE(req: AuthenticatedMedusaRequest, res: MedusaRespons
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "cp.override_unknown")
   }
   noteAuditChanges(req, { override: { key, from: before.value, to: "package" } })
+  await reissuePlanDocuments(req.scope, [tenant.id])
   res.json({ key, deleted: true })
 }

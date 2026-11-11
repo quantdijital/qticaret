@@ -1,5 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { parseEnv } from "../../../../lib/env"
+import { reissuePlanDocuments } from "../../../../lib/fleet/reissue"
 import { platformHostname } from "../../../../lib/tenants/hostname"
 import { createTenantWorkflow } from "../../../../workflows/tenants/create-tenant"
 import { noteAuditChanges, noteAuditResource } from "../../../http/audit"
@@ -113,5 +114,9 @@ export async function POST(
   })
   noteAuditResource(req, tenant.id)
   noteAuditChanges(req, { slug: { to: slug }, status: { to: tenant.status } })
+  if (package_id) {
+    // Its first plan document, kept for its setup (C10) and its first pull (Ek C9)
+    await reissuePlanDocuments(req.scope, [tenant.id])
+  }
   res.json({ tenant: { id: tenant.id, slug: tenant.slug, status: tenant.status } })
 }

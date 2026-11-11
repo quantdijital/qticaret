@@ -54,6 +54,7 @@ describe("a package change as the audit keeps it", () => {
     archived_at: null,
     created_at: NOW,
     limits: fullLimits({ products: 500 }),
+    features: {},
   }
 
   it("names only what moved, from and to", () => {

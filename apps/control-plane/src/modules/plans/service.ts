@@ -4,18 +4,20 @@ import {
   InjectTransactionManager,
   MedusaContext,
   MedusaError,
-  MedusaService,
 } from "@medusajs/framework/utils"
 import { LIMIT_KEYS } from "@qticaret/types/control-plane"
 import type { LimitKey } from "@qticaret/types/control-plane"
 import { fullLimits } from "../../lib/plans/limits"
 import type { LimitValues } from "../../lib/plans/limits"
-import { Package } from "./models/package"
-import { PackageLimit } from "./models/package-limit"
-import { TenantOverride } from "./models/tenant-override"
-import { TenantPlan } from "./models/tenant-plan"
+import { PlansFeatures } from "./service-features"
 import { PACKAGE_FIELDS, OVERRIDE_FIELDS } from "./types"
-import type { OverrideRecord, PackageFields, PackagePatch, PackageRecord } from "./types"
+import type {
+  FeaturePatch,
+  OverrideRecord,
+  PackageFields,
+  PackagePatch,
+  PackageRecord,
+} from "./types"
 
 interface Executor {
   execute: (sql: string, params: unknown[]) => Promise<unknown>
@@ -23,26 +25,24 @@ interface Executor {
 
 const PLAN_PAGE = 1000
 
-interface PackageRow extends Omit<PackageRecord, "limits"> {
+interface PackageRow extends Omit<PackageRecord, "limits" | "features"> {
   limits?: { key: LimitKey; value: number | null }[]
+  features?: { key: string; enabled: boolean }[]
 }
 
 const asRecord = (row: PackageRow): PackageRecord => ({
   ...row,
   limits: fullLimits(Object.fromEntries((row.limits ?? []).map((each) => [each.key, each.value]))),
+  features: Object.fromEntries((row.features ?? []).map((each) => [each.key, each.enabled])),
 })
 
 /**
  * Packages and who is on them (adr/0061 §2): a package's price, period,
  * days and limits; the package each shop is on; a shop's exceptions. An
- * archived package keeps its shops and takes no new one.
+ * archived package keeps its shops and takes no new one. Its platform flags
+ * and a shop's exceptions to them are `PlansFeatures`' (service-features.ts).
  */
-class PlansModuleService extends MedusaService({
-  Package,
-  PackageLimit,
-  TenantPlan,
-  TenantOverride,
-}) {
+class PlansModuleService extends PlansFeatures {
   /** Packages with their limits, oldest first; archived ones only when asked. */
   @InjectManager()
   async packages(
@@ -57,8 +57,14 @@ class PlansModuleService extends MedusaService({
           : { archived_at: filter.archived ? { $ne: null } : null }),
       },
       {
-        select: [...PACKAGE_FIELDS, "limits.key", "limits.value"],
-        relations: ["limits"],
+        select: [
+          ...PACKAGE_FIELDS,
+          "limits.key",
+          "limits.value",
+          "features.key",
+          "features.enabled",
+        ],
+        relations: ["limits", "features"],
         order: { price: "ASC", created_at: "ASC" },
         take: 200,
       },
@@ -88,17 +94,21 @@ class PlansModuleService extends MedusaService({
     return new Map(rows.map((row) => [row.package_id, row.n]))
   }
 
-  /** A new package with every registry limit (null where not given). */
+  /** A new package with every registry limit (null where not given) and its flags. */
   @InjectTransactionManager()
   async createPackage(
-    fields: PackageFields & { code: string; limits: Partial<LimitValues> },
+    fields: PackageFields & {
+      code: string
+      limits: Partial<LimitValues>
+      features?: FeaturePatch | undefined
+    },
     @MedusaContext() sharedContext: Context = {}
   ): Promise<string> {
     const [same] = await this.listPackages({ code: fields.code }, { take: 1 }, sharedContext)
     if (same) {
       throw new MedusaError(MedusaError.Types.DUPLICATE_ERROR, "cp.package_code_taken")
     }
-    const { limits, ...rest } = fields
+    const { limits, features, ...rest } = fields
     const [made] = await this.createPackages([rest], sharedContext)
     const id = made?.id ?? ""
     const values = fullLimits(limits)
@@ -106,15 +116,19 @@ class PlansModuleService extends MedusaService({
       LIMIT_KEYS.map((key) => ({ package_id: id, key, value: values[key] })),
       sharedContext
     )
+    if (features) {
+      await this.setPackageFeatures(id, features, sharedContext)
+    }
     return id
   }
 
-  /** A package's fields and limits set; the package as it was comes back to undo it. */
+  /** A package's fields, limits and flags set; the package as it was comes back to undo it. */
   @InjectTransactionManager()
   async updatePackage(
     id: string,
     patch: PackagePatch,
     limits: Partial<LimitValues> | undefined,
+    features: FeaturePatch | undefined,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<PackageRecord> {
     const before = await this.packageOf(id, sharedContext)
@@ -133,6 +147,9 @@ class PlansModuleService extends MedusaService({
           )
         }
       }
+    }
+    if (features) {
+      await this.setPackageFeatures(id, features, sharedContext)
     }
     return before
   }

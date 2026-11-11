@@ -1,5 +1,5 @@
 import { z } from "@medusajs/framework/zod"
-import { LIMIT_KEYS, TENANT_STATUSES } from "@qticaret/types/control-plane"
+import { LIMIT_KEYS, TENANT_STATUSES, isPlatformFlag } from "@qticaret/types/control-plane"
 import { isValidTckn, isValidVkn } from "@qticaret/server-kit"
 import { COMPANY_KINDS, CONTACT_ROLES, NOTE_MAX } from "../../../../lib/tenants/kinds"
 import { normalizePhone } from "../../../../lib/tenants/phone"
@@ -138,24 +138,37 @@ export type PostTenantPlanType = z.infer<typeof PostTenantPlan>
 /** A limit value: a whole count or megabytes, null for no limit. */
 export const limitValue = z.number().int().min(0).max(1_000_000_000).nullable()
 
+/** An exception's reason: required, so the activity says why a shop differs from its package. */
+const reason = z
+  .string()
+  .trim()
+  .min(3, "cp.reason_required")
+  .max(500)
+  .regex(CLEAN_TEXT, "cp.text_invalid")
+
+/** An exception's optional end; never already past. */
+const expiresAt = z.iso
+  .datetime({ offset: true })
+  .refine((value) => new Date(value).getTime() > Date.now(), "cp.override_expired")
+  .nullable()
+  .optional()
+
 export const PostOverride = z
-  .object({
-    key: z.enum(LIMIT_KEYS),
-    value: limitValue,
-    reason: z
-      .string()
-      .trim()
-      .min(3, "cp.reason_required")
-      .max(500)
-      .regex(CLEAN_TEXT, "cp.text_invalid"),
-    expires_at: z.iso
-      .datetime({ offset: true })
-      .refine((value) => new Date(value).getTime() > Date.now(), "cp.override_expired")
-      .nullable()
-      .optional(),
-  })
+  .object({ key: z.enum(LIMIT_KEYS), value: limitValue, reason, expires_at: expiresAt })
   .strict()
 export type PostOverrideType = z.infer<typeof PostOverride>
+
+/** A key of the shared platform flag list (Ek C9); any other is refused. */
+export const platformFlagKey = z
+  .string()
+  .max(100)
+  .refine((key) => isPlatformFlag(key, process.env["NODE_ENV"]), "cp.flag_unknown")
+
+/** A shop's exception for one platform flag (Ek C9), beside the limits'. */
+export const PostFeatureOverride = z
+  .object({ key: platformFlagKey, enabled: z.boolean(), reason, expires_at: expiresAt })
+  .strict()
+export type PostFeatureOverrideType = z.infer<typeof PostFeatureOverride>
 
 export const GetActivity = z
   .object({

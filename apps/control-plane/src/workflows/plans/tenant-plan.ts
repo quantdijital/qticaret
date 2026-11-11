@@ -1,7 +1,7 @@
 import { WorkflowResponse, createWorkflow } from "@medusajs/framework/workflows-sdk"
 import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
 import type { LimitKey } from "@qticaret/types/control-plane"
-import type { OverrideRecord } from "../../modules/plans/types"
+import type { FeatureOverrideRecord, OverrideRecord } from "../../modules/plans/types"
 import { plansIn } from "../modules"
 import { undoableStep } from "../undoable"
 
@@ -81,4 +81,56 @@ const setOverrideStep = undoableStep(
 export const setOverrideWorkflow = createWorkflow(
   { name: "cp-tenant-set-override", store: false },
   (input: WorkflowData<SetOverrideInput>) => new WorkflowResponse(setOverrideStep(input))
+)
+
+export interface SetFeatureOverrideInput {
+  tenant_id: string
+  /** A key of the shared platform flag list; the route checks it. */
+  key: string
+  /** Null removes the exception. */
+  override: {
+    enabled: boolean
+    reason: string
+    expires_at: Date | null
+    created_by: string | null
+  } | null
+}
+
+const asFeatureInput = (row: FeatureOverrideRecord | null) =>
+  row
+    ? {
+        enabled: row.enabled,
+        reason: row.reason,
+        expires_at: row.expires_at,
+        created_by: row.created_by,
+      }
+    : null
+
+const setFeatureOverrideStep = undoableStep(
+  "cp-tenant-set-feature-override",
+  async (input: SetFeatureOverrideInput, container) => {
+    const { before } = await plansIn(container).setFeatureOverride(
+      input.tenant_id,
+      input.key,
+      input.override
+    )
+    return { output: before, undo: { tenant_id: input.tenant_id, key: input.key, before } }
+  },
+  async (
+    undo: { tenant_id: string; key: string; before: FeatureOverrideRecord | null },
+    container
+  ) => {
+    await plansIn(container).setFeatureOverride(
+      undo.tenant_id,
+      undo.key,
+      asFeatureInput(undo.before)
+    )
+  }
+)
+
+/** A shop's exception for one platform flag set or removed, with its reason (Ek C9). */
+export const setFeatureOverrideWorkflow = createWorkflow(
+  { name: "cp-tenant-set-feature-override", store: false },
+  (input: WorkflowData<SetFeatureOverrideInput>) =>
+    new WorkflowResponse(setFeatureOverrideStep(input))
 )

@@ -22,7 +22,34 @@ export interface PackageRecord extends PackageFields {
   archived_at: Date | null
   created_at: Date
   limits: LimitValues
+  /** Its platform flags as set; a flag left out takes the list's default (Ek C9). */
+  features: Record<string, boolean>
 }
+
+/** A package's platform flags to set; null removes the package's value (the default applies). */
+export type FeaturePatch = Record<string, boolean | null>
+
+export interface FeatureOverrideRecord {
+  id: string
+  tenant_id: string
+  key: string
+  enabled: boolean
+  reason: string
+  expires_at: Date | null
+  created_by: string | null
+  created_at: Date
+}
+
+export const FEATURE_OVERRIDE_FIELDS = [
+  "id",
+  "tenant_id",
+  "key",
+  "enabled",
+  "reason",
+  "expires_at",
+  "created_by",
+  "created_at",
+] as const
 
 export interface OverrideRecord {
   id: string

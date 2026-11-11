@@ -1,4 +1,5 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { reissuePlanDocuments } from "../../../../../../lib/fleet/reissue"
 import { assignPlanWorkflow } from "../../../../../../workflows/plans/tenant-plan"
 import { noteAuditChanges } from "../../../../../http/audit"
 import { actorOf, plansOf, tenantParam } from "../../params"
@@ -31,5 +32,7 @@ export async function POST(
       to: result.to ? (codes.get(result.to) ?? result.to) : null,
     },
   })
+  // Its plan document follows (Ek C9); taken off its package, the shop keeps its last one
+  await reissuePlanDocuments(req.scope, [tenant.id])
   res.json({ package_id })
 }

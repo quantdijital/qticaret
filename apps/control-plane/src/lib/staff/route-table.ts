@@ -14,6 +14,10 @@ import type { CpStaffRole } from "./roles"
  * - `setup`: any active staff member before their 2FA is passed: who they
  *   are and setting 2FA up, nothing else
  * - a list of roles: active staff who passed 2FA, in one of those roles
+ *
+ * `/tenant-api/*` is not here and never will be (Ek C9): the shops' signed
+ * API is its own group with its own table (lib/fleet/tenant-api-routes.ts);
+ * no staff credential opens it and no shop signature opens this one.
  */
 
 export type Method = "GET" | "POST" | "DELETE"
@@ -91,6 +95,8 @@ const TENANT_ROUTES: RouteRule[] = [
       "/notes",
       "/notes/:note_id",
       "/overrides",
+      // Ek C9: a platform flag's exception, beside the limits' (no step-up, as theirs)
+      "/feature-overrides",
     ],
     SHOPS
   ),
@@ -104,7 +110,13 @@ const TENANT_ROUTES: RouteRule[] = [
   },
   ...shopRules(
     "DELETE",
-    ["/contacts/:contact_id", "/domains/:domain_id", "/notes/:note_id", "/overrides/:key"],
+    [
+      "/contacts/:contact_id",
+      "/domains/:domain_id",
+      "/notes/:note_id",
+      "/overrides/:key",
+      "/feature-overrides/:key",
+    ],
     SHOPS
   ),
   ...shopRules("POST", ["/company"], INVOICED),

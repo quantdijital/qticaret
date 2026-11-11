@@ -1,5 +1,5 @@
 import { z } from "@medusajs/framework/zod"
-import { BILLING_PERIODS, LIMIT_KEYS } from "@qticaret/types/control-plane"
+import { BILLING_PERIODS, LIMIT_KEYS, isPlatformFlag } from "@qticaret/types/control-plane"
 import { limitValue } from "../tenants/validators"
 
 const CLEAN = /^[^\p{Cc}\p{Cf}\u2028\u2029]*$/u
@@ -12,6 +12,18 @@ const days = (max: number) => z.number().int().min(0).max(max)
 
 /** Any of the registry's limits; a key not in it is refused. */
 const limits = z.partialRecord(z.enum(LIMIT_KEYS), limitValue)
+
+/**
+ * A package's platform flags (Ek C9): keys of the shared list only, on or
+ * off; null takes the package's value away (the list's default applies).
+ */
+const features = z.record(z.string(), z.boolean().nullable()).superRefine((value, ctx) => {
+  for (const key of Object.keys(value)) {
+    if (!isPlatformFlag(key, process.env["NODE_ENV"])) {
+      ctx.addIssue({ code: "custom", path: [key], message: "cp.flag_unknown" })
+    }
+  }
+})
 
 /** A new package: its code (fixed: the plan document names it), name, price and limits. */
 export const PostPlan = z
@@ -27,17 +39,19 @@ export const PostPlan = z
     trial_days: days(365).default(0),
     grace_days: days(90).default(7),
     limits: limits.default({}),
+    features: features.optional(),
   })
   .strict()
 export type PostPlanType = z.infer<typeof PostPlan>
 
-/** A package's name, days and limits; its price apart (a step-up, adr/0061 §3.5). */
+/** A package's name, days, limits and flags; its price apart (a step-up, adr/0061 §3.5). */
 export const PostPlanUpdate = z
   .object({
     name: name.optional(),
     trial_days: days(365).optional(),
     grace_days: days(90).optional(),
     limits: limits.optional(),
+    features: features.optional(),
   })
   .strict()
   .refine((value) => Object.keys(value).length > 0, "cp.nothing_to_save")

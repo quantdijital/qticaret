@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { parseTenantApiHosts } from "./fleet/push-target"
 import { publicDomainProblem } from "./tenants/hostname"
 import {
   EnvValidationError,
@@ -70,6 +71,22 @@ const envSchema = z.object({
   // F15.3: per-IP limits a thousand times larger for load tests from one
   // machine (perIpScale); development, test and staging only
   LOAD_TEST: z.enum(["on", "off"]).optional(),
+  // Ek C9: the internal hosts a shop's plan document may be pushed to (host
+  // names or `.suffixes`, comma-separated; lib/fleet/push-target.ts). Unset:
+  // only this machine in development and test, nowhere once deployed (the
+  // shops pull)
+  CP_TENANT_API_HOSTS: z
+    .string()
+    .max(4000)
+    .refine((value) => {
+      try {
+        parseTenantApiHosts(value)
+        return true
+      } catch {
+        return false
+      }
+    }, "must list host names or .suffixes")
+    .optional(),
 })
 
 export type Env = z.infer<typeof envSchema>

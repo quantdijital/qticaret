@@ -1,4 +1,5 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { reissuePlanDocuments } from "../../../../../../lib/fleet/reissue"
 import { setOverrideWorkflow } from "../../../../../../workflows/plans/tenant-plan"
 import { noteAuditChanges } from "../../../../../http/audit"
 import { actorOf, tenantParam } from "../../params"
@@ -31,5 +32,6 @@ export async function POST(
   noteAuditChanges(req, {
     override: { key, from: before ? before.value : "package", to: value },
   })
+  await reissuePlanDocuments(req.scope, [tenant.id])
   res.json({ override: { key, value } })
 }

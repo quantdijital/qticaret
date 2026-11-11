@@ -11,6 +11,10 @@ export async function POST(
   req: AuthenticatedMedusaRequest<PostPlanUpdateType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { limits, ...fields } = req.validatedBody
-  await changePackage(req, res, { fields, ...(limits ? { limits } : {}) })
+  const { limits, features, ...fields } = req.validatedBody
+  await changePackage(req, res, {
+    fields,
+    ...(limits ? { limits } : {}),
+    ...(features ? { features } : {}),
+  })
 }

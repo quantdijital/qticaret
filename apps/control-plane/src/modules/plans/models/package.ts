@@ -1,5 +1,6 @@
 import { model } from "@medusajs/framework/utils"
 import { BILLING_PERIODS } from "@qticaret/types/control-plane"
+import { PackageFeature } from "./package-feature"
 import { PackageLimit } from "./package-limit"
 import { TenantPlan } from "./tenant-plan"
 
@@ -23,7 +24,9 @@ export const Package = model
     grace_days: model.number().default(7),
     archived_at: model.dateTime().nullable(),
     limits: model.hasMany(() => PackageLimit, { mappedBy: "package" }),
+    /** Its platform flags (Ek C9); a flag without a row takes the list's default. */
+    features: model.hasMany(() => PackageFeature, { mappedBy: "package" }),
     tenants: model.hasMany(() => TenantPlan, { mappedBy: "package" }),
   })
   .indexes([{ on: ["code"], unique: true, where: "deleted_at IS NULL" }])
-  .cascades({ delete: ["limits"] })
+  .cascades({ delete: ["limits", "features"] })

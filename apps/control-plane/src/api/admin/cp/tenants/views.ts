@@ -1,6 +1,9 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
+import { platformFlags } from "@qticaret/types/control-plane"
+import { effectiveFlags } from "../../../../lib/fleet/plan-content"
 import { effectiveLimits } from "../../../../lib/plans/limits"
+import { fleetIn } from "../../../../workflows/modules"
 import { omit } from "../../../../lib/omit"
 import { maskEmail, maskPhone } from "../../../../lib/tenants/mask"
 import { maskedTckn } from "../../../../lib/tenants/tckn"
@@ -56,23 +59,28 @@ async function notesOf(req: MedusaRequest, tenantId: string) {
 export async function tenantDetail(
   req: MedusaRequest,
   tenant: TenantRecord,
-  options: { maskContacts: boolean }
+  options: { maskContacts: boolean; fleet: boolean }
 ) {
   const service = tenantsOf(req)
   const plans = plansOf(req)
-  const [company, contacts, domains, notes, plan, overrides] = await Promise.all([
-    service.companyOf(tenant.id),
-    service.contactsOf(tenant.id),
-    service.domainsOf(tenant.id),
-    notesOf(req, tenant.id),
-    plans.planOf(tenant.id),
-    plans.overridesOf(tenant.id),
-  ])
+  const [company, contacts, domains, notes, plan, overrides, flagOverrides, document] =
+    await Promise.all([
+      service.companyOf(tenant.id),
+      service.contactsOf(tenant.id),
+      service.domainsOf(tenant.id),
+      notesOf(req, tenant.id),
+      plans.planOf(tenant.id),
+      plans.overridesOf(tenant.id),
+      plans.featureOverridesOf(tenant.id),
+      options.fleet ? fleetIn(req.scope).planDocumentSummary(tenant.id) : null,
+    ])
   const names = await staffNames(req, [
     tenant.created_by,
     ...notes.map((note) => note.author_id),
     ...overrides.map((each) => each.created_by),
+    ...flagOverrides.map((each) => each.created_by),
   ])
+  const nodeEnv = process.env["NODE_ENV"]
   return {
     tenant: {
       id: tenant.id,
@@ -107,5 +115,19 @@ export async function tenantDetail(
       created_by: each.created_by ? (names[each.created_by] ?? null) : null,
     })),
     limits: effectiveLimits(plan?.limits ?? null, overrides),
+    // Ek C9: the platform flags as the shop's document carries them, and its exceptions
+    platform_flags: platformFlags(nodeEnv).map(({ key, default: value }) => ({
+      key,
+      default: value,
+    })),
+    feature_overrides: flagOverrides.map((each) => ({
+      ...bare(each),
+      created_by: each.created_by ? (names[each.created_by] ?? null) : null,
+    })),
+    features: effectiveFlags(plan?.features ?? null, flagOverrides, new Date(), nodeEnv),
+    // What the shop was last told and whether it took it: the roles that run shops only
+    plan_document: options.fleet
+      ? { ...document, issued: document !== null, push_target: tenant.api_base_url }
+      : undefined,
   }
 }

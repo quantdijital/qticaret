@@ -23,6 +23,12 @@ export const Tenant = model
     sector_pack: model.text().nullable(),
     /** The staff member who made the record; null for the system (a script). */
     created_by: model.text().nullable(),
+    /**
+     * The shop backend's internal base URL (Ek C9): where its plan document
+     * is pushed. Set by the provisioner (C10), in development by `cp:fleet`;
+     * null: nothing is pushed, the shop pulls.
+     */
+    api_base_url: model.text().nullable(),
     company: model.hasOne(() => TenantCompany, { mappedBy: "tenant" }),
     contacts: model.hasMany(() => TenantContact, { mappedBy: "tenant" }),
     domains: model.hasMany(() => TenantDomain, { mappedBy: "tenant" }),

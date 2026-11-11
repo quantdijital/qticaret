@@ -4,11 +4,10 @@ import {
   InjectTransactionManager,
   MedusaContext,
   MedusaError,
-  MedusaService,
 } from "@medusajs/framework/utils"
 import { ed25519KeyId, publicKeyFromRaw } from "@qticaret/server-kit"
-import { TenantKey } from "./models/tenant-key"
 import type { TenantKeyStatus } from "./models/tenant-key"
+import { FleetDocuments } from "./service-documents"
 
 interface Executor {
   execute: (sql: string, params: unknown[]) => Promise<unknown>
@@ -57,10 +56,31 @@ const FIELDS = [
 
 /**
  * What the control plane knows of the shops it runs, beyond their records
- * (adr/0061 §2 `fleet`). C8: the shops' public keys. Plan documents,
- * usage and health join with C9 and C13.
+ * (adr/0061 §2 `fleet`). C8: the shops' public keys. C9: their plan
+ * documents (`FleetDocuments`, service-documents.ts). Usage and health
+ * join with C13.
  */
-class FleetModuleService extends MedusaService({ TenantKey }) {
+class FleetModuleService extends FleetDocuments {
+  /**
+   * The public key a shop's signed request may be checked against (Ek C9):
+   * its `active` or `next` key by `kid`, never a retired one and never
+   * another shop's. Null when there is none: the caller answers as for a
+   * wrong signature, so it tells no one whether the shop exists.
+   */
+  @InjectManager()
+  async trustedTenantKey(
+    tenantId: string,
+    kid: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<string | null> {
+    const [row] = await this.listTenantKeys(
+      { tenant_id: tenantId, kid, status: ["active", "next"] },
+      { select: ["public_key"], take: 1 },
+      sharedContext
+    )
+    return row?.public_key ?? null
+  }
+
   @InjectManager()
   async tenantKeys(
     tenantId: string,

@@ -14,6 +14,8 @@ export interface TenantRecord {
   status_changed_at: Date
   sector_pack: string | null
   created_by: string | null
+  /** Internal base URL its plan document is pushed to (Ek C9); null: none. */
+  api_base_url: string | null
   created_at: Date
 }
 
