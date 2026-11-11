@@ -133,6 +133,14 @@ export async function rewrapEnvelope(
 const PREFIX = `qtenv${String(ENVELOPE_VERSION)}`
 const BASE64URL = /^[A-Za-z0-9_-]+$/
 
+/**
+ * Whether a stored text is in the serialised envelope form (any version),
+ * as opposed to an older format kept beside it while records migrate
+ * (adr/0027's base64 blob, whose alphabet has no dot). A newer envelope
+ * version is still an envelope: `parseEnvelope` refuses it by name.
+ */
+export const isSerializedEnvelope = (text: string): boolean => /^qtenv\d+\./.test(text)
+
 /** One text column: `qtenv1.<kek id>.<wrapped DEK>.<ciphertext>`, base64url parts. */
 export function serializeEnvelope(envelope: Envelope): string {
   return [

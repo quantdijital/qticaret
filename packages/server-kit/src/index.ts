@@ -14,6 +14,7 @@ export {
 export type { EnvelopeErrorCode, KeyWrapper, WrappedKey } from "./crypto/key-wrapper"
 export {
   ENVELOPE_VERSION,
+  isSerializedEnvelope,
   needsRewrap,
   openEnvelope,
   openEnvelopeText,

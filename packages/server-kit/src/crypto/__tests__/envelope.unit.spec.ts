@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto"
 import {
   ENVELOPE_VERSION,
+  isSerializedEnvelope,
   needsRewrap,
   openEnvelope,
   openEnvelopeText,
@@ -151,6 +152,19 @@ describe("serialised form", () => {
 
     expect(text).toMatch(/^qtenv1\.[0-9a-f]{16}\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/)
     expect(await openEnvelopeText(parseEnvelope(text), CONTEXT, wrapper)).toBe(SECRET)
+  })
+
+  it("tells the envelope form from an older stored format", async () => {
+    const wrapper = createLocalKeyWrapper([oldKek])
+    const text = serializeEnvelope(await sealEnvelope(SECRET, CONTEXT, wrapper))
+
+    expect(isSerializedEnvelope(text)).toBe(true)
+    // A later version is still an envelope: parseEnvelope names it unsupported
+    expect(isSerializedEnvelope("qtenv2.abc.AAAA.AAAA")).toBe(true)
+    // adr/0027's blob: standard base64, never a dot
+    expect(isSerializedEnvelope(randomBytes(48).toString("base64"))).toBe(false)
+    expect(isSerializedEnvelope("qtenvelope")).toBe(false)
+    expect(isSerializedEnvelope("")).toBe(false)
   })
 
   it.each([
