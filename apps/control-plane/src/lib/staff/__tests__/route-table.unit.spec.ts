@@ -140,6 +140,10 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "POST /admin/cp/staff/members/:id/reset-mfa",
       "POST /admin/cp/tenants",
       "POST /admin/cp/tenants/:id/plan",
+      "POST /admin/cp/tenants/:id/provisioning",
+      "POST /admin/cp/tenants/:id/provisioning/invite",
+      "POST /admin/cp/tenants/:id/provisioning/start",
+      "POST /admin/cp/tenants/:id/provisioning/stop",
       "POST /admin/cp/tenants/:id/reveal-tckn",
     ])
   })
@@ -213,6 +217,27 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
     for (const rule of keys) {
       expect(CP_STAFF_ROLES.filter((role) => decide(rule, staff(role)).allowed)).toEqual(["owner"])
       expect(rule.stepUp === true).toBe(rule.method === "POST")
+    }
+  })
+
+  it("gives a shop's setup to the owner and operator, every start behind a step-up (C10)", () => {
+    const setup = CP_ROUTES.filter((rule) => rule.path.includes("/provisioning"))
+
+    expect(setup.map((rule) => `${rule.method} ${rule.path}`).sort()).toEqual([
+      "GET /admin/cp/tenants/:id/provisioning",
+      "GET /admin/cp/tenants/:id/provisioning/runs/:run_id",
+      "POST /admin/cp/tenants/:id/provisioning",
+      "POST /admin/cp/tenants/:id/provisioning/invite",
+      "POST /admin/cp/tenants/:id/provisioning/start",
+      "POST /admin/cp/tenants/:id/provisioning/stop",
+    ])
+    for (const rule of setup) {
+      expect(CP_STAFF_ROLES.filter((role) => decide(rule, staff(role)).allowed)).toEqual([
+        "owner",
+        "operator",
+      ])
+      expect(rule.stepUp === true).toBe(rule.method === "POST")
+      expect(rule.resource).toEqual({ type: "tenant", param: "id" })
     }
   })
 

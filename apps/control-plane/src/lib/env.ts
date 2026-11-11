@@ -4,6 +4,7 @@ import { publicDomainProblem } from "./tenants/hostname"
 import {
   EnvValidationError,
   isLocalEnv,
+  isLoopbackUrl,
   key256,
   nodeEnv,
   originList,
@@ -87,9 +88,54 @@ const envSchema = z.object({
       }
     }, "must list host names or .suffixes")
     .optional(),
+  // Ek C10: who sets a shop up (adr/0061 §6). `local` on a developer's
+  // machine only (a real shop process and database here); `fake` in the
+  // tests only; `docker` comes with F16. Unset: no provisioning
+  CP_PROVISIONER: z.enum(["local", "docker", "fake"]).optional(),
+  // Ek C10: the local provisioner's administrative connection to this
+  // machine's Postgres (makes `qt_tenant_<slug>` and its role); local only
+  CP_LOCAL_PG_ADMIN_URL: z
+    .url({ protocol: /^postgres(ql)?$/, error: "must be a postgres:// URL" })
+    .optional(),
 })
 
 export type Env = z.infer<typeof envSchema>
+
+/**
+ * Ek C10: the local provisioner makes databases and processes on this
+ * machine, so it boots on a developer's machine only, against a Postgres
+ * here; the fake one exists for the tests; Docker is F16's.
+ */
+function provisionerIssues(env: Env, issue: (path: keyof Env, message: string) => void): void {
+  const admin = env.CP_LOCAL_PG_ADMIN_URL
+  // Refused here once deployed; the provisioner itself refuses anything but
+  // development (a test run reads the developer's .env too, and never makes one)
+  if (env.CP_PROVISIONER === "local" && !isLocalEnv(env)) {
+    issue("CP_PROVISIONER", "local is allowed on development only")
+  }
+  if (env.CP_PROVISIONER === "local" && admin === undefined) {
+    issue("CP_LOCAL_PG_ADMIN_URL", "is required with CP_PROVISIONER=local")
+  }
+  if (env.CP_PROVISIONER === "fake" && env.NODE_ENV !== "test") {
+    issue("CP_PROVISIONER", "fake is allowed in tests only")
+  }
+  if (env.CP_PROVISIONER === "docker") {
+    issue("CP_PROVISIONER", "docker is not available yet (F16)")
+  }
+  if (admin !== undefined && !isLocalEnv(env)) {
+    issue("CP_LOCAL_PG_ADMIN_URL", "is allowed on development and test only")
+  }
+  const here = (url: string) => {
+    try {
+      return isLoopbackUrl(url)
+    } catch {
+      return false
+    }
+  }
+  if (admin !== undefined && !here(admin)) {
+    issue("CP_LOCAL_PG_ADMIN_URL", "must point at a database on this machine")
+  }
+}
 
 const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
   const deployed = !isLocalEnv(env)
@@ -172,6 +218,9 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: "must be https outside development and test",
     })
   }
+  provisionerIssues(env, (path, message) => {
+    ctx.addIssue({ code: "custom", path: [path], message })
+  })
   if (env.LOAD_TEST === "on" && !(isLocalEnv(env) || env.NODE_ENV === "staging")) {
     ctx.addIssue({
       code: "custom",

@@ -1,0 +1,138 @@
+import { spawn } from "node:child_process"
+import { createWriteStream } from "node:fs"
+import type { WriteStream } from "node:fs"
+import { readTenantResult } from "@qticaret/types/control-plane"
+import { ProvisioningError } from "../provisioner"
+import type { CommandResult, TenantCommand } from "../provisioner"
+
+/**
+ * The closed list of shop commands (adr/0061 §3.4, Ek C10) as Medusa CLI
+ * arguments: `medusa db:migrate` and `medusa exec` of the backend's own
+ * scripts, nothing else. Run with Node directly (an argv array, never a
+ * shell), in the shop's folder, with only the shop's environment.
+ */
+
+const MINUTE = 60_000
+
+// Long enough for the slowest (the bootstrap fetches the country's address data)
+export const COMMAND_TIMEOUT_MS: Readonly<Record<TenantCommand["name"], number>> = {
+  migrate: 10 * MINUTE,
+  bootstrap: 20 * MINUTE,
+  "invite-owner": 2 * MINUTE,
+  "apply-pack": 10 * MINUTE,
+  "plan-import": 2 * MINUTE,
+}
+
+// The result line comes last; what came before it is the command's log
+const CAPTURE_BYTES = 64 * 1024
+const KILL_GRACE_MS = 5_000
+
+// Control and invisible format characters never make an argument
+const CLEAN = /^[^\p{Cc}\p{Cf}\u2028\u2029]+$/u
+const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,190}\.[^\s@]{2,63}$/
+
+/** The CLI arguments of a command; `apply-pack` is C12's and not available yet. */
+export function argvOf(cmd: TenantCommand): string[] {
+  switch (cmd.name) {
+    case "migrate":
+      // A new database has only new links: safe to sync without asking
+      return ["db:migrate", "--execute-safe-links"]
+    case "bootstrap":
+      if (!CLEAN.test(cmd.store_name) || cmd.store_name.length > 120) {
+        throw new ProvisioningError("provisioning.store_name_invalid")
+      }
+      return ["exec", "./src/scripts/bootstrap-tenant.js", `store-name=${cmd.store_name}`]
+    case "invite-owner":
+      if (!EMAIL.test(cmd.email)) {
+        throw new ProvisioningError("provisioning.owner_email_invalid")
+      }
+      return ["exec", "./src/scripts/invite-owner.js", `email=${cmd.email}`]
+    case "plan-import":
+      return ["exec", "./src/scripts/plan-import.js"]
+    case "apply-pack":
+      throw new ProvisioningError("provisioning.command_unavailable")
+  }
+}
+
+/** Keeps the last `max` bytes written to it. */
+class Tail {
+  private chunks: Buffer[] = []
+  private size = 0
+  constructor(private readonly max: number) {}
+  push(chunk: Buffer): void {
+    this.chunks.push(chunk)
+    this.size += chunk.length
+    while (this.size > this.max && this.chunks.length > 1) {
+      this.size -= this.chunks.shift()?.length ?? 0
+    }
+  }
+  text(): string {
+    return Buffer.concat(this.chunks).toString("utf8").slice(-this.max)
+  }
+}
+
+export interface RunOptions {
+  cli: string
+  cwd: string
+  env: Record<string, string>
+  args: string[]
+  stdin?: string
+  timeoutMs: number
+  /** The shop's own log file for the output; null keeps it nowhere (`invite-owner`). */
+  logFile: string | null
+}
+
+/**
+ * One command: its stdout's tail read for the result line only, its
+ * output appended to the shop's log (0600) unless `logFile` is null, ended
+ * (SIGTERM, then SIGKILL) at its time limit.
+ */
+export async function runCommand(options: RunOptions): Promise<CommandResult> {
+  const started = Date.now()
+  const log: WriteStream | null = options.logFile
+    ? createWriteStream(options.logFile, { flags: "a", mode: 0o600 })
+    : null
+  const tail = new Tail(CAPTURE_BYTES)
+  const child = spawn(process.execPath, [options.cli, ...options.args], {
+    cwd: options.cwd,
+    env: options.env,
+    shell: false,
+    stdio: ["pipe", "pipe", "pipe"],
+  })
+  child.stdout.on("data", (chunk: Buffer) => {
+    tail.push(chunk)
+    log?.write(chunk)
+  })
+  child.stderr.on("data", (chunk: Buffer) => log?.write(chunk))
+  child.stdin.on("error", () => undefined)
+  child.stdin.end(options.stdin ?? "")
+  const state = { timedOut: false }
+  const timer = setTimeout(() => {
+    state.timedOut = true
+    child.kill("SIGTERM")
+    setTimeout(() => child.kill("SIGKILL"), KILL_GRACE_MS).unref()
+  }, options.timeoutMs)
+  const exitCode = await new Promise<number | null>((resolve) => {
+    child.once("error", () => {
+      resolve(null)
+    })
+    child.once("close", (code) => {
+      resolve(code)
+    })
+  })
+  clearTimeout(timer)
+  await new Promise<void>((resolve) => {
+    if (log) {
+      log.end(resolve)
+    } else {
+      resolve()
+    }
+  })
+  return {
+    ok: !state.timedOut && exitCode === 0,
+    exit_code: exitCode,
+    timed_out: state.timedOut,
+    duration_ms: Date.now() - started,
+    result: readTenantResult(tail.text()),
+  }
+}

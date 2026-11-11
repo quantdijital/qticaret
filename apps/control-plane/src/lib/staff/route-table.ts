@@ -1,5 +1,6 @@
 import { CP_STAFF_ROLES } from "./roles"
 import type { CpStaffRole } from "./roles"
+import { PROVISIONING_ROUTES } from "./route-table-provisioning"
 
 /**
  * Every `/admin/cp/*` route and who may call it (adr/0061 §3.5, the shop's
@@ -268,6 +269,7 @@ export const CP_ROUTES: readonly RouteRule[] = [
   ...TENANT_ROUTES,
   ...PLAN_ROUTES,
   ...KEY_ROUTES,
+  ...PROVISIONING_ROUTES,
 ]
 
 const compiled = new Map<string, RegExp>()

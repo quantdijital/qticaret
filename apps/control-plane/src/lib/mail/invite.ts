@@ -29,7 +29,7 @@ export const enrolmentLink = (token: string, base: string = parseEnv().CP_PANEL_
 function linkEmail(
   to: string,
   link: string,
-  keys: { subject: MailMessageKey; lines: string[] },
+  keys: { subject: MailMessageKey; subjectValues?: Record<string, string>; lines: string[] },
   template: string
 ): OutgoingEmail {
   const [intro = "", action = "", ...rest] = keys.lines
@@ -40,7 +40,7 @@ function linkEmail(
   ].join("\n")
   return {
     to,
-    subject: format(keys.subject),
+    subject: format(keys.subject, keys.subjectValues),
     text: [intro, action, link, ...rest].join("\n\n"),
     html,
     template,
@@ -62,6 +62,28 @@ export const inviteEmail = (to: string, role: CpStaffRole, link: string): Outgoi
       ],
     },
     "cp.staff_invite"
+  )
+
+/**
+ * A new shop's owner invitation (adr/0061 §6.2, Ek C10): the link the shop
+ * made for its first owner, sent under the platform's name; it is not
+ * kept anywhere.
+ */
+export const ownerInviteEmail = (to: string, shop: string, link: string): OutgoingEmail =>
+  linkEmail(
+    to,
+    link,
+    {
+      subject: "owner_invite.subject",
+      subjectValues: { shop },
+      lines: [
+        format("owner_invite.intro", { shop }),
+        format("owner_invite.action"),
+        format("owner_invite.expiry"),
+        format("owner_invite.ignore"),
+      ],
+    },
+    "cp.owner_invite"
   )
 
 /** A 2FA reset's e-mail: the single-use enrolment link. */

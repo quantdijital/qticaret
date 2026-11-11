@@ -88,4 +88,10 @@ export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
   body(`${P}/:id/price`, PostPlanPrice),
   body(`${P}/:id/archive`, NoBody),
   body(`${P}/:id/restore`, NoBody),
+  // Ek C10: a shop's setup takes nothing but the path (no failure injection over HTTP)
+  query(`${T}/:id/provisioning`, NoQuery),
+  query(`${T}/:id/provisioning/runs/:run_id`, NoQuery),
+  ...["", "/stop", "/start", "/invite"].map((action) =>
+    body(`${T}/:id/provisioning${action}`, NoBody)
+  ),
 ]

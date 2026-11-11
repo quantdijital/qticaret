@@ -17,6 +17,13 @@ export const MAIL_MESSAGES_TR = {
   "staff_enrol.action": "Kurulum için bağlantıyı açın:",
   "staff_enrol.expiry": "Bağlantı 24 saat geçerlidir ve yalnızca bir kez kullanılır.",
   "staff_enrol.ignore": "Bu sıfırlamayı beklemiyorsanız hemen platform sahibine haber verin.",
+  "owner_invite.subject": "{shop} mağazanız hazır: yönetim paneline giriş",
+  "owner_invite.intro":
+    "{shop} mağazanız Quant Ticaret'te kuruldu. Mağazanın sahibi olarak yönetim paneli hesabınızı oluşturun.",
+  "owner_invite.action": "Hesabınızı oluşturmak için bağlantıyı açın:",
+  "owner_invite.expiry":
+    "Bağlantı yalnızca bir kez kullanılır. Süresi dolarsa platform ekibinden yeni bağlantı isteyin.",
+  "owner_invite.ignore": "Bu e-postayı beklemiyorsanız yok sayın.",
   "role.owner": "sahip",
   "role.operator": "operatör",
   "role.finance": "finans",

@@ -22,7 +22,9 @@
     "cp:end-sessions": "medusa exec ./src/scripts/end-sessions.ts",
     "cp:seed-dev": "medusa exec ./src/scripts/seed-dev.ts",
     "cp:keys": "medusa exec ./src/scripts/keys.ts",
-    "cp:fleet": "medusa exec ./src/scripts/fleet.ts"
+    "cp:fleet": "medusa exec ./src/scripts/fleet.ts",
+    "cp:tenant-create": "medusa exec ./src/scripts/tenant-create.ts",
+    "cp:tenant": "medusa exec ./src/scripts/tenant.ts"
   },
   "dependencies": {
     "@medusajs/caching": "2.21.2",

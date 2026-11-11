@@ -186,4 +186,33 @@ describe("parseEnv", () => {
     expect(parseEnv({ ...live, PLATFORM_DOMAIN: "magaza.quantticaret.com.tr" })).toBeTruthy()
     expect(parseEnv({ ...valid, PLATFORM_DOMAIN: "localhost" })).toBeTruthy()
   })
+
+  it("keeps the local provisioner to this machine and the fake one to tests (Ek C10)", () => {
+    const admin = "postgres://postgres:pw@localhost:55432/postgres"
+    expect(
+      parseEnv({ ...valid, CP_PROVISIONER: "local", CP_LOCAL_PG_ADMIN_URL: admin })
+    ).toMatchObject({ CP_PROVISIONER: "local" })
+    expect(problems({ ...valid, CP_PROVISIONER: "local" })).toContain(
+      "CP_LOCAL_PG_ADMIN_URL: is required with CP_PROVISIONER=local"
+    )
+    const deployed = problems({
+      ...valid,
+      NODE_ENV: "production",
+      CP_PROVISIONER: "local",
+      CP_LOCAL_PG_ADMIN_URL: admin,
+    })
+    expect(deployed).toContain("CP_PROVISIONER: local is allowed on development only")
+    expect(deployed).toContain("CP_LOCAL_PG_ADMIN_URL: is allowed on development and test only")
+    expect(deployed).not.toContain(":pw@")
+    expect(
+      problems({
+        ...valid,
+        CP_LOCAL_PG_ADMIN_URL: "postgres://postgres:pw@db.example.com/postgres",
+      })
+    ).toContain("CP_LOCAL_PG_ADMIN_URL: must point at a database on this machine")
+    expect(problems({ ...valid, CP_PROVISIONER: "fake" })).toContain(
+      "CP_PROVISIONER: fake is allowed in tests only"
+    )
+    expect(problems({ ...valid, CP_PROVISIONER: "docker" })).toContain("not available yet")
+  })
 })

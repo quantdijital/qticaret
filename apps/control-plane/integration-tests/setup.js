@@ -18,4 +18,8 @@ if (process.env.TEST_TYPE?.startsWith("integration")) {
   for (const name of ["EMAIL_TRANSPORT", "MAILPIT_URL", "EMAIL_FROM"]) {
     process.env[name] = ""
   }
+  // Ek C10: shops are set up by the fake provisioner (state in this process);
+  // no test makes a database or starts a shop
+  process.env.CP_PROVISIONER = "fake"
+  process.env.CP_LOCAL_PG_ADMIN_URL = ""
 }
