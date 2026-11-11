@@ -40,13 +40,13 @@ interface Sent {
   init: RequestInit
 }
 
-function fakeFetch(status: number | Error) {
+function fakeFetch(status: number | Error, answer: unknown = {}) {
   const sent: Sent[] = []
   const fetch = (url: string, init: RequestInit) => {
     sent.push({ url, init })
     return status instanceof Error
       ? Promise.reject(status)
-      : Promise.resolve(new Response("{}", { status }))
+      : Promise.resolve(new Response(JSON.stringify(answer), { status }))
   }
   return { sent, fetch }
 }
@@ -113,6 +113,16 @@ describe("sendUsageReport (adr/0061 §5.4, Ek C13)", () => {
       status: 409,
     })
     expect(refused.sent).toHaveLength(1)
+    // Review M1: a report minutes after the last is no failure, only said
+    const soon = fakeFetch(409, { type: "conflict", message: "usage.too_soon" })
+    expect(await sendUsageReport(container, { fetch: soon.fetch, release })).toEqual({
+      outcome: "too_soon",
+    })
+    const order = fakeFetch(409, { type: "conflict", message: "usage.out_of_order" })
+    expect(await sendUsageReport(container, { fetch: order.fetch, release })).toEqual({
+      outcome: "refused",
+      status: 409,
+    })
     const down = fakeFetch(new TypeError("fetch failed"))
     expect(await sendUsageReport(container, { fetch: down.fetch, release })).toEqual({
       outcome: "unreachable",

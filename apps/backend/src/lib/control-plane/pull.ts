@@ -27,7 +27,7 @@ export type PullResult =
   ReceiveResult | { outcome: "not_configured" | "unreachable" | "none" | "bad_answer" }
 
 /** The answer's bytes, at most `limit`; null past it (the rest is not read). */
-async function readCapped(response: Response, limit: number): Promise<string | null> {
+export async function readCapped(response: Response, limit: number): Promise<string | null> {
   const reader = response.body?.getReader()
   if (!reader) {
     return ""
