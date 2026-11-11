@@ -85,7 +85,12 @@
 
 ### Secret yönetimi
 - Secret'lar: geliştirmede `.env` (git'e girmez), prod'da secret manager / Docker secrets.
-- Control plane secret deposu: KMS destekli envelope encryption, anahtar döndürme planı (F17 ADR'ında ayrıntı).
+- Üst panelin (control plane) secret deposu (adr/0061 §4, Ek C8): `vault` modülü.
+  - **Zarf şifreleme:** her kayıt kendi veri anahtarıyla, veri anahtarı `CP_MASTER_KEY` (yerel KEK; OpenBao Transit F16) altında sarılı; AAD sahip + ad + sürüm. Satırda düz metin yok.
+  - **KEK döndürme:** yeni anahtar listenin başına eklenir, `pnpm --filter control-plane cp:keys rewrap` (ya da Anahtarlar > Yeniden sar, saatlik iş) eski anahtar altındaki sırları ve TCKN'leri yeniden sarar (veri yeniden şifrelenmez). Eski anahtar yalnızca `cp:keys status` onu "removable" gösterince çıkarılır; erken çıkarılırsa kayıtlar açılamaz ve panel, CLI ve saatlik iş bunu açıkça söyler.
+  - **İmza anahtarı:** üst panel üretir, gizli yarısı depoda mühürlü; döndürme üç adım (hazırla → geç → kaldır), kaldırılanın gizli yarısı silinir.
+  - **Mağazanın çalışma sırları:** üretilir, çağırana verilir, saklanmaz; yalnız açık anahtar (`tenant_key`) ve `CP_ESCROW_RECIPIENTS`'teki çevrimdışı `age` alıcılarına mühürlü emanet kopyası (`secret_escrow`) kalır. Üst panel emaneti açamaz: kimlik (identity) hiçbir yerde yok, env'de verilirse açılış reddeder.
+  - Anahtar uçları yalnız sahibin, her değişiklik yeniden doğrulamayla; yanıtlarda yalnız `kid`, açık anahtar, parmak izi ve sayılar.
 - Mağazanın sağlayıcı hesapları (PayTR, iyzico, ...) panelden girilir ve `integration-credentials` modülünde AES-256-GCM ile şifreli durur (adr/0027):
   - Anahtar `CREDENTIALS_ENCRYPTION_KEY`; PII anahtarlarından ayrıdır ve canlıda zorunludur.
   - Blok sağlayıcıya bağlıdır (AAD). Anahtar değişirse kayıt "yeniden girilmeli" olur.
