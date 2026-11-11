@@ -141,6 +141,8 @@ module.exports = defineConfig({
     { resolve: "./src/modules/order-refunds" },
     // F12.8: staff notes on orders
     { resolve: "./src/modules/order-notes" },
+    // adr/0061 C12: the sector packs applied here and the items each offered
+    { resolve: "./src/modules/sector-packs" },
     // F13 (adr/0041): legal texts in versions, and the consents given to them
     {
       resolve: "./src/modules/legal",
