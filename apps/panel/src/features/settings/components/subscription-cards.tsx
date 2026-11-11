@@ -117,7 +117,8 @@ export function PackageCard({ plan }: { plan: PlanSummary }) {
         rows={[
           [
             t("plan.package.name"),
-            plan.package_code ? packageName(plan.package_code) : t("plan.package.none"),
+            plan.package_name ??
+              (plan.package_code ? packageName(plan.package_code) : t("plan.package.none")),
           ],
           [t("plan.package.status"), t(`plan.statuses.${plan.status}`, plan.status)],
           [t("plan.package.period"), plan.period],
@@ -127,7 +128,7 @@ export function PackageCard({ plan }: { plan: PlanSummary }) {
   )
 }
 
-/** Payment status, the next payment day and amount, and how to pay (signed, C16). */
+/** Payment status, the next payment day and amount, and how to pay (signed, Ek C16). */
 export function BillingCard({ plan }: { plan: PlanSummary }) {
   const { t } = useTranslation()
   const billing = plan.billing

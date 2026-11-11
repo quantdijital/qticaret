@@ -9016,7 +9016,11 @@
       "restricted": "Your shop is restricted: the subscription payment is overdue. The panel is read only; order operations, stock, KVKK requests, exports and your own account stay open. The storefront keeps selling.",
       "suspended": "Your shop is suspended: the storefront is closed to visitors and takes no new orders. The panel is read only; existing orders' operations, stock, KVKK requests, exports and your own account stay open.",
       "askOwner": "Ask the shop's owner for the details.",
-      "closed": "This action is closed while your shop is restricted."
+      "closed": "This action is closed while your shop is restricted.",
+      "soon": "Your subscription payment is due on {{date}}: {{amount}}.",
+      "late": "Your subscription payment is late ({{date}}, {{amount}}). Unless it is paid by {{graceEnds}}, the panel will be restricted; your storefront keeps selling.",
+      "lateNoDate": "Your subscription payment is late ({{date}}, {{amount}}). Unless it is paid, the panel will be restricted; your storefront keeps selling.",
+      "howToPay": "How to pay"
     },
     "package": {
       "title": "Package",

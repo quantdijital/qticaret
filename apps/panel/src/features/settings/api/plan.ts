@@ -33,6 +33,8 @@ export interface PlanSummary {
   managed: boolean
   status: string
   package_code: string | null
+  /** The package's name as the control plane signs it (Ek C16); null from an older document. */
+  package_name: string | null
   period: string
   warning_ratio: number
   limits: LimitStanding[]

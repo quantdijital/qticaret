@@ -79,6 +79,42 @@ describe("SubscriptionPage (adr/0061 §5.6, Ek C14)", () => {
     ).toBeInTheDocument()
   })
 
+  it("shows the signed package name, the late payment, its grace and how to pay (Ek C16)", async () => {
+    fetchMock.mockResolvedValue({
+      plan: planOf({
+        package_code: "profesyonel-ag",
+        package_name: "Profesyonel Ağ",
+        billing: {
+          status: "past_due",
+          due_on: "2026-12-01",
+          grace_ends_on: "2026-12-08",
+          amount: 149_000,
+          currency: "TRY",
+        },
+        payment_instruction: "Alıcı: Quant Dijital Yazılım\nIBAN: TR12 0006 4000 0011 2345 6789 01",
+      }),
+    })
+    renderPage()
+
+    expect(await screen.findByText("Profesyonel Ağ")).toBeInTheDocument()
+    expect(screen.queryByText("Profesyonel ag")).toBeNull()
+    expect(screen.getByText("Gecikmiş")).toBeInTheDocument()
+    expect(screen.getByText("8 Ara 2026")).toBeInTheDocument()
+    expect(screen.getByText(/1\.490,00/)).toBeInTheDocument()
+    expect(screen.getByText(/IBAN: TR12 0006/)).toBeInTheDocument()
+    expect(
+      screen.queryByText("Ödeme talimatı, ödeme günü yaklaştığında burada görünür.")
+    ).toBeNull()
+  })
+
+  it("names the package from its code when an older document has no name", async () => {
+    fetchMock.mockResolvedValue({
+      plan: planOf({ package_code: "kurumsal", package_name: null }),
+    })
+    renderPage()
+    expect(await screen.findByText("Kurumsal")).toBeInTheDocument()
+  })
+
   it("says a shop without a plan has no limits, and shows its use", async () => {
     fetchMock.mockResolvedValue({
       plan: planOf(

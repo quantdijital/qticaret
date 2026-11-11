@@ -25,6 +25,7 @@ export function planOf(
     managed: true,
     status: "active",
     package_code: "standart",
+    package_name: "Standart",
     period: "2026-11",
     warning_ratio: 0.8,
     limits: LIMITS.map((limit) => ({ ...limit, ...limits[limit.key] })),

@@ -3,6 +3,7 @@ import { Ban, Lock } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { useCan, usePlanStatus } from "@/features/auth/api/staff"
+import { PaymentStrip } from "./payment-strip"
 
 /** The strip's id, for a button its status holds back to point to (`aria-describedby`). */
 export const PLAN_STRIP_ID = "plan-status-strip"
@@ -12,14 +13,16 @@ export const PLAN_STRIP_ID = "plan-status-strip"
  * §5.5, Ek C15): what is closed, what stays open and what to do. Every
  * role sees it (the status comes with `staff/me`); the owner and admins,
  * who may read the plan, get the way to Ayarlar > Abonelik, the others
- * are told to ask the owner.
+ * are told to ask the owner. While the shop is active, the owner and
+ * admins see the payment strip instead when a payment is near or late
+ * (Ek C16).
  */
 export function PlanStatusBanner() {
   const { t } = useTranslation()
   const status = usePlanStatus()
   const readsPlan = useCan("settings")
   if (status === "active") {
-    return null
+    return readsPlan ? <PaymentStrip id={PLAN_STRIP_ID} /> : null
   }
   const suspended = status === "suspended"
   const Icon = suspended ? Ban : Lock

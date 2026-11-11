@@ -9016,7 +9016,11 @@
       "restricted": "Mağazanız kısıtlı: abonelik ödemesi gecikti. Panel salt okunur; siparişlerin işlemleri, stok, KVKK talepleri, dışa aktarma ve kendi hesabınız açık. Vitrin satışa devam ediyor.",
       "suspended": "Mağazanız askıya alındı: vitrin ziyaretçilere kapalı, yeni sipariş alınmıyor. Panel salt okunur; mevcut siparişlerin işlemleri, stok, KVKK talepleri, dışa aktarma ve kendi hesabınız açık.",
       "askOwner": "Ayrıntılar için mağaza sahibine başvurun.",
-      "closed": "Mağazanız kısıtlıyken bu işlem kapalı."
+      "closed": "Mağazanız kısıtlıyken bu işlem kapalı.",
+      "soon": "Abonelik ödemenizin son günü {{date}}: {{amount}}.",
+      "late": "Abonelik ödemeniz gecikti ({{date}}, {{amount}}). {{graceEnds}} tarihine kadar ödenmezse panel kısıtlanır; vitrininiz satışa devam eder.",
+      "lateNoDate": "Abonelik ödemeniz gecikti ({{date}}, {{amount}}). Ödenmezse panel kısıtlanır; vitrininiz satışa devam eder.",
+      "howToPay": "Ödeme bilgileri"
     },
     "package": {
       "title": "Paket",

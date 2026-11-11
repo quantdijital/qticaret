@@ -1,9 +1,13 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen } from "@testing-library/react"
+import { cleanup, render, screen } from "@testing-library/react"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { dayOf } from "@qticaret/admin-ui/lib/days"
 import "@/lib/i18n"
 import { STAFF_KEY, refreshStandingAfter } from "@/features/auth/api/staff"
+import type { BillingSummary } from "@/features/settings/api/plan"
+import { planOf } from "@/features/settings/plan.fixtures"
+import { paymentStrip } from "@/features/settings/plan-rules"
 import { PlanStatusBanner } from "./plan-status-banner"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string) => Promise<unknown>>())
@@ -82,6 +86,73 @@ describe("PlanStatusBanner (adr/0061 Ek C15)", () => {
       await settled(client)
       expect(screen.queryByRole("status")).toBeNull()
     }
+  })
+
+  describe("the payment strip while the shop is active (Ek C16)", () => {
+    const today = dayOf(new Date())
+    const plusDays = (n: number) =>
+      new Date(Date.parse(`${today}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10)
+    const answers = (role: "owner" | "operations", billing: BillingSummary) => (url: string) =>
+      Promise.resolve(url === "/admin/plan" ? { plan: planOf({ billing }) } : me(role, "active"))
+    const late: BillingSummary = {
+      status: "past_due",
+      due_on: plusDays(-3),
+      grace_ends_on: plusDays(4),
+      amount: 149_000,
+      currency: "TRY",
+    }
+
+    it("tells the owner a payment is late, until when, and where to see how to pay", async () => {
+      fetchMock.mockImplementation(answers("owner", late))
+      renderBanner()
+
+      const strip = await screen.findByRole("status")
+      expect(strip).toHaveTextContent("Abonelik ödemeniz gecikti")
+      expect(strip).toHaveTextContent("1.490,00")
+      expect(strip).toHaveTextContent("tarihine kadar ödenmezse panel kısıtlanır")
+      expect(strip).toHaveClass("bg-warning-soft")
+      expect(screen.getByRole("link", { name: "Ödeme bilgileri" })).toHaveAttribute(
+        "href",
+        "/settings/subscription"
+      )
+    })
+
+    it("reminds the owner in the last three days before the due day, not earlier", async () => {
+      fetchMock.mockImplementation(
+        answers("owner", { ...late, status: "active", due_on: plusDays(2), grace_ends_on: null })
+      )
+      renderBanner()
+      expect(await screen.findByRole("status")).toHaveTextContent("Abonelik ödemenizin son günü")
+    })
+
+    it("shows nothing to other roles, nor far from the due day", async () => {
+      fetchMock.mockImplementation(answers("operations", late))
+      const client = renderBanner()
+      await settled(client)
+      expect(screen.queryByRole("status")).toBeNull()
+      expect(fetchMock).not.toHaveBeenCalledWith("/admin/plan")
+
+      cleanup()
+      fetchMock.mockImplementation(
+        answers("owner", { ...late, status: "active", due_on: plusDays(10), grace_ends_on: null })
+      )
+      const owner = renderBanner()
+      await settled(owner)
+      await vi.waitFor(() => {
+        expect(fetchMock).toHaveBeenCalledWith("/admin/plan")
+      })
+      expect(screen.queryByRole("status")).toBeNull()
+    })
+
+    it("names the strip by rule: late, soon or none", () => {
+      expect(paymentStrip(late, today)).toBe("late")
+      expect(paymentStrip({ ...late, status: "trialing", due_on: today }, today)).toBe("soon")
+      expect(paymentStrip({ ...late, status: "active", due_on: plusDays(3) }, today)).toBe("soon")
+      expect(paymentStrip({ ...late, status: "active", due_on: plusDays(4) }, today)).toBeNull()
+      expect(paymentStrip({ ...late, status: "restricted" }, today)).toBeNull()
+      expect(paymentStrip({ ...late, due_on: null }, today)).toBeNull()
+      expect(paymentStrip(null, today)).toBeNull()
+    })
   })
 
   it("reads the status again after any refused write", () => {

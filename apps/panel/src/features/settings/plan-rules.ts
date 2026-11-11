@@ -1,5 +1,5 @@
 import { LIMIT_WARNING_RATIO } from "@qticaret/types/control-plane"
-import type { LimitStanding } from "@/features/settings/api/plan"
+import type { BillingSummary, LimitStanding } from "@/features/settings/api/plan"
 
 /**
  * How a limit's use reads (adr/0061 §5.3, Ek C14), as the control plane's
@@ -50,7 +50,7 @@ export function noticeKey(limit: NoticedLimit, standing: LimitStanding): string 
   return `plan.notice.${limit}.${tone === "full" ? "full" : "near"}`
 }
 
-/** A package code as a name until the plan document carries one (`standart` → "Standart"). */
+/** A package code as a name when the plan document carries none (an older control plane). */
 export const packageName = (code: string): string => {
   const words = code.replace(/[-_]+/g, " ").trim()
   return words.charAt(0).toLocaleUpperCase("tr-TR") + words.slice(1)
@@ -59,3 +59,30 @@ export const packageName = (code: string): string => {
 /** The rows Settings > Abonelik lists: every limit but the ones not applied yet. */
 export const shownLimits = (limits: readonly LimitStanding[]): LimitStanding[] =>
   limits.filter((limit) => limit.kind !== "later")
+
+/** How many days before its due day an unpaid charge shows the payment strip (adr/0061 §7). */
+export const DUE_SOON_DAYS = 3
+
+export type PaymentStrip = "late" | "soon" | null
+
+/**
+ * The payment strip above every page for the owner and admins while the
+ * shop is active (adr/0061 §5.5 "ek süre içinde dahil", Ek C16): `late`
+ * while a charge is past its day (the grace), `soon` in the last days
+ * before it; nothing otherwise. `today` is an Istanbul day.
+ */
+export function paymentStrip(billing: BillingSummary | null, today: string): PaymentStrip {
+  if (!billing?.due_on) {
+    return null
+  }
+  if (billing.status === "past_due") {
+    return "late"
+  }
+  if (billing.status !== "active" && billing.status !== "trialing") {
+    return null
+  }
+  const days = Math.round(
+    (Date.parse(`${billing.due_on}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000
+  )
+  return days >= 0 && days <= DUE_SOON_DAYS ? "soon" : null
+}
