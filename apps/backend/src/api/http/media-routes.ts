@@ -8,6 +8,7 @@ import {
   AdminUpdateMedia,
 } from "../admin/media/validators"
 import { requireUserActor } from "./actor"
+import { guardImportStorage } from "./plan-limit-guards"
 import { rateLimit } from "./rate-limit"
 import { restrictStoreRelation } from "../validation/attribute-fields"
 
@@ -38,6 +39,8 @@ export const MEDIA_ROUTES = [
       requireUserActor,
       rateLimit(() => RATE_LIMIT_PROFILES.media_import),
       validateAndTransformBody(AdminImportMedia),
+      // adr/0061 Ek C14: a library at the package's storage limit fetches nothing more
+      guardImportStorage,
     ],
   },
   {

@@ -149,6 +149,8 @@ export const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/notifications/:id" },
   // Who the shop turns away, and why (adr/0044 §4)
   { methods: "*", path: "/admin/fraud/blocks*" },
+  // The package, its use and what the shop owes the platform (adr/0061 Ek C14): owner and admin
+  { methods: "*", path: "/admin/plan" },
 ]
 
 /**

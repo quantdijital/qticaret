@@ -10,6 +10,7 @@ import {
 import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
 import { acceptInviteWorkflow, createInvitesWorkflow } from "@medusajs/medusa/core-flows"
 import { ValidationError } from "../../lib/errors"
+import { assertStaffSeat, forgetUsage } from "../../lib/plan-limits"
 import { INVITABLE_ROLES } from "../../lib/staff"
 import type { InvitableRole } from "../../lib/staff"
 import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
@@ -66,12 +67,23 @@ export async function inviteOfToken(
 }
 
 /**
+ * A seat for one more (adr/0061 Ek C14): members and open invitations
+ * within the package's team limit, or 403 `plan.limit_reached`. Reads only.
+ */
+const staffSeatStep = createStep("staff-invite-seat", async (_: undefined, { container }) => {
+  await assertStaffSeat(container)
+  forgetUsage("staff")
+  return new StepResponse(undefined)
+})
+
+/**
  * An invitation to the panel with the role it gives (F12.6, adr/0040 §4):
  * Medusa's invitation, the role in its metadata, read back on acceptance.
  */
 export const inviteStaffWorkflow = createWorkflow(
   "staff-invite",
   (input: WorkflowData<{ email: string; role: InvitableRole; invited_by: string }>) => {
+    staffSeatStep()
     const invites = createInvitesWorkflow.runAsStep({
       input: transform({ input }, ({ input }) => ({
         invites: [

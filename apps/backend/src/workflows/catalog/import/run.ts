@@ -1,7 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { productsOf } from "../../../lib/catalog-sheet"
 import type { SheetProduct } from "../../../lib/catalog-sheet"
-import { ValidationError } from "../../../lib/errors"
+import { ValidationError, isPlanLimitError } from "../../../lib/errors"
+import { productAllowance } from "../../../lib/plan-limits"
 import { errorSummary, logger } from "../../../lib/logging"
 import type { Assessment } from "../../../lib/seo/advisor"
 import { readSheet } from "../../../lib/sheets"
@@ -14,7 +15,7 @@ import { importProductWorkflow } from "./import-product"
 import { planImport } from "./plan"
 import type { ImportPlan } from "./plan"
 import { importReferences } from "./references"
-import { measuresNote, problemRow, productRow, seoSummary } from "./report"
+import { limitedRow, measuresNote, problemRow, productRow, seoSummary } from "./report"
 import type { SeoSummary } from "./report"
 import type { ImportReferences } from "./references"
 
@@ -34,6 +35,11 @@ export interface ImportSummary {
   /** Rows with a problem, and products a write refused (apply). */
   problems: number
   failed: number
+  /**
+   * New products past the package's product limit (adr/0061 Ek C14): left
+   * out and reported, the rest of the sheet still written.
+   */
+  limited: number
   unknown_columns: string[]
   /** New products' SEO standing (check). */
   seo: SeoSummary | null
@@ -84,37 +90,57 @@ async function applyPlans(
   context: ImportHooks & { locationId: string | null }
 ) {
   const rows: SheetCell[][] = []
-  const counts = { create: 0, update: 0, failed: 0 }
+  const counts = { create: 0, update: 0, failed: 0, limited: 0 }
   const written: string[] = []
+  const limited: string[] = []
   const isBlocked = await publishGate(container)
+  // New products the package still allows; changes to existing ones are never held back
+  let allowance = await productAllowance(container)
+  // A new product past the limit: reported, not written
+  const leaveOut = (plan: ImportPlan) => {
+    counts.limited += 1
+    limited.push(plan.handle)
+    rows.push(limitedRow(plan.line, plan.handle))
+  }
   try {
     for (const [index, { plan }] of planned.entries()) {
-      try {
-        // A draft taken live passes the SEO gate as the product route's would
-        if (isBlocked && goesLive(plan) && (await isBlocked(plan.productId ?? ""))) {
-          throw new ValidationError("seo.publish_gate_blocked", { field: "status" })
-        }
-        await importProductWorkflow(container).run({
-          input: { plan, location_id: context.locationId, ...context.origin },
-        })
-        counts[plan.productId ? "update" : "create"] += 1
-        written.push(plan.handle)
-        rows.push(
-          productRow(
-            plan.line,
-            plan.handle,
-            plan.productId ? "updated" : "created",
-            measuresNote(plan)
+      const isNew = plan.productId === null
+      if (isNew && allowance !== null && allowance <= 0) {
+        leaveOut(plan)
+      } else {
+        try {
+          // A draft taken live passes the SEO gate as the product route's would
+          if (isBlocked && goesLive(plan) && (await isBlocked(plan.productId ?? ""))) {
+            throw new ValidationError("seo.publish_gate_blocked", { field: "status" })
+          }
+          await importProductWorkflow(container).run({
+            input: { plan, location_id: context.locationId, ...context.origin },
+          })
+          counts[isNew ? "create" : "update"] += 1
+          if (isNew && allowance !== null) {
+            allowance -= 1
+          }
+          written.push(plan.handle)
+          rows.push(
+            productRow(plan.line, plan.handle, isNew ? "created" : "updated", measuresNote(plan))
           )
-        )
-      } catch (error) {
-        counts.failed += 1
-        logger.warn({
-          event: "catalog.import_product_failed",
-          handle: plan.handle,
-          err: errorSummary(error),
-        })
-        rows.push(productRow(plan.line, plan.handle, "failed", { message: writeErrorText(error) }))
+        } catch (error) {
+          if (isPlanLimitError(error)) {
+            // Another write took the last places meanwhile: the other new ones wait too
+            allowance = 0
+            leaveOut(plan)
+          } else {
+            counts.failed += 1
+            logger.warn({
+              event: "catalog.import_product_failed",
+              handle: plan.handle,
+              err: errorSummary(error),
+            })
+            rows.push(
+              productRow(plan.line, plan.handle, "failed", { message: writeErrorText(error) })
+            )
+          }
+        }
       }
       await context.progress(10 + Math.floor(((index + 1) / planned.length) * 90))
     }
@@ -122,7 +148,7 @@ async function applyPlans(
     // What was written, however the run ended
     await context.audit("finished", { ...counts, handles: written.slice(0, MAX_AUDITED_HANDLES) })
   }
-  return { rows, counts }
+  return { rows, counts, limited }
 }
 
 // The rows a check reports: what each product would be, a new one's SEO standing
@@ -133,7 +159,17 @@ async function checkPlans(
 ) {
   const shop = await shopOf(container)
   const assessments: Assessment[] = []
+  // As the apply would: new products past the package's limit are left out (adr/0061 Ek C14)
+  let allowance = await productAllowance(container)
+  let limited = 0
   const rows = planned.map(({ sheet, plan }) => {
+    if (!plan.productId && allowance !== null) {
+      if (allowance <= 0) {
+        limited += 1
+        return limitedRow(plan.line, plan.handle)
+      }
+      allowance -= 1
+    }
     const assessment = plan.productId ? undefined : sheetAssessment(sheet, refs, shop)
     if (assessment) {
       assessments.push(assessment)
@@ -144,7 +180,7 @@ async function checkPlans(
       ...(assessment ? { assessment } : {}),
     })
   })
-  return { rows, seo: seoSummary(assessments) }
+  return { rows, limited, seo: seoSummary(assessments) }
 }
 
 /** The sheet read and grouped, each product checked against the shop. */
@@ -179,7 +215,7 @@ export async function runImport(
   buffer: Buffer,
   mode: ImportMode,
   hooks: ImportHooks
-): Promise<{ summary: ImportSummary; rows: SheetCell[][] }> {
+): Promise<{ summary: ImportSummary; rows: SheetCell[][]; limited: string[] }> {
   const { rows, sheet, refs, planned: all, problemRows } = await planSheet(container, buffer)
   await hooks.progress(10)
   const planned = all.filter(({ plan }) => !isUnchanged(plan))
@@ -200,12 +236,22 @@ export async function runImport(
     mode,
     rows,
     unchanged,
-    ...(applied?.counts ?? { create: creates, update: planned.length - creates, failed: 0 }),
+    ...(applied?.counts ?? {
+      create: creates - (checked?.limited ?? 0),
+      update: planned.length - creates,
+      failed: 0,
+      limited: checked?.limited ?? 0,
+    }),
     // Rows, not problems: a row can have several
     problems: new Set(problemRows.map((row) => row[0])).size,
     unknown_columns: sheet.unknownColumns,
     seo: checked?.seo ?? null,
   }
   const reported = [...problemRows, ...unchangedRows, ...(checked?.rows ?? applied?.rows ?? [])]
-  return { summary, rows: reported.sort((a, b) => Number(a[0]) - Number(b[0])) }
+  return {
+    summary,
+    rows: reported.sort((a, b) => Number(a[0]) - Number(b[0])),
+    // The new products the package's limit left out (the move from an old site names them)
+    limited: applied?.limited ?? [],
+  }
 }

@@ -1289,4 +1289,11 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "vat.code_invalid": "The code takes letters, digits, _ and - only, at most 20.",
   "vat.code_taken": "Another VAT rate already has this code.",
   "vat.too_many": "A shop keeps at most 20 VAT rates in use. Remove one to add another.",
+  // adr/0061 §5.3, Ek C14: the package's blocking limits
+  "plan.limit_reached":
+    "Your package's {{limit}} limit is reached ({{used}}/{{max}}). Settings > Subscription shows your package and usage.",
+  "catalog_import.plan_limit":
+    "Not added: your package's product limit is reached. Upload the file again once the limit allows more.",
+  "migration.product_plan_limit":
+    "Not moved: your package's product limit is reached. Run the move again once the limit allows more.",
 }

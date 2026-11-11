@@ -13,7 +13,8 @@ import { draftProblems } from "../../lib/content-drafts/gate"
 import { draftFacts, draftPrompt } from "../../lib/content-drafts/prompts"
 import type { DraftKind, ProductDraftFacts } from "../../lib/content-drafts/prompts"
 import { contentDraftProvider, draftMonthlyQuota } from "../../lib/content-drafts/provider"
-import { ValidationError } from "../../lib/errors"
+import { PlanLimitError, ValidationError } from "../../lib/errors"
+import { draftQuotaOf, forgetUsage } from "../../lib/plan-limits"
 import { plainText } from "../../lib/seo/resolve"
 import { CONTENT_DRAFTS_MODULE } from "../../modules/content-drafts"
 import type ContentDraftsModuleService from "../../modules/content-drafts/service"
@@ -97,12 +98,18 @@ const generateDraftStep = createStep(
       throw new ValidationError("content_drafts.no_provider")
     }
     const drafts = container.resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE)
-    const quota = draftMonthlyQuota()
+    // The platform's quota or the package's monthly credits, the lower (adr/0061 Ek C14)
+    const { quota, plan } = await draftQuotaOf(container, draftMonthlyQuota())
     // Filtered before anything is made of them: the provider sees no more than the prompt
     const facts = draftFacts(await productFacts(container, input.entity_id))
+    // Claimed in one statement, so two asks at the last credit cannot both pass
     if (!(await drafts.claimQuota(quota))) {
+      if (plan !== null) {
+        throw new PlanLimitError("llm_credits_per_month", await drafts.usedThisMonth(), plan)
+      }
       throw new ValidationError("content_drafts.quota_reached")
     }
+    forgetUsage("llm_credits_per_month")
     const prompt = draftPrompt(input.kind, facts)
     const text = (
       await provider.draft({

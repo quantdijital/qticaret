@@ -96,6 +96,8 @@ import { PROMOTION_ROUTES } from "./http/promotion-routes"
 import { SEO_ROUTES } from "./http/seo-routes"
 import { STOCK_ROUTES } from "./http/stock-routes"
 import { uploadValidator } from "./http/upload-validator"
+import { guardUploadStorage } from "./http/plan-limit-guards"
+import { PLAN_ROUTES } from "./http/plan-routes"
 import { StorePostPrivacyRequest } from "./store/customers/me/privacy-requests/validators"
 import { StorePostBillingProfile } from "./store/customers/me/billing-profile/validators"
 import { GetTrDistricts, GetTrNeighborhoods, GetTrProvinces } from "./tr-address/validators"
@@ -311,6 +313,8 @@ export default defineMiddlewares({
     ...MESSAGING_ROUTES,
     // adr/0061 Ek C9: the control plane's signed plan document push
     ...CONTROL_PLANE_ROUTES,
+    // adr/0061 Ek C14: Settings > Abonelik's reading
+    ...PLAN_ROUTES,
     ...ACCOUNT_ROUTES,
     // 2026-11-06: customers edited and guests added by staff, carts left behind
     ...CUSTOMER_ROUTES,
@@ -406,10 +410,11 @@ export default defineMiddlewares({
       middlewares: [closePresignedUploads],
     },
     // F2.9b: uploaded files checked by their bytes, after Medusa's multer
+    // adr/0061 Ek C14: the package's storage limit, by the cleaned images' size
     {
       matcher: "/admin/uploads",
       methods: ["POST"],
-      middlewares: [uploadValidator],
+      middlewares: [uploadValidator, guardUploadStorage],
     },
     {
       matcher: "/store/tr-address/provinces",

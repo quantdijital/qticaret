@@ -39,3 +39,38 @@ export function serverErrorMessage(
     Object.hasOwn(values, name) ? (values[name] ?? "") : ""
   )
 }
+
+// A plan limit as its refusal names it (adr/0061 Ek C14); megabytes carry their unit
+const LIMIT_NAMES: Readonly<Record<MessageLocale, Readonly<Record<string, string>>>> = {
+  tr: {
+    products: "ürün",
+    staff: "ekip üyesi",
+    storage_mb: "depolama alanı",
+    llm_credits_per_month: "aylık içerik taslağı",
+    orders_per_month: "aylık sipariş",
+    custom_domains: "özel alan adı",
+  },
+  en: {
+    products: "product",
+    staff: "team member",
+    storage_mb: "storage",
+    llm_credits_per_month: "monthly content draft",
+    orders_per_month: "monthly order",
+    custom_domains: "custom domain",
+  },
+}
+
+/** `plan.limit_reached` in words: which limit, used and allowed (`{ limit, used, max }`). */
+export function planLimitSentence(
+  refusal: { limit?: string; used?: number; max?: number },
+  locale: MessageLocale = "tr"
+): string {
+  const names = LIMIT_NAMES[locale]
+  const limit = refusal.limit ?? ""
+  const unit = limit === "storage_mb" ? " MB" : ""
+  return serverErrorMessage("plan.limit_reached", locale, {
+    limit: Object.hasOwn(names, limit) ? (names[limit] ?? limit) : limit,
+    used: String(refusal.used ?? ""),
+    max: `${String(refusal.max ?? "")}${unit}`,
+  })
+}

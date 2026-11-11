@@ -9,6 +9,7 @@ import {
   isValidationError,
 } from "./errors"
 import type { ProviderErrorShape } from "./errors"
+import { isPlanLimitError } from "./plan-limit"
 import { providerText } from "./provider-text"
 
 export interface HttpErrorResponse {
@@ -24,6 +25,10 @@ export interface HttpErrorResponse {
     provider?: string
     /** What it said, made safe (`providerText`): the admin API only. */
     provider_message?: string
+    /** A plan limit refusal's (`plan.limit_reached`): which limit, used now, allowed. */
+    limit?: string
+    used?: number
+    max?: number
   }
   retryAfterSeconds?: number
 }
@@ -125,6 +130,14 @@ export function toHttpError(
     // Values go with the rule's own key only, never with the fallback's sentence
     const values = message === value.safeMessage ? valuesOf(value.values) : {}
     return { status: 400, body: { type: "invalid_data", message, ...values } }
+  }
+  if (isPlanLimitError(value)) {
+    // Numbers the shop's own counts gave, never input (adr/0061 §5.3)
+    const { limit, used, max } = value
+    return {
+      status: 403,
+      body: { type: "not_allowed", message: value.safeMessage, limit, used, max },
+    }
   }
   if (isConflictError(value)) {
     const message = clientMessage(value.safeMessage, DEFAULT_CONFLICT_MESSAGE)

@@ -21,7 +21,8 @@ export const REPORT_HEADER = [
 
 export const REPORT_WIDTHS = [8, 28, 16, 18, 60, 10, 40] as const
 
-export type Outcome = "create" | "update" | "unchanged" | "created" | "updated" | "failed"
+export type Outcome =
+  "create" | "update" | "unchanged" | "created" | "updated" | "failed" | "limited"
 
 const OUTCOME_TEXT: Readonly<Record<Outcome, string>> = {
   create: "Eklenecek",
@@ -30,7 +31,15 @@ const OUTCOME_TEXT: Readonly<Record<Outcome, string>> = {
   created: "Eklendi",
   updated: "Güncellendi",
   failed: "Hata",
+  // adr/0061 Ek C14: past the package's product limit, the rest is reported, not written
+  limited: "Paket limiti",
 }
+
+/** A new product the package's product limit leaves out (adr/0061 Ek C14). */
+export const limitedRow = (line: number, handle: string): SheetCell[] =>
+  productRow(line, handle, "limited", {
+    message: serverErrorMessage("catalog_import.plan_limit", "tr"),
+  })
 
 export function problemRow(problem: SheetProblem, handle: string | undefined): SheetCell[] {
   return [

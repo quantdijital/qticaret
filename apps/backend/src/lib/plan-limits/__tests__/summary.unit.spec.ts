@@ -1,0 +1,98 @@
+import { DEFAULT_PLAN_STATE, NO_LIMITS } from "../../../modules/control-plane/types"
+import { readPlanSummary } from "../summary"
+import { USAGE_CACHE_MS, forgetUsage } from "../usage"
+
+const MB = 1024 * 1024
+
+function shop(managed: boolean) {
+  const counts = { products: 41 }
+  const state = {
+    ...DEFAULT_PLAN_STATE(managed),
+    package_code: managed ? "standart" : null,
+    limits: { ...NO_LIMITS, products: 50, orders_per_month: 10, staff: 3, storage_mb: 100 },
+    billing: managed
+      ? {
+          status: "active" as const,
+          due_on: null,
+          grace_ends_on: null,
+          amount: null,
+          currency: "TRY" as const,
+        }
+      : null,
+  }
+  const services: Record<string, unknown> = {
+    control_plane: { planState: () => Promise.resolve(state) },
+    product: { listAndCountProducts: () => Promise.resolve([[], counts.products]) },
+    user: {
+      listAndCountUsers: () => Promise.resolve([[], 2]),
+      listAndCountInvites: () => Promise.resolve([[], 1]),
+    },
+    media: { storedBytes: () => Promise.resolve(80 * MB + 1) },
+    content_drafts: { usedIn: () => Promise.resolve(4) },
+    query: { graph: () => Promise.resolve({ data: [], metadata: { count: 12 } }) },
+  }
+  return { container: { resolve: (key: string) => services[key] } as never, counts }
+}
+
+beforeEach(() => {
+  forgetUsage()
+})
+
+describe("readPlanSummary (Settings > Abonelik, adr/0061 Ek C14)", () => {
+  it("gives each limit its kind, use and allowance; seats count open invitations", async () => {
+    const now = new Date("2026-11-15T09:00:00.000Z")
+    const summary = await readPlanSummary(shop(true).container, now)
+
+    expect(summary).toMatchObject({
+      managed: true,
+      status: "active",
+      package_code: "standart",
+      period: "2026-11",
+      warning_ratio: 0.8,
+      payment_instruction: null,
+      billing: { status: "active", amount: null },
+    })
+    expect(summary.limits).toEqual([
+      { key: "products", kind: "block", unit: "count", monthly: false, used: 41, max: 50 },
+      { key: "orders_per_month", kind: "warn", unit: "count", monthly: true, used: 12, max: 10 },
+      { key: "staff", kind: "block", unit: "count", monthly: false, used: 3, max: 3, pending: 1 },
+      { key: "storage_mb", kind: "block", unit: "mb", monthly: false, used: 81, max: 100 },
+      {
+        key: "llm_credits_per_month",
+        kind: "block",
+        unit: "count",
+        monthly: true,
+        used: 4,
+        max: null,
+      },
+      {
+        key: "custom_domains",
+        kind: "later",
+        unit: "count",
+        monthly: false,
+        used: null,
+        max: null,
+      },
+    ])
+  })
+
+  it("has no limits and no billing without a control plane", async () => {
+    const summary = await readPlanSummary(shop(false).container)
+    expect(summary.managed).toBe(false)
+    expect(summary.billing).toBeNull()
+    expect(summary.limits.every((limit) => limit.max === null)).toBe(true)
+  })
+
+  it("keeps a count for a few seconds, then counts again", async () => {
+    const { container, counts } = shop(true)
+    const now = new Date("2026-11-15T09:00:00.000Z")
+    const first = await readPlanSummary(container, now)
+    counts.products = 45
+    const soon = await readPlanSummary(container, new Date(now.getTime() + 1000))
+    const later = await readPlanSummary(container, new Date(now.getTime() + USAGE_CACHE_MS))
+
+    expect(first.limits[0]?.used).toBe(41)
+    expect(soon.limits[0]?.used).toBe(41)
+    expect(later.limits[0]?.used).toBe(45)
+  })
+})

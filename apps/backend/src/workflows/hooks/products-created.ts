@@ -1,5 +1,6 @@
 import { StepResponse } from "@medusajs/framework/workflows-sdk"
 import { createProductsWorkflow } from "@medusajs/medusa/core-flows"
+import { assertProductsWithinLimit } from "../../lib/plan-limits"
 import { claimProductPaths, unclaimPaths } from "../catalog/entity-paths"
 import { planCreatedVariantImages, tieImages, untieImages } from "../catalog/variant-image-ties"
 import { addBackorderLevels, removeBackorderLevels } from "../stock/backorder-levels"
@@ -11,9 +12,14 @@ import { addBackorderLevels, removeBackorderLevels } from "../stock/backorder-le
 // The variant pictures picked before the product existed are tied to its
 // variants in the same save (`additional_data.variant_images`): a picture or
 // variant the product lacks is refused before anything is written here.
+// adr/0061 Ek C14: past the package's product limit the create is refused
+// (403 `plan.limit_reached`), first and before this hook writes anything. Every
+// way a product is made runs here: the product route, Medusa's batch, a
+// copy, the sheet import and the move from an old site.
 createProductsWorkflow.hooks.productsCreated(
   async ({ products, additional_data }, { container }) => {
     const ids = products.map((product) => product.id)
+    await assertProductsWithinLimit(container, ids.length)
     const ties = await planCreatedVariantImages(container, ids, additional_data)
     const claims = await claimProductPaths(container, ids)
     const levels = await addBackorderLevels(container, { product_ids: ids })

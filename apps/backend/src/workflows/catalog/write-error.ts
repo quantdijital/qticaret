@@ -1,5 +1,5 @@
 import { MedusaError } from "@medusajs/framework/utils"
-import { isConflictError, isValidationError } from "../../lib/errors"
+import { isConflictError, isPlanLimitError, isValidationError } from "../../lib/errors"
 import { serverErrorMessage } from "../../lib/errors/messages"
 
 /**
@@ -8,6 +8,10 @@ import { serverErrorMessage } from "../../lib/errors/messages"
  * else the generic sentence (an internal message stays in the log).
  */
 export function writeErrorText(error: unknown): string {
+  // A new product past the package's limit (adr/0061 Ek C14)
+  if (isPlanLimitError(error)) {
+    return serverErrorMessage("catalog_import.plan_limit", "tr")
+  }
   if (isValidationError(error) || isConflictError(error)) {
     return serverErrorMessage(error.safeMessage, "tr")
   }

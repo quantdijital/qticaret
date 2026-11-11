@@ -4,6 +4,7 @@ import type {
   MedusaResponse,
 } from "@medusajs/framework/http"
 import { contentDraftProvider, draftMonthlyQuota } from "../../../lib/content-drafts/provider"
+import { draftQuotaOf } from "../../../lib/plan-limits"
 import { CONTENT_DRAFTS_MODULE } from "../../../modules/content-drafts"
 import type ContentDraftsModuleService from "../../../modules/content-drafts/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
@@ -22,7 +23,7 @@ export async function GET(
 ): Promise<void> {
   const query = req.validatedQuery as AdminGetContentDraftsType
   const drafts = req.scope.resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE)
-  const [rows, used, enabled] = await Promise.all([
+  const [rows, used, enabled, budget] = await Promise.all([
     drafts.listContentDrafts(
       { entity_type: query.entity_type, entity_id: query.entity_id },
       {
@@ -35,12 +36,14 @@ export async function GET(
     req.scope
       .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
       .isFeatureEnabled(CONTENT_AI_DRAFTS),
+    // The package's monthly credits where they are below the platform's quota (adr/0061 Ek C14)
+    draftQuotaOf(req.scope, draftMonthlyQuota()),
   ])
   res.json({
     drafts: rows,
     enabled,
     provider_ready: contentDraftProvider() !== null,
-    quota: { used, limit: draftMonthlyQuota() },
+    quota: { used, limit: budget.quota },
   })
 }
 

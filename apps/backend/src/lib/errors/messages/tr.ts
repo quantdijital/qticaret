@@ -1282,4 +1282,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "vat.code_invalid": "Kod yalnızca harf, rakam, _ ve - içerebilir; en çok 20 karakter.",
   "vat.code_taken": "Bu kodla başka bir KDV oranı var.",
   "vat.too_many": "Bir mağaza en çok 20 KDV oranı kullanabilir. Yenisi için birini kaldırın.",
+  // adr/0061 §5.3, Ek C14: paketin engelleyen limitleri
+  "plan.limit_reached":
+    "Paketinizin {{limit}} limitine ulaştınız ({{used}}/{{max}}). Paketinizi ve kullanımınızı Ayarlar > Abonelik sayfasında görebilirsiniz.",
+  "catalog_import.plan_limit":
+    "Eklenmedi: paketinizin ürün limiti doldu. Limit yükselince dosyayı yeniden yükleyin.",
+  "migration.product_plan_limit":
+    "Taşınmadı: paketinizin ürün limiti doldu. Limit yükselince taşımayı yeniden çalıştırın.",
 }

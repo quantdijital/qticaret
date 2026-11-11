@@ -21,6 +21,8 @@ export type {
   RetryableErrorShape,
   ValidationErrorShape,
 } from "./errors"
+export { PLAN_LIMIT_MESSAGE, PlanLimitError, isPlanLimitError } from "./plan-limit"
+export type { PlanLimitErrorShape } from "./plan-limit"
 export { lockTimeoutError, uniqueViolationKeys } from "./db"
 export { I18N_KEY, PROVIDER_FAILED_MESSAGE, providerFailureOf, toHttpError } from "./http"
 export { MAX_PROVIDER_TEXT, PROVIDER_TEXT_MASK, providerText } from "./provider-text"

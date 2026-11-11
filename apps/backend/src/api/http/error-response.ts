@@ -15,6 +15,10 @@ export interface ErrorBody {
   /** A provider's failure on the admin API (`provider.failed`): which service, what it said. */
   provider?: string
   provider_message?: string
+  /** A plan limit refusal (`plan.limit_reached`, adr/0061 Ek C14): which, used, allowed. */
+  limit?: string
+  used?: number
+  max?: number
 }
 
 export type DbErrorKind = "duplicate" | "invalid_reference" | "not_null" | "unknown_column"

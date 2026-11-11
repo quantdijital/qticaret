@@ -144,6 +144,8 @@ export async function migrateProducts(
       { select: ["id", "handle"], take: null }
     )
     const ids = new Map(found.map((product) => [product.handle, product.id]))
+    // Left out at the package's product limit (adr/0061 Ek C14): a later run moves them
+    const limited = new Set(result.limited)
     made = fresh.filter((product) => ids.has(product.handle)).map((product) => product.source_key)
     await migration.remember(
       source,
@@ -154,7 +156,11 @@ export async function migrateProducts(
           source_key: product.source_key,
           target_id: id,
           status: id ? ("done" as const) : ("failed" as const),
-          error_code: id ? null : "migration.product_not_written",
+          error_code: id
+            ? null
+            : limited.has(product.handle)
+              ? "migration.product_plan_limit"
+              : "migration.product_not_written",
           old_url: product.old_url,
         }
       })
@@ -170,5 +176,13 @@ export async function migrateProducts(
     summaries = written.summaries
     problems.push(...written.problems)
   }
-  return { ...result, moved, problems, keys: { made, moved: movedKeys }, documents, summaries }
+  return {
+    summary: result.summary,
+    rows: result.rows,
+    moved,
+    problems,
+    keys: { made, moved: movedKeys },
+    documents,
+    summaries,
+  }
 }

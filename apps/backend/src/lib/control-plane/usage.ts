@@ -55,39 +55,62 @@ export interface UsageCounts {
  * the media library's stored masters. LLM: content drafts counted in the
  * month's row (adr/0005: one draft, one credit).
  */
-export async function readUsageCounts(
-  container: Pick<MedusaContainer, "resolve">,
-  now: Date
-): Promise<UsageCounts> {
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  const orders = { status: { $nin: NOT_ORDERS }, is_draft_order: false }
+type Resolver = Pick<MedusaContainer, "resolve">
+
+const ORDERS = { status: { $nin: NOT_ORDERS }, is_draft_order: false }
+
+// One count each, shared with the plan limits' checks (adr/0061 Ek C14)
+
+/** Products not deleted, drafts too. */
+export const countProducts = (container: Resolver): Promise<number> =>
+  container
+    .resolve(Modules.PRODUCT)
+    .listAndCountProducts({}, { select: ["id"], take: 1 })
+    .then(([, count]) => count)
+
+/** Orders placed this Turkish month, drafts and archived left out. */
+export const countOrdersThisMonth = (container: Resolver, now: Date): Promise<number> =>
+  container
+    .resolve(ContainerRegistrationKeys.QUERY)
+    .graph({
+      entity: "order",
+      fields: ["id"],
+      filters: { ...ORDERS, created_at: { $gte: startOfTurkishMonth(now) } },
+      pagination: { skip: 0, take: 1 },
+    })
+    .then((answer) => answer.metadata?.count ?? answer.data.length)
+
+/** The shop's users. */
+export const countStaff = (container: Resolver): Promise<number> =>
+  container
+    .resolve(Modules.USER)
+    .listAndCountUsers({}, { select: ["id"], take: 1 })
+    .then(([, count]) => count)
+
+/** The media library's stored masters, in bytes. */
+export const storedBytes = (container: Resolver): Promise<number> =>
+  container.resolve<MediaModuleService>(MEDIA_MODULE).storedBytes()
+
+/** Content drafts counted this Turkish month (adr/0005: one draft, one credit). */
+export const draftsThisMonth = (container: Resolver, now: Date): Promise<number> =>
+  container.resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE).usedIn(turkishMonth(now))
+
+export async function readUsageCounts(container: Resolver, now: Date): Promise<UsageCounts> {
   const [products, monthOrders, lastOrder, staff, bytes, drafts] = await Promise.all([
+    countProducts(container),
+    countOrdersThisMonth(container, now),
     container
-      .resolve(Modules.PRODUCT)
-      .listAndCountProducts({}, { select: ["id"], take: 1 })
-      .then(([, count]) => count),
-    query
-      .graph({
-        entity: "order",
-        fields: ["id"],
-        filters: { ...orders, created_at: { $gte: startOfTurkishMonth(now) } },
-        pagination: { skip: 0, take: 1 },
-      })
-      .then((answer) => answer.metadata?.count ?? answer.data.length),
-    query
+      .resolve(ContainerRegistrationKeys.QUERY)
       .graph({
         entity: "order",
         fields: ["created_at"],
-        filters: orders,
+        filters: ORDERS,
         pagination: { skip: 0, take: 1, order: { created_at: "DESC" } },
       })
       .then((answer) => (answer.data[0] as { created_at?: Date | string } | undefined)?.created_at),
-    container
-      .resolve(Modules.USER)
-      .listAndCountUsers({}, { select: ["id"], take: 1 })
-      .then(([, count]) => count),
-    container.resolve<MediaModuleService>(MEDIA_MODULE).storedBytes(),
-    container.resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE).usedIn(turkishMonth(now)),
+    countStaff(container),
+    storedBytes(container),
+    draftsThisMonth(container, now),
   ])
   return {
     products,

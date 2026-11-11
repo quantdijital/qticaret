@@ -8,7 +8,7 @@ import { providerText } from "./provider-text"
  * and the guards check shape, never `instanceof`.
  */
 
-export type ErrorKind = "validation" | "provider" | "retryable" | "conflict"
+export type ErrorKind = "validation" | "provider" | "retryable" | "conflict" | "plan_limit"
 
 export const DEFAULT_VALIDATION_MESSAGE = "errors.invalid_data"
 export const DEFAULT_PROVIDER_MESSAGE = "errors.provider_unavailable"
