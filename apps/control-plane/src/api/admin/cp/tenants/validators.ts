@@ -166,6 +166,10 @@ const reason = z
   .max(500)
   .regex(CLEAN_TEXT, "cp.text_invalid")
 
+/** A suspension or its end (Ek C15): why, required, kept on the status row. */
+export const PostStatusMove = z.object({ reason }).strict()
+export type PostStatusMoveType = z.infer<typeof PostStatusMove>
+
 /** An exception's optional end; never already past. */
 const expiresAt = z.iso
   .datetime({ offset: true })

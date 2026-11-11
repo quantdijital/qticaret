@@ -14,6 +14,8 @@ export const TenantStatusChange = model
     to_status: model.enum([...TENANT_STATUSES]),
     reason_code: model.text(),
     actor: model.text(),
+    /** Why, in the staff member's words (a suspension and its end, Ek C15); none for the system. */
+    note: model.text().nullable(),
     tenant: model.belongsTo(() => Tenant, { mappedBy: "status_changes" }),
   })
   .indexes([{ on: ["tenant_id", "created_at"], where: "deleted_at IS NULL" }])

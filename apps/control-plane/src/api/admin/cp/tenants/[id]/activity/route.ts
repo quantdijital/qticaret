@@ -5,8 +5,14 @@ import { tenantParam, tenantsOf } from "../../params"
 import type { GetActivityType } from "../../validators"
 import { staffNames } from "../../views"
 
-// The record's own reads and its making (the first status row says it) stay out
-const NOT_ACTIVITY = ["GET /admin/cp/tenants/:id", "POST /admin/cp/tenants"]
+// The record's own reads and its making (the first status row says it) stay out, and a
+// suspension and its end (Ek C15): their status row says it, with the reason
+const NOT_ACTIVITY = [
+  "GET /admin/cp/tenants/:id",
+  "POST /admin/cp/tenants",
+  "POST /admin/cp/tenants/:id/suspend",
+  "POST /admin/cp/tenants/:id/resume",
+]
 
 interface Item {
   id: string
@@ -18,6 +24,7 @@ interface Item {
   from_status?: string | null
   to_status?: string
   reason_code?: string
+  note?: string | null
 }
 
 /**
@@ -38,7 +45,7 @@ export async function GET(
     tenantsOf(req).listTenantStatusChanges(
       { tenant_id: tenant.id, ...until },
       {
-        select: ["id", "from_status", "to_status", "reason_code", "actor", "created_at"],
+        select: ["id", "from_status", "to_status", "reason_code", "note", "actor", "created_at"],
         order: { created_at: "DESC" },
         take: limit,
       }
@@ -67,6 +74,8 @@ export async function GET(
       from_status: change.from_status,
       to_status: change.to_status,
       reason_code: change.reason_code,
+      // Ek C15: a suspension's or its end's reason, in the staff member's words
+      note: change.note,
     })),
     ...entries.map((entry) => ({
       id: entry.id,

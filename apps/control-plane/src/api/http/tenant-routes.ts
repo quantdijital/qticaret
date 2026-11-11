@@ -16,6 +16,7 @@ import {
   PostNote,
   PostNoteUpdate,
   PostOverride,
+  PostStatusMove,
   PostTenant,
   PostTenantPlan,
   PostTenantUpdate,
@@ -89,6 +90,9 @@ export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
   body(`${T}/:id/plan`, PostTenantPlan),
   body(`${T}/:id/overrides`, PostOverride),
   body(`${T}/:id/feature-overrides`, PostFeatureOverride),
+  // Ek C15: a suspension and its end, each with its reason
+  body(`${T}/:id/suspend`, PostStatusMove),
+  body(`${T}/:id/resume`, PostStatusMove),
   body(P, PostPlan),
   body(`${P}/:id`, PostPlanUpdate),
   body(`${P}/:id/price`, PostPlanPrice),

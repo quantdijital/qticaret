@@ -145,7 +145,9 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "POST /admin/cp/tenants/:id/provisioning/invite",
       "POST /admin/cp/tenants/:id/provisioning/start",
       "POST /admin/cp/tenants/:id/provisioning/stop",
+      "POST /admin/cp/tenants/:id/resume",
       "POST /admin/cp/tenants/:id/reveal-tckn",
+      "POST /admin/cp/tenants/:id/suspend",
     ])
   })
 
@@ -284,5 +286,16 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
 
     expect(fresh).toEqual(["POST /admin/cp/me/sessions/revoke-others"])
     expect(CP_ROUTES.filter((rule) => rule.freshSignIn && !rule.stepUp)).toHaveLength(0)
+  })
+
+  it("gives a suspension and its end to the owner and operator, behind a step-up (C15)", () => {
+    for (const action of ["suspend", "resume"]) {
+      const path = `/admin/cp/tenants/ten_1/${action}`
+      expect(allowedRoles("POST", path)).toEqual(["owner", "operator"])
+      expect(matchRoute("POST", path)?.rule).toMatchObject({
+        stepUp: true,
+        resource: { type: "tenant", param: "id" },
+      })
+    }
   })
 })

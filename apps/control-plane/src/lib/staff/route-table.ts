@@ -124,6 +124,15 @@ const TENANT_ROUTES: RouteRule[] = [
     ],
     SHOPS
   ),
+  // Ek C15: a suspension and its end (adr/0061 §3.5 "askıya alma, geri açma"): who runs
+  // shops, proved again; it darkens or opens a storefront
+  ...["/suspend", "/resume"].map((action): RouteRule => ({
+    method: "POST",
+    path: `/admin/cp/tenants/:id${action}`,
+    access: SHOPS,
+    stepUp: true,
+    resource: TENANT,
+  })),
   ...shopRules("POST", ["/company"], INVOICED),
   // A sole proprietor's TCKN: proved again, recorded before it is shown
   {
