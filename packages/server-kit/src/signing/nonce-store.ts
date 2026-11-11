@@ -37,3 +37,29 @@ export class MemoryNonceStore implements NonceStore {
     }
   }
 }
+
+/** The part of an ioredis client the store uses: `SET key value EX ttl NX`. */
+export interface NonceRedisClient {
+  set: (key: string, value: string, ex: "EX", seconds: number, nx: "NX") => Promise<unknown>
+}
+
+/**
+ * Seen nonces in Redis (adr/0061 §3.2, Ek C9), shared by every process: a
+ * nonce replayed to another instance is refused too. `SET NX EX` claims
+ * and expires in one atomic command. A Redis error is thrown, never read
+ * as "unseen": the caller refuses the request (fails closed).
+ */
+export class RedisNonceStore implements NonceStore {
+  constructor(
+    private readonly redis: NonceRedisClient,
+    private readonly prefix = "qt:nonce:"
+  ) {}
+
+  async claim(key: string, ttlSeconds: number): Promise<boolean> {
+    if (!Number.isInteger(ttlSeconds) || ttlSeconds <= 0) {
+      throw new RangeError("ttlSeconds must be a positive whole number")
+    }
+    const answer = await this.redis.set(`${this.prefix}${key}`, "1", "EX", ttlSeconds, "NX")
+    return answer === "OK"
+  }
+}

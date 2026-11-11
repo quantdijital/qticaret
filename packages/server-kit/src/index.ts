@@ -38,8 +38,8 @@ export {
   signerFromPrivateKey,
 } from "./signing/ed25519"
 export type { Ed25519Signer } from "./signing/ed25519"
-export { MemoryNonceStore } from "./signing/nonce-store"
-export type { NonceStore } from "./signing/nonce-store"
+export { MemoryNonceStore, RedisNonceStore } from "./signing/nonce-store"
+export type { NonceRedisClient, NonceStore } from "./signing/nonce-store"
 export {
   DEFAULT_MAX_SKEW_SECONDS,
   DEFAULT_NONCE_TTL_SECONDS,

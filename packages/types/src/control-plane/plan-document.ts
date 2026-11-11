@@ -48,7 +48,7 @@ export const planDocumentSchema = z.strictObject({
   package_code: z.string().regex(/^[a-z0-9][a-z0-9_-]{0,63}$/, "must be a package code"),
   /** The package's limits with the shop's overrides already applied. */
   limits: limitsSchema,
-  /** `owner: platform` flags only (adr/0012); which keys those are is the shop's registry. */
+  /** `owner: platform` flags only (adr/0012, `PLATFORM_FLAGS`); a key the shop does not know is ignored there. */
   platform_flags: z
     .record(z.string().regex(FEATURE_FLAG_KEY, "must be a flag key"), z.boolean())
     .refine((flags) => Object.keys(flags).length <= 100, "has too many flags"),
