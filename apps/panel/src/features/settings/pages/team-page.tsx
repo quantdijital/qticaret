@@ -17,7 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@qticaret/admin-ui/ui/select"
-import { useCan } from "@/features/auth/api/staff"
+import { PLAN_STRIP_ID } from "@/components/layout/plan-status-banner"
+import { useCan, usePlanRestricted } from "@/features/auth/api/staff"
 import type { StaffRole } from "@/features/auth/api/staff"
 import {
   STAFF_ROLES,
@@ -150,7 +151,10 @@ export function TeamPage() {
   const { t } = useTranslation()
   const team = useQuery(teamQuery())
   const manage = useCan("staff")
+  const restricted = usePlanRestricted()
+  // At the package's team limit, or while the shop is restricted (adr/0061 Ek C14, C15)
   const seatsFull = isFull(useLimitStanding("staff"))
+  const inviteClosed = seatsFull || restricted
   const change = useChangeRole()
   const remove = useRemoveMember()
   const resetMfa = useResetMemberMfa()
@@ -177,10 +181,17 @@ export function TeamPage() {
         action={
           manage ? (
             <Button
-              // At the package's team limit the notice below says why (adr/0061 Ek C14)
-              disabled={seatsFull}
-              title={seatsFull ? t("plan.inviteBlocked") : undefined}
-              aria-describedby={seatsFull ? SEATS_NOTICE : undefined}
+              // The notice below says why at the limit, the strip above every page while
+              // the shop is restricted
+              disabled={inviteClosed}
+              title={
+                restricted
+                  ? t("plan.strip.closed")
+                  : seatsFull
+                    ? t("plan.inviteBlocked")
+                    : undefined
+              }
+              aria-describedby={restricted ? PLAN_STRIP_ID : seatsFull ? SEATS_NOTICE : undefined}
               onClick={() => {
                 setInviting(true)
               }}

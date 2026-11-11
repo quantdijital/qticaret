@@ -13,6 +13,8 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import type { BulkAction } from "@/features/products/api/bulk"
 import { PAGE_SIZE, productCountsQuery, productsQuery } from "@/features/products/api/products"
 import type { ProductFilters } from "@/features/products/api/products"
+import { PLAN_STRIP_ID } from "@/components/layout/plan-status-banner"
+import { usePlanRestricted } from "@/features/auth/api/staff"
 import { BulkBar } from "@/features/products/bulk/bulk-bar"
 import { BulkEditDialog } from "@/features/products/bulk/bulk-edit-dialog"
 import { FactsDialog } from "@/features/attributes/facts/facts-dialog"
@@ -57,6 +59,7 @@ export function ProductsPage() {
   )
   const duplicate = useDuplicateAndOpen()
   const productsFull = isFull(useLimitStanding("products"))
+  const restricted = usePlanRestricted()
   const columns = useProductColumns(
     new Map((scores.data ?? []).map((score) => [score.entity_id, score])),
     (product) => {
@@ -112,9 +115,14 @@ export function ProductsPage() {
               <Upload />
               {t("products.sheets.import")}
             </Button>
-            {productsFull ? (
-              // At the package's limit: the notice below says why (adr/0061 Ek C14)
-              <Button disabled title={t("plan.createBlocked")} aria-describedby={LIMIT_NOTICE}>
+            {productsFull || restricted ? (
+              // At the package's limit the notice below says why (adr/0061 Ek C14); while the
+              // shop is restricted or suspended, the strip above every page (Ek C15)
+              <Button
+                disabled
+                title={t(restricted ? "plan.strip.closed" : "plan.createBlocked")}
+                aria-describedby={restricted ? PLAN_STRIP_ID : LIMIT_NOTICE}
+              >
                 <Plus />
                 {t("products.add")}
               </Button>

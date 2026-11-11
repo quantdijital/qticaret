@@ -18,6 +18,8 @@ describe("plan refusals in the panel (adr/0061 Ek C14)", () => {
     expect(isPlanRefusal({ status: 403, message: SENTENCE })).toBe(true)
     expect(isPlanRefusal({ status: 403, code: "plan.limit_reached", message: SENTENCE })).toBe(true)
     expect(isPlanRefusal({ status: 403, code: "staff.forbidden" })).toBe(false)
+    // Ek C15: a write the shop's status closes
+    expect(isPlanRefusal({ status: 403, code: "plan.restricted", message: "Kısıtlı" })).toBe(true)
     expect(isPlanRefusal({ status: 400, message: "x" })).toBe(false)
     expect(isPlanRefusal(null)).toBe(false)
   })

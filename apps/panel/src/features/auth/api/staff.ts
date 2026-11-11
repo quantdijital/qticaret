@@ -1,4 +1,5 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
+import type { QueryClient } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
 
 export type StaffRole = "owner" | "admin" | "operations" | "readonly"
@@ -53,7 +54,15 @@ export interface StaffMe {
   can: Record<Capability, boolean>
   /** 2FA: whether this environment can ask it, the shop requires it, it is set up, this session passed it. */
   mfa: { available: boolean; required: boolean; enabled: boolean; passed: boolean }
+  /**
+   * The shop's status for every role (adr/0061 Ek C15): `restricted` or
+   * `suspended` close most writes. Absent from an older backend: active.
+   */
+  plan?: { status: PlanStatus }
 }
+
+/** What the shop's status lets the panel do (adr/0061 §5.5). */
+export type PlanStatus = "active" | "restricted" | "suspended"
 
 export const STAFF_KEY = ["auth", "staff"] as const
 
@@ -80,4 +89,28 @@ export function useCan(capability: Capability): boolean {
 export function useCapabilities(): (capability: Capability) => boolean {
   const can = useStaff()?.can
   return (capability) => can?.[capability] ?? false
+}
+
+const PLAN_STATUSES: readonly string[] = ["active", "restricted", "suspended"]
+
+/** The shop's status as `staff/me` gives it; active while unknown or of another shape. */
+export function usePlanStatus(): PlanStatus {
+  const status = (useStaff()?.plan as { status?: unknown } | undefined)?.status
+  return typeof status === "string" && PLAN_STATUSES.includes(status)
+    ? (status as PlanStatus)
+    : "active"
+}
+
+/** Whether the shop's status closes writes beyond its allow-list (adr/0061 Ek C15). */
+export const usePlanRestricted = (): boolean => usePlanStatus() !== "active"
+
+/**
+ * After any refused write (403): the role or the shop's status may have
+ * changed since `staff/me` was read, so it is read again and the strip
+ * above every page and the offered buttons catch up (adr/0061 Ek C15).
+ */
+export function refreshStandingAfter(client: QueryClient, failure: unknown): void {
+  if ((failure as { status?: unknown } | null)?.status === 403) {
+    void client.invalidateQueries({ queryKey: STAFF_KEY })
+  }
 }

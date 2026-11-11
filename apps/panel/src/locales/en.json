@@ -9012,6 +9012,12 @@
     "unmanaged": "This shop has no package limits: products, team, storage and content drafts are unlimited.",
     "loadFailed": "The subscription could not be loaded.",
     "view": "View subscription",
+    "strip": {
+      "restricted": "Your shop is restricted: the subscription payment is overdue. The panel is read only; order operations, stock, KVKK requests, exports and your own account stay open. The storefront keeps selling.",
+      "suspended": "Your shop is suspended: the storefront is closed to visitors and takes no new orders. The panel is read only; existing orders' operations, stock, KVKK requests, exports and your own account stay open.",
+      "askOwner": "Ask the shop's owner for the details.",
+      "closed": "This action is closed while your shop is restricted."
+    },
     "package": {
       "title": "Package",
       "text": "Your shop's package and status.",

@@ -9012,6 +9012,12 @@
     "unmanaged": "Bu mağazada paket limiti yok: ürün, ekip, depolama ve içerik taslakları sınırsızdır.",
     "loadFailed": "Abonelik bilgileri yüklenemedi.",
     "view": "Aboneliği gör",
+    "strip": {
+      "restricted": "Mağazanız kısıtlı: abonelik ödemesi gecikti. Panel salt okunur; siparişlerin işlemleri, stok, KVKK talepleri, dışa aktarma ve kendi hesabınız açık. Vitrin satışa devam ediyor.",
+      "suspended": "Mağazanız askıya alındı: vitrin ziyaretçilere kapalı, yeni sipariş alınmıyor. Panel salt okunur; mevcut siparişlerin işlemleri, stok, KVKK talepleri, dışa aktarma ve kendi hesabınız açık.",
+      "askOwner": "Ayrıntılar için mağaza sahibine başvurun.",
+      "closed": "Mağazanız kısıtlıyken bu işlem kapalı."
+    },
     "package": {
       "title": "Paket",
       "text": "Mağazanızın paketi ve durumu.",

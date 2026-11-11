@@ -8,8 +8,11 @@ import { errorText } from "@/lib/errors"
 /** The backend's key for a write past the package's limit (adr/0061 Ek C14). */
 export const PLAN_LIMIT_REACHED = "plan.limit_reached"
 
+/** The backend's key for a write the shop's status closes (adr/0061 Ek C15). */
+export const PLAN_RESTRICTED = "plan.restricted"
+
 /**
- * A write the package refused. Through the SDK only the status and the
+ * A write the package (or the shop's status, Ek C15) refused. Through the SDK only the status and the
  * backend's sentence survive (it names the limit and Ayarlar > Abonelik);
  * a `fetch` answer keeps the key. On the screens that call this (a new
  * product, a copy, an invitation, a draft), a 403 to someone allowed to
@@ -17,7 +20,11 @@ export const PLAN_LIMIT_REACHED = "plan.limit_reached"
  */
 export function isPlanRefusal(failure: unknown): boolean {
   const { status, code } = (failure ?? {}) as { status?: unknown; code?: unknown }
-  return code === PLAN_LIMIT_REACHED || (status === 403 && (code === undefined || code === null))
+  return (
+    code === PLAN_LIMIT_REACHED ||
+    code === PLAN_RESTRICTED ||
+    (status === 403 && (code === undefined || code === null))
+  )
 }
 
 /**

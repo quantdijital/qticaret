@@ -10,7 +10,11 @@ const fetchMock = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
-vi.mock("@/features/auth/api/staff", () => ({ useCan: () => true }))
+const plan = vi.hoisted(() => ({ restricted: false }))
+vi.mock("@/features/auth/api/staff", () => ({
+  useCan: () => true,
+  usePlanRestricted: () => plan.restricted,
+}))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
 }))
@@ -67,5 +71,19 @@ describe("TeamPage at the package's team limit (adr/0061 Ek C14)", () => {
 
     expect(await screen.findByRole("status")).toHaveTextContent("Ekip limitinize yaklaştınız")
     expect(screen.getByRole("button", { name: "Davet et" })).toBeEnabled()
+  })
+
+  it("holds the invite button back while the shop is restricted (Ek C15)", async () => {
+    plan.restricted = true
+    try {
+      renderPage({ used: 1, max: 10 })
+      await screen.findByText("Deniz Kaya")
+      const invite = screen.getByRole("button", { name: "Davet et" })
+      expect(invite).toBeDisabled()
+      expect(invite).toHaveAttribute("title", "Mağazanız kısıtlıyken bu işlem kapalı.")
+      expect(invite).toHaveAttribute("aria-describedby", "plan-status-strip")
+    } finally {
+      plan.restricted = false
+    }
   })
 })

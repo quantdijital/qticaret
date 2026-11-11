@@ -15,7 +15,8 @@ import { errorText } from "@/lib/errors"
  * Settings > Abonelik (adr/0061 §5.6, Ek C14), read only: the limits and
  * their use on the left, the package and payment in the right column. A
  * shop without a control plane says it has no limits and shows its use.
- * Grace and restriction banners are C15's; limit notices sit on their own
+ * The restricted or suspended shop's strip is above every page (Ek C15), the
+ * grace period's comes with C16; limit notices sit on their own
  * screens (products, team, media, drafts, orders).
  */
 export function SubscriptionPage() {

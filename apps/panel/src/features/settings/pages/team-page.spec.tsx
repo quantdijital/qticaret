@@ -10,7 +10,10 @@ const staff = vi.hoisted(() => ({ manage: true }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
-vi.mock("@/features/auth/api/staff", () => ({ useCan: () => staff.manage }))
+vi.mock("@/features/auth/api/staff", () => ({
+  useCan: () => staff.manage,
+  usePlanRestricted: () => false,
+}))
 // Links as plain anchors: rendered without a router
 vi.mock("@tanstack/react-router", () => ({ Link: () => null }))
 
