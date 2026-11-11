@@ -21,6 +21,7 @@ import { ShipResultsDialog } from "@/features/orders/components/ship-results-dia
 import { isFiltered } from "@/features/orders/search"
 import type { OrderListSearch } from "@/features/orders/search"
 import { PaymentLinkButtons } from "@/features/payment-links/components/order-buttons"
+import { LimitNotice } from "@/features/settings/components/limit-notice"
 import { errorText } from "@/lib/errors"
 
 const route = getRouteApi("/_auth/orders/")
@@ -97,6 +98,8 @@ export function OrdersPage() {
           </span>
         }
       />
+      {/* adr/0061 Ek C14: the month's orders near or past the package's limit; never stopped */}
+      <LimitNotice limit="orders_per_month" />
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs
           label={t("orders.views")}

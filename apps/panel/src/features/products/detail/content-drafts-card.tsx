@@ -10,6 +10,9 @@ import { errorText } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
 import { DRAFT_KINDS, draftsQuery } from "@/features/products/api/content-drafts"
 import type { Draft, DraftKind } from "@/features/products/api/content-drafts"
+import { PLAN_KEY } from "@/features/settings/api/plan"
+import { LimitNotice } from "@/features/settings/components/limit-notice"
+import { usePlanFailureToast } from "@/features/settings/use-plan-failure"
 import { productFold } from "./sections"
 
 const D = "products.drafts"
@@ -46,6 +49,7 @@ export function ContentDraftsCard({
     await client.invalidateQueries({ queryKey: ["seo"] })
   }
   const failed = (failure: unknown) => toast.error(errorText(t, failure))
+  const planFailure = usePlanFailureToast()
   const ask = useMutation({
     mutationFn: (kind: DraftKind) =>
       sdk.client.fetch<{ draft: Draft }>("/admin/content-drafts", {
@@ -57,8 +61,11 @@ export function ContentDraftsCard({
         toast.warning(t(`${D}.refused`))
       }
       await refresh()
+      // A draft spends one of the month's credits (adr/0061 Ek C14)
+      await client.invalidateQueries({ queryKey: PLAN_KEY })
     },
-    onError: failed,
+    // Past the package's monthly credits: a link to Settings > Abonelik
+    onError: planFailure,
   })
   const decide = useMutation({
     mutationFn: (input: { id: string; decision: "approve" | "reject" }) =>
@@ -97,6 +104,7 @@ export function ContentDraftsCard({
       }
     >
       <div className="flex flex-col gap-4">
+        <LimitNotice limit="llm_credits_per_month" />
         <div className="flex flex-wrap gap-2">
           {DRAFT_KINDS.map((kind) => (
             <Button

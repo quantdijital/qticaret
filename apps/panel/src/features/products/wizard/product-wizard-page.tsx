@@ -13,6 +13,8 @@ import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { Wizard } from "@qticaret/admin-ui/patterns/wizard"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { shopDefaultsQuery } from "@/features/products/api/lookups"
+import { LimitNotice } from "@/features/settings/components/limit-notice"
+import { usePlanFailureToast } from "@/features/settings/use-plan-failure"
 import { errorText } from "@/lib/errors"
 import { useCreateProduct } from "./create-product"
 import { canPublish, readiness } from "./readiness"
@@ -51,6 +53,8 @@ export function ProductWizardPage() {
   const [reached, setReached] = useState(0)
   const defaults = useQuery(shopDefaultsQuery())
   const create = useCreateProduct()
+  // A product past the package's limit is refused: the toast links to Settings > Abonelik
+  const planFailure = usePlanFailureToast()
   const values = useWatch({ control: form.control }) as WizardValues
   const stepKeys = stepsFor(values.kind)
   const stepKey = stepKeys[current] ?? "basics"
@@ -100,9 +104,7 @@ export function ProductWizardPage() {
               // Saved: leaving is no longer a loss, so the guard stands aside
               void navigate({ to: "/products/$id", params: { id: productId }, ignoreBlocker: true })
             },
-            onError: (failure) => {
-              toast.error(errorText(t, failure))
-            },
+            onError: planFailure,
           }
         )
       },
@@ -128,6 +130,7 @@ export function ProductWizardPage() {
         title={t("products.wizard.pageTitle")}
         back={{ to: "/products", label: t("nav.products") }}
       />
+      <LimitNotice limit="products" />
       <FormProvider {...form}>
         <form
           noValidate

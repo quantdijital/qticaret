@@ -2,7 +2,7 @@ import { useNavigate } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { useDuplicateProduct } from "@/features/products/api/products"
-import { errorText } from "@/lib/errors"
+import { usePlanFailureToast } from "@/features/settings/use-plan-failure"
 
 /**
  * "Kopyala" (owner 2026-11-06), from the list's row menu or the product's
@@ -12,6 +12,7 @@ export function useDuplicateAndOpen() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const duplicate = useDuplicateProduct()
+  const planFailure = usePlanFailureToast()
   return {
     pending: duplicate.isPending,
     run: (productId: string) => {
@@ -20,7 +21,8 @@ export function useDuplicateAndOpen() {
           toast.success(t("products.duplicate.done", { title: copy.title }))
           void navigate({ to: "/products/$id", params: { id: copy.id } })
         },
-        onError: (failure) => toast.error(errorText(t, failure)),
+        // A copy past the package's product limit links to Settings > Abonelik
+        onError: planFailure,
       })
     },
   }

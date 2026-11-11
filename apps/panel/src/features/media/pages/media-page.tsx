@@ -23,6 +23,7 @@ import { MEDIA_PAGE_SIZE, mediaListQuery } from "@/features/media/api/media"
 import { MediaDetailDialog } from "@/features/media/components/media-detail-dialog"
 import { MediaGrid } from "@/features/media/components/media-grid"
 import { UploadZone } from "@/features/media/components/upload-zone"
+import { LimitNotice } from "@/features/settings/components/limit-notice"
 import { errorText } from "@/lib/errors"
 
 const route = getRouteApi("/_auth/media")
@@ -102,6 +103,8 @@ export function MediaPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("nav.media")} description={t("media.description")} action={upload} />
+      {/* adr/0061 Ek C14: near or at the package's storage limit */}
+      <LimitNotice limit="storage_mb" />
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <div className="flex flex-wrap items-center gap-3 border-b px-5 py-3">
           <SearchInput

@@ -316,7 +316,8 @@
       "security": "Security",
       "legal": "Legal texts",
       "einvoice": "Invoices and accounting",
-      "migration": "Migration"
+      "migration": "Migration",
+      "subscription": "Subscription"
     },
     "appearance": {
       "title": "Appearance",
@@ -1903,7 +1904,8 @@
       "security": "Two-step verification, the team's requirement, fraud prevention",
       "legal": "Contracts, policies and the privacy notice",
       "einvoice": "Invoicing program, timing and series, carrier details, accounting",
-      "migration": "Catalog, customers and 301s from the old platform"
+      "migration": "Catalog, customers and 301s from the old platform",
+      "subscription": "Your package, limits and usage, payment status"
     },
     "marketing": {
       "title": "Marketing",
@@ -3466,7 +3468,9 @@
       "nothing": "No product to apply; the report shows the rows with problems.",
       "jobFailed": "The file could not be processed.",
       "unchanged_one": "{{formatted}} product stays as it is.",
-      "unchanged_other": "{{formatted}} products stay as they are."
+      "unchanged_other": "{{formatted}} products stay as they are.",
+      "limited_one": "{{count}} new product was not added: your package's product limit is reached. The report lists it.",
+      "limited_other": "{{count}} new products were not added: your package's product limit is reached. The report lists them."
     },
     "bulk": {
       "region": "Selected products",
@@ -9001,5 +9005,95 @@
     "subtitleAs": "You are signed in as {{email}}. Once confirmed, you sign in with your new address; your password stays the same.",
     "signInFirst": "Sign in with the account that asked for the change; you come back to this page afterwards.",
     "signIn": "Sign in"
+  },
+  "plan": {
+    "title": "Subscription",
+    "description": "Your package, limits and usage, and payment status. This page is for information; contact us to change your package.",
+    "unmanaged": "This shop has no package limits: products, team, storage and content drafts are unlimited.",
+    "loadFailed": "The subscription could not be loaded.",
+    "view": "View subscription",
+    "package": {
+      "title": "Package",
+      "text": "Your shop's package and status.",
+      "name": "Package",
+      "status": "Shop status",
+      "period": "This period",
+      "none": "No package set"
+    },
+    "statuses": {
+      "provisioning": "Being set up",
+      "active": "Active",
+      "restricted": "Restricted",
+      "suspended": "Suspended",
+      "closing": "Closing",
+      "closed": "Closed"
+    },
+    "usage": {
+      "title": "Limits and usage",
+      "text": "Your total and this month's usage. Amber from 80% of a limit, red at a limit that stops new records.",
+      "listLabel": "Limits and usage",
+      "barLabel": "{{name}}: {{value}}",
+      "of": "{{used}} / {{max}}",
+      "unlimited": "{{used}} · unlimited",
+      "pending_one": "{{count}} open invitation included",
+      "pending_other": "{{count}} open invitations included",
+      "ordersNote": "Warning only, never blocked",
+      "tone": {
+        "warn": "Near the limit",
+        "full": "At the limit",
+        "over": "Over the limit"
+      }
+    },
+    "keys": {
+      "products": "Products",
+      "orders_per_month": "Orders this month",
+      "staff": "Team",
+      "storage_mb": "Storage",
+      "llm_credits_per_month": "Content drafts this month",
+      "custom_domains": "Custom domains"
+    },
+    "mb": "{{value}} MB",
+    "billing": {
+      "title": "Payment",
+      "text": "Your subscription payment's status and the next payment.",
+      "status": "Payment status",
+      "nextDue": "Next payment day",
+      "graceEnds": "Grace period ends",
+      "amount": "Amount",
+      "none": "—",
+      "instruction": "Payment instructions",
+      "noInstruction": "Payment instructions appear here as the payment day nears.",
+      "statuses": {
+        "trialing": "In trial",
+        "active": "Up to date",
+        "past_due": "Overdue",
+        "restricted": "Restricted",
+        "cancelled": "Ended"
+      }
+    },
+    "notice": {
+      "products": {
+        "near": "You are near your product limit ({{used}}/{{max}}).",
+        "full": "You have reached your product limit ({{used}}/{{max}}). New products cannot be added; you can keep editing your products."
+      },
+      "staff": {
+        "near": "You are near your team limit ({{used}}/{{max}}, open invitations included).",
+        "full": "You have reached your team limit ({{used}}/{{max}}, open invitations included). No new invitation can be sent."
+      },
+      "storage_mb": {
+        "near": "Most of your storage is in use ({{used}}/{{max}} MB).",
+        "full": "You have reached your storage limit ({{used}}/{{max}} MB). Delete unused images to upload new ones."
+      },
+      "llm_credits_per_month": {
+        "near": "You have used most of this month's content drafts ({{used}}/{{max}}).",
+        "full": "This month's content drafts are used up ({{used}}/{{max}}). New drafts can be asked for next month."
+      },
+      "orders_per_month": {
+        "near": "You have reached 80% of this month's order limit ({{used}}/{{max}}). Orders are never blocked.",
+        "over": "You are over this month's order limit ({{used}}/{{max}}). Orders keep coming in; we suggest reviewing your package."
+      }
+    },
+    "createBlocked": "New products cannot be added: your product limit is reached.",
+    "inviteBlocked": "No new invitation can be sent: your team limit is reached."
   }
 }

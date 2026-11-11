@@ -16,7 +16,7 @@ import { Input } from "@qticaret/admin-ui/ui/input"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import { INVITABLE_ROLES, useInvite } from "@/features/settings/api/team"
 import type { InvitableRole } from "@/features/settings/api/team"
-import { errorText } from "@/lib/errors"
+import { usePlanFailureToast } from "@/features/settings/use-plan-failure"
 
 const T = "settings.team"
 
@@ -60,6 +60,7 @@ export function InviteDialog({
 }) {
   const { t } = useTranslation()
   const invite = useInvite()
+  const planFailure = usePlanFailureToast()
   const [email, setEmail] = useState("")
   const [role, setRole] = useState<InvitableRole>("operations")
   const [link, setLink] = useState<string | null>(null)
@@ -149,7 +150,8 @@ export function InviteDialog({
                       onSuccess: (made) => {
                         setLink(made.link)
                       },
-                      onError: (failure) => toast.error(errorText(t, failure)),
+                      // Past the package's team limit: a link to Settings > Abonelik
+                      onError: planFailure,
                     }
                   )
                 }}

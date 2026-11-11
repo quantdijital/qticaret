@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 import { AlertTriangle, CircleCheck, Loader2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Progress } from "@qticaret/admin-ui/ui/progress"
@@ -62,6 +63,18 @@ function Counts({ summary }: { summary: ImportSummary }) {
             ? t("products.sheets.problems", { count: summary.problems })
             : ""}{" "}
           {summary.failed > 0 ? t("products.sheets.failedCount", { count: summary.failed }) : ""}
+        </p>
+      ) : null}
+      {summary.limited ? (
+        // adr/0061 Ek C14: new products past the package's limit, left out and in the report
+        <p className="flex items-start gap-2 text-warning-text">
+          <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          <span>
+            {t("products.sheets.limited", { count: summary.limited })}{" "}
+            <Link to="/settings/subscription" className="font-medium underline">
+              {t("plan.view")}
+            </Link>
+          </span>
         </p>
       ) : null}
       {summary.unknown_columns.length > 0 ? (

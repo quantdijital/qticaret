@@ -23,9 +23,15 @@ import { useDuplicateAndOpen } from "@/features/products/use-duplicate"
 import { SheetExportMenu } from "@/features/products/components/sheet-export-menu"
 import { SheetImportDialog } from "@/features/products/components/sheet-import-dialog"
 import { productScoresQuery } from "@/features/seo/api/advisor"
+import { useLimitStanding } from "@/features/settings/api/plan"
+import { LimitNotice } from "@/features/settings/components/limit-notice"
+import { isFull } from "@/features/settings/plan-rules"
 import { errorText } from "@/lib/errors"
 
 const route = getRouteApi("/_auth/products/")
+
+// The product limit's notice, which the disabled add button points to
+const LIMIT_NOTICE = "products-limit-notice"
 
 /** Every product with its picture, status, stock and price; search and quick views above. */
 export function ProductsPage() {
@@ -50,6 +56,7 @@ export function ProductsPage() {
     productScoresQuery((list.data?.products ?? []).map((product) => product.id))
   )
   const duplicate = useDuplicateAndOpen()
+  const productsFull = isFull(useLimitStanding("products"))
   const columns = useProductColumns(
     new Map((scores.data ?? []).map((score) => [score.entity_id, score])),
     (product) => {
@@ -105,15 +112,24 @@ export function ProductsPage() {
               <Upload />
               {t("products.sheets.import")}
             </Button>
-            <Button asChild>
-              <Link to="/products/new">
+            {productsFull ? (
+              // At the package's limit: the notice below says why (adr/0061 Ek C14)
+              <Button disabled title={t("plan.createBlocked")} aria-describedby={LIMIT_NOTICE}>
                 <Plus />
                 {t("products.add")}
-              </Link>
-            </Button>
+              </Button>
+            ) : (
+              <Button asChild>
+                <Link to="/products/new">
+                  <Plus />
+                  {t("products.add")}
+                </Link>
+              </Button>
+            )}
           </div>
         }
       />
+      <LimitNotice limit="products" id={LIMIT_NOTICE} />
       <SheetImportDialog open={importing} onOpenChange={setImporting} />
       <BulkEditDialog
         action={bulkAction}

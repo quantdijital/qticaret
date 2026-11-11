@@ -15,6 +15,8 @@ export interface ImportSummary {
   unchanged: number
   problems: number
   failed: number
+  /** New products past the package's product limit, left out (adr/0061 Ek C14); older jobs lack it. */
+  limited?: number
   unknown_columns: string[]
   seo: {
     grades: Partial<Record<"excellent" | "good" | "needs_work" | "poor", number>>

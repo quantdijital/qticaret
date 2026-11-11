@@ -73,7 +73,12 @@ describe("Settings home", () => {
     )
     // Accounting, warehouses and SMS are tabs of invoices, shipping and e-mail now; the
     // storefront's parts are under Storefront in the main menu (adr/0049)
-    expect(screen.getAllByRole("link")).toHaveLength(18)
+    // adr/0061 Ek C14: Subscription joined the system group
+    expect(screen.getAllByRole("link")).toHaveLength(19)
+    expect(screen.getByRole("link", { name: /Abonelik.*limitler/ })).toHaveAttribute(
+      "href",
+      "/settings/subscription"
+    )
     expect(screen.queryByRole("link", { name: /^Vitrin/ })).toBeNull()
   })
 

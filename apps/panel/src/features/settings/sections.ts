@@ -3,6 +3,7 @@ import {
   CreditCard,
   FileClock,
   FileText,
+  Gauge,
   Import,
   KeyRound,
   ListChecks,
@@ -81,6 +82,8 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
   {
     key: "system",
     sections: [
+      // adr/0061 Ek C14: the package, limits and payment; owner and admin (the API's own rule)
+      { key: "subscription", to: "/settings/subscription", icon: Gauge, needs: "settings" },
       { key: "security", to: "/settings/security", icon: ShieldCheck },
       { key: "team", to: "/settings/team", icon: Users, needs: "team" },
       { key: "integrations", to: "/settings/integrations", icon: Plug, needs: "settings" },

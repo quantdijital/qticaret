@@ -83,6 +83,7 @@ import { Route as AuthSettingsSecurityRouteImport } from './routes/_auth/setting
 import { Route as AuthSettingsSeoRouteImport } from './routes/_auth/settings/seo'
 import { Route as AuthSettingsStoreRouteImport } from './routes/_auth/settings/store'
 import { Route as AuthSettingsStorefrontRouteImport } from './routes/_auth/settings/storefront'
+import { Route as AuthSettingsSubscriptionRouteImport } from './routes/_auth/settings/subscription'
 import { Route as AuthSettingsTeamRouteImport } from './routes/_auth/settings/team'
 import { Route as AuthStorefrontMenusRouteImport } from './routes/_auth/storefront/menus'
 import { Route as AuthStorefrontPreferencesRouteImport } from './routes/_auth/storefront/preferences'
@@ -475,6 +476,12 @@ const AuthSettingsStorefrontRoute = AuthSettingsStorefrontRouteImport.update({
   path: '/storefront',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
+const AuthSettingsSubscriptionRoute =
+  AuthSettingsSubscriptionRouteImport.update({
+    id: '/subscription',
+    path: '/subscription',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
 const AuthSettingsTeamRoute = AuthSettingsTeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -642,6 +649,7 @@ export interface FileRoutesByFullPath {
   '/settings/seo': typeof AuthSettingsSeoRoute
   '/settings/store': typeof AuthSettingsStoreRoute
   '/settings/storefront': typeof AuthSettingsStorefrontRoute
+  '/settings/subscription': typeof AuthSettingsSubscriptionRoute
   '/settings/team': typeof AuthSettingsTeamRoute
   '/storefront/menus': typeof AuthStorefrontMenusRoute
   '/storefront/preferences': typeof AuthStorefrontPreferencesRoute
@@ -733,6 +741,7 @@ export interface FileRoutesByTo {
   '/settings/seo': typeof AuthSettingsSeoRoute
   '/settings/store': typeof AuthSettingsStoreRoute
   '/settings/storefront': typeof AuthSettingsStorefrontRoute
+  '/settings/subscription': typeof AuthSettingsSubscriptionRoute
   '/settings/team': typeof AuthSettingsTeamRoute
   '/storefront/menus': typeof AuthStorefrontMenusRoute
   '/storefront/preferences': typeof AuthStorefrontPreferencesRoute
@@ -829,6 +838,7 @@ export interface FileRoutesById {
   '/_auth/settings/seo': typeof AuthSettingsSeoRoute
   '/_auth/settings/store': typeof AuthSettingsStoreRoute
   '/_auth/settings/storefront': typeof AuthSettingsStorefrontRoute
+  '/_auth/settings/subscription': typeof AuthSettingsSubscriptionRoute
   '/_auth/settings/team': typeof AuthSettingsTeamRoute
   '/_auth/storefront/menus': typeof AuthStorefrontMenusRoute
   '/_auth/storefront/preferences': typeof AuthStorefrontPreferencesRoute
@@ -924,6 +934,7 @@ export interface FileRouteTypes {
     | '/settings/seo'
     | '/settings/store'
     | '/settings/storefront'
+    | '/settings/subscription'
     | '/settings/team'
     | '/storefront/menus'
     | '/storefront/preferences'
@@ -1015,6 +1026,7 @@ export interface FileRouteTypes {
     | '/settings/seo'
     | '/settings/store'
     | '/settings/storefront'
+    | '/settings/subscription'
     | '/settings/team'
     | '/storefront/menus'
     | '/storefront/preferences'
@@ -1110,6 +1122,7 @@ export interface FileRouteTypes {
     | '/_auth/settings/seo'
     | '/_auth/settings/store'
     | '/_auth/settings/storefront'
+    | '/_auth/settings/subscription'
     | '/_auth/settings/team'
     | '/_auth/storefront/menus'
     | '/_auth/storefront/preferences'
@@ -1674,6 +1687,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSettingsStorefrontRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
+    '/_auth/settings/subscription': {
+      id: '/_auth/settings/subscription'
+      path: '/subscription'
+      fullPath: '/settings/subscription'
+      preLoaderRoute: typeof AuthSettingsSubscriptionRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
     '/_auth/settings/team': {
       id: '/_auth/settings/team'
       path: '/team'
@@ -1855,6 +1875,7 @@ interface AuthSettingsRouteChildren {
   AuthSettingsSeoRoute: typeof AuthSettingsSeoRoute
   AuthSettingsStoreRoute: typeof AuthSettingsStoreRoute
   AuthSettingsStorefrontRoute: typeof AuthSettingsStorefrontRoute
+  AuthSettingsSubscriptionRoute: typeof AuthSettingsSubscriptionRoute
   AuthSettingsTeamRoute: typeof AuthSettingsTeamRoute
   AuthSettingsIndexRoute: typeof AuthSettingsIndexRoute
   AuthSettingsLegalKindRoute: typeof AuthSettingsLegalKindRoute
@@ -1886,6 +1907,7 @@ const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsSeoRoute: AuthSettingsSeoRoute,
   AuthSettingsStoreRoute: AuthSettingsStoreRoute,
   AuthSettingsStorefrontRoute: AuthSettingsStorefrontRoute,
+  AuthSettingsSubscriptionRoute: AuthSettingsSubscriptionRoute,
   AuthSettingsTeamRoute: AuthSettingsTeamRoute,
   AuthSettingsIndexRoute: AuthSettingsIndexRoute,
   AuthSettingsLegalKindRoute: AuthSettingsLegalKindRoute,

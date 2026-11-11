@@ -26,8 +26,12 @@ setup("signs a temporary admin in", async ({ page }) => {
     await page.waitForURL((url) => !url.pathname.startsWith("/login"))
   }
   await signIn()
+  // The panel may move on to the 2FA setup a moment after the login page has gone:
+  // wait for where it settles, the setup or the panel itself
+  const mfaSetup = page.getByRole("heading", { name: "İki adımlı doğrulamayı kurun" })
+  await expect(mfaSetup.or(page.getByRole("navigation", { name: "Ana menü" }))).toBeVisible()
   // 2FA on in this environment (adr/0040): set up as a person would, then in with a code
-  if (new URL(page.url()).pathname === "/security/setup") {
+  if (await mfaSetup.isVisible()) {
     const key = (await page.getByLabel("Kurulum anahtarı").innerText()).replace(/\s+/g, "")
     await page.getByLabel("Uygulamadaki 6 haneli kod").fill(totp(key))
     // Setting it up asks the password too: a session alone must not enrol an app

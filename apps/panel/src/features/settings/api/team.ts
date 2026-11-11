@@ -1,5 +1,6 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import type { StaffRole } from "@/features/auth/api/staff"
+import { PLAN_KEY } from "@/features/settings/api/plan"
 import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
@@ -55,7 +56,12 @@ function useTeamMutation<Input, Output>(call: (input: Input) => Promise<Output>)
   const client = useQueryClient()
   return useMutation({
     mutationFn: call,
-    onSuccess: () => client.invalidateQueries({ queryKey: KEY }),
+    // The team's seats are a plan limit too (adr/0061 Ek C14)
+    onSuccess: () =>
+      Promise.all([
+        client.invalidateQueries({ queryKey: KEY }),
+        client.invalidateQueries({ queryKey: PLAN_KEY }),
+      ]),
   })
 }
 

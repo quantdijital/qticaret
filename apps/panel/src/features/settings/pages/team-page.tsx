@@ -28,11 +28,15 @@ import {
 } from "@/features/settings/api/team"
 import type { TeamMember } from "@/features/settings/api/team"
 import { InviteDialog } from "@/features/settings/components/invite-dialog"
+import { useLimitStanding } from "@/features/settings/api/plan"
+import { LimitNotice } from "@/features/settings/components/limit-notice"
 import { TeamInvitesCard } from "@/features/settings/components/team-invites-card"
+import { isFull } from "@/features/settings/plan-rules"
 import { errorText } from "@/lib/errors"
 import { formatDate } from "@qticaret/admin-ui/lib/format"
 
 const T = "settings.team"
+const SEATS_NOTICE = "team-limit-notice"
 
 const ROLE_TONE: Record<StaffRole, StatusTone> = {
   owner: "info",
@@ -146,6 +150,7 @@ export function TeamPage() {
   const { t } = useTranslation()
   const team = useQuery(teamQuery())
   const manage = useCan("staff")
+  const seatsFull = isFull(useLimitStanding("staff"))
   const change = useChangeRole()
   const remove = useRemoveMember()
   const resetMfa = useResetMemberMfa()
@@ -172,6 +177,10 @@ export function TeamPage() {
         action={
           manage ? (
             <Button
+              // At the package's team limit the notice below says why (adr/0061 Ek C14)
+              disabled={seatsFull}
+              title={seatsFull ? t("plan.inviteBlocked") : undefined}
+              aria-describedby={seatsFull ? SEATS_NOTICE : undefined}
               onClick={() => {
                 setInviting(true)
               }}
@@ -182,6 +191,7 @@ export function TeamPage() {
           ) : undefined
         }
       />
+      {manage ? <LimitNotice limit="staff" id={SEATS_NOTICE} /> : null}
       <SectionCard title={t(`${T}.members`)} description={t(`${T}.membersHint`)} flush>
         {team.isPending ? (
           <div className="border-t p-5">

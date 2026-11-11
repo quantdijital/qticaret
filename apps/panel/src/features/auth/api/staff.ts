@@ -71,7 +71,9 @@ export function useStaff(): StaffMe | undefined {
 
 /** Whether the signed-in staff member may: false until known, so nothing is offered on a guess. */
 export function useCan(capability: Capability): boolean {
-  return useStaff()?.can[capability] ?? false
+  // An answer without `can` (an older backend, a stand-in) offers nothing rather than failing
+  const can = useStaff()?.can as Partial<Record<Capability, boolean>> | undefined
+  return can?.[capability] ?? false
 }
 
 /** The capability check, for lists of things to offer. */
