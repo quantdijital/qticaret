@@ -2,10 +2,13 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { TURKIYEAPI_IDS, fakeTurkiyeApiDataset, startFakeTurkiyeApi } from "@qticaret/testing"
 import type { FakeTurkiyeApi } from "@qticaret/testing"
+import { serializeJob } from "../../src/api/admin/async-jobs/serialize"
 import trAddressSyncJob from "../../src/jobs/tr-address-sync"
 import { logger } from "../../src/lib/logging"
 import { ASYNC_JOB_MODULE } from "../../src/modules/async-job"
 import type AsyncJobModuleService from "../../src/modules/async-job/service"
+import { AUDIT_LOG_MODULE } from "../../src/modules/audit-log"
+import type AuditLogModuleService from "../../src/modules/audit-log/service"
 import { validateTrAddress } from "../../src/modules/tr-address/validation"
 import { enqueueAsyncJobWorkflow } from "../../src/workflows/async-job/enqueue-async-job"
 import { TR_ADDRESS_SYNC_JOB } from "../../src/workflows/async-job/types/tr-address-sync"
@@ -36,7 +39,9 @@ const finished = (job: Job | undefined) =>
  * adr/0008 Ek 2026-11-04: the address data from TürkiyeAPI (a fake one
  * here; never the real API), kept by the platform: the weekly check
  * queues the sync job, the CLI imports by hand. The shop's panel has no
- * surface for it (the owner's ruling, 2026-11-04).
+ * surface for it (the owner's ruling, 2026-11-04): the job and its audit
+ * entries are read here as the operator reads them, from the modules; the
+ * admin API leaves both out (async-jobs.spec, audit-log.spec).
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -64,8 +69,10 @@ medusaIntegrationTestRunner({
       owner = await createAdminUser(http, getContainer())
       storefront = await createStorefront(getContainer())
     })
-    afterEach(() => {
+    afterEach(async () => {
       jest.restoreAllMocks()
+      // A sync a failed assertion left behind must not outlive the test's database
+      await eventually(unfinishedJobs, (count) => count === 0, 300)
     })
 
     // What the operator reads (the module, the newest sync record): no admin route says it
@@ -79,18 +86,19 @@ medusaIntegrationTestRunner({
         last_updated: latest?.dataset_last_updated ?? null,
       }
     }
+    const jobs = () => getContainer().resolve<AsyncJobModuleService>(ASYNC_JOB_MODULE)
     const latestJobId = async () => {
-      const [job] = await getContainer()
-        .resolve<AsyncJobModuleService>(ASYNC_JOB_MODULE)
-        .listAsyncJobs(
-          { type: TR_ADDRESS_SYNC_JOB },
-          { order: { created_at: "DESC", id: "DESC" }, take: 1 }
-        )
+      const [job] = await jobs().listAsyncJobs(
+        { type: TR_ADDRESS_SYNC_JOB },
+        { order: { created_at: "DESC", id: "DESC" }, take: 1 }
+      )
       return job?.id ?? null
     }
-    const job = async (id: string) =>
-      (await http.get<{ async_job: Job }>(`/admin/async-jobs/${id}`, { headers: owner.headers }))
-        .data.async_job
+    const unfinishedJobs = async () =>
+      (await jobs().listAsyncJobs({ type: TR_ADDRESS_SYNC_JOB, status: ["queued", "running"] }))
+        .length
+    // The job as the operator reads it: the admin API answers 404 for the platform's jobs
+    const job = async (id: string): Promise<Job> => serializeJob(await jobs().retrieveAsyncJob(id))
     const waitFor = (id: string) => eventually(() => job(id), finished, 150)
     // The job as the weekly check queues it, without its version check: a sync now
     const sync = async () => {
@@ -105,13 +113,16 @@ medusaIntegrationTestRunner({
           external_id: `turkiyeapi:district:${String(externalId)}`,
         })
       )[0]?.id ?? "-"
-    const neighborhoodsOf = async (externalId: number) =>
-      (
-        await http.get<{ neighborhoods: { name: string; postal_code: string }[] }>(
+    const neighborhoodsOf = async (externalId: number) => {
+      const response = await settle(
+        http.get<{ neighborhoods: { name: string; postal_code: string }[] }>(
           `/store/tr-address/neighborhoods?district=${await districtId(getContainer(), externalId)}`,
           { headers: storefront.headers }
         )
-      ).data.neighborhoods
+      )
+      expect(response.status).toBe(200)
+      return response.data.neighborhoods
+    }
 
     it("syncs as a job with a report: the data, the store lists and the audit log", async () => {
       expect(await data()).toMatchObject({ provinces: 0, dataset_version: null })
@@ -150,10 +161,11 @@ medusaIntegrationTestRunner({
       expect(Object.keys(sandikli[0] ?? {}).sort()).toEqual(["id", "name", "postal_code"])
       expect(fake.requests).toContain("/v2/datasets/neighborhoods.json")
 
-      const audit = await http.get<{
-        audit_entries: { action: string; actor_type: string }[]
-      }>("/admin/audit-log?resource_type=tr_address&limit=10", { headers: owner.headers })
-      expect(audit.data.audit_entries).toContainEqual(
+      // The operator's record: in the log, out of the shop's viewer (audit-log.spec)
+      const audit = await getContainer()
+        .resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
+        .listAuditEntries({ resource_type: "tr_address" })
+      expect(audit).toContainEqual(
         expect.objectContaining({ action: "tr_address.imported", actor_type: "system" })
       )
     })
