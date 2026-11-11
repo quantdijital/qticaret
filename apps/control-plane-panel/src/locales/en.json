@@ -143,7 +143,8 @@
     "groups": {
       "platform": "Platform",
       "admin": "Administration"
-    }
+    },
+    "keys": "Keys"
   },
   "common": {
     "menu": "Menu",
@@ -714,6 +715,10 @@
       "session_revoked": "Your session was ended. Sign in again.",
       "session_unknown": "The session was not found; it may have ended already.",
       "sign_in_locked": "Too many wrong codes. Wait a while and try again.",
+      "signing_next_exists": "A next signing key is ready already.",
+      "signing_no_next": "There is no new key to switch to; prepare one first.",
+      "signing_no_previous": "There is no old key to remove.",
+      "signing_previous_pending": "Remove the previous key first; one switch at a time.",
       "slug_invalid": "The platform address is not valid: it starts with a letter; lower-case letters, digits and single hyphens, 3–30 characters.",
       "slug_reserved": "This address is reserved for the platform; choose another name.",
       "slug_taken": "This platform address belongs to another shop.",
@@ -729,6 +734,82 @@
       "tenant_unknown": "Shop not found.",
       "text_invalid": "The text holds characters that cannot be used.",
       "vkn_invalid": "The tax number is not valid."
+    }
+  },
+  "keys": {
+    "title": "Keys",
+    "text": "The control plane's signing and encryption keys. Secret values are never shown: only key ids, public keys and counts.",
+    "signing": {
+      "title": "Signing keys",
+      "text": "They sign the plan documents sent to the shops; the shops trust the published public keys.",
+      "empty": "No signing key yet.",
+      "columns": {
+        "kid": "Key",
+        "status": "Status",
+        "created": "Created",
+        "activated": "Signing since"
+      },
+      "status": {
+        "active": "Signing",
+        "next": "Next",
+        "previous": "Previous",
+        "retired": "Removed"
+      },
+      "published": "The shops' public key list",
+      "publishedText": "A shop's CONTROL_PLANE_PUBLIC_KEYS value. Public information, not a secret.",
+      "publishedEmpty": "No key is published.",
+      "copy": "Copy",
+      "copied": "Public key list copied.",
+      "steps": {
+        "create": {
+          "action": "Create a signing key",
+          "text": "The first key signs at once.",
+          "done": "Signing key created."
+        },
+        "prepare": {
+          "action": "Rotate the signing key",
+          "text": "Step 1: a new key is prepared and added to the shops' list; documents are still signed with the old key.",
+          "done": "New key prepared. Switch to it once the shops have the new list."
+        },
+        "switch": {
+          "action": "Switch to the new key",
+          "text": "Step 2: new documents are signed with the new key. The old key stays listed; what it signed keeps verifying.",
+          "confirmTitle": "Switch to the new key?",
+          "confirmText": "From now on documents are signed with {{kid}}. The shops must list this key, or they refuse the new documents.",
+          "done": "Signing switched to the new key."
+        },
+        "retire": {
+          "action": "Remove the old key",
+          "text": "Step 3: the old key leaves the list and its private half is deleted. This cannot be undone.",
+          "confirmTitle": "Remove the old signing key?",
+          "confirmText": "{{kid}} leaves the shops' list and its private half is deleted for good. Every shop should have received a document signed with the new key.",
+          "done": "Old key removed."
+        }
+      }
+    },
+    "keks": {
+      "title": "Encryption keys",
+      "text": "The keys wrapping stored secrets and TCKNs (CP_MASTER_KEY). Their fingerprints are shown, never the keys.",
+      "empty": "No encrypted records.",
+      "columns": {
+        "kek": "Fingerprint",
+        "state": "Status",
+        "secrets": "Secrets",
+        "tckn": "TCKN"
+      },
+      "state": {
+        "current": "Current",
+        "older": "Old",
+        "missing": "Not configured"
+      },
+      "pending": "{{count}} records are wrapped with an old key. Rewrap them, then the old key can go.",
+      "allCurrent": "Every record is wrapped with the current key.",
+      "strandedTitle": "Some records cannot be opened",
+      "strandedText": "{{count}} records are wrapped with a key that is not configured and cannot be opened. Put that key back in CP_MASTER_KEY, after the current one, and rewrap.",
+      "removable": "{{kek}} is empty now and can be removed from CP_MASTER_KEY.",
+      "rewrap": "Rewrap",
+      "rewrapped": "{{count}} records rewrapped.",
+      "rewrapFailed": "{{count}} records could not be rewrapped; their ids are in the server log."
     }
   }
 }

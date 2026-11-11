@@ -143,7 +143,8 @@
     "groups": {
       "platform": "Platform",
       "admin": "Yönetim"
-    }
+    },
+    "keys": "Anahtarlar"
   },
   "common": {
     "menu": "Menü",
@@ -714,6 +715,10 @@
       "session_revoked": "Oturumunuz kapatıldı. Yeniden giriş yapın.",
       "session_unknown": "Oturum bulunamadı; zaten kapanmış olabilir.",
       "sign_in_locked": "Çok fazla yanlış kod girildi. Bir süre bekleyip yeniden deneyin.",
+      "signing_next_exists": "Sıradaki bir imza anahtarı zaten hazır.",
+      "signing_no_next": "Geçilecek yeni anahtar yok; önce yeni anahtarı hazırlayın.",
+      "signing_no_previous": "Kaldırılacak eski anahtar yok.",
+      "signing_previous_pending": "Önce önceki anahtarı kaldırın; aynı anda tek geçiş yapılır.",
       "slug_invalid": "Platform adresi geçerli değil: harfle başlar; küçük harf, rakam ve tek tire, 3–30 karakter.",
       "slug_reserved": "Bu adres platforma ayrılmış; başka bir ad seçin.",
       "slug_taken": "Bu platform adresi başka bir mağazanın.",
@@ -729,6 +734,82 @@
       "tenant_unknown": "Mağaza bulunamadı.",
       "text_invalid": "Metinde kullanılamayan karakterler var.",
       "vkn_invalid": "Vergi kimlik no geçerli değil."
+    }
+  },
+  "keys": {
+    "title": "Anahtarlar",
+    "text": "Üst panelin imza ve şifreleme anahtarları. Gizli değerler hiçbir zaman gösterilmez: burada yalnız anahtar kimlikleri, açık anahtarlar ve sayılar var.",
+    "signing": {
+      "title": "İmza anahtarları",
+      "text": "Mağazalara giden plan belgelerini imzalar; mağazalar yayımlanan açık anahtarlara güvenir.",
+      "empty": "Henüz imza anahtarı yok.",
+      "columns": {
+        "kid": "Anahtar",
+        "status": "Durum",
+        "created": "Oluşturma",
+        "activated": "İmzaya başlama"
+      },
+      "status": {
+        "active": "İmzalıyor",
+        "next": "Sıradaki",
+        "previous": "Önceki",
+        "retired": "Kaldırıldı"
+      },
+      "published": "Mağazaların açık anahtar listesi",
+      "publishedText": "Mağazanın CONTROL_PLANE_PUBLIC_KEYS değeri. Açık bilgidir, gizli değildir.",
+      "publishedEmpty": "Yayımlanan anahtar yok.",
+      "copy": "Kopyala",
+      "copied": "Açık anahtar listesi kopyalandı.",
+      "steps": {
+        "create": {
+          "action": "İmza anahtarı oluştur",
+          "text": "İlk anahtar hemen imzalamaya başlar.",
+          "done": "İmza anahtarı oluşturuldu."
+        },
+        "prepare": {
+          "action": "İmza anahtarını döndür",
+          "text": "1. adım: yeni anahtar hazırlanır ve mağazaların listesine eklenir; belgeler hâlâ eski anahtarla imzalanır.",
+          "done": "Yeni anahtar hazırlandı. Mağazalar yeni listeyi aldıktan sonra yeni anahtara geçin."
+        },
+        "switch": {
+          "action": "Yeni anahtara geç",
+          "text": "2. adım: yeni belgeler yeni anahtarla imzalanır. Eski anahtar listede kalır; imzaladığı belgeler doğrulanmaya devam eder.",
+          "confirmTitle": "Yeni anahtara geçilsin mi?",
+          "confirmText": "Bundan sonraki belgeler {{kid}} anahtarıyla imzalanır. Mağazaların listesinde bu anahtar olmalı; yoksa yeni belgeleri reddederler.",
+          "done": "İmza yeni anahtara geçti."
+        },
+        "retire": {
+          "action": "Eski anahtarı kaldır",
+          "text": "3. adım: eski anahtar listeden çıkar ve gizli yarısı silinir. Geri alınamaz.",
+          "confirmTitle": "Eski imza anahtarı kaldırılsın mı?",
+          "confirmText": "{{kid}} anahtarı mağazaların listesinden çıkar ve gizli yarısı kalıcı olarak silinir. Bütün mağazalar yeni anahtarla imzalanmış bir belge almış olmalı.",
+          "done": "Eski anahtar kaldırıldı."
+        }
+      }
+    },
+    "keks": {
+      "title": "Şifreleme anahtarları",
+      "text": "Saklanan sırları ve TC kimlik numaralarını saran anahtarlar (CP_MASTER_KEY). Anahtarların kendisi değil, parmak izleri gösterilir.",
+      "empty": "Şifreli kayıt yok.",
+      "columns": {
+        "kek": "Parmak izi",
+        "state": "Durum",
+        "secrets": "Sır",
+        "tckn": "TC kimlik no"
+      },
+      "state": {
+        "current": "Güncel",
+        "older": "Eski",
+        "missing": "Yapılandırmada yok"
+      },
+      "pending": "{{count}} kayıt eski anahtarla sarılı. Yeniden sarınca eski anahtar çıkarılabilir.",
+      "allCurrent": "Bütün kayıtlar güncel anahtarla sarılı.",
+      "strandedTitle": "Açılamayan kayıtlar var",
+      "strandedText": "{{count}} kayıt yapılandırmada olmayan bir anahtarla sarılı ve açılamıyor. O anahtarı CP_MASTER_KEY'e, güncel anahtardan sonra geri ekleyin ve yeniden sarın.",
+      "removable": "{{kek}} artık boş; CP_MASTER_KEY'den çıkarılabilir.",
+      "rewrap": "Yeniden sar",
+      "rewrapped": "{{count}} kayıt yeniden sarıldı.",
+      "rewrapFailed": "{{count}} kayıt sarılamadı; kayıt kimlikleri sunucu günlüğünde."
     }
   }
 }

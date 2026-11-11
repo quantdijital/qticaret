@@ -7,11 +7,12 @@ const keys = (role: Parameters<typeof navFor>[0]) =>
   navFor(role).flatMap((group) => group.items.map((item) => item.key))
 
 describe("the control plane's menu", () => {
-  it("shows the staff and the audit log to an owner only (the API decides again)", () => {
-    expect(keys("owner")).toEqual(expect.arrayContaining(["dashboard", "staff", "audit"]))
+  it("shows the staff, the audit log and the keys to an owner only (the API decides again)", () => {
+    expect(keys("owner")).toEqual(expect.arrayContaining(["dashboard", "staff", "audit", "keys"]))
     for (const role of ["operator", "finance", "readonly", null] as const) {
       expect(keys(role)).not.toContain("staff")
       expect(keys(role)).not.toContain("audit")
+      expect(keys(role)).not.toContain("keys")
     }
   })
 
@@ -34,6 +35,7 @@ describe("the control plane's menu", () => {
     expect(activeKey("/tenants/ten_01")).toBe("shops")
     expect(activeKey("/packages")).toBe("packages")
     expect(activeKey("/audit-log")).toBe("audit")
+    expect(activeKey("/keys")).toBe("keys")
     expect(activeKey("/account")).toBe("account")
   })
 })
