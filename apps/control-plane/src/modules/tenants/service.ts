@@ -72,23 +72,6 @@ class TenantsModuleService extends TenantsRecords {
     }
   }
 
-  /**
-   * Where the shop stood when it was last suspended (Ek C15): the `from`
-   * of its latest move into `suspended`; null when it never was.
-   */
-  @InjectManager()
-  async statusBeforeSuspension(
-    id: string,
-    @MedusaContext() sharedContext: Context = {}
-  ): Promise<TenantStatus | null> {
-    const [last] = await this.listTenantStatusChanges(
-      { tenant_id: id, to_status: "suspended" },
-      { select: ["from_status", "created_at"], order: { created_at: "DESC" }, take: 1 },
-      sharedContext
-    )
-    return last?.from_status ?? null
-  }
-
   @InjectManager()
   async contactsOf(
     tenantId: string,

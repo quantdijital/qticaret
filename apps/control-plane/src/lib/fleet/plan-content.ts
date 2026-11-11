@@ -22,8 +22,9 @@ import type { LimitValues, OverrideLike } from "../plans/limits"
 export type PlanContent = Omit<PlanDocument, "serial" | "issued_at">
 
 /**
- * Billing arrives with C16. Until then every document says "active, nothing
- * due": the shop shows no payment strip, and no status follows from it.
+ * A document's billing before a shop has a subscription (Ek C9, C16):
+ * "active, nothing due"; the shop shows no payment strip, and no status
+ * follows from it. With one, the summary is billing's (lib/billing/summary.ts).
  */
 export const NEUTRAL_BILLING: PlanBillingSummary = Object.freeze({
   status: "active",
@@ -89,6 +90,8 @@ export interface PlanContentInput {
   packageFeatures: Readonly<Record<string, boolean>>
   limitOverrides: readonly OverrideLike[]
   flagOverrides: readonly FlagOverrideLike[]
+  /** The billing summary (Ek C16); the neutral one when not given. */
+  billing?: PlanBillingSummary | undefined
   now: Date
   nodeEnv: string | undefined
 }
@@ -109,7 +112,7 @@ export function planContent(input: PlanContentInput): PlanContent {
     package_code: input.packageCode,
     limits,
     platform_flags: Object.fromEntries(flags.map((flag) => [flag.key, flag.value])),
-    billing: { ...NEUTRAL_BILLING },
+    billing: { ...(input.billing ?? NEUTRAL_BILLING) },
   }
 }
 

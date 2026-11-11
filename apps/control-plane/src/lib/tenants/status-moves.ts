@@ -21,22 +21,21 @@ export const MOVE_STARTS: Readonly<Record<ManualStatusMove, readonly TenantStatu
 }
 
 /**
- * Where a suspension ends (§2: "ödeme durumuna göre"). Until C16 keeps the
- * payments, the shop goes back to where it stood when it was suspended: a
- * shop restricted for an unpaid subscription stays restricted, any other
- * becomes active. C16's billing job then moves it as its payments say.
+ * Where a suspension ends (§2: "ödeme durumuna göre", Ek C16): by the
+ * shop's payments today, not by where it stood before. Any open charge
+ * past its grace: `restricted`; else `active`.
  */
-export const resumeTarget = (before: TenantStatus | null): "active" | "restricted" =>
-  before === "restricted" ? "restricted" : "active"
+export const resumeTarget = (overdue: boolean): "active" | "restricted" =>
+  overdue ? "restricted" : "active"
 
-/** The move's target from where the shop stands now and stood before its suspension. */
+/** The move's target from where the shop stands now and whether a charge is past its grace. */
 export function moveTarget(
   move: ManualStatusMove,
   current: TenantStatus,
-  beforeSuspension: TenantStatus | null
+  overdue: boolean
 ): TenantStatus | null {
   if (!MOVE_STARTS[move].includes(current)) {
     return null
   }
-  return move === "suspend" ? "suspended" : resumeTarget(beforeSuspension)
+  return move === "suspend" ? "suspended" : resumeTarget(overdue)
 }

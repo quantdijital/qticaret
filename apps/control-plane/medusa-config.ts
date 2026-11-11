@@ -66,5 +66,7 @@ module.exports = defineConfig({
     { resolve: "./src/modules/fleet" },
     // C10 (adr/0061 §6): the setup's runs and steps
     { resolve: "./src/modules/provisioning" },
+    // C16 (adr/0061 §7): subscriptions, charges, reminders, the payment instruction
+    { resolve: "./src/modules/billing" },
   ],
 })

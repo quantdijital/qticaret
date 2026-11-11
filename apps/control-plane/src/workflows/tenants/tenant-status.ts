@@ -4,6 +4,7 @@ import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
 import type { TenantStatus } from "@qticaret/types/control-plane"
 import { MOVE_REASON_CODES, MOVE_STARTS, moveTarget } from "../../lib/tenants/status-moves"
 import type { ManualStatusMove } from "../../lib/tenants/status-moves"
+import { overdueToday } from "../../lib/billing/overdue"
 import { tenantsIn } from "../modules"
 import { undoableStep } from "../undoable"
 
@@ -27,9 +28,10 @@ const moveStep = undoableStep(
   async (input: TenantStatusMoveInput, container) => {
     const tenants = tenantsIn(container)
     const tenant = await tenants.tenantOf(input.tenant_id)
-    const before =
-      input.move === "resume" ? await tenants.statusBeforeSuspension(input.tenant_id) : null
-    const to = moveTarget(input.move, tenant.status, before)
+    // Ek C16: a suspension ends where the shop's payments put it today
+    const overdue =
+      input.move === "resume" ? await overdueToday(container, input.tenant_id, new Date()) : false
+    const to = moveTarget(input.move, tenant.status, overdue)
     if (to === null) {
       throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "cp.status_transition")
     }

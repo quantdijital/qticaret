@@ -9,6 +9,8 @@ import { CP_AUDIT_MODULE } from "../modules/cp-audit"
 import type CpAuditModuleService from "../modules/cp-audit/service"
 import type { CompanyFields, ContactFields } from "../modules/tenants/types"
 import { plansIn, tenantsIn } from "../workflows/modules"
+import { istanbulDay } from "../lib/billing/days"
+import { startSubscriptionWorkflow } from "../workflows/billing/workflows"
 import { createPackageWorkflow } from "../workflows/plans/packages"
 import type { CreatePackageInput } from "../workflows/plans/packages"
 import { createTenantWorkflow } from "../workflows/tenants/create-tenant"
@@ -17,7 +19,8 @@ import { addDomainWorkflow } from "../workflows/tenants/tenant-domains"
 /**
  * The control plane's development records (C7): two packages and three
  * shops, the first the platform's first real customer (My L'arte,
- * mylarte.com) with what is not known yet left blank. Only on a
+ * mylarte.com) with what is not known yet left blank, and the active
+ * shops' subscriptions (Ek C16). Only on a
  * developer's machine; idempotent (a package or shop already there is
  * skipped). `pnpm --filter control-plane cp:seed-dev`
  */
@@ -172,6 +175,27 @@ async function seedShop(container: MedusaContainer, shop: ShopSeed, packageId: s
   return tenant.id
 }
 
+/**
+ * Ek C16: every active seeded shop's subscription, started today with its
+ * package's trial (idempotent: one that has one keeps it). Records made by
+ * an earlier seed get theirs on the next run too.
+ */
+async function seedSubscriptions(container: MedusaContainer): Promise<number> {
+  const today = istanbulDay(new Date())
+  const shops = await tenantsIn(container).listTenants(
+    { slug: SHOPS.map((shop) => shop.slug), status: "active" },
+    { select: ["id"] }
+  )
+  let started = 0
+  for (const shop of shops) {
+    const { result } = await startSubscriptionWorkflow(container).run({
+      input: { tenant_id: shop.id, today },
+    })
+    started += result.created ? 1 : 0
+  }
+  return started
+}
+
 export default async function seedDev({ container }: ExecArgs): Promise<void> {
   const problem = localOnlyProblem(parseEnv())
   if (problem) {
@@ -185,11 +209,12 @@ export default async function seedDev({ container }: ExecArgs): Promise<void> {
   for (const shop of SHOPS.filter((each) => !taken.has(each.slug))) {
     made.push(await seedShop(container, shop, packages.get(shop.package) ?? null))
   }
+  const subscriptions = await seedSubscriptions(container)
   await container.resolve<CpAuditModuleService>(CP_AUDIT_MODULE).record({
     kind: "system",
     action: "cp.seed_dev",
     actor_type: "system",
-    changes: { packages: PACKAGES.length, shops: made.length },
+    changes: { packages: PACKAGES.length, shops: made.length, subscriptions },
   })
   container
     .resolve(ContainerRegistrationKeys.LOGGER)

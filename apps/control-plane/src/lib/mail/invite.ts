@@ -4,7 +4,7 @@ import { format } from "./messages"
 import type { MailMessageKey } from "./messages"
 import type { OutgoingEmail } from "./transport"
 
-const escapeHtml = (value: string): string =>
+export const escapeHtml = (value: string): string =>
   value.replace(
     /[&<>"']/g,
     (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char] ?? ""

@@ -1,4 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { BILLING_MODULE } from "../modules/billing"
+import type BillingModuleService from "../modules/billing/service"
 import { FLEET_MODULE } from "../modules/fleet"
 import type FleetModuleService from "../modules/fleet/service"
 import { PLANS_MODULE } from "../modules/plans"
@@ -23,3 +25,6 @@ export const fleetIn = (container: Container) => container.resolve<FleetModuleSe
 
 export const provisioningIn = (container: Container) =>
   container.resolve<ProvisioningModuleService>(PROVISIONING_MODULE)
+
+export const billingIn = (container: Container) =>
+  container.resolve<BillingModuleService>(BILLING_MODULE)

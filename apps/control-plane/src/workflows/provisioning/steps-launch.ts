@@ -6,6 +6,8 @@ import { ProvisioningError } from "../../lib/provisioning/provisioner"
 import type { ProvisionTarget } from "../../lib/provisioning/provisioner"
 import { provisioner } from "../../lib/provisioning/provider"
 import { sendOwnerInvite } from "../../lib/provisioning/owner-invite"
+import { istanbulDay } from "../../lib/billing/days"
+import { startSubscriptionWorkflow } from "../billing/workflows"
 import { issuePlanDocumentWorkflow } from "../fleet/plan-document"
 import { fleetIn, provisioningIn, tenantsIn } from "../modules"
 import { provisionStep } from "./step"
@@ -160,7 +162,10 @@ export const resendInviteStep = provisionStep("resend_invite", inviteStepBody)
  */
 export const activateStep = provisionStep("activate", async (input, container) => {
   const tenant = await tenantsIn(container).tenantOf(input.tenant_id)
+  // Ek C16: the subscription starts when the shop becomes active (idempotent)
+  const today = istanbulDay(new Date())
   if (tenant.status === "active") {
+    await startSubscriptionWorkflow(container).run({ input: { tenant_id: tenant.id, today } })
     return { status: "skipped", created: false, output: { status: "active" } }
   }
   const run = await provisioningIn(container).runOf(tenant.id, input.run_id)
@@ -168,6 +173,7 @@ export const activateStep = provisionStep("activate", async (input, container) =
     reason_code: "provisioned",
     actor: run.requested_by ?? "system",
   })
+  await startSubscriptionWorkflow(container).run({ input: { tenant_id: tenant.id, today } })
   const issued = (await reissuePlanDocuments(container, [tenant.id])).get(tenant.id)
   return {
     status: "succeeded",

@@ -1,6 +1,7 @@
 import { WorkflowResponse, createWorkflow } from "@medusajs/framework/workflows-sdk"
 import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { billingSummaryOf } from "../../lib/billing/summary"
 import { contentHash, planContent, planDocumentOf } from "../../lib/fleet/plan-content"
 import type { PlanContent } from "../../lib/fleet/plan-content"
 import { signPlanDocument } from "../../lib/vault/signing"
@@ -11,7 +12,7 @@ type Container = Pick<MedusaContainer, "resolve">
 
 /**
  * What a shop's document says now (Ek C9): its status, its package's
- * limits and flags with its unexpired exceptions. Null for a shop on no
+ * limits and flags with its unexpired exceptions, its billing (Ek C16). Null for a shop on no
  * package: no document is issued for it, and a shop that had one keeps
  * its last (the package code is part of the contract).
  */
@@ -30,6 +31,8 @@ export async function planContentOf(
   if (!plan) {
     return null
   }
+  // Ek C16: the subscription's state, its due charge, the package's name and how to pay
+  const billing = await billingSummaryOf(container, tenantId, plan)
   return planContent({
     tenantId,
     status: tenant.status,
@@ -38,6 +41,7 @@ export async function planContentOf(
     packageFeatures: plan.features,
     limitOverrides,
     flagOverrides,
+    billing,
     now,
     nodeEnv: process.env["NODE_ENV"],
   })

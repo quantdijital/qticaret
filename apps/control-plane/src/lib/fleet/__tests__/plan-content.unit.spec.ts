@@ -26,7 +26,7 @@ const input = (changes: Partial<PlanContentInput> = {}): PlanContentInput => ({
 })
 
 describe("a shop's plan document content (adr/0061 Ek C9)", () => {
-  it("carries every limit, every platform flag and the neutral billing until C16", () => {
+  it("carries every limit, every platform flag and, without a subscription, the neutral billing", () => {
     const content = planContent(input())
 
     expect(content.limits).toEqual(fullLimits({ products: 500, staff: 3 }))

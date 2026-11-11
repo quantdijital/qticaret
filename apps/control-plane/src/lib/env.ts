@@ -93,6 +93,10 @@ const envSchema = z.object({
   // machine only (a real shop process and database here); `fake` in the
   // tests only; `docker` comes with F16. Unset: no provisioning
   CP_PROVISIONER: z.enum(["local", "docker", "fake"]).optional(),
+  // Ek C16 (adr/0061 §7): our own e-invoice for subscriptions. `off` (the
+  // default, `SubscriptionInvoiceIssuer` `none`) until the company exists;
+  // Paraşüt is named here when it comes
+  CP_INVOICING: z.enum(["off"]).optional(),
   // Ek C10: the local provisioner's administrative connection to this
   // machine's Postgres (makes `qt_tenant_<slug>` and its role); local only
   CP_LOCAL_PG_ADMIN_URL: z
