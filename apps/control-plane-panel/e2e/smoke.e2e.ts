@@ -24,8 +24,13 @@ test("leads through the menu, the sections still to come shown but closed", asyn
     await page.getByRole("button", { name: "Menü", exact: true }).click()
   }
   const menu = page.getByRole("navigation", { name: "Ana menü" })
-  for (const soon of ["Mağazalar", "Paketler", "Ödemeler", "Sürümler"]) {
+  for (const soon of ["Ödemeler", "Sürümler"]) {
     await expect(menu.getByRole("button", { name: new RegExp(`^${soon}`) })).toBeDisabled()
+  }
+  await menu.getByRole("link", { name: "Mağazalar" }).click()
+  await expect(pageHeading(page)).toHaveText("Mağazalar")
+  if (info.project.name === "phone") {
+    await page.getByRole("button", { name: "Menü", exact: true }).click()
   }
   await menu.getByRole("link", { name: "Personel" }).click()
   await expect(pageHeading(page)).toHaveText("Personel")

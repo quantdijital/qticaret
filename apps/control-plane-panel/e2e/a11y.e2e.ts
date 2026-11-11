@@ -40,6 +40,38 @@ for (const path of SCREENS) {
   })
 }
 
+test("a shop's page and its dialogs have no serious accessibility issue", async ({ page }) => {
+  await page.goto("/tenants")
+  await expect(pageHeading(page)).toHaveText("Mağazalar")
+  await page.waitForLoadState("networkidle")
+  const first = page.getByRole("table").getByRole("link").first()
+  // A machine without any shop yet has no page to check (`cp:seed-dev` makes some)
+  test.skip((await first.count()) === 0, "no shop on this machine")
+  await first.click()
+  await expect(page.getByRole("tab", { name: /^Yetkililer/ })).toBeVisible()
+  // Each mode from a fresh load, as every other screen: no colour caught mid-transition
+  await check(page, new URL(page.url()).pathname)
+  for (const [tab, opener, dialogName] of [
+    [/^Yetkililer/, /^(Yetkili ekle)$/, "Yetkili ekle"],
+    [/^Paket ve limitler/, /^(Paketi değiştir|Paket ata)$/, "Paket"],
+  ] as const) {
+    await page.getByRole("tab", { name: tab }).click()
+    await page.getByRole("button", { name: opener }).first().click()
+    await expect(page.getByRole("dialog", { name: dialogName })).toBeVisible()
+    expect(await seriousIssues(page)).toEqual([])
+    await page.getByRole("button", { name: "Vazgeç" }).click()
+  }
+})
+
+test("the package dialog has no serious accessibility issue", async ({ page }) => {
+  await page.goto("/packages")
+  await expect(pageHeading(page)).toHaveText("Paketler")
+  await page.getByRole("button", { name: "Yeni paket" }).click()
+  await expect(page.getByRole("dialog", { name: "Yeni paket" })).toBeVisible()
+  expect(await seriousIssues(page)).toEqual([])
+  await page.getByRole("button", { name: "Vazgeç" }).click()
+})
+
 test("the step-up dialog has no serious accessibility issue", async ({ page }) => {
   await page.goto("/account")
   await expect(pageHeading(page)).toBeVisible()

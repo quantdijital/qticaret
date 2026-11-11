@@ -17,8 +17,11 @@ import { Route as NoAccessRouteImport } from './routes/no-access'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
 import { Route as AppAuditLogRouteImport } from './routes/_app/audit-log'
+import { Route as AppPackagesRouteImport } from './routes/_app/packages'
 import { Route as AppStaffRouteImport } from './routes/_app/staff'
 import { Route as SecuritySetupRouteImport } from './routes/security/setup'
+import { Route as AppTenantsIndexRouteImport } from './routes/_app/tenants/index'
+import { Route as AppTenantsIdRouteImport } from './routes/_app/tenants/$id'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -59,6 +62,11 @@ const AppAuditLogRoute = AppAuditLogRouteImport.update({
   path: '/audit-log',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPackagesRoute = AppPackagesRouteImport.update({
+  id: '/packages',
+  path: '/packages',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppStaffRoute = AppStaffRouteImport.update({
   id: '/staff',
   path: '/staff',
@@ -69,6 +77,16 @@ const SecuritySetupRoute = SecuritySetupRouteImport.update({
   path: '/security/setup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppTenantsIndexRoute = AppTenantsIndexRouteImport.update({
+  id: '/tenants/',
+  path: '/tenants/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTenantsIdRoute = AppTenantsIdRouteImport.update({
+  id: '/tenants/$id',
+  path: '/tenants/$id',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -78,8 +96,11 @@ export interface FileRoutesByFullPath {
   '/no-access': typeof NoAccessRoute
   '/account': typeof AppAccountRoute
   '/audit-log': typeof AppAuditLogRoute
+  '/packages': typeof AppPackagesRoute
   '/staff': typeof AppStaffRoute
   '/security/setup': typeof SecuritySetupRoute
+  '/tenants/$id': typeof AppTenantsIdRoute
+  '/tenants/': typeof AppTenantsIndexRoute
 }
 export interface FileRoutesByTo {
   '/enrol': typeof EnrolRoute
@@ -88,9 +109,12 @@ export interface FileRoutesByTo {
   '/no-access': typeof NoAccessRoute
   '/account': typeof AppAccountRoute
   '/audit-log': typeof AppAuditLogRoute
+  '/packages': typeof AppPackagesRoute
   '/staff': typeof AppStaffRoute
   '/security/setup': typeof SecuritySetupRoute
   '/': typeof AppIndexRoute
+  '/tenants/$id': typeof AppTenantsIdRoute
+  '/tenants': typeof AppTenantsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -101,9 +125,12 @@ export interface FileRoutesById {
   '/no-access': typeof NoAccessRoute
   '/_app/account': typeof AppAccountRoute
   '/_app/audit-log': typeof AppAuditLogRoute
+  '/_app/packages': typeof AppPackagesRoute
   '/_app/staff': typeof AppStaffRoute
   '/security/setup': typeof SecuritySetupRoute
   '/_app/': typeof AppIndexRoute
+  '/_app/tenants/$id': typeof AppTenantsIdRoute
+  '/_app/tenants/': typeof AppTenantsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -115,8 +142,11 @@ export interface FileRouteTypes {
     | '/no-access'
     | '/account'
     | '/audit-log'
+    | '/packages'
     | '/staff'
     | '/security/setup'
+    | '/tenants/$id'
+    | '/tenants/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/enrol'
@@ -125,9 +155,12 @@ export interface FileRouteTypes {
     | '/no-access'
     | '/account'
     | '/audit-log'
+    | '/packages'
     | '/staff'
     | '/security/setup'
     | '/'
+    | '/tenants/$id'
+    | '/tenants'
   id:
     | '__root__'
     | '/_app'
@@ -137,9 +170,12 @@ export interface FileRouteTypes {
     | '/no-access'
     | '/_app/account'
     | '/_app/audit-log'
+    | '/_app/packages'
     | '/_app/staff'
     | '/security/setup'
     | '/_app/'
+    | '/_app/tenants/$id'
+    | '/_app/tenants/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -209,6 +245,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAuditLogRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/packages': {
+      id: '/_app/packages'
+      path: '/packages'
+      fullPath: '/packages'
+      preLoaderRoute: typeof AppPackagesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/staff': {
       id: '/_app/staff'
       path: '/staff'
@@ -223,21 +266,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SecuritySetupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/tenants/': {
+      id: '/_app/tenants/'
+      path: '/tenants'
+      fullPath: '/tenants/'
+      preLoaderRoute: typeof AppTenantsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/tenants/$id': {
+      id: '/_app/tenants/$id'
+      path: '/tenants/$id'
+      fullPath: '/tenants/$id'
+      preLoaderRoute: typeof AppTenantsIdRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
 interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRoute
   AppAuditLogRoute: typeof AppAuditLogRoute
+  AppPackagesRoute: typeof AppPackagesRoute
   AppStaffRoute: typeof AppStaffRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppTenantsIdRoute: typeof AppTenantsIdRoute
+  AppTenantsIndexRoute: typeof AppTenantsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRoute,
   AppAuditLogRoute: AppAuditLogRoute,
+  AppPackagesRoute: AppPackagesRoute,
   AppStaffRoute: AppStaffRoute,
   AppIndexRoute: AppIndexRoute,
+  AppTenantsIdRoute: AppTenantsIdRoute,
+  AppTenantsIndexRoute: AppTenantsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

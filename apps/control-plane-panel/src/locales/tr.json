@@ -318,6 +318,322 @@
     "title": "Erişiminiz yok",
     "text": "Hesabınız üst panelde etkin değil: pasifleştirilmiş ya da doğrulama kurulumunun süresi dolmuş olabilir. Platform sahibiyle görüşün."
   },
+  "tenants": {
+    "title": "Mağazalar",
+    "text": "Platformdaki mağazalar, durumları ve paketleri.",
+    "list": "Mağaza listesi",
+    "search": "Ad ya da adresle ara",
+    "tabsLabel": "Mağaza durumu",
+    "all": "Tümü",
+    "empty": "Bu görünümde mağaza yok.",
+    "emptySearch": "Aramaya uyan mağaza yok.",
+    "noPackage": "Paket yok",
+    "columns": {
+      "shop": "Mağaza",
+      "status": "Durum",
+      "package": "Paket",
+      "nextPayment": "Sonraki ödeme",
+      "created": "Açılış"
+    },
+    "status": {
+      "provisioning": "Kuruluyor",
+      "active": "Etkin",
+      "restricted": "Kısıtlı",
+      "suspended": "Askıda",
+      "closing": "Kapanıyor",
+      "closed": "Kapandı"
+    },
+    "create": {
+      "open": "Yeni mağaza",
+      "title": "Yeni mağaza",
+      "text": "Mağazanın kaydı açılır; kurulumu ayrı bir adımda yapılır.",
+      "name": "Mağaza adı",
+      "slug": "Platform adresi",
+      "slugHelp": "Küçük harf, rakam ve tire. Mağazanın veritabanı ve alt alan adı bu adla açılır; sonradan değişmez.",
+      "slugInvalid": "3–30 karakter: harfle başlar; küçük harf, rakam ve tek tire.",
+      "package": "Paket",
+      "submit": "Kaydı aç",
+      "done": "Mağaza kaydı açıldı."
+    },
+    "detail": {
+      "title": "Mağaza",
+      "line": "{{address}} · {{date}} tarihinde açıldı",
+      "tabs": "Mağaza bölümleri"
+    },
+    "attention": {
+      "title": "Eksik bilgiler",
+      "company": "Fatura için firma bilgileri eksik: {{fields}}.",
+      "billingContact": "Faturalama kişisi yok: ödeme hatırlatmaları gidecek kimse yok.",
+      "package": "Paket atanmadı: mağazaya limit uygulanmıyor."
+    }
+  },
+  "summary": {
+    "title": "Özet",
+    "status": "Durum",
+    "package": "Paket",
+    "address": "Adres",
+    "nextPayment": "Sonraki ödeme",
+    "created": "Açılış",
+    "createdBy": "Açan"
+  },
+  "company": {
+    "title": "Firma",
+    "text": "Abonelik faturasının muhatabı.",
+    "dialogText": "Boş bırakılan alanlar sonra doldurulabilir; sayfa eksikleri gösterir.",
+    "edit": "Düzenle",
+    "saved": "Firma bilgileri kaydedildi.",
+    "invoice": "Fatura bilgileri",
+    "address": "Adres",
+    "kind": "Firma türü",
+    "kinds": {
+      "company": "Şirket",
+      "sole_proprietor": "Şahıs firması"
+    },
+    "legalName": "Unvan",
+    "taxOffice": "Vergi dairesi",
+    "taxNumber": "Vergi kimlik no",
+    "tckn": "TC kimlik no",
+    "tcknShow": "Göster",
+    "tcknHide": "Gizle",
+    "tcknKeep": "Kayıtlı: {{masked}} (değiştirmek için yazın)",
+    "addressLine": "Açık adres",
+    "district": "İlçe",
+    "city": "İl",
+    "place": "İlçe / İl",
+    "postalCode": "Posta kodu",
+    "country": "Ülke",
+    "turkey": "Türkiye",
+    "invalid": {
+      "tax_number": "Vergi kimlik no 10 rakamdır.",
+      "tckn": "TC kimlik no 11 rakamdır ve 0 ile başlamaz.",
+      "postal_code": "Posta kodu 5 rakamdır."
+    }
+  },
+  "contacts": {
+    "title": "Yetkililer",
+    "text": "Mağaza adına görüştüğümüz kişiler. Satıra tıklayınca açılır.",
+    "add": "Yetkili ekle",
+    "empty": "Henüz yetkili yok.",
+    "dialogText": "Telefon Türkiye numarasıysa yazıldığı gibi; değilse + ve ülke koduyla.",
+    "columns": {
+      "name": "Ad soyad",
+      "role": "Görevi",
+      "email": "E-posta",
+      "phone": "Telefon"
+    },
+    "roles": {
+      "owner": "Mağaza sahibi",
+      "billing": "Faturalama",
+      "technical": "Teknik"
+    },
+    "primary": "Faturalama kişisi",
+    "primaryText": "Ödeme hatırlatmaları bu kişiye gider. Bir mağazada bir kişidir.",
+    "remove": "Yetkiliyi sil",
+    "saved": "Yetkili kaydedildi.",
+    "removed": "Yetkili silindi.",
+    "previous": "Önceki yetkili",
+    "next": "Sonraki yetkili",
+    "confirm": {
+      "title": "Yetkiliyi sil",
+      "text": "{{name}} kalıcı olarak silinir. Faturalama kişisiyse görev başka bir yetkiliye geçer.",
+      "action": "Yetkiliyi sil"
+    }
+  },
+  "domains": {
+    "title": "Alan adları",
+    "text": "Mağazanın yanıt verdiği adresler; birincil olan vitrinin adresidir.",
+    "add": "Alan adı ekle",
+    "addText": "Mağazanın kendi alan adı kaydedilir; DNS doğrulaması yayına çıkışta yapılır.",
+    "addSubmit": "Ekle",
+    "hostname": "Alan adı",
+    "empty": "Alan adı yok.",
+    "columns": {
+      "host": "Adres",
+      "kind": "Tür",
+      "state": "Doğrulama"
+    },
+    "kinds": {
+      "platform_subdomain": "Platform adresi",
+      "custom": "Mağazanın alan adı"
+    },
+    "states": {
+      "pending": "Doğrulama bekliyor",
+      "verified": "Doğrulandı",
+      "failed": "Doğrulanamadı"
+    },
+    "primary": "Birincil",
+    "isPrimary": "Vitrinin birincil adresi",
+    "makePrimary": "Birincil yap",
+    "remove": "Kaldır",
+    "added_on": "Eklenme",
+    "pendingText": "Doğrulanmadan birincil yapılamaz: vitrinin bağlantıları çalışmaz.",
+    "platformText": "Platform adresi her zaman kalır; kaldırılamaz.",
+    "added": "Alan adı eklendi.",
+    "removed": "Alan adı kaldırıldı.",
+    "primarySaved": "Birincil adres değişti.",
+    "previous": "Önceki alan adı",
+    "next": "Sonraki alan adı",
+    "confirm": {
+      "title": "Alan adını kaldır",
+      "text": "{{host}} mağazanın adreslerinden çıkarılır.",
+      "action": "Kaldır"
+    }
+  },
+  "plan": {
+    "title": "Paket ve limitler",
+    "on": "{{name}} · {{price}}",
+    "noPackage": "Paket atanmadı: limit uygulanmıyor.",
+    "change": "Paketi değiştir",
+    "assign": "Paket ata",
+    "dialogTitle": "Paket",
+    "dialogText": "Yeni limitler mağazaya bir sonraki plan belgesiyle ulaşır.",
+    "saved": "Paket kaydedildi.",
+    "none": "Paket yok",
+    "noneText": "Limit uygulanmaz; abonelik başlamaz.",
+    "pickerLine": "{{price}} · {{products}} ürün · {{staff}} personel",
+    "pickerLimits": "{{products}} ürün · {{staff}} personel",
+    "columns": {
+      "limit": "Limit",
+      "package": "Paket",
+      "override": "İstisna",
+      "applies": "Uygulanan"
+    },
+    "until": "{{reason}} · {{date}} tarihine kadar"
+  },
+  "override": {
+    "text": "Paketteki değer: {{value}}. İstisna paketin değerinin yerine geçer.",
+    "value": "Değer",
+    "reason": "Gerekçe",
+    "until": "Bitiş günü",
+    "untilHelp": "Boş bırakılırsa süresiz.",
+    "remove": "İstisnayı kaldır",
+    "saved": "İstisna kaydedildi.",
+    "removed": "İstisna kaldırıldı."
+  },
+  "limits": {
+    "keys": {
+      "products": "Ürün",
+      "orders_per_month": "Aylık sipariş",
+      "staff": "Personel",
+      "storage_mb": "Depolama",
+      "llm_credits_per_month": "Aylık içerik kredisi",
+      "custom_domains": "Özel alan adı"
+    },
+    "unlimited": "Sınırsız",
+    "megabytes": "{{value}} MB",
+    "warnOnly": "Aşılınca engellenmez, uyarılır."
+  },
+  "notes": {
+    "title": "Notlar",
+    "new": "Yeni not",
+    "placeholder": "Mağazayla ilgili bir not yazın",
+    "add": "Not ekle",
+    "empty": "Henüz not yok.",
+    "pinned": "Sabitlendi",
+    "pin": "Sabitle",
+    "unpin": "Sabitlemeyi kaldır",
+    "remove": "Sil",
+    "by": "{{author}} · {{date}}",
+    "showAll": "Tümünü göster ({{count}})",
+    "showLess": "Daha az göster",
+    "saved": "Not eklendi.",
+    "removed": "Not silindi.",
+    "confirm": {
+      "title": "Notu sil",
+      "text": "Not kalıcı olarak silinir.",
+      "action": "Notu sil"
+    }
+  },
+  "activity": {
+    "title": "Etkinlik",
+    "text": "Durum değişiklikleri ve personelin yaptığı değişiklikler, en yenisi üstte.",
+    "empty": "Henüz etkinlik yok.",
+    "more": "Daha fazla göster",
+    "system": "Sistem",
+    "created": "Kayıt açıldı",
+    "status": "Durum değişti: {{from}} → {{to}}",
+    "fromTo": "{{from}} → {{to}}",
+    "reasons": {
+      "created": "yeni kayıt",
+      "imported": "mevcut mağaza aktarıldı"
+    },
+    "actions": {
+      "renamed": "Mağaza adı değişti",
+      "company": "Firma bilgileri değişti",
+      "tckn": "TC kimlik no görüntülendi",
+      "contactAdded": "Yetkili eklendi",
+      "contactChanged": "Yetkili güncellendi",
+      "contactRemoved": "Yetkili silindi",
+      "domainAdded": "Alan adı eklendi",
+      "domainRemoved": "Alan adı kaldırıldı",
+      "domainPrimary": "Birincil adres değişti",
+      "noteAdded": "Not eklendi",
+      "noteChanged": "Not güncellendi",
+      "noteRemoved": "Not silindi",
+      "plan": "Paket değişti",
+      "override": "Limit istisnası verildi",
+      "overrideRemoved": "Limit istisnası kaldırıldı",
+      "other": "Değişiklik"
+    }
+  },
+  "packages": {
+    "title": "Paketler",
+    "text": "Mağazalara verilen paketler, fiyatları ve limitleri.",
+    "list": "Paket listesi",
+    "tabsLabel": "Paket durumu",
+    "onSale": "Satışta",
+    "archived": "Arşivde",
+    "archivedMark": "arşivde",
+    "create": "Yeni paket",
+    "newText": "Kod sonradan değişmez; fiyat ve limitler değiştirilebilir.",
+    "codeLine": "Kod: {{code}}",
+    "empty": "Satışta paket yok.",
+    "emptyArchived": "Arşivde paket yok.",
+    "columns": {
+      "name": "Paket",
+      "price": "Fiyat",
+      "limits": "Ana limitler",
+      "days": "Deneme / ek süre",
+      "tenants": "Mağaza"
+    },
+    "daysLine": "{{trial}} gün / {{grace}} gün",
+    "priceEach": "{{amount}} / {{period}}",
+    "period": {
+      "monthly": "ay",
+      "yearly": "yıl"
+    },
+    "periodName": {
+      "monthly": "Aylık",
+      "yearly": "Yıllık"
+    },
+    "code": "Kod",
+    "codeHelp": "Küçük harf, rakam ve tire; plan belgesinde geçer.",
+    "name": "Ad",
+    "priceTitle": "Fiyat ve süreler",
+    "priceNote": "Fiyat ya da dönem değişikliği kimlik doğrulaması ister ve her mağazanın bir sonraki döneminden geçerlidir.",
+    "price": "Fiyat",
+    "periodTitle": "Dönem",
+    "trial": "Deneme süresi",
+    "grace": "Ek süre",
+    "days": "gün",
+    "limitsTitle": "Limitler",
+    "archive": "Arşivle",
+    "restore": "Arşivden çıkar",
+    "saved": "Paket kaydedildi.",
+    "created": "Paket oluşturuldu.",
+    "archivedDone": "Paket arşivlendi.",
+    "restored": "Paket yeniden satışta.",
+    "previous": "Önceki paket",
+    "next": "Sonraki paket",
+    "confirmArchive": {
+      "title": "Paketi arşivle",
+      "text": "{{name}} yeni mağazalara verilmez. Bu paketi kullanan {{count}} mağaza paketini ve limitlerini korur."
+    },
+    "confirmRestore": {
+      "title": "Arşivden çıkar",
+      "text": "{{name}} yeniden mağazalara verilebilir."
+    }
+  },
   "errors": {
     "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
     "pageTitle": "Sayfa açılamadı",
@@ -344,8 +660,16 @@
     },
     "cp": {
       "audit_kind_invalid": "Kayıt türü geçerli değil.",
+      "audit_unavailable": "Görüntüleme kaydı yazılamadığı için bilgi gösterilmedi. Biraz sonra tekrar deneyin.",
       "challenge_unknown": "Giriş adımının süresi doldu; yeniden giriş yapın.",
+      "contact_unknown": "Yetkili bulunamadı.",
       "deactivate_self": "Kendinizi pasifleştiremezsiniz.",
+      "domain_invalid": "Alan adı geçerli değil.",
+      "domain_platform": "Platformun alan adı altındaki adresler platform tarafından verilir.",
+      "domain_platform_kept": "Platform adresi kaldırılamaz.",
+      "domain_taken": "Bu alan adı başka bir mağazada kayıtlı.",
+      "domain_unknown": "Alan adı bulunamadı.",
+      "domain_unverified": "Doğrulanmamış alan adı birincil yapılamaz.",
       "email_invalid": "E-posta adresi geçerli değil.",
       "enrolment_token_invalid": "Kurulum bağlantısı geçersiz ya da süresi dolmuş. Platform sahibinden yenisini isteyin.",
       "forbidden": "Bu işlem rolünüzle yapılamaz.",
@@ -366,18 +690,43 @@
       "name_required": "Ad ve soyad gerekli.",
       "no_role": "Hesabınız üst panelde etkin değil.",
       "not_staff": "Bu hesap platform personeli değil.",
+      "note_not_yours": "Bu notu yalnızca yazan kişi ya da platform sahibi değiştirebilir.",
+      "note_required": "Not boş olamaz.",
+      "note_too_long": "Not en çok 2000 karakter olabilir.",
+      "note_unknown": "Not bulunamadı.",
+      "nothing_to_save": "Kaydedilecek bir değişiklik yok.",
+      "override_expired": "Bitiş günü geçmiş olamaz.",
+      "override_unknown": "Bu limit için istisna yok.",
       "owner_exists": "Platformun etkin bir sahibi var; bu davet artık geçmez.",
+      "package_archived": "Bu paket arşivde; yeni mağazaya verilemez.",
+      "package_code_invalid": "Paket kodu geçerli değil: harfle başlar; küçük harf, rakam ve tire.",
+      "package_code_taken": "Bu paket kodu kullanılıyor.",
+      "package_unknown": "Paket bulunamadı.",
       "password_invalid": "Şifre doğru değil.",
+      "phone_invalid": "Telefon numarası geçerli değil.",
+      "postal_code_invalid": "Posta kodu 5 rakam olmalı.",
+      "reason_required": "Gerekçe yazın.",
       "register_closed": "Hesap yalnızca geçerli bir davetle, davet edilen adresle açılır.",
       "reset_self": "Kendi doğrulamanızı Hesabım sayfasından yenileyin.",
       "session_required": "Oturumunuz kapandı. Yeniden giriş yapın.",
       "session_revoked": "Oturumunuz kapatıldı. Yeniden giriş yapın.",
       "session_unknown": "Oturum bulunamadı; zaten kapanmış olabilir.",
       "sign_in_locked": "Çok fazla yanlış kod girildi. Bir süre bekleyip yeniden deneyin.",
+      "slug_invalid": "Platform adresi geçerli değil: harfle başlar; küçük harf, rakam ve tek tire, 3–30 karakter.",
+      "slug_reserved": "Bu adres platforma ayrılmış; başka bir ad seçin.",
+      "slug_taken": "Bu platform adresi başka bir mağazanın.",
+      "status_transition": "Mağaza bu duruma geçemez.",
       "step_up_failed": "Kod doğru değil ya da kullanıldı.",
       "step_up_invalid": "Doğrulamanın süresi doldu; yeniden doğrulayın.",
       "step_up_locked": "Çok fazla yanlış kod girildi. Bir süre bekleyip yeniden deneyin.",
-      "step_up_required": "Bu işlem için kimliğinizi yeniden doğrulayın."
+      "step_up_required": "Bu işlem için kimliğinizi yeniden doğrulayın.",
+      "tckn_company": "TC kimlik no yalnızca şahıs firmasında girilir.",
+      "tckn_invalid": "TC kimlik no geçerli değil.",
+      "tckn_none": "Kayıtlı TC kimlik no yok.",
+      "tckn_unreadable": "TC kimlik no okunamadı. Platform sahibine bildirin.",
+      "tenant_unknown": "Mağaza bulunamadı.",
+      "text_invalid": "Metinde kullanılamayan karakterler var.",
+      "vkn_invalid": "Vergi kimlik no geçerli değil."
     }
   }
 }

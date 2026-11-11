@@ -16,7 +16,7 @@ export interface NavItem {
   key: string
   icon: LucideIcon
   /** Its page; none for a section still to come (shown, not reachable). */
-  to?: "/" | "/staff" | "/audit-log" | "/account"
+  to?: "/" | "/tenants" | "/packages" | "/staff" | "/audit-log" | "/account"
   /** Who sees it; everyone when not set. The API decides again (route table). */
   roles?: readonly StaffRole[]
 }
@@ -31,18 +31,18 @@ const OWNER = ["owner"] as const
 
 /**
  * The control plane's menu (adr/0061 §8): the dashboard; the platform's
- * sections still to come (shops C7, packages C7, payments C16, releases
- * C18) shown so the shape of the panel is clear, but not reachable until
- * their task builds them; the staff and the audit log for owners. One's
- * own account sits at the foot of the menu.
+ * shops and packages (C7), and the sections still to come (payments C16,
+ * releases C18) shown so the shape of the panel is clear, but not
+ * reachable until their task builds them; the staff and the audit log for
+ * owners. One's own account sits at the foot of the menu.
  */
 export const NAV_GROUPS: readonly NavGroup[] = [
   { key: null, items: [{ key: "dashboard", icon: LayoutDashboard, to: "/" }] },
   {
     key: "platform",
     items: [
-      { key: "shops", icon: Store },
-      { key: "packages", icon: Package },
+      { key: "shops", icon: Store, to: "/tenants" },
+      { key: "packages", icon: Package, to: "/packages" },
       { key: "payments", icon: CreditCard },
       { key: "releases", icon: GitBranch },
     ],

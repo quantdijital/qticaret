@@ -15,20 +15,24 @@ describe("the control plane's menu", () => {
     }
   })
 
-  it("shows the sections still to come, unreachable", () => {
-    const platform = navFor("readonly").find((group) => group.key === "platform")
-    expect(platform?.items.map((item) => item.key)).toEqual([
-      "shops",
-      "packages",
-      "payments",
-      "releases",
-    ])
-    expect(platform?.items.every((item) => item.to === undefined)).toBe(true)
+  it("opens the shops and packages to every role, the sections still to come unreachable", () => {
+    for (const role of ["owner", "operator", "finance", "readonly"] as const) {
+      const platform = navFor(role).find((group) => group.key === "platform")
+      expect(platform?.items.map((item) => [item.key, item.to])).toEqual([
+        ["shops", "/tenants"],
+        ["packages", "/packages"],
+        ["payments", undefined],
+        ["releases", undefined],
+      ])
+    }
   })
 
   it("lights one item for a page", () => {
     expect(activeKey("/")).toBe("dashboard")
     expect(activeKey("/staff")).toBe("staff")
+    expect(activeKey("/tenants")).toBe("shops")
+    expect(activeKey("/tenants/ten_01")).toBe("shops")
+    expect(activeKey("/packages")).toBe("packages")
     expect(activeKey("/audit-log")).toBe("audit")
     expect(activeKey("/account")).toBe("account")
   })

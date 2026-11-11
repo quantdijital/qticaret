@@ -318,6 +318,322 @@
     "title": "No access",
     "text": "Your account is not active in the control plane: it may be deactivated, or its verification setup window ran out. Talk to the platform owner."
   },
+  "tenants": {
+    "title": "Shops",
+    "text": "The platform's shops, their status and packages.",
+    "list": "Shop list",
+    "search": "Search by name or address",
+    "tabsLabel": "Shop status",
+    "all": "All",
+    "empty": "No shop in this view.",
+    "emptySearch": "No shop matches the search.",
+    "noPackage": "No package",
+    "columns": {
+      "shop": "Shop",
+      "status": "Status",
+      "package": "Package",
+      "nextPayment": "Next payment",
+      "created": "Opened"
+    },
+    "status": {
+      "provisioning": "Setting up",
+      "active": "Active",
+      "restricted": "Restricted",
+      "suspended": "Suspended",
+      "closing": "Closing",
+      "closed": "Closed"
+    },
+    "create": {
+      "open": "New shop",
+      "title": "New shop",
+      "text": "The shop's record is opened; its setup is a separate step.",
+      "name": "Shop name",
+      "slug": "Platform address",
+      "slugHelp": "Lower-case letters, digits and hyphens. The shop's database and subdomain take this name; it cannot change later.",
+      "slugInvalid": "3–30 characters: starts with a letter; lower-case letters, digits and single hyphens.",
+      "package": "Package",
+      "submit": "Open the record",
+      "done": "The shop's record is open."
+    },
+    "detail": {
+      "title": "Shop",
+      "line": "{{address}} · opened on {{date}}",
+      "tabs": "Shop sections"
+    },
+    "attention": {
+      "title": "Missing details",
+      "company": "Company details missing for the invoice: {{fields}}.",
+      "billingContact": "No billing contact: the payment reminders have nobody to go to.",
+      "package": "No package: no limit applies to the shop."
+    }
+  },
+  "summary": {
+    "title": "Summary",
+    "status": "Status",
+    "package": "Package",
+    "address": "Address",
+    "nextPayment": "Next payment",
+    "created": "Opened",
+    "createdBy": "Opened by"
+  },
+  "company": {
+    "title": "Company",
+    "text": "Who the subscription invoice is made out to.",
+    "dialogText": "Fields left blank can be filled in later; the page shows what is missing.",
+    "edit": "Edit",
+    "saved": "Company details saved.",
+    "invoice": "Invoice details",
+    "address": "Address",
+    "kind": "Company type",
+    "kinds": {
+      "company": "Company",
+      "sole_proprietor": "Sole proprietor"
+    },
+    "legalName": "Legal name",
+    "taxOffice": "Tax office",
+    "taxNumber": "Tax number",
+    "tckn": "Turkish ID number",
+    "tcknShow": "Show",
+    "tcknHide": "Hide",
+    "tcknKeep": "Stored: {{masked}} (type to replace)",
+    "addressLine": "Street address",
+    "district": "District",
+    "city": "City",
+    "place": "District / City",
+    "postalCode": "Postal code",
+    "country": "Country",
+    "turkey": "Türkiye",
+    "invalid": {
+      "tax_number": "A tax number has 10 digits.",
+      "tckn": "A Turkish ID number has 11 digits and does not start with 0.",
+      "postal_code": "A postal code has 5 digits."
+    }
+  },
+  "contacts": {
+    "title": "Contacts",
+    "text": "The people we deal with at the shop. Click a row to open it.",
+    "add": "Add contact",
+    "empty": "No contact yet.",
+    "dialogText": "A Turkish phone number as written; otherwise with + and the country code.",
+    "columns": {
+      "name": "Full name",
+      "role": "Role",
+      "email": "E-mail",
+      "phone": "Phone"
+    },
+    "roles": {
+      "owner": "Shop owner",
+      "billing": "Billing",
+      "technical": "Technical"
+    },
+    "primary": "Billing contact",
+    "primaryText": "The payment reminders go to this person. One per shop.",
+    "remove": "Delete contact",
+    "saved": "Contact saved.",
+    "removed": "Contact deleted.",
+    "previous": "Previous contact",
+    "next": "Next contact",
+    "confirm": {
+      "title": "Delete contact",
+      "text": "{{name}} is deleted for good. A billing contact's role passes to another contact.",
+      "action": "Delete contact"
+    }
+  },
+  "domains": {
+    "title": "Domains",
+    "text": "The addresses the shop answers on; the primary one is the storefront's address.",
+    "add": "Add domain",
+    "addText": "The shop's own domain is recorded; its DNS check is done at launch.",
+    "addSubmit": "Add",
+    "hostname": "Domain",
+    "empty": "No domain.",
+    "columns": {
+      "host": "Address",
+      "kind": "Type",
+      "state": "Verification"
+    },
+    "kinds": {
+      "platform_subdomain": "Platform address",
+      "custom": "Shop's domain"
+    },
+    "states": {
+      "pending": "Awaiting verification",
+      "verified": "Verified",
+      "failed": "Not verified"
+    },
+    "primary": "Primary",
+    "isPrimary": "The storefront's primary address",
+    "makePrimary": "Make primary",
+    "remove": "Remove",
+    "added_on": "Added",
+    "pendingText": "It cannot be primary before it is verified: the storefront's links would not work.",
+    "platformText": "The platform address always stays; it cannot be removed.",
+    "added": "Domain added.",
+    "removed": "Domain removed.",
+    "primarySaved": "Primary address changed.",
+    "previous": "Previous domain",
+    "next": "Next domain",
+    "confirm": {
+      "title": "Remove domain",
+      "text": "{{host}} is taken off the shop's addresses.",
+      "action": "Remove"
+    }
+  },
+  "plan": {
+    "title": "Package and limits",
+    "on": "{{name}} · {{price}}",
+    "noPackage": "No package: no limit applies.",
+    "change": "Change package",
+    "assign": "Assign package",
+    "dialogTitle": "Package",
+    "dialogText": "The new limits reach the shop with its next plan document.",
+    "saved": "Package saved.",
+    "none": "No package",
+    "noneText": "No limit applies; no subscription starts.",
+    "pickerLine": "{{price}} · {{products}} products · {{staff}} staff",
+    "pickerLimits": "{{products}} products · {{staff}} staff",
+    "columns": {
+      "limit": "Limit",
+      "package": "Package",
+      "override": "Exception",
+      "applies": "Applies"
+    },
+    "until": "{{reason}} · until {{date}}"
+  },
+  "override": {
+    "text": "Package value: {{value}}. The exception takes its place.",
+    "value": "Value",
+    "reason": "Reason",
+    "until": "Last day",
+    "untilHelp": "Leave empty for no end.",
+    "remove": "Remove exception",
+    "saved": "Exception saved.",
+    "removed": "Exception removed."
+  },
+  "limits": {
+    "keys": {
+      "products": "Products",
+      "orders_per_month": "Orders a month",
+      "staff": "Staff",
+      "storage_mb": "Storage",
+      "llm_credits_per_month": "Content credits a month",
+      "custom_domains": "Custom domains"
+    },
+    "unlimited": "Unlimited",
+    "megabytes": "{{value}} MB",
+    "warnOnly": "Never blocked; a warning when passed."
+  },
+  "notes": {
+    "title": "Notes",
+    "new": "New note",
+    "placeholder": "Write a note about the shop",
+    "add": "Add note",
+    "empty": "No note yet.",
+    "pinned": "Pinned",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "remove": "Delete",
+    "by": "{{author}} · {{date}}",
+    "showAll": "Show all ({{count}})",
+    "showLess": "Show fewer",
+    "saved": "Note added.",
+    "removed": "Note deleted.",
+    "confirm": {
+      "title": "Delete note",
+      "text": "The note is deleted for good.",
+      "action": "Delete note"
+    }
+  },
+  "activity": {
+    "title": "Activity",
+    "text": "Status changes and the changes staff made, newest first.",
+    "empty": "No activity yet.",
+    "more": "Show more",
+    "system": "System",
+    "created": "Record opened",
+    "status": "Status changed: {{from}} → {{to}}",
+    "fromTo": "{{from}} → {{to}}",
+    "reasons": {
+      "created": "new record",
+      "imported": "existing shop brought in"
+    },
+    "actions": {
+      "renamed": "Shop name changed",
+      "company": "Company details changed",
+      "tckn": "Turkish ID number viewed",
+      "contactAdded": "Contact added",
+      "contactChanged": "Contact updated",
+      "contactRemoved": "Contact deleted",
+      "domainAdded": "Domain added",
+      "domainRemoved": "Domain removed",
+      "domainPrimary": "Primary address changed",
+      "noteAdded": "Note added",
+      "noteChanged": "Note updated",
+      "noteRemoved": "Note deleted",
+      "plan": "Package changed",
+      "override": "Limit exception given",
+      "overrideRemoved": "Limit exception removed",
+      "other": "Change"
+    }
+  },
+  "packages": {
+    "title": "Packages",
+    "text": "The packages given to shops, their prices and limits.",
+    "list": "Package list",
+    "tabsLabel": "Package status",
+    "onSale": "On sale",
+    "archived": "Archived",
+    "archivedMark": "archived",
+    "create": "New package",
+    "newText": "The code cannot change later; the price and limits can.",
+    "codeLine": "Code: {{code}}",
+    "empty": "No package on sale.",
+    "emptyArchived": "No archived package.",
+    "columns": {
+      "name": "Package",
+      "price": "Price",
+      "limits": "Main limits",
+      "days": "Trial / grace",
+      "tenants": "Shops"
+    },
+    "daysLine": "{{trial}} days / {{grace}} days",
+    "priceEach": "{{amount}} / {{period}}",
+    "period": {
+      "monthly": "month",
+      "yearly": "year"
+    },
+    "periodName": {
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "code": "Code",
+    "codeHelp": "Lower-case letters, digits and hyphens; the plan document names it.",
+    "name": "Name",
+    "priceTitle": "Price and periods",
+    "priceNote": "A price or period change asks you to verify yourself and applies from each shop's next period.",
+    "price": "Price",
+    "periodTitle": "Period",
+    "trial": "Trial",
+    "grace": "Grace period",
+    "days": "days",
+    "limitsTitle": "Limits",
+    "archive": "Archive",
+    "restore": "Put back on sale",
+    "saved": "Package saved.",
+    "created": "Package created.",
+    "archivedDone": "Package archived.",
+    "restored": "Package back on sale.",
+    "previous": "Previous package",
+    "next": "Next package",
+    "confirmArchive": {
+      "title": "Archive package",
+      "text": "{{name}} is given to no new shop. The {{count}} shops on it keep their package and limits."
+    },
+    "confirmRestore": {
+      "title": "Put back on sale",
+      "text": "{{name}} can be given to shops again."
+    }
+  },
   "errors": {
     "generic": "That did not work. Try again in a moment.",
     "pageTitle": "The page could not open",
@@ -344,8 +660,16 @@
     },
     "cp": {
       "audit_kind_invalid": "The entry kind is not valid.",
+      "audit_unavailable": "The view could not be recorded, so nothing was shown. Try again in a moment.",
       "challenge_unknown": "The sign-in step ran out; sign in again.",
+      "contact_unknown": "Contact not found.",
       "deactivate_self": "You cannot deactivate yourself.",
+      "domain_invalid": "The domain is not valid.",
+      "domain_platform": "Addresses under the platform's domain are given by the platform.",
+      "domain_platform_kept": "The platform address cannot be removed.",
+      "domain_taken": "This domain is recorded for another shop.",
+      "domain_unknown": "Domain not found.",
+      "domain_unverified": "An unverified domain cannot be primary.",
       "email_invalid": "The email address is not valid.",
       "enrolment_token_invalid": "The setup link is invalid or expired. Ask the platform owner for a new one.",
       "forbidden": "Your role cannot do this.",
@@ -366,18 +690,43 @@
       "name_required": "First and last name are required.",
       "no_role": "Your account is not active in the control plane.",
       "not_staff": "This account is not platform staff.",
+      "note_not_yours": "Only its writer or the platform owner can change this note.",
+      "note_required": "A note cannot be empty.",
+      "note_too_long": "A note can be at most 2000 characters.",
+      "note_unknown": "Note not found.",
+      "nothing_to_save": "There is no change to save.",
+      "override_expired": "The last day cannot be in the past.",
+      "override_unknown": "There is no exception for this limit.",
       "owner_exists": "The platform has an active owner; this invitation no longer works.",
+      "package_archived": "This package is archived; it cannot be given to a new shop.",
+      "package_code_invalid": "The package code is not valid: it starts with a letter; lower-case letters, digits and hyphens.",
+      "package_code_taken": "This package code is in use.",
+      "package_unknown": "Package not found.",
       "password_invalid": "The password is wrong.",
+      "phone_invalid": "The phone number is not valid.",
+      "postal_code_invalid": "A postal code has 5 digits.",
+      "reason_required": "Write a reason.",
       "register_closed": "An account is made only with a valid invitation, for the invited address.",
       "reset_self": "Renew your own verification from My account.",
       "session_required": "Your session ended. Sign in again.",
       "session_revoked": "Your session was ended. Sign in again.",
       "session_unknown": "The session was not found; it may have ended already.",
       "sign_in_locked": "Too many wrong codes. Wait a while and try again.",
+      "slug_invalid": "The platform address is not valid: it starts with a letter; lower-case letters, digits and single hyphens, 3–30 characters.",
+      "slug_reserved": "This address is reserved for the platform; choose another name.",
+      "slug_taken": "This platform address belongs to another shop.",
+      "status_transition": "The shop cannot move to this status.",
       "step_up_failed": "The code is wrong or already used.",
       "step_up_invalid": "The verification ran out; verify again.",
       "step_up_locked": "Too many wrong codes. Wait a while and try again.",
-      "step_up_required": "Verify it is you for this change."
+      "step_up_required": "Verify it is you for this change.",
+      "tckn_company": "A Turkish ID number is entered for a sole proprietor only.",
+      "tckn_invalid": "The Turkish ID number is not valid.",
+      "tckn_none": "No Turkish ID number is stored.",
+      "tckn_unreadable": "The Turkish ID number could not be read. Tell the platform owner.",
+      "tenant_unknown": "Shop not found.",
+      "text_invalid": "The text holds characters that cannot be used.",
+      "vkn_invalid": "The tax number is not valid."
     }
   }
 }
