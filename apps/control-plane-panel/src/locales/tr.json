@@ -811,5 +811,38 @@
       "rewrapped": "{{count}} kayıt yeniden sarıldı.",
       "rewrapFailed": "{{count}} kayıt sarılamadı; kayıt kimlikleri sunucu günlüğünde."
     }
+  },
+  "flags": {
+    "title": "Platform özellikleri",
+    "packageText": "Paketin açıp kapattığı özellikler. Mağazalara bir sonraki plan belgesiyle ulaşır.",
+    "shopText": "Mağazanın plan belgesindeki özellikler: paketin değeri ya da mağazaya özel istisna.",
+    "none": "Bu sürümde paketlerin açıp kapattığı bir özellik yok.",
+    "on": "Açık",
+    "off": "Kapalı",
+    "enabled": "Açık",
+    "defaultIs": "Varsayılan: {{value}}",
+    "overrideText": "Paketteki değer: {{value}}. İstisna paketin değerinin yerine geçer.",
+    "columns": {
+      "flag": "Özellik"
+    },
+    "names": {
+      "test_platform_sample": "Örnek platform özelliği"
+    }
+  },
+  "planDocument": {
+    "title": "Plan belgesi",
+    "text": "Mağazaya en son gönderilen belge ve mağazanın onu alıp almadığı.",
+    "none": "Henüz belge yok: mağazanın paketi olunca hazırlanır.",
+    "serial": "Sıra no",
+    "issuedAt": "Hazırlanma",
+    "push": "Gönderim",
+    "pushedAt": "Teslim",
+    "pulledAt": "Son çekme",
+    "pushStatus": {
+      "pending": "Bekliyor",
+      "delivered": "Teslim edildi",
+      "failed": "Teslim edilemedi",
+      "superseded": "Yenisi gönderildi"
+    }
   }
 }

@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
@@ -14,12 +15,13 @@ import {
   parseCountInput,
   parseMoneyInput,
 } from "@qticaret/admin-ui/lib/money-input"
-import { useArchivePlan, useCreatePlan, useUpdatePlan } from "@/features/packages/api"
-import type { Plan } from "@/features/packages/api"
+import { plansQuery, useArchivePlan, useCreatePlan, useUpdatePlan } from "@/features/packages/api"
+import type { Plan, PlatformFlag } from "@/features/packages/api"
 import { errorText } from "@/lib/errors"
 import { isStepUpCancelled } from "@/lib/step-up"
 import { draftsOf, limitsOf } from "./limit-drafts"
 import type { LimitDrafts } from "./limit-drafts"
+import { FlagFields } from "./flag-fields"
 import { LimitFields } from "./limit-fields"
 import { PriceFields } from "./price-fields"
 import type { PriceDraft } from "./price-fields"
@@ -30,9 +32,11 @@ interface Draft extends PriceDraft {
   code: string
   name: string
   limits: LimitDrafts
+  /** Every platform flag's value, its default where the package sets none. */
+  features: Record<string, boolean>
 }
 
-const draftOf = (plan: Plan | null): Draft => ({
+const draftOf = (plan: Plan | null, flags: readonly PlatformFlag[]): Draft => ({
   code: plan?.code ?? "",
   name: plan?.name ?? "",
   price: plan ? formatMoneyInput(plan.price / 100) : "",
@@ -40,12 +44,16 @@ const draftOf = (plan: Plan | null): Draft => ({
   trial: String(plan?.trial_days ?? 14),
   grace: String(plan?.grace_days ?? 7),
   limits: draftsOf(plan?.limits ?? null),
+  features: Object.fromEntries(
+    flags.map((flag) => [flag.key, plan?.features[flag.key] ?? flag.default])
+  ),
 })
 
 /**
  * A package in one dialog (docs/18 §7), new or opened from the list: its
  * code (fixed once made: the plan document names it), name, price per
- * period, trial and grace days and every limit. A changed price or period
+ * period, trial and grace days, every limit and its platform flags
+ * (adr/0061 Ek C9). A changed price or period
  * asks the step-up and applies from each shop's next period (adr/0061 §7).
  * "Arşivle" says first how many shops are on it: they keep it.
  */
@@ -64,13 +72,15 @@ export function PackageDialog({
   const create = useCreatePlan()
   const update = useUpdatePlan()
   const archive = useArchivePlan()
+  // The flags a package may set come with the list the dialog was opened from
+  const flags = useQuery(plansQuery()).data?.platform_flags ?? []
   const [shown, setShown] = useState(plan?.id ?? null)
-  const [draft, setDraft] = useState(() => draftOf(plan))
+  const [draft, setDraft] = useState(() => draftOf(plan, flags))
   const [asking, setAsking] = useState(false)
   const [failure, setFailure] = useState<string | null>(null)
   if ((plan?.id ?? null) !== shown) {
     setShown(plan?.id ?? null)
-    setDraft(draftOf(plan))
+    setDraft(draftOf(plan, flags))
     setFailure(null)
   }
   const price = parseMoneyInput(draft.price)
@@ -86,7 +96,7 @@ export function PackageDialog({
     grace !== null &&
     grace <= 90 &&
     limits !== null
-  const dirty = JSON.stringify(draft) !== JSON.stringify(draftOf(plan))
+  const dirty = JSON.stringify(draft) !== JSON.stringify(draftOf(plan, flags))
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) => {
     setDraft((current) => ({ ...current, [key]: value }))
   }
@@ -108,6 +118,8 @@ export function PackageDialog({
       trial_days: trial,
       grace_days: grace,
       limits,
+      // Sent only when there are flags: an empty set says nothing
+      ...(flags.length > 0 ? { features: draft.features } : {}),
     }
     const done = {
       onSuccess: () => {
@@ -211,6 +223,16 @@ export function PackageDialog({
               disabled={!writable}
               onChange={(key, next) => {
                 set("limits", { ...draft.limits, [key]: next })
+              }}
+            />
+          </DialogSection>
+          <DialogSection title={t("flags.title")} description={t("flags.packageText")}>
+            <FlagFields
+              flags={flags}
+              values={draft.features}
+              disabled={!writable}
+              onChange={(key, enabled) => {
+                set("features", { ...draft.features, [key]: enabled })
               }}
             />
           </DialogSection>

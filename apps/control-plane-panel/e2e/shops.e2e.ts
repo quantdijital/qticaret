@@ -27,6 +27,10 @@ test("finds a shop, opens its page and walks its tabs", async ({ page, guard }) 
     await page.getByRole("tab", { name: tab }).click()
     await expect(page).toHaveURL(/part=/)
   }
+  // Ek C9: the package tab's platform flags and, for the owner, the plan document
+  await page.getByRole("tab", { name: /^Paket ve limitler/ }).click()
+  await expect(page.getByRole("heading", { name: "Platform özellikleri" })).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Plan belgesi" })).toBeVisible()
   await guard.assertHealthy()
 })
 
@@ -52,6 +56,9 @@ test("lists the packages and opens one", async ({ page, guard }) => {
   const name = (await rows.first().innerText()).trim()
   await rows.first().click()
   await expect(page.getByRole("dialog", { name })).toBeVisible()
+  await expect(
+    page.getByRole("dialog", { name }).getByRole("heading", { name: "Platform özellikleri" })
+  ).toBeVisible()
   await page.getByRole("button", { name: "Vazgeç" }).click()
   await page.getByRole("tab", { name: /^Arşivde/ }).click()
   await guard.assertHealthy()

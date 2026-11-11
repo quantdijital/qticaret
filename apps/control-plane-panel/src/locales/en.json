@@ -811,5 +811,38 @@
       "rewrapped": "{{count}} records rewrapped.",
       "rewrapFailed": "{{count}} records could not be rewrapped; their ids are in the server log."
     }
+  },
+  "flags": {
+    "title": "Platform features",
+    "packageText": "Features the package turns on or off. Shops get them with their next plan document.",
+    "shopText": "The features in the shop's plan document: the package's value or the shop's own exception.",
+    "none": "No feature is set by packages in this version.",
+    "on": "On",
+    "off": "Off",
+    "enabled": "On",
+    "defaultIs": "Default: {{value}}",
+    "overrideText": "Package value: {{value}}. The exception replaces the package's value.",
+    "columns": {
+      "flag": "Feature"
+    },
+    "names": {
+      "test_platform_sample": "Sample platform feature"
+    }
+  },
+  "planDocument": {
+    "title": "Plan document",
+    "text": "The document last sent to the shop, and whether the shop took it.",
+    "none": "No document yet: one is made once the shop has a package.",
+    "serial": "Serial",
+    "issuedAt": "Issued",
+    "push": "Push",
+    "pushedAt": "Delivered",
+    "pulledAt": "Last pull",
+    "pushStatus": {
+      "pending": "Waiting",
+      "delivered": "Delivered",
+      "failed": "Not delivered",
+      "superseded": "Superseded"
+    }
   }
 }

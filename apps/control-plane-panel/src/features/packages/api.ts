@@ -18,8 +18,16 @@ export interface Plan {
   created_at: string
   /** Null: no limit. */
   limits: Record<LimitKey, number | null>
+  /** Its platform flags as set; a flag left out takes its default (adr/0061 Ek C9). */
+  features: Record<string, boolean>
   /** How many shops are on it (the list). */
   tenant_count?: number
+}
+
+/** A flag a package may set (`owner: platform`, the shared list) and its default. */
+export interface PlatformFlag {
+  key: string
+  default: boolean
 }
 
 export const PLANS_KEY = ["plans"] as const
@@ -27,7 +35,7 @@ export const PLANS_KEY = ["plans"] as const
 export const plansQuery = () =>
   queryOptions({
     queryKey: PLANS_KEY,
-    queryFn: () => api<{ plans: Plan[] }>("/admin/cp/plans"),
+    queryFn: () => api<{ plans: Plan[]; platform_flags: PlatformFlag[] }>("/admin/cp/plans"),
   })
 
 const planPath = (id: string, rest = "") => `/admin/cp/plans/${encodeURIComponent(id)}${rest}`
@@ -51,6 +59,8 @@ export interface PlanInput {
   trial_days: number
   grace_days: number
   limits: Record<LimitKey, number | null>
+  /** Every platform flag's value; left out when there are none (Ek C9). */
+  features?: Record<string, boolean>
 }
 
 /** A new package (owner, finance; a step-up: it sets a price); its code is fixed once made. */
@@ -62,7 +72,7 @@ export const useCreatePlan = () =>
   )
 
 /**
- * A package's changes in one save: its name, days and limits; its price
+ * A package's changes in one save: its name, days, limits and flags; its price
  * and period apart, behind a step-up (adr/0061 §3.5), only when they moved.
  */
 export const useUpdatePlan = () =>

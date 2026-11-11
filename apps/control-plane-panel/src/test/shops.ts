@@ -22,6 +22,7 @@ export const PRO: Plan = {
   archived_at: null,
   created_at: "2026-11-01T09:00:00.000Z",
   limits: LIMITS,
+  features: {},
   tenant_count: 2,
 }
 
@@ -151,4 +152,18 @@ export const SHOP: TenantDetail = {
     { key: "llm_credits_per_month", package: 2000, value: 2000 },
     { key: "custom_domains", package: 3, value: 3 },
   ],
+  platform_flags: [{ key: "test.platform_sample", default: true }],
+  features: [{ key: "test.platform_sample", default: true, package: false, value: false }],
+  feature_overrides: [],
+  plan_document: {
+    issued: true,
+    serial: 3,
+    issued_at: "2026-11-11T10:05:00.000Z",
+    push_status: "delivered",
+    push_error: null,
+    push_attempts: 1,
+    pushed_at: "2026-11-11T10:05:01.000Z",
+    pulled_at: null,
+    push_target: null,
+  },
 }

@@ -133,3 +133,21 @@ export const useRemoveOverride = (id: string) =>
   useShopChange(id, (key: LimitKey) =>
     api(tenantPath(id, `/overrides/${encodeURIComponent(key)}`), { method: "DELETE" })
   )
+
+export interface FeatureOverrideInput {
+  key: string
+  enabled: boolean
+  reason: string
+  expires_at: string | null
+}
+
+/** A shop's own value for a platform flag (Ek C9), beside the limits' exceptions. */
+export const useSetFeatureOverride = (id: string) =>
+  useShopChange(id, (input: FeatureOverrideInput) =>
+    post(tenantPath(id, "/feature-overrides"), input)
+  )
+
+export const useRemoveFeatureOverride = (id: string) =>
+  useShopChange(id, (key: string) =>
+    api(tenantPath(id, `/feature-overrides/${encodeURIComponent(key)}`), { method: "DELETE" })
+  )

@@ -95,6 +95,40 @@ export interface EffectiveLimit {
   value: number | null
 }
 
+/** A platform flag as the shop's plan document carries it (adr/0061 Ek C9). */
+export interface EffectiveFlag {
+  key: string
+  default: boolean
+  /** Absent when the package sets none (or there is no package). */
+  package?: boolean
+  /** Absent when no exception holds. */
+  override?: boolean
+  value: boolean
+}
+
+export interface FeatureOverride {
+  id: string
+  key: string
+  enabled: boolean
+  reason: string
+  expires_at: string | null
+  created_by: string | null
+  created_at: string
+}
+
+/** What the shop was last told and whether it took it; owner and operator only. */
+export interface PlanDocumentState {
+  issued: boolean
+  serial?: number
+  issued_at?: string
+  push_status?: "pending" | "delivered" | "failed" | "superseded"
+  push_error?: string | null
+  push_attempts?: number
+  pushed_at?: string | null
+  pulled_at?: string | null
+  push_target: string | null
+}
+
 export interface TenantDetail {
   tenant: {
     id: string
@@ -114,6 +148,10 @@ export interface TenantDetail {
   package: Plan | null
   overrides: Override[]
   limits: EffectiveLimit[]
+  platform_flags: { key: string; default: boolean }[]
+  features: EffectiveFlag[]
+  feature_overrides: FeatureOverride[]
+  plan_document?: PlanDocumentState
 }
 
 export interface ActivityItem {

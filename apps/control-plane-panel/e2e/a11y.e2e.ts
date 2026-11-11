@@ -51,6 +51,8 @@ test("a shop's page and its dialogs have no serious accessibility issue", async 
   await expect(page.getByRole("tab", { name: /^Yetkililer/ })).toBeVisible()
   // Each mode from a fresh load, as every other screen: no colour caught mid-transition
   await check(page, new URL(page.url()).pathname)
+  // Ek C9: the package tab, with its flags and plan document cards
+  await check(page, `${new URL(page.url()).pathname}?part=plan`)
   for (const [tab, opener, dialogName] of [
     [/^Yetkililer/, /^(Yetkili ekle)$/, "Yetkili ekle"],
     [/^Paket ve limitler/, /^(Paketi değiştir|Paket ata)$/, "Paket"],

@@ -22,3 +22,11 @@ export function limitText(t: TFunction, key: LimitKey, value: number | null | un
     ? t("limits.megabytes", { value: formatCount(value) })
     : formatCount(value)
 }
+
+/** A platform flag's name (adr/0061 Ek C9); its key where none is written yet. */
+export const flagName = (t: TFunction, key: string): string =>
+  t(`flags.names.${key.replaceAll(".", "_")}`, { defaultValue: key })
+
+/** On or off, as a flag's value reads; a dash for none. */
+export const flagText = (t: TFunction, value: boolean | undefined): string =>
+  value === undefined ? "—" : t(value ? "flags.on" : "flags.off")

@@ -13,7 +13,9 @@ import { ActivityCard } from "@/features/tenants/components/activity-card"
 import { AttentionNote } from "@/features/tenants/components/attention-note"
 import { CompanyCard } from "@/features/tenants/components/company-card"
 import { ContactsCard } from "@/features/tenants/components/contacts-card"
+import { DocumentCard } from "@/features/tenants/components/document-card"
 import { DomainsCard } from "@/features/tenants/components/domains-card"
+import { FlagsCard } from "@/features/tenants/components/flags-card"
 import { NotesCard } from "@/features/tenants/components/notes-card"
 import { PlanCard } from "@/features/tenants/components/plan-card"
 import { SummaryCard } from "@/features/tenants/components/summary-card"
@@ -41,7 +43,18 @@ function TenantTabs({ shop }: { shop: TenantDetail }) {
           count: shop.domains.length,
           content: <DomainsCard shop={shop} />,
         },
-        { key: "plan", label: t("plan.title"), content: <PlanCard shop={shop} /> },
+        {
+          key: "plan",
+          label: t("plan.title"),
+          // Its limits, its platform flags and what its document last said (Ek C9)
+          content: (
+            <div className="flex flex-col gap-4">
+              <PlanCard shop={shop} />
+              <FlagsCard shop={shop} />
+              {shop.plan_document ? <DocumentCard state={shop.plan_document} /> : null}
+            </div>
+          ),
+        },
         {
           key: "notes",
           label: t("notes.title"),
