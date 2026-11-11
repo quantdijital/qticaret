@@ -18,14 +18,23 @@ import type StaffRolesModuleService from "../../modules/staff-roles/service"
 export interface InviteFacts {
   id: string
   email: string
-  role: InvitableRole
+  role: InvitableRole | "owner"
   invited_by: string | null
+  /** The setup's owner invitation (`tenant:invite-owner`, adr/0061 §5.7). */
+  bootstrap: boolean
 }
 
 const isInvitable = (value: unknown): value is InvitableRole =>
   typeof value === "string" && (INVITABLE_ROLES as readonly string[]).includes(value)
 
-/** What an invitation offers, read from a token that is still good; anything else is refused. */
+const staffRolesOf = (container: Pick<MedusaContainer, "resolve">) =>
+  container.resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE)
+
+/**
+ * What an invitation offers, read from a token that is still good; anything
+ * else is refused. An owner is offered only by the setup's invitation, and
+ * only while the shop has no staff: once anyone is in, it is dead.
+ */
 export async function inviteOfToken(
   container: Pick<MedusaContainer, "resolve">,
   token: string
@@ -39,15 +48,20 @@ export async function inviteOfToken(
     metadata?: Record<string, unknown> | null
   } | null
   const role = invite?.metadata?.["role"]
-  if (!invite || !isInvitable(role)) {
+  const bootstrap = invite?.metadata?.["bootstrap"] === true && role === "owner"
+  if (!invite || !(isInvitable(role) || bootstrap)) {
+    throw new ValidationError("staff.invite_invalid")
+  }
+  if (bootstrap && (await staffRolesOf(container).hasStaff())) {
     throw new ValidationError("staff.invite_invalid")
   }
   const by = invite.metadata?.["invited_by"]
   return {
     id: invite.id,
     email: invite.email,
-    role,
+    role: bootstrap ? "owner" : role,
     invited_by: typeof by === "string" ? by : null,
+    bootstrap,
   }
 }
 
@@ -96,18 +110,36 @@ const readInviteStep = createStep(
   }
 )
 
-/** The invitation's role to the new member; undone, they have none. */
+/**
+ * The invitation's role to the new member; undone, they have none. The
+ * setup's owner invitation makes them owner only if the shop still has no
+ * staff (checked again under the first-owner lock): otherwise refused, and
+ * Medusa's acceptance before this step is undone.
+ */
 const giveRoleStep = createStep(
   "staff-give-role",
-  async (input: { user_id: string; role: InvitableRole; by: string | null }, { container }) => {
-    await container
-      .resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE)
-      .setRole(input.user_id, input.role, input.by)
+  async (
+    input: {
+      user_id: string
+      role: InvitableRole | "owner"
+      by: string | null
+      bootstrap: boolean
+    },
+    { container }
+  ) => {
+    if (input.bootstrap) {
+      if (!(await staffRolesOf(container).claimBootstrapOwner(input.user_id))) {
+        throw new ValidationError("staff.invite_invalid")
+      }
+      // The last step: nothing after it fails, and the shop's only owner is never taken back
+      return new StepResponse(input.user_id, "")
+    }
+    await staffRolesOf(container).setRole(input.user_id, input.role, input.by)
     return new StepResponse(input.user_id, input.user_id)
   },
   async (userId: string | undefined, { container }) => {
     if (userId) {
-      await container.resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE).removeRole(userId)
+      await staffRolesOf(container).removeRole(userId)
     }
   }
 )
@@ -139,6 +171,7 @@ export const acceptStaffInviteWorkflow = createWorkflow(
       user_id: users[0]?.id ?? "",
       role: invite.role,
       by: invite.invited_by,
+      bootstrap: invite.bootstrap,
     }))
     giveRoleStep(member)
     return new WorkflowResponse(member)

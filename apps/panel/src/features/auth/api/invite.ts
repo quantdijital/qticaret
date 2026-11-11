@@ -4,7 +4,8 @@ import { passwordRuleText } from "../password-rule"
 /** What an invitation is for: the address it was sent to and the role it gives. */
 export interface InviteInfo {
   email: string
-  role: "admin" | "operations" | "readonly"
+  // `owner` only from a new shop's setup invitation (adr/0061 Ek C10)
+  role: "owner" | "admin" | "operations" | "readonly"
 }
 
 /** An API failure on this page: no session yet, so the answer carries a key, not a sentence. */

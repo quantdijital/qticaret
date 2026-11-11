@@ -95,6 +95,28 @@ class StaffRolesModuleService extends MedusaService({ StaffRole }) {
     )
   }
 
+  /**
+   * Whether the shop has any staff member yet (the setup's owner
+   * invitation, adr/0061 §5.7): read from the table, not the held copy, as
+   * it decides who may become owner.
+   */
+  @InjectManager()
+  async hasStaff(@MedusaContext() sharedContext: Context = {}): Promise<boolean> {
+    const rows = await this.listStaffRoles({}, { select: ["id"], take: 1 }, sharedContext)
+    return rows.length > 0
+  }
+
+  /**
+   * The setup's owner invitation accepted (adr/0061 Ek C10): the user
+   * becomes owner only while the shop still has no staff, under the same
+   * lock as the first-user rule. False when someone came first.
+   */
+  async claimBootstrapOwner(userId: string): Promise<boolean> {
+    const claimed = await this.claimFirstOwner_(userId)
+    await this.cache.invalidate()
+    return claimed
+  }
+
   /** The first user of a shop without staff becomes its owner; one at a time. */
   @InjectTransactionManager()
   protected async claimFirstOwner_(
