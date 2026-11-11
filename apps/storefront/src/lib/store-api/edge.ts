@@ -67,6 +67,8 @@ export interface EdgeSite {
   /** For the pages the edge answers itself (maintenance). */
   shopName: string
   maintenance: EdgeMaintenance
+  /** The platform suspended the shop (adr/0061 Ek C15): its 503, whatever maintenance says. */
+  suspended: boolean
   /** The measurement tags the shop connected: the CSP opens their hosts (docs/20). */
   tracking: TrackingIds
 }
@@ -132,6 +134,8 @@ export async function edgeSite(visitorIp: string | null): Promise<EdgeSite> {
       indexNowKey: data.indexnow_key,
       shopName: textOrNull(data.shop?.name) ?? "",
       maintenance: maintenanceOf(data.maintenance),
+      // Anything but `true` is open: an older backend, a malformed answer
+      suspended: data.suspended === true,
       tracking: trackingIdsOf(data.tracking),
     }
     edgeCache.set(SITE, { value, until: Date.now() + SITE_TTL_MS })
@@ -144,6 +148,7 @@ export async function edgeSite(visitorIp: string | null): Promise<EdgeSite> {
         indexNowKey: null,
         shopName: "",
         maintenance: OPEN,
+        suspended: false,
         tracking: NO_TRACKING,
       }
     )

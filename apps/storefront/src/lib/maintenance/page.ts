@@ -89,7 +89,19 @@ export function maintenanceHtml(
 }
 
 /**
- * The 503 itself: `Retry-After`, `Cache-Control: no-store` and the page's
+ * The suspended shop's page (adr/0061 Ek C15): the maintenance page's
+ * look, the platform's words. The shop's heading, message and expected
+ * opening are not read: it cannot word or time a suspension.
+ */
+export const suspendedNotice = (shopName: string): MaintenanceNotice => ({
+  shopName,
+  title: t("suspended.title"),
+  message: t("suspended.body"),
+  expectedAt: null,
+})
+
+/**
+ * The 503 itself:`Retry-After`, `Cache-Control: no-store` and the page's
  * CSP; a HEAD gets the headers only. A broken bypass link's page is kept
  * out of indexes and leaks no Referer.
  */

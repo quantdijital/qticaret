@@ -802,6 +802,8 @@
   "maintenance.link_invalid_title": "Bağlantı geçersiz",
   "maintenance.link_invalid": "Bu bağlantı geçersiz ya da süresi dolmuş. Mağazadan yeni bir bağlantı isteyin.",
   "maintenance.home": "Ana sayfaya git",
+  "suspended.title": "Mağaza şu anda hizmet vermiyor",
+  "suspended.body": "Bu mağaza geçici olarak kapalı. Lütfen daha sonra yeniden ziyaret edin.",
   "gift.title": "Hediye kartı kime gidecek?",
   "gift.recipient_email": "Alıcının e-posta adresi",
   "gift.recipient_name": "Alıcının adı (isteğe bağlı)",

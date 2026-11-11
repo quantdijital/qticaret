@@ -10,7 +10,8 @@ const { maintenanceGate } = await import("../gate")
 
 const TOKEN = `mnb_AbCdEfGhIjKlMnOp.zzzzzzzz.${"A".repeat(43)}`
 
-const site = (enabled: boolean): EdgeSite => ({
+const site = (enabled: boolean, suspended = false): EdgeSite => ({
+  suspended,
   indexing: true,
   canonicalHost: null,
   indexNowKey: null,
@@ -135,5 +136,50 @@ describe("maintenanceGate", () => {
       { ...context, production: true }
     )
     expect(hosted).toEqual({ blocked: null, bypassed: true })
+  })
+})
+
+/** adr/0061 Ek C15: the platform's suspension, open or dark the shop's maintenance. */
+describe("maintenanceGate for a suspended shop", () => {
+  beforeEach(() => {
+    edge.checkBypass.mockReset()
+    edge.checkBypass.mockResolvedValue("open")
+  })
+
+  it("darkens the shop's open paths and previews, a bypass cookie asked nothing", async () => {
+    for (const maintenance of [false, true]) {
+      for (const path of ["/", "/iletisim", "/sozlesmeler/kvkk", "/onizleme/x", "/bakim/gir"]) {
+        const gate = await maintenanceGate(
+          request(path, { cookie: `qt_bypass=${TOKEN}` }),
+          path,
+          site(maintenance, true),
+          context
+        )
+        expect(gate.blocked?.status).toBe(503)
+        expect(gate.blocked?.headers.get("retry-after")).toBe("3600")
+        // The cookie is the shop's maintenance business: neither checked nor cleared here
+        expect(gate.blocked?.headers.get("set-cookie")).toBeNull()
+        expect(await gate.blocked?.text()).toContain("Mağaza şu anda hizmet vermiyor")
+      }
+    }
+    expect(edge.checkBypass).not.toHaveBeenCalled()
+  })
+
+  it("keeps robots.txt, the sitemaps and a card provider's return open", async () => {
+    for (const path of ["/robots.txt", "/sitemap.xml", "/odeme/sonuc", "/odeme/durum/x"]) {
+      const gate = await maintenanceGate(request(path), path, site(false, true), context)
+      expect(gate).toEqual({ blocked: null, bypassed: false })
+    }
+  })
+
+  it("answers a HEAD with the headers alone", async () => {
+    const gate = await maintenanceGate(
+      request("/", { method: "HEAD" }),
+      "/",
+      site(false, true),
+      context
+    )
+    expect(gate.blocked?.status).toBe(503)
+    expect(await gate.blocked?.text()).toBe("")
   })
 })

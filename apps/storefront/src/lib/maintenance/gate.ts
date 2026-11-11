@@ -1,8 +1,13 @@
 import type { NextRequest } from "next/server"
 import type { EdgeSite } from "../store-api/edge"
 import { checkBypass } from "../store-api/edge"
-import { maintenanceResponse } from "./page"
-import { bypassCookieName, isBypassToken, isOpenDuringMaintenance } from "./rules"
+import { maintenanceResponse, suspendedNotice } from "./page"
+import {
+  bypassCookieName,
+  isBypassToken,
+  isOpenDuringMaintenance,
+  isOpenWhileSuspended,
+} from "./rules"
 
 /** What the proxy does with a request while the shop may be dark. */
 export type MaintenanceGate =
@@ -15,7 +20,10 @@ export type MaintenanceGate =
  * The dark shop's gate (adr/0053): open paths and an open shop pass; a
  * visitor whose bypass cookie the backend still accepts passes too (asked
  * at most once a minute per token). Anyone else gets the 503 page; a
- * cookie that no longer opens, or never could, is cleared with it.
+ * cookie that no longer opens, or never could, is cleared with it. A
+ * shop the platform suspended (adr/0061 Ek C15) gets the same 503 with the
+ * platform's words, open only for robots.txt, the sitemaps and a card
+ * provider's return; the shop's open paths and bypass cookie do nothing.
  */
 export async function maintenanceGate(
   request: NextRequest,
@@ -23,6 +31,19 @@ export async function maintenanceGate(
   site: EdgeSite,
   context: { nonce: string; csp: string; production: boolean; visitorIp: string | null }
 ): Promise<MaintenanceGate> {
+  // The platform's suspension (adr/0061 Ek C15) before the shop's own maintenance: no
+  // open path of the shop's and no bypass cookie opens it
+  if (site.suspended) {
+    return isOpenWhileSuspended(pathname)
+      ? { blocked: null, bypassed: false }
+      : {
+          blocked: maintenanceResponse(suspendedNotice(site.shopName), {
+            nonce: context.nonce,
+            csp: context.csp,
+            head: request.method === "HEAD",
+          }),
+        }
+  }
   const { maintenance } = site
   if (!maintenance.enabled || isOpenDuringMaintenance(pathname, maintenance.allowPaths)) {
     return { blocked: null, bypassed: false }

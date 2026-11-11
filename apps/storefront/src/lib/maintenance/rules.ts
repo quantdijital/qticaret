@@ -84,6 +84,25 @@ export function isStorefrontOpenPath(path: string): boolean {
   )
 }
 
+/**
+ * What stays open while the platform has suspended the shop (adr/0061
+ * §5.5, Ek C15): robots.txt and the sitemaps (crawlers keep the pages), a
+ * card provider's return (a payment already started settles), Next's own
+ * requests and static files. Narrower than maintenance: no preview, no
+ * bypass link's page, none of the shop's own open paths; the shop cannot
+ * open a suspended storefront.
+ */
+export function isOpenWhileSuspended(path: string): boolean {
+  return (
+    under(path, "/odeme/sonuc") ||
+    under(path, "/odeme/durum") ||
+    path === "/robots.txt" ||
+    path.startsWith("/sitemap") ||
+    path.startsWith("/_next/") ||
+    STATIC_FILES.has(path)
+  )
+}
+
 /** A path as the backend stores `allow_paths`: lower case, no trailing slash. */
 export function comparablePath(path: string): string {
   const lower = path.toLowerCase()
