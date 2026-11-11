@@ -42,6 +42,14 @@ describe("TenantsPage: the shops (adr/0061 §2, C7)", () => {
     expect(within(table).getByText("Profesyonel")).toBeInTheDocument()
     expect(within(table).getByText("Paket yok")).toBeInTheDocument()
     expect(within(table).getByText("Kuruluyor")).toBeInTheDocument()
+    // Ek C13: the worse of its two standings in words; a dash when never probed
+    expect(within(table).getByRole("columnheader", { name: "Sağlık" })).toBeInTheDocument()
+    const rowOf = (name: string) =>
+      within(table)
+        .getAllByRole("row")
+        .find((row) => row.textContent.includes(name)) ?? document.body
+    expect(within(rowOf("My L'arte")).getByText("Yanıt vermiyor")).toBeInTheDocument()
+    expect(within(rowOf("Kahve Durağı")).queryByText(/Sağlıklı|Yanıt/)).toBeNull()
     expect(screen.getByRole("tab", { name: /Tümü/ })).toHaveTextContent("2")
     expect(sent[0]?.path).toBe("/admin/cp/tenants?limit=20&offset=0")
     // A reading role is offered no new shop

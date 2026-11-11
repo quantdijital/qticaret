@@ -41,6 +41,8 @@ test("a shop's page and its dialogs have no serious accessibility issue", async 
   await check(page, new URL(page.url()).pathname)
   // Ek C9: the package tab, with its flags and plan document cards
   await check(page, `${new URL(page.url()).pathname}?part=plan`)
+  // Ek C13: the usage and health tab
+  await check(page, `${new URL(page.url()).pathname}?part=usage`)
   for (const [tab, opener, dialogName] of [
     [/^Yetkililer/, /^(Yetkili ekle)$/, "Yetkili ekle"],
     [/^Paket ve limitler/, /^(Paketi değiştir|Paket ata)$/, "Paket"],

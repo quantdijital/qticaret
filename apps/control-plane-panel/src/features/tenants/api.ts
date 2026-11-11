@@ -1,5 +1,6 @@
 import { keepPreviousData, queryOptions } from "@tanstack/react-query"
 import type { LimitKey, TenantStatus } from "@qticaret/types/control-plane"
+import type { HealthState } from "@/features/monitoring/api"
 import type { Plan } from "@/features/packages/api"
 import { api } from "@/lib/api"
 
@@ -23,6 +24,8 @@ export interface TenantRow {
   package: { id: string; code: string; name: string } | null
   /** The subscription's next due date: billing (C16). */
   next_payment_on: string | null
+  /** Ek C13: each probed target's latest standing; null when never probed. */
+  health: { backend: HealthState | null; storefront: HealthState | null }
 }
 
 export interface TenantList {

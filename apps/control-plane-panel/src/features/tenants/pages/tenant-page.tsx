@@ -9,6 +9,7 @@ import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { formatDate } from "@qticaret/admin-ui/lib/format"
 import type { PageTab } from "@qticaret/admin-ui/patterns/page-tabs"
 import { useMe } from "@/features/auth/api"
+import { UsageHealthTab } from "@/features/monitoring/components/usage-health-tab"
 import { SetupTab } from "@/features/provisioning/components/setup-tab"
 import { tenantQuery } from "@/features/tenants/api"
 import type { TenantDetail } from "@/features/tenants/api"
@@ -29,8 +30,8 @@ import { errorText } from "@/lib/errors"
 const route = getRouteApi("/_app/tenants/$id")
 
 /**
- * The shop's people, addresses, package, setup and history: one card a
- * tab. The setup ("Kurulum", C11) is the owner's and the operator's (the
+ * The shop's people, addresses, package, usage and health (Ek C13), setup
+ * and history: one card a tab. The setup ("Kurulum", C11) is the owner's and the operator's (the
  * control plane answers no one else); it keeps one place, so the tabs do
  * not move when the shop turns `active` (the wizard opens it by `?part=`).
  */
@@ -68,6 +69,8 @@ function TenantTabs({ shop }: { shop: TenantDetail }) {
             </div>
           ),
         },
+        // Ek C13: its usage against its limits and its health, every role's
+        { key: "usage", label: t("usage.tab"), content: <UsageHealthTab shop={shop} /> },
         ...setup,
         {
           key: "notes",

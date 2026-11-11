@@ -334,7 +334,8 @@
       "status": "Durum",
       "package": "Paket",
       "nextPayment": "Sonraki ödeme",
-      "created": "Açılış"
+      "created": "Açılış",
+      "health": "Sağlık"
     },
     "status": {
       "provisioning": "Kuruluyor",
@@ -1167,6 +1168,71 @@
       "flags_other": "{{count}} ayar",
       "seo_templates_one": "{{count}} SEO şablonu",
       "seo_templates_other": "{{count}} SEO şablonu"
+    }
+  },
+  "usage": {
+    "tab": "Kullanım ve sağlık",
+    "title": "Kullanım",
+    "text": "Mağazanın saatlik raporundaki toplamlar, etkin limitlerle.",
+    "none": "Henüz kullanım raporu gelmedi.",
+    "notYet": "Mağaza üst panele bağlı çalışmaya başlayınca saatte bir rapor gönderir.",
+    "missing": "Rapor gelmiyor: mağaza {{hours}} saattir kullanım raporu göndermedi. Mağaza çalışıyor mu, üst panele ulaşabiliyor mu bakın.",
+    "missingNever": "Rapor gelmiyor: mağaza etkinleştiğinden beri kullanım raporu göndermedi.",
+    "listLabel": "Kullanım ve limitler",
+    "barLabel": "{{name}}: {{value}}",
+    "of": "{{used}} / {{limit}}",
+    "unlimited": "{{used}} · sınırsız",
+    "notReported": "Raporda yok",
+    "tone": {
+      "warn": "Limite yaklaştı",
+      "full": "Limitte",
+      "over": "Limit aşıldı, engellenmez"
+    },
+    "facts": {
+      "period": "Dönem",
+      "lastOrder": "Son sipariş",
+      "noOrder": "Henüz sipariş yok",
+      "release": "Çalışan sürüm",
+      "reportedAt": "Son rapor"
+    }
+  },
+  "health": {
+    "title": "Sağlık",
+    "text": "Üst panel mağazayı beş dakikada bir yoklar; art arda {{count}} başarısız yoklamada sağlıksız sayılır.",
+    "targets": {
+      "backend": "Arka uç",
+      "storefront": "Vitrin"
+    },
+    "targetText": {
+      "backend": "Mağaza sunucusunun sağlık yanıtı",
+      "storefront": "Vitrinin ana sayfası"
+    },
+    "state": {
+      "healthy": "Sağlıklı",
+      "failing": "Yanıt vermiyor",
+      "unhealthy": "Sağlıksız",
+      "unknown": "Henüz yoklanmadı",
+      "off": "Yoklanmıyor"
+    },
+    "offText": {
+      "backend": "Mağaza sunucusunun iç adresi bilinmiyor: kurulum tamamlanınca yoklanır.",
+      "storefront": "Vitrin adresi bilinmiyor: yerel mağazaların vitrini yok."
+    },
+    "unknownText": "İlk yoklama birkaç dakika içinde yapılır.",
+    "failures": "art arda {{count}} başarısız yoklama",
+    "latency": "{{value}} ms",
+    "checkedAt": "Son yoklama {{when}}",
+    "lastOk": "Son başarılı yanıt {{when}}",
+    "uptime": "Son 24 saatte yoklamaların {{value}} kadarı yanıt aldı",
+    "history": "Son {{count}} yoklama",
+    "historyLabel": "Son {{count}} yoklamanın {{ok}} tanesi yanıt aldı",
+    "errors": {
+      "http": "HTTP {{status}} yanıtı",
+      "timeout": "Zaman aşımı",
+      "unreachable": "Bağlantı kurulamadı",
+      "redirect": "Yönlendirme döndü (izlenmez)",
+      "target_not_allowed": "Adres izin verilenlerden değil",
+      "target_invalid": "Adres geçersiz"
     }
   }
 }

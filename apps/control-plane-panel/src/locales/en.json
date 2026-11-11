@@ -334,7 +334,8 @@
       "status": "Status",
       "package": "Package",
       "nextPayment": "Next payment",
-      "created": "Opened"
+      "created": "Opened",
+      "health": "Health"
     },
     "status": {
       "provisioning": "Setting up",
@@ -1167,6 +1168,71 @@
       "flags_other": "{{count}} settings",
       "seo_templates_one": "{{count}} SEO template",
       "seo_templates_other": "{{count}} SEO templates"
+    }
+  },
+  "usage": {
+    "tab": "Usage and health",
+    "title": "Usage",
+    "text": "The totals from the shop's hourly report, against its limits.",
+    "none": "No usage report has arrived yet.",
+    "notYet": "Once the shop runs under the control plane it reports every hour.",
+    "missing": "Reports are not arriving: the shop has sent no usage report for {{hours}} hours. Check that it is running and can reach the control plane.",
+    "missingNever": "Reports are not arriving: the shop has sent no usage report since it became active.",
+    "listLabel": "Usage and limits",
+    "barLabel": "{{name}}: {{value}}",
+    "of": "{{used}} / {{limit}}",
+    "unlimited": "{{used}} · unlimited",
+    "notReported": "Not in the report",
+    "tone": {
+      "warn": "Near the limit",
+      "full": "At the limit",
+      "over": "Over the limit, not blocked"
+    },
+    "facts": {
+      "period": "Period",
+      "lastOrder": "Last order",
+      "noOrder": "No orders yet",
+      "release": "Running release",
+      "reportedAt": "Last report"
+    }
+  },
+  "health": {
+    "title": "Health",
+    "text": "The control plane probes the shop every five minutes; {{count}} failed probes in a row make it unhealthy.",
+    "targets": {
+      "backend": "Backend",
+      "storefront": "Storefront"
+    },
+    "targetText": {
+      "backend": "The shop server's health answer",
+      "storefront": "The storefront's home page"
+    },
+    "state": {
+      "healthy": "Healthy",
+      "failing": "Not answering",
+      "unhealthy": "Unhealthy",
+      "unknown": "Not probed yet",
+      "off": "Not probed"
+    },
+    "offText": {
+      "backend": "The shop server's internal address is not known: it is probed once the setup finishes.",
+      "storefront": "The storefront's address is not known: local shops have no storefront."
+    },
+    "unknownText": "The first probe comes within a few minutes.",
+    "failures": "{{count}} failed probes in a row",
+    "latency": "{{value}} ms",
+    "checkedAt": "Last probe {{when}}",
+    "lastOk": "Last good answer {{when}}",
+    "uptime": "{{value}} of the last 24 hours' probes were answered",
+    "history": "Last {{count}} probes",
+    "historyLabel": "{{ok}} of the last {{count}} probes were answered",
+    "errors": {
+      "http": "HTTP {{status}} answer",
+      "timeout": "Timed out",
+      "unreachable": "Could not connect",
+      "redirect": "Answered with a redirect (not followed)",
+      "target_not_allowed": "The address is not an allowed one",
+      "target_invalid": "The address is not valid"
     }
   }
 }

@@ -57,6 +57,7 @@ export const LIST: TenantList = {
       primary_hostname: "mylarte.localhost",
       package: { id: PRO.id, code: PRO.code, name: PRO.name },
       next_payment_on: null,
+      health: { backend: "healthy", storefront: "failing" },
     },
     {
       id: "ten_kahve",
@@ -68,6 +69,7 @@ export const LIST: TenantList = {
       primary_hostname: "kahveduragi.localhost",
       package: null,
       next_payment_on: null,
+      health: { backend: null, storefront: null },
     },
   ],
   count: 2,
