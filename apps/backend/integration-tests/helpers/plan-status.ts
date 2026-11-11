@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { createAdminUser } from "./admin"
-import type { HttpClient } from "./http"
+import type { HttpClient, HttpResponse } from "./http"
 import { settle } from "./http"
 import { readyCart } from "./paytr"
 import { setPlanStatus } from "./plan-limits"
@@ -25,8 +25,18 @@ export interface SellingShop {
   itemId: string
   productId: string
   admin: Awaited<ReturnType<typeof createAdminUser>>
-  /** A cart paid by bank transfer, completed through the Store API as a shopper does. */
-  checkout: () => Promise<{ status: number; data: Answer; retryAfter: string | undefined }>
+  /** A new cart's bank transfer started through the Store API, as a shopper does. */
+  startPayment: () => Promise<Step & { cartId: string }>
+  /** A cart whose payment started, completed through the Store API. */
+  complete: (cartId: string) => Promise<Step>
+  /** Both: the payment's start, or the completion once it started. */
+  checkout: () => Promise<Step>
+}
+
+export interface Step {
+  status: number
+  data: Answer
+  retryAfter: string | undefined
 }
 
 /**
@@ -62,7 +72,7 @@ export async function sellingShop(
   if (saved.status !== 200) {
     throw new Error(`bank transfer not set up: ${String(saved.status)} ${saved.data.message ?? ""}`)
   }
-  const checkout = async () => {
+  const startPayment = async () => {
     const cartId = await readyCart(container, shop, cup.variantId)
     const session = await settle(
       http.post<Answer>(
@@ -71,18 +81,27 @@ export async function sellingShop(
         { headers: storefront.headers }
       )
     )
-    if (session.status !== 200) {
-      throw new Error(`no payment session: ${String(session.status)} ${session.data.message ?? ""}`)
-    }
-    const answer = await settle(
-      http.post<Answer>(`/store/carts/${cartId}/complete`, {}, { headers: storefront.headers })
-    )
-    const retryAfter = answer.headers["retry-after"]
-    return {
-      status: answer.status,
-      data: answer.data,
-      retryAfter: typeof retryAfter === "string" ? retryAfter : undefined,
-    }
+    return { cartId, ...stepOf(session) }
   }
-  return { shop, storefront, ...cup, admin, checkout }
+  const complete = async (cartId: string) =>
+    stepOf(
+      await settle(
+        http.post<Answer>(`/store/carts/${cartId}/complete`, {}, { headers: storefront.headers })
+      )
+    )
+  const checkout = async () => {
+    const started = await startPayment()
+    return started.status === 200 ? await complete(started.cartId) : started
+  }
+  return { shop, storefront, ...cup, admin, startPayment, complete, checkout }
+}
+
+/** An answer as the specs read it: its status, body and `Retry-After`. */
+function stepOf(answer: HttpResponse<Answer>): Step {
+  const retryAfter = answer.headers["retry-after"]
+  return {
+    status: answer.status,
+    data: answer.data,
+    retryAfter: typeof retryAfter === "string" ? retryAfter : undefined,
+  }
 }

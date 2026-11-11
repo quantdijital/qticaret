@@ -55,9 +55,11 @@ export const SUSPENDED_RETRY_AFTER_SECONDS = 3600
 
 /**
  * A suspended shop takes no new order through the storefront: `POST
- * /store/carts/:id/complete` answers 503 `plan.suspended`. A payment already
- * started settles through its provider's callback, which never comes here.
- * A restricted shop sells as usual.
+ * /store/carts/:id/complete` (cash on delivery, bank transfer) and `POST
+ * /store/carts/:id/payment-session` (where every payment starts, a card
+ * form too) answer 503 `plan.suspended`. A payment already started
+ * settles through its provider's callback, which never comes here. A
+ * restricted shop sells as usual.
  */
 export async function refuseSuspendedCheckout(
   req: MedusaRequest,

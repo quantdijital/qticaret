@@ -146,8 +146,10 @@ export const PAYMENT_ROUTES = [
     matcher: "/store/carts/:id/payment-session",
     methods: ["POST" as const],
     // F15.6 (adr/0044): every way to pay starts here, a hosted card form too:
-    // the block list and checkout velocity are counted on starting
+    // the block list and checkout velocity are counted on starting. adr/0061 Ek C15: a
+    // suspended shop starts no payment (one started before settles through its hook)
     middlewares: [
+      refuseSuspendedCheckout,
       checkoutLimit,
       validateAndTransformBody(StorePostCartPaymentSession),
       guardPaymentStart,
