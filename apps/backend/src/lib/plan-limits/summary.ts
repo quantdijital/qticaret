@@ -24,25 +24,31 @@ export interface LimitStanding {
   pending?: number
 }
 
+/** The billing summary the panel shows: the document's, without the name and instruction lifted out. */
+export type BillingStanding = Omit<PlanBillingSummary, "package_name" | "payment_instruction">
+
 /**
- * Settings > Abonelik's reading (adr/0061 §5.6, Ek C14): the package, each
- * limit with its use, the billing summary as the signed plan document says
- * it (neutral until C16) and the payment instruction. Unmanaged, `managed`
- * is false and every limit is open: the shop has no plan.
+ * Settings > Abonelik's reading (adr/0061 §5.6, Ek C14, C16): the package
+ * and its name, each limit with its use, the billing summary and the
+ * payment instruction, both as the signed plan document says them.
+ * Unmanaged, `managed` is false and every limit is open: the shop has no
+ * plan.
  */
 export interface PlanSummary {
   managed: boolean
   status: TenantStatus
   package_code: string | null
+  /** The package's name as the control plane writes it (Ek C16); null from an older document. */
+  package_name: string | null
   /** The Turkish month the monthly limits count (`YYYY-MM`). */
   period: string
   warning_ratio: number
   limits: LimitStanding[]
-  billing: PlanBillingSummary | null
+  billing: BillingStanding | null
   /**
-   * How to pay, as the control plane will sign it into the plan document
-   * (C16). Null until then: an account number shown here must come signed,
-   * never from this shop's own settings.
+   * How to pay, as the control plane signs it into the plan document (Ek
+   * C16); null when it has none. An account number shown here comes signed,
+   * never from this shop's own settings or env.
    */
   payment_instruction: string | null
 }
@@ -67,14 +73,16 @@ export async function readPlanSummary(
       }
     })
   )
+  const { package_name = null, payment_instruction = null, ...billing } = state.billing ?? {}
   return {
     managed: state.managed,
     status: state.status,
     package_code: state.package_code,
+    package_name,
     period: turkishMonth(now),
     warning_ratio: LIMIT_WARNING_RATIO,
     limits,
-    billing: state.billing,
-    payment_instruction: null,
+    billing: state.billing ? (billing as BillingStanding) : null,
+    payment_instruction,
   }
 }

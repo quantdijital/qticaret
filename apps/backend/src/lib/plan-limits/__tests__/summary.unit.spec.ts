@@ -76,10 +76,42 @@ describe("readPlanSummary (Settings > Abonelik, adr/0061 Ek C14)", () => {
     ])
   })
 
+  it("lifts the package's name and the payment instruction out of the signed billing (Ek C16)", async () => {
+    const { container } = shop(true)
+    const services = container as unknown as { resolve: (key: string) => unknown }
+    const state = await (
+      services.resolve("control_plane") as { planState: () => Promise<Record<string, unknown>> }
+    ).planState()
+    state["billing"] = {
+      status: "past_due",
+      due_on: "2026-12-01",
+      grace_ends_on: "2026-12-08",
+      amount: 149_000,
+      currency: "TRY",
+      package_name: "Profesyonel Ağ",
+      payment_instruction: "IBAN: TR12",
+    }
+
+    const summary = await readPlanSummary(container)
+
+    expect(summary).toMatchObject({
+      package_name: "Profesyonel Ağ",
+      payment_instruction: "IBAN: TR12",
+    })
+    expect(summary.billing).toEqual({
+      status: "past_due",
+      due_on: "2026-12-01",
+      grace_ends_on: "2026-12-08",
+      amount: 149_000,
+      currency: "TRY",
+    })
+  })
+
   it("has no limits and no billing without a control plane", async () => {
     const summary = await readPlanSummary(shop(false).container)
     expect(summary.managed).toBe(false)
     expect(summary.billing).toBeNull()
+    expect(summary).toMatchObject({ package_name: null, payment_instruction: null })
     expect(summary.limits.every((limit) => limit.max === null)).toBe(true)
   })
 
