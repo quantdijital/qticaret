@@ -22,7 +22,8 @@ export const SIGNED_REQUEST_HEADERS = {
 
 /** The receiver's window either side of its clock, and how long it remembers a nonce. */
 export const SIGNED_REQUEST_MAX_SKEW_SECONDS = 5 * 60
-export const SIGNED_REQUEST_NONCE_TTL_SECONDS = 10 * 60
+// Strictly longer than the window either side together (C9 review L2)
+export const SIGNED_REQUEST_NONCE_TTL_SECONDS = 11 * 60
 
 /** `ten_` and the rest of the control plane's id. */
 export const tenantIdSchema = z.string().regex(/^ten_[0-9A-Za-z]{1,60}$/, "must be a tenant id")

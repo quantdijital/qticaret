@@ -1,6 +1,6 @@
 /**
  * Where seen nonces of signed requests are kept (adr/0061 §3.2: a nonce
- * seen in the last 10 minutes is refused). `claim` is atomic: true for the
+ * seen in the last 11 minutes is refused). `claim` is atomic: true for the
  * first caller only, as Redis `SET key 1 NX EX ttl` answers.
  */
 export interface NonceStore {

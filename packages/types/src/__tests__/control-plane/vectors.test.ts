@@ -1,5 +1,7 @@
 import { createHash, createPublicKey, verify } from "node:crypto"
 import {
+  DEFAULT_MAX_SKEW_SECONDS,
+  DEFAULT_NONCE_TTL_SECONDS,
   MemoryNonceStore,
   bodyDigest,
   privateKeyFromSeed,
@@ -16,6 +18,8 @@ import {
 } from "../../control-plane/plan-document.js"
 import {
   SIGNED_REQUEST_HEADERS,
+  SIGNED_REQUEST_MAX_SKEW_SECONDS,
+  SIGNED_REQUEST_NONCE_TTL_SECONDS,
   signedRequestHeadersSchema,
 } from "../../control-plane/signature.js"
 import { usageReportSchema } from "../../control-plane/usage-report.js"
@@ -170,5 +174,15 @@ describe("usage report vector", () => {
     )
 
     expect(result).toEqual({ ok: false, code: "signature.stale" })
+  })
+})
+
+describe("the nonce window (C9 review L2)", () => {
+  it("outlasts every timestamp still accepted, on both sides alike", () => {
+    expect(SIGNED_REQUEST_NONCE_TTL_SECONDS).toBe(DEFAULT_NONCE_TTL_SECONDS)
+    expect(SIGNED_REQUEST_MAX_SKEW_SECONDS).toBe(DEFAULT_MAX_SKEW_SECONDS)
+    expect(SIGNED_REQUEST_NONCE_TTL_SECONDS).toBeGreaterThanOrEqual(
+      2 * SIGNED_REQUEST_MAX_SKEW_SECONDS + 2
+    )
   })
 })

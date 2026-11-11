@@ -1,5 +1,6 @@
 import { sign, verify, type KeyObject } from "node:crypto"
 import { canonicalJsonDeep } from "../crypto/canonical-json"
+import { DUMMY_PUBLIC_KEY } from "./dummy-key"
 import type { Ed25519Signer } from "./ed25519"
 
 /**
@@ -51,21 +52,26 @@ export function verifyDocument(
     return { ok: false, code: "signature.malformed" }
   }
   const key = publicKey(kid)
-  if (key === undefined) {
-    return { ok: false, code: "signature.unknown_key" }
-  }
   let message: string
   try {
     message = canonicalDocument(purpose, document)
   } catch {
     return { ok: false, code: "signature.malformed" }
   }
+  let valid = false
   try {
-    if (verify(null, Buffer.from(message), key, Buffer.from(signature, "base64url"))) {
-      return { ok: true, kid }
-    }
+    // No key: the same work against a key nobody holds (C9 review L6)
+    valid = verify(
+      null,
+      Buffer.from(message),
+      key ?? DUMMY_PUBLIC_KEY,
+      Buffer.from(signature, "base64url")
+    )
   } catch {
     // A key of another type: the same answer as a wrong signature
   }
-  return { ok: false, code: "signature.invalid" }
+  if (key === undefined) {
+    return { ok: false, code: "signature.unknown_key" }
+  }
+  return valid ? { ok: true, kid } : { ok: false, code: "signature.invalid" }
 }

@@ -182,10 +182,16 @@ describe("signed requests", () => {
     })
   })
 
-  it("refuses a nonce window shorter than the clock window", async () => {
+  it("refuses a nonce window not strictly longer than the clock window (C9 review L2)", async () => {
     await expect(
       verifySignedRequest(signed(), { ...setup(), maxSkewSeconds: 300, nonceTtlSeconds: 300 })
     ).rejects.toThrow(RangeError)
+    await expect(
+      verifySignedRequest(signed(), { ...setup(), maxSkewSeconds: 300, nonceTtlSeconds: 600 })
+    ).rejects.toThrow(RangeError)
+    await expect(
+      verifySignedRequest(signed(), { ...setup(), maxSkewSeconds: 300, nonceTtlSeconds: 602 })
+    ).resolves.toMatchObject({ ok: true })
   })
 
   it("refuses to sign a malformed path or tenant id", () => {

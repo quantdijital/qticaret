@@ -1,4 +1,5 @@
 import { createHash, randomBytes, sign, verify, type KeyObject } from "node:crypto"
+import { DUMMY_PUBLIC_KEY } from "./dummy-key"
 import type { Ed25519Signer } from "./ed25519"
 import type { NonceStore } from "./nonce-store"
 
@@ -6,7 +7,7 @@ import type { NonceStore } from "./nonce-store"
  * Signed requests between a shop and the control plane (adr/0061 §3.2): an
  * Ed25519 signature over the method, path, tenant, time, a one-time nonce,
  * the key id and the body's SHA-256. The receiver refuses a timestamp more
- * than 5 minutes off and a nonce it has seen in the last 10 minutes. No
+ * than 5 minutes off and a nonce it has seen in the last 11 minutes. No
  * secret is shared: the receiver holds the sender's public key only.
  */
 
@@ -22,7 +23,8 @@ export const SIGNED_REQUEST_HEADERS = {
 } as const
 
 export const DEFAULT_MAX_SKEW_SECONDS = 5 * 60
-export const DEFAULT_NONCE_TTL_SECONDS = 10 * 60
+// Strictly longer than the 10 minutes a timestamp is accepted over (C9 review L2)
+export const DEFAULT_NONCE_TTL_SECONDS = 11 * 60
 
 export type SignedRequestErrorCode =
   | "signature.missing_header"
@@ -157,9 +159,10 @@ export async function verifySignedRequest(
 ): Promise<VerifiedRequest> {
   const maxSkew = options.maxSkewSeconds ?? DEFAULT_MAX_SKEW_SECONDS
   const nonceTtl = options.nonceTtlSeconds ?? DEFAULT_NONCE_TTL_SECONDS
-  if (nonceTtl < 2 * maxSkew) {
-    // A nonce forgotten while its timestamp is still accepted could be replayed
-    throw new RangeError("nonceTtlSeconds must be at least twice maxSkewSeconds")
+  if (nonceTtl <= 2 * maxSkew + 1) {
+    // A nonce forgotten while its timestamp is still accepted could be replayed;
+    // a second either side covers the seconds the timestamps are rounded to
+    throw new RangeError("nonceTtlSeconds must be more than twice maxSkewSeconds")
   }
   const headers = readHeaders(request.headers)
   if (typeof headers === "string") {
@@ -183,9 +186,6 @@ export async function verifySignedRequest(
     return fail("signature.stale")
   }
   const key = await options.publicKey(headers.keyId, headers.tenant)
-  if (key === undefined) {
-    return fail("signature.unknown_key")
-  }
   const message = canonicalRequest({
     method,
     path: request.path,
@@ -197,10 +197,19 @@ export async function verifySignedRequest(
   })
   let valid: boolean
   try {
-    valid = verify(null, Buffer.from(message), key, Buffer.from(headers.signature, "base64url"))
+    // No key: the same work against a key nobody holds (C9 review L6)
+    valid = verify(
+      null,
+      Buffer.from(message),
+      key ?? DUMMY_PUBLIC_KEY,
+      Buffer.from(headers.signature, "base64url")
+    )
   } catch {
     // A key of another type
     valid = false
+  }
+  if (key === undefined) {
+    return fail("signature.unknown_key")
   }
   if (!valid) {
     return fail("signature.invalid")

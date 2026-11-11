@@ -72,9 +72,16 @@ const TEST_FILES = [
 ]
 
 const TEST_ONLY_IMPORTS = {
-  group: ["age-encryption", "age-encryption/*", "@qticaret/server-kit/testing/*"],
+  group: [
+    "age-encryption",
+    "age-encryption/*",
+    "@qticaret/server-kit/testing/*",
+    // adr/0061 Ek C9 (review L1): the contract's test-only keys and vectors
+    "@qticaret/types/control-plane/testing",
+  ],
   message:
-    "Test-only: the escrow is opened by the offline identity alone (adr/0061 Ek C8). Seal with @qticaret/server-kit/escrow.",
+    "Test-only: the escrow is opened by the offline identity alone (adr/0061 Ek C8), and the contract's test keys sign nothing real (Ek C9). Seal with @qticaret/server-kit/escrow.",
 }
 
-const TEST_ONLY_REQUIRE = "/^(age-encryption|@qticaret\\/server-kit\\/testing\\/)/"
+const TEST_ONLY_REQUIRE =
+  "/^(age-encryption|@qticaret\\/server-kit\\/testing\\/|@qticaret\\/types\\/control-plane\\/testing)/"

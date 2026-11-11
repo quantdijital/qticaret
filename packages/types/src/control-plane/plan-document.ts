@@ -70,6 +70,32 @@ export type SignedPlanDocument = z.infer<typeof signedPlanDocumentSchema>
 export const PLAN_DOCUMENT_MAX_BYTES = 16 * 1024
 
 /**
+ * The pull's answer (adr/0061 Ek C9, review L3): the stored document as
+ * pushed, and a binding the control plane signs over the request's own
+ * nonce and that document. A shop accepts a pulled document only when the
+ * binding is for the nonce it just sent: an old or replayed answer, or one
+ * for another request, is refused, so only a fresh pull proves the shop
+ * is still in touch.
+ */
+export const PLAN_PULL_PURPOSE = "plan_pull"
+
+export const planPullResponseSchema = z.strictObject({
+  plan: signedPlanDocumentSchema,
+  binding: z.strictObject({ kid: keyIdSchema, signature: ed25519SignatureSchema }),
+})
+export type PlanPullResponse = z.infer<typeof planPullResponseSchema>
+
+/** What the binding signs: the request's nonce, the shop, the serial and the document's signature. */
+export function planPullBinding(nonce: string, signed: SignedPlanDocument) {
+  return {
+    nonce,
+    tenant_id: signed.document.tenant_id,
+    serial: signed.document.serial,
+    document_signature: signed.signature,
+  }
+}
+
+/**
  * The serial rule (adr/0061 §3.2): a greater serial replaces the stored
  * document; the same serial changes nothing (a repeated push); a smaller
  * one is an old document replayed and is refused.
