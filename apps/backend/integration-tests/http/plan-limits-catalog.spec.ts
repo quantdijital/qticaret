@@ -30,6 +30,9 @@ medusaIntegrationTestRunner({
     managedForThisFile()
 
     beforeEach(async () => {
+      // The tables are emptied between tests, the plan state cache is not (the plan
+      // guard reads it on every admin write, Ek C15): no limits again first
+      await setPlanLimits(getContainer(), {})
       admin = await createAdminUser(http, getContainer())
     })
 
