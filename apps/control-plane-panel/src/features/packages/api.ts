@@ -53,10 +53,12 @@ export interface PlanInput {
   limits: Record<LimitKey, number | null>
 }
 
-/** A new package (owner, finance); its code is fixed once made. */
+/** A new package (owner, finance; a step-up: it sets a price); its code is fixed once made. */
 export const useCreatePlan = () =>
   usePlanChange((input: PlanInput & { code: string }) =>
-    api<{ plan: Plan }>("/admin/cp/plans", { method: "POST", body: input })
+    withStepUp((headers) =>
+      api<{ plan: Plan }>("/admin/cp/plans", { method: "POST", body: input, headers })
+    )
   )
 
 /**

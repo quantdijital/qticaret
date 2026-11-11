@@ -27,12 +27,17 @@ export interface NewTenant {
   package_id: string | null
 }
 
-/** A new shop as a record (owner, operator): `provisioning`, set up later (C10, C11). */
+/**
+ * A new shop as a record (owner, operator): `provisioning`, set up later
+ * (C10, C11). A step-up: the record may name its package, what it pays.
+ */
 export function useCreateTenant() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: (input: NewTenant) =>
-      post<{ tenant: { id: string; slug: string } }>("/admin/cp/tenants", input),
+      withStepUp((headers) =>
+        post<{ tenant: { id: string; slug: string } }>("/admin/cp/tenants", input, headers)
+      ),
     onSettled: async () => {
       await client.invalidateQueries({ queryKey: TENANTS_KEY })
     },
@@ -108,9 +113,10 @@ export const useRemoveNote = (id: string) =>
     api(tenantPath(id, `/notes/${encodeURIComponent(noteId)}`), { method: "DELETE" })
   )
 
+/** The shop's package: what it pays, so a step-up as a price change. */
 export const useAssignPlan = (id: string) =>
   useShopChange(id, (packageId: string | null) =>
-    post(tenantPath(id, "/plan"), { package_id: packageId })
+    withStepUp((headers) => post(tenantPath(id, "/plan"), { package_id: packageId }, headers))
   )
 
 export interface OverrideInput {

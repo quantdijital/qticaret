@@ -28,6 +28,10 @@ function controlPlane(call: Sent): Answer {
   if (call.path === "/admin/cp/me/step-up") {
     return { status: 200, body: PROOF }
   }
+  // A new package sets a price: a step-up (C7 review M1)
+  if (call.path === "/admin/cp/plans" && call.method === "POST" && !call.headers[STEP_UP_HEADER]) {
+    return refusal(428, "cp.step_up_required")
+  }
   return { status: 200, body: { plan: PRO } }
 }
 
@@ -88,7 +92,15 @@ describe("PackagesPage: the packages (adr/0061 §2, C7)", () => {
     }
     await userEvent.click(last)
     await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }))
+    await userEvent.type(await screen.findByLabelText("Doğrulama kodu"), "123456")
+    await userEvent.click(screen.getByRole("button", { name: "Doğrula" }))
 
+    await waitFor(() => {
+      expect(
+        sent.filter((call) => call.path === "/admin/cp/plans" && call.method === "POST").at(-1)
+          ?.headers[STEP_UP_HEADER]
+      ).toBe("proof-1")
+    })
     await waitFor(() => {
       expect(sent.find((call) => call.method === "POST")?.body).toEqual({
         code: "kurumsal",

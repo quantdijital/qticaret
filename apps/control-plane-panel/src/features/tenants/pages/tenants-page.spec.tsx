@@ -5,7 +5,9 @@ import "@/lib/i18n"
 import { renderAs } from "@/test/member"
 import { routerState } from "@/test/router-mock"
 import { LIST, PRO, START } from "@/test/shops"
-import { stubApi } from "@/test/api"
+import { StepUpHost } from "@/components/layout/step-up-host"
+import { STEP_UP_HEADER, forgetStepUp } from "@/lib/step-up"
+import { refusal, stubApi } from "@/test/api"
 import type { Answer, Sent } from "@/test/api"
 import { TenantsPage } from "./tenants-page"
 
@@ -19,7 +21,18 @@ function controlPlane(call: Sent): Answer {
     return { status: 200, body: { plans: [PRO, START] } }
   }
   if (call.path === "/admin/cp/tenants" && call.method === "POST") {
-    return { status: 200, body: { tenant: { id: "ten_new", slug: "bicak-atolyesi" } } }
+    // A record may name its package: a step-up (C7 review M1)
+    return call.headers[STEP_UP_HEADER]
+      ? { status: 200, body: { tenant: { id: "ten_new", slug: "bicak-atolyesi" } } }
+      : refusal(428, "cp.step_up_required")
+  }
+  if (call.path === "/admin/cp/me/step-up") {
+    return {
+      status: 200,
+      body: {
+        step_up: { token: "proof-1", expires_at: new Date(Date.now() + 300_000).toISOString() },
+      },
+    }
   }
   return { status: 404, body: {} }
 }
@@ -28,6 +41,7 @@ describe("TenantsPage: the shops (adr/0061 §2, C7)", () => {
   beforeEach(() => {
     routerState.search = { status: "all", q: "", page: 1 }
     routerState.navigate.mockReset()
+    forgetStepUp()
   })
   afterEach(() => {
     vi.unstubAllGlobals()
@@ -79,9 +93,15 @@ describe("TenantsPage: the shops (adr/0061 §2, C7)", () => {
     )
   })
 
-  it("makes a record from a name, its address suggested, with a package, then opens it", async () => {
+  it("makes a record from a name, its address suggested, with a package, after the step-up", async () => {
     const sent = stubApi(controlPlane)
-    renderAs(<TenantsPage />, "operator")
+    renderAs(
+      <>
+        <TenantsPage />
+        <StepUpHost />
+      </>,
+      "operator"
+    )
 
     await userEvent.click(await screen.findByRole("button", { name: "Yeni mağaza" }))
     const dialog = await screen.findByRole("dialog", { name: "Yeni mağaza" })
@@ -89,6 +109,8 @@ describe("TenantsPage: the shops (adr/0061 §2, C7)", () => {
     expect(within(dialog).getByLabelText("Platform adresi")).toHaveValue("bicak-atolyesi")
     await userEvent.click(await within(dialog).findByRole("radio", { name: /Profesyonel/ }))
     await userEvent.click(within(dialog).getByRole("button", { name: "Kaydı aç" }))
+    await userEvent.type(await screen.findByLabelText("Doğrulama kodu"), "123456")
+    await userEvent.click(screen.getByRole("button", { name: "Doğrula" }))
 
     await waitFor(() => {
       expect(routerState.navigate).toHaveBeenCalledWith({
@@ -96,7 +118,9 @@ describe("TenantsPage: the shops (adr/0061 §2, C7)", () => {
         params: { id: "ten_new" },
       })
     })
-    expect(sent.find((call) => call.method === "POST")?.body).toEqual({
+    const made = sent.filter((call) => call.path === "/admin/cp/tenants" && call.method === "POST")
+    expect(made.map((call) => call.headers[STEP_UP_HEADER])).toEqual([undefined, "proof-1"])
+    expect(made[1]?.body).toEqual({
       name: "Bıçak Atölyesi",
       slug: "bicak-atolyesi",
       package_id: PRO.id,

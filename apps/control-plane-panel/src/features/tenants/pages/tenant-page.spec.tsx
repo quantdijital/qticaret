@@ -8,7 +8,7 @@ import { refusal, stubApi } from "@/test/api"
 import type { Answer, Sent } from "@/test/api"
 import { renderAs } from "@/test/member"
 import { routerState } from "@/test/router-mock"
-import { SHOP } from "@/test/shops"
+import { PRO, SHOP, START } from "@/test/shops"
 import type { TenantDetail } from "@/features/tenants/api"
 import { TenantPage } from "./tenant-page"
 
@@ -28,6 +28,15 @@ function controlPlane(shop: TenantDetail) {
       return call.headers[STEP_UP_HEADER]
         ? { status: 200, body: { tckn: TCKN } }
         : refusal(428, "cp.step_up_required")
+    }
+    if (call.path === "/admin/cp/tenants/ten_kahve/plan") {
+      // The shop's package is what it pays: a step-up (C7 review M1)
+      return call.headers[STEP_UP_HEADER]
+        ? { status: 200, body: { package_id: "pkg_pro" } }
+        : refusal(428, "cp.step_up_required")
+    }
+    if (call.path === "/admin/cp/plans") {
+      return { status: 200, body: { plans: [START, PRO] } }
     }
     if (call.path === "/admin/cp/me/step-up") {
       return { status: 200, body: PROOF }
@@ -208,6 +217,25 @@ describe("TenantPage: one shop (adr/0061 §2, C7)", () => {
         reason: "Sezon için ek personel",
         expires_at: null,
       })
+    })
+  })
+
+  it("puts the shop on another package after the step-up", async () => {
+    routerState.search = { part: "plan" }
+    const sent = stubApi(controlPlane(SHOP))
+    page("operator")
+
+    await userEvent.click(await screen.findByRole("button", { name: "Paketi değiştir" }))
+    const dialog = await screen.findByRole("dialog", { name: "Paket" })
+    await userEvent.click(await within(dialog).findByRole("radio", { name: /Profesyonel/ }))
+    await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }))
+    await userEvent.type(await screen.findByLabelText("Doğrulama kodu"), "123456")
+    await userEvent.click(screen.getByRole("button", { name: "Doğrula" }))
+
+    await waitFor(() => {
+      const assigned = sent.filter((call) => call.path.endsWith("/plan"))
+      expect(assigned.map((call) => call.headers[STEP_UP_HEADER])).toEqual([undefined, "proof-1"])
+      expect(assigned[1]?.body).toEqual({ package_id: PRO.id })
     })
   })
 

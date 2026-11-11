@@ -8,6 +8,7 @@ import { plansQuery } from "@/features/packages/api"
 import { NO_PACKAGE, PackagePicker } from "@/features/packages/components/package-picker"
 import { useAssignPlan } from "@/features/tenants/mutations"
 import { errorText } from "@/lib/errors"
+import { isStepUpCancelled } from "@/lib/step-up"
 
 /**
  * The shop's package (owner, operator): one of those on sale, or none. An
@@ -48,7 +49,9 @@ export function PlanDialog({
             onClose()
           },
           onError: (error) => {
-            setFailure(errorText(t, error))
+            if (!isStepUpCancelled(error)) {
+              setFailure(errorText(t, error))
+            }
           },
         })
       }}

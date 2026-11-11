@@ -12,6 +12,7 @@ import { NO_PACKAGE, PackagePicker } from "@/features/packages/components/packag
 import { useCreateTenant } from "@/features/tenants/mutations"
 import { SLUG_PATTERN, slugFromName } from "@/features/tenants/slug"
 import { errorText } from "@/lib/errors"
+import { isStepUpCancelled } from "@/lib/step-up"
 
 /**
  * A new shop as a record (owner, operator; adr/0061 §2): its name, its
@@ -67,7 +68,9 @@ export function CreateTenantDialog({
               void navigate({ to: "/tenants/$id", params: { id: tenant.id } })
             },
             onError: (error) => {
-              setFailure(errorText(t, error))
+              if (!isStepUpCancelled(error)) {
+                setFailure(errorText(t, error))
+              }
             },
           }
         )
