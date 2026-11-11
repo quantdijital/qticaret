@@ -579,3 +579,37 @@ Sıra bağımlılığa göredir; her görev tek kodlama ajanının bir oturumuna
   4. Yayın ve itme personel isteğinin içinde beklenir (yayın) ya da beklenmeden başlar (itme). Süreç itme sırasında düşerse iş dakikada bir dener, çekme 15 dakikada telafi eder.
   5. `confirmed_at` aynı serial'in tekrar itilmesiyle ilerler: imza geçerli olmalı, saldırgan eski bir geçerli belgeyi tekrar iterek "taze" görünümünü uzatabilir. Durum yine değişmez; bu yalnız 24 saat uyarısını geciktirir.
   6. Çekmede `TENANT_SIGNING_KEY` süreç belleğinde ayrıştırılmış durur.
+
+### Ek: C9 güvenlik incelemesi düzeltmeleri (2026-11-11)
+
+İnceleme kritik ya da yüksek bulgu vermedi; iki orta ve yedi düşük bulgu kapatıldı, her biri testli. Yukarıdaki Ek'in ilgili maddelerini bunlar günceller.
+
+- **M1, bayrakların yarışı:**
+  - `syncPlatformFlagsStep` artık workflow'a verilen bayrakları değil, **o an saklı belgenin** bayraklarını ve serial'ını yazar (adım belgeyi `storedPlan` ile okur).
+  - `platform_flag` satırları serial taşır (`Migration20261111041955`). Yazım tek danışma kilidi (`platform_flag:sync`) altındadır ve saklı olandan küçük serial hiçbir şey yazmaz: iki uygulama yarışınca yenisinin bayrakları kalır. Kilit, ilk yazımın tekil indeks yarışını da kapatır.
+  - **Karar:** satırlar, mağazanın kayıt defterindeki her platform bayrağı için yazılır (belgede yoksa varsayılan). Belge bir bayrağı düşürünce serial kaybolmaz.
+  - `same` sonucunda da yeniden yazılır, eski bir kopukluk kendiliğinden düzelir. `stale` yazmaz.
+  - **Telafiler karşılaştır-ve-değiştirir:** `restorePlanDocument` aynı `control_plane_plan:<mağaza>` kilidini alır ve yalnız satır hâlâ geri alınan serial'daysa yazar. Bayrak telafisi (`undoPlatformFlagSync`) yalnız satırlar hâlâ o serial'daysa eski hâle döner.
+  - **Test:** dört turda 5 ile 6 aynı anda itilir, sonuç hep 6'nın bayrakları. Eski serial'lı geç yazım `written: false` döner. Aynı serial yeniden itilince sapmış depo düzelir.
+- **M2, `NODE_ENV` yok:** `assertControlPlaneConfigured` yalnız yerel ortamı (`isLocalEnv`: development, test) muaf tutar. Değişkensiz `NODE_ENV` canlı sayılır, şemanın geri kalanıyla aynı. Şemadaki `CONTROL_PLANE_URL` `http` kuralı da artık "yerel değilse" uygulanır.
+- **L1:** `@qticaret/types/control-plane/testing` ortak ESLint tabanının yalnız-test yasağında (içe alma ve `require` deseni).
+- **L2, `nonce` süresi:** sözleşme ve server-kit 11 dakika (`SIGNED_REQUEST_NONCE_TTL_SECONDS` = `DEFAULT_NONCE_TTL_SECONDS` = 660). Doğrulayıcı `nonceTtl <= 2 × skew + 1` ise hata fırlatır (en az 602 sn). Kabul penceresi iki yanda toplam 10 dakika; saniye yuvarlaması dahil, unutulan `nonce` artık hâlâ kabul edilen bir zamanla tekrar edilemez. İki paketin değerlerinin eşitliği testli.
+- **L3, tazelik ve çekme cevabının bağlanması:**
+  - `confirmed_at` (boş olabilir, `Migration20261111041954`) yalnız başarılı bir çekmeyle ilerler. İtme, `applied` da olsa `same` da olsa onu değiştirmez; tekrar itilen geçerli belge mağazayı "haberli" gösteremez.
+  - **Sapma, çekme cevabının biçimi:** `{ plan: { document, kid, signature }, binding: { kid, signature } }` (`planPullResponseSchema`).
+    - `binding`, üst panelin etkin anahtarıyla `plan_pull` amacına ve `{ nonce, tenant_id, serial, document_signature }` üzerine imzadır. `nonce` mağazanın bu istekte kendi ürettiğidir.
+    - Mağaza önce bağlamayı kendi `nonce`'uyla doğrular, sonra belgeyi itme kurallarıyla denetler. Bağlamasız, başka bir isteğe bağlı ya da bozuk cevap `bad_answer` (log `control_plane.pull_refused`).
+    - Etkin imza anahtarı yoksa üst panel 503 `plan.unavailable` verir.
+  - 24 saat uyarısı böylece "son bağlı çekme"yi ölçer. Yalnız itme alan mağaza da uyarır, doğrusu bu: haberleşmenin kanıtı çekmedir.
+- **L4, itme hedefi:**
+  - `CP_TENANT_API_HOSTS` girdileri `ad[:port]`. Ad tek etiketli (Docker servisi) ya da `.internal`/`.local` altında olmalı; `.sonek` girdisi yalnız bu ad alanlarında. Diğerleri (genel ad, IP) açılışta reddedilir.
+  - Portsuz girdi yalnız 9000, 80 ve 443'e izin verir. Yerelde bu makine yalnız 9000 ve yerel provisioner'ın 9200–9299'u (§6.3).
+  - Denetim C10 için dışa açık: `tenantApiUrlProblem(url, env)`. `cp:fleet set-api-url` de onu kullanır.
+- **L5:** canlıda `CONTROL_PLANE_URL`'e `http` yalnız tek etiketli DNS adıyla (`/^[a-z0-9-]+$/`; `localhost`, Docker servisi) gider. IP (köşeli IPv6 dahil) ve noktalı ad `https` ister (testli).
+- **L6:** server-kit `verifySignedRequest` ve `verifyDocument`, anahtar bulunamayınca da sabit bir sahte açık anahtarla (süreç başına üretilir, gizli yarısı atılır) doğrulama yapar. Bilinmeyen anahtar ile yanlış imza aynı işi görür; zaman, mağaza+`kid` çiftinin varlığını söylemez. Anahtar araması veritabanı sorgusudur, o kısmın süresi bilerek eşitlenmedi.
+- **L7, sınırlı iş:**
+  - Yayın ve itme en çok 4'erli çalışır (`eachBounded`). İtmeler tek arka plan çalışmasıdır, mağaza başına ayrı `void` yoktur.
+  - **Karar:** paket değişikliğinde 20 mağazaya kadar yayın istekte beklenir, daha fazlası aynı sınırlı arka plan çalışmasına bırakılır (`cp.plan_reissue_background`). Süreç düşerse uzlaştırma işi (10 dk) tamamlar.
+  - `cp-plan-pushes` ve `cp-plan-reconcile` işleri Medusa'nın kilit modülüyle tek çalışmadır: kilit tutuluyorsa o dakika atlanır.
+  - `nonce` deposunun Redis hataları ilk isteğin kapanışıyla değil, sürecin kaydedicisiyle yazılır.
+- **Migration'lar:** mağaza `control-plane` `Migration20261111041954` (`confirmed_at` boş olabilir), `platform-settings` `Migration20261111041955` (`platform_flag.serial`). Adlar tekil, yeniden `db:generate` "Skipped".
