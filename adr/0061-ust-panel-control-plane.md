@@ -930,3 +930,37 @@ Sıra bağımlılığa göredir; her görev tek kodlama ajanının bir oturumuna
   - Üst panel arayüzü Vitest: 25 dosya, 132 test (yeni `status-actions.spec.tsx`: askıya al gerekçe + yeniden doğrulamayla, geri aç ve etkinlikte gerekçe, ret pencerede, finans/okuma/kurulumdaki mağazada düğme yok).
   - `pnpm turbo run typecheck lint` 25/25 yeşil.
 - **Güvenlik incelemesine:** (1) izin listesinin genişliği: `POST /admin/orders/:id/edit` satır ekleyebilir, `payment-collections` ve `payments` çekme/iade açık, sipariş devri açık; (2) gönderilmiş davetin kabulü açık; (3) askıda Store API'nin geri kalanı (sepet, ürün okuma) açık, yalnız ödeme başlatma ve tamamlama kapalı; (4) durum önbelleği Redis'siz süreçte 30 sn'ye kadar eski kalabilir; (5) `suspended` herkese açık `site` yanıtında.
+
+### Ek: C15 güvenlik incelemesi düzeltmeleri (2026-11-11)
+
+İnceleme kritik ya da yüksek bulgu vermedi; bir orta, dört düşük ve üç bilgi bulgusu kapatıldı, her biri testli. Yukarıdaki Ek'in ilgili maddelerini bunlar günceller.
+
+- **M1, arka planda gidenler durumu dinlemiyordu; durdurma düğmeleri kapalıydı:**
+  - `jobs/campaign-dispatch.ts`: mağaza `open` değilse (kısıt ya da askı) toplu gönderim turu hiç çalışmaz. **Karar:** kampanyalar olduğu yerde kalır; durum değiştirilmez, saat mantığı aynı. Mağaza açılınca kaldığı yerden sürer.
+  - `jobs/cart-reminders.ts` ve `jobs/google-merchant-sync.ts`: askıda çalışmaz (vitrin 503; bağlantı ve yeni ürün ilanı gönderilmez). Kısıtta vitrin satmaya devam ettiği için ikisi de sürer. Merchant'a bir sonraki çalışma o arada değişeni gönderir.
+  - İzin listesine durdurma eylemleri eklendi: `POST /admin/bulk-messages/:id/pause` ve `/cancel` (ödeme bağlantısını iptal ile aynı gerekçe), `DELETE /admin/google` (tek tam yol; Google hesabının bağlantısını keser, ürün gönderimi biter). Yeniden başlatma (`resume`), yorum bağlantısını kesme ve elle eşitleme kapalı kalır.
+  - **Test:** `jobs/__tests__/plan-senders.unit.spec.ts` (kısıt ve askıda gönderim turu yok, açık ve yönetimsiz kipte var; askıda hatırlatma ve Merchant yok, kısıtta var). `plan-status-restricted.spec.ts`: duraklat, iptal ve Google bağlantısını kesme plan reddi almıyor; `resume` 403.
+- **L1, sipariş düzenlemesi yeni mal satıyordu:** `refuseSellingEdit` (`order-edit-routes.ts`, gövde doğrulamasından sonra). Kip `open` değilse `add` boş olmayan ya da `expected_difference > 0` olan düzenleme 403 `plan.restricted`. Satır çıkarma ve fiyat düşürme açık kalır. Workflow beklenen farkla hesaplanan fark tutmazsa düzenlemeyi zaten reddeder (`guardOrderEditStep`), bu yüzden beklenen farkın işareti düzenlemenin kendisidir. **Test:** birim (iki durum × iki satış biçimi 403; aşağı düzeltme ve açık mağaza geçer); HTTP (ekleme ve fiyat artışı 403; fiyat düşürme plandan geçer, havaleli siparişte kendi `orders.edit_payment_unsupported` yanıtını verir).
+- **L2, bütünlük testinin boşlukları:**
+  - (a) Test artık sadakat eklentisinin (`@medusajs/loyalty-plugin`, `.medusa/server/src/api/admin`) yönetici yazma uçlarını da tarar. **Karar:** `/admin/gift-cards*` ve `/admin/store-credit-accounts*` kapalı: yeni hediye kartı satıştır, elle mağaza kredisi paradır. Var olan siparişin parası kendi açık yollarından döner: `POST /admin/orders/:id/refunds` ödemeye iade eder, Medusa'nın `POST /admin/orders/:id/credit-lines`'ı (mağaza kredisi satırı) açıktır. Mağaza krediye iade eden ayrı bir rotamız yok (denetlendi).
+  - (b) Açık kararı alan her rotanın, şablonu kendisininkine eşit (parametre adları yok sayılarak) bir izin listesi satırı olmalı. Böylece `/admin/orders/:id` gelecekteki `POST /admin/orders/bulk`'u açamaz; test bunu yakalar.
+  - **Sapma, çalışma anında değil testte:** eşleştirici parametrenin gerçek bir kardeş rotaya uymasını kendisi engellemez, çünkü rota listesini çalışma anında bilmez. Kapı bütünlük testidir: kardeş rota eklendiği an test düşer.
+- **L3, askıda `/sitemap` öneki:**
+  - Vitrinin askı ve bakım listeleri artık `robots.txt`, site haritaları ve `security.txt`'i tam adlarıyla tanır (`backendFile`, vekil onları zaten kapıdan önce arka uçtan cevaplar). `/sitemap-kampanya` gibi bir sayfa askıda ve bakımda 503'tür.
+  - `/_next/` yalnız derleme dosyaları, görseller ve geliştirme sunucusunun yeniden yükleme soketi için açık (`/_next/data` vb. kapalı).
+  - Arka uç: `isReservedPath` kökte `sitemap` ya da `robots` ile başlayan her kaydı reddeder (`RESERVED_ROOT_PREFIXES`; yalnız kökte, `/blog/sitemap-nedir` serbest).
+  - **Test:** `paths.unit.spec.ts` (7 ayrılmış, 4 serbest yeni örnek), vitrin `maintenance.spec.ts` ve `proxy-suspended.spec.ts`.
+- **L4, askı/geri açma yarışı:**
+  - `changeStatus` mağaza satırını `SELECT … FOR UPDATE` ile kilitler ve hareketin başlangıç durumlarını (`from`) kilidin altında yeniden denetler. Aynı anda iki hareketten yalnız biri geçer, diğeri 409.
+  - Belgenin içeriği (mağazanın durumu dahil) artık `issuePlanDocument`'ın mağaza başına danışma kilidinin içinde okunur (`prepare` geri çağrısı). Son yayınlanan belge her zaman son durumu söyler.
+  - **Test:** `tenant-status.spec.ts` üç turda aynı anda iki askı ve bir geri açma gönderiyor. Her yanıt 200 ya da 409; her turdan sonra son belgenin durumu mağazanınkine eşit; durum satırları zincir (her satır bir öncekinin bittiği yerden başlar).
+- **I1:** `GET /store/seo/site` artık `Cache-Control: no-store` (eskiden `public, max-age=300, stale-while-revalidate=3600`). Yük yine sınırlı: vitrin süreç başına dakikada en çok bir kez sorar, durum değişince yenileme sinyalini hemen alır. Mağazanın süreçleri arası pencere C9'un sürümlü önbelleğiyle ≤ 1 sn (Redis'siz 30 sn). HTTP testinde başlık `no-store`.
+- **I2, karar korunur:** gönderilmiş davetin kabulü (`/admin/staff/invites/info`, `/accept`) kısıt ve askıda açık kalır. Gerekçe C14'teki ile aynı: limit içinde ve kısıttan önce gönderilmiş bir davet onurlandırılır. Kapatmak, davetliyi mağaza açılana kadar bekletir ama mağazaya yeni bir hak vermez. Yeni davet ve yeniden gönderme kapalı.
+- **I3:** `cp:tenant suspend|resume` önce belgeyi yayınlar, sonra denetim satırını yazar. Her hatayı ayrı söyler ve biri bile başarısızsa çıkış kodu sıfırdan farklıdır.
+- **Dosya boyu:** `service-records.ts` 300 satırın altında kalsın diye `undoStatusChange` ve `statusBeforeSuspension` `tenants/service.ts`'e taşındı.
+- **Testler (düzeltmelerle, 2026-11-11):**
+  - Backend birim: 3757 test (+ 3 atlanan), 386 dosya.
+  - Backend HTTP, ilgili 22 dosya, 76/76: `plan-status-*` (7 + 2), `plan-limits-*`, `campaigns*`, `cart-reminders`, `abandoned-carts`, `google-merchant`, `order-edit`, `seo-url-style`, `seo-sitemap`, `seo-site-tracking`, `maintenance`, `route-inventory`, `staff-roles`, `control-plane-plan`.
+  - Vitrin Vitest: 151 dosya, 958 test.
+  - Üst panel birim: 26 dosya, 326 test. Üst panel HTTP: 19 dosya, 156 test.
+  - `pnpm turbo run typecheck lint` 25/25.
