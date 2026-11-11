@@ -96,13 +96,14 @@ export async function GET(
 /**
  * POST /admin/cp/tenants (owner, operator): a new shop as a record
  * (adr/0061 §2): `provisioning`, its subdomain under `PLATFORM_DOMAIN`,
- * optionally its package. Bringing it up is the setup's (C10, C11).
+ * optionally its package and sector pack (C11). Bringing it up is the
+ * setup's (C10); C11's wizard starts it once the record is filled in.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<PostTenantType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { name, slug, package_id } = req.validatedBody
+  const { name, slug, package_id, sector_pack } = req.validatedBody
   const { result: tenant } = await createTenantWorkflow(req.scope).run({
     input: {
       name,
@@ -110,6 +111,7 @@ export async function POST(
       hostname: platformHostname(slug, parseEnv().PLATFORM_DOMAIN),
       created_by: actorOf(req),
       package_id: package_id ?? null,
+      sector_pack: sector_pack ?? null,
     },
   })
   noteAuditResource(req, tenant.id)

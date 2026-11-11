@@ -85,6 +85,8 @@ const TENANT_ROUTES: RouteRule[] = [
     auditBefore: true,
   },
   { method: "GET", path: "/admin/cp/tenants/:id/activity", access: ALL, resource: TENANT },
+  // C11: a new shop's address checked while typed, by who may make one; no personal data
+  { method: "GET", path: "/admin/cp/tenant-availability", access: SHOPS },
   ...shopRules(
     "POST",
     [

@@ -173,6 +173,18 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
     }
   })
 
+  it("checks a new shop's address for who may make one, no step-up, no audit (C11)", () => {
+    const rule = matchRoute("GET", "/admin/cp/tenant-availability")?.rule
+
+    expect(allowedRoles("GET", "/admin/cp/tenant-availability")).toEqual(["owner", "operator"])
+    expect(rule?.stepUp).toBeUndefined()
+    expect(rule?.auditRead).toBeUndefined()
+    // Not under `/tenants/:id`: the word is never read as a shop's id
+    expect(matchRoute("GET", "/admin/cp/tenants/availability")?.rule.path).toBe(
+      "/admin/cp/tenants/:id"
+    )
+  })
+
   it("gives the company and its TCKN to finance too, packages to owner and finance (C7)", () => {
     expect(allowedRoles("POST", "/admin/cp/tenants/ten_1/company")).toEqual([
       "owner",

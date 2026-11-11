@@ -3,6 +3,7 @@ import { LIMIT_KEYS, TENANT_STATUSES, isPlatformFlag } from "@qticaret/types/con
 import { isValidTckn, isValidVkn } from "@qticaret/server-kit"
 import { COMPANY_KINDS, CONTACT_ROLES, NOTE_MAX } from "../../../../lib/tenants/kinds"
 import { normalizePhone } from "../../../../lib/tenants/phone"
+import { SECTOR_PACKS } from "../../../../lib/tenants/sector-packs"
 import { slugProblem } from "../../../../lib/tenants/slug"
 
 // Control and invisible format characters never make a name or an address
@@ -45,7 +46,7 @@ export const GetTenants = z
   .strict()
 export type GetTenantsType = z.infer<typeof GetTenants>
 
-/** A new shop record: its name and slug (fixed), optionally its package. */
+/** A new shop record: its name and slug (fixed), optionally its package and sector pack (C11). */
 export const PostTenant = z
   .object({
     name,
@@ -60,9 +61,22 @@ export const PostTenant = z
         }
       }),
     package_id: id.nullable().optional(),
+    sector_pack: z.enum(SECTOR_PACKS).nullable().optional(),
   })
   .strict()
 export type PostTenantType = z.infer<typeof PostTenant>
+
+/**
+ * A new shop's address asked while typed (C11): either or both, each
+ * bounded so a query cannot carry a long text to the database.
+ */
+export const GetTenantAvailability = z
+  .object({
+    slug: z.string().max(64).optional(),
+    hostname: z.string().trim().min(1).max(253).optional(),
+  })
+  .strict()
+export type GetTenantAvailabilityType = z.infer<typeof GetTenantAvailability>
 
 export const PostTenantUpdate = z.object({ name }).strict()
 export type PostTenantUpdateType = z.infer<typeof PostTenantUpdate>

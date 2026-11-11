@@ -10,6 +10,8 @@ export interface CreateTenantInput {
   hostname: string
   created_by: string | null
   package_id: string | null
+  /** The sector pack it is to be set up with (C11; applied by C12). */
+  sector_pack?: string | null
 }
 
 /** The record, its subdomain and first status row; undone, it is gone again, children too. */

@@ -7,6 +7,7 @@ import { NoBody, NoQuery } from "../admin/cp/validators"
 import { PostPlan, PostPlanPrice, PostPlanUpdate } from "../admin/cp/plans/validators"
 import {
   GetActivity,
+  GetTenantAvailability,
   GetTenants,
   PostCompany,
   PostContact,
@@ -52,6 +53,7 @@ const query = (
 
 export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
   query(T, GetTenants),
+  query("/admin/cp/tenant-availability", GetTenantAvailability),
   query(`${T}/:id`, NoQuery),
   query(`${T}/:id/activity`, GetActivity),
   query(P, NoQuery),

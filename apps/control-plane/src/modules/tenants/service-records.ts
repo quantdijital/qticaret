@@ -42,11 +42,16 @@ export class TenantsRecords extends MedusaService({
   /** A new shop record: `provisioning`, its platform subdomain primary, its first status row. */
   @InjectTransactionManager()
   async createTenantRecord(
-    input: { slug: string; name: string; created_by: string | null; hostname: string },
+    input: {
+      slug: string
+      name: string
+      created_by: string | null
+      hostname: string
+      sector_pack?: string | null
+    },
     @MedusaContext() sharedContext: Context = {}
   ): Promise<TenantRecord> {
-    const [sameSlug] = await this.listTenants({ slug: input.slug }, { take: 1 }, sharedContext)
-    if (sameSlug) {
+    if (await this.slugTaken(input.slug, sharedContext)) {
       throw taken("cp.slug_taken")
     }
     await this.refuseTakenHost(input.hostname, sharedContext)
@@ -58,6 +63,7 @@ export class TenantsRecords extends MedusaService({
           status: "provisioning",
           status_changed_at: new Date(),
           created_by: input.created_by,
+          sector_pack: input.sector_pack ?? null,
         },
       ],
       sharedContext
@@ -219,14 +225,34 @@ export class TenantsRecords extends MedusaService({
     )
   }
 
+  /** Whether a shop (not removed) has the slug. */
+  @InjectManager()
+  async slugTaken(slug: string, @MedusaContext() sharedContext: Context = {}): Promise<boolean> {
+    const [same] = await this.listTenants({ slug }, { take: 1, select: ["id"] }, sharedContext)
+    return same !== undefined
+  }
+
+  /** Whether any shop answers on the host already. */
+  @InjectManager()
+  async hostTaken(
+    hostname: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    const [same] = await this.listTenantDomains(
+      { hostname },
+      { take: 1, select: ["id"] },
+      sharedContext
+    )
+    return same !== undefined
+  }
+
   /** 422 `cp.domain_taken` when any shop answers on the host already. */
   @InjectManager()
   async refuseTakenHost(
     hostname: string,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
-    const [same] = await this.listTenantDomains({ hostname }, { take: 1 }, sharedContext)
-    if (same) {
+    if (await this.hostTaken(hostname, sharedContext)) {
       throw taken("cp.domain_taken")
     }
   }
