@@ -6,6 +6,7 @@ import { AdminPostOrderEdit, AdminPostOrderEditPreview } from "../admin/orders/[
 import { existingOrderAddresses, validateTrAddresses } from "../validation/tr-address"
 import { requireUserActor } from "./actor"
 import { holdCancelLocks } from "./bank-transfer-routes"
+import { refuseSellingEdit } from "./plan-guard"
 
 /**
  * Medusa's own order edits skip the difference and its refund (adr/0033):
@@ -52,7 +53,12 @@ export const ORDER_EDIT_ROUTES = [
   {
     matcher: "/admin/orders/:id/edit",
     methods: ["POST" as const],
-    middlewares: [requireUserActor, validateAndTransformBody(AdminPostOrderEdit)],
+    // adr/0061 Ek C15 (review L1): a restricted shop's edit sells nothing new
+    middlewares: [
+      requireUserActor,
+      validateAndTransformBody(AdminPostOrderEdit),
+      refuseSellingEdit,
+    ],
   },
   // Medusa's own address update: staff only, Turkish addresses checked, not once packed
   {

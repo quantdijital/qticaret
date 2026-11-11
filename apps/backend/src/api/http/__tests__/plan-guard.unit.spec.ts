@@ -2,7 +2,7 @@ import type { MedusaRequest } from "@medusajs/framework/http"
 import type { TenantStatus } from "@qticaret/types/control-plane"
 import { DEFAULT_PLAN_STATE } from "../../../modules/control-plane/types"
 import { forDashboard } from "../dashboard-messages"
-import { guardPlanStatus, refuseSuspendedCheckout } from "../plan-guard"
+import { guardPlanStatus, refuseSellingEdit, refuseSuspendedCheckout } from "../plan-guard"
 import { fakeResponse } from "./fakes"
 
 function request(
@@ -99,6 +99,37 @@ describe("guardPlanStatus", () => {
     expect(restricted.message).toMatch(/^Abonelik ödemesi geciktiği için.*Ayarlar > Abonelik/)
     const suspended = forDashboard(session, { message: "plan.restricted", status: "suspended" })
     expect(suspended.message).toMatch(/^Mağazanız platform tarafından askıya alındı/)
+  })
+})
+
+describe("refuseSellingEdit (review L1)", () => {
+  const edit = (
+    plan: { managed: boolean; status: TenantStatus },
+    body: Record<string, unknown>
+  ) => {
+    const req = request("POST", "/admin/orders/order_1/edit", plan)
+    ;(req as { validatedBody?: unknown }).validatedBody = { items: [], add: [], ...body }
+    return run(refuseSellingEdit, req)
+  }
+
+  it("refuses new lines or a difference owed while restricted or suspended", async () => {
+    for (const plan of [RESTRICTED, SUSPENDED]) {
+      for (const body of [
+        { add: [{ variant_id: "variant_1", quantity: 1 }], expected_difference: 0 },
+        { expected_difference: 30 },
+      ]) {
+        const answer = await edit(plan, body)
+        expect(answer.status).toBe(403)
+        expect(answer.body).toMatchObject({ message: "plan.restricted", status: plan.status })
+      }
+    }
+  })
+
+  it("lets corrections down through, and any edit of an open shop", async () => {
+    expect((await edit(RESTRICTED, { expected_difference: -20 })).passed).toBe(true)
+    expect((await edit(RESTRICTED, { expected_difference: 0 })).passed).toBe(true)
+    const open = { managed: true, status: "active" as const }
+    expect((await edit(open, { expected_difference: 30 })).passed).toBe(true)
   })
 })
 

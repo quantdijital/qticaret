@@ -64,13 +64,26 @@ export const RESERVED_PATHS: ReadonlySet<string> = new Set([
   "/blog/yazar",
 ])
 
+/**
+ * Root segments the crawlers' files start with (`/robots.txt`,
+ * `/sitemap.xml`, `/sitemap-urunler-1.xml`): no record's path at the root
+ * starts so, whatever follows (adr/0061 Ek C15 review L3). A page there
+ * would look like those files to a crawler and to the storefront's rules.
+ */
+export const RESERVED_ROOT_PREFIXES: readonly string[] = ["sitemap", "robots"]
+
 /** Whether `path` (`/arama`) is a path the storefront keeps for itself. */
 export function isReservedPath(path: string): boolean {
   if (RESERVED_PATHS.has(path)) {
     return true
   }
   const segments = path.split("/").slice(1)
-  return segments.length === 1 && RESERVED_ROOT_SEGMENTS.has(segments[0] ?? "")
+  const first = segments[0] ?? ""
+  return (
+    segments.length === 1 &&
+    (RESERVED_ROOT_SEGMENTS.has(first) ||
+      RESERVED_ROOT_PREFIXES.some((prefix) => first.startsWith(prefix)))
+  )
 }
 
 /**

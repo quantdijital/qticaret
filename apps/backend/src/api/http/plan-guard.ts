@@ -50,6 +50,35 @@ export async function guardPlanStatus(
   )
 }
 
+/**
+ * An order edit is open to a restricted or suspended shop (it corrects an
+ * existing order), but not one that sells: new lines (`add`) or a
+ * difference the shopper owes (`expected_difference > 0`) answer 403
+ * `plan.restricted` (review L1). Removals and lower prices stay open, so a
+ * refund still goes out. The workflow refuses an edit whose difference is
+ * not the expected one, so the expected sign is the edit's own.
+ */
+export async function refuseSellingEdit(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+): Promise<void> {
+  const mode = await planModeFor(req.scope)
+  const body = req.validatedBody as { add?: unknown[]; expected_difference?: number } | undefined
+  const sells = (body?.add?.length ?? 0) > 0 || (body?.expected_difference ?? 0) > 0
+  if (mode === "open" || !sells) {
+    next()
+    return
+  }
+  rejectRequest(
+    req,
+    res,
+    403,
+    { type: "not_allowed", message: PLAN_RESTRICTED_MESSAGE, status: shownStatusOf(mode) },
+    `plan_${mode}_edit_sells`
+  )
+}
+
 /** How long a suspended shop's checkout asks to wait: as the storefront's own page. */
 export const SUSPENDED_RETRY_AFTER_SECONDS = 3600
 

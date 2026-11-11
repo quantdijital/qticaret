@@ -29,6 +29,14 @@ describe("isReservedPath", () => {
     "/api",
     // A payment link's page, `/ode/<token>` (adr/0051)
     "/ode",
+    // The crawlers' files' names, whatever follows (adr/0061 Ek C15 review L3)
+    "/sitemap",
+    "/sitemap.xml",
+    "/sitemap-kampanya",
+    "/sitemaps",
+    "/robots",
+    "/robots.txt",
+    "/robots-ve-bicaklar",
   ])("keeps %s for the storefront", (path) => {
     expect(isReservedPath(path)).toBe(true)
   })
@@ -57,6 +65,11 @@ describe("isReservedPath", () => {
     "/api-anahtarligi",
     "/ode-sepeti",
     "/odeme-kolayligi",
+    // Only at the root: a deeper path or a word that merely contains it
+    "/blog/sitemap-nedir",
+    "/kategori/robotlar",
+    "/site-haritasi",
+    "/mini-robots",
   ])("leaves %s to records", (path) => {
     expect(isReservedPath(path)).toBe(false)
   })

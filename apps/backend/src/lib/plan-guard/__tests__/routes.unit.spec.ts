@@ -13,6 +13,11 @@ import { PLAN_OPEN, PLAN_OPEN_JOBS, decidePlanWrite } from ".."
 
 const OURS = join(__dirname, "../../../api/admin")
 const CORE = join(dirname(require.resolve("@medusajs/medusa/package.json")), "dist/api/admin")
+// The plugins medusa-config loads register their admin routes too (review L2)
+const LOYALTY = join(
+  dirname(require.resolve("@medusajs/loyalty-plugin/package.json")),
+  ".medusa/server/src/api/admin"
+)
 
 const OUR_HANDLER = /^export (?:async function|function|const|let) (POST|PUT|PATCH|DELETE)\b/gm
 const CORE_HANDLER = /exports\.(POST|PUT|PATCH|DELETE)\s*=/g
@@ -38,6 +43,7 @@ function routes(root: string, file: string, handler: RegExp): string[] {
 
 const ours = routes(OURS, "route.ts", OUR_HANDLER)
 const core = routes(CORE, "route.js", CORE_HANDLER)
+const loyalty = routes(LOYALTY, "route.js", CORE_HANDLER)
 
 // A sample in place of each parameter, lower-cased as Express routes it
 const sampleOf = (path: string) => path.replace(/:\w+/g, "x1")
@@ -52,17 +58,38 @@ describe("every admin write route has a plan decision", () => {
   it("finds the routes", () => {
     expect(ours.length).toBeGreaterThan(200)
     expect(core.length).toBeGreaterThan(250)
+    expect(loyalty.length).toBeGreaterThan(4)
   })
 
   it.each([
     ["ours", ours],
     ["Medusa's", core],
+    ["the loyalty plugin's", loyalty],
   ])("decides each of %s explicitly", (_, list) => {
     expect(list.filter((route) => decisionOf(route).reason === "unlisted")).toEqual([])
   })
 
+  it("opens a route only by its own line, never through a sibling's parameter", () => {
+    // `/admin/orders/:id` must not open a future `POST /admin/orders/bulk` (review L2)
+    const template = (path: string) => path.replace(/:\w+/g, ":")
+    const own = (route: string) => {
+      const [method = "", path = ""] = route.split(" ")
+      return PLAN_OPEN.some(
+        (rule) =>
+          (rule.methods === "*" || rule.methods.includes(method as never)) &&
+          template(rule.path) === template(path)
+      )
+    }
+    const opened = [...ours, ...core, ...loyalty].filter((route) => decisionOf(route).allowed)
+    expect(opened.length).toBeGreaterThan(50)
+    expect(opened.filter((route) => !own(route))).toEqual([])
+    // The matcher alone would open such a sibling; this test is what stops it landing
+    expect(decidePlanWrite("POST", "/admin/orders/bulk").allowed).toBe(true)
+    expect(own("POST /admin/orders/bulk")).toBe(false)
+  })
+
   it("opens only exact paths, each a route the app has", () => {
-    const known = new Set([...ours, ...core].map((route) => route.split(" ")[1]))
+    const known = new Set([...ours, ...core, ...loyalty].map((route) => route.split(" ")[1]))
     for (const rule of PLAN_OPEN) {
       expect(rule.path.endsWith("*")).toBe(false)
       expect(known.has(rule.path)).toBe(true)
@@ -116,6 +143,10 @@ describe("the plan guard's allow-list", () => {
     "POST /admin/staff/me/password",
     "DELETE /admin/staff/members/:id",
     "POST /admin/api-access/:id/revoke",
+    // Review M1: stopping what still goes out
+    "POST /admin/bulk-messages/:id/pause",
+    "POST /admin/bulk-messages/:id/cancel",
+    "DELETE /admin/google",
   ])("keeps %s open", (route) => {
     expect(decisionOf(route)).toEqual({ allowed: true, reason: "open" })
   })
@@ -150,6 +181,12 @@ describe("the plan guard's allow-list", () => {
     "POST /admin/customers/:id",
     "POST /admin/draft-orders",
     "POST /admin/returns",
+    // Review M1, L2: only the stop actions and the disconnect; the loyalty plugin closed
+    "POST /admin/bulk-messages/:id/resume",
+    "DELETE /admin/google/reviews",
+    "POST /admin/google/merchant/sync",
+    "POST /admin/gift-cards",
+    "POST /admin/store-credit-accounts/:id/credit",
   ])("closes %s", (route) => {
     expect(decisionOf(route)).toEqual({ allowed: false, reason: "closed" })
   })

@@ -72,7 +72,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   const jsonLd = url
     ? siteJsonLd({ name: shop.name, url, logo: appearance.logo_light_url }, identityOf(identity))
     : []
-  res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=3600")
+  // Never kept on the way (adr/0061 Ek C15 review I1): maintenance and a suspension must
+  // reach the storefront, which asks at most once a minute per process and is told at
+  // once by the refresh signal; a shared cache could hold either for hours
+  res.setHeader("Cache-Control", "no-store")
   res.vary("x-publishable-api-key")
   res.json({
     canonical_host: shop.canonicalHost,

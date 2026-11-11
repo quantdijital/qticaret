@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { errorSummary, logger } from "../lib/logging"
+import { planModeFor } from "../lib/plan-guard"
 import { PLATFORM_SETTINGS_MODULE } from "../modules/platform-settings"
 import type PlatformSettingsModuleService from "../modules/platform-settings/service"
 import type { MarketingSettings } from "../modules/platform-settings/sections"
@@ -18,6 +19,10 @@ const BATCH = 100
  * failure leaves the others to go.
  */
 export default async function cartReminders(container: MedusaContainer) {
+  // adr/0061 Ek C15 (review M1): a suspended shop's storefront answers 503; no link to it
+  if ((await planModeFor(container)) === "suspended") {
+    return
+  }
   const settings = (await container
     .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
     .getSection("marketing")) as unknown as MarketingSettings

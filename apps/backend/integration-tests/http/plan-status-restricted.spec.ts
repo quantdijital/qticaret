@@ -7,6 +7,7 @@ import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { productBody, setPlanStatus } from "../helpers/plan-limits"
 import { sellingShop } from "../helpers/plan-status"
+import { firstLineOf } from "../helpers/stock"
 import type { Answer, SellingShop } from "../helpers/plan-status"
 
 jest.setTimeout(240 * 1000)
@@ -114,6 +115,47 @@ medusaIntegrationTestRunner({
       expect(me.data).toMatchObject({ role: "operations", plan: { status: "restricted" } })
       // An order route stays the order's: open to the plan, answered by the order itself
       expect(refused.data.message).not.toBe("plan.restricted")
+    })
+
+    it("keeps the stop actions open: a bulk message paused or cancelled, Google disconnected (M1)", async () => {
+      const stops = [
+        await post("/admin/bulk-messages/bm_none/pause"),
+        await post("/admin/bulk-messages/bm_none/cancel"),
+        await settle(http.delete<Answer>("/admin/google", headers())),
+      ]
+      const resumed = await post("/admin/bulk-messages/bm_none/resume")
+
+      // Each answered by its own route (none here, or not connected), never by the plan
+      for (const answer of stops) {
+        expect(answer.data.message).not.toBe("plan.restricted")
+      }
+      expect(resumed.data).toMatchObject({ message: "plan.restricted" })
+    })
+
+    it("corrects an order down but sells nothing new through an edit (review L1)", async () => {
+      const placed = await selling.checkout()
+      const orderId = placed.data.order?.id ?? ""
+      await post(`/admin/orders/${orderId}/bank-transfer/confirm`)
+      const line = await firstLineOf(getContainer(), orderId)
+      const edit = (change: Record<string, unknown>, difference: number) =>
+        post(`/admin/orders/${orderId}/edit`, {
+          items: [],
+          ...change,
+          expected_difference: difference,
+          difference_collected: difference > 0,
+          reference: randomUUID().replace(/-/g, ""),
+        })
+
+      const added = await edit({ add: [{ variant_id: selling.variantId, quantity: 1 }] }, 120)
+      const raised = await edit({ items: [{ id: line, quantity: 1, unit_price: 150 }] }, 30)
+      const lowered = await edit({ items: [{ id: line, quantity: 1, unit_price: 100 }] }, -20)
+
+      for (const answer of [added, raised]) {
+        expect(answer.status).toBe(403)
+        expect(answer.data).toMatchObject({ message: "plan.restricted", status: "restricted" })
+      }
+      // Past the plan: the order answers itself (a bank transfer's money goes back by hand)
+      expect(lowered.data).toMatchObject({ message: "orders.edit_payment_unsupported" })
     })
   },
 })

@@ -76,7 +76,12 @@ export const PLAN_OPEN: readonly Rule[] = [
     "/admin/reports/statements",
     // A payment link stopped (making, sending or extending one sells anew)
     "/admin/payment-links/:id/cancel",
+    // A bulk message stopped (review M1): pausing or cancelling only ends sending
+    "/admin/bulk-messages/:id/pause",
+    "/admin/bulk-messages/:id/cancel",
   ]),
+  // The shop's Google account disconnected (review M1): its products stop going out
+  { methods: DELETE, path: "/admin/google" },
   { methods: DELETE, path: "/admin/payment-collections/:id" },
   // Returns (the shopper's legal right, adr/0032)
   ...open(POST, [
@@ -190,6 +195,10 @@ export const PLAN_CLOSED: readonly Rule[] = closed([
   "/admin/price-lists*",
   "/admin/price-preferences*",
   "/admin/translations*",
+  // The loyalty plugin's (review L2): a new gift card sells, store credit given by hand
+  // is money; an order's refund goes back through its own open route
+  "/admin/gift-cards*",
+  "/admin/store-credit-accounts*",
   // Campaigns and selling anew
   "/admin/promotions*",
   "/admin/campaigns*",

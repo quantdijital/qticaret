@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../lib/logging"
+import { planModeFor } from "../lib/plan-guard"
 import { dispatchCampaignsWorkflow } from "../workflows/campaigns/jobs"
 import { isLockBusy } from "../workflows/pricing/price-history"
 
@@ -12,6 +13,11 @@ import { isLockBusy } from "../workflows/pricing/price-history"
  */
 export default async function campaignDispatch(container: MedusaContainer) {
   try {
+    // adr/0061 Ek C15 (review M1): a restricted or suspended shop sends no bulk message.
+    // Its campaigns stay as they are and go on, from where they were, once it is open
+    if ((await planModeFor(container)) !== "open") {
+      return
+    }
     const result = await container
       .resolve(Modules.LOCKING)
       .execute(

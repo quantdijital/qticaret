@@ -67,6 +67,9 @@ medusaIntegrationTestRunner({
       expect(confirmed.status).toBe(200)
       expect(listed.status).toBe(200)
       expect(await site()).toMatchObject({ suspended: true })
+      // Review I1: never kept on the way, so the end of a suspension is not held back
+      const raw = await http.get("/store/seo/site", { headers: selling.storefront.headers })
+      expect(raw.headers["cache-control"]).toBe("no-store")
     })
 
     it("keeps provider hooks reachable, and the control plane's next document lifts it", async () => {
