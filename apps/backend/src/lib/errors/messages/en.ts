@@ -1296,4 +1296,6 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Not added: your package's product limit is reached. Upload the file again once the limit allows more.",
   "migration.product_plan_limit":
     "Not moved: your package's product limit is reached. Run the move again once the limit allows more.",
+  "migration.image_plan_limit":
+    "Picture not taken: your package's storage limit is reached. The product moved without it; run the move again once there is room.",
 }

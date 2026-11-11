@@ -1,6 +1,6 @@
 import { StepResponse } from "@medusajs/framework/workflows-sdk"
 import { createProductsWorkflow } from "@medusajs/medusa/core-flows"
-import { assertProductsWithinLimit } from "../../lib/plan-limits"
+import { assertProductsWithinLimit, forgetUsage } from "../../lib/plan-limits"
 import { claimProductPaths, unclaimPaths } from "../catalog/entity-paths"
 import { planCreatedVariantImages, tieImages, untieImages } from "../catalog/variant-image-ties"
 import { addBackorderLevels, removeBackorderLevels } from "../stock/backorder-levels"
@@ -31,6 +31,8 @@ createProductsWorkflow.hooks.productsCreated(
       await unclaimPaths(container, claims)
       throw failure
     }
+    // The panel's count of products is read again, now the write stands (review L3)
+    forgetUsage("products")
     return new StepResponse(undefined, { claims, levels, ties })
   },
   async (undo, { container }) => {

@@ -71,7 +71,7 @@ medusaIntegrationTestRunner({
       })
     })
 
-    it("refuses images past the storage limit by the size they bring, never a sheet", async () => {
+    it("refuses images past the storage limit by the size they bring, and every sheet", async () => {
       const upload = async (file: Buffer, type: string, name: string) => {
         const form = new FormData()
         form.append("files", new Blob([new Uint8Array(file)], { type }), name)
@@ -101,7 +101,9 @@ medusaIntegrationTestRunner({
         limit: "storage_mb",
         max: 2,
       })
-      expect(sheet.status).toBe(200)
+      // Review M4: images only; a sheet is the catalog import's own upload
+      expect(sheet.status).toBe(400)
+      expect(sheet.data.message).toBe("upload.unsupported_type")
       expect(fetched.status).toBe(403)
     })
 

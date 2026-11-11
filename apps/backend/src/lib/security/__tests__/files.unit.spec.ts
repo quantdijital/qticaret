@@ -76,7 +76,6 @@ describe("storedName", () => {
     ["an HTML name on PNG bytes", "logo.html", png, "logo.png"],
     ["a Turkish name with a path", "../../Şef Bıçağı.JPG", png, "sef-bicagi.png"],
     ["a name with no letters left", "%%%.png", png, "file.png"],
-    ["a CSV", "Ürünler.csv", { type: "csv" } as const, "urunler.csv"],
   ])("stores %s by what its bytes are", (_label, name, accepted, expected) => {
     expect(storedName(name, accepted)).toBe(expected)
   })
@@ -120,15 +119,11 @@ describe("validateUpload", () => {
     expect(reasonOf(upload(buffer, name))).toBe(reason)
   })
 
-  it("accepts a plain UTF-8 CSV for Medusa's product import", () => {
+  // adr/0061 Ek C14 review M4: uploads are images only; the sheet import reads its own body
+  it("refuses a plain UTF-8 CSV too", () => {
     expect(
-      validateUpload({
-        buffer: Buffer.from("Product Handle,Title\nsef-bicagi,Şef Bıçağı\n"),
-        originalname: "urunler.csv",
-      })
-    ).toEqual({
-      type: "csv",
-    })
+      reasonOf(upload(Buffer.from("Product Handle,Title\nsef-bicagi,Şef Bıçağı\n"), "urunler.csv"))
+    ).toBe("upload.unsupported_type")
   })
 })
 

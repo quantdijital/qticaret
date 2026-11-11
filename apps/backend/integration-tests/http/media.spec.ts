@@ -230,14 +230,12 @@ medusaIntegrationTestRunner({
       expect(unknown.status).toBe(404)
       expect(unknown.data.message).toBe("media.file_unknown")
 
+      // adr/0061 Ek C14 review M4: a CSV is not even stored any more (images only)
       const form = new FormData()
       form.append("files", new Blob(["sku;ad\n1;Kupa\n"], { type: "text/csv" }), "urunler.csv")
-      const { data } = await http.post<{ files: { id: string }[] }>("/admin/uploads", form, admin)
-      const csv = await post<{ message: string }>("/admin/media", {
-        file_ids: [data.files[0]?.id],
-      })
+      const csv = await post<{ message: string }>("/admin/uploads", form)
       expect(csv.status).toBe(400)
-      expect(csv.data.message).toBe("media.not_an_image")
+      expect(csv.data.message).toBe("upload.unsupported_type")
 
       // A key that would leave the storage folder is not even looked up
       const escape = await post<{ message: string }>("/admin/media", {

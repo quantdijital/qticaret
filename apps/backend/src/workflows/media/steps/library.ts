@@ -2,6 +2,7 @@ import { MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { ConflictError, RetryableError } from "../../../lib/errors"
 import { prepareImage } from "../../../lib/media"
+import { assertStorageFits } from "../../../lib/plan-limits"
 import { MEDIA_MODULE } from "../../../modules/media"
 import type MediaModuleService from "../../../modules/media/service"
 import { removeFiles, storePublicFile } from "../files"
@@ -18,6 +19,8 @@ export const storeImportedImageStep = createStep(
   async (input: { url: string }, { container }) => {
     const bytes = await mediaImportFetch.get(input.url)
     const image = await prepareImage(bytes, nameFromAddress(input.url), "url")
+    // adr/0061 Ek C14 review L1: the fetched size within the package's storage, before it is kept
+    await assertStorageFits(container, image.buffer.length)
     const file = await storePublicFile(container, image.filename, image.mimeType, image.buffer)
     return new StepResponse(file.id, file.id)
   },

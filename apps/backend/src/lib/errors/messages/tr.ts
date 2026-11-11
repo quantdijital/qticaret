@@ -1289,4 +1289,6 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Eklenmedi: paketinizin ürün limiti doldu. Limit yükselince dosyayı yeniden yükleyin.",
   "migration.product_plan_limit":
     "Taşınmadı: paketinizin ürün limiti doldu. Limit yükselince taşımayı yeniden çalıştırın.",
+  "migration.image_plan_limit":
+    "Görsel alınmadı: paketinizin depolama limiti doldu. Ürün görselsiz taşındı; yer açınca taşımayı yeniden çalıştırın.",
 }

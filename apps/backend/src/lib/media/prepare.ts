@@ -32,9 +32,6 @@ export async function prepareImage(
     }
     throw error
   }
-  if (type.type === "csv") {
-    throw new ValidationError("media.not_an_image", { field })
-  }
   let clean
   try {
     clean = await sanitizeImage(bytes, type.type)

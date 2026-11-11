@@ -28,15 +28,20 @@ export interface UploadFile {
   originalname: string
 }
 
-export type AcceptedUpload = ImageInfo | { type: "csv" }
+/**
+ * Only images (adr/0061 Ek C14 review M4): nothing uploads a CSV here any
+ * more (Medusa's product import is closed; the sheet import reads its own
+ * body), and a stored file that is no media record would never be counted
+ * against the package's storage or swept.
+ */
+export type AcceptedUpload = ImageInfo
 
 /** Extension and MIME type each accepted type is stored and served with. */
-export const UPLOAD_MEDIA_TYPES: Record<ImageType | "csv", { extension: string; mime: string }> = {
+export const UPLOAD_MEDIA_TYPES: Record<ImageType, { extension: string; mime: string }> = {
   jpeg: { extension: "jpg", mime: "image/jpeg" },
   png: { extension: "png", mime: "image/png" },
   webp: { extension: "webp", mime: "image/webp" },
   avif: { extension: "avif", mime: "image/avif" },
-  csv: { extension: "csv", mime: "text/csv" },
 }
 
 /**
@@ -50,27 +55,6 @@ export function storedName(originalName: string, accepted: AcceptedUpload): stri
   return `${toSlug(base, 80) || "file"}.${UPLOAD_MEDIA_TYPES[accepted.type].extension}`
 }
 
-// Product import (Medusa's CSV) still goes through /admin/uploads with the
-// local file provider; F3.9 replaces this with its own checked import path
-const CSV_NAME = /\.csv$/i
-const CSV_SAMPLE_BYTES = 8192
-
-function isPlainCsv(file: UploadFile): boolean {
-  if (!CSV_NAME.test(file.originalname)) {
-    return false
-  }
-  const sample = file.buffer.subarray(0, CSV_SAMPLE_BYTES)
-  if (sample.includes(0)) {
-    return false
-  }
-  try {
-    new TextDecoder("utf-8", { fatal: true }).decode(file.buffer)
-    return true
-  } catch {
-    return false
-  }
-}
-
 /** The accepted type, or a `ValidationError` with an `upload.*` key. */
 export function validateUpload(
   file: UploadFile,
@@ -81,9 +65,6 @@ export function validateUpload(
   }
   const image = readImageInfo(file.buffer)
   if (image === null) {
-    if (isPlainCsv(file)) {
-      return { type: "csv" }
-    }
     throw new ValidationError("upload.unsupported_type", { field: "files" })
   }
   if (

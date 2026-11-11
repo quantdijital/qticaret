@@ -7,10 +7,13 @@ import {
   MedusaService,
   generateEntityId,
 } from "@medusajs/framework/utils"
+import { usagePeriodOf } from "@qticaret/types/control-plane"
 import { ContentDraft } from "./models/content-draft"
 import { DraftUsage } from "./models/draft-usage"
 
-const monthOf = (now: Date) => now.toISOString().slice(0, 7)
+// The month in Turkey, the usage report's and the plan's (adr/0061 Ek C14 review L2):
+// a draft asked at 01:00 on the 1st counts in the new month, as the panel shows it
+const monthOf = (now: Date) => usagePeriodOf(now)
 
 /** Content drafts and the month's use of them (F10.13, adr/0005). */
 class ContentDraftsModuleService extends MedusaService({ ContentDraft, DraftUsage }) {

@@ -67,9 +67,6 @@ export async function uploadValidator(
   }
   // Images are stored cleaned: upright, without EXIF/GPS and other metadata (F3.3)
   for (const { file, type } of accepted) {
-    if (type.type === "csv") {
-      continue
-    }
     try {
       const clean = await sanitizeImage(file.buffer, type.type)
       file.buffer = clean.buffer

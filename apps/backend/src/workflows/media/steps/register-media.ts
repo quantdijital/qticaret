@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { errorSummary, logger } from "../../../lib/logging"
+import { assertStorageWithinLimit, forgetUsage } from "../../../lib/plan-limits"
 import { displayName, readImage } from "../../../lib/media"
 import { UPLOAD_MEDIA_TYPES, readImageInfo } from "../../../lib/security/upload"
 import { MEDIA_MODULE } from "../../../modules/media"
@@ -73,6 +74,8 @@ export const registerMediaStep = createStep(
     const media = container.resolve<MediaModuleService>(MEDIA_MODULE)
     const assets: MediaAssetRecord[] = []
     const undo: Undo = { created: [], kept: [] }
+    // The new records' bytes: what this registration adds to the library's storage
+    let added = 0
     for (const fileId of input.file_ids) {
       const url = await publicUploadUrl(container, fileId)
       if (!url) {
@@ -88,25 +91,41 @@ export const registerMediaStep = createStep(
         }
         continue
       }
+      const described = await describe(container, fileId)
       const asset = await media.createMediaAssets({
         file_id: fileId,
         url,
-        ...(await describe(container, fileId)),
+        ...described,
         uploaded_by: input.uploaded_by ?? null,
         in_library: input.library ?? false,
       })
       assets.push(asset)
       undo.created.push(asset.id)
+      added += described.size
+    }
+    // adr/0061 Ek C14 review H1: counted again with the new records in; past the
+    // package's storage limit they are undone here (a step that throws is not compensated)
+    try {
+      await assertStorageWithinLimit(container, added)
+    } catch (error) {
+      await undoRegistration(media, undo)
+      throw error
+    }
+    if (added > 0) {
+      forgetUsage("storage_mb")
     }
     return new StepResponse(assets, undo)
   },
   async (undo, { container }) => {
-    const media = container.resolve<MediaModuleService>(MEDIA_MODULE)
-    if (undo?.kept.length) {
-      await media.updateMediaAssets(undo.kept.map((id) => ({ id, in_library: false })))
-    }
-    if (undo?.created.length) {
-      await media.deleteMediaAssets(undo.created)
-    }
+    await undoRegistration(container.resolve<MediaModuleService>(MEDIA_MODULE), undo)
   }
 )
+
+async function undoRegistration(media: MediaModuleService, undo: Undo | undefined): Promise<void> {
+  if (undo?.kept.length) {
+    await media.updateMediaAssets(undo.kept.map((id) => ({ id, in_library: false })))
+  }
+  if (undo?.created.length) {
+    await media.deleteMediaAssets(undo.created)
+  }
+}

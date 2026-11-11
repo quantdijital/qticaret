@@ -10,7 +10,7 @@ import {
 import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
 import { acceptInviteWorkflow, createInvitesWorkflow } from "@medusajs/medusa/core-flows"
 import { ValidationError } from "../../lib/errors"
-import { assertStaffSeat, forgetUsage } from "../../lib/plan-limits"
+import { assertStaffSeat, assertStaffWithinLimit, forgetUsage } from "../../lib/plan-limits"
 import { INVITABLE_ROLES } from "../../lib/staff"
 import type { InvitableRole } from "../../lib/staff"
 import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
@@ -72,9 +72,23 @@ export async function inviteOfToken(
  */
 const staffSeatStep = createStep("staff-invite-seat", async (_: undefined, { container }) => {
   await assertStaffSeat(container)
-  forgetUsage("staff")
   return new StepResponse(undefined)
 })
+
+/**
+ * After the invitation is written (review M2): members and open invitations
+ * counted again, so two invitations sent together cannot both take the last
+ * seat. Past the limit it throws and the invitation's own compensation
+ * removes it; the e-mail goes only once the workflow succeeded (the route).
+ */
+const staffSeatRecountStep = createStep(
+  "staff-invite-seat-recount",
+  async (_: undefined, { container }) => {
+    await assertStaffWithinLimit(container)
+    forgetUsage("staff")
+    return new StepResponse(undefined)
+  }
+)
 
 /**
  * An invitation to the panel with the role it gives (F12.6, adr/0040 §4):
@@ -91,6 +105,7 @@ export const inviteStaffWorkflow = createWorkflow(
         ],
       })),
     })
+    staffSeatRecountStep()
     return new WorkflowResponse(invites)
   }
 )

@@ -1,7 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { updateProductsWorkflow } from "@medusajs/medusa/core-flows"
-import { isValidationError } from "../../lib/errors"
+import { isPlanLimitError, isValidationError } from "../../lib/errors"
+import { assertStorageFits } from "../../lib/plan-limits"
 import { sanitizeImage, suggestedAlts } from "../../lib/media"
 import { fakeOrigin } from "../../lib/migration/fetch"
 import type { SourceProduct, StepProblem, StepProgress } from "../../lib/migration/types"
@@ -15,7 +16,7 @@ import {
 import { MIGRATION_MODULE } from "../../modules/migration"
 import type MigrationModuleService from "../../modules/migration/service"
 import type { RememberedItem } from "../../modules/migration/service"
-import { storePublicFile } from "../media/files"
+import { removeFiles, storePublicFile } from "../media/files"
 import { registerMediaWorkflow, setProductAltsWorkflow } from "../media/workflows"
 import { tieVariantImages } from "./variant-images"
 
@@ -127,29 +128,47 @@ export async function storeImage(
     }
     throw error
   }
-  if (type.type === "csv") {
-    throw new ImageRefused("migration.image_not_accepted")
-  }
   let clean
   try {
     clean = await sanitizeImage(bytes, type.type)
   } catch {
     throw new ImageRefused("migration.image_not_accepted")
   }
+  // adr/0061 Ek C14 review M3: within the package's storage, or the picture is
+  // named in the report and its product moves without it
+  await withinStorage(() => assertStorageFits(container, clean.buffer.length))
   const file = await storePublicFile(
     container as MedusaContainer,
     storedName(name, type),
     UPLOAD_MEDIA_TYPES[type.type].mime,
     clean.buffer
   )
-  const { result } = await registerMediaWorkflow(container as MedusaContainer).run({
-    input: { file_ids: [file.id], versions },
-  })
+  const { result } = await withinStorage(
+    () =>
+      registerMediaWorkflow(container as MedusaContainer).run({
+        input: { file_ids: [file.id], versions },
+      }),
+    // Another write took the last megabytes meanwhile: the stored file goes again
+    () => removeFiles(container as MedusaContainer, [file.id])
+  )
   const asset = result[0]
   if (!asset) {
     throw new ImageRefused("migration.image_not_accepted")
   }
   return asset
+}
+
+/** A plan storage refusal as the picture's own (`migration.image_plan_limit`). */
+async function withinStorage<T>(work: () => Promise<T>, undo?: () => Promise<unknown>): Promise<T> {
+  try {
+    return await work()
+  } catch (error) {
+    if (!isPlanLimitError(error)) {
+      throw error
+    }
+    await undo?.()
+    throw new ImageRefused("migration.image_plan_limit")
+  }
 }
 
 type Outcome =

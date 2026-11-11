@@ -4,7 +4,9 @@ import { isPlanLimitError } from "../../errors"
 import {
   assertProductsWithinLimit,
   assertStaffSeat,
+  assertStaffWithinLimit,
   assertStorageFits,
+  assertStorageWithinLimit,
   blockingLimit,
   draftQuotaOf,
   productAllowance,
@@ -141,5 +143,26 @@ describe("plan limits (adr/0061 Ek C14)", () => {
       plan: null,
     })
     expect(await draftQuotaOf(shop(true, {}), 200)).toEqual({ quota: 200, plan: null })
+  })
+
+  // Review H1, M2: counted again after the write, the new ones in
+  it("refuses after the write only what took the count past the limit", async () => {
+    expect(
+      await refusal(assertStaffWithinLimit(shop(true, { staff: 3 }, { users: 2, invites: 1 })))
+    ).toBeNull()
+    expect(
+      await refusal(assertStaffWithinLimit(shop(true, { staff: 3 }, { users: 2, invites: 2 })))
+    ).toEqual({ limit: "staff", used: 3, max: 3 })
+    const library = shop(true, { storage_mb: 2 }, { bytes: 2 * MB + 10 })
+    expect(await refusal(assertStorageWithinLimit(library, 20))).toEqual({
+      limit: "storage_mb",
+      used: 2,
+      max: 2,
+    })
+    // Nothing new written (a record found again): nothing to refuse
+    expect(await refusal(assertStorageWithinLimit(library, 0))).toBeNull()
+    expect(
+      await refusal(assertStorageWithinLimit(shop(true, { storage_mb: 2 }, { bytes: 2 * MB }), 5))
+    ).toBeNull()
   })
 })

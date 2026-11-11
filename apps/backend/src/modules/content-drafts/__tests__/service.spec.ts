@@ -19,9 +19,10 @@ moduleIntegrationTestRunner<ContentDraftsModuleService>({
       expect(await service.usedThisMonth(march)).toBe(3)
     })
 
+    // The month in Turkey (UTC+3), as the usage report and the plan count it (adr/0061 Ek C14 L2)
     it("starts each month afresh", async () => {
-      const april = new Date("2026-04-30T23:00:00Z")
-      const may = new Date("2026-05-01T00:30:00Z")
+      const april = new Date("2026-04-30T20:00:00Z") // 23:00 on 30 April in Turkey
+      const may = new Date("2026-04-30T21:30:00Z") // 00:30 on 1 May in Turkey
 
       expect(await service.claimQuota(1, april)).toBe(true)
       expect(await service.claimQuota(1, april)).toBe(false)

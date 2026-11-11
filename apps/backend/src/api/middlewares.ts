@@ -96,7 +96,7 @@ import { PROMOTION_ROUTES } from "./http/promotion-routes"
 import { SEO_ROUTES } from "./http/seo-routes"
 import { STOCK_ROUTES } from "./http/stock-routes"
 import { uploadValidator } from "./http/upload-validator"
-import { guardUploadStorage } from "./http/plan-limit-guards"
+import { guardUploadStorage, registerUploads } from "./http/plan-limit-guards"
 import { PLAN_ROUTES } from "./http/plan-routes"
 import { StorePostPrivacyRequest } from "./store/customers/me/privacy-requests/validators"
 import { StorePostBillingProfile } from "./store/customers/me/billing-profile/validators"
@@ -410,11 +410,12 @@ export default defineMiddlewares({
       middlewares: [closePresignedUploads],
     },
     // F2.9b: uploaded files checked by their bytes, after Medusa's multer
-    // adr/0061 Ek C14: the package's storage limit, by the cleaned images' size
+    // adr/0061 Ek C14: the package's storage limit, by the cleaned images' size; each
+    // stored image a media record at once, so it counts and the nightly sweep sees it
     {
       matcher: "/admin/uploads",
       methods: ["POST"],
-      middlewares: [uploadValidator, guardUploadStorage],
+      middlewares: [uploadValidator, guardUploadStorage, registerUploads],
     },
     {
       matcher: "/store/tr-address/provinces",

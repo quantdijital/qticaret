@@ -60,7 +60,8 @@ describe("an image brought in from an address (docs/04, F3.3)", () => {
     })
     await expect(
       refusal(prepareImage(Buffer.from("a,b\n1,2\n"), "list.csv", "url"))
-    ).resolves.toEqual({ key: "media.not_an_image", field: "url" })
+      // adr/0061 Ek C14 review M4: a CSV is no accepted upload at all now
+    ).resolves.toEqual({ key: "upload.unsupported_type", field: "url" })
     const gif = Buffer.from("GIF89a\x01\x00\x01\x00\x00\x00\x00;", "latin1")
     await expect(refusal(prepareImage(gif, "a.gif", "url"))).resolves.toEqual({
       key: "upload.unsupported_type",

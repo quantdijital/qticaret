@@ -6,7 +6,7 @@ import type ControlPlaneModuleService from "../../modules/control-plane/service"
 import type { PlanState } from "../../modules/control-plane/service"
 import { megabytesOf, storedBytes } from "../control-plane/usage"
 import { PlanLimitError } from "../errors"
-import { countUsage, forgetUsage } from "./usage"
+import { countUsage } from "./usage"
 
 type Resolver = Pick<MedusaContainer, "resolve">
 
@@ -43,7 +43,6 @@ export async function assertProductsWithinLimit(
   created: number
 ): Promise<void> {
   const max = await blockingLimit(container, "products")
-  forgetUsage("products")
   if (max === null || created <= 0) {
     return
   }
@@ -73,6 +72,39 @@ export async function assertStaffSeat(container: Resolver, now = new Date()): Pr
   const { used } = await countUsage(container, "staff", now)
   if ((used ?? 0) + 1 > max) {
     throw new PlanLimitError("staff", used ?? 0, max)
+  }
+}
+
+/**
+ * After an invitation was written (review M2): members and open invitations
+ * counted again, so two invitations sent together cannot both take the last
+ * seat. Throws past the limit; the workflow's compensation removes it.
+ */
+export async function assertStaffWithinLimit(container: Resolver, now = new Date()): Promise<void> {
+  const max = await blockingLimit(container, "staff")
+  if (max === null) {
+    return
+  }
+  const { used } = await countUsage(container, "staff", now)
+  const seats = used ?? 0
+  if (seats > max) {
+    throw new PlanLimitError("staff", Math.max(0, seats - 1), max)
+  }
+}
+
+/**
+ * After media records were written (review H1): the library's stored
+ * masters counted again with the new ones in, so uploads made together
+ * cannot pass the limit between them. `added` is the new records' bytes.
+ */
+export async function assertStorageWithinLimit(container: Resolver, added: number): Promise<void> {
+  const max = await blockingLimit(container, "storage_mb")
+  if (max === null || added <= 0) {
+    return
+  }
+  const bytes = await storedBytes(container)
+  if (megabytesOf(bytes) > max) {
+    throw new PlanLimitError("storage_mb", megabytesOf(Math.max(0, bytes - added)), max)
   }
 }
 
