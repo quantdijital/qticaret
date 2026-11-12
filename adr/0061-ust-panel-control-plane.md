@@ -1310,3 +1310,30 @@ Faz sonu güvenlik incelemesi (üst panel, server-kit ve mağaza tarafı) kritik
 - **İmza anahtarı döndürme:** docs/08'deki sıra elle uygulanır. Mağazaların listesinin ve saklanan belgenin anahtarının güncellendiği henüz denetlenmiyor (C8 kalan risk 5). F16'nın dağıtım hattı "eski `kid`'li belgeyle kalan mağaza yok" kapısını ekler.
 - **Üst panelin saklama işi:** kapanış akışı (F16.11) ve danışman onaylı sürelerle (kvkk-envanter §5).
 - Önceki Ek'lerden aynen: `cp:tenant re-escrow` (C17), OpenBao Transit (§4), dalga/canary (F16.6), `FLEET_MAX` üstü sayfalı sayım (C18), destek erişimi (F16.10), mTLS ya da vekil sunucuda kimlik (§3.2).
+
+### Ek: C19 takip incelemesi düzeltmeleri (2026-11-12)
+
+C19'un 13 commit'ine yapılan salt okunur takip incelemesinin bulguları:
+
+- **LOW-1, panelin 5xx anahtarları:** üst panelin hata işleyicisi her 5xx'i sabit `unknown_error` gövdesiyle cevaplıyordu; `UNEXPECTED_STATE` (500) ile atılan `cp.tckn_unreadable`, `cp.mfa_start_failed`, `cp.invite_failed` panele ulaşmıyordu. Artık hatanın kendi iletisi `^(cp|provisioning)\.[a-z0-9_.]+$` kalıbında sabit bir anahtarsa (`keyMessage`, en çok 64 karakter) gövde `{ type: "unexpected_state", message: <anahtar> }` olur. Log satırı yalnız kod taşır; başka her 5xx sabit gövdeyle kalır. **Test:** `error-handler.unit.spec.ts` +8 (üç anahtar, düz `Error` ile `provisioning.*`, dört ret: başka önek, ileti içinde girdi, büyük harf, 64'ten uzun). `tenants-tckn.spec.ts` açılamayan TCKN'de `cp.tckn_unreadable` gövdesini doğrular.
+- **LOW-2, askıdaki mağazanın gevşemesi:** saklanan satır doğrulanamaz ve süreçte doğrulanmış durum yoksa, `restricted` ile satırın kendi durumunun (bilinen bir durumsa) katı olanı alınır. Sıra: `suspended`/`closing`/`closed` > `restricted` > `active`/`provisioning` (`plan-guard` `planModeOf` ile aynı). Sahte bir satır durumu yalnız daraltabilir. Bellekte doğrulanmış durum varken davranış aynıdır (o durum).
+- **LOW-3, silinen satır `active` sayılıyordu:** yeni `control_plane_marker` tablosu (model `ControlPlaneMarker`, migration `Migration20261112062254`) mağazanın en az bir doğrulanmış belge uyguladığını tutar.
+  - İşaret ilk `applied` ile aynı kilit ve işlem içinde yazılır. O ilk uygulama geri alınırsa (workflow telafisi, `StoreResult.marked`) işaret de silinir. Migration, satırı olan mağazalar için işareti geriye dönük yazar.
+  - Platform bayraklarının `serial` satırı yeniden kullanılmadı: başka bir modülde, ayrı bir adımda yazılıyor ve registry'de `owner: platform` bayrağı yoksa hiç yazılmıyor.
+  - Yönetilen kipte satır yoksa, başka mağazanın satırı da yoksa ve işaret varsa: `control_plane.document_missing` loglanır (yalnız kod) ve mağaza `restricted` olur. Süreç daha katı bir durumu doğrulamışsa o durum kullanılır. Geçerli bir itme ya da çekme düzeltir (satır yokken her serial `newer`). Hiç belge almamış mağaza eskisi gibi `active` kalır, çekme işinin bayat uyarısı sürer.
+- **INFO-1, aynı serial bozuk satırı onarmıyordu:** `same` sonucunda saklanan satır `storedRowProblem`'den geçmiyorsa, doğrulanmış gelen belgeyle yeniden yazılır (`StoreResult.repaired`) ve önbellek düşürülür. Vitrin yenilenir, çünkü güvenilmeyen satırın durumu farklı olabilir. Sağlam satırda davranış aynıdır: itmenin tekrarı hiçbir şey yeniden yüklemez.
+- **INFO-2:** docs/08'e, anahtar döndürme sırasının yanına plan belgesi sözleşmesi değişikliğinde dağıtım sırası eklendi:
+  - Ekleme: önce mağazalar, sonra üst panel.
+  - Kaldırma: önce üst panelin yeniden yayını, sonra mağazalar. Zorunlu anahtar önce isteğe bağlı yapılır.
+  - Sıra yanlışsa: yeniden yayına kadar `restricted`.
+
+  `provisioning.ts`'teki eskimiş yorum `RUN_STATUSES`'a göre düzeltildi (başlatma kısıtlı ve askıdaki mağazada da olur; davet ve paket yalnız kurulum ya da `active`'te).
+- **Kalan risk:** docs/04 "Üst panel güven sınırı" altına yazıldı:
+  - Veritabanına yazabilen biri satırla birlikte işareti de silerse mağaza bir sonraki çekmeye kadar `active` olur.
+  - Askıdaki mağazanın satırı silinirse yeni süreç belge gelene kadar `restricted` uygular.
+  - Veritabanında büyütülmüş bir `serial`, üst panel daha büyüğünü verene kadar `restricted` bırakır.
+- **Testler:**
+  - Backend birim: `trusted-state` 5 (+3). `control-plane|plan-guard` deseni 12 dosya, 121 test.
+  - Backend HTTP: `control-plane-trust` 7 (+4: LOW-2 askı korunur ve sahte gevşeme `restricted`; INFO-1 aynı serial onarır, sonraki tekrar yeniden yüklemez; LOW-3 SQL ile silinen satır `restricted` ve log, sonra çekme düzeltir; ilk belge öncesi `active` ve geri alınan ilk uygulama işareti siler).
+  - Etkilenen: `control-plane-plan`, `control-plane-pull`, `plan-status-restricted`, `plan-status-suspended`, `plan-billing`. 5 dosya, 21/21.
+  - Üst panel: `error-handler` birim 13/13, `tenants-tckn` 7/7, `error-logging` 2/2.
