@@ -88,6 +88,23 @@ export function TenantsPage() {
       },
     },
     {
+      // Ek C18: what it reports running; a badge when that is not its target
+      key: "version",
+      header: t("tenants.columns.version"),
+      className: "hidden xl:table-cell",
+      cell: (row) =>
+        row.version.reported ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="tabular-nums">{row.version.reported.version}</span>
+            {row.version.drift ? (
+              <StatusBadge tone="warning">{t("tenants.drift")}</StatusBadge>
+            ) : null}
+          </div>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+    },
+    {
       key: "package",
       header: t("tenants.columns.package"),
       cell: (row) =>

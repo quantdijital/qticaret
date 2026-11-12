@@ -2,6 +2,7 @@ import { keepPreviousData, queryOptions } from "@tanstack/react-query"
 import type { LimitKey, TenantStatus } from "@qticaret/types/control-plane"
 import type { HealthState } from "@/features/monitoring/api"
 import type { Plan } from "@/features/packages/api"
+import type { RowVersion, ShopVersion } from "@/features/releases/api"
 import { api } from "@/lib/api"
 
 /**
@@ -26,6 +27,8 @@ export interface TenantRow {
   next_payment_on: string | null
   /** Ek C13: each probed target's latest standing; null when never probed. */
   health: { backend: HealthState | null; storefront: HealthState | null }
+  /** Ek C18: what it reports running and whether that is its target. */
+  version: RowVersion
 }
 
 export interface TenantList {
@@ -158,6 +161,8 @@ export interface TenantDetail {
   features: EffectiveFlag[]
   feature_overrides: FeatureOverride[]
   plan_document?: PlanDocumentState
+  /** Ek C18: what it runs (its latest report), its target and whether they match. */
+  version: ShopVersion
 }
 
 export interface ActivityItem {

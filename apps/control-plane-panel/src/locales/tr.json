@@ -167,8 +167,43 @@
   "dashboard": {
     "title": "Gösterge",
     "text": "Platformun durumu bir bakışta.",
-    "summary": "Platform özeti",
-    "empty": "Mağazalar açıldıkça etkin mağaza, aylık gelir, geciken ödemeler ve sağlık durumu burada görünecek."
+    "tiles": {
+      "label": "Platform özeti",
+      "active": "Etkin mağaza",
+      "activeHint": "Toplam {{total}} · {{restricted}} kısıtlı · {{suspended}} askıda",
+      "mrr": "Aylık tekrarlayan gelir",
+      "mrrHint": "{{count}} ödeyen abonelik · {{trial}} denemede (+{{amount}})",
+      "overdue": "Geciken ödeme",
+      "overdueHint": "{{count}} kayıt",
+      "renewals": "Yaklaşan yenileme",
+      "renewalsHint": "{{days}} günde {{count}} ödeme",
+      "unhealthy": "Sağlıksız mağaza",
+      "unhealthyHint": "{{failing}} yanıt vermiyor · {{stale}} rapor göndermiyor"
+    },
+    "overdue": {
+      "title": "Geciken ödemeler",
+      "text": "Son günü geçmiş en eski beş kayıt.",
+      "all": "Tümünü gör",
+      "empty": "Geciken ödeme yok."
+    },
+    "renewals": {
+      "title": "Yaklaşan yenilemeler",
+      "text": "Önümüzdeki {{days}} gün, ilk beş ödeme.",
+      "all": "Tümünü gör",
+      "empty": "Önümüzdeki {{days}} günde yenileme yok.",
+      "projected": "Kaydı açılacak"
+    },
+    "attention": {
+      "title": "Dikkat isteyen mağazalar",
+      "text": "Sağlıksız olanlar ve {{hours}} saattir rapor göndermeyenler.",
+      "empty": "Sağlıksız ya da rapor göndermeyen mağaza yok.",
+      "unhealthy": "{{target}} · {{since}}",
+      "stale": "Son rapor {{since}}",
+      "drift_one": "{{count}} mağaza hedef sürümünde değil.",
+      "drift_other": "{{count}} mağaza hedef sürümünde değil.",
+      "driftLink": "Sürümlere git",
+      "staleBadge": "Rapor gelmiyor"
+    }
   },
   "account": {
     "title": "Hesabım",
@@ -337,7 +372,8 @@
       "package": "Paket",
       "nextPayment": "Sonraki ödeme",
       "created": "Açılış",
-      "health": "Sağlık"
+      "health": "Sağlık",
+      "version": "Sürüm"
     },
     "status": {
       "provisioning": "Kuruluyor",
@@ -364,7 +400,8 @@
       "company": "Fatura için firma bilgileri eksik: {{fields}}.",
       "billingContact": "Faturalama kişisi yok: ödeme hatırlatmaları gidecek kimse yok.",
       "package": "Paket atanmadı: mağazaya limit uygulanmıyor."
-    }
+    },
+    "drift": "Hedefte değil"
   },
   "summary": {
     "title": "Özet",
@@ -743,6 +780,10 @@
       "provisioning_busy": "Bu mağazada bir çalışma sürüyor; bitince yeniden deneyin.",
       "reason_required": "Gerekçe yazın.",
       "register_closed": "Hesap yalnızca geçerli bir davetle, davet edilen adresle açılır.",
+      "release_commit_invalid": "Commit 7–40 haneli onaltılık bir kimlik olmalı.",
+      "release_unknown": "Sürüm bulunamadı.",
+      "release_version_invalid": "Sürüm numarası 1.4.0 biçiminde olmalı.",
+      "release_version_taken": "Bu sürüm numarası zaten kayıtlı.",
       "reset_self": "Kendi doğrulamanızı Hesabım sayfasından yenileyin.",
       "run_unknown": "Çalışma bulunamadı.",
       "sector_pack_unknown": "Böyle bir sektör paketi yok.",
@@ -767,6 +808,7 @@
       "tckn_invalid": "TC kimlik no geçerli değil.",
       "tckn_none": "Kayıtlı TC kimlik no yok.",
       "tckn_unreadable": "TC kimlik no okunamadı. Platform sahibine bildirin.",
+      "tenant_closed": "Kapanan ya da kapatılmış bir mağazanın hedef sürümü değiştirilemez.",
       "tenant_unknown": "Mağaza bulunamadı.",
       "text_invalid": "Metinde kullanılamayan karakterler var.",
       "vkn_invalid": "Vergi kimlik no geçerli değil."
@@ -1452,5 +1494,64 @@
       "updated": "Son değişiklik {{at}}, {{by}}",
       "done": "Ödeme talimatı kaydedildi; mağazalara gönderiliyor."
     }
+  },
+  "releases": {
+    "title": "Sürümler",
+    "text": "Platformun bildiği sürümler ve onları çalıştıran mağazalar.",
+    "intent": "Hedef sürüm yalnızca niyeti kaydeder; mağazalar şimdilik kendiliğinden güncellenmez.",
+    "list": "Sürüm listesi",
+    "add": "Sürüm ekle",
+    "columns": {
+      "version": "Sürüm",
+      "commit": "Commit",
+      "notes": "Not",
+      "reported": "Çalıştıran",
+      "target": "Hedefleyen",
+      "created": "Eklenme"
+    },
+    "empty": "Henüz sürüm eklenmedi.",
+    "addText": "Sürüm numarası ve commit sonradan değişmez; yalnızca not düzenlenir.",
+    "version": "Sürüm numarası",
+    "versionHelp": "Örneğin 1.4.0 ya da 1.5.0-rc.1",
+    "versionInvalid": "Sürüm numarası 1.4.0 biçiminde olmalı.",
+    "commit": "Commit",
+    "commitHelp": "7–40 haneli commit kimliği",
+    "commitInvalid": "Commit 7–40 haneli onaltılık bir kimlik olmalı.",
+    "notes": "Not",
+    "notesHelp": "İsteğe bağlı, düz metin.",
+    "added": "Sürüm eklendi.",
+    "detailTitle": "Sürüm {{version}}",
+    "detailText": "Sürüm numarası ve commit geçmişte kalır; yalnızca not düzenlenir.",
+    "saved": "Not kaydedildi.",
+    "noNotes": "Not yok.",
+    "addedBy": "{{when}} · {{by}}",
+    "counts": "{{reported}} mağaza çalıştırıyor · {{target}} mağaza hedefliyor"
+  },
+  "version": {
+    "tab": "Sürüm",
+    "title": "Sürüm",
+    "text": "Mağazanın son raporunda bildirdiği sürüm ve hedef sürümü.",
+    "running": "Çalışan sürüm",
+    "lastReport": "Son rapor",
+    "target": "Hedef sürüm",
+    "setBy": "Belirleyen",
+    "reason": "Gerekçe",
+    "noReport": "Henüz rapor gelmedi",
+    "noTarget": "Hedef yok",
+    "line": "{{version}} · {{commit}}",
+    "state": {
+      "match": "Hedefte",
+      "drift": "Hedefte değil",
+      "unknown": "Karşılaştırılamıyor"
+    },
+    "change": "Hedef sürümü değiştir",
+    "dialogText": "Seçilen sürüm yalnızca hedef olarak kaydedilir; mağaza şimdilik kendiliğinden güncellenmez.",
+    "pick": "Hedef sürüm",
+    "none": "Hedef yok",
+    "noneText": "Mağazanın hedef sürümü olmaz.",
+    "reasonLabel": "Gerekçe",
+    "reasonHelp": "En az 3 karakter; kayıtta kalır.",
+    "saved": "Hedef sürüm kaydedildi.",
+    "noReleases": "Henüz sürüm yok: önce Sürümler sayfasından ekleyin."
   }
 }

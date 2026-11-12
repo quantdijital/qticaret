@@ -58,6 +58,11 @@ export const LIST: TenantList = {
       package: { id: PRO.id, code: PRO.code, name: PRO.name },
       next_payment_on: null,
       health: { backend: "healthy", storefront: "failing" },
+      version: {
+        reported: { version: "1.4.0", commit: "8a128bbe0c3d" },
+        target: { version: "1.5.0" },
+        drift: true,
+      },
     },
     {
       id: "ten_kahve",
@@ -70,6 +75,7 @@ export const LIST: TenantList = {
       package: null,
       next_payment_on: null,
       health: { backend: null, storefront: null },
+      version: { reported: null, target: null, drift: false },
     },
   ],
   count: 2,
@@ -170,4 +176,5 @@ export const SHOP: TenantDetail = {
     pulled_at: null,
     push_target: null,
   },
+  version: { reported: null, target: null, matches: null },
 }

@@ -20,6 +20,7 @@ import { Route as AppAuditLogRouteImport } from './routes/_app/audit-log'
 import { Route as AppKeysRouteImport } from './routes/_app/keys'
 import { Route as AppPackagesRouteImport } from './routes/_app/packages'
 import { Route as AppPaymentsRouteImport } from './routes/_app/payments'
+import { Route as AppReleasesRouteImport } from './routes/_app/releases'
 import { Route as AppStaffRouteImport } from './routes/_app/staff'
 import { Route as SecuritySetupRouteImport } from './routes/security/setup'
 import { Route as AppTenantsIndexRouteImport } from './routes/_app/tenants/index'
@@ -80,6 +81,11 @@ const AppPaymentsRoute = AppPaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => AppRoute,
 } as any)
+const AppReleasesRoute = AppReleasesRouteImport.update({
+  id: '/releases',
+  path: '/releases',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppStaffRoute = AppStaffRouteImport.update({
   id: '/staff',
   path: '/staff',
@@ -117,6 +123,7 @@ export interface FileRoutesByFullPath {
   '/keys': typeof AppKeysRoute
   '/packages': typeof AppPackagesRoute
   '/payments': typeof AppPaymentsRoute
+  '/releases': typeof AppReleasesRoute
   '/staff': typeof AppStaffRoute
   '/security/setup': typeof SecuritySetupRoute
   '/tenants/$id': typeof AppTenantsIdRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByTo {
   '/keys': typeof AppKeysRoute
   '/packages': typeof AppPackagesRoute
   '/payments': typeof AppPaymentsRoute
+  '/releases': typeof AppReleasesRoute
   '/staff': typeof AppStaffRoute
   '/security/setup': typeof SecuritySetupRoute
   '/': typeof AppIndexRoute
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/_app/keys': typeof AppKeysRoute
   '/_app/packages': typeof AppPackagesRoute
   '/_app/payments': typeof AppPaymentsRoute
+  '/_app/releases': typeof AppReleasesRoute
   '/_app/staff': typeof AppStaffRoute
   '/security/setup': typeof SecuritySetupRoute
   '/_app/': typeof AppIndexRoute
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/keys'
     | '/packages'
     | '/payments'
+    | '/releases'
     | '/staff'
     | '/security/setup'
     | '/tenants/$id'
@@ -188,6 +198,7 @@ export interface FileRouteTypes {
     | '/keys'
     | '/packages'
     | '/payments'
+    | '/releases'
     | '/staff'
     | '/security/setup'
     | '/'
@@ -206,6 +217,7 @@ export interface FileRouteTypes {
     | '/_app/keys'
     | '/_app/packages'
     | '/_app/payments'
+    | '/_app/releases'
     | '/_app/staff'
     | '/security/setup'
     | '/_app/'
@@ -302,6 +314,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPaymentsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/releases': {
+      id: '/_app/releases'
+      path: '/releases'
+      fullPath: '/releases'
+      preLoaderRoute: typeof AppReleasesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/staff': {
       id: '/_app/staff'
       path: '/staff'
@@ -346,6 +365,7 @@ interface AppRouteChildren {
   AppKeysRoute: typeof AppKeysRoute
   AppPackagesRoute: typeof AppPackagesRoute
   AppPaymentsRoute: typeof AppPaymentsRoute
+  AppReleasesRoute: typeof AppReleasesRoute
   AppStaffRoute: typeof AppStaffRoute
   AppIndexRoute: typeof AppIndexRoute
   AppTenantsIdRoute: typeof AppTenantsIdRoute
@@ -359,6 +379,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppKeysRoute: AppKeysRoute,
   AppPackagesRoute: AppPackagesRoute,
   AppPaymentsRoute: AppPaymentsRoute,
+  AppReleasesRoute: AppReleasesRoute,
   AppStaffRoute: AppStaffRoute,
   AppIndexRoute: AppIndexRoute,
   AppTenantsIdRoute: AppTenantsIdRoute,

@@ -167,8 +167,43 @@
   "dashboard": {
     "title": "Dashboard",
     "text": "The platform at a glance.",
-    "summary": "Platform summary",
-    "empty": "As shops open, active shops, monthly revenue, late payments and health will show here."
+    "tiles": {
+      "label": "Platform summary",
+      "active": "Active shops",
+      "activeHint": "{{total}} in all · {{restricted}} restricted · {{suspended}} suspended",
+      "mrr": "Monthly recurring revenue",
+      "mrrHint": "{{count}} paying subscriptions · {{trial}} on trial (+{{amount}})",
+      "overdue": "Overdue payments",
+      "overdueHint": "{{count}} charges",
+      "renewals": "Upcoming renewals",
+      "renewalsHint": "{{count}} payments in {{days}} days",
+      "unhealthy": "Unhealthy shops",
+      "unhealthyHint": "{{failing}} not answering · {{stale}} not reporting"
+    },
+    "overdue": {
+      "title": "Overdue payments",
+      "text": "The five oldest charges past their day.",
+      "all": "See all",
+      "empty": "No overdue payment."
+    },
+    "renewals": {
+      "title": "Upcoming renewals",
+      "text": "The next {{days}} days, first five payments.",
+      "all": "See all",
+      "empty": "No renewal in the next {{days}} days.",
+      "projected": "Charge opens later"
+    },
+    "attention": {
+      "title": "Shops needing attention",
+      "text": "Unhealthy ones and those silent for {{hours}} hours.",
+      "empty": "No unhealthy or silent shop.",
+      "unhealthy": "{{target}} · {{since}}",
+      "stale": "Last report {{since}}",
+      "drift_one": "{{count}} shop is not on its target release.",
+      "drift_other": "{{count}} shops are not on their target release.",
+      "driftLink": "Go to releases",
+      "staleBadge": "No report"
+    }
   },
   "account": {
     "title": "My account",
@@ -337,7 +372,8 @@
       "package": "Package",
       "nextPayment": "Next payment",
       "created": "Opened",
-      "health": "Health"
+      "health": "Health",
+      "version": "Release"
     },
     "status": {
       "provisioning": "Setting up",
@@ -364,7 +400,8 @@
       "company": "Company details missing for the invoice: {{fields}}.",
       "billingContact": "No billing contact: the payment reminders have nobody to go to.",
       "package": "No package: no limit applies to the shop."
-    }
+    },
+    "drift": "Not on target"
   },
   "summary": {
     "title": "Summary",
@@ -743,6 +780,10 @@
       "provisioning_busy": "A run is in progress for this shop; try again when it ends.",
       "reason_required": "Write a reason.",
       "register_closed": "An account is made only with a valid invitation, for the invited address.",
+      "release_commit_invalid": "The commit must be a hexadecimal id of 7–40 characters.",
+      "release_unknown": "Release not found.",
+      "release_version_invalid": "The version must look like 1.4.0.",
+      "release_version_taken": "This version is already recorded.",
       "reset_self": "Renew your own verification from My account.",
       "run_unknown": "Run not found.",
       "sector_pack_unknown": "There is no such sector pack.",
@@ -767,6 +808,7 @@
       "tckn_invalid": "The Turkish ID number is not valid.",
       "tckn_none": "No Turkish ID number is stored.",
       "tckn_unreadable": "The Turkish ID number could not be read. Tell the platform owner.",
+      "tenant_closed": "A closing or closed shop's target release cannot change.",
       "tenant_unknown": "Shop not found.",
       "text_invalid": "The text holds characters that cannot be used.",
       "vkn_invalid": "The tax number is not valid."
@@ -1452,5 +1494,64 @@
       "updated": "Last changed {{at}}, {{by}}",
       "done": "Payment instruction saved; it is on its way to the shops."
     }
+  },
+  "releases": {
+    "title": "Releases",
+    "text": "The releases the platform knows and the shops running them.",
+    "intent": "A target release records intent only; shops are not upgraded by it yet.",
+    "list": "Release list",
+    "add": "Add release",
+    "columns": {
+      "version": "Release",
+      "commit": "Commit",
+      "notes": "Note",
+      "reported": "Running",
+      "target": "Targeting",
+      "created": "Added"
+    },
+    "empty": "No release added yet.",
+    "addText": "The version and commit never change; only the note can be edited.",
+    "version": "Version",
+    "versionHelp": "For example 1.4.0 or 1.5.0-rc.1",
+    "versionInvalid": "The version must look like 1.4.0.",
+    "commit": "Commit",
+    "commitHelp": "A commit id of 7–40 characters",
+    "commitInvalid": "The commit must be a hexadecimal id of 7–40 characters.",
+    "notes": "Note",
+    "notesHelp": "Optional, plain text.",
+    "added": "Release added.",
+    "detailTitle": "Release {{version}}",
+    "detailText": "The version and commit are history; only the note can be edited.",
+    "saved": "Note saved.",
+    "noNotes": "No note.",
+    "addedBy": "{{when}} · {{by}}",
+    "counts": "{{reported}} shops running · {{target}} shops targeting"
+  },
+  "version": {
+    "tab": "Release",
+    "title": "Release",
+    "text": "The release the shop reported last and its target release.",
+    "running": "Running release",
+    "lastReport": "Last report",
+    "target": "Target release",
+    "setBy": "Set by",
+    "reason": "Reason",
+    "noReport": "No report yet",
+    "noTarget": "No target",
+    "line": "{{version}} · {{commit}}",
+    "state": {
+      "match": "On target",
+      "drift": "Not on target",
+      "unknown": "Cannot compare"
+    },
+    "change": "Change target release",
+    "dialogText": "The release chosen is recorded as the target only; the shop is not upgraded by it yet.",
+    "pick": "Target release",
+    "none": "No target",
+    "noneText": "The shop has no target release.",
+    "reasonLabel": "Reason",
+    "reasonHelp": "At least 3 characters; kept on the record.",
+    "saved": "Target release saved.",
+    "noReleases": "No release yet: add one on the Releases page first."
   }
 }
