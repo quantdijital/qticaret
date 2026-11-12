@@ -17,7 +17,10 @@ import { applySecurityHeaders, ensureRequestId, loggerOf, requestTarget } from "
  * Here:
  * - the status and body are Medusa's (`getHttpResponseFromError`), so the
  *   `cp.*` keys the panel reads stay as they are;
- * - every 5xx answers with the fixed body; a 4xx whose text Medusa built
+ * - every 5xx answers with the fixed body, except a stable `cp.*` /
+ *   `provisioning.*` key the route threw as its own message
+ *   (`UNEXPECTED_STATE`: `cp.tckn_unreadable`, `cp.mfa_start_failed`,
+ *   `cp.invite_failed`), which the panel maps; a 4xx whose text Medusa built
  *   from a database error (a duplicate quotes the row) becomes the generic
  *   `errors.invalid_request`; body-parser's errors (V8's text can quote the
  *   raw body) too;
@@ -34,6 +37,14 @@ interface Resolved {
 
 const GENERIC_MESSAGE = "errors.invalid_request"
 const TYPE = /^[a-z_]{1,40}$/
+// The 5xx keys the panel reads (adr/0061 Ek C19 takip LOW-1): fixed words a
+// route throws, never input
+const PANEL_KEY = /^(cp|provisioning)\.[a-z0-9_.]+$/
+
+function panelKey(error: unknown): string | null {
+  const key = keyMessage(error)
+  return key !== null && PANEL_KEY.test(key) ? key : null
+}
 
 // http-errors' shape, as body-parser throws it
 function clientHttpError(error: unknown): number | null {
@@ -72,6 +83,10 @@ export function resolveCpError(error: unknown): Resolved {
   const message = typeof body.message === "string" ? body.message : ""
   const dbError = classifyDbMessage(message)
   if (statusCode >= 500) {
+    const key = panelKey(error)
+    if (key !== null) {
+      return { status: statusCode, body: { type: "unexpected_state", message: key }, code: key }
+    }
     return { status: statusCode, body: { ...INTERNAL_ERROR_BODY }, code: codeOf(error, body.type) }
   }
   if (dbError !== null) {

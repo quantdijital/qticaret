@@ -57,6 +57,42 @@ describe("resolveCpError (adr/0061 Ek C19 M1)", () => {
     expect(JSON.stringify(resolved)).not.toContain(EMAIL)
   })
 
+  it.each(["cp.tckn_unreadable", "cp.mfa_start_failed", "cp.invite_failed"])(
+    "keeps the panel's 5xx key %s (Ek C19 takip LOW-1)",
+    (key) => {
+      const resolved = resolveCpError(new MedusaError(MedusaError.Types.UNEXPECTED_STATE, key))
+      expect(resolved).toEqual({
+        status: 500,
+        body: { type: "unexpected_state", message: key },
+        code: key,
+      })
+    }
+  )
+
+  it("keeps a provisioning key a plain error throws on a 5xx", () => {
+    expect(resolveCpError(new Error("provisioning.no_port"))).toEqual({
+      status: 500,
+      body: { type: "unexpected_state", message: "provisioning.no_port" },
+      code: "provisioning.no_port",
+    })
+  })
+
+  it.each([
+    "envelope.decrypt_failed",
+    `cp.contact ${EMAIL}`,
+    "cp.Upper_case",
+    `cp.${"x".repeat(80)}`,
+  ])("answers any other 5xx message %s with the fixed body", (message) => {
+    const resolved = resolveCpError(new MedusaError(MedusaError.Types.UNEXPECTED_STATE, message))
+    expect(resolved.status).toBe(500)
+    expect(resolved.body).toEqual({
+      code: "unknown_error",
+      type: "unknown_error",
+      message: "An unknown error occurred.",
+    })
+    expect(JSON.stringify(resolved)).not.toContain(EMAIL)
+  })
+
   it("answers body-parser's errors without their text", () => {
     const parse = Object.assign(new Error(`Unexpected token in JSON at "${EMAIL}"`), {
       status: 400,

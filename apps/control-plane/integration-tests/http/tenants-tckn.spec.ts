@@ -139,6 +139,11 @@ medusaIntegrationTestRunner({
         })
 
         expect(answer.status).toBe(500)
+        // The panel's key survives the fixed 5xx body (Ek C19 takip LOW-1)
+        expect(answer.data).toMatchObject({
+          type: "unexpected_state",
+          message: "cp.tckn_unreadable",
+        })
         expect(JSON.stringify(answer.data)).not.toContain(TEST_TCKN)
         expect(rows.map((row) => [row.kind, row.outcome])).toEqual([["sensitive_read", 500]])
       })
