@@ -1,13 +1,12 @@
-import { expect, pageHeading, platformBar, test } from "./support/guard"
+import { expect, pageHeading, test } from "./support/guard"
 import { SCREENS, SIGNED_OUT_SCREENS } from "./support/screens"
 
-/** Every screen opens, the "Üst panel" bar on it, with no error, script or server, and no raw key. */
+/** Every screen opens with no error, script or server, and no raw key. */
 test("opens every screen of the panel without an error", async ({ page, guard }) => {
   for (const path of SCREENS) {
     await test.step(path, async () => {
       await page.goto(path)
       await expect(pageHeading(page)).toBeVisible()
-      await expect(platformBar(page)).toBeVisible()
       await page.waitForLoadState("networkidle")
       await guard.assertHealthy()
     })
@@ -39,12 +38,11 @@ test("leads through the menu, every section open", async ({ page }, info) => {
 test.describe("signed out", () => {
   test.use({ storageState: { cookies: [], origins: [] } })
 
-  test("opens the pages before sign-in, the bar on each", async ({ page, guard }) => {
+  test("opens the pages before sign-in", async ({ page, guard }) => {
     for (const path of SIGNED_OUT_SCREENS) {
       await test.step(path, async () => {
         await page.goto(path)
         await expect(pageHeading(page)).toBeVisible()
-        await expect(platformBar(page)).toBeVisible()
         await page.waitForLoadState("networkidle")
         await guard.assertHealthy()
       })

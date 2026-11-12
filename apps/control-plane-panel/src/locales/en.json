@@ -4,11 +4,6 @@
     "product": "Quant Ticaret",
     "skipToContent": "Skip to content"
   },
-  "platformBar": {
-    "label": "Control plane: platform administration",
-    "title": "Control plane",
-    "text": "Quant Ticaret platform administration. Not a shop's panel."
-  },
   "auth": {
     "email": "Email",
     "password": "Password",

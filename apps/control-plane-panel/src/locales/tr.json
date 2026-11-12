@@ -4,11 +4,6 @@
     "product": "Quant Ticaret",
     "skipToContent": "İçeriğe geç"
   },
-  "platformBar": {
-    "label": "Üst panel: platform yönetimi",
-    "title": "Üst panel",
-    "text": "Quant Ticaret platform yönetimi. Mağaza paneli değildir."
-  },
   "auth": {
     "email": "E-posta",
     "password": "Şifre",

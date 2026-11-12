@@ -27,12 +27,6 @@ const ITEM_CLASS = cn(
   "data-[active=true]:before:opacity-100 group-data-[collapsible=icon]:before:hidden"
 )
 
-// Under the "Üst panel" bar, never over it (the bar's height is a token)
-const UNDER_THE_BAR = {
-  top: "var(--cp-bar-height)",
-  height: "calc(100svh - var(--cp-bar-height))",
-} as const
-
 function NavEntry({ item, active }: { item: NavItem; active: boolean }) {
   const { t } = useTranslation()
   const { setOpenMobile } = useSidebar()
@@ -77,7 +71,7 @@ export function AppSidebar() {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   const active = activeKey(pathname)
   return (
-    <Sidebar collapsible="icon" className="border-r-0" style={UNDER_THE_BAR}>
+    <Sidebar collapsible="icon" className="border-r-0">
       <SidebarHeader className="h-[var(--layout-topbar-height)] justify-center px-3">
         <div className="flex min-w-0 items-center gap-3">
           <span

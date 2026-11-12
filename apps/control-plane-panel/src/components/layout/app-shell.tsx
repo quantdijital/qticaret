@@ -2,7 +2,6 @@ import type { CSSProperties, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { SidebarInset, SidebarProvider } from "@qticaret/admin-ui/ui/sidebar"
 import { AppSidebar } from "./app-sidebar"
-import { PlatformBar } from "./platform-bar"
 import { StepUpHost } from "./step-up-host"
 import { Topbar } from "./topbar"
 
@@ -13,8 +12,7 @@ const SIDEBAR_STYLE = {
 } as CSSProperties
 
 /**
- * The "Üst panel" bar across the top, the menu under it on the left, the
- * top bar and the page beside it (docs/18 §2 "Yerleşim"). The menu is
+ * The menu on the left, the top bar and the page beside it (docs/18 §2 "Yerleşim"). The menu is
  * open by default; the toggle folds it to icons until the next visit.
  */
 export function AppShell({ children }: { children: ReactNode }) {
@@ -27,7 +25,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       >
         {t("app.skipToContent")}
       </a>
-      <PlatformBar />
       <SidebarProvider style={SIDEBAR_STYLE} className="min-h-0 flex-1">
         <AppSidebar />
         <SidebarInset className="min-w-0 bg-background">

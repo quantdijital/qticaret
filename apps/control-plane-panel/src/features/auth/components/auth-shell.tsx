@@ -3,7 +3,6 @@ import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { cn } from "@qticaret/admin-ui/lib/utils"
-import { PlatformBar } from "@/components/layout/platform-bar"
 
 // What the control plane is for, one line each (keys under `auth.intro`)
 const POINTS: { key: string; icon: LucideIcon }[] = [
@@ -93,7 +92,6 @@ export function AuthShell({
 }) {
   return (
     <div className="flex min-h-svh flex-col">
-      <PlatformBar />
       <div className="grid flex-1 grid-rows-[auto_1fr] lg:grid-cols-2 lg:grid-rows-1">
         <main className="flex items-start justify-center px-6 pt-10 pb-6 sm:items-center sm:px-10 sm:py-10 lg:px-12">
           <div className={cn("flex w-full flex-col gap-6", wide ? "max-w-lg" : "max-w-sm")}>

@@ -49,7 +49,3 @@ export { expect }
 
 /** The page's own heading. */
 export const pageHeading = (page: Page) => page.getByRole("heading", { level: 1 }).first()
-
-/** The permanent "Üst panel" bar, on every page. */
-export const platformBar = (page: Page) =>
-  page.getByRole("note", { name: "Üst panel: platform yönetimi" })

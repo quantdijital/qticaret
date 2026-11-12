@@ -68,7 +68,7 @@ function AccountMenu() {
 export function Topbar() {
   const { t } = useTranslation()
   return (
-    <header className="sticky top-[var(--cp-bar-height)] z-20 flex h-[var(--layout-topbar-height)] shrink-0 items-center gap-3 border-b bg-card px-4 lg:px-[var(--page-padding-wide)]">
+    <header className="sticky top-0 z-20 flex h-[var(--layout-topbar-height)] shrink-0 items-center gap-3 border-b bg-card px-4 lg:px-[var(--page-padding-wide)]">
       <SidebarTrigger
         aria-label={t("common.menu")}
         className="-ml-1 size-9 text-muted-foreground"
