@@ -79,7 +79,8 @@ export async function inviteOfToken(container: Container, token: string): Promis
 
 /** An invitation with the role it gives. `bootstrap` only from `cp:create-owner`. */
 export const inviteCpStaffWorkflow = createWorkflow(
-  "cp-staff-invite",
+  // The input holds the invited address (Ek C19 I1): never kept as an execution
+  { name: "cp-staff-invite", store: false },
   (
     input: WorkflowData<{
       email: string
