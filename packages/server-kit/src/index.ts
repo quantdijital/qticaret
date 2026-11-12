@@ -88,6 +88,7 @@ export { STEP_UP_TTL_MS, checkStepUpProof, issueStepUpProof, stepUpKey } from ".
 export type { StepUpCheck } from "./security/step-up"
 export { REDACTED, isSensitiveKey, redactDeep, redactText } from "./logging/redact"
 export { errorSummary } from "./logging/error-summary"
+export { codeSummary, failureCode, keyMessage, loggableCode } from "./logging/failure-code"
 
 // Ek C13 review L2: the SSRF address rule and the cancellable resolver (from the backend's safe-fetch)
 export { isBlockedAddress } from "./http/address-policy"
@@ -96,6 +97,8 @@ export type { Resolver } from "./http/resolver"
 export { authIdentityField, authRouteKind } from "./http/auth-routes"
 export type { AuthRouteKind } from "./http/auth-routes"
 export { HSTS_HEADER, REQUEST_ID_HEADER, SECURITY_HEADERS, isValidRequestId } from "./http/headers"
+export { INTERNAL_ERROR_BODY, classifyDbMessage } from "./http/error-body"
+export type { DbErrorKind } from "./http/error-body"
 export {
   decodedSegment,
   isAmbiguousTarget,

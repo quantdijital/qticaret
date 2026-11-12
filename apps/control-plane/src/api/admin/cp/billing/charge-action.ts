@@ -1,6 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { errorSummary } from "@qticaret/server-kit"
+import { codeSummary } from "@qticaret/server-kit"
 import { istanbulDay } from "../../../../lib/billing/days"
 import { invoiceIssuer } from "../../../../lib/billing/invoice-issuer"
 import { withBillingLock } from "../../../../lib/billing/lock"
@@ -100,7 +100,7 @@ async function issueInvoice(
     req.scope
       .resolve(ContainerRegistrationKeys.LOGGER)
       .warn(
-        `cp.billing_invoice_failed ${JSON.stringify({ charge_id: charge.id, err: errorSummary(error) })}`
+        `cp.billing_invoice_failed ${JSON.stringify({ charge_id: charge.id, err: codeSummary(error) })}`
       )
   }
 }

@@ -1,3 +1,5 @@
+import { INTERNAL_ERROR_BODY, classifyDbMessage } from "@qticaret/server-kit"
+import type { DbErrorKind } from "@qticaret/server-kit"
 import { DEFAULT_VALIDATION_MESSAGE } from "../../lib/errors"
 
 /**
@@ -23,51 +25,16 @@ export interface ErrorBody {
   status?: string
 }
 
-export type DbErrorKind = "duplicate" | "invalid_reference" | "not_null" | "unknown_column"
-
-// Medusa 2.21.2 builds these from Postgres errors: `dbErrorMapper` in the
-// service layer, `formatException` in the HTTP error handler. The error code
-// is gone by the time the handler runs, so the text is all there is; the unit
-// tests generate it with Medusa's own functions to catch template changes.
-const DB_MESSAGES: readonly (readonly [RegExp, DbErrorKind])[] = [
-  // "Customer with email: a@b.c, has_account: true, already exists."
-  [/ with .+ already exists\.$/s, "duplicate"],
-  // "You tried to set relationship region_id: reg_1, but such entity does not exist"
-  [/^You tried to set relationship .*, but such entity does not exist$/s, "invalid_reference"],
-  // "Region with id reg_1 does not exist."
-  [/^\S+ with \S+ .+ does not exist\.$/s, "invalid_reference"],
-  // "Cannot set field 'email' of Customer to null"
-  [/^Cannot set field '.+' of .+ to null$/s, "not_null"],
-  // "Can't insert null value in field email on insert in table customer"
-  [/^Can't insert null value in field .+ on insert in table .+$/s, "not_null"],
-  // `column "x" does not exist`
-  [/^column .+/s, "unknown_column"],
-]
+// The classification and the 5xx body live in server-kit, shared with the
+// control plane's handler (adr/0061 Ek C19 M1)
+export { INTERNAL_ERROR_BODY, classifyDbMessage }
+export type { DbErrorKind }
 
 const DB_MESSAGE_KEYS: Record<DbErrorKind, string> = {
   duplicate: "errors.duplicate",
   invalid_reference: "errors.invalid_reference",
   not_null: DEFAULT_VALIDATION_MESSAGE,
   unknown_column: DEFAULT_VALIDATION_MESSAGE,
-}
-
-// Database messages are short; a long text is attacker-sized input (an
-// echoed path) and is not worth running the patterns over
-const MAX_DB_MESSAGE_LENGTH = 1024
-
-export function classifyDbMessage(message: string): DbErrorKind | null {
-  if (message.length > MAX_DB_MESSAGE_LENGTH) {
-    return null
-  }
-  return DB_MESSAGES.find(([pattern]) => pattern.test(message))?.[1] ?? null
-}
-
-// Medusa's own fixed text for unknown errors, so the admin's toast stays
-// readable; clients branch on `type`
-export const INTERNAL_ERROR_BODY: Readonly<ErrorBody> = {
-  code: "unknown_error",
-  type: "unknown_error",
-  message: "An unknown error occurred.",
 }
 
 // Admin users see Medusa's message: the values are their own input, and a

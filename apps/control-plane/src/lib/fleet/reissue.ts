@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { errorSummary } from "@qticaret/server-kit"
+import { codeSummary } from "@qticaret/server-kit"
 import { issuePlanDocumentWorkflow } from "../../workflows/fleet/plan-document"
 import type { IssuedPlanDocument } from "../../workflows/fleet/plan-document"
 import { fleetIn, plansIn, tenantsIn, vaultIn } from "../../workflows/modules"
@@ -38,7 +38,7 @@ export async function reissuePlanDocuments(
       results.set(tenantId, result)
     } catch (error) {
       logOf(container).error(
-        `cp.plan_issue_failed ${JSON.stringify({ tenant_id: tenantId, err: errorSummary(error) })}`
+        `cp.plan_issue_failed ${JSON.stringify({ tenant_id: tenantId, err: codeSummary(error) })}`
       )
     }
   })
@@ -77,7 +77,7 @@ async function pushLatest(container: Container, tenantId: string): Promise<void>
     }
   } catch (error) {
     logOf(container).warn(
-      `cp.plan_push_failed ${JSON.stringify({ tenant_id: tenantId, err: errorSummary(error) })}`
+      `cp.plan_push_failed ${JSON.stringify({ tenant_id: tenantId, err: codeSummary(error) })}`
     )
   }
 }

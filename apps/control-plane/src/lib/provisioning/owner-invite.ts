@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { errorSummary } from "@qticaret/server-kit"
+import { codeSummary } from "@qticaret/server-kit"
 import { inviteOwnerResultSchema } from "@qticaret/types/control-plane"
 import type { TenantRecord } from "../../modules/tenants/types"
 import { tenantsIn } from "../../workflows/modules"
@@ -80,7 +80,7 @@ export async function sendOwnerInvite(
     container
       .resolve(ContainerRegistrationKeys.LOGGER)
       .warn(
-        `cp.owner_invite_mail_failed ${JSON.stringify({ tenant_id: tenant.id, err: errorSummary(error) })}`
+        `cp.owner_invite_mail_failed ${JSON.stringify({ tenant_id: tenant.id, err: codeSummary(error) })}`
       )
     return notSent("provisioning.mail_failed")
   }

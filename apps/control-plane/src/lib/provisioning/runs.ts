@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { errorSummary } from "@qticaret/server-kit"
+import { codeSummary } from "@qticaret/server-kit"
 import type { RunView } from "../../modules/provisioning/service"
 import { provisioningIn, tenantsIn } from "../../workflows/modules"
 import { codeOf } from "../../workflows/provisioning/step"
@@ -79,7 +79,7 @@ async function execute(
   } catch (error) {
     failed = codeOf(error)
     logger.warn(
-      `cp.provisioning_error ${JSON.stringify({ run_id: run.id, err: errorSummary(error) })}`
+      `cp.provisioning_error ${JSON.stringify({ run_id: run.id, err: codeSummary(error) })}`
     )
   }
   try {
@@ -101,7 +101,7 @@ async function execute(
     return await runs.runOf(run.tenant_id, run.id)
   } catch (error) {
     logger.error(
-      `cp.provisioning_finish_failed ${JSON.stringify({ run_id: run.id, err: errorSummary(error) })}`
+      `cp.provisioning_finish_failed ${JSON.stringify({ run_id: run.id, err: codeSummary(error) })}`
     )
     return { ...run, status: "failed", error_code: "provisioning.finish_failed" }
   }

@@ -4,6 +4,7 @@ import { CP_RATE_LIMIT_PROFILES } from "../lib/rate-limit-profiles"
 import { auditAuth, auditCpRequests } from "./http/audit"
 import { CP_ROUTE_MIDDLEWARES } from "./http/cp-routes"
 import { csrfProtection } from "./http/csrf"
+import { cpErrorHandler } from "./http/error-handler"
 import { FLEET_ROUTE_MIDDLEWARES } from "./http/fleet-routes"
 import { rejectAmbiguousPath, requestBasics, routeAllowlist } from "./http/guards"
 import { authIdentity, authProfile, rateLimit } from "./http/rate-limit"
@@ -16,6 +17,8 @@ import { TENANT_ROUTE_MIDDLEWARES } from "./http/tenant-routes"
 import { VAULT_ROUTE_MIDDLEWARES } from "./http/vault-routes"
 
 export default defineMiddlewares({
+  // Ek C19 M1: errors logged by code only, database texts never answered
+  errorHandler: cpErrorHandler,
   routes: [
     // Global (no `methods`): these run before every core route middleware
     // and handler, so the allowlist answers 404 for Medusa's commerce routes

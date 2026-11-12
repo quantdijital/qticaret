@@ -1,6 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { errorSummary } from "@qticaret/server-kit"
+import { codeSummary } from "@qticaret/server-kit"
 import { reconcilePlanDocuments } from "../../../../lib/fleet/reissue"
 import { setInstructionWorkflow } from "../../../../workflows/billing/workflows"
 import { billingIn } from "../../../../workflows/modules"
@@ -61,7 +61,7 @@ export async function POST(
     },
     (error: unknown) => {
       logger.error(
-        `cp.billing_instruction_reissue_failed ${JSON.stringify({ err: errorSummary(error) })}`
+        `cp.billing_instruction_reissue_failed ${JSON.stringify({ err: codeSummary(error) })}`
       )
     }
   )

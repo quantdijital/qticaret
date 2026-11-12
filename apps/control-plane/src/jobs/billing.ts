@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { errorSummary } from "@qticaret/server-kit"
+import { codeSummary } from "@qticaret/server-kit"
 import { runBilling } from "../lib/billing/run"
 import type { BillingRun } from "../lib/billing/run"
 
@@ -22,7 +22,7 @@ export default async function billingJob(container: MedusaContainer): Promise<vo
       .resolve(Modules.LOCKING)
       .execute(BILLING_LOCK, () => runBilling(container, new Date()), { timeout: 1 })
   } catch (error) {
-    logger.warn(`cp.billing_skipped ${JSON.stringify({ err: errorSummary(error) })}`)
+    logger.warn(`cp.billing_skipped ${JSON.stringify({ err: codeSummary(error) })}`)
     return
   }
   const { started, opened, restricted, released, failed, reminders } = run

@@ -1,6 +1,6 @@
 import type { Logger, MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { errorSummary } from "@qticaret/server-kit"
+import { codeSummary } from "@qticaret/server-kit"
 import { enrolmentEmail, enrolmentLink, inviteEmail, inviteLink } from "../mail/invite"
 import { emailTransport } from "../mail/transport"
 import type { OutgoingEmail } from "../mail/transport"
@@ -57,7 +57,7 @@ async function mailLink(
     container
       .resolve<Logger>(ContainerRegistrationKeys.LOGGER)
       .warn(
-        `cp.link_mail_failed ${JSON.stringify({ template: email.template, err: errorSummary(error) })}`
+        `cp.link_mail_failed ${JSON.stringify({ template: email.template, err: codeSummary(error) })}`
       )
     return { link, mailed: false }
   }

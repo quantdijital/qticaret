@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { errorSummary } from "@qticaret/server-kit"
+import { codeSummary } from "@qticaret/server-kit"
 import {
   advanceSubscriptionWorkflow,
   startSubscriptionWorkflow,
@@ -135,7 +135,7 @@ export async function runBilling(
         } catch (error) {
           run.failed += 1
           logger.error(
-            `cp.billing_advance_failed ${JSON.stringify({ tenant_id: sub.tenant_id, err: errorSummary(error) })}`
+            `cp.billing_advance_failed ${JSON.stringify({ tenant_id: sub.tenant_id, err: codeSummary(error) })}`
           )
         }
       }

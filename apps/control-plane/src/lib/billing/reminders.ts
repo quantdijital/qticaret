@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { errorSummary } from "@qticaret/server-kit"
+import { codeSummary } from "@qticaret/server-kit"
 import { billingIn, plansIn, tenantsIn } from "../../workflows/modules"
 import { eachBounded } from "../fleet/bounded"
 import { emailTransport } from "../mail/transport"
@@ -144,7 +144,7 @@ export async function sendReminders(
           tenant_id: charge.tenant_id,
           charge_id: charge.id,
           kind,
-          err: errorSummary(error),
+          err: codeSummary(error),
         })}`
       )
     }

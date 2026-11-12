@@ -1,5 +1,5 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { decodedSegment, errorSummary } from "@qticaret/server-kit"
+import { codeSummary, decodedSegment } from "@qticaret/server-kit"
 import { CP_AUDIT_MODULE } from "../../modules/cp-audit"
 import type CpAuditModuleService from "../../modules/cp-audit/service"
 import type { CpAuditInput } from "../../modules/cp-audit/service"
@@ -88,7 +88,7 @@ async function write(req: MedusaRequest, res: MedusaResponse, entry: CpAuditInpu
     await req.scope.resolve<CpAuditModuleService>(CP_AUDIT_MODULE).record(row)
   } catch (error) {
     loggerOf(req)?.error(
-      `cp.audit_write_failed ${JSON.stringify({ action: row.action, err: errorSummary(error) })}`
+      `cp.audit_write_failed ${JSON.stringify({ action: row.action, err: codeSummary(error) })}`
     )
   }
 }
@@ -178,7 +178,7 @@ export async function recordReadFirst(req: MedusaRequest): Promise<boolean> {
     return true
   } catch (error) {
     loggerOf(req)?.error(
-      `cp.audit_write_failed ${JSON.stringify({ action, err: errorSummary(error) })}`
+      `cp.audit_write_failed ${JSON.stringify({ action, err: codeSummary(error) })}`
     )
     return false
   }
