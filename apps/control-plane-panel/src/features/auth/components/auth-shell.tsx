@@ -3,6 +3,7 @@ import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { cn } from "@qticaret/admin-ui/lib/utils"
+import { useDocumentTitle } from "@qticaret/admin-ui/hooks/use-document-title"
 
 // What the control plane is for, one line each (keys under `auth.intro`)
 const POINTS: { key: string; icon: LucideIcon }[] = [
@@ -107,6 +108,7 @@ export function AuthShell({
 
 /** The box's title and its one sentence. */
 export function AuthHeading({ title, subtitle }: { title: string; subtitle: ReactNode }) {
+  useDocumentTitle(title)
   return (
     <div className="flex flex-col gap-1.5">
       <h1 className="text-[22px] leading-tight font-semibold tracking-tight">{title}</h1>

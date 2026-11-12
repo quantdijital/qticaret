@@ -10,6 +10,8 @@ import { MaintenanceBanner } from "./maintenance-banner"
 import { PlanStatusBanner } from "./plan-status-banner"
 import { ReauthHost } from "./reauth-host"
 import { Topbar } from "./topbar"
+import { useDocumentTitleName } from "@qticaret/admin-ui/hooks/use-document-title"
+import { useStoreName } from "@/features/settings/api/store"
 
 // shadcn's sidebar reads its widths from these two; the layout tokens feed them
 const SIDEBAR_STYLE = {
@@ -29,6 +31,7 @@ const SIDEBAR_STYLE = {
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
   const { data: appearance } = useQuery(appearanceQuery())
+  useDocumentTitleName(useStoreName())
   const inSettings = useRouterState({
     select: (state) =>
       state.location.pathname === "/settings" || state.location.pathname.startsWith("/settings/"),

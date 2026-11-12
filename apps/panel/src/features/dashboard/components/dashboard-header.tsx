@@ -7,6 +7,7 @@ import { useCurrentUser } from "@/features/auth/api/me"
 import { PERIODS } from "@/features/dashboard/period"
 import type { PeriodKey } from "@/features/dashboard/period"
 import { formatLongDate } from "@qticaret/admin-ui/lib/format"
+import { useDocumentTitle } from "@qticaret/admin-ui/hooks/use-document-title"
 
 interface DashboardHeaderProps {
   period: PeriodKey
@@ -17,6 +18,7 @@ interface DashboardHeaderProps {
 export function DashboardHeader({ period, onPeriodChange }: DashboardHeaderProps) {
   const { t } = useTranslation()
   const name = useCurrentUser()?.first_name?.trim()
+  useDocumentTitle(t("dashboard.title"))
   return (
     <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
       <div className="flex flex-col gap-1">

@@ -1,9 +1,11 @@
 import { useTranslation } from "react-i18next"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
+import { useDocumentTitle } from "@qticaret/admin-ui/hooks/use-document-title"
 
 /** A page that could not open (the control plane out of reach): one line, a retry. */
 export function RouteError() {
   const { t } = useTranslation()
+  useDocumentTitle(t("errors.pageTitle"))
   return (
     <div className="flex min-h-svh flex-col">
       <main className="flex flex-1 items-start justify-center px-6 py-16">

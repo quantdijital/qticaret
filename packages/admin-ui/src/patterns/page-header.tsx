@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router"
 import { ArrowLeft } from "lucide-react"
 import type { ReactNode } from "react"
+import { useDocumentTitle } from "../hooks/use-document-title"
 
 interface PageHeaderProps {
   title: string
@@ -14,8 +15,9 @@ interface PageHeaderProps {
   back?: { to: string; search?: Record<string, string>; label: string } | undefined
 }
 
-/** Every page starts with it (docs/18 §7). */
+/** Every page starts with it (docs/18 §7); its title is the browser tab's too. */
 export function PageHeader({ title, description, action, badge, back }: PageHeaderProps) {
+  useDocumentTitle(title)
   return (
     <header className="flex flex-col gap-3">
       {back ? (

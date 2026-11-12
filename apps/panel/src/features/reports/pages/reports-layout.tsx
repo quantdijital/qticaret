@@ -1,11 +1,24 @@
 import { Outlet, useRouterState } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
+import { useDocumentTitle } from "@qticaret/admin-ui/hooks/use-document-title"
 import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { SectionNav } from "@qticaret/admin-ui/patterns/section-nav"
 import { ReportExportButton } from "@/features/reports/components/report-export"
 import { ReportRangePicker } from "@/features/reports/components/report-range-picker"
 import { useReport } from "@/features/reports/use-report"
 import { formatCount } from "@qticaret/admin-ui/lib/format"
+
+const REPORT_TABS = [
+  { to: "/reports", key: "summary" },
+  { to: "/reports/products", key: "products" },
+  { to: "/reports/categories", key: "categories" },
+  { to: "/reports/brands", key: "brands" },
+  { to: "/reports/marketing", key: "marketing" },
+  { to: "/reports/daily", key: "daily" },
+  { to: "/reports/finance", key: "finance" },
+  { to: "/reports/stock", key: "stock" },
+  { to: "/reports/search", key: "search" },
+] as const
 
 /**
  * Reports (docs/06 §4, F11.1–F11.4): a preset period or a range of days,
@@ -28,6 +41,11 @@ export function ReportsLayout() {
             ? ("search" as const)
             : ("sales" as const),
   })
+  const tabs = REPORT_TABS.map((tab) => ({ to: tab.to, label: t(`reports.tabs.${tab.key}`) }))
+  const path = useRouterState({ select: (state) => state.location.pathname.replace(/\/$/, "") })
+  // The open tab's name before the page's in the browser tab ("Ürünler · Raporlar")
+  const open = tabs.find((tab) => tab.to === path)
+  useDocumentTitle(open ? `${open.label} · ${t("nav.reports")}` : undefined)
   return (
     <div className="flex flex-col gap-[var(--grid-gap)]">
       <PageHeader
@@ -41,21 +59,7 @@ export function ReportsLayout() {
           </div>
         }
       />
-      <SectionNav
-        label={t("reports.sections")}
-        keepSearch
-        items={[
-          { to: "/reports", label: t("reports.tabs.summary") },
-          { to: "/reports/products", label: t("reports.tabs.products") },
-          { to: "/reports/categories", label: t("reports.tabs.categories") },
-          { to: "/reports/brands", label: t("reports.tabs.brands") },
-          { to: "/reports/marketing", label: t("reports.tabs.marketing") },
-          { to: "/reports/daily", label: t("reports.tabs.daily") },
-          { to: "/reports/finance", label: t("reports.tabs.finance") },
-          { to: "/reports/stock", label: t("reports.tabs.stock") },
-          { to: "/reports/search", label: t("reports.tabs.search") },
-        ]}
-      />
+      <SectionNav label={t("reports.sections")} keepSearch items={tabs} />
       <Outlet />
       {report.data?.capped ? (
         <p className="text-xs text-muted-foreground">

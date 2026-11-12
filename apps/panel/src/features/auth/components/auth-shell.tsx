@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { AuthIntro } from "./auth-intro"
+import { useDocumentTitle } from "@qticaret/admin-ui/hooks/use-document-title"
 
 /**
  * The pages before the panel: sign-in, a forgotten password, an
@@ -36,6 +37,7 @@ export function AuthShell({
 
 /** The box's title and its one sentence. */
 export function AuthHeading({ title, subtitle }: { title: string; subtitle: ReactNode }) {
+  useDocumentTitle(title)
   return (
     <div className="flex flex-col gap-1.5">
       <h1 className="text-[22px] leading-tight font-semibold tracking-tight">{title}</h1>

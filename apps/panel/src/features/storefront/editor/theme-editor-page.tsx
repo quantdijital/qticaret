@@ -8,12 +8,14 @@ import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { layoutQuery } from "@/features/storefront/api/layout"
 import { errorText } from "@/lib/errors"
 import { ThemeEditor } from "./theme-editor"
+import { useDocumentTitle } from "@qticaret/admin-ui/hooks/use-document-title"
 
 const E = "storefront.editor"
 
 /** Storefront > Theme editor: the shop's design, read once, then held by the editor. */
 export function ThemeEditorPage() {
   const { t } = useTranslation()
+  useDocumentTitle(t(`${E}.title`))
   const query = useQuery(layoutQuery())
   if (query.data) {
     return <ThemeEditor layout={query.data} />
