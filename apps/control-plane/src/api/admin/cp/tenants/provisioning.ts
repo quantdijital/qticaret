@@ -43,8 +43,10 @@ export const runView = (run: RunView) => ({
 /**
  * A run of `kind` started for the shop the path names, answered at once
  * (202): the run's page follows it. Another run of the shop under way:
- * 409 `cp.provisioning_busy`; a start or invitation for a shop neither
- * being set up nor active: 409 `provisioning.tenant_status`; no provisioner here: 503
+ * 409 `cp.provisioning_busy`; a run the shop's status does not allow
+ * (`RUN_STATUSES`, Ek C19 L2: a start also for a restricted or suspended
+ * shop, an invitation or a pack only for one being set up or active): 409
+ * `provisioning.tenant_status`; no provisioner here: 503
  * `cp.provisioner_unavailable`.
  */
 export async function startFromRequest(
