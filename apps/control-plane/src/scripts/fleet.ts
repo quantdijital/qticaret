@@ -2,7 +2,7 @@ import type { ExecArgs, MedusaContainer } from "@medusajs/framework/types"
 import { CP_AUDIT_MODULE } from "../modules/cp-audit"
 import type CpAuditModuleService from "../modules/cp-audit/service"
 import { parseEnv } from "../lib/env"
-import { printUsage, probeNow, setStorefrontUrl } from "../lib/fleet/monitor-cli"
+import { printReleases, printUsage, probeNow, setStorefrontUrl } from "../lib/fleet/monitor-cli"
 import { pushPlanDocument } from "../lib/fleet/push"
 import { tenantApiUrlProblem } from "../lib/fleet/push-target"
 import { reissuePlanDocuments } from "../lib/fleet/reissue"
@@ -21,6 +21,7 @@ import { fleetIn, tenantsIn } from "../workflows/modules"
  *   the URL must pass the push policy (`CP_TENANT_API_HOSTS`, loopback)
  * - Ek C13: `usage <slug>`, `probe <slug>`, `set-storefront-url <slug>
  *   <url|none>` (lib/fleet/monitor-cli.ts)
+ * - Ek C18: `releases`: the releases and how many shops report and target each
  *
  * Prints serials, times and error codes only; no document body.
  */
@@ -76,12 +77,16 @@ export async function runFleetCommand(
   container: MedusaContainer,
   [command = "", slug = "", value = ""]: readonly string[]
 ): Promise<number> {
+  if (command === "releases") {
+    await printReleases(container)
+    return 0
+  }
   const tenant = slug ? await tenantBySlug(container, slug) : null
   const commands = ["status", "issue", "set-api-url", "usage", "probe", "set-storefront-url"]
   if (!tenant || !commands.includes(command)) {
     out(
       "usage: cp:fleet status <slug> | issue <slug> | set-api-url <slug> <url|none> | " +
-        "usage <slug> | probe <slug> | set-storefront-url <slug> <url|none>"
+        "usage <slug> | probe <slug> | set-storefront-url <slug> <url|none> | releases"
     )
     return 2
   }

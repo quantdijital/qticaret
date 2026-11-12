@@ -1,5 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { parseEnv } from "../../../../lib/env"
+import { listVersions } from "../../../../lib/fleet/release-views"
 import { reissuePlanDocuments } from "../../../../lib/fleet/reissue"
 import { platformHostname } from "../../../../lib/tenants/hostname"
 import type { HealthTarget } from "../../../../modules/fleet/models/health"
@@ -31,7 +32,8 @@ async function onPackage(req: AuthenticatedMedusaRequest, packageId: string | un
  * GET /admin/cp/tenants (all staff): the shops, newest first, by name or
  * slug, status and package, with each one's primary address and package,
  * and how many are in each status (the list's tabs), and its health
- * standing (Ek C13). No contact here: the list reads no personal data.
+ * standing (Ek C13) and version (Ek C18). No contact here: the list
+ * reads no personal data.
  */
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, GetTenantsType>,
@@ -76,6 +78,11 @@ export async function GET(
   const standings = await fleetIn(req.scope).healthOf(rows.map((row) => row.id))
   // Ek C16: each shop's next payment day (its oldest open charge, else its next renewal)
   const nextPayments = await billingIn(req.scope).nextPayments(rows.map((row) => row.id))
+  // Ek C18: what each runs (its latest report) and whether that is its target
+  const versions = await listVersions(
+    req.scope,
+    rows.map((row) => row.id)
+  )
   const healthOf = (id: string, target: HealthTarget) =>
     standings.find((each) => each.tenant_id === id && each.target === target)?.state ?? null
   res.json({
@@ -95,6 +102,7 @@ export async function GET(
           backend: healthOf(row.id, "backend"),
           storefront: healthOf(row.id, "storefront"),
         },
+        version: versions.get(row.id) ?? { reported: null, target: null, drift: false },
       }
     }),
     count,

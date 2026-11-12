@@ -9,6 +9,7 @@ import type { PlanDocument as PlanDocumentBody } from "@qticaret/types/control-p
 import { PlanDocument } from "./models/plan-document"
 import type { PlanPushStatus } from "./models/plan-document"
 import { HealthCheck, HealthStanding } from "./models/health"
+import { Release, TenantVersion } from "./models/release"
 import { TenantKey } from "./models/tenant-key"
 import { UsageSnapshot } from "./models/usage-snapshot"
 
@@ -69,6 +70,8 @@ export class FleetDocuments extends MedusaService({
   UsageSnapshot,
   HealthCheck,
   HealthStanding,
+  Release,
+  TenantVersion,
 }) {
   @InjectManager()
   async latestPlanDocument(

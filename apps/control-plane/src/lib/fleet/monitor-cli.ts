@@ -9,6 +9,7 @@ import { localOnlyProblem } from "../local-only"
 import { probeFleet } from "./health-probe"
 import type { ProbeRun } from "./health-probe"
 import { HEALTH_PROBES_LOCK } from "./health-rules"
+import { releaseList } from "./release-views"
 import { storefrontPolicy, storefrontTargetProblem } from "./storefront-target"
 
 /**
@@ -19,6 +20,7 @@ import { storefrontPolicy, storefrontTargetProblem } from "./storefront-target"
  * - `set-storefront-url <slug> <url|none>`: its storefront home page, for
  *   the probe. Development only (this machine, ports 8000–8099); deployed,
  *   F16's provisioner sets it on a verified domain
+ * - `releases` (Ek C18): the releases and their counts
  *
  * Prints counts, times, states and codes only.
  */
@@ -94,4 +96,24 @@ export async function setStorefrontUrl(
   })
   out(`cp:fleet: storefront ${url ? "set" : "removed"}`)
   return 0
+}
+
+/**
+ * `releases` (Ek C18): the releases, newest first, each with how many live
+ * shops report it and target it. Read only: adding one or a shop's target
+ * is the panel's, proved again and audited as the staff member.
+ */
+export async function printReleases(container: MedusaContainer) {
+  const releases = await releaseList(container)
+  if (releases.length === 0) {
+    out("cp:fleet: no release yet")
+    return
+  }
+  for (const release of releases) {
+    out(
+      `${release.version} commit=${release.commit.slice(0, 12)} ` +
+        `reported=${String(release.reported_count)} targeted=${String(release.target_count)} ` +
+        `added=${new Date(release.created_at).toISOString()}`
+    )
+  }
 }

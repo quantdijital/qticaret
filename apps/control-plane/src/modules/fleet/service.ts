@@ -7,7 +7,7 @@ import {
 } from "@medusajs/framework/utils"
 import { ed25519KeyId, publicKeyFromRaw } from "@qticaret/server-kit"
 import type { TenantKeyStatus } from "./models/tenant-key"
-import { FleetMonitoring } from "./service-monitoring"
+import { FleetReleases } from "./service-releases"
 
 interface Executor {
   execute: (sql: string, params: unknown[]) => Promise<unknown>
@@ -59,8 +59,9 @@ const FIELDS = [
  * (adr/0061 §2 `fleet`). C8: the shops' public keys. C9: their plan
  * documents (`FleetDocuments`, service-documents.ts). C13: their usage
  * snapshots and health probes (`FleetMonitoring`, service-monitoring.ts).
+ * C18: the releases and each shop's target (`FleetReleases`, service-releases.ts).
  */
-class FleetModuleService extends FleetMonitoring {
+class FleetModuleService extends FleetReleases {
   /**
    * The public key a shop's signed request may be checked against (Ek C9):
    * its `active` or `next` key by `kid`, never a retired one and never

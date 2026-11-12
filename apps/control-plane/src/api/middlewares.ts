@@ -4,6 +4,7 @@ import { CP_RATE_LIMIT_PROFILES } from "../lib/rate-limit-profiles"
 import { auditAuth, auditCpRequests } from "./http/audit"
 import { CP_ROUTE_MIDDLEWARES } from "./http/cp-routes"
 import { csrfProtection } from "./http/csrf"
+import { FLEET_ROUTE_MIDDLEWARES } from "./http/fleet-routes"
 import { rejectAmbiguousPath, requestBasics, routeAllowlist } from "./http/guards"
 import { authIdentity, authProfile, rateLimit } from "./http/rate-limit"
 import { gateRegistration } from "./http/register-gate"
@@ -93,5 +94,6 @@ export default defineMiddlewares({
     ...CP_ROUTE_MIDDLEWARES,
     ...TENANT_ROUTE_MIDDLEWARES,
     ...VAULT_ROUTE_MIDDLEWARES,
+    ...FLEET_ROUTE_MIDDLEWARES,
   ],
 })

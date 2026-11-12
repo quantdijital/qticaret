@@ -2,6 +2,7 @@ import type { MedusaRequest } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { platformFlags } from "@qticaret/types/control-plane"
 import { effectiveFlags } from "../../../../lib/fleet/plan-content"
+import { tenantVersionOf } from "../../../../lib/fleet/release-views"
 import { effectiveLimits } from "../../../../lib/plans/limits"
 import { billingIn, fleetIn } from "../../../../workflows/modules"
 import { omit } from "../../../../lib/omit"
@@ -63,7 +64,7 @@ export async function tenantDetail(
 ) {
   const service = tenantsOf(req)
   const plans = plansOf(req)
-  const [company, contacts, domains, notes, plan, overrides, flagOverrides, document] =
+  const [company, contacts, domains, notes, plan, overrides, flagOverrides, document, version] =
     await Promise.all([
       service.companyOf(tenant.id),
       service.contactsOf(tenant.id),
@@ -73,6 +74,11 @@ export async function tenantDetail(
       plans.overridesOf(tenant.id),
       plans.featureOverridesOf(tenant.id),
       options.fleet ? fleetIn(req.scope).planDocumentSummary(tenant.id) : null,
+      // Ek C18: what it runs and its target; why it was set, to the roles that set it
+      tenantVersionOf(req.scope, tenant.id, {
+        names: (ids) => staffNames(req, ids),
+        showReason: options.fleet,
+      }),
     ])
   const names = await staffNames(req, [
     tenant.created_by,
@@ -132,5 +138,6 @@ export async function tenantDetail(
     plan_document: options.fleet
       ? { ...document, issued: document !== null, push_target: tenant.api_base_url }
       : undefined,
+    version,
   }
 }

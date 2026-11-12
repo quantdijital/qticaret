@@ -134,6 +134,8 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "POST /admin/cp/me/sessions/revoke-others",
       "POST /admin/cp/plans",
       "POST /admin/cp/plans/:id/price",
+      "POST /admin/cp/releases",
+      "POST /admin/cp/releases/:id",
       "POST /admin/cp/staff/invites",
       "POST /admin/cp/staff/members/:id",
       "POST /admin/cp/staff/members/:id/deactivate",
@@ -154,6 +156,7 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "POST /admin/cp/tenants/:id/reveal-tckn",
       "POST /admin/cp/tenants/:id/subscription",
       "POST /admin/cp/tenants/:id/suspend",
+      "POST /admin/cp/tenants/:id/target-release",
     ])
   })
 
