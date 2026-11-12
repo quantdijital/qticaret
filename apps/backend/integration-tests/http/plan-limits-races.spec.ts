@@ -115,6 +115,32 @@ medusaIntegrationTestRunner({
       expect(again.status).toBe(200)
     })
 
+    it("never lets two expired invitations sent again together both take the last seat (Ek C19 L3)", async () => {
+      await setPlanLimits(getContainer(), { staff: 3 })
+      const pg = getContainer().resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
+      const lapsed = [await invite(), await invite()]
+      const ids = lapsed.map((answer) => answer.data.invite.id)
+      const past = new Date(Date.now() - 1000)
+      await pg("invite").whereIn("id", ids).update({ expires_at: past })
+      // One seat left: the owner and one member's worth of open invitation
+      const holder = await invite()
+
+      const answers = await Promise.all(ids.map((id) => post(`/admin/staff/invites/${id}/resend`)))
+      const rows = await pg<{ id: string; expires_at: Date }>("invite")
+        .whereIn("id", ids)
+        .select("id", "expires_at")
+      const open = rows.filter((row) => new Date(row.expires_at).getTime() > Date.now())
+
+      expect(holder.status).toBe(201)
+      expect(answers.filter((answer) => answer.status === 200).length).toBeLessThanOrEqual(1)
+      for (const answer of answers.filter((each) => each.status !== 200)) {
+        expect(answer.status).toBe(403)
+        expect(answer.data).toMatchObject({ message: "plan.limit_reached", limit: "staff" })
+      }
+      // A refused one is expired again: its fresh link is dead
+      expect(open).toHaveLength(answers.filter((answer) => answer.status === 200).length)
+    })
+
     it("never lets two invitations sent together both take the last seat", async () => {
       await setPlanLimits(getContainer(), { staff: 2 })
 
