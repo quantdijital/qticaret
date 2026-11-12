@@ -69,6 +69,7 @@ export const CP_ERROR_CODES = [
   "release_commit_invalid",
   "release_unknown",
   "release_version_invalid",
+  "release_version_reserved",
   "release_version_taken",
   "reset_self",
   "run_unknown",

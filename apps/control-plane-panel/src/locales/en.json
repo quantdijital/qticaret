@@ -783,6 +783,7 @@
       "release_commit_invalid": "The commit must be a hexadecimal id of 7–40 characters.",
       "release_unknown": "Release not found.",
       "release_version_invalid": "The version must look like 1.4.0.",
+      "release_version_reserved": "This version shape is for automated tests only; enter another version.",
       "release_version_taken": "This version is already recorded.",
       "reset_self": "Renew your own verification from My account.",
       "run_unknown": "Run not found.",

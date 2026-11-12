@@ -783,6 +783,7 @@
       "release_commit_invalid": "Commit 7–40 haneli onaltılık bir kimlik olmalı.",
       "release_unknown": "Sürüm bulunamadı.",
       "release_version_invalid": "Sürüm numarası 1.4.0 biçiminde olmalı.",
+      "release_version_reserved": "Bu sürüm biçimi yalnızca otomatik testler içindir; başka bir sürüm numarası girin.",
       "release_version_taken": "Bu sürüm numarası zaten kayıtlı.",
       "reset_self": "Kendi doğrulamanızı Hesabım sayfasından yenileyin.",
       "run_unknown": "Çalışma bulunamadı.",
