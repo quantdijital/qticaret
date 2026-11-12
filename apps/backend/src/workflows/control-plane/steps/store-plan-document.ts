@@ -16,11 +16,16 @@ export const storePlanDocumentStep = createStep(
   "control-plane-store-plan-document",
   async (input: StorePlanDocumentInput, { container }) => {
     const service = container.resolve<ControlPlaneModuleService>(CONTROL_PLANE_MODULE)
-    const { outcome, previous } = await service.storePlanDocument(input.signed, input.source)
-    // adr/0061 Ek C15: a new status reaches the storefront at once (a suspension's 503)
+    const { outcome, previous, marked, repaired } = await service.storePlanDocument(
+      input.signed,
+      input.source
+    )
+    // adr/0061 Ek C15: a new status reaches the storefront at once (a suspension's 503);
+    // a repaired row's (Ek C19 takip INFO-1) was not trusted, so its status may differ
     const statusChanged =
-      outcome === "applied" &&
-      (previous?.document.status ?? "active") !== input.signed.document.status
+      repaired ||
+      (outcome === "applied" &&
+        (previous?.document.status ?? "active") !== input.signed.document.status)
     return new StepResponse(
       { outcome, status_changed: statusChanged },
       outcome === "applied"
@@ -28,18 +33,26 @@ export const storePlanDocumentStep = createStep(
             tenant_id: input.signed.document.tenant_id,
             serial: input.signed.document.serial,
             previous,
+            marked,
           }
         : undefined
     )
   },
   async (
-    applied: { tenant_id: string; serial: number; previous: StoredPlan | null } | undefined,
+    applied:
+      | { tenant_id: string; serial: number; previous: StoredPlan | null; marked?: boolean }
+      | undefined,
     { container }
   ) => {
     if (!applied) {
       return
     }
     const service = container.resolve<ControlPlaneModuleService>(CONTROL_PLANE_MODULE)
-    await service.restorePlanDocument(applied.tenant_id, applied.serial, applied.previous)
+    await service.restorePlanDocument(
+      applied.tenant_id,
+      applied.serial,
+      applied.previous,
+      applied.marked === true
+    )
   }
 )

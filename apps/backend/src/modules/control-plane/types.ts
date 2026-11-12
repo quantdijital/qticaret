@@ -76,6 +76,10 @@ export interface StoreResult {
   outcome: StoreOutcome
   /** The row before an `applied`, to put back; null when there was none. */
   previous: StoredPlan | null
+  /** This `applied` wrote the shop's first marker (Ek C19 takip LOW-3): undone with it. */
+  marked: boolean
+  /** A `same` that rewrote a stored row failing its checks (Ek C19 takip INFO-1). */
+  repaired: boolean
 }
 
 export type { SignedPlanDocument }

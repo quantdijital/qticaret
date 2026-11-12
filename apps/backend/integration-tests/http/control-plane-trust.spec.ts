@@ -2,12 +2,23 @@ import type { Knex } from "@medusajs/framework/mikro-orm/knex"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { TENANT_ID } from "@qticaret/types/control-plane/testing"
+import { pullPlanDocument } from "../../src/lib/control-plane/pull"
 import { logger } from "../../src/lib/logging"
 import { CONTROL_PLANE_MODULE } from "../../src/modules/control-plane"
 import type ControlPlaneModuleService from "../../src/modules/control-plane/service"
+import { LastVerified } from "../../src/modules/control-plane/trusted-state"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
-import { FLAG, doc, managedForThisFile, signed } from "../helpers/control-plane"
+import {
+  FLAG,
+  MANAGED_ENV,
+  doc,
+  fakeControlPlane,
+  listen,
+  managedForThisFile,
+  pullAnswer,
+  signed,
+} from "../helpers/control-plane"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 
@@ -24,6 +35,10 @@ interface Cached {
  * document. A replayed push reloads nothing; a row changed in the
  * database is not believed (the last verified state stays); a row for
  * another shop restricts this one until a valid document arrives.
+ * Ek C19 takip: a failed row with nothing verified in memory keeps its
+ * stricter status (LOW-2); a lost row after an applied document restricts
+ * until a valid one heals it (LOW-3); a same-serial document repairs a
+ * damaged row (INFO-1).
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -36,6 +51,12 @@ medusaIntegrationTestRunner({
     const pg = () => getContainer().resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
     const eventsLogged = (spy: jest.SpyInstance) =>
       spy.mock.calls.map((call: unknown[]) => (call[0] as { event?: string }).event)
+
+    // A fresh process: nothing verified in memory
+    const forget = () => {
+      Reflect.set(plans(), "lastVerified", new LastVerified())
+    }
+    const tamper = (sql: string) => pg().raw(`UPDATE control_plane_plan SET document = ${sql}`)
 
     managedForThisFile()
 
@@ -104,6 +125,90 @@ medusaIntegrationTestRunner({
       }
       expect(saved).toBe(TENANT_ID)
       expect((await push(signed(doc(21)))).data).toMatchObject({ applied: true })
+    })
+
+    it("keeps a suspended shop closed when its row fails and nothing is held (LOW-2)", async () => {
+      expect((await push(signed(doc(30, { status: "suspended" })))).status).toBe(200)
+      jest.spyOn(logger, "error").mockImplementation(() => undefined)
+
+      await tamper(`jsonb_set(document, '{package_code}', '"pro"')`)
+      forget()
+      await plans().reloadPlanState()
+      expect(await plans().planState()).toMatchObject({ status: "suspended", serial: null })
+
+      // A forged loosening still restricts: never active
+      await tamper(`jsonb_set(document, '{status}', '"active"')`)
+      forget()
+      await plans().reloadPlanState()
+      expect(await plans().planState()).toMatchObject({ status: "restricted", serial: null })
+    })
+
+    it("repairs a damaged row with the same serial pushed again (INFO-1)", async () => {
+      expect((await push(signed(doc(40, { status: "suspended" })))).status).toBe(200)
+      jest.spyOn(logger, "error").mockImplementation(() => undefined)
+      await tamper(`jsonb_set(document, '{status}', '"active"')`)
+      forget()
+      await plans().reloadPlanState()
+      expect(await plans().planState()).toMatchObject({ status: "restricted", serial: null })
+      const planCache = jest.spyOn((plans() as unknown as Cached).cache, "invalidate")
+
+      const again = await push(signed(doc(40, { status: "suspended" })))
+
+      expect(again.data).toMatchObject({ applied: false })
+      expect(planCache).toHaveBeenCalled()
+      expect(await plans().planState()).toMatchObject({ status: "suspended", serial: 40 })
+      // Sound now: a replay of it reloads nothing again
+      planCache.mockClear()
+      expect((await push(signed(doc(40, { status: "suspended" })))).data).toMatchObject({
+        applied: false,
+      })
+      expect(planCache).not.toHaveBeenCalled()
+    })
+
+    it("restricts a shop whose row is deleted, until a pull heals it (LOW-3)", async () => {
+      expect((await push(signed(doc(50)))).status).toBe(200)
+      const errors = jest.spyOn(logger, "error").mockImplementation(() => undefined)
+
+      await pg()("control_plane_plan").delete()
+      forget()
+      await plans().reloadPlanState()
+
+      expect(await plans().planState()).toMatchObject({
+        managed: true,
+        status: "restricted",
+        serial: null,
+      })
+      expect(errors).toHaveBeenCalledWith({ event: "control_plane.document_missing", kept: false })
+      const { server } = fakeControlPlane((nonce) => ({
+        status: 200,
+        body: pullAnswer(signed(doc(50)), nonce),
+      }))
+      process.env["CONTROL_PLANE_URL"] = await listen(server)
+      try {
+        expect(await pullPlanDocument(getContainer())).toEqual({ outcome: "applied", serial: 50 })
+      } finally {
+        process.env["CONTROL_PLANE_URL"] = MANAGED_ENV.CONTROL_PLANE_URL
+        server.close()
+      }
+      expect(await plans().planState()).toMatchObject({ status: "active", serial: 50 })
+    })
+
+    it("leaves a shop active before its first document, and an undone first one unmarked (LOW-3)", async () => {
+      await pg()("control_plane_plan").delete()
+      await pg()("control_plane_marker").delete()
+      await plans().reloadPlanState()
+      expect(await plans().planState()).toMatchObject({ status: "active", serial: null })
+
+      const stored = await plans().storePlanDocument(signed(doc(60)), "push")
+      expect(stored).toMatchObject({ outcome: "applied", previous: null, marked: true })
+      expect(await pg()("control_plane_marker").count("* as n")).toEqual([{ n: "1" }])
+
+      await plans().restorePlanDocument(TENANT_ID, 60, null, true)
+      expect(await pg()("control_plane_marker").count("* as n")).toEqual([{ n: "0" }])
+      expect(await plans().planState()).toMatchObject({ status: "active", serial: null })
+      // The next apply is not a first one again for a shop already marked
+      await plans().storePlanDocument(signed(doc(61)), "push")
+      expect((await plans().storePlanDocument(signed(doc(62)), "push")).marked).toBe(false)
     })
   },
 })

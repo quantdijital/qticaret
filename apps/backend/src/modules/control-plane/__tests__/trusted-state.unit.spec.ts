@@ -2,7 +2,13 @@ import { privateKeyFromSeed, signDocument, signerFromPrivateKey } from "@qticare
 import { PLAN_DOCUMENT_PURPOSE } from "@qticaret/types/control-plane"
 import { TENANT_ID, TEST_ONLY_CP_SEED, planDocument } from "@qticaret/types/control-plane/testing"
 import { logger } from "../../../lib/logging"
-import { LastVerified, stateOfStored, storedRowProblem } from "../trusted-state"
+import {
+  LastVerified,
+  stateOfStored,
+  storedRowProblem,
+  stricterThanRestricted,
+  unverifiedStatus,
+} from "../trusted-state"
 import type { StoredPlan } from "../types"
 
 const cp = signerFromPrivateKey(privateKeyFromSeed(TEST_ONLY_CP_SEED))
@@ -59,6 +65,53 @@ describe("the stored plan document, checked again (adr/0061 Ek C19 I2)", () => {
       [{ event: "control_plane.stored_invalid", code: "signature.invalid", kept: false }],
       [{ event: "control_plane.stored_invalid", code: "signature.invalid", kept: true }],
       [{ event: "control_plane.stored_invalid", code: "signature.invalid", kept: false }],
+    ])
+  })
+})
+
+describe("what an untrusted row or a lost one may still say (adr/0061 Ek C19 takip)", () => {
+  it("only ever tightens restricted: suspended > restricted > active (LOW-2)", () => {
+    expect(stricterThanRestricted("suspended")).toBe("suspended")
+    expect(stricterThanRestricted("closing")).toBe("closing")
+    expect(stricterThanRestricted("closed")).toBe("closed")
+    for (const looser of ["active", "provisioning", "restricted", "paused", 7, null, undefined]) {
+      expect(stricterThanRestricted(looser)).toBe("restricted")
+    }
+  })
+
+  it("keeps a suspended shop closed when its row fails and nothing is held (LOW-2)", () => {
+    jest.spyOn(logger, "error").mockImplementation(() => undefined)
+    const forged = row({ ...planDocument, status: "suspended" })
+    const last = new LastVerified()
+
+    expect(last.fallback(TENANT_ID, "signature.invalid", unverifiedStatus(forged))).toMatchObject({
+      managed: true,
+      status: "suspended",
+      serial: null,
+    })
+    // A forged active row still restricts
+    const active = row({ ...planDocument, status: "active" })
+    expect(last.fallback(TENANT_ID, "signature.invalid", unverifiedStatus(active))).toMatchObject({
+      status: "restricted",
+    })
+    // A row with no document object says nothing
+    const broken = { ...forged, document: "x" as unknown as StoredPlan["document"] }
+    expect(unverifiedStatus(broken)).toBeUndefined()
+  })
+
+  it("restricts a shop whose row is gone, or keeps the stricter status it verified (LOW-3)", () => {
+    const error = jest.spyOn(logger, "error").mockImplementation(() => undefined)
+    const last = new LastVerified()
+
+    expect(last.missing(TENANT_ID)).toMatchObject({ managed: true, status: "restricted" })
+    last.remember(TENANT_ID, stateOfStored(row({ ...planDocument, status: "active" })))
+    expect(last.missing(TENANT_ID)).toMatchObject({ status: "restricted", serial: null })
+    last.remember(TENANT_ID, stateOfStored(row({ ...planDocument, status: "suspended" })))
+    expect(last.missing(TENANT_ID)).toMatchObject({ status: "suspended", serial: null })
+    expect(error.mock.calls).toEqual([
+      [{ event: "control_plane.document_missing", kept: false }],
+      [{ event: "control_plane.document_missing", kept: true }],
+      [{ event: "control_plane.document_missing", kept: true }],
     ])
   })
 })

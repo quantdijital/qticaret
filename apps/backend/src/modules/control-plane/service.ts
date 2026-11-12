@@ -11,9 +11,16 @@ import { createRedisVersionSource, createVersionedCache } from "../../lib/cache"
 import type { VersionedCache } from "../../lib/cache"
 import { controlPlaneConfig } from "../../lib/control-plane/config"
 import { createRedisClient } from "../../lib/redis"
+import { ControlPlaneMarker } from "./models/control-plane-marker"
 import { ControlPlanePlan } from "./models/control-plane-plan"
 import type { PlanSource } from "./models/control-plane-plan"
-import { LastVerified, stateOfStored, storedRowProblem, tenantMismatch } from "./trusted-state"
+import {
+  LastVerified,
+  stateOfStored,
+  storedRowProblem,
+  tenantMismatch,
+  unverifiedStatus,
+} from "./trusted-state"
 import { DEFAULT_PLAN_STATE } from "./types"
 import type {
   ControlPlaneModuleOptions,
@@ -60,9 +67,11 @@ const FIELDS = [
  * lib/control-plane/receive.ts) and applies the serial rule itself, under
  * a lock, so a push and a pull cannot race. Unmanaged (no public keys),
  * it reports `active` with no limits and stores nothing. What it loads is
- * checked again (Ek C19 I2, I3: `trusted-state.ts`).
+ * checked again (Ek C19 I2, I3: `trusted-state.ts`); a missing row after
+ * an applied document (`ControlPlaneMarker`) is not a fresh shop (Ek C19
+ * takip LOW-3).
  */
-class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
+class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan, ControlPlaneMarker }) {
   private readonly cache: VersionedCache<PlanState>
   private readonly lastVerified = new LastVerified()
 
@@ -97,13 +106,27 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
         { select: ["id"], take: 1 },
         sharedContext
       )
-      return other ? tenantMismatch() : DEFAULT_PLAN_STATE(true)
+      if (other) {
+        return tenantMismatch()
+      }
+      return (await this.hasApplied_(config.tenantId, sharedContext))
+        ? this.lastVerified.missing(config.tenantId)
+        : DEFAULT_PLAN_STATE(true)
     }
     const problem = storedRowProblem(stored, config)
     if (problem !== null) {
-      return this.lastVerified.fallback(config.tenantId, problem)
+      return this.lastVerified.fallback(config.tenantId, problem, unverifiedStatus(stored))
     }
     return this.lastVerified.remember(config.tenantId, stateOfStored(stored))
+  }
+
+  private async hasApplied_(tenantId: string, sharedContext: Context): Promise<boolean> {
+    const [marker] = await this.listControlPlaneMarkers(
+      { tenant_id: tenantId },
+      { select: ["id"], take: 1 },
+      sharedContext
+    )
+    return marker !== undefined
   }
 
   /** Reads the stored document again now in this process (the next `planState` loads it). */
@@ -139,6 +162,8 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
    * never makes the shop look in touch (C9 review L3). Ek C19 I1: so a
    * pushed `same` changes nothing either, and neither drops the cache nor
    * moves the processes' shared marker (a replayed push costs no reload).
+   * Ek C19 takip INFO-1: a `same` whose stored row fails its checks is
+   * `repaired` with the verified document and reloads.
    */
   async storePlanDocument(
     signed: SignedPlanDocument,
@@ -146,7 +171,11 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
     now: Date = new Date()
   ): Promise<StoreResult> {
     const result = await this.storeInTransaction_(signed, source, now)
-    if (result.outcome === "applied" || (result.outcome === "same" && source === "pull")) {
+    if (
+      result.outcome === "applied" ||
+      result.repaired ||
+      (result.outcome === "same" && source === "pull")
+    ) {
       await this.cache.invalidate()
     }
     return result
@@ -171,15 +200,9 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
     )) as unknown as (StoredPlan & { id: string })[]
     const order = comparePlanSerial(row ? row.serial : null, signed.document.serial)
     if (order === "stale") {
-      return { outcome: "stale", previous: null }
+      return { outcome: "stale", previous: null, marked: false, repaired: false }
     }
     const pulled = source === "pull"
-    if (order === "same" && row) {
-      if (pulled) {
-        await this.updateControlPlanePlans({ id: row.id, confirmed_at: now }, sharedContext)
-      }
-      return { outcome: "same", previous: null }
-    }
     const values = {
       serial: signed.document.serial,
       document: signed.document as unknown as Record<string, unknown>,
@@ -189,26 +212,44 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
       confirmed_at: pulled ? now : (row?.confirmed_at ?? null),
       source,
     }
+    if (order === "same" && row) {
+      const repaired = storedRowProblem(storedOf(row), controlPlaneConfig()) !== null
+      if (repaired) {
+        await this.updateControlPlanePlans({ id: row.id, ...values }, sharedContext)
+      } else if (pulled) {
+        await this.updateControlPlanePlans({ id: row.id, confirmed_at: now }, sharedContext)
+      }
+      return { outcome: "same", previous: null, marked: false, repaired }
+    }
     if (row) {
       await this.updateControlPlanePlans({ id: row.id, ...values }, sharedContext)
     } else {
       await this.createControlPlanePlans([{ tenant_id: tenantId, ...values }], sharedContext)
     }
-    return { outcome: "applied", previous: row ? storedOf(row) : null }
+    const marked = !(await this.hasApplied_(tenantId, sharedContext))
+    if (marked) {
+      await this.createControlPlaneMarkers(
+        [{ tenant_id: tenantId, first_applied_at: now }],
+        sharedContext
+      )
+    }
+    return { outcome: "applied", previous: row ? storedOf(row) : null, marked, repaired: false }
   }
 
   /**
    * Puts the stored document back as it was before an `applied` (workflow
    * compensation), under the same lock and only while the row still holds
    * the serial being undone (C9 review M1): a newer document stored in
-   * between is never overwritten by an older one.
+   * between is never overwritten by an older one. `unmark`: the apply
+   * wrote the shop's first marker, which goes with it.
    */
   async restorePlanDocument(
     tenantId: string,
     undoneSerial: number,
-    previous: StoredPlan | null
+    previous: StoredPlan | null,
+    unmark = false
   ): Promise<void> {
-    await this.restoreInTransaction_(tenantId, undoneSerial, previous)
+    await this.restoreInTransaction_(tenantId, undoneSerial, previous, unmark)
     await this.cache.invalidate()
   }
 
@@ -217,6 +258,7 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
     tenantId: string,
     undoneSerial: number,
     previous: StoredPlan | null,
+    unmark: boolean,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
     await (sharedContext.transactionManager as Executor).execute(
@@ -230,6 +272,17 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
     )) as unknown as { id: string; serial: number }[]
     if (row?.serial !== undoneSerial) {
       return
+    }
+    if (unmark) {
+      const markers = await this.listControlPlaneMarkers(
+        { tenant_id: tenantId },
+        { select: ["id"] },
+        sharedContext
+      )
+      await this.deleteControlPlaneMarkers(
+        markers.map((marker) => marker.id),
+        sharedContext
+      )
     }
     if (previous === null) {
       await this.deleteControlPlanePlans([row.id], sharedContext)
