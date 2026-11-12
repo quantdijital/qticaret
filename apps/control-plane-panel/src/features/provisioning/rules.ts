@@ -5,8 +5,10 @@ import type { ProvisioningState, RunAction } from "./api"
  * Which of the setup's actions can start now, by the control plane's own
  * rules (Ek C10), so a button is not offered where it would refuse: one
  * run of a shop at a time (409 `cp.provisioning_busy`), none without a
- * provisioner (503), a start or an invitation only for a shop being set
- * up or active (409 `provisioning.tenant_status`; a stop in any status).
+ * provisioner (503), an invitation or the sector pack only for a shop
+ * being set up or active, a start also for a restricted or suspended one
+ * (Ek C19 L2: it keeps running) (409 `provisioning.tenant_status`; a stop
+ * in any status; the control plane's `RUN_STATUSES`).
  * Starting, stopping, inviting and applying the sector pack again (C12)
  * need a shop that was set up once. The control plane decides again.
  */
@@ -23,6 +25,7 @@ export type ActionRules = Record<RunAction, ActionRule> & {
 }
 
 const LIVE: readonly TenantStatus[] = ["provisioning", "active"]
+const STARTABLE: readonly TenantStatus[] = [...LIVE, "restricted", "suspended"]
 
 const yes: ActionRule = { enabled: true, reason: null }
 const no = (reason: string): ActionRule => ({ enabled: false, reason })
@@ -75,7 +78,11 @@ export function actionRules(
     // Set up and active: nothing left to do (a setup run again would only skip)
     create: needsLive(setUp && status === "active" ? no("setup.reasons.done") : yes),
     stop: needsSetUp,
-    start: needsSetUp.enabled ? needsLive(yes) : needsSetUp,
+    start: needsSetUp.enabled
+      ? STARTABLE.includes(status)
+        ? yes
+        : no("setup.reasons.status")
+      : needsSetUp,
     invite: needsSetUp.enabled ? needsLive(yes) : needsSetUp,
     apply_pack: needsSetUp.enabled ? needsLive(yes) : needsSetUp,
     createLabel,

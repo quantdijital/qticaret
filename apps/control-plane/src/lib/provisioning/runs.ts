@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { codeSummary } from "@qticaret/server-kit"
+import type { TenantStatus } from "@qticaret/types/control-plane"
 import type { RunView } from "../../modules/provisioning/service"
 import { provisioningIn, tenantsIn } from "../../workflows/modules"
 import { codeOf } from "../../workflows/provisioning/step"
@@ -31,6 +32,20 @@ export interface StartedRun {
  * for `done` (the CLI) or answer at once and let the page follow (the API).
  * One run of a shop at a time (`cp.provisioning_busy`).
  */
+/**
+ * The statuses a run may start from (review L7, Ek C19 L2). A restricted
+ * or suspended shop keeps running (its storefront sells, or answers its
+ * 503; its orders are operated), so it may be started again after a
+ * reboot; it gets no new owner invitation and no pack while its panel is
+ * closed to such changes. Setup and stop are not limited here (setup has
+ * its own rule; a closing shop is stopped).
+ */
+export const RUN_STATUSES: Partial<Record<RunKind, readonly TenantStatus[]>> = {
+  start: ["provisioning", "active", "restricted", "suspended"],
+  invite: ["provisioning", "active"],
+  apply_pack: ["provisioning", "active"],
+}
+
 export async function startRun(
   container: MedusaContainer,
   input: StartRunInput
@@ -40,12 +55,12 @@ export async function startRun(
     throw new ProvisioningError("provisioning.fail_at_local_only")
   }
   const which = provisioner()
-  // Review L7: a shop is started, invited or given its pack again (C12) only
-  // while it is being set up or active; stopping is always allowed (a
-  // suspended or closing shop is stopped)
-  if (input.kind === "start" || input.kind === "invite" || input.kind === "apply_pack") {
+  // Review L7, Ek C19 L2: which shops a run may touch (`RUN_STATUSES`);
+  // stopping is always allowed (a closing shop is stopped)
+  const allowed = RUN_STATUSES[input.kind]
+  if (allowed) {
     const { status } = await tenantsIn(container).tenantOf(input.tenant_id)
-    if (status !== "provisioning" && status !== "active") {
+    if (!allowed.includes(status)) {
       throw new ProvisioningError("provisioning.tenant_status")
     }
   }

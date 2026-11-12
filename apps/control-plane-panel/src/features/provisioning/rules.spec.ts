@@ -39,12 +39,18 @@ describe("the setup's actions by the control plane's rules (Ek C10)", () => {
     expect(rules.create.reason).toBe("setup.reasons.done")
   })
 
-  it("keeps a stop for any status, the rest for a shop being set up or active", () => {
-    const rules = actionRules(state(SET_UP), "suspended")
+  it("keeps a stop for any status, a start for a running one, the rest for one being set up or active", () => {
+    // Ek C19 L2: a restricted or suspended shop keeps running; it may be started again
+    for (const status of ["restricted", "suspended"] as const) {
+      const rules = actionRules(state(SET_UP), status)
 
-    expect(enabled(rules)).toEqual(["stop"])
-    expect(rules.start.reason).toBe("setup.reasons.status")
-    expect(rules.apply_pack.reason).toBe("setup.reasons.status")
+      expect(enabled(rules)).toEqual(["start", "stop"])
+      expect(rules.invite.reason).toBe("setup.reasons.status")
+      expect(rules.apply_pack.reason).toBe("setup.reasons.status")
+    }
+    const closing = actionRules(state(SET_UP), "closing")
+    expect(enabled(closing)).toEqual(["stop"])
+    expect(closing.start.reason).toBe("setup.reasons.status")
   })
 
   it("tells the shop's last known state from its runs", () => {

@@ -289,6 +289,34 @@ medusaIntegrationTestRunner({
         expect(await probe(a.slug)).toMatchObject({ healthy: 1 })
       })
 
+      it("probes a restricted shop's two targets, a suspended one's backend only, and expects their reports (Ek C19 L2)", async () => {
+        const a = await shop()
+        await tenants().updateTenants({ id: a.id, api_base_url: base, storefront_url: base })
+        state.mode = "ok"
+        const page = async () =>
+          (await call.get(`/admin/cp/tenants/${a.id}/usage-health`, readonly)).data as {
+            report: { expected: boolean }
+            health: { backend: { probed: boolean }; storefront: { probed: boolean } }
+          }
+
+        await tenants().changeStatus(a.id, "active", { reason_code: "test", actor: "system" })
+        await tenants().changeStatus(a.id, "restricted", { reason_code: "test", actor: "system" })
+        expect((await probe(a.slug)).probed).toBe(2)
+        expect(await page()).toMatchObject({
+          report: { expected: true },
+          health: { backend: { probed: true }, storefront: { probed: true } },
+        })
+
+        await tenants().changeStatus(a.id, "suspended", { reason_code: "test", actor: "system" })
+        state.seen.length = 0
+        expect(await probe(a.slug)).toMatchObject({ probed: 1, healthy: 1 })
+        expect(state.seen).toEqual(["/health"])
+        expect(await page()).toMatchObject({
+          report: { expected: true },
+          health: { backend: { probed: true }, storefront: { probed: false } },
+        })
+      })
+
       it("asks nothing of an address outside the policy, and records why", async () => {
         const a = await shop()
         await tenants().updateTenants({ id: a.id, api_base_url: "http://metadata.example.com/" })

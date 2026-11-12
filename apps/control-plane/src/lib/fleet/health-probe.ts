@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { HealthTarget } from "../../modules/fleet/models/health"
 import type { TenantRecord } from "../../modules/tenants/types"
+import type { TenantStatus } from "@qticaret/types/control-plane"
 import { fleetIn, tenantsIn } from "../../workflows/modules"
 import { eachBounded } from "./bounded"
 import { PROBE_CONCURRENCY, PROBE_TIMEOUT_MS, statusOutcome } from "./health-rules"
@@ -15,8 +16,20 @@ import { storefrontPolicy, storefrontTargetProblem } from "./storefront-target"
 type Container = Pick<MedusaContainer, "resolve">
 export type Fetch = (url: string, init: RequestInit) => Promise<Response>
 
-/** The statuses whose shops are probed: running, or being set up (adr/0061 §2). */
-export const PROBED_STATUSES = ["active", "provisioning"] as const
+/**
+ * The statuses whose shops are probed, per target (adr/0061 §2, Ek C19
+ * L2): a restricted or suspended shop keeps running and its backend still
+ * answers; a suspended storefront answers its 503 on purpose (§5.5), so
+ * it is not asked. Being set up counts as running.
+ */
+export const PROBED_STATUSES: Readonly<Record<HealthTarget, readonly TenantStatus[]>> = {
+  backend: ["provisioning", "active", "restricted", "suspended"],
+  storefront: ["provisioning", "active", "restricted"],
+}
+
+/** Whether a shop in `status` has its `target` probed. */
+export const isProbed = (status: string, target: HealthTarget): boolean =>
+  (PROBED_STATUSES[target] as readonly string[]).includes(status)
 const PAGE = 200
 
 /**
@@ -110,23 +123,23 @@ export interface ProbeRun {
   unhealthy: number
 }
 
-/** The shops to probe, page by page: running or being set up, with an address to ask. */
+/** The shops to probe, page by page: running or being set up, with an address to ask (`PROBED_STATUSES`). */
 async function probedShops(container: Container, slugs?: readonly string[]): Promise<Job[]> {
   const jobs: Job[] = []
   for (let skip = 0; ; skip += PAGE) {
     const rows = (await tenantsIn(container).listTenants(
       {
-        status: [...PROBED_STATUSES],
+        status: [...PROBED_STATUSES.backend],
         ...(slugs ? { slug: [...slugs] } : {}),
         $or: [{ api_base_url: { $ne: null } }, { storefront_url: { $ne: null } }],
       },
       { order: { created_at: "ASC", id: "ASC" }, skip, take: PAGE }
     )) as unknown as TenantRecord[]
     for (const tenant of rows) {
-      if (tenant.api_base_url) {
+      if (tenant.api_base_url && isProbed(tenant.status, "backend")) {
         jobs.push({ tenant, target: "backend" })
       }
-      if (tenant.storefront_url) {
+      if (tenant.storefront_url && isProbed(tenant.status, "storefront")) {
         jobs.push({ tenant, target: "storefront" })
       }
     }
@@ -140,7 +153,7 @@ async function probedShops(container: Container, slugs?: readonly string[]): Pro
  * The health probe (adr/0061 §5.4, Ek C13): every running or provisioning
  * shop's backend `/health` (its internal address, held to the push policy)
  * and, when known, its storefront home page (held to the storefront
- * policy), `PROBE_CONCURRENCY` at a time. Each result is stored with the
+ * policy; not while suspended, Ek C19 L2), `PROBE_CONCURRENCY` at a time. Each result is stored with the
  * target's new standing; a change to or from `unhealthy` is logged by
  * code. `slugs` narrows it to some shops (the CLI).
  */

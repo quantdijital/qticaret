@@ -82,3 +82,13 @@ export function reportMissing(
   const from = lastReportAt ?? since
   return from !== null && now.getTime() - from.getTime() > REPORT_MISSING_AFTER_MS
 }
+
+/**
+ * The statuses whose shops send the hourly usage report (adr/0061 §5.4,
+ * Ek C19 L2): a restricted or suspended shop keeps running and reporting.
+ */
+export const REPORTING_STATUSES: readonly string[] = ["active", "restricted", "suspended"]
+
+/** Whether a shop is expected to report: in a reporting status, with an internal address. */
+export const reportExpected = (shop: { status: string; api_base_url: string | null }): boolean =>
+  REPORTING_STATUSES.includes(shop.status) && shop.api_base_url !== null

@@ -155,10 +155,13 @@ medusaIntegrationTestRunner({
         { due: 0, amount: 10_000 },
       ])
 
-      // Health: A's backend unhealthy, G's storefront failing once, D (not probed) ignored
-      await failProbes(container, a, "backend", 3)
+      // Health: A's backend unhealthy, G's storefront failing once; Ek C19 L2:
+      // restricted C's backend is probed and counts, suspended D's storefront
+      // (a deliberate 503, not probed) is ignored
+      await failProbes(container, a, "backend", 3, new Date(Date.now() - 10 * 60_000))
       await failProbes(container, g, "storefront", 1)
-      await failProbes(container, d, "backend", 3)
+      await failProbes(container, c, "backend", 3)
+      await failProbes(container, d, "storefront", 3)
       // Reports: A last 4 hours ago (silent), G an hour ago, E never since 5 hours, B never but just now
       const tenants = tenantsOf(container)
       for (const id of [a, b, e, g]) {
@@ -258,7 +261,7 @@ medusaIntegrationTestRunner({
         [d, day(29), 70_000, false, false],
       ])
       expect(board["health"]).toMatchObject({
-        unhealthy: 1,
+        unhealthy: 2,
         failing: 1,
         stale: 2,
         stale_after_hours: 3,
@@ -270,6 +273,7 @@ medusaIntegrationTestRunner({
             target: "backend",
             error: "health.http_503",
           },
+          { tenant: { id: c }, problem: "unhealthy", target: "backend" },
           { tenant: { id: e }, problem: "stale", target: null },
         ],
       })

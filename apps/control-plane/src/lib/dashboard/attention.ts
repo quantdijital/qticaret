@@ -2,8 +2,8 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import type { HealthState, HealthTarget } from "../../modules/fleet/models/health"
 import type { ReportedRelease, TargetRecord } from "../../modules/fleet/service-releases"
 import { fleetIn } from "../../workflows/modules"
-import { PROBED_STATUSES } from "../fleet/health-probe"
-import { REPORT_MISSING_AFTER_MS, reportMissing } from "../fleet/health-rules"
+import { isProbed } from "../fleet/health-probe"
+import { REPORT_MISSING_AFTER_MS, reportExpected, reportMissing } from "../fleet/health-rules"
 import { warnCap } from "../fleet/release-views"
 import type { LiveShop } from "../fleet/release-views"
 import { drifts } from "../fleet/releases"
@@ -43,10 +43,13 @@ const refOf = ({ id, name, slug, status }: LiveShop): ShopRef => ({ id, name, sl
 /**
  * The dashboard's attention list (Ek C18), from what C13 keeps:
  *
- * - **unhealthy:** a probed shop (`active`, `provisioning`) with a target
- *   `unhealthy` (three failed probes in a row); `failing` (fewer) is
- *   counted apart and not listed (it often passes on the next probe)
- * - **stale report:** a shop that should report (`active` with an address)
+ * - **unhealthy:** a probed target (`PROBED_STATUSES`: the backend of a
+ *   running, restricted or suspended shop, the storefront but a suspended
+ *   one's, Ek C19 L2) `unhealthy` (three failed probes in a row);
+ *   `failing` (fewer) is counted apart and not listed (it often passes on
+ *   the next probe)
+ * - **stale report:** a shop that should report (`active`, `restricted` or
+ *   `suspended` with an address)
  *   whose last report, or its activation when it never reported, is older
  *   than `REPORT_MISSING_AFTER_MS` (three hours: the shop page's "rapor
  *   gelmiyor" rule, one threshold for both)
@@ -65,7 +68,6 @@ export async function attentionOf(
   now: Date
 ) {
   const byId = new Map(shops.map((shop) => [shop.id, shop]))
-  const probed = new Set<string>(PROBED_STATUSES)
   // Review I1: worst first, then oldest, in a fixed order, so a cap drops the mildest
   const read = async (state: HealthState, order: "unhealthy_since" | "checked_at") => {
     const rows = (await fleetIn(container).listHealthStandings(
@@ -89,7 +91,7 @@ export async function attentionOf(
   const worst = new Map<string, { row: Standing; shop: LiveShop }>()
   for (const row of standings) {
     const shop = byId.get(row.tenant_id)
-    if (!shop || !probed.has(shop.status)) {
+    if (!shop || !isProbed(shop.status, row.target)) {
       continue
     }
     const held = worst.get(row.tenant_id)
@@ -99,7 +101,7 @@ export async function attentionOf(
   }
   const unhealthy = [...worst.values()].filter(({ row }) => row.state === "unhealthy")
   const failing = worst.size - unhealthy.length
-  const expected = shops.filter((shop) => shop.status === "active" && shop.api_base_url !== null)
+  const expected = shops.filter(reportExpected)
   const stale = expected
     .map((shop) => ({ shop, last: reports.get(shop.id)?.received_at ?? null }))
     .filter(({ shop, last }) => reportMissing(last, now, shop.status_changed_at))

@@ -8,8 +8,10 @@ import {
   HEALTH_KEEP_MS,
   REPORT_MISSING_AFTER_MS,
   UNHEALTHY_AFTER,
+  reportExpected,
   reportMissing,
 } from "./health-rules"
+import { isProbed } from "./health-probe"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -37,8 +39,9 @@ const usageView = (row: UsageSnapshotRow | null) =>
 /**
  * A shop's usage and health as its page shows them (Ek C13): the latest
  * snapshot, whether the hourly report is overdue (a managed, running shop
- * only: `active` with an internal address, three hours without one since
- * its last report or since it became active), and per probed target its
+ * only: `active`, `restricted` or `suspended` with an internal address,
+ * Ek C19 L2; three hours without one since its last report or since its
+ * status last changed), and per probed target its
  * standing, its last probes and how many of a day's answered.
  */
 export async function usageHealthOf(container: Container, tenant: TenantRecord, now: Date) {
@@ -47,7 +50,7 @@ export async function usageHealthOf(container: Container, tenant: TenantRecord, 
     fleet.latestUsage(tenant.id),
     fleet.healthOf([tenant.id]),
   ])
-  const expected = tenant.status === "active" && tenant.api_base_url !== null
+  const expected = reportExpected(tenant)
   const since = new Date(now.getTime() - HEALTH_KEEP_MS)
   const target = async (name: HealthTarget, probed: boolean) => {
     const standing: HealthStatusRow | undefined = standings.find((row) => row.target === name)
@@ -61,8 +64,8 @@ export async function usageHealthOf(container: Container, tenant: TenantRecord, 
     return { probed, standing: omit(standing, "tenant_id", "target"), history, day }
   }
   const [backend, storefront] = await Promise.all([
-    target("backend", tenant.api_base_url !== null),
-    target("storefront", tenant.storefront_url !== null),
+    target("backend", tenant.api_base_url !== null && isProbed(tenant.status, "backend")),
+    target("storefront", tenant.storefront_url !== null && isProbed(tenant.status, "storefront")),
   ])
   return {
     usage: usageView(latest),
