@@ -35,7 +35,7 @@ export type PostCpMfaVerifyType = z.infer<typeof PostCpMfaVerify>
 export const PostCpStepUp = z.object({ method: z.enum(["totp", "recovery_code"]), code }).strict()
 export type PostCpStepUpType = z.infer<typeof PostCpStepUp>
 
-/** An invitation: the address and the role it gives; an owner is made from the team. */
+/** An invitation: the address and the role it gives, an owner's too (adr/0061 §3.5). */
 export const PostCpInvite = z.object({ email, role: z.enum(CP_INVITABLE_ROLES) }).strict()
 export type PostCpInviteType = z.infer<typeof PostCpInvite>
 

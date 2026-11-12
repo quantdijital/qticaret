@@ -269,7 +269,7 @@
     "invite": {
       "open": "Invite staff",
       "title": "Invite staff",
-      "text": "The invitation goes by email. The owner role is never given by invitation; give it to an existing member later.",
+      "text": "The invitation goes by email. The role takes effect once they set up two-step verification.",
       "email": "Email",
       "role": "Role",
       "submit": "Send invitation"

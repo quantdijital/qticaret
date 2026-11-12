@@ -18,9 +18,11 @@ import type CpStaffModuleService from "../../modules/cp-staff/service"
  * Platform staff invitations (adr/0061 §3.5; the shop's staff invites,
  * adr/0040 §4, copied): Medusa's invitation with the role in its metadata,
  * read back on acceptance by our own route (Medusa's acceptance gives no
- * role and is unreachable here: the allowlist answers 404). An owner comes
- * only from a bootstrap invitation (`cp:create-owner`), and only while the
- * control plane has no active owner.
+ * role and is unreachable here: the allowlist answers 404). An owner's
+ * invitation is one of two kinds, never the other: a bootstrap one
+ * (`cp:create-owner`: an hour, only while the control plane has no granted
+ * owner) or, since 2026-11-12, an owner's, good only while its inviter is
+ * still a granted, active owner.
  */
 
 export interface InviteFacts {
@@ -54,27 +56,48 @@ export async function inviteOfToken(container: Container, token: string): Promis
     metadata?: Record<string, unknown> | null
     created_at?: Date | string
   } | null
-  const role = invite?.metadata?.["role"]
-  const invitable = (CP_INVITABLE_ROLES as readonly unknown[]).includes(role)
-  const fresh =
-    invite?.created_at !== undefined &&
-    Date.now() - new Date(invite.created_at).getTime() < BOOTSTRAP_INVITE_MS
-  const bootstrap =
-    role === "owner" &&
-    invite?.metadata?.["bootstrap"] === true &&
-    fresh &&
-    !(await staff(container).hasActiveOwner())
-  if (!invite || !(invitable || bootstrap)) {
+  if (!invite) {
     throw invalid()
   }
+  const role = invite.metadata?.["role"]
   const by = invite.metadata?.["invited_by"]
+  const invitedBy = typeof by === "string" && by !== "" ? by : null
+  // Flagged once, at its making: a bootstrap invitation past its rules is no other kind
+  const flagged = invite.metadata?.["bootstrap"] === true
+  const bootstrap = flagged && role === "owner" && (await bootstrapHolds(container, invite))
+  const invited =
+    !flagged &&
+    (CP_INVITABLE_ROLES as readonly unknown[]).includes(role) &&
+    (role !== "owner" || (await stillOwner(container, invitedBy)))
+  if (!(bootstrap || invited)) {
+    throw invalid()
+  }
   return {
     id: invite.id,
     email: invite.email,
     role: role as CpStaffRole,
-    invited_by: typeof by === "string" ? by : null,
+    invited_by: invitedBy,
     bootstrap,
   }
+}
+
+/** A bootstrap invitation holds for its hour, and only while no owner is granted. */
+async function bootstrapHolds(
+  container: Container,
+  invite: { created_at?: Date | string }
+): Promise<boolean> {
+  const fresh =
+    invite.created_at !== undefined &&
+    Date.now() - new Date(invite.created_at).getTime() < BOOTSTRAP_INVITE_MS
+  return fresh && !(await staff(container).hasActiveOwner())
+}
+
+/**
+ * An owner's invitation holds only while its inviter is a granted, active
+ * owner: a link taken from a removed owner's mailbox makes no owner.
+ */
+async function stillOwner(container: Container, invitedBy: string | null): Promise<boolean> {
+  return invitedBy !== null && (await staff(container).roleOf(invitedBy)) === "owner"
 }
 
 /** An invitation with the role it gives. `bootstrap` only from `cp:create-owner`. */

@@ -3,7 +3,8 @@ import type { StaffRole } from "@/features/auth/api"
 import { api } from "@/lib/api"
 import { withStepUp } from "@/lib/step-up"
 
-export const INVITABLE_ROLES = ["operator", "finance", "readonly"] as const
+// Every role, an owner's too (adr/0061 §3.5, 2026-11-12), as the member dialog orders them
+export const INVITABLE_ROLES = ["owner", "operator", "finance", "readonly"] as const
 export type InvitableRole = (typeof INVITABLE_ROLES)[number]
 export const STAFF_ROLES = ["owner", "operator", "finance", "readonly"] as const
 

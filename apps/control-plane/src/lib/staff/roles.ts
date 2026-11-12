@@ -12,10 +12,12 @@ export const CP_STAFF_ROLES = ["owner", "operator", "finance", "readonly"] as co
 export type CpStaffRole = (typeof CP_STAFF_ROLES)[number]
 
 /**
- * The roles an invitation gives. An owner is made from the team by an
- * owner, or bootstrapped once by `cp:create-owner`.
+ * The roles an invitation gives: every one (2026-11-12). An owner is
+ * invited by a granted owner (accepted only while that owner still is
+ * one), made from the team, or bootstrapped once by `cp:create-owner`.
+ * Any role is granted only once the member's 2FA is set up.
  */
-export const CP_INVITABLE_ROLES = ["operator", "finance", "readonly"] as const
+export const CP_INVITABLE_ROLES = ["owner", "operator", "finance", "readonly"] as const
 export type CpInvitableRole = (typeof CP_INVITABLE_ROLES)[number]
 
 export const isCpStaffRole = (value: unknown): value is CpStaffRole =>

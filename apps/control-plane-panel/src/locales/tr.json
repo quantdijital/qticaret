@@ -269,7 +269,7 @@
     "invite": {
       "open": "Personel davet et",
       "title": "Personel davet et",
-      "text": "Davet e-postayla gider. Sahip rolü davetle verilmez; mevcut bir üyeye sonradan verilir.",
+      "text": "Davet e-postayla gider. Rol, kişi iki adımlı doğrulamayı kurunca geçerli olur.",
       "email": "E-posta",
       "role": "Rol",
       "submit": "Davet gönder"

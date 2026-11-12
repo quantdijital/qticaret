@@ -14,8 +14,8 @@ import { RolePicker } from "./role-picker"
 const EMAIL = z.email()
 
 /**
- * A new member invited (owner, step-up): an address and a role; an owner
- * is never invited, an owner makes one from the team. The link goes by
+ * A new member invited (owner, step-up): an address and a role, an
+ * owner's too; the role holds once they set 2FA up. The link goes by
  * e-mail, or comes back once to pass on.
  */
 export function InviteDialog({

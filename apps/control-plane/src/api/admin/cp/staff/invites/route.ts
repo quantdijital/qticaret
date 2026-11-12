@@ -7,9 +7,10 @@ import type { InviteRow } from "../../../../../lib/staff/invites"
 
 /**
  * POST /admin/cp/staff/invites (owner, step-up; adr/0061 §3.5): an
- * invitation with its role (operator, finance or readonly), sent by
- * e-mail; its link in this answer only, for the owner to pass on by hand
- * when no e-mail goes out (`mailed: false`). Never stored by us.
+ * invitation with its role (any, an owner's too: accepted only while the
+ * inviting owner still is one), sent by e-mail; its link in this answer
+ * only, for the owner to pass on by hand when no e-mail goes out
+ * (`mailed: false`). Never stored by us.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<PostCpInviteType>,
