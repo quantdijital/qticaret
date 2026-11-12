@@ -12,7 +12,12 @@ import {
   PostChargeReason,
   PostSubscriptionGrace,
 } from "../admin/cp/billing/validators"
-import { PostPlan, PostPlanPrice, PostPlanUpdate } from "../admin/cp/plans/validators"
+import {
+  PostPlan,
+  PostPlanPrice,
+  PostPlanTerms,
+  PostPlanUpdate,
+} from "../admin/cp/plans/validators"
 import {
   GetActivity,
   GetTenantAvailability,
@@ -104,6 +109,7 @@ export const TENANT_ROUTE_MIDDLEWARES: MiddlewareRoute[] = [
   body(P, PostPlan),
   body(`${P}/:id`, PostPlanUpdate),
   body(`${P}/:id/price`, PostPlanPrice),
+  body(`${P}/:id/terms`, PostPlanTerms),
   body(`${P}/:id/archive`, NoBody),
   body(`${P}/:id/restore`, NoBody),
   // Ek C10: a shop's setup takes nothing but the path (no failure injection over HTTP)

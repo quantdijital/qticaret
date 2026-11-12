@@ -147,7 +147,7 @@ const TENANT_ROUTES: RouteRule[] = [
   },
 ]
 
-/** The packages (C7): read by all; made, changed and archived by finance; a price behind a step-up. */
+/** The packages (C7): read by all; made, changed and archived by finance; a price and the trial and grace days behind a step-up. */
 const PLAN_ROUTES: RouteRule[] = [
   { method: "GET", path: "/admin/cp/plans", access: ALL },
   // C12: the sector packs' manifests and counts, read by all as the packages are (no personal data)
@@ -169,6 +169,15 @@ const PLAN_ROUTES: RouteRule[] = [
   {
     method: "POST",
     path: "/admin/cp/plans/:id/price",
+    access: PACKAGES,
+    stepUp: true,
+    resource: PACKAGE,
+  },
+  // Ek C19 L1: the trial and grace days bear money as the price does (one
+  // shop's grace days already asked the proof)
+  {
+    method: "POST",
+    path: "/admin/cp/plans/:id/terms",
     access: PACKAGES,
     stepUp: true,
     resource: PACKAGE,

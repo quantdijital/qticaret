@@ -134,6 +134,7 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "POST /admin/cp/me/sessions/revoke-others",
       "POST /admin/cp/plans",
       "POST /admin/cp/plans/:id/price",
+      "POST /admin/cp/plans/:id/terms",
       "POST /admin/cp/releases",
       "POST /admin/cp/releases/:id",
       "POST /admin/cp/staff/invites",
@@ -211,7 +212,14 @@ describe("the control plane's route table (adr/0061 §3.5)", () => {
       "operator",
       "finance",
     ])
-    for (const path of ["", "/pkg_1", "/pkg_1/price", "/pkg_1/archive", "/pkg_1/restore"]) {
+    for (const path of [
+      "",
+      "/pkg_1",
+      "/pkg_1/price",
+      "/pkg_1/terms",
+      "/pkg_1/archive",
+      "/pkg_1/restore",
+    ]) {
       expect(allowedRoles("POST", `/admin/cp/plans${path}`)).toEqual(["owner", "finance"])
     }
   })

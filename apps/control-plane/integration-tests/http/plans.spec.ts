@@ -141,6 +141,45 @@ medusaIntegrationTestRunner({
       )
     })
 
+    it("changes the trial and grace days only with a step-up, never with the name (Ek C19 L1)", async () => {
+      const made = planOf(await newPlan(finance))
+      const path = `/admin/cp/plans/${made.id}/terms`
+
+      const throughName = await call.post(
+        `/admin/cp/plans/${made.id}`,
+        { name: "Esnaf", grace_days: 60 },
+        finance
+      )
+      const unproved = await call.post(path, { grace_days: 60 }, finance)
+      const byOperator = await call.post(path, { grace_days: 60 }, operator)
+      const empty = await call.post(path, {}, finance, await proved(http, finance))
+      const termed = await call.post(
+        path,
+        { trial_days: 30, grace_days: 60 },
+        finance,
+        await proved(http, finance)
+      )
+      const rows = await auditRows(getContainer(), {
+        resource_type: "package",
+        resource_id: made.id,
+        outcome: 200,
+      })
+
+      expect(throughName.status).toBe(400)
+      expect(unproved.status).toBe(428)
+      expect(byOperator.status).toBe(403)
+      expect(JSON.stringify(empty.data)).toContain("cp.nothing_to_save")
+      expect(planOf(termed)).toMatchObject({ trial_days: 30, grace_days: 60, name: "Başlangıç" })
+      expect(rows.map((row) => row.changes)).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            trial_days: { from: 14, to: 30 },
+            grace_days: { from: 7, to: 60 },
+          }),
+        ])
+      )
+    })
+
     it("keeps an archived package on its shops and gives it to no new one", async () => {
       const made = planOf(await newPlan(owner))
       const first = await makeTenant(http, operator, { package_id: made.id })

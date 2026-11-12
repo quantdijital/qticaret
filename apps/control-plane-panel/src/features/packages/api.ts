@@ -72,18 +72,31 @@ export const useCreatePlan = () =>
   )
 
 /**
- * A package's changes in one save: its name, days, limits and flags; its price
- * and period apart, behind a step-up (adr/0061 §3.5), only when they moved.
+ * A package's changes in one save: its name, limits and flags; its price and
+ * period, and its trial and grace days, apart, behind a step-up (adr/0061
+ * §3.5, Ek C19 L1), only when they moved. One proof covers both.
  */
 export const useUpdatePlan = () =>
   usePlanChange(async ({ id, before, input }: { id: string; before: Plan; input: PlanInput }) => {
-    const { price, period, ...rest } = input
+    const { price, period, trial_days, grace_days, ...rest } = input
     await api(planPath(id), { method: "POST", body: rest })
-    if (price !== before.price || period !== before.period) {
-      await withStepUp((headers) =>
-        api(planPath(id, "/price"), { method: "POST", body: { price, period }, headers })
-      )
+    const priced = price !== before.price || period !== before.period
+    const termed = trial_days !== before.trial_days || grace_days !== before.grace_days
+    if (!priced && !termed) {
+      return
     }
+    await withStepUp(async (headers) => {
+      if (priced) {
+        await api(planPath(id, "/price"), { method: "POST", body: { price, period }, headers })
+      }
+      if (termed) {
+        await api(planPath(id, "/terms"), {
+          method: "POST",
+          body: { trial_days, grace_days },
+          headers,
+        })
+      }
+    })
   })
 
 /** Archived: offered to no new shop; the shops on it keep it. Restored: offered again. */

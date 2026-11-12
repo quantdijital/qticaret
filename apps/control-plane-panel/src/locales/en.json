@@ -673,7 +673,7 @@
     "codeHelp": "Lower-case letters, digits and hyphens; the plan document names it.",
     "name": "Name",
     "priceTitle": "Price and periods",
-    "priceNote": "A price or period change asks you to verify yourself and applies from each shop's next period.",
+    "priceNote": "A change to the price, period, trial or grace days asks you to verify yourself. A price or period applies from each shop's next period.",
     "price": "Price",
     "periodTitle": "Period",
     "trial": "Trial",

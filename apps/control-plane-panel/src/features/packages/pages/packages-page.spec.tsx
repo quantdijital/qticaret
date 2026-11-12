@@ -20,7 +20,7 @@ function controlPlane(call: Sent): Answer {
   if (call.path === "/admin/cp/plans" && call.method === "GET") {
     return { status: 200, body: { plans: [START, PRO, OLD] } }
   }
-  if (call.path.endsWith("/price")) {
+  if (call.path.endsWith("/price") || call.path.endsWith("/terms")) {
     return call.headers[STEP_UP_HEADER]
       ? { status: 200, body: { plan: PRO } }
       : refusal(428, "cp.step_up_required")
@@ -146,6 +146,34 @@ describe("PackagesPage: the packages (adr/0061 §2, C7)", () => {
       price: 169_000,
       period: "monthly",
     })
+  })
+
+  it("asks the step-up for new trial and grace days, sent apart from the name (Ek C19 L1)", async () => {
+    const sent = stubApi(controlPlane)
+    page("finance")
+
+    await userEvent.click(await screen.findByText("Profesyonel"))
+    const dialog = await screen.findByRole("dialog", { name: "Profesyonel" })
+    const grace = within(dialog).getByLabelText("Ek süre")
+    await userEvent.clear(grace)
+    await userEvent.type(grace, "30")
+    await userEvent.click(within(dialog).getByRole("button", { name: "Kaydet" }))
+    await userEvent.type(await screen.findByLabelText("Doğrulama kodu"), "123456")
+    await userEvent.click(screen.getByRole("button", { name: "Doğrula" }))
+
+    await waitFor(() => {
+      expect(
+        sent.filter((call) => call.path.endsWith("/terms")).at(-1)?.headers[STEP_UP_HEADER]
+      ).toBe("proof-1")
+    })
+    expect(sent.find((call) => call.path.endsWith("/terms"))?.body).toEqual({
+      trial_days: 14,
+      grace_days: 30,
+    })
+    const plain = sent.find((call) => call.path === "/admin/cp/plans/pkg_pro")?.body
+    expect(plain).not.toHaveProperty("grace_days")
+    expect(plain).not.toHaveProperty("trial_days")
+    expect(sent.some((call) => call.path.endsWith("/price"))).toBe(false)
   })
 
   it("says how many shops keep an archived package before archiving it", async () => {

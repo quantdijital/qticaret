@@ -44,12 +44,13 @@ export const PostPlan = z
   .strict()
 export type PostPlanType = z.infer<typeof PostPlan>
 
-/** A package's name, days, limits and flags; its price apart (a step-up, adr/0061 §3.5). */
+/**
+ * A package's name, limits and flags; its price and its trial and grace
+ * days apart (`/price`, `/terms`: a step-up, adr/0061 §3.5, Ek C19 L1).
+ */
 export const PostPlanUpdate = z
   .object({
     name: name.optional(),
-    trial_days: days(365).optional(),
-    grace_days: days(90).optional(),
     limits: limits.optional(),
     features: features.optional(),
   })
@@ -60,3 +61,10 @@ export type PostPlanUpdateType = z.infer<typeof PostPlanUpdate>
 /** A package's price and period: from the next period on (adr/0061 §7). */
 export const PostPlanPrice = z.object({ price, period: z.enum(BILLING_PERIODS) }).strict()
 export type PostPlanPriceType = z.infer<typeof PostPlanPrice>
+
+/** A package's trial and grace days (Ek C19 L1: a step-up, as one shop's grace days). */
+export const PostPlanTerms = z
+  .object({ trial_days: days(365).optional(), grace_days: days(90).optional() })
+  .strict()
+  .refine((value) => Object.keys(value).length > 0, "cp.nothing_to_save")
+export type PostPlanTermsType = z.infer<typeof PostPlanTerms>

@@ -3,9 +3,10 @@ import { changePackage } from "../changes"
 import type { PostPlanUpdateType } from "../validators"
 
 /**
- * POST /admin/cp/plans/:id (owner, finance): a package's name, trial and
- * grace days and limits; its price apart (`/price`, a step-up). Shops on
- * it get the new limits with their next plan document (C9).
+ * POST /admin/cp/plans/:id (owner, finance): a package's name, limits and
+ * flags; its price (`/price`) and its trial and grace days (`/terms`)
+ * apart, each a step-up (Ek C19 L1). Shops on it get the new limits with
+ * their next plan document (C9).
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<PostPlanUpdateType>,

@@ -673,7 +673,7 @@
     "codeHelp": "Küçük harf, rakam ve tire; plan belgesinde geçer.",
     "name": "Ad",
     "priceTitle": "Fiyat ve süreler",
-    "priceNote": "Fiyat ya da dönem değişikliği kimlik doğrulaması ister ve her mağazanın bir sonraki döneminden geçerlidir.",
+    "priceNote": "Fiyat, dönem, deneme ya da ek süre değişikliği kimlik doğrulaması ister. Fiyat ve dönem her mağazanın bir sonraki döneminden geçerlidir.",
     "price": "Fiyat",
     "periodTitle": "Dönem",
     "trial": "Deneme süresi",
