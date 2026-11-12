@@ -72,6 +72,19 @@ medusaIntegrationTestRunner({
       expect(raw.headers["cache-control"]).toBe("no-store")
     })
 
+    it("answers its product feeds 503 with Retry-After, as the storefront (Ek C19 L1)", async () => {
+      const feed = () => settle(http.get<Answer>("/feeds/0123456789abcdef0123456789abcdef/google"))
+      const open = await feed()
+      await setPlanStatus(getContainer(), "suspended")
+      const closed = await feed()
+
+      // Open: a wrong token is the feed's own 404
+      expect(open.status).toBe(404)
+      expect(closed.status).toBe(503)
+      expect(closed.headers["retry-after"]).toBe("3600")
+      expect(closed.data).toMatchObject({ type: "unavailable", message: "plan.suspended" })
+    })
+
     it("keeps provider hooks reachable, and the control plane's next document lifts it", async () => {
       await setPlanStatus(getContainer(), "suspended")
 

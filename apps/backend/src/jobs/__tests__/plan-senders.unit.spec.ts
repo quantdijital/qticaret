@@ -7,10 +7,14 @@ import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import { dispatchCampaignsWorkflow } from "../../workflows/campaigns/jobs"
 import { syncMerchantProductsWorkflow } from "../../workflows/google/merchant"
 import { findAbandonedCartsWorkflow } from "../../workflows/marketing/cart-reminders"
+import { generateFeedsWorkflow } from "../../workflows/marketing/feeds"
 import { brandOf } from "../../workflows/messaging/brand"
+import { inviteStatus, sendInvites } from "../../workflows/migration/invites"
 import campaignDispatch from "../campaign-dispatch"
 import cartReminders from "../cart-reminders"
 import googleMerchantSync from "../google-merchant-sync"
+import marketingFeeds from "../marketing-feeds"
+import migrationInvites from "../migration-invites"
 
 jest.mock("../../workflows/campaigns/jobs", () => ({ dispatchCampaignsWorkflow: jest.fn() }))
 jest.mock("../../workflows/google/merchant", () => ({ syncMerchantProductsWorkflow: jest.fn() }))
@@ -19,10 +23,16 @@ jest.mock("../../workflows/marketing/cart-reminders", () => ({
   remindCartWorkflow: jest.fn(),
 }))
 jest.mock("../../workflows/messaging/brand", () => ({ brandOf: jest.fn() }))
+jest.mock("../../workflows/marketing/feeds", () => ({ generateFeedsWorkflow: jest.fn() }))
+jest.mock("../../workflows/migration/invites", () => ({
+  inviteStatus: jest.fn(),
+  sendInvites: jest.fn(),
+}))
 
 const dispatch = jest.fn()
 const sync = jest.fn()
 const findCarts = jest.fn()
+const generateFeeds = jest.fn()
 
 /** A container whose control plane says `status` (managed), the shop's reminders on. */
 function shopIn(status: TenantStatus, managed = true): MedusaContainer {
@@ -48,6 +58,10 @@ beforeEach(() => {
   jest.mocked(syncMerchantProductsWorkflow).mockReturnValue({ run: sync } as never)
   jest.mocked(findAbandonedCartsWorkflow).mockReturnValue({ run: findCarts } as never)
   jest.mocked(brandOf).mockResolvedValue({ storefrontUrl: "https://magaza.example" } as never)
+  generateFeeds.mockResolvedValue({ result: {} })
+  jest.mocked(generateFeedsWorkflow).mockReturnValue({ run: generateFeeds } as never)
+  jest.mocked(inviteStatus).mockResolvedValue({ waiting: 12 } as never)
+  jest.mocked(sendInvites).mockResolvedValue({ sent: 12 } as never)
 })
 afterEach(() => {
   jest.clearAllMocks()
@@ -75,5 +89,23 @@ describe("background senders and the shop's status", () => {
     }
     expect(findCarts).toHaveBeenCalledTimes(2)
     expect(sync).toHaveBeenCalledTimes(2)
+  })
+
+  it("sends no migration invitation while restricted or suspended (Ek C19 L1)", async () => {
+    await migrationInvites(shopIn("restricted"))
+    await migrationInvites(shopIn("suspended"))
+    expect(sendInvites).not.toHaveBeenCalled()
+    await migrationInvites(shopIn("active"))
+    await migrationInvites(shopIn("suspended", false))
+    expect(sendInvites).toHaveBeenCalledTimes(2)
+  })
+
+  it("builds no product feed while suspended; restricted sells (Ek C19 L1)", async () => {
+    await marketingFeeds(shopIn("suspended"))
+    expect(generateFeeds).not.toHaveBeenCalled()
+    for (const status of ["restricted", "active"] as const) {
+      await marketingFeeds(shopIn(status))
+    }
+    expect(generateFeeds).toHaveBeenCalledTimes(2)
   })
 })
