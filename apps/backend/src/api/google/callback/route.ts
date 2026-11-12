@@ -2,6 +2,7 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { errorSummary, logger } from "../../../lib/logging"
 import { isValidationError } from "../../../lib/errors"
 import { REVIEWS_STATE_PREFIX, panelPathOfState } from "../../../lib/google/oauth"
+import { planModeFor } from "../../../lib/plan-guard"
 import {
   dropGoogleStateWorkflow,
   finishGoogleConnectWorkflow,
@@ -18,6 +19,11 @@ import type { GoogleCallbackQueryType } from "../../admin/google/validators"
  * Google reviews, adr/0058; else Settings > Marketing) with one word of
  * outcome. Connected for its reviews, a shop with one location has it
  * picked and read at once.
+ *
+ * A GET outside `/admin`, so the panel's plan guard never sees it (adr/0061
+ * Ek C19 L2): a restricted or suspended shop connects nothing (the start,
+ * `POST /admin/google/connect`, is closed to it too); the state is dropped
+ * and the panel hears `google=restricted`.
  */
 export async function GET(
   req: MedusaRequest<unknown, GoogleCallbackQueryType>,
@@ -30,6 +36,11 @@ export async function GET(
   }
   if (!state) {
     back("failed")
+    return
+  }
+  if ((await planModeFor(req.scope)) !== "open") {
+    await dropGoogleStateWorkflow(req.scope).run({ input: { state } })
+    back("restricted")
     return
   }
   if (error || !code) {

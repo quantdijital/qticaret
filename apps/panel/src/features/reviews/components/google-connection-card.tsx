@@ -24,7 +24,15 @@ import { errorText } from "@/lib/errors"
 import { formatRelative } from "@qticaret/admin-ui/lib/format"
 
 const G = "reviews.google"
-const OUTCOMES = ["connected", "denied", "state_invalid", "no_refresh_token", "failed"] as const
+// `restricted`: the shop's plan closed the connection (adr/0061 Ek C19 L2)
+const OUTCOMES = [
+  "connected",
+  "denied",
+  "state_invalid",
+  "no_refresh_token",
+  "restricted",
+  "failed",
+] as const
 // What the last sync's stop means for the shop: connect again, pick again, or wait
 const RECONNECT = new Set(["invalid_grant", "reviews_scope", "not_connected"])
 const LOST = new Set(["PERMISSION_DENIED", "NOT_FOUND", "http_403", "http_404"])

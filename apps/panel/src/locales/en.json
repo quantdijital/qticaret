@@ -2004,6 +2004,7 @@
           "denied": "Access was not allowed on Google; nothing was connected.",
           "state_invalid": "The connection request expired; try again.",
           "no_refresh_token": "Google gave no lasting access; try again.",
+          "restricted": "Your shop is restricted, so Google was not connected. See Settings > Subscription.",
           "failed": "Google could not be connected; try again."
         }
       },

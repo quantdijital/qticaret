@@ -3,7 +3,7 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import type { PlanSummary } from "../../src/lib/plan-limits"
 import { createAdminUser } from "../helpers/admin"
 import { managedForThisFile } from "../helpers/control-plane"
-import type { HttpClient } from "../helpers/http"
+import type { HttpClient, RequestConfig } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { productBody, setPlanStatus } from "../helpers/plan-limits"
 import { sellingShop } from "../helpers/plan-status"
@@ -130,6 +130,18 @@ medusaIntegrationTestRunner({
         expect(answer.data.message).not.toBe("plan.restricted")
       }
       expect(resumed.data).toMatchObject({ message: "plan.restricted" })
+    })
+
+    it("connects no Google account through the callback outside /admin (Ek C19 L2)", async () => {
+      const back = await settle(
+        http.get<Answer>("/google/callback?state=gst_restricted&code=4%2F0Aabc", {
+          responseType: "text",
+          maxRedirects: 0,
+        } as RequestConfig)
+      )
+
+      expect(back.status).toBe(303)
+      expect(String(back.headers["location"])).toMatch(/[?&]google=restricted$/)
     })
 
     it("corrects an order down but sells nothing new through an edit (review L1)", async () => {

@@ -13,7 +13,15 @@ import { errorText } from "@/lib/errors"
 import { formatRelative } from "@qticaret/admin-ui/lib/format"
 
 const G = "settings.marketing.google"
-const OUTCOMES = ["connected", "denied", "state_invalid", "no_refresh_token", "failed"] as const
+// `restricted`: the shop's plan closed the connection (adr/0061 Ek C19 L2)
+const OUTCOMES = [
+  "connected",
+  "denied",
+  "state_invalid",
+  "no_refresh_token",
+  "restricted",
+  "failed",
+] as const
 
 /** The word Google's callback sent the panel back with, once; the address is cleaned. */
 function useCallbackOutcome() {

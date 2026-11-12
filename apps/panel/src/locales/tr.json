@@ -2004,6 +2004,7 @@
           "denied": "Google'da izin verilmedi; bağlantı kurulmadı.",
           "state_invalid": "Bağlantı isteğinin süresi doldu; yeniden deneyin.",
           "no_refresh_token": "Google kalıcı erişim vermedi; yeniden deneyin.",
+          "restricted": "Mağazanız kısıtlı olduğu için Google bağlantısı kurulmadı. Ayrıntılar Ayarlar > Abonelik'te.",
           "failed": "Google bağlantısı kurulamadı; yeniden deneyin."
         }
       },

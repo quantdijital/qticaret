@@ -79,4 +79,14 @@ describe("GoogleMerchantCard", () => {
     expect(toastMock.error).toHaveBeenCalledWith(expect.stringMatching(/izin verilmedi/))
     expect(window.location.search).toBe("")
   })
+
+  it("says a restricted shop connected nothing (adr/0061 Ek C19 L2)", async () => {
+    window.history.replaceState(null, "", "/settings/marketing?google=restricted")
+    fetchMock.mockResolvedValue(status({ connected: false, email: null }))
+    renderCard()
+
+    await screen.findByRole("button", { name: "Google hesabını bağla" })
+    expect(toastMock.error).toHaveBeenCalledWith(expect.stringMatching(/kısıtlı olduğu için/))
+    expect(window.location.search).toBe("")
+  })
 })
