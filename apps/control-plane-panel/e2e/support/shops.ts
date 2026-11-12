@@ -27,7 +27,16 @@ export function removeE2eShop(slug: string): void {
   controlPlane(["remove", slug])
 }
 
-/** Every shop an e2e run left behind (the teardown's sweep). */
+/**
+ * A shop record of the e2e's slug shape that reports running `version`
+ * (`commit`) now, set up nowhere (Ek C18: the version tab and the list's
+ * drift without a real shop); removed as any e2e shop.
+ */
+export function makeReportingShop(slug: string, version: string, commit: string): void {
+  controlPlane(["make", slug, version, commit])
+}
+
+/** Every shop an e2e run left behind, and every release it added (the teardown's sweep). */
 export function removeAllE2eShops(): void {
   controlPlane(["remove-all"])
 }

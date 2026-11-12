@@ -1,9 +1,11 @@
-/** Every screen of the signed-in panel today (the sections still to come have none). */
+/** Every screen of the signed-in panel today. */
 export const SCREENS = [
   "/",
   "/tenants",
   "/tenants/new",
   "/packages",
+  "/payments",
+  "/releases",
   "/account",
   "/staff",
   "/audit-log",

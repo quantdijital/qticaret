@@ -14,9 +14,7 @@ test("opens every screen of the panel without an error", async ({ page, guard })
   }
 })
 
-test("leads through the menu, the sections still to come shown but closed", async ({
-  page,
-}, info) => {
+test("leads through the menu, every section open", async ({ page }, info) => {
   await page.goto("/")
   await expect(pageHeading(page)).toHaveText("Gösterge")
   if (info.project.name === "phone") {
@@ -24,9 +22,10 @@ test("leads through the menu, the sections still to come shown but closed", asyn
     await page.getByRole("button", { name: "Menü", exact: true }).click()
   }
   const menu = page.getByRole("navigation", { name: "Ana menü" })
-  for (const soon of ["Ödemeler", "Sürümler"]) {
-    await expect(menu.getByRole("button", { name: new RegExp(`^${soon}`) })).toBeDisabled()
+  for (const section of ["Mağazalar", "Paketler", "Ödemeler", "Sürümler"]) {
+    await expect(menu.getByRole("link", { name: section })).toBeVisible()
   }
+  await expect(menu.getByText("Yakında")).toHaveCount(0)
   await menu.getByRole("link", { name: "Mağazalar" }).click()
   await expect(pageHeading(page)).toHaveText("Mağazalar")
   if (info.project.name === "phone") {

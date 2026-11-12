@@ -1,4 +1,6 @@
 import type { Env } from "../../lib/env"
+import { E2E_RELEASE_VERSION } from "../../lib/fleet/e2e-fleet"
+import { RELEASE_VERSION } from "../../lib/fleet/releases"
 import { slugProblem } from "../../lib/tenants/slug"
 import { E2E_SHOP_SLUG, E2eShopError, checkE2eSlug } from "../e2e-shop"
 
@@ -36,5 +38,24 @@ describe("the e2e shop script's guard (C11)", () => {
     expect(() => {
       checkE2eSlug(slug, { ...local, DATABASE_URL: "postgres://u:p@db.quantticaret.com/cp" })
     }).toThrow("e2e-shop: only against a database on this machine")
+  })
+})
+
+describe("the e2e's releases (Ek C18)", () => {
+  it("removes only the version shape the panel's e2e adds, itself a valid release", () => {
+    const version = "0.0.0-e2e.1762800000000"
+
+    expect(E2E_RELEASE_VERSION.test(version)).toBe(true)
+    expect(RELEASE_VERSION.test(version)).toBe(true)
+    for (const other of [
+      "1.4.0",
+      "0.0.0",
+      "0.0.0-e2e",
+      "0.0.0-e2e.1",
+      `1.${version}`,
+      `${version}.1`,
+    ]) {
+      expect(E2E_RELEASE_VERSION.test(other)).toBe(false)
+    }
   })
 })

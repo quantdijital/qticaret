@@ -1,5 +1,6 @@
 import type { ExecArgs, MedusaContainer } from "@medusajs/framework/types"
 import { parseEnv } from "../lib/env"
+import { makeReportingShop, removeE2eReleases } from "../lib/fleet/e2e-fleet"
 import { localOnlyProblem } from "../lib/local-only"
 import { provisioner } from "../lib/provisioning/provider"
 import { ProvisioningError } from "../lib/provisioning/provisioner"
@@ -122,11 +123,18 @@ export async function e2eShopSlugs(container: MedusaContainer): Promise<string[]
 
 /**
  * `NODE_ENV=development CP_PROVISIONER=local medusa exec ./src/scripts/e2e-shop.ts remove <slug>`
- * or `… remove-all` (every shop of the e2e's slug shape). Prints slugs only.
+ * or `… remove-all` (every shop of the e2e's slug shape, then every release
+ * of the e2e's version shape, Ek C18), or `… make <slug> <semver> <commit>`
+ * (Ek C18: a shop record that reports that release, no setup). Prints
+ * slugs and versions only.
  */
 export default async function e2eShop({ container, args }: ExecArgs) {
-  const [action = "", slug = ""] = args
-  if (action === "remove") {
+  const [action = "", slug = "", version = "", commit = ""] = args
+  if (action === "make") {
+    checkE2eSlug(slug)
+    await makeReportingShop(container, slug, { version, commit })
+    process.stdout.write(`e2e-shop: made ${slug} reporting ${version}\n`)
+  } else if (action === "remove") {
     const removed = await removeE2eShop(container, slug)
     process.stdout.write(`e2e-shop: ${removed ? "removed" : "none"} ${slug}\n`)
   } else if (action === "remove-all") {
@@ -134,7 +142,10 @@ export default async function e2eShop({ container, args }: ExecArgs) {
       await removeE2eShop(container, each)
       process.stdout.write(`e2e-shop: removed ${each}\n`)
     }
+    for (const each of await removeE2eReleases(container)) {
+      process.stdout.write(`e2e-shop: removed release ${each}\n`)
+    }
   } else {
-    throw new E2eShopError("e2e-shop: remove <slug> | remove-all")
+    throw new E2eShopError("e2e-shop: remove <slug> | remove-all | make <slug> <semver> <commit>")
   }
 }
