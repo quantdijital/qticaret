@@ -32,7 +32,10 @@ export const managedOnly = (platform: Record<string, boolean>): Record<string, b
 
 /** A sync of the document's platform flags, as `syncPlatformFlags` answers. */
 export interface PlatformFlagSync {
-  /** False when a newer document's flags were already stored: nothing written. */
+  /**
+   * False when a newer document's flags were already stored, or the rows
+   * already said the same (Ek C19 I1: a replayed document): nothing written.
+   */
   written: boolean
   /** The stored values and serial before, for a compensation to put back. */
   previous: { values: Record<string, boolean>; serial: number }
@@ -95,15 +98,19 @@ export class PlatformFlagStore extends MedusaService({
     return { rows, serial: Math.max(0, ...rows.map((row) => row.serial)) }
   }
 
-  /** Every registry platform key set to `values` (its default where absent), with `serial`. */
+  /**
+   * Every registry platform key set to `values` (its default where absent),
+   * with `serial`; only the rows that differ are written. Whether any was.
+   */
   private async writeAll_(
     rows: FlagRow[],
     values: Readonly<Record<string, boolean>>,
     serial: number,
     sharedContext: Context
-  ): Promise<void> {
+  ): Promise<boolean> {
     const keys = platformKeys()
     const gone = rows.filter((row) => !keys.some((each) => each.key === row.key))
+    let changed = gone.length > 0
     if (gone.length > 0) {
       await this.deletePlatformFlags(
         gone.map((row) => row.id),
@@ -115,10 +122,13 @@ export class PlatformFlagStore extends MedusaService({
       const row = rows.find((each) => each.key === flag.key)
       if (!row) {
         await this.createPlatformFlags([{ key: flag.key, enabled, serial }], sharedContext)
+        changed = true
       } else if (row.enabled !== enabled || row.serial !== serial) {
         await this.updatePlatformFlags({ id: row.id, enabled, serial }, sharedContext)
+        changed = true
       }
     }
+    return changed
   }
 
   @InjectTransactionManager()
@@ -138,8 +148,9 @@ export class PlatformFlagStore extends MedusaService({
     if (serial < stored) {
       return { written: false, previous, ignored }
     }
-    await this.writeAll_(rows, values, serial, sharedContext)
-    return { written: true, previous, ignored }
+    // Ek C19 I1: the same rows (a replayed document) write nothing and drop no cache
+    const written = await this.writeAll_(rows, values, serial, sharedContext)
+    return { written, previous, ignored }
   }
 
   /** Back to `previous`, only while the rows still hold the serial being undone. */

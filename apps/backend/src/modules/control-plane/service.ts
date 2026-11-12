@@ -13,6 +13,7 @@ import { controlPlaneConfig } from "../../lib/control-plane/config"
 import { createRedisClient } from "../../lib/redis"
 import { ControlPlanePlan } from "./models/control-plane-plan"
 import type { PlanSource } from "./models/control-plane-plan"
+import { LastVerified, stateOfStored, storedRowProblem, tenantMismatch } from "./trusted-state"
 import { DEFAULT_PLAN_STATE } from "./types"
 import type {
   ControlPlaneModuleOptions,
@@ -58,10 +59,12 @@ const FIELDS = [
  * one. It stores only what the caller has verified (signature, shop id;
  * lib/control-plane/receive.ts) and applies the serial rule itself, under
  * a lock, so a push and a pull cannot race. Unmanaged (no public keys),
- * it reports `active` with no limits and stores nothing.
+ * it reports `active` with no limits and stores nothing. What it loads is
+ * checked again (Ek C19 I2, I3: `trusted-state.ts`).
  */
 class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
   private readonly cache: VersionedCache<PlanState>
+  private readonly lastVerified = new LastVerified()
 
   constructor(container: Record<string, unknown>, options: ControlPlaneModuleOptions = {}) {
     // eslint-disable-next-line prefer-rest-params -- MedusaService needs every constructor argument
@@ -89,22 +92,23 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
     }
     const stored = await this.storedPlan(config.tenantId, sharedContext)
     if (!stored) {
-      return DEFAULT_PLAN_STATE(true)
+      const [other] = await this.listControlPlanePlans(
+        {},
+        { select: ["id"], take: 1 },
+        sharedContext
+      )
+      return other ? tenantMismatch() : DEFAULT_PLAN_STATE(true)
     }
-    const { document } = stored
-    return {
-      managed: true,
-      status: document.status,
-      package_code: document.package_code,
-      limits: { ...document.limits },
-      platform_flags: { ...document.platform_flags },
-      billing: { ...document.billing },
-      serial: stored.serial,
-      issued_at: document.issued_at,
-      received_at: stored.received_at,
-      confirmed_at: stored.confirmed_at,
-      source: stored.source,
+    const problem = storedRowProblem(stored, config)
+    if (problem !== null) {
+      return this.lastVerified.fallback(config.tenantId, problem)
     }
+    return this.lastVerified.remember(config.tenantId, stateOfStored(stored))
+  }
+
+  /** Reads the stored document again now in this process (the next `planState` loads it). */
+  async reloadPlanState(): Promise<void> {
+    await this.cache.invalidate()
   }
 
   /** What the control plane says now (cached); unmanaged: `active`, no limits. */
@@ -132,7 +136,9 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
    * one (a replay) is `stale` and changes nothing at all. Only a pull
    * (whose answer is bound to the shop's own fresh nonce) moves
    * `confirmed_at`: a pushed document, even the current one replayed,
-   * never makes the shop look in touch (C9 review L3).
+   * never makes the shop look in touch (C9 review L3). Ek C19 I1: so a
+   * pushed `same` changes nothing either, and neither drops the cache nor
+   * moves the processes' shared marker (a replayed push costs no reload).
    */
   async storePlanDocument(
     signed: SignedPlanDocument,
@@ -140,7 +146,7 @@ class ControlPlaneModuleService extends MedusaService({ ControlPlanePlan }) {
     now: Date = new Date()
   ): Promise<StoreResult> {
     const result = await this.storeInTransaction_(signed, source, now)
-    if (result.outcome !== "stale") {
+    if (result.outcome === "applied" || (result.outcome === "same" && source === "pull")) {
       await this.cache.invalidate()
     }
     return result

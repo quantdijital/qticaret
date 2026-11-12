@@ -1,7 +1,9 @@
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+import { controlPlaneConfig } from "../../../lib/control-plane/config"
 import { CONTROL_PLANE_MODULE } from "../../../modules/control-plane"
 import type ControlPlaneModuleService from "../../../modules/control-plane/service"
 import type { StoreOutcome } from "../../../modules/control-plane/service"
+import { storedRowProblem } from "../../../modules/control-plane/trusted-state"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import type {
   PlatformFlagSync,
@@ -24,8 +26,11 @@ interface Undo {
  * serial: not the flags this workflow was handed, which a newer document
  * may have replaced in between. The store never writes a smaller serial,
  * so two applies racing end with the newer one's flags. It runs on `same`
- * too, so an earlier interrupted sync heals; not on `stale`. Undone to the
- * set before only while nothing newer was stored over it.
+ * too, so an earlier interrupted sync heals; not on `stale`. Ek C19 I1:
+ * the store writes only the rows that differ, so a replayed document
+ * writes nothing and drops no cache. I2: a stored row that fails its
+ * checks gives no flags. Undone to the set before only while nothing
+ * newer was stored over it.
  */
 export const syncPlatformFlagsStep = createStep<
   SyncPlatformFlagsInput,
@@ -40,7 +45,7 @@ export const syncPlatformFlagsStep = createStep<
     const stored = await container
       .resolve<ControlPlaneModuleService>(CONTROL_PLANE_MODULE)
       .storedPlan(input.tenant_id)
-    if (!stored) {
+    if (!stored || storedRowProblem(stored, controlPlaneConfig()) !== null) {
       return new StepResponse({ ignored: [] as string[] }, null)
     }
     const service = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
