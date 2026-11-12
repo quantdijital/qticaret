@@ -2,6 +2,8 @@ import { randomUUID } from "node:crypto"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { CP_AUDIT_MODULE } from "../../src/modules/cp-audit"
 import type CpAuditModuleService from "../../src/modules/cp-audit/service"
+import { CP_STAFF_MODULE } from "../../src/modules/cp-staff"
+import type CpStaffModuleService from "../../src/modules/cp-staff/service"
 import {
   anyStatus,
   bearer,
@@ -15,6 +17,7 @@ import {
   tokenOfLink,
 } from "../helpers/staff"
 import type { HttpClient, Member } from "../helpers/staff"
+import { freshCode } from "../helpers/totp"
 
 jest.setTimeout(180 * 1000)
 
@@ -28,8 +31,8 @@ interface Invited {
  * adr/0061 §3.5 (2026-11-12): an owner invites another owner from the
  * staff page, behind the same step-up and audit as any invitation. The
  * invited owner is pending until their 2FA (no owner until then, the last
- * owner's guard included); the invitation holds only while its inviter is
- * still a granted owner.
+ * owner's guard included); the invitation, and the grant at 2FA, hold
+ * only while its inviter is still a granted owner.
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -169,6 +172,54 @@ medusaIntegrationTestRunner({
       expect(accepted.status).toBe(400)
       expect(accepted.data).toMatchObject({ message: "cp.invite_invalid" })
       expect(financeInfo.data).toEqual({ email: financeEmail, role: "finance" })
+    })
+
+    it("grants no owner at 2FA once the inviter was demoted after acceptance", async () => {
+      const second = await makeMember(http, getContainer(), "owner")
+      const email = `owner5-${randomUUID()}@quant.test`
+      const password = randomUUID()
+      const token = tokenOfLink((await invite(await stepUp(http, second), email)).data.link)
+      const login = await registerLogin(http, email, password, token)
+      const accepted = await http.post<{ member: { id: string } }>(
+        "/admin/cp/invites/accept",
+        { token, first_name: "Can", last_name: "Arslan" },
+        { ...anyStatus, headers: bearer(login) }
+      )
+      const first = bearer(tokenOf(await http.post("/auth/user/emailpass", { email, password })))
+      const demoted = await changeRole(await stepUp(http, owner), second.userId, "operator")
+      const started = await http.post<{ secret: string }>(
+        "/admin/cp/me/mfa",
+        {},
+        {
+          ...anyStatus,
+          headers: first,
+        }
+      )
+      const verified = await http.post(
+        "/admin/cp/me/mfa/verify",
+        { code: freshCode(started.data.secret, new Set()), password },
+        { ...anyStatus, headers: first }
+      )
+      const role = await getContainer()
+        .resolve<CpStaffModuleService>(CP_STAFF_MODULE)
+        .roleOf(accepted.data.member.id)
+      const me = await http.get<{ me: Record<string, unknown> }>("/admin/cp/me", {
+        ...anyStatus,
+        headers: first,
+      })
+
+      expect(accepted.status).toBe(201)
+      expect(demoted.status).toBe(200)
+      expect(started.status).toBe(200)
+      expect(verified.status).toBe(403)
+      // The verify route's plain refusal: no word of the inviter, no recovery codes
+      expect(verified.data).toMatchObject({
+        type: "not_allowed",
+        message: "cp.enrolment_token_invalid",
+      })
+      expect(Object.keys(verified.data).sort()).toEqual(["message", "request_id", "type"])
+      expect(role).toBeNull()
+      expect(me.data.me).toMatchObject({ role: "owner", pending: true })
     })
   },
 })

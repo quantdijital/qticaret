@@ -8,6 +8,8 @@ import {
   generateEntityId,
 } from "@medusajs/framework/utils"
 import type { CpStaffRole } from "../../lib/staff/roles"
+import { GRANT_REFUSED, grantHolds } from "./grant"
+import type { GrantRow } from "./grant"
 import { CpStaffMember } from "./models/cp-staff-member"
 
 interface Executor {
@@ -171,21 +173,50 @@ class CpStaffModuleService extends MedusaService({ CpStaffMember }) {
   }
 
   /**
+   * Whether the member's first factor may grant their role now (`grantHolds`),
+   * read without the lock: the verify route asks before it confirms anything;
+   * `activate` decides under the lock.
+   */
+  @InjectManager()
+  async mayGrant(userId: string, @MedusaContext() sharedContext: Context = {}): Promise<boolean> {
+    const [row] = await this.listCpStaffMembers(
+      { user_id: userId },
+      { select: [...FIELDS, "assigned_by"], take: 1 },
+      sharedContext
+    )
+    const owners = await this.listCpStaffMembers(
+      { role: "owner" },
+      { select: ["user_id", "deactivated_at", "enrol_by"], take: 100 },
+      sharedContext
+    )
+    const granted = owners
+      .filter((owner) => owner.deactivated_at === null && owner.enrol_by === null)
+      .map((owner) => owner.user_id)
+    return grantHolds(row, granted)
+  }
+
+  /**
    * The member's first factor is confirmed: the role is granted, the
    * enrolment token spent, and 2FA from before this no longer counts. A
-   * bootstrap owner is granted only while no other owner is.
+   * bootstrap owner is granted only while no other owner is; an invited
+   * owner only while whoever gave the role still is one (`grantHolds`),
+   * under the owners' lock, so a demotion cannot slip in between.
    */
   @InjectTransactionManager()
   async activate(userId: string, @MedusaContext() sharedContext: Context = {}): Promise<void> {
     const manager = sharedContext.transactionManager as Executor
     const owners = (await manager.execute(ACTIVE_OWNERS, [])) as { user_id: string }[]
     const [row] = (await manager.execute(
-      `SELECT role, bootstrap FROM cp_staff_member
+      `SELECT role, bootstrap, assigned_by, enrol_by, enrol_token_hash FROM cp_staff_member
         WHERE user_id = ? AND deleted_at IS NULL FOR UPDATE`,
       [userId]
-    )) as { role: string; bootstrap: boolean }[]
+    )) as GrantRow[]
     if (row?.bootstrap && owners.some((owner) => owner.user_id !== userId)) {
       throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "cp.owner_exists")
+    }
+    const granted = owners.map((owner) => owner.user_id)
+    if (!grantHolds(row, granted)) {
+      throw new MedusaError(MedusaError.Types.NOT_ALLOWED, GRANT_REFUSED)
     }
     await manager.execute(
       `UPDATE cp_staff_member SET enrol_by = NULL, enrol_token_hash = NULL, bootstrap = false,

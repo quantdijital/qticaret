@@ -2,6 +2,7 @@ import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/frame
 import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { TOTP_CODE, safeEqual } from "@qticaret/server-kit"
 import { confirmTotp } from "../../../../../../lib/staff/mfa"
+import { GRANT_REFUSED } from "../../../../../../modules/cp-staff/grant"
 import { cpStaff, keyed } from "../../../../../http/caller"
 import { codeFirstUse, countWrong, provePassword } from "../../../../../http/proofs"
 import { rejectRequest } from "../../../../../http/request"
@@ -22,7 +23,9 @@ const refuse = (
  * with its first code and the member's password (a session alone must not
  * put someone else's app on the account); after a 2FA reset, the e-mailed
  * enrolment token too (M3). Then the first recovery codes, this answer
- * only; the member's role is granted (a pending one) and every other
+ * only; the member's role is granted (a pending one; an invited owner
+ * only while their inviter still is one, else 403
+ * `cp.enrolment_token_invalid`, before anything is confirmed) and every other
  * session ends: 2FA from before this counts no more (H1). The code is
  * spent. The member then signs in again with a code.
  */
@@ -48,6 +51,11 @@ export async function POST(
     refuse(req, res, 403, "cp.owner_exists")
     return
   }
+  // An invited owner whose inviter is no granted owner any more: plainly an enrolment that is no good
+  if (!(await staff.mayGrant(userId))) {
+    refuse(req, res, 403, GRANT_REFUSED)
+    return
+  }
   const [user] = await req.scope
     .resolve(Modules.USER)
     .listUsers({ id: userId }, { select: ["email"], take: 1 })
@@ -70,7 +78,16 @@ export async function POST(
     refuse(req, res, 403, "cp.mfa_code_invalid")
     return
   }
-  await staff.activate(userId)
+  try {
+    await staff.activate(userId)
+  } catch (error) {
+    // Decided again under the owners' lock: a demotion in between refuses alike
+    if (error instanceof MedusaError && error.message === GRANT_REFUSED) {
+      refuse(req, res, 403, GRANT_REFUSED)
+      return
+    }
+    throw error
+  }
   await endAllSessions(req, userId, { keepCurrent: true })
   res.setHeader("Cache-Control", "no-store")
   res.json(confirmed)
