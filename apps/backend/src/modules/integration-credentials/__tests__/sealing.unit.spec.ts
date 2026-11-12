@@ -4,7 +4,14 @@ import { anyOf, fakeSecret } from "@qticaret/testing"
 import { credentialKeyring } from "../../../lib/integrations/credential-keys"
 import type { CredentialKeyring } from "../../../lib/integrations/credential-keys"
 import { contextOf } from "../rows"
-import { openCredentials, openSealedDraft, sealCredentials, upgradedSeal } from "../sealing"
+import {
+  credentialContext,
+  openCredentials,
+  openSealedDraft,
+  resealedForRestore,
+  sealCredentials,
+  upgradedSeal,
+} from "../sealing"
 import type { SealedRow } from "../sealing"
 import { keyFingerprint } from "@qticaret/server-kit"
 
@@ -133,5 +140,83 @@ describe("sealed provider accounts (adr/0061 Ek C17)", () => {
       expect(await openSealedDraft(keyring, "iyzico", settings, text)).toBeNull()
       expect(await openSealedDraft(ring(otherKey ?? ""), "paytr", settings, text)).toBeNull()
     }
+  })
+
+  it("refuses to seal afresh a text that looks like an envelope but does not parse (review I1)", async () => {
+    const keyring = ring(newKey ?? "", oldKey ?? "")
+    const broken: SealedRow = {
+      provider: "paytr",
+      settings,
+      secret_ciphertext: "qtenv1.not-a-kek.AAAA",
+      key_id: "not-a-kek",
+    }
+
+    // The rewrap passes no secrets for envelopes: an empty account must never be sealed
+    await expect(upgradedSeal(keyring, broken, {})).rejects.toMatchObject({
+      code: "envelope.malformed",
+    })
+    expect(await resealedForRestore(keyring, broken)).toEqual({
+      secret_ciphertext: broken.secret_ciphertext,
+      key_id: broken.key_id,
+    })
+  })
+
+  it("binds the settings in code-unit order, whatever the locale (review L4)", async () => {
+    // "a" sorts before "B" in a locale's order, after it in code-unit order
+    const mixed = { a: "1", B: "2", nested: { z: true, A: [1, { y: 1, X: 2 }] } }
+    expect(credentialContext("paytr", mixed)["settings"]).toBe(
+      '{"B":"2","a":"1","nested":{"A":[1,{"X":2,"y":1}],"z":true}}'
+    )
+    const keyring = ring(newKey ?? "")
+    const row = {
+      provider: "paytr",
+      settings: mixed,
+      ...(await sealCredentials(keyring, "paytr", mixed, secrets)),
+    }
+
+    // Another machine's collation: every comparison turned around
+    const turned = jest.spyOn(String.prototype, "localeCompare").mockImplementation(function (
+      this: string,
+      other: string
+    ) {
+      return this < other ? 1 : this > other ? -1 : 0
+    })
+    try {
+      expect(
+        await openCredentials(keyring, {
+          ...row,
+          settings: { nested: mixed.nested, B: "2", a: "1" },
+        })
+      ).toEqual({
+        ok: true,
+        secrets,
+        stale: false,
+      })
+    } finally {
+      turned.mockRestore()
+    }
+  })
+
+  it("puts a kept copy back under the current KEK (review I4)", async () => {
+    const rotating = ring(newKey ?? "", oldKey ?? "")
+    for (const kept of [await rowOf(ring(oldKey ?? "")), legacyRow(oldKey ?? "")]) {
+      const restored = { ...kept, ...(await resealedForRestore(rotating, kept)) }
+
+      expect(restored.key_id).toBe(rotating.wrapper.kekId)
+      expect(await openCredentials(ring(newKey ?? ""), restored)).toMatchObject({
+        ok: true,
+        secrets,
+      })
+    }
+    // Already current, or no key at all: as it was
+    const current = await rowOf(rotating)
+    expect(await resealedForRestore(rotating, current)).toEqual({
+      secret_ciphertext: current.secret_ciphertext,
+      key_id: current.key_id,
+    })
+    expect(await resealedForRestore(null, current)).toEqual({
+      secret_ciphertext: current.secret_ciphertext,
+      key_id: current.key_id,
+    })
   })
 })

@@ -1,5 +1,6 @@
 import {
-  canonicalJson,
+  EnvelopeError,
+  canonicalJsonDeep,
   isSerializedEnvelope,
   openEnvelopeText,
   openSecret,
@@ -24,6 +25,17 @@ import { contextOf } from "./rows"
  * Rows sealed before (adr/0027's box straight under the key, `key_id` the
  * key's fingerprint) are still read and are upgraded as they are read.
  * Nothing here logs, and no error carries a secret.
+ *
+ * The settings are bound in code-unit order at every depth
+ * (`canonicalJsonDeep`), never the locale's order (review L4): the same
+ * bytes on every machine, whatever its language. adr/0027's context
+ * (`contextOf`, locale order) stays only to open the old rows.
+ *
+ * The shop is not bound (review I5, decision): each shop has its own KEK,
+ * so another shop's blob opens nowhere; binding `TENANT_ID` now would make
+ * every envelope of a shop unreadable the day it goes from unmanaged to
+ * managed. The Transit switch (F16) brings a key per shop or the tenant in
+ * the associated data.
  */
 
 export const credentialContext = (
@@ -32,7 +44,7 @@ export const credentialContext = (
 ): EnvelopeContext => ({
   record: "integration_credential",
   provider,
-  settings: canonicalJson(settings),
+  settings: canonicalJsonDeep(settings),
 })
 
 /** The two columns that hold a sealed account. */
@@ -154,17 +166,20 @@ export async function openSealedDraft(
  * The row sealed as new rows are: an envelope under an older KEK has its
  * data key rewrapped (the data is not encrypted again); an old-format row
  * is sealed afresh from its secrets. `secrets` are the row's, just opened.
+ * A text that looks like an envelope but does not parse is refused, never
+ * sealed afresh (review I1): the rewrap passes no secrets for envelopes.
  */
 export async function upgradedSeal(
   keyring: CredentialKeyring,
   row: SealedRow,
   secrets: Record<string, string>
 ): Promise<Sealed> {
-  const envelope = isSerializedEnvelope(row.secret_ciphertext)
-    ? parsed(row.secret_ciphertext)
-    : null
-  if (!envelope) {
+  if (!isSerializedEnvelope(row.secret_ciphertext)) {
     return sealCredentials(keyring, row.provider, row.settings, secrets)
+  }
+  const envelope = parsed(row.secret_ciphertext)
+  if (!envelope) {
+    throw new EnvelopeError("envelope.malformed")
   }
   const moved = await rewrapEnvelope(
     envelope,
@@ -172,4 +187,22 @@ export async function upgradedSeal(
     keyring.wrapper
   )
   return { secret_ciphertext: serializeEnvelope(moved.envelope), key_id: moved.envelope.kekId }
+}
+
+/**
+ * A copy kept for a compensation, as it is put back (review I4): sealed
+ * the old way or under an older KEK, it is sealed as new rows are, so an
+ * undo never brings back a key the rewrap already moved the row away from.
+ * A copy no configured key opens goes back as it was.
+ */
+export async function resealedForRestore(
+  keyring: CredentialKeyring | null,
+  row: SealedRow
+): Promise<Sealed> {
+  const sealed = { secret_ciphertext: row.secret_ciphertext, key_id: row.key_id }
+  if (!keyring) {
+    return sealed
+  }
+  const opened = await openCredentials(keyring, row)
+  return opened.ok && opened.stale ? upgradedSeal(keyring, row, opened.secrets) : sealed
 }

@@ -15,6 +15,7 @@ import { PAYTR_PAYMENT_PROVIDER_ID } from "../../src/lib/payments/checkout"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../src/modules/integration-credentials"
 import { contextOf } from "../../src/modules/integration-credentials/rows"
 import type IntegrationCredentialsModuleService from "../../src/modules/integration-credentials/service"
+import { runCredentialKeysCommand } from "../../src/scripts/credentials-keys"
 import { rewrapCredentialsWorkflow } from "../../src/workflows/integration-credentials/rewrap-credentials"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -103,8 +104,8 @@ medusaIntegrationTestRunner({
       return orderOfCart(getContainer(), cartId)
     }
 
-    /** The rows a shop made before C17 hold: adr/0027's box straight under the single key. */
-    async function makeLegacy() {
+    /** The PayTR row as a shop made it before C17: adr/0027's box straight under the single key. */
+    async function makePaytrLegacy() {
       const service = credentials()
       const key = Buffer.from(oldKey, "hex")
       const [paytr] = await service.listIntegrationCredentials({ provider: "paytr" })
@@ -120,7 +121,13 @@ medusaIntegrationTestRunner({
         ),
         key_id: keyFingerprint(key),
       })
-      await service.createIntegrationCredentials({
+    }
+
+    /** Both accounts in adr/0027's format: PayTR, and iyzico written as it was. */
+    async function makeLegacy() {
+      await makePaytrLegacy()
+      const key = Buffer.from(oldKey, "hex")
+      await credentials().createIntegrationCredentials({
         provider: "iyzico",
         settings: iyzico.settings,
         secret_ciphertext: sealSecret(
@@ -167,6 +174,10 @@ medusaIntegrationTestRunner({
         expect((await credentials().keyStatus()).keys).toEqual([
           { kek_id: kekIdOf(oldKey), state: "current", records: 2 },
         ])
+        // A row nobody has read since: the hourly job upgrades it
+        await makePaytrLegacy()
+        await credentialsRewrapJob(getContainer())
+        expect(await credentials().keyStatus()).toMatchObject({ pending: 0 })
 
         // During: the new key first, the old one kept, the rewrap half done
         useKeys([newKey, oldKey])
@@ -177,8 +188,13 @@ medusaIntegrationTestRunner({
         // Reads leave an older KEK's envelope to the rewrap
         expect(await credentials().keyStatus()).toMatchObject({ pending: 1, stranded: 0 })
 
-        // The job finishes the rewrap; the old key holds nothing and may go
+        // The hourly job moves no row between KEKs (review L1): it says so and waits
         await credentialsRewrapJob(getContainer())
+        expect(await credentials().keyStatus()).toMatchObject({ pending: 1 })
+
+        // The operator's rewrap from the updated config finishes; the old key may go
+        expect(await runCredentialKeysCommand(getContainer(), "rewrap")).toBe(0)
+        expect(await runCredentialKeysCommand(getContainer(), "status")).toBe(0)
         const done = await credentials().keyStatus()
         expect(done).toMatchObject({ pending: 0, stranded: 0, removable: [kekIdOf(oldKey)] })
 
@@ -206,7 +222,13 @@ medusaIntegrationTestRunner({
       expect(JSON.stringify(rows)).not.toMatch(SECRETS)
       expect(output).not.toMatch(SECRETS)
       expect(output).toContain('"from":"legacy"')
-      expect(output).toMatch(/"event":"integration_credentials\.rewrap_done"[^\n]*"rewrapped":1,/)
+      expect(output).toMatch(/"event":"integration_credentials\.rewrap_done"[^\n]*"upgraded":1,/)
+      expect(output).toMatch(
+        new RegExp(
+          `"event":"integration_credentials\\.kek_order_conflict","current":"${kekIdOf(newKey)}","older":\\[\\{"kek_id":"${kekIdOf(oldKey)}","records":1\\}\\]`
+        )
+      )
+      expect(output).toContain("credentials:keys: rewrapped 1, upgraded 0, failed 0, stranded 0")
       expect(output).not.toContain("integration_credentials.kek_missing")
     })
   },

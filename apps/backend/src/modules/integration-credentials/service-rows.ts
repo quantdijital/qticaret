@@ -5,13 +5,14 @@ import { createVersionedCache } from "../../lib/cache"
 import type { VersionedCache } from "../../lib/cache"
 import { credentialKeyring } from "../../lib/integrations/credential-keys"
 import type { CredentialKeyring } from "../../lib/integrations/credential-keys"
-import { errorSummary, logger } from "../../lib/logging"
+import { logger } from "../../lib/logging"
 import { IntegrationCredential } from "./models/integration-credential"
 import { versionSource } from "./rows"
 import { openCredentials, upgradedSeal } from "./sealing"
 import type { Sealed, SealedRow } from "./sealing"
 import { keyStatusOf } from "./key-status"
 import type { CredentialKeyStatus, KeyCount } from "./key-status"
+import { logCredentialFailure } from "./safe-log"
 import type {
   IntegrationCredentialRecord,
   IntegrationCredentialsModuleOptions,
@@ -116,10 +117,9 @@ export class CredentialRows extends MedusaService({ IntegrationCredential }) {
           })
         }
       } catch (error) {
-        logger.warn({
-          event: "integration_credentials.upgrade_failed",
+        // By code alone: a database error's message holds both sealed texts
+        logCredentialFailure("warn", "integration_credentials.upgrade_failed", error, {
           provider: row.provider,
-          err: errorSummary(error),
         })
       }
     }
@@ -161,10 +161,11 @@ export class CredentialRows extends MedusaService({ IntegrationCredential }) {
   private async rewrapRow(
     keyring: CredentialKeyring,
     row: SealedRow & { id: string },
-    tally: RewrapTally
+    tally: RewrapTally,
+    legacyOnly: boolean
   ): Promise<void> {
     const envelope = isSerializedEnvelope(row.secret_ciphertext)
-    if (envelope && row.key_id === keyring.wrapper.kekId) {
+    if (envelope && (legacyOnly || row.key_id === keyring.wrapper.kekId)) {
       return
     }
     const opened = envelope
@@ -181,6 +182,7 @@ export class CredentialRows extends MedusaService({ IntegrationCredential }) {
         tally[envelope ? "rewrapped" : "upgraded"] += 1
       }
     } catch {
+      // Counted, never logged here: the error may carry the SQL and its values
       tally.failed += 1
       tally.failed_providers.push(row.provider)
     }
@@ -209,10 +211,15 @@ export class CredentialRows extends MedusaService({ IntegrationCredential }) {
    * `REWRAP_BATCH` at a time by id. `limit` stops after that many rows
    * moved (a partial run; the next one finishes). Idempotent: rows already
    * current are skipped, and a row saved meanwhile is not overwritten.
+   *
+   * `legacyOnly` (the hourly job, review L1): adr/0027 rows only, never a
+   * KEK move. A process left on an older key order would otherwise wrap
+   * rows back under a key the operator is about to remove; KEK moves come
+   * only from `credentials:keys rewrap`, run from the updated config.
    */
   @InjectManager()
   async rewrapAll(
-    options: { limit?: number } = {},
+    options: { limit?: number; legacyOnly?: boolean } = {},
     @MedusaContext() sharedContext: Context = {}
   ): Promise<RewrapTally> {
     const tally: RewrapTally = {
@@ -242,7 +249,7 @@ export class CredentialRows extends MedusaService({ IntegrationCredential }) {
         if (tally.rewrapped + tally.upgraded >= limit) {
           return tally
         }
-        await this.rewrapRow(keyring, row, tally)
+        await this.rewrapRow(keyring, row, tally, options.legacyOnly === true)
       }
       if (rows.length < REWRAP_BATCH) {
         break
@@ -260,7 +267,8 @@ export class CredentialRows extends MedusaService({ IntegrationCredential }) {
   @InjectManager()
   async keyStatus(@MedusaContext() sharedContext: Context = {}): Promise<CredentialKeyStatus> {
     const counts = (await (sharedContext.manager as Executor).execute(
-      `SELECT key_id, (secret_ciphertext LIKE 'qtenv%') AS envelope, count(*)::int AS records
+      // The same test as isSerializedEnvelope (review I2)
+      `SELECT key_id, (secret_ciphertext ~ '^qtenv[0-9]+\\.') AS envelope, count(*)::int AS records
          FROM integration_credential WHERE deleted_at IS NULL GROUP BY 1, 2`,
       []
     )) as KeyCount[]

@@ -13,6 +13,8 @@ import type {
 export interface RewrapCredentialsInput {
   /** Stop after this many rows moved (a partial run); every row when unset. */
   limit?: number
+  /** adr/0027 rows only, no KEK move (the hourly job, review L1). */
+  legacy_only?: boolean
 }
 
 /**
@@ -29,7 +31,10 @@ const rewrapCredentialsStep = createStep(
   async (input: RewrapCredentialsInput, { container }) => {
     const tally = await container
       .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
-      .rewrapAll(input.limit === undefined ? {} : { limit: input.limit })
+      .rewrapAll({
+        ...(input.limit === undefined ? {} : { limit: input.limit }),
+        legacyOnly: input.legacy_only === true,
+      })
     return new StepResponse<RewrapTally>(tally)
   }
 )

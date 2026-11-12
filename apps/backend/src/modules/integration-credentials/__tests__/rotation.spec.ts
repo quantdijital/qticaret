@@ -206,5 +206,50 @@ moduleIntegrationTestRunner<IntegrationCredentialsModuleService>({
       expect((await rowOf("paytr")).key_id).toBe(kekIdOf(newKey))
       expect(await service.keyStatus()).toMatchObject({ pending: 0 })
     })
+
+    it("moves no row between KEKs on a legacy-only pass, the hourly job's (review L1)", async () => {
+      await connect("paytr")
+      await storeLegacy("iyzico", { settings: iyzicoSettings, secrets: iyzicoSecrets })
+      // A process whose config puts the new key first; the paytr row is under the old one
+      useKeys([newKey, oldKey])
+      const paytrBefore = await rowOf("paytr")
+
+      expect(await service.rewrapAll({ legacyOnly: true })).toMatchObject({
+        rewrapped: 0,
+        upgraded: 1,
+      })
+      expect((await rowOf("paytr")).secret_ciphertext).toBe(paytrBefore.secret_ciphertext)
+      expect((await rowOf("iyzico")).key_id).toBe(kekIdOf(newKey))
+      // A second pass has nothing left; the KEK move waits for the operator's rewrap
+      expect(await service.rewrapAll({ legacyOnly: true })).toMatchObject({
+        rewrapped: 0,
+        upgraded: 0,
+      })
+      expect(await service.keyStatus()).toMatchObject({ pending: 1 })
+      expect(await service.rewrapAll()).toMatchObject({ rewrapped: 1 })
+    })
+
+    it("puts an undone save's account back under the current KEK (review I4)", async () => {
+      // A save under the single old key; the rotation and its rewrap happen before the undo
+      await connect("paytr")
+      const draft = await service.draft("paytr", {
+        settings,
+        secrets: { merchant_salt: fakeSecret() },
+      })
+      const previous = await service.store(draft, "unverified", "user_2")
+      useKeys([newKey, oldKey])
+      await service.rewrapAll()
+
+      // The compensation's copy is the row as it was before the save, under the old KEK
+      expect(previous?.key_id).toBe(kekIdOf(oldKey))
+      await service.restore("paytr", JSON.parse(JSON.stringify(previous)) as typeof previous)
+
+      const restored = await rowOf("paytr")
+      expect(restored.key_id).toBe(kekIdOf(newKey))
+      expect(restored.secrets_version).toBe(1)
+      expect(await service.keyStatus()).toMatchObject({ pending: 0, removable: [kekIdOf(oldKey)] })
+      useKeys([newKey])
+      expect(await service.read("paytr")).toEqual({ settings, secrets })
+    })
   },
 })

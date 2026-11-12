@@ -10,7 +10,7 @@ import type { CredentialProviderName } from "./providers"
 import { stampOf, storedOf } from "./rows"
 import { planSave, statusOf } from "./rules"
 import type { SaveInput } from "./rules"
-import { openSealedDraft, sealCredentials } from "./sealing"
+import { openSealedDraft, resealedForRestore, sealCredentials } from "./sealing"
 import type { Sealed } from "./sealing"
 import { CredentialRows } from "./service-rows"
 import type {
@@ -273,12 +273,16 @@ class IntegrationCredentialsModuleService extends CredentialRows {
     return storedOf(row)
   }
 
-  /** Puts the account back as it was before a save or a removal (workflow compensation). */
-  async restore(
-    provider: CredentialProviderName,
-    previous: StoredCredential | null
-  ): Promise<void> {
+  /**
+   * Puts the account back as it was before a save or a removal (workflow
+   * compensation), sealed under the current KEK (review I4).
+   */
+  async restore(provider: CredentialProviderName, stored: StoredCredential | null): Promise<void> {
     const [row] = await this.listIntegrationCredentials({ provider }, { take: 1 })
+    const previous = stored && {
+      ...stored,
+      ...(await resealedForRestore(this.keyring(), { provider, ...stored })),
+    }
     if (previous === null) {
       if (row) {
         await this.deleteIntegrationCredentials(row.id)
