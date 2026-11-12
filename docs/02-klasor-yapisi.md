@@ -105,10 +105,13 @@ repo/
 │   │   │   └── scripts/             # seed, tr-address import, tenant bootstrap, katalog yollarını claim etme (F3.1)
 │   │   └── integration-tests/
 │   │       ├── http/  modules/  fixtures/
+│   ├── control-plane/               # üst panel (F17, adr/0061): Medusa 2.21.2, port 9100, `qticaret_cp`; modules/ (tenants, plans, billing, fleet, provisioning, vault, cp-staff, cp-audit), workflows/, api/admin/cp + api/tenant-api, lib/provisioning (TenantProvisioner, LocalProvisioner), jobs/, scripts/ (cp:*)
+│   ├── control-plane-panel/         # üst panelin arayüzü (Vite, 5174; panelle aynı yapı, admin-ui'dan)
 │   ├── panel/                       # yönetici paneli, bizim SPA'mız (adr/0022; yapı docs/18 §6)
 │   └── storefront/                  # F18 vitrin, Next.js App Router (adr/0046): app/ rotalar, screens/ varlık türüne göre sayfalar, lib/ Store API istemcisi, SEO, sepet, i18n
 ├── packages/
-│   ├── types/                       # paylaşılan tipler (Store API sözleşmeleri; vitrin için `src/store/`)
+│   ├── types/                       # paylaşılan tipler (Store API sözleşmeleri; vitrin için `src/store/`; üst panel ↔ mağaza sözleşmesi `src/control-plane/`: plan belgesi, kullanım raporu, imza başlıkları, durum ve limit kayıt defteri, adr/0061)
+│   ├── server-kit/                  # iki sunucunun ortak kodu (adr/0061 Ek C1): kripto, zarf şifreleme, Ed25519 imzalı belge ve istek, redaksiyon, hata gövdesi ve kodla loglama, env yardımcıları, hız sınırı, TR vergi no; Medusa bilmez
 │   ├── ui/                          # tema sözleşmesi, görünüm modelleri, ortak vitrin parçaları (adr/0046 §7)
 │   ├── admin-ui/                    # panellerin ortak arayüzü: shadcn ilkelleri, desenler, token ve tema motoru, `admin-ui` metinleri (adr/0061 §1.4; docs/18 §6)
 │   ├── themes/atolye/               # vitrin teması (tek ve varsayılan, yön "Grafit", design.md; adr/0057): yalnızca sunum
@@ -118,6 +121,7 @@ repo/
 ├── infra/
 │   ├── docker/                      # Dockerfile'lar, compose (dev)
 │   ├── tenant/                      # tenant şablonu, provisioning scriptleri
+│   ├── tenants/local/<slug>/        # yerel provisioner'ın mağaza klasörü (git dışı, 0700; `.env` 0600, logs/, pid; adr/0061 Ek C10)
 │   └── observability/
 ├── turbo.json
 ├── pnpm-workspace.yaml

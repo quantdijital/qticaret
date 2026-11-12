@@ -39,6 +39,13 @@ Script **idempotent** olmalı (yarıda kalırsa tekrar çalıştırılabilir).
 
 F16'da aynı workflow `DockerProvisioner` ile çalışır; imaj `NODE_OPTIONS=--conditions=qt-compiled` taşır, `ts-node` gerekmez.
 
+**Plan belgesi ve kullanım raporu (adr/0061 §3.2, §5.4, Ek C9, C13):** mağazanın `CONTROL_PLANE_PUBLIC_KEYS` (üst panelin `cp:keys public-keys` satırı), `TENANT_ID`, `CONTROL_PLANE_URL`, `TENANT_SIGNING_KEY` değişkenleri kurulumda yazılır. Mağaza belgeyi itmeyle alır, 15 dakikada bir çeker, saatte bir imzalı kullanım raporu gönderir. Üst panel `/health`'i ve vitrin ana sayfasını 5 dakikada bir yoklar (askıdaki mağazanın vitrini yoklanmaz: bilerek 503). İzleme: mağaza logunda `control_plane.stored_invalid` ya da `control_plane.tenant_mismatch` (hata) mağazanın kısıtlı kaldığını söyler; düzeltme geçerli bir belgedir (`cp:tenant` ile yeniden yayın).
+
+**Üst panel imza anahtarının döndürülmesi (adr/0061 §4.5, Ek C8, C19 I2):**
+1. Anahtarlar > Hazırla (`next`); yeni açık anahtarı her mağazanın `CONTROL_PLANE_PUBLIC_KEYS`'ine **ekle** ve dağıt.
+2. Anahtarlar > Geç: yeni belgeler yeni anahtarla imzalanır. `cp-plan-reconcile` (10 dakikada bir) içeriği aynı olsa da her mağazanın belgesini yeni anahtarla yeniden yayınlar (yeni `serial`).
+3. Her mağazanın yeni anahtarlı belgeyi aldığını gör (mağaza sayfasında son belge ve itme durumu). Ancak sonra eski açık anahtarı mağazaların listesinden çıkar ve dağıt; sonra Anahtarlar > Kaldır. Mağaza saklanan belgesini her yüklemede doğrular: eski anahtarlı belgeyle kalmış bir mağaza, eski anahtar listeden çıkınca yeniden başlatmada `restricted` olur.
+
 ## Tenant işletimi (F16)
 - **Hosting ve bölge:** adr/0003 (KVKK veri yerleşimi dahil)
 - **Alan adı:** varsayılan `<slug>.<platform-domain>`; tenant domain'i DNS TXT sahiplik doğrulamasıyla bağlanır, otomatik SSL; bağlanınca platform alt alan adı 301 (SEO + güvenlik)

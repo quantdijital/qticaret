@@ -100,9 +100,19 @@
   - Gizli alanlar yalnızca yazılır: yanıt, log ve denetim kaydında değer ya da parçası yer almaz; denetimde yalnızca sürüm numarası görünür.
   - Workflow girdisi ve adımları yalnızca şifreli bloğu taşır.
   - Uçlar personele açık (secret API anahtarı reddedilir) ve sağlayıcıyı çağıran kayıt ile test uçları `provider_check` hız profilinde. Hesabı yalnızca sahip (owner) değiştirir (adr/0040); bağlantı testi yöneticiye de açık.
+- Mağazanın sırları birbirinden ayrıdır: PII anahtarları, sağlayıcı hesabı anahtarları, `AUTH_MFA_ENCRYPTION_KEY`, `JWT_SECRET`, `COOKIE_SECRET`, `STOREFRONT_IP_SECRET` (tanımlı olanlar) aynı değeri taşırsa açılış durur; ileti iki değişkeni adlandırır, değeri asla (adr/0061 Ek C19 I4).
 - Açılışta Zod ile env doğrulama; secret değerleri asla loglanmaz (`src/lib/logging` redaksiyonu, kurallar docs/10 "Loglama").
 - Repo'da gitleaks (pre-commit + CI). CI loglarında secret maskeleme.
 - Claude Code `.env*` dosyalarını okuyamaz (`.claude/settings.json` deny).
+
+### Üst panel (control plane) güven sınırı
+Ayrıntı adr/0061 §3 ve Ek'leri; özet:
+- **Yüzey:** yalnız `/health`, personel girişi, `/admin/cp/*` ve mağazaların imzalı `/tenant-api/*`'ı cevaplanır (izin listesi, Medusa'nın ticaret rotaları 404). Ekran genel internete açık değildir (F16: IP listesi ya da Cloudflare Access).
+- **Personel:** `owner`, `operator`, `finance`, `readonly`; kapalı varsayılan rota tablosu (`lib/staff/route-table*.ts`, her ucun kararı birim testte). 2FA her zaman zorunlu. Yeniden doğrulama: askı ve geri açma, personel ve rol, anahtarlar, ödeme işaretleme ve bağışlama, paket fiyatı **ve paketin deneme/ek süresi** (`/plans/:id/terms`, Ek C19 L1), mağaza ek süresi, hedef sürüm, TCKN görme. Her mutasyon ve hassas okuma denetim kaydında (yalnız ekleme, değer yok).
+- **Mağaza ile:** iki yönde Ed25519 imza (paylaşılan sır yok); plan belgesi `serial`, istekler zaman + tek kullanımlık `nonce` ile tekrar saldırısına kapalı. Mağaza saklanan belgeyi her yüklemede yeniden doğrular; tutmayan satıra inanmaz (son doğrulanmış durum ya da `restricted`), başka mağazanın satırı mağazayı kısıtlar (Ek C19 I2, I3).
+- **Hata ve log:** üst panelin kendi hata işleyicisi var (`api/http/error-handler.ts`, Ek C19 M1): 5xx sabit gövde, veritabanı metni yanıtlanmaz, log satırı yalnız `{ request_id, method, path, status, code }` (SQLSTATE ya da `cp.*`). Veritabanına yazan yerlerin hata logları da yalnız kod taşır (`codeSummary`).
+- **Kısıtlı ve askıdaki mağaza (mağaza tarafı):** `/admin` yazmaları `plan-guard`'dan geçer; `/admin` dışındaki her rotanın kararı birim testte kayıtlıdır (Google dönüşü kısıtta bağlanmaz, ürün beslemesi askıda 503; Ek C19).
+- **Sırlar:** üst panelin sırları zarf şifreli `vault`'tadır (aşağıda); mağazanın çalışma sırları üst panelde tutulmaz.
 
 ### Kimlik doğrulama ve yetki
 - Medusa auth modülü kullanılır; kendi auth sistemi yazılmaz.

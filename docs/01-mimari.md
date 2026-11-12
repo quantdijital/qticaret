@@ -2,10 +2,10 @@
 
 ## Genel görünüm
 ```
-                ┌──────────────── Control Plane (F17) ────────────────┐
-                │  tenant kayıt, abonelik, secret yönetimi, provisioning │
+                ┌──────────── Üst panel / control plane (F17) ─────────┐
+                │ mağaza kaydı, paket, abonelik, kurulum, sürüm, sağlık │
                 └───────────────┬─────────────────────────────────────┘
-                                │ provision / deploy / secret inject
+                                │ kurulum · imzalı plan belgesi ↓ · imzalı kullanım raporu ↑
      ┌──────────────────────────┼──────────────────────────┐
      ▼                          ▼                          ▼
 ┌─────────────┐          ┌─────────────┐            ┌─────────────┐
@@ -20,6 +20,15 @@
  iyzico · PayTR · Geliver · e-fatura entegratörü · SMS · e-posta
 ```
 
+## Üst panel (control plane, F17)
+Ayrı bir Medusa uygulaması ve ayrı veritabanı (adr/0061; ayrıntı ADR'nin §1–§8'i ve Ek'leri, burada tekrarlanmaz):
+- **Uygulamalar:** `apps/control-plane` (Medusa 2.21.2, port 9100, `qticaret_cp`; ticaret rotaları izin listesiyle kapalı), `apps/control-plane-panel` (Vite, 5174). Ortak kod `packages/server-kit` (kripto, zarf şifreleme, Ed25519 imza, redaksiyon, hata gövdesi), `packages/admin-ui` (iki panelin arayüzü), `packages/sector-packs` (sektör paketleri, veri), sözleşme `packages/types/src/control-plane` (Zod, katı).
+- **Güven sınırı:** üst panel mağazanın veritabanına bağlanmaz, müşteri verisi tutmaz. Konuşma iki yönde Ed25519 imzalıdır, paylaşılan sır yok:
+  - **Plan belgesi (üst panel → mağaza):** durum, paket, limitler, platform bayrakları, faturalama özeti; `serial` ile tekrar reddi. İtme (`POST /hooks/control-plane/plan`) + 15 dakikalık çekme. Mağaza son geçerli belgeyle çalışır; üst panele ulaşamamak durumu değiştirmez. Saklanan belge her yüklemede yeniden doğrulanır (Ek C19 I2).
+  - **Kullanım raporu (mağaza → üst panel):** saatlik, imzalı, yalnız toplamlar (ürün, sipariş, personel, depolama, LLM, sürüm); kişi ya da ciro yok.
+- **Durumlar:** `active` → `restricted` (ödeme gecikince otomatik; panel okunur, vitrin satar) → `suspended` (personel; vitrin 503). Veri hiç silinmez. Yönetimsiz kip (`CONTROL_PLANE_PUBLIC_KEYS` yok): bugünkü davranış.
+- **Kurulum:** `provisioning` workflow'u + `TenantProvisioner` (yerelde `LocalProvisioner`, F16'da Docker). Çalışma sırları üretilir, mağazaya teslim edilir, üst panelde tutulmaz; çevrimdışı `age` emaneti kalır.
+
 ## Tenant modeli: instance-per-tenant
 Her tenant = ayrı Medusa süreçleri + ayrı veritabanı. Gerekçe: izolasyon, KVKK, basit yedek/geri yükleme,
 bir tenant'ın yükünün diğerini etkilememesi, Medusa'nın tek-mağaza varsayımıyla uyum. (adr/0001)
@@ -31,7 +40,7 @@ Mağazanın kendi sağlayıcı hesapları (PayTR, iyzico, sonra Geliver, e-fatur
 - Gizli alanlar yalnızca yazılır: hiçbir yanıtta, logda ya da denetim kaydında görünmez.
 - Kayıttan önce sağlayıcıya sorulur; değişiklik yeniden başlatma gerektirmez (sürümlü önbellek).
 - Medusa module provider'ları izoledir. Sağlayıcı, mağazanın hesabını `@medusajs/framework`'ün paylaşılan `container`'ı üzerinden, çağrı anında okur (V2'de testle doğrulanır).
-- Platformun kendi sırları (veritabanı, JWT, PII anahtarları, S3) env/secret store'da kalır. F17'de şifreleme anahtarı KMS'e taşınır.
+- Platformun kendi sırları (veritabanı, JWT, PII anahtarları, S3) env/secret store'da kalır; her biri ayrı değer olmalıdır (açılış aynı değeri iki anahtarda reddeder, adr/0061 Ek C19 I4). KEK'in OpenBao Transit'e taşınması F16'dadır (adr/0061 §4).
 
 ## Backend katmanları
 | Katman | Sorumluluk | Kural |

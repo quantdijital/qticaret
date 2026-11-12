@@ -509,10 +509,12 @@ Ayrı uygulama (`apps/control-plane`). Başlamadan önce ayrı ADR (teknoloji, v
 - F17.6 Platform yönetici paneli: tenant listesi, durum, kullanım, destek erişimi başlatma (F16.10)
 - F17.7 Sektör paketi atama: tenant'a attribute şablonları + flag ön ayarı + SEO şablon seti yükleme
 
+Uygulama: adr/0061 (C1–C19, 2026-11-10 → 2026-11-12). Müşterinin kendi kaydı, kartla tahsilat, kendi e-faturamız, dalga/canary yürütmesi ve destek erişimi sonraki aşamaya kaldı (adr/0061 §8).
+
 **KK:**
-- [ ] Yeni müşteri kendi kendine kayıt olup deneme mağazasını açabiliyor
-- [ ] Abonelik ödemesi alınamazsa tanımlı süre sonunda mağaza kısıtlanıyor, veri silinmiyor
-- [ ] Secret değişikliği kesintisiz uygulanıyor ve hiçbir yerde düz metin görünmüyor
+- [x] Platform personeli üst panelden bilgileri girerek yeni mağaza açabiliyor; mağaza yerelde gerçek olarak ayağa kalkıyor, sağlık yeşil ve sahip daveti gidiyor. Self-servis kayıt sonraki aşamaya (adr/0061 §8). Kanıt: yerelde gerçek kurulum, C10 CLI'ı ve C11 sihirbazının `@real` e2e'si (`apps/control-plane-panel` `wizard.e2e.ts`: arayüzden kur, durum `active`), C12'nin gerçek çalıştırması (2026-11-11: migration, bootstrap, sektör paketi, sağlık 200, `active`, Mailpit'te davet; adr/0061 Ek C10–C12); üst panel `provisioning.spec.ts`.
+- [x] Abonelik ödemesi alınamazsa tanımlı süre sonunda mağaza kısıtlanıyor, veri silinmiyor. Kanıt: `apps/control-plane/integration-tests/http/billing-cycle.spec.ts` ve backend `plan-billing.spec.ts` (KK2: ek süre dolunca `restricted`, veri yerinde, ödemeyle `active`; adr/0061 Ek C16).
+- [x] Secret değişikliği kesintisiz uygulanıyor ve hiçbir yerde düz metin görünmüyor. Kanıt: backend `credentials-rotation.spec.ts` (KK3: döndürme boyunca ödeme siparişe dönüyor, satırlarda ve loglarda düz metin yok; adr/0061 Ek C17), üst panel `vault-rotation.spec.ts` (Ek C8).
 
 ---
 
