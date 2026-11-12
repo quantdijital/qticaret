@@ -95,13 +95,19 @@ medusaIntegrationTestRunner({
     it("refuses a bad signature, a stale time and a reused nonce", async () => {
       const { tenant, signer } = await shopWithDocument()
       const good = signedGet(PLAN, tenant.id, signer)
+      // One character in the middle swapped for another: always a different signature
+      // (the last character carries padding bits; a fixed `AA` tail could equal the real one)
+      const signature = good["x-qt-signature"] ?? ""
+      const middle = Math.floor(signature.length / 2)
+      const swapped = signature[middle] === "A" ? "B" : "A"
       const tampered = {
         ...good,
-        "x-qt-signature": `${(good["x-qt-signature"] ?? "").slice(0, -2)}AA`,
+        "x-qt-signature": `${signature.slice(0, middle)}${swapped}${signature.slice(middle + 1)}`,
       }
       const old = signedGet(PLAN, tenant.id, signer, { now: Date.now() - 6 * 60 * 1000 })
       const ahead = signedGet(PLAN, tenant.id, signer, { now: Date.now() + 6 * 60 * 1000 })
 
+      expect(tampered["x-qt-signature"]).not.toBe(signature)
       expect((await get(tampered)).data.message).toBe("signature.invalid")
       expect((await get(old)).data.message).toBe("signature.stale")
       expect((await get(ahead)).data.message).toBe("signature.stale")
