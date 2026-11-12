@@ -1204,3 +1204,109 @@ Sıra bağımlılığa göredir; her görev tek kodlama ajanının bir oturumuna
 - **I2:** `release_id` `rel_` + ULID biçiminde olmalı (değilse 400); gerekçede Windows satır sonları nottaki gibi düz satır sonuna çevrilir. Test: birim.
 - **I3 (kabul):** göstergedeki aylık gelir bütün rollere açık. Abonelik fiyatları ve ödemeler zaten bütün rollere okunuyor (C16); yeni bir bilgi açılmıyor.
 - **Testler (düzeltmelerle):** üst panel birim 30 dosya, 371 test. HTTP `releases`, `release-sweep` (yeni, 1), `dashboard`, `billing-actions`, `billing-cycle`: 5 dosya, 25/25. Panel Vitest `lib` 30/30 (hata sözlüğü). Playwright `releases` + `smoke`: 12/12. Koşu ayrı bir veritabanında yapıldı; veritabanı `.env` dosyasına yazmayan bir betikle kuruldu ve iş bitince silindi. Koşunun sürümünü süpürme sildi.
+
+## Ek: C19 kapanış (2026-11-12)
+
+Faz sonu güvenlik incelemesi (üst panel, server-kit ve mağaza tarafı) kritik ya da yüksek bulgu vermedi: bir orta, altı düşük ve altı bilgi bulgusu. Hepsi kapatıldı ya da (I2 üst panel) F16 notu olarak kayda geçti. Sonra docs güncellendi ve F17 KK'leri işaretlendi. Migration yok.
+
+### Üst panel (`apps/control-plane`, `packages/server-kit`)
+
+- **M1, ham hata logu:**
+  - **Sorun:** `api/middlewares.ts`'te `errorHandler` yoktu. Medusa'nın varsayılanı ham hatayı loglar. MikroORM sürücü hatasının iletisi bağlı değerleriyle SQL'i taşır: yetkilinin e-postası ve telefonu, firma adresi, VKN, mühürlü TCKN, ödeme referansı loga düşüyordu.
+  - **Düzeltme:** `api/http/error-handler.ts` (`cpErrorHandler`). Durum ve gövde Medusa'nınki (`getHttpResponseFromError`), böylece `cp.*` anahtarları ve panelin okuduğu her şey aynı kaldı.
+    - Her 5xx sabit gövdedir (`unknown_error`).
+    - Medusa'nın veritabanından kurduğu 4xx metni (`… with email: …, already exists.`) `errors.invalid_request` olur. **Karar:** durum korunur (400/404), çünkü istemci açısından hâlâ bir ret; satır değerleri yanıta girmez.
+    - body-parser hatalarının metni (V8 gövdeyi alıntılayabilir) yerine `errors.invalid_request` döner.
+    - Log satırı yalnız `http.request_failed|request_rejected {request_id, method, path, status, code}`. `code` sabit bir anahtar (`cp.*`, `provisioning.*`), SQLSTATE (hatanın ya da bir seviye içindeki `cause`'un `code`'u), `db_<tür>`, `http_<durum>` ya da Medusa'nın `type`'ı. İleti, yığın ve neden asla yazılmaz.
+  - **server-kit'e taşınan (karar, backend davranışı aynı):**
+    - `http/error-body.ts`: `classifyDbMessage`, `DbErrorKind`, `INTERNAL_ERROR_BODY`. Backend'in `error-response.ts`'i bunları oradan alıp yeniden dışa verir.
+    - `logging/failure-code.ts`: `failureCode` (C17'nin `safe-log`'u, artık `cause`'a da bakar), `keyMessage`, `loggableCode`, `codeSummary` (`errorSummary`'nin yalnız sınıf adı + kod veren eşi).
+    - Backend'in hata işleyicisinin geri kalanı (`toHttpError`, panel iletileri) mağazaya özgü olduğu için taşınmadı.
+  - **`errorSummary` → `codeSummary`:** görevdeki dört yer (`audit.ts` iki, `jobs/billing.ts`, `charge-action.ts`). **Sapma (genişletme):** veritabanına yazan ya da e-posta gönderen yedi yer daha: `billing/run.ts`, `billing/reminders.ts` (SMTP hatası alıcı adresini taşıyabilir), `staff/invites.ts`, `provisioning/owner-invite.ts`, `provisioning/runs.ts`, `fleet/reissue.ts`, `billing-settings`. Redis ve ağ hatalarındaki `errorSummary`'ler kaldı (kişisel veri taşımazlar; ioredis'in komut metni zaten C13'te ele alındı).
+  - **Test:** HTTP `error-logging.spec.ts`. Test, `tenant_contact`'a tek adresi reddeden bir CHECK kısıtı ekler; yetkili kaydı 500 ve sabit gövde alır. Konteynerin logger'ı, `console` ve stdout/stderr'in hiçbir satırında e-posta, telefon, `insert into` ya da kısıt adı yoktur, log `"code":"23514"` taşır. İşleyici kapatılınca test kırılıyor (doğrulandı). Bilinmeyen mağaza `cp.tenant_unknown` anahtarını koruyor. Birim: `error-handler.unit.spec.ts` 5, server-kit `failure-code.unit.spec.ts`.
+- **L1, paketin deneme ve ek süresi yeniden doğrulamasızdı:**
+  - **Düzeltme (karar: ayrı uç):** yeni uç `POST /admin/cp/plans/:id/terms` (`owner`, `finance`, yeniden doğrulama). Gövde `{ trial_days?, grace_days? }`, en az biri; boşsa `cp.nothing_to_save`.
+  - `POST /admin/cp/plans/:id` artık yalnız ad, limit ve bayrak alır; gün alanı 400 olur (katı şema). Fiyat ucunun gövdesi değişmedi, bu yüzden günler ona eklenmedi.
+  - Panel: paket penceresi fiyat/dönem ve gün değişikliklerini tek `withStepUp` içinde `/price` ve `/terms`'e gönderir (tek kanıt). Açıklama metni günleri de anar (tr/en).
+  - **Test:** rota tablosu (yeniden doğrulama listesi, roller), HTTP `plans.spec.ts` (ad ucuyla gün 400, kanıtsız 428, operatör 403, boş gövde, denetimde önce/sonra), panel `packages-page.spec.tsx` (`/terms` kanıtla, ad ucunda gün yok, fiyat çağrısı yok).
+- **L2, kısıtlı ve askıdaki mağaza:**
+  - **Kurulum çalışmaları (`RUN_STATUSES`):** `start` artık `restricted` ve `suspended` mağazada da açık (mağaza çalışmaya devam eder; yeniden başlatmadan sonra ayağa kalkmalı). `invite` ve `apply_pack` yalnız `provisioning` ve `active` mağazada. `stop` her durumda.
+  - **Yoklama (`PROBED_STATUSES`, hedef başına):** backend `provisioning`, `active`, `restricted`, `suspended` mağazada; vitrin `provisioning`, `active`, `restricted` mağazada. Askıdaki vitrin bilerek 503 verir, yoklanmaz.
+  - **Rapor beklentisi (`reportExpected`):** `active`, `restricted` ya da `suspended`, iç adresi olan mağaza. Gösterge ve mağaza sayfası bunu kullanır.
+  - Göstergenin sağlıksız listesi yalnız yoklanan hedefleri sayar. Mağaza sayfası hedef başına `probed` döner (askıdaki vitrinde `false`).
+  - Panel: "Başlat" düğmesi aynı kuralla (`STARTABLE`).
+  - **Test:** HTTP `provisioning.spec.ts` (kısıtlı ve askıda: başlat ve durdur geçer, davet ve paket 409, kurulum `tenant_status`), `usage-health.spec.ts` (kısıtlıda iki hedef, askıda yalnız backend, ikisinde de rapor bekleniyor), `dashboard.spec.ts` (kısıtlının backend'i sayılıyor, askıdakinin vitrini sayılmıyor), panel `rules.spec.ts`.
+- **L3, geçici sır dosyası:** `writePrivateFile`'da yazma, `sync`, `close` ve `rename` tek `try` içinde. Herhangi bir hata geçici dosyayı siler (`rm(…, {force: true})`, silme hatası yutulur, asıl hata atılır). **Test:** `private-files.unit.spec.ts`: `node:fs/promises` sarmalanır, sırayla `writeFile`, `sync` ve `close` hata verir, klasörde dosya kalmaz; hatasız yazım okunur.
+- **I1, davet workflow'u kayıt tutuyordu:** `cp-staff-invite` artık `store: false`. Önceden "her workflow `store: false`" testi yoktu; **yeni** `workflows/__tests__/store.unit.spec.ts` `src/workflows` altındaki her dosyayı yükler, dışa verilen her workflow'un Medusa kaydında `store: false` olduğunu ister (en az 30 bulunmalı; ikisi davet workflow'ları). Düzeltme geri alınınca test kırılıyor (doğrulandı).
+- **I2, F16 notları (yalnız belge, kod yok):** aşağıda "F16'ya kalanlar".
+
+### Mağaza (`apps/backend`)
+
+- **L1, planı dinlemeyen gönderenler:**
+  - `migration-invites` mağaza `open` değilse hiçbir şey göndermez (`campaign-dispatch` gibi).
+  - `marketing-feeds` askıdayken beslemeyi yeniden üretmez (`google-merchant-sync` gibi).
+  - `GET /feeds/:token/:target` askıdayken 503 `{ type: "unavailable", message: "plan.suspended" }` ve `Retry-After: 3600` döner. Bu, sepet tamamlamanın kalıbıdır (`SUSPENDED_RETRY_AFTER_SECONDS`, `rejectRequest`).
+  - **Karar:** askı denetimi jetondan önce yapılır. Vitrin askıyı zaten herkese 503'le gösterir, yeni bir bilgi açılmaz; jeton karşılaştırması da yapılmaz.
+  - **Test:** `plan-senders.unit.spec.ts` +2, HTTP `plan-status-suspended.spec.ts` (açıkken yanlış jeton 404, askıda 503, `Retry-After` 3600, `plan.suspended`).
+- **L2, Google OAuth dönüşü:**
+  - `GET /google/callback` mağaza `open` değilse durumu (`state`) siler ve `google=restricted` ile panele döner; bağlantı kurulmaz.
+  - Panelde iki kart da (`google-merchant-card`, `google-connection-card`) `google=` sorgusunu zaten okuyordu. `restricted` için tek cümle eklendi: "Mağazanız kısıtlı olduğu için Google bağlantısı kurulmadı. Ayrıntılar Ayarlar > Abonelik'te." (tr/en).
+  - **Envanter testi (yeni, `/admin` envanterinin eşi):** `lib/plan-guard/__tests__/outside-admin.unit.spec.ts`. `src/api` altında `/admin` ve `/store` dışındaki her `route.ts`'in her yöntemi bir kararla yazılıdır: `checks` (rota `planModeFor`'u kendisi sorar; test kaynakta bunu arar) ya da `open` (sağlayıcı dönüşleri, üst panelin belgesi, abonelikten çıkma, çift onaylar, geliştirme). Yeni bir rota karar yazılana kadar testi kırar; silinen rotanın kararı da kalamaz.
+  - **Test:** HTTP `plan-status-restricted.spec.ts` (kısıtlıda dönüş 303 `google=restricted`), panel kart testi.
+- **L3, davetin yeniden gönderilmesi koltuk saymıyordu:**
+  - **Düzeltme:** süresi dolmuş daveti yeniden gönderirken `refreshInviteTokensWorkflow`'dan sonra ekip `assertStaffWithinLimit` ile yeniden sayılır. Sınır aşılırsa davetin `expires_at`'i eski (geçmiş) değerine döner, yeni bağlantı ölü kalır ve hiçbir şey gönderilmez. Yanıt 403 `plan.limit_reached`.
+  - **Karar, kilit yok:** davet akışı da kilit değil yeniden sayma kullanır (C14 inceleme M2); aynı kalıp seçildi.
+  - **Test:** HTTP `plan-limits-races.spec.ts`: tek koltuk kala iki süresi dolmuş davet birlikte gönderilir. En çok biri 200 alır, reddedilen 403 alır, açık davet sayısı başarı sayısına eşittir.
+- **I1, tekrar edilen belge:**
+  - İtilen `same` serial ne önbelleği düşürür ne Redis işaretini ilerletir. Çekmenin `same`'i `confirmed_at`'i değiştirdiği için düşürmeye devam eder.
+  - `syncPlatformFlags` yalnız farklı satırları yazar; hiçbir satır değişmediyse `written: false` döner (önbellek düşmez, telafi gerekmez). Kaymış bir depo aynı serial'le yine onarılır (mevcut test).
+  - **Test:** HTTP `control-plane-trust.spec.ts` (tekrar edilen itmede iki önbellek de düşmüyor, `platform_flag` satırları aynı; yeni belge ikisini de düşürüyor).
+- **I2, saklanan belgeye güven:**
+  - `loadState_` saklanan satırı her yüklemede `checkPlanDocument`'tan (imza, `kid`, mağaza kimliği, katı şema) yeniden geçirir (`modules/control-plane/trusted-state.ts`).
+  - **Karar (görevdeki gibi):** tutmazsa `control_plane.stored_invalid` yalnız kodla loglanır (`signature.invalid`, `signature.unknown_key` …, `kept`). Süreç daha önce bu mağaza için bir durum doğruladıysa o kalır; doğrulamadıysa mağaza `restricted` sayılır (panel yazmaları kapalı, vitrin satar).
+  - Platform bayrağı eşitlemesi de tutmayan satırdan bayrak almaz.
+  - **Sapma, üst panelde zorunlu ek (anahtar döndürme):** yeniden doğrulama yüzünden, eski imza anahtarı mağazanın `CONTROL_PLANE_PUBLIC_KEYS`'inden çıkınca eski anahtarlı belgeyle kalmış mağaza yeniden başlatmada kısıtlanırdı. Üst panelde belge içerik aynı olsa bile her mağaza için yeniden yayılmıyordu.
+    - Düzeltme: `issuePlanDocument` artık etkin anahtarın `kid`'ini de karşılaştırır. Aynı içerik başka anahtarla imzalıysa yeni serial'le etkin anahtarla yeniden yayılır; `cp-plan-reconcile` geçişten sonra en geç 10 dakikada bütün mağazalara yapar.
+    - Döndürme sırası docs/08'de: hazırla → listeye ekle → geç → yeni belgeyi gör → listeden çıkar → kaldır.
+    - Test: üst panel `plan-documents.spec.ts` (geçişten sonra aynı içerik yeni `kid` ve serial+1 alıyor, ikinci yayın bir şey yapmıyor).
+  - **Test:** HTTP `control-plane-trust.spec.ts` (satırın `status`'u SQL ile `suspended` yapılır; durum `active` ve serial aynı kalır, log `stored_invalid`/`signature.invalid`/`kept: true`, logda `suspended` yok; sonra geçerli belge satırı değiştiriyor). Birim `trusted-state.unit.spec.ts` 2: değişmiş satır, bilinmeyen anahtar ve başka mağaza reddi; durumu olmayan süreç `restricted`, başka mağazanın durumu kullanılmıyor.
+- **I3, başka mağazanın satırı:** yönetilen kipte bu `TENANT_ID` için satır yok ama başka bir mağazanınki varsa `control_plane.tenant_mismatch` (hata) loglanır ve mağaza geçerli bir belge gelene kadar `restricted` sayılır. Hiç satır yoksa davranış bugünkü gibidir (`active`; çekme işinin `control_plane.no_document`/`document_stale` uyarısı). **Test:** `control-plane-trust.spec.ts` (`TENANT_ID` değişince `restricted` ve log; satırlar silinince `active`, serial yok; eski kimlik geri gelince belge uygulanıyor).
+- **I4, anahtarın yeniden kullanımı:** `checkCredentialKeysEnv` artık `AUTH_MFA_ENCRYPTION_KEY`, `JWT_SECRET`, `COOKIE_SECRET` ve `STOREFRONT_IP_SECRET`'i de (tanımlıysa) PII anahtarlarıyla, sağlayıcı hesabı anahtarlarıyla (tek ve liste) ve birbirleriyle karşılaştırır. Karşılaştırma kırpılmış ve küçük harfli yapılır. İleti iki değişkeni adlandırır (`COOKIE_SECRET: must differ from JWT_SECRET`), değeri asla. Mevcut "must differ from the PII keys" iletileri aynı.
+  - `pnpm env:init` her `__GENERATED__`'i ayrı `openssl rand` ile üretir, `STOREFRONT_IP_SECRET` paylaşılan ayrı bir değerdir: çıktı geçer. Test fikstürleri de geçer.
+  - `.env.test` ile açılan HTTP koşuları yeşil. Sahibin `.env`'i okunmadı; bir çakışma varsa açılış iki değişkeni adlandırarak durur.
+  - **Test:** `env.unit.spec.ts` +1 (altı çakışma; iletide değer yok; ayrı değerler kabul).
+
+### Docs
+
+- **docs/01:** "Üst panel (control plane, F17)" bölümü: uygulamalar ve paketler, güven sınırı (plan belgesi ve kullanım raporu), durumlar, kurulum. Diyagram güncellendi, KMS cümlesi Transit/F16 olarak düzeltildi.
+- **docs/02:** `apps/control-plane`, `apps/control-plane-panel`, `packages/server-kit`, `packages/types/src/control-plane` ve `infra/tenants/local/<slug>/`.
+- **docs/04:** "Üst panel güven sınırı" (yüzey, roller, yeniden doğrulama listesi, imza, saklanan belgenin yeniden doğrulanması, kodla loglama, `/admin` dışı rotaların envanteri) ve sırların birbirinden ayrı olması.
+- **docs/08:** plan belgesi ve kullanım raporu işletimi (değişkenler, çekme ve rapor, yoklama, izlenecek loglar) ve üst panel imza anahtarı döndürme sırası.
+- **docs/03 §F17:** KK1 §8'deki ifadeyle yeniden yazıldı. Üç KK işaretlendi, kanıtları:
+  - KK1: C10 CLI'ı, C11 `wizard.e2e.ts` `@real`, C12 gerçek çalıştırma, `provisioning.spec.ts`.
+  - KK2: `billing-cycle.spec.ts`, backend `plan-billing.spec.ts`.
+  - KK3: backend `credentials-rotation.spec.ts`, `vault-rotation.spec.ts`.
+- **kvkk-envanter §5:** personel girişi ve 2FA (`auth_identity`), personel daveti (`invite`), oturum dizini (Redis, 8 saat), `release.notes`, `tenant_version.reason`, istisna gerekçeleri ve askı notu, bütün workflow'ların `store: false` olduğu, logların yalnız kod taşıdığı. Saklama kararı: üst panel için ayrı gecelik saklama işi F17'de yazılmadı; kapanış akışı ve danışman onaylı sürelerle F16'da yazılacak (`cp-fleet-retention` dışındakiler "mağaza kaldıkça").
+
+### Testler (2026-11-12)
+
+- server-kit: 24 dosya, 348 test (yeni `failure-code.unit.spec.ts` 5).
+- Üst panel birim: 33 dosya, 383 test (yeni: `error-handler` 5, `private-files` 4, `store` 2; rota tablosu güncellendi).
+- Üst panel HTTP: **bütün takım** 26 dosya, 195/195 (`--maxWorkers=1`; hata işleyicisi her ucu etkilediği için tamamı). Yeni `error-logging.spec.ts` 2; `plans`, `provisioning`, `usage-health`, `dashboard`, `plan-documents` genişletildi.
+- Üst panel arayüzü Vitest: 28 dosya, 151 test.
+- Backend birim: **bütün takım** 392 dosya, 3786 test (+ 3 atlanan). Yeni: `outside-admin` 3, `trusted-state` 2, `plan-senders` +2, `env` +1.
+- Backend HTTP: 13 dosya, 47/47:
+  - Yeni: `control-plane-trust` 3.
+  - Değişen: `plan-status-suspended`, `plan-status-restricted`, `plan-limits-races`.
+  - Etkilenen: `marketing-feeds`, `control-plane-plan`, `control-plane-pull`, `control-plane-usage`, `tenant-scripts`, `plan-limits-unmanaged`, `plan-limits-team`, `plan-billing`, `credentials-rotation`.
+- Panel Vitest (ayarlar + yorumlar): 74 dosya, 262 test.
+- `lint` ve `typecheck`: server-kit, üst panel, üst panel arayüzü, panel yeşil. Backend `lint` yeşil. Backend `typecheck`'te bu çalışma ağacında 16 `TS7006` var; hepsi dokunulmamış dosyalarda (`scripts/seed`, `scripts/bootstrap`, `bootstrap-tenant.spec.ts`). Nedeni, `query.graph` tiplerini veren `.medusa/types`'ın ağaçta üretilmemiş olması; bu çalışmanın değişikliklerinde tip hatası yok.
+- Tam test (turbo) birleştirmeden sonra bir kez, tek başına çalıştırılacak.
+
+### F16'ya kalanlar
+
+- **Canlıya çıkış kapısı (I2): mağaza başına ayrı Redis ya da Redis ACL kullanıcısı.** Yerel provisioner Redis'i paylaşır, ad alanı veritabanından türer (`shopRedisUrl`, §6.3). Bu ayrım değildir: Redis'e ulaşan mağaza başkasının anahtarlarını okuyabilir. `DockerProvisioner` `shopRedisUrl`'ı yeniden kullanmaz. Mağazaya kendi Redis'i ya da yalnız kendi önekine (`~<ad alanı>:*`) izinli bir ACL kullanıcısı verilir; kurulum adımı ve sır listesi buna göre genişler.
+- **SMTP taşıyıcısı (I2):** üst panelin e-posta göndericisinde bugün yalnız Mailpit var (`EMAIL_TRANSPORT=mailpit`, canlıda reddedilir). Ödeme hatırlatmaları (C16) ve personel/sahip davetleri canlıda SMTP taşıyıcısı ister (sahibin VPS'inin SMTP'si, adr/0036 kalıbı). O gelene kadar hatırlatma ve davet canlıda gitmez.
+- **İmza anahtarı döndürme:** docs/08'deki sıra elle uygulanır. Mağazaların listesinin ve saklanan belgenin anahtarının güncellendiği henüz denetlenmiyor (C8 kalan risk 5). F16'nın dağıtım hattı "eski `kid`'li belgeyle kalan mağaza yok" kapısını ekler.
+- **Üst panelin saklama işi:** kapanış akışı (F16.11) ve danışman onaylı sürelerle (kvkk-envanter §5).
+- Önceki Ek'lerden aynen: `cp:tenant re-escrow` (C17), OpenBao Transit (§4), dalga/canary (F16.6), `FLEET_MAX` üstü sayfalı sayım (C18), destek erişimi (F16.10), mTLS ya da vekil sunucuda kimlik (§3.2).
