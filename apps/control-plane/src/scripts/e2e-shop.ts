@@ -2,6 +2,7 @@ import type { ExecArgs, MedusaContainer } from "@medusajs/framework/types"
 import { parseEnv } from "../lib/env"
 import { makeReportingShop, removeE2eReleases } from "../lib/fleet/e2e-fleet"
 import { localOnlyProblem } from "../lib/local-only"
+import { E2E_SHOP_SLUG } from "./e2e-shop-slug"
 import { provisioner } from "../lib/provisioning/provider"
 import { ProvisioningError } from "../lib/provisioning/provisioner"
 import { CP_AUDIT_MODULE } from "../modules/cp-audit"
@@ -21,7 +22,7 @@ import { contextOf } from "../workflows/provisioning/target"
  * audit rows stay (append-only).
  */
 
-export const E2E_SHOP_SLUG = /^e2e-\d{13}-[0-9a-f]{6}$/
+export { E2E_SHOP_SLUG } from "./e2e-shop-slug"
 
 export class E2eShopError extends Error {
   override readonly name = "E2eShopError"
@@ -142,8 +143,12 @@ export default async function e2eShop({ container, args }: ExecArgs) {
       await removeE2eShop(container, each)
       process.stdout.write(`e2e-shop: removed ${each}\n`)
     }
-    for (const each of await removeE2eReleases(container)) {
+    const sweep = await removeE2eReleases(container)
+    for (const each of sweep.removed) {
       process.stdout.write(`e2e-shop: removed release ${each}\n`)
+    }
+    for (const each of sweep.kept) {
+      process.stdout.write(`e2e-shop: kept release ${each} (not this e2e's alone)\n`)
     }
   } else {
     throw new E2eShopError("e2e-shop: remove <slug> | remove-all | make <slug> <semver> <commit>")

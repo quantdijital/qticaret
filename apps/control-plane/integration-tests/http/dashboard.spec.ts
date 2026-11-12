@@ -121,7 +121,7 @@ medusaIntegrationTestRunner({
         await shop("Çelik C", ["active", "restricted"]),
         await shop("Demir D", ["active", "suspended"]),
         await shop("Ege E", ["active"]),
-        await shop("Fırın F", ["active", "closing", "closed"]),
+        await shop("Fırın F", ["active"]),
         await shop("Gümüş G", ["active"]),
         await shop("Hasır H", []),
       ]
@@ -192,6 +192,8 @@ medusaIntegrationTestRunner({
           reason: "Pilot",
         })
       }
+      // F closes after its target was set (a closed shop's target never changes, review L2)
+      await moveThrough(container, f, ["closing", "closed"])
 
       const answer = await call.get("/admin/cp/dashboard", readonly)
 

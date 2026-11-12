@@ -4,6 +4,7 @@ import { runFleetCommand } from "../../src/scripts/fleet"
 import { makeMember } from "../helpers/staff"
 import type { HttpClient, Member } from "../helpers/staff"
 import { auditRows, client, makeTenant, proved } from "../helpers/tenants"
+import { fleetOf } from "../helpers/fleet"
 import { moveThrough, reportAt } from "../helpers/releases"
 
 jest.setTimeout(240 * 1000)
@@ -196,7 +197,7 @@ medusaIntegrationTestRunner({
         (await setTarget(operator, shop.id, { release_id: first.id, reason: " " })).status
       ).toBe(400)
       const unknown = await setTarget(operator, shop.id, {
-        release_id: "rel_unknown",
+        release_id: "rel_00000000000000000000000000",
         reason: "Pilot",
       })
       expect([unknown.status, unknown.data["message"]]).toEqual([404, "cp.release_unknown"])
@@ -284,6 +285,15 @@ medusaIntegrationTestRunner({
         release_id: null,
         reason: "Kapanıyor",
       })
+      // Review L2: decided in the module under the shop's lock, whoever calls it
+      await expect(
+        fleetOf(getContainer()).setTarget({
+          tenant_id: closed.id,
+          release_id: release.id,
+          actor: owner.userId,
+          reason: "Kapanıyor",
+        })
+      ).rejects.toMatchObject({ message: "cp.tenant_closed" })
       expect([refused.status, refused.data["message"]]).toEqual([409, "cp.tenant_closed"])
       const list = (await call.get("/admin/cp/releases", readonly)).data as { releases: Release[] }
       expect(list.releases.find((each) => each.id === release.id)).toMatchObject({

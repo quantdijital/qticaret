@@ -1,8 +1,11 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { Modules } from "@medusajs/framework/utils"
 import { usagePeriodOf } from "@qticaret/types/control-plane"
 import { CP_AUDIT_MODULE } from "../../modules/cp-audit"
 import type CpAuditModuleService from "../../modules/cp-audit/service"
-import { fleetIn } from "../../workflows/modules"
+import { E2E_OWNER_EMAIL } from "../../scripts/e2e-owner"
+import { E2E_SHOP_SLUG } from "../../scripts/e2e-shop-slug"
+import { fleetIn, tenantsIn } from "../../workflows/modules"
 import { createTenantWorkflow } from "../../workflows/tenants/create-tenant"
 import { parseEnv } from "../env"
 import { localOnlyProblem } from "../local-only"
@@ -60,17 +63,56 @@ export async function makeReportingShop(
   return result.id
 }
 
-/** Every release of the e2e's version shape gone, and any target naming one; their versions. */
-export async function removeE2eReleases(container: MedusaContainer): Promise<string[]> {
+/** What the e2e sweep did: the releases it removed, and those it left (not the e2e's own). */
+export interface E2eReleaseSweep {
+  removed: string[]
+  kept: string[]
+}
+
+/**
+ * The e2e run's releases gone (review L1). A release goes only when its
+ * version has the e2e's shape **and** it was added by an e2e owner account
+ * (`E2E_OWNER_EMAIL`, the run's temporary owner: the teardown sweeps before
+ * it removes the owner). A target naming it is cleared only on an e2e shop
+ * (`E2E_SHOP_SLUG`); a release some other shop targets is kept, that shop's
+ * row untouched. Only on a developer's machine or in a test run.
+ */
+export async function removeE2eReleases(container: MedusaContainer): Promise<E2eReleaseSweep> {
   const problem = localOnlyProblem(parseEnv())
   if (problem) {
     throw new Error(`e2e-shop: ${problem}`)
   }
   const fleet = fleetIn(container)
-  const releases = (await fleet.releases()).filter((each) => E2E_RELEASE_VERSION.test(each.version))
+  const shaped = (await fleet.releases()).filter((each) => E2E_RELEASE_VERSION.test(each.version))
+  const authors = [...new Set(shaped.map((each) => each.created_by).filter((id) => id !== null))]
+  const users = authors.length
+    ? await container
+        .resolve(Modules.USER)
+        .listUsers({ id: authors }, { select: ["id", "email"], take: authors.length })
+    : []
+  const e2eAuthors = new Set(
+    users.filter((user) => E2E_OWNER_EMAIL.test(user.email)).map((user) => user.id)
+  )
   const targets = await fleet.targets()
-  for (const release of releases) {
-    for (const target of targets.filter((each) => each.release_id === release.id)) {
+  const targeting = [...new Set(targets.map((each) => each.tenant_id))]
+  const slugs = new Map(
+    (targeting.length
+      ? await tenantsIn(container).listTenants(
+          { id: targeting },
+          { select: ["id", "slug"], take: targeting.length }
+        )
+      : []
+    ).map((shop) => [shop.id, shop.slug])
+  )
+  const sweep: E2eReleaseSweep = { removed: [], kept: [] }
+  for (const release of shaped) {
+    const naming = targets.filter((each) => each.release_id === release.id)
+    const others = naming.some((each) => !E2E_SHOP_SLUG.test(slugs.get(each.tenant_id) ?? ""))
+    if (!release.created_by || !e2eAuthors.has(release.created_by) || others) {
+      sweep.kept.push(release.version)
+      continue
+    }
+    for (const target of naming) {
       await fleet.forgetTarget(target.tenant_id)
     }
     await fleet.removeRelease(release.id)
@@ -81,6 +123,7 @@ export async function removeE2eReleases(container: MedusaContainer): Promise<str
       resource_type: "release",
       resource_id: release.id,
     })
+    sweep.removed.push(release.version)
   }
-  return releases.map((each) => each.version)
+  return sweep
 }

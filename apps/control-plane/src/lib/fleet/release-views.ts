@@ -1,4 +1,5 @@
-import type { MedusaContainer } from "@medusajs/framework/types"
+import type { Logger, MedusaContainer } from "@medusajs/framework/types"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { TenantStatus } from "@qticaret/types/control-plane"
 import type { ReportedRelease } from "../../modules/fleet/service-releases"
 import { fleetIn, tenantsIn } from "../../workflows/modules"
@@ -32,9 +33,13 @@ export interface LiveShop {
   api_base_url: string | null
 }
 
-/** Every live shop with what the counts need (no contact, no company). */
+/**
+ * Every live shop with what the counts need (no contact, no company), by
+ * id. At `FLEET_MAX` the counts built on it are partial: a warning says so
+ * (review I1; the bound only, no shop named).
+ */
 export async function liveShops(container: Container): Promise<LiveShop[]> {
-  return await tenantsIn(container).listTenants(
+  const shops: LiveShop[] = await tenantsIn(container).listTenants(
     { status: [...LIVE_STATUSES] },
     {
       select: ["id", "name", "slug", "status", "status_changed_at", "api_base_url"],
@@ -42,6 +47,17 @@ export async function liveShops(container: Container): Promise<LiveShop[]> {
       take: FLEET_MAX,
     }
   )
+  if (shops.length >= FLEET_MAX) {
+    warnCap(container, "live_shops", FLEET_MAX)
+  }
+  return shops
+}
+
+/** A bounded read hit its bound: the event and the bound, nothing about a shop. */
+export function warnCap(container: Container, read: string, cap: number): void {
+  container
+    .resolve<Logger>(ContainerRegistrationKeys.LOGGER)
+    .warn(`cp.dashboard_cap_reached ${JSON.stringify({ read, cap })}`)
 }
 
 const reportedView = (report: ReportedRelease | undefined) =>

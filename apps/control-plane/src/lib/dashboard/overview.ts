@@ -2,7 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import type { TenantStatus } from "@qticaret/types/control-plane"
 import { billingIn, fleetIn, plansIn, tenantsIn } from "../../workflows/modules"
 import { istanbulDay } from "../billing/days"
-import { FLEET_MAX, liveShops } from "../fleet/release-views"
+import { liveShops } from "../fleet/release-views"
 import { attentionOf } from "./attention"
 import { DASHBOARD_LIST, RENEWAL_DAYS, recurringRevenue, renewalWindow } from "./revenue"
 
@@ -41,23 +41,11 @@ export async function dashboardOf(container: Container, now: Date) {
   const fleet = fleetIn(container)
   const today = istanbulDay(now)
   const window = renewalWindow(today)
-  const [counts, shops, gone] = await Promise.all([
-    tenants.statusCounts(),
-    liveShops(container),
-    tenants.listTenants(
-      { status: ["closing", "closed"] },
-      { select: ["id"], order: { id: "ASC" }, take: FLEET_MAX }
-    ),
-  ])
-  const closing = gone.map((shop) => shop.id)
-  // Suspended shops sell nothing: their subscriptions are not recurring revenue now
-  const notPaying = [
-    ...closing,
-    ...shops.filter((shop) => shop.status === "suspended").map((shop) => shop.id),
-  ]
+  const [counts, shops] = await Promise.all([tenants.statusCounts(), liveShops(container)])
   const liveIds = shops.map((shop) => shop.id)
   const [totals, overdue, upcoming, projected, reports, targets] = await Promise.all([
-    billing.recurringTotals(notPaying),
+    // Review I1: the shops left out by status in the query itself, no id list, no cap
+    billing.recurringTotals(),
     // The payments screen's own lists: one definition of "overdue" and "upcoming"
     billing.payments({ view: "overdue", today, limit: DASHBOARD_LIST, offset: 0 }),
     billing.payments({
@@ -68,7 +56,7 @@ export async function dashboardOf(container: Container, now: Date) {
       limit: DASHBOARD_LIST,
       offset: 0,
     }),
-    billing.projectedRenewals({ ...window, excludeTenantIds: closing, limit: DASHBOARD_LIST }),
+    billing.projectedRenewals({ ...window, limit: DASHBOARD_LIST }),
     fleet.latestReports(liveIds),
     fleet.targetsOf(liveIds),
   ])

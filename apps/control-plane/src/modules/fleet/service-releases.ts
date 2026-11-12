@@ -67,6 +67,25 @@ function chunks<T>(values: readonly T[]): T[][] {
 const unknownRelease = () => new MedusaError(MedusaError.Types.NOT_FOUND, "cp.release_unknown")
 
 /**
+ * A shop being closed is never upgraded: its target does not change. The
+ * one read of the tenants module's table (same database, read only), its
+ * row shared-locked until the target is written: a status move (`FOR
+ * UPDATE`) waits for it, and it for the move.
+ */
+async function refuseClosedShop(manager: Executor, tenantId: string): Promise<void> {
+  const [shop] = await manager.execute<{ status: string }[]>(
+    "SELECT status FROM tenant WHERE id = ? AND deleted_at IS NULL FOR SHARE",
+    [tenantId]
+  )
+  if (!shop) {
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "cp.tenant_unknown")
+  }
+  if (shop.status === "closing" || shop.status === "closed") {
+    throw new MedusaError(MedusaError.Types.CONFLICT, "cp.tenant_closed")
+  }
+}
+
+/**
  * The fleet module's releases (adr/0061 §2 `release` / `tenant_version`,
  * Ek C18): the releases the platform knows and the one each shop should
  * run. A version is unique (under an advisory lock, the unique index a
@@ -190,8 +209,10 @@ export class FleetReleases extends FleetMonitoring {
 
   /**
    * A shop's target set (`release_id` null: none), under the shop's lock;
-   * 404 `cp.release_unknown` for a release that is not known. What it was
-   * comes back, for the undo and the audit's from/to.
+   * 404 `cp.release_unknown` for a release that is not known, 409
+   * `cp.tenant_closed` for a shop being closed (review L2: read in this
+   * transaction with the shop's row shared-locked, so a close cannot slip
+   * in between). What it was comes back, for the undo and the audit.
    */
   @InjectTransactionManager()
   async setTarget(
@@ -202,6 +223,7 @@ export class FleetReleases extends FleetMonitoring {
     await manager.execute("SELECT pg_advisory_xact_lock(hashtext(?))", [
       `tenant_version:${input.tenant_id}`,
     ])
+    await refuseClosedShop(manager, input.tenant_id)
     if (input.release_id !== null) {
       await this.releaseOf(input.release_id, sharedContext)
     }

@@ -86,4 +86,37 @@ describe("releases (Ek C18)", () => {
       PostTargetRelease.safeParse({ release_id: "rel_1", reason: "x".repeat(501) }).success
     ).toBe(false)
   })
+
+  it("takes a release's id shape only, and makes a reason's Windows line breaks plain (review I2)", () => {
+    const id = "rel_01M76PXN5PCP0WW34GV0QJ0MXB"
+
+    expect(PostTargetRelease.parse({ release_id: id, reason: "Pilot\r\ngrubu\r\n" })).toEqual({
+      release_id: id,
+      reason: "Pilot\ngrubu",
+    })
+    for (const release_id of [
+      "rel_1",
+      "ten_01M76PXN5PCP0WW34GV0QJ0MXB",
+      `${id}x`,
+      "rel_01m76pxn5pcp0ww34gv0qj0mxb",
+    ]) {
+      expect(PostTargetRelease.safeParse({ release_id, reason: "Pilot" }).success).toBe(false)
+    }
+  })
+
+  it("refuses the e2e's pre-release shape outside development and test (review L1)", () => {
+    const before = process.env["NODE_ENV"]
+    const body = { version: "0.0.0-e2e.1762800000000", commit: "8a128bbe" }
+    try {
+      process.env["NODE_ENV"] = "production"
+      const refused = PostRelease.safeParse(body)
+      expect(refused.success).toBe(false)
+      expect(JSON.stringify(refused.error)).toContain("cp.release_version_reserved")
+      expect(PostRelease.safeParse({ ...body, version: "1.0.0-rc.1" }).success).toBe(true)
+      process.env["NODE_ENV"] = "development"
+      expect(PostRelease.safeParse(body).success).toBe(true)
+    } finally {
+      process.env["NODE_ENV"] = before
+    }
+  })
 })

@@ -4,13 +4,14 @@ import type { ReportedRelease, TargetRecord } from "../../modules/fleet/service-
 import { fleetIn } from "../../workflows/modules"
 import { PROBED_STATUSES } from "../fleet/health-probe"
 import { REPORT_MISSING_AFTER_MS, reportMissing } from "../fleet/health-rules"
+import { warnCap } from "../fleet/release-views"
 import type { LiveShop } from "../fleet/release-views"
 import { drifts } from "../fleet/releases"
 import { DASHBOARD_LIST } from "./revenue"
 
 type Container = Pick<MedusaContainer, "resolve">
 
-/** Standings read at most: the troubled ones only, normally a handful. */
+/** Standings read at most per state: the troubled ones only, normally a handful. */
 const TROUBLED_MAX = 1_000
 
 const SEVERITY: Record<HealthState, number> = { healthy: 0, failing: 1, unhealthy: 2 }
@@ -65,13 +66,25 @@ export async function attentionOf(
 ) {
   const byId = new Map(shops.map((shop) => [shop.id, shop]))
   const probed = new Set<string>(PROBED_STATUSES)
-  const standings = (await fleetIn(container).listHealthStandings(
-    { state: ["failing", "unhealthy"] },
-    {
-      select: ["tenant_id", "target", "state", "checked_at", "unhealthy_since", "error"],
-      take: TROUBLED_MAX,
+  // Review I1: worst first, then oldest, in a fixed order, so a cap drops the mildest
+  const read = async (state: HealthState, order: "unhealthy_since" | "checked_at") => {
+    const rows = (await fleetIn(container).listHealthStandings(
+      { state },
+      {
+        select: ["tenant_id", "target", "state", "checked_at", "unhealthy_since", "error"],
+        order: { [order]: "ASC", id: "ASC" },
+        take: TROUBLED_MAX,
+      }
+    )) as unknown as Standing[]
+    if (rows.length >= TROUBLED_MAX) {
+      warnCap(container, `health_${state}`, TROUBLED_MAX)
     }
-  )) as unknown as Standing[]
+    return rows
+  }
+  const standings = [
+    ...(await read("unhealthy", "unhealthy_since")),
+    ...(await read("failing", "checked_at")),
+  ]
   // Each shop's worse target
   const worst = new Map<string, { row: Standing; shop: LiveShop }>()
   for (const row of standings) {
