@@ -5,6 +5,7 @@ import { parsePublicKeys, verifyDocument } from "@qticaret/server-kit"
 import { pushPlanDocument } from "../../src/lib/fleet/push"
 import { parseTenantApiHosts } from "../../src/lib/fleet/push-target"
 import { publishedKeys } from "../../src/lib/vault/signing"
+import { issuePlanDocumentWorkflow } from "../../src/workflows/fleet/plan-document"
 import { TENANTS_MODULE } from "../../src/modules/tenants"
 import type TenantsModuleService from "../../src/modules/tenants/service"
 import { ensureSigningKey, fleetOf } from "../helpers/fleet"
@@ -238,6 +239,28 @@ medusaIntegrationTestRunner({
       } finally {
         server.close()
       }
+    })
+
+    // Last in this file: it switches the signing key
+    it("issues the same content again with the new key after a key switch (Ek C19 I2)", async () => {
+      const { tenant } = await shopOnPackage()
+      const before = await latest(tenant.id)
+      const proof = await proved(http, owner)
+      await call.post("/admin/cp/keys/signing/prepare", {}, owner, proof)
+      const switched = await call.post("/admin/cp/keys/signing/switch", {}, owner, proof)
+      const { active } = switched.data as { active: string }
+
+      await issuePlanDocumentWorkflow(getContainer()).run({ input: { tenant_id: tenant.id } })
+      const after = await latest(tenant.id)
+      await issuePlanDocumentWorkflow(getContainer()).run({ input: { tenant_id: tenant.id } })
+
+      expect(switched.status).toBe(200)
+      expect(after?.serial).toBe((before?.serial ?? 0) + 1)
+      expect(after?.kid).toBe(active)
+      expect(after?.kid).not.toBe(before?.kid)
+      expect(after?.content_hash).toBe(before?.content_hash)
+      // Once on the active key, the same content issues nothing
+      expect((await latest(tenant.id))?.serial).toBe(after?.serial)
     })
   },
 })

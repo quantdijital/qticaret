@@ -5,7 +5,7 @@ import { billingSummaryOf } from "../../lib/billing/summary"
 import { contentHash, planContent, planDocumentOf } from "../../lib/fleet/plan-content"
 import type { PlanContent } from "../../lib/fleet/plan-content"
 import { signPlanDocument } from "../../lib/vault/signing"
-import { fleetIn, plansIn, tenantsIn } from "../modules"
+import { fleetIn, plansIn, tenantsIn, vaultIn } from "../modules"
 import { undoableStep } from "../undoable"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -66,9 +66,12 @@ const issueStep = undoableStep(
       input.tenant_id,
       async () => {
         const content = await planContentOf(container, input.tenant_id)
+        // Ek C19 I2: the active key too, so a key switch issues every shop's document again
+        const active = content ? await vaultIn(container).signingKeyIn("active") : null
         return content
           ? {
               contentHash: contentHash(content),
+              ...(active ? { kid: active.kid } : {}),
               build: async (serial: number, issuedAt: Date) => {
                 const document = planDocumentOf(content, serial, issuedAt)
                 // The control plane's `active` key, its seed open for this signature only (Ek C8)

@@ -95,11 +95,17 @@ export class FleetDocuments extends MedusaService({
    * said last (Ek C15 review L4: a suspension and its end in a race). Null
    * from `prepare` (no package): nothing issued, no row. A pending push of
    * an older document is superseded.
+   *
+   * Ek C19 I2: the same content signed by another key than the active one
+   * (`kid`) is issued again with the active key. A shop re-verifies its
+   * stored document on every load, so after a signing key switch every
+   * shop must hold a document of the new key before the old one leaves
+   * its `CONTROL_PLANE_PUBLIC_KEYS` (the reconcile job does it).
    */
   @InjectTransactionManager()
   async issuePlanDocument(
     tenantId: string,
-    prepare: () => Promise<{ contentHash: string; build: BuildDocument } | null>,
+    prepare: () => Promise<{ contentHash: string; kid?: string; build: BuildDocument } | null>,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<{ issued: boolean; row: PlanDocumentRow | null }> {
     const manager = sharedContext.transactionManager as Executor
@@ -110,9 +116,9 @@ export class FleetDocuments extends MedusaService({
     if (!prepared) {
       return { issued: false, row: null }
     }
-    const { contentHash, build } = prepared
+    const { contentHash, kid, build } = prepared
     const latest = await this.latestPlanDocument(tenantId, sharedContext)
-    if (latest?.content_hash === contentHash) {
+    if (latest?.content_hash === contentHash && (kid === undefined || latest.kid === kid)) {
       return { issued: false, row: latest }
     }
     const serial = (latest?.serial ?? 0) + 1
