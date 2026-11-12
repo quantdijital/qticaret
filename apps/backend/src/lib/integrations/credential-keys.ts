@@ -78,9 +78,26 @@ export function configuredCredentialKeys(env: CredentialKeysEnv): string[] {
   return single !== undefined && single !== "" ? [single.toLowerCase()] : []
 }
 
+/**
+ * The other secrets that must each be their own (adr/0061 Ek C19 I4): one
+ * value reused as two keys means one leak opens both, and a rotation of
+ * one silently changes the other. Compared only when set.
+ */
+export const DISTINCT_SECRETS = [
+  "AUTH_MFA_ENCRYPTION_KEY",
+  "JWT_SECRET",
+  "COOKIE_SECRET",
+  "STOREFRONT_IP_SECRET",
+] as const
+
+type SecretsEnv = CredentialKeysEnv & {
+  PII_ENCRYPTION_KEY: string
+  PII_HASH_KEY: string
+} & Partial<Record<(typeof DISTINCT_SECRETS)[number], string | undefined>>
+
 /** The cross-variable rules, added to the shop's schema; `deployed`: production or staging. */
 export function checkCredentialKeysEnv(
-  env: CredentialKeysEnv & { PII_ENCRYPTION_KEY: string; PII_HASH_KEY: string },
+  env: SecretsEnv,
   deployed: boolean,
   issue: (path: string, message: string) => void
 ): void {
@@ -105,11 +122,28 @@ export function checkCredentialKeysEnv(
   if (single !== undefined && pii.includes(single)) {
     issue("CREDENTIALS_ENCRYPTION_KEY", "must differ from the PII keys")
   }
-  if (
-    listed &&
-    configuredCredentialKeys({ CREDENTIALS_ENCRYPTION_KEYS: list }).some((key) => pii.includes(key))
-  ) {
+  const listedKeys = listed ? configuredCredentialKeys({ CREDENTIALS_ENCRYPTION_KEYS: list }) : []
+  if (listedKeys.some((key) => pii.includes(key))) {
     issue("CREDENTIALS_ENCRYPTION_KEYS", "must differ from the PII keys")
+  }
+  // Ek C19 I4: each further secret differs from every key before it. The
+  // message names the variables, never a value
+  const seen: (readonly [string, string])[] = [
+    ["PII_ENCRYPTION_KEY", pii[0] ?? ""],
+    ["PII_HASH_KEY", pii[1] ?? ""],
+    ...(single === undefined ? [] : [["CREDENTIALS_ENCRYPTION_KEY", single] as const]),
+    ...listedKeys.map((key) => ["CREDENTIALS_ENCRYPTION_KEYS", key] as const),
+  ]
+  for (const name of DISTINCT_SECRETS) {
+    const value = env[name]?.trim().toLowerCase()
+    if (!value) {
+      continue
+    }
+    const clash = seen.find(([, other]) => other === value)
+    if (clash) {
+      issue(name, `must differ from ${clash[0]}`)
+    }
+    seen.push([name, value])
   }
 }
 

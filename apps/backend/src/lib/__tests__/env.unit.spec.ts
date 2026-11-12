@@ -221,6 +221,49 @@ describe("parseEnv", () => {
     expect(error).not.toContain(oldKey)
   })
 
+  it("refuses a secret reused as another key, naming variables only (adr/0061 Ek C19 I4)", () => {
+    const [shared, list] = [hexKey(), hexKey()]
+    const cases: [Record<string, string>, string][] = [
+      [
+        { AUTH_MFA_ENCRYPTION_KEY: validEnv.PII_ENCRYPTION_KEY },
+        "AUTH_MFA_ENCRYPTION_KEY: must differ from PII_ENCRYPTION_KEY",
+      ],
+      [{ COOKIE_SECRET: jwtSecret }, "COOKIE_SECRET: must differ from JWT_SECRET"],
+      [
+        { JWT_SECRET: validEnv.PII_HASH_KEY.toUpperCase() },
+        "JWT_SECRET: must differ from PII_HASH_KEY",
+      ],
+      [
+        { CREDENTIALS_ENCRYPTION_KEYS: `${list},${shared}`, STOREFRONT_IP_SECRET: shared },
+        "STOREFRONT_IP_SECRET: must differ from CREDENTIALS_ENCRYPTION_KEYS",
+      ],
+      [
+        { CREDENTIALS_ENCRYPTION_KEY: shared, AUTH_MFA_ENCRYPTION_KEY: shared },
+        "AUTH_MFA_ENCRYPTION_KEY: must differ from CREDENTIALS_ENCRYPTION_KEY",
+      ],
+      [
+        { AUTH_MFA_ENCRYPTION_KEY: shared, STOREFRONT_IP_SECRET: shared },
+        "STOREFRONT_IP_SECRET: must differ from AUTH_MFA_ENCRYPTION_KEY",
+      ],
+    ]
+    for (const [changes, message] of cases) {
+      const error = errorOf({ ...validEnv, ...changes })
+      expect(error).toContain(message)
+      for (const value of Object.values(changes)) {
+        expect(error.toLowerCase()).not.toContain(value.toLowerCase())
+      }
+    }
+    // Each its own, or unset: accepted
+    expect(() =>
+      parseEnv({
+        ...validEnv,
+        AUTH_MFA_ENCRYPTION_KEY: hexKey(),
+        STOREFRONT_IP_SECRET: hexKey(),
+        CREDENTIALS_ENCRYPTION_KEYS: list,
+      })
+    ).not.toThrow()
+  })
+
   it.each(["production", "staging"])("requires the staff 2FA key in %s (adr/0040)", (env) => {
     expect(errorOf({ ...validEnv, NODE_ENV: env })).toContain(
       "AUTH_MFA_ENCRYPTION_KEY: is required in production and staging"
