@@ -33,7 +33,11 @@ export async function privateFolder(path: string, make: boolean): Promise<void> 
   }
 }
 
-/** `text` at `path`, whole or not at all, 0600. */
+/**
+ * `text` at `path`, whole or not at all, 0600. Ek C19 L3: a failed write,
+ * sync, close or rename removes the temporary file, which may hold part
+ * of the shop's secrets.
+ */
 export async function writePrivateFile(path: string, text: string): Promise<void> {
   await privateFolder(path, true)
   const temporary = `${path}.${randomBytes(6).toString("hex")}.tmp`
@@ -43,15 +47,15 @@ export async function writePrivateFile(path: string, text: string): Promise<void
     0o600
   )
   try {
-    await handle.writeFile(text, "utf8")
-    await handle.sync()
-  } finally {
-    await handle.close()
-  }
-  try {
+    try {
+      await handle.writeFile(text, "utf8")
+      await handle.sync()
+    } finally {
+      await handle.close()
+    }
     await rename(temporary, path)
   } catch (error) {
-    await rm(temporary, { force: true })
+    await rm(temporary, { force: true }).catch(() => undefined)
     throw error
   }
 }
