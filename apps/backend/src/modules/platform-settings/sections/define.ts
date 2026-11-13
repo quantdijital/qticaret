@@ -11,7 +11,15 @@ export interface SectionDefinition<T extends object> {
   defaults: T
   full: z.ZodType<T>
   patch: z.ZodType<Partial<Record<keyof T, unknown>>>
+  /**
+   * A stored row read as the section means it today, before it is checked:
+   * for a row written when its fields meant something else (adr/0062 §4).
+   * Runs on every read of a stored row and must leave an up-to-date one alone.
+   */
+  upgrade?: SectionUpgrade
 }
+
+export type SectionUpgrade = (stored: Record<string, unknown>) => Record<string, unknown>
 
 type Fields = Record<string, z.ZodType>
 
@@ -19,7 +27,8 @@ export function defineSection<T extends object>(
   name: string,
   fields: Fields,
   defaults: T,
-  refine?: (values: T, ctx: z.RefinementCtx) => void
+  refine?: (values: T, ctx: z.RefinementCtx) => void,
+  upgrade?: SectionUpgrade
 ): SectionDefinition<T> {
   const base = z.object(fields).strict()
   const full = (refine
@@ -36,10 +45,10 @@ export function defineSection<T extends object>(
   const patch = z.object(patchFields).strict() as unknown as z.ZodType<
     Partial<Record<keyof T, unknown>>
   >
-  return { name, defaults, full, patch }
+  return upgrade ? { name, defaults, full, patch, upgrade } : { name, defaults, full, patch }
 }
 
-const isPlainObject = (value: unknown): value is Record<string, unknown> =>
+export const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === "object" && !Array.isArray(value)
 
 /** `patch` over `current`, one level deep: a nested object keeps the fields the patch leaves out. */

@@ -1,4 +1,6 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
+import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -54,19 +56,20 @@ medusaIntegrationTestRunner({
         colors: { primary: "#1E3A8A", background: "cool" },
         typography: { heading: "playfair" },
         product_card: { show_rating: true },
-        header: { layout: "left" },
+        header: { layout: "centered" },
         buttons: "rounded",
       })
       const after = await frame()
 
       expect(before.status).toBe(200)
+      // Today's Grafit look (adr/0062 §2); the section's own version stays inside
       expect(before.data.theme).toEqual({
         theme: "atolye",
-        colors: { primary: null, accent: null, background: "warm" },
-        typography: { heading: "fraunces", body: "inter" },
+        colors: { primary: null, accent: null, background: "steel" },
+        typography: { heading: "manrope", body: "manrope" },
         radius: "soft",
-        product_card: { ratio: "4:5", show_brand: true, show_rating: false },
-        header: { layout: "centered", sticky: true },
+        product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+        header: { layout: "left", sticky: true },
         buttons: "pill",
       })
       expect(fallback.data.theme.colors.primary).toBe("#0b5c99")
@@ -78,14 +81,68 @@ medusaIntegrationTestRunner({
       expect(after.data.theme).toEqual({
         theme: "atolye",
         colors: { primary: "#1e3a8a", accent: null, background: "cool" },
-        typography: { heading: "playfair", body: "inter" },
+        typography: { heading: "playfair", body: "manrope" },
         radius: "soft",
-        product_card: { ratio: "4:5", show_brand: true, show_rating: true },
-        header: { layout: "left", sticky: true },
+        product_card: { ratio: "1:1", show_brand: true, show_rating: true },
+        header: { layout: "centered", sticky: true },
         buttons: "rounded",
       })
       // The old field stays until the storefront and the panel move over
       expect(after.data.storefront.primary_color).toBe("#0b5c99")
+    })
+
+    it("reads a row stored before adr/0062 as the storefront drew it, and stores it with the version at the next save", async () => {
+      const container = getContainer()
+      const owner = await createAdminUser(http, container)
+      const store = await createStorefront(container)
+      const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+      const section = () =>
+        settle(
+          http.get<{ values: Record<string, unknown> }>("/admin/platform-settings/theme", {
+            headers: owner.headers,
+          })
+        )
+      // As `saveSection` wrote it then: the shop's colour, and choices Atölye never showed
+      await settings.createSettingsSections({
+        section: "theme",
+        values: {
+          theme: "atolye",
+          colors: { primary: "#7a1a48", accent: "#f5d90a", background: "warm" },
+          typography: { heading: "playfair", body: "inter" },
+          radius: "round",
+          product_card: { ratio: "4:5", show_brand: false, show_rating: true },
+          header: { layout: "centered", sticky: false },
+          buttons: "square",
+        },
+      })
+      const grafit = {
+        theme: "atolye",
+        colors: { primary: "#7a1a48", accent: null, background: "steel" },
+        typography: { heading: "manrope", body: "manrope" },
+        radius: "soft",
+        product_card: { ratio: "1:1", show_brand: false, show_rating: false },
+        header: { layout: "left", sticky: false },
+        buttons: "pill",
+      }
+
+      const read = await section()
+      const saved = await settle(
+        http.post(
+          "/admin/platform-settings/theme",
+          { typography: { heading: "fraunces" } },
+          { headers: owner.headers }
+        )
+      )
+      const [row] = await settings.listSettingsSections({ section: "theme" })
+      const shown = await settle(http.get<Frame>("/store/storefront", { headers: store.headers }))
+      // A choice made since is the shop's own, the old default's value included
+      const chosen = { ...grafit, typography: { heading: "fraunces", body: "manrope" } }
+
+      expect(read.data.values).toEqual({ settings_version: 2, ...grafit })
+      expect(saved.status).toBe(200)
+      expect(row?.values).toEqual({ settings_version: 2, ...chosen })
+      expect((await section()).data.values).toEqual({ settings_version: 2, ...chosen })
+      expect(shown.data.theme).toEqual(chosen)
     })
   },
 })

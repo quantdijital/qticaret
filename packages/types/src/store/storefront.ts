@@ -77,12 +77,15 @@ export type ThemeHeadingFont = "fraunces" | "inter" | "playfair" | "dm-serif" | 
 /** The body faces a shop may choose. */
 export type ThemeBodyFont = "inter" | "manrope" | "source-sans" | "nunito"
 
-/** The page colour's name; the storefront paints each with the backend's `THEME_BACKGROUNDS`. */
-export type ThemeBackground = "warm" | "neutral" | "cool"
+/**
+ * The page colour's name; the storefront paints each with the backend's
+ * `THEME_BACKGROUNDS`. `steel` is Grafit's counter and the default (adr/0062 §3).
+ */
+export type ThemeBackground = "steel" | "warm" | "neutral" | "cool"
 
 /**
  * How the storefront looks (F18 D11, adr/0053 §B): choices from fixed
- * lists, never CSS. The defaults are today's look.
+ * lists, never CSS. The defaults are today's Grafit look (adr/0062 §2).
  */
 export interface StoreThemeSettings {
   theme: "atolye"

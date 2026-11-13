@@ -73,12 +73,23 @@ function filled(
 /**
  * The theme's choices (F18 D11, adr/0053). Its main colour falls back to the
  * storefront section's `primary_color` until the panel writes it here; that
- * field stays in `storefront` meanwhile.
+ * field stays in `storefront` meanwhile. The section's own version stays
+ * inside: a stored row is already read as it means today (adr/0062 §4).
  */
-const themeOf = (theme: ThemeSettings, storefront: StorefrontSettings): ThemeSettings => ({
-  ...theme,
-  colors: { ...theme.colors, primary: theme.colors.primary ?? storefront.primary_color },
-})
+function themeOf(
+  theme: ThemeSettings,
+  storefront: StorefrontSettings
+): Omit<ThemeSettings, "settings_version"> {
+  return {
+    theme: theme.theme,
+    colors: { ...theme.colors, primary: theme.colors.primary ?? storefront.primary_color },
+    typography: theme.typography,
+    radius: theme.radius,
+    product_card: theme.product_card,
+    header: theme.header,
+    buttons: theme.buttons,
+  }
+}
 
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const settings = req.scope.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)

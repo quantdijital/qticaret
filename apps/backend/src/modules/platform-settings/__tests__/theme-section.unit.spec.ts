@@ -1,5 +1,11 @@
 import { mergePatch } from "../sections/define"
-import { THEME_BACKGROUNDS, primaryReadable, themeSection } from "../sections/theme"
+import { parseStored } from "../sections/stored"
+import {
+  THEME_BACKGROUNDS,
+  primaryReadable,
+  themeSection,
+  upgradeStoredTheme,
+} from "../sections/theme"
 
 const { full, patch, defaults } = themeSection
 
@@ -7,19 +13,34 @@ const saved = (body: Record<string, unknown>) => full.safeParse(mergePatch(defau
 const issueOf = (body: Record<string, unknown>) => saved(body).error?.issues[0]
 
 describe("theme section", () => {
-  it("starts as today's look, and its defaults pass its own checks", () => {
+  it("starts as today's Grafit look, and its defaults pass its own checks (adr/0062 §2)", () => {
     expect(defaults).toEqual({
+      settings_version: 2,
       theme: "atolye",
-      colors: { primary: null, accent: null, background: "warm" },
-      typography: { heading: "fraunces", body: "inter" },
+      colors: { primary: null, accent: null, background: "steel" },
+      typography: { heading: "manrope", body: "manrope" },
       radius: "soft",
-      product_card: { ratio: "4:5", show_brand: true, show_rating: false },
-      header: { layout: "centered", sticky: true },
+      product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+      header: { layout: "left", sticky: true },
       buttons: "pill",
     })
     expect(full.safeParse(defaults).success).toBe(true)
-    // The first theme's page colour, still the panel's contrast check's
-    expect(THEME_BACKGROUNDS.warm).toBe("#f6f4ef")
+    expect(parseStored("theme", undefined)).toEqual(defaults)
+  })
+
+  it("offers Grafit's steel counter beside the three earlier page colours (adr/0062 §3)", () => {
+    // `steel` is Atölye's `--color-paper`, oklch(98.4% 0.003 250), in sRGB: the
+    // storefront's theme spec derives it from the token. The storefront and
+    // the panel hold the same four values
+    expect(THEME_BACKGROUNDS).toEqual({
+      steel: "#f8fafc",
+      warm: "#f6f4ef",
+      neutral: "#f5f5f5",
+      cool: "#f3f5f8",
+    })
+    for (const background of Object.keys(THEME_BACKGROUNDS)) {
+      expect(saved({ colors: { primary: null, accent: null, background } }).success).toBe(true)
+    }
   })
 
   it("reads a section stored with the removed first theme as Atölye (adr/0057 Ek 2026-11-09)", () => {
@@ -46,7 +67,7 @@ describe("theme section", () => {
   it("keeps a nested group's other fields when the panel sends one", () => {
     const body = patch.parse({ colors: { primary: "#1a1814" } })
     const merged = full.parse(mergePatch(defaults, body))
-    expect(merged.colors).toEqual({ primary: "#1a1814", accent: null, background: "warm" })
+    expect(merged.colors).toEqual({ primary: "#1a1814", accent: null, background: "steel" })
   })
 
   it.each([
@@ -59,6 +80,7 @@ describe("theme section", () => {
     ["a card shape", { product_card: { ratio: "16:9", show_brand: true, show_rating: false } }],
     ["a button shape", { buttons: "blob" }],
     ["CSS of its own", { css: "body{display:none}" }],
+    ["a version it does not write", { settings_version: 1 }],
   ])("refuses %s", (_, body) => {
     expect(saved(body).success).toBe(false)
   })
@@ -73,18 +95,130 @@ describe("theme section", () => {
     expect(
       issueOf({ colors: { primary: "#949494", accent: null, background: "warm" } })?.message
     ).toBe("platform_settings.color_contrast")
-    // Dark enough for both
-    for (const background of ["warm", "neutral", "cool"] as const) {
+    // Dark enough for both, on every page
+    for (const background of ["steel", "warm", "neutral", "cool"] as const) {
       expect(saved({ colors: { primary: "#2f6feb", accent: null, background } }).success).toBe(true)
       expect(primaryReadable("#1a1814", background)).toBe(true)
     }
   })
 
-  it("checks the colour against the page it is saved with", () => {
-    // #8e8e8e: 3.28:1 on white; 3.005:1 on the neutral page, 2.98 on the warm, 2.9996 on the cool
-    const colors = (background: string) => ({ primary: "#8e8e8e", accent: null, background })
-    expect(saved({ colors: colors("neutral") }).success).toBe(true)
-    expect(saved({ colors: colors("warm") }).success).toBe(false)
-    expect(saved({ colors: colors("cool") }).success).toBe(false)
+  it("checks the colour against the page it is saved with, each as the storefront paints it", () => {
+    const on = (primary: string, background: string) =>
+      saved({ colors: { primary, accent: null, background } }).success
+    // Every grey here reaches 3:1 on white; the pages are darker, each by its own measure.
+    // #919191: 3.01:1 on steel (the lightest), 2.87 to 2.89 on the others
+    expect(on("#919191", "steel")).toBe(true)
+    expect(["warm", "neutral", "cool"].map((page) => on("#919191", page))).toEqual([
+      false,
+      false,
+      false,
+    ])
+    // #929292: 2.97:1 on steel
+    expect(on("#929292", "steel")).toBe(false)
+    // #8e8e8e: 3.13:1 on steel, 3.005 on neutral, 2.9996 on cool, 2.98 on warm
+    expect(on("#8e8e8e", "steel")).toBe(true)
+    expect(on("#8e8e8e", "neutral")).toBe(true)
+    expect(on("#8e8e8e", "cool")).toBe(false)
+    expect(on("#8e8e8e", "warm")).toBe(false)
+    // #8d8d8d: 3.02:1 on warm, the darkest page
+    expect(on("#8d8d8d", "warm")).toBe(true)
+    expect(on("#8d8d8d", "cool")).toBe(true)
+  })
+})
+
+describe("a theme row stored before adr/0062 (no settings_version)", () => {
+  // What `saveSection` wrote then: every field, the old defaults where untouched
+  const oldDefaults = {
+    theme: "atolye",
+    colors: { primary: null, accent: null, background: "warm" },
+    typography: { heading: "fraunces", body: "inter" },
+    radius: "soft",
+    product_card: { ratio: "4:5", show_brand: true, show_rating: false },
+    header: { layout: "centered", sticky: true },
+    buttons: "pill",
+  }
+
+  it("reads the old defaults as Grafit: the storefront drew nothing else", () => {
+    expect(parseStored("theme", oldDefaults)).toEqual(defaults)
+    // The first theme's name, from before adr/0057 Ek 2026-11-09
+    expect(parseStored("theme", { ...oldDefaults, theme: "base" })).toEqual(defaults)
+  })
+
+  it("keeps what Atölye showed: the main colour, the cards' brand and shape, the sticky header", () => {
+    const stored = {
+      ...oldDefaults,
+      colors: { primary: "#7a1a48", accent: null, background: "warm" },
+      product_card: { ratio: "3:4", show_brand: false, show_rating: false },
+      header: { layout: "centered", sticky: false },
+    }
+    expect(parseStored("theme", stored)).toEqual({
+      ...defaults,
+      colors: { ...defaults.colors, primary: "#7a1a48" },
+      product_card: { ratio: "3:4", show_brand: false, show_rating: false },
+      header: { layout: "left", sticky: false },
+    })
+    const square = { ...stored, product_card: { ...stored.product_card, ratio: "1:1" } }
+    expect(parseStored("theme", square)["product_card"]).toMatchObject({ ratio: "1:1" })
+  })
+
+  it("takes to Grafit every choice that never showed, and a 4:5 card that was drawn square", () => {
+    const stored = {
+      theme: "atolye",
+      colors: { primary: "#0b5c99", accent: "#f5d90a", background: "cool" },
+      typography: { heading: "playfair", body: "nunito" },
+      radius: "round",
+      product_card: { ratio: "4:5", show_brand: true, show_rating: true },
+      header: { layout: "centered", sticky: true },
+      buttons: "square",
+    }
+    expect(parseStored("theme", stored)).toEqual({
+      ...defaults,
+      colors: { primary: "#0b5c99", accent: null, background: "steel" },
+    })
+  })
+
+  it("keeps a main colour that passed on its old page: steel is the lightest of the four", () => {
+    // #8d8d8d: 3.02:1 on the warm page it was saved with, 3.17 on steel
+    const stored = { ...oldDefaults, colors: { ...oldDefaults.colors, primary: "#8d8d8d" } }
+    expect(parseStored("theme", stored)["colors"]).toEqual({
+      primary: "#8d8d8d",
+      accent: null,
+      background: "steel",
+    })
+  })
+
+  it("reads a partial or malformed row without failing", () => {
+    expect(parseStored("theme", { colors: { primary: "#7a1a48" } })).toEqual({
+      ...defaults,
+      colors: { ...defaults.colors, primary: "#7a1a48" },
+    })
+    expect(parseStored("theme", { colors: "red", product_card: null, header: [] })).toEqual(
+      defaults
+    )
+    expect(parseStored("theme", {})).toEqual(defaults)
+  })
+
+  it("is written with the version by its next save, and left alone from then on", () => {
+    const before = parseStored("theme", { ...oldDefaults, radius: "round" })
+    const after = full.parse(mergePatch(before, patch.parse({ radius: "round" })))
+    expect(after).toEqual({ ...defaults, radius: "round" })
+    expect(parseStored("theme", after)).toEqual(after)
+  })
+})
+
+describe("a theme row stored since adr/0062 (settings_version 2)", () => {
+  it("is the shop's choice in every field, the old defaults' values included", () => {
+    const stored = {
+      settings_version: 2,
+      theme: "atolye",
+      colors: { primary: "#0b5c99", accent: "#f5d90a", background: "warm" },
+      typography: { heading: "fraunces", body: "inter" },
+      radius: "round",
+      product_card: { ratio: "4:5", show_brand: false, show_rating: true },
+      header: { layout: "centered", sticky: false },
+      buttons: "square",
+    }
+    expect(upgradeStoredTheme(stored)).toBe(stored)
+    expect(parseStored("theme", stored)).toEqual(stored)
   })
 })

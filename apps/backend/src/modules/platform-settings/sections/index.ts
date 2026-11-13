@@ -44,7 +44,13 @@ export type { StoreSettings } from "./store"
 export type { StorefrontLink, StorefrontHero, StorefrontSettings, TrustIcon } from "./storefront"
 export { TRUST_ICONS } from "./storefront"
 export type { ThemeBackground, ThemeSettings } from "./theme"
-export { BODY_FONTS, HEADING_FONTS, INSTALLED_THEMES, THEME_BACKGROUNDS } from "./theme"
+export {
+  BODY_FONTS,
+  HEADING_FONTS,
+  INSTALLED_THEMES,
+  THEME_BACKGROUNDS,
+  THEME_SETTINGS_VERSION,
+} from "./theme"
 export { mergePatch } from "./define"
 export type { SectionDefinition } from "./define"
 
