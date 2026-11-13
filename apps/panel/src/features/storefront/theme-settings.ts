@@ -73,8 +73,10 @@ export const themeValuesOf = (saved: ThemeSettings, legacyPrimary: string | null
 
 const orNull = (value: string): string | null => (value === "" ? null : value)
 
-/** Every group as it is sent; the server keeps the theme itself. */
-export const themeBodyOf = (values: ThemeParsed): Omit<ThemeSettings, "theme"> => ({
+/** Every group as it is sent; the server keeps the theme itself and the settings' version. */
+export const themeBodyOf = (
+  values: ThemeParsed
+): Omit<ThemeSettings, "theme" | "settings_version"> => ({
   colors: {
     primary: orNull(values.colors.primary),
     accent: orNull(values.colors.accent),

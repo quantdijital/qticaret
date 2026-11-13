@@ -17,9 +17,11 @@ export const STOREFRONT_THEME_COLOR = INK
 /**
  * The page colours the storefront's theme settings offer (adr/0053,
  * backend `THEME_BACKGROUNDS`): the contrast check reads them, so they are
- * the storefront's own values.
+ * the storefront's own values. `steel` is Grafit's counter, the default
+ * (adr/0062 §3).
  */
 export const STOREFRONT_BACKGROUNDS = {
+  steel: "#f8fafc",
   warm: "#f6f4ef",
   neutral: "#f5f5f5",
   cool: "#f3f5f8",

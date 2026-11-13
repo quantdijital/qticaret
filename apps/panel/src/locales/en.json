@@ -8023,6 +8023,7 @@
         "clear": "Default",
         "background": "Page colour",
         "backgrounds": {
+          "steel": "Steel white (Grafit)",
           "warm": "Warm",
           "neutral": "Neutral",
           "cool": "Cool"

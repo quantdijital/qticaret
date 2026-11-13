@@ -108,12 +108,13 @@ const STOREFRONT: StorefrontSettings = {
 }
 /** The theme section's defaults, as the server gives them before anything is saved. */
 export const THEME: ThemeSettings = {
+  settings_version: 2,
   theme: "atolye",
-  colors: { primary: null, accent: null, background: "warm" },
-  typography: { heading: "fraunces", body: "inter" },
+  colors: { primary: null, accent: null, background: "steel" },
+  typography: { heading: "manrope", body: "manrope" },
   radius: "soft",
-  product_card: { ratio: "4:5", show_brand: true, show_rating: false },
-  header: { layout: "centered", sticky: true },
+  product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+  header: { layout: "left", sticky: true },
   buttons: "pill",
 }
 

@@ -86,10 +86,10 @@ describe("the theme settings", HEAVY, () => {
     })
     expect(themeBody()).toEqual({
       colors: { primary: "#0b5c99", accent: null, background: "neutral" },
-      typography: { heading: "playfair", body: "inter" },
+      typography: { heading: "playfair", body: "manrope" },
       radius: "soft",
-      product_card: { ratio: "4:5", show_brand: true, show_rating: true },
-      header: { layout: "centered", sticky: true },
+      product_card: { ratio: "1:1", show_brand: true, show_rating: true },
+      header: { layout: "left", sticky: true },
       buttons: "pill",
     })
     // The main colour lives in the theme now; the draft is not touched
@@ -119,9 +119,11 @@ describe("the theme settings", HEAVY, () => {
           : null,
     })
 
-    // Over 3:1 on white and on the neutral page, not on the warm one
+    // Over 3:1 on white, on Grafit's steel and on the neutral page, not on the warm one
     await user.type(primary, "#2f8dff")
-    expect(screen.getByRole("alert")).toHaveTextContent(CONTRAST)
+    expect(screen.queryByRole("alert")).toBeNull()
+    await user.click(screen.getByRole("radio", { name: "Sıcak" }))
+    expect(await screen.findByRole("alert")).toHaveTextContent(CONTRAST)
     expect(primary).toHaveAttribute("aria-invalid", "true")
     await user.click(save())
     expect(postsTo(fetchMock, THEME_SETTINGS)).toEqual([])
@@ -150,7 +152,7 @@ describe("the theme settings", HEAVY, () => {
 
     await waitFor(() => {
       expect(themeBody()).toMatchObject({
-        colors: { primary: "#0b5c99", accent: null, background: "warm" },
+        colors: { primary: "#0b5c99", accent: null, background: "steel" },
         radius: "sharp",
       })
     })

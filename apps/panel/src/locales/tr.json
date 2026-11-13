@@ -8023,6 +8023,7 @@
         "clear": "Varsayılan",
         "background": "Sayfa zemini",
         "backgrounds": {
+          "steel": "Çelik beyazı (Grafit)",
           "warm": "Sıcak",
           "neutral": "Nötr",
           "cool": "Soğuk"

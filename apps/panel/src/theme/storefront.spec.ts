@@ -33,6 +33,22 @@ describe("primaryReadable", () => {
     // Passes on the neutral page, not on the warmer one
     expect(primaryReadable("#2f8dff", "neutral")).toBe(true)
     expect(primaryReadable("#2f8dff", "warm")).toBe(false)
-    expect(Object.keys(STOREFRONT_BACKGROUNDS)).toEqual(["warm", "neutral", "cool"])
+    // The server's four values (backend `THEME_BACKGROUNDS`), Grafit's steel first
+    expect(STOREFRONT_BACKGROUNDS).toEqual({
+      steel: "#f8fafc",
+      warm: "#f6f4ef",
+      neutral: "#f5f5f5",
+      cool: "#f3f5f8",
+    })
+  })
+
+  it("takes on steel, the lightest page, what the darker ones refuse", () => {
+    // #919191: 3.01:1 on steel, under 2.9 on the other three
+    expect(primaryReadable("#919191", "steel")).toBe(true)
+    for (const page of ["warm", "neutral", "cool"] as const) {
+      expect(primaryReadable("#919191", page)).toBe(false)
+    }
+    // #929292: 3.11:1 on white, 2.97 on steel
+    expect(primaryReadable("#929292", "steel")).toBe(false)
   })
 })

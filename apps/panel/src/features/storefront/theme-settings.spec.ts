@@ -9,6 +9,7 @@ import {
 } from "./theme-settings"
 
 const SAVED: ThemeSettings = {
+  settings_version: 2,
   theme: "atolye",
   colors: { primary: null, accent: "#C2410C", background: "warm" },
   typography: { heading: "fraunces", body: "inter" },
@@ -27,7 +28,7 @@ describe("the theme settings form (adr/0053 §B)", () => {
     ).toMatchObject({ colors: { primary: "#111113" } })
 
     const body = themeBodyOf(themeSchema.parse({ ...values, colors: { ...values.colors } }))
-    // Lower case as the server keeps it; the theme itself is not sent
+    // Lower case as the server keeps it; the theme itself and the settings' version are not sent
     expect(body).toEqual({
       colors: { primary: "#0b5c99", accent: "#c2410c", background: "warm" },
       typography: { heading: "fraunces", body: "inter" },
@@ -58,6 +59,8 @@ describe("the theme settings form (adr/0053 §B)", () => {
       message: CONTRAST_ERROR,
     })
     expect(on("#2f8dff", "neutral").success).toBe(true)
+    // Grafit's steel is the lightest page: it takes the colour too
+    expect(on("#2f8dff", "steel").success).toBe(true)
     expect(on("#0b5c9", "warm").success).toBe(false)
     expect(themeSchema.safeParse({ ...values, radius: "pointy" }).success).toBe(false)
   })

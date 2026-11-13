@@ -10,7 +10,12 @@ import type { StorefrontBackground } from "@/theme/storefront"
 /** Self-hosted faces the storefront has a loader for; names only. */
 export const HEADING_FONTS = ["fraunces", "inter", "playfair", "dm-serif", "manrope"] as const
 export const BODY_FONTS = ["inter", "manrope", "source-sans", "nunito"] as const
-export const BACKGROUNDS = ["warm", "neutral", "cool"] as const satisfies StorefrontBackground[]
+export const BACKGROUNDS = [
+  "steel",
+  "warm",
+  "neutral",
+  "cool",
+] as const satisfies StorefrontBackground[]
 export const RADII = ["sharp", "soft", "round"] as const
 export const CARD_RATIOS = ["4:5", "1:1", "3:4"] as const
 export const HEADER_LAYOUTS = ["centered", "left"] as const
@@ -20,6 +25,11 @@ export type HeadingFont = (typeof HEADING_FONTS)[number]
 export type BodyFont = (typeof BODY_FONTS)[number]
 
 export interface ThemeSettings {
+  /**
+   * What the fields mean (adr/0062 §4): the server's own, read with the
+   * section and never sent. A row stored before it reads as Grafit already.
+   */
+  settings_version: 2
   /** The installed theme; one today (`atolye`, adr/0057). */
   theme: "atolye"
   colors: {
