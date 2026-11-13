@@ -4,6 +4,9 @@ import { storedAddonsOf } from "../../lib/catalog/addons"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import { PRODUCT_ADDONS } from "../../modules/platform-settings/features"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
+import { PRODUCT_REVIEWS_MODULE } from "../../modules/product-reviews"
+import type ProductReviewsModuleService from "../../modules/product-reviews/service"
+import type { Rating } from "../../modules/product-reviews/types"
 import { liveSettings } from "./layout-shared"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -15,6 +18,11 @@ export interface CardFacts {
   stock: StockBucket
   /** Put straight in the cart from the card; null when the product needs its page first. */
   quick_add: { variant_id: string } | null
+  /**
+   * The average (to one decimal) and count of its approved reviews, the
+   * product page's own numbers (adr/0062); null without an approved one.
+   */
+  rating: Rating | null
 }
 
 interface VariantRow {
@@ -78,9 +86,11 @@ export function quickAddOf(
 /**
  * Card facts for a page of products (adr/0046 Ek 2026-11-04): the stock
  * bucket and the quick-add variant of each published product in one of
- * the shopper's sales channels; others are left out. One product read and
- * one stock read for the whole page. "Az kaldı" at the published design's
- * threshold (adr/0049 Ek 2026-11-06), else the old storefront field's.
+ * the shopper's sales channels; others are left out. One product read,
+ * one stock read and one read of the summed ratings for the whole page.
+ * "Az kaldı" at the published design's threshold (adr/0049 Ek 2026-11-06),
+ * else the old storefront field's. The rating is the row the product page
+ * and its JSON-LD read (`ratingsOf`): approved reviews only.
  */
 export async function cardFacts(
   container: Container,
@@ -94,7 +104,8 @@ export async function cardFacts(
   }
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  const [{ data }, shared, addonsOn] = await Promise.all([
+  const reviews = container.resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
+  const [{ data }, shared, addonsOn, ratings] = await Promise.all([
     query.graph({
       entity: "product",
       fields: [
@@ -111,6 +122,8 @@ export async function cardFacts(
     }),
     liveSettings(container),
     settings.isFeatureEnabled(PRODUCT_ADDONS),
+    // Beside the product read, not after it: only the shown products' are answered below
+    reviews.ratingsOf(ids),
   ])
   const shown = (data as ProductRow[]).filter(
     (product) =>
@@ -131,7 +144,14 @@ export async function cardFacts(
   return Object.fromEntries(
     shown.map((product) => {
       const stock = stockBucketOf(variantsOf(product), available, lowAt)
-      return [product.id, { stock, quick_add: quickAddOf(product, stock, addonsOn) }]
+      return [
+        product.id,
+        {
+          stock,
+          quick_add: quickAddOf(product, stock, addonsOn),
+          rating: ratings.get(product.id) ?? null,
+        },
+      ]
     })
   )
 }

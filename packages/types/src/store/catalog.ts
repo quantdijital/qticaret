@@ -134,6 +134,11 @@ export interface StoreCardFacts {
   stock: StoreStockBucket
   /** The one variant a card may put in the cart; null: the product's page first. */
   quick_add: { variant_id: string } | null
+  /**
+   * Its approved reviews in short (adr/0062): the average to one decimal
+   * and how many; null without one. Absent from a backend before it.
+   */
+  rating?: { average: number; count: number } | null
 }
 
 export interface StoreProduct {

@@ -11,7 +11,11 @@ jest.setTimeout(180 * 1000)
 interface Facts {
   facts: Record<
     string,
-    { stock: "in_stock" | "low" | "out"; quick_add: { variant_id: string } | null }
+    {
+      stock: "in_stock" | "low" | "out"
+      quick_add: { variant_id: string } | null
+      rating: { average: number; count: number } | null
+    }
   >
 }
 
@@ -91,11 +95,16 @@ medusaIntegrationTestRunner({
       expect(first.status).toBe(200)
       expect(first.headers["cache-control"]).toBe("no-store")
       expect(first.data.facts).toEqual({
-        [plenty.productId]: { stock: "in_stock", quick_add: { variant_id: plenty.variantId } },
-        [few.productId]: { stock: "low", quick_add: { variant_id: few.variantId } },
-        [none.productId]: { stock: "out", quick_add: null },
+        // No review yet: no stars (adr/0062; `card-facts-rating.spec.ts` has the reviewed ones)
+        [plenty.productId]: {
+          stock: "in_stock",
+          quick_add: { variant_id: plenty.variantId },
+          rating: null,
+        },
+        [few.productId]: { stock: "low", quick_add: { variant_id: few.variantId }, rating: null },
+        [none.productId]: { stock: "out", quick_add: null, rating: null },
         // Two variants need the page to choose; a variant keeping no count is to be had
-        [two]: { stock: "in_stock", quick_add: null },
+        [two]: { stock: "in_stock", quick_add: null, rating: null },
       })
       // A draft is no card: left out
       expect(first.data.facts).not.toHaveProperty(draft)

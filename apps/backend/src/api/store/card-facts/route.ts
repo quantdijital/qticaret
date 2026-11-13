@@ -6,9 +6,10 @@ import type { StoreGetCardFactsType } from "./validators"
  * GET /store/card-facts?id= (adr/0046 Ek 2026-11-04): what a product card
  * says beside its price, for one page of cards (a listing, a search, a
  * home rail): `stock` as a bucket (`in_stock`, `low`, `out`; never the
- * number) and `quick_add` (the one variant a card may put in the cart, or
- * null). Only published products in the shopper's sales channels answer.
- * Stock changes by the minute: not kept by caches.
+ * number), `quick_add` (the one variant a card may put in the cart, or
+ * null) and `rating` (the average and count of its approved reviews, or
+ * null; adr/0062). Only published products in the shopper's sales
+ * channels answer. Stock changes by the minute: not kept by caches.
  */
 export async function GET(
   req: MedusaStoreRequest<unknown, StoreGetCardFactsType>,

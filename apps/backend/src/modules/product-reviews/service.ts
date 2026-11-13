@@ -207,7 +207,8 @@ class ProductReviewsModuleService extends MedusaService({
   ): Promise<Map<string, Rating>> {
     const rows = await this.listProductRatings(
       { product_id: productIds },
-      { select: ["product_id", "review_count", "rating_total"] },
+      // A page of cards asks for up to a hundred products: every row, not a default page
+      { select: ["product_id", "review_count", "rating_total"], take: null },
       sharedContext
     )
     return new Map(
