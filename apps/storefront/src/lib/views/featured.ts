@@ -33,7 +33,7 @@ export async function featuredView(
     if (!path) {
       return null
     }
-    const [card] = withCardFacts([productCard(product, path, displays, options)], facts)
+    const [card] = withCardFacts([productCard(product, path, displays, options)], facts, options, t)
     if (!card) {
       return null
     }

@@ -238,7 +238,7 @@ export async function ListingContent({
     swatchLookup(shared.color_swatches)
   )
   const first = current === 1 && facets.active.length === 0
-  const cards = withCardFacts(productCards(products, paths, displays, options), facts)
+  const cards = withCardFacts(productCards(products, paths, displays, options), facts, options, t)
   // A search is one when asked, not again for each page or filter (as the backend counts it).
   // Prices are the cards' own, an automatic promotion included (adr/0023 Ek 2026-11-05)
   const list =

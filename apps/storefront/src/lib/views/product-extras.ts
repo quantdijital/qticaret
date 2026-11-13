@@ -1,6 +1,7 @@
 import "server-only"
 import type { ProductCardView, QuestionsView, ReviewsView, Translate } from "@qticaret/ui"
 import type { StoreProduct } from "@qticaret/types"
+import { t as words } from "@/lib/i18n"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { cardFacts } from "@/lib/store-api/extras"
 import {
@@ -101,5 +102,5 @@ export async function relatedOf(product: StoreProduct): Promise<ProductCardView[
     cardOptions(),
     cardFacts(others.map((each) => each.id)),
   ])
-  return withCardFacts(productCards(others, paths, displays, options), facts)
+  return withCardFacts(productCards(others, paths, displays, options), facts, options, words)
 }

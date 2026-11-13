@@ -1,4 +1,5 @@
 import type {
+  CardRatingView,
   CategoryCardView,
   CustomerPhotoView,
   ImageView,
@@ -21,6 +22,7 @@ import type {
   StoreReviewSummary,
 } from "@qticaret/types"
 import { imageView } from "./image"
+import type { CardOptions } from "./product"
 
 /**
  * The theme contract's optional fields (adr/0046 Ek 2026-11-04) from the
@@ -35,14 +37,40 @@ export function categoryCard(
   return image ? { ...link, image: imageView(image, link.label) } : link
 }
 
+const AVERAGE = new Intl.NumberFormat("tr-TR", {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+})
+
+/**
+ * A card's stars from its facts (adr/0062): the average in Turkish
+ * ("4,3"), the count and the line a screen reader hears. None without an
+ * approved review, or from a backend that does not answer it.
+ */
+export function cardRating(rating: StoreCardFacts["rating"], t: Translate): CardRatingView | null {
+  if (!rating || !(rating.count > 0) || !Number.isFinite(rating.average)) {
+    return null
+  }
+  const average = AVERAGE.format(rating.average)
+  return {
+    average,
+    count: rating.count,
+    label: t("product.card_rating", { average, count: rating.count }),
+  }
+}
+
 /**
  * Cards with their stock bucket and quick add from the card facts. Quick
  * add goes only on a card that shows a price and can be bought now: the
- * facts are a moment younger than the card's own answer.
+ * facts are a moment younger than the card's own answer. The stars go on
+ * only while the shop shows them (`product_card.show_rating`); otherwise
+ * the field is left out of the view and no theme has it to draw.
  */
 export function withCardFacts(
   cards: readonly ProductCardView[],
-  facts: Readonly<Record<string, StoreCardFacts>>
+  facts: Readonly<Record<string, StoreCardFacts>>,
+  options: Pick<CardOptions, "showRating">,
+  t: Translate
 ): ProductCardView[] {
   return cards.map((card) => {
     const fact = facts[card.id]
@@ -50,10 +78,12 @@ export function withCardFacts(
       return card
     }
     const quick = fact.quick_add && card.price && card.available ? fact.quick_add : null
+    const rating = options.showRating ? cardRating(fact.rating, t) : null
     return {
       ...card,
       stock: fact.stock,
       quickAdd: quick ? { variantId: quick.variant_id } : null,
+      ...(rating ? { rating } : {}),
     }
   })
 }
@@ -87,11 +117,6 @@ export function ratingBars(
     }
   })
 }
-
-const AVERAGE = new Intl.NumberFormat("tr-TR", {
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1,
-})
 
 /**
  * The shop's reviews in short (adr/0046 Ek 2026-11-05): the average in

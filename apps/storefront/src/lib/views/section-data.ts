@@ -12,6 +12,7 @@ import type {
   ProductCardView,
   Translate,
 } from "@qticaret/ui"
+import { t as words } from "@/lib/i18n"
 import { allCategories, listProducts, pathsOf, priceDisplays } from "@/lib/store-api/requests"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { cardFacts, categoryImages, latestReviewPhotos } from "@/lib/store-api/extras"
@@ -148,7 +149,7 @@ export async function railCards(products: readonly StoreProduct[]): Promise<Prod
     cardOptions(),
     cardFacts(products.map((product) => product.id)),
   ])
-  return withCardFacts(productCards(products, paths, displays, options), facts)
+  return withCardFacts(productCards(products, paths, displays, options), facts, options, words)
 }
 
 /** The categories a section names (or the top ones) with their live paths and pictures. */

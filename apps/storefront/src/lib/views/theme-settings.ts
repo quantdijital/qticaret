@@ -10,8 +10,14 @@ export const currentTheme = cache(async () => {
   return themeSettings(answer.theme, answer.storefront.primary_color)
 })
 
-/** What the shop's cards show; the brand is left out of the view when the shop hides it. */
+/**
+ * What the shop's cards show; the brand is left out of the view when the
+ * shop hides it, the stars put in only when it asks for them (adr/0062).
+ */
 export async function cardOptions(): Promise<CardOptions> {
   const settings = await currentTheme()
-  return { showBrand: settings.product_card.show_brand }
+  return {
+    showBrand: settings.product_card.show_brand,
+    showRating: settings.product_card.show_rating,
+  }
 }

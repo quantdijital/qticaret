@@ -122,7 +122,11 @@ export function ProductCard({
         {product.rating && (
           <p className="flex items-center gap-1.5 text-xs text-text-2">
             <Stars rating={Number(product.rating.average.replace(",", "."))} />
-            <span aria-hidden="true">{product.rating.average}</span>
+            {/* The eye reads "4,3 (12)"; a screen reader hears the label's whole sentence */}
+            <span aria-hidden="true" className="tabular">
+              <span className="font-semibold text-text">{product.rating.average}</span> (
+              {product.rating.count})
+            </span>
             <span className="sr-only">{product.rating.label}</span>
           </p>
         )}

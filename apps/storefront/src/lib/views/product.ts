@@ -19,9 +19,12 @@ const kurusOf = (amount: number | null | undefined): number | null =>
 /** What the shop shows on its cards (adr/0053 §B, `product_card`). */
 export interface CardOptions {
   showBrand: boolean
+  /** The stars of its approved reviews, from the card facts (`withCardFacts`, adr/0062). */
+  showRating: boolean
 }
 
-const ALL_SHOWN: CardOptions = { showBrand: true }
+// Without the shop's settings: the brand as ever, no stars (the setting's own default)
+const ALL_SHOWN: CardOptions = { showBrand: true, showRating: false }
 
 /** A product in a grid; one without a live path is left out by the caller. */
 export function productCard(

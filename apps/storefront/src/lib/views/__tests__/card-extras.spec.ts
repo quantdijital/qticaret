@@ -4,6 +4,7 @@ import { t } from "@/lib/i18n"
 import {
   categoryCard,
   customerPhotos,
+  cardRating,
   ratingBars,
   reviewPhotos,
   reviewReply,
@@ -32,13 +33,21 @@ const picture = {
   derivatives: { srcset: { webp: [{ width: 64, url: "https://cdn.example.com/k-64.webp" }] } },
 }
 
+const SHOWN = { showRating: true }
+const HIDDEN = { showRating: false }
+
 // adr/0046 Ek 2026-11-04: the theme contract's optional fields
 describe("withCardFacts", () => {
   it("adds the stock bucket and quick add, never the number", () => {
-    const [low, out, other] = withCardFacts([card("a"), card("b"), card("c")], {
-      a: { stock: "low", quick_add: { variant_id: "variant_a" } },
-      b: { stock: "out", quick_add: null },
-    })
+    const [low, out, other] = withCardFacts(
+      [card("a"), card("b"), card("c")],
+      {
+        a: { stock: "low", quick_add: { variant_id: "variant_a" } },
+        b: { stock: "out", quick_add: null },
+      },
+      HIDDEN,
+      t
+    )
     expect(low).toMatchObject({ stock: "low", quickAdd: { variantId: "variant_a" } })
     expect(out).toMatchObject({ stock: "out", quickAdd: null })
     // No facts for it (an older backend, a draft): the card as it was
@@ -47,8 +56,49 @@ describe("withCardFacts", () => {
 
   it("gives no quick add to a card without a price or that cannot be bought now", () => {
     const facts = { a: { stock: "in_stock" as const, quick_add: { variant_id: "variant_a" } } }
-    expect(withCardFacts([card("a", { price: null })], facts)[0]?.quickAdd).toBeNull()
-    expect(withCardFacts([card("a", { available: false })], facts)[0]?.quickAdd).toBeNull()
+    expect(withCardFacts([card("a", { price: null })], facts, HIDDEN, t)[0]?.quickAdd).toBeNull()
+    expect(
+      withCardFacts([card("a", { available: false })], facts, HIDDEN, t)[0]?.quickAdd
+    ).toBeNull()
+  })
+})
+
+// adr/0062: the card's stars, only while the shop shows them
+describe("the card's rating", () => {
+  const facts = {
+    a: { stock: "in_stock" as const, quick_add: null, rating: { average: 4.3, count: 12 } },
+    // No approved review
+    b: { stock: "in_stock" as const, quick_add: null, rating: null },
+    // A backend before the field
+    c: { stock: "in_stock" as const, quick_add: null },
+  }
+  const cards = [card("a"), card("b"), card("c")]
+
+  it("goes on the reviewed card in the shop's language while the shop shows ratings", () => {
+    const [rated, bare, older] = withCardFacts(cards, facts, SHOWN, t)
+    expect(rated?.rating).toEqual({
+      average: "4,3",
+      count: 12,
+      label: "5 üzerinden 4,3 (12 değerlendirme)",
+    })
+    expect(bare).not.toHaveProperty("rating")
+    expect(older).not.toHaveProperty("rating")
+    // The other facts as ever
+    expect(rated).toMatchObject({ stock: "in_stock", quickAdd: null })
+  })
+
+  it("is left out of every card while the shop hides ratings", () => {
+    for (const each of withCardFacts(cards, facts, HIDDEN, t)) {
+      expect(each).not.toHaveProperty("rating")
+      expect(each.stock).toBe("in_stock")
+    }
+  })
+
+  it("writes a whole average with its decimal and drops a count of none or a broken number", () => {
+    expect(cardRating({ average: 5, count: 1 }, t)?.average).toBe("5,0")
+    expect(cardRating({ average: 4, count: 0 }, t)).toBeNull()
+    expect(cardRating({ average: Number.NaN, count: 3 }, t)).toBeNull()
+    expect(cardRating(undefined, t)).toBeNull()
   })
 })
 

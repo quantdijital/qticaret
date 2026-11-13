@@ -43,7 +43,11 @@ describe("the self-hosted faces", () => {
 
 describe("fontPreloads", () => {
   it("preloads the shop's body face, then its heading face, and nothing else", () => {
-    expect(fontPreloads(DEFAULT_THEME)).toEqual([...FONT_FILES.inter, ...FONT_FILES.fraunces])
+    // Grafit draws both with Manrope (adr/0062 §2): one face, named once
+    expect(fontPreloads(DEFAULT_THEME)).toEqual([...FONT_FILES.manrope])
+    expect(
+      fontPreloads({ ...DEFAULT_THEME, typography: { heading: "fraunces", body: "inter" } })
+    ).toEqual([...FONT_FILES.inter, ...FONT_FILES.fraunces])
   })
 
   it("follows the shop's choice (theme.typography)", () => {

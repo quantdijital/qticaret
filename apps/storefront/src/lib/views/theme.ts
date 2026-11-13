@@ -16,22 +16,27 @@ import { brandDeclarations, isHexColor, readableOn } from "./color"
  * defaults nothing is printed: the theme's own look stands.
  */
 
-/** Today's look (backend `themeSection`'s defaults). */
+/**
+ * Today's Grafit look (adr/0062 §2; backend `themeSection`'s defaults, the
+ * two must stay equal): what the theme draws with nothing printed.
+ */
 export const DEFAULT_THEME: StoreThemeSettings = {
   theme: "atolye",
-  colors: { primary: null, accent: null, background: "warm" },
-  typography: { heading: "fraunces", body: "inter" },
+  colors: { primary: null, accent: null, background: "steel" },
+  typography: { heading: "manrope", body: "manrope" },
   radius: "soft",
-  product_card: { ratio: "4:5", show_brand: true, show_rating: false },
-  header: { layout: "centered", sticky: true },
+  product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+  header: { layout: "left", sticky: true },
   buttons: "pill",
 }
 
 /**
  * The page colours, as the backend's contrast check reads them
- * (`THEME_BACKGROUNDS`): the two must stay equal.
+ * (`THEME_BACKGROUNDS`): the two must stay equal. `steel` is the theme's
+ * own `--color-paper` in sRGB (adr/0062 §3; the spec derives it from the token).
  */
 export const THEME_BACKGROUNDS: Readonly<Record<ThemeBackground, string>> = {
+  steel: "#f8fafc",
   warm: "#f6f4ef",
   neutral: "#f5f5f5",
   cool: "#f3f5f8",
@@ -39,10 +44,20 @@ export const THEME_BACKGROUNDS: Readonly<Record<ThemeBackground, string>> = {
 
 /**
  * The quiet surfaces, lines and secondary text that go with a page colour;
- * `warm` is the theme's own. Secondary text keeps WCAG AA on the page
- * (6.4:1 and more), on muted surfaces (5.8:1) and on cards (7.0:1).
+ * `steel` is the theme's own and prints nothing, `warm` is the removed
+ * first theme's bone set. Secondary text keeps WCAG AA on the page (6.4:1
+ * and more), on muted surfaces (5.8:1) and on cards (7.0:1). Atölye's own
+ * surface family per tone takes their place (adr/0062 §5).
  */
-const NEUTRALS: Readonly<Record<Exclude<ThemeBackground, "warm">, readonly string[]>> = {
+const NEUTRALS: Readonly<Record<Exclude<ThemeBackground, "steel">, readonly string[]>> = {
+  warm: [
+    "--secondary:#ece8e0",
+    "--muted:#ece8e0",
+    "--accent:#ece8e0",
+    "--border:#e2ddd2",
+    "--input:#d3cdbf",
+    "--muted-foreground:#5c574d",
+  ],
   neutral: [
     "--secondary:#ebebeb",
     "--muted:#ebebeb",
@@ -92,8 +107,8 @@ const RADIUS_SCALE = { sharp: "0.2", soft: null, round: "1.5" } as const
 /** The buttons' corners (`--button-radius`); pill is the theme's own. */
 const BUTTON_RADIUS = { pill: null, rounded: "0.75rem", square: "0" } as const
 
-/** The card picture's shape (`--card-ratio`); 4:5 is the theme's own. */
-const CARD_RATIO = { "4:5": null, "1:1": "1 / 1", "3:4": "3 / 4" } as const
+/** The card picture's shape (`--card-ratio`); square is the theme's own (adr/0062 §9). */
+const CARD_RATIO = { "4:5": "4 / 5", "1:1": null, "3:4": "3 / 4" } as const
 
 const oneOf = <T extends string>(value: unknown, allowed: readonly T[], fallback: T): T =>
   (allowed as readonly unknown[]).includes(value) ? (value as T) : fallback
@@ -178,7 +193,7 @@ export function themeStyle(settings: StoreThemeSettings): string | null {
       `--highlight-foreground:${readableOn(colors.accent)}`
     )
   }
-  if (colors.background !== "warm") {
+  if (colors.background !== "steel") {
     declarations.push(
       `--background:${THEME_BACKGROUNDS[colors.background]}`,
       ...NEUTRALS[colors.background]
