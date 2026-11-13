@@ -20,7 +20,7 @@
    `src/theme.ts` yalnız `@qticaret/storefront-theme`'i okur; başka hiçbir dosya tema paketi adlandırmaz. Birim testleri `vitest.config.ts`'teki takma adla base temayı çalıştırır; temaya özel testler paketi doğrudan içe alır.
 3. **Tema girişi (`ThemeEntry`):** `theme` (sözleşmenin sayfaları), `fontPreloads(settings)`, `style(settings)`.
    - Base: bugünkü davranış aynen; mağazanın bütün tema ayarları uygulanır.
-   - Atölye: yalnız ana renk (`--primary` ezmesi temanın `--color-signal`'ine akar) ve kart görsel oranı. Yazı tipi, köşe, düğme, zemin ve vurgu ayarı bu temada basılmaz (sahip kararı 2026-11-04); kendi iki yüzü (Libre Caslon Display, Hanken Grotesk 400/500) `public/fonts`'ta, `app/fonts.css`'te, `THEME_OWN_FONT_FILES`'ta.
+   - Atölye: yalnız ana renk (`--primary` ezmesi temanın `--color-signal`'ine akar) ve kart görsel oranı. **Not (2026-11-14):** bu satır adr/0062 ile değişti; Atölye `theme` bölümünün bütün alanlarını uygular, varsayılanlar Grafit görünümüdür (Ek 2026-11-14). Yazı tipi, köşe, düğme, zemin ve vurgu ayarı bu temada basılmaz (sahip kararı 2026-11-04); kendi iki yüzü (Libre Caslon Display, Hanken Grotesk 400/500) `public/fonts`'ta, `app/fonts.css`'te, `THEME_OWN_FONT_FILES`'ta.
 4. **Paketler çalışma alanında yan yana:** `packages/themes/base` değişmez. Atölye henüz çizmediği sayfalarda base temanın sayfalarını kendi token'larıyla kullanır (`{ ...baseTheme, … }`); sırayla değiştirilir.
 5. **Backend'in `theme` ayarı** (`theme: "base"`, `INSTALLED_THEMES`) şimdilik dokunulmadı: hangi temanın kurulu olduğu imajın kendisidir. Panel temayı göstermek isterse backend bu adı bölümün izinli listesine ekler (ayrı görev).
 
@@ -50,3 +50,11 @@ Sahip (2026-11-09): "projeyi pnpm dev ile başlattığımda atölye temasından 
 - **Testler:** birim testleri `vitest.config.ts`'te Atölye girişiyle çalışır. Base temanın görünümüne özgü durumlar silindi; uygulama mantığını sınayanlar (iade/hediye kartı iadesi, cayma hakkı, ödeme bağlantısı, sepetteki hediye alıcısı, stok süzgeci, sözleşmenin isteğe bağlı alanları) Atölye'ye çevrildi. Yeni: `atolye-small-pages-theme.spec.ts`.
 - **Backend:** `theme` bölümünde `INSTALLED_THEMES = ["atolye"]`, varsayılan `theme: "atolye"`. Kayıtlı `"base"` değeri okunurken ve kaydedilirken `"atolye"` olarak alınır (şema ön işlemi); veri göçü gerekmez, bölüm bir sonraki kayıtta yeni adla yazılır. Diğer ayarların varsayılanları (Fraunces/Inter, sıcak zemin vb.) değişmedi: Atölye onlardan yalnız ana rengi ve kart oranını alır (karar 3). `StoreThemeSettings.theme` ve panelin `ThemeSettings.theme` tipi `"atolye"`.
 - `app/fonts.ts`'teki yüz dosyaları (Inter, Fraunces, …) ve `fontPreloads` yerinde kaldı: panelin yazı tipi seçimi ve ileride bu ayarları alan bir tema için.
+
+## Ek (2026-11-14): karar 3'ün Atölye satırı adr/0062 ile değişti
+
+Sahip (2026-11-14): "hepsi vitrinde çalışır. Bugünkü Grafit tasarımının kuralları panelde kayıtlı varsayılan olur."
+
+- Karar 3'teki "Atölye yalnız ana rengi ve kart oranını alır" kuralının ve Ek 2026-11-09'daki "diğer ayarların varsayılanları değişmedi" satırının yerini **adr/0062** aldı: Atölye bütün tema ayarlarını uygular; varsayılanlar bugünkü Grafit görünümüdür (Manrope, `steel` zemin, kare kart, solda yazı markası); adr/0062'den önce saklanan satırlar okurken Grafit'e eşlenir.
+- Karar 1, 2, 4, 5 ve tema girişinin biçimi (`ThemeEntry`) değişmedi.
+- Geçiş: backend şeması, varsayılanlar ve eşleme yerinde (adr/0062 iş 1). `atolyeSettings` süzgeci, temanın CSS'i ayarları okuyana kadar durur ve sırayla kalkar (adr/0062 Faz 1).

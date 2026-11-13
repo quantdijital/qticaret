@@ -78,6 +78,8 @@
 
 1. **Ayar bölümü `theme`** (`sections/theme.ts`). Kaydedilmemişken varsayılanlar geçerli ve bugünkü görünüme eşit; hiçbir şey tohumlanmaz.
 
+   > **Not (2026-11-14):** aşağıdaki varsayılan sütunu ve §B.2'nin zemin tablosu **adr/0062** ile değişti (Ek 2026-11-14). Tablo ilk kararın kaydı olarak duruyor.
+
    | Alan                       | Değerler                                                     | Varsayılan |
    | -------------------------- | ------------------------------------------------------------ | ---------- |
    | `theme`                    | `base` (kurulu temalar; yeni tema = yeni sürüm)              | `base`     |
@@ -187,3 +189,10 @@
   - Yedek `storefront.primary_color` karşıtlık denetiminden geçmemiş olabilir; panel taşırken denetimden geçirir.
   - `accent` denetlenmez.
   - Kaydedilmemiş tema ayarını önizlemede göstermek gerekirse önizleme bağlantısına `theme` taslağı eklenir (sonraki adım).
+
+## Ek (2026-11-14): tema ayarlarının varsayılanları ve zemin tablosu adr/0062 ile değişti
+
+- **§B.1 varsayılanlar:** `colors.background` `steel`, `typography` `manrope` / `manrope`, `product_card.ratio` `1:1`, `header.layout` `left`; diğerleri aynı (`radius` `soft`, `buttons` `pill`, `show_brand` açık, `show_rating` kapalı, renkler `null`). Bunlar Atölye'nin bugünkü Grafit görünümüdür; `theme` alanı `atolye` (adr/0057 Ek 2026-11-09). Bölümde panelin göstermediği `settings_version` alanı var; onu taşımayan (adr/0062'den önce saklanan) satır okurken Grafit'e eşlenir, göç yok.
+- **§B.2 zemin renkleri:** listeye `steel` `#f8fafc` eklendi (Atölye'nin `--color-paper`'ının sRGB karşılığı; testle token'a bağlı). `warm`, `neutral`, `cool` aynı değerlerle duruyor.
+- **§B.3 karşıtlık:** kural aynı (beyazla ve seçilen zeminle 3:1); `steel` seçiliyken gerçek Grafit zeminine göre ölçülür. Kuyu yüzeyi (`paper-2`) koşulu adr/0062 karar 6 ile, ton kümeleri tanımlanınca eklenir.
+- **§B.7 taslak:** tema ayarı adr/0063 karar 3 uygulanınca "Yayınla" ile yayına girecek (sahip, 2026-11-14); o işe kadar kayıt hemen yayındadır.
