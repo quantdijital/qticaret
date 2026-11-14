@@ -2,10 +2,14 @@ import { mergePatch } from "../sections/define"
 import { parseStored } from "../sections/stored"
 import {
   THEME_BACKGROUNDS,
+  THEME_WELLS,
   primaryReadable,
+  primaryReadableInWell,
+  themeSaveIssue,
   themeSection,
   upgradeStoredTheme,
 } from "../sections/theme"
+import type { ThemeSettings } from "../sections/theme"
 
 const { full, patch, defaults } = themeSection
 
@@ -220,5 +224,62 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
     }
     expect(upgradeStoredTheme(stored)).toBe(stored)
     expect(parseStored("theme", stored)).toEqual(stored)
+  })
+})
+
+describe("the main colour in the page's well (adr/0062 §6): a rule for saves, not for stored rows", () => {
+  const withColors = (primary: string | null, background: ThemeSettings["colors"]["background"]) =>
+    ({ ...defaults, colors: { primary, accent: null, background } }) satisfies ThemeSettings
+  const refused = { message: "platform_settings.color_contrast", path: ["colors", "primary"] }
+
+  it("holds each tone's well as the theme paints it (Atölye's paper-2)", () => {
+    expect(THEME_WELLS).toEqual({
+      steel: "#eef1f4",
+      warm: "#eeebe2",
+      neutral: "#ececec",
+      cool: "#e9ecf1",
+    })
+    expect(Object.keys(THEME_WELLS)).toEqual(Object.keys(THEME_BACKGROUNDS))
+  })
+
+  it("refuses a newly chosen colour the well cannot carry, though the page can", () => {
+    // #919191: 3.01:1 on steel's page, 2.78 in its well
+    expect(primaryReadable("#919191", "steel")).toBe(true)
+    expect(primaryReadableInWell("#919191", "steel")).toBe(false)
+    expect(themeSaveIssue(withColors("#919191", "steel"), defaults)).toEqual(refused)
+    // #8a8a8a: 3.05 in steel's well
+    expect(themeSaveIssue(withColors("#8a8a8a", "steel"), defaults)).toBeNull()
+    // Warm's well is darker: #8d8d8d reads on the page (3.02), not in the well (2.78); #878787 does (3.01)
+    expect(primaryReadable("#8d8d8d", "warm")).toBe(true)
+    expect(themeSaveIssue(withColors("#8d8d8d", "warm"), defaults)).toEqual(refused)
+    expect(themeSaveIssue(withColors("#878787", "warm"), defaults)).toBeNull()
+    for (const background of ["steel", "warm", "neutral", "cool"] as const) {
+      expect(themeSaveIssue(withColors("#2f6feb", background), defaults)).toBeNull()
+      expect(themeSaveIssue(withColors(null, background), defaults)).toBeNull()
+    }
+  })
+
+  it("asks again when the page colour changes under a kept colour", () => {
+    // #8a8a8a reads in steel's well (3.05), not in warm's (2.90)
+    const before = withColors("#8a8a8a", "steel")
+    expect(themeSaveIssue(withColors("#8a8a8a", "warm"), before)).toEqual(refused)
+  })
+
+  it("leaves a colour saved before the rule alone: it reads as stored and other fields still save", () => {
+    const stored = { ...withColors("#919191", "steel") }
+    // Read: the stored row passes as it is (a failed read would put the colour back to none)
+    expect(parseStored("theme", stored)).toEqual(stored)
+    expect(full.safeParse(stored).success).toBe(true)
+    // A save that touches neither the colour nor the page colour goes through
+    expect(themeSaveIssue({ ...stored, radius: "round", buttons: "square" }, stored)).toBeNull()
+    expect(
+      themeSaveIssue({ ...stored, colors: { ...stored.colors, accent: "#f5d90a" } }, stored)
+    ).toBeNull()
+    // Choosing another borderline colour is a new choice
+    expect(themeSaveIssue(withColors("#909090", "steel"), stored)).toEqual(refused)
+  })
+
+  it("is the theme section's save check", () => {
+    expect(themeSection.saveIssue).toBe(themeSaveIssue)
   })
 })

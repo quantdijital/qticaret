@@ -149,6 +149,10 @@ class PlatformSettingsModuleService extends PlatformFlagStore {
     } catch (error) {
       throw toValidationError(error)
     }
+    const issue = section.saveIssue?.(after, before)
+    if (issue) {
+      throw new ValidationError(issue.message, { field: issue.path.join(".") })
+    }
     if (row) {
       await this.updateSettingsSections(
         { id: row.id, values: after, version: row.version + 1, updated_by: actorId },

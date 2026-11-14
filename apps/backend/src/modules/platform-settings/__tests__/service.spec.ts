@@ -47,6 +47,34 @@ moduleIntegrationTestRunner<PlatformSettingsModuleService>({
         expect(await service.readSection("seo")).toMatchObject({ version: 0 })
       })
 
+      it("holds a new main colour to the page's well, never a stored one (adr/0062 §6)", async () => {
+        // #919191: 3.01:1 on the steel page, 2.78 in its well
+        const reason = await reasonOf(
+          service.saveSection("theme", { colors: { primary: "#919191" } }, null)
+        )
+        expect(reason).toBe("platform_settings.color_contrast")
+        expect(await service.readSection("theme")).toMatchObject({ version: 0 })
+
+        // A row saved before the rule: read as it is, and its other fields still save
+        const stored = {
+          ...(await service.getSection("theme")),
+          colors: { primary: "#919191", accent: null, background: "steel" },
+        }
+        await service.createSettingsSections({ section: "theme", values: stored, updated_by: null })
+        expect((await service.readSection("theme")).values).toMatchObject({
+          colors: { primary: "#919191" },
+        })
+        const saved = await service.saveSection("theme", { radius: "round" }, null)
+        expect(saved.after).toMatchObject({ radius: "round", colors: { primary: "#919191" } })
+        // Moving to a darker page under the same colour is asked again
+        expect(
+          await reasonOf(service.saveSection("theme", { colors: { background: "warm" } }, null))
+        ).toBe("platform_settings.color_contrast")
+        expect(
+          (await service.saveSection("theme", { colors: { primary: "#8a8a8a" } }, null)).after
+        ).toMatchObject({ colors: { primary: "#8a8a8a", background: "steel" } })
+      })
+
       it("puts a section back as it was", async () => {
         const first = await service.saveSection("store", { weight_unit: "kg" }, null)
         await service.restoreSection("store", first.previous)

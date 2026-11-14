@@ -36,6 +36,19 @@ export const THEME_BACKGROUNDS = {
 
 export type ThemeBackground = keyof typeof THEME_BACKGROUNDS
 
+/**
+ * Each page colour's well, the tinted ground links and outlined controls
+ * also stand on (Atölye's `paper-2` for the tone, `ATOLYE_TONES` in the
+ * theme package; the storefront's tests hold the two equal). A newly
+ * saved main colour must read there too (adr/0062 §6).
+ */
+export const THEME_WELLS = {
+  steel: "#eef1f4",
+  warm: "#eeebe2",
+  neutral: "#ececec",
+  cool: "#e9ecf1",
+} as const satisfies Record<ThemeBackground, string>
+
 const HEX_COLOR = /^#[0-9a-f]{6}$/
 const WHITE = "#ffffff"
 
@@ -86,6 +99,28 @@ const color = z
 export const primaryReadable = (primary: string, background: ThemeBackground): boolean =>
   contrastRatio(primary, WHITE) >= AA_LARGE_TEXT &&
   contrastRatio(primary, THEME_BACKGROUNDS[background]) >= AA_LARGE_TEXT
+
+/**
+ * Whether the colour also reads in the page colour's well, 3:1 (adr/0062
+ * §6). Asked of a save that sets the colour or the page colour, never of a
+ * stored row: a colour saved before this rule, within 3:1 of the page but
+ * not of its well, keeps showing until the shop next changes either.
+ */
+export const primaryReadableInWell = (primary: string, background: ThemeBackground): boolean =>
+  contrastRatio(primary, THEME_WELLS[background]) >= AA_LARGE_TEXT
+
+/** A save that changes the main colour or the page colour to a pair the well cannot carry. */
+export function themeSaveIssue(
+  after: ThemeSettings,
+  before: ThemeSettings
+): { message: string; path: string[] } | null {
+  const { primary, background } = after.colors
+  const changed = primary !== before.colors.primary || background !== before.colors.background
+  if (primary === null || !changed || primaryReadableInWell(primary, background)) {
+    return null
+  }
+  return { message: "platform_settings.color_contrast", path: ["colors", "primary"] }
+}
 
 /**
  * The settings' starting values, today's Grafit look (adr/0062 §2): Manrope
@@ -185,5 +220,6 @@ export const themeSection = defineSection<ThemeSettings>(
       })
     }
   },
-  upgradeStoredTheme
+  upgradeStoredTheme,
+  themeSaveIssue
 )
