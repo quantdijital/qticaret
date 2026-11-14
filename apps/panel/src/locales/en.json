@@ -7895,7 +7895,7 @@
         "title": "Look settings",
         "titleSet_one": "Look settings · {{count}} set",
         "titleSet_other": "Look settings · {{count}} set",
-        "hint": "Spacing, background, alignment and width. Any field left unset uses the theme's own look; the preview shows it at once.",
+        "hint": "The section's spacing and look. Any field left unset uses the theme's own look; the preview shows it at once.",
         "reset": "Back to default",
         "space_outer": {
           "label": "Outer spacing",
@@ -8188,7 +8188,7 @@
           "square": "Square"
         },
         "buttonsHint": "Buttons, the search field, form fields and the quantity stepper change together. Chips and counts are always pills.",
-        "card": "Product card and header",
+        "card": "Product card",
         "ratio": "Image ratio",
         "ratios": {
           "4x5": "4:5 (portrait)",
@@ -8432,10 +8432,11 @@
       },
       "headerBar": {
         "sticky": "Keep the header in view",
-        "stickyHint": "The header stays at the top of the screen while the page scrolls. Off, it scrolls away with the page."
+        "stickyHint": "The header stays at the top of the screen while the page scrolls. Off, it scrolls away with the page.",
+        "stickyTerm": "sticky"
       },
       "main": {
-        "fixed": "This section is on every page; it cannot be hidden, copied or removed."
+        "fixed": "This section is a fixed part of the page; it cannot be hidden, moved, copied or removed."
       }
     },
     "preferences": {

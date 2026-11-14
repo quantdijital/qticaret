@@ -98,7 +98,8 @@ export function VariantSketch<T extends VariantSectionType>({
   const sketches: Readonly<Record<string, (() => ReactElement) | undefined>> = SKETCHES[type] ?? {}
   const Sketch = sketches[variant]
   return Sketch ? (
-    <svg aria-hidden="true" viewBox="0 0 112 32" className="h-8 w-full max-w-28">
+    // `size-full` keeps the toggle's own icon size (`size-4`) off the sketch; `h-8` sets its height
+    <svg aria-hidden="true" viewBox="0 0 112 32" className="size-full h-8 max-w-28">
       <Sketch />
     </svg>
   ) : null

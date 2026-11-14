@@ -113,7 +113,7 @@ export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }
       <h1>{view.title}</h1>
       <div className="grid gap-(--gap-columns) lg:grid-cols-12">
         <div className="lg:col-span-4">
-          <div className="lg:sticky lg:top-40">
+          <div className="lg:sticky lg:top-(--gf-stick-top)">
             {summary ? (
               <Summary summary={summary} t={t} filter={filter} />
             ) : (

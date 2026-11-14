@@ -82,7 +82,7 @@ export function LegalPage({ view, t }: { view: LegalPageView; t: Translate }) {
               </div>
             </details>
             <aside aria-labelledby="icindekiler" className={`max-lg:hidden ${reading.side}`}>
-              <div className="sticky top-40 flex max-h-[calc(100dvh-11rem)] flex-col gap-3 overflow-y-auto pb-4">
+              <div className="sticky top-(--gf-stick-top) flex max-h-[calc(100dvh-var(--gf-stick-top)-1rem)] flex-col gap-3 overflow-y-auto pb-4">
                 <h2 id="icindekiler" className="text-md text-text">
                   {t("legal.contents")}
                 </h2>

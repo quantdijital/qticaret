@@ -63,6 +63,7 @@ export const FIELD_IDS = {
   placement: (sectionId: string) => `${sectionId}-placement`,
   look: (sectionId: string, field: SectionLookField) => `${sectionId}-look-${field}`,
   marquee: (sectionId: string, setting: MarqueeSetting) => `${sectionId}-marquee-${setting}`,
+  sticky: (sectionId: string) => `${sectionId}-sticky`,
   visible: (sectionId: string) => `${sectionId}-schedule-visible`,
   starts: (sectionId: string) => `${sectionId}-schedule-starts`,
   ends: (sectionId: string) => `${sectionId}-schedule-ends`,
@@ -114,6 +115,16 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
         target: FIELD_IDS.marquee(id, setting),
       })
     }
+  }
+  if (section.type === "header_bar") {
+    fields.push({
+      key: "sticky",
+      group: "content",
+      label: "storefront.editor.headerBar.sticky",
+      term: "storefront.editor.headerBar.stickyTerm",
+      options: [],
+      target: FIELD_IDS.sticky(id),
+    })
   }
   if (takesLook(section, group)) {
     for (const field of lookFieldsFor(section.type)) {

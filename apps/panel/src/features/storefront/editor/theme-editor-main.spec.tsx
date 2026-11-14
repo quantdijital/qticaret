@@ -65,7 +65,9 @@ describe("the main sections in the theme editor (adr/0049 Ek 2026-11-14 §5, §7
     expect(screen.getByRole("radio", { name: "Ortada logo (hazırlanıyor)" })).toBeDisabled()
     expect(screen.getByRole("radio", { name: "Solda logo" })).toBeChecked()
     expect(
-      screen.getByText("Bu bölüm her sayfada durur; gizlenemez, kopyalanamaz ve kaldırılamaz.")
+      screen.getByText(
+        "Bu bölüm sayfanın sabit parçasıdır; gizlenemez, taşınamaz, kopyalanamaz ve kaldırılamaz."
+      )
     ).toBeVisible()
     expect(screen.queryByRole("button", { name: "Bölümü kaldır" })).toBeNull()
     expect(screen.queryByText("Görünürlük")).toBeNull()

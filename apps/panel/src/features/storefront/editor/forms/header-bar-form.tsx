@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next"
 import type { HeaderBarSection } from "@/features/storefront/api/layout"
 import { SwitchRow } from "../theme-fields"
+import { FIELD_IDS } from "./field-registry"
 import type { SectionFormProps } from "./form-props"
 
 /**
@@ -13,7 +14,7 @@ export function HeaderBarForm({ section, onChange }: SectionFormProps<HeaderBarS
   const { t } = useTranslation()
   return (
     <SwitchRow
-      id={`${section.id}-sticky`}
+      id={FIELD_IDS.sticky(section.id)}
       label={t("storefront.editor.headerBar.sticky")}
       hint={t("storefront.editor.headerBar.stickyHint")}
       checked={section.sticky}

@@ -77,7 +77,7 @@ export function OutlineAside({
 }) {
   return (
     <aside aria-labelledby={id} className={`max-lg:hidden ${className ?? ""}`}>
-      <div className="sticky top-40 flex max-h-[calc(100dvh-11rem)] max-w-64 flex-col gap-3 overflow-y-auto pb-4">
+      <div className="sticky top-(--gf-stick-top) flex max-h-[calc(100dvh-var(--gf-stick-top)-1rem)] max-w-64 flex-col gap-3 overflow-y-auto pb-4">
         <h2 id={id} className="text-md tracking-normal text-text">
           {t("legal.contents")}
         </h2>

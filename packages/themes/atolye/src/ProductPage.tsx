@@ -65,7 +65,7 @@ export function ProductPage({
   return (
     <>
       {/* The product's own block: the design's main section, in its look when the shop set one */}
-      <Look look={view.main?.look}>
+      <Look look={view.main?.look} main>
         {/* A draft's signed preview says so above everything (F18), as the home page's draft does */}
         {view.notice && (
           <Container className="pt-4">
@@ -82,7 +82,7 @@ export function ProductPage({
           className="gf-product-top mt-4 grid gap-8 md:gap-(--gap-columns) lg:mt-6"
         >
           <div className="min-w-0">
-            <div className="md:sticky md:top-40">
+            <div className="md:sticky md:top-(--gf-stick-top)">
               <Gallery
                 images={view.images}
                 own={Object.fromEntries(
@@ -99,7 +99,7 @@ export function ProductPage({
             </div>
           </div>
           <div className="@container min-w-0 lg:pl-(--space-lg)">
-            <div className="gf-buy-stack flex flex-col gap-6 md:sticky md:top-40">
+            <div className="gf-buy-stack flex flex-col gap-6 md:sticky md:top-(--gf-stick-top)">
               <Headline view={view} t={t} />
               <Buy
                 productId={view.id}

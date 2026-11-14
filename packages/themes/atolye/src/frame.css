@@ -10,6 +10,13 @@
  * scrolls down and while a field is being typed in. Only transform and
  * opacity move (no layout shift); reduced motion stops the slide (base.css).
  */
+/* Where a page's sticky column stops (product, listing filters, contents):
+   under the header while it stays at the top (its height from ScrollCue,
+   133 px on a wide screen until measured), near the top when it scrolls away */
+:root {
+  --gf-stick-top: calc(var(--gf-head-h, 8.3125rem) + 1.6875rem);
+}
+
 @layer components {
   .gf-head,
   .gf-head-row,

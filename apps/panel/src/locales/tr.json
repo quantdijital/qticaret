@@ -7895,7 +7895,7 @@
         "title": "Görünüm ayarları",
         "titleSet_one": "Görünüm ayarları · {{count}} ayar",
         "titleSet_other": "Görünüm ayarları · {{count}} ayar",
-        "hint": "Boşluk, zemin, hizalama ve genişlik. Seçilmeyen her alan temanın kendi görünümünü kullanır; önizleme hemen gösterir.",
+        "hint": "Bölümün boşluğu ve görünüşü. Seçilmeyen her alan temanın kendi görünümünü kullanır; önizleme hemen gösterir.",
         "reset": "Varsayılana dön",
         "space_outer": {
           "label": "Dış boşluk",
@@ -8188,7 +8188,7 @@
           "square": "Köşeli"
         },
         "buttonsHint": "Düğmeler, arama alanı, form alanları ve adet seçici birlikte değişir. Çipler ve sayı rozetleri her zaman hap biçimindedir.",
-        "card": "Ürün kartı ve üst bilgi",
+        "card": "Ürün kartı",
         "ratio": "Görsel oranı",
         "ratios": {
           "4x5": "4:5 (dikey)",
@@ -8432,10 +8432,11 @@
       },
       "headerBar": {
         "sticky": "Üst bilgi sabit kalsın",
-        "stickyHint": "Sayfa kaydırılırken üst bilgi ekranın üstünde durur. Kapalıyken sayfayla birlikte kayar."
+        "stickyHint": "Sayfa kaydırılırken üst bilgi ekranın üstünde durur. Kapalıyken sayfayla birlikte kayar.",
+        "stickyTerm": "sticky"
       },
       "main": {
-        "fixed": "Bu bölüm her sayfada durur; gizlenemez, kopyalanamaz ve kaldırılamaz."
+        "fixed": "Bu bölüm sayfanın sabit parçasıdır; gizlenemez, taşınamaz, kopyalanamaz ve kaldırılamaz."
       }
     },
     "preferences": {

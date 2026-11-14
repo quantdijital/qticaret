@@ -88,7 +88,7 @@ export function ListingPage({
       {top.length > 0 && <Blocks sections={top} t={t} subscribe={subscribe} quickAdd={quickAdd} />}
 
       {/* The product grid: the category group's main section, in its look when set */}
-      <Look look={view.main?.look}>
+      <Look look={view.main?.look} main>
         <Container className="pt-8 lg:pt-(--space-xl)">
           {listed ? (
             <div
@@ -100,7 +100,7 @@ export function ListingPage({
             >
               {panel && (
                 <aside aria-labelledby="filtre-baslik" className="max-lg:hidden">
-                  <div className="sticky top-40 flex max-h-[calc(100dvh-11rem)] flex-col gap-3 overflow-y-auto overscroll-contain pb-2">
+                  <div className="sticky top-(--gf-stick-top) flex max-h-[calc(100dvh-var(--gf-stick-top)-1rem)] flex-col gap-3 overflow-y-auto overscroll-contain pb-2">
                     <h2 id="filtre-baslik" className="text-title">
                       {t("listing.filters")}
                     </h2>

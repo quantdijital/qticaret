@@ -37,7 +37,7 @@ export function FaqBody({ view, faq, t }: { view: ContentPageView; faq: FaqView;
   return (
     <div className="grid gap-8 lg:grid-cols-12 lg:gap-(--gap-columns)">
       <aside className="max-lg:contents lg:col-span-4">
-        <div className="max-lg:contents lg:sticky lg:top-40 lg:flex lg:flex-col lg:gap-8">
+        <div className="max-lg:contents lg:sticky lg:top-(--gf-stick-top) lg:flex lg:flex-col lg:gap-8">
           {titled.length >= 2 && (
             <nav aria-label={t("content.faq_topics")} className="min-w-0 max-lg:order-1">
               <ul className="gf-rail -mx-(--gutter) flex scroll-px-(--gutter) gap-2 overflow-x-auto px-(--gutter) py-1 lg:scroll-px-0 lg:mx-0 lg:flex-col lg:items-start lg:overflow-visible lg:px-0">
