@@ -7,8 +7,7 @@ import { ShelfTabs } from "./ShelfTabs"
 /**
  * The shelf: the shop's product sections that stand next to each other,
  * each drawn as its own variant (`Rack`); two or more become tabs (pills),
- * every panel in the HTML (a columns rail stands alone, `blocksOf`). In tabs each panel's own head is for the reader only
- * (its pill names it) and its "all products" link sits under its grid.
+ * every panel in the HTML. A columns rail stands alone (`blocksOf`).
  */
 export function Shelf({
   sections,
