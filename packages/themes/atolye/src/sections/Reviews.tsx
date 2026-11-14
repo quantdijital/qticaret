@@ -11,7 +11,7 @@ import { SectionHead } from "./SectionHead"
  * nearly every review in full. A longer one ends at a word with "…"; the
  * section's link leads to the reviews page, where every review is whole.
  */
-const QUOTE = 360
+const QUOTE = 600
 
 /** A review as a quote: whole when it fits, else its words up to `QUOTE` characters and "…". */
 export function quoteOf(body: string): string {
