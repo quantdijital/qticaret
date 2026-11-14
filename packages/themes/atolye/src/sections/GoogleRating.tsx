@@ -4,6 +4,7 @@ import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { Stars } from "../parts/Stars"
 import { type Of, headingId } from "./plan"
+import { ReviewQuote } from "./ReviewQuote"
 import { quoteOf } from "./Reviews"
 import { SectionHead } from "./SectionHead"
 
@@ -78,8 +79,12 @@ export function GoogleRating({ section, t }: { section: Of<"google_rating">; t: 
                   className="flex flex-col gap-3 rounded-tile border border-rule p-5 lg:p-6"
                 >
                   <Stars rating={excerpt.rating} label={excerpt.ratingLabel} />
-                  <blockquote className="text-md leading-relaxed font-semibold break-words">
-                    <p>“{quoteOf(excerpt.text)}”</p>
+                  <blockquote className="flex flex-col gap-1 text-md leading-relaxed font-semibold break-words">
+                    <ReviewQuote
+                      text={quoteOf(excerpt.text)}
+                      more={t("product.read_more")}
+                      less={t("product.read_less")}
+                    />
                   </blockquote>
                   <footer className="mt-auto flex flex-col pt-2 text-sm">
                     <span className="truncate font-semibold text-text">{excerpt.author}</span>

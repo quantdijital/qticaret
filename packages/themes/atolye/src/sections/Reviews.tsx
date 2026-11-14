@@ -4,6 +4,7 @@ import { Container } from "../parts/Container"
 import { fillOf } from "../parts/FreeShippingMeter"
 import { Stars } from "../parts/Stars"
 import { type Of, headingId } from "./plan"
+import { ReviewQuote } from "./ReviewQuote"
 import { SectionHead } from "./SectionHead"
 
 /**
@@ -116,8 +117,8 @@ export function Summary({
  * The shop's approved reviews: its average set large with the stars, the
  * count and the spread on a tinted panel (only when the storefront has
  * the shop-wide summary), beside the three newest reviews as quotes (the
- * stars, the review whole (a very long one cut at a word), the name with
- * its verified-purchase mark). Nothing is written for the shop.
+ * stars, the review closed at five lines over "Devamını oku" (a very long
+ * one cut at a word), the name with its verified-purchase mark). Nothing is written for the shop.
  */
 export function Reviews({ section, t }: { section: Of<"reviews">; t: Translate }) {
   const id = headingId(section.id)
@@ -153,8 +154,12 @@ export function Reviews({ section, t }: { section: Of<"reviews">; t: Translate }
                     rating={review.rating}
                     label={t("reviews.stars", { rating: review.rating })}
                   />
-                  <blockquote className="text-md leading-relaxed font-semibold">
-                    <p>“{quoteOf(review.body)}”</p>
+                  <blockquote className="flex flex-col gap-1 text-md leading-relaxed font-semibold">
+                    <ReviewQuote
+                      text={quoteOf(review.body)}
+                      more={t("product.read_more")}
+                      less={t("product.read_less")}
+                    />
                   </blockquote>
                   <footer className="mt-auto pt-2 text-sm">
                     <span className="flex items-center gap-1.5 font-semibold text-text">
