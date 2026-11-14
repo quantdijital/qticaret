@@ -34,7 +34,7 @@ const BRAND = "{marka} Bıçak ve Çakı Modelleri | {mağaza}"
 /** The cutlery pack one version on: a template, attributes, a category and an SEO template more. */
 const cutleryV2: SectorPack = {
   ...cutlery,
-  version: 2,
+  version: cutlery.version + 1,
   attribute_templates: [
     ...cutlery.attribute_templates.map((template) =>
       template.handle === "bicak-ve-caki"
@@ -123,7 +123,7 @@ medusaIntegrationTestRunner({
       const first = await applySectorPack(container(), cutlery)
       expect(first).toEqual({
         pack: "cutlery",
-        version: 1,
+        version: cutlery.version,
         added: CUTLERY_ITEMS,
         kept: 0,
         skipped: 0,
@@ -139,7 +139,13 @@ medusaIntegrationTestRunner({
       expect(after.seo["brand"]).toBe(BRAND)
 
       const second = await applySectorPack(container(), cutlery)
-      expect(second).toEqual({ pack: "cutlery", version: 1, added: 0, kept: 0, skipped: 0 })
+      expect(second).toEqual({
+        pack: "cutlery",
+        version: cutlery.version,
+        added: 0,
+        kept: 0,
+        skipped: 0,
+      })
       expect(await shop()).toEqual(after)
       const ledger = container().resolve<SectorPacksModuleService>(SECTOR_PACKS_MODULE)
       expect((await ledger.offeredItems("cutlery")).size).toBe(CUTLERY_ITEMS)
@@ -207,7 +213,13 @@ medusaIntegrationTestRunner({
 
       const result = await applySectorPack(container(), cutleryV2)
       // A template and its attribute, an attribute in a template of v1, a category, an SEO template
-      expect(result).toEqual({ pack: "cutlery", version: 2, added: 5, kept: 0, skipped: 0 })
+      expect(result).toEqual({
+        pack: "cutlery",
+        version: cutlery.version + 1,
+        added: 5,
+        kept: 0,
+        skipped: 0,
+      })
       const after = await shop()
       expect(after.templates.map((t) => t.handle)).toEqual(["bicak-ve-caki", "bileme-urunleri"])
       const knives = after.templates.find((t) => t.handle === "bicak-ve-caki")
@@ -231,11 +243,13 @@ medusaIntegrationTestRunner({
 
       const ledger = container().resolve<SectorPacksModuleService>(SECTOR_PACKS_MODULE)
       const [applied] = await ledger.listSectorPackApplications({ pack: "cutlery" })
-      expect(applied?.version).toBe(2)
-      // Again at v2, and back at v1 (an older build): nothing more, the version stays
+      expect(applied?.version).toBe(cutlery.version + 1)
+      // Again at the next version, and back at this one (an older build): nothing more
       expect(await applySectorPack(container(), cutleryV2)).toMatchObject({ added: 0 })
       expect(await applySectorPack(container(), cutlery)).toMatchObject({ added: 0 })
-      expect((await ledger.listSectorPackApplications({ pack: "cutlery" }))[0]?.version).toBe(2)
+      expect((await ledger.listSectorPackApplications({ pack: "cutlery" }))[0]?.version).toBe(
+        cutlery.version + 1
+      )
       expect(await shop()).toEqual(after)
     })
 
