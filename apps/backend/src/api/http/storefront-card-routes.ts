@@ -28,6 +28,12 @@ export const STOREFRONT_CARD_ROUTES = [
     middlewares: [noQuery],
   },
   {
+    // Every shown category's product count (adr/0049 Ek 2026-11-14 §10 karar 7b)
+    matcher: "/store/category-counts",
+    methods: ["GET" as const],
+    middlewares: [noQuery],
+  },
+  {
     matcher: "/store/card-facts",
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(StoreGetCardFacts, {})],
