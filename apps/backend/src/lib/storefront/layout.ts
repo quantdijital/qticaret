@@ -3,9 +3,9 @@ import {
   LAYOUT_LIMITS,
   announcementBar,
   categorySection,
+  footerNewsletter,
   pageSection,
   productSection,
-  worded,
 } from "./layout-sections"
 import type { BodySection } from "./layout-sections"
 import { layoutSettings, storedSettings } from "./layout-settings"
@@ -37,7 +37,7 @@ export const layoutDocument = z
   .object({
     header: z.array(announcementBar).max(LAYOUT_LIMITS.header).default([]),
     home: z.array(pageSection).max(LAYOUT_LIMITS.home).default([]),
-    footer: z.array(worded("newsletter")).max(LAYOUT_LIMITS.footer).default([]),
+    footer: z.array(footerNewsletter).max(LAYOUT_LIMITS.footer).default([]),
     product: z.array(productSection).max(LAYOUT_LIMITS.product).default([]),
     category: z.array(categorySection).max(LAYOUT_LIMITS.category).default([]),
     /** What several pages draw alike: trust badges, colour swatches, "Az kaldı". */

@@ -285,12 +285,14 @@ medusaIntegrationTestRunner({
         limit: 4,
         columns: 5,
       })
+      // On the tinted well, no gap above (its look, adr/0049 Ek 2026-11-14 §6)
       const faq: Section = {
         id: "sikcasorulan",
         type: "faq",
         ...ALWAYS,
         title: null,
         items: [{ question: "Size nasıl ulaşırım?", answer: "{telefon} numarasından arayın." }],
+        look: { ground: "well", space_outer: "none" },
       }
       const intro: Section = {
         id: "kategorigiris",
@@ -312,6 +314,7 @@ medusaIntegrationTestRunner({
       })
       const wrongPage = await save({ category: [related({ kind: "same_category" })] })
       const unknownVariant = await save({ category: [{ ...trust, variant: "bento" }] })
+      const unknownStep = await save({ product: [{ ...faq, look: { ground: "red" } }] })
       const saved = await save({
         product: [
           related({ kind: "manual", product_ids: [liveProduct, draftProduct] }),
@@ -327,6 +330,8 @@ medusaIntegrationTestRunner({
       expect(wrongPage.data.message).toContain("storefront_layout.section_invalid")
       expect(unknownVariant.status).toBe(400)
       expect(unknownVariant.data.message).toContain("storefront_layout.section_invalid")
+      expect(unknownStep.status).toBe(400)
+      expect(unknownStep.data.message).toContain("storefront_layout.section_invalid")
       expect(saved.status).toBe(200)
       expect(saved.data.layout).toMatchObject({ is_default: false, has_changes: true })
       // A category page's section without a place goes below the grid
@@ -367,7 +372,16 @@ medusaIntegrationTestRunner({
           items: [
             { question: "Size nasıl ulaşırım?", answer: "0532 123 45 67 numarasından arayın." },
           ],
+          // The steps the shop set reach the storefront, the others the theme's own
+          look: {
+            space_outer: "none",
+            space_inner: null,
+            ground: "well",
+            align: null,
+            width: null,
+          },
         },
+        // A section the shop left to the theme prints no look, as before looks
         { id: "urunguven", type: "trust_badges", variant: "strip" },
       ])
       expect(layout.category).toEqual([

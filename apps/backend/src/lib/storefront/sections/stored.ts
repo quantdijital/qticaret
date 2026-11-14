@@ -1,4 +1,5 @@
 import { isPlainObject } from "../../../modules/platform-settings/sections/define"
+import { storedLook } from "./look"
 import { TRUST_BADGES_BRANCHES } from "./trust-badges"
 import { REMOVED_VARIANTS, SECTION_VARIANTS, isVariantType } from "./variants"
 import type { SectionVariant, VariantBranch, VariantSectionType } from "./variants"
@@ -18,12 +19,17 @@ const ALWAYS_KEPT = ["placement"]
  * forgiving on reading): a variant off its type's list (taken off since,
  * or written by a newer build) reads as the one that replaced it, else as
  * the default, keeping only the fields that variant has, so the design
- * still reads. No variant at all is the default's to fill (the schema).
- * A save is still held to the list.
+ * still reads; a look's step off its list is dropped (`storedLook`). No
+ * variant at all is the default's to fill (the schema). A save is still
+ * held to the lists.
  */
-export function storedSection(section: unknown): unknown {
-  const type = isPlainObject(section) ? section["type"] : undefined
-  if (!isPlainObject(section) || !isVariantType(type)) {
+export function storedSection(stored: unknown): unknown {
+  if (!isPlainObject(stored)) {
+    return stored
+  }
+  const section = storedLook(stored)
+  const type = section["type"]
+  if (!isVariantType(type)) {
     return section
   }
   const listed: readonly string[] = SECTION_VARIANTS[type]

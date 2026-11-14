@@ -104,6 +104,14 @@ describe("the storefront's value imports", () => {
     expect(unresolvableForTurbopack()).toEqual([])
   })
 
+  it("takes the contract's values from subpaths that import nothing relative", () => {
+    for (const subpath of ["@qticaret/types/section-variants", "@qticaret/types/section-look"]) {
+      const file = fromPackage(subpath)
+      expect(file && existsSync(file)).toBe(true)
+      expect(valueSpecifiers(file ?? "").filter((each) => each.startsWith("."))).toEqual([])
+    }
+  })
+
   it("would catch a value import from the `@qticaret/types` root", () => {
     expect(valueSpecifiers(path.join(REPO, "packages/types/src/index.ts"))).toContain(
       "./appearance.js"

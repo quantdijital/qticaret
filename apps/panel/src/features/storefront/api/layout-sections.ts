@@ -1,4 +1,4 @@
-import type { ProductSource, ShelfColumns, TrustBadgesVariant } from "@qticaret/types"
+import type { ProductSource, SectionLook, ShelfColumns, TrustBadgesVariant } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
 import type { MenuInput } from "@/features/storefront/api/menus"
@@ -25,7 +25,16 @@ interface SectionBase {
   ends_at: string | null
 }
 
-export interface HeroSection extends SectionBase {
+/**
+ * What a page's body section has beside: its look (adr/0049 Ek 2026-11-14
+ * §6), absent until the shop sets a step, each step `null` for the
+ * theme's own. The header's bar and the footer's box have none.
+ */
+interface BodySectionBase extends SectionBase {
+  look?: SectionLook
+}
+
+export interface HeroSection extends BodySectionBase {
   type: "hero"
   eyebrow: string | null
   /** None: the shop's name. */
@@ -50,7 +59,7 @@ export interface HeroSlide {
 }
 
 /** The home page's sliding opening (adr/0049 Ek 2026-11-06), an extra to the still hero. */
-export interface HeroSliderSection extends SectionBase {
+export interface HeroSliderSection extends BodySectionBase {
   type: "hero_slider"
   slides: HeroSlide[]
   height: "compact" | "regular"
@@ -69,19 +78,19 @@ export interface BannerSlide {
   link: LayoutLink | null
 }
 
-export interface BannerSection extends SectionBase {
+export interface BannerSection extends BodySectionBase {
   type: "banner"
   slides: BannerSlide[]
 }
 
-export interface CategoriesSection extends SectionBase {
+export interface CategoriesSection extends BodySectionBase {
   type: "categories"
   title: string | null
   /** None: the top categories. */
   category_ids: string[]
 }
 
-export interface ProductsSection extends SectionBase {
+export interface ProductsSection extends BodySectionBase {
   type: "products"
   title: string | null
   source: ProductSource
@@ -93,7 +102,7 @@ export interface ProductsSection extends SectionBase {
 }
 
 /** One product up close (adr/0046 Ek 2026-11-05): the storefront adds its facts and spec table. */
-export interface FeaturedProductSection extends SectionBase {
+export interface FeaturedProductSection extends BodySectionBase {
   type: "featured_product"
   title: string | null
   /** A line about it; may hold the shop's details (`{telefon}`). */
@@ -102,14 +111,14 @@ export interface FeaturedProductSection extends SectionBase {
   product_id: string
 }
 
-export interface BrandsSection extends SectionBase {
+export interface BrandsSection extends BodySectionBase {
   type: "brands"
   title: string | null
   /** None: every brand. */
   brand_ids: string[]
 }
 
-export interface CountedSection extends SectionBase {
+export interface CountedSection extends BodySectionBase {
   type: "posts" | "reviews"
   title: string | null
   limit: number
@@ -120,7 +129,7 @@ export interface CountedSection extends SectionBase {
  * average and count from the shop's Business Profile, shown only while
  * the shop's Google reviews are connected and there are some.
  */
-export interface GoogleRatingSection extends SectionBase {
+export interface GoogleRatingSection extends BodySectionBase {
   type: "google_rating"
   title: string | null
   /** Recent 4–5 star excerpts under the badge: 0 (off) to 3. */
@@ -129,20 +138,20 @@ export interface GoogleRatingSection extends SectionBase {
   profile_link: boolean
 }
 
-export interface RichTextSection extends SectionBase {
+export interface RichTextSection extends BodySectionBase {
   type: "rich_text"
   title: string | null
   /** The content editor's document (adr/0019). */
   body: JSONContent
 }
 
-export interface TrustBadgesSection extends SectionBase {
+export interface TrustBadgesSection extends BodySectionBase {
   type: "trust_badges"
   /** How the strip is drawn (adr/0049 Ek 2026-11-14 §2); the server fills the default on reading. */
   variant: TrustBadgesVariant
 }
 
-export interface WordedSection extends SectionBase {
+export interface WordedSection extends BodySectionBase {
   type: "newsletter" | "help"
   title: string | null
   text: string | null
@@ -156,7 +165,7 @@ export interface FaqItem {
 }
 
 /** Questions and answers, shown on the page; never `FAQPage` structured data (docs/13 §5). */
-export interface FaqSection extends SectionBase {
+export interface FaqSection extends BodySectionBase {
   type: "faq"
   title: string | null
   items: FaqItem[]
@@ -168,7 +177,7 @@ export type RelatedSource =
   | { kind: "collection"; collection_id: string }
   | { kind: "manual"; product_ids: string[] }
 
-export interface RelatedProductsSection extends SectionBase {
+export interface RelatedProductsSection extends BodySectionBase {
   type: "related_products"
   title: string | null
   source: RelatedSource

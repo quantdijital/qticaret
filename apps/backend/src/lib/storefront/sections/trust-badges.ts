@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
-import { base, placement } from "../layout-fields"
+import { placement } from "../layout-fields"
+import { bodyFields } from "./look"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
 import type { SectionVariant, VariantBranch } from "./variants"
 
@@ -9,7 +10,7 @@ import type { SectionVariant, VariantBranch } from "./variants"
  * where it stands and how it is drawn.
  */
 
-const common = { ...base, type: z.literal("trust_badges") }
+const common = { ...bodyFields, type: z.literal("trust_badges") }
 
 /** Today's drawing: a tinted strip, cards two by two on a phone. */
 const strip = z.object({ ...common, variant: defaultVariant("trust_badges") }).strict()

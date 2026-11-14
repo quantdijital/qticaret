@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
-import { base, title } from "../layout-fields"
+import { title } from "../layout-fields"
+import { bodyFields } from "./look"
 
 /**
  * The home page's Google rating badge (`google_rating`, adr/0049 Ek and
@@ -20,7 +21,7 @@ export const GOOGLE_RATING_LIMITS = {
 
 export const googleRating = z
   .object({
-    ...base,
+    ...bodyFields,
     type: z.literal("google_rating"),
     /** None: the storefront's own ("Google'da bizi değerlendirenler"). */
     title,

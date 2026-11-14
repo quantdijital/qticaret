@@ -4,6 +4,7 @@
  * shop's details in place. A copy of the backend's answer (adr/0046 §8).
  */
 import type { MediaDerivatives } from "./catalog.js"
+import type { SectionLook } from "./section-look.js"
 import type { TrustBadgesVariant } from "./section-variants.js"
 import type { MenuLinkKind, StoreMenu, StoreThemeSettings, StorefrontFrame } from "./storefront.js"
 
@@ -45,59 +46,71 @@ export type ProductSource =
  */
 export type ShelfColumns = 3 | 4 | 5
 
-export type StoreLayoutSection =
-  | {
-      id: string
-      type: "hero"
-      eyebrow: string | null
-      /** None: the shop's name. */
-      heading: string | null
-      text: string | null
-      links: StoreLayoutLink[]
-      image: StoreLayoutImage | null
-    }
-  | {
-      id: string
-      type: "banner"
-      slides: {
-        image: StoreLayoutImage
+/**
+ * What every body section may carry beside its own fields: its look
+ * (adr/0049 Ek 2026-11-14 §6), only when the shop set a step; absent, the
+ * theme's own drawing (and from a backend before looks). The storefront
+ * reads it forgivingly (`lookOf`).
+ */
+export interface StoreSectionLookPart {
+  look?: SectionLook
+}
+
+export type StoreLayoutSection = StoreSectionLookPart &
+  (
+    | {
+        id: string
+        type: "hero"
+        eyebrow: string | null
+        /** None: the shop's name. */
         heading: string | null
         text: string | null
-        link: StoreLayoutLink | null
-      }[]
-    }
-  | StoreHeroSliderSection
-  | { id: string; type: "categories"; title: string | null; category_ids: string[] }
-  | {
-      id: string
-      type: "products"
-      title: string | null
-      source: ProductSource
-      limit: number
-      columns: ShelfColumns
-      more: StoreLayoutLink | null
-      /** A sale or best-seller rail's products, picked in order; absent for the other sources. */
-      product_ids?: string[]
-      /** A best-seller rail with too few sales, its rest the newest products; no counts shown. */
-      filled_with_newest?: boolean
-    }
-  | StoreFeaturedProductSection
-  | { id: string; type: "brands"; title: string | null; brand_ids: string[] }
-  | { id: string; type: "posts" | "reviews"; title: string | null; limit: number }
-  | StoreGoogleRatingSection
-  | { id: string; type: "rich_text"; title: string | null; html: string }
-  | {
-      id: string
-      type: "trust_badges"
-      /**
-       * How the strip is drawn (adr/0049 Ek 2026-11-14 §2); absent from a
-       * backend before variants. The storefront reads one it does not know
-       * as the default (`variantOf`).
-       */
-      variant?: TrustBadgesVariant
-    }
-  | { id: string; type: "newsletter" | "help"; title: string | null; text: string | null }
-  | StoreFaqSection
+        links: StoreLayoutLink[]
+        image: StoreLayoutImage | null
+      }
+    | {
+        id: string
+        type: "banner"
+        slides: {
+          image: StoreLayoutImage
+          heading: string | null
+          text: string | null
+          link: StoreLayoutLink | null
+        }[]
+      }
+    | StoreHeroSliderSection
+    | { id: string; type: "categories"; title: string | null; category_ids: string[] }
+    | {
+        id: string
+        type: "products"
+        title: string | null
+        source: ProductSource
+        limit: number
+        columns: ShelfColumns
+        more: StoreLayoutLink | null
+        /** A sale or best-seller rail's products, picked in order; absent for the other sources. */
+        product_ids?: string[]
+        /** A best-seller rail with too few sales, its rest the newest products; no counts shown. */
+        filled_with_newest?: boolean
+      }
+    | StoreFeaturedProductSection
+    | { id: string; type: "brands"; title: string | null; brand_ids: string[] }
+    | { id: string; type: "posts" | "reviews"; title: string | null; limit: number }
+    | StoreGoogleRatingSection
+    | { id: string; type: "rich_text"; title: string | null; html: string }
+    | {
+        id: string
+        type: "trust_badges"
+        /**
+         * How the strip is drawn (adr/0049 Ek 2026-11-14 §2); absent from a
+         * backend before variants. The storefront reads one it does not know
+         * as the default (`variantOf`).
+         */
+        variant?: TrustBadgesVariant
+      }
+    | { id: string; type: "newsletter" | "help"; title: string | null; text: string | null }
+    | StoreFaqSection
+  )
 
 /**
  * The home page's Google rating badge (adr/0058 Ek 2026-11-06): its
@@ -181,14 +194,14 @@ export type StorePageSection = Extract<
 /** A section below every product's own block. */
 export type StoreProductSection =
   | StorePageSection
-  | {
+  | (StoreSectionLookPart & {
       id: string
       type: "related_products"
       title: string | null
       source: RelatedSource
       limit: number
       columns: ShelfColumns
-    }
+    })
 
 /** A section of every category page: above the product grid (`top`) or below it. */
 export type StoreCategorySection = StorePageSection & { placement: "top" | "bottom" }

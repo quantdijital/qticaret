@@ -171,6 +171,18 @@ describe("the theme's home page: opening, promises, aisles", () => {
     expect(html).toContain("auto-rows-fr grid-cols-2 gap-2")
   })
 
+  it("gives the strip a column per badge from 1024 px and an odd last one a whole phone row", () => {
+    const badges = (["truck", "clock", "refresh"] as const).map((icon) => ({
+      icon,
+      title: icon,
+      text: null,
+    }))
+    const html = home([hero, { id: "guven", type: "trust_badges", variant: "strip", badges }])
+    expect(html).toContain("lg:grid-cols-3")
+    expect(html).not.toContain("lg:grid-cols-4")
+    expect(html).toContain("last:odd:col-span-2")
+  })
+
   it("draws every category as a tile of one size, no pills, and the link to every category", () => {
     const html = home([hero, categories(13, 13)])
     expect(html.match(/href="\/kategori\/k\d+"/g)).toHaveLength(13)

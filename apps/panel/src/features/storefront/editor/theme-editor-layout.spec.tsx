@@ -95,6 +95,26 @@ describe("the theme editor's layout", () => {
     expect(screen.getByRole("region", { name: "Tema ayarları" })).toBeVisible()
   })
 
+  it("clears the drawer's settings search on Escape before it closes the drawer", async () => {
+    windowOf(1100)
+    renderEditor()
+    const tree = await opened()
+    await userEvent.click(within(tree).getByRole("button", { name: "Giriş" }))
+    await userEvent.click(screen.getByRole("button", { name: "Bölümler" }))
+    const drawer = await screen.findByRole("dialog", { name: "Sayfanın bölümleri" })
+    const search = within(drawer).getByRole("searchbox", { name: "Ayarlarda ara" })
+    await userEvent.type(search, "margin")
+
+    await userEvent.keyboard("{Escape}")
+    expect(search).toHaveValue("")
+    expect(drawer).toBeVisible()
+
+    await userEvent.keyboard("{Escape}")
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull()
+    })
+  })
+
   it("switches between the settings and the preview on a phone, keeping both", async () => {
     windowOf(390)
     renderEditor()

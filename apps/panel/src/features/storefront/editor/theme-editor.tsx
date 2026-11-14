@@ -39,6 +39,7 @@ import { SamplePicker } from "./sample-picker"
 import { SaveStatus } from "./save-status"
 import { sectionLabel } from "./section-meta"
 import { SectionTree } from "./section-tree"
+import { SettingsSearch } from "./settings-search-panel"
 import { useEditorActions } from "./use-editor-actions"
 import { usePreviewTarget } from "./use-preview-target"
 import { useUndoKeys } from "./use-undo-keys"
@@ -72,6 +73,8 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
     blocked: problems.size > 0 || acting,
   })
   const [opened, setOpened] = useState<Opened>(null)
+  // Each pick of the settings search a fresh number: the same field picked again is shown again
+  const picks = useRef(0)
   const [page, setPage] = useState<BodyGroup>("home")
   // The chooser is open for this side of a category page's products (the others have one)
   const [adding, setAdding] = useState<Placement | null>(null)
@@ -153,31 +156,43 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
           }}
         />
       ) : null}
-      <SectionTree
-        page={page}
+      <SettingsSearch
         doc={doc}
-        problems={new Set(problems.keys())}
-        dispatch={dispatch}
-        onOpen={(id) => {
-          setOpened({ kind: "section", id })
+        page={page}
+        onPick={({ section, field }) => {
+          picks.current += 1
+          const focus = field
+            ? { target: field.target, group: field.group, nonce: picks.current }
+            : undefined
+          setOpened({ kind: "section", id: section.id, ...(focus ? { focus } : {}) })
         }}
-        onRemove={remove}
-        onAddSection={(placement) => {
-          setAdding(placement ?? "bottom")
-        }}
-        onTheme={() => {
-          setOpened({ kind: "theme" })
-        }}
-        themeProblem={Object.keys(problems.get(SETTINGS_KEY) ?? {}).some(
-          (field) => partOf(field) === "theme"
-        )}
-        onLooks={() => {
-          setOpened({ kind: "looks" })
-        }}
-        looksProblem={Object.keys(problems.get(SETTINGS_KEY) ?? {}).some(
-          (field) => partOf(field) === "looks"
-        )}
-      />
+      >
+        <SectionTree
+          page={page}
+          doc={doc}
+          problems={new Set(problems.keys())}
+          dispatch={dispatch}
+          onOpen={(id) => {
+            setOpened({ kind: "section", id })
+          }}
+          onRemove={remove}
+          onAddSection={(placement) => {
+            setAdding(placement ?? "bottom")
+          }}
+          onTheme={() => {
+            setOpened({ kind: "theme" })
+          }}
+          themeProblem={Object.keys(problems.get(SETTINGS_KEY) ?? {}).some(
+            (field) => partOf(field) === "theme"
+          )}
+          onLooks={() => {
+            setOpened({ kind: "looks" })
+          }}
+          looksProblem={Object.keys(problems.get(SETTINGS_KEY) ?? {}).some(
+            (field) => partOf(field) === "looks"
+          )}
+        />
+      </SettingsSearch>
     </>
   )
   const tools = (

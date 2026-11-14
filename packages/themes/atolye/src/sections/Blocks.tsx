@@ -16,6 +16,7 @@ import { Guides } from "./Guides"
 import { Help } from "./Help"
 import { Hero } from "./Hero"
 import { HeroSlider } from "./HeroSlider"
+import { Look } from "./Look"
 import { type Block, blocksOf, headingId } from "./plan"
 import { PROMISE_VARIANTS, Promises } from "./Promises"
 import { Reviews } from "./Reviews"
@@ -29,6 +30,10 @@ export type Subscribe = (state: PlaceOrderResult, form: FormData) => Promise<Pla
 /** A help section, when the block is one. */
 const helpOf = (block: Block | undefined) =>
   block?.kind === "one" && block.section.type === "help" ? block.section : null
+
+/** The block's look: a shelf of joined rails takes its first rail's (adr/0049 Ek 2026-11-14 §6). */
+const lookOf = (block: Block) =>
+  block.kind === "shelf" ? block.sections[0]?.look : block.section.look
 
 /** Whether the block is drawn by the one before it (a help section under the FAQ). */
 const joined = (block: Block, before: Block | undefined) =>
@@ -117,6 +122,7 @@ function BlockView({
  * home page an opening hero is the page's h1 and its picture the LCP
  * (`heroFirst`, with `opening` the newest pictured product when the hero
  * has none); on a listing or a product page every section heads with an h2.
+ * Each block stands in its look's box when the shop set one (`Look`).
  */
 export function Blocks({
   sections,
@@ -137,13 +143,17 @@ export function Blocks({
   const context: Context = { t, subscribe, quickAdd, opening }
   return blocks.map((block, index) =>
     joined(block, blocks[index - 1]) ? null : (
-      <BlockView
+      <Look
         key={block.kind === "shelf" ? (block.sections[0]?.id ?? "raf") : block.section.id}
-        block={block}
-        next={blocks[index + 1]}
-        first={heroFirst && index === 0}
-        context={context}
-      />
+        look={lookOf(block)}
+      >
+        <BlockView
+          block={block}
+          next={blocks[index + 1]}
+          first={heroFirst && index === 0}
+          context={context}
+        />
+      </Look>
     )
   )
 }

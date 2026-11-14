@@ -10,14 +10,18 @@ import type {
 } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
+import { lookCount } from "@/features/storefront/layout/look"
 import { offersVariants, switchVariant } from "@/features/storefront/layout/variants"
 import { AnnouncementForm } from "./forms/announcement-form"
 import { BannerForm } from "./forms/banner-form"
 import { FaqForm } from "./forms/faq-form"
 import { FeaturedForm } from "./forms/featured-form"
+import { FIELD_IDS, takesLook } from "./forms/field-registry"
+import type { FieldGroupName } from "./forms/field-registry"
 import { GoogleRatingForm } from "./forms/google-rating-form"
 import { HeroForm } from "./forms/hero-form"
 import { HeroSliderForm } from "./forms/hero-slider-form"
+import { LookFields } from "./forms/look-fields"
 import { ProductsForm } from "./forms/products-form"
 import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
@@ -27,6 +31,8 @@ import { Panel, PanelGroup } from "./panel-header"
 import { BrandsForm, CategoriesForm, CountedForm, WordedForm } from "./forms/simple-forms"
 import { SECTION_ICONS, kindOf } from "./section-meta"
 import { TrustBadgeList } from "./shared/trust-badge-list"
+import { useFieldFocus } from "./use-field-focus"
+import type { FieldFocus } from "./use-field-focus"
 
 const P = "storefront.editor.panel"
 
@@ -45,6 +51,8 @@ interface SectionPanelProps {
   /** The theme's one list of trust badges, edited in every strip's form (adr/0049 Ek 2026-11-06). */
   badges: TrustBadge[]
   onBadges: (badges: TrustBadge[], field?: string) => void
+  /** The field the settings search picked: its group opens, the field is shown and marked. */
+  focus?: (FieldFocus & { group: FieldGroupName }) | null
 }
 
 /** The form for one section type. */
@@ -97,8 +105,10 @@ function FormOf({
  * A section's settings in their own column, as Shopify's editor opens
  * them: the way back to the page's parts, what the section is, its fields
  * in groups that fold away (how it is drawn when its type has variants,
- * where it sits on a category page, its own fields, when it shows), then the section copied or taken off (both
- * undone with "Geri al").
+ * where it sits on a category page, its own fields, a body section's look
+ * closed at first (adr/0049 Ek 2026-11-14 §6), when it shows), then the
+ * section copied or taken off (both undone with "Geri al"). A field the
+ * settings search picked is opened, shown and marked.
  */
 export function SectionPanel({
   section,
@@ -112,19 +122,24 @@ export function SectionPanel({
   onRemove,
   badges,
   onBadges,
+  focus = null,
 }: SectionPanelProps) {
   const { t } = useTranslation()
   const kind = kindOf(section, group === "footer")
   const name = t(`storefront.editor.types.${kind}.name`)
+  useFieldFocus(focus)
+  const reveal = (which: FieldGroupName) => (focus?.group === which ? focus.nonce : null)
+  const looked = takesLook(section, group) && section.type !== "announcement_bar" ? section : null
+  const set = looked ? lookCount(looked) : 0
   return (
     <Panel icon={SECTION_ICONS[kind]} title={name} onBack={onBack}>
       <p className="border-b px-5 py-4 text-[13px] leading-5 text-muted-foreground">
         {t(`storefront.editor.types.${kind}.description`)}
       </p>
       {offersVariants(section) ? (
-        <PanelGroup title={t(`${P}.variant`)}>
+        <PanelGroup title={t(`${P}.variant`)} reveal={reveal("variant")}>
           <VariantField
-            id={`${section.id}-variant`}
+            id={FIELD_IDS.variant(section.id)}
             type={section.type}
             value={section.variant}
             onChange={(next) => {
@@ -135,8 +150,9 @@ export function SectionPanel({
         </PanelGroup>
       ) : null}
       {"placement" in section ? (
-        <PanelGroup title={t(`${P}.placement`)}>
+        <PanelGroup title={t(`${P}.placement`)} reveal={reveal("placement")}>
           <RadioGroup
+            id={FIELD_IDS.placement(section.id)}
             aria-label={t(`${P}.placement`)}
             value={section.placement}
             className="gap-3"
@@ -162,7 +178,21 @@ export function SectionPanel({
           onBadges={onBadges}
         />
       </PanelGroup>
-      <PanelGroup title={t(`${P}.visibility`)}>
+      {looked ? (
+        <PanelGroup
+          title={
+            set > 0
+              ? t("storefront.editor.look.titleSet", { count: set })
+              : t("storefront.editor.look.title")
+          }
+          hint={t("storefront.editor.look.hint")}
+          defaultOpen={false}
+          reveal={reveal("look")}
+        >
+          <LookFields section={looked} onChange={onChange} />
+        </PanelGroup>
+      ) : null}
+      <PanelGroup title={t(`${P}.visibility`)} reveal={reveal("visibility")}>
         <ScheduleFields section={section} problem={problems["schedule"]} onChange={onChange} />
       </PanelGroup>
       <div className="flex flex-wrap gap-2 border-t px-5 py-4">

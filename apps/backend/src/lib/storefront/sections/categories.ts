@@ -1,10 +1,11 @@
 import { z } from "@medusajs/framework/zod"
-import { LAYOUT_LIMITS, base, recordId, title } from "../layout-fields"
+import { LAYOUT_LIMITS, recordId, title } from "../layout-fields"
+import { bodyFields } from "./look"
 
 /** The shop's categories as cards. */
 export const categories = z
   .object({
-    ...base,
+    ...bodyFields,
     type: z.literal("categories"),
     title,
     /** None: the top categories. */

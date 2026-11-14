@@ -1,11 +1,12 @@
 import { z } from "@medusajs/framework/zod"
-import { LAYOUT_LIMITS, base, image, optional, shopText } from "../layout-fields"
+import { LAYOUT_LIMITS, image, optional, shopText } from "../layout-fields"
+import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
 
 /** One to six pictures, each with its heading, a line and one link. */
 export const banner = z
   .object({
-    ...base,
+    ...bodyFields,
     type: z.literal("banner"),
     slides: z
       .array(

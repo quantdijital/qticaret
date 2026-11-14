@@ -104,6 +104,17 @@ export function EditorShell({ layout, view, tree, form, formKey, preview }: Edit
           <SheetContent
             side="left"
             className="w-[min(20rem,calc(100vw-3rem))] gap-0 bg-card p-0 sm:max-w-none"
+            onEscapeKeyDown={(event) => {
+              // Escape in the settings search clears the query first; the next one closes
+              const target = event.target
+              if (
+                target instanceof HTMLInputElement &&
+                target.type === "search" &&
+                target.value !== ""
+              ) {
+                event.preventDefault()
+              }
+            }}
           >
             <SheetHeader className="border-b px-4 py-3">
               <SheetTitle className="text-sm">{t(`${E}.drawer.title`)}</SheetTitle>

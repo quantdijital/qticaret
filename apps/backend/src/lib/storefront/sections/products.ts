@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
-import { LAYOUT_LIMITS, base, columns, optional, recordId, title } from "../layout-fields"
+import { LAYOUT_LIMITS, columns, optional, recordId, title } from "../layout-fields"
+import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
 import { collectionSource, manualSource } from "./sources"
 
@@ -30,7 +31,7 @@ const productSource = z.discriminatedUnion("kind", [
 /** A product rail. */
 export const products = z
   .object({
-    ...base,
+    ...bodyFields,
     type: z.literal("products"),
     title,
     source: productSource,

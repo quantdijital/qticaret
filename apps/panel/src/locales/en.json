@@ -7857,6 +7857,64 @@
           "lined": "Lined boxes"
         }
       },
+      "look": {
+        "title": "Look settings",
+        "titleSet_one": "Look settings · {{count}} set",
+        "titleSet_other": "Look settings · {{count}} set",
+        "hint": "Spacing, background, alignment and width. Any field left unset uses the theme's own look; the preview shows it at once.",
+        "reset": "Back to default",
+        "space_outer": {
+          "label": "Outer spacing",
+          "term": "margin",
+          "hint": "The space above the section, from the theme's scale; it shrinks on narrow screens.",
+          "none": "None",
+          "small": "Small",
+          "medium": "Medium",
+          "large": "Large"
+        },
+        "space_inner": {
+          "label": "Inner spacing",
+          "term": "padding",
+          "hint": "The space inside the section; with a background it stays inside the colour.",
+          "none": "None",
+          "small": "Small",
+          "medium": "Medium",
+          "large": "Large"
+        },
+        "ground": {
+          "label": "Background",
+          "term": "background",
+          "hint": "The colour pairs are measured in the theme; text and button colours follow the background.",
+          "page": "Page",
+          "well": "Light tint",
+          "stage": "Dark",
+          "primary": "Main colour"
+        },
+        "align": {
+          "label": "Alignment",
+          "term": "text-align",
+          "hint": "The section's heading and the text under it.",
+          "start": "Left",
+          "center": "Centre"
+        },
+        "width": {
+          "label": "Width",
+          "term": "width",
+          "hint": "Narrow: a reading width. Boxed: the page's width. Full: edge to edge on a wide screen.",
+          "narrow": "Narrow",
+          "boxed": "Boxed",
+          "full": "Full"
+        }
+      },
+      "search": {
+        "label": "Search settings",
+        "placeholder": "Search settings: background, margin, FAQ…",
+        "clear": "Clear the search",
+        "results": "Search results",
+        "empty": "No setting found for “{{query}}”.",
+        "count_one": "{{count}} result",
+        "count_other": "{{count}} results"
+      },
       "panel": {
         "back": "Back to sections",
         "visibility": "Visibility",
