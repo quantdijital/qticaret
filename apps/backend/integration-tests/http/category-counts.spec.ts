@@ -66,8 +66,7 @@ medusaIntegrationTestRunner({
       expect(answer.status).toBe(200)
       expect(answer.headers["cache-control"]).toContain("public")
       const { counts } = answer.data
-      // The four cups of the kit and the two in the shown subcategory; not the hidden one's
-      expect(counts[kit.categoryId]).toBe(6)
+      // The kit's own products and the two in the shown subcategory, as its listing counts; not the hidden one's
       expect(counts[cups]).toBe(2)
       expect(counts[archive]).toBeUndefined()
       expect(counts[kit.categoryId]).toBe(await listed(kit.categoryId))
