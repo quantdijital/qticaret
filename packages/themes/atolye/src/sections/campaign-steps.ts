@@ -27,11 +27,18 @@ export const ROW: Record<Row, string> = {
   bottom: "justify-end",
 }
 
-/** On the right the words stay left-aligned (a ragged left edge reads badly). */
+/** Where the words' block stands across the slide. */
 export const COLUMN: Record<Column, string> = {
   left: "items-start",
   center: "items-center text-center",
   right: "items-end",
+}
+
+/** The lines inside the block: on the right they stay left-aligned (a ragged left edge reads badly). */
+export const WORDS: Record<Column, string> = {
+  left: "items-start",
+  center: "items-center text-center",
+  right: "items-start",
 }
 
 /** The buttons: the shop's style for the first, one step quieter for the second. */

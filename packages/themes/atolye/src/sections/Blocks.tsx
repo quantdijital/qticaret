@@ -130,7 +130,8 @@ function BlockView({
  * help section right after the FAQ drawn beside its questions. On the
  * home page an opening hero is the page's h1 and its picture the LCP
  * (`heroFirst`, with `opening` the newest pictured product when the hero
- * has none); on a listing or a product page every section heads with an h2.
+ * has none; an opening picture band's picture is the LCP too); on a
+ * listing or a product page every section heads with an h2.
  * Each block stands in its look's box when the shop set one (`Look`).
  */
 export function Blocks({

@@ -28,11 +28,15 @@
     z-index: -1;
     pointer-events: none;
   }
+  /* Eased towards its clear end: a straight fade leaves a line where it stops */
   .gf-band[data-overlay="medium"] .gf-band-veil {
     background: linear-gradient(
       var(--band-from, to top),
       var(--band-veil) 8%,
       color-mix(in srgb, var(--band-veil) 72%, transparent) 30%,
+      color-mix(in srgb, var(--band-veil) 42%, transparent) 44%,
+      color-mix(in srgb, var(--band-veil) 18%, transparent) 57%,
+      color-mix(in srgb, var(--band-veil) 5%, transparent) 66%,
       transparent 72%
     );
   }
@@ -63,7 +67,8 @@
   .gf-band[data-overlay="light"] .gf-band-words,
   .gf-band[data-overlay="medium"] .gf-band-words {
     background: color-mix(in srgb, var(--band-veil) 72%, transparent);
-    box-shadow: 0 0 3rem 2rem color-mix(in srgb, var(--band-veil) 72%, transparent);
+    /* Spread as wide as the blur: the cloud is whole where the plate ends (no edge) */
+    box-shadow: 0 0 3rem 3rem color-mix(in srgb, var(--band-veil) 72%, transparent);
   }
 
   /* Dark words: the counter's inks, the main button the shop-colour pill again */

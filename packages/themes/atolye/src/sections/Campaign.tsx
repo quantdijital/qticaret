@@ -2,7 +2,7 @@ import type { BannerSectionView, BannerSlideView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { BandPicture } from "./BandPicture"
-import { COLUMN, HEIGHT, ROW, buttonClass, placeOf, sizesOf } from "./campaign-steps"
+import { COLUMN, HEIGHT, ROW, WORDS, buttonClass, placeOf, sizesOf } from "./campaign-steps"
 import type { Of } from "./plan"
 
 /**
@@ -32,7 +32,8 @@ function Slide({
       data-row={row}
       data-column={column}
       className={cn(
-        "gf-band relative isolate flex flex-col overflow-hidden",
+        // Clipped, not hidden: a slide whose words outgrow its proportion grows to fit them
+        "gf-band relative isolate flex flex-col overflow-clip",
         dark ? "bg-paper-2" : "gf-stage",
         section.width === "boxed" && "rounded-tile",
         height.phone,
@@ -49,7 +50,7 @@ function Slide({
       />
       <span aria-hidden="true" className="gf-band-veil" />
       <div className={cn("flex max-w-xl flex-col p-5 sm:p-8 lg:p-12", COLUMN[column])}>
-        <div className={cn("gf-band-words flex flex-col gap-3", COLUMN[column])}>
+        <div className={cn("gf-band-words flex flex-col gap-3", WORDS[column])}>
           {slide.heading && <h2 className="text-display">{slide.heading}</h2>}
           {slide.text && <p className={dark ? "text-text" : "text-stage-text"}>{slide.text}</p>}
           {links.length > 0 && (
@@ -96,7 +97,7 @@ export function Campaign({
   const list = (
     <ul
       className={cn(
-        "grid gap-(--gap-columns)",
+        "grid items-stretch justify-items-stretch gap-(--gap-columns)",
         slides.length === 2 && "lg:grid-cols-[repeat(2,minmax(0,1fr))]",
         slides.length === 3 && "lg:grid-cols-[repeat(3,minmax(0,1fr))]"
       )}
@@ -112,9 +113,12 @@ export function Campaign({
       ))}
     </ul>
   )
+  const full = section.width === "full"
+  // Opening the page it sits under the header as the hero does; edge to edge, right against it
+  const top = !first ? "pt-(--section-gap)" : full ? undefined : "pt-3 lg:pt-6"
   return (
-    <section aria-label={label} className="pt-(--section-gap)">
-      {section.width === "full" ? list : <Container>{list}</Container>}
+    <section aria-label={label} className={top}>
+      {full ? list : <Container>{list}</Container>}
     </section>
   )
 }

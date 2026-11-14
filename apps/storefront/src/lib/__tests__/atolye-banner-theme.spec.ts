@@ -95,6 +95,20 @@ describe("Atölye's picture band (adr/0049 Ek 2026-11-14 §3.3 E2)", () => {
       '<source media="(max-width: 39.99rem)" type="image/webp" srcSet="/media/dar-800.webp 800w" sizes="100vw"/>'
     )
     expect(html).toMatch(/<source type="image\/webp" srcSet="\/media\/genis-800.webp 800w"/)
-    expect(html).toContain('loading="lazy"')
+  })
+
+  it("asks for its picture at once when it opens the page (the LCP), else lazily", () => {
+    expect(draw(band())).toMatch(/loading="eager" fetchPriority="high"/)
+    const later = renderPage(atolyeTheme, "HomePage", {
+      view: {
+        sections: [
+          { id: "hikaye", type: "rich_text", title: "Neden biz?", html: "<p>Atölyemizden.</p>" },
+          band(),
+        ],
+      },
+      subscribe: (): Promise<PlaceOrderResult> =>
+        Promise.resolve({ ok: true, error: null, challenge: null }),
+    })
+    expect(later).toMatch(/loading="lazy" fetchPriority="auto"/)
   })
 })

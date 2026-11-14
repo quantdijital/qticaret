@@ -24,7 +24,9 @@ export function HomePage({
 }) {
   const [head] = blocksOf(view.sections)
   const opening = head?.kind === "one" ? head.section : null
-  const opensWithHero = opening?.type === "hero" || opening?.type === "hero_slider"
+  // An opening picture is the page's LCP: the hero's, the sliding opening's or a picture band's
+  const opensWithPicture =
+    opening?.type === "hero" || opening?.type === "hero_slider" || opening?.type === "banner"
   // A sliding opening heads the page with its first slide's heading, when it has one
   const ownsH1 =
     opening?.type === "hero" ||
@@ -44,7 +46,7 @@ export function HomePage({
         t={t}
         subscribe={subscribe}
         quickAdd={quickAdd}
-        heroFirst={opensWithHero}
+        heroFirst={opensWithPicture}
         opening={openingProduct(view.sections)}
       />
     </>
