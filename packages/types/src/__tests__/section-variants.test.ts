@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest"
 import {
+  CARD_VARIANTS,
   SECTION_VARIANTS,
+  cardVariantOf,
   defaultVariant,
   hasVariants,
   variantOf,
@@ -23,5 +25,14 @@ describe("section variants (adr/0049 Ek 2026-11-14 §2)", () => {
     expect(hasVariants("trust_badges")).toBe(true)
     expect(hasVariants("faq")).toBe(false)
     expect(hasVariants("constructor")).toBe(false)
+  })
+})
+
+describe("card variants (adr/0049 Ek 2026-11-14 §3.3)", () => {
+  it("lists today's card first and reads anything else as it", () => {
+    expect(CARD_VARIANTS).toEqual(["standard", "framed"])
+    expect(cardVariantOf("framed")).toBe("framed")
+    expect(cardVariantOf("technical")).toBe("standard")
+    expect(cardVariantOf(undefined)).toBe("standard")
   })
 })

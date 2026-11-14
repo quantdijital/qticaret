@@ -59,6 +59,10 @@ export function cardRating(rating: StoreCardFacts["rating"], t: Translate): Card
   }
 }
 
+/** A framed card whose reviews are unknown: empty stars would say it has none. */
+const unrated = (card: ProductCardView): ProductCardView =>
+  card.framed?.emptyStars ? { ...card, framed: { ...card.framed, emptyStars: false } } : card
+
 /**
  * Cards with their stock bucket and quick add from the card facts. Quick
  * add goes only on a card that shows a price and can be bought now: the
@@ -75,16 +79,17 @@ export function withCardFacts(
   return cards.map((card) => {
     const fact = facts[card.id]
     if (!fact) {
-      return card
+      return unrated(card)
     }
     const quick = fact.quick_add && card.price && card.available ? fact.quick_add : null
     const rating = options.showRating ? cardRating(fact.rating, t) : null
-    return {
+    const read = {
       ...card,
       stock: fact.stock,
       quickAdd: quick ? { variantId: quick.variant_id } : null,
-      ...(rating ? { rating } : {}),
     }
+    // A backend before the stars says nothing of reviews: no empty stars for it
+    return rating ? { ...read, rating } : fact.rating === undefined ? unrated(read) : read
   })
 }
 

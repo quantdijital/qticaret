@@ -1,3 +1,4 @@
+import { CARD_VARIANTS } from "@qticaret/types"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { StorefrontBackground } from "@/theme/storefront"
 
@@ -21,6 +22,15 @@ export const BACKGROUNDS = [
 ] as const satisfies StorefrontBackground[]
 export const RADII = ["sharp", "soft", "round"] as const
 export const CARD_RATIOS = ["4:5", "1:1", "3:4"] as const
+/** How cards are drawn (adr/0049 Ek 2026-11-14 §3.3): the contract's list; a rail may pick its own. */
+export { CARD_VARIANTS }
+/** The framed card's switches (E5), each the theme setting's wherever a framed card shows. */
+export const FRAMED_CARD_SWITCHES = [
+  "hover_image",
+  "delivery_note",
+  "full_button",
+  "empty_stars",
+] as const
 export const HEADER_LAYOUTS = ["centered", "left"] as const
 export const BUTTON_SHAPES = ["pill", "rounded", "square"] as const
 
@@ -48,7 +58,8 @@ export interface ThemeSettings {
     ratio: (typeof CARD_RATIOS)[number]
     show_brand: boolean
     show_rating: boolean
-  }
+    variant: (typeof CARD_VARIANTS)[number]
+  } & Record<(typeof FRAMED_CARD_SWITCHES)[number], boolean>
   header: { layout: (typeof HEADER_LAYOUTS)[number]; sticky: boolean }
   buttons: (typeof BUTTON_SHAPES)[number]
 }
@@ -76,7 +87,16 @@ export const GRAFIT_THEME: ThemeChoices = {
   colors: { primary: null, accent: null, background: "steel" },
   typography: { heading: "manrope", body: "manrope" },
   radius: "soft",
-  product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+  product_card: {
+    ratio: "1:1",
+    show_brand: true,
+    show_rating: false,
+    variant: "standard",
+    hover_image: true,
+    delivery_note: true,
+    full_button: true,
+    empty_stars: false,
+  },
   header: { layout: "left", sticky: true },
   buttons: "pill",
 }

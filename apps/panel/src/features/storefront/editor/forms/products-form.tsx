@@ -3,6 +3,7 @@ import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import type { ProductSource, ProductsSection } from "@/features/storefront/api/layout"
 import { BEST_SELLER_DAYS, LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import { CardVariantField } from "./card-variant-field"
 import { ColumnsField } from "./columns-field"
 import { CountField, F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
@@ -141,6 +142,12 @@ export function ProductsForm({ section, problems, onChange }: SectionFormProps<P
           }}
         />
       ) : null}
+      <CardVariantField
+        value={section.card_variant ?? null}
+        onChange={(card_variant) => {
+          set({ card_variant })
+        }}
+      />
       <ColumnsField
         id="products-columns"
         value={section.columns}

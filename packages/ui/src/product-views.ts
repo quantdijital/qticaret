@@ -9,6 +9,7 @@ import type {
   StockLevel,
 } from "./card-views"
 import type { InstallmentSummaryView } from "./cart-views"
+import type { CardVariant } from "./section-variants"
 import type { HomeSectionView } from "./content-views"
 import type { ImageView, LinkView, PriceView, TrustBadgeView } from "./views"
 
@@ -31,6 +32,30 @@ export interface ProductCardView {
   stock?: StockLevel
   /** Put in the cart from the card (`addToCart` with this variant, quantity 1); none: its page first. */
   quickAdd?: QuickAddView | null
+  /**
+   * How the card is drawn (adr/0049 Ek 2026-11-14 §3.3): the theme
+   * setting's, or its rail's own; none: `standard`. A theme draws one it
+   * does not know as `standard` and leaves `framed` unread.
+   */
+  variant?: CardVariant
+  /** What only a framed card shows (UK5 + E5); present with `variant: "framed"`. */
+  framed?: FramedCardView
+}
+
+/** A framed card's own (adr/0049 Ek 2026-11-14 §3.3, E5), each as the shop set it. */
+export interface FramedCardView {
+  /**
+   * The product's second photo, shown over the first on hover or focus and
+   * swiped to on a touch screen; null: one photo, or the shop turned it off.
+   * Loaded lazily, never with the first paint.
+   */
+  secondImage: ImageView | null
+  /** "Ücretsiz kargo" under the price: a shipped product whose lowest price reaches the threshold. */
+  freeShipping: boolean
+  /** The add button across the card's foot ("Sepete ekle", or "Seçenekler" to its page). */
+  fullButton: boolean
+  /** Without reviews, empty stars and "no reviews yet" where the stars stand (the stars shown). */
+  emptyStars: boolean
 }
 
 /** A card's stars: the average and how many reviews, formatted, and in words for a screen reader. */

@@ -1,4 +1,5 @@
 import type {
+  CardVariant,
   MarqueeSettings,
   ProductSource,
   SectionLook,
@@ -112,6 +113,8 @@ export interface ProductsSection extends BodySectionBase {
   columns: ShelfColumns
   /** A "see all" link under the rail. */
   more: LayoutLink | null
+  /** The rail's own card style over the theme's (adr/0049 Ek 2026-11-14 §3.3); null or absent: the theme's. */
+  card_variant?: CardVariant | null
 }
 
 /** One product up close (adr/0046 Ek 2026-11-05): the storefront adds its facts and spec table. */

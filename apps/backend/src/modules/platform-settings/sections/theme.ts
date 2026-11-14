@@ -59,6 +59,31 @@ const WHITE = "#ffffff"
  */
 export const THEME_SETTINGS_VERSION = 2
 
+/**
+ * How a product card is drawn (adr/0049 Ek 2026-11-14 §3.3): `standard`
+ * today's card, `framed` the bordered box (UK5). Mirrors `@qticaret/types`'
+ * `CARD_VARIANTS` (a unit test keeps them equal); a product rail's
+ * `card_variant` takes the same list.
+ */
+export const PRODUCT_CARD_VARIANTS = ["standard", "framed"] as const
+
+export interface ProductCardSettings {
+  ratio: "4:5" | "1:1" | "3:4"
+  show_brand: boolean
+  show_rating: boolean
+  /** Everywhere's card; a product rail may draw its own (`card_variant`). */
+  variant: (typeof PRODUCT_CARD_VARIANTS)[number]
+  /**
+   * The framed card's own (E5), read wherever a framed card is drawn: the
+   * second photo on hover, the free shipping line, the add button across
+   * its foot, empty stars without reviews.
+   */
+  hover_image: boolean
+  delivery_note: boolean
+  full_button: boolean
+  empty_stars: boolean
+}
+
 /** How the storefront looks (F18 D11, adr/0053): choices from fixed lists, no CSS. */
 export interface ThemeSettings {
   /** Not a choice and not shown by the panel: see `THEME_SETTINGS_VERSION`. */
@@ -79,7 +104,7 @@ export interface ThemeSettings {
     body: (typeof BODY_FONTS)[number]
   }
   radius: "sharp" | "soft" | "round"
-  product_card: { ratio: "4:5" | "1:1" | "3:4"; show_brand: boolean; show_rating: boolean }
+  product_card: ProductCardSettings
   header: { layout: "centered" | "left"; sticky: boolean }
   buttons: "pill" | "rounded" | "square"
 }
@@ -135,9 +160,38 @@ const GRAFIT: ThemeSettings = {
   colors: { primary: null, accent: null, background: "steel" },
   typography: { heading: "manrope", body: "manrope" },
   radius: "soft",
-  product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+  product_card: {
+    ratio: "1:1",
+    show_brand: true,
+    show_rating: false,
+    variant: "standard",
+    hover_image: true,
+    delivery_note: true,
+    full_button: true,
+    empty_stars: false,
+  },
   header: { layout: "left", sticky: true },
   buttons: "pill",
+}
+
+/**
+ * Theme settings with the card's later fields (adr/0049 Ek 2026-11-14
+ * §3.3) at their defaults where they are missing: a design's theme or a
+ * preset written before them reads as it always drew (a `standard` card).
+ * A card variant off the list (taken off since, or a newer build's) reads
+ * as `standard` (§2.3). A settings row needs none of this: it is read over
+ * the defaults.
+ */
+export function withCardDefaults(value: unknown): unknown {
+  if (!isPlainObject(value) || !isPlainObject(value["product_card"])) {
+    return value
+  }
+  const card = { ...GRAFIT.product_card, ...value["product_card"] }
+  const listed: readonly unknown[] = PRODUCT_CARD_VARIANTS
+  return {
+    ...value,
+    product_card: listed.includes(card.variant) ? card : { ...card, variant: "standard" },
+  }
 }
 
 /** `group`'s own `keys`, for spreading over a default group; nothing from anything but an object. */
@@ -199,6 +253,11 @@ export const themeSection = defineSection<ThemeSettings>(
         ratio: z.enum(["4:5", "1:1", "3:4"]),
         show_brand: z.boolean(),
         show_rating: z.boolean(),
+        variant: z.enum(PRODUCT_CARD_VARIANTS),
+        hover_image: z.boolean(),
+        delivery_note: z.boolean(),
+        full_button: z.boolean(),
+        empty_stars: z.boolean(),
       })
       .strict(),
     header: z.object({ layout: z.enum(["centered", "left"]), sticky: z.boolean() }).strict(),

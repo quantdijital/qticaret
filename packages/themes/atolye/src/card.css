@@ -1,0 +1,149 @@
+/*
+ * The framed card's photos (UK5 + E5, adr/0049 Ek 2026-11-14 §3.3;
+ * `parts/FramedCard.tsx`): the second photo, when the card carries one.
+ * No inline style (CSP); both photos fill the well, nothing shifts (CLS).
+ *
+ * - A mouse (hover and a fine pointer): the second sits over the first,
+ *   out of the layout (`display: none`, so the browser never fetches it
+ *   with the page), and fades in while the card is hovered or anything in
+ *   it has focus; at once for a shopper who asks for less motion.
+ * - A touch screen: the two side by side in a strip that swipes and snaps,
+ *   above the card's link so the swipe reaches it (the strip is a link to
+ *   the same page, so a tap still opens it). Where the browser drives an
+ *   animation by scrolling, the second photo's picture stays out of the
+ *   layout until the strip first moves (its slide keeps its width, so the
+ *   swipe works) and two dots under the photo follow the strip; without
+ *   that, no dots and the second loads lazily as any image.
+ */
+@layer components {
+  .gf-card-slides {
+    display: block;
+    height: 100%;
+  }
+  .gf-card-slide {
+    display: block;
+    height: 100%;
+  }
+  .gf-card-slide picture {
+    display: block;
+    height: 100%;
+  }
+  .gf-card-dots {
+    display: none;
+  }
+  .gf-card-framed .gf-card-media > ul {
+    z-index: calc(var(--z-raised) + 1);
+    pointer-events: none;
+  }
+
+  /* One height for "Sepete ekle" (with its icon) and "Seçenekler", so a row's buttons line up */
+  .gf-card-btn {
+    min-height: 2.75rem;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--text-sm);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .gf-card-slide--second {
+      position: absolute;
+      inset: 0;
+      display: none;
+      opacity: 0;
+    }
+    .gf-card-framed:hover .gf-card-slide--second,
+    .gf-card-framed:focus-within .gf-card-slide--second {
+      display: block;
+      opacity: 1;
+    }
+  }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .gf-card-slide--second {
+      transition:
+        opacity var(--dur-short) var(--ease-out),
+        display var(--dur-short) allow-discrete;
+    }
+    @starting-style {
+      .gf-card-framed:hover .gf-card-slide--second,
+      .gf-card-framed:focus-within .gf-card-slide--second {
+        opacity: 0;
+      }
+    }
+  }
+
+  @media not ((hover: hover) and (pointer: fine)) {
+    .gf-card-slides {
+      position: relative;
+      z-index: var(--z-raised);
+      display: flex;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+    .gf-card-slides::-webkit-scrollbar {
+      display: none;
+    }
+    .gf-card-slide {
+      flex: 0 0 100%;
+      scroll-snap-align: start;
+    }
+
+    @supports (animation-timeline: scroll()) {
+      .gf-card-media {
+        timeline-scope: --gf-card-photos;
+      }
+      .gf-card-slides {
+        scroll-timeline: --gf-card-photos inline;
+      }
+      .gf-card-slide--second picture {
+        animation: gf-card-reveal linear both;
+        animation-timeline: --gf-card-photos;
+      }
+      .gf-card-dots {
+        position: absolute;
+        bottom: var(--space-xs);
+        left: 50%;
+        z-index: calc(var(--z-raised) + 1);
+        display: flex;
+        gap: 6px;
+        translate: -50% 0;
+        pointer-events: none;
+      }
+      .gf-card-dots i {
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--color-field);
+        box-shadow: 0 0 0 1px var(--color-rule);
+        animation: gf-card-dot linear both;
+        animation-timeline: --gf-card-photos;
+      }
+      .gf-card-dots i + i {
+        animation-direction: reverse;
+      }
+    }
+  }
+}
+
+/* The first dot dark at the strip's start, the second at its end */
+@keyframes gf-card-dot {
+  from {
+    background: var(--color-text);
+  }
+  to {
+    background: var(--color-field);
+  }
+}
+
+/*
+ * The second photo out of the layout only while its strip has not moved:
+ * `display` takes the shown value anywhere past the start
+ */
+@keyframes gf-card-reveal {
+  from {
+    display: none;
+  }
+  to {
+    display: block;
+  }
+}

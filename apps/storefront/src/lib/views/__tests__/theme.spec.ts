@@ -39,7 +39,16 @@ describe("themeSettings", () => {
       colors: { primary: "#0b5c99", accent: "#f5d90a", background: "cool" },
       typography: { heading: "playfair", body: "nunito" },
       radius: "round",
-      product_card: { ratio: "1:1", show_brand: false, show_rating: true },
+      product_card: {
+        ratio: "1:1",
+        show_brand: false,
+        show_rating: true,
+        variant: "framed",
+        hover_image: false,
+        delivery_note: true,
+        full_button: false,
+        empty_stars: true,
+      },
       header: { layout: "left", sticky: false },
       buttons: "square",
     }
@@ -53,7 +62,16 @@ describe("themeSettings", () => {
       colors: { primary: null, accent: null, background: "steel" },
       typography: { heading: "manrope", body: "manrope" },
       radius: "soft",
-      product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+      product_card: {
+        ratio: "1:1",
+        show_brand: true,
+        show_rating: false,
+        variant: "standard",
+        hover_image: true,
+        delivery_note: true,
+        full_button: true,
+        empty_stars: false,
+      },
       header: { layout: "left", sticky: true },
       buttons: "pill",
     })
@@ -67,7 +85,14 @@ describe("themeSettings", () => {
         colors: { primary: "red;}body{display:none", accent: "#FFF", background: "pink" },
         typography: { heading: "comic-sans", body: "url(https://fonts.example/x)" },
         radius: "blob",
-        product_card: { ratio: "16:9", show_brand: "no", show_rating: 1 },
+        product_card: {
+          ratio: "16:9",
+          show_brand: "no",
+          show_rating: 1,
+          variant: "technical",
+          hover_image: "yes",
+          empty_stars: null,
+        },
         header: { layout: "right", sticky: null },
         buttons: "circle",
         extra: "ignored",
@@ -227,7 +252,12 @@ describe("themeView", () => {
       themeView(
         theme({
           header: { layout: "centered", sticky: false },
-          product_card: { ratio: "4:5", show_brand: false, show_rating: true },
+          product_card: {
+            ...DEFAULT_THEME.product_card,
+            ratio: "4:5",
+            show_brand: false,
+            show_rating: true,
+          },
         })
       )
     ).toMatchObject({

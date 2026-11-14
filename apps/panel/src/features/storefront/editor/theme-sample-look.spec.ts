@@ -80,7 +80,9 @@ describe("what the sample paints for the form's choices (adr/0062 §12)", () => 
 
   it("draws the card at the chosen shape with the brand and the rating as chosen", () => {
     const card = (product_card: ThemeValues["product_card"]) => look({ product_card })
-    expect(card({ ratio: "4:5", show_brand: false, show_rating: true })).toMatchObject({
+    expect(
+      card({ ...g.product_card, ratio: "4:5", show_brand: false, show_rating: true })
+    ).toMatchObject({
       ratio: "4 / 5",
       showBrand: false,
       showRating: true,

@@ -141,6 +141,7 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         limit: section.limit,
         columns: section.columns,
         more: link(section.more),
+        card_variant: section.card_variant,
         // A sale or best-seller rail: its products in order, and whether the newest made it up
         ...at.picks?.get(id),
       }

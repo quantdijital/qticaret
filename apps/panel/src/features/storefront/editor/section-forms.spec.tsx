@@ -188,6 +188,24 @@ describe("the section forms", HEAVY, () => {
     })
   })
 
+  it("frames a product list's cards over the theme's style, and gives it back (adr/0049 Ek 2026-11-14 §3.3)", async () => {
+    await open("Ürün listesi")
+    const field = screen.getByRole("combobox", { name: "Kart biçimi" })
+    expect(field).toHaveTextContent("Temadaki biçim")
+
+    await user.click(field)
+    await user.click(await screen.findByRole("option", { name: "Çerçeveli" }))
+    await saved((doc) => {
+      expect(doc.home[1]).toMatchObject({ type: "products", card_variant: "framed" })
+    })
+
+    await user.click(field)
+    await user.click(await screen.findByRole("option", { name: "Temadaki biçim" }))
+    await saved((doc) => {
+      expect(doc.home[1]).toMatchObject({ type: "products", card_variant: null })
+    })
+  })
+
   it("schedules a section in local time, refusing an end before its start", async () => {
     await open("Blog yazıları")
     const starts = screen.getByLabelText("Başlangıç")

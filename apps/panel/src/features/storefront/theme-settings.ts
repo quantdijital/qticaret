@@ -37,9 +37,9 @@ export function isGrafit(values: ThemeValues): boolean {
     values.typography.body === g.typography.body &&
     values.radius === g.radius &&
     values.buttons === g.buttons &&
-    values.product_card.ratio === g.product_card.ratio &&
-    values.product_card.show_brand === g.product_card.show_brand &&
-    values.product_card.show_rating === g.product_card.show_rating &&
+    (Object.keys(g.product_card) as (keyof ThemeValues["product_card"])[]).every(
+      (key) => values.product_card[key] === g.product_card[key]
+    ) &&
     values.header.layout === g.header.layout &&
     values.header.sticky === g.header.sticky
   )

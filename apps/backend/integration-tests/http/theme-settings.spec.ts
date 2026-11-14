@@ -15,10 +15,19 @@ interface Frame {
     colors: { primary: string | null; accent: string | null; background: string }
     typography: { heading: string; body: string }
     radius: string
-    product_card: { ratio: string; show_brand: boolean; show_rating: boolean }
+    product_card: Record<string, unknown>
     header: { layout: string; sticky: boolean }
     buttons: string
   }
+}
+
+/** The card's variant and the framed card's switches at their defaults (adr/0049 Ek 2026-11-14 §3.3). */
+const CARD = {
+  variant: "standard",
+  hover_image: true,
+  delivery_note: true,
+  full_button: true,
+  empty_stars: false,
 }
 
 /** F18 D11 (adr/0053): the shop picks its look from fixed lists; the storefront reads it. */
@@ -68,7 +77,7 @@ medusaIntegrationTestRunner({
         colors: { primary: null, accent: null, background: "steel" },
         typography: { heading: "manrope", body: "manrope" },
         radius: "soft",
-        product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+        product_card: { ...CARD, ratio: "1:1", show_brand: true, show_rating: false },
         header: { layout: "left", sticky: true },
         buttons: "pill",
       })
@@ -83,7 +92,7 @@ medusaIntegrationTestRunner({
         colors: { primary: "#1e3a8a", accent: null, background: "cool" },
         typography: { heading: "playfair", body: "manrope" },
         radius: "soft",
-        product_card: { ratio: "1:1", show_brand: true, show_rating: true },
+        product_card: { ...CARD, ratio: "1:1", show_brand: true, show_rating: true },
         header: { layout: "centered", sticky: true },
         buttons: "rounded",
       })
@@ -120,7 +129,7 @@ medusaIntegrationTestRunner({
         colors: { primary: "#7a1a48", accent: null, background: "steel" },
         typography: { heading: "manrope", body: "manrope" },
         radius: "soft",
-        product_card: { ratio: "1:1", show_brand: false, show_rating: false },
+        product_card: { ...CARD, ratio: "1:1", show_brand: false, show_rating: false },
         header: { layout: "left", sticky: false },
         buttons: "pill",
       }

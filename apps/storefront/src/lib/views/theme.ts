@@ -5,6 +5,7 @@ import type {
   ThemeHeadingFont,
 } from "@qticaret/types"
 import type { ThemeView } from "@qticaret/ui"
+import { cardVariantOf } from "@qticaret/types/section-variants"
 import { brandDeclarations, isHexColor, readableOn } from "./color"
 
 /**
@@ -25,7 +26,16 @@ export const DEFAULT_THEME: StoreThemeSettings = {
   colors: { primary: null, accent: null, background: "steel" },
   typography: { heading: "manrope", body: "manrope" },
   radius: "soft",
-  product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+  product_card: {
+    ratio: "1:1",
+    show_brand: true,
+    show_rating: false,
+    variant: "standard",
+    hover_image: true,
+    delivery_note: true,
+    full_button: true,
+    empty_stars: false,
+  },
   header: { layout: "left", sticky: true },
   buttons: "pill",
 }
@@ -97,6 +107,17 @@ const oneOf = <T extends string>(value: unknown, allowed: readonly T[], fallback
 const flag = (value: unknown, fallback: boolean): boolean =>
   typeof value === "boolean" ? value : fallback
 
+const CARD_FLAGS = ["hover_image", "delivery_note", "full_button", "empty_stars"] as const
+
+/** The framed card's E5 switches (adr/0049 Ek 2026-11-14 §3.3), each checked. */
+const cardFlags = (raw: unknown) =>
+  Object.fromEntries(
+    CARD_FLAGS.map((key) => [
+      key,
+      flag(at(raw, "product_card", key), DEFAULT_THEME.product_card[key]),
+    ])
+  ) as Pick<StoreThemeSettings["product_card"], (typeof CARD_FLAGS)[number]>
+
 /** A nested field of an answer read as nothing in particular: what is missing is undefined. */
 const at = (value: unknown, ...keys: string[]): unknown =>
   keys.reduce<unknown>(
@@ -136,6 +157,8 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
       ratio: oneOf(at(raw, "product_card", "ratio"), ["4:5", "1:1", "3:4"], d.product_card.ratio),
       show_brand: flag(at(raw, "product_card", "show_brand"), d.product_card.show_brand),
       show_rating: flag(at(raw, "product_card", "show_rating"), d.product_card.show_rating),
+      variant: cardVariantOf(at(raw, "product_card", "variant")),
+      ...cardFlags(raw),
     },
     header: {
       layout: oneOf(at(raw, "header", "layout"), ["centered", "left"], d.header.layout),

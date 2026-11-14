@@ -2,6 +2,7 @@ import path from "node:path"
 import { layoutDocument, readStoredLayout, storedDocument } from "../layout"
 import { storedSection } from "../sections/stored"
 import { SECTION_VARIANTS } from "../sections/variants"
+import { PRODUCT_CARD_VARIANTS } from "../../../modules/platform-settings/sections/theme"
 
 // The contract's own file (`@qticaret/types`), through jest: the package is ESM for tsc here
 const CONTRACT_FILE = path.resolve(
@@ -80,7 +81,35 @@ describe("section variants (adr/0049 Ek 2026-11-14 §2)", () => {
   })
 
   it("mirrors the contract's lists: a variant goes there first", () => {
-    const contract = jest.requireActual<{ SECTION_VARIANTS: unknown }>(CONTRACT_FILE)
+    const contract = jest.requireActual<{ SECTION_VARIANTS: unknown; CARD_VARIANTS: unknown }>(
+      CONTRACT_FILE
+    )
     expect(SECTION_VARIANTS).toEqual(contract.SECTION_VARIANTS)
+    expect(PRODUCT_CARD_VARIANTS).toEqual(contract.CARD_VARIANTS)
+  })
+})
+
+describe("a product rail's card variant (adr/0049 Ek 2026-11-14 §3.3, owner's decision 4)", () => {
+  const rail = (more: Record<string, unknown> = {}) => ({
+    id: "yeniurunler",
+    type: "products",
+    title: null,
+    source: { kind: "newest" },
+    ...more,
+  })
+
+  it("is the theme setting's (null) for a rail saved before it, and keeps one on the list", () => {
+    expect(layoutDocument.parse({ home: [rail()] }).home[0]).toMatchObject({ card_variant: null })
+    expect(
+      layoutDocument.parse({ home: [rail({ card_variant: "framed" })] }).home[0]
+    ).toMatchObject({ card_variant: "framed" })
+  })
+
+  it("refuses a save naming one off the list, and reads a stored one as the setting's", () => {
+    expect(issues({ home: [rail({ card_variant: "technical" })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+    const doc = readStoredLayout({ home: [rail({ ...ALWAYS, card_variant: "technical" })] })
+    expect(doc.home[0]).toMatchObject({ type: "products", card_variant: null })
   })
 })

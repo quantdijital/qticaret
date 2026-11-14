@@ -7,7 +7,7 @@ import type { MediaDerivatives } from "./catalog.js"
 import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
 import type { StoreMainSections } from "./section-main.js"
-import type { TrustBadgesVariant } from "./section-variants.js"
+import type { CardVariant, TrustBadgesVariant } from "./section-variants.js"
 import type {
   MenuLinkKind,
   StoreMenu,
@@ -96,6 +96,8 @@ export type StoreLayoutSection = StoreSectionLookPart &
         limit: number
         columns: ShelfColumns
         more: StoreLayoutLink | null
+        /** The rail's own card variant; null or absent (an older backend): the theme setting's. */
+        card_variant?: CardVariant | null
         /** A sale or best-seller rail's products, picked in order; absent for the other sources. */
         product_ids?: string[]
         /** A best-seller rail with too few sales, its rest the newest products; no counts shown. */

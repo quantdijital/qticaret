@@ -4,6 +4,7 @@
  * backend's build does not compile workspace TypeScript (adr/0046 §8).
  */
 import type { MediaDerivatives, StoreImage } from "./catalog.js"
+import type { CardVariant } from "./section-variants.js"
 
 export type TrustIcon =
   "truck" | "clock" | "shield" | "card" | "refresh" | "award" | "gift" | "phone"
@@ -98,7 +99,21 @@ export interface StoreThemeSettings {
   }
   typography: { heading: ThemeHeadingFont; body: ThemeBodyFont }
   radius: "sharp" | "soft" | "round"
-  product_card: { ratio: "4:5" | "1:1" | "3:4"; show_brand: boolean; show_rating: boolean }
+  product_card: {
+    ratio: "4:5" | "1:1" | "3:4"
+    show_brand: boolean
+    show_rating: boolean
+    /** How cards are drawn; a product rail may draw its own (`card_variant`). */
+    variant: CardVariant
+    /** A framed card's second photo on hover, swiped on a touch screen (E5). */
+    hover_image: boolean
+    /** A framed card's "free shipping" line, from its price and the shop's threshold (E5). */
+    delivery_note: boolean
+    /** A framed card's add button across its foot instead of the round "+" (E5). */
+    full_button: boolean
+    /** Empty stars on a framed card without reviews, while the stars are shown (E5). */
+    empty_stars: boolean
+  }
   header: { layout: "centered" | "left"; sticky: boolean }
   buttons: "pill" | "rounded" | "square"
 }

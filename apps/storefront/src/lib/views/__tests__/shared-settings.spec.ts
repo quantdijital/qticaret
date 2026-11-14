@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { StoreLayoutSettings, StoreMenu, StoreThemeSettings } from "@qticaret/types"
 import { t } from "@/lib/i18n"
 import { menusOf, sharedSettingsOf, themeSourceOf } from "../shared-settings"
+import { DEFAULT_THEME } from "../theme"
 import type * as layoutModule from "../layout"
 
 type LayoutModule = typeof layoutModule
@@ -97,7 +98,7 @@ describe("the theme's settings and a menu set in the design (adr/0063 §3)", () 
     colors: { primary, accent: null, background: "steel" },
     typography: { heading: "manrope", body: "manrope" },
     radius,
-    product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+    product_card: DEFAULT_THEME.product_card,
     header: { layout: "left", sticky: true },
     buttons: "pill",
   })

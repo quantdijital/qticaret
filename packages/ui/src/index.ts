@@ -1,13 +1,16 @@
 export { formatLira } from "./money"
 export { ResponsiveImage } from "./ResponsiveImage"
 export {
+  CARD_VARIANTS,
   SECTION_VARIANTS,
+  cardVariantOf,
   defaultVariant,
   drawnVariant,
   hasVariants,
   variantOf,
 } from "./section-variants"
 export type {
+  CardVariant,
   CategoryMainVariant,
   DefaultVariant,
   FooterBarVariant,

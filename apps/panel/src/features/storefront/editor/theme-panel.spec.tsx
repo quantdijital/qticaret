@@ -76,6 +76,23 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
     releaseClock()
   })
 
+  it("saves the card style and the framed card's switches into the draft (adr/0049 Ek 2026-11-14 §3.3)", async () => {
+    await openTheme()
+    await choose("Kart biçimi", "Çerçeveli")
+    await user.click(screen.getByRole("switch", { name: /^Üstüne gelince ikinci fotoğraf/ }))
+    await user.click(screen.getByRole("switch", { name: /^Yorumsuz üründe boş yıldız/ }))
+    await pass(AUTOSAVE_MS)
+
+    await waitFor(() => {
+      expect(savedTheme()?.product_card).toEqual({
+        ...THEME.product_card,
+        variant: "framed",
+        hover_image: false,
+        empty_stars: true,
+      })
+    })
+  })
+
   it("saves every choice into the draft as it is made, the preview reloading, nothing live", async () => {
     const primary = await openTheme()
     const preview = await screen.findByTitle("Vitrin önizlemesi")
@@ -95,7 +112,7 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
         ...THEME,
         colors: { primary: "#0b5c99", accent: null, background: "neutral" },
         typography: { heading: "playfair", body: "manrope" },
-        product_card: { ratio: "1:1", show_brand: true, show_rating: true },
+        product_card: { ...THEME.product_card, ratio: "1:1", show_brand: true, show_rating: true },
       })
     })
     // Neither the theme section nor the storefront section is written: "Yayınla" puts it live
