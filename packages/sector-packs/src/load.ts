@@ -75,8 +75,8 @@ export function readPack(dir: string, code: string): LoadedSectorPack {
     throw new SectorPackError(`${code} is not a pack code`)
   }
   const stray = readdirSync(dir, { withFileTypes: true }).find(
+    // A hidden file (`.DS_Store`) is no pack file either: refused by its name
     (entry) =>
-      !entry.name.startsWith(".") &&
       !(entry.isFile() && isFileName(entry.name)) &&
       !(entry.isDirectory() && entry.name === PRESETS_DIR)
   )

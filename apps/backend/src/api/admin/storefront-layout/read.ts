@@ -28,19 +28,14 @@ export async function adminLayout(container: MedusaContainer) {
   const [row, legacy] = await Promise.all([layoutRow(container), legacySettings(container)])
   const kept = await container
     .resolve<StorefrontLayoutModuleService>(STOREFRONT_LAYOUT_MODULE)
-    .listStorefrontLayoutRevisions(
-      {},
-      {
-        select: ["revision", "published_at", "published_by", "document"],
-        order: { revision: "DESC" },
-      }
-    )
-  // Whether restoring it brings that day's menus too (adr/0063 §3): the panel says so
+    .revisionSummaries()
+  // Whether restoring it brings that day's menus too (adr/0063 §3): the panel says so.
+  // Read as the restore reads it (`storedSettings`), from the set alone, not the document
   const revisions = kept.map((each) => ({
     revision: each.revision,
     published_at: each.published_at,
     published_by: each.published_by,
-    has_menus: storedSettings(each.document).menus !== null,
+    has_menus: storedSettings({ settings: { menus: each.menus } }).menus !== null,
   }))
   const draft = withLegacySettings(
     row ? current(row.draft) : await defaultLayout(container),

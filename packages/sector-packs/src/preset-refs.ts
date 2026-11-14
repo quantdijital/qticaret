@@ -1,5 +1,5 @@
 import type { z } from "zod"
-import { HANDLE_KINDS, handleRef, hrefRef, imageRef } from "./preset-schema"
+import { HANDLE_KINDS, handleRef, hrefRef, imageRef, presetHref } from "./preset-schema"
 import { SectorPackError, pathText } from "./read-json"
 
 /**
@@ -22,8 +22,11 @@ const ID_FIELD = /^([a-z]+)_(ids?)$/
 /** A Medusa record id (`pcat_01J…`, a ULID): a shop's own, never a preset's. */
 const RECORD_ID = /^[a-z]+_[0-9A-HJKMNP-TV-Z]{26}$/
 
-/** Fields of a link to a record and of a media image; a preset writes `$href` and `$image`. */
-const SHOP_ONLY_FIELDS = new Set(["url", "target"])
+/**
+ * Fields of a link to a record and of a media image (a rich text's image
+ * node's `attrs.src` among them); a preset writes `$href` and `$image`.
+ */
+const SHOP_ONLY_FIELDS = new Set(["url", "target", "src"])
 
 export interface PresetRefs {
   /** Every `$image` path. */
@@ -96,6 +99,10 @@ export function presetRefs(value: unknown, where: string, refs?: PresetRefs): Pr
     for (const [key, child] of Object.entries(node)) {
       if (SHOP_ONLY_FIELDS.has(key)) {
         fail([...path, key], "a preset writes a link as {$href} and an image as {$image}")
+      }
+      // A rich text's link mark (`attrs.href`): held to the rule a `$href` is
+      if (key === "href" && !presetHref.safeParse(child).success) {
+        fail([...path, key], "not a shop path or an https address")
       }
       const field = ID_FIELD.exec(key)
       if (field?.[1] && field[2]) {

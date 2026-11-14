@@ -26,17 +26,21 @@ const REQUIRED: readonly FileName[] = ["preset.json", "theme.json", "layout.json
 
 const isFileName = (name: string): name is FileName => Object.hasOwn(PRESET_FILES, name)
 
-/** The visible entries of a folder; a link of any kind is refused. */
+/**
+ * The entries of a folder; a hidden one (`.DS_Store`) and a link of any
+ * kind are refused: only the frame's names may be there (adr/0063 §7).
+ */
 function entries(dir: string, where: string) {
-  return readdirSync(dir, { withFileTypes: true }).filter((entry) => {
+  const found = readdirSync(dir, { withFileTypes: true })
+  for (const entry of found) {
     if (entry.name.startsWith(".")) {
-      return false
+      throw new SectorPackError(`${where}/${entry.name} is a hidden file`)
     }
     if (entry.isSymbolicLink()) {
       throw new SectorPackError(`${where}/${entry.name} is a link`)
     }
-    return true
-  })
+  }
+  return found
 }
 
 // The first bytes of each image type: a file named `.png` must be one

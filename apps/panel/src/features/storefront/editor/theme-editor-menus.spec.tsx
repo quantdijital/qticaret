@@ -37,6 +37,7 @@ vi.mock("@tanstack/react-router", () => ({
 }))
 
 const RESTORE = "/admin/storefront-layout/revisions/2/restore"
+const PUBLISH = "/admin/storefront-layout/publish"
 const HEAVY = { timeout: 15_000 }
 
 const menu = (title: string, location: MenuInput["location"], rank: number): MenuInput => ({
@@ -136,5 +137,31 @@ describe("menus in the design's draft (adr/0063 §3)", HEAVY, () => {
     // One undo brings the set back, as any change to the design
     await user.click(screen.getByRole("button", { name: "Geri al" }))
     expect(screen.getByText(/2 menüsü var/)).toBeVisible()
+  })
+
+  it("reloads the draft once published, so the set put live is not saved back", async () => {
+    const draft = { ...DOC, settings: { ...DOC.settings, menus: MENUS } }
+    serve(fetchMock, admin, layoutOf({ draft, has_changes: true }))
+    renderEditor()
+    await opened()
+    expect(screen.getByText(/2 menüsü var/)).toBeVisible()
+
+    await user.click(screen.getByRole("button", { name: "Yayınla" }))
+    const dialog = await screen.findByRole("alertdialog", { name: "Tasarım yayınlansın mı?" })
+    await user.click(within(dialog).getByRole("button", { name: "Yayınla" }))
+    await waitFor(() => {
+      expect(postsTo(fetchMock, PUBLISH)).toHaveLength(1)
+    })
+    await waitFor(() => {
+      expect(screen.queryByText(/menüsü var/)).toBeNull()
+    })
+
+    // A later change saves a draft without the set: the next publish leaves the menus alone
+    await user.click(screen.getByRole("button", { name: "Giriş bölümünü gizle" }))
+    await pass(AUTOSAVE_MS)
+    await waitFor(() => {
+      expect(lastSaved(fetchMock)?.home[0]).toMatchObject({ visible: false })
+    })
+    expect(lastSaved(fetchMock)?.settings.menus).toBeNull()
   })
 })

@@ -98,7 +98,7 @@ describe("the theme's shared settings in the design (adr/0049 Ek 2026-11-06)", (
       color_swatches: [{ label: "Beyaz", hex: "#ffffff" }],
       low_stock: { enabled: false, threshold: 7 },
       theme: { ...GRAFIT, radius: "sharp" as const },
-      menus: [],
+      menus: null,
     }
     expect(withLegacy(own, LEGACY)).toEqual(own)
     expect(withLegacy({ ...UNSET_SETTINGS, trust_badges: [] }, LEGACY).trust_badges).toEqual([])
@@ -141,35 +141,48 @@ describe("the theme's shared settings in the design (adr/0049 Ek 2026-11-06)", (
         settings: { low_stock: { enabled: "x" }, color_swatches: [], theme: { radius: "oval" } },
       })
     ).toEqual({ ...UNSET_SETTINGS, color_swatches: [] })
+    // An empty menu set is none: the publication leaves the shop's menus alone
     expect(storedSettings({ settings: { theme: GRAFIT, menus: [] } })).toEqual({
       ...UNSET_SETTINGS,
       theme: GRAFIT,
-      menus: [],
+      menus: null,
     })
 
-    // A theme written without the settings' version reads as the section's row does (adr/0062 §4)
+    // A theme written without the settings' version (a script, a preset) reads with today's
+    // meaning: the design's theme has no time before the version, so nothing turns to Grafit
     const unversioned = Object.fromEntries(
       Object.entries(GRAFIT).filter(([key]) => key !== "settings_version")
     )
-    const old = {
+    const written = {
       ...unversioned,
-      colors: { ...GRAFIT.colors, primary: "#0b5c99" },
+      colors: { primary: "#0b5c99", accent: null, background: "warm" },
+      typography: { heading: "fraunces", body: "inter" },
+      radius: "round",
       product_card: { ratio: "4:5", show_brand: false, show_rating: true },
     }
-    expect(storedSettings({ settings: { theme: old } }).theme).toEqual({
-      ...GRAFIT,
-      colors: { ...GRAFIT.colors, primary: "#0b5c99" },
-      product_card: { ratio: "1:1", show_brand: false, show_rating: false },
-    })
+    const read = { ...written, settings_version: GRAFIT.settings_version }
+    expect(storedSettings({ settings: { theme: written } }).theme).toEqual(read)
     // A save still has to carry it
-    expect(parses({ theme: old })).toBe(false)
+    expect(parses({ theme: written })).toBe(false)
     // So does a whole stored document (draft, live, revision): it neither drops nor fails the read
-    expect(() => layoutDocument.parse({ settings: { theme: old } })).toThrow()
-    expect(readStoredLayout({ settings: { theme: old } }).settings.theme).toMatchObject({
-      settings_version: 2,
-      colors: { primary: "#0b5c99" },
-    })
+    expect(() => layoutDocument.parse({ settings: { theme: written } })).toThrow()
+    expect(readStoredLayout({ settings: { theme: written } }).settings.theme).toEqual(read)
     expect(readStoredLayout({ home: [] }).settings.theme).toBeNull()
+  })
+
+  it("reads a stored document's settings part by part, as the storefront's frame does", () => {
+    // A theme today's schema refuses (a rule added since): unset, not a failed read
+    const stored = {
+      home: [],
+      settings: {
+        theme: { ...GRAFIT, colors: { ...GRAFIT.colors, primary: "#fde68a" } },
+        low_stock: { enabled: true, threshold: 3 },
+      },
+    }
+    const read = readStoredLayout(stored)
+    expect(read.settings).toEqual(storedSettings(stored))
+    expect(read.settings.theme).toBeNull()
+    expect(read.settings.low_stock).toEqual({ enabled: true, threshold: 3 })
   })
 })
 
@@ -199,6 +212,9 @@ describe("the theme's settings and a menu set in the design (adr/0063 §3)", () 
     }).menus
     expect(set).toHaveLength(4)
     expect(set?.[0]).toMatchObject({ rank: 0, items: [{ children: [] }] })
+    // An empty set would delete every menu at the publication: "leave them alone" is null
+    expect(parses({ menus: [] })).toBe(false)
+    expect(parses({ menus: null })).toBe(true)
     expect(parses({ menus: [menu("main"), menu("main")] })).toBe(false)
     expect(parses({ menus: [menu("top"), menu("top")] })).toBe(false)
     expect(parses({ menus: Array.from({ length: 11 }, () => menu("footer")) })).toBe(false)

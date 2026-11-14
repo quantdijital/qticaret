@@ -204,7 +204,9 @@ export function serve(
       return Promise.resolve({ url: path, path, expires_at: "2026-11-03T09:00:00.000Z" })
     }
     if (url === `${PATH}/publish`) {
-      return answer({ ...current, has_changes: false, revision: current.revision + 1 })
+      // As the server: the menu set going live is cleared from the draft (adr/0063 §3)
+      const draft = { ...current.draft, settings: { ...current.draft.settings, menus: null } }
+      return answer({ ...current, draft, has_changes: false, revision: current.revision + 1 })
     }
     if (url === `${PATH}/discard`) {
       return answer({ ...current, draft: DOC, has_changes: false })

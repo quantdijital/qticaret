@@ -1,8 +1,8 @@
 import { isPlainObject } from "../../modules/platform-settings/sections/define"
 import {
+  THEME_SETTINGS_VERSION,
   primaryReadable,
   themeSection,
-  upgradeStoredTheme,
 } from "../../modules/platform-settings/sections/theme"
 import type { ThemeSettings } from "../../modules/platform-settings/sections"
 
@@ -17,13 +17,17 @@ import type { ThemeSettings } from "../../modules/platform-settings/sections"
 export const layoutTheme = themeSection.full.nullable().default(null)
 
 /**
- * A stored design's theme read as the theme section reads its row (adr/0062
- * §4): one written without the settings' version (a script, an imported
- * preset) is read with today's meaning rather than dropped for the
- * section's. Only on reading: a save without the version is refused.
+ * A stored design's theme read with today's meaning: one written without
+ * the settings' version (a script, an imported preset) gets the current
+ * version and is read as it stands. The design's theme has no time before
+ * the version (it came after adr/0062), so the theme section's upgrade of
+ * an old row (`upgradeStoredTheme`) is not for it. Only on reading: a save
+ * without the version is refused.
  */
 export const storedTheme = (value: unknown): unknown =>
-  isPlainObject(value) ? upgradeStoredTheme(value) : value
+  isPlainObject(value) && !Object.hasOwn(value, "settings_version")
+    ? { ...value, settings_version: THEME_SETTINGS_VERSION }
+    : value
 
 /** The theme as the storefront applies it: the section's version stays inside. */
 export type ShownTheme = Omit<ThemeSettings, "settings_version">

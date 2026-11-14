@@ -163,8 +163,8 @@ export function shownSettings(settings: LayoutSettings, legacy: Legacy): ShownSe
 
 /**
  * A stored document's settings, read part by part (adr/0063 §3): a part
- * today's schema no longer reads is unset, the others stand. A theme from
- * before the settings' version is upgraded first, as the section's row is.
+ * today's schema no longer reads is unset, the others stand. A theme written
+ * without the settings' version is read with today's meaning (`storedTheme`).
  */
 export function storedSettings(document: unknown): LayoutSettings {
   const raw = (document as { settings?: unknown } | null)?.settings

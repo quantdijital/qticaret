@@ -14,8 +14,11 @@ import type { MenuInput } from "./menus"
 /** As many menus as the module takes: one header menu, one row of top links, the footer columns. */
 export const MENU_SET_LIMIT = 2 + MENU_LIMITS.footers
 
+// An empty set would delete every menu of the shop at the publication: refused.
+// "Leave the menus alone" is null
 export const menuSet = z
   .array(menuInput)
+  .min(1)
   .max(MENU_SET_LIMIT)
   .superRefine((menus, ctx) => {
     const count = (location: MenuInput["location"]) =>

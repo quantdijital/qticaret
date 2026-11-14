@@ -18,7 +18,11 @@ interface EditorActionsOptions {
   flush: () => Promise<boolean>
   /** The page the preview opens on: a product's or category's path; null: the home page. */
   page: string | null
-  /** The draft as the server now holds it, after a discard or a restore. */
+  /**
+   * The draft as the server now holds it, after a publish, a discard or a
+   * restore: a publish clears the menu set it put live (adr/0063 §3), and the
+   * editor and the autosave must not carry it back into the draft.
+   */
   onLoaded: (doc: LayoutDocument) => void
 }
 
@@ -43,7 +47,10 @@ export function useEditorActions({ flush, page, onLoaded }: EditorActionsOptions
         return
       }
       publish.mutate(undefined, {
-        onSuccess: () => toast.success(t(`${E}.publish.done`)),
+        onSuccess: (layout) => {
+          onLoaded(layout.draft)
+          toast.success(t(`${E}.publish.done`))
+        },
         onError: failed,
       })
     },
