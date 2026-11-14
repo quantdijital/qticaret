@@ -3,6 +3,7 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { FormAction, ProductCardView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { CardBadges, CardRating, drawnCardVariant, isOut, quickAddWords } from "./card-parts"
+import { CompactCard } from "./CompactCard"
 import { FramedCard } from "./FramedCard"
 import { Price } from "./Price"
 import { QuickAdd } from "./QuickAdd"
@@ -33,7 +34,8 @@ const SIZES = {
  * The name and price take their larger size from 1024 px only on a card
  * 256 px wide or more (a container query): five across at 1440 px, or a
  * listing's four at 1024, keep the smaller one. A card the storefront
- * sends as `framed` is drawn by `FramedCard` (adr/0049 Ek 2026-11-14 §3.3).
+ * sends as `framed` is drawn by `FramedCard` (adr/0049 Ek 2026-11-14 §3.3),
+ * one sent as `compact` by `CompactCard` (Ek 2026-11-15).
  */
 export function ProductCard({
   product,
@@ -50,10 +52,14 @@ export function ProductCard({
   /** How wide the card shows at each width (the grid's own, else a shelf's). */
   sizes?: string
 }) {
-  if (drawnCardVariant(product) === "framed") {
+  const variant = drawnCardVariant(product)
+  if (variant === "framed") {
     return (
       <FramedCard product={product} t={t} quickAdd={quickAdd} priority={priority} sizes={sizes} />
     )
+  }
+  if (variant === "compact") {
+    return <CompactCard product={product} t={t} priority={priority} />
   }
   const out = isOut(product)
   const add = quickAdd && product.quickAdd && !out ? product.quickAdd : null
