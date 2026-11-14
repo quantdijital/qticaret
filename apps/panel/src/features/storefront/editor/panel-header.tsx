@@ -30,7 +30,12 @@ export function Panel({
   const { openSections } = useContext(EditorChromeContext)
   const id = useId()
   return (
-    <div role="region" aria-labelledby={id} className="flex flex-col [--editor-panel-head:3.25rem]">
+    <div
+      role="region"
+      aria-labelledby={id}
+      // A field the settings search picked is marked for a moment (`use-field-focus.ts`)
+      className="flex flex-col [--editor-panel-head:3.25rem] [&_[data-highlight]]:rounded-md [&_[data-highlight]]:ring-2 [&_[data-highlight]]:ring-ring [&_[data-highlight]]:ring-offset-4 [&_[data-highlight]]:ring-offset-card"
+    >
       <div className="sticky top-0 z-10 flex h-[var(--editor-panel-head)] shrink-0 items-center gap-2 border-b bg-card px-3">
         {openSections ? (
           <Button
@@ -69,20 +74,33 @@ export function Panel({
 
 /**
  * A group of a panel's fields that folds away: its title held under the
- * panel's header while its fields scroll past, all open at first.
+ * panel's header while its fields scroll past, open at first unless it is
+ * the "fine settings" kind (`defaultOpen`). `reveal` opens it each time it
+ * changes: the settings search found a field in it.
  */
 export function PanelGroup({
   title,
   hint,
   children,
   className,
+  defaultOpen = true,
+  reveal = null,
 }: {
   title: string
   hint?: string | undefined
   children: ReactNode
   className?: string
+  defaultOpen?: boolean
+  reveal?: number | null
 }) {
-  const [open, setOpen] = useState(true)
+  const [open, setOpen] = useState(defaultOpen || reveal !== null)
+  const [revealed, setRevealed] = useState(reveal)
+  if (reveal !== revealed) {
+    setRevealed(reveal)
+    if (reveal !== null) {
+      setOpen(true)
+    }
+  }
   const id = useId()
   return (
     <div role="group" aria-labelledby={`${id}-title`} className="border-b last:border-b-0">

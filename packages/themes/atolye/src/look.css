@@ -1,0 +1,135 @@
+/*
+ * A section's look (adr/0049 Ek 2026-11-14 §6; `sections/Look.tsx`): the
+ * shop's named steps onto this theme's own scale. Only a section the shop
+ * gave a step has the box; its attributes name the steps, the values here
+ * are tokens, never inline style.
+ *
+ * - Outer space (margin): the gap above the section moves onto the box
+ *   (none, then the small, medium and large section gaps, which shrink on
+ *   narrower screens), and the section's own top gap gives way inside it.
+ * - Ground (background): a band from edge to edge. It takes the gap above
+ *   it as its margin (the theme's medium gap unless the shop set one) and
+ *   pads its section inside (medium unless the shop set the inner space),
+ *   so the colour never swallows the gap. Each ground sets its own inks
+ *   and wells for the section inside: the page's paper; the tinted well,
+ *   its inner tiles on paper; the graphite stage with the stage's measured
+ *   inks (`gf-stage`'s buttons and fields); the shop's colour with its own
+ *   foreground (adr/0062 §6 measures that pair to 3:1, so the panel does
+ *   not offer it on long text).
+ * - Inner space (padding): the box's own, from the spacing scale.
+ * - Alignment: the section's heading, the line under it and its head row.
+ * - Width: the reading measure, the container (the theme's own), or the
+ *   container without its cap (the gutter stays, words never touch the edge).
+ */
+@layer components {
+  .gf-look {
+    --look-inner-small: var(--space-xl);
+    --look-inner-medium: var(--space-2xl);
+    --look-inner-large: var(--space-3xl);
+  }
+  @media (max-width: 40rem) {
+    .gf-look {
+      --look-inner-small: var(--space-lg);
+      --look-inner-medium: var(--space-xl);
+      --look-inner-large: var(--space-2xl);
+    }
+  }
+
+  .gf-look[data-outer="none"] {
+    --look-outer: 0px;
+  }
+  .gf-look[data-outer="small"] {
+    --look-outer: var(--section-gap-s);
+  }
+  .gf-look[data-outer="medium"] {
+    --look-outer: var(--section-gap);
+  }
+  .gf-look[data-outer="large"] {
+    --look-outer: var(--section-gap-l);
+  }
+  .gf-look:is([data-outer], [data-ground]) {
+    margin-top: var(--look-outer, var(--section-gap));
+  }
+  .gf-look:is([data-outer], [data-ground]) > * {
+    --section-gap-s: 0px;
+    --section-gap: 0px;
+    --section-gap-l: 0px;
+  }
+
+  .gf-look[data-inner="none"] {
+    --look-inner: 0px;
+  }
+  .gf-look[data-inner="small"] {
+    --look-inner: var(--look-inner-small);
+  }
+  .gf-look[data-inner="medium"] {
+    --look-inner: var(--look-inner-medium);
+  }
+  .gf-look[data-inner="large"] {
+    --look-inner: var(--look-inner-large);
+  }
+  .gf-look:is([data-inner], [data-ground]) {
+    padding-block: var(--look-inner, var(--look-inner-medium));
+  }
+
+  .gf-look[data-ground="page"] {
+    background: var(--color-paper);
+    color: var(--color-text);
+  }
+  .gf-look[data-ground="well"] {
+    background: var(--color-paper-2);
+    color: var(--color-text);
+  }
+  .gf-look[data-ground="well"] > * {
+    --color-paper-2: var(--color-paper);
+  }
+  /* The background and ink are `gf-stage`'s; the section's own tokens turn to the stage's */
+  .gf-look[data-ground="stage"] > * {
+    --color-text: var(--color-stage-text);
+    --color-text-2: var(--color-stage-text-2);
+    --color-text-3: var(--color-stage-text-2);
+    --color-placeholder: var(--color-stage-text-2);
+    --color-rule: var(--color-stage-rule);
+    --color-edge: var(--color-stage-text-2);
+    --color-paper: var(--color-stage);
+    --color-paper-2: var(--color-stage-2);
+    --color-paper-3: var(--color-stage-rule);
+    --color-field: var(--color-stage-2);
+    --color-deal: var(--color-deal-on-stage);
+    --color-ok: var(--color-ok-on-stage);
+    --color-error: var(--color-error-on-stage);
+    --color-focus: var(--color-signal-on-stage);
+  }
+  .gf-look[data-ground="primary"] {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+  .gf-look[data-ground="primary"] > * {
+    --color-text: var(--primary-foreground);
+    --color-text-2: var(--primary-foreground);
+    --color-text-3: var(--primary-foreground);
+    --color-placeholder: var(--primary-foreground);
+    --color-rule: color-mix(in oklab, var(--primary-foreground) 35%, var(--primary));
+    --color-edge: var(--primary-foreground);
+    --color-paper: var(--primary);
+    --color-paper-2: color-mix(in oklab, var(--primary-foreground) 12%, var(--primary));
+    --color-paper-3: color-mix(in oklab, var(--primary-foreground) 22%, var(--primary));
+    --color-field: color-mix(in oklab, var(--primary-foreground) 8%, var(--primary));
+    /* An action on the shop's colour turns to its foreground, as on graphite */
+    --color-signal: var(--primary-foreground);
+    --color-signal-ink: var(--primary);
+    --color-signal-deep: color-mix(in oklab, var(--primary-foreground) 85%, var(--primary));
+    --color-focus: var(--primary-foreground);
+  }
+
+  .gf-look[data-align="center"] > * :is(h2, h2 + p) {
+    text-align: center;
+  }
+
+  .gf-look[data-width="narrow"] > * {
+    --container: var(--container-narrow);
+  }
+  .gf-look[data-width="full"] > * {
+    --container: 100%;
+  }
+}

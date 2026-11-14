@@ -5,6 +5,7 @@ import type {
   StoreLayoutSection,
   StoreProductSection,
 } from "@qticaret/types"
+import { lookOf } from "@qticaret/types/section-look"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { HomeSectionView, LinkView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
@@ -240,6 +241,16 @@ async function sectionView(
   }
 }
 
+/**
+ * A section's look as the theme reads it (adr/0049 Ek 2026-11-14 §6): the
+ * steps the shop set that the contract knows (`lookOf`); none, no `look`,
+ * so the theme draws its own and the view is as it was before looks.
+ */
+function withLook(view: HomeSectionView, section: BodySection): HomeSectionView {
+  const look = lookOf(section.look)
+  return Object.keys(look).length > 0 ? { ...view, look } : view
+}
+
 /** A page's sections, in the shop's order, each fetched at once; the empty ones left out. */
 export async function sectionViews(
   sections: readonly BodySection[],
@@ -247,7 +258,10 @@ export async function sectionViews(
   context: SectionContext = {}
 ): Promise<HomeSectionView[]> {
   const views = await Promise.all(sections.map((section) => sectionView(section, t, context)))
-  return views.flatMap((view) => (view ? [view] : []))
+  return views.flatMap((view, index) => {
+    const section = sections[index]
+    return view && section ? [withLook(view, section)] : []
+  })
 }
 
 /** A category page's sections by where they go: above the product grid, or below it. */

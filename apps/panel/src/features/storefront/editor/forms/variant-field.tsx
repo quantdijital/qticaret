@@ -25,7 +25,7 @@ export function VariantField<T extends VariantSectionType>({
   const { t } = useTranslation()
   const variants: readonly SectionVariant<T>[] = SECTION_VARIANTS[type]
   return (
-    <div className="flex flex-col gap-2">
+    <div id={id} className="flex flex-col gap-2">
       <ToggleGroup
         type="single"
         variant="outline"

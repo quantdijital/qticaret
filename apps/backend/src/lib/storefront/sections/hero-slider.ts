@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
-import { LAYOUT_LIMITS, base, image, optional, shopText } from "../layout-fields"
+import { LAYOUT_LIMITS, image, optional, shopText } from "../layout-fields"
+import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
 
 /**
@@ -34,7 +35,7 @@ export const heroSlide = z
 
 export const heroSlider = z
   .object({
-    ...base,
+    ...bodyFields,
     type: z.literal("hero_slider"),
     slides: z.array(heroSlide).min(SLIDER_LIMITS.slides.min).max(SLIDER_LIMITS.slides.max),
     height: z.enum(["compact", "regular"]).default("regular"),

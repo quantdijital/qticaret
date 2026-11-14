@@ -4,7 +4,8 @@ import { cn } from "@qticaret/ui/lib/utils"
 /**
  * A section's head: its h2 on the left, the link to the whole list on
  * the right on one baseline (a destination, never a label above the
- * head). `children` sits under the head (a tab row).
+ * head). `children` sits under the head (a tab row). In a section the shop
+ * centred (its look, `Look.tsx`) the link stands under the centred head.
  */
 export function SectionHead({
   id,
@@ -18,7 +19,12 @@ export function SectionHead({
   className?: string
 }) {
   return (
-    <div className={cn("flex items-end justify-between gap-4", className)}>
+    <div
+      className={cn(
+        "flex items-end justify-between gap-4 group-data-[align=center]/look:flex-col group-data-[align=center]/look:items-center group-data-[align=center]/look:gap-1 group-data-[align=center]/look:text-center",
+        className
+      )}
+    >
       <h2 id={id}>{title}</h2>
       {more && (
         <a href={more.path} className="gf-link shrink-0 text-sm lg:text-md">

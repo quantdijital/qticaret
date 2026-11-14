@@ -7857,6 +7857,65 @@
           "lined": "Çizgili kutular"
         }
       },
+      "look": {
+        "title": "Görünüm ayarları",
+        "titleSet_one": "Görünüm ayarları · {{count}} ayar",
+        "titleSet_other": "Görünüm ayarları · {{count}} ayar",
+        "hint": "Boşluk, zemin, hizalama ve genişlik. Seçilmeyen her alan temanın kendi görünümünü kullanır; önizleme hemen gösterir.",
+        "reset": "Varsayılana dön",
+        "themeOwn": "Seçilmedi: temanın kendi görünümü.",
+        "space_outer": {
+          "label": "Dış boşluk",
+          "term": "margin",
+          "hint": "Bölümün üstündeki boşluk; temanın ölçüsünden gelir, dar ekranda kendiliğinden küçülür.",
+          "none": "Yok",
+          "small": "Dar",
+          "medium": "Orta",
+          "large": "Geniş"
+        },
+        "space_inner": {
+          "label": "İç boşluk",
+          "term": "padding",
+          "hint": "Bölümün kendi içindeki boşluk; zemin seçiliyse rengin içinde kalır.",
+          "none": "Yok",
+          "small": "Dar",
+          "medium": "Orta",
+          "large": "Geniş"
+        },
+        "ground": {
+          "label": "Zemin",
+          "term": "background",
+          "hint": "Renk çiftleri temada ölçülüdür; yazı ve düğme renkleri zemine göre kendiliğinden değişir.",
+          "page": "Sayfa",
+          "well": "Kuyu",
+          "stage": "Sahne",
+          "primary": "Ana renk"
+        },
+        "align": {
+          "label": "Hizalama",
+          "term": "text-align",
+          "hint": "Bölümün başlığı ve altındaki metin.",
+          "start": "Sola",
+          "center": "Ortaya"
+        },
+        "width": {
+          "label": "Genişlik",
+          "term": "width",
+          "hint": "Dar: okuma genişliği. Kutulu: sayfanın genişliği. Tam: kenardan kenara.",
+          "narrow": "Dar",
+          "boxed": "Kutulu",
+          "full": "Tam"
+        }
+      },
+      "search": {
+        "label": "Ayarlarda ara",
+        "placeholder": "Ayar ara: zemin, margin, SSS…",
+        "clear": "Aramayı temizle",
+        "results": "Arama sonuçları",
+        "empty": "“{{query}}” için ayar bulunamadı.",
+        "count_one": "{{count}} sonuç",
+        "count_other": "{{count}} sonuç"
+      },
       "panel": {
         "back": "Bölümlere dön",
         "visibility": "Görünürlük",

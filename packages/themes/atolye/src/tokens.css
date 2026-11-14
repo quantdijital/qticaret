@@ -122,6 +122,8 @@
   --dur-short: 220ms;
   --dur-long: 420ms;
   --container: 1440px;
+  /* A section set to the reading measure (its look, adr/0049 Ek 2026-11-14 §6) */
+  --container-narrow: 960px;
   --gutter: 48px;
   --gap-columns: 24px;
   --section-gap-s: 96px;

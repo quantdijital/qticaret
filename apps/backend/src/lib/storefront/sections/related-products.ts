@@ -1,11 +1,12 @@
 import { z } from "@medusajs/framework/zod"
-import { LAYOUT_LIMITS, base, columns, title } from "../layout-fields"
+import { LAYOUT_LIMITS, columns, title } from "../layout-fields"
+import { bodyFields } from "./look"
 import { collectionSource, manualSource } from "./sources"
 
 /** Products shown under a product's own: its category's, a collection's, or chosen ones. */
 export const relatedProducts = z
   .object({
-    ...base,
+    ...bodyFields,
     type: z.literal("related_products"),
     title,
     source: z.discriminatedUnion("kind", [

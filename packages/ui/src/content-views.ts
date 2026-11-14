@@ -1,4 +1,4 @@
-import type { ShelfColumns, TrustBadgesVariant } from "@qticaret/types"
+import type { SectionLook, ShelfColumns, TrustBadgesVariant } from "@qticaret/types"
 import type { CategoryCardView, CustomerPhotoView, ShopMarkView } from "./card-views"
 import type {
   FeaturedProductSectionView,
@@ -17,12 +17,20 @@ import type { ContactView, ImageView, LinkView, SocialLinkView, TrustBadgeView }
  */
 
 /**
+ * A section's look as a theme reads it (adr/0049 Ek 2026-11-14 §6): only
+ * the steps the shop set and the contract knows; a field left out is the
+ * theme's own drawing. A theme maps each step onto its own scale and may
+ * leave a field unread where it means nothing in that section.
+ */
+export type SectionLookView = Partial<SectionLook>
+
+/**
  * A section as the theme draws it (adr/0049): the shop lays the home,
  * product and category pages out in the theme editor; every title already
  * in words (the shop's own or the storefront's default, a FAQ's aside),
- * every link already a path.
+ * every link already a path; its look beside (none: the theme's own).
  */
-export type HomeSectionView =
+export type HomeSectionView = { look?: SectionLookView } & (
   | {
       id: string
       type: "hero"
@@ -94,6 +102,7 @@ export type HomeSectionView =
       /** Plain text; the theme keeps the answers in the HTML (open or closed). */
       items: { question: string; answer: string }[]
     }
+)
 
 export interface HomePageView {
   sections: HomeSectionView[]

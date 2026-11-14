@@ -59,6 +59,7 @@ export function OpenedForm({
         onRemove={() => {
           onRemove(found.section)
         }}
+        focus={opened?.kind === "section" ? (opened.focus ?? null) : null}
         badges={doc.settings.trust_badges}
         onBadges={(trust_badges, field) => {
           dispatch({ type: "settings", settings: { ...doc.settings, trust_badges }, merge: field })

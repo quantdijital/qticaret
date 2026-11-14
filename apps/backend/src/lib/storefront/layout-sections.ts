@@ -14,7 +14,7 @@ import { products } from "./sections/products"
 import { relatedProducts } from "./sections/related-products"
 import { richText } from "./sections/rich-text"
 import { placedTrustBadges, trustBadges } from "./sections/trust-badges"
-import { worded } from "./sections/worded"
+import { footerNewsletter, worded } from "./sections/worded"
 
 /**
  * The storefront design's sections (adr/0049), each a type of its own with
@@ -24,13 +24,14 @@ import { worded } from "./sections/worded"
  * shop's media library; links point at records, never typed paths. No
  * HTML, CSS or scripts. Each type is its own file under `sections/`
  * (adr/0049 Ek 2026-11-14 §2.5), a type with variants a union of its
- * variants' branches (`sections/variants.ts`); their pieces are
- * `layout-fields.ts`; the whole document is `layout.ts`.
+ * variants' branches (`sections/variants.ts`), every body section with
+ * its look (`sections/look.ts`, §6); their pieces are `layout-fields.ts`;
+ * the whole document is `layout.ts`.
  */
 
 export { LAYOUT_LIMITS } from "./layout-fields"
 export { BEST_SELLER_DAYS } from "./sections/products"
-export { announcementBar, worded }
+export { announcementBar, footerNewsletter, worded }
 
 // A type a group does not take (another page's, or none) reads as an unknown section
 const SECTION_TYPE = { error: "storefront_layout.section_invalid" }
@@ -84,5 +85,5 @@ export type CategorySection = z.infer<typeof categorySection>
 /** A section of a page's body: the home, product or category page's. */
 export type BodySection = PageSection | ProductSection | CategorySection
 export type HeaderSection = z.infer<typeof announcementBar>
-export type FooterSection = z.infer<ReturnType<typeof worded>>
+export type FooterSection = z.infer<typeof footerNewsletter>
 export type LayoutSection = BodySection | HeaderSection

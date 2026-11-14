@@ -1,10 +1,11 @@
 import { z } from "@medusajs/framework/zod"
-import { LAYOUT_LIMITS, base, shopText, text, title } from "../layout-fields"
+import { LAYOUT_LIMITS, shopText, text, title } from "../layout-fields"
+import { bodyFields } from "./look"
 
 /** Questions and answers, shown on the page; never `FAQPage` structured data (docs/13 §5). */
 export const faq = z
   .object({
-    ...base,
+    ...bodyFields,
     type: z.literal("faq"),
     title,
     items: z

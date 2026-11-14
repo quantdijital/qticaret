@@ -1,11 +1,12 @@
 import { z } from "@medusajs/framework/zod"
-import { base, image, optional, shopText } from "../layout-fields"
+import { image, optional, shopText } from "../layout-fields"
+import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
 
 /** The page's opening: a line above, a heading, a text, up to two buttons and a picture. */
 export const hero = z
   .object({
-    ...base,
+    ...bodyFields,
     type: z.literal("hero"),
     eyebrow: optional(shopText(40)),
     /** None: the shop's name. */

@@ -3,6 +3,7 @@ import { renderDoc } from "../../lib/content"
 import type { BodySection } from "../../lib/storefront/layout"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import type { RailPick } from "../../lib/storefront/rails"
+import { hasLook } from "../../lib/storefront/sections/look"
 import { fillShopDoc, fillShopText } from "../../lib/shop/tokens"
 import type { ShopInfoValues } from "../../lib/shop/tokens"
 import { cardTargets } from "../../api/store/content/cards"
@@ -41,8 +42,17 @@ export interface HydrateContext {
 export const fill = (text: string | null, values: ShopInfoValues) =>
   text === null ? null : fillShopText(text, values)
 
-/** A page's section as the storefront prints it (adr/0049), on any page. */
+/**
+ * A page's section as the storefront prints it (adr/0049), on any page;
+ * its look only when the shop set a step (adr/0049 Ek 2026-11-14 §6), so a
+ * section drawn the theme's own way prints as it did before looks.
+ */
 export async function hydrateSection(section: BodySection, at: HydrateContext): Promise<Hydrated> {
+  const shown = await hydrateBody(section, at)
+  return hasLook(section.look) ? { ...shown, look: section.look } : shown
+}
+
+async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hydrated> {
   const { id, type } = section
   const image = (url: string, alt: string | null): StoreLayoutImage =>
     at.images.get(url) ?? { url, alt, width: null, height: null, derivatives: null }
