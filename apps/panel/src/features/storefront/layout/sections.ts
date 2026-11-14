@@ -15,7 +15,7 @@ import type {
   ProductSection,
 } from "@/features/storefront/api/layout"
 import { BANNER_DEFAULTS, MARQUEE_DEFAULTS, defaultVariant } from "@qticaret/types"
-import { LAYOUT_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
+import { LAYOUT_LIMITS, PRICE_BANDS_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
 
 /** The groups in the order the storefront draws them (a page's body between header and footer). */
 export const LAYOUT_GROUPS: readonly LayoutGroup[] = [
@@ -45,6 +45,7 @@ export const HOME_TYPES: readonly HomeSectionType[] = [
   "faq",
   "trust_badges",
   "marquee",
+  "price_bands",
   "newsletter",
   "help",
 ]
@@ -141,7 +142,18 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
     case "faq":
       return { ...base, type, title: null, items: [{ question: "", answer: "" }] }
     case "hero":
-      return { ...base, type, eyebrow: null, heading: null, text: null, links: [], image: null }
+      return {
+        ...base,
+        type,
+        variant: defaultVariant(type),
+        eyebrow: null,
+        heading: null,
+        text: null,
+        links: [],
+        image: null,
+      }
+    case "price_bands":
+      return { ...base, type, ...newPriceBands() }
     case "hero_slider":
       return {
         ...base,
@@ -156,7 +168,7 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
     case "banner":
       return { ...base, type, slides: [], ...BANNER_DEFAULTS }
     case "categories":
-      return { ...base, type, title: null, category_ids: [] }
+      return { ...base, type, title: null, category_ids: [], show_count: false, more: null }
     case "products":
       return {
         ...base,
@@ -214,6 +226,22 @@ export function newBodySection(
   return group === "category" ? ({ ...section, placement } as CategorySection) : section
 }
 
+/**
+ * A new price bands strip's fields: three bands to start from, each an
+ * upper bound in whole lira, the last without one ("and up"), and a label
+ * to write (the form suggests one from the bound, as a strip's first
+ * item); the contract's default products shown small.
+ */
+const newPriceBands = () => ({
+  title: null,
+  bands: [
+    { label: "", text: null, max: 500 },
+    { label: "", text: null, max: 1000 },
+    { label: "", text: null, max: null },
+  ],
+  thumbs: PRICE_BANDS_LIMITS.thumbs.default,
+})
+
 /** The announcement bar, with one line to write. */
 export const newAnnouncementBar = (id: string): AnnouncementBar => ({
   id,
@@ -242,6 +270,10 @@ export const newHeaderMarquee = (id: string): HeaderMarquee => ({
  */
 export const marqueesOn = (doc: LayoutDocument, page: BodyGroup): number =>
   [...doc.header, ...doc[page]].filter((section) => section.type === "marquee").length
+
+/** A page's price bands strips (the home page's only), hidden ones counted. */
+export const priceBandsOn = (doc: LayoutDocument, page: BodyGroup): number =>
+  doc[page].filter((section) => section.type === "price_bands").length
 
 /** The pages a strip in the header would show on beside their own. */
 export const BODY_GROUPS: readonly BodyGroup[] = ["home", "product", "category"]

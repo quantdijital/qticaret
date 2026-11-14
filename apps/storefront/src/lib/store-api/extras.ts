@@ -2,6 +2,7 @@ import "server-only"
 import { cache } from "react"
 import type {
   StoreCardFacts,
+  StoreCategoryCounts,
   StoreCategoryImage,
   StoreCollectionDetails,
   StoreGoogleReviews,
@@ -36,6 +37,19 @@ export const categoryImages = cache(async (): Promise<ReadonlyMap<string, StoreC
     { images: [] }
   )
   return new Map(images.map((image) => [image.category_id, image]))
+})
+
+/**
+ * Every shown category's product count, its shown subcategories' included
+ * (adr/0049 Ek 2026-11-14 §10 karar 7b): counted by the backend in one
+ * statement, shop-wide, kept a minute. None from a backend without it.
+ */
+export const categoryCounts = cache(async (): Promise<ReadonlyMap<string, number>> => {
+  const { counts } = await orNone(
+    () => storePublicGet<StoreCategoryCounts>("/store/category-counts"),
+    { counts: {} }
+  )
+  return new Map(Object.entries(counts))
 })
 
 /**

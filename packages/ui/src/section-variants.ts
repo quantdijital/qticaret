@@ -25,6 +25,7 @@ export type {
   DefaultVariant,
   FooterBarVariant,
   HeaderBarVariant,
+  HeroVariant,
   ProductMainVariant,
   SectionVariant,
   TrustBadgesVariant,

@@ -40,7 +40,7 @@ describe("the packs in this package (adr/0061 C12)", () => {
         categories: 16,
         flags: 2,
         seo_templates: 1,
-        presets: 0,
+        presets: 1,
       },
     })
   })

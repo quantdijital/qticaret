@@ -1,6 +1,7 @@
-import type { HeroSlideView, ImageView, Translate } from "@qticaret/ui"
+import type { HeroSlideView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
+import { Preload } from "../parts/Preload"
 import { type Of, headingId } from "./plan"
 import { SliderStage, type SliderWords } from "./SliderStage"
 
@@ -9,27 +10,6 @@ const SIZES = "(min-width: 1440px) 1344px, 100vw"
 /** A phone's own picture shows under 640 px. */
 const PHONE = "(max-width: 39.99rem)"
 const WIDE = "(min-width: 40rem)"
-
-/** The first slide's pictures asked for first (React puts the links in <head>). */
-function Preload({ image, media }: { image: ImageView; media?: string }) {
-  const set = image.sources.avif ?? image.sources.webp
-  return (
-    <link
-      rel="preload"
-      as="image"
-      href={image.src}
-      {...(set
-        ? {
-            imageSrcSet: set,
-            imageSizes: SIZES,
-            type: image.sources.avif ? "image/avif" : "image/webp",
-          }
-        : {})}
-      {...(media ? { media } : {})}
-      fetchPriority="high"
-    />
-  )
-}
 
 /** A slide's picture: a phone's own under 640 px when the shop gave one, else the wide one cropped. */
 function Picture({ slide, eager }: { slide: HeroSlideView; eager: boolean }) {
@@ -206,8 +186,16 @@ export function HeroSlider({
       aria-label={words.label}
       className="pt-3 lg:pt-6"
     >
-      {first && opening.mobileImage && <Preload image={opening.mobileImage} media={PHONE} />}
-      {first && <Preload image={opening.image} {...(opening.mobileImage ? { media: WIDE } : {})} />}
+      {first && opening.mobileImage && (
+        <Preload image={opening.mobileImage} sizes={SIZES} media={PHONE} />
+      )}
+      {first && (
+        <Preload
+          image={opening.image}
+          sizes={SIZES}
+          {...(opening.mobileImage ? { media: WIDE } : {})}
+        />
+      )}
       <Container>
         <SliderStage
           words={words}

@@ -944,6 +944,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "A section was added twice; the announcement bar, the scrolling strip and the newsletter can appear once each.",
   "storefront_layout.marquee_limit":
     "A page can show at most two scrolling strips; the one in the header counts on every page.",
+  "storefront_layout.price_bands_limit":
+    "The home page can show at most two price bands sections; hidden or scheduled ones count too.",
+  "storefront_layout.price_bands_order":
+    "Price bands must rise; only the last one may have no upper bound.",
   "storefront_layout.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
   "storefront_layout.color_duplicate": "Each colour name can be listed once.",
   "storefront_layout.schedule_invalid": "The section must end after it starts.",

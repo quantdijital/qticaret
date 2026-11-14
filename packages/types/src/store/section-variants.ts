@@ -11,6 +11,11 @@ export const SECTION_VARIANTS = {
   /** `strip`: today's tinted strip; `lined`: boxes split by hairlines (GB4). */
   trust_badges: ["strip", "lined"],
   /**
+   * `standard`: today's graphite opening; `category_list`: the category
+   * list, the opening's tile and two category tiles side by side (H17).
+   */
+  hero: ["standard", "category_list"],
+  /**
    * The main sections (adr/0049 Ek 2026-11-14 §5, §7), each with today's
    * drawing first. The header bar's `centered` is the theme setting's
    * centred header (`header.layout`), read into the bar by name; its
@@ -55,6 +60,7 @@ export type SectionVariant<T extends VariantSectionType> = (typeof SECTION_VARIA
 export type DefaultVariant<T extends VariantSectionType> = (typeof SECTION_VARIANTS)[T][0]
 
 export type TrustBadgesVariant = SectionVariant<"trust_badges">
+export type HeroVariant = SectionVariant<"hero">
 export type HeaderBarVariant = SectionVariant<"header_bar">
 export type FooterBarVariant = SectionVariant<"footer_bar">
 export type ProductMainVariant = SectionVariant<"product_main">

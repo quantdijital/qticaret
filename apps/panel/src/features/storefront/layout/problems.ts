@@ -4,11 +4,13 @@ import {
   BEST_SELLER_DAYS,
   LAYOUT_LIMITS as L,
   MARQUEE_LIMITS,
+  PRICE_BANDS_LIMITS,
   SLIDER_LIMITS,
 } from "@/features/storefront/api/layout"
 import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
-import { BODY_GROUPS, allSections, marqueesOn } from "./sections"
+import { heroCatalogProblems, priceBandsProblems } from "./catalog-problems"
+import { BODY_GROUPS, allSections, marqueesOn, priceBandsOn } from "./sections"
 import { SETTINGS_KEY, badgeProblems, settingsProblems } from "./settings-problems"
 
 /**
@@ -38,6 +40,8 @@ export type Problem =
   | "wellContrast"
   | "thresholdRange"
   | "marqueeLimit"
+  | "bandsOrder"
+  | "bandsLimit"
 
 /** A section's problems by field (`heading`, `lines.0`, `slides.1.text`, `schedule`). */
 export type SectionProblems = Record<string, Problem>
@@ -92,7 +96,10 @@ function fieldsOf(section: AnySection): Found[] {
         ["text", textProblem(section.text, L.text, true)],
         ["image", textProblem(section.image?.alt ?? null, L.alt)],
         ...section.links.map((link, index): Found => [`links.${String(index)}`, linkProblem(link)]),
+        ...heroCatalogProblems(section),
       ]
+    case "price_bands":
+      return priceBandsProblems(section)
     case "banner":
       return [
         ["slides", section.slides.length === 0 ? "slidesRequired" : null],
@@ -194,6 +201,10 @@ function fieldsOf(section: AnySection): Found[] {
         ["product_id", section.product_id === "" ? "productRequired" : null],
       ]
     case "categories":
+      return [
+        ["title", textProblem(section.title, L.title)],
+        ["more", linkProblem(section.more)],
+      ]
     case "brands":
     case "posts":
     case "reviews":
@@ -235,7 +246,8 @@ function fieldsOf(section: AnySection): Found[] {
 
 /**
  * The scrolling strips of a page showing more than it may (adr/0049 Ek
- * 2026-11-14 §4.1): the header's and the page's, each marked, by id.
+ * 2026-11-14 §4.1): the header's and the page's, each marked, by id; and
+ * the price bands strips of a page with more than two.
  */
 function marqueeLimitIds(doc: LayoutDocument): Set<string> {
   const ids = new Set<string>()
@@ -243,6 +255,13 @@ function marqueeLimitIds(doc: LayoutDocument): Set<string> {
     if (marqueesOn(doc, page) > MARQUEE_LIMITS.perPage) {
       for (const section of [...doc.header, ...doc[page]]) {
         if (section.type === "marquee") ids.add(section.id)
+      }
+    }
+  }
+  for (const page of BODY_GROUPS) {
+    if (priceBandsOn(doc, page) > PRICE_BANDS_LIMITS.perPage) {
+      for (const section of doc[page]) {
+        if (section.type === "price_bands") ids.add(section.id)
       }
     }
   }
@@ -275,7 +294,12 @@ export function documentProblems(
     const found: SectionProblems = {
       ...sectionProblems(section),
       ...(section.type === "trust_badges" ? badges : {}),
-      ...(overLimit.has(section.id) ? { limit: "marqueeLimit" as const } : {}),
+      ...(overLimit.has(section.id)
+        ? {
+            limit:
+              section.type === "price_bands" ? ("bandsLimit" as const) : ("marqueeLimit" as const),
+          }
+        : {}),
     }
     if (Object.keys(found).length > 0) {
       problems.set(section.id, found)

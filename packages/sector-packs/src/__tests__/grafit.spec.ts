@@ -40,9 +40,8 @@ describe("the presets in this package (adr/0063 §8)", () => {
     expect([layout?.header, layout?.product, layout?.category]).toEqual([[], [], []])
   })
 
-  it("raised the general pack's version with its first preset; cutlery has none yet", () => {
+  it("raised the general pack's version with its first preset", () => {
     expect(sectorPack("general")?.version).toBe(2)
-    expect(sectorPack("cutlery")?.presets).toEqual([])
     expect(storefrontPreset("general", "yok")).toBeNull()
     expect(storefrontPreset("yok", "grafit")).toBeNull()
   })

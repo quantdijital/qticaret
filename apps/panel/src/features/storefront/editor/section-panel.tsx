@@ -1,7 +1,5 @@
-import { Copy, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { BANNER_DEFAULTS, BANNER_SETTING_NAMES, MARQUEE_DEFAULTS } from "@qticaret/types"
-import { Button } from "@qticaret/admin-ui/ui/button"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import type {
   AnySection,
@@ -27,6 +25,7 @@ import { MarqueeForm } from "./forms/marquee-form"
 import { MarqueeGroups } from "./forms/marquee-groups"
 import { BannerSettings } from "./forms/banner-settings"
 import { MarqueeSettings } from "./forms/marquee-settings"
+import { PriceBandsForm } from "./forms/price-bands-form"
 import { ProductsForm } from "./forms/products-form"
 import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
@@ -36,6 +35,7 @@ import { HeaderCatalogOther } from "./forms/header-catalog-other"
 import { isMain } from "@/features/storefront/layout/main-sections"
 import { VariantField } from "./forms/variant-field"
 import { Panel, PanelGroup } from "./panel-header"
+import { SectionActions } from "./section-actions"
 import { BrandsForm, CategoriesForm, CountedForm, WordedForm } from "./forms/simple-forms"
 import { SECTION_ICONS, kindOf } from "./section-meta"
 import { TrustBadgeList } from "./shared/trust-badge-list"
@@ -50,6 +50,8 @@ interface SectionPanelProps {
   problems: SectionProblems
   /** May another of it be added (a page's section under its page's limit). */
   canDuplicate: boolean
+  /** Why it may not be copied, when a per-page limit is what stops it. */
+  duplicateNote?: string | null
   onChange: (section: AnySection, field?: string) => void
   /** A category page's section to the other side of its products. */
   onPlace: (placement: Placement) => void
@@ -102,6 +104,8 @@ function FormOf({
       return <RelatedForm section={section} {...props} />
     case "marquee":
       return <MarqueeForm section={section} {...props} />
+    case "price_bands":
+      return <PriceBandsForm section={section} {...props} />
     case "trust_badges":
       // The strip's problems are the badges' (`trust_badges.0.title`) and its schedule
       return <TrustBadgeList badges={badges} problems={problems} onChange={onBadges} />
@@ -132,6 +136,7 @@ export function SectionPanel({
   group,
   problems,
   canDuplicate,
+  duplicateNote = null,
   onChange,
   onPlace,
   onBack,
@@ -260,6 +265,7 @@ export function SectionPanel({
           <SectionActions
             canCopy={isBodyGroup(group)}
             canDuplicate={canDuplicate}
+            note={duplicateNote}
             onDuplicate={onDuplicate}
             onRemove={onRemove}
           />
@@ -274,32 +280,3 @@ const hasContent = (section: AnySection) =>
   section.type !== "footer_bar" &&
   section.type !== "product_main" &&
   section.type !== "category_main"
-
-/** The section copied (a page's body only) or taken off; both undone with "Geri al". */
-function SectionActions({
-  canCopy,
-  canDuplicate,
-  onDuplicate,
-  onRemove,
-}: {
-  canCopy: boolean
-  canDuplicate: boolean
-  onDuplicate: () => void
-  onRemove: () => void
-}) {
-  const { t } = useTranslation()
-  return (
-    <div className="flex flex-wrap gap-2 border-t px-5 py-4">
-      {canCopy ? (
-        <Button type="button" variant="outline" disabled={!canDuplicate} onClick={onDuplicate}>
-          <Copy />
-          {t(`${P}.duplicate`)}
-        </Button>
-      ) : null}
-      <Button type="button" variant="ghost" className="text-destructive-text" onClick={onRemove}>
-        <Trash2 />
-        {t(`${P}.remove`)}
-      </Button>
-    </div>
-  )
-}

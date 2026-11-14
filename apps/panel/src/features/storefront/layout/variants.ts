@@ -1,4 +1,4 @@
-import { hasVariants } from "@qticaret/types"
+import { HERO_CATALOG_LIMITS, hasVariants } from "@qticaret/types"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
 import type { AnySection, HeaderCatalogFields } from "@/features/storefront/api/layout"
 
@@ -27,6 +27,19 @@ export const VARIANT_FIELDS: {
   readonly [T in VariantSectionType]: Readonly<Record<SectionVariant<T>, Readonly<object>>>
 } = {
   trust_badges: { strip: {}, lined: {} },
+  // H17's own fields as a switched opening starts them: the top categories with counts
+  hero: {
+    standard: {},
+    category_list: {
+      list: { kind: "top" },
+      list_limit: HERO_CATALOG_LIMITS.list.default,
+      show_count: true,
+      tiles: [],
+      chips: [],
+      picks: [],
+      show_price: true,
+    },
+  },
   header_bar: { standard: {}, centered: {}, catalog: HEADER_CATALOG_DEFAULTS },
   footer_bar: { ledger: {} },
   product_main: { standard: {} },

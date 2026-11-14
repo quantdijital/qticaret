@@ -12,6 +12,8 @@ import type { ImageView, LinkView, SpecView } from "./views"
 export interface CategoryCardView extends LinkView {
   /** The shop's picture for it (media library); none: a theme draws no box. */
   image?: ImageView | null
+  /** How many products it and the categories below it list; none: not counted or not shown. */
+  count?: number | null
 }
 
 /** What a card says of the product's stock: a bucket, never the number. */

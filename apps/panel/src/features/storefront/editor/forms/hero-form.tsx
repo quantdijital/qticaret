@@ -3,6 +3,7 @@ import { RowActions } from "@/features/settings/components/storefront-rows"
 import type { HeroSection, LayoutLink } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import { F, FieldGroup, TextField } from "./fields"
+import { HeroCatalogFields } from "./hero-catalog-fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { ImageField } from "./image-field"
@@ -15,7 +16,10 @@ const H = "storefront.editor.hero"
 export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroSection>) {
   const { t } = useTranslation()
   const problem = useProblemText()
-  const set = (next: Partial<HeroSection>, field?: string) => {
+  const set = (
+    next: Partial<Pick<HeroSection, "eyebrow" | "heading" | "text" | "links" | "image">>,
+    field?: string
+  ) => {
     onChange({ ...section, ...next }, field)
   }
   const setLinks = (links: LayoutLink[]) => {
@@ -121,6 +125,9 @@ export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroS
           set({ image }, image && section.image ? "image" : undefined)
         }}
       />
+      {section.variant === "category_list" ? (
+        <HeroCatalogFields section={section} problems={problems} onChange={onChange} />
+      ) : null}
       {picker.dialog}
     </div>
   )

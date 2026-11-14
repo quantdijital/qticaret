@@ -11,7 +11,9 @@ import type { Problem } from "@/features/storefront/layout/problems"
 import { CountField, F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
+import { LinkField } from "./link-field"
 import { RecordListField } from "./record-fields"
+import { SwitchRow } from "../theme-fields"
 
 const D = "storefront.editor.defaults"
 const R = "storefront.editor.records"
@@ -50,6 +52,7 @@ export function CategoriesForm({
   onChange,
 }: SectionFormProps<CategoriesSection>) {
   const { t } = useTranslation()
+  const text = useProblemText()
   return (
     <div className="flex flex-col gap-5">
       <TitleField
@@ -68,6 +71,25 @@ export function CategoriesForm({
         empty={t(`${R}.categoriesEmpty`)}
         onChange={(category_ids) => {
           onChange({ ...section, category_ids })
+        }}
+      />
+      <SwitchRow
+        id={`${section.id}-show-count`}
+        label={t("storefront.editor.heroCatalog.showCount")}
+        hint={t("storefront.editor.categories.showCountHint")}
+        checked={section.show_count}
+        onChange={(show_count) => {
+          onChange({ ...section, show_count })
+        }}
+      />
+      <LinkField
+        id={`${section.id}-more`}
+        label={t("storefront.editor.categories.more")}
+        hint={t("storefront.editor.categories.moreHint")}
+        link={section.more}
+        error={text(problems["more"], L.label)}
+        onChange={(more, field) => {
+          onChange({ ...section, more }, field && "more.label")
         }}
       />
     </div>

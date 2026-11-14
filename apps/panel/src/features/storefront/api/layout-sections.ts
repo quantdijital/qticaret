@@ -10,6 +10,7 @@ import type {
 } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
+import type { HeroCatalogFields, PriceBand } from "@/features/storefront/api/layout-catalog"
 import type { MenuInput } from "@/features/storefront/api/menus"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
 import type { LinkInput } from "@/features/storefront/api/menus"
@@ -50,7 +51,8 @@ interface BodySectionBase extends SectionBase {
   look?: SectionLook
 }
 
-export interface HeroSection extends BodySectionBase {
+/** The opening's words, buttons and picture, the same in every variant (adr/0049 Ek 2026-11-14 §2). */
+interface HeroBase extends BodySectionBase {
   type: "hero"
   eyebrow: string | null
   /** None: the shop's name. */
@@ -58,6 +60,18 @@ export interface HeroSection extends BodySectionBase {
   text: string | null
   links: LayoutLink[]
   image: LayoutImage | null
+}
+
+/** Today's graphite opening, or H17's category list with its own fields. */
+export type HeroSection = HeroBase & ({ variant: "standard" } | HeroCatalogFields)
+
+/** The price bands strip: 2–4 rising bands, each band's products picked on the server. */
+export interface PriceBandsSection extends BodySectionBase {
+  type: "price_bands"
+  title: string | null
+  bands: PriceBand[]
+  /** Products shown small in each band (0–4). */
+  thumbs: number
 }
 
 /** One slide of the home page's sliding opening. */
@@ -111,6 +125,10 @@ export interface CategoriesSection extends BodySectionBase {
   title: string | null
   /** None: the top categories. */
   category_ids: string[]
+  /** Each card's product count. */
+  show_count: boolean
+  /** The link beside the title; none: "every category". */
+  more: LayoutLink | null
 }
 
 export interface ProductsSection extends BodySectionBase {
@@ -244,6 +262,7 @@ export type HomeSection =
   | WordedSection
   | FaqSection
   | MarqueeSection
+  | PriceBandsSection
 
 export type HomeSectionType = HomeSection["type"]
 

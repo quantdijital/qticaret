@@ -8,6 +8,7 @@ import type { StoreBannerSection } from "./section-banner.js"
 import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
 import type { StoreMainSections } from "./section-main.js"
+import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
 import type { CardVariant, TrustBadgesVariant } from "./section-variants.js"
 import type {
   MenuLinkKind,
@@ -67,19 +68,19 @@ export interface StoreSectionLookPart {
 
 export type StoreLayoutSection = StoreSectionLookPart &
   (
-    | {
-        id: string
-        type: "hero"
-        eyebrow: string | null
-        /** None: the shop's name. */
-        heading: string | null
-        text: string | null
-        links: StoreLayoutLink[]
-        image: StoreLayoutImage | null
-      }
+    | StoreHeroSection
     | StoreBannerSection
     | StoreHeroSliderSection
-    | { id: string; type: "categories"; title: string | null; category_ids: string[] }
+    | {
+        id: string
+        type: "categories"
+        title: string | null
+        category_ids: string[]
+        /** Each tile's product count (`/store/category-counts`); absent from an older backend: none. */
+        show_count?: boolean
+        /** The link beside the title; none (or absent): the storefront's "every category". */
+        more?: StoreLayoutLink | null
+      }
     | {
         id: string
         type: "products"
@@ -113,6 +114,7 @@ export type StoreLayoutSection = StoreSectionLookPart &
     | { id: string; type: "newsletter" | "help"; title: string | null; text: string | null }
     | StoreFaqSection
     | StoreMarqueeSection
+    | StorePriceBandsSection
   )
 
 /**
