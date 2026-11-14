@@ -57,12 +57,15 @@ function Photos({
   )
 }
 
-/** Where the stars stand without a review, when the shop asks for empty ones (E5). */
+/**
+ * Where the stars stand without a review, when the shop asks for empty ones
+ * (E5): the words keep to one line, under the stars on a narrow card.
+ */
 function NoReviews({ t }: { t: Translate }) {
   return (
-    <p className="flex items-center gap-1.5 text-xs text-text-3">
+    <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-text-3">
       <Stars rating={0} />
-      <span>{t("product.card_no_reviews")}</span>
+      <span className="whitespace-nowrap">{t("product.card_no_reviews")}</span>
     </p>
   )
 }
@@ -108,9 +111,10 @@ function FootButton({
  * A framed card (UK5, adr/0049 Ek 2026-11-14 §3.3): today's card inside a
  * bordered white box, the photo's well, the pills and the one link over
  * the whole card as ever; under the price "Ücretsiz kargo" when the
- * storefront says it ships free; at its foot the add button across the
- * box ("Sepete ekle" for one variant, "Seçenekler" to its page), or the
- * round "+" on the photo while the shop turns the button off. The second
+ * storefront says it ships free (never on a sold-out card); at its foot
+ * the add button across the box ("Sepete ekle" for one variant,
+ * "Seçenekler" to its page), or the round "+" on the photo while the shop
+ * turns the button off. The second
  * photo, the line, the button and the empty stars are the shop's E5
  * switches, each read by the storefront into the card's `framed`.
  */
@@ -180,8 +184,8 @@ export function FramedCard({
         ) : (
           framed.emptyStars && <NoReviews t={t} />
         )}
-        {product.price && <Price price={product.price} t={t} className="mt-auto pt-1" />}
-        {framed.freeShipping && (
+        {product.price && <Price price={product.price} t={t} className="pt-1" />}
+        {framed.freeShipping && !out && (
           <p className="flex items-center gap-1 text-xs font-semibold text-ok">
             <Truck className="size-4 shrink-0" aria-hidden="true" strokeWidth={1.75} />
             {t("product.card_free_shipping")}

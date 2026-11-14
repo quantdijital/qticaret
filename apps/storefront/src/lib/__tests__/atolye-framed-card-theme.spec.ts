@@ -93,7 +93,10 @@ describe("the theme's framed card", () => {
     expect(text).not.toContain(t("product.card_free_shipping"))
     expect(text).not.toContain(t("product.card_no_reviews"))
     expect(text).not.toContain(t("product.card_options"))
-    expect(textOf(cardOf(card({ available: false })))).not.toContain(t("product.card_options"))
+    const out = textOf(cardOf(card({ available: false })))
+    expect(out).not.toContain(t("product.card_options"))
+    // Free shipping says nothing on a product that cannot be bought now
+    expect(out).not.toContain(t("product.card_free_shipping"))
   })
 
   it("is today's card without its own fields, or for a variant it does not draw", () => {

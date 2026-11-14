@@ -4,13 +4,16 @@
  * No inline style (CSP); both photos fill the well, nothing shifts (CLS).
  *
  * - A mouse (hover and a fine pointer): the second sits over the first,
- *   unseen, and fades in while the card is hovered or anything in it has
- *   focus; at once for a shopper who asks for less motion.
+ *   out of the layout (`display: none`, so the browser never fetches it
+ *   with the page), and fades in while the card is hovered or anything in
+ *   it has focus; at once for a shopper who asks for less motion.
  * - A touch screen: the two side by side in a strip that swipes and snaps,
  *   above the card's link so the swipe reaches it (the strip is a link to
- *   the same page, so a tap still opens it). Two dots under the photo
- *   follow the strip where the browser drives an animation by scrolling;
- *   without that, no dots.
+ *   the same page, so a tap still opens it). Where the browser drives an
+ *   animation by scrolling, the second photo's picture stays out of the
+ *   layout until the strip first moves (its slide keeps its width, so the
+ *   swipe works) and two dots under the photo follow the strip; without
+ *   that, no dots and the second loads lazily as any image.
  */
 @layer components {
   .gf-card-slides {
@@ -33,9 +36,10 @@
     pointer-events: none;
   }
 
+  /* One height for "Sepete ekle" (with its icon) and "Seçenekler", so a row's buttons line up */
   .gf-card-btn {
     min-height: 2.75rem;
-    padding-inline: var(--space-sm);
+    padding: var(--space-xs) var(--space-sm);
     font-size: var(--text-sm);
   }
 
@@ -43,16 +47,26 @@
     .gf-card-slide--second {
       position: absolute;
       inset: 0;
+      display: none;
       opacity: 0;
     }
     .gf-card-framed:hover .gf-card-slide--second,
     .gf-card-framed:focus-within .gf-card-slide--second {
+      display: block;
       opacity: 1;
     }
   }
   @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
     .gf-card-slide--second {
-      transition: opacity var(--dur-short) var(--ease-out);
+      transition:
+        opacity var(--dur-short) var(--ease-out),
+        display var(--dur-short) allow-discrete;
+    }
+    @starting-style {
+      .gf-card-framed:hover .gf-card-slide--second,
+      .gf-card-framed:focus-within .gf-card-slide--second {
+        opacity: 0;
+      }
     }
   }
 
@@ -80,6 +94,10 @@
       }
       .gf-card-slides {
         scroll-timeline: --gf-card-photos inline;
+      }
+      .gf-card-slide--second picture {
+        animation: gf-card-reveal linear both;
+        animation-timeline: --gf-card-photos;
       }
       .gf-card-dots {
         position: absolute;
@@ -114,5 +132,18 @@
   }
   to {
     background: var(--color-field);
+  }
+}
+
+/*
+ * The second photo out of the layout only while its strip has not moved:
+ * `display` takes the shown value anywhere past the start
+ */
+@keyframes gf-card-reveal {
+  from {
+    display: none;
+  }
+  to {
+    display: block;
   }
 }

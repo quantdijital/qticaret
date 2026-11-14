@@ -26,8 +26,9 @@ const INITIAL: ActionResult = { ok: false, error: null }
  * A card's quick add: a plain form posting the one variant, quantity 1,
  * to the storefront's add-to-cart action, so it works before the script.
  * On a card a 44 px round button on the photo's corner; `wide`, the
- * filled button the close-up's width; `fill`, a framed card's button
- * across its foot. Busy while sent; once in, the cart
+ * filled button the close-up's width; `fill`, a framed card's quiet
+ * button across its foot, like its "Seçenekler" (UK5: the button does
+ * not shout). Busy while sent; once in, the cart
  * sheet opens and says so; refused, the reason in words with the
  * product's page as the way on.
  */
@@ -68,7 +69,11 @@ export function QuickAdd({
       onSubmit={() => {
         sent.current = true
       }}
-      className={cn("relative z-(--z-raised)", shown ? "flex flex-col gap-2" : "contents")}
+      // A framed card's button keeps to the card's foot: no gap under it until there is an error
+      className={cn(
+        "relative z-(--z-raised)",
+        fill ? "flex flex-col" : wide ? "flex flex-col gap-2" : "contents"
+      )}
     >
       <input type="hidden" name="variant_id" value={variantId} />
       <input type="hidden" name="quantity" value="1" />
@@ -76,7 +81,7 @@ export function QuickAdd({
         type="submit"
         className={
           fill
-            ? "gf-btn gf-card-btn w-full"
+            ? "gf-btn gf-btn--quiet gf-card-btn w-full"
             : wide
               ? "gf-btn w-full sm:w-auto"
               : "gf-icon-btn absolute right-2 bottom-2 z-(--z-raised) size-11 bg-field text-text shadow-float hover:bg-paper-2"
@@ -100,7 +105,12 @@ export function QuickAdd({
         className={shown ? "" : "absolute inset-x-2 bottom-14 z-(--z-raised)"}
       >
         {error && (
-          <span className="flex items-start gap-2 rounded-inner bg-field p-2 text-sm text-error shadow-float">
+          <span
+            className={cn(
+              "flex items-start gap-2 rounded-inner bg-field p-2 text-sm text-error shadow-float",
+              fill && "mt-2"
+            )}
+          >
             <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
             <span>
               {error}{" "}
