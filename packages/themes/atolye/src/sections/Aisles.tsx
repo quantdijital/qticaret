@@ -1,4 +1,4 @@
-import type { CategoryCardView, LinkView } from "@qticaret/ui"
+import type { CategoryCardView, LinkView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { CategoryTile } from "../parts/CategoryTile"
 import { Container } from "../parts/Container"
@@ -19,11 +19,15 @@ export function Aisles({
   title,
   categories,
   all,
+  t,
 }: {
   id: string
   title: string
   categories: readonly CategoryCardView[]
+  /** The link beside the head: the shop's own, else every category. */
   all: LinkView
+  /** For a tile's count ("24 ürün"), when the shop shows counts. */
+  t?: Translate
 }) {
   return (
     <section aria-labelledby={id} className="pt-(--section-gap-s)">
@@ -41,6 +45,11 @@ export function Aisles({
               <CategoryTile
                 category={category}
                 sizes="(min-width: 1280px) 15vw, (min-width: 1024px) 19vw, (min-width: 640px) 30vw, 44vw"
+                note={
+                  t && typeof category.count === "number"
+                    ? t("listing.count", { count: category.count.toLocaleString("tr-TR") })
+                    : null
+                }
               />
             </li>
           ))}

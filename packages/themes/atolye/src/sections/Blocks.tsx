@@ -15,10 +15,12 @@ import { GoogleRating } from "./GoogleRating"
 import { Guides } from "./Guides"
 import { Help } from "./Help"
 import { Hero } from "./Hero"
+import { HERO_VARIANTS, HeroCatalog } from "./HeroCatalog"
 import { HeroSlider } from "./HeroSlider"
 import { Look } from "./Look"
 import { Marquee } from "./Marquee"
 import { type Block, blocksOf, headingId } from "./plan"
+import { PriceBands } from "./PriceBands"
 import { PROMISE_VARIANTS, Promises } from "./Promises"
 import { Reviews } from "./Reviews"
 import { Shelf } from "./Shelf"
@@ -65,8 +67,24 @@ function BlockView({
   }
   const { section } = block
   switch (section.type) {
-    case "hero":
-      return <Hero hero={section} product={first ? context.opening : null} first={first} />
+    case "hero": {
+      const product = first ? context.opening : null
+      // H17 when the shop chose it and its parts came; else today's opening (`drawnVariant`)
+      return drawnVariant("hero", section.variant, HERO_VARIANTS) === "category_list" &&
+        section.catalog ? (
+        <HeroCatalog
+          hero={section}
+          catalog={section.catalog}
+          product={product}
+          first={first}
+          t={t}
+        />
+      ) : (
+        <Hero hero={section} product={product} first={first} />
+      )
+    }
+    case "price_bands":
+      return <PriceBands section={section} />
     case "hero_slider":
       return <HeroSlider section={section} first={first} t={t} />
     case "trust_badges":
@@ -83,7 +101,8 @@ function BlockView({
           id={headingId(section.id)}
           title={section.title}
           categories={section.categories}
-          all={{ label: t("home.all_categories"), path: "/kategoriler" }}
+          all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
+          t={t}
         />
       )
     case "banner":
