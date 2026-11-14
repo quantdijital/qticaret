@@ -16,6 +16,7 @@ const S = "storefront.editor.search"
 const GROUP_NAMES: Readonly<Record<FieldGroupName, string>> = {
   variant: "storefront.editor.panel.variant",
   placement: "storefront.editor.panel.placement",
+  content: "storefront.editor.panel.content",
   look: "storefront.editor.look.title",
   visibility: "storefront.editor.panel.visibility",
 }

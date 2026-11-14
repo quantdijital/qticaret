@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { renderDoc } from "../../lib/content"
 import type { BodySection } from "../../lib/storefront/layout"
+import type { HeaderMarquee, MarqueeSection } from "../../lib/storefront/sections/marquee"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import type { RailPick } from "../../lib/storefront/rails"
 import { hasLook } from "../../lib/storefront/sections/look"
@@ -41,6 +42,29 @@ export interface HydrateContext {
 
 export const fill = (text: string | null, values: ShopInfoValues) =>
   text === null ? null : fillShopText(text, values)
+
+/**
+ * A scrolling strip as the storefront prints it (adr/0049 Ek 2026-11-14
+ * §4.1), on a page or in the header: its items' words filled, their links
+ * placed (a broken one null, the item kept), its steps as saved.
+ */
+export function hydrateMarquee(section: MarqueeSection | HeaderMarquee, at: HydrateContext) {
+  return {
+    id: section.id,
+    type: section.type,
+    items: section.items.map((item) => ({
+      icon: item.icon,
+      text: fillShopText(item.text, at.values),
+      subtext: fill(item.subtext, at.values),
+      link: item.link ? (at.links.get(item.link) ?? null) : null,
+    })),
+    speed: section.speed,
+    direction: section.direction,
+    ground: section.ground,
+    size: section.size,
+    separator: section.separator,
+  }
+}
 
 /**
  * A page's section as the storefront prints it (adr/0049), on any page;
@@ -178,5 +202,7 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
     case "trust_badges":
       // The badges are the shared settings'; the section says where and how it is drawn
       return { id, type, variant: section.variant }
+    case "marquee":
+      return hydrateMarquee(section, at)
   }
 }

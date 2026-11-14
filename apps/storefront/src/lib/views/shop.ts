@@ -30,6 +30,7 @@ import { footerMenus, mainMenu, topLinks } from "./menus"
 import { hoursOf } from "./hours"
 import { themeView } from "./theme"
 import { currentTheme } from "./theme-settings"
+import { headerMarquee } from "./marquee"
 
 /** How to reach the shop, from its store details and legal identity (adr/0048): one source. */
 export function contactOf(identity: LegalIdentity, t: Translate): ContactView {
@@ -123,7 +124,10 @@ export async function shopView(): Promise<ShopView> {
     cartQuantity: (cart?.items ?? []).reduce((sum, line) => sum + line.quantity, 0),
     cart: miniCartOf(cart, free_shipping_threshold, t, linePaths, linePictures),
     // The header's and footer's sections from the design (adr/0049)
-    announcements: layout.header.flatMap((section) => section.lines),
+    announcements: layout.header.flatMap((section) =>
+      section.type === "announcement_bar" ? section.lines : []
+    ),
+    marquee: headerMarquee(layout.header, t),
     newsletter: newsletterOf(layout, identity.company_title ?? site.shop.name),
     topLinks: topLinks(menus, t),
     footerGroups: footerGroups(footerMenus(menus, t), menu, t),

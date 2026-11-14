@@ -4,9 +4,16 @@
  * shop's details in place. A copy of the backend's answer (adr/0046 §8).
  */
 import type { MediaDerivatives } from "./catalog.js"
+import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
 import type { TrustBadgesVariant } from "./section-variants.js"
-import type { MenuLinkKind, StoreMenu, StoreThemeSettings, StorefrontFrame } from "./storefront.js"
+import type {
+  MenuLinkKind,
+  StoreMenu,
+  StoreThemeSettings,
+  StorefrontFrame,
+  TrustIcon,
+} from "./storefront.js"
 
 export interface StoreLayoutLink {
   /** The shop's wording, else the record's name; null: the storefront's own name. */
@@ -110,7 +117,28 @@ export type StoreLayoutSection = StoreSectionLookPart &
       }
     | { id: string; type: "newsletter" | "help"; title: string | null; text: string | null }
     | StoreFaqSection
+    | StoreMarqueeSection
   )
+
+/**
+ * The scrolling strip (adr/0049 Ek 2026-11-14 §4.1): on the home, product
+ * and category pages, and at most one in the header above the shop's
+ * header. Its items' words filled, their links placed (a broken one null);
+ * its settings as the contract lists them, read forgivingly by the
+ * storefront (`marqueeStepOf`). Absent from a backend before it.
+ */
+export type StoreMarqueeSection = {
+  id: string
+  type: "marquee"
+  items: StoreMarqueeItem[]
+} & MarqueeSettings
+
+export interface StoreMarqueeItem {
+  icon: TrustIcon | null
+  text: string
+  subtext: string | null
+  link: StoreLayoutLink | null
+}
 
 /**
  * The home page's Google rating badge (adr/0058 Ek 2026-11-06): its
@@ -188,7 +216,7 @@ export type RelatedSource =
 /** The kinds every product and category page may hold (adr/0049 Ek 2026-11-03). */
 export type StorePageSection = Extract<
   StoreLayoutSection,
-  { type: "rich_text" | "banner" | "faq" | "trust_badges" | "help" | "newsletter" }
+  { type: "rich_text" | "banner" | "faq" | "trust_badges" | "help" | "newsletter" | "marquee" }
 >
 
 /** A section below every product's own block. */
@@ -206,8 +234,13 @@ export type StoreProductSection =
 /** A section of every category page: above the product grid (`top`) or below it. */
 export type StoreCategorySection = StorePageSection & { placement: "top" | "bottom" }
 
+/** A section of the header group: drawn above the shop's header on every page but the checkout's. */
+export type StoreHeaderSection =
+  { id: string; type: "announcement_bar"; lines: string[] } | StoreMarqueeSection
+
 export interface StoreLayout {
-  header: { id: string; type: "announcement_bar"; lines: string[] }[]
+  /** The announcement bar and the scrolling strip, each at most once (adr/0049 §10 karar 9). */
+  header: StoreHeaderSection[]
   home: StoreLayoutSection[]
   footer: { id: string; type: "newsletter"; title: string | null; text: string | null }[]
   product: StoreProductSection[]

@@ -122,6 +122,7 @@ describe("the theme editor's pages", () => {
       "Görsel slayt",
       "Sık sorulan sorular",
       "Güven rozetleri",
+      "Kayan yazı",
       "Yardım kutusu",
       "E-bülten",
     ])

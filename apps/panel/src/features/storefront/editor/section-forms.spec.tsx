@@ -249,7 +249,11 @@ describe("the section forms", HEAVY, () => {
     await user.type(screen.getByRole("textbox", { name: "2. duyuru" }), "Aynı gün kargo")
 
     await saved((doc) => {
-      expect(doc.header[0]?.lines).toEqual(["Kargo bedava", "Aynı gün kargo"])
+      const [bar] = doc.header
+      expect(bar?.type === "announcement_bar" ? bar.lines : null).toEqual([
+        "Kargo bedava",
+        "Aynı gün kargo",
+      ])
     })
   })
 })

@@ -1,9 +1,10 @@
 import { z } from "@medusajs/framework/zod"
 import {
   LAYOUT_LIMITS,
-  announcementBar,
+  MARQUEE_PER_PAGE,
   categorySection,
   footerNewsletter,
+  headerSection,
   pageSection,
   productSection,
 } from "./layout-sections"
@@ -32,10 +33,29 @@ export type {
 const onlyOnce = (sections: readonly { type: string }[]) =>
   new Set(sections.map((section) => section.type)).size === sections.length
 
+const marquees = (sections: readonly { type: string }[]) =>
+  sections.filter((section) => section.type === "marquee").length
+
+/**
+ * Whether a page would show more scrolling strips than it may (adr/0049
+ * Ek 2026-11-14 §4.1): the header's, on every page, counts with the home,
+ * product or category page's own. Hidden and scheduled ones count too: a
+ * campaign's strip may come on beside the others.
+ */
+const tooManyMarquees = (doc: {
+  header: readonly { type: string }[]
+  home: readonly { type: string }[]
+  product: readonly { type: string }[]
+  category: readonly { type: string }[]
+}) =>
+  [doc.home, doc.product, doc.category].some(
+    (page) => marquees(doc.header) + marquees(page) > MARQUEE_PER_PAGE
+  )
+
 /** The whole design: checked as one, so a section's id is unique across the groups. */
 export const layoutDocument = z
   .object({
-    header: z.array(announcementBar).max(LAYOUT_LIMITS.header).default([]),
+    header: z.array(headerSection).max(LAYOUT_LIMITS.header).default([]),
     home: z.array(pageSection).max(LAYOUT_LIMITS.home).default([]),
     footer: z.array(footerNewsletter).max(LAYOUT_LIMITS.footer).default([]),
     product: z.array(productSection).max(LAYOUT_LIMITS.product).default([]),
@@ -57,6 +77,9 @@ export const layoutDocument = z
     }
     if (!onlyOnce(doc.header) || !onlyOnce(doc.footer)) {
       ctx.addIssue({ code: "custom", message: "storefront_layout.section_duplicate" })
+    }
+    if (tooManyMarquees(doc)) {
+      ctx.addIssue({ code: "custom", message: "storefront_layout.marquee_limit" })
     }
     const backwards = all.some(
       (section) =>

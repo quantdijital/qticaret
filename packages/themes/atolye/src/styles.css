@@ -30,6 +30,7 @@
 @import "./content.css";
 @import "./frame.css";
 @import "./look.css";
+@import "./marquee.css";
 
 /*
  * The theme's values for the contract's names (shadcn's names, wired to

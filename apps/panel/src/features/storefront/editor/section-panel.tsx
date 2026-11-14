@@ -1,5 +1,6 @@
 import { Copy, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { MARQUEE_DEFAULTS } from "@qticaret/types"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import type {
@@ -16,12 +17,14 @@ import { AnnouncementForm } from "./forms/announcement-form"
 import { BannerForm } from "./forms/banner-form"
 import { FaqForm } from "./forms/faq-form"
 import { FeaturedForm } from "./forms/featured-form"
-import { FIELD_IDS, takesLook } from "./forms/field-registry"
+import { FIELD_IDS, MARQUEE_LOOK_SETTINGS, takesLook } from "./forms/field-registry"
 import type { FieldGroupName } from "./forms/field-registry"
 import { GoogleRatingForm } from "./forms/google-rating-form"
 import { HeroForm } from "./forms/hero-form"
 import { HeroSliderForm } from "./forms/hero-slider-form"
 import { LookFields } from "./forms/look-fields"
+import { MarqueeForm } from "./forms/marquee-form"
+import { MarqueeSettings } from "./forms/marquee-settings"
 import { ProductsForm } from "./forms/products-form"
 import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
@@ -92,6 +95,8 @@ function FormOf({
       return <FaqForm section={section} {...props} />
     case "related_products":
       return <RelatedForm section={section} {...props} />
+    case "marquee":
+      return <MarqueeForm section={section} {...props} />
     case "trust_badges":
       // The strip's problems are the badges' (`trust_badges.0.title`) and its schedule
       return <TrustBadgeList badges={badges} problems={problems} onChange={onBadges} />
@@ -129,8 +134,14 @@ export function SectionPanel({
   const name = t(`storefront.editor.types.${kind}.name`)
   useFieldFocus(focus)
   const reveal = (which: FieldGroupName) => (focus?.group === which ? focus.nonce : null)
-  const looked = takesLook(section, group) && section.type !== "announcement_bar" ? section : null
-  const set = looked ? lookCount(looked) : 0
+  const looked = takesLook(section, group) ? section : null
+  // A strip's own ground, speed, way and separator sit with the look; the header's has no look
+  const strip = section.type === "marquee" ? section : null
+  const set =
+    (looked ? lookCount(looked) : 0) +
+    (strip
+      ? MARQUEE_LOOK_SETTINGS.filter((name) => strip[name] !== MARQUEE_DEFAULTS[name]).length
+      : 0)
   return (
     <Panel icon={SECTION_ICONS[kind]} title={name} onBack={onBack}>
       <p className="border-b px-5 py-4 text-[13px] leading-5 text-muted-foreground">
@@ -169,7 +180,7 @@ export function SectionPanel({
           </RadioGroup>
         </PanelGroup>
       ) : null}
-      <PanelGroup title={t(`${P}.content`)}>
+      <PanelGroup title={t(`${P}.content`)} reveal={reveal("content")}>
         <FormOf
           section={section}
           problems={problems}
@@ -178,18 +189,31 @@ export function SectionPanel({
           onBadges={onBadges}
         />
       </PanelGroup>
-      {looked ? (
+      {looked || strip ? (
         <PanelGroup
           title={
             set > 0
               ? t("storefront.editor.look.titleSet", { count: set })
               : t("storefront.editor.look.title")
           }
-          hint={t("storefront.editor.look.hint")}
+          hint={
+            strip
+              ? t(`storefront.editor.marquee.${looked ? "lookHint" : "headerLookHint"}`)
+              : t("storefront.editor.look.hint")
+          }
           defaultOpen={false}
           reveal={reveal("look")}
         >
-          <LookFields section={looked} onChange={onChange} />
+          {strip ? (
+            <MarqueeSettings
+              section={strip}
+              settings={MARQUEE_LOOK_SETTINGS}
+              onChange={(next) => {
+                onChange(next)
+              }}
+            />
+          ) : null}
+          {looked ? <LookFields section={looked} onChange={onChange} /> : null}
         </PanelGroup>
       ) : null}
       <PanelGroup title={t(`${P}.visibility`)} reveal={reveal("visibility")}>

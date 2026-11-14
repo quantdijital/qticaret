@@ -8,6 +8,7 @@
     ".": "./src/index.ts",
     "./section-variants": "./src/store/section-variants.ts",
     "./section-look": "./src/store/section-look.ts",
+    "./section-marquee": "./src/store/section-marquee.ts",
     "./control-plane": {
       "qt-compiled": "./dist/control-plane/index.js",
       "default": "./src/control-plane/index.ts"

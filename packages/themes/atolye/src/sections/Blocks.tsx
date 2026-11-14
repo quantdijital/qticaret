@@ -17,6 +17,7 @@ import { Help } from "./Help"
 import { Hero } from "./Hero"
 import { HeroSlider } from "./HeroSlider"
 import { Look } from "./Look"
+import { Marquee } from "./Marquee"
 import { type Block, blocksOf, headingId } from "./plan"
 import { PROMISE_VARIANTS, Promises } from "./Promises"
 import { Reviews } from "./Reviews"
@@ -112,6 +113,14 @@ function BlockView({
       return subscribe ? <Signup section={section} t={t} subscribe={subscribe} /> : null
     case "brands":
       return <Brands section={section} />
+    case "marquee":
+      return (
+        <Marquee
+          section={section}
+          t={t}
+          boxed={section.look?.width === "boxed" || section.look?.width === "narrow"}
+        />
+      )
   }
 }
 

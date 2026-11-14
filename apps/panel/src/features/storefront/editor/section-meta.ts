@@ -10,6 +10,7 @@ import {
   LifeBuoy,
   Mail,
   Megaphone,
+  MoveHorizontal,
   MessageSquareQuote,
   PanelTop,
   ScanSearch,
@@ -42,6 +43,7 @@ export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   trust_badges: BadgeCheck,
   newsletter: Mail,
   help: LifeBuoy,
+  marquee: MoveHorizontal,
   footer_newsletter: Mail,
 }
 
@@ -72,6 +74,8 @@ function ownTitle(section: AnySection): string | null {
       return section.title
     case "announcement_bar":
       return section.lines.find((line) => line.trim() !== "") ?? null
+    case "marquee":
+      return section.items.find((item) => item.text.trim() !== "")?.text ?? null
     case "trust_badges":
       return null
   }

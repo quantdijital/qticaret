@@ -7,6 +7,7 @@ import type {
   ShopRatingView,
 } from "./home-views"
 import type { PaginationView } from "./listing-views"
+import type { MarqueeSectionView } from "./marquee-views"
 import type { BreadcrumbView, ProductCardView, ReviewView } from "./product-views"
 import type { ContactView, ImageView, LinkView, SocialLinkView, TrustBadgeView } from "./views"
 
@@ -45,6 +46,7 @@ export type HomeSectionView = { look?: SectionLookView } & (
     }
   | HeroSliderSectionView
   | GoogleRatingSectionView
+  | MarqueeSectionView
   | {
       id: string
       type: "banner"
