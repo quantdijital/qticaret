@@ -69,3 +69,4 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0061 | [Üst panel (control plane): teknoloji, veri modeli, güvenlik sınırı ve secret şifreleme](0061-ust-panel-control-plane.md) | — |
 | 0062 | [Atölye bütün tema ayarlarını uygular; Grafit kayıtlı varsayılandır](0062-atolye-tema-ayarlarinin-tamami.md) | — |
 | 0063 | [Hazır görünümler (preset)](0063-hazir-gorunumler.md) | — |
+| 0064 | [Görünüm kitaplığı: kayıtlı tasarımlar ve galeri](0064-gorunum-kitapligi.md) | — |
