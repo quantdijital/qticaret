@@ -41,15 +41,17 @@ const normalized = (path: string): string => {
  * A link written as an address, as a record when the address is one
  * (adr/0049): a storefront page by its name, a record's live path by the
  * record, anything else kept as written. For moving the frame's typed
- * links into menus and for shop profiles. The wording is kept.
+ * links into menus, for shop profiles and presets (adr/0063 §4). The
+ * wording is kept; none (null) is the theme's own (a "see all" button),
+ * but an address has no wording of its own: it is its own label then.
  */
 export async function linkFromHref(
   container: Container,
-  { label, href }: { label: string; href: string }
+  { label, href }: { label: string | null; href: string }
 ): Promise<MenuLinkInput> {
   const url = href.trim()
   if (isHttpsUrl(url) || !isShopPath(url)) {
-    return { kind: "url", url, label }
+    return { kind: "url", url, label: label ?? url }
   }
   const path = normalized(url)
   const system = SYSTEM_PATHS[path]
@@ -63,5 +65,7 @@ export async function linkFromHref(
       { select: ["entity_type", "entity_id"], take: 1 }
     )
   const kind = entry ? KIND_OF_TYPE[entry.entity_type] : undefined
-  return kind && entry ? { kind, target: entry.entity_id, label } : { kind: "url", url, label }
+  return kind && entry
+    ? { kind, target: entry.entity_id, label }
+    : { kind: "url", url, label: label ?? url }
 }

@@ -214,7 +214,15 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["attribute_template", "attribute", "category", "flag", "seo_template"],
+          "enumItems": [
+            "attribute_template",
+            "attribute",
+            "category",
+            "flag",
+            "seo_template",
+            "preset_image",
+            "demo_record"
+          ],
           "mappedType": "enum"
         },
         "outcome": {

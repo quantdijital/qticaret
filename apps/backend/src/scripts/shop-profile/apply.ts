@@ -22,6 +22,7 @@ import { updatePlatformSettingsWorkflow } from "../../workflows/platform-setting
 import { ensureStoreName } from "../bootstrap/store-name"
 import { pageBody, profileFile } from "./profile"
 import type { LoadedProfile } from "./profile"
+import { carryProfileTheme } from "./theme"
 
 /** Each section through its own schema and workflow (adr/0012), as the panel saves it. */
 async function applySections(container: MedusaContainer, loaded: LoadedProfile): Promise<void> {
@@ -183,7 +184,10 @@ async function queueBundle(container: MedusaContainer, loaded: LoadedProfile): P
   logger.info({ event: "shop_profile.bundle_applied", job: result.id }, "migration run done")
 }
 
-/** The whole profile: name, settings, retired then current pages, the migration run, menus. Safe to run again. */
+/**
+ * The whole profile: name, settings (a theme into the design's draft too),
+ * retired then current pages, the migration run, menus. Safe to run again.
+ */
 export async function applyProfile(
   container: MedusaContainer,
   loaded: LoadedProfile
@@ -192,6 +196,8 @@ export async function applyProfile(
     await ensureStoreName(container, loaded.profile.store_name)
   }
   await applySections(container, loaded)
+  // A design holding a theme is what the storefront reads: the profile's theme goes into its draft
+  await carryProfileTheme(container, loaded)
   await retirePages(container, loaded)
   await applyPages(container, loaded)
   await queueBundle(container, loaded)

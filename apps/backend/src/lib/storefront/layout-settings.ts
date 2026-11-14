@@ -38,6 +38,22 @@ export const SETTINGS_LIMITS = {
 
 const HEX_COLOR = /^#[0-9a-f]{6}$/
 
+const CODE = /^[a-z][a-z0-9-]{1,39}$/
+
+/**
+ * The ready-made look last applied to this design (adr/0063 §2): its pack,
+ * code and version, drafted, published and kept in the revisions with the
+ * sections, so the panel can say "şu an bu" and "yeni sürüm var". Null:
+ * none applied, or the design was made by hand.
+ */
+const appliedPreset = z
+  .object({
+    pack: z.string().regex(CODE),
+    code: z.string().regex(CODE),
+    version: z.number().int().min(1).max(10_000),
+  })
+  .strict()
+
 const trustBadge = z
   .object({
     icon: z.enum(TRUST_ICONS),
@@ -84,6 +100,7 @@ export const UNSET_SETTINGS = {
   low_stock: null,
   theme: null,
   menus: null,
+  preset: null,
 } as const
 
 /** Each part's own schema: a stored document is read part by part (`storedSettings`). */
@@ -93,6 +110,7 @@ const PARTS = {
   low_stock: lowStock.nullable().default(null),
   theme: layoutTheme,
   menus: menuSet.nullable().default(null),
+  preset: appliedPreset.nullable().default(null),
 }
 
 export const layoutSettings = z
@@ -146,6 +164,7 @@ export function withLegacy(settings: LayoutSettings, legacy: Legacy): LayoutSett
     theme: settings.theme ?? legacyTheme(legacy.theme, legacy.primary_color),
     // Nothing to fill: an unset set leaves the live menus alone
     menus: settings.menus,
+    preset: settings.preset,
   }
 }
 
@@ -182,5 +201,6 @@ export function storedSettings(document: unknown): LayoutSettings {
     low_stock: read("low_stock"),
     theme: read("theme"),
     menus: read("menus"),
+    preset: read("preset"),
   }
 }

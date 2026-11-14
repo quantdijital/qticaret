@@ -6,6 +6,9 @@ export const PACK_ITEM_KINDS = [
   "category",
   "flag",
   "seo_template",
+  // adr/0063 §4: what a storefront preset makes in the shop (an image it uploads, a demo record)
+  "preset_image",
+  "demo_record",
 ] as const
 export type PackItemKind = (typeof PACK_ITEM_KINDS)[number]
 
@@ -33,7 +36,10 @@ export const SectorPackItem = model
     outcome: model.enum([...PACK_ITEM_OUTCOMES]),
     /** The pack's version that first offered it. */
     version: model.number(),
-    /** The record it is (a template, definition or category id); none for a setting. */
+    /**
+     * The record it is (a template, definition, category or media id); none
+     * for a setting. A preset's image uploaded again, its first gone, names the new one.
+     */
     record_id: model.text().nullable(),
   })
   .indexes([{ on: ["pack", "key"], unique: true, where: "deleted_at IS NULL" }])

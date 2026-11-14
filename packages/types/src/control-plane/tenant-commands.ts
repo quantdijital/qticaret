@@ -71,6 +71,30 @@ export const applyPackResultSchema = z.discriminatedUnion("status", [
 ])
 export type ApplyPackResult = z.infer<typeof applyPackResultSchema>
 
+/**
+ * `tenant:apply-preset pack= preset= demo=` (adr/0063 §7): the preset and
+ * version written into the design's draft, how many of its references the
+ * shop had nothing for (`skipped`) and the sections left out (`dropped`),
+ * whether the draft was published (only on a shop that has never published
+ * a design: a new shop opens with the look). `unknown_preset`: this
+ * shop's build has no such preset, or the shop was not given its pack; it exits 1.
+ */
+export const applyPresetResultSchema = z.discriminatedUnion("status", [
+  z
+    .object({
+      status: z.literal("applied"),
+      pack: z.string().regex(/^[a-z][a-z0-9-]{1,39}$/),
+      preset: z.string().regex(/^[a-z][a-z0-9-]{1,39}$/),
+      version: z.number().int().min(1).max(10_000),
+      skipped: count,
+      dropped: count,
+      published: z.boolean(),
+    })
+    .strict(),
+  z.object({ status: z.literal("unknown_preset") }).strict(),
+])
+export type ApplyPresetResult = z.infer<typeof applyPresetResultSchema>
+
 /** The line a command prints for `result`. */
 export const tenantResultLine = (result: object): string =>
   `${TENANT_RESULT_PREFIX}${JSON.stringify(result)}`
