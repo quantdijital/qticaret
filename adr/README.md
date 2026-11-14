@@ -70,3 +70,4 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0062 | [Atölye bütün tema ayarlarını uygular; Grafit kayıtlı varsayılandır](0062-atolye-tema-ayarlarinin-tamami.md) | — |
 | 0063 | [Hazır görünümler (preset)](0063-hazir-gorunumler.md) | — |
 | 0064 | [Görünüm kitaplığı: kayıtlı tasarımlar ve galeri](0064-gorunum-kitapligi.md) | — |
+| 0065 | [Canlı tema düzenleyici: önizleme köprüsü ve anında yansıma](0065-canli-tema-duzenleyici.md) | — |
