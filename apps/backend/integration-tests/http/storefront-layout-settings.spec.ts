@@ -19,6 +19,7 @@ interface Shared {
   low_stock: { enabled: boolean; threshold: number } | null
   theme?: Record<string, unknown> | null
   menus?: unknown[] | null
+  preset?: { pack: string; code: string; version: number } | null
 }
 
 interface AdminLayout {
@@ -104,7 +105,7 @@ medusaIntegrationTestRunner({
       const firstStock = await stock()
 
       const {
-        settings: { theme: openedTheme, menus: openedMenus, ...opened },
+        settings: { theme: openedTheme, menus: openedMenus, preset: openedPreset, ...opened },
         ...groups
       } = first.draft
       const refused = await save({
@@ -151,6 +152,8 @@ medusaIntegrationTestRunner({
       // The theme section stands in for the design's theme (adr/0063 §3); no menu set
       expect(openedTheme).toMatchObject({ settings_version: 2, theme: "atolye", radius: "soft" })
       expect(openedMenus).toBeNull()
+      // No ready-made look applied (adr/0063 §2)
+      expect(openedPreset).toBeNull()
       expect(firstLive.settings.menus).toBeNull()
       expect(firstLive.settings.theme).toMatchObject({ theme: "atolye", radius: "soft" })
       expect(firstLive.settings).toMatchObject({

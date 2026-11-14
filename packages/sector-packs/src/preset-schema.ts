@@ -97,11 +97,26 @@ export const imageRef = z.strictObject({
   alt: plain(300).nullable().optional(),
 })
 
-/** A link written as an address, in place of a link to a record; none: the theme's wording. */
-export const hrefRef = z.strictObject({
-  $href: presetHref,
-  label: plain(60).nullable().optional(),
-})
+/**
+ * A link written as an address, in place of a link to a record; none: the
+ * theme's wording. An https address has no wording of its own and the
+ * backend keeps it as written, so it must carry its label; a path on the
+ * shop resolves to a record or a storefront page, which have theirs.
+ */
+export const hrefRef = z
+  .strictObject({
+    $href: presetHref,
+    label: plain(60).nullable().optional(),
+  })
+  .superRefine((ref, ctx) => {
+    if (isHttpsUrl(ref.$href) && (ref.label === null || ref.label === undefined)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["label"],
+        message: "an https address needs its label",
+      })
+    }
+  })
 
 export const presetManifestSchema = z.strictObject({
   format: z.literal(PRESET_FORMAT),

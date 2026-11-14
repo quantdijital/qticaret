@@ -76,36 +76,38 @@ export const registerMediaStep = createStep(
     const undo: Undo = { created: [], kept: [] }
     // The new records' bytes: what this registration adds to the library's storage
     let added = 0
-    for (const fileId of input.file_ids) {
-      const url = await publicUploadUrl(container, fileId)
-      if (!url) {
-        throw new MedusaError(MedusaError.Types.NOT_FOUND, "media.file_unknown")
-      }
-      const [known] = await media.listMediaAssets({ url }, { take: 1 })
-      if (known) {
-        if (input.library && !known.in_library) {
-          assets.push(await media.updateMediaAssets({ id: known.id, in_library: true }))
-          undo.kept.push(known.id)
-        } else {
-          assets.push(known)
-        }
-        continue
-      }
-      const described = await describe(container, fileId)
-      const asset = await media.createMediaAssets({
-        file_id: fileId,
-        url,
-        ...described,
-        uploaded_by: input.uploaded_by ?? null,
-        in_library: input.library ?? false,
-      })
-      assets.push(asset)
-      undo.created.push(asset.id)
-      added += described.size
-    }
-    // adr/0061 Ek C14 review H1: counted again with the new records in; past the
-    // package's storage limit they are undone here (a step that throws is not compensated)
+    // A step that throws is not compensated: a failure part-way (a file storage
+    // lacks, one that is no image, past the storage limit) undoes here what the
+    // earlier turns made, never leaving records with no file counted in the quota
     try {
+      for (const fileId of input.file_ids) {
+        const url = await publicUploadUrl(container, fileId)
+        if (!url) {
+          throw new MedusaError(MedusaError.Types.NOT_FOUND, "media.file_unknown")
+        }
+        const [known] = await media.listMediaAssets({ url }, { take: 1 })
+        if (known) {
+          if (input.library && !known.in_library) {
+            assets.push(await media.updateMediaAssets({ id: known.id, in_library: true }))
+            undo.kept.push(known.id)
+          } else {
+            assets.push(known)
+          }
+          continue
+        }
+        const described = await describe(container, fileId)
+        const asset = await media.createMediaAssets({
+          file_id: fileId,
+          url,
+          ...described,
+          uploaded_by: input.uploaded_by ?? null,
+          in_library: input.library ?? false,
+        })
+        assets.push(asset)
+        undo.created.push(asset.id)
+        added += described.size
+      }
+      // adr/0061 Ek C14 review H1: counted again with the new records in
       await assertStorageWithinLimit(container, added)
     } catch (error) {
       await undoRegistration(media, undo)

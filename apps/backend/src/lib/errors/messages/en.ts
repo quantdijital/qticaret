@@ -949,6 +949,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "storefront_layout.nothing_to_preview": "Save the draft once before previewing it.",
   "storefront_layout.revision_unknown": "This revision is no longer kept.",
   "storefront_layout.preview_unknown": "The preview link is not valid or has expired.",
+  // adr/0063 §4: a ready-made look applied to the draft
+  "storefront_preset.unknown": "This ready-made look was not found.",
+  "storefront_preset.pack_not_applied":
+    "This look's sector pack is not applied to the shop; apply the pack first.",
+  "storefront_preset.invalid": "The ready-made look's files could not be read; contact support.",
+  "storefront_preset.theme_invalid": "The look's theme settings cannot be used in this shop.",
+  "storefront_preset.layout_invalid": "The look's page design cannot be used in this shop.",
+  "storefront_preset.demo_unavailable": "Demo content is not offered with this look yet.",
   "storefront_menus.text_invalid":
     "Menu and link names must be at most 60 characters, without disallowed characters.",
   "storefront_menus.target_invalid": "The link's target is not valid.",

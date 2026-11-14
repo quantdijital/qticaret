@@ -64,6 +64,12 @@ export const packItemKey = {
   category: (handle: string) => `category:${handle}`,
   flag: (key: string) => `flag:${key}`,
   seo: (group: string, entity: string) => `seo:${group}.${entity}`,
-  /** A preset's image uploaded to the shop's media library (adr/0063 §4), by its path (`images/hero.webp`). */
-  presetImage: (preset: string, path: string) => `preset_image:${preset}/${path}`,
+  /**
+   * A preset's image uploaded to the shop's media library (adr/0063 §4), by
+   * its path (`images/hero.webp`) and its bytes' digest (sha256, hex): a
+   * later version that changes the image under the same name is a new item,
+   * uploaded once more, never the old picture kept.
+   */
+  presetImage: (preset: string, path: string, digest: string) =>
+    `preset_image:${preset}/${path}@${digest}`,
 } as const

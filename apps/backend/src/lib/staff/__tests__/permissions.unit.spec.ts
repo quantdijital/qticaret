@@ -626,6 +626,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/storefront-layout/preview": false,
   "POST /admin/storefront-layout/publish": false,
   "POST /admin/storefront-layout/revisions/:revision/restore": false,
+  // adr/0063 §7: a preset into the draft, as a draft's save
+  "POST /admin/storefront-presets/:pack/:code/apply": false,
   // adr/0007 Ek 2026-11-04: the KDV rates, the owner's
   "POST /admin/vat-rates": false,
   "POST /admin/vat-rates/:id": false,

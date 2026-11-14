@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { isHttpsUrl } from "../../lib/security/https-url"
 import type { MenuLinkInput, RecordLinkKind, SystemLink } from "../../lib/storefront/menus"
-import { isShopPath } from "../../lib/storefront/menus"
+import { MENU_LIMITS, isShopPath } from "../../lib/storefront/menus"
 import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
 import type UrlRegistryModuleService from "../../modules/url-registry/service"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
@@ -41,15 +41,19 @@ const normalized = (path: string): string => {
  * A link written as an address, as a record when the address is one
  * (adr/0049): a storefront page by its name, a record's live path by the
  * record, anything else kept as written. For moving the frame's typed
- * links into menus and for shop profiles. The wording is kept.
+ * links into menus, for shop profiles and presets (adr/0063 §4). The
+ * wording is kept; none (null) is the theme's own (a "see all" button),
+ * but an address has no wording of its own: it is its own label then, cut
+ * to the length a label may have.
  */
 export async function linkFromHref(
   container: Container,
-  { label, href }: { label: string; href: string }
+  { label, href }: { label: string | null; href: string }
 ): Promise<MenuLinkInput> {
   const url = href.trim()
+  const own = label ?? url.slice(0, MENU_LIMITS.label)
   if (isHttpsUrl(url) || !isShopPath(url)) {
-    return { kind: "url", url, label }
+    return { kind: "url", url, label: own }
   }
   const path = normalized(url)
   const system = SYSTEM_PATHS[path]
@@ -63,5 +67,5 @@ export async function linkFromHref(
       { select: ["entity_type", "entity_id"], take: 1 }
     )
   const kind = entry ? KIND_OF_TYPE[entry.entity_type] : undefined
-  return kind && entry ? { kind, target: entry.entity_id, label } : { kind: "url", url, label }
+  return kind && entry ? { kind, target: entry.entity_id, label } : { kind: "url", url, label: own }
 }

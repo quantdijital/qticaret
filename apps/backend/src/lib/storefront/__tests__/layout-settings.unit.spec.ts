@@ -44,6 +44,7 @@ describe("the theme's shared settings in the design (adr/0049 Ek 2026-11-06)", (
       low_stock: { enabled: true, threshold: 5 },
       theme: null,
       menus: null,
+      preset: null,
     })
     // Written empty is not unset: the shop chose none
     expect(layoutSettings.parse({ trust_badges: [], color_swatches: [] })).toMatchObject({
@@ -92,6 +93,7 @@ describe("the theme's shared settings in the design (adr/0049 Ek 2026-11-06)", (
       low_stock: { enabled: true, threshold: 3 },
       theme: GRAFIT,
       menus: null,
+      preset: null,
     })
     const own = {
       trust_badges: [],
@@ -99,6 +101,7 @@ describe("the theme's shared settings in the design (adr/0049 Ek 2026-11-06)", (
       low_stock: { enabled: false, threshold: 7 },
       theme: { ...GRAFIT, radius: "sharp" as const },
       menus: null,
+      preset: { pack: "general", code: "grafit", version: 1 },
     }
     expect(withLegacy(own, LEGACY)).toEqual(own)
     expect(withLegacy({ ...UNSET_SETTINGS, trust_badges: [] }, LEGACY).trust_badges).toEqual([])
@@ -141,6 +144,10 @@ describe("the theme's shared settings in the design (adr/0049 Ek 2026-11-06)", (
         settings: { low_stock: { enabled: "x" }, color_swatches: [], theme: { radius: "oval" } },
       })
     ).toEqual({ ...UNSET_SETTINGS, color_swatches: [] })
+    // The applied preset (adr/0063 §2): kept as written, unset when it no longer reads
+    const preset = { pack: "general", code: "grafit", version: 1 }
+    expect(storedSettings({ settings: { preset } }).preset).toEqual(preset)
+    expect(storedSettings({ settings: { preset: { pack: "general" } } }).preset).toBeNull()
     // An empty menu set is none: the publication leaves the shop's menus alone
     expect(storedSettings({ settings: { theme: GRAFIT, menus: [] } })).toEqual({
       ...UNSET_SETTINGS,

@@ -953,6 +953,14 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "storefront_layout.nothing_to_preview": "Önizlemek için önce taslağı kaydedin.",
   "storefront_layout.revision_unknown": "Bu sürüm artık tutulmuyor.",
   "storefront_layout.preview_unknown": "Önizleme bağlantısı geçersiz ya da süresi dolmuş.",
+  // adr/0063 §4: a ready-made look applied to the draft
+  "storefront_preset.unknown": "Bu hazır görünüm bulunamadı.",
+  "storefront_preset.pack_not_applied":
+    "Bu görünümün sektör paketi mağazaya uygulanmamış; önce paketi uygulayın.",
+  "storefront_preset.invalid": "Hazır görünüm dosyaları okunamadı; destekle iletişime geçin.",
+  "storefront_preset.theme_invalid": "Hazır görünümün tema ayarları bu mağazada kullanılamıyor.",
+  "storefront_preset.layout_invalid": "Hazır görünümün sayfa düzeni bu mağazada kullanılamıyor.",
+  "storefront_preset.demo_unavailable": "Demo içerik bu görünümde henüz sunulmuyor.",
   "storefront_menus.text_invalid":
     "Menü adı ve bağlantı adı en fazla 60 karakter olmalı ve kullanılamayan karakter içermemeli.",
   "storefront_menus.target_invalid": "Bağlantının hedefi geçerli değil.",

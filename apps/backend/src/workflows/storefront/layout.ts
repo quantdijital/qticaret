@@ -7,6 +7,7 @@ import {
   createWorkflow,
   transform,
 } from "@medusajs/framework/workflows-sdk"
+import type { WorkflowData } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep, emitEventStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { ValidationError } from "../../lib/errors"
 import { readStoredLayout } from "../../lib/storefront/layout"
@@ -28,7 +29,8 @@ export { layoutRow } from "./layout-row"
 /** Emitted when a design goes live: the storefront may forget what it holds (adr/0049). */
 export const LAYOUT_PUBLISHED = "storefront.layout_published"
 
-const LAYOUT_LOCK = { key: "storefront-layout", timeout: 10, ttl: 60 }
+/** The design's lock: every write of the draft or the live design holds it. */
+export const LAYOUT_LOCK = { key: "storefront-layout", timeout: 10, ttl: 60 }
 
 /** Writes the draft (the first save makes the record); undone, the draft is as it was. */
 const writeDraftStep = createStep(
@@ -76,14 +78,26 @@ export const saveLayoutDraftWorkflow = createWorkflow(
   "storefront-layout-save-draft",
   (draft: LayoutDocument) => {
     acquireLockStep(LAYOUT_LOCK)
-    const media = checkLayoutStep(draft)
-    checkThemeStep(draft)
-    const saved = writeDraftStep(draft)
-    attachMediaStep(transform({ media }, ({ media }) => ({ link: media, record: [] })))
+    const saved = saveDraftSteps(draft)
     releaseLockStep({ key: LAYOUT_LOCK.key })
     return new WorkflowResponse(saved)
   }
 )
+
+/**
+ * The draft's save for a workflow that holds the design's lock itself
+ * (`LAYOUT_LOCK`) over what it read to compose the draft: a ready-made
+ * look keeping the shop's own settings (adr/0063 §4). A lock taken in a
+ * workflow run as another's step is skipped, so such a caller cannot use
+ * `saveLayoutDraftWorkflow.runAsStep` and be covered.
+ */
+export function saveDraftSteps(draft: LayoutDocument | WorkflowData<LayoutDocument>) {
+  const media = checkLayoutStep(draft)
+  checkThemeStep(draft)
+  const saved = writeDraftStep(draft)
+  attachMediaStep(transform({ media }, ({ media }) => ({ link: media, record: [] })))
+  return saved
+}
 
 /** The draft to publish, read through today's schema; none saved yet: nothing to publish. */
 const loadDraftStep = createStep(

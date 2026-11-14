@@ -1,4 +1,4 @@
-import { storefrontLink, SYSTEM_LINKS } from "../../../lib/storefront/menus"
+import { MENU_LIMITS, storefrontLink, SYSTEM_LINKS } from "../../../lib/storefront/menus"
 import { linkFromHref } from "../menu-hrefs"
 
 /** A container whose address registry holds nothing (no record lives at these paths). */
@@ -40,5 +40,22 @@ describe("storefront system links (adr/0049)", () => {
       url: "/kampanyalar-arsivi",
       label: "Ad",
     })
+  })
+})
+
+describe("an address as a link with no wording of its own", () => {
+  it("is its own label, cut to the length the link's schema takes", async () => {
+    const long = `https://ornek.com/${"rehber/".repeat(20)}`
+    const link = await linkFromHref(container, { label: null, href: long })
+    expect(link).toMatchObject({ kind: "url", url: long })
+    expect(link.label).toHaveLength(MENU_LIMITS.label)
+    expect(storefrontLink.safeParse(link).success).toBe(true)
+    // A path nothing answers, too
+    const path = await linkFromHref(container, { label: null, href: `/${"a".repeat(80)}` })
+    expect(storefrontLink.safeParse(path).success).toBe(true)
+    // A short one is kept whole
+    await expect(
+      linkFromHref(container, { label: null, href: "https://ornek.com/a" })
+    ).resolves.toEqual({ kind: "url", url: "https://ornek.com/a", label: "https://ornek.com/a" })
   })
 })
