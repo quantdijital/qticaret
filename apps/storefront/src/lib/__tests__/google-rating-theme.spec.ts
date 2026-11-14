@@ -128,8 +128,7 @@ describe("the themes' Google rating badge", () => {
     expect(html).toContain('href="https://maps.google.com/maps?cid=1267"')
     expect(html).toMatch(/target="_blank" rel="noopener noreferrer"/)
     // The first sentence of each excerpt, quoted
-    expect(html).toContain("“Şam çeliği av bıçağı aldım.”")
-    expect(html).not.toContain("dikişleri çok temiz")
+    expect(html).toContain("“Şam çeliği av bıçağı aldım. Kılıfı gerçek deri, dikişleri çok temiz.”")
     expect(html).toContain("Google kullanıcısı")
     expect(html).toContain(`aria-label="Google'dan son değerlendirmeler"`)
     expect(html).not.toContain("application/ld+json")
