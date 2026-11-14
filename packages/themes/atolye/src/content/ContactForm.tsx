@@ -137,7 +137,7 @@ export function ContactForm({
               maxLength={3000}
               rows={6}
               placeholder={ph.message}
-              className="gf-field min-h-40 rounded-media py-3"
+              className="gf-field min-h-40 rounded-[min(var(--button-radius),var(--radius-media))] py-3"
             />
           </div>
           <p className="text-sm text-text-2 sm:col-span-2">

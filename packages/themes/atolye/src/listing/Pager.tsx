@@ -56,7 +56,7 @@ export function Pager({ pagination, t }: { pagination: PaginationView; t: Transl
                 aria-current={each === pagination.page ? "page" : undefined}
                 aria-label={t("listing.page_n", { page: each })}
                 className={cn(
-                  "tabular inline-flex size-11 items-center justify-center rounded-pill text-sm font-semibold no-underline transition-colors duration-(--dur-micro)",
+                  "tabular inline-flex size-11 items-center justify-center rounded-button text-sm font-semibold no-underline transition-colors duration-(--dur-micro)",
                   each === pagination.page ? "bg-text text-paper" : "bg-paper-2 hover:bg-paper-3"
                 )}
               >

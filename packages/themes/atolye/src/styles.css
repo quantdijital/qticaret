@@ -37,15 +37,16 @@
  *
  * `--primary` holds the shop's colour; the storefront prints the shop's
  * own over it at `:root` (adr/0053 §B). The fallback is a graphite-wine.
- * The shop's faces, corners, page colour and accent are not taken
- * (`src/themes/atolye.ts` in the storefront): this theme's own stand.
+ * The shop's faces, corner scale, button shape, card ratio and accent are
+ * printed over the values here the same way (adr/0062); a page tone's
+ * surfaces over the tokens they read (`tones.ts`).
  */
 :root {
   --primary: oklch(36% 0.12 350);
   --primary-foreground: oklch(99% 0.003 350);
 
-  --font-sans: var(--font-body);
-  --font-heading: var(--font-display);
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-heading: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
 
   --background: var(--color-paper);
   --foreground: var(--color-text);

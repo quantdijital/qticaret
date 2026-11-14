@@ -5,7 +5,7 @@ import { Trail } from "../parts/Trail"
 /** A draft's preview says it is one, above everything. */
 export function Notice({ text }: { text: string | null | undefined }) {
   return text ? (
-    <p role="status" className="rounded-media bg-signal-soft px-5 py-3 text-sm font-semibold">
+    <p role="status" className="rounded-media bg-highlight-soft px-5 py-3 text-sm font-semibold">
       {text}
     </p>
   ) : null

@@ -28,8 +28,8 @@
   transform: translateY(1px);
 }
 .gf-tab:has(> input:checked) {
-  background: var(--color-text);
-  color: var(--color-paper);
+  background: var(--color-mark);
+  color: var(--color-mark-ink);
 }
 .gf-tab:has(> input:focus-visible) {
   outline: 2px solid var(--color-focus);

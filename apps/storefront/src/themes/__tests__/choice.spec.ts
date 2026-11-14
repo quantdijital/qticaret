@@ -2,8 +2,6 @@ import { existsSync } from "node:fs"
 import { dirname, join } from "node:path"
 import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
-import { DEFAULT_THEME, themeStyle } from "@/lib/views/theme"
-import { atolyeSettings } from "../atolye"
 import {
   DEFAULT_STOREFRONT_THEME,
   STOREFRONT_THEMES,
@@ -46,49 +44,6 @@ describe("the theme a build is made with (adr/0057)", () => {
       for (const entry of Object.values(themeEntries(name))) {
         expect(existsSync(join(here, "..", "..", "..", entry))).toBe(true)
       }
-    }
-  })
-})
-
-describe("the settings the Atölye theme takes", () => {
-  const chosen = {
-    ...DEFAULT_THEME,
-    colors: { primary: "#7a1a48", accent: "#ffcc00", background: "cool" as const },
-    typography: { heading: "playfair" as const, body: "nunito" as const },
-    radius: "round" as const,
-    buttons: "square" as const,
-    product_card: { ...DEFAULT_THEME.product_card, ratio: "3:4" as const },
-  }
-
-  it("prints the shop's main colour and the cards' shape, nothing of faces, corners or page colour", () => {
-    const style = themeStyle(atolyeSettings(chosen)) ?? ""
-
-    expect(style).toContain("--primary:#7a1a48")
-    expect(style).toContain("--card-ratio:3 / 4")
-    for (const taken of [
-      "--font-",
-      "--radius-scale",
-      "--button-radius",
-      "--background",
-      "--highlight",
-    ]) {
-      expect(style).not.toContain(taken)
-    }
-  })
-
-  it("prints nothing at the defaults", () => {
-    expect(themeStyle(atolyeSettings(DEFAULT_THEME))).toBeNull()
-  })
-
-  it("prints nothing for the first theme's look either: every page colour and face reads as its own", () => {
-    for (const background of ["steel", "warm", "neutral", "cool"] as const) {
-      const settings = {
-        ...DEFAULT_THEME,
-        colors: { ...DEFAULT_THEME.colors, background },
-        typography: { heading: "fraunces" as const, body: "inter" as const },
-        header: { layout: "centered" as const, sticky: true },
-      }
-      expect(themeStyle(atolyeSettings(settings))).toBeNull()
     }
   })
 })

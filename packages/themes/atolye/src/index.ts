@@ -61,3 +61,6 @@ export const atolyeTheme: StorefrontTheme = {
   GiftCardBalancePage,
   PaymentLinkPage,
 }
+
+export { ATOLYE_TONES, TONE_SURFACES } from "./tones"
+export type { ToneSet, ToneSurface } from "./tones"

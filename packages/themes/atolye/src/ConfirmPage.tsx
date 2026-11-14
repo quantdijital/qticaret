@@ -26,7 +26,7 @@ export function ConfirmPage({
         <h1>{view.title}</h1>
         <p className="max-w-[52ch] text-lg text-text-2">{view.text}</p>
         {view.warning && (
-          <p role="note" className="rounded-media bg-signal-soft p-4 text-md font-semibold">
+          <p role="note" className="rounded-media bg-highlight-soft p-4 text-md font-semibold">
             {view.warning}
           </p>
         )}

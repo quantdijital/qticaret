@@ -14,7 +14,7 @@ import type { AddonWords, GiftWords } from "./words"
  * `prefix` keeps a line's ids apart, `values` starts them as chosen.
  */
 
-const FIELD = "gf-field rounded-inner"
+const FIELD = "gf-field rounded-box"
 
 const CHOICE =
   "flex min-h-11 cursor-pointer items-center gap-3 rounded-inner bg-field px-3 text-sm transition-colors duration-(--dur-micro) hover:bg-paper-3 has-[:checked]:font-semibold has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
@@ -258,7 +258,7 @@ export function GiftRecipientFields({
           defaultValue={values?.message ?? ""}
           placeholder={words.placeholders.message}
           aria-describedby={`${prefix}-mesaj-ipucu`}
-          className="gf-field min-h-24 rounded-inner"
+          className="gf-field min-h-24 rounded-box"
         />
         <p id={`${prefix}-mesaj-ipucu`} className="text-xs text-text-2">
           {words.messageHint}

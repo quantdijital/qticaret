@@ -6,7 +6,7 @@ import type { ActionResult, FormAction } from "@qticaret/ui"
 import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 import type { CommunityWords } from "./words"
 
-const FIELD = "gf-field rounded-inner"
+const FIELD = "gf-field rounded-box"
 
 /** A refusal under the button, in the shop's words for it. */
 function Refusal({
@@ -118,7 +118,7 @@ export function ReviewForm({
           maxLength={2000}
           rows={4}
           placeholder={placeholders.body}
-          className="gf-field min-h-28 rounded-inner"
+          className="gf-field min-h-28 rounded-box"
         />
       </div>
       <div className="flex flex-col gap-2">
@@ -132,7 +132,7 @@ export function ReviewForm({
           multiple
           accept="image/jpeg,image/png,image/webp,image/avif"
           aria-describedby="yorum-foto-ipucu"
-          className="text-sm file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-pill file:border-0 file:bg-paper-3 file:px-4 file:font-semibold file:text-text"
+          className="text-sm file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-button file:border-0 file:bg-paper-3 file:px-4 file:font-semibold file:text-text"
         />
         <p id="yorum-foto-ipucu" className="text-xs text-text-2">
           {words.photosHint}
@@ -183,7 +183,7 @@ export function QuestionForm({
         maxLength={1000}
         rows={4}
         placeholder={placeholder}
-        className="gf-field min-h-32 rounded-inner"
+        className="gf-field min-h-32 rounded-box"
       />
       <button type="submit" disabled={pending} aria-busy={pending} className={`${SEND} mt-2`}>
         {pending ? words.sending : words.ask}

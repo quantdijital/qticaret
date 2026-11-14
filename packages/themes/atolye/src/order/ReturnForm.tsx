@@ -226,7 +226,7 @@ export function ReturnForm({
           name="note"
           maxLength={1000}
           rows={3}
-          className="gf-field min-h-24 rounded-inner"
+          className="gf-field min-h-24 rounded-box"
         />
       </div>
       {words.shipping && <p className="text-text-2">{words.shipping}</p>}

@@ -169,7 +169,7 @@ function ActiveFilter({ filter, t }: { filter: ReviewFilterView; t: Translate })
         href={filter.clearPath}
         rel="nofollow"
         aria-label={t("reviews.filter_clear", { label })}
-        className="inline-flex min-h-11 items-center gap-2 rounded-pill bg-text pr-3 pl-4 text-sm font-semibold whitespace-nowrap text-paper no-underline transition-colors duration-(--dur-micro) hover:bg-text-2 active:translate-y-px"
+        className="inline-flex min-h-11 items-center gap-2 rounded-pill bg-mark pr-3 pl-4 text-sm font-semibold whitespace-nowrap text-mark-ink no-underline transition-colors duration-(--dur-micro) hover:bg-mark-deep active:translate-y-px"
       >
         <Star className="size-4 fill-current" aria-hidden="true" strokeWidth={1.5} />
         {label}

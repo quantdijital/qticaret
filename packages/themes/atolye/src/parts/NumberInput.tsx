@@ -19,7 +19,7 @@ type InputProps = Omit<
 >
 
 const ARROW =
-  "flex min-h-0 flex-1 items-center justify-center rounded-pill text-text-3 transition-colors duration-(--dur-micro) hover:bg-paper-3 hover:text-text disabled:pointer-events-none disabled:opacity-35"
+  "flex min-h-0 flex-1 items-center justify-center rounded-button text-text-3 transition-colors duration-(--dur-micro) hover:bg-paper-3 hover:text-text disabled:pointer-events-none disabled:opacity-35"
 
 /**
  * A number field in the Grafit pill (`gf-field`) with its own up / down

@@ -97,7 +97,7 @@ export function Consents({
       )}
       {ageLimit !== null && (
         <fieldset
-          className="flex flex-col gap-3 rounded-media bg-signal-soft p-4 sm:p-5"
+          className="flex flex-col gap-3 rounded-media bg-highlight-soft p-4 sm:p-5"
           aria-describedby="yas-hata"
         >
           <legend className="sr-only">{words.ageTitle}</legend>

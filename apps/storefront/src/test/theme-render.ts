@@ -3,6 +3,7 @@ import type { ComponentType } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import type { ShopView, StorefrontTheme } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
+import { DEFAULT_THEME, themeView } from "@/lib/views/theme"
 
 /**
  * A theme's page as the server prints it, for any theme package
@@ -67,11 +68,8 @@ export const shopFixture = (over: Partial<ShopView> = {}): ShopView => ({
   legalLinks: [{ label: "Mesafeli Satış Sözleşmesi", path: "/yasal/mesafeli-satis-sozlesmesi" }],
   privacyPath: null,
   identityLines: ["MERSİS: 0000000000000000", "Denizli V.D. 0000000000"],
-  theme: {
-    card: { ratio: "4:5", showBrand: true, showRating: false },
-    header: { layout: "centered", sticky: true },
-    buttons: "pill",
-  },
+  // The defaults, Grafit (adr/0062 §2)
+  theme: themeView(DEFAULT_THEME),
   bottomNav: { current: "home" },
   ...over,
 })

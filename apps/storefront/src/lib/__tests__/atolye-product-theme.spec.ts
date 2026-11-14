@@ -151,7 +151,7 @@ describe("the theme's product page", () => {
     const html = page({ notice })
     expect(html).toMatch(new RegExp(`<p role="status"[^>]*>${notice}</p>`))
     expect(html.indexOf(notice)).toBeLessThan(html.indexOf("<h1"))
-    expect(page()).not.toContain('role="status" class="rounded-media bg-signal-soft')
+    expect(page()).not.toContain('role="status" class="rounded-media bg-highlight-soft')
   })
 
   it("on a phone the trail is the one step back", () => {

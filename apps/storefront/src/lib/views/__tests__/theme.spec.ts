@@ -2,35 +2,20 @@ import { readFileSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 import type { StoreThemeSettings } from "@qticaret/types"
-import { DEFAULT_THEME, THEME_BACKGROUNDS, themeSettings, themeStyle, themeView } from "../theme"
+import { oklchToHex } from "@/test/colour"
+import {
+  DEFAULT_THEME,
+  THEME_BACKGROUNDS,
+  THEME_FONTS,
+  themeSettings,
+  themeStyle,
+  themeView,
+} from "../theme"
 
 const theme = (patch: Partial<StoreThemeSettings>): StoreThemeSettings => ({
   ...DEFAULT_THEME,
   ...patch,
 })
-
-/** `oklch(L% C H)` as `#rrggbb` (CSS Color 4: OKLCH → OKLab → linear sRGB → gamma, 8-bit). */
-function oklchToHex(lightness: number, chroma: number, hue: number): string {
-  const L = lightness / 100
-  const a = chroma * Math.cos((hue * Math.PI) / 180)
-  const b = chroma * Math.sin((hue * Math.PI) / 180)
-  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3
-  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3
-  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3
-  const linear = [
-    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
-    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
-    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
-  ]
-  const channels = linear.map((value) => {
-    const clipped = Math.min(1, Math.max(0, value))
-    const gamma = clipped <= 0.0031308 ? 12.92 * clipped : 1.055 * clipped ** (1 / 2.4) - 0.055
-    return Math.round(gamma * 255)
-      .toString(16)
-      .padStart(2, "0")
-  })
-  return `#${channels.join("")}`
-}
 
 /** The Atölye theme's page token as its stylesheet declares it. */
 function paperToken(): [number, number, number] {
@@ -126,31 +111,33 @@ describe("themeStyle", () => {
     expect(oklchToHex(62.8, 0.2577, 29.23)).toBe("#ff0000")
   })
 
-  it("paints the page with the backend's values and the neutrals that go with it", () => {
+  it("holds the page colours as the backend's check reads them, and leaves painting a tone to the theme", () => {
     expect(THEME_BACKGROUNDS).toEqual({
       steel: "#f8fafc",
       warm: "#f6f4ef",
       neutral: "#f5f5f5",
       cool: "#f3f5f8",
     })
-    const warm = themeStyle(theme({ colors: { ...DEFAULT_THEME.colors, background: "warm" } }))
-    expect(warm).toContain("--background:#f6f4ef;")
-    expect(warm).toContain("--muted-foreground:#5c574d")
-    const neutral = themeStyle(
-      theme({ colors: { ...DEFAULT_THEME.colors, background: "neutral" } })
+    // A theme prints its own surfaces for a tone (adr/0062 §5), handed in as `own`
+    for (const background of ["steel", "warm", "neutral", "cool"] as const) {
+      expect(themeStyle(theme({ colors: { ...DEFAULT_THEME.colors, background } }))).toBeNull()
+    }
+    expect(
+      themeStyle(theme({ colors: { ...DEFAULT_THEME.colors, background: "warm" } }), [
+        "--color-paper:#f6f4ef",
+      ])
+    ).toBe(":root{--color-paper:#f6f4ef}")
+    expect(themeStyle(theme({ radius: "sharp" }), ["--x:1", "--y:2"])).toBe(
+      ":root{--radius-scale:0.2;--x:1;--y:2}"
     )
-    expect(neutral).toContain("--background:#f5f5f5;")
-    expect(neutral).toContain("--muted-foreground:#585858")
-    const cool = themeStyle(theme({ colors: { ...DEFAULT_THEME.colors, background: "cool" } }))
-    expect(cool).toContain("--background:#f3f5f8;")
-    expect(cool).toContain("--border:#dce1e8")
+    expect(themeStyle(DEFAULT_THEME, [])).toBeNull()
   })
 
   it("sets the faces through their own variables, each with a fallback of its kind", () => {
-    const style = themeStyle(theme({ typography: { heading: "dm-serif", body: "source-sans" } }))
+    const style = themeStyle(theme({ typography: { heading: "playfair", body: "source-sans" } }))
     expect(themeStyle(theme({ typography: { heading: "manrope", body: "manrope" } }))).toBeNull()
     expect(style).toContain(
-      '--font-heading:var(--font-dm-serif), ui-serif, Georgia, "Times New Roman", serif'
+      '--font-heading:var(--font-playfair), ui-serif, Georgia, "Times New Roman", serif'
     )
     expect(style).toContain("--font-sans:var(--font-source-sans), ui-sans-serif")
     // Inter for headings is a sans face
@@ -159,11 +146,53 @@ describe("themeStyle", () => {
     )
   })
 
+  it("prints every face the lists offer, and only the one that is not Manrope", () => {
+    for (const heading of ["fraunces", "inter", "playfair", "dm-serif"] as const) {
+      const style = themeStyle(theme({ typography: { heading, body: "manrope" } }))
+      expect(style).toContain(`--font-heading:var(${THEME_FONTS[heading].variable}), `)
+      expect(style).not.toContain("--font-sans")
+    }
+    for (const body of ["inter", "source-sans", "nunito"] as const) {
+      const style = themeStyle(theme({ typography: { heading: "manrope", body } }))
+      expect(style).toContain(`--font-sans:var(${THEME_FONTS[body].variable}), `)
+      expect(style).not.toContain("--font-heading")
+    }
+  })
+
+  it("sets a heading's weight to what its face carries: 400 for DM Serif, 800 (unprinted) for the rest", () => {
+    expect(themeStyle(theme({ typography: { heading: "dm-serif", body: "manrope" } }))).toBe(
+      ':root{--font-heading:var(--font-dm-serif), ui-serif, Georgia, "Times New Roman", serif;' +
+        "--display-weight:400}"
+    )
+    for (const heading of ["fraunces", "inter", "playfair", "manrope"] as const) {
+      expect(THEME_FONTS[heading].displayWeight).toBe(800)
+      expect(themeStyle(theme({ typography: { heading, body: "manrope" } })) ?? "").not.toContain(
+        "--display-weight"
+      )
+    }
+    // Each face's file carries the weight its headings ask for (`app/fonts.css`)
+    const css = readFileSync(
+      fileURLToPath(new URL("../../../app/fonts.css", import.meta.url)),
+      "utf8"
+    )
+    for (const [font, { variable, displayWeight }] of Object.entries(THEME_FONTS)) {
+      const family = `qt-${variable.replace("--font-", "")}`
+      const range = new RegExp(
+        `font-family: "${family}";\\s+font-style: normal;\\s+font-weight: (\\d+)(?: (\\d+))?;`
+      ).exec(css)
+      const [lightest, heaviest] = [Number(range?.[1]), Number(range?.[2] ?? range?.[1])]
+      expect(displayWeight >= lightest && displayWeight <= heaviest, font).toBe(true)
+      expect(displayWeight, font).toBe(Math.min(800, heaviest))
+    }
+  })
+
   it("scales the corners, shapes the buttons and the cards' pictures", () => {
     expect(themeStyle(theme({ radius: "sharp" }))).toBe(":root{--radius-scale:0.2}")
     expect(themeStyle(theme({ radius: "round" }))).toBe(":root{--radius-scale:1.5}")
     expect(themeStyle(theme({ buttons: "rounded" }))).toBe(":root{--button-radius:0.75rem}")
-    expect(themeStyle(theme({ buttons: "square" }))).toBe(":root{--button-radius:0}")
+    // With its unit: the theme compares it with a length in `min()`
+    expect(themeStyle(theme({ buttons: "square" }))).toBe(":root{--button-radius:0px}")
+    expect(themeStyle(theme({ radius: "soft", buttons: "pill" }))).toBeNull()
     expect(
       themeStyle(theme({ product_card: { ...DEFAULT_THEME.product_card, ratio: "3:4" } }))
     ).toBe(":root{--card-ratio:3 / 4}")

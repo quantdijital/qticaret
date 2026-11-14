@@ -6,7 +6,7 @@ import { SmallPrint } from "./SmallPrint"
 import { Wordmark } from "./Wordmark"
 
 const ROUND =
-  "inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-pill text-sm font-semibold no-underline"
+  "inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-2 rounded-button text-sm font-semibold no-underline"
 
 /** A question while paying: the shop's WhatsApp, else its phone; none when it gave neither. */
 function Help({ shop, t }: { shop: ShopView; t: Translate }) {

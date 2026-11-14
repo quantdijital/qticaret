@@ -11,6 +11,12 @@
  * The signal is the shop's colour (adr/0053 §B): the storefront prints
  * `--primary` and `--primary-foreground` over the theme's at `:root`, and
  * the signal reads them (`styles.css` holds the fallback).
+ *
+ * The shop's other theme settings reach these tokens the same way
+ * (adr/0062): the faces read the contract's `--font-heading` and
+ * `--font-sans`, the corners its `--radius-scale`, and the storefront's
+ * theme entry prints a page tone's surfaces (`tones.ts`) and the accent's
+ * mark over the values here. With nothing printed this is Grafit.
  */
 @theme static {
   --text-2xs: 0.75rem;
@@ -59,7 +65,13 @@
   --color-signal: var(--primary);
   --color-signal-ink: var(--primary-foreground);
   --color-signal-deep: color-mix(in oklab, var(--primary) 82%, oklch(12% 0.01 255));
-  --color-signal-soft: color-mix(in oklab, var(--primary) 9%, var(--color-paper));
+  /* The shop's accent (adr/0062 §11): a note's tinted ground reads the contract's
+     `--highlight` (the signal until the shop picks one); a selected chip and a count
+     are graphite until then (the theme entry prints the three marks with the accent) */
+  --color-highlight-soft: color-mix(in oklab, var(--highlight) 9%, var(--color-paper));
+  --color-mark: var(--color-text);
+  --color-mark-ink: var(--color-paper);
+  --color-mark-deep: var(--color-text-2);
   --color-signal-on-stage: oklch(78% 0.1 350);
   --color-focus: var(--primary);
   --color-deal: oklch(52% 0.19 27);
@@ -76,12 +88,18 @@
   --color-whatsapp-ink: oklch(99% 0.003 152);
   --color-scrim: oklch(15% 0.012 255 / 0.5);
 
-  --font-display: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  /* The shop's faces (adr/0062 §7): the contract's names, Manrope in `styles.css` */
+  --font-display: var(--font-heading);
+  --font-body: var(--font-sans);
 
-  --radius-tile: 20px;
-  --radius-media: 14px;
-  --radius-inner: 10px;
+  /* The shop's corner choice scales the three (adr/0062 §8); soft is 1: 20 / 14 / 10 px */
+  --radius-tile: calc(20px * var(--radius-scale, 1));
+  --radius-media: calc(14px * var(--radius-scale, 1));
+  --radius-inner: calc(10px * var(--radius-scale, 1));
+  /* A field that is a box, not a pill (a textarea, a product form's field): the
+     inner corner, never rounder than the shop's button shape */
+  --radius-box: min(var(--button-radius, 999px), var(--radius-inner));
+  /* Chips, badges and status pills: never scaled, whatever the button shape */
   --radius-pill: 999px;
   --shadow-float: 0 12px 32px oklch(20% 0.012 255 / 0.14), 0 1px 2px oklch(20% 0.012 255 / 0.08);
 }
@@ -119,6 +137,7 @@
   --z-modal: 400;
   --z-toast: 500;
   --z-tooltip: 600;
+  /* The heading face's heavy weight; the storefront prints a face's own when it has no 800 */
   --display-weight: 800;
   /* The hero and the big figures; a page's and a section's heads are set less tight */
   --tracking-display: -0.035em;

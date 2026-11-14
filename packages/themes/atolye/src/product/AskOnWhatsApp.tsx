@@ -18,7 +18,7 @@ export function AskOnWhatsApp({ href, t }: { href: string; t: Translate }) {
       href={href}
       target="_blank"
       rel="noopener"
-      className="flex min-h-12 w-full items-center justify-center gap-2.5 rounded-pill border border-whatsapp bg-whatsapp/8 px-5 py-2.5 text-md font-semibold text-text no-underline transition-colors duration-(--dur-micro) hover:bg-whatsapp/16 active:translate-y-px"
+      className="flex min-h-12 w-full items-center justify-center gap-2.5 rounded-button border border-whatsapp bg-whatsapp/8 px-5 py-2.5 text-md font-semibold text-text no-underline transition-colors duration-(--dur-micro) hover:bg-whatsapp/16 active:translate-y-px"
     >
       <WhatsAppGlyph className="size-6 text-whatsapp" />
       {t("product.whatsapp_button")}

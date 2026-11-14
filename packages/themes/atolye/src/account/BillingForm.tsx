@@ -67,7 +67,7 @@ export function BillingForm({
               key={each}
               className={cn(
                 "inline-flex min-h-11 cursor-pointer items-center rounded-pill px-5 text-sm font-semibold transition-colors duration-(--dur-micro) active:translate-y-px has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus",
-                type === each ? "bg-text text-paper" : "bg-field hover:bg-paper-3"
+                type === each ? "bg-mark text-mark-ink" : "bg-field hover:bg-paper-3"
               )}
             >
               <input

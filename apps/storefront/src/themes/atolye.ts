@@ -1,34 +1,50 @@
-import { atolyeTheme } from "@qticaret/theme-atolye"
+import { ATOLYE_TONES, TONE_SURFACES, atolyeTheme } from "@qticaret/theme-atolye"
 import type { StoreThemeSettings } from "@qticaret/types"
-import { FONT_FILES } from "@/app/fonts"
+import { fontPreloads } from "@/app/fonts"
+import { isHexColor, readableOn } from "@/lib/views/color"
 import { DEFAULT_THEME, themeStyle } from "@/lib/views/theme"
 import type { ThemeEntry } from "./entry"
 
+/** What a pointed-at mark is mixed with: the ink `readableOn` writes with. */
+const INK = "#111113"
+
 /**
- * The settings the theme takes (docs/tema/yon-2026-11-05.md; owner
- * 2026-11-04): the shop's main colour (its action) and the cards' picture
- * shape. Its own counter, face, corners and pills stand whatever the panel
- * chose, so those are read as the defaults and print nothing. The defaults
- * are this look now (Grafit, adr/0062 §2); the filter goes when the theme's
- * CSS reads each setting (adr/0062 §1).
+ * What the theme prints on its own tokens for the shop's settings
+ * (adr/0062 §5, §11), beside the contract's variables every theme takes:
+ *
+ * - a page tone other than Grafit's steel: its surface family
+ *   (`ATOLYE_TONES`), over `--color-paper` and the tokens that go with it;
+ * - an accent: the mark a selected chip and a count are filled with, the
+ *   text that reads on it and its pointed-at shade. With no accent those
+ *   are graphite, the theme's own, though the contract's `--highlight`
+ *   falls back to the main colour.
+ *
+ * Nothing at the defaults; every value is from a fixed list or a checked colour.
  */
-export const atolyeSettings = (settings: StoreThemeSettings): StoreThemeSettings => ({
-  ...settings,
-  colors: {
-    primary: settings.colors.primary,
-    accent: null,
-    background: DEFAULT_THEME.colors.background,
-  },
-  typography: DEFAULT_THEME.typography,
-  radius: DEFAULT_THEME.radius,
-  buttons: DEFAULT_THEME.buttons,
-})
+export function atolyeDeclarations(settings: StoreThemeSettings): string[] {
+  const { accent, background } = settings.colors
+  const declarations: string[] = []
+  if (background !== DEFAULT_THEME.colors.background) {
+    const tone = ATOLYE_TONES[background]
+    declarations.push(...TONE_SURFACES.map((surface) => `--color-${surface}:${tone[surface]}`))
+  }
+  if (isHexColor(accent)) {
+    declarations.push(
+      `--color-mark:${accent}`,
+      `--color-mark-ink:${readableOn(accent)}`,
+      `--color-mark-deep:color-mix(in oklab,${accent} 85%,${INK})`
+    )
+  }
+  return declarations
+}
 
-/** One face for everything (Manrope, variable 200–800): its `latin` file and its Turkish letters. */
-const PRELOADS = [...FONT_FILES.manrope]
-
+/**
+ * Atölye takes every theme setting (adr/0062 §1): the saved settings as
+ * they are, the chosen faces preloaded, and its own tokens for the page
+ * tone and the accent. At the defaults (Grafit) it prints nothing.
+ */
 export const entry: ThemeEntry = {
   theme: atolyeTheme,
-  fontPreloads: () => PRELOADS,
-  style: (settings) => themeStyle(atolyeSettings(settings)),
+  fontPreloads,
+  style: (settings) => themeStyle(settings, atolyeDeclarations(settings)),
 }

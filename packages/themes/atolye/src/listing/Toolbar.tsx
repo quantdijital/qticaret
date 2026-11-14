@@ -104,7 +104,7 @@ export function Toolbar({
                 <SlidersHorizontal className="size-4" aria-hidden="true" strokeWidth={2} />
                 {t("listing.show_filters")}
                 {on > 0 && (
-                  <span className="tabular rounded-pill bg-text px-2 text-2xs leading-5 text-paper">
+                  <span className="tabular rounded-pill bg-mark px-2 text-2xs leading-5 text-mark-ink">
                     <span className="sr-only">: </span>
                     {on}
                   </span>
@@ -132,7 +132,7 @@ export function Toolbar({
                   href={chip.path}
                   rel="nofollow"
                   aria-label={t("listing.remove_filter", { label: chip.label })}
-                  className="inline-flex min-h-11 items-center gap-2 rounded-pill bg-text pr-3 pl-4 text-sm font-semibold whitespace-nowrap text-paper no-underline transition-colors duration-(--dur-micro) hover:bg-text-2 active:translate-y-px"
+                  className="inline-flex min-h-11 items-center gap-2 rounded-pill bg-mark pr-3 pl-4 text-sm font-semibold whitespace-nowrap text-mark-ink no-underline transition-colors duration-(--dur-micro) hover:bg-mark-deep active:translate-y-px"
                 >
                   {chip.label}
                   <X className="size-4" aria-hidden="true" strokeWidth={2} />

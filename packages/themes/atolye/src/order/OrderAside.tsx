@@ -73,7 +73,7 @@ export function OrderAside({ view, t }: { view: OrderPageView; t: Translate }) {
       {view.guest && (
         <section
           aria-labelledby="hesap-teklifi"
-          className="flex flex-col gap-4 rounded-tile bg-signal-soft p-5 sm:p-7"
+          className="flex flex-col gap-4 rounded-tile bg-highlight-soft p-5 sm:p-7"
         >
           <h2 id="hesap-teklifi" className="flex items-center gap-3 text-title">
             <UserRoundPlus className="size-6 shrink-0" aria-hidden="true" strokeWidth={1.75} />

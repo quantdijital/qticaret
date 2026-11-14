@@ -23,7 +23,7 @@ export function BankTransfer({ view, t }: { view: OrderPageView; t: Translate })
   return (
     <section
       aria-labelledby="havale"
-      className="flex flex-col gap-5 rounded-tile bg-signal-soft p-5 sm:p-7"
+      className="flex flex-col gap-5 rounded-tile bg-highlight-soft p-5 sm:p-7"
     >
       <h2 id="havale" className="flex items-center gap-3 text-title">
         <Landmark className="size-6 shrink-0" aria-hidden="true" strokeWidth={1.75} />

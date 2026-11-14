@@ -17,7 +17,7 @@ export interface SliderWords {
 }
 
 const ROUND =
-  "absolute top-1/2 z-10 hidden size-12 -translate-y-1/2 items-center justify-center rounded-pill bg-stage/70 text-stage-text transition-colors hover:bg-stage lg:inline-flex"
+  "absolute top-1/2 z-10 hidden size-12 -translate-y-1/2 items-center justify-center rounded-button bg-stage/70 text-stage-text transition-colors hover:bg-stage lg:inline-flex"
 
 /** Two round arrows either side of the slide, from 1024 px; past the last is the first. */
 export function SliderArrows({
@@ -79,12 +79,12 @@ export function SliderDots({
 }) {
   return (
     <div className="absolute inset-x-0 bottom-3 z-10 flex justify-center sm:bottom-5">
-      <div className="flex items-center rounded-pill bg-stage/70 px-1 text-stage-text backdrop-blur-sm">
+      <div className="flex items-center rounded-button bg-stage/70 px-1 text-stage-text backdrop-blur-sm">
         {playControl && (
           <button
             type="button"
             aria-label={playing ? words.pause : words.play}
-            className="inline-flex size-11 items-center justify-center rounded-pill"
+            className="inline-flex size-11 items-center justify-center rounded-button"
             onClick={onPlay}
           >
             {playing ? (

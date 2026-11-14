@@ -131,7 +131,7 @@ export function MenuSheet({
                       <li>
                         <a
                           href={category.path}
-                          className="inline-flex min-h-11 items-center gap-1.5 rounded-pill px-2 text-sm font-semibold text-text underline-offset-4 hover:underline"
+                          className="inline-flex min-h-11 items-center gap-1.5 rounded-button px-2 text-sm font-semibold text-text underline-offset-4 hover:underline"
                         >
                           {words.allIn[category.path]}
                           <ArrowRight

@@ -199,7 +199,7 @@ export function ReviewList({
                     onClick={() => {
                       choose(null)
                     }}
-                    className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-pill bg-text pr-3 pl-4 text-sm font-semibold whitespace-nowrap text-paper transition-colors duration-(--dur-micro) hover:bg-text-2 active:translate-y-px"
+                    className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-pill bg-mark pr-3 pl-4 text-sm font-semibold whitespace-nowrap text-mark-ink transition-colors duration-(--dur-micro) hover:bg-mark-deep active:translate-y-px"
                   >
                     <Star className="size-4 fill-current" aria-hidden="true" strokeWidth={1.5} />
                     {label}
@@ -220,7 +220,7 @@ export function ReviewList({
                     setOrder(event.target.value as Order)
                     setShown(PAGE)
                   }}
-                  className="min-h-11 cursor-pointer appearance-none rounded-pill border border-edge bg-paper py-2 pr-10 pl-4 font-semibold"
+                  className="min-h-11 cursor-pointer appearance-none rounded-button border border-edge bg-paper py-2 pr-10 pl-4 font-semibold"
                 >
                   <option value="newest">{words.newest}</option>
                   <option value="highest">{words.highest}</option>

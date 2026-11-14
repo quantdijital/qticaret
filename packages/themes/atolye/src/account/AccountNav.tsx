@@ -73,7 +73,7 @@ export function SideNav({
   actions: AccountActions
 }) {
   const row =
-    "flex min-h-12 w-full items-center gap-3 rounded-pill px-4 text-md font-semibold no-underline transition-colors duration-(--dur-micro)"
+    "flex min-h-12 w-full items-center gap-3 rounded-button px-4 text-md font-semibold no-underline transition-colors duration-(--dur-micro)"
   return (
     <nav
       aria-label={t("account.menu")}

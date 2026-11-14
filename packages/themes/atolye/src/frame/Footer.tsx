@@ -55,7 +55,7 @@ function Contact({ shop, t }: { shop: ShopView; t: Translate }) {
                 href={profile.href}
                 rel="noopener me"
                 target="_blank"
-                className="inline-flex min-h-11 items-center rounded-pill border border-rule bg-field px-4 text-sm font-semibold no-underline hover:border-edge"
+                className="inline-flex min-h-11 items-center rounded-button border border-rule bg-field px-4 text-sm font-semibold no-underline hover:border-edge"
               >
                 {profile.label}
               </a>

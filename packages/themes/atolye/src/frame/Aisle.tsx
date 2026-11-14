@@ -7,7 +7,7 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { NavCategoryView } from "@qticaret/ui"
 
 const ITEM =
-  "group inline-flex min-h-11 items-center gap-1 rounded-pill px-3 text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text data-[state=open]:bg-text data-[state=open]:text-paper"
+  "group inline-flex min-h-11 items-center gap-1 rounded-button px-3 text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text data-[state=open]:bg-text data-[state=open]:text-paper"
 
 /** A category's panel: its children in short columns beside its picture tile. */
 function Panel({ category, allIn }: { category: NavCategoryView; allIn: string }) {

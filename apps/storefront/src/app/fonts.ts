@@ -21,26 +21,20 @@ export const FONT_FILES: Readonly<Record<ThemeFont, readonly [string, string]>> 
 }
 
 /**
- * The faces a theme sets for itself, whatever the shop chose (adr/0057):
- * the Atölye theme's display face and its body face's two weights, each
- * as its `latin` file and its Turkish letters (`app/fonts.css`).
+ * The most a page preloads in faces, in bytes (docs/21, adr/0062 §7): the
+ * heaviest pair, Fraunces with Inter, is 124 968. A face that takes a pair
+ * past it cannot join the lists.
  */
-export const THEME_OWN_FONT_FILES = {
-  caslon: ["/fonts/caslon-latin.84267e9374.woff2", "/fonts/caslon-tr.c382a2b006.woff2"],
-  hanken: ["/fonts/hanken-latin.787b3fdd0b.woff2", "/fonts/hanken-tr.e652988611.woff2"],
-  "hanken-medium": [
-    "/fonts/hanken-medium-latin.31f666af7b.woff2",
-    "/fonts/hanken-medium-tr.f59de0cc0a.woff2",
-  ],
-} as const satisfies Readonly<Record<string, readonly [string, string]>>
+export const FONT_PRELOAD_BUDGET = 125_000
 
 /**
  * The files the page preloads: the shop's two faces (adr/0053 §B
  * `typography`), body first, and no other. The body face draws the
  * first text on a phone (the hero's line, the cookie notice); the
  * heading face draws the shop's name in the header and the page's h1,
- * above the fold on every page, so it is preloaded too. The five faces
- * the shop did not choose cost its visitors nothing.
+ * above the fold on every page, so it is preloaded too. The faces the
+ * shop did not choose cost its visitors nothing. No pair may pass
+ * `FONT_PRELOAD_BUDGET` (the spec sums every pair's files).
  */
 export function fontPreloads(settings: StoreThemeSettings): string[] {
   const { heading, body } = settings.typography

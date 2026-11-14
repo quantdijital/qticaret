@@ -1,14 +1,27 @@
 import { createHash } from "node:crypto"
-import { readdirSync, readFileSync } from "node:fs"
+import { readdirSync, readFileSync, statSync } from "node:fs"
 import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
 import { isStaticFile } from "@/lib/seo/paths"
 import { DEFAULT_THEME, THEME_FONTS } from "@/lib/views/theme"
-import { FONT_FILES, THEME_OWN_FONT_FILES, fontPreloads } from "../fonts"
+import type { ThemeBodyFont, ThemeHeadingFont } from "@qticaret/types"
+import { entry } from "@/themes/atolye"
+import { FONT_FILES, FONT_PRELOAD_BUDGET, fontPreloads } from "../fonts"
 
 const publicDir = fileURLToPath(new URL("../../../public", import.meta.url))
 const css = readFileSync(fileURLToPath(new URL("../fonts.css", import.meta.url)), "utf8")
-const listed = [...Object.values(FONT_FILES), ...Object.values(THEME_OWN_FONT_FILES)].flat()
+const listed = Object.values(FONT_FILES).flat()
+
+const HEADINGS: readonly ThemeHeadingFont[] = [
+  "fraunces",
+  "inter",
+  "playfair",
+  "dm-serif",
+  "manrope",
+]
+const BODIES: readonly ThemeBodyFont[] = ["inter", "manrope", "source-sans", "nunito"]
+const bytes = (paths: readonly string[]) =>
+  paths.reduce((sum, path) => sum + statSync(`${publicDir}${path}`).size, 0)
 
 describe("the self-hosted faces", () => {
   it("lists exactly the files under public/fonts, each named by its content's hash", () => {
@@ -29,9 +42,8 @@ describe("the self-hosted faces", () => {
     for (const { variable } of Object.values(THEME_FONTS)) {
       expect(css).toContain(`${variable}: "qt-`)
     }
-    // A theme's own faces (adr/0057): the Atölye theme's tokens read these
-    expect(css).toContain('--font-caslon: "qt-caslon"')
-    expect(css).toContain('--font-hanken: "qt-hanken"')
+    // The first look's own faces went with it (adr/0062 §7)
+    expect(css).not.toMatch(/caslon|hanken/)
   })
 
   it("serves every file past the proxy (no resolve, no 404 report)", () => {
@@ -63,5 +75,37 @@ describe("fontPreloads", () => {
     expect(
       fontPreloads({ ...DEFAULT_THEME, typography: { heading: "manrope", body: "manrope" } })
     ).toEqual([...FONT_FILES.manrope])
+    expect(
+      fontPreloads({ ...DEFAULT_THEME, typography: { heading: "inter", body: "inter" } })
+    ).toEqual([...FONT_FILES.inter])
+  })
+
+  it("keeps every pair the shop may choose within the preload budget (docs/21, adr/0062 §7)", () => {
+    expect(FONT_PRELOAD_BUDGET).toBe(125_000)
+    const totals = HEADINGS.flatMap((heading) =>
+      BODIES.map((body) => {
+        const files = fontPreloads({ ...DEFAULT_THEME, typography: { heading, body } })
+        // Body first, then the heading face; two files a face, none twice
+        expect(files.slice(0, 2)).toEqual([...FONT_FILES[body]])
+        expect(files).toHaveLength(heading === body ? 2 : 4)
+        expect(new Set(files).size).toBe(files.length)
+        return { pair: `${heading} + ${body}`, total: bytes(files) }
+      })
+    )
+    expect(totals).toHaveLength(20)
+    for (const { pair, total } of totals) {
+      expect(total, pair).toBeLessThanOrEqual(FONT_PRELOAD_BUDGET)
+    }
+    // The heaviest pair and Grafit's own, as measured (a changed file is a new measure)
+    expect(totals.find(({ pair }) => pair === "fraunces + inter")?.total).toBe(124_968)
+    expect(bytes(fontPreloads(DEFAULT_THEME))).toBe(26_932)
+    expect(Math.max(...totals.map(({ total }) => total))).toBe(124_968)
+  })
+
+  it("is what the Atölye theme preloads: the chosen pair, Manrope at the defaults", () => {
+    expect(entry.fontPreloads(DEFAULT_THEME)).toEqual([...FONT_FILES.manrope])
+    expect(
+      entry.fontPreloads({ ...DEFAULT_THEME, typography: { heading: "dm-serif", body: "nunito" } })
+    ).toEqual([...FONT_FILES.nunito, ...FONT_FILES["dm-serif"]])
   })
 })

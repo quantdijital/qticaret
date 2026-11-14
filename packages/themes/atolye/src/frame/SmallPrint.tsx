@@ -101,7 +101,7 @@ export function SmallPrint({ shop, t }: { shop: ShopView; t: Translate }) {
         </div>
         <a
           href="#top"
-          className="-mr-3 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-pill px-3 text-xs font-semibold text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
+          className="-mr-3 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-button px-3 text-xs font-semibold text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
         >
           <span className="max-sm:sr-only">{t("footer.back_to_top")}</span>
           <ArrowUp className="size-4" aria-hidden="true" strokeWidth={2} />

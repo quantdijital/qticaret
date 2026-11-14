@@ -26,7 +26,7 @@ function Option({ option, hash }: { option: FilterOptionView; hash: string }) {
     <span
       aria-hidden="true"
       className={cn(
-        "flex size-5 shrink-0 items-center justify-center rounded-[6px] border transition-colors",
+        "flex size-5 shrink-0 items-center justify-center rounded-[min(6px,calc(6px*var(--radius-scale)))] border transition-colors",
         option.selected ? "border-text bg-text text-paper" : "border-edge bg-field"
       )}
     >

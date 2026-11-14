@@ -43,7 +43,7 @@ export function Price({
         </p>
       )}
       {price.cartOffer && (
-        <p className="self-start rounded-inner bg-signal-soft px-3 py-2 text-sm font-semibold">
+        <p className="self-start rounded-inner bg-highlight-soft px-3 py-2 text-sm font-semibold">
           {price.cartOffer}
         </p>
       )}

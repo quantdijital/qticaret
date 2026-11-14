@@ -126,7 +126,7 @@ export function CartPage({
                 {offers.map((offer) => (
                   <li
                     key={offer}
-                    className="flex min-h-11 items-center gap-2 rounded-pill bg-signal-soft px-4 text-sm font-semibold"
+                    className="flex min-h-11 items-center gap-2 rounded-pill bg-highlight-soft px-4 text-sm font-semibold"
                   >
                     <BadgePercent
                       className="size-4.5 shrink-0"

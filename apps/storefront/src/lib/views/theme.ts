@@ -34,6 +34,8 @@ export const DEFAULT_THEME: StoreThemeSettings = {
  * The page colours, as the backend's contrast check reads them
  * (`THEME_BACKGROUNDS`): the two must stay equal. `steel` is the theme's
  * own `--color-paper` in sRGB (adr/0062 §3; the spec derives it from the token).
+ * Painting a tone is the theme's: its entry prints its own surfaces for
+ * it (adr/0062 §5), each tone's counter being the value here.
  */
 export const THEME_BACKGROUNDS: Readonly<Record<ThemeBackground, string>> = {
   steel: "#f8fafc",
@@ -42,54 +44,30 @@ export const THEME_BACKGROUNDS: Readonly<Record<ThemeBackground, string>> = {
   cool: "#f3f5f8",
 }
 
-/**
- * The quiet surfaces, lines and secondary text that go with a page colour;
- * `steel` is the theme's own and prints nothing, `warm` is the removed
- * first theme's bone set. Secondary text keeps WCAG AA on the page (6.4:1
- * and more), on muted surfaces (5.8:1) and on cards (7.0:1). Atölye's own
- * surface family per tone takes their place (adr/0062 §5).
- */
-const NEUTRALS: Readonly<Record<Exclude<ThemeBackground, "steel">, readonly string[]>> = {
-  warm: [
-    "--secondary:#ece8e0",
-    "--muted:#ece8e0",
-    "--accent:#ece8e0",
-    "--border:#e2ddd2",
-    "--input:#d3cdbf",
-    "--muted-foreground:#5c574d",
-  ],
-  neutral: [
-    "--secondary:#ebebeb",
-    "--muted:#ebebeb",
-    "--accent:#ebebeb",
-    "--border:#e0e0e0",
-    "--input:#cfcfcf",
-    "--muted-foreground:#585858",
-  ],
-  cool: [
-    "--secondary:#e8ecf1",
-    "--muted:#e8ecf1",
-    "--accent:#e8ecf1",
-    "--border:#dce1e8",
-    "--input:#c9d0da",
-    "--muted-foreground:#525a66",
-  ],
-}
-
 export type ThemeFont = ThemeHeadingFont | ThemeBodyFont
 
 const SERIF = 'ui-serif, Georgia, "Times New Roman", serif'
 const SANS = 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif'
 
-/** Each face's CSS variable (`app/fonts.css` sets it) and the fallback its kind wants. */
-export const THEME_FONTS: Readonly<Record<ThemeFont, { variable: string; fallback: string }>> = {
-  fraunces: { variable: "--font-fraunces", fallback: SERIF },
-  playfair: { variable: "--font-playfair", fallback: SERIF },
-  "dm-serif": { variable: "--font-dm-serif", fallback: SERIF },
-  inter: { variable: "--font-inter", fallback: SANS },
-  manrope: { variable: "--font-manrope", fallback: SANS },
-  "source-sans": { variable: "--font-source-sans", fallback: SANS },
-  nunito: { variable: "--font-nunito", fallback: SANS },
+/** The weight a theme's headings are set in when the face has it (`--display-weight`). */
+const DISPLAY_WEIGHT = 800
+
+/**
+ * Each face's CSS variable (`app/fonts.css` sets it), the fallback its kind
+ * wants, and the weight its headings take: the heaviest its file carries up
+ * to 800 (adr/0062 §7). DM Serif Display has one weight; a heading asked
+ * for 800 there would lean on the browser's matching, so its own is printed.
+ */
+export const THEME_FONTS: Readonly<
+  Record<ThemeFont, { variable: string; fallback: string; displayWeight: number }>
+> = {
+  fraunces: { variable: "--font-fraunces", fallback: SERIF, displayWeight: 800 },
+  playfair: { variable: "--font-playfair", fallback: SERIF, displayWeight: 800 },
+  "dm-serif": { variable: "--font-dm-serif", fallback: SERIF, displayWeight: 400 },
+  inter: { variable: "--font-inter", fallback: SANS, displayWeight: 800 },
+  manrope: { variable: "--font-manrope", fallback: SANS, displayWeight: 800 },
+  "source-sans": { variable: "--font-source-sans", fallback: SANS, displayWeight: 800 },
+  nunito: { variable: "--font-nunito", fallback: SANS, displayWeight: 800 },
 }
 
 const HEADING_FONTS: readonly ThemeHeadingFont[] = [
@@ -104,8 +82,11 @@ const BODY_FONTS: readonly ThemeBodyFont[] = ["inter", "manrope", "source-sans",
 /** The corner scale's factor (`--radius-scale`); soft is the theme's own. */
 const RADIUS_SCALE = { sharp: "0.2", soft: null, round: "1.5" } as const
 
-/** The buttons' corners (`--button-radius`); pill is the theme's own. */
-const BUTTON_RADIUS = { pill: null, rounded: "0.75rem", square: "0" } as const
+/**
+ * The buttons' corners (`--button-radius`); pill is the theme's own. Square
+ * carries its unit: a theme may compare the value with a length (`min()`).
+ */
+const BUTTON_RADIUS = { pill: null, rounded: "0.75rem", square: "0px" } as const
 
 /** The card picture's shape (`--card-ratio`); square is the theme's own (adr/0062 §9). */
 const CARD_RATIO = { "4:5": "4 / 5", "1:1": null, "3:4": "3 / 4" } as const
@@ -183,8 +164,13 @@ const fontValue = (font: ThemeFont) =>
 /**
  * The settings as CSS variables over the theme's own (docs/19 §3), one
  * `:root` rule for the page's nonce'd style element; null at the defaults.
+ * `own` is what the theme prints for the same settings on its own tokens
+ * (a page tone's surfaces, adr/0062 §5), from fixed lists as the rest.
  */
-export function themeStyle(settings: StoreThemeSettings): string | null {
+export function themeStyle(
+  settings: StoreThemeSettings,
+  own: readonly string[] = []
+): string | null {
   const { colors, typography, radius, product_card, buttons } = settings
   const declarations = [...brandDeclarations(colors.primary)]
   if (isHexColor(colors.accent)) {
@@ -193,14 +179,12 @@ export function themeStyle(settings: StoreThemeSettings): string | null {
       `--highlight-foreground:${readableOn(colors.accent)}`
     )
   }
-  if (colors.background !== "steel") {
-    declarations.push(
-      `--background:${THEME_BACKGROUNDS[colors.background]}`,
-      ...NEUTRALS[colors.background]
-    )
-  }
   if (typography.heading !== DEFAULT_THEME.typography.heading) {
     declarations.push(`--font-heading:${fontValue(typography.heading)}`)
+  }
+  const weight = THEME_FONTS[typography.heading].displayWeight
+  if (weight !== DISPLAY_WEIGHT) {
+    declarations.push(`--display-weight:${weight}`)
   }
   if (typography.body !== DEFAULT_THEME.typography.body) {
     declarations.push(`--font-sans:${fontValue(typography.body)}`)
@@ -217,5 +201,6 @@ export function themeStyle(settings: StoreThemeSettings): string | null {
   if (ratio) {
     declarations.push(`--card-ratio:${ratio}`)
   }
+  declarations.push(...own)
   return declarations.length > 0 ? `:root{${declarations.join(";")}}` : null
 }

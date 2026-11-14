@@ -3,7 +3,7 @@ import { cn } from "@qticaret/ui/lib/utils"
 import { Swatch } from "../parts/Swatch"
 
 const PILL =
-  "inline-flex min-h-11 min-w-12 cursor-pointer items-center justify-center rounded-pill bg-paper-2 px-5 text-sm font-semibold transition-colors duration-(--dur-micro) hover:bg-paper-3 has-[:checked]:bg-text has-[:checked]:text-paper has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
+  "inline-flex min-h-11 min-w-12 cursor-pointer items-center justify-center rounded-pill bg-paper-2 px-5 text-sm font-semibold transition-colors duration-(--dur-micro) hover:bg-paper-3 has-[:checked]:bg-mark has-[:checked]:text-mark-ink has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
 
 const SWATCH =
   "inline-flex size-11 cursor-pointer items-center justify-center rounded-pill p-1 ring-2 ring-transparent transition-shadow duration-(--dur-micro) hover:ring-edge has-[:checked]:ring-text has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"

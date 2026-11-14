@@ -6,7 +6,7 @@ import { useState } from "react"
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value))
 
 const STEP =
-  "flex size-11 shrink-0 items-center justify-center rounded-pill bg-paper-2 text-text transition-colors duration-(--dur-micro) hover:bg-paper-3 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-40"
+  "flex size-11 shrink-0 items-center justify-center rounded-button bg-paper-2 text-text transition-colors duration-(--dur-micro) hover:bg-paper-3 active:translate-y-px disabled:cursor-not-allowed disabled:opacity-40"
 
 /**
  * How many: a round minus and plus (44 px) either side of a real number

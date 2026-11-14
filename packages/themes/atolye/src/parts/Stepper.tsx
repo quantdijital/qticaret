@@ -38,7 +38,7 @@ export function Stepper({
     <div
       role="group"
       aria-label={words.group}
-      className={cn("flex h-11 shrink-0 items-center rounded-pill bg-field", className)}
+      className={cn("flex h-11 shrink-0 items-center rounded-button bg-field", className)}
     >
       <button
         type="submit"

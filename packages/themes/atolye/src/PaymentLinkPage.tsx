@@ -80,7 +80,7 @@ export function PaymentLinkPage({
               <input key={field.name} type="hidden" name={field.name} value={field.value} />
             ))}
             {pay.warning && (
-              <p role="note" className="rounded-media bg-signal-soft p-4 text-md font-semibold">
+              <p role="note" className="rounded-media bg-highlight-soft p-4 text-md font-semibold">
                 {pay.warning}
               </p>
             )}
