@@ -1,0 +1,42 @@
+import "server-only"
+import type { StoreBannerSection } from "@qticaret/types"
+import { bannerStepOf, bannerToneOf } from "@qticaret/types/section-banner"
+import type { BannerSectionView, Translate } from "@qticaret/ui"
+import { layoutImage, layoutLink } from "./layout"
+
+/**
+ * The picture band (adr/0049 Ek 2026-11-14 §3.3 E2) as a theme draws it:
+ * each slide's pictures with their sizes (a phone's own when the shop gave
+ * one), its words and its one or two buttons as paths (a broken one none,
+ * and a second without a first moves up); the band's steps and a slide's
+ * tone as the contract knows them (an unknown one, or none from a backend
+ * before them, read as the default).
+ */
+export function bannerView(section: StoreBannerSection, t: Translate): BannerSectionView {
+  return {
+    id: section.id,
+    type: "banner",
+    slides: section.slides.map((slide) => {
+      const [link = null, secondLink = null] = [
+        layoutLink(slide.link, t),
+        layoutLink(slide.second_link ?? null, t),
+      ].filter((each) => each !== null)
+      return {
+        image: layoutImage(slide.image, slide.heading ?? ""),
+        mobileImage: slide.mobile_image
+          ? layoutImage(slide.mobile_image, slide.image.alt ?? slide.heading ?? "")
+          : null,
+        heading: slide.heading,
+        text: slide.text,
+        link,
+        secondLink,
+        tone: bannerToneOf(slide.tone),
+      }
+    }),
+    width: bannerStepOf("width", section.width),
+    height: bannerStepOf("height", section.height),
+    text_position: bannerStepOf("text_position", section.text_position),
+    overlay: bannerStepOf("overlay", section.overlay),
+    button_style: bannerStepOf("button_style", section.button_style),
+  }
+}

@@ -7791,7 +7791,7 @@
         },
         "banner": {
           "name": "Görsel slayt",
-          "description": "Sırayla kayan 1–6 görsel; her birinin başlığı, satırı ve bağlantısı olabilir."
+          "description": "1–6 görsel; geniş ekranda yan yana. Her birinin başlığı, satırı ve bir ya da iki düğmesi olabilir."
         },
         "categories": {
           "name": "Kategoriler",
@@ -8017,10 +8017,64 @@
       "banner": {
         "empty": "Henüz görsel yok. Bölüm en az bir görselle kaydedilir.",
         "slide": "{{number}}. görsel",
-        "link": "Bağlantı",
-        "linkHint": "Görsele tıklayan ziyaretçinin gideceği yer; isteğe bağlı.",
+        "link": "Düğme",
+        "linkHint": "Görselin ana düğmesi; isteğe bağlı.",
         "add": "Görsel ekle",
-        "hint": "En çok {{max}} görsel; sırayla kayar."
+        "hint": "En çok {{max}} görsel; geniş ekranda yan yana gösterilir.",
+        "secondLink": "İkinci düğme",
+        "secondLinkHint": "İsteğe bağlı; ilk düğmeden bir basamak sade çizilir.",
+        "mobileImage": "Telefon görseli",
+        "mobileImageHint": "İsteğe bağlı. 640 px'ten dar ekranlarda geniş görselin yerine gösterilir.",
+        "tone": {
+          "label": "Yazı rengi",
+          "hint": "Görsele göre seçin: koyu görselde açık yazı, açık görselde koyu yazı. Yazı her ayarda okunur kalır.",
+          "light": "Açık yazı",
+          "dark": "Koyu yazı"
+        },
+        "width": {
+          "label": "Genişlik",
+          "term": "width",
+          "hint": "Kutulu: sayfanın genişliğinde, köşeleri yuvarlak. Tam: ekranın kenarından kenarına.",
+          "boxed": "Kutulu",
+          "full": "Tam"
+        },
+        "height": {
+          "label": "Yükseklik",
+          "term": "height",
+          "low": "Alçak",
+          "medium": "Orta",
+          "high": "Yüksek"
+        },
+        "text_position": {
+          "label": "Yazının yeri",
+          "term": "position",
+          "top_left": "Sol üst",
+          "top_center": "Orta üst",
+          "top_right": "Sağ üst",
+          "middle_left": "Sol orta",
+          "middle_center": "Tam orta",
+          "middle_right": "Sağ orta",
+          "bottom_left": "Sol alt",
+          "bottom_center": "Orta alt",
+          "bottom_right": "Sağ alt"
+        },
+        "overlay": {
+          "label": "Perde gücü",
+          "term": "overlay",
+          "hint": "Perde yazının okunmasını sağlar; güçlendikçe görselin daha çoğunu örter. Yok seçilirse yazı kendi zemininde durur.",
+          "none": "Yok",
+          "light": "Hafif",
+          "medium": "Orta",
+          "strong": "Güçlü"
+        },
+        "button_style": {
+          "label": "Düğme stili",
+          "term": "button",
+          "hint": "İkinci düğme bir basamak sade çizilir.",
+          "solid": "Dolu",
+          "outline": "Çerçeveli",
+          "text": "Yazı"
+        }
       },
       "products": {
         "source": "Hangi ürünler",

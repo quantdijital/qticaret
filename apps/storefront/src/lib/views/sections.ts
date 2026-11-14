@@ -17,6 +17,7 @@ import { categoryTiles } from "./category-tiles"
 import { railCardVariant } from "./card-framed"
 import { featuredView } from "./featured"
 import { EXCERPT_MIN_RATING, googleRatingView } from "./google-rating"
+import { bannerView } from "./banner"
 import { heroSliderView } from "./hero-slider"
 import { marqueeView } from "./marquee"
 import { currentShared, layoutImage, layoutLink } from "./layout"
@@ -114,16 +115,7 @@ async function sectionView(
     case "hero_slider":
       return heroSliderView(section, t)
     case "banner":
-      return {
-        id,
-        type: "banner",
-        slides: section.slides.map((slide) => ({
-          image: layoutImage(slide.image, slide.heading ?? ""),
-          heading: slide.heading,
-          text: slide.text,
-          link: layoutLink(slide.link, t),
-        })),
-      }
+      return bannerView(section, t)
     case "categories": {
       // A product's photo stands in for a missing category picture on the home page only
       const categories = await (context.home

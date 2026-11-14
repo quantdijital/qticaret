@@ -1,5 +1,5 @@
-import { MARQUEE_SETTINGS, SECTION_VARIANTS } from "@qticaret/types"
-import type { MarqueeSetting, SectionLookField } from "@qticaret/types"
+import { BANNER_SETTINGS, MARQUEE_SETTINGS, SECTION_VARIANTS } from "@qticaret/types"
+import type { BannerSetting, MarqueeSetting, SectionLookField } from "@qticaret/types"
 import type { AnySection, LayoutGroup, LookedSection } from "@/features/storefront/api/layout"
 import { lookFieldsFor, lookStepsFor } from "@/features/storefront/layout/look"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
@@ -36,6 +36,7 @@ export interface RegistryField {
 const P = "storefront.editor.panel"
 const LOOK = "storefront.editor.look"
 const MARQUEE = "storefront.editor.marquee"
+const BANNER = "storefront.editor.banner"
 
 /** A strip's size sits in its content (it is what the strip is); how it moves and looks, with the look. */
 const MARQUEE_GROUPS: Readonly<Record<MarqueeSetting, FieldGroupName>> = {
@@ -63,6 +64,7 @@ export const FIELD_IDS = {
   placement: (sectionId: string) => `${sectionId}-placement`,
   look: (sectionId: string, field: SectionLookField) => `${sectionId}-look-${field}`,
   marquee: (sectionId: string, setting: MarqueeSetting) => `${sectionId}-marquee-${setting}`,
+  banner: (sectionId: string, setting: BannerSetting) => `${sectionId}-banner-${setting}`,
   sticky: (sectionId: string) => `${sectionId}-sticky`,
   visible: (sectionId: string) => `${sectionId}-schedule-visible`,
   starts: (sectionId: string) => `${sectionId}-schedule-starts`,
@@ -113,6 +115,22 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
         term: `${MARQUEE}.${setting}.term`,
         options: steps.map((step) => `${MARQUEE}.${setting}.${step}`),
         target: FIELD_IDS.marquee(id, setting),
+      })
+    }
+  }
+  // The band's settings sit with the look, in the closed "Görünüm ayarları" group
+  if (section.type === "banner") {
+    for (const [setting, steps] of Object.entries(BANNER_SETTINGS) as [
+      BannerSetting,
+      readonly string[],
+    ][]) {
+      fields.push({
+        key: `banner.${setting}`,
+        group: "look",
+        label: `${BANNER}.${setting}.label`,
+        term: `${BANNER}.${setting}.term`,
+        options: steps.map((step) => `${BANNER}.${setting}.${step}`),
+        target: FIELD_IDS.banner(id, setting),
       })
     }
   }

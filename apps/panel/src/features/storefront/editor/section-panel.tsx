@@ -1,6 +1,6 @@
 import { Copy, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { MARQUEE_DEFAULTS } from "@qticaret/types"
+import { BANNER_DEFAULTS, BANNER_SETTING_NAMES, MARQUEE_DEFAULTS } from "@qticaret/types"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import type {
@@ -24,6 +24,7 @@ import { HeroForm } from "./forms/hero-form"
 import { HeroSliderForm } from "./forms/hero-slider-form"
 import { LookFields } from "./forms/look-fields"
 import { MarqueeForm } from "./forms/marquee-form"
+import { BannerSettings } from "./forms/banner-settings"
 import { MarqueeSettings } from "./forms/marquee-settings"
 import { ProductsForm } from "./forms/products-form"
 import { RelatedForm } from "./forms/related-form"
@@ -146,11 +147,14 @@ export function SectionPanel({
   const looked = takesLook(section, group) ? section : null
   // A strip's own ground, speed, way and separator sit with the look; the header's has no look
   const strip = section.type === "marquee" ? section : null
+  // The band's width, height, words' place, veil and buttons sit there too (E2)
+  const band = section.type === "banner" ? section : null
   const set =
     (looked ? lookCount(looked) : 0) +
     (strip
       ? MARQUEE_LOOK_SETTINGS.filter((name) => strip[name] !== MARQUEE_DEFAULTS[name]).length
-      : 0)
+      : 0) +
+    (band ? BANNER_SETTING_NAMES.filter((name) => band[name] !== BANNER_DEFAULTS[name]).length : 0)
   return (
     <Panel icon={SECTION_ICONS[kind]} title={name} onBack={onBack}>
       <p className="border-b px-5 py-4 text-[13px] leading-5 text-muted-foreground">
@@ -224,6 +228,7 @@ export function SectionPanel({
               }}
             />
           ) : null}
+          {band ? <BannerSettings section={band} onChange={onChange} /> : null}
           {looked ? <LookFields section={looked} onChange={onChange} /> : null}
         </PanelGroup>
       ) : null}
