@@ -36,6 +36,11 @@ export async function liveRecords(
       section.category_ids.forEach((id) => want("category", id))
     } else if (section.type === "brands") {
       section.brand_ids.forEach((id) => want("brand", id))
+    } else if (section.type === "hero" && section.variant === "category_list") {
+      if (section.list.kind === "manual")
+        section.list.category_ids.forEach((id) => want("category", id))
+      section.tiles.forEach((tile) => want("category", tile.category_id))
+      section.picks.forEach((pick) => want("product", pick.product_id))
     } else if (section.type === "featured_product") {
       want("product", section.product_id)
     } else if (section.type === "products" || section.type === "related_products") {
@@ -55,6 +60,24 @@ export async function liveRecords(
     if (section.type === "categories" && section.category_ids.length > 0) {
       const ids = section.category_ids.filter(live("category"))
       return ids.length > 0 ? [{ ...section, category_ids: ids }] : []
+    }
+    // H17 keeps its opening: a gone tile or product is left out, an emptied list is the top categories
+    if (section.type === "hero" && section.variant === "category_list") {
+      const listed = section.list.kind === "manual" ? section.list.category_ids : []
+      const kept = listed.filter(live("category"))
+      return [
+        {
+          ...section,
+          list:
+            kept.length > 0
+              ? { kind: "manual", category_ids: kept }
+              : section.list.kind === "manual"
+                ? { kind: "top" }
+                : section.list,
+          tiles: section.tiles.filter((tile) => live("category")(tile.category_id)),
+          picks: section.picks.filter((pick) => live("product")(pick.product_id)),
+        },
+      ]
     }
     // A featured product that is not live now: no close-up of nothing
     if (section.type === "featured_product") {

@@ -1,6 +1,7 @@
 import { isPlainObject } from "../../../modules/platform-settings/sections/define"
 import { storedLook } from "./look"
 import { MAIN_BRANCHES, storedByVariant } from "./main"
+import { HERO_BRANCHES } from "./hero"
 import { TRUST_BADGES_BRANCHES } from "./trust-badges"
 import { REMOVED_VARIANTS, SECTION_VARIANTS, isVariantType } from "./variants"
 import type { SectionVariant, VariantBranch, VariantSectionType } from "./variants"
@@ -10,6 +11,7 @@ const BRANCHES: {
   readonly [T in VariantSectionType]: Readonly<Record<SectionVariant<T>, VariantBranch>>
 } = {
   trust_badges: TRUST_BADGES_BRANCHES,
+  hero: HERO_BRANCHES,
   ...MAIN_BRANCHES,
 }
 
