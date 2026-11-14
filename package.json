@@ -29,7 +29,8 @@
     "db:up": "docker compose --env-file infra/docker/.env -f infra/docker/compose.dev.yml up -d --wait",
     "db:down": "docker compose --env-file infra/docker/.env -f infra/docker/compose.dev.yml down",
     "prepare": "husky",
-    "audit:deps": "bash scripts/dependency-report.sh"
+    "audit:deps": "bash scripts/dependency-report.sh",
+    "verify:changed": "node scripts/verify-changed.mjs"
   },
   "prettier": "@qticaret/config/prettier",
   "devDependencies": {
