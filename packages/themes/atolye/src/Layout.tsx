@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Announcement } from "./frame/Announcement"
+import { BackToTop } from "./frame/BackToTop"
 import { BottomBar } from "./frame/BottomBar"
 import { CheckoutFooter, CheckoutHeader } from "./frame/CheckoutFrame"
 import { Consent } from "./frame/Consent"
@@ -66,6 +67,8 @@ export function Layout({
     shop.bottomNav !== null &&
     shop.bottomNav.current !== "cart" &&
     shop.cookieBanner?.due !== true
+  // The footer's floating "Yukarı çık" (adr/0049 Ek 2026-11-15), away while the cookie question waits
+  const backToTop = shop.cookieBanner?.due === true ? null : (shop.footerBar?.backToTop ?? null)
   return (
     <div className="flex min-h-dvh flex-col">
       {skip}
@@ -105,6 +108,14 @@ export function Layout({
           />
           <WhatsAppClear />
         </>
+      )}
+      {backToTop && (
+        <BackToTop
+          view={backToTop}
+          label={t("footer.back_to_top")}
+          aboveBottomBar={shop.bottomNav !== null}
+          overWhatsApp={whatsapp && backToTop.side === "right"}
+        />
       )}
       {consent}
       <ScrollCue />

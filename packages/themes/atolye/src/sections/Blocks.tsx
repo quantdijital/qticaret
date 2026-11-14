@@ -9,6 +9,7 @@ import type {
 import { Aisles } from "./Aisles"
 import { Brands } from "./Brands"
 import { Campaign } from "./Campaign"
+import { CATEGORY_VARIANTS, CategoryCards } from "./CategoryCards"
 import { CustomerPhotos } from "./CustomerPhotos"
 import { Faq } from "./Faq"
 import { GoogleRating } from "./GoogleRating"
@@ -96,7 +97,17 @@ function BlockView({
         />
       )
     case "categories":
-      return (
+      // The linked cards when the theme draws them and the view has them; else today's tiles
+      return drawnVariant("categories", section.variant, CATEGORY_VARIANTS) === "linked" &&
+        section.linked ? (
+        <CategoryCards
+          id={headingId(section.id)}
+          title={section.title}
+          view={section.linked}
+          all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
+          t={t}
+        />
+      ) : (
         <Aisles
           id={headingId(section.id)}
           title={section.title}
