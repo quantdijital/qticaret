@@ -1,4 +1,4 @@
-import { hasVariants } from "@qticaret/types"
+import { HERO_CATALOG_LIMITS, hasVariants } from "@qticaret/types"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 
@@ -19,7 +19,7 @@ export const VARIANT_FIELDS: {
     standard: {},
     category_list: {
       list: { kind: "top" },
-      list_limit: 9,
+      list_limit: HERO_CATALOG_LIMITS.list.default,
       show_count: true,
       tiles: [],
       chips: [],

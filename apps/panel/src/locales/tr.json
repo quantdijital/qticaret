@@ -7895,7 +7895,7 @@
         "soon": "{{name}} (hazırlanıyor)",
         "kept": "Kayıtlı biçim hazırlanıyor; hazır olana kadar vitrin standart biçimi çizer.",
         "hero": {
-          "standard": "Sahne",
+          "standard": "Tek görsel",
           "category_list": "Kategori listesi"
         }
       },

@@ -7895,7 +7895,7 @@
         "soon": "{{name}} (coming soon)",
         "kept": "The saved layout is being prepared; until it is ready, the storefront draws the standard one.",
         "hero": {
-          "standard": "Stage",
+          "standard": "Single image",
           "category_list": "Category list"
         }
       },

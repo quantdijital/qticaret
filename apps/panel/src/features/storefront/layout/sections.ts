@@ -15,7 +15,7 @@ import type {
   ProductSection,
 } from "@/features/storefront/api/layout"
 import { BANNER_DEFAULTS, MARQUEE_DEFAULTS, defaultVariant } from "@qticaret/types"
-import { LAYOUT_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
+import { LAYOUT_LIMITS, PRICE_BANDS_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
 
 /** The groups in the order the storefront draws them (a page's body between header and footer). */
 export const LAYOUT_GROUPS: readonly LayoutGroup[] = [
@@ -153,7 +153,7 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
         image: null,
       }
     case "price_bands":
-      return { ...base, type, title: null, bands: newPriceBands(), thumbs: 3 }
+      return { ...base, type, ...newPriceBands() }
     case "hero_slider":
       return {
         ...base,
@@ -227,15 +227,20 @@ export function newBodySection(
 }
 
 /**
- * A new price bands strip's bands: three to start from, each an upper
- * bound in whole lira, the last without one ("and up"), and a label to
- * write (the form suggests one from the bound, as a strip's first item).
+ * A new price bands strip's fields: three bands to start from, each an
+ * upper bound in whole lira, the last without one ("and up"), and a label
+ * to write (the form suggests one from the bound, as a strip's first
+ * item); the contract's default products shown small.
  */
-const newPriceBands = () => [
-  { label: "", text: null, max: 500 },
-  { label: "", text: null, max: 1000 },
-  { label: "", text: null, max: null },
-]
+const newPriceBands = () => ({
+  title: null,
+  bands: [
+    { label: "", text: null, max: 500 },
+    { label: "", text: null, max: 1000 },
+    { label: "", text: null, max: null },
+  ],
+  thumbs: PRICE_BANDS_LIMITS.thumbs.default,
+})
 
 /** The announcement bar, with one line to write. */
 export const newAnnouncementBar = (id: string): AnnouncementBar => ({
