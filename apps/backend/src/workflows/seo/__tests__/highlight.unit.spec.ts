@@ -49,6 +49,20 @@ describe("highlightText", () => {
     ).toBe("Kırmızı, Mavi")
   })
 
+  it("reads a single choice from the text column, by its option's label (adr/0013)", () => {
+    const steel = definition({
+      type: "select",
+      label: "Namlu çeliği",
+      options: [{ value: "d2", label: "D2 takım çeliği" }],
+    })
+    expect(highlightText([{ value_text: "d2", value_options: null, definition: steel }])).toBe(
+      "D2 takım çeliği"
+    )
+    // An option the definition no longer lists is said by its stored value
+    expect(highlightText([{ value_text: "n690", definition: steel }])).toBe("n690")
+    expect(highlightText([{ value_text: null, definition: steel }])).toBeNull()
+  })
+
   it("says a true flag by its label and nothing otherwise", () => {
     const flag = definition({ type: "boolean", label: "Bulaşık makinesinde yıkanabilir" })
     expect(highlightText([{ value_boolean: true, definition: flag }])).toBe(

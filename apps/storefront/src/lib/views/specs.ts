@@ -3,6 +3,21 @@ import type { SpecGroupView, SpecView, Translate } from "@qticaret/ui"
 
 const NUMBER = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 2 })
 
+/** The chosen options by their labels; one the definition no longer lists by its stored value. */
+function labelsOf(
+  definition: StoreAttributeValue["definition"],
+  chosen: readonly (string | null)[]
+): string | null {
+  const labels = chosen.flatMap((value) => {
+    const stored = value?.trim() ?? ""
+    if (stored === "") {
+      return []
+    }
+    return [definition.options?.find((option) => option.value === value)?.label ?? stored]
+  })
+  return labels.length > 0 ? labels.join(", ") : null
+}
+
 function valueOf(attribute: StoreAttributeValue, t: Translate): string | null {
   const { definition } = attribute
   switch (definition.type) {
@@ -23,12 +38,10 @@ function valueOf(attribute: StoreAttributeValue, t: Translate): string | null {
         ? null
         : t(attribute.value_boolean ? "spec.yes" : "spec.no")
     case "select":
-    case "multi_select": {
-      const labels = (attribute.value_options ?? []).map(
-        (value) => definition.options?.find((option) => option.value === value)?.label ?? value
-      )
-      return labels.length > 0 ? labels.join(", ") : null
-    }
+      // A single choice sits in `value_text`, a multiple one in `value_options` (adr/0013)
+      return labelsOf(definition, [attribute.value_text])
+    case "multi_select":
+      return labelsOf(definition, attribute.value_options ?? [])
   }
 }
 

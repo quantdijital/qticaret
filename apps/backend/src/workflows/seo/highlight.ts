@@ -28,8 +28,7 @@ export interface HighlightValue {
 const withUnit = (text: string, unit: string | null | undefined): string =>
   unit ? `${text} ${unit}` : text
 
-function optionLabels(value: HighlightValue): string {
-  const chosen = Array.isArray(value.value_options) ? (value.value_options as unknown[]) : []
+function optionLabels(value: HighlightValue, chosen: readonly unknown[]): string {
   const options = Array.isArray(value.definition?.options)
     ? (value.definition.options as Option[])
     : []
@@ -56,8 +55,13 @@ const FORMATS: Readonly<Record<string, (value: HighlightValue, definition: Defin
     },
     // "Bulaşık makinesinde yıkanabilir" says it; "hayır" says nothing worth a title
     boolean: (value, definition) => (value.value_boolean ? (definition.label ?? "") : ""),
-    select: (value) => optionLabels(value),
-    multi_select: (value) => optionLabels(value),
+    // A single choice sits in `value_text`, a multiple one in `value_options` (adr/0013)
+    select: (value) => optionLabels(value, [value.value_text]),
+    multi_select: (value) =>
+      optionLabels(
+        value,
+        Array.isArray(value.value_options) ? (value.value_options as unknown[]) : []
+      ),
   }
 
 /** An attribute's value as a shopper reads it; empty when it has none. */

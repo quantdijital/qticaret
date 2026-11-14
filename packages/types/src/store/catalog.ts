@@ -74,13 +74,17 @@ export interface StoreAttributeGroup {
   rank: number
 }
 
-/** A public product attribute (adr/0013): the value sits in its type's column. */
+/**
+ * A public product attribute (adr/0013): the value sits in its type's
+ * column. A `text` and a `select` (the chosen option's value) in
+ * `value_text`, a `multi_select` in `value_options`.
+ */
 export interface StoreAttributeValue {
   id: string
   value_text: string | null
   value_number: number | string | null
   value_boolean: boolean | null
-  /** The chosen option values, for select types. */
+  /** The chosen options' values of a `multi_select`; a `select` has null here. */
   value_options: string[] | null
   definition: {
     key: string
