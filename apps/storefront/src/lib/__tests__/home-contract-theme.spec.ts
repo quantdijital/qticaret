@@ -109,6 +109,10 @@ describe("the home page's new optional sections and fields", () => {
     const long = draw(`${"Çok keskin ve dengeli bir bıçak. ".repeat(30)}Sonuncu cümle.`)
     expect(long).toContain("…")
     expect(long).not.toContain("Sonuncu cümle.")
+    // A short quote has no toggle; a long one closes at five lines over "Devamını oku"
+    expect(whole).not.toContain("Devamını oku")
+    expect(long).toContain("Devamını oku")
+    expect(long).toContain('class="gf-quote"')
   })
 
   it("draws the shop-wide rating on the reviews page", () => {
