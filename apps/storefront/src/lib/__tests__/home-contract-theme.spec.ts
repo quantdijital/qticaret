@@ -95,7 +95,7 @@ describe("the home page's new optional sections and fields", () => {
     expect(without).not.toContain("Puan dağılımı")
   })
 
-  it("quotes a review whole on the home page, cutting only a very long one", () => {
+  it("quotes a short review whole on the home page and cuts a longer one at a word", () => {
     const draw = (body: string) =>
       renderPage(atolyeTheme, "HomePage", {
         view: {
@@ -106,13 +106,10 @@ describe("the home page's new optional sections and fields", () => {
     expect(whole).toContain(
       "Ürünün kalitesine diyecek bir şey yok. Kutusu ve kılıfı da çok özenli."
     )
-    const long = draw(`${"Çok keskin ve dengeli bir bıçak. ".repeat(30)}Sonuncu cümle.`)
+    const long = draw(`${"Çok keskin ve dengeli bir bıçak. ".repeat(6)}Sonuncu cümle.`)
     expect(long).toContain("…")
     expect(long).not.toContain("Sonuncu cümle.")
-    // A short quote has no toggle; a long one closes at five lines over "Devamını oku"
-    expect(whole).not.toContain("Devamını oku")
-    expect(long).toContain("Devamını oku")
-    expect(long).toContain('class="gf-quote"')
+    expect(long).not.toContain("Devamını oku")
   })
 
   it("draws the shop-wide rating on the reviews page", () => {
