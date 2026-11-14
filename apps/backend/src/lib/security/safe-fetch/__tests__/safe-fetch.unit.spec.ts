@@ -142,6 +142,20 @@ describe("safeFetch", () => {
       expect(reason).toBe("response_too_large")
     })
 
+    it("names the status that came before a body over the limit", async () => {
+      const server = await serve((_req, res) => {
+        res.writeHead(500)
+        res.end("x".repeat(1600))
+      })
+
+      const error = await fetchAsPublic()(
+        publicUrl(server),
+        onPort(server, { maxResponseBytes: 1000 })
+      ).catch((caught: unknown) => caught)
+
+      expect(error).toMatchObject({ reason: "response_too_large", status: 500 })
+    })
+
     it("accepts a HEAD answer that declares a large length", async () => {
       const server = await serve((_req, res) => {
         res.writeHead(200, { "content-length": "999999" }).end()

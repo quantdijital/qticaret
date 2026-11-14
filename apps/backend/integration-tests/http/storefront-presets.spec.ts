@@ -24,6 +24,8 @@ import { settle } from "../helpers/http"
 jest.setTimeout(240 * 1000)
 
 type Doc = Record<string, unknown> & {
+  header?: { id: string; type: string }[]
+  footer?: { id: string; type: string }[]
   home: { id: string; type: string; category_ids?: string[]; image?: { url: string } | null }[]
   settings: Record<string, unknown> & { preset: unknown; trust_badges: unknown }
 }
@@ -39,6 +41,7 @@ interface Applied {
     version: number
     skipped: { where: string; ref: string }[]
     dropped: string[]
+    kept: string[]
     images: { added: number; kept: number }
   }
   layout: AdminLayout["layout"]
@@ -168,11 +171,19 @@ medusaIntegrationTestRunner({
         expect.arrayContaining([expect.objectContaining({ pack: "general", code: "grafit" })])
       )
 
-      // The shop's own design, live, with its own trust badges and a home page of one section
+      // The shop's own design, live, with its own trust badges, an announcement bar and a
+      // home page of one section
       const opened = await admin()
       const badges = [{ icon: "truck", title: "Aynı gün kargo", text: null }]
+      const bar = {
+        id: "duyurular",
+        type: "announcement_bar",
+        ...SCHEDULE,
+        lines: ["Kargo bedava"],
+      }
       const own = {
         ...opened.draft,
+        header: [bar],
         home: [{ id: "yardimkutusu", type: "help", ...SCHEDULE, title: "Bize yazın", text: null }],
         settings: { ...opened.draft.settings, trust_badges: badges },
       }
@@ -192,10 +203,15 @@ medusaIntegrationTestRunner({
         version: 1,
         skipped: [],
         dropped: [],
+        // Grafit writes no header: the shop's announcement bar stays, and the answer says so
+        kept: ["header.duyurular"],
         images: { added: 0, kept: 0 },
         demo: { added: 0, kept: 0 },
       })
       const draft = first.data.layout.draft
+      expect(draft.header).toEqual([bar])
+      // Grafit fills the footer: its own stands
+      expect(draft.footer?.map((section) => section.id)).toEqual(["ebultenkutusu"])
       expect(draft.home.map((section) => section.id)).toEqual([
         "girisbolumu",
         "kategoriler",

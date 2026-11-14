@@ -143,6 +143,19 @@ describe("the theme's home page: opening, promises, aisles", () => {
     expect(html).toContain("30 gün iade")
     // The strip's tinted cards are not drawn
     expect(html).not.toContain("auto-rows-fr grid-cols-2 gap-2")
+    // As many columns as badges: no empty box
+    expect(html).toContain("lg:grid-cols-2")
+    const three = home([
+      hero,
+      {
+        id: "guven",
+        type: "trust_badges",
+        variant: "lined",
+        badges: [...badges, { icon: "truck" as const, title: "Aynı gün kargo", text: null }],
+      },
+    ])
+    expect(three).toContain("lg:grid-cols-3")
+    expect(three).not.toContain("lg:grid-cols-4")
   })
 
   it("draws the strip for a variant the theme does not draw", () => {

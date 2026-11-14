@@ -5,7 +5,7 @@ import type {
   StoreLayoutSection,
   StoreProductSection,
 } from "@qticaret/types"
-import { variantOf } from "@qticaret/types"
+import { variantOf } from "@qticaret/types/section-variants"
 import type { HomeSectionView, LinkView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
 import { legalIdentity, siteSeo } from "@/lib/store-api/requests"

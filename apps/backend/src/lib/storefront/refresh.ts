@@ -209,16 +209,35 @@ async function send(
       logger.info({ event: "storefront.refresh_sent", status: answer.status, scopes })
       return "sent"
     }
-    logger.warn({ event: "storefront.refresh_failed", status: answer.status, scopes })
-  } catch (error) {
-    // The reason only (`timeout`, `address_not_allowed`…): the URL is not logged
     logger.warn({
       event: "storefront.refresh_failed",
+      status: answer.status,
+      reason: "status_not_ok",
       scopes,
-      ...(isSafeFetchError(error) ? { reason: error.reason } : { err: errorSummary(error) }),
     })
+  } catch (error) {
+    logger.warn({ event: "storefront.refresh_failed", scopes, ...failureOf(error) })
   }
   return "failed"
+}
+
+/**
+ * Why the signal failed, for its log line. The reason only (`timeout`,
+ * `address_not_allowed`…): the URL is not logged. A storefront that
+ * answered and whose body was too long to read is classified by its status:
+ * a 500's error page is `status_not_ok` (the storefront failed), not a
+ * size problem; only a 2xx with an oversized body is `response_too_large`.
+ */
+export function failureOf(error: unknown): Record<string, unknown> {
+  if (!isSafeFetchError(error)) {
+    return { err: errorSummary(error) }
+  }
+  const status = error.status
+  if (status === undefined) {
+    return { reason: error.reason }
+  }
+  const ok = status >= 200 && status < 300
+  return { status, reason: ok ? error.reason : "status_not_ok" }
 }
 
 /**

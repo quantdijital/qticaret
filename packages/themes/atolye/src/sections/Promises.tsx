@@ -63,21 +63,26 @@ function Strip({ badges }: { badges: readonly TrustBadgeView[] }) {
 }
 
 /**
- * GB4 (adr/0049 Ek 2026-11-14 §3.2): one framed row of boxes, the hairlines
- * between them the frame's own colour showing through a one-pixel gap; two
- * by two on a phone, four across from 1024 px; the icon beside its words,
- * no chip. Equal boxes: an odd count leaves the last row's gap the field's.
+ * GB4 (adr/0049 Ek 2026-11-14 §3.2): one framed row of boxes split by
+ * hairlines; two by two on a phone, four across from 1024 px; the icon
+ * beside its words, no chip. Each box draws its right and bottom hairline
+ * as a one-pixel shadow on the field-coloured frame; the frame clips the
+ * ones on its edge. No empty box: from 1024 px there are as many columns
+ * as badges, and on a phone an odd last badge takes the whole row.
  */
+const LINED_COLUMNS = ["lg:grid-cols-1", "lg:grid-cols-2", "lg:grid-cols-3", "lg:grid-cols-4"]
+
 function Lined({ badges }: { badges: readonly TrustBadgeView[] }) {
+  const columns = LINED_COLUMNS[Math.min(badges.length, 4) - 1]
   return (
     <ul
       data-variant="lined"
-      className="grid auto-rows-fr grid-cols-2 gap-px overflow-hidden rounded-inner border border-rule bg-rule lg:grid-cols-4"
+      className={`grid auto-rows-fr grid-cols-2 overflow-hidden rounded-inner border border-rule bg-field ${columns}`}
     >
       {badges.map((badge) => (
         <li
           key={badge.title}
-          className="flex items-center gap-3 bg-field p-3 lg:gap-4 lg:px-6 lg:py-4"
+          className="flex items-center gap-3 p-3 shadow-[1px_0_0_0_var(--color-rule),0_1px_0_0_var(--color-rule)] last:odd:col-span-2 lg:gap-4 lg:px-6 lg:py-4 lg:last:odd:col-span-1"
         >
           <TrustIcon icon={badge.icon} className="size-6 shrink-0 text-text-2 lg:size-8" />
           <span className="flex min-w-0 flex-col gap-px leading-snug">

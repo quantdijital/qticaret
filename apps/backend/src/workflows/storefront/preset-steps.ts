@@ -5,13 +5,16 @@ import { SectorPackError, sectorPack, storefrontPreset } from "@qticaret/sector-
 import type { PresetMenu } from "@qticaret/sector-packs"
 import { ValidationError } from "../../lib/errors"
 import { storedSettings } from "../../lib/storefront/layout-settings"
+import { layoutDocument, storedDocument } from "../../lib/storefront/layout"
 import type { LayoutDocument } from "../../lib/storefront/layout"
-import { presetDocument, presetTheme } from "../../lib/storefront/presets/document"
+import { presetDocument, presetTheme, withShopFrame } from "../../lib/storefront/presets/document"
+import type { ShopFrame } from "../../lib/storefront/presets/document"
 import { presetMarkers, resolvePreset } from "../../lib/storefront/presets/resolve"
 import type { PresetLink, SkippedRef } from "../../lib/storefront/presets/resolve"
 import type { ThemeSettings } from "../../modules/platform-settings/sections"
 import { SECTOR_PACKS_MODULE } from "../../modules/sector-packs"
 import type SectorPacksModuleService from "../../modules/sector-packs/service"
+import { defaultLayout } from "./layout-default"
 import { layoutRow } from "./layout-row"
 import { liveMenus, presetLookups } from "./preset-lookups"
 
@@ -55,16 +58,37 @@ const placeholders = (paths: Iterable<string>): Map<string, string> =>
   new Map([...paths].map((path) => [path, `/${path}`]))
 
 /**
+ * The draft's header and footer as the editor shows them (the default
+ * design's before the first save): kept where the preset leaves the group
+ * empty (`withShopFrame`). A draft today's schema no longer reads keeps none.
+ */
+async function shopFrame(
+  container: MedusaContainer,
+  row: Awaited<ReturnType<typeof layoutRow>>
+): Promise<ShopFrame> {
+  if (!row) {
+    const { header, footer } = await defaultLayout(container)
+    return { header, footer }
+  }
+  const parsed = layoutDocument.safeParse(storedDocument(row.draft))
+  return parsed.success
+    ? { header: parsed.data.header, footer: parsed.data.footer }
+    : { header: [], footer: [] }
+}
+
+/**
  * The draft's own parts a preset keeps: the trust badges, colour swatches
- * and "Az kaldı"; with the shop's live menus, kept where the preset
- * leaves a place (`resolveMenus`). Read for the draft it writes under the
- * design's lock (`composePresetDraftStep`), so an editor's save just
- * before is kept.
+ * and "Az kaldı"; the shop's header and footer where the preset leaves
+ * them empty (`withShopFrame`); with the shop's live menus, kept where the
+ * preset leaves a place (`resolveMenus`). Read for the draft it writes
+ * under the design's lock (`composePresetDraftStep`), so an editor's save
+ * just before is kept.
  */
 async function keptSettings(container: MedusaContainer) {
   const [row, live] = await Promise.all([layoutRow(container), liveMenus(container)])
   const { trust_badges, color_swatches, low_stock } = storedSettings(row?.draft ?? null)
-  return { settings: { trust_badges, color_swatches, low_stock }, live }
+  const frame = await shopFrame(container, row)
+  return { settings: { trust_badges, color_swatches, low_stock }, live, frame }
 }
 
 /**
@@ -120,20 +144,33 @@ function documentOf(
   resolution: Omit<PresetResolution, "images">,
   images: Map<string, string>,
   kept: Awaited<ReturnType<typeof keptSettings>>
-): { document: LayoutDocument; skipped: SkippedRef[]; dropped: string[]; images: string[] } {
+): {
+  document: LayoutDocument
+  skipped: SkippedRef[]
+  dropped: string[]
+  kept: string[]
+  images: string[]
+} {
   const resolved = resolvePreset(preset.layout, preset.menus, {
     records: new Map(Object.entries(resolution.records)),
     links: new Map(Object.entries(resolution.links)),
     images,
     live: kept.live,
   })
+  const frame = withShopFrame(resolved.groups, kept.frame)
   const document = presetDocument(
-    resolved,
+    { groups: frame.groups, menus: resolved.menus },
     preset.theme,
     { pack: preset.pack, code: preset.code, version: preset.version },
     kept.settings
   )
-  return { document, skipped: resolved.skipped, dropped: resolved.dropped, images: resolved.images }
+  return {
+    document,
+    skipped: resolved.skipped,
+    dropped: resolved.dropped,
+    kept: frame.kept,
+    images: resolved.images,
+  }
 }
 
 /**
@@ -163,7 +200,7 @@ export const resolvePresetStep = createStep(
 
 /**
  * The draft the preset makes, its images now the library's (adr/0063
- * §4.5); with what was left out, for the panel to say. Reads only, run
+ * §4.5); with what was left out and the shop's sections kept, for the panel to say. Reads only, run
  * under the design's lock: the draft is written next (`saveDraftSteps`),
  * the shop's kept settings as they are at that moment.
  */
@@ -173,12 +210,12 @@ export const composePresetDraftStep = createStep(
     input: { preset: LoadedPreset; resolution: PresetResolution; images: Record<string, string> },
     { container }
   ) => {
-    const { document, skipped, dropped } = documentOf(
+    const { document, skipped, dropped, kept } = documentOf(
       input.preset,
       input.resolution,
       new Map(Object.entries(input.images)),
       await keptSettings(container)
     )
-    return new StepResponse({ document, skipped, dropped })
+    return new StepResponse({ document, skipped, dropped, kept })
   }
 )

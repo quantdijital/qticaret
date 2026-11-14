@@ -63,7 +63,7 @@ Hazır görünüm, bir sektör paketinin içinde duran, şemayla doğrulanan **v
 
 ### 4. Uygulama: `applyPresetWorkflow`
 
-Girdi: `{ pack, code, demo: boolean, actor }`. Çıktı: `{ preset, version, skipped: [{ where, ref }], demo: { added, kept } }`.
+Girdi: `{ pack, code, demo: boolean, actor }`. Çıktı: `{ preset, version, skipped: [{ where, ref }], dropped, kept, demo: { added, kept } }`.
 
 1. **Doğrula:** görünüm okunur, tema ve menü şemaları, dosya adları denetlenir.
 2. **Demo içerik** (istenmişse, §5).
@@ -73,7 +73,7 @@ Girdi: `{ pack, code, demo: boolean, actor }`. Çıktı: `{ preset, version, ski
 6. **Kayıt:** denetim kaydı (`storefront_layout`, eylem `preset_applied`, paket, kod, sürüm, atlananların sayısı).
 
 - **Çözülemeyen tutamaç uygulamayı durdurmaz, bölümü düşürür.** Seçim listesinde (kategori karoları, elle ürün rafı, markalar) bulunamayan öğe çıkarılır; liste boşalırsa ya da bölümün tek kaydı yoksa (öne çıkan ürün, kategori ya da koleksiyon rafı) bölüm taslağa girmez. Yerine başka kayıt konmaz, kaynak sessizce "en yeniler"e çevrilmez. Mağaza yoluna giden ama kaydı bulunmayan menü ve düğme bağlantısı çıkarılır. Görünümün bir menüsü bütün bağlantıları çözülemediği için düşerse ya da görünüm bir konum için hiç menü tanımlamıyorsa, mağazanın o konumdaki canlı menüsü takıma olduğu gibi kopyalanır ("Yayınla" onu silmez; düşen menü `skipped`'te `kept_live: true` taşır); takım yalnız kopyalardan oluşacaksa `menus = null` kalır. Hepsi `skipped`'te döner; panel "3 bölüm eklenmedi: şu kategoriler yok" der. Paketin gizli oluşturduğu kategoriler (`is_active: false`) çözülür; bölüm, kategori açılınca görünür (`liveRecords` bugün böyle süzüyor).
-- **Var olan taslak.** Uygulama taslağın bölümlerini, `settings.theme`'ini ve `settings.menus`'ünü değiştirir; yayındaki görünüme dokunmaz. Yayınlanmamış değişiklik varsa panel önce sorar. Rozetler, renk örnekleri ve "Az kaldı" eşiği mağazanın verisidir, korunur. "Vazgeç" var olan `discard` ucudur.
+- **Var olan taslak.** Uygulama taslağın bölümlerini, `settings.theme`'ini ve `settings.menus`'ünü değiştirir; yayındaki görünüme dokunmaz. Yayınlanmamış değişiklik varsa panel önce sorar. Rozetler, renk örnekleri ve "Az kaldı" eşiği mağazanın verisidir, korunur. Görünüm üst (`header`) ya da alt (`footer`) grup için bölüm tanımlamıyorsa (ya da o gruptaki bütün bölümleri düşmüşse) mağazanın taslaktaki o gruptaki bölümleri korunur ve sonuçta `kept`'te (`header.duyurular`) döner; görünüm grubu doldurmuşsa görünümünki geçer (menülerdeki kuralın aynısı; sahip kararı 2026-11-14). "Vazgeç" var olan `discard` ucudur.
 - **İdempotentlik.** Aynı görünümü yeniden uygulamak aynı taslağı üretir: bölüm kimlikleri sabit, görseller ve demo kayıtları defterden bulunur. Defter kuralı ikiye ayrılır: **kayıt üreten öğeler** (görsel, demo içerik) C12'deki gibi bir kez sunulur; **taslağa yazma** deftere bağlı değildir, her uygulamada yeniden yazılır (sahibin istediği davranış bu). `PACK_ITEM_KINDS`'e `preset_image` ve `demo_record` eklenir (enum; migration ister).
 - İş mantığı workflow'dadır; betik ve API ince kalır. Alt workflow'ların adım olarak çağrılması ve kilitlerin iç içe alınmaması Medusa belgelerinden doğrulanarak kurulur (Context7; bu ADR bir Medusa API'si varsaymıyor).
 
