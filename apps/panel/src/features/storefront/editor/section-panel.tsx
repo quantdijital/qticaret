@@ -17,13 +17,14 @@ import { AnnouncementForm } from "./forms/announcement-form"
 import { BannerForm } from "./forms/banner-form"
 import { FaqForm } from "./forms/faq-form"
 import { FeaturedForm } from "./forms/featured-form"
-import { FIELD_IDS, MARQUEE_LOOK_SETTINGS, takesLook } from "./forms/field-registry"
+import { FIELD_IDS, MARQUEE_OTHER_SETTINGS, takesLook } from "./forms/field-registry"
 import type { FieldGroupName } from "./forms/field-registry"
 import { GoogleRatingForm } from "./forms/google-rating-form"
 import { HeroForm } from "./forms/hero-form"
 import { HeroSliderForm } from "./forms/hero-slider-form"
 import { LookFields } from "./forms/look-fields"
 import { MarqueeForm } from "./forms/marquee-form"
+import { MarqueeGroups } from "./forms/marquee-groups"
 import { BannerSettings } from "./forms/banner-settings"
 import { MarqueeSettings } from "./forms/marquee-settings"
 import { ProductsForm } from "./forms/products-form"
@@ -145,14 +146,14 @@ export function SectionPanel({
   useFieldFocus(focus)
   const reveal = (which: FieldGroupName) => (focus?.group === which ? focus.nonce : null)
   const looked = takesLook(section, group) ? section : null
-  // A strip's own ground, speed, way and separator sit with the look; the header's has no look
+  // A strip moves and looks in two open groups; its screens and close button sit with the look
   const strip = section.type === "marquee" ? section : null
   // The band's width, height, words' place, veil and buttons sit there too (E2)
   const band = section.type === "banner" ? section : null
   const set =
     (looked ? lookCount(looked) : 0) +
     (strip
-      ? MARQUEE_LOOK_SETTINGS.filter((name) => strip[name] !== MARQUEE_DEFAULTS[name]).length
+      ? MARQUEE_OTHER_SETTINGS.filter((name) => strip[name] !== MARQUEE_DEFAULTS[name]).length
       : 0) +
     (band ? BANNER_SETTING_NAMES.filter((name) => band[name] !== BANNER_DEFAULTS[name]).length : 0)
   return (
@@ -204,12 +205,17 @@ export function SectionPanel({
           />
         </PanelGroup>
       ) : null}
+      {strip ? <MarqueeGroups section={strip} reveal={reveal} onChange={onChange} /> : null}
       {looked || strip ? (
         <PanelGroup
           title={
-            set > 0
-              ? t("storefront.editor.look.titleSet", { count: set })
-              : t("storefront.editor.look.title")
+            strip
+              ? t(`storefront.editor.marquee.${set > 0 ? "otherTitleSet" : "otherTitle"}`, {
+                  count: set,
+                })
+              : set > 0
+                ? t("storefront.editor.look.titleSet", { count: set })
+                : t("storefront.editor.look.title")
           }
           hint={
             strip
@@ -222,7 +228,7 @@ export function SectionPanel({
           {strip ? (
             <MarqueeSettings
               section={strip}
-              settings={MARQUEE_LOOK_SETTINGS}
+              settings={MARQUEE_OTHER_SETTINGS}
               onChange={(next) => {
                 onChange(next)
               }}

@@ -17,7 +17,8 @@ import { offersVariants } from "@/features/storefront/layout/variants"
  */
 
 /** The panel group a field sits in: a field in a closed group opens it. */
-export type FieldGroupName = "variant" | "placement" | "content" | "look" | "visibility"
+export type FieldGroupName =
+  "variant" | "placement" | "content" | "motion" | "appearance" | "look" | "visibility"
 
 export interface RegistryField {
   /** The field's name in the search: `variant`, `look.ground`, `starts_at`. */
@@ -38,13 +39,27 @@ const LOOK = "storefront.editor.look"
 const MARQUEE = "storefront.editor.marquee"
 const BANNER = "storefront.editor.banner"
 
-/** A strip's size sits in its content (it is what the strip is); how it moves and looks, with the look. */
+/**
+ * Where a strip's settings sit (adr/0049 Ek 2026-11-15, the owner's "kayma
+ * hızı ayarı yok": it was there, in a closed group): how it moves and how
+ * it looks in two open groups under its items, the rarely changed ones
+ * (the screens, the close button) closed in "Diğer ayarlar" with the
+ * page's look.
+ */
 const MARQUEE_GROUPS: Readonly<Record<MarqueeSetting, FieldGroupName>> = {
-  size: "content",
-  ground: "look",
-  speed: "look",
-  direction: "look",
-  separator: "look",
+  speed: "motion",
+  direction: "motion",
+  hover_pause: "motion",
+  pause_button: "motion",
+  size: "appearance",
+  ground: "appearance",
+  separator: "appearance",
+  weight: "appearance",
+  uppercase: "appearance",
+  gap: "appearance",
+  outline: "appearance",
+  device: "look",
+  closable: "look",
 }
 
 const settingsIn = (group: FieldGroupName): readonly MarqueeSetting[] =>
@@ -52,11 +67,24 @@ const settingsIn = (group: FieldGroupName): readonly MarqueeSetting[] =>
     (setting) => MARQUEE_GROUPS[setting] === group
   )
 
-/** A strip's settings in its content: the size. */
-export const MARQUEE_CONTENT_SETTINGS = settingsIn("content")
+/** How the strip moves: the open "Hareket" group. */
+export const MARQUEE_MOTION_SETTINGS = settingsIn("motion")
 
-/** How it moves and looks, in the closed "Görünüm ayarları" group with the look's fields. */
-export const MARQUEE_LOOK_SETTINGS = settingsIn("look")
+/** How it looks: the open "Görünüm" group. */
+export const MARQUEE_APPEARANCE_SETTINGS = settingsIn("appearance")
+
+/** The rarely changed ones, in the closed "Diğer ayarlar" group with the page's look. */
+export const MARQUEE_OTHER_SETTINGS = settingsIn("look")
+
+/** Whether the strip offers the setting as it stands: the outline only at the large size. */
+export const marqueeOffers = (section: { size: string }, setting: MarqueeSetting): boolean =>
+  setting !== "outline" || section.size === "large"
+
+/** The settings told as a switch: two steps, one of them "on". */
+export const isSwitch = (setting: MarqueeSetting): boolean => {
+  const steps: readonly string[] = MARQUEE_SETTINGS[setting]
+  return steps.length === 2 && steps.includes("on") && steps.includes("off")
+}
 
 /** The elements' ids, shared by the forms and the search. */
 export const FIELD_IDS = {
@@ -108,6 +136,9 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       MarqueeSetting,
       readonly string[],
     ][]) {
+      if (!marqueeOffers(section, setting)) {
+        continue
+      }
       fields.push({
         key: `marquee.${setting}`,
         group: MARQUEE_GROUPS[setting],

@@ -2,8 +2,23 @@ import type { MarqueeItemView, MarqueeSectionView, Translate } from "@qticaret/u
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { TrustIcon } from "../parts/TrustIcon"
-import { loopOf } from "./marquee-loop"
+import { loopOf, outlined } from "./marquee-loop"
+import { MarqueeClose } from "./MarqueeClose"
 import { MarqueeToggle } from "./MarqueeToggle"
+
+/**
+ * The key a closed strip is remembered by: its id and a digest of its
+ * words, so a strip the shop rewrites shows again (FNV-1a, not a secret).
+ */
+export function closedKey(section: MarqueeSectionView): string {
+  let hash = 0x811c9dc5
+  for (const char of section.items
+    .map((item) => `${item.text}\u0000${item.subtext ?? ""}`)
+    .join("\u0001")) {
+    hash = Math.imul(hash ^ (char.codePointAt(0) ?? 0), 0x01000193)
+  }
+  return `gf-marquee:${section.id}:${(hash >>> 0).toString(36)}`
+}
 
 /**
  * One item: its icon, its line and second line, the whole a link when it
@@ -47,9 +62,14 @@ function Item({ item, loop = false }: { item: MarqueeItemView; loop?: boolean })
  * scrolls into view), and its pause button holds it (WCAG 2.2.2); under
  * `prefers-reduced-motion` it does not move and its items wrap. Its size,
  * ground, speed, direction and separator are attributes, its height fixed
- * by its size so nothing below moves (CLS). On a page it stands edge to
- * edge, or in the container with rounded corners when the shop boxed it;
- * in the header it is a band above the shop's header.
+ * by its size so nothing below moves (CLS). Its newer settings (adr/0049
+ * Ek 2026-11-15: whether the pointer stops it, when the pause button shows,
+ * weight, capitals, room, large outlined items, the screens it shows on
+ * and a close button) are attributes too; the screens and a closed strip
+ * take its outermost box (`data-mq-shell`) off the page, so a hidden strip
+ * leaves no gap. On a page it stands edge to edge, or in the container
+ * with rounded corners when the shop boxed it; in the header it is a band
+ * above the shop's header.
  */
 export function Marquee({
   section,
@@ -67,6 +87,8 @@ export function Marquee({
   const { items } = section
   const { rounds, span } = loopOf(section)
   const repeats = Array.from({ length: rounds - 1 }, (_, round) => round)
+  // The outermost box carries what takes the strip off the page
+  const shell = { "data-mq-shell": "", "data-device": section.device }
   const strip = (
     <section
       aria-label={t("marquee.label")}
@@ -76,7 +98,14 @@ export function Marquee({
       data-speed={section.speed}
       data-direction={section.direction}
       data-separator={section.separator}
+      data-hover-pause={section.hover_pause}
+      data-pause-button={section.pause_button}
+      data-weight={section.weight}
+      data-uppercase={section.uppercase}
+      data-gap={section.gap}
+      data-outline={outlined(section) ? "on" : undefined}
       data-span={span}
+      {...(header ? shell : {})}
       className={cn(
         "gf-marquee",
         section.ground === "stage" && "gf-stage",
@@ -105,12 +134,17 @@ export function Marquee({
         </div>
       </div>
       <MarqueeToggle pause={t("marquee.pause")} play={t("marquee.play")} />
+      {section.closable === "on" && (
+        <MarqueeClose label={t("marquee.close")} storageKey={closedKey(section)} />
+      )}
     </section>
   )
   if (header) {
     return strip
   }
   return (
-    <div className="pt-(--section-gap-s)">{boxed ? <Container>{strip}</Container> : strip}</div>
+    <div className="pt-(--section-gap-s)" {...shell}>
+      {boxed ? <Container>{strip}</Container> : strip}
+    </div>
   )
 }

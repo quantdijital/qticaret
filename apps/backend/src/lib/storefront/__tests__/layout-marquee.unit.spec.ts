@@ -69,6 +69,38 @@ describe("the scrolling strip (adr/0049 Ek 2026-11-14 §4.1)", () => {
     ).toEqual(["storefront_layout.section_invalid"])
   })
 
+  it("keeps the newer settings (adr/0049 Ek 2026-11-15), the pause button never taken away", () => {
+    const set = {
+      speed: "fastest",
+      hover_pause: "off",
+      pause_button: "hover",
+      weight: "normal",
+      uppercase: "on",
+      gap: "wide",
+      outline: "on",
+      device: "mobile",
+      closable: "on",
+    }
+    const doc = layoutDocument.parse({ home: [strip("kayan00001", { size: "large", ...set })] })
+
+    expect(doc.home[0]).toMatchObject(set)
+    expect(issues({ home: [strip("kayan00001", { pause_button: "none" })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+    expect(issues({ home: [strip("kayan00001", { closable: true })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+  })
+
+  it("reads a strip saved before the newer settings as it was drawn then", () => {
+    const saved = { speed: "slow", direction: "right", ground: "light", size: "small" }
+    const doc = layoutDocument.parse({
+      home: [strip("kayan00001", { ...saved, separator: "line" })],
+    })
+
+    expect(doc.home[0]).toMatchObject({ ...MARQUEE_DEFAULTS, ...saved, separator: "line" })
+  })
+
   it("holds an item's lines to their lengths and the shop's details", () => {
     const one = (item: Record<string, unknown>) => ({
       home: [strip("kayan00001", { items: [item] })],

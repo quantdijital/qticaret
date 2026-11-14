@@ -1,7 +1,12 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { renderDoc } from "../../lib/content"
 import type { BodySection } from "../../lib/storefront/layout"
-import type { HeaderMarquee, MarqueeSection } from "../../lib/storefront/sections/marquee"
+import { MARQUEE_SETTING_NAMES } from "../../lib/storefront/sections/marquee"
+import type {
+  HeaderMarquee,
+  MarqueeSection,
+  MarqueeSettingName,
+} from "../../lib/storefront/sections/marquee"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import type { RailPick } from "../../lib/storefront/rails"
 import { hasLook } from "../../lib/storefront/sections/look"
@@ -48,6 +53,12 @@ export const fill = (text: string | null, values: ShopInfoValues) =>
  * §4.1), on a page or in the header: its items' words filled, their links
  * placed (a broken one null, the item kept), its steps as saved.
  */
+const settingsOf = (section: MarqueeSection | HeaderMarquee) =>
+  Object.fromEntries(MARQUEE_SETTING_NAMES.map((name) => [name, section[name]])) as Pick<
+    MarqueeSection,
+    MarqueeSettingName
+  >
+
 export function hydrateMarquee(section: MarqueeSection | HeaderMarquee, at: HydrateContext) {
   return {
     id: section.id,
@@ -58,11 +69,7 @@ export function hydrateMarquee(section: MarqueeSection | HeaderMarquee, at: Hydr
       subtext: fill(item.subtext, at.values),
       link: item.link ? (at.links.get(item.link) ?? null) : null,
     })),
-    speed: section.speed,
-    direction: section.direction,
-    ground: section.ground,
-    size: section.size,
-    separator: section.separator,
+    ...settingsOf(section),
   }
 }
 

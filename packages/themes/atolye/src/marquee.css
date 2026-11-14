@@ -12,15 +12,20 @@
  *   foreground (adr/0062 §6 measures that pair for large text and controls;
  *   the strip's words are short and heavy), or the counter's light well.
  * - Speed and length: the loop's time is the size's own (about 64 px a
- *   second at medium), times the speed (slow 1.6, fast 0.6), times the
+ *   second at medium), times the speed (slowest 2.4, slow 1.6, fast 0.6,
+ *   fastest 0.4), times the
  *   copy's length against a screen-wide one (`data-span`), so a long strip
  *   slides as fast as a short one.
- * - It stops while the pointer is over its words and when paused
+ * - It stops while the pointer is over its words (unless the shop turned
+ *   that off, `data-hover-pause="off"`) and when paused
  *   (`data-paused`); not over or on the pause button, so "oynat" moves it
  *   at once. A focused link stops and resets the loop and the band
  *   scrolls to it, so the focused item is always on screen.
  * - Under `prefers-reduced-motion` nothing moves: the loop's rounds and
  *   copy go, the items wrap and centre, the pause button is not needed.
+ * - The separators, the pause and close buttons and the newer settings
+ *   (weight, capitals, room, outline, screens, the pause button's
+ *   showing) are `marquee-options.css`.
  */
 @layer components {
   .gf-marquee {
@@ -28,6 +33,8 @@
     --mq-span: 1;
     --mq-sub: color-mix(in oklab, currentColor 74%, transparent);
     --mq-mark: color-mix(in oklab, currentColor 50%, transparent);
+    --mq-gap-x: 1;
+    --mq-space: calc(var(--mq-gap) * var(--mq-gap-x));
     position: relative;
     display: flex;
     align-items: center;
@@ -94,11 +101,17 @@
     box-shadow: inset 0 0 0 1px var(--color-rule);
   }
 
+  .gf-marquee[data-speed="slowest"] {
+    --mq-speed: 2.4;
+  }
   .gf-marquee[data-speed="slow"] {
     --mq-speed: 1.6;
   }
   .gf-marquee[data-speed="fast"] {
     --mq-speed: 0.6;
+  }
+  .gf-marquee[data-speed="fastest"] {
+    --mq-speed: 0.4;
   }
   .gf-marquee[data-span="1.5"] {
     --mq-span: 1.5;
@@ -147,7 +160,7 @@
     animation-direction: reverse;
   }
   /* Not over or on the pause button: pressing "oynat" moves the strip at once */
-  .gf-marquee-view:hover .gf-marquee-track,
+  .gf-marquee:not([data-hover-pause="off"]) .gf-marquee-view:hover .gf-marquee-track,
   .gf-marquee[data-paused] .gf-marquee-track {
     animation-play-state: paused;
   }
@@ -167,8 +180,8 @@
     display: flex;
     flex: none;
     align-items: center;
-    gap: var(--mq-gap);
-    padding-inline-start: var(--mq-gap);
+    gap: var(--mq-space);
+    padding-inline-start: var(--mq-space);
     font-size: var(--mq-font);
     white-space: nowrap;
   }
@@ -253,66 +266,6 @@
     block-size: 0.7em;
   }
 
-  /* What stands between two items: nothing, a dot, a star or a hairline */
-  .gf-marquee-item::before {
-    flex: none;
-    color: var(--mq-mark);
-  }
-  .gf-marquee[data-separator="dot"] .gf-marquee-item::before {
-    content: "";
-    inline-size: max(4px, 0.16em);
-    block-size: max(4px, 0.16em);
-    border-radius: 50%;
-    background: currentColor;
-  }
-  .gf-marquee[data-separator="star"] .gf-marquee-item::before {
-    content: "\2726";
-    font-size: 0.7em;
-    line-height: 1;
-  }
-  .gf-marquee[data-separator="line"] .gf-marquee-item::before {
-    content: "";
-    inline-size: 1px;
-    block-size: min(1.4em, calc(var(--mq-height) - 16px));
-    background: currentColor;
-  }
-  /* A campaign's hairline stands as tall as its capitals, not the whole band */
-  .gf-marquee[data-size="large"][data-separator="line"] .gf-marquee-item::before {
-    block-size: 0.7em;
-  }
-
-  /* The pause button keeps its own column at the band's end, never over the words */
-  .gf-marquee-toggle {
-    position: relative;
-    display: grid;
-    flex: none;
-    place-items: center;
-    inline-size: var(--mq-toggle);
-    block-size: var(--mq-toggle);
-    margin-inline: 4px 12px;
-    border: 1px solid var(--mq-mark);
-    border-radius: var(--radius-pill);
-    background: transparent;
-    color: inherit;
-    cursor: pointer;
-  }
-  .gf-marquee-toggle::before {
-    content: "";
-    position: absolute;
-    inset: min(-4px, calc((var(--mq-toggle) - 44px) / 2));
-  }
-  .gf-marquee-toggle svg {
-    inline-size: 40%;
-    block-size: 40%;
-  }
-  .gf-marquee-toggle:hover {
-    border-color: currentColor;
-  }
-  .gf-marquee-toggle:focus-visible {
-    outline: 2px solid var(--color-focus, currentColor);
-    outline-offset: 2px;
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .gf-marquee {
       block-size: auto;
@@ -331,7 +284,7 @@
       flex: 1;
       flex-wrap: wrap;
       justify-content: center;
-      gap: 0.25rem var(--mq-gap);
+      gap: 0.25rem var(--mq-space);
       padding: 0.5rem var(--mq-gap);
     }
     .gf-marquee-item {
@@ -344,8 +297,7 @@
     .gf-marquee-item::before {
       display: none;
     }
-    .gf-marquee [data-loop],
-    .gf-marquee-toggle {
+    .gf-marquee [data-loop] {
       display: none;
     }
   }
