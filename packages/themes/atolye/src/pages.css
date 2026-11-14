@@ -152,22 +152,6 @@
     }
   }
 
-  /* A review on a card closed at five lines over its toggle
-     (sections/ReviewQuote); without the script it stays whole, no toggle */
-  @media (scripting: enabled) {
-    .gf-quote[data-open="false"] {
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      -webkit-line-clamp: 5;
-      overflow: hidden;
-    }
-  }
-  @media (scripting: none) {
-    .gf-quote-toggle {
-      display: none;
-    }
-  }
-
   /* The zoom: the picture follows the pointer once enlarged */
   .gf-zoom {
     touch-action: pinch-zoom;
