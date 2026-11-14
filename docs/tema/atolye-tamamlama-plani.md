@@ -78,3 +78,31 @@ Görsel yön (renk, yazı tipi, fotoğraf dili) sahip ile; ana sayfa, ürün ve 
 ## Ek istek (sahip, 2026-11-14): bileşen başına hazır tasarımlar
 
 Sahip, Elementor'daki gibi üst bilgi (navbar), menü, hero ve diğer bölümler için birden çok hazır tasarım arasından seçim ve bileşenleri tek tek özelleştirme istiyor. Bu, Faz 2 iş 2.5'i (bölüm biçimleri) genişletir: üst bilgi, mega menü, hero, ürün rafı, kategori karoları, alt bilgi için biçim galerisi (ilk hedef: bölüm başına 3–4 biçim) ve biçime özgü ayar alanları. Sınır (adr/0049): serbest sürükle-bırak konumlandırma ve özel HTML/CSS yok; seçim şemalı biçimler ve alanlar üzerinden. Üst bilgi bugün yalnız `announcement_bar` bölümü ve `header.layout` ayarı taşıyor; üst bilgi ve menü biçimleri için ADR-0063'e ek gerekir. Kapsam ve biçim sayısı sahip ile netleşecek.
+
+## Ek istekler ve kararlar (sahip, 2026-11-14 öğleden sonra)
+
+Maket galerisinin ikinci turu sırasında sahibin istediği, Faz 2 iş 2.5 (bölüm biçimleri) ve Faz 3 ile birlikte yapılacak işler. Hepsi şemalı alanlarla çözülür; sektöre özel kod yok.
+
+| # | İş | Not |
+|---|---|---|
+| E1 | Kayan yazı şeridi (yeni bölüm türü) | Ögeler (simge, başlık, alt satır, bağlantı; 1–8), hız, yön, zemin, boyut, ayraç; üzerine gelince durur; `prefers-reduced-motion`'da kaymaz. Maket: KY1–KY3 |
+| E2 | Görsel bant ayarları | Bugün `banner` tek bağlantı taşır, biçim ayarı yok. Eklenecek: ikinci düğme, düğme stili (dolu / çerçeveli / yazı), genişlik (tam / kutulu), yükseklik, metin konumu, perde gücü, metin rengi, telefon görseli |
+| E3 | Kategori listeli, çok karolu hero | Hero yanında ürün sayılı kategori listesi, hızlı bağlantı çipleri, 3 görsel karo. Kategori başına ürün sayısı verisi doğrulanacak. Maket: H17 |
+| E4 | Klasik katalog üst bilgisi | Yazılı arama düğmesi, yazılı hesap bağlantısı, tutar ve adet gösteren sepet düğmesi. Maket: N14 |
+| E5 | Ürün kartı ayarları | Üstüne gelince ikinci fotoğraf (aç/kapat; dokunmatikte kaydırma; ikinci görsel yalnız gerektiğinde yüklenir), teslimat notu satırı, kartta tam genişlik "Sepete ekle / Seçenekler" düğmesi, yorumsuz üründe boş yıldız seçeneği |
+| E6 | Raf yoğunluğu ve sayfa genişliği | Rafta 4 / 5 sütun; kapsayıcı genişliği ayarı |
+| E7 | Hero'da ürün ve kampanya geri sayımı | Sayaç gerçek kampanyanın bitiş tarihine bağlanır; süre bitince bölüm kapanır ya da normal hero'ya döner; fiyat sunucuda hesaplanır. Maket: H7, FS1, H11 |
+| E8 | Bölüm başına gelişmiş CSS | Karar aşağıda |
+
+### Karar: bölüm başına gelişmiş CSS (sahip onayı, 2026-11-14)
+
+Sahip "Shopify mantığıyla gidelim" dedi. adr/0049'un "özel CSS yok" kuralı bu kapsamda değişir; kodlamadan önce adr/0049'a ek yazılır.
+
+- Önce zengin ayarlar (E1–E7); gelişmiş CSS bölüm biçimleri ve ayarları bittikten sonra gelir.
+- Kutu bölüm başınadır; yazılan kurallar o bölümün kutusuna kapsanır, sayfanın geri kalanına dokunamaz.
+- Temanın stilleri bir kaskad katmanında, özel CSS sonraki katmanda durur; `!important` gerekmeden üstün gelir.
+- Kayıtta süzülür: dış adres, `@import`, sayfaya sabitlenen katmanlar ve benzeri tehlikeli yapılar reddedilir; uzunluk sınırı vardır.
+- Sepet ve ödeme adımlarında kapalıdır.
+- Yalnız mağaza sahibi rolü yazar; taslak, önizleme ve sürüm geçmişine girer.
+- Panelde not: tema güncellemesinde bozulabilir, destek kapsamı dışındadır.
+- Sınırsız tema kodu düzenleme yoktur.
