@@ -1,4 +1,6 @@
-import type { MenuLinkInput } from "../menus"
+import type { MenuInput, MenuLinkInput } from "../menus"
+import { resolveMenus } from "./resolve-menus"
+import type { PresetMenuInput } from "./resolve-menus"
 
 /**
  * A storefront preset's references resolved for this shop (adr/0063 §2,
@@ -12,8 +14,10 @@ import type { MenuLinkInput } from "../menus"
  * of a list (`category_ids`, a hero's buttons) is taken out; a list of
  * records the preset filled and the shop has none of, or a section's one
  * record (`product_id`, a rail's `category_id`), drops the section; a
- * button's single link (`more`, a slide's `link`) is cleared. Each is
- * named in `skipped`.
+ * button's single link (`more`, a slide's `link`) is cleared; a menu
+ * whose every link is gone leaves the set, the shop's live menu kept in its
+ * place (`resolveMenus`), never an empty menu put live. Each is named in
+ * `skipped`.
  */
 
 /** A link resolved without its wording: the preset's label goes on it. */
@@ -26,13 +30,17 @@ export interface PresetLookups {
   links: ReadonlyMap<string, PresetLink | null>
   /** `images/hero.webp` → its address in the media library. */
   images: ReadonlyMap<string, string>
+  /** The shop's menus now, as a set writes them: kept where the preset leaves a place (`resolveMenus`). */
+  live?: readonly MenuInput[]
 }
 
 export interface SkippedRef {
-  /** `home.kategoriler` (a section), `menus.main` (a menu). */
+  /** `home.kategoriler` (a section), `menus.main` (a menu), `menus` (the set). */
   where: string
-  /** The reference as the preset wrote it: `category:cakilar`, `/cakilar`. */
+  /** The reference as the preset wrote it: `category:cakilar`, `/cakilar`; a menu left out by its place, `main`. */
   ref: string
+  /** A menu left out: the shop's live menu in its place was kept. */
+  kept_live?: boolean
 }
 
 export interface PresetGroups {
@@ -89,11 +97,13 @@ function marker(node: Record<string, unknown>, walk: Walk): Outcome {
   const href = text(node["$href"])
   if (href !== null) {
     const link = walk.lookups.links.get(href)
-    if (!link) {
+    const label = text(node["label"])
+    // An address kept as written has no wording of its own (the pack's schema asks one)
+    if (!link || (link.kind === "url" && label === null)) {
       walk.skipped.push({ where: walk.where, ref: href })
       return GONE
     }
-    return { ...link, label: text(node["label"]) }
+    return { ...link, label }
   }
   const path = text(node["$image"])
   if (path !== null) {
@@ -154,42 +164,6 @@ function resolveNode(node: unknown, walk: Walk, key: string | null = null): Outc
   return out
 }
 
-interface PresetMenuInput {
-  title: string
-  location: string
-  items: {
-    label: string
-    href: string
-    children?: { label: string; href: string }[] | undefined
-  }[]
-}
-
-function resolveMenus(menus: readonly PresetMenuInput[], walk: Walk): unknown[] {
-  return menus.map((menu, rank) => {
-    const at = { ...walk, where: `menus.${menu.location}` }
-    const link = (each: { label: string; href: string }) => {
-      const found = walk.lookups.links.get(each.href)
-      if (!found) {
-        walk.skipped.push({ where: at.where, ref: each.href })
-        return null
-      }
-      return { ...found, label: each.label }
-    }
-    const items = menu.items.flatMap((item) => {
-      const parent = link(item)
-      if (!parent) {
-        return []
-      }
-      const children = (item.children ?? []).flatMap((child) => {
-        const resolved = link(child)
-        return resolved ? [resolved] : []
-      })
-      return [{ link: parent, children }]
-    })
-    return { title: menu.title, location: menu.location, rank, items }
-  })
-}
-
 const sectionId = (section: unknown): string =>
   isObject(section) && typeof section["id"] === "string" ? section["id"] : "?"
 
@@ -220,10 +194,9 @@ export function resolvePreset(
       groups[group].push(resolved)
     }
   }
-  const walk = { lookups, where: "menus", skipped, images }
   return {
     groups,
-    menus: menus ? resolveMenus(menus, walk) : null,
+    menus: menus ? resolveMenus(menus, lookups.links, lookups.live ?? [], skipped) : null,
     skipped,
     dropped,
     images: [...images].sort(),

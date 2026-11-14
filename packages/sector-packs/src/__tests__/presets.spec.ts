@@ -77,7 +77,12 @@ describe("a preset's folder", () => {
           home: [
             section("girisbolumu", {
               image: { $image: "images/hero.webp", alt: "Atölye" },
-              links: [{ $href: "/cakilar", label: "Çakılar" }],
+              links: [
+                { $href: "/cakilar", label: "Çakılar" },
+                { $href: "https://a.example/b", label: "Dış" },
+              ],
+              // A path on the shop takes the wording of what it resolves to
+              more: { $href: "/magaza" },
             }),
             section("kategoriler", {
               type: "categories",
@@ -181,6 +186,16 @@ describe("a preset's folder", () => {
     ["a media address", { image: { url: "https://cdn.example/a.webp", alt: null } }, "image.url"],
     ["an address that leaves the shop", { more: { $href: "//kotu.example/a" } }, "more.$href"],
     ["a plain http address", { more: { $href: "http://kotu.example/a" } }, "more.$href"],
+    [
+      "an https address without its label",
+      { more: { $href: "https://a.example/b" } },
+      "more.label",
+    ],
+    [
+      "an https address with a null label",
+      { more: { $href: "https://a.example/b", label: null } },
+      "more.label",
+    ],
     ["an image outside images/", { image: { $image: "../../manifest.json" } }, "image.$image"],
     ["an image in a subfolder", { image: { $image: "images/a/b.webp" } }, "image.$image"],
     ["an image of another type", { image: { $image: "images/a.svg" } }, "image.$image"],

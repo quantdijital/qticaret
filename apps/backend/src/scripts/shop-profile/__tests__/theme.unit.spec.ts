@@ -46,6 +46,30 @@ describe("a shop profile's theme and the design (adr/0063 §3)", () => {
     })
   })
 
+  it("writes it into a draft that holds no theme of its own while the live design has one", async () => {
+    row.mockResolvedValue({
+      draft: { home: [], settings: { theme: null, menus: null } },
+      published: { settings: { theme: { radius: "soft" } } },
+    })
+    await expect(carryProfileTheme(container, profile({ theme: {} }))).resolves.toBe(true)
+    expect(save).toHaveBeenCalledTimes(1)
+  })
+
+  it("keeps the owner's unpublished theme change in the draft", async () => {
+    row.mockResolvedValue({
+      draft: { home: [], settings: { theme: { radius: "pill" }, menus: null } },
+      published: { settings: { theme: { radius: "soft" } } },
+    })
+    await expect(carryProfileTheme(container, profile({ theme: {} }))).resolves.toBe(false)
+    // A theme drafted in a design never published is a change too
+    row.mockResolvedValue({
+      draft: { home: [], settings: { theme: { radius: "pill" }, menus: null } },
+      published: null,
+    })
+    await expect(carryProfileTheme(container, profile({ theme: {} }))).resolves.toBe(false)
+    expect(save).not.toHaveBeenCalled()
+  })
+
   it("leaves the design alone without a theme in the profile or in the design", async () => {
     row.mockResolvedValue({ draft: { settings: { theme: null } }, published: null })
     await expect(carryProfileTheme(container, profile({ theme: {} }))).resolves.toBe(false)

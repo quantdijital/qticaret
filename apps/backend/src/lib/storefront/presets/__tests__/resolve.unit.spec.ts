@@ -214,6 +214,113 @@ describe("a preset's references resolved for a shop (adr/0063 §4)", () => {
     ])
   })
 
+  it("leaves out an address kept as written that has no wording", () => {
+    const resolved = resolvePreset(
+      {
+        home: [
+          {
+            ...hero,
+            links: [
+              { $href: "https://ornek.com/rehber" },
+              { $href: "https://ornek.com/rehber", label: null },
+              { $href: "https://ornek.com/rehber", label: "Rehber" },
+            ],
+          },
+        ],
+      },
+      null,
+      lookups
+    )
+    expect(resolved.groups.home).toEqual([
+      expect.objectContaining({
+        links: [{ kind: "url", url: "https://ornek.com/rehber", label: "Rehber" }],
+      }),
+    ])
+    expect(resolved.skipped).toEqual([
+      { where: "home.girisbolumu", ref: "https://ornek.com/rehber" },
+      { where: "home.girisbolumu", ref: "https://ornek.com/rehber" },
+    ])
+  })
+
+  it("takes a menu whose every link is gone out of the set, and an emptied set is none", () => {
+    const lost = { label: "Kayıp", href: "/yok-boyle-bir-yer" }
+    const resolved = resolvePreset(
+      {},
+      [
+        { title: "Ana menü", location: "main", items: [lost] },
+        { title: "Kurumsal", location: "footer", items: [{ label: "Mağaza", href: "/magaza" }] },
+      ],
+      lookups
+    )
+    expect(resolved.menus).toEqual([
+      expect.objectContaining({ location: "footer", items: [expect.anything()] }),
+    ])
+    expect(resolved.skipped).toEqual([
+      { where: "menus.main", ref: "/yok-boyle-bir-yer" },
+      { where: "menus", ref: "main", kept_live: false },
+    ])
+
+    const none = resolvePreset(
+      {},
+      [
+        { title: "Ana menü", location: "main", items: [lost] },
+        { title: "Kurumsal", location: "footer", items: [lost] },
+      ],
+      lookups
+    )
+    // Never an empty set: that would delete every menu at the publication
+    expect(none.menus).toBeNull()
+    expect(none.skipped).toEqual(
+      expect.arrayContaining([
+        { where: "menus", ref: "main", kept_live: false },
+        { where: "menus", ref: "footer", kept_live: false },
+      ])
+    )
+  })
+
+  it("keeps the shop's live menu where the preset leaves a place, never deleting it", () => {
+    const shopMain = {
+      title: "Mağaza menüsü",
+      location: "main" as const,
+      rank: 0,
+      items: [
+        { link: { kind: "system" as const, target: "blog" as const, label: null }, children: [] },
+      ],
+    }
+    const shopFooters = [1, 2].map((rank) => ({
+      title: `Alt ${String(rank)}`,
+      location: "footer" as const,
+      rank,
+      items: [],
+    }))
+    const live = [shopMain, ...shopFooters]
+    const lost = { label: "Kayıp", href: "/yok-boyle-bir-yer" }
+    const resolved = resolvePreset(
+      {},
+      [
+        // Every link gone: the shop's header menu stays in its place
+        { title: "Ana menü", location: "main", items: [lost] },
+        { title: "Üst", location: "top", items: [{ label: "Mağaza", href: "/magaza" }] },
+        // No footer in the preset: the shop's footer columns stay
+      ],
+      { ...lookups, live }
+    )
+    expect(resolved.menus).toEqual([
+      expect.objectContaining({ location: "top", title: "Üst" }),
+      shopMain,
+      ...shopFooters,
+    ])
+    expect(resolved.skipped).toContainEqual({ where: "menus", ref: "main", kept_live: true })
+
+    // A set of only the shop's own menus is none: the menus are left alone
+    const none = resolvePreset({}, [{ title: "Ana menü", location: "main", items: [lost] }], {
+      ...lookups,
+      live,
+    })
+    expect(none.menus).toBeNull()
+    expect(none.skipped).toContainEqual({ where: "menus", ref: "main", kept_live: true })
+  })
+
   it("finds every reference a preset writes, menus' addresses included", () => {
     const found = presetMarkers({
       layout: { home: [hero, { id: "x", category_ids: [{ $handle: "category:cakilar" }] }] },

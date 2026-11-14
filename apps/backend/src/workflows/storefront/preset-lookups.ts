@@ -1,9 +1,13 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { HandleKind } from "@qticaret/sector-packs"
-import { isShopPath } from "../../lib/storefront/menus"
+import { MENU_LIMITS, isShopPath } from "../../lib/storefront/menus"
+import type { MenuInput, MenuLinkInput } from "../../lib/storefront/menus"
 import type { PresetLink, PresetLookups } from "../../lib/storefront/presets/resolve"
 import { linkFromHref } from "./menu-hrefs"
+import { existingRecords, isRecordKind } from "./menu-links"
+import { adminMenus } from "./menus-read"
+import type { AdminMenuLink } from "./menus-read"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -85,4 +89,39 @@ export async function presetLookups(
     linksByHref(container, markers.hrefs),
   ])
   return { records, links, images }
+}
+
+/** A stored link as a set writes it. */
+const inputOf = (item: AdminMenuLink): MenuLinkInput =>
+  item.kind === "url"
+    ? {
+        kind: "url",
+        url: item.url ?? "",
+        label: item.label ?? (item.url ?? "").slice(0, MENU_LIMITS.label),
+      }
+    : ({ kind: item.kind, target: item.target ?? "", label: item.label } as MenuLinkInput)
+
+/**
+ * The shop's menus now, as a menu set writes them (adr/0063 §4): what a
+ * preset keeps where it leaves a place, put back live as it is. Read with
+ * the Menüler screen's own reader; a link whose record no longer exists is
+ * left out (the storefront shows none, and a set naming it is refused).
+ */
+export async function liveMenus(container: Container): Promise<MenuInput[]> {
+  const menus = await adminMenus(container)
+  const found = await existingRecords(
+    container,
+    menus.flatMap((menu) => menu.items.flatMap((item) => [item, ...item.children]))
+  )
+  const alive = (item: AdminMenuLink) =>
+    !isRecordKind(item.kind) || found.has(`${item.kind}:${item.target ?? ""}`)
+  return menus.map((menu) => ({
+    title: menu.title,
+    location: menu.location,
+    rank: menu.rank,
+    items: menu.items.filter(alive).map((item) => ({
+      link: inputOf(item),
+      children: item.children.filter(alive).map(inputOf),
+    })),
+  }))
 }

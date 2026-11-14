@@ -4,6 +4,8 @@ import { PACK_CODE, PRESET_CODE } from "@qticaret/sector-packs"
 import { tenantResultLine } from "@qticaret/types/control-plane"
 import type { ApplyPresetResult } from "@qticaret/types/control-plane"
 import { isValidationError } from "../lib/errors"
+import { AUDIT_LOG_MODULE } from "../modules/audit-log"
+import type AuditLogModuleService from "../modules/audit-log/service"
 import { layoutRow } from "../workflows/storefront/layout-row"
 import { publishLayoutWorkflow } from "../workflows/storefront/layout"
 import { applyPresetWorkflow } from "../workflows/storefront/preset-apply"
@@ -31,10 +33,19 @@ export function presetArgs(args: readonly string[]): PresetArgs {
   return { pack, preset, demo: demo === "true" }
 }
 
-const isUnknown = (error: unknown): boolean =>
+/**
+ * A preset this build does not have, or whose pack the shop was not given;
+ * any other error (a record or file not found on the way) is thrown as it is.
+ */
+export function isUnknownPreset(error: unknown): boolean {
   // By its shape: a workflow's error may come back as another instance
-  (error as { type?: unknown } | null)?.type === MedusaError.Types.NOT_FOUND ||
-  (isValidationError(error) && error.safeMessage === "storefront_preset.pack_not_applied")
+  const shape = error as { type?: unknown; message?: unknown } | null
+  return (
+    (shape?.type === MedusaError.Types.NOT_FOUND &&
+      shape.message === "storefront_preset.unknown") ||
+    (isValidationError(error) && error.safeMessage === "storefront_preset.pack_not_applied")
+  )
+}
 
 /**
  * Usage: pnpm --filter @qticaret/backend tenant:apply-preset pack=<code> preset=<code> [demo=true]
@@ -44,7 +55,8 @@ const isUnknown = (error: unknown): boolean =>
  * panel's workflow. Only a shop that has never published a design (a new
  * shop) gets it published, so it opens with the look; anywhere else it
  * stays in the draft for the owner to preview and publish. Prints one
- * result line (`QT_TENANT_RESULT {...}`); a preset this build does not
+ * result line (`QT_TENANT_RESULT {...}`); the apply and the publication
+ * are recorded in the audit log as the system's. A preset this build does not
  * have, or whose pack the shop was not given, prints `unknown_preset` and
  * exits 1. A preset the shop's schemas refuse throws before writing anything.
  */
@@ -59,7 +71,7 @@ export default async function applyPreset({ container, args }: ExecArgs): Promis
       })
     ).result
   } catch (error) {
-    if (!isUnknown(error)) {
+    if (!isUnknownPreset(error)) {
       throw error
     }
     const result: ApplyPresetResult = { status: "unknown_preset" }
@@ -68,7 +80,18 @@ export default async function applyPreset({ container, args }: ExecArgs): Promis
     return
   }
   if (fresh) {
-    await publishLayoutWorkflow(container).run({ input: null })
+    const { result: published } = await publishLayoutWorkflow(container).run({ input: null })
+    // No staff member, no request: the admin log does not see it
+    await container.resolve<AuditLogModuleService>(AUDIT_LOG_MODULE).record({
+      kind: "system",
+      action: "storefront_layout.published",
+      actor_type: "system",
+      actor_id: null,
+      resource_type: "storefront_layout",
+      resource_id: String(published.revision),
+      outcome: 200,
+      changes: { pack: outcome.pack, preset: outcome.preset, version: outcome.version },
+    })
   }
   const result: ApplyPresetResult = {
     status: "applied",

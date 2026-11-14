@@ -1,8 +1,14 @@
-import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
+import {
+  WorkflowResponse,
+  createWorkflow,
+  transform,
+  when,
+} from "@medusajs/framework/workflows-sdk"
+import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { recordAuditEntryStep } from "../audit-log/steps/record-audit-entry"
 import { registerMediaStep } from "../media/steps/register-media"
 import { askForVersions } from "../media/workflows"
-import { saveLayoutDraftWorkflow } from "./layout"
+import { LAYOUT_LOCK, saveDraftSteps } from "./layout"
 import {
   planPresetImagesStep,
   recordPresetImagesStep,
@@ -14,32 +20,52 @@ import type { ApplyPresetInput } from "./preset-steps"
 export { GENERAL_PACK } from "./preset-steps"
 export type { ApplyPresetInput } from "./preset-steps"
 
+/** A pack's preset images, from the ledger's read to its write: one apply at a time. */
+export const presetLockKey = (pack: string): string => `storefront-preset:${pack}`
+// Uploads run under it: longer than the design's
+const PRESET_LOCK = { timeout: 30, ttl: 120 }
+
 /**
  * A ready-made look applied to the theme editor's draft (adr/0063 §4):
  * the preset read and its theme checked; every `$handle` and `$href`
  * resolved for this shop and the result held to the editor's schema; the
  * images the design still shows brought into the media library once
- * (recorded by path, uploaded again only if the shop deleted them); the
- * draft written by `saveLayoutDraftWorkflow` (its checks, its lock, the
- * images kept from the sweep); one audit entry. Nothing goes live: the
- * owner previews and publishes. Applying the same preset again writes the
- * same draft and uploads nothing.
+ * (recorded by path and digest, uploaded again only if the shop deleted
+ * them or the preset changed them); the draft written with the editor's
+ * checks; nothing goes live: the owner previews and publishes. Applying
+ * the same preset again writes the same draft and uploads nothing.
  *
  * What the shop has no record for is left out and named in `skipped`,
  * never stood in for. Any step failing undoes the uploads, their records
- * and the draft. This workflow takes no lock of its own: the draft's
- * save takes the design's, and the ledger's unique key settles two
- * applies uploading at once (the second fails and undoes its uploads).
+ * and the draft. Two locks, always in this order: the pack's
+ * (`presetLockKey`) from the ledger's read to the draft's write, so two
+ * applies never both upload an image the shop deleted and one of them
+ * leaves it unrecorded in the library; the
+ * design's (`LAYOUT_LOCK`) from reading the shop's own settings it keeps
+ * (trust badges, swatches, "Az kaldı") to writing the draft, so an
+ * editor's save in between is not undone. Taken here, not by
+ * `saveLayoutDraftWorkflow` as a step: a lock in a nested workflow is skipped.
+ *
+ * Audit: an apply through the panel is recorded once by the admin
+ * mutation log (`resources/storefront-layout.ts`, with the request's
+ * status and address); one with no staff member (the provisioner's
+ * script) is recorded here.
  */
 export const applyPresetWorkflow = createWorkflow(
   "storefront-preset-apply",
   (input: ApplyPresetInput) => {
     const preset = loadPresetStep(input)
     const resolution = resolvePresetStep(preset)
+    const presetLock = transform({ preset }, ({ preset }) => ({
+      key: presetLockKey(preset.pack),
+      ...PRESET_LOCK,
+    }))
+    acquireLockStep(presetLock).config({ name: "storefront-preset-lock-images" })
     const plan = planPresetImagesStep(
       transform({ preset, resolution }, ({ preset, resolution }) => ({
         pack: preset.pack,
         code: preset.code,
+        dir: preset.dir,
         images: resolution.images,
       }))
     )
@@ -57,12 +83,12 @@ export const applyPresetWorkflow = createWorkflow(
     const recorded = recordPresetImagesStep(
       transform({ preset, plan, assets }, ({ preset, plan, assets }) => ({
         pack: preset.pack,
-        code: preset.code,
         version: preset.pack_version,
         plan,
         assets,
       }))
     )
+    acquireLockStep(LAYOUT_LOCK)
     const draft = composePresetDraftStep(
       transform({ preset, resolution, recorded }, ({ preset, resolution, recorded }) => ({
         preset,
@@ -70,28 +96,38 @@ export const applyPresetWorkflow = createWorkflow(
         images: recorded.images,
       }))
     )
-    saveLayoutDraftWorkflow.runAsStep({
-      input: transform({ draft }, ({ draft }) => draft.document),
-    })
-    recordAuditEntryStep(
-      transform({ input, preset, draft, recorded }, ({ input, preset, draft, recorded }) => ({
-        kind: "mutation" as const,
-        action: "storefront_layout.preset_applied",
-        actor_type: input.actor ? "user" : "system",
-        actor_id: input.actor,
-        resource_type: "storefront_layout",
-        resource_id: `${preset.pack}/${preset.code}`,
-        outcome: 200,
-        changes: {
-          pack: preset.pack,
-          code: preset.code,
-          version: preset.version,
-          skipped: draft.skipped.length,
-          dropped: draft.dropped.length,
-          images_added: recorded.added,
+    saveDraftSteps(transform({ draft }, ({ draft }) => draft.document))
+    releaseLockStep({ key: LAYOUT_LOCK.key })
+    // Held until the draft names the images: an apply waiting on it then finds them recorded
+    releaseLockStep(
+      transform({ preset }, ({ preset }) => ({ key: presetLockKey(preset.pack) }))
+    ).config({ name: "storefront-preset-unlock-images" })
+    const entry = transform(
+      { input, preset, draft, recorded },
+      ({ input, preset, draft, recorded }) => ({
+        actor: input.actor,
+        audit: {
+          action: "storefront_layout.preset_applied",
+          actor_type: "system",
+          actor_id: null,
+          resource_type: "storefront_layout",
+          resource_id: `${preset.pack}/${preset.code}`,
+          // Reached only when every step before it succeeded
+          outcome: 200,
+          changes: {
+            pack: preset.pack,
+            code: preset.code,
+            version: preset.version,
+            skipped: draft.skipped.length,
+            dropped: draft.dropped.length,
+            images_added: recorded.added,
+          },
         },
-      }))
+      })
     )
+    when("storefront-preset-audit-system", entry, ({ actor }) => actor === null).then(() => {
+      recordAuditEntryStep(transform({ entry }, ({ entry }) => entry.audit))
+    })
     return new WorkflowResponse(
       transform({ preset, draft, recorded }, ({ preset, draft, recorded }) => ({
         pack: preset.pack,

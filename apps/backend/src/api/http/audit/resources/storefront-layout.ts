@@ -11,8 +11,10 @@ import type { AuditedResource, Resolver, Snapshot } from "../types"
  * the menus now change with a publication and a restored revision. Each is
  * summed up by what it changes: a publication by the live theme (its
  * fields by their path, `theme.colors.primary`) and the shop's menus; a
- * restore by the draft's theme and the menu set it carries. A menu is its
- * place, title and number of links; the links themselves are the menus'.
+ * restore by the draft's theme and the menu set it carries; a ready-made
+ * look applied (adr/0063 §7) by the same and the preset the draft names.
+ * A menu is its place, title and number of links; the links themselves
+ * are the menus'.
  */
 
 interface MenuFacts {
@@ -97,6 +99,13 @@ export async function draftSnapshot(scope: Resolver): Promise<Snapshot> {
   return { ...flatten(settings?.theme ?? null, "theme", {}), ...menus }
 }
 
+/** What applying a preset changes: the draft's theme, its menu set and the preset it names. */
+export async function presetSnapshot(scope: Resolver): Promise<Snapshot> {
+  const row = await storedRow(scope)
+  const preset = row?.draft ? storedSettings(row.draft).preset : null
+  return { ...(await draftSnapshot(scope)), ...flatten(preset, "preset", {}) }
+}
+
 export const STOREFRONT_LAYOUT_RESOURCES: readonly AuditedResource[] = [
   {
     method: "POST",
@@ -113,5 +122,13 @@ export const STOREFRONT_LAYOUT_RESOURCES: readonly AuditedResource[] = [
     resourceType: "storefront_layout",
     resourceId: (params) => params["revision"] ?? null,
     snapshot: ({ scope }) => draftSnapshot(scope),
+  },
+  {
+    method: "POST",
+    route: "POST /admin/storefront-presets/:pack/:code/apply",
+    pattern: /^\/admin\/storefront-presets\/(?<pack>[a-z0-9-]+)\/(?<code>[a-z0-9-]+)\/apply$/i,
+    resourceType: "storefront_layout",
+    resourceId: (params) => `${params["pack"] ?? ""}/${params["code"] ?? ""}`,
+    snapshot: ({ scope }) => presetSnapshot(scope),
   },
 ]

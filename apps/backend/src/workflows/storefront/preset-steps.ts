@@ -13,7 +13,7 @@ import type { ThemeSettings } from "../../modules/platform-settings/sections"
 import { SECTOR_PACKS_MODULE } from "../../modules/sector-packs"
 import type SectorPacksModuleService from "../../modules/sector-packs/service"
 import { layoutRow } from "./layout-row"
-import { presetLookups } from "./preset-lookups"
+import { liveMenus, presetLookups } from "./preset-lookups"
 
 /** The pack every shop has its presets from, applied or not (adr/0063 §7). */
 export const GENERAL_PACK = "general"
@@ -54,11 +54,17 @@ export interface PresetResolution {
 const placeholders = (paths: Iterable<string>): Map<string, string> =>
   new Map([...paths].map((path) => [path, `/${path}`]))
 
-/** The draft's own parts a preset keeps: the trust badges, colour swatches and "Az kaldı". */
+/**
+ * The draft's own parts a preset keeps: the trust badges, colour swatches
+ * and "Az kaldı"; with the shop's live menus, kept where the preset
+ * leaves a place (`resolveMenus`). Read for the draft it writes under the
+ * design's lock (`composePresetDraftStep`), so an editor's save just
+ * before is kept.
+ */
 async function keptSettings(container: MedusaContainer) {
-  const row = await layoutRow(container)
+  const [row, live] = await Promise.all([layoutRow(container), liveMenus(container)])
   const { trust_badges, color_swatches, low_stock } = storedSettings(row?.draft ?? null)
-  return { trust_badges, color_swatches, low_stock }
+  return { settings: { trust_badges, color_swatches, low_stock }, live }
 }
 
 /**
@@ -119,12 +125,13 @@ function documentOf(
     records: new Map(Object.entries(resolution.records)),
     links: new Map(Object.entries(resolution.links)),
     images,
+    live: kept.live,
   })
   const document = presetDocument(
     resolved,
     preset.theme,
     { pack: preset.pack, code: preset.code, version: preset.version },
-    kept
+    kept.settings
   )
   return { document, skipped: resolved.skipped, dropped: resolved.dropped, images: resolved.images }
 }
@@ -156,8 +163,9 @@ export const resolvePresetStep = createStep(
 
 /**
  * The draft the preset makes, its images now the library's (adr/0063
- * §4.5); with what was left out, for the panel to say. Reads only: the
- * draft is written by `saveLayoutDraftWorkflow`.
+ * §4.5); with what was left out, for the panel to say. Reads only, run
+ * under the design's lock: the draft is written next (`saveDraftSteps`),
+ * the shop's kept settings as they are at that moment.
  */
 export const composePresetDraftStep = createStep(
   "storefront-preset-compose",

@@ -5,8 +5,14 @@ import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { DEFAULT_PACKS_DIR } from "@qticaret/sector-packs"
 import sharp from "sharp"
+import { AUDIT_LOG_MODULE } from "../../src/modules/audit-log"
+import type AuditLogModuleService from "../../src/modules/audit-log/service"
 import { MEDIA_MODULE } from "../../src/modules/media"
 import type MediaModuleService from "../../src/modules/media/service"
+import { SECTOR_PACKS_MODULE } from "../../src/modules/sector-packs"
+import type SectorPacksModuleService from "../../src/modules/sector-packs/service"
+import { STOREFRONT_LAYOUT_MODULE } from "../../src/modules/storefront-layout"
+import type StorefrontLayoutModuleService from "../../src/modules/storefront-layout/service"
 import { layoutRow } from "../../src/workflows/storefront/layout-row"
 import { applyPresetWorkflow } from "../../src/workflows/storefront/preset-apply"
 import applyPreset from "../../src/scripts/apply-preset"
@@ -96,6 +102,34 @@ async function fixturePacks(): Promise<string> {
       },
     ],
   })
+  // A preset with menus only: its header menu's one link answers nothing here, no footer
+  const menulu = join(root, "general", "presets", "menulu")
+  mkdirSync(menulu, { recursive: true })
+  copyFileSync(join(preset, "theme.json"), join(menulu, "theme.json"))
+  const write = (name: string, value: unknown) => {
+    writeFileSync(join(menulu, name), JSON.stringify(value))
+  }
+  write("preset.json", {
+    format: "quant-storefront-preset",
+    code: "menulu",
+    version: 1,
+    theme: "atolye",
+    name: "Menülü",
+    description: "Menüleri olan deneme görünümü.",
+    tone: "light",
+    credits: [],
+  })
+  write("layout.json", {
+    home: [{ id: "yardim", type: "help", ...SCHEDULE, title: "Bize yazın", text: null }],
+  })
+  write("menus.json", [
+    {
+      title: "Ana menü",
+      location: "main",
+      items: [{ label: "Kayıp", href: "/yok-boyle-bir-yer" }],
+    },
+    { title: "Üst satır", location: "top", items: [{ label: "Blog", href: "/blog" }] },
+  ])
   return root
 }
 
@@ -183,6 +217,34 @@ medusaIntegrationTestRunner({
       expect(second.data.layout.draft).toEqual(draft)
       expect((await layoutRow(container))?.published).toEqual(live)
 
+      // One audit entry per apply: the admin log's, with the request's status and the preset named
+      const audit = container.resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
+      const applied = async () =>
+        audit.listAuditEntries(
+          { action: "POST /admin/storefront-presets/:pack/:code/apply", outcome: 200 },
+          { select: ["resource_type", "resource_id", "actor_id", "changes"] }
+        )
+      for (let attempt = 0; attempt < 30 && (await applied()).length < 2; attempt++) {
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+      const entries = await applied()
+      expect(entries).toHaveLength(2)
+      expect(entries[0]).toMatchObject({
+        resource_type: "storefront_layout",
+        resource_id: "general/grafit",
+      })
+      const codes = entries.map(
+        (entry) =>
+          (entry.changes as { diff?: Record<string, { after?: unknown }> } | null)?.diff?.[
+            "preset.code"
+          ]?.after
+      )
+      // The first named the preset in the draft; the second changed nothing
+      expect(codes).toContain("grafit")
+      expect(await audit.listAuditEntries({ action: "storefront_layout.preset_applied" })).toEqual(
+        []
+      )
+
       // Unknown, refused demo, and not for operations
       expect((await apply("general", "yok")).status).toBe(404)
       expect((await apply("general", "grafit", { demo: true })).status).toBe(400)
@@ -233,6 +295,133 @@ medusaIntegrationTestRunner({
       expect(second.images).toEqual({ added: 0, kept: 1 })
       expect((await library()).length).toBe(count)
       expect(((await layoutRow(container))?.draft as Doc).home[0]?.image?.url).toBe(image)
+
+      // The shop deletes the image; two applies at once upload it once, and the ledger names it
+      const media = container.resolve<MediaModuleService>(MEDIA_MODULE)
+      const [uploaded] = await media.listMediaAssets({ url: image }, { select: ["id"] })
+      await media.deleteMediaAssets([uploaded?.id ?? ""])
+      const both = await Promise.all([run(), run()])
+      expect(both.map((each) => each.images.added).sort()).toEqual([0, 1])
+      expect((await library()).length).toBe(count)
+      const ledger = container.resolve<SectorPacksModuleService>(SECTOR_PACKS_MODULE)
+      const rows = await ledger.listSectorPackItems(
+        { kind: "preset_image" },
+        { select: ["record_id"] }
+      )
+      const named = await media.listMediaAssets(
+        { id: rows.flatMap((row) => (row.record_id ? [row.record_id] : [])) },
+        { select: ["id"] }
+      )
+      expect(named.length).toBe(rows.length)
+
+      // A new version changes the picture under the same name: uploaded again
+      const before = ((await layoutRow(container))?.draft as Doc).home[0]?.image?.url
+      writeFileSync(
+        join(packs, "general", "presets", "vitrin", "images", "hero.png"),
+        await sharp({
+          create: { width: 96, height: 64, channels: 3, background: { r: 200, g: 60, b: 40 } },
+        })
+          .png()
+          .toBuffer()
+      )
+      const changed = await run()
+      expect(changed.images).toEqual({ added: 1, kept: 0 })
+      const after = ((await layoutRow(container))?.draft as Doc).home[0]?.image?.url
+      expect(after).toEqual(expect.any(String))
+      expect(after).not.toBe(before)
+    })
+
+    it("keeps the shop's live menus where the preset leaves a place, through the publication", async () => {
+      const container = getContainer()
+      const owner = await createAdminUser(http, container)
+      const asOwner = { headers: owner.headers }
+      const system = (target: string, label: string | null = null) => ({
+        link: { kind: "system", target, label },
+      })
+      for (const menu of [
+        { title: "Mağaza menüsü", location: "main", items: [system("home", "Anasayfa")] },
+        { title: "Kurumsal", location: "footer", items: [system("blog")] },
+      ]) {
+        expect((await settle(http.post("/admin/storefront-menus", menu, asOwner))).status).toBe(201)
+      }
+      interface AdminMenu {
+        title: string
+        location: string
+        items: { kind: string; target: string | null; label: string | null }[]
+      }
+      const menus = async () =>
+        (await settle(http.get<{ menus: AdminMenu[] }>("/admin/storefront-menus", asOwner))).data
+          .menus
+      const at = (list: AdminMenu[], location: string) =>
+        list
+          .filter((menu) => menu.location === location)
+          .map(({ title, items }) => ({
+            title,
+            items: items.map(({ kind, target, label }) => ({ kind, target, label })),
+          }))
+      const before = await menus()
+
+      const { result } = await applyPresetWorkflow(container).run({
+        input: { pack: "general", code: "menulu", demo: false, actor: null, packs_dir: packs },
+      })
+      // The header menu's every link is gone: the shop's own is kept, and the answer says so
+      expect(result.skipped).toContainEqual({ where: "menus", ref: "main", kept_live: true })
+      const set = ((await layoutRow(container))?.draft as Doc).settings["menus"] as {
+        title: string
+        location: string
+      }[]
+      expect(set.map(({ location, title }) => `${location}:${title}`).sort()).toEqual([
+        "footer:Kurumsal",
+        "main:Mağaza menüsü",
+        "top:Üst satır",
+      ])
+
+      expect(
+        (await settle(http.post("/admin/storefront-layout/publish", {}, asOwner))).status
+      ).toBe(200)
+      const after = await menus()
+      // (a) the header menu as it was; (b) the footer the preset names none of, still there
+      expect(at(after, "main")).toEqual(at(before, "main"))
+      expect(at(after, "footer")).toEqual(at(before, "footer"))
+      expect(at(after, "top")).toEqual([
+        { title: "Üst satır", items: [{ kind: "system", target: "blog", label: "Blog" }] },
+      ])
+    })
+
+    it("keeps the shop's settings an editor saves while the preset waits for the design", async () => {
+      const container = getContainer()
+      const run = () =>
+        applyPresetWorkflow(container).run({
+          input: { pack: "general", code: "grafit", demo: false, actor: null },
+        })
+      await run()
+      const locking = container.resolve(Modules.LOCKING)
+      const owner = "test-editor"
+      await locking.acquire("storefront-layout", { ownerId: owner, expire: 30 })
+      let done = false
+      const applying = run().finally(() => {
+        done = true
+      })
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 1500))
+        // It waits for the design's lock before reading what it keeps
+        expect(done).toBe(false)
+        // The editor's save, under the lock: new trust badges
+        const row = await layoutRow(container)
+        const draft = row?.draft as Doc
+        const badges = [{ icon: "truck", title: "Kapıda ödeme", text: null }]
+        await container
+          .resolve<StorefrontLayoutModuleService>(STOREFRONT_LAYOUT_MODULE)
+          .updateStorefrontLayouts({
+            id: row?.id ?? "",
+            draft: { ...draft, settings: { ...draft.settings, trust_badges: badges } },
+          })
+      } finally {
+        await locking.release("storefront-layout", { ownerId: owner })
+      }
+      await applying
+      const kept = ((await layoutRow(container))?.draft as Doc).settings.trust_badges
+      expect(kept).toEqual([{ icon: "truck", title: "Kapıda ödeme", text: null }])
     })
 
     it("the provisioner's script publishes only a design never published before", async () => {
@@ -270,6 +459,19 @@ medusaIntegrationTestRunner({
       process.exitCode = 0
       const row = await layoutRow(container)
       expect((row?.published as { settings?: unknown } | null)?.settings).toBeDefined()
+      // With no staff member, the workflow records each apply and the script its publication
+      const audit = container.resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
+      const entries = await audit.listAuditEntries(
+        { action: ["storefront_layout.preset_applied", "storefront_layout.published"] },
+        { select: ["action", "actor_type", "resource_id"] }
+      )
+      expect(entries.filter((each) => each.action === "storefront_layout.preset_applied")).toEqual([
+        expect.objectContaining({ actor_type: "system", resource_id: "general/grafit" }),
+        expect.objectContaining({ actor_type: "system", resource_id: "general/grafit" }),
+      ])
+      expect(entries.filter((each) => each.action === "storefront_layout.published").length).toBe(
+        fresh ? 1 : 0
+      )
     })
   },
 })

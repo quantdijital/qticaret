@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import { readFile } from "node:fs/promises"
 import { basename, resolve, sep } from "node:path"
 import type { MedusaContainer } from "@medusajs/framework/types"
@@ -15,10 +16,12 @@ import { removeFiles, storePublicFile } from "../media/files"
 
 /**
  * A preset's images in the shop's media library (adr/0063 §4): each
- * offered once, recorded by its path (`sector_pack_item`, kind
- * `preset_image`), so applying the preset again finds the image it
- * uploaded before. One still in the library is never uploaded again; one
- * the shop deleted since is uploaded anew and the record names the new one.
+ * offered once, recorded by its path and its bytes' digest
+ * (`sector_pack_item`, kind `preset_image`), so applying the preset again
+ * finds the image it uploaded before, and a new version that changed the
+ * picture under the same name uploads the new one. One still in the
+ * library is never uploaded again; one the shop deleted since is uploaded
+ * anew and the record names the new one.
  * Every file goes through the upload line (its type read from its bytes,
  * cleaned, the package's storage counted); a preset is not trusted input.
  */
@@ -30,28 +33,47 @@ export interface PresetImagesPlan {
   upload: string[]
   /** Path → the record of an image uploaded before and deleted since. */
   stale: Record<string, string>
+  /** Path → its record's key, its digest in it (`packItemKey.presetImage`). */
+  keys: Record<string, string>
 }
 
 interface PlanInput {
   pack: string
   code: string
+  /** The preset's folder: each image's digest is read from its bytes. */
+  dir: string
   images: string[]
 }
 
 const ledger = (container: Pick<MedusaContainer, "resolve">) =>
   container.resolve<SectorPacksModuleService>(SECTOR_PACKS_MODULE)
 
+/** A preset's file read from its folder, never from outside it (the loader checked the path). */
+async function presetFile(dir: string, path: string): Promise<Buffer> {
+  const root = resolve(dir)
+  const file = resolve(root, path)
+  if (!file.startsWith(`${root}${sep}`)) {
+    throw new ValidationError("storefront_preset.invalid", { field: "images" })
+  }
+  return await readFile(file)
+}
+
 /** Which of the images the design shows were uploaded before and are still there. Reads only. */
 export const planPresetImagesStep = createStep(
   "storefront-preset-plan-images",
   async (input: PlanInput, { container }) => {
-    const plan: PresetImagesPlan = { known: {}, upload: [], stale: {} }
+    const plan: PresetImagesPlan = { known: {}, upload: [], stale: {}, keys: {} }
     if (input.images.length === 0) {
       return new StepResponse(plan)
     }
-    const keyOf = (path: string) => packItemKey.presetImage(input.code, path)
+    for (const path of input.images) {
+      const digest = createHash("sha256")
+        .update(await presetFile(input.dir, path))
+        .digest("hex")
+      plan.keys[path] = packItemKey.presetImage(input.code, path, digest)
+    }
     const rows = await ledger(container).listSectorPackItems(
-      { pack: input.pack, key: input.images.map(keyOf) },
+      { pack: input.pack, key: Object.values(plan.keys) },
       { select: ["id", "key", "record_id"], take: null }
     )
     const ids = rows.flatMap((row) => (row.record_id ? [row.record_id] : []))
@@ -63,7 +85,7 @@ export const planPresetImagesStep = createStep(
         : []
     const urls = new Map(assets.map((asset) => [asset.id, asset.url]))
     for (const path of input.images) {
-      const row = rows.find((each) => each.key === keyOf(path))
+      const row = rows.find((each) => each.key === plan.keys[path])
       const url = row?.record_id ? urls.get(row.record_id) : undefined
       if (url) {
         plan.known[path] = url
@@ -77,16 +99,6 @@ export const planPresetImagesStep = createStep(
     return new StepResponse(plan)
   }
 )
-
-/** A preset's file read from its folder, never from outside it (the loader checked the path). */
-async function presetFile(dir: string, path: string): Promise<Buffer> {
-  const root = resolve(dir)
-  const file = resolve(root, path)
-  if (!file.startsWith(`${root}${sep}`)) {
-    throw new ValidationError("storefront_preset.invalid", { field: "images" })
-  }
-  return await readFile(file)
-}
 
 /**
  * The images to upload, cleaned and stored as an upload is; their storage
@@ -125,7 +137,6 @@ export const storePresetImagesStep = createStep(
 
 interface RecordInput {
   pack: string
-  code: string
   version: number
   plan: PresetImagesPlan
   assets: MediaAssetRecord[]
@@ -150,7 +161,8 @@ export const recordPresetImagesStep = createStep(
     try {
       for (const [index, path] of input.plan.upload.entries()) {
         const asset = input.assets[index]
-        if (!asset) {
+        const key = input.plan.keys[path]
+        if (!asset || !key) {
           throw new Error(`preset image ${path} was not registered`)
         }
         images[path] = asset.url
@@ -163,7 +175,7 @@ export const recordPresetImagesStep = createStep(
         }
         const made = await service.createSectorPackItems({
           pack: input.pack,
-          key: packItemKey.presetImage(input.code, path),
+          key,
           kind: "preset_image",
           outcome: "added",
           version: input.version,

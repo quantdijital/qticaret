@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from "node:util"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { logger } from "../../lib/logging"
 import { readStoredLayout } from "../../lib/storefront/layout"
@@ -15,6 +16,8 @@ import type { LoadedProfile } from "./profile"
  * into the draft as well, the rest of the draft as it is. It goes live
  * with the next publication, as every theme change now does; nothing is
  * published here. A shop whose design holds no theme needs nothing more.
+ * A draft whose theme differs from the live one holds the owner's change
+ * not yet published: it is kept, never overwritten, and a warning says so.
  * Returns whether the draft was written.
  */
 export async function carryProfileTheme(
@@ -26,7 +29,15 @@ export async function carryProfileTheme(
   }
   const row = await layoutRow(container)
   const live = row?.published ? storedSettings(row.published).theme : null
-  if (!row || (storedSettings(row.draft).theme === null && live === null)) {
+  const drafted = row ? storedSettings(row.draft).theme : null
+  if (!row || (drafted === null && live === null)) {
+    return false
+  }
+  if (drafted !== null && !isDeepStrictEqual(drafted, live)) {
+    logger.warn(
+      { event: "shop_profile.theme_draft_kept" },
+      "the design's draft holds an unpublished theme change: the profile's theme was not written into it"
+    )
     return false
   }
   const { theme } = await legacySettings(container)

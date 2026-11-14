@@ -1,4 +1,5 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { createHash } from "node:crypto"
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { asValue } from "@medusajs/framework/awilix"
@@ -62,7 +63,12 @@ interface Input {
 
 const workflow = createWorkflow("test-preset-images", (input: Input) => {
   const plan = planPresetImagesStep(
-    transform({ input }, ({ input }) => ({ pack: "general", code: "vitrin", images: input.images }))
+    transform({ input }, ({ input }) => ({
+      pack: "general",
+      code: "vitrin",
+      dir: input.dir,
+      images: input.images,
+    }))
   )
   const fileIds = storePresetImagesStep(
     transform({ input, plan }, ({ input, plan }) => ({ dir: input.dir, upload: plan.upload }))
@@ -71,7 +77,6 @@ const workflow = createWorkflow("test-preset-images", (input: Input) => {
   const recorded = recordPresetImagesStep(
     transform({ plan, assets }, ({ plan, assets }) => ({
       pack: "general",
-      code: "vitrin",
       version: 3,
       plan,
       assets,
@@ -82,6 +87,11 @@ const workflow = createWorkflow("test-preset-images", (input: Input) => {
 })
 
 let dir: string
+/** An image's record key as the step writes it: its path and its bytes' digest. */
+const keyOf = (name: string) =>
+  `preset_image:vitrin/images/${name}@${createHash("sha256")
+    .update(readFileSync(join(dir, "images", name)))
+    .digest("hex")}`
 
 beforeAll(async () => {
   dir = mkdtempSync(join(tmpdir(), "preset-images-"))
@@ -127,12 +137,12 @@ beforeEach(() => {
         : [
             {
               id: "spitm_hero",
-              key: "preset_image:vitrin/images/hero.png",
+              key: keyOf("hero.png"),
               record_id: "media_hero",
             },
             {
               id: "spitm_eski",
-              key: "preset_image:vitrin/images/eski.png",
+              key: keyOf("eski.png"),
               record_id: "media_gone",
             },
           ]
@@ -168,7 +178,7 @@ describe("a preset's images in the media library (adr/0063 §4.3)", () => {
     })
     expect(ledger.createSectorPackItems).toHaveBeenCalledWith({
       pack: "general",
-      key: "preset_image:vitrin/images/kart.png",
+      key: keyOf("kart.png"),
       kind: "preset_image",
       outcome: "added",
       version: 3,
@@ -195,13 +205,41 @@ describe("a preset's images in the media library (adr/0063 §4.3)", () => {
     const { errors } = await run(true)
     expect(errors).toHaveLength(1)
     expect(files.deleteFiles).toHaveBeenCalledWith(["file_1", "file_2"])
-    expect(ledger.deleteSectorPackItems).toHaveBeenCalledWith([
-      "spitm_preset_image:vitrin/images/kart.png",
-    ])
+    expect(ledger.deleteSectorPackItems).toHaveBeenCalledWith([`spitm_${keyOf("kart.png")}`])
     expect(ledger.updateSectorPackItems).toHaveBeenLastCalledWith({
       id: "spitm_eski",
       record_id: "media_gone",
     })
+  })
+
+  it("uploads an image a new version changed under the same name", async () => {
+    const before = keyOf("hero.png")
+    const changed = await sharp({
+      create: { width: 64, height: 48, channels: 3, background: { r: 200, g: 40, b: 40 } },
+    })
+      .png()
+      .toBuffer()
+    writeFileSync(join(dir, "images", "hero.png"), changed)
+    // The ledger still holds the old picture's record, its image in the library
+    ledger.listSectorPackItems.mockImplementation((filters: { key?: string[] }) =>
+      Promise.resolve(
+        [{ id: "spitm_hero", key: before, record_id: "media_hero" }].filter((row) =>
+          filters.key?.includes(row.key)
+        )
+      )
+    )
+    const { result } = await workflow(container()).run({
+      input: { dir, images: ["images/hero.png"], fail: false },
+    })
+    expect(result).toEqual({
+      images: { "images/hero.png": "http://files/file_1" },
+      added: 1,
+      kept: 0,
+    })
+    expect(ledger.createSectorPackItems).toHaveBeenCalledWith(
+      expect.objectContaining({ key: keyOf("hero.png"), record_id: "media_file_1" })
+    )
+    expect(keyOf("hero.png")).not.toBe(before)
   })
 
   it("refuses a file that is not the image it claims, storing nothing", async () => {

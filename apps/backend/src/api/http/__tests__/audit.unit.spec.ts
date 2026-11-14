@@ -157,6 +157,18 @@ describe("audit registry", () => {
     })
   })
 
+  it("records a preset applied as a change of the design, by its pack and code", () => {
+    const match = matchAuditedResource("POST", "/admin/storefront-presets/general/grafit/apply")
+    expect(match).toMatchObject({
+      resource: {
+        route: "POST /admin/storefront-presets/:pack/:code/apply",
+        resourceType: "storefront_layout",
+      },
+      params: { pack: "general", code: "grafit" },
+    })
+    expect(match?.resource.resourceId(match.params)).toBe("general/grafit")
+  })
+
   it("leaves other routes to the generic entry", () => {
     expect(matchAuditedResource("POST", "/admin/regions/reg_01ABC")).toBeNull()
   })
