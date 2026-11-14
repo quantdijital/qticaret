@@ -81,7 +81,8 @@ describe("the section's look settings", () => {
       const field = screen.getByRole("radiogroup", { name: `${label ?? ""} ${term ?? ""}` })
       expect(within(field).getAllByRole("radio").length).toBeGreaterThan(1)
     }
-    expect(screen.getAllByText("Seçilmedi: temanın kendi görünümü.")).toHaveLength(5)
+    // An unset field says nothing more: the group's hint covers it
+    expect(screen.queryByText(/temanın ölçüsünden/)).not.toBeInTheDocument()
   })
 
   it("sets a step, says how many are set, and puts the theme's own back", async () => {
@@ -89,7 +90,7 @@ describe("the section's look settings", () => {
     await userEvent.click(lookToggle())
 
     const ground = screen.getByRole("radiogroup", { name: "Zemin background" })
-    await userEvent.click(within(ground).getByRole("radio", { name: "Kuyu" }))
+    await userEvent.click(within(ground).getByRole("radio", { name: "Hafif ton" }))
 
     expect(changes.at(-1)).toMatchObject({ look: { ground: "well", space_outer: null } })
     expect(lookToggle(/1 ayar/)).toBeInTheDocument()
@@ -97,7 +98,9 @@ describe("the section's look settings", () => {
     await userEvent.click(screen.getByRole("button", { name: "Varsayılana dön" }))
 
     expect(changes.at(-1)).not.toHaveProperty("look")
-    expect(within(ground).getByRole("radio", { name: "Kuyu" })).not.toBeChecked()
+    expect(within(ground).getByRole("radio", { name: "Hafif ton" })).not.toBeChecked()
+    // The reset button goes: the focus stays on the field, not the page
+    expect(within(ground).getByRole("radio", { name: "Sayfa" })).toHaveFocus()
   })
 
   it("offers only what means something in the section", async () => {
@@ -106,7 +109,7 @@ describe("the section's look settings", () => {
 
     const ground = screen.getByRole("radiogroup", { name: "Zemin background" })
     expect(within(ground).queryByRole("radio", { name: "Ana renk" })).toBeNull()
-    expect(within(ground).getByRole("radio", { name: "Sahne" })).toBeInTheDocument()
+    expect(within(ground).getByRole("radio", { name: "Koyu" })).toBeInTheDocument()
   })
 
   it("has no alignment where the words sit on a picture", async () => {

@@ -60,7 +60,7 @@ describe("the theme editor's settings search", () => {
       option: "storefront.editor.variants.trust_badges.lined",
     })
 
-    const stage = search("sahne")
+    const stage = search("hafif ton")
     expect(stage.map((hit) => hit.field?.key)).toEqual([
       "look.ground",
       "look.ground",

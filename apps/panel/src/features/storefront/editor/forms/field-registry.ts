@@ -26,7 +26,7 @@ export interface RegistryField {
   label: string
   /** The technical term's i18n key, shown small beside it ("margin"); null: none. */
   term: string | null
-  /** Its choices' names (i18n keys): "Sahne" finds the ground, "Çizgili" the variant. */
+  /** Its choices' names (i18n keys): "Koyu" finds the ground, "Çizgili" the variant. */
   options: readonly string[]
   /** The element the search scrolls to and marks. */
   target: string

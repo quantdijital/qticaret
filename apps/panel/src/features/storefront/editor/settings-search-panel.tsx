@@ -103,7 +103,7 @@ export function SettingsSearch({
             aria-controls={searching ? `${id}-hits` : undefined}
             placeholder={t(`${S}.placeholder`)}
             value={query}
-            className="pr-8 pl-8"
+            className="pr-8 pl-8 [&::-webkit-search-cancel-button]:hidden"
             onChange={(event) => {
               setQuery(event.target.value)
             }}

@@ -1,4 +1,5 @@
 import { RotateCcw } from "lucide-react"
+import { useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
@@ -44,6 +45,7 @@ function LookField<F extends SectionLookField>({
   const id = FIELD_IDS.look(section.id, field)
   const value = lookStep(section, field)
   const steps: readonly SectionLookStep<F>[] = lookStepsFor(section.type, field)
+  const group = useRef<HTMLDivElement>(null)
   return (
     <div id={id} data-look-field={field} className="flex flex-col gap-2">
       <div className="flex min-h-7 items-center justify-between gap-2">
@@ -60,6 +62,8 @@ function LookField<F extends SectionLookField>({
             size="xs"
             onClick={() => {
               onChange(null)
+              // The button goes once reset: the focus stays on the field, not the page
+              group.current?.querySelector<HTMLElement>("[role=radio]")?.focus()
             }}
           >
             <RotateCcw />
@@ -68,10 +72,11 @@ function LookField<F extends SectionLookField>({
         ) : null}
       </div>
       <ToggleGroup
+        ref={group}
         type="single"
         variant="outline"
         aria-labelledby={`${id}-label`}
-        aria-describedby={`${id}-hint`}
+        aria-describedby={value === null ? undefined : `${id}-hint`}
         value={value ?? ""}
         onValueChange={(next) => {
           onChange(next === "" ? null : (next as SectionLook[F]))
@@ -89,9 +94,11 @@ function LookField<F extends SectionLookField>({
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <p id={`${id}-hint`} className="text-xs text-muted-foreground">
-        {value === null ? t(`${LOOK}.themeOwn`) : t(`${LOOK}.${field}.hint`)}
-      </p>
+      {value === null ? null : (
+        <p id={`${id}-hint`} className="text-xs text-muted-foreground">
+          {t(`${LOOK}.${field}.hint`)}
+        </p>
+      )}
     </div>
   )
 }

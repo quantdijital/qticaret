@@ -89,7 +89,7 @@ describe("the theme editor's settings search", () => {
     const ground = screen.getByRole("radiogroup", { name: "Zemin background" })
     expect(ground.closest("[data-highlight]")).not.toBeNull()
 
-    await user.click(within(ground).getByRole("radio", { name: "Sahne" }))
+    await user.click(within(ground).getByRole("radio", { name: "Koyu" }))
     await pass(AUTOSAVE_MS)
 
     await waitFor(() => {

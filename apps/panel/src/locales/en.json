@@ -7863,7 +7863,6 @@
         "titleSet_other": "Look settings · {{count}} set",
         "hint": "Spacing, background, alignment and width. Any field left unset uses the theme's own look; the preview shows it at once.",
         "reset": "Back to default",
-        "themeOwn": "Not set: the theme's own look.",
         "space_outer": {
           "label": "Outer spacing",
           "term": "margin",
@@ -7887,8 +7886,8 @@
           "term": "background",
           "hint": "The colour pairs are measured in the theme; text and button colours follow the background.",
           "page": "Page",
-          "well": "Well",
-          "stage": "Stage",
+          "well": "Light tint",
+          "stage": "Dark",
           "primary": "Main colour"
         },
         "align": {
@@ -7901,7 +7900,7 @@
         "width": {
           "label": "Width",
           "term": "width",
-          "hint": "Narrow: a reading width. Boxed: the page's width. Full: edge to edge.",
+          "hint": "Narrow: a reading width. Boxed: the page's width. Full: edge to edge on a wide screen.",
           "narrow": "Narrow",
           "boxed": "Boxed",
           "full": "Full"

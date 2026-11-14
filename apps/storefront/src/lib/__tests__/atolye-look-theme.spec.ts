@@ -66,4 +66,18 @@ describe("a section's look in Atölye", () => {
     expect(LOOK_CSS).toContain('[data-width="full"]')
     expect(LOOK_CSS).not.toMatch(/:\s*[1-9]\d*px/)
   })
+
+  it("keeps a sale readable on each ground and the sale badge in the deal's red", () => {
+    // The stage lifts only the sale price (`ui.css`'s `.gf-stage .text-deal`): the badge is `bg-deal`
+    expect(LOOK_CSS).not.toContain("--color-deal:")
+    expect(LOOK_CSS).toMatch(
+      /\.gf-look\[data-ground="primary"\] \.text-deal \{\s*color: var\(--primary-foreground\);/
+    )
+  })
+
+  it("trades the two papers in the well, so a chip on a tile still shows", () => {
+    expect(LOOK_CSS).toMatch(
+      /--color-paper: var\(--look-well\);\s*--color-paper-2: var\(--look-page\);/
+    )
+  })
 })

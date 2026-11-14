@@ -12,10 +12,14 @@
  *   pads its section inside (medium unless the shop set the inner space),
  *   so the colour never swallows the gap. Each ground sets its own inks
  *   and wells for the section inside: the page's paper; the tinted well,
- *   its inner tiles on paper; the graphite stage with the stage's measured
- *   inks (`gf-stage`'s buttons and fields); the shop's colour with its own
- *   foreground (adr/0062 §6 measures that pair to 3:1, so the panel does
- *   not offer it on long text).
+ *   its two papers traded (its inner tiles on paper, what sits on a tile
+ *   in the well's tint); the graphite stage with the stage's measured
+ *   inks (`gf-stage`'s buttons and fields, its lifted sale price; the sale
+ *   badge keeps the deal's red, its ink measured on it); the shop's colour
+ *   with its own foreground (adr/0062 §6 measures that pair to 3:1, so the
+ *   panel does not offer it on long text), where a sale price reads in that
+ *   foreground too: the deal's red is lost on most shop colours, and the
+ *   struck price and the badge still mark the sale.
  * - Inner space (padding): the box's own, from the spacing scale.
  * - Alignment: the section's heading, the line under it and its head row.
  * - Width: the reading measure, the container (the theme's own), or the
@@ -77,11 +81,15 @@
     color: var(--color-text);
   }
   .gf-look[data-ground="well"] {
+    --look-page: var(--color-paper);
+    --look-well: var(--color-paper-2);
     background: var(--color-paper-2);
     color: var(--color-text);
   }
+  /* The two papers trade places: a tile on paper, a chip on the tile in the well's tint */
   .gf-look[data-ground="well"] > * {
-    --color-paper-2: var(--color-paper);
+    --color-paper: var(--look-well);
+    --color-paper-2: var(--look-page);
   }
   /* The background and ink are `gf-stage`'s; the section's own tokens turn to the stage's */
   .gf-look[data-ground="stage"] > * {
@@ -95,7 +103,6 @@
     --color-paper-2: var(--color-stage-2);
     --color-paper-3: var(--color-stage-rule);
     --color-field: var(--color-stage-2);
-    --color-deal: var(--color-deal-on-stage);
     --color-ok: var(--color-ok-on-stage);
     --color-error: var(--color-error-on-stage);
     --color-focus: var(--color-signal-on-stage);
@@ -132,4 +139,13 @@
   .gf-look[data-width="full"] > * {
     --container: 100%;
   }
+}
+
+/*
+ * A sale price on the shop's colour reads in its foreground (WCAG 1.4.3):
+ * outside the layers, as `ui.css`'s graphite rule, since `text-deal` is a
+ * utility and `--color-deal` also paints the sale badge, which stays red.
+ */
+.gf-look[data-ground="primary"] .text-deal {
+  color: var(--primary-foreground);
 }
