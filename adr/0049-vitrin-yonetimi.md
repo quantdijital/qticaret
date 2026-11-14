@@ -304,3 +304,316 @@ Kararın 6.3 adımı ("diğer sayfa şablonlarının bölümleri"), backend tara
   - Backend, panel ve şema değişmedi: bölüm türü, sınırlar (12 soru, 160/600 karakter) ve belirteçler aynı.
   - Advisor'da `FAQPage`'e dayanan kural yoktu; eklenmedi.
 - **Koruma.** Vitrin birim testi (`lib/seo/__tests__/seo-policy.spec.ts`) vitrin, tema ve ui kaynaklarında JSON-LD türü olarak `"FAQPage"` geçmediğini denetler; e2e duman testi ürün sayfasında `FAQPage` bloğu olmadığını.
+
+## Ek 2026-11-14: bölüm biçimleri, yeni bölüm türleri ve gelişmiş CSS (Kabul edildi, 2026-11-14)
+
+- **Durum:** Kabul edildi (2026-11-14). §10'daki on iki karar verildi: dördünü (4, 5, 6, 11) sahip seçti; kalan sekizi sahibin "önerilerle ilerle" yetkisiyle önerilen seçenekle kapandı. Ekin gövdesi kararlara göre güncellendi; kodlama §9'un sırasıyla başlar.
+- **Dayanak:** `docs/tema/atolye-tamamlama-plani.md` ("Ek istek: bileşen başına hazır tasarımlar", E1–E8, "Karar: bölüm başına gelişmiş CSS", "İlke: bölüm ayarları kullanıcıyı boğmaz", "Maket seçimi"); adr/0063 §6 ve iş 2.5 (kapsamı bu eke taşındı); adr/0062; adr/0053 §B; adr/0040; adr/0011. Maketler depo dışındadır (`qticaret-demo-katalog/maket/`); biçim tanımları `_kaynak/*.mjs` dosyalarındaki `code`, `title`, `note`, `fields` alanlarından okundu.
+- **Değişen kural:** Karar 2'deki "Panelden HTML, CSS ya da JavaScript yazılmaz" cümlesinin CSS kısmı §8'deki dar kapsamla değişir (sahip, 2026-11-14: "Shopify mantığıyla gidelim"). HTML ve JavaScript yasağı aynen kalır; serbest sürükle-bırak konumlandırma ve tema kodu düzenleme yine yoktur.
+
+### 1. Bugün kodda olan (doğrulandı)
+
+- Bölüm şemaları `lib/storefront/layout-sections.ts` (249 satır); ortak parçalar `layout-fields.ts` (`base`: `id`, `visible`, `starts_at`, `ends_at`; `columns` 3 | 4 | 5); belge `layout.ts`: `header` yalnız `announcement_bar` alır (en çok 3, her tür bir kez), `home` 30, `product` ve `category` 12, `footer` yalnız `newsletter`, ayrıca `settings`. `hero_slider` `layout-slider.ts`'te, `google_rating` `layout-google.ts`'te. **Hiçbir türde `variant` yok.**
+- `defaultLayout` (`workflows/storefront/layout-default.ts`): duyuru, `hero`, `categories`, `products` (en yeniler), `help`, `posts`; alt bilgide bülten; ürün ve kategori grupları boş. `settings.theme` adr/0063 iş 2.1 ile bu ek yazılırken ayrı bir işte ekleniyor.
+- Kategori grubundaki bölümler `placement` (`top` | `bottom`) taşır; ürün ve kategori grupları bütün ürün ve kategori sayfalarında ortaktır (Ek 2026-11-03).
+- Tema ayarı (`modules/platform-settings/sections/theme.ts`) `header: { layout: "centered" | "left", sticky }` taşır. Atölye `frame/Header.tsx` yalnız `sticky`'yi okur; ortalanmış düzen adr/0062 karar 6'ya göre ayrı dalda.
+- Atölye'de sekmeli raf ayrı bir tür değildir: art arda duran `products` bölümleri tek sekmeli rafa birleşir (`sections/plan.ts` `blocksOf`, `sections/ShelfTabs.tsx`, betiksiz).
+- `banner` 1–6 slayt taşır, her slaytta tek bağlantı; Atölye ilk üçünü yan yana çizer (`sections/Campaign.tsx`). Biçim ayarı yok.
+- Ürün kartının görünüm modeli tek görsel taşır (`@qticaret/ui` `ProductCardView.image`); ikinci görsel, teslimat notu ve varyant sayısı yok. Tek varyantlı üründe karttan sepete ekleme var (`QuickAddView`).
+- Üst bilgi sepetin adedini ve ara toplamını zaten alır (`ShopView.cartQuantity`, `MiniCartView.subtotal`); sepet çekmecesi ücretsiz kargo çubuğunu çizer (`parts/FreeShippingMeter.tsx`, `FreeShippingView`); eşik `promotions.free_shipping_threshold`.
+- Kategori başına ürün sayısı yalnız `/kategoriler` sayfasında var: vitrin her kategori için ayrı `/store/products` sayımı ister (`apps/storefront/src/lib/views/category-index.ts`, `nav-pictures.ts` `categoryGlance`). Ana sayfa bölümlerinde ve menüde sayı yok.
+- Fiyat listelerinin `starts_at` / `ends_at`'i backend'de okunuyor (`workflows/pricing/price-history.ts`); bitiş tarihini store tarafına veren uç yok. Store `fields` promosyonun kampanyasına ulaşamıyor (adr/0024).
+- Marka kaydı: ad, tanıtıcı, açıklama, logo (`modules/brands`); kapak görseli ve ürün sayısı yok. Blog etiketleri var (`modules/content` `content-term`, tür `tag`). Çalışma saatleri `store` ayar bölümünde (`opening_hours`), sosyal hesaplar `legal` bölümünde (`sameAs`).
+- Atölye stilleri katmanlı: `base.css` `layer(base)`; `ui.css`, `frame.css`, `pages.css`, `content.css` `@layer components`; `tokens.css` katmansız. Vitrin canlıda `style-src 'self' 'nonce-…'` gönderir ve tema değişkenlerini nonce'lu bir `<style>` ile basar (`apps/storefront/src/app/layout.tsx`, `lib/security/csp.ts`); `img-src` her https adresine açık.
+- Tema ölçeği adlandırılmış: `--section-gap-s` / `--section-gap` / `--section-gap-l`, `--space-3xs` … `--space-4xl`, `--container` 1440 px, `--gutter` (`tokens.css`; dar ekranda kendiliğinden küçülür).
+- Panel düzenleyicide ayar araması yok (`editor/`'deki tek arama önizleme ürünü seçicisi). Bölüm formları `editor/forms/` altında, tür başına bir dosya.
+
+### 2. `variant` alanının kuralları
+
+1. **Alan.** Biçim taşıyan her bölüm türünde `variant`: tür başına kapalı liste, varsayılanı bugünkü çizim. Saklanan belgede alan yoksa varsayılan okunur (`placement` ve `columns` deseni); göç yok, "değişiklik var" yanmaz. adr/0063 §6 ile aynı kural.
+2. **Adlar** İngilizce, sektörden bağımsız ve çizimi anlatır (`bento`, `category_list`); maket kodu ya da sektör adı değildir. Paneldeki Türkçe adı i18n anahtarından gelir (`storefront.editor.variants.<tür>.<biçim>`).
+3. **Yazmada katı, okumada bağışlayıcı.**
+   - Kayıt listede olmayan biçimi `storefront_layout.section_invalid` ile reddeder (`columns`'taki gibi: başka değer bozuk ya da eski bir istemcidir).
+   - Tema tanımadığı biçimde varsayılan çizimi basar ve biçime özgü alanları yok sayar (base tema, eski tema derlemesi). Biçim listeleri `@qticaret/ui`'de durur; yeni biçim önce sözleşmeye, sonra temaya girer.
+   - Bir biçim listeden kaldırılırsa şema onu okuma anında varsayılana eşler (`REMOVED_THEMES` deseni); saklanan belge hiçbir zaman okunamaz olmaz.
+4. **Biçime özgü alanlar: üç seçenek.**
+
+   | | (A) Düz, hepsi isteğe bağlı | (B) Tür içinde `variant`'a göre ayrık birleşim | (C) Ortak alanlar + biçim başına alt nesne (`by_variant`) |
+   | --- | --- | --- | --- |
+   | Doğrulama | Zayıf: biçimin zorunlu alanı şemada söylenemez, `superRefine` yığını | Katı: her biçim kendi zorunlusunu söyler | Katı, ama yalnız seçili biçim anlamlı |
+   | Biçim değişince | Veri durur, kullanılmayan alanlar belgede birikir | Ortak alanlar taşınır, biçime özgüler düşer (geri al getirir) | Hepsi durur, geri dönünce yerinde |
+   | Denetim ve görseller | Ölü alanlar `checkLayout`'ta denetlenir, gizli görseller "bağlı" kalır, süpürülemez | Yalnız görünen veri | A gibi |
+   | Görünüm modeli ve tema | Her biçimde `null` denetimi | TypeScript daraltması: `section.variant === "bento"` | B gibi, bir kat daha derin |
+   | Hazır görünüm dosyaları (adr/0063) | Gereksiz alanlar | Yalnız seçili biçim | Ölü alt nesneler |
+
+   **Seçilen: (B)** (§10 karar 1). Tek istisna `category_main`'dir (§7: birden çok biçim aynı anda yayında). Ortak içerik (başlık, metin, düğmeler, görsel) türün tabanındadır ve her biçimde aynı adla durur; biçime özgü alanlar `variant` dalındadır. Panel biçim değişiminde ortak alanları taşır, biçime özgüleri yeni biçimin varsayılanlarıyla doldurur; geri al tek adımda eski biçimi verisiyle getirir. Uygulama notu: alan yokken varsayılanın birleşimden önce yazılması gerekir (`z.preprocess`); dış birleşim `type`, iç birleşim `variant` üzerinedir. Zod 4'te iç içe ayrık birleşimin `preprocess` ile hata anahtarını koruyarak çalıştığı kodlamadan önce Context7 ile doğrulanır (doğrulanmadı).
+5. **Dosya düzeni.** `layout-sections.ts` 300 satır sınırına yakın. İlk iş türleri `lib/storefront/sections/<tür>.ts` dosyalarına böler (`layout-slider.ts`, `layout-google.ts` emsal). Paralel çalışmanın önkoşulu budur.
+6. **Panel.** Bölüm formunun en üstünde "Biçim": küçük çizimli seçim (Ek 2026-11-05'teki sütun çizimleri gibi), anında önizleme. Ayrıntı §6.
+
+### 3. İki takım için biçimler
+
+Boyut: S (bir gün), M (birkaç gün), L (bir hafta ve üstü; çoğu yeni backend verisi ister). "Var" diye yazılanlar kodda doğrulandı; doğrulanamayanlar "doğrulanmadı" diye işaretli.
+
+#### 3.1 Kombinasyon takımı
+
+| Maket | Bölüm türü | `variant` | Yeni alanlar | Backend'de gereken veri | Boyut |
+| --- | --- | --- | --- | --- | --- |
+| DY3 | `announcement_bar` | `free_shipping` (bugünkü: `lines`) | Boş sepet metni (`{esik}`), kalan metni (`{kalan}`), eşik aşıldı metni, isteğe bağlı öneri bağlantısı (koleksiyon) | Eşik var; sepet ara toplamı üst bilgide var. İki belirteç adr/0048'in mağaza belirteçlerinden ayrıdır, yalnız bu alanlarda geçer. Eşik yoksa bölüm `lines` gibi çizilir | M |
+| N12 | `header_bar` (ana bölüm, §5) | `shrinking` | Üst satır sloganı + 0–4 bağlantı, küçülme aç/kapa, eşik Erken / Orta / Geç | Yok. Atölye kaydırınca kategori şeridini zaten katlıyor (`ScrollCue`, `frame.css`) | M |
+| M7 | `usage_menu` (yeni, üst bilgi grubunda, §5) | yok (tek çizim) | 1–5 sekme (ad, simge, alt yazı), tanıtım başlığı ve cümlesi, 0–5 bağlantılı etiket, 3 ürün (koleksiyon ya da elle), menüdeki konumu | Ürünler var olan raf seçimiyle (`storeLayout`). Kategoriye süzülen çok satanlar yeni: `best_sellers` bugün mağaza geneli | L |
+| MT1 | `header_bar` | alan `phone_menu: layered` | Katman 2 / 3, küçük resim aç/kapa, ek satırlar (Markalar, Kampanyalar), alt bağlantılar | Kategori ağacı ve resimleri var (`frame/MenuSheet.tsx`). Menünün tek alt düzeyi 3. katmana yetmez; katmanlar kategori ağacından okunur | M |
+| H11 | `hero` | `bento` | Büyük kutu (görsel, rozet, başlık, metin, düğme), ürün kutusu (ürün + rozet), sayaç kutusu, rehber kutusu (yazı), kategori kutusu (2–4), büyük kutu sol / sağ | Sayacın bitişi §4.2 ile ortak, yeni okuma. Yazı seçimi `checkLayout`'a yeni kayıt türü (`post`) olarak girer | L |
+| KK2 | `categories` | `uses` (bugünkü: `tiles`) | 3–6 karo: görsel, ad, açıklama, hedef (`storefrontLink`: kategori, filtre sayfası, koleksiyon), 0–3 alt bağlantı | Yok; bağlantı yapısı var | M |
+| SR1 | `tabbed_products` (yeni, §4.3) | `side` | Sekme açıklaması, ürün sayısı aç/kapa, adet 3 / 6, kart biçimi (`card_variant`, §3.3) | Kaynak başına ürün sayısı yeni (doğrulanmadı; çok satanlar ve indirimdekiler için anlamı sahiple netleşir) | M |
+| UK2 | tema ayarı `product_card.variant`, rafta `card_variant` (§3.3) | `technical` | Özellik 1–3 (özellik şablonundan), cetvel aç/kapa, varyant sayısı, stok/tedarik satırı, Karşılaştır | Kartta anahtar özellik, varyant sayısı ve tedarik süresi Faz 4 işidir, kart verisine (`/store/card-facts`) eklenir; Karşılaştır Faz 4 | L |
+| FS1 | `timed_offer` (yeni, §4.2) | `single` | §4.2 | Fiyat listesinin bitişi ya da elle bitiş; stok kovası var (`StockLevel`); fiyat sunucuda | L |
+| OU2 | `featured_product` | `story` (bugünkü: `specs`) | Üst metin, hikâye (600 karakter), üç bilgi (etiket + değer), imza (ad, yer), zemin Sahne / Açık | Yok; ürün verisi var | M |
+| GS1 | `shop_the_look` (yeni, §4.4) | yok | §4.4 | Çok satırlı sepete ekleme yeni (doğrulanmadı) | L |
+| GB2 | `banner` | `service_cards` | Slayta isteğe bağlı `caption` (fiyat / süre satırı, 60 karakter); 2–4 kart | Yok. WhatsApp hedefi `storefrontLink`'te yok (doğrulanmadı); yoksa mağaza yolu ya da https adresi | M |
+| RH3 | `posts` | `topic_rail` (bugünkü: `cards`) | 2–5 konu çipi (blog etiketinden), 4–10 kart, ilgili ürün satırı aç/kapa | Etiketler var. "Yazıda geçen ürün" yazının içerik belgesindeki ilk ürün kartından türetilir (doğrulanmadı) | M-L |
+| YR1 | `reviews` | `rail` (bugünkü: `summary`) | Kaynak En yeni / En yüksek puan / Elle, 4–12 kart, en düşük puan 4 / 5, ürün bağlantısı aç/kapa | Bugünkü bölüm yalnız `limit` taşır; elle seçim ve puana göre sıra yeni (doğrulanmadı) | M |
+| MR2 | `brands` | `cards` (bugünkü: `pills`) | Marka başına kapak görseli (bölümde tutulur), ürün sayısı aç/kapa, sütun 3 / 4 | Kapak marka kaydında yok, bölümde durur; tanım `description`'dan; marka başına ürün sayısı yeni (doğrulanmadı) | M |
+| BL2 | `newsletter` | `benefits` (bugünkü: `plain`) | Görsel, 2–4 avantaj, karşılık (kod kampanyası, isteğe bağlı), görsel sol / sağ | Onay bugünkü bülten akışından (adr/0041). Kayıttan sonra karşılık kodunun gösterimi yeni (doğrulanmadı) | M |
+| AB3 | `footer_bar` (ana bölüm, §5) | `dark_rich` | Bülten aç/kapa, 2–3 sütun (menü seçimi), sosyal hesaplar, ETBİS karekodu (görsel), taksit metni | Saatler `store`, sosyal hesaplar `legal`'dan; ödeme işaretleri var. Karekod medya görseli | M |
+| SC1, SP1, OD1, SO1 | bölüm değil | | Sepet çekmecesi, sepet, ödeme, onay | Bu eke girmez (§10 karar 10); çekmecede kargo çubuğu bugün var | |
+
+#### 3.2 Klasik katalog takımı
+
+| Maket | Bölüm türü | `variant` | Yeni alanlar | Backend'de gereken veri | Boyut |
+| --- | --- | --- | --- | --- | --- |
+| KY3 | `marquee` (yeni, §4.1) | boy Küçük | 1–8 öge (metin, bağlantı) | Yok | §4.1 |
+| N14 | `header_bar` | `catalog` | Arama yer tutucusu, yazılı arama düğmesi, yazılı hesap bağlantısı aç/kapa, sepette tutar aç/kapa, ikinci satırda vurgulu son bağlantı (metin, hedef) | Var: sepet adedi ve ara toplamı üst bilgide | M |
+| H17 | `hero` | `category_list` | Kategori listesi (kaynak: menü ya da üst kategoriler; ürün sayısı aç/kapa), 0–4 hızlı bağlantı çipi, ikinci düğme, 3 görsel karo (görsel, kategori, bağlantı) | Kategori başına sayı bugün yalnız `/kategoriler`'de ve kategori başına bir istekle. İlk ekran için backend'de tek sorguda sayım ve önbellek gerekir (§10 karar 7) | M-L |
+| GB4 | `trust_badges` | `lined` (bugünkü: `strip`) | Yok: rozetler `settings.trust_badges` (en çok 4; başlık + açıklama) | Yok | S |
+| UR5 | `products` | yok | Yok: `columns: 5` var | Yok. "Telefonda ilk 4" bugünkü dolu sıralar kuralıyla aynı (Ek 2026-11-05) | S |
+| UK5 + E5 | tema ayarı `product_card.variant`, rafta `card_variant` | `framed` | İndirim rozeti, yorumsuzda boş yıldız, teslimat notu, tam genişlik "Sepete ekle / Seçenekler", üzerine gelince ikinci fotoğraf | İkinci görsel kart modelinde yok: kart verisine eklenir (adres + türevler; yalnız gerekince yüklenir). "Ücretsiz kargo" notu fiyat ve eşikten hesaplanır; "aynı gün" verisi yok (doğrulanmadı). Tek varyantta düğme `QuickAddView` ile var | M-L |
+| KY1 | `marquee` | boy Orta, simgeli | 1–8 öge (simge, başlık, alt satır, bağlantı) | Yok | §4.1 |
+| KB2 | `banner` | `split` | Kart başına üst metin, zemin Sahne / Açık / Vurgu, görsel sol / sağ; E2 alanları | Yok | M |
+| KK4 | `categories` | `mosaic` | Büyük karo (kategori + açıklama), 4 küçük kategori, büyük karo sol / sağ, yazı fotoğrafın üstünde / altında | Yok | M |
+| MR1 | `brands` | `logos` | Ton Gri / Renkli, 3–8 marka sıralı | Logo var (`logo_url`) | S |
+| YR1 | `reviews` | `rail` | 3.1'deki gibi | 3.1'deki gibi | 3.1 |
+| AB1 | `footer_bar` | `columns` | Tanıtım metni (200), 2–4 sütun (menü), yaş uyarısı aç/kapa | Menüler, yasal metinler, ödeme işaretleri var | M |
+
+#### 3.3 Ortak işler
+
+- **E2 görsel bant ayarları** (`banner`'ın bütün biçimlerinde): slayta ikinci düğme; düğme stili Dolu / Çerçeveli / Yazı; genişlik Tam / Kutulu; yükseklik Alçak / Orta / Yüksek; metin konumu Sol / Orta / Sağ × Üst / Orta / Alt (küçük ızgara çizimiyle); perde gücü Yok / Hafif / Orta / Güçlü; metin rengi Açık / Koyu (slayttaki `tone` deseni); telefon görseli (`hero_slider`'daki `mobile_image`). M.
+- **Kart biçimi: tema genelinde bir varsayılan, rafta geçersiz kılma** (§10 karar 4).
+  - `product_card.variant: "standard" | "technical" | "framed"` ve E5 alanları (`hover_image`, `delivery_note`, `full_button`, `empty_stars`) tema ayarına girer; adr/0063 §3'e göre `settings.theme` ile taslağa ve yayına gider.
+  - Ürün raflarında (`products`, `tabbed_products`) `card_variant: null | "standard" | "technical" | "framed"`; `null` tema ayarını okur, saklanan belgeler değişmez, göç yok. Raf yalnız biçimi seçer; E5 alanları her yerde tema ayarından okunur. Liste, arama ve kategori sayfası her zaman tema ayarındaki biçimi çizer. SR1'deki "Kart biçimi" alanı ilk turda vardır.
+  - Kart verisi rafın etkin biçimine göre istenir: genel biçim `standard` olsa da `technical` biçimli raf kart verisini (`/store/card-facts`) yalnız kendi ürünleri için ister; ikinci görsel yalnız `framed` çizilen kartlarda yüklenir. §2 kural 3 burada da geçer: tema tanımadığı biçimde `standard` çizer.
+  - Boyut: rafta geçersiz kılma ve raf başına kart verisi M (§9 C).
+- **E6:** rafta 4 / 5 sütun var. Sayfa genişliği tema ayarına `layout.width: "standard" | "wide" | "full"` olarak girer (1440 px / 1680 px / tam; `--container`). S.
+
+### 4. Yeni bölüm türleri
+
+Hepsi `base` alanlarını (kimlik, görünürlük, başlangıç, bitiş) ve §6'daki görünüm ayarlarını taşır. Metinler `shopText`, bağlantılar `storefrontLink`, görseller medya kütüphanesinden.
+
+#### 4.1 Kayan yazı şeridi: `marquee` (E1; KY1, KY3, ileride KY2)
+
+- **Gruplar:** ana sayfa; ürün ve kategori sayfası (kategoride `placement` ile); üst bilgi grubunda en çok bir tane, üst bilginin üstünde (§10 karar 9).
+- **Alanlar:** `items` 1–8: `icon` (güven rozetlerinin simge listesi, isteğe bağlı), `text` (60), `subtext` (80, isteğe bağlı), `link` (isteğe bağlı); `speed` Yavaş / Orta / Hızlı; `direction` Sola / Sağa; `ground` Sahne / Ana renk / Açık; `size` Küçük / Orta / Büyük; `separator` Yok / Nokta / Yıldız / Çizgi.
+- **Sınırlar:**
+  - Üzerine gelince ve klavye odağında durur; görünür bir "durdur" düğmesi taşır (WCAG 2.2.2: beş saniyeden uzun kendiliğinden hareket durdurulabilmeli).
+  - `prefers-reduced-motion`'da kaymaz; ögeler yan yana sarılır.
+  - Ögeler HTML'de bir kez yazılır; döngü için kopya `aria-hidden` ve odaklanamaz.
+  - Sayfada en çok iki şerit.
+- **Boyut:** M.
+
+#### 4.2 Süreli fırsat: `timed_offer` (E7; FS1, H11'in sayaç kutusu, ileride H7)
+
+- **Gruplar:** ana sayfa.
+- **Alanlar:** `product_id`; `offer`: sayacın kaynağı (§10 karar 5), `{ kind: "price_list", price_list_id }` (varsayılan: gerçek indirimin bitişi) | `{ kind: "manual", ends_at }` (mağaza sahibinin girdiği bitiş; indirimsiz duyuru da olur); `show_stock` aç/kapa (stok kovası); `image_side` Sol / Sağ; `next_product_id` (yarının fırsatı, isteğe bağlı); `after_end` Gizle / Sayaçsız ürün bölümü olarak kal.
+- **Kurallar:**
+  - Bitiş sunucuda kaynaktan okunur, istemciden alınmaz: `price_list`'te fiyat listesinin `ends_at`'i (her okumada listeden, belgeye kopyalanmaz; liste uzatılırsa sayaç yeni bitişi gösterir), `manual`'da belgedeki `offer.ends_at`. Sayaç yalnız onu gösterir. İki kaynakta da bitiş geçmişse `storeLayout` bölümü çıkarır ya da `after_end`'e göre sayaçsız verir. Bölümün kendi `ends_at`'i kaynağın bitişinden sonra olamaz (kayıtta denetlenir).
+  - Fiyat ve indirim ürünün fiyatından, sunucuda (`price-display`); bölüm tutar taşımaz (altın kural 5).
+  - `price_list`: liste yoksa ya da ürün listede değilse kayıt `storefront_layout.target_unknown` verir; bitişi olmayan liste seçilemez (`storefront_layout.section_invalid`).
+  - `manual`: tarih kayıtta gelecekte ve bölümün `starts_at`'inden sonra olmalıdır. Ürün indirimsiz olabilir; fiyat yine ürünün sunucudaki fiyatıdır. Elle girilen bir tarihtir, tutar değildir; altın kural 5'e dokunmaz.
+  - Yayındaki düzenin süreç önbelleği (sürüm + satış kanalı anahtarlı, Ek 2026-11-05) bitiş anını aşmamalı; sayaç sıfırlanınca vitrin sayfayı yenilemeden bölümü kapatır.
+  - Stok göstergesi stok kovasıdır (§10 karar 6): ürünün `StockLevel`'ı `low` iken "Az kaldı" (kartın bugünkü ifadesi, adr/0046 Ek 2026-11-04), `out` iken "Tükendi"; `in_stock` iken gösterge yok. Sayı ve yüzde gösterilmez; maketteki doluluk oranı anlatan çubuk çizilmez. Kova bugün kart ve ürün görünüm modelinde var (`@qticaret/ui` `StockLevel`); yeni backend verisi gerekmez.
+  - Kişi başı sınır fiyat listesinde yok, promosyon bütçesinde var (adr/0024); ilk turda alan yok.
+- **Boyut:** L (fiyat listesi bitişinin yeni okuması, önbellek, sayaç, testler). Elle bitiş ve stok kovası boyutu değiştirmez (ikisi birlikte S).
+
+#### 4.3 Sekmeli raf: `tabbed_products` (SR1 ve bugünkü birleşen raflar)
+
+- **Gruplar:** ana sayfa.
+- **Alanlar:** `title`; `variant` `pills` (bugünkü çizim) | `side` (SR1); `tabs` 2–4: `label` (30), `description` (60; yalnız `side`'da görünür), `source` (`products` bölümünün kaynakları), `more` bağlantısı; `limit` (`side`'da 3 / 6); `columns`; `show_count`.
+- **Geriye uyum:** art arda duran `products` bölümleri bugünkü gibi birleşmeye devam eder (`blocksOf`); yeni tür bunun açık ve adlandırılmış karşılığıdır, sekmeler tek kimlik ve tek görünürlükle taşınır.
+- **Sınırlar:** çok satanlar ve indirimdeki sekmeler var olan seçimden geçer; boş sekme çizilmez, tek sekme kalırsa sekmesiz raf olur. Betiksiz çalışır (`tabs.css` deseni).
+- **Boyut:** M.
+
+#### 4.4 Görünümü satın al: `shop_the_look` (GS1)
+
+- **Gruplar:** ana sayfa, kategori sayfası.
+- **Alanlar:** `image` (alt metni zorunlu); `points` 1–8: `product_id`, `x` ve `y` görselin yüzdesi (0–100, tam sayı; panelde görsele tıklanarak konur, klavyeyle de taşınır, sürükleme zorunlu değil); `title`, `text`; `bulk_add` aç/kapa; `image_side` Sol / Sağ.
+- **Kurallar:**
+  - Noktalar ve liste aynı numaraları taşır; nokta odaklanabilen bir düğmedir ve ürün satırına götürür.
+  - Toplam yalnız gösterimdir; sepete ekleme var olan sepet akışıyla, satır başına sunucu fiyatıyla. Toplu ekleme yalnız tek varyantlı ve stokta ürünleri ekler (`QuickAddView`); çok varyantlı ürün "Seçenekler" ile ürün sayfasına gider.
+  - Yayında olmayan ürünün noktası düşer; nokta kalmazsa bölüm çıkar (L8).
+- **Backend:** çok satırlı sepete ekleme vitrin eyleminde yeni (doğrulanmadı).
+- **Boyut:** L.
+
+### 5. Üst bilgi, menü ve alt bilgi biçimleri
+
+Bugün üst bilgiyi belgede yalnız `announcement_bar`, tema ayarında `header.layout` ve `header.sticky` yönetir; alt bilgi temanın sabit çizimidir, belgede yalnız bülten var. N12, N14, M7, MT1, AB1, AB3 için üç model tartıldı:
+
+| | (a) Tema ayarı genişler (`header.layout`'a yeni değerler, `header.*` alanları) | (b) Ana bölüm: üst bilgi grubunda tek `header_bar`, `variant` ve alanlarıyla | (c) Her biçim ayrı bölüm türü |
+| --- | --- | --- | --- |
+| Taslak, önizleme, yayın | adr/0063 §3 ile tema ayarı da taslağa giriyor; ikisi de olur | Var olan yol | Var olan yol |
+| Biçime özgü alanlar | `themeSection` her biçimin alanını taşır, büyür | §2'nin kuralıyla, bölüm formunda | Tür sayısı büyür; biçim değişimi tür değişimi olur |
+| Düzenleyici | "Tema ayarları"nda, ağaçta üst bilginin yanında değil | Ağaçta "Üst bilgi" altında, kullanıcının aradığı yerde | Aynı |
+| Gelişmiş CSS (§8) | Bölüm kutusu yok | Bölüm kutusu var | Var |
+| Tutarlılık | Ayrı model | Kategori ve ürün sayfasının ana bölümüyle aynı desen | Ayrı |
+
+**Seçilen: (b), dört ana bölümle tek desen** (§10 karar 2). "Ana bölüm" grupta en çok bir kez duran, silinemeyen ve gizlenemeyen, belgede yoksa varsayılanıyla okunan bölümdür (Shopify'daki "main" bölümünün karşılığı).
+
+- **`header_bar`** (üst bilgi grubu): `variant` `standard` (bugünkü) | `centered` | `catalog` (N14) | `shrinking` (N12). Ortak alanlar: arama yer tutucusu, hesap ve favori görünürlüğü, `sticky`, `phone_menu` `sheet` (bugünkü) | `layered` (MT1).
+  - **Okuma:** belgede `header_bar` yoksa `header.layout` ve `header.sticky` tema ayarından okunur (`withLegacy` deseni; `centered` → `centered`). İlk kayıt değerleri bölüme yazar; panel o günden tema ayarındaki iki alanı göstermez. Ortalanmış çizim adr/0062 karar 6'daki dalda kalır; bu bölüm yalnız onun adını taşır.
+- **`usage_menu`** (üst bilgi grubu, en çok bir): M7'nin paneli. Yapı menüde, sunuş belgede kalır: menüler modülü değişmez, migration yok, panel içeriği taslağa ve sürüme girer. Paneli açan öge `header_bar`'da yazılır (`usage_menu_label`, konum İlk / Son); menü bağlantılarının kimliğine bağlanmaz, çünkü hazır görünüm menüleri değiştirince (adr/0063 §3) kimlikler değişir.
+- **`footer_bar`** (alt bilgi grubu): `variant` `ledger` (bugünkü Grafit) | `columns` (AB1) | `dark_rich` (AB3). Alt bilgideki `newsletter` bölümü yerinde kalır; `dark_rich` bülteni kendi içinde çizer ve iki bülten basılmaz.
+- **`category_main`, `product_main`:** §7.
+- Üst bilgi grubunun sınırı 3'ten 5'e çıkar (`announcement_bar`, `marquee`, `header_bar`, `usage_menu`; her tür bir kez). Ana bölümler hazır görünümlerin `layout.json`'unda diğer bölümler gibi yazılır.
+
+### 6. Ortak görünüm ayarları ve etiket ilkesi
+
+- **Alan kümesi `look`** (bütün gövde bölümlerinde ve ana bölümlerde; `null` = temanın kendi çizimi, saklanan belgeler değişmez):
+
+  | Alan | Etiket | Seçenekler | Temadaki karşılığı |
+  | --- | --- | --- | --- |
+  | `space_outer` | Dış boşluk <small>margin</small> | Yok / Dar / Orta / Geniş | 0, `--section-gap-s`, `--section-gap`, `--section-gap-l` |
+  | `space_inner` | İç boşluk <small>padding</small> | Yok / Dar / Orta / Geniş | `--space-*` ölçeğinden, tema seçer |
+  | `ground` | Zemin <small>background</small> | Sayfa / Kuyu / Sahne / Ana renk | `paper`, kuyu, `stage`, `--primary`; çiftler temada ölçülmüş, serbest renk yok |
+  | `align` | Hizalama <small>text-align</small> | Sola / Ortaya | Başlık ve metin bloğu |
+  | `width` | Genişlik <small>width</small> | Dar / Kutulu / Tam | Okuma genişliği, `Container`, kenardan kenara |
+
+  - Bir alan biçimde anlamsızsa (ör. `marquee`'de hizalama) panel onu göstermez; şema yine kabul eder, tema yok sayar.
+  - "Ana renk" zemininde karşıtlık yalnız büyük yazı ve denetimler için güvencededir (adr/0062 §6, 3:1); uzun metin taşıyan bölümde (`rich_text`, `faq`) panel bu seçeneği sunmaz.
+- **Etiket ilkesi** (planın "İlke" bölümü):
+  - Her alanın iki i18n anahtarı var: `label` (Türkçe, gündelik) ve isteğe bağlı `term` (küçük teknik terim). Arama ikisinde de, Türkçe büyük/küçük harfe ve aksana duyarsız çalışır (`toLocaleLowerCase("tr")`; "ı" ile "i" eşleşir); sonuç alanı açar ve vurgular.
+  - Ayar araması düzenleyicinin sol panelinin üstündedir; bölüm adlarını, biçim adlarını ve alanları arar. Alan listesi formlardan türetilen tek bir kayıttır (`editor/forms/field-registry.ts`), elle ikinci liste yazılmaz.
+  - Bölüm açılınca içerik alanları ve "Biçim" görünür; "Görünüm ayarları" kapalı gelir; "Gelişmiş CSS" en altta, ayrı ve kapalıdır, yalnız yetkili role görünür.
+  - Her alanda "varsayılana dön"; seçenekler küçük çizimlerle (hizalama, biçim, düğme stili).
+
+### 7. Kategori ve ürün sayfası düzenleri
+
+- **Kategori: `category_main`** (kategori grubunda bir tane; diğer bölümler `placement`'larını korur, ana bölüm sıraya girmez):
+  - `variant` `standard` (bugünkü liste, varsayılan) | `showcase` (KT1) | `technical` (KT2) | `hub` (KT3) | `quick` (KT4). Belgedeki `variant` mağaza genelindeki varsayılan düzendir.
+  - `showcase`: alt kategori sekmeleri aç/kapa, çubukta en çok 6 filtre (özellik şablonundan, sıralı), 0–2 editoryal kutu (yazı ya da kampanya bağlantısı + kaçıncı satır). Kart oranı tema ayarından.
+  - `technical`: 0–5 sütun (özellik alanı), sütuna göre sıralama aç/kapa, satırda adet aç/kapa, kurumsal alım notu (metin + bağlantı), karşılaştırma aç/kapa (Faz 4).
+  - `hub`: öne çıkan alt kategori, en çok 6 kısayol (simge, başlık, alt metin, filtre sayfası), çok satan rafı (kategorinin çok satanları ya da elle 4), seçim rehberi (görsel, en çok 3 adım, bağlantı). Öne çıkan alt kategori ve kısayollar her kategoride farklıdır, ortak ayarda tutulamaz: ilk turda kategorinin kendi alt kategorilerinden türetilir (sıra ve görsel kategori kaydından); ortak ayarda yalnız gösterim tercihleri durur (kısayol sayısı, rafın kaynağı, rehber). Kategori başına elle içerik gerekirse ayrı bir ekle kategori kaydına girer.
+  - `quick`: kartta seçenek türü, hızlı bakış aç/kapa, sayfa sonu Daha fazla göster / Sayfa numaraları, en çok 6 hızlı filtre çipi.
+  - **Kapsam: kategori başına seçim** (§10 karar 11). Her kategori için ayrı düzen seçilebilir; seçilmemiş kategori `category_main.variant`'ı, yani mağaza genelindeki varsayılanı çizer. Alt kategori üst kategorinin seçimini devralmaz. Taslaktaki `leaf_variant` alanı düşer. Gruptaki diğer bölümler bütün kategorilerde ortak kalır (Ek 2026-11-03).
+  - **Biçim ayarları biçim başına saklanır.** Aynı anda birden çok düzen yayında olabildiği için `category_main` §2 kural 4'teki (B)'nin tek istisnasıdır: ortak alanlar tabanda, biçime özgü ayarlar `by_variant: { showcase?, technical?, hub?, quick? }` altında, biçim başına bir nesne (§2 tablosundaki (C)). Ayarı olmayan biçim kendi varsayılanlarıyla çizilir. `checkLayout` bütün alt nesneleri denetler (editoryal kutudaki yazı ve kampanya başvuruları dahil); kullanılmayan biçimin ayarı belgede durur, bu bilinen bedeldir.
+  - **Veri: kategori kaydında düzen alanı.** Medusa'nın kategori tablosuna dokunulmaz (altın kural 2); seçim `catalog-extension` modülüne yeni bir modelle girer: `category_layout` (`category_id` tekil, `variant`), `category_image` ve `category_restriction` deseniyle. Seçimi olmayan kategorinin satırı yoktur; var olan mağazalarda veri göçü ve doldurma yoktur, yalnız tablo ekleyen bir migration gerekir (`pnpm --filter backend medusa db:generate catalog-extension`). `variant` yazmada `category_main`'in kapalı listesiyle doğrulanır; listeden kaldırılan biçim okumada varsayılana eşlenir (§2 kural 3).
+  - **Uç ve panel.** Yazma ucu `category_image` gibi kategori kimliğiyle (`api/admin/category-images/[category_id]` deseni) ve denetim kaydıyla (adr/0011, `api/http/audit/resources/catalog.ts`). Seçim panelde kategori düzenleme ekranında "Sayfa düzeni" olarak yapılır ("Mağaza varsayılanı" + beş biçim); düzenleyici bir kategoriyi önizlerken o kategorinin seçimini gösterir ve kategori ekranına bağlantı verir. Vitrin kategori sayfası seçimi kategoriyle birlikte okur (hangi uçla olacağı kodlarken seçilir); seçim değişince vitrin yenilemesi `subscribers/storefront-refresh.ts`'e eklenir.
+  - **Sonuç: seçim taslağa girmez.** Kategori kaydı kaydedilince yayındadır (kategori görseli gibi); düzen taslağına, önizlemeye ve sürüm geçmişine girmez, "Yayınla" ile gitmez. Bu, adr/0063 §3'ün tema ayarını ve menüleri belgeye alma gerekçesiyle gerilimdir ve kabul edilen bedeldir. Biçimin ayarları (`by_variant`) belgede olduğundan taslaktadır; panel, ayarı yalnız taslakta olan bir biçimi kategoriye atarken vitrinin yayındaki ayarı (yoksa varsayılanları) çizeceğini söyler.
+  - **Hazır görünümler** (adr/0063 Ek 2026-11-14) varsayılan düzeni belgedeki `category_main.variant`'a, demo kategorilere örnek atamaları tutamaçla (`{ "$handle": "category:…" }`) kategori kayıtlarına yazar. Bu, belge dışında bir yazmadır: görünüm uygulamasının ayrı bir adımıdır ve compensation'ı önceki atamaları geri yazar (altın kural 4 deseni).
+  - **Backend:** listede satır başına özellik değerleri (KT2, doğrulanmadı); kategoriye süzülen çok satanlar (bugün mağaza geneli); kartta seçenekler ve hızlı bakış (KT4; bugün `QuickAddView` yalnız tek varyant); "daha fazla göster" için sayfalı uç (doğrulanmadı). KT2 ve KT4 Faz 4 ile örtüşür.
+- **Ürün: `product_main`** (ürün grubunda, diğer bölümlerin üstünde):
+  - `variant` `standard` (bugünkü galeri ve satın alma sütunu) | `gallery_wall` (UP3; sahibin seçtiği varsayılan).
+  - `gallery_wall`: duvar düzeni İkili ızgara / Tek sütun / İlk görsel geniş; ölçü çizimi Göster / Gizle (verisi doğrulanmadı); akordeon sırası ve ilk açık olan; en çok 3 güven satırı (`settings.trust_badges`'tan seçim); telefonda yatay şerit ve sayaç.
+  - VS1 ve SK2 ayrı biçim değil, `product_main`'in ortak alanlarıdır: `option_style` Liste / Yuvarlak ve çip; `buy_box` Sade / Güven yoğun. SK2'nin ile göre teslim çizelgesi ve havale indirimi Faz 5 ile örtüşür (doğrulanmadı).
+  - Ürünün kendi içeriği (görseller, fiyat, varyantlar) her zaman üründen, vitrinde okunur.
+
+### 8. Bölüm başına gelişmiş CSS (E8)
+
+Çerçeveyi sahip kararı verdi (planın "Karar" bölümü); burası uygulamanın kuralıdır.
+
+- **Saklama.** Ana bölümler dahil her bölümde `custom_css: string | null`. Ayrı kayıt yok; bölümle birlikte taslağa, önizlemeye, yayına ve sürüm geçmişine girer. Belgede ayrıca `settings.custom_css_enabled` (varsayılan açık): tek anahtarla bütün özel CSS kapanır (destek ve "güvenli mod").
+- **Kayıtta süzme, okumada kapsamlama.**
+  - Metin backend'de bir CSS ayrıştırıcısıyla ağaca çevrilir, aşağıdaki listelere göre denetlenir ve **ağaçtan yeniden yazılır**: belgeye ham metin değil normalleştirilmiş hâli girer (yorumlar atılır, kaçış dizileri çözülür).
+  - Tek bir yasak yapı bütün kaydı `storefront_layout.css_invalid` ile reddeder, satır ve nedenle; sessizce budanmaz.
+  - Kapsamlanmış hâl okumada (`storeLayout`) üretilir, yayın sürümüyle önbelleğe girer. Yayın ve geri yükleme metni aynı süzgeçten yeniden geçirir (L4).
+- **Kapsamlama yöntemi.**
+  - Tema her bölümün dış kutusuna `data-qs="<bölüm kimliği>"` yazar (kimlik `^[a-z0-9]{6,24}$`, seçicide güvenli).
+  - Her seçici ağaçta önüne `[data-qs="<kimlik>"]` alarak yeniden yazılır; `:scope` kutunun kendisidir. `@keyframes` adları `qs-<kimlik>-<ad>` olur; `animation-name` yalnız bu adları kullanabilir.
+  - Yerel `@scope` tek başına kullanılmaz: tarayıcı desteği doğrulanmadı ve `@import`, `url()`, `position: fixed` gibi yapıları durdurmaz. İleride yeniden yazılmış seçicinin üstüne ikinci kat olarak eklenebilir.
+- **Kaskad katmanı.** Atölye'nin giriş stil dosyasının başına katman sırası yazılır: `@layer theme, base, components, utilities, section-css;`. Özel CSS `@layer section-css { … }` içinde basılır ve `!important` olmadan temanın bütün katmanlarını yener. Katmansız kurallar (bugün `tokens.css` değişkenleri) katmanların üstündedir; ama değişken bölüm kutusunda yeniden tanımlanınca kutunun içinde kazanır. Atölye'de özel CSS'in yenmesi gereken katmansız bir kural kalmadığı ve Tailwind v4'ün katman adları kodlarken denetlenir (doğrulanmadı).
+- **İzinli yapılar.**
+  - Kurallar: stil kuralı; `@media` (genişlik, `hover`, `pointer`, `prefers-reduced-motion`, `prefers-contrast`); `@container`; `@supports`; `@keyframes`. İç içe yazım aynı kurallarla.
+  - Seçiciler: tür, sınıf, kimlik, öznitelik (`data-qs` hariç); birleştiriciler (boşluk, `>`, `+`, `~`); sözde sınıflar `:hover`, `:focus`, `:focus-visible`, `:focus-within`, `:active`, `:first-child`, `:last-child`, `:nth-child()`, `:nth-of-type()`, `:not()`, `:is()`, `:where()`, `:has()`, `:empty`, `:checked`, `:disabled`; sözde ögeler `::before`, `::after`, `::marker`, `::placeholder`, `::first-line`, `::first-letter`, `::selection`.
+  - Değerler: sayı, uzunluk, yüzde; renkler (`#`, `rgb()`, `hsl()`, `oklch()`, `color-mix()`); `var()`, `calc()`, `min()`, `max()`, `clamp()`, `env()`; gradyanlar; dizgiler (`content` için).
+  - Tema kancaları: Atölye bölümlerinde belgelenmiş `data-part` öznitelikleri (`title`, `text`, `media`, `button`, `item`) desteklenen yüzeydir; sınıf adları sözleşme değildir.
+- **Yasak yapılar.**
+  - Kurallar: `@import`, `@font-face`, `@namespace`, `@layer`, `@property`, `@page`, `@charset`, `@scope`, `@counter-style`, `@font-feature-values`, `@font-palette-values`, `@view-transition`, `@position-try`, `@starting-style` ve izinli listede olmayan her `@` kuralı.
+  - Seçiciler: `:root`, `html`, `body`, `:host`, `:host-context()`, `::backdrop`, `::view-transition` ailesi, `:modal`, `:fullscreen`, `:popover-open`, `::part()`, `::slotted()`, `data-qs` özniteliği; izinli listede olmayan her sözde sınıf ve öge.
+  - İşlev ve değerler: `url()`, `image()`, `image-set()`, `cross-fade()`, `element()`, `src()`, `attr()`, `expression()`, `-moz-binding`, `behavior`; `!important`; `<` karakteri (birleştirici `>` dışında açılı ayraç yok); denetim karakterleri. Kaçış dizileri çözüldükten sonra liste yeniden uygulanır.
+  - Özellikler: `position: fixed` ve `position: sticky` (kutudan çıkıp sayfayı örter; ödeme benzeri sahte katman riski); 100'den büyük `z-index`; 200 karakterden uzun `content` dizgisi; kutunun kendisinde `pointer-events: none`.
+  - Listeler testli sabitlerde durur, yalnız ADR ekiyle değişir. Neden `url()` tümden yasak: vitrinin `img-src`'i her https adresine açık (`csp.ts`); dış görsel ziyaretçiyi izlemenin ve bilgi sızdırmanın yoludur. Görsel gerekiyorsa bölümün görsel alanı kullanılır.
+- **Uzunluk.** Bölüm başına 4.096 karakter ve 200 kural, belgede toplam 32.768 karakter (§10 karar 8). Toplam vitrin performans bütçesine (docs/21) eklenir.
+- **Nerede kapalı.**
+  - Gövde bölümleri zaten yalnız kendi sayfalarında basılır.
+  - `header_bar`, `marquee`, `usage_menu` ve `footer_bar`'ın CSS'i sepet, ödeme, ödeme bağlantısı, sipariş onayı ve sipariş sorgulama sayfalarında, `CheckoutFrame` altında ve bakım sayfasında **basılmaz**.
+  - `custom_css_enabled: false` ve önizlemede panelin "özel CSS'siz göster" düğmesi hepsini kapatır.
+- **Yetki.** Yalnız `owner` (adr/0040) yazar, değiştirir, siler. `admin` düzeni bugünkü gibi yazar; ama kayıtta bir bölümün `custom_css`'i taslaktakinden farklıysa ve yazan `owner` değilse kayıt `storefront_layout.css_forbidden` ile reddedilir. Sürüm geri yüklemede de aynı kural geçer. `admin` alanı salt okunur görür. Hazır görünümler CSS taşımaz (adr/0063 §1); görünüm uygulanınca var olan özel CSS silinir, panel uygulamadan önce CSS'i gidecek bölümleri sayar (§10 karar 12).
+- **Denetim kaydı** (adr/0011): `storefront_layout`, eylem `custom_css_changed`; bölüm kimliği, önceki ve sonraki uzunluk, normalleştirilmiş metnin özeti (hash). Metnin kendisi sürüm geçmişindedir.
+- **CSP etkisi: yok.** Özel CSS temanın değişkenleriyle aynı nonce'lu `<style>` öğesinde ya da hemen ardından ikinci nonce'lu öğede basılır; `unsafe-inline` eklenmez, `style-src-attr` değişmez. `font-src 'self'` dış yazı tipini zaten durdurur. `</style>` kaçışı: `<` yasak ve çıktı ağaçtan yazılıyor; vitrin basmadan önce `<` olmadığını ayrıca denetler (iki kat).
+- **Panel.** Bölüm formunun en altında kapalı "Gelişmiş CSS": yeni bağımlılık eklemeden kod alanı (satır numarası, hatalı satırın vurgusu), kullanılabilecek kancaların listesi, "kapsam: yalnız bu bölüm" örneği ve sabit uyarı: "Tema güncellemesinde bozulabilir; destek kapsamı dışındadır." Geri al/yinele alan başına.
+- **Test yaklaşımı.**
+  - Birim: her yasak maddeye en az bir örnek (kaçışla gizlenmiş `u\72l(`, yorumla bölünmüş `ur/**/l(`, büyük harfli `URL(` ve `@IMPORT`, `</style>`, `<!--`, Unicode boşluklar, `@media` içinde `@import`); idempotentlik (süzülmüş çıktı yeniden süzülünce aynı); her seçicinin önünde kutu; `@keyframes` adlarının yeniden yazılması; uzunluk sınırları.
+  - HTTP: `owner` yazar, `admin` reddedilir (kayıt ve geri yükleme); denetim kaydı; önizleme taslağın CSS'ini, yayın yayındakini verir; `custom_css_enabled: false`.
+  - Vitrin ve e2e (Playwright): bir bölümün CSS'i komşu bölümün hesaplanmış stiline dokunmaz; sepet ve ödeme sayfalarında `section-css` katmanı yok; CSP ihlali yok; `prefers-reduced-motion` korunur.
+  - `security-reviewer` incelemesi zorunlu (süzgeç, yetki, basım yeri).
+- **Riskler.**
+  - Süzgeç atlatma (ayrıştırıcının tarayıcıdan farklı okuduğu girdi). Azaltma: yasak listesi değil izin listesi, ağaçtan yeniden yazma, idempotentlik testi, `<` yasağı.
+  - Tema güncellemesinde kırılma: sınıf adları sözleşme değil; `data-part` kancaları belgelenir, değişirse sürüm notuna girer.
+  - Kendi bölümünde yanıltıcı görünüm (`content` metni) önlenemez; yazan mağaza sahibidir, denetim kaydı ve sürüm geçmişi vardır.
+  - Karşıtlık ve erişilebilirlik denetlenemez; panel uyarır.
+  - Yeni bağımlılık: backend'e doğrudan bir CSS ayrıştırıcısı (`postcss` + seçici ayrıştırıcısı ya da `css-tree`) girer; depoda hangisinin bulunduğu doğrulanmadı, seçim Context7 ve lisans denetimiyle yapılır.
+- **Reddedilen alternatifler.**
+
+  | Seçenek | Neden reddedildi |
+  | --- | --- |
+  | Mağaza geneli serbest CSS, tema kodu düzenleme | Sahip reddetti; kapsamlanamaz, sepet ve ödemeye sızar |
+  | Yalnız iç içe yazımla sarmak (`[data-qs] { … }`) | `@import`, `url()`, `position: fixed`'i durdurmaz; ham metin basılır |
+  | Yalnız yerel `@scope` | Tarayıcı desteği doğrulanmadı; tehlikeli yapıları durdurmaz |
+  | Bölüm başına Shadow DOM | Sunucu çiziminde bildirimsel Shadow DOM gerekir; temanın stilleri içeri girmez |
+  | Bölüm başına `iframe` | Performans, erişilebilirlik ve SEO maliyeti |
+  | Satır içi `style` öznitelikleri | `style-src-attr`'ı gevşetir; sözde sınıf ve medya sorgusu yok |
+  | İstemcide süzme | Atlatılır |
+  | `!important`'a izin | Katman sırası onu gereksiz kılar; katmanlarda önemli kurallar ters sıralanır, temayı beklenmedik yerden ezer |
+
+### 9. Uygulama sırası
+
+| # | İş | Boyut | Bağımlılık | Paralel |
+| --- | --- | --- | --- | --- |
+| V1 | Altyapı: `layout-sections.ts`'in tür başına dosyalara bölünmesi; `variant` kuralı (preprocess, iç birleşim, okuma eşlemesi); `@qticaret/types` ve `@qticaret/ui` biçim listeleri; vitrin görünüm modeli; temada varsayılana düşme; panelde "Biçim" seçici; testler | M | Yok | adr/0063 iş 2.1, 2.2 ile |
+| V2 | Ortak `look` alanları ve tema eşlemesi; alan kaydı ve ayar araması | M | V1 | V3 ile |
+| V3 | Ana bölümler: `header_bar` (`header.layout` okuma eşlemesiyle), `footer_bar`, `category_main` (`by_variant` istisnasıyla, §7), `product_main`; üst bilgi grubunun sınırı | M | V1 | V2 ile |
+| A | Üst ve alt bilgi: N14 (M), N12 (M), MT1 (M), AB1 (M), AB3 (M), DY3 (M), M7 `usage_menu` (L) | L | V3 | B–F ile |
+| B | Giriş ve bantlar: E2 + KB2 + GB2 (M), GB4 (S), H17 + kategori sayımı (M-L), H11 (L) | L | V1; H11 E'deki sayaç verisinden sonra | A, C–F ile |
+| C | Raf ve kart: UR5 (S, yalnız doğrulama), E6 (S), `tabbed_products` (M), rafta kart biçimi geçersiz kılma + raf başına kart verisi (M; karar 4), `framed` kart + E5 + ikinci görsel (M-L), `technical` kart (L) | L (karar 4 ile bir M büyüdü) | V1; kart biçimi adr/0063 iş 2.1'den sonra; `technical` Faz 4 kart verisiyle | A, B, D–F ile |
+| D | İçerik bölümleri: KK2 (M), KK4 (M), OU2 (M), MR1 (S), MR2 (M), YR1 (M), RH3 (M-L), BL2 (M) | L | V1 | A–C, E, F ile; tür dosyaları ayrı, ajanlar çakışmaz |
+| E | Yeni türler: `marquee` (M), `timed_offer` + fiyat listesi bitişi okuması + elle bitiş + stok kovası (L), `shop_the_look` + çok satırlı sepete ekleme (L) | L | V1, V2 | A–D, F ile; sepet ve fiyata dokunduğu için `security-reviewer` |
+| F | Kategori ve ürün düzenleri: KT1 (M), KT3 (M-L), KT2 (L), KT4 (L), UP3 + VS1 + SK2 alanları (M) | L | V3; KT2 ve KT4 Faz 4'ten sonra | A–E ile |
+| F1 | Kategori başına düzen seçimi: `catalog-extension`'a `category_layout` modeli + migration, admin ucu ve denetim kaydı, panel kategori ekranında "Sayfa düzeni", vitrinde kategori başına biçim okuması, yenileme; hazır görünümün örnek atama adımı (compensation'lı) | M (karar 11 ile yeni) | V3 | A–E ile; F'nin çizimleriyle aynı anda yürür, migration yalnız bu işte |
+| G | Gelişmiş CSS: süzgeç, kapsamlama, katman sırası, yetki, denetim kaydı, basım yerleri, panel alanı, testler | L | V1–V3 ve iki takımın biçimleri (sahip kararı: en son) | Yok; tek ajan + güvenlik incelemesi |
+
+- V1 ortak dosyaları tek ajanda değiştirir; sonra A–F tür başına dosyalarda çalışır. `@qticaret/ui` görünüm türleri ve panelin `section-meta.ts`'i ortak noktadır: her ajan yalnız kendi türünün girdisini ekler, çakışma birleştirmede çözülür.
+- Her biçim: şema, `checkLayout`, `storeLayout`, görünüm modeli, Atölye çizimi, panel formu, `design.md` kuralı; HTTP, birim, panel ve vitrin testleri. Çizimler sahip vitrinde görüp onaylayınca `dev`'e girer.
+- Kararların sıraya ve boyuta etkisi: karar 4 C'ye bir M, karar 11 yeni F1'i (M) ve V3'e `by_variant` istisnasını ekler; ekin tek migration'ı F1'dedir (`catalog-extension`). Karar 5 ve 6 E'nin boyutunu değiştirmez; karar 1, 2, 3, 7–10, 12 taslaktaki tahminleri değiştirmez. Toplamda iki M büyür; sıra değişmez, G yine en sondadır.
+- Faz 2'deki yeri: V1–V3 adr/0063 iş 2.5'in yerini alır; A–F ve F1 iki yeni hazır görünümün (adr/0063 Ek 2026-11-14) önkoşuludur (F1 demo kategorilerdeki örnek atamalar için).
+
+### 10. Sahip kararları (2026-11-14)
+
+Sahip 4, 5, 6 ve 11'i kendisi seçti; teknik ve küçük kararlarda "önerilerle ilerle" dedi (2026-11-14), kalanlar önerilen seçenekle kapandı.
+
+1. **Biçime özgü alanların şeması.** (A) düz, hepsi isteğe bağlı; (B) `variant`'a göre ayrık birleşim, ortak içerik tabanda; (C) bütün biçimlerin ayarını saklayan alt nesne. **Karar: B** (öneriyle, sahip yetkisiyle). İstisna: `category_main` biçim ayarlarını biçim başına saklar (§7), çünkü karar 11 ile birden çok biçim aynı anda yayındadır.
+2. **Üst bilgi modeli.** (a) tema ayarı genişler; (b) `header_bar` ana bölümü; (c) biçim başına ayrı tür. **Karar: b** (öneriyle, sahip yetkisiyle).
+3. **M7 menü içeriği nerede.** (a) menüler modülü genişler (sekme, simge, ürün; migration; hemen yayında); (b) düzen belgesinde `usage_menu` (taslak, önizleme, sürüm). **Karar: b** (öneriyle, sahip yetkisiyle).
+4. **Kart biçiminin kapsamı.** (a) tema genelinde tek; (b) raf başına; (c) genel + raf başına geçersiz kılma. Öneri a idi. **Karar: c** (sahip). Tema ayarındaki `product_card.variant` her yerin biçimidir; `products` ve `tabbed_products` raflarında `card_variant` onu geçersiz kılar (§3.3). İş C'ye bir M ekler.
+5. **Sayacın kaynağı (FS1, H11, E7).** (a) bölümün kendi bitişi (elle); (b) fiyat listesinin bitişi (gerçek kampanya, yeni okuma); (c) promosyon kampanyasının bitişi. Öneri b idi. **Karar: a ve b birlikte** (sahip). Varsayılan gerçek indirimin, yani fiyat listesinin bitişi; mağaza sahibi isterse bölüme elle bitiş tarihi girer (ör. indirimsiz duyuru). Elle tarihte de süre bitince bölüm `after_end`'e göre kapanır ya da sayaçsız, normal hâline döner (§4.2). c bu ekte yok.
+6. **FS1 stok çubuğu.** "Stok sayısı gösterilmez" kuralıyla çakışıyor. (a) çubuk yok; (b) sahibin girdiği kampanya adedine göre yüzde; (c) stok kovası ("Az kaldı"). **Karar: c** (sahip). Sayı ve yüzde gösterilmez (§4.2).
+7. **Kategori başına ürün sayısı (H17, MR2, SR1).** (a) vitrin bugünkü gibi kategori başına istek atar; (b) backend tek sorguda sayar ve önbelleğe alır; (c) sayı gösterilmez. **Karar: b** (öneriyle, sahip yetkisiyle).
+8. **Gelişmiş CSS uzunluğu.** Bölüm başına 2 / 4 / 8 KB; belgede 16 / 32 / 64 KB. **Karar: 4 KB ve 32 KB** (öneriyle, sahip yetkisiyle).
+9. **Kayan yazının üst bilgideki yeri.** (a) duyuru şeridinin yerine; (b) duyuru şeridiyle birlikte, ikisi de en çok bir; (c) yalnız gövdede. **Karar: b** (öneriyle, sahip yetkisiyle).
+10. **Sepet, ödeme ve onay maketleri (SC1, SP1, OD1, SO1).** (a) bu eke girmez, ayrı ADR (ödemeye dokunur, test zorunlu); (b) tema ayarı olarak bu ekte. **Karar: a** (öneriyle, sahip yetkisiyle).
+11. **Kategori düzeni bütün kategorilerde mi?** (a) tek düzen; (b) kategori kaydında kategori başına seçim; (c) tek düzen + "alt kategorisi olmayanda şu biçim" alanı. Öneri c idi. **Karar: b** (sahip). Her kategori için ayrı düzen seçilebilir; seçilmemişse mağaza genelindeki varsayılan düzen geçerlidir. Seçim `catalog-extension`'da yeni `category_layout` modelinde durur (tablo ekleyen bir migration, veri göçü yok) ve taslağa girmez (§7). İş yeni F1'i (M) ekler.
+12. **Hazır görünüm uygulanınca var olan özel CSS.** (a) silinir, panel önceden söyler; (b) aynı kimlikli bölümde korunur. **Karar: a** (öneriyle, sahip yetkisiyle; görünüm başka bölüm kimlikleri yazar, eşleşme yanıltıcı olur).
+
+### Doğrulanmayanlar (bu ek yazılırken)
+
+- Zod 4'te iç içe ayrık birleşimin `preprocess` ile hata anahtarını koruyarak çalışması.
+- Tarayıcılarda `@scope` desteği; Tailwind v4 katman adlarının Atölye derlemesindeki sırası; Atölye'de katmansız kural kalıp kalmadığı.
+- Depoda bir CSS ayrıştırıcısının (`postcss`, `css-tree`) doğrudan bağımlılık olarak bulunup bulunmadığı.
+- `storefrontLink`'te WhatsApp hedefi; çok satırlı sepete ekleme; listede satır başına özellik değerleri; sayfalı "daha fazla göster" ucu; marka ve kaynak başına ürün sayısı; yazıdan ilgili ürün türetme; bülten karşılık kodunun gösterimi; ürün ölçü çizimi verisi; "aynı gün" teslimat verisi; yorumlarda elle seçim ve puana göre sıra.
+- Fiyat listesi bitişinin store tarafına hangi uçla verileceği (backend `listPriceLists` ile okuyor; uç yok).

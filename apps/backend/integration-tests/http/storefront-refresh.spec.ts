@@ -120,7 +120,8 @@ medusaIntegrationTestRunner({
 
       expect((await publish()).status).toBe(200)
       await arrived(1)
-      expectSigned(received[0], ["layout"])
+      // The theme's settings are the design's (adr/0063 §3): `/store/storefront` carries them
+      expectSigned(received[0], ["layout", "settings"])
 
       const saved = await settle(
         http.post(
@@ -171,7 +172,7 @@ medusaIntegrationTestRunner({
       expect((await saveDraft()).status).toBe(200)
       expect((await publish()).status).toBe(200)
       await arrived(3)
-      expectSigned(received[2], ["layout"])
+      expectSigned(received[2], ["layout", "settings"])
     })
 
     it("keeps the publication when the storefront answers 500 or never answers", async () => {

@@ -1,7 +1,14 @@
 import { z } from "@medusajs/framework/zod"
 import { TRUST_ICONS } from "../../modules/platform-settings/sections/storefront"
-import type { StorefrontSettings, TrustIcon } from "../../modules/platform-settings/sections"
+import type {
+  StorefrontSettings,
+  ThemeSettings,
+  TrustIcon,
+} from "../../modules/platform-settings/sections"
 import { shopText, text } from "./layout-fields"
+import { menuSet } from "./layout-menus"
+import { layoutTheme, legacyTheme, shownTheme, storedTheme } from "./layout-theme"
+import type { ShownTheme } from "./layout-theme"
 
 /**
  * The theme's shared settings in the design document (adr/0049 Ek
@@ -11,9 +18,13 @@ import { shopText, text } from "./layout-fields"
  * as swatches (product cards, filters, the product page's options) and
  * the product card's "Az kaldı" line.
  *
+ * Since adr/0063 §3 also the theme's settings (`layout-theme.ts`) and a
+ * menu set waiting to replace the shop's menus (`layout-menus.ts`).
+ *
  * Each part is null until the shop writes it here: readers then take the
- * storefront settings' old field (Vitrin tercihleri before the move), so a
- * shop sees the same storefront without a migration.
+ * storefront settings' old field (Vitrin tercihleri before the move) or
+ * the theme section, so a shop sees the same storefront without a
+ * migration. The menu set's null means "leave the menus alone".
  */
 
 export const SETTINGS_LIMITS = {
@@ -67,29 +78,48 @@ const lowStock = z
   })
   .strict()
 
-export const UNSET_SETTINGS = { trust_badges: null, color_swatches: null, low_stock: null } as const
+export const UNSET_SETTINGS = {
+  trust_badges: null,
+  color_swatches: null,
+  low_stock: null,
+  theme: null,
+  menus: null,
+} as const
+
+/** Each part's own schema: a stored document is read part by part (`storedSettings`). */
+const PARTS = {
+  trust_badges: z.array(trustBadge).max(SETTINGS_LIMITS.badges).nullable().default(null),
+  color_swatches: swatches.nullable().default(null),
+  low_stock: lowStock.nullable().default(null),
+  theme: layoutTheme,
+  menus: menuSet.nullable().default(null),
+}
 
 export const layoutSettings = z
-  .object({
-    trust_badges: z.array(trustBadge).max(SETTINGS_LIMITS.badges).nullable().default(null),
-    color_swatches: swatches.nullable().default(null),
-    low_stock: lowStock.nullable().default(null),
-  })
+  .object(PARTS)
   .strict()
   // A document from before the settings reads with every part unset
   .default({ ...UNSET_SETTINGS })
 
 export type LayoutSettings = z.infer<typeof layoutSettings>
 
-/** The settings as the storefront applies them: every part written, here or in the old place. */
+/**
+ * The settings as the storefront applies them: every part written, here or
+ * in the old place. The menu set is not one: the live menus are the module's.
+ */
 export interface ShownSettings {
   trust_badges: { icon: TrustIcon; title: string; text: string | null }[]
   color_swatches: { label: string; hex: string }[]
   /** "Az kaldı" at this many units or fewer; 0: never. */
   low_stock_threshold: number
+  theme: ShownTheme
 }
 
-type Legacy = Pick<StorefrontSettings, "trust_badges" | "color_swatches" | "low_stock_threshold">
+/** Where an unset part is read from: the storefront section's old fields and the theme section. */
+export type Legacy = Pick<
+  StorefrontSettings,
+  "trust_badges" | "color_swatches" | "low_stock_threshold" | "primary_color"
+> & { theme: ThemeSettings }
 
 /** A threshold the old field held (0: off) as the new part reads it. */
 export const lowStockOf = (threshold: number): NonNullable<LayoutSettings["low_stock"]> =>
@@ -113,6 +143,9 @@ export function withLegacy(settings: LayoutSettings, legacy: Legacy): LayoutSett
     color_swatches:
       settings.color_swatches ?? legacy.color_swatches.map(({ label, hex }) => ({ label, hex })),
     low_stock: settings.low_stock ?? lowStockOf(legacy.low_stock_threshold),
+    theme: settings.theme ?? legacyTheme(legacy.theme, legacy.primary_color),
+    // Nothing to fill: an unset set leaves the live menus alone
+    menus: settings.menus,
   }
 }
 
@@ -124,12 +157,30 @@ export function shownSettings(settings: LayoutSettings, legacy: Legacy): ShownSe
     trust_badges: filled.trust_badges ?? [],
     color_swatches: filled.color_swatches ?? [],
     low_stock_threshold: low.enabled ? low.threshold : 0,
+    theme: shownTheme(settings.theme, legacy.theme, legacy.primary_color),
   }
 }
 
-/** A stored document's settings, read on their own; an unreadable part is unset. */
+/**
+ * A stored document's settings, read part by part (adr/0063 §3): a part
+ * today's schema no longer reads is unset, the others stand. A theme written
+ * without the settings' version is read with today's meaning (`storedTheme`).
+ */
 export function storedSettings(document: unknown): LayoutSettings {
   const raw = (document as { settings?: unknown } | null)?.settings
-  const parsed = layoutSettings.safeParse(raw)
-  return parsed.success ? parsed.data : { ...UNSET_SETTINGS }
+  const stored: Record<string, unknown> =
+    raw !== null && typeof raw === "object" && !Array.isArray(raw)
+      ? (raw as Record<string, unknown>)
+      : {}
+  const read = <K extends keyof typeof PARTS>(key: K): LayoutSettings[K] => {
+    const parsed = PARTS[key].safeParse(key === "theme" ? storedTheme(stored[key]) : stored[key])
+    return (parsed.success ? parsed.data : null) as LayoutSettings[K]
+  }
+  return {
+    trust_badges: read("trust_badges"),
+    color_swatches: read("color_swatches"),
+    low_stock: read("low_stock"),
+    theme: read("theme"),
+    menus: read("menus"),
+  }
 }

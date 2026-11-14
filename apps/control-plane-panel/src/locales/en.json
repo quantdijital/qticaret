@@ -1241,7 +1241,9 @@
       "flags_one": "{{count}} setting",
       "flags_other": "{{count}} settings",
       "seo_templates_one": "{{count}} SEO template",
-      "seo_templates_other": "{{count}} SEO templates"
+      "seo_templates_other": "{{count}} SEO templates",
+      "presets_one": "{{count}} ready-made look",
+      "presets_other": "{{count}} ready-made looks"
     }
   },
   "usage": {

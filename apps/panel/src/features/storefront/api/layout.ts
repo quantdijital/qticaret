@@ -1,6 +1,7 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
 import type { LayoutDocument } from "@/features/storefront/api/layout-sections"
+import { MENUS_KEY } from "@/features/storefront/api/menus"
 
 /**
  * The theme editor's document (adr/0049, backend lib/storefront/layout.ts):
@@ -15,6 +16,8 @@ export interface LayoutRevision {
   revision: number
   published_at: string
   published_by: string | null
+  /** It put a menu set live: restoring it brings that day's menus too, unless left out (adr/0063 §3). */
+  has_menus: boolean
 }
 
 export interface AdminLayout {
@@ -68,13 +71,18 @@ export const layoutQuery = () =>
   })
 
 /** Each change answers with the layout as stored: it replaces the cache at once. */
-function useLayoutAction<T>(call: (input: T) => Promise<Answer>, action = true) {
+function useLayoutAction<T>(
+  call: (input: T) => Promise<Answer>,
+  action = true,
+  after?: (client: ReturnType<typeof useQueryClient>) => void
+) {
   const client = useQueryClient()
   return useMutation({
     mutationKey: action ? LAYOUT_ACTION_KEY : [...LAYOUT_KEY, "save"],
     mutationFn: async (input: T) => withAllGroups((await call(input)).layout),
     onSuccess: (layout) => {
       client.setQueryData(LAYOUT_KEY, layout)
+      after?.(client)
     },
   })
 }
@@ -86,15 +94,21 @@ const post = (path: string, body: object = {}) =>
 export const useSaveLayout = () =>
   useLayoutAction((document: LayoutDocument) => post(PATH, { document }), false)
 
-export const usePublishLayout = () => useLayoutAction(() => post(`${PATH}/publish`))
+/** A menu set the draft carried is live now (adr/0063 §3): the Menüler screen reads again. */
+export const usePublishLayout = () =>
+  useLayoutAction(
+    () => post(`${PATH}/publish`),
+    true,
+    (client) => void client.invalidateQueries({ queryKey: MENUS_KEY })
+  )
 
 /** The draft back to what is live (or the default design). */
 export const useDiscardLayout = () => useLayoutAction(() => post(`${PATH}/discard`))
 
-/** A published revision back into the draft. */
+/** A published revision back into the draft; `menus: false` leaves out the menus it put live. */
 export const useRestoreRevision = () =>
-  useLayoutAction((revision: number) =>
-    post(`${PATH}/revisions/${encodeURIComponent(String(revision))}/restore`)
+  useLayoutAction(({ revision, menus }: { revision: number; menus: boolean }) =>
+    post(`${PATH}/revisions/${encodeURIComponent(String(revision))}/restore`, { menus })
   )
 
 /** A fresh link to the draft as saved now. */

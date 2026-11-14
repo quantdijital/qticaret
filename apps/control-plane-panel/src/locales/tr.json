@@ -1241,7 +1241,9 @@
       "flags_one": "{{count}} ayar",
       "flags_other": "{{count}} ayar",
       "seo_templates_one": "{{count}} SEO şablonu",
-      "seo_templates_other": "{{count}} SEO şablonu"
+      "seo_templates_other": "{{count}} SEO şablonu",
+      "presets_one": "{{count}} hazır görünüm",
+      "presets_other": "{{count}} hazır görünüm"
     }
   },
   "usage": {

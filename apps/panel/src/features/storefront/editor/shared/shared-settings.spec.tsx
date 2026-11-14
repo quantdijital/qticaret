@@ -172,6 +172,9 @@ describe("the theme's shared settings", () => {
         color_swatches: [...DOC.settings.color_swatches, { label: "Lacivert", hex: "#1e3a8a" }],
         // The threshold is kept for when it is turned on again
         low_stock: { enabled: false, threshold: 3 },
+        // The theme's settings and the menus are left as they were (adr/0063 §3)
+        theme: DOC.settings.theme,
+        menus: null,
       })
     })
   })

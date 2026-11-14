@@ -15,7 +15,7 @@ import type StorefrontMenusModuleService from "../../modules/storefront-menus/se
 import { existingRecords, isRecordKind } from "./menu-links"
 import { refreshStorefrontStep } from "./steps/refresh-storefront"
 
-const MENUS_LOCK = { key: "storefront-menus", timeout: 10, ttl: 60 }
+export const MENUS_LOCK = { key: "storefront-menus", timeout: 10, ttl: 60 }
 
 const menus = (container: Pick<MedusaContainer, "resolve">) =>
   container.resolve<StorefrontMenusModuleService>(STOREFRONT_MENUS_MODULE)
@@ -29,7 +29,7 @@ const linksOf = (input: MenuInput): MenuLinkInput[] =>
   input.items.flatMap((each) => [each.link, ...each.children])
 
 /** A link as stored: its target or its address, and its own wording. */
-const stored = (link: MenuLinkInput) =>
+export const stored = (link: MenuLinkInput) =>
   link.kind === "url"
     ? { kind: link.kind, target: null, url: link.url, label: link.label }
     : { kind: link.kind, target: link.target, url: null, label: link.label }
@@ -70,7 +70,7 @@ const checkMenuStep = createStep(
   }
 )
 
-interface Snapshot {
+export interface Snapshot {
   menu: { id: string; title: string; location: "main" | "top" | "footer"; rank: number }
   items: {
     id: string
@@ -84,7 +84,7 @@ interface Snapshot {
   }[]
 }
 
-async function snapshotOf(
+export async function snapshotOf(
   service: StorefrontMenusModuleService,
   id: string
 ): Promise<Snapshot | null> {
@@ -99,11 +99,25 @@ async function snapshotOf(
     { menu_id: id },
     { select: ["id", "menu_id", "parent_id", "rank", "label", "kind", "target", "url"] }
   )
-  return { menu, items: items }
+  // Its own fields only: the list also gives the menu as a relation, which a create
+  // would take for a new menu to make
+  return {
+    menu,
+    items: items.map((item) => ({
+      id: item.id,
+      menu_id: item.menu_id,
+      parent_id: item.parent_id,
+      rank: item.rank,
+      label: item.label,
+      kind: item.kind,
+      target: item.target,
+      url: item.url,
+    })),
+  }
 }
 
 // Children after their parents: a restored child points at a restored parent
-const parentsFirst = (items: Snapshot["items"]) =>
+export const parentsFirst = (items: Snapshot["items"]) =>
   [...items].sort((a, b) => Number(a.parent_id !== null) - Number(b.parent_id !== null))
 
 async function restore(service: StorefrontMenusModuleService, snapshot: Snapshot) {
@@ -128,6 +142,28 @@ async function putBack(
   }
 }
 
+/** A menu's links written under it, each parent first and its children beside it. */
+export async function writeLinks(
+  service: StorefrontMenusModuleService,
+  menuId: string,
+  items: MenuInput["items"]
+): Promise<void> {
+  const parents = await service.createStorefrontMenuItems(
+    items.map((each, rank) => ({ menu_id: menuId, rank, ...stored(each.link) }))
+  )
+  const children = items.flatMap((each, index) =>
+    each.children.map((child, rank) => ({
+      menu_id: menuId,
+      parent_id: parents[index]?.id ?? null,
+      rank,
+      ...stored(child),
+    }))
+  )
+  if (children.length > 0) {
+    await service.createStorefrontMenuItems(children)
+  }
+}
+
 /**
  * Writes the menu and replaces its links; undone, the menu is as it was
  * (or gone, if new). The writes are several: one failing part-way puts the
@@ -148,20 +184,7 @@ const saveMenuStep = createStep(
         menuId = (await service.createStorefrontMenus(fields)).id
       }
       const owner = menuId ?? ""
-      const parents = await service.createStorefrontMenuItems(
-        input.items.map((each, rank) => ({ menu_id: owner, rank, ...stored(each.link) }))
-      )
-      const children = input.items.flatMap((each, index) =>
-        each.children.map((child, rank) => ({
-          menu_id: owner,
-          parent_id: parents[index]?.id ?? null,
-          rank,
-          ...stored(child),
-        }))
-      )
-      if (children.length > 0) {
-        await service.createStorefrontMenuItems(children)
-      }
+      await writeLinks(service, owner, input.items)
       return new StepResponse({ id: owner }, { menuId: owner, previous })
     } catch (error) {
       if (menuId) {

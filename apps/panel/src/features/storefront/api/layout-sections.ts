@@ -1,6 +1,8 @@
 import type { ProductSource, ShelfColumns } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
+import type { MenuInput } from "@/features/storefront/api/menus"
+import type { ThemeSettings } from "@/features/storefront/api/theme"
 import type { LinkInput } from "@/features/storefront/api/menus"
 
 // The sections of the theme editor's document (adr/0049), by page group
@@ -237,6 +239,19 @@ export interface LayoutSettings {
   color_swatches: { label: string; hex: string }[]
   /** "Az kaldı" on a product card at `threshold` units or fewer, never the number. */
   low_stock: { enabled: boolean; threshold: number }
+  /**
+   * The theme's settings (adr/0063 §3): drafted, previewed and published
+   * with the design. The server fills them from the theme section until
+   * the shop writes them here.
+   */
+  theme: ThemeSettings
+  /**
+   * Menus that replace the shop's when the design is published (adr/0063
+   * §3), then cleared from the draft; null: the menus are left alone. The
+   * editor carries a set (a restored revision's) and may drop it, never
+   * edits one: menus are the Menüler screen's.
+   */
+  menus: MenuInput[] | null
 }
 
 export interface LayoutDocument {

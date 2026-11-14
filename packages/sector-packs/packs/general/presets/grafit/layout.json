@@ -1,0 +1,68 @@
+{
+  "header": [],
+  "home": [
+    {
+      "id": "girisbolumu",
+      "type": "hero",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "eyebrow": null,
+      "heading": null,
+      "text": null,
+      "links": [],
+      "image": null
+    },
+    {
+      "id": "kategoriler",
+      "type": "categories",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": null,
+      "category_ids": []
+    },
+    {
+      "id": "yeniurunler",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": null,
+      "source": { "kind": "newest" },
+      "limit": 12,
+      "more": { "$href": "/magaza", "label": null }
+    },
+    {
+      "id": "yardimkutusu",
+      "type": "help",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": null,
+      "text": null
+    },
+    {
+      "id": "blogyazilari",
+      "type": "posts",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": null,
+      "limit": 3
+    }
+  ],
+  "footer": [
+    {
+      "id": "ebultenkutusu",
+      "type": "newsletter",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": null,
+      "text": null
+    }
+  ],
+  "product": [],
+  "category": []
+}

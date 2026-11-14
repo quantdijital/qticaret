@@ -138,6 +138,8 @@ interface SectionTreeProps {
   onRemove: (section: AnySection) => void
   onAddSection: (placement?: Placement) => void
   onTheme: () => void
+  /** A theme setting in the draft the server would refuse (adr/0063 §3). */
+  themeProblem: boolean
   /** The stock line and colour names in the draft (adr/0049 Ek 2026-11-06), and whether one is wrong. */
   onLooks: () => void
   looksProblem: boolean
@@ -159,6 +161,7 @@ export function SectionTree({
   onRemove,
   onAddSection,
   onTheme,
+  themeProblem,
   onLooks,
   looksProblem,
 }: SectionTreeProps) {
@@ -257,7 +260,12 @@ export function SectionTree({
         </ul>
       </TreeGroup>
       <TreeGroup title={t(`${T}.theme`)}>
-        <ThemeRow icon={Palette} label={t(`${T}.themeSettings`)} onClick={onTheme} />
+        <ThemeRow
+          icon={Palette}
+          label={t(`${T}.themeSettings`)}
+          problem={themeProblem}
+          onClick={onTheme}
+        />
         <ThemeRow
           icon={SwatchBook}
           label={t(`${T}.looks`)}

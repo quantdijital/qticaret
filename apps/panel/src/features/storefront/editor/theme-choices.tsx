@@ -1,6 +1,4 @@
 import type { ReactNode } from "react"
-import { Controller } from "react-hook-form"
-import type { Control } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import {
   BODY_FONTS,
@@ -14,8 +12,7 @@ import {
   SINGLE_WEIGHT_FONTS,
   UNBUILT_HEADER_LAYOUTS,
 } from "@/features/storefront/api/theme"
-import type { BodyFont, HeadingFont } from "@/features/storefront/api/theme"
-import type { ThemeParsed, ThemeValues } from "@/features/storefront/theme-settings"
+import type { BodyFont, HeadingFont, ThemeSettings } from "@/features/storefront/api/theme"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { PanelGroup } from "./panel-header"
 import { ChoiceSelect, SwitchRow } from "./theme-fields"
@@ -61,149 +58,124 @@ function useHeadingNote(): (font: HeadingFont) => string | undefined {
   }
 }
 
+interface ThemeChoicesProps {
+  theme: ThemeSettings
+  /** The theme with one choice changed: the draft takes it at once (adr/0063 §3). */
+  onChange: (theme: ThemeSettings) => void
+}
+
 /** The theme's fixed-list choices: faces, corners and buttons, the product card and the header. */
-export function ThemeChoices({ control }: { control: Control<ThemeValues, unknown, ThemeParsed> }) {
+export function ThemeChoices({ theme, onChange }: ThemeChoicesProps) {
   const { t } = useTranslation()
   const headingNote = useHeadingNote()
+  const { typography, product_card: card, header } = theme
   return (
     <>
       <PanelGroup title={t(`${C}.fontsTitle`)} hint={t(`${C}.fontsHint`)}>
         <Pair long>
-          <Controller
-            control={control}
-            name="typography.heading"
-            render={({ field }) => (
-              <ChoiceSelect
-                id="theme-heading"
-                label={t(`${C}.heading`)}
-                value={field.value}
-                options={HEADING_FONTS}
-                onChange={field.onChange}
-                render={(font) => <FontName font={font} />}
-                hint={headingNote(field.value)}
-              />
-            )}
+          <ChoiceSelect
+            id="theme-heading"
+            label={t(`${C}.heading`)}
+            value={typography.heading}
+            options={HEADING_FONTS}
+            onChange={(value) => {
+              onChange({ ...theme, typography: { ...typography, heading: value } })
+            }}
+            render={(font) => <FontName font={font} />}
+            hint={headingNote(typography.heading)}
           />
-          <Controller
-            control={control}
-            name="typography.body"
-            render={({ field }) => (
-              <ChoiceSelect
-                id="theme-body"
-                label={t(`${C}.body`)}
-                value={field.value}
-                options={BODY_FONTS}
-                onChange={field.onChange}
-                render={(font) => <FontName font={font} />}
-              />
-            )}
+          <ChoiceSelect
+            id="theme-body"
+            label={t(`${C}.body`)}
+            value={typography.body}
+            options={BODY_FONTS}
+            onChange={(value) => {
+              onChange({ ...theme, typography: { ...typography, body: value } })
+            }}
+            render={(font) => <FontName font={font} />}
           />
         </Pair>
       </PanelGroup>
       <PanelGroup title={t(`${C}.shapes`)}>
         <Pair>
-          <Controller
-            control={control}
-            name="radius"
-            render={({ field }) => (
-              <ChoiceSelect
-                id="theme-radius"
-                label={t(`${C}.radius`)}
-                value={field.value}
-                options={RADII}
-                onChange={field.onChange}
-                render={(option) => t(`${C}.radii.${option}`)}
-                hint={t(`${C}.radiusHint`)}
-              />
-            )}
+          <ChoiceSelect
+            id="theme-radius"
+            label={t(`${C}.radius`)}
+            value={theme.radius}
+            options={RADII}
+            onChange={(value) => {
+              onChange({ ...theme, radius: value })
+            }}
+            render={(option) => t(`${C}.radii.${option}`)}
+            hint={t(`${C}.radiusHint`)}
           />
-          <Controller
-            control={control}
-            name="buttons"
-            render={({ field }) => (
-              <ChoiceSelect
-                id="theme-buttons"
-                label={t(`${C}.buttons`)}
-                value={field.value}
-                options={BUTTON_SHAPES}
-                onChange={field.onChange}
-                render={(option) => t(`${C}.buttonShapes.${option}`)}
-                hint={t(`${C}.buttonsHint`)}
-              />
-            )}
+          <ChoiceSelect
+            id="theme-buttons"
+            label={t(`${C}.buttons`)}
+            value={theme.buttons}
+            options={BUTTON_SHAPES}
+            onChange={(value) => {
+              onChange({ ...theme, buttons: value })
+            }}
+            render={(option) => t(`${C}.buttonShapes.${option}`)}
+            hint={t(`${C}.buttonsHint`)}
           />
         </Pair>
       </PanelGroup>
       <PanelGroup title={t(`${C}.card`)}>
         <Pair>
-          <Controller
-            control={control}
-            name="product_card.ratio"
-            render={({ field }) => (
-              <ChoiceSelect
-                id="theme-ratio"
-                label={t(`${C}.ratio`)}
-                value={field.value}
-                options={CARD_RATIOS}
-                onChange={field.onChange}
-                render={(option) => t(`${C}.ratios.${option.replace(":", "x")}`)}
-                hint={t(`${C}.ratioHint`)}
-              />
-            )}
+          <ChoiceSelect
+            id="theme-ratio"
+            label={t(`${C}.ratio`)}
+            value={card.ratio}
+            options={CARD_RATIOS}
+            onChange={(value) => {
+              onChange({ ...theme, product_card: { ...card, ratio: value } })
+            }}
+            render={(option) => t(`${C}.ratios.${option.replace(":", "x")}`)}
+            hint={t(`${C}.ratioHint`)}
           />
-          <Controller
-            control={control}
-            name="header.layout"
-            render={({ field }) => (
-              <ChoiceSelect
-                id="theme-header"
-                label={t(`${C}.headerLayout`)}
-                value={field.value}
-                options={HEADER_LAYOUTS}
-                onChange={field.onChange}
-                unavailable={UNBUILT_HEADER_LAYOUTS}
-                render={(option) =>
-                  UNBUILT_HEADER_LAYOUTS.has(option)
-                    ? t(`${C}.headerLayoutSoon`, { name: t(`${C}.headerLayouts.${option}`) })
-                    : t(`${C}.headerLayouts.${option}`)
-                }
-                hint={t(
-                  UNBUILT_HEADER_LAYOUTS.has(field.value)
-                    ? `${C}.headerLayoutKept`
-                    : `${C}.headerLayoutHint`
-                )}
-              />
+          <ChoiceSelect
+            id="theme-header"
+            label={t(`${C}.headerLayout`)}
+            value={header.layout}
+            options={HEADER_LAYOUTS}
+            onChange={(value) => {
+              onChange({ ...theme, header: { ...header, layout: value } })
+            }}
+            unavailable={UNBUILT_HEADER_LAYOUTS}
+            render={(option) =>
+              UNBUILT_HEADER_LAYOUTS.has(option)
+                ? t(`${C}.headerLayoutSoon`, { name: t(`${C}.headerLayouts.${option}`) })
+                : t(`${C}.headerLayouts.${option}`)
+            }
+            hint={t(
+              UNBUILT_HEADER_LAYOUTS.has(header.layout)
+                ? `${C}.headerLayoutKept`
+                : `${C}.headerLayoutHint`
             )}
           />
         </Pair>
         {(["show_brand", "show_rating"] as const).map((name) => (
-          <Controller
+          <SwitchRow
             key={name}
-            control={control}
-            name={`product_card.${name}`}
-            render={({ field }) => (
-              <SwitchRow
-                id={`theme-${name}`}
-                label={t(`${C}.${name}`)}
-                hint={t(`${C}.${name}Hint`)}
-                checked={field.value}
-                onChange={field.onChange}
-              />
-            )}
+            id={`theme-${name}`}
+            label={t(`${C}.${name}`)}
+            hint={t(`${C}.${name}Hint`)}
+            checked={card[name]}
+            onChange={(value) => {
+              onChange({ ...theme, product_card: { ...card, [name]: value } })
+            }}
           />
         ))}
-        <Controller
-          control={control}
-          name="header.sticky"
-          render={({ field }) => (
-            <SwitchRow
-              id="theme-sticky"
-              label={t(`${C}.sticky`)}
-              hint={t(`${C}.stickyHint`)}
-              checked={field.value}
-              onChange={field.onChange}
-            />
-          )}
+        <SwitchRow
+          id="theme-sticky"
+          label={t(`${C}.sticky`)}
+          hint={t(`${C}.stickyHint`)}
+          checked={header.sticky}
+          onChange={(value) => {
+            onChange({ ...theme, header: { ...header, sticky: value } })
+          }}
         />
       </PanelGroup>
     </>

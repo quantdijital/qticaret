@@ -6,7 +6,6 @@ import type {
   PromotionSettings,
   ShippingSettings,
   StorefrontSettings,
-  ThemeSettings,
 } from "../../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import { fillShopText } from "../../../lib/shop/tokens"
@@ -70,68 +69,37 @@ function filled(
   }
 }
 
-/**
- * The theme's choices (F18 D11, adr/0053). Its main colour falls back to the
- * storefront section's `primary_color` until the panel writes it here; that
- * field stays in `storefront` meanwhile. The section's own version stays
- * inside: a stored row is already read as it means today (adr/0062 §4).
- */
-function themeOf(
-  theme: ThemeSettings,
-  storefront: StorefrontSettings
-): Omit<ThemeSettings, "settings_version"> {
-  return {
-    theme: theme.theme,
-    colors: { ...theme.colors, primary: theme.colors.primary ?? storefront.primary_color },
-    typography: theme.typography,
-    radius: theme.radius,
-    product_card: theme.product_card,
-    header: theme.header,
-    buttons: theme.buttons,
-  }
-}
-
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const settings = req.scope.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  const [
-    storefront,
-    promotions,
-    theme,
-    shipping,
-    marketing,
-    giftCards,
-    addons,
-    values,
-    marks,
-    shared,
-  ] = (await Promise.all([
-    settings.getSection("storefront"),
-    settings.getSection("promotions"),
-    settings.getSection("theme"),
-    settings.getSection("shipping"),
-    settings.getSection("marketing"),
-    settings.isFeatureEnabled(GIFT_CARDS),
-    settings.isFeatureEnabled(PRODUCT_ADDONS),
-    shopInfoValues(req.scope),
-    shopMarks(req.scope),
-    liveSettings(req.scope),
-  ])) as unknown as [
-    StorefrontSettings,
-    PromotionSettings,
-    ThemeSettings,
-    ShippingSettings,
-    MarketingSettings,
-    boolean,
-    boolean,
-    ShopInfoValues,
-    ShopMarks,
-    ShownSettings,
-  ]
+  const [storefront, promotions, shipping, marketing, giftCards, addons, values, marks, shared] =
+    (await Promise.all([
+      settings.getSection("storefront"),
+      settings.getSection("promotions"),
+      settings.getSection("shipping"),
+      settings.getSection("marketing"),
+      settings.isFeatureEnabled(GIFT_CARDS),
+      settings.isFeatureEnabled(PRODUCT_ADDONS),
+      shopInfoValues(req.scope),
+      shopMarks(req.scope),
+      liveSettings(req.scope),
+    ])) as unknown as [
+      StorefrontSettings,
+      PromotionSettings,
+      ShippingSettings,
+      MarketingSettings,
+      boolean,
+      boolean,
+      ShopInfoValues,
+      ShopMarks,
+      ShownSettings,
+    ]
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=3600")
   res.vary("x-publishable-api-key")
   res.json({
     storefront: filled(storefront, shared, values),
-    theme: themeOf(theme, storefront),
+    // The theme's choices (F18 D11, adr/0053) as the published design holds them, else the
+    // theme section with the old main colour (adr/0063 §3); its version stays inside
+    theme: shared.theme,
     free_shipping_threshold: promotions.free_shipping_threshold,
     // The product page's "Kargo ve Teslimat" card says these (adr/0046 Ek 2026-11-06)
     delivery: storefrontDelivery(shipping, marketing),

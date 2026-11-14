@@ -117,3 +117,14 @@ Ayar panelini kullanan kişi mağaza sahibidir, tasarımcı ya da geliştirici d
 - **Her seçim anında önizlemede görünür**; her alanın "varsayılana dön" düğmesi vardır.
 - **Seçenekler görselle anlatılır** (hizalama, biçim, düğme stili küçük çizimlerle), yalnız metinle değil.
 - Etiketler ve terimler i18n anahtarlarından gelir (altın kural 9).
+
+## Maket seçimi (sahip, 2026-11-14)
+
+Maket galerisi (depo dışı, iki tur, 25 sayfa) üzerinden sahip şunları seçti:
+
+- **İlk taşınacak takımlar: ikisi de**, iki ayrı hazır görünüm olarak.
+  - Kombinasyon: DY3, N12, M7 (telefon MT1), H11, KK2, SR1 (kart UK2), FS1, OU2, GS1, GB2, RH3, YR1, MR2, BL2, AB3; sepet çekmecesi SC1, sepet SP1, ödeme OD1, onay SO1.
+  - Klasik katalog: KY3, N14, H17, GB4, UR5 (kart UK5), KY1, KB2, KK4, MR1, YR1, AB1.
+- **Kategori sayfası:** KT1 vitrin, KT2 teknik liste, KT3 kategori merkezi, KT4 hızlı alışveriş; dördü de biçim olarak taşınır.
+- **Ürün sayfası:** varsayılan UP3 galeri duvarı (içinde VS1 varyant seçici, SK2 satın alma kutusu).
+- **Faz 2 sırası:** önce altyapı (hazır görünüm altyapısı, bölümlere biçim alanı), sonra biçimler tek tek.

@@ -6,7 +6,14 @@ export const GENERAL: SectorPackSummary = {
   version: 1,
   name: "Genel",
   description: "Her sektöre uyan sade bir başlangıç.",
-  counts: { attribute_templates: 1, attributes: 5, categories: 0, flags: 0, seo_templates: 0 },
+  counts: {
+    attribute_templates: 1,
+    attributes: 5,
+    categories: 0,
+    flags: 0,
+    seo_templates: 0,
+    presets: 1,
+  },
 }
 
 export const CUTLERY: SectorPackSummary = {
@@ -14,7 +21,14 @@ export const CUTLERY: SectorPackSummary = {
   version: 2,
   name: "Bıçak ve çatal-bıçak",
   description: "Çakı, av, kamp, mutfak ve kasap bıçağı satan mağazalar için.",
-  counts: { attribute_templates: 2, attributes: 31, categories: 16, flags: 2, seo_templates: 1 },
+  counts: {
+    attribute_templates: 2,
+    attributes: 31,
+    categories: 16,
+    flags: 2,
+    seo_templates: 1,
+    presets: 0,
+  },
 }
 
 export const SECTOR_PACKS = { sector_packs: [GENERAL, CUTLERY] }

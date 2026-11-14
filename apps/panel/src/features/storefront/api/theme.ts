@@ -4,8 +4,10 @@ import type { StorefrontBackground } from "@/theme/storefront"
 /**
  * The storefront's theme settings (F18 D11, adr/0053, adr/0062; backend
  * `platform-settings/sections/theme.ts`): choices from fixed lists, no CSS
- * and no font address. The Atölye theme applies every one of them. Saved,
- * they are live at once: there is no draft (until adr/0063).
+ * and no font address. The Atölye theme applies every one of them. Since
+ * adr/0063 §3 they are part of the design's draft (`LayoutSettings.theme`)
+ * and go live with "Yayınla"; the section is what the design falls back
+ * to until the shop writes them there.
  */
 
 /** Self-hosted faces the storefront has a loader for; names only. */

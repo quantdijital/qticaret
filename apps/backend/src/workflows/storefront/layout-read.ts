@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { BodySection, LayoutDocument } from "../../lib/storefront/layout"
-import { isShowing, layoutDocument } from "../../lib/storefront/layout"
+import { isShowing, readStoredLayout } from "../../lib/storefront/layout"
 import { fillShopText } from "../../lib/shop/tokens"
 import { shownSettings } from "../../lib/storefront/layout-settings"
 import { MEDIA_MODULE } from "../../modules/media"
@@ -15,6 +15,7 @@ import { fill, hydrateSection } from "./layout-hydrate"
 import type { HydrateContext } from "./layout-hydrate"
 import { liveRecords } from "./layout-live"
 import { resolveLinks } from "./menu-links"
+import type { StoreMenu } from "./menus-read"
 import { railPicks } from "./rails"
 
 /** The addresses of the images shown with their sizes: openings and slides (not rich text's). */
@@ -32,7 +33,10 @@ const imageUrls = (section: BodySection): string[] =>
  * products are picked here, for the shopper's sales channels (`channels`,
  * the publishable key's; null: any), and named by id. The theme's shared
  * settings come applied (adr/0049 Ek 2026-11-06): the badges' and the colour
- * names' as written here, else as the old storefront fields hold them.
+ * names' as written here, else as the old storefront fields hold them; the
+ * theme's settings as written here, else as the theme section holds them
+ * (adr/0063 §3). The menu set is the preview's to show (`draftMenus`):
+ * the live menus are the module's, so it is null here.
  */
 export async function storeLayout(
   container: MedusaContainer,
@@ -142,7 +146,7 @@ export async function storeLayout(
   }
 }
 
-/** The shared settings as the storefront draws them: the badges' details in place. */
+/** The shared settings as the storefront draws them: the badges' details in place, the theme applied. */
 function sharedOf(
   doc: LayoutDocument,
   legacy: Awaited<ReturnType<typeof legacySettings>>,
@@ -156,6 +160,8 @@ function sharedOf(
       text: fill(badge.text, values),
     })),
     color_swatches: shown.color_swatches,
+    theme: shown.theme,
+    menus: null as StoreMenu[] | null,
   }
 }
 
@@ -178,9 +184,7 @@ export async function publishedLayout(
   const doc = row?.published ? `revision:${String(row.revision)}` : "default"
   const key = `${doc}|${channels ? [...new Set(channels)].sort().join(",") : "*"}`
   return shownCache(key, async () => {
-    const shown = row?.published
-      ? layoutDocument.parse(row.published)
-      : await defaultLayout(container)
+    const shown = row?.published ? readStoredLayout(row.published) : await defaultLayout(container)
     return storeLayout(container, shown, channels)
   })
 }

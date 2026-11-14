@@ -150,3 +150,21 @@ Sahip iki ADR'ı birlikte onayladı ("önerilerle ilerle"). Taslaktaki açık so
 | 2.7 | Üst panel: sihirbaz adımı, `tenant.preset`, `preset` kurulum adımı | S | 2.3'ten sonra |
 
 Her iş kendi testleriyle gelir: HTTP (uygulama iki kez aynı taslak; çözülemeyen tutamaç; canlı mağazada demo reddi; yayında menülerin değişmesi ve telafisi; önizlemede taslak tema ve menü), birim (gezici, şema reddi, her görünümün doğrulanması), panel ve e2e (galeriden yayına).
+
+## Ek 2026-11-14 (Kabul edildi, 2026-11-14): ilk görünümler ve iş 2.5
+
+- **Durum:** Kabul edildi (2026-11-14), adr/0049 Ek 2026-11-14 ile birlikte. Dayanak: `docs/tema/atolye-tamamlama-plani.md` "Maket seçimi"; adr/0049 Ek 2026-11-14 (bölüm biçimleri, yeni bölüm türleri, gelişmiş CSS).
+- **§8 "İlk görünümler" güncellenir.** Sahip maket galerisinden iki düzen takımı seçti; ikisi de ayrı hazır görünüm olur:
+
+  | Kod | Paket | Takım | Maketler |
+  | --- | --- | --- | --- |
+  | `grafit` | `general` | Bugünkü görünüm | Değişmez |
+  | `koyu-sert` | `cutlery` | Kombinasyon | DY3, N12, M7 (telefonda MT1), H11, KK2, SR1 (kart UK2), FS1, OU2, GS1, GB2, RH3, YR1, MR2, BL2, AB3 |
+  | `acik-temiz` | `cutlery` | Klasik katalog | KY3, N14, H17, GB4, UR5 (kart UK5), KY1, KB2, KK4, MR1, YR1, AB1 |
+
+  - **Hava ile takımın ilişkisi.** Sahip kararı 6 iki hava istemişti (koyu-sert, açık-temiz); maket seçimi iki düzen takımı verdi. Seçenekler: (a) her takım bir havayla eşleşir, iki görünüm; (b) takım ve hava ayrı eksen, 2 × 2 = dört görünüm; (c) takım görünümdür, hava galeride ayrı bir tema ayarı düğmesidir. **Karar: (a)** (öneriyle, sahip yetkisiyle; sahip teknik ve küçük kararlarda "önerilerle ilerle" dedi, 2026-11-14). Kombinasyon takımı koyu-sert olur (OU2'yi maket notu "koyu-sert görünümün imza bölümü" diye anlatıyor; AB3 koyu alt bilgi; sahne zeminli bölümler), klasik katalog açık-temiz. Eşleme: kombinasyon = `koyu-sert`, klasik katalog = `acik-temiz`; (b) içerik ve bakım yükünü ikiye katladığı için seçilmedi.
+  - Koyu-sert görünümde sayfa zemini yine açıktır (sahip kararı 6); koyu hava sahne zeminli bölümlerle (adr/0049 Ek 2026-11-14 §6 `look.ground: stage`), koyu alt bilgiyle, renk ve fotoğraf diliyle verilir.
+  - **Kategori ve ürün sayfası:** dört kategori düzeni (KT1–KT4) biçim olarak taşınır (adr/0049 Ek §7 `category_main`). Kategori düzeni artık kategori başına seçilir (adr/0049 Ek §10 karar 11, sahip), bu yüzden görünüm iki şey yazar: **görünümün varsayılan kategori düzeni** (`layout.json`'da `category_main.variant`) ve **demo kategorilerde örnek atamalar** (tutamaçla, kategori kayıtlarına; `category_layout`, adr/0049 Ek §7). Atamalar düzen belgesi dışında bir yazmadır, görünüm uygulamasının compensation'lı ayrı adımıdır ve taslakla önizlenmez. Başlangıç değerleri: koyu-sert'te varsayılan KT1 (`showcase`), demo üst kategorilerde KT3 (`hub`); açık-temiz'de varsayılan KT3, demo yaprak kategorilerde KT2 (`technical`). KT2 Faz 4'ün karşılaştırması gelene kadar `standard` liste çizilir. Ürün sayfası ikisinde de UP3 (`product_main` `gallery_wall`).
+  - Sepet, ödeme ve onay maketleri (SC1, SP1, OD1, SO1) görünümlerin parçası değildir; adr/0049 Ek §10 karar 10 (ayrı ADR).
+  - Görünümler gelişmiş CSS taşımaz (§1 aynen).
+- **İş 2.5'in kapsamı adr/0049 Ek 2026-11-14'e taşındı.** §6'nın kuralı (alan `variant`, varsayılan bugünkü çizim, tanımayan tema varsayılanı çizer, adlar sektörden bağımsız) aynen geçerlidir; "ilk tur `hero`, `products`, `categories`" sınırı kalkar, biçim listesi ve şema kararı o ektedir. "Uygulama sırası" tablosundaki 2.5 satırı "adr/0049 Ek 2026-11-14 V1–V3" diye okunur; iki görünüm (Faz 6) o ekin A–F işlerinde kullandıkları biçimler ve F1 (kategori başına düzen seçimi) bitince yazılır.

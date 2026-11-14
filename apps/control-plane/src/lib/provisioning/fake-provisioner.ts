@@ -148,7 +148,10 @@ export class FakeProvisioner implements TenantProvisioner {
             exit_code: 1,
           })
         }
-        const counts = Object.values(summaryOf(pack).counts).reduce((sum, n) => sum + n, 0)
+        // Presets are offered in the shop's theme editor, not written by the pack (adr/0063)
+        const counts = Object.entries(summaryOf(pack).counts)
+          .filter(([kind]) => kind !== "presets")
+          .reduce((sum, [, n]) => sum + n, 0)
         const added = Object.hasOwn(shop.packs, pack.code) ? 0 : counts
         shop.packs[pack.code] = pack.version
         return await Promise.resolve(

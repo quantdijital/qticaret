@@ -1,4 +1,5 @@
 import { z } from "zod"
+import type { StorefrontPreset } from "./preset-schema"
 
 /**
  * A sector pack's files as this package reads them (adr/0061 F17.7, C12).
@@ -70,7 +71,10 @@ export const seoTemplateSetSchema = z.strictObject({
   description_templates: templates.optional(),
 })
 
-/** The files a pack's folder may hold, and what each is; any other file is refused. */
+/**
+ * The files a pack's folder may hold, and what each is; any other file is
+ * refused, but for the `presets/` folder (`PRESETS_DIR`, `preset-load.ts`).
+ */
 export const PACK_FILES = {
   "manifest.json": manifestSchema,
   "attributes.json": z.array(attributeTemplateSchema).max(50),
@@ -93,6 +97,15 @@ export interface SectorPack extends Omit<PackManifest, "format"> {
   seo: SeoTemplateSet
 }
 
+/**
+ * A pack as read from disk: its items and its storefront presets
+ * (`presets/`, adr/0063 §2). Applying a pack never applies a preset; a
+ * preset is applied on its own, by the shop or at setup.
+ */
+export interface LoadedSectorPack extends SectorPack {
+  presets: readonly StorefrontPreset[]
+}
+
 /** What the control plane's wizard shows of a pack. */
 export interface SectorPackSummary {
   code: string
@@ -105,5 +118,6 @@ export interface SectorPackSummary {
     categories: number
     flags: number
     seo_templates: number
+    presets: number
   }
 }

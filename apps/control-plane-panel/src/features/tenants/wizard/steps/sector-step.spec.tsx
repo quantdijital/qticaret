@@ -30,7 +30,7 @@ describe("SectorStep: the packs the control plane offers (C12)", () => {
     expect(general).toBeChecked()
     // No pack is "coming soon" any more: every one listed can be chosen
     expect(screen.queryByText("Yakında")).not.toBeInTheDocument()
-    expect(screen.getByText("1 özellik şablonu · 5 özellik")).toBeInTheDocument()
+    expect(screen.getByText("1 özellik şablonu · 5 özellik · 1 hazır görünüm")).toBeInTheDocument()
     expect(
       screen.getByText(
         "2 özellik şablonu · 31 özellik · 16 önerilen kategori · 2 ayar · 1 SEO şablonu"

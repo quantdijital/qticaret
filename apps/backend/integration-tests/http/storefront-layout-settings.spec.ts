@@ -17,6 +17,8 @@ interface Shared {
   trust_badges: Badge[]
   color_swatches: { label: string; hex: string }[]
   low_stock: { enabled: boolean; threshold: number } | null
+  theme?: Record<string, unknown> | null
+  menus?: unknown[] | null
 }
 
 interface AdminLayout {
@@ -29,7 +31,7 @@ interface AdminLayout {
 }
 
 interface StoreLayout {
-  layout: { settings: Omit<Shared, "low_stock"> }
+  layout: { settings: Omit<Shared, "low_stock" | "theme"> & { theme: Record<string, unknown> } }
 }
 
 interface Frame {
@@ -101,7 +103,10 @@ medusaIntegrationTestRunner({
       const firstFrame = await frame()
       const firstStock = await stock()
 
-      const { settings: opened, ...groups } = first.draft
+      const {
+        settings: { theme: openedTheme, menus: openedMenus, ...opened },
+        ...groups
+      } = first.draft
       const refused = await save({
         ...groups,
         settings: {
@@ -143,7 +148,12 @@ medusaIntegrationTestRunner({
         color_swatches: OLD.color_swatches,
         low_stock: { enabled: true, threshold: 3 },
       })
-      expect(firstLive.settings).toEqual({
+      // The theme section stands in for the design's theme (adr/0063 §3); no menu set
+      expect(openedTheme).toMatchObject({ settings_version: 2, theme: "atolye", radius: "soft" })
+      expect(openedMenus).toBeNull()
+      expect(firstLive.settings.menus).toBeNull()
+      expect(firstLive.settings.theme).toMatchObject({ theme: "atolye", radius: "soft" })
+      expect(firstLive.settings).toMatchObject({
         trust_badges: [{ icon: "truck", title: "0532 123 45 67 ile sipariş", text: null }],
         color_swatches: OLD.color_swatches,
       })
@@ -155,7 +165,9 @@ medusaIntegrationTestRunner({
       expect(JSON.stringify(refused.data)).toContain("storefront_layout.color_duplicate")
       expect(saved.status).toBe(200)
       expect(saved.data.layout.has_changes).toBe(true)
-      expect(saved.data.layout.draft.settings).toEqual({
+      // Saved without a theme (an older editor): the theme section stands in again
+      expect(saved.data.layout.draft.settings.theme).toEqual(openedTheme)
+      expect(saved.data.layout.draft.settings).toMatchObject({
         ...NEW,
         color_swatches: [{ label: "Lacivert", hex: "#1f2a44" }],
       })

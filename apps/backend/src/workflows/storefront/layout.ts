@@ -9,42 +9,26 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep, emitEventStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { ValidationError } from "../../lib/errors"
-import { layoutDocument } from "../../lib/storefront/layout"
+import { readStoredLayout } from "../../lib/storefront/layout"
 import type { LayoutDocument } from "../../lib/storefront/layout"
-import { STOREFRONT_LAYOUT_MODULE } from "../../modules/storefront-layout"
 import type StorefrontLayoutModuleService from "../../modules/storefront-layout/service"
 import { KEPT_REVISIONS } from "../../modules/storefront-layout/service"
 import { attachMediaStep } from "../media/steps/attach-media"
 import { checkLayout } from "./layout-check"
 import { defaultLayout } from "./layout-default"
+import { json, layoutRow, layouts } from "./layout-row"
+import type { LayoutRow } from "./layout-row"
+import { checkThemeStep, clearDraftMenusStep } from "./layout-steps"
+import { MENUS_LOCK } from "./menus"
+import { replaceMenusStep } from "./menus-replace"
+import { refreshStorefrontStep } from "./steps/refresh-storefront"
+
+export { layoutRow } from "./layout-row"
 
 /** Emitted when a design goes live: the storefront may forget what it holds (adr/0049). */
 export const LAYOUT_PUBLISHED = "storefront.layout_published"
 
 const LAYOUT_LOCK = { key: "storefront-layout", timeout: 10, ttl: 60 }
-
-// The document as the JSON column takes it
-const json = (doc: LayoutDocument) => doc as unknown as Record<string, unknown>
-
-const layouts = (container: Pick<MedusaContainer, "resolve">) =>
-  container.resolve<StorefrontLayoutModuleService>(STOREFRONT_LAYOUT_MODULE)
-
-interface LayoutRow {
-  id: string
-  draft: unknown
-  published: unknown
-  published_at: Date | null
-  published_by: string | null
-  revision: number
-}
-
-/** The shop's one design record, if it has made one. */
-export async function layoutRow(
-  container: Pick<MedusaContainer, "resolve">
-): Promise<LayoutRow | null> {
-  const [row] = await layouts(container).listStorefrontLayouts({}, { take: 1 })
-  return (row as LayoutRow | undefined) ?? null
-}
 
 /** Writes the draft (the first save makes the record); undone, the draft is as it was. */
 const writeDraftStep = createStep(
@@ -85,13 +69,15 @@ const checkLayoutStep = createStep(
 /**
  * Saves the theme editor's draft (adr/0049), as the editor saves while
  * staff work: checked, written, its images kept from the nightly sweep.
- * Nothing reaches shoppers until it is published.
+ * Nothing reaches shoppers until it is published; the theme's settings
+ * and a menu set included (adr/0063 §3).
  */
 export const saveLayoutDraftWorkflow = createWorkflow(
   "storefront-layout-save-draft",
   (draft: LayoutDocument) => {
     acquireLockStep(LAYOUT_LOCK)
     const media = checkLayoutStep(draft)
+    checkThemeStep(draft)
     const saved = writeDraftStep(draft)
     attachMediaStep(transform({ media }, ({ media }) => ({ link: media, record: [] })))
     releaseLockStep({ key: LAYOUT_LOCK.key })
@@ -107,7 +93,7 @@ const loadDraftStep = createStep(
     if (!row) {
       throw new ValidationError("storefront_layout.nothing_to_publish", { field: "document" })
     }
-    return new StepResponse(layoutDocument.parse(row.draft))
+    return new StepResponse(readStoredLayout(row.draft))
   }
 )
 
@@ -151,10 +137,13 @@ const publishStep = createStep(
     const revision = row.revision + 1
     const now = new Date()
     const undo: PublishUndo = { row, made: null, pruned: [] }
+    // The live copy holds no menu set: the live menus are the module's from now on, and a
+    // draft going back to what is live brings none (adr/0063 §3). The revision keeps it
+    const live: LayoutDocument = { ...draft, settings: { ...draft.settings, menus: null } }
     try {
       await service.updateStorefrontLayouts({
         id: row.id,
-        published: json(draft),
+        published: json(live),
         published_at: now,
         published_by: actor,
         revision,
@@ -190,25 +179,41 @@ const publishStep = createStep(
 /**
  * Takes the draft live (adr/0049), checked again first: a record or an
  * image it names may have gone since it was saved. The storefront shows it
- * within its cache's minute.
+ * within its cache's minute; the theme's settings with it (adr/0063 §3).
+ * A menu set the draft carries replaces the shop's menus under the menus'
+ * lock and is then cleared from the draft; any step failing puts the
+ * design, the menus and the draft back as they were.
  */
 export const publishLayoutWorkflow = createWorkflow(
   "storefront-layout-publish",
   (actor: string | null) => {
-    acquireLockStep(LAYOUT_LOCK)
+    // The design's and the menus' locks at once: the Menüler screen waits for a set going live
+    const locks = { ...LAYOUT_LOCK, key: [LAYOUT_LOCK.key, MENUS_LOCK.key] }
+    acquireLockStep(locks)
     const draft = loadDraftStep()
     checkLayoutStep(draft)
     const published = publishStep(transform({ draft, actor }, (data) => data))
+    const set = transform({ draft }, ({ draft }) => draft.settings.menus)
+    const menus = replaceMenusStep(set)
+    clearDraftMenusStep(draft)
     emitEventStep({ eventName: LAYOUT_PUBLISHED, data: published })
-    releaseLockStep({ key: LAYOUT_LOCK.key })
+    releaseLockStep({ key: locks.key })
+    refreshStorefrontStep(
+      transform({ menus }, ({ menus }) => (menus.replaced ? ["menus" as const] : []))
+    )
     return new WorkflowResponse(published)
   }
 )
 
-/** What the draft goes back to: a revision, else what is live, else the default design. */
+/**
+ * What the draft goes back to: a revision, else what is live, else the
+ * default design. A revision brings the menus it put live (adr/0063 §3)
+ * unless `menus` is false.
+ */
 export async function draftSource(
   container: MedusaContainer,
-  revision: number | null
+  revision: number | null,
+  menus = true
 ): Promise<LayoutDocument> {
   if (revision !== null) {
     const [kept] = await layouts(container).listStorefrontLayoutRevisions(
@@ -219,8 +224,9 @@ export async function draftSource(
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "storefront_layout.revision_unknown")
     }
     // Through today's schema: a document kept under an older one is checked again
-    return layoutDocument.parse(kept.document)
+    const doc = readStoredLayout(kept.document)
+    return menus ? doc : { ...doc, settings: { ...doc.settings, menus: null } }
   }
   const row = await layoutRow(container)
-  return row?.published ? layoutDocument.parse(row.published) : defaultLayout(container)
+  return row?.published ? readStoredLayout(row.published) : defaultLayout(container)
 }

@@ -1,13 +1,19 @@
 import "server-only"
 import { cache } from "react"
 import { storefrontSettings } from "@/lib/store-api/requests"
+import { currentLayout } from "./layout"
 import type { CardOptions } from "./product"
+import { themeSourceOf } from "./shared-settings"
 import { themeSettings } from "./theme"
 
-/** The shop's theme settings for this request (adr/0053 §B), every field checked. */
+/**
+ * The shop's theme settings for this request (adr/0053 §B), every field
+ * checked: the published design's, a preview's draft on its address
+ * (adr/0063 §3).
+ */
 export const currentTheme = cache(async () => {
-  const answer = await storefrontSettings()
-  return themeSettings(answer.theme, answer.storefront.primary_color)
+  const [layout, answer] = await Promise.all([currentLayout(), storefrontSettings()])
+  return themeSettings(...themeSourceOf(layout, answer))
 })
 
 /**

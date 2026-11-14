@@ -22,6 +22,7 @@ import { SEO_RESOURCES } from "./resources/seo"
 import { SETTINGS_RESOURCES } from "./resources/settings"
 import { STAFF_RESOURCES } from "./resources/staff"
 import { STOCK_RESOURCES } from "./resources/stock"
+import { STOREFRONT_LAYOUT_RESOURCES } from "./resources/storefront-layout"
 import { TAX_RESOURCES } from "./resources/tax"
 import type { AuditedResource } from "./types"
 import { ID } from "./types"
@@ -56,6 +57,7 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...GOOGLE_REVIEW_RESOURCES,
   ...PRODUCT_REVIEW_RESOURCES,
   ...MESSAGING_RESOURCES,
+  ...STOREFRONT_LAYOUT_RESOURCES,
 ]
 
 export interface ResourceMatch {

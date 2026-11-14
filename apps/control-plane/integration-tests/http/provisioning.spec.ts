@@ -176,10 +176,10 @@ medusaIntegrationTestRunner({
       })
       const tenant = await tenants().tenantOf(made.id)
       expect(tenant.status).toBe("active")
-      expect(tenant).toMatchObject({ sector_pack: "general", sector_pack_version: 1 })
+      expect(tenant).toMatchObject({ sector_pack: "general", sector_pack_version: 2 })
       expect(first.steps?.find((step) => step.name === "sector_pack")?.output).toMatchObject({
         pack: "general",
-        version: 1,
+        version: 2,
         added: 6,
       })
       expect(tenant.api_base_url).toBe(`http://localhost:${String(first.port)}`)

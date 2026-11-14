@@ -7686,7 +7686,11 @@
         "confirmTitle": "Load version {{revision}} into the draft?",
         "confirmText": "The draft's changes are replaced by this version. The storefront does not change until you publish.",
         "confirm": "Load into draft",
-        "restored": "Version {{revision}} is in the draft."
+        "restored": "Version {{revision}} is in the draft.",
+        "menusBadge": "With menus",
+        "confirmKeep": "This version is loaded into the draft. The storefront does not change until you publish.",
+        "menusText": "When this version was published it changed the menus too. The menus come into the draft as well: publish it again and that day's menus replace today's.",
+        "skipMenus": "Leave the menus out, keep today's"
       },
       "discard": {
         "open": "Discard changes",
@@ -8007,15 +8011,16 @@
         "slidesTwo": "Add at least two slides.",
         "colorInvalid": "The colour must be in #rrggbb form, e.g. #1e3a8a.",
         "colorDuplicate": "This colour name is already in the list.",
-        "thresholdRange": "Enter a whole number from 1 to {{max}}."
+        "thresholdRange": "Enter a whole number from 1 to {{max}}.",
+        "contrast": "This colour does not read well enough with white text or on the page colour (3:1 at least). Pick a darker shade.",
+        "wellContrast": "This colour does not read well enough on the areas one shade darker than the page (the boxes links and outlined buttons stand on; 3:1 at least). Pick a darker shade."
       },
       "theme": {
         "title": "Theme settings",
-        "live": "Theme settings are not part of the draft: once saved they are live at once and show on the storefront within a minute.",
+        "live": "Theme settings are part of the draft: changes are saved with it, show in the preview and go live with Publish.",
         "colors": "Colours",
         "primary": "Main colour",
         "primaryHint": "Buttons, links and the focus ring. It must read with white text and on the page colour. Empty, the theme's wine tone is used. The announcement bar does not take it; it stays graphite.",
-        "primaryMoved": "This colour comes from the old setting in Storefront preferences; saving moves it to the theme settings.",
         "accent": "Accent colour",
         "accentHint": "The selected chip and tab, counts, and the light ground of notes. Empty, selected items are graphite and a note's ground is a light tone of the main colour. The sale red and stock colours do not change.",
         "pick": "{{name}} picker",
@@ -8104,16 +8109,10 @@
         "show_ratingHint": "Stars, the average and the number of reviews on the cards of products with approved reviews. Nothing shows for a product without reviews.",
         "sticky": "Keep the header in view",
         "stickyHint": "The header stays at the top while the page scrolls. Off, it scrolls away with the page.",
-        "save": "Save and publish",
-        "saved": "Theme settings saved; they show on the storefront within a minute.",
         "grafit": {
           "action": "Back to Grafit",
-          "hint": "Sets every field to the theme's default look (Grafit). The storefront does not change until you save.",
-          "confirmTitle": "Go back to Grafit?",
-          "confirmText": "Every field, your unsaved changes included, is set to the theme's default look (Grafit). The storefront does not change until you save."
-        },
-        "errors": {
-          "contrast": "This colour does not read well enough with white text or on the page colour (3:1 at least). Pick a darker shade."
+          "hint": "Sets every field to the theme's default look (Grafit). The change goes into the draft; the storefront does not change until you publish.",
+          "done": "Theme settings are back to Grafit."
         }
       },
       "faq": {
@@ -8283,6 +8282,11 @@
           "add": "Add colour",
           "hint": "At most {{max}} colours; each name at most {{length}} characters, written once."
         }
+      },
+      "pendingMenus": {
+        "text_one": "The draft carries a restored version's menu: Publish replaces the shop's menu with it.",
+        "text_other": "The draft carries a restored version's {{count}} menus: Publish replaces the shop's menus with them.",
+        "drop": "Leave the menus out"
       }
     },
     "preferences": {

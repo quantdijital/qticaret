@@ -1,18 +1,20 @@
-import { screen, waitFor, within } from "@testing-library/react"
+import { act, screen, waitFor, within } from "@testing-library/react"
 import type { UserEvent } from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { toast } from "sonner"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { GRAFIT_THEME } from "@/features/storefront/api/theme"
+import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
 import { ATOLYE_COLORS } from "@/theme/atolye"
 import {
-  SETTINGS,
   THEME,
   THEME_SETTINGS,
   holdClock,
+  lastSaved,
   layoutOf,
   opened,
+  pass,
   postsTo,
   releaseClock,
   renderEditor,
@@ -40,9 +42,9 @@ vi.mock("@tanstack/react-router", () => ({
 // The whole editor draws itself anew on every key: see theme-panel.spec.tsx
 const HEAVY = { timeout: 15_000 }
 
-const save = () => screen.getByRole("button", { name: "Kaydet ve yayınla" })
 const grafit = () => screen.getByRole("button", { name: "Grafit'e dön" })
-const themeBody = () => postsTo(fetchMock, THEME_SETTINGS).at(-1)?.[1]?.body
+/** The theme the last draft save sent. */
+const savedTheme = () => lastSaved(fetchMock)?.settings.theme
 
 /** A part of the sample by its name (`data-sample`). */
 function part(name: string): HTMLElement {
@@ -166,13 +168,13 @@ describe("the theme settings show what the theme draws (adr/0062 §12)", HEAVY, 
     await user.click(screen.getByRole("option", { name: "Solda" }))
     expect(layout).toHaveTextContent("Solda")
     expect(screen.getByText(/“Ortada” hazırlanıyor; hazır olana kadar seçilemez/)).toBeVisible()
-    await user.click(save())
+    await pass(AUTOSAVE_MS)
     await waitFor(() => {
-      expect(themeBody()).toMatchObject({ header: { layout: "left", sticky: true } })
+      expect(savedTheme()).toMatchObject({ header: { layout: "left", sticky: true } })
     })
   })
 
-  it("goes back to Grafit at once from a saved look, and saves it only when asked", async () => {
+  it("puts Grafit into the draft at once from a saved look, one toast's undo away", async () => {
     await openTheme({
       theme: {
         colors: { primary: "#0b5c99", accent: "#c2410c", background: "warm" },
@@ -183,10 +185,10 @@ describe("the theme settings show what the theme draws (adr/0062 §12)", HEAVY, 
         header: { layout: "left", sticky: false },
       },
     })
-    expect(save()).toBeDisabled()
+    expect(grafit()).toHaveAttribute("title", expect.stringMatching(/Değişiklik taslağa yazılır/))
     await user.click(grafit())
 
-    // Nothing unsaved to lose: no question
+    // No question: the draft keeps its history, the toast takes it back
     expect(screen.queryByRole("alertdialog")).toBeNull()
     expect(screen.getByRole("textbox", { name: "Ana renk" })).toHaveValue("")
     expect(screen.getByRole("textbox", { name: "Vurgu rengi" })).toHaveValue("")
@@ -194,18 +196,26 @@ describe("the theme settings show what the theme draws (adr/0062 §12)", HEAVY, 
     expect(screen.getByRole("combobox", { name: "Köşeler" })).toHaveTextContent("Yumuşak")
     expect(part("button")).toHaveStyle({ backgroundColor: ATOLYE_COLORS.wine })
     expect(grafit()).toBeDisabled()
+    const [said, extra] = vi.mocked(toast.success).mock.calls.at(-1) ?? []
+    expect(said).toBe("Tema ayarları Grafit'e döndü.")
+    const action = extra?.action as { label: string; onClick: () => void } | undefined
+    expect(action?.label).toBe("Geri al")
+    await pass(AUTOSAVE_MS)
+    await waitFor(() => {
+      expect(savedTheme()).toEqual({ ...THEME, ...GRAFIT_THEME })
+    })
+    // The theme section is never written: "Yayınla" puts the draft live
     expect(postsTo(fetchMock, THEME_SETTINGS)).toEqual([])
 
-    await user.click(save())
-    await waitFor(() => {
-      expect(themeBody()).toEqual(GRAFIT_THEME)
+    act(() => {
+      action?.onClick()
     })
-    await waitFor(() => {
-      expect(save()).toBeDisabled()
-    })
+    expect(screen.getByRole("textbox", { name: "Ana renk" })).toHaveValue("#0b5c99")
+    expect(screen.getByRole("combobox", { name: "Köşeler" })).toHaveTextContent("Keskin")
+    expect(screen.getByRole("radio", { name: "Sıcak" })).toBeChecked()
   })
 
-  it("asks before Grafit replaces unsaved changes, and has nothing to do on Grafit itself", async () => {
+  it("has nothing to do on Grafit itself, and one undo takes Grafit back over unsaved changes", async () => {
     const primary = await openTheme()
     expect(THEME).toMatchObject(GRAFIT_THEME)
     expect(grafit()).toBeDisabled()
@@ -213,37 +223,13 @@ describe("the theme settings show what the theme draws (adr/0062 §12)", HEAVY, 
     await user.type(primary, "#0b5c99")
     await choose("Köşeler", "Keskin")
     await user.click(grafit())
-    const question = await screen.findByRole("alertdialog", { name: "Grafit'e dönülsün mü?" })
-    expect(question).toHaveTextContent(/Vitrin, siz kaydedene kadar değişmez/)
-    await user.click(within(question).getByRole("button", { name: "Vazgeç" }))
+    expect(screen.queryByRole("alertdialog")).toBeNull()
+    expect(primary).toHaveValue("")
+    expect(screen.getByRole("combobox", { name: "Köşeler" })).toHaveTextContent("Yumuşak")
+
+    // The editor's own undo, as for any change to the design
+    await user.click(screen.getByRole("button", { name: "Geri al" }))
     expect(primary).toHaveValue("#0b5c99")
     expect(screen.getByRole("combobox", { name: "Köşeler" })).toHaveTextContent("Keskin")
-
-    await user.click(grafit())
-    const again = await screen.findByRole("alertdialog", { name: "Grafit'e dönülsün mü?" })
-    await user.click(within(again).getByRole("button", { name: "Grafit'e dön" }))
-    await waitFor(() => {
-      expect(primary).toHaveValue("")
-    })
-    expect(screen.getByRole("combobox", { name: "Köşeler" })).toHaveTextContent("Yumuşak")
-    // The stored look is Grafit: nothing left to save
-    expect(save()).toBeDisabled()
-    expect(postsTo(fetchMock, THEME_SETTINGS)).toEqual([])
-  })
-
-  it("clears the storefront's old main colour when Grafit is saved over it", async () => {
-    const primary = await openTheme({ storefront: { primary_color: "#0b5c99" } })
-    expect(primary).toHaveValue("#0b5c99")
-    // The old colour shows in the form: not Grafit yet
-    await user.click(grafit())
-    expect(primary).toHaveValue("")
-    await user.click(save())
-
-    await waitFor(() => {
-      expect(postsTo(fetchMock, SETTINGS).map(([, init]) => init?.body)).toEqual([
-        { primary_color: null },
-      ])
-    })
-    expect(themeBody()).toEqual(GRAFIT_THEME)
   })
 })
