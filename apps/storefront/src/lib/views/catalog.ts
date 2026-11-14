@@ -34,8 +34,11 @@ import { productsInOrder } from "./section-data"
  * server's.
  */
 
-/** The categories the list shows: the shop's pick, its header menu's categories, or the top ones. */
-async function listedIds(list: HeroListSource): Promise<string[]> {
+/**
+ * The categories the list shows: the shop's pick, its header menu's
+ * categories, or (null) the top ones.
+ */
+async function listedIds(list: HeroListSource): Promise<string[] | null> {
   if (list.kind === "manual") {
     return list.category_ids
   }
@@ -45,8 +48,15 @@ async function listedIds(list: HeroListSource): Promise<string[]> {
       item.kind === "category" && item.target ? [item.target] : []
     )
   }
-  return []
+  return null
 }
+
+/**
+ * The categories named, with their pictures; none named, none (an empty
+ * list here never means "the top ones", and asks nothing).
+ */
+const named = async (ids: readonly string[], limit?: number) =>
+  ids.length > 0 ? picturedCategories(ids, limit) : []
 
 /** A card with its count when the shop shows counts and the backend counted it. */
 const counted = (
@@ -108,9 +118,12 @@ export async function heroCatalogView(
   )
   const tileIds = section.tiles.map((tile) => tile.category_id)
   const [listed, tiles, chipCards, counts, picks] = await Promise.all([
-    listedIds(section.list).then(picturedCategories),
-    picturedCategories(tileIds),
-    picturedCategories(chipIds),
+    // Cut to the list's limit before any photo is asked for
+    listedIds(section.list).then((ids) =>
+      ids === null ? picturedCategories([], section.list_limit) : named(ids, section.list_limit)
+    ),
+    named(tileIds),
+    named(chipIds),
     categoryCounts(),
     thumbs(
       section.picks.map((pick) => pick.product_id),
@@ -125,9 +138,7 @@ export async function heroCatalogView(
   }
   const ownImages = new Map(section.tiles.map((tile) => [tile.category_id, tile.image]))
   return {
-    list: listed
-      .slice(0, section.list_limit)
-      .map(({ id, card }) => counted(card, id, counts, section.show_count)),
+    list: listed.map(({ id, card }) => counted(card, id, counts, section.show_count)),
     all: { label: t("home.all_categories"), path: "/kategoriler" },
     tiles: tiles.map(({ id, card }) => {
       const own = ownImages.get(id)
