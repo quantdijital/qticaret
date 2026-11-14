@@ -29,6 +29,7 @@ import { productShipping } from "@/lib/views/product-shipping"
 import { questionsView, relatedOf, reviewsView } from "@/lib/views/product-extras"
 import { swatchLookup } from "@/lib/views/color"
 import { sharedSettingsOf } from "@/lib/views/shared-settings"
+import { productMainOf } from "@/lib/views/main-sections"
 import { sectionViews, showsOwnCategory } from "@/lib/views/sections"
 import { theme } from "@/theme"
 
@@ -115,6 +116,8 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     questions,
     related,
     sections,
+    // The product's own block as the design's main section (adr/0049 Ek 2026-11-14 §7)
+    main: productMainOf(layout.main),
     // The amount is the variant; the cart form asks who the card is for (adr/0025 Ek 2026-11-03)
     giftCard: features?.gift_cards === true && product.product_extension?.is_gift_card === true,
     // Picked above "add to cart"; the server prices them on the line (adr/0052)

@@ -189,6 +189,11 @@ describe("the theme's frame", () => {
     const still = shopFixture()
     still.theme = { ...still.theme, header: { ...still.theme.header, sticky: false } }
     expect(renderFrame(atolyeTheme, still)).not.toContain("gf-head sticky")
+    // The design's header bar (adr/0049 Ek 2026-11-14 §5) over the theme's setting
+    const bar = shopFixture({ headerBar: { id: "mainheader", variant: "centered", sticky: false } })
+    const kept = renderFrame(atolyeTheme, bar)
+    expect(kept).not.toContain("gf-head sticky")
+    expect(kept).toContain('data-variant="standard"')
   })
 
   it("keeps the bottom bar's search a link to /arama before the script, and the field's example whole", () => {

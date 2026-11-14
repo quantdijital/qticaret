@@ -1,0 +1,44 @@
+import type { SectionLook } from "./section-look.js"
+import type {
+  CategoryMainVariant,
+  FooterBarVariant,
+  HeaderBarVariant,
+  ProductMainVariant,
+} from "./section-variants.js"
+
+/**
+ * The main sections (adr/0049 Ek 2026-11-14 §5, §7; Shopify's "main"):
+ * the shop's header bar, its footer, the product's own block and the
+ * category's product grid, one each, always shown. A design saved before
+ * them reads each with its default (the header bar's from the theme's
+ * `header`). Each carries its id (the section's box) and its variant; a
+ * theme draws the variants it has and the default for the rest
+ * (`drawnVariant`). Types only: no runtime value lives here.
+ */
+export interface StoreMainSections {
+  header_bar: {
+    id: string
+    type: "header_bar"
+    variant: HeaderBarVariant
+    /** The header stays at the top of a long page. */
+    sticky: boolean
+  }
+  footer_bar: { id: string; type: "footer_bar"; variant: FooterBarVariant }
+  product_main: {
+    id: string
+    type: "product_main"
+    variant: ProductMainVariant
+    look?: SectionLook
+  }
+  category_main: {
+    id: string
+    type: "category_main"
+    variant: CategoryMainVariant
+    /**
+     * Each variant's own settings (§7: several category layouts are live at
+     * once); a variant without one draws with its defaults. None so far.
+     */
+    by_variant: Record<string, never>
+    look?: SectionLook
+  }
+}

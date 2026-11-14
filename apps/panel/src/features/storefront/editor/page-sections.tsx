@@ -7,23 +7,48 @@ import type {
   BodyGroup,
   BodySection,
   LayoutDocument,
+  MainSection,
   Placement,
 } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import { groupLimit, placed } from "@/features/storefront/layout/sections"
+import { bodyOf, mainOf } from "@/features/storefront/layout/main-sections"
 import { SectionList } from "./section-list"
+import { ThemeRow } from "./tree-rows"
 import { BuyBoxBadges } from "./shared/buy-box-badges"
 
 const T = "storefront.editor.tree"
 
-/** The page's own part, drawn by the storefront: where the sections sit around it. */
-function FixedRow({ icon: Icon, name }: { icon: LucideIcon; name: string }) {
-  return (
-    <div className="flex items-center gap-2 rounded-md border border-dashed py-1.5 pr-2 pl-6 text-sm text-muted-foreground">
-      <Icon className="size-4 shrink-0" aria-hidden="true" />
-      <span className="truncate">{name}</span>
+/**
+ * The page's main section (adr/0049 Ek 2026-11-14 §7), drawn by the
+ * storefront where the sections sit around it: a fixed row that opens its
+ * settings, never moved, copied, hidden or removed.
+ */
+function MainRow({
+  section,
+  icon,
+  name,
+  problem,
+  onOpen,
+}: {
+  section: MainSection | undefined
+  icon: LucideIcon
+  name: string
+  problem: boolean
+  onOpen: (id: string) => void
+}) {
+  return section ? (
+    <div className="rounded-md border border-dashed">
+      <ThemeRow
+        icon={icon}
+        label={name}
+        problem={problem}
+        onClick={() => {
+          onOpen(section.id)
+        }}
+      />
     </div>
-  )
+  ) : null
 }
 
 function AddButton({
@@ -78,8 +103,20 @@ export function PageSections({
   onAdd,
 }: PageSectionsProps) {
   const { t } = useTranslation()
-  const sections: readonly BodySection[] = doc[page]
+  const sections: readonly BodySection[] = bodyOf(doc, page)
   const full = sections.length >= groupLimit(page)
+  const main = (type: "product_main" | "category_main", icon: LucideIcon) => {
+    const section = mainOf(doc, type)
+    return (
+      <MainRow
+        section={section}
+        icon={icon}
+        name={t(`storefront.editor.types.${type}.name`)}
+        problem={section ? problems.has(section.id) : false}
+        onOpen={onOpen}
+      />
+    )
+  }
   const list = (label: string, items: readonly BodySection[], placement?: Placement) =>
     items.length === 0 ? null : (
       <SectionList
@@ -113,7 +150,7 @@ export function PageSections({
     return (
       <div className="flex flex-col gap-2">
         {sides[0]}
-        <FixedRow icon={LayoutGrid} name={t(`${T}.grid`)} />
+        {main("category_main", LayoutGrid)}
         {sides[1]}
       </div>
     )
@@ -123,7 +160,7 @@ export function PageSections({
     <div className="flex flex-col gap-1">
       {page === "product" ? (
         <>
-          <FixedRow icon={Package} name={t(`${T}.productBlock`)} />
+          {main("product_main", Package)}
           <BuyBoxBadges settings={doc.settings} dispatch={dispatch} />
         </>
       ) : null}

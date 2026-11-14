@@ -6,6 +6,7 @@
 import type { MediaDerivatives } from "./catalog.js"
 import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
+import type { StoreMainSections } from "./section-main.js"
 import type { TrustBadgesVariant } from "./section-variants.js"
 import type {
   MenuLinkKind,
@@ -245,6 +246,12 @@ export interface StoreLayout {
   footer: { id: string; type: "newsletter"; title: string | null; text: string | null }[]
   product: StoreProductSection[]
   category: StoreCategorySection[]
+  /**
+   * The main sections (adr/0049 Ek 2026-11-14 §5, §7), out of the groups
+   * above. Absent from a backend before them: the storefront reads the
+   * theme's `header` and draws every default.
+   */
+  main?: StoreMainSections
   /**
    * The theme's shared settings (adr/0049 Ek 2026-11-06), applied: the
    * design's own, else the storefront settings' old fields. Absent from a

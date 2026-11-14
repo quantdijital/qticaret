@@ -2,6 +2,7 @@ import type { TrustIcon } from "@qticaret/types"
 import type { CategoryCardView, ShopMarkView } from "./card-views"
 import type { CartLineView, FreeShippingView } from "./cart-views"
 import type { BottomNavView, ThemeView } from "./frame-views"
+import type { FooterBarView, HeaderBarView } from "./main-views"
 import type { MarqueeSectionView } from "./marquee-views"
 
 /**
@@ -123,6 +124,14 @@ export interface ShopView {
    * absent: no strip.
    */
   marquee?: MarqueeSectionView | null
+  /**
+   * The shop's header bar and footer, the design's main sections (adr/0049
+   * Ek 2026-11-14 §5): their variants, and whether the header stays at the
+   * top (it overrides `theme.header.sticky`). Absent: today's header and
+   * footer, the header sticky as `theme.header` says.
+   */
+  headerBar?: HeaderBarView
+  footerBar?: FooterBarView
   /** The footer's newsletter box in the shop's words; null: the shop took it out (adr/0049). */
   newsletter: { title: string; text: string } | null
   /** The header's small links (about, contact…). */

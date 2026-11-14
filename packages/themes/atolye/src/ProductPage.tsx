@@ -21,6 +21,7 @@ import {
   installmentWords,
 } from "./product/words"
 import { Blocks, type Subscribe } from "./sections/Blocks"
+import { Look } from "./sections/Look"
 import { SectionHead } from "./sections/SectionHead"
 
 /**
@@ -63,91 +64,98 @@ export function ProductPage({
       : null
   return (
     <>
-      {/* A draft's signed preview says so above everything (F18), as the home page's draft does */}
-      {view.notice && (
-        <Container className="pt-4">
-          <p role="status" className="rounded-media bg-highlight-soft p-4 text-sm font-semibold">
-            {view.notice}
-          </p>
-        </Container>
-      )}
-      <Container className="pt-4 lg:pt-6">
-        <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} compact />
-      </Container>
-      <Container
-        data-gf-clear=""
-        className="gf-product-top mt-4 grid gap-8 md:gap-(--gap-columns) lg:mt-6"
-      >
-        <div className="min-w-0">
-          <div className="md:sticky md:top-40">
-            <Gallery
-              images={view.images}
-              own={Object.fromEntries(
-                view.variants.flatMap((variant) =>
-                  variant.images && variant.images.length > 0 ? [[variant.id, variant.images]] : []
-                )
-              )}
-              openOn={view.galleryVariantId ?? null}
-              initial={view.title.trim().charAt(0).toLocaleUpperCase("tr")}
-              words={galleryWords(t)}
-            />
-          </div>
-        </div>
-        <div className="@container min-w-0 lg:pl-(--space-lg)">
-          <div className="gf-buy-stack flex flex-col gap-6 md:sticky md:top-40">
-            <Headline view={view} t={t} />
-            <Buy
-              productId={view.id}
-              title={view.title}
-              image={view.images[0] ?? null}
-              options={view.options}
-              variants={view.variants}
-              selectedVariantId={view.selectedVariantId}
-              addToCart={actions.addToCart}
-              gift={gift ? { action: gift, words: giftWords(t) } : null}
-              addons={addons}
-              favorite={{
-                add: actions.addFavorite,
-                loginPath: view.loginPath,
-                words: favoriteWords(t),
-              }}
-              installments={{ load: actions.installments, words: installmentWords(t) }}
-              stockAlert={{ action: actions.stockAlert, words: alertWords(t) }}
-              signedIn={view.signedIn}
-              summary={view.summaryHtml ? <Summary html={view.summaryHtml} /> : null}
-              whatsapp={view.whatsappHref ? <AskOnWhatsApp href={view.whatsappHref} t={t} /> : null}
-              words={buyWords(t, percents)}
-            />
-            {/* Before the purchase, beside the buy form (MSY md. 5/1-h, 6/2): the storefront's words */}
-            {view.withdrawalNote && (
-              <p className="flex items-start gap-3 rounded-media bg-paper-2 p-4 text-sm font-semibold">
-                <Info className="size-5 shrink-0" aria-hidden="true" strokeWidth={2} />
-                {view.withdrawalNote}
-              </p>
-            )}
-            <Assurances view={view} t={t} />
-          </div>
-        </div>
-      </Container>
-
-      <Container
-        data-gf-clear=""
-        className="flex flex-col gap-(--section-gap-s) pt-(--section-gap-s)"
-      >
-        <Details view={view} t={t} />
-        <Community view={view} t={t} actions={actions} />
-        {view.related.length > 0 && (
-          <section aria-labelledby="benzer-urunler" className="flex flex-col gap-6 lg:gap-10">
-            <SectionHead id="benzer-urunler" title={t("product.related")} />
-            <ProductGrid
-              products={view.related.slice(0, 8)}
-              t={t}
-              quickAdd={actions.addToCart}
-              wide
-            />
-          </section>
+      {/* The product's own block: the design's main section, in its look when the shop set one */}
+      <Look look={view.main?.look} main>
+        {/* A draft's signed preview says so above everything (F18), as the home page's draft does */}
+        {view.notice && (
+          <Container className="pt-4">
+            <p role="status" className="rounded-media bg-highlight-soft p-4 text-sm font-semibold">
+              {view.notice}
+            </p>
+          </Container>
         )}
-      </Container>
+        <Container className="pt-4 lg:pt-6">
+          <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} compact />
+        </Container>
+        <Container
+          data-gf-clear=""
+          className="gf-product-top mt-4 grid gap-8 md:gap-(--gap-columns) lg:mt-6"
+        >
+          <div className="min-w-0">
+            <div className="md:sticky md:top-(--gf-stick-top)">
+              <Gallery
+                images={view.images}
+                own={Object.fromEntries(
+                  view.variants.flatMap((variant) =>
+                    variant.images && variant.images.length > 0
+                      ? [[variant.id, variant.images]]
+                      : []
+                  )
+                )}
+                openOn={view.galleryVariantId ?? null}
+                initial={view.title.trim().charAt(0).toLocaleUpperCase("tr")}
+                words={galleryWords(t)}
+              />
+            </div>
+          </div>
+          <div className="@container min-w-0 lg:pl-(--space-lg)">
+            <div className="gf-buy-stack flex flex-col gap-6 md:sticky md:top-(--gf-stick-top)">
+              <Headline view={view} t={t} />
+              <Buy
+                productId={view.id}
+                title={view.title}
+                image={view.images[0] ?? null}
+                options={view.options}
+                variants={view.variants}
+                selectedVariantId={view.selectedVariantId}
+                addToCart={actions.addToCart}
+                gift={gift ? { action: gift, words: giftWords(t) } : null}
+                addons={addons}
+                favorite={{
+                  add: actions.addFavorite,
+                  loginPath: view.loginPath,
+                  words: favoriteWords(t),
+                }}
+                installments={{ load: actions.installments, words: installmentWords(t) }}
+                stockAlert={{ action: actions.stockAlert, words: alertWords(t) }}
+                signedIn={view.signedIn}
+                summary={view.summaryHtml ? <Summary html={view.summaryHtml} /> : null}
+                whatsapp={
+                  view.whatsappHref ? <AskOnWhatsApp href={view.whatsappHref} t={t} /> : null
+                }
+                words={buyWords(t, percents)}
+              />
+              {/* Before the purchase, beside the buy form (MSY md. 5/1-h, 6/2): the storefront's words */}
+              {view.withdrawalNote && (
+                <p className="flex items-start gap-3 rounded-media bg-paper-2 p-4 text-sm font-semibold">
+                  <Info className="size-5 shrink-0" aria-hidden="true" strokeWidth={2} />
+                  {view.withdrawalNote}
+                </p>
+              )}
+              <Assurances view={view} t={t} />
+            </div>
+          </div>
+        </Container>
+
+        <Container
+          data-gf-clear=""
+          className="flex flex-col gap-(--section-gap-s) pt-(--section-gap-s)"
+        >
+          <Details view={view} t={t} />
+          <Community view={view} t={t} actions={actions} />
+          {view.related.length > 0 && (
+            <section aria-labelledby="benzer-urunler" className="flex flex-col gap-6 lg:gap-10">
+              <SectionHead id="benzer-urunler" title={t("product.related")} />
+              <ProductGrid
+                products={view.related.slice(0, 8)}
+                t={t}
+                quickAdd={actions.addToCart}
+                wide
+              />
+            </section>
+          )}
+        </Container>
+      </Look>
 
       {sections.length > 0 && (
         <Blocks sections={sections} t={t} subscribe={subscribe} quickAdd={actions.addToCart} />

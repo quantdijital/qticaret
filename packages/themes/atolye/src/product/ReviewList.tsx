@@ -139,7 +139,7 @@ export function ReviewList({
   return (
     <div className="grid gap-8 lg:grid-cols-12 lg:gap-(--gap-columns)">
       <div className="lg:col-span-4">
-        <div className="flex flex-col gap-6 rounded-tile bg-paper-2 p-6 lg:sticky lg:top-40 lg:p-8">
+        <div className="flex flex-col gap-6 rounded-tile bg-paper-2 p-6 lg:sticky lg:top-(--gf-stick-top) lg:p-8">
           <p className="flex items-end gap-3">
             <span className="tabular text-figure leading-none font-extrabold tracking-(--tracking-display)">
               {average}

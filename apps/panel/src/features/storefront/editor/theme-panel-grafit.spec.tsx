@@ -156,22 +156,11 @@ describe("the theme settings show what the theme draws (adr/0062 §12)", HEAVY, 
     expect(screen.queryByText(/₺ işareti yok/)).toBeNull()
   })
 
-  it("shows the centred header as in preparation: not offered, a saved one kept and explained", async () => {
+  it("leaves the header's layout and stickiness to the header bar (adr/0049 Ek 2026-11-14 §5)", async () => {
     await openTheme({ theme: { header: { layout: "centered", sticky: true } } })
-    const layout = screen.getByRole("combobox", { name: "Logo yerleşimi" })
-    expect(layout).toHaveTextContent("Ortada (hazırlanıyor)")
-    expect(screen.getByText(/hazır olana kadar vitrin mağaza adını solda çizer/)).toBeVisible()
-
-    await user.click(layout)
-    const soon = await screen.findByRole("option", { name: "Ortada (hazırlanıyor)" })
-    expect(soon).toHaveAttribute("aria-disabled", "true")
-    await user.click(screen.getByRole("option", { name: "Solda" }))
-    expect(layout).toHaveTextContent("Solda")
-    expect(screen.getByText(/“Ortada” hazırlanıyor; hazır olana kadar seçilemez/)).toBeVisible()
-    await pass(AUTOSAVE_MS)
-    await waitFor(() => {
-      expect(savedTheme()).toMatchObject({ header: { layout: "left", sticky: true } })
-    })
+    expect(screen.getByRole("combobox", { name: "Köşeler" })).toBeVisible()
+    expect(screen.queryByRole("combobox", { name: "Logo yerleşimi" })).toBeNull()
+    expect(screen.queryByRole("switch", { name: "Üst bilgi sabit kalsın" })).toBeNull()
   })
 
   it("puts Grafit into the draft at once from a saved look, one toast's undo away", async () => {

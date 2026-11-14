@@ -1,5 +1,6 @@
 import type { CategoryCardView } from "./card-views"
 import type { HomeSectionView } from "./content-views"
+import type { CategoryMainView } from "./main-views"
 import type { BreadcrumbView, ProductCardView } from "./product-views"
 import type { ImageView, LinkView } from "./views"
 
@@ -89,6 +90,11 @@ export interface ListingPageView {
   sectionsTop?: HomeSectionView[]
   /** …and below the pages. */
   sectionsBottom?: HomeSectionView[]
+  /**
+   * A category page's product grid as the design's main section (adr/0049
+   * Ek 2026-11-14 §7); absent on other lists and from an older backend: today's.
+   */
+  main?: CategoryMainView
   /** A site search's help (`/arama`); none on other lists. */
   search?: SearchHelpView | null
   /** The empty list's words, when the page has its own (a search, the sale page). */

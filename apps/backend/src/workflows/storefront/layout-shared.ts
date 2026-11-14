@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { LayoutDocument } from "../../lib/storefront/layout"
+import { withMainSections } from "../../lib/storefront/layout-main"
 import { shownSettings, storedSettings, withLegacy } from "../../lib/storefront/layout-settings"
 import type { Legacy, ShownSettings } from "../../lib/storefront/layout-settings"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -31,9 +32,14 @@ export async function legacySettings(container: Container): Promise<StorefrontSe
  * The document with each unset shared part filled from the old fields: the
  * editor opens what the storefront shows, and its first save carries the
  * values into the draft. Settings the schema no longer reads count as unset.
+ * So do the main sections it lacks (adr/0049 Ek 2026-11-14 §5, §7), the
+ * header bar from the theme's header as the document (else the theme
+ * section) holds it.
  */
 export function withLegacySettings(doc: LayoutDocument, legacy: Legacy): LayoutDocument {
-  return { ...doc, settings: withLegacy(storedSettings(doc), legacy) }
+  const settings = withLegacy(storedSettings(doc), legacy)
+  const header = (settings.theme ?? legacy.theme).header
+  return withMainSections({ ...doc, settings }, header)
 }
 
 /**

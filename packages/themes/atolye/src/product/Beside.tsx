@@ -18,7 +18,9 @@ export function Beside({ aside, children }: { aside?: ReactNode; children: React
         {children}
       </div>
       {aside && (
-        <div className="min-w-0 lg:sticky lg:top-40 lg:col-span-4 lg:self-start">{aside}</div>
+        <div className="min-w-0 lg:sticky lg:top-(--gf-stick-top) lg:col-span-4 lg:self-start">
+          {aside}
+        </div>
       )}
     </div>
   )

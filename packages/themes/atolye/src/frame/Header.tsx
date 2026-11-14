@@ -1,4 +1,5 @@
 import { Heart, UserRound } from "lucide-react"
+import { drawnVariant } from "@qticaret/ui"
 import type { ShopView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
@@ -65,6 +66,10 @@ export function Header({
     // A search that finds nothing offers the shop's own top categories
     browse: shop.categories.slice(0, 6).map(({ label, path }) => ({ label, path })),
   }
+  // The design's header bar (adr/0049 Ek 2026-11-14 §5): one drawing here, every variant
+  // falls to it (`centered` is adr/0062 karar 6's); its own `sticky` over the theme's
+  const variant = drawnVariant("header_bar", shop.headerBar?.variant, ["standard"])
+  const sticky = shop.headerBar?.sticky ?? shop.theme.header.sticky
   const account = shop.customerName
     ? t("nav.account_of", { name: shop.customerName })
     : t("nav.account")
@@ -73,8 +78,9 @@ export function Header({
       data-gf-head=""
       className={cn(
         "z-(--z-sticky-nav) border-b border-rule bg-paper",
-        shop.theme.header.sticky ? "gf-head sticky top-0" : "relative"
+        sticky ? "gf-head sticky top-0" : "relative"
       )}
+      data-variant={variant}
     >
       <Container
         data-gf-head-row=""

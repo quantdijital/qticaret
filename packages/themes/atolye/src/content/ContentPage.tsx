@@ -40,7 +40,7 @@ function InfoBody({ view, t }: { view: ContentPageView; t: Translate }) {
         {prose}
       </article>
       {facts && (
-        <div className="flex min-w-0 flex-col gap-(--gap-columns) lg:sticky lg:top-40 lg:col-span-5 lg:self-start">
+        <div className="flex min-w-0 flex-col gap-(--gap-columns) lg:sticky lg:top-(--gf-stick-top) lg:col-span-5 lg:self-start">
           {payments && payments.marks.length > 0 && <PaymentMarks marks={payments.marks} t={t} />}
           {shipping && <ShippingFacts facts={shipping} t={t} />}
         </div>

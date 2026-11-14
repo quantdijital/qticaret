@@ -1,8 +1,9 @@
 import { MARQUEE_SETTINGS, SECTION_VARIANTS } from "@qticaret/types"
 import type { MarqueeSetting, SectionLookField } from "@qticaret/types"
-import type { AnySection, BodySection, LayoutGroup } from "@/features/storefront/api/layout"
+import type { AnySection, LayoutGroup, LookedSection } from "@/features/storefront/api/layout"
 import { lookFieldsFor, lookStepsFor } from "@/features/storefront/layout/look"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
+import { isMain } from "@/features/storefront/layout/main-sections"
 import { offersVariants } from "@/features/storefront/layout/variants"
 
 /**
@@ -62,13 +63,17 @@ export const FIELD_IDS = {
   placement: (sectionId: string) => `${sectionId}-placement`,
   look: (sectionId: string, field: SectionLookField) => `${sectionId}-look-${field}`,
   marquee: (sectionId: string, setting: MarqueeSetting) => `${sectionId}-marquee-${setting}`,
+  sticky: (sectionId: string) => `${sectionId}-sticky`,
   visible: (sectionId: string) => `${sectionId}-schedule-visible`,
   starts: (sectionId: string) => `${sectionId}-schedule-starts`,
   ends: (sectionId: string) => `${sectionId}-schedule-ends`,
 } as const
 
-/** Whether the section takes a look: a page's body section (not the header's bar, the footer's box). */
-export const takesLook = (section: AnySection, group: LayoutGroup): section is BodySection =>
+/**
+ * Whether the section takes a look: a page's body section or its main one
+ * (not the header's or the footer's parts).
+ */
+export const takesLook = (section: AnySection, group: LayoutGroup): section is LookedSection =>
   isBodyGroup(group) && section.type !== "announcement_bar"
 
 /** The fields the section's panel shows, in its order, as the search finds them. */
@@ -111,6 +116,16 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       })
     }
   }
+  if (section.type === "header_bar") {
+    fields.push({
+      key: "sticky",
+      group: "content",
+      label: "storefront.editor.headerBar.sticky",
+      term: "storefront.editor.headerBar.stickyTerm",
+      options: [],
+      target: FIELD_IDS.sticky(id),
+    })
+  }
   if (takesLook(section, group)) {
     for (const field of lookFieldsFor(section.type)) {
       const steps: readonly string[] = lookStepsFor(section.type, field)
@@ -123,6 +138,10 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
         target: FIELD_IDS.look(id, field),
       })
     }
+  }
+  // A main section always shows (adr/0049 Ek 2026-11-14 §5): no visibility
+  if (isMain(section)) {
+    return fields
   }
   fields.push(
     {

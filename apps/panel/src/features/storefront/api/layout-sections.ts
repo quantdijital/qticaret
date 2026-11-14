@@ -10,6 +10,13 @@ import type { TrustIcon } from "@/features/settings/api/sections"
 import type { MenuInput } from "@/features/storefront/api/menus"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
 import type { LinkInput } from "@/features/storefront/api/menus"
+import type {
+  CategoryMainSection,
+  FooterBarSection,
+  HeaderBarSection,
+  MainSection,
+  ProductMainSection,
+} from "@/features/storefront/api/layout-main"
 
 // The sections of the theme editor's document (adr/0049), by page group
 
@@ -292,15 +299,17 @@ export interface LayoutSettings {
   menus: MenuInput[] | null
 }
 
-/** Above the shop's header: the announcement bar and the scrolling strip, each at most once. */
-export type HeaderSection = AnnouncementBar | HeaderMarquee
+/** The header: the announcement bar, the scrolling strip and the shop's bar, each at most once. */
+export type HeaderSection = AnnouncementBar | HeaderMarquee | HeaderBarSection
+export type FooterSection = FooterNewsletter | FooterBarSection
 
+/** Each group's sections; the product and category pages' main one beside their body (`BodySection`). */
 export interface LayoutDocument {
   header: HeaderSection[]
   home: HomeSection[]
-  footer: FooterNewsletter[]
-  product: ProductSection[]
-  category: CategorySection[]
+  footer: FooterSection[]
+  product: (ProductMainSection | ProductSection)[]
+  category: (CategoryMainSection | CategorySection)[]
   settings: LayoutSettings
 }
 
@@ -310,4 +319,6 @@ export type LayoutGroup = Exclude<keyof LayoutDocument, "settings">
 export type BodyGroup = "home" | "product" | "category"
 export type BodySection = HomeSection | ProductSection | CategorySection
 export type BodySectionType = BodySection["type"]
-export type AnySection = HeaderSection | BodySection | FooterNewsletter
+export type AnySection = HeaderSection | BodySection | FooterSection | MainSection
+/** What takes a look (adr/0049 Ek 2026-11-14 §6): a page's body section and its main one. */
+export type LookedSection = BodySection | ProductMainSection | CategoryMainSection

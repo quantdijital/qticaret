@@ -11,6 +11,7 @@ import { MENUS_KEY } from "@/features/storefront/api/menus"
 
 export * from "@/features/storefront/api/layout-limits"
 export type * from "@/features/storefront/api/layout-sections"
+export type * from "@/features/storefront/api/layout-main"
 
 export interface LayoutRevision {
   revision: number

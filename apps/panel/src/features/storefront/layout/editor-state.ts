@@ -15,6 +15,7 @@ import {
   newSectionId,
   placed,
 } from "./sections"
+import { bodyOf, categoryBody, isMain, withBody } from "./main-sections"
 
 /**
  * The theme editor's working document with its history: every change is
@@ -104,7 +105,7 @@ function add(doc: LayoutDocument, group: LayoutGroup, section: AnySection, at?: 
   const sections: AnySection[] = [...doc[group]]
   // A page's body has a limit; the header and the footer hold one section of a type
   const full = isBodyGroup(group)
-    ? sections.length >= groupLimit(group)
+    ? bodyOf(doc, group).length >= groupLimit(group) || isMain(section)
     : sections.some((each) => each.type === section.type)
   if (full || idsOf(doc).has(section.id)) {
     return doc
@@ -129,7 +130,7 @@ function reorder<T extends { id: string }>(list: readonly T[], id: string, to: n
 
 function move(doc: LayoutDocument, id: string, to: number): LayoutDocument {
   const found = findSection(doc, id)
-  if (!found || !isBodyGroup(found.group)) {
+  if (!found || !isBodyGroup(found.group) || isMain(found.section)) {
     return doc
   }
   if (found.group === "category") {
@@ -142,30 +143,41 @@ function move(doc: LayoutDocument, id: string, to: number): LayoutDocument {
     }
     const top = placement === "top" ? moved : placed(doc.category, "top")
     const bottom = placement === "bottom" ? moved : placed(doc.category, "bottom")
-    return { ...doc, category: [...top, ...bottom] }
+    return { ...doc, category: withBody(doc.category, [...top, ...bottom]) }
   }
-  const list: readonly AnySection[] = doc[found.group]
+  // The list's places are the body's: the page's main section stays first
+  const list: readonly AnySection[] = bodyOf(doc, found.group)
   const moved = reorder(list, id, to)
-  return moved === list ? doc : withGroup(doc, found.group, moved as never)
+  return moved === list
+    ? doc
+    : withGroup(doc, found.group, withBody(doc[found.group] as AnySection[], moved) as never)
 }
 
-/** To the other side of the products, at the end nearest where it was: the top's last place, the bottom's first. */
 function place(doc: LayoutDocument, id: string, placement: Placement): LayoutDocument {
-  const section = doc.category.find((each) => each.id === id)
+  const section = categoryBody(doc).find((each) => each.id === id)
   if (!section || section.placement === placement) {
     return doc
   }
   const others = doc.category.filter((each) => each.id !== id)
   return {
     ...doc,
-    category: [...placed(others, "top"), { ...section, placement }, ...placed(others, "bottom")],
+    category: withBody(doc.category, [
+      ...placed(others, "top"),
+      { ...section, placement },
+      ...placed(others, "bottom"),
+    ]),
   }
 }
 
 function duplicate(doc: LayoutDocument, id: string): LayoutDocument {
   const found = findSection(doc, id)
   // Only a page's body holds several of a kind
-  if (!found || !isBodyGroup(found.group) || doc[found.group].length >= groupLimit(found.group)) {
+  if (
+    !found ||
+    !isBodyGroup(found.group) ||
+    isMain(found.section) ||
+    bodyOf(doc, found.group).length >= groupLimit(found.group)
+  ) {
     return doc
   }
   const copy = copyOf(found.section, newSectionId(idsOf(doc)))
@@ -193,16 +205,21 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
       return commit(state, place(doc, action.id, action.placement))
     case "duplicate":
       return commit(state, duplicate(doc, action.id))
+    // A main section is never removed nor hidden (adr/0049 Ek 2026-11-14 §5)
     case "remove":
       return commit(
         state,
-        inGroupOf(doc, action.id, (sections, index) => sections.filter((_, at) => at !== index))
+        inGroupOf(doc, action.id, (sections, index) =>
+          sections.filter((each, at) => at !== index || isMain(each))
+        )
       )
     case "toggle":
       return commit(
         state,
         inGroupOf(doc, action.id, (sections, index) =>
-          sections.map((each, at) => (at === index ? { ...each, visible: !each.visible } : each))
+          sections.map((each, at) =>
+            at === index && !isMain(each) ? { ...each, visible: !each.visible } : each
+          )
         )
       )
     case "settings":

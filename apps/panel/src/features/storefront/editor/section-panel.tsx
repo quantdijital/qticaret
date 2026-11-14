@@ -29,6 +29,8 @@ import { ProductsForm } from "./forms/products-form"
 import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
 import { ScheduleFields } from "./forms/schedule-fields"
+import { HeaderBarForm } from "./forms/header-bar-form"
+import { isMain } from "@/features/storefront/layout/main-sections"
 import { VariantField } from "./forms/variant-field"
 import { Panel, PanelGroup } from "./panel-header"
 import { BrandsForm, CategoriesForm, CountedForm, WordedForm } from "./forms/simple-forms"
@@ -103,6 +105,13 @@ function FormOf({
     case "newsletter":
     case "help":
       return <WordedForm section={section} {...props} />
+    case "header_bar":
+      return <HeaderBarForm section={section} {...props} />
+    // The other main sections have nothing of their own yet: their variant and look
+    case "footer_bar":
+    case "product_main":
+    case "category_main":
+      return null
   }
 }
 
@@ -180,15 +189,17 @@ export function SectionPanel({
           </RadioGroup>
         </PanelGroup>
       ) : null}
-      <PanelGroup title={t(`${P}.content`)} reveal={reveal("content")}>
-        <FormOf
-          section={section}
-          problems={problems}
-          onChange={onChange}
-          badges={badges}
-          onBadges={onBadges}
-        />
-      </PanelGroup>
+      {hasContent(section) ? (
+        <PanelGroup title={t(`${P}.content`)} reveal={reveal("content")}>
+          <FormOf
+            section={section}
+            problems={problems}
+            onChange={onChange}
+            badges={badges}
+            onBadges={onBadges}
+          />
+        </PanelGroup>
+      ) : null}
       {looked || strip ? (
         <PanelGroup
           title={
@@ -216,21 +227,59 @@ export function SectionPanel({
           {looked ? <LookFields section={looked} onChange={onChange} /> : null}
         </PanelGroup>
       ) : null}
-      <PanelGroup title={t(`${P}.visibility`)} reveal={reveal("visibility")}>
-        <ScheduleFields section={section} problem={problems["schedule"]} onChange={onChange} />
-      </PanelGroup>
-      <div className="flex flex-wrap gap-2 border-t px-5 py-4">
-        {isBodyGroup(group) ? (
-          <Button type="button" variant="outline" disabled={!canDuplicate} onClick={onDuplicate}>
-            <Copy />
-            {t(`${P}.duplicate`)}
-          </Button>
-        ) : null}
-        <Button type="button" variant="ghost" className="text-destructive-text" onClick={onRemove}>
-          <Trash2 />
-          {t(`${P}.remove`)}
-        </Button>
-      </div>
+      {/* A main section always shows and stays (adr/0049 Ek 2026-11-14 §5) */}
+      {isMain(section) ? (
+        <p className="border-t px-5 py-4 text-xs text-muted-foreground">
+          {t("storefront.editor.main.fixed")}
+        </p>
+      ) : (
+        <>
+          <PanelGroup title={t(`${P}.visibility`)} reveal={reveal("visibility")}>
+            <ScheduleFields section={section} problem={problems["schedule"]} onChange={onChange} />
+          </PanelGroup>
+          <SectionActions
+            canCopy={isBodyGroup(group)}
+            canDuplicate={canDuplicate}
+            onDuplicate={onDuplicate}
+            onRemove={onRemove}
+          />
+        </>
+      )}
     </Panel>
+  )
+}
+
+// The main sections whose content group would be empty: their variant and look are elsewhere
+const hasContent = (section: AnySection) =>
+  section.type !== "footer_bar" &&
+  section.type !== "product_main" &&
+  section.type !== "category_main"
+
+/** The section copied (a page's body only) or taken off; both undone with "Geri al". */
+function SectionActions({
+  canCopy,
+  canDuplicate,
+  onDuplicate,
+  onRemove,
+}: {
+  canCopy: boolean
+  canDuplicate: boolean
+  onDuplicate: () => void
+  onRemove: () => void
+}) {
+  const { t } = useTranslation()
+  return (
+    <div className="flex flex-wrap gap-2 border-t px-5 py-4">
+      {canCopy ? (
+        <Button type="button" variant="outline" disabled={!canDuplicate} onClick={onDuplicate}>
+          <Copy />
+          {t(`${P}.duplicate`)}
+        </Button>
+      ) : null}
+      <Button type="button" variant="ghost" className="text-destructive-text" onClick={onRemove}>
+        <Trash2 />
+        {t(`${P}.remove`)}
+      </Button>
+    </div>
   )
 }

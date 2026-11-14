@@ -77,7 +77,7 @@ export function SideNav({
   return (
     <nav
       aria-label={t("account.menu")}
-      className="hidden flex-col gap-2 self-start rounded-tile bg-paper-2 p-3 lg:sticky lg:top-40 lg:flex"
+      className="hidden flex-col gap-2 self-start rounded-tile bg-paper-2 p-3 lg:sticky lg:top-(--gf-stick-top) lg:flex"
     >
       <p className="flex flex-col px-4 pt-2 pb-3">
         <span className="text-md font-extrabold">{view.name}</span>

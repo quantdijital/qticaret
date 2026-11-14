@@ -10,13 +10,18 @@ import { cn } from "@qticaret/ui/lib/utils"
  * the container). No inline style: the steps are attributes, the values
  * tokens. A section the shop left to the theme gets no box at all, so it
  * draws exactly as before looks. The dark stage takes the theme's own
- * `gf-stage` (its buttons, fields and focus ring on graphite).
+ * `gf-stage` (its buttons, fields and focus ring on graphite). A page's
+ * main section (`main`: the product's block, the category's grid) keeps
+ * the gaps between its own parts; only a home section gives its top gap
+ * to the box.
  */
 export function Look({
   look,
+  main = false,
   children,
 }: {
   look: SectionLookView | undefined
+  main?: boolean
   children: ReactNode
 }) {
   if (!look || Object.keys(look).length === 0) {
@@ -30,6 +35,7 @@ export function Look({
       data-ground={look.ground}
       data-align={look.align}
       data-width={look.width}
+      data-main={main ? "" : undefined}
     >
       {children}
     </div>

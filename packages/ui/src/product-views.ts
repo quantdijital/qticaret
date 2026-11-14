@@ -1,4 +1,5 @@
 import type { AddonFieldView } from "./addon-views"
+import type { ProductMainView } from "./main-views"
 import type {
   QuickAddView,
   RatingBarView,
@@ -159,6 +160,8 @@ export interface ProductPageView {
   withdrawalNote?: string | null
   /** The shop's sections below the product's own block (adr/0049), drawn as on the home page. */
   sections?: HomeSectionView[]
+  /** The product's own block as the design's main section (adr/0049 Ek 2026-11-14 §7); absent: today's. */
+  main?: ProductMainView
   /**
    * A gift card the shop sells (adr/0025 Ek 2026-11-03): the amount is the
    * variant, and the cart form asks who the card is for.

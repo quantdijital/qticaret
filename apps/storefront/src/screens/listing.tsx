@@ -43,6 +43,7 @@ import {
   withSort,
 } from "@/lib/views/listing"
 import { breadcrumbsOf, productCards, variantIdsOf } from "@/lib/views/product"
+import { categoryMainOf } from "@/lib/views/main-sections"
 import { byPlacement, sectionViews } from "@/lib/views/sections"
 import { cardOptions } from "@/lib/views/theme-settings"
 import { paragraphsOf } from "@/lib/views/text"
@@ -143,11 +144,15 @@ export function ListingScreen({ page, url }: { page: Entity; url: URL }) {
   )
 }
 
-/** The design's category page sections (adr/0049), above the grid and below it. */
+/**
+ * The design's category page sections (adr/0049), above the grid and below
+ * it, and the grid itself as the group's main section (Ek 2026-11-14 §7).
+ */
 async function listingSections() {
-  const { top, bottom } = byPlacement((await currentLayout()).category)
+  const layout = await currentLayout()
+  const { top, bottom } = byPlacement(layout.category)
   const [above, below] = await Promise.all([sectionViews(top, t), sectionViews(bottom, t)])
-  return { top: above, bottom: below }
+  return { top: above, bottom: below, main: categoryMainOf(layout.main) }
 }
 
 /**
@@ -186,7 +191,7 @@ export async function ListingContent({
   const [heading, answer, sections] = await Promise.all([
     loadHeading(),
     load(listingQueryOf(state)),
-    isSearch ? { top: [], bottom: [] } : listingSections(),
+    isSearch ? { top: [], bottom: [], main: undefined } : listingSections(),
   ])
   const pages = Math.max(1, Math.ceil(answer.count / answer.page_size))
   const current = state.page
@@ -275,6 +280,7 @@ export async function ListingContent({
           image: first ? (heading.image ?? null) : null,
           sectionsTop: sections.top,
           sectionsBottom: sections.bottom,
+          ...(sections.main ? { main: sections.main } : {}),
           breadcrumbs: breadcrumbs(heading.title),
           subcategories: heading.subcategories,
           products: cards,

@@ -18,7 +18,11 @@ export {
   variantOf,
 } from "@qticaret/types/section-variants"
 export type {
+  CategoryMainVariant,
   DefaultVariant,
+  FooterBarVariant,
+  HeaderBarVariant,
+  ProductMainVariant,
   SectionVariant,
   TrustBadgesVariant,
   VariantSectionType,

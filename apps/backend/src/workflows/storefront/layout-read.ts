@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { BodySection, LayoutDocument } from "../../lib/storefront/layout"
-import { isShowing, readStoredLayout } from "../../lib/storefront/layout"
+import { isBody, isShowing, readStoredLayout } from "../../lib/storefront/layout"
+import { mainSectionsOf, withMainSections } from "../../lib/storefront/layout-main"
 import { fillShopText } from "../../lib/shop/tokens"
 import { shownSettings } from "../../lib/storefront/layout-settings"
 import { MEDIA_MODULE } from "../../modules/media"
@@ -40,18 +41,27 @@ const imageUrls = (section: BodySection): string[] =>
  */
 export async function storeLayout(
   container: MedusaContainer,
-  doc: LayoutDocument,
+  stored: LayoutDocument,
   channels: readonly string[] | null = null,
   now = new Date()
 ) {
+  const legacy = await legacySettings(container)
+  // A design from before the main sections reads them in, the header's from the theme's
+  const doc = withMainSections(stored, shownSettings(stored.settings, legacy).theme.header)
   const showing = <T extends Parameters<typeof isShowing>[0]>(group: readonly T[]) =>
     group.filter((section) => isShowing(section, now))
-  const header = showing(doc.header)
-  const footer = showing(doc.footer)
+  const header = showing(doc.header).filter(
+    (section): section is Exclude<typeof section, { type: "header_bar" }> =>
+      section.type !== "header_bar"
+  )
+  const footer = showing(doc.footer).filter(
+    (section): section is Exclude<typeof section, { type: "footer_bar" }> =>
+      section.type !== "footer_bar"
+  )
   const pages = {
     home: showing(doc.home),
-    product: showing(doc.product),
-    category: showing(doc.category),
+    product: showing(doc.product).filter(isBody),
+    category: showing(doc.category).filter(isBody),
   }
   const keepLive = await liveRecords(container, [
     ...pages.home,
@@ -65,7 +75,7 @@ export async function storeLayout(
   // The header's scrolling strip links like a body section (adr/0049 Ek 2026-11-14 §4.1)
   const links = [...body, ...headerLinked({ header })].flatMap(linksOf)
   const urls = body.flatMap(imageUrls)
-  const [values, resolved, assets, picks, legacy] = await Promise.all([
+  const [values, resolved, assets, picks] = await Promise.all([
     shopInfoValues(container),
     resolveLinks(
       container,
@@ -88,7 +98,6 @@ export async function storeLayout(
           )
       : Promise.resolve([]),
     railPicks(container, home, channels),
-    legacySettings(container),
   ])
   const at: HydrateContext = {
     values,
@@ -147,6 +156,7 @@ export async function storeLayout(
         placement: section.placement,
       }))
     ),
+    main: mainSectionsOf(doc),
     settings: sharedOf(doc, legacy, values),
   }
 }

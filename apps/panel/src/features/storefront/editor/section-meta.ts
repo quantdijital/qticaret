@@ -1,5 +1,6 @@
 import type { TFunction } from "i18next"
 import {
+  AppWindow,
   BadgeCheck,
   BookOpen,
   Boxes,
@@ -12,6 +13,8 @@ import {
   Megaphone,
   MoveHorizontal,
   MessageSquareQuote,
+  Package,
+  PanelBottom,
   PanelTop,
   ScanSearch,
   ShoppingBag,
@@ -20,10 +23,11 @@ import {
   Text,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import type { AnySection, BodySectionType } from "@/features/storefront/api/layout"
+import type { AnySection, BodySectionType, MainSectionType } from "@/features/storefront/api/layout"
 
 /** What a section is called: `storefront.editor.types.<type>` (the footer's box is its own). */
-export type SectionKind = BodySectionType | "announcement_bar" | "footer_newsletter"
+export type SectionKind =
+  BodySectionType | MainSectionType | "announcement_bar" | "footer_newsletter"
 
 export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   announcement_bar: Megaphone,
@@ -45,6 +49,10 @@ export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   help: LifeBuoy,
   marquee: MoveHorizontal,
   footer_newsletter: Mail,
+  header_bar: AppWindow,
+  footer_bar: PanelBottom,
+  product_main: Package,
+  category_main: LayoutGrid,
 }
 
 /** The section's kind; the newsletter box is the footer's when it sits there. */
@@ -77,6 +85,10 @@ function ownTitle(section: AnySection): string | null {
     case "marquee":
       return section.items.find((item) => item.text.trim() !== "")?.text ?? null
     case "trust_badges":
+    case "header_bar":
+    case "footer_bar":
+    case "product_main":
+    case "category_main":
       return null
   }
 }

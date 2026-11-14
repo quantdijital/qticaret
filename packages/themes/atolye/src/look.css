@@ -54,7 +54,8 @@
   .gf-look:is([data-outer], [data-ground]) {
     margin-top: var(--look-outer, var(--section-gap));
   }
-  .gf-look:is([data-outer], [data-ground]) > * {
+  /* A page's main section (data-main) keeps the gaps between its own parts */
+  .gf-look:is([data-outer], [data-ground]):not([data-main]) > * {
     --section-gap-s: 0px;
     --section-gap: 0px;
     --section-gap-l: 0px;

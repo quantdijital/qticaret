@@ -12,7 +12,18 @@ import type { SearchHit } from "./settings-search"
 const t = (key: string) => i18next.t(key)
 
 const doc = {
-  header: [newAnnouncementBar("duyuru0001")],
+  header: [
+    newAnnouncementBar("duyuru0001"),
+    {
+      id: "ustbilgi01",
+      type: "header_bar",
+      visible: true,
+      starts_at: null,
+      ends_at: null,
+      variant: "standard",
+      sticky: true,
+    },
+  ],
   home: [
     { ...newHomeSection("faq", "sss000001"), title: "Sık sorulanlar" },
     newHomeSection("trust_badges", "guvenserit"),
@@ -78,6 +89,11 @@ describe("the theme editor's settings search", () => {
     expect(search("zemin").map((hit) => hit.group)).toEqual(["home", "home", "home"])
     expect(keys(search("başlangıç"))).toContain("duyuru0001:starts_at")
     expect(keys(search("başlangıç"))).toContain("bulten0001:starts_at")
+  })
+
+  it("finds the header's stickiness by its name and its term", () => {
+    expect(keys(search("sabit"))).toEqual(["ustbilgi01:sticky"])
+    expect(keys(search("sticky"))).toEqual(["ustbilgi01:sticky"])
   })
 
   it("offers alignment only where it means something", () => {

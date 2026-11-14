@@ -8,7 +8,11 @@ export {
   variantOf,
 } from "./section-variants"
 export type {
+  CategoryMainVariant,
   DefaultVariant,
+  FooterBarVariant,
+  HeaderBarVariant,
+  ProductMainVariant,
   SectionVariant,
   TrustBadgesVariant,
   VariantSectionType,
@@ -39,6 +43,7 @@ export type * from "./card-views"
 export type * from "./checkout-views"
 export type * from "./frame-views"
 export type * from "./home-views"
+export type * from "./main-views"
 export type * from "./marquee-views"
 export type * from "./payment-link-views"
 export type * from "./views"

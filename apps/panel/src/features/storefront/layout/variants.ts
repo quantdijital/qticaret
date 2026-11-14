@@ -14,7 +14,25 @@ export const VARIANT_FIELDS: {
   readonly [T in VariantSectionType]: Readonly<Record<SectionVariant<T>, Readonly<object>>>
 } = {
   trust_badges: { strip: {}, lined: {} },
+  header_bar: { standard: {}, centered: {} },
+  footer_bar: { ledger: {} },
+  product_main: { standard: {} },
+  category_main: { standard: {} },
 }
+
+/**
+ * Variants on the list the theme does not draw yet: shown, not offered
+ * (as the theme settings' "Ortada" was, adr/0062 karar 6). A section saved
+ * with one keeps it; the storefront draws the default meanwhile.
+ */
+export const UNBUILT_VARIANTS: {
+  readonly [T in VariantSectionType]?: ReadonlySet<SectionVariant<T>>
+} = {
+  header_bar: new Set(["centered"]),
+}
+
+export const isUnbuilt = <T extends VariantSectionType>(type: T, variant: SectionVariant<T>) =>
+  (UNBUILT_VARIANTS[type] as ReadonlySet<string> | undefined)?.has(variant) ?? false
 
 /** Whether the panel offers the section's "Biçim": its type is drawn more than one way. */
 export const offersVariants = (section: AnySection): section is VariantSection =>

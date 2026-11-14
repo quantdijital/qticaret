@@ -184,7 +184,7 @@ export function Community({
         {questions.items.length > 0 ? (
           <div className="grid gap-8 lg:grid-cols-12 lg:gap-(--gap-columns)">
             <div className="lg:col-span-4">
-              <div className="flex flex-col gap-5 rounded-tile bg-paper-2 p-6 lg:sticky lg:top-40 lg:p-8">
+              <div className="flex flex-col gap-5 rounded-tile bg-paper-2 p-6 lg:sticky lg:top-(--gf-stick-top) lg:p-8">
                 <p className="flex items-center gap-4">
                   <span className="flex size-12 shrink-0 items-center justify-center rounded-pill bg-paper">
                     <MessageCircleQuestion

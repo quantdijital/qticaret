@@ -30,6 +30,7 @@ import { footerMenus, mainMenu, topLinks } from "./menus"
 import { hoursOf } from "./hours"
 import { themeView } from "./theme"
 import { currentTheme } from "./theme-settings"
+import { footerBarOf, headerBarOf } from "./main-sections"
 import { headerMarquee } from "./marquee"
 
 /** How to reach the shop, from its store details and legal identity (adr/0048): one source. */
@@ -128,6 +129,9 @@ export async function shopView(): Promise<ShopView> {
       section.type === "announcement_bar" ? section.lines : []
     ),
     marquee: headerMarquee(layout.header, t),
+    // The design's header bar and footer (Ek 2026-11-14 §5); the theme's header before them
+    headerBar: headerBarOf(layout.main, theme),
+    footerBar: footerBarOf(layout.main),
     newsletter: newsletterOf(layout, identity.company_title ?? site.shop.name),
     topLinks: topLinks(menus, t),
     footerGroups: footerGroups(footerMenus(menus, t), menu, t),

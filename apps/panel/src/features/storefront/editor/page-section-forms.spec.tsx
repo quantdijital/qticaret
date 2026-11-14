@@ -101,7 +101,7 @@ describe("the product and category pages' section forms", HEAVY, () => {
 
     await user.click(screen.getByRole("button", { name: "2. soru: yukarı taşı" }))
     await saved((doc) => {
-      expect(doc.category[0]).toMatchObject({
+      expect(doc.category[1]).toMatchObject({
         id: "kategorisss",
         placement: "top",
         items: [
@@ -120,7 +120,14 @@ describe("the product and category pages' section forms", HEAVY, () => {
 
     await user.click(screen.getByRole("radio", { name: "Izgaranın altı" }))
     await saved((doc) => {
-      expect(doc.category.map((section) => [section.id, section.placement])).toEqual([
+      // The grid (the main section) stays first, in no place
+      expect(
+        doc.category.map((section) => [
+          section.id,
+          "placement" in section ? section.placement : null,
+        ])
+      ).toEqual([
+        ["maincategory", null],
         ["kategorisss", "bottom"],
         ["kategoriyardim", "bottom"],
       ])
@@ -145,7 +152,7 @@ describe("the product and category pages' section forms", HEAVY, () => {
     await user.clear(limit)
     await user.type(limit, "30")
     await saved((doc) => {
-      expect(doc.product[0]).toMatchObject({
+      expect(doc.product[1]).toMatchObject({
         type: "related_products",
         source: { kind: "manual", product_ids: ["prod_bread"] },
         // Held within the server's bounds
