@@ -7897,6 +7897,13 @@
         "hero": {
           "standard": "Single image",
           "category_list": "Category list"
+        },
+        "products": {
+          "grid": "Grid",
+          "carousel": "Carousel",
+          "featured": "Featured",
+          "compact": "Compact list",
+          "columns": "Lists side by side"
         }
       },
       "look": {
@@ -8273,7 +8280,8 @@
         "cardVariant": "Card style",
         "cardVariants": {
           "standard": "Standard",
-          "framed": "Framed"
+          "framed": "Framed",
+          "compact": "Compact"
         },
         "cardVariantHint": "The style of every product card in the shop. A product rail can pick its own; listing, search and category pages use this one.",
         "framed": "Framed card",
@@ -8632,6 +8640,100 @@
         "thumbsHint": "A few products from each range show small; the storefront picks them by price.",
         "thumbsCount": "Products per band",
         "full": "The home page already has {{max}} price bands sections (hidden ones count too)."
+      },
+      "shelf": {
+        "layout": "Layout",
+        "scroll": "Scrolling",
+        "firstTitle": "First list's title",
+        "list": "List {{n}}",
+        "addList": "Add a list",
+        "removeList": "Remove",
+        "rows": "Rows",
+        "rowsTerm": "rows",
+        "rowsOption": "{{n}} rows",
+        "rowsHint": "Three columns on a wide screen; one under another on a phone.",
+        "perList": "Products per list",
+        "perListTerm": "per list",
+        "perListOption": "{{n}} products",
+        "perListHint": "How many products each list shows; side by side on a wide screen, one under another on a phone.",
+        "featuredHint": "The first product large on the left, small cards beside it ({{n}} products in all); the large card on top on a phone.",
+        "cardCompact": "Cards in this layout are always compact: a small photo, name, stars and price."
+      },
+      "scroller": {
+        "desktop": {
+          "label": "Cards in view (desktop)",
+          "term": "per view",
+          "three": "3",
+          "four": "4",
+          "five": "5",
+          "six": "6",
+          "hint": "Narrower screens show fewer by themselves."
+        },
+        "mobile": {
+          "label": "Cards in view (phone)",
+          "term": "per view",
+          "one": "1",
+          "peek": "1.5",
+          "two": "2",
+          "hint": "1.5: the next card's edge shows, so it reads as scrollable."
+        },
+        "arrows": {
+          "label": "Arrows",
+          "term": "arrows",
+          "always": "Always",
+          "hover": "On hover",
+          "hidden": "Hidden",
+          "hint": "Hidden, it still scrolls by touch, mouse and keyboard."
+        },
+        "arrow_style": {
+          "label": "Arrow style",
+          "term": "arrow style",
+          "round": "Round",
+          "square": "Square",
+          "plain": "Plain"
+        },
+        "arrow_position": {
+          "label": "Arrow position",
+          "term": "position",
+          "head": "Beside the heading",
+          "sides": "On the sides",
+          "hint": "Side arrows are not shown on a phone; it swipes there."
+        },
+        "dots": {
+          "label": "Dots",
+          "term": "dots",
+          "off": "Hide",
+          "on": "Show",
+          "hint": "Dots showing which page is in view."
+        },
+        "autoplay": {
+          "label": "Autoplay",
+          "term": "autoplay",
+          "off": "Off",
+          "on": "On",
+          "hint": "Stops on hover and keyboard focus, with a visible pause button; never runs for a visitor asking for reduced motion."
+        },
+        "speed": {
+          "label": "Interval",
+          "term": "interval",
+          "slow": "Slow",
+          "medium": "Medium",
+          "fast": "Fast"
+        },
+        "loop": {
+          "label": "Loop",
+          "term": "loop",
+          "off": "Off",
+          "on": "On",
+          "hint": "Back to the start at the end."
+        },
+        "drag": {
+          "label": "Drag to scroll",
+          "term": "drag",
+          "off": "Off",
+          "on": "On",
+          "hint": "Scrolls by dragging with a mouse on a wide screen."
+        }
       }
     },
     "preferences": {

@@ -5,6 +5,7 @@ import { lookFieldsFor, lookStepsFor } from "@/features/storefront/layout/look"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
 import { isMain } from "@/features/storefront/layout/main-sections"
 import { offersVariants } from "@/features/storefront/layout/variants"
+import { SHELF_IDS, shelfFields } from "./shelf-registry"
 
 /**
  * The section panel's fields as the settings search knows them (adr/0049
@@ -18,7 +19,15 @@ import { offersVariants } from "@/features/storefront/layout/variants"
 
 /** The panel group a field sits in: a field in a closed group opens it. */
 export type FieldGroupName =
-  "variant" | "placement" | "content" | "motion" | "appearance" | "look" | "visibility"
+  | "variant"
+  | "placement"
+  | "content"
+  | "layout"
+  | "scroll"
+  | "motion"
+  | "appearance"
+  | "look"
+  | "visibility"
 
 export interface RegistryField {
   /** The field's name in the search: `variant`, `look.ground`, `starts_at`. */
@@ -93,6 +102,7 @@ export const FIELD_IDS = {
   look: (sectionId: string, field: SectionLookField) => `${sectionId}-look-${field}`,
   marquee: (sectionId: string, setting: MarqueeSetting) => `${sectionId}-marquee-${setting}`,
   banner: (sectionId: string, setting: BannerSetting) => `${sectionId}-banner-${setting}`,
+  ...SHELF_IDS,
   sticky: (sectionId: string) => `${sectionId}-sticky`,
   visible: (sectionId: string) => `${sectionId}-schedule-visible`,
   starts: (sectionId: string) => `${sectionId}-schedule-starts`,
@@ -114,7 +124,8 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
     const variants: readonly string[] = SECTION_VARIANTS[section.type]
     fields.push({
       key: "variant",
-      group: "variant",
+      // A product rail's sits first in its open "Diziliş"
+      group: section.type === "products" ? "layout" : "variant",
       label: `${P}.variant`,
       term: null,
       options: variants.map((variant) => `storefront.editor.variants.${section.type}.${variant}`),
@@ -164,6 +175,9 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
         target: FIELD_IDS.banner(id, setting),
       })
     }
+  }
+  if (section.type === "products") {
+    fields.push(...shelfFields(section))
   }
   if (section.type === "header_bar") {
     fields.push({

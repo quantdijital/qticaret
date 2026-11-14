@@ -53,8 +53,6 @@ export const UNBUILT_VARIANTS: {
   readonly [T in VariantSectionType]?: ReadonlySet<SectionVariant<T>>
 } = {
   header_bar: new Set(["centered"]),
-  // The rail's new variants until the theme draws them (Ek 2026-11-15)
-  products: new Set(["carousel", "featured", "compact", "columns"]),
 }
 
 export const isUnbuilt = <T extends VariantSectionType>(type: T, variant: SectionVariant<T>) =>

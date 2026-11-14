@@ -1,52 +1,85 @@
 import { useTranslation } from "react-i18next"
-import { Field } from "@qticaret/admin-ui/patterns/form-section"
-import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
-import type { ProductSource, ProductsSection } from "@/features/storefront/api/layout"
+import { Button } from "@qticaret/admin-ui/ui/button"
+import { Plus, Trash2 } from "lucide-react"
+import { SHELF_LIMITS } from "@qticaret/types"
+import type { ProductSource, ProductsSection, ShelfList } from "@/features/storefront/api/layout"
 import { BEST_SELLER_DAYS, LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
-import { CardVariantField } from "./card-variant-field"
-import { ColumnsField } from "./columns-field"
 import { CountField, F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { LinkField } from "./link-field"
-import { RecordField, RecordListField } from "./record-fields"
+import { ProductSourceField } from "./product-source-field"
+import { NAMED, sourceOf } from "./product-sources"
+import type { SourceKind } from "./product-sources"
 
 const P = "storefront.editor.products"
+const SH = "storefront.editor.shelf"
 
-type SourceKind = ProductSource["kind"]
-const SOURCE_KINDS: readonly SourceKind[] = [
-  "newest",
-  "best_sellers",
-  "on_sale",
-  "category",
-  "collection",
-  "manual",
-]
-
-// The sources whose name is the rail's title until the shop writes its own
-const NAMED: readonly SourceKind[] = ["best_sellers", "on_sale"]
-
-/** A source of another kind, nothing chosen in it yet. */
-function sourceOf(kind: SourceKind): ProductSource {
-  switch (kind) {
-    case "newest":
-    case "on_sale":
-      return { kind }
-    case "best_sellers":
-      return { kind, days: BEST_SELLER_DAYS.default }
-    case "category":
-      return { kind, category_id: "" }
-    case "collection":
-      return { kind, collection_id: "" }
-    case "manual":
-      return { kind, product_ids: [] }
-  }
+/** A list's title and source: the rail's own, or one of a columns rail's more. */
+interface Listed {
+  title: string | null
+  source: ProductSource
 }
 
 /**
- * A rail of products: the newest, the best sellers, those on sale, a
- * category's, a collection's or the shop's own picks. The best sellers
- * and those on sale are picked by the server (adr/0049 Ek 2026-11-05).
+ * One list's title and source; an empty title, or the last source's name,
+ * becomes the new source's name when the kind changes.
+ */
+function ListFields({
+  id,
+  list,
+  titleLabel,
+  problems,
+  at,
+  onChange,
+}: {
+  id: string
+  list: Listed
+  titleLabel: string
+  problems: SectionFormProps<ProductsSection>["problems"]
+  /** The problems' prefix: none for the rail's own, `lists.0.` for its first more. */
+  at: string
+  onChange: (next: Listed, field?: string) => void
+}) {
+  const { t } = useTranslation()
+  const problem = useProblemText()
+  const nameOf = (kind: SourceKind) => (NAMED.includes(kind) ? t(`${P}.sources.${kind}`) : null)
+  return (
+    <>
+      <TextField
+        id={`${id}-title`}
+        label={titleLabel}
+        value={list.title}
+        max={L.title}
+        placeholder={t("storefront.editor.defaults.products")}
+        hint={t(`${F}.titleHint`)}
+        error={problem(problems[`${at}title`], L.title)}
+        onChange={(title) => {
+          onChange({ ...list, title }, `${at}title`)
+        }}
+      />
+      <ProductSourceField
+        id={id}
+        source={list.source}
+        sourceError={problem(problems[`${at}source`])}
+        daysError={problem(problems[`${at}days`], BEST_SELLER_DAYS.max)}
+        onKind={(kind) => {
+          const named = list.title === null || list.title === nameOf(list.source.kind)
+          onChange({ source: sourceOf(kind), title: named ? nameOf(kind) : list.title })
+        }}
+        onChange={(source, field) => {
+          onChange({ ...list, source }, field && `${at}${field}`)
+        }}
+      />
+    </>
+  )
+}
+
+/**
+ * A product rail's content (adr/0049 Ek 2026-11-05, Ek 2026-11-15): its
+ * title and source, how many it shows (a grid's or a carousel's; the other
+ * variants' counts are fixed), a columns rail's one or two more lists, and
+ * the "see all" link. How it stands sits in "Diziliş" (`ShelfGroups`).
  */
 export function ProductsForm({ section, problems, onChange }: SectionFormProps<ProductsSection>) {
   const { t } = useTranslation()
@@ -54,118 +87,84 @@ export function ProductsForm({ section, problems, onChange }: SectionFormProps<P
   const set = (next: Partial<ProductsSection>, field?: string) => {
     onChange({ ...section, ...next }, field)
   }
-  const { source } = section
-  const sourceError = problem(problems["source"])
-  const nameOf = (kind: SourceKind) => (NAMED.includes(kind) ? t(`${P}.sources.${kind}`) : null)
-  /** Another source; an empty title, or the last source's name, becomes the new one's name. */
-  const switchTo = (kind: SourceKind) => {
-    const named = section.title === null || section.title === nameOf(source.kind)
-    set({ source: sourceOf(kind), ...(named ? { title: nameOf(kind) } : {}) })
+  const columns = section.variant === "columns"
+  const lists = section.lists ?? []
+  const setLists = (next: ShelfList[], field?: string) => {
+    set({ lists: next }, field)
   }
   return (
     <div className="flex flex-col gap-5">
-      <TextField
-        id="products-title"
-        label={t(`${F}.title`)}
-        value={section.title}
-        max={L.title}
-        placeholder={t("storefront.editor.defaults.products")}
-        hint={t(`${F}.titleHint`)}
-        error={problem(problems["title"], L.title)}
-        onChange={(title) => {
-          set({ title }, "title")
+      <ListFields
+        id="products"
+        list={section}
+        titleLabel={t(columns ? `${SH}.firstTitle` : `${F}.title`)}
+        problems={problems}
+        at=""
+        onChange={(next, field) => {
+          set(next, field)
         }}
       />
-      <Field label={t(`${P}.source`)}>
-        <RadioGroup
-          aria-label={t(`${P}.source`)}
-          value={source.kind}
-          className="gap-2"
-          onValueChange={(kind) => {
-            if (kind !== source.kind) {
-              switchTo(kind as SourceKind)
-            }
-          }}
-        >
-          {SOURCE_KINDS.map((kind) => (
-            <label key={kind} className="flex items-center gap-2 text-sm">
-              <RadioGroupItem value={kind} />
-              {t(`${P}.sources.${kind}`)}
-            </label>
-          ))}
-        </RadioGroup>
-      </Field>
-      {source.kind === "category" ? (
-        <RecordField
-          kind="category"
-          label={t(`${P}.category`)}
-          id={source.category_id}
-          error={sourceError}
-          onChange={(id) => {
-            set({ source: { kind: "category", category_id: id } })
-          }}
-        />
-      ) : source.kind === "collection" ? (
-        <RecordField
-          kind="collection"
-          label={t(`${P}.collection`)}
-          id={source.collection_id}
-          error={sourceError}
-          onChange={(id) => {
-            set({ source: { kind: "collection", collection_id: id } })
-          }}
-        />
-      ) : source.kind === "best_sellers" ? (
+      {section.variant === "grid" || section.variant === "carousel" ? (
         <CountField
-          id="products-days"
-          label={t(`${P}.days`)}
-          hint={t(`${P}.daysHint`, { min: BEST_SELLER_DAYS.min, max: BEST_SELLER_DAYS.max })}
-          value={source.days}
-          min={BEST_SELLER_DAYS.min}
-          max={BEST_SELLER_DAYS.max}
-          error={problem(problems["days"], BEST_SELLER_DAYS.max)}
-          onChange={(days) => {
-            set({ source: { kind: "best_sellers", days } }, "days")
-          }}
-        />
-      ) : source.kind === "on_sale" ? (
-        <p className="-mt-3 text-xs text-muted-foreground">{t(`${P}.onSaleHint`)}</p>
-      ) : source.kind === "manual" ? (
-        <RecordListField
-          kind="product"
-          label={t(`${P}.products`)}
-          ids={source.product_ids}
-          empty={t(`${P}.manualEmpty`)}
-          error={sourceError}
-          onChange={(ids) => {
-            set({ source: { kind: "manual", product_ids: ids } })
+          id="products-limit"
+          label={t(`${F}.limit`)}
+          hint={t(`${F}.limitHint`, { max: L.items })}
+          value={section.limit}
+          max={L.items}
+          onChange={(limit) => {
+            set({ limit }, "limit")
           }}
         />
       ) : null}
-      <CardVariantField
-        value={section.card_variant ?? null}
-        onChange={(card_variant) => {
-          set({ card_variant })
-        }}
-      />
-      <ColumnsField
-        id="products-columns"
-        value={section.columns ?? 3}
-        limit={section.limit}
-        onChange={(columns) => {
-          set({ columns })
-        }}
-      />
-      <CountField
-        id="products-limit"
-        label={t(`${F}.limit`)}
-        hint={t(`${F}.limitHint`, { max: L.items })}
-        value={section.limit}
-        max={L.items}
-        onChange={(limit) => {
-          set({ limit }, "limit")
-        }}
-      />
+      {columns
+        ? lists.map((list, index) => (
+            <fieldset key={index} className="flex flex-col gap-5 border-t pt-4">
+              <legend className="flex w-full items-center justify-between gap-2 text-sm font-medium">
+                {t(`${SH}.list`, { n: index + 2 })}
+                {lists.length > SHELF_LIMITS.columns.lists.min ? (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="xs"
+                    onClick={() => {
+                      setLists(lists.filter((_, at) => at !== index))
+                    }}
+                  >
+                    <Trash2 />
+                    {t(`${SH}.removeList`)}
+                  </Button>
+                ) : null}
+              </legend>
+              <ListFields
+                id={`products-list-${String(index)}`}
+                list={list}
+                titleLabel={t(`${F}.title`)}
+                problems={problems}
+                at={`lists.${String(index)}.`}
+                onChange={(next, field) => {
+                  setLists(
+                    lists.map((each, at) => (at === index ? next : each)),
+                    field
+                  )
+                }}
+              />
+            </fieldset>
+          ))
+        : null}
+      {columns && lists.length < SHELF_LIMITS.columns.lists.max ? (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="self-start"
+          onClick={() => {
+            setLists([...lists, { title: null, source: { kind: "newest" } }])
+          }}
+        >
+          <Plus />
+          {t(`${SH}.addList`)}
+        </Button>
+      ) : null}
       <LinkField
         id="products-more"
         label={t(`${P}.more`)}

@@ -13,16 +13,18 @@ const OPTIONS = [THEME, ...CARD_VARIANTS] as const
  * card's switches stay the theme's (Tema > Çerçeveli kart).
  */
 export function CardVariantField({
+  id,
   value,
   onChange,
 }: {
+  id: string
   value: CardVariant | null
   onChange: (value: CardVariant | null) => void
 }) {
   const { t } = useTranslation()
   return (
     <ChoiceSelect
-      id="products-card-variant"
+      id={id}
       label={t("storefront.editor.products.cardVariant")}
       value={value ?? THEME}
       options={OPTIONS}

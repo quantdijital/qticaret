@@ -17,15 +17,20 @@ const GROUP_NAMES: Readonly<Record<FieldGroupName, string>> = {
   variant: "storefront.editor.panel.variant",
   placement: "storefront.editor.panel.placement",
   content: "storefront.editor.panel.content",
+  layout: "storefront.editor.shelf.layout",
+  scroll: "storefront.editor.shelf.scroll",
   motion: "storefront.editor.panel.motion",
   appearance: "storefront.editor.panel.appearance",
   look: "storefront.editor.look.title",
   visibility: "storefront.editor.panel.visibility",
 }
 
-/** A group's name as the section's panel shows it: a strip's look group is its "Diğer ayarlar". */
-const groupName = (field: { group: FieldGroupName }, type: string) =>
-  type === "marquee" && field.group === "look"
+/**
+ * A group's name as the section's panel shows it: a strip's look group is
+ * its "Diğer ayarlar", and so is a carousel's, where its scroller settings sit.
+ */
+const groupName = (field: { group: FieldGroupName; key: string }, type: string) =>
+  (type === "marquee" || field.key.startsWith("scroller.")) && field.group === "look"
     ? "storefront.editor.marquee.otherTitle"
     : GROUP_NAMES[field.group]
 

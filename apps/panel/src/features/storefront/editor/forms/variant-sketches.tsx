@@ -1,5 +1,12 @@
 import type { ReactElement } from "react"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
+import {
+  ShelfCarousel,
+  ShelfColumns,
+  ShelfCompact,
+  ShelfFeatured,
+  ShelfGrid,
+} from "./shelf-sketches"
 
 // Each variant drawn in small for the "Biçim" choice (adr/0049 Ek 2026-11-14 §2.6):
 // a plain sketch in the current colour, not a picture of the storefront
@@ -124,6 +131,13 @@ const SKETCHES: {
   trust_badges: { strip: TrustStrip, lined: TrustLined },
   hero: { standard: HeroStandard, category_list: HeroCategoryList },
   header_bar: { standard: HeaderStandard, centered: HeaderCentered },
+  products: {
+    grid: ShelfGrid,
+    carousel: ShelfCarousel,
+    featured: ShelfFeatured,
+    compact: ShelfCompact,
+    columns: ShelfColumns,
+  },
 }
 
 /** A variant in small, in the current colour; a variant without a sketch yet draws nothing. */

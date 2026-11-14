@@ -1,5 +1,11 @@
 import { useTranslation } from "react-i18next"
-import { BANNER_DEFAULTS, BANNER_SETTING_NAMES, MARQUEE_DEFAULTS } from "@qticaret/types"
+import {
+  BANNER_DEFAULTS,
+  BANNER_SETTING_NAMES,
+  MARQUEE_DEFAULTS,
+  SCROLLER_DEFAULTS,
+  scrollerSettingsOf,
+} from "@qticaret/types"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import type {
   AnySection,
@@ -27,6 +33,9 @@ import { BannerSettings } from "./forms/banner-settings"
 import { MarqueeSettings } from "./forms/marquee-settings"
 import { PriceBandsForm } from "./forms/price-bands-form"
 import { ProductsForm } from "./forms/products-form"
+import { ScrollerFields } from "./forms/scroller-fields"
+import { SCROLLER_OTHER } from "./forms/scroller-groups"
+import { ShelfGroups } from "./forms/shelf-groups"
 import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
 import { ScheduleFields } from "./forms/schedule-fields"
@@ -155,7 +164,13 @@ export function SectionPanel({
   const strip = section.type === "marquee" ? section : null
   // The band's width, height, words' place, veil and buttons sit there too (E2)
   const band = section.type === "banner" ? section : null
+  // A product rail stands in "Diziliş"; a carousel's rarely changed scroller settings sit there too
+  const shelf = section.type === "products" ? section : null
+  const scroller = shelf?.variant === "carousel" ? scrollerSettingsOf(shelf.scroller) : null
   const set =
+    (scroller
+      ? SCROLLER_OTHER.filter((name) => scroller[name] !== SCROLLER_DEFAULTS[name]).length
+      : 0) +
     (looked ? lookCount(looked) : 0) +
     (strip
       ? MARQUEE_OTHER_SETTINGS.filter((name) => strip[name] !== MARQUEE_DEFAULTS[name]).length
@@ -166,7 +181,7 @@ export function SectionPanel({
       <p className="border-b px-5 py-4 text-[13px] leading-5 text-muted-foreground">
         {t(`storefront.editor.types.${kind}.description`)}
       </p>
-      {offersVariants(section) ? (
+      {offersVariants(section) && !shelf ? (
         <PanelGroup title={t(`${P}.variant`)} reveal={reveal("variant")}>
           <VariantField
             id={FIELD_IDS.variant(section.id)}
@@ -211,10 +226,11 @@ export function SectionPanel({
         </PanelGroup>
       ) : null}
       {strip ? <MarqueeGroups section={strip} reveal={reveal} onChange={onChange} /> : null}
+      {shelf ? <ShelfGroups section={shelf} reveal={reveal} onChange={onChange} /> : null}
       {looked || strip ? (
         <PanelGroup
           title={
-            strip
+            strip || scroller
               ? t(`storefront.editor.marquee.${set > 0 ? "otherTitleSet" : "otherTitle"}`, {
                   count: set,
                 })
@@ -236,6 +252,16 @@ export function SectionPanel({
               settings={MARQUEE_OTHER_SETTINGS}
               onChange={(next) => {
                 onChange(next)
+              }}
+            />
+          ) : null}
+          {shelf && scroller ? (
+            <ScrollerFields
+              value={scroller}
+              settings={SCROLLER_OTHER}
+              fieldId={(setting) => FIELD_IDS.scroller(shelf.id, setting)}
+              onChange={(next) => {
+                onChange({ ...shelf, scroller: next })
               }}
             />
           ) : null}
