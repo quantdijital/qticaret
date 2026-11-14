@@ -21,6 +21,21 @@ export const SECTION_VARIANTS = {
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
+/**
+ * How a product card is drawn (adr/0049 Ek 2026-11-14 §3.3, owner's
+ * decision 4): the theme setting's `product_card.variant` everywhere, a
+ * product rail's `card_variant` over it. `standard`: today's card;
+ * `framed`: a bordered box with the add button across its foot (UK5).
+ * Mirrored by the backend's `PRODUCT_CARD_VARIANTS`.
+ */
+export const CARD_VARIANTS = ["standard", "framed"] as const
+
+export type CardVariant = (typeof CARD_VARIANTS)[number]
+
+/** A card variant as a reader takes it: one on the list as it is, anything else `standard`. */
+export const cardVariantOf = (value: unknown): CardVariant =>
+  CARD_VARIANTS.find((each) => each === value) ?? CARD_VARIANTS[0]
+
 export type VariantSectionType = keyof typeof SECTION_VARIANTS
 export type SectionVariant<T extends VariantSectionType> = (typeof SECTION_VARIANTS)[T][number]
 export type DefaultVariant<T extends VariantSectionType> = (typeof SECTION_VARIANTS)[T][0]

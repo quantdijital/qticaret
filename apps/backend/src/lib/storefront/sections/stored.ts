@@ -1,6 +1,7 @@
 import { isPlainObject } from "../../../modules/platform-settings/sections/define"
 import { storedLook } from "./look"
 import { MAIN_BRANCHES, storedByVariant } from "./main"
+import { storedCardVariant } from "./products"
 import { TRUST_BADGES_BRANCHES } from "./trust-badges"
 import { REMOVED_VARIANTS, SECTION_VARIANTS, isVariantType } from "./variants"
 import type { SectionVariant, VariantBranch, VariantSectionType } from "./variants"
@@ -23,15 +24,15 @@ const ALWAYS_KEPT = ["placement"]
  * the default, keeping only the fields that variant has, so the design
  * still reads; a look's step off its list is dropped (`storedLook`), and
  * so is a category grid's settings of a variant off its list
- * (`storedByVariant`). No
- * variant at all is the default's to fill (the schema). A save is still
+ * (`storedByVariant`), a product rail's card variant off its list too
+ * (`storedCardVariant`). No variant at all is the default's to fill (the schema). A save is still
  * held to the lists.
  */
 export function storedSection(stored: unknown): unknown {
   if (!isPlainObject(stored)) {
     return stored
   }
-  const section = storedByVariant(storedLook(stored))
+  const section = storedCardVariant(storedByVariant(storedLook(stored)))
   const type = section["type"]
   if (!isVariantType(type)) {
     return section

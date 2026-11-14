@@ -4,6 +4,8 @@ import {
   BODY_FONTS,
   BUTTON_SHAPES,
   CARD_RATIOS,
+  CARD_VARIANTS,
+  FRAMED_CARD_SWITCHES,
   HEADING_FONTS,
   NO_LIRA_FONTS,
   RADII,
@@ -137,8 +139,35 @@ export function ThemeChoices({ theme, onChange }: ThemeChoicesProps) {
             render={(option) => t(`${C}.ratios.${option.replace(":", "x")}`)}
             hint={t(`${C}.ratioHint`)}
           />
+          <ChoiceSelect
+            id="theme-card-variant"
+            label={t(`${C}.cardVariant`)}
+            value={card.variant}
+            options={CARD_VARIANTS}
+            onChange={(value) => {
+              onChange({ ...theme, product_card: { ...card, variant: value } })
+            }}
+            render={(option) => t(`${C}.cardVariants.${option}`)}
+            hint={t(`${C}.cardVariantHint`)}
+          />
         </Pair>
         {(["show_brand", "show_rating"] as const).map((name) => (
+          <SwitchRow
+            key={name}
+            id={`theme-${name}`}
+            label={t(`${C}.${name}`)}
+            hint={t(`${C}.${name}Hint`)}
+            checked={card[name]}
+            onChange={(value) => {
+              onChange({ ...theme, product_card: { ...card, [name]: value } })
+            }}
+          />
+        ))}
+      </PanelGroup>
+      {/* Read wherever a card is framed: a rail may frame its own while the shop's cards stay standard */}
+      <PanelGroup title={t(`${C}.framed`)}>
+        <p className="text-sm text-muted-foreground">{t(`${C}.framedHint`)}</p>
+        {FRAMED_CARD_SWITCHES.map((name) => (
           <SwitchRow
             key={name}
             id={`theme-${name}`}

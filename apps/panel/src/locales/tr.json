@@ -8040,7 +8040,10 @@
         "daysHint": "Son kaç günde en çok satılanlar ({{min}}–{{max}} gün). Ödenmiş siparişler sayılır, iptal ve iadeler düşülür. Satış az olduğunda liste en yeni ürünlerle tamamlanır.",
         "onSaleHint": "Kampanyalar sayfasındaki ürünler, indirimi en büyük olan önce. İndirimde ürün yokken bölüm vitrinde görünmez.",
         "more": "Tümünü gör bağlantısı",
-        "moreHint": "Listenin altındaki bağlantı; kaldırırsanız görünmez."
+        "moreHint": "Listenin altındaki bağlantı; kaldırırsanız görünmez.",
+        "cardVariant": "Kart biçimi",
+        "cardVariantTheme": "Temadaki biçim",
+        "cardVariantHint": "Bu raftaki kartların biçimi. Çerçeveli kartın ayarları Tema > Çerçeveli kart'tan gelir."
       },
       "records": {
         "pick": {
@@ -8200,6 +8203,22 @@
         "show_brandHint": "Ürün kartında, ürün adının üstünde marka adı. Markası olmayan üründe bir şey görünmez.",
         "show_rating": "Puanı göster",
         "show_ratingHint": "Onaylı değerlendirmesi olan ürünlerin kartında yıldız, ortalama puan ve değerlendirme sayısı. Değerlendirmesi olmayan üründe bir şey görünmez.",
+        "cardVariant": "Kart biçimi",
+        "cardVariants": {
+          "standard": "Standart",
+          "framed": "Çerçeveli"
+        },
+        "cardVariantHint": "Mağazadaki bütün ürün kartlarının biçimi. Ürün rafı kendi biçimini seçebilir; liste, arama ve kategori sayfası bunu kullanır.",
+        "framed": "Çerçeveli kart",
+        "framedHint": "Kart çerçeveli çizildiği her yerde geçer: genel biçimde ya da çerçeveli seçilmiş bir rafta.",
+        "hover_image": "Üstüne gelince ikinci fotoğraf",
+        "hover_imageHint": "Fare kartın üstüne gelince ürünün ikinci fotoğrafı görünür; telefonda fotoğraflar yana kaydırılır. Tek fotoğraflı üründe etkisi yok.",
+        "delivery_note": "Ücretsiz kargo notu",
+        "delivery_noteHint": "Fiyatı ücretsiz kargo eşiğine ulaşan üründe fiyatın altında \"Ücretsiz kargo\" yazar. Eşik Kampanyalar sayfasındaki ayardan gelir.",
+        "full_button": "Tam genişlik düğme",
+        "full_buttonHint": "Kartın altında \"Sepete ekle\" düğmesi; seçenekli üründe \"Seçenekler\" ürün sayfasını açar. Kapalıyken fotoğrafın köşesinde yuvarlak + durur.",
+        "empty_stars": "Yorumsuz üründe boş yıldız",
+        "empty_starsHint": "Değerlendirmesi olmayan üründe boş yıldız ve \"Henüz yorum yok\". Yalnız \"Puanı göster\" açıkken.",
         "grafit": {
           "action": "Grafit'e dön",
           "hint": "Bütün alanları temanın varsayılan görünümüne (Grafit) çeker. Değişiklik taslağa yazılır; Yayınla'ya basana kadar vitrin değişmez.",

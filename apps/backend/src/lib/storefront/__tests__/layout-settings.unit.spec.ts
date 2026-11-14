@@ -167,7 +167,12 @@ describe("the theme's shared settings in the design (adr/0049 Ek 2026-11-06)", (
       radius: "round",
       product_card: { ratio: "4:5", show_brand: false, show_rating: true },
     }
-    const read = { ...written, settings_version: GRAFIT.settings_version }
+    // A card written before its variant and E5 fields reads as today's card (adr/0049 Ek 2026-11-14 §3.3)
+    const read = {
+      ...written,
+      settings_version: GRAFIT.settings_version,
+      product_card: { ...GRAFIT.product_card, ...written.product_card },
+    }
     expect(storedSettings({ settings: { theme: written } }).theme).toEqual(read)
     // A save still has to carry it
     expect(parses({ theme: written })).toBe(false)

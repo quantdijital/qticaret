@@ -18,12 +18,24 @@ export const currentTheme = cache(async () => {
 
 /**
  * What the shop's cards show; the brand is left out of the view when the
- * shop hides it, the stars put in only when it asks for them (adr/0062).
+ * shop hides it, the stars put in only when it asks for them (adr/0062);
+ * how they are drawn, a product rail's own variant laid over by the rail
+ * (`railCards`).
  */
 export async function cardOptions(): Promise<CardOptions> {
-  const settings = await currentTheme()
+  const [settings, answer] = await Promise.all([currentTheme(), storefrontSettings()])
+  const card = settings.product_card
   return {
-    showBrand: settings.product_card.show_brand,
-    showRating: settings.product_card.show_rating,
+    showBrand: card.show_brand,
+    showRating: card.show_rating,
+    variant: card.variant,
+    // The framed card's switches (E5): empty stars only where the stars are shown
+    framed: {
+      hoverImage: card.hover_image,
+      deliveryNote: card.delivery_note,
+      fullButton: card.full_button,
+      emptyStars: card.empty_stars && card.show_rating,
+      freeShippingFrom: answer.free_shipping_threshold,
+    },
   }
 }

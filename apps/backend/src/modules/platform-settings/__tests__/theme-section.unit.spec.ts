@@ -24,7 +24,17 @@ describe("theme section", () => {
       colors: { primary: null, accent: null, background: "steel" },
       typography: { heading: "manrope", body: "manrope" },
       radius: "soft",
-      product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+      product_card: {
+        ratio: "1:1",
+        show_brand: true,
+        show_rating: false,
+        // adr/0049 Ek 2026-11-14 §3.3: today's card; the framed card's switches for when it is chosen
+        variant: "standard",
+        hover_image: true,
+        delivery_note: true,
+        full_button: true,
+        empty_stars: false,
+      },
       header: { layout: "left", sticky: true },
       buttons: "pill",
     })
@@ -158,7 +168,7 @@ describe("a theme row stored before adr/0062 (no settings_version)", () => {
     expect(parseStored("theme", stored)).toEqual({
       ...defaults,
       colors: { ...defaults.colors, primary: "#7a1a48" },
-      product_card: { ratio: "3:4", show_brand: false, show_rating: false },
+      product_card: { ...defaults.product_card, ratio: "3:4", show_brand: false },
       header: { layout: "left", sticky: false },
     })
     const square = { ...stored, product_card: { ...stored.product_card, ratio: "1:1" } }
@@ -223,7 +233,28 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
       buttons: "square",
     }
     expect(upgradeStoredTheme(stored)).toBe(stored)
-    expect(parseStored("theme", stored)).toEqual(stored)
+    // Its card stored before the variant and E5 fields: read over the defaults, today's card
+    expect(parseStored("theme", stored)).toEqual({
+      ...stored,
+      product_card: { ...defaults.product_card, ...stored.product_card },
+    })
+    const framed = { ...stored, product_card: { ...defaults.product_card, variant: "framed" } }
+    expect(parseStored("theme", framed)).toEqual(framed)
+  })
+
+  it("takes a card variant on its list only (adr/0049 Ek 2026-11-14 §3.3)", () => {
+    const card = (product_card: Record<string, unknown>) =>
+      full.safeParse({ ...defaults, product_card: { ...defaults.product_card, ...product_card } })
+        .success
+    expect(card({ variant: "framed", hover_image: false, empty_stars: true })).toBe(true)
+    // `technical` comes with Faz 4's card facts, not yet
+    expect(card({ variant: "technical" })).toBe(false)
+    expect(card({ full_button: "yes" })).toBe(false)
+    // A patch of one switch keeps the others
+    const after = full.parse(
+      mergePatch(defaults, patch.parse({ product_card: { empty_stars: true } }))
+    )
+    expect(after.product_card).toEqual({ ...defaults.product_card, empty_stars: true })
   })
 })
 

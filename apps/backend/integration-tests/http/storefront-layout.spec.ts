@@ -171,6 +171,10 @@ medusaIntegrationTestRunner({
       expect(saved.data.layout).toMatchObject({ is_default: false, has_changes: true, revision: 0 })
       // A draft reaches no shopper
       expect((await live()).home.map((section) => section.id)).toContain("yeniurunler")
+      // A rail without a card variant of its own draws the theme's (adr/0049 Ek 2026-11-14 §3.3)
+      expect(defaultLive.home.find((section) => section.id === "yeniurunler")).toMatchObject({
+        card_variant: null,
+      })
 
       const preview = await action("preview")
       const token = (preview.data as unknown as { path: string }).path.split("/").pop() ?? ""

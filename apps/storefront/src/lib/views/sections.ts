@@ -14,6 +14,7 @@ import { isStoreApiError } from "@/lib/store-api/errors"
 import { googleRatingReviews, reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
 import { categoryTiles } from "./category-tiles"
+import { railCardVariant } from "./card-framed"
 import { featuredView } from "./featured"
 import { EXCERPT_MIN_RATING, googleRatingView } from "./google-rating"
 import { heroSliderView } from "./hero-slider"
@@ -133,7 +134,7 @@ async function sectionView(
         : null
     }
     case "products": {
-      const products = await railCards(await railProducts(section))
+      const products = await railCards(await railProducts(section), railCardVariant(section))
       // Nothing on sale now: no sale rail, rather than an empty one
       if (products.length === 0 && section.source.kind === "on_sale") {
         return null

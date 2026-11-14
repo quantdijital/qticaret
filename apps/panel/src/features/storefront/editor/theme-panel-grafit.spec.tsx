@@ -170,7 +170,12 @@ describe("the theme settings show what the theme draws (adr/0062 §12)", HEAVY, 
         typography: { heading: "fraunces", body: "inter" },
         radius: "sharp",
         buttons: "square",
-        product_card: { ratio: "4:5", show_brand: false, show_rating: true },
+        product_card: {
+          ...GRAFIT_THEME.product_card,
+          ratio: "4:5",
+          show_brand: false,
+          show_rating: true,
+        },
         header: { layout: "left", sticky: false },
       },
     })

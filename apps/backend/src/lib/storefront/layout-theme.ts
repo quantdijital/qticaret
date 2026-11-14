@@ -3,6 +3,7 @@ import {
   THEME_SETTINGS_VERSION,
   primaryReadable,
   themeSection,
+  withCardDefaults,
 } from "../../modules/platform-settings/sections/theme"
 import type { ThemeSettings } from "../../modules/platform-settings/sections"
 
@@ -21,13 +22,16 @@ export const layoutTheme = themeSection.full.nullable().default(null)
  * the settings' version (a script, an imported preset) gets the current
  * version and is read as it stands. The design's theme has no time before
  * the version (it came after adr/0062), so the theme section's upgrade of
- * an old row (`upgradeStoredTheme`) is not for it. Only on reading: a save
- * without the version is refused.
+ * an old row (`upgradeStoredTheme`) is not for it. A card written before
+ * its variant and E5 fields gets their defaults (`withCardDefaults`). Only
+ * on reading: a save without them is refused.
  */
 export const storedTheme = (value: unknown): unknown =>
-  isPlainObject(value) && !Object.hasOwn(value, "settings_version")
-    ? { ...value, settings_version: THEME_SETTINGS_VERSION }
-    : value
+  withCardDefaults(
+    isPlainObject(value) && !Object.hasOwn(value, "settings_version")
+      ? { ...value, settings_version: THEME_SETTINGS_VERSION }
+      : value
+  )
 
 /** The theme as the storefront applies it: the section's version stays inside. */
 export type ShownTheme = Omit<ThemeSettings, "settings_version">

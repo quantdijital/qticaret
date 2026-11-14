@@ -202,7 +202,7 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     }
     // Badges, option chips and counts: pills whatever the shape
     for (const file of [
-      "parts/ProductCard.tsx",
+      "parts/card-parts.tsx",
       "product/Price.tsx",
       "product/Options.tsx",
       "product/InstallmentPlans.tsx",
@@ -229,7 +229,8 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     expect(atolyeCss("listing/Toolbar.tsx")).toContain("rounded-pill bg-mark px-2")
     expect(atolyeCss("account/BillingForm.tsx")).toContain('"bg-mark text-mark-ink"')
     // The sale badge and the stock badges on a card keep their fixed colours
-    const card = atolyeCss("parts/ProductCard.tsx")
+    // (`card-parts.tsx`: both card variants draw the same pills)
+    const card = atolyeCss("parts/card-parts.tsx")
     expect(card).toContain("rounded-pill bg-deal px-2 py-1 text-deal-ink")
     expect(card).not.toMatch(/bg-mark|highlight/)
     expect(atolyeCss("product/Price.tsx")).toContain("bg-deal")

@@ -26,7 +26,16 @@ export const THEME: ThemeSettings = {
   colors: { primary: null, accent: null, background: "steel" },
   typography: { heading: "manrope", body: "manrope" },
   radius: "soft",
-  product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+  product_card: {
+    ratio: "1:1",
+    show_brand: true,
+    show_rating: false,
+    variant: "standard",
+    hover_image: true,
+    delivery_note: true,
+    full_button: true,
+    empty_stars: false,
+  },
   header: { layout: "left", sticky: true },
   buttons: "pill",
 }
