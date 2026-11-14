@@ -20,24 +20,48 @@ import { bodyFields } from "./look"
  * them equal.
  */
 export const MARQUEE_SETTINGS = {
-  speed: ["slow", "medium", "fast"],
+  speed: ["slowest", "slow", "medium", "fast", "fastest"],
   direction: ["left", "right"],
-  ground: ["stage", "primary", "light"],
+  hover_pause: ["on", "off"],
+  pause_button: ["always", "hover"],
   size: ["small", "medium", "large"],
+  ground: ["stage", "primary", "light"],
   separator: ["none", "dot", "star", "line"],
+  weight: ["bold", "normal"],
+  uppercase: ["off", "on"],
+  gap: ["tight", "normal", "wide"],
+  outline: ["off", "on"],
+  device: ["all", "mobile", "desktop"],
+  closable: ["off", "on"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
-type Setting = keyof typeof MARQUEE_SETTINGS
+export type MarqueeSettingName = keyof typeof MARQUEE_SETTINGS
+type Setting = MarqueeSettingName
 type Step<S extends Setting> = (typeof MARQUEE_SETTINGS)[S][number]
 
-/** A new strip's steps, filled where a section has none. */
+/**
+ * A new strip's steps, filled where a section has none: a strip saved
+ * before a setting existed reads as it was drawn then (adr/0049 Ek
+ * 2026-11-15), so no migration.
+ */
 export const MARQUEE_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   speed: "medium",
   direction: "left",
-  ground: "stage",
+  hover_pause: "on",
+  pause_button: "always",
   size: "medium",
+  ground: "stage",
   separator: "dot",
+  weight: "bold",
+  uppercase: "off",
+  gap: "normal",
+  outline: "off",
+  device: "all",
+  closable: "off",
 }
+
+/** The settings' names, in the contract's order. */
+export const MARQUEE_SETTING_NAMES = Object.keys(MARQUEE_SETTINGS) as Setting[]
 
 export const MARQUEE_LIMITS = { items: { min: 1, max: 8 }, text: 60, subtext: 80 } as const
 
@@ -58,6 +82,13 @@ const setting = <S extends Setting>(name: S) => {
     .default(MARQUEE_DEFAULTS[name])
 }
 
+/** Every setting's field, each with its default. */
+function settingFields() {
+  return Object.fromEntries(MARQUEE_SETTING_NAMES.map((name) => [name, setting(name)])) as {
+    [S in Setting]: ReturnType<typeof setting<S>>
+  }
+}
+
 const item = z
   .object({
     icon: z
@@ -76,11 +107,7 @@ const item = z
 const fields = {
   type: z.literal("marquee"),
   items: z.array(item).min(MARQUEE_LIMITS.items.min).max(MARQUEE_LIMITS.items.max),
-  speed: setting("speed"),
-  direction: setting("direction"),
-  ground: setting("ground"),
-  size: setting("size"),
-  separator: setting("separator"),
+  ...settingFields(),
 }
 
 /** On a page's body: the home and product pages', with its look (§6). */

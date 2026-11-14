@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import type { StoreMarqueeSection } from "@qticaret/types"
+import { MARQUEE_DEFAULTS } from "@qticaret/types/section-marquee"
 import { t } from "@/lib/i18n"
 
 vi.mock("server-only", () => ({}))
@@ -30,7 +31,9 @@ const section = (over: Record<string, unknown> = {}) =>
 
 describe("the scrolling strip's view (adr/0049 Ek 2026-11-14 §4.1)", () => {
   it("carries its items with their links as paths and its steps", () => {
+    // A backend before the newer settings (adr/0049 Ek 2026-11-15): each reads as its default
     expect(marqueeView(section(), t)).toEqual({
+      ...MARQUEE_DEFAULTS,
       id: "kayan1",
       type: "marquee",
       items: [
@@ -48,6 +51,24 @@ describe("the scrolling strip's view (adr/0049 Ek 2026-11-14 §4.1)", () => {
       ground: "light",
       size: "small",
       separator: "line",
+    })
+  })
+
+  it("carries the newer settings as saved", () => {
+    const set = {
+      speed: "fastest",
+      hover_pause: "off",
+      pause_button: "hover",
+      weight: "normal",
+      uppercase: "on",
+      gap: "tight",
+      outline: "on",
+      device: "desktop",
+      closable: "on",
+    }
+    expect(marqueeView(section(set), t)).toMatchObject(set)
+    expect(marqueeView(section({ pause_button: "none" }), t)).toMatchObject({
+      pause_button: "always",
     })
   })
 

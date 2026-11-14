@@ -17,9 +17,17 @@ const GROUP_NAMES: Readonly<Record<FieldGroupName, string>> = {
   variant: "storefront.editor.panel.variant",
   placement: "storefront.editor.panel.placement",
   content: "storefront.editor.panel.content",
+  motion: "storefront.editor.panel.motion",
+  appearance: "storefront.editor.panel.appearance",
   look: "storefront.editor.look.title",
   visibility: "storefront.editor.panel.visibility",
 }
+
+/** A group's name as the section's panel shows it: a strip's look group is its "Diğer ayarlar". */
+const groupName = (field: { group: FieldGroupName }, type: string) =>
+  type === "marquee" && field.group === "look"
+    ? "storefront.editor.marquee.otherTitle"
+    : GROUP_NAMES[field.group]
 
 function HitRow({ hit, onPick }: { hit: SearchHit; onPick: (hit: SearchHit) => void }) {
   const { t } = useTranslation()
@@ -50,7 +58,7 @@ function HitRow({ hit, onPick }: { hit: SearchHit; onPick: (hit: SearchHit) => v
           </span>
           <span className="truncate text-xs text-muted-foreground">
             {field
-              ? `${name} · ${t(GROUP_NAMES[field.group])}`
+              ? `${name} · ${t(groupName(field, hit.section.type))}`
               : t(`storefront.editor.types.${kindOf(hit.section, inFooter)}.name`)}
           </span>
         </span>

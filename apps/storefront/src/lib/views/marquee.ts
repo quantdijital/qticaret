@@ -1,5 +1,5 @@
 import type { StoreLayout, StoreMarqueeSection, TrustIcon } from "@qticaret/types"
-import { marqueeStepOf } from "@qticaret/types/section-marquee"
+import { marqueeSettingsOf } from "@qticaret/types/section-marquee"
 import type { MarqueeSectionView, Translate } from "@qticaret/ui"
 import { layoutLink } from "./layout"
 
@@ -19,7 +19,7 @@ const ICONS: ReadonlySet<string> = new Set([
  * A scrolling strip as the theme draws it (adr/0049 Ek 2026-11-14 §4.1):
  * its items in the shop's words, their links as paths (a broken one none),
  * its steps as the contract knows them (an unknown one, from a newer
- * backend, read as the default); an icon this build does not draw is
+ * backend, or none, from an older one, read as the default); an icon this build does not draw is
  * left out. No items: no strip.
  */
 export function marqueeView(section: StoreMarqueeSection, t: Translate): MarqueeSectionView | null {
@@ -34,11 +34,7 @@ export function marqueeView(section: StoreMarqueeSection, t: Translate): Marquee
         id: section.id,
         type: "marquee",
         items,
-        speed: marqueeStepOf("speed", section.speed),
-        direction: marqueeStepOf("direction", section.direction),
-        ground: marqueeStepOf("ground", section.ground),
-        size: marqueeStepOf("size", section.size),
-        separator: marqueeStepOf("separator", section.separator),
+        ...marqueeSettingsOf(section),
       }
     : null
 }

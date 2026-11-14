@@ -1,0 +1,166 @@
+/*
+ * The scrolling strip's separators, its buttons and its newer settings
+ * (adr/0049 Ek 2026-11-15;
+ * `sections/Marquee.tsx`, beside `marquee.css`): each an attribute the
+ * shop's step names, each value the theme's own; no inline style (CSP).
+ *
+ * - Weight: bold is the strip as it was (600 small, 800 medium and large);
+ *   normal sets its lines in the regular face (500 for the display face).
+ * - Capitals: the line, not its second line; the page's `lang="tr"` gives
+ *   i its dotted capital İ.
+ * - Room: the size's own gap times 0.5 / 1 / 1.75 (`marquee-loop.ts`
+ *   counts the same, so a copy still fills the widest screen).
+ * - Outline (large only, `data-outline`): every other item drawn as its
+ *   letters' edge in the ground's own text colour; where the browser
+ *   cannot stroke text, it stays filled.
+ * - Screens: phones below 64rem (the frame's own switch, `frame.css`),
+ *   wide screens from it; the hidden strip and its look's box are
+ *   `display: none`, so it takes no room and nothing reads it.
+ * - The pause button "on hover" shows while the pointer is over the strip,
+ *   focus is in it or it is paused; on a touch screen (no hover) always.
+ *   It stays in its column and in the tab order (WCAG 2.2.2).
+ * - The close button sits after it; a closed strip goes as a hidden one.
+ */
+@layer components {
+  /* What stands between two items: nothing, a dot, a star or a hairline */
+  .gf-marquee-item::before {
+    flex: none;
+    color: var(--mq-mark);
+  }
+  .gf-marquee[data-separator="dot"] .gf-marquee-item::before {
+    content: "";
+    inline-size: max(4px, 0.16em);
+    block-size: max(4px, 0.16em);
+    border-radius: 50%;
+    background: currentColor;
+  }
+  .gf-marquee[data-separator="star"] .gf-marquee-item::before {
+    content: "\2726";
+    font-size: 0.7em;
+    line-height: 1;
+  }
+  .gf-marquee[data-separator="line"] .gf-marquee-item::before {
+    content: "";
+    inline-size: 1px;
+    block-size: min(1.4em, calc(var(--mq-height) - 16px));
+    background: currentColor;
+  }
+  /* A campaign's hairline stands as tall as its capitals, not the whole band */
+  .gf-marquee[data-size="large"][data-separator="line"] .gf-marquee-item::before {
+    block-size: 0.7em;
+  }
+
+  /* The pause button keeps its own column at the band's end, never over the words */
+  .gf-marquee-toggle {
+    position: relative;
+    display: grid;
+    flex: none;
+    place-items: center;
+    inline-size: var(--mq-toggle);
+    block-size: var(--mq-toggle);
+    margin-inline: 4px 12px;
+    border: 1px solid var(--mq-mark);
+    border-radius: var(--radius-pill);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+  .gf-marquee-toggle::before {
+    content: "";
+    position: absolute;
+    inset: min(-4px, calc((var(--mq-toggle) - 44px) / 2));
+  }
+  .gf-marquee-toggle svg {
+    inline-size: 40%;
+    block-size: 40%;
+  }
+  .gf-marquee-toggle:hover {
+    border-color: currentColor;
+  }
+  .gf-marquee-toggle:focus-visible {
+    outline: 2px solid var(--color-focus, currentColor);
+    outline-offset: 2px;
+  }
+
+  .gf-marquee[data-weight="normal"] .gf-marquee-text {
+    font-weight: 400;
+  }
+  .gf-marquee[data-weight="normal"][data-size="large"] .gf-marquee-text {
+    font-weight: 500;
+  }
+
+  .gf-marquee[data-uppercase="on"] .gf-marquee-text {
+    text-transform: uppercase;
+  }
+  .gf-marquee[data-uppercase="on"]:not([data-size="large"]) .gf-marquee-text {
+    letter-spacing: 0.04em;
+  }
+
+  .gf-marquee[data-gap="tight"] {
+    --mq-gap-x: 0.5;
+  }
+  .gf-marquee[data-gap="wide"] {
+    --mq-gap-x: 1.75;
+  }
+
+  /* The ground's own text colour, named: the outlined letters' colour is transparent */
+  .gf-marquee[data-outline="on"] {
+    --mq-ink: var(--color-stage-text);
+  }
+  .gf-marquee[data-outline="on"][data-ground="primary"] {
+    --mq-ink: var(--primary-foreground);
+  }
+  .gf-marquee[data-outline="on"][data-ground="light"] {
+    --mq-ink: var(--color-text);
+  }
+  @supports (-webkit-text-stroke: 1px black) {
+    .gf-marquee[data-outline="on"] .gf-marquee-item:nth-child(even) .gf-marquee-text {
+      color: transparent;
+      -webkit-text-stroke: max(1.5px, 0.03em) var(--mq-ink);
+      text-decoration-color: var(--mq-ink);
+    }
+  }
+
+  @media (width >= 64rem) {
+    [data-mq-shell][data-device="mobile"],
+    .gf-look:has(> [data-mq-shell][data-device="mobile"]) {
+      display: none;
+    }
+  }
+  @media (width < 64rem) {
+    [data-mq-shell][data-device="desktop"],
+    .gf-look:has(> [data-mq-shell][data-device="desktop"]) {
+      display: none;
+    }
+  }
+  [data-mq-shell][data-closed],
+  .gf-look:has(> [data-mq-shell][data-closed]) {
+    display: none;
+  }
+
+  @media (hover: hover) {
+    .gf-marquee[data-pause-button="hover"] [data-part="button"] {
+      opacity: 0;
+    }
+    .gf-marquee[data-pause-button="hover"]:hover [data-part="button"],
+    .gf-marquee[data-pause-button="hover"]:focus-within [data-part="button"],
+    .gf-marquee[data-pause-button="hover"][data-paused] [data-part="button"] {
+      opacity: 1;
+    }
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .gf-marquee[data-pause-button="hover"] [data-part="button"] {
+      transition: opacity 0.15s ease;
+    }
+  }
+
+  /* Still, the strip has nothing to pause, but it can still be closed */
+  @media (prefers-reduced-motion: reduce) {
+    .gf-marquee-toggle {
+      display: none;
+    }
+    .gf-marquee .gf-marquee-close {
+      display: grid;
+    }
+  }
+}

@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs"
 import path from "node:path"
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
+import { MARQUEE_DEFAULTS } from "@qticaret/types/section-marquee"
 import type { HomeSectionView, MarqueeSectionView } from "@qticaret/ui"
 import { renderFrame, renderPage, shopFixture } from "@/test/theme-render"
 
@@ -12,6 +13,7 @@ import { renderFrame, renderPage, shopFixture } from "@/test/theme-render"
  */
 
 const strip = (over: Partial<MarqueeSectionView> = {}): MarqueeSectionView => ({
+  ...MARQUEE_DEFAULTS,
   id: "kayan1",
   type: "marquee",
   items: [
@@ -34,10 +36,15 @@ const strip = (over: Partial<MarqueeSectionView> = {}): MarqueeSectionView => ({
 const home = (sections: HomeSectionView[]) =>
   renderPage(atolyeTheme, "HomePage", { view: { sections } })
 
-const MARQUEE_CSS = readFileSync(
-  path.resolve(import.meta.dirname, "../../../../../packages/themes/atolye/src/marquee.css"),
-  "utf8"
-)
+// The strip's stylesheet and its separators, buttons and newer settings beside it
+const MARQUEE_CSS = ["marquee.css", "marquee-options.css"]
+  .map((file) =>
+    readFileSync(
+      path.resolve(import.meta.dirname, "../../../../../packages/themes/atolye/src", file),
+      "utf8"
+    )
+  )
+  .join("\n")
 
 const count = (html: string, needle: string) => html.split(needle).length - 1
 
@@ -101,7 +108,7 @@ describe("the scrolling strip in Atölye", () => {
     for (const [name, steps] of Object.entries({
       size: ["small", "medium", "large"],
       ground: ["primary", "light", "stage"],
-      speed: ["slow", "fast"],
+      speed: ["slowest", "slow", "fast", "fastest"],
       direction: ["right"],
       separator: ["dot", "star", "line"],
       span: ["1.5", "2", "3", "4", "6", "8"],

@@ -63,6 +63,14 @@ describe("MarqueeForm", () => {
       ground: "stage",
       size: "medium",
       separator: "dot",
+      hover_pause: "on",
+      pause_button: "always",
+      weight: "bold",
+      uppercase: "off",
+      gap: "normal",
+      outline: "off",
+      device: "all",
+      closable: "off",
     })
     expect(sectionProblems(newStrip())).toEqual({ "items.0.text": "required" })
   })
@@ -89,16 +97,6 @@ describe("MarqueeForm", () => {
     const item = { icon: null, text: "Öge", subtext: null, link: null }
     renderForm({ ...newStrip(), items: Array.from({ length: 8 }, () => item) })
     expect(screen.getByRole("button", { name: "Öge ekle" })).toBeDisabled()
-  })
-
-  it("picks its size among three steps, each its own change", async () => {
-    const changes = renderForm()
-
-    expect(screen.getByRole("radio", { name: /Orta/ })).toHaveAttribute("data-state", "on")
-    await userEvent.click(screen.getByRole("radio", { name: /Büyük/ }))
-    expect(changes.at(-1)).toMatchObject({ size: "large" })
-    await userEvent.click(screen.getByRole("button", { name: "Varsayılana dön" }))
-    expect(changes.at(-1)).toMatchObject({ size: "medium" })
   })
 
   it("says when the page shows more strips than it may", () => {
@@ -177,10 +175,11 @@ describe("scrolling strips per page", () => {
     expect(screen.getByText(/Bu sayfada zaten 2 kayan yazı var/)).toBeInTheDocument()
   })
 
-  it("finds its settings in the search: the size in the content, the ground with the look", () => {
+  it("finds its settings in the search: moving and looks open, the screens with the look", () => {
     const fields = sectionFields(newStrip(), "home")
-    expect(fields.find((field) => field.key === "marquee.size")?.group).toBe("content")
-    expect(fields.find((field) => field.key === "marquee.ground")?.group).toBe("look")
+    expect(fields.find((field) => field.key === "marquee.speed")?.group).toBe("motion")
+    expect(fields.find((field) => field.key === "marquee.size")?.group).toBe("appearance")
+    expect(fields.find((field) => field.key === "marquee.device")?.group).toBe("look")
     expect(fields.map((field) => field.key)).toContain("look.width")
     expect(fields.map((field) => field.key)).not.toContain("look.ground")
     const header = sectionFields(newHeaderMarquee("ustserit"), "header")

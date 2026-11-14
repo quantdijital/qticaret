@@ -7962,6 +7962,8 @@
         "placement": "Yeri",
         "sections": "Bölümler",
         "content": "İçerik",
+        "motion": "Hareket",
+        "appearance": "Görünüm",
         "variant": "Biçim",
         "variantHint": "Bölümün vitrinde nasıl görüneceği; önizleme hemen gösterir. Ortak içerik (başlık, metin) biçim değişince korunur, \"Geri al\" önceki biçimi getirir."
       },
@@ -8464,8 +8466,11 @@
         "subtextPlaceholder": "Saat 14.00'e kadar verilen siparişlerde",
         "link": "Bağlantı (isteğe bağlı)",
         "full": "Bu sayfada zaten {{max}} kayan yazı var (üst bilgideki de sayılır).",
-        "lookHint": "Zemin, hız, yön ve ayraç; ayrıca şeridin çevresindeki boşluk ve genişliği.",
-        "headerLookHint": "Zemin, hız, yön ve ayraç.",
+        "lookHint": "Hangi cihazda görüneceği, kapatma düğmesi; şeridin çevresindeki boşluk ve genişliği.",
+        "headerLookHint": "Hangi cihazda görüneceği ve kapatma düğmesi.",
+        "otherTitle": "Diğer ayarlar",
+        "otherTitleSet_one": "Diğer ayarlar · {{count}} ayar",
+        "otherTitleSet_other": "Diğer ayarlar · {{count}} ayar",
         "size": {
           "label": "Boy",
           "term": "size",
@@ -8484,9 +8489,11 @@
         "speed": {
           "label": "Hız",
           "term": "speed",
+          "slowest": "Çok yavaş",
           "slow": "Yavaş",
           "medium": "Orta",
-          "fast": "Hızlı"
+          "fast": "Hızlı",
+          "fastest": "Çok hızlı"
         },
         "direction": {
           "label": "Yön",
@@ -8501,6 +8508,54 @@
           "dot": "Nokta",
           "star": "Yıldız",
           "line": "Çizgi"
+        },
+        "hover_pause": {
+          "label": "Üzerine gelince dur",
+          "term": "pause on hover",
+          "hint": "Kapalıyken fare üstündeyken de akar; klavyeyle bir ögeye gelinince yine durur."
+        },
+        "pause_button": {
+          "label": "Durdur düğmesi",
+          "term": "pause button",
+          "always": "Her zaman",
+          "hover": "Üzerine gelince",
+          "hint": "Düğme tamamen kaldırılamaz: hareketli yazıyı durdurabilmek bazı ziyaretçiler için gerekli. Telefonda her zaman görünür."
+        },
+        "weight": {
+          "label": "Yazı kalınlığı",
+          "term": "font weight",
+          "bold": "Kalın",
+          "normal": "Normal"
+        },
+        "uppercase": {
+          "label": "Büyük harf",
+          "term": "uppercase",
+          "hint": "Ögelerin ana satırı BÜYÜK HARFLE yazılır; alt satır olduğu gibi kalır."
+        },
+        "gap": {
+          "label": "Ögeler arası boşluk",
+          "term": "gap",
+          "tight": "Sıkı",
+          "normal": "Normal",
+          "wide": "Geniş"
+        },
+        "outline": {
+          "label": "Dolu / çerçeve yazı",
+          "term": "outline",
+          "hint": "Ögeler sırayla dolu ve yalnız çerçeveli yazılır. Yalnız büyük boyda."
+        },
+        "device": {
+          "label": "Cihaz",
+          "term": "device",
+          "all": "Her yerde",
+          "mobile": "Yalnız telefonda",
+          "desktop": "Yalnız masaüstünde",
+          "hint": "Telefon: 1024 pikselden dar ekranlar (tablet dahil). Sayfadaki en çok iki şerit sınırına gizli olan da sayılır."
+        },
+        "closable": {
+          "label": "Kapatma düğmesi",
+          "term": "close button",
+          "hint": "Ziyaretçi kapatırsa şerit o tarayıcıda bir daha görünmez; yazıyı değiştirirseniz yeniden görünür."
         }
       },
       "headerBar": {

@@ -418,6 +418,7 @@ Hepsi `base` alanlarını (kimlik, görünürlük, başlangıç, bitiş) ve §6'
   - Ögeler HTML'de bir kez yazılır; döngü için kopya `aria-hidden` ve odaklanamaz.
   - Sayfada en çok iki şerit.
 - **Boyut:** M.
+- **Ek 2026-11-15 (sahip kararı):** sahibin eleştirisi ("kayma hızı ayarı yok, durdur tuşunun gizlenme özelliği yok"; hız vardı ama kapalı grupta bulunamadı) üzerine sekiz alan eklendi; hepsi isteğe bağlı, varsayılanı bugünkü çizim, kayıtlı düzenler aynen okunur (migration yok): `speed` beş basamak (Çok yavaş … Çok hızlı); `pause_button` Her zaman / Üzerine gelince (fare şeridin üstünde, odak içeride ya da duraklatılmışken görünür; dokunmatikte hep görünür, Tab sırasında kalır); `hover_pause` aç/kapa (kapalıyken klavye odağında yine durur); `device` Her yerde / Yalnız telefonda / Yalnız masaüstünde (temanın 64rem çerçeve kırılımı; gizli şerit `display:none`, yer kaplamaz; "en çok iki şerit" sınırı cihazdan bağımsız sayılır); `weight` Kalın / Normal ve `uppercase` aç/kapa; `gap` Sıkı / Normal / Geniş; `outline` (yalnız Büyük boyda: ögeler sırayla dolu ve çerçeveli); `closable` (ziyaretçi kapatınca o tarayıcıda, içerik değişene dek görünmez; `localStorage`'a yalnız bayrak yazılır). **Durdur düğmesi tamamen kaldırılamaz** (WCAG 2.2.2): `pause_button`'da "yok" basamağı yoktur. Panelde Hareket ve Görünüm grupları açık ve ögelerin hemen altında; cihaz ve kapatma "Diğer ayarlar"da.
 
 #### 4.2 Süreli fırsat: `timed_offer` (E7; FS1, H11'in sayaç kutusu, ileride H7)
 

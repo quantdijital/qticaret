@@ -1,4 +1,12 @@
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import {
+  ArrowLeft,
+  ArrowRight,
+  Monitor,
+  MonitorSmartphone,
+  MousePointer2,
+  Pause,
+  Smartphone,
+} from "lucide-react"
 import type { MarqueeSetting, MarqueeStep } from "@qticaret/types"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 
@@ -45,6 +53,27 @@ const SEPARATOR: Readonly<Record<MarqueeStep<"separator">, string>> = {
   line: "|",
 }
 
+const DEVICE = { all: MonitorSmartphone, mobile: Smartphone, desktop: Monitor } as const
+
+/** The room between items: two words with a narrow, normal or wide gap. */
+function Gap({ step }: { step: MarqueeStep<"gap"> }) {
+  const room = { tight: 2, normal: 4, wide: 8 }[step]
+  const word = (22 - room) / 2
+  return (
+    <svg viewBox="0 0 24 16" className="h-4 w-6" aria-hidden="true">
+      <rect x={1} y={6.5} width={word} height={3} rx={1} className="fill-current opacity-70" />
+      <rect
+        x={1 + word + room}
+        y={6.5}
+        width={word}
+        height={3}
+        rx={1}
+        className="fill-current opacity-70"
+      />
+    </svg>
+  )
+}
+
 /** One step of a scrolling strip's setting, drawn in small. */
 export function MarqueeSketch<S extends MarqueeSetting>({
   setting,
@@ -67,22 +96,27 @@ export function MarqueeSketch<S extends MarqueeSetting>({
       const Arrow = step === "right" ? ArrowRight : ArrowLeft
       return <Arrow aria-hidden="true" className="size-4" />
     }
-    case "speed": {
-      const marks = step === "slow" ? 1 : step === "medium" ? 2 : 3
+    case "pause_button": {
+      const Icon = step === "hover" ? MousePointer2 : Pause
+      return <Icon aria-hidden="true" className="size-4" />
+    }
+    case "weight":
       return (
-        <svg viewBox="0 0 24 16" className="h-4 w-6" aria-hidden="true">
-          {Array.from({ length: marks }, (_, index) => (
-            <path
-              key={index}
-              d={`M${String(5 + index * 6)} 4l4 4-4 4`}
-              className="fill-none stroke-current"
-              strokeWidth={1.75}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          ))}
-        </svg>
+        <span
+          aria-hidden="true"
+          className={cn(
+            "text-[13px] leading-4",
+            step === "bold" ? "font-extrabold" : "font-normal"
+          )}
+        >
+          Aa
+        </span>
       )
+    case "gap":
+      return <Gap step={step as MarqueeStep<"gap">} />
+    case "device": {
+      const Icon = DEVICE[step as MarqueeStep<"device">]
+      return <Icon aria-hidden="true" className="size-4" />
     }
     case "separator":
       return (
@@ -94,6 +128,12 @@ export function MarqueeSketch<S extends MarqueeSetting>({
           <span className="h-1 w-1.5 rounded-full bg-current opacity-40" />
         </span>
       )
+    // The speed is a row of stops, the on/off ones switches: nothing to draw
+    case "speed":
+    case "hover_pause":
+    case "uppercase":
+    case "outline":
+    case "closable":
+      return null
   }
-  return null
 }

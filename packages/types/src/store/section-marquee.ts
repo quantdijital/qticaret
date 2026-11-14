@@ -13,28 +13,60 @@
  * `@qticaret/types/section-marquee` subpath, which Turbopack resolves).
  */
 export const MARQUEE_SETTINGS = {
-  /** How fast it slides: the theme's slow, medium and fast loop. */
-  speed: ["slow", "medium", "fast"],
+  /** How fast it slides: the theme's five loops, slowest to fastest. */
+  speed: ["slowest", "slow", "medium", "fast", "fastest"],
   /** Which way the items travel. */
   direction: ["left", "right"],
-  /** Its ground: the dark stage, the shop's own colour, a light tint; pairs the theme measured. */
-  ground: ["stage", "primary", "light"],
+  /** Whether it stops under the pointer; it always stops while focus is in it. */
+  hover_pause: ["on", "off"],
+  /**
+   * When its pause button shows: always, or only while the pointer is over
+   * the strip or focus is in it (always on a touch screen). It never goes
+   * (WCAG 2.2.2): there is no "none".
+   */
+  pause_button: ["always", "hover"],
   /** Small: a thin line of text; medium: items with an icon and a second line; large: a campaign set big. */
   size: ["small", "medium", "large"],
+  /** Its ground: the dark stage, the shop's own colour, a light tint; pairs the theme measured. */
+  ground: ["stage", "primary", "light"],
   /** What stands between two items. */
   separator: ["none", "dot", "star", "line"],
+  /** The lines' weight: the theme's heavy one (as before) or its regular. */
+  weight: ["bold", "normal"],
+  /** The lines in capitals (the page's language picks the letters: i to İ). */
+  uppercase: ["off", "on"],
+  /** The room between two items. */
+  gap: ["tight", "normal", "wide"],
+  /** Large only: every other item drawn as an outline. A theme ignores it at the other sizes. */
+  outline: ["off", "on"],
+  /** Which screens show it: everywhere, phones (the theme's narrow frame) or wide screens. */
+  device: ["all", "mobile", "desktop"],
+  /** A close button: a shopper who closes it does not see it again in that browser. */
+  closable: ["off", "on"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type MarqueeSetting = keyof typeof MARQUEE_SETTINGS
 export type MarqueeStep<S extends MarqueeSetting> = (typeof MARQUEE_SETTINGS)[S][number]
 
-/** A new strip's settings, and what a reader takes for a step it does not know. */
+/**
+ * A new strip's settings, and what a reader takes for a step it does not
+ * know or a strip saved before the setting existed: each is the strip as
+ * it was drawn before.
+ */
 export const MARQUEE_DEFAULTS: { readonly [S in MarqueeSetting]: MarqueeStep<S> } = {
   speed: "medium",
   direction: "left",
-  ground: "stage",
+  hover_pause: "on",
+  pause_button: "always",
   size: "medium",
+  ground: "stage",
   separator: "dot",
+  weight: "bold",
+  uppercase: "off",
+  gap: "normal",
+  outline: "off",
+  device: "all",
+  closable: "off",
 }
 
 /** The settings in the order the panel offers them. */
@@ -57,3 +89,14 @@ export function marqueeStepOf<S extends MarqueeSetting>(setting: S, step: unknow
 
 /** The strip's settings as the design keeps them. */
 export type MarqueeSettings = { [S in MarqueeSetting]: MarqueeStep<S> }
+
+/** Every setting of a strip as a reader takes it (`marqueeStepOf`), one missing read as its default. */
+export function marqueeSettingsOf(
+  section: Partial<Record<MarqueeSetting, unknown>>
+): MarqueeSettings {
+  const settings: Partial<Record<MarqueeSetting, string>> = {}
+  for (const name of MARQUEE_SETTING_NAMES) {
+    settings[name] = marqueeStepOf(name, section[name])
+  }
+  return settings as MarqueeSettings
+}

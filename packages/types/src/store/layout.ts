@@ -120,7 +120,8 @@ export type StoreLayoutSection = StoreSectionLookPart &
  * and category pages, and at most one in the header above the shop's
  * header. Its items' words filled, their links placed (a broken one null);
  * its settings as the contract lists them, read forgivingly by the
- * storefront (`marqueeStepOf`). Absent from a backend before it.
+ * storefront (`marqueeSettingsOf`): a setting a backend before it lacks reads
+ * as its default. Absent from a backend before the strip.
  */
 export type StoreMarqueeSection = {
   id: string
