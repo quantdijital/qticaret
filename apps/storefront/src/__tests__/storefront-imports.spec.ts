@@ -110,6 +110,7 @@ describe("the storefront's value imports", () => {
       "@qticaret/types/section-look",
       "@qticaret/types/section-marquee",
       "@qticaret/types/section-banner",
+      "@qticaret/types/section-catalog",
     ]) {
       const file = fromPackage(subpath)
       expect(file && existsSync(file)).toBe(true)
