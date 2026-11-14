@@ -131,7 +131,7 @@ export async function shopView(): Promise<ShopView> {
     marquee: headerMarquee(layout.header, t),
     // The design's header bar and footer (Ek 2026-11-14 §5); the theme's header before them
     headerBar: headerBarOf(layout.main, theme),
-    footerBar: footerBarOf(layout.main),
+    footerBar: footerBarOf(layout.main, t),
     newsletter: newsletterOf(layout, identity.company_title ?? site.shop.name),
     topLinks: topLinks(menus, t),
     footerGroups: footerGroups(footerMenus(menus, t), menu, t),

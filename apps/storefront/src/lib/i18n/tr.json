@@ -979,6 +979,8 @@
   "marks.iyzico": "iyzico",
   "marks.bank_transfer": "Havale / EFT",
   "marks.cash_on_delivery": "Kapıda ödeme",
+  "marks.amex": "American Express",
+  "marks.installments": "Taksit imkânı",
   "marks.aras": "Aras Kargo",
   "marks.yurtici": "Yurtiçi Kargo",
   "price.cart_offer_percent": "Sepette %{percent} indirim",

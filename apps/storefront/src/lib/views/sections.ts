@@ -15,6 +15,7 @@ import { googleRatingReviews, reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
 import { railCardVariant } from "./card-framed"
 import { heroView, priceBandsView, withCounts } from "./catalog"
+import { linkedCategoriesView } from "./category-cards-data"
 import { picturedCategories } from "./category-tiles"
 import { featuredView } from "./featured"
 import { EXCERPT_MIN_RATING, googleRatingView } from "./google-rating"
@@ -107,6 +108,21 @@ async function sectionView(
     case "banner":
       return bannerView(section, t)
     case "categories": {
+      if (section.variant === "linked") {
+        const { cards, linked } = await linkedCategoriesView(section, t, context.home === true)
+        const more = layoutLink(section.more ?? null, t)
+        return cards.length > 0
+          ? {
+              id,
+              type: "categories",
+              title: section.title ?? t("home.shop_categories"),
+              categories: cards,
+              ...(more ? { more } : {}),
+              variant: "linked",
+              linked,
+            }
+          : null
+      }
       // A product's photo stands in for a missing category picture on the home page only
       const categories = context.home
         ? await withCounts(

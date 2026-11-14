@@ -44,7 +44,7 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
     expect(headerBarOf(newer, { header: { layout: "left", sticky: true } }).variant).toBe(
       "standard"
     )
-    expect(footerBarOf(newer).variant).toBe("ledger")
+    expect(footerBarOf(newer, (key) => key).variant).toBe("ledger")
   })
 
   it("gives the product's block the steps the shop set, and none when it set none", () => {

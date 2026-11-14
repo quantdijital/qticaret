@@ -11,6 +11,7 @@ export {
 } from "./section-variants"
 export type {
   CardVariant,
+  CategoriesVariant,
   CategoryMainVariant,
   DefaultVariant,
   FooterBarVariant,
@@ -46,6 +47,7 @@ export type * from "./addon-views"
 export type * from "./banner-views"
 export type * from "./card-views"
 export type * from "./catalog-views"
+export type * from "./category-card-views"
 export type * from "./checkout-views"
 export type * from "./frame-views"
 export type * from "./home-views"
