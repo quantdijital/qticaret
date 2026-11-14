@@ -28,7 +28,19 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       ...ALWAYS,
     })
     expect(doc.footer).toEqual([
-      { id: MAIN_SECTION_IDS.footer_bar, type: "footer_bar", variant: "ledger", ...ALWAYS },
+      {
+        id: MAIN_SECTION_IDS.footer_bar,
+        type: "footer_bar",
+        variant: "ledger",
+        ...ALWAYS,
+        // The footer's own settings read in with their defaults (adr/0049 Ek 2026-11-15)
+        social: "text",
+        payment_badges: [],
+        back_to_top: false,
+        back_to_top_side: "right",
+        back_to_top_shape: "round",
+        back_to_top_mobile: true,
+      },
     ])
     expect(doc.product.map((section) => section.type)).toEqual(["product_main", "help"])
     expect(doc.category).toEqual([

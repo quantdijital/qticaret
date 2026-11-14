@@ -206,6 +206,16 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         // Printed only when set, so a section from before them prints as it did
         ...(section.show_count ? { show_count: true } : {}),
         ...(section.more ? { more: link(section.more) } : {}),
+        // Today's tiles print no variant, as before variants (adr/0049 Ek 2026-11-15)
+        ...(section.variant === "linked"
+          ? {
+              variant: section.variant,
+              columns: section.columns,
+              image_position: section.image_position,
+              frame: section.frame,
+              links: section.links,
+            }
+          : {}),
       }
     case "brands":
       return { id, type, title: section.title, brand_ids: section.brand_ids }
