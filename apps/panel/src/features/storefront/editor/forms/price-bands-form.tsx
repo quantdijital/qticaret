@@ -48,7 +48,7 @@ export function PriceBandsForm({
   }
   const last = section.bands.length - 1
   const before = (index: number) => section.bands[index - 1]?.max ?? null
-  /** "500 TL altı", "2.500 TL ve üzeri": the label a band's bound suggests. */
+  /** "500 TL'ye kadar", "2.500 TL üzeri": the label a band's bound suggests. */
   const suggested = (band: PriceBand, index: number) =>
     band.max === null
       ? t(`${P}.labelOpen`, { amount: LIRA.format(before(index) ?? 0) })

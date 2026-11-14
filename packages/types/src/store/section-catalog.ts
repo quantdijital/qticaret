@@ -53,14 +53,19 @@ export interface PriceBand {
 }
 
 /**
- * Each band's range: from the band before's upper bound (none for the
- * first) to its own (none for "and up"), as a listing's price filter reads
- * it (`fiyat=min-max`, either end left out).
+ * Each band's range: from one whole unit above the band before's upper
+ * bound (none for the first) to its own (none for "and up"), as a
+ * listing's price filter reads it (`fiyat=min-max`, both ends included,
+ * whole units, either end left out). So a price on a bound is in one band
+ * only, the lower one.
  */
 export function bandRanges(
   bands: readonly Pick<PriceBand, "max">[]
 ): { min: number | null; max: number | null }[] {
-  return bands.map((band, index) => ({ min: bands[index - 1]?.max ?? null, max: band.max }))
+  return bands.map((band, index) => {
+    const before = bands[index - 1]?.max
+    return { min: before === undefined || before === null ? null : before + 1, max: band.max }
+  })
 }
 
 /**

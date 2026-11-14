@@ -188,8 +188,8 @@ describe("the price bands (adr/0049 Ek 2026-11-14, Katalog ana sayfası)", () =>
       title: null,
       bands: [
         { label: "₺500 altı", text: null, min: null, max: 500, product_ids: ["prod_1"] },
-        { label: "₺1.000 altı", text: null, min: 500, max: 1000, product_ids: [] },
-        { label: "Üstü", text: null, min: 1000, max: null, product_ids: ["prod_2"] },
+        { label: "₺1.000 altı", text: null, min: 501, max: 1000, product_ids: [] },
+        { label: "Üstü", text: null, min: 1001, max: null, product_ids: ["prod_2"] },
       ],
     })
     expect(hydratePriceBands(section, undefined, (text) => text).bands[0]?.product_ids).toEqual([])

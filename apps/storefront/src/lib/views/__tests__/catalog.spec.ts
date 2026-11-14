@@ -187,7 +187,7 @@ describe("the price bands", () => {
         title: null,
         bands: [
           { label: "₺500 altı", text: null, min: null, max: 500, product_ids: ["p2", "yok"] },
-          { label: "Üstü", text: "Koleksiyon", min: 500, max: null, product_ids: ["p1"] },
+          { label: "Üstü", text: "Koleksiyon", min: 501, max: null, product_ids: ["p1"] },
         ],
       },
       t
@@ -196,7 +196,7 @@ describe("the price bands", () => {
     expect(view?.title).toBe("Fiyata göre alışveriş")
     expect(view?.bands.map((band) => [band.path, band.products.map((each) => each.path)])).toEqual([
       ["/magaza?fiyat=-500", ["/urun/p2"]],
-      ["/magaza?fiyat=500-", ["/urun/p1"]],
+      ["/magaza?fiyat=501-", ["/urun/p1"]],
     ])
   })
 })

@@ -7,7 +7,7 @@ import { bodyFields } from "./look"
  * "Katalog ana sayfası"): two to four bands, each a label, an optional
  * line and an upper bound in whole units of the shop's currency (none:
  * "and up", the last band only); every bound above the one before. A
- * band's range runs from the band before's bound to its own. Its products
+ * band's range runs from just above the band before's bound to its own. Its products
  * are picked on the server by their indexed prices (never a price from the
  * editor, golden rule 5); the storefront links each band to the catalogue
  * filtered by its range. On the home page.
@@ -37,9 +37,16 @@ export function bandsRise(bands: readonly { max: number | null }[]): boolean {
   })
 }
 
-/** Each band's range: the band before's bound (none first) to its own (none: open). */
+/**
+ * Each band's range: one whole unit above the band before's bound (none
+ * first) to its own (none: open); the listing's price filter takes both
+ * ends, so a price on a bound is in the lower band only.
+ */
 export const bandRanges = (bands: readonly { max: number | null }[]) =>
-  bands.map((band, index) => ({ min: bands[index - 1]?.max ?? null, max: band.max }))
+  bands.map((band, index) => {
+    const before = bands[index - 1]?.max
+    return { min: before === undefined || before === null ? null : before + 1, max: band.max }
+  })
 
 const band = z
   .object({

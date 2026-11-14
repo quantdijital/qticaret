@@ -88,8 +88,8 @@ describe("PriceBandsForm", () => {
     const user = userEvent.setup()
     const changes = holder(PriceBandsForm, bands())
 
-    expect(screen.getAllByPlaceholderText("500 TL altı")).toHaveLength(1)
-    expect(screen.getAllByPlaceholderText("1.000 TL ve üzeri")).toHaveLength(1)
+    expect(screen.getAllByPlaceholderText("500 TL'ye kadar")).toHaveLength(1)
+    expect(screen.getAllByPlaceholderText("1.000 TL üzeri")).toHaveLength(1)
     await user.click(screen.getByRole("button", { name: "Bant ekle" }))
     expect(changes.at(-1)?.bands.map((band) => band.max)).toEqual([500, 1000, 2000, null])
     expect(screen.getByRole("button", { name: "Bant ekle" })).toBeDisabled()
