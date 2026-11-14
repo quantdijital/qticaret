@@ -117,7 +117,7 @@ async function readBody(response: IncomingMessage, maxBytes: number, method: str
   const declared = Number(response.headers["content-length"])
   if (hasBody && Number.isFinite(declared) && declared > maxBytes) {
     response.destroy()
-    throw new SafeFetchError("response_too_large")
+    throw new SafeFetchError("response_too_large", { status })
   }
   const chunks: Buffer[] = []
   let size = 0
@@ -126,7 +126,7 @@ async function readBody(response: IncomingMessage, maxBytes: number, method: str
     size += buffer.length
     if (size > maxBytes) {
       response.destroy()
-      throw new SafeFetchError("response_too_large")
+      throw new SafeFetchError("response_too_large", { status })
     }
     chunks.push(buffer)
   }

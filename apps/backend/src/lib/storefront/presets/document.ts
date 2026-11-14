@@ -4,7 +4,7 @@ import type { ThemeSettings } from "../../../modules/platform-settings/sections"
 import { layoutDocument } from "../layout"
 import type { LayoutDocument } from "../layout"
 import type { LayoutSettings } from "../layout-settings"
-import type { ResolvedPreset } from "./resolve"
+import type { PresetGroups, ResolvedPreset } from "./resolve"
 
 /** The preset a design was last given (`settings.preset`, adr/0063 §2). */
 export interface AppliedPreset {
@@ -16,6 +16,37 @@ export interface AppliedPreset {
 const fieldOf = (error: { issues: { path: PropertyKey[] }[] }, prefix: string): string => {
   const path = error.issues[0]?.path ?? []
   return [prefix, ...path.map(String)].join(".")
+}
+
+/** The frame's groups a preset may leave to the shop (adr/0063 §4): the header and footer. */
+export const SHOP_FRAME_GROUPS = ["header", "footer"] as const
+export type ShopFrame = Pick<PresetGroups, (typeof SHOP_FRAME_GROUPS)[number]>
+
+const idOf = (section: unknown): string => {
+  const id = (section as { id?: unknown } | null)?.id
+  return typeof id === "string" ? id : "?"
+}
+
+/**
+ * The preset's groups with the shop's frame kept where the preset leaves it
+ * empty (adr/0063 §4, as with menus): a header or footer the preset writes no
+ * section for, or whose every section was dropped, carries the shop's own
+ * sections there (an announcement bar is not lost to a look that has none);
+ * one the preset fills is the preset's. `kept` names them, `header.duyurular`.
+ */
+export function withShopFrame(
+  groups: PresetGroups,
+  shop: ShopFrame
+): { groups: PresetGroups; kept: string[] } {
+  const out: PresetGroups = { ...groups }
+  const kept: string[] = []
+  for (const group of SHOP_FRAME_GROUPS) {
+    if (groups[group].length === 0 && shop[group].length > 0) {
+      out[group] = [...shop[group]]
+      kept.push(...shop[group].map((section) => `${group}.${idOf(section)}`))
+    }
+  }
+  return { groups: out, kept }
 }
 
 /**

@@ -7851,6 +7851,12 @@
           "description": "Ürünün kategorisinden, bir koleksiyondan ya da elle seçtiğiniz ürünler."
         }
       },
+      "variants": {
+        "trust_badges": {
+          "strip": "Şerit",
+          "lined": "Çizgili kutular"
+        }
+      },
       "panel": {
         "back": "Bölümlere dön",
         "visibility": "Görünürlük",
@@ -7863,7 +7869,9 @@
         "remove": "Bölümü kaldır",
         "placement": "Yeri",
         "sections": "Bölümler",
-        "content": "İçerik"
+        "content": "İçerik",
+        "variant": "Biçim",
+        "variantHint": "Bölümün vitrinde nasıl görüneceği; önizleme hemen gösterir. Ortak içerik (başlık, metin) biçim değişince korunur, \"Geri al\" önceki biçimi getirir."
       },
       "defaults": {
         "heading": "Mağazanızın adı",

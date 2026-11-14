@@ -10,6 +10,7 @@ import type {
 } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
+import { offersVariants, switchVariant } from "@/features/storefront/layout/variants"
 import { AnnouncementForm } from "./forms/announcement-form"
 import { BannerForm } from "./forms/banner-form"
 import { FaqForm } from "./forms/faq-form"
@@ -21,6 +22,7 @@ import { ProductsForm } from "./forms/products-form"
 import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
 import { ScheduleFields } from "./forms/schedule-fields"
+import { VariantField } from "./forms/variant-field"
 import { Panel, PanelGroup } from "./panel-header"
 import { BrandsForm, CategoriesForm, CountedForm, WordedForm } from "./forms/simple-forms"
 import { SECTION_ICONS, kindOf } from "./section-meta"
@@ -94,8 +96,8 @@ function FormOf({
 /**
  * A section's settings in their own column, as Shopify's editor opens
  * them: the way back to the page's parts, what the section is, its fields
- * in groups that fold away (where it sits on a category page, its own
- * fields, when it shows), then the section copied or taken off (both
+ * in groups that fold away (how it is drawn when its type has variants,
+ * where it sits on a category page, its own fields, when it shows), then the section copied or taken off (both
  * undone with "Geri al").
  */
 export function SectionPanel({
@@ -119,6 +121,19 @@ export function SectionPanel({
       <p className="border-b px-5 py-4 text-[13px] leading-5 text-muted-foreground">
         {t(`storefront.editor.types.${kind}.description`)}
       </p>
+      {offersVariants(section) ? (
+        <PanelGroup title={t(`${P}.variant`)}>
+          <VariantField
+            id={`${section.id}-variant`}
+            type={section.type}
+            value={section.variant}
+            onChange={(next) => {
+              // Its own step in the history: "Geri al" brings the old variant back
+              onChange(switchVariant(section, next))
+            }}
+          />
+        </PanelGroup>
+      ) : null}
       {"placement" in section ? (
         <PanelGroup title={t(`${P}.placement`)}>
           <RadioGroup

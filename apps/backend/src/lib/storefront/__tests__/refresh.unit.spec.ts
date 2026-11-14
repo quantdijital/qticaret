@@ -3,9 +3,11 @@ import { createServer } from "node:http"
 import type { IncomingHttpHeaders, Server } from "node:http"
 import type { AddressInfo } from "node:net"
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { logger } from "../../logging"
 import { SafeFetchError } from "../../security/safe-fetch"
 import {
   REFRESH_HEADERS,
+  failureOf,
   isRefreshOn,
   refreshFetch,
   refreshRequest,
@@ -86,6 +88,7 @@ describe("storefront refresh signal (adr/0048 ek 2026-11-03)", () => {
   describe("sending", () => {
     let server: Server
     let status = 204
+    let answer = ""
     const received: { url: string; headers: IncomingHttpHeaders; body: string }[] = []
     const port = () => (server.address() as AddressInfo).port
     const local = () => ({
@@ -100,7 +103,7 @@ describe("storefront refresh signal (adr/0048 ek 2026-11-03)", () => {
         req.on("data", (chunk: Buffer) => (body += chunk.toString()))
         req.on("end", () => {
           received.push({ url: req.url ?? "", headers: req.headers, body })
-          res.writeHead(status).end()
+          res.writeHead(status).end(answer)
         })
       })
       await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
@@ -117,6 +120,7 @@ describe("storefront refresh signal (adr/0048 ek 2026-11-03)", () => {
     beforeEach(() => {
       received.length = 0
       status = 204
+      answer = ""
     })
 
     it("posts the signed scopes to the storefront and says it was sent", async () => {
@@ -190,5 +194,38 @@ describe("storefront refresh signal (adr/0048 ek 2026-11-03)", () => {
       ])
       expect(received).toHaveLength(1)
     })
+
+    it("logs a storefront's 500 by its status, though its error page is too long to read", async () => {
+      // `next dev`'s error page: far over the 4 KB the signal reads
+      status = 500
+      answer = "x".repeat(20_000)
+      const warn = jest.spyOn(logger, "warn").mockImplementation(() => undefined)
+
+      try {
+        const outcome = await refreshStorefront(containerWith(null), ["layout"], { env: local() })
+
+        expect(outcome).toBe("failed")
+        expect(warn).toHaveBeenCalledWith({
+          event: "storefront.refresh_failed",
+          scopes: ["layout"],
+          status: 500,
+          reason: "status_not_ok",
+        })
+      } finally {
+        warn.mockRestore()
+      }
+    })
+  })
+
+  it("classifies a failure by the answer's status when one came", () => {
+    const tooLarge = (status?: number) =>
+      new SafeFetchError("response_too_large", status === undefined ? {} : { status })
+
+    expect(failureOf(tooLarge(502))).toEqual({ status: 502, reason: "status_not_ok" })
+    // A 2xx whose body is over the limit is the size problem it says
+    expect(failureOf(tooLarge(200))).toEqual({ status: 200, reason: "response_too_large" })
+    expect(failureOf(tooLarge())).toEqual({ reason: "response_too_large" })
+    expect(failureOf(new SafeFetchError("timeout"))).toEqual({ reason: "timeout" })
+    expect(failureOf(new Error("boom"))).toHaveProperty("err")
   })
 })

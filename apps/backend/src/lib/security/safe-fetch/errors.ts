@@ -21,18 +21,29 @@ export type SafeFetchFailure =
 export class SafeFetchError extends Error {
   override readonly name = "SafeFetchError"
   readonly reason: SafeFetchFailure
+  /**
+   * The answer's status when it came before the failure (a body over
+   * `maxResponseBytes`): a caller can tell a 500's long error page from a
+   * long success.
+   */
+  readonly status?: number
 
-  constructor(reason: SafeFetchFailure, options: { cause?: unknown } = {}) {
+  constructor(reason: SafeFetchFailure, options: { cause?: unknown; status?: number } = {}) {
     super(
       `safe-fetch refused: ${reason}`,
       "cause" in options ? { cause: options.cause } : undefined
     )
     this.reason = reason
+    if (options.status !== undefined) {
+      this.status = options.status
+    }
   }
 }
 
 /** Shape check: a workflow hands thrown errors back as plain objects (docs/10). */
-export function isSafeFetchError(value: unknown): value is Pick<SafeFetchError, "name" | "reason"> {
+export function isSafeFetchError(
+  value: unknown
+): value is Pick<SafeFetchError, "name" | "reason" | "status"> {
   const fields = value as { name?: unknown; reason?: unknown } | null
   return fields?.name === "SafeFetchError" && typeof fields.reason === "string"
 }

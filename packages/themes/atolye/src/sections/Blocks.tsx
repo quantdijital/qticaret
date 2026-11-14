@@ -1,3 +1,4 @@
+import { drawnVariant } from "@qticaret/ui"
 import type {
   FormAction,
   HomeSectionView,
@@ -16,7 +17,7 @@ import { Help } from "./Help"
 import { Hero } from "./Hero"
 import { HeroSlider } from "./HeroSlider"
 import { type Block, blocksOf, headingId } from "./plan"
-import { Promises } from "./Promises"
+import { PROMISE_VARIANTS, Promises } from "./Promises"
 import { Reviews } from "./Reviews"
 import { Shelf } from "./Shelf"
 import { Signup } from "./Signup"
@@ -63,7 +64,13 @@ function BlockView({
     case "hero_slider":
       return <HeroSlider section={section} first={first} t={t} />
     case "trust_badges":
-      return <Promises badges={section.badges} label={t("footer.trust")} />
+      return (
+        <Promises
+          badges={section.badges}
+          label={t("footer.trust")}
+          variant={drawnVariant("trust_badges", section.variant, PROMISE_VARIANTS)}
+        />
+      )
     case "categories":
       return (
         <Aisles

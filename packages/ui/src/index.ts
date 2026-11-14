@@ -1,6 +1,19 @@
 export { formatLira } from "./money"
 export { ResponsiveImage } from "./ResponsiveImage"
 export {
+  SECTION_VARIANTS,
+  defaultVariant,
+  drawnVariant,
+  hasVariants,
+  variantOf,
+} from "./section-variants"
+export type {
+  DefaultVariant,
+  SectionVariant,
+  TrustBadgesVariant,
+  VariantSectionType,
+} from "./section-variants"
+export {
   IDLE,
   SUGGEST_DELAY_MS,
   SUGGEST_MIN_LENGTH,

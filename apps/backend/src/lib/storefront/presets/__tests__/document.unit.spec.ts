@@ -82,4 +82,24 @@ describe("the draft a preset makes (adr/0063 §4)", () => {
       "storefront_preset.layout_invalid"
     )
   })
+
+  it("takes a section's variant, the default where it names none (adr/0049 Ek 2026-11-14)", () => {
+    const theme = presetTheme(grafit.theme_settings)
+    const groups = { header: [], home: [], footer: [], product: [], category: [] }
+    const strip = { id: "guvenserit", type: "trust_badges" }
+    const lined = { ...strip, id: "guvencizgi", variant: "lined" }
+
+    const doc = presetDocument(
+      { groups: { ...groups, home: [strip, lined] }, menus: null },
+      theme,
+      APPLIED,
+      KEPT
+    )
+    const offList = { groups: { ...groups, home: [{ ...strip, variant: "bento" }] }, menus: null }
+
+    expect(doc.home).toMatchObject([{ variant: "strip" }, { variant: "lined" }])
+    expect(refusal(() => presetDocument(offList, theme, APPLIED, KEPT)).message).toBe(
+      "storefront_preset.layout_invalid"
+    )
+  })
 })

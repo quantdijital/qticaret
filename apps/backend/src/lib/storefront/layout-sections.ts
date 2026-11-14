@@ -1,19 +1,20 @@
 import { z } from "@medusajs/framework/zod"
-import { contentDoc } from "../content"
-import {
-  LAYOUT_LIMITS,
-  base,
-  columns,
-  image,
-  optional,
-  recordId,
-  shopText,
-  text,
-  title,
-} from "./layout-fields"
-import { googleRating } from "./layout-google"
-import { heroSlider } from "./layout-slider"
-import { storefrontLink } from "./menus"
+import { placement } from "./layout-fields"
+import { announcementBar } from "./sections/announcement-bar"
+import { banner } from "./sections/banner"
+import { brands } from "./sections/brands"
+import { categories } from "./sections/categories"
+import { counted } from "./sections/counted"
+import { faq } from "./sections/faq"
+import { featuredProduct } from "./sections/featured-product"
+import { googleRating } from "./sections/google-rating"
+import { hero } from "./sections/hero"
+import { heroSlider } from "./sections/hero-slider"
+import { products } from "./sections/products"
+import { relatedProducts } from "./sections/related-products"
+import { richText } from "./sections/rich-text"
+import { placedTrustBadges, trustBadges } from "./sections/trust-badges"
+import { worded } from "./sections/worded"
 
 /**
  * The storefront design's sections (adr/0049), each a type of its own with
@@ -21,175 +22,15 @@ import { storefrontLink } from "./menus"
  * page's, the product and category pages', the footer's. Sector-free; text
  * is plain (shop details as `{belirteç}`s, adr/0048); images only from the
  * shop's media library; links point at records, never typed paths. No
- * HTML, CSS or scripts. Their pieces are `layout-fields.ts`; the whole
- * document is `layout.ts`.
+ * HTML, CSS or scripts. Each type is its own file under `sections/`
+ * (adr/0049 Ek 2026-11-14 §2.5), a type with variants a union of its
+ * variants' branches (`sections/variants.ts`); their pieces are
+ * `layout-fields.ts`; the whole document is `layout.ts`.
  */
 
 export { LAYOUT_LIMITS } from "./layout-fields"
-
-export const announcementBar = z
-  .object({
-    ...base,
-    type: z.literal("announcement_bar"),
-    lines: z.array(shopText(120)).min(1).max(5),
-  })
-  .strict()
-
-const hero = z
-  .object({
-    ...base,
-    type: z.literal("hero"),
-    eyebrow: optional(shopText(40)),
-    /** None: the shop's name. */
-    heading: optional(shopText(90)),
-    text: optional(shopText(240)),
-    links: z.array(storefrontLink).max(2).default([]),
-    image: optional(image),
-  })
-  .strict()
-
-const banner = z
-  .object({
-    ...base,
-    type: z.literal("banner"),
-    slides: z
-      .array(
-        z
-          .object({
-            image,
-            heading: optional(shopText(90)),
-            text: optional(shopText(160)),
-            link: optional(storefrontLink),
-          })
-          .strict()
-      )
-      .min(1)
-      .max(LAYOUT_LIMITS.slides),
-  })
-  .strict()
-
-const categories = z
-  .object({
-    ...base,
-    type: z.literal("categories"),
-    title,
-    /** None: the top categories. */
-    category_ids: z.array(recordId).max(LAYOUT_LIMITS.items).default([]),
-  })
-  .strict()
-
-const collectionSource = z
-  .object({ kind: z.literal("collection"), collection_id: recordId })
-  .strict()
-const manualSource = (max: number) =>
-  z.object({ kind: z.literal("manual"), product_ids: z.array(recordId).min(1).max(max) }).strict()
-
-/** A best-seller rail's window in days (adr/0049 Ek 2026-11-05): a week to a year, a season by default. */
-export const BEST_SELLER_DAYS = { min: 7, max: 365, default: 90 } as const
-
-const productSource = z.discriminatedUnion("kind", [
-  z.object({ kind: z.literal("newest") }).strict(),
-  /** What `/kampanyalar` lists now, the deepest discount first; picked on the server. */
-  z.object({ kind: z.literal("on_sale") }).strict(),
-  /** The most units sold in paid orders over the last `days`; picked on the server. */
-  z
-    .object({
-      kind: z.literal("best_sellers"),
-      days: z
-        .number()
-        .int()
-        .min(BEST_SELLER_DAYS.min)
-        .max(BEST_SELLER_DAYS.max)
-        .default(BEST_SELLER_DAYS.default),
-    })
-    .strict(),
-  z.object({ kind: z.literal("category"), category_id: recordId }).strict(),
-  collectionSource,
-  manualSource(LAYOUT_LIMITS.items),
-])
-
-const products = z
-  .object({
-    ...base,
-    type: z.literal("products"),
-    title,
-    source: productSource,
-    limit: z.number().int().min(1).max(LAYOUT_LIMITS.items).default(12),
-    /** Cards in a row on a wide screen: 3, 4 or 5 (adr/0049 Ek 2026-11-05). */
-    columns,
-    /** A "see all" link under the rail. */
-    more: optional(storefrontLink),
-  })
-  .strict()
-
-/** One product up close (adr/0046 Ek 2026-11-05): the storefront adds its facts and spec table. */
-const featuredProduct = z
-  .object({
-    ...base,
-    type: z.literal("featured_product"),
-    title,
-    text: optional(shopText(240)),
-    product_id: recordId,
-  })
-  .strict()
-
-const brands = z
-  .object({
-    ...base,
-    type: z.literal("brands"),
-    title,
-    /** None: every brand, up to the limit. */
-    brand_ids: z.array(recordId).max(LAYOUT_LIMITS.items).default([]),
-  })
-  .strict()
-
-const counted = (type: "posts" | "reviews", max: number, fallback: number) =>
-  z
-    .object({
-      ...base,
-      type: z.literal(type),
-      title,
-      limit: z.number().int().min(1).max(max).default(fallback),
-    })
-    .strict()
-
-const richText = z
-  .object({ ...base, type: z.literal("rich_text"), title, body: contentDoc })
-  .strict()
-
-const trustBadges = z.object({ ...base, type: z.literal("trust_badges") }).strict()
-
-export const worded = (type: "newsletter" | "help") =>
-  z.object({ ...base, type: z.literal(type), title, text: optional(shopText(240)) }).strict()
-
-/** Questions and answers, shown on the page; never `FAQPage` structured data (docs/13 §5). */
-const faq = z
-  .object({
-    ...base,
-    type: z.literal("faq"),
-    title,
-    items: z
-      .array(z.object({ question: text(160), answer: shopText(600) }).strict())
-      .min(1)
-      .max(LAYOUT_LIMITS.faq),
-  })
-  .strict()
-
-/** Products shown under a product's own: its category's, a collection's, or chosen ones. */
-const relatedProducts = z
-  .object({
-    ...base,
-    type: z.literal("related_products"),
-    title,
-    source: z.discriminatedUnion("kind", [
-      z.object({ kind: z.literal("same_category") }).strict(),
-      collectionSource,
-      manualSource(LAYOUT_LIMITS.related),
-    ]),
-    limit: z.number().int().min(1).max(LAYOUT_LIMITS.related).default(8),
-    columns,
-  })
-  .strict()
+export { BEST_SELLER_DAYS } from "./sections/products"
+export { announcementBar, worded }
 
 // A type a group does not take (another page's, or none) reads as an unknown section
 const SECTION_TYPE = { error: "storefront_layout.section_invalid" }
@@ -223,16 +64,14 @@ export const productSection = z.discriminatedUnion(
   SECTION_TYPE
 )
 
-/** Where a category page shows a section: above its product grid or below it. */
-const placement = z.enum(["top", "bottom"]).default("bottom")
-
+/** On every category page, above its product grid or below it (`placement`). */
 export const categorySection = z.discriminatedUnion(
   "type",
   [
     richText.extend({ placement }),
     banner.extend({ placement }),
     faq.extend({ placement }),
-    trustBadges.extend({ placement }),
+    placedTrustBadges,
     worded("help").extend({ placement }),
     worded("newsletter").extend({ placement }),
   ],

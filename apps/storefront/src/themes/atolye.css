@@ -13,6 +13,6 @@
    the first paint. `themes/__tests__/atolye-sources.spec.ts` fails when a
    file the theme reaches is missing here. */
 @source "../../../../packages/themes/atolye/src";
-@source "../../../../packages/ui/src/{ResponsiveImage,index,money,search-suggest}.ts{,x}";
+@source "../../../../packages/ui/src/{ResponsiveImage,index,money,search-suggest,section-variants}.ts{,x}";
 @source "../../../../packages/ui/src/components/{breadcrumb,button,kept-form,payment-frame}.tsx";
 @source "../../../../packages/ui/src/{hooks,lib}/*.ts";

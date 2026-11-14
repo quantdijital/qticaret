@@ -120,6 +120,7 @@ describe("the theme's home page: opening, promises, aisles", () => {
       {
         id: "guven",
         type: "trust_badges",
+        variant: "strip",
         badges: [{ icon: "truck", title: "Ücretsiz kargo", text: "1.500,00 TL ve üzeri" }],
       },
     ])
@@ -129,6 +130,45 @@ describe("the theme's home page: opening, promises, aisles", () => {
     expect(html).toContain("auto-rows-fr")
     expect(html).toContain("flex-col items-start")
     expect(html).toContain("sm:flex-row")
+  })
+
+  it("draws the promises as boxes split by hairlines in the lined variant (adr/0049 Ek 2026-11-14)", () => {
+    const badges = [
+      { icon: "truck" as const, title: "Ücretsiz kargo", text: "1.500,00 TL ve üzeri" },
+      { icon: "refresh" as const, title: "30 gün iade", text: null },
+    ]
+    const html = home([hero, { id: "guven", type: "trust_badges", variant: "lined", badges }])
+    expect(html).toContain('data-variant="lined"')
+    expect(html).toContain("Ücretsiz kargo")
+    expect(html).toContain("30 gün iade")
+    // The strip's tinted cards are not drawn
+    expect(html).not.toContain("auto-rows-fr grid-cols-2 gap-2")
+    // As many columns as badges: no empty box
+    expect(html).toContain("lg:grid-cols-2")
+    const three = home([
+      hero,
+      {
+        id: "guven",
+        type: "trust_badges",
+        variant: "lined",
+        badges: [...badges, { icon: "truck" as const, title: "Aynı gün kargo", text: null }],
+      },
+    ])
+    expect(three).toContain("lg:grid-cols-3")
+    expect(three).not.toContain("lg:grid-cols-4")
+  })
+
+  it("draws the strip for a variant the theme does not draw", () => {
+    const badges = [{ icon: "truck" as const, title: "Kargo", text: null }]
+    const newer = {
+      id: "guven",
+      type: "trust_badges",
+      variant: "bento",
+      badges,
+    } as unknown as HomeSectionView
+    const html = home([hero, newer])
+    expect(html).not.toContain('data-variant="lined"')
+    expect(html).toContain("auto-rows-fr grid-cols-2 gap-2")
   })
 
   it("draws every category as a tile of one size, no pills, and the link to every category", () => {

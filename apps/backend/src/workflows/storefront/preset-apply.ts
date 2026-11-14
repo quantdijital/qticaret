@@ -36,7 +36,8 @@ const PRESET_LOCK = { timeout: 30, ttl: 120 }
  * the same preset again writes the same draft and uploads nothing.
  *
  * What the shop has no record for is left out and named in `skipped`,
- * never stood in for. Any step failing undoes the uploads, their records
+ * never stood in for; a header or footer the preset leaves empty keeps the
+ * shop's sections, named in `kept`. Any step failing undoes the uploads, their records
  * and the draft. Two locks, always in this order: the pack's
  * (`presetLockKey`) from the ledger's read to the draft's write, so two
  * applies never both upload an image the shop deleted and one of them
@@ -120,6 +121,7 @@ export const applyPresetWorkflow = createWorkflow(
             version: preset.version,
             skipped: draft.skipped.length,
             dropped: draft.dropped.length,
+            kept: draft.kept.length,
             images_added: recorded.added,
           },
         },
@@ -135,6 +137,8 @@ export const applyPresetWorkflow = createWorkflow(
         version: preset.version,
         skipped: draft.skipped,
         dropped: draft.dropped,
+        /** The shop's header or footer sections kept where the preset leaves the group empty. */
+        kept: draft.kept,
         images: { added: recorded.added, kept: recorded.kept },
         // Demo records come with work item 2.4 (adr/0063 §5)
         demo: { added: 0, kept: 0 },

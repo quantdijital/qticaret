@@ -1,4 +1,4 @@
-import type { ProductSource, ShelfColumns } from "@qticaret/types"
+import type { ProductSource, ShelfColumns, TrustBadgesVariant } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
 import type { MenuInput } from "@/features/storefront/api/menus"
@@ -138,6 +138,8 @@ export interface RichTextSection extends SectionBase {
 
 export interface TrustBadgesSection extends SectionBase {
   type: "trust_badges"
+  /** How the strip is drawn (adr/0049 Ek 2026-11-14 §2); the server fills the default on reading. */
+  variant: TrustBadgesVariant
 }
 
 export interface WordedSection extends SectionBase {

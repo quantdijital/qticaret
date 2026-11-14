@@ -4,6 +4,7 @@
  * shop's details in place. A copy of the backend's answer (adr/0046 §8).
  */
 import type { MediaDerivatives } from "./catalog.js"
+import type { TrustBadgesVariant } from "./section-variants.js"
 import type { MenuLinkKind, StoreMenu, StoreThemeSettings, StorefrontFrame } from "./storefront.js"
 
 export interface StoreLayoutLink {
@@ -85,7 +86,16 @@ export type StoreLayoutSection =
   | { id: string; type: "posts" | "reviews"; title: string | null; limit: number }
   | StoreGoogleRatingSection
   | { id: string; type: "rich_text"; title: string | null; html: string }
-  | { id: string; type: "trust_badges" }
+  | {
+      id: string
+      type: "trust_badges"
+      /**
+       * How the strip is drawn (adr/0049 Ek 2026-11-14 §2); absent from a
+       * backend before variants. The storefront reads one it does not know
+       * as the default (`variantOf`).
+       */
+      variant?: TrustBadgesVariant
+    }
   | { id: string; type: "newsletter" | "help"; title: string | null; text: string | null }
   | StoreFaqSection
 

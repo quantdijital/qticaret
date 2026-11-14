@@ -1,6 +1,6 @@
 import { z } from "@medusajs/framework/zod"
-import { LAYOUT_LIMITS, base, image, optional, shopText } from "./layout-fields"
-import { storefrontLink } from "./menus"
+import { LAYOUT_LIMITS, base, image, optional, shopText } from "../layout-fields"
+import { storefrontLink } from "../menus"
 
 /**
  * The home page's sliding opening (`hero_slider`, adr/0049 Ek 2026-11-06):
