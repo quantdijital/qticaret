@@ -1,4 +1,6 @@
 import type {
+  BannerSettings,
+  BannerTone,
   CardVariant,
   MarqueeSettings,
   ProductSource,
@@ -85,17 +87,24 @@ export interface HeroSliderSection extends BodySectionBase {
   arrows: boolean
 }
 
+/** One picture of the band (adr/0049 Ek 2026-11-14 §3.3 E2). */
 export interface BannerSlide {
   image: LayoutImage
+  /** A phone's own picture (a closer crop); none: the wide one. */
+  mobile_image: LayoutImage | null
   heading: string | null
   text: string | null
   link: LayoutLink | null
+  /** A second, quieter button. */
+  second_link: LayoutLink | null
+  tone: BannerTone
 }
 
-export interface BannerSection extends BodySectionBase {
+/** The picture band: its slides and how the whole band stands. */
+export type BannerSection = BodySectionBase & {
   type: "banner"
   slides: BannerSlide[]
-}
+} & BannerSettings
 
 export interface CategoriesSection extends BodySectionBase {
   type: "categories"

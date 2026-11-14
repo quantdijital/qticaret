@@ -103,10 +103,23 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         type,
         slides: section.slides.map((slide) => ({
           image: { ...image(slide.image.url, slide.image.alt), alt: slide.image.alt },
+          mobile_image: slide.mobile_image
+            ? {
+                ...image(slide.mobile_image.url, slide.mobile_image.alt),
+                alt: slide.mobile_image.alt,
+              }
+            : null,
           heading: fill(slide.heading, at.values),
           text: fill(slide.text, at.values),
           link: link(slide.link),
+          second_link: link(slide.second_link),
+          tone: slide.tone,
         })),
+        width: section.width,
+        height: section.height,
+        text_position: section.text_position,
+        overlay: section.overlay,
+        button_style: section.button_style,
       }
     case "hero_slider":
       return {

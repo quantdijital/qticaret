@@ -4,6 +4,7 @@
  * shop's details in place. A copy of the backend's answer (adr/0046 §8).
  */
 import type { MediaDerivatives } from "./catalog.js"
+import type { StoreBannerSection } from "./section-banner.js"
 import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
 import type { StoreMainSections } from "./section-main.js"
@@ -76,16 +77,7 @@ export type StoreLayoutSection = StoreSectionLookPart &
         links: StoreLayoutLink[]
         image: StoreLayoutImage | null
       }
-    | {
-        id: string
-        type: "banner"
-        slides: {
-          image: StoreLayoutImage
-          heading: string | null
-          text: string | null
-          link: StoreLayoutLink | null
-        }[]
-      }
+    | StoreBannerSection
     | StoreHeroSliderSection
     | { id: string; type: "categories"; title: string | null; category_ids: string[] }
     | {

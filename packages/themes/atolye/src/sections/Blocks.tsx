@@ -87,7 +87,7 @@ function BlockView({
         />
       )
     case "banner":
-      return <Campaign section={section} label={t("home.banner")} />
+      return <Campaign section={section} label={t("home.banner")} first={first} />
     case "featured_product":
       return <Spotlight section={section} t={t} quickAdd={quickAdd} />
     case "reviews":

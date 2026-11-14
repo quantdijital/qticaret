@@ -3,6 +3,7 @@ import { docStats } from "../../lib/content"
 import { ValidationError } from "../../lib/errors"
 import { bodySections } from "../../lib/storefront/layout"
 import type { BodySection, HeaderSection, LayoutDocument } from "../../lib/storefront/layout"
+import { bannerImages, bannerLinks } from "../../lib/storefront/sections/banner"
 import { sliderImages } from "../../lib/storefront/sections/hero-slider"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import { unknownDocTokens } from "../../lib/shop/tokens"
@@ -18,7 +19,10 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
   if (section.type === "hero") {
     return section.links
   }
-  if (section.type === "banner" || section.type === "hero_slider") {
+  if (section.type === "banner") {
+    return bannerLinks(section)
+  }
+  if (section.type === "hero_slider") {
     return section.slides.flatMap((slide) => (slide.link ? [slide.link] : []))
   }
   if (section.type === "products") {
@@ -66,7 +70,7 @@ export function imagesOf(section: BodySection): string[] {
     return sliderImages(section)
   }
   if (section.type === "banner") {
-    return section.slides.map((slide) => slide.image.url)
+    return bannerImages(section)
   }
   if (section.type === "rich_text") {
     return docStats(section.body).images.map((each) => each.src)

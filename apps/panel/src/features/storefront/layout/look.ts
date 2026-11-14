@@ -34,9 +34,18 @@ const ONLY: Partial<Record<LookedType, readonly SectionLookField[]>> = {
 }
 
 /** The look's fields the panel offers for a type, in the contract's order. */
+/**
+ * Types with a width of their own (the band's "Kutulu / Tam", adr/0049 Ek
+ * 2026-11-14 §3.3 E2): the look's width is not offered beside it.
+ */
+const OWN_WIDTH: ReadonlySet<LookedType> = new Set(["banner"])
+
 export const lookFieldsFor = (type: LookedType): readonly SectionLookField[] =>
   SECTION_LOOK_FIELDS.filter(
-    (field) => (ONLY[type]?.includes(field) ?? true) && (field !== "align" || !NO_ALIGN.has(type))
+    (field) =>
+      (ONLY[type]?.includes(field) ?? true) &&
+      (field !== "align" || !NO_ALIGN.has(type)) &&
+      (field !== "width" || !OWN_WIDTH.has(type))
   )
 
 /** A field's steps the panel offers for a type. */

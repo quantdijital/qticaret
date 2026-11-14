@@ -1,0 +1,73 @@
+/*
+ * The picture band (`banner`, adr/0049 Ek 2026-11-14 §3.3 E2;
+ * `sections/Campaign.tsx`): the shop's steps are attributes, every value a
+ * token; no inline style (CSP). The words stay readable (4.5:1, measured
+ * against a white picture under light words and a black one under dark)
+ * at every step: their line is drawn in the full ink, never the second,
+ * and the veil under them is never thinner than 72 % of the stage's
+ * graphite (light words) or the counter's white (dark words). How strong
+ * the veil is decides how much of the picture it covers, not how thin it
+ * is under the words:
+ * - none: the picture clear, the words on a plate of their own;
+ * - light: a soft cloud behind the words only;
+ * - medium: the cloud, and the veil from the words' side across the
+ *   picture (the band as drawn before the steps);
+ * - strong: the whole picture veiled at 82 %.
+ */
+@layer components {
+  .gf-band {
+    --band-veil: var(--color-stage);
+  }
+  .gf-band[data-tone="dark"] {
+    --band-veil: var(--color-paper);
+  }
+
+  .gf-band-veil {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+  .gf-band[data-overlay="medium"] .gf-band-veil {
+    background: linear-gradient(
+      var(--band-from, to top),
+      var(--band-veil) 8%,
+      color-mix(in srgb, var(--band-veil) 72%, transparent) 30%,
+      transparent 72%
+    );
+  }
+  .gf-band[data-overlay="strong"] .gf-band-veil {
+    background: color-mix(in srgb, var(--band-veil) 82%, transparent);
+  }
+  /* The medium veil comes from the words' side: their row, or in the middle row their column */
+  .gf-band[data-row="top"] {
+    --band-from: to bottom;
+  }
+  .gf-band[data-row="middle"][data-column="left"] {
+    --band-from: to right;
+  }
+  .gf-band[data-row="middle"][data-column="right"] {
+    --band-from: to left;
+  }
+  .gf-band[data-row="middle"][data-column="center"] {
+    --band-from: to top;
+  }
+
+  .gf-band-words {
+    border-radius: var(--radius-inner);
+  }
+  .gf-band[data-overlay="none"] .gf-band-words {
+    padding: var(--space-md) var(--space-lg);
+    background: var(--band-veil);
+  }
+  .gf-band[data-overlay="light"] .gf-band-words,
+  .gf-band[data-overlay="medium"] .gf-band-words {
+    background: color-mix(in srgb, var(--band-veil) 72%, transparent);
+    box-shadow: 0 0 3rem 2rem color-mix(in srgb, var(--band-veil) 72%, transparent);
+  }
+
+  /* Dark words: the counter's inks, the main button the shop-colour pill again */
+  .gf-band[data-tone="dark"] {
+    color: var(--color-text);
+  }
+}

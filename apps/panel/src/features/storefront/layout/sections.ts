@@ -14,7 +14,7 @@ import type {
   Placement,
   ProductSection,
 } from "@/features/storefront/api/layout"
-import { MARQUEE_DEFAULTS, defaultVariant } from "@qticaret/types"
+import { BANNER_DEFAULTS, MARQUEE_DEFAULTS, defaultVariant } from "@qticaret/types"
 import { LAYOUT_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
 
 /** The groups in the order the storefront draws them (a page's body between header and footer). */
@@ -154,7 +154,7 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
         arrows: true,
       }
     case "banner":
-      return { ...base, type, slides: [] }
+      return { ...base, type, slides: [], ...BANNER_DEFAULTS }
     case "categories":
       return { ...base, type, title: null, category_ids: [] }
     case "products":

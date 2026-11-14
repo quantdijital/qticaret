@@ -7791,7 +7791,7 @@
         },
         "banner": {
           "name": "Image slider",
-          "description": "1–6 images shown in turn, each with its own heading, line and link."
+          "description": "1–6 images, side by side on a wide screen, each with its own heading, line and one or two buttons."
         },
         "categories": {
           "name": "Categories",
@@ -8017,10 +8017,64 @@
       "banner": {
         "empty": "No images yet. The section is saved once it has one.",
         "slide": "Image {{number}}",
-        "link": "Link",
-        "linkHint": "Where a visitor clicking the image goes; optional.",
+        "link": "Button",
+        "linkHint": "The picture's main button; optional.",
         "add": "Add image",
-        "hint": "Up to {{max}} images, shown in turn."
+        "hint": "Up to {{max}} images, side by side on a wide screen.",
+        "secondLink": "Second button",
+        "secondLinkHint": "Optional; drawn one step quieter than the first.",
+        "mobileImage": "Phone image",
+        "mobileImageHint": "Optional. Shown instead of the wide image on screens narrower than 640 px.",
+        "tone": {
+          "label": "Text colour",
+          "hint": "Pick by the picture: light text on a dark one, dark text on a light one. The text stays readable at every setting.",
+          "light": "Light text",
+          "dark": "Dark text"
+        },
+        "width": {
+          "label": "Width",
+          "term": "width",
+          "hint": "Boxed: the page's width, rounded corners. Full: edge to edge.",
+          "boxed": "Boxed",
+          "full": "Full"
+        },
+        "height": {
+          "label": "Height",
+          "term": "height",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
+        },
+        "text_position": {
+          "label": "Text position",
+          "term": "position",
+          "top_left": "Top left",
+          "top_center": "Top centre",
+          "top_right": "Top right",
+          "middle_left": "Middle left",
+          "middle_center": "Centre",
+          "middle_right": "Middle right",
+          "bottom_left": "Bottom left",
+          "bottom_center": "Bottom centre",
+          "bottom_right": "Bottom right"
+        },
+        "overlay": {
+          "label": "Overlay strength",
+          "term": "overlay",
+          "hint": "The overlay keeps the text readable; the stronger, the more of the picture it covers. With none the text stands on its own plate.",
+          "none": "None",
+          "light": "Light",
+          "medium": "Medium",
+          "strong": "Strong"
+        },
+        "button_style": {
+          "label": "Button style",
+          "term": "button",
+          "hint": "A second button is drawn one step quieter.",
+          "solid": "Filled",
+          "outline": "Outlined",
+          "text": "Text"
+        }
       },
       "products": {
         "source": "Which products",

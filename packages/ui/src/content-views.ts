@@ -1,4 +1,5 @@
 import type { SectionLook, ShelfColumns, TrustBadgesVariant } from "@qticaret/types"
+import type { BannerSectionView } from "./banner-views"
 import type { CategoryCardView, CustomerPhotoView, ShopMarkView } from "./card-views"
 import type {
   FeaturedProductSectionView,
@@ -47,16 +48,7 @@ export type HomeSectionView = { look?: SectionLookView } & (
   | HeroSliderSectionView
   | GoogleRatingSectionView
   | MarqueeSectionView
-  | {
-      id: string
-      type: "banner"
-      slides: {
-        image: ImageView
-        heading: string | null
-        text: string | null
-        link: LinkView | null
-      }[]
-    }
+  | BannerSectionView
   | { id: string; type: "categories"; title: string; categories: CategoryCardView[] }
   | {
       id: string
