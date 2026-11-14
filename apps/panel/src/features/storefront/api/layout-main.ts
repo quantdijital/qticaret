@@ -2,9 +2,11 @@ import type {
   CategoryMainVariant,
   FooterBarVariant,
   HeaderBarVariant,
+  HeaderMenuGround,
   ProductMainVariant,
   SectionLook,
 } from "@qticaret/types"
+import type { LayoutLink } from "./layout-sections"
 
 /**
  * The main sections (adr/0049 Ek 2026-11-14 §5, §7): the shop's header
@@ -21,12 +23,33 @@ interface MainBase {
   ends_at: null
 }
 
-export interface HeaderBarSection extends MainBase {
+interface HeaderBarCommon extends MainBase {
   type: "header_bar"
-  variant: HeaderBarVariant
   /** The header stays at the top of a long page (the theme's `header.sticky` before). */
   sticky: boolean
 }
+
+/**
+ * The catalog header's own settings (adr/0049 Ek 2026-11-14 N14, Ek
+ * 2026-11-15): kept only while the bar is drawn as it.
+ */
+export interface HeaderCatalogFields {
+  /** The search box's words; null: the storefront's. */
+  search_placeholder: string | null
+  search_label: boolean
+  account_text: boolean
+  cart_total: boolean
+  highlight_link: LayoutLink | null
+  utility_bar: boolean
+  phone: boolean
+  categories_button: boolean
+  menu_ground: HeaderMenuGround
+}
+
+export type HeaderCatalogSection = HeaderBarCommon & { variant: "catalog" } & HeaderCatalogFields
+
+export type HeaderBarSection =
+  (HeaderBarCommon & { variant: Exclude<HeaderBarVariant, "catalog"> }) | HeaderCatalogSection
 
 export interface FooterBarSection extends MainBase {
   type: "footer_bar"

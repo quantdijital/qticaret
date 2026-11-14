@@ -31,6 +31,7 @@ import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
 import { ScheduleFields } from "./forms/schedule-fields"
 import { HeaderBarForm } from "./forms/header-bar-form"
+import { HeaderCatalogOther } from "./forms/header-catalog-other"
 import { isMain } from "@/features/storefront/layout/main-sections"
 import { VariantField } from "./forms/variant-field"
 import { Panel, PanelGroup } from "./panel-header"
@@ -211,6 +212,14 @@ export function SectionPanel({
         </PanelGroup>
       ) : null}
       {strip ? <MarqueeGroups section={strip} reveal={reveal} onChange={onChange} /> : null}
+      {section.type === "header_bar" && section.variant === "catalog" ? (
+        <HeaderCatalogOther
+          section={section}
+          problems={problems}
+          reveal={reveal("look")}
+          onChange={onChange}
+        />
+      ) : null}
       {looked || strip ? (
         <PanelGroup
           title={

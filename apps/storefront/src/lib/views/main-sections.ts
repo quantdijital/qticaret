@@ -5,9 +5,12 @@ import type {
   CategoryMainView,
   FooterBarView,
   HeaderBarView,
+  NavCategoryView,
   ProductMainView,
   SectionLookView,
+  Translate,
 } from "@qticaret/ui"
+import { headerCatalogOf } from "./header-catalog"
 
 /**
  * The design's main sections as a theme draws them (adr/0049 Ek 2026-11-14
@@ -25,7 +28,17 @@ const withLook = (look: unknown): { look?: SectionLookView } => {
   return Object.keys(set).length > 0 ? { look: set } : {}
 }
 
-export function headerBarOf(main: Main, theme: Pick<StoreThemeSettings, "header">): HeaderBarView {
+/** What the catalog header is drawn with beside its settings: the words and the category tree. */
+export interface HeaderBarParts {
+  t: Translate
+  tree: () => NavCategoryView[]
+}
+
+export function headerBarOf(
+  main: Main,
+  theme: Pick<StoreThemeSettings, "header">,
+  parts?: HeaderBarParts
+): HeaderBarView {
   const bar = main?.header_bar
   if (!bar) {
     return {
@@ -34,10 +47,14 @@ export function headerBarOf(main: Main, theme: Pick<StoreThemeSettings, "header"
       sticky: theme.header.sticky,
     }
   }
+  const variant = variantOf("header_bar", bar.variant)
   return {
     id: bar.id,
-    variant: variantOf("header_bar", bar.variant),
+    variant,
     sticky: bar.sticky,
+    ...(variant === "catalog" && parts
+      ? { catalog: headerCatalogOf(bar.catalog, parts.t, parts.tree) }
+      : {}),
   }
 }
 

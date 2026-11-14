@@ -10,9 +10,16 @@ import { MenuSheet } from "./MenuSheet"
 import { SearchBox } from "./SearchBox"
 import { PHONE_SEARCH } from "./SearchLink"
 import { Wordmark } from "./Wordmark"
+import { HeaderCatalog, catalogParts } from "./HeaderCatalog"
+import { LABELLED, accountOf, allInOf, searchOf } from "./header-words"
 
-const LABELLED =
-  "gf-icon-btn flex-col gap-0.5 px-2 text-2xs font-semibold leading-none max-lg:size-11 lg:min-w-16 lg:py-1"
+/** The catalog header's strip and phone when the shop's bar is drawn as it (else null). */
+export function catalogOf(shop: ShopView) {
+  const catalog = shop.headerBar?.catalog
+  return catalog && drawnVariant("header_bar", shop.headerBar?.variant, ["catalog"]) === "catalog"
+    ? catalogParts(shop, catalog)
+    : null
+}
 
 /**
  * The header, sticky unless the shop says not. A phone: a 56 px row (the
@@ -38,41 +45,25 @@ export function Header({
   /** The cart drawer's quantity and remove buttons; none: its lines read only. */
   changeCartLine?: ((form: FormData) => Promise<void>) | undefined
 }) {
-  const allIn = Object.fromEntries(
-    shop.categories.map((category) => [category.path, t("nav.see_all", { name: category.label })])
-  )
-  const search = {
-    words: {
-      label: t("search.label"),
-      placeholder: t("search.placeholder"),
-      submit: t("search.submit"),
-      clear: t("search.clear"),
-      results: t("search.help"),
-      products: t("search.suggest.products"),
-      categories: t("search.suggest.categories"),
-      brands: t("search.suggest.brands"),
-      phrases: t("search.suggest.phrases"),
-      // Filled in the browser with the answer's own numbers and words
-      all: t("search.suggest.all"),
-      none: t("search.suggest.none"),
-      browse: t("search.suggest.browse"),
-      loading: t("search.suggest.loading"),
-      error: t("search.suggest.error"),
-      found: t("search.suggest.found"),
-      priceBefore: t("price.before"),
-      from: t("price.from"),
-    },
-    suggest: searchSuggest,
-    // A search that finds nothing offers the shop's own top categories
-    browse: shop.categories.slice(0, 6).map(({ label, path }) => ({ label, path })),
-  }
-  // The design's header bar (adr/0049 Ek 2026-11-14 §5): one drawing here, every variant
-  // falls to it (`centered` is adr/0062 karar 6's); its own `sticky` over the theme's
-  const variant = drawnVariant("header_bar", shop.headerBar?.variant, ["standard"])
+  // The design's header bar (adr/0049 Ek 2026-11-14 §5): `catalog` is its own drawing (N14),
+  // the rest fall to this one (`centered` is adr/0062 karar 6's); its own `sticky` over the theme's
+  const variant = drawnVariant("header_bar", shop.headerBar?.variant, ["standard", "catalog"])
   const sticky = shop.headerBar?.sticky ?? shop.theme.header.sticky
-  const account = shop.customerName
-    ? t("nav.account_of", { name: shop.customerName })
-    : t("nav.account")
+  if (variant === "catalog" && shop.headerBar?.catalog) {
+    return (
+      <HeaderCatalog
+        shop={shop}
+        catalog={shop.headerBar.catalog}
+        sticky={sticky}
+        t={t}
+        searchSuggest={searchSuggest}
+        changeCartLine={changeCartLine}
+      />
+    )
+  }
+  const allIn = allInOf(shop.categories, t)
+  const search = searchOf(shop, t, searchSuggest)
+  const account = accountOf(shop, t)
   return (
     <header
       data-gf-head=""
@@ -80,7 +71,7 @@ export function Header({
         "z-(--z-sticky-nav) border-b border-rule bg-paper",
         sticky ? "gf-head sticky top-0" : "relative"
       )}
-      data-variant={variant}
+      data-variant={variant === "catalog" ? "standard" : variant}
     >
       <Container
         data-gf-head-row=""

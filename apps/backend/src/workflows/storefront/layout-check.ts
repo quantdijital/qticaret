@@ -34,12 +34,22 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
   if (section.type === "products") {
     return section.more ? [section.more] : []
   }
+  // The catalog header's highlighted last link (adr/0049 Ek 2026-11-15)
+  if (section.type === "header_bar" && section.variant === "catalog") {
+    return section.highlight_link ? [section.highlight_link] : []
+  }
   return []
 }
 
-/** The header's sections that hold links: its scrolling strip (the announcement's lines are words). */
+/**
+ * The header's sections that hold links: its scrolling strip and the
+ * catalog header bar (the announcement's lines are words).
+ */
 export const headerLinked = (doc: Pick<LayoutDocument, "header">): HeaderSection[] =>
-  doc.header.filter((section) => section.type === "marquee")
+  doc.header.filter(
+    (section) =>
+      section.type === "marquee" || (section.type === "header_bar" && section.variant === "catalog")
+  )
 
 /** Every record a section names by id, as a link would point at it. */
 function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }[] {

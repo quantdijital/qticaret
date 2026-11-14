@@ -18,13 +18,27 @@ export const SECTION_VARIANTS = {
   /**
    * The main sections (adr/0049 Ek 2026-11-14 §5, §7), each with today's
    * drawing first. The header bar's `centered` is the theme setting's
-   * centred header (`header.layout`), read into the bar by name.
+   * centred header (`header.layout`), read into the bar by name; its
+   * `catalog` (N14) a utility strip, a wide search with the shop's phone and
+   * a filled menu bar with a "Kategoriler" button.
    */
-  header_bar: ["standard", "centered"],
+  header_bar: ["standard", "centered", "catalog"],
   footer_bar: ["ledger"],
   product_main: ["standard"],
   category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
+
+/**
+ * The catalog header's menu bar ground (adr/0049 Ek 2026-11-15, N14):
+ * "Koyu / Ana renk / Açık", the marquee's names; the first the default.
+ * Mirrored by the backend's `HEADER_MENU_GROUNDS`.
+ */
+export const HEADER_MENU_GROUNDS = ["stage", "primary", "light"] as const
+
+export type HeaderMenuGround = (typeof HEADER_MENU_GROUNDS)[number]
+
+/** The catalog header's words: the search box's placeholder. Mirrored by the backend. */
+export const HEADER_CATALOG_LIMITS = { search_placeholder: 60 } as const
 
 /**
  * How a product card is drawn (adr/0049 Ek 2026-11-14 §3.3, owner's

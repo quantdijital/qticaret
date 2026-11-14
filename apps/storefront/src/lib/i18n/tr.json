@@ -61,6 +61,8 @@
   "nav.see_all": "Tümünü gör: {name}",
   "nav.cart_label": "Sepet, {count} ürün",
   "nav.top_links": "Kurumsal bağlantılar",
+  "nav.customer_service": "Müşteri hizmetleri",
+  "nav.category_menu": "Tüm kategoriler",
   "nav.announcements": "Duyurular",
   "marquee.label": "Kayan duyurular",
   "marquee.pause": "Kayan yazıyı durdur",

@@ -1,0 +1,114 @@
+import { describe, expect, it } from "vitest"
+import { atolyeTheme } from "@qticaret/theme-atolye"
+import type { HeaderCatalogView, ShopView } from "@qticaret/ui"
+import { renderFrame, shopFixture } from "@/test/theme-render"
+
+/**
+ * The catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15) as the
+ * server prints it: the strip, the search with the shop's phone, the menu
+ * bar on its ground with "Kategoriler", the main menu, the highlighted link
+ * and the icons; the phone's rows as the standard header's.
+ */
+
+const CATALOG: HeaderCatalogView = {
+  searchPlaceholder: null,
+  searchLabel: false,
+  accountText: true,
+  cartTotal: false,
+  highlight: null,
+  utilityBar: true,
+  phone: true,
+  categories: [
+    {
+      label: "Mutfak",
+      path: "/kategori/mutfak",
+      children: [{ label: "Şef bıçakları", path: "/kategori/mutfak/sef" }],
+    },
+    { label: "Bahçe", path: "/kategori/bahce", children: [] },
+  ],
+  menuGround: "stage",
+}
+
+const catalogShop = (set: Partial<HeaderCatalogView> = {}, over: Partial<ShopView> = {}) =>
+  shopFixture({
+    headerBar: {
+      id: "mainheader",
+      variant: "catalog",
+      sticky: true,
+      catalog: { ...CATALOG, ...set },
+    },
+    ...over,
+  })
+
+describe("the catalog header", () => {
+  it("draws the strip, the phone under its words and the menu bar on its ground", () => {
+    const html = renderFrame(atolyeTheme, catalogShop())
+    expect(html).toContain('data-variant="catalog"')
+    expect(html).toMatch(/data-gf-strip=""[^>]*class="[^"]*lg:block/)
+    expect(html).toContain("Müşteri hizmetleri")
+    expect(html).toMatch(/<a href="tel:\+905320000000"[^>]*>(?:(?!<\/a>).)*0532 000 00 00/)
+    expect(html).toMatch(/class="gf-menubar[^"]*" data-ground="stage"/)
+    // The top links and the phone are not said twice above the header (the bar above stays bare)
+    expect(html.match(/href="\/hakkimizda"/g)).toHaveLength(1)
+    const standard = renderFrame(atolyeTheme, shopFixture())
+    expect(html.match(/href="tel:/g)?.length).toBe(standard.match(/href="tel:/g)?.length)
+    // The main menu's panels are in the HTML, folded into the bar
+    expect(html).toContain("gf-menubar-aisle")
+    expect(html).not.toContain("data-gf-aisle")
+  })
+
+  it("lists the top categories under Kategoriler, every link in the first HTML, closed", () => {
+    const html = renderFrame(atolyeTheme, catalogShop())
+    expect(html).toMatch(/<button type="button" aria-expanded="false" aria-controls="[^"]+"/)
+    expect(html).toMatch(/<nav id="[^"]+" aria-label="Tüm kategoriler" hidden=""/)
+    expect(html).toContain('href="/kategori/mutfak/sef"')
+    expect(html).toContain("Tümünü gör: Mutfak")
+    expect(html).toMatch(/data-cm-top="0"[^>]*aria-expanded="false"/)
+  })
+
+  it("takes the shop's words, a written search button, the highlighted link and the cart's subtotal", () => {
+    const html = renderFrame(
+      atolyeTheme,
+      catalogShop(
+        {
+          searchPlaceholder: "Ürün adı ya da kodu",
+          searchLabel: true,
+          cartTotal: true,
+          highlight: { label: "Kampanyalar", path: "/kampanyalar" },
+          menuGround: "primary",
+        },
+        { cart: { lines: [], subtotal: "1.250,00 TL", freeShipping: null } }
+      )
+    )
+    expect(html).toContain('placeholder="Ürün adı ya da kodu"')
+    expect(html).toMatch(/<button type="submit" class="gf-btn gf-btn--small[^"]*">Ara<\/button>/)
+    expect(html).toMatch(
+      /<a href="\/kampanyalar" class="gf-btn gf-btn--small shrink-0">Kampanyalar<\/a>/
+    )
+    expect(html).toContain('aria-label="Sepet, 2 ürün, 1.250,00 TL"')
+    expect(html).toContain('data-ground="primary"')
+  })
+
+  it("leaves out what the shop turned off", () => {
+    const html = renderFrame(
+      atolyeTheme,
+      catalogShop({ utilityBar: false, phone: false, categories: [], accountText: false })
+    )
+    expect(html).not.toContain("data-gf-strip")
+    expect(html).not.toContain("Müşteri hizmetleri")
+    expect(html).not.toContain("Tüm kategoriler")
+    // The bar above the header says the links and the phone again
+    expect(html).toMatch(/href="tel:\+905320000000"/)
+    const bare = renderFrame(atolyeTheme, catalogShop({ accountText: false }, { topLinks: [] }))
+    expect(bare).not.toContain("data-gf-strip")
+  })
+
+  it("draws today's header for a catalog bar without its settings", () => {
+    const html = renderFrame(
+      atolyeTheme,
+      shopFixture({ headerBar: { id: "mainheader", variant: "catalog", sticky: true } })
+    )
+    expect(html).toContain('data-variant="standard"')
+    expect(html).toContain('data-gf-aisle=""')
+  })
+})
