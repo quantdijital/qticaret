@@ -9,6 +9,7 @@ import {
 } from "./layout-sections"
 import type { BodySection } from "./layout-sections"
 import { layoutSettings, storedSettings } from "./layout-settings"
+import { storedSection } from "./sections/stored"
 
 /**
  * The storefront's design as the theme editor writes it (adr/0049): the
@@ -90,18 +91,28 @@ export function isShowing(
   )
 }
 
+const GROUPS = ["header", "home", "footer", "product", "category"] as const
+
 /**
  * A stored document (a draft, what is live, a revision) as today's schema
  * reads it: its settings read part by part (`storedSettings`), as the
  * storefront's frame reads them, so a part today's schema no longer reads
  * (a theme from before a rule) is unset rather than failing the whole read,
- * and every reader sees the same settings. A save is still held to the schema.
+ * and every reader sees the same settings; a section's variant off today's
+ * list reads as its replacement or the default (`storedSection`). A save
+ * is still held to the schema.
  */
 export function storedDocument(stored: unknown): unknown {
   if (stored === null || typeof stored !== "object" || Array.isArray(stored)) {
     return stored
   }
-  return { ...stored, settings: storedSettings(stored) }
+  const groups = Object.fromEntries(
+    GROUPS.flatMap((group) => {
+      const sections: unknown = (stored as Record<string, unknown>)[group]
+      return Array.isArray(sections) ? [[group, sections.map(storedSection)]] : []
+    })
+  )
+  return { ...stored, ...groups, settings: storedSettings(stored) }
 }
 
 /** A stored document read through today's schema (see `storedDocument`); throws if it does not read. */

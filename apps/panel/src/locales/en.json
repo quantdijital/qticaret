@@ -7851,6 +7851,12 @@
           "description": "Products from the product's category, a collection or ones you pick."
         }
       },
+      "variants": {
+        "trust_badges": {
+          "strip": "Strip",
+          "lined": "Lined boxes"
+        }
+      },
       "panel": {
         "back": "Back to sections",
         "visibility": "Visibility",
@@ -7863,7 +7869,9 @@
         "remove": "Remove section",
         "placement": "Position",
         "sections": "Sections",
-        "content": "Content"
+        "content": "Content",
+        "variant": "Layout",
+        "variantHint": "How the section looks on the storefront; the preview shows it at once. Shared content (title, text) stays when the layout changes, and \"Undo\" brings the previous one back."
       },
       "defaults": {
         "heading": "Your shop's name",

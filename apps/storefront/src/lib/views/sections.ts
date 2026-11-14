@@ -5,6 +5,7 @@ import type {
   StoreLayoutSection,
   StoreProductSection,
 } from "@qticaret/types"
+import { variantOf } from "@qticaret/types"
 import type { HomeSectionView, LinkView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
 import { legalIdentity, siteSeo } from "@/lib/store-api/requests"
@@ -204,7 +205,9 @@ async function sectionView(
     case "trust_badges": {
       // The design's badges (adr/0049 Ek 2026-11-06): a preview shows its draft's
       const { trust_badges: badges } = await currentShared()
-      return badges.length > 0 ? { id, type: "trust_badges", badges } : null
+      // Its variant as the contract knows it: none (an older backend) or a newer one, the default
+      const variant = variantOf("trust_badges", section.variant)
+      return badges.length > 0 ? { id, type: "trust_badges", variant, badges } : null
     }
     case "newsletter": {
       const [site, identity, notice] = await Promise.all([

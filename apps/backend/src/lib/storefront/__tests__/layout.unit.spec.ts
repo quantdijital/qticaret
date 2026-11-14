@@ -68,7 +68,8 @@ describe("storefront layout document (adr/0049)", () => {
       { ...faq("sss001"), ...ALWAYS, title: null },
     ])
     expect(doc.category).toEqual([
-      { id: "guvence1", type: "trust_badges", ...ALWAYS, placement: "bottom" },
+      // No variant saved: the default, today's strip (adr/0049 Ek 2026-11-14 §2)
+      { id: "guvence1", type: "trust_badges", ...ALWAYS, variant: "strip", placement: "bottom" },
       { id: "ustmetin1", type: "help", ...ALWAYS, title: null, text: null, placement: "top" },
     ])
     expect(doc.home).toEqual([])

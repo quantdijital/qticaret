@@ -82,3 +82,6 @@ export const columns = z
     error: "storefront_layout.section_invalid",
   })
   .default(3)
+
+/** Where a category page shows a section: above its product grid or below it. */
+export const placement = z.enum(["top", "bottom"]).default("bottom")

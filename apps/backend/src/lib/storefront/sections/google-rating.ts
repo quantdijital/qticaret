@@ -1,5 +1,5 @@
 import { z } from "@medusajs/framework/zod"
-import { base, title } from "./layout-fields"
+import { base, title } from "../layout-fields"
 
 /**
  * The home page's Google rating badge (`google_rating`, adr/0049 Ek and

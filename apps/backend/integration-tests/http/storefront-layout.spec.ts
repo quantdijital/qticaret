@@ -303,14 +303,21 @@ medusaIntegrationTestRunner({
         },
         placement: "top",
       }
-      const trust: Section = { id: "guvencealt", type: "trust_badges", ...ALWAYS }
+      // Drawn as GB4's lined boxes (adr/0049 Ek 2026-11-14); the product page's without a variant
+      const trust: Section = { id: "guvencealt", type: "trust_badges", ...ALWAYS, variant: "lined" }
+      const productTrust: Section = { id: "urunguven", type: "trust_badges", ...ALWAYS }
 
       const noCollection = await save({
         product: [related({ kind: "collection", collection_id: "pcol_yok" })],
       })
       const wrongPage = await save({ category: [related({ kind: "same_category" })] })
+      const unknownVariant = await save({ category: [{ ...trust, variant: "bento" }] })
       const saved = await save({
-        product: [related({ kind: "manual", product_ids: [liveProduct, draftProduct] }), faq],
+        product: [
+          related({ kind: "manual", product_ids: [liveProduct, draftProduct] }),
+          faq,
+          productTrust,
+        ],
         category: [intro, trust],
       })
 
@@ -318,6 +325,8 @@ medusaIntegrationTestRunner({
       expect(noCollection.data.message).toBe("storefront_layout.target_unknown")
       expect(wrongPage.status).toBe(400)
       expect(wrongPage.data.message).toContain("storefront_layout.section_invalid")
+      expect(unknownVariant.status).toBe(400)
+      expect(unknownVariant.data.message).toContain("storefront_layout.section_invalid")
       expect(saved.status).toBe(200)
       expect(saved.data.layout).toMatchObject({ is_default: false, has_changes: true })
       // A category page's section without a place goes below the grid
@@ -325,6 +334,8 @@ medusaIntegrationTestRunner({
         "top",
         "bottom",
       ])
+      // No variant saved: the default, today's strip
+      expect(saved.data.layout.draft.product[2]).toMatchObject({ variant: "strip" })
 
       const preview = await settle(
         http.post<{ path: string }>("/admin/storefront-layout/preview", {}, asOwner)
@@ -357,6 +368,7 @@ medusaIntegrationTestRunner({
             { question: "Size nasıl ulaşırım?", answer: "0532 123 45 67 numarasından arayın." },
           ],
         },
+        { id: "urunguven", type: "trust_badges", variant: "strip" },
       ])
       expect(layout.category).toEqual([
         {
@@ -366,7 +378,7 @@ medusaIntegrationTestRunner({
           html: expect.stringContaining("Danışın: 0532 123 45 67") as unknown,
           placement: "top",
         },
-        { id: "guvencealt", type: "trust_badges", placement: "bottom" },
+        { id: "guvencealt", type: "trust_badges", variant: "lined", placement: "bottom" },
       ])
 
       const published = await settle(
@@ -376,6 +388,7 @@ medusaIntegrationTestRunner({
       expect(published.data.layout.draft.product.map((each) => each.id)).toEqual([
         "benzerurunler",
         "sikcasorulan",
+        "urunguven",
       ])
     })
 

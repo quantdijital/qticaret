@@ -45,8 +45,14 @@ const panel = (name: string) => screen.findByRole("region", { name })
 /** The fixture's design with a trust strip on the home and the product page. */
 const withStrips = () => ({
   ...DOC,
-  home: [...DOC.home, { id: "guvenserit", type: "trust_badges" as const, ...ALWAYS }],
-  product: [...DOC.product, { id: "urunguven", type: "trust_badges" as const, ...ALWAYS }],
+  home: [
+    ...DOC.home,
+    { id: "guvenserit", type: "trust_badges" as const, variant: "strip" as const, ...ALWAYS },
+  ],
+  product: [
+    ...DOC.product,
+    { id: "urunguven", type: "trust_badges" as const, variant: "strip" as const, ...ALWAYS },
+  ],
 })
 
 /** Opens the home page's trust strip: its form, where the badges are written. */

@@ -1,4 +1,4 @@
-import type { ShelfColumns } from "@qticaret/types"
+import type { ShelfColumns, TrustBadgesVariant } from "@qticaret/types"
 import type { CategoryCardView, CustomerPhotoView, ShopMarkView } from "./card-views"
 import type {
   FeaturedProductSectionView,
@@ -77,7 +77,13 @@ export type HomeSectionView =
       summary?: ShopRatingView | null
     }
   | { id: string; type: "rich_text"; title: string | null; html: string }
-  | { id: string; type: "trust_badges"; badges: TrustBadgeView[] }
+  | {
+      id: string
+      type: "trust_badges"
+      /** How the strip is drawn (adr/0049 Ek 2026-11-14 §2); a theme draws its default for one it lacks (`drawnVariant`). */
+      variant: TrustBadgesVariant
+      badges: TrustBadgeView[]
+    }
   | { id: string; type: "newsletter"; title: string; text: string; privacyPath: string | null }
   | { id: string; type: "help"; title: string; text: string; contact: ContactView }
   | {

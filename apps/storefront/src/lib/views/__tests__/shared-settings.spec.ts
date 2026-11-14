@@ -59,10 +59,32 @@ describe("the theme's shared settings (adr/0049 Ek 2026-11-06)", () => {
   it("draws a trust strip section from the design's badges, and none without badges", async () => {
     shared.current.mockResolvedValueOnce(DESIGN)
     const [strip] = await sectionViews([{ id: "guven1", type: "trust_badges" }], t)
-    expect(strip).toEqual({ id: "guven1", type: "trust_badges", badges: DESIGN.trust_badges })
+    // No variant from an older backend: the default, today's strip (adr/0049 Ek 2026-11-14 §2)
+    expect(strip).toEqual({
+      id: "guven1",
+      type: "trust_badges",
+      variant: "strip",
+      badges: DESIGN.trust_badges,
+    })
 
     shared.current.mockResolvedValueOnce({ trust_badges: [], color_swatches: [] })
     expect(await sectionViews([{ id: "guven1", type: "trust_badges" }], t)).toEqual([])
+  })
+
+  it("carries the strip's variant to the theme, one the contract does not know as the default", async () => {
+    shared.current.mockResolvedValue(DESIGN)
+    const [lined] = await sectionViews(
+      [{ id: "guven1", type: "trust_badges", variant: "lined" }],
+      t
+    )
+    const newer = { id: "guven2", type: "trust_badges", variant: "bento" } as unknown as Parameters<
+      typeof sectionViews
+    >[0][number]
+    const [fallback] = await sectionViews([newer], t)
+    shared.current.mockReset()
+
+    expect(lined).toMatchObject({ type: "trust_badges", variant: "lined" })
+    expect(fallback).toMatchObject({ type: "trust_badges", variant: "strip" })
   })
 })
 

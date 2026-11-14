@@ -13,6 +13,7 @@ import type {
   Placement,
   ProductSection,
 } from "@/features/storefront/api/layout"
+import { defaultVariant } from "@qticaret/types"
 import { LAYOUT_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
 
 /** The groups in the order the storefront draws them (a page's body between header and footer). */
@@ -169,7 +170,7 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
     case "rich_text":
       return { ...base, type, title: null, body: { type: "doc", content: [] } }
     case "trust_badges":
-      return { ...base, type }
+      return { ...base, type, variant: defaultVariant(type) }
     case "newsletter":
     case "help":
       return { ...base, type, title: null, text: null }

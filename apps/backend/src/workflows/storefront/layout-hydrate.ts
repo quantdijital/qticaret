@@ -166,6 +166,7 @@ export async function hydrateSection(section: BodySection, at: HydrateContext): 
         profile_link: section.profile_link,
       }
     case "trust_badges":
-      return { id, type }
+      // The badges are the shared settings'; the section says where and how it is drawn
+      return { id, type, variant: section.variant }
   }
 }

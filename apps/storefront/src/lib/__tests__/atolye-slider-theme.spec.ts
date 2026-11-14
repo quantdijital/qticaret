@@ -123,6 +123,7 @@ describe("the Atölye hero slider", () => {
       {
         id: "guven",
         type: "trust_badges",
+        variant: "strip",
         badges: [{ icon: "truck", title: "Kargo", text: "Hızlı" }],
       },
       slider({ slides: [slide("bir", { heading: null, text: null, link: null }), slide("iki")] }),
