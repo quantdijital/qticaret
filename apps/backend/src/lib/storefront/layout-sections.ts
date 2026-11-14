@@ -10,6 +10,7 @@ import { featuredProduct } from "./sections/featured-product"
 import { googleRating } from "./sections/google-rating"
 import { hero } from "./sections/hero"
 import { heroSlider } from "./sections/hero-slider"
+import { headerMarquee, marquee, placedMarquee } from "./sections/marquee"
 import { products } from "./sections/products"
 import { relatedProducts } from "./sections/related-products"
 import { richText } from "./sections/rich-text"
@@ -32,6 +33,7 @@ import { footerNewsletter, worded } from "./sections/worded"
 export { LAYOUT_LIMITS } from "./layout-fields"
 export { BEST_SELLER_DAYS } from "./sections/products"
 export { announcementBar, footerNewsletter, worded }
+export { MARQUEE_PER_PAGE } from "./sections/marquee"
 
 // A type a group does not take (another page's, or none) reads as an unknown section
 const SECTION_TYPE = { error: "storefront_layout.section_invalid" }
@@ -54,6 +56,7 @@ export const pageSection = z.discriminatedUnion(
     worded("newsletter"),
     worded("help"),
     faq,
+    marquee,
   ],
   SECTION_TYPE
 )
@@ -61,7 +64,16 @@ export const pageSection = z.discriminatedUnion(
 /** Below the product's own block on every product page. */
 export const productSection = z.discriminatedUnion(
   "type",
-  [relatedProducts, richText, banner, faq, trustBadges, worded("help"), worded("newsletter")],
+  [
+    relatedProducts,
+    richText,
+    banner,
+    faq,
+    trustBadges,
+    worded("help"),
+    worded("newsletter"),
+    marquee,
+  ],
   SECTION_TYPE
 )
 
@@ -75,7 +87,18 @@ export const categorySection = z.discriminatedUnion(
     placedTrustBadges,
     worded("help").extend({ placement }),
     worded("newsletter").extend({ placement }),
+    placedMarquee,
   ],
+  SECTION_TYPE
+)
+
+/**
+ * Above the shop's header on every page: the announcement bar and the
+ * scrolling strip, each at most once (adr/0049 Ek 2026-11-14 §10 karar 9).
+ */
+export const headerSection = z.discriminatedUnion(
+  "type",
+  [announcementBar, headerMarquee],
   SECTION_TYPE
 )
 
@@ -84,6 +107,6 @@ export type ProductSection = z.infer<typeof productSection>
 export type CategorySection = z.infer<typeof categorySection>
 /** A section of a page's body: the home, product or category page's. */
 export type BodySection = PageSection | ProductSection | CategorySection
-export type HeaderSection = z.infer<typeof announcementBar>
+export type HeaderSection = z.infer<typeof headerSection>
 export type FooterSection = z.infer<typeof footerNewsletter>
 export type LayoutSection = BodySection | HeaderSection

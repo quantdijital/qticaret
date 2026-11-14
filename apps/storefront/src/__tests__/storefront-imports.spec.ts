@@ -105,7 +105,11 @@ describe("the storefront's value imports", () => {
   })
 
   it("takes the contract's values from subpaths that import nothing relative", () => {
-    for (const subpath of ["@qticaret/types/section-variants", "@qticaret/types/section-look"]) {
+    for (const subpath of [
+      "@qticaret/types/section-variants",
+      "@qticaret/types/section-look",
+      "@qticaret/types/section-marquee",
+    ]) {
       const file = fromPackage(subpath)
       expect(file && existsSync(file)).toBe(true)
       expect(valueSpecifiers(file ?? "").filter((each) => each.startsWith("."))).toEqual([])

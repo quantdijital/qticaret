@@ -17,6 +17,7 @@ import { categoryTiles } from "./category-tiles"
 import { featuredView } from "./featured"
 import { EXCERPT_MIN_RATING, googleRatingView } from "./google-rating"
 import { heroSliderView } from "./hero-slider"
+import { marqueeView } from "./marquee"
 import { currentShared, layoutImage, layoutLink } from "./layout"
 import { legalDocument, legalPath } from "./legal"
 import { postCards } from "./posts"
@@ -225,6 +226,8 @@ async function sectionView(
         privacyPath: notice ? legalPath("privacy_notice") : null,
       }
     }
+    case "marquee":
+      return marqueeView(section, t)
     case "help": {
       const contact = contactOf(await legalIdentity(), t)
       const reachable = Boolean(contact.whatsappHref ?? contact.phone ?? contact.email)

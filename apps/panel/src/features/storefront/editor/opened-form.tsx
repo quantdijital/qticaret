@@ -3,7 +3,8 @@ import type { LayoutDocument } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { SETTINGS_KEY, partProblems } from "@/features/storefront/layout/settings-problems"
-import { groupLimit, isBodyGroup } from "@/features/storefront/layout/sections"
+import { groupLimit, isBodyGroup, marqueesOn } from "@/features/storefront/layout/sections"
+import { MARQUEE_LIMITS } from "@/features/storefront/api/layout"
 import type { findSection } from "@/features/storefront/layout/sections"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { Opened } from "./opened"
@@ -45,7 +46,13 @@ export function OpenedForm({
         section={found.section}
         group={found.group}
         problems={problems.get(found.section.id) ?? {}}
-        canDuplicate={isBodyGroup(found.group) && doc[found.group].length < groupLimit(found.group)}
+        canDuplicate={
+          isBodyGroup(found.group) &&
+          doc[found.group].length < groupLimit(found.group) &&
+          // A page shows two scrolling strips at most, the header's counted
+          (found.section.type !== "marquee" ||
+            marqueesOn(doc, found.group) < MARQUEE_LIMITS.perPage)
+        }
         onChange={(section, field) => {
           dispatch({ type: "update", section, merge: field ? `${section.id}:${field}` : undefined })
         }}
@@ -84,7 +91,11 @@ export function OpenedForm({
       <ThemePanel
         theme={doc.settings.theme}
         problems={partProblems(settingsProblems, "theme")}
-        announcement={doc.header[0]?.lines.find((line) => line.trim() !== "") ?? null}
+        announcement={
+          doc.header
+            .flatMap((section) => (section.type === "announcement_bar" ? section.lines : []))
+            .find((line) => line.trim() !== "") ?? null
+        }
         onChange={(theme, field) => {
           dispatch({
             type: "settings",

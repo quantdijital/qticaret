@@ -24,9 +24,20 @@ const NO_ALIGN: ReadonlySet<BodySectionType> = new Set([
  */
 const LONG_TEXT: ReadonlySet<BodySectionType> = new Set(["rich_text", "faq"])
 
+/**
+ * Types that offer only some of the look: a scrolling strip has its own
+ * ground and a height set by its size, and no heading to align (adr/0049
+ * Ek 2026-11-14 §4.1, §6); the space above it and its width stay.
+ */
+const ONLY: Partial<Record<BodySectionType, readonly SectionLookField[]>> = {
+  marquee: ["space_outer", "width"],
+}
+
 /** The look's fields the panel offers for a type, in the contract's order. */
 export const lookFieldsFor = (type: BodySectionType): readonly SectionLookField[] =>
-  SECTION_LOOK_FIELDS.filter((field) => field !== "align" || !NO_ALIGN.has(type))
+  SECTION_LOOK_FIELDS.filter(
+    (field) => (ONLY[type]?.includes(field) ?? true) && (field !== "align" || !NO_ALIGN.has(type))
+  )
 
 /** A field's steps the panel offers for a type. */
 export function lookStepsFor<F extends SectionLookField>(

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { LeaveGuard } from "@qticaret/admin-ui/patterns/leave-guard"
-import { LAYOUT_ACTION_KEY, layoutQuery } from "@/features/storefront/api/layout"
+import { LAYOUT_ACTION_KEY, MARQUEE_LIMITS, layoutQuery } from "@/features/storefront/api/layout"
 import type {
   AdminLayout,
   AnySection,
@@ -18,6 +18,7 @@ import { SETTINGS_KEY, partOf } from "@/features/storefront/layout/settings-prob
 import {
   findSection,
   idsOf,
+  marqueesOn,
   newBodySection,
   newSectionId,
 } from "@/features/storefront/layout/sections"
@@ -264,6 +265,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
         open={adding !== null}
         page={page}
         placement={adding ?? "bottom"}
+        marqueeFull={marqueesOn(doc, page) >= MARQUEE_LIMITS.perPage}
         onOpenChange={(open) => {
           if (!open) {
             setAdding(null)

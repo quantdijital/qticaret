@@ -1,6 +1,6 @@
-import { SECTION_VARIANTS } from "@qticaret/types"
-import type { SectionLookField } from "@qticaret/types"
-import type { AnySection, LayoutGroup } from "@/features/storefront/api/layout"
+import { MARQUEE_SETTINGS, SECTION_VARIANTS } from "@qticaret/types"
+import type { MarqueeSetting, SectionLookField } from "@qticaret/types"
+import type { AnySection, BodySection, LayoutGroup } from "@/features/storefront/api/layout"
 import { lookFieldsFor, lookStepsFor } from "@/features/storefront/layout/look"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
 import { offersVariants } from "@/features/storefront/layout/variants"
@@ -16,7 +16,7 @@ import { offersVariants } from "@/features/storefront/layout/variants"
  */
 
 /** The panel group a field sits in: a field in a closed group opens it. */
-export type FieldGroupName = "variant" | "placement" | "look" | "visibility"
+export type FieldGroupName = "variant" | "placement" | "content" | "look" | "visibility"
 
 export interface RegistryField {
   /** The field's name in the search: `variant`, `look.ground`, `starts_at`. */
@@ -34,19 +34,41 @@ export interface RegistryField {
 
 const P = "storefront.editor.panel"
 const LOOK = "storefront.editor.look"
+const MARQUEE = "storefront.editor.marquee"
+
+/** A strip's size sits in its content (it is what the strip is); how it moves and looks, with the look. */
+const MARQUEE_GROUPS: Readonly<Record<MarqueeSetting, FieldGroupName>> = {
+  size: "content",
+  ground: "look",
+  speed: "look",
+  direction: "look",
+  separator: "look",
+}
+
+const settingsIn = (group: FieldGroupName): readonly MarqueeSetting[] =>
+  (Object.keys(MARQUEE_SETTINGS) as MarqueeSetting[]).filter(
+    (setting) => MARQUEE_GROUPS[setting] === group
+  )
+
+/** A strip's settings in its content: the size. */
+export const MARQUEE_CONTENT_SETTINGS = settingsIn("content")
+
+/** How it moves and looks, in the closed "Görünüm ayarları" group with the look's fields. */
+export const MARQUEE_LOOK_SETTINGS = settingsIn("look")
 
 /** The elements' ids, shared by the forms and the search. */
 export const FIELD_IDS = {
   variant: (sectionId: string) => `${sectionId}-variant`,
   placement: (sectionId: string) => `${sectionId}-placement`,
   look: (sectionId: string, field: SectionLookField) => `${sectionId}-look-${field}`,
+  marquee: (sectionId: string, setting: MarqueeSetting) => `${sectionId}-marquee-${setting}`,
   visible: (sectionId: string) => `${sectionId}-schedule-visible`,
   starts: (sectionId: string) => `${sectionId}-schedule-starts`,
   ends: (sectionId: string) => `${sectionId}-schedule-ends`,
 } as const
 
 /** Whether the section takes a look: a page's body section (not the header's bar, the footer's box). */
-export const takesLook = (section: AnySection, group: LayoutGroup): boolean =>
+export const takesLook = (section: AnySection, group: LayoutGroup): section is BodySection =>
   isBodyGroup(group) && section.type !== "announcement_bar"
 
 /** The fields the section's panel shows, in its order, as the search finds them. */
@@ -74,7 +96,22 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       target: FIELD_IDS.placement(id),
     })
   }
-  if (takesLook(section, group) && section.type !== "announcement_bar") {
+  if (section.type === "marquee") {
+    for (const [setting, steps] of Object.entries(MARQUEE_SETTINGS) as [
+      MarqueeSetting,
+      readonly string[],
+    ][]) {
+      fields.push({
+        key: `marquee.${setting}`,
+        group: MARQUEE_GROUPS[setting],
+        label: `${MARQUEE}.${setting}.label`,
+        term: `${MARQUEE}.${setting}.term`,
+        options: steps.map((step) => `${MARQUEE}.${setting}.${step}`),
+        target: FIELD_IDS.marquee(id, setting),
+      })
+    }
+  }
+  if (takesLook(section, group)) {
     for (const field of lookFieldsFor(section.type)) {
       const steps: readonly string[] = lookStepsFor(section.type, field)
       fields.push({

@@ -1,5 +1,3 @@
-import { Award, Clock, CreditCard, Gift, Phone, RefreshCw, ShieldCheck, Truck } from "lucide-react"
-import type { LucideIcon } from "lucide-react"
 import { useId } from "react"
 import { useTranslation } from "react-i18next"
 import { Input } from "@qticaret/admin-ui/ui/input"
@@ -23,20 +21,9 @@ import { STOREFRONT_LIMITS as L } from "@/features/settings/storefront"
 import type { TrustBadge } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { useProblemText } from "../forms/problem-text"
+import { BADGE_ICONS } from "./badge-icons"
 
 const B = "storefront.editor.shared.badges"
-
-/** Each icon as the storefront draws it (docs/19 §4). */
-const BADGE_ICONS: Record<TrustIcon, LucideIcon> = {
-  truck: Truck,
-  clock: Clock,
-  shield: ShieldCheck,
-  card: CreditCard,
-  refresh: RefreshCw,
-  award: Award,
-  gift: Gift,
-  phone: Phone,
-}
 
 interface TrustBadgeListProps {
   badges: TrustBadge[]

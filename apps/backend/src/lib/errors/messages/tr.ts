@@ -945,7 +945,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "storefront_layout.image_invalid": "Görsel mağazanın medya kütüphanesinden seçilmeli.",
   "storefront_layout.section_invalid": "Bölüm tanınmadı; sayfayı yenileyip yeniden deneyin.",
   "storefront_layout.section_duplicate":
-    "Aynı bölüm iki kez eklenmiş; duyuru şeridi ve bülten birer kez olabilir.",
+    "Aynı bölüm iki kez eklenmiş; duyuru şeridi, kayan yazı ve bülten birer kez olabilir.",
+  "storefront_layout.marquee_limit":
+    "Bir sayfada en çok iki kayan yazı şeridi olabilir; üst bilgideki şerit her sayfada sayılır.",
   "storefront_layout.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",
   "storefront_layout.color_duplicate": "Her renk adı bir kez yazılabilir.",
   "storefront_layout.schedule_invalid": "Bölümün bitiş zamanı başlangıçtan sonra olmalı.",

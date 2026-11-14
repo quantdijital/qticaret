@@ -1,4 +1,10 @@
-import type { ProductSource, SectionLook, ShelfColumns, TrustBadgesVariant } from "@qticaret/types"
+import type {
+  MarqueeSettings,
+  ProductSource,
+  SectionLook,
+  ShelfColumns,
+  TrustBadgesVariant,
+} from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
 import type { MenuInput } from "@/features/storefront/api/menus"
@@ -185,6 +191,25 @@ export interface RelatedProductsSection extends BodySectionBase {
   columns: ShelfColumns
 }
 
+/** One item of a scrolling strip: an optional icon, its line, an optional second line and link. */
+export interface MarqueeItem {
+  /** One of the trust badges' icons; none: no icon. */
+  icon: TrustIcon | null
+  /** Plain text; may hold the shop's details (`{telefon}`). */
+  text: string
+  subtext: string | null
+  link: LayoutLink | null
+}
+
+/** What every scrolling strip has, on a page or in the header (adr/0049 Ek 2026-11-14 §4.1). */
+type MarqueeFields = { type: "marquee"; items: MarqueeItem[] } & MarqueeSettings
+
+/** A scrolling strip on a page's body: its look beside. */
+export type MarqueeSection = BodySectionBase & MarqueeFields
+
+/** The header group's scrolling strip, above the shop's header: no look. */
+export type HeaderMarquee = SectionBase & MarqueeFields
+
 export type HomeSection =
   | HeroSection
   | HeroSliderSection
@@ -199,6 +224,7 @@ export type HomeSection =
   | TrustBadgesSection
   | WordedSection
   | FaqSection
+  | MarqueeSection
 
 export type HomeSectionType = HomeSection["type"]
 
@@ -210,13 +236,14 @@ export type ProductSection =
   | FaqSection
   | TrustBadgesSection
   | WordedSection
+  | MarqueeSection
 
 /** Where a category page shows a section: above its product grid or below it. */
 export type Placement = "top" | "bottom"
 
 /** On every category page, above or below the products. */
 export type CategorySection = (
-  RichTextSection | BannerSection | FaqSection | TrustBadgesSection | WordedSection
+  RichTextSection | BannerSection | FaqSection | TrustBadgesSection | WordedSection | MarqueeSection
 ) & { placement: Placement }
 
 export interface AnnouncementBar extends SectionBase {
@@ -265,8 +292,11 @@ export interface LayoutSettings {
   menus: MenuInput[] | null
 }
 
+/** Above the shop's header: the announcement bar and the scrolling strip, each at most once. */
+export type HeaderSection = AnnouncementBar | HeaderMarquee
+
 export interface LayoutDocument {
-  header: AnnouncementBar[]
+  header: HeaderSection[]
   home: HomeSection[]
   footer: FooterNewsletter[]
   product: ProductSection[]
@@ -280,4 +310,4 @@ export type LayoutGroup = Exclude<keyof LayoutDocument, "settings">
 export type BodyGroup = "home" | "product" | "category"
 export type BodySection = HomeSection | ProductSection | CategorySection
 export type BodySectionType = BodySection["type"]
-export type AnySection = AnnouncementBar | BodySection | FooterNewsletter
+export type AnySection = HeaderSection | BodySection | FooterNewsletter

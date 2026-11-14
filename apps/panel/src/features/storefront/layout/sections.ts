@@ -1,5 +1,6 @@
 import type {
   AnnouncementBar,
+  HeaderMarquee,
   AnySection,
   BodyGroup,
   BodySection,
@@ -13,7 +14,7 @@ import type {
   Placement,
   ProductSection,
 } from "@/features/storefront/api/layout"
-import { defaultVariant } from "@qticaret/types"
+import { MARQUEE_DEFAULTS, defaultVariant } from "@qticaret/types"
 import { LAYOUT_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
 
 /** The groups in the order the storefront draws them (a page's body between header and footer). */
@@ -43,6 +44,7 @@ export const HOME_TYPES: readonly HomeSectionType[] = [
   "rich_text",
   "faq",
   "trust_badges",
+  "marquee",
   "newsletter",
   "help",
 ]
@@ -57,6 +59,7 @@ export const PRODUCT_TYPES: readonly ProductSectionType[] = [
   "banner",
   "faq",
   "trust_badges",
+  "marquee",
   "help",
   "newsletter",
 ]
@@ -67,6 +70,7 @@ export const CATEGORY_TYPES: readonly CategorySectionType[] = [
   "banner",
   "faq",
   "trust_badges",
+  "marquee",
   "help",
   "newsletter",
 ]
@@ -171,6 +175,8 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
       return { ...base, type, title: null, body: { type: "doc", content: [] } }
     case "trust_badges":
       return { ...base, type, variant: defaultVariant(type) }
+    case "marquee":
+      return { ...base, ...newMarqueeFields() }
     case "newsletter":
     case "help":
       return { ...base, type, title: null, text: null }
@@ -209,6 +215,30 @@ export const newAnnouncementBar = (id: string): AnnouncementBar => ({
   type: "announcement_bar",
   lines: [""],
 })
+
+/** A new scrolling strip's fields: one item to write, the contract's default steps. */
+const newMarqueeFields = () => ({
+  type: "marquee" as const,
+  items: [{ icon: null, text: "", subtext: null, link: null }],
+  ...MARQUEE_DEFAULTS,
+})
+
+/** The header group's scrolling strip, above the shop's header (adr/0049 Ek 2026-11-14 §10 karar 9). */
+export const newHeaderMarquee = (id: string): HeaderMarquee => ({
+  id,
+  ...ALWAYS,
+  ...newMarqueeFields(),
+})
+
+/**
+ * Scrolling strips a page would show (adr/0049 Ek 2026-11-14 §4.1): the
+ * header's, on every page, with the page's own; hidden ones count too.
+ */
+export const marqueesOn = (doc: LayoutDocument, page: BodyGroup): number =>
+  [...doc.header, ...doc[page]].filter((section) => section.type === "marquee").length
+
+/** The pages a strip in the header would show on beside their own. */
+export const BODY_GROUPS: readonly BodyGroup[] = ["home", "product", "category"]
 
 /** The footer's newsletter box, in the storefront's own words. */
 export const newFooterNewsletter = (id: string): FooterNewsletter => ({

@@ -7746,7 +7746,8 @@
           "top": "Üste bölüm ekle",
           "bottom": "Alta bölüm ekle"
         },
-        "looks": "Stok ve renk örnekleri"
+        "looks": "Stok ve renk örnekleri",
+        "addMarquee": "Kayan yazı ekle"
       },
       "row": {
         "drag": "Sürükleyerek taşıyın",
@@ -7849,6 +7850,10 @@
         "related_products": {
           "name": "Benzer ürünler",
           "description": "Ürünün kategorisinden, bir koleksiyondan ya da elle seçtiğiniz ürünler."
+        },
+        "marquee": {
+          "name": "Kayan yazı",
+          "description": "Kısa sözleriniz ya da bir kampanya, yan yana kayan bir şerit olarak."
         }
       },
       "variants": {
@@ -8079,7 +8084,8 @@
         "colorDuplicate": "Bu renk adı listede zaten var.",
         "thresholdRange": "1 ile {{max}} arasında bir tam sayı yazın.",
         "contrast": "Bu renk beyaz yazıyla ya da sayfa zemininde yeterince okunmuyor (en az 3:1 gerekir). Daha koyu bir ton seçin.",
-        "wellContrast": "Bu renk, sayfa zemininin bir ton koyusu olan alanlarda (bağlantıların ve çerçeveli düğmelerin durduğu kutular) yeterince okunmuyor (en az 3:1 gerekir). Daha koyu bir ton seçin."
+        "wellContrast": "Bu renk, sayfa zemininin bir ton koyusu olan alanlarda (bağlantıların ve çerçeveli düğmelerin durduğu kutular) yeterince okunmuyor (en az 3:1 gerekir). Daha koyu bir ton seçin.",
+        "marqueeLimit": "Aynı sayfada en çok {{max}} kayan yazı olabilir (üst bilgideki her sayfada sayılır); birini kaldırın."
       },
       "theme": {
         "title": "Tema ayarları",
@@ -8353,6 +8359,57 @@
         "text_one": "Taslakta geri yüklenen bir sürümün menüsü var: Yayınla'ya bastığınızda mağazanın menüsü bununla değişir.",
         "text_other": "Taslakta geri yüklenen bir sürümün {{count}} menüsü var: Yayınla'ya bastığınızda mağazanın menüleri bunlarla değişir.",
         "drop": "Menüleri bırak"
+      },
+      "marquee": {
+        "item": "{{number}}. öge",
+        "add": "Öge ekle",
+        "hint": "En çok {{max}} öge; şerit bunları art arda kaydırır.",
+        "iconOf": "{{number}}. ögenin simgesi",
+        "noIcon": "Simgesiz",
+        "textOf": "{{number}}. ögenin yazısı",
+        "textPlaceholder": "{ücretsiz_kargo_eşiği} üzeri kargo bedava",
+        "subtextOf": "{{number}}. ögenin alt satırı (isteğe bağlı)",
+        "subtextPlaceholder": "Saat 14.00'e kadar verilen siparişlerde",
+        "link": "Bağlantı (isteğe bağlı)",
+        "full": "Bu sayfada zaten {{max}} kayan yazı var (üst bilgideki de sayılır).",
+        "lookHint": "Zemin, hız, yön ve ayraç; ayrıca şeridin çevresindeki boşluk ve genişliği.",
+        "headerLookHint": "Zemin, hız, yön ve ayraç.",
+        "size": {
+          "label": "Boy",
+          "term": "size",
+          "small": "Küçük",
+          "medium": "Orta",
+          "large": "Büyük",
+          "hint": "Küçük: ince bir yazı satırı. Orta: simge ve alt satırla. Büyük: iri kampanya yazısı."
+        },
+        "ground": {
+          "label": "Zemin",
+          "term": "background",
+          "stage": "Koyu",
+          "primary": "Ana renk",
+          "light": "Açık"
+        },
+        "speed": {
+          "label": "Hız",
+          "term": "speed",
+          "slow": "Yavaş",
+          "medium": "Orta",
+          "fast": "Hızlı"
+        },
+        "direction": {
+          "label": "Yön",
+          "term": "direction",
+          "left": "Sola",
+          "right": "Sağa"
+        },
+        "separator": {
+          "label": "Ayraç",
+          "term": "separator",
+          "none": "Yok",
+          "dot": "Nokta",
+          "star": "Yıldız",
+          "line": "Çizgi"
+        }
       }
     },
     "preferences": {

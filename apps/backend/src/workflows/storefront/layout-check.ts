@@ -2,7 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { docStats } from "../../lib/content"
 import { ValidationError } from "../../lib/errors"
 import { bodySections } from "../../lib/storefront/layout"
-import type { BodySection, LayoutDocument } from "../../lib/storefront/layout"
+import type { BodySection, HeaderSection, LayoutDocument } from "../../lib/storefront/layout"
 import { sliderImages } from "../../lib/storefront/sections/hero-slider"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import { unknownDocTokens } from "../../lib/shop/tokens"
@@ -10,8 +10,11 @@ import type { MenuLinkKind } from "../../modules/storefront-menus/service"
 import { assertCards, mediaOf } from "../content/rules"
 import { existingRecords, isRecordKind } from "./menu-links"
 
-/** Every link a section holds: buttons, slides, "see all". */
-export function linksOf(section: BodySection): MenuLinkInput[] {
+/** Every link a section holds: buttons, slides, "see all", a scrolling strip's items. */
+export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
+  if (section.type === "marquee") {
+    return section.items.flatMap((item) => (item.link ? [item.link] : []))
+  }
   if (section.type === "hero") {
     return section.links
   }
@@ -23,6 +26,10 @@ export function linksOf(section: BodySection): MenuLinkInput[] {
   }
   return []
 }
+
+/** The header's sections that hold links: its scrolling strip (the announcement's lines are words). */
+export const headerLinked = (doc: Pick<LayoutDocument, "header">): HeaderSection[] =>
+  doc.header.filter((section) => section.type === "marquee")
 
 /** Every record a section names by id, as a link would point at it. */
 function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }[] {
@@ -73,7 +80,8 @@ export function imagesOf(section: BodySection): string[] {
  * whose cards exist and whose `{belirteç}`s are the shop's details. The
  * home, product and category pages' sections go through the same checks
  * (the plain lines' `{belirteç}`s, a FAQ's answers among them, are the
- * schema's). A menu set the design carries (adr/0063 §3) links only
+ * schema's); the header's scrolling strip links only records that exist
+ * too. A menu set the design carries (adr/0063 §3) links only
  * records that exist, as the Menüler screen asks (`storefront_menus.target_unknown`).
  * Returns the media records it uses, to keep their files.
  */
@@ -82,12 +90,14 @@ export async function checkLayout(
   doc: LayoutDocument
 ): Promise<string[]> {
   const sections = bodySections(doc)
-  const targets = sections.flatMap((section) => [
-    ...recordsOf(section),
-    ...linksOf(section).flatMap((link) =>
+  const recordLinks = (section: BodySection | HeaderSection) =>
+    linksOf(section).flatMap((link) =>
       isRecordKind(link.kind) && "target" in link ? [{ kind: link.kind, target: link.target }] : []
-    ),
-  ])
+    )
+  const targets = [
+    ...sections.flatMap((section) => [...recordsOf(section), ...recordLinks(section)]),
+    ...headerLinked(doc).flatMap(recordLinks),
+  ]
   const menuTargets = (doc.settings.menus ?? []).flatMap((menu) =>
     menu.items
       .flatMap((each) => [each.link, ...each.children])

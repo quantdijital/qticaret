@@ -2,11 +2,12 @@ import type { AnySection, LayoutDocument, LayoutLink } from "@/features/storefro
 import {
   BEST_SELLER_DAYS,
   LAYOUT_LIMITS as L,
+  MARQUEE_LIMITS,
   SLIDER_LIMITS,
 } from "@/features/storefront/api/layout"
 import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
-import { allSections } from "./sections"
+import { BODY_GROUPS, allSections, marqueesOn } from "./sections"
 import { SETTINGS_KEY, badgeProblems, settingsProblems } from "./settings-problems"
 
 /**
@@ -35,6 +36,7 @@ export type Problem =
   | "contrast"
   | "wellContrast"
   | "thresholdRange"
+  | "marqueeLimit"
 
 /** A section's problems by field (`heading`, `lines.0`, `slides.1.text`, `schedule`). */
 export type SectionProblems = Record<string, Problem>
@@ -197,7 +199,37 @@ function fieldsOf(section: AnySection): Found[] {
       return [["title", textProblem(section.title, L.title)]]
     case "trust_badges":
       return []
+    case "marquee":
+      return section.items.flatMap((item, index): Found[] => {
+        const at = `items.${String(index)}`
+        return [
+          [
+            `${at}.text`,
+            item.text.trim() === ""
+              ? "required"
+              : textProblem(item.text, MARQUEE_LIMITS.text, true),
+          ],
+          [`${at}.subtext`, textProblem(item.subtext, MARQUEE_LIMITS.subtext, true)],
+          [`${at}.link`, linkProblem(item.link)],
+        ]
+      })
   }
+}
+
+/**
+ * The scrolling strips of a page showing more than it may (adr/0049 Ek
+ * 2026-11-14 §4.1): the header's and the page's, each marked, by id.
+ */
+function marqueeLimitIds(doc: LayoutDocument): Set<string> {
+  const ids = new Set<string>()
+  for (const page of BODY_GROUPS) {
+    if (marqueesOn(doc, page) > MARQUEE_LIMITS.perPage) {
+      for (const section of [...doc.header, ...doc[page]]) {
+        if (section.type === "marquee") ids.add(section.id)
+      }
+    }
+  }
+  return ids
 }
 
 /** The section's problems; none: it may be saved as it is. */
@@ -221,10 +253,12 @@ export function documentProblems(
   const problems = new Map<string, SectionProblems>()
   const settings = settingsProblems(doc.settings, savedTheme)
   const badges = badgeProblems(settings)
+  const overLimit = marqueeLimitIds(doc)
   for (const section of allSections(doc)) {
-    const found = {
+    const found: SectionProblems = {
       ...sectionProblems(section),
       ...(section.type === "trust_badges" ? badges : {}),
+      ...(overLimit.has(section.id) ? { limit: "marqueeLimit" as const } : {}),
     }
     if (Object.keys(found).length > 0) {
       problems.set(section.id, found)

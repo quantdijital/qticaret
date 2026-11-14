@@ -1,18 +1,6 @@
-import { Link } from "@tanstack/react-router"
-import {
-  ChevronRight,
-  CircleAlert,
-  Columns3,
-  Contact,
-  Palette,
-  Plus,
-  Store,
-  SwatchBook,
-} from "lucide-react"
-import type { Dispatch, ReactNode } from "react"
-import type { LucideIcon } from "lucide-react"
+import { Columns3, Contact, Palette, Store, SwatchBook } from "lucide-react"
+import type { Dispatch } from "react"
 import { useTranslation } from "react-i18next"
-import { Button } from "@qticaret/admin-ui/ui/button"
 import type {
   AnySection,
   BodyGroup,
@@ -21,112 +9,22 @@ import type {
 } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import {
+  BODY_GROUPS,
   idsOf,
   isScheduled,
+  marqueesOn,
   newAnnouncementBar,
   newFooterNewsletter,
+  newHeaderMarquee,
   newSectionId,
 } from "@/features/storefront/layout/sections"
+import { MARQUEE_LIMITS } from "@/features/storefront/api/layout"
 import { PageSections } from "./page-sections"
 import { SECTION_ICONS, kindOf, sectionLabel } from "./section-meta"
 import { SectionRow } from "./section-row"
+import { AddRow, ElsewhereRow, ThemeRow, TreeGroup } from "./tree-rows"
 
 const T = "storefront.editor.tree"
-
-function TreeGroup({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="flex flex-col gap-1">
-      <h2 className="px-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-        {title}
-      </h2>
-      {children}
-    </div>
-  )
-}
-
-/** A part of the frame edited on another screen: its name and links there. */
-function ElsewhereRow({
-  icon: Icon,
-  name,
-  links,
-}: {
-  icon: LucideIcon
-  name: string
-  links: { to: "/settings/store" | "/storefront/menus"; label: string }[]
-}) {
-  return (
-    <li className="flex items-start gap-2 py-1.5 pr-2 pl-6">
-      <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-      <div className="flex min-w-0 flex-col gap-0.5">
-        <span className="text-sm">{name}</span>
-        <span className="flex flex-wrap gap-x-3 text-xs">
-          {links.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className="text-primary-text underline-offset-4 hover:underline"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </span>
-      </div>
-    </li>
-  )
-}
-
-/** One of the theme's own panels: its settings, or a part every page shares. */
-function ThemeRow({
-  icon: Icon,
-  label,
-  problem = false,
-  onClick,
-}: {
-  icon: LucideIcon
-  label: string
-  problem?: boolean
-  onClick: () => void
-}) {
-  const { t } = useTranslation()
-  return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="sm"
-      className="w-full justify-start pl-6"
-      onClick={onClick}
-    >
-      <Icon />
-      <span className="flex-1 truncate text-left">{label}</span>
-      {problem ? (
-        <CircleAlert
-          role="img"
-          aria-label={t("storefront.editor.row.problem")}
-          className="size-3.5 shrink-0 text-destructive-text"
-        />
-      ) : null}
-      <ChevronRight className="text-muted-foreground" />
-    </Button>
-  )
-}
-
-/** A button that adds what a group lacks (the header's bar, the footer's box). */
-function AddRow({ label, onClick }: { label: string; onClick: () => void }) {
-  return (
-    <li className="pl-5">
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="w-full justify-start text-primary-text"
-        onClick={onClick}
-      >
-        <Plus />
-        {label}
-      </Button>
-    </li>
-  )
-}
 
 interface SectionTreeProps {
   /** The page being edited: its own sections between the header and the footer. */
@@ -192,13 +90,21 @@ export function SectionTree({
       />
     )
   }
-  const add = (group: "header" | "footer") => {
+  const add = (which: "announcement" | "marquee" | "newsletter") => {
     const id = newSectionId(idsOf(doc))
-    const section = group === "header" ? newAnnouncementBar(id) : newFooterNewsletter(id)
-    dispatch({ type: "add", group, section })
+    if (which === "newsletter") {
+      dispatch({ type: "add", group: "footer", section: newFooterNewsletter(id) })
+    } else {
+      const section = which === "marquee" ? newHeaderMarquee(id) : newAnnouncementBar(id)
+      dispatch({ type: "add", group: "header", section })
+    }
     onOpen(id)
   }
-  const [bar] = doc.header
+  // The header draws its bar first, its strip under it (adr/0049 Ek 2026-11-14 §4.1)
+  const bar = doc.header.find((section) => section.type === "announcement_bar")
+  const strip = doc.header.find((section) => section.type === "marquee")
+  // A strip in the header shows on every page: not while a page already has its two
+  const stripFull = BODY_GROUPS.some((body) => marqueesOn(doc, body) >= MARQUEE_LIMITS.perPage)
   const [newsletter] = doc.footer
   return (
     <nav aria-label={t(`${T}.label`)} className="flex flex-col gap-6 px-3 py-4">
@@ -210,7 +116,22 @@ export function SectionTree({
             <AddRow
               label={t(`${T}.addAnnouncement`)}
               onClick={() => {
-                add("header")
+                add("announcement")
+              }}
+            />
+          )}
+          {strip ? (
+            row(strip)
+          ) : (
+            <AddRow
+              label={t(`${T}.addMarquee`)}
+              full={
+                stripFull
+                  ? t("storefront.editor.marquee.full", { max: MARQUEE_LIMITS.perPage })
+                  : null
+              }
+              onClick={() => {
+                add("marquee")
               }}
             />
           )}
@@ -243,7 +164,7 @@ export function SectionTree({
             <AddRow
               label={t(`${T}.addNewsletter`)}
               onClick={() => {
-                add("footer")
+                add("newsletter")
               }}
             />
           )}

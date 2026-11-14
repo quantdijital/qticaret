@@ -941,7 +941,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "storefront_layout.section_invalid":
     "The section was not recognised; reload the page and try again.",
   "storefront_layout.section_duplicate":
-    "A section was added twice; the announcement bar and the newsletter can appear once each.",
+    "A section was added twice; the announcement bar, the scrolling strip and the newsletter can appear once each.",
+  "storefront_layout.marquee_limit":
+    "A page can show at most two scrolling strips; the one in the header counts on every page.",
   "storefront_layout.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
   "storefront_layout.color_duplicate": "Each colour name can be listed once.",
   "storefront_layout.schedule_invalid": "The section must end after it starts.",

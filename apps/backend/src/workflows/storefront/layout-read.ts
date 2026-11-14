@@ -10,8 +10,8 @@ import { shopInfoValues } from "../shop/info-values"
 import { layoutRow } from "./layout"
 import { legacySettings } from "./layout-shared"
 import { defaultLayout } from "./layout-default"
-import { imagesOf, linksOf } from "./layout-check"
-import { fill, hydrateSection } from "./layout-hydrate"
+import { headerLinked, imagesOf, linksOf } from "./layout-check"
+import { fill, hydrateMarquee, hydrateSection } from "./layout-hydrate"
 import type { HydrateContext } from "./layout-hydrate"
 import { liveRecords } from "./layout-live"
 import { resolveLinks } from "./menu-links"
@@ -62,7 +62,8 @@ export async function storeLayout(
   const product = keepLive(pages.product)
   const category = keepLive(pages.category)
   const body: BodySection[] = [...home, ...product, ...category]
-  const links = body.flatMap(linksOf)
+  // The header's scrolling strip links like a body section (adr/0049 Ek 2026-11-14 §4.1)
+  const links = [...body, ...headerLinked({ header })].flatMap(linksOf)
   const urls = body.flatMap(imageUrls)
   const [values, resolved, assets, picks, legacy] = await Promise.all([
     shopInfoValues(container),
@@ -123,11 +124,15 @@ export async function storeLayout(
     ),
   }
   return {
-    header: header.map((section) => ({
-      id: section.id,
-      type: section.type,
-      lines: section.lines.map((line) => fillShopText(line, values)),
-    })),
+    header: header.map((section) =>
+      section.type === "marquee"
+        ? hydrateMarquee(section, at)
+        : {
+            id: section.id,
+            type: section.type,
+            lines: section.lines.map((line) => fillShopText(line, values)),
+          }
+    ),
     home: await Promise.all(home.map((section) => hydrateSection(section, at))),
     footer: footer.map((section) => ({
       id: section.id,

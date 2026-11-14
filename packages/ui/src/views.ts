@@ -2,6 +2,7 @@ import type { TrustIcon } from "@qticaret/types"
 import type { CategoryCardView, ShopMarkView } from "./card-views"
 import type { CartLineView, FreeShippingView } from "./cart-views"
 import type { BottomNavView, ThemeView } from "./frame-views"
+import type { MarqueeSectionView } from "./marquee-views"
 
 /**
  * What a theme is given to show (adr/0046 §7): ready-made view models.
@@ -116,6 +117,12 @@ export interface ShopView {
   cart: MiniCartView | null
   /** The announcement bar's lines; none: no bar. */
   announcements: string[]
+  /**
+   * The header group's scrolling strip, drawn above the shop's header on
+   * every page but the checkout's (adr/0049 Ek 2026-11-14 §4.1); none or
+   * absent: no strip.
+   */
+  marquee?: MarqueeSectionView | null
   /** The footer's newsletter box in the shop's words; null: the shop took it out (adr/0049). */
   newsletter: { title: string; text: string } | null
   /** The header's small links (about, contact…). */

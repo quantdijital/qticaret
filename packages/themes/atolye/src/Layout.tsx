@@ -6,13 +6,15 @@ import { CheckoutFooter, CheckoutHeader } from "./frame/CheckoutFrame"
 import { Consent } from "./frame/Consent"
 import { Footer } from "./frame/Footer"
 import { Header } from "./frame/Header"
+import { Marquee } from "./sections/Marquee"
 import { ScrollCue } from "./frame/ScrollCue"
 import { WhatsApp } from "./frame/WhatsApp"
 import { WhatsAppClear } from "./frame/WhatsAppClear"
 
 /**
  * The frame every page shares (docs/tema/yon-2026-11-05.md § Frame): a
- * skip link, the graphite announcement bar, the sticky two-row header,
+ * skip link, the graphite announcement bar, the shop's scrolling strip
+ * when its header group has one (adr/0049 Ek 2026-11-14 §4.1), the sticky two-row header,
  * the page, the graphite mast footer, and under 1024 px the bottom bar.
  * The WhatsApp button stays away from the checkout and the cart, and
  * while the cookie question waits. `ScrollCue` tells the stylesheet
@@ -73,6 +75,7 @@ export function Layout({
         contact={shop.contact}
         words={{ announcements: t("nav.announcements"), links: t("nav.top_links") }}
       />
+      {shop.marquee && <Marquee section={shop.marquee} t={t} header />}
       <Header shop={shop} t={t} searchSuggest={searchSuggest} changeCartLine={changeCartLine} />
       <main id="icerik" className="flex-1">
         {children}

@@ -7746,7 +7746,8 @@
           "top": "Add section above",
           "bottom": "Add section below"
         },
-        "looks": "Stock and colour swatches"
+        "looks": "Stock and colour swatches",
+        "addMarquee": "Add scrolling strip"
       },
       "row": {
         "drag": "Drag to move",
@@ -7849,6 +7850,10 @@
         "related_products": {
           "name": "Related products",
           "description": "Products from the product's category, a collection or ones you pick."
+        },
+        "marquee": {
+          "name": "Scrolling strip",
+          "description": "Short promises or a campaign, as a strip that slides sideways."
         }
       },
       "variants": {
@@ -8079,7 +8084,8 @@
         "colorDuplicate": "This colour name is already in the list.",
         "thresholdRange": "Enter a whole number from 1 to {{max}}.",
         "contrast": "This colour does not read well enough with white text or on the page colour (3:1 at least). Pick a darker shade.",
-        "wellContrast": "This colour does not read well enough on the areas one shade darker than the page (the boxes links and outlined buttons stand on; 3:1 at least). Pick a darker shade."
+        "wellContrast": "This colour does not read well enough on the areas one shade darker than the page (the boxes links and outlined buttons stand on; 3:1 at least). Pick a darker shade.",
+        "marqueeLimit": "A page may show up to {{max}} scrolling strips (the header's counts on every page); remove one."
       },
       "theme": {
         "title": "Theme settings",
@@ -8353,6 +8359,57 @@
         "text_one": "The draft carries a restored version's menu: Publish replaces the shop's menu with it.",
         "text_other": "The draft carries a restored version's {{count}} menus: Publish replaces the shop's menus with them.",
         "drop": "Leave the menus out"
+      },
+      "marquee": {
+        "item": "Item {{number}}",
+        "add": "Add item",
+        "hint": "Up to {{max}} items; the strip slides them one after another.",
+        "iconOf": "Icon of item {{number}}",
+        "noIcon": "No icon",
+        "textOf": "Text of item {{number}}",
+        "textPlaceholder": "Free shipping from {ücretsiz_kargo_eşiği}",
+        "subtextOf": "Second line of item {{number}} (optional)",
+        "subtextPlaceholder": "On orders placed before 2 pm",
+        "link": "Link (optional)",
+        "full": "This page already has {{max}} scrolling strips (the header's counts too).",
+        "lookHint": "Background, speed, direction and separator; also the space around the strip and its width.",
+        "headerLookHint": "Background, speed, direction and separator.",
+        "size": {
+          "label": "Size",
+          "term": "size",
+          "small": "Small",
+          "medium": "Medium",
+          "large": "Large",
+          "hint": "Small: a thin line of text. Medium: with an icon and a second line. Large: a big campaign line."
+        },
+        "ground": {
+          "label": "Background",
+          "term": "background",
+          "stage": "Dark",
+          "primary": "Main colour",
+          "light": "Light"
+        },
+        "speed": {
+          "label": "Speed",
+          "term": "speed",
+          "slow": "Slow",
+          "medium": "Medium",
+          "fast": "Fast"
+        },
+        "direction": {
+          "label": "Direction",
+          "term": "direction",
+          "left": "Left",
+          "right": "Right"
+        },
+        "separator": {
+          "label": "Separator",
+          "term": "separator",
+          "none": "None",
+          "dot": "Dot",
+          "star": "Star",
+          "line": "Line"
+        }
       }
     },
     "preferences": {
