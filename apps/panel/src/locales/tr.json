@@ -7868,6 +7868,10 @@
         "category_main": {
           "name": "Ürün ızgarası",
           "description": "Kategorinin ürünleri, filtreler ve sıralama; her kategori sayfasında. Diğer bölümler bunun üstünde ya da altında durur."
+        },
+        "price_bands": {
+          "name": "Fiyat bantları",
+          "description": "Fiyat aralıklarına göre 2–4 kart; her kart mağazayı o aralıkla süzer ve aralıktaki birkaç ürünü küçük gösterir."
         }
       },
       "variants": {
@@ -7889,7 +7893,11 @@
           "standard": "Standart"
         },
         "soon": "{{name}} (hazırlanıyor)",
-        "kept": "Kayıtlı biçim hazırlanıyor; hazır olana kadar vitrin standart biçimi çizer."
+        "kept": "Kayıtlı biçim hazırlanıyor; hazır olana kadar vitrin standart biçimi çizer.",
+        "hero": {
+          "standard": "Sahne",
+          "category_list": "Kategori listesi"
+        }
       },
       "look": {
         "title": "Görünüm ayarları",
@@ -7981,7 +7989,8 @@
         "helpText": "Ürün, sipariş ya da kargo için bize yazın; en kısa sürede dönelim.",
         "newsletterText": "Vitrinin metni: kampanya ve yeniliklerden e-postayla haberdar olun…",
         "faq": "Sık sorulan sorular",
-        "related_products": "Benzer ürünler"
+        "related_products": "Benzer ürünler",
+        "price_bands": "Fiyata göre alışveriş"
       },
       "fields": {
         "eyebrow": "Üst satır",
@@ -8173,7 +8182,8 @@
         "thresholdRange": "1 ile {{max}} arasında bir tam sayı yazın.",
         "contrast": "Bu renk beyaz yazıyla ya da sayfa zemininde yeterince okunmuyor (en az 3:1 gerekir). Daha koyu bir ton seçin.",
         "wellContrast": "Bu renk, sayfa zemininin bir ton koyusu olan alanlarda (bağlantıların ve çerçeveli düğmelerin durduğu kutular) yeterince okunmuyor (en az 3:1 gerekir). Daha koyu bir ton seçin.",
-        "marqueeLimit": "Aynı sayfada en çok {{max}} kayan yazı olabilir (üst bilgideki her sayfada sayılır); birini kaldırın."
+        "marqueeLimit": "Aynı sayfada en çok {{max}} kayan yazı olabilir (üst bilgideki her sayfada sayılır); birini kaldırın.",
+        "bandsOrder": "Üst sınırlar sırayla artmalı; sınırı olmayan bant yalnız en sonda olabilir."
       },
       "theme": {
         "title": "Tema ayarları",
@@ -8565,6 +8575,61 @@
       },
       "main": {
         "fixed": "Bu bölüm sayfanın sabit parçasıdır; gizlenemez, taşınamaz, kopyalanamaz ve kaldırılamaz."
+      },
+      "heroCatalog": {
+        "list": "Kategori listesi",
+        "listHint": "Solda, her kategori küçük görseliyle.",
+        "listSource": "Hangi kategoriler",
+        "sources": {
+          "top": "Ana kategoriler",
+          "menu": "Üst menüdeki kategoriler",
+          "manual": "Seçtiklerim"
+        },
+        "listEmpty": "En az bir kategori seçin.",
+        "listLimit": "En çok kaç kategori",
+        "listLimitHint": "{{min}} ile {{max}} arası.",
+        "showCount": "Ürün sayısını göster",
+        "showCountHint": "Her kategorinin yanında yayındaki ürün sayısı.",
+        "tiles": "Yandaki karolar",
+        "tilesHint": "Girişin yanında en çok {{max}} kategori karosu.",
+        "tilesEmpty": "Karo seçmezseniz yalnız liste ve giriş görünür.",
+        "tileImage": "{{number}}. karonun görseli",
+        "tileImageHint": "Boş bırakırsanız kategorinin görseli, o da yoksa en yeni ürününün fotoğrafı görünür.",
+        "chips": "Hızlı bağlantılar",
+        "chipsHint": "Girişin altında en çok {{max}} bağlantı; kategoriler küçük görseliyle görünür.",
+        "chip": "{{number}}. bağlantı",
+        "addChip": "Bağlantı ekle",
+        "picks": "Küçük ürünler",
+        "picksHint": "Düğmenin altında en çok {{max}} ürün, kısa adlarıyla.",
+        "picksEmpty": "Ürün seçmezseniz bu satır görünmez.",
+        "pickLabel": "{{number}}. ürünün kısa adı",
+        "pickLabelHint": "Boş bırakırsanız ürünün adı görünür.",
+        "pickLabelPlaceholder": "Çam yeşili",
+        "showPrice": "Başlangıç fiyatını göster",
+        "showPriceHint": "Seçtiğiniz ürünlerin en düşük güncel fiyatı."
+      },
+      "categories": {
+        "showCountHint": "Her karonun altında yayındaki ürün sayısı.",
+        "more": "Başlığın yanındaki bağlantı",
+        "moreHint": "Seçmezseniz Tüm kategoriler sayfasına gider."
+      },
+      "priceBands": {
+        "bands": "Bantlar",
+        "bandsHint": "2 ile 4 bant; üst sınırlar sırayla artar. Her bant mağazayı kendi fiyat aralığıyla süzer.",
+        "band": "{{number}}. bant",
+        "label": "Bandın adı",
+        "labelUnder": "{{amount}} TL altı",
+        "labelOpen": "{{amount}} TL ve üzeri",
+        "text": "Kısa açıklama",
+        "textPlaceholder": "Anahtarlık çakılar, mini modeller",
+        "max": "Üst sınır (TL)",
+        "maxHint": "Bant, önceki bandın sınırından bu tutara kadar olan ürünleri kapsar.",
+        "open": "Üst sınır yok",
+        "openHint": "Son bant önceki sınırın üstündeki bütün ürünleri kapsar.",
+        "addBand": "Bant ekle",
+        "thumbs": "Ürün görselleri",
+        "thumbsHint": "Her bantta o aralıktan birkaç ürün küçük görünür; vitrin fiyatlara göre kendisi seçer.",
+        "thumbsCount": "Bant başına ürün"
       }
     },
     "preferences": {

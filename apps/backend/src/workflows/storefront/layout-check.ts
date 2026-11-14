@@ -17,7 +17,13 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
     return section.items.flatMap((item) => (item.link ? [item.link] : []))
   }
   if (section.type === "hero") {
-    return section.links
+    // H17's quick links beside its buttons
+    return section.variant === "category_list"
+      ? [...section.links, ...section.chips]
+      : section.links
+  }
+  if (section.type === "categories") {
+    return section.more ? [section.more] : []
   }
   if (section.type === "banner") {
     return bannerLinks(section)
@@ -40,6 +46,16 @@ function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }
   const as = (kind: MenuLinkKind) => (target: string) => ({ kind, target })
   if (section.type === "categories") {
     return section.category_ids.map(as("category"))
+  }
+  // H17: its list's picked categories, its tiles' categories and its products shown small
+  if (section.type === "hero") {
+    return section.variant === "category_list"
+      ? [
+          ...(section.list.kind === "manual" ? section.list.category_ids : []).map(as("category")),
+          ...section.tiles.map((tile) => as("category")(tile.category_id)),
+          ...section.picks.map((pick) => as("product")(pick.product_id)),
+        ]
+      : []
   }
   if (section.type === "brands") {
     return section.brand_ids.map(as("brand"))
@@ -64,7 +80,10 @@ function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }
 /** The addresses of every image the design shows: openings, slides, rich text. */
 export function imagesOf(section: BodySection): string[] {
   if (section.type === "hero") {
-    return section.image ? [section.image.url] : []
+    const tiles = section.variant === "category_list" ? section.tiles : []
+    return [section.image, ...tiles.map((tile) => tile.image)].flatMap((each) =>
+      each ? [each.url] : []
+    )
   }
   if (section.type === "hero_slider") {
     return sliderImages(section)

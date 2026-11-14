@@ -45,6 +45,7 @@ export const HOME_TYPES: readonly HomeSectionType[] = [
   "faq",
   "trust_badges",
   "marquee",
+  "price_bands",
   "newsletter",
   "help",
 ]
@@ -141,7 +142,18 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
     case "faq":
       return { ...base, type, title: null, items: [{ question: "", answer: "" }] }
     case "hero":
-      return { ...base, type, eyebrow: null, heading: null, text: null, links: [], image: null }
+      return {
+        ...base,
+        type,
+        variant: defaultVariant(type),
+        eyebrow: null,
+        heading: null,
+        text: null,
+        links: [],
+        image: null,
+      }
+    case "price_bands":
+      return { ...base, type, title: null, bands: newPriceBands(), thumbs: 3 }
     case "hero_slider":
       return {
         ...base,
@@ -156,7 +168,7 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
     case "banner":
       return { ...base, type, slides: [], ...BANNER_DEFAULTS }
     case "categories":
-      return { ...base, type, title: null, category_ids: [] }
+      return { ...base, type, title: null, category_ids: [], show_count: false, more: null }
     case "products":
       return {
         ...base,
@@ -213,6 +225,17 @@ export function newBodySection(
   const section = newHomeSection(type, id)
   return group === "category" ? ({ ...section, placement } as CategorySection) : section
 }
+
+/**
+ * A new price bands strip's bands: three to start from, each an upper
+ * bound in whole lira, the last without one ("and up"), and a label to
+ * write (the form suggests one from the bound, as a strip's first item).
+ */
+const newPriceBands = () => [
+  { label: "", text: null, max: 500 },
+  { label: "", text: null, max: 1000 },
+  { label: "", text: null, max: null },
+]
 
 /** The announcement bar, with one line to write. */
 export const newAnnouncementBar = (id: string): AnnouncementBar => ({

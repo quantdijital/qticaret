@@ -1,0 +1,140 @@
+{
+  "header": [],
+  "home": [
+    {
+      "id": "katalogacilis",
+      "type": "hero",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "category_list",
+      "eyebrow": null,
+      "heading": "El yapımı çakı ve bıçaklar",
+      "text": "Çeliğe, sapa ve kullanıma göre seçin; her modelde ölçü ve malzeme yazılı.",
+      "links": [{ "$href": "/magaza", "label": "Tüm ürünleri gör" }],
+      "image": null,
+      "list": { "kind": "top" },
+      "list_limit": 9,
+      "show_count": true,
+      "tiles": [
+        { "category_id": { "$handle": "category:kamp-baltalari" }, "image": null },
+        { "category_id": { "$handle": "category:sef-bicaklari" }, "image": null }
+      ],
+      "chips": [
+        { "$href": "/kategori/kilic-modelleri/minyatur-kiliclar", "label": null },
+        { "$href": "/kategori/mutfak-sef-serisi/mutfak-setleri", "label": null },
+        { "$href": "/kategori/kasap-bicaklari/kasap-bicak-setleri", "label": null },
+        { "$href": "/kategori/hediyelik-esyalar/ahsap-caki-kutulari", "label": null }
+      ],
+      "picks": [],
+      "show_price": true
+    },
+    {
+      "id": "coksatanlar",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": null,
+      "source": { "kind": "best_sellers", "days": 90 },
+      "limit": 10,
+      "columns": 5,
+      "more": { "$href": "/magaza", "label": "Tüm ürünler" }
+    },
+    {
+      "id": "yenigelenler",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Yeni gelenler",
+      "source": { "kind": "newest" },
+      "limit": 10,
+      "columns": 5,
+      "more": { "$href": "/magaza", "label": "Tüm ürünler" }
+    },
+    {
+      "id": "kilicrafi",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Kılıç Modelleri",
+      "source": { "kind": "category", "category_id": { "$handle": "category:kilic-modelleri" } },
+      "limit": 10,
+      "columns": 5,
+      "more": null
+    },
+    {
+      "id": "fiyatbantlari",
+      "type": "price_bands",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "look": {
+        "space_outer": null,
+        "space_inner": null,
+        "ground": "well",
+        "align": null,
+        "width": null
+      },
+      "title": "Fiyata göre alışveriş",
+      "bands": [
+        { "label": "500 TL altı", "text": "Günlük taşıma ve anahtarlık çakıları", "max": 500 },
+        { "label": "1.000 TL altı", "text": "Gravürlü çakılar, mini baltalar", "max": 1000 },
+        { "label": "2.500 TL altı", "text": "El yapımı çakılar ve şef bıçakları", "max": 2500 },
+        { "label": "Koleksiyonluk", "text": "Özel çelik ve koleksiyon bıçakları", "max": null }
+      ],
+      "thumbs": 3
+    },
+    {
+      "id": "mutfakrafi",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Mutfak & Şef",
+      "source": { "kind": "category", "category_id": { "$handle": "category:mutfak-sef-serisi" } },
+      "limit": 5,
+      "columns": 5,
+      "more": { "$href": "/kategori/mutfak-sef-serisi", "label": null }
+    },
+    {
+      "id": "celiksap",
+      "type": "categories",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "look": {
+        "space_outer": null,
+        "space_inner": null,
+        "ground": "well",
+        "align": null,
+        "width": null
+      },
+      "title": "Çeliğe ve sapa göre",
+      "category_ids": [
+        { "$handle": "category:damascus-celik-bicaklar" },
+        { "$handle": "category:elmax-cakilar" },
+        { "$handle": "category:n690-cakilar" },
+        { "$handle": "category:geyik-boynuzu-sapli-cakilar" },
+        { "$handle": "category:kemik-sapli-cakilar" },
+        { "$handle": "category:epoksi-cakilar" }
+      ],
+      "show_count": true,
+      "more": { "$href": "/kategori/el-yapimi-caki", "label": "Tüm çakılar" }
+    },
+    {
+      "id": "musteriyorumlari",
+      "type": "reviews",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": null,
+      "limit": 3
+    }
+  ],
+  "footer": [],
+  "product": [],
+  "category": []
+}

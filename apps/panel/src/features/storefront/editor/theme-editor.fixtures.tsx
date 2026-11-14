@@ -51,6 +51,7 @@ export const DOC: LayoutDocument = {
       id: "girisbolumu",
       type: "hero",
       ...ALWAYS,
+      variant: "standard",
       eyebrow: null,
       heading: null,
       text: null,

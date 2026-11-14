@@ -16,13 +16,20 @@ import { namedCategories } from "./section-data"
  * catalogue.
  */
 export async function categoryTiles(ids: readonly string[]): Promise<CategoryCardView[]> {
+  return (await picturedCategories(ids)).map(({ card }) => card)
+}
+
+/** `categoryTiles` with each tile's category id beside it (its count, a tile's own picture). */
+export async function picturedCategories(
+  ids: readonly string[]
+): Promise<{ id: string; card: CategoryCardView }[]> {
   const { categories, named } = await namedCategories(ids)
   return mapLimited(named, PHOTO_REQUESTS, async ({ id, card }) => {
     if (card.image) {
-      return card
+      return { id, card }
     }
     const photo = await newestPhoto(subtreeIds(categories, id))
-    return photo ? { ...card, image: photo } : card
+    return { id, card: photo ? { ...card, image: photo } : card }
   })
 }
 

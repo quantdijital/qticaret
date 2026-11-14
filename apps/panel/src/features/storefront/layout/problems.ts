@@ -7,6 +7,7 @@ import {
 } from "@/features/storefront/api/layout"
 import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
+import { heroCatalogProblems, priceBandsProblems } from "./catalog-problems"
 import { BODY_GROUPS, allSections, marqueesOn } from "./sections"
 import { SETTINGS_KEY, badgeProblems, settingsProblems } from "./settings-problems"
 
@@ -37,6 +38,7 @@ export type Problem =
   | "wellContrast"
   | "thresholdRange"
   | "marqueeLimit"
+  | "bandsOrder"
 
 /** A section's problems by field (`heading`, `lines.0`, `slides.1.text`, `schedule`). */
 export type SectionProblems = Record<string, Problem>
@@ -91,7 +93,10 @@ function fieldsOf(section: AnySection): Found[] {
         ["text", textProblem(section.text, L.text, true)],
         ["image", textProblem(section.image?.alt ?? null, L.alt)],
         ...section.links.map((link, index): Found => [`links.${String(index)}`, linkProblem(link)]),
+        ...heroCatalogProblems(section),
       ]
+    case "price_bands":
+      return priceBandsProblems(section)
     case "banner":
       return [
         ["slides", section.slides.length === 0 ? "slidesRequired" : null],
@@ -193,6 +198,10 @@ function fieldsOf(section: AnySection): Found[] {
         ["product_id", section.product_id === "" ? "productRequired" : null],
       ]
     case "categories":
+      return [
+        ["title", textProblem(section.title, L.title)],
+        ["more", linkProblem(section.more)],
+      ]
     case "brands":
     case "posts":
     case "reviews":

@@ -10,6 +10,7 @@
     "./section-look": "./src/store/section-look.ts",
     "./section-marquee": "./src/store/section-marquee.ts",
     "./section-banner": "./src/store/section-banner.ts",
+    "./section-catalog": "./src/store/section-catalog.ts",
     "./control-plane": {
       "qt-compiled": "./dist/control-plane/index.js",
       "default": "./src/control-plane/index.ts"

@@ -27,6 +27,7 @@ import { MarqueeForm } from "./forms/marquee-form"
 import { MarqueeGroups } from "./forms/marquee-groups"
 import { BannerSettings } from "./forms/banner-settings"
 import { MarqueeSettings } from "./forms/marquee-settings"
+import { PriceBandsForm } from "./forms/price-bands-form"
 import { ProductsForm } from "./forms/products-form"
 import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
@@ -101,6 +102,8 @@ function FormOf({
       return <RelatedForm section={section} {...props} />
     case "marquee":
       return <MarqueeForm section={section} {...props} />
+    case "price_bands":
+      return <PriceBandsForm section={section} {...props} />
     case "trust_badges":
       // The strip's problems are the badges' (`trust_badges.0.title`) and its schedule
       return <TrustBadgeList badges={badges} problems={problems} onChange={onBadges} />

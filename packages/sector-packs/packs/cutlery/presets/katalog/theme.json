@@ -1,0 +1,10 @@
+{
+  "settings_version": 2,
+  "theme": "atolye",
+  "colors": { "primary": null, "accent": null, "background": "steel" },
+  "typography": { "heading": "manrope", "body": "manrope" },
+  "radius": "soft",
+  "product_card": { "ratio": "1:1", "show_brand": true, "show_rating": false },
+  "header": { "layout": "left", "sticky": true },
+  "buttons": "pill"
+}

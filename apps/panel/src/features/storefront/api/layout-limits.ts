@@ -43,5 +43,8 @@ export const BEST_SELLER_DAYS = { min: 7, max: 365, default: 90 } as const
 /** A product rail's cards in a row on a wide screen (adr/0049 Ek 2026-11-05); 3 by default. */
 export const SHELF_COLUMNS: readonly ShelfColumns[] = [3, 4, 5]
 
+/** H17's list, tiles, quick links and picks; the price bands (adr/0049 Ek 2026-11-14, Katalog). */
+export { HERO_CATALOG_LIMITS, PRICE_BANDS_LIMITS } from "@qticaret/types"
+
 /** A scrolling strip's items and lines (adr/0049 Ek 2026-11-14 §4.1), and strips a page shows at most. */
 export const MARQUEE_LIMITS = { ...MARQUEE, perPage: MARQUEE_PER_PAGE } as const
