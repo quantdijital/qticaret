@@ -64,6 +64,13 @@ describe("the catalogue opening (H17)", () => {
     expect(html).toContain('<nav aria-label="Kategoriler" class="gf-mosaic-list">')
   })
 
+  it("keeps the words the shop wrote for its picture, and preloads one picture only", () => {
+    const html = home([opening(), opening({ id: "ikinci", variant: "standard" })])
+
+    expect(html).toMatch(/<img[^>]*alt="elmax"/)
+    expect(html.match(/rel="preload"/g)).toHaveLength(1)
+  })
+
   it("lists the categories with their counts, the tiles with theirs, a missing count left out", () => {
     const html = home([opening()])
 
