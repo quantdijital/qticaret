@@ -18,6 +18,8 @@ export interface SectorPackSummary {
     categories: number
     flags: number
     seo_templates: number
+    /** Ready-made storefront looks (adr/0063). */
+    presets: number
   }
 }
 
@@ -30,6 +32,7 @@ export const SECTOR_PACK_COUNTS = [
   "categories",
   "flags",
   "seo_templates",
+  "presets",
 ] as const satisfies readonly (keyof SectorPackSummary["counts"])[]
 
 export const sectorPacksQuery = () =>

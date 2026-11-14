@@ -117,6 +117,7 @@ medusaIntegrationTestRunner({
             categories: 16,
             flags: 2,
             seo_templates: 1,
+            presets: 0,
           },
         })
       }

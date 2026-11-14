@@ -12,11 +12,35 @@ export type {
   AttributeTemplateData,
   CategoryData,
   FlagPreset,
+  LoadedSectorPack,
   PackManifest,
   SectorPack,
   SectorPackSummary,
   SeoTemplateSet,
 } from "./schema"
+export {
+  HANDLE_KINDS,
+  PRESET_CODE,
+  PRESET_FILES,
+  PRESET_FORMAT,
+  PRESET_HANDLE,
+  PRESET_IMAGE_PATH,
+  PRESET_LIMITS,
+  PRESET_PREVIEW,
+  handleRef,
+  hrefRef,
+  imageRef,
+  presetManifestSchema,
+} from "./preset-schema"
+export type {
+  HandleKind,
+  PresetDemo,
+  PresetLayout,
+  PresetManifest,
+  PresetMenu,
+  StorefrontPreset,
+} from "./preset-schema"
+export { PRESETS_DIR, readPreset } from "./preset-load"
 export {
   DEFAULT_PACKS_DIR,
   SectorPackError,
@@ -24,6 +48,7 @@ export {
   readPack,
   sectorPack,
   sectorPacks,
+  storefrontPreset,
   summaryOf,
 } from "./load"
 
@@ -39,4 +64,6 @@ export const packItemKey = {
   category: (handle: string) => `category:${handle}`,
   flag: (key: string) => `flag:${key}`,
   seo: (group: string, entity: string) => `seo:${group}.${entity}`,
+  /** A preset's image uploaded to the shop's media library (adr/0063 §4), by its path (`images/hero.webp`). */
+  presetImage: (preset: string, path: string) => `preset_image:${preset}/${path}`,
 } as const

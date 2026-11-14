@@ -28,6 +28,7 @@ describe("the packs in this package (adr/0061 C12)", () => {
       categories: 0,
       flags: 0,
       seo_templates: 0,
+      presets: 1,
     })
     const cutlery = sectorPack("cutlery")
     expect(cutlery && summaryOf(cutlery)).toMatchObject({
@@ -39,6 +40,7 @@ describe("the packs in this package (adr/0061 C12)", () => {
         categories: 16,
         flags: 2,
         seo_templates: 1,
+        presets: 0,
       },
     })
   })
@@ -52,6 +54,9 @@ describe("the packs in this package (adr/0061 C12)", () => {
     expect(packItemKey.template("bicak-seti")).toBe("attribute_template:bicak-seti")
     expect(packItemKey.attribute("bicak-seti", "sertlik")).toBe("attribute:bicak-seti/sertlik")
     expect(packItemKey.seo("title_templates", "brand")).toBe("seo:title_templates.brand")
+    expect(packItemKey.presetImage("grafit", "images/hero.webp")).toBe(
+      "preset_image:grafit/images/hero.webp"
+    )
   })
 })
 
@@ -80,6 +85,7 @@ describe("a pack's folder", () => {
       categories: [],
       flags: [],
       seo: {},
+      presets: [],
     })
   })
 
@@ -88,6 +94,7 @@ describe("a pack's folder", () => {
     ["a manifest of another code", { "manifest.json": manifest("baska") }],
     ["no manifest", { "flags.json": [] }],
     ["a file it does not know", { "manifest.json": manifest("x1"), "notes.json": {} }],
+    ["a file named as the presets folder", { "manifest.json": manifest("x1"), presets: "{}" }],
     ["a file that is not JSON", { "manifest.json": manifest("x1"), "flags.json": "{" }],
     [
       "an unknown category field",

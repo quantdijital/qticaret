@@ -1,8 +1,11 @@
-import { existsSync, readFileSync, readdirSync } from "node:fs"
+import { existsSync, readdirSync } from "node:fs"
 import { join } from "node:path"
 import type { z } from "zod"
+import { PRESETS_DIR, readPresets } from "./preset-load"
+import type { StorefrontPreset } from "./preset-schema"
+import { SectorPackError, readJsonFile } from "./read-json"
 import { PACK_CODE, PACK_FILES } from "./schema"
-import type { SectorPack, SectorPackSummary } from "./schema"
+import type { LoadedSectorPack, SectorPack, SectorPackSummary } from "./schema"
 
 /**
  * The packs on disk (`packages/sector-packs/packs/<code>/`), read at run
@@ -12,13 +15,7 @@ import type { SectorPack, SectorPackSummary } from "./schema"
  * any caller, branches on a pack's code.
  */
 
-/** A pack that does not read as one: its code, file and what is wrong. */
-export class SectorPackError extends Error {
-  constructor(message: string) {
-    super(`sector pack: ${message}`)
-    this.name = "SectorPackError"
-  }
-}
+export { SectorPackError } from "./read-json"
 
 export const DEFAULT_PACKS_DIR = join(__dirname, "..", "packs")
 
@@ -26,30 +23,16 @@ type FileName = keyof typeof PACK_FILES
 
 const isFileName = (name: string): name is FileName => Object.hasOwn(PACK_FILES, name)
 
-function readFile<N extends FileName>(
+const readFile = <N extends FileName>(
   dir: string,
   code: string,
   name: N
-): z.infer<(typeof PACK_FILES)[N]> | undefined {
-  const path = join(dir, name)
-  if (!existsSync(path)) {
-    return undefined
-  }
-  let raw: unknown
-  try {
-    raw = JSON.parse(readFileSync(path, "utf8"))
-  } catch {
-    throw new SectorPackError(`${code}/${name} is not JSON`)
-  }
-  const parsed = PACK_FILES[name].safeParse(raw)
-  if (!parsed.success) {
-    const issue = parsed.error.issues[0]
-    throw new SectorPackError(
-      `${code}/${name} ${issue?.path.map(String).join(".") ?? ""}: ${issue?.message ?? ""}`
-    )
-  }
-  return parsed.data as z.infer<(typeof PACK_FILES)[N]>
-}
+): z.infer<(typeof PACK_FILES)[N]> | undefined =>
+  existsSync(join(dir, name))
+    ? (readJsonFile(join(dir, name), `${code}/${name}`, PACK_FILES[name]) as z.infer<
+        (typeof PACK_FILES)[N]
+      >)
+    : undefined
 
 const repeated = (values: readonly string[]): string | undefined =>
   values.find((value, index) => values.indexOf(value) !== index)
@@ -87,13 +70,18 @@ function checkItems(pack: SectorPack): void {
 }
 
 /** One pack's folder read and checked; throws `SectorPackError` naming what is wrong. */
-export function readPack(dir: string, code: string): SectorPack {
+export function readPack(dir: string, code: string): LoadedSectorPack {
   if (!PACK_CODE.test(code)) {
     throw new SectorPackError(`${code} is not a pack code`)
   }
-  const stray = readdirSync(dir).find((name) => !name.startsWith(".") && !isFileName(name))
+  const stray = readdirSync(dir, { withFileTypes: true }).find(
+    (entry) =>
+      !entry.name.startsWith(".") &&
+      !(entry.isFile() && isFileName(entry.name)) &&
+      !(entry.isDirectory() && entry.name === PRESETS_DIR)
+  )
   if (stray) {
-    throw new SectorPackError(`${code}/${stray} is not a pack file`)
+    throw new SectorPackError(`${code}/${stray.name} is not a pack file`)
   }
   const manifest = readFile(dir, code, "manifest.json")
   if (!manifest) {
@@ -102,7 +90,7 @@ export function readPack(dir: string, code: string): SectorPack {
   if (manifest.code !== code) {
     throw new SectorPackError(`${code}/manifest.json names ${manifest.code}`)
   }
-  const pack: SectorPack = {
+  const pack: LoadedSectorPack = {
     code: manifest.code,
     version: manifest.version,
     name: manifest.name,
@@ -111,15 +99,16 @@ export function readPack(dir: string, code: string): SectorPack {
     categories: readFile(dir, code, "categories.json") ?? [],
     flags: readFile(dir, code, "flags.json") ?? [],
     seo: readFile(dir, code, "seo.json") ?? {},
+    presets: readPresets(dir, code),
   }
   checkItems(pack)
   return pack
 }
 
-const cache = new Map<string, readonly SectorPack[]>()
+const cache = new Map<string, readonly LoadedSectorPack[]>()
 
 /** Every pack under `dir`, by code; read once per process (packs change with a release). */
-export function sectorPacks(dir: string = DEFAULT_PACKS_DIR): readonly SectorPack[] {
+export function sectorPacks(dir: string = DEFAULT_PACKS_DIR): readonly LoadedSectorPack[] {
   const known = cache.get(dir)
   if (known) {
     return known
@@ -132,8 +121,17 @@ export function sectorPacks(dir: string = DEFAULT_PACKS_DIR): readonly SectorPac
   return packs
 }
 
+/** The preset of this code in this pack, or null. */
+export function storefrontPreset(
+  pack: string,
+  code: string,
+  dir?: string
+): StorefrontPreset | null {
+  return sectorPack(pack, dir)?.presets.find((preset) => preset.code === code) ?? null
+}
+
 /** The pack of this code, or null for one there is none of. */
-export function sectorPack(code: string, dir?: string): SectorPack | null {
+export function sectorPack(code: string, dir?: string): LoadedSectorPack | null {
   return sectorPacks(dir).find((pack) => pack.code === code) ?? null
 }
 
@@ -144,7 +142,7 @@ const count = (record: Readonly<Record<string, string>> | undefined): number =>
   record ? Object.keys(record).length : 0
 
 /** What the wizard shows of a pack: its manifest and how many items of each kind. */
-export function summaryOf(pack: SectorPack): SectorPackSummary {
+export function summaryOf(pack: LoadedSectorPack): SectorPackSummary {
   return {
     code: pack.code,
     version: pack.version,
@@ -159,6 +157,7 @@ export function summaryOf(pack: SectorPack): SectorPackSummary {
       categories: pack.categories.length,
       flags: pack.flags.length,
       seo_templates: count(pack.seo.title_templates) + count(pack.seo.description_templates),
+      presets: pack.presets.length,
     },
   }
 }
