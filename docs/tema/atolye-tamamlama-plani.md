@@ -106,3 +106,14 @@ Sahip "Shopify mantığıyla gidelim" dedi. adr/0049'un "özel CSS yok" kuralı 
 - Yalnız mağaza sahibi rolü yazar; taslak, önizleme ve sürüm geçmişine girer.
 - Panelde not: tema güncellemesinde bozulabilir, destek kapsamı dışındadır.
 - Sınırsız tema kodu düzenleme yoktur.
+
+### İlke: bölüm ayarları kullanıcıyı boğmaz (sahip, 2026-11-14)
+
+Ayar panelini kullanan kişi mağaza sahibidir, tasarımcı ya da geliştirici değil. E1–E7'deki bütün ayar alanları şu kurallara uyar:
+
+- **Etiket Türkçe ve gündelik dildedir; teknik terim yanında çok küçük yazılır.** Örnek: "Dış boşluk" <small>margin</small>, "İç boşluk" <small>padding</small>, "Köşe yuvarlaklığı" <small>radius</small>, "Perde" <small>overlay</small>. Paneldeki ayar araması iki adı da bulur ("dış boşluk" yazan da "margin" yazan da aynı alana gider).
+- **Sayı yerine adlandırılmış seçenek.** Piksel girilmez; "Dar / Orta / Geniş", "Alçak / Orta / Yüksek", "Yavaş / Orta / Hızlı" gibi 3–4 seçenek sunulur. Seçenekler temanın ölçeğinden gelir, böylece sayfa ritmi bozulmaz.
+- **Önce az, isteyene çok.** Bölüm açıldığında yalnız içerik alanları (metin, görsel, bağlantı) ve "Biçim" seçimi görünür. Boşluk, hizalama, renk gibi ince ayarlar kapalı gelen "Görünüm ayarları" başlığı altındadır; gelişmiş CSS (E8) en altta, ayrı ve kapalıdır.
+- **Her seçim anında önizlemede görünür**; her alanın "varsayılana dön" düğmesi vardır.
+- **Seçenekler görselle anlatılır** (hizalama, biçim, düğme stili küçük çizimlerle), yalnız metinle değil.
+- Etiketler ve terimler i18n anahtarlarından gelir (altın kural 9).
