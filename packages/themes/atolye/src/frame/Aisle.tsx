@@ -7,7 +7,7 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { NavCategoryView } from "@qticaret/ui"
 
 const ITEM =
-  "group inline-flex min-h-11 items-center gap-1 rounded-button px-3 text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text data-[state=open]:bg-text data-[state=open]:text-paper"
+  "gf-aisle-item group inline-flex min-h-11 items-center gap-1 rounded-button px-3 text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text data-[state=open]:bg-text data-[state=open]:text-paper"
 
 /** A category's panel: its children in short columns beside its picture tile. */
 function Panel({ category, allIn }: { category: NavCategoryView; allIn: string }) {
@@ -74,17 +74,21 @@ function Panel({ category, allIn }: { category: NavCategoryView; allIn: string }
  * closed (`forceMount`), so each link reaches a crawler without a script
  * (docs/13). A closed panel still listens for presses outside it; it lets
  * them pass, or a press inside the open panel would close the menu before
- * its link is followed.
+ * its link is followed. In the catalog header's menu bar (`inBar`) its
+ * panels float under the bar's whole row, the bar's ground on its items.
  */
 export function Aisle({
   categories,
   label,
   allIn,
+  inBar = false,
 }: {
   categories: readonly NavCategoryView[]
   label: string
   /** "Tümünü gör: {name}" for each category path, in words. */
   allIn: Record<string, string>
+  /** In the catalog header's menu bar: its panels placed by the bar's row, no line under it. */
+  inBar?: boolean
 }) {
   const [open, setOpen] = useState("")
   return (
@@ -93,9 +97,15 @@ export function Aisle({
       onValueChange={setOpen}
       delayDuration={150}
       aria-label={label}
-      className="relative pb-2"
+      className={inBar ? "gf-menubar-aisle static min-w-0" : "relative pb-2"}
     >
-      <NavigationMenu.List className="-ml-3 flex flex-wrap items-center gap-x-1">
+      <NavigationMenu.List
+        className={
+          inBar
+            ? "flex flex-wrap items-center gap-x-1"
+            : "-ml-3 flex flex-wrap items-center gap-x-1"
+        }
+      >
         {categories.map((category) =>
           category.children.length === 0 ? (
             <NavigationMenu.Item key={category.path}>

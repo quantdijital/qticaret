@@ -79,12 +79,32 @@ const HeaderStandard = () => <HeaderRow mark={6} />
 /** The theme setting's centred header: the wordmark in the middle. */
 const HeaderCentered = () => <HeaderRow mark={47} />
 
+/** N14: a thin strip, the wordmark with a wide search and the phone, a filled menu bar. */
+function HeaderCatalog() {
+  return (
+    <>
+      <rect x={1} y={2} width={110} height={4} rx={1} className="fill-current opacity-10" />
+      <rect x={6} y={11} width={16} height={6} rx={1.5} className="fill-current opacity-70" />
+      <rect
+        x={28}
+        y={10}
+        width={52}
+        height={8}
+        rx={3}
+        className="fill-none stroke-current opacity-50"
+      />
+      <rect x={86} y={11} width={20} height={6} rx={1.5} className="fill-current opacity-40" />
+      <rect x={1} y={22} width={110} height={8} rx={1.5} className="fill-current opacity-70" />
+    </>
+  )
+}
+
 // A type with one variant offers no choice and has no sketch
 const SKETCHES: {
   readonly [T in VariantSectionType]?: Readonly<Record<SectionVariant<T>, () => ReactElement>>
 } = {
   trust_badges: { strip: TrustStrip, lined: TrustLined },
-  header_bar: { standard: HeaderStandard, centered: HeaderCentered },
+  header_bar: { standard: HeaderStandard, centered: HeaderCentered, catalog: HeaderCatalog },
 }
 
 /** A variant in small, in the current colour; a variant without a sketch yet draws nothing. */

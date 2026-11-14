@@ -48,13 +48,14 @@ const still = () => () => undefined
  * own clear glyph is hidden; an X button clears the words and gives the
  * field its focus back. On the results page the field keeps the search,
  * ready to change; empty, it leaves its example whole (no room held for
- * the clear button).
+ * the clear button). `written`: the submit is a filled "Ara" button.
  */
 export function SearchBox({
   id,
   words,
   suggest,
   browse = [],
+  written = false,
   className,
 }: {
   id: string
@@ -63,6 +64,8 @@ export function SearchBox({
   suggest?: string | undefined
   /** The shop's categories, offered when a search finds nothing. */
   browse?: readonly LinkView[]
+  /** The submit written ("Ara") in a filled button rather than the magnifier (the catalog header). */
+  written?: boolean
   className?: string
 }) {
   const hydrated = useHydrated()
@@ -227,7 +230,10 @@ export function SearchBox({
         enterKeyHint="search"
         maxLength={100}
         defaultValue={asked}
-        className={cn("gf-field", text === "" ? "pr-14" : "pr-24")}
+        className={cn(
+          "gf-field",
+          written ? (text === "" ? "pr-24" : "pr-34") : text === "" ? "pr-14" : "pr-24"
+        )}
         onChange={change}
         onKeyDown={keyDown}
         onFocus={() => {
@@ -249,19 +255,28 @@ export function SearchBox({
         <button
           type="button"
           aria-label={words.clear}
-          className="gf-icon-btn absolute top-0.5 right-12 text-text-2"
+          className={cn(
+            "gf-icon-btn absolute top-0.5 text-text-2",
+            written ? "right-22" : "right-12"
+          )}
           onClick={clear}
         >
           <X className="size-5" aria-hidden="true" strokeWidth={1.75} />
         </button>
       )}
-      <button
-        type="submit"
-        aria-label={words.submit}
-        className="gf-icon-btn absolute top-0.5 right-1 text-text"
-      >
-        <Search className="size-5" aria-hidden="true" strokeWidth={1.75} />
-      </button>
+      {written ? (
+        <button type="submit" className="gf-btn gf-btn--small absolute top-0.5 right-0.5 min-w-20">
+          {words.submit}
+        </button>
+      ) : (
+        <button
+          type="submit"
+          aria-label={words.submit}
+          className="gf-icon-btn absolute top-0.5 right-1 text-text"
+        >
+          <Search className="size-5" aria-hidden="true" strokeWidth={1.75} />
+        </button>
+      )}
       {live && (
         <>
           <p role="status" className="sr-only">

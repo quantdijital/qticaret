@@ -1,7 +1,7 @@
 "use client"
 
 import { ShoppingBag } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CategoryCardView, MiniCartView } from "@qticaret/ui"
 import { FreeShippingMeter } from "../parts/FreeShippingMeter"
@@ -155,6 +155,7 @@ export function CartSheet({
   categories,
   change,
   buttonClass,
+  total = null,
   words,
 }: {
   cart: MiniCartView | null
@@ -163,12 +164,19 @@ export function CartSheet({
   /** The storefront's `changeCartLine`; none: the lines read only. */
   change?: ((form: FormData) => Promise<void>) | undefined
   buttonClass: string
+  /** The subtotal in place of "Sepet" (the catalog header's choice); null: the word. */
+  total?: string | null
   words: CartSheetWords
 }) {
   const [open, setOpen] = useState(false)
   const [said, setSaid] = useState("")
+  const trigger = useRef<HTMLAnchorElement>(null)
   useEffect(() => {
     const show = (event: Event) => {
+      // A header may hold one cart a screen width (the catalog's): only the one shown opens
+      if (trigger.current?.getClientRects().length === 0) {
+        return
+      }
       setSaid(cartAddedMessage(event))
       setOpen(true)
     }
@@ -180,8 +188,9 @@ export function CartSheet({
   return (
     <>
       <a
+        ref={trigger}
         href="/sepet"
-        aria-label={words.label}
+        aria-label={total ? `${words.label}, ${total}` : words.label}
         className={`${buttonClass} -mr-2 lg:mr-0`}
         onClick={(event) => {
           if (isOwnClick(event)) {
@@ -193,8 +202,8 @@ export function CartSheet({
         }}
       >
         <ShoppingBag className="size-6" aria-hidden="true" strokeWidth={1.75} />
-        <span aria-hidden="true" className="max-lg:hidden">
-          {words.short}
+        <span aria-hidden="true" className={total ? "tabular max-lg:hidden" : "max-lg:hidden"}>
+          {total ?? words.short}
         </span>
         <span aria-live="polite" className="gf-count tabular empty:hidden lg:right-2">
           {count > 0 ? count : ""}

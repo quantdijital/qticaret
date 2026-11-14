@@ -7877,7 +7877,8 @@
         },
         "header_bar": {
           "standard": "Logo on the left",
-          "centered": "Logo in the middle"
+          "centered": "Logo in the middle",
+          "catalog": "Classic catalogue"
         },
         "footer_bar": {
           "ledger": "Standard"
@@ -8561,7 +8562,57 @@
       "headerBar": {
         "sticky": "Keep the header in view",
         "stickyHint": "The header stays at the top of the screen while the page scrolls. Off, it scrolls away with the page.",
-        "stickyTerm": "sticky"
+        "stickyTerm": "sticky",
+        "search_placeholder": {
+          "label": "Search box text",
+          "term": "placeholder",
+          "hint": "Left empty: “Search products, categories or brands”."
+        },
+        "search_label": {
+          "label": "Written search button",
+          "term": "button",
+          "hint": "On: a filled “Search” button instead of the magnifier."
+        },
+        "account_text": {
+          "label": "“My account” in the top strip",
+          "term": "link",
+          "hint": "The account icon always stays on the menu bar."
+        },
+        "cart_total": {
+          "label": "Show the cart's total",
+          "term": "subtotal",
+          "hint": "With items in the cart, the subtotal shows beside its icon."
+        },
+        "highlight_link": {
+          "label": "Highlighted link",
+          "term": "link",
+          "hint": "One standout link at the end of the main menu on the menu bar (e.g. Offers)."
+        },
+        "utility_bar": {
+          "label": "Top utility strip",
+          "term": "top bar",
+          "hint": "A thin light strip: the “Top menu” links from Menus and My account. Hidden on phones."
+        },
+        "phone": {
+          "label": "Phone number",
+          "term": "phone",
+          "hint": "The phone from your store details, right of the search under “Customer service”. Not shown without a phone."
+        },
+        "categories_button": {
+          "label": "“Categories” button",
+          "term": "dropdown",
+          "hint": "At the start of the menu bar; top categories and their subcategories as a dropdown."
+        },
+        "menu_ground": {
+          "label": "Menu bar background",
+          "term": "background",
+          "hint": "Text and icon colours are picked to read on it.",
+          "stage": "Dark",
+          "primary": "Brand colour",
+          "light": "Light"
+        },
+        "phoneNote": "On phones the header stays as it is: menu, logo, favourites and cart, with the search below.",
+        "otherHint": "The search button, the My account text and the cart total."
       },
       "main": {
         "fixed": "This section is a fixed part of the page; it cannot be hidden, moved, copied or removed."

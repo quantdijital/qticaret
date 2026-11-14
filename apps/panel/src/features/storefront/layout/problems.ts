@@ -1,4 +1,5 @@
 import type { AnySection, LayoutDocument, LayoutLink } from "@/features/storefront/api/layout"
+import { HEADER_CATALOG_LIMITS } from "@qticaret/types"
 import {
   BEST_SELLER_DAYS,
   LAYOUT_LIMITS as L,
@@ -200,6 +201,16 @@ function fieldsOf(section: AnySection): Found[] {
     case "rich_text":
       return [["title", textProblem(section.title, L.title)]]
     case "header_bar":
+      // The catalog header's words and highlighted link (adr/0049 Ek 2026-11-15)
+      return section.variant === "catalog"
+        ? [
+            [
+              "search_placeholder",
+              textProblem(section.search_placeholder, HEADER_CATALOG_LIMITS.search_placeholder),
+            ],
+            ["highlight_link", linkProblem(section.highlight_link)],
+          ]
+        : []
     case "footer_bar":
     case "product_main":
     case "category_main":
