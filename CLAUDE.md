@@ -26,6 +26,7 @@ Güncel faz ve görevler: `PROGRESS.md`
 - `pnpm dev:paytr` — sahte PayTR (panelden test hesabıyla bağlanır); vitrin ödemesi `localhost:8000/odeme`
 - `pnpm --filter backend test:unit` / `test:integration:http` / `test:integration:modules`
 - `pnpm lint` / `pnpm typecheck` / `pnpm format`
+- `pnpm verify:changed` — PR öncesi: değişen paketlerin typecheck/lint/test'i + değişen dosyalarda prettier (`origin/dev`'e göre)
 - `pnpm --filter backend medusa db:migrate` — migration
 - `pnpm --filter backend medusa db:generate <modul>` — migration üret
 
@@ -67,5 +68,16 @@ Güncel faz ve görevler: `PROGRESS.md`
 | Vitrin performans ölçümü (Lighthouse, CWV, düzeltme listesi) | docs/21-vitrin-performans-olcumu.md |
 | Entegrasyonlar | docs/entegrasyonlar/*.md |
 
+## Ortak çalışma (iki geliştirici: Deniz, Oğuzhan)
+- **Dallar:** `dev` ortak ve varsayılan dal; `main` canlı sürüm (yalnız `dev`'den). Her iş `dev`'den açılan kısa ömürlü dalda: `deniz/<konu>`, `oguzhan/<konu>`; 1–3 günde PR ile `dev`'e girer, sonra silinir. `dev`'e doğrudan commit yok, hiçbir dala force push yok.
+- **Çakışmayı küçük tut:** işe başlarken ve PR açmadan önce `git pull --rebase origin dev`. Başkasının alanına (Deniz: backend, üst panel, `infra/`, F16; Oğuzhan: tema ve vitrin) dokunacaksan önce haber ver.
+- **Kim olduğun:** `git config user.name` (Deniz → `progress/deniz.md`, Oğuzhan → `progress/oguzhan.md`).
+- **PROGRESS:** oturum notu yalnız kendi `progress/<kişi>.md` dosyana, en üste. `PROGRESS.md` ortak durumdur (aktif faz, sıradaki görev, açık sorular, faz durumu); yalnız bunlar değişince dokunulur.
+- **ADR:** numara önce `adr/README.md`'de ayrılır ve hemen `dev`'e push edilir; sonra ADR kendi dalında yazılır.
+- **Migration:** aynı modülün migration'ını aynı anda tek kişi üretir; birleştirmede migration adlarının benzersizliği kontrol edilir.
+- **Çeviri dosyaları:** yeni anahtar kendi bölümünün altına; çakışmada iki tarafın satırları da tutulur.
+- **`pnpm-lock.yaml`:** paket eklemeyi haber ver; çakışırsa elle düzeltme, `pnpm install` ile yeniden üret. Yeni ortam değişkeni `.env.example`'a yazılır.
+- **PR:** GitHub Actions kapalı (CI kotası); PR'ı açan `pnpm verify:changed` çalıştırır ve sonucu PR'a yazar. Ödeme, auth, migration ve güvenlik dokunan PR'a diğeri bakar; gerisini açan birleştirir.
+
 ## Oturum düzeni
-Oturum başı: `PROGRESS.md` oku → tek görev seç → plan modu → onay → kodla → test → `/oturum-kapat`.
+Oturum başı: `PROGRESS.md` ve kendi `progress/<kişi>.md` dosyanı oku → `dev`'i çek, iş dalı aç → tek görev seç → plan modu → onay → kodla → test → `/oturum-kapat`.
