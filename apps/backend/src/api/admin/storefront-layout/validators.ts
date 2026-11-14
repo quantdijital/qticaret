@@ -5,5 +5,14 @@ import { layoutDocument } from "../../../lib/storefront/layout"
 export const AdminPostStorefrontLayout = z.object({ document: layoutDocument }).strict()
 export type AdminPostStorefrontLayoutType = z.output<typeof AdminPostStorefrontLayout>
 
-/** Publish, discard, restore and preview take no body. */
+/** Publish, discard and preview take no body. */
 export const AdminPostStorefrontLayoutAction = z.object({}).strict()
+
+/**
+ * A revision back into the draft; `menus: false` leaves out the menu set it
+ * put live (adr/0063 §3), so publishing it does not bring that day's menus back.
+ */
+export const AdminPostStorefrontLayoutRestore = z
+  .object({ menus: z.boolean().default(true) })
+  .strict()
+export type AdminPostStorefrontLayoutRestoreType = z.output<typeof AdminPostStorefrontLayoutRestore>

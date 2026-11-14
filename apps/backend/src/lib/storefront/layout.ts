@@ -9,6 +9,7 @@ import {
 } from "./layout-sections"
 import type { BodySection } from "./layout-sections"
 import { layoutSettings } from "./layout-settings"
+import { storedTheme } from "./layout-theme"
 
 /**
  * The storefront's design as the theme editor writes it (adr/0049): the
@@ -89,3 +90,22 @@ export function isShowing(
     (!section.ends_at || new Date(section.ends_at).getTime() > at)
   )
 }
+
+/**
+ * A stored document (a draft, what is live, a revision) as today's schema
+ * reads it: the theme written without the settings' version is upgraded
+ * first, as the theme section's row is (adr/0062 §4), so it neither drops
+ * nor fails the read. A save is still held to the version.
+ */
+export function storedDocument(stored: unknown): unknown {
+  const settings = (stored as { settings?: unknown } | null)?.settings
+  if (settings === null || typeof settings !== "object" || !("theme" in settings)) {
+    return stored
+  }
+  const theme = storedTheme(settings.theme)
+  return { ...(stored as object), settings: { ...settings, theme } }
+}
+
+/** A stored document read through today's schema (see `storedDocument`); throws if it does not read. */
+export const readStoredLayout = (stored: unknown): LayoutDocument =>
+  layoutDocument.parse(storedDocument(stored))

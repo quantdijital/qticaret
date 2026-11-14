@@ -56,14 +56,17 @@ export function useEditorActions({ flush, page, onLoaded }: EditorActionsOptions
         onError: failed,
       })
     },
-    restore: (revision: number) => {
-      restore.mutate(revision, {
-        onSuccess: (layout) => {
-          onLoaded(layout.draft)
-          toast.success(t(`${E}.revisions.restored`, { revision }))
-        },
-        onError: failed,
-      })
+    restore: (revision: number, menus: boolean) => {
+      restore.mutate(
+        { revision, menus },
+        {
+          onSuccess: (layout) => {
+            onLoaded(layout.draft)
+            toast.success(t(`${E}.revisions.restored`, { revision }))
+          },
+          onError: failed,
+        }
+      )
     },
     previewing: preview.isPending,
     // The tab opens on the click, before the link exists: a tab opened after

@@ -5,6 +5,7 @@ import type {
   ProductSection,
   ProductsSection,
 } from "@/features/storefront/api/layout"
+import { GRAFIT_THEME } from "@/features/storefront/api/theme"
 import { HISTORY_LIMIT, editorReducer, initialEditorState } from "./editor-state"
 import type { EditorAction, EditorState } from "./editor-state"
 import {
@@ -14,6 +15,12 @@ import {
   newHomeSection,
   newSectionId,
 } from "./sections"
+
+/** The theme's settings as the draft opens them (adr/0063 §3); no menu set. */
+const SHARED = {
+  theme: { settings_version: 2 as const, theme: "atolye" as const, ...GRAFIT_THEME },
+  menus: null,
+}
 
 const hero = newHomeSection("hero", "girisbolumu")
 const products = newHomeSection("products", "yeniurunler") as ProductsSection
@@ -34,7 +41,12 @@ const DOC: LayoutDocument = {
     category("faq", "altsss", "bottom"),
     category("help", "altyardim", "bottom"),
   ],
-  settings: { trust_badges: [], color_swatches: [], low_stock: { enabled: true, threshold: 3 } },
+  settings: {
+    trust_badges: [],
+    color_swatches: [],
+    low_stock: { enabled: true, threshold: 3 },
+    ...SHARED,
+  },
 }
 
 const ids = (sections: readonly { id: string }[]) => sections.map((section) => section.id)

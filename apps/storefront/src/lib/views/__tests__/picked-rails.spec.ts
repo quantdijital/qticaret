@@ -20,8 +20,12 @@ const requests = vi.hoisted(() => ({
   legalIdentity: vi.fn(),
   siteSeo: vi.fn(),
   storefrontSettings: vi.fn(),
+  // The published design, no theme of its own: the frame\'s theme stands (adr/0063 §3)
+  storefrontLayout: vi.fn(() => Promise.resolve({})),
 }))
 vi.mock("@/lib/store-api/requests", () => requests)
+// A request without a preview: the theme is the published design's (adr/0063 §3)
+vi.mock("next/headers", () => ({ headers: () => Promise.resolve(new Headers()) }))
 vi.mock("@/lib/store-api/extras", () => ({
   cardFacts: vi.fn(() => Promise.resolve({})),
   categoryImages: vi.fn(() => Promise.resolve(new Map())),

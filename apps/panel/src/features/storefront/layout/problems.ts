@@ -32,6 +32,8 @@ export type Problem =
   | "scheduleOrder"
   | "colorInvalid"
   | "colorDuplicate"
+  | "contrast"
+  | "wellContrast"
   | "thresholdRange"
 
 /** A section's problems by field (`heading`, `lines.0`, `slides.1.text`, `schedule`). */
@@ -208,11 +210,16 @@ export function sectionProblems(section: AnySection): SectionProblems {
  * The sections with a problem, by id, and the theme's shared settings'
  * under `SETTINGS_KEY`; an empty map: the draft may be saved. Every trust
  * strip section carries the badges' problems too: the one list is edited
- * in each strip's form (adr/0049 Ek 2026-11-06).
+ * in each strip's form (adr/0049 Ek 2026-11-06). `savedTheme`, the draft's
+ * theme as the server holds it, judges a colour change against the page's
+ * well (adr/0062 §6).
  */
-export function documentProblems(doc: LayoutDocument): Map<string, SectionProblems> {
+export function documentProblems(
+  doc: LayoutDocument,
+  savedTheme?: LayoutDocument["settings"]["theme"]
+): Map<string, SectionProblems> {
   const problems = new Map<string, SectionProblems>()
-  const settings = settingsProblems(doc.settings)
+  const settings = settingsProblems(doc.settings, savedTheme)
   const badges = badgeProblems(settings)
   for (const section of allSections(doc)) {
     const found = {

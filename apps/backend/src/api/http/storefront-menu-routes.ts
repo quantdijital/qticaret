@@ -2,6 +2,7 @@ import { validateAndTransformBody } from "@medusajs/framework/http"
 import {
   AdminPostStorefrontLayout,
   AdminPostStorefrontLayoutAction,
+  AdminPostStorefrontLayoutRestore,
 } from "../admin/storefront-layout/validators"
 import { AdminPostStorefrontMenu } from "../admin/storefront-menus/validators"
 
@@ -26,10 +27,14 @@ export const STOREFRONT_MENU_ROUTES = [
     "/admin/storefront-layout/publish",
     "/admin/storefront-layout/discard",
     "/admin/storefront-layout/preview",
-    "/admin/storefront-layout/revisions/:revision/restore",
   ].map((matcher) => ({
     matcher,
     methods: ["POST" as const],
     middlewares: [validateAndTransformBody(AdminPostStorefrontLayoutAction)],
   })),
+  {
+    matcher: "/admin/storefront-layout/revisions/:revision/restore",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(AdminPostStorefrontLayoutRestore)],
+  },
 ]

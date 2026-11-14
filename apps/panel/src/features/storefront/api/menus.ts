@@ -121,7 +121,8 @@ export const menuInputOf = (menu: Menu, rank = menu.rank): MenuInput => ({
   })),
 })
 
-const KEY = ["storefront-menus"] as const
+export const MENUS_KEY = ["storefront-menus"] as const
+const KEY = MENUS_KEY
 
 /** Every menu: the header's, the top links, then the footer's columns in their order. */
 export const menusQuery = () =>

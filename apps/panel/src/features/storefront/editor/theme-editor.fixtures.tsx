@@ -14,6 +14,21 @@ import { ThemeEditorPage } from "./theme-editor-page"
 
 const ALWAYS = { visible: true, starts_at: null, ends_at: null }
 
+/**
+ * The theme's settings as the server opens them in the draft (adr/0063 §3):
+ * the theme section's defaults until the shop writes its own.
+ */
+export const THEME: ThemeSettings = {
+  settings_version: 2,
+  theme: "atolye",
+  colors: { primary: null, accent: null, background: "steel" },
+  typography: { heading: "manrope", body: "manrope" },
+  radius: "soft",
+  product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+  header: { layout: "left", sticky: true },
+  buttons: "pill",
+}
+
 export const DOC: LayoutDocument = {
   header: [{ id: "duyurular", type: "announcement_bar", ...ALWAYS, lines: ["Kargo bedava"] }],
   home: [
@@ -67,6 +82,8 @@ export const DOC: LayoutDocument = {
     trust_badges: [{ icon: "truck", title: "Aynı gün kargo", text: null }],
     color_swatches: [{ label: "Siyah", hex: STOREFRONT_THEME_COLOR }],
     low_stock: { enabled: true, threshold: 3 },
+    theme: THEME,
+    menus: null,
   },
 }
 
@@ -77,7 +94,9 @@ export const layoutOf = (more: Partial<AdminLayout> = {}): AdminLayout => ({
   has_changes: false,
   revision: 1,
   published_at: "2026-11-01T09:00:00.000Z",
-  revisions: [{ revision: 1, published_at: "2026-11-01T09:00:00.000Z", published_by: null }],
+  revisions: [
+    { revision: 1, published_at: "2026-11-01T09:00:00.000Z", published_by: null, has_menus: false },
+  ],
   ...more,
 })
 
@@ -106,27 +125,13 @@ const STOREFRONT: StorefrontSettings = {
   color_swatches: [],
   low_stock_threshold: 3,
 }
-/** The theme section's defaults, as the server gives them before anything is saved. */
-export const THEME: ThemeSettings = {
-  settings_version: 2,
-  theme: "atolye",
-  colors: { primary: null, accent: null, background: "steel" },
-  typography: { heading: "manrope", body: "manrope" },
-  radius: "soft",
-  product_card: { ratio: "1:1", show_brand: true, show_rating: false },
-  header: { layout: "left", sticky: true },
-  buttons: "pill",
-}
-
 export interface ServeOptions {
   /** The next draft saves fail with this message. */
   refuse?: () => string | null
   /** The storefront section as stored (its old main colour). */
   storefront?: Partial<StorefrontSettings>
-  /** The theme section as stored. */
+  /** The draft's theme settings (adr/0063 §3), over the defaults. */
   theme?: Partial<ThemeSettings>
-  /** A theme save fails with this (an API error). */
-  refuseTheme?: () => Error | null
 }
 
 /** A theme save over the stored one: the groups sent replace theirs, field by field. */
@@ -163,7 +168,7 @@ export const PRODUCTS = [
 /**
  * The server: the layout, a save answered with the draft it was sent, a
  * preview link per call (`sfl_1`, `sfl_2`…), publish, discard and restore;
- * the storefront and theme sections, saved at once.
+ * the storefront section, saved at once.
  */
 export function serve(
   fetchMock: FetchMock,
@@ -171,9 +176,12 @@ export function serve(
   layout: AdminLayout = layoutOf(),
   options: ServeOptions = {}
 ) {
-  let current = layout
+  const theme = mergeTheme(THEME, options.theme ?? {})
+  let current: AdminLayout = {
+    ...layout,
+    draft: { ...layout.draft, settings: { ...layout.draft.settings, theme } },
+  }
   let previews = 0
-  let theme = mergeTheme(THEME, options.theme ?? {})
   fetchMock.mockImplementation((url: string, init?: Init) => {
     const answer = (next: AdminLayout) => {
       current = next
@@ -205,15 +213,8 @@ export function serve(
       const values = { ...STOREFRONT, ...options.storefront, ...(init?.body as object | undefined) }
       return Promise.resolve({ section: "storefront", values, version: 1 })
     }
-    // The theme's own settings, saved at once (adr/0053)
-    if (url === THEME_SETTINGS) {
-      if (init?.method === "POST") {
-        const refused = options.refuseTheme?.()
-        if (refused) {
-          return Promise.reject(refused)
-        }
-        theme = mergeTheme(theme, init.body as Partial<ThemeSettings>)
-      }
+    // The theme section is the design's to fall back to: the editor never writes it (adr/0063 §3)
+    if (url === THEME_SETTINGS && init?.method !== "POST") {
       return Promise.resolve({ section: "theme", values: theme, version: 1 })
     }
     if (url.startsWith(`${PATH}/revisions/`)) {

@@ -34,6 +34,18 @@ export const STOREFRONT_BACKGROUNDS = {
 
 export type StorefrontBackground = keyof typeof STOREFRONT_BACKGROUNDS
 
+/**
+ * Each page colour's well, the tinted ground links and outlined controls
+ * also stand on (backend `THEME_WELLS`, Atölye's `paper-2`): a newly chosen
+ * main colour must read there too (adr/0062 §6).
+ */
+export const STOREFRONT_WELLS = {
+  steel: "#eef1f4",
+  warm: "#eeebe2",
+  neutral: "#ececec",
+  cool: "#e9ecf1",
+} as const satisfies Record<StorefrontBackground, string>
+
 /** WCAG AA for large text and controls (§1.4.3, §1.4.11): what the server asks of the main colour. */
 const AA_LARGE_TEXT = 3
 
@@ -69,3 +81,11 @@ export const contrastRatio = (a: string, b: string): number => ratio(luminance(a
 export const primaryReadable = (primary: string, background: StorefrontBackground): boolean =>
   contrastRatio(primary, WHITE) >= AA_LARGE_TEXT &&
   contrastRatio(primary, STOREFRONT_BACKGROUNDS[background]) >= AA_LARGE_TEXT
+
+/**
+ * Whether the main colour also reads in the page colour's well, 3:1 (adr/0062
+ * §6): asked of a change to the colour or the page colour, never of one
+ * already saved, as the server does.
+ */
+export const primaryReadableInWell = (primary: string, background: StorefrontBackground): boolean =>
+  contrastRatio(primary, STOREFRONT_WELLS[background]) >= AA_LARGE_TEXT

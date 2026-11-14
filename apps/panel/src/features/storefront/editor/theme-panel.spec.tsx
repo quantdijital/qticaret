@@ -4,13 +4,16 @@ import type { ReactNode } from "react"
 import { toast } from "sonner"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
+import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
 import {
   SETTINGS,
   THEME,
   THEME_SETTINGS,
   holdClock,
+  lastSaved,
   layoutOf,
   opened,
+  pass,
   postsTo,
   releaseClock,
   renderEditor,
@@ -35,8 +38,8 @@ vi.mock("@tanstack/react-router", () => ({
   useBlocker: () => ({ status: "idle" }),
 }))
 
-const CONTRAST = /yeterince okunmuyor/
-const save = () => screen.getByRole("button", { name: "Kaydet ve yayınla" })
+const CONTRAST = /beyaz yazıyla ya da sayfa zemininde yeterince okunmuyor/
+const WELL = /bir ton koyusu olan alanlarda/
 
 // Each test types and picks through the whole editor, which draws itself anew
 // on every key: CPU work a full run's load can stretch past the default 5 s.
@@ -54,9 +57,15 @@ async function openTheme(options: ServeOptions = {}) {
   return screen.findByRole("textbox", { name: "Ana renk" })
 }
 
-const themeBody = () => postsTo(fetchMock, THEME_SETTINGS).at(-1)?.[1]?.body
+async function choose(field: string, option: RegExp | string) {
+  await user.click(screen.getByRole("combobox", { name: field }))
+  await user.click(await screen.findByRole("option", { name: option }))
+}
 
-describe("the theme settings", HEAVY, () => {
+/** The theme the last draft save sent. */
+const savedTheme = () => lastSaved(fetchMock)?.settings.theme
+
+describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
   beforeEach(() => {
     user = holdClock()
     fetchMock.mockReset()
@@ -67,141 +76,114 @@ describe("the theme settings", HEAVY, () => {
     releaseClock()
   })
 
-  it("saves every choice as one body, live at once, and reloads the preview", async () => {
+  it("saves every choice into the draft as it is made, the preview reloading, nothing live", async () => {
     const primary = await openTheme()
     const preview = await screen.findByTitle("Vitrin önizlemesi")
     expect(preview).toHaveAttribute("src", expect.stringContaining("/onizleme/sfl_1"))
-    expect(screen.getByText(/taslağa bağlı değildir/)).toBeVisible()
-    expect(save()).toBeDisabled()
+    expect(screen.getByText(/taslağın parçasıdır/)).toBeVisible()
+    expect(screen.queryByRole("button", { name: "Kaydet ve yayınla" })).toBeNull()
 
     await user.type(primary, "#0B5C99")
     await user.click(screen.getByRole("combobox", { name: "Başlıklar" }))
     await user.click(await screen.findByRole("option", { name: /Playfair Display/ }))
     await user.click(screen.getByRole("radio", { name: "Nötr" }))
     await user.click(screen.getByRole("switch", { name: /^Puanı göster/ }))
-    await user.click(save())
+    await pass(AUTOSAVE_MS)
 
     await waitFor(() => {
-      expect(postsTo(fetchMock, THEME_SETTINGS)).toHaveLength(1)
-    })
-    expect(themeBody()).toEqual({
-      colors: { primary: "#0b5c99", accent: null, background: "neutral" },
-      typography: { heading: "playfair", body: "manrope" },
-      radius: "soft",
-      product_card: { ratio: "1:1", show_brand: true, show_rating: true },
-      header: { layout: "left", sticky: true },
-      buttons: "pill",
-    })
-    // The main colour lives in the theme now; the draft is not touched
-    expect(postsTo(fetchMock, SETTINGS)).toEqual([])
-    expect(postsTo(fetchMock)).toEqual([])
-    await waitFor(() => {
-      expect(screen.getByTitle("Vitrin önizlemesi")).toHaveAttribute(
-        "src",
-        expect.stringContaining("/onizleme/sfl_2")
-      )
-    })
-    expect(toast.success).toHaveBeenCalledWith(
-      "Tema ayarları kaydedildi; vitrinde en geç bir dakikada görünür."
-    )
-    expect(save()).toBeDisabled()
-  })
-
-  it("shows a main colour that does not read on the page under it, and the server's refusal", async () => {
-    let refuse = false
-    const primary = await openTheme({
-      refuseTheme: () =>
-        refuse
-          ? Object.assign(new Error("Bu renk yeterince okunmuyor."), {
-              status: 400,
-              code: "platform_settings.color_contrast",
-            })
-          : null,
-    })
-
-    // Over 3:1 on white, on Grafit's steel and on the neutral page, not on the warm one
-    await user.type(primary, "#2f8dff")
-    expect(screen.queryByRole("alert")).toBeNull()
-    await user.click(screen.getByRole("radio", { name: "Sıcak" }))
-    expect(await screen.findByRole("alert")).toHaveTextContent(CONTRAST)
-    expect(primary).toHaveAttribute("aria-invalid", "true")
-    await user.click(save())
-    expect(postsTo(fetchMock, THEME_SETTINGS)).toEqual([])
-
-    await user.click(screen.getByRole("radio", { name: "Nötr" }))
-    // The field is checked again against the new page colour, which takes a moment
-    await waitFor(() => {
-      expect(screen.queryByRole("alert")).toBeNull()
-    })
-
-    refuse = true
-    await user.click(save())
-    expect(await screen.findByRole("alert")).toHaveTextContent(CONTRAST)
-    expect(postsTo(fetchMock, THEME_SETTINGS)).toHaveLength(1)
-    expect(toast.error).not.toHaveBeenCalled()
-  })
-
-  it("moves the old main colour into the theme with the next save", async () => {
-    const primary = await openTheme({ storefront: { primary_color: "#0b5c99" } })
-    expect(primary).toHaveValue("#0b5c99")
-    expect(screen.getByText(/eski ayardan geliyor/)).toBeVisible()
-
-    await user.click(screen.getByRole("combobox", { name: "Köşeler" }))
-    await user.click(await screen.findByRole("option", { name: "Keskin" }))
-    await user.click(save())
-
-    await waitFor(() => {
-      expect(themeBody()).toMatchObject({
-        colors: { primary: "#0b5c99", accent: null, background: "steel" },
-        radius: "sharp",
+      expect(savedTheme()).toEqual({
+        ...THEME,
+        colors: { primary: "#0b5c99", accent: null, background: "neutral" },
+        typography: { heading: "playfair", body: "manrope" },
+        product_card: { ratio: "1:1", show_brand: true, show_rating: true },
       })
     })
-    // The old one gives way once the theme holds the colour, after the theme's save
-    await waitFor(() => {
-      expect(postsTo(fetchMock, SETTINGS).map(([, init]) => init?.body)).toEqual([
-        { primary_color: null },
-      ])
-    })
-    const sections = fetchMock.mock.calls
-      .filter(
-        ([url, init]) => init?.method === "POST" && url.startsWith("/admin/platform-settings")
-      )
-      .map(([url]) => url)
-    expect(sections).toEqual([THEME_SETTINGS, SETTINGS])
-    expect(primary).toHaveValue("#0b5c99")
-    expect(screen.queryByText(/eski ayardan geliyor/)).toBeNull()
-  })
-
-  it("puts the main colour back to the theme's own over an old one, clearing that once", async () => {
-    const primary = await openTheme({ storefront: { primary_color: "#0b5c99" } })
-    expect(primary).toHaveValue("#0b5c99")
-
-    await user.click(screen.getByRole("button", { name: "Varsayılan" }))
-    await user.click(save())
-
-    await waitFor(() => {
-      expect(postsTo(fetchMock, SETTINGS)).toHaveLength(1)
-    })
-    expect(themeBody()).toMatchObject({ colors: { primary: null } })
-    expect(postsTo(fetchMock, SETTINGS)[0]?.[1]?.body).toEqual({ primary_color: null })
-    // The theme's own colour shows, not the old one
-    await waitFor(() => {
-      expect(primary).toHaveValue("")
-    })
+    // Neither the theme section nor the storefront section is written: "Yayınla" puts it live
+    expect(postsTo(fetchMock, THEME_SETTINGS)).toEqual([])
+    expect(postsTo(fetchMock, SETTINGS)).toEqual([])
     await waitFor(() => {
       expect(screen.getByTitle("Vitrin önizlemesi")).toHaveAttribute(
         "src",
         expect.stringContaining("/onizleme/sfl_2")
       )
     })
+    expect(screen.getByRole("button", { name: "Yayınla" })).toBeEnabled()
+  })
 
-    // A later save leaves the storefront section alone
-    await user.click(screen.getByRole("radio", { name: "Nötr" }))
-    await user.click(save())
+  it("holds the draft while the main colour does not read on the page, or newly in its well", async () => {
+    const primary = await openTheme()
+    await pass(AUTOSAVE_MS)
+    const before = postsTo(fetchMock).length
+
+    // Over 3:1 on white and on Grafit's steel page, not on its well (adr/0062 §6)
+    await user.type(primary, "#2f8dff")
+    expect(await screen.findByRole("alert")).toHaveTextContent(WELL)
+    expect(primary).toHaveAttribute("aria-invalid", "true")
+    // Not on the warm page at all
+    await user.click(screen.getByRole("radio", { name: "Sıcak" }))
+    expect(screen.getByRole("alert")).toHaveTextContent(CONTRAST)
+    expect(screen.getByRole("alert")).not.toHaveTextContent(WELL)
+    // The row in the tree says where the problem is
+    expect(
+      within(screen.getByRole("navigation", { name: "Sayfanın bölümleri" })).getByRole("button", {
+        name: /Tema ayarları/,
+      })
+    ).toBeInTheDocument()
+    await pass(AUTOSAVE_MS)
+    expect(postsTo(fetchMock)).toHaveLength(before)
+    expect(screen.getByRole("status", { name: "Taslağın durumu" })).toHaveTextContent(/düzelt/i)
+
+    await user.clear(primary)
+    await user.type(primary, "#2a7ff0")
+    expect(screen.queryByRole("alert")).toBeNull()
+    await pass(AUTOSAVE_MS)
     await waitFor(() => {
-      expect(postsTo(fetchMock, THEME_SETTINGS)).toHaveLength(2)
+      expect(savedTheme()?.colors).toEqual({ primary: "#2a7ff0", accent: null, background: "warm" })
     })
-    expect(postsTo(fetchMock, SETTINGS)).toHaveLength(1)
+  })
+
+  it("keeps saving a colour stored before the well rule until it is changed", async () => {
+    // Stored in the draft already: the server lets it be, so does the editor
+    const primary = await openTheme({ theme: { colors: { ...THEME.colors, primary: "#2f8dff" } } })
+    expect(primary).toHaveValue("#2f8dff")
+    expect(screen.queryByRole("alert")).toBeNull()
+    await choose("Köşeler", "Keskin")
+    await pass(AUTOSAVE_MS)
+    await waitFor(() => {
+      expect(savedTheme()).toMatchObject({ radius: "sharp", colors: { primary: "#2f8dff" } })
+    })
+    // Another page colour is a change: judged in the new page's well
+    await user.click(screen.getByRole("radio", { name: "Soğuk" }))
+    expect(await screen.findByRole("alert")).toHaveTextContent(WELL)
+  })
+
+  it("says why the server refused a colour, in the shop's words", async () => {
+    const refusal =
+      "Bu renk beyaz yazıyla ya da sayfa zemininde yeterince okunmuyor (en az 3:1 karşıtlık gerekir). Daha koyu bir ton seçin."
+    let refuse = false
+    serve(fetchMock, admin, layoutOf(), { refuse: () => (refuse ? refusal : null) })
+    renderEditor()
+    const tree = await opened()
+    await user.click(within(tree).getByRole("button", { name: "Tema ayarları" }))
+    await pass(AUTOSAVE_MS)
+    refuse = true
+    await choose("Köşeler", "Keskin")
+    await pass(AUTOSAVE_MS)
+    await waitFor(() => {
+      expect(screen.getByRole("status", { name: "Taslağın durumu" })).toHaveTextContent(
+        `Kaydedilemedi: ${refusal}`
+      )
+    })
+  })
+
+  it("takes a change back with the editor's undo, as any change to the design", async () => {
+    await openTheme()
+    await user.click(screen.getByRole("combobox", { name: "Köşeler" }))
+    await user.click(await screen.findByRole("option", { name: "Keskin" }))
+    expect(screen.getByRole("combobox", { name: "Köşeler" })).toHaveTextContent("Keskin")
+
+    await user.click(screen.getByRole("button", { name: "Geri al" }))
+    expect(screen.getByRole("combobox", { name: "Köşeler" })).not.toHaveTextContent("Keskin")
   })
 
   it("puts a colour back to the theme's own as none", async () => {
@@ -213,10 +195,10 @@ describe("the theme settings", HEAVY, () => {
 
     await user.click(screen.getByRole("button", { name: "Varsayılan" }))
     expect(accent).toHaveValue("")
-    await user.click(save())
+    await pass(AUTOSAVE_MS)
 
     await waitFor(() => {
-      expect(themeBody()).toMatchObject({ colors: { primary: null, accent: null } })
+      expect(savedTheme()?.colors).toMatchObject({ primary: null, accent: null })
     })
   })
 })

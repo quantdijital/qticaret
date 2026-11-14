@@ -4,7 +4,7 @@
  * shop's details in place. A copy of the backend's answer (adr/0046 §8).
  */
 import type { MediaDerivatives } from "./catalog.js"
-import type { MenuLinkKind, StorefrontFrame } from "./storefront.js"
+import type { MenuLinkKind, StoreMenu, StoreThemeSettings, StorefrontFrame } from "./storefront.js"
 
 export interface StoreLayoutLink {
   /** The shop's wording, else the record's name; null: the storefront's own name. */
@@ -197,8 +197,23 @@ export interface StoreLayout {
   settings?: StoreLayoutSettings
 }
 
-/** What several pages draw alike: the trust badges (details filled) and the colour names. */
+/**
+ * What several pages draw alike: the trust badges (details filled) and the
+ * colour names; and since adr/0063 §3 the theme's settings and, on a
+ * preview, the menu set the draft would put live.
+ */
 export interface StoreLayoutSettings {
   trust_badges: StorefrontFrame["trust_badges"]
   color_swatches: StorefrontFrame["color_swatches"]
+  /**
+   * The theme's choices as the design holds them (else the theme section's,
+   * applied). Absent from a backend before adr/0063: `StorefrontAnswer.theme`.
+   */
+  theme?: StoreThemeSettings
+  /**
+   * The menus a preview's draft would put live, printed as `GET
+   * /store/storefront-menus` prints the live ones; null (or absent): the
+   * live menus stand. Never set on the published design.
+   */
+  menus?: StoreMenu[] | null
 }

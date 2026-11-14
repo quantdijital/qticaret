@@ -73,7 +73,9 @@ export function imagesOf(section: BodySection): string[] {
  * whose cards exist and whose `{belirteç}`s are the shop's details. The
  * home, product and category pages' sections go through the same checks
  * (the plain lines' `{belirteç}`s, a FAQ's answers among them, are the
- * schema's). Returns the media records it uses, to keep their files.
+ * schema's). A menu set the design carries (adr/0063 §3) links only
+ * records that exist, as the Menüler screen asks (`storefront_menus.target_unknown`).
+ * Returns the media records it uses, to keep their files.
  */
 export async function checkLayout(
   container: MedusaContainer,
@@ -86,9 +88,23 @@ export async function checkLayout(
       isRecordKind(link.kind) && "target" in link ? [{ kind: link.kind, target: link.target }] : []
     ),
   ])
-  const found = await existingRecords(container, targets)
-  if (targets.some((each) => !found.has(`${each.kind}:${each.target}`))) {
+  const menuTargets = (doc.settings.menus ?? []).flatMap((menu) =>
+    menu.items
+      .flatMap((each) => [each.link, ...each.children])
+      .flatMap((link) =>
+        isRecordKind(link.kind) && "target" in link
+          ? [{ kind: link.kind, target: link.target }]
+          : []
+      )
+  )
+  const found = await existingRecords(container, [...targets, ...menuTargets])
+  const missing = (list: typeof targets) =>
+    list.some((each) => !found.has(`${each.kind}:${each.target}`))
+  if (missing(targets)) {
     throw new ValidationError("storefront_layout.target_unknown", { field: "document" })
+  }
+  if (missing(menuTargets)) {
+    throw new ValidationError("storefront_menus.target_unknown", { field: "document" })
   }
   for (const section of sections) {
     if (section.type === "rich_text") {

@@ -250,7 +250,7 @@ medusaIntegrationTestRunner({
         expect(readTenantResult(written.join(""))).toEqual({
           status: "applied",
           pack: "general",
-          version: 1,
+          version: 2,
           added: 6,
           kept: 0,
           skipped: 0,

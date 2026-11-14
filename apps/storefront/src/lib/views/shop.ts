@@ -11,7 +11,6 @@ import {
   legalIdentity,
   pathsOf,
   siteSeo,
-  storefrontMenus,
   storefrontSettings,
 } from "@/lib/store-api/requests"
 import { categoryImages } from "@/lib/store-api/extras"
@@ -25,7 +24,7 @@ import { withNavPictures } from "./nav-pictures"
 import { cookieBannerOf } from "./cookies"
 import { identityLinesOf, legalDocument, legalPath, publishedLegalLinks } from "./legal"
 import { displayPhone, footerGroups, socialLinks, whatsappHref } from "./frame"
-import { currentLayout } from "./layout"
+import { currentLayout, currentMenus } from "./layout"
 import { sharedSettingsOf } from "./shared-settings"
 import { footerMenus, mainMenu, topLinks } from "./menus"
 import { hoursOf } from "./hours"
@@ -84,7 +83,7 @@ export async function shopView(): Promise<ShopView> {
     currentCustomer(),
     legalDocument("cookie_policy"),
     publishedLegalLinks(),
-    storefrontMenus(),
+    currentMenus(),
     currentLayout(),
     onCookiePreferencesPage(),
     currentTheme(),

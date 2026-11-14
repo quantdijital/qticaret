@@ -7686,7 +7686,11 @@
         "confirmTitle": "{{revision}}. sürüm taslağa yüklensin mi?",
         "confirmText": "Taslaktaki değişiklikler bu sürümle değiştirilir. Vitrin, siz yayınlayana kadar değişmez.",
         "confirm": "Taslağa yükle",
-        "restored": "{{revision}}. sürüm taslağa yüklendi."
+        "restored": "{{revision}}. sürüm taslağa yüklendi.",
+        "menusBadge": "Menülerle",
+        "confirmKeep": "Bu sürüm taslağa yüklenir. Vitrin, siz yayınlayana kadar değişmez.",
+        "menusText": "Bu sürüm yayınlandığında menüleri de değiştirmişti. Menüler de taslağa gelir: yeniden yayınlarsanız bugünkü menülerin yerine o günkü menüler geçer.",
+        "skipMenus": "Menüleri alma, bugünkü menüler kalsın"
       },
       "discard": {
         "open": "Değişiklikleri at",
@@ -8007,15 +8011,16 @@
         "slidesTwo": "En az iki slayt ekleyin.",
         "colorInvalid": "Renk #rrggbb biçiminde olmalı, ör. #1e3a8a.",
         "colorDuplicate": "Bu renk adı listede zaten var.",
-        "thresholdRange": "1 ile {{max}} arasında bir tam sayı yazın."
+        "thresholdRange": "1 ile {{max}} arasında bir tam sayı yazın.",
+        "contrast": "Bu renk beyaz yazıyla ya da sayfa zemininde yeterince okunmuyor (en az 3:1 gerekir). Daha koyu bir ton seçin.",
+        "wellContrast": "Bu renk, sayfa zemininin bir ton koyusu olan alanlarda (bağlantıların ve çerçeveli düğmelerin durduğu kutular) yeterince okunmuyor (en az 3:1 gerekir). Daha koyu bir ton seçin."
       },
       "theme": {
         "title": "Tema ayarları",
-        "live": "Tema ayarları taslağa bağlı değildir: kaydettiğinizde hemen yayına girer ve vitrinde en geç bir dakikada görünür.",
+        "live": "Tema ayarları taslağın parçasıdır: değişiklikler taslakla kaydedilir, önizlemede görünür ve Yayınla ile yayına girer.",
         "colors": "Renkler",
         "primary": "Ana renk",
         "primaryHint": "Düğmeler, bağlantılar ve odak çerçevesi. Beyaz yazıyla ve sayfa zemininde okunur olmalı. Boşsa temanın şarap tonu kullanılır. Duyuru şeridi bu rengi almaz, grafit kalır.",
-        "primaryMoved": "Bu renk Vitrin tercihlerindeki eski ayardan geliyor; kaydettiğinizde tema ayarlarına taşınır.",
         "accent": "Vurgu rengi",
         "accentHint": "Seçili çip ve sekme, sayı rozetleri ve bilgi notlarının açık zemini. Boşsa seçili öğeler grafit, notların zemini ana rengin açık tonu olur. İndirim kırmızısı ve stok renkleri değişmez.",
         "pick": "{{name}} seçici",
@@ -8104,16 +8109,10 @@
         "show_ratingHint": "Onaylı değerlendirmesi olan ürünlerin kartında yıldız, ortalama puan ve değerlendirme sayısı. Değerlendirmesi olmayan üründe bir şey görünmez.",
         "sticky": "Üst bilgi sabit kalsın",
         "stickyHint": "Sayfa kaydırılırken üst bilgi ekranın üstünde durur. Kapalıyken sayfayla birlikte kayar.",
-        "save": "Kaydet ve yayınla",
-        "saved": "Tema ayarları kaydedildi; vitrinde en geç bir dakikada görünür.",
         "grafit": {
           "action": "Grafit'e dön",
-          "hint": "Bütün alanları temanın varsayılan görünümüne (Grafit) çeker. Kaydedene kadar vitrin değişmez.",
-          "confirmTitle": "Grafit'e dönülsün mü?",
-          "confirmText": "Kaydetmediğiniz değişiklikler dahil bütün alanlar temanın varsayılan görünümüne (Grafit) çekilir. Vitrin, siz kaydedene kadar değişmez."
-        },
-        "errors": {
-          "contrast": "Bu renk beyaz yazıyla ya da sayfa zemininde yeterince okunmuyor (en az 3:1 gerekir). Daha koyu bir ton seçin."
+          "hint": "Bütün alanları temanın varsayılan görünümüne (Grafit) çeker. Değişiklik taslağa yazılır; Yayınla'ya basana kadar vitrin değişmez.",
+          "done": "Tema ayarları Grafit'e döndü."
         }
       },
       "faq": {
@@ -8283,6 +8282,11 @@
           "add": "Renk ekle",
           "hint": "En çok {{max}} renk; her ad en çok {{length}} karakter ve bir kez yazılır."
         }
+      },
+      "pendingMenus": {
+        "text_one": "Taslakta geri yüklenen bir sürümün menüsü var: Yayınla'ya bastığınızda mağazanın menüsü bununla değişir.",
+        "text_other": "Taslakta geri yüklenen bir sürümün {{count}} menüsü var: Yayınla'ya bastığınızda mağazanın menüleri bunlarla değişir.",
+        "drop": "Menüleri bırak"
       }
     },
     "preferences": {

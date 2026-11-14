@@ -1,7 +1,6 @@
 import { useIsMutating, useQuery } from "@tanstack/react-query"
 import { useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router"
 import { useEffect, useMemo, useReducer, useRef, useState } from "react"
-import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { LeaveGuard } from "@qticaret/admin-ui/patterns/leave-guard"
@@ -18,9 +17,7 @@ import { documentProblems } from "@/features/storefront/layout/problems"
 import { SETTINGS_KEY, partOf } from "@/features/storefront/layout/settings-problems"
 import {
   findSection,
-  groupLimit,
   idsOf,
-  isBodyGroup,
   newBodySection,
   newSectionId,
 } from "@/features/storefront/layout/sections"
@@ -30,19 +27,18 @@ import { OpenedSectionContext, editorLayoutNow, useEditorLayout } from "./editor
 import type { EditorView } from "./editor-layout"
 import { EditorShell } from "./editor-shell"
 import { EditorTopBar } from "./editor-top-bar"
+import { OpenedForm } from "./opened-form"
 import { formKeyOf } from "./opened"
 import type { Opened } from "./opened"
 import type { Device } from "./preview-fit"
+import { PendingMenus } from "./pending-menus"
 import { PreviewFrame } from "./preview-frame"
 import { DraftTools, PublishButton } from "./publish-controls"
 import { RevisionsSheet } from "./revisions-sheet"
 import { SamplePicker } from "./sample-picker"
 import { SaveStatus } from "./save-status"
 import { sectionLabel } from "./section-meta"
-import { SectionPanel } from "./section-panel"
 import { SectionTree } from "./section-tree"
-import { LooksPanel } from "./shared/looks-panel"
-import { ThemePanel } from "./theme-panel"
 import { useEditorActions } from "./use-editor-actions"
 import { usePreviewTarget } from "./use-preview-target"
 import { useUndoKeys } from "./use-undo-keys"
@@ -63,7 +59,10 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
   const canGoBack = useCanGoBack()
   const [state, dispatch] = useReducer(editorReducer, layout.draft, initialEditorState)
   const { doc } = state
-  const problems = useMemo(() => documentProblems(doc), [doc])
+  const live = useQuery(layoutQuery()).data ?? layout
+  // A colour change is judged against the draft as stored (adr/0062 §6)
+  const savedTheme = live.draft.settings.theme
+  const problems = useMemo(() => documentProblems(doc, savedTheme), [doc, savedTheme])
   // Publishing, discarding or restoring: the autosave waits for it
   const acting = useIsMutating({ mutationKey: LAYOUT_ACTION_KEY }) > 0
   const autosave = useAutosave({
@@ -72,7 +71,6 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
     stored: layout.is_default ? null : layout.draft,
     blocked: problems.size > 0 || acting,
   })
-  const live = useQuery(layoutQuery()).data ?? layout
   const [opened, setOpened] = useState<Opened>(null)
   const [page, setPage] = useState<BodyGroup>("home")
   // The chooser is open for this side of a category page's products (the others have one)
@@ -84,8 +82,6 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
     editorLayoutNow() === "narrow" ? "mobile" : "desktop"
   )
   const target = usePreviewTarget(page)
-  // A theme setting saved elsewhere than the draft reloads the preview too
-  const [refreshed, setRefreshed] = useState(0)
   const actions = useEditorActions({
     flush: autosave.flush,
     page: target.path,
@@ -131,85 +127,58 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
   const found = opened?.kind === "section" ? findSection(doc, opened.id) : null
   const changed = live.has_changes || autosave.dirty
 
-  let form: ReactNode = null
-  if (found) {
-    form = (
-      <SectionPanel
-        section={found.section}
-        group={found.group}
-        problems={problems.get(found.section.id) ?? {}}
-        canDuplicate={isBodyGroup(found.group) && doc[found.group].length < groupLimit(found.group)}
-        onChange={(section, field) => {
-          dispatch({ type: "update", section, merge: field ? `${section.id}:${field}` : undefined })
-        }}
-        onPlace={(placement) => {
-          dispatch({ type: "place", id: found.section.id, placement })
-        }}
-        onBack={() => {
-          setOpened(null)
-        }}
-        onDuplicate={() => {
-          dispatch({ type: "duplicate", id: found.section.id })
-        }}
-        onRemove={() => {
-          remove(found.section)
-        }}
-        badges={doc.settings.trust_badges}
-        onBadges={(trust_badges, field) => {
-          dispatch({ type: "settings", settings: { ...doc.settings, trust_badges }, merge: field })
-        }}
-      />
-    )
-  } else if (opened?.kind === "looks") {
-    form = (
-      <LooksPanel
-        settings={doc.settings}
-        problems={problems.get(SETTINGS_KEY) ?? {}}
-        onChange={(settings, field) => {
-          dispatch({ type: "settings", settings, merge: field })
-        }}
-        onBack={() => {
-          setOpened(null)
-        }}
-      />
-    )
-  } else if (opened?.kind === "theme") {
-    form = (
-      <ThemePanel
-        announcement={doc.header[0]?.lines.find((line) => line.trim() !== "") ?? null}
-        onBack={() => {
-          setOpened(null)
-        }}
-        onSaved={() => {
-          setRefreshed((was) => was + 1)
-        }}
-      />
-    )
-  }
-  const formKey = formKeyOf(opened, found ? found.section.id : null)
-  const tree = (
-    <SectionTree
-      page={page}
+  const form = (
+    <OpenedForm
+      opened={opened}
+      found={found}
       doc={doc}
-      problems={new Set(problems.keys())}
+      problems={problems}
       dispatch={dispatch}
-      onOpen={(id) => {
-        setOpened({ kind: "section", id })
-      }}
+      onUndo={undo}
       onRemove={remove}
-      onAddSection={(placement) => {
-        setAdding(placement ?? "bottom")
+      onClose={() => {
+        setOpened(null)
       }}
-      onTheme={() => {
-        setOpened({ kind: "theme" })
-      }}
-      onLooks={() => {
-        setOpened({ kind: "looks" })
-      }}
-      looksProblem={Object.keys(problems.get(SETTINGS_KEY) ?? {}).some(
-        (field) => partOf(field) === "looks"
-      )}
     />
+  )
+  const formKey = formKeyOf(opened, found ? found.section.id : null)
+  const pendingMenus = doc.settings.menus
+  const tree = (
+    <>
+      {pendingMenus ? (
+        <PendingMenus
+          count={pendingMenus.length}
+          onDrop={() => {
+            dispatch({ type: "settings", settings: { ...doc.settings, menus: null } })
+          }}
+        />
+      ) : null}
+      <SectionTree
+        page={page}
+        doc={doc}
+        problems={new Set(problems.keys())}
+        dispatch={dispatch}
+        onOpen={(id) => {
+          setOpened({ kind: "section", id })
+        }}
+        onRemove={remove}
+        onAddSection={(placement) => {
+          setAdding(placement ?? "bottom")
+        }}
+        onTheme={() => {
+          setOpened({ kind: "theme" })
+        }}
+        themeProblem={Object.keys(problems.get(SETTINGS_KEY) ?? {}).some(
+          (field) => partOf(field) === "theme"
+        )}
+        onLooks={() => {
+          setOpened({ kind: "looks" })
+        }}
+        looksProblem={Object.keys(problems.get(SETTINGS_KEY) ?? {}).some(
+          (field) => partOf(field) === "looks"
+        )}
+      />
+    </>
   )
   const tools = (
     <>
@@ -260,7 +229,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
           formKey={formKey}
           preview={
             <PreviewFrame
-              round={autosave.round + refreshed}
+              round={autosave.round}
               ready={!layout.is_default || autosave.round > 0}
               device={device}
               onDevice={setDevice}

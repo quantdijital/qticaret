@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { STOREFRONT_MENUS_MODULE } from "../../modules/storefront-menus"
 import type StorefrontMenusModuleService from "../../modules/storefront-menus/service"
 import type { MenuLinkKind, MenuLocation } from "../../modules/storefront-menus/service"
+import type { MenuSet } from "../../lib/storefront/layout-menus"
 import { resolveLinks } from "./menu-links"
 import type { ResolvedLink, StoredLink } from "./menu-links"
 
@@ -30,12 +31,22 @@ export interface StoreMenuLink {
   children: StoreMenuLink[]
 }
 
+/** A menu as the storefront prints it: only menus with a link left. */
+export interface StoreMenu {
+  title: string
+  location: MenuLocation
+  rank: number
+  items: StoreMenuLink[]
+}
+
 interface MenuRow {
   id: string
   title: string
   location: MenuLocation
   rank: number
 }
+
+type ItemRow = StoredLink & { menu_id: string }
 
 async function rowsOf(container: Container) {
   const service = container.resolve<StorefrontMenusModuleService>(STOREFRONT_MENUS_MODULE)
@@ -46,7 +57,12 @@ async function rowsOf(container: Container) {
   const items = (await service.listStorefrontMenuItems(
     { menu_id: menus.map((menu) => menu.id) },
     { select: ["id", "menu_id", "parent_id", "rank", "label", "kind", "target", "url"] }
-  )) as (StoredLink & { menu_id: string })[]
+  )) as ItemRow[]
+  return arranged(container, menus, items)
+}
+
+/** Menus and their links, each menu's links under their parent, every link resolved. */
+async function arranged(container: Container, menus: MenuRow[], items: ItemRow[]) {
   menus.sort((a, b) => LOCATION_ORDER[a.location] - LOCATION_ORDER[b.location] || a.rank - b.rank)
   items.sort((a, b) => a.rank - b.rank)
   // Each menu's links under their parent, in one pass (security review 2026-11-02, L1)
@@ -84,8 +100,15 @@ export async function adminMenus(container: Container) {
  * is gone or not live, or whose legal text is not published, is left out,
  * and so are its children.
  */
-export async function storeMenus(container: Container) {
-  const { menus, childrenOf, resolved } = await rowsOf(container)
+export async function storeMenus(container: Container): Promise<StoreMenu[]> {
+  return printed(await rowsOf(container))
+}
+
+function printed({
+  menus,
+  childrenOf,
+  resolved,
+}: Awaited<ReturnType<typeof arranged>>): StoreMenu[] {
   const linksOf = (menuId: string, parentId: string | null): StoreMenuLink[] =>
     childrenOf(menuId, parentId).flatMap((item) => {
       const shown = resolved.get(item.id) ?? BROKEN
@@ -108,4 +131,45 @@ export async function storeMenus(container: Container) {
       ? [{ title: menu.title, location: menu.location, rank: menu.rank, items }]
       : []
   })
+}
+
+/**
+ * A design's menu set (adr/0063 §3) as the storefront would print it once
+ * published: the same resolver and rules as the live menus, for the
+ * preview of a draft that carries one.
+ */
+export async function draftMenus(container: Container, set: MenuSet): Promise<StoreMenu[]> {
+  const menus: MenuRow[] = set.map((menu, index) => ({
+    id: `m${String(index)}`,
+    title: menu.title,
+    location: menu.location,
+    rank: menu.rank,
+  }))
+  const asItem = (
+    link: MenuSet[number]["items"][number]["link"],
+    menuId: string,
+    id: string,
+    parentId: string | null,
+    rank: number
+  ): ItemRow => ({
+    id,
+    menu_id: menuId,
+    parent_id: parentId,
+    rank,
+    label: link.label,
+    kind: link.kind,
+    target: link.kind === "url" ? null : link.target,
+    url: link.kind === "url" ? link.url : null,
+  })
+  const items = set.flatMap((menu, m) => {
+    const menuId = `m${String(m)}`
+    return menu.items.flatMap((each, i) => {
+      const id = `${menuId}.${String(i)}`
+      return [
+        asItem(each.link, menuId, id, null, i),
+        ...each.children.map((child, c) => asItem(child, menuId, `${id}.${String(c)}`, id, c)),
+      ]
+    })
+  })
+  return printed(await arranged(container, menus, items))
 }

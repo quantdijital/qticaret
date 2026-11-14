@@ -10,11 +10,18 @@ import type {
   ProductSection,
   ProductsSection,
 } from "@/features/storefront/api/layout"
+import { GRAFIT_THEME } from "@/features/storefront/api/theme"
 import { previewAddress } from "./preview-url"
 import { documentProblems, sectionProblems } from "./problems"
 import { fromLocalInput, toLocalInput } from "./schedule"
 import { newAnnouncementBar, newBodySection, newHomeSection } from "./sections"
 import { SETTINGS_KEY, badgeProblems, partOf, settingsProblems } from "./settings-problems"
+
+/** The theme's settings as the draft opens them (adr/0063 §3); no menu set. */
+const SHARED = {
+  theme: { settings_version: 2 as const, theme: "atolye" as const, ...GRAFIT_THEME },
+  menus: null,
+}
 
 describe("sectionProblems", () => {
   it("finds what the server would refuse, field by field", () => {
@@ -99,6 +106,7 @@ describe("sectionProblems", () => {
         trust_badges: [],
         color_swatches: [],
         low_stock: { enabled: true, threshold: 3 },
+        ...SHARED,
       },
     }
     expect([...documentProblems(doc).keys()]).toEqual(["duyurular", "urunsss"])
@@ -122,6 +130,7 @@ describe("sectionProblems", () => {
           { label: "", hex: "#000000" },
         ],
         low_stock: { enabled: false, threshold: 0 },
+        ...SHARED,
       },
     }
     expect(documentProblems(doc).get(SETTINGS_KEY)).toEqual({
@@ -138,6 +147,7 @@ describe("sectionProblems", () => {
         trust_badges: [{ icon: "truck", title: "{telefon} ile sipariş", text: null }],
         color_swatches: [{ label: "Siyah", hex: "#111111" }],
         low_stock: { enabled: true, threshold: 1000 },
+        ...SHARED,
       })
     ).toEqual({})
     expect(partOf("trust_badges.0.title")).toBe("trust_badges")
@@ -156,6 +166,7 @@ describe("sectionProblems", () => {
         trust_badges: [{ icon: "truck", title: "", text: null }],
         color_swatches: [{ label: "", hex: "#000000" }],
         low_stock: { enabled: true, threshold: 3 },
+        ...SHARED,
       },
     }
     const problems = documentProblems(doc)

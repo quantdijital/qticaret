@@ -10,7 +10,7 @@ import { refreshStorefrontWorkflow } from "../workflows/storefront/steps/refresh
  */
 export default async function storefrontRefresh({ container }: SubscriberArgs) {
   try {
-    await refreshStorefrontWorkflow(container).run({ input: ["layout"] })
+    await refreshStorefrontWorkflow(container).run({ input: ["layout", "settings"] })
   } catch (error) {
     logger.warn({ event: "storefront.refresh_failed", err: errorSummary(error) })
   }
