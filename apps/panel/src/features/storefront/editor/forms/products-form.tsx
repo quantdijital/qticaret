@@ -150,7 +150,7 @@ export function ProductsForm({ section, problems, onChange }: SectionFormProps<P
       />
       <ColumnsField
         id="products-columns"
-        value={section.columns}
+        value={section.columns ?? 3}
         limit={section.limit}
         onChange={(columns) => {
           set({ columns })

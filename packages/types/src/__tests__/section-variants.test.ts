@@ -30,7 +30,7 @@ describe("section variants (adr/0049 Ek 2026-11-14 §2)", () => {
 
 describe("card variants (adr/0049 Ek 2026-11-14 §3.3)", () => {
   it("lists today's card first and reads anything else as it", () => {
-    expect(CARD_VARIANTS).toEqual(["standard", "framed"])
+    expect(CARD_VARIANTS).toEqual(["standard", "framed", "compact"])
     expect(cardVariantOf("framed")).toBe("framed")
     expect(cardVariantOf("technical")).toBe("standard")
     expect(cardVariantOf(undefined)).toBe("standard")

@@ -9,7 +9,8 @@ import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
 import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
-import type { CardVariant, TrustBadgesVariant } from "./section-variants.js"
+import type { StoreProductsSection } from "./section-shelf.js"
+import type { TrustBadgesVariant } from "./section-variants.js"
 import type {
   MenuLinkKind,
   StoreMenu,
@@ -81,21 +82,7 @@ export type StoreLayoutSection = StoreSectionLookPart &
         /** The link beside the title; none (or absent): the storefront's "every category". */
         more?: StoreLayoutLink | null
       }
-    | {
-        id: string
-        type: "products"
-        title: string | null
-        source: ProductSource
-        limit: number
-        columns: ShelfColumns
-        more: StoreLayoutLink | null
-        /** The rail's own card variant; null or absent (an older backend): the theme setting's. */
-        card_variant?: CardVariant | null
-        /** A sale or best-seller rail's products, picked in order; absent for the other sources. */
-        product_ids?: string[]
-        /** A best-seller rail with too few sales, its rest the newest products; no counts shown. */
-        filled_with_newest?: boolean
-      }
+    | StoreProductsSection
     | StoreFeaturedProductSection
     | { id: string; type: "brands"; title: string | null; brand_ids: string[] }
     | { id: string; type: "posts" | "reviews"; title: string | null; limit: number }

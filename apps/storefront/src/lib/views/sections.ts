@@ -138,7 +138,7 @@ async function sectionView(
         products,
         more: layoutLink(section.more, t),
         empty: t("home.no_products"),
-        columns: section.columns,
+        ...(section.columns ? { columns: section.columns } : {}),
       }
     }
     case "related_products":

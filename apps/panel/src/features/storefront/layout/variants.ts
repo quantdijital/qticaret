@@ -1,4 +1,4 @@
-import { HERO_CATALOG_LIMITS, hasVariants } from "@qticaret/types"
+import { HERO_CATALOG_LIMITS, SCROLLER_DEFAULTS, SHELF_LIMITS, hasVariants } from "@qticaret/types"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 
@@ -27,6 +27,17 @@ export const VARIANT_FIELDS: {
       show_price: true,
     },
   },
+  // A rail's own by variant (Ek 2026-11-15): a columns rail starts one more list, the newest
+  products: {
+    grid: { columns: 3 },
+    carousel: { scroller: SCROLLER_DEFAULTS },
+    featured: {},
+    compact: { rows: SHELF_LIMITS.compact.default },
+    columns: {
+      per_list: SHELF_LIMITS.columns.default,
+      lists: [{ title: null, source: { kind: "newest" } }],
+    },
+  },
   header_bar: { standard: {}, centered: {} },
   footer_bar: { ledger: {} },
   product_main: { standard: {} },
@@ -42,6 +53,8 @@ export const UNBUILT_VARIANTS: {
   readonly [T in VariantSectionType]?: ReadonlySet<SectionVariant<T>>
 } = {
   header_bar: new Set(["centered"]),
+  // The rail's new variants until the theme draws them (Ek 2026-11-15)
+  products: new Set(["carousel", "featured", "compact", "columns"]),
 }
 
 export const isUnbuilt = <T extends VariantSectionType>(type: T, variant: SectionVariant<T>) =>

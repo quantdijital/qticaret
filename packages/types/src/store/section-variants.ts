@@ -16,6 +16,15 @@ export const SECTION_VARIANTS = {
    */
   hero: ["standard", "category_list"],
   /**
+   * The product rail (adr/0049 Ek 2026-11-15): `grid`, today's rows of
+   * cards; `carousel`, one row that slides (the scroller kit,
+   * `section-scroller`); `featured`, one large card beside two rows of
+   * three small ones; `compact`, small side-by-side cards three across;
+   * `columns`, two or three lists side by side, each its own title and
+   * source, in small cards. Counts by variant: `section-shelf`.
+   */
+  products: ["grid", "carousel", "featured", "compact", "columns"],
+  /**
    * The main sections (adr/0049 Ek 2026-11-14 §5, §7), each with today's
    * drawing first. The header bar's `centered` is the theme setting's
    * centred header (`header.layout`), read into the bar by name.
@@ -30,10 +39,13 @@ export const SECTION_VARIANTS = {
  * How a product card is drawn (adr/0049 Ek 2026-11-14 §3.3, owner's
  * decision 4): the theme setting's `product_card.variant` everywhere, a
  * product rail's `card_variant` over it. `standard`: today's card;
- * `framed`: a bordered box with the add button across its foot (UK5).
+ * `framed`: a bordered box with the add button across its foot (UK5);
+ * `compact` (Ek 2026-11-15): a small side-by-side card (photo left, name,
+ * stars, price), no add button, the whole card one link. A `compact` or
+ * `columns` rail draws its cards compact whatever is set.
  * Mirrored by the backend's `PRODUCT_CARD_VARIANTS`.
  */
-export const CARD_VARIANTS = ["standard", "framed"] as const
+export const CARD_VARIANTS = ["standard", "framed", "compact"] as const
 
 export type CardVariant = (typeof CARD_VARIANTS)[number]
 
@@ -47,6 +59,7 @@ export type DefaultVariant<T extends VariantSectionType> = (typeof SECTION_VARIA
 
 export type TrustBadgesVariant = SectionVariant<"trust_badges">
 export type HeroVariant = SectionVariant<"hero">
+export type ProductsVariant = SectionVariant<"products">
 export type HeaderBarVariant = SectionVariant<"header_bar">
 export type FooterBarVariant = SectionVariant<"footer_bar">
 export type ProductMainVariant = SectionVariant<"product_main">

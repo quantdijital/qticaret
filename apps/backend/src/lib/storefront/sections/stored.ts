@@ -1,7 +1,7 @@
 import { isPlainObject } from "../../../modules/platform-settings/sections/define"
 import { storedLook } from "./look"
 import { MAIN_BRANCHES, storedByVariant } from "./main"
-import { storedCardVariant } from "./products"
+import { PRODUCTS_BRANCHES, storedCardVariant } from "./products"
 import { HERO_BRANCHES } from "./hero"
 import { TRUST_BADGES_BRANCHES } from "./trust-badges"
 import { REMOVED_VARIANTS, SECTION_VARIANTS, isVariantType } from "./variants"
@@ -13,6 +13,7 @@ const BRANCHES: {
 } = {
   trust_badges: TRUST_BADGES_BRANCHES,
   hero: HERO_BRANCHES,
+  products: PRODUCTS_BRANCHES,
   ...MAIN_BRANCHES,
 }
 

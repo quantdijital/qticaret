@@ -4,6 +4,8 @@ import { errorSummary, logger } from "../../lib/logging"
 import type { BodySection } from "../../lib/storefront/layout"
 import { SALE_POOL, deepestFirst, topUp } from "../../lib/storefront/rails"
 import type { RailPick } from "../../lib/storefront/rails"
+import { shelfLimit, shelfSources } from "../../lib/storefront/sections/products"
+import type { ProductSourceInput } from "../../lib/storefront/sections/products"
 import { SEARCH_INDEX_MODULE } from "../../modules/search-index"
 import type SearchIndexModuleService from "../../modules/search-index/service"
 import { CURRENCY } from "../catalog/prices"
@@ -92,36 +94,46 @@ async function bestSellerRail(
   return topUp(ranked, newest, limit)
 }
 
-/** A section's pick, by its id; null for a section whose products the storefront fetches itself. */
+/** A source's pick under its key; null for a source whose products the storefront fetches itself. */
 async function pickOf(
   container: MedusaContainer,
-  section: BodySection,
+  key: string,
+  source: ProductSourceInput,
+  limit: number,
   channels: Channels
 ): Promise<[string, RailPick] | null> {
-  if (section.type !== "products") {
-    return null
-  }
-  const { source, limit } = section
   try {
     if (source.kind === "on_sale") {
-      return [section.id, await saleRail(container, channels, limit)]
+      return [key, await saleRail(container, channels, limit)]
     }
     if (source.kind === "best_sellers") {
-      return [section.id, await bestSellerRail(container, source.days, channels, limit)]
+      return [key, await bestSellerRail(container, source.days, channels, limit)]
     }
   } catch (error) {
     logger.warn({ event: "storefront.rail_failed", kind: source.kind, err: errorSummary(error) })
-    return [section.id, { product_ids: [], filled_with_newest: false }]
+    return [key, { product_ids: [], filled_with_newest: false }]
   }
   return null
 }
 
-/** The picked rails among these sections, by section id; each picked once, all at once. */
+/**
+ * The picked rails among these sections, by section id (a columns rail's
+ * extra lists by `listKey`), each as many as its variant shows; each
+ * picked once, all at once.
+ */
 export async function railPicks(
   container: MedusaContainer,
   sections: readonly BodySection[],
   channels: Channels
 ): Promise<Map<string, RailPick>> {
-  const picks = await Promise.all(sections.map((section) => pickOf(container, section, channels)))
+  const picks = await Promise.all(
+    sections.flatMap((section) =>
+      section.type === "products"
+        ? shelfSources(section).map(({ key, source }) =>
+            pickOf(container, key, source, shelfLimit(section), channels)
+          )
+        : []
+    )
+  )
   return new Map(picks.filter((pick) => pick !== null))
 }

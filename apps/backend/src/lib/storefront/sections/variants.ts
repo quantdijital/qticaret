@@ -17,6 +17,8 @@ export const SECTION_VARIANTS = {
   trust_badges: ["strip", "lined"],
   // H17: the category list, the opening's tile and two category tiles side by side
   hero: ["standard", "category_list"],
+  // The product rail (adr/0049 Ek 2026-11-15): today's grid first
+  products: ["grid", "carousel", "featured", "compact", "columns"],
   // The main sections (adr/0049 Ek 2026-11-14 §5, §7): today's drawing first.
   // `centered` is the theme setting's centred header (`header.layout`), read
   // into the bar; its drawing stays on adr/0062 karar 6's branch

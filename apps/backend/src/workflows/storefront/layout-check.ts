@@ -5,6 +5,7 @@ import { bodySections } from "../../lib/storefront/layout"
 import type { BodySection, HeaderSection, LayoutDocument } from "../../lib/storefront/layout"
 import { bannerImages, bannerLinks } from "../../lib/storefront/sections/banner"
 import { sliderImages } from "../../lib/storefront/sections/hero-slider"
+import { shelfSources } from "../../lib/storefront/sections/products"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import { unknownDocTokens } from "../../lib/shop/tokens"
 import type { MenuLinkKind } from "../../modules/storefront-menus/service"
@@ -64,15 +65,21 @@ function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }
     return [as("product")(section.product_id)]
   }
   // A rail's or a product page's related products: their category, collection or choice
+  // (each of a columns rail's lists too)
   if (section.type === "products" || section.type === "related_products") {
-    const { source } = section
-    return source.kind === "category"
-      ? [as("category")(source.category_id)]
-      : source.kind === "collection"
-        ? [as("collection")(source.collection_id)]
-        : source.kind === "manual"
-          ? source.product_ids.map(as("product"))
-          : []
+    const sources =
+      section.type === "products"
+        ? shelfSources(section).map(({ source }) => source)
+        : [section.source]
+    return sources.flatMap((source) =>
+      source.kind === "category"
+        ? [as("category")(source.category_id)]
+        : source.kind === "collection"
+          ? [as("collection")(source.collection_id)]
+          : source.kind === "manual"
+            ? source.product_ids.map(as("product"))
+            : []
+    )
   }
   return []
 }
