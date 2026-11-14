@@ -95,6 +95,22 @@ describe("the home page's new optional sections and fields", () => {
     expect(without).not.toContain("Puan dağılımı")
   })
 
+  it("quotes a review whole on the home page, cutting only a very long one", () => {
+    const draw = (body: string) =>
+      renderPage(atolyeTheme, "HomePage", {
+        view: {
+          sections: [reviews({ reviews: reviews().reviews.map((one) => ({ ...one, body })) })],
+        },
+      })
+    const whole = draw("Ürünün kalitesine diyecek bir şey yok. Kutusu ve kılıfı da çok özenli.")
+    expect(whole).toContain(
+      "Ürünün kalitesine diyecek bir şey yok. Kutusu ve kılıfı da çok özenli."
+    )
+    const long = draw(`${"Çok keskin ve dengeli bir bıçak. ".repeat(20)}Sonuncu cümle.`)
+    expect(long).toContain("…")
+    expect(long).not.toContain("Sonuncu cümle.")
+  })
+
   it("draws the shop-wide rating on the reviews page", () => {
     const view: ReviewsPageView = {
       title: "Müşteri yorumları",
