@@ -16,6 +16,11 @@ export const SECTION_VARIANTS = {
    */
   hero: ["standard", "category_list"],
   /**
+   * `tiles`: today's picture tiles; `linked`: each category a card with its
+   * first subcategories as links (adr/0049 Ek 2026-11-15).
+   */
+  categories: ["tiles", "linked"],
+  /**
    * The main sections (adr/0049 Ek 2026-11-14 §5, §7), each with today's
    * drawing first. The header bar's `centered` is the theme setting's
    * centred header (`header.layout`), read into the bar by name.
@@ -47,6 +52,7 @@ export type DefaultVariant<T extends VariantSectionType> = (typeof SECTION_VARIA
 
 export type TrustBadgesVariant = SectionVariant<"trust_badges">
 export type HeroVariant = SectionVariant<"hero">
+export type CategoriesVariant = SectionVariant<"categories">
 export type HeaderBarVariant = SectionVariant<"header_bar">
 export type FooterBarVariant = SectionVariant<"footer_bar">
 export type ProductMainVariant = SectionVariant<"product_main">

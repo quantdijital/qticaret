@@ -1,3 +1,4 @@
+import type { StoreFooterBarSettings } from "./section-footer.js"
 import type { SectionLook } from "./section-look.js"
 import type {
   CategoryMainVariant,
@@ -23,7 +24,15 @@ export interface StoreMainSections {
     /** The header stays at the top of a long page. */
     sticky: boolean
   }
-  footer_bar: { id: string; type: "footer_bar"; variant: FooterBarVariant }
+  /**
+   * The footer with its own settings (adr/0049 Ek 2026-11-15); an older
+   * backend prints none: a reader takes `FOOTER_BAR_DEFAULTS`.
+   */
+  footer_bar: {
+    id: string
+    type: "footer_bar"
+    variant: FooterBarVariant
+  } & Partial<StoreFooterBarSettings>
   product_main: {
     id: string
     type: "product_main"
