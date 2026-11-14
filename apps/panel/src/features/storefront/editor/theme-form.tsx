@@ -1,8 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Loader2 } from "lucide-react"
+import { useState } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { useSaveSection } from "@/features/settings/api/sections"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
@@ -11,7 +13,9 @@ import { THEME_SECTION } from "@/features/storefront/api/theme"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
 import {
   CONTRAST_ERROR,
+  GRAFIT_VALUES,
   isContrastRefusal,
+  isGrafit,
   themeBodyOf,
   themeSchema,
   themeValuesOf,
@@ -19,10 +23,12 @@ import {
 import type { ThemeParsed, ThemeValues } from "@/features/storefront/theme-settings"
 import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@qticaret/admin-ui/lib/forms"
-import { STOREFRONT_THEME_COLOR, primaryReadable } from "@/theme/storefront"
+import { ATOLYE_COLORS } from "@/theme/atolye"
+import { primaryReadable } from "@/theme/storefront"
 import { PanelGroup } from "./panel-header"
 import { ThemeChoices } from "./theme-choices"
-import { BackgroundField, ColorInput, ThemeSample } from "./theme-fields"
+import { BackgroundField, ColorInput } from "./theme-fields"
+import { ThemeSample } from "./theme-sample"
 
 const C = "storefront.editor.theme"
 
@@ -37,9 +43,11 @@ interface ThemeFormProps {
 }
 
 /**
- * The theme's settings (adr/0053 §B): colours, faces, corners, the product
- * card and the header, from the server's fixed lists. One save puts them
+ * The theme's settings (adr/0053 §B, adr/0062): colours, faces, corners,
+ * the product card and the header, from the server's fixed lists; the
+ * sample draws them as the theme does, saved or not. One save puts them
  * live at once; they are the shop's settings, not part of the draft.
+ * "Grafit'e dön" fills the form with the theme's defaults and saves nothing.
  */
 export function ThemeForm({ saved, legacyPrimary, announcement, onSaved }: ThemeFormProps) {
   const { t } = useTranslation()
@@ -54,9 +62,17 @@ export function ThemeForm({ saved, legacyPrimary, announcement, onSaved }: Theme
     resetOptions: { keepDirtyValues: true },
   })
   const { control } = form
-  const colors = useWatch({ control, name: "colors" })
-  const buttons = useWatch({ control, name: "buttons" })
+  const [colors, typography, radius, buttons, product_card, header] = useWatch({
+    control,
+    name: ["colors", "typography", "radius", "buttons", "product_card", "header"],
+  })
+  const shown: ThemeValues = { colors, typography, radius, buttons, product_card, header }
   const dirty = form.formState.isDirty
+  const [asking, setAsking] = useState(false)
+  // The saved settings stay what "Geri al" returns to; the form is dirty until Grafit is saved
+  const toGrafit = () => {
+    form.reset(GRAFIT_VALUES, { ...FULL_RESET, keepDefaultValues: true })
+  }
   const submit = form.handleSubmit((next) => {
     save.mutate(themeBodyOf(next), {
       onSuccess: (stored) => {
@@ -90,82 +106,104 @@ export function ThemeForm({ saved, legacyPrimary, announcement, onSaved }: Theme
   const accentText = form.formState.errors.colors?.accent?.message
   const usesLegacy = saved.colors.primary === null && legacyPrimary !== null
   return (
-    <form noValidate className="flex flex-col" onSubmit={(event) => void submit(event)}>
-      <p className="border-b px-5 py-4 text-[13px] leading-5 text-muted-foreground">
-        {t(`${C}.live`)}
-      </p>
-      <PanelGroup title={t(`${C}.colors`)}>
-        <Controller
-          control={control}
-          name="colors.primary"
-          render={({ field }) => (
-            <ColorInput
-              id="theme-primary"
-              label={t(`${C}.primary`)}
-              hint={t(usesLegacy ? `${C}.primaryMoved` : `${C}.primaryHint`)}
-              value={field.value}
-              onChange={field.onChange}
-              fallback={STOREFRONT_THEME_COLOR}
-              error={primaryText ? t(primaryText) : undefined}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="colors.accent"
-          render={({ field }) => (
-            <ColorInput
-              id="theme-accent"
-              label={t(`${C}.accent`)}
-              hint={t(`${C}.accentHint`)}
-              value={field.value}
-              onChange={field.onChange}
-              fallback={STOREFRONT_THEME_COLOR}
-              error={accentText ? t(accentText) : undefined}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="colors.background"
-          render={({ field }) => (
-            <BackgroundField
-              value={field.value}
-              onChange={(next) => {
-                field.onChange(next)
-                // The main colour is judged against the page: its refusal may no longer hold
-                if (form.getFieldState("colors.primary").error) {
-                  void form.trigger("colors.primary")
-                }
-              }}
-            />
-          )}
-        />
-        <ThemeSample
-          primary={isHexColor(primary) ? primary : STOREFRONT_THEME_COLOR}
-          accent={isHexColor(colors.accent) ? colors.accent : null}
-          background={colors.background}
-          buttons={buttons}
-          announcement={announcement}
-        />
-      </PanelGroup>
-      <ThemeChoices control={control} />
-      <div className="sticky bottom-0 z-10 flex items-center gap-2 border-t bg-card px-5 py-3">
-        <Button type="submit" disabled={!dirty || save.isPending}>
-          {save.isPending ? <Loader2 className="animate-spin" /> : null}
-          {t(`${C}.save`)}
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          disabled={!dirty || save.isPending}
-          onClick={() => {
-            form.reset(values, FULL_RESET)
-          }}
-        >
-          {t("common.reset")}
-        </Button>
-      </div>
-    </form>
+    <>
+      <form noValidate className="flex flex-col" onSubmit={(event) => void submit(event)}>
+        <p className="border-b px-5 py-4 text-[13px] leading-5 text-muted-foreground">
+          {t(`${C}.live`)}
+        </p>
+        <div className="border-b px-5 py-4">
+          <ThemeSample values={shown} announcement={announcement} />
+        </div>
+        <PanelGroup title={t(`${C}.colors`)}>
+          <Controller
+            control={control}
+            name="colors.primary"
+            render={({ field }) => (
+              <ColorInput
+                id="theme-primary"
+                label={t(`${C}.primary`)}
+                hint={t(usesLegacy ? `${C}.primaryMoved` : `${C}.primaryHint`)}
+                value={field.value}
+                onChange={field.onChange}
+                fallback={ATOLYE_COLORS.wine}
+                error={primaryText ? t(primaryText) : undefined}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="colors.accent"
+            render={({ field }) => (
+              <ColorInput
+                id="theme-accent"
+                label={t(`${C}.accent`)}
+                hint={t(`${C}.accentHint`)}
+                value={field.value}
+                onChange={field.onChange}
+                fallback={ATOLYE_COLORS.text}
+                error={accentText ? t(accentText) : undefined}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="colors.background"
+            render={({ field }) => (
+              <BackgroundField
+                value={field.value}
+                onChange={(next) => {
+                  field.onChange(next)
+                  // The main colour is judged against the page: its refusal may no longer hold
+                  if (form.getFieldState("colors.primary").error) {
+                    void form.trigger("colors.primary")
+                  }
+                }}
+              />
+            )}
+          />
+        </PanelGroup>
+        <ThemeChoices control={control} />
+        <div className="sticky bottom-0 z-10 flex flex-wrap items-center gap-2 border-t bg-card px-5 py-3">
+          <Button type="submit" disabled={!dirty || save.isPending}>
+            {save.isPending ? <Loader2 className="animate-spin" /> : null}
+            {t(`${C}.save`)}
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            disabled={!dirty || save.isPending}
+            onClick={() => {
+              form.reset(values, FULL_RESET)
+            }}
+          >
+            {t("common.reset")}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="ml-auto"
+            title={t(`${C}.grafit.hint`)}
+            disabled={save.isPending || isGrafit(shown)}
+            onClick={() => {
+              if (dirty) {
+                setAsking(true)
+              } else {
+                toGrafit()
+              }
+            }}
+          >
+            {t(`${C}.grafit.action`)}
+          </Button>
+        </div>
+      </form>
+      <ConfirmDialog
+        open={asking}
+        onOpenChange={setAsking}
+        title={t(`${C}.grafit.confirmTitle`)}
+        description={t(`${C}.grafit.confirmText`)}
+        confirmLabel={t(`${C}.grafit.action`)}
+        onConfirm={toGrafit}
+      />
+    </>
   )
 }

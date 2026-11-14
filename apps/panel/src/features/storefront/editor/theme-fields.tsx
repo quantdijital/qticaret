@@ -14,9 +14,7 @@ import {
 import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { isHexColor } from "@/features/settings/storefront"
 import { BACKGROUNDS } from "@/features/storefront/api/theme"
-import type { ThemeSettings } from "@/features/storefront/api/theme"
-import { cn } from "@qticaret/admin-ui/lib/utils"
-import { STOREFRONT_BACKGROUNDS, storefrontTextOn } from "@/theme/storefront"
+import { STOREFRONT_BACKGROUNDS } from "@/theme/storefront"
 import type { StorefrontBackground } from "@/theme/storefront"
 
 const C = "storefront.editor.theme"
@@ -27,7 +25,7 @@ interface ColorInputProps {
   hint?: string | undefined
   value: string
   onChange: (value: string) => void
-  /** What the storefront paints while the field is empty; the picker starts there. */
+  /** What the storefront paints while the field is empty; the picker shows it and starts there. */
   fallback: string
   error?: string | undefined
 }
@@ -77,7 +75,7 @@ export function ColorInput({ id, label, hint, value, onChange, fallback, error }
   )
 }
 
-/** The page colour: three swatches, each named, the storefront's own values. */
+/** The page colour: a swatch per tone, each named, the storefront's own values. */
 export function BackgroundField({
   value,
   onChange,
@@ -91,11 +89,12 @@ export function BackgroundField({
       <span id="theme-background-label" className="text-sm font-medium">
         {t(`${C}.background`)}
       </span>
-      {/* Three across once each gets 160 px; one under another below that */}
+      {/* Side by side once each gets 160 px; one under another below that */}
       <RadioGroup
         aria-labelledby="theme-background-label"
+        aria-describedby="theme-background-hint"
         value={value}
-        className="grid gap-2 @min-[31rem]:grid-cols-3"
+        className="grid gap-2 @min-[21rem]:grid-cols-2"
         onValueChange={(next) => {
           onChange(next as StorefrontBackground)
         }}
@@ -115,6 +114,9 @@ export function BackgroundField({
           </label>
         ))}
       </RadioGroup>
+      <p id="theme-background-hint" className="text-xs text-muted-foreground">
+        {t(`${C}.backgroundHint`)}
+      </p>
     </div>
   )
 }
@@ -127,6 +129,10 @@ interface ChoiceSelectProps<T extends string> {
   onChange: (value: T) => void
   /** How an option reads: its name, and what else helps choose it. */
   render: (option: T) => ReactNode
+  /** What the choice changes on the storefront, and what to know about the chosen one. */
+  hint?: string | undefined
+  /** Options shown but not offered (not drawn by the theme yet). */
+  unavailable?: ReadonlySet<T> | undefined
 }
 
 /** One choice from the server's fixed list. */
@@ -137,9 +143,11 @@ export function ChoiceSelect<T extends string>({
   options,
   onChange,
   render,
+  hint,
+  unavailable,
 }: ChoiceSelectProps<T>) {
   return (
-    <Field label={label} htmlFor={id}>
+    <Field label={label} htmlFor={id} hint={hint}>
       <Select
         value={value}
         onValueChange={(next) => {
@@ -151,7 +159,7 @@ export function ChoiceSelect<T extends string>({
         </SelectTrigger>
         <SelectContent>
           {options.map((option) => (
-            <SelectItem key={option} value={option}>
+            <SelectItem key={option} value={option} disabled={unavailable?.has(option) ?? false}>
               {render(option)}
             </SelectItem>
           ))}
@@ -183,63 +191,5 @@ export function SwitchRow({
       </label>
       <Switch id={id} checked={checked} onCheckedChange={onChange} />
     </div>
-  )
-}
-
-const BUTTON_CORNERS: Record<ThemeSettings["buttons"], string> = {
-  pill: "rounded-full",
-  rounded: "rounded-md",
-  square: "rounded-none",
-}
-
-/** The announcement bar and a button as the storefront paints them with these choices. */
-export function ThemeSample({
-  primary,
-  accent,
-  background,
-  buttons,
-  announcement,
-}: {
-  primary: string
-  accent: string | null
-  background: StorefrontBackground
-  buttons: ThemeSettings["buttons"]
-  announcement: string
-}) {
-  const { t } = useTranslation()
-  const paint = { backgroundColor: primary, color: storefrontTextOn(primary) }
-  return (
-    <figure className="flex flex-col gap-2">
-      <figcaption className="text-xs font-medium text-muted-foreground">
-        {t(`${C}.sample`)}
-      </figcaption>
-      <div
-        className="flex flex-col overflow-hidden rounded-md border"
-        style={{ backgroundColor: STOREFRONT_BACKGROUNDS[background] }}
-      >
-        <p style={paint} className="truncate px-4 py-2 text-center text-xs">
-          {announcement}
-        </p>
-        <div className="flex items-center gap-3 p-3">
-          <span
-            style={paint}
-            className={cn(
-              "inline-flex h-9 items-center px-4 text-sm font-medium",
-              BUTTON_CORNERS[buttons]
-            )}
-          >
-            {t(`${C}.button`)}
-          </span>
-          {accent ? (
-            <span
-              style={{ backgroundColor: accent, color: storefrontTextOn(accent) }}
-              className="rounded-full px-2 py-0.5 text-xs font-medium"
-            >
-              {t(`${C}.badge`)}
-            </span>
-          ) : null}
-        </div>
-      </div>
-    </figure>
   )
 }

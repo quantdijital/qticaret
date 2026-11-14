@@ -6,10 +6,11 @@ import {
   BUTTON_SHAPES,
   CARD_RATIOS,
   HEADER_LAYOUTS,
+  GRAFIT_THEME,
   HEADING_FONTS,
   RADII,
 } from "@/features/storefront/api/theme"
-import type { ThemeSettings } from "@/features/storefront/api/theme"
+import type { ThemeChoices } from "@/features/storefront/api/theme"
 import { primaryReadable } from "@/theme/storefront"
 
 /**
@@ -58,7 +59,7 @@ export type ThemeParsed = z.output<typeof themeSchema>
  * here shows the storefront section's old one (adr/0053 §B.5): saving moves
  * it, through the contrast check.
  */
-export const themeValuesOf = (saved: ThemeSettings, legacyPrimary: string | null): ThemeValues => ({
+export const themeValuesOf = (saved: ThemeChoices, legacyPrimary: string | null): ThemeValues => ({
   colors: {
     primary: saved.colors.primary ?? legacyPrimary ?? "",
     accent: saved.colors.accent ?? "",
@@ -74,9 +75,7 @@ export const themeValuesOf = (saved: ThemeSettings, legacyPrimary: string | null
 const orNull = (value: string): string | null => (value === "" ? null : value)
 
 /** Every group as it is sent; the server keeps the theme itself and the settings' version. */
-export const themeBodyOf = (
-  values: ThemeParsed
-): Omit<ThemeSettings, "theme" | "settings_version"> => ({
+export const themeBodyOf = (values: ThemeParsed): ThemeChoices => ({
   colors: {
     primary: orNull(values.colors.primary),
     accent: orNull(values.colors.accent),
@@ -88,6 +87,28 @@ export const themeBodyOf = (
   header: values.header,
   buttons: values.buttons,
 })
+
+/** Grafit as the form holds it: no colour of the shop's own, the theme's every default. */
+export const GRAFIT_VALUES: ThemeValues = themeValuesOf(GRAFIT_THEME, null)
+
+/** Whether the form holds Grafit already: nothing for "Grafit'e dön" to put back. */
+export function isGrafit(values: ThemeValues): boolean {
+  const g = GRAFIT_VALUES
+  return (
+    values.colors.primary === g.colors.primary &&
+    values.colors.accent === g.colors.accent &&
+    values.colors.background === g.colors.background &&
+    values.typography.heading === g.typography.heading &&
+    values.typography.body === g.typography.body &&
+    values.radius === g.radius &&
+    values.buttons === g.buttons &&
+    values.product_card.ratio === g.product_card.ratio &&
+    values.product_card.show_brand === g.product_card.show_brand &&
+    values.product_card.show_rating === g.product_card.show_rating &&
+    values.header.layout === g.header.layout &&
+    values.header.sticky === g.header.sticky
+  )
+}
 
 /** Whether the server refused the main colour's contrast (the key in `code`, or as the message). */
 export function isContrastRefusal(error: unknown): boolean {

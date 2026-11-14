@@ -11,7 +11,12 @@ const HEX = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/
 const INK = "#111113"
 const WHITE = "#ffffff"
 
-/** The colour the storefront uses when the shop has chosen none. */
+/**
+ * The storefront's near-black ink: what it writes with on a light colour,
+ * and where a new colour row's picker starts. The main colour the theme
+ * paints while the shop has chosen none is its own wine (`ATOLYE_COLORS.wine`
+ * in `./atolye`, adr/0062).
+ */
 export const STOREFRONT_THEME_COLOR = INK
 
 /**

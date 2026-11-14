@@ -8014,10 +8014,10 @@
         "live": "Tema ayarları taslağa bağlı değildir: kaydettiğinizde hemen yayına girer ve vitrinde en geç bir dakikada görünür.",
         "colors": "Renkler",
         "primary": "Ana renk",
-        "primaryHint": "Düğmeler, bağlantılar ve duyuru şeridi; beyaz yazıyla ve sayfa zemininde okunur olmalı. Boşsa temanın rengi kullanılır.",
+        "primaryHint": "Düğmeler, bağlantılar ve odak çerçevesi. Beyaz yazıyla ve sayfa zemininde okunur olmalı. Boşsa temanın şarap tonu kullanılır. Duyuru şeridi bu rengi almaz, grafit kalır.",
         "primaryMoved": "Bu renk Vitrin tercihlerindeki eski ayardan geliyor; kaydettiğinizde tema ayarlarına taşınır.",
         "accent": "Vurgu rengi",
-        "accentHint": "Rozetler ve küçük vurgular; boşsa temanın rengi kullanılır.",
+        "accentHint": "Seçili çip ve sekme, sayı rozetleri ve bilgi notlarının açık zemini. Boşsa seçili öğeler grafit, notların zemini ana rengin açık tonu olur. İndirim kırmızısı ve stok renkleri değişmez.",
         "pick": "{{name}} seçici",
         "themeOwn": "Temanın rengi",
         "clear": "Varsayılan",
@@ -8028,10 +8028,26 @@
           "neutral": "Nötr",
           "cool": "Soğuk"
         },
+        "backgroundHint": "Sayfanın, kutuların ve form alanlarının açık yüzeyleri birlikte değişir. Koyu grafit bölümler (duyuru şeridi, sahneler) aynı kalır.",
         "sample": "Örnek",
-        "sampleLine": "Duyuru şeridiniz böyle görünür",
+        "sampleLine": "Duyuru şeridiniz burada görünür",
+        "sampleParts": {
+          "heading": "Yeni gelenler",
+          "text": "Metinler bu yazı tipiyle görünür.",
+          "link": "Tümünü gör",
+          "search": "Ürün ara",
+          "brand": "Marka",
+          "product": "Örnek ürün",
+          "rating": "4,8 (12)",
+          "price": "1.250,00 ₺",
+          "chipSelected": "Seçili çip",
+          "chip": "Çip",
+          "note": "Bilgi notu",
+          "faces": "Başlık: {{heading}}. Metin: {{body}}.",
+          "facesNote": "Panelde yüklü olmayan yazı tipi: {{names}}. Örnek bunu benzer türde bir sistem yazı tipiyle çizer; gerçeği vitrinde görünür.",
+          "ownPrimary": "Ana renk boş: örnekteki renk temanın şarap tonudur."
+        },
         "button": "Sepete ekle",
-        "badge": "Yeni",
         "fontsTitle": "Yazı tipleri",
         "fontsHint": "Vitrin yazı tiplerini kendi sunucusundan yükler; ziyaretçi bilgisi üçüncü taraflara gitmez.",
         "heading": "Başlıklar",
@@ -8047,6 +8063,10 @@
           "source-sans": "Source Sans 3",
           "nunito": "Nunito"
         },
+        "fontNotes": {
+          "noLira": "Bu yazı tipinde ₺ işareti yok. Fiyatlar metin yazı tipiyle çizilir; başlık metnine yazdığınız ₺ yedek bir yazı tipiyle görünür.",
+          "singleWeight": "Tek kalınlığı vardır: başlıklar kalın değil, normal kalınlıkta çizilir."
+        },
         "shapes": "Köşeler ve düğmeler",
         "radius": "Köşeler",
         "radii": {
@@ -8054,12 +8074,14 @@
           "soft": "Yumuşak",
           "round": "Yuvarlak"
         },
+        "radiusHint": "Kutular, görseller ve iç köşeler. Yumuşak, Grafit'in 20 / 14 / 10 px köşeleridir; Keskin bunları beşte birine indirir, Yuvarlak bir buçuk katına çıkarır.",
         "buttons": "Düğmeler",
         "buttonShapes": {
           "pill": "Hap",
           "rounded": "Yuvarlatılmış",
           "square": "Köşeli"
         },
+        "buttonsHint": "Düğmeler, arama alanı, form alanları ve adet seçici birlikte değişir. Çipler ve sayı rozetleri her zaman hap biçimindedir.",
         "card": "Ürün kartı ve üst bilgi",
         "ratio": "Görsel oranı",
         "ratios": {
@@ -8067,19 +8089,29 @@
           "1x1": "1:1 (kare)",
           "3x4": "3:4 (uzun)"
         },
+        "ratioHint": "Ürün kartlarındaki görselin biçimi. Grafit kare (1:1) çizer.",
         "headerLayout": "Logo yerleşimi",
         "headerLayouts": {
           "centered": "Ortada",
           "left": "Solda"
         },
+        "headerLayoutSoon": "{{name}} (hazırlanıyor)",
+        "headerLayoutHint": "Mağaza adının üst bilgideki yeri. “Ortada” hazırlanıyor; hazır olana kadar seçilemez.",
+        "headerLayoutKept": "Kayıtlı seçim “Ortada”. Bu yerleşim hazırlanıyor; hazır olana kadar vitrin mağaza adını solda çizer.",
         "show_brand": "Markayı göster",
-        "show_brandHint": "Kartta ürün adının üstünde marka adı.",
+        "show_brandHint": "Ürün kartında, ürün adının üstünde marka adı. Markası olmayan üründe bir şey görünmez.",
         "show_rating": "Puanı göster",
-        "show_ratingHint": "Değerlendirmesi olan ürünlerde yıldız ve sayı.",
+        "show_ratingHint": "Onaylı değerlendirmesi olan ürünlerin kartında yıldız, ortalama puan ve değerlendirme sayısı. Değerlendirmesi olmayan üründe bir şey görünmez.",
         "sticky": "Üst bilgi sabit kalsın",
-        "stickyHint": "Sayfa kaydırılırken üst bilgi ekranın üstünde durur.",
+        "stickyHint": "Sayfa kaydırılırken üst bilgi ekranın üstünde durur. Kapalıyken sayfayla birlikte kayar.",
         "save": "Kaydet ve yayınla",
         "saved": "Tema ayarları kaydedildi; vitrinde en geç bir dakikada görünür.",
+        "grafit": {
+          "action": "Grafit'e dön",
+          "hint": "Bütün alanları temanın varsayılan görünümüne (Grafit) çeker. Kaydedene kadar vitrin değişmez.",
+          "confirmTitle": "Grafit'e dönülsün mü?",
+          "confirmText": "Kaydetmediğiniz değişiklikler dahil bütün alanlar temanın varsayılan görünümüne (Grafit) çekilir. Vitrin, siz kaydedene kadar değişmez."
+        },
         "errors": {
           "contrast": "Bu renk beyaz yazıyla ya da sayfa zemininde yeterince okunmuyor (en az 3:1 gerekir). Daha koyu bir ton seçin."
         }

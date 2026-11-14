@@ -8,8 +8,11 @@ import {
   CARD_RATIOS,
   HEADER_LAYOUTS,
   HEADING_FONTS,
+  NO_LIRA_FONTS,
   RADII,
   SERIF_FONTS,
+  SINGLE_WEIGHT_FONTS,
+  UNBUILT_HEADER_LAYOUTS,
 } from "@/features/storefront/api/theme"
 import type { BodyFont, HeadingFont } from "@/features/storefront/api/theme"
 import type { ThemeParsed, ThemeValues } from "@/features/storefront/theme-settings"
@@ -43,9 +46,25 @@ function FontName({ font }: { font: HeadingFont | BodyFont }) {
   )
 }
 
+/**
+ * What to know about a heading face before choosing it (adr/0062 §7): no ₺
+ * in its files, one weight only. Nothing for the others.
+ */
+function useHeadingNote(): (font: HeadingFont) => string | undefined {
+  const { t } = useTranslation()
+  return (font) => {
+    const notes = [
+      NO_LIRA_FONTS.has(font) ? t(`${C}.fontNotes.noLira`) : null,
+      SINGLE_WEIGHT_FONTS.has(font) ? t(`${C}.fontNotes.singleWeight`) : null,
+    ].filter((note) => note !== null)
+    return notes.length > 0 ? notes.join(" ") : undefined
+  }
+}
+
 /** The theme's fixed-list choices: faces, corners and buttons, the product card and the header. */
 export function ThemeChoices({ control }: { control: Control<ThemeValues, unknown, ThemeParsed> }) {
   const { t } = useTranslation()
+  const headingNote = useHeadingNote()
   return (
     <>
       <PanelGroup title={t(`${C}.fontsTitle`)} hint={t(`${C}.fontsHint`)}>
@@ -61,6 +80,7 @@ export function ThemeChoices({ control }: { control: Control<ThemeValues, unknow
                 options={HEADING_FONTS}
                 onChange={field.onChange}
                 render={(font) => <FontName font={font} />}
+                hint={headingNote(field.value)}
               />
             )}
           />
@@ -93,6 +113,7 @@ export function ThemeChoices({ control }: { control: Control<ThemeValues, unknow
                 options={RADII}
                 onChange={field.onChange}
                 render={(option) => t(`${C}.radii.${option}`)}
+                hint={t(`${C}.radiusHint`)}
               />
             )}
           />
@@ -107,6 +128,7 @@ export function ThemeChoices({ control }: { control: Control<ThemeValues, unknow
                 options={BUTTON_SHAPES}
                 onChange={field.onChange}
                 render={(option) => t(`${C}.buttonShapes.${option}`)}
+                hint={t(`${C}.buttonsHint`)}
               />
             )}
           />
@@ -125,6 +147,7 @@ export function ThemeChoices({ control }: { control: Control<ThemeValues, unknow
                 options={CARD_RATIOS}
                 onChange={field.onChange}
                 render={(option) => t(`${C}.ratios.${option.replace(":", "x")}`)}
+                hint={t(`${C}.ratioHint`)}
               />
             )}
           />
@@ -138,7 +161,17 @@ export function ThemeChoices({ control }: { control: Control<ThemeValues, unknow
                 value={field.value}
                 options={HEADER_LAYOUTS}
                 onChange={field.onChange}
-                render={(option) => t(`${C}.headerLayouts.${option}`)}
+                unavailable={UNBUILT_HEADER_LAYOUTS}
+                render={(option) =>
+                  UNBUILT_HEADER_LAYOUTS.has(option)
+                    ? t(`${C}.headerLayoutSoon`, { name: t(`${C}.headerLayouts.${option}`) })
+                    : t(`${C}.headerLayouts.${option}`)
+                }
+                hint={t(
+                  UNBUILT_HEADER_LAYOUTS.has(field.value)
+                    ? `${C}.headerLayoutKept`
+                    : `${C}.headerLayoutHint`
+                )}
               />
             )}
           />

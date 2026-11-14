@@ -2,9 +2,10 @@ import { sectionQuery } from "@/features/settings/api/sections"
 import type { StorefrontBackground } from "@/theme/storefront"
 
 /**
- * The storefront's theme settings (F18 D11, adr/0053; backend
+ * The storefront's theme settings (F18 D11, adr/0053, adr/0062; backend
  * `platform-settings/sections/theme.ts`): choices from fixed lists, no CSS
- * and no font address. Saved, they are live at once: there is no draft.
+ * and no font address. The Atölye theme applies every one of them. Saved,
+ * they are live at once: there is no draft (until adr/0063).
  */
 
 /** Self-hosted faces the storefront has a loader for; names only. */
@@ -33,9 +34,9 @@ export interface ThemeSettings {
   /** The installed theme; one today (`atolye`, adr/0057). */
   theme: "atolye"
   colors: {
-    /** Buttons, links, the announcement bar (`#rrggbb`); none: the storefront's old main colour, then the theme's ink. */
+    /** Buttons and links (`#rrggbb`); none: the storefront's old main colour, then the theme's wine. */
     primary: string | null
-    /** Badges and highlights; none: the theme's own. Not contrast-checked. */
+    /** Info badges, the selected chip and highlights; none: the main colour. Not contrast-checked. */
     accent: string | null
     background: StorefrontBackground
   }
@@ -59,4 +60,41 @@ export const SERIF_FONTS: ReadonlySet<HeadingFont | BodyFont> = new Set([
   "fraunces",
   "playfair",
   "dm-serif",
+])
+
+/** What the form holds and sends: every choice, without the server's own fields. */
+export type ThemeChoices = Omit<ThemeSettings, "theme" | "settings_version">
+
+/**
+ * Grafit, the look the theme draws with nothing chosen (adr/0062 §2;
+ * backend `themeSection`'s defaults and the storefront's `DEFAULT_THEME`):
+ * the panel's one copy, what "Grafit'e dön" puts back.
+ */
+export const GRAFIT_THEME: ThemeChoices = {
+  colors: { primary: null, accent: null, background: "steel" },
+  typography: { heading: "manrope", body: "manrope" },
+  radius: "soft",
+  product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+  header: { layout: "left", sticky: true },
+  buttons: "pill",
+}
+
+/**
+ * Heading faces whose files carry no ₺ (storefront `app/fonts.css`): prices
+ * are drawn in the body face, a ₺ typed into a heading in a fallback face
+ * (adr/0062 §7, owner's decision 3). The form says so under the choice.
+ */
+export const NO_LIRA_FONTS: ReadonlySet<HeadingFont> = new Set(["playfair", "dm-serif"])
+
+/** Faces with one weight (400): headings are drawn regular, not bold (adr/0062 §7). */
+export const SINGLE_WEIGHT_FONTS: ReadonlySet<HeadingFont> = new Set(["dm-serif"])
+
+/**
+ * Header layouts the theme does not draw yet: "centered" is built on its
+ * own branch and reaches the storefront once the owner approves it
+ * (adr/0062 §10, owner's decision 6). Until then the theme draws "left",
+ * so the form shows the choice as in preparation and does not offer it.
+ */
+export const UNBUILT_HEADER_LAYOUTS: ReadonlySet<ThemeSettings["header"]["layout"]> = new Set([
+  "centered",
 ])
