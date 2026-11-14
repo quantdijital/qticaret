@@ -7868,6 +7868,10 @@
         "category_main": {
           "name": "Product grid",
           "description": "The category's products, filters and sorting, on every category page. The other sections sit above or below it."
+        },
+        "price_bands": {
+          "name": "Price bands",
+          "description": "2–4 cards by price range; each card filters the shop by its range and shows a few products in it."
         }
       },
       "variants": {
@@ -7889,7 +7893,11 @@
           "standard": "Standard"
         },
         "soon": "{{name}} (coming soon)",
-        "kept": "The saved layout is being prepared; until it is ready, the storefront draws the standard one."
+        "kept": "The saved layout is being prepared; until it is ready, the storefront draws the standard one.",
+        "hero": {
+          "standard": "Stage",
+          "category_list": "Category list"
+        }
       },
       "look": {
         "title": "Look settings",
@@ -7979,7 +7987,8 @@
         "helpText": "Write to us about a product, an order or shipping; we will get back soon.",
         "newsletterText": "The storefront's text: hear about campaigns and news by e-mail…",
         "faq": "Frequently asked questions",
-        "related_products": "Related products"
+        "related_products": "Related products",
+        "price_bands": "Shop by price"
       },
       "fields": {
         "eyebrow": "Eyebrow",
@@ -8114,7 +8123,8 @@
         "thresholdRange": "Enter a whole number from 1 to {{max}}.",
         "contrast": "This colour does not read well enough with white text or on the page colour (3:1 at least). Pick a darker shade.",
         "wellContrast": "This colour does not read well enough on the areas one shade darker than the page (the boxes links and outlined buttons stand on; 3:1 at least). Pick a darker shade.",
-        "marqueeLimit": "A page may show up to {{max}} scrolling strips (the header's counts on every page); remove one."
+        "marqueeLimit": "A page may show up to {{max}} scrolling strips (the header's counts on every page); remove one.",
+        "bandsOrder": "Upper bounds must rise; only the last band may have none."
       },
       "theme": {
         "title": "Theme settings",
@@ -8437,6 +8447,61 @@
       },
       "main": {
         "fixed": "This section is a fixed part of the page; it cannot be hidden, moved, copied or removed."
+      },
+      "heroCatalog": {
+        "list": "Category list",
+        "listHint": "On the left, each category with its small picture.",
+        "listSource": "Which categories",
+        "sources": {
+          "top": "Top categories",
+          "menu": "Categories in the header menu",
+          "manual": "My choice"
+        },
+        "listEmpty": "Choose at least one category.",
+        "listLimit": "Categories at most",
+        "listLimitHint": "Between {{min}} and {{max}}.",
+        "showCount": "Show product counts",
+        "showCountHint": "Each category's live product count beside it.",
+        "tiles": "Tiles beside it",
+        "tilesHint": "Up to {{max}} category tiles beside the opening.",
+        "tilesEmpty": "Without tiles only the list and the opening show.",
+        "tileImage": "Tile {{number}} picture",
+        "tileImageHint": "Left empty, the category's picture shows, else its newest product's photo.",
+        "chips": "Quick links",
+        "chipsHint": "Up to {{max}} links under the opening; categories show with a small picture.",
+        "chip": "Link {{number}}",
+        "addChip": "Add link",
+        "picks": "Small products",
+        "picksHint": "Up to {{max}} products under the button, with short names.",
+        "picksEmpty": "Without products this row does not show.",
+        "pickLabel": "Product {{number}} short name",
+        "pickLabelHint": "Left empty, the product's name shows.",
+        "pickLabelPlaceholder": "Pine green",
+        "showPrice": "Show the starting price",
+        "showPriceHint": "The lowest current price among the products you chose."
+      },
+      "categories": {
+        "showCountHint": "Each tile's live product count under it.",
+        "more": "Link beside the title",
+        "moreHint": "Left empty, it goes to All categories."
+      },
+      "priceBands": {
+        "bands": "Bands",
+        "bandsHint": "2 to 4 bands; upper bounds rise. Each band filters the shop by its price range.",
+        "band": "Band {{number}}",
+        "label": "Band name",
+        "labelUnder": "Under {{amount}} TL",
+        "labelOpen": "{{amount}} TL and up",
+        "text": "Short line",
+        "textPlaceholder": "Keyring knives, mini models",
+        "max": "Upper bound (TL)",
+        "maxHint": "The band covers products from the band before's bound up to this amount.",
+        "open": "No upper bound",
+        "openHint": "The last band covers every product above the bound before.",
+        "addBand": "Add band",
+        "thumbs": "Product pictures",
+        "thumbsHint": "A few products from each range show small; the storefront picks them by price.",
+        "thumbsCount": "Products per band"
       }
     },
     "preferences": {

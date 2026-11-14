@@ -14,6 +14,19 @@ export const VARIANT_FIELDS: {
   readonly [T in VariantSectionType]: Readonly<Record<SectionVariant<T>, Readonly<object>>>
 } = {
   trust_badges: { strip: {}, lined: {} },
+  // H17's own fields as a switched opening starts them: the top categories with counts
+  hero: {
+    standard: {},
+    category_list: {
+      list: { kind: "top" },
+      list_limit: 9,
+      show_count: true,
+      tiles: [],
+      chips: [],
+      picks: [],
+      show_price: true,
+    },
+  },
   header_bar: { standard: {}, centered: {} },
   footer_bar: { ledger: {} },
   product_main: { standard: {} },

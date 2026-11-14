@@ -79,11 +79,50 @@ const HeaderStandard = () => <HeaderRow mark={6} />
 /** The theme setting's centred header: the wordmark in the middle. */
 const HeaderCentered = () => <HeaderRow mark={47} />
 
+/** Today's opening: one dark stage, the words on its left, the picture on its right. */
+function HeroStandard() {
+  return (
+    <>
+      <rect x={1} y={3} width={110} height={26} rx={4} className="fill-current opacity-70" />
+      <rect x={60} y={3} width={51} height={26} rx={4} className="fill-current opacity-40" />
+      <rect x={8} y={10} width={34} height={4} rx={1} className="fill-background" />
+      <rect x={8} y={18} width={18} height={5} rx={2.5} className="fill-background opacity-80" />
+    </>
+  )
+}
+
+/** H17: the category list, the opening as a tile, two category tiles. */
+function HeroCategoryList() {
+  return (
+    <>
+      <rect x={1} y={3} width={26} height={26} rx={3} className="fill-current opacity-15" />
+      {[7, 13, 19, 25].map((y) => (
+        <rect
+          key={y}
+          x={4}
+          y={y - 1}
+          width={18}
+          height={2}
+          rx={1}
+          className="fill-current opacity-60"
+        />
+      ))}
+      <rect x={30} y={3} width={56} height={26} rx={3} className="fill-current opacity-25" />
+      <rect x={58} y={3} width={28} height={26} rx={3} className="fill-current opacity-50" />
+      <rect x={34} y={10} width={18} height={3} rx={1} className="fill-current opacity-80" />
+      <rect x={34} y={18} width={12} height={4} rx={2} className="fill-current opacity-60" />
+      <rect x={89} y={3} width={22} height={12} rx={3} className="fill-current opacity-50" />
+      <rect x={89} y={17} width={22} height={12} rx={3} className="fill-current opacity-50" />
+    </>
+  )
+}
+
 // A type with one variant offers no choice and has no sketch
 const SKETCHES: {
   readonly [T in VariantSectionType]?: Readonly<Record<SectionVariant<T>, () => ReactElement>>
 } = {
   trust_badges: { strip: TrustStrip, lined: TrustLined },
+  hero: { standard: HeroStandard, category_list: HeroCategoryList },
   header_bar: { standard: HeaderStandard, centered: HeaderCentered },
 }
 
