@@ -17,6 +17,7 @@ import type { HydrateContext } from "./layout-hydrate"
 import { liveRecords } from "./layout-live"
 import { resolveLinks } from "./menu-links"
 import type { StoreMenu } from "./menus-read"
+import { bandPicks } from "./price-bands"
 import { railPicks } from "./rails"
 
 /** The addresses of the images shown with their sizes: openings and slides (not rich text's). */
@@ -75,7 +76,7 @@ export async function storeLayout(
   // The header's scrolling strip links like a body section (adr/0049 Ek 2026-11-14 §4.1)
   const links = [...body, ...headerLinked({ header })].flatMap(linksOf)
   const urls = body.flatMap(imageUrls)
-  const [values, resolved, assets, picks] = await Promise.all([
+  const [values, resolved, assets, picks, bands] = await Promise.all([
     shopInfoValues(container),
     resolveLinks(
       container,
@@ -98,11 +99,13 @@ export async function storeLayout(
           )
       : Promise.resolve([]),
     railPicks(container, home, channels),
+    bandPicks(container, home, channels),
   ])
   const at: HydrateContext = {
     values,
     container,
     picks,
+    bands,
     images: new Map(
       assets.map((asset) => [
         asset.url,

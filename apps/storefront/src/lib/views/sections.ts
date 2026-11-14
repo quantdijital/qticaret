@@ -7,20 +7,21 @@ import type {
 } from "@qticaret/types"
 import { lookOf } from "@qticaret/types/section-look"
 import { variantOf } from "@qticaret/types/section-variants"
-import type { HomeSectionView, LinkView, Translate } from "@qticaret/ui"
+import type { HomeSectionView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
 import { legalIdentity, siteSeo } from "@/lib/store-api/requests"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { googleRatingReviews, reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
-import { categoryTiles } from "./category-tiles"
 import { railCardVariant } from "./card-framed"
+import { heroView, priceBandsView, withCounts } from "./catalog"
+import { picturedCategories } from "./category-tiles"
 import { featuredView } from "./featured"
 import { EXCERPT_MIN_RATING, googleRatingView } from "./google-rating"
 import { bannerView } from "./banner"
 import { heroSliderView } from "./hero-slider"
 import { marqueeView } from "./marquee"
-import { currentShared, layoutImage, layoutLink } from "./layout"
+import { currentShared, layoutLink } from "./layout"
 import { legalDocument, legalPath } from "./legal"
 import { postCards } from "./posts"
 import {
@@ -52,9 +53,6 @@ export interface SectionContext {
   /** The home page: its category cards take a product photo where the category has none. */
   home?: boolean
 }
-
-const links = (items: readonly (LinkView | null)[]): LinkView[] =>
-  items.flatMap((item) => (item ? [item] : []))
 
 /** A related rail under a product; none when its source has nothing else or cannot be read. */
 async function relatedView(
@@ -100,29 +98,31 @@ async function sectionView(
 ): Promise<HomeSectionView | null> {
   const { id } = section
   switch (section.type) {
-    case "hero": {
-      const site = await siteSeo()
-      return {
-        id,
-        type: "hero",
-        eyebrow: section.eyebrow,
-        heading: section.heading ?? site.shop.name,
-        intro: section.text,
-        actions: links(section.links.map((link) => layoutLink(link, t))),
-        image: section.image ? layoutImage(section.image, section.heading ?? site.shop.name) : null,
-      }
-    }
+    case "hero":
+      return heroView(section, t)
+    case "price_bands":
+      return priceBandsView(section, t)
     case "hero_slider":
       return heroSliderView(section, t)
     case "banner":
       return bannerView(section, t)
     case "categories": {
       // A product's photo stands in for a missing category picture on the home page only
-      const categories = await (context.home
-        ? categoryTiles(section.category_ids)
-        : categoryLinks(section.category_ids))
+      const categories = context.home
+        ? await withCounts(
+            await picturedCategories(section.category_ids),
+            section.show_count === true
+          )
+        : await categoryLinks(section.category_ids)
+      const more = layoutLink(section.more ?? null, t)
       return categories.length > 0
-        ? { id, type: "categories", title: section.title ?? t("home.shop_categories"), categories }
+        ? {
+            id,
+            type: "categories",
+            title: section.title ?? t("home.shop_categories"),
+            categories,
+            ...(more ? { more } : {}),
+          }
         : null
     }
     case "products": {

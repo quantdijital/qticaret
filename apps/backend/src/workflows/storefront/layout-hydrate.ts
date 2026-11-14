@@ -13,6 +13,8 @@ import { hasLook } from "../../lib/storefront/sections/look"
 import { fillShopDoc, fillShopText } from "../../lib/shop/tokens"
 import type { ShopInfoValues } from "../../lib/shop/tokens"
 import { cardTargets } from "../../api/store/content/cards"
+import { hydrateHero, hydratePriceBands } from "./layout-hydrate-catalog"
+import type { BandPick } from "./price-bands"
 
 /** A button or slide link as the storefront prints it; a broken one is not there. */
 export interface StoreLayoutLink {
@@ -43,6 +45,8 @@ export interface HydrateContext {
   container: MedusaContainer
   /** The sale and best-seller rails' products, picked for the shopper's channels, by section id. */
   picks?: ReadonlyMap<string, RailPick>
+  /** The price bands strips' products per band, picked for the shopper's channels, by section id. */
+  bands?: ReadonlyMap<string, BandPick>
 }
 
 export const fill = (text: string | null, values: ShopInfoValues) =>
@@ -90,20 +94,9 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
   const link = (each: MenuLinkInput | null) => (each ? (at.links.get(each) ?? null) : null)
   switch (section.type) {
     case "hero":
-      return {
-        id,
-        type,
-        eyebrow: fill(section.eyebrow, at.values),
-        heading: fill(section.heading, at.values),
-        text: fill(section.text, at.values),
-        links: section.links.flatMap((each) => {
-          const shown = link(each)
-          return shown ? [shown] : []
-        }),
-        image: section.image
-          ? { ...image(section.image.url, section.image.alt), alt: section.image.alt }
-          : null,
-      }
+      return hydrateHero(section, { fill: (text) => fill(text, at.values), link, image })
+    case "price_bands":
+      return hydratePriceBands(section, at.bands?.get(id), (text) => fill(text, at.values))
     case "banner":
       return {
         id,
@@ -205,7 +198,15 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
     case "help":
       return { id, type, title: section.title, text: fill(section.text, at.values) }
     case "categories":
-      return { id, type, title: section.title, category_ids: section.category_ids }
+      return {
+        id,
+        type,
+        title: section.title,
+        category_ids: section.category_ids,
+        // Printed only when set, so a section from before them prints as it did
+        ...(section.show_count ? { show_count: true } : {}),
+        ...(section.more ? { more: link(section.more) } : {}),
+      }
     case "brands":
       return { id, type, title: section.title, brand_ids: section.brand_ids }
     case "posts":

@@ -46,7 +46,7 @@ const server = vi.hoisted(() => ({ storeGet: vi.fn(), storePublicGet: vi.fn() })
 vi.mock("@/lib/store-api/server", () => server)
 
 const { categoryLinks } = await import("../section-data")
-const { categoryTiles } = await import("../category-tiles")
+const { categoryTiles, picturedCategories } = await import("../category-tiles")
 
 /** The category ids a photo was asked for, in the order asked. */
 const asked = () =>
@@ -116,6 +116,13 @@ describe("categoryTiles", () => {
     expect(tiles.every((tile) => tile.image?.src === "/media/x.jpg")).toBe(true)
     expect(most).toBeLessThanOrEqual(6)
     expect(most).toBeGreaterThan(1)
+  })
+
+  it("keeps only as many as the limit, and asks photos for those only", async () => {
+    extras.categoryImages.mockResolvedValue(new Map())
+    const kept = await picturedCategories([], 1)
+    expect(kept.map(({ id }) => id)).toEqual(["pcat_a"])
+    expect(asked()).toEqual([["pcat_a", "pcat_a1"]])
   })
 
   it("leaves a category with no pictured product, or an unanswered one, without a picture", async () => {

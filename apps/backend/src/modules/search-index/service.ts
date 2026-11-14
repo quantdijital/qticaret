@@ -24,6 +24,7 @@ import {
   setPopularity,
   upsertDocuments,
 } from "./sql/documents"
+import { categoryCountsOf, categoryCountsStatement } from "./sql/category-counts"
 import { listingResult, listingStatement } from "./sql/listing"
 import { claimPending, finishPending, markPending, pendingCount } from "./sql/pending"
 import { readState, writeState } from "./sql/state"
@@ -209,6 +210,24 @@ class SearchIndexModuleService extends MedusaService({ SearchSynonym }) {
     const { sql, params } = listingStatement(plan)
     const [row] = (await run(context).execute(sql, params)) as Parameters<typeof listingResult>[1][]
     return listingResult(plan, row)
+  }
+
+  /**
+   * Each category's published products in its shown subtree (given), in
+   * these channels (null: any): one statement for every category.
+   */
+  @InjectManager()
+  async categoryCounts(
+    subtrees: readonly { id: string; ids: readonly string[] }[],
+    channels: readonly string[] | null,
+    @MedusaContext() context: Context = {}
+  ): Promise<Record<string, number>> {
+    if (subtrees.length === 0) {
+      return {}
+    }
+    const { sql, params } = categoryCountsStatement(subtrees, channels)
+    const rows = (await run(context).execute(sql, params)) as { id: string; count: number }[]
+    return categoryCountsOf(rows)
   }
 
   /** The listing statement's plan in PostgreSQL's words (the ADR's EXPLAIN, tests). */

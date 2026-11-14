@@ -11,6 +11,7 @@ import {
 import type { BodySection, PageMain } from "./layout-sections"
 import { layoutSettings, storedSettings } from "./layout-settings"
 import { isMainType } from "./sections/main"
+import { PRICE_BANDS_LIMITS } from "./sections/price-bands"
 import { storedSection } from "./sections/stored"
 
 /**
@@ -58,6 +59,10 @@ const tooManyMarquees = (doc: {
     (page) => marquees(doc.header) + marquees(page) > MARQUEE_PER_PAGE
   )
 
+/** Whether the home page has more price bands strips than it may; hidden ones count too. */
+const tooManyBands = (home: readonly { type: string }[]) =>
+  home.filter((section) => section.type === "price_bands").length > PRICE_BANDS_LIMITS.perPage
+
 /** The whole design: checked as one, so a section's id is unique across the groups. */
 export const layoutDocument = z
   .object({
@@ -102,6 +107,9 @@ export const layoutDocument = z
     }
     if (tooManyMarquees(doc)) {
       ctx.addIssue({ code: "custom", message: "storefront_layout.marquee_limit" })
+    }
+    if (tooManyBands(doc.home)) {
+      ctx.addIssue({ code: "custom", message: "storefront_layout.price_bands_limit" })
     }
     const backwards = all.some(
       (section) =>

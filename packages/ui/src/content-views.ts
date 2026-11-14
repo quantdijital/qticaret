@@ -1,6 +1,7 @@
-import type { SectionLook, ShelfColumns, TrustBadgesVariant } from "@qticaret/types"
+import type { HeroVariant, SectionLook, ShelfColumns, TrustBadgesVariant } from "@qticaret/types"
 import type { BannerSectionView } from "./banner-views"
 import type { CategoryCardView, CustomerPhotoView, ShopMarkView } from "./card-views"
+import type { HeroCatalogView, PriceBandsSectionView } from "./catalog-views"
 import type {
   FeaturedProductSectionView,
   GoogleRatingSectionView,
@@ -44,12 +45,25 @@ export type HomeSectionView = { look?: SectionLookView } & (
       /** At most two buttons, the first the main one. */
       actions: LinkView[]
       image: ImageView | null
+      /** How the opening is drawn (adr/0049 Ek 2026-11-14 §2); none: today's (`standard`). */
+      variant?: HeroVariant
+      /** `category_list`'s own parts (H17); a theme without that drawing leaves them unread. */
+      catalog?: HeroCatalogView | null
     }
+  | PriceBandsSectionView
   | HeroSliderSectionView
   | GoogleRatingSectionView
   | MarqueeSectionView
   | BannerSectionView
-  | { id: string; type: "categories"; title: string; categories: CategoryCardView[] }
+  | {
+      id: string
+      type: "categories"
+      title: string
+      /** Each card's `count` is set when the shop shows counts. */
+      categories: CategoryCardView[]
+      /** The link beside the title; none (or absent): the theme's "every category". */
+      more?: LinkView | null
+    }
   | {
       id: string
       type: "products"

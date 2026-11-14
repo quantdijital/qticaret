@@ -21,6 +21,7 @@ import {
   Star,
   Tags,
   Text,
+  Wallet,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { AnySection, BodySectionType, MainSectionType } from "@/features/storefront/api/layout"
@@ -48,6 +49,7 @@ export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   newsletter: Mail,
   help: LifeBuoy,
   marquee: MoveHorizontal,
+  price_bands: Wallet,
   footer_newsletter: Mail,
   header_bar: AppWindow,
   footer_bar: PanelBottom,
@@ -79,6 +81,7 @@ function ownTitle(section: AnySection): string | null {
     case "related_products":
     case "newsletter":
     case "help":
+    case "price_bands":
       return section.title
     case "announcement_bar":
       return section.lines.find((line) => line.trim() !== "") ?? null
