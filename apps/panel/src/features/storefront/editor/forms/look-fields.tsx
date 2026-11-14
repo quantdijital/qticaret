@@ -5,7 +5,7 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import type { SectionLook, SectionLookField, SectionLookStep } from "@qticaret/types"
-import type { BodySection } from "@/features/storefront/api/layout"
+import type { LookedSection } from "@/features/storefront/api/layout"
 import {
   lookFieldsFor,
   lookStep,
@@ -36,7 +36,7 @@ function LookField<F extends SectionLookField>({
   field,
   onChange,
 }: {
-  section: BodySection
+  section: LookedSection
   field: F
   onChange: (step: SectionLook[F]) => void
 }) {
@@ -108,7 +108,7 @@ function LookField<F extends SectionLookField>({
  * fields its type offers (no alignment where the words sit on a picture),
  * each set and reset on its own; every change shows in the preview at once.
  */
-export function LookFields<S extends BodySection>({
+export function LookFields<S extends LookedSection>({
   section,
   onChange,
 }: {

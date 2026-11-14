@@ -19,6 +19,7 @@ import {
   newSectionId,
 } from "@/features/storefront/layout/sections"
 import { MARQUEE_LIMITS } from "@/features/storefront/api/layout"
+import { mainOf } from "@/features/storefront/layout/main-sections"
 import { PageSections } from "./page-sections"
 import { SECTION_ICONS, kindOf, sectionLabel } from "./section-meta"
 import { SectionRow } from "./section-row"
@@ -105,7 +106,23 @@ export function SectionTree({
   const strip = doc.header.find((section) => section.type === "marquee")
   // A strip in the header shows on every page: not while a page already has its two
   const stripFull = BODY_GROUPS.some((body) => marqueesOn(doc, body) >= MARQUEE_LIMITS.perPage)
-  const [newsletter] = doc.footer
+  const newsletter = doc.footer.find((section) => section.type === "newsletter")
+  // The header's bar and the footer: main sections, fixed rows (adr/0049 Ek 2026-11-14 §5)
+  const mainRow = (type: "header_bar" | "footer_bar") => {
+    const section = mainOf(doc, type)
+    return section ? (
+      <li className="rounded-md border border-dashed">
+        <ThemeRow
+          icon={SECTION_ICONS[type]}
+          label={t(`storefront.editor.types.${type}.name`)}
+          problem={problems.has(section.id)}
+          onClick={() => {
+            onOpen(section.id)
+          }}
+        />
+      </li>
+    ) : null
+  }
   return (
     <nav aria-label={t(`${T}.label`)} className="flex flex-col gap-6 px-3 py-4">
       <TreeGroup title={t(`${T}.header`)}>
@@ -135,6 +152,7 @@ export function SectionTree({
               }}
             />
           )}
+          {mainRow("header_bar")}
           <ElsewhereRow
             icon={Store}
             name={t(`${T}.logo`)}
@@ -158,6 +176,7 @@ export function SectionTree({
       </TreeGroup>
       <TreeGroup title={t(`${T}.footer`)}>
         <ul className="flex flex-col gap-0.5">
+          {mainRow("footer_bar")}
           {newsletter ? (
             row(newsletter, true)
           ) : (

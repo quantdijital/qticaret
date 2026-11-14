@@ -10,6 +10,15 @@
 export const SECTION_VARIANTS = {
   /** `strip`: today's tinted strip; `lined`: boxes split by hairlines (GB4). */
   trust_badges: ["strip", "lined"],
+  /**
+   * The main sections (adr/0049 Ek 2026-11-14 §5, §7), each with today's
+   * drawing first. The header bar's `centered` is the theme setting's
+   * centred header (`header.layout`), read into the bar by name.
+   */
+  header_bar: ["standard", "centered"],
+  footer_bar: ["ledger"],
+  product_main: ["standard"],
+  category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type VariantSectionType = keyof typeof SECTION_VARIANTS
@@ -17,6 +26,10 @@ export type SectionVariant<T extends VariantSectionType> = (typeof SECTION_VARIA
 export type DefaultVariant<T extends VariantSectionType> = (typeof SECTION_VARIANTS)[T][0]
 
 export type TrustBadgesVariant = SectionVariant<"trust_badges">
+export type HeaderBarVariant = SectionVariant<"header_bar">
+export type FooterBarVariant = SectionVariant<"footer_bar">
+export type ProductMainVariant = SectionVariant<"product_main">
+export type CategoryMainVariant = SectionVariant<"category_main">
 
 export const isVariantType = (type: string): type is VariantSectionType =>
   Object.hasOwn(SECTION_VARIANTS, type)

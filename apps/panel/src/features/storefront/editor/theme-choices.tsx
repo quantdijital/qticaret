@@ -4,13 +4,11 @@ import {
   BODY_FONTS,
   BUTTON_SHAPES,
   CARD_RATIOS,
-  HEADER_LAYOUTS,
   HEADING_FONTS,
   NO_LIRA_FONTS,
   RADII,
   SERIF_FONTS,
   SINGLE_WEIGHT_FONTS,
-  UNBUILT_HEADER_LAYOUTS,
 } from "@/features/storefront/api/theme"
 import type { BodyFont, HeadingFont, ThemeSettings } from "@/features/storefront/api/theme"
 import { cn } from "@qticaret/admin-ui/lib/utils"
@@ -64,11 +62,15 @@ interface ThemeChoicesProps {
   onChange: (theme: ThemeSettings) => void
 }
 
-/** The theme's fixed-list choices: faces, corners and buttons, the product card and the header. */
+/**
+ * The theme's fixed-list choices: faces, corners and buttons, the product
+ * card. The header's layout and stickiness are the header bar's now
+ * (adr/0049 Ek 2026-11-14 §5), in the tree under "Üst bilgi".
+ */
 export function ThemeChoices({ theme, onChange }: ThemeChoicesProps) {
   const { t } = useTranslation()
   const headingNote = useHeadingNote()
-  const { typography, product_card: card, header } = theme
+  const { typography, product_card: card } = theme
   return (
     <>
       <PanelGroup title={t(`${C}.fontsTitle`)} hint={t(`${C}.fontsHint`)}>
@@ -135,26 +137,6 @@ export function ThemeChoices({ theme, onChange }: ThemeChoicesProps) {
             render={(option) => t(`${C}.ratios.${option.replace(":", "x")}`)}
             hint={t(`${C}.ratioHint`)}
           />
-          <ChoiceSelect
-            id="theme-header"
-            label={t(`${C}.headerLayout`)}
-            value={header.layout}
-            options={HEADER_LAYOUTS}
-            onChange={(value) => {
-              onChange({ ...theme, header: { ...header, layout: value } })
-            }}
-            unavailable={UNBUILT_HEADER_LAYOUTS}
-            render={(option) =>
-              UNBUILT_HEADER_LAYOUTS.has(option)
-                ? t(`${C}.headerLayoutSoon`, { name: t(`${C}.headerLayouts.${option}`) })
-                : t(`${C}.headerLayouts.${option}`)
-            }
-            hint={t(
-              UNBUILT_HEADER_LAYOUTS.has(header.layout)
-                ? `${C}.headerLayoutKept`
-                : `${C}.headerLayoutHint`
-            )}
-          />
         </Pair>
         {(["show_brand", "show_rating"] as const).map((name) => (
           <SwitchRow
@@ -168,15 +150,6 @@ export function ThemeChoices({ theme, onChange }: ThemeChoicesProps) {
             }}
           />
         ))}
-        <SwitchRow
-          id="theme-sticky"
-          label={t(`${C}.sticky`)}
-          hint={t(`${C}.stickyHint`)}
-          checked={header.sticky}
-          onChange={(value) => {
-            onChange({ ...theme, header: { ...header, sticky: value } })
-          }}
-        />
       </PanelGroup>
     </>
   )

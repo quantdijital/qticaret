@@ -10,6 +10,8 @@ import { featuredProduct } from "./sections/featured-product"
 import { googleRating } from "./sections/google-rating"
 import { hero } from "./sections/hero"
 import { heroSlider } from "./sections/hero-slider"
+import { categoryMain, footerBar, headerBar, productMain } from "./sections/main"
+import type { MainSectionType } from "./sections/main"
 import { headerMarquee, marquee, placedMarquee } from "./sections/marquee"
 import { products } from "./sections/products"
 import { relatedProducts } from "./sections/related-products"
@@ -61,10 +63,11 @@ export const pageSection = z.discriminatedUnion(
   SECTION_TYPE
 )
 
-/** Below the product's own block on every product page. */
+/** On every product page: the product's own block (`product_main`), the others below it. */
 export const productSection = z.discriminatedUnion(
   "type",
   [
+    productMain,
     relatedProducts,
     richText,
     banner,
@@ -77,10 +80,14 @@ export const productSection = z.discriminatedUnion(
   SECTION_TYPE
 )
 
-/** On every category page, above its product grid or below it (`placement`). */
+/**
+ * On every category page: its product grid (`category_main`, in no order),
+ * the others above it or below it (`placement`).
+ */
 export const categorySection = z.discriminatedUnion(
   "type",
   [
+    categoryMain,
     richText.extend({ placement }),
     banner.extend({ placement }),
     faq.extend({ placement }),
@@ -93,20 +100,30 @@ export const categorySection = z.discriminatedUnion(
 )
 
 /**
- * Above the shop's header on every page: the announcement bar and the
- * scrolling strip, each at most once (adr/0049 Ek 2026-11-14 §10 karar 9).
+ * On every page but the checkout's: the shop's header bar (`header_bar`),
+ * and above it the announcement bar and the scrolling strip; each at most
+ * once (adr/0049 Ek 2026-11-14 §5, §10 karar 9).
  */
 export const headerSection = z.discriminatedUnion(
   "type",
-  [announcementBar, headerMarquee],
+  [announcementBar, headerMarquee, headerBar],
+  SECTION_TYPE
+)
+
+/** The shop's footer (`footer_bar`) and its newsletter box, each at most once. */
+export const footerSection = z.discriminatedUnion(
+  "type",
+  [footerNewsletter, footerBar],
   SECTION_TYPE
 )
 
 export type PageSection = z.infer<typeof pageSection>
 export type ProductSection = z.infer<typeof productSection>
 export type CategorySection = z.infer<typeof categorySection>
-/** A section of a page's body: the home, product or category page's. */
-export type BodySection = PageSection | ProductSection | CategorySection
+/** A page's main section (adr/0049 Ek 2026-11-14 §7): the product's block, the category's grid. */
+export type PageMain = Extract<ProductSection | CategorySection, { type: MainSectionType }>
+/** A section of a page's body, its main one aside: the home, product or category page's. */
+export type BodySection = Exclude<PageSection | ProductSection | CategorySection, PageMain>
 export type HeaderSection = z.infer<typeof headerSection>
-export type FooterSection = z.infer<typeof footerNewsletter>
+export type FooterSection = z.infer<typeof footerSection>
 export type LayoutSection = BodySection | HeaderSection

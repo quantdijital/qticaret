@@ -1,6 +1,8 @@
 import { SECTION_LOOK, SECTION_LOOK_FIELDS } from "@qticaret/types"
 import type { SectionLook, SectionLookField, SectionLookStep } from "@qticaret/types"
-import type { BodySection, BodySectionType } from "@/features/storefront/api/layout"
+import type { LookedSection } from "@/features/storefront/api/layout"
+
+type LookedType = LookedSection["type"]
 
 /**
  * A section's look in the panel (adr/0049 Ek 2026-11-14 §6): which of the
@@ -11,37 +13,35 @@ import type { BodySection, BodySectionType } from "@/features/storefront/api/lay
  */
 
 /** Types whose heading and text sit on their own picture or have none: alignment means nothing. */
-const NO_ALIGN: ReadonlySet<BodySectionType> = new Set([
-  "hero",
-  "hero_slider",
-  "banner",
-  "trust_badges",
-])
+const NO_ALIGN: ReadonlySet<LookedType> = new Set(["hero", "hero_slider", "banner", "trust_badges"])
 
 /**
  * Types carrying long text: the shop's colour holds its foreground only for
  * large text and controls (adr/0062 §6, 3:1), so it is not offered there.
  */
-const LONG_TEXT: ReadonlySet<BodySectionType> = new Set(["rich_text", "faq"])
+const LONG_TEXT: ReadonlySet<LookedType> = new Set(["rich_text", "faq"])
 
 /**
  * Types that offer only some of the look: a scrolling strip has its own
  * ground and a height set by its size, and no heading to align (adr/0049
  * Ek 2026-11-14 §4.1, §6); the space above it and its width stay.
  */
-const ONLY: Partial<Record<BodySectionType, readonly SectionLookField[]>> = {
+const ONLY: Partial<Record<LookedType, readonly SectionLookField[]>> = {
   marquee: ["space_outer", "width"],
+  // The page's main block keeps its own grounds and inner spacing (adr/0049 Ek 2026-11-14 §7)
+  product_main: ["space_outer", "width"],
+  category_main: ["space_outer", "width"],
 }
 
 /** The look's fields the panel offers for a type, in the contract's order. */
-export const lookFieldsFor = (type: BodySectionType): readonly SectionLookField[] =>
+export const lookFieldsFor = (type: LookedType): readonly SectionLookField[] =>
   SECTION_LOOK_FIELDS.filter(
     (field) => (ONLY[type]?.includes(field) ?? true) && (field !== "align" || !NO_ALIGN.has(type))
   )
 
 /** A field's steps the panel offers for a type. */
 export function lookStepsFor<F extends SectionLookField>(
-  type: BodySectionType,
+  type: LookedType,
   field: F
 ): readonly SectionLookStep<F>[] {
   const steps: readonly SectionLookStep<F>[] = SECTION_LOOK[field]
@@ -60,7 +60,7 @@ const NONE: SectionLook = {
 
 /** A field's step as the section has it; `null`: the theme's own. */
 export const lookStep = <F extends SectionLookField>(
-  section: BodySection,
+  section: LookedSection,
   field: F
 ): SectionLook[F] => section.look?.[field] ?? null
 
@@ -69,7 +69,7 @@ export const lookStep = <F extends SectionLookField>(
  * back. With no step left the look goes, so a section put back to the
  * theme's own is the document it was before (nothing left to save).
  */
-export function withLookStep<S extends BodySection, F extends SectionLookField>(
+export function withLookStep<S extends LookedSection, F extends SectionLookField>(
   section: S,
   field: F,
   step: SectionLook[F]
@@ -84,5 +84,5 @@ export function withLookStep<S extends BodySection, F extends SectionLookField>(
 }
 
 /** How many of the type's offered fields the shop set: the closed group says so. */
-export const lookCount = (section: BodySection): number =>
+export const lookCount = (section: LookedSection): number =>
   lookFieldsFor(section.type).filter((field) => lookStep(section, field) !== null).length

@@ -1,5 +1,6 @@
 import { isPlainObject } from "../../../modules/platform-settings/sections/define"
 import { storedLook } from "./look"
+import { MAIN_BRANCHES, storedByVariant } from "./main"
 import { TRUST_BADGES_BRANCHES } from "./trust-badges"
 import { REMOVED_VARIANTS, SECTION_VARIANTS, isVariantType } from "./variants"
 import type { SectionVariant, VariantBranch, VariantSectionType } from "./variants"
@@ -9,6 +10,7 @@ const BRANCHES: {
   readonly [T in VariantSectionType]: Readonly<Record<SectionVariant<T>, VariantBranch>>
 } = {
   trust_badges: TRUST_BADGES_BRANCHES,
+  ...MAIN_BRANCHES,
 }
 
 /** Kept whatever the branch: a category page's section's place. */
@@ -19,7 +21,9 @@ const ALWAYS_KEPT = ["placement"]
  * forgiving on reading): a variant off its type's list (taken off since,
  * or written by a newer build) reads as the one that replaced it, else as
  * the default, keeping only the fields that variant has, so the design
- * still reads; a look's step off its list is dropped (`storedLook`). No
+ * still reads; a look's step off its list is dropped (`storedLook`), and
+ * so is a category grid's settings of a variant off its list
+ * (`storedByVariant`). No
  * variant at all is the default's to fill (the schema). A save is still
  * held to the lists.
  */
@@ -27,7 +31,7 @@ export function storedSection(stored: unknown): unknown {
   if (!isPlainObject(stored)) {
     return stored
   }
-  const section = storedLook(stored)
+  const section = storedByVariant(storedLook(stored))
   const type = section["type"]
   if (!isVariantType(type)) {
     return section
@@ -38,9 +42,10 @@ export function storedSection(stored: unknown): unknown {
     return section
   }
   const removed: Readonly<Record<string, string>> = REMOVED_VARIANTS[type] ?? {}
-  const to = ((typeof variant === "string" ? removed[variant] : undefined) ??
-    SECTION_VARIANTS[type][0]) as SectionVariant<typeof type>
-  const keeps = new Set([...Object.keys(BRANCHES[type][to].shape), ...ALWAYS_KEPT])
+  const to: string =
+    (typeof variant === "string" ? removed[variant] : undefined) ?? SECTION_VARIANTS[type][0]
+  const branches: Readonly<Record<string, VariantBranch>> = BRANCHES[type]
+  const keeps = new Set([...Object.keys(branches[to]?.shape ?? {}), ...ALWAYS_KEPT])
   return {
     ...Object.fromEntries(Object.entries(section).filter(([key]) => keeps.has(key))),
     variant: to,

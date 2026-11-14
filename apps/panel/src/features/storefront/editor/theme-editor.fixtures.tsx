@@ -13,6 +13,8 @@ import { ThemeEditorPage } from "./theme-editor-page"
 /** What the theme editor's specs share: the shop's design, the server and the editor. */
 
 const ALWAYS = { visible: true, starts_at: null, ends_at: null }
+/** A main section always shows (adr/0049 Ek 2026-11-14 §5). */
+const MAIN = { visible: true, starts_at: null, ends_at: null } as const
 
 /**
  * The theme's settings as the server opens them in the draft (adr/0063 §3):
@@ -30,7 +32,11 @@ export const THEME: ThemeSettings = {
 }
 
 export const DOC: LayoutDocument = {
-  header: [{ id: "duyurular", type: "announcement_bar", ...ALWAYS, lines: ["Kargo bedava"] }],
+  // The main sections as the server reads them in (adr/0049 Ek 2026-11-14 §5, §7)
+  header: [
+    { id: "duyurular", type: "announcement_bar", ...ALWAYS, lines: ["Kargo bedava"] },
+    { id: "mainheader", type: "header_bar", ...MAIN, variant: "standard", sticky: true },
+  ],
   home: [
     {
       id: "girisbolumu",
@@ -54,8 +60,12 @@ export const DOC: LayoutDocument = {
     },
     { id: "blogyazilari", type: "posts", ...ALWAYS, title: null, limit: 3 },
   ],
-  footer: [{ id: "ebultenkutusu", type: "newsletter", ...ALWAYS, title: null, text: null }],
+  footer: [
+    { id: "mainfooter", type: "footer_bar", ...MAIN, variant: "ledger" },
+    { id: "ebultenkutusu", type: "newsletter", ...ALWAYS, title: null, text: null },
+  ],
   product: [
+    { id: "mainproduct", type: "product_main", ...MAIN, variant: "standard" },
     {
       id: "benzerurunler",
       type: "related_products",
@@ -67,6 +77,13 @@ export const DOC: LayoutDocument = {
     },
   ],
   category: [
+    {
+      id: "maincategory",
+      type: "category_main",
+      ...MAIN,
+      variant: "standard",
+      by_variant: {},
+    },
     {
       id: "kategorisss",
       type: "faq",

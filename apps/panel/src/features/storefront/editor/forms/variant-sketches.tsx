@@ -55,10 +55,36 @@ function TrustLined() {
   )
 }
 
+/** A header row: the wordmark at `mark`, the search field and two icons around it. */
+const HeaderRow = ({ mark }: { mark: number }) => (
+  <>
+    <rect x={1} y={8} width={110} height={16} rx={3} className="fill-current opacity-15" />
+    <rect x={mark} y={13} width={18} height={6} rx={1.5} className="fill-current opacity-70" />
+    <rect
+      x={mark < 40 ? 30 : 6}
+      y={13}
+      width={30}
+      height={6}
+      rx={3}
+      className="fill-current opacity-35"
+    />
+    <circle cx={94} cy={16} r={2.5} className="fill-current opacity-60" />
+    <circle cx={103} cy={16} r={2.5} className="fill-current opacity-60" />
+  </>
+)
+
+/** Today's header: the wordmark first. */
+const HeaderStandard = () => <HeaderRow mark={6} />
+
+/** The theme setting's centred header: the wordmark in the middle. */
+const HeaderCentered = () => <HeaderRow mark={47} />
+
+// A type with one variant offers no choice and has no sketch
 const SKETCHES: {
-  readonly [T in VariantSectionType]: Readonly<Record<SectionVariant<T>, () => ReactElement>>
+  readonly [T in VariantSectionType]?: Readonly<Record<SectionVariant<T>, () => ReactElement>>
 } = {
   trust_badges: { strip: TrustStrip, lined: TrustLined },
+  header_bar: { standard: HeaderStandard, centered: HeaderCentered },
 }
 
 /** A variant in small, in the current colour; a variant without a sketch yet draws nothing. */
@@ -69,7 +95,7 @@ export function VariantSketch<T extends VariantSectionType>({
   type: T
   variant: SectionVariant<T>
 }) {
-  const sketches: Readonly<Record<string, (() => ReactElement) | undefined>> = SKETCHES[type]
+  const sketches: Readonly<Record<string, (() => ReactElement) | undefined>> = SKETCHES[type] ?? {}
   const Sketch = sketches[variant]
   return Sketch ? (
     <svg aria-hidden="true" viewBox="0 0 112 32" className="h-8 w-full max-w-28">

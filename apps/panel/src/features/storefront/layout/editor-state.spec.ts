@@ -9,6 +9,7 @@ import { GRAFIT_THEME } from "@/features/storefront/api/theme"
 import { HISTORY_LIMIT, editorReducer, initialEditorState } from "./editor-state"
 import type { EditorAction, EditorState } from "./editor-state"
 import {
+  placed,
   newAnnouncementBar,
   newBodySection,
   newFooterNewsletter,
@@ -51,8 +52,8 @@ const DOC: LayoutDocument = {
 
 const ids = (sections: readonly { id: string }[]) => sections.map((section) => section.id)
 const sides = (state: EditorState) => ({
-  top: ids(state.doc.category.filter((section) => section.placement === "top")),
-  bottom: ids(state.doc.category.filter((section) => section.placement === "bottom")),
+  top: ids(placed(state.doc.category, "top")),
+  bottom: ids(placed(state.doc.category, "bottom")),
 })
 
 const run = (actions: EditorAction[], from: EditorState = initialEditorState(DOC)) =>
@@ -254,7 +255,7 @@ describe("editorReducer", () => {
       top: ["ustbanner", "ustmetin", "altyardim"],
       bottom: ["altsss"],
     })
-    expect(up.doc.category.find((section) => section.id === "altyardim")?.placement).toBe("top")
+    expect(placed(up.doc.category, "top").some((section) => section.id === "altyardim")).toBe(true)
     // Already there: nothing to undo
     const still = run([{ type: "place", id: "altsss", placement: "bottom" }])
     expect(still.doc).toBe(DOC)

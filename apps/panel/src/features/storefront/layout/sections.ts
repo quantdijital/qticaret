@@ -103,9 +103,15 @@ export function newSectionId(taken: ReadonlySet<string> = new Set()): string {
 export const allSections = (doc: LayoutDocument): AnySection[] =>
   LAYOUT_GROUPS.flatMap((group): readonly AnySection[] => doc[group])
 
-/** A category page's sections in one place: above the grid or below it, in order. */
-export const placed = (sections: readonly CategorySection[], placement: Placement) =>
-  sections.filter((section) => section.placement === placement)
+/** A category page's sections in one place: above the grid or below it, in order (the grid in neither). */
+export const placed = (
+  sections: readonly LayoutDocument["category"][number][],
+  placement: Placement
+): CategorySection[] =>
+  sections.filter(
+    (section): section is CategorySection =>
+      "placement" in section && section.placement === placement
+  )
 
 export const idsOf = (doc: LayoutDocument): Set<string> =>
   new Set(allSections(doc).map((section) => section.id))

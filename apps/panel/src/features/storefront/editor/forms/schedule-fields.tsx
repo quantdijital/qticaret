@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { Switch } from "@qticaret/admin-ui/ui/switch"
-import type { AnySection } from "@/features/storefront/api/layout"
+import type { AnySection, MainSection } from "@/features/storefront/api/layout"
 import type { Problem } from "@/features/storefront/layout/problems"
 import { fromLocalInput, toLocalInput } from "@/features/storefront/layout/schedule"
 import { FIELD_IDS } from "./field-registry"
@@ -11,7 +11,8 @@ import { useProblemText } from "./problem-text"
 const P = "storefront.editor.panel"
 
 interface ScheduleFieldsProps {
-  section: AnySection
+  /** Not a main section: those always show (adr/0049 Ek 2026-11-14 §5). */
+  section: Exclude<AnySection, MainSection>
   problem: Problem | undefined
   onChange: (section: AnySection, field?: string) => void
 }

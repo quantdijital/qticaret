@@ -132,6 +132,7 @@ describe("the theme editor's pages", () => {
     await pass(AUTOSAVE_MS)
     await waitFor(() => {
       expect(lastSaved(fetchMock)?.product.map((section) => section.type)).toEqual([
+        "product_main",
         "related_products",
         "help",
       ])
@@ -167,6 +168,7 @@ describe("the theme editor's pages", () => {
     await pass(AUTOSAVE_MS)
     await waitFor(() => {
       expect(lastSaved(fetchMock)?.category).toMatchObject([
+        { id: "maincategory", type: "category_main" },
         { id: "kategorisss", placement: "bottom" },
         { id: "kategoriyardim", placement: "bottom" },
       ])

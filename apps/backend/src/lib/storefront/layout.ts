@@ -3,13 +3,14 @@ import {
   LAYOUT_LIMITS,
   MARQUEE_PER_PAGE,
   categorySection,
-  footerNewsletter,
+  footerSection,
   headerSection,
   pageSection,
   productSection,
 } from "./layout-sections"
-import type { BodySection } from "./layout-sections"
+import type { BodySection, PageMain } from "./layout-sections"
 import { layoutSettings, storedSettings } from "./layout-settings"
+import { isMainType } from "./sections/main"
 import { storedSection } from "./sections/stored"
 
 /**
@@ -26,12 +27,17 @@ export type {
   FooterSection,
   HeaderSection,
   LayoutSection,
+  PageMain,
   PageSection,
   ProductSection,
 } from "./layout-sections"
 
 const onlyOnce = (sections: readonly { type: string }[]) =>
   new Set(sections.map((section) => section.type)).size === sections.length
+
+/** A page's sections but its main one (adr/0049 Ek 2026-11-14 §7), which takes no slot. */
+const others = (sections: readonly { type: string }[]) =>
+  sections.filter((section) => !isMainType(section.type))
 
 const marquees = (sections: readonly { type: string }[]) =>
   sections.filter((section) => section.type === "marquee").length
@@ -57,9 +63,16 @@ export const layoutDocument = z
   .object({
     header: z.array(headerSection).max(LAYOUT_LIMITS.header).default([]),
     home: z.array(pageSection).max(LAYOUT_LIMITS.home).default([]),
-    footer: z.array(footerNewsletter).max(LAYOUT_LIMITS.footer).default([]),
-    product: z.array(productSection).max(LAYOUT_LIMITS.product).default([]),
-    category: z.array(categorySection).max(LAYOUT_LIMITS.category).default([]),
+    footer: z.array(footerSection).max(LAYOUT_LIMITS.footer).default([]),
+    // Its main section on top of the group's slots
+    product: z
+      .array(productSection)
+      .max(LAYOUT_LIMITS.product + 1)
+      .default([]),
+    category: z
+      .array(categorySection)
+      .max(LAYOUT_LIMITS.category + 1)
+      .default([]),
     /** What several pages draw alike: trust badges, colour swatches, "Az kaldı". */
     settings: layoutSettings,
   })
@@ -75,8 +88,17 @@ export const layoutDocument = z
     if (new Set(all.map((section) => section.id)).size !== all.length) {
       ctx.addIssue({ code: "custom", message: "storefront_layout.section_duplicate" })
     }
-    if (!onlyOnce(doc.header) || !onlyOnce(doc.footer)) {
+    const mainTwice = [doc.product, doc.category].some(
+      (page) => page.filter((section) => isMainType(section.type)).length > 1
+    )
+    if (!onlyOnce(doc.header) || !onlyOnce(doc.footer) || mainTwice) {
       ctx.addIssue({ code: "custom", message: "storefront_layout.section_duplicate" })
+    }
+    if (
+      others(doc.product).length > LAYOUT_LIMITS.product ||
+      others(doc.category).length > LAYOUT_LIMITS.category
+    ) {
+      ctx.addIssue({ code: "custom", message: "storefront_layout.section_invalid" })
     }
     if (tooManyMarquees(doc)) {
       ctx.addIssue({ code: "custom", message: "storefront_layout.marquee_limit" })
@@ -95,11 +117,12 @@ export const layoutDocument = z
 export type LayoutDocument = z.infer<typeof layoutDocument>
 
 /** Every page's body sections (home, product, category): checked and shown alike. */
-export const bodySections = (doc: LayoutDocument): BodySection[] => [
-  ...doc.home,
-  ...doc.product,
-  ...doc.category,
-]
+export const bodySections = (doc: LayoutDocument): BodySection[] =>
+  [...doc.home, ...doc.product, ...doc.category].filter(isBody)
+
+/** Whether a page's section is one of its body's, not its main one. */
+export const isBody = <S extends { type: string }>(section: S): section is Exclude<S, PageMain> =>
+  !isMainType(section.type)
 
 /** Whether a section shows at this moment: visible, and within its dates if it has any. */
 export function isShowing(

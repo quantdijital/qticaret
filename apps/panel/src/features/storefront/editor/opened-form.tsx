@@ -7,6 +7,7 @@ import { groupLimit, isBodyGroup, marqueesOn } from "@/features/storefront/layou
 import { MARQUEE_LIMITS } from "@/features/storefront/api/layout"
 import type { findSection } from "@/features/storefront/layout/sections"
 import type { AnySection } from "@/features/storefront/api/layout"
+import { bodyOf, isMain } from "@/features/storefront/layout/main-sections"
 import type { Opened } from "./opened"
 import { SectionPanel } from "./section-panel"
 import { LooksPanel } from "./shared/looks-panel"
@@ -48,7 +49,8 @@ export function OpenedForm({
         problems={problems.get(found.section.id) ?? {}}
         canDuplicate={
           isBodyGroup(found.group) &&
-          doc[found.group].length < groupLimit(found.group) &&
+          !isMain(found.section) &&
+          bodyOf(doc, found.group).length < groupLimit(found.group) &&
           // A page shows two scrolling strips at most, the header's counted
           (found.section.type !== "marquee" ||
             marqueesOn(doc, found.group) < MARQUEE_LIMITS.perPage)

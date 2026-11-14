@@ -15,6 +15,13 @@ import { z } from "@medusajs/framework/zod"
  */
 export const SECTION_VARIANTS = {
   trust_badges: ["strip", "lined"],
+  // The main sections (adr/0049 Ek 2026-11-14 §5, §7): today's drawing first.
+  // `centered` is the theme setting's centred header (`header.layout`), read
+  // into the bar; its drawing stays on adr/0062 karar 6's branch
+  header_bar: ["standard", "centered"],
+  footer_bar: ["ledger"],
+  product_main: ["standard"],
+  category_main: ["standard"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 export type VariantSectionType = keyof typeof SECTION_VARIANTS

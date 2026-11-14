@@ -1,8 +1,9 @@
 import { MARQUEE_SETTINGS, SECTION_VARIANTS } from "@qticaret/types"
 import type { MarqueeSetting, SectionLookField } from "@qticaret/types"
-import type { AnySection, BodySection, LayoutGroup } from "@/features/storefront/api/layout"
+import type { AnySection, LayoutGroup, LookedSection } from "@/features/storefront/api/layout"
 import { lookFieldsFor, lookStepsFor } from "@/features/storefront/layout/look"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
+import { isMain } from "@/features/storefront/layout/main-sections"
 import { offersVariants } from "@/features/storefront/layout/variants"
 
 /**
@@ -67,8 +68,11 @@ export const FIELD_IDS = {
   ends: (sectionId: string) => `${sectionId}-schedule-ends`,
 } as const
 
-/** Whether the section takes a look: a page's body section (not the header's bar, the footer's box). */
-export const takesLook = (section: AnySection, group: LayoutGroup): section is BodySection =>
+/**
+ * Whether the section takes a look: a page's body section or its main one
+ * (not the header's or the footer's parts).
+ */
+export const takesLook = (section: AnySection, group: LayoutGroup): section is LookedSection =>
   isBodyGroup(group) && section.type !== "announcement_bar"
 
 /** The fields the section's panel shows, in its order, as the search finds them. */
@@ -123,6 +127,10 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
         target: FIELD_IDS.look(id, field),
       })
     }
+  }
+  // A main section always shows (adr/0049 Ek 2026-11-14 §5): no visibility
+  if (isMain(section)) {
+    return fields
   }
   fields.push(
     {

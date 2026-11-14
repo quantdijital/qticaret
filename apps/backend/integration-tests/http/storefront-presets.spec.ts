@@ -209,9 +209,21 @@ medusaIntegrationTestRunner({
         demo: { added: 0, kept: 0 },
       })
       const draft = first.data.layout.draft
-      expect(draft.header).toEqual([bar])
-      // Grafit fills the footer: its own stands
-      expect(draft.footer?.map((section) => section.id)).toEqual(["ebultenkutusu"])
+      // The header bar read in from grafit's theme header (adr/0049 Ek 2026-11-14 §5)
+      expect(draft.header).toEqual([
+        bar,
+        {
+          id: "mainheader",
+          type: "header_bar",
+          visible: true,
+          starts_at: null,
+          ends_at: null,
+          variant: "standard",
+          sticky: true,
+        },
+      ])
+      // Grafit fills the footer: its own stands (after the footer, read in)
+      expect(draft.footer?.map((section) => section.id)).toEqual(["mainfooter", "ebultenkutusu"])
       expect(draft.home.map((section) => section.id)).toEqual([
         "girisbolumu",
         "kategoriler",

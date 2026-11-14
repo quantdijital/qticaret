@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import { SECTION_VARIANTS } from "@qticaret/types"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
+import { isUnbuilt } from "@/features/storefront/layout/variants"
 import { VariantSketch } from "./variant-sketches"
 
 const V = "storefront.editor.variants"
@@ -43,15 +44,20 @@ export function VariantField<T extends VariantSectionType>({
           <ToggleGroupItem
             key={variant}
             value={variant}
+            disabled={variant !== value && isUnbuilt(type, variant)}
             className="h-auto flex-col gap-1.5 px-3 py-2.5 text-[13px] data-[state=on]:bg-accent data-[state=on]:font-medium data-[state=on]:text-accent-foreground"
           >
             <VariantSketch type={type} variant={variant} />
-            <span>{t(`${V}.${type}.${variant}`)}</span>
+            <span>
+              {isUnbuilt(type, variant)
+                ? t(`${V}.soon`, { name: t(`${V}.${type}.${variant}`) })
+                : t(`${V}.${type}.${variant}`)}
+            </span>
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
       <p id={`${id}-hint`} className="text-xs text-muted-foreground">
-        {t("storefront.editor.panel.variantHint")}
+        {t(isUnbuilt(type, value) ? `${V}.kept` : "storefront.editor.panel.variantHint")}
       </p>
     </div>
   )

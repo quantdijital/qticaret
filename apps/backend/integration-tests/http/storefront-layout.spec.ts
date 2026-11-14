@@ -111,7 +111,10 @@ medusaIntegrationTestRunner({
         "help",
         "posts",
       ])
-      expect([first.draft.product, first.draft.category]).toEqual([[], []])
+      // Only the main sections, read in (adr/0049 Ek 2026-11-14 §7)
+      expect(
+        [first.draft.product, first.draft.category].map((group) => group.map((each) => each.type))
+      ).toEqual([["product_main"], ["category_main"]])
       const defaultLive = await live()
       expect([defaultLive.product, defaultLive.category]).toEqual([[], []])
       expect(defaultLive.header).toEqual([
@@ -335,12 +338,14 @@ medusaIntegrationTestRunner({
       expect(saved.status).toBe(200)
       expect(saved.data.layout).toMatchObject({ is_default: false, has_changes: true })
       // A category page's section without a place goes below the grid
+      // (the category grid, read in first, takes no place)
       expect(saved.data.layout.draft.category.map((each) => each["placement"])).toEqual([
+        undefined,
         "top",
         "bottom",
       ])
-      // No variant saved: the default, today's strip
-      expect(saved.data.layout.draft.product[2]).toMatchObject({ variant: "strip" })
+      // No variant saved: the default, today's strip (after the product's block, read in)
+      expect(saved.data.layout.draft.product[3]).toMatchObject({ variant: "strip" })
 
       const preview = await settle(
         http.post<{ path: string }>("/admin/storefront-layout/preview", {}, asOwner)
@@ -400,6 +405,7 @@ medusaIntegrationTestRunner({
       )
       expect(published.data.layout).toMatchObject({ revision: 1, has_changes: false })
       expect(published.data.layout.draft.product.map((each) => each.id)).toEqual([
+        "mainproduct",
         "benzerurunler",
         "sikcasorulan",
         "urunguven",

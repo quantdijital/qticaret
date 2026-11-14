@@ -37,9 +37,9 @@ describe("section variants in the editor", () => {
     for (const [type, variants] of Object.entries(SECTION_VARIANTS)) {
       for (const variant of variants) {
         const key = (dict: typeof tr) =>
-          (dict.storefront.editor.variants as Record<string, Record<string, string>>)[type]?.[
-            variant
-          ]
+          (dict.storefront.editor.variants as unknown as Record<string, Record<string, string>>)[
+            type
+          ]?.[variant]
         expect(key(tr)).toBeTruthy()
         expect(key(en)).toBeTruthy()
         expect(Object.keys(VARIANT_FIELDS[type as keyof typeof VARIANT_FIELDS])).toContain(variant)

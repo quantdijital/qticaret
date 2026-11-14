@@ -11,11 +11,16 @@ import { isShopPath } from "./menus"
  * the settings every section has. No HTML, CSS or scripts.
  */
 
+/**
+ * How many sections a group holds; the product and category pages' main
+ * section (adr/0049 Ek 2026-11-14 §7) comes on top of theirs.
+ */
 export const LAYOUT_LIMITS = {
   home: 30,
   product: 12,
   category: 12,
-  header: 3,
+  /** The strips, the header bar and the usage menu, each once (adr/0049 Ek 2026-11-14 §5). */
+  header: 5,
   footer: 3,
   items: 24,
   slides: 6,

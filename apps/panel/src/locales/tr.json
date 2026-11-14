@@ -7736,8 +7736,6 @@
         "contact": "İletişim ve yasal bilgiler",
         "storeProfile": "Mağaza profili",
         "menus": "Menüler",
-        "productBlock": "Ürünün kendi bilgileri",
-        "grid": "Ürün ızgarası",
         "placements": {
           "top": "Izgaranın üstü",
           "bottom": "Izgaranın altı"
@@ -7854,13 +7852,44 @@
         "marquee": {
           "name": "Kayan yazı",
           "description": "Kısa sözleriniz ya da bir kampanya, yan yana kayan bir şerit olarak."
+        },
+        "header_bar": {
+          "name": "Üst bilgi",
+          "description": "Mağaza adınız, arama, hesap ve sepet; her sayfanın üstünde. Logo ve menüler kendi ekranlarında düzenlenir."
+        },
+        "footer_bar": {
+          "name": "Alt bilgi",
+          "description": "İletişim bilgileriniz, menüleriniz ve ödeme işaretleri; her sayfanın altında. Menüler ve iletişim bilgileri kendi ekranlarında düzenlenir."
+        },
+        "product_main": {
+          "name": "Ürünün kendi bilgileri",
+          "description": "Fotoğraflar, fiyat, seçenekler ve sepete ekleme; her ürün sayfasında. İçerik ürünün kendi kaydından gelir."
+        },
+        "category_main": {
+          "name": "Ürün ızgarası",
+          "description": "Kategorinin ürünleri, filtreler ve sıralama; her kategori sayfasında. Diğer bölümler bunun üstünde ya da altında durur."
         }
       },
       "variants": {
         "trust_badges": {
           "strip": "Şerit",
           "lined": "Çizgili kutular"
-        }
+        },
+        "header_bar": {
+          "standard": "Solda logo",
+          "centered": "Ortada logo"
+        },
+        "footer_bar": {
+          "ledger": "Standart"
+        },
+        "product_main": {
+          "standard": "Standart"
+        },
+        "category_main": {
+          "standard": "Standart"
+        },
+        "soon": "{{name}} (hazırlanıyor)",
+        "kept": "Kayıtlı biçim hazırlanıyor; hazır olana kadar vitrin standart biçimi çizer."
       },
       "look": {
         "title": "Görünüm ayarları",
@@ -8167,20 +8196,10 @@
           "3x4": "3:4 (uzun)"
         },
         "ratioHint": "Ürün kartlarındaki görselin biçimi. Grafit kare (1:1) çizer.",
-        "headerLayout": "Logo yerleşimi",
-        "headerLayouts": {
-          "centered": "Ortada",
-          "left": "Solda"
-        },
-        "headerLayoutSoon": "{{name}} (hazırlanıyor)",
-        "headerLayoutHint": "Mağaza adının üst bilgideki yeri. “Ortada” hazırlanıyor; hazır olana kadar seçilemez.",
-        "headerLayoutKept": "Kayıtlı seçim “Ortada”. Bu yerleşim hazırlanıyor; hazır olana kadar vitrin mağaza adını solda çizer.",
         "show_brand": "Markayı göster",
         "show_brandHint": "Ürün kartında, ürün adının üstünde marka adı. Markası olmayan üründe bir şey görünmez.",
         "show_rating": "Puanı göster",
         "show_ratingHint": "Onaylı değerlendirmesi olan ürünlerin kartında yıldız, ortalama puan ve değerlendirme sayısı. Değerlendirmesi olmayan üründe bir şey görünmez.",
-        "sticky": "Üst bilgi sabit kalsın",
-        "stickyHint": "Sayfa kaydırılırken üst bilgi ekranın üstünde durur. Kapalıyken sayfayla birlikte kayar.",
         "grafit": {
           "action": "Grafit'e dön",
           "hint": "Bütün alanları temanın varsayılan görünümüne (Grafit) çeker. Değişiklik taslağa yazılır; Yayınla'ya basana kadar vitrin değişmez.",
@@ -8410,6 +8429,13 @@
           "star": "Yıldız",
           "line": "Çizgi"
         }
+      },
+      "headerBar": {
+        "sticky": "Üst bilgi sabit kalsın",
+        "stickyHint": "Sayfa kaydırılırken üst bilgi ekranın üstünde durur. Kapalıyken sayfayla birlikte kayar."
+      },
+      "main": {
+        "fixed": "Bu bölüm her sayfada durur; gizlenemez, kopyalanamaz ve kaldırılamaz."
       }
     },
     "preferences": {

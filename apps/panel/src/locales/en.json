@@ -7736,8 +7736,6 @@
         "contact": "Contact and legal details",
         "storeProfile": "Store profile",
         "menus": "Menus",
-        "productBlock": "The product's own details",
-        "grid": "Product grid",
         "placements": {
           "top": "Above the grid",
           "bottom": "Below the grid"
@@ -7854,13 +7852,44 @@
         "marquee": {
           "name": "Scrolling strip",
           "description": "Short promises or a campaign, as a strip that slides sideways."
+        },
+        "header_bar": {
+          "name": "Header",
+          "description": "Your shop's name, search, account and cart, at the top of every page. The logo and menus are edited on their own screens."
+        },
+        "footer_bar": {
+          "name": "Footer",
+          "description": "Your contact details, menus and payment marks, at the bottom of every page. Menus and contact details are edited on their own screens."
+        },
+        "product_main": {
+          "name": "The product's own details",
+          "description": "Photos, price, options and add to cart, on every product page. The content comes from the product's own record."
+        },
+        "category_main": {
+          "name": "Product grid",
+          "description": "The category's products, filters and sorting, on every category page. The other sections sit above or below it."
         }
       },
       "variants": {
         "trust_badges": {
           "strip": "Strip",
           "lined": "Lined boxes"
-        }
+        },
+        "header_bar": {
+          "standard": "Logo on the left",
+          "centered": "Logo in the middle"
+        },
+        "footer_bar": {
+          "ledger": "Standard"
+        },
+        "product_main": {
+          "standard": "Standard"
+        },
+        "category_main": {
+          "standard": "Standard"
+        },
+        "soon": "{{name}} (coming soon)",
+        "kept": "The saved layout is being prepared; until it is ready, the storefront draws the standard one."
       },
       "look": {
         "title": "Look settings",
@@ -8167,20 +8196,10 @@
           "3x4": "3:4 (tall)"
         },
         "ratioHint": "The shape of the picture on product cards. Grafit draws a square (1:1).",
-        "headerLayout": "Logo placement",
-        "headerLayouts": {
-          "centered": "Centred",
-          "left": "Left"
-        },
-        "headerLayoutSoon": "{{name}} (in preparation)",
-        "headerLayoutHint": "Where the shop's name sits in the header. “Centred” is in preparation and cannot be chosen until it is ready.",
-        "headerLayoutKept": "The saved choice is “Centred”. This layout is in preparation; until it is ready the storefront draws the shop's name on the left.",
         "show_brand": "Show the brand",
         "show_brandHint": "The brand's name above the product's on the product card. Nothing shows for a product without a brand.",
         "show_rating": "Show the rating",
         "show_ratingHint": "Stars, the average and the number of reviews on the cards of products with approved reviews. Nothing shows for a product without reviews.",
-        "sticky": "Keep the header in view",
-        "stickyHint": "The header stays at the top while the page scrolls. Off, it scrolls away with the page.",
         "grafit": {
           "action": "Back to Grafit",
           "hint": "Sets every field to the theme's default look (Grafit). The change goes into the draft; the storefront does not change until you publish.",
@@ -8410,6 +8429,13 @@
           "star": "Star",
           "line": "Line"
         }
+      },
+      "headerBar": {
+        "sticky": "Keep the header in view",
+        "stickyHint": "The header stays at the top of the screen while the page scrolls. Off, it scrolls away with the page."
+      },
+      "main": {
+        "fixed": "This section is on every page; it cannot be hidden, copied or removed."
       }
     },
     "preferences": {
