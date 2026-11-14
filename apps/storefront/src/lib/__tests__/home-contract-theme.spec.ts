@@ -106,7 +106,7 @@ describe("the home page's new optional sections and fields", () => {
     expect(whole).toContain(
       "Ürünün kalitesine diyecek bir şey yok. Kutusu ve kılıfı da çok özenli."
     )
-    const long = draw(`${"Çok keskin ve dengeli bir bıçak. ".repeat(20)}Sonuncu cümle.`)
+    const long = draw(`${"Çok keskin ve dengeli bir bıçak. ".repeat(30)}Sonuncu cümle.`)
     expect(long).toContain("…")
     expect(long).not.toContain("Sonuncu cümle.")
   })
