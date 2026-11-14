@@ -948,6 +948,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Aynı bölüm iki kez eklenmiş; duyuru şeridi, kayan yazı ve bülten birer kez olabilir.",
   "storefront_layout.marquee_limit":
     "Bir sayfada en çok iki kayan yazı şeridi olabilir; üst bilgideki şerit her sayfada sayılır.",
+  "storefront_layout.price_bands_limit":
+    "Ana sayfada en çok iki fiyat bandı bölümü olabilir; gizli ya da zamanlanmış olanlar da sayılır.",
   "storefront_layout.price_bands_order":
     "Fiyat aralıkları artan sırada olmalı; üst sınırı olmayan aralık yalnız sonda olabilir.",
   "storefront_layout.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",

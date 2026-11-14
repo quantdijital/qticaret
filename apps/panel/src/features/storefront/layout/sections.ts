@@ -266,6 +266,10 @@ export const newHeaderMarquee = (id: string): HeaderMarquee => ({
 export const marqueesOn = (doc: LayoutDocument, page: BodyGroup): number =>
   [...doc.header, ...doc[page]].filter((section) => section.type === "marquee").length
 
+/** A page's price bands strips (the home page's only), hidden ones counted. */
+export const priceBandsOn = (doc: LayoutDocument, page: BodyGroup): number =>
+  doc[page].filter((section) => section.type === "price_bands").length
+
 /** The pages a strip in the header would show on beside their own. */
 export const BODY_GROUPS: readonly BodyGroup[] = ["home", "product", "category"]
 

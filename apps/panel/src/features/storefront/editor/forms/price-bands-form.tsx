@@ -55,6 +55,11 @@ export function PriceBandsForm({
       : t(`${P}.labelUnder`, { amount: LIRA.format(band.max) })
   return (
     <div className="flex flex-col gap-5">
+      {problems["limit"] ? (
+        <p role="alert" className="text-sm text-destructive-text">
+          {t(`storefront.editor.problems.${problems["limit"]}`, { max: B.perPage })}
+        </p>
+      ) : null}
       <TitleField
         id={section.id}
         title={section.title}

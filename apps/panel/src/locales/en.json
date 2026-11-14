@@ -8183,7 +8183,8 @@
         "contrast": "This colour does not read well enough with white text or on the page colour (3:1 at least). Pick a darker shade.",
         "wellContrast": "This colour does not read well enough on the areas one shade darker than the page (the boxes links and outlined buttons stand on; 3:1 at least). Pick a darker shade.",
         "marqueeLimit": "A page may show up to {{max}} scrolling strips (the header's counts on every page); remove one.",
-        "bandsOrder": "Upper bounds must rise; only the last band may have none."
+        "bandsOrder": "Upper bounds must rise; only the last band may have none.",
+        "bandsLimit": "The home page can have at most {{max}} price bands sections (hidden ones count too); remove one."
       },
       "theme": {
         "title": "Theme settings",
@@ -8629,7 +8630,8 @@
         "addBand": "Add band",
         "thumbs": "Product pictures",
         "thumbsHint": "A few products from each range show small; the storefront picks them by price.",
-        "thumbsCount": "Products per band"
+        "thumbsCount": "Products per band",
+        "full": "The home page already has {{max}} price bands sections (hidden ones count too)."
       }
     },
     "preferences": {

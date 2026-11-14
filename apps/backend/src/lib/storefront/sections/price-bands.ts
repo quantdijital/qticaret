@@ -22,6 +22,8 @@ export const PRICE_BANDS_LIMITS = {
   text: 80,
   max: 10_000_000,
   thumbs: { min: 0, max: 4, default: 3 },
+  /** Strips a page (the home page) shows at most. */
+  perPage: 2,
 } as const
 
 const L = PRICE_BANDS_LIMITS

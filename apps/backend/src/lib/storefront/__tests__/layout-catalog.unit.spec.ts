@@ -163,6 +163,22 @@ describe("the price bands (adr/0049 Ek 2026-11-14, Katalog ana sayfası)", () =>
     expect(issues({ product: [bands([band("A", 1), band("B", 2)])] })).toHaveLength(1)
   })
 
+  it("takes two strips on the home page, a third refused, hidden ones counted", () => {
+    const strip = (id: string, more: Record<string, unknown> = {}) => ({
+      ...bands([band("A", 500), band("B", null)]),
+      id,
+      ...more,
+    })
+
+    expect(issues({ home: [strip("fiyatbant1"), strip("fiyatbant2")] })).toEqual([])
+    expect(
+      issues({
+        home: [strip("fiyatbant1"), strip("fiyatbant2"), strip("fiyatbant3", { visible: false })],
+      })
+    ).toEqual(["storefront_layout.price_bands_limit"])
+    expect(PRICE_BANDS_LIMITS.perPage).toBe(2)
+  })
+
   it("fills a band's line and the products shown small", () => {
     const [section] = layoutDocument.parse({
       home: [bands([band("₺500 altı", 500), band("Daha fazlası", null)])],

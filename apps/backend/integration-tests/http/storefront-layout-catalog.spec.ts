@@ -103,6 +103,11 @@ medusaIntegrationTestRunner({
           ],
         },
       ])
+      const threeStrips = await save([
+        strip,
+        { ...strip, id: "fiyatbant2" },
+        { ...strip, id: "fiyatbant3", visible: false },
+      ])
       const notStandard = await save([{ ...opening(), variant: "standard" }])
       const saved = await save([opening(), strip, cards])
 
@@ -117,6 +122,11 @@ medusaIntegrationTestRunner({
       expect([fallingBands.status, fallingBands.data.message]).toEqual([
         400,
         "storefront_layout.price_bands_order",
+      ])
+      // Two strips a page at most, a hidden one counted
+      expect([threeStrips.status, threeStrips.data.message]).toEqual([
+        400,
+        "storefront_layout.price_bands_limit",
       ])
       // Today's opening takes none of the list's fields
       expect(notStandard.status).toBe(400)
@@ -148,7 +158,7 @@ medusaIntegrationTestRunner({
         more: { kind: "system", target: "categories", label: "Tüm çakılar" },
       })
       const picked = (bands?.["bands"] ?? []) as { min: number | null; product_ids: string[] }[]
-      expect(picked.map((band) => band.min)).toEqual([null, 1, 2])
+      expect(picked.map((band) => band.min)).toEqual([null, 2, 3])
       expect(picked[0]?.product_ids).toEqual([cheap.productId])
       expect(picked[1]?.product_ids).toEqual([])
       expect(picked[2]?.product_ids).toContain(dear.productId)
