@@ -12,6 +12,7 @@ export type {
   DefaultVariant,
   FooterBarVariant,
   HeaderBarVariant,
+  HeroVariant,
   ProductMainVariant,
   SectionVariant,
   TrustBadgesVariant,
@@ -40,6 +41,7 @@ export type {
 export type * from "./account-views"
 export type * from "./addon-views"
 export type * from "./card-views"
+export type * from "./catalog-views"
 export type * from "./checkout-views"
 export type * from "./frame-views"
 export type * from "./home-views"

@@ -1,0 +1,49 @@
+import type { CategoryCardView } from "./card-views"
+import type { ImageView, LinkView } from "./views"
+
+/**
+ * The catalogue home page's parts as a theme draws them (adr/0049 Ek
+ * 2026-11-14 §3.2 H17, and the note "Katalog ana sayfası"): the opening's
+ * category list and the price bands strip. Every word already in words,
+ * every link a path, every price formatted on the server from live prices.
+ */
+
+/** A product shown small: its picture, its name (or the shop's short label) and its page. */
+export interface ProductThumbView {
+  label: string
+  path: string
+  image: ImageView | null
+}
+
+/**
+ * H17's own parts beside the opening's words, buttons and picture: the
+ * category list (each row its picture and, when the shop shows them, its
+ * product count), the link to every category, up to two category tiles,
+ * up to four quick links (a category's with its small picture), the
+ * products shown small under the button and the lowest of their prices.
+ */
+export interface HeroCatalogView {
+  list: CategoryCardView[]
+  all: LinkView
+  tiles: CategoryCardView[]
+  chips: CategoryCardView[]
+  picks: ProductThumbView[]
+  /** "4.249,00 TL": the lowest live price among the picks; null: not shown. */
+  from: string | null
+}
+
+/**
+ * The price bands: each band its label, line, the catalogue's listing
+ * filtered by its range and the products picked in it on the server.
+ */
+export interface PriceBandsSectionView {
+  id: string
+  type: "price_bands"
+  title: string
+  bands: {
+    label: string
+    text: string | null
+    path: string
+    products: ProductThumbView[]
+  }[]
+}
