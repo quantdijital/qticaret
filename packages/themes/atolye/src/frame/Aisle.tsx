@@ -65,7 +65,7 @@ function MorePanel({ categories }: { categories: readonly NavCategoryView[] }) {
 
 /** "Daha fazla"'s panel: the floating surfaces' one recipe, the page's ink. */
 const MORE_PANEL =
-  "absolute top-full right-0 z-(--z-dropdown) w-max rounded-tile border border-rule bg-field p-6 text-text shadow-float data-[state=closed]:hidden xl:p-8"
+  "absolute top-full right-0 z-(--z-dropdown) w-max rounded-tile border border-rule bg-field p-6 text-text shadow-float-edged data-[state=closed]:hidden xl:p-8"
 
 /**
  * The category aisle from 1024 px: one line of the shop's top categories

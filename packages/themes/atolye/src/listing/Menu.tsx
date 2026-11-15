@@ -64,7 +64,7 @@ export function Menu({
       </summary>
       <div
         className={cn(
-          "absolute top-[calc(100%+var(--space-xs))] z-(--z-dropdown) min-w-56 rounded-tile border border-rule bg-field p-2 shadow-float",
+          "absolute top-[calc(100%+var(--space-xs))] z-(--z-dropdown) min-w-56 rounded-tile border border-rule bg-field p-2 shadow-float-edged",
           align === "end" ? "right-0" : "left-0"
         )}
       >

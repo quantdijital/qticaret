@@ -46,7 +46,7 @@
       "file": "marquee.css"
     },
     {
-      "sha256": "9cb475208840db70f9d59fdae20d144540c808f372c3f545a4d410d86476777a",
+      "sha256": "c2bf4d521463cf7eed9f861f03b27d45ab7690d54ae1ee9326a94a13b1784f9a",
       "file": "menu.css"
     },
     {
@@ -74,11 +74,11 @@
       "file": "tabs.css"
     },
     {
-      "sha256": "069e5556b741af3c60299a1af21c9b5cc700970e10b5dc7b2442ca6f547bb2f3",
+      "sha256": "4e91aa7efbafd6057054384a60d80bf86264d0680e2ecf5e10a75d372a7f7c23",
       "file": "tokens.css"
     },
     {
-      "sha256": "3eeb6df6a9d05b79d62a22ff0b1ae79054e6ad8fae07bc73eb72bb6448b56284",
+      "sha256": "b90cddf079830af5f328cb4084ba11bef37acd0a31470759e0666703ee7dc579",
       "file": "ui.css"
     }
   ]
