@@ -3,7 +3,7 @@ import type { Dispatch } from "react"
 import { useTranslation } from "react-i18next"
 import type { BodyGroup, LayoutDocument } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
-import { findSection } from "@/features/storefront/layout/sections"
+import { findSection, idsOf, newSectionId } from "@/features/storefront/layout/sections"
 import { isDiscrete } from "@/features/storefront/layout/use-autosave"
 import { BRIDGE_ON, whyNotShown } from "./bridge/bridge-client"
 import { useLivePreview } from "./bridge/use-live-preview"
@@ -63,9 +63,16 @@ export function useEditorPreview({
       if (action.type === "move" || action.type === "place") {
         afterSave.current(action.id)
       }
+      // A copy: its id chosen here, so the frame scrolls to it once its save is drawn
+      if (action.type === "duplicate" && !action.copyId) {
+        const copyId = newSectionId(idsOf(doc))
+        afterSave.current(copyId)
+        dispatch({ ...action, copyId })
+        return
+      }
       dispatch(action)
     },
-    [dispatch, hurry]
+    [dispatch, hurry, doc]
   )
   const preview = useLivePreview({
     ready,
