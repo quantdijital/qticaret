@@ -6,6 +6,7 @@ import type {
   HomeSectionView,
   ImageView,
   ProductCardView,
+  ProductsSectionView,
 } from "@qticaret/ui"
 import { renderPage } from "@/test/theme-render"
 
@@ -235,7 +236,10 @@ describe("the theme's home page: the shelf", () => {
     const html = home([
       hero,
       shelf("yeni", "Yeni ürünler", [product("a")]),
-      { ...shelf("caki", "Çakılar", [product("c")]), variant: "carousel" },
+      {
+        ...(shelf("caki", "Çakılar", [product("c")]) as ProductsSectionView),
+        variant: "carousel",
+      },
     ])
     expect(html).not.toContain("gf-btn--quiet")
     expect(html.match(/class="gf-tab-aside[^"]*"/g)).toHaveLength(2)
