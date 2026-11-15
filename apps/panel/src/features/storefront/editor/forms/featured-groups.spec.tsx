@@ -9,6 +9,7 @@ import type { AnySection, FeaturedProductSection } from "@/features/storefront/a
 import { newHomeSection } from "@/features/storefront/layout/sections"
 import { SectionPanel } from "../section-panel"
 import { FIELD_IDS } from "./field-registry"
+import { openGroup, openTab } from "../settings-groups.fixtures"
 
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children, to }: { children: ReactNode; to: string }) => <a href={to}>{children}</a>,
@@ -58,10 +59,16 @@ const field = () => {
 
 /** adr/0049 Ek 2026-11-15: how the featured product's photographs stand. */
 describe("the featured product's photographs layout", () => {
-  it("shows open in Diziliş, the collage chosen for a section saved before it", () => {
+  it("shows in Stil › Diziliş, closed at first, the collage chosen for a section saved before it", async () => {
+    const user = userEvent.setup()
     renderPanel(newHomeSection("featured_product", ID))
 
-    expect(screen.getByRole("button", { name: "Diziliş" })).toHaveAttribute("aria-expanded", "true")
+    await openTab(user, "style")
+    expect(screen.getByRole("button", { name: "Diziliş" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    )
+    await openGroup(user, "Diziliş")
     expect(field().getByText("Fotoğraf düzeni")).toBeInTheDocument()
     expect(field().getByText("gallery")).toBeInTheDocument()
     expect(field().getByRole("radio", { name: "Kolaj" })).toBeChecked()
@@ -72,6 +79,7 @@ describe("the featured product's photographs layout", () => {
   it("saves the strips, says what they do, and goes back to the collage", async () => {
     const user = userEvent.setup()
     const changes = renderPanel(newHomeSection("featured_product", ID))
+    await openGroup(user, "Diziliş")
 
     await user.click(field().getByRole("radio", { name: "Çapraz şeritler" }))
     expect(changes.at(-1)).toMatchObject({ type: "featured_product", gallery: "strips" })
@@ -81,9 +89,11 @@ describe("the featured product's photographs layout", () => {
     expect(changes.at(-1)).toMatchObject({ gallery: "collage" })
   })
 
-  it("reads a saved strips layout as chosen", () => {
+  it("reads a saved strips layout as chosen", async () => {
+    const user = userEvent.setup()
     const section = newHomeSection("featured_product", ID) as FeaturedProductSection
     renderPanel({ ...section, gallery: "strips" })
+    await openGroup(user, "Diziliş")
 
     expect(field().getByRole("radio", { name: "Çapraz şeritler" })).toBeChecked()
   })

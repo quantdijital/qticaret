@@ -15,6 +15,7 @@ import {
   serve,
 } from "./theme-editor.fixtures"
 import type { AdminMock, Init } from "./theme-editor.fixtures"
+import { openGroup, openTab } from "./settings-groups.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
 const admin = vi.hoisted<AdminMock>(() => ({
@@ -68,14 +69,20 @@ describe("a product list's layout and scrolling (adr/0049 Ek 2026-11-15)", HEAVY
     releaseClock()
   })
 
-  it("picks a carousel in Diziliş, shows Kaydırma with its arrows, and saves the kit's steps", async () => {
+  it("picks a carousel in Stil › Diziliş, offers Kaydırma with its arrows, and saves the kit's steps", async () => {
     await open("Ürün listesi")
-    // The variant sits in "Diziliş", not in a group of its own over the content
-    expect(screen.getByRole("button", { name: "Diziliş" })).toBeVisible()
+    // The variant sits in "Diziliş" (closed at first), not in a group of its own
+    await openTab(user, "style")
+    expect(screen.getByRole("button", { name: "Diziliş" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    )
     expect(screen.queryByRole("button", { name: "Kaydırma" })).toBeNull()
 
+    await openGroup(user, "Diziliş")
     await user.click(screen.getByRole("radio", { name: /Kayan sıra/ }))
     expect(screen.getByRole("button", { name: "Kaydırma" })).toBeVisible()
+    await openGroup(user, "Kaydırma")
     // The grid's own cards in a row go with it
     expect(screen.queryByRole("radio", { name: "Satırda 3 ürün" })).toBeNull()
     await user.click(screen.getByRole("radio", { name: "Üzerine gelince" }))
@@ -95,11 +102,15 @@ describe("a product list's layout and scrolling (adr/0049 Ek 2026-11-15)", HEAVY
 
   it("adds a second list to a columns layout, each with its own title and source", async () => {
     await open("Ürün listesi")
+    await openGroup(user, "Diziliş")
     await user.click(screen.getByRole("radio", { name: /Yan yana listeler/ }))
     expect(screen.getByText(/her zaman kompakt/)).toBeVisible()
     expect(screen.queryByRole("combobox", { name: "Kart biçimi" })).toBeNull()
+    // The lists are the content, how many each shows its layout
+    await openTab(user, "content")
     await user.click(screen.getByRole("button", { name: "Liste ekle" }))
     expect(screen.queryByRole("button", { name: "Liste ekle" })).toBeNull()
+    await openTab(user, "style")
     await user.click(screen.getByRole("radio", { name: "4 ürün" }))
     await saved((doc) => {
       expect(doc.home[1]).toMatchObject({

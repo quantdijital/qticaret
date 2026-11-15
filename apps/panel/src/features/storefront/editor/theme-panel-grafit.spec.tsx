@@ -21,6 +21,7 @@ import {
   serve,
 } from "./theme-editor.fixtures"
 import type { AdminMock, Init, ServeOptions } from "./theme-editor.fixtures"
+import { openGroups } from "./settings-groups.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
 const admin = vi.hoisted<AdminMock>(() => ({
@@ -57,13 +58,15 @@ function part(name: string): HTMLElement {
 
 let user: UserEvent
 
-/** The editor with the theme's settings open. */
+/** The editor with the theme's settings open, its groups (closed at first) all opened. */
 async function openTheme(options: ServeOptions = {}) {
   serve(fetchMock, admin, layoutOf(), options)
   renderEditor()
   const tree = await opened()
   await user.click(within(tree).getByRole("button", { name: "Tema ayarları" }))
-  return screen.findByRole("textbox", { name: "Ana renk" })
+  await screen.findByRole("searchbox", { name: "Tema ayarlarında ara" })
+  await openGroups(user, "Renkler", "Yazı tipleri", "Şekiller", "Yüzeyler", "Ürün kartı")
+  return screen.getByRole("textbox", { name: "Ana renk" })
 }
 
 async function choose(field: string, option: RegExp | string) {
