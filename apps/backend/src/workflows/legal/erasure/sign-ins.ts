@@ -1,5 +1,5 @@
 import type { IAuthModuleService, MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { Modules } from "@medusajs/framework/utils"
 import { likeLiteral } from "../../../lib/db/like"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -20,12 +20,17 @@ interface AuthVerifications {
 
 /** The customer's sign-ins: every identity pointing at them, e-mail and social alike. */
 export async function signInsOf(container: Container, customerId: string): Promise<string[]> {
-  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "auth_identity",
-    fields: ["id", "app_metadata"],
-    filters: { app_metadata: { customer_id: customerId } },
-  })
-  return (data as { id: string; app_metadata?: Metadata }[])
+  // The auth service's own filter on the JSON column (Medusa's
+  // `FilterableAuthIdentityProps.app_metadata`, the filter its
+  // `removeCustomerAccountWorkflow` reads by): applied in the database.
+  // Each row is checked again, so no other customer's sign-in is taken
+  const identities = await container
+    .resolve<IAuthModuleService>(Modules.AUTH)
+    .listAuthIdentities(
+      { app_metadata: { customer_id: customerId } },
+      { select: ["id", "app_metadata"], take: null }
+    )
+  return identities
     .filter((identity) => identity.app_metadata?.["customer_id"] === customerId)
     .map((identity) => identity.id)
 }

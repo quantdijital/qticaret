@@ -1,4 +1,4 @@
-import type { MedusaContainer } from "@medusajs/framework/types"
+import type { IAuthModuleService, MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { ADDRESS_VOUCHING_PROVIDERS } from "../../lib/auth/providers"
 import { likeLiteral } from "../../lib/db/like"
@@ -108,17 +108,17 @@ export async function confirmedByOwnLogin(
  */
 async function vouchedBySocial(container: Container, email: string, customerId: string) {
   try {
-    const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-      entity: "auth_identity",
-      fields: [
-        "id",
-        "app_metadata",
-        "provider_identities.provider",
-        "provider_identities.user_metadata",
-      ],
-      filters: { app_metadata: { customer_id: customerId } },
-    })
-    return (data as IdentityRow[]).some(
+    // The auth service's own filter on the JSON column (Medusa's
+    // `FilterableAuthIdentityProps.app_metadata`, the filter its
+    // `removeCustomerAccountWorkflow` reads by): applied in the database.
+    // Each row is checked again below all the same
+    const identities: IdentityRow[] = await container
+      .resolve<IAuthModuleService>(Modules.AUTH)
+      .listAuthIdentities(
+        { app_metadata: { customer_id: customerId } },
+        { relations: ["provider_identities"], take: null }
+      )
+    return identities.some(
       (identity) =>
         identity.app_metadata?.["customer_id"] === customerId &&
         (identity.provider_identities ?? []).some((provider) => {

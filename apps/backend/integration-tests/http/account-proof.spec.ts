@@ -234,9 +234,24 @@ medusaIntegrationTestRunner({
       expect(joined.opened.data.customer?.id).toBe(customer.id)
       const appleIdentity = identityOf(joined.token)
 
+      // Another customer, whose sign-in must survive the erasure
+      const other = await registerCustomer(http, store)
+      const [otherLogin] = await auth().listProviderIdentities({ entity_id: other.email })
+      const otherIdentity = otherLogin?.auth_identity_id ?? ""
+      // The filter the erasure reads by is applied in the database: one identity, not every one
+      const byCustomer = await auth().listAuthIdentities(
+        { app_metadata: { customer_id: other.id } },
+        { take: null }
+      )
+      expect(byCustomer.map(({ id }) => id)).toEqual([otherIdentity])
+
       const confirmations = await verifications({ entity_id: customer.email })
       await eraseCustomer(getContainer(), customer.id)
 
+      const [survivor] = await auth().listAuthIdentities({ id: [otherIdentity] }, { take: null })
+      expect(survivor?.app_metadata?.["customer_id"]).toBe(other.id)
+      expect(await auth().listProviderIdentities({ entity_id: other.email })).toHaveLength(1)
+      expect(await verifications({ entity_id: other.email })).not.toEqual([])
       expect(confirmations.length).toBeGreaterThan(0)
       expect(
         await auth().listAuthIdentities({ id: [emailIdentity, appleIdentity] }, { take: null })

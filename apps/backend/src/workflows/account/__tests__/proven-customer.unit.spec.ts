@@ -51,15 +51,27 @@ function shop(
           .map((each) => ({ auth_identity_id: each.id }))
       )
     },
-    listAuthIdentities: (filters: { id: string[] }) =>
-      Promise.resolve(
+    listAuthIdentities: (filters: { id?: string[]; app_metadata?: { customer_id: string } }) => {
+      const wanted = filters.app_metadata?.customer_id
+      if (wanted !== undefined && socialReadFails) {
+        return Promise.reject(new Error("select … where email = 'ali@example.com'"))
+      }
+      return Promise.resolve(
         identities
-          .filter((each) => filters.id.includes(each.id))
+          .filter((each) =>
+            wanted === undefined
+              ? (filters.id ?? []).includes(each.id)
+              : filterIgnored || each.customer_id === wanted
+          )
           .map((each) => ({
             id: each.id,
             app_metadata: each.customer_id ? { customer_id: each.customer_id } : {},
+            provider_identities: [
+              { provider: each.provider, user_metadata: { email: each.email } },
+            ],
           }))
-      ),
+      )
+    },
     listAuthVerifications: (filters: Filters) => {
       const address = ilike(filters["entity_id"])
       const own = filters["auth_identity_id"] as string[]
@@ -71,26 +83,7 @@ function shop(
     },
   }
   const query = {
-    graph: (input: { entity: string; filters: Filters }) => {
-      if (input.entity === "customer") {
-        return Promise.resolve({ data: customer ? [customer] : [] })
-      }
-      if (socialReadFails) {
-        return Promise.reject(new Error("select … where email = 'ali@example.com'"))
-      }
-      const wanted = (input.filters["app_metadata"] as { customer_id: string }).customer_id
-      return Promise.resolve({
-        data: identities
-          .filter((each) => filterIgnored || each.customer_id === wanted)
-          .map((each) => ({
-            id: each.id,
-            app_metadata: each.customer_id ? { customer_id: each.customer_id } : {},
-            provider_identities: [
-              { provider: each.provider, user_metadata: { email: each.email } },
-            ],
-          })),
-      })
-    },
+    graph: () => Promise.resolve({ data: customer ? [customer] : [] }),
   }
   return {
     resolve: (key: string) => {
