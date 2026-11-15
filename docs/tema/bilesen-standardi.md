@@ -27,8 +27,8 @@
 | Katman | Panelde | İçinde | Açık / kapalı |
 | --- | --- | --- | --- |
 | **İçerik** | "İçerik" grubu | Yazılar, görseller, bağlantılar, kaynak (hangi ürünler), adet, öğeler (slayt, soru, liste) | Açık |
-| **Diziliş ve stil** | Biçim + bölüme göre adlandırılmış açık gruplar: "Diziliş", "Kaydırma", "Hareket", "Stil" | Biçim, sütun/sıra, görünen kart, oklar, hız, yükseklik, yazının yeri, perde, boy, zemin (bölüme özgü) | Açık |
-| **Diğer ayarlar** | Tek kapalı grup, adı her bölümde "Diğer ayarlar" (değişmiş ayar sayısıyla) | Seyrek değişen stil (nokta, döngü, sürükleme, ayraç kalınlığı), ortak `look` (dış/iç boşluk, zemin, hizalama, genişlik), ileride gelişmiş CSS en altta | Kapalı |
+| **Diziliş ve stil** | Biçim + bölüme göre adlandırılmış açık gruplar: "Diziliş", "Kaydırma", "Hareket", "Stil"; her gövde bölümünde ortak "Boşluk" (üst/alt boşluk, `look.space_outer`/`space_below`) | Biçim, sütun/sıra, görünen kart, oklar, hız, yükseklik, yazının yeri, perde, boy, zemin (bölüme özgü) | Açık |
+| **Diğer ayarlar** | Tek kapalı grup, adı her bölümde "Diğer ayarlar" (değişmiş ayar sayısıyla) | Seyrek değişen stil (nokta, döngü, sürükleme, ayraç kalınlığı), ortak `look`un kalanı (iç boşluk, zemin, hizalama, genişlik), ileride gelişmiş CSS en altta | Kapalı |
 | **Görünürlük** | "Görünürlük" grubu, en altta | Vitrinde göster, başlangıç/bitiş tarihi, cihaz | Açık |
 
 Kurallar:
@@ -68,7 +68,7 @@ Yeni bir gövde bölümü bunları **kendisi yazmaz**, ortak takımdan alır:
 
 | Takım | Alanlar (varsayılan kalın) | Nerede | Not |
 | --- | --- | --- | --- |
-| `look` | `space_outer` none/small/medium/large · `space_inner` aynı · `ground` page/well/stage/primary · `align` start/center · `width` narrow/boxed/full; hepsi **null** (temanın kendi) | `section-look.ts`, backend `sections/look.ts` (`bodyFields`) | Bölümde anlamsız alan `lookFieldsFor`'da gizlenir; uzun metinde `primary` zemin sunulmaz (3:1 kuralı) |
+| `look` | `space_outer` (üst) none/small/medium/large · `space_below` (alt) aynı · `space_inner` aynı · `ground` page/well/stage/primary · `align` start/center · `width` narrow/boxed/full; hepsi **null** (temanın kendi) | `section-look.ts`, backend `sections/look.ts` (`bodyFields`) | Bölümde anlamsız alan `lookFieldsFor`'da gizlenir; uzun metinde `primary` zemin sunulmaz (3:1 kuralı) |
 | Görünürlük | `visible` **true**, `starts_at`, `ends_at` **null** | backend `layout-fields.ts` `base` | Ana bölümlerde (üst/alt bilgi, ürün, kategori) kilitli |
 | Cihaz | `device` **all**/mobile/desktop | `section-device.ts`, backend `layout-fields.ts` (`bodyFields`), panel `visibility-registry.ts`; her gövde bölümü + üst bilgideki kayan yazı (denetim O1, yapıldı) | Telefon = temanın dar çerçevesi (1024 px altı) |
 | Kaydırma | `scroller` (§4.4) | `section-scroller.ts` | Kayan her bölüm bunu kullanır, kendi ok/nokta alanını yazmaz |
@@ -98,7 +98,7 @@ varsayılan değer ayarın nasıl kullanılacağını gösterir, deneme metni (l
 | Bekleme süresi (sayfa/slayt) | `interval` (kaydırma takımında tarihsel adı `speed`, denetim O6) | Geçiş süresi <small>interval</small> | slow/medium/fast → Yavaş/Orta/Hızlı |
 | Boy (öğe/yazı) | `size` | Boy <small>size</small> | small/medium/large → Küçük/Orta/Büyük |
 | Yükseklik (görsel alan) | `height` | Yükseklik <small>height</small> | low/medium/high → Alçak/Orta/Yüksek (+ ileride `adapt` "Görsele göre") |
-| Boşluk | `space_*`, `gap` | Dış/İç boşluk, Ögeler arası boşluk | none/small/medium/large → Yok/Dar/Orta/Geniş; `gap` tight/normal/wide → Sıkı/Normal/Geniş |
+| Boşluk | `space_*`, `gap` | Üst/Alt/İç boşluk, Ögeler arası boşluk | none/small/medium/large → Yok/Dar/Orta/Geniş; `gap` tight/normal/wide → Sıkı/Normal/Geniş |
 | Zemin | `ground` | Zemin <small>background</small> | page/well/stage/primary → Sayfa/Hafif ton/Koyu/Ana renk (tek sözlük; `light` → `well`'e iner, denetim O5) |
 | Genişlik | `width` | Genişlik <small>width</small> | narrow/boxed/full → Dar/Kutulu/Tam |
 | Hizalama | `align` | Hizalama <small>text-align</small> | start/center → Sola/Ortaya |

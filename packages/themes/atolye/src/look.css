@@ -7,6 +7,8 @@
  * - Outer space (margin): the gap above the section moves onto the box
  *   (none, then the small, medium and large section gaps, which shrink on
  *   narrower screens), and the section's own top gap gives way inside it.
+ * - Space below (margin): the same steps under the box; it stands in for the
+ *   next section's gap above it, so two gaps never add up.
  * - Ground (background): a band from edge to edge. It takes the gap above
  *   it as its margin (the theme's medium gap unless the shop set one) and
  *   pads its section inside (medium unless the shop set the inner space),
@@ -20,31 +22,24 @@
  *   panel does not offer it on long text), where a sale price reads in that
  *   foreground too: the deal's red is lost on most shop colours, and the
  *   struck price and the badge still mark the sale.
- * - Inner space (padding): the box's own, from the spacing scale.
+ * - Inner space (padding): the box's own, top and bottom alike, from the
+ *   same section gaps: a band's room equals the gap around it.
  * - Alignment: the section's heading, the line under it and its head row.
  * - Width: the reading measure, the container (the theme's own), or the
  *   container without its cap (the gutter stays, words never touch the edge).
  */
 @layer components {
-  .gf-look {
-    --look-inner-small: var(--space-xl);
-    --look-inner-medium: var(--space-2xl);
-    --look-inner-large: var(--space-3xl);
-  }
-  @media (max-width: 40rem) {
-    .gf-look {
-      --look-inner-small: var(--space-lg);
-      --look-inner-medium: var(--space-xl);
-      --look-inner-large: var(--space-2xl);
-    }
+  /* Every section's one gap above it (sahip 2026-11-15: the same for all);
+     a page's opening keeps its own, close under the header */
+  .gf-section {
+    padding-top: var(--section-top, var(--section-gap));
   }
 
-  /* A page that opens with the catalogue list is dense throughout (sahip
-     2026-11-15): every section on it keeps the small gap, the one after
-     the opening too, so the rhythm stays even. A section set to "medium"
-     there reads as small; "large" stays large. */
-  :has(> [data-gf-catalog-hero]) {
-    --section-gap: var(--section-gap-s);
+  /* The room inside a band is the gap around it, step for step */
+  .gf-look {
+    --look-inner-small: var(--section-gap-s);
+    --look-inner-medium: var(--section-gap);
+    --look-inner-large: var(--section-gap-l);
   }
 
   .gf-look[data-outer="none"] {
@@ -67,6 +62,45 @@
     --section-gap-s: 0px;
     --section-gap: 0px;
     --section-gap-l: 0px;
+  }
+
+  /* The space below: one gap between two sections, never two added. The
+     step stands in for the next section's own gap above it (on the screens
+     the box shows on); set on both sides, the margins meet and the larger
+     stands. At the page's end it meets the footer's gap the same way. */
+  .gf-look[data-below="none"] {
+    --look-below: 0px;
+  }
+  .gf-look[data-below="small"] {
+    --look-below: var(--section-gap-s);
+  }
+  .gf-look[data-below="medium"] {
+    --look-below: var(--section-gap);
+  }
+  .gf-look[data-below="large"] {
+    --look-below: var(--section-gap-l);
+  }
+  .gf-look[data-below] {
+    margin-bottom: var(--look-below);
+  }
+  .gf-look[data-below]:not([data-show-on]) + :not([data-outer]) {
+    --section-top: 0px;
+    --look-outer: 0px;
+  }
+  @media (width >= 64rem) {
+    .gf-look[data-below][data-show-on="desktop"] + :not([data-outer]) {
+      --section-top: 0px;
+      --look-outer: 0px;
+    }
+  }
+  @media (width < 64rem) {
+    .gf-look[data-below][data-show-on="mobile"] + :not([data-outer]) {
+      --section-top: 0px;
+      --look-outer: 0px;
+    }
+  }
+  main > .gf-look[data-below]:last-child {
+    margin-bottom: max(0px, var(--look-below) - var(--footer-gap));
   }
 
   .gf-look[data-inner="none"] {

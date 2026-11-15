@@ -14,6 +14,8 @@ interface PromisesProps {
   variant?: PromiseVariant
   /** The theme editor's live preview (adr/0065 Faz 2b): each badge's words carry their field marks. */
   marks?: boolean | undefined
+  /** Right under a picture opening: it keeps close to it; anywhere else the theme's section gap. */
+  hug?: boolean
 }
 
 /**
@@ -25,12 +27,12 @@ interface PromisesProps {
  * 640 px the icon beside the text; from 1024 px all across in one tinted
  * strip. Lined (GB4): the same badges as boxes split by hairlines.
  */
-export function Promises({ badges, label, variant = "strip", marks }: PromisesProps) {
+export function Promises({ badges, label, variant = "strip", marks, hug = false }: PromisesProps) {
   if (badges.length === 0) {
     return null
   }
   return (
-    <section aria-label={label} className="pt-3 lg:pt-4">
+    <section aria-label={label} className={hug ? "pt-3 lg:pt-4" : "gf-section"}>
       <Container>
         {variant === "lined" ? (
           <Lined badges={badges} marks={marks} />

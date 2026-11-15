@@ -9,7 +9,14 @@ const MAIN: StoreMainSections = {
     id: "mainproduct",
     type: "product_main",
     variant: "standard",
-    look: { space_outer: null, space_inner: null, ground: null, align: null, width: "narrow" },
+    look: {
+      space_outer: null,
+      space_below: null,
+      space_inner: null,
+      ground: null,
+      align: null,
+      width: "narrow",
+    },
   },
   category_main: { id: "maincategory", type: "category_main", variant: "standard", by_variant: {} },
 }

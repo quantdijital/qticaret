@@ -64,7 +64,7 @@ export function Help({ section, t }: { section: Of<"help">; t: Translate }) {
   const id = headingId(section.id)
   const { contact } = section
   return (
-    <section aria-labelledby={id} className="pt-(--section-gap)">
+    <section aria-labelledby={id} className="gf-section">
       <Container>
         <div className="grid gap-6 rounded-tile border border-rule p-6 sm:p-10 lg:grid-cols-12 lg:items-center lg:gap-(--gap-columns)">
           <div className="flex flex-col gap-3 lg:col-span-6">

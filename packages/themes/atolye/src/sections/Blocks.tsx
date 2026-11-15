@@ -59,12 +59,15 @@ function BlockView({
   block,
   next,
   first,
+  afterOpening,
   context,
 }: {
   block: Block
   /** The block after it: a help section right after the FAQ joins it there. */
   next: Block | undefined
   first: boolean
+  /** Right after the page's picture opening: a trust strip keeps close to it. */
+  afterOpening: boolean
   context: Context
 }) {
   const { t, subscribe, quickAdd } = context
@@ -100,6 +103,7 @@ function BlockView({
           label={t("footer.trust")}
           variant={drawnVariant("trust_badges", section.variant, PROMISE_VARIANTS)}
           marks={section.editor}
+          hug={afterOpening}
         />
       )
     case "categories": {
@@ -218,6 +222,7 @@ export function Blocks({
           block={block}
           next={blocks[index + 1]}
           first={heroFirst && index === 0}
+          afterOpening={heroFirst && index === 1}
           context={context}
         />
       </Look>

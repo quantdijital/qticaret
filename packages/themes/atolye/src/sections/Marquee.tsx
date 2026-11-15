@@ -193,7 +193,7 @@ export function Marquee({
     return strip
   }
   return (
-    <div className="pt-(--section-gap-s)" {...shell}>
+    <div className="gf-section" {...shell}>
       {boxed ? <Container>{strip}</Container> : strip}
     </div>
   )

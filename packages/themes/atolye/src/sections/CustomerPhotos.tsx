@@ -22,7 +22,7 @@ export function CustomerPhotos({
     return null
   }
   return (
-    <section aria-labelledby={id} className="pt-(--section-gap-s)">
+    <section aria-labelledby={id} className="pt-(--section-gap)">
       <Container className="flex flex-col gap-6">
         <h2 id={id}>{t("reviews.customer_photos")}</h2>
         <ul className="gf-rail -mx-(--gutter) flex scroll-px-(--gutter) gap-(--gap-columns) overflow-x-auto px-(--gutter) lg:mx-0 lg:grid lg:grid-cols-[repeat(6,minmax(0,1fr))] lg:overflow-visible lg:px-0">
