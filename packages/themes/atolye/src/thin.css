@@ -1,0 +1,65 @@
+/*
+ * A thin strip's gaps (sahip 2026-11-16: "çok küçük componentlerin alt üst
+ * padding ve margin değerleri farklı olabilir"): a section with no heading
+ * whose whole body is one slim row (the marquee, the trust strip) marks its
+ * outermost box `data-thin`. It takes the small section gap above it
+ * (`--section-gap-s`) instead of the medium one, and so does the section
+ * after it, so the strip stands as far from what follows as from what comes
+ * before. A step the shop set wins: the look's outer space on either
+ * section, and the strip's space below (`data-below`, `look.css`). On a band
+ * (the look's ground) the room inside is the gap around it, as for every
+ * section: the small step, unless the shop set the inner space. The strip's
+ * own height (the marquee's size and room) never changes. A strip hidden on a screen (the look's `data-show-on`, the marquee's own
+ * `data-device`, a closed marquee) leaves the next section its full gap
+ * there.
+ */
+@layer components {
+  .gf-section[data-thin] {
+    padding-top: var(--section-top, var(--section-gap-s));
+  }
+  /* A band gives the gap above it to its box: the strip's box, the small one */
+  .gf-look[data-ground]:not([data-outer]):has(> [data-thin]) {
+    margin-top: var(--look-outer, var(--section-gap-s));
+  }
+  .gf-look[data-ground]:not([data-inner]):has(> [data-thin]) {
+    padding-block: var(--section-gap-s);
+  }
+
+  /* The section after a strip shown on this screen (the strip, or the box
+     that holds it, neither hidden here): the next section itself, the
+     section in its plain box, or its band's box */
+  @media (width >= 64rem) {
+    [data-thin]:not([data-device="mobile"], [data-closed]) + .gf-section,
+    [data-thin]:not([data-device="mobile"], [data-closed])
+      + :not([data-outer], [data-ground])
+      > .gf-section,
+    :not([data-show-on="mobile"]):has(> [data-thin]:not([data-device="mobile"], [data-closed]))
+      + :not([data-outer], [data-ground])
+      > .gf-section {
+      padding-top: var(--section-top, var(--section-gap-s));
+    }
+    [data-thin]:not([data-device="mobile"], [data-closed])
+      + .gf-look[data-ground]:not([data-outer]),
+    :not([data-show-on="mobile"]):has(> [data-thin]:not([data-device="mobile"], [data-closed]))
+      + .gf-look[data-ground]:not([data-outer]) {
+      margin-top: var(--look-outer, var(--section-gap-s));
+    }
+  }
+  @media (width < 64rem) {
+    [data-thin]:not([data-device="desktop"], [data-closed]) + .gf-section,
+    [data-thin]:not([data-device="desktop"], [data-closed])
+      + :not([data-outer], [data-ground])
+      > .gf-section,
+    :not([data-show-on="desktop"]):has(> [data-thin]:not([data-device="desktop"], [data-closed]))
+      + :not([data-outer], [data-ground])
+      > .gf-section {
+      padding-top: var(--section-top, var(--section-gap-s));
+    }
+    [data-thin]:not([data-device="desktop"], [data-closed])
+      + .gf-look[data-ground]:not([data-outer]),
+    :not([data-show-on="desktop"]):has(> [data-thin]:not([data-device="desktop"], [data-closed]))
+      + .gf-look[data-ground]:not([data-outer]) {
+      margin-top: var(--look-outer, var(--section-gap-s));
+    }
+  }
+}

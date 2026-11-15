@@ -86,7 +86,7 @@
       "file": "spotlight.css"
     },
     {
-      "sha256": "b469983db64221d5fefdbd5fba33b68b5e5cdb2e186ea5c2f14e7310eae5d807",
+      "sha256": "4407a54716b8e891bafc4b1a593edda41888ae67591a816050861dd5c272bfc5",
       "file": "styles.css"
     },
     {
@@ -96,6 +96,10 @@
     {
       "sha256": "073dae8e256f00078f008d6be3322976dd8e1ce3d64e61629826a01053156d34",
       "file": "tabs.css"
+    },
+    {
+      "sha256": "4579942a0fc10779daffa595c24398bb86c55625817a371b0b905a2526f0c8ef",
+      "file": "thin.css"
     },
     {
       "sha256": "fee3334dfa8102b5a9bffa8669be76763710fa4e677ee86292981bef22ff5365",
