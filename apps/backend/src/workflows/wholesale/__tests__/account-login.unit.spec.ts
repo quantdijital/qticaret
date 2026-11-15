@@ -1,6 +1,6 @@
 import { addressLogin, ensureLogin } from "../steps/account-login"
 import type { EnsureLoginInput } from "../steps/account-login"
-import { sealPassword } from "../steps/login-password"
+import { emailLoginsAt, sealPassword } from "../steps/login-password"
 
 const proven = jest.fn<Promise<boolean>, [unknown, string]>()
 const createCustomer = jest.fn<Promise<{ result: { id: string } }>, [unknown]>()
@@ -12,7 +12,7 @@ jest.mock("@medusajs/medusa/core-flows", () => ({
   createCustomerAccountWorkflow: () => ({ run: (args: unknown) => createCustomer(args) }),
 }))
 
-const EMAIL = "siparis@yilmazticaret.com"
+const EMAIL = "victim@example.com"
 // A password made for the test, not anyone's
 const PASSWORD = "Toptan-Yilmaz-2026"
 
@@ -26,7 +26,7 @@ function fakeContainer(state: {
   customers?: { id: string }[]
   logins?: { auth_identity_id: string; entity_id: string }[]
   identities?: Identity[]
-  carts?: { id: string }[]
+  guestExists?: boolean
 }) {
   const identities = new Map((state.identities ?? []).map((each) => [each.id, { ...each }]))
   const resolved = <T>(value: T) => jest.fn(() => Promise.resolve(value))
@@ -36,15 +36,13 @@ function fakeContainer(state: {
       return Promise.resolve({ success: true, authIdentity: { id: "auth_new" } })
     }),
     updateProvider: resolved({ success: true }),
-    listProviderIdentities: jest.fn((filters: Record<string, unknown>) =>
+    listProviderIdentities: jest.fn(() =>
       Promise.resolve(
-        (state.logins ?? [])
-          .filter((login) =>
-            typeof filters["auth_identity_id"] === "string"
-              ? login.auth_identity_id === filters["auth_identity_id"]
-              : true
-          )
-          .map((login) => ({ ...login, id: `pi_${login.auth_identity_id}`, provider_metadata: {} }))
+        (state.logins ?? []).map((login) => ({
+          ...login,
+          id: `pi_${login.auth_identity_id}`,
+          provider_metadata: { password: `hash_${login.auth_identity_id}` },
+        }))
       )
     ),
     retrieveAuthIdentity: jest.fn((id: string) => Promise.resolve(identities.get(id))),
@@ -58,18 +56,21 @@ function fakeContainer(state: {
     requestAuthVerification: resolved({ code: "code_1" }),
     confirmAuthVerification: resolved(undefined),
   }
-  const cart = {
-    listCarts: resolved(state.carts ?? []),
-    softDeleteCarts: resolved(undefined),
-    restoreCarts: resolved(undefined),
+  const customer = {
+    updateCustomers: jest.fn((_id: string, data: { has_account?: boolean }) =>
+      state.guestExists && data.has_account === false
+        ? Promise.reject(new Error("unique email, has_account"))
+        : Promise.resolve()
+    ),
+    softDeleteCustomers: resolved(undefined),
+    restoreCustomers: resolved(undefined),
+    deleteCustomers: resolved(undefined),
   }
-  const customer = { deleteCustomers: resolved(undefined) }
   const query = { graph: resolved({ data: state.customers ?? [] }) }
-  const modules: Record<string, unknown> = { auth, cart, customer, query }
+  const modules: Record<string, unknown> = { auth, customer, query }
   return {
     container: { resolve: (key: string) => modules[key] } as never,
     auth,
-    cart,
     customer,
     identities,
   }
@@ -85,6 +86,21 @@ const input = (fields: Partial<EnsureLoginInput>): EnsureLoginInput => ({
   ...fields,
 })
 
+/** A sign-up at the address in two cases (review M2), the first tied to the customer. */
+const squatted = (extra: { guestExists?: boolean } = {}) =>
+  fakeContainer({
+    customers: [{ id: "cus_1" }],
+    logins: [
+      { auth_identity_id: "auth_1", entity_id: "Victim@example.com" },
+      { auth_identity_id: "auth_2", entity_id: "victim@example.com" },
+    ],
+    identities: [
+      { id: "auth_1", app_metadata: { customer_id: "cus_1" } },
+      { id: "auth_2", app_metadata: {} },
+    ],
+    ...extra,
+  })
+
 beforeEach(() => {
   proven.mockReset()
   createCustomer.mockReset()
@@ -92,38 +108,36 @@ beforeEach(() => {
 })
 
 describe("who signs in at a new wholesaler's address (ADR-0068 Ek 2026-11-15 (2))", () => {
-  it("reads a proven customer, an unconfirmed sign-up, a staff sign-in, or nobody", async () => {
+  it("reads a proven customer, an unconfirmed sign-up with every sign-in, or nobody", async () => {
     proven.mockResolvedValue(true)
     expect(
       await addressLogin(fakeContainer({ customers: [{ id: "cus_1" }] }).container, EMAIL)
-    ).toEqual({
-      kind: "proven",
-      customer_id: "cus_1",
-    })
+    ).toEqual({ kind: "proven", customer_id: "cus_1" })
     proven.mockResolvedValue(false)
-    const squatted = fakeContainer({
-      customers: [{ id: "cus_1" }],
-      logins: [{ auth_identity_id: "auth_1", entity_id: EMAIL }],
-      identities: [{ id: "auth_1", app_metadata: { customer_id: "cus_1" } }],
-    })
-    expect(await addressLogin(squatted.container, EMAIL)).toEqual({
-      kind: "unproven",
-      customer_id: "cus_1",
-      identity_id: "auth_1",
-    })
+    const found = await addressLogin(squatted().container, EMAIL)
+    expect(found.kind).toBe("unproven")
+    expect(found.kind === "unproven" && found.logins.map((login) => login.entity_id)).toEqual([
+      "Victim@example.com",
+      "victim@example.com",
+    ])
+    expect(await addressLogin(fakeContainer({}).container, EMAIL)).toEqual({ kind: "none" })
+  })
+
+  it("never takes a staff member's sign-in, even one tied to a proven customer (review M3)", async () => {
+    proven.mockResolvedValue(true)
     const staff = fakeContainer({
+      customers: [{ id: "cus_1" }],
       logins: [{ auth_identity_id: "auth_9", entity_id: EMAIL }],
-      identities: [{ id: "auth_9", app_metadata: { user_id: "user_1" } }],
+      identities: [{ id: "auth_9", app_metadata: { user_id: "user_1", customer_id: "cus_1" } }],
     })
     expect(await addressLogin(staff.container, EMAIL)).toEqual({ kind: "staff" })
-    expect(await addressLogin(fakeContainer({}).container, EMAIL)).toEqual({ kind: "none" })
   })
 })
 
 describe("the wholesaler's sign-in as staff set it", () => {
   it("case 1: no one at the address: a sign-in with staff's password and a customer, confirmed", async () => {
     const fake = fakeContainer({})
-    const { result, undo } = await ensureLogin(fake.container, input({}))
+    const { result } = await ensureLogin(fake.container, input({}))
     expect(result).toEqual({ customer_id: "cus_new", password: "set" })
     expect(fake.auth.register).toHaveBeenCalledWith("emailpass", {
       body: { email: EMAIL, password: PASSWORD },
@@ -141,7 +155,6 @@ describe("the wholesaler's sign-in as staff set it", () => {
     })
     expect(fake.auth.confirmAuthVerification).toHaveBeenCalledWith({ code: "code_1" })
     expect(fake.auth.updateProvider).not.toHaveBeenCalled()
-    expect(undo).toMatchObject({ identity_made: "auth_new", customer_made: "cus_new" })
   })
 
   it("case 2: a customer who proved the address keeps their own password", async () => {
@@ -157,34 +170,63 @@ describe("the wholesaler's sign-in as staff set it", () => {
   })
 
   it("case 3: an unconfirmed sign-up is refused until staff take it over", async () => {
-    const fake = fakeContainer({})
-    const login = { kind: "unproven" as const, customer_id: "cus_1", identity_id: "auth_1" }
+    const fake = squatted()
+    const login = { kind: "unproven" as const, customer_id: "cus_1", logins: [] }
     await expect(ensureLogin(fake.container, input({ login }))).rejects.toThrow(
       "wholesale.unproven_signup"
     )
     expect(fake.auth.updateProvider).not.toHaveBeenCalled()
-    expect(fake.cart.softDeleteCarts).not.toHaveBeenCalled()
+    expect(fake.customer.updateCustomers).not.toHaveBeenCalled()
   })
 
-  it("case 3, taken over: the password replaced, older sign-ins ended, its carts set aside", async () => {
-    const fake = fakeContainer({
-      logins: [{ auth_identity_id: "auth_1", entity_id: EMAIL }],
-      identities: [{ id: "auth_1", app_metadata: { customer_id: "cus_1" } }],
-      carts: [{ id: "cart_1" }],
-    })
-    const login = { kind: "unproven" as const, customer_id: "cus_1", identity_id: "auth_1" }
+  it("case 3, taken over: every sign-in's password replaced and unlinked, a fresh customer", async () => {
+    const fake = squatted()
+    const logins = await emailLoginsAt(fake.container, EMAIL)
+    const login = { kind: "unproven" as const, customer_id: "cus_1", logins }
     const { result } = await ensureLogin(fake.container, input({ login, take_over: true }))
-    expect(result).toEqual({ customer_id: "cus_1", password: "replaced" })
-    expect(fake.auth.updateProvider).toHaveBeenCalledWith("emailpass", {
-      entity_id: EMAIL,
-      password: PASSWORD,
+    expect(result).toEqual({ customer_id: "cus_new", password: "replaced" })
+    // Both case variants (review M2)
+    expect(fake.auth.updateProvider.mock.calls).toEqual([
+      ["emailpass", { entity_id: "Victim@example.com", password: PASSWORD }],
+      ["emailpass", { entity_id: "victim@example.com", password: PASSWORD }],
+    ])
+    for (const id of ["auth_1", "auth_2"]) {
+      const metadata = fake.identities.get(id)?.app_metadata
+      expect(typeof metadata?.["password_changed_at"]).toBe("string")
+      expect(metadata?.["customer_id"]).toBeUndefined()
+    }
+    // The sign-up's record retired, a fresh one for the sign-up's own sign-in (review M5)
+    expect(fake.customer.updateCustomers).toHaveBeenCalledWith("cus_1", { has_account: false })
+    expect(createCustomer.mock.calls[0]?.[0]).toMatchObject({
+      input: { authIdentityId: "auth_1" },
     })
-    const metadata = fake.identities.get("auth_1")?.app_metadata
-    expect(metadata?.["customer_id"]).toBe("cus_1")
-    expect(typeof metadata?.["password_changed_at"]).toBe("string")
-    expect(fake.cart.softDeleteCarts).toHaveBeenCalledWith(["cart_1"])
-    expect(fake.auth.register).not.toHaveBeenCalled()
-    expect(createCustomer).not.toHaveBeenCalled()
+  })
+
+  it("soft-deletes the retired record where the address already has a guest one", async () => {
+    const fake = squatted({ guestExists: true })
+    const logins = await emailLoginsAt(fake.container, EMAIL)
+    await ensureLogin(
+      fake.container,
+      input({ login: { kind: "unproven", customer_id: "cus_1", logins }, take_over: true })
+    )
+    expect(fake.customer.softDeleteCustomers).toHaveBeenCalledWith(["cus_1"])
+  })
+
+  it("puts everything back when the fresh customer cannot be made", async () => {
+    createCustomer.mockRejectedValue(new Error("customer refused"))
+    const fake = squatted()
+    const logins = await emailLoginsAt(fake.container, EMAIL)
+    await expect(
+      ensureLogin(
+        fake.container,
+        input({ login: { kind: "unproven", customer_id: "cus_1", logins }, take_over: true })
+      )
+    ).rejects.toThrow("customer refused")
+    expect(fake.customer.updateCustomers).toHaveBeenLastCalledWith("cus_1", { has_account: true })
+    expect(fake.auth.updateProviderIdentities).toHaveBeenCalledWith([
+      { id: "pi_auth_1", provider_metadata: { password: "hash_auth_1" } },
+    ])
+    expect(fake.identities.get("auth_1")?.app_metadata).toEqual({ customer_id: "cus_1" })
   })
 
   it("never touches a staff member's sign-in, and needs a password for a new one", async () => {

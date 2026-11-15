@@ -51,6 +51,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Invalid tracking: a carrier name, a 4–40 character tracking number and an https link.",
   "orders.nothing_to_deliver": "No parcel of the shop's own delivery waits to be delivered.",
   "orders.deliver_failed": "The order could not be marked delivered; try again on its page.",
+  "orders.wholesaler_filter_denied": "Only the shop owner and admins can filter by wholesaler.",
   "orders.range_invalid":
     "Invalid date range: days as YYYY-MM-DD, and the start cannot come after the end.",
   "orders.note_unknown": "Note not found; it may have been removed.",
@@ -800,6 +801,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "wholesale.login_in_use":
     "This e-mail address is a staff member's sign-in; use another address for the wholesaler.",
   "wholesale.login_not_made": "The wholesaler's sign-in could not be prepared. Try again shortly.",
+  "wholesale.password_own_login":
+    'This wholesaler signs in with an account they verified themselves; they renew their password with "Forgot password" on the storefront.',
   "wholesale.no_password_login":
     "This customer signs in another way (e.g. Google), not with an e-mail and password; no password can be set.",
   "platform_settings.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",

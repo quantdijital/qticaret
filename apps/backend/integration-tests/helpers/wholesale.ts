@@ -107,6 +107,7 @@ export interface AccountAnswer {
   customer: { id: string; email: string | null } | null
   tier: { id: string; name: string } | null
   own_prices: boolean
+  staff_login: boolean
   percent: number | null
   min_quantity: number | null
   invitation_expires_at: string | null

@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import {
   StepResponse,
   WorkflowResponse,
@@ -9,28 +9,28 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { ConflictError } from "../../../lib/errors"
-import { likeLiteral } from "../../../lib/db/like"
 import { normalizeEmail } from "../../../lib/wholesale"
-import { checkAccountStep } from "../steps/account-rows"
-import { replacePassword, restorePassword } from "../steps/login-password"
+import { checkAccountStep, accountById } from "../steps/account-rows"
+import {
+  emailLoginsAt,
+  replacePasswords,
+  restorePasswords,
+  unlinkCustomer,
+} from "../steps/login-password"
+import type { EmailLogin } from "../steps/login-password"
 
 type Container = Pick<MedusaContainer, "resolve">
 
-interface AuthRows {
-  listProviderIdentities: (
-    filters: Record<string, unknown>,
-    config: { select: string[]; take: null }
-  ) => Promise<{ auth_identity_id?: string | null }[]>
-}
-
 /**
- * The customer's e-mail sign-in: the identity of their address's
- * e-mail login that is tied to them; null when they sign in otherwise.
+ * The customer's e-mail sign-ins (review M2: every one at their address,
+ * whatever its case), refused when one is a staff member's or another
+ * customer's (review M3); null when none of them is the customer's own
+ * (they sign in another way).
  */
-export async function customerLogin(
+export async function customerLogins(
   container: Container,
   customerId: string
-): Promise<{ identity_id: string; email: string } | null> {
+): Promise<{ email: string; logins: EmailLogin[]; own: EmailLogin } | null> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "customer",
     fields: ["id", "email"],
@@ -40,40 +40,58 @@ export async function customerLogin(
   if (email === "") {
     return null
   }
-  const auth = container.resolve(Modules.AUTH)
-  const logins = await (auth as unknown as AuthRows).listProviderIdentities(
-    { provider: "emailpass", entity_id: { $ilike: likeLiteral(email) } },
-    { select: ["auth_identity_id"], take: null }
-  )
-  for (const login of logins) {
-    if (login.auth_identity_id) {
-      const identity = await auth.retrieveAuthIdentity(login.auth_identity_id)
-      if (identity.app_metadata?.["customer_id"] === customerId) {
-        return { identity_id: identity.id, email }
-      }
-    }
+  const logins = await emailLoginsAt(container, email)
+  const linked = (login: EmailLogin) => login.app_metadata["customer_id"]
+  if (
+    logins.some(
+      (login) =>
+        typeof login.app_metadata["user_id"] === "string" ||
+        (typeof linked(login) === "string" && linked(login) !== customerId)
+    )
+  ) {
+    throw new ConflictError("wholesale.login_in_use")
   }
-  return null
+  const own = logins.find((login) => linked(login) === customerId)
+  return own ? { email, logins, own } : null
 }
 
-/** The bound customer's password replaced; every older sign-in of theirs ends. */
+/**
+ * The bound customer's password replaced on every sign-in at the address,
+ * older sign-ins ended, exactly one sign-in left tied to the customer
+ * (review M2). Only for an account whose sign-in staff made or took over
+ * (review M4): a customer who proved their own address keeps theirs.
+ */
 const setCustomerPasswordStep = createStep(
   "wholesale-set-customer-password",
-  async (input: { customer_id: string | null; sealed: string; email: string }, { container }) => {
-    const login = input.customer_id ? await customerLogin(container, input.customer_id) : null
-    if (!login) {
+  async (input: { id: string; sealed: string; email: string }, { container }) => {
+    const account = await accountById(container, input.id)
+    if (!account.staff_login) {
+      throw new ConflictError("wholesale.password_own_login")
+    }
+    const found = account.customer_id ? await customerLogins(container, account.customer_id) : null
+    if (!found) {
       throw new ConflictError("wholesale.no_password_login")
     }
-    const undo = await replacePassword(container, {
-      identity_id: login.identity_id,
+    const undo = await replacePasswords(container, {
+      logins: found.logins,
       email: input.email,
       sealed: input.sealed,
     })
-    return new StepResponse({ identity_id: login.identity_id }, undo)
+    try {
+      for (const login of found.logins) {
+        if (login.identity_id !== found.own.identity_id && login.app_metadata["customer_id"]) {
+          await unlinkCustomer(container, login.identity_id)
+        }
+      }
+    } catch (error) {
+      await restorePasswords(container, undo)
+      throw error
+    }
+    return new StepResponse({ identity_id: found.own.identity_id }, undo)
   },
   async (undo, { container }) => {
     if (undo) {
-      await restorePassword(container, undo)
+      await restorePasswords(container, undo)
     }
   }
 )
@@ -81,22 +99,22 @@ const setCustomerPasswordStep = createStep(
 /**
  * A wholesaler's new password, typed by staff (ADR-0068 Ek 2026-11-15
  * (2)): there is no invitation mail to recover one, and the storefront's
- * own reset stays open to them. The account must be bound (active or
- * closed); the password, sealed for the request by the route after the
- * platform's rule, replaces the sign-in's and ends every older sign-in.
- * Kept out of the workflow store.
+ * own reset stays open to them. Only an open account whose sign-in staff
+ * made or took over; the password, sealed for the request by the route
+ * after the platform's rule, replaces the sign-in's and ends every older
+ * sign-in. Kept out of the workflow store.
  */
 export const setWholesalerPasswordWorkflow = createWorkflow(
   { name: "wholesale-set-password", store: false },
   (input: { id: string; email: string; sealed_password: string }) => {
     const lock = transform({ input }, ({ input }) => `wholesale-account:${input.id}`)
     acquireLockStep({ key: lock, timeout: 5, ttl: 60 })
-    const account = checkAccountStep(
+    checkAccountStep(
       transform({ input }, ({ input }) => ({ id: input.id, action: "password" as const }))
     )
     const set = setCustomerPasswordStep(
-      transform({ input, account }, ({ input, account }) => ({
-        customer_id: account.customer_id,
+      transform({ input }, ({ input }) => ({
+        id: input.id,
         sealed: input.sealed_password,
         email: input.email,
       }))

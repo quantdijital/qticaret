@@ -11,7 +11,14 @@ import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
-import { accountApi, groupsOf, joinGroup, tierRecords, wholesaleApi } from "../helpers/wholesale"
+import {
+  accountApi,
+  groupsOf,
+  joinGroup,
+  testPassword,
+  tierRecords,
+  wholesaleApi,
+} from "../helpers/wholesale"
 
 jest.setTimeout(240 * 1000)
 
@@ -166,14 +173,22 @@ medusaIntegrationTestRunner({
       expect(await groupsOf(getContainer(), customer.id)).toEqual([groupId])
     })
 
-    it("keeps the account workflows, which carry names and addresses, out of the store (L3)", async () => {
+    it("keeps the account workflows, which carry names, addresses and passwords, out of the store (L3)", async () => {
       const { account } = await wholesaler("depo")
       await accounts.update(account.id, { contact_name: "Veli Ak", company_name: "Ak Ticaret" })
+      // The two that carry a password (Ek 2026-11-15 (2)): a staff-made sign-in, its password set
+      const made = await accounts.made({
+        email: `depo-${String(Date.now())}@example.com`,
+        contact_name: "Ali Kaya",
+        own_prices: true,
+      })
+      expect((await accounts.password(made.id, testPassword())).status).toBe(200)
       const engine = getContainer().resolve(Modules.WORKFLOW_ENGINE)
       for (const workflowId of [
         "wholesale-create-account",
         "wholesale-update-account",
         "wholesale-claim-account",
+        "wholesale-set-password",
       ]) {
         const kept = await engine.listWorkflowExecutions({ workflow_id: workflowId })
         expect({ workflowId, kept: kept.length }).toEqual({ workflowId, kept: 0 })

@@ -3,7 +3,7 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { createAdminUser } from "../helpers/admin"
 import { registerCustomer } from "../helpers/customer"
 import type { TestCustomer } from "../helpers/customer"
-import type { HttpClient } from "../helpers/http"
+import type { HttpClient, HttpResponse } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
@@ -29,6 +29,17 @@ interface StoreCart {
 }
 
 const message = (answer: { data: unknown }) => (answer.data as { message?: string }).message
+
+/** The session cookie `POST /auth/session` set, as a request sends it back. */
+function sessionCookieOf(response: HttpResponse<unknown>): string {
+  const header = response.headers["set-cookie"]
+  const cookies = Array.isArray(header) ? header : header ? [header] : []
+  const cookie = cookies.find((value) => value.startsWith("connect.sid="))
+  if (!cookie) {
+    throw new Error("no session cookie was set")
+  }
+  return cookie.split(";")[0] ?? ""
+}
 
 /**
  * ADR-0068 slice 1b: wholesalers opened, changed, closed and reopened by
@@ -232,7 +243,7 @@ medusaIntegrationTestRunner({
       expect([none.status, message(none)]).toEqual([400, "wholesale.password_required"])
     })
 
-    it("sets a wholesaler's new password, every older sign-in ended", async () => {
+    it("sets a wholesaler's new password, every older token and session ended (review H1, L6)", async () => {
       await staff.flag(true)
       const { productId, tier } = await level("sifre")
       const email = fresh()
@@ -248,9 +259,15 @@ medusaIntegrationTestRunner({
       )
       const oldHeaders = { ...store.headers, authorization: `Bearer ${before.data.token}` }
       expect(await priceFor(productId, oldHeaders)).toBe(80)
-      // Sign-ins are compared by the second
-      await new Promise((resolve) => setTimeout(resolve, 1_100))
+      // A real session opened before the change, from that token
+      const opened = await http.post("/auth/session", {}, { headers: oldHeaders })
+      const cookie = sessionCookieOf(opened)
+      const cookieHeaders = { ...store.headers, cookie }
+      expect(
+        (await settle(http.get("/store/customers/me", { headers: cookieHeaders }))).status
+      ).toBe(200)
 
+      // No wait: a sign-in of the change's own second is ended too (L6)
       const second = testPassword()
       const set = await accounts.password(account.id, second)
       expect(set.status).toBe(200)
@@ -258,13 +275,31 @@ medusaIntegrationTestRunner({
       expect((await settle(http.get("/store/customers/me", { headers: oldHeaders }))).status).toBe(
         401
       )
+      // The old session beside a forged bearer is refused too: Medusa reads the session first (H1)
+      const forged = `x.${Buffer.from(JSON.stringify({ auth_identity_id: "auth_forged", iat: 4_102_444_800 })).toString("base64url")}.y`
+      expect(
+        (
+          await settle(
+            http.get("/store/customers/me", {
+              headers: { ...cookieHeaders, authorization: `Bearer ${forged}` },
+            })
+          )
+        ).status
+      ).toBe(401)
+      expect(
+        (await settle(http.get("/store/customers/me", { headers: cookieHeaders }))).status
+      ).toBe(401)
       expect(
         (await settle(http.post("/auth/customer/emailpass", { email, password: first }))).status
       ).toBe(401)
+      // The change is noted a second ahead (L6): a sign-in after it waits that second out
+      await new Promise((resolve) => setTimeout(resolve, 2_100))
       const after = await settle(
         http.post<{ token: string }>("/auth/customer/emailpass", { email, password: second })
       )
       expect(after.status).toBe(200)
+      const newHeaders = { ...store.headers, authorization: `Bearer ${after.data.token}` }
+      expect(await priceFor(productId, newHeaders)).toBe(80)
     })
 
     it("finds wholesalers on the list by company and by state", async () => {

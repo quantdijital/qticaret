@@ -108,6 +108,23 @@ medusaIntegrationTestRunner({
       expect((await accounts.action(account.id, "deactivate")).status).toBe(200)
       const after = await board("stage=all&segment=wholesale")
       expect(after.data.orders.map((row) => row.id)).toContain(wholesaleId)
+      // Operations ship them too, but see the company only and cannot narrow by wholesaler (L7)
+      const operations = await createAdminUser(http, container, "operations")
+      const shipped = await settle(
+        http.get<Board>("/admin/order-board?stage=all&segment=wholesale", {
+          headers: operations.headers,
+        })
+      )
+      expect(shipped.status).toBe(200)
+      expect(shipped.data.orders.find((row) => row.id === wholesaleId)?.wholesaler).toEqual({
+        name: "Kaya Bıçak Ltd",
+      })
+      const narrowed = await settle(
+        http.get(`/admin/order-board?segment=wholesale&wholesaler=${account.id}`, {
+          headers: operations.headers,
+        })
+      )
+      expect(narrowed.status).toBe(400)
       // The customer's page shows every order of theirs
       const theirs = await board(`stage=all&segment=all&customer_id=${customer.id}`)
       expect(theirs.data.orders.map((row) => row.id)).toContain(wholesaleId)

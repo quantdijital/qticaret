@@ -2,6 +2,7 @@ import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusaj
 import { errorSummary, logger } from "../../lib/logging"
 import { staffAccountStore } from "../../lib/staff/account-store"
 import type { AccountStore } from "../../lib/staff/account-store"
+import { SESSION_SIGNED_IN_AT } from "./sign-in-epoch"
 
 /**
  * A staff member's panel sessions (the owner, 2026-11-06; security review
@@ -240,6 +241,10 @@ export async function renewSession(
     const renewed = asSession(req)
     if (renewed.session) {
       renewed.session.auth_context = kept ?? null
+      // The renewed session is a sign-in after the change: noted, as `POST /auth/session` notes one
+      ;(renewed.session as Record<string, unknown>)[SESSION_SIGNED_IN_AT] = Math.floor(
+        Date.now() / 1000
+      )
       await new Promise<void>((resolve, reject) => {
         renewed.session?.save?.((error) => {
           if (error) {

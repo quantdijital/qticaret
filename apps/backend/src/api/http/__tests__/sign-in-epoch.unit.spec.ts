@@ -61,6 +61,7 @@ async function run(req: MedusaRequest) {
 
 beforeEach(() => {
   forgetPasswordChange("auth_1")
+  forgetPasswordChange("auth_x")
 })
 
 describe("a changed password ends every older sign-in (ADR-0068 Ek 2026-11-15 (2))", () => {
@@ -110,5 +111,51 @@ describe("a changed password ends every older sign-in (ADR-0068 Ek 2026-11-15 (2
     noteSessionSignIn({ session } as unknown as MedusaRequest, fakeResponse().res, next)
     expect(typeof session[SESSION_SIGNED_IN_AT]).toBe("number")
     expect(next).toHaveBeenCalled()
+  })
+
+  it("refuses an old session whatever bearer comes beside it, and ends it (review H1)", async () => {
+    // Medusa reads the session first: a forged bearer must not hide the session from the check
+    const old = request({
+      session: {
+        auth_context: { auth_identity_id: "auth_1" },
+        [SESSION_SIGNED_IN_AT]: changedSeconds - 60,
+      },
+      bearer: { auth_identity_id: "auth_x", iat: changedSeconds + 60 },
+      changedAt: CHANGED,
+    })
+    expect(await run(old.req)).toEqual({ status: 401, passed: false })
+    expect(old.destroy).toHaveBeenCalled()
+  })
+
+  it("refuses an old bearer beside a fresh session, the session left alone", async () => {
+    const mixed = request({
+      session: {
+        auth_context: { auth_identity_id: "auth_1" },
+        [SESSION_SIGNED_IN_AT]: changedSeconds + 60,
+      },
+      bearer: { auth_identity_id: "auth_x", iat: changedSeconds - 60 },
+      changedAt: CHANGED,
+    })
+    expect(await run(mixed.req)).toEqual({ status: 401, passed: false })
+    expect(mixed.destroy).not.toHaveBeenCalled()
+  })
+
+  it("does not hold a failed read as never changed (review INFO)", async () => {
+    const retrieve = jest
+      .fn()
+      .mockRejectedValueOnce(new Error("database away"))
+      .mockResolvedValueOnce({ app_metadata: { password_changed_at: CHANGED } })
+    const req = {
+      path: "/store/carts",
+      originalUrl: "/store/carts",
+      method: "GET",
+      headers: {
+        authorization: `Bearer ${token({ auth_identity_id: "auth_1", iat: changedSeconds - 60 })}`,
+      },
+      scope: { resolve: () => ({ retrieveAuthIdentity: retrieve }) },
+    } as unknown as MedusaRequest
+    expect(await run(req)).toEqual({ status: 200, passed: true })
+    expect(await run(req)).toEqual({ status: 401, passed: false })
+    expect(retrieve).toHaveBeenCalledTimes(2)
   })
 })

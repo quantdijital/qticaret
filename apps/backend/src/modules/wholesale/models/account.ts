@@ -25,6 +25,12 @@ export const WholesaleAccount = model
     min_quantity: model.number().nullable(),
     /** Invitations sent while pending, the first counted; a resend is capped (review L2). */
     invite_count: model.number().default(1),
+    /**
+     * The sign-in is one staff made or took over (Ek 2026-11-15 (2), review
+     * M4): only then may staff set a new password; a customer who proved
+     * their own address keeps theirs. Set by the server only.
+     */
+    staff_login: model.boolean().default(false),
     status: model.enum(["pending", "active", "inactive"]).default("pending"),
     invited_at: model.dateTime().nullable(),
     activated_at: model.dateTime().nullable(),

@@ -1,4 +1,4 @@
-import type { ICartModuleService, MedusaContainer } from "@medusajs/framework/types"
+import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { createCustomerAccountWorkflow } from "@medusajs/medusa/core-flows"
@@ -7,14 +7,10 @@ import { likeLiteral } from "../../../lib/db/like"
 import { errorSummary, logger } from "../../../lib/logging"
 import { normalizeEmail, splitContactName } from "../../../lib/wholesale"
 import { provenCustomer } from "../../account/proven-customer"
-import {
-  confirmAddress,
-  dropConfirmations,
-  registerLogin,
-  replacePassword,
-  restorePassword,
-} from "./login-password"
-import type { PasswordUndo } from "./login-password"
+import { confirmAddress, dropConfirmations, emailLoginsAt, registerLogin } from "./login-password"
+import type { EmailLogin } from "./login-password"
+import { takeOver, undoTakeOver } from "./take-over"
+import type { TakeOverUndo } from "./take-over"
 
 /**
  * Who signs in at a new wholesaler's address (ADR-0068 Ek 2026-11-15
@@ -23,9 +19,11 @@ import type { PasswordUndo } from "./login-password"
  * 1. no sign-in: a customer and its e-mail sign-in made, password set;
  * 2. a customer who proved the address: theirs, their own password kept;
  * 3. a sign-up that never proved it (someone may hold the address): refused
- *    unless staff take it over, which replaces the password, ends every
- *    older sign-in and sets its open carts aside;
- * a staff member's sign-in is never touched.
+ *    unless staff take it over (`take-over.ts`): every sign-in at the
+ *    address gets staff's password and ends its older sign-ins, the
+ *    sign-up's customer record is retired and a fresh one opened;
+ * a staff member's sign-in, or one tied to another customer, is never
+ * touched (checked before anything else, review M3).
  */
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -33,33 +31,22 @@ type Container = Pick<MedusaContainer, "resolve">
 export type AddressLogin =
   | { kind: "none" }
   | { kind: "proven"; customer_id: string }
-  | { kind: "unproven"; customer_id: string | null; identity_id: string | null }
+  | { kind: "unproven"; customer_id: string | null; logins: EmailLogin[] }
   | { kind: "staff" }
 
-interface AuthRows {
-  listProviderIdentities: (
-    filters: Record<string, unknown>,
-    config: { select: string[]; take: number }
-  ) => Promise<{ auth_identity_id?: string | null }[]>
-}
-
-/** The e-mail sign-in at the address (any case), its identity's app metadata. */
-async function emailLogin(container: Container, email: string) {
-  const auth = container.resolve(Modules.AUTH)
-  const [login] = await (auth as unknown as AuthRows).listProviderIdentities(
-    { provider: "emailpass", entity_id: { $ilike: likeLiteral(email) } },
-    { select: ["auth_identity_id"], take: 1 }
-  )
-  if (!login?.auth_identity_id) {
-    return null
-  }
-  const identity = await auth.retrieveAuthIdentity(login.auth_identity_id)
-  return { id: identity.id, app_metadata: identity.app_metadata ?? {} }
+const linkedCustomer = (login: EmailLogin) => {
+  const id = login.app_metadata["customer_id"]
+  return typeof id === "string" ? id : null
 }
 
 /** What signs in at the address now; read only. */
 export async function addressLogin(container: Container, address: string): Promise<AddressLogin> {
   const email = normalizeEmail(address)
+  const logins = await emailLoginsAt(container, email)
+  // A staff member's sign-in, whatever else the identity holds: never ours (review M3)
+  if (logins.some((login) => typeof login.app_metadata["user_id"] === "string")) {
+    return { kind: "staff" }
+  }
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "customer",
     fields: ["id"],
@@ -69,19 +56,16 @@ export async function addressLogin(container: Container, address: string): Promi
   if (customerId && (await provenCustomer(container, customerId))) {
     return { kind: "proven", customer_id: customerId }
   }
-  const login = await emailLogin(container, email)
-  if (login && typeof login.app_metadata["user_id"] === "string") {
+  // A sign-in tied to another customer than the one at the address is no one's to take
+  if (
+    logins.some((login) => linkedCustomer(login) !== null && linkedCustomer(login) !== customerId)
+  ) {
     return { kind: "staff" }
   }
-  const linked = login?.app_metadata["customer_id"]
-  if (customerId === null && login === null) {
+  if (customerId === null && logins.length === 0) {
     return { kind: "none" }
   }
-  // A sign-in tied to another customer than the one at the address is no one's to take
-  if (login && typeof linked === "string" && linked !== customerId) {
-    return { kind: "staff" }
-  }
-  return { kind: "unproven", customer_id: customerId, identity_id: login?.id ?? null }
+  return { kind: "unproven", customer_id: customerId, logins }
 }
 
 export interface EnsureLoginInput {
@@ -100,9 +84,7 @@ export type PasswordOutcome = "set" | "replaced" | "kept"
 export interface LoginUndo {
   identity_made: string | null
   customer_made: string | null
-  password: PasswordUndo | null
-  linked_identity: { id: string; before: Record<string, unknown> } | null
-  carts: string[]
+  take_over: TakeOverUndo | null
   confirmations: string[]
 }
 
@@ -120,21 +102,12 @@ function refusalOf(input: EnsureLoginInput): Error | null {
   return null
 }
 
-/** The customer's open carts set aside: one priced for the sign-up before must not go on. */
-async function setCartsAside(container: Container, customerId: string): Promise<string[]> {
-  const carts = container.resolve<ICartModuleService>(Modules.CART)
-  const open = await carts.listCarts({ customer_id: customerId, completed_at: null } as never, {
-    select: ["id"],
-    take: null,
-  })
-  const ids = open.map((cart) => cart.id)
-  if (ids.length > 0) {
-    await carts.softDeleteCarts(ids)
-  }
-  return ids
-}
-
-async function makeCustomer(container: Container, input: EnsureLoginInput, identityId: string) {
+/** A new customer record for the sign-in, with the account's names. */
+export async function makeCustomer(
+  container: Container,
+  input: Pick<EnsureLoginInput, "email" | "contact_name" | "company_name">,
+  identityId: string
+): Promise<string> {
   const { result } = await createCustomerAccountWorkflow(container as MedusaContainer).run({
     input: {
       authIdentityId: identityId,
@@ -149,25 +122,15 @@ async function makeCustomer(container: Container, input: EnsureLoginInput, ident
 }
 
 export async function undoLogin(container: Container, undo: LoginUndo) {
-  const auth = container.resolve(Modules.AUTH)
   await dropConfirmations(container, undo.confirmations)
-  if (undo.carts.length > 0) {
-    await container.resolve<ICartModuleService>(Modules.CART).restoreCarts(undo.carts)
-  }
   if (undo.customer_made) {
     await container.resolve(Modules.CUSTOMER).deleteCustomers([undo.customer_made])
   }
-  if (undo.linked_identity) {
-    await auth.updateAuthIdentities({
-      id: undo.linked_identity.id,
-      app_metadata: undo.linked_identity.before,
-    })
-  }
-  if (undo.password) {
-    await restorePassword(container, undo.password)
+  if (undo.take_over) {
+    await undoTakeOver(container, undo.take_over)
   }
   if (undo.identity_made) {
-    await auth.deleteAuthIdentities([undo.identity_made])
+    await container.resolve(Modules.AUTH).deleteAuthIdentities([undo.identity_made])
   }
 }
 
@@ -186,47 +149,29 @@ export async function ensureLogin(
   }
   const { login } = input
   if (login.kind === "proven") {
-    return {
-      result: { customer_id: login.customer_id, password: "kept" },
-      undo: null,
-    }
+    return { result: { customer_id: login.customer_id, password: "kept" }, undo: null }
   }
   const email = normalizeEmail(input.email)
   const sealed = input.sealed_password ?? ""
   const undo: LoginUndo = {
     identity_made: null,
     customer_made: null,
-    password: null,
-    linked_identity: null,
-    carts: [],
+    take_over: null,
     confirmations: [],
   }
   try {
     let identityId: string
-    let customerId: string | null = login.kind === "unproven" ? login.customer_id : null
-    if (login.kind === "unproven" && login.identity_id) {
-      identityId = login.identity_id
-      undo.password = await replacePassword(container, { identity_id: identityId, email, sealed })
+    if (login.kind === "unproven") {
+      const taken = await takeOver(container, { email, sealed, login })
+      undo.take_over = taken.undo
+      undo.identity_made = taken.identity_made
+      identityId = taken.identity_id
     } else {
       identityId = await registerLogin(container, email, sealed)
       undo.identity_made = identityId
     }
-    if (customerId === null) {
-      customerId = await makeCustomer(container, input, identityId)
-      undo.customer_made = customerId
-    } else if (!(login.kind === "unproven" && login.identity_id)) {
-      // A customer without an e-mail sign-in: the new sign-in is theirs
-      const auth = container.resolve(Modules.AUTH)
-      const identity = await auth.retrieveAuthIdentity(identityId)
-      undo.linked_identity = { id: identityId, before: identity.app_metadata ?? {} }
-      await auth.updateAuthIdentities({
-        id: identityId,
-        app_metadata: { ...(identity.app_metadata ?? {}), customer_id: customerId },
-      })
-    }
-    if (login.kind === "unproven" && login.customer_id) {
-      undo.carts = await setCartsAside(container, login.customer_id)
-    }
+    const customerId = await makeCustomer(container, input, identityId)
+    undo.customer_made = customerId
     undo.confirmations = await confirmAddress(container, identityId, email)
     return {
       result: {

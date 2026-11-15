@@ -73,7 +73,7 @@ export const createAccountWorkflow = createWorkflow(
       }))
     )
     const account = createAccountRowStep(
-      transform({ input }, ({ input }) => ({
+      transform({ input, login }, ({ input, login }) => ({
         email: normalizeEmail(input.email),
         company_name: input.company_name,
         contact_name: input.contact_name,
@@ -81,6 +81,8 @@ export const createAccountWorkflow = createWorkflow(
         rate_bps: input.rate_bps,
         min_quantity: input.min_quantity,
         invited_at: null,
+        // Made or taken over by staff: theirs to set again (review M4); a proven customer's is not
+        staff_login: login.password !== "kept",
         created_by: input.created_by,
       }))
     )

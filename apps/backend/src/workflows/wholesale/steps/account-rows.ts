@@ -34,7 +34,7 @@ const ACTION_STATE: Record<AccountAction, string> = {
   deactivate: "active",
   reactivate: "inactive",
   delete: "pending",
-  password: "bound",
+  password: "active",
 }
 
 /** The account is in a state that allows the action, or 409 says it is not. */
@@ -70,8 +70,10 @@ export interface AccountRowInput {
   tier_id: string | null
   rate_bps: number | null
   min_quantity: number | null
-  /** Set when no registered customer has the address: the invitation goes out. */
+  /** Null: no invitation goes out any more (Ek 2026-11-15 (2)). */
   invited_at: Date | null
+  /** The sign-in is one staff made or took over (review M4). */
+  staff_login: boolean
   created_by: string | null
 }
 

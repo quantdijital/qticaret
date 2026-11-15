@@ -150,33 +150,76 @@ medusaIntegrationTestRunner({
       expect(await groupsOf(getContainer(), intruder.id)).toEqual([])
     })
 
-    it("takes an unconfirmed sign-up over: password replaced, the intruder signed out (b2)", async () => {
+    it("takes an unconfirmed sign-up over: every sign-in ended, nothing it planted kept (b2)", async () => {
       const { productId, tier } = await level("devral")
       const email = `devral-${randomUUID()}@example.com`
       const intruder = await unconfirmed(email)
-      // Sign-ins are compared by the second: the take-over comes in a later one, as it would
-      await new Promise((resolve) => setTimeout(resolve, 1_100))
+      // What the intruder planted on their record: an address the wholesaler must not inherit
+      await getContainer()
+        .resolve(Modules.CUSTOMER)
+        .createCustomerAddresses([
+          { customer_id: intruder.id, first_name: "Saldırgan", address_1: "Bilinmeyen Sk. 1" },
+        ])
+      // A second sign-in at the address in another case, where the provider keeps them apart (M2)
+      const variant = email.replace(/^d/, "D")
+      const second = await settle(
+        http.post("/auth/customer/emailpass/register", {
+          email: variant,
+          password: intruder.password,
+        })
+      )
       const password = testPassword()
       const made = await accounts.create({
         email,
         contact_name: "Ali Kaya",
+        company_name: "Kaya Bıçak",
+        tax_office: "Kadıköy",
+        tax_id: "1234567890",
         tier_id: tier.id,
         password,
         take_over: true,
       })
       expect(made.status).toBe(201)
-      expect(made.data).toMatchObject({
-        account: { status: "active", customer: { id: intruder.id } },
-        password: "replaced",
+      expect(made.data).toMatchObject({ account: { status: "active" }, password: "replaced" })
+      // A fresh customer for the wholesaler; the sign-up's record retired (M5)
+      const customerId = made.data.account.customer?.id ?? ""
+      expect(customerId).not.toBe(intruder.id)
+      const query = getContainer().resolve(ContainerRegistrationKeys.QUERY)
+      const { data: rows } = await query.graph({
+        entity: "customer",
+        fields: ["id", "has_account", "addresses.id", "billing_profile.legal_name"],
+        filters: { id: [customerId, intruder.id] },
+        withDeleted: true,
       })
+      const byId = new Map(
+        (
+          rows as {
+            id: string
+            has_account: boolean
+            addresses?: unknown[]
+            billing_profile?: { legal_name?: string } | null
+          }[]
+        ).map((row) => [row.id, row])
+      )
+      expect(byId.get(customerId)).toMatchObject({
+        has_account: true,
+        addresses: [],
+        billing_profile: { legal_name: "Kaya Bıçak" },
+      })
+      expect(byId.get(intruder.id)?.has_account).toBe(false)
+
       // Every sign-in from before the take-over is refused, not only a refresh
       expect((await readMe(intruder.headers)).status).toBe(401)
       expect(await priceFor(productId, intruder.headers)).toBe(401)
-      const old = await settle(
-        http.post("/auth/customer/emailpass", { email, password: intruder.password })
-      )
-      expect(old.status).toBe(401)
+      for (const address of second.status === 200 ? [email, variant] : [email]) {
+        const old = await settle(
+          http.post("/auth/customer/emailpass", { email: address, password: intruder.password })
+        )
+        expect({ address, status: old.status }).toEqual({ address, status: 401 })
+      }
 
+      // The change is noted a second ahead (L6): a sign-in after it waits that second out
+      await new Promise((resolve) => setTimeout(resolve, 2_100))
       const login = await settle(
         http.post<{ token: string }>("/auth/customer/emailpass", { email, password })
       )
@@ -184,6 +227,15 @@ medusaIntegrationTestRunner({
       const headers = { ...store.headers, authorization: `Bearer ${login.data.token}` }
       expect((await readMe(headers)).status).toBe(200)
       expect(await priceFor(productId, headers)).toBe(80)
+      // The wholesaler's first cart starts with no address of the intruder's
+      const cart = await settle(
+        http.post<{ cart: { shipping_address: unknown } }>(
+          "/store/carts",
+          { region_id: shop.regionId },
+          { headers }
+        )
+      )
+      expect(cart.data.cart.shipping_address ?? null).toBeNull()
     })
 
     it("counts no code confirmed for another address (c)", async () => {

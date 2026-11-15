@@ -24,6 +24,7 @@ import {
 } from "../admin/wholesale/account-validators"
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
+import { requireReauth } from "./reauth"
 import { requireFeature } from "./require-feature"
 import { guardWholesaleRecords, hideWholesaleRecords } from "./wholesale-guard"
 import { guardWholesaleLinkFields } from "./wholesale-link-fields"
@@ -87,7 +88,12 @@ export const WHOLESALE_ROUTES = [
   {
     matcher: "/admin/wholesale/accounts",
     methods: ["POST" as const],
-    middlewares: staff(perStaff(), validateAndTransformBody(AdminPostWholesaleAccount)),
+    middlewares: staff(
+      perStaff(),
+      // Taking over an unconfirmed sign-up replaces someone's password: proved again (review M4)
+      requireReauth((req) => (req.body as { take_over?: unknown } | undefined)?.take_over === true),
+      validateAndTransformBody(AdminPostWholesaleAccount)
+    ),
   },
   { matcher: "/admin/wholesale/accounts/:id", methods: ["GET" as const], middlewares: staff() },
   {
@@ -105,7 +111,11 @@ export const WHOLESALE_ROUTES = [
   {
     matcher: "/admin/wholesale/accounts/:id/password",
     methods: ["POST" as const],
-    middlewares: staff(perStaff(), validateAndTransformBody(AdminPostWholesalePassword)),
+    middlewares: staff(
+      perStaff(),
+      requireReauth(),
+      validateAndTransformBody(AdminPostWholesalePassword)
+    ),
   },
   {
     matcher: "/admin/wholesale/accounts/:id/lines",

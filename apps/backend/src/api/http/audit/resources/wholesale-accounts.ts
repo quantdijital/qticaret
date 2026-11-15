@@ -29,6 +29,7 @@ const accountSnapshot = (account: Account | undefined): Snapshot =>
         customer_id: account.customer_id ?? null,
         tier_id: account.tier_id ?? null,
         own_prices: account.private_price_list_id !== null,
+        staff_login: account.staff_login,
         rate_bps: account.rate_bps ?? null,
         min_quantity: account.min_quantity ?? null,
         invited_at: stamp(account.invited_at),

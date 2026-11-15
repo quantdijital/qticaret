@@ -33,9 +33,10 @@ medusaIntegrationTestRunner({
     let staff: ReturnType<typeof wholesaleApi>
     let accounts: ReturnType<typeof accountApi>
     let store: Storefront
+    let admin: Awaited<ReturnType<typeof createAdminUser>>
 
     beforeEach(async () => {
-      const admin = await createAdminUser(http, getContainer())
+      admin = await createAdminUser(http, getContainer())
       staff = wholesaleApi(http, admin.headers)
       accounts = accountApi(http, admin.headers)
       store = await createStorefront(getContainer())
@@ -115,24 +116,59 @@ medusaIntegrationTestRunner({
       expect([refused.status, message(refused)]).toEqual([409, "wholesale.account_not_pending"])
     })
 
-    it("sets a new password for a bound wholesaler only, by the platform's rule", async () => {
+    it("sets a new password only on an open account whose sign-in staff made (review M4)", async () => {
       const pending = await legacyPendingAccount(getContainer(), { email: fresh() })
       const unbound = await accounts.password(pending.id, testPassword())
       expect([unbound.status, message(unbound)]).toEqual([409, "wholesale.account_not_bound"])
 
+      // A customer who proved their own address keeps their own password
       const customer = await registerCustomer(http, store)
-      const active = await accounts.made({
+      const kept = await accounts.made({
         email: customer.email,
         contact_name: "Ali Kaya",
         own_prices: true,
       })
-      const weak = await accounts.password(active.id, "123")
+      const own = await accounts.password(kept.id, testPassword())
+      expect([own.status, message(own)]).toEqual([409, "wholesale.password_own_login"])
+      expect((await accounts.get(kept.id)).data.account).toMatchObject({ staff_login: false })
+
+      const made = await accounts.made({
+        email: fresh(),
+        contact_name: "Ali Kaya",
+        own_prices: true,
+      })
+      expect((await accounts.get(made.id)).data.account).toMatchObject({ staff_login: true })
+      const weak = await accounts.password(made.id, "123")
       expect(weak.status).toBe(400)
-      const extra = await staff.post(`/admin/wholesale/accounts/${active.id}/password`, {
+      const extra = await staff.post(`/admin/wholesale/accounts/${made.id}/password`, {
         password: testPassword(),
         email: "x@example.com",
       })
       expect(extra.status).toBe(400)
+      // Not on a closed account
+      expect((await accounts.action(made.id, "deactivate")).status).toBe(200)
+      const closed = await accounts.password(made.id, testPassword())
+      expect([closed.status, message(closed)]).toEqual([409, "wholesale.account_not_active"])
+    })
+
+    it("asks staff to prove themselves again for a new password and a take-over (review M4)", async () => {
+      const made = await accounts.made({
+        email: fresh(),
+        contact_name: "Ali Kaya",
+        own_prices: true,
+      })
+      const plain = accountApi(http, admin.plain)
+      expect((await plain.password(made.id, testPassword())).status).toBe(428)
+      const takeOver = await plain.create({
+        email: fresh(),
+        contact_name: "Ali",
+        own_prices: true,
+        take_over: true,
+      })
+      expect(takeOver.status).toBe(428)
+      // An ordinary opening needs no proof
+      const ordinary = await plain.create({ email: fresh(), contact_name: "Ali", own_prices: true })
+      expect(ordinary.status).toBe(201)
     })
 
     it("expands a customer's wholesale link for the owner and admin only (M3)", async () => {
@@ -163,9 +199,11 @@ medusaIntegrationTestRunner({
       expect(JSON.stringify(owned.data)).toContain(account.id)
     })
 
-    it("counts openings against a staff member's budget: twenty an hour", async () => {
+    // Opening a wholesaler mails no one any more (Ek 2026-11-15 (2)): it counts as the other
+    // wholesale writes do, ten a minute from one address and thirty in ten minutes per person
+    it("counts openings against the wholesale writes' budget: ten a minute", async () => {
       const statuses: number[] = []
-      for (let i = 0; i < 21; i += 1) {
+      for (let i = 0; i < 11; i += 1) {
         const made = await accounts.create({
           email: fresh(),
           contact_name: "Ali",
@@ -173,8 +211,8 @@ medusaIntegrationTestRunner({
         })
         statuses.push(made.status)
       }
-      expect(statuses.slice(0, 20).every((status) => status === 201)).toBe(true)
-      expect(statuses[20]).toBe(429)
+      expect(statuses.slice(0, 10).every((status) => status === 201)).toBe(true)
+      expect(statuses[10]).toBe(429)
     })
   },
 })

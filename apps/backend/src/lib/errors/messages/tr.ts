@@ -58,6 +58,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "orders.nothing_to_deliver": "Teslim edilecek, mağazanın kendi teslimatında bir koli yok.",
   "orders.deliver_failed":
     "Sipariş teslim edildi olarak işaretlenemedi; sipariş sayfasından tekrar deneyin.",
+  "orders.wholesaler_filter_denied":
+    "Toptancıya göre süzmeyi yalnızca mağaza sahibi ve yöneticiler kullanabilir.",
   "orders.range_invalid":
     "Tarih aralığı geçersiz: günler YYYY-AA-GG biçiminde olmalı ve başlangıç bitişten sonra olamaz.",
   "orders.note_unknown": "Not bulunamadı; silinmiş olabilir.",
@@ -802,6 +804,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "wholesale.login_in_use":
     "Bu e-posta adresi mağaza ekibinden birinin girişinde kullanılıyor; toptancı için başka bir adres kullanın.",
   "wholesale.login_not_made": "Toptancının girişi hazırlanamadı. Biraz sonra yeniden deneyin.",
+  "wholesale.password_own_login":
+    'Bu toptancı kendi doğruladığı hesabıyla giriş yapıyor; şifresini kendisi vitrindeki "Şifremi unuttum" ile yeniler.',
   "wholesale.no_password_login":
     "Bu müşteri e-posta ve şifreyle değil, başka bir yolla (ör. Google) giriş yapıyor; şifre belirlenemez.",
   "platform_settings.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",

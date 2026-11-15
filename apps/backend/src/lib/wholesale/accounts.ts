@@ -138,8 +138,8 @@ export const ACCOUNT_ACTIONS = {
   reactivate: ["inactive"],
   // A pending account is one invited before staff set passwords (Ek 2026-11-15 (2)): taken back only
   delete: ["pending"],
-  // A new password typed by staff (Ek 2026-11-15 (2)): a bound account, open or closed
-  password: ["active", "inactive"],
+  // A new password typed by staff (Ek 2026-11-15 (2)): an open account only (review M4)
+  password: ["active"],
 } as const satisfies Record<string, readonly AccountStatus[]>
 
 export type AccountAction = keyof typeof ACCOUNT_ACTIONS
