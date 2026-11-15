@@ -349,3 +349,33 @@ Yetki notu (sahip, 2026-11-15): backend ve güvenlik parçaları dahil bütün f
 - Elementor'un `content_template()` olmayan widget'ı AJAX ile sunucuda çizdiği; Divi 5'in iframe kullanıp kullanmadığı; Contentful'ün `postMessage` ve `data-contentful-*` ayrıntıları (resmi sayfa erişilemedi).
 - CSSOM ile yazılan konum stilinin `style-src-attr`'e takılmadığı (Faz 2'de e2e ile doğrulanacak); `startTransition` ile `router.refresh()`'in bitişinin güvenilir biçimde yakalanabildiği (Faz 1'in ilk işi).
 - Sahibin bildirdiği yaklaşık 2 sn gecikme ölçülmedi; bileşenleri koddan ve docs/21'den çıkarıldı. Tekrarlanan öğelerin (slayt, SSS maddesi) kalıcı kimliği olup olmadığı.
+
+## Ek 2026-11-15: Faz 2 uygulaması ve sistem sayfaları önizlemede
+
+### 1. Faz 2 sahip kararı 1'e göre uygulandı
+
+- **İnceleme kipi ve "İncele" düğmesi yok.** Önizlemede tıklama gezer. Gezinti önizlemenin içinde kalır. Bölümün üstüne gelince kesik çizgili çerçeve ve sağ üst köşede "Düzenle · <bölüm adı>" etiketi çıkar. Etikete basılınca `click` gider, panel formu açar ve `aria-live` ile "Seçildi: …" der. Dokunmatik ekranda (`hover: none`) her bölümde küçük bir "Düzenle" tutamağı görünür. Klavyede önizleme odaktayken `Alt+↓` / `Alt+↑` bölümler arasında gezer ve odağı etikete verir; etiket bir düğmedir, `Enter` ile açılır. `Escape` Faz 1'deki gibi odağı panele döndürür.
+- **Katman** `qt-editor-layer` öğesinde, kapalı (`closed`) bir shadow root altındadır. Stili nonce'lu tek bir `<style>` öğesidir. Konum ve boyut CSSOM ile yazılır (`element.style.*`); `style` özniteliği ve `setAttribute("style")` kullanılmaz. Adlar `textContent` ile yazılır. Çizgi ve etiket `1/scale` katsayısıyla büyür.
+- **Yeni mesajlar** (her biri yeni tür; eski türlere alan eklenmedi, böylece sürüm farkındaki taraf tanımadığını atar):
+  - panelden vitrine `hover { id | null }` ve `labels { edit, names }` (en çok 400 ad, ad en çok 120 karakter);
+  - vitrinden panele `hover { id | null }`, `click { id }`, `navigate-request { path, previewable }`, `location { path, sections }` ve `left { path | null }`.
+  - `location`, çizilen sayfadaki bölüm kimliklerini sayfa sırasıyla taşır. Panel sayfanın türünü bunlardan çıkarır: ürün bölümleri varsa ürün sayfası ve o ürün örnek olur, kategori bölümleri varsa kategori sayfası, ana sayfa bölümleri varsa ana sayfa. Hiçbiri yoksa (sepet, arama, marka, blog) sayfa olduğu gibi gösterilir. Bu durumda panel "Önizlemede <yol> açık; bu sayfada üst ve alt bilgi düzenlenir" der, sayfa ya da örnek seçilince geri döner.
+  - `left`: sayfa önizlemeden kendi başına çıkarsa köprü bunu söküm sırasında bildirir ve panel çerçeveyi o sayfa için önizleme adresinde yeniden yükler. Örnekler: bir Server Action'ın `redirect("/sepet?hata=…")`'i, Next'in istemci gezintisi. Söküm anında adresin yeni sayfayı gösterdiği varsayımı **tarayıcıda doğrulanmadı**. Tam sayfa yüklemesinde (`location.assign`) Faz 1'in "5 sn'de `ready` yok" yolu çalışır.
+- **Tutulan gezinti** (yakalama evresinde, `preventDefault` + `stopPropagation`):
+  - Aynı kökenli düz sol tıklamalı bağlantılar ve `GET` arama formları panele sorulur.
+  - Değiştirici tuşlu tıklama, `target="_blank"`, `download`, sayfa içi `#` atlaması, `mailto:` ve `tel:` tarayıcıya bırakılır.
+  - Başka köken, `javascript:`/`data:` gibi şemalar, `/onizleme/…` adresleri ve `%2F`, `%5C`, `%00`, boşluk ya da denetim karakteri içeren yollar tutulur ve sessizce atılır.
+  - Ödeme, hesap ve giriş gibi yollar `previewable: false` ile sorulur; panel "önizlemede açılmaz" der, gezinti olmaz.
+  - React'in işlev eylemli formları ve `POST` formları (Server Action) yayındaki gibi çalışır.
+- **Tema olayları.** `qt:section:select` / `qt:section:deselect` (`{ sectionId, load: false }`, kabaran) seçimde kaydırmadan önce yayılır; `data-qt-editor` kök öğeye yazılır, söküldüğünde silinir. Atölye bu olaylarla iki şey yapar: sekmeli raftaki gizli sekmenin hapını işaretler (`ShelfTabsReveal`: canlı sayfada bir `<span hidden>` ve küçük bir istemci parçası ekler) ve seçili slaytın otomatik oynatmasını durdurur.
+- **Yapılmayanlar.** İsteğe bağlı `data-qb` blok işareti yapılmadı: tekrarlanan öğelerin kalıcı kimliği hâlâ doğrulanmadı, ayrı iş. CSP ihlal dinleyicili e2e ve Playwright turları bu PR'da yazılmadı; tarayıcı doğrulaması birleşmeden önce elle yapılır.
+
+### 2. Sistem sayfaları önizlemede: `/sepet` ve `/arama` (yapıldı)
+
+- **Sorun.** `previewPage` sistem yollarını ana sayfaya düşürüyordu. Sepet ve arama sonuçları taslak temasıyla görülemiyordu; önizlemede arama yapınca ya da sepete gidince ana sayfa açılıyordu.
+- **Karar.** Yalnız canlı oturumda (`sfs_`) `?sayfa=/sepet…` sepet sayfasını, `?sayfa=/arama?q=…` arama sonuçlarını taslağın üst/alt bilgisi ve tema ayarlarıyla çizer (`previewPage(raw, { system: true })`, `DesignPreviewScreen`'in `cart` ve `search` dalları). Paylaşılan `sfl_` bağlantısı bugünkü sayfalarla kalır.
+- **Neden güvenli.** Önizleme yalnız çizimi taslak temasıyla yapar. Sepet verisi ziyaretçinin kendi çerezinden gelir. Jeton yeni veri erişimi vermez, yalnız taslak düzeni okur. Yanıt `/onizleme/` yolunda olduğu için vekil `no-store` + `noindex, nofollow` yazar, ölçüm etiketleri kapalı kalır (`x-qt-url`). Sepetteki yazma eylemleri (adet, kod, ek seçim) Server Action olarak yayındaki gibi çalışır. Ödeme, hesap, giriş ve diğer sistem yolları açılmaz; köprü onları `previewable: false` sayar, sunucu da ana sayfaya düşürür.
+- **Bilinen sınırlar.**
+  - Panel başka bir sitedeyse (üçüncü taraf çerçeve) tarayıcı `SameSite=Lax` sepet çerezini göndermez. Önizlemede sepet boş görünür (boş sepet tasarımı). Bu tarayıcı kuralıdır, düzeltilmez.
+  - Bazı sepet eylemleri `redirect("/sepet?…")` ile yayındaki adrese gider; köprü bunu `left` ile bildirir, panel önizlemede geri açar (bkz. §1, doğrulanmadı).
+- **Önerilen ama yapılmayan.** Ödeme ve hesap sayfaları önizlemeye alınmadı. Ödeme sağlayıcı çerçeveleri iç içe iframe'de CSP `frame-ancestors` ve `form-action` kurallarına girer, hesap sayfaları oturum çerezine bağlıdır. Bunlar ayrı karar ister: ya örnek veriyle "tasarım görünümü" çizilir ya da yalnız yeni sekmede açılır.
