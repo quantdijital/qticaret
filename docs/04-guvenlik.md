@@ -167,6 +167,7 @@ Ayrıntı adr/0061 §3 ve Ek'leri; özet:
   - API yanıtlarında `src/api/http/security-headers.ts` uygulanır: `default-src 'none'; frame-ancestors 'none'`, nosniff, DENY, `no-referrer`, Permissions-Policy, yerel ortam dışında HSTS. `X-Powered-By` kaldırılır.
   - Medusa'nın bizim middleware'lerimizden önce yazdığı yanıtlar (admin auth 401, CORS preflight, `/app` ve `/static` dosyaları) bu header'ları alamaz. Admin CSP dahil hepsi F16'da reverse proxy'de eklenir.
   - Panelin kendi HTML'i (`apps/panel`, giriş, 2FA kurulumu, yeniden doğrulama penceresi, ekip ekranları) de API başlıklarını almaz. F16'da vekil sunucu panele `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` ve panel CSP'si ekler; e2e bir denetim bunu doğrular (F12 Y13 incelemesi).
+  - Vitrinin önizleme yolu `/onizleme/<jeton>` jetonu yolda taşır (tasarım bağlantısı `sfl_`, adr/0049; canlı düzenleyici oturumu `sfs_`, adr/0065). F16'da vekil ve CDN erişim günlükleri bu yolu maskeler (`/onizleme/***`); ham yol günlüğe, analitiğe ve hata izleyiciye girmez (güvenlik incelemesi 2026-11-15).
   - Medusa, store preflight'ında da publishable key ister; izinli origin bile 400 alır ve allow header'ı dönmez. Vitrin (F18) Store API'yi yalnızca kendi sunucusundan çağırır; tarayıcıdan doğrudan çağrı yoktur, bu yüzden ön istek sorunu doğmaz (adr/0046 §5).
 - Hata yanıtları iç detay sızdırmaz (stack trace, SQL, sağlayıcı ham yanıtı).
 - **Üst panel ↔ mağaza (adr/0061 §3.2, Ek C9):**
