@@ -7843,7 +7843,7 @@
         },
         "faq": {
           "name": "Frequently asked questions",
-          "description": "Questions and answers; search engines are told about them as a FAQ too."
+          "description": "Questions and answers that open and close; shown on the page only."
         },
         "related_products": {
           "name": "Related products",

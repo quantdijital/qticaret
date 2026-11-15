@@ -7843,7 +7843,7 @@
         },
         "faq": {
           "name": "Sık sorulan sorular",
-          "description": "Soru ve cevaplar; arama motorlarına da soru-cevap olarak bildirilir."
+          "description": "Açılır kapanır soru ve cevaplar; yalnız sayfada görünür."
         },
         "related_products": {
           "name": "Benzer ürünler",
