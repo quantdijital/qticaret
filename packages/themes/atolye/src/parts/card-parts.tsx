@@ -37,11 +37,24 @@ export const drawnCardVariant = (product: ProductCardView): CardVariant =>
       : "standard"
 
 /**
+ * Which pills the shop shows (adr/0049 Ek 2026-11-15): each on unless the
+ * card's `shown` turns it off, so a card without it draws today's.
+ */
+export const badgesOf = (product: ProductCardView) => ({
+  sale: product.shown?.saleBadge ?? true,
+  lowStock: product.shown?.lowStockBadge ?? true,
+  soldOut: product.shown?.soldOutBadge ?? true,
+})
+
+/**
  * The pills on a card's photo: a discount ("%30", the reader hears "%30
- * indirim"), then "Tükendi" or "Az kaldı" (a stock bucket, never a number).
+ * indirim"), then "Tükendi" or "Az kaldı" (a stock bucket, never a
+ * number); each as the shop shows it.
  */
 export function CardBadges({ product, t }: { product: ProductCardView; t: Translate }) {
-  const discount = product.price?.discount ?? null
+  const badges = badgesOf(product)
+  const discount = badges.sale ? (product.price?.discount ?? null) : null
+  const out = isOut(product)
   return (
     <ul className="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
       {discount !== null && (
@@ -50,13 +63,16 @@ export function CardBadges({ product, t }: { product: ProductCardView; t: Transl
           <span className="sr-only">{t("product.discount", { percent: discount })}</span>
         </li>
       )}
-      {isOut(product) ? (
-        <li className="rounded-pill bg-text px-2 py-1 text-paper">{t("product.out_of_stock")}</li>
-      ) : (
-        product.stock === "low" && (
-          <li className="rounded-pill bg-field px-2 py-1 text-text">{t("product.few_left")}</li>
-        )
-      )}
+      {out
+        ? badges.soldOut && (
+            <li className="rounded-pill bg-text px-2 py-1 text-paper">
+              {t("product.out_of_stock")}
+            </li>
+          )
+        : badges.lowStock &&
+          product.stock === "low" && (
+            <li className="rounded-pill bg-field px-2 py-1 text-text">{t("product.few_left")}</li>
+          )}
     </ul>
   )
 }

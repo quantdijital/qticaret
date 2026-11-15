@@ -37,7 +37,7 @@ const SWITCHES: NonNullable<CardOptions["framed"]> = {
   hoverImage: true,
   deliveryNote: true,
   fullButton: true,
-  emptyStars: true,
+  buttonStyle: "solid",
   freeShippingFrom: 1000,
 }
 
@@ -46,6 +46,14 @@ const FRAMED: CardOptions = {
   showRating: true,
   variant: "framed",
   framed: SWITCHES,
+  // adr/0049 Ek 2026-11-15: empty stars without reviews, every card's choice now
+  shown: {
+    saleBadge: true,
+    lowStockBadge: true,
+    soldOutBadge: true,
+    soldOutRow: "price",
+    noReviews: "empty_stars",
+  },
 }
 
 const card = (over: Partial<StoreProduct> = {}, options: CardOptions = FRAMED) =>
@@ -68,8 +76,9 @@ describe("a framed card (adr/0049 Ek 2026-11-14 §3.3)", () => {
         secondImage: { src: "https://cdn.example/arka.jpg" },
         freeShipping: true,
         fullButton: true,
-        emptyStars: true,
+        buttonStyle: "solid",
       },
+      shown: { noReviews: "empty_stars" },
     })
   })
 
@@ -104,11 +113,11 @@ describe("a framed card (adr/0049 Ek 2026-11-14 §3.3)", () => {
         ...(rating === undefined ? {} : { rating }),
       },
     })
-    const empty = (cards: ProductCardView[]) => cards[0]?.framed?.emptyStars
+    const empty = (cards: ProductCardView[]) => cards[0]?.shown?.noReviews === "empty_stars"
     expect(empty(withCardFacts([framed], facts(null), FRAMED, t))).toBe(true)
-    // An older backend says nothing of reviews; no facts at all neither
+    // An older backend says nothing of reviews; no facts at all neither: today's card again
     expect(empty(withCardFacts([framed], facts(undefined), FRAMED, t))).toBe(false)
-    expect(empty(withCardFacts([framed], {}, FRAMED, t))).toBe(false)
+    expect(withCardFacts([framed], {}, FRAMED, t)[0]).not.toHaveProperty("shown")
     const [rated] = withCardFacts([framed], facts({ average: 4.5, count: 2 }), FRAMED, t)
     expect(rated?.rating?.count).toBe(2)
   })

@@ -28,7 +28,13 @@ const CARD = {
   hover_image: true,
   delivery_note: true,
   full_button: true,
-  empty_stars: false,
+  // adr/0049 Ek 2026-11-15: every pill, the price on a sold-out card, no stars without reviews
+  sale_badge: true,
+  low_stock_badge: true,
+  sold_out_badge: true,
+  sold_out_row: "price",
+  no_reviews: "hide",
+  button_style: "outline",
 }
 
 /** F18 D11 (adr/0053): the shop picks its look from fixed lists; the storefront reads it. */

@@ -2,7 +2,13 @@ import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
-import type { FramedCardView, ImageView, ListingPageView, ProductCardView } from "@qticaret/ui"
+import type {
+  CardShownView,
+  FramedCardView,
+  ImageView,
+  ListingPageView,
+  ProductCardView,
+} from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 
 /**
@@ -24,7 +30,16 @@ const FRAMED: FramedCardView = {
   secondImage: image("https://cdn.example/arka.jpg"),
   freeShipping: true,
   fullButton: true,
-  emptyStars: true,
+  buttonStyle: "outline",
+}
+
+// Empty stars without reviews (adr/0049 Ek 2026-11-15: every card's, no longer the framed card's switch)
+const SHOWN: CardShownView = {
+  saleBadge: true,
+  lowStockBadge: true,
+  soldOutBadge: true,
+  soldOutRow: "price",
+  noReviews: "empty_stars",
 }
 
 const card = (over: Partial<ProductCardView> = {}): ProductCardView => ({
@@ -37,6 +52,7 @@ const card = (over: Partial<ProductCardView> = {}): ProductCardView => ({
   available: true,
   variant: "framed",
   framed: FRAMED,
+  shown: SHOWN,
   ...over,
 })
 
@@ -84,7 +100,13 @@ describe("the theme's framed card", () => {
   it("leaves out what the shop switched off, and the button of a product that is out", () => {
     const quiet = cardOf(
       card({
-        framed: { secondImage: null, freeShipping: false, fullButton: false, emptyStars: false },
+        framed: {
+          secondImage: null,
+          freeShipping: false,
+          fullButton: false,
+          buttonStyle: "outline",
+        },
+        shown: { ...SHOWN, noReviews: "hide" },
       })
     )
     expect(quiet.match(/<img /g)).toHaveLength(1)

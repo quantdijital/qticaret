@@ -7,10 +7,9 @@ import type {
   ProductCardView,
   Translate,
 } from "@qticaret/ui"
-import { CardBadges, CardRating, isOut, quickAddWords } from "./card-parts"
-import { Price } from "./Price"
-import { QuickAdd } from "./QuickAdd"
-import { Stars } from "./Stars"
+import { CardBadges, isOut, quickAddWords } from "./card-parts"
+import { CardPriceRow, CardStars } from "./card-rows"
+import { QuickAdd, cardButtonClass } from "./QuickAdd"
 
 /**
  * The photo of a framed card with a second one (`card.css`): with a
@@ -57,19 +56,6 @@ function Photos({
   )
 }
 
-/**
- * Where the stars stand without a review, when the shop asks for empty ones
- * (E5): the words keep to one line, under the stars on a narrow card.
- */
-function NoReviews({ t }: { t: Translate }) {
-  return (
-    <p className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-text-3">
-      <Stars rating={0} />
-      <span className="whitespace-nowrap">{t("product.card_no_reviews")}</span>
-    </p>
-  )
-}
-
 /** The button across a framed card's foot: in the cart for one variant, else to its page. */
 function FootButton({
   product,
@@ -92,14 +78,14 @@ function FootButton({
         path={product.path}
         action={quickAdd}
         words={quickAddWords(t, product.title)}
-        fill
+        fill={framed.buttonStyle}
       />
     )
   }
   return (
     <a
       href={product.path}
-      className="gf-btn gf-btn--quiet gf-card-btn relative z-(--z-raised) w-full"
+      className={`${cardButtonClass(framed.buttonStyle)} relative z-(--z-raised) w-full`}
       aria-label={t("product.card_options_label", { title: product.title })}
     >
       {t("product.card_options")}
@@ -114,9 +100,10 @@ function FootButton({
  * storefront says it ships free (never on a sold-out card); at its foot
  * the add button across the box ("Sepete ekle" for one variant,
  * "Seçenekler" to its page), or the round "+" on the photo while the shop
- * turns the button off. The second
- * photo, the line, the button and the empty stars are the shop's E5
- * switches, each read by the storefront into the card's `framed`.
+ * turns the button off, in the look the shop chose (`buttonStyle`). The
+ * second photo, the line and the button are the shop's E5 switches, each
+ * read by the storefront into the card's `framed`; the pills and the
+ * rows every card's (`shown`, adr/0049 Ek 2026-11-15).
  */
 export function FramedCard({
   product,
@@ -179,12 +166,8 @@ export function FramedCard({
             {product.title}
           </a>
         </h3>
-        {product.rating ? (
-          <CardRating rating={product.rating} />
-        ) : (
-          framed.emptyStars && <NoReviews t={t} />
-        )}
-        {product.price && <Price price={product.price} t={t} className="pt-1" />}
+        <CardStars product={product} t={t} />
+        <CardPriceRow product={product} t={t} className="pt-1" />
         {framed.freeShipping && !out && (
           <p className="flex items-center gap-1 text-xs font-semibold text-ok">
             <Truck className="size-4 shrink-0" aria-hidden="true" strokeWidth={1.75} />

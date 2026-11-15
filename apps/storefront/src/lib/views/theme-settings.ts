@@ -29,12 +29,20 @@ export async function cardOptions(): Promise<CardOptions> {
     showBrand: card.show_brand,
     showRating: card.show_rating,
     variant: card.variant,
-    // The framed card's switches (E5): empty stars only where the stars are shown
+    // Every card's pills and rows (adr/0049 Ek 2026-11-15): the no-reviews row only where the stars are shown
+    shown: {
+      saleBadge: card.sale_badge,
+      lowStockBadge: card.low_stock_badge,
+      soldOutBadge: card.sold_out_badge,
+      soldOutRow: card.sold_out_row,
+      noReviews: card.show_rating ? card.no_reviews : "hide",
+    },
+    // The framed card's switches (E5)
     framed: {
       hoverImage: card.hover_image,
       deliveryNote: card.delivery_note,
       fullButton: card.full_button,
-      emptyStars: card.empty_stars && card.show_rating,
+      buttonStyle: card.button_style,
       freeShippingFrom: answer.free_shipping_threshold,
     },
   }

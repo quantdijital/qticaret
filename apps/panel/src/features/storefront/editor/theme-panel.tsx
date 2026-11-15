@@ -4,12 +4,19 @@ import type { ThemeSettings } from "@/features/storefront/api/theme"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { Panel } from "./panel-header"
 import { ThemeForm } from "./theme-form"
+import type { CardVariantsInUse, ThemeGroupName } from "./forms/theme-registry"
+import { useFieldFocus } from "./use-field-focus"
+import type { FieldFocus } from "./use-field-focus"
 
 const C = "storefront.editor.theme"
 
 interface ThemePanelProps {
   /** The draft's theme settings. */
   theme: ThemeSettings
+  /** The card variants the draft draws: a field meaningless for all of them is hidden. */
+  variants: CardVariantsInUse
+  /** The field the settings search picked; its group opens and it is marked. */
+  focus: (FieldFocus & { group: ThemeGroupName }) | null
   /** The settings' problems; the theme's are under `theme.`. */
   problems: SectionProblems
   /** The first announcement line, for the sample. */
@@ -25,6 +32,8 @@ interface ThemePanelProps {
  */
 export function ThemePanel({
   theme,
+  variants,
+  focus,
   problems,
   announcement,
   onChange,
@@ -32,10 +41,13 @@ export function ThemePanel({
   onBack,
 }: ThemePanelProps) {
   const { t } = useTranslation()
+  useFieldFocus(focus)
   return (
     <Panel icon={Palette} title={t(`${C}.title`)} onBack={onBack}>
       <ThemeForm
         theme={theme}
+        variants={variants}
+        reveal={(group) => (focus?.group === group ? focus.nonce : null)}
         problems={problems}
         announcement={announcement ?? t(`${C}.sampleLine`)}
         onChange={onChange}

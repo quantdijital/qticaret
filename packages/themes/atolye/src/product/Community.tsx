@@ -7,6 +7,7 @@ import { MoreList } from "./More"
 import { ReviewList } from "./ReviewList"
 import { communityWords, reviewListWords } from "./words"
 import { DoneButton, WriteDialog } from "./Write"
+import { REVIEWS_ID } from "./anchors"
 
 /**
  * Nothing yet (owner 2026-11-06: a thin "none yet" strip beside a huge
@@ -147,7 +148,7 @@ export function Community({
   return (
     <div className="flex flex-col gap-(--section-gap-s)">
       <section
-        id="degerlendirmeler"
+        id={REVIEWS_ID}
         aria-labelledby="degerlendirmeler-baslik"
         className="flex scroll-mt-40 flex-col gap-6 lg:gap-8"
       >

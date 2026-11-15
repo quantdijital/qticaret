@@ -1,6 +1,17 @@
 import { z } from "@medusajs/framework/zod"
 import { AA_LARGE_TEXT, contrastRatio } from "../../../lib/color/contrast"
 import { defineSection, isPlainObject } from "./define"
+import { PRODUCT_CARD_VARIANTS, productCardSchema, upgradeCard } from "./theme-card"
+import type { ProductCardSettings } from "./theme-card"
+
+export {
+  CARD_BUTTON_STYLES,
+  CARD_NO_REVIEWS,
+  CARD_SOLD_OUT_ROWS,
+  PRODUCT_CARD_VARIANTS,
+  upgradeCard,
+} from "./theme-card"
+export type { ProductCardSettings } from "./theme-card"
 
 /** The storefront themes this build carries (adr/0046 §7); a new theme is a deploy. */
 export const INSTALLED_THEMES = ["atolye"] as const
@@ -58,32 +69,6 @@ const WHITE = "#ffffff"
  * before, when the theme stood its own for most fields.
  */
 export const THEME_SETTINGS_VERSION = 2
-
-/**
- * How a product card is drawn (adr/0049 Ek 2026-11-14 §3.3): `standard`
- * today's card, `framed` the bordered box (UK5), `compact` the small
- * side-by-side card (Ek 2026-11-15). Mirrors `@qticaret/types`'
- * `CARD_VARIANTS` (a unit test keeps them equal); a product rail's
- * `card_variant` takes the same list.
- */
-export const PRODUCT_CARD_VARIANTS = ["standard", "framed", "compact"] as const
-
-export interface ProductCardSettings {
-  ratio: "4:5" | "1:1" | "3:4"
-  show_brand: boolean
-  show_rating: boolean
-  /** Everywhere's card; a product rail may draw its own (`card_variant`). */
-  variant: (typeof PRODUCT_CARD_VARIANTS)[number]
-  /**
-   * The framed card's own (E5), read wherever a framed card is drawn: the
-   * second photo on hover, the free shipping line, the add button across
-   * its foot, empty stars without reviews.
-   */
-  hover_image: boolean
-  delivery_note: boolean
-  full_button: boolean
-  empty_stars: boolean
-}
 
 /** How the storefront looks (F18 D11, adr/0053): choices from fixed lists, no CSS. */
 export interface ThemeSettings {
@@ -179,7 +164,12 @@ const GRAFIT: ThemeSettings = {
     hover_image: true,
     delivery_note: true,
     full_button: true,
-    empty_stars: false,
+    sale_badge: true,
+    low_stock_badge: true,
+    sold_out_badge: true,
+    sold_out_row: "price",
+    no_reviews: "hide",
+    button_style: "outline",
   },
   header: { layout: "left", sticky: true },
   buttons: "pill",
@@ -205,7 +195,7 @@ export function withCardDefaults(value: unknown): unknown {
   if (!isPlainObject(value) || !isPlainObject(value["product_card"])) {
     return value
   }
-  const card = { ...GRAFIT.product_card, ...value["product_card"] }
+  const card = { ...GRAFIT.product_card, ...(upgradeCard(value["product_card"]) as object) }
   const listed: readonly unknown[] = PRODUCT_CARD_VARIANTS
   return {
     ...value,
@@ -230,7 +220,9 @@ const kept = (group: unknown, keys: readonly string[]): Record<string, unknown> 
  */
 export function upgradeStoredTheme(stored: Record<string, unknown>): Record<string, unknown> {
   if (Object.hasOwn(stored, "settings_version")) {
-    return stored
+    // The card's `empty_stars` switch became the no-reviews choice (adr/0049 Ek 2026-11-15)
+    const card = upgradeCard(stored["product_card"])
+    return card === stored["product_card"] ? stored : { ...stored, product_card: card }
   }
   const card = kept(stored["product_card"], ["ratio", "show_brand"])
   if (card["ratio"] === "4:5") {
@@ -267,18 +259,7 @@ export const themeSection = defineSection<ThemeSettings>(
       .strict(),
     typography: z.object({ heading: z.enum(HEADING_FONTS), body: z.enum(BODY_FONTS) }).strict(),
     radius: z.enum(["sharp", "soft", "round"]),
-    product_card: z
-      .object({
-        ratio: z.enum(["4:5", "1:1", "3:4"]),
-        show_brand: z.boolean(),
-        show_rating: z.boolean(),
-        variant: z.enum(PRODUCT_CARD_VARIANTS),
-        hover_image: z.boolean(),
-        delivery_note: z.boolean(),
-        full_button: z.boolean(),
-        empty_stars: z.boolean(),
-      })
-      .strict(),
+    product_card: productCardSchema,
     header: z.object({ layout: z.enum(["centered", "left"]), sticky: z.boolean() }).strict(),
     buttons: z.enum(["pill", "rounded", "square"]),
     section_spacing: z.enum(SECTION_SPACINGS),

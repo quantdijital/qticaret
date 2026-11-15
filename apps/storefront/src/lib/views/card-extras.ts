@@ -12,6 +12,7 @@ import type {
   ShopRatingView,
   Translate,
 } from "@qticaret/ui"
+import { unrated } from "./card-shown"
 import type {
   StoreCardFacts,
   StoreImage,
@@ -58,10 +59,6 @@ export function cardRating(rating: StoreCardFacts["rating"], t: Translate): Card
     label: t("product.card_rating", { average, count: rating.count }),
   }
 }
-
-/** A framed card whose reviews are unknown: empty stars would say it has none. */
-const unrated = (card: ProductCardView): ProductCardView =>
-  card.framed?.emptyStars ? { ...card, framed: { ...card.framed, emptyStars: false } } : card
 
 /**
  * Cards with their stock bucket and quick add from the card facts. Quick

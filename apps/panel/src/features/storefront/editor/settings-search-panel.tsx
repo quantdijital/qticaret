@@ -1,4 +1,4 @@
-import { Search, X } from "lucide-react"
+import { Palette, Search, X } from "lucide-react"
 import { useId, useMemo, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -7,8 +7,9 @@ import { Input } from "@qticaret/admin-ui/ui/input"
 import type { BodyGroup, LayoutDocument } from "@/features/storefront/api/layout"
 import type { FieldGroupName } from "./forms/field-registry"
 import { SECTION_ICONS, kindOf, sectionLabel } from "./section-meta"
-import { searchSettings, searchedSections } from "./settings-search"
-import type { SearchHit } from "./settings-search"
+import { allHits, searchSettings, searchTheme, searchedSections } from "./settings-search"
+import type { SearchHit, ThemeHit } from "./settings-search"
+import { THEME_GROUP_TITLES, cardVariantsInUse } from "./forms/theme-registry"
 
 const S = "storefront.editor.search"
 
@@ -23,6 +24,53 @@ const GROUP_NAMES: Readonly<Record<FieldGroupName, string>> = {
   appearance: "storefront.editor.panel.appearance",
   look: "storefront.editor.look.title",
   visibility: "storefront.editor.panel.visibility",
+}
+
+/** A hit's field name, its term small beside it, and the choice found. */
+function FieldName({
+  field,
+  option,
+}: {
+  field: { label: string; term: string | null }
+  option: string | null
+}) {
+  const { t } = useTranslation()
+  return (
+    <span className="text-sm">
+      {t(field.label)}
+      {field.term ? (
+        <>
+          {" "}
+          <small className="text-[11px] text-muted-foreground">{t(field.term)}</small>
+        </>
+      ) : null}
+      {option ? <span className="text-muted-foreground">: {t(option)}</span> : null}
+    </span>
+  )
+}
+
+/** A theme setting found: the theme panel's name and the group under it. */
+function ThemeHitRow({ hit, onPick }: { hit: ThemeHit; onPick: (hit: ThemeHit) => void }) {
+  const { t } = useTranslation()
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={() => {
+          onPick(hit)
+        }}
+        className="flex w-full items-start gap-2 rounded-md px-2 py-2 text-left hover:bg-muted/60 focus-visible:outline-2 focus-visible:outline-ring"
+      >
+        <Palette className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+        <span className="flex min-w-0 flex-col gap-0.5">
+          <FieldName field={hit.field} option={hit.option} />
+          <span className="truncate text-xs text-muted-foreground">
+            {`${t("storefront.editor.theme.title")} · ${t(THEME_GROUP_TITLES[hit.field.group])}`}
+          </span>
+        </span>
+      </button>
+    </li>
+  )
 }
 
 function HitRow({ hit, onPick }: { hit: SearchHit; onPick: (hit: SearchHit) => void }) {
@@ -42,16 +90,11 @@ function HitRow({ hit, onPick }: { hit: SearchHit; onPick: (hit: SearchHit) => v
       >
         <Icon className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         <span className="flex min-w-0 flex-col gap-0.5">
-          <span className="text-sm">
-            {field ? t(field.label) : name}
-            {field?.term ? (
-              <>
-                {" "}
-                <small className="text-[11px] text-muted-foreground">{t(field.term)}</small>
-              </>
-            ) : null}
-            {option ? <span className="text-muted-foreground">: {t(option)}</span> : null}
-          </span>
+          {field ? (
+            <FieldName field={field} option={option} />
+          ) : (
+            <span className="text-sm">{name}</span>
+          )}
           <span className="truncate text-xs text-muted-foreground">
             {field
               ? `${name} · ${t(GROUP_NAMES[field.group])}`
@@ -78,7 +121,7 @@ export function SettingsSearch({
 }: {
   doc: LayoutDocument
   page: BodyGroup
-  onPick: (hit: SearchHit) => void
+  onPick: (hit: SearchHit | ThemeHit) => void
   /** The page's parts, shown while nothing is typed. */
   children: ReactNode
 }) {
@@ -91,7 +134,8 @@ export function SettingsSearch({
       const { name } = sectionLabel(t, section, inFooter)
       return [name, t(`storefront.editor.types.${kindOf(section, inFooter)}.name`)]
     })
-    return searchSettings(query, sections, t)
+    const theme = searchTheme(query, doc.settings.theme, cardVariantsInUse(doc), t)
+    return allHits(searchSettings(query, sections, t), theme)
   }, [doc, page, query, t])
   const searching = query.trim() !== ""
   return (
@@ -145,9 +189,17 @@ export function SettingsSearch({
             aria-label={t(`${S}.results`)}
             className="flex flex-col gap-0.5 px-3 py-3"
           >
-            {hits.map((hit) => (
-              <HitRow key={`${hit.section.id}:${hit.field?.key ?? ""}`} hit={hit} onPick={onPick} />
-            ))}
+            {hits.map((hit) =>
+              "theme" in hit ? (
+                <ThemeHitRow key={`theme:${hit.field.key}`} hit={hit} onPick={onPick} />
+              ) : (
+                <HitRow
+                  key={`${hit.section.id}:${hit.field?.key ?? ""}`}
+                  hit={hit}
+                  onPick={onPick}
+                />
+              )
+            )}
           </ul>
         ) : (
           <p id={`${id}-hits`} className="px-5 py-6 text-sm text-muted-foreground">
