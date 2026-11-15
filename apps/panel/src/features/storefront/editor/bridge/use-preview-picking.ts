@@ -3,6 +3,10 @@ import { useTranslation } from "react-i18next"
 import { BRIDGE_MAX_NAME, BRIDGE_MAX_SECTIONS } from "@qticaret/types/editor-bridge"
 import type { BodyGroup, LayoutDocument } from "@/features/storefront/api/layout"
 import { allSections, findSection, isBodyGroup } from "@/features/storefront/layout/sections"
+import { previewField } from "../forms/preview-fields"
+import type { PreviewContext, PreviewField } from "../forms/preview-fields"
+import { bodyOf } from "@/features/storefront/layout/main-sections"
+import { shelfRun } from "@/features/storefront/layout/shelf-tabs"
 import { sectionLabel } from "../section-meta"
 import type { LivePreview, PickMessage } from "./use-live-preview"
 
@@ -15,8 +19,11 @@ interface Options {
   /** Each `ready` from the frame: a bridge set up again starts without names. */
   handshakes?: number
   post: LivePreview["post"]
-  /** A section's edit label was pressed in the frame: its form opens. */
-  onOpen: (id: string) => void
+  /**
+   * A section's edit label was pressed in the frame: its form opens; a
+   * field's (Faz 2b), at that field when the register knows it.
+   */
+  onOpen: (id: string, focus?: PreviewField) => void
   /** A link followed in the frame: that page is shown. */
   onVisit: (path: string) => void
   /** The frame drew `path`, with `group`'s sections (null: none of the editor's pages). */
@@ -34,6 +41,20 @@ export function groupOf(doc: LayoutDocument, ids: readonly string[]): BodyGroup 
   return null
 }
 
+/** What the field register reads beside a section (Faz 2b): a rail's shelf, the badges' count. */
+export function fieldContext(
+  doc: LayoutDocument,
+  found: NonNullable<ReturnType<typeof findSection>>
+): PreviewContext {
+  const { group, section } = found
+  return {
+    badges: doc.settings.trust_badges.length,
+    ...(section.type === "products" && isBodyGroup(group)
+      ? { shelf: shelfRun(bodyOf(doc, group), section.id) }
+      : {}),
+  }
+}
+
 /** Each section's name as the tree shows it, for the frame's labels (text only there). */
 export function sectionNames(
   doc: LayoutDocument,
@@ -46,6 +67,14 @@ export function sectionNames(
   }
   return names
 }
+
+/**
+ * A section's name from `sectionNames`: its own entry only, never the
+ * object's prototype (an id such as `constructor`; security review
+ * 2026-11-15, BİLGİ-1). Empty: not named (past the frame's limit).
+ */
+export const nameOf = (names: Readonly<Record<string, string>>, id: string): string =>
+  Object.hasOwn(names, id) ? (names[id] ?? "") : ""
 
 /**
  * Picking in the preview (adr/0065 §6, Faz 2; owner's decision 1): the
@@ -102,7 +131,21 @@ export function usePreviewPicking({
         if (found) {
           setBlocked(null)
           onOpen(found.section.id)
-          setAnnounce(t(`${V}.selected`, { name: names[found.section.id] ?? "" }))
+          setAnnounce(t(`${V}.selected`, { name: nameOf(names, found.section.id) }))
+        }
+        return
+      }
+      case "field": {
+        // The key is the frame's word: matched against the register, never used otherwise
+        const found = findSection(doc, message.payload.id)
+        if (found) {
+          const focus = previewField(found.section, message.payload.field, fieldContext(doc, found))
+          // A shelf's pill names the rail beside it: that rail opens
+          const id = focus?.section ?? found.section.id
+          setBlocked(null)
+          onOpen(id, focus ?? undefined)
+          const name = nameOf(names, id)
+          setAnnounce(t(focus ? `${V}.fieldSelected` : `${V}.selected`, { name }))
         }
         return
       }

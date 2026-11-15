@@ -45,6 +45,7 @@ export function Gallery({
   words: GalleryWords
 }) {
   const rail = useRef<HTMLUListElement>(null)
+  const opener = useRef<HTMLButtonElement>(null)
   const [index, setIndex] = useState(0)
   const [zoom, setZoom] = useState<number | null>(null)
   const [variant, setVariant] = useState(openOn)
@@ -126,7 +127,7 @@ export function Gallery({
     .replace("{count}", String(count))
   return (
     <section aria-label={words.label} className="gf-pictures flex flex-col gap-3">
-      <div className="relative overflow-hidden rounded-tile bg-paper-2">
+      <div className="relative overflow-hidden rounded-tile bg-media">
         <ul
           ref={rail}
           className="gf-gallery flex overflow-x-auto"
@@ -162,6 +163,7 @@ export function Gallery({
         )}
         {hydrated && (
           <button
+            ref={opener}
             type="button"
             className="gf-icon-btn absolute top-3 right-3 bg-stage/80 text-stage-text hover:bg-stage-2 focus-visible:outline-signal-on-stage"
             aria-label={words.zoom}
@@ -213,6 +215,7 @@ export function Gallery({
           images={images}
           start={zoom}
           words={words}
+          returnTo={opener}
           onClose={(last) => {
             setZoom(null)
             go(last)

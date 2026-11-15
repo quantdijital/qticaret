@@ -10,6 +10,14 @@ import type { AnySection, ProductsSection } from "@/features/storefront/api/layo
  * dates, so the panel's answer is the page as the shop laid it out.
  */
 export function tabMates(sections: readonly AnySection[], id: string): ProductsSection[] {
+  return shelfRun(sections, id).filter((rail) => rail.id !== id)
+}
+
+/**
+ * The whole shelf a rail stands in, itself among them in the page's order
+ * (`tabMates` with the rail); empty when it is no rail of the page.
+ */
+export function shelfRun(sections: readonly AnySection[], id: string): ProductsSection[] {
   let run: ProductsSection[] = []
   for (const section of sections) {
     if (!section.visible) {
@@ -24,5 +32,5 @@ export function tabMates(sections: readonly AnySection[], id: string): ProductsS
       run = section.type === "products" ? [section] : []
     }
   }
-  return run.some((rail) => rail.id === id) ? run.filter((rail) => rail.id !== id) : []
+  return run.some((rail) => rail.id === id) ? run : []
 }

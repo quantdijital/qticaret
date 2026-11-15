@@ -1,4 +1,4 @@
-import { ResponsiveImage } from "@qticaret/ui"
+import { ResponsiveImage, fieldKey, fieldMark } from "@qticaret/ui"
 import type { ProductCardView } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { Preload } from "../parts/Preload"
@@ -31,13 +31,18 @@ export function Hero({
   const [action] = hero.actions
   const image = hero.image ?? product?.image ?? null
   const Heading = first ? "h1" : "h2"
+  // The editor's field marks (adr/0065 Faz 2b): in its live preview only
+  const on = hero.editor
   return (
     <section aria-labelledby={id} className="pt-3 lg:pt-6">
       {first && image && <Preload image={image} sizes={SIZES} />}
       <Container>
         <div className="gf-stage relative grid overflow-hidden rounded-tile lg:min-h-[clamp(28rem,58svh,36rem)] lg:grid-cols-12">
           {image && (
-            <div className="relative aspect-[16/10] after:absolute after:inset-0 after:bg-linear-to-t after:from-stage after:from-0% after:via-stage/0 after:via-30% after:to-transparent sm:aspect-[2/1] lg:col-span-7 lg:col-start-6 lg:row-start-1 lg:aspect-auto lg:after:bg-linear-to-r lg:after:via-25%">
+            <div
+              {...fieldMark(on, "image")}
+              className="relative aspect-[16/10] after:absolute after:inset-0 after:bg-linear-to-t after:from-stage after:from-0% after:via-stage/0 after:via-30% after:to-transparent sm:aspect-[2/1] lg:col-span-7 lg:col-start-6 lg:row-start-1 lg:aspect-auto lg:after:bg-linear-to-r lg:after:via-25%"
+            >
               <ResponsiveImage
                 image={image}
                 sizes={SIZES}
@@ -49,18 +54,26 @@ export function Hero({
           <div className="flex flex-col justify-center gap-4 p-5 pt-3 sm:p-8 sm:pt-4 lg:col-span-5 lg:row-start-1 lg:gap-6 lg:p-14">
             <Heading
               id={id}
+              {...fieldMark(on, "heading")}
               className="max-w-[18ch] text-hero leading-[1.05] tracking-(--tracking-display) text-stage-text"
             >
               {hero.heading}
             </Heading>
             {hero.intro && (
-              <p className="hidden max-w-[44ch] text-md text-stage-text-2 sm:block lg:text-lead">
+              <p
+                {...fieldMark(on, "text")}
+                className="hidden max-w-[44ch] text-md text-stage-text-2 sm:block lg:text-lead"
+              >
                 {hero.intro}
               </p>
             )}
             {action && (
               <div className="pt-1">
-                <a href={action.path} className="gf-btn">
+                <a
+                  href={action.path}
+                  className="gf-btn"
+                  {...fieldMark(on, fieldKey("links", hero.actionsAt?.[0] ?? 0))}
+                >
                   {action.label}
                 </a>
               </div>

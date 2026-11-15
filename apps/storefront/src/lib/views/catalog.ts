@@ -19,7 +19,8 @@ import { pathsOf, priceDisplays, siteSeo } from "@/lib/store-api/requests"
 import { categoryCounts } from "@/lib/store-api/extras"
 import { picturedCategories } from "./category-tiles"
 import { productImages } from "./image"
-import { currentMenus, layoutImage, layoutLink } from "./layout"
+import { currentMenus, layoutImage, layoutLink, layoutLinks } from "./layout"
+import { heroCatalogSlides } from "./hero-slides"
 import { hrefOf } from "./listing"
 import { shownAmount } from "./price"
 import { variantIdsOf } from "./product"
@@ -108,7 +109,10 @@ async function thumbs(
   return { views, lowest: amounts.length > 0 ? Math.min(...amounts) : null }
 }
 
-/** H17's own parts: its list, tiles and quick links with pictures and counts, its picks, "from". */
+/**
+ * H17's own parts: its list, tiles and quick links with pictures and
+ * counts, its picks, "from", and its slides when the shop saved them.
+ */
 export async function heroCatalogView(
   section: StoreHeroCatalog,
   t: Translate
@@ -148,6 +152,7 @@ export async function heroCatalogView(
     chips: section.chips.flatMap(chipView),
     picks: section.picks.flatMap((pick) => picks.views.get(pick.product_id) ?? []),
     from: section.show_price && picks.lowest !== null ? formatLira(picks.lowest) : null,
+    ...heroCatalogSlides(section, t),
   }
 }
 
@@ -165,7 +170,7 @@ export async function heroView(section: StoreHeroSection, t: Translate): Promise
     eyebrow: section.eyebrow,
     heading,
     intro: section.text,
-    actions: section.links.flatMap((link) => layoutLink(link, t) ?? []),
+    ...layoutLinks(section.links, t),
     image: section.image ? layoutImage(section.image, heading) : null,
     ...(section.variant === "category_list"
       ? { variant: section.variant, catalog: await heroCatalogView(section, t) }
@@ -203,24 +208,31 @@ export async function priceBandsView(
     categoryIds.length > 0 ? namedCategories(categoryIds) : null,
   ])
   const shown = new Map(categories?.named.map(({ id, card }) => [id, card]))
-  const bands = section.bands.flatMap((band) => {
+  const kept = section.bands.flatMap((band, at) => {
     const products = band.product_ids.flatMap((id) => views.get(id) ?? [])
     if (!band.category_id) {
-      return [{ label: band.label, text: band.text, path: bandPath(band.min, band.max), products }]
+      const view = { label: band.label, text: band.text, path: bandPath(band.min, band.max) }
+      return [{ at, view: { ...view, products } }]
     }
     const card = shown.get(band.category_id)
     return card
       ? [
           {
-            label: band.label,
-            text: band.text,
-            category: card.label,
-            path: bandPath(band.min, band.max, card.path),
-            products,
+            at,
+            view: {
+              label: band.label,
+              text: band.text,
+              category: card.label,
+              path: bandPath(band.min, band.max, card.path),
+              products,
+            },
           },
         ]
       : []
   })
+  // Once a band is left out, each says its place in the design (the editor's field mark)
+  const moved = kept.some(({ at }, drawn) => at !== drawn)
+  const bands = kept.map(({ at, view }) => (moved ? { ...view, at } : view))
   if (bands.length === 0) {
     return null
   }

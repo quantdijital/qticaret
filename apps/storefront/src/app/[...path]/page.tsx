@@ -8,12 +8,33 @@ import { blogPageOf } from "@/lib/views/blog"
 import { EntityScreen } from "@/screens/entity"
 import { requestedUrl } from "@/screens/url"
 
+interface CatchAllProps {
+  params: Promise<{ path: string[] }>
+}
+
+/**
+ * Next's own address space (`/_next/static/<no such file>`): Next falls back
+ * to this page when no build file lives there, often without the proxy (its
+ * matcher skips `_next/static`). Nothing of the shop's lives under `/_next`:
+ * a 404 asked of no backend (adr/0053 Ek 2026-11-15). Read from the route's
+ * own segments, not the proxy's `x-qt-url`, which a skipped proxy never set.
+ */
+const isNextOwnPath = async (params: CatchAllProps["params"]) => (await params).path[0] === "_next"
+
+const NOT_FOUND_METADATA: Metadata = {
+  title: { absolute: t("not_found.title") },
+  robots: "noindex,follow",
+}
+
 async function resolution() {
   const url = await requestedUrl()
   return { url, page: await resolvePath(`${url.pathname}${url.search}`) }
 }
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({ params }: CatchAllProps): Promise<Metadata> {
+  if (await isNextOwnPath(params)) {
+    return NOT_FOUND_METADATA
+  }
   const { url, page } = await resolution()
   if (page.type === "entity" && page.seo) {
     // A list's later page is its own page (docs/13 §3, §7): a listing's number and canonical
@@ -28,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
     }
     return metadataOf(pagedSeo(page.seo, page.listing?.page ?? 1, t))
   }
-  return { title: { absolute: t("not_found.title") }, robots: "noindex,follow" }
+  return NOT_FOUND_METADATA
 }
 
 /**
@@ -37,7 +58,10 @@ export async function generateMetadata(): Promise<Metadata> {
  * and 410s normally leave from `proxy.ts` with their own codes; these
  * branches only cover a rule saved between the two calls.
  */
-export default async function CatchAllPage() {
+export default async function CatchAllPage({ params }: CatchAllProps) {
+  if (await isNextOwnPath(params)) {
+    return notFound()
+  }
   const { url, page } = await resolution()
   switch (page.type) {
     case "redirect":

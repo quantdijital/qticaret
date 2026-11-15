@@ -208,7 +208,7 @@ export function SearchPanel({
           <Group label={words.products}>
             {model.products.map((product) => (
               <a key={product.id} role="option" {...option(product.path)} className={OPTION}>
-                <span className="size-12 shrink-0 overflow-hidden rounded-inner bg-paper-2">
+                <span className="size-12 shrink-0 overflow-hidden rounded-inner bg-media">
                   {product.image && (
                     <ResponsiveImage
                       image={{ ...product.image, alt: "" }}

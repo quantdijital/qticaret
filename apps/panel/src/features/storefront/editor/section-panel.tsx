@@ -29,7 +29,7 @@ import { MarqueeSettings } from "./forms/marquee-settings"
 import { ScrollerFields } from "./forms/scroller-fields"
 import { SCROLLER_OTHER } from "./forms/scroller-groups"
 import { SliderGroups, SliderOther } from "./forms/slider-groups"
-import { sliderOtherCount } from "./forms/slider-kit"
+import { sliderOtherCount, turnsAsSlider } from "./forms/slider-kit"
 import { ShelfGroups } from "./forms/shelf-groups"
 import { ScheduleFields } from "./forms/schedule-fields"
 import { takesDevice } from "./forms/visibility-registry"
@@ -42,7 +42,7 @@ import { Panel, PanelGroup } from "./panel-header"
 import { SectionActions } from "./section-actions"
 import { FormOf } from "./section-form"
 import { SECTION_ICONS, kindOf } from "./section-meta"
-import { useFieldFocus } from "./use-field-focus"
+import { FieldFocusContext, useFieldFocus } from "./use-field-focus"
 import type { FieldFocus } from "./use-field-focus"
 
 const P = "storefront.editor.panel"
@@ -111,7 +111,8 @@ export function SectionPanel({
   const rail = shelf ?? (section.type === "related_products" ? section : null)
   const scroller = rail?.variant === "carousel" ? scrollerSettingsOf(rail.scroller) : null
   // The sliding opening turns on the kit's settings it has use for (bilesen-denetimi (b) 4)
-  const slider = section.type === "hero_slider" ? section : null
+  // and so does the catalogue opening once it has two or more slides (adr/0049 Ek 2026-11-15)
+  const slider = turnsAsSlider(section) ? section : null
   // The linked category cards' frame sits with the look (adr/0049 Ek 2026-11-15)
   const cards = section.type === "categories" && section.variant === "linked" ? section : null
   const set =
@@ -126,141 +127,144 @@ export function SectionPanel({
       : 0) +
     (band ? BANNER_OTHER_SETTINGS.filter((name) => band[name] !== BANNER_DEFAULTS[name]).length : 0)
   return (
-    <Panel icon={SECTION_ICONS[kind]} title={name} onBack={onBack}>
-      <p className="border-b px-5 py-4 text-[13px] leading-5 text-muted-foreground">
-        {t(`storefront.editor.types.${kind}.description`)}
-      </p>
-      {offersVariants(section) && !shelf ? (
-        <PanelGroup title={t(`${P}.variant`)} reveal={reveal("variant")}>
-          <VariantField
-            id={FIELD_IDS.variant(section.id)}
-            type={section.type}
-            value={section.variant}
-            onChange={(next) => {
-              // Its own step in the history: "Geri al" brings the old variant back
-              onChange(switchVariant(section, next))
-            }}
-          />
-        </PanelGroup>
-      ) : null}
-      {"placement" in section ? (
-        <PanelGroup title={t(`${P}.placement`)} reveal={reveal("placement")}>
-          <RadioGroup
-            id={FIELD_IDS.placement(section.id)}
-            aria-label={t(`${P}.placement`)}
-            value={section.placement}
-            className="gap-3"
-            onValueChange={(next) => {
-              onPlace(next as Placement)
-            }}
-          >
-            {(["top", "bottom"] as const).map((placement) => (
-              <label key={placement} className="flex items-center gap-2 text-sm">
-                <RadioGroupItem value={placement} />
-                {t(`storefront.editor.tree.placements.${placement}`)}
-              </label>
-            ))}
-          </RadioGroup>
-        </PanelGroup>
-      ) : null}
-      {hasContent(section) ? (
-        <PanelGroup title={t(`${P}.content`)} reveal={reveal("content")}>
-          <FormOf
-            section={section}
-            problems={problems}
-            onChange={onChange}
-            badges={badges}
-            onBadges={onBadges}
-          />
-        </PanelGroup>
-      ) : null}
-      <SectionLayoutGroup section={section} reveal={reveal} onChange={onChange} />
-      {strip ? <MarqueeGroups section={strip} reveal={reveal} onChange={onChange} /> : null}
-      {section.type === "announcement_bar" ? (
-        <>
-          <AnnouncementMotion section={section} reveal={reveal} onChange={onChange} />
-          <AnnouncementStyle section={section} reveal={reveal} onChange={onChange} />
-        </>
-      ) : null}
-      {shelf ? (
-        <ShelfGroups section={shelf} mates={shelfMates} reveal={reveal} onChange={onChange} />
-      ) : null}
-      {slider ? <SliderGroups section={slider} reveal={reveal} onChange={onChange} /> : null}
-      {section.type === "header_bar" && section.variant === "catalog" ? (
-        <HeaderCatalogOther
-          section={section}
-          problems={problems}
-          reveal={reveal("look")}
-          onChange={onChange}
-        />
-      ) : null}
-      {looked || strip ? (
-        <PanelGroup
-          title={
-            set > 0
-              ? t("storefront.editor.look.titleSet", { count: set })
-              : t("storefront.editor.look.title")
-          }
-          hint={
-            strip
-              ? t(`storefront.editor.marquee.${looked ? "lookHint" : "headerLookHint"}`)
-              : t("storefront.editor.look.hint")
-          }
-          defaultOpen={false}
-          reveal={reveal("look")}
-        >
-          {strip ? (
-            <MarqueeSettings
-              section={strip}
-              settings={MARQUEE_OTHER_SETTINGS}
-              onChange={(next) => {
-                onChange(next)
-              }}
-            />
-          ) : null}
-          {rail && scroller ? (
-            <ScrollerFields
-              value={scroller}
-              settings={SCROLLER_OTHER}
-              fieldId={(setting) => FIELD_IDS.scroller(rail.id, setting)}
-              onChange={(next) => {
-                onChange({ ...rail, scroller: next })
-              }}
-            />
-          ) : null}
-          {slider ? <SliderOther section={slider} onChange={onChange} /> : null}
-          {band ? (
-            <BannerSettings section={band} settings={BANNER_OTHER_SETTINGS} onChange={onChange} />
-          ) : null}
-          {cards ? <CategoryCardsOther section={cards} onChange={onChange} /> : null}
-          {looked ? <LookFields section={looked} onChange={onChange} /> : null}
-        </PanelGroup>
-      ) : null}
-      {/* A main section always shows and stays (adr/0049 Ek 2026-11-14 §5) */}
-      {isMain(section) ? (
-        <p className="border-t px-5 py-4 text-xs text-muted-foreground">
-          {t("storefront.editor.main.fixed")}
+    // A slide's field opens its dialog from the slide list (Faz 2b)
+    <FieldFocusContext.Provider value={focus}>
+      <Panel icon={SECTION_ICONS[kind]} title={name} onBack={onBack}>
+        <p className="border-b px-5 py-4 text-[13px] leading-5 text-muted-foreground">
+          {t(`storefront.editor.types.${kind}.description`)}
         </p>
-      ) : (
-        <>
-          <PanelGroup title={t(`${P}.visibility`)} reveal={reveal("visibility")}>
-            <ScheduleFields
-              section={section}
-              problem={problems["schedule"]}
-              offersDevice={takesDevice(section, group)}
-              onChange={onChange}
+        {offersVariants(section) && !shelf ? (
+          <PanelGroup title={t(`${P}.variant`)} reveal={reveal("variant")}>
+            <VariantField
+              id={FIELD_IDS.variant(section.id)}
+              type={section.type}
+              value={section.variant}
+              onChange={(next) => {
+                // Its own step in the history: "Geri al" brings the old variant back
+                onChange(switchVariant(section, next))
+              }}
             />
           </PanelGroup>
-          <SectionActions
-            canCopy={isBodyGroup(group)}
-            canDuplicate={canDuplicate}
-            note={duplicateNote}
-            onDuplicate={onDuplicate}
-            onRemove={onRemove}
+        ) : null}
+        {"placement" in section ? (
+          <PanelGroup title={t(`${P}.placement`)} reveal={reveal("placement")}>
+            <RadioGroup
+              id={FIELD_IDS.placement(section.id)}
+              aria-label={t(`${P}.placement`)}
+              value={section.placement}
+              className="gap-3"
+              onValueChange={(next) => {
+                onPlace(next as Placement)
+              }}
+            >
+              {(["top", "bottom"] as const).map((placement) => (
+                <label key={placement} className="flex items-center gap-2 text-sm">
+                  <RadioGroupItem value={placement} />
+                  {t(`storefront.editor.tree.placements.${placement}`)}
+                </label>
+              ))}
+            </RadioGroup>
+          </PanelGroup>
+        ) : null}
+        {hasContent(section) ? (
+          <PanelGroup title={t(`${P}.content`)} reveal={reveal("content")}>
+            <FormOf
+              section={section}
+              problems={problems}
+              onChange={onChange}
+              badges={badges}
+              onBadges={onBadges}
+            />
+          </PanelGroup>
+        ) : null}
+        <SectionLayoutGroup section={section} reveal={reveal} onChange={onChange} />
+        {strip ? <MarqueeGroups section={strip} reveal={reveal} onChange={onChange} /> : null}
+        {section.type === "announcement_bar" ? (
+          <>
+            <AnnouncementMotion section={section} reveal={reveal} onChange={onChange} />
+            <AnnouncementStyle section={section} reveal={reveal} onChange={onChange} />
+          </>
+        ) : null}
+        {shelf ? (
+          <ShelfGroups section={shelf} mates={shelfMates} reveal={reveal} onChange={onChange} />
+        ) : null}
+        {slider ? <SliderGroups section={slider} reveal={reveal} onChange={onChange} /> : null}
+        {section.type === "header_bar" && section.variant === "catalog" ? (
+          <HeaderCatalogOther
+            section={section}
+            problems={problems}
+            reveal={reveal("look")}
+            onChange={onChange}
           />
-        </>
-      )}
-    </Panel>
+        ) : null}
+        {looked || strip ? (
+          <PanelGroup
+            title={
+              set > 0
+                ? t("storefront.editor.look.titleSet", { count: set })
+                : t("storefront.editor.look.title")
+            }
+            hint={
+              strip
+                ? t(`storefront.editor.marquee.${looked ? "lookHint" : "headerLookHint"}`)
+                : t("storefront.editor.look.hint")
+            }
+            defaultOpen={false}
+            reveal={reveal("look")}
+          >
+            {strip ? (
+              <MarqueeSettings
+                section={strip}
+                settings={MARQUEE_OTHER_SETTINGS}
+                onChange={(next) => {
+                  onChange(next)
+                }}
+              />
+            ) : null}
+            {rail && scroller ? (
+              <ScrollerFields
+                value={scroller}
+                settings={SCROLLER_OTHER}
+                fieldId={(setting) => FIELD_IDS.scroller(rail.id, setting)}
+                onChange={(next) => {
+                  onChange({ ...rail, scroller: next })
+                }}
+              />
+            ) : null}
+            {slider ? <SliderOther section={slider} onChange={onChange} /> : null}
+            {band ? (
+              <BannerSettings section={band} settings={BANNER_OTHER_SETTINGS} onChange={onChange} />
+            ) : null}
+            {cards ? <CategoryCardsOther section={cards} onChange={onChange} /> : null}
+            {looked ? <LookFields section={looked} onChange={onChange} /> : null}
+          </PanelGroup>
+        ) : null}
+        {/* A main section always shows and stays (adr/0049 Ek 2026-11-14 §5) */}
+        {isMain(section) ? (
+          <p className="border-t px-5 py-4 text-xs text-muted-foreground">
+            {t("storefront.editor.main.fixed")}
+          </p>
+        ) : (
+          <>
+            <PanelGroup title={t(`${P}.visibility`)} reveal={reveal("visibility")}>
+              <ScheduleFields
+                section={section}
+                problem={problems["schedule"]}
+                offersDevice={takesDevice(section, group)}
+                onChange={onChange}
+              />
+            </PanelGroup>
+            <SectionActions
+              canCopy={isBodyGroup(group)}
+              canDuplicate={canDuplicate}
+              note={duplicateNote}
+              onDuplicate={onDuplicate}
+              onRemove={onRemove}
+            />
+          </>
+        )}
+      </Panel>
+    </FieldFocusContext.Provider>
   )
 }
 

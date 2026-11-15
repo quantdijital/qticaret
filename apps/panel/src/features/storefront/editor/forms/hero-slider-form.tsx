@@ -11,6 +11,7 @@ import { FieldGroup } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { Choice, SlideDialog } from "./slide-dialog"
+import { useSlideFocus } from "../use-field-focus"
 
 const S = "storefront.editor.slider"
 
@@ -41,6 +42,14 @@ export function HeroSliderForm({
   const problem = useProblemText()
   const [picking, setPicking] = useState(false)
   const [editing, setEditing] = useState<number | null>(null)
+  // The field an edit label in the preview named: its slide's dialog opens at it (Faz 2b)
+  const [initial, setInitial] = useState<string | null>(null)
+  useSlideFocus((slide, target) => {
+    if (slide < section.slides.length) {
+      setEditing(slide)
+      setInitial(target)
+    }
+  })
   const set = (next: Partial<HeroSliderSection>, field?: string) => {
     onChange({ ...section, ...next }, field)
   }
@@ -160,11 +169,13 @@ export function HeroSliderForm({
           section={section}
           index={editing}
           onIndexChange={setEditing}
+          initialFocus={initial}
           onSave={(index, slide) => {
             setSlides(section.slides.map((each, at) => (at === index ? slide : each)))
           }}
           onClose={() => {
             setEditing(null)
+            setInitial(null)
           }}
         />
       ) : null}

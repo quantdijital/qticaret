@@ -16,6 +16,7 @@ import { cn } from "@qticaret/admin-ui/lib/utils"
 import { PanelGroup } from "./panel-header"
 import { ChoiceSelect } from "./theme-fields"
 import { ThemeCardGroups } from "./theme-card-fields"
+import { KitChoice } from "./theme-style-kit-fields"
 import { THEME_GROUP_TITLES, THEME_IDS } from "./forms/theme-registry"
 import type { CardVariantsInUse, ThemeGroupName } from "./forms/theme-registry"
 
@@ -71,14 +72,17 @@ interface ThemeChoicesProps {
 }
 
 /**
- * The theme's fixed-list choices: faces, corners and buttons, the product
- * card. The header's layout and stickiness are the header bar's now
+ * The theme's fixed-list choices: faces, shapes (corners, buttons, chips),
+ * surfaces (boxes, shadow, the photos' ground, menu items, section
+ * spacing; adr/0067 §2.7), the product card. The header's layout and stickiness are the header bar's now
  * (adr/0049 Ek 2026-11-14 §5), in the tree under "Üst bilgi".
  */
 export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoicesProps) {
   const { t } = useTranslation()
   const headingNote = useHeadingNote()
   const { typography } = theme
+  // A style kit field's props (adr/0067): hidden until the storefront draws it
+  const kit = { theme, variants, onChange }
   return (
     <>
       <PanelGroup
@@ -137,20 +141,11 @@ export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoices
             render={(option) => t(`${C}.buttonShapes.${option}`)}
             hint={t(`${C}.buttonsHint`)}
           />
+          <KitChoice field="chip_style" {...kit} />
         </Pair>
+      </PanelGroup>
+      <PanelGroup title={t(THEME_GROUP_TITLES.surfaces)} reveal={reveal("surfaces")}>
         <Pair>
-          <ChoiceSelect
-            id={THEME_IDS.section_spacing}
-            label={t(`${C}.sectionSpacing`)}
-            term={t(`${C}.sectionSpacingTerm`)}
-            value={theme.section_spacing}
-            options={SECTION_SPACINGS}
-            onChange={(value) => {
-              onChange({ ...theme, section_spacing: value })
-            }}
-            render={(option) => t(`${C}.sectionSpacings.${option}`)}
-            hint={t(`${C}.sectionSpacingHint`)}
-          />
           <ChoiceSelect
             id={THEME_IDS.surface_style}
             label={t(`${C}.surfaceStyle`)}
@@ -162,6 +157,21 @@ export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoices
             }}
             render={(option) => t(`${C}.surfaceStyles.${option}`)}
             hint={t(`${C}.surfaceStyleHint`)}
+          />
+          <KitChoice field="shadow" {...kit} />
+          <KitChoice field="media_ground" {...kit} />
+          <KitChoice field="menu_style" {...kit} />
+          <ChoiceSelect
+            id={THEME_IDS.section_spacing}
+            label={t(`${C}.sectionSpacing`)}
+            term={t(`${C}.sectionSpacingTerm`)}
+            value={theme.section_spacing}
+            options={SECTION_SPACINGS}
+            onChange={(value) => {
+              onChange({ ...theme, section_spacing: value })
+            }}
+            render={(option) => t(`${C}.sectionSpacings.${option}`)}
+            hint={t(`${C}.sectionSpacingHint`)}
           />
         </Pair>
       </PanelGroup>

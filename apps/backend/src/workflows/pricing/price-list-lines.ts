@@ -44,7 +44,7 @@ interface ListRow {
   ends_at: Date | string | null
 }
 
-interface VariantRow {
+export interface VariantRow {
   id: string
   title?: string | null
   sku?: string | null
@@ -65,7 +65,7 @@ export function overlaps(a: ListRow, b: ListRow): boolean {
   )
 }
 
-async function variantsBySet(container: MedusaContainer, priceSetIds: string[]) {
+export async function variantsBySet(container: MedusaContainer, priceSetIds: string[]) {
   if (priceSetIds.length === 0) {
     return new Map<string, string>()
   }
@@ -82,7 +82,10 @@ async function variantsBySet(container: MedusaContainer, priceSetIds: string[]) 
   )
 }
 
-async function variantRows(container: MedusaContainer, ids: string[]): Promise<VariantRow[]> {
+export async function variantRows(
+  container: MedusaContainer,
+  ids: string[]
+): Promise<VariantRow[]> {
   if (ids.length === 0) {
     return []
   }

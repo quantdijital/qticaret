@@ -44,12 +44,24 @@ describe("the theme panel's register", () => {
 describe("the settings search over the theme", () => {
   it("finds the colours, faces, corners and section spacing by their names", () => {
     expect(keys("ana renk")).toEqual(["colors.primary"])
-    expect(keys("sayfa zemini")).toEqual(["colors.background"])
+    // The photo ground's "Sayfa" step is the page's own ground too (adr/0067 S4)
+    expect(keys("sayfa zemini")).toEqual(["colors.background", "media_ground"])
     expect(keys("yazı tipleri font")).toEqual(["typography.heading", "typography.body"])
     expect(keys("köşeler")).toEqual(["radius"])
     expect(keys("bolum araligi")).toEqual(["section_spacing"])
     expect(keys("kutu stili")).toEqual(["surface_style"])
-    expect(keys("cizgili")).toEqual(["surface_style"])
+    // "Çizgili" names a step of the box style, the chip style (adr/0067 step 3) and the
+    // menu's "Alt çizgili" (step 1)
+    expect([...keys("cizgili")].sort()).toEqual(["chip_style", "menu_style", "surface_style"])
+    expect(keys("çip stili")).toEqual(["chip_style"])
+    expect(keys("chips")).toEqual(["chip_style"])
+  })
+
+  it("finds the menu style once the storefront draws it (adr/0067 S1)", () => {
+    expect(keys("menü stili")).toEqual(["menu_style"])
+    expect(keys("menu items")).toEqual(["menu_style"])
+    const [plain] = searchTheme("sade", GRAFIT_THEME, standard, t)
+    expect(plain).toMatchObject({ field: { key: "menu_style" } })
   })
 
   it("finds a field by its technical term and a choice by its name, naming it", () => {

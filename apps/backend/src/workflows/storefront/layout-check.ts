@@ -4,6 +4,7 @@ import { ValidationError } from "../../lib/errors"
 import { bodySections } from "../../lib/storefront/layout"
 import type { BodySection, HeaderSection, LayoutDocument } from "../../lib/storefront/layout"
 import { bannerImages, bannerLinks } from "../../lib/storefront/sections/banner"
+import { catalogSlides } from "../../lib/storefront/sections/hero"
 import { sliderImages } from "../../lib/storefront/sections/hero-slider"
 import { shelfSources } from "../../lib/storefront/sections/products"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
@@ -18,9 +19,15 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
     return section.items.flatMap((item) => (item.link ? [item.link] : []))
   }
   if (section.type === "hero") {
-    // H17's quick links beside its buttons
+    // H17's quick links beside its buttons, and its slides' buttons and picture links
     return section.variant === "category_list"
-      ? [...section.links, ...section.chips]
+      ? [
+          ...section.links,
+          ...section.chips,
+          ...catalogSlides(section).flatMap((slide) =>
+            slide.link ? [...slide.links, slide.link] : slide.links
+          ),
+        ]
       : section.links
   }
   if (section.type === "categories") {
@@ -104,9 +111,11 @@ function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }
 export function imagesOf(section: BodySection): string[] {
   if (section.type === "hero") {
     const tiles = section.variant === "category_list" ? section.tiles : []
-    return [section.image, ...tiles.map((tile) => tile.image)].flatMap((each) =>
-      each ? [each.url] : []
-    )
+    return [
+      section.image,
+      ...tiles.map((tile) => tile.image),
+      ...catalogSlides(section).map((slide) => slide.image),
+    ].flatMap((each) => (each ? [each.url] : []))
   }
   if (section.type === "hero_slider") {
     return sliderImages(section)

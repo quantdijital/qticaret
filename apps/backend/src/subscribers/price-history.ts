@@ -7,6 +7,7 @@ import {
   priceSetsOfPrices,
   variantsOfPriceSets,
 } from "../workflows/pricing/priced-variants"
+import { isWholesalePriceEvent } from "../workflows/wholesale/events"
 
 type Container = SubscriberArgs["container"]
 
@@ -49,6 +50,10 @@ async function priceSetsOf(container: Container, eventName: string, id: string) 
  */
 export default async function priceHistory({ event, container }: SubscriberArgs<{ id: string }>) {
   try {
+    // A wholesale list's rows change no public price (ADR-0068 §7)
+    if (await isWholesalePriceEvent(container, event.name, event.data.id)) {
+      return
+    }
     const priceSetIds = await priceSetsOf(container, event.name, event.data.id)
     const variantIds = await variantsOfPriceSets(container, priceSetIds)
     if (variantIds.length > 0) {

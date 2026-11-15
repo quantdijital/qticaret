@@ -97,6 +97,17 @@ export const SLIDER_DEFAULTS: { readonly [S in SliderSetting]: Step<S> } = {
   dots: "on",
 }
 
+/**
+ * The catalogue opening's slides (adr/0049 Ek 2026-11-15): the slider's
+ * settings and defaults, still until the shop turns it on
+ * (docs/tema/bilesen-standardi.md §4.5). Mirrors `@qticaret/types`'
+ * `HERO_CATALOG_SLIDER_DEFAULTS`.
+ */
+export const HERO_CATALOG_SLIDER_DEFAULTS: { readonly [S in SliderSetting]: Step<S> } = {
+  ...SLIDER_DEFAULTS,
+  autoplay: "off",
+}
+
 /** Seconds a slide stays by speed step; saved seconds read as the nearest step. */
 export const SLIDER_SECONDS: Readonly<Record<Step<"speed">, number>> = {
   fast: 5,
@@ -108,20 +119,25 @@ export const SLIDER_SECONDS: Readonly<Record<Step<"speed">, number>> = {
 export const sliderSpeedOf = (seconds: number): Step<"speed"> =>
   seconds <= 5 ? "fast" : seconds <= 7 ? "medium" : "slow"
 
-const sliderSetting = <S extends SliderSetting>(name: S) => {
+type SliderDefaults = { readonly [S in SliderSetting]: Step<S> }
+
+const sliderSetting = <S extends SliderSetting>(name: S, defaults: SliderDefaults) => {
   const steps: readonly unknown[] = SCROLLER_SETTINGS[name]
-  return z
-    .custom<Step<S>>((value) => steps.includes(value), SETTING_ERROR)
-    .default(SLIDER_DEFAULTS[name])
+  return z.custom<Step<S>>((value) => steps.includes(value), SETTING_ERROR).default(defaults[name])
 }
 
-function sliderFields() {
-  return Object.fromEntries(SLIDER_SCROLLER.map((name) => [name, sliderSetting(name)])) as {
+function sliderFields(defaults: SliderDefaults) {
+  return Object.fromEntries(
+    SLIDER_SCROLLER.map((name) => [name, sliderSetting(name, defaults)])
+  ) as {
     [S in SliderSetting]: ReturnType<typeof sliderSetting<S>>
   }
 }
 
 /** The slider's kit settings as one field; a step missing reads as the slider's default. */
-export const sliderScroller = z.object(sliderFields()).strict()
+export const sliderScroller = z.object(sliderFields(SLIDER_DEFAULTS)).strict()
+
+/** The catalogue opening's slides' settings: the slider's, a step missing read as its own default. */
+export const heroCatalogScroller = z.object(sliderFields(HERO_CATALOG_SLIDER_DEFAULTS)).strict()
 
 export type SliderFields = z.infer<typeof sliderScroller>

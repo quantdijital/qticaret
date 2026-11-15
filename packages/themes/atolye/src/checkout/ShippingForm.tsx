@@ -33,7 +33,7 @@ export function ShippingForm({
 }) {
   const { state, pending, form } = useKeptForm(choose)
   if (options.length === 0) {
-    return <p className="rounded-media bg-field p-4 text-sm font-semibold">{words.none}</p>
+    return <p className="rounded-media gf-pane-inner p-4 text-sm font-semibold">{words.none}</p>
   }
   return (
     <form {...form} className="flex flex-col gap-6">

@@ -92,7 +92,7 @@ export function BannerSlideFields({
         }}
       />
       <LinkField
-        id={`${id}-second`}
+        id={`${id}-second_link`}
         label={t(`${B}.secondLink`)}
         hint={t(`${B}.secondLinkHint`)}
         link={slide.second_link}

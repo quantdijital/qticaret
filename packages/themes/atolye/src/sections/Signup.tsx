@@ -1,3 +1,4 @@
+import { fieldMark } from "@qticaret/ui"
 import type { PlaceOrderResult, Translate } from "@qticaret/ui"
 import { NewsletterForm } from "../frame/NewsletterForm"
 import { newsletterWords } from "../frame/newsletter-words"
@@ -22,8 +23,8 @@ export function Signup({
   return (
     <section aria-labelledby={id} className="pt-(--section-gap)">
       <Container>
-        <div className="grid gap-6 rounded-tile bg-paper-2 p-6 sm:p-10 lg:grid-cols-12 lg:items-end lg:gap-(--gap-columns) lg:p-14">
-          <h2 id={id} className="lg:col-span-5">
+        <div className="grid gap-6 rounded-tile gf-pane p-6 sm:p-10 lg:grid-cols-12 lg:items-end lg:gap-(--gap-columns) lg:p-14">
+          <h2 id={id} className="lg:col-span-5" {...fieldMark(section.editor, "title")}>
             {section.title}
           </h2>
           <NewsletterForm
@@ -31,6 +32,7 @@ export function Signup({
             action={subscribe}
             privacyPath={section.privacyPath}
             words={newsletterWords(t, section.text)}
+            marks={section.editor}
             className="lg:col-span-6 lg:col-start-7"
           />
         </div>

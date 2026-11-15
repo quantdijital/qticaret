@@ -56,6 +56,7 @@ medusaIntegrationTestRunner({
         type: "header_bar",
         variant: "standard",
         sticky: true,
+        menu_images: "submenus",
         ...ALWAYS,
       })
       expect(opened.draft.footer[0]).toMatchObject({ type: "footer_bar", variant: "ledger" })
@@ -65,7 +66,13 @@ medusaIntegrationTestRunner({
       const before = await live()
       expect(before.header.some((section) => section.type === "header_bar")).toBe(false)
       expect(before.main).toEqual({
-        header_bar: { id: "mainheader", type: "header_bar", variant: "standard", sticky: true },
+        header_bar: {
+          id: "mainheader",
+          type: "header_bar",
+          variant: "standard",
+          sticky: true,
+          menu_images: "submenus",
+        },
         footer_bar: { id: "mainfooter", type: "footer_bar", variant: "ledger" },
         product_main: { id: "mainproduct", type: "product_main", variant: "standard" },
         category_main: {
@@ -89,7 +96,17 @@ medusaIntegrationTestRunner({
 
       // The first save writes the bar's values; what is live follows on publishing
       const saved = await save({
-        header: [bar, { id: "mainheader", type: "header_bar", variant: "centered", sticky: false }],
+        // The menus' pictures in "Kategoriler" too (adr/0049 Ek 2026-11-15)
+        header: [
+          bar,
+          {
+            id: "mainheader",
+            type: "header_bar",
+            variant: "centered",
+            sticky: false,
+            menu_images: "all",
+          },
+        ],
         product: [
           { id: "mainproduct", type: "product_main", look: { width: "narrow" } },
           { id: "yardim0001", type: "help" },
@@ -111,6 +128,7 @@ medusaIntegrationTestRunner({
           type: "header_bar",
           variant: "centered",
           sticky: false,
+          menu_images: "all",
           ...ALWAYS,
         },
       ])
@@ -124,6 +142,7 @@ medusaIntegrationTestRunner({
         type: "header_bar",
         variant: "centered",
         sticky: false,
+        menu_images: "all",
       })
       expect(after.product.map((section) => section.type)).toEqual(["help"])
       expect(after.main["product_main"]).toMatchObject({ look: { width: "narrow" } })

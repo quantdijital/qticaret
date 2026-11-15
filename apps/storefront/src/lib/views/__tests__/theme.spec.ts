@@ -63,6 +63,10 @@ describe("themeSettings", () => {
       buttons: "square",
       section_spacing: "compact",
       surface_style: "lined",
+      menu_style: "underline",
+      shadow: "none",
+      chip_style: "lined",
+      media_ground: "page",
     }
     expect(themeSettings(answer, null)).toEqual(answer)
   })
@@ -99,6 +103,11 @@ describe("themeSettings", () => {
       buttons: "pill",
       section_spacing: "normal",
       surface_style: "filled",
+      // adr/0067 §1: the style kit at today's drawing
+      menu_style: "filled",
+      shadow: "float",
+      chip_style: "filled",
+      media_ground: "well",
     })
     expect(themeSettings(undefined, null)).toEqual(DEFAULT_THEME)
     expect(themeSettings(undefined, "#0b5c99").colors.primary).toBe("#0b5c99")
@@ -298,6 +307,12 @@ describe("themeView", () => {
       header: { layout: "left", sticky: true },
       buttons: "pill",
       surface: "filled",
+      styleKit: {
+        menu_style: "filled",
+        shadow: "float",
+        chip_style: "filled",
+        media_ground: "well",
+      },
     })
     expect(themeView(theme({ surface_style: "lined" })).surface).toBe("lined")
     expect(

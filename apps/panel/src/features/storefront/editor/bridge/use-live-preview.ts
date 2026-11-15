@@ -4,7 +4,13 @@ import { bridgeMessage } from "@qticaret/types/editor-bridge"
 import type { Reveal, ToStorefrontMessage } from "@qticaret/types/editor-bridge"
 import { LAYOUT_KEY, fetchLayoutPreview } from "@/features/storefront/api/layout"
 import { previewAddress } from "@/features/storefront/layout/preview-url"
-import { BRIDGE_ON, acceptFromFrame, createKeyGate, frameOrigin } from "./bridge-client"
+import {
+  BRIDGE_ON,
+  acceptFromFrame,
+  createKeyGate,
+  createPickGate,
+  frameOrigin,
+} from "./bridge-client"
 import { READY_MS, RELOAD_LIMIT, RELOAD_WINDOW_MS, RENDER_MS } from "./live-preview-options"
 import type { LivePreviewOptions as Options, Payload } from "./live-preview-options"
 import { useEditorSession } from "./use-editor-session"
@@ -78,6 +84,7 @@ export function useLivePreview({
     reloads: [] as number[],
   })
   const keyGate = useRef(createKeyGate())
+  const pickGate = useRef(createPickGate())
   const [connected, setConnected] = useState(false)
   // Each `ready` the frame says: what it was told before (the names) is told again
   const [handshakes, setHandshakes] = useState(0)
@@ -172,9 +179,15 @@ export function useLivePreview({
         }
         onPick?.(message)
         return
-      case "hover":
       case "click":
+      case "field":
       case "navigate-request":
+        // A press in the frame: it has the focus (pressing moves it there); a few a second at most
+        if (pickGate.current(document.activeElement === frame.current, Date.now())) {
+          onPick?.(message)
+        }
+        return
+      case "hover":
       case "location":
         onPick?.(message)
         return

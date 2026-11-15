@@ -125,12 +125,12 @@
 
 - **Bakım açıkken** her sayfa isteği şunu alır: `503`, `Retry-After`, `Cache-Control: no-store` ve sade bir sayfa (başlık, metin, beklenen zaman; tema çerçevesi ve menü yok).
   - `Retry-After`: `expected_at` ilerideyse kalan saniye, 300 ile 86400 arasına kırpılır. Yoksa ya da geçmişse 3600.
-- **Açık kalanlar:**
-  - `/onizleme/*`, yalnız `GET` ve `HEAD` (Ek 2026-11-15: kök düzen her sayfaya sepet ve çerez Server Action'larını taşıyor; Next bunları jetona bakılmadan önce `/onizleme/x`'e gönderilen POST'ta da çalıştırıyordu. Önizleme altındaki diğer yöntemler atlama çerezi ister, `allow_paths` de açamaz)
-  - `/odeme/sonuc*`: sağlayıcı dönüşü. Öneri: `/odeme/durum` da açık kalsın, `/odeme/sonuc`'un yönlendirdiği yer orası; yoksa ödemesi geçen alıcı bakım sayfası görür.
+- **Açık kalanlar** (Ek 2026-11-15: yol bazlı açıklık yalnız `GET` ve `HEAD` içindir; başka yöntem yalnız `POST /odeme/sonuc` ve `POST /odeme/sonuc/hata`'da geçer, geri kalanı atlama çerezi ister):
+  - `/onizleme/*`
+  - `/odeme/sonuc`, `/odeme/sonuc/hata` (sağlayıcı dönüşü) ve `/odeme/durum` (`/odeme/sonuc`'un yönlendirdiği yer; yoksa ödemesi geçen alıcı bakım sayfası görür). Ek 2026-11-15: yalnız bu tam yollar; altları açık değil.
   - `/{indexnow_key}.txt`, `/robots.txt`, `/sitemap*`
   - `/bakim/gir`
-  - statik dosyalar (`/_next/static/*`, `favicon.ico`)
+  - statik dosyalar (`/_next/static/*`, `/_next/image`, vitrinin gerçekten var olan dosyaları: `app/icon.svg`, `public/fonts`, `public/marks`). Geliştirme sunucusunun soketi (`/_next/hmr`) upgrade ile gelir, kapıya hiç uğramaz.
   - `allow_paths`: tam eşleşme; `/x/*` ise `/x` ve altı. Karşılaştırma vitrinin normalize ettiği (küçük harf, sondaki `/` yok) yolla yapılır.
   - atlama çerezi taşıyan ziyaretçi.
 - **`/bakim/gir?t=…`:**
@@ -196,3 +196,46 @@
 - **§B.2 zemin renkleri:** listeye `steel` `#f8fafc` eklendi (Atölye'nin `--color-paper`'ının sRGB karşılığı; testle token'a bağlı). `warm`, `neutral`, `cool` aynı değerlerle duruyor.
 - **§B.3 karşıtlık:** kural aynı (beyazla ve seçilen zeminle 3:1); `steel` seçiliyken gerçek Grafit zeminine göre ölçülür. Kuyu yüzeyi (`paper-2`) koşulu adr/0062 karar 6 ile, ton kümeleri tanımlanınca eklenir.
 - **§B.7 taslak:** tema ayarı adr/0063 karar 3 uygulanınca "Yayınla" ile yayına girecek (sahip, 2026-11-14); o işe kadar kayıt hemen yayındadır.
+
+## Ek (2026-11-15): bakımda ve askıda yazma yalnız atlama çereziyle
+
+- **Bağlam:** kapı yalnız vitrinin kenarında (`proxy.ts`) çalışır; backend store API bakımı bilmez. Kök düzen her sayfaya sepet ve çerez Server Action'larını taşır ve Next, `Next-Action` başlıklı bir POST'u eşleşen herhangi bir sayfa adresinde sayfa çizilmeden çalıştırır. Güvenlik incelemesi (PR #39) şu açıkları buldu:
+  1. Eşleştiricinin dışarıda bıraktığı ama dosyası olmayan adlar (`/favicon.ico`, `/apple-icon.png`, `/manifest.webmanifest`, desene uyan olmayan yazı tipi ve işaret adları) kapıya uğramadan `[...path]` sayfasına düşüyor; oraya gönderilen action bakımda ve askıda çalışıyor, GET'te CSP'siz HTML dönüyordu.
+  2. Yol bazlı açıklık (`/odeme/durum*`, `/odeme/sonuc/<alt yol>`, `allow_paths`) yöntem ayırmıyordu.
+  3. Önizleme istisnası harfe duyarlıydı ve sondaki `/`'ı istiyordu (`POST /onizleme`, `POST /ONIZLEME/x` kaçıyordu).
+  4. `/_next/webpack-hmr` üretimde de açık sayılıyordu.
+- **Karar:**
+  - Bakımda ve askıda yol bazlı açıklık yalnız `GET` ve `HEAD`'e tanınır. Başka yöntem yalnız tam yolu listelenen route handler'larda geçer: bugün `POST /odeme/sonuc` ve `POST /odeme/sonuc/hata` (ödeme sağlayıcısının dönüşü; route handler Server Action çalıştırmaz). Diğer her yazma (`/odeme/durum*`, `allow_paths`, alt yollar, önizleme, tanınmayan yöntem) atlama çerezi ister; askıda hiç geçmez. Önizlemeye özel istisna bu genel kurala katıldı.
+  - `/bakim/gir` listede yok: route yalnız `GET` ve `HEAD` alıyor; açmanın bir faydası yok, kapalı kalması güvenli varsayılan.
+  - Eşleştirici yalnız Next'in kendi çıktılarını (`/_next/static/`, `/_next/image`) dışarıda bırakır. Dosya adı biçimindeki her istek (`isFileName`) proxy'de backend'e sorulmadan cevaplanır: gerçekten var olan dosyaya (`isStaticFile`; spec `public/` ve `app/` ile birebir eşleştiğini sınar) `GET`/`HEAD` geçer, olmayan ada düz `404`, başka yönteme `405`. (Buradaki "kapının çalışmadığı hiçbir adres bir sayfaya düşmez" iddiası yanlıştı; aşağıdaki ikinci inceleme.)
+  - ~~`/_next/webpack-hmr` yalnız geliştirmede açık sayılır.~~ İkinci incelemede kaldırıldı: Next 16'da bu yol yok; geliştirme soketi `/_next/hmr`, Next'in yönlendiricisi onu upgrade olarak proxy'den önce alır.
+- **Ödünleşim:** `allow_paths` içindeki bir sayfanın formu (ör. iletişim) bakımda gönderilemez; ziyaretçi sayfayı görür, gönderince bakım sayfasını alır. Güvenli varsayılan budur. İhtiyaç çıkarsa ileride `allow_paths` için açık bir ayarla (varsayılan kapalı, yalnız seçilen yolda `POST`) gevşetilebilir.
+- **Bedel:** yazı tipi ve işaret istekleri artık proxy'den geçer; proxy bunlarda backend'e gitmeden hemen döner.
+- **İkinci güvenlik incelemesi (PR #43, Next 16.4.2 kaynağı okunarak):**
+  - **Açık (YÜKSEK):** eşleştiricinin dışarıda bıraktığı `/_next/static/` altında dosyası olmayan bir ada gelen istek de sayfaya düşer: Next dosyayı bulamayınca dinamik rotaları dener (`resolve-routes.js`), `[...path]` eşleşir ve POST'taki Server Action çalışır (`Next-Action` başlığı ya da form içerik tipi, `server-action-request-meta.js`). Kapı yine atlanıyordu.
+  - **Kapanış (üç kat):**
+    1. Eşleştiriciye başlık koşullu iki giriş: `/_next/:path*` (yapı dosyaları ve `/_next/image` dahil) `next-action` ya da `content-type` başlığı varken proxy'ye uğrar. `has` değeri harfe duyarlı bir regex (`prepare-destination.js` `matchHas`), içerik tipinin harfi ise gönderenin; bu yüzden yalnız anahtar aranır. Tarayıcının parça (chunk) ve resim GET'i içerik tipi göndermez, ek maliyet yok. Spec eşleştiriciyi Next'in kendi mantığıyla (`unstable_doesMiddlewareMatch`) ve derlemenin `config`'i kaynaktan okuyabildiğini (`extractExportedConstValue`) sınar.
+    2. Proxy'nin en başında, yol normalizasyonundan ve 301'den önce: `/_next/` altında `GET`/`HEAD` dışındaki her istek `405` (`Allow: GET, HEAD`); `/_next/static/` ve `/_next/image` altındaki GET/HEAD backend'e sorulmadan Next'e geçer.
+    3. `[...path]` sayfası ve `generateMetadata`: ilk parça `_next` ise backend'e sormadan `notFound()` (yol rotanın kendi parçalarından okunur, proxy'nin `x-qt-url`'inden değil). Önceden `GET /_next/static/<olmayan>` her seferinde backend'e resolve gönderiyordu.
+  - **DÜŞÜK, kapandı:** bakımda ve askıda açık GET'ler `/odeme/sonuc` ve `/odeme/durum` altını da açıyordu; artık yalnız `/odeme/sonuc`, `/odeme/sonuc/hata`, `/odeme/durum` (uygulamada `app/odeme/` altında başka rota yok; `/odeme/kart` ve `/odeme` kapalı).
+  - **DÜŞÜK, kapandı:** `/marks/:file` ve `/icon.svg` kendi CSP'sini alır (`default-src 'none'; style-src 'unsafe-inline'; sandbox`): doğrudan açılan bir SVG betik çalıştıramaz, bir şey yükleyemez; `<img>` ile gösterim etkilenmez.
+  - **Bilinen sınırlar (açık):**
+    - (a) **ORTA, mimari; askıda kapandı, bakımda açık:**
+      - **Askı (PR #56, adr/0061 §5.5):** backend de reddediyor. Store API'ye doğrudan gelen sepet ve ödeme yazmaları `503 plan.suspended` ve `Retry-After` alır (`api/http/plan-guard.ts`):
+        - `/store/carts*` altındaki her yazma: yeni sepet, satır, adres, kargo, kod. `POST /store/carts/:id/payment-session` ve `/complete` de buna dahil.
+        - ödeme bağlantısının sepeti (`POST /store/payment-links/:token/cart`)
+        - sepet hatırlatıcısının kullanımı (`POST /store/cart-reminders/redeem`)
+        - Açık kalanlar: okumalar, POST ile yapılan sipariş erişim okuması, satış dışı yazmalar (hesap, onaylar, soru, yorum, verilmiş sipariş) ve sağlayıcı dönüşleri. Her Store API yazmasının kararı `lib/plan-guard/__tests__/store-writes.unit.spec.ts`'te yazılı.
+      - **Bakım:** backend bakımı hâlâ bilmiyor. Store API'de bakım modu için bir koruma yok; bakımla ilgili backend kodu yalnız atlatma bağlantısının iki route'u. Store API'yi doğrudan çağıran biri (yayınlanabilir anahtar vitrinde açık) bakımda da sepet kurup ödeme başlatabilir. Bakım tasarım gereği geçici ve mağazanın kendi kararı; sipariş açığı kapatılmak istenirse askıdaki korumanın bakım için bir benzeri ayrı iş olarak eklenir.
+    - (b) Bakımda panel önizlemesindeki Server Action'lar (sepet, çerez tercihi) atlama çerezi olmadan `503` alır; önizleme GET'i açıktır. Bilinçli.
+    - (c) `fonts` ve `marks` kökleri backend'in ayrılmış kök listesinde değil: aynı adla bir slug ya da yönlendirme kurulabilir; vitrin bu yolları dosya olarak cevapladığı için o kayıt görünmez. Backend listesine eklenmesi ayrı iş.
+    - (d) Bakımda ACME HTTP-01 doğrulaması (`/.well-known/acme-challenge/*`) vitrine gelirse `503` alır; sertifika kenarda (ters vekil) alınmalı ya da DNS-01 kullanılmalı.
+    - (e) `/_next/image/<alt yol>` dosya denetiminde `nextImage` sayılmaz (yalnız tam `/_next/image`), dinamik rotaya düşer; orada Next'in resim işleyicisi `startsWith('/_next/image')` ile yakalayıp (`images.unoptimized` iken) 404 çizer. Bu davranışa güvenilmedi: action taşıyabilecek istek zaten 1. ve 2. maddeyle proxy'de 405 alır.
+  - **Çalışan sunucuda doğrulandı (2026-11-15):** üretim derlemesinde (`next build`, `next start -p 8100`, Next 16.4.2) ve geliştirme sunucusunda (8000) bakım açıkken atlatma çerezi olmadan denendi; sonuçlar ikisinde de aynı çıktı:
+    - `/_next/static/<olmayan>` ve `/_next/image/x`: `Next-Action` ya da `multipart` içerik tipiyle gelen POST `405` alıyor.
+    - `/favicon.ico`: POST `405`, GET düz `404`.
+    - `POST /odeme/durum` ve `/odeme/sonuc/x`, `GET /odeme/durum/x`, önizleme yazmaları (`/onizleme/x`, `/onizleme`, `/ONIZLEME/x`), `POST /` ve küçük harfli `post /`: hepsi `503`.
+    - `POST /odeme/sonuc`: route handler `303` dönüyor, action çalışmıyor.
+    - `/marks/*` ve `/icon.svg`: `200`, kendi CSP'leriyle.
+    - Kanıt: bu istekler sırasında backend'de yeni sepet oluşmadı. Atlatma çereziyle aynı action sepet kurdu.
+    - Denemenin geçerliliği: bakım kapalıyken aynı çerezsiz `POST /` action'ı sepet kurdu (karşı deneme).

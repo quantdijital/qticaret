@@ -25,7 +25,9 @@ const present = <T>(items: readonly (T | null)[]): T[] =>
 /**
  * The opening in its variant: the common words, buttons and picture, and
  * for H17 its variant, list, tiles (their pictures sized), quick links (a
- * broken one left out), products shown small and whether "from" is shown.
+ * broken one left out), products shown small, whether "from" is shown,
+ * and its slides (their words filled, links placed, pictures sized) and
+ * how they turn when the shop saved them.
  * Today's opening prints as it did before variants (no `variant`: the
  * storefront reads none as `standard`).
  */
@@ -55,6 +57,19 @@ export function hydrateHero(section: HeroSection, readers: Readers) {
     chips: present(section.chips.map((each) => readers.link(each))),
     picks: section.picks,
     show_price: section.show_price,
+    // Printed only when saved (Ek 2026-11-15), so an opening from before them prints as it did
+    ...(section.slides
+      ? {
+          slides: section.slides.map((slide) => ({
+            image: shownImage(readers, slide.image),
+            heading: readers.fill(slide.heading),
+            text: readers.fill(slide.text),
+            links: present(slide.links.map((each) => readers.link(each))),
+            link: readers.link(slide.link),
+          })),
+        }
+      : {}),
+    ...(section.scroller ? { scroller: section.scroller } : {}),
   }
 }
 

@@ -7718,6 +7718,7 @@
         "liveOff": "Live preview is unavailable; the preview will reload after each save.",
         "edit": "Edit",
         "selected": "Selected: {{name}}",
+        "fieldSelected": "Selected: {{name}}; moved to its field.",
         "elsewhere": "The preview shows {{path}}; on this page the header and footer can be edited. Pick a page to go back.",
         "blocked": "{{path}} does not open in the preview (a checkout, account or sign-in page)."
       },
@@ -7759,7 +7760,6 @@
         "addMarquee": "Add scrolling strip"
       },
       "row": {
-        "drag": "Drag to move",
         "problem": "A field needs fixing",
         "scheduled": "Scheduled",
         "moveUpOf": "Move {{name}} up",
@@ -8342,7 +8342,7 @@
           "noLira": "This font has no ₺ sign. Prices are drawn in the body font; a ₺ you type into a heading shows in a fallback font.",
           "singleWeight": "It has one weight: headings are drawn regular, not bold."
         },
-        "shapes": "Corners and buttons",
+        "shapes": "Shapes",
         "radius": "Corners",
         "radiusTerm": "border-radius",
         "radii": {
@@ -8373,6 +8373,46 @@
           "lined": "Lined"
         },
         "surfaceStyleHint": "The product page's info boxes, the category page's filters and subcategories, the cart's boxes. Filled is a tone darker than the page; Lined is a 1 px rule on the page's ground.",
+        "surfaces": "Surfaces",
+        "styleKit": {
+          "menu_style": {
+            "label": "Menu style",
+            "term": "menu items",
+            "steps": {
+              "filled": "Filled",
+              "underline": "Underlined",
+              "plain": "Plain"
+            },
+            "hint": "How a desktop menu item looks when pointed at or open: the header's menu, the dropdown and the list menu. Filled is each header layout's drawing today. The phone's menu stays the same."
+          },
+          "shadow": {
+            "label": "Shadow",
+            "term": "shadow",
+            "steps": {
+              "float": "On floating layers",
+              "none": "None"
+            },
+            "hint": "Surfaces that open or float over the page: dropdown menus, drawers, dialogs, the phone's sticky buy bar and floating buttons. With None the shadow goes; a surface with no edge of its own gets a 1 px rule."
+          },
+          "chip_style": {
+            "label": "Chip style",
+            "term": "chips",
+            "steps": {
+              "filled": "Filled",
+              "lined": "Lined"
+            },
+            "hint": "Unselected chips, tabs, option buttons and page numbers. A selected chip stays filled with the highlight colour in both styles."
+          },
+          "media_ground": {
+            "label": "Photo background",
+            "term": "image background",
+            "steps": {
+              "well": "Light tone",
+              "page": "Page"
+            },
+            "hint": "Behind product and category photos, list thumbnails included. Light tone is a tone darker than the page; Page is the page's own ground."
+          }
+        },
         "card": "Product card",
         "ratio": "Image ratio",
         "ratioTerm": "aspect-ratio",
@@ -8777,6 +8817,14 @@
           "term": "dropdown",
           "hint": "At the start of the menu bar; top categories and their subcategories as a dropdown."
         },
+        "menu_images": {
+          "label": "Category pictures in the menu",
+          "term": "thumbnails",
+          "hint": "Submenus: the list that opens on hover and the phone menu. Everywhere: the catalog header's “Kategoriler” list too. A category without a picture shows an empty square.",
+          "all": "Everywhere",
+          "submenus": "In submenus",
+          "off": "None"
+        },
         "menu_ground": {
           "label": "Menu bar background",
           "term": "background",
@@ -8903,7 +8951,17 @@
         "pickLabelPlaceholder": "Pine green",
         "showPrice": "Show the starting price",
         "showPriceTerm": "price",
-        "showPriceHint": "The lowest current price among the products you chose."
+        "showPriceHint": "The lowest current price among the products you chose.",
+        "slides": "Slides",
+        "slidesTerm": "slides",
+        "slidesHint": "Up to {{max}} slides. One slide stays still; two or more turn by themselves, set in the Scrolling group.",
+        "pictureOnly": "Picture only",
+        "slideImageHint": "With no heading, text or button the picture fills the whole tile.",
+        "slideImageFirstHint": "Left empty, the shop's newest product photo shows. With no heading, text or button the picture fills the whole tile.",
+        "slideLink": "Picture link",
+        "slideLinkTerm": "link",
+        "slideLinkHint": "A click on the picture goes here.",
+        "slideWordsHint": "Leave them all empty for a picture-only slide."
       },
       "categories": {
         "showCount": "Show product counts",

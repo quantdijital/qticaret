@@ -28,12 +28,21 @@ export const BRIDGE_ON = bridgeOn(import.meta.env.VITE_EDITOR_BRIDGE, STOREFRONT
 export const KEYS_PER_SECOND = 5
 
 /**
- * A gate for the frame's `key` messages (undo, redo, escape): taken only
- * while the frame itself has the focus (a key pressed in it) and at most
- * `limit` in any `windowMs`, so a page in the frame cannot replay the
- * editor's history on its own.
+ * The frame's presses (`click`, `field`, `navigate-request`) taken at most
+ * this often (security review 2026-11-15, DÜŞÜK-1): a person presses a
+ * label or a link far less often.
  */
-export function createKeyGate(limit = KEYS_PER_SECOND, windowMs = 1000) {
+export const PICKS_PER_SECOND = 4
+
+/**
+ * A gate for messages that act on the panel (a key, or a press that opens
+ * a form, a dialog or a page): taken only while the frame itself has the
+ * focus (a key pressed or a pointer pressed in it moves the focus to it)
+ * and at most `limit` in any `windowMs`, so a page in the frame cannot
+ * replay the editor's history, open forms or take the focus on its own.
+ * Refusals take no room.
+ */
+export function createFrameGate(limit: number, windowMs = 1000) {
   const taken: number[] = []
   return (focused: boolean, now: number): boolean => {
     if (!focused) {
@@ -49,6 +58,12 @@ export function createKeyGate(limit = KEYS_PER_SECOND, windowMs = 1000) {
     return true
   }
 }
+
+/** The gate for the frame's `key` messages (undo, redo, escape). */
+export const createKeyGate = () => createFrameGate(KEYS_PER_SECOND)
+
+/** The gate for the frame's presses: an edit label, a field's label, a link. */
+export const createPickGate = () => createFrameGate(PICKS_PER_SECOND)
 
 /** The exact origin of the address the frame opens; null for one that is not http(s). */
 export function frameOrigin(address: string | null): string | null {

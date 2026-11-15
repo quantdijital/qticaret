@@ -13,11 +13,14 @@ export function BandPicture({
   phone,
   sizes,
   eager,
+  mark = {},
 }: {
   image: ImageView
   phone: ImageView | null
   sizes: string
   eager: boolean
+  /** The editor's field mark for the picture (adr/0065 Faz 2b); none elsewhere. */
+  mark?: { "data-qf"?: string }
 }) {
   return (
     <picture>
@@ -41,6 +44,7 @@ export function BandPicture({
         fetchPriority={eager ? "high" : "auto"}
         decoding={eager ? "sync" : "async"}
         className="absolute inset-0 -z-10 h-full w-full object-cover"
+        {...mark}
       />
     </picture>
   )

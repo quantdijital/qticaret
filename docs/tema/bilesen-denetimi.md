@@ -53,7 +53,7 @@ Sütunlar: **Var** = bugünkü ayarlar (grup); **Eksik** = standarda göre; **Gr
 
 | | |
 | --- | --- |
-| Var | Ortak: `eyebrow`, `heading`, `text`, `links` ≤2, `image` (İçerik). `category_list`: `list` kaynağı, `list_limit` 4–12, `show_count`, `tiles` ≤2, `chips` ≤4, `picks` ≤4, `show_price`. `look`: dış/iç boşluk, zemin, genişlik (hizalama gizli) |
+| Var | Ortak: `eyebrow`, `heading`, `text`, `links` ≤2, `image` (İçerik). `category_list`: `list` kaynağı, `list_limit` 4–12, `show_count`, `tiles` ≤2, `chips` ≤4, `picks` ≤4, `show_price`, `slides` ≤6 (her biri başlık, yazı, `links` ≤2, görsel, görsel bağlantısı `link`; yazısız slayt yalnız görsel) ve 2+ slaytta giriş slaytının takımı `scroller` (adr/0049 Ek 2026-11-15, "Açılışta slayt"). `look`: dış/iç boşluk, zemin, genişlik (hizalama gizli) |
 | Eksik | Medya ailesi: yükseklik, yazı konumu, perde gücü, düğme stili, telefon görseli, görsel odağı. Görsel bandındaki `BANNER_SETTINGS` takımı buraya ortak takım olarak taşınmalı |
 | Grup | — |
 | Ad | `links` (burada) / `link` + `second_link` (görsel bandı) / `link` (slayt): "düğme" kavramı üç yapıda |
@@ -213,7 +213,7 @@ Sütunlar: **Var** = bugünkü ayarlar (grup); **Eksik** = standarda göre; **Gr
 
 | | |
 | --- | --- |
-| Var | Biçim; `sticky` (İçerik). `catalog`: İçerik'te `search_placeholder`, `utility_bar`, `phone`, `categories_button`, `menu_ground`, `highlight_link`; kapalı "Diğer ayarlar"da `search_label`, `account_text`, `cart_total` |
+| Var | Biçim; `sticky`, `menu_images` (her biçimde İçerik; menülerde kategori resimleri: all/**submenus**/off → Her yerde/Alt menülerde/Yok; varsayılan bugünkü çizim, adr/0049 Ek 2026-11-15). `catalog`: İçerik'te `search_placeholder`, `utility_bar`, `phone`, `categories_button` (ardından `menu_images`), `menu_ground`, `highlight_link`; kapalı "Diğer ayarlar"da `search_label`, `account_text`, `cart_total` |
 | Eksik | Yapışkanlık basamakları (her zaman / yukarı kaydırınca / hiç); logo boyu; telefonda logo yeri; alt çizgi; menü türü (açılır / mega / çekmece) |
 | Grup | — |
 | Ad | `sticky` hem tema ayarı `header.sticky` hem bölüm ayarı; `centered` biçimi tema ayarı `header.layout`'tan okunuyor: iki doğruluk kaynağı. O5 (`menu_ground`) |

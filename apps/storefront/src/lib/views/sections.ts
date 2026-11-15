@@ -17,7 +17,7 @@ import { EXCERPT_MIN_RATING, googleRatingView } from "./google-rating"
 import { bannerView } from "./banner"
 import { heroSliderView } from "./hero-slider"
 import { marqueeView } from "./marquee"
-import { currentShared, layoutLink } from "./layout"
+import { currentShared, isEditorSession, layoutLink } from "./layout"
 import { legalDocument, legalPath } from "./legal"
 import { postCards } from "./posts"
 import {
@@ -215,16 +215,28 @@ function withLook(view: HomeSectionView, section: BodySection): HomeSectionView 
   return device === "all" ? shown : { ...shown, device }
 }
 
-/** A page's sections, in the shop's order, each fetched at once; the empty ones left out. */
+/**
+ * A page's sections, in the shop's order, each fetched at once; the empty
+ * ones left out. In the theme editor's live session each says so
+ * (`editor`), so the theme marks its fields (adr/0065 Faz 2b); a live page's
+ * views are as they were.
+ */
 export async function sectionViews(
   sections: readonly BodySection[],
   t: Translate,
   context: SectionContext = {}
 ): Promise<HomeSectionView[]> {
-  const views = await Promise.all(sections.map((section) => sectionView(section, t, context)))
+  const [views, editing] = await Promise.all([
+    Promise.all(sections.map((section) => sectionView(section, t, context))),
+    isEditorSession(),
+  ])
   return views.flatMap((view, index) => {
     const section = sections[index]
-    return view && section ? [withLook(view, section)] : []
+    if (!view || !section) {
+      return []
+    }
+    const shown = withLook(view, section)
+    return [editing ? { ...shown, editor: true as const } : shown]
   })
 }
 

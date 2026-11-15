@@ -30,6 +30,7 @@ import { rateLimit } from "./rate-limit"
 import { requireReauth } from "./reauth"
 import { requireFeature } from "./require-feature"
 import { requestPath } from "./request-path"
+import { refuseSuspendedCartWrite } from "./plan-guard"
 
 type Middleware = (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => unknown
 
@@ -194,6 +195,8 @@ export const PAYMENT_LINK_ROUTES = [
     matcher: "/store/payment-links/:token/cart",
     methods: ["POST" as const],
     middlewares: [
+      // adr/0061 §5.5: a suspended shop opens no cart, a link's either
+      refuseSuspendedCartWrite,
       requireFeature(PAYMENT_LINKS),
       rateLimit(() => PAY_LINK),
       validateAndTransformBody(StorePostPaymentLinkCart),

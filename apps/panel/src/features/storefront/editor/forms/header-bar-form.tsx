@@ -1,33 +1,60 @@
 import { useTranslation } from "react-i18next"
+import { HEADER_MENU_IMAGES } from "@qticaret/types"
 import type { HeaderBarSection } from "@/features/storefront/api/layout"
 import { SwitchRow } from "../theme-fields"
 import { FIELD_IDS } from "./field-registry"
 import type { SectionFormProps } from "./form-props"
 import { HeaderCatalogFields } from "./header-catalog-fields"
+import { StepChoice } from "./step-choice"
+
+const H = "storefront.editor.headerBar"
 
 /**
  * The shop's header bar (adr/0049 Ek 2026-11-14 §5): whether it stays at
- * the top of a long page, the theme settings' "Sabit üst bilgi" before.
+ * the top of a long page, the theme settings' "Sabit üst bilgi" before,
+ * and where its menus show the categories' small pictures (Ek 2026-11-15;
+ * every variant's, as the dropdowns and the phone's menu are): three named
+ * steps, the default the drawing from before.
  * Its look is the variant's ("Biçim"); the logo and menus are edited on
  * their own screens. The catalog header adds what it shows and its menu
- * bar's ground here (Ek 2026-11-15); its finer settings sit closed in
- * "Diğer ayarlar" (`SectionPanel`).
+ * bar's ground here (Ek 2026-11-15), the pictures beside its "Kategoriler"
+ * button; its finer settings sit closed in "Diğer ayarlar" (`SectionPanel`).
  */
 export function HeaderBarForm({ section, problems, onChange }: SectionFormProps<HeaderBarSection>) {
   const { t } = useTranslation()
   const sticky = (
     <SwitchRow
       id={FIELD_IDS.sticky(section.id)}
-      label={t("storefront.editor.headerBar.sticky")}
-      hint={t("storefront.editor.headerBar.stickyHint")}
+      label={t(`${H}.sticky`)}
+      hint={t(`${H}.stickyHint`)}
       checked={section.sticky}
       onChange={(next) => {
         onChange({ ...section, sticky: next })
       }}
     />
   )
+  const menuImages = (
+    <StepChoice
+      id={FIELD_IDS.menuImages(section.id)}
+      label={t(`${H}.menu_images.label`)}
+      term={t(`${H}.menu_images.term`)}
+      hint={t(`${H}.menu_images.hint`)}
+      steps={HEADER_MENU_IMAGES}
+      value={section.menu_images}
+      fallback="submenus"
+      nameOf={(step) => t(`${H}.menu_images.${step}`)}
+      onChange={(step) => {
+        onChange({ ...section, menu_images: step })
+      }}
+    />
+  )
   if (section.variant !== "catalog") {
-    return sticky
+    return (
+      <div className="flex flex-col gap-5">
+        {menuImages}
+        {sticky}
+      </div>
+    )
   }
   return (
     <div className="flex flex-col gap-5">
@@ -36,9 +63,10 @@ export function HeaderBarForm({ section, problems, onChange }: SectionFormProps<
         group="content"
         problems={problems}
         onChange={onChange}
+        afterCategories={menuImages}
       />
       {sticky}
-      <p className="text-xs text-muted-foreground">{t("storefront.editor.headerBar.phoneNote")}</p>
+      <p className="text-xs text-muted-foreground">{t(`${H}.phoneNote`)}</p>
     </div>
   )
 }

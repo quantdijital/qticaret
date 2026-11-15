@@ -1,5 +1,6 @@
 import { GRAFIT_THEME } from "@/features/storefront/api/theme"
 import type { ThemeChoices } from "@/features/storefront/api/theme"
+import { STYLE_KIT_FIELDS } from "@qticaret/types"
 
 /**
  * The theme's settings as the form and its sample hold them (adr/0053 §B):
@@ -23,6 +24,10 @@ export const themeValuesOf = (saved: ThemeChoices): ThemeValues => ({
   buttons: saved.buttons,
   section_spacing: saved.section_spacing,
   surface_style: saved.surface_style,
+  menu_style: saved.menu_style,
+  shadow: saved.shadow,
+  chip_style: saved.chip_style,
+  media_ground: saved.media_ground,
 })
 
 /** Grafit as the form holds it: no colour of the shop's own, the theme's every default. */
@@ -41,6 +46,7 @@ export function isGrafit(values: ThemeValues): boolean {
     values.buttons === g.buttons &&
     values.section_spacing === g.section_spacing &&
     values.surface_style === g.surface_style &&
+    STYLE_KIT_FIELDS.every((field) => values[field] === g[field]) &&
     (Object.keys(g.product_card) as (keyof ThemeValues["product_card"])[]).every(
       (key) => values.product_card[key] === g.product_card[key]
     ) &&

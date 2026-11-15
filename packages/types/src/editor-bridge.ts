@@ -13,7 +13,8 @@ import { z } from "zod"
  * selecting and scrolling to a section, changing the shown page and the
  * undo keys. Faz 2 adds hovering both ways, the edit label's click, the
  * section names, and links held in the frame (`navigate-request`, then
- * `location`). Patches come with Faz 3: until then unknown, so dropped.
+ * `location`). Faz 2b adds a field's edit label (`field`). Patches come
+ * with Faz 3: until then unknown, so dropped.
  * A new message is a new type, never a new field on an old one: a panel
  * and a storefront a release apart drop what they do not know.
  *
@@ -30,6 +31,16 @@ export const EDITOR_BRIDGE_MAX_BYTES = 64 * 1024
 export const BRIDGE_SECTION_ID = /^[a-z0-9]{6,24}$/
 
 const sectionId = z.string().regex(BRIDGE_SECTION_ID)
+
+/**
+ * A field's key inside its section (Faz 2b, adr/0065 §9): the design's own
+ * path to the text or picture drawn (`heading`, `links.0`,
+ * `slides.2.heading`): lowercase words and small numbers joined by dots,
+ * nothing else, so it is safe inside a CSS attribute selector. The panel
+ * acts on it only when its register knows the key for that section.
+ */
+export const BRIDGE_FIELD_KEY = /^[a-z][a-z_]{0,31}(?:\.(?:[0-9]{1,2}|[a-z][a-z_]{0,31})){0,3}$/
+const fieldKey = z.string().max(80).regex(BRIDGE_FIELD_KEY)
 
 /** The draft's edition: the moment it was last saved (ISO 8601). */
 const edition = z.string().min(1).max(40)
@@ -160,6 +171,11 @@ export const toPanelMessage = z.discriminatedUnion("type", [
   envelope("hover", z.strictObject({ id: sectionId.nullable() })),
   /** Faz 2: a section's edit label was pressed: its form opens. */
   envelope("click", z.strictObject({ id: sectionId })),
+  /**
+   * Faz 2b: a field's edit label was pressed (a heading, a button, a
+   * picture marked `data-qf`): the section's form opens at that field.
+   */
+  envelope("field", z.strictObject({ id: sectionId, field: fieldKey })),
   /**
    * Faz 2: a link followed (or a search sent) in the frame, held there: the
    * panel shows that page in the frame, or says it cannot be previewed.

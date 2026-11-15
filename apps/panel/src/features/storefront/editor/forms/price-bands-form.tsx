@@ -8,6 +8,7 @@ import { SwitchRow } from "../theme-fields"
 import { FIELD_IDS } from "./field-registry"
 import { CountField, FieldGroup, TextField } from "./fields"
 import type { SectionFormProps } from "./form-props"
+import { PREVIEW_IDS } from "./preview-fields"
 import { PriceBandRange, isPriced, nextBound } from "./price-band-range"
 import { useProblemText } from "./problem-text"
 import { TitleField } from "./simple-forms"
@@ -95,7 +96,7 @@ export function PriceBandsForm({
                 />
               </div>
               <TextField
-                id={`${section.id}-${at}-label`}
+                id={PREVIEW_IDS.text(section.id, `${at}.label`)}
                 label={t(`${P}.label`)}
                 value={band.label}
                 max={B.label}
@@ -108,7 +109,7 @@ export function PriceBandsForm({
                 }}
               />
               <TextField
-                id={`${section.id}-${at}-text`}
+                id={PREVIEW_IDS.text(section.id, `${at}.text`)}
                 label={t(`${P}.text`)}
                 value={band.text}
                 max={B.text}

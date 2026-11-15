@@ -3,7 +3,15 @@ import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { bridgeMessage } from "@qticaret/types/editor-bridge"
 import { DOC } from "../theme-editor.fixtures"
-import { groupOf, sectionNames, usePreviewPicking } from "./use-preview-picking"
+import type { LayoutDocument, ProductsSection } from "@/features/storefront/api/layout"
+import { newHomeSection } from "@/features/storefront/layout/sections"
+import {
+  fieldContext,
+  groupOf,
+  nameOf,
+  sectionNames,
+  usePreviewPicking,
+} from "./use-preview-picking"
 import type { PickMessage } from "./use-live-preview"
 
 const pickOf = <T extends PickMessage["type"]>(
@@ -11,13 +19,13 @@ const pickOf = <T extends PickMessage["type"]>(
   payload: Extract<PickMessage, { type: T }>["payload"]
 ) => bridgeMessage(type, payload as never, 0) as PickMessage
 
-function setup(connected = true) {
+function setup(connected = true, doc = DOC) {
   const post = vi.fn(() => true)
   const onOpen = vi.fn()
   const onVisit = vi.fn()
   const onLand = vi.fn()
   const hook = renderHook(() =>
-    usePreviewPicking({ doc: DOC, connected, post, onOpen, onVisit, onLand })
+    usePreviewPicking({ doc, connected, post, onOpen, onVisit, onLand })
   )
   return { hook, post, onOpen, onVisit, onLand }
 }
@@ -45,6 +53,14 @@ describe("picking in the preview", () => {
         DOC.category.length +
         DOC.footer.length
     )
+  })
+
+  it("reads a name by its own entry only, never the prototype (BİLGİ-1)", () => {
+    const names = { girisbolumu: "Açılış" }
+    expect(nameOf(names, "girisbolumu")).toBe("Açılış")
+    expect(nameOf(names, "constructor")).toBe("")
+    expect(nameOf(names, "hasOwnProperty")).toBe("")
+    expect(nameOf({ constructor: "Kurucu" }, "constructor")).toBe("Kurucu")
   })
 
   it("sends the edit word and the names once connected", () => {
@@ -96,6 +112,70 @@ describe("picking in the preview", () => {
     })
     expect(onOpen).toHaveBeenCalledWith("yeniurunler")
     expect(hook.result.current.announce).toMatch(/^Seçildi: /)
+  })
+
+  it("opens a section at a field its register knows (Faz 2b), said aloud", () => {
+    const { hook, onOpen } = setup()
+    act(() => {
+      hook.result.current.onPick(pickOf("field", { id: "girisbolumu", field: "heading" }))
+    })
+    expect(onOpen).toHaveBeenCalledWith("girisbolumu", {
+      target: "girisbolumu-heading",
+      group: "content",
+    })
+    expect(hook.result.current.announce).toMatch(/^Seçildi: .*ilgili alana gidildi/)
+    act(() => {
+      hook.result.current.onPick(pickOf("field", { id: "duyurular", field: "lines.0" }))
+    })
+    expect(onOpen).toHaveBeenLastCalledWith("duyurular", {
+      target: "duyurular-lines-0",
+      group: "content",
+    })
+  })
+
+  it("opens the section alone for a key it does not know there; ignores an unknown section", () => {
+    const { hook, onOpen } = setup()
+    act(() => {
+      // The opening has no buttons: its first is not a field; a title is not the opening's
+      hook.result.current.onPick(pickOf("field", { id: "girisbolumu", field: "links.0" }))
+      hook.result.current.onPick(pickOf("field", { id: "girisbolumu", field: "title" }))
+    })
+    expect(onOpen.mock.calls).toEqual([
+      ["girisbolumu", undefined],
+      ["girisbolumu", undefined],
+    ])
+    expect(hook.result.current.announce).toMatch(/^Seçildi: /)
+    expect(hook.result.current.announce).not.toMatch(/alana/)
+    act(() => {
+      hook.result.current.onPick(pickOf("field", { id: "unknown01", field: "heading" }))
+    })
+    expect(onOpen).toHaveBeenCalledTimes(2)
+  })
+
+  it("opens the rail a shelf's pill names, at its title, and a badge by the shared list", () => {
+    const [one, two] = ["raf0000001", "raf0000002"].map(
+      (id) => newHomeSection("products", id) as ProductsSection
+    )
+    if (!one || !two) throw new Error("no rails")
+    const rails = [one, two]
+    const doc: LayoutDocument = { ...DOC, home: rails }
+    const found = { group: "home" as const, section: one, index: 0 }
+    expect(fieldContext(doc, found).shelf?.map((rail) => rail.id)).toEqual(rails.map((r) => r.id))
+    expect(fieldContext(doc, found).badges).toBe(DOC.settings.trust_badges.length)
+    const { hook, onOpen } = setup(true, doc)
+    act(() => {
+      hook.result.current.onPick(pickOf("field", { id: "raf0000001", field: "tabs.1.2" }))
+    })
+    expect(onOpen).toHaveBeenLastCalledWith("raf0000002", {
+      target: "raf0000002-title",
+      group: "content",
+      section: "raf0000002",
+    })
+    act(() => {
+      // The page drew three pills: the panel's shelf has two, so the shelf's own form opens
+      hook.result.current.onPick(pickOf("field", { id: "raf0000001", field: "tabs.1.3" }))
+    })
+    expect(onOpen).toHaveBeenLastCalledWith("raf0000001", undefined)
   })
 
   it("lights a row for a known section only", () => {

@@ -7,6 +7,7 @@ import { cn } from "@qticaret/admin-ui/lib/utils"
 import { BANNER_DEFAULTS, BANNER_SETTINGS } from "@qticaret/types"
 import type { BannerSetting, BannerStep } from "@qticaret/types"
 import type { BannerSection } from "@/features/storefront/api/layout"
+import { Hint } from "../shared/hint"
 import { FIELD_IDS } from "./field-registry"
 
 const B = "storefront.editor.banner"
@@ -94,19 +95,21 @@ function BannerSettingField<S extends BannerSetting>({
         className={cn("grid w-full", COLUMNS[steps.length], place && "max-w-56")}
       >
         {steps.map((step) => (
-          <ToggleGroupItem
-            key={step}
-            value={step}
-            aria-label={place ? t(`${B}.${setting}.${step}`) : undefined}
-            title={place ? t(`${B}.${setting}.${step}`) : undefined}
-            className="h-auto min-w-0 gap-1 px-1.5 py-2 text-xs data-[state=on]:bg-accent data-[state=on]:font-medium data-[state=on]:text-accent-foreground"
-          >
-            {place ? (
-              <PlaceSketch step={step} />
-            ) : (
-              <span className="truncate">{t(`${B}.${setting}.${step}`)}</span>
-            )}
-          </ToggleGroupItem>
+          // A sketch has no words: the hint names it (its own state named again, past the hint's)
+          <Hint key={step} label={place ? t(`${B}.${setting}.${step}`) : null} side="bottom">
+            <ToggleGroupItem
+              value={step}
+              data-state={value === step ? "on" : "off"}
+              aria-label={place ? t(`${B}.${setting}.${step}`) : undefined}
+              className="h-auto min-w-0 gap-1 px-1.5 py-2 text-xs data-[state=on]:bg-accent data-[state=on]:font-medium data-[state=on]:text-accent-foreground"
+            >
+              {place ? (
+                <PlaceSketch step={step} />
+              ) : (
+                <span className="truncate">{t(`${B}.${setting}.${step}`)}</span>
+              )}
+            </ToggleGroupItem>
+          </Hint>
         ))}
       </ToggleGroup>
       {hint ? (

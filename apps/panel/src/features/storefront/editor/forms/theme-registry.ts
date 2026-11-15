@@ -11,6 +11,7 @@ import {
   HEADING_FONTS,
   RADII,
   SECTION_SPACINGS,
+  STYLE_KIT,
   SURFACE_STYLES,
 } from "@/features/storefront/api/theme"
 import type {
@@ -19,9 +20,10 @@ import type {
   QUICK_VIEW_SWITCHES,
   ThemeChoices,
 } from "@/features/storefront/api/theme"
-import type { CardVariant } from "@qticaret/types"
+import type { CardVariant, StyleKitField } from "@qticaret/types"
 import type { AnySection, LayoutDocument } from "@/features/storefront/api/layout"
 import { LAYOUT_GROUPS } from "@/features/storefront/layout/sections"
+import { STYLE_KIT_READY } from "./style-kit-ready"
 
 /**
  * The theme panel's fields as the settings search knows them (adr/0049 Ek
@@ -35,13 +37,14 @@ import { LAYOUT_GROUPS } from "@/features/storefront/layout/sections"
 const C = "storefront.editor.theme"
 
 /** The theme panel's groups, in its order. */
-export type ThemeGroupName = "colors" | "fonts" | "shapes" | "card" | "framed"
+export type ThemeGroupName = "colors" | "fonts" | "shapes" | "surfaces" | "card" | "framed"
 
 /** Each group's title (i18n key), as the panel and a hit's second line show it. */
 export const THEME_GROUP_TITLES: Readonly<Record<ThemeGroupName, string>> = {
   colors: `${C}.colors`,
   fonts: `${C}.fontsTitle`,
   shapes: `${C}.shapes`,
+  surfaces: `${C}.surfaces`,
   card: `${C}.card`,
   framed: `${C}.framed`,
 }
@@ -95,6 +98,18 @@ const quickViewSwitch = (name: (typeof QUICK_VIEW_SWITCHES)[number]): FieldMeta 
 })
 
 /**
+ * A style kit field (adr/0067 §1): `styleKit.<field>.*` names; out of the
+ * panel and its search until the storefront draws it (`STYLE_KIT_READY`).
+ */
+const kitField = (field: StyleKitField, group: ThemeGroupName): FieldMeta => ({
+  group,
+  label: `${C}.styleKit.${field}.label`,
+  term: `${C}.styleKit.${field}.term`,
+  options: named(STYLE_KIT[field], `styleKit.${field}.steps`),
+  shown: () => STYLE_KIT_READY[field],
+})
+
+/**
  * Each field's place, name and choices; null: not in the theme panel (the
  * header's layout and stickiness are the header bar's, adr/0049 Ek
  * 2026-11-14 §5).
@@ -130,17 +145,22 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
     label: `${C}.buttons`,
     options: named(BUTTON_SHAPES, "buttonShapes"),
   },
-  section_spacing: {
-    group: "shapes",
-    label: `${C}.sectionSpacing`,
-    term: `${C}.sectionSpacingTerm`,
-    options: named(SECTION_SPACINGS, "sectionSpacings"),
-  },
+  // adr/0067 §2.7: shapes are corners, buttons and chips; surfaces the rest
+  chip_style: kitField("chip_style", "shapes"),
   surface_style: {
-    group: "shapes",
+    group: "surfaces",
     label: `${C}.surfaceStyle`,
     term: `${C}.surfaceStyleTerm`,
     options: named(SURFACE_STYLES, "surfaceStyles"),
+  },
+  shadow: kitField("shadow", "surfaces"),
+  media_ground: kitField("media_ground", "surfaces"),
+  menu_style: kitField("menu_style", "surfaces"),
+  section_spacing: {
+    group: "surfaces",
+    label: `${C}.sectionSpacing`,
+    term: `${C}.sectionSpacingTerm`,
+    options: named(SECTION_SPACINGS, "sectionSpacings"),
   },
   "product_card.ratio": {
     group: "card",

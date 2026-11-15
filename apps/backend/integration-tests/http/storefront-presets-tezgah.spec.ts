@@ -103,6 +103,8 @@ medusaIntegrationTestRunner({
       ])
       expect(previewed.data.layout.main["header_bar"]).toMatchObject({
         variant: "catalog",
+        // Pictures in "Kategoriler" too (adr/0049 Ek 2026-11-15)
+        menu_images: "all",
         catalog: expect.objectContaining({ menu_ground: "stage", utility_bar: true }) as unknown,
       })
       expect(previewed.data.layout.settings.theme).toMatchObject({

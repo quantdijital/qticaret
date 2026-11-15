@@ -35,6 +35,8 @@ vi.mock("@/lib/store-api/extras", () => ({
 vi.mock("../layout", async (importOriginal) => ({
   ...(await importOriginal<LayoutModule>()),
   currentShared: shared.current,
+  // A live page: no editor session
+  isEditorSession: () => Promise.resolve(false),
 }))
 
 const { sectionViews } = await import("../sections")
@@ -103,6 +105,10 @@ describe("the theme's settings and a menu set in the design (adr/0063 §3)", () 
     buttons: "pill",
     section_spacing: "normal",
     surface_style: "filled",
+    menu_style: "filled",
+    shadow: "float",
+    chip_style: "filled",
+    media_ground: "well",
   })
   const frame = { primary_color: "#0b5c99" } as Parameters<typeof themeSourceOf>[1]["storefront"]
   const menu = (title: string): StoreMenu => ({ title, location: "main", rank: 0, items: [] })

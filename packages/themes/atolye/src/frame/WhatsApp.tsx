@@ -29,8 +29,9 @@ export function WhatsApp({
       rel="noopener"
       aria-label={label}
       data-whatsapp=""
+      // Edged for `shadow: none` (adr/0067 S2): the green fill is its own edge, no ring round it
       className={cn(
-        "fixed right-4 z-(--z-raised) inline-flex size-14 items-center justify-center rounded-button bg-whatsapp text-whatsapp-ink shadow-float lg:right-6 lg:bottom-6",
+        "fixed right-4 z-(--z-raised) inline-flex size-14 items-center justify-center rounded-button bg-whatsapp text-whatsapp-ink shadow-float-edged lg:right-6 lg:bottom-6",
         aboveBottomBar ? "bottom-[calc(5rem+env(safe-area-inset-bottom))]" : "bottom-4"
       )}
     >

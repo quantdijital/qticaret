@@ -5,6 +5,7 @@ import {
   canonicalHostRedirect,
   indexNowFile,
   isCataloguePage,
+  isFileName,
   isStaticFile,
   isStorefrontIndex,
   isSystemPath,
@@ -150,18 +151,29 @@ describe("indexNowFile", () => {
 })
 
 describe("isStaticFile", () => {
-  it("knows the app's metadata files and the self-hosted faces, exactly", () => {
+  it("knows the app's icon, the self-hosted faces and the marks, exactly", () => {
     for (const path of [
       "/icon.svg",
-      "/apple-icon.png",
-      "/manifest.webmanifest",
-      "/favicon.ico",
       "/fonts/inter-latin.c940764593.woff2",
       "/fonts/source-sans-tr.2739d40613.woff2",
       "/marks/visa.png",
-      "/marks/bank_transfer.svg",
     ]) {
       expect(isStaticFile(path)).toBe(true)
+      expect(isFileName(path)).toBe(true)
+    }
+  })
+
+  it("leaves out a file's name where no file lives (adr/0053 Ek 2026-11-15)", () => {
+    for (const path of [
+      "/apple-icon.png",
+      "/manifest.webmanifest",
+      "/favicon.ico",
+      "/fonts/inter-latin.0000000000.woff2",
+      "/marks/bank_transfer.svg",
+    ]) {
+      expect(isStaticFile(path)).toBe(false)
+      // Still a file's name: the proxy answers it a 404 itself, never the catch-all page
+      expect(isFileName(path)).toBe(true)
     }
   })
 
@@ -182,6 +194,7 @@ describe("isStaticFile", () => {
       "/kategori/marks/visa.png",
     ]) {
       expect(isStaticFile(path)).toBe(false)
+      expect(isFileName(path)).toBe(false)
     }
   })
 })

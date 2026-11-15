@@ -1,5 +1,5 @@
 import { Heart, UserRound } from "lucide-react"
-import { sectionMark } from "@qticaret/ui"
+import { fieldMark, sectionMark } from "@qticaret/ui"
 import type { HeaderCatalogView, ShopView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
@@ -14,9 +14,8 @@ import { Wordmark } from "./Wordmark"
 import { LABELLED, accountOf, allInOf, searchOf } from "./header-words"
 import { menuWords } from "./menu-words"
 
-/** An icon on the menu bar: its ground's colours (`header-catalog.css`), 44 px. */
-const ON_BAR =
-  "gf-on-bar gf-icon-btn text-text transition-colors duration-(--dur-micro) hover:bg-paper-2"
+/** An icon on the menu bar: its ground's colours (`header-catalog.css`), 44 px; hovered, the menus' look. */
+const ON_BAR = "gf-on-bar gf-icon-btn gf-tool text-text transition-colors duration-(--dur-micro)"
 
 /** Whether the catalog header draws the strip, and the phone beside its search. */
 export function catalogParts(shop: ShopView, catalog: HeaderCatalogView) {
@@ -55,9 +54,17 @@ export function HeaderCatalog({
   changeCartLine?: ((form: FormData) => Promise<void>) | undefined
 }) {
   const menu = menuWords(shop.categories, t)
+  // The menus' small pictures (adr/0049 Ek 2026-11-15): the dropdowns and the sheet unless the
+  // shop said none, "Kategoriler" only when it asked for them everywhere
+  const images = shop.headerBar?.menuImages ?? "submenus"
+  const pictures = images !== "off"
   // The highlighted link stands right after the main menu's last item (Tezgâh audit Y-05)
   const highlight = catalog.highlight && (
-    <a href={catalog.highlight.path} className="gf-btn gf-btn--small shrink-0">
+    <a
+      href={catalog.highlight.path}
+      className="gf-btn gf-btn--small shrink-0"
+      {...fieldMark(shop.editor, "highlight_link")}
+    >
       {catalog.highlight.label}
     </a>
   )
@@ -118,6 +125,7 @@ export function HeaderCatalog({
           categories={shop.categories}
           topLinks={shop.topLinks}
           contact={shop.contact}
+          pictures={pictures}
           highlight={catalog.highlight}
           account={{ label: account, path: "/hesap" }}
           words={{
@@ -133,6 +141,7 @@ export function HeaderCatalog({
           {...search}
           id="arama-genis"
           written={catalog.searchLabel}
+          marks={shop.editor}
           className="hidden max-w-180 flex-1 lg:block"
         />
         {parts.phone && (
@@ -152,7 +161,12 @@ export function HeaderCatalog({
         </nav>
       </Container>
       <Container className="pb-2 lg:hidden">
-        <SearchBox {...search} id={PHONE_SEARCH} written={catalog.searchLabel} />
+        <SearchBox
+          {...search}
+          id={PHONE_SEARCH}
+          written={catalog.searchLabel}
+          marks={shop.editor}
+        />
       </Container>
       <div className="gf-menubar hidden lg:block" data-ground={catalog.menuGround}>
         <Container>
@@ -160,6 +174,7 @@ export function HeaderCatalog({
             {catalog.categories.length > 0 && (
               <CategoryMenu
                 categories={catalog.categories}
+                pictures={images === "all"}
                 words={{
                   button: t("nav.categories"),
                   label: t("nav.category_menu"),
@@ -175,6 +190,7 @@ export function HeaderCatalog({
                 words={menu}
                 more={t("nav.more")}
                 tail={highlight}
+                pictures={pictures}
               />
             )}
             {shop.categories.length === 0 && highlight}

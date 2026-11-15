@@ -7718,6 +7718,7 @@
         "liveOff": "Canlı önizleme kullanılamıyor; önizleme her kayıttan sonra yeniden yüklenecek.",
         "edit": "Düzenle",
         "selected": "Seçildi: {{name}}",
+        "fieldSelected": "Seçildi: {{name}}; ilgili alana gidildi.",
         "elsewhere": "Önizlemede {{path}} açık; bu sayfada üst ve alt bilgi düzenlenir. Sayfa seçerek geri dönün.",
         "blocked": "{{path}} önizlemede açılmaz (ödeme, hesap ya da giriş sayfası)."
       },
@@ -7759,7 +7760,6 @@
         "addMarquee": "Kayan yazı ekle"
       },
       "row": {
-        "drag": "Sürükleyerek taşıyın",
         "problem": "Düzeltilecek alan var",
         "scheduled": "Zamanlanmış",
         "moveUpOf": "{{name}} bölümünü yukarı taşı",
@@ -8342,7 +8342,7 @@
           "noLira": "Bu yazı tipinde ₺ işareti yok. Fiyatlar metin yazı tipiyle çizilir; başlık metnine yazdığınız ₺ yedek bir yazı tipiyle görünür.",
           "singleWeight": "Tek kalınlığı vardır: başlıklar kalın değil, normal kalınlıkta çizilir."
         },
-        "shapes": "Köşeler ve düğmeler",
+        "shapes": "Şekiller",
         "radius": "Köşeler",
         "radiusTerm": "border-radius",
         "radii": {
@@ -8373,6 +8373,46 @@
           "lined": "Çizgili"
         },
         "surfaceStyleHint": "Ürün sayfasındaki bilgi kutuları, kategori sayfasındaki filtreler ve alt kategoriler, sepetteki kutular. Dolu, sayfadan bir ton koyu zemindir; Çizgili, sayfa zemininde 1 px çizgidir.",
+        "surfaces": "Yüzeyler",
+        "styleKit": {
+          "menu_style": {
+            "label": "Menü stili",
+            "term": "menu items",
+            "steps": {
+              "filled": "Dolu",
+              "underline": "Alt çizgili",
+              "plain": "Sade"
+            },
+            "hint": "Masaüstü menüde üzerine gelinen ve açık olan öğenin görünüşü: üst bilginin menüsü, açılır liste ve liste menüsü. Dolu, her üst bilgi biçiminin bugünkü çizimidir. Telefondaki menü değişmez."
+          },
+          "shadow": {
+            "label": "Gölge",
+            "term": "shadow",
+            "steps": {
+              "float": "Açılır katmanlarda",
+              "none": "Yok"
+            },
+            "hint": "Sayfanın üstünde açılan ya da yüzen yüzeyler: açılır menü, çekmece, pencere, telefondaki yapışkan satın alma çubuğu ve yüzen düğmeler. Yok seçilince gölge kalkar; kendi kenarı olmayan yüzeye 1 px çizgi gelir."
+          },
+          "chip_style": {
+            "label": "Çip stili",
+            "term": "chips",
+            "steps": {
+              "filled": "Dolu",
+              "lined": "Çizgili"
+            },
+            "hint": "Seçili olmayan çipler, sekmeler, seçenek düğmeleri ve sayfa numaraları. Seçili çip iki stilde de vurgu rengiyle dolu kalır."
+          },
+          "media_ground": {
+            "label": "Fotoğraf zemini",
+            "term": "image background",
+            "steps": {
+              "well": "Hafif ton",
+              "page": "Sayfa"
+            },
+            "hint": "Ürün ve kategori fotoğraflarının arkası, liste küçük resimleri dahil. Hafif ton, sayfadan bir ton koyu zemindir; Sayfa, sayfanın kendi zeminidir."
+          }
+        },
         "card": "Ürün kartı",
         "ratio": "Görsel oranı",
         "ratioTerm": "aspect-ratio",
@@ -8777,6 +8817,14 @@
           "term": "dropdown",
           "hint": "Menü çubuğunun başında; üst kategoriler ve alt kategorileri açılır liste olarak."
         },
+        "menu_images": {
+          "label": "Menüde kategori resimleri",
+          "term": "thumbnails",
+          "hint": "Alt menüler: üstüne gelince açılan liste ve telefon menüsü. Her yerde: katalog üst bilgisinin “Kategoriler” listesi de resimli. Resmi olmayan kategoride boş kare durur.",
+          "all": "Her yerde",
+          "submenus": "Alt menülerde",
+          "off": "Yok"
+        },
         "menu_ground": {
           "label": "Menü çubuğu zemini",
           "term": "background",
@@ -8903,7 +8951,17 @@
         "pickLabelPlaceholder": "Çam yeşili",
         "showPrice": "Başlangıç fiyatını göster",
         "showPriceTerm": "price",
-        "showPriceHint": "Seçtiğiniz ürünlerin en düşük güncel fiyatı."
+        "showPriceHint": "Seçtiğiniz ürünlerin en düşük güncel fiyatı.",
+        "slides": "Slaytlar",
+        "slidesTerm": "slides",
+        "slidesHint": "En çok {{max}} slayt. Tek slayt durağan durur; iki ve üstü kendiliğinden döner, ayarları Kaydırma grubunda.",
+        "pictureOnly": "Yalnız görsel",
+        "slideImageHint": "Başlık, yazı ve düğme boşsa görsel alanın tamamını kaplar.",
+        "slideImageFirstHint": "Boş bırakırsanız mağazanın en yeni ürün fotoğrafı görünür. Başlık, yazı ve düğme boşsa görsel alanın tamamını kaplar.",
+        "slideLink": "Görselin bağlantısı",
+        "slideLinkTerm": "link",
+        "slideLinkHint": "Görsele tıklayan buraya gider.",
+        "slideWordsHint": "Hepsini boş bırakırsanız slayt yalnız görsel olur."
       },
       "categories": {
         "showCount": "Ürün sayısını göster",

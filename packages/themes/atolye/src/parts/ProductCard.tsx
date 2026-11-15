@@ -66,7 +66,7 @@ export function ProductCard({
   const add = quickAdd && product.quickAdd && !out ? product.quickAdd : null
   return (
     <article className="group gf-card @container relative flex h-full flex-col gap-3">
-      <div className="relative aspect-card overflow-hidden rounded-media bg-paper-2">
+      <div className="relative aspect-card overflow-hidden rounded-media bg-media">
         {product.image && (
           <ResponsiveImage
             image={product.image}

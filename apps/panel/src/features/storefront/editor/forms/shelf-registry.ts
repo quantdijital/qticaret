@@ -5,7 +5,12 @@ import {
   scrollerSettingsOf,
   sliderSettingsOf,
 } from "@qticaret/types"
-import type { ScrollerSetting, ScrollerSettings, SliderSource } from "@qticaret/types"
+import type {
+  ScrollerSetting,
+  ScrollerSettings,
+  SliderSettings,
+  SliderSource,
+} from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { RegistryField } from "./field-registry"
 import { SCROLLER_MAIN, SLIDER_MAIN, scrollerOffers } from "./scroller-groups"
@@ -76,8 +81,12 @@ export function scrollerFields(id: string, scroller: unknown): RegistryField[] {
  * (bilesen-denetimi (b) 4, `SliderGroups`): turning, speed, arrows and
  * dots open, looping closed.
  */
-export function sliderFields(id: string, section: SliderSource): RegistryField[] {
-  const settings = { ...SCROLLER_DEFAULTS, ...sliderSettingsOf(section) }
+export function sliderFields(
+  id: string,
+  section: SliderSource,
+  defaults?: SliderSettings
+): RegistryField[] {
+  const settings = { ...SCROLLER_DEFAULTS, ...sliderSettingsOf(section, defaults) }
   return kitFields(id, settings, SLIDER_SCROLLER, SLIDER_MAIN)
 }
 
