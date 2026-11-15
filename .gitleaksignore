@@ -30,6 +30,9 @@ da2b7469cd411a891ea54fc4c18200baaedb9071:apps/control-plane-panel/src/features/e
 727152fe0a39fd4afe7a7779a005ad0a2b1d55bb:apps/panel/src/features/auth/pages/confirm-email-page.spec.tsx:generic-api-key:72
 # storefront: verify-code fixture ("kod-" + 1234567890)
 7720981c6004a61029188a12b9e0dc45ccfdba84:apps/storefront/src/lib/__tests__/atolye-auth-theme.spec.ts:generic-api-key:70
+# backend wholesale (branch deniz/toptanci-2-panel): test password, Turkish words + year, commented as made for the test
+872376e9076def07c585b6b67dbbbab9bf1fb454:apps/backend/src/workflows/wholesale/__tests__/account-login.unit.spec.ts:generic-api-key:17
+e77f82da13498ff7a6153ff4e839cc4710ff8403:apps/panel/src/features/wholesale/components/new-wholesaler-dialog.spec.tsx:generic-api-key:18
 # storefront e2e: the env variable's name in a doc comment, not a value
 ebeed5808153082b83c706a74c4e920f53662a7f:apps/storefront/e2e/catalog.ts:generic-api-key:50
 # backend: a made-up key in Stripe's live shape (body 0123456789abcdefABCDEF); the fixture is now built from parts
