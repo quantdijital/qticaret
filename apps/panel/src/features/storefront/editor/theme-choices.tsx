@@ -128,14 +128,8 @@ export function ThemeChoices({ theme, onChange }: ThemeChoicesProps) {
         </Pair>
         <ChoiceSelect
           id="theme-section-spacing"
-          label={
-            <>
-              {t(`${C}.sectionSpacing`)}{" "}
-              <small className="text-[11px] font-normal text-muted-foreground">
-                {t(`${C}.sectionSpacingTerm`)}
-              </small>
-            </>
-          }
+          label={t(`${C}.sectionSpacing`)}
+          term={t(`${C}.sectionSpacingTerm`)}
           value={theme.section_spacing}
           options={SECTION_SPACINGS}
           onChange={(value) => {

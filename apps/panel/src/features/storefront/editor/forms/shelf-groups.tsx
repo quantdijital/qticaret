@@ -93,7 +93,7 @@ export function ShelfGroups({
   const { variant } = section
   return (
     <>
-      <PanelGroup title={t(`${SH}.layout`)} reveal={reveal("layout")}>
+      <PanelGroup title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
         <div className="flex flex-col gap-5">
           <VariantField
             id={FIELD_IDS.variant(id)}
@@ -160,7 +160,7 @@ export function ShelfGroups({
         </div>
       </PanelGroup>
       {variant === "carousel" ? (
-        <PanelGroup title={t(`${SH}.scroll`)} reveal={reveal("scroll")}>
+        <PanelGroup title={t("storefront.editor.panel.scroll")} reveal={reveal("scroll")}>
           <ScrollerFields
             value={scrollerSettingsOf(section.scroller)}
             settings={SCROLLER_MAIN}

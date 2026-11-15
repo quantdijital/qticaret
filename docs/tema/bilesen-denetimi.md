@@ -14,9 +14,9 @@
 | # | Bulgu | Kanıt |
 | --- | --- | --- |
 | O1 | **Cihaza göre gösterim ortak değil.** Yalnız `marquee`'de `device` var; diğer bölümler telefonda ya da masaüstünde gizlenemez. | `section-marquee.ts` `device`; `layout-fields.ts` `base`'de yok |
-| O2 | **Ayar araması içerik alanlarını bilmiyor.** Kayıt yalnız biçim, yer, kayan yazı, görsel bandı, raf/kaydırma, üst bilgi, `look` ve görünürlüğü tutar; giriş slaytının oto geçiş/süre/nokta/ok, Google puanının alıntı sayısı, kategorilerin ürün sayısı, `limit`, `columns` (benzer ürünler) gibi alanlar aranamaz. | `field-registry.ts` `sectionFields` |
-| O3 | **İçerik alanlarında teknik terim yok.** `look`, `marquee`, `scroller`, `banner`, `headerBar` alanlarının `term` anahtarı var; `fields.*`, `slider.*`, `googleRating.*`, `categories.*`, `products.*` alanlarının yok. | `tr.json` |
-| O4 | **Kapalı grubun adı iki türlü:** çoğu bölümde "Görünüm ayarları", kayan yazı ve kayan rafta "Diğer ayarlar"; kayan yazının açık "Görünüm" grubu kapalı "Görünüm ayarları" ile karışıyor. | `section-panel.tsx`, `look.title`, `marquee.otherTitle`, `panel.appearance` |
+| O2 | **Ayar araması içerik alanlarını bilmiyor.** Kayıt yalnız biçim, yer, kayan yazı, görsel bandı, raf/kaydırma, üst bilgi, `look` ve görünürlüğü tutar; giriş slaytının oto geçiş/süre/nokta/ok, Google puanının alıntı sayısı, kategorilerin ürün sayısı, `limit`, `columns` (benzer ürünler) gibi alanlar aranamaz. | `field-registry.ts` `sectionFields`. Yapıldı (2026-11-15): (a) 1 |
+| O3 | **İçerik alanlarında teknik terim yok.** `look`, `marquee`, `scroller`, `banner`, `headerBar` alanlarının `term` anahtarı var; `fields.*`, `slider.*`, `googleRating.*`, `categories.*`, `products.*` alanlarının yok. | `tr.json`. Yapıldı (2026-11-15): (a) 2 |
+| O4 | **Kapalı grubun adı iki türlü:** çoğu bölümde "Görünüm ayarları", kayan yazı ve kayan rafta "Diğer ayarlar"; kayan yazının açık "Görünüm" grubu kapalı "Görünüm ayarları" ile karışıyor. | `section-panel.tsx`, `look.title`, `marquee.otherTitle`, `panel.appearance`. Yapıldı (2026-11-15): (a) 3 |
 | O5 | **Zemin sözlüğü iki takım:** `look.ground` = `page / well / stage / primary` ("Sayfa / Hafif ton / Koyu / Ana renk"); kayan yazı ve katalog üst bilgisi `stage / primary / light` ("Koyu / Ana renk / Açık"). Aynı açık tonun iki adı ve iki kodu var: Atölye'de ikisi de `--color-paper-2`. | `section-look.ts`, `section-marquee.ts`, `HEADER_MENU_GROUNDS`; `look.css` (`well`), `marquee.css` ve `header-catalog.css` (`light`) |
 | O6 | **Hız/süre adları karışık:** kayan yazının `speed`'i akış hızı (5 basamak); kaydırma takımının `speed`'i sayfanın bekleme süresi ("Geçiş süresi", terim `interval`, 3 basamak); giriş slaytında aynı kavram `interval` saniye sayısı (5–10). | `section-marquee.ts`, `section-scroller.ts`, `sections/hero-slider.ts` |
 | O7 | **Aç/kapat iki biçimde saklanıyor:** kayan yazı ve kaydırma takımı `off/on` adımı; giriş slaytı, üst bilgi, kategoriler, Google puanı `boolean`. Etiketler de karışık: "Gizle/Göster", "Kapalı/Açık", anahtar düğmesi. | sözleşmeler |
@@ -26,7 +26,7 @@
 | O11 | **Gizli ikili karar:** art arda duran ürün rafları kendiliğinden sekmeli tek rafa birleşir; kapatan ayar yok. | `atolye/src/sections/plan.ts` `blocksOf` |
 | O12 | **Görsel odağı (focal point) hiçbir görselde yok;** telefonda kırpma hep ortadan. | `layout-fields.ts` `image` = `url` + `alt` |
 | O13 | **Gelişmiş CSS (adr/0049 §8, E8) yazılmadı;** "Diğer" grubunun gelişmiş katmanı boş. | `custom_css` hiçbir pakette yok |
-| O14 | **Panelin söylediğini tema yapmıyor:** duyuru şeridinin 2.–5. satırı kaydediliyor ama vitrinde hiç görünmüyor. | `tr.json` `types.announcement_bar`, `frame/Announcement.tsx` (`const [line] = lines`) |
+| O14 | **Panelin söylediğini tema yapmıyor:** duyuru şeridinin 2.–5. satırı kaydediliyor ama vitrinde hiç görünmüyor. | `tr.json` `types.announcement_bar`, `frame/Announcement.tsx` (`const [line] = lines`). Metin yapıldı (2026-11-15): (a) 8; dönme (b) 6 |
 
 İyi olanlar (korunacak): `look` beş alanı ve "varsayılana dön"; tür başına anlamsız `look` alanının
 gizlenmesi (`lookFieldsFor`); görünürlük + başlangıç/bitiş tarihi her gövde bölümünde (`base`);
@@ -69,7 +69,7 @@ Sütunlar: **Var** = bugünkü ayarlar (grup); **Eksik** = standarda göre; **Gr
 | Ad | O6 (`interval` sayı), O7 (`boolean`), O9 (`compact/regular`), O10 (`position`). Kaydırma takımına bağlanmalı |
 | Shopify | Dawn `slideshow`: `layout` full_bleed/grid, `slide_height` adapt_image/small/medium/large, `slider_visual` dots/counter/numbers, `auto_rotate`, `change_slides_speed` 3–9 sn, `show_text_below`, `accessibility_info`; slayt başına `image_overlay_opacity`, `box_align`, `text_alignment`. Horizon: ok `icons_style` (arrow/chevron/…/none) + `icons_shape` (none/circle/square), `slideshow_controls_style` none/dots/counter |
 
-### 1.4 `banner` "Görsel slayt"
+### 1.4 `banner` "Görsel bant" (eski adı "Görsel slayt")
 
 | | |
 | --- | --- |
@@ -247,17 +247,43 @@ Kapsamda geçen kısaltmalar: **T** = `packages/types/src/store/…`, **B** = `a
 
 ### (a) Küçük, hemen yapılabilir (S; migration yok)
 
+> Sekiz maddenin hepsi yapıldı (2026-11-15, `oguzhan/denetim-kucuk-isler`). Sözleşme ve kayıt
+> biçimi değişmedi; yalnız panel düzenleyicisi ve çeviri. Kodla uyuşmayan dayanaklar maddenin
+> altında yazılı.
+
 1. **İçerik alanlarını ayar aramasına kaydet (O2).** `sectionFields`'a giriş slaytı seçenekleri, `limit`, `columns`, `show_count`, `excerpts`, `profile_link`, `thumbs`, `list_limit`, `show_price` eklenir; formlar kimliği `FIELD_IDS`'ten alır. P `forms/field-registry.ts`, ilgili formlar, `theme-editor-search.spec.tsx`.
+   **Yapıldı (2026-11-15).** Kayıt `forms/content-registry.ts`'de (`field-registry.ts` 300 satırı geçmesin diye ayrı,
+   `shelf-registry.ts` deseni); kimlikler `FIELD_IDS.content`. Alanlar formun o anki hâlini izler (süre
+   yalnız oto geçiş açıkken, alıntı ve görsel sayısı yalnız anahtarı açıkken). `categories.show_count`
+   kendi anahtarına (`categories.showCount`) kavuştu (1.5 "Ad").
 2. **Eksik teknik terimleri ekle (O3).** `fields.limit/columns/title`, `slider.*`, `googleRating.*`, `categories.*`, `products.*` için `term` anahtarı ve formlarda `<small>`. İ, P `forms/fields.tsx`.
+   **Yapıldı (2026-11-15).** Terim anahtarı düz ad yanında `<ad>Term` (`fields.limitTerm`). Terim etiketin dışında
+   çizilir (`Field`'in yeni `term` özelliği, `admin-ui`): alanın erişilebilir adı Türkçe etiket kalır.
+   Ek olarak `products.days/more`, `categories.more`, `related.source`, `heroCatalog.*`, `priceBands.thumbs*`.
 3. **Kapalı grubun adını tekle (O4):** her bölümde "Diğer ayarlar"; kayan yazının açık "Görünüm"ü "Stil" olur. İ `look.title*`, `panel.appearance`; P `section-panel.tsx`.
+   **Yapıldı (2026-11-15).** Kodda "Diğer ayarlar" zaten `marquee.otherTitle` olarak vardı; anahtar `look.title`'a
+   toplandı, `marquee.otherTitle*` kalktı (üst bilgi kataloğunun kapalı grubu da). Arama sonucundaki grup
+   adları da aynı anahtardan; "Diziliş" ve "Kaydırma" `shelf.*`'tan `panel.layout/scroll`'a taşındı.
 4. **Görsel bandının temel ayarlarını aç (1.4):** yükseklik, yazının yeri, perde açık "Diziliş"e; düğme stili ve genişlik kapalıda kalır. P `section-panel.tsx`, `forms/banner-settings.tsx`, `field-registry.ts` (grup `layout`).
-5. **Tür adını düzelt:** "Görsel slayt" → "Görsel bandı" (yalnız i18n). İ `types.banner`.
+   **Yapıldı (2026-11-15).** Gruplar `forms/banner-groups.ts`'de; açık grup `forms/layout-group.tsx`. "Diğer ayarlar"
+   sayacı yalnız kapalıda kalan iki ayarı sayar. `width`'in `look.width` ile birleşmesi sözleşme işi: (c) 1.
+5. **Tür adını düzelt:** "Görsel slayt" → **"Görsel bant"** (sahibin kararı; "Görsel bandı" değil;
+   yalnız i18n, tür anahtarı `banner` aynı). İ `types.banner`.
+   **Yapıldı (2026-11-15).** İngilizcesi "Image band".
 6. **Benzer ürünlerde `columns`'u "Diziliş"e taşı (1.15).** P `related-form.tsx`, `section-panel.tsx`.
+   **Yapıldı (2026-11-15).** Açık "Diziliş" grubunda (`forms/layout-group.tsx`), aramada grup `layout`.
 7. **Etiket tekliği (O7 görünen yüz):** iki adımlı aç/kapat her yerde anahtar düğmesi, basamak adları "Kapalı / Açık" ("Gizle / Göster" kalkar). İ `scroller.dots.*`; P `scroller-fields.tsx`.
+   **Yapıldı (2026-11-15).** Kodda noktalar zaten anahtar düğmesiydi (`scroller-fields.tsx` `isSwitch`); "Gizle / Göster"
+   yalnız basamak adında (aramada) kalmıştı: "Kapalı / Açık" oldu, etiket "Noktaları göster". Kayan
+   yazının dört anahtarının basamak adı hiç yoktu (arama eksik anahtara bakıyordu): eklendi. Giriş
+   slaytının "Kendiliğinden geçsin"i kaydırmadaki adla "Otomatik geçiş" oldu (bir kavram, bir ad).
 
 8. **Duyuru şeridinin metnini gerçeğe uydur (O14):** dönme gelene kadar açıklama ve ipucu "ilk satır
    gösterilir" der ya da satır sınırı 1'e iner (kayıtlı fazla satır okunur, yalnız ilki çizilir). İ
    `types.announcement_bar`, `announcement.hint`; asıl çözüm (b) 6.
+   **Yapıldı (2026-11-15).** Kod doğrulandı: Atölye yalnız ilk satırı çizer (`frame/Announcement.tsx`,
+   `const [line] = lines`). Açıklama "vitrin ilk duyuruyu gösterir", ipucu "şimdilik yalnız ilk satır;
+   diğerleri saklanır" diyor; satır sınırı 5'te kaldı (davranış değişmedi).
 
 ### (b) Orta (M; sözleşme + backend + panel + tema, migration yok, okumada varsayılan)
 

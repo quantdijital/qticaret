@@ -35,7 +35,7 @@ export function ProductSourceField({
   const { t } = useTranslation()
   return (
     <>
-      <Field label={t(`${P}.source`)}>
+      <Field label={t(`${P}.source`)} term={t(`${P}.sourceTerm`)}>
         <RadioGroup
           aria-label={t(`${P}.source`)}
           value={source.kind}
@@ -78,6 +78,7 @@ export function ProductSourceField({
         <CountField
           id={`${id}-days`}
           label={t(`${P}.days`)}
+          term={t(`${P}.daysTerm`)}
           hint={t(`${P}.daysHint`, { min: BEST_SELLER_DAYS.min, max: BEST_SELLER_DAYS.max })}
           value={source.days}
           min={BEST_SELLER_DAYS.min}

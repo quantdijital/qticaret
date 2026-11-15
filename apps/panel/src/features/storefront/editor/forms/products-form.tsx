@@ -4,6 +4,7 @@ import { Plus, Trash2 } from "lucide-react"
 import { SHELF_LIMITS } from "@qticaret/types"
 import type { ProductSource, ProductsSection, ShelfList } from "@/features/storefront/api/layout"
 import { BEST_SELLER_DAYS, LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import { FIELD_IDS } from "./field-registry"
 import { CountField, F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
@@ -49,6 +50,7 @@ function ListFields({
       <TextField
         id={`${id}-title`}
         label={titleLabel}
+        term={t(`${F}.titleTerm`)}
         value={list.title}
         max={L.title}
         placeholder={t("storefront.editor.defaults.products")}
@@ -105,16 +107,19 @@ export function ProductsForm({ section, problems, onChange }: SectionFormProps<P
         }}
       />
       {section.variant === "grid" || section.variant === "carousel" ? (
-        <CountField
-          id="products-limit"
-          label={t(`${F}.limit`)}
-          hint={t(`${F}.limitHint`, { max: L.items })}
-          value={section.limit}
-          max={L.items}
-          onChange={(limit) => {
-            set({ limit }, "limit")
-          }}
-        />
+        <div id={FIELD_IDS.content(section.id, "limit")}>
+          <CountField
+            id="products-limit"
+            label={t(`${F}.limit`)}
+            term={t(`${F}.limitTerm`)}
+            hint={t(`${F}.limitHint`, { max: L.items })}
+            value={section.limit}
+            max={L.items}
+            onChange={(limit) => {
+              set({ limit }, "limit")
+            }}
+          />
+        </div>
       ) : null}
       {columns
         ? lists.map((list, index) => (
@@ -168,6 +173,7 @@ export function ProductsForm({ section, problems, onChange }: SectionFormProps<P
       <LinkField
         id="products-more"
         label={t(`${P}.more`)}
+        term={t(`${P}.moreTerm`)}
         hint={t(`${P}.moreHint`)}
         link={section.more}
         error={problem(problems["more"], L.label)}

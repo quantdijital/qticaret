@@ -123,7 +123,9 @@ export function BackgroundField({
 
 interface ChoiceSelectProps<T extends string> {
   id: string
-  label: ReactNode
+  label: string
+  /** The technical term shown small beside the label. */
+  term?: string | undefined
   value: T
   options: readonly T[]
   onChange: (value: T) => void
@@ -139,6 +141,7 @@ interface ChoiceSelectProps<T extends string> {
 export function ChoiceSelect<T extends string>({
   id,
   label,
+  term,
   value,
   options,
   onChange,
@@ -147,7 +150,7 @@ export function ChoiceSelect<T extends string>({
   unavailable,
 }: ChoiceSelectProps<T>) {
   return (
-    <Field label={label} htmlFor={id} hint={hint}>
+    <Field label={label} term={term} htmlFor={id} hint={hint}>
       <Select
         value={value}
         onValueChange={(next) => {
@@ -169,16 +172,18 @@ export function ChoiceSelect<T extends string>({
   )
 }
 
-/** A yes-or-no choice with what it does. */
+/** A yes-or-no choice with what it does; a technical term, when given, small beside its name. */
 export function SwitchRow({
   id,
   label,
+  term,
   hint,
   checked,
   onChange,
 }: {
   id: string
   label: string
+  term?: string | undefined
   hint: string
   checked: boolean
   onChange: (checked: boolean) => void
@@ -186,7 +191,13 @@ export function SwitchRow({
   return (
     <div className="flex items-start justify-between gap-4">
       <label htmlFor={id} className="flex flex-col gap-0.5 text-sm">
-        {label}
+        {term ? (
+          <span>
+            {label} <small className="text-[11px] text-muted-foreground">{term}</small>
+          </span>
+        ) : (
+          label
+        )}
         <span className="text-xs text-muted-foreground">{hint}</span>
       </label>
       <Switch id={id} checked={checked} onCheckedChange={onChange} />

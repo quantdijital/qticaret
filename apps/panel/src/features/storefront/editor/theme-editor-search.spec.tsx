@@ -55,12 +55,27 @@ describe("the theme editor's settings search", () => {
 
     const hits = within(screen.getByRole("list", { name: "Arama sonuçları" }))
     expect(hits.getAllByRole("button").map((hit) => hit.textContent)).toEqual([
-      "Dış boşluk margin" + "Giriş · Görünüm ayarları",
-      "Dış boşluk margin" + "Ürün listesi · Görünüm ayarları",
-      "Dış boşluk margin" + "Blog yazıları · Görünüm ayarları",
+      "Dış boşluk margin" + "Giriş · Diğer ayarlar",
+      "Dış boşluk margin" + "Ürün listesi · Diğer ayarlar",
+      "Dış boşluk margin" + "Blog yazıları · Diğer ayarlar",
     ])
     // The list of the page's parts gives way while something is typed
     expect(screen.queryByRole("navigation", { name: "Sayfanın bölümleri" })).toBeNull()
+  })
+
+  it("finds a content field by its term and lands on it, focused and marked (denetim O2)", async () => {
+    renderEditor()
+    await opened()
+
+    await user.type(searchbox(), "blog limit")
+    const hits = within(screen.getByRole("list", { name: "Arama sonuçları" }))
+    const hit = hits.getByRole("button", { name: /Gösterilecek sayı/ })
+    expect(hit).toHaveTextContent("Gösterilecek sayı limit" + "Blog yazıları · İçerik")
+    await user.click(hit)
+
+    const field = document.getElementById("blogyazilari-content-limit")
+    expect(field).toHaveAttribute("data-highlight")
+    expect(screen.getByRole("spinbutton", { name: "Gösterilecek sayı" })).toHaveFocus()
   })
 
   it("brings the list back on Escape, and says when nothing is found", async () => {
@@ -82,7 +97,7 @@ describe("the theme editor's settings search", () => {
     await user.type(searchbox(), "ürün listesi zemin")
     await user.click(screen.getByRole("button", { name: /Zemin background/ }))
 
-    expect(screen.getByRole("button", { name: /^Görünüm ayarları/ })).toHaveAttribute(
+    expect(screen.getByRole("button", { name: /^Diğer ayarlar/ })).toHaveAttribute(
       "aria-expanded",
       "true"
     )

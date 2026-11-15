@@ -66,7 +66,7 @@ describe("a scrolling strip's settings", () => {
   it("opens the motion and look groups at first", () => {
     renderGroups()
     expect(screen.getByRole("button", { name: "Hareket" })).toHaveAttribute("aria-expanded", "true")
-    expect(screen.getByRole("button", { name: "Görünüm" })).toHaveAttribute("aria-expanded", "true")
+    expect(screen.getByRole("button", { name: "Stil" })).toHaveAttribute("aria-expanded", "true")
   })
 
   it("moves the speed over five stops, read out by name", async () => {

@@ -22,6 +22,7 @@ const same = (a: HeroSlide, b: HeroSlide) => JSON.stringify(a) === JSON.stringif
 export function Choice<T extends string>({
   id,
   label,
+  term,
   hint,
   value,
   options,
@@ -29,15 +30,23 @@ export function Choice<T extends string>({
 }: {
   id: string
   label: string
+  /** The technical term shown small beside the label. */
+  term?: string
   hint?: string
   value: T
   options: readonly { value: T; label: string }[]
   onChange: (value: T) => void
 }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div id={id} className="flex flex-col gap-2">
       <span id={`${id}-label`} className="text-sm font-medium">
         {label}
+        {term ? (
+          <>
+            {" "}
+            <small className="text-[11px] font-normal text-muted-foreground">{term}</small>
+          </>
+        ) : null}
       </span>
       <ToggleGroup
         type="single"

@@ -31,8 +31,9 @@ export function FormSection({ title, description, children, className }: FormSec
 }
 
 interface FieldProps {
-  /** Its name; a small technical term may follow it (`<small>`). */
-  label: ReactNode
+  label: string
+  /** A technical term shown small beside the label ("margin"); outside it, so the name stays the label. */
+  term?: string | undefined
   htmlFor?: string
   hint?: string | undefined
   /** An i18n'd error sentence; replaces the hint. */
@@ -43,13 +44,32 @@ interface FieldProps {
 }
 
 /** One labelled field with its hint or error underneath. */
-export function Field({ label, htmlFor, hint, error, required, children, className }: FieldProps) {
+export function Field({
+  label,
+  term,
+  htmlFor,
+  hint,
+  error,
+  required,
+  children,
+  className,
+}: FieldProps) {
+  const name = (
+    <label htmlFor={htmlFor} className="text-sm font-medium">
+      {label}
+      {required ? <span className="ml-0.5 text-destructive-text">*</span> : null}
+    </label>
+  )
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <label htmlFor={htmlFor} className="text-sm font-medium">
-        {label}
-        {required ? <span className="ml-0.5 text-destructive-text">*</span> : null}
-      </label>
+      {term ? (
+        <div className="flex flex-wrap items-baseline gap-x-1.5">
+          {name}
+          <small className="text-[11px] text-muted-foreground">{term}</small>
+        </div>
+      ) : (
+        name
+      )}
       {children}
       {error ? (
         <p role="alert" className="text-xs text-destructive-text">

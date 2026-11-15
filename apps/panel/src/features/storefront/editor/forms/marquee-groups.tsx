@@ -8,7 +8,7 @@ import { MarqueeSettings } from "./marquee-settings"
 /**
  * A scrolling strip's two open groups under its items (adr/0049 Ek
  * 2026-11-15): "Hareket" (speed, way, stopping under the pointer, the
- * pause button) and "Görünüm" (size, ground, separator, weight, capitals,
+ * pause button) and "Stil" (size, ground, separator, weight, capitals,
  * room, the large size's outline). Its rarely changed settings sit closed
  * in "Diğer ayarlar" (`SectionPanel`).
  */

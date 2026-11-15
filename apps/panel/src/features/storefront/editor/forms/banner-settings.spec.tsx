@@ -7,6 +7,7 @@ import type { BannerSection } from "@/features/storefront/api/layout"
 import { lookFieldsFor } from "@/features/storefront/layout/look"
 import { sectionProblems } from "@/features/storefront/layout/problems"
 import { newHomeSection } from "@/features/storefront/layout/sections"
+import { BANNER_LAYOUT_SETTINGS, BANNER_OTHER_SETTINGS } from "./banner-groups"
 import { BannerSettings } from "./banner-settings"
 import { FIELD_IDS, sectionFields } from "./field-registry"
 
@@ -29,6 +30,7 @@ function renderSettings(section = newBand()) {
     return (
       <BannerSettings
         section={value}
+        settings={[...BANNER_LAYOUT_SETTINGS, ...BANNER_OTHER_SETTINGS]}
         onChange={(next) => {
           changes.push(next)
           setValue(next)
@@ -67,7 +69,12 @@ describe("BannerSettings", () => {
     expect(changes.at(-1)).toMatchObject({ text_position: "bottom_left" })
   })
 
-  it("is found by the settings search in the look group, and offers no second width", () => {
+  it('keeps the basics open in "Diziliş" and the rarer ones closed (denetim 1.4)', () => {
+    expect(BANNER_LAYOUT_SETTINGS).toEqual(["height", "text_position", "overlay"])
+    expect(BANNER_OTHER_SETTINGS).toEqual(["width", "button_style"])
+  })
+
+  it("is found by the settings search in its groups, and offers no second width", () => {
     const fields = sectionFields(newBand(), "home")
     const keys = fields.map((field) => field.key)
     expect(keys).toEqual(
@@ -76,8 +83,11 @@ describe("BannerSettings", () => {
     expect(keys).not.toContain("look.width")
     expect(lookFieldsFor("banner")).not.toContain("width")
     expect(fields.find((field) => field.key === "banner.overlay")).toMatchObject({
-      group: "look",
+      group: "layout",
       target: FIELD_IDS.banner("gorselbant", "overlay"),
+    })
+    expect(fields.find((field) => field.key === "banner.button_style")).toMatchObject({
+      group: "look",
     })
   })
 

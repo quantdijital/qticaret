@@ -31,7 +31,10 @@ export function ColumnsField({
   return (
     <div className="flex flex-col gap-2">
       <span id={`${id}-label`} className="text-sm font-medium">
-        {t(`${F}.columns`)}
+        {t(`${F}.columns`)}{" "}
+        <small className="text-[11px] font-normal text-muted-foreground">
+          {t(`${F}.columnsTerm`)}
+        </small>
       </span>
       <ToggleGroup
         type="single"
