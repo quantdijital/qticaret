@@ -3,6 +3,8 @@ import type { EnsureLoginInput } from "../steps/account-login"
 import { emailLoginsAt, sealPassword } from "../steps/login-password"
 
 const proven = jest.fn<Promise<boolean>, [unknown, string]>()
+// The fake's identities, for Medusa's own refusal below
+let identitiesNow = new Map<string, Identity>()
 const createCustomer = jest.fn<Promise<{ result: { id: string } }>, [unknown]>()
 
 jest.mock("../../account/proven-customer", () => ({
@@ -29,6 +31,7 @@ function fakeContainer(state: {
   guestExists?: boolean
 }) {
   const identities = new Map((state.identities ?? []).map((each) => [each.id, { ...each }]))
+  identitiesNow = identities
   const resolved = <T>(value: T) => jest.fn(() => Promise.resolve(value))
   const auth = {
     register: jest.fn(() => {
@@ -46,8 +49,13 @@ function fakeContainer(state: {
       )
     ),
     retrieveAuthIdentity: jest.fn((id: string) => Promise.resolve(identities.get(id))),
+    // As Medusa's: a key the update does not name is kept
     updateAuthIdentities: jest.fn((update: Identity) => {
-      identities.set(update.id, update)
+      const before = identities.get(update.id)?.app_metadata ?? {}
+      identities.set(update.id, {
+        id: update.id,
+        app_metadata: { ...before, ...update.app_metadata },
+      })
       return Promise.resolve()
     }),
     updateProviderIdentities: resolved(undefined),
@@ -63,6 +71,7 @@ function fakeContainer(state: {
         : Promise.resolve()
     ),
     softDeleteCustomers: resolved(undefined),
+    createCustomers: jest.fn(() => Promise.resolve([{ id: "cus_fresh" }])),
     restoreCustomers: resolved(undefined),
     deleteCustomers: resolved(undefined),
   }
@@ -104,7 +113,13 @@ const squatted = (extra: { guestExists?: boolean } = {}) =>
 beforeEach(() => {
   proven.mockReset()
   createCustomer.mockReset()
-  createCustomer.mockResolvedValue({ result: { id: "cus_new" } })
+  // As Medusa's setAuthAppMetadata: an identity that ever held a customer id is refused
+  createCustomer.mockImplementation((args) => {
+    const id = (args as { input: { authIdentityId: string } }).input.authIdentityId
+    return identitiesNow.get(id)?.app_metadata["customer_id"] !== undefined
+      ? Promise.reject(new Error("Key customer_id already exists in app metadata"))
+      : Promise.resolve({ result: { id: "cus_new" } })
+  })
 })
 
 describe("who signs in at a new wholesaler's address (ADR-0068 Ek 2026-11-15 (2))", () => {
@@ -184,22 +199,30 @@ describe("the wholesaler's sign-in as staff set it", () => {
     const logins = await emailLoginsAt(fake.container, EMAIL)
     const login = { kind: "unproven" as const, customer_id: "cus_1", logins }
     const { result } = await ensureLogin(fake.container, input({ login, take_over: true }))
-    expect(result).toEqual({ customer_id: "cus_new", password: "replaced" })
+    expect(result).toEqual({ customer_id: "cus_fresh", password: "replaced" })
     // Both case variants (review M2)
     expect(fake.auth.updateProvider.mock.calls).toEqual([
       ["emailpass", { entity_id: "Victim@example.com", password: PASSWORD }],
       ["emailpass", { entity_id: "victim@example.com", password: PASSWORD }],
     ])
     for (const id of ["auth_1", "auth_2"]) {
-      const metadata = fake.identities.get(id)?.app_metadata
-      expect(typeof metadata?.["password_changed_at"]).toBe("string")
-      expect(metadata?.["customer_id"]).toBeUndefined()
+      expect(typeof fake.identities.get(id)?.app_metadata["password_changed_at"]).toBe("string")
     }
-    // The sign-up's record retired, a fresh one for the sign-up's own sign-in (review M5)
+    // The sign-up's record retired, a fresh one tied to the sign-up's own sign-in (review M5)
     expect(fake.customer.updateCustomers).toHaveBeenCalledWith("cus_1", { has_account: false })
-    expect(createCustomer.mock.calls[0]?.[0]).toMatchObject({
-      input: { authIdentityId: "auth_1" },
-    })
+    expect(fake.customer.createCustomers).toHaveBeenCalledWith([
+      {
+        email: EMAIL,
+        first_name: "Ayşe",
+        last_name: "Yılmaz",
+        company_name: "Yılmaz Ticaret",
+        has_account: true,
+      },
+    ])
+    expect(fake.identities.get("auth_1")?.app_metadata["customer_id"]).toBe("cus_fresh")
+    expect(fake.identities.get("auth_2")?.app_metadata["customer_id"]).toBeNull()
+    // Medusa's own account workflow, which refuses an identity that held a customer, is not used
+    expect(createCustomer).not.toHaveBeenCalled()
   })
 
   it("soft-deletes the retired record where the address already has a guest one", async () => {
@@ -213,8 +236,8 @@ describe("the wholesaler's sign-in as staff set it", () => {
   })
 
   it("puts everything back when the fresh customer cannot be made", async () => {
-    createCustomer.mockRejectedValue(new Error("customer refused"))
     const fake = squatted()
+    fake.customer.createCustomers.mockRejectedValue(new Error("customer refused"))
     const logins = await emailLoginsAt(fake.container, EMAIL)
     await expect(
       ensureLogin(
@@ -226,7 +249,9 @@ describe("the wholesaler's sign-in as staff set it", () => {
     expect(fake.auth.updateProviderIdentities).toHaveBeenCalledWith([
       { id: "pi_auth_1", provider_metadata: { password: "hash_auth_1" } },
     ])
-    expect(fake.identities.get("auth_1")?.app_metadata).toEqual({ customer_id: "cus_1" })
+    // The link back; the change's time stays (an update keeps it): older sign-ins stay ended
+    expect(fake.identities.get("auth_1")?.app_metadata).toMatchObject({ customer_id: "cus_1" })
+    expect(fake.customer.updateCustomers).toHaveBeenLastCalledWith("cus_1", { has_account: true })
   })
 
   it("never touches a staff member's sign-in, and needs a password for a new one", async () => {

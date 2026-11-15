@@ -199,11 +199,13 @@ medusaIntegrationTestRunner({
       expect(JSON.stringify(owned.data)).toContain(account.id)
     })
 
-    // Opening a wholesaler mails no one any more (Ek 2026-11-15 (2)): it counts as the other
-    // wholesale writes do, ten a minute from one address and thirty in ten minutes per person
-    it("counts openings against the wholesale writes' budget: ten a minute", async () => {
+    // Opening a wholesaler mails no one any more (Ek 2026-11-15 (2)): it counts against the
+    // wholesale writes' budget (`bulk_ship`), thirty in ten minutes per staff member from any
+    // address. Its per-address ten a minute is multiplied in integration tests (`perIpScale`);
+    // the per-person count is not, and is what this measures
+    it("counts openings against a staff member's wholesale budget: thirty in ten minutes", async () => {
       const statuses: number[] = []
-      for (let i = 0; i < 11; i += 1) {
+      for (let i = 0; i < 31; i += 1) {
         const made = await accounts.create({
           email: fresh(),
           contact_name: "Ali",
@@ -211,8 +213,8 @@ medusaIntegrationTestRunner({
         })
         statuses.push(made.status)
       }
-      expect(statuses.slice(0, 10).every((status) => status === 201)).toBe(true)
-      expect(statuses[10]).toBe(429)
+      expect(statuses.slice(0, 30).every((status) => status === 201)).toBe(true)
+      expect(statuses[30]).toBe(429)
     })
   },
 })

@@ -161,17 +161,28 @@ export async function ensureLogin(
   }
   try {
     let identityId: string
+    let customerId: string
     if (login.kind === "unproven") {
-      const taken = await takeOver(container, { email, sealed, login })
+      const taken = await takeOver(container, {
+        email,
+        sealed,
+        login,
+        customer: {
+          email,
+          ...splitContactName(input.contact_name),
+          company_name: input.company_name,
+        },
+      })
       undo.take_over = taken.undo
       undo.identity_made = taken.identity_made
       identityId = taken.identity_id
+      customerId = taken.customer_id
     } else {
       identityId = await registerLogin(container, email, sealed)
       undo.identity_made = identityId
+      customerId = await makeCustomer(container, input, identityId)
+      undo.customer_made = customerId
     }
-    const customerId = await makeCustomer(container, input, identityId)
-    undo.customer_made = customerId
     undo.confirmations = await confirmAddress(container, identityId, email)
     return {
       result: {

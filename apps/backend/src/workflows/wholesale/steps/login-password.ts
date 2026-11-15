@@ -84,14 +84,18 @@ export async function emailLoginsAt(container: Container, email: string): Promis
   return logins
 }
 
-/** The identity no longer tied to any customer (its other metadata kept). */
+/**
+ * The identity no longer tied to any customer: its customer id written
+ * as null (an update keeps a key it does not name), its other metadata
+ * kept. A sign-in with it opens no customer.
+ */
 export async function unlinkCustomer(container: Container, identityId: string): Promise<void> {
   const auth = container.resolve(Modules.AUTH)
   const identity = await auth.retrieveAuthIdentity(identityId)
-  const metadata = Object.fromEntries(
-    Object.entries(identity.app_metadata ?? {}).filter(([key]) => key !== "customer_id")
-  )
-  await auth.updateAuthIdentities({ id: identityId, app_metadata: metadata })
+  await auth.updateAuthIdentities({
+    id: identityId,
+    app_metadata: { ...(identity.app_metadata ?? {}), customer_id: null },
+  })
 }
 
 /** A new e-mail sign-in for the address with the sealed password; its identity's id. */

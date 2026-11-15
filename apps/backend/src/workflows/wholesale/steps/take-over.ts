@@ -25,6 +25,42 @@ type Container = Pick<MedusaContainer, "resolve">
 export interface TakeOverUndo {
   passwords: PasswordUndo | null
   retired: { customer_id: string; how: "guest" | "deleted" } | null
+  customer_made: string | null
+}
+
+/** The account's names for the fresh customer record. */
+export interface FreshCustomer {
+  email: string
+  first_name: string | null
+  last_name: string | null
+  company_name: string | null
+}
+
+/**
+ * The fresh customer, tied to the kept sign-in by writing its id over the
+ * old one. Not Medusa's `createCustomerAccountWorkflow`: its
+ * `setAuthAppMetadata` refuses an identity that held a customer id
+ * before, and the update keeps the key once written (the HTTP run of the
+ * review fix), so the link is ours to overwrite.
+ */
+async function freshCustomer(
+  container: Container,
+  identityId: string,
+  data: FreshCustomer
+): Promise<string> {
+  const [customer] = await container
+    .resolve(Modules.CUSTOMER)
+    .createCustomers([{ ...data, has_account: true }])
+  if (!customer) {
+    throw new Error("wholesale.customer_not_made")
+  }
+  const auth = container.resolve(Modules.AUTH)
+  const identity = await auth.retrieveAuthIdentity(identityId)
+  await auth.updateAuthIdentities({
+    id: identityId,
+    app_metadata: { ...(identity.app_metadata ?? {}), customer_id: customer.id },
+  })
+  return customer.id
 }
 
 /** The sign-up's customer record out of the way: a guest, or soft-deleted where one exists. */
@@ -45,6 +81,9 @@ async function retireCustomer(
 }
 
 export async function undoTakeOver(container: Container, undo: TakeOverUndo): Promise<void> {
+  if (undo.customer_made) {
+    await container.resolve(Modules.CUSTOMER).deleteCustomers([undo.customer_made])
+  }
   if (undo.retired) {
     const customers = container.resolve(Modules.CUSTOMER)
     if (undo.retired.how === "deleted") {
@@ -61,8 +100,8 @@ export async function undoTakeOver(container: Container, undo: TakeOverUndo): Pr
 
 /**
  * The take-over: staff's password on every sign-in at the address, all
- * unlinked, the sign-up's record retired. Returns the sign-in the fresh
- * customer is made for (one it made, when the address had none).
+ * unlinked, the sign-up's record retired, a fresh customer made and tied
+ * to the kept sign-in (one it made, when the address had none).
  */
 export async function takeOver(
   container: Container,
@@ -70,9 +109,15 @@ export async function takeOver(
     email: string
     sealed: string
     login: { customer_id: string | null; logins: EmailLogin[] }
+    customer: FreshCustomer
   }
-): Promise<{ identity_id: string; identity_made: string | null; undo: TakeOverUndo }> {
-  const undo: TakeOverUndo = { passwords: null, retired: null }
+): Promise<{
+  identity_id: string
+  identity_made: string | null
+  customer_id: string
+  undo: TakeOverUndo
+}> {
+  const undo: TakeOverUndo = { passwords: null, retired: null, customer_made: null }
   const { logins, customer_id: customerId } = input.login
   let made: string | null = null
   try {
@@ -96,7 +141,9 @@ export async function takeOver(
     if (customerId) {
       undo.retired = { customer_id: customerId, how: await retireCustomer(container, customerId) }
     }
-    return { identity_id: identityId, identity_made: made, undo }
+    const fresh = await freshCustomer(container, identityId, input.customer)
+    undo.customer_made = fresh
+    return { identity_id: identityId, identity_made: made, customer_id: fresh, undo }
   } catch (error) {
     await undoTakeOver(container, undo)
       .then(() => (made ? container.resolve(Modules.AUTH).deleteAuthIdentities([made]) : undefined))
