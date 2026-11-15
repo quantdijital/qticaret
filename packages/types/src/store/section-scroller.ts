@@ -122,12 +122,13 @@ export const SLIDER_DEFAULTS: SliderSettings = {
 /**
  * The catalogue opening's slides (`hero` `category_list` with two or more,
  * adr/0049 Ek 2026-11-15): the slider's settings under the same names and
- * steps, turning by itself unless the shop turns that off (the owner's
- * slideshow, Shopify's emsal); one slide never moves whatever they say.
+ * steps and the same defaults: still until the shop turns it on (an opening
+ * slider never turns by itself unasked, docs/tema/bilesen-standardi.md
+ * §4.5); one slide never moves whatever they say.
  */
 export const HERO_CATALOG_SLIDER_DEFAULTS: SliderSettings = {
   ...SLIDER_DEFAULTS,
-  autoplay: "on",
+  autoplay: "off",
 }
 
 /**

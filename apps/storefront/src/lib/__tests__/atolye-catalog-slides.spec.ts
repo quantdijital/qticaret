@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs"
+import path from "node:path"
 import { describe, expect, it } from "vitest"
 import { HERO_CATALOG_SLIDER_DEFAULTS } from "@qticaret/types/section-scroller"
 import { atolyeTheme } from "@qticaret/theme-atolye"
@@ -102,5 +104,22 @@ describe("the catalogue opening's slides", () => {
     expect(html).not.toContain("carousel")
     expect(html).not.toContain("Yeni sezon")
     expect(html).toMatch(/<link rel="preload" as="image" href="\/media\/kamp\.jpg"/)
+  })
+
+  it("keeps the light tile's inks on a slide, the stage's graphite for its controls only", () => {
+    const css = readFileSync(
+      path.resolve(import.meta.dirname, "../../../../../packages/themes/atolye/src/catalog.css"),
+      "utf8"
+    )
+    const rule = (selector: string) =>
+      css.slice(css.indexOf(`${selector} {`), css.indexOf("}", css.indexOf(`${selector} {`)))
+
+    // Found in the browser: the heading took the stage's light ink, the button its inverse
+    expect(rule(".gf-mosaic-stage .gf-mosaic-feature")).toContain("color: var(--color-text)")
+    expect(rule(".gf-mosaic-stage .gf-mosaic-feature .gf-btn:not(.gf-btn--quiet)")).toContain(
+      "background: var(--color-signal)"
+    )
+    // A picture alone takes the tile's width, never the ratio's (it overflowed, cropped off-centre)
+    expect(rule(".gf-mosaic-feature--whole .gf-mosaic-photo")).toContain("width: 100%")
   })
 })

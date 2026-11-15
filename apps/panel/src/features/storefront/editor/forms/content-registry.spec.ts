@@ -101,14 +101,14 @@ describe("the content fields' register", () => {
     expect(keys({ ...hero, slides: [slide] } as HeroSection)).not.toContain(
       "scroll:scroller.autoplay"
     )
-    // Turning by itself is the opening's default: its speed is offered too
+    // Still by default (bilesen-standardi §4.5): the speed waits for autoplay
     expect(keys(turning)).toEqual(
-      expect.arrayContaining([
-        "scroll:scroller.autoplay",
-        "scroll:scroller.speed",
-        "look:scroller.loop",
-      ])
+      expect.arrayContaining(["scroll:scroller.autoplay", "look:scroller.loop"])
     )
+    expect(keys(turning)).not.toContain("scroll:scroller.speed")
+    expect(
+      keys({ ...turning, scroller: { ...SLIDER_DEFAULTS, autoplay: "on" } } as HeroSection)
+    ).toContain("scroll:scroller.speed")
     // Back to today's opening, the slides and their settings go
     expect(
       switchVariant(turning as Extract<HeroSection, { variant: "category_list" }>, "standard")

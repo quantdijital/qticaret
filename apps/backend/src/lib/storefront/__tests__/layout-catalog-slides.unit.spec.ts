@@ -40,7 +40,7 @@ describe("the catalogue opening's slides (adr/0049 Ek 2026-11-15)", () => {
 
     expect(section).toMatchObject({
       slides: [{ image: IMAGE, heading: null, text: null, links: [], link: null }],
-      scroller: { ...HERO_CATALOG_SLIDER_DEFAULTS, dots: "off", autoplay: "on" },
+      scroller: { ...HERO_CATALOG_SLIDER_DEFAULTS, dots: "off", autoplay: "off" },
     })
   })
 

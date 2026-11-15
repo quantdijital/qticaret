@@ -99,12 +99,13 @@ export const SLIDER_DEFAULTS: { readonly [S in SliderSetting]: Step<S> } = {
 
 /**
  * The catalogue opening's slides (adr/0049 Ek 2026-11-15): the slider's
- * settings, turning by itself unless the shop turns that off. Mirrors
- * `@qticaret/types`' `HERO_CATALOG_SLIDER_DEFAULTS`.
+ * settings and defaults, still until the shop turns it on
+ * (docs/tema/bilesen-standardi.md §4.5). Mirrors `@qticaret/types`'
+ * `HERO_CATALOG_SLIDER_DEFAULTS`.
  */
 export const HERO_CATALOG_SLIDER_DEFAULTS: { readonly [S in SliderSetting]: Step<S> } = {
   ...SLIDER_DEFAULTS,
-  autoplay: "on",
+  autoplay: "off",
 }
 
 /** Seconds a slide stays by speed step; saved seconds read as the nearest step. */

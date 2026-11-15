@@ -133,7 +133,7 @@ export function CatalogSlide({
   return (
     <article className={stage ? "gf-mosaic-feature h-full" : "gf-mosaic-feature"}>
       <div
-        className={stage ? cn(WORDS, "pb-16 sm:pb-16 lg:pb-16", stage.arrows && "lg:px-20") : WORDS}
+        className={stage ? cn(WORDS, "pb-16 sm:pb-16 lg:pb-16", stage.arrows && "lg:pl-20") : WORDS}
       >
         {extras?.eyebrow && <p className="text-sm font-semibold text-text-2">{extras.eyebrow}</p>}
         {hidden}

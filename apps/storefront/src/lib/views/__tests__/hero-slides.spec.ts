@@ -48,9 +48,10 @@ describe("the catalogue opening's slides (adr/0049 Ek 2026-11-15)", () => {
     expect(view.slides?.[0]?.image?.alt).toBe("Yeni")
   })
 
-  it("turns two or more by themselves unless the shop said otherwise, a speed step as seconds", () => {
+  it("keeps two or more still unless the shop turns them on (bilesen-standardi §4.5), a speed step as seconds", () => {
     const two = [slide(), slide({ image: picture("iki", "İki"), link: shop, links: [shop] })]
 
+    expect(HERO_CATALOG_SLIDER_DEFAULTS.autoplay).toBe("off")
     expect(heroCatalogSlides(section({ slides: two }), t).slider).toEqual({
       settings: HERO_CATALOG_SLIDER_DEFAULTS,
       interval: 6,
@@ -58,12 +59,12 @@ describe("the catalogue opening's slides (adr/0049 Ek 2026-11-15)", () => {
     const view = heroCatalogSlides(
       section({
         slides: two,
-        scroller: { ...HERO_CATALOG_SLIDER_DEFAULTS, autoplay: "off", speed: "slow" },
+        scroller: { ...HERO_CATALOG_SLIDER_DEFAULTS, autoplay: "on", speed: "slow" },
       }),
       t
     )
     expect(view.slider).toEqual({
-      settings: { ...HERO_CATALOG_SLIDER_DEFAULTS, autoplay: "off", speed: "slow" },
+      settings: { ...HERO_CATALOG_SLIDER_DEFAULTS, autoplay: "on", speed: "slow" },
       interval: 8,
     })
     expect(view.slides?.[1]).toMatchObject({
