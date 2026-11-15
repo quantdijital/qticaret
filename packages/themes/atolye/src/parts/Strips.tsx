@@ -54,6 +54,17 @@ export const STRIPS_PHONE_MAX = 3
 export const STRIPS_MOST = 8
 
 /**
+ * Below 1024 px, strips past what the screen shows: `cap` (the default)
+ * leaves them out, as the featured product's gallery does; `scroll` keeps
+ * every strip, a set share of the width each, the row scrolling sideways
+ * (a gallery whose every strip is its own link must not lose one).
+ */
+export type StripsPhone = "cap" | "scroll"
+
+/** A scrolling strip's share of the screen (vw): a phone's two and a peek, a tablet's three and a peek. */
+const SCROLL_SHARE = { phone: 43, tablet: 30 } as const
+
+/**
  * How much wider than the box the strips' sum runs, per seam, as a share
  * of the box's width (each seam's run and overlap, less its line): an
  * estimate for a box about 4:3, so a wider one gets a slightly larger
@@ -72,7 +83,8 @@ const OVERLAP_SHARE = 0.04
 export function stripSizes(
   count: number,
   span: number,
-  look: Pick<StripsLook, "slant" | "overlap" | "hover"> = STRIPS_LOOK_BEFORE
+  look: Pick<StripsLook, "slant" | "overlap" | "hover"> = STRIPS_LOOK_BEFORE,
+  phone: StripsPhone = "cap"
 ): string {
   const grow = look.hover !== "still"
   const seams = (count - 1) * (SEAM_SHARE[look.slant] + (look.overlap ? OVERLAP_SHARE : 0))
@@ -82,11 +94,17 @@ export function stripSizes(
   )
   const wide = `(min-width: 1024px) ${open}vw`
   const share = (strips: number) => `${Math.ceil(100 / strips)}vw`
-  const tablet = Math.min(count, STRIPS_TABLET_MAX)
-  const phone = Math.min(count, STRIPS_PHONE_MAX)
-  return tablet === phone
-    ? `${wide}, ${share(phone)}`
-    : `${wide}, (min-width: 640px) ${share(tablet)}, ${share(phone)}`
+  // Scrolling, a screen with more than it shows draws each strip a set share (strips.css)
+  const scrolls = (cap: number) => phone === "scroll" && count > cap
+  const tabletShare = scrolls(STRIPS_TABLET_MAX)
+    ? `${SCROLL_SHARE.tablet}vw`
+    : share(Math.min(count, STRIPS_TABLET_MAX))
+  const phoneShare = scrolls(STRIPS_PHONE_MAX)
+    ? `${SCROLL_SHARE.phone}vw`
+    : share(Math.min(count, STRIPS_PHONE_MAX))
+  return tabletShare === phoneShare
+    ? `${wide}, ${phoneShare}`
+    : `${wide}, (min-width: 640px) ${tabletShare}, ${phoneShare}`
 }
 
 /**
@@ -108,6 +126,8 @@ export function Strips({
   max = 4,
   span,
   label,
+  phone = "cap",
+  priority = false,
   className,
 }: {
   items: readonly StripItem[]
@@ -118,27 +138,37 @@ export function Strips({
   span: number
   /** The list's name, when the section's heading does not name it. */
   label?: string | undefined
+  /** Below 1024 px, strips past what the screen shows: left out (`cap`) or scrolled to (`scroll`). */
+  phone?: StripsPhone | undefined
+  /** The first strip's photograph asked for at once (the strips open the page: the LCP). */
+  priority?: boolean | undefined
   className?: string | undefined
 }) {
   const shown = items.slice(0, Math.min(max, STRIPS_MOST))
   const grow = look.hover !== "still"
-  const sizes = stripSizes(shown.length, span, look)
+  const sizes = stripSizes(shown.length, span, look, phone)
   return (
     <ul
       className={cn("gf-strips rounded-media", className)}
       aria-label={label}
       data-count={shown.length}
+      data-phone={phone === "scroll" ? "scroll" : undefined}
       data-slant={look.slant === "soft" ? undefined : look.slant}
       data-line={look.line === "medium" ? undefined : look.line}
       data-overlap={look.overlap ? "on" : undefined}
       data-dim={look.dim ? "on" : undefined}
       data-hover={grow ? undefined : "still"}
     >
-      {shown.map((item) => {
+      {shown.map((item, at) => {
         const words = Boolean(item.title) || Boolean(item.note)
         const inner = (
           <span className="gf-strip-frame">
-            <ResponsiveImage image={item.image} sizes={sizes} className="gf-strip-image" />
+            <ResponsiveImage
+              image={item.image}
+              sizes={sizes}
+              priority={priority && at === 0}
+              className="gf-strip-image"
+            />
             {words ? (
               <span className="gf-strip-text">
                 {item.title ? (

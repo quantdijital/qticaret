@@ -138,6 +138,54 @@
     }
   }
 
+  /*
+   * `data-phone="scroll"`: below 1024 px a row with more strips than the
+   * screen shows keeps them all, each a set share of the box (a phone's two
+   * and a peek, a tablet's three and a peek), the row scrolling sideways and
+   * snapping to a strip; the seams stay slanted, the last strip ends straight.
+   */
+  @media (max-width: 63.99rem) {
+    .gf-strips[data-phone="scroll"]:is(
+        [data-count="5"],
+        [data-count="6"],
+        [data-count="7"],
+        [data-count="8"]
+      ) {
+      --strip-share: 0.3;
+    }
+  }
+  @media (max-width: 39.99rem) {
+    .gf-strips[data-phone="scroll"]:is(
+        [data-count="4"],
+        [data-count="5"],
+        [data-count="6"],
+        [data-count="7"],
+        [data-count="8"]
+      ) {
+      --strip-share: 0.43;
+    }
+  }
+  @media (max-width: 63.99rem) {
+    .gf-strips[data-phone="scroll"] {
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+    .gf-strips[data-phone="scroll"]::-webkit-scrollbar {
+      display: none;
+    }
+    .gf-strips[data-phone="scroll"] .gf-strip {
+      display: block;
+      /* No share (the row fits): a basis of 0, the strips sharing the width as before */
+      flex: 1 0 calc(100cqw * var(--strip-share, 0));
+      scroll-snap-align: start;
+    }
+    .gf-strips[data-phone="scroll"] .gf-strip:not(:first-child, :last-child) .gf-strip-cut {
+      clip-path: polygon(var(--strip-run) 0, 100% 0, calc(100% - var(--strip-run)) 100%, 0 100%);
+    }
+  }
+
   .gf-strip-frame {
     position: absolute;
     inset: 0;

@@ -1,0 +1,39 @@
+/*
+ * The strip gallery (`sections/StripGallery.tsx`, adr/0049 Ek 2026-11-16):
+ * the shared strips (`strips.css`) across the section. Edge to edge
+ * (`data-width="full"`) the strips meet the screen's edges square; in the
+ * container they keep the media's rounding. Its strips are wider than the
+ * featured product's, so from 1024 px a strip's heading reads a step
+ * larger while the row holds five or fewer.
+ */
+@layer utilities {
+  .gf-strip-gallery[data-width="full"] .gf-strips {
+    border-radius: 0;
+  }
+}
+
+@layer components {
+  /*
+   * A strip without a line under its heading keeps that line's room while
+   * another strip has one, so the headings of a row stand on one line (a
+   * zero-width character, silent for a screen reader).
+   */
+  .gf-strip-gallery .gf-strips:has(.gf-strip-note) .gf-strip-text:not(:has(.gf-strip-note))::after {
+    content: "\200b" / "";
+    font-size: var(--text-sm);
+  }
+  /*
+   * Overlapping, the strip under the pointer lies over its right neighbour's
+   * foot by the overlap: that neighbour's words start past it.
+   */
+  .gf-strip-gallery .gf-strips[data-overlap="on"] .gf-strip + .gf-strip .gf-strip-text {
+    padding-left: calc(var(--strip-line) + var(--strip-overlap) + var(--space-sm));
+  }
+  @media (min-width: 64rem) {
+    .gf-strip-gallery
+      .gf-strips:is([data-count="2"], [data-count="3"], [data-count="4"], [data-count="5"])
+      .gf-strip-title {
+      font-size: var(--text-lg);
+    }
+  }
+}
