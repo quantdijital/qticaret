@@ -3,6 +3,7 @@
 import { X } from "lucide-react"
 import { Dialog } from "radix-ui"
 import type { ReactNode } from "react"
+import { LayerPortal } from "../frame/Layers"
 
 /**
  * "Değerlendirme yaz" and "Soru sor" (owner 2026-11-06: the form open on
@@ -36,7 +37,7 @@ export function WriteDialog({
         {icon}
         {label}
       </Dialog.Trigger>
-      <Dialog.Portal>
+      <LayerPortal>
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-scrim duration-(--dur-short) motion-safe:data-[state=closed]:animate-out data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:animate-in data-[state=open]:fade-in-0" />
         <Dialog.Content
           data-write=""
@@ -55,7 +56,7 @@ export function WriteDialog({
             {children}
           </div>
         </Dialog.Content>
-      </Dialog.Portal>
+      </LayerPortal>
     </Dialog.Root>
   )
 }

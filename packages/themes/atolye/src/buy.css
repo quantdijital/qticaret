@@ -5,8 +5,10 @@
  */
 
 @media (hover: hover) {
-  :is(.bg-paper-2, .gf-pane) .gf-icon-btn:hover,
-  :is(.bg-paper-2, .gf-pane) .gf-chip:hover:not([aria-selected="true"]):not([aria-current="page"]) {
+  /* A photo well (`bg-media`, tokens.css) is the same tint: its controls answer alike */
+  :is(.bg-paper-2, .gf-pane, .bg-media) .gf-icon-btn:hover,
+  :is(.bg-paper-2, .gf-pane, .bg-media)
+    .gf-chip:hover:not([aria-selected="true"]):not([aria-current="page"]) {
     background: var(--color-paper-3);
   }
   :is(.bg-field, .gf-pane-inner) .gf-icon-btn:hover:not(:disabled) {

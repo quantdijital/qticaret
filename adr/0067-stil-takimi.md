@@ -85,6 +85,50 @@ Dökümün sayımı: daldaki 17 değişikliğin 3'ü takımla ifade edilir (`men
 2. ~~Hesap, sipariş ve ödeme sayfalarındaki kutuların tam listesi adım 4'te çıkarılır.~~ Kapandı: Ek 2026-11-15.
 3. Tema ayarlarının ayar aramasına girmesi.
 
+## Uygulama notu (2026-11-15): önce sözleşme
+
+Dört yeni alan (S1–S4) çizime dokunmadan uçtan uca tanımlandı; her alanın çizimi kendi adımında, ayrı dosyalarda bağlanır. Bu PR'dan sonra varsayılan dışı değerler kaydedilir ve vitrine ulaşır, ama görünüşü değiştirmez; panel onları henüz göstermez.
+
+- **Sözleşme:** `packages/types/src/store/style-kit.ts` (`STYLE_KIT`: alan → basamak listesi, ilk basamak varsayılan; `STYLE_KIT_DEFAULTS`, `styleKitAttributes`). `StoreThemeSettings` bu alanları taşır. Backend aynası `platform-settings/sections/theme-style-kit.ts` (eşitlik testi `theme-style-kit.unit.spec.ts`); alan yoksa varsayılan (`withCardDefaults` içinden `withStyleKitDefaults`), liste dışı değer reddedilir. Ayarlar JSON'da, migration yok.
+- **İşaret:** `:root` değişkeni değil, `data-*` özniteliği. Temanın kök öğesi (Atölye `Layout`'unun en dıştaki `div`'i, ödeme çerçevesi dahil) varsayılan dışı her alan için `data-menu-style="underline|plain"`, `data-shadow="none"`, `data-chip-style="lined"`, `data-media-ground="page"` taşır; varsayılanda hiçbiri basılmaz, HTML ve stil çıktısı önceki gibidir (görünüm kilidi değişmeden geçti). Temanın `style(settings)` işlevi kit için hiçbir şey basmaz. Neden öznitelik: çizim ajanları yalnız CSS yazar, ortak TS dosyasına (`themes/atolye.ts`) dokunmaz; `:root` değişkenini değerine göre seçen taşınabilir bir CSS yolu da yoktur.
+- **CSS'te okuma** (yerel `<dialog>` üst katmanda da DOM'daki atasını korur; Radix portalıyla `body`'ye çizilen diyalog ve çekmeceler işareti kendi taşıyıcılarından alır, aşağıda "Ek 2026-11-15"):
+
+  ```css
+  [data-menu-style="plain"] .gf-aisle a:hover { background: none; }
+  [data-chip-style="lined"] .gf-chip:not([aria-pressed="true"]) { background: var(--color-paper); box-shadow: inset 0 0 0 1px var(--color-rule); }
+  /* Belirteçle (§3, tercih edilen): mevcut sınıf belirteci okur, öznitelik belirteci değiştirir */
+  [data-shadow="none"] { --shadow-float: none; --float-line: var(--color-rule); }
+  [data-media-ground="page"] { --media-ground: var(--color-paper); }
+  ```
+
+  Sınıf ve belirteç adları örnektir (`--shadow-float`, `--media-ground` taşıma adımında tanımlanır). Katman sırası özgüllükten önce gelir: kural ya katmansız (`surface.css` deseni) ya da okuduğu kuralla aynı katmanda yazılır; o zaman öznitelik + sınıf, tek sınıflı kuralı geçer. Kök öğenin dışında kalan yalnız `html`/`body` zeminidir; portallar için "Ek 2026-11-15".
+- **Panelde hazır-değil:** `apps/panel/src/features/storefront/editor/forms/style-kit-ready.ts` içindeki `STYLE_KIT_READY` (alan başına bir `false` satırı, aralarında yorum satırı). Kayıt defteri bu alanı `shown: () => STYLE_KIT_READY[alan]` ile bağlar: `false` iken alan formda da ayar aramasında da yoktur. Gruplar ikiye bölündü (§2.7): "Şekiller" (köşe, düğme, çip) ve "Yüzeyler" (kutu, gölge, fotoğraf zemini, menü, bölüm aralığı). Etiketler, basamak adları ve açıklamalar `storefront.editor.theme.styleKit.<alan>.{label,term,steps,hint}` altında yazılı.
+
+**Çizim adımının yapacakları** (alan başına):
+
+1. Taşıma (§3 a): kimliği sabit yazan yerleri sınıf ya da belirtece toplamak; çözülmüş stil aynı kalır, CSS özeti bilerek güncellenir (`pnpm lock:presets`).
+2. Yeni basamak (§3 b): yalnız CSS, yukarıdaki seçicilerle. Yeni TS işareti gerekmez; `styleKitAttributes`'e, `themes/atolye.ts`'e, sözleşmeye, backend'e ve i18n'e dokunulmaz (açıklama metni değişecekse yalnız kendi `styleKit.<alan>` bloğu).
+3. `STYLE_KIT_READY.<alan>` satırını `true` yapmak; panelde alan açılır.
+4. Test: vitrinde basamağın CSS'te okunduğu (ör. `atolye-settings.spec.ts` deseniyle `ruleBody`), panelde alanın göründüğü. Çip adımı `theme-registry.spec.ts`'teki `keys("cizgili")` beklentisini günceller ("Çizgili" artık iki alanda geçer).
+5. PR gövdesi: etkilenen hazır görünümler (hepsi varsayılanı taşır: yok), CSS kilidi bilerek güncellendi, çözülmüş stil denetimi sonucu.
+
+Ortak kalan dosyalar: `style-kit-ready.ts` (ayrı satırlar, birleşir), `styles.lock.json` (iki adım aynı anda girerse rebase sonrası `pnpm lock:presets` yeniden koşulur) ve yeni CSS dosyası açılırsa `styles.css`'teki `@import` satırı.
+
+## Ek (2026-11-15): işaret portallara nasıl ulaşır
+
+**Sorun.** Radix `Dialog.Portal` içeriğini `body`'nin sonuna çizer; tema kök öğesinin dışında kalır. #62 ve #63'ü doğrularken sepet çekmecesinde görüldü: `lined` çip ve `page` fotoğraf zemini sepet çekmecesinde, telefon menüsünde, hızlı bakışta, taksit penceresinde, yorum yazmada ve yakınlaştırmada uygulanmıyordu. Süzgeç çekmecesi yerel `<dialog>` olduğu için kökün içindedir, etkilenmiyordu. `surface_style`'ın kutu belirteçleri `:root`'ta olduğu için etkilenmiyordu.
+
+**Karar.** Portal, tema kökünün işaretlerini taşıyan bir taşıyıcıya çizilir:
+
+- `frame/root-marks.ts`: `rootMarks(theme)` kökün işaretleri (`data-surface` ve kit öznitelikleri), tek kaynak. `layerMarks(theme)` en az bir kit basamağı varsayılan dışındayken aynı işaretleri, varsayılanda `null` döndürür.
+- `frame/Layers.tsx`: `Layout` içeriğini `<LayerMarks marks={layerMarks(theme)}>` ile sarar (DOM'a hiçbir şey basmaz). İşaret varken `body`'nin sonunda tek bir `display: contents` taşıyıcı tutar, işaretleri onun üstünde günceller. `LayerPortal` (= `Dialog.Portal container={useLayerHost()}`) katmanı bu taşıyıcıya çizer. Taşıyıcı yine `body`'nin çocuğudur: üstündeki sayfanın yığın bağlamı, `overflow`'u, `transform`'u katmanı etkilemez. Odak tuzağı, kaydırma kilidi ve `aria-hidden` önceki gibi çalışır.
+- **Varsayılanda hiçbir şey değişmez:** taşıyıcı yoktur, katman eskisi gibi `body`'nin doğrudan çocuğudur, yayın HTML'i ve çözülmüş stil aynıdır.
+- **Kural:** temada çıplak `*.Portal` ya da `createPortal` yazılmaz. Yeni bir katman türü (Popover, Tooltip, DropdownMenu) `frame/Layers.tsx`'e kendi sarmalayıcısını ekler (`container={useLayerHost()}`). `atolye-layers.spec.tsx` bunu denetler.
+
+**CSS yazan adımlar için:** kural, kökteki gibi ata seçicisiyle yazılır (`[data-shadow="none"] .gf-x`, `[data-menu-style="plain"] …`). Taşıyıcı ata olduğu için portal içindeki öğe de bu kuralla eşleşir; ek seçici gerekmez. Seçici `body >` ya da kökün sınıfına (`.min-h-dvh`) bağlanmaz.
+
+**Değerlendirilen seçenekler.** (a) İşaretleri her portalın `Content`'ine basmak: `Content`'in kendisini hedefleyen kural (çekmecenin gölgesi) ata seçicisiyle eşleşmez, perdeye ulaşmaz, her portalda tekrar eder; reddedildi. Kapanış animasyonu Radix'in çocuk başına `Presence`'ını kestiği için portalın içine sarmalayıcı `div` koymak da olmaz. (b) Portalı kökün içine yönlendirmek: katman kökün yığın bağlamına ve gelecekte eklenebilecek `transform`/`overflow`'a bağlanır, çözülmüş stil anahtarları varsayılanda da değişirdi; reddedildi. (c) İşareti `html`/`body`'ye taşımak: tema `body`'yi çizmez (vitrinin kök düzeni), varsayılanda işaretsiz HTML ilkesi ve tema-vitrin sınırı bozulurdu; reddedildi.
+
 ## Ek 2026-11-15: adım 4, `surface_style` kapsamı (açık kalan 2 kapandı)
 
 Tema tek tek okundu (hesap, sipariş, ödeme, hediye, ödeme bağlantısı, içerik klasörleri ve bölümler dahil). Döküm ~17 kutu sayıyordu; gerçek sayı daha büyük çıktı, çünkü hesap/sipariş/ödeme sayfalarının kutuları grep'te görünmüyordu.

@@ -1,3 +1,5 @@
+import { FONT_FILES } from "../../app/fonts"
+
 /**
  * The storefront's own pages (backend `lib/seo/paths.ts`): they never go
  * through resolve, and their addresses carry ids and tokens whose case
@@ -54,26 +56,48 @@ export const STOREFRONT_INDEXES = [
 export const BLOG_ARCHIVE_PREFIXES = { category: "/blog/kategori", tag: "/blog/etiket" } as const
 
 /**
- * Files Next or `public/` serve as they are: the app's metadata files
- * (`app/icon.svg`; the others if ever added), the self-hosted faces
- * (`app/fonts.css`, a content hash in each name) and the providers' marks
- * (`public/marks/`). Never a page: no
- * resolve, no 404 report, no maintenance page. `proxy.ts`'s matcher
- * leaves the same addresses out, exactly these and nothing that only
- * starts like them.
+ * Names a file would have here: the app's metadata files (Next's names),
+ * a self-hosted face's (`app/fonts.css`, a content hash in each name) and
+ * a provider's mark's (`public/marks/`). The proxy answers every such name
+ * itself (`fileResponse`): never a page, so never one of the root layout's
+ * Server Actions, whether or not a file lives there.
  */
-const METADATA_FILES: readonly string[] = [
+const METADATA_NAMES: readonly string[] = [
   "/favicon.ico",
   "/icon.svg",
   "/apple-icon.png",
   "/manifest.webmanifest",
 ]
-const FONT_FILE = /^\/fonts\/[a-z-]+\.[0-9a-f]{10}\.woff2$/
-// The providers' marks in the footer (`public/marks/`, card-extras `MARK_LOGOS`)
-const MARK_FILE = /^\/marks\/[a-z_]+\.(?:svg|png)$/
+const FONT_NAME = /^\/fonts\/[a-z-]+\.[0-9a-f]{10}\.woff2$/
+const MARK_NAME = /^\/marks\/[a-z_]+\.(?:svg|png)$/
 
-export const isStaticFile = (pathname: string): boolean =>
-  METADATA_FILES.includes(pathname) || FONT_FILE.test(pathname) || MARK_FILE.test(pathname)
+export const isFileName = (pathname: string): boolean =>
+  METADATA_NAMES.includes(pathname) || FONT_NAME.test(pathname) || MARK_NAME.test(pathname)
+
+// The providers' marks in the footer (card-extras `MARK_LOGOS`): `public/marks/`, by the spec
+const MARK_FILES = [
+  "aras.svg",
+  "iyzico.svg",
+  "mastercard.svg",
+  "paytr.png",
+  "troy.svg",
+  "visa.png",
+  "yurtici.svg",
+] as const
+
+/**
+ * The files that live at those names, exactly (the spec reads `public/`
+ * and `app/`): the app's icon (`app/icon.svg`), every face `fonts.ts`
+ * lists and every mark. Never a page: no resolve, no 404 report, no
+ * maintenance page. Any other file name is a 404 the proxy gives itself.
+ */
+export const SERVED_FILES: ReadonlySet<string> = new Set([
+  "/icon.svg",
+  ...Object.values(FONT_FILES).flat(),
+  ...MARK_FILES.map((file) => `/marks/${file}`),
+])
+
+export const isStaticFile = (pathname: string): boolean => SERVED_FILES.has(pathname)
 
 export const isStorefrontIndex = (pathname: string): boolean =>
   (STOREFRONT_INDEXES as readonly string[]).includes(pathname)

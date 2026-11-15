@@ -17,7 +17,9 @@ export type MaintenanceGate =
   | { blocked: null; bypassed: boolean }
 
 /**
- * The dark shop's gate (adr/0053): open paths and an open shop pass; a
+ * The dark shop's gate (adr/0053): an open shop passes, so do its open
+ * paths for GET and HEAD and a card provider's return for its POST too
+ * (adr/0053 Ek 2026-11-15: no Server Action by an open path's name); a
  * visitor whose bypass cookie the backend still accepts passes too (asked
  * at most once a minute per token). Anyone else gets the 503 page; a
  * cookie that no longer opens, or never could, is cleared with it. A
@@ -29,12 +31,17 @@ export async function maintenanceGate(
   request: NextRequest,
   pathname: string,
   site: EdgeSite,
-  context: { nonce: string; csp: string; production: boolean; visitorIp: string | null }
+  context: {
+    nonce: string
+    csp: string
+    production: boolean
+    visitorIp: string | null
+  }
 ): Promise<MaintenanceGate> {
   // The platform's suspension (adr/0061 Ek C15) before the shop's own maintenance: no
   // open path of the shop's and no bypass cookie opens it
   if (site.suspended) {
-    return isOpenWhileSuspended(pathname)
+    return isOpenWhileSuspended(pathname, request.method)
       ? { blocked: null, bypassed: false }
       : {
           blocked: maintenanceResponse(suspendedNotice(site.shopName), {

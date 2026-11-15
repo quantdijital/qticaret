@@ -10,7 +10,7 @@
       "file": "base.css"
     },
     {
-      "sha256": "f39ebcd9ab6fd6cd52f3a94659d0eefb3835d82cd417f4ff337a6965570cc3b4",
+      "sha256": "a80b7d884f6a974eb063d8ac4d83ed5f0bf0b3e53a0de93ceb4a860a9cda0da8",
       "file": "buy.css"
     },
     {
@@ -18,8 +18,12 @@
       "file": "card.css"
     },
     {
-      "sha256": "fa65232931974ff3629313a3eab58cf915e2e3d073e31701931bab94b601f526",
+      "sha256": "506aa24d5ec194c74236fc67d1645481e55ba6fa9b0e6dffab1cc9869c490f6f",
       "file": "catalog.css"
+    },
+    {
+      "sha256": "1630fe42b6e89ab34607a02be3ea2166efc31d3b1bc1826c74aedfd161cfcdf7",
+      "file": "chips.css"
     },
     {
       "sha256": "f1ef03835bb1b47f3f983cf87e2a11a69109ae5a3c7395c7669f5a9573767011",
@@ -46,7 +50,11 @@
       "file": "marquee.css"
     },
     {
-      "sha256": "6bebdfc8f51f407595cbfa30a152b92a7277cc268aff2bf8f14e49bb632f8957",
+      "sha256": "5ff34a3362dc46e95c39b1a5718aca87f4bdbb4594a75da18d19112cea27bdff",
+      "file": "media.css"
+    },
+    {
+      "sha256": "0c4e2ccad01cdd25f6c0c49ede9ccbba3cda6100c1fecc8abdf1d1957a047e42",
       "file": "menu.css"
     },
     {
@@ -62,7 +70,7 @@
       "file": "slider.css"
     },
     {
-      "sha256": "1a8827558ffb87c9de06e483b140a55a51f6c24666711c8b566a1771fc8d49bd",
+      "sha256": "58004a2b88bb28402595ac312cf0214232c4ce29d738a6f92709798ad73bcafa",
       "file": "styles.css"
     },
     {
@@ -74,7 +82,7 @@
       "file": "tabs.css"
     },
     {
-      "sha256": "069e5556b741af3c60299a1af21c9b5cc700970e10b5dc7b2442ca6f547bb2f3",
+      "sha256": "0796d3f2bbf461ef9c0db4d02e4bf4f3c7d6a0944363d5c7ee8e54564860c77a",
       "file": "tokens.css"
     },
     {

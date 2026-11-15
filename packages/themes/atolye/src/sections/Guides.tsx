@@ -22,7 +22,7 @@ export function Guides({ section }: { section: Of<"posts"> }) {
             <li key={post.path} className="min-w-0">
               <article className="group relative flex h-full flex-col overflow-hidden rounded-tile gf-pane">
                 {post.image && (
-                  <div className="relative aspect-[16/10] bg-paper-3">
+                  <div className="relative aspect-[16/10] bg-media-deep">
                     <ResponsiveImage
                       image={{ ...post.image, alt: "" }}
                       sizes="(min-width: 768px) 30vw, 100vw"

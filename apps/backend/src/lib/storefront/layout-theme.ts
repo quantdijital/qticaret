@@ -46,6 +46,11 @@ const shown = (theme: ThemeSettings): ShownTheme => ({
   buttons: theme.buttons,
   section_spacing: theme.section_spacing,
   surface_style: theme.surface_style,
+  // The style kit (adr/0067 §1)
+  menu_style: theme.menu_style,
+  shadow: theme.shadow,
+  chip_style: theme.chip_style,
+  media_ground: theme.media_ground,
 })
 
 /**

@@ -1,6 +1,7 @@
 export * from "./catalog.js"
 export * from "./seo.js"
 export * from "./storefront.js"
+export * from "./style-kit.js"
 export * from "./layout.js"
 export * from "./section-variants.js"
 export * from "./section-look.js"

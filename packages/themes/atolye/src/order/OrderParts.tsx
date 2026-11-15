@@ -135,7 +135,7 @@ export function OrderLines({ view, t }: { view: OrderPageView; t: Translate }) {
           <li key={`${String(index)}:${line.title}`} className="flex items-start gap-4">
             <LinePhoto
               path={line.path}
-              className="size-18 shrink-0 overflow-hidden rounded-inner bg-paper-3 sm:size-20"
+              className="size-18 shrink-0 overflow-hidden rounded-inner bg-media-deep sm:size-20"
             >
               {line.image && (
                 <ResponsiveImage

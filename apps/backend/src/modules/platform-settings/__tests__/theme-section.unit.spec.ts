@@ -3,6 +3,7 @@ import { mergePatch } from "../sections/define"
 import { parseStored } from "../sections/stored"
 import {
   SECTION_SPACINGS,
+  STYLE_KIT_DEFAULTS,
   SURFACE_STYLES,
   THEME_BACKGROUNDS,
   THEME_WELLS,
@@ -60,6 +61,11 @@ describe("theme section", () => {
       buttons: "pill",
       section_spacing: "normal",
       surface_style: "filled",
+      // adr/0067 §1: the style kit at today's drawing
+      menu_style: "filled",
+      shadow: "float",
+      chip_style: "filled",
+      media_ground: "well",
     })
     expect(full.safeParse(defaults).success).toBe(true)
     expect(parseStored("theme", undefined)).toEqual(defaults)
@@ -267,9 +273,12 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
       section_spacing: "normal",
       // and before the surface style (Z-04): today's filled boxes
       surface_style: "filled",
+      // and before the style kit (adr/0067): today's drawing
+      ...STYLE_KIT_DEFAULTS,
     })
     const framed = {
       ...stored,
+      ...STYLE_KIT_DEFAULTS,
       section_spacing: "compact",
       surface_style: "lined",
       product_card: { ...defaults.product_card, variant: "framed" },

@@ -18,7 +18,7 @@ function Product({ product, t }: { product: NonNullable<Review["product"]>; t: T
       href={product.path}
       className="group flex min-h-14 items-center gap-3 border-t border-rule pt-3 no-underline"
     >
-      <span className="relative size-12 shrink-0 overflow-hidden rounded-inner bg-paper-3">
+      <span className="relative size-12 shrink-0 overflow-hidden rounded-inner bg-media-deep">
         {product.image && (
           <ResponsiveImage
             image={{ ...product.image, alt: "" }}
@@ -56,7 +56,7 @@ function Card({ review, t }: { review: Review; t: Translate }) {
                 href={photo.image.src}
                 target="_blank"
                 rel="noopener"
-                className="relative block size-20 overflow-hidden rounded-inner bg-paper-2"
+                className="relative block size-20 overflow-hidden rounded-inner bg-media"
               >
                 <ResponsiveImage
                   image={{

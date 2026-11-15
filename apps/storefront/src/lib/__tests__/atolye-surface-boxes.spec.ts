@@ -108,7 +108,7 @@ describe("the theme's other boxes (adr/0067 step 4)", () => {
 
   it("keeps a control's hover a step darker on a moved box", async () => {
     const css = await buildAtolyeCss([])
-    expect(css).toContain(":is(.bg-paper-2, .gf-pane) .gf-icon-btn:hover")
+    expect(css).toContain(":is(.bg-paper-2, .gf-pane, .bg-media) .gf-icon-btn:hover")
     expect(css).toContain(":is(.bg-field, .gf-pane-inner) .gf-icon-btn:hover:not(:disabled)")
   })
 

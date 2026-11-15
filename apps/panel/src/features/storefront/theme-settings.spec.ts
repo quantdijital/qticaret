@@ -41,6 +41,10 @@ const SAVED: ThemeSettings = {
   buttons: "pill",
   section_spacing: "normal",
   surface_style: "filled",
+  menu_style: "filled",
+  shadow: "float",
+  chip_style: "filled",
+  media_ground: "well",
 }
 
 describe("the theme settings as the form holds them (adr/0053 §B)", () => {
@@ -54,6 +58,10 @@ describe("the theme settings as the form holds them (adr/0053 §B)", () => {
       buttons: "pill",
       section_spacing: "normal",
       surface_style: "filled",
+      menu_style: "filled",
+      shadow: "float",
+      chip_style: "filled",
+      media_ground: "well",
     })
   })
 })
@@ -88,6 +96,10 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
       buttons: "pill",
       section_spacing: "normal",
       surface_style: "filled",
+      menu_style: "filled",
+      shadow: "float",
+      chip_style: "filled",
+      media_ground: "well",
     })
     // As the form holds it
     expect(GRAFIT_VALUES.colors).toEqual({ primary: "", accent: "", background: "steel" })
@@ -107,6 +119,11 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
       { ...g, buttons: "square" },
       { ...g, section_spacing: "compact" },
       { ...g, surface_style: "lined" },
+      // The style kit (adr/0067): a field the panel hides yet still counts
+      { ...g, menu_style: "plain" },
+      { ...g, shadow: "none" },
+      { ...g, chip_style: "lined" },
+      { ...g, media_ground: "page" },
       { ...g, product_card: { ...g.product_card, ratio: "4:5" } },
       { ...g, product_card: { ...g.product_card, show_brand: false } },
       { ...g, product_card: { ...g.product_card, show_rating: true } },

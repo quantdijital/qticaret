@@ -1,6 +1,6 @@
 import { isPlainObject } from "../../../modules/platform-settings/sections/define"
 import { storedLook } from "./look"
-import { MAIN_BRANCHES, storedByVariant } from "./main"
+import { MAIN_BRANCHES, storedByVariant, storedMenuImages } from "./main"
 import { PRODUCTS_BRANCHES, storedCardVariant } from "./products"
 import { CATEGORIES_BRANCHES } from "./categories"
 import { RELATED_BRANCHES } from "./related-products"
@@ -32,14 +32,15 @@ const ALWAYS_KEPT = ["placement"]
  * still reads; a look's step off its list is dropped (`storedLook`), and
  * so is a category grid's settings of a variant off its list
  * (`storedByVariant`), a product rail's card variant off its list too
- * (`storedCardVariant`). No variant at all is the default's to fill (the schema). A save is still
+ * (`storedCardVariant`), a header bar's menus' pictures off their list
+ * (`storedMenuImages`). No variant at all is the default's to fill (the schema). A save is still
  * held to the lists.
  */
 export function storedSection(stored: unknown): unknown {
   if (!isPlainObject(stored)) {
     return stored
   }
-  const section = storedCardVariant(storedByVariant(storedLook(stored)))
+  const section = storedMenuImages(storedCardVariant(storedByVariant(storedLook(stored))))
   const type = section["type"]
   if (!isVariantType(type)) {
     return section

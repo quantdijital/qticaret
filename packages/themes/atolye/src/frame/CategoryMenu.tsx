@@ -3,10 +3,45 @@
 import { ChevronDown, ChevronRight, LayoutGrid } from "lucide-react"
 import { useEffect, useId, useRef, useState } from "react"
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from "react"
-import type { NavCategoryView } from "@qticaret/ui"
+import type { CategoryCardView, NavCategoryView } from "@qticaret/ui"
+import { MenuThumb } from "./MenuParts"
 
 const LINK =
   "flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+// With the pictures: the dropdown's row (`menu.css`), 48 px, the square 8 px in, the name 12 px past it
+const PICTURED =
+  "flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+
+/** A category's panel: two columns for a long list, one narrow for a short; wider with the pictures. */
+function panelWidth(wide: boolean, pictures: boolean): string {
+  if (wide) {
+    return pictures
+      ? "min-h-full w-[min(34rem,calc(100vw-26rem))]"
+      : "min-h-full w-[min(34rem,calc(100vw-24rem))]"
+  }
+  return pictures ? "w-72" : "w-64"
+}
+
+/** A row's words, with its category's square before them when the pictures show. */
+function Label({
+  category,
+  size,
+  pictures,
+}: {
+  category: CategoryCardView
+  size: 36 | 40
+  pictures: boolean
+}) {
+  if (!pictures) {
+    return <>{category.label}</>
+  }
+  return (
+    <>
+      <MenuThumb category={category} size={size} />
+      <span className="flex-1">{category.label}</span>
+    </>
+  )
+}
 
 /** How long the pointer rests on the button before the list opens, and off it before it closes (ms). */
 const OPEN_AFTER = 150
@@ -35,15 +70,23 @@ function linksBeside(from: HTMLElement): HTMLAnchorElement[] {
  * column, right into a category's children and left back. Every link is
  * in the first HTML, its panel hidden, so a crawler reaches each without a
  * script (docs/13). Open, it says so (`data-state`), so the sticky header
- * stays unfolded (`frame.css`).
+ * stays unfolded (`frame.css`). Its rows are words; with the menus'
+ * pictures everywhere (`all`, adr/0049 Ek 2026-11-15) each shows its
+ * category's picture as the dropdowns do (a 40 px square on a top row,
+ * 36 px on a child's, an empty one where there is none) and the list
+ * widens to 320 px.
  */
 export function CategoryMenu({
   categories,
   words,
+  pictures = false,
 }: {
   categories: readonly NavCategoryView[]
   words: { button: string; label: string; allIn: Record<string, string> }
+  /** The rows' small pictures (`HeaderBarView.menuImages` `all`); off by default: words, as before. */
+  pictures?: boolean
 }) {
+  const row = pictures ? PICTURED : LINK
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(-1)
   const root = useRef<HTMLDivElement>(null)
@@ -197,7 +240,7 @@ export function CategoryMenu({
         id={id}
         aria-label={words.label}
         hidden={!open}
-        className="absolute top-full left-0 z-(--z-dropdown) mt-1 w-72 rounded-tile border border-rule bg-field p-2 text-text shadow-float"
+        className={`absolute top-full left-0 z-(--z-dropdown) mt-1 ${pictures ? "w-80" : "w-72"} rounded-tile border border-rule bg-field p-2 text-text shadow-float`}
       >
         <ul data-cm-list="top" className="flex flex-col">
           {categories.map((category, index) => {
@@ -210,7 +253,7 @@ export function CategoryMenu({
                 <a
                   href={category.path}
                   data-cm-top={own ? String(index) : undefined}
-                  className={`${LINK} justify-between font-semibold ${active === index ? "bg-paper-2 text-text" : ""}`}
+                  className={`${pictures ? PICTURED : `${LINK} justify-between`} font-semibold ${active === index ? "bg-paper-2 text-text" : ""}`}
                   {...(own ? { "aria-expanded": active === index, "aria-controls": panel } : {})}
                   onPointerEnter={() => {
                     setActive(own ? index : -1)
@@ -219,7 +262,7 @@ export function CategoryMenu({
                     setActive(own ? index : -1)
                   }}
                 >
-                  {category.label}
+                  <Label category={category} size={40} pictures={pictures} />
                   {own && (
                     <ChevronRight className="size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
                   )}
@@ -229,7 +272,7 @@ export function CategoryMenu({
                     id={panel}
                     data-cm-sub={String(index)}
                     hidden={active !== index}
-                    className={`absolute top-0 left-full ml-1 rounded-tile border border-rule bg-field p-5 shadow-float ${wide ? "min-h-full w-[min(34rem,calc(100vw-24rem))]" : "w-64"}`}
+                    className={`absolute top-0 left-full ml-1 rounded-tile border border-rule bg-field p-5 shadow-float ${panelWidth(wide, pictures)}`}
                   >
                     <ul
                       data-cm-list={String(index)}
@@ -237,15 +280,15 @@ export function CategoryMenu({
                     >
                       {category.children.map((each) => (
                         <li key={each.path} className="break-inside-avoid">
-                          <a href={each.path} className={LINK}>
-                            {each.label}
+                          <a href={each.path} className={row}>
+                            <Label category={each} size={36} pictures={pictures} />
                           </a>
                         </li>
                       ))}
                       <li className="break-inside-avoid">
                         <a
                           href={category.path}
-                          className={`${LINK} font-semibold text-text underline`}
+                          className={`${row} font-semibold text-text underline`}
                         >
                           {words.allIn[category.path] ?? category.label}
                         </a>

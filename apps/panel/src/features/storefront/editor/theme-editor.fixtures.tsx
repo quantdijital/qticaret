@@ -51,13 +51,24 @@ export const THEME: ThemeSettings = {
   buttons: "pill",
   section_spacing: "normal",
   surface_style: "filled",
+  menu_style: "filled",
+  shadow: "float",
+  chip_style: "filled",
+  media_ground: "well",
 }
 
 export const DOC: LayoutDocument = {
   // The main sections as the server reads them in (adr/0049 Ek 2026-11-14 §5, §7)
   header: [
     { id: "duyurular", type: "announcement_bar", ...ALWAYS, lines: ["Kargo bedava"] },
-    { id: "mainheader", type: "header_bar", ...MAIN, variant: "standard", sticky: true },
+    {
+      id: "mainheader",
+      type: "header_bar",
+      ...MAIN,
+      variant: "standard",
+      sticky: true,
+      menu_images: "submenus",
+    },
   ],
   home: [
     {

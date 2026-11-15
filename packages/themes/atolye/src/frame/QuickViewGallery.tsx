@@ -27,7 +27,7 @@ export function QuickViewGallery({
   const image = images[shown] ?? images[0] ?? null
   return (
     <div className="flex flex-col gap-3">
-      <div className="relative mx-auto aspect-card w-2/3 overflow-hidden rounded-media bg-paper-2 md:w-full">
+      <div className="relative mx-auto aspect-card w-2/3 overflow-hidden rounded-media bg-media md:w-full">
         {image && (
           <ResponsiveImage
             key={image.src}
@@ -52,7 +52,7 @@ export function QuickViewGallery({
                   show(index)
                 }}
                 className={cn(
-                  "block size-14 overflow-hidden rounded-inner bg-paper-2 ring-2 ring-transparent ring-offset-2 ring-offset-paper transition-shadow duration-(--dur-micro) hover:ring-edge",
+                  "block size-14 overflow-hidden rounded-inner bg-media ring-2 ring-transparent ring-offset-2 ring-offset-paper transition-shadow duration-(--dur-micro) hover:ring-edge",
                   index === shown && "ring-text hover:ring-text"
                 )}
               >

@@ -1,3 +1,5 @@
+import type { StyleKit } from "@qticaret/types/style-kit"
+
 /**
  * The shop's theme choices a theme draws by itself (F18 D11, adr/0053 §B).
  * Colours, faces and corner sizes reach it as CSS variables the storefront
@@ -26,6 +28,12 @@ export interface ThemeView {
    * 1 px rule; also `--box-ground` and `--box-line`. Absent: `filled`.
    */
   surface?: "filled" | "lined"
+  /**
+   * The style kit (adr/0067 §1): menu items, shadow, chips, the photos'
+   * ground. The theme marks a step off the default on its root element
+   * (`styleKitAttributes`, `@qticaret/types`). Absent, or a field absent: its default.
+   */
+  styleKit?: Partial<StyleKit>
 }
 
 /** The phone's bottom bar's items (docs/20 "mobil alt gezinme"). */

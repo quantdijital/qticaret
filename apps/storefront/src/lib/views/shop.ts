@@ -20,7 +20,7 @@ import { shopMarks } from "./card-extras"
 import { miniCartOf } from "./cart"
 import { linePicturesOf, productPathsOf } from "./line-paths"
 import { imageView } from "./image"
-import { navigation } from "./categories"
+import { navigation, withPicturesOf } from "./categories"
 import { withNavPictures } from "./nav-pictures"
 import { withNavCounts } from "./nav-counts"
 import { cookieBannerOf } from "./cookies"
@@ -142,8 +142,12 @@ export async function shopView(): Promise<ShopView> {
     ),
     marquee: headerMarquee(layout.header, t),
     // The design's header bar and footer (Ek 2026-11-14 §5); the theme's header before them
-    // The catalog header's "Kategoriler" lists the top categories already read (no request)
-    headerBar: headerBarOf(layout.main, theme, { t, tree: () => navigation(categories, paths) }),
+    // The catalog header's "Kategoriler" lists the top categories already read (no request),
+    // with the shop's pictures, else the ones the menu shows for the same page
+    headerBar: headerBarOf(layout.main, theme, {
+      t,
+      tree: () => withPicturesOf(navigation(categories, paths, pictures), menu),
+    }),
     footerBar: footerBarOf(layout.main, t),
     newsletter: newsletterOf(layout, identity.company_title ?? site.shop.name),
     topLinks: topLinks(menus, t),

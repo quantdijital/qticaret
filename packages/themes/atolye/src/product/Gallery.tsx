@@ -126,7 +126,7 @@ export function Gallery({
     .replace("{count}", String(count))
   return (
     <section aria-label={words.label} className="gf-pictures flex flex-col gap-3">
-      <div className="relative overflow-hidden rounded-tile bg-paper-2">
+      <div className="relative overflow-hidden rounded-tile bg-media">
         <ul
           ref={rail}
           className="gf-gallery flex overflow-x-auto"

@@ -44,12 +44,16 @@ describe("the theme panel's register", () => {
 describe("the settings search over the theme", () => {
   it("finds the colours, faces, corners and section spacing by their names", () => {
     expect(keys("ana renk")).toEqual(["colors.primary"])
-    expect(keys("sayfa zemini")).toEqual(["colors.background"])
+    // The photo ground's "Sayfa" step is the page's own ground too (adr/0067 S4)
+    expect(keys("sayfa zemini")).toEqual(["colors.background", "media_ground"])
     expect(keys("yazı tipleri font")).toEqual(["typography.heading", "typography.body"])
     expect(keys("köşeler")).toEqual(["radius"])
     expect(keys("bolum araligi")).toEqual(["section_spacing"])
     expect(keys("kutu stili")).toEqual(["surface_style"])
-    expect(keys("cizgili")).toEqual(["surface_style"])
+    // "Çizgili" names a step of the box style and of the chip style (adr/0067 step 3)
+    expect([...keys("cizgili")].sort()).toEqual(["chip_style", "surface_style"])
+    expect(keys("çip stili")).toEqual(["chip_style"])
+    expect(keys("chips")).toEqual(["chip_style"])
   })
 
   it("finds a field by its technical term and a choice by its name, naming it", () => {
