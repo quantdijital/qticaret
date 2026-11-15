@@ -287,6 +287,15 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     expect(atolyeCss("parts/CategoryTile.tsx")).toContain("gf-subtile")
   })
 
+  it("draws the cart count on a graphite bar in the stage's light ink, not the shop's colour (audit C)", () => {
+    const count = ruleBody(
+      atolyeCss("header-catalog.css"),
+      '.gf-menubar[data-ground="stage"] .gf-on-bar .gf-count'
+    )
+    expect(count).toContain("background: var(--color-stage-text)")
+    expect(count).toContain("color: var(--color-stage)")
+  })
+
   it("keeps a sale apart from a warm main colour: a graphite badge, an ink price (K-05)", () => {
     const deal = ["--color-deal:var(--color-text)", "--color-deal-ink:var(--color-paper)"]
     // Tezgâh's red and reds around it, its orange set's (old and new) and an amber

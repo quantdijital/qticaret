@@ -36,7 +36,7 @@ Ziyaretçi bir alet arıyor. Önce nerede olduğunu (kategori listesi), sonra ne
 | Lacivert | `#33709c` (eski `#2f6690`) | 5,33 | 5,10 | 3,44 (eski 2,99) | 1,14 | `#1f4f8f` (eski `#1c2b4a`) | 8,16 | 2,25 (eski 1,30) | kırmızı |
 | Turuncu | `#b03b0b` (eski `#c2410c`) | 6,04 | 5,77 (eski 4,95) | 3,03 | 1,01 | `#2e3338` | 12,75 | 1,44 | grafit rozet |
 
-Lacivert takımın tabanı artık grafitten ayrışan bir mavi (seçili sekme lacivert okunur); eylem mavisi sayacı çubukta 3:1'in üstüne çıkacak kadar açıldı, sayfada 4,5:1'in üstünde kaldı. Turuncu, sayfada metin bağlantısı olarak rahat okunacak kadar koyulaştı. Bilinen sınır: varsayılan kırmızının sayacı çubukta 2,80:1 (sayacın rakamı beyaz yazıyla 6,54:1 okunur).
+Lacivert takımın tabanı artık grafitten ayrışan bir mavi (seçili sekme lacivert okunur); eylem mavisi sayacı çubukta 3:1'in üstüne çıkacak kadar açıldı, sayfada 4,5:1'in üstünde kaldı. Turuncu, sayfada metin bağlantısı olarak rahat okunacak kadar koyulaştı. Grafit çubukta sepet sayacı artık takımın renginde değil: sahnenin açık mürekkebi üstünde grafit rakam (her takımda yaklaşık 16:1; üçüncü denetim C). Tablodaki "Çubukta" sütunu sayfadaki sayaçlar ve telefon alt çubuğu içindir.
 
 **Zemin sırası.** Sayfa zemini çelik beyazı (`steel`). Ritim: açık bölümler arasına iki kuyu bandı (`look.ground: well`) ve tek grafit sahne. Kuyu bandının iç boşluğu `medium`. Kuyu bandı iki kez üst üste gelmez, alt bilginin kuyusuna da yapışmaz.
 
