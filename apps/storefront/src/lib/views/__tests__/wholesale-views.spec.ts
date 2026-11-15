@@ -9,7 +9,9 @@ import { lineNetOf, netTotalsOf, taxLinesOf } from "../cart-tax"
 import { summaryOf } from "../checkout-summary"
 import { filterViews } from "../facets"
 import type { ListingState } from "../listing"
+import { offersOf } from "../cart-extras"
 import { cardPrice, isVatExclusive, paidAmount, variantPrice } from "../price"
+import { markWholesale } from "../wholesale-displays"
 
 const variant = (id: string, amount: number): StoreVariant =>
   ({ id, calculated_price: { calculated_amount: amount } }) as StoreVariant
@@ -58,6 +60,18 @@ describe("a price as the views show it", () => {
       from: true,
       taxNote: "Toptan fiyat · KDV hariç",
     })
+  })
+
+  it("gives a wholesaler's variant without a display no price at all (review L2)", () => {
+    const own = markWholesale<Record<string, PriceDisplay>>({ v1: WHOLESALE })
+    const bare = variant("v2", 80)
+    expect(variantPrice(bare, own, t)).toBeNull()
+    expect(paidAmount(bare, own)).toBeNull()
+    expect(isVatExclusive(bare, own)).toBe(true)
+    expect(cardPrice([variant("v1", 80), bare], own)).toMatchObject({ current: "66,67 TL" })
+    // Anyone else's falls back to Medusa's price as before
+    expect(variantPrice(bare, { v1: RETAIL }, t)).toMatchObject({ current: "80,00 TL" })
+    expect(offersOf(own, t)).toEqual([])
   })
 
   it("pays a wholesaler's KDV-included amount for what follows the money", () => {

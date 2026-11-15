@@ -26,8 +26,10 @@ interface WholesaleAnswer {
 /**
  * Whether this request's shopper buys at wholesale: asked of the backend
  * once per request, only with a session (a guest is never asked about),
- * the customer the session's. Any refusal reads as retail: the public
- * prices show, and the cart still charges what Medusa prices it at.
+ * the customer the session's. A key the backend no longer takes (401,
+ * 403) reads as retail, as the customer reads as a guest. Anything else
+ * (429, a 5xx) fails the page as a network error does (security review
+ * L1): a wholesaler is never shown retail prices as theirs by accident.
  */
 export const currentWholesale = cache(async (): Promise<Wholesale> => {
   const token = await sessionToken()
@@ -45,7 +47,7 @@ export const currentWholesale = cache(async (): Promise<Wholesale> => {
         }
       : RETAIL
   } catch (error) {
-    if (isStoreApiError(error)) {
+    if (isStoreApiError(error) && (error.status === 401 || error.status === 403)) {
       return RETAIL
     }
     throw error

@@ -10,6 +10,7 @@ import { listProducts, priceDisplays, storefrontLayout } from "@/lib/store-api/r
 import type { PriceDisplay } from "@qticaret/types"
 import { cartOfferText } from "./price"
 import { railCards } from "./section-data"
+import { isWholesaleDisplays } from "./wholesale-displays"
 
 /**
  * What the cart page shows beside its lines (adr/0046 Ek 2026-11-05):
@@ -41,8 +42,14 @@ export function cheapestShipping(options: readonly ShippingOption[], t: Translat
   return same ? formatLira(lowest) : t("cart.shipping_from", { price: formatLira(lowest) })
 }
 
-/** The shop's cart offers on the cart's variants, in words, each once. */
+/**
+ * The shop's cart offers on the cart's variants, in words, each once; none
+ * for a wholesaler (ADR-0068 §6: automatic campaigns are not theirs).
+ */
 export function offersOf(displays: Record<string, PriceDisplay>, t: Translate): string[] {
+  if (isWholesaleDisplays(displays)) {
+    return []
+  }
   const said = Object.values(displays).flatMap((display) => {
     const text = cartOfferText(display.cart_offer, t)
     return text ? [text] : []

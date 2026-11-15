@@ -2,6 +2,7 @@ import { formatLira } from "@qticaret/ui"
 import type { PriceView, Translate } from "@qticaret/ui"
 import type { PriceDisplay, StoreCartOffer, StoreVariant } from "@qticaret/types"
 import { t as words } from "../i18n"
+import { isWholesaleDisplays } from "./wholesale-displays"
 
 /** Whether a variant can be put in the cart now (stock, or no stock kept, or backorders). */
 export const isAvailable = (variant: StoreVariant): boolean =>
@@ -25,6 +26,8 @@ export function percentOff(before: number, amount: number): number | null {
  * What a shopper pays for a variant now: the backend's display, an
  * automatic promotion every shopper gets included (adr/0023 Ek
  * 2026-11-05), else Medusa's calculated price. Both come from the server.
+ * A wholesaler's variant without a display of their own has no price
+ * (ADR-0068 §7, review L2): Medusa's group price would carry KDV unsaid.
  */
 export function shownAmount(
   variant: StoreVariant,
@@ -34,15 +37,22 @@ export function shownAmount(
   if (displays[variant.id] && Number.isFinite(shown)) {
     return shown
   }
+  if (isWholesaleDisplays(displays)) {
+    return null
+  }
   const amount = variant.calculated_price?.calculated_amount
   return typeof amount === "number" ? amount : null
 }
 
-/** Whether a variant's display is a signed-in wholesaler's own, without KDV (ADR-0068 §7). */
+/**
+ * Whether a variant's price is a signed-in wholesaler's own, without KDV
+ * (ADR-0068 §7), or one of theirs left unpriced: the shop-wide extras of
+ * a retail price (installments, Open Graph, a bare "from") leave it out.
+ */
 export const isVatExclusive = (
   variant: Pick<StoreVariant, "id">,
   displays: Readonly<Record<string, PriceDisplay>>
-): boolean => displays[variant.id]?.vat_exclusive === true
+): boolean => displays[variant.id]?.vat_exclusive === true || isWholesaleDisplays(displays)
 
 /**
  * What the shopper pays for a variant, KDV included: the shown amount,

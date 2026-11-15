@@ -19,6 +19,7 @@ vi.mock("@/lib/store-api/core", () => core)
 const { priceDisplays } = await import("../requests")
 const { storeCaches } = await import("../registry")
 const { WHOLESALE_PRICES_PATH } = await import("../wholesale-prices")
+const { isWholesaleDisplays } = await import("@/lib/views/wholesale-displays")
 
 const token = () =>
   `h.${Buffer.from(JSON.stringify({ actor_id: "cus_1", exp: Math.floor(Date.now() / 1000) + 3600 })).toString("base64url")}.s`
@@ -37,11 +38,11 @@ const PUBLIC = {
 type Call = [string, { query?: Record<string, unknown>; headers?: Record<string, string> }]
 
 /** Answers as the backend would: `wholesale` is whether the session's customer is one. */
-function backend(wholesale: boolean | "fails") {
+function backend(wholesale: boolean | number) {
   core.storeRequest.mockImplementation((path: string, request: Call[1]) => {
     if (path === "/store/customers/me/wholesale") {
-      if (wholesale === "fails") {
-        return Promise.reject(new StoreApiError(503, null, null))
+      if (typeof wholesale === "number") {
+        return Promise.reject(new StoreApiError(wholesale, null, null))
       }
       return Promise.resolve({
         data: { wholesale: { active: wholesale, vat_exclusive: wholesale, min_quantity: null } },
@@ -136,9 +137,25 @@ describe("priceDisplays", () => {
     expect(sizes).toEqual([100, 50])
   })
 
-  it("shows the public display when the wholesale answer fails", async () => {
+  it("shows the public display only when the backend no longer takes the key (review L1)", async () => {
     jar.session = token()
-    backend("fails")
-    await expect(priceDisplays(["variant_a"])).resolves.toEqual({ variant_a: PUBLIC })
+    for (const status of [401, 403]) {
+      backend(status)
+      await expect(priceDisplays(["variant_a"])).resolves.toEqual({ variant_a: PUBLIC })
+    }
+    for (const status of [429, 500, 503]) {
+      core.storeRequest.mockReset()
+      backend(status)
+      await expect(priceDisplays(["variant_a"])).rejects.toMatchObject({ status })
+      expect(paths()).toEqual(["/store/customers/me/wholesale"])
+    }
+  })
+
+  it("marks a wholesaler's displays, so a variant left out has no price (review L2)", async () => {
+    jar.session = token()
+    backend(true)
+    expect(isWholesaleDisplays(await priceDisplays(["variant_a"]))).toBe(true)
+    jar.session = undefined
+    expect(isWholesaleDisplays(await priceDisplays(["variant_a"]))).toBe(false)
   })
 })

@@ -1,5 +1,6 @@
 import "server-only"
 import type { PriceDisplay } from "@qticaret/types"
+import { markWholesale } from "../views/wholesale-displays"
 import { storeGet } from "./server"
 
 /** The wholesaler's own prices route (ADR-0068 §7): personal, never in the shared cache. */
@@ -38,7 +39,8 @@ export function wholesaleDisplay(price: { net: string; gross: string }): PriceDi
 export async function wholesaleDisplays(
   variantIds: readonly string[]
 ): Promise<Record<string, PriceDisplay>> {
-  const found: Record<string, PriceDisplay> = {}
+  // Marked: a variant left out has no price for them, never the group's with KDV (review L2)
+  const found = markWholesale<Record<string, PriceDisplay>>({})
   for (let start = 0; start < variantIds.length; start += 100) {
     const { wholesale_prices } = await storeGet<WholesalePricesAnswer>(WHOLESALE_PRICES_PATH, {
       variant_id: variantIds.slice(start, start + 100),
