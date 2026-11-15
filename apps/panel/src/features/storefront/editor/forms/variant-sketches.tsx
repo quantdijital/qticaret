@@ -63,10 +63,27 @@ function TrustLined() {
   )
 }
 
+/**
+ * Every header drawn in the same frame (one size, one edge, nothing past
+ * it), so the three read as three choices of the same thing (owner,
+ * 2026-11-15: "Klasik katalog" looked half cut beside the other two).
+ */
+const HeaderFrame = () => (
+  <rect
+    data-sketch-frame=""
+    x={1}
+    y={4}
+    width={110}
+    height={24}
+    rx={3}
+    className="fill-current opacity-15"
+  />
+)
+
 /** A header row: the wordmark at `mark`, the search field and two icons around it. */
 const HeaderRow = ({ mark }: { mark: number }) => (
   <>
-    <rect x={1} y={8} width={110} height={16} rx={3} className="fill-current opacity-15" />
+    <HeaderFrame />
     <rect x={mark} y={13} width={18} height={6} rx={1.5} className="fill-current opacity-70" />
     <rect
       x={mark < 40 ? 30 : 6}
@@ -87,22 +104,23 @@ const HeaderStandard = () => <HeaderRow mark={6} />
 /** The theme setting's centred header: the wordmark in the middle. */
 const HeaderCentered = () => <HeaderRow mark={47} />
 
-/** N14: a thin strip, the wordmark with a wide search and the phone, a filled menu bar. */
+/** N14 as it is drawn today: a thin strip, the wordmark with a wide search and the phone, a filled menu bar. */
 function HeaderCatalog() {
   return (
     <>
-      <rect x={1} y={2} width={110} height={4} rx={1} className="fill-current opacity-10" />
-      <rect x={6} y={11} width={16} height={6} rx={1.5} className="fill-current opacity-70" />
+      <HeaderFrame />
+      <rect x={4} y={6} width={104} height={2.5} rx={1} className="fill-current opacity-25" />
+      <rect x={6} y={11.5} width={14} height={5} rx={1.5} className="fill-current opacity-70" />
       <rect
-        x={28}
-        y={10}
+        x={24}
+        y={11}
         width={52}
-        height={8}
+        height={6}
         rx={3}
         className="fill-none stroke-current opacity-50"
       />
-      <rect x={86} y={11} width={20} height={6} rx={1.5} className="fill-current opacity-40" />
-      <rect x={1} y={22} width={110} height={8} rx={1.5} className="fill-current opacity-70" />
+      <rect x={84} y={12} width={22} height={4} rx={1.5} className="fill-current opacity-40" />
+      <rect x={4} y={20} width={104} height={6} rx={1.5} className="fill-current opacity-70" />
     </>
   )
 }
