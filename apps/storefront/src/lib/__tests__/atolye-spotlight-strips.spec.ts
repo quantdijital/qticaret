@@ -87,15 +87,19 @@ describe("the featured product's slanted strips", () => {
 
   it("asks for an image as wide as a widened strip, and a phone's equal share", () => {
     const html = strips(["bir", "iki", "uc", "dort"].map(picture))
-    // 44vw × 2.75 / (2.75 + 3) from 1024 px; a quarter of a phone's screen
-    expect(html).toContain('sizes="(min-width: 1024px) 22vw, 25vw"')
+    // 53vw × 2.75 / (2.75 + 3) from 1024 px; a quarter of a tablet's screen, a third of a phone's
+    expect(html).toContain('sizes="(min-width: 1024px) 26vw, (min-width: 640px) 25vw, 34vw"')
+    // Three: 53vw × 2.75 / (2.75 + 2); a third below 1024 px
+    expect(strips(["bir", "iki", "uc"].map(picture))).toContain(
+      'sizes="(min-width: 1024px) 31vw, 34vw"'
+    )
   })
 
   it("draws one photograph as one straight strip, two and three as equal strips", () => {
     const one = strips([picture("bir")])
     expect(one).toContain('data-count="1"')
     expect(count(one, 'class="gf-strip bg-stage-2"')).toBe(1)
-    expect(one).toContain('sizes="(min-width: 1024px) 44vw, 100vw"')
+    expect(one).toContain('sizes="(min-width: 1024px) 53vw, 100vw"')
     expect(strips(["bir", "iki"].map(picture))).toContain('data-count="2"')
     expect(strips(["bir", "iki", "uc"].map(picture))).toContain('data-count="3"')
   })
@@ -156,7 +160,22 @@ describe("the strips' stylesheet", () => {
     const [focus] = rules(css, ".gf-strip:has(.gf-strip-link:focus-visible)")
     expect(focus?.around).toEqual(["@layer components", "@media (min-width: 64rem)"])
     expect(focus?.body).toBe("flex-grow: var(--strip-grow);")
-    expect(rules(css, ".gf-strip-link:focus-visible")[0]?.body).toContain("outline-offset: -4px;")
+    // The ring is a layer over the photograph (the link's outline lies under it), clear of the seams
+    expect(rules(css, ".gf-strip-link:focus-visible")[0]?.body).toBe("outline: none;")
+    const ring = rules(css, ".gf-strip-link:focus-visible::after")[0]?.body
+    expect(ring).toContain("position: absolute;")
+    expect(ring).toContain("inset: 4px calc(var(--strip-slant) + 4px);")
+    expect(ring).toContain("outline: 2px solid var(--color-focus);")
+  })
+
+  it("shows three strips on a phone's width, the third then ending the gallery straight", async () => {
+    const css = await buildAtolyeCss([])
+    const [hidden] = rules(css, ".gf-strip:nth-child(n + 4)")
+    expect(hidden?.around).toEqual(["@layer components", "@media (max-width: 39.99rem)"])
+    expect(hidden?.body).toBe("display: none;")
+    expect(rules(css, '.gf-strips[data-count="4"] .gf-strip:nth-child(3)')[0]?.body).toBe(
+      "clip-path: polygon(var(--strip-slant) 0, 100% 0, 100% 100%, 0 100%);"
+    )
   })
 
   it("snaps at once under reduced motion", async () => {

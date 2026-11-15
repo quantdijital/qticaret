@@ -4,17 +4,28 @@ import type { ImageView } from "@qticaret/ui"
 /** The most photographs the strips show: four still read as photographs beside the words. */
 export const STRIPS_MAX = 4
 
+/** The most a phone's width (below 640 px) shows; more would be slivers (spotlight.css). */
+export const STRIPS_PHONE_MAX = 3
+
 /** How far a strip under the pointer widens against the others (`--strip-grow`, spotlight.css). */
 const GROW = 2.75
+
+/** The gallery's share of the screen from 1024 px (7 of the stage's 12 columns), in vw. */
+const GALLERY = 53
 
 /**
  * The image's `sizes` for `count` strips: from 1024 px a widened strip's
  * share of the gallery's column (the image is drawn that wide, so it does
- * not jump as the strip widens); on a phone an equal share of the screen.
+ * not jump as the strip widens); below, an equal share of the screen, of
+ * the three a phone shows when there are more.
  */
 export function stripSizes(count: number): string {
-  const open = Math.ceil((44 * GROW) / (GROW + count - 1))
-  return `(min-width: 1024px) ${count > 1 ? open : 44}vw, ${Math.ceil(100 / count)}vw`
+  const open = Math.ceil((GALLERY * GROW) / (GROW + count - 1))
+  const wide = `(min-width: 1024px) ${count > 1 ? open : GALLERY}vw`
+  const share = (strips: number) => `${Math.ceil(100 / strips)}vw`
+  return count > STRIPS_PHONE_MAX
+    ? `${wide}, (min-width: 640px) ${share(count)}, ${share(STRIPS_PHONE_MAX)}`
+    : `${wide}, ${share(count)}`
 }
 
 /**

@@ -57,6 +57,15 @@
   .gf-strip + .gf-strip {
     margin-left: calc(var(--strip-gap) - var(--strip-slant));
   }
+  /* A phone's width shows three (`STRIPS_PHONE_MAX`): four upright strips there are slivers */
+  @media (max-width: 39.99rem) {
+    .gf-strip:nth-child(n + 4) {
+      display: none;
+    }
+    .gf-strips[data-count="4"] .gf-strip:nth-child(3) {
+      clip-path: polygon(var(--strip-slant) 0, 100% 0, 100% 100%, 0 100%);
+    }
+  }
 
   .gf-strip-link {
     position: absolute;
@@ -64,9 +73,19 @@
     display: block;
     overflow: hidden;
   }
-  /* Inside the strip: its slanted clip would cut a ring drawn outside it */
+  /*
+   * The ring is drawn by a layer over the photograph (the link's own outline
+   * would lie under it), inside the straight middle of the strip: its slanted
+   * clip would cut a ring drawn outside it or along the seams.
+   */
   .gf-strip-link:focus-visible {
-    outline-offset: -4px;
+    outline: none;
+  }
+  .gf-strip-link:focus-visible::after {
+    content: "";
+    position: absolute;
+    inset: 4px calc(var(--strip-slant) + 4px);
+    outline: 2px solid var(--color-focus);
   }
 
   .gf-strip-image {
