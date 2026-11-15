@@ -3,7 +3,15 @@ import type { BrandLinkView, BrandsPageView, Translate } from "@qticaret/ui"
 import { Container } from "./parts/Container"
 import { Trail } from "./parts/Trail"
 
-/** A brand as a filled tile: its logo on a white plate when it has one, its name; one link. */
+/**
+ * A brand as a filled tile: its logo on a white plate when it has one, its
+ * name; one link. The plate is 40 px tall and as wide as its logo at that
+ * height, from a 40 px square (a square logo's, as before) up to 120 px
+ * (a 3:1 wordmark whole); a logo wider still keeps its ratio, lower. The
+ * name keeps its line first: where the tile is narrow the plate gives way
+ * down to the square, its logo smaller, and only then does the name wrap
+ * (as it did beside the square).
+ */
 function BrandTile({ brand }: { brand: BrandLinkView }) {
   return (
     <a
@@ -11,15 +19,23 @@ function BrandTile({ brand }: { brand: BrandLinkView }) {
       className="flex min-h-16 min-w-0 items-center gap-3 rounded-media gf-pane p-3 transition-colors duration-(--dur-micro) hover:bg-paper-3"
     >
       {brand.logo && (
-        <span className="gf-logo-plate flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-inner bg-field">
+        <span className="gf-logo-plate flex h-10 max-w-30 min-w-10 items-center justify-center overflow-hidden rounded-inner bg-field">
           <ResponsiveImage
             image={brand.logo}
-            sizes="40px"
-            className="max-h-10 max-w-10 object-contain"
+            sizes="120px"
+            className="max-h-10 max-w-full object-contain"
           />
         </span>
       )}
-      <span className="min-w-0 text-md font-semibold break-words">{brand.label}</span>
+      <span
+        className={
+          brand.logo
+            ? "max-w-[calc(100%-3.25rem)] min-w-0 shrink-0 text-md font-semibold break-words"
+            : "min-w-0 text-md font-semibold break-words"
+        }
+      >
+        {brand.label}
+      </span>
     </a>
   )
 }
