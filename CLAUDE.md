@@ -27,6 +27,7 @@ Güncel faz ve görevler: `PROGRESS.md`
 - `pnpm --filter backend test:unit` / `test:integration:http` / `test:integration:modules`
 - `pnpm lint` / `pnpm typecheck` / `pnpm format`
 - `pnpm verify:changed` — PR öncesi: değişen paketlerin typecheck/lint/test'i + değişen dosyalarda prettier (`origin/dev`'e göre)
+- `pnpm lock:presets` — hazır görünüm kilidini bilerek yeniden yaz (docs/tema/bilesen-standardi.md §7; PR'da etkilenen görünümleri yaz)
 - `pnpm --filter backend medusa db:migrate` — migration
 - `pnpm --filter backend medusa db:generate <modul>` — migration üret
 
