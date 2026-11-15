@@ -30,6 +30,8 @@ export function VariantField<T extends VariantSectionType>({
       <ToggleGroup
         type="single"
         variant="outline"
+        // Apart, each choice keeps its whole edge (joined, a third one alone on its row lost its left side)
+        spacing={2}
         aria-label={t("storefront.editor.panel.variant")}
         aria-describedby={`${id}-hint`}
         value={value}
