@@ -11,7 +11,7 @@ import type { StyleKitField } from "@qticaret/types"
  */
 export const STYLE_KIT_READY: Readonly<Record<StyleKitField, boolean>> = {
   // S1, adr/0067 step 1: menu items (`data-menu-style`)
-  menu_style: false,
+  menu_style: true,
   // S2, step 2: floating surfaces' shadow (`data-shadow`)
   shadow: false,
   // S3, step 3: chips, tabs, option buttons (`data-chip-style`)

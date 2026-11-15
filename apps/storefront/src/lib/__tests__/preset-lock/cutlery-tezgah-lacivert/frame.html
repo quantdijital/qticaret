@@ -132,7 +132,7 @@
         <a
           href="/hesap/favoriler"
           aria-label="Favoriler"
-          class="gf-icon-btn flex-col gap-0.5 px-2 text-2xs font-semibold leading-none max-lg:size-11 lg:min-w-16 lg:py-1"
+          class="gf-icon-btn gf-tool flex-col gap-0.5 px-2 text-2xs font-semibold leading-none max-lg:size-11 lg:min-w-16 lg:py-1"
         >
           <svg
             width="24"
@@ -145,7 +145,7 @@
         <a
           href="/sepet"
           aria-label="Sepet, 0 ürün"
-          class="gf-icon-btn flex-col gap-0.5 px-2 text-2xs font-semibold leading-none max-lg:size-11 lg:min-w-16 lg:py-1 -mr-2 lg:mr-0"
+          class="gf-icon-btn gf-tool flex-col gap-0.5 px-2 text-2xs font-semibold leading-none max-lg:size-11 lg:min-w-16 lg:py-1 -mr-2 lg:mr-0"
         >
           <svg
             width="24"
@@ -201,7 +201,7 @@
               type="button"
               aria-expanded="false"
               aria-controls="«id»"
-              class="gf-on-bar group inline-flex min-h-11 items-center gap-2 rounded-button bg-paper-2 px-4 text-sm font-bold whitespace-nowrap text-text transition-colors duration-(--dur-micro) hover:bg-paper-3 aria-expanded:bg-paper-3 aria-expanded:shadow-[inset_0_-2px_0_currentColor]"
+              class="gf-on-bar gf-bar-button group inline-flex min-h-11 items-center gap-2 rounded-button px-4 text-sm font-bold whitespace-nowrap text-text transition-colors duration-(--dur-micro)"
             >
               <svg
                 width="24"
@@ -210,7 +210,9 @@
                 class="lucide lucide-layout-grid size-4"
                 aria-hidden="true"
               />
-              Kategoriler
+              <span class="gf-menu-word" data-text="Kategoriler">
+                Kategoriler
+              </span>
               <svg
                 width="24"
                 height="24"
@@ -230,7 +232,7 @@
                   <a
                     href="/kategori/el-yapimi-caki"
                     data-cm-top="0"
-                    class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text font-semibold "
+                    class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text font-semibold"
                     aria-expanded="false"
                     aria-controls="«id»-0"
                   >
@@ -250,7 +252,7 @@
                         />
                       </picture>
                     </span>
-                    <span class="flex-1">
+                    <span class="gf-menu-word flex-1">
                       El Yapımı Çakılar
                     </span>
                     <svg
@@ -271,7 +273,7 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/el-yapimi-caki/damascus-celik-bicaklar"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text"
                         >
                           <span
                             class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-9"
@@ -294,7 +296,7 @@
                               />
                             </picture>
                           </span>
-                          <span class="flex-1">
+                          <span class="gf-menu-word flex-1">
                             Damascus Çelik
                           </span>
                         </a>
@@ -302,7 +304,7 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/el-yapimi-caki/elmax-cakilar"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text"
                         >
                           <span
                             class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-9"
@@ -320,7 +322,7 @@
                               />
                             </picture>
                           </span>
-                          <span class="flex-1">
+                          <span class="gf-menu-word flex-1">
                             Elmax Çakılar
                           </span>
                         </a>
@@ -328,7 +330,7 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/el-yapimi-caki/n690-cakilar"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text"
                         >
                           <span
                             class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-9"
@@ -351,7 +353,7 @@
                               />
                             </picture>
                           </span>
-                          <span class="flex-1">
+                          <span class="gf-menu-word flex-1">
                             N690 Çakılar
                           </span>
                         </a>
@@ -359,7 +361,7 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/el-yapimi-caki/geyik-boynuzu-sapli-cakilar"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text"
                         >
                           <span
                             class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-9"
@@ -377,7 +379,7 @@
                               />
                             </picture>
                           </span>
-                          <span class="flex-1">
+                          <span class="gf-menu-word flex-1">
                             Geyik Boynuzu Saplı
                           </span>
                         </a>
@@ -385,7 +387,7 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/el-yapimi-caki/kemik-sapli-cakilar"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text"
                         >
                           <span
                             class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-9"
@@ -408,7 +410,7 @@
                               />
                             </picture>
                           </span>
-                          <span class="flex-1">
+                          <span class="gf-menu-word flex-1">
                             Kemik Saplı
                           </span>
                         </a>
@@ -416,7 +418,7 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/el-yapimi-caki/epoksi-cakilar"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text"
                         >
                           <span
                             class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-9"
@@ -434,7 +436,7 @@
                               />
                             </picture>
                           </span>
-                          <span class="flex-1">
+                          <span class="gf-menu-word flex-1">
                             Epoksi Saplı
                           </span>
                         </a>
@@ -442,9 +444,11 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/el-yapimi-caki"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text font-semibold text-text underline"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text font-semibold text-text underline"
                         >
-                          Tümünü gör: El Yapımı Çakılar
+                          <span class="gf-menu-word">
+                            Tümünü gör: El Yapımı Çakılar
+                          </span>
                         </a>
                       </li>
                     </ul>
@@ -453,7 +457,7 @@
                 <li>
                   <a
                     href="/kategori/av-bicaklari"
-                    class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text font-semibold "
+                    class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text font-semibold"
                   >
                     <span
                       class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-10"
@@ -476,7 +480,7 @@
                         />
                       </picture>
                     </span>
-                    <span class="flex-1">
+                    <span class="gf-menu-word flex-1">
                       Av Bıçakları
                     </span>
                   </a>
@@ -485,7 +489,7 @@
                   <a
                     href="/kategori/outdoor-ve-kamp"
                     data-cm-top="2"
-                    class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text font-semibold "
+                    class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text font-semibold"
                     aria-expanded="false"
                     aria-controls="«id»-2"
                   >
@@ -505,7 +509,7 @@
                         />
                       </picture>
                     </span>
-                    <span class="flex-1">
+                    <span class="gf-menu-word flex-1">
                       Outdoor ve Kamp
                     </span>
                     <svg
@@ -526,7 +530,7 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/outdoor-ve-kamp/kamp-bicaklari"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text"
                         >
                           <span
                             class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-9"
@@ -549,7 +553,7 @@
                               />
                             </picture>
                           </span>
-                          <span class="flex-1">
+                          <span class="gf-menu-word flex-1">
                             Kamp Bıçakları
                           </span>
                         </a>
@@ -557,7 +561,7 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/outdoor-ve-kamp/kamp-baltalari"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text"
                         >
                           <span
                             class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-9"
@@ -575,7 +579,7 @@
                               />
                             </picture>
                           </span>
-                          <span class="flex-1">
+                          <span class="gf-menu-word flex-1">
                             Kamp Baltaları
                           </span>
                         </a>
@@ -583,9 +587,11 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/outdoor-ve-kamp"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text font-semibold text-text underline"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text font-semibold text-text underline"
                         >
-                          Tümünü gör: Outdoor ve Kamp
+                          <span class="gf-menu-word">
+                            Tümünü gör: Outdoor ve Kamp
+                          </span>
                         </a>
                       </li>
                     </ul>
@@ -595,7 +601,7 @@
                   <a
                     href="/kategori/mutfak-ve-sef-bicaklari"
                     data-cm-top="3"
-                    class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text font-semibold "
+                    class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text font-semibold"
                     aria-expanded="false"
                     aria-controls="«id»-3"
                   >
@@ -620,7 +626,7 @@
                         />
                       </picture>
                     </span>
-                    <span class="flex-1">
+                    <span class="gf-menu-word flex-1">
                       Mutfak ve Şef Bıçakları
                     </span>
                     <svg
@@ -641,7 +647,7 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/mutfak-ve-sef-bicaklari/sef-bicaklari"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text"
                         >
                           <span
                             class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-9"
@@ -659,7 +665,7 @@
                               />
                             </picture>
                           </span>
-                          <span class="flex-1">
+                          <span class="gf-menu-word flex-1">
                             Şef Bıçakları
                           </span>
                         </a>
@@ -667,7 +673,7 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/mutfak-ve-sef-bicaklari/mutfak-bicak-setleri"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text"
                         >
                           <span
                             class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-9"
@@ -690,7 +696,7 @@
                               />
                             </picture>
                           </span>
-                          <span class="flex-1">
+                          <span class="gf-menu-word flex-1">
                             Mutfak Bıçak Setleri
                           </span>
                         </a>
@@ -698,7 +704,7 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/mutfak-ve-sef-bicaklari/kasap-bicaklari"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text"
                         >
                           <span
                             class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-9"
@@ -716,7 +722,7 @@
                               />
                             </picture>
                           </span>
-                          <span class="flex-1">
+                          <span class="gf-menu-word flex-1">
                             Kasap Bıçakları
                           </span>
                         </a>
@@ -724,9 +730,11 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/mutfak-ve-sef-bicaklari"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text font-semibold text-text underline"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text font-semibold text-text underline"
                         >
-                          Tümünü gör: Mutfak ve Şef Bıçakları
+                          <span class="gf-menu-word">
+                            Tümünü gör: Mutfak ve Şef Bıçakları
+                          </span>
                         </a>
                       </li>
                     </ul>
@@ -735,7 +743,7 @@
                 <li>
                   <a
                     href="/kategori/mutfak-sef-serisi"
-                    class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text font-semibold "
+                    class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text font-semibold"
                   >
                     <span
                       class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-10"
@@ -758,7 +766,7 @@
                         />
                       </picture>
                     </span>
-                    <span class="flex-1">
+                    <span class="gf-menu-word flex-1">
                       Mutfak &amp; Şef Serisi
                     </span>
                   </a>
@@ -767,7 +775,7 @@
                   <a
                     href="/kategori/kiliclar"
                     data-cm-top="5"
-                    class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text font-semibold "
+                    class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text font-semibold"
                     aria-expanded="false"
                     aria-controls="«id»-5"
                   >
@@ -787,7 +795,7 @@
                         />
                       </picture>
                     </span>
-                    <span class="flex-1">
+                    <span class="gf-menu-word flex-1">
                       Kılıçlar
                     </span>
                     <svg
@@ -808,7 +816,7 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/kiliclar/kilic-modelleri"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text"
                         >
                           <span
                             class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-9"
@@ -831,7 +839,7 @@
                               />
                             </picture>
                           </span>
-                          <span class="flex-1">
+                          <span class="gf-menu-word flex-1">
                             Kılıç Modelleri
                           </span>
                         </a>
@@ -839,9 +847,11 @@
                       <li class="break-inside-avoid">
                         <a
                           href="/kategori/kiliclar"
-                          class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text font-semibold text-text underline"
+                          class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text font-semibold text-text underline"
                         >
-                          Tümünü gör: Kılıçlar
+                          <span class="gf-menu-word">
+                            Tümünü gör: Kılıçlar
+                          </span>
                         </a>
                       </li>
                     </ul>
@@ -850,7 +860,7 @@
                 <li>
                   <a
                     href="/kategori/ozel-koleksiyon"
-                    class="flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text font-semibold "
+                    class="gf-menu-row flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:text-text font-semibold"
                   >
                     <span
                       class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-10"
@@ -868,7 +878,7 @@
                         />
                       </picture>
                     </span>
-                    <span class="flex-1">
+                    <span class="gf-menu-word flex-1">
                       Özel Koleksiyon
                     </span>
                   </a>
@@ -893,10 +903,12 @@
                     id="radix-«id»-trigger-/kategori/el-yapimi-caki"
                     data-state="closed"
                     aria-expanded="false"
-                    class="gf-aisle-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text px-2 xl:px-3 data-[state=open]:bg-paper-2 data-[state=open]:text-text data-[state=open]:shadow-[inset_0_-2px_0_currentColor]"
+                    class="gf-menu-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap transition-colors duration-(--dur-micro) gf-menu-item--bar px-2 xl:px-3"
                     data-radix-collection-item=""
                   >
-                    El Yapımı Çakılar
+                    <span class="gf-menu-word" data-text="El Yapımı Çakılar">
+                      El Yapımı Çakılar
+                    </span>
                     <svg
                       width="24"
                       height="24"
@@ -943,7 +955,7 @@
                               />
                             </picture>
                           </span>
-                          <span>
+                          <span class="gf-menu-word">
                             Damascus Çelik
                           </span>
                           <span class="gf-menu-count">
@@ -978,7 +990,7 @@
                               />
                             </picture>
                           </span>
-                          <span>
+                          <span class="gf-menu-word">
                             Elmax Çakılar
                           </span>
                           <span class="gf-menu-count">
@@ -1018,7 +1030,7 @@
                               />
                             </picture>
                           </span>
-                          <span>
+                          <span class="gf-menu-word">
                             N690 Çakılar
                           </span>
                           <span class="gf-menu-count">
@@ -1053,7 +1065,7 @@
                               />
                             </picture>
                           </span>
-                          <span>
+                          <span class="gf-menu-word">
                             Geyik Boynuzu Saplı
                           </span>
                           <span class="gf-menu-count">
@@ -1093,7 +1105,7 @@
                               />
                             </picture>
                           </span>
-                          <span>
+                          <span class="gf-menu-word">
                             Kemik Saplı
                           </span>
                           <span class="gf-menu-count">
@@ -1128,7 +1140,7 @@
                               />
                             </picture>
                           </span>
-                          <span>
+                          <span class="gf-menu-word">
                             Epoksi Saplı
                           </span>
                           <span class="gf-menu-count">
@@ -1147,7 +1159,7 @@
                       class="gf-drop-row gf-drop-all"
                       data-radix-collection-item=""
                     >
-                      <span aria-hidden="true">
+                      <span class="gf-menu-word" aria-hidden="true">
                         Tümünü gör
                       </span>
                       <span class="sr-only">
@@ -1167,10 +1179,12 @@
                 <li data-aisle-item="">
                   <a
                     href="/kategori/av-bicaklari"
-                    class="gf-aisle-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text px-2 xl:px-3 data-[state=open]:bg-paper-2 data-[state=open]:text-text data-[state=open]:shadow-[inset_0_-2px_0_currentColor]"
+                    class="gf-menu-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap transition-colors duration-(--dur-micro) gf-menu-item--bar px-2 xl:px-3"
                     data-radix-collection-item=""
                   >
-                    Av Bıçakları
+                    <span class="gf-menu-word" data-text="Av Bıçakları">
+                      Av Bıçakları
+                    </span>
                   </a>
                 </li>
                 <li data-aisle-item="" class="relative">
@@ -1178,10 +1192,12 @@
                     id="radix-«id»-trigger-/kategori/outdoor-ve-kamp"
                     data-state="closed"
                     aria-expanded="false"
-                    class="gf-aisle-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text px-2 xl:px-3 data-[state=open]:bg-paper-2 data-[state=open]:text-text data-[state=open]:shadow-[inset_0_-2px_0_currentColor]"
+                    class="gf-menu-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap transition-colors duration-(--dur-micro) gf-menu-item--bar px-2 xl:px-3"
                     data-radix-collection-item=""
                   >
-                    Outdoor ve Kamp
+                    <span class="gf-menu-word" data-text="Outdoor ve Kamp">
+                      Outdoor ve Kamp
+                    </span>
                     <svg
                       width="24"
                       height="24"
@@ -1228,7 +1244,7 @@
                               />
                             </picture>
                           </span>
-                          <span>
+                          <span class="gf-menu-word">
                             Kamp Bıçakları
                           </span>
                           <span class="gf-menu-count">
@@ -1263,7 +1279,7 @@
                               />
                             </picture>
                           </span>
-                          <span>
+                          <span class="gf-menu-word">
                             Kamp Baltaları
                           </span>
                           <span class="gf-menu-count">
@@ -1282,7 +1298,7 @@
                       class="gf-drop-row gf-drop-all"
                       data-radix-collection-item=""
                     >
-                      <span aria-hidden="true">
+                      <span class="gf-menu-word" aria-hidden="true">
                         Tümünü gör
                       </span>
                       <span class="sr-only">
@@ -1304,10 +1320,12 @@
                     id="radix-«id»-trigger-/kategori/mutfak-ve-sef-bicaklari"
                     data-state="closed"
                     aria-expanded="false"
-                    class="gf-aisle-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text px-2 xl:px-3 data-[state=open]:bg-paper-2 data-[state=open]:text-text data-[state=open]:shadow-[inset_0_-2px_0_currentColor]"
+                    class="gf-menu-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap transition-colors duration-(--dur-micro) gf-menu-item--bar px-2 xl:px-3"
                     data-radix-collection-item=""
                   >
-                    Mutfak ve Şef Bıçakları
+                    <span class="gf-menu-word" data-text="Mutfak ve Şef Bıçakları">
+                      Mutfak ve Şef Bıçakları
+                    </span>
                     <svg
                       width="24"
                       height="24"
@@ -1349,7 +1367,7 @@
                               />
                             </picture>
                           </span>
-                          <span>
+                          <span class="gf-menu-word">
                             Şef Bıçakları
                           </span>
                           <span class="gf-menu-count">
@@ -1389,7 +1407,7 @@
                               />
                             </picture>
                           </span>
-                          <span>
+                          <span class="gf-menu-word">
                             Mutfak Bıçak Setleri
                           </span>
                           <span class="gf-menu-count">
@@ -1424,7 +1442,7 @@
                               />
                             </picture>
                           </span>
-                          <span>
+                          <span class="gf-menu-word">
                             Kasap Bıçakları
                           </span>
                           <span class="gf-menu-count">
@@ -1443,7 +1461,7 @@
                       class="gf-drop-row gf-drop-all"
                       data-radix-collection-item=""
                     >
-                      <span aria-hidden="true">
+                      <span class="gf-menu-word" aria-hidden="true">
                         Tümünü gör
                       </span>
                       <span class="sr-only">
@@ -1463,10 +1481,12 @@
                 <li data-aisle-item="">
                   <a
                     href="/kategori/mutfak-sef-serisi"
-                    class="gf-aisle-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text px-2 xl:px-3 data-[state=open]:bg-paper-2 data-[state=open]:text-text data-[state=open]:shadow-[inset_0_-2px_0_currentColor]"
+                    class="gf-menu-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap transition-colors duration-(--dur-micro) gf-menu-item--bar px-2 xl:px-3"
                     data-radix-collection-item=""
                   >
-                    Mutfak &amp; Şef Serisi
+                    <span class="gf-menu-word" data-text="Mutfak &amp; Şef Serisi">
+                      Mutfak &amp; Şef Serisi
+                    </span>
                   </a>
                 </li>
                 <li data-aisle-item="" class="relative">
@@ -1474,10 +1494,12 @@
                     id="radix-«id»-trigger-/kategori/kiliclar"
                     data-state="closed"
                     aria-expanded="false"
-                    class="gf-aisle-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text px-2 xl:px-3 data-[state=open]:bg-paper-2 data-[state=open]:text-text data-[state=open]:shadow-[inset_0_-2px_0_currentColor]"
+                    class="gf-menu-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap transition-colors duration-(--dur-micro) gf-menu-item--bar px-2 xl:px-3"
                     data-radix-collection-item=""
                   >
-                    Kılıçlar
+                    <span class="gf-menu-word" data-text="Kılıçlar">
+                      Kılıçlar
+                    </span>
                     <svg
                       width="24"
                       height="24"
@@ -1524,7 +1546,7 @@
                               />
                             </picture>
                           </span>
-                          <span>
+                          <span class="gf-menu-word">
                             Kılıç Modelleri
                           </span>
                           <span class="gf-menu-count">
@@ -1543,7 +1565,7 @@
                       class="gf-drop-row gf-drop-all"
                       data-radix-collection-item=""
                     >
-                      <span aria-hidden="true">
+                      <span class="gf-menu-word" aria-hidden="true">
                         Tümünü gör
                       </span>
                       <span class="sr-only">
@@ -1563,10 +1585,12 @@
                 <li data-aisle-item="">
                   <a
                     href="/kategori/ozel-koleksiyon"
-                    class="gf-aisle-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text px-2 xl:px-3 data-[state=open]:bg-paper-2 data-[state=open]:text-text data-[state=open]:shadow-[inset_0_-2px_0_currentColor]"
+                    class="gf-menu-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap transition-colors duration-(--dur-micro) gf-menu-item--bar px-2 xl:px-3"
                     data-radix-collection-item=""
                   >
-                    Özel Koleksiyon
+                    <span class="gf-menu-word" data-text="Özel Koleksiyon">
+                      Özel Koleksiyon
+                    </span>
                   </a>
                 </li>
                 <li data-aisle-more="" class="invisible relative" aria-hidden="true">
@@ -1574,11 +1598,13 @@
                     id="radix-«id»-trigger-more"
                     data-state="closed"
                     aria-expanded="false"
-                    class="gf-aisle-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text px-2 xl:px-3 data-[state=open]:bg-paper-2 data-[state=open]:text-text data-[state=open]:shadow-[inset_0_-2px_0_currentColor]"
+                    class="gf-menu-item group inline-flex min-h-11 items-center gap-1 rounded-button text-sm font-semibold whitespace-nowrap transition-colors duration-(--dur-micro) gf-menu-item--bar px-2 xl:px-3"
                     tabindex="-1"
                     data-radix-collection-item=""
                   >
-                    Daha fazla
+                    <span class="gf-menu-word" data-text="Daha fazla">
+                      Daha fazla
+                    </span>
                     <svg
                       width="24"
                       height="24"
@@ -1600,7 +1626,7 @@
             <a
               href="/hesap"
               aria-label="Hesabım"
-              class="gf-on-bar gf-icon-btn text-text transition-colors duration-(--dur-micro) hover:bg-paper-2"
+              class="gf-on-bar gf-icon-btn gf-tool text-text transition-colors duration-(--dur-micro)"
             >
               <svg
                 width="24"
@@ -1613,7 +1639,7 @@
             <a
               href="/hesap/favoriler"
               aria-label="Favoriler"
-              class="gf-on-bar gf-icon-btn text-text transition-colors duration-(--dur-micro) hover:bg-paper-2"
+              class="gf-on-bar gf-icon-btn gf-tool text-text transition-colors duration-(--dur-micro)"
             >
               <svg
                 width="24"
@@ -1626,7 +1652,7 @@
             <a
               href="/sepet"
               aria-label="Sepet, 0 ürün"
-              class="gf-on-bar gf-icon-btn text-text transition-colors duration-(--dur-micro) hover:bg-paper-2 gap-2 px-2 text-sm font-semibold [&amp;_.gf-count]:right-auto [&amp;_.gf-count]:left-6 -mr-2 lg:mr-0"
+              class="gf-on-bar gf-icon-btn gf-tool text-text transition-colors duration-(--dur-micro) gap-2 px-2 text-sm font-semibold [&amp;_.gf-count]:right-auto [&amp;_.gf-count]:left-6 -mr-2 lg:mr-0"
             >
               <svg
                 width="24"

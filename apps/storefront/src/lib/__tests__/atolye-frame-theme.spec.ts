@@ -61,7 +61,9 @@ describe("the theme's frame", () => {
         : category
     )
     const html = renderFrame(atolyeTheme, shopFixture({ categories }))
-    expect(html).toMatch(/<button[^>]*aria-expanded="false"[^>]*>Çakılar/)
+    expect(html).toMatch(
+      /<button[^>]*aria-expanded="false"[^>]*><span class="gf-menu-word"[^>]*>Çakılar/
+    )
     expect(html).toContain('href="/kategori/cakilar/sabit"')
     // The top category's own picture stays in the phone's sheet, not in the dropdown
     expect(html).not.toMatch(/<a href="\/kategori\/cakilar" tabindex="-1" aria-hidden="true"/)
@@ -73,7 +75,7 @@ describe("the theme's frame", () => {
     expect(html).toContain('href="/kategori/cakilar/katlanir"')
     // The dropdown's last row reads "Tümünü gör"; a screen reader hears it whole (K-21)
     expect(html).toMatch(
-      /<a href="\/kategori\/cakilar" class="gf-drop-row gf-drop-all"[^>]*><span aria-hidden="true">Tümünü gör<\/span><span class="sr-only">Tümünü gör: Çakılar<\/span>/
+      /<a href="\/kategori\/cakilar" class="gf-drop-row gf-drop-all"[^>]*><span class="gf-menu-word" aria-hidden="true">Tümünü gör<\/span><span class="sr-only">Tümünü gör: Çakılar<\/span>/
     )
     expect(html).toContain("Örnek Atölye</span>")
   })
