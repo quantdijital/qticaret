@@ -164,6 +164,14 @@ describe("the footer's own settings", () => {
     expect(left).toContain("bottom-[calc(5rem+env(safe-area-inset-bottom))]")
     expect(left).toContain("rounded-inner")
     expect(left).toContain("max-lg:hidden")
+    // Inside the 48 px gutter from 1024 px: a 40 px face 4 px from the edge (K-10)
+    expect(right).toContain("lg:size-10")
+    expect(right).toContain("lg:right-1")
+    // One way up: the footer line's link goes where the button shows
+    const link = /<a href="#top"[^>]*>/
+    expect(renderFrame(atolyeTheme, shopFixture())).toMatch(link)
+    expect(right).not.toMatch(link)
+    expect(left).toMatch(/<a href="#top" class="lg:hidden /)
   })
 
   it("leaves the button out while the cookie question waits", () => {
