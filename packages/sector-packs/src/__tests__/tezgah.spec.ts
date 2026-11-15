@@ -18,7 +18,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     expect(read("tezgah")).toMatchObject({
       pack: "cutlery",
       code: "tezgah",
-      version: 2,
+      version: 3,
       theme: "atolye",
       name: "Tezgâh",
       tone: "light",
@@ -99,7 +99,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
   })
 
   it("draws the catalog header on a graphite bar and fills the footer", () => {
-    const { header, footer, product, category } = read("tezgah").layout
+    const { header, footer } = read("tezgah").layout
     expect(header).toEqual([
       expect.objectContaining({
         id: "mainheader",
@@ -124,7 +124,33 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
       back_to_top_shape: "square",
       back_to_top_mobile: true,
     })
-    expect([product, category]).toEqual([[], []])
+  })
+
+  it("ends a product page on a sliding related rail and a category page on the trust strip", () => {
+    const { product, category } = read("tezgah").layout
+    const rail = (read("tezgah").layout.home ?? []).find((each) => each.id === "yenirafi")
+    expect(product).toEqual([
+      expect.objectContaining({
+        id: "benzerurunler",
+        type: "related_products",
+        ...ALWAYS,
+        variant: "carousel",
+        source: { kind: "same_category" },
+        card_variant: null,
+        // The tabbed rail's kit: square arrows by the heading, no autoplay
+        scroller: rail?.["scroller"],
+      }),
+    ])
+    expect(product?.[0]?.["scroller"]).toMatchObject({ arrow_position: "head", autoplay: "off" })
+    expect(category).toEqual([
+      expect.objectContaining({ type: "trust_badges", variant: "lined", placement: "bottom" }),
+    ])
+  })
+
+  it("draws its boxes as lines on the page ground", () => {
+    for (const code of CODES) {
+      expect(read(code).theme_settings["surface_style"]).toBe("lined")
+    }
   })
 
   it("keeps its words plain: no arrows, no capitalised line above a heading", () => {

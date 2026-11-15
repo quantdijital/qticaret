@@ -5,7 +5,7 @@ import { TrustIcon } from "../parts/TrustIcon"
 /** One promise in a compact row: its icon in a round chip, the title, its line. */
 function Fact({ badge }: { badge: TrustBadgeView }) {
   return (
-    <li className="flex items-center gap-3 rounded-media bg-paper-2 p-3">
+    <li className="flex items-center gap-3 rounded-media gf-box p-3">
       <span className="flex size-9 shrink-0 items-center justify-center rounded-pill bg-paper">
         <TrustIcon icon={badge.icon} className="size-5" />
       </span>
@@ -56,7 +56,7 @@ export function Assurances({ view, t }: { view: ProductPageView; t: Translate })
   return (
     <section
       aria-labelledby="teslimat"
-      className="flex flex-col gap-4 rounded-media bg-paper-2 p-4 lg:p-5"
+      className="flex flex-col gap-4 rounded-media gf-box p-4 lg:p-5"
     >
       <h2 id="teslimat" className="text-md tracking-[-0.01em]">
         {t("product.delivery")}

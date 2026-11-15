@@ -1,4 +1,5 @@
 import { BadgeCheck } from "lucide-react"
+import { cn } from "@qticaret/ui/lib/utils"
 import type { RatingBarView, ReviewFilterView, ShopRatingView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { fillOf } from "../parts/FreeShippingMeter"
@@ -141,11 +142,11 @@ export function Reviews({ section, t }: { section: Of<"reviews">; t: Translate }
           )}
           {reviews.length > 0 && (
             <ul
-              className={
-                summary
-                  ? "grid items-start gap-(--gap-columns) md:grid-cols-[repeat(3,minmax(0,1fr))] lg:col-span-8"
-                  : "grid items-start gap-(--gap-columns) md:grid-cols-[repeat(3,minmax(0,1fr))] lg:col-span-12"
-              }
+              // A phone slides the reviews sideways, the next one peeking, instead of a long column (third audit Z-08)
+              className={cn(
+                "gf-rail grid items-start gap-(--gap-columns) max-md:-mx-(--gutter) max-md:auto-cols-[85%] max-md:grid-flow-col max-md:overflow-x-auto max-md:scroll-px-(--gutter) max-md:px-(--gutter) max-md:py-1 md:grid-cols-[repeat(3,minmax(0,1fr))]",
+                summary ? "lg:col-span-8" : "lg:col-span-12"
+              )}
             >
               {reviews.map((review, index) => (
                 <li

@@ -4,6 +4,7 @@ import {
   CARD_SOLD_OUT_ROWS,
   CARD_VARIANTS,
   SECTION_SPACINGS,
+  SURFACE_STYLES,
 } from "@qticaret/types"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { StorefrontBackground } from "@/theme/storefront"
@@ -43,6 +44,8 @@ export const HEADER_LAYOUTS = ["centered", "left"] as const
 export const BUTTON_SHAPES = ["pill", "rounded", "square"] as const
 /** The gap between sections, theme-wide (Tezgâh audit K-11): the contract's list, `normal` the theme's own. */
 export { SECTION_SPACINGS }
+/** How the theme's boxes stand (Tezgâh audit Z-04): the contract's list, `filled` today's tone. */
+export { SURFACE_STYLES }
 
 export type HeadingFont = (typeof HEADING_FONTS)[number]
 export type BodyFont = (typeof BODY_FONTS)[number]
@@ -76,6 +79,7 @@ export interface ThemeSettings {
   header: { layout: (typeof HEADER_LAYOUTS)[number]; sticky: boolean }
   buttons: (typeof BUTTON_SHAPES)[number]
   section_spacing: (typeof SECTION_SPACINGS)[number]
+  surface_style: (typeof SURFACE_STYLES)[number]
 }
 
 export const THEME_SECTION = "theme"
@@ -119,6 +123,7 @@ export const GRAFIT_THEME: ThemeChoices = {
   header: { layout: "left", sticky: true },
   buttons: "pill",
   section_spacing: "normal",
+  surface_style: "filled",
 }
 
 /**

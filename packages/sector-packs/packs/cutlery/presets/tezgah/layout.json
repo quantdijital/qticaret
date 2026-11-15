@@ -331,6 +331,41 @@
       "text": "Yeni gelen modelleri ve indirimleri e-postayla haber veririz."
     }
   ],
-  "product": [],
-  "category": []
+  "product": [
+    {
+      "id": "benzerurunler",
+      "type": "related_products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Benzer ürünler",
+      "source": { "kind": "same_category" },
+      "limit": 12,
+      "card_variant": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "square",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "off"
+      }
+    }
+  ],
+  "category": [
+    {
+      "id": "kategoriguvence",
+      "type": "trust_badges",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "lined",
+      "placement": "bottom"
+    }
+  ]
 }

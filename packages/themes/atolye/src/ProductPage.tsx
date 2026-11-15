@@ -127,7 +127,7 @@ export function ProductPage({
               />
               {/* Before the purchase, beside the buy form (MSY md. 5/1-h, 6/2): the storefront's words */}
               {view.withdrawalNote && (
-                <p className="flex items-start gap-3 rounded-media bg-paper-2 p-4 text-sm font-semibold">
+                <p className="flex items-start gap-3 rounded-media gf-box p-4 text-sm font-semibold">
                   <Info className="size-5 shrink-0" aria-hidden="true" strokeWidth={2} />
                   {view.withdrawalNote}
                 </p>

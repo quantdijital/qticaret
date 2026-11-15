@@ -96,7 +96,7 @@ export function Empty({ view, t }: { view: ListingPageView; t: Translate }) {
   const help = view.search ?? null
   if (view.active.length > 0) {
     return (
-      <div className="flex flex-col items-start gap-5 rounded-tile bg-paper-2 p-6 lg:p-10">
+      <div className="flex flex-col items-start gap-5 rounded-tile gf-box p-6 lg:p-10">
         <p className="max-w-[48ch] text-title font-extrabold tracking-[-0.015em]">
           {t("listing.no_match")}
         </p>
@@ -113,7 +113,7 @@ export function Empty({ view, t }: { view: ListingPageView; t: Translate }) {
   const popular = help?.popular ?? []
   return (
     <div className="flex flex-col gap-(--space-2xl)">
-      <div className="flex flex-col items-start gap-5 rounded-tile bg-paper-2 p-6 lg:p-10">
+      <div className="flex flex-col items-start gap-5 rounded-tile gf-box p-6 lg:p-10">
         <p className="max-w-[48ch] text-title font-extrabold tracking-[-0.015em]">{words}</p>
         {help && <DidYouMean suggestions={help.suggestions} t={t} />}
         <p className="flex flex-wrap items-center gap-x-6 gap-y-3">

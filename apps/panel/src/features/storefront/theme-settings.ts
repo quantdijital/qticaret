@@ -22,6 +22,7 @@ export const themeValuesOf = (saved: ThemeChoices): ThemeValues => ({
   header: { ...saved.header },
   buttons: saved.buttons,
   section_spacing: saved.section_spacing,
+  surface_style: saved.surface_style,
 })
 
 /** Grafit as the form holds it: no colour of the shop's own, the theme's every default. */
@@ -39,6 +40,7 @@ export function isGrafit(values: ThemeValues): boolean {
     values.radius === g.radius &&
     values.buttons === g.buttons &&
     values.section_spacing === g.section_spacing &&
+    values.surface_style === g.surface_style &&
     (Object.keys(g.product_card) as (keyof ThemeValues["product_card"])[]).every(
       (key) => values.product_card[key] === g.product_card[key]
     ) &&

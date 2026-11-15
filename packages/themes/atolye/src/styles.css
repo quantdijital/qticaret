@@ -37,6 +37,7 @@
 @import "./marquee-options.css";
 @import "./card.css";
 @import "./catalog.css";
+@import "./surface.css";
 
 /*
  * The theme's values for the contract's names (shadcn's names, wired to
