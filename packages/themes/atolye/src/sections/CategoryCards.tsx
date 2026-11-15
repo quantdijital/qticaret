@@ -11,7 +11,11 @@ import { Container } from "../parts/Container"
 import { SectionHead } from "./SectionHead"
 
 /** The category cards' variants this theme draws (`drawnVariant`). */
-export const CATEGORY_VARIANTS = ["tiles", "linked"] as const satisfies readonly CategoriesVariant[]
+export const CATEGORY_VARIANTS = [
+  "tiles",
+  "linked",
+  "collage",
+] as const satisfies readonly CategoriesVariant[]
 
 /**
  * Cards in a row from 1024 px, the shop's choice; two from 640 px; one on a

@@ -8,7 +8,7 @@ import type {
 } from "@qticaret/types"
 import type { BannerSectionView } from "./banner-views"
 import type { CategoryCardView, CustomerPhotoView, ShopMarkView } from "./card-views"
-import type { CategoryCardsView } from "./category-card-views"
+import type { CategoryCardsView, CategoryCollageView } from "./category-card-views"
 import type { HeroCatalogView, PriceBandsSectionView } from "./catalog-views"
 import type {
   FeaturedProductSectionView,
@@ -106,6 +106,8 @@ export type HomeSectionView = {
        * their subcategories); a theme without that drawing draws the tiles.
        */
       linked?: CategoryCardsView | null
+      /** `collage`'s settings and cards; a theme without that drawing draws the tiles. */
+      collage?: CategoryCollageView | null
     }
   | ProductsSectionView
   | FeaturedProductSectionView
