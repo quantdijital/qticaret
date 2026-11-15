@@ -1,14 +1,12 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { Loader2, Monitor, MonitorX, Smartphone, Tablet } from "lucide-react"
-import { useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
-import { LAYOUT_KEY, fetchLayoutPreview } from "@/features/storefront/api/layout"
-import { previewAddress } from "@/features/storefront/layout/preview-url"
 import { errorText } from "@/lib/errors"
+import type { LivePreview } from "./bridge/use-live-preview"
 import { DEVICES, fitPreview, useRoom } from "./preview-fit"
 import type { Device } from "./preview-fit"
 
@@ -20,20 +18,18 @@ const DEVICE_ICONS = { mobile: Smartphone, tablet: Tablet, desktop: Monitor } as
 const PERCENT = new Intl.NumberFormat("tr-TR", { style: "percent", maximumFractionDigits: 0 })
 
 interface PreviewFrameProps {
-  /** Grows with each saved draft (and each change made elsewhere): a new link is asked for. */
-  round: number
-  /** The draft has been saved at least once: there is something to show. */
-  ready: boolean
+  /** What the frame opens: the live session's one address, or a signed link per save (adr/0065). */
+  preview: LivePreview
   device: Device
   onDevice: (device: Device) => void
   /** Which product's or category's page shows the draft (their pages only). */
   sample: ReactNode
-  /** The page shown with the draft: a product's or category's path; null: the home page. */
-  page: string | null
   /** Why the chosen page cannot be shown (no live product yet); shown in place of the frame. */
   missing: string | null
   /** The page to show is still being found (the first live product): the frame waits. */
   finding: boolean
+  /** What the frame cannot show of what is asked (a hidden section, the live preview off). */
+  notice?: string | null
 }
 
 /** A message in place of the storefront: why it does not show, and what to do. */
@@ -103,40 +99,39 @@ function PreviewBar({
 }
 
 /**
- * The storefront itself, showing the draft (adr/0049): a signed link asked
- * for after each save, in a frame the storefront allows only the panel to
- * open. It is drawn at the chosen device's width and scaled down as a
+ * The storefront itself, showing the draft (adr/0049): the live session's
+ * one address, redrawn in place after each save (adr/0065), else a signed
+ * link asked for after each save; in a frame the storefront allows only
+ * the panel to open. It is drawn at the chosen device's width and scaled down as a
  * whole to the room it has, never cut off. The last page stays on show
  * while the next one loads.
  */
 export function PreviewFrame({
-  round,
-  ready,
+  preview,
   device,
   onDevice,
   sample,
-  page,
   missing,
   finding,
+  notice = null,
 }: PreviewFrameProps) {
   const { t } = useTranslation()
-  const preview = useQuery({
-    queryKey: [...LAYOUT_KEY, "preview", round],
-    queryFn: fetchLayoutPreview,
-    enabled: ready,
-    staleTime: Infinity,
-    placeholderData: keepPreviousData,
-  })
   const stage = useRef<HTMLDivElement>(null)
   const fit = fitPreview(device, useRoom(stage))
-  const address =
-    preview.data && !missing && !finding ? previewAddress(preview.data, undefined, page) : null
+  const { setScale, frame, frameKey, live, onFrameLoad } = preview
+  useEffect(() => {
+    setScale(fit.scale)
+  }, [fit.scale, setScale])
+  // The live frame stays on the page it shows while a sample is looked up: taken out, it would
+  // load the session's address again (adr/0065 §1)
+  const address = preview.address && !missing && (!finding || live) ? preview.address : null
   const [loaded, setLoaded] = useState<string | null>(null)
-  // The spinner while a link is asked for, and while the page it opens loads
+  // The spinner while a link is asked for, while the page it opens loads, and while the live
+  // frame redraws
   const waiting =
     !missing &&
     !preview.isError &&
-    (finding || (address ? loaded !== address || preview.isPlaceholderData : !preview.data))
+    (finding || (address ? loaded !== address || preview.stale || preview.busy : !preview.linked))
   let content: ReactNode
   if (missing) {
     content = <PreviewMessage text={missing} />
@@ -145,13 +140,13 @@ export function PreviewFrame({
       <PreviewMessage
         text={`${t(`${V}.failed`)} ${errorText(t, preview.error)}`}
         action={
-          <Button variant="outline" size="sm" onClick={() => void preview.refetch()}>
+          <Button variant="outline" size="sm" onClick={preview.retry}>
             {t("common.retry")}
           </Button>
         }
       />
     )
-  } else if (preview.data && !address && !finding) {
+  } else if (preview.linked && !address && !finding) {
     content = (
       <PreviewMessage
         text={t(`${V}.noHost`)}
@@ -169,7 +164,10 @@ export function PreviewFrame({
         style={{ width: fit.width * fit.scale, height: fit.height * fit.scale }}
       >
         <iframe
+          key={frameKey}
+          ref={frame}
           data-storefront-preview=""
+          data-live={live ? "" : undefined}
           data-device={device}
           title={t(`${V}.frameTitle`)}
           src={address}
@@ -179,6 +177,7 @@ export function PreviewFrame({
           style={{ width: fit.width, height: fit.height, transform: `scale(${String(fit.scale)})` }}
           onLoad={() => {
             setLoaded(address)
+            onFrameLoad()
           }}
         />
       </div>
@@ -201,6 +200,14 @@ export function PreviewFrame({
             <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
             {t(address ? `${V}.refreshing` : `${V}.loading`)}
           </div>
+        ) : null}
+        {notice ? (
+          <p
+            role="status"
+            className="pointer-events-none absolute bottom-6 left-1/2 max-w-[90%] -translate-x-1/2 rounded-full border bg-card px-3 py-1.5 text-center text-xs text-muted-foreground shadow-card"
+          >
+            {notice}
+          </p>
         ) : null}
       </div>
     </div>

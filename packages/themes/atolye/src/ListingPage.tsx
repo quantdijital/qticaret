@@ -88,7 +88,7 @@ export function ListingPage({
       {top.length > 0 && <Blocks sections={top} t={t} subscribe={subscribe} quickAdd={quickAdd} />}
 
       {/* The product grid: the category group's main section, in its look when set */}
-      <Look look={view.main?.look} main>
+      <Look id={view.main?.id} look={view.main?.look} main>
         <Container className="pt-8 lg:pt-(--space-xl)">
           {listed ? (
             <div

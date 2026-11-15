@@ -7708,7 +7708,14 @@
         "noHost": "Önizleme için mağazanızın adresi gerekli; SEO ayarlarında alan adınızı girin.",
         "noHostLink": "SEO ayarlarına git",
         "scale": "Ölçek",
-        "scaleHint": "Vitrin seçilen cihazın genişliğinde çizilir ve buraya sığacak kadar küçültülür."
+        "scaleHint": "Vitrin seçilen cihazın genişliğinde çizilir ve buraya sığacak kadar küçültülür.",
+        "missing": {
+          "hidden": "Bu bölüm gizli; önizlemede görünmez.",
+          "scheduled": "Bu bölüm zamanlaması dışında; önizlemede şu an görünmez.",
+          "other_page": "Bu bölüm başka bir sayfada.",
+          "timeout": "Bölüm önizlemede bulunamadı."
+        },
+        "liveOff": "Canlı önizleme kullanılamıyor; önizleme her kayıttan sonra yeniden yüklenecek."
       },
       "publish": {
         "open": "Yayınla",

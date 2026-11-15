@@ -1,11 +1,9 @@
 import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/http"
 import { MedusaError } from "@medusajs/framework/utils"
 import { layoutPreview } from "../../../../../lib/content/preview-token"
-import { readStoredLayout } from "../../../../../lib/storefront/layout"
 import { orderAccessKey } from "../../../../../lib/orders/access-token"
 import { layoutRow } from "../../../../../workflows/storefront/layout"
-import { storeLayout } from "../../../../../workflows/storefront/layout-read"
-import { draftMenus } from "../../../../../workflows/storefront/menus-read"
+import { draftLayout } from "../../draft"
 
 /**
  * GET /store/storefront-layout/preview/:token (adr/0049): the draft as the
@@ -26,12 +24,5 @@ export async function GET(req: MedusaStoreRequest, res: MedusaResponse): Promise
   if (!layoutPreview.opens(orderAccessKey(), parts, updated)) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "storefront_layout.preview_unknown")
   }
-  // Through today's schema: a draft saved before a group existed shows it empty
-  const channels = req.publishable_key_context.sales_channel_ids
-  const draft = readStoredLayout(row.draft)
-  const [layout, menus] = await Promise.all([
-    storeLayout(req.scope, draft, channels),
-    draft.settings.menus ? draftMenus(req.scope, draft.settings.menus) : null,
-  ])
-  res.json({ layout: { ...layout, settings: { ...layout.settings, menus } } })
+  res.json({ layout: await draftLayout(req, row) })
 }

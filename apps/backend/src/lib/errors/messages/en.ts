@@ -955,6 +955,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "storefront_layout.nothing_to_preview": "Save the draft once before previewing it.",
   "storefront_layout.revision_unknown": "This revision is no longer kept.",
   "storefront_layout.preview_unknown": "The preview link is not valid or has expired.",
+  // adr/0065: the theme editor's live preview session
+  "storefront_layout.session_unknown": "The live preview session has ended; open the editor again.",
+  "storefront_layout.session_needs_sign_in": "The live preview needs a signed-in panel session.",
   // adr/0063 §4: a ready-made look applied to the draft
   "storefront_preset.unknown": "This ready-made look was not found.",
   "storefront_preset.pack_not_applied":

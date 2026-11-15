@@ -3,9 +3,18 @@ import { useTranslation } from "react-i18next"
 import { useSaveLayout } from "@/features/storefront/api/layout"
 import type { LayoutDocument } from "@/features/storefront/api/layout"
 import { errorText } from "@/lib/errors"
+import type { EditorAction } from "./editor-state"
 
 /** How long the editor waits after the last change before it saves the draft. */
 export const AUTOSAVE_MS = 1500
+
+/**
+ * A change made in one go (adr/0065 §5): adding, removing, moving, hiding,
+ * a choice picked, undo and redo. Saved at once; typing (a change with a
+ * `merge` key) waits for a pause as before.
+ */
+export const isDiscrete = (action: EditorAction): boolean =>
+  action.type !== "load" && !("merge" in action && action.merge)
 
 export type SaveStatus =
   | { kind: "idle" }
@@ -25,7 +34,8 @@ interface AutosaveOptions {
 
 /**
  * The theme editor's autosave (adr/0049): a change is saved to the draft
- * once nothing changed for a moment. One save runs at a time; a change
+ * once nothing changed for a moment, a change made in one go at once
+ * (`hurry`, adr/0065 §5). One save runs at a time; a change
  * made meanwhile is saved after it. A refused save keeps the local
  * document as it is and says why; the next change, or "retry", sends again.
  */
@@ -40,6 +50,8 @@ export function useAutosave({ doc, stored, blocked, delay = AUTOSAVE_MS }: Autos
   const dirty = body !== saved
   // What async callers (leave, publish) read after awaiting
   const live = useRef({ doc, saved, running: null as Promise<boolean> | null })
+  // The next save goes without waiting (a change made in one go)
+  const urgent = useRef(false)
   useEffect(() => {
     live.current.doc = doc
   }, [doc])
@@ -81,7 +93,13 @@ export function useAutosave({ doc, stored, blocked, delay = AUTOSAVE_MS }: Autos
     if (!dirty || saving || blocked || refusedAsIs) {
       return
     }
-    const timer = setTimeout(onQuiet, delay)
+    const timer = setTimeout(
+      () => {
+        urgent.current = false
+        onQuiet()
+      },
+      urgent.current ? 0 : delay
+    )
     return () => {
       clearTimeout(timer)
     }
@@ -109,6 +127,10 @@ export function useAutosave({ doc, stored, blocked, delay = AUTOSAVE_MS }: Autos
     setRound((was) => was + 1)
   }, [])
 
+  const hurry = useCallback(() => {
+    urgent.current = true
+  }, [])
+
   return {
     status,
     /** A change not yet stored (waiting, being saved or refused). */
@@ -117,5 +139,7 @@ export function useAutosave({ doc, stored, blocked, delay = AUTOSAVE_MS }: Autos
     flush,
     reset,
     retry: () => void send(live.current.doc),
+    /** The change about to be made is saved at once, not after the pause. */
+    hurry,
   }
 }

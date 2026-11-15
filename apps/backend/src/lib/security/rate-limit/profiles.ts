@@ -112,6 +112,14 @@ export const RATE_LIMIT_PROFILES = {
   },
   // F18: a draft's signed preview link; a guess finds nothing
   content_preview: { name: "content_preview", perIp: { max: 60, windowMs: 15 * MINUTE } },
+  // adr/0065: the theme editor's live preview reads the draft after every save (a
+  // redraw a second at most); a guessed token finds nothing
+  layout_session: { name: "layout_session", perIp: { max: 120, windowMs: MINUTE } },
+  // adr/0065: opening the theme editor's live preview; per staff member
+  layout_session_open: {
+    name: "layout_session_open",
+    perIdentityAnyIp: { max: 60, windowMs: HOUR },
+  },
   // adr/0053: the storefront checking a visitor's maintenance bypass (it keeps
   // the answer a minute); per the visitor's address, a guess finds nothing
   maintenance_bypass: { name: "maintenance_bypass", perIp: { max: 60, windowMs: MINUTE } },

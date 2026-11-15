@@ -1,4 +1,5 @@
 import { Heart, UserRound } from "lucide-react"
+import { sectionMark } from "@qticaret/ui"
 import type { HeaderCatalogView, ShopView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
@@ -74,6 +75,7 @@ export function HeaderCatalog({
   return (
     <header
       data-gf-head=""
+      {...sectionMark(shop.headerBar?.id)}
       className={cn(
         "z-(--z-sticky-nav) border-b border-rule bg-paper",
         sticky ? "gf-head sticky top-0" : "relative"

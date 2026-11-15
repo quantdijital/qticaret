@@ -10,6 +10,7 @@ import type {
 import type { ImageView, LinkView, Translate } from "@qticaret/ui"
 import {
   layoutPreview,
+  layoutSession,
   storefrontLayout,
   storefrontMenus,
   storefrontSettings,
@@ -22,22 +23,41 @@ import { menusOf, sharedSettingsOf } from "./shared-settings"
 const LAYOUT_PREVIEW_HEADER = "x-qt-layout-preview"
 
 const LAYOUT_TOKEN = /^sfl_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}$/
+// The theme editor's live session (adr/0065 §1)
+const SESSION_TOKEN = /^sfs_[0-9a-f]{32}\.[0-9a-z]{1,12}\.[\w-]{43}$/
 
 /**
  * The design this request shows: the draft on a signed preview address
- * (its header and footer too), else the published one. A preview link
- * that no longer opens falls back to what is live; its page says 404.
+ * or the theme editor's live session (its header and footer too), else
+ * the published one. A preview that no longer opens falls back to what is
+ * live; its page says 404.
  */
 export async function currentLayout(): Promise<StoreLayout> {
   const token = await layoutPreviewToken()
-  const preview = token ? await layoutPreview(token) : null
+  const preview = token ? await previewLayoutOf(token) : null
   return preview ?? (await storefrontLayout())
 }
 
-/** The design preview's token this request came on (its form only; the backend checks it), or null. */
+/**
+ * The preview token this request came on (its form only; the backend
+ * checks it), a signed design link's or the theme editor's live
+ * session's, or null.
+ */
 export async function layoutPreviewToken(): Promise<string | null> {
   const token = (await headers()).get(LAYOUT_PREVIEW_HEADER)
-  return token && LAYOUT_TOKEN.test(token) ? token : null
+  return token && (LAYOUT_TOKEN.test(token) || SESSION_TOKEN.test(token)) ? token : null
+}
+
+/**
+ * The draft a preview token opens: the live session's as last saved, else
+ * the signed link's; null when it no longer opens.
+ */
+export async function previewLayoutOf(token: string): Promise<StoreLayout | null> {
+  return SESSION_TOKEN.test(token)
+    ? ((await layoutSession(token))?.layout ?? null)
+    : LAYOUT_TOKEN.test(token)
+      ? layoutPreview(token)
+      : null
 }
 
 /**

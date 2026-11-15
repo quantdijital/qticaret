@@ -113,6 +113,14 @@ describe("editorReducer", () => {
     expect(run([{ type: "duplicate", id: "duyurular" }]).doc).toBe(DOC)
   })
 
+  it("names the copy with the id chosen beforehand, unless that id is taken", () => {
+    const chosen = run([{ type: "duplicate", id: "yeniurunler", copyId: "kopya0000001" }])
+    expect(chosen.doc.home[2]?.id).toBe("kopya0000001")
+    const taken = run([{ type: "duplicate", id: "yeniurunler", copyId: "girisbolumu" }])
+    expect(taken.doc.home[2]?.id).not.toBe("girisbolumu")
+    expect(taken.doc.home[2]?.id).toMatch(/^[a-z0-9]{12}$/)
+  })
+
   it("removes and hides a section in whichever group holds it", () => {
     const state = run([
       { type: "remove", id: "yeniurunler" },

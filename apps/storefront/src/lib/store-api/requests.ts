@@ -67,6 +67,23 @@ export const layoutPreview = cache(async (token: string): Promise<StoreLayout | 
   }
 })
 
+/** The theme editor's live session (adr/0065 §1): the draft as last saved and its edition; null: ended. */
+export const layoutSession = cache(
+  async (token: string): Promise<{ layout: StoreLayout; edition: string | null } | null> => {
+    try {
+      const answer = await storeGet<{ layout: StoreLayout; edition?: string }>(
+        `/store/storefront-layout/session/${encodeURIComponent(token)}`
+      )
+      return { layout: answer.layout, edition: answer.edition ?? null }
+    } catch (error) {
+      if (isStoreApiError(error) && error.status === 404) {
+        return null
+      }
+      throw error
+    }
+  }
+)
+
 /** The shop's menus (adr/0049): links named and placed as their records are now. */
 export const storefrontMenus = cache(async () => {
   const { menus } = await storePublicGet<{ menus: StoreMenu[] }>("/store/storefront-menus")

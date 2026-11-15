@@ -959,6 +959,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "storefront_layout.nothing_to_preview": "Önizlemek için önce taslağı kaydedin.",
   "storefront_layout.revision_unknown": "Bu sürüm artık tutulmuyor.",
   "storefront_layout.preview_unknown": "Önizleme bağlantısı geçersiz ya da süresi dolmuş.",
+  // adr/0065: the theme editor's live preview session
+  "storefront_layout.session_unknown":
+    "Canlı önizleme oturumu sona erdi; düzenleyiciyi yeniden açın.",
+  "storefront_layout.session_needs_sign_in": "Canlı önizleme için panelde oturum açık olmalı.",
   // adr/0063 §4: a ready-made look applied to the draft
   "storefront_preset.unknown": "Bu hazır görünüm bulunamadı.",
   "storefront_preset.pack_not_applied":

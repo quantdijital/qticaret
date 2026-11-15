@@ -50,7 +50,9 @@ describe("a section's look in Atölye", () => {
 
   it("puts the dark stage's ground on the theme's own graphite", () => {
     const html = home([faq("sss1", { ground: "stage" })])
-    expect(html).toMatch(/<div class="[^"]*gf-look[^"]*gf-stage[^"]*" data-ground="stage">/)
+    expect(html).toMatch(
+      /<div class="[^"]*gf-look[^"]*gf-stage[^"]*" data-ground="stage" data-qs="sss1">/
+    )
   })
 
   it("maps every step of the contract onto a token, never a number of its own", () => {
@@ -86,7 +88,7 @@ describe("a section's look in Atölye", () => {
 describe("the screens a section shows on in Atölye", () => {
   it("puts them on a box that draws nothing, or on the look's box when there is one", () => {
     const plain = home([{ ...faq("sss1"), device: "mobile" }])
-    expect(plain).toContain('<div class="gf-device" data-show-on="mobile">')
+    expect(plain).toContain('<div class="gf-device" data-show-on="mobile" data-qs="sss1">')
     expect(plain).not.toContain("gf-look")
 
     const looked = home([{ ...faq("sss1", { ground: "well" }), device: "desktop" }])

@@ -1,7 +1,6 @@
 import { GET as quickView } from "@/app/api/quick-view/route"
 import { isStoreApiError } from "@/lib/store-api/errors"
-import { layoutPreview } from "@/lib/store-api/requests"
-import { layoutPreviewToken } from "@/lib/views/layout"
+import { layoutPreviewToken, previewLayoutOf } from "@/lib/views/layout"
 
 // Every answer is the shopper's: never a cached page
 export const dynamic = "force-dynamic"
@@ -11,14 +10,15 @@ const HEADERS = { "cache-control": "private, no-store", "x-robots-tag": "noindex
 /**
  * The theme editor's preview asks its quick view here (adr/0049 Ek 2026-11-15): the proxy reads
  * the token off this address, so the answer follows the draft the frame shows (its switches, its
- * card settings), never the live design. Only for a live signed design preview: `/onizleme/`
+ * card settings), never the live design. Only for a live signed design preview or the theme
+ * editor's live session (adr/0065 §1, its draft as last saved): `/onizleme/`
  * stays open while the shop is dark (adr/0053), so a malformed, changed or lapsed token is a 404
  * here, never the live design's answer `/api/quick-view` would refuse behind the dark shop.
  */
 export async function GET(request: Request): Promise<Response> {
   const token = await layoutPreviewToken()
   try {
-    if (!token || !(await layoutPreview(token))) {
+    if (!token || !(await previewLayoutOf(token))) {
       return Response.json({ message: "quick_view.not_found" }, { status: 404, headers: HEADERS })
     }
   } catch (error) {
