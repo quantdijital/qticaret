@@ -56,19 +56,38 @@ jobs:
           cache: pnpm
       # Random per run and useless outside this job; masked all the same,
       # since every later step lists its env in the (public) log
+      # (the control plane's keys too: its `medusa build` validates its env)
       - name: Generate throwaway secrets
         run: |
-          for name in JWT_SECRET COOKIE_SECRET PII_ENCRYPTION_KEY PII_HASH_KEY CREDENTIALS_ENCRYPTION_KEY; do
+          for name in JWT_SECRET COOKIE_SECRET PII_ENCRYPTION_KEY PII_HASH_KEY CREDENTIALS_ENCRYPTION_KEY \
+            AUTH_MFA_ENCRYPTION_KEY CP_HASH_KEY CP_MASTER_KEY; do
             value="$(openssl rand -hex 32)"
+            # Masking only tidies the log: the values are worthless outside this
+            # job, so a branch that stops workflow commands exposes nothing
+            # nosemgrep: yaml.github-actions.security.audit.unsafe-add-mask-workflow-command.unsafe-add-mask-workflow-command
             echo "::add-mask::$value"
             echo "$name=$value" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile
+      # The control plane's escrow recipient: a public age key whose identity
+      # is thrown away at once, so nothing sealed to it can ever be opened
+      - name: Throwaway escrow recipient
+        run: >-
+          echo "CP_ESCROW_RECIPIENTS=$(pnpm --silent --filter @qticaret/server-kit exec node --input-type=module
+          -e 'import { generateIdentity, identityToRecipient } from "age-encryption";
+          console.log(await identityToRecipient(await generateIdentity()))')" >> "$GITHUB_ENV"
       - run: pnpm format:check
       # The backend's tsconfig includes the query and container types Medusa
       # writes when it builds (.medusa/types; `medusa develop` writes them
-      # locally): typecheck and lint run after them, not beside them
+      # locally): typecheck and lint run after them, not beside them.
+      # A build is a release build: the apps' configs validate as deployed
+      # (NODE_ENV unset), so the control plane gets a public-looking domain,
+      # an https panel and Redis (the service above; nothing connects at build)
       - run: pnpm turbo run build
+        env:
+          REDIS_URL: redis://localhost:6379
+          PLATFORM_DOMAIN: qticaret-ci.dev
+          CP_PANEL_URL: https://cp.qticaret-ci.dev
       - run: pnpm turbo run lint typecheck test
 
   integration:
@@ -122,6 +141,9 @@ jobs:
         run: |
           for name in JWT_SECRET COOKIE_SECRET PII_ENCRYPTION_KEY PII_HASH_KEY CREDENTIALS_ENCRYPTION_KEY; do
             value="$(openssl rand -hex 32)"
+            # Masking only tidies the log: the values are worthless outside this
+            # job, so a branch that stops workflow commands exposes nothing
+            # nosemgrep: yaml.github-actions.security.audit.unsafe-add-mask-workflow-command.unsafe-add-mask-workflow-command
             echo "::add-mask::$value"
             echo "$name=$value" >> "$GITHUB_ENV"
           done
@@ -172,6 +194,9 @@ jobs:
         run: |
           for name in JWT_SECRET COOKIE_SECRET PII_ENCRYPTION_KEY PII_HASH_KEY CREDENTIALS_ENCRYPTION_KEY; do
             value="$(openssl rand -hex 32)"
+            # Masking only tidies the log: the values are worthless outside this
+            # job, so a branch that stops workflow commands exposes nothing
+            # nosemgrep: yaml.github-actions.security.audit.unsafe-add-mask-workflow-command.unsafe-add-mask-workflow-command
             echo "::add-mask::$value"
             echo "$name=$value" >> "$GITHUB_ENV"
           done
