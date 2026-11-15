@@ -83,9 +83,36 @@ describe("the content fields' register", () => {
 
   it("names the catalogue opening's list count, product counts and prices", () => {
     const hero = switchVariant(newHomeSection("hero", "giris00001") as HeroSection, "category_list")
-    expect(keys(hero)).toEqual(["content:list_limit", "content:show_count", "content:show_price"])
+    expect(keys(hero)).toEqual([
+      "content:slides",
+      "content:list_limit",
+      "content:show_count",
+      "content:show_price",
+    ])
     expect(keys(newHomeSection("hero", "giris00002"))).toEqual([])
     expect(keys(newHomeSection("categories", "kategori01"))).toEqual(["content:show_count"])
+  })
+
+  it("names the slider's settings only once the catalogue opening has two slides (Ek 2026-11-15)", () => {
+    const hero = switchVariant(newHomeSection("hero", "giris00001") as HeroSection, "category_list")
+    const slide = { image: null, heading: "Bir", text: null, links: [], link: null }
+    const turning = { ...hero, slides: [slide, { ...slide, heading: "İki" }] } as HeroSection
+
+    expect(keys({ ...hero, slides: [slide] } as HeroSection)).not.toContain(
+      "scroll:scroller.autoplay"
+    )
+    // Still by default (bilesen-standardi §4.5): the speed waits for autoplay
+    expect(keys(turning)).toEqual(
+      expect.arrayContaining(["scroll:scroller.autoplay", "look:scroller.loop"])
+    )
+    expect(keys(turning)).not.toContain("scroll:scroller.speed")
+    expect(
+      keys({ ...turning, scroller: { ...SLIDER_DEFAULTS, autoplay: "on" } } as HeroSection)
+    ).toContain("scroll:scroller.speed")
+    // Back to today's opening, the slides and their settings go
+    expect(
+      switchVariant(turning as Extract<HeroSection, { variant: "category_list" }>, "standard")
+    ).not.toHaveProperty("slides")
   })
 
   it("gives every entry a label and a term in both languages, and the forms' element id", () => {

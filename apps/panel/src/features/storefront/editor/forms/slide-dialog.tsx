@@ -80,6 +80,55 @@ export function Choice<T extends string>({
   )
 }
 
+/** The dialog's way to the slide before or after and where it stands ("2 / 4"); shown from two. */
+export function SlideStepper({
+  index,
+  total,
+  onGo,
+}: {
+  index: number
+  total: number
+  onGo: (to: number) => void
+}) {
+  const { t } = useTranslation()
+  if (total < 2) {
+    return null
+  }
+  return (
+    <>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="size-8"
+        disabled={index === 0}
+        aria-label={t(`${S}.previous`)}
+        onClick={() => {
+          onGo(index - 1)
+        }}
+      >
+        <ChevronLeft />
+      </Button>
+      <span className="min-w-10 text-center text-xs text-muted-foreground tabular-nums">
+        {t(`${S}.position`, { at: index + 1, total })}
+      </span>
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className="size-8"
+        disabled={index === total - 1}
+        aria-label={t(`${S}.next`)}
+        onClick={() => {
+          onGo(index + 1)
+        }}
+      >
+        <ChevronRight />
+      </Button>
+    </>
+  )
+}
+
 /**
  * One slide of the sliding opening in the panel's standard dialog (rows
  * open one dialog; docs/18 §7): its wide picture and a phone's own, its
@@ -143,41 +192,7 @@ export function SlideDialog({
       pane="fixed"
       title={t(`${S}.editSlide`)}
       description={slide.heading ?? t(`${S}.slide`, { number: index + 1 })}
-      headerAction={
-        total > 1 ? (
-          <>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              disabled={index === 0}
-              aria-label={t(`${S}.previous`)}
-              onClick={() => {
-                go(index - 1)
-              }}
-            >
-              <ChevronLeft />
-            </Button>
-            <span className="min-w-10 text-center text-xs text-muted-foreground tabular-nums">
-              {t(`${S}.position`, { at: index + 1, total })}
-            </span>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              disabled={index === total - 1}
-              aria-label={t(`${S}.next`)}
-              onClick={() => {
-                go(index + 1)
-              }}
-            >
-              <ChevronRight />
-            </Button>
-          </>
-        ) : null
-      }
+      headerAction={total > 1 ? <SlideStepper index={index} total={total} onGo={go} /> : null}
       dirty={dirty}
       saving={false}
       onSubmit={() => {

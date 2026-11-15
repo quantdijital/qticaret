@@ -72,6 +72,19 @@ export const VARIANT_FIELDS: {
 }
 
 /**
+ * A variant's own fields a section holds only once the shop sets them (no
+ * default to start from): dropped with the rest when it leaves the variant.
+ * H17's slides are the opening's; the common fields keep the first one's.
+ */
+const OPTIONAL_FIELDS: {
+  readonly [T in VariantSectionType]?: Readonly<
+    Partial<Record<SectionVariant<T>, readonly string[]>>
+  >
+} = {
+  hero: { category_list: ["slides", "scroller"] },
+}
+
+/**
  * Variants on the list the theme does not draw yet: shown, not offered
  * (as the theme settings' "Ortada" was, adr/0062 karar 6). A section saved
  * with one keeps it; the storefront draws the default meanwhile. None
@@ -99,7 +112,11 @@ export function switchVariant<S extends VariantSection>(
   next: SectionVariant<S["type"]>
 ): S {
   const fields: Readonly<Record<string, object>> = VARIANT_FIELDS[section.type]
-  const own = new Set(Object.keys(fields[section.variant] ?? {}))
+  const optional: Readonly<Record<string, readonly string[]>> = OPTIONAL_FIELDS[section.type] ?? {}
+  const own = new Set([
+    ...Object.keys(fields[section.variant] ?? {}),
+    ...(optional[section.variant] ?? []),
+  ])
   const kept = Object.fromEntries(Object.entries(section).filter(([key]) => !own.has(key)))
   return { ...kept, ...structuredClone(fields[next] ?? {}), variant: next } as S
 }

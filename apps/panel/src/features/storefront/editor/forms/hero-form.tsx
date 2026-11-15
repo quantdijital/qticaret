@@ -4,6 +4,7 @@ import type { HeroSection, LayoutLink } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import { F, FieldGroup, TextField } from "./fields"
 import { HeroCatalogFields } from "./hero-catalog-fields"
+import { HeroSlidesField } from "./hero-slides-field"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { ImageField } from "./image-field"
@@ -16,6 +17,7 @@ const H = "storefront.editor.hero"
 export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroSection>) {
   const { t } = useTranslation()
   const problem = useProblemText()
+  const catalog = section.variant === "category_list" ? section : null
   const set = (
     next: Partial<Pick<HeroSection, "eyebrow" | "heading" | "text" | "links" | "image">>,
     field?: string
@@ -45,88 +47,95 @@ export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroS
           set({ eyebrow }, "eyebrow")
         }}
       />
-      <TextField
-        id="hero-heading"
-        label={t(`${F}.heading`)}
-        value={section.heading}
-        max={L.heading}
-        tokens
-        placeholder={t("storefront.editor.defaults.heading")}
-        hint={t(`${H}.headingHint`)}
-        error={problem(problems["heading"], L.heading)}
-        onChange={(heading) => {
-          set({ heading }, "heading")
-        }}
-      />
-      <TextField
-        id="hero-text"
-        label={t(`${F}.text`)}
-        value={section.text}
-        max={L.text}
-        tokens
-        multiline
-        placeholder={t(`${H}.textPlaceholder`)}
-        error={problem(problems["text"], L.text)}
-        onChange={(text) => {
-          set({ text }, "text")
-        }}
-      />
-      <FieldGroup title={t(`${H}.buttons`)} hint={t(`${H}.buttonsHint`, { max: L.heroLinks })}>
-        {section.links.map((link, index) => {
-          const item = t(`${H}.button`, { number: index + 1 })
-          return (
-            <LinkCard
-              key={`${String(index)}-${link.kind}`}
-              id={`hero-link-${String(index)}`}
-              link={link}
-              error={problem(problems[`links.${String(index)}`], L.label)}
-              onChange={(next, field) => {
-                set(
-                  { links: section.links.map((each, at) => (at === index ? next : each)) },
-                  field && `links.${String(index)}.label`
-                )
-              }}
-              onEdit={() => {
-                picker.open(link)
-              }}
-              actions={
-                <RowActions
-                  index={index}
-                  count={section.links.length}
-                  item={item}
-                  onMove={(to) => {
-                    const next = section.links.filter((_, at) => at !== index)
-                    next.splice(to, 0, link)
-                    setLinks(next)
+      {/* H17's words, buttons and picture are its slides' (adr/0049 Ek 2026-11-15) */}
+      {catalog ? (
+        <HeroSlidesField section={catalog} problems={problems} onChange={onChange} />
+      ) : (
+        <>
+          <TextField
+            id="hero-heading"
+            label={t(`${F}.heading`)}
+            value={section.heading}
+            max={L.heading}
+            tokens
+            placeholder={t("storefront.editor.defaults.heading")}
+            hint={t(`${H}.headingHint`)}
+            error={problem(problems["heading"], L.heading)}
+            onChange={(heading) => {
+              set({ heading }, "heading")
+            }}
+          />
+          <TextField
+            id="hero-text"
+            label={t(`${F}.text`)}
+            value={section.text}
+            max={L.text}
+            tokens
+            multiline
+            placeholder={t(`${H}.textPlaceholder`)}
+            error={problem(problems["text"], L.text)}
+            onChange={(text) => {
+              set({ text }, "text")
+            }}
+          />
+          <FieldGroup title={t(`${H}.buttons`)} hint={t(`${H}.buttonsHint`, { max: L.heroLinks })}>
+            {section.links.map((link, index) => {
+              const item = t(`${H}.button`, { number: index + 1 })
+              return (
+                <LinkCard
+                  key={`${String(index)}-${link.kind}`}
+                  id={`hero-link-${String(index)}`}
+                  link={link}
+                  error={problem(problems[`links.${String(index)}`], L.label)}
+                  onChange={(next, field) => {
+                    set(
+                      { links: section.links.map((each, at) => (at === index ? next : each)) },
+                      field && `links.${String(index)}.label`
+                    )
                   }}
-                  onRemove={() => {
-                    setLinks(section.links.filter((_, at) => at !== index))
+                  onEdit={() => {
+                    picker.open(link)
                   }}
+                  actions={
+                    <RowActions
+                      index={index}
+                      count={section.links.length}
+                      item={item}
+                      onMove={(to) => {
+                        const next = section.links.filter((_, at) => at !== index)
+                        next.splice(to, 0, link)
+                        setLinks(next)
+                      }}
+                      onRemove={() => {
+                        setLinks(section.links.filter((_, at) => at !== index))
+                      }}
+                    />
+                  }
                 />
-              }
+              )
+            })}
+            <AddLinkButton
+              label={t(`${H}.addButton`)}
+              disabled={section.links.length >= L.heroLinks}
+              onClick={() => {
+                picker.open(null)
+              }}
             />
-          )
-        })}
-        <AddLinkButton
-          label={t(`${H}.addButton`)}
-          disabled={section.links.length >= L.heroLinks}
-          onClick={() => {
-            picker.open(null)
-          }}
-        />
-      </FieldGroup>
-      <ImageField
-        id="hero-image"
-        label={t(`${F}.image`)}
-        hint={t(`${H}.imageHint`)}
-        image={section.image}
-        altError={problem(problems["image"], L.alt)}
-        onChange={(image) => {
-          set({ image }, image && section.image ? "image" : undefined)
-        }}
-      />
-      {section.variant === "category_list" ? (
-        <HeroCatalogFields section={section} problems={problems} onChange={onChange} />
+          </FieldGroup>
+          <ImageField
+            id="hero-image"
+            label={t(`${F}.image`)}
+            hint={t(`${H}.imageHint`)}
+            image={section.image}
+            altError={problem(problems["image"], L.alt)}
+            onChange={(image) => {
+              set({ image }, image && section.image ? "image" : undefined)
+            }}
+          />
+        </>
+      )}
+      {catalog ? (
+        <HeroCatalogFields section={catalog} problems={problems} onChange={onChange} />
       ) : null}
       {picker.dialog}
     </div>
