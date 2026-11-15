@@ -178,7 +178,7 @@ export function CategoryMenu({
         type="button"
         aria-expanded={open}
         aria-controls={id}
-        className="gf-on-bar group inline-flex min-h-11 items-center gap-2 rounded-button bg-paper-2 px-4 text-sm font-bold whitespace-nowrap text-text transition-colors duration-(--dur-micro) hover:bg-paper-3 aria-expanded:bg-text aria-expanded:text-paper"
+        className="gf-on-bar group inline-flex min-h-11 items-center gap-2 rounded-button bg-paper-2 px-4 text-sm font-bold whitespace-nowrap text-text transition-colors duration-(--dur-micro) hover:bg-paper-3 aria-expanded:bg-paper-3 aria-expanded:shadow-[inset_0_-2px_0_currentColor]"
         onClick={() => {
           clearTimeout(timer.current)
           setOpen((was) => !was)

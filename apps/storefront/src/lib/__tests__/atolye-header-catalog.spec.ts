@@ -140,11 +140,44 @@ describe("the catalog header", () => {
       expect(panels.length).toBeGreaterThan(0)
       for (const panel of panels) {
         expect(panel).toContain(" text-text ")
-        expect(panel).toContain("inset-x-0")
+        expect(panel).toMatch(/inset-x-0|w-max/)
       }
       expect(html).toMatch(/aria-label="Tüm kategoriler" hidden=""[^>]*class="[^"]* text-text /)
     }
   )
+})
+
+describe("the menu bar's open states (third audit)", () => {
+  const child = (n: number) => ({ label: `Alt ${n}`, path: `/kategori/cok/${n}` })
+  const panelsOf = (html: string) =>
+    html.match(/class="absolute top-full z-\(--z-dropdown\)[^"]*"/g) ?? []
+
+  it("opens a few children narrow under their trigger, many across the bar", () => {
+    const html = renderFrame(
+      atolyeTheme,
+      catalogShop(
+        {},
+        {
+          // The main menu's categories: the bar's items and their panels
+          categories: [
+            { label: "Az", path: "/kategori/az", children: [child(1), child(2)] },
+            { label: "Çok", path: "/kategori/cok", children: [1, 2, 3, 4, 5].map(child) },
+          ],
+        }
+      )
+    )
+    const [few, many] = panelsOf(html)
+    expect(few).toContain("left-0 w-max")
+    expect(few).not.toContain("inset-x-0")
+    expect(many).toContain("inset-x-0")
+  })
+
+  it("draws the open Kategoriler button as the bar's open items, not as the highlighted link", () => {
+    const html = renderFrame(atolyeTheme, catalogShop())
+    const button = /<button[^>]*aria-expanded="false"[^>]*class="gf-on-bar[^"]*"/.exec(html)?.[0]
+    expect(button).toContain("aria-expanded:shadow-[inset_0_-2px_0_currentColor]")
+    expect(button).not.toContain("aria-expanded:bg-text")
+  })
 })
 
 describe("the menu bar's fit", () => {

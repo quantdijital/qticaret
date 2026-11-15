@@ -23,13 +23,22 @@ function Panel({
   category,
   allIn,
   seeAll,
+  narrow = false,
 }: {
   category: NavCategoryView
   allIn: string
   seeAll: string
+  /** A few children: one column beside a small picture, the panel as wide as they are. */
+  narrow?: boolean
 }) {
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,18rem)] gap-(--space-xl) xl:grid-cols-[minmax(0,1fr)_minmax(0,21rem)]">
+    <div
+      className={
+        narrow
+          ? "grid w-max grid-cols-[18rem_auto] gap-(--space-lg)"
+          : "grid grid-cols-[minmax(0,1fr)_minmax(0,18rem)] gap-(--space-xl) xl:grid-cols-[minmax(0,1fr)_minmax(0,21rem)]"
+      }
+    >
       <div className="flex min-w-0 flex-col gap-4">
         <div className="flex items-baseline justify-between gap-6 border-b border-rule pb-4">
           <p className="text-title leading-tight font-extrabold tracking-(--tracking-display)">
@@ -42,7 +51,7 @@ function Panel({
             </a>
           </NavigationMenu.Link>
         </div>
-        <ul className="columns-3 gap-x-(--gap-columns) xl:columns-4">
+        <ul className={narrow ? "flex flex-col" : "columns-3 gap-x-(--gap-columns) xl:columns-4"}>
           {category.children.map((child) => (
             <li key={child.path} className="break-inside-avoid">
               <NavigationMenu.Link asChild>
@@ -63,11 +72,14 @@ function Panel({
           href={category.path}
           tabIndex={-1}
           aria-hidden="true"
-          className="relative block aspect-[4/3] self-start overflow-hidden rounded-media bg-paper-2 no-underline"
+          className={cn(
+            "relative block aspect-[4/3] self-start overflow-hidden rounded-media bg-paper-2 no-underline",
+            narrow && "w-48"
+          )}
         >
           <ResponsiveImage
             image={{ ...category.image, alt: "" }}
-            sizes="(min-width: 1280px) 336px, 288px"
+            sizes={narrow ? "192px" : "(min-width: 1280px) 336px, 288px"}
             className="absolute inset-0 h-full w-full object-cover"
           />
         </a>
@@ -122,6 +134,9 @@ function MorePanel({ categories }: { categories: readonly NavCategoryView[] }) {
   )
 }
 
+/** Fewer children than this open a narrow panel under their trigger (third audit; "Daha fazla"'s way). */
+const NARROW_UNDER = 5
+
 const PANEL =
   "absolute top-full z-(--z-dropdown) rounded-tile border border-rule bg-field p-6 text-text shadow-float data-[state=closed]:hidden xl:p-8"
 
@@ -171,6 +186,7 @@ export function Aisle({
   const { list, fit } = useAisleFit(categories.length, inBar)
   const shown = fit ?? categories.length
   const rest = categories.slice(shown)
+  const narrowIn = (category: NavCategoryView) => inBar && category.children.length < NARROW_UNDER
   return (
     <NavigationMenu.Root
       value={open}
@@ -210,7 +226,8 @@ export function Aisle({
               key={category.path}
               value={category.path}
               data-aisle-item=""
-              className={away ? "static hidden" : "static"}
+              // A few children open under their own trigger, as wide as they are (third audit)
+              className={cn(narrowIn(category) ? "relative" : "static", away && "hidden")}
             >
               <NavigationMenu.Trigger className={cn(ITEM, inBar && BAR_ITEM)}>
                 {category.label}
@@ -227,9 +244,20 @@ export function Aisle({
                     event.preventDefault()
                   }
                 }}
-                className={cn(PANEL, inBar ? "inset-x-0" : "-right-3 -left-3")}
+                className={cn(
+                  PANEL,
+                  narrowIn(category)
+                    ? // The bar's second half opens leftward, so the panel stays on the page
+                      index < shown / 2
+                      ? "left-0 w-max"
+                      : "right-0 w-max"
+                    : inBar
+                      ? "inset-x-0"
+                      : "-right-3 -left-3"
+                )}
               >
                 <Panel
+                  narrow={narrowIn(category)}
                   category={category}
                   allIn={allIn[category.path] ?? category.label}
                   seeAll={seeAll}
