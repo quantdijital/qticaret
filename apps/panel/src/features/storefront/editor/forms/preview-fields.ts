@@ -111,12 +111,21 @@ function heroField(section: HeroSection, parts: readonly string[]): PreviewField
   return link === null ? null : content(PREVIEW_IDS.text(section.id, `links.${String(link)}`))
 }
 
-/** A field of one word (`title`, `text`, `body`, a catalog header's own). */
+/**
+ * The "see all" link the theme marks (`more`): a product rail's and the
+ * categories', only while the shop has set its own (its field's element
+ * stands in the form then; the theme's own fallback link is not marked).
+ */
+const ownMore = (section: AnySection): boolean =>
+  (section.type === "products" || section.type === "categories") && Boolean(section.more)
+
+/** A field of one word (`title`, `text`, `body`, `more`, a catalog header's own). */
 function wordField(section: AnySection, word: string): PreviewField | null {
   if (
     (word === "title" && TITLED.has(section.type)) ||
     (word === "text" && TEXTED.has(section.type)) ||
-    (word === "body" && section.type === "rich_text")
+    (word === "body" && section.type === "rich_text") ||
+    (word === "more" && ownMore(section))
   ) {
     return content(PREVIEW_IDS.text(section.id, word))
   }

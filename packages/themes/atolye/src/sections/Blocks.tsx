@@ -110,6 +110,7 @@ function BlockView({
           title={section.title}
           view={section.linked}
           all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
+          ownAll={Boolean(section.more)}
           t={t}
           marks={section.editor}
         />
@@ -119,6 +120,7 @@ function BlockView({
           title={section.title}
           categories={section.categories}
           all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
+          ownAll={Boolean(section.more)}
           t={t}
           marks={section.editor}
         />
