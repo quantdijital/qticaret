@@ -14,6 +14,7 @@ import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group
 import type { BodyGroup } from "@/features/storefront/api/layout"
 import { BarButton } from "./bar-button"
 import type { EditorLayout, EditorView } from "./editor-layout"
+import { Hint } from "./shared/hint"
 
 const E = "storefront.editor"
 
@@ -50,30 +51,32 @@ function UndoRedo({
   const { t } = useTranslation()
   return (
     <div className="flex shrink-0">
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        disabled={!canUndo}
-        aria-label={t(`${E}.undo`)}
-        title={t(`${E}.undo`)}
-        aria-keyshortcuts="Control+Z Meta+Z"
-        onClick={onUndo}
-      >
-        <Undo2 />
-      </Button>
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-sm"
-        disabled={!canRedo}
-        aria-label={t(`${E}.redo`)}
-        title={t(`${E}.redo`)}
-        aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z"
-        onClick={onRedo}
-      >
-        <Redo2 />
-      </Button>
+      <Hint label={t(`${E}.undo`)} side="bottom">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          disabled={!canUndo}
+          aria-label={t(`${E}.undo`)}
+          aria-keyshortcuts="Control+Z Meta+Z"
+          onClick={onUndo}
+        >
+          <Undo2 />
+        </Button>
+      </Hint>
+      <Hint label={t(`${E}.redo`)} side="bottom">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon-sm"
+          disabled={!canRedo}
+          aria-label={t(`${E}.redo`)}
+          aria-keyshortcuts="Control+Shift+Z Meta+Shift+Z"
+          onClick={onRedo}
+        >
+          <Redo2 />
+        </Button>
+      </Hint>
     </div>
   )
 }

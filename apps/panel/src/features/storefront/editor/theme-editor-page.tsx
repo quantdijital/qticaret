@@ -7,6 +7,7 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { Skeleton } from "@qticaret/admin-ui/ui/skeleton"
 import { layoutQuery } from "@/features/storefront/api/layout"
 import { errorText } from "@/lib/errors"
+import { HintProvider } from "./shared/hint"
 import { ThemeEditor } from "./theme-editor"
 import { useDocumentTitle } from "@qticaret/admin-ui/hooks/use-document-title"
 
@@ -18,7 +19,12 @@ export function ThemeEditorPage() {
   useDocumentTitle(t(`${E}.title`))
   const query = useQuery(layoutQuery())
   if (query.data) {
-    return <ThemeEditor layout={query.data} />
+    // One tooltip clock for the whole editor: the next hint along opens at once
+    return (
+      <HintProvider>
+        <ThemeEditor layout={query.data} />
+      </HintProvider>
+    )
   }
   return (
     <div className="flex h-dvh flex-col overflow-hidden bg-background">

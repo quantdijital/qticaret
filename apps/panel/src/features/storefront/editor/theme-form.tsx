@@ -11,6 +11,7 @@ import { PanelGroup } from "./panel-header"
 import { ThemeChoices } from "./theme-choices"
 import { BackgroundField, ColorInput } from "./theme-fields"
 import { ThemeSample } from "./theme-sample"
+import { Hint } from "./shared/hint"
 import { THEME_GROUP_TITLES, THEME_IDS } from "./forms/theme-registry"
 import type { CardVariantsInUse, ThemeGroupName } from "./forms/theme-registry"
 
@@ -111,16 +112,17 @@ export function ThemeForm({
         }}
       />
       <div className="sticky bottom-0 z-10 flex flex-wrap items-center gap-2 border-t bg-card px-5 py-3">
-        <Button
-          type="button"
-          variant="outline"
-          className="ml-auto"
-          title={t(`${C}.grafit.hint`)}
-          disabled={isGrafit(shown)}
-          onClick={toGrafit}
-        >
-          {t(`${C}.grafit.action`)}
-        </Button>
+        <Hint label={t(`${C}.grafit.hint`)} side="top" align="end" describe>
+          <Button
+            type="button"
+            variant="outline"
+            className="ml-auto"
+            disabled={isGrafit(shown)}
+            onClick={toGrafit}
+          >
+            {t(`${C}.grafit.action`)}
+          </Button>
+        </Hint>
       </div>
     </div>
   )
