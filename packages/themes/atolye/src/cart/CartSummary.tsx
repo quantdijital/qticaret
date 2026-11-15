@@ -87,7 +87,7 @@ export function CartSummary({
             value={view.shipping ?? t("cart.shipping_at_checkout")}
             quiet={!view.shipping}
           />
-          <div className="mt-2 flex items-baseline justify-between gap-4 rounded-media bg-paper p-4">
+          <div className="mt-2 flex items-baseline justify-between gap-4 rounded-media gf-shape bg-paper p-4">
             <dt className="font-semibold">{t("cart.subtotal")}</dt>
             <dd className="tabular text-title font-extrabold">{view.subtotal}</dd>
           </div>
