@@ -87,6 +87,18 @@ describe("the settings search over the theme", () => {
     expect(keys("düğme stili", framedRail)).toEqual(["product_card.button_style"])
     const round = { ...GRAFIT_THEME, product_card: { ...card, full_button: false } }
     expect(keys("düğme stili", framedRail, round)).toEqual([])
+    // The quick view: its switch always, its look and contents only while it is on
+    expect(keys("quick view")).toEqual(["product_card.quick_view"])
+    expect(keys("hızlı bakış")).toEqual(["product_card.quick_view"])
+    const quick = { ...GRAFIT_THEME, product_card: { ...card, quick_view: true } }
+    expect(keys("quick view", standard, quick)).toEqual([
+      "product_card.quick_view",
+      "product_card.quick_view_rating",
+      "product_card.quick_view_summary",
+      "product_card.quick_view_quantity",
+    ])
+    expect(keys("her zaman simge", standard, quick)).toEqual(["product_card.quick_view_trigger"])
+    expect(keys("her zaman simge")).toEqual([])
   })
 
   it("puts the page's parts first and caps the whole list", () => {

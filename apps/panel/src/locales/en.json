@@ -8373,6 +8373,23 @@
           "notify": "“Notify me” link"
         },
         "sold_out_rowHint": "What stands in the price's place. None of them adds the product to the cart from the card; the link opens the stock alert form on the product page.",
+        "quickViewTitle": "Quick view",
+        "quick_view": "Show quick view",
+        "quick_viewTerm": "quick view",
+        "quick_viewHint": "A “Quick view” button on the card: the product opens in a dialog without leaving the page, and goes to the cart from there. The product link stays as it is.",
+        "quick_view_trigger": "Button look",
+        "quick_view_triggerTerm": "trigger",
+        "quickViewTriggers": {
+          "hover": "Button on hover",
+          "icon": "Icon always"
+        },
+        "quick_view_triggerHint": "Phones and the compact card always show the small icon.",
+        "quick_view_rating": "Show the rating in the dialog",
+        "quick_view_ratingHint": "The product's stars and review count; hidden without reviews.",
+        "quick_view_summary": "Show the short description in the dialog",
+        "quick_view_summaryHint": "The product's short description; without one, the description's first paragraph.",
+        "quick_view_quantity": "Show the quantity field in the dialog",
+        "quick_view_quantityHint": "While off, the dialog adds one.",
         "cardVariant": "Card style",
         "cardVariants": {
           "standard": "Standard",

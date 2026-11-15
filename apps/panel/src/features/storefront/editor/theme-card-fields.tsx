@@ -4,10 +4,12 @@ import {
   CARD_BADGE_SWITCHES,
   CARD_BUTTON_STYLES,
   CARD_NO_REVIEWS,
+  CARD_QUICK_VIEW_TRIGGERS,
   CARD_RATIOS,
   CARD_SOLD_OUT_ROWS,
   CARD_VARIANTS,
   FRAMED_CARD_SWITCHES,
+  QUICK_VIEW_SWITCHES,
 } from "@/features/storefront/api/theme"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
 import { cn } from "@qticaret/admin-ui/lib/utils"
@@ -19,7 +21,8 @@ import type { CardVariantsInUse, ThemeGroupName, ThemeRegistryField } from "./fo
 const C = "storefront.editor.theme"
 
 type Card = ThemeSettings["product_card"]
-type CardChoice = "ratio" | "variant" | "no_reviews" | "sold_out_row" | "button_style"
+type CardChoice =
+  "ratio" | "variant" | "no_reviews" | "sold_out_row" | "button_style" | "quick_view_trigger"
 
 /** A card choice's list, as the registry names its options in this order. */
 const LISTS: { [K in CardChoice]: readonly Card[K][] } = {
@@ -28,6 +31,7 @@ const LISTS: { [K in CardChoice]: readonly Card[K][] } = {
   no_reviews: CARD_NO_REVIEWS,
   sold_out_row: CARD_SOLD_OUT_ROWS,
   button_style: CARD_BUTTON_STYLES,
+  quick_view_trigger: CARD_QUICK_VIEW_TRIGGERS,
 }
 
 /** Two choices side by side once each gets 160 px. */
@@ -47,7 +51,8 @@ interface CardGroupsProps {
  * 2026-11-15): the open "Ürün kartı" with its picture, variant, brand and
  * stars, the stars' place without reviews, the pills and a sold-out card's
  * row, every card's; then the framed card's switches and its button's
- * look. Each field's name, term, hint and element from the registry; one
+ * look; the quick view's switch, its button's look and what its dialog
+ * shows, the last three only while it is on. Each field's name, term, hint and element from the registry; one
  * meaningless now (`shown`) is not drawn.
  */
 export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroupsProps) {
@@ -84,6 +89,8 @@ export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroup
       | "show_rating"
       | (typeof CARD_BADGE_SWITCHES)[number]
       | (typeof FRAMED_CARD_SWITCHES)[number]
+      | "quick_view"
+      | (typeof QUICK_VIEW_SWITCHES)[number]
   ) => {
     const field = THEME_FIELD[`product_card.${name}`]
     return visible(field) ? (
@@ -116,6 +123,13 @@ export function ThemeCardGroups({ theme, variants, reveal, onChange }: CardGroup
         </p>
         {CARD_BADGE_SWITCHES.map(toggle)}
         {choice("sold_out_row")}
+        {/* The quick view (adr/0049 Ek 2026-11-15): its look and contents only while it is on */}
+        <p className="pt-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+          {t(`${C}.quickViewTitle`)}
+        </p>
+        {toggle("quick_view")}
+        {choice("quick_view_trigger")}
+        {QUICK_VIEW_SWITCHES.map(toggle)}
       </PanelGroup>
       {/* Read wherever a card is framed: a rail may frame its own while the shop's cards stay standard */}
       <PanelGroup title={t(THEME_GROUP_TITLES.framed)} reveal={reveal("framed")}>
