@@ -81,7 +81,7 @@ function rules(css: string): Rule[] {
 
 const STEP = rules(atolyeCss("shadow.css"))
 const stepFor = (part: string) => STEP.find((rule) => rule.selector.includes(part))
-const MARK = ':is([data-shadow="none"], :root:has([data-shadow="none"]))'
+const MARK = '[data-shadow="none"]'
 const LINE = "0 0 0 1px var(--color-rule)"
 
 describe("the floating surfaces' shadow (adr/0067 S2)", () => {
@@ -123,7 +123,7 @@ describe("the floating surfaces' shadow (adr/0067 S2)", () => {
 })
 
 describe("shadow's none step in the stylesheet", () => {
-  it("draws the rule round an edgeless utility surface, the portalled dialogs too", () => {
+  it("draws the rule round an edgeless utility surface, read from an ancestor's mark", () => {
     const bare = stepFor(".shadow-float")
     expect(bare?.selector).toBe(`${MARK} .shadow-float`)
     expect(bare?.layer).toBe("utilities")
@@ -156,7 +156,7 @@ describe("shadow's none step in the stylesheet", () => {
   it("writes every rule under the mark and nothing for the default step", () => {
     expect(STEP).toHaveLength(4)
     for (const rule of STEP) {
-      expect(rule.selector).toMatch(/^(?::is\(\[data-shadow="none"\]|\[data-shadow="none"\])/)
+      expect(rule.selector.startsWith(`${MARK} `), rule.selector).toBe(true)
     }
     expect(atolyeCss("shadow.css")).not.toContain('data-shadow="float"')
     expect(atolyeCss("styles.css")).toContain('@import "./shadow.css";')

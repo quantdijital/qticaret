@@ -7,28 +7,31 @@
  * still stands off the page; one with its own rule (`shadow-float-edged`,
  * the aisle dropdown, the search suggestions) gets nothing more.
  *
- * The drawers and dialogs are portalled into `body`, outside the root, so
- * `html` carries the choice too (`:has`, as frame.css reads the listing
- * bar). The rule is drawn round the surface (a spread, as a shadow sits),
- * so nothing moves, and declared on the surface itself, so its colour is
- * the rule where it is drawn (a card on a graphite section takes that
+ * The rule is drawn round the surface (a spread, as a shadow sits), so
+ * nothing moves, and declared on the surface itself, so its colour is the
+ * rule where it is drawn (a card on a graphite section takes that
  * section's rule). Each rule sits in the layer of what it rewrites.
+ *
+ * The rules read the mark from an ancestor. The Radix drawers and dialogs
+ * (the cart and the phone's menu, the quick view, installments and review)
+ * are portalled into `body`, outside the root: they follow once the style
+ * kit's shared portal fix carries the root's marks to them.
  */
 @layer utilities {
-  :is([data-shadow="none"], :root:has([data-shadow="none"])) .shadow-float {
+  [data-shadow="none"] .shadow-float {
     --tw-shadow: 0 0 0 1px var(--color-rule);
   }
-  :is([data-shadow="none"], :root:has([data-shadow="none"])) .shadow-float-edged {
+  [data-shadow="none"] .shadow-float-edged {
     --tw-shadow: 0 0 #0000;
   }
 }
 
 @layer components {
-  :is([data-shadow="none"], :root:has([data-shadow="none"])) :is(.gf-drop, .gf-suggest) {
+  [data-shadow="none"] :is(.gf-drop, .gf-suggest) {
     box-shadow: none;
   }
-  /* The sheet is a <dialog> inside the root; before the script it shows in place, drawn by
-     its own outline (pages.css), which keeps its stronger selector */
+  /* Before the script the sheet shows in place, drawn by its own outline (pages.css),
+     which keeps its stronger selector */
   [data-shadow="none"] .gf-sheet {
     box-shadow: 0 0 0 1px var(--color-rule);
   }
