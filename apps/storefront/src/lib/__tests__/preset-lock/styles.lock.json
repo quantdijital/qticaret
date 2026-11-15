@@ -58,11 +58,15 @@
       "file": "scroller.css"
     },
     {
+      "sha256": "18dda22273e05db35aa4b12ab2b81c5271cf6e033103abb3ea0a48547e1425fe",
+      "file": "shadow.css"
+    },
+    {
       "sha256": "f2535c467207a43b88f19881bb32353bd8d1092ba4160a8987d40952f5fe57de",
       "file": "slider.css"
     },
     {
-      "sha256": "1a8827558ffb87c9de06e483b140a55a51f6c24666711c8b566a1771fc8d49bd",
+      "sha256": "01f9921b9e1f964697548f27119c24d1dcf6ca043e28d5a79e555c4db5aa9b66",
       "file": "styles.css"
     },
     {
