@@ -125,9 +125,7 @@ describe("the catalog header's layout choices", () => {
 
   it("narrows the search to 35 rem right after the wordmark", () => {
     const html = headerOf(renderFrame(atolyeTheme, catalogShop({ searchWidth: "narrow" })))
-    expect(html).toMatch(
-      /class="[^"]*lg:\[&amp;&gt;\[role=search\]\]:max-w-140/
-    )
+    expect(html).toMatch(/class="[^"]*lg:\[&amp;&gt;\[role=search\]\]:max-w-140/)
   })
 })
 
