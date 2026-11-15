@@ -103,10 +103,10 @@ Sütunlar: **Var** = bugünkü ayarlar (grup); **Eksik** = standarda göre; **Gr
 
 | | |
 | --- | --- |
-| Var | `product_id`, `title`, `text` (İçerik); `look` tam |
+| Var | `product_id`, `title`, `text` (İçerik); `gallery` **collage**/strips (Diziliş, 2026-11-15); `look` tam |
 | Eksik | Görselin yeri (sol/sağ), görsel boyu, gösterilecek parçalar (fiyat, puan, özellik tablosu, sepete ekle) aç/kapat |
-| Grup | — |
-| Ad | — |
+| Grup | "Diziliş" (fotoğraf düzeni) |
+| Ad | "Fotoğraf düzeni <small>gallery</small>": Kolaj / Çapraz şeritler |
 | Shopify | Dawn `featured-product`: `media_size` small/medium/large, `media_position` left/right, `media_fit`, `image_zoom` lightbox/hover/none, `hide_variants`, `secondary_background`; parçalar blok (başlık, fiyat, seçenek, satın al, puan, paylaş…) |
 
 ### 1.8 `brands` "Markalar"

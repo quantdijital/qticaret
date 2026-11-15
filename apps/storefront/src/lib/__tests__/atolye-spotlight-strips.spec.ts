@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
+import type { FeaturedProductSettings } from "@qticaret/types"
 import type { HomeSectionView, ImageView, ProductCardView } from "@qticaret/ui"
 import { buildAtolyeCss } from "@/test/tailwind-build"
 import { renderPage } from "@/test/theme-render"
@@ -59,7 +60,7 @@ describe("the featured product's collage (the default)", () => {
     const before = home(featured())
     expect(home(featured({ settings: { gallery: "collage" } }))).toBe(before)
     expect(
-      home(featured({ settings: { gallery: "mosaic" } as unknown as Featured["settings"] }))
+      home(featured({ settings: { gallery: "mosaic" } as unknown as FeaturedProductSettings }))
     ).toBe(before)
     expect(before).not.toContain("gf-strip")
     // One large and two small beside it, as before the setting

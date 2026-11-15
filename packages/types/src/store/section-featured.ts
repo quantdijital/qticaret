@@ -8,7 +8,7 @@
  * step goes here first, then into the backend's mirror
  * (`lib/storefront/sections/featured-product.ts`, a test keeps them equal),
  * then into the themes. The panel's Turkish names are
- * `storefront.editor.featured.gallery.*`.
+ * `storefront.editor.featured.galleries.<step>`.
  *
  * Imports nothing at run time (the storefront takes it from the
  * `@qticaret/types/section-featured` subpath).

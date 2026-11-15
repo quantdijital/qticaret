@@ -81,6 +81,16 @@ describe("the content fields' register", () => {
     ])
   })
 
+  it("puts the featured product's photographs layout in Diziliş, its steps searchable", () => {
+    const featured = newHomeSection("featured_product", "yakin00001")
+    expect(keys(featured)).toEqual(["layout:gallery"])
+    const [gallery] = contentFields(featured)
+    expect(gallery?.options.map((key) => i18next.t(key, { lng: "tr" }))).toEqual([
+      "Kolaj",
+      "Çapraz şeritler",
+    ])
+  })
+
   it("names the catalogue opening's list count, product counts and prices", () => {
     const hero = switchVariant(newHomeSection("hero", "giris00001") as HeroSection, "category_list")
     expect(keys(hero)).toEqual([
@@ -127,6 +137,7 @@ describe("the content fields' register", () => {
       },
       switchVariant(newHomeSection("hero", "giris00001") as HeroSection, "category_list"),
       newHomeSection("categories", "kategori01"),
+      newHomeSection("featured_product", "yakin00001"),
     ]
     for (const section of sections) {
       for (const field of contentFields(section)) {
