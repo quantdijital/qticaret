@@ -6,9 +6,8 @@ import { model } from "@medusajs/framework/utils"
  * active the customer record is the one source and these are cleared.
  * Its own prices live in a private `override` list for a one-member hidden
  * group, every row of which also carries that group as a price rule, so
- * it outranks the level's list (Ek 2026-11-15). Opening and closing
- * accounts is slice 1b; slice 1a keeps the table and the private list's
- * pricing.
+ * it outranks the level's list (Ek 2026-11-15). Opened, changed, closed
+ * and taken on sign-in by `workflows/wholesale/accounts/`.
  */
 export const WholesaleAccount = model
   .define("wholesale_account", {
