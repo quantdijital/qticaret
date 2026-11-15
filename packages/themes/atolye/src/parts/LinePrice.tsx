@@ -3,12 +3,14 @@ import { cn } from "@qticaret/ui/lib/utils"
 /**
  * A line's price as the storefront formatted it: what the shopper pays,
  * heavy, in the deal's red when a discount took something off, the price
- * before it struck through above it, read as "Önceki fiyat:".
+ * before it struck through above it, read as "Önceki fiyat:"; a
+ * wholesaler's "KDV hariç" under a total without KDV (ADR-0068).
  */
 export function LinePrice({
   total,
   original,
   before,
+  note,
   large = false,
   className,
 }: {
@@ -17,6 +19,8 @@ export function LinePrice({
   original: string | null
   /** "Önceki fiyat:", for the reader. */
   before: string
+  /** "KDV hariç" for a wholesaler's line; none for anyone else's. */
+  note?: string | null | undefined
   large?: boolean
   className?: string
 }) {
@@ -37,6 +41,7 @@ export function LinePrice({
       >
         {total}
       </span>
+      {note && <span className="text-xs text-text-2">{note}</span>}
     </p>
   )
 }

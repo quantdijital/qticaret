@@ -65,7 +65,12 @@ function Controls({
             increase: words.increase,
           }}
         />
-        <LinePrice total={line.total} original={line.original} before={words.before} />
+        <LinePrice
+          total={line.total}
+          original={line.original}
+          before={words.before}
+          note={line.taxNote}
+        />
       </div>
     </>
   )
@@ -165,7 +170,12 @@ function ReadOnlyLine({ line, words }: { line: CartLineView; words: SheetLineWor
         <Words line={line} words={words} />
         <div className="mt-auto flex items-end justify-between gap-3 text-sm text-text-3">
           <span>{words.quantity.replace("{count}", String(line.quantity))}</span>
-          <LinePrice total={line.total} original={line.original} before={words.before} />
+          <LinePrice
+            total={line.total}
+            original={line.original}
+            before={words.before}
+            note={line.taxNote}
+          />
         </div>
       </div>
     </li>

@@ -4,7 +4,8 @@ import { cn } from "@qticaret/ui/lib/utils"
 /**
  * A price as the storefront formatted it ("1.299,90 TL"): the shopper's
  * price heavy, the struck price before it small and muted, only when the
- * 30-day rule allows one (F4.3); "…'den başlayan" when variants differ.
+ * 30-day rule allows one (F4.3); "…'den başlayan" when variants differ;
+ * a wholesaler's note ("Toptan fiyat · KDV hariç", ADR-0068) after it.
  * A card's price grows from 1024 px only on a card 256 px wide or more
  * (the card is the container; `ProductCard`).
  */
@@ -34,6 +35,7 @@ export function Price({
           {price.before}
         </s>
       )}
+      {price.taxNote && <span className="text-xs text-text-2">{price.taxNote}</span>}
     </p>
   )
 }

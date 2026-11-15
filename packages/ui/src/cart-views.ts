@@ -12,9 +12,12 @@ export interface CartLineView {
   title: string
   detail: string | null
   quantity: number
+  /** The line's total, KDV included; without it when `taxNote` says so. */
   total: string
   /** The line before its discount, only when one applies. */
   original: string | null
+  /** A wholesaler's line (ADR-0068 §5): "KDV hariç" under a total without KDV; absent otherwise. */
+  taxNote?: string | null
   image: ImageView | null
   /**
    * The product's page with the line's variant chosen (`?variant=`), for
@@ -53,6 +56,13 @@ export interface CartPageView {
   items: string
   discount: string | null
   subtotal: string
+  /**
+   * A wholesaler's cart (ADR-0068 §5), Medusa's totals in words: the
+   * items without KDV (shown in place of `items`, the discount then
+   * without KDV too) and the KDV on them as a line of its own; the
+   * subtotal still includes it. Absent for every other shopper.
+   */
+  tax?: TaxLinesView | null
   /** The coupon codes on the cart, each removable. */
   promotions: string[]
   /** The gift card codes on the cart, each removable; null while the shop sells none (F4.8). */
@@ -85,6 +95,16 @@ export interface CartPageView {
   trust?: TrustBadgeView[]
   /** Products to add, never one already in the cart: the shop's best sellers or newest. */
   upsell?: { title: string; products: ProductCardView[] } | null
+}
+
+/** The KDV shown on its own line (ADR-0068 §5): never added up here, Medusa's amounts in words. */
+export interface TaxLinesView {
+  /** The items before discounts, without KDV ("1.000,00 TL"). */
+  items: string
+  /** The KDV on the items. */
+  vat: string
+  /** Said under the totals in place of "Fiyatlara KDV dahildir.". */
+  note: string
 }
 
 export interface FreeShippingView {

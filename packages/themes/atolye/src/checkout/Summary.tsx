@@ -50,8 +50,8 @@ function Totals({ summary, t }: { summary: CheckoutSummaryView; t: Translate }) 
   return (
     <dl className="flex flex-col gap-2.5 text-sm">
       <div className={row}>
-        <dt className="text-stage-text-2">{t("cart.items")}</dt>
-        <dd className="tabular">{summary.items}</dd>
+        <dt className="text-stage-text-2">{t(summary.tax ? "cart.items_net" : "cart.items")}</dt>
+        <dd className="tabular">{summary.tax?.items ?? summary.items}</dd>
       </div>
       {summary.discount && (
         <div className={cn(row, "text-deal")}>
@@ -71,6 +71,12 @@ function Totals({ summary, t }: { summary: CheckoutSummaryView; t: Translate }) 
           {summary.shipping ?? t("checkout.shipping_next")}
         </dd>
       </div>
+      {summary.tax && (
+        <div className={row}>
+          <dt className="text-stage-text-2">{t("cart.vat")}</dt>
+          <dd className="tabular">{summary.tax.vat}</dd>
+        </div>
+      )}
       <div className={cn(row, "mt-3 border-t border-stage-rule pt-4")}>
         <dt className="text-md font-semibold">{t("checkout.total")}</dt>
         <dd className="tabular text-title font-extrabold">{summary.total}</dd>
@@ -83,7 +89,8 @@ function Totals({ summary, t }: { summary: CheckoutSummaryView; t: Translate }) 
  * The basket beside the checkout as a graphite stage, its photographs
  * sinking into it: each line with its count, picks (a gift wrap, an
  * engraving) and total, then the totals, the total large. The backend's
- * amounts in words; nothing is added up here.
+ * amounts in words; nothing is added up here. A wholesaler's: lines and
+ * items without KDV, the KDV a row of its own (ADR-0068 §5).
  */
 export function Summary({
   summary,
@@ -111,7 +118,7 @@ export function Summary({
       <Lines summary={summary} t={t} />
       {code}
       <Totals summary={summary} t={t} />
-      <p className="text-xs text-stage-text-2">{t("checkout.tax_included")}</p>
+      <p className="text-xs text-stage-text-2">{summary.tax?.note ?? t("checkout.tax_included")}</p>
     </aside>
   )
 }
