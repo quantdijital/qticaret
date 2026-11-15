@@ -22,6 +22,16 @@
     --color-paper-3: var(--color-stage-rule);
     --color-focus: var(--color-signal-on-stage);
   }
+  /*
+   * The cart's count on graphite: the stage's light ink with a graphite
+   * figure, not the shop's colour (a red reads 2.8:1 on the bar; the
+   * light pill ~16:1 in every colour set, the figure as much; Tezgâh
+   * audit C).
+   */
+  .gf-menubar[data-ground="stage"] .gf-on-bar .gf-count {
+    background: var(--color-stage-text);
+    color: var(--color-stage);
+  }
   .gf-menubar[data-ground="stage"] .gf-btn {
     background: var(--color-stage-text);
     color: var(--color-stage);
@@ -48,12 +58,12 @@
     --color-focus: var(--primary-foreground);
   }
 
-  .gf-menubar[data-ground="light"] {
+  .gf-menubar[data-ground="well"] {
     background: var(--color-paper-2);
     color: var(--color-text);
     box-shadow: inset 0 1px 0 var(--color-rule);
   }
-  .gf-menubar[data-ground="light"] :is(.gf-on-bar, .gf-aisle-item) {
+  .gf-menubar[data-ground="well"] :is(.gf-on-bar, .gf-aisle-item) {
     --color-paper-2: var(--color-paper-3);
   }
 

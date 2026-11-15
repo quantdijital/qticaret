@@ -1,5 +1,6 @@
 import "server-only"
 import type { StoreHeroSliderSection } from "@qticaret/types"
+import { sliderSecondsOf, sliderSettingsOf } from "@qticaret/types/section-scroller"
 import type { HeroSliderSectionView, Translate } from "@qticaret/ui"
 import { layoutImage, layoutLink } from "./layout"
 
@@ -8,11 +9,13 @@ import { layoutImage, layoutLink } from "./layout"
  * draws it: each slide's pictures with their sizes (a phone's own when the
  * shop gave one), its words and its one action. A picture without words
  * of its own is named by the slide's heading, else the media library's.
+ * Its kit settings read forgivingly, a backend's from before the kit too.
  */
 export function heroSliderView(
   section: StoreHeroSliderSection,
   t: Translate
 ): HeroSliderSectionView {
+  const settings = sliderSettingsOf(section)
   return {
     id: section.id,
     type: "hero_slider",
@@ -28,9 +31,7 @@ export function heroSliderView(
       tone: slide.tone,
     })),
     height: section.height,
-    autoplay: section.autoplay,
-    interval: section.interval,
-    dots: section.dots,
-    arrows: section.arrows,
+    settings,
+    interval: sliderSecondsOf(section, settings),
   }
 }

@@ -96,6 +96,8 @@ export interface ThemeSettings {
   buttons: "pill" | "rounded" | "square"
   /** The gap between the home page's sections, on the theme's own scale (`SECTION_SPACINGS`). */
   section_spacing: (typeof SECTION_SPACINGS)[number]
+  /** How the theme draws its boxes (`SURFACE_STYLES`): a filled tone or a 1 px rule. */
+  surface_style: (typeof SURFACE_STYLES)[number]
 }
 
 /**
@@ -105,6 +107,14 @@ export interface ThemeSettings {
  * `SECTION_SPACINGS` (a unit test keeps them equal).
  */
 export const SECTION_SPACINGS = ["compact", "normal", "roomy"] as const
+
+/**
+ * How the theme draws its boxes (Tezgâh audit Z-04): `filled` a tone darker
+ * than the page (today's, the default), `lined` the page's ground inside a
+ * 1 px rule. Mirrors `@qticaret/types`' `SURFACE_STYLES` (a unit test keeps
+ * them equal).
+ */
+export const SURFACE_STYLES = ["filled", "lined"] as const
 
 const color = z
   .string()
@@ -180,6 +190,7 @@ const GRAFIT: ThemeSettings = {
   header: { layout: "left", sticky: true },
   buttons: "pill",
   section_spacing: "normal",
+  surface_style: "filled",
 }
 
 /**
@@ -197,6 +208,10 @@ export function withCardDefaults(value: unknown): unknown {
   // The section spacing came later still (K-11): without it, the theme's own gaps
   if (!Object.hasOwn(value, "section_spacing")) {
     value = { ...value, section_spacing: GRAFIT.section_spacing }
+  }
+  // So did the surface style (Z-04): without it, today's filled boxes
+  if (isPlainObject(value) && !Object.hasOwn(value, "surface_style")) {
+    value = { ...value, surface_style: GRAFIT.surface_style }
   }
   if (!isPlainObject(value) || !isPlainObject(value["product_card"])) {
     return value
@@ -269,6 +284,7 @@ export const themeSection = defineSection<ThemeSettings>(
     header: z.object({ layout: z.enum(["centered", "left"]), sticky: z.boolean() }).strict(),
     buttons: z.enum(["pill", "rounded", "square"]),
     section_spacing: z.enum(SECTION_SPACINGS),
+    surface_style: z.enum(SURFACE_STYLES),
   },
   GRAFIT,
   (values, ctx) => {

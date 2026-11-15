@@ -261,6 +261,41 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     expect(themeSettings({ section_spacing: "compact" }, null).section_spacing).toBe("compact")
   })
 
+  it("draws the boxes filled by default and lined on the page's ground when asked (Z-04)", () => {
+    expect(entry.style(chosen({ surface_style: "filled" }))).toBeNull()
+    expect(entry.style(chosen({ surface_style: "lined" }))).toBe(
+      ":root{--box-ground:var(--color-paper);--box-line:var(--color-rule)}"
+    )
+    expect(themeSettings({ surface_style: "glass" }, null).surface_style).toBe("filled")
+    expect(themeSettings({ surface_style: "lined" }, null).surface_style).toBe("lined")
+    // One class for every box: the filled tone and a rule only through the variables
+    const surface = atolyeCss("surface.css")
+    expect(ruleBody(surface, ".gf-box")).toContain("var(--box-ground, var(--color-paper-2))")
+    expect(ruleBody(surface, ".gf-box")).toContain("var(--box-line, transparent)")
+    for (const file of [
+      "product/Shipping.tsx",
+      "product/ReviewList.tsx",
+      "product/Assurances.tsx",
+      "product/Community.tsx",
+      "listing/FilterPanel.tsx",
+      "frame/CartSheet.tsx",
+      "frame/CartSheetLine.tsx",
+    ]) {
+      expect(atolyeCss(file), file).toContain("gf-box")
+      expect(atolyeCss(file), file).not.toMatch(/rounded-(media|tile) bg-paper-2/)
+    }
+    expect(atolyeCss("parts/CategoryTile.tsx")).toContain("gf-subtile")
+  })
+
+  it("draws the cart count on a graphite bar in the stage's light ink, not the shop's colour (audit C)", () => {
+    const count = ruleBody(
+      atolyeCss("header-catalog.css"),
+      '.gf-menubar[data-ground="stage"] .gf-on-bar .gf-count'
+    )
+    expect(count).toContain("background: var(--color-stage-text)")
+    expect(count).toContain("color: var(--color-stage)")
+  })
+
   it("keeps a sale apart from a warm main colour: a graphite badge, an ink price (K-05)", () => {
     const deal = ["--color-deal:var(--color-text)", "--color-deal-ink:var(--color-paper)"]
     // Tezgâh's red and reds around it, its orange set's (old and new) and an amber

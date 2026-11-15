@@ -49,12 +49,25 @@ export const SECTION_VARIANTS = {
 
 /**
  * The catalog header's menu bar ground (adr/0049 Ek 2026-11-15, N14):
- * "Koyu / Ana renk / Açık", the marquee's names; the first the default.
- * Mirrored by the backend's `HEADER_MENU_GROUNDS`.
+ * "Koyu / Ana renk / Hafif ton", the look's and the marquee's names
+ * (bilesen-standardi §3); the first the default. Mirrored by the backend's
+ * `HEADER_MENU_GROUNDS`.
  */
-export const HEADER_MENU_GROUNDS = ["stage", "primary", "light"] as const
+export const HEADER_MENU_GROUNDS = ["stage", "primary", "well"] as const
 
 export type HeaderMenuGround = (typeof HEADER_MENU_GROUNDS)[number]
+
+/**
+ * A menu bar ground as a reader takes it: `light`, the light tint's name
+ * before the dictionary had one, is `well` (bilesen-denetimi (b) 5); one
+ * off the list is the default.
+ */
+export function headerMenuGroundOf(value: unknown): HeaderMenuGround {
+  const named = value === "light" ? "well" : value
+  return (HEADER_MENU_GROUNDS as readonly unknown[]).includes(named)
+    ? (named as HeaderMenuGround)
+    : "stage"
+}
 
 /** The catalog header's words: the search box's placeholder. Mirrored by the backend. */
 export const HEADER_CATALOG_LIMITS = { search_placeholder: 60 } as const

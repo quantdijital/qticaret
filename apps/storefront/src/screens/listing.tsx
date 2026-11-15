@@ -28,8 +28,7 @@ import { listingPage } from "@/lib/store-api/listings"
 import type { ListingAnswer, ListingType } from "@/lib/store-api/listings"
 import { withCardFacts } from "@/lib/views/card-extras"
 import { imageView } from "@/lib/views/image"
-import { childrenOf } from "@/lib/views/categories"
-import { categoryTiles } from "@/lib/views/category-tiles"
+import { subcategoryTiles } from "@/lib/views/category-tiles"
 import { swatchLookup } from "@/lib/views/color"
 import { filterViews } from "@/lib/views/facets"
 import { currentLayout, currentShared } from "@/lib/views/layout"
@@ -75,12 +74,11 @@ async function headingOf(page: Entity): Promise<Heading> {
     case "product_category": {
       const categories = await allCategories()
       const category = categories.find((each) => each.id === page.entity_id)
-      const children = childrenOf(categories, page.entity_id)
       return {
         title: category?.name ?? "",
         description: paragraphsOf(category?.description),
         // Each with its picture: the shop's own, else its newest product's photo (adr/0046 Ek 2026-11-05)
-        subcategories: await categoryTiles(children.map((child) => child.id)),
+        subcategories: await subcategoryTiles(categories, page.entity_id),
       }
     }
     case "brand": {

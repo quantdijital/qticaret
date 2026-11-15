@@ -110,7 +110,7 @@
   .gf-marquee[data-outline="on"][data-ground="primary"] {
     --mq-ink: var(--primary-foreground);
   }
-  .gf-marquee[data-outline="on"][data-ground="light"] {
+  .gf-marquee[data-outline="on"][data-ground="well"] {
     --mq-ink: var(--color-text);
   }
   @supports (-webkit-text-stroke: 1px black) {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
+import { SLIDER_DEFAULTS } from "@qticaret/types/section-scroller"
 import type { HeroSlideView, HomeSectionView, ImageView } from "@qticaret/ui"
 import { renderPage } from "@/test/theme-render"
 import {
@@ -41,10 +42,8 @@ const slider = (over: Partial<Extract<HomeSectionView, { type: "hero_slider" }>>
     type: "hero_slider",
     slides: [slide("bir"), slide("iki"), slide("uc")],
     height: "regular",
-    autoplay: false,
+    settings: SLIDER_DEFAULTS,
     interval: 6,
-    dots: true,
-    arrows: true,
     ...over,
   }) satisfies HomeSectionView
 
@@ -133,6 +132,16 @@ describe("the Atölye hero slider", () => {
     // A slide without a link: the rail takes the focus so its keys scroll it
     expect(html).toMatch(
       /role="group" tabindex="0" aria-label="Öne çıkan seçkiler"|tabindex="0"[^>]*role="group"/
+    )
+  })
+
+  it("carries the kit's arrows on its stage: always by default, while hovered when the shop says (bilesen-denetimi (b) 4)", () => {
+    expect(home([slider()])).toContain('data-arrows="always"')
+    expect(home([slider({ settings: { ...SLIDER_DEFAULTS, arrows: "hover" } })])).toContain(
+      'data-arrows="hover"'
+    )
+    expect(home([slider({ settings: { ...SLIDER_DEFAULTS, arrows: "hidden" } })])).toContain(
+      'data-arrows="hidden"'
     )
   })
 

@@ -46,13 +46,31 @@ const server = vi.hoisted(() => ({ storeGet: vi.fn(), storePublicGet: vi.fn() })
 vi.mock("@/lib/store-api/server", () => server)
 
 const { categoryLinks } = await import("../section-data")
-const { categoryTiles, picturedCategories } = await import("../category-tiles")
+const { categoryTiles, picturedCategories, subcategoryTiles } = await import("../category-tiles")
 
 /** The category ids a photo was asked for, in the order asked. */
 const asked = () =>
   server.storePublicGet.mock.calls.map(
     ([, query]) => (query as { category_id: string[] }).category_id
   )
+
+describe("subcategoryTiles (Z-05)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    requests.allCategories.mockResolvedValue(CATEGORIES)
+    server.storePublicGet.mockResolvedValue({ products: [] })
+  })
+
+  it("lists a category's own children, never the page itself", async () => {
+    const tiles = await subcategoryTiles(CATEGORIES, "pcat_a")
+    expect(tiles.map((tile) => tile.label)).toEqual(["Katlanır çakılar"])
+  })
+
+  it("lists nothing for a category without children (not the top ones)", async () => {
+    expect(await subcategoryTiles(CATEGORIES, "pcat_b")).toEqual([])
+    expect(requests.allCategories).not.toHaveBeenCalled()
+  })
+})
 
 describe("categoryTiles", () => {
   beforeEach(() => {

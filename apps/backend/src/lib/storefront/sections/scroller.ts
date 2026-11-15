@@ -70,3 +70,58 @@ function settingFields() {
 export const scroller = z.object(settingFields()).strict().prefault({})
 
 export type ScrollerFields = z.infer<typeof scroller>
+/**
+ * The sliding opening's settings from the kit (bilesen-denetimi (b) 4):
+ * the ones a slider of one slide in view has use for, with its own
+ * defaults (its look before the kit: still, looping, dots and round
+ * arrows showing). Mirrors `@qticaret/types`' `SLIDER_SCROLLER`,
+ * `SLIDER_DEFAULTS` and `SLIDER_SECONDS`; a unit test keeps them equal.
+ */
+export const SLIDER_SCROLLER = [
+  "autoplay",
+  "speed",
+  "loop",
+  "arrows",
+  "arrow_style",
+  "dots",
+] as const satisfies readonly Setting[]
+
+type SliderSetting = (typeof SLIDER_SCROLLER)[number]
+
+export const SLIDER_DEFAULTS: { readonly [S in SliderSetting]: Step<S> } = {
+  autoplay: "off",
+  speed: "medium",
+  loop: "on",
+  arrows: "always",
+  arrow_style: "round",
+  dots: "on",
+}
+
+/** Seconds a slide stays by speed step; saved seconds read as the nearest step. */
+export const SLIDER_SECONDS: Readonly<Record<Step<"speed">, number>> = {
+  fast: 5,
+  medium: 6,
+  slow: 8,
+}
+
+/** Saved seconds (5–10) as the nearest speed step: 5 fast, 6–7 medium, 8–10 slow. */
+export const sliderSpeedOf = (seconds: number): Step<"speed"> =>
+  seconds <= 5 ? "fast" : seconds <= 7 ? "medium" : "slow"
+
+const sliderSetting = <S extends SliderSetting>(name: S) => {
+  const steps: readonly unknown[] = SCROLLER_SETTINGS[name]
+  return z
+    .custom<Step<S>>((value) => steps.includes(value), SETTING_ERROR)
+    .default(SLIDER_DEFAULTS[name])
+}
+
+function sliderFields() {
+  return Object.fromEntries(SLIDER_SCROLLER.map((name) => [name, sliderSetting(name)])) as {
+    [S in SliderSetting]: ReturnType<typeof sliderSetting<S>>
+  }
+}
+
+/** The slider's kit settings as one field; a step missing reads as the slider's default. */
+export const sliderScroller = z.object(sliderFields()).strict()
+
+export type SliderFields = z.infer<typeof sliderScroller>

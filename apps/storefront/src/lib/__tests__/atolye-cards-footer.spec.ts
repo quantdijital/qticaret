@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
 import type { CategoryCardsView, HomeSectionView, LinkedCategoryCardView } from "@qticaret/ui"
+import { atolyeCss } from "@/test/atolye-css"
 import { renderFrame, renderPage, shopFixture } from "@/test/theme-render"
 
 /**
@@ -160,14 +161,20 @@ describe("the footer's own settings", () => {
     expect(right).toContain("bottom-[calc(9.5rem+env(safe-area-inset-bottom))]")
     expect(right).toContain("rounded-pill")
     const left = on({ side: "left", shape: "square", mobile: false })
-    expect(left).toContain("left-2")
+    expect(left).toContain("left-1")
     expect(left).toContain("bottom-[calc(5rem+env(safe-area-inset-bottom))]")
     expect(left).toContain("rounded-inner")
     expect(left).toContain("max-lg:hidden")
-    // A 40 px face; inside the 48 px gutter wider than 1024 px, 4 px from the edge (K-10, Y-02)
-    expect(right).toContain("size-10")
+    // A 40 px face inside the 48 px gutter wider than 1024 px, 4 px from the edge (K-10, Y-02);
+    // narrower a 32 px see-through face, as little over the content as it can be (third audit)
+    expect(right).toContain("min-[64.0625rem]:size-10")
+    expect(right).toContain("size-8")
     expect(right).not.toContain("size-12")
-    expect(right).toContain("min-[64.0625rem]:right-1")
+    expect(right).toContain("right-1")
+    expect(/<button[^>]*data-back-to-top=""[^>]*>/.exec(right)?.[0]).not.toMatch(/ right-2 /)
+    expect(atolyeCss("frame.css")).toContain(
+      "[data-back-to-top][data-shown]:not(:hover, :focus-visible) {\n      opacity: 0.8;"
+    )
     // One way up: the footer line's link goes where the button shows
     const link = /<a href="#top"[^>]*>/
     expect(renderFrame(atolyeTheme, shopFixture())).toMatch(link)

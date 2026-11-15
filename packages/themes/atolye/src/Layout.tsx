@@ -55,7 +55,7 @@ export function Layout({
   )
   if (shop.checkout) {
     return (
-      <div className="flex min-h-dvh flex-col">
+      <div className="flex min-h-dvh flex-col" data-surface={shop.theme.surface ?? "filled"}>
         {skip}
         <CheckoutHeader shop={shop} t={t} />
         <main id="icerik" className="flex-1">
@@ -76,7 +76,7 @@ export function Layout({
   // The footer's floating "Yukarı çık" (adr/0049 Ek 2026-11-15), away while the cookie question waits
   const backToTop = shop.cookieBanner?.due === true ? null : (shop.footerBar?.backToTop ?? null)
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col" data-surface={shop.theme.surface ?? "filled"}>
       {skip}
       <Announcement
         lines={shop.announcements}

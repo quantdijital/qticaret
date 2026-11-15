@@ -50,9 +50,26 @@ export const cartAddedMessage = (event: Event): string =>
     ? (event.detail as { message: string }).message
     : ""
 
-/** Tells the cart a line went in, with the words its live region says. */
-export function announceCartAdded(message: string): void {
-  window.dispatchEvent(new CustomEvent(CART_ADDED_EVENT, { detail: { message } }))
+/** The button a `qt:cart-added` event came from, for the drawer to give the focus back to (Z-03). */
+export const cartAddedOrigin = (event: Event): HTMLElement | null => {
+  const origin =
+    event instanceof CustomEvent ? (event.detail as { origin?: unknown } | null)?.origin : null
+  return origin instanceof HTMLElement ? origin : null
+}
+
+/**
+ * The button that sent a form: the one to go back to once the drawer it
+ * opens shuts. Pressed, it is disabled while the form is busy and the
+ * focus drops to the page, so it is taken here, at the submit.
+ */
+export const submitterOf = (event: { nativeEvent: Event }): HTMLElement | null => {
+  const { submitter } = event.nativeEvent as SubmitEvent
+  return submitter instanceof HTMLElement ? submitter : null
+}
+
+/** Tells the cart a line went in, with the words its live region says and the button that sent it. */
+export function announceCartAdded(message: string, origin: HTMLElement | null = null): void {
+  window.dispatchEvent(new CustomEvent(CART_ADDED_EVENT, { detail: { message, origin } }))
 }
 
 /** A click the link should follow itself: a new tab, a modifier, or one already handled. */

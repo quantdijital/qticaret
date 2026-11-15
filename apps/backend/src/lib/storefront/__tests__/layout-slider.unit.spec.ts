@@ -17,7 +17,7 @@ const slider = (more: Record<string, unknown> = {}) => ({
 const parses = (doc: Record<string, unknown>) => layoutDocument.safeParse(doc).success
 
 describe("the home page's hero slider (adr/0049 Ek 2026-11-06)", () => {
-  it("fills its options: still, regular height, dots and arrows, 6 s once it plays", () => {
+  it("fills its options: still, regular height, looping with dots and round arrows", () => {
     const [read] = layoutDocument.parse({ home: [slider()] }).home
     expect(read).toEqual({
       id: "kayan0001",
@@ -33,10 +33,14 @@ describe("the home page's hero slider (adr/0049 Ek 2026-11-06)", () => {
         tone: "light",
       })),
       height: "regular",
-      autoplay: false,
-      interval: 6,
-      dots: true,
-      arrows: true,
+      scroller: {
+        autoplay: "off",
+        speed: "medium",
+        loop: "on",
+        arrows: "always",
+        arrow_style: "round",
+        dots: "on",
+      },
     })
   })
 
@@ -51,10 +55,17 @@ describe("the home page's hero slider (adr/0049 Ek 2026-11-06)", () => {
     })
     const doc = layoutDocument.parse({
       home: [
-        slider({ slides: [own, slide("iki")], height: "compact", autoplay: true, interval: 10 }),
+        slider({
+          slides: [own, slide("iki")],
+          height: "compact",
+          scroller: { autoplay: "on", speed: "slow" },
+        }),
       ],
     })
-    expect(doc.home[0]).toMatchObject({ height: "compact", autoplay: true, interval: 10 })
+    expect(doc.home[0]).toMatchObject({
+      height: "compact",
+      scroller: { autoplay: "on", speed: "slow", loop: "on", dots: "on" },
+    })
     expect(sliderImages(doc.home[0] as never)).toEqual([
       picture("bir").url,
       "/static/bir-dar.webp",

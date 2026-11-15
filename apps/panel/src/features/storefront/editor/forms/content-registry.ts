@@ -1,6 +1,6 @@
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
-import { scrollerFields } from "./shelf-registry"
+import { scrollerFields, sliderFields } from "./shelf-registry"
 
 /**
  * The content fields the settings search finds (docs/tema/bilesen-standardi
@@ -26,10 +26,6 @@ export type ContentField =
   | "thumbs"
   | "thumbs_count"
   | "slider_height"
-  | "autoplay"
-  | "interval"
-  | "dots"
-  | "arrows"
   | "open_first"
   | "single_open"
 
@@ -116,10 +112,8 @@ export function contentFields(section: AnySection): RegistryField[] {
           `${S}.height`,
           ["compact", "regular"].map((height) => `${S}.heights.${height}`)
         ),
-        entry(section, "autoplay", `${S}.autoplay`),
-        ...(section.autoplay ? [entry(section, "interval", `${S}.interval`)] : []),
-        entry(section, "dots", `${S}.dots`),
-        entry(section, "arrows", `${S}.arrows`),
+        // The scroller kit's settings it has use for (bilesen-denetimi (b) 4)
+        ...sliderFields(section.id, section),
       ]
     case "faq":
       return [

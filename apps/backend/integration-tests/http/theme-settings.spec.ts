@@ -19,6 +19,7 @@ interface Frame {
     header: { layout: string; sticky: boolean }
     buttons: string
     section_spacing: string
+    surface_style: string
   }
 }
 
@@ -81,6 +82,7 @@ medusaIntegrationTestRunner({
         header: { layout: "centered" },
         buttons: "rounded",
         section_spacing: "roomy",
+        surface_style: "lined",
       })
       const after = await frame()
 
@@ -95,6 +97,8 @@ medusaIntegrationTestRunner({
         header: { layout: "left", sticky: true },
         buttons: "pill",
         section_spacing: "normal",
+        // A row before the surface style reads today's filled boxes (Z-04)
+        surface_style: "filled",
       })
       expect(fallback.data.theme.colors.primary).toBe("#0b5c99")
       expect(pale.status).toBe(400)
@@ -111,6 +115,7 @@ medusaIntegrationTestRunner({
         header: { layout: "centered", sticky: true },
         buttons: "rounded",
         section_spacing: "roomy",
+        surface_style: "lined",
       })
       // The old field stays until the storefront and the panel move over
       expect(after.data.storefront.primary_color).toBe("#0b5c99")
@@ -149,6 +154,7 @@ medusaIntegrationTestRunner({
         header: { layout: "left", sticky: false },
         buttons: "pill",
         section_spacing: "normal",
+        surface_style: "filled",
       }
 
       const read = await section()

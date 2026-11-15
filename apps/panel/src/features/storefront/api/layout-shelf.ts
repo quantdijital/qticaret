@@ -7,6 +7,7 @@ import type {
   ShelfPerList,
   ShelfPhoneColumns,
   ShelfRows,
+  ShelfTabs,
 } from "@qticaret/types"
 import type { BodySectionBase, LayoutLink } from "@/features/storefront/api/layout-sections"
 
@@ -25,6 +26,8 @@ export interface ProductsSection extends BodySectionBase {
   more: LayoutLink | null
   /** The rail's own card style over the theme's (adr/0049 Ek 2026-11-14 §3.3); null or absent: the theme's. */
   card_variant?: CardVariant | null
+  /** Joined with the rails beside it in one tabbed shelf, or set apart (bilesen-denetimi (b) 2); absent: `auto`. */
+  tabs?: ShelfTabs
   /** `grid`: cards in a row on a wide screen; the theme steps down on narrower ones. */
   columns?: ShelfColumns
   /** `grid`: cards in a row on a phone (bilesen-denetimi (b) 3); the server fills 2 on reading. */

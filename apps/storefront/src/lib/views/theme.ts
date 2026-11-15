@@ -10,6 +10,7 @@ import {
   CARD_NO_REVIEWS,
   CARD_SOLD_OUT_ROWS,
   SECTION_SPACINGS,
+  SURFACE_STYLES,
 } from "@qticaret/types/storefront"
 import type { ThemeView } from "@qticaret/ui"
 import { cardVariantOf } from "@qticaret/types/section-variants"
@@ -56,6 +57,7 @@ export const DEFAULT_THEME: StoreThemeSettings = {
   header: { layout: "left", sticky: true },
   buttons: "pill",
   section_spacing: "normal",
+  surface_style: "filled",
 }
 
 /**
@@ -226,6 +228,7 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
     },
     buttons: oneOf(at(raw, "buttons"), ["pill", "rounded", "square"], d.buttons),
     section_spacing: oneOf(at(raw, "section_spacing"), SECTION_SPACINGS, d.section_spacing),
+    surface_style: oneOf(at(raw, "surface_style"), SURFACE_STYLES, d.surface_style),
   }
 }
 
@@ -239,6 +242,7 @@ export function themeView(settings: StoreThemeSettings): ThemeView {
     },
     header: { layout: settings.header.layout, sticky: settings.header.sticky },
     buttons: settings.buttons,
+    surface: settings.surface_style,
   }
 }
 

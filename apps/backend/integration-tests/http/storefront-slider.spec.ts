@@ -90,6 +90,7 @@ medusaIntegrationTestRunner({
             link: { kind: "system", target: "shop", label: "Tüm ürünler" },
           },
         ],
+        // Saved as before the scroller kit: read into its steps (bilesen-denetimi (b) 4)
         autoplay: true,
         interval: 8,
       }
@@ -143,14 +144,20 @@ medusaIntegrationTestRunner({
       )
       const [read, hero] = shown.data.layout.home
       expect(hero?.type).toBe("hero")
+      expect(read).not.toHaveProperty("interval")
       expect(read).toMatchObject({
         id: "kayangiris",
         type: "hero_slider",
         height: "regular",
-        autoplay: true,
-        interval: 8,
-        dots: true,
-        arrows: true,
+        // 8 s is the slow step's own: no seconds printed beside it
+        scroller: {
+          autoplay: "on",
+          speed: "slow",
+          loop: "on",
+          arrows: "always",
+          arrow_style: "round",
+          dots: "on",
+        },
         slides: [
           {
             image: { url: wide, alt: "Tezgâhta çakılar", width: 96, height: 40 },

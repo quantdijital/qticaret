@@ -50,6 +50,7 @@ export const THEME: ThemeSettings = {
   header: { layout: "left", sticky: true },
   buttons: "pill",
   section_spacing: "normal",
+  surface_style: "filled",
 }
 
 export const DOC: LayoutDocument = {

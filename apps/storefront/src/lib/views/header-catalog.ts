@@ -1,4 +1,5 @@
 import type { StoreHeaderCatalog } from "@qticaret/types"
+import { headerMenuGroundOf } from "@qticaret/types/section-variants"
 import type { HeaderCatalogView, NavCategoryView, Translate } from "@qticaret/ui"
 import { menuLink } from "./menus"
 
@@ -38,6 +39,6 @@ export function headerCatalogOf(
     utilityBar: set.utility_bar,
     phone: set.phone,
     categories: set.categories_button ? tree() : [],
-    menuGround: set.menu_ground,
+    menuGround: headerMenuGroundOf(set.menu_ground),
   }
 }

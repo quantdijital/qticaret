@@ -5,6 +5,7 @@ import type {
   ShelfPerList,
   ShelfPhoneColumns,
   ShelfRows,
+  ShelfTabs,
 } from "@qticaret/types"
 import type { ProductCardView } from "./product-views"
 import type { LinkView } from "./views"
@@ -24,6 +25,11 @@ export interface ProductsSectionView {
   empty: string
   /** How the cards stand; none: `grid`. */
   variant?: ProductsVariant
+  /**
+   * `off`: drawn on its own, never in its neighbours' tabbed shelf
+   * (bilesen-denetimi (b) 2). None: `auto`, it joins them (`shelfJoins`).
+   */
+  tabs?: ShelfTabs
   /**
    * `grid`: cards in a row on a wide screen, the shop's choice (adr/0049
    * Ek 2026-11-05); the theme steps down on narrower ones. None: 3.

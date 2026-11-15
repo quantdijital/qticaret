@@ -21,6 +21,11 @@ export interface ThemeView {
   }
   /** The buttons' corners; also `--button-radius`. */
   buttons: "pill" | "rounded" | "square"
+  /**
+   * How the boxes stand (theme setting `surface_style`): a filled tone or a
+   * 1 px rule; also `--box-ground` and `--box-line`. Absent: `filled`.
+   */
+  surface?: "filled" | "lined"
 }
 
 /** The phone's bottom bar's items (docs/20 "mobil alt gezinme"). */

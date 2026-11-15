@@ -1,6 +1,7 @@
 import "server-only"
+import type { StoreCategory } from "@qticaret/types"
 import type { CategoryCardView } from "@qticaret/ui"
-import { subtreeIds } from "./categories"
+import { childrenOf, subtreeIds } from "./categories"
 import { mapLimited } from "./limited"
 import { newestPhoto, PHOTO_REQUESTS } from "./nav-pictures"
 import { namedCategories } from "./section-data"
@@ -17,6 +18,19 @@ import { namedCategories } from "./section-data"
  */
 export async function categoryTiles(ids: readonly string[]): Promise<CategoryCardView[]> {
   return (await picturedCategories(ids)).map(({ card }) => card)
+}
+
+/**
+ * A category page's tiles: its own children, none without any. An empty
+ * list would ask `categoryTiles` for the top categories, the page itself
+ * among them (Tezgâh audit Z-05).
+ */
+export async function subcategoryTiles(
+  categories: readonly StoreCategory[],
+  parentId: string
+): Promise<CategoryCardView[]> {
+  const ids = childrenOf(categories, parentId).map((child) => child.id)
+  return ids.length > 0 ? categoryTiles(ids) : []
 }
 
 /**

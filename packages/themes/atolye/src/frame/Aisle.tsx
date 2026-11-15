@@ -3,10 +3,10 @@
 import { ChevronDown } from "lucide-react"
 import { NavigationMenu } from "radix-ui"
 import { useState, type ReactNode } from "react"
-import { ResponsiveImage } from "@qticaret/ui"
 import type { NavCategoryView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { useAisleFit } from "./aisle-fit"
+import { Panel } from "./AislePanel"
 
 const ITEM =
   "gf-aisle-item group inline-flex min-h-11 items-center gap-1 rounded-button px-3 text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text data-[state=open]:bg-text data-[state=open]:text-paper"
@@ -17,64 +17,6 @@ const ITEM =
  */
 const BAR_ITEM =
   "px-2 xl:px-3 data-[state=open]:bg-paper-2 data-[state=open]:text-text data-[state=open]:shadow-[inset_0_-2px_0_currentColor]"
-
-/** A category's panel: its children in short columns beside its picture tile. */
-function Panel({
-  category,
-  allIn,
-  seeAll,
-}: {
-  category: NavCategoryView
-  allIn: string
-  seeAll: string
-}) {
-  return (
-    <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,18rem)] gap-(--space-xl) xl:grid-cols-[minmax(0,1fr)_minmax(0,21rem)]">
-      <div className="flex min-w-0 flex-col gap-4">
-        <div className="flex items-baseline justify-between gap-6 border-b border-rule pb-4">
-          <p className="text-title leading-tight font-extrabold tracking-(--tracking-display)">
-            {category.label}
-          </p>
-          <NavigationMenu.Link asChild>
-            {/* The name stands once, over the link (Tezgâh audit K-21); a screen reader hears it whole */}
-            <a href={category.path} aria-label={allIn} className="gf-link shrink-0 text-sm">
-              {seeAll || allIn}
-            </a>
-          </NavigationMenu.Link>
-        </div>
-        <ul className="columns-3 gap-x-(--gap-columns) xl:columns-4">
-          {category.children.map((child) => (
-            <li key={child.path} className="break-inside-avoid">
-              <NavigationMenu.Link asChild>
-                <a
-                  href={child.path}
-                  className="-mx-3 flex min-h-10 items-center pointer-coarse:min-h-11 rounded-inner px-3 py-2 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
-                >
-                  {child.label}
-                </a>
-              </NavigationMenu.Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-      {category.image && (
-        // The same page as the link above, by its picture: one stop for the keyboard
-        <a
-          href={category.path}
-          tabIndex={-1}
-          aria-hidden="true"
-          className="relative block aspect-[4/3] self-start overflow-hidden rounded-media bg-paper-2 no-underline"
-        >
-          <ResponsiveImage
-            image={{ ...category.image, alt: "" }}
-            sizes="(min-width: 1280px) 336px, 288px"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        </a>
-      )}
-    </div>
-  )
-}
 
 /**
  * The categories that did not fit on the bar's line, each with its
@@ -121,6 +63,9 @@ function MorePanel({ categories }: { categories: readonly NavCategoryView[] }) {
     </ul>
   )
 }
+
+/** Fewer children than this open a narrow panel under their trigger (third audit; "Daha fazla"'s way). */
+const NARROW_UNDER = 5
 
 const PANEL =
   "absolute top-full z-(--z-dropdown) rounded-tile border border-rule bg-field p-6 text-text shadow-float data-[state=closed]:hidden xl:p-8"
@@ -171,6 +116,7 @@ export function Aisle({
   const { list, fit } = useAisleFit(categories.length, inBar)
   const shown = fit ?? categories.length
   const rest = categories.slice(shown)
+  const narrowIn = (category: NavCategoryView) => inBar && category.children.length < NARROW_UNDER
   return (
     <NavigationMenu.Root
       value={open}
@@ -210,7 +156,8 @@ export function Aisle({
               key={category.path}
               value={category.path}
               data-aisle-item=""
-              className={away ? "static hidden" : "static"}
+              // A few children open under their own trigger, as wide as they are (third audit)
+              className={cn(narrowIn(category) ? "relative" : "static", away && "hidden")}
             >
               <NavigationMenu.Trigger className={cn(ITEM, inBar && BAR_ITEM)}>
                 {category.label}
@@ -227,9 +174,20 @@ export function Aisle({
                     event.preventDefault()
                   }
                 }}
-                className={cn(PANEL, inBar ? "inset-x-0" : "-right-3 -left-3")}
+                className={cn(
+                  PANEL,
+                  narrowIn(category)
+                    ? // The bar's second half opens leftward, so the panel stays on the page
+                      index < shown / 2
+                      ? "left-0 w-max"
+                      : "right-0 w-max"
+                    : inBar
+                      ? "inset-x-0"
+                      : "-right-3 -left-3"
+                )}
               >
                 <Panel
+                  narrow={narrowIn(category)}
                   category={category}
                   allIn={allIn[category.path] ?? category.label}
                   seeAll={seeAll}

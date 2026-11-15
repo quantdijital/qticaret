@@ -76,7 +76,7 @@
     color: var(--primary-foreground);
     --color-focus: var(--primary-foreground);
   }
-  .gf-marquee[data-ground="light"] {
+  .gf-marquee[data-ground="well"] {
     background: var(--color-paper-2);
     color: var(--color-text);
     box-shadow:
@@ -97,7 +97,7 @@
   .gf-marquee--boxed {
     border-radius: var(--radius-tile);
   }
-  .gf-marquee--boxed[data-ground="light"] {
+  .gf-marquee--boxed[data-ground="well"] {
     box-shadow: inset 0 0 0 1px var(--color-rule);
   }
 

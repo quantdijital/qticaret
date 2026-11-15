@@ -142,7 +142,7 @@ function LineForm({
     return null
   }, null)
   return (
-    <li className="flex gap-3 rounded-media bg-paper-2 p-3">
+    <li className="flex gap-3 rounded-media gf-box p-3">
       <Picture line={line} />
       <form
         action={act}
@@ -159,7 +159,7 @@ function LineForm({
 /** A payment link's line, or one without the action: its count in words. */
 function ReadOnlyLine({ line, words }: { line: CartLineView; words: SheetLineWords }) {
   return (
-    <li className="flex gap-3 rounded-media bg-paper-2 p-3">
+    <li className="flex gap-3 rounded-media gf-box p-3">
       <Picture line={line} />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <Words line={line} words={words} />

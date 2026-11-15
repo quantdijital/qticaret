@@ -178,7 +178,9 @@ export function HeroSlider({
     goTo: slides.map((_, index) => t("home.slider_go", { n: index + 1 })),
   }
   const compact = section.height === "compact"
-  const arrows = section.arrows && total > 1
+  // The kit's settings a slider has use for (bilesen-denetimi (b) 4)
+  const { settings } = section
+  const arrows = settings.arrows !== "hidden" && total > 1
   return (
     <section
       id={headingId(section.id)}
@@ -199,10 +201,12 @@ export function HeroSlider({
       <Container>
         <SliderStage
           words={words}
-          autoplay={section.autoplay}
+          autoplay={settings.autoplay === "on"}
           interval={section.interval}
-          dots={section.dots}
-          arrows={arrows}
+          dots={settings.dots === "on"}
+          arrows={arrows ? settings.arrows : "hidden"}
+          arrowStyle={settings.arrow_style}
+          loop={settings.loop === "on"}
           focusable={slides.some((slide) => !slide.link)}
         >
           {slides.map((slide, index) => (

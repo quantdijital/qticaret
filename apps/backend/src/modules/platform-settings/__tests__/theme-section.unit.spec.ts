@@ -3,6 +3,7 @@ import { mergePatch } from "../sections/define"
 import { parseStored } from "../sections/stored"
 import {
   SECTION_SPACINGS,
+  SURFACE_STYLES,
   THEME_BACKGROUNDS,
   THEME_WELLS,
   primaryReadable,
@@ -58,6 +59,7 @@ describe("theme section", () => {
       header: { layout: "left", sticky: true },
       buttons: "pill",
       section_spacing: "normal",
+      surface_style: "filled",
     })
     expect(full.safeParse(defaults).success).toBe(true)
     expect(parseStored("theme", undefined)).toEqual(defaults)
@@ -116,6 +118,7 @@ describe("theme section", () => {
     ["a button shape", { buttons: "blob" }],
     ["a section spacing off the list", { section_spacing: "dense" }],
     ["a section spacing in pixels", { section_spacing: 64 }],
+    ["a surface style off the list", { surface_style: "glass" }],
     ["CSS of its own", { css: "body{display:none}" }],
     ["a version it does not write", { settings_version: 1 }],
   ])("refuses %s", (_, body) => {
@@ -262,10 +265,13 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
       product_card: { ...defaults.product_card, ...stored.product_card },
       // Stored before the section spacing (K-11): the theme's own gaps
       section_spacing: "normal",
+      // and before the surface style (Z-04): today's filled boxes
+      surface_style: "filled",
     })
     const framed = {
       ...stored,
       section_spacing: "compact",
+      surface_style: "lined",
       product_card: { ...defaults.product_card, variant: "framed" },
     }
     expect(parseStored("theme", framed)).toEqual(framed)
@@ -302,6 +308,25 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
     expect(withCardDefaults(before)).toEqual(defaults)
     expect(withCardDefaults({ ...defaults, section_spacing: "roomy" })).toMatchObject({
       section_spacing: "roomy",
+    })
+  })
+
+  it("takes the surface style from its list, the contract's; one stored before it reads filled (Z-04)", () => {
+    const contract = jest.requireActual<{ SURFACE_STYLES: unknown }>(CONTRACT_FILE)
+    expect(SURFACE_STYLES).toEqual(contract.SURFACE_STYLES)
+    for (const surface_style of SURFACE_STYLES) {
+      expect(saved({ surface_style }).success).toBe(true)
+    }
+    expect(full.parse(mergePatch(defaults, patch.parse({ surface_style: "lined" })))).toEqual({
+      ...defaults,
+      surface_style: "lined",
+    })
+    const before: Record<string, unknown> = { ...defaults }
+    delete before["surface_style"]
+    expect(withCardDefaults(before)).toEqual(defaults)
+    expect(parseStored("theme", before)).toEqual(defaults)
+    expect(withCardDefaults({ ...defaults, surface_style: "lined" })).toMatchObject({
+      surface_style: "lined",
     })
   })
 })
