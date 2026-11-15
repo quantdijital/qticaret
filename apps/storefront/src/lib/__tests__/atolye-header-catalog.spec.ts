@@ -2,7 +2,16 @@ import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
 import type { HeaderCatalogView, ShopView } from "@qticaret/ui"
 import { renderFrame, shopFixture } from "@/test/theme-render"
+import { readFileSync } from "node:fs"
 import { aisleFit } from "../../../../../packages/themes/atolye/src/frame/aisle-fit"
+
+const MENU_CSS = readFileSync(
+  new URL("../../../../../packages/themes/atolye/src/menu.css", import.meta.url),
+  "utf8"
+)
+/** A rule's body in a stylesheet, by its selector. */
+const css = (sheet: string, selector: string) =>
+  sheet.slice(sheet.indexOf(`${selector} {`)).split("}")[0] ?? ""
 
 /**
  * The catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15) as the
@@ -133,15 +142,13 @@ describe("the catalog header", () => {
   })
 
   it.each(["stage", "primary", "well"] as const)(
-    "writes the opened panels in the page's ink on a %s bar",
+    "writes the opened dropdowns in the page's ink on a %s bar",
     (menuGround) => {
       const html = renderFrame(atolyeTheme, catalogShop({ menuGround }))
-      const panels = html.match(/class="absolute top-full z-\(--z-dropdown\)[^"]*"/g) ?? []
-      expect(panels.length).toBeGreaterThan(0)
-      for (const panel of panels) {
-        expect(panel).toContain(" text-text ")
-        expect(panel).toMatch(/inset-x-0|w-max/)
-      }
+      // The bar's ground reaches its own items only (`.gf-on-bar`, `.gf-aisle-item`)
+      expect(html).toMatch(/data-ground="[^"]+"/)
+      expect(html).toContain('class="gf-drop data-[state=closed]:hidden"')
+      expect(css(MENU_CSS, ".gf-drop")).toContain("color: var(--color-text)")
       expect(html).toMatch(/aria-label="Tüm kategoriler" hidden=""[^>]*class="[^"]* text-text /)
     }
   )
@@ -149,16 +156,14 @@ describe("the catalog header", () => {
 
 describe("the menu bar's open states (third audit)", () => {
   const child = (n: number) => ({ label: `Alt ${n}`, path: `/kategori/cok/${n}` })
-  const panelsOf = (html: string) =>
-    html.match(/class="absolute top-full z-\(--z-dropdown\)[^"]*"/g) ?? []
 
-  it("opens a few children narrow under their trigger, many across the bar", () => {
+  it("opens each category's narrow dropdown under its own trigger, few children or many (M1)", () => {
     const html = renderFrame(
       atolyeTheme,
       catalogShop(
         {},
         {
-          // The main menu's categories: the bar's items and their panels
+          // The main menu's categories: the bar's items and their dropdowns
           categories: [
             { label: "Az", path: "/kategori/az", children: [child(1), child(2)] },
             { label: "Çok", path: "/kategori/cok", children: [1, 2, 3, 4, 5].map(child) },
@@ -166,10 +171,13 @@ describe("the menu bar's open states (third audit)", () => {
         }
       )
     )
-    const [few, many] = panelsOf(html)
-    expect(few).toContain("left-0 w-max")
-    expect(few).not.toContain("inset-x-0")
-    expect(many).toContain("inset-x-0")
+    for (const path of ["/kategori/az", "/kategori/cok"]) {
+      expect(html).toContain(`data-gf-drop="${path}"`)
+    }
+    expect(html).toMatch(/href="\/kategori\/cok\/5" class="gf-drop-row"/)
+    // No wide panel across the bar any more
+    expect(html).not.toMatch(/z-\(--z-dropdown\)[^"]*inset-x-0/)
+    expect(html.match(/<li[^>]*data-aisle-item=""[^>]*class="relative"/g)?.length).toBe(2)
   })
 
   it("draws the open Kategoriler button as the bar's open items, not as the highlighted link", () => {

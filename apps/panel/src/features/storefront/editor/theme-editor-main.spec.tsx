@@ -54,7 +54,7 @@ describe("the main sections in the theme editor (adr/0049 Ek 2026-11-14 §5, §7
     releaseClock()
   })
 
-  it("opens the header bar from its fixed row: its stickiness, the centred one in preparation, never removed", async () => {
+  it("opens the header bar from its fixed row: its stickiness, both layouts offered, never removed", async () => {
     renderEditor()
     const tree = await opened()
     await frame()
@@ -62,7 +62,9 @@ describe("the main sections in the theme editor (adr/0049 Ek 2026-11-14 §5, §7
     await user.click(within(tree).getByRole("button", { name: "Üst bilgi" }))
     const sticky = await screen.findByRole("switch", { name: /^Üst bilgi sabit kalsın/ })
     expect(sticky).toBeChecked()
-    expect(screen.getByRole("radio", { name: "Ortada logo (hazırlanıyor)" })).toBeDisabled()
+    // The theme draws the centred header now: offered, with no "in preparation" marker
+    expect(screen.getByRole("radio", { name: "Ortada logo" })).toBeEnabled()
+    expect(screen.queryByText(/hazırlanıyor/)).toBeNull()
     expect(screen.getByRole("radio", { name: "Solda logo" })).toBeChecked()
     expect(
       screen.getByText(
@@ -80,6 +82,16 @@ describe("the main sections in the theme editor (adr/0049 Ek 2026-11-14 §5, §7
         variant: "standard",
         sticky: false,
         visible: true,
+      })
+    })
+
+    await user.click(screen.getByRole("radio", { name: "Ortada logo" }))
+    await pass(AUTOSAVE_MS)
+    await waitFor(() => {
+      expect(lastSaved(fetchMock)?.header.at(-1)).toMatchObject({
+        type: "header_bar",
+        variant: "centered",
+        sticky: false,
       })
     })
   })

@@ -157,13 +157,3 @@ export const NO_LIRA_FONTS: ReadonlySet<HeadingFont> = new Set(["playfair", "dm-
 
 /** Faces with one weight (400): headings are drawn regular, not bold (adr/0062 §7). */
 export const SINGLE_WEIGHT_FONTS: ReadonlySet<HeadingFont> = new Set(["dm-serif"])
-
-/**
- * Header layouts the theme does not draw yet: "centered" is built on its
- * own branch and reaches the storefront once the owner approves it
- * (adr/0062 §10, owner's decision 6). Until then the theme draws "left",
- * so the form shows the choice as in preparation and does not offer it.
- */
-export const UNBUILT_HEADER_LAYOUTS: ReadonlySet<ThemeSettings["header"]["layout"]> = new Set([
-  "centered",
-])

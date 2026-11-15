@@ -29,7 +29,15 @@ afterEach(() => {
   host.remove()
 })
 
-const WORDS = { open: "Menüyü aç", title: "Menü", close: "Kapat", allIn: {}, whatsapp: "WhatsApp" }
+const WORDS = {
+  open: "Menüyü aç",
+  title: "Menü",
+  close: "Kapat",
+  seeAll: "Tümünü gör",
+  allIn: {},
+  counts: {},
+  whatsapp: "WhatsApp",
+}
 const CONTACT = {
   phone: null,
   phoneHref: null,

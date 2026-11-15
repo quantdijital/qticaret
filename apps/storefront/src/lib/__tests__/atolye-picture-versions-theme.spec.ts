@@ -49,11 +49,18 @@ const card: PostCardView = {
 }
 
 describe("the theme prints library pictures in their versions", () => {
-  it("in the header's category panel", () => {
+  it("in the header's category dropdown rows", () => {
     const categories = shopFixture().categories.map((category, index) =>
-      index === 0 ? { ...category, image: versions("cakilar") } : category
+      index === 0
+        ? {
+            ...category,
+            children: category.children.map((child, at) =>
+              at === 0 ? { ...child, image: versions("katlanir") } : child
+            ),
+          }
+        : category
     )
-    expect(pictured(renderFrame(atolyeTheme, shopFixture({ categories })), "cakilar")).toBe(true)
+    expect(pictured(renderFrame(atolyeTheme, shopFixture({ categories })), "katlanir")).toBe(true)
   })
 
   it("on /kategoriler: the section's small picture and the tiles", () => {

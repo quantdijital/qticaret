@@ -2,11 +2,12 @@
 
 import { ChevronDown } from "lucide-react"
 import { NavigationMenu } from "radix-ui"
-import { useState, type ReactNode } from "react"
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react"
 import type { NavCategoryView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { useAisleFit } from "./aisle-fit"
-import { Panel } from "./AislePanel"
+import { Drop } from "./AisleDrop"
+import type { MenuWords } from "./menu-words"
 
 const ITEM =
   "gf-aisle-item group inline-flex min-h-11 items-center gap-1 rounded-button px-3 text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text data-[state=open]:bg-text data-[state=open]:text-paper"
@@ -64,61 +65,73 @@ function MorePanel({ categories }: { categories: readonly NavCategoryView[] }) {
   )
 }
 
-/** Fewer children than this open a narrow panel under their trigger (third audit; "Daha fazla"'s way). */
-const NARROW_UNDER = 5
-
-const PANEL =
-  "absolute top-full z-(--z-dropdown) rounded-tile border border-rule bg-field p-6 text-text shadow-float data-[state=closed]:hidden xl:p-8"
+/** "Daha fazla"'s panel: the floating surfaces' one recipe, the page's ink. */
+const MORE_PANEL =
+  "absolute top-full right-0 z-(--z-dropdown) w-max rounded-tile border border-rule bg-field p-6 text-text shadow-float data-[state=closed]:hidden xl:p-8"
 
 /**
- * The category aisle from 1024 px: one line of the shop's top
- * categories; a category with children opens its panel, after a 150 ms
- * hover or by a press, Enter or Space; Escape, a press outside it or
- * leaving it closes it, the focus back on its button (Radix: the button
- * says whether it is open and which panel it opens; the arrow keys move
- * along the line). The panel floats over the page the container's width,
- * so nothing below moves: the category's name and "Tümünü gör" over its
- * children in short columns, its picture tile (the shop's own, else its
- * newest product's photo) beside them. Every panel is in the first HTML,
- * closed (`forceMount`), so each link reaches a crawler without a script
- * (docs/13). A closed panel still listens for presses outside it; it lets
- * them pass, or a press inside the open panel would close the menu before
- * its link is followed. Panels take the page's ink, never the bar's.
+ * The category aisle from 1024 px: one line of the shop's top categories
+ * (from the start, or centred under a centred header); a category with
+ * children opens its dropdown (`AisleDrop`), after a 150 ms hover or by a
+ * press, Enter or Space; Escape, a press outside it or leaving it closes
+ * it, the focus back on its button (Radix: the button says whether it is
+ * open and which list it opens; the arrow keys move along the line). The
+ * dropdown hangs under its own category, 336 px wide, over the page, so
+ * nothing below moves; one that would pass the aisle's end lines up with
+ * its category's end instead. A category without children is a plain
+ * link. Every dropdown is in the first HTML, closed (`forceMount`), so
+ * each link reaches a crawler without a script (docs/13). A closed
+ * dropdown still listens for presses outside it; it lets them pass, or a
+ * press inside the open one would close the menu before its link is
+ * followed. Dropdowns take the page's ink, never the bar's.
  *
- * In the catalog header's menu bar (`inBar`) its panels float under the
- * bar's whole row, the bar's ground on its items, and the line never
- * wraps: the categories that do not fit go under "Daha fazla" (`more`),
- * whose panel lists them with their children (`aisle-fit.ts`).
+ * In the catalog header's menu bar (`inBar`) the bar's ground is on its
+ * items, and the line never wraps: the categories that do not fit go
+ * under "Daha fazla" (`more`), whose panel lists them with their children
+ * (`aisle-fit.ts`); each category on the line opens the same dropdown.
  */
 export function Aisle({
   categories,
   label,
-  allIn,
+  words,
+  centered = false,
   inBar = false,
   more = "",
-  seeAll = "",
   tail,
 }: {
   categories: readonly NavCategoryView[]
   label: string
-  /** "Tümünü gör: {name}" for each category path, in words. */
-  allIn: Record<string, string>
-  /** In the catalog header's menu bar: its panels placed by the bar's row, no line under it. */
+  words: MenuWords
+  /** The centred header's aisle: the line centred. */
+  centered?: boolean
+  /** In the catalog header's menu bar: the bar's ground on its items, no line under it. */
   inBar?: boolean
   /** The bar's "Daha fazla", in words. */
   more?: string
-  /** "Tümünü gör", the link's words in a panel (its name is the panel's head); none: `allIn`'s. */
-  seeAll?: string
   /** In the bar, an item always shown right after the last category (the highlighted link). */
   tail?: ReactNode
 }) {
   const [open, setOpen] = useState("")
+  const root = useRef<HTMLElement>(null)
   const { list, fit } = useAisleFit(categories.length, inBar)
   const shown = fit ?? categories.length
   const rest = categories.slice(shown)
-  const narrowIn = (category: NavCategoryView) => inBar && category.children.length < NARROW_UNDER
+
+  // Measured as it opens, before it is painted: past the aisle's end, it lines up at its end
+  useLayoutEffect(() => {
+    const drop = [...(root.current?.querySelectorAll<HTMLElement>("[data-gf-drop]") ?? [])].find(
+      (each) => open !== "" && each.getAttribute("data-gf-drop") === open
+    )
+    const bounds = root.current?.getBoundingClientRect()
+    const item = drop?.parentElement?.getBoundingClientRect()
+    if (drop && bounds && item) {
+      drop.setAttribute("data-align", item.left + drop.offsetWidth > bounds.right ? "end" : "start")
+    }
+  }, [open])
+
   return (
     <NavigationMenu.Root
+      ref={root}
       value={open}
       onValueChange={setOpen}
       delayDuration={150}
@@ -134,7 +147,7 @@ export function Aisle({
                 // Clipped only while measured: the "Daha fazla" panel opens leftward from its button
                 fit === null && "overflow-x-clip [overflow-clip-margin:0.375rem]"
               )
-            : "-ml-3 flex flex-wrap items-center gap-x-1"
+            : cn("flex flex-wrap items-center gap-x-1", centered ? "justify-center" : "-ml-3")
         }
       >
         {categories.map((category, index) => {
@@ -156,8 +169,7 @@ export function Aisle({
               key={category.path}
               value={category.path}
               data-aisle-item=""
-              // A few children open under their own trigger, as wide as they are (third audit)
-              className={cn(narrowIn(category) ? "relative" : "static", away && "hidden")}
+              className={cn("relative", away && "hidden")}
             >
               <NavigationMenu.Trigger className={cn(ITEM, inBar && BAR_ITEM)}>
                 {category.label}
@@ -169,29 +181,15 @@ export function Aisle({
               </NavigationMenu.Trigger>
               <NavigationMenu.Content
                 forceMount
+                data-gf-drop={category.path}
                 onInteractOutside={(event) => {
                   if (open !== category.path) {
                     event.preventDefault()
                   }
                 }}
-                className={cn(
-                  PANEL,
-                  narrowIn(category)
-                    ? // The bar's second half opens leftward, so the panel stays on the page
-                      index < shown / 2
-                      ? "left-0 w-max"
-                      : "right-0 w-max"
-                    : inBar
-                      ? "inset-x-0"
-                      : "-right-3 -left-3"
-                )}
+                className="gf-drop data-[state=closed]:hidden"
               >
-                <Panel
-                  narrow={narrowIn(category)}
-                  category={category}
-                  allIn={allIn[category.path] ?? category.label}
-                  seeAll={seeAll}
-                />
+                <Drop category={category} words={words} />
               </NavigationMenu.Content>
             </NavigationMenu.Item>
           )
@@ -222,7 +220,7 @@ export function Aisle({
                     event.preventDefault()
                   }
                 }}
-                className={cn(PANEL, "right-0 w-max")}
+                className={MORE_PANEL}
               >
                 <MorePanel categories={rest} />
               </NavigationMenu.Content>

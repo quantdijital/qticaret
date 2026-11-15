@@ -11,6 +11,7 @@ import { SearchBox } from "./SearchBox"
 import { PHONE_SEARCH } from "./SearchLink"
 import { Wordmark } from "./Wordmark"
 import { LABELLED, accountOf, allInOf, searchOf } from "./header-words"
+import { menuWords } from "./menu-words"
 
 /** An icon on the menu bar: its ground's colours (`header-catalog.css`), 44 px. */
 const ON_BAR =
@@ -30,7 +31,7 @@ export function catalogParts(shop: ShopView, catalog: HeaderCatalogView) {
  * end), the wordmark with a wide search and the shop's phone under
  * "Müşteri hizmetleri", then the menu bar on its ground: "Kategoriler"
  * (the shop's top categories in a column, each one's children beside it),
- * the main menu with its panels (`Aisle`), the highlighted last link and
+ * the main menu with its dropdowns (`Aisle`), the highlighted last link and
  * account, favourites and the cart with its count (and subtotal, when the
  * shop asks). Sticky, the strip folds away while the page scrolls down
  * (`ScrollCue`, `data-gf-strip`); the search and the menu bar stay. A
@@ -52,7 +53,7 @@ export function HeaderCatalog({
   searchSuggest?: string | undefined
   changeCartLine?: ((form: FormData) => Promise<void>) | undefined
 }) {
-  const allIn = allInOf(shop.categories, t)
+  const menu = menuWords(shop.categories, t)
   // The highlighted link stands right after the main menu's last item (Tezgâh audit Y-05)
   const highlight = catalog.highlight && (
     <a href={catalog.highlight.path} className="gf-btn gf-btn--small shrink-0">
@@ -121,8 +122,8 @@ export function HeaderCatalog({
             open: t("nav.open_menu"),
             title: t("nav.menu"),
             close: t("nav.close"),
-            allIn,
             whatsapp: t("home.help_whatsapp"),
+            ...menu,
           }}
         />
         <Wordmark name={shop.name} logo={shop.logo} className="mr-auto lg:mr-0" />
@@ -169,9 +170,8 @@ export function HeaderCatalog({
                 inBar
                 categories={shop.categories}
                 label={t("nav.categories")}
-                allIn={allIn}
+                words={menu}
                 more={t("nav.more")}
-                seeAll={t("categories.see_all")}
                 tail={highlight}
               />
             )}

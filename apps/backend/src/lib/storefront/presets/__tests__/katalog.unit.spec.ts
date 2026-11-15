@@ -59,7 +59,8 @@ describe("the katalog preset's draft (adr/0049 Ek 2026-11-14, Katalog ana sayfas
       variant: "category_list",
       tiles: [{ category_id: expect.stringMatching(/^pcat_/) as unknown }, expect.anything()],
     })
-    expect(doc.home[0]).toHaveProperty("chips.length", 4)
+    // The owner (2026-11-15): no quick links under the opening
+    expect(doc.home[0]).toHaveProperty("chips.length", 0)
   })
 
   it("leaves out what a shop without those categories lacks, keeping the rest", () => {

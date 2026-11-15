@@ -6,12 +6,13 @@ import { Container } from "../parts/Container"
 import { Aisle } from "./Aisle"
 import { CartSheet } from "./CartSheet"
 import { cartSheetWords } from "./cart-sheet-words"
+import { menuWords } from "./menu-words"
 import { MenuSheet } from "./MenuSheet"
 import { SearchBox } from "./SearchBox"
 import { PHONE_SEARCH } from "./SearchLink"
 import { Wordmark } from "./Wordmark"
 import { HeaderCatalog, catalogParts } from "./HeaderCatalog"
-import { LABELLED, accountOf, allInOf, searchOf } from "./header-words"
+import { LABELLED, accountOf, searchOf } from "./header-words"
 
 /** The catalog header's strip and phone when the shop's bar is drawn as it (else null). */
 export function catalogOf(shop: ShopView) {
@@ -21,16 +22,26 @@ export function catalogOf(shop: ShopView) {
     : null
 }
 
+/** The header bar's variants this theme draws (`drawnVariant`). */
+export const HEADER_VARIANTS = ["standard", "centered", "catalog"] as const
+
 /**
- * The header, sticky unless the shop says not. A phone: a 56 px row (the
- * menu, the wordmark, favourites, the cart with its count) over the 48 px
- * search pill, 112 px in all. From 1024 px: the wordmark, a wide search
- * in the middle, account, favourites and cart with their names under
- * them; the category aisle below, each category with children opening
- * its panel. Both searches show their live panel as the shopper types
- * once the storefront gives its address. Sticky, it folds while the page
- * scrolls down (`frame.css`, `ScrollCue`): the aisle from 1024 px, the
- * top row on a phone; the search always stays.
+ * The header, sticky unless the shop says not, in the design's variant
+ * (adr/0049 Ek 2026-11-14 §5; the theme's `header.layout` "centered" is
+ * the bar's `centered`, adr/0062 karar 10; `catalog`, N14, is
+ * `HeaderCatalog`'s own drawing). A phone, both: a 56 px row
+ * (the menu, the wordmark, favourites, the cart with its count) over the
+ * 48 px search pill, 112 px in all; centred, the wordmark stands in the
+ * row's middle. From 1024 px, standard: the wordmark, a wide search in
+ * the middle, account, favourites and cart with their names under them;
+ * centred: the search on the left (22 rem at most), the wordmark in the
+ * middle, the same three tools on the right, the aisle centred under
+ * them. The keyboard meets the search, the wordmark, then the tools.
+ * Each aisle category with children opens its dropdown. Both searches
+ * show their live panel as the shopper types once the storefront gives
+ * its address. Sticky, it folds while the page scrolls down (`frame.css`,
+ * `ScrollCue`): the aisle from 1024 px, the top row on a phone; the
+ * search always stays.
  */
 export function Header({
   shop,
@@ -46,8 +57,9 @@ export function Header({
   changeCartLine?: ((form: FormData) => Promise<void>) | undefined
 }) {
   // The design's header bar (adr/0049 Ek 2026-11-14 §5): `catalog` is its own drawing (N14),
-  // the rest fall to this one (`centered` is adr/0062 karar 6's); its own `sticky` over the theme's
-  const variant = drawnVariant("header_bar", shop.headerBar?.variant, ["standard", "catalog"])
+  // `centered` and `standard` are drawn here, a variant this theme lacks falls to the
+  // standard drawing; its own `sticky` over the theme's
+  const variant = drawnVariant("header_bar", shop.headerBar?.variant, HEADER_VARIANTS)
   const sticky = shop.headerBar?.sticky ?? shop.theme.header.sticky
   if (variant === "catalog" && shop.headerBar?.catalog) {
     return (
@@ -61,9 +73,57 @@ export function Header({
       />
     )
   }
-  const allIn = allInOf(shop.categories, t)
+  const centered = variant === "centered"
+  const menu = menuWords(shop.categories, t)
   const search = searchOf(shop, t, searchSuggest)
   const account = accountOf(shop, t)
+
+  const sheet = (
+    <MenuSheet
+      categories={shop.categories}
+      topLinks={shop.topLinks}
+      contact={shop.contact}
+      words={{
+        open: t("nav.open_menu"),
+        title: t("nav.menu"),
+        close: t("nav.close"),
+        whatsapp: t("home.help_whatsapp"),
+        ...menu,
+      }}
+    />
+  )
+  const wideSearch = (className: string) => (
+    <SearchBox {...search} id="arama-genis" className={cn("hidden flex-1 lg:block", className)} />
+  )
+  const tools = (
+    <nav
+      aria-label={t("nav.account")}
+      className={cn("flex items-center lg:gap-1", centered ? "justify-self-end" : "lg:ml-auto")}
+    >
+      <a href="/hesap" aria-label={account} className={cn(LABELLED, "max-lg:hidden")}>
+        <UserRound className="size-6" aria-hidden="true" strokeWidth={1.75} />
+        <span aria-hidden="true" className="max-lg:hidden">
+          {t("nav.account")}
+        </span>
+      </a>
+      {/* Named as it reads (WCAG 2.5.3): a voice user says the word on screen */}
+      <a href="/hesap/favoriler" aria-label={t("nav.favorites")} className={LABELLED}>
+        <Heart className="size-6" aria-hidden="true" strokeWidth={1.75} />
+        <span aria-hidden="true" className="max-lg:hidden">
+          {t("nav.favorites")}
+        </span>
+      </a>
+      <CartSheet
+        cart={shop.cart}
+        count={shop.cartQuantity}
+        categories={shop.categories}
+        change={changeCartLine}
+        buttonClass={LABELLED}
+        words={cartSheetWords(t, shop.cartQuantity)}
+      />
+    </nav>
+  )
+
   return (
     <header
       data-gf-head=""
@@ -73,48 +133,34 @@ export function Header({
       )}
       data-variant={variant === "catalog" ? "standard" : variant}
     >
-      <Container
-        data-gf-head-row=""
-        className="gf-head-row flex h-14 items-center gap-1 lg:h-20 lg:gap-(--space-xl)"
-      >
-        <MenuSheet
-          categories={shop.categories}
-          topLinks={shop.topLinks}
-          contact={shop.contact}
-          words={{
-            open: t("nav.open_menu"),
-            title: t("nav.menu"),
-            close: t("nav.close"),
-            allIn,
-            whatsapp: t("home.help_whatsapp"),
-          }}
-        />
-        <Wordmark name={shop.name} logo={shop.logo} className="mr-auto lg:mr-0" />
-        <SearchBox {...search} id="arama-genis" className="hidden max-w-160 flex-1 lg:block" />
-        <nav aria-label={t("nav.account")} className="flex items-center lg:ml-auto lg:gap-1">
-          <a href="/hesap" aria-label={account} className={cn(LABELLED, "max-lg:hidden")}>
-            <UserRound className="size-6" aria-hidden="true" strokeWidth={1.75} />
-            <span aria-hidden="true" className="max-lg:hidden">
-              {t("nav.account")}
-            </span>
-          </a>
-          {/* Named as it reads (WCAG 2.5.3): a voice user says the word on screen */}
-          <a href="/hesap/favoriler" aria-label={t("nav.favorites")} className={LABELLED}>
-            <Heart className="size-6" aria-hidden="true" strokeWidth={1.75} />
-            <span aria-hidden="true" className="max-lg:hidden">
-              {t("nav.favorites")}
-            </span>
-          </a>
-          <CartSheet
-            cart={shop.cart}
-            count={shop.cartQuantity}
-            categories={shop.categories}
-            change={changeCartLine}
-            buttonClass={LABELLED}
-            words={cartSheetWords(t, shop.cartQuantity)}
+      {centered ? (
+        <Container
+          data-gf-head-row=""
+          className="gf-head-row grid h-14 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 lg:h-20 lg:gap-(--space-lg)"
+        >
+          <div className="flex min-w-0 items-center">
+            {sheet}
+            {wideSearch("max-w-88")}
+          </div>
+          {/* A long name truncates before it pushes the menu or the cart off a phone's row */}
+          <Wordmark
+            name={shop.name}
+            logo={shop.logo}
+            className="max-w-[calc(100vw-15rem)] justify-self-center lg:max-w-120"
           />
-        </nav>
-      </Container>
+          {tools}
+        </Container>
+      ) : (
+        <Container
+          data-gf-head-row=""
+          className="gf-head-row flex h-14 items-center gap-1 lg:h-20 lg:gap-(--space-xl)"
+        >
+          {sheet}
+          <Wordmark name={shop.name} logo={shop.logo} className="mr-auto lg:mr-0" />
+          {wideSearch("max-w-160")}
+          {tools}
+        </Container>
+      )}
       <Container className="pb-2 lg:hidden">
         <SearchBox {...search} id={PHONE_SEARCH} />
       </Container>
@@ -123,8 +169,8 @@ export function Header({
           <Aisle
             categories={shop.categories}
             label={t("nav.categories")}
-            allIn={allIn}
-            seeAll={t("categories.see_all")}
+            words={menu}
+            centered={centered}
           />
         </Container>
       )}

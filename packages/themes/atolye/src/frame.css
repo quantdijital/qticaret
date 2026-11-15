@@ -55,6 +55,13 @@ html[data-js-scroll="down"]:not(:has(.gf-head:focus-within, .gf-head [data-state
       background: var(--color-paper);
     }
   }
+  /* The centred header's search is 22 rem at most: its live panel opens wider, to the right */
+  @media (width >= 64rem) {
+    [data-gf-head][data-variant="centered"] .gf-suggest {
+      right: auto;
+      width: min(40rem, calc(100vw - 2 * var(--gutter)));
+    }
+  }
   /* A listing's filter and sort pills stay under the header on a phone (Toolbar) */
   @media (width < 64rem) {
     .gf-listbar {

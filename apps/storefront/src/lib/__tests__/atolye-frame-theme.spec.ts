@@ -7,7 +7,7 @@ import { renderFrame, renderPage, shopFixture } from "@/test/theme-render"
 /**
  * The theme's frame (docs/tema/yon-2026-11-05.md § Frame) as the server
  * prints it: one announcement, the two-row header with its search, the
- * aisle's panels in the HTML, the compact footer with the shop's contact,
+ * aisle's dropdowns in the HTML, the compact footer with the shop's contact,
  * menus, the providers' own marks and the small print. Only what the shop
  * gave is drawn.
  */
@@ -45,7 +45,7 @@ describe("the theme's frame", () => {
     expect(html).toContain('href="/sepet"')
   })
 
-  it("gives a category's panel its name, its see-all link, its children and its picture tile", () => {
+  it("opens a category's dropdown from its button: no big picture tile any more", () => {
     const categories = shopFixture().categories.map((category, index) =>
       index === 0
         ? {
@@ -63,17 +63,17 @@ describe("the theme's frame", () => {
     const html = renderFrame(atolyeTheme, shopFixture({ categories }))
     expect(html).toMatch(/<button[^>]*aria-expanded="false"[^>]*>Çakılar/)
     expect(html).toContain('href="/kategori/cakilar/sabit"')
-    // The picture is the same page as "Tümünü gör": one stop for the keyboard
-    expect(html).toMatch(/<a href="\/kategori\/cakilar" tabindex="-1" aria-hidden="true"/)
-    expect(html).toContain('src="/media/cakilar.jpg"')
+    // The top category's own picture stays in the phone's sheet, not in the dropdown
+    expect(html).not.toMatch(/<a href="\/kategori\/cakilar" tabindex="-1" aria-hidden="true"/)
+    expect(html).not.toContain('src="/media/cakilar.jpg"')
   })
 
   it("keeps every category panel's links in the HTML and the wordmark without a logo", () => {
     const html = renderFrame(atolyeTheme, shopFixture())
     expect(html).toContain('href="/kategori/cakilar/katlanir"')
-    // The panel names the category once, over "Tümünü gör"; a screen reader hears it whole (K-21)
+    // The dropdown's last row reads "Tümünü gör"; a screen reader hears it whole (K-21)
     expect(html).toMatch(
-      /<a href="\/kategori\/cakilar" aria-label="Tümünü gör: Çakılar"[^>]*>Tümünü gör<\/a>/
+      /<a href="\/kategori\/cakilar" class="gf-drop-row gf-drop-all"[^>]*><span aria-hidden="true">Tümünü gör<\/span><span class="sr-only">Tümünü gör: Çakılar<\/span>/
     )
     expect(html).toContain("Örnek Atölye</span>")
   })
@@ -196,7 +196,7 @@ describe("the theme's frame", () => {
     const bar = shopFixture({ headerBar: { id: "mainheader", variant: "centered", sticky: false } })
     const kept = renderFrame(atolyeTheme, bar)
     expect(kept).not.toContain("gf-head sticky")
-    expect(kept).toContain('data-variant="standard"')
+    expect(kept).toContain('data-variant="centered"')
   })
 
   it("keeps the bottom bar's search a link to /arama before the script, and the field's example whole", () => {

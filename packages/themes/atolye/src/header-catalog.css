@@ -3,8 +3,8 @@
  * 2026-11-15): its ground "Koyu / Ana renk / Açık" (`data-ground`, the
  * marquee's names). The bar's own controls (the "Kategoriler" button, the
  * main menu's items, the icons: `.gf-on-bar`, `.gf-aisle-item`) take the
- * ground's tokens; the panels they open keep the page's, so a mega panel
- * or the category column reads as it does under the standard header. On
+ * ground's tokens; the dropdowns they open keep the page's, so a category's
+ * dropdown or the category column reads as it does under the standard header. On
  * the shop's colour the ink is its measured foreground (adr/0062 §6), as
  * the look's primary ground does; the highlighted link turns to the
  * ground's own ink, as an action on a graphite stage does.
@@ -65,12 +65,6 @@
   }
   .gf-menubar[data-ground="well"] :is(.gf-on-bar, .gf-aisle-item) {
     --color-paper-2: var(--color-paper-3);
-  }
-
-  /* The main menu's panels float under the bar's whole row, not under the menu's own
-     items: Radix's list wrapper places itself (`position: relative`, inline) */
-  .gf-menubar-aisle > div {
-    position: static !important;
   }
 }
 

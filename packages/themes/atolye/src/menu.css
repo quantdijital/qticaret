@@ -1,0 +1,82 @@
+/*
+ * The category menu's rows (frame/Aisle, frame/MenuSheet; owner's "M1",
+ * 2026-11-15): from 1024 px a narrow dropdown under its category, 48 px
+ * rows of a 40 px picture, the name and the product count in a pill, then
+ * "Tümünü gör" over a rule with the category's own count in the dark
+ * pill; the phone's sheet gives its rows the same pills. The dropdown
+ * keeps the floating surfaces' one recipe (a field with a rule edge and
+ * the float shadow), as the search panel does, and the page's ink under
+ * the catalog header's coloured menu bar.
+ */
+@layer components {
+  .gf-drop {
+    position: absolute;
+    top: calc(100% + var(--space-xs));
+    left: 0;
+    z-index: var(--z-dropdown);
+    width: 21rem;
+    padding: var(--space-xs);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-tile);
+    background: var(--color-field);
+    color: var(--color-text);
+    box-shadow: var(--shadow-float);
+  }
+  /* Past the aisle's end it lines up with its category's end (Aisle measures it) */
+  .gf-drop[data-align="end"] {
+    right: 0;
+    left: auto;
+  }
+  .gf-drop-row {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    min-height: 3rem;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-2xs) var(--space-xs);
+    border-radius: var(--radius-inner);
+    color: var(--color-text);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    line-height: 1.3;
+    text-decoration: none;
+    transition: background-color var(--dur-micro) var(--ease-out);
+  }
+  .gf-drop-row:hover {
+    background: var(--color-paper-2);
+  }
+  .gf-drop-row:active {
+    background: var(--color-paper-3);
+  }
+  .gf-drop-all {
+    margin-top: var(--space-2xs);
+    padding-block: var(--space-sm);
+    border-top: 1px solid var(--color-rule);
+    border-radius: 0 0 var(--radius-inner) var(--radius-inner);
+    font-weight: 800;
+  }
+  .gf-drop-all > :first-child {
+    grid-column: 1 / 3;
+    padding-left: var(--space-2xs);
+  }
+
+  .gf-menu-count {
+    min-width: 2rem;
+    padding: var(--space-3xs) var(--space-xs);
+    border-radius: var(--radius-pill);
+    background: var(--color-paper-2);
+    color: var(--color-text-2);
+    font-size: var(--text-xs);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.4;
+    text-align: center;
+  }
+  .gf-drop-row:hover .gf-menu-count:not(.gf-menu-count--dark) {
+    background: var(--color-field);
+  }
+  .gf-menu-count--dark {
+    background: var(--color-text);
+    color: var(--color-paper);
+  }
+}

@@ -19,7 +19,7 @@ const PATHS = { pcat_a: "/kategori/a", pcat_a1: "/kategori/a/a1", pcat_b: "/kate
 const server = vi.hoisted(() => ({ storeGet: vi.fn(), storePublicGet: vi.fn() }))
 vi.mock("@/lib/store-api/server", () => server)
 
-const { withNavPictures } = await import("../nav-pictures")
+const { OTHER_PHOTOS, withNavPictures } = await import("../nav-pictures")
 
 const entry = (path: string, over: Partial<NavCategoryView> = {}): NavCategoryView => ({
   label: path,
@@ -89,5 +89,106 @@ describe("withNavPictures", () => {
       PATHS
     )
     expect(menu.map((each) => each.image)).toEqual([undefined, undefined])
+  })
+})
+
+describe("withNavPictures: no photo twice among siblings", () => {
+  const TREE = [
+    category("pcat_a"),
+    category("pcat_a1", "pcat_a"),
+    category("pcat_a2", "pcat_a"),
+    category("pcat_a3", "pcat_a"),
+  ]
+  const TREE_PATHS = {
+    pcat_a: "/kategori/a",
+    pcat_a1: "/kategori/a/a1",
+    pcat_a2: "/kategori/a/a2",
+    pcat_a3: "/kategori/a/a3",
+  }
+  const children = (...over: Partial<NavCategoryView>[]) =>
+    entry("/kategori/a", {
+      children: ["a1", "a2", "a3"].map((name, index) => ({
+        label: name,
+        path: `/kategori/a/${name}`,
+        ...over[index],
+      })),
+    })
+  const own = (src: string) => ({
+    src,
+    alt: "",
+    width: 1,
+    height: 1,
+    sources: { avif: null, webp: null },
+  })
+  /** The newest product's photo for one, the newest few for a repeated one. */
+  const answers = (newest: string, more: readonly string[]) =>
+    server.storePublicGet.mockImplementation((_path: string, query: { limit: number }) =>
+      Promise.resolve({
+        products: query.limit === 1 ? [product(newest)] : more.map((url) => product(url)),
+      })
+    )
+
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("gives a child whose photo a sibling above shows its subtree's next newest one", async () => {
+    answers("/media/ayni.jpg", ["/media/ayni.jpg", "/media/baska.jpg", "/media/ucuncu.jpg"])
+    const [top] = await withNavPictures([children()], TREE, TREE_PATHS)
+    expect(top?.children.map((child) => child.image?.src)).toEqual([
+      "/media/ayni.jpg",
+      "/media/baska.jpg",
+      "/media/ucuncu.jpg",
+    ])
+    expect(server.storePublicGet).toHaveBeenCalledWith(
+      "/store/products",
+      expect.objectContaining({ category_id: ["pcat_a2"], limit: OTHER_PHOTOS })
+    )
+    // The parent is no sibling: its photo may be a child's
+    expect(top?.image?.src).toBe("/media/ayni.jpg")
+  })
+
+  it("keeps the repeated photo when the data offers no other, never an invented one", async () => {
+    answers("/media/ayni.jpg", ["/media/ayni.jpg"])
+    const [top] = await withNavPictures([children()], TREE, TREE_PATHS)
+    expect(top?.children.map((child) => child.image?.src)).toEqual([
+      "/media/ayni.jpg",
+      "/media/ayni.jpg",
+      "/media/ayni.jpg",
+    ])
+  })
+
+  it("looks past the shop's own picture repeated on a sibling, and leaves distinct ones alone", async () => {
+    answers("/media/urun.jpg", ["/media/urun.jpg"])
+    const [top] = await withNavPictures(
+      [
+        children(
+          { image: own("/media/kapak.jpg") },
+          { image: own("/media/kapak.jpg") },
+          { image: own("/media/kendi.jpg") }
+        ),
+      ],
+      TREE,
+      TREE_PATHS
+    )
+    expect(top?.children.map((child) => child.image?.src)).toEqual([
+      "/media/kapak.jpg",
+      "/media/urun.jpg",
+      "/media/kendi.jpg",
+    ])
+  })
+
+  it("keeps the repeated photo when the backend does not answer the second question", async () => {
+    server.storePublicGet.mockImplementation((_path: string, query: { limit: number }) =>
+      query.limit === 1
+        ? Promise.resolve({ products: [product("/media/ayni.jpg")] })
+        : Promise.reject(new StoreApiError(503, "unavailable", null))
+    )
+    const [top] = await withNavPictures([children()], TREE, TREE_PATHS)
+    expect(top?.children.map((child) => child.image?.src)).toEqual([
+      "/media/ayni.jpg",
+      "/media/ayni.jpg",
+      "/media/ayni.jpg",
+    ])
   })
 })

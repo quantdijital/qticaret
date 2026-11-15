@@ -39,6 +39,14 @@
     }
   }
 
+  /* A page that opens with the catalogue list is dense throughout (sahip
+     2026-11-15): every section on it keeps the small gap, the one after
+     the opening too, so the rhythm stays even. A section set to "medium"
+     there reads as small; "large" stays large. */
+  :has(> [data-gf-catalog-hero]) {
+    --section-gap: var(--section-gap-s);
+  }
+
   .gf-look[data-outer="none"] {
     --look-outer: 0px;
   }
