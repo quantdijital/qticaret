@@ -155,7 +155,16 @@ describe("the category collage", () => {
 
   it("draws today's tiles for a section without the collage's view", () => {
     const list = [card("Mutfak", [])]
-    const html = home([{ ...collage(list), collage: null }])
+    const html = home([
+      {
+        id: "kolaj",
+        type: "categories",
+        title: "Kullanıma göre",
+        categories: list,
+        variant: "collage",
+        collage: null,
+      },
+    ])
     expect(html).not.toContain("gf-collage")
     expect(html).toContain(">Kullanıma göre</h2>")
   })
