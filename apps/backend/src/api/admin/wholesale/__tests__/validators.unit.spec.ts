@@ -1,4 +1,5 @@
 import {
+  AdminGetWholesaleLines,
   AdminPostWholesalePrices,
   AdminPostWholesaleTier,
   AdminUpdateWholesaleTier,
@@ -35,6 +36,29 @@ describe("wholesale level bodies (ADR-0068)", () => {
     expect(AdminUpdateWholesaleTier.parse({ percent: null })).toEqual({ percent: null })
     expect(AdminUpdateWholesaleTier.parse({ min_quantity: 5 })).toEqual({ min_quantity: 5 })
     expect(AdminUpdateWholesaleTier.safeParse({}).success).toBe(false)
+  })
+})
+
+describe("a page of a level's lines", () => {
+  it("reads limit and offset from the query string, 50 from the start by default", () => {
+    expect(AdminGetWholesaleLines.parse({})).toEqual({ limit: 50, offset: 0 })
+    expect(AdminGetWholesaleLines.parse({ limit: "2", offset: "4", q: " bıçak " })).toEqual({
+      limit: 2,
+      offset: 4,
+      q: "bıçak",
+    })
+  })
+
+  it("refuses a page past 200, a negative offset, a long search and other filters", () => {
+    for (const query of [
+      { limit: "201" },
+      { limit: "0" },
+      { offset: "-1" },
+      { q: "x".repeat(101) },
+      { price_list_id: "plist_x" },
+    ]) {
+      expect(AdminGetWholesaleLines.safeParse(query).success).toBe(false)
+    }
   })
 })
 

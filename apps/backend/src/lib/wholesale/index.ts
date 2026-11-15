@@ -17,3 +17,5 @@ export {
 } from "./money"
 export { baseOf, desiredPrice, isEmptyPlan, isUndercut, planListRows } from "./plan"
 export type { ListPlan, ListRowBefore, ListRowWrite, PlanList, PlanRow, PlanVariant } from "./plan"
+export { byName, lineMatches } from "./search"
+export type { SearchableLine } from "./search"

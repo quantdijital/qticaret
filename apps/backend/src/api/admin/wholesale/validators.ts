@@ -27,6 +27,16 @@ export const AdminUpdateWholesaleTier = z
   .refine((body) => Object.keys(body).length > 0)
 export type AdminUpdateWholesaleTierType = z.infer<typeof AdminUpdateWholesaleTier>
 
+/** A page of a level's lines, by product name; `q` finds by product, variant or SKU. */
+export const AdminGetWholesaleLines = z
+  .object({
+    limit: z.coerce.number().int().min(1).max(200).default(50),
+    offset: z.coerce.number().int().min(0).max(100_000).default(0),
+    q: z.string().trim().max(100).optional(),
+  })
+  .strict()
+export type AdminGetWholesaleLinesType = z.infer<typeof AdminGetWholesaleLines>
+
 /** Lira with up to two decimals, as Medusa writes amounts ("1250.50"); never zero. */
 const netAmount = z
   .string()

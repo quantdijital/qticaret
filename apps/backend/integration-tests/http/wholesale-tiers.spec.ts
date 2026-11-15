@@ -55,7 +55,7 @@ medusaIntegrationTestRunner({
       expect(tier).toMatchObject({ percent: 15, min_quantity: 10 })
 
       const written = await eventually(
-        () => staff.lines(tier.id),
+        () => staff.lines(tier.id, "q=toptan-oran"),
         ({ lines }) => lines.some((line) => line.variant_id === knife.variantId),
         150
       )
@@ -66,6 +66,29 @@ medusaIntegrationTestRunner({
         source: "rate",
       })
 
+      // Every variant of the shop is on the list: a page at a time, found by name
+      const everything = await eventually(
+        () => staff.lines(tier.id, "limit=200"),
+        ({ count, lines }) => count > 2 && lines.length === count,
+        150
+      )
+      const first = await staff.lines(tier.id, "limit=2")
+      const second = await staff.lines(tier.id, "limit=2&offset=2")
+      expect({ first: first.lines.length, count: first.count }).toEqual({
+        first: 2,
+        count: everything.count,
+      })
+      expect([...first.lines, ...second.lines].map((line) => line.variant_id)).toEqual(
+        everything.lines.slice(0, 4).map((line) => line.variant_id)
+      )
+      expect(await staff.lines(tier.id, "q=yok-boyle-bir-urun")).toMatchObject({
+        lines: [],
+        count: 0,
+      })
+      expect((await staff.get(`/admin/wholesale/tiers/${tier.id}/lines?limit=1000`)).status).toBe(
+        400
+      )
+
       await updateProductVariantsWorkflow(getContainer()).run({
         input: {
           product_variants: [
@@ -74,7 +97,7 @@ medusaIntegrationTestRunner({
         },
       })
       const followed = await eventually(
-        () => staff.lines(tier.id),
+        () => staff.lines(tier.id, "q=toptan-oran"),
         ({ lines }) => lines.some((line) => line.gross === "42.50"),
         50
       )
@@ -84,12 +107,14 @@ medusaIntegrationTestRunner({
     it("keeps a hand-entered price, KDV excluded, through rate changes and back", async () => {
       await staff.flag(true)
       const board = await stockedProduct(getContainer(), shop, "toptan-elle", null, 100)
+      // The rate prices the demo catalogue too: this product's line alone
+      const ELLE = "q=toptan-elle"
       const tier = await staff.tier({ name: "Toptan Elle" })
       const set = await staff.prices(tier.id, {
         set: [{ variant_id: board.variantId, net: "8.33" }],
       })
       expect(set.data).toMatchObject({ written: 1, rows: { created: 1 } })
-      expect((await staff.lines(tier.id)).lines).toMatchObject([
+      expect((await staff.lines(tier.id, ELLE)).lines).toMatchObject([
         { net: "8.33", gross: "10.00", source: "manual" },
       ])
 
@@ -100,13 +125,15 @@ medusaIntegrationTestRunner({
         ({ data }) => !data.tier.sync_pending,
         150
       )
-      expect((await staff.lines(tier.id)).lines).toMatchObject([
+      expect((await staff.lines(tier.id, ELLE)).lines).toMatchObject([
         { net: "8.33", gross: "10.00", source: "manual" },
       ])
 
       // Taken away, the rate prices the variant again
       await staff.prices(tier.id, { remove: [board.variantId] })
-      expect((await staff.lines(tier.id)).lines).toMatchObject([{ gross: "50.00", source: "rate" }])
+      expect((await staff.lines(tier.id, ELLE)).lines).toMatchObject([
+        { gross: "50.00", source: "rate" },
+      ])
       const unknown = await staff.prices(tier.id, { set: [{ variant_id: "variant_x", net: "1" }] })
       expect([unknown.status, (unknown.data as { message?: string }).message]).toEqual([
         400,

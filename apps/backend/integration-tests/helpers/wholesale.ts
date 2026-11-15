@@ -45,10 +45,11 @@ export function wholesaleApi(http: HttpClient, headers: Record<string, string>) 
     },
     prices: (tierId: string, body: unknown) =>
       post<Record<string, unknown>>(`/admin/wholesale/tiers/${tierId}/prices`, body),
-    lines: async (tierId: string) =>
+    /** A page of a level's lines; `query` as the panel sends it (`q=…&limit=…`). */
+    lines: async (tierId: string, query = "") =>
       (
-        await get<{ lines: LineAnswer[]; undercut_count: number }>(
-          `/admin/wholesale/tiers/${tierId}/lines`
+        await get<{ lines: LineAnswer[]; count: number; undercut_count: number }>(
+          `/admin/wholesale/tiers/${tierId}/lines${query ? `?${query}` : ""}`
         )
       ).data,
   }

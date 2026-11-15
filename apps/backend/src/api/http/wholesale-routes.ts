@@ -4,11 +4,12 @@ import type {
   MedusaRequest,
   MedusaResponse,
 } from "@medusajs/framework/http"
-import { validateAndTransformBody } from "@medusajs/framework/http"
+import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { GUARDED_ROUTES } from "../../lib/wholesale"
 import { CUSTOMERS_WHOLESALE } from "../../modules/platform-settings/features"
 import {
+  AdminGetWholesaleLines,
   AdminPostWholesalePrices,
   AdminPostWholesaleTier,
   AdminUpdateWholesaleTier,
@@ -52,7 +53,11 @@ export const WHOLESALE_ROUTES = [
     middlewares: staff(perStaff(), validateAndTransformBody(AdminUpdateWholesaleTier)),
   },
   { matcher: "/admin/wholesale/tiers/:id", methods: ["DELETE" as const], middlewares: staff() },
-  { matcher: "/admin/wholesale/tiers/:id/lines", methods: ["GET" as const], middlewares: staff() },
+  {
+    matcher: "/admin/wholesale/tiers/:id/lines",
+    methods: ["GET" as const],
+    middlewares: staff(validateAndTransformQuery(AdminGetWholesaleLines, {})),
+  },
   {
     matcher: "/admin/wholesale/tiers/:id/prices",
     methods: ["POST" as const],
