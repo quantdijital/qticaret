@@ -82,5 +82,16 @@ Dökümün sayımı: daldaki 17 değişikliğin 3'ü takımla ifade edilir (`men
 ## Açık kalanlar
 
 1. `density` ne zaman ve hangi adla ("Sık" bölüm aralığında kullanılıyor; öneri "Sıkı").
-2. Hesap, sipariş ve ödeme sayfalarındaki kutuların tam listesi adım 4'te çıkarılır.
+2. ~~Hesap, sipariş ve ödeme sayfalarındaki kutuların tam listesi adım 4'te çıkarılır.~~ Kapandı: Ek 2026-11-15.
 3. Tema ayarlarının ayar aramasına girmesi.
+
+## Ek 2026-11-15: adım 4, `surface_style` kapsamı (açık kalan 2 kapandı)
+
+Tema tek tek okundu (hesap, sipariş, ödeme, hediye, ödeme bağlantısı, içerik klasörleri ve bölümler dahil). Döküm ~17 kutu sayıyordu; gerçek sayı daha büyük çıktı, çünkü hesap/sipariş/ödeme sayfalarının kutuları grep'te görünmüyordu.
+
+- **Bağlanan: 80 kutu, 48 dosya.** İki tarif (`surface.css`): `gf-pane` (zemindeki kutu; `filled` = `bg-paper-2` ile aynı) 56 kutu, `gf-pane-inner` (kutu içindeki kutu; `filled` = `bg-field` ile aynı) 24 kutu. Klasöre göre: `account/` 22, `order/` 14, `checkout/` 9, kök sayfalar 13 (marka, kategori, onay, çerez, hediye çeki bakiyesi, yasal, ödeme bağlantısı), `content/` 11, `sections/` 6 (SSS, yazılar, bülten, hikâye, Google puanı, boş raf), `cart/` 3, `payment-link/` 2, `gift/` 0 (formda kutu yok). Sipariş sayfalarının ortak `WELL` sabitleri birer kutu sayıldı.
+- **`lined`:** kutu, durduğu bölümün kendi `--color-paper` zemininde ve `--color-rule` çizgisiyle çizilir; grafit ve ana renk zeminli bölümde o bölümün belirteçleri geçer (`:root`'taki `--box-*` sayfanın açık zeminini taşırdı, bu yüzden `gf-box`'tan ayrı tutuldu). Kutu içindeki kutu çizgi almaz, tona iner; üçüncü kat (katlanan sözleşmenin metni) alana döner.
+- **`filled` aynı:** iki tarif değiştirdikleri sınıfla aynı bildirimi `components` katmanında taşır; kutudaki her yardımcı sınıf (üzerine gelme tonu, `lg:bg-transparent`) eskisi gibi kazanır. Tailwind'le derlenen stil testi (`atolye-surface-boxes.spec.ts`) bunu doğrular.
+- **Nötr zeminli bildirimler bağlandı:** `role="status"`/`"alert"` notları zemini nötr tonsa (yazısı ya da simgesi yeşil/kırmızı olsa da) kutu sayıldı; mevcut `gf-box` emsali böyle (`product/StockAlert.tsx`, `product/Forms.tsx`, sepet notu). Anlam rengini zemininde taşıyan bildirim yok; vurgu zeminliler aşağıda dışarıda.
+- **Bilerek dışarıda:** fotoğraf kuyuları ve iskeletler (`media_ground`); çip, hap, rozet, durum hapları ve simge madalyonları (`chip_style` ya da denetim); form denetimleri (ödeme seçeneği kartı `checkout/fields.tsx`, eklenti seçeneği, adet); menü ve açılır yüzeyler (`MenuSheet` hızlı bağlantı kutusu dahil, `menu_style`); yüzen katmanlar (çerez bandı, sepetin yapışkan çubuğu); vurgu zeminli notlar (`bg-highlight-soft`: havale, hesap teklifi, onay notları; anlam rengi); bölüm zeminleri (`Campaign`, alt bilgi bantları); güvence şeridi `strip` biçimi (`trust_badges` kendi `lined` basamağını taşır) ve kategori kartları (`categories.frame`); zaten çizgili kutular (yorum kartları, yardım kutusu, fiyat bantları, SSS sayfasının yan kutusu: iki basamakta da çizgili, ayarla uyumlu); çizgili kartın içindeki ton blokları (mağaza yanıtı `ReviewReply`, Google yorumunun alt kutusu: çizgi alırsa çift çizgi olur); ürün açıklamasındaki alıntı (`[&_blockquote]`, yazı biçimi).
+- **Hazır görünümler:** Grafit ve Katalog değişmez. Tezgâh ×3 kilitli sayfalarda yalnız ana sayfanın yazı kartlarında (`home-09-yazilar`) değişir; geri kalanı kilit dışı sayfalardadır.
