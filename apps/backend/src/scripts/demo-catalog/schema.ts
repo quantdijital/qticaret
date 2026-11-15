@@ -74,6 +74,12 @@ const brandSchema = z.object({
   handle,
   name: z.string().min(1),
   description: z.string().nullable().default(null),
+  /**
+   * Its logo in the `images` folder, a JPEG, PNG or WebP as every upload
+   * is (an SVG is refused, docs/04): a wordmark drawn as a vector is
+   * written out as a PNG first.
+   */
+  logo: imageFile.optional(),
 })
 
 export const demoCatalogSchema = z.object({
