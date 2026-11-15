@@ -52,7 +52,8 @@ export function CategoryTile({
         <span
           className={cn(
             "leading-tight font-extrabold tracking-[-0.01em] text-balance underline-offset-4 group-hover:underline",
-            compact ? "text-sm" : "text-md"
+            // A row's tile keeps its name to two lines, the rest cut (V-03)
+            compact ? "line-clamp-2 text-sm" : "text-md"
           )}
         >
           {category.label}

@@ -47,7 +47,7 @@ export function TileRail({
       </h2>
       <ul
         className={cn(
-          "gf-rail -mx-(--gutter) -my-1 grid auto-cols-[40%] grid-flow-col gap-(--gap-columns) overflow-x-auto scroll-px-(--gutter) px-(--gutter) py-1 sm:auto-cols-[22%] lg:mx-0 lg:scroll-px-0 lg:px-0",
+          "gf-rail -mx-(--gutter) -my-1 grid auto-cols-[40%] grid-flow-col items-stretch gap-(--gap-columns) overflow-x-auto scroll-px-(--gutter) px-(--gutter) py-1 sm:auto-cols-[22%] lg:mx-0 lg:scroll-px-0 lg:px-0",
           part?.[1] ?? "lg:auto-cols-[calc((100%_-_7*var(--gap-columns))/8)]"
         )}
       >
