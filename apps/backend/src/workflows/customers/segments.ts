@@ -16,6 +16,7 @@ import { inSegment } from "../../lib/customers/segments"
 import type { SegmentRules } from "../../lib/customers/segments"
 import { CUSTOMER_SEGMENTS_MODULE } from "../../modules/customer-segments"
 import type CustomerSegmentsModuleService from "../../modules/customer-segments/service"
+import { activeWholesalers } from "../wholesale/accounts/wholesalers"
 import { customerFacts } from "./segment-facts"
 
 const loadSegmentStep = createStep(
@@ -32,14 +33,20 @@ const loadSegmentStep = createStep(
   }
 )
 
-/** Who belongs now, and who is to join or leave the segment's group. */
+/**
+ * Who belongs now, and who is to join or leave the segment's group. An
+ * active wholesaler never does (ADR-0068 Ek 2026-11-15 4): a list or a
+ * promotion for the segment would tie with their level's and undercut
+ * the wholesale price.
+ */
 const segmentChangesStep = createStep(
   "customer-segments-changes",
   async (input: { rules: SegmentRules; customer_group_id: string }, { container }) => {
     const now = new Date()
+    const wholesalers = await activeWholesalers(container)
     const members = new Set(
       (await customerFacts(container, input.rules))
-        .filter((facts) => inSegment(input.rules, facts, now))
+        .filter((facts) => inSegment(input.rules, facts, now) && !wholesalers.has(facts.id))
         .map(({ id }) => id)
     )
     const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({

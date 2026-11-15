@@ -11,6 +11,7 @@ import { addressesOf, eraseCustomer } from "./erasure/customer"
 import { customerRecords, erasureBlocker } from "./erasure/guard"
 import { eraseOrders } from "./erasure/orders"
 import { eraseTraces } from "./erasure/traces"
+import { eraseWholesale } from "./erasure/wholesale"
 import { closePrivacyRequestStep, openRequest } from "./privacy-requests"
 
 // The steps hand each other the customers' ids and counts, never their data:
@@ -61,6 +62,13 @@ const eraseOrdersStep = createStep(
   }
 )
 
+// ADR-0068 §10: before the customer, whose addresses find a pending invitation
+const eraseWholesaleStep = createStep(
+  "legal-erase-wholesale",
+  async (input: { records: string[] }, { container }) =>
+    new StepResponse({ wholesale_accounts: await eraseWholesale(container, input.records) })
+)
+
 const eraseCustomerStep = createStep(
   "legal-erase-customer",
   async (input: { records: string[] }, { container }) => {
@@ -75,7 +83,7 @@ const eraseCustomerStep = createStep(
  * A customer's erasure, as their KVKK request asks (F13.5, adr/0041 §6;
  * KK3): every record of theirs, refused while an order, a return or a
  * sale for the books is still under way. Their traces, their orders'
- * personal data, then the customer. The books keep amounts, lines and
+ * personal data, their wholesale account (ADR-0068 §10), then the customer. The books keep amounts, lines and
  * tax; a contract keeps its copy while the law does. Nothing is undone on
  * a failure: putting the data back would undo the request. Every step
  * finds only what is left, so running the request again finishes it; it
@@ -90,6 +98,7 @@ export const eraseCustomerWorkflow = createWorkflow(
     const request = readErasureRequestStep({ request_id: input.request_id })
     const traces = eraseTracesStep(request)
     const orders = eraseOrdersStep(request)
+    const wholesale = eraseWholesaleStep(request)
     const customer = eraseCustomerStep(request)
     closePrivacyRequestStep(
       transform({ input }, ({ input }) => ({
@@ -100,6 +109,8 @@ export const eraseCustomerWorkflow = createWorkflow(
       }))
     )
     releaseLockStep({ key })
-    return new WorkflowResponse(transform({ traces, orders, customer }, (results) => results))
+    return new WorkflowResponse(
+      transform({ traces, orders, wholesale, customer }, (results) => results)
+    )
   }
 )
