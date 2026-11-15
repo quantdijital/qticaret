@@ -35,8 +35,14 @@ const product = {
 
 const subscribe = (): Promise<PlaceOrderResult> => Promise.resolve({ ok: true } as PlaceOrderResult)
 
-const rail = (id: string, title: string) =>
-  ({ id, type: "products", title, products: [product], more: null, empty: "Yok" }) as const
+const rail = (id: string, title: string) => ({
+  id,
+  type: "products" as const,
+  title,
+  products: [product],
+  more: null,
+  empty: "Yok",
+})
 
 /** Every section this spec looks at, each marked when `editor`. */
 function sections(editor: boolean): HomeSectionView[] {
@@ -201,7 +207,7 @@ describe("the field marks in Atölye's frame", () => {
     utilityBar: false,
     phone: false,
     categories: [],
-    menuGround: "dark" as const,
+    menuGround: "stage" as const,
   }
   const shop = (editor: boolean) =>
     shopFixture({
