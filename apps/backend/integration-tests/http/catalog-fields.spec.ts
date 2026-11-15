@@ -193,6 +193,29 @@ medusaIntegrationTestRunner({
         expect(after.data.primary_category_id).toBeNull()
       })
 
+      // W-02 (2026-11-15): asked as `categories.id` the store answers each category as
+      // `{ is_internal }` only; the storefront's product page asks for `*categories`
+      it("gives a storefront the product's category ids for `*categories`", async () => {
+        const knives = await category("Av Bıçakları")
+        const storefront = await createStorefront(getContainer())
+        const created = await createProduct(
+          product("Kanca Av Bıçağı", {
+            status: "published",
+            categories: [{ id: knives }],
+            sales_channels: [{ id: storefront.salesChannelId }],
+          })
+        )
+        const asked = await settle(
+          http.get<{ product: { categories: { id?: string }[] } }>(
+            `/store/products/${created.id}?fields=id,*categories`,
+            { headers: storefront.headers }
+          )
+        )
+
+        expect(asked.status).toBe(200)
+        expect(asked.data.product.categories.map((each) => each.id)).toEqual([knives])
+      })
+
       it("answers 404 for an unknown product", async () => {
         const missing = await settle(
           http.get(`/admin/products/prod_unknown/catalog`, { headers: admin.headers })

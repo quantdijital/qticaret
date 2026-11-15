@@ -79,14 +79,16 @@ function Strip({ badges }: { badges: readonly TrustBadgeView[] }) {
  * icon beside its words, no chip. Between 1024 and 1279 px the boxes are
  * tighter (16 px in, a 24 px icon, the phone's type), so four badges'
  * words keep to one line each and the row stays even (third audit Z-07). Each box draws its right and bottom
- * hairline as a one-pixel shadow on the field-coloured frame; the frame
- * clips the ones on its edge.
+ * hairline as a one-pixel shadow on the frame; the frame
+ * clips the ones on its edge. The frame is the field colour, or with the
+ * theme's lined boxes (`surface_style`, `--box-ground`) the page's ground,
+ * as the other boxes on the page (fourth audit W-03).
  */
 function Lined({ badges }: { badges: readonly TrustBadgeView[] }) {
   return (
     <ul
       data-variant="lined"
-      className={`grid auto-rows-fr grid-cols-2 overflow-hidden rounded-inner border border-rule bg-field ${columnsFor(badges)}`}
+      className={`grid auto-rows-fr grid-cols-2 overflow-hidden rounded-inner border border-rule bg-[color:var(--box-ground,var(--color-field))] ${columnsFor(badges)}`}
     >
       {badges.map((badge) => (
         <li

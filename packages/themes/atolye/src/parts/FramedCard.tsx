@@ -9,7 +9,8 @@ import type {
 } from "@qticaret/ui"
 import { CardBadges, isOut, quickAddWords } from "./card-parts"
 import { CardPriceRow, CardStars } from "./card-rows"
-import { QuickAdd, cardButtonClass } from "./QuickAdd"
+import { cardButtonClass } from "./card-button"
+import { QuickAdd } from "./QuickAdd"
 
 /**
  * The photo of a framed card with a second one (`card.css`): with a

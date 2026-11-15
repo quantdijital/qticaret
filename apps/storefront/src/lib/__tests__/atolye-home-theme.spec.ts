@@ -146,6 +146,9 @@ describe("the theme's home page: opening, promises, aisles", () => {
     expect(html).not.toContain("auto-rows-fr grid-cols-2 gap-2")
     // As many columns as badges: no empty box
     expect(html).toContain("lg:grid-cols-2")
+    // On the page's ground with the theme's lined boxes, else the field colour (W-03)
+    expect(html).toContain("bg-[color:var(--box-ground,var(--color-field))]")
+    expect(html).not.toContain("border-rule bg-field")
     const three = home([
       hero,
       {
