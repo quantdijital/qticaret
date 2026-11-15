@@ -30,7 +30,8 @@ jobs:
   quality:
     name: Lint, typecheck, test, build
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    # Build ~2, lint and typecheck ~5, the tests one package at a time ~15 minutes
+    timeout-minutes: 40
     # The rate limiter's Redis counters (an atomic Lua script) are tested
     # against a real Redis; the same pinned image as local dev
     services:
@@ -45,6 +46,12 @@ jobs:
           --health-retries 10
     env:
       TEST_REDIS_URL: redis://localhost:6379/15
+      # The control plane validates its env wherever it reads it (its build,
+      # and unit tests of code that reads it, such as the rate limiter's
+      # identity key): a public-looking domain and an https panel pass both
+      # as deployed and as local. Build-time values only; nothing is served
+      PLATFORM_DOMAIN: qticaret-ci.dev
+      CP_PANEL_URL: https://cp.qticaret-ci.dev
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -81,13 +88,11 @@ jobs:
       # writes when it builds (.medusa/types; `medusa develop` writes them
       # locally): typecheck and lint run after them, not beside them.
       # A build is a release build: the apps' configs validate as deployed
-      # (NODE_ENV unset), so the control plane gets a public-looking domain,
-      # an https panel and Redis (the service above; nothing connects at build)
+      # (NODE_ENV unset), so the control plane also needs Redis (the service
+      # above; nothing connects at build)
       - run: pnpm turbo run build
         env:
           REDIS_URL: redis://localhost:6379
-          PLATFORM_DOMAIN: qticaret-ci.dev
-          CP_PANEL_URL: https://cp.qticaret-ci.dev
       # --continue: every failing package is reported, not only the first
       - run: pnpm turbo run lint typecheck --continue
       # One package's tests at a time: beside lint and typecheck the runner's
