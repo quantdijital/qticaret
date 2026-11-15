@@ -122,7 +122,7 @@ export function Thumbs({
                 onChoose(n)
               }}
               className={cn(
-                "relative block aspect-square overflow-hidden rounded-inner bg-paper-2 outline-offset-2 transition-opacity duration-(--dur-micro)",
+                "relative block aspect-square overflow-hidden rounded-inner bg-media outline-offset-2 transition-opacity duration-(--dur-micro)",
                 n === index ? "outline-2 outline-text" : "opacity-70 hover:opacity-100"
               )}
             >

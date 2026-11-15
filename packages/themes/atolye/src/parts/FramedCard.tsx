@@ -129,7 +129,7 @@ export function FramedCard({
   const second = product.image ? framed.secondImage : null
   return (
     <article className="group gf-card gf-card-framed @container relative flex h-full flex-col gap-3 rounded-tile border border-rule bg-field p-2.5">
-      <div className="gf-card-media relative aspect-card overflow-hidden rounded-media bg-paper-2">
+      <div className="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media">
         {product.image && second ? (
           <Photos
             first={product.image}

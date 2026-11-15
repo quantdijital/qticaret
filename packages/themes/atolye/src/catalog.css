@@ -54,7 +54,7 @@
     height: 2rem;
     overflow: hidden;
     border-radius: var(--radius-inner);
-    background: var(--color-paper-3);
+    /* Its ground is the photo well's (`bg-media-deep`, tokens.css) */
   }
   .gf-mosaic-count {
     min-width: 2rem;

@@ -20,7 +20,7 @@ function ListRow({ category, t }: { category: CategoryCardView; t: Translate }) 
   return (
     <li>
       <a href={category.path} className="gf-mosaic-row">
-        <span className="gf-mosaic-thumb">
+        <span className="gf-mosaic-thumb bg-media-deep">
           {category.image && (
             <ResponsiveImage
               image={{ ...category.image, alt: "" }}
