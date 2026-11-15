@@ -166,8 +166,14 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
       <SettingsSearch
         doc={doc}
         page={page}
-        onPick={({ section, field }) => {
+        onPick={(hit) => {
           picks.current += 1
+          if ("theme" in hit) {
+            const { target, group } = hit.field
+            setOpened({ kind: "theme", focus: { target, group, nonce: picks.current } })
+            return
+          }
+          const { section, field } = hit
           const focus = field
             ? { target: field.target, group: field.group, nonce: picks.current }
             : undefined

@@ -1,11 +1,13 @@
 import type { FieldGroupName } from "./forms/field-registry"
+import type { ThemeGroupName } from "./forms/theme-registry"
 import type { FieldFocus } from "./use-field-focus"
 
 /** The panel open beside the page's parts; none: the list alone. */
 export type Opened =
   /** A section, at the field the settings search picked if it did (adr/0049 Ek 2026-11-14 §6). */
   | { kind: "section"; id: string; focus?: FieldFocus & { group: FieldGroupName } }
-  | { kind: "theme" }
+  /** The theme's settings, at the field the settings search picked if it did. */
+  | { kind: "theme"; focus?: FieldFocus & { group: ThemeGroupName } }
   /** The stock line and colour names, drafted with the design (adr/0049 Ek 2026-11-06). */
   | { kind: "looks" }
   | null

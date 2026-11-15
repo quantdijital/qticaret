@@ -8249,6 +8249,7 @@
         "fontsHint": "Vitrin yazı tiplerini kendi sunucusundan yükler; ziyaretçi bilgisi üçüncü taraflara gitmez.",
         "heading": "Başlıklar",
         "body": "Metin",
+        "fontTerm": "font-family",
         "serif": "tırnaklı",
         "sans": "tırnaksız",
         "fonts": {
@@ -8266,6 +8267,7 @@
         },
         "shapes": "Köşeler ve düğmeler",
         "radius": "Köşeler",
+        "radiusTerm": "border-radius",
         "radii": {
           "sharp": "Keskin",
           "soft": "Yumuşak",
@@ -8289,6 +8291,7 @@
         "sectionSpacingHint": "Sayfadaki bölümler arasındaki boşluk, her bölümde birlikte değişir. Normal, temanın kendi aralığıdır (geniş ekranda 120 px); Sık bunu 66 px'e indirir, Ferah 144 px'e çıkarır.",
         "card": "Ürün kartı",
         "ratio": "Görsel oranı",
+        "ratioTerm": "aspect-ratio",
         "ratios": {
           "4x5": "4:5 (dikey)",
           "1x1": "1:1 (kare)",

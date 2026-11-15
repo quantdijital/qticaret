@@ -78,6 +78,33 @@ describe("the theme editor's settings search", () => {
     expect(screen.getByRole("spinbutton", { name: "Gösterilecek sayı" })).toHaveFocus()
   })
 
+  it("finds the theme's settings and opens the theme panel at the picked one (Ek 2026-11-15)", async () => {
+    renderEditor()
+    await opened()
+
+    await user.type(searchbox(), "border-radius")
+    const hits = within(screen.getByRole("list", { name: "Arama sonuçları" }))
+    const hit = hits.getByRole("button", { name: /Köşeler border-radius/ })
+    expect(hit).toHaveTextContent("Köşeler border-radius" + "Tema ayarları · Köşeler ve düğmeler")
+    await user.click(hit)
+
+    expect(screen.getByRole("heading", { name: "Tema ayarları" })).toBeInTheDocument()
+    const field = document.getElementById("theme-radius")
+    expect(field).toHaveAttribute("data-highlight")
+    expect(field).toHaveFocus()
+  })
+
+  it("finds a theme choice by its name: the section spacing's 'Ferah'", async () => {
+    renderEditor()
+    await opened()
+
+    await user.type(searchbox(), "ferah")
+    const hits = within(screen.getByRole("list", { name: "Arama sonuçları" }))
+    await user.click(hits.getByRole("button", { name: /Bölüm aralığı section spacing: Ferah/ }))
+
+    expect(document.getElementById("theme-section-spacing")).toHaveAttribute("data-highlight")
+  })
+
   it("brings the list back on Escape, and says when nothing is found", async () => {
     renderEditor()
     await opened()

@@ -77,15 +77,18 @@ export function ColorInput({ id, label, hint, value, onChange, fallback, error }
 
 /** The page colour: a swatch per tone, each named, the storefront's own values. */
 export function BackgroundField({
+  id,
   value,
   onChange,
 }: {
+  /** The field's element, where the settings search lands. */
+  id: string
   value: StorefrontBackground
   onChange: (value: StorefrontBackground) => void
 }) {
   const { t } = useTranslation()
   return (
-    <div className="flex flex-col gap-2">
+    <div id={id} className="flex flex-col gap-2">
       <span id="theme-background-label" className="text-sm font-medium">
         {t(`${C}.background`)}
       </span>

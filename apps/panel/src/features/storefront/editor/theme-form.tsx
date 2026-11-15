@@ -11,12 +11,18 @@ import { PanelGroup } from "./panel-header"
 import { ThemeChoices } from "./theme-choices"
 import { BackgroundField, ColorInput } from "./theme-fields"
 import { ThemeSample } from "./theme-sample"
+import { THEME_GROUP_TITLES, THEME_IDS } from "./forms/theme-registry"
+import type { CardVariantsInUse, ThemeGroupName } from "./forms/theme-registry"
 
 const C = "storefront.editor.theme"
 
 interface ThemeFormProps {
   /** The draft's theme (the theme section's until the shop writes it there). */
   theme: ThemeSettings
+  /** The card variants the draft draws. */
+  variants: CardVariantsInUse
+  /** A group to open now (the settings search's pick): a fresh number each time; null: none. */
+  reveal: (group: ThemeGroupName) => number | null
   /** Its problems by field (`theme.colors.primary`), as the document's settings hold them. */
   problems: SectionProblems
   /** The first announcement line, for the sample. */
@@ -38,7 +44,15 @@ const orNull = (value: string): string | null => (value === "" ? null : value)
  * it and put live by "Yayınla". "Grafit'e dön" puts the theme's defaults
  * in the draft, one step to undo.
  */
-export function ThemeForm({ theme, problems, announcement, onChange, onUndo }: ThemeFormProps) {
+export function ThemeForm({
+  theme,
+  variants,
+  reveal,
+  problems,
+  announcement,
+  onChange,
+  onUndo,
+}: ThemeFormProps) {
   const { t } = useTranslation()
   const problem = useProblemText()
   const shown = themeValuesOf(theme)
@@ -57,9 +71,9 @@ export function ThemeForm({ theme, problems, announcement, onChange, onUndo }: T
       <div className="border-b px-5 py-4">
         <ThemeSample values={shown} announcement={announcement} />
       </div>
-      <PanelGroup title={t(`${C}.colors`)}>
+      <PanelGroup title={t(THEME_GROUP_TITLES.colors)} reveal={reveal("colors")}>
         <ColorInput
-          id="theme-primary"
+          id={THEME_IDS["colors.primary"]}
           label={t(`${C}.primary`)}
           hint={t(`${C}.primaryHint`)}
           value={shown.colors.primary}
@@ -70,7 +84,7 @@ export function ThemeForm({ theme, problems, announcement, onChange, onUndo }: T
           error={problem(problems["theme.colors.primary"])}
         />
         <ColorInput
-          id="theme-accent"
+          id={THEME_IDS["colors.accent"]}
           label={t(`${C}.accent`)}
           hint={t(`${C}.accentHint`)}
           value={shown.colors.accent}
@@ -81,6 +95,7 @@ export function ThemeForm({ theme, problems, announcement, onChange, onUndo }: T
           error={problem(problems["theme.colors.accent"])}
         />
         <BackgroundField
+          id={THEME_IDS["colors.background"]}
           value={colors.background}
           onChange={(background) => {
             onChange({ ...theme, colors: { ...colors, background } })
@@ -89,6 +104,8 @@ export function ThemeForm({ theme, problems, announcement, onChange, onUndo }: T
       </PanelGroup>
       <ThemeChoices
         theme={theme}
+        variants={variants}
+        reveal={reveal}
         onChange={(next) => {
           onChange(next)
         }}
