@@ -39,7 +39,7 @@ export function Faq({
               key={item.question}
               name={group}
               open={openFirst && index === 0 ? true : undefined}
-              className="group rounded-media bg-paper-2"
+              className="group rounded-media gf-pane"
             >
               <summary className="flex min-h-14 cursor-pointer items-center justify-between gap-4 rounded-media px-5 py-3 text-md font-semibold hover:bg-paper-3">
                 {item.question}

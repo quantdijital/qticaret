@@ -423,6 +423,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "aras.secret_invalid":
     "Aras Kargo did not accept this user name and password. Copy them again from Aras's integration document; test and live accounts differ.",
   "customers.unknown": "Customer not found.",
+  "customer_groups.unknown": "Customer group not found.",
   "customers.email_is_login":
     "A member's e-mail is their sign-in address; only the customer can change it from their account.",
   "customers.email_taken": "A guest customer with this e-mail already exists.",
@@ -777,6 +778,25 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "price_lists.unknown": "Price list not found.",
   "price_lists.no_currency": "The shop has no currency set.",
   "price_lists.rate": "The rate must be between 0 and 100 percent.",
+  "wholesale.managed":
+    "This group or price list belongs to wholesale; change it on the wholesale screens.",
+  "wholesale.tier_exists": "A wholesale level or customer group with this name already exists.",
+  "wholesale.tier_in_use": "Wholesalers are on this level; move them to another level first.",
+  "wholesale.tier_unknown": "Wholesale level not found.",
+  "wholesale.variant_unknown": "One of the products chosen no longer exists.",
+  "wholesale.exists": "A wholesaler with this e-mail address already exists.",
+  "wholesale.account_unknown": "Wholesaler not found.",
+  "wholesale.account_not_active": "This wholesaler is not active.",
+  "wholesale.account_not_inactive": "This wholesaler is not closed.",
+  "wholesale.account_not_pending": "This wholesaler is not awaiting an invitation.",
+  "wholesale.no_price_source": "Choose a level for the wholesaler or turn on their own prices.",
+  "wholesale.own_prices_off": "This wholesaler has no prices of their own yet; turn them on first.",
+  "wholesale.tax_pair": "Enter the tax office and the tax number together.",
+  "wholesale.company_for_tax": "A company name is needed with tax details.",
+  "wholesale.invite_too_soon": "The invitation was just sent; you can send it again in an hour.",
+  "wholesale.invite_limit": "This invitation can be sent again at most 5 times.",
+  "wholesale.invite_expired":
+    "This invitation has expired; delete the wholesaler and add them again.",
   "platform_settings.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
   "platform_settings.color_duplicate": "Each colour name can be listed once.",
   "platform_settings.color_contrast":

@@ -13,6 +13,7 @@ import { isDiscrete } from "@/features/storefront/layout/use-autosave"
 import { BRIDGE_ON, whyNotShown } from "./bridge/bridge-client"
 import { useLivePreview } from "./bridge/use-live-preview"
 import { usePreviewPicking } from "./bridge/use-preview-picking"
+import type { PreviewField } from "./forms/preview-fields"
 import type { Opened } from "./opened"
 
 const V = "storefront.editor.preview"
@@ -33,8 +34,8 @@ interface Options {
   hurry: () => void
   /** A page reached in the frame that is none of the editor's (its path); null: the page picked. */
   visited?: string | null
-  /** Faz 2: open a section's form (its edit label pressed in the frame). */
-  onOpen?: (id: string) => void
+  /** Faz 2: open a section's form (its edit label pressed in the frame); Faz 2b: at a field. */
+  onOpen?: (id: string, focus?: PreviewField) => void
   /** Faz 2: a link followed in the frame. */
   onVisit?: (path: string) => void
   /** Faz 2: the page the frame drew and whose sections it has. */

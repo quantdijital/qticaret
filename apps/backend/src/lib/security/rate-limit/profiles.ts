@@ -190,6 +190,13 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 30, windowMs: 15 * MINUTE },
     perIdentityAnyIp: { max: 10, windowMs: 15 * MINUTE },
   },
+  // ADR-0068 §3: a wholesaler opened or their invitation sent again mails an address in the
+  // shop's name; per staff member from any address
+  wholesale_invite: {
+    name: "wholesale_invite",
+    perIp: { max: 30, windowMs: 15 * MINUTE },
+    perIdentityAnyIp: { max: 20, windowMs: HOUR },
+  },
   // F5 (adr/0027): saving or testing a provider account calls the provider
   // and per staff member from any address: not an oracle for other people's details
   provider_check: {

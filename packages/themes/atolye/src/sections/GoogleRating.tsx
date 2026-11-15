@@ -24,11 +24,11 @@ export function GoogleRating({ section, t }: { section: Of<"google_rating">; t: 
   return (
     <section aria-labelledby={id} className="pt-(--section-gap)">
       <Container className="flex flex-col gap-6 lg:gap-10">
-        <SectionHead id={id} title={section.title} />
+        <SectionHead id={id} title={section.title} marks={section.editor} />
         <div className="grid gap-(--gap-columns) lg:grid-cols-12">
           <div
             className={cn(
-              "flex flex-col gap-5 rounded-tile bg-paper-2 p-6 lg:p-8",
+              "flex flex-col gap-5 rounded-tile gf-pane p-6 lg:p-8",
               wide
                 ? "md:flex-row md:items-center md:justify-between lg:col-span-12"
                 : "lg:col-span-4"

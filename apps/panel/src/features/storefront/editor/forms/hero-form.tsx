@@ -8,6 +8,7 @@ import { HeroSlidesField } from "./hero-slides-field"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { ImageField } from "./image-field"
+import { PREVIEW_IDS } from "./preview-fields"
 import { AddLinkButton, LinkCard } from "./link-field"
 import { useLinkPicker } from "./use-link-picker"
 
@@ -36,7 +37,7 @@ export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroS
   return (
     <div className="flex flex-col gap-5">
       <TextField
-        id="hero-eyebrow"
+        id={PREVIEW_IDS.text(section.id, "eyebrow")}
         label={t(`${F}.eyebrow`)}
         value={section.eyebrow}
         max={L.eyebrow}
@@ -53,7 +54,7 @@ export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroS
       ) : (
         <>
           <TextField
-            id="hero-heading"
+            id={PREVIEW_IDS.text(section.id, "heading")}
             label={t(`${F}.heading`)}
             value={section.heading}
             max={L.heading}
@@ -66,7 +67,7 @@ export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroS
             }}
           />
           <TextField
-            id="hero-text"
+            id={PREVIEW_IDS.text(section.id, "text")}
             label={t(`${F}.text`)}
             value={section.text}
             max={L.text}
@@ -84,7 +85,7 @@ export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroS
               return (
                 <LinkCard
                   key={`${String(index)}-${link.kind}`}
-                  id={`hero-link-${String(index)}`}
+                  id={PREVIEW_IDS.text(section.id, `links.${String(index)}`)}
                   link={link}
                   error={problem(problems[`links.${String(index)}`], L.label)}
                   onChange={(next, field) => {
@@ -123,7 +124,7 @@ export function HeroForm({ section, problems, onChange }: SectionFormProps<HeroS
             />
           </FieldGroup>
           <ImageField
-            id="hero-image"
+            id={PREVIEW_IDS.text(section.id, "image")}
             label={t(`${F}.image`)}
             hint={t(`${H}.imageHint`)}
             image={section.image}

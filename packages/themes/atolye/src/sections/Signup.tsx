@@ -22,7 +22,7 @@ export function Signup({
   return (
     <section aria-labelledby={id} className="pt-(--section-gap)">
       <Container>
-        <div className="grid gap-6 rounded-tile bg-paper-2 p-6 sm:p-10 lg:grid-cols-12 lg:items-end lg:gap-(--gap-columns) lg:p-14">
+        <div className="grid gap-6 rounded-tile gf-pane p-6 sm:p-10 lg:grid-cols-12 lg:items-end lg:gap-(--gap-columns) lg:p-14">
           <h2 id={id} className="lg:col-span-5">
             {section.title}
           </h2>

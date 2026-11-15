@@ -24,6 +24,8 @@ import { STAFF_RESOURCES } from "./resources/staff"
 import { STOCK_RESOURCES } from "./resources/stock"
 import { STOREFRONT_LAYOUT_RESOURCES } from "./resources/storefront-layout"
 import { TAX_RESOURCES } from "./resources/tax"
+import { WHOLESALE_RESOURCES } from "./resources/wholesale"
+import { WHOLESALE_ACCOUNT_RESOURCES } from "./resources/wholesale-accounts"
 import type { AuditedResource } from "./types"
 import { ID } from "./types"
 
@@ -58,6 +60,8 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...PRODUCT_REVIEW_RESOURCES,
   ...MESSAGING_RESOURCES,
   ...STOREFRONT_LAYOUT_RESOURCES,
+  ...WHOLESALE_RESOURCES,
+  ...WHOLESALE_ACCOUNT_RESOURCES,
 ]
 
 export interface ResourceMatch {

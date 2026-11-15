@@ -97,7 +97,7 @@ export function ProductsForm({ section, problems, onChange }: SectionFormProps<P
   return (
     <div className="flex flex-col gap-5">
       <ListFields
-        id="products"
+        id={section.id}
         list={section}
         titleLabel={t(columns ? `${SH}.firstTitle` : `${F}.title`)}
         problems={problems}

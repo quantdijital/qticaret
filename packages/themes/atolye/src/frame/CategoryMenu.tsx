@@ -3,45 +3,9 @@
 import { ChevronDown, ChevronRight, LayoutGrid } from "lucide-react"
 import { useEffect, useId, useRef, useState } from "react"
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from "react"
-import type { CategoryCardView, NavCategoryView } from "@qticaret/ui"
-import { MenuThumb } from "./MenuParts"
-
-const LINK =
-  "flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
-// With the pictures: the dropdown's row (`menu.css`), 48 px, the square 8 px in, the name 12 px past it
-const PICTURED =
-  "flex min-h-12 items-center gap-3 rounded-inner px-2 py-1 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
-
-/** A category's panel: two columns for a long list, one narrow for a short; wider with the pictures. */
-function panelWidth(wide: boolean, pictures: boolean): string {
-  if (wide) {
-    return pictures
-      ? "min-h-full w-[min(34rem,calc(100vw-26rem))]"
-      : "min-h-full w-[min(34rem,calc(100vw-24rem))]"
-  }
-  return pictures ? "w-72" : "w-64"
-}
-
-/** A row's words, with its category's square before them when the pictures show. */
-function Label({
-  category,
-  size,
-  pictures,
-}: {
-  category: CategoryCardView
-  size: 36 | 40
-  pictures: boolean
-}) {
-  if (!pictures) {
-    return <>{category.label}</>
-  }
-  return (
-    <>
-      <MenuThumb category={category} size={size} />
-      <span className="flex-1">{category.label}</span>
-    </>
-  )
-}
+import type { NavCategoryView } from "@qticaret/ui"
+import { Word } from "./AisleDrop"
+import { LINK, Label, PICTURED, panelWidth } from "./CategoryMenuParts"
 
 /** How long the pointer rests on the button before the list opens, and off it before it closes (ms). */
 const OPEN_AFTER = 150
@@ -221,7 +185,7 @@ export function CategoryMenu({
         type="button"
         aria-expanded={open}
         aria-controls={id}
-        className="gf-on-bar group inline-flex min-h-11 items-center gap-2 rounded-button bg-paper-2 px-4 text-sm font-bold whitespace-nowrap text-text transition-colors duration-(--dur-micro) hover:bg-paper-3 aria-expanded:bg-paper-3 aria-expanded:shadow-[inset_0_-2px_0_currentColor]"
+        className="gf-on-bar gf-bar-button group inline-flex min-h-11 items-center gap-2 rounded-button px-4 text-sm font-bold whitespace-nowrap text-text transition-colors duration-(--dur-micro)"
         onClick={() => {
           clearTimeout(timer.current)
           setOpen((was) => !was)
@@ -229,7 +193,7 @@ export function CategoryMenu({
         }}
       >
         <LayoutGrid className="size-4" aria-hidden="true" strokeWidth={2} />
-        {words.button}
+        <Word text={words.button} />
         <ChevronDown
           className="size-4 group-aria-expanded:rotate-180 motion-safe:transition-transform"
           aria-hidden="true"
@@ -240,7 +204,7 @@ export function CategoryMenu({
         id={id}
         aria-label={words.label}
         hidden={!open}
-        className={`absolute top-full left-0 z-(--z-dropdown) mt-1 ${pictures ? "w-80" : "w-72"} rounded-tile border border-rule bg-field p-2 text-text shadow-float`}
+        className={`absolute top-full left-0 z-(--z-dropdown) mt-1 ${pictures ? "w-80" : "w-72"} rounded-tile border border-rule bg-field p-2 text-text shadow-float-edged`}
       >
         <ul data-cm-list="top" className="flex flex-col">
           {categories.map((category, index) => {
@@ -253,7 +217,7 @@ export function CategoryMenu({
                 <a
                   href={category.path}
                   data-cm-top={own ? String(index) : undefined}
-                  className={`${pictures ? PICTURED : `${LINK} justify-between`} font-semibold ${active === index ? "bg-paper-2 text-text" : ""}`}
+                  className={`${pictures ? PICTURED : `${LINK} justify-between`} font-semibold`}
                   {...(own ? { "aria-expanded": active === index, "aria-controls": panel } : {})}
                   onPointerEnter={() => {
                     setActive(own ? index : -1)
@@ -272,7 +236,7 @@ export function CategoryMenu({
                     id={panel}
                     data-cm-sub={String(index)}
                     hidden={active !== index}
-                    className={`absolute top-0 left-full ml-1 rounded-tile border border-rule bg-field p-5 shadow-float ${panelWidth(wide, pictures)}`}
+                    className={`absolute top-0 left-full ml-1 rounded-tile border border-rule bg-field p-5 shadow-float-edged ${panelWidth(wide, pictures)}`}
                   >
                     <ul
                       data-cm-list={String(index)}
@@ -290,7 +254,9 @@ export function CategoryMenu({
                           href={category.path}
                           className={`${row} font-semibold text-text underline`}
                         >
-                          {words.allIn[category.path] ?? category.label}
+                          <span className="gf-menu-word">
+                            {words.allIn[category.path] ?? category.label}
+                          </span>
                         </a>
                       </li>
                     </ul>

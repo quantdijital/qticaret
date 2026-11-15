@@ -20,6 +20,27 @@
 [data-media-ground="page"] :is(.bg-media, .bg-media-deep) {
   background-color: var(--color-paper);
 }
+/*
+ * A well in one of the theme's boxes (`gf-pane`, `gf-pane-inner`, surface.css)
+ * sits on that box, so it takes the box's ground at each `surface_style`
+ * step: `filled` the tone (a box) or the field (a box inside one), `lined`
+ * the page's paper (a ruled box) or the tone (a box inside it). The inner
+ * box is written after the box, so a well in both reads the nearer one.
+ * The order's lines, the payment link's rows, a guide's card, an account's
+ * order row.
+ */
+[data-media-ground="page"] .gf-pane :is(.bg-media, .bg-media-deep) {
+  background-color: var(--color-paper-2);
+}
+[data-media-ground="page"] .gf-pane-inner :is(.bg-media, .bg-media-deep) {
+  background-color: var(--color-field);
+}
+[data-media-ground="page"][data-surface="lined"] .gf-pane :is(.bg-media, .bg-media-deep) {
+  background-color: var(--color-paper);
+}
+[data-media-ground="page"][data-surface="lined"] .gf-pane-inner :is(.bg-media, .bg-media-deep) {
+  background-color: var(--color-paper-2);
+}
 [data-media-ground="page"] :is(.bg-field, .gf-drop, .gf-suggest) :is(.bg-media, .bg-media-deep) {
   background-color: var(--color-field);
 }

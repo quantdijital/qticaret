@@ -1,4 +1,10 @@
-import { migrationInvite, passwordReset, verifyEmail } from "./account"
+import {
+  migrationInvite,
+  passwordReset,
+  verifyEmail,
+  wholesaleEnabled,
+  wholesaleInvite,
+} from "./account"
 import { campaignMessage } from "./campaign"
 import { cartReminder } from "./cart-reminder"
 import { giftCardIssued } from "./gift-card"
@@ -33,7 +39,13 @@ import { staffPaymentIssue } from "./staff-payment-issue"
 import { staffSmtpRejections } from "./staff-smtp-rejections"
 import { staffStockShort } from "./staff-stock-short"
 
-export type { MigrationInviteVars, ResetVars, VerifyVars } from "./account"
+export type {
+  MigrationInviteVars,
+  ResetVars,
+  VerifyVars,
+  WholesaleEnabledVars,
+  WholesaleInviteVars,
+} from "./account"
 export type { AnnouncementVars } from "./marketing"
 export type { CampaignVars } from "./campaign"
 export type { CartReminderVars } from "./cart-reminder"
@@ -84,6 +96,9 @@ export const MESSAGE_TEMPLATES = {
   "account.verify_email": verifyEmail,
   // F14.5 (adr/0042 §6): a moved customer asked to open their account here
   "account.migration_invite": migrationInvite,
+  // ADR-0068 §3: a wholesaler invited to sign up, an existing customer made one
+  "account.wholesale_invite": wholesaleInvite,
+  "account.wholesale_enabled": wholesaleEnabled,
   "payment.failed": paymentFailed,
   // adr/0025 Ek 2026-11-03: a sold gift card, to its recipient
   "gift_card.issued": giftCardIssued,

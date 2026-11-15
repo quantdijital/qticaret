@@ -49,7 +49,7 @@ export function Rack({
       )}
     </div>
   ) : (
-    <SectionHead id={id} title={section.title} more={section.more} />
+    <SectionHead id={id} title={section.title} more={section.more} marks={section.editor} />
   )
   const columns = shelfColumns(section.columns)
   const phone = shelfPhone(section.phoneColumns)
@@ -60,7 +60,7 @@ export function Rack({
       {empty ? (
         <>
           {head}
-          <p className="rounded-media bg-paper-2 p-4 text-text-2">{section.empty}</p>
+          <p className="rounded-media gf-pane p-4 text-text-2">{section.empty}</p>
         </>
       ) : variant === "carousel" ? (
         <CarouselShelf {...props} head={head} />

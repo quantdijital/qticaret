@@ -62,7 +62,7 @@ export function LegalPage({ view, t }: { view: LegalPageView; t: Translate }) {
       <Container className={`mt-8 grid gap-8 lg:mt-12 ${reading.grid}`}>
         {contents && (
           <>
-            <details className="group rounded-tile bg-paper-2 lg:hidden">
+            <details className="group rounded-tile gf-pane lg:hidden">
               <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-4 px-5 font-semibold">
                 <span>{t("legal.contents")}</span>
                 <span className="flex items-center gap-2 text-sm font-normal text-text-3">
@@ -103,7 +103,7 @@ export function LegalPage({ view, t }: { view: LegalPageView; t: Translate }) {
           {view.others.length > 0 && (
             <section
               aria-labelledby="diger-metinler"
-              className="mt-16 flex flex-col gap-4 rounded-tile bg-paper-2 p-6 lg:p-8"
+              className="mt-16 flex flex-col gap-4 rounded-tile gf-pane p-6 lg:p-8"
             >
               <h2 id="diger-metinler" className="text-title">
                 {t("legal.others")}

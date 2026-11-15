@@ -110,6 +110,7 @@ function BlockView({
           view={section.linked}
           all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
           t={t}
+          marks={section.editor}
         />
       ) : (
         <Aisles
@@ -118,6 +119,7 @@ function BlockView({
           categories={section.categories}
           all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
           t={t}
+          marks={section.editor}
         />
       )
     case "banner":

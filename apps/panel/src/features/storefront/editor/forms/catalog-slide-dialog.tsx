@@ -33,6 +33,7 @@ export function CatalogSlideDialog({
   onIndexChange,
   onSave,
   onClose,
+  initialFocus = null,
 }: {
   section: CatalogHero
   slides: HeroCatalogSlide[]
@@ -40,6 +41,8 @@ export function CatalogSlideDialog({
   onIndexChange: (index: number) => void
   onSave: (index: number, slide: HeroCatalogSlide) => void
   onClose: () => void
+  /** The element the dialog opens at (a field the preview named); null: its first. */
+  initialFocus?: string | null
 }) {
   const { t } = useTranslation()
   const problem = useProblemText()
@@ -101,6 +104,7 @@ export function CatalogSlideDialog({
           onClose()
         }
       }}
+      initialFocus={initialFocus}
       guard={guard}
     >
       <DialogBody>

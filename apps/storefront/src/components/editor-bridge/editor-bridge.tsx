@@ -238,6 +238,9 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
       onEdit: (id) => {
         send("click", { id })
       },
+      onEditField: (id, field) => {
+        send("field", { id, field })
+      },
     })
     state.overlay = overlay
     const unhook = installPageHooks({

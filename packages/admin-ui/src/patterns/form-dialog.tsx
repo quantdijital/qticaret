@@ -8,6 +8,10 @@ import type { DialogPane, DialogSize } from "../ui/dialog"
 import { DialogHeading } from "./dialog-heading"
 import { useDiscardGuard } from "./use-discard-guard"
 
+/** What may take the caret on opening: a control, never a box around one. */
+const FOCUSABLE =
+  'a[href], input:not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
 interface FormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -89,9 +93,13 @@ export function FormDialog({
           className={className}
           onOpenAutoFocus={(event) => {
             const target = initialFocus ? document.getElementById(initialFocus) : null
-            if (target) {
+            // A field's box (a picture's) is not focusable itself: its first control is
+            const control = target?.matches(FOCUSABLE)
+              ? target
+              : target?.querySelector<HTMLElement>(FOCUSABLE)
+            if (control) {
               event.preventDefault()
-              target.focus()
+              control.focus()
             }
           }}
         >

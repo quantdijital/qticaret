@@ -49,6 +49,20 @@ export async function layoutPreviewToken(): Promise<string | null> {
 }
 
 /**
+ * Whether this request is the theme editor's live session (adr/0065 §1):
+ * its views say so (`editor`), and the theme marks its fields for the
+ * editor's labels (Faz 2b). A shared design link and a live page never are,
+ * nor a token of the session's form that opens none (a made-up or ended
+ * one's 404; security review 2026-11-15, DÜŞÜK-2). The session is asked
+ * through `layoutSession`'s request cache: the layout read for the same
+ * request already asked, so no second call.
+ */
+export async function isEditorSession(): Promise<boolean> {
+  const token = await layoutPreviewToken()
+  return token !== null && SESSION_TOKEN.test(token) && (await layoutSession(token)) !== null
+}
+
+/**
  * The draft a preview token opens: the live session's as last saved, else
  * the signed link's; null when it no longer opens.
  */
@@ -82,6 +96,28 @@ export async function currentMenus(): Promise<StoreMenu[]> {
 /** A button's or slide's link as the theme prints it; null when it has no name or address. */
 export const layoutLink = (link: StoreLayoutLink | null, t: Translate): LinkView | null =>
   link ? menuLink({ ...link, children: [] }, t) : null
+
+/**
+ * A section's buttons as the theme prints them; a link with no name or
+ * address is left out. Only then each printed one says its place among
+ * the design's links (`actionsAt`), so the editor's field mark (adr/0065
+ * Faz 2b) names the button saved, not the one drawn before it.
+ */
+export function layoutLinks(
+  links: readonly StoreLayoutLink[],
+  t: Translate
+): { actions: LinkView[]; actionsAt?: number[] } {
+  const actions: LinkView[] = []
+  const at: number[] = []
+  links.forEach((link, index) => {
+    const view = layoutLink(link, t)
+    if (view) {
+      actions.push(view)
+      at.push(index)
+    }
+  })
+  return at.every((place, drawn) => place === drawn) ? { actions } : { actions, actionsAt: at }
+}
 
 /** A design picture with its sizes and versions; its alt text the shop's, else the media library's. */
 export const layoutImage = (image: StoreLayoutImage, fallbackAlt: string): ImageView =>

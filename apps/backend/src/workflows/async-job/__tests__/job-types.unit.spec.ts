@@ -1,5 +1,6 @@
 import {
   JOB_TYPE_KEYS,
+  MANAGER_JOB_TYPES,
   PLATFORM_JOB_TYPES,
   SCHEDULED_JOB_TYPES,
   exclusiveTypes,
@@ -35,6 +36,8 @@ describe("job types", () => {
       "seo.sitemap",
       "seo.url_style",
       "tr_address.sync",
+      "wholesale.carts",
+      "wholesale.sync",
     ])
     expect(jobType("__proto__")).toBeUndefined()
     expect(jobType("constructor")).toBeUndefined()
@@ -55,6 +58,23 @@ describe("job types", () => {
       containsPersonalData: true,
       resultTtlDays: 7,
     })
+  })
+
+  it("writes wholesale prices one run at a time, queued by its own code, seen by managers (L4)", () => {
+    expect(jobType("wholesale.sync")).toMatchObject({
+      singleton: true,
+      internal: true,
+      managersOnly: true,
+      containsPersonalData: false,
+    })
+    // Review M2: the carts repriced when the flag turns, likewise
+    expect(jobType("wholesale.carts")).toMatchObject({
+      singleton: true,
+      internal: true,
+      managersOnly: true,
+      containsPersonalData: false,
+    })
+    expect(MANAGER_JOB_TYPES).toEqual(["wholesale.carts", "wholesale.sync"])
   })
 
   it("syncs the address data one run at a time, never through the jobs route", () => {

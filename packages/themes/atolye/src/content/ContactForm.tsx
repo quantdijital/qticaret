@@ -55,7 +55,7 @@ export function ContactForm({
   return (
     <section
       aria-labelledby="iletisim-formu"
-      className="flex flex-col gap-6 rounded-tile bg-paper-2 p-6 sm:p-8 lg:p-10"
+      className="flex flex-col gap-6 rounded-tile gf-pane p-6 sm:p-8 lg:p-10"
     >
       <h2 id="iletisim-formu" className="text-section">
         {words.title}

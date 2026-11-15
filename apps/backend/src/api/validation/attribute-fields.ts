@@ -83,6 +83,19 @@ export const rejectStoreVariantExtension = restrictStoreRelation(
   "variant_extension_fields"
 )
 
+/**
+ * A variant's price rows (`variants.prices`, `variants.price_set.prices`):
+ * the rows of every price list are among them, a wholesale level's and a
+ * wholesaler's own too (ADR-0068 §7). The storefront reads prices only as
+ * `calculated_price`, worked out for the shopper; no spelling of the rows
+ * reaches it.
+ */
+export const rejectStorePriceRows = restrictStoreRelation(
+  /price_set|(^|[.*])prices(\.|$)/i,
+  [],
+  "price_row_fields"
+)
+
 /** Product attributes: `.definition.template` or `.definition.values` would reach other products. */
 export const restrictStoreAttributeFields = restrictStoreRelation(
   ATTRIBUTE_RELATION,

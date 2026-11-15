@@ -91,7 +91,7 @@ describe("the photo well's name (adr/0067 S4, step 5a)", () => {
     )
     // Boxes around the wells, a person's picture, a graphite stage's well
     expect(atolyeCss("sections/Guides.tsx")).toContain(
-      "flex-col overflow-hidden rounded-tile bg-paper-2"
+      "flex-col overflow-hidden rounded-tile gf-pane"
     )
     expect(atolyeCss("content/GoogleReviews.tsx")).toContain("rounded-full bg-paper-3 object-cover")
     expect(atolyeCss("sections/Spotlight.tsx")).toContain(
@@ -102,7 +102,9 @@ describe("the photo well's name (adr/0067 S4, step 5a)", () => {
   })
 
   it("keeps a well's controls answering the pointer one step darker, as on paper-2", () => {
-    expect(atolyeCss("buy.css")).toContain(":is(.bg-paper-2, .bg-media) .gf-icon-btn:hover")
+    expect(atolyeCss("buy.css")).toContain(
+      ":is(.bg-paper-2, .gf-pane, .bg-media) .gf-icon-btn:hover"
+    )
   })
 })
 
@@ -119,8 +121,49 @@ describe("the photo ground's page step (adr/0067 S4, step 5b)", () => {
     expect(ruleBody(media, SUBTILE)).toContain("background: var(--color-paper);")
   })
 
+  // A well in a box of adr/0067 step 4 (the order's lines, the payment link's rows)
+  const WELL = ":is(.bg-media, .bg-media-deep)"
+  const IN_PANE = `[data-media-ground="page"] .gf-pane ${WELL}`
+  const IN_PANE_INNER = `[data-media-ground="page"] .gf-pane-inner ${WELL}`
+  const IN_PANE_LINED = `[data-media-ground="page"][data-surface="lined"] .gf-pane ${WELL}`
+  const IN_PANE_INNER_LINED = `[data-media-ground="page"][data-surface="lined"] .gf-pane-inner ${WELL}`
+
+  it("draws a well in a box in the box's ground, at both surface steps", () => {
+    // `filled`: the box's tone, the inner box's field (surface.css)
+    expect(ruleBody(media, IN_PANE)).toContain("background-color: var(--color-paper-2);")
+    expect(ruleBody(media, IN_PANE_INNER)).toContain("background-color: var(--color-field);")
+    // `lined`: the ruled box stands on the page's paper, the box inside it on the tone
+    expect(ruleBody(media, IN_PANE_LINED)).toContain("background-color: var(--color-paper);")
+    expect(ruleBody(media, IN_PANE_INNER_LINED)).toContain(
+      "background-color: var(--color-paper-2);"
+    )
+    const surface = atolyeCss("surface.css")
+    expect(ruleBody(surface, ".gf-pane")).toContain("var(--color-paper-2)")
+    expect(ruleBody(surface, ".gf-pane-inner")).toContain("var(--color-field)")
+    expect(ruleBody(surface, '[data-surface="lined"] .gf-pane')).toContain("var(--color-paper)")
+    expect(ruleBody(surface, '[data-surface="lined"] .gf-pane-inner')).toContain(
+      "var(--color-paper-2)"
+    )
+  })
+
+  it("lets the nearer box win: the inner box after the box, the lined step after filled", () => {
+    const at = (selector: string) => media.indexOf(`${selector} {`)
+    expect(at(PAGE)).toBeLessThan(at(IN_PANE))
+    expect(at(IN_PANE)).toBeLessThan(at(IN_PANE_INNER))
+    expect(at(IN_PANE_INNER)).toBeLessThan(at(IN_PANE_LINED))
+    expect(at(IN_PANE_LINED)).toBeLessThan(at(IN_PANE_INNER_LINED))
+  })
+
   it("adds no edge: a photo without a frame, the framed card keeps its own rule", () => {
-    for (const selector of [PAGE, IN_BOX, SUBTILE]) {
+    for (const selector of [
+      PAGE,
+      IN_BOX,
+      SUBTILE,
+      IN_PANE,
+      IN_PANE_INNER,
+      IN_PANE_LINED,
+      IN_PANE_INNER_LINED,
+    ]) {
       expect(ruleBody(media, selector)).not.toMatch(/border|box-shadow|outline/)
     }
   })

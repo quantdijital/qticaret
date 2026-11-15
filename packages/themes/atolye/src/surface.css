@@ -16,6 +16,68 @@
 }
 
 /*
+ * Every other box of the theme (adr/0067 step 4): the account, order,
+ * checkout, payment link and content pages' boxes and the home sections'
+ * (FAQ, guides, signup, story, Google rating, an empty rack). `gf-pane` is
+ * a box on its ground, a tone darker (as `gf-box`); `gf-pane-inner` is a
+ * box inside one, on the field's light ground. They draw `filled` exactly
+ * as the utilities they replace (`bg-paper-2`, `bg-field`). Kept apart
+ * from `gf-box`: these sit in sections a shop may put on graphite or its
+ * colour, so their `lined` look reads the section's own tokens (below)
+ * rather than the page's, which `:root` would carry into them.
+ */
+@layer components {
+  .gf-pane {
+    background-color: var(--color-paper-2);
+  }
+  .gf-pane-inner {
+    background-color: var(--color-field);
+  }
+
+  /* `lined`: the ground the box stands on inside a 1 px rule. On graphite
+     or the shop's colour a section turns `--color-paper` and `--color-rule`
+     to its own (`look.css`), so the box follows it there. */
+  [data-surface="lined"] .gf-pane {
+    background-color: var(--color-paper);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+  }
+  /* A box inside a ruled box takes no rule of its own (one ruled box, no
+     double line, docs/tema/tezgah-tasarim-dili.md): it steps to the tone,
+     and a third level (a contract's text in its fold) back to the field. */
+  [data-surface="lined"] .gf-pane-inner {
+    background-color: var(--color-paper-2);
+  }
+  [data-surface="lined"] :is(.gf-pane, .gf-box) .gf-pane {
+    background-color: var(--color-paper-2);
+    box-shadow: none;
+  }
+  [data-surface="lined"] .gf-pane-inner .gf-pane {
+    background-color: var(--color-field);
+  }
+}
+
+/*
+ * A shape a box draws inside (`gf-shape`: an icon's disc, a status pill),
+ * `lined`. Each is a step off its box's `filled` ground: the page's paper
+ * or the field on the tone, the tone on the field. A ruled box stands on
+ * the paper and a box inside it on the tone, so the shape would vanish
+ * into it; it steps to the tone in a ruled box and back to the paper in a
+ * box inside one, as a box inside a box does (above). The inner box is
+ * written after the box, so the nearer one wins. Unlayered: the shape's
+ * colour is a utility. An order row's overlapping thumbnails are ringed in
+ * their row's ground, the paper in a ruled box.
+ */
+[data-surface="lined"] :is(.gf-pane, .gf-box) .gf-shape {
+  background-color: var(--color-paper-2);
+}
+[data-surface="lined"] .gf-pane-inner .gf-shape {
+  background-color: var(--color-paper);
+}
+[data-surface="lined"] .gf-pane .ring-paper-2 {
+  --tw-ring-color: var(--color-paper);
+}
+
+/*
  * The subcategory tiles above a listing's grid, `lined`: no graphite and
  * no gradient, a plain row on the page's ground: a small square picture,
  * the name beside it, inside the same 1 px rule. Outside the layers, as
