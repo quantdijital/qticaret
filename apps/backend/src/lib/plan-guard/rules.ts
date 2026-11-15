@@ -205,6 +205,8 @@ export const PLAN_CLOSED: readonly Rule[] = closed([
   "/admin/customer-segments*",
   "/admin/customer-groups*",
   "/admin/customers*",
+  // ADR-0068 §9: wholesale levels and prices are selling anew; closing an account (slice 1b) opens
+  "/admin/wholesale*",
   "/admin/abandoned-carts*",
   "/admin/payment-links*",
   "/admin/draft-orders*",
