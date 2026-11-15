@@ -221,8 +221,17 @@ medusaIntegrationTestRunner({
         { channel: "sms", status: "granted", text_version: "2026-10" },
         { headers: customer.headers }
       )
-      const [request] = await messaging().listConsentRequests({ customer_id: customer.id })
+      // Asked again while the confirmation is on its way: nothing more is sent (#73 review, L3)
+      const again = await http.post<ConsentsBody & { pending: string | null }>(
+        "/store/customers/me/consents",
+        { channel: "sms", status: "granted", text_version: "2026-10" },
+        { headers: customer.headers }
+      )
+      const requests = await messaging().listConsentRequests({ customer_id: customer.id })
+      const [request] = requests
 
+      expect(again.status).toBe(202)
+      expect(requests).toHaveLength(1)
       expect(asked.status).toBe(202)
       expect(asked.data.pending).toBe("sms")
       expect(await messaging().consentOf("sms", phone)).toBeNull()

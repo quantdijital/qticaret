@@ -51,6 +51,38 @@ export class ConsentRequests extends ConsentRecords {
     return { id: request.id, token }
   }
 
+  /**
+   * Whether the same request is still on its way: asked after `since`,
+   * for the same customer, address and answer, neither confirmed nor
+   * expired. An account asking again within that time is sent nothing
+   * more (security review of PR #73, L3).
+   */
+  @InjectManager()
+  async consentRequestPending(
+    input: Pick<ConsentRequestInput, "channel" | "address" | "status" | "customer_id">,
+    since: Date,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    const recipient = this.recipientOf(input.channel, input.address)
+    if (!recipient) {
+      return false
+    }
+    const [request] = await this.listConsentRequests(
+      {
+        channel: input.channel,
+        recipient_hash: recipient.hash,
+        status: input.status,
+        customer_id: input.customer_id ?? null,
+        confirmed_at: null,
+        expires_at: { $gt: new Date() },
+        created_at: { $gt: since },
+      },
+      { take: 1, select: ["id"] },
+      sharedContext
+    )
+    return request !== undefined
+  }
+
   /** Where a request's confirmation goes, decrypted to send it; null once it is answered. */
   @InjectManager()
   async consentRequestOf(

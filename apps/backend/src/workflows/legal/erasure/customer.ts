@@ -7,6 +7,7 @@ import { BILLING_PROFILE_MODULE } from "../../../modules/billing-profile"
 import type BillingProfileModuleService from "../../../modules/billing-profile/service"
 import { ORDER_NOTES_MODULE } from "../../../modules/order-notes"
 import type OrderNotesModuleService from "../../../modules/order-notes/service"
+import { eraseSignIns, signInsOf } from "./sign-ins"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -58,20 +59,22 @@ export async function addressesOf(container: Container, customerId: string): Pro
  * The customer themselves (adr/0041 §6): a person's invoice identity and
  * its tax number deleted for good (a company's stays for the books), the
  * profile's name, e-mail and phone replaced, the addresses deleted, then
- * the sign-in removed and the record closed as Medusa does. The record
+ * the record closed as Medusa does and every sign-in of theirs removed
+ * with the address's confirmations (`eraseSignIns`). The record
  * stays, erased: orders still point at it. Run again, it changes nothing
  * more.
  */
 export async function eraseCustomer(container: Container, customerId: string) {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "customer",
-    fields: ["id", "has_account", "billing_profile.id", "billing_profile.type"],
+    fields: ["id", "email", "has_account", "billing_profile.id", "billing_profile.type"],
     filters: { id: customerId },
     withDeleted: true,
   })
   const customer = data[0] as
     | {
         id: string
+        email: string | null
         has_account: boolean
         billing_profile?: { id: string; type: "individual" | "corporate" } | null
       }
@@ -79,6 +82,13 @@ export async function eraseCustomer(container: Container, customerId: string) {
   if (!customer) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "customers.unknown")
   }
+  // Read before the record forgets them: its sign-ins and its address
+  const signIns = await signInsOf(container, customerId)
+  // An account's only: a guest record's address may be an account's login too
+  const email =
+    customer.has_account && customer.email && customer.email !== erasedEmail(customerId)
+      ? customer.email
+      : null
   // A company's invoice identity is no person's: the books keep reading it
   const profileId =
     customer.billing_profile?.type === "individual" ? customer.billing_profile.id : undefined
@@ -133,5 +143,6 @@ export async function eraseCustomer(container: Container, customerId: string) {
       await customers.softDeleteCustomers([customerId])
     }
   }
+  await eraseSignIns(container, signIns, email)
   return { billing_profile: Boolean(profileId), addresses: addresses.length }
 }

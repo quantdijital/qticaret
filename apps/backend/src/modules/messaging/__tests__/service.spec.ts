@@ -138,6 +138,38 @@ moduleIntegrationTestRunner<MessagingModuleService>({
         expect(unknown).toBeNull()
         expect(await service.consentOf("sms", "+905327654321")).toBe("granted")
       })
+
+      it("tells a request still on its way from one answered, another's or too old", async () => {
+        const asked = {
+          channel: "email" as const,
+          address: "Bekleyen@Example.com",
+          status: "granted" as const,
+          customer_id: "cus_7",
+        }
+        const before = new Date(Date.now() - 60_000)
+        const none = await service.consentRequestPending(asked, before)
+        const { token } = await service.requestConsent({ ...asked, source: "account" })
+
+        const pending = await service.consentRequestPending(
+          { ...asked, address: " bekleyen@example.com" },
+          before
+        )
+        const later = await service.consentRequestPending(asked, new Date(Date.now() + 60_000))
+        const other = await service.consentRequestPending(
+          { ...asked, customer_id: "cus_8" },
+          before
+        )
+        const revoke = await service.consentRequestPending({ ...asked, status: "revoked" }, before)
+        await service.confirmConsentRequest(token)
+        const answered = await service.consentRequestPending(asked, before)
+
+        expect(none).toBe(false)
+        expect(pending).toBe(true)
+        expect(later).toBe(false)
+        expect(other).toBe(false)
+        expect(revoke).toBe(false)
+        expect(answered).toBe(false)
+      })
     })
 
     describe("suppression (adr/0036)", () => {

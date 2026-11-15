@@ -1,11 +1,14 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { provenCustomer } from "../proven-customer"
+import { ADDRESS_VOUCHING_PROVIDERS, customerAuthProviders } from "../../../lib/auth/providers"
+import type { Env } from "../../../lib/env"
+import { logger } from "../../../lib/logging"
+import { confirmedByOwnLogin, provenCustomer } from "../proven-customer"
 
 interface Identity {
   id: string
   customer_id?: string
   provider: string
-  /** The e-mail login's address, or the address a social provider vouched for. */
+  /** The e-mail login's address, or the address a social provider vouched for, as stored. */
   email: string
 }
 
@@ -20,34 +23,31 @@ type Filters = Record<string, unknown>
 const ilike = (filter: unknown): string =>
   ((filter as { $ilike?: string } | undefined)?.$ilike ?? "").replace(/\\(.)/g, "$1").toLowerCase()
 
+interface Options {
+  verifications?: Verification[]
+  /** The identities' read fails (a database error). */
+  socialReadFails?: boolean
+  /** The identities' read ignores its filter and answers every identity. */
+  filterIgnored?: boolean
+}
+
 /**
- * The auth service as `provenCustomer` reads it: provider identities by
- * provider and address, identities by id, verifications by identity and
- * address. Enough of Medusa's filters to tell the cases apart.
+ * The auth service and query as `provenCustomer` reads them: e-mail logins
+ * by address, identities by id, verifications by identity and address,
+ * and a customer's identities with their provider rows.
  */
 function shop(
   customer: { email: string | null; has_account: boolean } | null,
   identities: Identity[],
-  verifications: Verification[] = [],
-  socialReadFails = false
+  options: Options = {}
 ) {
+  const { verifications = [], socialReadFails = false, filterIgnored = false } = options
   const auth = {
     listProviderIdentities: (filters: Filters) => {
-      if (filters["provider"] === "emailpass") {
-        const address = ilike(filters["entity_id"])
-        return Promise.resolve(
-          identities
-            .filter((each) => each.provider === "emailpass" && each.email === address)
-            .map((each) => ({ auth_identity_id: each.id }))
-        )
-      }
-      if (socialReadFails) {
-        return Promise.reject(new Error("json filter"))
-      }
-      const address = (filters["user_metadata"] as { email: string }).email
+      const address = ilike(filters["entity_id"])
       return Promise.resolve(
         identities
-          .filter((each) => each.provider !== "emailpass" && each.email === address)
+          .filter((each) => each.provider === "emailpass" && each.email.toLowerCase() === address)
           .map((each) => ({ auth_identity_id: each.id }))
       )
     },
@@ -70,7 +70,28 @@ function shop(
       )
     },
   }
-  const query = { graph: () => Promise.resolve({ data: customer ? [customer] : [] }) }
+  const query = {
+    graph: (input: { entity: string; filters: Filters }) => {
+      if (input.entity === "customer") {
+        return Promise.resolve({ data: customer ? [customer] : [] })
+      }
+      if (socialReadFails) {
+        return Promise.reject(new Error("select … where email = 'ali@example.com'"))
+      }
+      const wanted = (input.filters["app_metadata"] as { customer_id: string }).customer_id
+      return Promise.resolve({
+        data: identities
+          .filter((each) => filterIgnored || each.customer_id === wanted)
+          .map((each) => ({
+            id: each.id,
+            app_metadata: each.customer_id ? { customer_id: each.customer_id } : {},
+            provider_identities: [
+              { provider: each.provider, user_metadata: { email: each.email } },
+            ],
+          })),
+      })
+    },
+  }
   return {
     resolve: (key: string) => {
       if (key === ContainerRegistrationKeys.QUERY) {
@@ -88,45 +109,70 @@ const EMAIL = "ali_veli@example.com"
 const member = { email: "Ali_Veli@Example.com", has_account: true }
 const login = { id: "authid_1", customer_id: "cus_1", provider: "emailpass", email: EMAIL }
 const confirmed = { auth_identity_id: "authid_1", entity_id: EMAIL, verified_at: "2026-11-15" }
+const apple = { id: "authid_3", customer_id: "cus_1", provider: "apple", email: EMAIL }
 
 /** Security review of ADR-0068 slice 1b, H1, and of PR #73: what proves an address. */
 describe("whether a customer has proven their address", () => {
   it("is proven by the e-mail login's own address confirmed in its own session", async () => {
-    expect(await provenCustomer(shop(member, [login], [confirmed]), "cus_1")).toBe(true)
+    const container = shop(member, [login], { verifications: [confirmed] })
+    expect(await provenCustomer(container, "cus_1")).toBe(true)
+    expect(await confirmedByOwnLogin(container, "cus_1")).toBe(true)
   })
 
   it("is not proven by a registration never confirmed: has_account alone is no proof", async () => {
     expect(await provenCustomer(shop(member, [login]), "cus_1")).toBe(false)
-    expect(
-      await provenCustomer(shop(member, [login], [{ ...confirmed, verified_at: null }]), "cus_1")
-    ).toBe(false)
+    const unverified = { verifications: [{ ...confirmed, verified_at: null }] }
+    expect(await provenCustomer(shop(member, [login], unverified), "cus_1")).toBe(false)
   })
 
   it("is not proven by a code confirmed for another address, or by another identity", async () => {
     const elsewhere = { ...confirmed, entity_id: "kendi@example.com" }
-    const stranger = { id: "authid_2", customer_id: "cus_2", provider: "emailpass", email: EMAIL }
-    expect(await provenCustomer(shop(member, [login], [elsewhere]), "cus_1")).toBe(false)
-    // A sign-in of another customer with the address, confirmed, proves nothing for this one
     expect(
-      await provenCustomer(
-        shop(member, [{ ...login, customer_id: "cus_2" }, stranger], [confirmed]),
-        "cus_1"
-      )
+      await provenCustomer(shop(member, [login], { verifications: [elsewhere] }), "cus_1")
     ).toBe(false)
+    // Another identity confirmed a code for this address in its own session: no proof here
+    const accomplice = {
+      id: "authid_2",
+      customer_id: "cus_2",
+      provider: "emailpass",
+      email: "y@example.com",
+    }
+    const theirs = { ...confirmed, auth_identity_id: "authid_2" }
+    const container = shop(member, [login, accomplice], { verifications: [theirs] })
+    expect(await provenCustomer(container, "cus_1")).toBe(false)
+    expect(await confirmedByOwnLogin(container, "cus_1")).toBe(false)
   })
 
-  it("is proven by a social sign-in of the customer whose provider vouched for the address", async () => {
-    const apple = { id: "authid_3", customer_id: "cus_1", provider: "apple", email: EMAIL }
+  it("is proven by its own social sign-in from a provider that verifies addresses, in any case", async () => {
     expect(await provenCustomer(shop(member, [login, apple]), "cus_1")).toBe(true)
-    // Another customer's social sign-in with the address vouches for nobody else
-    expect(
-      await provenCustomer(shop(member, [login, { ...apple, customer_id: "cus_2" }]), "cus_1")
-    ).toBe(false)
+    // Google keeps the address as the person wrote it (Medusa 2.21.2)
+    const google = { ...apple, provider: "google", email: " Ali_Veli@EXAMPLE.com " }
+    expect(await provenCustomer(shop(member, [login, google]), "cus_1")).toBe(true)
+    // A social sign-in is no e-mail confirmation: it never joins another (adr/0037 §3)
+    expect(await confirmedByOwnLogin(shop(member, [login, apple]), "cus_1")).toBe(false)
   })
 
-  it("counts a social read that fails as no proof", async () => {
-    const apple = { id: "authid_3", customer_id: "cus_1", provider: "apple", email: EMAIL }
-    expect(await provenCustomer(shop(member, [apple], [], true), "cus_1")).toBe(false)
+  it("is not proven by a provider off the list, another customer's sign-in or another address", async () => {
+    const unlisted = { ...apple, provider: "github" }
+    expect(await provenCustomer(shop(member, [login, unlisted]), "cus_1")).toBe(false)
+    const others = { ...apple, customer_id: "cus_2" }
+    expect(await provenCustomer(shop(member, [login, others]), "cus_1")).toBe(false)
+    // Even if the read answered every identity, another customer's proves nothing
+    expect(
+      await provenCustomer(shop(member, [login, others], { filterIgnored: true }), "cus_1")
+    ).toBe(false)
+    const elsewhere = { ...apple, email: "ali.veli@example.com" }
+    expect(await provenCustomer(shop(member, [login, elsewhere]), "cus_1")).toBe(false)
+  })
+
+  it("counts a social read that fails as no proof, and logs no value of the query", async () => {
+    const warn = jest.spyOn(logger, "warn").mockImplementation(() => undefined)
+    expect(await provenCustomer(shop(member, [apple], { socialReadFails: true }), "cus_1")).toBe(
+      false
+    )
+    expect(warn).toHaveBeenCalledWith({ event: "account.social_proof_unread", error: "Error" })
+    expect(JSON.stringify(warn.mock.calls)).not.toContain("@example.com")
+    warn.mockRestore()
   })
 
   it("is never proven for a guest record, a customer without an address, or none", async () => {
@@ -136,7 +182,27 @@ describe("whether a customer has proven their address", () => {
       { email: "  ", has_account: true },
       null,
     ]) {
-      expect(await provenCustomer(shop(customer, [login], [confirmed]), "cus_1")).toBe(false)
+      const container = shop(customer, [login, apple], { verifications: [confirmed] })
+      expect(await provenCustomer(container, "cus_1")).toBe(false)
+      expect(await confirmedByOwnLogin(container, "cus_1")).toBe(false)
     }
+  })
+})
+
+describe("the providers whose sign-in proves an address", () => {
+  it("lists every social provider the shop can offer a customer", () => {
+    const env = {
+      GOOGLE_AUTH_CLIENT_ID: "id",
+      GOOGLE_AUTH_CLIENT_SECRET: "placeholder",
+      GOOGLE_AUTH_CALLBACK_URL: "https://magaza.example.com/hesap/giris/google",
+      APPLE_AUTH_CLIENT_ID: "id",
+      APPLE_AUTH_TEAM_ID: "team",
+      APPLE_AUTH_KEY_ID: "key",
+      APPLE_AUTH_PRIVATE_KEY: "placeholder",
+      APPLE_AUTH_CALLBACK_URL: "https://magaza.example.com/hesap/giris/apple",
+    } as unknown as Env
+    const social = customerAuthProviders(env).ids.filter((id) => id !== "emailpass")
+    expect(social.length).toBeGreaterThan(0)
+    expect(social.filter((id) => !ADDRESS_VOUCHING_PROVIDERS.includes(id))).toEqual([])
   })
 })
