@@ -125,6 +125,12 @@ describe("the photo ground's page step (adr/0067 S4, step 5b)", () => {
     }
   })
 
+  it("keeps an empty well's shape with the rule, inside the well; a well with its photo stays unframed", () => {
+    const EMPTY = '[data-media-ground="page"] :is(.bg-media, .bg-media-deep):not(:has(img))'
+    expect(ruleBody(media, EMPTY)).toContain("box-shadow: inset 0 0 0 1px var(--color-rule);")
+    expect(ruleBody(media, EMPTY)).not.toMatch(/background|border|outline/)
+  })
+
   it("is unlayered, so the mark outranks the well's utility, and loaded after the boxes", () => {
     expect(media).not.toContain("@layer")
     const styles = atolyeCss("styles.css")
