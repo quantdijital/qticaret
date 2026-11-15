@@ -106,6 +106,8 @@ describe("the theme's product rail variants", () => {
       rail({ id: "sonra", title: "Sonra" }),
     ])
     expect(html).toContain('<h2 id="bolum-raf-1"')
+    // Each list's heading is a section heading, the page's one size (K-13)
+    expect(html).toContain('<h2 id="bolum-raf-1">')
     expect(html).toContain("lg:grid-cols-[repeat(3,minmax(0,1fr))]")
     // The rails either side are not joined across it: no tabs at all
     expect(html).not.toContain('type="radio"')

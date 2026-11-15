@@ -126,9 +126,7 @@ export function ColumnsShelf({ section, t }: LayoutProps) {
     >
       {lists.map((list) => (
         <section key={list.id} aria-labelledby={headingId(list.id)} className="flex flex-col gap-5">
-          <h2 id={headingId(list.id)} className="text-lg">
-            {list.title}
-          </h2>
+          <h2 id={headingId(list.id)}>{list.title}</h2>
           <CompactList products={list.products} t={t} />
         </section>
       ))}
