@@ -1,0 +1,41 @@
+<!-- preset lock: cutlery-tezgah-lacivert (docs/tema/bilesen-standardi.md §7) -->
+<link
+  rel="preload"
+  as="image"
+  href="https://cdn.example.com/p/01.webp"
+  imagesrcset="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
+  imagesizes="(min-width: 1440px) 500px, (min-width: 1024px) 35vw, (min-width: 768px) 50vw, 92vw"
+  type="image/webp"
+  fetchpriority="high"
+/>
+<!-- section 01-tezgahacilis -->
+<!-- section 02-guvenseridi -->
+<!-- section 03-yenirafi -->
+<!-- section 04-yakinplan -->
+<!-- section 05-fiyatbantlari -->
+<!-- section 06-coksatanlar -->
+<!-- section 07-kullanimagore -->
+<!-- section 08-indirimdekiler -->
+<!-- section 09-yazilar -->
+<!-- section 10-markalar -->
+<!-- section 11-kisalisteler -->
+<!-- section 12-musteriyorumlari -->
+<script>
+  addEventListener("submit", function (a) {
+    if (!a.defaultPrevented) {
+      var b = a.target,
+        d = a.submitter,
+        c = b.action,
+        e = d
+      if (d) {
+        var f = d.getAttribute("formAction")
+        null != f && ((c = f), (e = null))
+      }
+      "javascript:throw new Error('React form unexpectedly submitted.')" === c &&
+        (a.preventDefault(),
+        (a = new FormData(b, e)),
+        (c = b.ownerDocument || b),
+        (c.$$reactFormReplay = c.$$reactFormReplay || []).push(b, d, a))
+    }
+  })
+</script>
