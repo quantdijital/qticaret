@@ -1,10 +1,14 @@
 import { z } from "@medusajs/framework/zod"
 import { logger } from "../../../lib/logging"
 import { activeWholesalers } from "../../wholesale/accounts/wholesalers"
+import { wholesaleListsState } from "../../wholesale/lists-status"
 import { repriceCustomerCarts } from "../../wholesale/steps/carts"
 import type { JobContext, JobType } from "./types"
 
 export const WHOLESALE_CARTS_JOB = "wholesale.carts"
+
+// The flag turned during a pass: priced again, a few times at most
+const MAX_ROUNDS = 3
 
 export const WholesaleCartsInput = z.object({}).strict()
 export type WholesaleCartsInput = z.infer<typeof WholesaleCartsInput>
@@ -24,19 +28,32 @@ export const wholesaleCarts: JobType<WholesaleCartsInput> = {
   resultTtlDays: 1,
   containsPersonalData: false,
   execute: async (context: JobContext) => {
-    const customers = [...(await activeWholesalers(context.container))]
+    let wholesalers = 0
     let repriced = 0
     let failed = 0
-    for (const [index, customerId] of customers.entries()) {
-      const counts = await repriceCustomerCarts(context.container, customerId)
-      repriced += counts.repriced
-      failed += counts.failed
-      await context.progress(Math.min(99, Math.round(((index + 1) / customers.length) * 100)))
+    // The job is one at a time: a flag turned again while it runs queues
+    // nothing, and the carts it already passed keep the old prices. A pass
+    // that ends on other list statuses than it began with is run again.
+    for (let round = 0; round < MAX_ROUNDS; round++) {
+      const before = await wholesaleListsState(context.container)
+      const customers = [...(await activeWholesalers(context.container))]
+      wholesalers = customers.length
+      repriced = 0
+      failed = 0
+      for (const [index, customerId] of customers.entries()) {
+        const counts = await repriceCustomerCarts(context.container, customerId)
+        repriced += counts.repriced
+        failed += counts.failed
+        await context.progress(Math.min(99, Math.round(((index + 1) / customers.length) * 100)))
+      }
+      if ((await wholesaleListsState(context.container)) === before) {
+        break
+      }
     }
     if (failed > 0) {
       logger.warn({ event: "wholesale.carts_left_unpriced", failed })
     }
-    logger.info({ event: "wholesale.carts_repriced", wholesalers: customers.length, repriced })
-    return { summary: { wholesalers: customers.length, repriced, failed } }
+    logger.info({ event: "wholesale.carts_repriced", wholesalers, repriced })
+    return { summary: { wholesalers, repriced, failed } }
   },
 }

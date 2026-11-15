@@ -23,7 +23,9 @@ test("opens the theme editor with the draft in the preview and a section's setti
   const tree = page.getByRole("navigation", { name: "Sayfanın bölümleri" })
   await expect(tree.getByRole("heading", { name: "Ana sayfa" })).toBeVisible()
   const frame = page.locator("iframe[data-storefront-preview]")
-  await expect(frame).toHaveAttribute("src", /\/onizleme\/sfl_/)
+  // The frame shows the editor's live session (`sfs_`, adr/0065 §1); a signed
+  // design link (`sfl_`) is for opening in a new tab
+  await expect(frame).toHaveAttribute("src", /\/onizleme\/sfs_/)
   // The storefront allows the panel to frame its preview page: the draft's page shows inside
   await expect(page.frameLocator("iframe[data-storefront-preview]").locator("body")).toBeVisible({
     timeout: 30_000,

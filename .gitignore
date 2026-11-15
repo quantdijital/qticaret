@@ -38,6 +38,8 @@ apps/control-plane-panel/e2e/.report/
 apps/storefront/e2e/.results/
 apps/storefront/e2e/.report/
 apps/storefront/e2e/.resolved-style/
+# Playwright's default output, written when it runs from a package root
+test-results/
 
 # Müşteri kaynak dosyaları (dışa aktarmalar, tedarikçi belgeleri): depoya girmez
 docs/gecis/*/kaynak/
