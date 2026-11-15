@@ -19,6 +19,7 @@ import {
   BANNER_DEFAULTS,
   MARQUEE_DEFAULTS,
   SLIDER_DEFAULTS,
+  STRIP_GALLERY_DEFAULTS,
   defaultVariant,
 } from "@qticaret/types"
 import { LAYOUT_LIMITS, PRICE_BANDS_LIMITS } from "@/features/storefront/api/layout"
@@ -40,6 +41,7 @@ export const HOME_TYPES: readonly HomeSectionType[] = [
   "hero",
   "hero_slider",
   "banner",
+  "strip_gallery",
   "categories",
   "products",
   "featured_product",
@@ -170,6 +172,9 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
       }
     case "banner":
       return { ...base, type, slides: [], ...BANNER_DEFAULTS }
+    case "strip_gallery":
+      // No strip yet: the shop adds two to eight, each from a record or its own picture
+      return { ...base, type, title: null, text: null, items: [], ...STRIP_GALLERY_DEFAULTS }
     case "categories":
       return {
         ...base,

@@ -10,6 +10,7 @@ import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
 import { heroCatalogProblems, priceBandsProblems } from "./catalog-problems"
 import { listProblems } from "./shelf-problems"
+import { stripGalleryProblems } from "./strip-problems"
 import { BODY_GROUPS, allSections, marqueesOn, priceBandsOn } from "./sections"
 import { SETTINGS_KEY, badgeProblems, settingsProblems } from "./settings-problems"
 
@@ -28,10 +29,13 @@ export type Problem =
   | "linkLabel"
   | "slidesRequired"
   | "slidesTwo"
+  | "stripsTwo"
+  | "imageRequired"
   | "productsRequired"
   | "productRequired"
   | "categoryRequired"
   | "collectionRequired"
+  | "brandRequired"
   | "daysRange"
   | "scheduleOrder"
   | "colorInvalid"
@@ -100,6 +104,8 @@ function fieldsOf(section: AnySection): Found[] {
       ]
     case "price_bands":
       return priceBandsProblems(section)
+    case "strip_gallery":
+      return stripGalleryProblems(section)
     case "banner":
       return [
         ["slides", section.slides.length === 0 ? "slidesRequired" : null],

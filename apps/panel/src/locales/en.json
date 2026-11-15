@@ -7807,6 +7807,10 @@
           "name": "Image band",
           "description": "1–6 images, side by side on a wide screen, each with its own heading, line and one or two buttons."
         },
+        "strip_gallery": {
+          "name": "Slanted strips",
+          "description": "2–8 pictures side by side as slanted strips; the one under the mouse widens. Each strip can be a product, a category, a collection, a brand or your own picture; you can write its words and link yourself if you like."
+        },
         "categories": {
           "name": "Categories",
           "description": "The categories you pick; with none, your top categories."
@@ -8301,7 +8305,10 @@
         "wellContrast": "This colour does not read well enough on the areas one shade darker than the page (the boxes links and outlined buttons stand on; 3:1 at least). Pick a darker shade.",
         "marqueeLimit": "A page may show up to {{max}} scrolling strips (the header's counts on every page); remove one.",
         "bandsOrder": "Upper bounds must rise; only the last band may have none.",
-        "bandsLimit": "The home page can have at most {{max}} price bands sections (hidden ones count too); remove one."
+        "bandsLimit": "The home page can have at most {{max}} price bands sections (hidden ones count too); remove one.",
+        "stripsTwo": "Add at least two strips.",
+        "brandRequired": "Choose a brand.",
+        "imageRequired": "Choose a picture."
       },
       "theme": {
         "title": "Theme settings",
@@ -8629,6 +8636,111 @@
           "dark": "Dark text, light picture"
         },
         "toneHint": "A shade that suits the picture goes behind the words. On phones the words sit under the picture on a dark ground."
+      },
+      "stripGallery": {
+        "textHint": "Optional; a short line under the heading.",
+        "items": "Strips",
+        "itemsHint": "{{min}}–{{max}} strips, left to right in this order. Click a strip to edit it.",
+        "empty": "No strips yet. The section is saved with at least {{min}} strips.",
+        "item": "Strip {{number}}",
+        "noTitle": "No heading",
+        "add": "Add strip",
+        "full": "At most {{max}} strips can be added.",
+        "editItem": "Edit strip",
+        "source": "Source",
+        "kind": "The strip's source",
+        "kindHint": "The picture, heading, line and link you leave empty come from the record you choose. Changing the source keeps what you wrote.",
+        "kinds": {
+          "product": "Product",
+          "category": "Category",
+          "collection": "Collection",
+          "brand": "Brand",
+          "custom": "Own picture"
+        },
+        "own": "Picture and words",
+        "ownHint": "All optional; a field you fill takes the place of the source's.",
+        "image": "Picture",
+        "imageHint": {
+          "product": "Left empty, the product's picture is used. Upright or square pictures suit a strip best.",
+          "category": "Left empty, the category's picture is used. Upright or square pictures suit a strip best.",
+          "collection": "Left empty, the collection's picture is used. Upright or square pictures suit a strip best.",
+          "brand": "Left empty, the brand's picture is used. Upright or square pictures suit a strip best.",
+          "custom": "Required. Upright or square pictures suit a strip best."
+        },
+        "title": "Heading",
+        "emptyAs": "If empty: {{value}}",
+        "titleHint": {
+          "product": "Left empty, the product's name is shown.",
+          "category": "Left empty, the category's name is shown.",
+          "collection": "Left empty, the collection's name is shown.",
+          "brand": "Left empty, the brand's name is shown.",
+          "custom": "Optional; left empty, the strip shows no heading."
+        },
+        "note": "Line under it",
+        "noteHint": {
+          "product": "Left empty, the product's price is shown.",
+          "category": "Left empty, the number of products in the category is shown.",
+          "collection": "Optional; left empty, no line is shown.",
+          "brand": "Optional; left empty, no line is shown.",
+          "custom": "Optional; left empty, no line is shown."
+        },
+        "link": "Link",
+        "linkHint": {
+          "product": "Left empty, the product's page opens.",
+          "category": "Left empty, the category's page opens.",
+          "collection": "Left empty, the collection's page opens.",
+          "brand": "Left empty, the brand's page opens.",
+          "custom": "Optional; left empty, the strip leads nowhere."
+        },
+        "width": {
+          "label": "Width",
+          "term": "width",
+          "hint": "Full width strips run from one edge of the screen to the other; boxed ones stand at the page's width with rounded corners.",
+          "full": "Full width",
+          "boxed": "Boxed"
+        },
+        "height": {
+          "label": "Height",
+          "term": "height",
+          "hint": "How tall the strips stand; a little shorter on phones.",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
+        },
+        "captions": {
+          "label": "Words",
+          "term": "captions",
+          "hint": "Each strip's heading and line at its foot, or the pictures alone.",
+          "on": "Show",
+          "off": "Hide"
+        },
+        "strips_slant": {
+          "label": "Slant",
+          "term": "strips_slant",
+          "hint": "How far the lines between the strips lean.",
+          "soft": "Slight",
+          "medium": "Medium",
+          "steep": "Sharp"
+        },
+        "strips_line": {
+          "label": "Line thickness",
+          "term": "strips_line",
+          "hint": "The space between the strips. With “None” the strips touch.",
+          "none": "None",
+          "thin": "Thin",
+          "medium": "Medium",
+          "thick": "Thick"
+        },
+        "strips_overlap": {
+          "label": "Overlap",
+          "term": "strips_overlap",
+          "hint": "Each strip lies over the one before it with a thin shadow on its edge; the one under the mouse comes to the top."
+        },
+        "strips_dim": {
+          "label": "Darken the others",
+          "term": "strips_dim",
+          "hint": "On wide screens, while the mouse is over a strip or the keyboard selects one, the other strips darken."
+        }
       },
       "googleRating": {
         "excerpts": "Show excerpts from recent reviews",
