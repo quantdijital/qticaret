@@ -17,6 +17,7 @@ import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import { F, FieldGroup, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
+import { PREVIEW_IDS } from "./preview-fields"
 
 const T = "storefront.editor.richText"
 // The panel shows the text's start; the editor holds the whole
@@ -56,6 +57,7 @@ export function RichTextForm({ section, problems, onChange }: SectionFormProps<R
           {text === "" ? t(`${T}.empty`) : text.slice(0, EXCERPT)}
         </p>
         <Button
+          id={PREVIEW_IDS.text(section.id, "body")}
           type="button"
           size="sm"
           variant="outline"

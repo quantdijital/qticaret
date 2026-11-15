@@ -75,6 +75,7 @@ describe("the picture band's view (adr/0049 Ek 2026-11-14 §3.3 E2)", () => {
       secondLink: { path: "/b" },
       tone: "dark",
     })
+    expect(view.slides[0]).not.toHaveProperty("secondFirst")
   })
 
   it("moves a second button up when the first one is broken", () => {
@@ -90,5 +91,7 @@ describe("the picture band's view (adr/0049 Ek 2026-11-14 §3.3 E2)", () => {
     )
 
     expect(view.slides[0]).toMatchObject({ link: { path: "/b" }, secondLink: null })
+    // The editor's field mark names the design's second button (adr/0065 Faz 2b)
+    expect(view.slides[0]?.secondFirst).toBe(true)
   })
 })

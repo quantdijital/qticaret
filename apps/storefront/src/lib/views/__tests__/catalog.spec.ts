@@ -244,6 +244,32 @@ describe("the price bands", () => {
       ["Kamp", "Kamp", "/kategori/pcat_kamp"],
     ])
     expect(view?.bands[2]?.products.map((each) => each.path)).toEqual(["/urun/p1"])
+    // Only the last was left out: no band says its place
+    expect(view?.bands.some((band) => "at" in band)).toBe(false)
+  })
+
+  it("says each band's place in the design once one before it was left out (adr/0065 Faz 2b)", async () => {
+    const band = (label: string, category_id: string | null) => ({
+      label,
+      text: null,
+      category_id,
+      min: null,
+      max: null,
+      product_ids: [],
+    })
+    const view = await priceBandsView(
+      {
+        id: "fiyat",
+        type: "price_bands",
+        title: null,
+        bands: [band("Gizli", "pcat_gizli"), band("Kamp", "pcat_kamp"), band("Hepsi", null)],
+      },
+      t
+    )
+    expect(view?.bands.map((each) => [each.label, each.at])).toEqual([
+      ["Kamp", 1],
+      ["Hepsi", 2],
+    ])
   })
 
   it("draws no strip when every band's category is hidden, and asks no category for price bands", async () => {

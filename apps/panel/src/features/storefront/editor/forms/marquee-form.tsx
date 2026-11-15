@@ -17,6 +17,7 @@ import { BADGE_ICONS } from "../shared/badge-icons"
 import { LinkField } from "./link-field"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
+import { PREVIEW_IDS } from "./preview-fields"
 
 const M = "storefront.editor.marquee"
 const ICONS = "storefront.editor.shared.badges.icons"
@@ -64,7 +65,7 @@ export function MarqueeForm<S extends AnyMarquee>({
           {section.items.map((item, index) => {
             const number = index + 1
             const at = `items.${String(index)}`
-            const id = `${section.id}-marquee-item-${String(index)}`
+            const id = PREVIEW_IDS.text(section.id, at)
             const textError = problem(problems[`${at}.text`], L.text)
             const subtextError = problem(problems[`${at}.subtext`], L.subtext)
             return (

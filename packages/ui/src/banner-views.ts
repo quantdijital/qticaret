@@ -24,5 +24,10 @@ export interface BannerSlideView {
   link: LinkView | null
   /** A second button, one step quieter than the first; null: none. */
   secondLink: LinkView | null
+  /**
+   * The main button is the design's second (its first was broken and left
+   * out), for the editor's field mark; absent: each where the design has it.
+   */
+  secondFirst?: true
   tone: BannerTone
 }

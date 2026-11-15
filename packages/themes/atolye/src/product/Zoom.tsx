@@ -3,7 +3,7 @@
 import { ChevronLeft, ChevronRight, X } from "lucide-react"
 import { Dialog } from "radix-ui"
 import { useRef, useState } from "react"
-import type { PointerEvent } from "react"
+import type { PointerEvent, RefObject } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { ImageView } from "@qticaret/ui"
 import { LayerPortal } from "../frame/Layers"
@@ -31,11 +31,14 @@ export function Zoom({
   images,
   start,
   words,
+  returnTo,
   onClose,
 }: {
   images: ImageView[]
   start: number
   words: GalleryWords
+  /** The button that opens it: the focus goes back there when it closes. */
+  returnTo: RefObject<HTMLElement | null>
   /** Closed on this picture: the gallery shows it too. */
   onClose: (last: number) => void
 }) {
@@ -64,6 +67,11 @@ export function Zoom({
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-stage" />
         <Dialog.Content
           aria-describedby={undefined}
+          onCloseAutoFocus={(event) => {
+            // No Trigger here (the gallery opens it): say where the focus goes
+            event.preventDefault()
+            returnTo.current?.focus()
+          }}
           className="gf-stage fixed inset-0 z-(--z-modal) flex flex-col outline-none"
           onKeyDown={(event) => {
             if (count > 1 && event.key === "ArrowLeft") {
