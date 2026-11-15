@@ -15,6 +15,7 @@ import type { FieldGroupName } from "./field-registry"
 import { FIELD_IDS } from "./field-registry"
 import { PhoneColumnsField } from "./phone-columns-field"
 import { ScrollerFields } from "./scroller-fields"
+import { ShelfTabsField } from "./shelf-tabs-field"
 import { SCROLLER_MAIN } from "./scroller-groups"
 import { VariantField } from "./variant-field"
 
@@ -80,14 +81,18 @@ function CountChoice<N extends number>({
  * card) and, on a carousel only, "Kaydırma" (cards in view, the arrows).
  * Its rarely changed scroller settings sit closed in "Diğer ayarlar"
  * (`SectionPanel`). A field the variant does not use is not shown: the
- * card on a compact or columns rail (always compact).
+ * card on a compact or columns rail (always compact), the tabs switch on a
+ * columns rail (it never joins).
  */
 export function ShelfGroups({
   section,
+  mates = [],
   reveal,
   onChange,
 }: {
   section: ProductsSection
+  /** The rails it shares one tabbed shelf with on the page (bilesen-denetimi (b) 2). */
+  mates?: readonly ProductsSection[]
   reveal: (group: FieldGroupName) => number | null
   onChange: (section: ProductsSection) => void
 }) {
@@ -170,6 +175,16 @@ export function ShelfGroups({
               value={section.card_variant ?? null}
               onChange={(card_variant) => {
                 set({ card_variant })
+              }}
+            />
+          )}
+          {variant === "columns" ? null : (
+            <ShelfTabsField
+              id={FIELD_IDS.shelf(id, "tabs")}
+              value={section.tabs}
+              mates={mates}
+              onChange={(tabs) => {
+                set({ tabs })
               }}
             />
           )}

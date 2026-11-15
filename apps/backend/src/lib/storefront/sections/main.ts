@@ -66,7 +66,7 @@ const headerCentered = z.object({ ...headerCommon, variant: z.literal("centered"
  * mirrors `@qticaret/types`' `HEADER_MENU_GROUNDS` and
  * `HEADER_CATALOG_LIMITS`; a unit test keeps them equal.
  */
-export const HEADER_MENU_GROUNDS = ["stage", "primary", "light"] as const
+export const HEADER_MENU_GROUNDS = ["stage", "primary", "well"] as const
 export const HEADER_CATALOG_LIMITS = { search_placeholder: 60 } as const
 
 type MenuGround = (typeof HEADER_MENU_GROUNDS)[number]
@@ -99,12 +99,14 @@ const headerCatalog = z
     phone: z.boolean().default(true),
     /** The "Kategoriler" button opening the shop's top categories. */
     categories_button: z.boolean().default(true),
+    // `light`, the light tint's name before the dictionary had one, reads and is written as `well`
     menu_ground: z
       .custom<MenuGround>(
-        (value) => (HEADER_MENU_GROUNDS as readonly unknown[]).includes(value),
+        (value) => value === "light" || (HEADER_MENU_GROUNDS as readonly unknown[]).includes(value),
         MAIN_ERROR
       )
-      .default("stage"),
+      .default("stage")
+      .transform((value): MenuGround => ((value as unknown) === "light" ? "well" : value)),
   })
   .strict()
 

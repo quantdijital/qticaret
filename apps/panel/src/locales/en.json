@@ -8486,18 +8486,6 @@
           "compact": "A low strip on wide screens; more of the sections below fit the first screen.",
           "regular": "As tall as the hero; the picture leads on wide screens."
         },
-        "autoplay": "Autoplay",
-        "autoplayTerm": "autoplay",
-        "autoplayHint": "Off: a slide changes only when the visitor moves on. On: it waits on hover or focus and stops once the visitor steps on their own; it does not play for visitors who ask for reduced motion, and a pause button shows.",
-        "interval": "Seconds per slide",
-        "intervalTerm": "interval",
-        "intervalHint": "Between {{min}} and {{max}} seconds.",
-        "dots": "Show dots",
-        "dotsTerm": "dots",
-        "dotsHint": "Under the slides; they show which slide is on and go to one when clicked.",
-        "arrows": "Show arrows",
-        "arrowsTerm": "arrows",
-        "arrowsHint": "On wide screens (1024 px and up), either side of the slide. Phones swipe.",
         "editSlide": "Edit slide",
         "previous": "Previous slide",
         "next": "Next slide",
@@ -8624,7 +8612,7 @@
           "term": "background",
           "stage": "Dark",
           "primary": "Main colour",
-          "light": "Light"
+          "well": "Light tint"
         },
         "speed": {
           "label": "Speed",
@@ -8748,7 +8736,7 @@
           "hint": "Text and icon colours are picked to read on it.",
           "stage": "Dark",
           "primary": "Brand colour",
-          "light": "Light"
+          "well": "Light tint"
         },
         "phoneNote": "On phones the header stays as it is: menu, logo, favourites and cart, with the search below.",
         "otherHint": "The search button, the My account text and the cart total."
@@ -8913,7 +8901,12 @@
         "perListOption": "{{n}} products",
         "perListHint": "How many products each list shows; side by side on a wide screen, one under another on a phone.",
         "featuredHint": "The first product large on the left, small cards beside it ({{n}} products in all); the large card on top on a phone.",
-        "cardCompact": "Cards in this layout are always compact: a small photo, name, stars and price."
+        "cardCompact": "Cards in this layout are always compact: a small photo, name, stars and price.",
+        "tabs": "Join the rail beside it in tabs",
+        "tabsTerm": "tabs",
+        "tabsJoined": "Joins this rail in one tabbed shelf: {{names}}. Turn it off to draw this rail on its own.",
+        "tabsAlone": "A product rail put right before or after it joins it in one tabbed shelf.",
+        "tabsApart": "This rail never joins the rails beside it; it is drawn on its own under its own heading."
       },
       "scroller": {
         "desktop": {

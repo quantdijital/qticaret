@@ -46,7 +46,10 @@ describe("sectionProblems", () => {
 
   it("asks a hero slider for two slides and checks each slide's words (adr/0049 Ek 2026-11-06)", () => {
     const slider = newHomeSection("hero_slider", "kayangiris") as HeroSliderSection
-    expect(slider).toMatchObject({ autoplay: false, interval: 6, height: "regular" })
+    expect(slider).toMatchObject({
+      scroller: { autoplay: "off", speed: "medium" },
+      height: "regular",
+    })
     expect(sectionProblems(slider)).toEqual({ slides: "slidesTwo" })
     const slide = {
       image: { url: "/static/bir.webp", alt: null },

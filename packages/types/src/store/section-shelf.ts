@@ -37,6 +37,29 @@ export const SHELF_PHONE_DEFAULT: ShelfPhoneColumns = 2
 export const shelfPhoneColumnsOf = (value: unknown): ShelfPhoneColumns =>
   value === 1 ? 1 : SHELF_PHONE_DEFAULT
 
+/**
+ * Whether a rail joins the product rails beside it in one shelf with tabs
+ * (docs/tema/bilesen-denetimi (b) 2, O11; bilesen-standardi §0.2): `auto`,
+ * the look before the setting, joins its neighbours; `off` stands alone.
+ * A columns rail never joins (its lists already stand side by side).
+ * Mirrored by the backend's `products.ts`; a unit test keeps them equal.
+ */
+export const SHELF_TABS = ["auto", "off"] as const
+export type ShelfTabs = (typeof SHELF_TABS)[number]
+export const SHELF_TABS_DEFAULT: ShelfTabs = "auto"
+
+/** A rail's tabs setting as a reader takes it: `off`, anything else the default. */
+export const shelfTabsOf = (value: unknown): ShelfTabs =>
+  value === "off" ? "off" : SHELF_TABS_DEFAULT
+
+/**
+ * Whether a rail may share a tabbed shelf with its neighbours: not a
+ * columns rail, not one the shop set apart. The theme joins two rails
+ * standing next to each other when both may; the panel says which.
+ */
+export const shelfJoins = (section: { variant?: unknown; tabs?: unknown }): boolean =>
+  section.variant !== "columns" && shelfTabsOf(section.tabs) === "auto"
+
 export type ShelfRows = (typeof SHELF_LIMITS.compact.rows)[number]
 export type ShelfPerList = (typeof SHELF_LIMITS.columns.per_list)[number]
 
@@ -102,6 +125,8 @@ export interface StoreProductsSection extends ShelfPick {
   more: StoreLayoutLink | null
   /** The rail's own card variant; null or absent (an older backend): the theme setting's. */
   card_variant?: CardVariant | null
+  /** Set apart from its neighbours' tabs; printed only when `off` (absent: `auto`). */
+  tabs?: ShelfTabs
   /** `grid`: cards in a row on a wide screen. */
   columns?: ShelfColumns
   /** `grid`: cards in a row on a phone; printed only when not the default (2). */

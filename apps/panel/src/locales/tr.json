@@ -8486,18 +8486,6 @@
           "compact": "Geniş ekranda alçak bir şerit; altındaki bölümler ilk ekrana daha çok girer.",
           "regular": "Giriş bölümüyle aynı boy; geniş ekranda görsel öne çıkar."
         },
-        "autoplay": "Otomatik geçiş",
-        "autoplayTerm": "autoplay",
-        "autoplayHint": "Kapalıyken slayt yalnız ziyaretçi geçince değişir. Açıkken üzerine gelince ya da odaklanınca bekler, ziyaretçi kendisi geçince durur; hareketi azaltmayı seçen ziyaretçide oynamaz ve durdurma düğmesi görünür.",
-        "interval": "Her slayt kaç saniye",
-        "intervalTerm": "interval",
-        "intervalHint": "{{min}} ile {{max}} saniye arası.",
-        "dots": "Noktaları göster",
-        "dotsTerm": "dots",
-        "dotsHint": "Slaytların altında; hangi slaytta olunduğunu gösterir ve tıklanınca o slayta geçer.",
-        "arrows": "Okları göster",
-        "arrowsTerm": "arrows",
-        "arrowsHint": "Geniş ekranda (1024 px ve üstü) slaydın iki yanında. Telefonda kaydırarak geçilir.",
         "editSlide": "Slaydı düzenle",
         "previous": "Önceki slayt",
         "next": "Sonraki slayt",
@@ -8624,7 +8612,7 @@
           "term": "background",
           "stage": "Koyu",
           "primary": "Ana renk",
-          "light": "Açık"
+          "well": "Hafif ton"
         },
         "speed": {
           "label": "Hız",
@@ -8748,7 +8736,7 @@
           "hint": "Yazı ve simge renkleri zemine göre okunur seçilir.",
           "stage": "Koyu",
           "primary": "Ana renk",
-          "light": "Açık"
+          "well": "Hafif ton"
         },
         "phoneNote": "Telefonda üst bilgi değişmez: menü, logo, favori ve sepet; altında arama.",
         "otherHint": "Arama düğmesi, Hesabım yazısı ve sepet tutarı."
@@ -8913,7 +8901,12 @@
         "perListOption": "{{n}} ürün",
         "perListHint": "Her listede gösterilecek ürün sayısı; listeler masaüstünde yan yana, telefonda alt alta.",
         "featuredHint": "İlk ürün solda büyük, yanında küçük kartlar (toplam {{n}} ürün); telefonda büyük kart üstte.",
-        "cardCompact": "Bu biçimde kartlar her zaman kompakt çizilir: küçük görsel, ad, puan ve fiyat."
+        "cardCompact": "Bu biçimde kartlar her zaman kompakt çizilir: küçük görsel, ad, puan ve fiyat.",
+        "tabs": "Yanındaki rafla sekmeli birleşsin",
+        "tabsTerm": "tabs",
+        "tabsJoined": "Şu rafla sekmeli tek rafta birleşiyor: {{names}}. Kapatırsan bu raf ayrı çizilir.",
+        "tabsAlone": "Hemen önüne ya da arkasına bir ürün rafı gelirse ikisi sekmeli tek rafta birleşir.",
+        "tabsApart": "Bu raf yanındaki raflarla birleşmez, kendi başlığıyla ayrı çizilir."
       },
       "scroller": {
         "desktop": {

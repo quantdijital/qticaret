@@ -1,6 +1,7 @@
 "use client"
 
 import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react"
+import type { ScrollerStep } from "@qticaret/types"
 import { cn } from "@qticaret/ui/lib/utils"
 
 /** The carousel's words, in the shopper's language (the server's `t`). */
@@ -16,15 +17,31 @@ export interface SliderWords {
   goTo: string[]
 }
 
-const ROUND =
-  "absolute top-1/2 z-10 hidden size-12 -translate-y-1/2 items-center justify-center rounded-button bg-stage/70 text-stage-text transition-colors hover:bg-stage lg:inline-flex"
+const ARROW =
+  "gf-slider-arrow absolute top-1/2 z-10 hidden size-12 -translate-y-1/2 items-center justify-center text-stage-text transition-[color,background-color,opacity] disabled:cursor-default disabled:opacity-35 lg:inline-flex"
 
-/** Two round arrows either side of the slide, from 1024 px; past the last is the first. */
+/** The arrows' shape, the scroller kit's steps: the graphite round (as before), square or bare. */
+const SHAPE: Readonly<Record<ScrollerStep<"arrow_style">, string>> = {
+  round: "rounded-button bg-stage/70 enabled:hover:bg-stage",
+  square: "rounded-(--radius-inner) bg-stage/70 enabled:hover:bg-stage",
+  plain: "drop-shadow-[0_1px_2px_rgb(0_0_0/0.65)] enabled:hover:text-stage-text-2",
+}
+
+/**
+ * Two arrows either side of the slide, from 1024 px; past the last is the
+ * first unless the slider does not loop (then each is off at its end).
+ */
 export function SliderArrows({
   words,
+  shape,
+  atStart,
+  atEnd,
   onStep,
 }: {
   words: SliderWords
+  shape: ScrollerStep<"arrow_style">
+  atStart: boolean
+  atEnd: boolean
   onStep: (by: -1 | 1) => void
 }) {
   return (
@@ -32,7 +49,8 @@ export function SliderArrows({
       <button
         type="button"
         aria-label={words.previous}
-        className={cn(ROUND, "left-4")}
+        className={cn(ARROW, SHAPE[shape], "left-4")}
+        disabled={atStart}
         onClick={() => {
           onStep(-1)
         }}
@@ -42,7 +60,8 @@ export function SliderArrows({
       <button
         type="button"
         aria-label={words.next}
-        className={cn(ROUND, "right-4")}
+        className={cn(ARROW, SHAPE[shape], "right-4")}
+        disabled={atEnd}
         onClick={() => {
           onStep(1)
         }}

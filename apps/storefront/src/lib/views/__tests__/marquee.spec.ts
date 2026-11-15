@@ -23,11 +23,12 @@ const section = (over: Record<string, unknown> = {}) =>
     ],
     speed: "fast",
     direction: "right",
+    // A strip saved before the dictionary named the light tint `well`
     ground: "light",
     size: "small",
     separator: "line",
     ...over,
-  }) as StoreMarqueeSection
+  }) as unknown as StoreMarqueeSection
 
 describe("the scrolling strip's view (adr/0049 Ek 2026-11-14 §4.1)", () => {
   it("carries its items with their links as paths and its steps", () => {
@@ -48,7 +49,8 @@ describe("the scrolling strip's view (adr/0049 Ek 2026-11-14 §4.1)", () => {
       ],
       speed: "fast",
       direction: "right",
-      ground: "light",
+      // The light tint's old name reads as the dictionary's (bilesen-denetimi (b) 5)
+      ground: "well",
       size: "small",
       separator: "line",
     })

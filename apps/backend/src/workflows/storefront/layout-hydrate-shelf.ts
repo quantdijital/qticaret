@@ -21,6 +21,8 @@ export function hydrateShelf<L>(
     limit: section.limit,
     more,
     card_variant: section.card_variant,
+    // Printed only when set apart, so a rail from before it prints as it did
+    ...(section.tabs === "off" ? { tabs: "off" as const } : {}),
     // A sale or best-seller rail: its products in order, and whether the newest made it up
     ...picks?.get(section.id),
   }

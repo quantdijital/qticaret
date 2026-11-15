@@ -28,6 +28,7 @@ describe("a product rail's variants (adr/0049 Ek 2026-11-15)", () => {
       variant: "grid",
       columns: 4,
       columns_mobile: 2,
+      tabs: "auto",
       limit: 12,
       more: null,
       card_variant: null,

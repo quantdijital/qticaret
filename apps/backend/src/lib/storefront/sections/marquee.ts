@@ -25,7 +25,7 @@ export const MARQUEE_SETTINGS = {
   hover_pause: ["on", "off"],
   pause_button: ["always", "hover"],
   size: ["small", "medium", "large"],
-  ground: ["stage", "primary", "light"],
+  ground: ["stage", "primary", "well"],
   separator: ["none", "dot", "star", "line"],
   weight: ["bold", "normal"],
   uppercase: ["off", "on"],
@@ -76,9 +76,16 @@ const SETTING_ERROR = { error: "storefront_layout.section_invalid" }
 const setting = <S extends Setting>(name: S) => {
   const steps: readonly unknown[] = MARQUEE_SETTINGS[name]
   return z
-    .custom<Step<S>>((value) => steps.includes(value), SETTING_ERROR)
+    .custom<Step<S>>((value) => steps.includes(value) || isOldName(name, value), SETTING_ERROR)
     .default(MARQUEE_DEFAULTS[name])
+    .transform((value) => (isOldName(name, value) ? "well" : value))
 }
+
+/**
+ * The light tint's name before the dictionary had one (bilesen-denetimi
+ * (b) 5): a strip saved with it reads, and is written again, as `well`.
+ */
+const isOldName = (name: Setting, value: unknown) => name === "ground" && value === "light"
 
 /** Every setting's field, each with its default. */
 function settingFields() {

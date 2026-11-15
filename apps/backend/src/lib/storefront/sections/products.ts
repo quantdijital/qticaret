@@ -44,6 +44,14 @@ export const productSource = z.discriminatedUnion("kind", [
 
 export type ProductSourceInput = z.infer<typeof productSource>
 
+/**
+ * Whether the rail joins the rails beside it in one tabbed shelf
+ * (bilesen-denetimi (b) 2): `auto`, as before the setting, or `off`.
+ * Mirrors `@qticaret/types`' `SHELF_TABS`; a unit test keeps them equal.
+ */
+export const SHELF_TABS = ["auto", "off"] as const
+export const SHELF_TABS_DEFAULT = "auto" satisfies (typeof SHELF_TABS)[number]
+
 /** Two or three of a closed list of counts, refused with the error key off it. */
 const count = <N extends number>(steps: readonly N[], fallback: N) =>
   z
@@ -67,6 +75,16 @@ const common = {
    * variant: the framed card's E5 fields are the theme setting's everywhere.
    */
   card_variant: optional(z.enum(PRODUCT_CARD_VARIANTS, VARIANT_ERROR)),
+  /**
+   * Joined with the rails beside it in one tabbed shelf, or set apart;
+   * kept on every variant so switching keeps it (a columns rail never joins).
+   */
+  tabs: z
+    .custom<(typeof SHELF_TABS)[number]>(
+      (value) => (SHELF_TABS as readonly unknown[]).includes(value),
+      VARIANT_ERROR
+    )
+    .default(SHELF_TABS_DEFAULT),
 }
 
 /** Today's rows of cards; the shop's cards in a row on a wide screen (adr/0049 Ek 2026-11-05). */

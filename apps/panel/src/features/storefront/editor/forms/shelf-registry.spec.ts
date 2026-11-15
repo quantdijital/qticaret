@@ -17,6 +17,7 @@ describe("a product list's fields for the settings search", () => {
       "layout:columns",
       "layout:columns_mobile",
       "layout:card_variant",
+      "layout:tabs",
     ])
     // Its count is the content's (denetim O2), and the columns carry their term
     expect(keys(grid)).toContain("content:limit")
@@ -43,5 +44,8 @@ describe("a product list's fields for the settings search", () => {
     const columns = keys(switchVariant(grid, "columns"))
     expect(columns).toContain("layout:per_list")
     expect(columns).not.toContain("layout:card_variant")
+    // A columns rail never joins tabs (bilesen-denetimi (b) 2)
+    expect(columns).not.toContain("layout:tabs")
+    expect(keys(switchVariant(grid, "carousel"))).toContain("layout:tabs")
   })
 })

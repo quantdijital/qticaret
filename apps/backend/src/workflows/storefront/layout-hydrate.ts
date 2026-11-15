@@ -145,10 +145,9 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
           tone: slide.tone,
         })),
         height: section.height,
-        autoplay: section.autoplay,
-        interval: section.interval,
-        dots: section.dots,
-        arrows: section.arrows,
+        // The kit's settings (bilesen-denetimi (b) 4); saved seconds only while no step keeps them
+        scroller: section.scroller,
+        ...(section.interval === undefined ? {} : { interval: section.interval }),
       }
     case "products":
       return hydrateShelf(section, at.picks, link(section.more))
