@@ -2,7 +2,7 @@ import { fieldKey, fieldMark } from "@qticaret/ui"
 import type { StripGallerySectionView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { Strips } from "../parts/Strips"
-import type { StripItem, StripsLook } from "../parts/Strips"
+import type { StripItem, StripsLook, StripsShape } from "../parts/Strips"
 import { SectionHead } from "./SectionHead"
 import { type Of, headingId } from "./plan"
 
@@ -15,6 +15,13 @@ const HEIGHT: Record<StripGallerySectionView["height"], string> = {
   low: "aspect-[4/3] sm:aspect-[2/1] lg:aspect-[3/1] max-h-[60svh]",
   medium: "aspect-square sm:aspect-[16/9] lg:aspect-[12/5] max-h-[78svh]",
   high: "aspect-[4/5] sm:aspect-[4/3] lg:aspect-[16/9] max-h-[88svh]",
+}
+
+/** The same heights as numbers, height over width (the images' `sizes`, `StripsShape`). */
+const SHAPE: Record<StripGallerySectionView["height"], StripsShape> = {
+  low: { phone: 3 / 4, tablet: 1 / 2, desktop: 1 / 3 },
+  medium: { phone: 1, tablet: 9 / 16, desktop: 5 / 12 },
+  high: { phone: 5 / 4, tablet: 3 / 4, desktop: 9 / 16 },
 }
 
 /** The strips' share of the screen from 1024 px (vw): the whole width, or the container's. */
@@ -81,6 +88,7 @@ export function StripGallery({
       look={stripsLookOf(section)}
       max={8}
       span={SPAN[section.width]}
+      shape={SHAPE[section.height]}
       phone="scroll"
       priority={first}
       className={HEIGHT[section.height]}

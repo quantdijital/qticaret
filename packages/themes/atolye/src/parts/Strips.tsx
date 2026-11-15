@@ -74,37 +74,60 @@ const SEAM_SHARE: Readonly<Record<StripSlant, number>> = { soft: 0, medium: 0.09
 const OVERLAP_SHARE = 0.04
 
 /**
+ * The box's height against its width below 640 px, from 640 px and from
+ * 1024 px (what the section's aspect classes draw). With it an image asks
+ * for the width its photograph is drawn at: a strip is far taller than
+ * wide, and the photograph covers its height.
+ */
+export interface StripsShape {
+  phone: number
+  tablet: number
+  desktop: number
+}
+
+/** A photograph's width against its height, when the image says both. */
+function aspectOf(image: ImageView): number | null {
+  return image.width && image.height ? image.width / image.height : null
+}
+
+/**
  * The image's `sizes` for `count` strips over `span` vw of the screen from
  * 1024 px (below, the strips take the screen's width): from 1024 px a
  * widened strip's share (the image is drawn that wide, so it does not jump
  * as the strip widens); below, an equal share of the screen, of the four a
- * tablet or the three a phone shows when there are more.
+ * tablet or the three a phone shows when there are more. Given the box's
+ * `shape` and the photograph's `aspect`, never less than the width the
+ * photograph covers the box's height at (at most the screen's width).
  */
 export function stripSizes(
   count: number,
   span: number,
   look: Pick<StripsLook, "slant" | "overlap" | "hover"> = STRIPS_LOOK_BEFORE,
+  fit?: { shape: StripsShape; aspect: number | null },
   phone: StripsPhone = "cap"
 ): string {
   const grow = look.hover !== "still"
   const seams = (count - 1) * (SEAM_SHARE[look.slant] + (look.overlap ? OVERLAP_SHARE : 0))
   const sum = span * (1 + seams)
-  const open = Math.ceil(
-    count > 1 ? (grow ? (sum * GROW) / (GROW + count - 1) : sum / count) : span
-  )
-  const wide = `(min-width: 1024px) ${open}vw`
-  const share = (strips: number) => `${Math.ceil(100 / strips)}vw`
+  const open = count > 1 ? (grow ? (sum * GROW) / (GROW + count - 1) : sum / count) : span
+  const covered = (share: number, height: number) =>
+    Math.ceil(fit?.aspect ? Math.min(100, Math.max(share, height * fit.aspect)) : share)
   // Scrolling, a screen with more than it shows draws each strip a set share (strips.css)
-  const scrolls = (cap: number) => phone === "scroll" && count > cap
-  const tabletShare = scrolls(STRIPS_TABLET_MAX)
-    ? `${SCROLL_SHARE.tablet}vw`
-    : share(Math.min(count, STRIPS_TABLET_MAX))
-  const phoneShare = scrolls(STRIPS_PHONE_MAX)
-    ? `${SCROLL_SHARE.phone}vw`
-    : share(Math.min(count, STRIPS_PHONE_MAX))
-  return tabletShare === phoneShare
-    ? `${wide}, ${phoneShare}`
-    : `${wide}, (min-width: 640px) ${tabletShare}, ${phoneShare}`
+  const shareOf = (cap: number, scroll: number) =>
+    phone === "scroll" && count > cap ? scroll : 100 / Math.min(count, cap)
+  const desktop = covered(open, span * (fit?.shape.desktop ?? 0))
+  const tablet = covered(
+    shareOf(STRIPS_TABLET_MAX, SCROLL_SHARE.tablet),
+    100 * (fit?.shape.tablet ?? 0)
+  )
+  const small = covered(
+    shareOf(STRIPS_PHONE_MAX, SCROLL_SHARE.phone),
+    100 * (fit?.shape.phone ?? 0)
+  )
+  const wide = `(min-width: 1024px) ${desktop}vw`
+  return tablet === small
+    ? `${wide}, ${small}vw`
+    : `${wide}, (min-width: 640px) ${tablet}vw, ${small}vw`
 }
 
 /**
@@ -125,6 +148,7 @@ export function Strips({
   look,
   max = 4,
   span,
+  shape,
   label,
   phone = "cap",
   priority = false,
@@ -136,6 +160,8 @@ export function Strips({
   max?: number | undefined
   /** The strips' share of the screen from 1024 px, in vw (the images' `sizes`). */
   span: number
+  /** The box's height against its width, as `className` draws it (the images' `sizes`). */
+  shape?: StripsShape | undefined
   /** The list's name, when the section's heading does not name it. */
   label?: string | undefined
   /** Below 1024 px, strips past what the screen shows: left out (`cap`) or scrolled to (`scroll`). */
@@ -146,7 +172,8 @@ export function Strips({
 }) {
   const shown = items.slice(0, Math.min(max, STRIPS_MOST))
   const grow = look.hover !== "still"
-  const sizes = stripSizes(shown.length, span, look, phone)
+  const sizesOf = (image: ImageView) =>
+    stripSizes(shown.length, span, look, shape && { shape, aspect: aspectOf(image) }, phone)
   return (
     <ul
       className={cn("gf-strips rounded-media", className)}
@@ -165,7 +192,7 @@ export function Strips({
           <span className="gf-strip-frame">
             <ResponsiveImage
               image={item.image}
-              sizes={sizes}
+              sizes={sizesOf(item.image)}
               priority={priority && at === 0}
               className="gf-strip-image"
             />

@@ -17,4 +17,10 @@ if (process.env.TEST_TYPE?.startsWith("integration")) {
   // No connect to [::1]:55432, which can connect a socket to itself, and a
   // connect left unanswered is opened again (integration-tests/database.js)
   require("./database").setUpTestDatabaseConnections()
+  // A fresh connection per test request: a spec that works a proof of work
+  // between calls can idle past the server's 5 s keep-alive on a slow
+  // runner, and the next call on the socket the server just closed gets
+  // ECONNRESET (storefront-client-ip.spec.ts in CI)
+  const http = require("node:http")
+  http.globalAgent = new http.Agent({ keepAlive: false })
 }

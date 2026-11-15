@@ -39,6 +39,7 @@ export type ContentField =
   | "open_first"
   | "single_open"
   | "gallery"
+  | "strips_layout"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {
@@ -87,6 +88,26 @@ function stripGalleryFields(section: AnySection): RegistryField[] {
       }
     }
   )
+}
+
+/** The featured product's strips' look (`featured-groups.tsx`): three steps, two switches. */
+function stripsFields(section: AnySection): RegistryField[] {
+  const P = `${E}.featured`
+  const steps = (field: "strips_layout" | "strips_slant" | "strips_line", key: string) =>
+    entry(
+      section,
+      field,
+      `${P}.${key}`,
+      FEATURED_PRODUCT_SETTINGS[field].map((step) => `${P}.${key}s.${step}`),
+      "layout"
+    )
+  return [
+    steps("strips_layout", "stripsLayout"),
+    steps("strips_slant", "stripsSlant"),
+    steps("strips_line", "stripsLine"),
+    entry(section, "strips_overlap", `${P}.stripsOverlap`, [], "layout"),
+    entry(section, "strips_dim", `${P}.stripsDim`, [], "layout"),
+  ]
 }
 
 /** The content fields the section's form shows as it stands, in the form's order. */
@@ -158,7 +179,8 @@ export function contentFields(section: AnySection): RegistryField[] {
         entry(section, "single_open", `${E}.faq.singleOpen`),
       ]
     case "featured_product":
-      // Its photographs layout, open in "Diziliş" (adr/0049 Ek 2026-11-15)
+      // Its photographs layout, open in "Diziliş" (adr/0049 Ek 2026-11-15); the strips' look
+      // under it while they are chosen (Ek 2026-11-16)
       return [
         entry(
           section,
@@ -167,6 +189,7 @@ export function contentFields(section: AnySection): RegistryField[] {
           FEATURED_PRODUCT_SETTINGS.gallery.map((step) => `${E}.featured.galleries.${step}`),
           "layout"
         ),
+        ...(section.gallery === "strips" ? stripsFields(section) : []),
       ]
     case "strip_gallery":
       return stripGalleryFields(section)

@@ -120,9 +120,13 @@ describe("the strip gallery's markup", () => {
 
 describe("the strips' sizes when a phone scrolls them", () => {
   it("draws each scrolled strip a phone's and a tablet's set share, a row that fits as before", () => {
-    expect(stripSizes(6, 100, undefined, "scroll")).toMatch(/\(min-width: 640px\) 30vw, 43vw$/)
-    expect(stripSizes(4, 100, undefined, "scroll")).toMatch(/\(min-width: 640px\) 25vw, 43vw$/)
-    expect(stripSizes(3, 100, undefined, "scroll")).toBe(stripSizes(3, 100))
+    expect(stripSizes(6, 100, undefined, undefined, "scroll")).toMatch(
+      /\(min-width: 640px\) 30vw, 43vw$/
+    )
+    expect(stripSizes(4, 100, undefined, undefined, "scroll")).toMatch(
+      /\(min-width: 640px\) 25vw, 43vw$/
+    )
+    expect(stripSizes(3, 100, undefined, undefined, "scroll")).toBe(stripSizes(3, 100))
     expect(stripSizes(6, 100)).toMatch(/\(min-width: 640px\) 25vw, 34vw$/)
   })
 })
