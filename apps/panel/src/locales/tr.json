@@ -1594,9 +1594,7 @@
           "account": {
             "password_reset": "Şifre sıfırlama",
             "verify_email": "E-posta doğrulama",
-            "migration_invite": "Taşınan müşteriye hesap daveti",
-            "wholesale_invite": "Toptancı daveti",
-            "wholesale_enabled": "Toptan hesap açıldı"
+            "migration_invite": "Taşınan müşteriye hesap daveti"
           },
           "payment": {
             "failed": "Ödeme alınamadı"

@@ -1594,9 +1594,7 @@
           "account": {
             "password_reset": "Password reset",
             "verify_email": "E-mail verification",
-            "migration_invite": "Moved customer's account invitation",
-            "wholesale_invite": "Wholesale invitation",
-            "wholesale_enabled": "Wholesale account opened"
+            "migration_invite": "Moved customer's account invitation"
           },
           "payment": {
             "failed": "Payment failed"
