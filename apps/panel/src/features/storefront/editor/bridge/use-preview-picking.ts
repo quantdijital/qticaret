@@ -53,6 +53,14 @@ export function sectionNames(
 }
 
 /**
+ * A section's name from `sectionNames`: its own entry only, never the
+ * object's prototype (an id such as `constructor`; security review
+ * 2026-11-15, BİLGİ-1). Empty: not named (past the frame's limit).
+ */
+export const nameOf = (names: Readonly<Record<string, string>>, id: string): string =>
+  Object.hasOwn(names, id) ? (names[id] ?? "") : ""
+
+/**
  * Picking in the preview (adr/0065 §6, Faz 2; owner's decision 1): the
  * section pointed at in the frame lights its tree row, a row pointed at
  * frames its section, the edit label opens the form (said aloud), the
@@ -107,7 +115,7 @@ export function usePreviewPicking({
         if (found) {
           setBlocked(null)
           onOpen(found.section.id)
-          setAnnounce(t(`${V}.selected`, { name: names[found.section.id] ?? "" }))
+          setAnnounce(t(`${V}.selected`, { name: nameOf(names, found.section.id) }))
         }
         return
       }
@@ -118,7 +126,7 @@ export function usePreviewPicking({
           const focus = previewField(found.section, message.payload.field)
           setBlocked(null)
           onOpen(found.section.id, focus ?? undefined)
-          const name = names[found.section.id] ?? ""
+          const name = nameOf(names, found.section.id)
           setAnnounce(t(focus ? `${V}.fieldSelected` : `${V}.selected`, { name }))
         }
         return

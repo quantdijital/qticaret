@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { bridgeMessage } from "@qticaret/types/editor-bridge"
 import { DOC } from "../theme-editor.fixtures"
-import { groupOf, sectionNames, usePreviewPicking } from "./use-preview-picking"
+import { groupOf, nameOf, sectionNames, usePreviewPicking } from "./use-preview-picking"
 import type { PickMessage } from "./use-live-preview"
 
 const pickOf = <T extends PickMessage["type"]>(
@@ -45,6 +45,14 @@ describe("picking in the preview", () => {
         DOC.category.length +
         DOC.footer.length
     )
+  })
+
+  it("reads a name by its own entry only, never the prototype (BİLGİ-1)", () => {
+    const names = { girisbolumu: "Açılış" }
+    expect(nameOf(names, "girisbolumu")).toBe("Açılış")
+    expect(nameOf(names, "constructor")).toBe("")
+    expect(nameOf(names, "hasOwnProperty")).toBe("")
+    expect(nameOf({ constructor: "Kurucu" }, "constructor")).toBe("Kurucu")
   })
 
   it("sends the edit word and the names once connected", () => {
