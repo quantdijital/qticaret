@@ -3,10 +3,11 @@
 import { ChevronDown } from "lucide-react"
 import { NavigationMenu } from "radix-ui"
 import { useLayoutEffect, useRef, useState, type ReactNode } from "react"
-import type { NavCategoryView } from "@qticaret/ui"
+import type { LinkView, NavCategoryView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { useAisleFit } from "./aisle-fit"
 import { Drop, Word } from "./AisleDrop"
+import { BarLinks, MORE_PANEL, MorePanel } from "./AisleMore"
 import type { MenuWords } from "./menu-words"
 
 /** An aisle item; its hovered and open look is the menus' one recipe (`menu.css`, `menu_style`). */
@@ -19,53 +20,6 @@ const ITEM =
  * it is drawn as.
  */
 const BAR_ITEM = "gf-menu-item--bar px-2 xl:px-3"
-/** A row of the "Daha fazla" panel: its hovered fill is the recipe's (`.gf-menu-row`). */
-const MORE_ROW =
-  "gf-menu-row -mx-3 flex min-h-10 items-center rounded-inner px-3 py-2 text-sm leading-snug no-underline pointer-coarse:min-h-11"
-
-/**
- * The categories that did not fit on the bar's line, each with its
- * children under it: a column each, two at most below 1280 px and three
- * from it, the panel as wide as they are (Tezgâh audit Y-06).
- */
-function MorePanel({ categories }: { categories: readonly NavCategoryView[] }) {
-  const columns =
-    categories.length === 1
-      ? "grid-cols-1"
-      : categories.length === 2
-        ? "grid-cols-2"
-        : "grid-cols-2 xl:grid-cols-3"
-  return (
-    <ul className={cn("grid w-max gap-x-(--gap-columns) gap-y-4", columns)}>
-      {categories.map((category) => (
-        <li key={category.path} className="w-52">
-          <NavigationMenu.Link asChild>
-            <a href={category.path} className={cn(MORE_ROW, "font-bold text-text")}>
-              <span className="gf-menu-word">{category.label}</span>
-            </a>
-          </NavigationMenu.Link>
-          {category.children.length > 0 && (
-            <ul>
-              {category.children.map((child) => (
-                <li key={child.path}>
-                  <NavigationMenu.Link asChild>
-                    <a href={child.path} className={cn(MORE_ROW, "text-text-2 hover:text-text")}>
-                      <span className="gf-menu-word">{child.label}</span>
-                    </a>
-                  </NavigationMenu.Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </li>
-      ))}
-    </ul>
-  )
-}
-
-/** "Daha fazla"'s panel: the floating surfaces' one recipe, the page's ink. */
-const MORE_PANEL =
-  "absolute top-full right-0 z-(--z-dropdown) w-max rounded-tile border border-rule bg-field p-6 text-text shadow-float-edged data-[state=closed]:hidden xl:p-8"
 
 /**
  * The category aisle from 1024 px: one line of the shop's top categories
@@ -87,6 +41,9 @@ const MORE_PANEL =
  * items, and the line never wraps: the categories that do not fit go
  * under "Daha fazla" (`more`), whose panel lists them with their children
  * (`aisle-fit.ts`); each category on the line opens the same dropdown.
+ * The shop's top links (`links`, `top_links: bar`) stand quietly at the
+ * bar's end while every category fits beside them, else they go under
+ * "Daha fazla" too.
  */
 export function Aisle({
   categories,
@@ -97,6 +54,8 @@ export function Aisle({
   more = "",
   tail,
   pictures = true,
+  links = [],
+  linksLabel = "",
 }: {
   categories: readonly NavCategoryView[]
   label: string
@@ -111,12 +70,22 @@ export function Aisle({
   tail?: ReactNode
   /** The dropdowns' small pictures (`HeaderBarView.menuImages` not `off`); else words only. */
   pictures?: boolean
+  /** In the bar, the shop's top links at its end (under "Daha fazla" when they do not fit). */
+  links?: readonly LinkView[]
+  /** The links' group's name for a screen reader. */
+  linksLabel?: string
 }) {
   const [open, setOpen] = useState("")
   const root = useRef<HTMLElement>(null)
-  const { list, fit } = useAisleFit(categories.length, inBar)
-  const shown = fit ?? categories.length
+  const barLinks = inBar ? links : []
+  const {
+    list,
+    links: linksGroup,
+    fit,
+  } = useAisleFit(`${String(categories.length)}:${String(barLinks.length)}`, inBar)
+  const shown = fit?.count ?? categories.length
   const rest = categories.slice(shown)
+  const linksAway = barLinks.length > 0 && fit !== null && !fit.links
 
   // Measured as it opens, before it is painted: past the aisle's end, it lines up at its end
   useLayoutEffect(() => {
@@ -130,7 +99,7 @@ export function Aisle({
     }
   }, [open])
 
-  return (
+  const menu = (
     <NavigationMenu.Root
       ref={root}
       value={open}
@@ -195,8 +164,8 @@ export function Aisle({
             </NavigationMenu.Item>
           )
         })}
-        {inBar && more !== "" && (fit === null || rest.length > 0) && (
-          // Measured while hidden; shown once some categories wait under it
+        {inBar && more !== "" && (fit === null || rest.length > 0 || linksAway) && (
+          // Measured while hidden; shown once some categories (or the links) wait under it
           <NavigationMenu.Item
             value="more"
             data-aisle-more=""
@@ -214,7 +183,7 @@ export function Aisle({
                 strokeWidth={2}
               />
             </NavigationMenu.Trigger>
-            {rest.length > 0 && fit !== null && (
+            {(rest.length > 0 || linksAway) && fit !== null && (
               <NavigationMenu.Content
                 onInteractOutside={(event) => {
                   if (open !== "more") {
@@ -223,7 +192,7 @@ export function Aisle({
                 }}
                 className={MORE_PANEL}
               >
-                <MorePanel categories={rest} />
+                <MorePanel categories={rest} links={linksAway ? barLinks : []} />
               </NavigationMenu.Content>
             )}
           </NavigationMenu.Item>
@@ -235,5 +204,14 @@ export function Aisle({
         )}
       </NavigationMenu.List>
     </NavigationMenu.Root>
+  )
+  if (barLinks.length === 0) {
+    return menu
+  }
+  return (
+    <>
+      {menu}
+      <BarLinks ref={linksGroup} links={barLinks} label={linksLabel} hidden={linksAway} />
+    </>
   )
 }

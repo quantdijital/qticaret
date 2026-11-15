@@ -5,6 +5,9 @@ import type {
   HeaderBarVariant,
   HeaderMenuGround,
   HeaderMenuImages,
+  HeaderSearchWidth,
+  HeaderToolsPlace,
+  HeaderTopLinksPlace,
   ProductMainVariant,
 } from "@qticaret/types"
 import type { SectionLookView } from "./content-views"
@@ -47,7 +50,7 @@ export interface HeaderCatalogView {
   searchPlaceholder: string | null
   /** The search button written ("Ara") rather than a magnifier. */
   searchLabel: boolean
-  /** "Hesabım" written at the utility strip's end. */
+  /** "Hesabım" written at the utility strip's end (beside the bar's icons; `toolsPlace` `bar`). */
   accountText: boolean
   /** The cart's subtotal beside its icon (when the cart holds something). */
   cartTotal: boolean
@@ -61,6 +64,20 @@ export interface HeaderCatalogView {
   categories: NavCategoryView[]
   /** The menu bar's ground: "Koyu / Ana renk / Açık". */
   menuGround: HeaderMenuGround
+  /**
+   * Account, favourites and the cart (Ek 2026-11-15): `bar`, the menu
+   * bar's icons; `row`, named beside the shop's phone (the account once:
+   * the strip writes no "Hesabım" then). Absent: `bar`.
+   */
+  toolsPlace?: HeaderToolsPlace
+  /**
+   * The shop's top links: `strip`, in the thin strip (none while
+   * `utilityBar` is off); `bar`, quiet words at the menu bar's end, under
+   * "Daha fazla" when the categories need the room. Absent: `strip`.
+   */
+  topLinksPlace?: HeaderTopLinksPlace
+  /** The search: `wide`; `narrow`, 35 rem at most right after the wordmark. Absent: `wide`. */
+  searchWidth?: HeaderSearchWidth
 }
 
 export interface FooterBarView {

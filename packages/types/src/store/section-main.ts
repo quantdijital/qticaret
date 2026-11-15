@@ -7,6 +7,9 @@ import type {
   HeaderBarVariant,
   HeaderMenuGround,
   HeaderMenuImages,
+  HeaderSearchWidth,
+  HeaderToolsPlace,
+  HeaderTopLinksPlace,
   ProductMainVariant,
 } from "./section-variants.js"
 
@@ -26,7 +29,8 @@ import type {
  * written button, the written account link in the utility strip, the cart's
  * subtotal beside its icon, the highlighted last link of the menu bar (a
  * broken one null), the utility strip, the shop's phone number, the
- * "Kategoriler" button and the menu bar's ground.
+ * "Kategoriler" button and the menu bar's ground; where its tools and the
+ * shop's top links stand and how wide its search is.
  */
 export interface StoreHeaderCatalog {
   search_placeholder: string | null
@@ -38,6 +42,14 @@ export interface StoreHeaderCatalog {
   phone: boolean
   categories_button: boolean
   menu_ground: HeaderMenuGround
+  /**
+   * The layout choices (Ek 2026-11-15, `HEADER_TOOLS_PLACES`,
+   * `HEADER_TOP_LINKS_PLACES`, `HEADER_SEARCH_WIDTHS`); an older backend
+   * prints none: a reader takes each list's first (today's drawing).
+   */
+  tools_place?: HeaderToolsPlace
+  top_links?: HeaderTopLinksPlace
+  search_width?: HeaderSearchWidth
 }
 
 export interface StoreMainSections {

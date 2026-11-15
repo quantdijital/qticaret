@@ -1,5 +1,10 @@
 import type { StoreHeaderCatalog } from "@qticaret/types"
-import { headerMenuGroundOf } from "@qticaret/types/section-variants"
+import {
+  headerMenuGroundOf,
+  headerSearchWidthOf,
+  headerToolsPlaceOf,
+  headerTopLinksPlaceOf,
+} from "@qticaret/types/section-variants"
 import type { HeaderCatalogView, NavCategoryView, Translate } from "@qticaret/ui"
 import { menuLink } from "./menus"
 
@@ -22,7 +27,8 @@ const DEFAULTS: StoreHeaderCatalog = {
  * name in the storefront's words; none without a name and an address),
  * the "Kategoriler" list only when its button shows, the shop's top
  * categories (`tree`, built from the categories the frame already read:
- * no request of its own).
+ * no request of its own); each layout choice the answer lacks (an older
+ * backend) or names off its list, today's drawing.
  */
 export function headerCatalogOf(
   catalog: StoreHeaderCatalog | undefined,
@@ -40,5 +46,8 @@ export function headerCatalogOf(
     phone: set.phone,
     categories: set.categories_button ? tree() : [],
     menuGround: headerMenuGroundOf(set.menu_ground),
+    toolsPlace: headerToolsPlaceOf(set.tools_place),
+    topLinksPlace: headerTopLinksPlaceOf(set.top_links),
+    searchWidth: headerSearchWidthOf(set.search_width),
   }
 }
