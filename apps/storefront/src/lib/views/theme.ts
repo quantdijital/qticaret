@@ -130,13 +130,15 @@ const CARD_FLAGS = [
 
 /**
  * The card's stars without reviews (adr/0049 Ek 2026-11-15); a backend
- * before the choice answers the framed card's `empty_stars` switch it replaced.
+ * before the choice answers the framed card's `empty_stars` switch it replaced
+ * (on only drew there: another card's stays hidden, as the backend reads it).
  */
 const noReviews = (raw: unknown) =>
   oneOf(
     at(raw, "product_card", "no_reviews"),
     CARD_NO_REVIEWS,
-    at(raw, "product_card", "empty_stars") === true
+    at(raw, "product_card", "empty_stars") === true &&
+      at(raw, "product_card", "variant") === "framed"
       ? "empty_stars"
       : DEFAULT_THEME.product_card.no_reviews
   )

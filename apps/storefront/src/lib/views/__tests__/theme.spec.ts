@@ -121,11 +121,17 @@ describe("themeSettings", () => {
   })
 
   it("reads a backend before the no-reviews choice by the framed card's empty stars switch", () => {
-    const old = (empty_stars: unknown) =>
-      themeSettings({ product_card: { show_rating: true, empty_stars } }, null).product_card
-        .no_reviews
+    const old = (empty_stars: unknown, variant = "framed") =>
+      themeSettings({ product_card: { show_rating: true, variant, empty_stars } }, null)
+        .product_card.no_reviews
     expect(old(true)).toBe("empty_stars")
     expect(old(false)).toBe("hide")
+    // The switch drew only on the framed card: another's saved look does not change
+    expect(old(true, "standard")).toBe("hide")
+    expect(old(true, "technical")).toBe("hide")
+    expect(
+      themeSettings({ product_card: { empty_stars: true } }, null).product_card.no_reviews
+    ).toBe("hide")
     expect(
       themeSettings({ product_card: { empty_stars: true, no_reviews: "write_first" } }, null)
         .product_card.no_reviews

@@ -62,8 +62,10 @@ const choice = <T extends string>(list: readonly T[]) => {
 
 /**
  * A card written with the framed card's `empty_stars` switch read as the
- * no-reviews choice that replaced it: on, empty stars; off, nothing. A
- * card that has both keeps its choice. Anything else as it is.
+ * no-reviews choice that replaced it: on, empty stars; off, nothing. The
+ * switch drew only on the framed card, so on another variant (or none
+ * stored) on reads as nothing: a saved shop looks as it did. A card that
+ * has both keys keeps its choice. Anything else as it is.
  */
 export function upgradeCard(card: unknown): unknown {
   if (!isPlainObject(card) || !Object.hasOwn(card, "empty_stars")) {
@@ -72,7 +74,10 @@ export function upgradeCard(card: unknown): unknown {
   const { empty_stars: emptyStars, ...rest } = card
   return Object.hasOwn(rest, "no_reviews")
     ? rest
-    : { ...rest, no_reviews: emptyStars === true ? "empty_stars" : "hide" }
+    : {
+        ...rest,
+        no_reviews: emptyStars === true && rest["variant"] === "framed" ? "empty_stars" : "hide",
+      }
 }
 
 /** The card's fields as the theme section checks them. */

@@ -85,20 +85,41 @@ describe("theme section: the product card's badges, sold-out row, no-reviews row
   })
 
   it("reads the framed card's old empty stars switch as the no-reviews choice", () => {
-    const old = (empty_stars: boolean) => {
-      const card: Record<string, unknown> = { ...defaults.product_card, empty_stars }
+    const old = (empty_stars: boolean, variant = "framed") => {
+      const card: Record<string, unknown> = { ...defaults.product_card, variant, empty_stars }
       delete card["no_reviews"]
       return { ...defaults, product_card: card }
     }
     const read = parseStored("theme", old(true))
-    expect(read["product_card"]).toMatchObject({ no_reviews: "empty_stars" })
-    expect(parseStored("theme", old(false))).toEqual(defaults)
+    expect(read["product_card"]).toMatchObject({ variant: "framed", no_reviews: "empty_stars" })
+    expect(parseStored("theme", old(false))["product_card"]).toMatchObject({
+      variant: "framed",
+      no_reviews: "hide",
+    })
+    // The switch drew only on the framed card: on another variant, on reads as hide
+    for (const variant of ["standard", "compact"]) {
+      expect(parseStored("theme", old(true, variant))["product_card"]).toMatchObject({
+        variant,
+        no_reviews: "hide",
+      })
+    }
     // A design's theme and a preset (`withCardDefaults`) read the same
     expect(withCardDefaults(old(true))).toEqual({
       ...defaults,
-      product_card: { ...defaults.product_card, no_reviews: "empty_stars" },
+      product_card: { ...defaults.product_card, variant: "framed", no_reviews: "empty_stars" },
+    })
+    expect(withCardDefaults(old(true, "standard"))).toEqual({
+      ...defaults,
+      product_card: { ...defaults.product_card, variant: "standard", no_reviews: "hide" },
     })
     expect(full.safeParse(withCardDefaults(old(false))).success).toBe(true)
+    // A chosen no_reviews holds on every card
+    expect(
+      upgradeCard({ variant: "standard", empty_stars: true, no_reviews: "empty_stars" })
+    ).toEqual({
+      variant: "standard",
+      no_reviews: "empty_stars",
+    })
     // A card holding both keeps its choice; anything not a card stays as it is
     expect(upgradeCard({ empty_stars: true, no_reviews: "write_first" })).toEqual({
       no_reviews: "write_first",
