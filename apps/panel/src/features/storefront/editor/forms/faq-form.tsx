@@ -2,11 +2,22 @@ import { useTranslation } from "react-i18next"
 import { ListFooter, RowActions } from "@/features/settings/components/storefront-rows"
 import type { FaqItem, FaqSection } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import { faqSettingsOf } from "@qticaret/types"
+import type { FaqSetting } from "@qticaret/types"
+import { SwitchRow } from "../theme-fields"
+import type { ContentField } from "./content-registry"
+import { FIELD_IDS } from "./field-registry"
 import { F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 
 const Q = "storefront.editor.faq"
+
+/** The two switches, by setting and label key (the settings search's, `content-registry.ts`). */
+const SWITCHES = [
+  ["open_first", "openFirst"],
+  ["single_open", "singleOpen"],
+] as const satisfies readonly (readonly [FaqSetting & ContentField, string])[]
 
 /**
  * Questions and their answers, in order (adr/0049 ek 2026-11-03). An
@@ -99,6 +110,21 @@ export function FaqForm({ section, problems, onChange }: SectionFormProps<FaqSec
           setItems([...section.items, { question: "", answer: "" }])
         }}
       />
+      {/* How the questions open (bilesen-denetimi (b) 8): both off, as before */}
+      {SWITCHES.map(([setting, key]) => (
+        <div key={setting} id={FIELD_IDS.content(section.id, setting)}>
+          <SwitchRow
+            id={`${section.id}-${setting}`}
+            label={t(`${Q}.${key}`)}
+            term={t(`${Q}.${key}Term`)}
+            hint={t(`${Q}.${key}Hint`)}
+            checked={faqSettingsOf(section)[setting] === "on"}
+            onChange={(checked) => {
+              onChange({ ...section, [setting]: checked ? "on" : "off" }, setting)
+            }}
+          />
+        </div>
+      ))}
     </div>
   )
 }

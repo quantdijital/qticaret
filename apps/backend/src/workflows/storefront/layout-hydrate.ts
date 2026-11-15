@@ -187,6 +187,9 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
           question: item.question,
           answer: fillShopText(item.answer, at.values),
         })),
+        // Printed only when on, so a section from before them prints as it did
+        ...(section.open_first === "on" ? { open_first: "on" } : {}),
+        ...(section.single_open === "on" ? { single_open: "on" } : {}),
       }
     case "newsletter":
     case "help":

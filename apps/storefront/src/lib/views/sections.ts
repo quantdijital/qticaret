@@ -1,6 +1,7 @@
 import "server-only"
 import type { StoreCategorySection, StoreLayoutSection, StoreProductSection } from "@qticaret/types"
 import { deviceOf } from "@qticaret/types/section-device"
+import { faqSettingsOf } from "@qticaret/types/section-faq"
 import { lookOf } from "@qticaret/types/section-look"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { HomeSectionView, Translate } from "@qticaret/ui"
@@ -186,7 +187,13 @@ async function sectionView(
       return { id, type: "rich_text", title: section.title, html: section.html }
     case "faq":
       return section.items.length > 0
-        ? { id, type: "faq", title: section.title, items: section.items }
+        ? {
+            id,
+            type: "faq",
+            title: section.title,
+            items: section.items,
+            settings: faqSettingsOf(section),
+          }
         : null
     case "trust_badges": {
       // The design's badges (adr/0049 Ek 2026-11-06): a preview shows its draft's

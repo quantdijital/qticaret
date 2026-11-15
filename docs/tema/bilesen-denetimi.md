@@ -300,6 +300,8 @@ Kapsamda geçen kısaltmalar: **T** = `packages/types/src/store/…`, **B** = `a
    **Kısmen yapıldı (2026-11-15):** birden çok duyuru (yalnız ilki / sırayla / yan yana), süre, durdur düğmesi, üzerine gelince dur, azaltılmış harekette durma (adr/0049 Ek 2026-11-15, orta işler). Oklar, satır bağlantısı, kapatma ve zemin açık.
 7. **Benzer ürünlere biçim + kart biçimi (1.15).** T `layout.ts`, B `related-products.ts`, P `related-form.tsx`, A ürün sayfası rafı.
 8. **SSS ayarları (1.14):** ilk soru açık, tek açık. B `faq.ts`, P `faq-form.tsx`, A `Faq.tsx`.
+   **Yapıldı (2026-11-15):** `open_first` ve `single_open` off/on (ikisi de kapalı); tek açık yerel
+   `<details name>` ile, betiksiz (adr/0049 Ek 2026-11-15, orta işler).
 
 ### (c) Büyük (L; ADR eki gerekir)
 

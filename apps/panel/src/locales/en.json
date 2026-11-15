@@ -8358,7 +8358,13 @@
         "question": "Question {{number}}'s text",
         "answer": "Question {{number}}'s answer",
         "add": "Add question",
-        "hint": "Up to {{max}} questions; answers may hold the shop's details."
+        "hint": "Up to {{max}} questions; answers may hold the shop's details.",
+        "openFirst": "First question open",
+        "openFirstTerm": "open first",
+        "openFirstHint": "The first answer shows when the page opens.",
+        "singleOpen": "One question open at a time",
+        "singleOpenTerm": "accordion",
+        "singleOpenHint": "Opening a question closes the one already open."
       },
       "related": {
         "source": "Which products",

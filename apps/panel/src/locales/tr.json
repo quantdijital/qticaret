@@ -8358,7 +8358,13 @@
         "question": "{{number}}. sorunun metni",
         "answer": "{{number}}. sorunun cevabı",
         "add": "Soru ekle",
-        "hint": "En çok {{max}} soru; cevaplarda mağaza bilgisi kullanılabilir."
+        "hint": "En çok {{max}} soru; cevaplarda mağaza bilgisi kullanılabilir.",
+        "openFirst": "İlk soru açık gelsin",
+        "openFirstTerm": "open first",
+        "openFirstHint": "Sayfa açıldığında ilk sorunun cevabı görünür.",
+        "singleOpen": "Aynı anda tek soru açık",
+        "singleOpenTerm": "accordion",
+        "singleOpenHint": "Bir soru açılınca açık olan öteki kapanır."
       },
       "related": {
         "source": "Hangi ürünler",

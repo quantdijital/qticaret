@@ -143,7 +143,24 @@ describe("a FAQ section", () => {
 
     const views = await sectionViews([{ id: "sss", type: "faq", title: null, items }], t)
 
-    expect(views).toEqual([{ id: "sss", type: "faq", title: null, items }])
+    expect(views).toEqual([
+      {
+        id: "sss",
+        type: "faq",
+        title: null,
+        items,
+        settings: { open_first: "off", single_open: "off" },
+      },
+    ])
+  })
+
+  it("passes the shop's switches on, one off the list read as closed (bilesen-denetimi (b) 8)", async () => {
+    const items = [{ question: "Kargo ne zaman?", answer: "1–3 iş günü." }]
+    const section = { id: "sss", type: "faq", title: null, items, open_first: "on" } as const
+
+    const [view] = await sectionViews([{ ...section, single_open: "always" as unknown as "on" }], t)
+
+    expect(view).toMatchObject({ settings: { open_first: "on", single_open: "off" } })
   })
 })
 

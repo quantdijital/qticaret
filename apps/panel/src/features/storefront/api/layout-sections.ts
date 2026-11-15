@@ -2,6 +2,7 @@ import type {
   AnnouncementSettings,
   BannerSettings,
   BannerTone,
+  FaqSettings,
   MarqueeSettings,
   ProductSource,
   SectionDevice,
@@ -205,8 +206,12 @@ export interface FaqItem {
   answer: string
 }
 
-/** Questions and answers, shown on the page; never `FAQPage` structured data (docs/13 §5). */
-export interface FaqSection extends BodySectionBase {
+/**
+ * Questions and answers, shown on the page; never `FAQPage` structured data
+ * (docs/13 §5). Its switches (bilesen-denetimi (b) 8) are filled on reading;
+ * one absent reads as its default (`faqSettingsOf`).
+ */
+export interface FaqSection extends BodySectionBase, Partial<FaqSettings> {
   type: "faq"
   title: string | null
   items: FaqItem[]

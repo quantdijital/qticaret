@@ -1,5 +1,6 @@
 import type {
   CategoriesVariant,
+  FaqSettings,
   HeroVariant,
   SectionDevice,
   SectionLook,
@@ -121,6 +122,11 @@ export type HomeSectionView = { look?: SectionLookView; device?: SectionDeviceVi
       title: string | null
       /** Plain text; the theme keeps the answers in the HTML (open or closed). */
       items: { question: string; answer: string }[]
+      /**
+       * The first question open, one open at a time (bilesen-denetimi (b) 8).
+       * Absent (an older storefront): all closed, each opened on its own.
+       */
+      settings?: FaqSettings
     }
 )
 

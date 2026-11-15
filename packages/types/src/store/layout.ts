@@ -9,6 +9,7 @@ import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
 import type { SectionDevice } from "./section-device.js"
 import type { AnnouncementSettings } from "./section-announcement.js"
+import type { FaqSettings } from "./section-faq.js"
 import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
 import type { StoreCategoriesLinked } from "./section-categories.js"
@@ -198,13 +199,17 @@ export interface StoreFeaturedProductSection {
   product_id: string
 }
 
-/** Questions and answers in plain text, the answers' `{tokens}` already filled (adr/0049 Ek 2026-11-03). */
-export interface StoreFaqSection {
+/**
+ * Questions and answers in plain text, the answers' `{tokens}` already
+ * filled (adr/0049 Ek 2026-11-03). Its settings (bilesen-denetimi (b) 8)
+ * are printed only when on: one absent reads as its default (`faqSettingsOf`).
+ */
+export type StoreFaqSection = {
   id: string
   type: "faq"
   title: string | null
   items: { question: string; answer: string }[]
-}
+} & Partial<FaqSettings>
 
 /**
  * Where a product page's related rail takes its products from: the

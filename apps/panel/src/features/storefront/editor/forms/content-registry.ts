@@ -27,6 +27,8 @@ export type ContentField =
   | "interval"
   | "dots"
   | "arrows"
+  | "open_first"
+  | "single_open"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {
@@ -102,12 +104,16 @@ export function contentFields(section: AnySection): RegistryField[] {
         entry(section, "dots", `${S}.dots`),
         entry(section, "arrows", `${S}.arrows`),
       ]
+    case "faq":
+      return [
+        entry(section, "open_first", `${E}.faq.openFirst`),
+        entry(section, "single_open", `${E}.faq.singleOpen`),
+      ]
     // No count or switch in their content, or their own register (the band, the strip, the header)
     case "announcement_bar":
     case "banner":
     case "brands":
     case "category_main":
-    case "faq":
     case "featured_product":
     case "footer_bar":
     case "header_bar":

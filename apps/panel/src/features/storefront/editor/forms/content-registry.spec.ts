@@ -53,6 +53,13 @@ describe("the content fields' register", () => {
     expect(keys({ ...slider, autoplay: true })).toContain("content:interval")
   })
 
+  it("names the FAQ's two switches (bilesen-denetimi (b) 8)", () => {
+    expect(keys(newHomeSection("faq", "sss0000001"))).toEqual([
+      "content:open_first",
+      "content:single_open",
+    ])
+  })
+
   it("names the catalogue opening's list count, product counts and prices", () => {
     const hero = switchVariant(newHomeSection("hero", "giris00001") as HeroSection, "category_list")
     expect(keys(hero)).toEqual(["content:list_limit", "content:show_count", "content:show_price"])

@@ -66,7 +66,7 @@ describe("storefront layout document (adr/0049)", () => {
         limit: 8,
         columns: 3,
       },
-      { ...faq("sss001"), ...ALWAYS, title: null },
+      { ...faq("sss001"), ...ALWAYS, title: null, open_first: "off", single_open: "off" },
     ])
     expect(doc.category).toEqual([
       // No variant saved: the default, today's strip (adr/0049 Ek 2026-11-14 §2)
