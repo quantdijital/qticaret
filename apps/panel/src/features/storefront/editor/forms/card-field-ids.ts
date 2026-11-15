@@ -1,4 +1,4 @@
-import { CATEGORY_CARD_SETTINGS, FOOTER_BAR_SETTINGS } from "@qticaret/types"
+import { CATEGORY_CARD_SETTINGS, FOOTER_BAR_SETTINGS, PAYMENT_BADGES } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { RegistryField } from "./field-registry"
 
@@ -35,6 +35,8 @@ const stepsOf = (prefix: string, field: string): readonly string[] => {
   const lists: Readonly<Record<string, readonly (string | number)[]>> = {
     ...CATEGORY_CARD_SETTINGS,
     ...FOOTER_BAR_SETTINGS,
+    // The ways to pay, found by name ("Troy", "Kapıda ödeme")
+    payment_badges: PAYMENT_BADGES,
   }
   return (lists[field] ?? []).map((step) => `${prefix}.${field}.${String(step)}`)
 }

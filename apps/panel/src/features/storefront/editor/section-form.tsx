@@ -4,6 +4,7 @@ import { AnnouncementForm } from "./forms/announcement-form"
 import { BannerForm } from "./forms/banner-form"
 import { FaqForm } from "./forms/faq-form"
 import { FeaturedForm } from "./forms/featured-form"
+import { FooterBarForm } from "./forms/footer-bar-form"
 import { GoogleRatingForm } from "./forms/google-rating-form"
 import { HeaderBarForm } from "./forms/header-bar-form"
 import { HeroForm } from "./forms/hero-form"
@@ -71,8 +72,9 @@ export function FormOf({
       return <WordedForm section={section} {...props} />
     case "header_bar":
       return <HeaderBarForm section={section} {...props} />
-    // The other main sections have nothing of their own yet: their variant and look
     case "footer_bar":
+      return <FooterBarForm section={section} {...props} />
+    // The other main sections have nothing of their own yet: their variant and look
     case "product_main":
     case "category_main":
       return null
