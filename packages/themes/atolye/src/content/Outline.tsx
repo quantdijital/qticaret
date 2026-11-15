@@ -41,7 +41,7 @@ export function OutlineWell({
   className?: string
 }) {
   return (
-    <details className={`group rounded-tile bg-paper-2 lg:hidden ${className ?? ""}`}>
+    <details className={`group rounded-tile gf-pane lg:hidden ${className ?? ""}`}>
       <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-4 px-5 font-semibold">
         <span>{t("legal.contents")}</span>
         <span className="flex items-center gap-2 text-sm font-normal text-text-3">

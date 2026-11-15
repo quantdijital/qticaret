@@ -20,9 +20,9 @@ export function Guides({ section }: { section: Of<"posts"> }) {
         <ul className="grid gap-(--gap-columns) md:grid-cols-[repeat(3,minmax(0,1fr))]">
           {posts.map((post) => (
             <li key={post.path} className="min-w-0">
-              <article className="group relative flex h-full flex-col overflow-hidden rounded-tile bg-paper-2">
+              <article className="group relative flex h-full flex-col overflow-hidden rounded-tile gf-pane">
                 {post.image && (
-                  <div className="relative aspect-[16/10] bg-paper-3">
+                  <div className="relative aspect-[16/10] bg-media-deep">
                     <ResponsiveImage
                       image={{ ...post.image, alt: "" }}
                       sizes="(min-width: 768px) 30vw, 100vw"

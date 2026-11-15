@@ -41,7 +41,7 @@ export function Thumbs({
         <span
           key={`${image.src}:${String(index)}`}
           className={cn(
-            "relative overflow-hidden bg-paper-3 ring-2 ring-paper-2",
+            "relative overflow-hidden bg-media-deep ring-2 ring-paper-2",
             box,
             index > 0 && "-ml-6"
           )}
@@ -87,7 +87,7 @@ export function OrderRow({ order, t }: { order: AccountOrderView; t: Translate }
     <li>
       <a
         href={order.path}
-        className="group flex flex-col gap-4 rounded-tile bg-paper-2 p-4 no-underline transition-colors duration-(--dur-micro) hover:bg-paper-3 sm:p-5"
+        className="group flex flex-col gap-4 rounded-tile gf-pane p-4 no-underline transition-colors duration-(--dur-micro) hover:bg-paper-3 sm:p-5"
       >
         <span className="flex items-center gap-4">
           <Thumbs images={order.images ?? []} />
@@ -107,7 +107,7 @@ export function OrderRow({ order, t }: { order: AccountOrderView; t: Translate }
           />
         </span>
         <span className="flex items-center gap-3">
-          <span className="shrink-0 rounded-pill bg-field px-2.5 py-1 text-xs font-semibold">
+          <span className="shrink-0 rounded-pill gf-shape bg-field px-2.5 py-1 text-xs font-semibold">
             {statusOf(order)}
           </span>
           {order.progress && <StepBar steps={order.progress} />}
@@ -120,9 +120,9 @@ export function OrderRow({ order, t }: { order: AccountOrderView; t: Translate }
 /** No order yet: what will show here, and the way to the shop. */
 export function NoOrders({ t }: { t: Translate }) {
   return (
-    <div className="flex flex-col items-start justify-between gap-8 rounded-tile bg-paper-2 p-6 sm:p-8">
+    <div className="flex flex-col items-start justify-between gap-8 rounded-tile gf-pane p-6 sm:p-8">
       <div className="flex flex-col gap-3">
-        <span className="mb-1 flex size-14 shrink-0 items-center justify-center rounded-pill bg-paper">
+        <span className="mb-1 flex size-14 shrink-0 items-center justify-center rounded-pill gf-shape bg-paper">
           <ShoppingBag className="size-6" aria-hidden="true" strokeWidth={1.75} />
         </span>
         <p className="text-title font-extrabold">{t("account.no_orders")}</p>

@@ -40,7 +40,7 @@ function RemoveAddress({
       </summary>
       <form
         action={remove}
-        className="mt-3 flex flex-wrap items-center gap-3 rounded-media bg-field p-4"
+        className="mt-3 flex flex-wrap items-center gap-3 rounded-media gf-pane-inner p-4"
       >
         <input type="hidden" name="id" value={address.id} />
         <p className="flex-1 text-sm font-semibold">{t("account.address_remove_confirm")}</p>
@@ -77,7 +77,7 @@ export function Addresses({
   return (
     <>
       {empty ? (
-        <p className="flex items-start gap-3 rounded-tile bg-paper-2 p-6 text-md sm:p-8">
+        <p className="flex items-start gap-3 rounded-tile gf-pane p-6 text-md sm:p-8">
           <MapPin
             className="mt-0.5 size-5 shrink-0 text-text-2"
             aria-hidden="true"
@@ -88,7 +88,7 @@ export function Addresses({
       ) : (
         <ul className="grid gap-3 md:grid-cols-[repeat(2,minmax(0,1fr))]">
           {view.addresses.map((address) => (
-            <li key={address.id} className="flex flex-col gap-5 rounded-tile bg-paper-2 p-5 sm:p-6">
+            <li key={address.id} className="flex flex-col gap-5 rounded-tile gf-pane p-5 sm:p-6">
               <address className="flex flex-col gap-0.5 text-md not-italic">
                 <span className="font-extrabold">{address.name}</span>
                 {address.lines.map((line) => (
@@ -103,7 +103,7 @@ export function Addresses({
         </ul>
       )}
       {view.newAddress && addAddress && districts && neighborhoods && (
-        <details id="yeni-adres" open={empty} className="group rounded-tile bg-paper-2">
+        <details id="yeni-adres" open={empty} className="group rounded-tile gf-pane">
           <summary className="flex min-h-16 cursor-pointer items-center gap-3 px-5 text-md font-extrabold sm:px-6">
             <span className="flex size-9 shrink-0 items-center justify-center rounded-pill bg-text text-paper">
               <Plus className="size-4.5" aria-hidden="true" strokeWidth={2} />

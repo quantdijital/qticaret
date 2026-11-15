@@ -161,7 +161,7 @@ describe("the theme's product page", () => {
 
   it("puts the photographs in a well over their thumbnails: the first eager, anchors before the script", () => {
     const html = page()
-    expect(html).toContain("relative overflow-hidden rounded-tile bg-paper-2")
+    expect(html).toContain("relative overflow-hidden rounded-tile bg-media")
     expect(html).not.toContain("gf-stage relative overflow-hidden rounded-tile")
     expect(html.match(/fetchPriority="high"/g)).toHaveLength(1)
     expect(html).toContain('id="gorsel-kucukleri"')

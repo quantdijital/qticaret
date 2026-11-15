@@ -114,7 +114,7 @@ export function CategoriesPage({ view, t }: { view: CategoriesPageView; t: Trans
         {listed > 0 && <p className="text-md text-text-2 lg:text-lead">{lead}</p>}
       </header>
       {listed === 0 ? (
-        <p className="mt-8 rounded-tile bg-paper-2 px-6 py-12 text-center text-text-2">
+        <p className="mt-8 rounded-tile gf-pane px-6 py-12 text-center text-text-2">
           {t("categories.empty")}
         </p>
       ) : (

@@ -16,7 +16,7 @@ const ORDER: CheckoutStep[] = ["address", "shipping", "payment"]
 /** Who the invoice goes to, in words, and where to change it (F8): a quiet row in the payment step. */
 function Invoice({ invoice }: { invoice: CheckoutPageView["invoice"] }) {
   return (
-    <p className="mb-8 flex items-start gap-3 rounded-media bg-field p-4 text-sm">
+    <p className="mb-8 flex items-start gap-3 rounded-media gf-pane-inner p-4 text-sm">
       <ReceiptText
         className="mt-0.5 size-5 shrink-0 text-text-2"
         aria-hidden="true"
@@ -75,7 +75,7 @@ export function CheckoutPage({
     <Container className="flex flex-col gap-6 pt-6 lg:gap-8 lg:pt-12">
       <h1>{t("checkout.title")}</h1>
       {view.error && (
-        <p role="alert" className="rounded-media bg-paper-2 p-4 text-sm font-semibold text-error">
+        <p role="alert" className="rounded-media gf-pane p-4 text-sm font-semibold text-error">
           {view.error}
         </p>
       )}
@@ -158,7 +158,7 @@ export function CheckoutPage({
           >
             <Invoice invoice={view.invoice} />
             {view.paymentMethods.length === 0 ? (
-              <p className="rounded-media bg-field p-4 text-sm font-semibold">
+              <p className="rounded-media gf-pane-inner p-4 text-sm font-semibold">
                 {t("checkout.no_payment")}
               </p>
             ) : (

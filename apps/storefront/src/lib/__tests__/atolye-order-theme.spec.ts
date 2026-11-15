@@ -153,4 +153,13 @@ describe("the theme's order page", () => {
     expect(html).not.toContain("Sipariş durumu")
     expect(html).not.toContain("Siparişi iptal et")
   })
+
+  it("draws its boxes on the theme's box recipe, the address inside one as an inner box (adr/0067)", () => {
+    const html = renderPage(atolyeTheme, "OrderPage", { view: view(), actions })
+    // The summary, tracking, documents, lines and steps; the cancel form
+    expect(html.match(/rounded-tile gf-pane p-5 sm:p-7/g)?.length).toBeGreaterThanOrEqual(5)
+    expect(html).toContain('class="flex flex-col gap-4 rounded-tile gf-pane p-5 sm:p-7"')
+    expect(html).toContain('class="flex flex-col gap-1 rounded-media gf-pane-inner p-4 text-sm"')
+    expect(html).not.toMatch(/rounded-(tile|media) bg-(paper-2|field) p-/)
+  })
 })

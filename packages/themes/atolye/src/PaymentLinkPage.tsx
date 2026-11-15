@@ -7,8 +7,8 @@ import { LinkLines, LinkTotals } from "./payment-link/LinkLines"
 function Unavailable({ t }: { t: Translate }) {
   return (
     <Container className="pt-8 lg:pt-16">
-      <div className="mx-auto flex max-w-2xl flex-col items-start gap-6 rounded-tile bg-paper-2 p-6 sm:p-10">
-        <span className="flex size-14 items-center justify-center rounded-pill bg-paper text-text-2">
+      <div className="mx-auto flex max-w-2xl flex-col items-start gap-6 rounded-tile gf-pane p-6 sm:p-10">
+        <span className="flex size-14 items-center justify-center rounded-pill gf-shape bg-paper text-text-2">
           <CircleAlert className="size-7" aria-hidden="true" strokeWidth={1.75} />
         </span>
         <h1>{t("payment_link.unavailable_title")}</h1>
@@ -56,7 +56,7 @@ export function PaymentLinkPage({
         {notice && (
           <p
             role="alert"
-            className="flex items-start gap-2 rounded-media bg-paper-2 p-4 text-md font-semibold text-error"
+            className="flex items-start gap-2 rounded-media gf-pane p-4 text-md font-semibold text-error"
           >
             <CircleAlert className="mt-0.5 size-5 shrink-0" aria-hidden="true" strokeWidth={1.75} />
             {notice}
@@ -64,7 +64,7 @@ export function PaymentLinkPage({
         )}
         <section
           aria-labelledby="odeme-baglantisi-urunler"
-          className="flex flex-col gap-5 rounded-tile bg-paper-2 p-4 sm:p-7"
+          className="flex flex-col gap-5 rounded-tile gf-pane p-4 sm:p-7"
         >
           <h2 id="odeme-baglantisi-urunler">{t("cart.summary")}</h2>
           <LinkLines lines={order.lines} t={t} />

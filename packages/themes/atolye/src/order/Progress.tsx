@@ -22,7 +22,7 @@ export function Progress({ steps, t }: { steps: readonly OrderStepView[]; t: Tra
   return (
     <section
       aria-labelledby="siparis-durumu"
-      className="flex flex-col gap-6 rounded-tile bg-paper-2 p-5 sm:p-7"
+      className="flex flex-col gap-6 rounded-tile gf-pane p-5 sm:p-7"
     >
       <h2 id="siparis-durumu" className="text-title">
         {t("order.progress")}
@@ -80,7 +80,7 @@ export function Progress({ steps, t }: { steps: readonly OrderStepView[]; t: Tra
           )
         })}
       </ol>
-      <p className="rounded-media bg-field p-4 text-md">
+      <p className="rounded-media gf-pane-inner p-4 text-md">
         {t(current ? NEXT[current.key] : "order.next_done")}
       </p>
     </section>

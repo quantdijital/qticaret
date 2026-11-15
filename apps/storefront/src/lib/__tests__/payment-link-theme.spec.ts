@@ -69,6 +69,14 @@ describe("the payment link page", () => {
     expect(html).toMatch(/<button[^>]*type="submit"[^>]*>Ödemeye geç/)
   })
 
+  it("draws the order as a box, its lines and totals inside it as inner boxes (adr/0067)", () => {
+    const html = linkPage({ order, notice: null, pay: null })
+    expect(html).toContain('class="flex flex-col gap-5 rounded-tile gf-pane p-4 sm:p-7"')
+    expect(html).toContain('class="flex items-start gap-4 rounded-media gf-pane-inner p-3"')
+    expect(html).toContain("rounded-media gf-pane-inner px-4 py-3")
+    expect(html).not.toMatch(/rounded-(tile|media) bg-(paper-2|field) p/)
+  })
+
   it("explains moved prices without a button", () => {
     const html = linkPage({ order, notice: t("payment_link.prices_changed"), pay: null })
     expect(html).toContain('role="alert"')

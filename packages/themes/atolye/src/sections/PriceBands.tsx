@@ -54,7 +54,7 @@ export function PriceBands({ section }: { section: Of<"price_bands"> }) {
                     {band.products.map((product) => (
                       <span
                         key={product.path}
-                        className="block size-16 shrink-0 overflow-hidden rounded-inner bg-paper-3"
+                        className="block size-16 shrink-0 overflow-hidden rounded-inner bg-media-deep"
                       >
                         {product.image && (
                           <ResponsiveImage

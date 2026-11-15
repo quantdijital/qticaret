@@ -59,7 +59,7 @@ export function OrderReturns({
   })
   const both = goods.length > 0 && gifts.length > 0
   return (
-    <details className="group rounded-tile bg-paper-2">
+    <details className="group rounded-tile gf-pane">
       <summary className="flex min-h-16 cursor-pointer items-center justify-between gap-3 px-5 text-title font-extrabold sm:px-7">
         {t(goods.length > 0 ? "order.return_title" : "order.return_gift_title")}
         <ChevronDown
