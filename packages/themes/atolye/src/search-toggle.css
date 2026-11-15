@@ -1,0 +1,59 @@
+/*
+ * The header's search as a magnifier (frame/SearchToggle, `search_style:
+ * icon`): from 1024 px a 44 px button holds the box's place; pressed, the
+ * box grows out of it (its width from the button's to `--gf-search-open`,
+ * 220 ms; at once under reduced motion, base.css) over the button, to the
+ * right at the row's start, to the left beside the tools. Closed, the box
+ * is hidden from the eye and the keyboard (visibility, after the slide).
+ * Nothing in the row moves: the box floats over the room it was given.
+ */
+@layer components {
+  .gf-search-toggle {
+    position: relative;
+    display: none;
+    flex: 1 1 0%;
+    min-width: 0;
+    align-items: center;
+  }
+  @media (width >= 64rem) {
+    .gf-search-toggle {
+      display: flex;
+    }
+  }
+  .gf-search-toggle[data-search-toggle="end"] {
+    justify-content: flex-end;
+  }
+  .gf-search-toggle__box {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    z-index: 2;
+    display: flex;
+    width: 100%;
+    max-width: 2.75rem;
+    align-items: center;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      max-width var(--dur-short) var(--ease-out),
+      opacity var(--dur-short) var(--ease-out),
+      visibility 0s linear var(--dur-short);
+  }
+  .gf-search-toggle__box > [role="search"] {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .gf-search-toggle[data-search-toggle="end"] .gf-search-toggle__box {
+    right: 0;
+    left: auto;
+  }
+  .gf-search-toggle[data-open] .gf-search-toggle__box {
+    max-width: var(--gf-search-open, 22rem);
+    opacity: 1;
+    visibility: visible;
+    transition:
+      max-width var(--dur-short) var(--ease-out),
+      opacity var(--dur-short) var(--ease-out),
+      visibility 0s;
+  }
+}

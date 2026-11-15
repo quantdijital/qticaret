@@ -7,6 +7,7 @@ import type {
   HeaderBarVariant,
   HeaderMenuGround,
   HeaderMenuImages,
+  HeaderSearchStyle,
   HeaderSearchWidth,
   HeaderToolsPlace,
   HeaderTopLinksPlace,
@@ -73,6 +74,11 @@ export interface StoreMainSections {
      * prints none: a reader takes `submenus` (`headerMenuImagesOf`).
      */
     menu_images?: HeaderMenuImages
+    /**
+     * How the search stands (`HEADER_SEARCH_STYLES`), every variant's; an
+     * older backend prints none: a reader takes `field` (`headerSearchStyleOf`).
+     */
+    search_style?: HeaderSearchStyle
     /** The `catalog` variant's own settings; absent on the others. */
     catalog?: StoreHeaderCatalog
   }

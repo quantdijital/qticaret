@@ -53,6 +53,7 @@ const catalogHeader = () =>
       variant: "standard",
       sticky: true,
       menu_images: "submenus",
+      search_style: "field",
     },
     "catalog"
   ) as HeaderBarSection

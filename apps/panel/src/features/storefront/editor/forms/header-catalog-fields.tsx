@@ -169,7 +169,8 @@ function CatalogField({
  * 2026-11-15): what it shows and its menu bar's ground open with the
  * header's content, the rest closed in "Diğer ayarlar" (`SectionPanel`).
  * `afterCategories`, a setting of every variant's that belongs beside the
- * "Kategoriler" button (the menus' pictures), stands right under it.
+ * "Kategoriler" button (the menus' pictures), stands right under it;
+ * `beforeSearch` (the search's look) over the search box's own words.
  */
 export function HeaderCatalogFields({
   section,
@@ -177,12 +178,14 @@ export function HeaderCatalogFields({
   problems,
   onChange,
   afterCategories,
+  beforeSearch,
 }: {
   section: HeaderCatalogSection
   group: FieldGroupName
   problems: SectionProblems
   onChange: Change
   afterCategories?: ReactNode
+  beforeSearch?: ReactNode
 }) {
   return (
     <div className="flex flex-col gap-5">
@@ -190,6 +193,7 @@ export function HeaderCatalogFields({
         .filter((field) => headerCatalogOffers(section, field))
         .map((field) => (
           <Fragment key={field}>
+            {field === "search_placeholder" && beforeSearch}
             <CatalogField section={section} field={field} problems={problems} onChange={onChange} />
             {field === "categories_button" && afterCategories}
           </Fragment>

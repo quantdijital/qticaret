@@ -70,6 +70,10 @@
       "file": "scroller.css"
     },
     {
+      "sha256": "c6b11413dd5282f5b9b8a85c0d1a4300b1a5f70f766cf0e1c297d3144fe63b54",
+      "file": "search-toggle.css"
+    },
+    {
       "sha256": "c5b8abb98e34e8679c59eed0088d136c120617ceaff68d90548b46ce4638313a",
       "file": "shadow.css"
     },
@@ -82,7 +86,7 @@
       "file": "spotlight.css"
     },
     {
-      "sha256": "2cbeb356c32cf4498a2a97eff01013ae8f51e83a5bc8b6256f1ef493ff13dd9d",
+      "sha256": "b469983db64221d5fefdbd5fba33b68b5e5cdb2e186ea5c2f14e7310eae5d807",
       "file": "styles.css"
     },
     {

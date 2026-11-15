@@ -57,6 +57,15 @@ export const HEADER_MENU_IMAGES = ["all", "submenus", "off"] as const
 type MenuImages = (typeof HEADER_MENU_IMAGES)[number]
 
 /**
+ * How the header's search stands (adr/0049 Ek 2026-11-15): mirrors
+ * `@qticaret/types`' `HEADER_SEARCH_STYLES` (a unit test keeps them
+ * equal); `field`, the box drawn open as before, is the default.
+ */
+export const HEADER_SEARCH_STYLES = ["field", "icon"] as const
+
+type SearchStyle = (typeof HEADER_SEARCH_STYLES)[number]
+
+/**
  * The catalog header's layout choices (adr/0049 Ek 2026-11-15): mirror
  * `@qticaret/types`' `HEADER_TOOLS_PLACES`, `HEADER_TOP_LINKS_PLACES` and
  * `HEADER_SEARCH_WIDTHS` (a unit test keeps them equal); each list's first
@@ -69,6 +78,7 @@ export const HEADER_SEARCH_WIDTHS = ["wide", "narrow"] as const
 /** A header bar's named steps, each with its list: a stored bar keeps one only while listed. */
 const HEADER_STEPS: Readonly<Record<string, readonly unknown[]>> = {
   menu_images: HEADER_MENU_IMAGES,
+  search_style: HEADER_SEARCH_STYLES,
   tools_place: HEADER_TOOLS_PLACES,
   top_links: HEADER_TOP_LINKS_PLACES,
   search_width: HEADER_SEARCH_WIDTHS,
@@ -113,6 +123,18 @@ const headerCommon = {
       MAIN_ERROR
     )
     .default("submenus"),
+  /**
+   * How the search stands, whatever the variant: `field` (the box drawn
+   * open, as before it: the default) or `icon` (a magnifier that opens it;
+   * on a phone the bottom bar's "Ara" drops it down). A step off the list
+   * is a stale or forged editor; on reading a stored design it is dropped.
+   */
+  search_style: z
+    .custom<SearchStyle>(
+      (value) => (HEADER_SEARCH_STYLES as readonly unknown[]).includes(value),
+      MAIN_ERROR
+    )
+    .default("field"),
 }
 
 /** Today's header: the wordmark on the left, search, account and cart. */

@@ -8864,6 +8864,13 @@
           "submenus": "Alt menülerde",
           "off": "Yok"
         },
+        "search_style": {
+          "label": "Arama görünümü",
+          "term": "search",
+          "hint": "Simge: geniş ekranda büyüteç, basınca arama kutusu açılır; telefonda üst bilgide kutu durmaz, alt menüdeki “Ara” kutuyu yukarıdan açar.",
+          "field": "Kutu",
+          "icon": "Simge, basınca açılır"
+        },
         "menu_ground": {
           "label": "Menü çubuğu zemini",
           "term": "background",
@@ -8875,7 +8882,7 @@
         "search_width": {
           "label": "Arama kutusunun genişliği",
           "term": "search width",
-          "hint": "Dar: logonun hemen yanında kısa bir kutu; kalan yer telefon numarasına ve simgelere kalır.",
+          "hint": "Dar: logonun hemen yanında kısa bir kutu; kalan yer telefon numarasına ve simgelere kalır. Arama simgeyse açılan kutu bu genişlikte olur.",
           "wide": "Geniş",
           "narrow": "Dar"
         },
@@ -8893,7 +8900,7 @@
           "bar": "Menü çubuğunda",
           "row": "Logo satırında"
         },
-        "phoneNote": "Telefonda üst bilgi değişmez: menü, logo, favori ve sepet; altında arama.",
+        "phoneNote": "Telefonda üst bilgi değişmez: menü, logo, favori ve sepet; altında arama (arama görünümü simgeyse kutu durmaz, alt menüdeki “Ara” açar).",
         "otherHint": "Arama düğmesi, Hesabım yazısı ve sepet tutarı."
       },
       "categoryCards": {

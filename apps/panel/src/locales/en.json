@@ -8864,6 +8864,13 @@
           "submenus": "In submenus",
           "off": "None"
         },
+        "search_style": {
+          "label": "Search look",
+          "term": "search",
+          "hint": "Icon: a magnifier on wide screens that opens the search box; on a phone the header shows no box and the bottom bar's “Ara” drops it down from the top.",
+          "field": "Box",
+          "icon": "Icon, opens on press"
+        },
         "menu_ground": {
           "label": "Menu bar background",
           "term": "background",
@@ -8875,7 +8882,7 @@
         "search_width": {
           "label": "Search box width",
           "term": "search width",
-          "hint": "Narrow: a short box right after the logo; the rest of the row is left to the phone number and the icons.",
+          "hint": "Narrow: a short box right after the logo; the rest of the row is left to the phone number and the icons. With the search as an icon, the box opens this wide.",
           "wide": "Wide",
           "narrow": "Narrow"
         },
@@ -8893,7 +8900,7 @@
           "bar": "On the menu bar",
           "row": "In the logo row"
         },
-        "phoneNote": "On phones the header stays as it is: menu, logo, favourites and cart, with the search below.",
+        "phoneNote": "On phones the header stays as it is: menu, logo, favourites and cart, with the search below (with the search as an icon there is no box; the bottom bar’s “Ara” opens it).",
         "otherHint": "The search button, the My account text and the cart total."
       },
       "categoryCards": {
