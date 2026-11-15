@@ -1,0 +1,43 @@
+/*
+ * The chip family's grounds (adr/0067 S3, theme setting `chip_style`):
+ * the choosable pills the shop's chips, tabs, option buttons and page
+ * numbers share. Today's drawing (`filled`) is a tinted pill a step darker
+ * than the page, one more step under the pointer, and the chosen one
+ * filled: the accent's mark for a chip, a tab and an option (adr/0062
+ * §11), graphite for the current page (a place, not a choice).
+ *
+ * The family's members: `.gf-chip` (`ui.css`, its search panel variant
+ * `.gf-option-chip`), `.gf-tab` (`tabs.css`, the shelf's tabs), and here
+ * the radio pills of a product's options and its installment programs
+ * (`.gf-pill`), a listing's page numbers (`.gf-page-link`) and a
+ * product's highlighted facts (`.gf-fact`, a pill to read, not to press).
+ * Their shape, size and type stay in the markup; only the grounds live
+ * here, so a step of the setting is written once for all of them.
+ */
+@layer components {
+  .gf-pill {
+    background-color: var(--color-paper-2);
+  }
+  .gf-pill:has(:checked) {
+    background-color: var(--color-mark);
+    color: var(--color-mark-ink);
+  }
+  .gf-page-link {
+    background-color: var(--color-paper-2);
+  }
+  .gf-page-link[aria-current="page"] {
+    background-color: var(--color-text);
+    color: var(--color-paper);
+  }
+  .gf-fact {
+    background-color: var(--color-paper-2);
+  }
+}
+
+/* Unlayered like `ui.css`'s hover rules: a step darker under the pointer, the chosen one stays */
+@media (hover: hover) {
+  .gf-pill:hover:not(:has(:checked)),
+  .gf-page-link:hover:not([aria-current="page"]) {
+    background-color: var(--color-paper-3);
+  }
+}

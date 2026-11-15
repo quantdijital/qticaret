@@ -1,6 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import type { PaginationView, Translate } from "@qticaret/ui"
-import { cn } from "@qticaret/ui/lib/utils"
 
 /** The page numbers shown: the first, the last, and one on each side of the current one. */
 export function visiblePages(page: number, pages: number): (number | "gap")[] {
@@ -55,10 +54,7 @@ export function Pager({ pagination, t }: { pagination: PaginationView; t: Transl
                 href={pagination.pagePath[each] ?? "#"}
                 aria-current={each === pagination.page ? "page" : undefined}
                 aria-label={t("listing.page_n", { page: each })}
-                className={cn(
-                  "tabular inline-flex size-11 items-center justify-center rounded-button text-sm font-semibold no-underline transition-colors duration-(--dur-micro)",
-                  each === pagination.page ? "bg-text text-paper" : "bg-paper-2 hover:bg-paper-3"
-                )}
+                className="gf-page-link tabular inline-flex size-11 items-center justify-center rounded-button text-sm font-semibold no-underline transition-colors duration-(--dur-micro)"
               >
                 {each}
               </a>
