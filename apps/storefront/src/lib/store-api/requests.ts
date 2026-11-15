@@ -16,9 +16,11 @@ import type {
   StoreMenu,
   StorefrontAnswer,
 } from "@qticaret/types"
+import { currentWholesale } from "../account/wholesale"
 import { isStoreApiError } from "./errors"
 import { keepResolution, keptResolution } from "./resolutions"
 import { storeGet, storePublicGet } from "./server"
+import { wholesaleDisplays } from "./wholesale-prices"
 
 /**
  * The Store API calls pages make (adr/0046), each one deduplicated within
@@ -255,11 +257,19 @@ export const allCategories = cache(async () => {
   return product_categories
 })
 
-/** The 30-day rule's prices by variant (F4.3), a hundred at a time. */
+/**
+ * The 30-day rule's prices by variant (F4.3), a hundred at a time: the one
+ * way every page, card, quick view and suggestion is priced. A signed-in
+ * wholesaler's are their own instead (ADR-0068 §7, without KDV), from the
+ * personal route; everyone else's the public display.
+ */
 export async function priceDisplays(
   variantIds: readonly string[]
 ): Promise<Record<string, PriceDisplay>> {
   const unique = [...new Set(variantIds)]
+  if (unique.length > 0 && (await currentWholesale()).active) {
+    return wholesaleDisplays(unique)
+  }
   const found: Record<string, PriceDisplay> = {}
   for (let start = 0; start < unique.length; start += 100) {
     const { price_display } = await storeGet<{ price_display: Record<string, PriceDisplay> }>(

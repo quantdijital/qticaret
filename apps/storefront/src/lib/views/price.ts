@@ -1,6 +1,7 @@
 import { formatLira } from "@qticaret/ui"
 import type { PriceView, Translate } from "@qticaret/ui"
 import type { PriceDisplay, StoreCartOffer, StoreVariant } from "@qticaret/types"
+import { t as words } from "../i18n"
 
 /** Whether a variant can be put in the cart now (stock, or no stock kept, or backorders). */
 export const isAvailable = (variant: StoreVariant): boolean =>
@@ -35,6 +36,29 @@ export function shownAmount(
   }
   const amount = variant.calculated_price?.calculated_amount
   return typeof amount === "number" ? amount : null
+}
+
+/** Whether a variant's display is a signed-in wholesaler's own, without KDV (ADR-0068 §7). */
+export const isVatExclusive = (
+  variant: Pick<StoreVariant, "id">,
+  displays: Readonly<Record<string, PriceDisplay>>
+): boolean => displays[variant.id]?.vat_exclusive === true
+
+/**
+ * What the shopper pays for a variant, KDV included: the shown amount,
+ * or a wholesaler's KDV-included one (their shown price is without it).
+ * For what follows the money paid: installments, free shipping, events.
+ */
+export function paidAmount(
+  variant: StoreVariant,
+  displays: Readonly<Record<string, PriceDisplay>>
+): number | null {
+  const display = displays[variant.id]
+  const gross = Number(display?.gross)
+  if (display?.vat_exclusive === true && display.gross !== undefined && Number.isFinite(gross)) {
+    return gross
+  }
+  return shownAmount(variant, displays)
 }
 
 /** A cart offer in words: "Sepette %10 indirim", "2.000,00 TL ve üzeri sepette %10 indirim". */
@@ -81,6 +105,8 @@ export function variantPrice(
     discount,
     saving: before && discount !== null ? formatLira(Number(before) - amount) : null,
     ...(cartOffer ? { cartOffer } : {}),
+    // A wholesaler's one price, without KDV (ADR-0068 §6–§7); never on anyone else's
+    ...(display?.vat_exclusive === true ? { taxNote: words("price.wholesale_note") } : {}),
   }
 }
 

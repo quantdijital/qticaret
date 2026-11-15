@@ -3,7 +3,7 @@ import type { InstallmentSummaryView } from "@qticaret/ui"
 import type { PriceDisplay, StoreProduct } from "@qticaret/types"
 import { installmentSummary } from "../views/installments"
 import type { InstallmentTable } from "../views/installments"
-import { isAvailable, shownAmount } from "../views/price"
+import { isAvailable, isVatExclusive, shownAmount } from "../views/price"
 import { isStoreApiError } from "./errors"
 import { liraRegion } from "./requests"
 import { storePublicGet } from "./server"
@@ -52,6 +52,10 @@ export async function installmentSummaries(
 ): Promise<Record<string, InstallmentSummaryView>> {
   const byPrice = new Map<number, string[]>()
   for (const variant of product.variants ?? []) {
+    // The shop-wide table is the retail price's: none under a wholesaler's own (ADR-0068 §7)
+    if (isVatExclusive(variant, displays)) {
+      continue
+    }
     const amount = shownAmount(variant, displays)
     if (amount !== null && amount > 0 && isAvailable(variant)) {
       byPrice.set(amount, [...(byPrice.get(amount) ?? []), variant.id])

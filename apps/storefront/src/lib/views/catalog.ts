@@ -22,7 +22,7 @@ import { productImages } from "./image"
 import { currentMenus, layoutImage, layoutLink, layoutLinks } from "./layout"
 import { heroCatalogSlides } from "./hero-slides"
 import { hrefOf } from "./listing"
-import { shownAmount } from "./price"
+import { isVatExclusive, shownAmount } from "./price"
 import { variantIdsOf } from "./product"
 import { namedCategories, productsInOrder } from "./section-data"
 
@@ -100,7 +100,8 @@ async function thumbs(
       image: image ? { ...image, alt: "" } : null,
     })
     for (const variant of product.variants ?? []) {
-      const amount = shownAmount(variant, displays)
+      // A bare "from" amount carries no note: never a wholesaler's price without KDV (ADR-0068)
+      const amount = isVatExclusive(variant, displays) ? null : shownAmount(variant, displays)
       if (amount !== null) {
         amounts.push(amount)
       }

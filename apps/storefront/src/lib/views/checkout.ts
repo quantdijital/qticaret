@@ -16,6 +16,7 @@ import {
   provinceOptions,
   selectsOf,
 } from "@/lib/checkout/address"
+import { RETAIL, currentWholesale } from "@/lib/account/wholesale"
 import { codesOf } from "@/lib/cart/cart"
 import { isPaymentLinkCart } from "@/lib/cart/payment-link"
 import { addressComplete } from "@/lib/checkout/cart"
@@ -218,7 +219,7 @@ export async function checkoutView(
   const selects = known ? await selectsOf(known) : { province: "", district: "", neighborhood: "" }
   const complete = addressComplete(cart)
   const chosen = cart.shipping_methods[0] ?? null
-  const [provinces, districts, neighborhoods, options, payment, paths, pictures] =
+  const [provinces, districts, neighborhoods, options, payment, paths, pictures, wholesale] =
     await Promise.all([
       provinceOptions(),
       selects.province ? districtOptions(selects.province) : [],
@@ -229,6 +230,8 @@ export async function checkoutView(
         : { paymentMethods: [], contracts: {}, ageLimit: null },
       productPathsOf(cart.items),
       linePicturesOf(cart.items),
+      // A wholesaler's basket is without KDV, the KDV a line of its own (ADR-0068 §5)
+      customer ? currentWholesale() : RETAIL,
     ])
   return {
     step,
@@ -266,7 +269,7 @@ export async function checkoutView(
       : null,
     ...payment,
     marketingVersion: MARKETING_TEXT_VERSION,
-    summary: summaryOf(cart, t, paths, pictures),
+    summary: summaryOf(cart, t, paths, pictures, wholesale.active && wholesale.vatExclusive),
     // A payment link's cart keeps the code it was made with (adr/0051): no field
     promotions: isPaymentLinkCart(cart.metadata) ? null : codesOf(cart),
     error,

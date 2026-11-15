@@ -12,7 +12,7 @@ import type { CardQuickViewTrigger, PriceDisplay, SeoPayload, StoreProduct } fro
 import { framedCard, type FramedCardOptions } from "./card-framed"
 import { cardShown } from "./card-shown"
 import { productImages, variantImages } from "./image"
-import { cardPrice, isAvailable, shownAmount, variantPrice } from "./price"
+import { cardPrice, isAvailable, isVatExclusive, shownAmount, variantPrice } from "./price"
 import { specGroupsOf, specsOf } from "./specs"
 import { paragraphsOf, pathOf } from "./text"
 
@@ -181,7 +181,8 @@ export function productPage({
       })
     ),
     price: variantPrice(variant, displays, t),
-    kurus: kurusOf(shownAmount(variant, displays)),
+    // The add-ons are priced with KDV: no running total beside a wholesaler's price without it
+    kurus: isVatExclusive(variant, displays) ? null : kurusOf(shownAmount(variant, displays)),
     available: isAvailable(variant),
     sku: variant.sku,
     installments: installments[variant.id] ?? null,

@@ -57,7 +57,9 @@ function stockView(
  * address, its count what the list would hold; a filter with one value and
  * nothing chosen narrows nothing and is left out, as is the brand filter
  * on a brand's own page. The in-stock toggle is one more such link. What
- * is chosen shows again as links that take it away.
+ * is chosen shows again as links that take it away. `priceRange` false (a
+ * wholesaler's, ADR-0068 §7: the index holds retail prices): no price
+ * range form; a range already chosen still shows, to be taken away.
  */
 export function filterViews(
   pathname: string,
@@ -65,7 +67,8 @@ export function filterViews(
   facets: ListingAnswer["facets"],
   isBrandPage: boolean,
   t: Translate,
-  swatchOf: (value: string) => string | null = () => null
+  swatchOf: (value: string) => string | null = () => null,
+  priceRange = true
 ): FilterViews {
   const groups = [
     ...(isBrandPage ? [] : [{ key: BRAND, label: t("listing.brand"), values: facets.brands }]),
@@ -109,7 +112,7 @@ export function filterViews(
 
   // The price form keeps the rest of the query as hidden fields
   const keep = new URLSearchParams(searchOf({ ...state, price: null, page: 1 }))
-  const range = facets.price
+  const range = priceRange ? facets.price : null
   const price: PriceFilterView | null =
     range && (range.max > range.min || state.price)
       ? {

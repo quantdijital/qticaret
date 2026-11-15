@@ -29,6 +29,8 @@ export interface CheckoutCartLine {
   thumbnail: string | null
   quantity: number
   total: number
+  /** The KDV in `total` (Medusa's): a wholesaler's line is shown without it (ADR-0068 §5). */
+  tax_total?: number | null
   /** The server's records on the line: its add-on picks (`qt_addons`, adr/0052). */
   metadata?: Record<string, unknown> | null
 }
@@ -42,6 +44,9 @@ export interface CheckoutCart {
   items: CheckoutCartLine[]
   original_item_total: number
   item_total: number
+  /** Items before discounts without KDV, and the KDV on them after (Medusa's; ADR-0068 §5). */
+  item_subtotal?: number | null
+  item_tax_total?: number | null
   shipping_total: number
   /** What gift cards and store credit take off (F4.8); `total` is after it. */
   credit_line_total?: number | null
@@ -85,9 +90,12 @@ const FIELDS = [
   "items.thumbnail",
   "items.quantity",
   "items.total",
+  "items.tax_total",
   "items.metadata",
   "original_item_total",
   "item_total",
+  "item_subtotal",
+  "item_tax_total",
   "shipping_total",
   "credit_line_total",
   "total",
