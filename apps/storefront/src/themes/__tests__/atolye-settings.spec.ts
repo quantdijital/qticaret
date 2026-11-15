@@ -261,6 +261,18 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     expect(themeSettings({ section_spacing: "compact" }, null).section_spacing).toBe("compact")
   })
 
+  it("keeps a sale apart from a red main colour: a graphite badge, an ink price (K-05)", () => {
+    const deal = ["--color-deal:var(--color-text)", "--color-deal-ink:var(--color-paper)"]
+    // Tezgâh's red, and reds around it
+    for (const primary of ["#b3261e", "#be2323", "#d32f2f", "#a4161a"]) {
+      expect(atolyeDeclarations(colours({ primary })), primary).toEqual(deal)
+    }
+    // Orange, wine, navy, the theme's own ink and a brown keep the theme's sale red
+    for (const primary of ["#c2410c", "#7a1a48", "#2f6690", null, "#6b4a3a"]) {
+      expect(atolyeDeclarations(colours({ primary })), String(primary)).toEqual([])
+    }
+  })
+
   it("leaves a malformed accent or an unknown tone out of CSS", () => {
     expect(
       entry.style(themeSettings({ colors: { accent: "#fff}", background: "pink" } }, null))

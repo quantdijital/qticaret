@@ -147,3 +147,20 @@
     display: block;
   }
 }
+
+/* Outside the layers, as the quiet button's own hover (`ui.css`) it takes over */
+/* The card's one action at rest is quiet, so a row of cards is not a row of
+   filled buttons; the card pointed at, or its button in focus, shows it in
+   the action's colour (Tezgâh audit K-27: "kartın Sepete ekle'si eylem rengi") */
+.gf-card-framed .gf-card-btn:focus-visible {
+  border-color: var(--color-signal);
+  background: var(--color-signal);
+  color: var(--color-signal-ink);
+}
+@media (hover: hover) {
+  .gf-card-framed:hover .gf-card-btn:not(:disabled):not([aria-disabled="true"]) {
+    border-color: var(--color-signal);
+    background: var(--color-signal);
+    color: var(--color-signal-ink);
+  }
+}

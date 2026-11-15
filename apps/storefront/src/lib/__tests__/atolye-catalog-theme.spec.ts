@@ -128,6 +128,9 @@ describe("the price bands", () => {
     expect(html).toContain("Anahtarlık çakılar")
     expect(html).toContain('alt=""')
     expect(html).toContain("lg:grid-cols-2")
+    // The band's big figure in the page's ink: the shop's colour stays on actions (K-05)
+    expect(html).not.toMatch(/text-display[^"]*text-signal/)
+    expect(html).toMatch(/text-display[^"]*text-text/)
   })
 })
 
