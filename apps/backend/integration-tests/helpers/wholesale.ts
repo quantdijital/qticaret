@@ -73,36 +73,87 @@ export async function joinGroup(container: MedusaContainer, groupId: string, cus
   })
 }
 
-/**
- * A wholesaler's own list as slice 1b will open it (ADR-0068 §3 step 4):
- * a one-member hidden group, an `override` list for it and the account
- * that owns both. Its rows are written through the module.
- */
-export async function privateList(container: MedusaContainer, customerId: string) {
-  const { result: groups } = await createCustomerGroupsWorkflow(container).run({
-    input: {
-      customersData: [{ name: `Toptancı ${customerId}`, metadata: { managed_by: "wholesale" } }],
+export interface AccountAnswer {
+  id: string
+  status: "pending" | "active" | "inactive"
+  email: string | null
+  company_name: string | null
+  contact_name: string | null
+  customer: { id: string; email: string | null } | null
+  tier: { id: string; name: string } | null
+  own_prices: boolean
+  percent: number | null
+  min_quantity: number | null
+  invitation_expires_at: string | null
+}
+
+/** Staff calls on wholesalers (ADR-0068 slice 1b), as the given staff member. */
+export function accountApi(http: HttpClient, headers: Record<string, string>) {
+  const { post, get, del } = wholesaleApi(http, headers)
+  return {
+    create: (body: Record<string, unknown>) =>
+      post<{ account: AccountAnswer; message: string; billing_profile: string }>(
+        "/admin/wholesale/accounts",
+        body
+      ),
+    /** A new wholesaler that must be made; its answer. */
+    made: async (body: Record<string, unknown>) => {
+      const made = await post<{ account: AccountAnswer }>("/admin/wholesale/accounts", body)
+      if (made.status !== 201) {
+        throw new Error(`account not made: ${String(made.status)} ${JSON.stringify(made.data)}`)
+      }
+      return made.data.account
     },
+    get: (id: string) => get<{ account: AccountAnswer }>(`/admin/wholesale/accounts/${id}`),
+    list: (query = "") =>
+      get<{ accounts: AccountAnswer[]; count: number }>(
+        `/admin/wholesale/accounts${query ? `?${query}` : ""}`
+      ),
+    update: (id: string, body: Record<string, unknown>) =>
+      post<{ account: AccountAnswer }>(`/admin/wholesale/accounts/${id}`, body),
+    action: (id: string, action: "deactivate" | "reactivate" | "invitation") =>
+      post<{ account: AccountAnswer; message?: string }>(
+        `/admin/wholesale/accounts/${id}/${action}`,
+        {}
+      ),
+    remove: (id: string) => del(`/admin/wholesale/accounts/${id}`),
+    prices: (id: string, body: unknown) =>
+      post<Record<string, unknown>>(`/admin/wholesale/accounts/${id}/prices`, body),
+    lines: (id: string, query = "") =>
+      get<{ lines: LineAnswer[]; count: number }>(
+        `/admin/wholesale/accounts/${id}/lines${query ? `?${query}` : ""}`
+      ),
+  }
+}
+
+/** The Medusa group and list a wholesaler's own prices live in (the API gives its id only). */
+export async function accountRecords(container: MedusaContainer, accountId: string) {
+  const [account] = await container
+    .resolve<WholesaleModuleService>(WHOLESALE_MODULE)
+    .listWholesaleAccounts({ id: accountId }, { take: 1, withDeleted: true })
+  return {
+    groupId: account?.private_group_id ?? null,
+    priceListId: account?.private_price_list_id ?? null,
+    customerId: account?.customer_id ?? null,
+    deleted: account?.deleted_at !== null && account?.deleted_at !== undefined,
+    email: account?.email ?? null,
+  }
+}
+
+/** The ids of the groups a customer is in, as Medusa's customer module keeps them. */
+export async function groupsOf(container: MedusaContainer, customerId: string) {
+  const [customer] = await container
+    .resolve(Modules.CUSTOMER)
+    .listCustomers({ id: customerId }, { relations: ["groups"], take: 1 })
+  return (customer?.groups ?? []).map((group) => group.id).sort()
+}
+
+/** A customer group of the shop's own (a segment's stand-in), the customer in it. */
+export async function ownGroup(container: MedusaContainer, name: string, customerId: string) {
+  const { result: groups } = await createCustomerGroupsWorkflow(container).run({
+    input: { customersData: [{ name }] },
   })
   const groupId = groups[0]?.id ?? ""
-  const lists = await container.resolve(Modules.PRICING).createPriceLists([
-    {
-      title: `Toptancı ${customerId}`,
-      description: "",
-      type: "override",
-      status: "active",
-      rules: { "customer.groups.id": [groupId] },
-    },
-  ])
-  const priceListId = lists[0]?.id ?? ""
-  const account = await container
-    .resolve<WholesaleModuleService>(WHOLESALE_MODULE)
-    .createWholesaleAccounts({
-      customer_id: customerId,
-      status: "active",
-      private_group_id: groupId,
-      private_price_list_id: priceListId,
-    })
   await joinGroup(container, groupId, customerId)
-  return { accountId: account.id, groupId, priceListId }
+  return groupId
 }

@@ -54,6 +54,34 @@ moduleIntegrationTestRunner<WholesaleModuleService>({
       ).rejects.toThrow()
     })
 
+    it("keeps one account per invited address and per customer (slice 1b)", async () => {
+      await service.createWholesaleAccounts({ email: "davet@example.com", status: "pending" })
+      await expect(
+        service.createWholesaleAccounts({ email: "davet@example.com", status: "pending" })
+      ).rejects.toThrow()
+      await service.createWholesaleAccounts({ customer_id: "cus_2", status: "active" })
+      await expect(
+        service.createWholesaleAccounts({ customer_id: "cus_2", status: "inactive" })
+      ).rejects.toThrow()
+    })
+
+    it("frees an address and keeps a taken-back account's ids for its list's events", async () => {
+      const account = await service.createWholesaleAccounts({
+        email: "geri@example.com",
+        private_group_id: "cusgroup_back",
+        private_price_list_id: "plist_back",
+      })
+      await service.updateWholesaleAccounts({ id: account.id, email: null })
+      await service.softDeleteWholesaleAccounts([account.id])
+      // The address may be invited again
+      await service.createWholesaleAccounts({ email: "geri@example.com" })
+      const owned = await service.ownedIds()
+      expect(owned.priceListIds.has("plist_back")).toBe(false)
+      const withDeleted = await service.ownedIds({ withDeleted: true })
+      expect(withDeleted.priceListIds.has("plist_back")).toBe(true)
+      expect(withDeleted.groupIds.has("cusgroup_back")).toBe(true)
+    })
+
     it("knows a list asked to be written again until a pass that started after it", async () => {
       const created = await tier("c", 1000)
       const list = { kind: "level" as const, owner_id: created.id }
