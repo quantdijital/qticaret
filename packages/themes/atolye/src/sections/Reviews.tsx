@@ -60,7 +60,7 @@ export function Summary({
   filter?: ReviewFilterView | null
 }) {
   return (
-    <div className="flex flex-col gap-5 rounded-tile border border-rule p-6 lg:p-8">
+    <div className="flex flex-1 flex-col gap-5 rounded-tile border border-rule p-6 lg:p-8">
       <p className="flex items-end gap-3">
         <span className="tabular text-figure leading-none font-extrabold tracking-(--tracking-display)">
           {summary.average}
@@ -136,7 +136,7 @@ export function Reviews({ section, t }: { section: Of<"reviews">; t: Translate }
         <SectionHead id={id} title={section.title} more={section.more} />
         <div className="grid gap-(--gap-columns) lg:grid-cols-12">
           {summary && (
-            <div className="lg:col-span-4">
+            <div className="flex lg:col-span-4">
               <Summary summary={summary} t={t} />
             </div>
           )}
