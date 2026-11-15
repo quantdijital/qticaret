@@ -32,7 +32,7 @@ export function GiftCardBalancePage({
           <h1>{view.title}</h1>
           <p className="max-w-[56ch] text-md text-text-2 lg:text-lead">{view.text}</p>
         </header>
-        <div className="rounded-tile bg-paper-2 p-5 sm:p-8">
+        <div className="rounded-tile gf-pane p-5 sm:p-8">
           <GiftBalanceForm
             action={actions.checkBalance}
             words={{

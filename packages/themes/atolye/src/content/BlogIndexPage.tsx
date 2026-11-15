@@ -112,7 +112,7 @@ export function BlogIndexPage({ view, t }: { view: BlogIndexPageView; t: Transla
       )}
       {terms.length > 0 && <Terms terms={terms} t={t} />}
       {view.posts.length === 0 ? (
-        <p className="rounded-tile bg-paper-2 px-6 py-12 text-center text-text-2">
+        <p className="rounded-tile gf-pane px-6 py-12 text-center text-text-2">
           {t(author ? "blog.author_empty" : archive ? "blog.archive_empty" : "blog.empty")}
         </p>
       ) : (

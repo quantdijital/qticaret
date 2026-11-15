@@ -6,7 +6,7 @@ import { BankTransfer, CashOnDelivery, OrderLines, Parcels } from "./OrderParts"
 import { OrderReturns } from "./OrderReturns"
 import { Progress } from "./Progress"
 
-const WELL = "flex flex-col gap-4 rounded-tile bg-paper-2 p-5 sm:p-7"
+const WELL = "flex flex-col gap-4 rounded-tile gf-pane p-5 sm:p-7"
 
 /** Return requests already made, each with its status and what was refused at receipt. */
 function Requests({ view, t }: { view: OrderPageView; t: Translate }) {
@@ -20,7 +20,7 @@ function Requests({ view, t }: { view: OrderPageView; t: Translate }) {
       </h2>
       <ul className="flex flex-col gap-3 text-sm">
         {view.returns.map((request, index) => (
-          <li key={String(index)} className="flex flex-col gap-0.5 rounded-media bg-field p-4">
+          <li key={String(index)} className="flex flex-col gap-0.5 rounded-media gf-pane-inner p-4">
             <span className="font-semibold">
               {request.kind}, {request.status}
             </span>
@@ -61,7 +61,7 @@ function Cancel({
     )
   }
   return view.cancelNote ? (
-    <p className="rounded-tile bg-paper-2 p-5 text-md sm:p-7">{view.cancelNote}</p>
+    <p className="rounded-tile gf-pane p-5 text-md sm:p-7">{view.cancelNote}</p>
   ) : null
 }
 
@@ -87,7 +87,7 @@ export function OrderPage({
     <Container className="flex flex-col gap-3 pt-6 lg:gap-6 lg:pt-10">
       <OrderHero view={view} t={t} />
       {view.notice && (
-        <p role="status" className="rounded-media bg-paper-2 p-4 text-md font-semibold">
+        <p role="status" className="rounded-media gf-pane p-4 text-md font-semibold">
           {view.notice}
         </p>
       )}

@@ -24,7 +24,7 @@ export function AddonEditor({
   t: Translate
 }) {
   return (
-    <div className="flex flex-col gap-2 rounded-media bg-field p-3 text-sm sm:p-4">
+    <div className="flex flex-col gap-2 rounded-media gf-pane-inner p-3 text-sm sm:p-4">
       {form.missingRequired && (
         <p className="flex items-start gap-1.5 font-semibold text-error">
           <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2} />

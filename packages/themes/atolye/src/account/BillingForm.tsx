@@ -47,7 +47,7 @@ export function BillingForm({
   return (
     <form {...form} className="flex flex-col gap-5">
       {billing?.taxIdMasked && (
-        <p className="flex items-start gap-3 rounded-media bg-field p-4 text-sm">
+        <p className="flex items-start gap-3 rounded-media gf-pane-inner p-4 text-sm">
           <ReceiptText
             className="mt-0.5 size-5 shrink-0 text-text-2"
             aria-hidden="true"

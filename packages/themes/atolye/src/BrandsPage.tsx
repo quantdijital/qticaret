@@ -8,7 +8,7 @@ function BrandTile({ brand }: { brand: BrandLinkView }) {
   return (
     <a
       href={brand.path}
-      className="flex min-h-16 min-w-0 items-center gap-3 rounded-media bg-paper-2 p-3 transition-colors duration-(--dur-micro) hover:bg-paper-3"
+      className="flex min-h-16 min-w-0 items-center gap-3 rounded-media gf-pane p-3 transition-colors duration-(--dur-micro) hover:bg-paper-3"
     >
       {brand.logo && (
         <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-inner bg-field">
@@ -35,7 +35,7 @@ export function BrandsPage({ view, t }: { view: BrandsPageView; t: Translate }) 
       <Trail items={view.breadcrumbs} label={t("nav.breadcrumbs")} />
       <h1 className="mt-4 lg:mt-6">{view.title}</h1>
       {view.groups.length === 0 ? (
-        <p className="mt-8 rounded-tile bg-paper-2 px-6 py-12 text-center text-text-2">
+        <p className="mt-8 rounded-tile gf-pane px-6 py-12 text-center text-text-2">
           {t("brands.empty")}
         </p>
       ) : (

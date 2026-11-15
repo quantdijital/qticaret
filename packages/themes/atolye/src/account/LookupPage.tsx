@@ -35,14 +35,14 @@ export function LookupPage({
       <div className="grid items-start gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-6">
         <section
           aria-labelledby="siparis-bul"
-          className="flex flex-col gap-6 rounded-tile bg-paper-2 p-5 sm:p-8 lg:p-10"
+          className="flex flex-col gap-6 rounded-tile gf-pane p-5 sm:p-8 lg:p-10"
         >
           <h1 id="siparis-bul">{t("account.lookup_title")}</h1>
           <p className="max-w-[56ch] text-lg text-text-2">{t("account.lookup_text")}</p>
           {view.notice && (
             <p
               role="status"
-              className="flex items-start gap-3 rounded-media bg-field p-4 text-md font-semibold"
+              className="flex items-start gap-3 rounded-media gf-pane-inner p-4 text-md font-semibold"
             >
               <CircleCheck
                 className="mt-0.5 size-5 shrink-0 text-ok"

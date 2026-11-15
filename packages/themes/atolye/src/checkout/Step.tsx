@@ -30,7 +30,7 @@ export function Step({
     <section
       aria-labelledby={id}
       aria-current={state === "open" ? "step" : undefined}
-      className={cn("rounded-tile bg-paper-2 p-5 sm:p-7", state === "ahead" && "text-text-2")}
+      className={cn("rounded-tile gf-pane p-5 sm:p-7", state === "ahead" && "text-text-2")}
     >
       <div className="flex min-h-11 items-center gap-3">
         <span
