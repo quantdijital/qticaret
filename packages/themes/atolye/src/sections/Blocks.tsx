@@ -98,6 +98,7 @@ function BlockView({
           badges={section.badges}
           label={t("footer.trust")}
           variant={drawnVariant("trust_badges", section.variant, PROMISE_VARIANTS)}
+          marks={section.editor}
         />
       )
     case "categories":
@@ -155,6 +156,7 @@ function BlockView({
           section={section}
           t={t}
           boxed={section.look?.width === "boxed" || section.look?.width === "narrow"}
+          marks={section.editor}
         />
       )
   }

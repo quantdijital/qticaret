@@ -17,11 +17,14 @@ export function bannerView(section: StoreBannerSection, t: Translate): BannerSec
     id: section.id,
     type: "banner",
     slides: section.slides.map((slide) => {
+      const first = layoutLink(slide.link, t)
       const [link = null, secondLink = null] = [
-        layoutLink(slide.link, t),
+        first,
         layoutLink(slide.second_link ?? null, t),
       ].filter((each) => each !== null)
       return {
+        // The second moved up: the editor's field mark names it (adr/0065 Faz 2b)
+        ...(first === null && link !== null ? { secondFirst: true as const } : {}),
         image: layoutImage(slide.image, slide.heading ?? ""),
         mobileImage: slide.mobile_image
           ? layoutImage(slide.mobile_image, slide.image.alt ?? slide.heading ?? "")

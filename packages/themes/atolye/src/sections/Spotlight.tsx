@@ -1,4 +1,4 @@
-import { ResponsiveImage } from "@qticaret/ui"
+import { ResponsiveImage, fieldMark } from "@qticaret/ui"
 import type { FormAction, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { Price } from "../parts/Price"
@@ -60,11 +60,19 @@ export function Spotlight({
             </div>
           )}
           <div className="flex flex-col justify-center gap-5 px-2 pb-4 lg:col-span-5 lg:px-8 lg:py-10">
-            <h2 id={id} className="text-display text-stage-text">
+            <h2
+              id={id}
+              className="text-display text-stage-text"
+              {...fieldMark(section.editor, "title")}
+            >
               {section.title ?? product.title}
             </h2>
             {section.title && <h3 className="text-title text-stage-text">{product.title}</h3>}
-            {section.text && <p className="text-stage-text-2">{section.text}</p>}
+            {section.text && (
+              <p className="text-stage-text-2" {...fieldMark(section.editor, "text")}>
+                {section.text}
+              </p>
+            )}
             {section.facts.length > 0 && (
               <dl className="grid grid-cols-[auto_minmax(0,1fr)] text-sm">
                 {section.facts.slice(0, 5).map((fact) => (

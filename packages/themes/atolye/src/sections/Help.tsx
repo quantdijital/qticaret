@@ -1,4 +1,5 @@
 import { Mail, Phone } from "lucide-react"
+import { fieldMark } from "@qticaret/ui"
 import type { ContactView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { WhatsAppGlyph } from "../parts/WhatsAppGlyph"
@@ -67,8 +68,12 @@ export function Help({ section, t }: { section: Of<"help">; t: Translate }) {
       <Container>
         <div className="grid gap-6 rounded-tile border border-rule p-6 sm:p-10 lg:grid-cols-12 lg:items-center lg:gap-(--gap-columns)">
           <div className="flex flex-col gap-3 lg:col-span-6">
-            <h2 id={id}>{section.title}</h2>
-            <p className="text-text-2 lg:text-lead">{section.text}</p>
+            <h2 id={id} {...fieldMark(section.editor, "title")}>
+              {section.title}
+            </h2>
+            <p className="text-text-2 lg:text-lead" {...fieldMark(section.editor, "text")}>
+              {section.text}
+            </p>
           </div>
           <Reach contact={contact} t={t} className="lg:col-span-6 lg:justify-end" />
         </div>

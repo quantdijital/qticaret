@@ -138,6 +138,13 @@ export interface ShopView {
    */
   announcementMark?: string
   /**
+   * Set only in the theme editor's live preview (adr/0065 Faz 2b): the
+   * frame marks its fields too (the catalog header's search and highlighted
+   * link; the header's strip and the footer's newsletter box with their
+   * own section marks). Absent on a live page, whose frame is drawn as today.
+   */
+  editor?: true
+  /**
    * The header group's scrolling strip, drawn above the shop's header on
    * every page but the checkout's (adr/0049 Ek 2026-11-14 §4.1); none or
    * absent: no strip.
@@ -152,7 +159,12 @@ export interface ShopView {
   headerBar?: HeaderBarView
   footerBar?: FooterBarView
   /** The footer's newsletter box in the shop's words; null: the shop took it out (adr/0049). */
-  newsletter: { title: string; text: string } | null
+  newsletter: {
+    title: string
+    text: string
+    /** Its section id, only in the theme editor's live preview (`editor`): the box's section mark. */
+    mark?: string
+  } | null
   /** The header's small links (about, contact…). */
   topLinks: LinkView[]
   /** The shop's own columns, or the storefront's (categories, help). */

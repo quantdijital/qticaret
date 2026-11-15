@@ -1,3 +1,4 @@
+import { fieldKey, fieldMark, sectionMark } from "@qticaret/ui"
 import type { MarqueeItemView, MarqueeSectionView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
@@ -24,15 +25,30 @@ export function closedKey(section: MarqueeSectionView): string {
  * One item: its icon, its line and second line, the whole a link when it
  * has one. A round that only fills the screen (`loop`) is hidden and inert.
  */
-function Item({ item, loop = false }: { item: MarqueeItemView; loop?: boolean }) {
+function Item({
+  item,
+  loop = false,
+  at,
+}: {
+  item: MarqueeItemView
+  loop?: boolean
+  /** Its place among the strip's items, in the editor's live preview only (its field marks). */
+  at?: number | undefined
+}) {
+  // The editor's field marks (adr/0065 Faz 2b): the first round only, the rest are inert copies
+  const qf = (part: string) => fieldMark(at !== undefined, fieldKey("items", at ?? 0, part))
   const body = (
     <>
       {item.icon && <TrustIcon icon={item.icon} className="gf-marquee-icon" />}
       <span className="gf-marquee-words">
-        <span data-part="text" className="gf-marquee-text">
+        <span data-part="text" className="gf-marquee-text" {...qf("text")}>
           {item.text}
         </span>
-        {item.subtext && <span className="gf-marquee-sub">{item.subtext}</span>}
+        {item.subtext && (
+          <span className="gf-marquee-sub" {...qf("subtext")}>
+            {item.subtext}
+          </span>
+        )}
       </span>
     </>
   )
@@ -76,6 +92,8 @@ export function Marquee({
   t,
   boxed = false,
   header = false,
+  marks = false,
+  mark,
 }: {
   section: MarqueeSectionView
   t: Translate
@@ -83,8 +101,13 @@ export function Marquee({
   boxed?: boolean
   /** Above the shop's header: no gap of its own. */
   header?: boolean
+  /** The theme editor's live preview (adr/0065 Faz 2b): its items carry their field marks. */
+  marks?: boolean | undefined
+  /** In the header, in that preview: the strip's section id, its own section mark (a page's strip has its look's). */
+  mark?: string | undefined
 }) {
   const { items } = section
+  const marked = marks || mark !== undefined
   const { rounds, span } = loopOf(section)
   const repeats = Array.from({ length: rounds - 1 }, (_, round) => round)
   // The outermost box carries what takes the strip off the page
@@ -105,7 +128,7 @@ export function Marquee({
       data-gap={section.gap}
       data-outline={outlined(section) ? "on" : undefined}
       data-span={span}
-      {...(header ? shell : {})}
+      {...(header ? { ...shell, ...sectionMark(mark) } : {})}
       className={cn(
         "gf-marquee",
         section.ground === "stage" && "gf-stage",
@@ -116,7 +139,7 @@ export function Marquee({
         <div className="gf-marquee-track">
           <ul className="gf-marquee-copy">
             {items.map((item, index) => (
-              <Item key={index} item={item} />
+              <Item key={index} item={item} at={marked ? index : undefined} />
             ))}
             {repeats.map((round) =>
               items.map((item, index) => (

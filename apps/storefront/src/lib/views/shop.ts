@@ -49,12 +49,14 @@ export function contactOf(identity: LegalIdentity, t: Translate): ContactView {
 }
 
 /** The footer's newsletter box in the design's words; null when the shop took it out. */
-function newsletterOf(layout: StoreLayout, shop: string): ShopView["newsletter"] {
+function newsletterOf(layout: StoreLayout, shop: string, editing: boolean): ShopView["newsletter"] {
   const [section] = layout.footer
   return section
     ? {
         title: section.title ?? t("newsletter.title"),
         text: section.text ?? t("newsletter.text", { shop }),
+        // The editor's live session marks the box as its own section (adr/0065 Faz 2b)
+        ...(editing ? { mark: section.id } : {}),
       }
     : null
 }
@@ -119,10 +121,12 @@ export async function shopView(): Promise<ShopView> {
   )
   // The page's address as the proxy set it (never the visitor's)
   const url = requestHeaders.get("x-qt-url") ?? ""
-  // The editor's live session marks the one announcement bar and its lines (adr/0065 Faz 2b)
+  // The editor's live session marks the frame's fields: the one announcement bar and its
+  // lines, the header strip, the catalog header, the footer's newsletter (adr/0065 Faz 2b)
+  const editing = await isEditorSession()
   const bars = layout.header.filter((section) => section.type === "announcement_bar")
   const [bar] = bars
-  const announcementMark = bars.length === 1 && bar && (await isEditorSession()) ? bar.id : null
+  const announcementMark = bars.length === 1 && bar && editing ? bar.id : null
   return {
     name: site.shop.name,
     logo: site.shop.logo_url
@@ -145,6 +149,7 @@ export async function shopView(): Promise<ShopView> {
       layout.header.find((section) => section.type === "announcement_bar") ?? {}
     ),
     ...(announcementMark ? { announcementMark } : {}),
+    ...(editing ? { editor: true as const } : {}),
     marquee: headerMarquee(layout.header, t),
     // The design's header bar and footer (Ek 2026-11-14 §5); the theme's header before them
     // The catalog header's "Kategoriler" lists the top categories already read (no request),
@@ -154,7 +159,7 @@ export async function shopView(): Promise<ShopView> {
       tree: () => withPicturesOf(navigation(categories, paths, pictures), menu),
     }),
     footerBar: footerBarOf(layout.main, t),
-    newsletter: newsletterOf(layout, identity.company_title ?? site.shop.name),
+    newsletter: newsletterOf(layout, identity.company_title ?? site.shop.name, editing),
     topLinks: topLinks(menus, t),
     footerGroups: footerGroups(footerMenus(menus, t), menu, t),
     // The design's badges (adr/0049 Ek 2026-11-06); a preview shows its draft's

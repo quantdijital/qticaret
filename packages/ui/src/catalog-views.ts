@@ -79,5 +79,7 @@ export interface PriceBandsSectionView {
     category?: string
     path: string
     products: ProductThumbView[]
+    /** Its place among the design's bands when one before it was left out (the editor's field mark); absent: its drawn place. */
+    at?: number
   }[]
 }

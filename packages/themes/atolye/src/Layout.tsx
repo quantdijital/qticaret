@@ -98,7 +98,14 @@ export function Layout({
           play: t("nav.announcements_play"),
         }}
       />
-      {shop.marquee && <Marquee section={shop.marquee} t={t} header />}
+      {shop.marquee && (
+        <Marquee
+          section={shop.marquee}
+          t={t}
+          header
+          mark={shop.editor ? shop.marquee.id : undefined}
+        />
+      )}
       <Header shop={shop} t={t} searchSuggest={searchSuggest} changeCartLine={changeCartLine} />
       <main id="icerik" className="flex-1">
         {children}

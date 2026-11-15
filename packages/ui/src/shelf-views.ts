@@ -55,4 +55,10 @@ export interface ShelfListView {
   id: string
   title: string
   products: ProductCardView[]
+  /**
+   * Its place in the design (0 the rail's own, 1 its first more list) when
+   * one before it had nothing to show and was left out, for the editor's
+   * field mark; absent: its drawn place.
+   */
+  at?: number
 }

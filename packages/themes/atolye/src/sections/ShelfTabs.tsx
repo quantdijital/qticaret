@@ -14,11 +14,14 @@ export function ShelfTabs({
   id,
   label,
   tabs,
+  keys,
   children,
 }: {
   id: string
   label: string
   tabs: readonly string[]
+  /** Each pill's field key, in the theme editor's live preview only (adr/0065 Faz 2b). */
+  keys?: readonly string[] | undefined
   children: ReactNode
 }) {
   const panels = Children.toArray(children)
@@ -29,7 +32,11 @@ export function ShelfTabs({
         <legend className="sr-only">{label}</legend>
         <div className="gf-rail -mx-(--gutter) flex scroll-px-(--gutter) gap-2 overflow-x-auto px-(--gutter) py-1">
           {tabs.map((tab, index) => (
-            <label key={tab} className="gf-tab">
+            <label
+              key={tab}
+              className="gf-tab"
+              {...(keys?.[index] ? { "data-qf": keys[index] } : {})}
+            >
               <input
                 type="radio"
                 name={`${id}-raf`}
