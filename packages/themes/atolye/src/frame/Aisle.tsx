@@ -98,6 +98,7 @@ export function Aisle({
   inBar = false,
   more = "",
   tail,
+  pictures = true,
 }: {
   categories: readonly NavCategoryView[]
   label: string
@@ -110,6 +111,8 @@ export function Aisle({
   more?: string
   /** In the bar, an item always shown right after the last category (the highlighted link). */
   tail?: ReactNode
+  /** The dropdowns' small pictures (`HeaderBarView.menuImages`); off: words only. */
+  pictures?: boolean
 }) {
   const [open, setOpen] = useState("")
   const root = useRef<HTMLElement>(null)
@@ -189,7 +192,7 @@ export function Aisle({
                 }}
                 className="gf-drop data-[state=closed]:hidden"
               >
-                <Drop category={category} words={words} />
+                <Drop category={category} words={words} pictures={pictures} />
               </NavigationMenu.Content>
             </NavigationMenu.Item>
           )

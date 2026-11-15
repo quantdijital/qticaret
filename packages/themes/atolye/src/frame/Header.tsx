@@ -74,6 +74,8 @@ export function Header({
     )
   }
   const centered = variant === "centered"
+  // The menus' small pictures, every variant's setting (adr/0049 Ek 2026-11-15)
+  const pictures = shop.headerBar?.menuImages !== false
   const menu = menuWords(shop.categories, t)
   const search = searchOf(shop, t, searchSuggest)
   const account = accountOf(shop, t)
@@ -83,6 +85,7 @@ export function Header({
       categories={shop.categories}
       topLinks={shop.topLinks}
       contact={shop.contact}
+      pictures={pictures}
       words={{
         open: t("nav.open_menu"),
         title: t("nav.menu"),
@@ -172,6 +175,7 @@ export function Header({
             label={t("nav.categories")}
             words={menu}
             centered={centered}
+            pictures={pictures}
           />
         </Container>
       )}

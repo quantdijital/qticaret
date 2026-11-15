@@ -34,7 +34,9 @@ const ALL =
  * children as 48 px rows with 36 px pictures and their counts, set in
  * under the parent's name (no rule, no tree lines; a row the storefront
  * could not count shows no pill); then the shop's
- * small links and its phone and WhatsApp as quiet pills. The same links
+ * small links and its phone and WhatsApp as quiet pills. With the shop's
+ * pictures off (adr/0049 Ek 2026-11-15) the rows keep their heights and
+ * show no square, the children a step in. The same links
  * are in the page's HTML through the aisle, so the sheet hides nothing
  * from a crawler. The bottom bar's "Kategoriler" opens it too, and gets
  * the focus back.
@@ -46,6 +48,7 @@ export function MenuSheet({
   words,
   highlight = null,
   account = null,
+  pictures = true,
 }: {
   categories: readonly NavCategoryView[]
   topLinks: readonly LinkView[]
@@ -55,6 +58,8 @@ export function MenuSheet({
   highlight?: LinkView | null
   /** The account's page in words, where the header has no account icon on a phone. */
   account?: LinkView | null
+  /** The categories' small pictures (`HeaderBarView.menuImages`); off: words only. */
+  pictures?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const opener = useRef<HTMLElement | null>(null)
@@ -107,14 +112,14 @@ export function MenuSheet({
               <li key={category.path}>
                 {category.children.length === 0 ? (
                   <a href={category.path} className={ROW}>
-                    <MenuThumb category={category} size={40} />
+                    {pictures && <MenuThumb category={category} size={40} />}
                     <span className="flex-1">{category.label}</span>
                     <MenuCount count={words.counts[category.path]} />
                   </a>
                 ) : (
                   <details className="group">
                     <summary className={`${ROW} cursor-pointer`}>
-                      <MenuThumb category={category} size={40} />
+                      {pictures && <MenuThumb category={category} size={40} />}
                       <span className="flex-1">{category.label}</span>
                       <ChevronDown
                         className="mr-2 size-5 shrink-0 group-open:rotate-180 motion-safe:transition-transform"
@@ -122,7 +127,8 @@ export function MenuSheet({
                         strokeWidth={1.75}
                       />
                     </summary>
-                    <ul className="ml-13 flex flex-col gap-0.5 pb-3">
+                    {/* Under the parent's name: past its square, else a step in */}
+                    <ul className={`${pictures ? "ml-13" : "ml-4"} flex flex-col gap-0.5 pb-3`}>
                       <li>
                         <a href={category.path} className={ALL}>
                           {/* Heard in full ("Tümünü gör: Çakılar"), its visible words first */}
@@ -136,7 +142,7 @@ export function MenuSheet({
                       {category.children.map((child) => (
                         <li key={child.path}>
                           <a href={child.path} className={SUB}>
-                            <MenuThumb category={child} size={36} />
+                            {pictures && <MenuThumb category={child} size={36} />}
                             <span className="flex-1">{child.label}</span>
                             <MenuCount count={words.counts[child.path]} />
                           </a>
