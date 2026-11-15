@@ -1,3 +1,4 @@
+import { fieldKey, fieldMark } from "@qticaret/ui"
 import type { HeroSlideView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
@@ -73,15 +74,19 @@ function Slide({
   heading,
   eager,
   roomForArrows,
+  marks,
 }: {
   slide: HeroSlideView
   compact: boolean
   heading: "h1" | "h2"
   eager: boolean
   roomForArrows: boolean
+  /** The editor's preview (adr/0065 Faz 2b): the slide's place, for its field marks; none elsewhere. */
+  marks: number | null
 }) {
   const Heading = heading
   const dark = slide.tone === "dark"
+  const mark = (key: string) => fieldMark(marks !== null, fieldKey("slides", marks ?? 0, key))
   return (
     <div
       className={cn(
@@ -91,6 +96,7 @@ function Slide({
       )}
     >
       <div
+        {...mark("image")}
         className={cn(
           "relative shrink-0 after:absolute after:inset-0 after:bg-linear-to-t after:from-stage after:from-0% after:via-stage/0 after:via-30% after:to-transparent sm:absolute sm:inset-0 sm:after:hidden",
           compact ? "aspect-[2/1]" : "aspect-[16/10]",
@@ -118,6 +124,7 @@ function Slide({
         >
           {slide.heading && (
             <Heading
+              {...mark("heading")}
               // Not merged: tailwind-merge reads the size `text-hero` as a colour and drops it
               className={`max-w-[18ch] text-hero leading-[1.05] tracking-(--tracking-display) text-stage-text${dark ? " sm:text-text" : ""}`}
             >
@@ -126,6 +133,7 @@ function Slide({
           )}
           {slide.text && (
             <p
+              {...mark("text")}
               className={`hidden max-w-[44ch] text-md text-stage-text-2 sm:block lg:text-lead${dark ? " sm:text-text-2" : ""}`}
             >
               {slide.text}
@@ -133,7 +141,7 @@ function Slide({
           )}
           {slide.link && (
             <div className="pt-1">
-              <a href={slide.link.path} className="gf-btn">
+              <a href={slide.link.path} className="gf-btn" {...mark("link")}>
                 {slide.link.label}
               </a>
             </div>
@@ -217,6 +225,7 @@ export function HeroSlider({
               heading={first && index === 0 ? "h1" : "h2"}
               eager={first && index === 0}
               roomForArrows={arrows}
+              marks={section.editor ? index : null}
             />
           ))}
         </SliderStage>

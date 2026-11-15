@@ -61,7 +61,7 @@ describe("the catalogue opening's slides", () => {
     expect(list.querySelectorAll("li")).toHaveLength(1)
     expect(screen.getByText("Bıçaklar")).toBeInTheDocument()
     // The heading, line, buttons and picture are the slide's: no second set beside it
-    expect(document.getElementById("hero-heading")).toBeNull()
+    expect(document.getElementById("giris00001-heading")).toBeNull()
     expect(screen.queryByRole("button", { name: /1\. slaytı kaldır/i })).toBeNull()
   })
 

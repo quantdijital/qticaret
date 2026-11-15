@@ -6,7 +6,7 @@ import {
   sliderSettingsOf,
 } from "@qticaret/types/section-scroller"
 import type { HeroCatalogSlideView, HeroCatalogView, Translate } from "@qticaret/ui"
-import { layoutImage, layoutLink } from "./layout"
+import { layoutImage, layoutLink, layoutLinks } from "./layout"
 
 /**
  * H17's slides as the theme draws them (adr/0049 Ek 2026-11-15): each
@@ -20,22 +20,30 @@ export function heroCatalogSlides(
   section: StoreHeroCatalog,
   t: Translate
 ): Pick<HeroCatalogView, "slides" | "slider"> {
-  const slides = (section.slides ?? []).flatMap((slide): HeroCatalogSlideView[] => {
-    const actions = slide.links.flatMap((link) => layoutLink(link, t) ?? [])
+  const kept = (section.slides ?? []).flatMap((slide, at) => {
+    const { actions, actionsAt } = layoutLinks(slide.links, t)
     const image = slide.image ? layoutImage(slide.image, slide.heading ?? "") : null
     const shows = image !== null || slide.heading !== null || slide.text !== null
     return shows || actions.length > 0
       ? [
           {
-            heading: slide.heading,
-            intro: slide.text,
-            actions,
-            image,
-            link: layoutLink(slide.link, t),
+            at,
+            view: {
+              heading: slide.heading,
+              intro: slide.text,
+              actions,
+              ...(actionsAt ? { actionsAt } : {}),
+              image,
+              link: layoutLink(slide.link, t),
+            },
           },
         ]
       : []
   })
+  // A slide after one left out says its place in the design (the editor's field mark)
+  const slides = kept.map(({ at, view }, drawn): HeroCatalogSlideView =>
+    at === drawn ? view : { ...view, at }
+  )
   if (slides.length === 0) {
     return {}
   }

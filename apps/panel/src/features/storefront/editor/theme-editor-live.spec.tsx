@@ -157,6 +157,8 @@ describe("the theme editor on the live preview (adr/0065 Faz 1)", () => {
     expect(posted("labels")[0]).toMatchObject({ payload: { edit: "Düzenle" } })
 
     // The edit label: the section's form opens and is said aloud
+    // A press in the frame moves the focus to it (the panel takes presses only then)
+    frame.focus()
     fromFrame(bridgeMessage("click", { id: "yeniurunler" }, 1))
     await waitFor(() => {
       expect(screen.getByText(/^Seçildi: /)).toBeInTheDocument()
@@ -168,6 +170,7 @@ describe("the theme editor on the live preview (adr/0065 Faz 1)", () => {
     )
 
     // A link followed in the frame: shown there with the draft, the frame kept
+    frame.focus()
     fromFrame(bridgeMessage("navigate-request", { path: "/sepet", previewable: true }, 2))
     await waitFor(() => {
       expect(posted("navigate")).toContainEqual(
@@ -179,6 +182,7 @@ describe("the theme editor on the live preview (adr/0065 Faz 1)", () => {
     expect(await screen.findByText("Bu bölüm başka bir sayfada.")).toBeInTheDocument()
     // Checkout does not open in the preview: said, nothing sent
     const navigations = posted("navigate").length
+    frame.focus()
     fromFrame(bridgeMessage("navigate-request", { path: "/odeme", previewable: false }, 4))
     expect(await screen.findByText(/\/odeme önizlemede açılmaz/)).toBeInTheDocument()
     expect(posted("navigate")).toHaveLength(navigations)

@@ -7718,6 +7718,7 @@
         "liveOff": "Canlı önizleme kullanılamıyor; önizleme her kayıttan sonra yeniden yüklenecek.",
         "edit": "Düzenle",
         "selected": "Seçildi: {{name}}",
+        "fieldSelected": "Seçildi: {{name}}; ilgili alana gidildi.",
         "elsewhere": "Önizlemede {{path}} açık; bu sayfada üst ve alt bilgi düzenlenir. Sayfa seçerek geri dönün.",
         "blocked": "{{path}} önizlemede açılmaz (ödeme, hesap ya da giriş sayfası)."
       },

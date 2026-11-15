@@ -20,6 +20,7 @@ export function Aisles({
   categories,
   all,
   t,
+  marks,
 }: {
   id: string
   title: string
@@ -28,11 +29,13 @@ export function Aisles({
   all: LinkView
   /** For a tile's count ("24 ürün"), when the shop shows counts. */
   t?: Translate
+  /** The editor's live preview (adr/0065 Faz 2b): the title carries its field mark. */
+  marks?: boolean | undefined
 }) {
   return (
     <section aria-labelledby={id} className="pt-(--section-gap-s)">
       <Container className="flex flex-col gap-6 lg:gap-10">
-        <SectionHead id={id} title={title} more={all} />
+        <SectionHead id={id} title={title} more={all} marks={marks} />
         <ul
           className={cn(
             "gf-rail -mx-(--gutter) -my-1 grid auto-cols-[44%] grid-flow-col gap-(--gap-columns) overflow-x-auto scroll-px-(--gutter) px-(--gutter) py-1 sm:auto-cols-[30%]",

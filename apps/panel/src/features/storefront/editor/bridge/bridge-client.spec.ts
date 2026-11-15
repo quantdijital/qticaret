@@ -3,9 +3,11 @@ import { EDITOR_BRIDGE_MAX_BYTES, bridgeMessage } from "@qticaret/types/editor-b
 import type { AnySection } from "@/features/storefront/api/layout"
 import {
   KEYS_PER_SECOND,
+  PICKS_PER_SECOND,
   acceptFromFrame,
   bridgeOn,
   createKeyGate,
+  createPickGate,
   frameOrigin,
   whyNotShown,
 } from "./bridge-client"
@@ -71,6 +73,29 @@ describe("the panel's bridge client (adr/0065 §2, §7)", () => {
     expect(take(bridgeMessage("error", { code: "x".repeat(40) }, 1))).not.toBeNull()
   })
 
+  it("takes a field's label (Faz 2b) only from the frame, with a key of the schema's form", () => {
+    const field = bridgeMessage("field", { id: "giris1", field: "slides.2.heading" }, 3)
+    const take = (data: unknown, origin = ORIGIN, source: unknown = frameWindow) =>
+      acceptFromFrame({ origin, source, data }, ORIGIN, frameWindow)
+    expect(take(field)).toEqual(field)
+    expect(take(field, "https://evil.example")).toBeNull()
+    expect(take(field, ORIGIN, {})).toBeNull()
+    // A key that is not one (a selector, markup, too deep, too long) is dropped whole
+    for (const key of [
+      '"]{}',
+      "<img src=x>",
+      "Heading",
+      "a.b.c.d.e",
+      "slides.100.heading",
+      `a${"b".repeat(80)}`,
+      "",
+    ]) {
+      expect(take(bridgeMessage("field", { id: "giris1", field: key }, 4))).toBeNull()
+    }
+    expect(take(bridgeMessage("field", { id: "a],[b", field: "heading" }, 5))).toBeNull()
+    expect(take({ ...field, payload: { ...field.payload, extra: 1 } })).toBeNull()
+  })
+
   it("says why a section would not show on the page in the frame", () => {
     const now = new Date("2026-11-15T12:00:00.000Z")
     const section = (more: object) =>
@@ -125,5 +150,22 @@ describe("the panel's bridge client (adr/0065 §2, §7)", () => {
     expect(gate(true, 1001)).toBe(false)
     expect(gate(true, 1040)).toBe(true)
     expect(KEYS_PER_SECOND).toBe(5)
+  })
+
+  it("takes the frame's presses only while it has the focus, four a second at most", () => {
+    const gate = createPickGate()
+    expect(gate(false, 0)).toBe(false)
+    expect(gate(true, 0)).toBe(true)
+    expect([gate(true, 10), gate(true, 20), gate(true, 30), gate(true, 40)]).toEqual([
+      true,
+      true,
+      true,
+      false,
+    ])
+    expect(gate(true, 1000)).toBe(true)
+    expect(PICKS_PER_SECOND).toBe(4)
+    // Its own room: the keys' gate is apart
+    const keys = createKeyGate()
+    expect(keys(true, 40)).toBe(true)
   })
 })

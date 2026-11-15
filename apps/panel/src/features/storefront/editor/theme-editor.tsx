@@ -114,8 +114,11 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
     dispatch,
     hurry: autosave.hurry,
     visited: place.visited,
-    onOpen: (id) => {
-      setOpened({ kind: "section", id })
+    onOpen: (id, field) => {
+      // A field's label (Faz 2b): its group opens and the field is shown, as a search hit's
+      picks.current += 1
+      const focus = field ? { ...field, nonce: picks.current } : undefined
+      setOpened({ kind: "section", id, ...(focus ? { focus } : {}) })
       // On a phone the preview hides the form: the edit label brings the form up
       setView("edit")
     },

@@ -1,5 +1,6 @@
 import { Phone } from "lucide-react"
 import type { AnnouncementSettings } from "@qticaret/types"
+import { sectionMark } from "@qticaret/ui"
 import type { ContactView, LinkView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
@@ -9,17 +10,22 @@ import { announcementStepsOf } from "./announcement-steps"
 /** The bar's lines as the shop wants several shown (docs/tema/bilesen-denetimi (b) 6). */
 function Lines({
   lines,
+  keys,
   settings,
   words,
 }: {
   lines: readonly string[]
+  /** Each line's field key in the editor's live preview; none elsewhere. */
+  keys: readonly string[] | undefined
   settings: AnnouncementSettings | undefined
   words: { announcements: string; pause: string; play: string }
 }) {
   const mode = lines.length > 1 ? (settings?.mode ?? "first") : "first"
+  // A line's field mark (adr/0065 Faz 2b): its place among the bar's lines in the design
+  const qf = (index: number) => (keys?.[index] ? { "data-qf": keys[index] } : {})
   const { align, size } = announcementStepsOf(settings)
   if (mode === "rotate" && settings) {
-    return <AnnouncementTurns lines={lines} settings={settings} words={words} />
+    return <AnnouncementTurns lines={lines} keys={keys} settings={settings} words={words} />
   }
   if (mode === "inline") {
     // Side by side on a wide screen; a phone has room for the first only
@@ -36,7 +42,11 @@ function Lines({
         )}
       >
         {lines.map((line, index) => (
-          <li key={index} className={cn("flex items-center gap-x-3", index > 0 && "max-lg:hidden")}>
+          <li
+            key={index}
+            {...qf(index)}
+            className={cn("flex items-center gap-x-3", index > 0 && "max-lg:hidden")}
+          >
             {index > 0 && (
               <span aria-hidden="true" className="text-stage-text-2">
                 ·
@@ -52,6 +62,7 @@ function Lines({
     <p
       aria-label={words.announcements}
       className={cn(size.pad, align.text, "font-semibold", align.textWide)}
+      {...qf(0)}
     >
       {lines[0]}
     </p>
@@ -76,6 +87,7 @@ export function Announcement({
   links,
   contact,
   words,
+  mark,
 }: {
   lines: readonly string[]
   /** How several lines show; absent (an older storefront): the first alone. */
@@ -83,8 +95,16 @@ export function Announcement({
   links: readonly LinkView[]
   contact: ContactView
   words: { announcements: string; links: string; pause: string; play: string }
+  /**
+   * The bar's section id in the theme editor's live preview (adr/0065 Faz
+   * 2b): the bar carries its section mark and each line its field mark
+   * (`lines.<n>`, its place in the design). Absent on a live page.
+   */
+  mark?: string | undefined
 }) {
-  const shown = lines.filter((line) => line.length > 0)
+  const kept = lines.flatMap((line, at) => (line.length > 0 ? [{ line, at }] : []))
+  const shown = kept.map(({ line }) => line)
+  const keys = mark ? kept.map(({ at }) => `lines.${String(at)}`) : undefined
   const phone = contact.phone && contact.phoneHref ? contact : null
   const wide = links.length > 0 || phone !== null
   if (shown.length === 0 && !wide) {
@@ -93,7 +113,10 @@ export function Announcement({
   const { align, size } = announcementStepsOf(settings)
   const tappable = cn("inline-flex", size.height, "items-center")
   return (
-    <div className={cn("gf-stage", size.text, shown.length === 0 && "max-lg:hidden")}>
+    <div
+      {...sectionMark(mark)}
+      className={cn("gf-stage", size.text, shown.length === 0 && "max-lg:hidden")}
+    >
       <Container
         className={cn(
           "flex",
@@ -105,7 +128,7 @@ export function Announcement({
           wide && align.spacer
         )}
       >
-        {shown.length > 0 && <Lines lines={shown} settings={settings} words={words} />}
+        {shown.length > 0 && <Lines lines={shown} keys={keys} settings={settings} words={words} />}
         {wide && (
           <nav
             aria-label={words.links}

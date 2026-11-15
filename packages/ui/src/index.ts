@@ -1,6 +1,7 @@
 export { formatLira } from "./money"
 export { ResponsiveImage } from "./ResponsiveImage"
 export { SECTION_MARK, sectionMark } from "./section-mark"
+export { FIELD_MARK, fieldKey, fieldMark } from "./field-mark"
 export {
   CARD_VARIANTS,
   SECTION_VARIANTS,
