@@ -18,6 +18,7 @@ interface Frame {
     product_card: Record<string, unknown>
     header: { layout: string; sticky: boolean }
     buttons: string
+    section_spacing: string
   }
 }
 
@@ -67,6 +68,7 @@ medusaIntegrationTestRunner({
         product_card: { show_rating: true },
         header: { layout: "centered" },
         buttons: "rounded",
+        section_spacing: "roomy",
       })
       const after = await frame()
 
@@ -80,6 +82,7 @@ medusaIntegrationTestRunner({
         product_card: { ...CARD, ratio: "1:1", show_brand: true, show_rating: false },
         header: { layout: "left", sticky: true },
         buttons: "pill",
+        section_spacing: "normal",
       })
       expect(fallback.data.theme.colors.primary).toBe("#0b5c99")
       expect(pale.status).toBe(400)
@@ -95,6 +98,7 @@ medusaIntegrationTestRunner({
         product_card: { ...CARD, ratio: "1:1", show_brand: true, show_rating: true },
         header: { layout: "centered", sticky: true },
         buttons: "rounded",
+        section_spacing: "roomy",
       })
       // The old field stays until the storefront and the panel move over
       expect(after.data.storefront.primary_color).toBe("#0b5c99")
@@ -132,6 +136,7 @@ medusaIntegrationTestRunner({
         product_card: { ...CARD, ratio: "1:1", show_brand: false, show_rating: false },
         header: { layout: "left", sticky: false },
         buttons: "pill",
+        section_spacing: "normal",
       }
 
       const read = await section()

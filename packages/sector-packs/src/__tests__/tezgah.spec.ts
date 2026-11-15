@@ -18,7 +18,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     expect(read("tezgah")).toMatchObject({
       pack: "cutlery",
       code: "tezgah",
-      version: 1,
+      version: 2,
       theme: "atolye",
       name: "Tezgâh",
       tone: "light",
@@ -42,7 +42,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
       ["yakinplan", "featured_product", null],
       ["fiyatbantlari", "price_bands", null],
       ["coksatanlar", "products", "featured"],
-      ["kullanimagore", "categories", null],
+      ["kullanimagore", "categories", "linked"],
       ["indirimdekiler", "products", "compact"],
       ["yazilar", "posts", null],
       ["markalar", "brands", null],
@@ -76,6 +76,28 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     expect(home[at("fiyatbantlari")]).toMatchObject({ thumbs: 0 })
   })
 
+  it("draws the category cards with their subcategories, only top categories that have some", () => {
+    const cards = (read("tezgah").layout.home ?? []).find((each) => each.id === "kullanimagore")
+    expect(cards).toMatchObject({
+      type: "categories",
+      variant: "linked",
+      columns: 3,
+      image_position: "side",
+      frame: "lined",
+      links: 5,
+      show_count: true,
+    })
+    const categories = sectorPack("cutlery")?.categories ?? []
+    const named = (cards?.["category_ids"] as { $handle: string }[]).map((each) =>
+      each.$handle.replace(/^category:/, "")
+    )
+    expect(named).toEqual(["outdoor-ve-kamp", "mutfak-ve-sef-bicaklari", "kasap-bicaklari"])
+    for (const handle of named) {
+      expect(categories.find((each) => each.handle === handle)?.parent).toBeUndefined()
+      expect(categories.some((each) => each.parent === handle)).toBe(true)
+    }
+  })
+
   it("draws the catalog header on a graphite bar and fills the footer", () => {
     const { header, footer, product, category } = read("tezgah").layout
     expect(header).toEqual([
@@ -92,6 +114,16 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
       }),
     ])
     expect(footer?.map((each) => each.type)).toEqual(["footer_bar", "newsletter"])
+    // Glyphs for the profiles, written payment names, a square back-to-top button on the right
+    expect(footer?.[0]).toMatchObject({
+      variant: "ledger",
+      social: "icons",
+      payment_badges: ["visa", "mastercard", "troy", "bank_transfer", "cash_on_delivery"],
+      back_to_top: true,
+      back_to_top_side: "right",
+      back_to_top_shape: "square",
+      back_to_top_mobile: true,
+    })
     expect([product, category]).toEqual([[], []])
   })
 
@@ -106,11 +138,12 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
   it("names the pack's categories and one product by handle, never by id", () => {
     expect(read("tezgah").handles).toEqual([
       "category:av-bicaklari",
-      "category:kamp-baltalari",
       "category:kamp-bicaklari",
       "category:kasap-bicaklari",
       "category:kiliclar",
       "category:mutfak-bicak-setleri",
+      "category:mutfak-ve-sef-bicaklari",
+      "category:outdoor-ve-kamp",
       "category:sef-bicaklari",
       "product:karacelik-alageyik-sam-celigi-av-bicagi",
     ])
@@ -134,7 +167,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
   })
 
   it("raised the cutlery pack's version with them", () => {
-    expect(sectorPack("cutlery")?.version).toBe(3)
+    expect(sectorPack("cutlery")?.version).toBe(4)
     expect(sectorPack("cutlery")?.presets.map((preset) => preset.code)).toEqual([
       "katalog",
       ...CODES,

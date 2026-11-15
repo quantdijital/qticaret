@@ -62,5 +62,5 @@ export const atolyeTheme: StorefrontTheme = {
   PaymentLinkPage,
 }
 
-export { ATOLYE_TONES, TONE_SURFACES } from "./tones"
+export { ATOLYE_SECTION_SCALE, ATOLYE_TONES, TONE_SURFACES } from "./tones"
 export type { ToneSet, ToneSurface } from "./tones"

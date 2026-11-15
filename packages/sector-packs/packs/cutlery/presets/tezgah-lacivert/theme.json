@@ -15,5 +15,6 @@
     "empty_stars": false
   },
   "header": { "layout": "left", "sticky": true },
-  "buttons": "square"
+  "buttons": "square",
+  "section_spacing": "compact"
 }

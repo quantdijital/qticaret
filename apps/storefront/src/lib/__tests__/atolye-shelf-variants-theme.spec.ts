@@ -82,6 +82,8 @@ describe("the theme's product rail variants", () => {
     expect(html).toContain("lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]")
     expect(html.match(/<article/g)).toHaveLength(7)
     expect(html).toContain('sizes="(min-width: 1440px) 540px')
+    // Its photo grows to the two rows beside it (card.css, K-07)
+    expect(html.match(/class="gf-card-lead min-w-0"/g)).toHaveLength(1)
   })
 
   it("draws compact cards: the photo small, one link, no add button", () => {
@@ -104,6 +106,8 @@ describe("the theme's product rail variants", () => {
       rail({ id: "sonra", title: "Sonra" }),
     ])
     expect(html).toContain('<h2 id="bolum-raf-1"')
+    // Each list's heading is a section heading, the page's one size (K-13)
+    expect(html).toContain('<h2 id="bolum-raf-1">')
     expect(html).toContain("lg:grid-cols-[repeat(3,minmax(0,1fr))]")
     // The rails either side are not joined across it: no tabs at all
     expect(html).not.toContain('type="radio"')

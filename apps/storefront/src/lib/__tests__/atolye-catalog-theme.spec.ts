@@ -90,6 +90,9 @@ describe("the catalogue opening (H17)", () => {
     expect(html).toContain(">Çam yeşili</span>")
     expect(html).toContain('aria-label="Hızlı bağlantılar"')
     expect(html).toContain(">Kampanyalar</a>")
+    // A long category name wraps rather than losing its end (K-15)
+    expect(html).toContain('class="line-clamp-2 leading-snug break-words"')
+    expect(html).not.toMatch(/gf-mosaic-row[^>]*>(?:(?!<\/a>).)*class="truncate"/)
   })
 
   it("draws today's opening when the variant is not the category list or its parts did not come", () => {
@@ -128,6 +131,9 @@ describe("the price bands", () => {
     expect(html).toContain("Anahtarlık çakılar")
     expect(html).toContain('alt=""')
     expect(html).toContain("lg:grid-cols-2")
+    // The band's big figure in the page's ink: the shop's colour stays on actions (K-05)
+    expect(html).not.toMatch(/text-display[^"]*text-signal/)
+    expect(html).toMatch(/text-display[^"]*text-text/)
   })
 })
 

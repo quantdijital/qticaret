@@ -126,9 +126,11 @@
   --container-narrow: 960px;
   --gutter: 48px;
   --gap-columns: 24px;
-  --section-gap-s: 96px;
-  --section-gap: 120px;
-  --section-gap-l: 144px;
+  /* The gaps between sections, each width's own, times the shop's section spacing
+     (`--section-scale`, `ATOLYE_SECTION_SCALE`; unset at the theme's own) */
+  --section-gap-s: calc(96px * var(--section-scale, 1));
+  --section-gap: calc(120px * var(--section-scale, 1));
+  --section-gap-l: calc(144px * var(--section-scale, 1));
   /* The last section to the footer, the same on every page (owner 2026-11-05): pages add none */
   --footer-gap: 64px;
   --z-base: 1;
@@ -148,9 +150,9 @@
 @media (max-width: 64rem) {
   :root {
     --gutter: 24px;
-    --section-gap-s: 64px;
-    --section-gap: 80px;
-    --section-gap-l: 96px;
+    --section-gap-s: calc(64px * var(--section-scale, 1));
+    --section-gap: calc(80px * var(--section-scale, 1));
+    --section-gap-l: calc(96px * var(--section-scale, 1));
     --footer-gap: 48px;
   }
 }
@@ -158,9 +160,9 @@
   :root {
     --gutter: 16px;
     --gap-columns: 12px;
-    --section-gap-s: 48px;
-    --section-gap: 56px;
-    --section-gap-l: 64px;
+    --section-gap-s: calc(48px * var(--section-scale, 1));
+    --section-gap: calc(56px * var(--section-scale, 1));
+    --section-gap-l: calc(64px * var(--section-scale, 1));
     --footer-gap: 40px;
   }
 }

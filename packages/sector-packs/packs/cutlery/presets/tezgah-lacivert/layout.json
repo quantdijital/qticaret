@@ -48,7 +48,7 @@
       "ends_at": null,
       "variant": "lined",
       "look": {
-        "space_outer": "small",
+        "space_outer": "none",
         "space_inner": null,
         "ground": null,
         "align": null,
@@ -90,7 +90,7 @@
       "title": "Av bıçakları",
       "source": { "kind": "category", "category_id": { "$handle": "category:av-bicaklari" } },
       "limit": 12,
-      "more": { "$href": "/kategori/av-bicaklari", "label": null },
+      "more": { "$href": "/kategori/av-bicaklari", "label": "Tüm av bıçakları" },
       "card_variant": null,
       "scroller": {
         "desktop": "four",
@@ -115,7 +115,10 @@
       "title": "Kamp bıçakları",
       "source": { "kind": "category", "category_id": { "$handle": "category:kamp-bicaklari" } },
       "limit": 12,
-      "more": { "$href": "/kategori/outdoor-ve-kamp/kamp-bicaklari", "label": null },
+      "more": {
+        "$href": "/kategori/outdoor-ve-kamp/kamp-bicaklari",
+        "label": "Tüm kamp bıçakları"
+      },
       "card_variant": null,
       "scroller": {
         "desktop": "four",
@@ -140,7 +143,10 @@
       "title": "Şef bıçakları",
       "source": { "kind": "category", "category_id": { "$handle": "category:sef-bicaklari" } },
       "limit": 12,
-      "more": { "$href": "/kategori/mutfak-ve-sef-bicaklari/sef-bicaklari", "label": null },
+      "more": {
+        "$href": "/kategori/mutfak-ve-sef-bicaklari/sef-bicaklari",
+        "label": "Tüm şef bıçakları"
+      },
       "card_variant": null,
       "scroller": {
         "desktop": "four",
@@ -162,7 +168,7 @@
       "starts_at": null,
       "ends_at": null,
       "title": null,
-      "text": "Katmanlı Şam çeliği namlu. Namlu boyu, sertlik ve sap malzemesi tabloda.",
+      "text": "Katmanlı Şam çeliği namlu. Çeliği, ölçüleri ve bakımı ürün sayfasında yazılı.",
       "product_id": { "$handle": "product:karacelik-alageyik-sam-celigi-av-bicagi" }
     },
     {
@@ -203,6 +209,7 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
+      "variant": "linked",
       "look": {
         "space_outer": null,
         "space_inner": "medium",
@@ -212,13 +219,14 @@
       },
       "title": "Kullanıma göre",
       "category_ids": [
-        { "$handle": "category:kamp-bicaklari" },
-        { "$handle": "category:kamp-baltalari" },
-        { "$handle": "category:av-bicaklari" },
-        { "$handle": "category:sef-bicaklari" },
-        { "$handle": "category:mutfak-bicak-setleri" },
+        { "$handle": "category:outdoor-ve-kamp" },
+        { "$handle": "category:mutfak-ve-sef-bicaklari" },
         { "$handle": "category:kasap-bicaklari" }
       ],
+      "columns": 3,
+      "image_position": "side",
+      "frame": "lined",
+      "links": 5,
       "show_count": true,
       "more": { "$href": "/kategoriler", "label": "Tüm kategoriler" }
     },
@@ -232,7 +240,7 @@
       "title": "İndirimdekiler",
       "source": { "kind": "on_sale" },
       "limit": 6,
-      "more": { "$href": "/kampanyalar", "label": null },
+      "more": { "$href": "/kampanyalar", "label": "Tüm indirimler" },
       "card_variant": null,
       "rows": 2
     },
@@ -294,7 +302,7 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "title": null,
+      "title": "Müşteri yorumları",
       "limit": 3
     }
   ],
@@ -305,7 +313,13 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "ledger"
+      "variant": "ledger",
+      "social": "icons",
+      "payment_badges": ["visa", "mastercard", "troy", "bank_transfer", "cash_on_delivery"],
+      "back_to_top": true,
+      "back_to_top_side": "right",
+      "back_to_top_shape": "square",
+      "back_to_top_mobile": true
     },
     {
       "id": "ebultenkutusu",

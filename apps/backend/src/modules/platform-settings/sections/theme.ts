@@ -108,7 +108,17 @@ export interface ThemeSettings {
   product_card: ProductCardSettings
   header: { layout: "centered" | "left"; sticky: boolean }
   buttons: "pill" | "rounded" | "square"
+  /** The gap between the home page's sections, on the theme's own scale (`SECTION_SPACINGS`). */
+  section_spacing: (typeof SECTION_SPACINGS)[number]
 }
+
+/**
+ * The gap between sections, theme-wide (Tezgâh audit K-11, as Shopify
+ * themes' section spacing): `normal` the theme's own gaps, `compact` a
+ * dense catalog's, `roomy` a showcase's. Mirrors `@qticaret/types`'
+ * `SECTION_SPACINGS` (a unit test keeps them equal).
+ */
+export const SECTION_SPACINGS = ["compact", "normal", "roomy"] as const
 
 const color = z
   .string()
@@ -173,6 +183,7 @@ const GRAFIT: ThemeSettings = {
   },
   header: { layout: "left", sticky: true },
   buttons: "pill",
+  section_spacing: "normal",
 }
 
 /**
@@ -184,6 +195,13 @@ const GRAFIT: ThemeSettings = {
  * the defaults.
  */
 export function withCardDefaults(value: unknown): unknown {
+  if (!isPlainObject(value)) {
+    return value
+  }
+  // The section spacing came later still (K-11): without it, the theme's own gaps
+  if (!Object.hasOwn(value, "section_spacing")) {
+    value = { ...value, section_spacing: GRAFIT.section_spacing }
+  }
   if (!isPlainObject(value) || !isPlainObject(value["product_card"])) {
     return value
   }
@@ -263,6 +281,7 @@ export const themeSection = defineSection<ThemeSettings>(
       .strict(),
     header: z.object({ layout: z.enum(["centered", "left"]), sticky: z.boolean() }).strict(),
     buttons: z.enum(["pill", "rounded", "square"]),
+    section_spacing: z.enum(SECTION_SPACINGS),
   },
   GRAFIT,
   (values, ctx) => {

@@ -66,13 +66,15 @@ export function Spotlight({
             {section.title && <h3 className="text-title text-stage-text">{product.title}</h3>}
             {section.text && <p className="text-stage-text-2">{section.text}</p>}
             {section.facts.length > 0 && (
-              <dl className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-6 text-sm">
+              <dl className="grid grid-cols-[auto_minmax(0,1fr)] text-sm">
                 {section.facts.slice(0, 5).map((fact) => (
                   <div key={fact.label} className="contents">
                     <dt className="border-t border-stage-rule py-2 text-stage-text-2">
                       {fact.label}
                     </dt>
-                    <dd className="border-t border-stage-rule py-2 font-semibold">{fact.value}</dd>
+                    <dd className="border-t border-stage-rule py-2 pl-6 font-semibold">
+                      {fact.value}
+                    </dd>
                   </div>
                 ))}
               </dl>

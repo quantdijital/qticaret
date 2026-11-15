@@ -8326,6 +8326,14 @@
           "square": "Square"
         },
         "buttonsHint": "Buttons, the search field, form fields and the quantity stepper change together. Chips and counts are always pills.",
+        "sectionSpacing": "Section spacing",
+        "sectionSpacingTerm": "section spacing",
+        "sectionSpacings": {
+          "compact": "Compact",
+          "normal": "Normal",
+          "roomy": "Roomy"
+        },
+        "sectionSpacingHint": "The space between the page's sections, changing for every section together. Normal is the theme's own gap (120 px on a wide screen); Compact brings it to 66 px, Roomy to 144 px.",
         "card": "Product card",
         "ratio": "Image ratio",
         "ratios": {

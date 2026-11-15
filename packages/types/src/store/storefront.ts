@@ -116,7 +116,18 @@ export interface StoreThemeSettings {
   }
   header: { layout: "centered" | "left"; sticky: boolean }
   buttons: "pill" | "rounded" | "square"
+  /** The gap between sections, theme-wide; `normal` is the theme's own (`SECTION_SPACINGS`). */
+  section_spacing: SectionSpacing
 }
+
+/**
+ * The gap between sections, theme-wide (Tezgâh audit K-11, as Shopify
+ * themes' section spacing): `compact` a dense catalog's, `normal` the
+ * theme's own (the default, today's gaps), `roomy` a showcase's. The
+ * theme maps each onto its own scale; the backend mirrors the list.
+ */
+export const SECTION_SPACINGS = ["compact", "normal", "roomy"] as const
+export type SectionSpacing = (typeof SECTION_SPACINGS)[number]
 
 /** `GET /store/storefront`: the frame and the free shipping threshold (F4.5). */
 export interface StorefrontAnswer {

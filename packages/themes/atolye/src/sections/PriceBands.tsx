@@ -14,7 +14,8 @@ const COLUMNS: Record<number, string> = {
 /**
  * The price bands (adr/0049 Ek 2026-11-14, note "Katalog ana sayfası";
  * design.md § Fiyat bantları): one card a band, the band's label large in
- * the shop's colour, its line under it and the products picked in it
+ * the page's ink (the shop's colour stays on actions: the border on hover,
+ * Tezgâh audit K-05), its line under it and the products picked in it
  * small; the whole card one link to the catalogue filtered by the band's
  * range. On a phone one row that scrolls (70% a card), from 768 px two
  * columns, from 1024 px all side by side. The cards stand on `field`, so
@@ -39,7 +40,7 @@ export function PriceBands({ section }: { section: Of<"price_bands"> }) {
                 href={band.path}
                 className="group flex h-full flex-col gap-2 rounded-tile border border-rule bg-field p-5 no-underline transition-colors hover:border-signal lg:p-6"
               >
-                <span className="text-display leading-[1.15] font-extrabold tracking-(--tracking-head) text-signal group-hover:underline group-hover:underline-offset-4">
+                <span className="text-display leading-[1.15] font-extrabold tracking-(--tracking-head) text-text group-hover:underline group-hover:underline-offset-4">
                   {band.label}
                 </span>
                 {band.text && <span className="text-sm text-text-2">{band.text}</span>}
