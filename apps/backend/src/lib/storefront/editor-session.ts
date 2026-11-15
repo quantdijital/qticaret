@@ -165,16 +165,21 @@ async function ownRecord(
     : null
 }
 
-/** Keeps `userId`'s open session going; false when it is not theirs or has ended. */
+/**
+ * Keeps an open session going, asked from the very panel session it was
+ * opened from (security review 2026-11-15: the same staff member signed in
+ * elsewhere does not keep it alive); false when it is not theirs, not from
+ * that panel session, or has ended.
+ */
 export async function renewEditorSession(
   store: EditorSessionStore,
   id: string,
-  userId: string,
+  owner: { userId: string; sid: string },
   now = new Date()
 ): Promise<boolean> {
   const at = now.getTime()
-  const record = await ownRecord(store, id, userId, at)
-  if (!record) {
+  const record = await ownRecord(store, id, owner.userId, at)
+  if (!record || !owner.sid || record.sid !== owner.sid) {
     return false
   }
   const renewed = { ...record, last_seen: at }

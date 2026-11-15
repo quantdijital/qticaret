@@ -75,31 +75,33 @@ describe("the theme editor's live preview session", () => {
     const { store, tick } = setup()
     const { id, token } = await openEditorSession(store, KEY, OWNER, T0)
     const later = tick(SESSION_IDLE_MS - MINUTE)
-    expect(await renewEditorSession(store, id, OWNER.userId, later)).toBe(true)
+    expect(await renewEditorSession(store, id, OWNER, later)).toBe(true)
     const stillOpen = tick(SESSION_IDLE_MS - MINUTE)
     expect(await editorSessionOf(store, KEY, token, stillOpen)).not.toBeNull()
     const idle = tick(2 * MINUTE)
     expect(await editorSessionOf(store, KEY, token, idle)).toBeNull()
-    expect(await renewEditorSession(store, id, OWNER.userId, idle)).toBe(false)
+    expect(await renewEditorSession(store, id, OWNER, idle)).toBe(false)
   })
 
   it("ends after 12 hours whatever its renewals", async () => {
     const { store, tick } = setup()
     const { id, token } = await openEditorSession(store, KEY, OWNER, T0)
     for (let step = 0; step < 47; step += 1) {
-      expect(await renewEditorSession(store, id, OWNER.userId, tick(15 * MINUTE))).toBe(true)
+      expect(await renewEditorSession(store, id, OWNER, tick(15 * MINUTE))).toBe(true)
     }
     // 11 h 45 min in: still open
     expect(await editorSessionOf(store, KEY, token, at(47 * 15 * MINUTE))).not.toBeNull()
     const end = tick(15 * MINUTE)
-    expect(await renewEditorSession(store, id, OWNER.userId, end)).toBe(false)
+    expect(await renewEditorSession(store, id, OWNER, end)).toBe(false)
     expect(await editorSessionOf(store, KEY, token, end)).toBeNull()
   })
 
   it("is renewed and closed by its own staff member only", async () => {
     const { store } = setup()
     const { id, token } = await openEditorSession(store, KEY, OWNER, T0)
-    expect(await renewEditorSession(store, id, "user_01OTHER", T0)).toBe(false)
+    expect(
+      await renewEditorSession(store, id, { userId: "user_01OTHER", sid: OWNER.sid }, T0)
+    ).toBe(false)
     expect(await closeEditorSession(store, id, "user_01OTHER", T0)).toBe(false)
     expect(await editorSessionOf(store, KEY, token, T0)).not.toBeNull()
     expect(await closeEditorSession(store, id, OWNER.userId, T0)).toBe(true)
@@ -108,9 +110,21 @@ describe("the theme editor's live preview session", () => {
     expect(await closeEditorSession(store, id, OWNER.userId, T0)).toBe(false)
   })
 
+  it("is renewed only from the panel session it was opened from", async () => {
+    const { store, tick } = setup()
+    const { id, token } = await openEditorSession(store, KEY, OWNER, T0)
+    const later = tick(SESSION_IDLE_MS - MINUTE)
+    // The same member signed in elsewhere, or with no panel session, keeps nothing alive
+    expect(await renewEditorSession(store, id, { ...OWNER, sid: "sid-elsewhere" }, later)).toBe(
+      false
+    )
+    expect(await renewEditorSession(store, id, { ...OWNER, sid: "" }, later)).toBe(false)
+    expect(await editorSessionOf(store, KEY, token, tick(2 * MINUTE))).toBeNull()
+  })
+
   it("refuses a malformed id before reading the store", async () => {
     const { store } = setup()
-    expect(await renewEditorSession(store, "../../x", OWNER.userId, T0)).toBe(false)
+    expect(await renewEditorSession(store, "../../x", OWNER, T0)).toBe(false)
     expect(await closeEditorSession(store, "sfs_*", OWNER.userId, T0)).toBe(false)
   })
 })

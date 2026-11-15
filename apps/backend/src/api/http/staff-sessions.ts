@@ -159,8 +159,17 @@ export async function sessionHolds(
   }
 }
 
-/** The panel session making the request and who it is signed in as; null for a bearer request. */
+/**
+ * The panel session making the request and who it is signed in as; null
+ * for a bearer request, and for one carrying any credential beside its
+ * session cookie (a bearer token, a secret API key: two identities, Medusa
+ * reads the session's and the other may name someone else; security
+ * review 2026-11-15).
+ */
 export function currentStaffSession(req: MedusaRequest): { sid: string; userId: string } | null {
+  if (req.headers.authorization?.trim()) {
+    return null
+  }
   const { session, sessionID } = asSession(req)
   const userId = staffOf(session)
   return userId && sessionID ? { sid: sessionID, userId } : null

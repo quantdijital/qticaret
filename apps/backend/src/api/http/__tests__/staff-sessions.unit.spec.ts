@@ -147,13 +147,36 @@ describe("the panel session a live preview is bound to (adr/0065)", () => {
   })
 
   it("names the session asking and its member; none for a bearer request", () => {
-    const signedIn = { sessionID: "s9", session: staff("user_9") } as unknown as MedusaRequest
+    const signedIn = {
+      headers: {},
+      sessionID: "s9",
+      session: staff("user_9"),
+    } as unknown as MedusaRequest
     expect(currentStaffSession(signedIn)).toEqual({ sid: "s9", userId: "user_9" })
-    expect(currentStaffSession({ session: null } as unknown as MedusaRequest)).toBeNull()
+    expect(
+      currentStaffSession({ headers: {}, session: null } as unknown as MedusaRequest)
+    ).toBeNull()
     const customer = {
+      headers: {},
       sessionID: "s8",
       session: { auth_context: { actor_type: "customer", actor_id: "cus_1" } },
     } as unknown as MedusaRequest
     expect(currentStaffSession(customer)).toBeNull()
+  })
+
+  it("names none for a session cookie sent with a bearer token (two identities)", () => {
+    const mixed = {
+      headers: { authorization: "Bearer eyJ.other.token" },
+      sessionID: "s9",
+      session: staff("user_9"),
+    } as unknown as MedusaRequest
+    expect(currentStaffSession(mixed)).toBeNull()
+    // A secret API key (`Basic`) beside the cookie is a second identity too
+    const basic = {
+      headers: { authorization: "Basic c2tfdGVzdDo=" },
+      sessionID: "s9",
+      session: staff("user_9"),
+    } as unknown as MedusaRequest
+    expect(currentStaffSession(basic)).toBeNull()
   })
 })
