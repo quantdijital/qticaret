@@ -46,6 +46,10 @@
       "file": "marquee.css"
     },
     {
+      "sha256": "d0ea816ae8997f1d4fc562774b5b54ad5cbe986b6b7193c5e493516d6537e66b",
+      "file": "media.css"
+    },
+    {
       "sha256": "6bebdfc8f51f407595cbfa30a152b92a7277cc268aff2bf8f14e49bb632f8957",
       "file": "menu.css"
     },
@@ -62,7 +66,7 @@
       "file": "slider.css"
     },
     {
-      "sha256": "1a8827558ffb87c9de06e483b140a55a51f6c24666711c8b566a1771fc8d49bd",
+      "sha256": "4248179e0fef3cd64f2cc4bca1ef71436943e24ccd083bd4353eca755f3e581d",
       "file": "styles.css"
     },
     {

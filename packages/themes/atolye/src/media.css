@@ -1,0 +1,29 @@
+/*
+ * The photo well's ground (theme setting `media_ground`, adr/0067 S4).
+ * `well` (the default) draws a tone darker than the page behind a product's
+ * or a category's photograph and a list's thumbnail (`bg-media`,
+ * `bg-media-deep`, tokens.css), and prints nothing. `page` (the root's
+ * `data-media-ground="page"`) draws the ground the photo sits on, so a
+ * white-ground product photograph merges with the page: the page's paper,
+ * or the field inside a white box (a framed card, a price band, a dropdown,
+ * the live search). Each resolves on the well, so on a graphite or the
+ * shop's-colour section the well is that section's own ground and the
+ * photo reads on it as it does on the page.
+ *
+ * No edge is added: the setting's point is a photo without a frame. A shop
+ * that wants the card's outline picks the framed card (`product_card.variant`),
+ * which keeps its 1 px rule; a row's thumbnail stands beside its name.
+ *
+ * Unlayered, as `surface.css`: the attribute and the class outrank the
+ * well's utility whatever its layer (adr/0067 "Uygulama notu").
+ */
+[data-media-ground="page"] :is(.bg-media, .bg-media-deep) {
+  background-color: var(--color-paper);
+}
+[data-media-ground="page"] :is(.bg-field, .gf-drop, .gf-suggest) :is(.bg-media, .bg-media-deep) {
+  background-color: var(--color-field);
+}
+/* The lined subcategory tile's small picture (surface.css) is a photo well too */
+[data-media-ground="page"][data-surface="lined"] .gf-subtile img {
+  background: var(--color-paper);
+}

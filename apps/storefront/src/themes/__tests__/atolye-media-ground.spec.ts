@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest"
-import { ATOLYE_SOURCE, atolyeCss, declared } from "@/test/atolye-css"
+import { atolyeTheme } from "@qticaret/theme-atolye"
+import { DEFAULT_THEME, themeView } from "@/lib/views/theme"
+import { ATOLYE_SOURCE, atolyeCss, declared, ruleBody } from "@/test/atolye-css"
+import { renderFrame, shopFixture } from "@/test/theme-render"
 import { readdirSync } from "node:fs"
 
 /**
@@ -100,5 +103,42 @@ describe("the photo well's name (adr/0067 S4, step 5a)", () => {
 
   it("keeps a well's controls answering the pointer one step darker, as on paper-2", () => {
     expect(atolyeCss("buy.css")).toContain(":is(.bg-paper-2, .bg-media) .gf-icon-btn:hover")
+  })
+})
+
+describe("the photo ground's page step (adr/0067 S4, step 5b)", () => {
+  const media = atolyeCss("media.css")
+  const PAGE = '[data-media-ground="page"] :is(.bg-media, .bg-media-deep)'
+  const IN_BOX =
+    '[data-media-ground="page"] :is(.bg-field, .gf-drop, .gf-suggest) :is(.bg-media, .bg-media-deep)'
+  const SUBTILE = '[data-media-ground="page"][data-surface="lined"] .gf-subtile img'
+
+  it("draws the well in the ground it sits on: the page, or the field in a white box", () => {
+    expect(ruleBody(media, PAGE)).toContain("background-color: var(--color-paper);")
+    expect(ruleBody(media, IN_BOX)).toContain("background-color: var(--color-field);")
+    expect(ruleBody(media, SUBTILE)).toContain("background: var(--color-paper);")
+  })
+
+  it("adds no edge: a photo without a frame, the framed card keeps its own rule", () => {
+    for (const selector of [PAGE, IN_BOX, SUBTILE]) {
+      expect(ruleBody(media, selector)).not.toMatch(/border|box-shadow|outline/)
+    }
+  })
+
+  it("is unlayered, so the mark outranks the well's utility, and loaded after the boxes", () => {
+    expect(media).not.toContain("@layer")
+    const styles = atolyeCss("styles.css")
+    expect(styles).toContain('@import "./media.css";')
+    expect(styles.indexOf('"./media.css"')).toBeGreaterThan(styles.indexOf('"./surface.css"'))
+  })
+
+  it("marks nothing at the default: every well prints its tone as before the step", () => {
+    const html = renderFrame(atolyeTheme, shopFixture({ theme: themeView(DEFAULT_THEME) }))
+    expect(html).not.toContain("data-media-ground")
+    const page = renderFrame(
+      atolyeTheme,
+      shopFixture({ theme: themeView({ ...DEFAULT_THEME, media_ground: "page" }) })
+    )
+    expect(/^<div[^>]*>/.exec(page)?.[0]).toContain('data-media-ground="page"')
   })
 })
