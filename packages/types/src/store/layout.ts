@@ -14,6 +14,7 @@ import type { FeaturedProductSettings } from "./section-featured.js"
 import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
 import type { StoreCategoriesCollage, StoreCategoriesLinked } from "./section-categories.js"
+import type { StoreStripGallerySection } from "./section-strips.js"
 import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
 import type { CardVariant, RelatedProductsVariant, TrustBadgesVariant } from "./section-variants.js"
 import type { ScrollerSettings, SliderSettings } from "./section-scroller.js"
@@ -122,6 +123,7 @@ export type StoreLayoutSection = StoreSectionLookPart &
     | StoreFaqSection
     | StoreMarqueeSection
     | StorePriceBandsSection
+    | StoreStripGallerySection
   )
 
 /**
