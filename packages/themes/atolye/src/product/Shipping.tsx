@@ -16,7 +16,7 @@ export function ShippingCard({ shipping, t }: { shipping: ProductShippingView; t
     <section
       id="kargo-ve-teslimat"
       aria-labelledby="kargo-ve-teslimat-baslik"
-      className="flex scroll-mt-40 flex-col gap-5 rounded-tile bg-paper-2 p-5 sm:p-6"
+      className="flex scroll-mt-40 flex-col gap-5 rounded-tile gf-box p-5 sm:p-6"
     >
       {/* The page's one heading size and no arrow on a link (Tezgâh audits K-13, Y-09) */}
       <h2 id="kargo-ve-teslimat-baslik" className="text-section">

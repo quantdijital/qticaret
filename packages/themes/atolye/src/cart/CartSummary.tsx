@@ -48,7 +48,7 @@ export function CartSummary({
   const trust = view.trust ?? []
   return (
     <aside aria-labelledby="sepet-ozeti" className="flex flex-col gap-4 lg:sticky lg:top-44">
-      <div className="flex flex-col gap-6 rounded-tile bg-paper-2 p-5 sm:p-7">
+      <div className="flex flex-col gap-6 rounded-tile gf-box p-5 sm:p-7">
         <h2 id="sepet-ozeti" className="text-title">
           {t("cart.summary")}
         </h2>

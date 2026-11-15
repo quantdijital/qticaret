@@ -66,7 +66,7 @@ function Group({ group, hash, t }: { group: FilterGroupView; hash: string; t: Tr
   const rest = group.options.slice(SHOWN)
   const chosen = group.options.filter((option) => option.selected).length
   return (
-    <details open className="group/filter rounded-media bg-paper-2 px-2 py-1">
+    <details open className="group/filter rounded-media gf-box px-2 py-1">
       <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-inner px-2 text-md font-semibold">
         <span>
           {group.label}
@@ -127,8 +127,7 @@ function StockSwitch({ stock, hash }: { stock: StockFilterView; hash: string }) 
       <span className="tabular text-xs text-text-3">{stock.count}</span>
     </>
   )
-  const style =
-    "flex min-h-14 items-center gap-3 rounded-media bg-paper-2 px-4 text-sm no-underline"
+  const style = "flex min-h-14 items-center gap-3 rounded-media gf-box px-4 text-sm no-underline"
   return dim ? (
     <span aria-disabled="true" className={cn(style, "opacity-60")}>
       {body}
@@ -162,7 +161,7 @@ function PriceRange({
   const rule = { min: 0, max: stepCeiling(price.max, step), step }
   const words = { increase: t("listing.price_increase"), decrease: t("listing.price_decrease") }
   return (
-    <details open className="group/filter rounded-media bg-paper-2 px-2 py-1">
+    <details open className="group/filter rounded-media gf-box px-2 py-1">
       <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-3 rounded-inner px-2 text-md font-semibold">
         {t("listing.price")}
         <ChevronDown

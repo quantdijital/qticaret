@@ -14,7 +14,9 @@ Ziyaretçi bir alet arıyor. Önce nerede olduğunu (kategori listesi), sonra ne
 
 **Köşe.** Keskin (`radius: sharp`, Grafit ölçeğinin 0,2'si: 4 / 3 / 2 px). Düğme kare (`buttons: square`). Çip, rozet ve sayaç tema gereği hap kalır; onlar etiket, yüzey değil.
 
-**Çizgi.** Yüzeyleri gölge değil 1 px `rule` çizgi ayırır. Kart çerçeveli (`product_card.variant: framed`), gölgesiz; güvence şeridi çizgilerle bölünmüş kutular (`trust_badges: lined`). Gölge yalnız açılır katmanda (temanın `--shadow-float`).
+**Çizgi.** Yüzeyleri gölge değil 1 px `rule` çizgi ayırır. Kart çerçeveli (`product_card.variant: framed`), gölgesiz; güvence şeridi çizgilerle bölünmüş kutular (`trust_badges: lined`). Gölge yalnız açılır katmanda (temanın `--shadow-float`). Alt sayfalar da aynı dili konuşur: tema ayarı "Kutu stili" `surface_style: lined` (sektörsüz; varsayılan `filled`) ürün sayfasının bilgi kutularını ve puan özetini, kategori sayfasının filtre gruplarını, "Filtrele"/"Sırala" düğmelerini ve alt kategori döşemelerini (gradyansız satır: küçük kare görsel + ad), sepet ve sepet çekmecesindeki kutuları sayfa zemininde 1 px çizgiyle çizer (üçüncü denetim Z-04, Z-05).
+
+**Alt sayfaların sonu.** Ürün sayfası çıkmaz sokak değildir: altta "Benzer ürünler" (aynı kategori, `related_products: carousel`, sekmeli rafın kaydırma takımı: kare oklar başlığın yanında, otomatik geçiş yok). Kategori sayfasının altında çizgili güvence şeridi (`trust_badges: lined`, `placement: bottom`). (Üçüncü denetim Z-01.)
 
 **Boşluk ritmi.** Bölüm aralığı Sık: tema ayarı `section_spacing: compact` (temanın aralığının 0,55 katı; 1440'ta 66 px, fiyat bantlarında 53 px). Bölümlerin kendi dış boşluğu temanınki (`look.space_outer: null`). İki istisna: açılışın hemen altındaki güvence şeridi `none` (açılışa yapışık, ilk ekranda); kuyu zeminli bantlarda iç boşluk `medium`. Başka boşluk ayarı yok. (2026-11-15 tarayıcı denetimi K-02/K-11: "Sık" ile "temanın aralığı" çelişkisi bu ayarla kalktı.)
 

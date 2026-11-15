@@ -57,6 +57,7 @@ describe("themeSettings", () => {
       header: { layout: "left", sticky: false },
       buttons: "square",
       section_spacing: "compact",
+      surface_style: "lined",
     }
     expect(themeSettings(answer, null)).toEqual(answer)
   })
@@ -86,6 +87,7 @@ describe("themeSettings", () => {
       header: { layout: "left", sticky: true },
       buttons: "pill",
       section_spacing: "normal",
+      surface_style: "filled",
     })
     expect(themeSettings(undefined, null)).toEqual(DEFAULT_THEME)
     expect(themeSettings(undefined, "#0b5c99").colors.primary).toBe("#0b5c99")
@@ -281,7 +283,9 @@ describe("themeView", () => {
       card: { ratio: "1:1", showBrand: true, showRating: false },
       header: { layout: "left", sticky: true },
       buttons: "pill",
+      surface: "filled",
     })
+    expect(themeView(theme({ surface_style: "lined" })).surface).toBe("lined")
     expect(
       themeView(
         theme({

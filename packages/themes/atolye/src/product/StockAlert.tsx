@@ -36,11 +36,7 @@ export function StockAlert({
   })
   if (done) {
     return (
-      <p
-        id={id}
-        role="status"
-        className="rounded-media bg-paper-2 p-4 text-sm font-semibold text-ok"
-      >
+      <p id={id} role="status" className="rounded-media gf-box p-4 text-sm font-semibold text-ok">
         {signedIn ? words.sent : words.sentGuest}
       </p>
     )
@@ -50,7 +46,7 @@ export function StockAlert({
     <form
       id={id}
       onSubmit={onSubmit}
-      className="flex scroll-mt-40 flex-col gap-3 rounded-media bg-paper-2 p-4"
+      className="flex scroll-mt-40 flex-col gap-3 rounded-media gf-box p-4"
     >
       <p className="flex items-center gap-2 text-sm font-semibold">
         <BellRing className="size-5" aria-hidden="true" strokeWidth={1.75} />
