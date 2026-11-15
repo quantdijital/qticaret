@@ -784,7 +784,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "wholesale.managed":
     "Bu grup ya da fiyat listesi toptan satışa ait; toptan ekranlarından değiştirin.",
   "wholesale.tier_exists": "Bu adla bir toptan seviyesi ya da müşteri grubu zaten var.",
-  "wholesale.tier_in_use": "Bu seviyede toptancılar var; önce onları başka bir seviyeye taşıyın.",
+  "wholesale.tier_in_use":
+    "Bu seviyede toptancılar var; önce bu seviyedeki toptancıları başka bir seviyeye taşıyın ya da silin.",
   "wholesale.tier_unknown": "Toptan seviyesi bulunamadı.",
   "wholesale.variant_unknown": "Seçilen ürünlerden biri artık yok.",
   "wholesale.exists": "Bu e-posta adresi için zaten bir toptancı kaydı var.",

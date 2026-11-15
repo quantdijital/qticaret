@@ -136,8 +136,8 @@ export const isEmptyMembershipPlan = (plan: MembershipPlan): boolean =>
 export const ACCOUNT_ACTIONS = {
   deactivate: ["active"],
   reactivate: ["inactive"],
-  // A pending account is one invited before staff set passwords (Ek 2026-11-15 (2)): taken back only
-  delete: ["pending"],
+  // Deleted whatever its state (Ek 2026-11-15 (2)): the wholesale side only, the customer stays
+  delete: ["pending", "active", "inactive"],
   // A new password typed by staff (Ek 2026-11-15 (2)): an open account only (review M4)
   password: ["active"],
 } as const satisfies Record<string, readonly AccountStatus[]>

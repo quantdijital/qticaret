@@ -101,7 +101,12 @@ export const WHOLESALE_ROUTES = [
     methods: ["POST" as const],
     middlewares: staff(perStaff(), validateAndTransformBody(AdminUpdateWholesaleAccount)),
   },
-  { matcher: "/admin/wholesale/accounts/:id", methods: ["DELETE" as const], middlewares: staff() },
+  // Ek 2026-11-15 (2): any wholesaler deleted, the customer kept; the other writes' budget
+  {
+    matcher: "/admin/wholesale/accounts/:id",
+    methods: ["DELETE" as const],
+    middlewares: staff(perStaff()),
+  },
   ...["deactivate", "reactivate"].map((action) => ({
     matcher: `/admin/wholesale/accounts/:id/${action}`,
     methods: ["POST" as const],

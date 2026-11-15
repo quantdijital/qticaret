@@ -1,6 +1,7 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { percentToBps } from "../../../../../lib/wholesale"
-import { deletePendingAccountWorkflow } from "../../../../../workflows/wholesale/accounts/remove"
+import { deleteAccountWorkflow } from "../../../../../workflows/wholesale/accounts/remove"
+import { AUDIT_RESULT } from "../../../../http/audit/notes"
 import { updateAccountWorkflow } from "../../../../../workflows/wholesale/accounts/update"
 import { queueWholesaleSync } from "../../../../../workflows/wholesale/queue"
 import type { AdminUpdateWholesaleAccountType } from "../../account-validators"
@@ -46,9 +47,17 @@ export async function POST(
   res.json({ account: await accountViewOf(req, id) })
 }
 
-/** `DELETE /admin/wholesale/accounts/:id`: a pending wholesaler taken back; others are closed. */
+/**
+ * `DELETE /admin/wholesale/accounts/:id` (Ek 2026-11-15 (2)): a wholesaler
+ * deleted whatever its state; the wholesale side only, the customer stays
+ * a retail customer. Its open carts are priced again as closing does;
+ * `carts` says how many and how many could not be (also in the audit entry).
+ */
 export async function DELETE(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const id = await accountIdOf(req)
-  await deletePendingAccountWorkflow(req.scope).run({ input: { id } })
-  res.json({ id, deleted: true })
+  const { result } = await deleteAccountWorkflow(req.scope).run({
+    input: { id, updated_by: req.auth_context.actor_id || null },
+  })
+  res.locals[AUDIT_RESULT] = { carts: result.carts }
+  res.json({ id, deleted: true, carts: result.carts })
 }

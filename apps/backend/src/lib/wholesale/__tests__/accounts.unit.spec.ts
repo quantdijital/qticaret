@@ -138,7 +138,7 @@ describe("the groups a wholesaler's customer is in (ADR-0068 §2, §3)", () => {
 })
 
 describe("what each state allows (ADR-0068 §3)", () => {
-  it("closes an active one, reopens a closed one, takes back a pending one, sets an open one's password", () => {
+  it("closes an active one, reopens a closed one, deletes any, sets an open one's password", () => {
     expect(allows("deactivate", "active")).toBe(true)
     expect(allows("deactivate", "pending")).toBe(false)
     expect(allows("deactivate", "inactive")).toBe(false)
@@ -148,8 +148,9 @@ describe("what each state allows (ADR-0068 §3)", () => {
     expect(allows("password", "inactive")).toBe(false)
     expect(allows("password", "pending")).toBe(false)
     expect(allows("delete", "pending")).toBe(true)
-    expect(allows("delete", "active")).toBe(false)
-    expect(allows("delete", "inactive")).toBe(false)
+    // Deleted whatever its state (Ek 2026-11-15 (2))
+    expect(allows("delete", "active")).toBe(true)
+    expect(allows("delete", "inactive")).toBe(true)
   })
 
   it("keeps a level or an own list: never neither", () => {

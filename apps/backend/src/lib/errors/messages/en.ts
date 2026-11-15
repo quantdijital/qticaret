@@ -782,7 +782,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "wholesale.managed":
     "This group or price list belongs to wholesale; change it on the wholesale screens.",
   "wholesale.tier_exists": "A wholesale level or customer group with this name already exists.",
-  "wholesale.tier_in_use": "Wholesalers are on this level; move them to another level first.",
+  "wholesale.tier_in_use":
+    "Wholesalers are on this level; move them to another level or delete them first.",
   "wholesale.tier_unknown": "Wholesale level not found.",
   "wholesale.variant_unknown": "One of the products chosen no longer exists.",
   "wholesale.exists": "A wholesaler with this e-mail address already exists.",

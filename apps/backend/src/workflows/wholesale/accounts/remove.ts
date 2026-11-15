@@ -7,15 +7,26 @@ import {
   transform,
   when,
 } from "@medusajs/framework/workflows-sdk"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import {
   acquireLockStep,
   deleteCustomerGroupsWorkflow,
   deletePriceListsWorkflow,
+  dismissRemoteLinkStep,
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
 import { errorSummary, logger } from "../../../lib/logging"
 import { inviteCutoff } from "../../../lib/wholesale"
-import { checkAccountStep, removeAccountRowStep, wholesale } from "../steps/account-rows"
+import { WHOLESALE_MODULE } from "../../../modules/wholesale"
+import {
+  accountById,
+  checkAccountStep,
+  patchAccountStep,
+  retireAccountRowStep,
+  wholesale,
+} from "../steps/account-rows"
+import { repriceCartsStep } from "../steps/carts"
+import { syncMembershipsStep } from "../steps/memberships"
 
 /** The own list's hand-entered prices taken away with it; undone by bringing them back. */
 const removeMarksStep = createStep(
@@ -42,18 +53,67 @@ const removeMarksStep = createStep(
   }
 )
 
+/** The account's state before deleting, and its customer's display name for the order list. */
+const readForDeleteStep = createStep(
+  "wholesale-read-for-delete",
+  async (input: { id: string }, { container }) => {
+    const account = await accountById(container, input.id)
+    const { data } = account.customer_id
+      ? await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+          entity: "customer",
+          fields: ["company_name"],
+          filters: { id: account.customer_id },
+        })
+      : { data: [] }
+    const company = (data[0] as { company_name?: string | null } | undefined)?.company_name
+    return new StepResponse({
+      customer_id: account.customer_id ?? null,
+      // The company the order list names; a person's name is not kept (KVKK inventory)
+      company_name:
+        [company, account.company_name]
+          .map((name) => name?.trim() ?? "")
+          .find((name) => name !== "") ?? null,
+    })
+  }
+)
+
 /**
- * A pending wholesaler taken back (ADR-0068 §3: only a pending one; an
- * active one is closed) or past its 90 days (§10): its own list and group
- * and their prices, then the account, the address it held cleared.
+ * A wholesaler deleted (ADR-0068 Ek 2026-11-15 (2), the owner: "bu
+ * toptancıları silemiyorum"), whatever its state; also an older pending
+ * one taken back or past its days. Only the wholesale side goes, each
+ * step undone if a later one fails:
+ * - closed first, as `deactivateAccountWorkflow` closes: out of its
+ *   groups at once, its open carts priced again at retail (counted);
+ * - its own list, hidden group and hand-entered prices deleted;
+ * - its link to the customer dismissed; the customer and their sign-in
+ *   stay, an ordinary retail customer;
+ * - the row soft-deleted with only the company name kept, so its past
+ *   orders stay wholesale orders and still show who placed them; the
+ *   address and contact cleared. The same address may be opened again.
  */
-export const deletePendingAccountWorkflow = createWorkflow(
-  "wholesale-delete-pending-account",
-  (input: { id: string }) => {
+export const deleteAccountWorkflow = createWorkflow(
+  "wholesale-delete-account",
+  (input: { id: string; updated_by: string | null }) => {
     const lock = transform({ input }, ({ input }) => `wholesale-account:${input.id}`)
-    acquireLockStep({ key: lock, timeout: 5, ttl: 60 })
+    acquireLockStep({ key: lock, timeout: 5, ttl: 120 })
     const account = checkAccountStep(
       transform({ input }, ({ input }) => ({ id: input.id, action: "delete" as const }))
+    )
+    const read = readForDeleteStep(transform({ input }, ({ input }) => ({ id: input.id })))
+    patchAccountStep(
+      transform({ input }, ({ input }) => ({
+        id: input.id,
+        patch: { status: "inactive" as const, updated_by: input.updated_by },
+      }))
+    )
+    const moved = syncMembershipsStep(
+      transform({ input }, ({ input }) => ({ account_id: input.id }))
+    )
+    const carts = repriceCartsStep(
+      transform({ account, moved }, ({ account, moved }) => ({
+        customer_id: account.customer_id,
+        changed: moved.added + moved.removed > 0,
+      }))
     )
     removeMarksStep(
       transform({ account }, ({ account }) => ({ price_list_id: account.private_price_list_id }))
@@ -74,9 +134,28 @@ export const deletePendingAccountWorkflow = createWorkflow(
         })),
       })
     })
-    removeAccountRowStep(transform({ input }, ({ input }) => ({ id: input.id })))
+    when("wholesale-delete-customer-link", { read }, ({ read }) => read.customer_id !== null).then(
+      () => {
+        dismissRemoteLinkStep(
+          transform({ input, read }, ({ input, read }) => [
+            {
+              [Modules.CUSTOMER]: { customer_id: read.customer_id ?? "" },
+              [WHOLESALE_MODULE]: { wholesale_account_id: input.id },
+            },
+          ])
+        )
+      }
+    )
+    retireAccountRowStep(
+      transform({ input, read }, ({ input, read }) => ({
+        id: input.id,
+        company_name: read.company_name,
+      }))
+    )
     releaseLockStep({ key: lock })
-    return new WorkflowResponse({ id: input.id })
+    return new WorkflowResponse(
+      transform({ input, carts }, ({ input, carts }) => ({ id: input.id, carts }))
+    )
   }
 )
 
@@ -104,7 +183,7 @@ export async function removeExpiredInvitations(
   let removed = 0
   for (const { id } of expired) {
     try {
-      await deletePendingAccountWorkflow(container).run({ input: { id } })
+      await deleteAccountWorkflow(container).run({ input: { id, updated_by: null } })
       removed += 1
     } catch (error) {
       logger.warn({ event: "wholesale.invite_expiry_failed", err: errorSummary(error) })

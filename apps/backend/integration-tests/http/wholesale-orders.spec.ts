@@ -128,6 +128,17 @@ medusaIntegrationTestRunner({
       // The customer's page shows every order of theirs
       const theirs = await board(`stage=all&segment=all&customer_id=${customer.id}`)
       expect(theirs.data.orders.map((row) => row.id)).toContain(wholesaleId)
+
+      // Deleted, it stays a wholesale order that names its wholesaler, off the retail list
+      expect((await accounts.remove(account.id)).status).toBe(200)
+      const kept = await board("stage=all&segment=wholesale")
+      expect(kept.data.orders.find((row) => row.id === wholesaleId)?.wholesaler?.name).toBe(
+        "Kaya Bıçak Ltd"
+      )
+      const retailAfter = await board("stage=all")
+      expect(retailAfter.data.orders.map((row) => row.id)).not.toContain(wholesaleId)
+      // The wholesaler picker lists only wholesalers that are still there
+      expect((await accounts.list()).data.accounts.map((each) => each.id)).not.toContain(account.id)
     })
 
     it("refuses an unknown segment", async () => {

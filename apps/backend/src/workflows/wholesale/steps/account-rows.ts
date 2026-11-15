@@ -145,22 +145,37 @@ export const patchAccountStep = createStep(
 )
 
 /**
- * The account gone for good (a pending one taken back or past its 90
- * days): what named a person (address, company, contact) cleared, the
- * row soft-deleted so its Medusa ids still tell the price events apart.
- * The workflow's last step: nothing after it to undo it for.
+ * The account gone (deleted by staff, or a pending one past its days):
+ * the address and contact cleared, the company name the order list shows
+ * kept, the row soft-deleted so its Medusa ids still tell the price
+ * events apart and its past orders still name it. Undone by putting the
+ * fields back and restoring the row.
  */
-export const removeAccountRowStep = createStep(
-  "wholesale-remove-account-row",
-  async (input: { id: string }, { container }) => {
+export const retireAccountRowStep = createStep(
+  "wholesale-retire-account-row",
+  async (input: { id: string; company_name: string | null }, { container }) => {
     const service = wholesale(container)
+    const account = await accountById(container, input.id)
+    const before = {
+      id: account.id,
+      email: account.email ?? null,
+      company_name: account.company_name ?? null,
+      contact_name: account.contact_name ?? null,
+    }
     await service.updateWholesaleAccounts({
       id: input.id,
       email: null,
-      company_name: null,
+      company_name: input.company_name,
       contact_name: null,
     })
     await service.softDeleteWholesaleAccounts([input.id])
-    return new StepResponse({ id: input.id })
+    return new StepResponse({ id: input.id }, before)
+  },
+  async (before, { container }) => {
+    if (before) {
+      const service = wholesale(container)
+      await service.restoreWholesaleAccounts([before.id])
+      await service.updateWholesaleAccounts(before)
+    }
   }
 )

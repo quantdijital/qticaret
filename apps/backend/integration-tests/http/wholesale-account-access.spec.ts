@@ -6,9 +6,13 @@ import { registerCustomer } from "../helpers/customer"
 import type { HttpClient } from "../helpers/http"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
+import { WHOLESALE_MODULE } from "../../src/modules/wholesale"
+import type WholesaleModuleService from "../../src/modules/wholesale/service"
+import { settle } from "../helpers/http"
 import {
   accountApi,
   accountRecords,
+  groupsOf,
   legacyPendingAccount,
   testPassword,
   wholesaleApi,
@@ -85,7 +89,7 @@ medusaIntegrationTestRunner({
       expect(listed.data.customer_groups.map((group) => group.id)).not.toContain(groupId)
     })
 
-    it("takes a pending wholesaler back with its own list, never an active one", async () => {
+    it("takes an older pending wholesaler back with its own list", async () => {
       const pending = await legacyPendingAccount(getContainer(), {
         email: fresh(),
         contact_name: "Ali Kaya",
@@ -105,15 +109,62 @@ medusaIntegrationTestRunner({
         .resolve(Modules.CUSTOMER)
         .listCustomerGroups({ id: [before.groupId ?? ""] })
       expect({ lists: lists.length, groups: groups.length }).toEqual({ lists: 0, groups: 0 })
+    })
 
+    it("deletes an active wholesaler: the wholesale side only, the customer stays retail", async () => {
       const customer = await registerCustomer(http, store)
       const active = await accounts.made({
         email: customer.email,
         contact_name: "Ali Kaya",
+        company_name: "Kaya Bıçak Ltd",
         own_prices: true,
       })
-      const refused = await accounts.remove(active.id)
-      expect([refused.status, message(refused)]).toEqual([409, "wholesale.account_not_pending"])
+      const before = await accountRecords(getContainer(), active.id)
+      expect(await groupsOf(getContainer(), customer.id)).toEqual([before.groupId])
+
+      const removed = await accounts.remove(active.id)
+      expect(removed.status).toBe(200)
+      expect(removed.data).toMatchObject({ deleted: true, carts: { repriced: 0, failed: 0 } })
+      expect((await accounts.get(active.id)).status).toBe(404)
+      expect((await accounts.list()).data.accounts.map((account) => account.id)).not.toContain(
+        active.id
+      )
+      // Out of its groups, its own list gone; the customer and their sign-in stay
+      expect(await groupsOf(getContainer(), customer.id)).toEqual([])
+      const lists = await getContainer()
+        .resolve(Modules.PRICING)
+        .listPriceLists({ id: [before.priceListId ?? ""] })
+      expect(lists).toHaveLength(0)
+      expect(
+        (await settle(http.get("/store/customers/me", { headers: customer.headers }))).status
+      ).toBe(200)
+      // The row keeps the company name only, for the order list
+      const row = await getContainer()
+        .resolve<WholesaleModuleService>(WHOLESALE_MODULE)
+        .listWholesaleAccounts({ id: active.id }, { take: 1, withDeleted: true })
+      expect(row[0]).toMatchObject({
+        email: null,
+        contact_name: null,
+        company_name: "Kaya Bıçak Ltd",
+      })
+
+      // The same address opened again: a new account, its own sign-in rule
+      const again = await accounts.made({
+        email: customer.email,
+        contact_name: "Ali Kaya",
+        own_prices: true,
+      })
+      expect(again.id).not.toBe(active.id)
+      expect((await accounts.get(again.id)).data.account).toMatchObject({
+        status: "active",
+        staff_login: false,
+      })
+      // Operations may not delete
+      const operations = accountApi(
+        http,
+        (await createAdminUser(http, getContainer(), "operations")).headers
+      )
+      expect((await operations.remove(again.id)).status).toBe(403)
     })
 
     it("sets a new password only on an open account whose sign-in staff made (review M4)", async () => {
