@@ -20,6 +20,7 @@ describe("a section's look in the editor", () => {
 
     expect(set.look).toEqual({
       space_outer: "none",
+      space_below: null,
       space_inner: null,
       ground: "well",
       align: null,

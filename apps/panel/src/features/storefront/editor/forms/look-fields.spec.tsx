@@ -67,12 +67,11 @@ describe("the section's look settings", () => {
     renderPanel(newHomeSection("products", "rafyeni001"))
 
     expect(lookToggle()).toHaveAttribute("aria-expanded", "false")
-    expect(screen.queryByRole("radiogroup", { name: /Dış boşluk/ })).toBeNull()
+    expect(screen.queryByRole("radiogroup", { name: /İç boşluk/ })).toBeNull()
 
     await userEvent.click(lookToggle())
 
     for (const [label, term] of [
-      ["Dış boşluk", "margin"],
       ["İç boşluk", "padding"],
       ["Zemin", "background"],
       ["Hizalama", "text-align"],
@@ -83,6 +82,28 @@ describe("the section's look settings", () => {
     }
     // An unset field says nothing more: the group's hint covers it
     expect(screen.queryByText(/temanın ölçüsünden/)).not.toBeInTheDocument()
+  })
+
+  it("keeps the space above and below in their own open group (sahip 2026-11-15)", async () => {
+    const changes = renderPanel(newHomeSection("products", "rafyeni001"))
+
+    const spacing = screen.getByRole("button", { name: /^Boşluk/ })
+    expect(spacing).toHaveAttribute("aria-expanded", "true")
+    const above = screen.getByRole("radiogroup", { name: "Üst boşluk margin-top" })
+    const below = screen.getByRole("radiogroup", { name: "Alt boşluk margin-bottom" })
+    expect(
+      within(below)
+        .getAllByRole("radio")
+        .map((radio) => radio.textContent)
+    ).toEqual(["Yok", "Dar", "Orta", "Geniş"])
+    expect(within(above).getByRole("radio", { name: "Orta" })).not.toBeChecked()
+
+    await userEvent.click(within(below).getByRole("radio", { name: "Dar" }))
+
+    expect(changes.at(-1)).toMatchObject({ look: { space_below: "small", space_outer: null } })
+    expect(screen.getByRole("button", { name: /^Boşluk · 1 ayar/ })).toBeInTheDocument()
+    // The other group counts only its own
+    expect(lookToggle(/^Diğer ayarlar$/)).toBeInTheDocument()
   })
 
   it("sets a step, says how many are set, and puts the theme's own back", async () => {

@@ -7,11 +7,14 @@ import { cn } from "@qticaret/admin-ui/lib/utils"
 import type { SectionLook, SectionLookField, SectionLookStep } from "@qticaret/types"
 import type { LookedSection } from "@/features/storefront/api/layout"
 import {
+  type LookPart,
+  lookCount,
   lookFieldsFor,
   lookStep,
   lookStepsFor,
   withLookStep,
 } from "@/features/storefront/layout/look"
+import { PanelGroup } from "../panel-header"
 import { FIELD_IDS } from "./field-registry"
 import { LookSketch } from "./look-sketches"
 
@@ -104,20 +107,24 @@ function LookField<F extends SectionLookField>({
 }
 
 /**
- * A body section's look, in the closed "Diğer ayarlar" group: only the
+ * A body section's look, its spacing in the open "Boşluk" group and the
+ * rest in the closed "Diğer ayarlar" (`part`): only the
  * fields its type offers (no alignment where the words sit on a picture),
  * each set and reset on its own; every change shows in the preview at once.
  */
 export function LookFields<S extends LookedSection>({
   section,
+  part,
   onChange,
 }: {
   section: S
+  /** One group's fields: the open "Boşluk" (`spacing`) or the closed "Diğer ayarlar" (`other`). */
+  part?: LookPart
   onChange: (section: S, field?: string) => void
 }) {
   return (
     <div className="flex flex-col gap-5">
-      {lookFieldsFor(section.type).map((field) => (
+      {lookFieldsFor(section.type, part).map((field) => (
         <LookField
           key={field}
           section={section}
@@ -129,5 +136,35 @@ export function LookFields<S extends LookedSection>({
         />
       ))}
     </div>
+  )
+}
+
+/**
+ * The open "Boşluk" group: the space above and below a section, within
+ * reach on every body section (sahip 2026-11-15), its title counting the
+ * steps set. None set is the theme's section spacing on both sides.
+ */
+export function SpacingGroup<S extends LookedSection>({
+  section,
+  reveal,
+  onChange,
+}: {
+  section: S
+  reveal: number | null
+  onChange: (section: S, field?: string) => void
+}) {
+  const { t } = useTranslation()
+  if (lookFieldsFor(section.type, "spacing").length === 0) {
+    return null
+  }
+  const set = lookCount(section, "spacing")
+  return (
+    <PanelGroup
+      title={set > 0 ? t(`${LOOK}.spacing.titleSet`, { count: set }) : t(`${LOOK}.spacing.title`)}
+      hint={t(`${LOOK}.spacing.hint`)}
+      reveal={reveal}
+    >
+      <LookFields section={section} part="spacing" onChange={onChange} />
+    </PanelGroup>
   )
 }

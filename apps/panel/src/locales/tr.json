@@ -7934,12 +7934,27 @@
         "title": "Diğer ayarlar",
         "titleSet_one": "Diğer ayarlar · {{count}} ayar",
         "titleSet_other": "Diğer ayarlar · {{count}} ayar",
-        "hint": "Bölümün boşluğu ve görünüşü. Seçilmeyen her alan temanın kendi görünümünü kullanır; önizleme hemen gösterir.",
+        "hint": "Bölümün iç boşluğu ve görünüşü. Seçilmeyen her alan temanın kendi görünümünü kullanır; önizleme hemen gösterir.",
         "reset": "Varsayılana dön",
+        "spacing": {
+          "title": "Boşluk",
+          "titleSet_one": "Boşluk · {{count}} ayar",
+          "titleSet_other": "Boşluk · {{count}} ayar",
+          "hint": "Bölümün üstündeki ve altındaki boşluk. Seçilmeyen taraf temanın bölüm aralığını kullanır (Tema ayarları > Bölüm aralığı)."
+        },
         "space_outer": {
-          "label": "Dış boşluk",
-          "term": "margin",
-          "hint": "Bölümün üstündeki boşluk; temanın ölçüsünden gelir, dar ekranda kendiliğinden küçülür.",
+          "label": "Üst boşluk",
+          "term": "margin-top",
+          "hint": "Bölümün üstündeki boşluk; temanın bölüm aralığından gelir, dar ekranda kendiliğinden küçülür.",
+          "none": "Yok",
+          "small": "Dar",
+          "medium": "Orta",
+          "large": "Geniş"
+        },
+        "space_below": {
+          "label": "Alt boşluk",
+          "term": "margin-bottom",
+          "hint": "Bölümün altındaki boşluk; sonraki bölümün üst boşluğunun yerine geçer, ikisi de seçiliyse büyüğü kalır.",
           "none": "Yok",
           "small": "Dar",
           "medium": "Orta",
@@ -7948,7 +7963,7 @@
         "space_inner": {
           "label": "İç boşluk",
           "term": "padding",
-          "hint": "Bölümün kendi içindeki boşluk; zemin seçiliyse rengin içinde kalır.",
+          "hint": "Bölümün kendi içindeki üst ve alt boşluk, bölüm aralığıyla aynı ölçüden; zemin seçiliyse rengin içinde kalır.",
           "none": "Yok",
           "small": "Dar",
           "medium": "Orta",
@@ -8369,7 +8384,7 @@
           "normal": "Normal",
           "roomy": "Ferah"
         },
-        "sectionSpacingHint": "Sayfadaki bölümler arasındaki boşluk, her bölümde birlikte değişir. Normal, temanın kendi aralığıdır (geniş ekranda 120 px); Sık bunu 66 px'e indirir, Ferah 144 px'e çıkarır.",
+        "sectionSpacingHint": "Sayfadaki bölümler arasındaki boşluk, her bölümde birlikte değişir. Normal, temanın kendi aralığıdır (geniş ekranda 96 px); Sık bunu 53 px'e indirir, Ferah 115 px'e çıkarır. Zeminli bölümün iç boşluğu da aynı ölçüden gelir.",
         "surfaceStyle": "Kutu stili",
         "surfaceStyleTerm": "surface style",
         "surfaceStyles": {
