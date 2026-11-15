@@ -11,11 +11,16 @@ import { renderFrame, shopFixture } from "@/test/theme-render"
  * `none` step read from the theme root's `data-shadow` (`shadow.css`).
  */
 
-/** The surfaces with a rule of their own: `none` takes the shadow and draws nothing. */
+/**
+ * The surfaces with a rule of their own: `none` takes the shadow and draws
+ * nothing. The WhatsApp button counts as edged: its full green fill already
+ * stands off any ground, and a pale ring round it reads as a halo.
+ */
 const EDGED = [
   "frame/Aisle.tsx",
   "frame/BackToTop.tsx",
   "frame/CategoryMenu.tsx",
+  "frame/WhatsApp.tsx",
   "listing/Menu.tsx",
   "product/BuyBar.tsx",
 ]
@@ -25,7 +30,6 @@ const BARE = [
   "frame/ConsentFrame.tsx",
   "frame/QuickViewDialog.tsx",
   "frame/Sheet.tsx",
-  "frame/WhatsApp.tsx",
   "parts/QuickAdd.tsx",
   "parts/QuickViewButton.tsx",
   "product/Installments.tsx",
