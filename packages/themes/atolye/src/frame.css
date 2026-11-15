@@ -16,6 +16,30 @@
 :root {
   --gf-stick-top: calc(var(--gf-head-h, 8.3125rem) + 1.6875rem);
 }
+/* Folded, the header is its folding part shorter: the column starts under what
+   is left of it, not where the whole header ended (Tezgâh audit Y-08) */
+html[data-js-scroll="down"]:not(:has(.gf-head:focus-within, .gf-head [data-state="open"])) {
+  --gf-stick-top: calc(var(--gf-head-h, 8.3125rem) - var(--gf-head-fold, 0px) + 1rem);
+}
+
+/* A sticky column that scrolls on its own (the listing's filters) fades at its
+   foot while more waits below it, so a half-cut row reads as "there is more";
+   where the browser cannot drive that by scrolling, no fade */
+@supports (animation-timeline: scroll()) {
+  .gf-scroll-fade {
+    animation: gf-scroll-fade linear both;
+    animation-timeline: scroll(self);
+  }
+}
+@keyframes gf-scroll-fade {
+  0%,
+  98% {
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+  }
+  100% {
+    mask-image: none;
+  }
+}
 
 @layer components {
   .gf-head,
