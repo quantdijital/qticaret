@@ -7,7 +7,7 @@ import type {
   MarqueeSection,
   MarqueeSettingName,
 } from "../../lib/storefront/sections/marquee"
-import type { MenuLinkInput } from "../../lib/storefront/menus"
+import type { MenuLinkInput, RecordLinkKind } from "../../lib/storefront/menus"
 import type { RailPick } from "../../lib/storefront/rails"
 import { hasLook } from "../../lib/storefront/sections/look"
 import { shownDevice } from "../../lib/storefront/layout-fields"
@@ -16,6 +16,7 @@ import type { ShopInfoValues } from "../../lib/shop/tokens"
 import { cardTargets } from "../../api/store/content/cards"
 import { hydrateHero, hydratePriceBands } from "./layout-hydrate-catalog"
 import { hydrateShelf } from "./layout-hydrate-shelf"
+import { hydrateStrips } from "./layout-hydrate-strips"
 import type { BandPick } from "./price-bands"
 
 /** A button or slide link as the storefront prints it; a broken one is not there. */
@@ -49,6 +50,8 @@ export interface HydrateContext {
   picks?: ReadonlyMap<string, RailPick>
   /** The price bands strips' products per band, picked for the shopper's channels, by section id. */
   bands?: ReadonlyMap<string, BandPick>
+  /** Whether a record is live now (`liveRecords`); none: all are. */
+  live?: (kind: RecordLinkKind, id: string) => boolean
 }
 
 export const fill = (text: string | null, values: ShopInfoValues) =>
@@ -177,6 +180,13 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         // Printed only off the collage, so a section from before it prints as it did
         ...(section.gallery === "strips" ? { gallery: section.gallery } : {}),
       }
+    case "strip_gallery":
+      return hydrateStrips(section, {
+        fill: (text) => fill(text, at.values),
+        link,
+        image,
+        live: at.live,
+      })
     case "rich_text": {
       const body = fillShopDoc(section.body, at.values)
       return {

@@ -20,7 +20,7 @@ import type { StoreMenu } from "./menus-read"
 import { bandPicks } from "./price-bands"
 import { railPicks } from "./rails"
 
-/** The addresses of the images shown with their sizes: openings and slides (not rich text's). */
+/** The addresses of the images shown with their sizes: openings, slides, strips (not rich text's). */
 const imageUrls = (section: BodySection): string[] =>
   section.type === "rich_text" ? [] : imagesOf(section)
 
@@ -108,6 +108,7 @@ export async function storeLayout(
     container,
     picks,
     bands,
+    live: keepLive.live,
     images: new Map(
       assets.map((asset) => [
         asset.url,
