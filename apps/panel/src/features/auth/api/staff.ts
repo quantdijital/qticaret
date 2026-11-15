@@ -46,6 +46,8 @@ export type Capability =
   | "abandonedCarts"
   /** An order's message sent again (2026-11-06): owner, admin, operations. */
   | "resendMessages"
+  /** The wholesalers, their levels and prices (ADR-0068 §9): owner and admin. */
+  | "wholesale"
 
 export interface StaffMe {
   user_id: string

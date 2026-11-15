@@ -260,6 +260,7 @@ describe("staff roles", () => {
       customers: true,
       abandonedCarts: true,
       resendMessages: true,
+      wholesale: true,
     })
     expect(capabilitiesOf("admin")).toMatchObject({
       settings: true,
@@ -282,6 +283,7 @@ describe("staff roles", () => {
       legalTexts: true,
       vatRates: false,
       orderExport: false,
+      wholesale: true,
     })
     expect(capabilitiesOf("operations")).toEqual({
       settings: false,
@@ -313,6 +315,7 @@ describe("staff roles", () => {
       customers: true,
       abandonedCarts: true,
       resendMessages: true,
+      wholesale: false,
     })
     expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
     expect(Object.values(capabilitiesOf(null)).every((can) => !can)).toBe(true)
