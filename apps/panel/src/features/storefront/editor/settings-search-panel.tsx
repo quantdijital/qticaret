@@ -22,6 +22,7 @@ const GROUP_NAMES: Readonly<Record<FieldGroupName, string>> = {
   scroll: "storefront.editor.panel.scroll",
   motion: "storefront.editor.panel.motion",
   appearance: "storefront.editor.panel.appearance",
+  spacing: "storefront.editor.look.spacing.title",
   look: "storefront.editor.look.title",
   visibility: "storefront.editor.panel.visibility",
 }

@@ -258,9 +258,10 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     for (const token of ["--section-gap-s", "--section-gap", "--section-gap-l"]) {
       expect(declared(tokens, token)).toMatch(/^calc\(\d+px \* var\(--section-scale, 1\)\)$/)
     }
-    // A wide screen's gap at compact: 66 px, a dense catalog's rhythm
+    // A wide screen's one section gap: 96 px, at compact about 53 px, a dense catalog's rhythm
     const wide = /^calc\((\d+)px/.exec(declared(tokens, "--section-gap"))
-    expect(Number(wide?.[1]) * 0.55).toBe(66)
+    expect(Number(wide?.[1])).toBe(96)
+    expect(Number(wide?.[1]) * 0.55).toBeCloseTo(52.8)
     expect(themeSettings({ section_spacing: "dense" }, null).section_spacing).toBe("normal")
     expect(themeSettings({ section_spacing: "compact" }, null).section_spacing).toBe("compact")
   })

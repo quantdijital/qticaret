@@ -146,7 +146,7 @@ export function Community({
     )
   const rated = reviews.average !== null && reviews.count > 0 && reviews.items.length > 0
   return (
-    <div className="flex flex-col gap-(--section-gap-s)">
+    <div className="flex flex-col gap-(--section-gap)">
       <section
         id={REVIEWS_ID}
         aria-labelledby="degerlendirmeler-baslik"

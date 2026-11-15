@@ -166,7 +166,7 @@ export function CategoryCards({
   ownAll?: boolean
 }) {
   return (
-    <section aria-labelledby={id} className="pt-(--section-gap-s)">
+    <section aria-labelledby={id} className="gf-section">
       <Container className="flex flex-col gap-6 lg:gap-10">
         <SectionHead id={id} title={title} more={all} marks={marks} ownMore={ownAll} />
         <ul

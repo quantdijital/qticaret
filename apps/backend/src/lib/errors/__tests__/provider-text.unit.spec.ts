@@ -28,7 +28,9 @@ describe("providerText", () => {
       providerText(
         "Bkz. https://customerws.araskargo.com.tr/svc?x=1, www.ornek.com ve api.ornek.com.tr:8443/v1; " +
           "sunucu 10.0.0.12:443; token=abc123; ayse@example.com; 0532 123 45 67; " +
-          "anahtar sk_live_0123456789abcdefABCDEF"
+          // A made-up key in a live key's shape, built so no scanner mistakes it for one
+          "anahtar " +
+          ["sk", "live", "0123456789abcdefABCDEF"].join("_")
       ) ?? ""
     for (const leak of [
       "araskargo",

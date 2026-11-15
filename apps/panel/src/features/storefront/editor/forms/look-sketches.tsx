@@ -30,6 +30,23 @@ function Outer({ step }: { step: SectionLookStep<"space_outer"> }) {
   )
 }
 
+/** The gap below a block: the next one's line moves away as the step grows. */
+function Below({ step }: { step: SectionLookStep<"space_below"> }) {
+  return (
+    <svg viewBox="0 0 24 16" className="h-4 w-6" aria-hidden="true">
+      <rect
+        x={2}
+        y={0}
+        width={20}
+        height={14 - 2 - SPACE[step]}
+        rx={1.5}
+        className="fill-current opacity-60"
+      />
+      <rect x={2} y={14.5} width={20} height={1.5} rx={0.75} className="fill-current opacity-35" />
+    </svg>
+  )
+}
+
 /** The room inside a frame: its content shrinks as the step grows. */
 function Inner({ step }: { step: SectionLookStep<"space_inner"> }) {
   const room = SPACE[step] / 2
@@ -72,6 +89,8 @@ export function LookSketch<F extends SectionLookField>({
   switch (field) {
     case "space_outer":
       return <Outer step={step as SectionLookStep<"space_outer">} />
+    case "space_below":
+      return <Below step={step as SectionLookStep<"space_below">} />
     case "space_inner":
       return <Inner step={step as SectionLookStep<"space_inner">} />
     case "ground":

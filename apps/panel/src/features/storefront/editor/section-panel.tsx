@@ -19,7 +19,7 @@ import { lookCount } from "@/features/storefront/layout/look"
 import { offersVariants, switchVariant } from "@/features/storefront/layout/variants"
 import { FIELD_IDS, MARQUEE_OTHER_SETTINGS, takesLook } from "./forms/field-registry"
 import type { FieldGroupName } from "./forms/field-registry"
-import { LookFields } from "./forms/look-fields"
+import { LookFields, SpacingGroup } from "./forms/look-fields"
 import { MarqueeGroups } from "./forms/marquee-groups"
 import { AnnouncementMotion, AnnouncementStyle } from "./forms/announcement-settings"
 import { BannerSettings } from "./forms/banner-settings"
@@ -121,7 +121,7 @@ export function SectionPanel({
     (scroller
       ? SCROLLER_OTHER.filter((name) => scroller[name] !== SCROLLER_DEFAULTS[name]).length
       : 0) +
-    (looked ? lookCount(looked) : 0) +
+    (looked ? lookCount(looked, "other") : 0) +
     (strip
       ? MARQUEE_OTHER_SETTINGS.filter((name) => strip[name] !== MARQUEE_DEFAULTS[name]).length
       : 0) +
@@ -197,6 +197,9 @@ export function SectionPanel({
             onChange={onChange}
           />
         ) : null}
+        {looked ? (
+          <SpacingGroup section={looked} reveal={reveal("spacing")} onChange={onChange} />
+        ) : null}
         {looked || strip ? (
           <PanelGroup
             title={
@@ -236,7 +239,7 @@ export function SectionPanel({
               <BannerSettings section={band} settings={BANNER_OTHER_SETTINGS} onChange={onChange} />
             ) : null}
             {cards ? <CategoryCardsOther section={cards} onChange={onChange} /> : null}
-            {looked ? <LookFields section={looked} onChange={onChange} /> : null}
+            {looked ? <LookFields section={looked} part="other" onChange={onChange} /> : null}
           </PanelGroup>
         ) : null}
         {/* A main section always shows and stays (adr/0049 Ek 2026-11-14 §5) */}

@@ -153,7 +153,7 @@ export function PostPage({ view, t }: { view: ContentPageView; t: Translate }) {
         </article>
       </Container>
       {products.length > 0 && (
-        <section aria-labelledby="yazidaki-urunler" className="pt-(--section-gap-s)">
+        <section aria-labelledby="yazidaki-urunler" className="pt-(--section-gap)">
           <Container className="flex flex-col gap-6 lg:gap-8">
             <h2 id="yazidaki-urunler">{t("blog.products")}</h2>
             <ul className="grid grid-cols-[repeat(2,minmax(0,1fr))] gap-(--gap-columns) lg:grid-cols-[repeat(4,minmax(0,1fr))]">
@@ -167,7 +167,7 @@ export function PostPage({ view, t }: { view: ContentPageView; t: Translate }) {
         </section>
       )}
       {related.length > 0 && (
-        <section aria-labelledby="ilgili-yazilar" className="pt-(--section-gap-s)">
+        <section aria-labelledby="ilgili-yazilar" className="pt-(--section-gap)">
           <Container className="flex flex-col gap-6 lg:gap-8">
             <h2 id="ilgili-yazilar">{t("blog.related")}</h2>
             <ul className="grid gap-x-(--gap-columns) gap-y-10 md:grid-cols-[repeat(3,minmax(0,1fr))]">

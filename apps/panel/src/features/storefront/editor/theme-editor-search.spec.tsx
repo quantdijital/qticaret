@@ -51,13 +51,13 @@ describe("the theme editor's settings search", () => {
     renderEditor()
     await opened()
 
-    await user.type(searchbox(), "margin")
+    await user.type(searchbox(), "margin-top")
 
     const hits = within(screen.getByRole("list", { name: "Arama sonuçları" }))
     expect(hits.getAllByRole("button").map((hit) => hit.textContent)).toEqual([
-      "Dış boşluk margin" + "Giriş · Diğer ayarlar",
-      "Dış boşluk margin" + "Ürün listesi · Diğer ayarlar",
-      "Dış boşluk margin" + "Blog yazıları · Diğer ayarlar",
+      "Üst boşluk margin-top" + "Giriş · Boşluk",
+      "Üst boşluk margin-top" + "Ürün listesi · Boşluk",
+      "Üst boşluk margin-top" + "Blog yazıları · Boşluk",
     ])
     // The list of the page's parts gives way while something is typed
     expect(screen.queryByRole("navigation", { name: "Sayfanın bölümleri" })).toBeNull()

@@ -12,7 +12,7 @@ import type {
   LayoutGroup,
   LookedSection,
 } from "@/features/storefront/api/layout"
-import { lookFieldsFor, lookStepsFor } from "@/features/storefront/layout/look"
+import { SPACING_FIELDS, lookFieldsFor, lookStepsFor } from "@/features/storefront/layout/look"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
 import { offersVariants } from "@/features/storefront/layout/variants"
 import { ANNOUNCEMENT_IDS, announcementFields } from "./announcement-registry"
@@ -46,6 +46,7 @@ export type FieldGroupName =
   | "scroll"
   | "motion"
   | "appearance"
+  | "spacing"
   | "look"
   | "visibility"
 
@@ -288,7 +289,7 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       const steps: readonly string[] = lookStepsFor(section.type, field)
       fields.push({
         key: `look.${field}`,
-        group: "look",
+        group: SPACING_FIELDS.includes(field) ? "spacing" : "look",
         label: `${LOOK}.${field}.label`,
         term: `${LOOK}.${field}.term`,
         options: steps.map((step) => `${LOOK}.${field}.${step}`),

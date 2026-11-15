@@ -47,7 +47,7 @@ const LOGO_CELL =
 export function Brands({ section }: { section: Of<"brands"> }) {
   const id = headingId(section.id)
   return (
-    <section aria-labelledby={id} className="pt-(--section-gap)">
+    <section aria-labelledby={id} className="gf-section">
       <Container className="flex flex-col gap-6">
         <SectionHead id={id} title={section.title} marks={section.editor} />
         <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">

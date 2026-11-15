@@ -33,7 +33,7 @@ export function Spotlight({
   const strips = section.settings?.gallery === "strips"
   const add = quickAdd && product.quickAdd && product.available ? product.quickAdd : null
   return (
-    <section aria-labelledby={id} className="pt-(--section-gap)">
+    <section aria-labelledby={id} className="gf-section">
       <Container>
         <div className="gf-stage grid gap-6 overflow-hidden rounded-tile p-3 sm:p-4 lg:grid-cols-12 lg:gap-(--gap-columns) lg:p-4">
           {main && strips && (
