@@ -74,7 +74,11 @@
       "file": "slider.css"
     },
     {
-      "sha256": "19daaeba5056b1612848faa52bc80b13533848e28b2be686d6fe90e502fb4655",
+      "sha256": "7569e2ecd82143325748ef6074526e8d9fca53f0e8b3fe6b8950077c3a952b55",
+      "file": "spotlight.css"
+    },
+    {
+      "sha256": "574191956daecf17af484abf59b1751d6749d9bafae3a978d785bbd53ec7a3b3",
       "file": "styles.css"
     },
     {
