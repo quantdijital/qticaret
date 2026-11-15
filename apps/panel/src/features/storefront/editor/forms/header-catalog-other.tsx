@@ -5,6 +5,7 @@ import { HEADER_CATALOG_DEFAULTS } from "@/features/storefront/layout/variants"
 import { PanelGroup } from "../panel-header"
 import { headerCatalogIn } from "./field-registry"
 import { HeaderCatalogFields } from "./header-catalog-fields"
+import { headerCatalogOffers } from "./header-catalog-steps"
 
 /**
  * The catalog header's finer settings (adr/0049 Ek 2026-11-15): the
@@ -24,7 +25,8 @@ export function HeaderCatalogOther({
 }) {
   const { t } = useTranslation()
   const set = headerCatalogIn("look").filter(
-    (field) => section[field] !== HEADER_CATALOG_DEFAULTS[field]
+    (field) =>
+      headerCatalogOffers(section, field) && section[field] !== HEADER_CATALOG_DEFAULTS[field]
   ).length
   return (
     <PanelGroup

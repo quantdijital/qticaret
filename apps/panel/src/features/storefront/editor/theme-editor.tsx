@@ -114,6 +114,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
     dispatch,
     hurry: autosave.hurry,
     visited: place.visited,
+    problems,
     onOpen: (id, field) => {
       // A field's label (Faz 2b): its group opens and the field is shown, as a search hit's
       picks.current += 1

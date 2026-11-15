@@ -61,13 +61,62 @@ describe("the catalog header's settings", () => {
   it("puts the basics first and open, the finer ones closed", () => {
     expect(headerCatalogIn("content")).toEqual([
       "search_placeholder",
+      "search_width",
       "utility_bar",
+      "top_links",
       "phone",
+      "tools_place",
       "categories_button",
       "menu_ground",
       "highlight_link",
     ])
     expect(headerCatalogIn("look")).toEqual(["search_label", "account_text", "cart_total"])
+  })
+
+  it("offers the three layout choices, each starting at today's drawing", async () => {
+    const changes = renderBar(switchVariant(standard, "catalog"))
+    const choice = (name: RegExp) => screen.getByRole("radiogroup", { name })
+    const names = (name: RegExp) =>
+      within(choice(name))
+        .getAllByRole("radio")
+        .map((each) => each.textContent)
+    expect(names(/Arama kutusunun genişliği/)).toEqual(["Geniş", "Dar"])
+    expect(names(/Üst menü bağlantılarının yeri/)).toEqual(["Üst şeritte", "Menü çubuğunda"])
+    expect(names(/simgelerinin yeri/)).toEqual(["Menü çubuğunda", "Logo satırında"])
+    expect(
+      within(choice(/Arama kutusunun genişliği/)).getByRole("radio", { name: "Geniş" })
+    ).toBeChecked()
+    await userEvent.click(
+      within(choice(/Arama kutusunun genişliği/)).getByRole("radio", { name: "Dar" })
+    )
+    expect(changes.at(-1)).toMatchObject({ search_width: "narrow" })
+    await userEvent.click(
+      within(choice(/Üst menü bağlantılarının yeri/)).getByRole("radio", { name: "Menü çubuğunda" })
+    )
+    expect(changes.at(-1)).toMatchObject({ top_links: "bar" })
+    // Off the default, it offers the way back
+    const width = document.getElementById("mainheader-header-search_width") ?? document.body
+    await userEvent.click(within(width).getByRole("button", { name: /Varsayılana dön/ }))
+    expect(changes.at(-1)).toMatchObject({ search_width: "wide" })
+  })
+
+  it("hides what the tools in the logo row leave without a job", async () => {
+    const changes = renderBar(switchVariant(standard, "catalog"))
+    await userEvent.click(screen.getByRole("button", { name: /Diğer ayarlar/ }))
+    expect(screen.getByRole("switch", { name: /Üst şeritte “Hesabım” yazısı/ })).toBeInTheDocument()
+    await userEvent.click(screen.getByRole("radio", { name: "Logo satırında" }))
+    expect(changes.at(-1)).toMatchObject({ tools_place: "row" })
+    // The row carries "Hesabım": the strip's written one is no longer offered
+    expect(screen.queryByRole("switch", { name: /Üst şeritte “Hesabım” yazısı/ })).toBeNull()
+    expect(screen.getByRole("switch", { name: /Üst yardımcı şerit/ })).toBeInTheDocument()
+    // With the top links on the bar too, the strip has nothing left to hold
+    await userEvent.click(
+      within(screen.getByRole("radiogroup", { name: /Üst menü bağlantılarının yeri/ })).getByRole(
+        "radio",
+        { name: "Menü çubuğunda" }
+      )
+    )
+    expect(screen.queryByRole("switch", { name: /Üst yardımcı şerit/ })).toBeNull()
   })
 
   it("shows today's bar only its pictures' steps and sticky switch", () => {
@@ -145,6 +194,18 @@ describe("the catalog header's settings", () => {
     expect(keys("zemin")).toContain("header.menu_ground")
     expect(keys("placeholder")).toContain("header.search_placeholder")
     expect(keys("kategoriler")).toContain("header.categories_button")
+    // The layout choices by their names, terms and steps
+    expect(keys("genişliği")).toContain("header.search_width")
+    expect(keys("dar")).toContain("header.search_width")
+    expect(keys("top links")).toContain("header.top_links")
+    expect(keys("logo satırında")).toEqual(["header.tools_place"])
+    // Tools in the row: the strip's written "Hesabım" is not offered, so not found
+    const row = { ...section, tools_place: "row" } as HeaderBarSection
+    expect(
+      searchSettings("hesabım yazısı", [{ section: row, group: "header", names: [] }], t).map(
+        (hit) => hit.field?.key ?? null
+      )
+    ).not.toContain("header.account_text")
     expect(keys("tutar")).toContain("header.cart_total")
     expect(keys("thumbnails")).toEqual(["menu_images"])
     expect(keys("alt menülerde")).toEqual(["menu_images"])

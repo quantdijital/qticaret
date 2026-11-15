@@ -88,6 +88,37 @@ export function headerMenuImagesOf(value: unknown): HeaderMenuImages {
     : "submenus"
 }
 
+/**
+ * The catalog header's small layout choices (adr/0049 Ek 2026-11-15,
+ * adr/0066 §2 "küçük yerleşim → bölüm ayarı"), each list's first step the
+ * drawing from before it, so a bar saved without one reads as drawn:
+ * where account, favourites and the cart stand (`bar`, the menu bar's
+ * icons; `row`, beside the shop's phone with their names under them);
+ * where the shop's top links stand (`strip`, the thin strip, shown only
+ * while `utility_bar` is on; `bar`, quiet words at the menu bar's end,
+ * whatever the strip); how wide the search is (`wide`; `narrow`, 35 rem
+ * right after the wordmark). Mirrored by the backend's lists.
+ */
+export const HEADER_TOOLS_PLACES = ["bar", "row"] as const
+export const HEADER_TOP_LINKS_PLACES = ["strip", "bar"] as const
+export const HEADER_SEARCH_WIDTHS = ["wide", "narrow"] as const
+
+export type HeaderToolsPlace = (typeof HEADER_TOOLS_PLACES)[number]
+export type HeaderTopLinksPlace = (typeof HEADER_TOP_LINKS_PLACES)[number]
+export type HeaderSearchWidth = (typeof HEADER_SEARCH_WIDTHS)[number]
+
+/** A step as a reader takes it: absent (an older answer) or off its list, the list's first. */
+function stepOf<T extends string>(steps: readonly [T, ...T[]], value: unknown): T {
+  return (steps as readonly unknown[]).includes(value) ? (value as T) : steps[0]
+}
+
+export const headerToolsPlaceOf = (value: unknown): HeaderToolsPlace =>
+  stepOf(HEADER_TOOLS_PLACES, value)
+export const headerTopLinksPlaceOf = (value: unknown): HeaderTopLinksPlace =>
+  stepOf(HEADER_TOP_LINKS_PLACES, value)
+export const headerSearchWidthOf = (value: unknown): HeaderSearchWidth =>
+  stepOf(HEADER_SEARCH_WIDTHS, value)
+
 /** The catalog header's words: the search box's placeholder. Mirrored by the backend. */
 export const HEADER_CATALOG_LIMITS = { search_placeholder: 60 } as const
 

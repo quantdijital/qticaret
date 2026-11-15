@@ -140,6 +140,48 @@
 }
 
 /*
+ * Tall menus scroll inside (owner, 2026-11-15: "kategoriler menüsü çok
+ * yüksek oluyor"): a category's dropdown, the bar's "Daha fazla" panel
+ * (`.gf-menu-scroll`), the "Kategoriler" column and a category's panel
+ * beside it stop at 70% of the screen (less when the header leaves less
+ * under it) and scroll within, a thin scrollbar in the theme's line
+ * colour; the page under them does not scroll on. A list shorter than
+ * that is drawn as before (no scrollbar takes room until it scrolls).
+ * The column scrolls its list, not its box: a category's panel hangs off
+ * the box and an absolute child whose containing block is outside a
+ * scroller is not clipped by it; the list takes the box's 8 px padding
+ * (`p-2`) into its own, so a focused row's ring is never cut. A row the
+ * keyboard reaches scrolls into view with room around it; a dropdown's
+ * "Tümünü gör" stays at its foot while its rows scroll (on the dropdown's
+ * own ground, so it reads as before when nothing scrolls).
+ */
+@layer components {
+  .gf-drop,
+  .gf-menu-scroll,
+  [data-cm-list="top"],
+  [data-cm-sub] {
+    max-height: min(70dvh, calc(100dvh - var(--gf-head-h, 9.5625rem) - 2rem));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-color: var(--color-rule) transparent;
+    scrollbar-width: thin;
+    scroll-padding-block: var(--space-xs);
+  }
+  [data-cm-list="top"] {
+    margin: calc(-1 * var(--space-xs));
+    padding: var(--space-xs);
+  }
+  .gf-drop {
+    scroll-padding-bottom: 4.5rem;
+  }
+  .gf-drop-all {
+    position: sticky;
+    bottom: 0;
+    background-color: var(--color-field);
+  }
+}
+
+/*
  * `menu_style`'s other steps (adr/0067 S1, §2.1): the theme's root carries
  * `data-menu-style` when it is not `filled`. Only the desktop's hovered and
  * open look changes: a press keeps its fill (`.gf-drop-row:active`), the
@@ -172,6 +214,10 @@
   :is([data-menu-style="underline"], [data-menu-style="plain"]) .gf-drop-row:hover:not(:active) {
     background-color: transparent;
     box-shadow: none;
+  }
+  /* The dropdown's "Tümünü gör" keeps its ground: rows may scroll under it */
+  :is([data-menu-style="underline"], [data-menu-style="plain"]) .gf-drop-all:hover:not(:active) {
+    background-color: var(--color-field);
   }
   :is([data-menu-style="underline"], [data-menu-style="plain"]) .gf-menu-item[data-state="open"] {
     color: var(--color-text);

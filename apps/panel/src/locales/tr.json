@@ -7723,7 +7723,10 @@
           "hidden": "Bu bölüm gizli; önizlemede görünmez.",
           "scheduled": "Bu bölüm zamanlaması dışında; önizlemede şu an görünmez.",
           "other_page": "Bu bölüm başka bir sayfada.",
-          "timeout": "Bölüm önizlemede bulunamadı."
+          "timeout": "Bölüm önizlemede bulunamadı.",
+          "incomplete": "Bu bölüm henüz boş. Zorunlu alanları doldurunca önizlemede görünür.",
+          "unsaved": "Başka bir bölümde eksik alan olduğu için değişiklikler henüz kaydedilmedi. O alanlar dolunca bu bölüm de önizlemede görünür.",
+          "empty": "Bu bölümün şu an gösterecek bir şeyi yok. Mağazanıza ürün, yorum ya da yazı gibi ilgili içerik eklenince önizlemede görünür."
         },
         "liveOff": "Canlı önizleme kullanılamıyor; önizleme her kayıttan sonra yeniden yüklenecek.",
         "edit": "Düzenle",
@@ -8815,7 +8818,7 @@
         "utility_bar": {
           "label": "Üst yardımcı şerit",
           "term": "top bar",
-          "hint": "İnce açık şerit: Menüler'deki “Üst menü” bağlantıları ve Hesabım. Telefonda görünmez."
+          "hint": "İnce açık şerit: Menüler'deki “Üst menü” bağlantıları (yerleri aşağıda) ve Hesabım. Telefonda görünmez."
         },
         "phone": {
           "label": "Telefon numarası",
@@ -8842,6 +8845,27 @@
           "stage": "Koyu",
           "primary": "Ana renk",
           "well": "Hafif ton"
+        },
+        "search_width": {
+          "label": "Arama kutusunun genişliği",
+          "term": "search width",
+          "hint": "Dar: logonun hemen yanında kısa bir kutu; kalan yer telefon numarasına ve simgelere kalır.",
+          "wide": "Geniş",
+          "narrow": "Dar"
+        },
+        "top_links": {
+          "label": "Üst menü bağlantılarının yeri",
+          "term": "top links",
+          "hint": "Menüler'deki “Üst menü” bağlantıları. Menü çubuğunda: kategorilerden sonra sade yazıyla durur, sığmazsa “Daha fazla”nın içine girer. Üst şeritte: şerit kapalıysa üst bilgide görünmez.",
+          "strip": "Üst şeritte",
+          "bar": "Menü çubuğunda"
+        },
+        "tools_place": {
+          "label": "Hesap, favori ve sepet simgelerinin yeri",
+          "term": "icons",
+          "hint": "Logo satırında: simgeler adlarıyla birlikte telefon numarasının sağında durur, “Hesabım” bir kez görünür. Telefonda değişmez.",
+          "bar": "Menü çubuğunda",
+          "row": "Logo satırında"
         },
         "phoneNote": "Telefonda üst bilgi değişmez: menü, logo, favori ve sepet; altında arama.",
         "otherHint": "Arama düğmesi, Hesabım yazısı ve sepet tutarı."

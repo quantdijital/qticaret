@@ -17,7 +17,7 @@ import { renderFrame, shopFixture } from "@/test/theme-render"
  * stands off any ground, and a pale ring round it reads as a halo.
  */
 const EDGED = [
-  "frame/Aisle.tsx",
+  "frame/AisleMore.tsx",
   "frame/BackToTop.tsx",
   "frame/CategoryMenu.tsx",
   "frame/WhatsApp.tsx",

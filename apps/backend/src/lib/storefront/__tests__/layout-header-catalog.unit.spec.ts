@@ -2,7 +2,13 @@ import path from "node:path"
 import { headerLinked, linksOf } from "../../../workflows/storefront/layout-check"
 import { layoutDocument, readStoredLayout } from "../layout"
 import { mainSectionsOf, withMainSections } from "../layout-main"
-import { HEADER_CATALOG_LIMITS, HEADER_MENU_GROUNDS } from "../sections/main"
+import {
+  HEADER_CATALOG_LIMITS,
+  HEADER_MENU_GROUNDS,
+  HEADER_SEARCH_WIDTHS,
+  HEADER_TOOLS_PLACES,
+  HEADER_TOP_LINKS_PLACES,
+} from "../sections/main"
 
 // The contract's own file (`@qticaret/types`), through jest: the package is ESM for tsc here
 const CONTRACT_FILE = path.resolve(
@@ -30,6 +36,9 @@ const DEFAULTS = {
   phone: true,
   categories_button: true,
   menu_ground: "stage",
+  tools_place: "bar",
+  top_links: "strip",
+  search_width: "wide",
 }
 
 describe("the catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15)", () => {
@@ -49,6 +58,9 @@ describe("the catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15)", () =>
       phone: false,
       categories_button: false,
       menu_ground: "primary",
+      tools_place: "row",
+      top_links: "bar",
+      search_width: "narrow",
     }
     expect(layoutDocument.parse({ header: [catalog(set)] }).header[0]).toMatchObject(set)
     // The light tint's old name reads, and is written again, as the dictionary's (bilesen-denetimi (b) 5)
@@ -103,12 +115,39 @@ describe("the catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15)", () =>
     expect(mainSectionsOf(plain).header_bar).not.toHaveProperty("catalog")
   })
 
-  it("mirrors the contract's ground list and limits", () => {
+  it("refuses a layout step off its list on a save, and drops it from a stored bar", () => {
+    for (const field of ["tools_place", "top_links", "search_width"]) {
+      expect(issues({ header: [catalog({ [field]: "middle" })] })).toContain(
+        "storefront_layout.section_invalid"
+      )
+      expect(issues({ header: [catalog({ [field]: true })] })).toContain(
+        "storefront_layout.section_invalid"
+      )
+    }
+    // A stored bar with a newer build's step reads with the default; the others it set stand
+    const stored = readStoredLayout({
+      header: [catalog({ tools_place: "floating", top_links: "bar", search_width: 3 })],
+    })
+    expect(stored.header[0]).toMatchObject({
+      variant: "catalog",
+      tools_place: "bar",
+      top_links: "bar",
+      search_width: "wide",
+    })
+  })
+
+  it("mirrors the contract's ground list, layout steps and limits", () => {
     const contract = jest.requireActual<{
       HEADER_MENU_GROUNDS: unknown
+      HEADER_TOOLS_PLACES: unknown
+      HEADER_TOP_LINKS_PLACES: unknown
+      HEADER_SEARCH_WIDTHS: unknown
       HEADER_CATALOG_LIMITS: unknown
     }>(CONTRACT_FILE)
     expect(HEADER_MENU_GROUNDS).toEqual(contract.HEADER_MENU_GROUNDS)
+    expect(HEADER_TOOLS_PLACES).toEqual(contract.HEADER_TOOLS_PLACES)
+    expect(HEADER_TOP_LINKS_PLACES).toEqual(contract.HEADER_TOP_LINKS_PLACES)
+    expect(HEADER_SEARCH_WIDTHS).toEqual(contract.HEADER_SEARCH_WIDTHS)
     expect(HEADER_CATALOG_LIMITS).toEqual(contract.HEADER_CATALOG_LIMITS)
   })
 })
