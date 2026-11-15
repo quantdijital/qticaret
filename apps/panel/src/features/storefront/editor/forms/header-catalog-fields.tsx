@@ -1,3 +1,5 @@
+import { Fragment } from "react"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { HEADER_CATALOG_LIMITS, HEADER_MENU_GROUNDS } from "@qticaret/types"
 import type { HeaderMenuGround } from "@qticaret/types"
@@ -142,28 +144,29 @@ function CatalogField({
  * The catalog header's settings of one panel group (adr/0049 Ek
  * 2026-11-15): what it shows and its menu bar's ground open with the
  * header's content, the rest closed in "Diğer ayarlar" (`SectionPanel`).
+ * `afterCategories`, a setting of every variant's that belongs beside the
+ * "Kategoriler" button (the menus' pictures), stands right under it.
  */
 export function HeaderCatalogFields({
   section,
   group,
   problems,
   onChange,
+  afterCategories,
 }: {
   section: HeaderCatalogSection
   group: FieldGroupName
   problems: SectionProblems
   onChange: Change
+  afterCategories?: ReactNode
 }) {
   return (
     <div className="flex flex-col gap-5">
       {headerCatalogIn(group).map((field) => (
-        <CatalogField
-          key={field}
-          section={section}
-          field={field}
-          problems={problems}
-          onChange={onChange}
-        />
+        <Fragment key={field}>
+          <CatalogField section={section} field={field} problems={problems} onChange={onChange} />
+          {field === "categories_button" && afterCategories}
+        </Fragment>
       ))}
     </div>
   )

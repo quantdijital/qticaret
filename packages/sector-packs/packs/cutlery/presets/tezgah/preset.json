@@ -1,7 +1,7 @@
 {
   "format": "quant-storefront-preset",
   "code": "tezgah",
-  "version": 3,
+  "version": 4,
   "theme": "atolye",
   "name": "Tezgâh",
   "description": "Kategori listeli klasik katalog. Antrasit ve kırmızı: grafit menü çubuklu katalog üst bilgisi, solda kategori listesi yanında giriş, çizgili güvence şeridi, sekmeli kayan raf, grafit yakın plan, bir büyük altı küçük çok satanlar, kullanıma göre kategori kartları, kısa listeler, markalar, yorumlar ve dolu alt bilgi. Keskin köşe, çerçeveli kart. Menülere ve ürünlere dokunmaz.",

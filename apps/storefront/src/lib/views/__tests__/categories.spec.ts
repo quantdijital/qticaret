@@ -1,6 +1,7 @@
 import type { StoreCategory } from "@qticaret/types"
 import { describe, expect, it } from "vitest"
-import { categoryTree } from "../categories"
+import type { ImageView, NavCategoryView } from "@qticaret/ui"
+import { categoryTree, withPicturesOf } from "../categories"
 
 const category = (id: string, name: string, parent: string | null, rank = 0): StoreCategory => ({
   id,
@@ -65,5 +66,50 @@ describe("the category index (/kategoriler)", () => {
     const fourth = tree[0]?.children[0]?.children[0]?.children[0]
     expect(fourth?.label).toBe("D")
     expect(fourth?.children).toEqual([])
+  })
+})
+
+describe("the catalog header's list pictures (adr/0049 Ek 2026-11-15)", () => {
+  const image = (src: string): ImageView => ({
+    src,
+    alt: "",
+    width: null,
+    height: null,
+    sources: { avif: null, webp: null },
+  })
+
+  it("takes the menu's picture for the same page, keeping the shop's own", () => {
+    const tree: NavCategoryView[] = [
+      {
+        label: "Bıçaklar",
+        path: "/bicak",
+        children: [
+          { label: "Şef", path: "/sef" },
+          { label: "Çakı", path: "/caki", image: image("own.jpg") },
+          { label: "Satır", path: "/satir" },
+        ],
+      },
+      { label: "Mutfak", path: "/mutfak", children: [] },
+    ]
+    const menu: NavCategoryView[] = [
+      {
+        label: "Bıçaklar",
+        path: "/bicak",
+        image: image("top.jpg"),
+        children: [
+          { label: "Şef", path: "/sef", image: image("sef.jpg") },
+          { label: "Çakı", path: "/caki", image: image("newest.jpg") },
+        ],
+      },
+    ]
+    const [knives, kitchen] = withPicturesOf(tree, menu)
+    expect(knives?.image?.src).toBe("top.jpg")
+    expect(knives?.children.map((child) => child.image?.src)).toEqual([
+      "sef.jpg",
+      "own.jpg",
+      undefined,
+    ])
+    // A page the menu does not hold keeps none
+    expect(kitchen).toEqual(tree[1])
   })
 })

@@ -18,7 +18,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     expect(read("tezgah")).toMatchObject({
       pack: "cutlery",
       code: "tezgah",
-      version: 3,
+      version: 4,
       theme: "atolye",
       name: "Tezgâh",
       tone: "light",
@@ -110,6 +110,8 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
         utility_bar: true,
         phone: true,
         categories_button: true,
+        // The owner asked for pictures in "Kategoriler" too (adr/0049 Ek 2026-11-15)
+        menu_images: "all",
         highlight_link: { $href: "/kampanyalar", label: "İndirimdekiler" },
       }),
     ])
@@ -180,6 +182,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     const { colors: mainColors, ...mainRest } = main.theme_settings
     for (const sibling of CODES.slice(1).map(read)) {
       expect(sibling.layout).toEqual(main.layout)
+      expect(sibling.layout.header?.[0]).toHaveProperty("menu_images", "all")
       const { colors, ...rest } = sibling.theme_settings
       expect(rest).toEqual(mainRest)
       expect(colors).not.toEqual(mainColors)
@@ -192,8 +195,9 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     ])
   })
 
-  it("raised the cutlery pack's version with them (and with katalog's second version)", () => {
-    expect(sectorPack("cutlery")?.version).toBe(5)
+  it("raised the cutlery pack's version with them (katalog's second, tezgah's fourth)", () => {
+    expect(sectorPack("cutlery")?.version).toBe(6)
+    expect(CODES.map((code) => read(code).version)).toEqual([4, 4, 4])
     expect(sectorPack("cutlery")?.presets.map((preset) => preset.code)).toEqual([
       "katalog",
       ...CODES,

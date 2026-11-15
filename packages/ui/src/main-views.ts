@@ -4,6 +4,7 @@ import type {
   FooterBarVariant,
   HeaderBarVariant,
   HeaderMenuGround,
+  HeaderMenuImages,
   ProductMainVariant,
 } from "@qticaret/types"
 import type { SectionLookView } from "./content-views"
@@ -23,6 +24,13 @@ export interface HeaderBarView {
   variant: HeaderBarVariant
   /** The header stays at the top of a long page. */
   sticky: boolean
+  /**
+   * Where the menus show the categories' small pictures (adr/0049 Ek
+   * 2026-11-15): `all` the "Kategoriler" list too, `submenus` the
+   * dropdowns and the phone's sheet only (the drawing from before), `off`
+   * none; absent: `submenus`.
+   */
+  menuImages?: HeaderMenuImages
   /** The `catalog` variant's own settings (adr/0049 N14); absent on the others. */
   catalog?: HeaderCatalogView
 }
