@@ -8780,7 +8780,10 @@
         "menu_images": {
           "label": "Category pictures in the menu",
           "term": "thumbnails",
-          "hint": "A small picture beside each category in the dropdowns and the phone menu. A category without one shows an empty square; off, words only."
+          "hint": "Submenus: the list that opens on hover and the phone menu. Everywhere: the catalog header's “Kategoriler” list too. A category without a picture shows an empty square.",
+          "all": "Everywhere",
+          "submenus": "In submenus",
+          "off": "None"
         },
         "menu_ground": {
           "label": "Menu bar background",

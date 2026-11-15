@@ -3,6 +3,7 @@ import type {
   FooterBarVariant,
   HeaderBarVariant,
   HeaderMenuGround,
+  HeaderMenuImages,
   ProductMainVariant,
   SectionLook,
 } from "@qticaret/types"
@@ -29,11 +30,12 @@ interface HeaderBarCommon extends MainBase {
   /** The header stays at the top of a long page (the theme's `header.sticky` before). */
   sticky: boolean
   /**
-   * The menus' category pictures (adr/0049 Ek 2026-11-15): "Kategoriler",
-   * the dropdowns and the phone's menu, on every variant; the server reads
-   * a bar saved before it with them on.
+   * Where the menus show the categories' pictures (adr/0049 Ek 2026-11-15),
+   * on every variant: `all` ("Kategoriler" too), `submenus` (the dropdowns
+   * and the phone's menu), `off`; the server reads a bar saved before it
+   * as `submenus`.
    */
-  menu_images: boolean
+  menu_images: HeaderMenuImages
 }
 
 /**

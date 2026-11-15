@@ -1,6 +1,7 @@
 import {
   BANNER_SETTINGS,
   HEADER_MENU_GROUNDS,
+  HEADER_MENU_IMAGES,
   MARQUEE_SETTINGS,
   SECTION_VARIANTS,
 } from "@qticaret/types"
@@ -243,7 +244,7 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       group: "content",
       label: `${HEADER}.menu_images.label`,
       term: `${HEADER}.menu_images.term`,
-      options: [],
+      options: HEADER_MENU_IMAGES.map((step) => `${HEADER}.menu_images.${step}`),
       target: FIELD_IDS.menuImages(id),
     })
     if (section.variant === "catalog") {

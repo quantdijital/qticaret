@@ -8780,7 +8780,10 @@
         "menu_images": {
           "label": "Menüde kategori resimleri",
           "term": "thumbnails",
-          "hint": "Açılır menülerde ve telefon menüsünde her kategorinin yanında küçük resim. Resmi olmayan kategoride boş kare durur; kapalıyken yalnız yazı."
+          "hint": "Alt menüler: üstüne gelince açılan liste ve telefon menüsü. Her yerde: katalog üst bilgisinin “Kategoriler” listesi de resimli. Resmi olmayan kategoride boş kare durur.",
+          "all": "Her yerde",
+          "submenus": "Alt menülerde",
+          "off": "Yok"
         },
         "menu_ground": {
           "label": "Menü çubuğu zemini",

@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react"
+import { render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { useState } from "react"
 import { describe, expect, it } from "vitest"
@@ -23,7 +23,7 @@ const standard: HeaderBarSection = {
   ends_at: null,
   variant: "standard",
   sticky: true,
-  menu_images: true,
+  menu_images: "submenus",
 }
 
 /** The bar's open content and its closed "Diğer ayarlar", every change kept. */
@@ -70,33 +70,54 @@ describe("the catalog header's settings", () => {
     expect(headerCatalogIn("look")).toEqual(["search_label", "account_text", "cart_total"])
   })
 
-  it("shows today's bar only its pictures and sticky switches", () => {
+  it("shows today's bar only its pictures' steps and sticky switch", () => {
     renderBar(standard)
     expect(screen.getByRole("switch", { name: /Üst bilgi sabit kalsın/ })).toBeInTheDocument()
-    expect(screen.getByRole("switch", { name: /Menüde kategori resimleri/ })).toBeChecked()
+    const steps = screen.getByRole("radiogroup", {
+      name: /Menüde kategori resimleri/,
+    })
+    expect(
+      within(steps)
+        .getAllByRole("radio")
+        .map((each) => each.textContent)
+    ).toEqual(["Her yerde", "Alt menülerde", "Yok"])
+    // The default, the drawing from before the setting, is chosen and offers no reset
+    expect(within(steps).getByRole("radio", { name: "Alt menülerde" })).toBeChecked()
+    expect(screen.queryByRole("button", { name: /Varsayılana dön/ })).toBeNull()
     expect(screen.queryByText(/Menü çubuğu zemini/)).toBeNull()
   })
 
-  it("turns the menus' pictures off on today's bar too", async () => {
+  it("picks each step on today's bar too, and goes back to the default", async () => {
     const changes = renderBar(standard)
-    await userEvent.click(screen.getByRole("switch", { name: /Menüde kategori resimleri/ }))
-    expect(changes.at(-1)).toMatchObject({ variant: "standard", menu_images: false })
+    await userEvent.click(screen.getByRole("radio", { name: "Yok" }))
+    expect(changes.at(-1)).toMatchObject({
+      variant: "standard",
+      menu_images: "off",
+    })
+    await userEvent.click(screen.getByRole("radio", { name: "Her yerde" }))
+    expect(changes.at(-1)).toMatchObject({ menu_images: "all" })
+    await userEvent.click(screen.getByRole("button", { name: /Varsayılana dön/ }))
+    expect(changes.at(-1)).toMatchObject({ menu_images: "submenus" })
   })
 
-  it("puts the pictures' switch right under the catalog's Kategoriler button, kept across variants", async () => {
-    const catalog = switchVariant({ ...standard, menu_images: false }, "catalog")
-    expect(catalog).toMatchObject({ menu_images: false })
-    expect(switchVariant(catalog, "centered")).toMatchObject({ menu_images: false })
+  it("puts the pictures' steps right under the catalog's Kategoriler button, kept across variants", async () => {
+    const catalog = switchVariant({ ...standard, menu_images: "all" }, "catalog")
+    expect(catalog).toMatchObject({ menu_images: "all" })
+    expect(switchVariant(catalog, "centered")).toMatchObject({
+      menu_images: "all",
+    })
     const changes = renderBar(catalog)
-    const names = screen
-      .getAllByRole("switch")
-      .map((each) => each.getAttribute("id") ?? "")
-      .filter((id) => id.includes("categories_button") || id.includes("menu-images"))
-    expect(names).toEqual(["mainheader-header-categories_button-input", "mainheader-menu-images"])
-    await userEvent.click(screen.getByRole("switch", { name: /Menüde kategori resimleri/ }))
-    expect(changes.at(-1)).toMatchObject({ variant: "catalog", menu_images: true })
+    const order = [
+      ...document.querySelectorAll("#mainheader-header-categories_button, #mainheader-menu-images"),
+    ].map((each) => each.id)
+    expect(order).toEqual(["mainheader-header-categories_button", "mainheader-menu-images"])
+    expect(screen.getByRole("radio", { name: "Her yerde" })).toBeChecked()
+    await userEvent.click(screen.getByRole("radio", { name: "Alt menülerde" }))
+    expect(changes.at(-1)).toMatchObject({
+      variant: "catalog",
+      menu_images: "submenus",
+    })
   })
-
   it("changes what the catalog bar shows, its ground and words", async () => {
     const changes = renderBar(switchVariant(standard, "catalog"))
     await userEvent.click(screen.getByRole("switch", { name: /Telefon numarası/ }))
@@ -126,6 +147,7 @@ describe("the catalog header's settings", () => {
     expect(keys("kategoriler")).toContain("header.categories_button")
     expect(keys("tutar")).toContain("header.cart_total")
     expect(keys("thumbnails")).toEqual(["menu_images"])
+    expect(keys("alt menülerde")).toEqual(["menu_images"])
     expect(
       searchSettings("kategori resim", [{ section: standard, group: "header", names: [] }], t).map(
         (hit) => hit.field?.key ?? null

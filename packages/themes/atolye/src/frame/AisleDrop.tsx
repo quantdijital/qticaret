@@ -8,7 +8,7 @@ import { MenuCount, MenuThumb } from "./MenuParts"
  * A category's dropdown (the owner's "M1", 2026-11-15; `menu.css`): its
  * children as 48 px rows (a 40 px picture, the name, the product count in
  * a pill), then "Tümünü gör" with the category's own count in the dark
- * pill. No panel, no big picture. With the shop's pictures off (adr/0049
+ * pill. No panel, no big picture. With no pictures, `off` (adr/0049
  * Ek 2026-11-15) the rows are the name and the count, 44 px, no square.
  */
 export function Drop({

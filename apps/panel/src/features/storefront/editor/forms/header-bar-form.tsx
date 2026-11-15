@@ -1,17 +1,20 @@
 import { useTranslation } from "react-i18next"
+import { HEADER_MENU_IMAGES } from "@qticaret/types"
 import type { HeaderBarSection } from "@/features/storefront/api/layout"
 import { SwitchRow } from "../theme-fields"
 import { FIELD_IDS } from "./field-registry"
 import type { SectionFormProps } from "./form-props"
 import { HeaderCatalogFields } from "./header-catalog-fields"
+import { StepChoice } from "./step-choice"
 
 const H = "storefront.editor.headerBar"
 
 /**
  * The shop's header bar (adr/0049 Ek 2026-11-14 §5): whether it stays at
  * the top of a long page, the theme settings' "Sabit üst bilgi" before,
- * and whether its menus show the categories' small pictures (Ek
- * 2026-11-15; every variant's, as the dropdowns and the phone's menu are).
+ * and where its menus show the categories' small pictures (Ek 2026-11-15;
+ * every variant's, as the dropdowns and the phone's menu are): three named
+ * steps, the default the drawing from before.
  * Its look is the variant's ("Biçim"); the logo and menus are edited on
  * their own screens. The catalog header adds what it shows and its menu
  * bar's ground here (Ek 2026-11-15), the pictures beside its "Kategoriler"
@@ -31,14 +34,17 @@ export function HeaderBarForm({ section, problems, onChange }: SectionFormProps<
     />
   )
   const menuImages = (
-    <SwitchRow
+    <StepChoice
       id={FIELD_IDS.menuImages(section.id)}
       label={t(`${H}.menu_images.label`)}
       term={t(`${H}.menu_images.term`)}
       hint={t(`${H}.menu_images.hint`)}
-      checked={section.menu_images}
-      onChange={(next) => {
-        onChange({ ...section, menu_images: next })
+      steps={HEADER_MENU_IMAGES}
+      value={section.menu_images}
+      fallback="submenus"
+      nameOf={(step) => t(`${H}.menu_images.${step}`)}
+      onChange={(step) => {
+        onChange({ ...section, menu_images: step })
       }}
     />
   )

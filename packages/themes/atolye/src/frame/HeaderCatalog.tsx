@@ -55,8 +55,10 @@ export function HeaderCatalog({
   changeCartLine?: ((form: FormData) => Promise<void>) | undefined
 }) {
   const menu = menuWords(shop.categories, t)
-  // "Kategoriler", the dropdowns and the sheet with their small pictures unless the shop says not
-  const pictures = shop.headerBar?.menuImages !== false
+  // The menus' small pictures (adr/0049 Ek 2026-11-15): the dropdowns and the sheet unless the
+  // shop said none, "Kategoriler" only when it asked for them everywhere
+  const images = shop.headerBar?.menuImages ?? "submenus"
+  const pictures = images !== "off"
   // The highlighted link stands right after the main menu's last item (Tezgâh audit Y-05)
   const highlight = catalog.highlight && (
     <a href={catalog.highlight.path} className="gf-btn gf-btn--small shrink-0">
@@ -163,7 +165,7 @@ export function HeaderCatalog({
             {catalog.categories.length > 0 && (
               <CategoryMenu
                 categories={catalog.categories}
-                pictures={pictures}
+                pictures={images === "all"}
                 words={{
                   button: t("nav.categories"),
                   label: t("nav.category_menu"),

@@ -41,7 +41,7 @@ export const defaultHeaderBar = (theme: ThemeHeader): HeaderBar => ({
   ends_at: null,
   variant: theme.layout === "centered" ? "centered" : "standard",
   sticky: theme.sticky,
-  menu_images: true,
+  menu_images: "submenus",
 })
 
 const FOOTER_BAR: FooterBar = {

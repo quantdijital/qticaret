@@ -25,7 +25,7 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       type: "header_bar",
       variant: "centered",
       sticky: false,
-      menu_images: true,
+      menu_images: "submenus",
       ...ALWAYS,
     })
     expect(doc.footer).toEqual([
@@ -81,27 +81,10 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       type: "header_bar",
       variant: "standard",
       sticky: true,
-      menu_images: true,
+      menu_images: "submenus",
       ...ALWAYS,
     })
     expect(doc.category[0]).toMatchObject({ variant: "standard", by_variant: {} })
-  })
-
-  it("reads a header bar saved before the menus' pictures with them on, and keeps one turned off (Ek 2026-11-15)", () => {
-    for (const variant of ["standard", "centered", "catalog"]) {
-      const old = readStoredLayout({
-        header: [{ id: "mainheader", type: "header_bar", variant, sticky: false }],
-      })
-      expect(old.header[0]).toMatchObject({ variant, menu_images: true })
-      const off = layoutDocument.parse({
-        header: [{ id: "mainheader", type: "header_bar", variant, menu_images: false }],
-      })
-      expect(off.header[0]).toMatchObject({ variant, menu_images: false })
-      expect(mainSectionsOf(off).header_bar).toMatchObject({ variant, menu_images: false })
-    }
-    expect(
-      issues({ header: [{ id: "mainheader", type: "header_bar", menu_images: "no" }] })
-    ).not.toEqual([])
   })
 
   it("refuses a main section hidden, scheduled, twice, or of a variant off its list", () => {
@@ -169,7 +152,7 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       type: "header_bar",
       variant: "standard",
       sticky: true,
-      menu_images: true,
+      menu_images: "submenus",
     })
     expect(main.footer_bar).toEqual({ id: "mainfooter", type: "footer_bar", variant: "ledger" })
     expect(main.product_main).toMatchObject({ variant: "standard", look: { width: "narrow" } })

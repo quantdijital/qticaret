@@ -48,17 +48,51 @@ export const MAIN_SECTION_IDS: Readonly<Record<MainSectionType, string>> = {
   category_main: "maincategory",
 }
 
+/**
+ * The menus' pictures' steps (adr/0049 Ek 2026-11-15): mirrors
+ * `@qticaret/types`' `HEADER_MENU_IMAGES`; a unit test keeps them equal.
+ */
+export const HEADER_MENU_IMAGES = ["all", "submenus", "off"] as const
+
+type MenuImages = (typeof HEADER_MENU_IMAGES)[number]
+
+/**
+ * A stored header bar's menus' pictures as today's list reads them
+ * (forgiving on reading, as `storedLook`): a step off the list (a
+ * development draft's `true`/`false` from before the steps, or a newer
+ * build's) is dropped, so the bar reads with the default. A save is still
+ * held to the list.
+ */
+export function storedMenuImages(section: Record<string, unknown>): Record<string, unknown> {
+  if (
+    section["type"] !== "header_bar" ||
+    !("menu_images" in section) ||
+    (HEADER_MENU_IMAGES as readonly unknown[]).includes(section["menu_images"])
+  ) {
+    return section
+  }
+  return Object.fromEntries(Object.entries(section).filter(([key]) => key !== "menu_images"))
+}
+
 const headerCommon = {
   ...mainBase,
   type: z.literal("header_bar"),
   /** The header stays at the top of a long page (the theme setting's `header.sticky` before). */
   sticky: z.boolean().default(true),
   /**
-   * The menus' category pictures (adr/0049 Ek 2026-11-15): the
-   * "Kategoriler" list, the dropdowns and the phone's sheet, whatever the
-   * variant; a bar saved before it reads on, as the menus were drawn.
+   * Where the menus show the categories' pictures (adr/0049 Ek 2026-11-15),
+   * whatever the variant: `all` (the "Kategoriler" list too), `submenus`
+   * (the dropdowns and the phone's sheet, as drawn before it: the default,
+   * so a bar saved without it reads as it was drawn), `off`. A step off
+   * the list is a stale or forged editor; on reading a stored design it is
+   * dropped (`storedMenuImages`).
    */
-  menu_images: z.boolean().default(true),
+  menu_images: z
+    .custom<MenuImages>(
+      (value) => (HEADER_MENU_IMAGES as readonly unknown[]).includes(value),
+      MAIN_ERROR
+    )
+    .default("submenus"),
 }
 
 /** Today's header: the wordmark on the left, search, account and cart. */

@@ -34,8 +34,8 @@ const ALL =
  * children as 48 px rows with 36 px pictures and their counts, set in
  * under the parent's name (no rule, no tree lines; a row the storefront
  * could not count shows no pill); then the shop's
- * small links and its phone and WhatsApp as quiet pills. With the shop's
- * pictures off (adr/0049 Ek 2026-11-15) the rows keep their heights and
+ * small links and its phone and WhatsApp as quiet pills. With no
+ * pictures, `off` (adr/0049 Ek 2026-11-15) the rows keep their heights and
  * show no square, the children a step in. The same links
  * are in the page's HTML through the aisle, so the sheet hides nothing
  * from a crawler. The bottom bar's "Kategoriler" opens it too, and gets
@@ -58,7 +58,7 @@ export function MenuSheet({
   highlight?: LinkView | null
   /** The account's page in words, where the header has no account icon on a phone. */
   account?: LinkView | null
-  /** The categories' small pictures (`HeaderBarView.menuImages`); off: words only. */
+  /** The categories' small pictures (`HeaderBarView.menuImages` not `off`); else words only. */
   pictures?: boolean
 }) {
   const [open, setOpen] = useState(false)

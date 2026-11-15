@@ -8,6 +8,7 @@
       "ends_at": null,
       "variant": "catalog",
       "sticky": true,
+      "menu_images": "all",
       "search_placeholder": "Model, çelik ya da kategori ara",
       "search_label": false,
       "account_text": true,

@@ -63,7 +63,7 @@ export const DOC: LayoutDocument = {
       ...MAIN,
       variant: "standard",
       sticky: true,
-      menu_images: true,
+      menu_images: "submenus",
     },
   ],
   home: [

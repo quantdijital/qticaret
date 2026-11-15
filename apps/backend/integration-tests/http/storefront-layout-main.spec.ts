@@ -56,7 +56,7 @@ medusaIntegrationTestRunner({
         type: "header_bar",
         variant: "standard",
         sticky: true,
-        menu_images: true,
+        menu_images: "submenus",
         ...ALWAYS,
       })
       expect(opened.draft.footer[0]).toMatchObject({ type: "footer_bar", variant: "ledger" })
@@ -71,7 +71,7 @@ medusaIntegrationTestRunner({
           type: "header_bar",
           variant: "standard",
           sticky: true,
-          menu_images: true,
+          menu_images: "submenus",
         },
         footer_bar: { id: "mainfooter", type: "footer_bar", variant: "ledger" },
         product_main: { id: "mainproduct", type: "product_main", variant: "standard" },
@@ -96,7 +96,7 @@ medusaIntegrationTestRunner({
 
       // The first save writes the bar's values; what is live follows on publishing
       const saved = await save({
-        // The menus' pictures turned off (adr/0049 Ek 2026-11-15)
+        // The menus' pictures in "Kategoriler" too (adr/0049 Ek 2026-11-15)
         header: [
           bar,
           {
@@ -104,7 +104,7 @@ medusaIntegrationTestRunner({
             type: "header_bar",
             variant: "centered",
             sticky: false,
-            menu_images: false,
+            menu_images: "all",
           },
         ],
         product: [
@@ -128,7 +128,7 @@ medusaIntegrationTestRunner({
           type: "header_bar",
           variant: "centered",
           sticky: false,
-          menu_images: false,
+          menu_images: "all",
           ...ALWAYS,
         },
       ])
@@ -142,7 +142,7 @@ medusaIntegrationTestRunner({
         type: "header_bar",
         variant: "centered",
         sticky: false,
-        menu_images: false,
+        menu_images: "all",
       })
       expect(after.product.map((section) => section.type)).toEqual(["help"])
       expect(after.main["product_main"]).toMatchObject({ look: { width: "narrow" } })

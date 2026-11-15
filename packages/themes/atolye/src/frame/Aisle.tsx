@@ -111,7 +111,7 @@ export function Aisle({
   more?: string
   /** In the bar, an item always shown right after the last category (the highlighted link). */
   tail?: ReactNode
-  /** The dropdowns' small pictures (`HeaderBarView.menuImages`); off: words only. */
+  /** The dropdowns' small pictures (`HeaderBarView.menuImages` not `off`); else words only. */
   pictures?: boolean
 }) {
   const [open, setOpen] = useState("")

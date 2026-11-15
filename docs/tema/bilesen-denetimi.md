@@ -213,7 +213,7 @@ Sütunlar: **Var** = bugünkü ayarlar (grup); **Eksik** = standarda göre; **Gr
 
 | | |
 | --- | --- |
-| Var | Biçim; `sticky`, `menu_images` (her biçimde İçerik; menülerde kategori resimleri, vars. açık, adr/0049 Ek 2026-11-15). `catalog`: İçerik'te `search_placeholder`, `utility_bar`, `phone`, `categories_button` (ardından `menu_images`), `menu_ground`, `highlight_link`; kapalı "Diğer ayarlar"da `search_label`, `account_text`, `cart_total` |
+| Var | Biçim; `sticky`, `menu_images` (her biçimde İçerik; menülerde kategori resimleri: all/**submenus**/off → Her yerde/Alt menülerde/Yok; varsayılan bugünkü çizim, adr/0049 Ek 2026-11-15). `catalog`: İçerik'te `search_placeholder`, `utility_bar`, `phone`, `categories_button` (ardından `menu_images`), `menu_ground`, `highlight_link`; kapalı "Diğer ayarlar"da `search_label`, `account_text`, `cart_total` |
 | Eksik | Yapışkanlık basamakları (her zaman / yukarı kaydırınca / hiç); logo boyu; telefonda logo yeri; alt çizgi; menü türü (açılır / mega / çekmece) |
 | Grup | — |
 | Ad | `sticky` hem tema ayarı `header.sticky` hem bölüm ayarı; `centered` biçimi tema ayarı `header.layout`'tan okunuyor: iki doğruluk kaynağı. O5 (`menu_ground`) |

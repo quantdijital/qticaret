@@ -3,6 +3,7 @@ import { act } from "react"
 import { createRoot, type Root } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
+import type { HeaderMenuImages } from "@qticaret/types"
 import type { HeaderBarView, NavCategoryView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 import { renderFrame, shopFixture } from "@/test/theme-render"
@@ -11,10 +12,11 @@ import { MenuSheet } from "../../../../../packages/themes/atolye/src/frame/MenuS
 import { menuWords } from "../../../../../packages/themes/atolye/src/frame/menu-words"
 
 /**
- * The menus' category pictures (adr/0049 Ek 2026-11-15, the owner's
- * "isteğe bağlı olsun"): on, "Kategoriler", the dropdowns and the phone's
- * sheet show each category's small square (an empty one where there is no
- * picture); off, all three are words only, no square, on any variant.
+ * The menus' category pictures (adr/0049 Ek 2026-11-15; adr/0066 K3b):
+ * `submenus`, the default, is the drawing from before the setting (the
+ * dropdowns and the phone's sheet with their squares, "Kategoriler" in
+ * words at 288 px); `all` gives "Kategoriler" the squares too (320 px);
+ * `off` leaves all three in words, on any variant.
  */
 
 ;(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true
@@ -40,7 +42,7 @@ const CATEGORIES: NavCategoryView[] = [
   { label: "Bahçe", path: "/kategori/bahce", children: [] },
 ]
 
-const bar = (variant: HeaderBarView["variant"], menuImages?: boolean): HeaderBarView => ({
+const bar = (variant: HeaderBarView["variant"], menuImages?: HeaderMenuImages): HeaderBarView => ({
   id: "mainheader",
   variant,
   sticky: true,
@@ -75,10 +77,46 @@ const squares = (within: Element | null | undefined) =>
     src: square.querySelector("img")?.getAttribute("src") ?? null,
   }))
 
+// "Kategoriler" as drawn before the setting: its link recipe, word for word
+const WORDS_LINK =
+  "flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+const LIST = 'nav[aria-label="Tüm kategoriler"]'
+
 describe("the menus' pictures in the header as the server prints it", () => {
-  it("draws Kategoriler's rows with the dropdowns' squares, an empty one where none", () => {
-    const doc = page(bar("catalog", true))
-    const list = doc.querySelector('nav[aria-label="Tüm kategoriler"]')
+  it("draws the default as before: the dropdowns' squares, Kategoriler in words at 288 px", () => {
+    const doc = page(bar("catalog", "submenus"))
+    const list = doc.querySelector(LIST)
+    expect(squares(list)).toEqual([])
+    expect(list?.className).toContain(" w-72 ")
+    expect(list?.className).not.toContain("w-80")
+    const top = list?.querySelector<HTMLAnchorElement>('a[data-cm-top="0"]')
+    expect(top?.className).toBe(`${WORDS_LINK} justify-between font-semibold `)
+    // The name is the row's own words, no box around it
+    expect(top?.firstChild?.nodeType).toBe(Node.TEXT_NODE)
+    expect(top?.firstChild?.textContent).toBe("Mutfak")
+    expect(list?.querySelector('[data-cm-sub="0"]')?.className).toMatch(/ w-64$/)
+    const child = list?.querySelector<HTMLAnchorElement>('a[href="/kategori/mutfak/sef"]')
+    expect(child?.className).toBe(WORDS_LINK)
+    expect(child?.innerHTML).toBe("Şef bıçakları")
+    // The dropdown under the main menu keeps its 40 px squares
+    const drop = doc.querySelector('[data-gf-drop="/kategori/mutfak"]')
+    expect(squares(drop)).toEqual([
+      { size: 40, src: "/media/sef.jpg" },
+      { size: 40, src: null },
+    ])
+    expect(drop?.querySelector(".gf-drop-row--words")).toBeNull()
+  })
+
+  it("reads an answer without the setting as the default, on every variant", () => {
+    for (const variant of ["standard", "centered", "catalog"] as const) {
+      expect(page(bar(variant)).body.innerHTML).toBe(page(bar(variant, "submenus")).body.innerHTML)
+    }
+  })
+
+  it("gives Kategoriler the dropdowns' squares everywhere, an empty one where none", () => {
+    const doc = page(bar("catalog", "all"))
+    const list = doc.querySelector(LIST)
+    expect(list?.className).toContain(" w-80 ")
     expect(squares(list?.querySelector("[data-cm-list='top']"))).toEqual([
       { size: 40, src: "/media/mutfak.jpg" },
       // The children's 36 px squares (in the panel) come first in Mutfak's row
@@ -90,23 +128,15 @@ describe("the menus' pictures in the header as the server prints it", () => {
     const top = list?.querySelector<HTMLAnchorElement>('a[data-cm-top="0"]')
     expect(top?.className).toContain("min-h-12")
     expect(top?.querySelector("span.flex-1")?.textContent).toBe("Mutfak")
-    // The dropdown under the main menu keeps its 40 px squares
-    const drop = doc.querySelector('[data-gf-drop="/kategori/mutfak"]')
-    expect(squares(drop)).toEqual([
-      { size: 40, src: "/media/sef.jpg" },
-      { size: 40, src: null },
-    ])
+    expect(list?.querySelector('[data-cm-sub="0"]')?.className).toMatch(/ w-72$/)
+    expect(squares(doc.querySelector('[data-gf-drop="/kategori/mutfak"]'))).toHaveLength(2)
   })
 
-  it("reads an older answer without the setting as on", () => {
-    const doc = page(bar("catalog"))
-    expect(squares(doc.querySelector('nav[aria-label="Tüm kategoriler"]'))).toHaveLength(4)
-  })
-
-  it("draws words only, no square, when the shop turned them off", () => {
-    const doc = page(bar("catalog", false))
-    const list = doc.querySelector('nav[aria-label="Tüm kategoriler"]')
+  it("draws words only, no square, with none", () => {
+    const doc = page(bar("catalog", "off"))
+    const list = doc.querySelector(LIST)
     expect(squares(list)).toEqual([])
+    expect(list?.className).toContain(" w-72 ")
     expect(list?.querySelector('a[data-cm-top="0"]')?.className).toContain("min-h-11")
     expect(list?.querySelector('a[href="/kategori/mutfak/sef"]')?.textContent).toBe("Şef bıçakları")
     const drop = doc.querySelector('[data-gf-drop="/kategori/mutfak"]')
@@ -116,10 +146,12 @@ describe("the menus' pictures in the header as the server prints it", () => {
     expect(rows.every((row) => row.classList.contains("gf-drop-row--words"))).toBe(true)
   })
 
-  it("is every variant's: today's header drops its dropdowns' squares too", () => {
+  it("is every variant's: today's header has no Kategoriler list, so all draws as the default", () => {
     for (const variant of ["standard", "centered"] as const) {
-      expect(squares(page(bar(variant, true)).querySelector("[data-gf-drop]"))).toHaveLength(2)
-      expect(squares(page(bar(variant, false)).querySelector("[data-gf-drop]"))).toEqual([])
+      const before = page(bar(variant, "submenus"))
+      expect(squares(before.querySelector("[data-gf-drop]"))).toHaveLength(2)
+      expect(page(bar(variant, "all")).body.innerHTML).toBe(before.body.innerHTML)
+      expect(squares(page(bar(variant, "off")).querySelector("[data-gf-drop]"))).toEqual([])
     }
   })
 })
@@ -177,7 +209,7 @@ describe("the menus' pictures in the phone's sheet", () => {
     return sheet
   }
 
-  it("shows the squares by default", () => {
+  it("shows the squares by default, as before the setting", () => {
     const sheet = open()
     expect(squares(sheet)).toEqual([
       { size: 40, src: "/media/mutfak.jpg" },
@@ -188,7 +220,7 @@ describe("the menus' pictures in the phone's sheet", () => {
     expect(sheet.querySelector("details ul")?.className).toContain("ml-13")
   })
 
-  it("lists words only when off, the children a step in under the parent's name", () => {
+  it("lists words only with none, the children a step in under the parent's name", () => {
     const sheet = open(false)
     expect(squares(sheet)).toEqual([])
     expect(sheet.querySelector("details ul")?.className).toContain("ml-4")
