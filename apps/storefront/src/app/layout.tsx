@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { headers } from "next/headers"
 import type { ReactNode } from "react"
 import { AnalyticsScripts } from "@/app/AnalyticsScripts"
+import { StyleNonce } from "@/app/StyleNonce"
 import { addToCart, changeCartLine } from "@/app/actions/cart"
 import { saveCookieChoice } from "@/app/actions/cookies"
 import { NO_CART } from "@/lib/analytics/cart-changes"
@@ -62,6 +63,8 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
           />
         ))}
         {style && <style nonce={nonce}>{style}</style>}
+        {/* The dialogs' scroll lock writes its own style element: it takes the nonce from here */}
+        <StyleNonce nonce={nonce} />
         {/* Before the page: its page view goes first, the page's own events after */}
         <AnalyticsScripts
           ga4={preview ? null : tags.ga4}

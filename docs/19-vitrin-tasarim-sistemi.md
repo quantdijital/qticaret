@@ -138,7 +138,7 @@ shadcn bileşeni eklemek: `cd packages/ui && pnpm exec shadcn add <ad>`. CLI'nin
 7. **Görsel:** `ResponsiveImage` (`<picture>`, AVIF/WebP). Yalnızca LCP görseli `priority`; ızgarada ilk satır.
 8. **Biçimlendirme storefront'ta:** fiyat, indirim yüzdesi, telefon görünüm modelinde biçimlenir (`lib/views`); tema sayı biçimlendirmez. Tek istisna ürün sayfasının ek seçenek canlı toplamı (adr/0052): tarayıcıda hesaplanır, sözleşmenin `formatLira`'sıyla yazılır, yalnız gösterimdir.
 9. **Dosya ≤ ~300 satır;** büyüyen sayfa `components/` ya da `layout/` altına bölünür.
-10. **Satır içi `style` yok:** üretimdeki CSP (`style-src 'self' 'nonce-…'`) HTML'deki `style` niteliğini reddeder. Değişken genişlik gibi değerler sabit sınıf adlarıyla verilir (ör. sepet kargo çubuğu 5'lik adımlar).
+10. **Satır içi `style` yok:** üretimdeki CSP (`style-src 'self' 'nonce-…'`) HTML'deki `style` niteliğini reddeder. Değişken genişlik gibi değerler sabit sınıf adlarıyla verilir (ör. sepet kargo çubuğu 5'lik adımlar). Çalışırken `<style>` öğesi yazan kütüphane de nonce ister: Radix diyaloglarının kaydırma kilidi (`react-remove-scroll`) nonce'u `window.__webpack_nonce__`'dan alır, onu kök düzendeki `StyleNonce` belgenin ilk nonce'uyla verir. Yeni böyle bir kütüphane geldiğinde üretim derlemesinde CSP ihlali dinlenir.
 
 ### 6.9 Kaydırılabilir kutular (2026-11-03)
 
