@@ -206,6 +206,13 @@ describe("the quick view dialog", () => {
     })
     expect(dialog?.querySelector("[aria-busy=true]")).toBeNull()
     expect(dialog?.textContent).toContain("450,00 TL")
+    // The name heads the dialog at a section's size, the price follows a step below it
+    expect(title?.className).toContain("text-section")
+    const price = [...(dialog?.querySelectorAll("span") ?? [])].find(
+      (span) => span.textContent === "450,00 TL"
+    )
+    expect(price?.className).toContain("text-price-s")
+    expect(price?.className).not.toMatch(/(^| )text-price( |$)/)
     expect(dialog?.textContent).toContain("Paslanmaz çelik.")
     expect(dialog?.textContent).toContain("Atölye")
     // The chosen variant's radio, the quantity field and the add button
