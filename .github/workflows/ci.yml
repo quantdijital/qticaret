@@ -54,12 +54,14 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      # Random per run and useless outside this job, so they are never
-      # printed and need no masking
+      # Random per run and useless outside this job; masked all the same,
+      # since every later step lists its env in the (public) log
       - name: Generate throwaway secrets
         run: |
           for name in JWT_SECRET COOKIE_SECRET PII_ENCRYPTION_KEY PII_HASH_KEY CREDENTIALS_ENCRYPTION_KEY; do
-            echo "$name=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+            value="$(openssl rand -hex 32)"
+            echo "::add-mask::$value"
+            echo "$name=$value" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
@@ -114,12 +116,14 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
-      # Random per run and useless outside this job, so they are never
-      # printed and need no masking
+      # Random per run and useless outside this job; masked all the same,
+      # since every later step lists its env in the (public) log
       - name: Generate throwaway secrets
         run: |
           for name in JWT_SECRET COOKIE_SECRET PII_ENCRYPTION_KEY PII_HASH_KEY CREDENTIALS_ENCRYPTION_KEY; do
-            echo "$name=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+            value="$(openssl rand -hex 32)"
+            echo "::add-mask::$value"
+            echo "$name=$value" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile
       # One jest worker, replaced when its heap grows (jest.config.js)
@@ -167,7 +171,9 @@ jobs:
       - name: Generate throwaway secrets
         run: |
           for name in JWT_SECRET COOKIE_SECRET PII_ENCRYPTION_KEY PII_HASH_KEY CREDENTIALS_ENCRYPTION_KEY; do
-            echo "$name=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+            value="$(openssl rand -hex 32)"
+            echo "::add-mask::$value"
+            echo "$name=$value" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile
       - name: Install Chromium for Playwright
