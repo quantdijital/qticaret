@@ -34,6 +34,7 @@ export function CatalogSlideDialog({
   onSave,
   onClose,
   initialFocus = null,
+  returnFocus,
 }: {
   section: CatalogHero
   slides: HeroCatalogSlide[]
@@ -43,6 +44,8 @@ export function CatalogSlideDialog({
   onClose: () => void
   /** The element the dialog opens at (a field the preview named); null: its first. */
   initialFocus?: string | null
+  /** The element the caret goes back to on closing, by the slide shown (`useSlideRows`). */
+  returnFocus?: (index: number) => HTMLElement | null
 }) {
   const { t } = useTranslation()
   const problem = useProblemText()
@@ -105,6 +108,7 @@ export function CatalogSlideDialog({
         }
       }}
       initialFocus={initialFocus}
+      returnFocus={() => returnFocus?.(index) ?? null}
       guard={guard}
     >
       <DialogBody>

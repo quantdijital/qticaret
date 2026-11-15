@@ -1,5 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen, waitFor } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
@@ -106,6 +107,15 @@ describe("a field named by the preview", () => {
     })
     expect(dialog.contains(document.activeElement)).toBe(true)
     expect(document.activeElement).toHaveValue("Slayt 1")
+
+    // Opened from the frame (no opener in the panel): Escape leaves the caret on the slide's row
+    await userEvent.keyboard("{Escape}")
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).toBeNull()
+    })
+    await waitFor(() => {
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "2. slayt: düzenle" }))
+    })
   })
 
   it("opens a catalogue opening's slide at its picture's control", async () => {
@@ -117,5 +127,10 @@ describe("a field named by the preview", () => {
       expect(document.getElementById(field.target)?.contains(document.activeElement)).toBe(true)
     })
     expect(document.activeElement?.tagName).toBe("BUTTON")
+
+    await userEvent.keyboard("{Escape}")
+    await waitFor(() => {
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "1. slayt: düzenle" }))
+    })
   })
 })

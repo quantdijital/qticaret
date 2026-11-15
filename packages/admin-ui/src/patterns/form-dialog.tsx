@@ -31,6 +31,13 @@ interface FormDialogProps {
   guard?: ReturnType<typeof useDiscardGuard>
   /** The element (by id) the caret goes to on opening, in place of the first field. */
   initialFocus?: string | null
+  /**
+   * Where the caret goes on closing, for a dialog opened without a trigger
+   * (shown by a parent's state, opened from code): Radix returns it to the
+   * trigger only, so without one it falls to the page. Called once closed;
+   * null: Radix's own way. Unset: unchanged.
+   */
+  returnFocus?: () => HTMLElement | null
   /** The submit button's words in place of "Kaydet" (`Yanıtla`). */
   submitLabel?: string
   /** Whether what is typed may be sent at all (within its limits); with `dirty`, it lights "Kaydet". */
@@ -61,6 +68,7 @@ export function FormDialog({
   onSubmit,
   guard,
   initialFocus,
+  returnFocus,
   submitLabel,
   canSubmit = true,
   footerStart,
@@ -100,6 +108,13 @@ export function FormDialog({
             if (control) {
               event.preventDefault()
               control.focus()
+            }
+          }}
+          onCloseAutoFocus={(event) => {
+            const back = returnFocus?.()
+            if (back?.isConnected) {
+              event.preventDefault()
+              back.focus()
             }
           }}
         >
