@@ -44,7 +44,8 @@ export type EditorAction =
   | { type: "move"; id: string; to: number }
   /** A category page's section to the other side of its products. */
   | { type: "place"; id: string; placement: Placement }
-  | { type: "duplicate"; id: string }
+  /** `copyId`: the copy's id, chosen beforehand so the preview can scroll to it (else a new one). */
+  | { type: "duplicate"; id: string; copyId?: string }
   | { type: "remove"; id: string }
   | { type: "toggle"; id: string }
   /**
@@ -169,7 +170,7 @@ function place(doc: LayoutDocument, id: string, placement: Placement): LayoutDoc
   }
 }
 
-function duplicate(doc: LayoutDocument, id: string): LayoutDocument {
+function duplicate(doc: LayoutDocument, id: string, copyId?: string): LayoutDocument {
   const found = findSection(doc, id)
   // Only a page's body holds several of a kind
   if (
@@ -180,7 +181,8 @@ function duplicate(doc: LayoutDocument, id: string): LayoutDocument {
   ) {
     return doc
   }
-  const copy = copyOf(found.section, newSectionId(idsOf(doc)))
+  const taken = idsOf(doc)
+  const copy = copyOf(found.section, copyId && !taken.has(copyId) ? copyId : newSectionId(taken))
   return add(doc, found.group, copy, found.index + 1)
 }
 
@@ -204,7 +206,7 @@ export function editorReducer(state: EditorState, action: EditorAction): EditorS
     case "place":
       return commit(state, place(doc, action.id, action.placement))
     case "duplicate":
-      return commit(state, duplicate(doc, action.id))
+      return commit(state, duplicate(doc, action.id, action.copyId))
     // A main section is never removed nor hidden (adr/0049 Ek 2026-11-14 §5)
     case "remove":
       return commit(

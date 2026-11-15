@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { AUTOSAVE_MS } from "@/features/storefront/layout/use-autosave"
 import {
+  PATH,
   SETTINGS,
   THEME,
   THEME_SETTINGS,
@@ -128,12 +129,19 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
     expect(screen.getByText(/taslağın parçasıdır/)).toBeVisible()
     expect(screen.queryByRole("button", { name: "Kaydet ve yayınla" })).toBeNull()
 
+    // Typing waits for a pause; a choice picked is saved at once, with what was typed (adr/0065 §5)
     await user.type(primary, "#0B5C99")
+    expect(postsTo(fetchMock)).toEqual([])
     await user.click(screen.getByRole("combobox", { name: "Başlıklar" }))
     await user.click(await screen.findByRole("option", { name: /Playfair Display/ }))
+    await pass(0)
+    await waitFor(() => {
+      expect(savedTheme()?.typography.heading).toBe("playfair")
+    })
+    expect(savedTheme()?.colors.primary).toBe("#0b5c99")
     await user.click(screen.getByRole("radio", { name: "Nötr" }))
     await user.click(screen.getByRole("switch", { name: /^Puanı göster/ }))
-    await pass(AUTOSAVE_MS)
+    await pass(0)
 
     await waitFor(() => {
       expect(savedTheme()).toEqual({
@@ -146,10 +154,13 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
     // Neither the theme section nor the storefront section is written: "Yayınla" puts it live
     expect(postsTo(fetchMock, THEME_SETTINGS)).toEqual([])
     expect(postsTo(fetchMock, SETTINGS)).toEqual([])
+    // The bridge is not there (no session served): a new link after each save, the newest shown
+    const links = () => postsTo(fetchMock, `${PATH}/preview`).length
     await waitFor(() => {
+      expect(links()).toBeGreaterThan(2)
       expect(screen.getByTitle("Vitrin önizlemesi")).toHaveAttribute(
         "src",
-        expect.stringContaining("/onizleme/sfl_2")
+        expect.stringContaining(`/onizleme/sfl_${String(links())}`)
       )
     })
     expect(screen.getByRole("button", { name: "Yayınla" })).toBeEnabled()

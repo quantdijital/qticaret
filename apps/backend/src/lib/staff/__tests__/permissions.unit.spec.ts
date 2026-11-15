@@ -623,6 +623,10 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   // The storefront's design and menus (adr/0049): the admin's and the owner's
   "POST /admin/storefront-layout": false,
   "POST /admin/storefront-layout/discard": false,
+  // adr/0065: the theme editor's live preview session, as the editor itself
+  "POST /admin/storefront-layout/editor-session": false,
+  "PUT /admin/storefront-layout/editor-session/:id": false,
+  "DELETE /admin/storefront-layout/editor-session/:id": false,
   "POST /admin/storefront-layout/preview": false,
   "POST /admin/storefront-layout/publish": false,
   "POST /admin/storefront-layout/revisions/:revision/restore": false,

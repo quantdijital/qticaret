@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { sectionMark } from "@qticaret/ui"
 import type { SectionDeviceView, SectionLookView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 
@@ -19,13 +20,19 @@ import { cn } from "@qticaret/ui/lib/utils"
  * box (`data-show-on`); a section shown everywhere with no look set gets
  * none. `look.css` hides it at the theme's frame breakpoint (64rem), so
  * every visitor gets the same page and a lazy picture in it is not fetched.
+ *
+ * With the section's `id` the box always stands and carries its mark
+ * (`sectionMark`, adr/0065 §4): a plain box, so the page draws as before.
  */
 export function Look({
+  id,
   look,
   device,
   main = false,
   children,
 }: {
+  /** The section's id: its mark on the box (adr/0065 §4). */
+  id?: string | undefined
   look: SectionLookView | undefined
   device?: SectionDeviceView | undefined
   main?: boolean
@@ -33,8 +40,8 @@ export function Look({
 }) {
   const looked = look !== undefined && Object.keys(look).length > 0
   if (!looked) {
-    return device ? (
-      <div className="gf-device" data-show-on={device}>
+    return device || id ? (
+      <div className={device ? "gf-device" : undefined} data-show-on={device} {...sectionMark(id)}>
         {children}
       </div>
     ) : (
@@ -51,6 +58,7 @@ export function Look({
       data-width={look.width}
       data-main={main ? "" : undefined}
       data-show-on={device}
+      {...sectionMark(id)}
     >
       {children}
     </div>

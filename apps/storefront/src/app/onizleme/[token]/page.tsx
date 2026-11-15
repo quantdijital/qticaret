@@ -1,11 +1,14 @@
 import type { Metadata } from "next"
+import { headers } from "next/headers"
 import { notFound } from "next/navigation"
 import { cache } from "react"
 import type { StoreBodyImage, StoreContentTerm } from "@qticaret/types"
+import { EditorBridgeLoader } from "@/components/editor-bridge/loader"
+import { panelOrigins, storefrontEnv } from "@/lib/env"
 import { t } from "@/lib/i18n"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { productPreview } from "@/lib/store-api/product-preview"
-import { layoutPreview } from "@/lib/store-api/requests"
+import { layoutPreview, layoutSession } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
 import { postTerms } from "@/lib/views/posts"
 import { previewPage } from "@/lib/views/preview"
@@ -30,6 +33,8 @@ interface PreviewEntry {
 const TOKEN = /^cnt_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}$/
 // The theme editor's draft (adr/0049)
 const LAYOUT_TOKEN = /^sfl_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}$/
+// The theme editor's live session (adr/0065 §1): one address while the editor is open
+const SESSION_TOKEN = /^sfs_[0-9a-f]{32}\.[0-9a-z]{1,12}\.[\w-]{43}$/
 
 /** The entry a signed link opens; null for one malformed, changed or past its day. */
 const previewOf = cache(async (token: string): Promise<PreviewEntry | null> => {
@@ -51,11 +56,13 @@ const previewOf = cache(async (token: string): Promise<PreviewEntry | null> => {
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { token } = await params
-  const found = LAYOUT_TOKEN.test(token)
-    ? (await layoutPreview(token)) && t("preview.design")
-    : isProductPreviewToken(token)
-      ? (await productPreview(token))?.product.title
-      : (await previewOf(token))?.title
+  const found = SESSION_TOKEN.test(token)
+    ? (await layoutSession(token)) && t("preview.design")
+    : LAYOUT_TOKEN.test(token)
+      ? (await layoutPreview(token)) && t("preview.design")
+      : isProductPreviewToken(token)
+        ? (await productPreview(token))?.product.title
+        : (await previewOf(token))?.title
   return {
     title: { absolute: found ? t("preview.title", { title: found }) : t("preview.gone") },
     // A preview is nobody's search result, nor a page to follow links from
@@ -70,6 +77,8 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
  * editor's draft (adr/0049) with its header and footer: the home page, or
  * with `?sayfa=<path>` that storefront page (a product, a category, brand,
  * collection or landing, `/magaza`, `/blog`) with the draft's sections.
+ * Or the theme editor's live session (adr/0065 §1): the same pages, the
+ * draft as last saved, with the editor's bridge when framed by the panel.
  * Or a draft product's page as it will read (F18), `?variant=` chosen.
  * Never indexed.
  */
@@ -81,6 +90,24 @@ export default async function PreviewPage({
   searchParams: SearchParams
 }) {
   const { token } = await params
+  if (SESSION_TOKEN.test(token)) {
+    const session = await layoutSession(token)
+    if (!session) {
+      notFound()
+    }
+    const { sayfa } = await searchParams
+    // The panel's exact origin, as frame-ancestors names it; none set: no bridge
+    const [panelOrigin] = panelOrigins(storefrontEnv())
+    const nonce = (await headers()).get("x-nonce") ?? undefined
+    return (
+      <>
+        <DesignPreviewScreen layout={session.layout} target={previewPage(sayfa)} />
+        {panelOrigin && (
+          <EditorBridgeLoader panelOrigin={panelOrigin} edition={session.edition} nonce={nonce} />
+        )}
+      </>
+    )
+  }
   if (LAYOUT_TOKEN.test(token)) {
     const layout = await layoutPreview(token)
     if (!layout) {

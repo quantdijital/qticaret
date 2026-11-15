@@ -48,6 +48,7 @@ import { sectionLabel } from "./section-meta"
 import { SectionTree } from "./section-tree"
 import { SettingsSearch } from "./settings-search-panel"
 import { useEditorActions } from "./use-editor-actions"
+import { useEditorPreview } from "./use-editor-preview"
 import { usePreviewTarget } from "./use-preview-target"
 import { useUndoKeys } from "./use-undo-keys"
 
@@ -57,7 +58,8 @@ const E = "storefront.editor"
  * The theme editor (adr/0049): full screen, the page's parts, the open
  * part's settings and the storefront itself, laid out as the window allows
  * (`EditorShell`). Every change is kept here with its history and saved to
- * the draft once typing pauses; the preview reloads after each save;
+ * the draft once typing pauses (a change made in one go at once); the
+ * preview redraws in place after each save (adr/0065);
  * "Yayınla" puts the draft live.
  */
 export function ThemeEditor({ layout }: { layout: AdminLayout }) {
@@ -92,6 +94,17 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
     editorLayoutNow() === "narrow" ? "mobile" : "desktop"
   )
   const target = usePreviewTarget(page)
+  const { preview, act, notice, markNew } = useEditorPreview({
+    doc,
+    page,
+    path: target.path,
+    finding: target.finding,
+    opened,
+    ready: !layout.is_default || autosave.round > 0,
+    round: autosave.round,
+    dispatch,
+    hurry: autosave.hurry,
+  })
   const actions = useEditorActions({
     flush: autosave.flush,
     page: target.path,
@@ -101,10 +114,10 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
     },
   })
   const undo = () => {
-    dispatch({ type: "undo" })
+    act({ type: "undo" })
   }
   const redo = () => {
-    dispatch({ type: "redo" })
+    act({ type: "redo" })
   }
   useUndoKeys(undo, redo)
 
@@ -128,7 +141,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
   const remove = (section: AnySection) => {
     const inFooter = findSection(doc, section.id)?.group === "footer"
     const { name } = sectionLabel(t, section, inFooter)
-    dispatch({ type: "remove", id: section.id })
+    act({ type: "remove", id: section.id })
     setOpened(null)
     toast.success(t(`${E}.row.removed`, { name }), {
       action: { label: t(`${E}.undo`), onClick: undo },
@@ -143,7 +156,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
       found={found}
       doc={doc}
       problems={problems}
-      dispatch={dispatch}
+      dispatch={act}
       onUndo={undo}
       onRemove={remove}
       onClose={() => {
@@ -159,7 +172,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
         <PendingMenus
           count={pendingMenus.length}
           onDrop={() => {
-            dispatch({ type: "settings", settings: { ...doc.settings, menus: null } })
+            act({ type: "settings", settings: { ...doc.settings, menus: null } })
           }}
         />
       ) : null}
@@ -184,7 +197,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
           page={page}
           doc={doc}
           problems={new Set(problems.keys())}
-          dispatch={dispatch}
+          dispatch={act}
           onOpen={(id) => {
             setOpened({ kind: "section", id })
           }}
@@ -257,8 +270,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
           formKey={formKey}
           preview={
             <PreviewFrame
-              round={autosave.round}
-              ready={!layout.is_default || autosave.round > 0}
+              preview={preview}
               device={device}
               onDevice={setDevice}
               sample={
@@ -266,8 +278,8 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
                   <SamplePicker page={page} sample={target.sample} onChange={target.choose} />
                 )
               }
-              page={target.path}
               missing={target.missing}
+              notice={notice}
               finding={target.finding}
             />
           }
@@ -287,7 +299,8 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
         onPick={(type) => {
           const id = newSectionId(idsOf(doc))
           const section = newBodySection(page, type, id, adding ?? "bottom")
-          dispatch({ type: "add", group: page, section })
+          markNew(id)
+          act({ type: "add", group: page, section })
           setAdding(null)
           setOpened({ kind: "section", id })
         }}

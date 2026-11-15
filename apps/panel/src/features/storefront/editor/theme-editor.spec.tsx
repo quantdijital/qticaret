@@ -92,28 +92,32 @@ describe("ThemeEditor", () => {
     expect(calls.indexOf(PATH, 1)).toBeLessThan(calls.indexOf(`${PATH}/preview`))
   })
 
-  it("saves a change once nothing changed for a moment, the whole draft, then reloads the preview", async () => {
+  it("saves a change made in one go at once, the whole draft, then reloads the preview", async () => {
     renderEditor()
     await opened()
     await frame()
 
+    // Hiding is one click: saved without the pause typing waits for (adr/0065 §5)
     await user.click(screen.getByRole("button", { name: "Blog yazıları bölümünü gizle" }))
     await user.click(screen.getByRole("button", { name: "Giriş bölümünü gizle" }))
-    expect(status()).toHaveTextContent("Kaydediliyor…")
-    await pass(AUTOSAVE_MS - 1)
-    expect(postsTo(fetchMock)).toEqual([])
-
-    await pass(1)
+    await pass(0)
     await waitFor(() => {
-      expect(postsTo(fetchMock)).toHaveLength(1)
+      expect(postsTo(fetchMock).length).toBeGreaterThanOrEqual(1)
     })
+    await pass(0)
     const [hero, products, posts] = DOC.home
-    expect(lastSaved(fetchMock)).toEqual({
-      ...DOC,
-      home: [{ ...hero, visible: false }, products, { ...posts, visible: false }],
+    await waitFor(() => {
+      expect(lastSaved(fetchMock)).toEqual({
+        ...DOC,
+        home: [{ ...hero, visible: false }, products, { ...posts, visible: false }],
+      })
     })
-    expect(await frame()).toHaveAttribute("src", expect.stringContaining("/onizleme/sfl_2"))
-    expect(status()).toHaveTextContent(/Taslak kaydedildi \d\d:\d\d/)
+    // Fewer saves than a pause apart would need: never one per keystroke's pause
+    expect(postsTo(fetchMock).length).toBeLessThanOrEqual(2)
+    expect(await frame()).toHaveAttribute("src", expect.stringMatching(/\/onizleme\/sfl_[23]/))
+    await waitFor(() => {
+      expect(status()).toHaveTextContent(/Taslak kaydedildi \d\d:\d\d/)
+    })
     expect(screen.getByRole("button", { name: "Yayınla" })).toBeEnabled()
   })
 

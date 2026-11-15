@@ -7,6 +7,7 @@ import {
 } from "../admin/storefront-layout/validators"
 import { AdminPostStorefrontMenu } from "../admin/storefront-menus/validators"
 import { AdminPostStorefrontPresetApply } from "../admin/storefront-presets/validators"
+import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import type { RateLimitProfile } from "../../lib/security/rate-limit"
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
@@ -43,6 +44,29 @@ export const STOREFRONT_MENU_ROUTES = [
     methods: ["POST" as const],
     middlewares: [validateAndTransformBody(AdminPostStorefrontLayoutAction)],
   })),
+  // adr/0065: the theme editor's live preview session, a person's from their panel session
+  {
+    matcher: "/admin/storefront-layout/editor-session",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      rateLimit(() => RATE_LIMIT_PROFILES.layout_session_open, {
+        identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
+      }),
+      validateAndTransformBody(AdminPostStorefrontLayoutAction),
+    ],
+  },
+  {
+    matcher: "/admin/storefront-layout/editor-session/:id",
+    methods: ["PUT" as const, "DELETE" as const],
+    middlewares: [requireUserActor],
+  },
+  // Its draft, read by the storefront after every save; a guessed token finds nothing
+  {
+    matcher: "/store/storefront-layout/session/:token",
+    methods: ["GET" as const],
+    middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.layout_session)],
+  },
   {
     matcher: "/admin/storefront-layout/revisions/:revision/restore",
     methods: ["POST" as const],

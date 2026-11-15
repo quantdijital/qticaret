@@ -1,5 +1,5 @@
 import { Mail, MapPin, Phone } from "lucide-react"
-import { drawnVariant } from "@qticaret/ui"
+import { drawnVariant, sectionMark } from "@qticaret/ui"
 import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { FooterLinks } from "./FooterLinks"
@@ -85,6 +85,7 @@ export function Footer({
   return (
     <footer
       data-gf-clear=""
+      {...sectionMark(shop.footerBar?.id)}
       data-variant={variant}
       className="mt-(--footer-gap) border-t border-rule bg-paper-2"
     >

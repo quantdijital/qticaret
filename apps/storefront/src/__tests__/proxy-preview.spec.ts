@@ -61,11 +61,50 @@ describe("the proxy on a preview page", () => {
     // Nothing else under a preview's address carries the token on
     expect((await visit(`/onizleme/${design}/baska`)).headers.get(header)).toBeNull()
     expect((await visit(`/onizleme/${design}/hizli-bakis/x`)).headers.get(header)).toBeNull()
+    // The theme editor's live session's frame asks its quick view the same way (adr/0065)
+    const session = `sfs_${"0a".repeat(16)}.to51q5.${"b".repeat(43)}`
+    expect((await visit(`/onizleme/${session}/hizli-bakis?id=prod_01`)).headers.get(header)).toBe(
+      session
+    )
+    expect((await visit(`/onizleme/${session}/baska`)).headers.get(header)).toBeNull()
+  })
+
+  it("drops a preview header a visitor sends itself", async () => {
+    const forged = `sfs_${"0a".repeat(16)}.to51q5.${"b".repeat(43)}`
+    const response = await proxy(
+      new NextRequest("http://localhost:8000/urun/bir-urun", {
+        headers: { "x-qt-layout-preview": forged },
+      })
+    )
+    expect(response.headers.get("x-middleware-request-x-qt-layout-preview")).toBeNull()
   })
 
   it("leaves a live product page indexable", async () => {
     const response = await visit("/urun/bir-urun")
     expect(response.headers.get("x-robots-tag")).toBeNull()
     expect(response.headers.get("cache-control")).not.toBe("private, no-store")
+  })
+
+  it("passes the theme editor's live session on to the page, framed by the panel only, never stored", async () => {
+    const session = `sfs_${"0a".repeat(16)}.to51q5.${"b".repeat(43)}`
+    const response = await visit(`/onizleme/${session}?sayfa=%2Furun%2Fbir-urun`)
+    expect(response.headers.get("x-middleware-request-x-qt-layout-preview")).toBe(session)
+    expect(response.headers.get("x-robots-tag")).toBe("noindex, nofollow")
+    expect(response.headers.get("cache-control")).toBe("private, no-store")
+    expect(response.headers.get("content-security-policy")).toContain(
+      "frame-ancestors http://localhost:5173"
+    )
+    // An uppercase or longer id is no session's: no draft header
+    const forged = await visit(`/onizleme/sfs_${"0A".repeat(16)}.to51q5.${"b".repeat(43)}`)
+    expect(forged.headers.get("x-middleware-request-x-qt-layout-preview")).toBeNull()
+  })
+
+  it("never takes the draft's header from the visitor, and sets none on a live page", async () => {
+    const request = new NextRequest("http://localhost:8000/urun/bir-urun", {
+      headers: { "x-qt-layout-preview": `sfs_${"0a".repeat(16)}.to51q5.${"b".repeat(43)}` },
+    })
+    const response = await proxy(request)
+    expect(response.headers.get("x-middleware-request-x-qt-layout-preview")).toBeNull()
+    expect(response.headers.get("content-security-policy")).toContain("frame-ancestors 'none'")
   })
 })
