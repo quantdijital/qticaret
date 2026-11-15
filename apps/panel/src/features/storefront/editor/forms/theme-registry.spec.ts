@@ -49,7 +49,15 @@ describe("the settings search over the theme", () => {
     expect(keys("köşeler")).toEqual(["radius"])
     expect(keys("bolum araligi")).toEqual(["section_spacing"])
     expect(keys("kutu stili")).toEqual(["surface_style"])
-    expect(keys("cizgili")).toEqual(["surface_style"])
+    // "Çizgili" is a box style and, since adr/0067 step 1, the menu's "Alt çizgili"
+    expect(keys("cizgili")).toEqual(["surface_style", "menu_style"])
+  })
+
+  it("finds the menu style once the storefront draws it (adr/0067 S1)", () => {
+    expect(keys("menü stili")).toEqual(["menu_style"])
+    expect(keys("menu items")).toEqual(["menu_style"])
+    const [plain] = searchTheme("sade", GRAFIT_THEME, standard, t)
+    expect(plain).toMatchObject({ field: { key: "menu_style" } })
   })
 
   it("finds a field by its technical term and a choice by its name, naming it", () => {

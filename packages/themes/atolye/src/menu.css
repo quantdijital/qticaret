@@ -138,3 +138,110 @@
     color: var(--color-paper);
   }
 }
+
+/*
+ * `menu_style`'s other steps (adr/0067 S1, §2.1): the theme's root carries
+ * `data-menu-style` when it is not `filled`. Only the desktop's hovered and
+ * open look changes: a press keeps its fill (`.gf-drop-row:active`), the
+ * phone's sheet draws its own rows, and the focus ring (`base.css`) is the
+ * same in every step (nothing here touches `outline`, WCAG 2.4.7).
+ *
+ * `underline`: no fill and no box; a hovered or open item, the
+ * "Kategoriler" button and a header tool get a 2 px line of their own ink
+ * at their foot (on the menu bar the ground's ink: light on graphite, the
+ * measured foreground on the shop's colour); a row's words are underlined,
+ * its count pill not. `plain`: no fill, box or line; a hovered or open item
+ * turns 800 in its ink, its words keeping the heavier width (a hidden copy
+ * from `data-text`) so nothing beside it moves; open, its arrow turns too,
+ * so the state never rests on colour alone (WCAG 1.4.1); a row's words
+ * turn 800, a tool's icon draws a heavier stroke.
+ *
+ * The rules sit in the layer of what they rewrite (`components`); the
+ * tools' in none, as `.gf-icon-btn:hover` (`ui.css`) is.
+ */
+@layer components {
+  /* Both steps: no fill, no box (the bar's "Kategoriler" at rest too), no bar line */
+  :is([data-menu-style="underline"], [data-menu-style="plain"]) .gf-menu-item:hover,
+  :is([data-menu-style="underline"], [data-menu-style="plain"]) .gf-menu-item[data-state="open"],
+  :is([data-menu-style="underline"], [data-menu-style="plain"]) .gf-bar-button,
+  :is([data-menu-style="underline"], [data-menu-style="plain"]) .gf-bar-button:hover,
+  :is([data-menu-style="underline"], [data-menu-style="plain"])
+    .gf-bar-button[aria-expanded="true"],
+  :is([data-menu-style="underline"], [data-menu-style="plain"]) .gf-menu-row:hover,
+  :is([data-menu-style="underline"], [data-menu-style="plain"]) .gf-menu-row[aria-expanded="true"],
+  :is([data-menu-style="underline"], [data-menu-style="plain"]) .gf-drop-row:hover:not(:active) {
+    background-color: transparent;
+    box-shadow: none;
+  }
+  :is([data-menu-style="underline"], [data-menu-style="plain"]) .gf-menu-item[data-state="open"] {
+    color: var(--color-text);
+  }
+  :is([data-menu-style="underline"], [data-menu-style="plain"])
+    .gf-drop-row:hover
+    .gf-menu-count:not(.gf-menu-count--dark) {
+    background: var(--color-paper-2);
+  }
+
+  /* underline: the line at the item's foot; a row's words underlined */
+  [data-menu-style="underline"] :is(.gf-menu-item, .gf-bar-button) {
+    position: relative;
+  }
+  [data-menu-style="underline"] :is(.gf-menu-item:hover, .gf-menu-item[data-state="open"])::after,
+  [data-menu-style="underline"]
+    :is(.gf-bar-button:hover, .gf-bar-button[aria-expanded="true"])::after {
+    position: absolute;
+    inset: auto 0 0;
+    height: 2px;
+    background: currentColor;
+    content: "";
+    pointer-events: none;
+  }
+  [data-menu-style="underline"] :is(.gf-menu-row, .gf-drop-row):hover .gf-menu-word,
+  [data-menu-style="underline"] .gf-menu-row[aria-expanded="true"] .gf-menu-word {
+    text-decoration-line: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.25em;
+  }
+
+  /* plain: heavier words; an item's keep their width */
+  [data-menu-style="plain"]
+    :is(.gf-menu-item:hover, .gf-menu-item[data-state="open"])
+    .gf-menu-word,
+  [data-menu-style="plain"]
+    :is(.gf-bar-button:hover, .gf-bar-button[aria-expanded="true"])
+    .gf-menu-word,
+  [data-menu-style="plain"] :is(.gf-menu-row, .gf-drop-row):hover .gf-menu-word,
+  [data-menu-style="plain"] .gf-menu-row[aria-expanded="true"] .gf-menu-word {
+    font-weight: 800;
+  }
+  /* The heavier copy under the words keeps their width (Deniz's bar, deniz/katalog-ust-sade) */
+  [data-menu-style="plain"] .gf-menu-word[data-text] {
+    display: inline-grid;
+  }
+  [data-menu-style="plain"] .gf-menu-word[data-text]::after {
+    height: 0;
+    overflow: hidden;
+    content: attr(data-text);
+    content: attr(data-text) / "";
+    font-weight: 800;
+    pointer-events: none;
+    user-select: none;
+    visibility: hidden;
+  }
+}
+
+/* The header's tools: no fill; a line at the foot, or a heavier stroke */
+:is([data-menu-style="underline"], [data-menu-style="plain"]) .gf-tool.gf-icon-btn:hover {
+  background: none;
+}
+[data-menu-style="underline"] .gf-tool.gf-icon-btn:hover::after {
+  position: absolute;
+  inset: auto 0 0;
+  height: 2px;
+  background: currentColor;
+  content: "";
+  pointer-events: none;
+}
+[data-menu-style="plain"] .gf-tool.gf-icon-btn:hover svg {
+  stroke-width: 2.25;
+}
