@@ -1,5 +1,6 @@
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
+import { scrollerFields } from "./shelf-registry"
 
 /**
  * The content fields the settings search finds (docs/tema/bilesen-standardi
@@ -14,6 +15,8 @@ import type { FieldGroupName, RegistryField } from "./field-registry"
 export type ContentField =
   | "limit"
   | "columns"
+  | "columns_mobile"
+  | "card_variant"
   | "show_count"
   | "list_limit"
   | "show_price"
@@ -27,6 +30,8 @@ export type ContentField =
   | "interval"
   | "dots"
   | "arrows"
+  | "open_first"
+  | "single_open"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {
@@ -67,7 +72,21 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "reviews":
       return [limit(section)]
     case "related_products":
-      return [limit(section), entry(section, "columns", `${F}.columns`, [], "layout")]
+      // As a rail's (bilesen-denetimi (b) 7): a grid's columns, the card, a carousel's scroller
+      return [
+        limit(section),
+        ...(section.variant === "carousel"
+          ? []
+          : [
+              entry(section, "columns", `${F}.columns`, [], "layout"),
+              entry(section, "columns_mobile", `${F}.columnsMobile`, [], "layout"),
+            ]),
+        {
+          ...entry(section, "card_variant", `${E}.products.cardVariant`, [], "layout"),
+          term: `${E}.products.cardVariantTerm`,
+        },
+        ...(section.variant === "carousel" ? scrollerFields(section.id, section.scroller) : []),
+      ]
     case "categories":
       return [entry(section, "show_count", `${E}.categories.showCount`)]
     case "hero":
@@ -102,12 +121,16 @@ export function contentFields(section: AnySection): RegistryField[] {
         entry(section, "dots", `${S}.dots`),
         entry(section, "arrows", `${S}.arrows`),
       ]
+    case "faq":
+      return [
+        entry(section, "open_first", `${E}.faq.openFirst`),
+        entry(section, "single_open", `${E}.faq.singleOpen`),
+      ]
     // No count or switch in their content, or their own register (the band, the strip, the header)
     case "announcement_bar":
     case "banner":
     case "brands":
     case "category_main":
-    case "faq":
     case "featured_product":
     case "footer_bar":
     case "header_bar":

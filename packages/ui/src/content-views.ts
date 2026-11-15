@@ -1,6 +1,8 @@
 import type {
   CategoriesVariant,
+  FaqSettings,
   HeroVariant,
+  SectionDevice,
   SectionLook,
   TrustBadgesVariant,
 } from "@qticaret/types"
@@ -35,12 +37,22 @@ import type { ContactView, ImageView, LinkView, SocialLinkView, TrustBadgeView }
 export type SectionLookView = Partial<SectionLook>
 
 /**
+ * Which screens show a section (docs/tema/bilesen-standardi §2): only on
+ * phones (the theme's narrow frame) or only on wide screens; none (absent)
+ * everywhere. A theme hides it with CSS at its own breakpoint, so the page
+ * is the same for every visitor (cached, no layout shift) and a lazy picture
+ * in the hidden section is not fetched.
+ */
+export type SectionDeviceView = Exclude<SectionDevice, "all">
+
+/**
  * A section as the theme draws it (adr/0049): the shop lays the home,
  * product and category pages out in the theme editor; every title already
  * in words (the shop's own or the storefront's default, a FAQ's aside),
- * every link already a path; its look beside (none: the theme's own).
+ * every link already a path; its look beside (none: the theme's own) and
+ * the screens it shows on (none: everywhere).
  */
-export type HomeSectionView = { look?: SectionLookView } & (
+export type HomeSectionView = { look?: SectionLookView; device?: SectionDeviceView } & (
   | {
       id: string
       type: "hero"
@@ -110,6 +122,11 @@ export type HomeSectionView = { look?: SectionLookView } & (
       title: string | null
       /** Plain text; the theme keeps the answers in the HTML (open or closed). */
       items: { question: string; answer: string }[]
+      /**
+       * The first question open, one open at a time (bilesen-denetimi (b) 8).
+       * Absent (an older storefront): all closed, each opened on its own.
+       */
+      settings?: FaqSettings
     }
 )
 

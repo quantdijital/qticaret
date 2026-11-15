@@ -1,6 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { TRUST_ICONS } from "../../../modules/platform-settings/sections/storefront"
-import { base, optional, placement, shopText } from "../layout-fields"
+import { base, device, optional, placement, shopText } from "../layout-fields"
 import { storefrontLink } from "../menus"
 import { bodyFields } from "./look"
 
@@ -31,7 +31,6 @@ export const MARQUEE_SETTINGS = {
   uppercase: ["off", "on"],
   gap: ["tight", "normal", "wide"],
   outline: ["off", "on"],
-  device: ["all", "mobile", "desktop"],
   closable: ["off", "on"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
@@ -56,7 +55,6 @@ export const MARQUEE_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   uppercase: "off",
   gap: "normal",
   outline: "off",
-  device: "all",
   closable: "off",
 }
 
@@ -117,7 +115,7 @@ export const marquee = z.object({ ...bodyFields, ...fields }).strict()
 export const placedMarquee = marquee.extend({ placement })
 
 /** In the header group, above the shop's header: no look (the header's frame is §9 V3's). */
-export const headerMarquee = z.object({ ...base, ...fields }).strict()
+export const headerMarquee = z.object({ ...base, device, ...fields }).strict()
 
 export type MarqueeSection = z.infer<typeof marquee>
 export type HeaderMarquee = z.infer<typeof headerMarquee>

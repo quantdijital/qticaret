@@ -7779,7 +7779,7 @@
       "types": {
         "announcement_bar": {
           "name": "Duyuru şeridi",
-          "description": "Sayfanın en üstünde ince bir şerit; vitrin ilk duyuruyu gösterir."
+          "description": "Sayfanın en üstünde ince bir şerit; birden çok duyuru yalnız ilki, sırayla ya da yan yana gösterilir."
         },
         "hero": {
           "name": "Giriş",
@@ -7909,6 +7909,10 @@
         "categories": {
           "tiles": "Görselli karo",
           "linked": "Alt kategorili kart"
+        },
+        "related_products": {
+          "grid": "Izgara",
+          "carousel": "Kayan sıra"
         }
       },
       "look": {
@@ -7987,7 +7991,15 @@
         "motion": "Hareket",
         "appearance": "Stil",
         "variant": "Biçim",
-        "variantHint": "Bölümün vitrinde nasıl görüneceği; önizleme hemen gösterir. Ortak içerik (başlık, metin) biçim değişince korunur, \"Geri al\" önceki biçimi getirir."
+        "variantHint": "Bölümün vitrinde nasıl görüneceği; önizleme hemen gösterir. Ortak içerik (başlık, metin) biçim değişince korunur, \"Geri al\" önceki biçimi getirir.",
+        "device": {
+          "label": "Cihaz",
+          "term": "device",
+          "all": "Her yerde",
+          "mobile": "Yalnız telefonda",
+          "desktop": "Yalnız masaüstünde",
+          "hint": "Telefon: 1024 pikselden dar ekranlar (tablet dahil). Gizlendiği cihazda bölümün görselleri indirilmez; sayfanın ilk görseli yine indirilir."
+        }
       },
       "defaults": {
         "heading": "Mağazanızın adı",
@@ -8030,7 +8042,12 @@
           "4": "Geniş ekranda yan yana 4 ürün, iki sıra ({{total}} ürün); tablette 3, telefonda 2.",
           "5": "Geniş ekranda yan yana 5 ürün, iki sıra ({{total}} ürün); daha dar ekranda 4 ve 3, telefonda 2."
         },
-        "columnsShort": "Vitrin yalnız dolu sıraları gösterir: iki tam sıra için gösterilecek sayıyı en az {{total}} yapın."
+        "columnsShort": "Vitrin yalnız dolu sıraları gösterir: iki tam sıra için gösterilecek sayıyı en az {{total}} yapın.",
+        "columnsMobile": "Telefonda sütun",
+        "columnsMobileTerm": "columns mobile",
+        "columnsMobileHint": "Telefonda yan yana kaç ürün; tek sütunda kartlar büyür, üç ürün görünür.",
+        "columnsMobileOption_one": "{{count}} kart",
+        "columnsMobileOption_other": "{{count}} kart"
       },
       "hero": {
         "eyebrowPlaceholder": "Yeni sezon",
@@ -8180,7 +8197,37 @@
         "line": "{{number}}. duyuru",
         "placeholder": "{ücretsiz_kargo_eşiği} ve üzeri kargo bedava",
         "add": "Duyuru ekle",
-        "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter. Vitrin şimdilik yalnız ilk satırı gösterir; diğer satırlar saklanır."
+        "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter.",
+        "mode": {
+          "label": "Birden çok duyuru",
+          "term": "multiple",
+          "first": "Yalnız ilki",
+          "rotate": "Sırayla dönsün",
+          "inline": "Yan yana",
+          "hint": "Yan yana: geniş ekranda hepsi tek satırda, telefonda yalnız ilki. Sırayla: hareket azaltılmışsa ilk duyuru kalır."
+        },
+        "interval": {
+          "label": "Geçiş süresi",
+          "term": "interval",
+          "slow": "Yavaş",
+          "medium": "Orta",
+          "fast": "Hızlı",
+          "hint": "Her duyurunun ekranda kalma süresi: 8, 6 ya da 4 saniye."
+        },
+        "pause_button": {
+          "label": "Durdur düğmesi",
+          "term": "pause button",
+          "always": "Her zaman",
+          "hover": "Üzerine gelince",
+          "hint": "Düğme tamamen kaldırılamaz (erişilebilirlik); dokunmatik ekranda her zaman görünür."
+        },
+        "hover_pause": {
+          "label": "Üzerine gelince dur",
+          "term": "pause on hover",
+          "on": "Açık",
+          "off": "Kapalı",
+          "hint": "Klavyeyle şeride gelince her zaman durur."
+        }
       },
       "problems": {
         "required": "Bu satırı yazın ya da kaldırın.",
@@ -8328,7 +8375,13 @@
         "question": "{{number}}. sorunun metni",
         "answer": "{{number}}. sorunun cevabı",
         "add": "Soru ekle",
-        "hint": "En çok {{max}} soru; cevaplarda mağaza bilgisi kullanılabilir."
+        "hint": "En çok {{max}} soru; cevaplarda mağaza bilgisi kullanılabilir.",
+        "openFirst": "İlk soru açık gelsin",
+        "openFirstTerm": "open first",
+        "openFirstHint": "Sayfa açıldığında ilk sorunun cevabı görünür.",
+        "singleOpen": "Aynı anda tek soru açık",
+        "singleOpenTerm": "accordion",
+        "singleOpenHint": "Bir soru açılınca açık olan öteki kapanır."
       },
       "related": {
         "source": "Hangi ürünler",
@@ -8516,8 +8569,8 @@
         "subtextPlaceholder": "Saat 14.00'e kadar verilen siparişlerde",
         "link": "Bağlantı (isteğe bağlı)",
         "full": "Bu sayfada zaten {{max}} kayan yazı var (üst bilgideki de sayılır).",
-        "lookHint": "Hangi cihazda görüneceği, kapatma düğmesi; şeridin çevresindeki boşluk ve genişliği.",
-        "headerLookHint": "Hangi cihazda görüneceği ve kapatma düğmesi.",
+        "lookHint": "Kapatma düğmesi; şeridin çevresindeki boşluk ve genişliği.",
+        "headerLookHint": "Kapatma düğmesi.",
         "size": {
           "label": "Boy",
           "term": "size",
@@ -8596,14 +8649,6 @@
           "off": "Kapalı",
           "on": "Açık",
           "hint": "Ögeler sırayla dolu ve yalnız çerçeveli yazılır. Yalnız büyük boyda."
-        },
-        "device": {
-          "label": "Cihaz",
-          "term": "device",
-          "all": "Her yerde",
-          "mobile": "Yalnız telefonda",
-          "desktop": "Yalnız masaüstünde",
-          "hint": "Telefon: 1024 pikselden dar ekranlar (tablet dahil). Sayfadaki en çok iki şerit sınırına gizli olan da sayılır."
         },
         "closable": {
           "label": "Kapatma düğmesi",
@@ -8692,6 +8737,13 @@
           "label": "Alt kategori sayısı",
           "term": "links",
           "hint": "Her kartta adın altında en çok bu kadar alt kategori; 0 seçerseniz yalnız ad ve görsel. Daha fazlası varsa \"Tümünü gör\" bağlantısı çıkar."
+        },
+        "columns_mobile": {
+          "1": "1 kart",
+          "2": "2 kart",
+          "label": "Telefonda sütun",
+          "term": "columns mobile",
+          "hint": "Telefonda yan yana kaç kart; iki sütunda kartlar daralır."
         }
       },
       "footerBar": {

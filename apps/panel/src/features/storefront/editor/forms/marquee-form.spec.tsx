@@ -69,7 +69,6 @@ describe("MarqueeForm", () => {
       uppercase: "off",
       gap: "normal",
       outline: "off",
-      device: "all",
       closable: "off",
     })
     expect(sectionProblems(newStrip())).toEqual({ "items.0.text": "required" })
@@ -175,15 +174,17 @@ describe("scrolling strips per page", () => {
     expect(screen.getByText(/Bu sayfada zaten 2 kayan yazı var/)).toBeInTheDocument()
   })
 
-  it("finds its settings in the search: moving and looks open, the screens with the look", () => {
+  it("finds its settings in the search: moving and looks open, the screens in Görünürlük", () => {
     const fields = sectionFields(newStrip(), "home")
     expect(fields.find((field) => field.key === "marquee.speed")?.group).toBe("motion")
     expect(fields.find((field) => field.key === "marquee.size")?.group).toBe("appearance")
-    expect(fields.find((field) => field.key === "marquee.device")?.group).toBe("look")
+    expect(fields.find((field) => field.key === "device")?.group).toBe("visibility")
+    expect(fields.map((field) => field.key)).not.toContain("marquee.device")
     expect(fields.map((field) => field.key)).toContain("look.width")
     expect(fields.map((field) => field.key)).not.toContain("look.ground")
     const header = sectionFields(newHeaderMarquee("ustserit"), "header")
     expect(header.some((field) => field.key.startsWith("look."))).toBe(false)
     expect(header.some((field) => field.key === "marquee.speed")).toBe(true)
+    expect(header.some((field) => field.key === "device")).toBe(true)
   })
 })

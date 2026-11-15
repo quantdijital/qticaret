@@ -12,7 +12,13 @@ import type { RegistryField } from "./field-registry"
 const CARDS = "storefront.editor.categoryCards"
 const FOOTER = "storefront.editor.footerBar"
 
-export const CARD_FIELDS = ["columns", "image_position", "links", "frame"] as const
+export const CARD_FIELDS = [
+  "columns",
+  "columns_mobile",
+  "image_position",
+  "links",
+  "frame",
+] as const
 export type CardField = (typeof CARD_FIELDS)[number]
 
 export const FOOTER_FIELDS = [

@@ -7,11 +7,15 @@ import type { MediaDerivatives } from "./catalog.js"
 import type { StoreBannerSection } from "./section-banner.js"
 import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
+import type { SectionDevice } from "./section-device.js"
+import type { AnnouncementSettings } from "./section-announcement.js"
+import type { FaqSettings } from "./section-faq.js"
 import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
 import type { StoreCategoriesLinked } from "./section-categories.js"
-import type { StoreProductsSection } from "./section-shelf.js"
-import type { TrustBadgesVariant } from "./section-variants.js"
+import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
+import type { CardVariant, RelatedProductsVariant, TrustBadgesVariant } from "./section-variants.js"
+import type { ScrollerSettings } from "./section-scroller.js"
 import type {
   MenuLinkKind,
   StoreMenu,
@@ -66,6 +70,11 @@ export type ShelfColumns = 3 | 4 | 5
  */
 export interface StoreSectionLookPart {
   look?: SectionLook
+  /**
+   * Which screens show it (docs/tema/bilesen-standardi §2), only when not
+   * everywhere; absent from a backend before the setting. Read with `deviceOf`.
+   */
+  device?: SectionDevice
 }
 
 /**
@@ -125,6 +134,8 @@ export type StoreMarqueeSection = {
   id: string
   type: "marquee"
   items: StoreMarqueeItem[]
+  /** Which screens show it, only when not everywhere (the header's strip has no look part). */
+  device?: SectionDevice
 } & MarqueeSettings
 
 export interface StoreMarqueeItem {
@@ -189,13 +200,17 @@ export interface StoreFeaturedProductSection {
   product_id: string
 }
 
-/** Questions and answers in plain text, the answers' `{tokens}` already filled (adr/0049 Ek 2026-11-03). */
-export interface StoreFaqSection {
+/**
+ * Questions and answers in plain text, the answers' `{tokens}` already
+ * filled (adr/0049 Ek 2026-11-03). Its settings (bilesen-denetimi (b) 8)
+ * are printed only when on: one absent reads as its default (`faqSettingsOf`).
+ */
+export type StoreFaqSection = {
   id: string
   type: "faq"
   title: string | null
   items: { question: string; answer: string }[]
-}
+} & Partial<FaqSettings>
 
 /**
  * Where a product page's related rail takes its products from: the
@@ -222,15 +237,38 @@ export type StoreProductSection =
       title: string | null
       source: RelatedSource
       limit: number
-      columns: ShelfColumns
+      /**
+       * How the cards stand (bilesen-denetimi (b) 7): printed only for
+       * `carousel`; absent, or one this build does not know, reads as `grid`.
+       */
+      variant?: RelatedProductsVariant
+      /** The rail's own card variant; absent: the theme setting's. */
+      card_variant?: CardVariant | null
+      /** `grid` (and a backend before variants): cards in a row on a wide screen. */
+      columns?: ShelfColumns
+      /** `grid`: cards in a row on a phone; printed only when not the default (2). */
+      columns_mobile?: ShelfPhoneColumns
+      /** `carousel`: the scroller kit's settings. */
+      scroller?: ScrollerSettings
     })
 
 /** A section of every category page: above the product grid (`top`) or below it. */
 export type StoreCategorySection = StorePageSection & { placement: "top" | "bottom" }
 
 /** A section of the header group: drawn above the shop's header on every page but the checkout's. */
-export type StoreHeaderSection =
-  { id: string; type: "announcement_bar"; lines: string[] } | StoreMarqueeSection
+export type StoreHeaderSection = StoreAnnouncementBar | StoreMarqueeSection
+
+/**
+ * The announcement bar: its lines in the shop's words and how it shows more
+ * than one (docs/tema/bilesen-denetimi (b) 6). A backend before the settings
+ * sends none: the storefront reads each as its default (`announcementSettingsOf`),
+ * the first line alone.
+ */
+export type StoreAnnouncementBar = {
+  id: string
+  type: "announcement_bar"
+  lines: string[]
+} & Partial<AnnouncementSettings>
 
 export interface StoreLayout {
   /** The announcement bar and the scrolling strip, each at most once (adr/0049 §10 karar 9). */

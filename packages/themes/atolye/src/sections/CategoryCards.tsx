@@ -13,7 +13,10 @@ import { SectionHead } from "./SectionHead"
 /** The category cards' variants this theme draws (`drawnVariant`). */
 export const CATEGORY_VARIANTS = ["tiles", "linked"] as const satisfies readonly CategoriesVariant[]
 
-/** Cards in a row from 1024 px, the shop's choice; one on a phone, two from 640 px. Written whole for Tailwind. */
+/**
+ * Cards in a row from 1024 px, the shop's choice; two from 640 px; one on a
+ * phone, or two when the shop asks (`phoneColumns`). Written whole for Tailwind.
+ */
 const COLUMNS: Record<CategoryCardsView["columns"], string> = {
   2: "lg:grid-cols-2",
   3: "lg:grid-cols-3",
@@ -26,6 +29,10 @@ const SIZES: Record<CategoryCardsView["columns"], string> = {
   3: "(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw",
   4: "(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw",
 }
+
+/** The above picture's `sizes`: half the phone's width when two stand in a row there. */
+const sizesOf = (view: CategoryCardsView): string =>
+  view.phoneColumns === 2 ? SIZES[view.columns].replace(/90vw$/, "45vw") : SIZES[view.columns]
 
 const LINK =
   "flex min-h-11 items-center text-sm text-text-2 no-underline underline-offset-4 hover:text-text hover:underline lg:pointer-fine:min-h-8"
@@ -65,7 +72,7 @@ function Card({
         >
           <ResponsiveImage
             image={{ ...picture, alt: "" }}
-            sizes={side ? "96px" : SIZES[view.columns]}
+            sizes={side ? "96px" : sizesOf(view)}
             className="h-full w-full object-cover"
           />
         </a>
@@ -154,7 +161,7 @@ export function CategoryCards({
         <SectionHead id={id} title={title} more={all} />
         <ul
           className={cn(
-            "grid grid-cols-1 sm:grid-cols-2",
+            view.phoneColumns === 2 ? "grid grid-cols-2" : "grid grid-cols-1 sm:grid-cols-2",
             view.frame === "lined" ? "gap-(--gap-columns)" : "gap-x-(--gap-columns) gap-y-8",
             COLUMNS[view.columns]
           )}

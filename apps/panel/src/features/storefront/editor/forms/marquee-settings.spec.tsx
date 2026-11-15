@@ -60,7 +60,7 @@ describe("a scrolling strip's settings", () => {
       "gap",
       "outline",
     ])
-    expect(MARQUEE_OTHER_SETTINGS).toEqual(["device", "closable"])
+    expect(MARQUEE_OTHER_SETTINGS).toEqual(["closable"])
   })
 
   it("opens the motion and look groups at first", () => {
@@ -119,13 +119,12 @@ describe("a scrolling strip's settings", () => {
     expect(changes.at(-1)).toMatchObject({ outline: "on" })
   })
 
-  it("picks the room between items and the screens it shows on", async () => {
+  it("picks the room between items, its screens no longer among its own settings", async () => {
     const changes = renderGroups()
 
     await userEvent.click(screen.getByRole("radio", { name: /Geniş/ }))
     expect(changes.at(-1)).toMatchObject({ gap: "wide" })
-    await userEvent.click(screen.getByRole("radio", { name: /Yalnız telefonda/ }))
-    expect(changes.at(-1)).toMatchObject({ device: "mobile" })
+    expect(screen.queryByRole("radio", { name: /Yalnız telefonda/ })).not.toBeInTheDocument()
     await userEvent.click(screen.getByRole("radio", { name: /Kalın/ }))
     expect(changes.at(-1)).toMatchObject({ weight: "bold" })
   })
@@ -146,7 +145,7 @@ describe("a scrolling strip's settings", () => {
     expect(keys("uppercase")).toContain("marquee.uppercase")
     expect(keys("boşluk")).toContain("marquee.gap")
     expect(keys("gap")).toContain("marquee.gap")
-    expect(keys("telefon")).toContain("marquee.device")
+    expect(keys("telefon")).toContain("device")
     expect(keys("kapat")).toContain("marquee.closable")
     expect(keys("çerçeve")).toContain("marquee.outline")
     expect(MARQUEE_DEFAULTS.pause_button).toBe("always")

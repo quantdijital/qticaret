@@ -11,10 +11,11 @@ const keys = (section: ProductsSection) =>
 
 /** adr/0049 Ek 2026-11-15: a product list's fields in the settings search, as its variant shows them. */
 describe("a product list's fields for the settings search", () => {
-  it("puts the variant first in Diziliş, with a grid's cards in a row and its card", () => {
+  it("puts the variant first in Diziliş, with a grid's cards in a row (wide, phone) and its card", () => {
     expect(keys(grid).filter((key) => key.startsWith("layout:"))).toEqual([
       "layout:variant",
       "layout:columns",
+      "layout:columns_mobile",
       "layout:card_variant",
     ])
     // Its count is the content's (denetim O2), and the columns carry their term

@@ -1,4 +1,5 @@
 import "server-only"
+import { announcementSettingsOf } from "@qticaret/types/section-announcement"
 import { headers } from "next/headers"
 import type { ContactView, ShopView, Translate } from "@qticaret/ui"
 import type { LegalIdentity, StoreLayout } from "@qticaret/types"
@@ -127,6 +128,9 @@ export async function shopView(): Promise<ShopView> {
     // The header's and footer's sections from the design (adr/0049)
     announcements: layout.header.flatMap((section) =>
       section.type === "announcement_bar" ? section.lines : []
+    ),
+    announcementSettings: announcementSettingsOf(
+      layout.header.find((section) => section.type === "announcement_bar") ?? {}
     ),
     marquee: headerMarquee(layout.header, t),
     // The design's header bar and footer (Ek 2026-11-14 §5); the theme's header before them

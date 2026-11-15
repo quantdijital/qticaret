@@ -7,6 +7,8 @@ import type { CategoryCardStep, FooterBarStep, PaymentBadge } from "@qticaret/ty
 export interface CategoriesLinkedFields {
   variant: "linked"
   columns: CategoryCardStep<"columns">
+  /** Cards in a row on a phone (bilesen-denetimi (b) 3); the server fills 1 on reading. */
+  columns_mobile?: CategoryCardStep<"columns_mobile">
   image_position: CategoryCardStep<"image_position">
   frame: CategoryCardStep<"frame">
   /** Subcategory links under each card's name (0–8). */

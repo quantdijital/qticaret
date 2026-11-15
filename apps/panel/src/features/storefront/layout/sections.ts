@@ -14,7 +14,12 @@ import type {
   Placement,
   ProductSection,
 } from "@/features/storefront/api/layout"
-import { BANNER_DEFAULTS, MARQUEE_DEFAULTS, defaultVariant } from "@qticaret/types"
+import {
+  ANNOUNCEMENT_DEFAULTS,
+  BANNER_DEFAULTS,
+  MARQUEE_DEFAULTS,
+  defaultVariant,
+} from "@qticaret/types"
 import { LAYOUT_LIMITS, PRICE_BANDS_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
 
 /** The groups in the order the storefront draws them (a page's body between header and footer). */
@@ -226,6 +231,7 @@ export function newBodySection(
       ...base,
       type,
       title: null,
+      variant: "grid",
       source: { kind: "same_category" },
       limit: 8,
       columns: 3,
@@ -257,6 +263,7 @@ export const newAnnouncementBar = (id: string): AnnouncementBar => ({
   ...ALWAYS,
   type: "announcement_bar",
   lines: [""],
+  ...ANNOUNCEMENT_DEFAULTS,
 })
 
 /** A new scrolling strip's fields: one item to write, the contract's default steps. */

@@ -39,6 +39,10 @@ const helpOf = (block: Block | undefined) =>
 const lookOf = (block: Block) =>
   block.kind === "shelf" ? block.sections[0]?.look : block.section.look
 
+/** The screens it shows on (docs/tema/bilesen-standardi §2): a shelf of joined rails, its first rail's. */
+const deviceOf = (block: Block) =>
+  block.kind === "shelf" ? block.sections[0]?.device : block.section.device
+
 /** Whether the block is drawn by the one before it (a help section under the FAQ). */
 const joined = (block: Block, before: Block | undefined) =>
   helpOf(block) !== null && before?.kind === "one" && before.section.type === "faq"
@@ -186,6 +190,7 @@ export function Blocks({
       <Look
         key={block.kind === "shelf" ? (block.sections[0]?.id ?? "raf") : block.section.id}
         look={lookOf(block)}
+        device={deviceOf(block)}
       >
         <BlockView
           block={block}

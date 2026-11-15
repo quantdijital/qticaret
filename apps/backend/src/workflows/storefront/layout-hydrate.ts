@@ -10,6 +10,7 @@ import type {
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import type { RailPick } from "../../lib/storefront/rails"
 import { hasLook } from "../../lib/storefront/sections/look"
+import { shownDevice } from "../../lib/storefront/layout-fields"
 import { fillShopDoc, fillShopText } from "../../lib/shop/tokens"
 import type { ShopInfoValues } from "../../lib/shop/tokens"
 import { cardTargets } from "../../api/store/content/cards"
@@ -75,16 +76,19 @@ export function hydrateMarquee(section: MarqueeSection | HeaderMarquee, at: Hydr
       link: item.link ? (at.links.get(item.link) ?? null) : null,
     })),
     ...settingsOf(section),
+    // Which screens show it (every section's since docs/tema/bilesen-standardi §2), only when not all
+    ...shownDevice(section.device),
   }
 }
 
 /**
  * A page's section as the storefront prints it (adr/0049), on any page;
- * its look only when the shop set a step (adr/0049 Ek 2026-11-14 §6), so a
- * section drawn the theme's own way prints as it did before looks.
+ * its look only when the shop set a step (adr/0049 Ek 2026-11-14 §6) and
+ * its screens only when not everywhere (docs/tema/bilesen-standardi §2), so
+ * a section drawn the theme's own way prints as it did before them.
  */
 export async function hydrateSection(section: BodySection, at: HydrateContext): Promise<Hydrated> {
-  const shown = await hydrateBody(section, at)
+  const shown = { ...(await hydrateBody(section, at)), ...shownDevice(section.device) }
   return hasLook(section.look) ? { ...shown, look: section.look } : shown
 }
 
@@ -155,7 +159,14 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         title: section.title,
         source: section.source,
         limit: section.limit,
-        columns: section.columns,
+        // Each printed only off its default, so a rail from before them prints as it did
+        ...(section.card_variant ? { card_variant: section.card_variant } : {}),
+        ...(section.variant === "carousel"
+          ? { variant: section.variant, scroller: section.scroller }
+          : {
+              columns: section.columns,
+              ...(section.columns_mobile === 1 ? { columns_mobile: 1 as const } : {}),
+            }),
       }
     case "featured_product":
       return {
@@ -183,6 +194,9 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
           question: item.question,
           answer: fillShopText(item.answer, at.values),
         })),
+        // Printed only when on, so a section from before them prints as it did
+        ...(section.open_first === "on" ? { open_first: "on" } : {}),
+        ...(section.single_open === "on" ? { single_open: "on" } : {}),
       }
     case "newsletter":
     case "help":
@@ -201,6 +215,8 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
           ? {
               variant: section.variant,
               columns: section.columns,
+              // Printed only when not the default (1), as the settings before it
+              ...(section.columns_mobile === 2 ? { columns_mobile: 2 as const } : {}),
               image_position: section.image_position,
               frame: section.frame,
               links: section.links,

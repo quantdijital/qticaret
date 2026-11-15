@@ -29,6 +29,7 @@ describe("the scrolling strip (adr/0049 Ek 2026-11-14 §4.1)", () => {
     expect(doc.home[0]).toEqual({
       ...strip("kayan00001"),
       ...ALWAYS,
+      device: "all",
       ...MARQUEE_DEFAULTS,
       items: [
         {
@@ -78,7 +79,6 @@ describe("the scrolling strip (adr/0049 Ek 2026-11-14 §4.1)", () => {
       uppercase: "on",
       gap: "wide",
       outline: "on",
-      device: "mobile",
       closable: "on",
     }
     const doc = layoutDocument.parse({ home: [strip("kayan00001", { size: "large", ...set })] })

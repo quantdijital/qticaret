@@ -21,7 +21,6 @@ describe("the scrolling strip's settings (adr/0049 Ek 2026-11-14 §4.1)", () => 
       "uppercase",
       "gap",
       "outline",
-      "device",
       "closable",
     ])
     expect(MARQUEE_SETTINGS.speed).toEqual(["slowest", "slow", "medium", "fast", "fastest"])

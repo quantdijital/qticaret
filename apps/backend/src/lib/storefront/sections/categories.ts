@@ -13,6 +13,7 @@ import type { SectionVariant, VariantBranch } from "./variants"
  */
 export const CATEGORY_CARD_SETTINGS = {
   columns: [2, 3, 4],
+  columns_mobile: [1, 2],
   image_position: ["side", "top", "none"],
   frame: ["lined", "plain"],
 } as const
@@ -21,6 +22,7 @@ export const CATEGORY_CARD_LIMITS = { links: { min: 0, max: 8, default: 5 } } as
 
 export const CATEGORY_CARD_DEFAULTS = {
   columns: 3,
+  columns_mobile: 1,
   image_position: "side",
   frame: "lined",
   links: CATEGORY_CARD_LIMITS.links.default,
@@ -63,6 +65,7 @@ const linked = z
     ...common,
     variant: z.literal("linked"),
     columns: step("columns"),
+    columns_mobile: step("columns_mobile"),
     image_position: step("image_position"),
     frame: step("frame"),
     links: z

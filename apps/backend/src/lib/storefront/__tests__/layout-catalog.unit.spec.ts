@@ -14,7 +14,8 @@ const CONTRACT_FILE = path.resolve(
   "../../../../../../packages/types/src/store/section-catalog.ts"
 )
 
-const ALWAYS = { visible: true, starts_at: null, ends_at: null }
+// Every body section shows on every screen unless the shop picks one (bilesen-standardi §2)
+const ALWAYS = { visible: true, starts_at: null, ends_at: null, device: "all" }
 const IMAGE = { url: "http://localhost:9000/static/kamp.webp", alt: null }
 const hero = (more: Record<string, unknown> = {}) => ({ id: "giris00001", type: "hero", ...more })
 const bands = (list: unknown[], more: Record<string, unknown> = {}) => ({

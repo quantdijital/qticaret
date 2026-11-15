@@ -74,6 +74,27 @@ export const base = {
   ends_at: optional(z.iso.datetime({ offset: true })),
 }
 
+/**
+ * Which screens show a section (docs/tema/bilesen-standardi §2): everywhere,
+ * phones only (the theme's narrow frame) or wide screens only. Mirrors
+ * `@qticaret/types`' `SECTION_DEVICES`; a unit test keeps them equal. The
+ * scrolling strip had it alone before, under the same key: its saved step
+ * reads as it is.
+ */
+export const SECTION_DEVICES = ["all", "mobile", "desktop"] as const
+export type SectionDevice = (typeof SECTION_DEVICES)[number]
+
+/** A step off the list is a stale or forged editor (a custom check: Medusa's answer drops an enum's key). */
+export const device = z
+  .custom<SectionDevice>((value) => (SECTION_DEVICES as readonly unknown[]).includes(value), {
+    error: "storefront_layout.section_invalid",
+  })
+  .default("all")
+
+/** What the storefront is given: the screens only when not everywhere, so a section prints as before. */
+export const shownDevice = (value: SectionDevice): { device?: SectionDevice } =>
+  value === "all" ? {} : { device: value }
+
 export const title = optional(text(60))
 
 /**
@@ -87,6 +108,23 @@ export const columns = z
     error: "storefront_layout.section_invalid",
   })
   .default(3)
+
+/**
+ * Cards in a row on a phone (docs/tema/bilesen-denetimi (b) 3, the
+ * dictionary's `columns_mobile`) for a grid rail and the related products:
+ * one or two, two by default (the look before the setting). Mirrors
+ * `@qticaret/types`' `SHELF_PHONE_COLUMNS`; a unit test keeps them equal.
+ */
+export const SHELF_PHONE_COLUMNS = [1, 2] as const
+export const SHELF_PHONE_DEFAULT = 2
+
+/** A count off the list is a stale or forged editor (a custom check: Medusa's answer drops an enum's key). */
+export const columnsMobile = z
+  .custom<(typeof SHELF_PHONE_COLUMNS)[number]>(
+    (value) => (SHELF_PHONE_COLUMNS as readonly unknown[]).includes(value),
+    { error: "storefront_layout.section_invalid" }
+  )
+  .default(SHELF_PHONE_DEFAULT)
 
 /** Where a category page shows a section: above its product grid or below it. */
 export const placement = z.enum(["top", "bottom"]).default("bottom")

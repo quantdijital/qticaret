@@ -26,11 +26,23 @@ describe("the content fields' register", () => {
     expect(keys(switchVariant(rail, "compact"))).toEqual([])
   })
 
-  it("puts related products' columns in Diziliş beside their count", () => {
+  it("puts related products' columns (wide, phone) and card in Diziliş beside their count", () => {
     expect(keys(newBodySection("product", "related_products", "benzer0001"))).toEqual([
       "content:limit",
       "layout:columns",
+      "layout:columns_mobile",
+      "layout:card_variant",
     ])
+  })
+
+  it("gives related products in a carousel the scroller's fields, no columns (denetim (b) 7)", () => {
+    const related = newBodySection("product", "related_products", "benzer0001")
+    if (related.type !== "related_products") throw new Error("not related")
+    const found = keys(switchVariant(related, "carousel"))
+    expect(found).not.toContain("layout:columns")
+    expect(found).toContain("layout:card_variant")
+    expect(found).toContain("scroll:scroller.arrows")
+    expect(found).toContain("look:scroller.loop")
   })
 
   it("follows the switches: a count only while it is on", () => {
@@ -51,6 +63,13 @@ describe("the content fields' register", () => {
       "content:arrows",
     ])
     expect(keys({ ...slider, autoplay: true })).toContain("content:interval")
+  })
+
+  it("names the FAQ's two switches (bilesen-denetimi (b) 8)", () => {
+    expect(keys(newHomeSection("faq", "sss0000001"))).toEqual([
+      "content:open_first",
+      "content:single_open",
+    ])
   })
 
   it("names the catalogue opening's list count, product counts and prices", () => {

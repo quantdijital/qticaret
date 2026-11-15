@@ -1,11 +1,12 @@
 import "server-only"
 import type { StoreCategorySection, StoreLayoutSection, StoreProductSection } from "@qticaret/types"
+import { deviceOf } from "@qticaret/types/section-device"
+import { faqSettingsOf } from "@qticaret/types/section-faq"
 import { lookOf } from "@qticaret/types/section-look"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { HomeSectionView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
 import { legalIdentity, siteSeo } from "@/lib/store-api/requests"
-import { isStoreApiError } from "@/lib/store-api/errors"
 import { googleRatingReviews, reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
 import { heroView, priceBandsView, withCounts } from "./catalog"
@@ -24,10 +25,9 @@ import {
   categoryLinks,
   customerPhotoViews,
   type ProductContext,
-  railCards,
-  relatedProducts,
   reviewViews,
 } from "./section-data"
+import { relatedView } from "./related"
 import { shelfView } from "./shelf"
 import { contactOf } from "./shop"
 
@@ -41,38 +41,6 @@ export interface SectionContext {
   product?: ProductContext
   /** The home page: its category cards take a product photo where the category has none. */
   home?: boolean
-}
-
-/** A related rail under a product; none when its source has nothing else or cannot be read. */
-async function relatedView(
-  section: Extract<StoreProductSection, { type: "related_products" }>,
-  t: Translate,
-  context: SectionContext
-): Promise<HomeSectionView | null> {
-  if (!context.product) {
-    return null
-  }
-  try {
-    const products = await relatedProducts(section.source, section.limit, context.product)
-    const cards = await railCards(products)
-    return cards.length > 0
-      ? {
-          id: section.id,
-          type: "products",
-          title: section.title ?? t("product.related"),
-          products: cards,
-          more: null,
-          empty: "",
-          columns: section.columns,
-        }
-      : null
-  } catch (error) {
-    // A rail the backend could not answer is left out, not the product page
-    if (isStoreApiError(error)) {
-      return null
-    }
-    throw error
-  }
 }
 
 /**
@@ -132,7 +100,7 @@ async function sectionView(
     case "products":
       return shelfView(section, t)
     case "related_products":
-      return relatedView(section, t, context)
+      return relatedView(section, t, context.product)
     case "brands": {
       const brands = await brandLinks(section.brand_ids)
       return brands.length > 0
@@ -185,7 +153,13 @@ async function sectionView(
       return { id, type: "rich_text", title: section.title, html: section.html }
     case "faq":
       return section.items.length > 0
-        ? { id, type: "faq", title: section.title, items: section.items }
+        ? {
+            id,
+            type: "faq",
+            title: section.title,
+            items: section.items,
+            settings: faqSettingsOf(section),
+          }
         : null
     case "trust_badges": {
       // The design's badges (adr/0049 Ek 2026-11-06): a preview shows its draft's
@@ -230,11 +204,15 @@ async function sectionView(
 /**
  * A section's look as the theme reads it (adr/0049 Ek 2026-11-14 §6): the
  * steps the shop set that the contract knows (`lookOf`); none, no `look`,
- * so the theme draws its own and the view is as it was before looks.
+ * so the theme draws its own and the view is as it was before looks. Its
+ * screens beside (docs/tema/bilesen-standardi §2), only when not everywhere
+ * (`deviceOf`: none or a newer backend's step, everywhere).
  */
 function withLook(view: HomeSectionView, section: BodySection): HomeSectionView {
   const look = lookOf(section.look)
-  return Object.keys(look).length > 0 ? { ...view, look } : view
+  const device = deviceOf(section.device)
+  const shown: HomeSectionView = Object.keys(look).length > 0 ? { ...view, look } : view
+  return device === "all" ? shown : { ...shown, device }
 }
 
 /** A page's sections, in the shop's order, each fetched at once; the empty ones left out. */

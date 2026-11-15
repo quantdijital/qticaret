@@ -65,6 +65,8 @@
   "nav.category_menu": "Tüm kategoriler",
   "nav.more": "Daha fazla",
   "nav.announcements": "Duyurular",
+  "nav.announcements_pause": "Duyuruları durdur",
+  "nav.announcements_play": "Duyuruları oynat",
   "marquee.label": "Kayan duyurular",
   "marquee.pause": "Kayan yazıyı durdur",
   "marquee.play": "Kayan yazıyı oynat",

@@ -1,4 +1,5 @@
 import type { StoreLayout, StoreMarqueeSection, TrustIcon } from "@qticaret/types"
+import { deviceOf } from "@qticaret/types/section-device"
 import { marqueeSettingsOf } from "@qticaret/types/section-marquee"
 import type { MarqueeSectionView, Translate } from "@qticaret/ui"
 import { layoutLink } from "./layout"
@@ -39,8 +40,14 @@ export function marqueeView(section: StoreMarqueeSection, t: Translate): Marquee
     : null
 }
 
-/** The header group's strip, drawn above the shop's header; none: no strip. */
+/**
+ * The header group's strip, drawn above the shop's header, with the screens
+ * it shows on (none: everywhere; on a page that is every section's,
+ * `sections.ts`); none: no strip.
+ */
 export function headerMarquee(header: StoreLayout["header"], t: Translate) {
   const section = header.find((each) => each.type === "marquee")
-  return section ? marqueeView(section, t) : null
+  const view = section ? marqueeView(section, t) : null
+  const device = deviceOf(section?.device)
+  return view && device !== "all" ? { ...view, device } : view
 }

@@ -7,20 +7,12 @@ import {
 import type { CategoriesLinkedFields, CategoriesSection } from "@/features/storefront/api/layout"
 import { CARD_FIELD_IDS } from "./card-field-ids"
 import { CountField } from "./fields"
+import { ColumnsDrawing as Columns, PhoneColumnsField } from "./phone-columns-field"
 import { StepChoice } from "./step-choice"
 
 const C = "storefront.editor.categoryCards"
 
 type Linked = CategoriesSection & CategoriesLinkedFields
-
-/** A column count drawn in small: that many cards in a row. */
-const Columns = ({ count }: { count: number }) => (
-  <span aria-hidden="true" className="flex w-full max-w-12 gap-0.5">
-    {Array.from({ length: count }, (_, index) => (
-      <span key={index} className="h-3 flex-1 rounded-sm bg-current opacity-40" />
-    ))}
-  </span>
-)
 
 /** The picture's place drawn in small: a square beside two lines, a block above them, or lines alone. */
 function Place({ step }: { step: CategoriesLinkedFields["image_position"] }) {
@@ -70,6 +62,15 @@ export function CategoryCardsFields({
         drawOf={(step) => <Columns count={step} />}
         onChange={(columns) => {
           onChange({ ...section, columns })
+        }}
+      />
+      <PhoneColumnsField
+        id={CARD_FIELD_IDS.card(section.id, "columns_mobile")}
+        value={section.columns_mobile ?? CATEGORY_CARD_DEFAULTS.columns_mobile}
+        fallback={CATEGORY_CARD_DEFAULTS.columns_mobile}
+        hint={t(`${C}.columns_mobile.hint`)}
+        onChange={(columns_mobile) => {
+          onChange({ ...section, columns_mobile })
         }}
       />
       <StepChoice

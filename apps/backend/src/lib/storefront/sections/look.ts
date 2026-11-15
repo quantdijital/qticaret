@@ -1,6 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { isPlainObject } from "../../../modules/platform-settings/sections/define"
-import { base } from "../layout-fields"
+import { base, device } from "../layout-fields"
 
 /**
  * A section's look (adr/0049 Ek 2026-11-14 §6): the space around it and
@@ -58,8 +58,8 @@ export const sectionLook = z
 
 export type SectionLook = z.infer<typeof sectionLook>
 
-/** What every body section is made of: the settings every section has, and its look. */
-export const bodyFields = { ...base, look: sectionLook.optional() }
+/** What every body section is made of: the settings every section has, the screens it shows on, and its look. */
+export const bodyFields = { ...base, device, look: sectionLook.optional() }
 
 const isLookField = (key: string): key is LookField => Object.hasOwn(SECTION_LOOK, key)
 
