@@ -41,7 +41,11 @@ medusaIntegrationTestRunner({
       const preview = await get<Preview>(`${PATH}/order.placed/preview`)
 
       expect(list.status).toBe(200)
-      expect(list.data.templates).toHaveLength(35)
+      // adr/0068: the wholesaler's invitation and opened account made it 37
+      expect(list.data.templates).toHaveLength(37)
+      expect(list.data.templates.map((template) => template.name)).toEqual(
+        expect.arrayContaining(["account.wholesale_invite", "account.wholesale_enabled"])
+      )
       // Units refused at receipt, a sealed good opened (adr/0032 Ek 2026-11-03)
       expect(list.data.templates).toContainEqual({
         name: "return.refused",
