@@ -192,7 +192,7 @@ describe("the theme settings show what the theme draws (adr/0062 §12)", HEAVY, 
         header: { layout: "left", sticky: false },
       },
     })
-    expect(grafit()).toHaveAttribute("title", expect.stringMatching(/Değişiklik taslağa yazılır/))
+    expect(grafit()).toHaveAccessibleDescription(/Değişiklik taslağa yazılır/)
     await user.click(grafit())
 
     // No question: the draft keeps its history, the toast takes it back

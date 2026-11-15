@@ -1,4 +1,4 @@
-import type { HeroListSource } from "@qticaret/types"
+import type { HeroListSource, SliderSettings } from "@qticaret/types"
 import type { LinkInput } from "@/features/storefront/api/menus"
 
 // The catalogue home page's parts in the theme editor's document (adr/0049
@@ -22,8 +22,23 @@ export interface HeroPick {
 }
 
 /**
+ * One slide of H17's opening (adr/0049 Ek 2026-11-15): its heading (none:
+ * none), line, up to two buttons, picture (none: the first slide's the
+ * shop's newest product photo) and where the picture leads. Without words
+ * it is the picture alone.
+ */
+export interface HeroCatalogSlide {
+  image: Image | null
+  heading: string | null
+  text: string | null
+  links: LinkInput[]
+  link: LinkInput | null
+}
+
+/**
  * H17's own fields (`category_list`): the category list, the tiles beside
- * the opening, quick links under it, products shown small and "from".
+ * the opening, quick links under it, products shown small and "from", and
+ * the opening's slides with how they turn.
  */
 export interface HeroCatalogFields {
   variant: "category_list"
@@ -35,6 +50,14 @@ export interface HeroCatalogFields {
   chips: LinkInput[]
   picks: HeroPick[]
   show_price: boolean
+  /**
+   * The opening's slides; absent until the shop edits them (an opening saved
+   * before them is one slide of its own fields). The editor keeps the common
+   * heading, line, buttons and picture the first slide's.
+   */
+  slides?: HeroCatalogSlide[]
+  /** How two or more turn: the slider's settings, with its own defaults (turning by itself). */
+  scroller?: SliderSettings
 }
 
 /**

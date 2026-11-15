@@ -5,6 +5,7 @@ import { StorePostCartSource } from "../store/carts/[id]/source/validators"
 import { StorePostCartTracking } from "../store/carts/[id]/tracking/validators"
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
+import { refuseSuspendedCartWrite } from "./plan-guard"
 
 /** F10.7 (adr/0038 §1): a reminder's link back to the cart; its numbers for staff. */
 export const MARKETING_ROUTES = [
@@ -12,6 +13,8 @@ export const MARKETING_ROUTES = [
     matcher: "/store/cart-reminders/redeem",
     methods: ["POST" as const],
     middlewares: [
+      // adr/0061 §5.5: a suspended shop restores no cart (and spends no single-use token)
+      refuseSuspendedCartWrite,
       rateLimit(() => RATE_LIMIT_PROFILES.cart_return),
       validateAndTransformBody(StorePostCartReminderRedeem),
     ],

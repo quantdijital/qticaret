@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { EditorChromeContext } from "./editor-layout"
+import { Hint } from "./shared/hint"
 
 const P = "storefront.editor.panel"
 
@@ -49,16 +50,17 @@ export function Panel({
             {t(`${P}.sections`)}
           </Button>
         ) : (
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon-sm"
-            aria-label={t(`${P}.back`)}
-            title={t(`${P}.back`)}
-            onClick={onBack}
-          >
-            <ArrowLeft />
-          </Button>
+          <Hint label={t(`${P}.back`)} side="bottom" align="start">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t(`${P}.back`)}
+              onClick={onBack}
+            >
+              <ArrowLeft />
+            </Button>
+          </Hint>
         )}
         {Icon ? (
           <Icon className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />

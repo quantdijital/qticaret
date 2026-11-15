@@ -82,6 +82,44 @@ export async function refuseSellingEdit(
 /** How long a suspended shop's checkout asks to wait: as the storefront's own page. */
 export const SUSPENDED_RETRY_AFTER_SECONDS = 3600
 
+/** A storefront write a suspended shop answers 503 to: the cart's and the checkout's. */
+const SUSPENDED_WRITES: ReadonlySet<string> = new Set(["POST", "PUT", "PATCH", "DELETE"])
+
+/**
+ * A read by POST under a cart (its id is the guest's credential, kept out
+ * of the address): `/odeme/sonuc` asks it for a payment that settled after
+ * the suspension, so it stays open (security review of the cart guard).
+ */
+const READ_BY_POST = /^\/store\/carts\/[^/]+\/order-access$/
+
+/** 503 `plan.suspended` with Retry-After for a write while the shop is suspended, else on. */
+function suspendedWriteGuard(reason: string) {
+  return async function refuse(
+    req: MedusaRequest,
+    res: MedusaResponse,
+    next: MedusaNextFunction
+  ): Promise<void> {
+    if (!SUSPENDED_WRITES.has(req.method.toUpperCase()) || READ_BY_POST.test(routePath(req))) {
+      next()
+      return
+    }
+    let mode
+    try {
+      mode = await planModeFor(req.scope)
+    } catch (error) {
+      // Unreadable plan state: the sanitising error handler answers, nothing slips through
+      next(error)
+      return
+    }
+    if (mode !== "suspended") {
+      next()
+      return
+    }
+    res.setHeader("Retry-After", String(SUSPENDED_RETRY_AFTER_SECONDS))
+    rejectRequest(req, res, 503, { type: "unavailable", message: PLAN_SUSPENDED_MESSAGE }, reason)
+  }
+}
+
 /**
  * A suspended shop takes no new order through the storefront: `POST
  * /store/carts/:id/complete` (cash on delivery, bank transfer) and `POST
@@ -90,21 +128,15 @@ export const SUSPENDED_RETRY_AFTER_SECONDS = 3600
  * settles through its provider's callback, which never comes here. A
  * restricted shop sells as usual.
  */
-export async function refuseSuspendedCheckout(
-  req: MedusaRequest,
-  res: MedusaResponse,
-  next: MedusaNextFunction
-): Promise<void> {
-  if (req.method.toUpperCase() !== "POST" || (await planModeFor(req.scope)) !== "suspended") {
-    next()
-    return
-  }
-  res.setHeader("Retry-After", String(SUSPENDED_RETRY_AFTER_SECONDS))
-  rejectRequest(
-    req,
-    res,
-    503,
-    { type: "unavailable", message: PLAN_SUSPENDED_MESSAGE },
-    "plan_suspended_checkout"
-  )
-}
+export const refuseSuspendedCheckout = suspendedWriteGuard("plan_suspended_checkout")
+
+/**
+ * Nor does it build carts (security review of #43, adr/0061 §5.5): every
+ * write under `/store/carts` (a new cart, its lines, addresses, shipping,
+ * codes), a payment link's cart and a cart reminder's redemption answer as
+ * the checkout does, whoever calls the Store API directly; the storefront's
+ * edge already shows its suspended page. Reads stay open (the order access
+ * read by POST too); provider hooks are not under these paths. Every
+ * other Store API write has its decision in `store-writes.unit.spec.ts`.
+ */
+export const refuseSuspendedCartWrite = suspendedWriteGuard("plan_suspended_cart")

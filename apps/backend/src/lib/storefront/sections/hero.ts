@@ -2,6 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import { image, optional, recordId, shopText, text } from "../layout-fields"
 import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
+import { heroCatalogScroller } from "./scroller"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
 import type { SectionVariant, VariantBranch } from "./variants"
 
@@ -22,20 +23,44 @@ export const HERO_CATALOG_LIMITS = {
   chips: 4,
   picks: 4,
   pickLabel: 24,
+  slides: 6,
 } as const
 
 const L = HERO_CATALOG_LIMITS
+
+/** The opening's heading (none: the shop's name), line and up to two buttons; a slide's too. */
+const words = {
+  heading: optional(shopText(90)),
+  text: optional(shopText(240)),
+  links: z.array(storefrontLink).max(2).default([]),
+}
 
 const common = {
   ...bodyFields,
   type: z.literal("hero"),
   eyebrow: optional(shopText(40)),
-  /** None: the shop's name. */
-  heading: optional(shopText(90)),
-  text: optional(shopText(240)),
-  links: z.array(storefrontLink).max(2).default([]),
+  ...words,
   image: optional(image),
 }
+
+/**
+ * One slide of H17's opening (adr/0049 Ek 2026-11-15): the opening's
+ * words, buttons and picture, and where the picture leads. No heading is
+ * none here; a slide with neither words nor a picture is refused.
+ */
+const catalogSlide = z
+  .object({ ...words, image: optional(image), link: optional(storefrontLink) })
+  .strict()
+  .refine(
+    (slide) =>
+      slide.image !== null ||
+      slide.heading !== null ||
+      slide.text !== null ||
+      slide.links.length > 0,
+    { message: "storefront_layout.section_invalid" }
+  )
+
+export type HeroCatalogSlide = z.infer<typeof catalogSlide>
 
 /** Today's opening: one graphite stage, the picture beside the words. */
 const standard = z.object({ ...common, variant: defaultVariant("hero") }).strict()
@@ -77,6 +102,9 @@ const categoryList = z
       .max(L.picks)
       .default([]),
     show_price: z.boolean().default(true),
+    // The opening's slides and how they turn (Ek 2026-11-15); absent: its own fields, one slide
+    slides: z.array(catalogSlide).min(1).max(L.slides).optional(),
+    scroller: heroCatalogScroller.optional(),
   })
   .strict()
 
@@ -89,3 +117,7 @@ export const hero = z.discriminatedUnion("variant", [standard, categoryList], VA
 
 export type HeroSection = z.infer<typeof hero>
 export type HeroCatalogSection = Extract<HeroSection, { variant: "category_list" }>
+
+/** H17's own slides (none for today's opening or one saved before them). */
+export const catalogSlides = (section: HeroSection): HeroCatalogSlide[] =>
+  section.variant === "category_list" ? (section.slides ?? []) : []
