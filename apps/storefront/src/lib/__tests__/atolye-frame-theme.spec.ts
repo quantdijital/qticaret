@@ -71,7 +71,10 @@ describe("the theme's frame", () => {
   it("keeps every category panel's links in the HTML and the wordmark without a logo", () => {
     const html = renderFrame(atolyeTheme, shopFixture())
     expect(html).toContain('href="/kategori/cakilar/katlanir"')
-    expect(html).toContain("Tümünü gör: Çakılar")
+    // The dropdown's last row reads "Tümünü gör"; a screen reader hears it whole (K-21)
+    expect(html).toMatch(
+      /<a href="\/kategori\/cakilar" class="gf-drop-row gf-drop-all"[^>]*><span aria-hidden="true">Tümünü gör<\/span><span class="sr-only">Tümünü gör: Çakılar<\/span>/
+    )
     expect(html).toContain("Örnek Atölye</span>")
   })
 

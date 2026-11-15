@@ -14,8 +14,14 @@ import type {
   Placement,
   ProductSection,
 } from "@/features/storefront/api/layout"
-import { MARQUEE_DEFAULTS, defaultVariant } from "@qticaret/types"
-import { LAYOUT_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
+import {
+  ANNOUNCEMENT_DEFAULTS,
+  BANNER_DEFAULTS,
+  MARQUEE_DEFAULTS,
+  SLIDER_DEFAULTS,
+  defaultVariant,
+} from "@qticaret/types"
+import { LAYOUT_LIMITS, PRICE_BANDS_LIMITS } from "@/features/storefront/api/layout"
 
 /** The groups in the order the storefront draws them (a page's body between header and footer). */
 export const LAYOUT_GROUPS: readonly LayoutGroup[] = [
@@ -153,27 +159,33 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
         image: null,
       }
     case "price_bands":
-      return { ...base, type, title: null, bands: newPriceBands(), thumbs: 3 }
+      return { ...base, type, ...newPriceBands() }
     case "hero_slider":
       return {
         ...base,
         type,
         slides: [],
         height: "regular",
-        autoplay: false,
-        interval: SLIDER_LIMITS.interval.default,
-        dots: true,
-        arrows: true,
+        scroller: SLIDER_DEFAULTS,
       }
     case "banner":
-      return { ...base, type, slides: [] }
+      return { ...base, type, slides: [], ...BANNER_DEFAULTS }
     case "categories":
-      return { ...base, type, title: null, category_ids: [], show_count: false, more: null }
+      return {
+        ...base,
+        type,
+        title: null,
+        category_ids: [],
+        show_count: false,
+        more: null,
+        variant: defaultVariant(type),
+      }
     case "products":
       return {
         ...base,
         type,
         title: null,
+        variant: "grid",
         source: { kind: "newest" },
         limit: 12,
         columns: 3,
@@ -217,6 +229,7 @@ export function newBodySection(
       ...base,
       type,
       title: null,
+      variant: "grid",
       source: { kind: "same_category" },
       limit: 8,
       columns: 3,
@@ -227,15 +240,20 @@ export function newBodySection(
 }
 
 /**
- * A new price bands strip's bands: three to start from, each an upper
- * bound in whole lira, the last without one ("and up"), and a label to
- * write (the form suggests one from the bound, as a strip's first item).
+ * A new price bands strip's fields: three bands to start from, each an
+ * upper bound in whole lira, the last without one ("and up"), and a label
+ * to write (the form suggests one from the bound, as a strip's first
+ * item); the contract's default products shown small.
  */
-const newPriceBands = () => [
-  { label: "", text: null, max: 500 },
-  { label: "", text: null, max: 1000 },
-  { label: "", text: null, max: null },
-]
+const newPriceBands = () => ({
+  title: null,
+  bands: [
+    { label: "", text: null, max: 500 },
+    { label: "", text: null, max: 1000 },
+    { label: "", text: null, max: null },
+  ],
+  thumbs: PRICE_BANDS_LIMITS.thumbs.default,
+})
 
 /** The announcement bar, with one line to write. */
 export const newAnnouncementBar = (id: string): AnnouncementBar => ({
@@ -243,6 +261,7 @@ export const newAnnouncementBar = (id: string): AnnouncementBar => ({
   ...ALWAYS,
   type: "announcement_bar",
   lines: [""],
+  ...ANNOUNCEMENT_DEFAULTS,
 })
 
 /** A new scrolling strip's fields: one item to write, the contract's default steps. */
@@ -265,6 +284,10 @@ export const newHeaderMarquee = (id: string): HeaderMarquee => ({
  */
 export const marqueesOn = (doc: LayoutDocument, page: BodyGroup): number =>
   [...doc.header, ...doc[page]].filter((section) => section.type === "marquee").length
+
+/** A page's price bands strips (the home page's only), hidden ones counted. */
+export const priceBandsOn = (doc: LayoutDocument, page: BodyGroup): number =>
+  doc[page].filter((section) => section.type === "price_bands").length
 
 /** The pages a strip in the header would show on beside their own. */
 export const BODY_GROUPS: readonly BodyGroup[] = ["home", "product", "category"]

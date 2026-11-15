@@ -9,6 +9,7 @@ import type {
 import { Aisles } from "./Aisles"
 import { Brands } from "./Brands"
 import { Campaign } from "./Campaign"
+import { CATEGORY_VARIANTS, CategoryCards } from "./CategoryCards"
 import { CustomerPhotos } from "./CustomerPhotos"
 import { Faq } from "./Faq"
 import { GoogleRating } from "./GoogleRating"
@@ -37,6 +38,10 @@ const helpOf = (block: Block | undefined) =>
 /** The block's look: a shelf of joined rails takes its first rail's (adr/0049 Ek 2026-11-14 §6). */
 const lookOf = (block: Block) =>
   block.kind === "shelf" ? block.sections[0]?.look : block.section.look
+
+/** The screens it shows on (docs/tema/bilesen-standardi §2): a shelf of joined rails, its first rail's. */
+const deviceOf = (block: Block) =>
+  block.kind === "shelf" ? block.sections[0]?.device : block.section.device
 
 /** Whether the block is drawn by the one before it (a help section under the FAQ). */
 const joined = (block: Block, before: Block | undefined) =>
@@ -96,7 +101,17 @@ function BlockView({
         />
       )
     case "categories":
-      return (
+      // The linked cards when the theme draws them and the view has them; else today's tiles
+      return drawnVariant("categories", section.variant, CATEGORY_VARIANTS) === "linked" &&
+        section.linked ? (
+        <CategoryCards
+          id={headingId(section.id)}
+          title={section.title}
+          view={section.linked}
+          all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
+          t={t}
+        />
+      ) : (
         <Aisles
           id={headingId(section.id)}
           title={section.title}
@@ -106,7 +121,7 @@ function BlockView({
         />
       )
     case "banner":
-      return <Campaign section={section} label={t("home.banner")} />
+      return <Campaign section={section} label={t("home.banner")} first={first} />
     case "featured_product":
       return <Spotlight section={section} t={t} quickAdd={quickAdd} />
     case "reviews":
@@ -149,7 +164,8 @@ function BlockView({
  * help section right after the FAQ drawn beside its questions. On the
  * home page an opening hero is the page's h1 and its picture the LCP
  * (`heroFirst`, with `opening` the newest pictured product when the hero
- * has none); on a listing or a product page every section heads with an h2.
+ * has none; an opening picture band's picture is the LCP too); on a
+ * listing or a product page every section heads with an h2.
  * Each block stands in its look's box when the shop set one (`Look`).
  */
 export function Blocks({
@@ -174,6 +190,7 @@ export function Blocks({
       <Look
         key={block.kind === "shelf" ? (block.sections[0]?.id ?? "raf") : block.section.id}
         look={lookOf(block)}
+        device={deviceOf(block)}
       >
         <BlockView
           block={block}

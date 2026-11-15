@@ -3,15 +3,23 @@ import type { LayoutDocument } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { SETTINGS_KEY, partProblems } from "@/features/storefront/layout/settings-problems"
-import { groupLimit, isBodyGroup, marqueesOn } from "@/features/storefront/layout/sections"
-import { MARQUEE_LIMITS } from "@/features/storefront/api/layout"
+import { useTranslation } from "react-i18next"
+import {
+  groupLimit,
+  isBodyGroup,
+  marqueesOn,
+  priceBandsOn,
+} from "@/features/storefront/layout/sections"
+import { MARQUEE_LIMITS, PRICE_BANDS_LIMITS } from "@/features/storefront/api/layout"
 import type { findSection } from "@/features/storefront/layout/sections"
 import type { AnySection } from "@/features/storefront/api/layout"
 import { bodyOf, isMain } from "@/features/storefront/layout/main-sections"
+import { tabMates } from "@/features/storefront/layout/shelf-tabs"
 import type { Opened } from "./opened"
 import { SectionPanel } from "./section-panel"
 import { LooksPanel } from "./shared/looks-panel"
 import { ThemePanel } from "./theme-panel"
+import { cardVariantsInUse } from "./forms/theme-registry"
 
 interface OpenedFormProps {
   opened: Opened
@@ -40,8 +48,18 @@ export function OpenedForm({
   onRemove,
   onClose,
 }: OpenedFormProps) {
+  const { t } = useTranslation()
   const settingsProblems = problems.get(SETTINGS_KEY) ?? {}
   if (found) {
+    // A page shows two scrolling strips at most (the header's counted) and two price bands strips
+    const stripsFull =
+      found.section.type === "marquee" &&
+      isBodyGroup(found.group) &&
+      marqueesOn(doc, found.group) >= MARQUEE_LIMITS.perPage
+    const bandsFull =
+      found.section.type === "price_bands" &&
+      isBodyGroup(found.group) &&
+      priceBandsOn(doc, found.group) >= PRICE_BANDS_LIMITS.perPage
     return (
       <SectionPanel
         section={found.section}
@@ -51,9 +69,15 @@ export function OpenedForm({
           isBodyGroup(found.group) &&
           !isMain(found.section) &&
           bodyOf(doc, found.group).length < groupLimit(found.group) &&
-          // A page shows two scrolling strips at most, the header's counted
-          (found.section.type !== "marquee" ||
-            marqueesOn(doc, found.group) < MARQUEE_LIMITS.perPage)
+          !stripsFull &&
+          !bandsFull
+        }
+        duplicateNote={
+          stripsFull
+            ? t("storefront.editor.marquee.full", { max: MARQUEE_LIMITS.perPage })
+            : bandsFull
+              ? t("storefront.editor.priceBands.full", { max: PRICE_BANDS_LIMITS.perPage })
+              : null
         }
         onChange={(section, field) => {
           dispatch({ type: "update", section, merge: field ? `${section.id}:${field}` : undefined })
@@ -69,6 +93,11 @@ export function OpenedForm({
           onRemove(found.section)
         }}
         focus={opened?.kind === "section" ? (opened.focus ?? null) : null}
+        shelfMates={
+          found.section.type === "products" && isBodyGroup(found.group)
+            ? tabMates(bodyOf(doc, found.group), found.section.id)
+            : []
+        }
         badges={doc.settings.trust_badges}
         onBadges={(trust_badges, field) => {
           dispatch({ type: "settings", settings: { ...doc.settings, trust_badges }, merge: field })
@@ -92,6 +121,8 @@ export function OpenedForm({
     return (
       <ThemePanel
         theme={doc.settings.theme}
+        variants={cardVariantsInUse(doc)}
+        focus={opened.focus ?? null}
         problems={partProblems(settingsProblems, "theme")}
         announcement={
           doc.header

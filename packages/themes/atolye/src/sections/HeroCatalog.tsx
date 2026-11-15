@@ -1,40 +1,18 @@
 import { ResponsiveImage } from "@qticaret/ui"
-import type {
-  CategoryCardView,
-  HeroCatalogView,
-  ImageView,
-  ProductCardView,
-  Translate,
-} from "@qticaret/ui"
+import type { CategoryCardView, HeroCatalogView, ProductCardView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
+import { Preload } from "../parts/Preload"
 import { type Of, headingId } from "./plan"
 
-const SIZES = "(min-width: 1024px) 26vw, (min-width: 768px) 50vw, 100vw"
+// The photo as drawn: about a third of the width from 1024 px (495 px at 1440), half a tablet, a phone across (K-28)
+const SIZES = "(min-width: 1440px) 500px, (min-width: 1024px) 35vw, (min-width: 768px) 50vw, 92vw"
 
 /** The opening's variants this theme draws (`drawnVariant`): today's and the category list. */
 export const HERO_VARIANTS = ["standard", "category_list"] as const
 
 /** A count in Turkish digits ("1.240"). */
 const digits = (count: number) => count.toLocaleString("tr-TR")
-
-/** The LCP picture asked for first, before the parser reaches it (React puts the link in <head>). */
-function Preload({ image }: { image: ImageView }) {
-  const set = image.sources.avif ?? image.sources.webp
-  return set ? (
-    <link
-      rel="preload"
-      as="image"
-      href={image.src}
-      imageSrcSet={set}
-      imageSizes={SIZES}
-      type={image.sources.avif ? "image/avif" : "image/webp"}
-      fetchPriority="high"
-    />
-  ) : (
-    <link rel="preload" as="image" href={image.src} fetchPriority="high" />
-  )
-}
 
 /** "58" in a pill, "58 ürün" for a screen reader. */
 function Count({ count, t }: { count: number; t: Translate }) {
@@ -60,7 +38,8 @@ function ListRow({ category, t }: { category: CategoryCardView; t: Translate }) 
             />
           )}
         </span>
-        <span className="truncate">{category.label}</span>
+        {/* A name wraps rather than losing its end: three lines in a phone's narrow cell (K-15) */}
+        <span className="line-clamp-3 leading-snug break-words">{category.label}</span>
         {typeof category.count === "number" ? <Count count={category.count} t={t} /> : <span />}
       </a>
     </li>
@@ -117,11 +96,12 @@ export function HeroCatalog({
 }) {
   const id = headingId(hero.id)
   const [action, second] = hero.actions
-  const image = hero.image ?? product?.image ?? null
+  // The shop's own picture keeps the words it wrote; a stand-in product photo says nothing
+  const image = hero.image ?? (product?.image ? { ...product.image, alt: "" } : null)
   const Heading = first ? "h1" : "h2"
   return (
     <section aria-labelledby={id} data-gf-catalog-hero="" className="pt-3 lg:pt-6">
-      {first && image && <Preload image={image} />}
+      {first && image && <Preload image={image} sizes={SIZES} />}
       <Container>
         <div className="gf-mosaic">
           <article className="gf-mosaic-feature">
@@ -179,7 +159,7 @@ export function HeroCatalog({
             {image && (
               <div className="gf-mosaic-photo">
                 <ResponsiveImage
-                  image={{ ...image, alt: "" }}
+                  image={image}
                   sizes={SIZES}
                   priority={first}
                   className="absolute inset-0 h-full w-full object-cover"

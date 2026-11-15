@@ -1,0 +1,250 @@
+/*
+ * The framed card's photos (UK5 + E5, adr/0049 Ek 2026-11-14 §3.3;
+ * `parts/FramedCard.tsx`): the second photo, when the card carries one.
+ * No inline style (CSP); both photos fill the well, nothing shifts (CLS).
+ *
+ * - A mouse (hover and a fine pointer): the second sits over the first,
+ *   out of the layout (`display: none`, so the browser never fetches it
+ *   with the page), and fades in while the card is hovered or anything in
+ *   it has focus; at once for a shopper who asks for less motion.
+ * - A touch screen: the two side by side in a strip that swipes and snaps,
+ *   above the card's link so the swipe reaches it (the strip is a link to
+ *   the same page, so a tap still opens it). Where the browser drives an
+ *   animation by scrolling, the second photo's picture stays out of the
+ *   layout until the strip first moves (its slide keeps its width, so the
+ *   swipe works) and two dots under the photo follow the strip; without
+ *   that, no dots and the second loads lazily as any image.
+ */
+@layer components {
+  .gf-card-slides {
+    display: block;
+    height: 100%;
+  }
+  .gf-card-slide {
+    display: block;
+    height: 100%;
+  }
+  .gf-card-slide picture {
+    display: block;
+    height: 100%;
+  }
+  .gf-card-dots {
+    display: none;
+  }
+  .gf-card-framed .gf-card-media > ul {
+    z-index: calc(var(--z-raised) + 1);
+    pointer-events: none;
+  }
+
+  /* One height for "Sepete ekle" (with its icon) and "Seçenekler", so a row's buttons line up */
+  .gf-card-btn {
+    min-height: 2.75rem;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--text-sm);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .gf-card-slide--second {
+      position: absolute;
+      inset: 0;
+      display: none;
+      opacity: 0;
+    }
+    .gf-card-framed:hover .gf-card-slide--second,
+    .gf-card-framed:focus-within .gf-card-slide--second {
+      display: block;
+      opacity: 1;
+    }
+  }
+  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+    .gf-card-slide--second {
+      transition:
+        opacity var(--dur-short) var(--ease-out),
+        display var(--dur-short) allow-discrete;
+    }
+    @starting-style {
+      .gf-card-framed:hover .gf-card-slide--second,
+      .gf-card-framed:focus-within .gf-card-slide--second {
+        opacity: 0;
+      }
+    }
+  }
+
+  @media not ((hover: hover) and (pointer: fine)) {
+    .gf-card-slides {
+      position: relative;
+      z-index: var(--z-raised);
+      display: flex;
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+    .gf-card-slides::-webkit-scrollbar {
+      display: none;
+    }
+    .gf-card-slide {
+      flex: 0 0 100%;
+      scroll-snap-align: start;
+    }
+
+    @supports (animation-timeline: scroll()) {
+      .gf-card-media {
+        timeline-scope: --gf-card-photos;
+      }
+      .gf-card-slides {
+        scroll-timeline: --gf-card-photos inline;
+      }
+      .gf-card-slide--second picture {
+        animation: gf-card-reveal linear both;
+        animation-timeline: --gf-card-photos;
+      }
+      .gf-card-dots {
+        position: absolute;
+        bottom: var(--space-xs);
+        left: 50%;
+        z-index: calc(var(--z-raised) + 1);
+        display: flex;
+        gap: 6px;
+        translate: -50% 0;
+        pointer-events: none;
+      }
+      .gf-card-dots i {
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: var(--color-field);
+        box-shadow: 0 0 0 1px var(--color-rule);
+        animation: gf-card-dot linear both;
+        animation-timeline: --gf-card-photos;
+      }
+      .gf-card-dots i + i {
+        animation-direction: reverse;
+      }
+    }
+  }
+}
+
+/* The first dot dark at the strip's start, the second at its end */
+@keyframes gf-card-dot {
+  from {
+    background: var(--color-text);
+  }
+  to {
+    background: var(--color-field);
+  }
+}
+
+/*
+ * The second photo out of the layout only while its strip has not moved:
+ * `display` takes the shown value anywhere past the start
+ */
+@keyframes gf-card-reveal {
+  from {
+    display: none;
+  }
+  to {
+    display: block;
+  }
+}
+
+/* Outside the layers, as the quiet button's own hover (`ui.css`) it takes over */
+/* The card's one action at rest is quiet, so a row of cards is not a row of
+   filled buttons; the card pointed at, or its button in focus, shows it in
+   the action's colour (Tezgâh audit K-27: "kartın Sepete ekle'si eylem rengi") */
+.gf-card-framed .gf-card-btn:focus-visible {
+  border-color: var(--color-signal);
+  background: var(--color-signal);
+  color: var(--color-signal-ink);
+}
+@media (hover: hover) {
+  .gf-card-framed:hover .gf-card-btn:not(:disabled):not([aria-disabled="true"]) {
+    border-color: var(--color-signal);
+    background: var(--color-signal);
+    color: var(--color-signal-ink);
+  }
+}
+
+/* A framed card's foot button as the shop chose it (adr/0049 Ek 2026-11-15):
+   `solid` in the action's colour at rest too; `text` an underlined word, a
+   thicker line while pointed at, never a filled box. `outline` is the rule above */
+.gf-card-framed .gf-card-btn--solid {
+  border-color: var(--color-signal);
+  background: var(--color-signal);
+  color: var(--color-signal-ink);
+}
+.gf-card-framed .gf-card-btn--text,
+.gf-card-framed .gf-card-btn--text:focus-visible {
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-text);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+@media (hover: hover) {
+  .gf-card-framed:hover .gf-card-btn--text:not(:disabled):not([aria-disabled="true"]) {
+    border-color: transparent;
+    background: transparent;
+    color: var(--color-text);
+    text-decoration-thickness: 2px;
+  }
+}
+
+/* The lead card of a "1 big + 6 small" shelf (sections/ShelfLayouts, Tezgâh
+   audits K-07, Y-01, third audit D-4, fifth audit V-02): from 1024 px the card
+   stays as tall as the two rows beside it, and its photo well takes what the
+   words and the button leave, on the well's light tone. The photo sits whole
+   in the well's middle (`contain`), never cropped and never drawn past its own
+   size (an `auto` width and height inside the well's bounds), so the room it
+   does not fill is the well's own margin, not an empty band under the price.
+   The words (name, stars, price) and the button keep together at the foot,
+   the price as far from the button as on a small card (~32 px) */
+@media (width >= 64rem) {
+  .gf-card-lead {
+    display: flex;
+    flex-direction: column;
+  }
+  .gf-card-lead > .gf-card-framed {
+    flex: 1 1 auto;
+  }
+  .gf-card-lead > .gf-card-framed .gf-card-media {
+    flex: 1 1 16rem;
+    aspect-ratio: auto;
+    min-height: 16rem;
+  }
+  .gf-card-lead > .gf-card-framed .gf-card-media > :is(picture, .gf-card-slides) {
+    position: absolute;
+    inset: 0;
+  }
+  /* Only inside the strip: a lone photo's picture is the well's direct child
+     and stays absolute (above), its box the well's; matching it here too
+     would outrank that rule, leave it inline at 0 wide and draw the photo
+     0×0 (sixth audit V-05) */
+  .gf-card-lead
+    > .gf-card-framed
+    .gf-card-media
+    :is(.gf-card-slide:not(.gf-card-slide--second), .gf-card-slide picture) {
+    position: relative;
+    height: 100%;
+  }
+  .gf-card-lead > .gf-card-framed .gf-card-media img {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: 100%;
+    margin: auto;
+    object-fit: contain;
+  }
+  .gf-card-lead > .gf-card-framed h3 {
+    font-size: var(--text-section);
+    line-height: 1.25;
+  }
+  .gf-card-lead > .gf-card-framed > .gf-card-info {
+    flex: none;
+    padding-inline: var(--space-xs);
+    padding-bottom: 1.25rem;
+  }
+}

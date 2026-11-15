@@ -1,4 +1,5 @@
 import { BadgeCheck } from "lucide-react"
+import { cn } from "@qticaret/ui/lib/utils"
 import type { RatingBarView, ReviewFilterView, ShopRatingView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { fillOf } from "../parts/FreeShippingMeter"
@@ -6,16 +7,17 @@ import { Stars } from "../parts/Stars"
 import { type Of, headingId } from "./plan"
 import { SectionHead } from "./SectionHead"
 
-/** How long a quote may run: about a dozen words, so a screen holds the summary and three. */
-const QUOTE = 110
+/**
+ * How long a quote may run (sahip 2026-11-14: about two short sentences,
+ * "göründüğü gibi keskinliği iyi … ürüne detay katıyor"), so the cards in
+ * a row stay even. A longer one ends at a word with "…"; the section's
+ * link leads to the reviews page, where every review is whole.
+ */
+const QUOTE = 140
 
-/** The first sentence of a review when it is short enough, else its first words up to `QUOTE` characters. */
+/** A review as a quote: whole when it fits, else its words up to `QUOTE` characters and "…". */
 export function quoteOf(body: string): string {
   const text = body.replace(/\s+/g, " ").trim()
-  const sentence = /^(.{12,}?[.!?…])(\s|$)/u.exec(text)?.[1]
-  if (sentence && sentence.length <= QUOTE) {
-    return sentence
-  }
   if (text.length <= QUOTE) {
     return text
   }
@@ -58,7 +60,7 @@ export function Summary({
   filter?: ReviewFilterView | null
 }) {
   return (
-    <div className="flex flex-col gap-5 rounded-tile bg-paper-2 p-6 lg:p-8">
+    <div className="flex flex-col gap-5 rounded-tile border border-rule p-6 lg:p-8">
       <p className="flex items-end gap-3">
         <span className="tabular text-figure leading-none font-extrabold tracking-(--tracking-display)">
           {summary.average}
@@ -114,10 +116,12 @@ export function Summary({
 
 /**
  * The shop's approved reviews: its average set large with the stars, the
- * count and the spread on a tinted panel (only when the storefront has
- * the shop-wide summary), beside the three newest reviews as quotes (the
- * stars, the first sentence or first dozen words, the name with its
- * verified-purchase mark). Nothing is written for the shop.
+ * count and the spread in a hairline box (only when the storefront has
+ * the shop-wide summary), beside the three newest reviews as quotes in the
+ * same boxes, each as tall as its words (the stars, the review up to about
+ * 140 characters, cut at a word with "…", the name with its
+ * verified-purchase mark, the product it is about as a link; Tezgâh audit
+ * K-25). Nothing is written for the shop.
  */
 export function Reviews({ section, t }: { section: Of<"reviews">; t: Translate }) {
   const id = headingId(section.id)
@@ -138,11 +142,11 @@ export function Reviews({ section, t }: { section: Of<"reviews">; t: Translate }
           )}
           {reviews.length > 0 && (
             <ul
-              className={
-                summary
-                  ? "grid gap-(--gap-columns) md:grid-cols-[repeat(3,minmax(0,1fr))] lg:col-span-8"
-                  : "grid gap-(--gap-columns) md:grid-cols-[repeat(3,minmax(0,1fr))] lg:col-span-12"
-              }
+              // A phone slides the reviews sideways, the next one peeking, instead of a long column (third audit Z-08)
+              className={cn(
+                "gf-rail grid items-start gap-(--gap-columns) max-md:-mx-(--gutter) max-md:auto-cols-[85%] max-md:grid-flow-col max-md:overflow-x-auto max-md:scroll-px-(--gutter) max-md:px-(--gutter) max-md:py-1 md:grid-cols-[repeat(3,minmax(0,1fr))]",
+                summary ? "lg:col-span-8" : "lg:col-span-12"
+              )}
             >
               {reviews.map((review, index) => (
                 <li
@@ -156,7 +160,7 @@ export function Reviews({ section, t }: { section: Of<"reviews">; t: Translate }
                   <blockquote className="text-md leading-relaxed font-semibold">
                     <p>“{quoteOf(review.body)}”</p>
                   </blockquote>
-                  <footer className="mt-auto pt-2 text-sm">
+                  <footer className="flex flex-col gap-1 pt-2 text-sm">
                     <span className="flex items-center gap-1.5 font-semibold text-text">
                       {review.author}
                       {review.verified && (
@@ -168,6 +172,16 @@ export function Reviews({ section, t }: { section: Of<"reviews">; t: Translate }
                         />
                       )}
                     </span>
+                    {review.product && (
+                      // Which tool it is about (Tezgâh audit K-25: a catalogue labels its items)
+                      <a
+                        href={review.product.path}
+                        className="gf-link line-clamp-2 self-start text-text-2"
+                        aria-label={`${t("reviews.about")}: ${review.product.label}`}
+                      >
+                        {review.product.label}
+                      </a>
+                    )}
                   </footer>
                 </li>
               ))}

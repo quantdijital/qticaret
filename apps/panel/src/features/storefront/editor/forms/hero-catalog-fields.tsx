@@ -11,6 +11,7 @@ import type {
 import { HERO_CATALOG_LIMITS as H, LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { SwitchRow } from "../theme-fields"
+import { FIELD_IDS } from "./field-registry"
 import { CountField, FieldGroup, TextField } from "./fields"
 import { ImageField } from "./image-field"
 import { AddLinkButton, LinkCard } from "./link-field"
@@ -93,26 +94,32 @@ export function HeroCatalogFields({
             }}
           />
         ) : null}
-        <CountField
-          id={`${section.id}-list-limit`}
-          label={t(`${C}.listLimit`)}
-          hint={t(`${C}.listLimitHint`, { min: H.list.min, max: H.list.max })}
-          value={section.list_limit}
-          min={H.list.min}
-          max={H.list.max}
-          onChange={(list_limit) => {
-            set({ list_limit }, "list_limit")
-          }}
-        />
-        <SwitchRow
-          id={`${section.id}-show-count`}
-          label={t(`${C}.showCount`)}
-          hint={t(`${C}.showCountHint`)}
-          checked={section.show_count}
-          onChange={(show_count) => {
-            set({ show_count })
-          }}
-        />
+        <div id={FIELD_IDS.content(section.id, "list_limit")}>
+          <CountField
+            id={`${section.id}-list-limit`}
+            label={t(`${C}.listLimit`)}
+            term={t(`${C}.listLimitTerm`)}
+            hint={t(`${C}.listLimitHint`, { min: H.list.min, max: H.list.max })}
+            value={section.list_limit}
+            min={H.list.min}
+            max={H.list.max}
+            onChange={(list_limit) => {
+              set({ list_limit }, "list_limit")
+            }}
+          />
+        </div>
+        <div id={FIELD_IDS.content(section.id, "show_count")}>
+          <SwitchRow
+            id={`${section.id}-show-count`}
+            label={t(`${C}.showCount`)}
+            term={t(`${C}.showCountTerm`)}
+            hint={t(`${C}.showCountHint`)}
+            checked={section.show_count}
+            onChange={(show_count) => {
+              set({ show_count })
+            }}
+          />
+        </div>
       </FieldGroup>
       <FieldGroup title={t(`${C}.tiles`)} hint={t(`${C}.tilesHint`, { max: H.tiles })}>
         <RecordListField
@@ -217,15 +224,18 @@ export function HeroCatalogFields({
             }}
           />
         ))}
-        <SwitchRow
-          id={`${section.id}-show-price`}
-          label={t(`${C}.showPrice`)}
-          hint={t(`${C}.showPriceHint`)}
-          checked={section.show_price}
-          onChange={(show_price) => {
-            set({ show_price })
-          }}
-        />
+        <div id={FIELD_IDS.content(section.id, "show_price")}>
+          <SwitchRow
+            id={`${section.id}-show-price`}
+            label={t(`${C}.showPrice`)}
+            term={t(`${C}.showPriceTerm`)}
+            hint={t(`${C}.showPriceHint`)}
+            checked={section.show_price}
+            onChange={(show_price) => {
+              set({ show_price })
+            }}
+          />
+        </div>
       </FieldGroup>
       {picker.dialog}
     </div>

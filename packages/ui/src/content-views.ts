@@ -1,5 +1,14 @@
-import type { HeroVariant, SectionLook, ShelfColumns, TrustBadgesVariant } from "@qticaret/types"
+import type {
+  CategoriesVariant,
+  FaqSettings,
+  HeroVariant,
+  SectionDevice,
+  SectionLook,
+  TrustBadgesVariant,
+} from "@qticaret/types"
+import type { BannerSectionView } from "./banner-views"
 import type { CategoryCardView, CustomerPhotoView, ShopMarkView } from "./card-views"
+import type { CategoryCardsView } from "./category-card-views"
 import type { HeroCatalogView, PriceBandsSectionView } from "./catalog-views"
 import type {
   FeaturedProductSectionView,
@@ -10,6 +19,7 @@ import type {
 import type { PaginationView } from "./listing-views"
 import type { MarqueeSectionView } from "./marquee-views"
 import type { BreadcrumbView, ProductCardView, ReviewView } from "./product-views"
+import type { ProductsSectionView } from "./shelf-views"
 import type { ContactView, ImageView, LinkView, SocialLinkView, TrustBadgeView } from "./views"
 
 /**
@@ -27,12 +37,22 @@ import type { ContactView, ImageView, LinkView, SocialLinkView, TrustBadgeView }
 export type SectionLookView = Partial<SectionLook>
 
 /**
+ * Which screens show a section (docs/tema/bilesen-standardi §2): only on
+ * phones (the theme's narrow frame) or only on wide screens; none (absent)
+ * everywhere. A theme hides it with CSS at its own breakpoint, so the page
+ * is the same for every visitor (cached, no layout shift) and a lazy picture
+ * in the hidden section is not fetched.
+ */
+export type SectionDeviceView = Exclude<SectionDevice, "all">
+
+/**
  * A section as the theme draws it (adr/0049): the shop lays the home,
  * product and category pages out in the theme editor; every title already
  * in words (the shop's own or the storefront's default, a FAQ's aside),
- * every link already a path; its look beside (none: the theme's own).
+ * every link already a path; its look beside (none: the theme's own) and
+ * the screens it shows on (none: everywhere).
  */
-export type HomeSectionView = { look?: SectionLookView } & (
+export type HomeSectionView = { look?: SectionLookView; device?: SectionDeviceView } & (
   | {
       id: string
       type: "hero"
@@ -53,16 +73,7 @@ export type HomeSectionView = { look?: SectionLookView } & (
   | HeroSliderSectionView
   | GoogleRatingSectionView
   | MarqueeSectionView
-  | {
-      id: string
-      type: "banner"
-      slides: {
-        image: ImageView
-        heading: string | null
-        text: string | null
-        link: LinkView | null
-      }[]
-    }
+  | BannerSectionView
   | {
       id: string
       type: "categories"
@@ -71,21 +82,15 @@ export type HomeSectionView = { look?: SectionLookView } & (
       categories: CategoryCardView[]
       /** The link beside the title; none (or absent): the theme's "every category". */
       more?: LinkView | null
-    }
-  | {
-      id: string
-      type: "products"
-      title: string
-      products: ProductCardView[]
-      more: LinkView | null
-      /** Words when the rail has nothing to show. */
-      empty: string
+      /** How the cards are drawn (adr/0049 Ek 2026-11-15); none: today's tiles. */
+      variant?: CategoriesVariant
       /**
-       * Cards in a row on a wide screen, the shop's choice (adr/0049 Ek
-       * 2026-11-05); the theme steps down on narrower ones. None: 3.
+       * `linked`'s settings and cards (the same cards as `categories`, with
+       * their subcategories); a theme without that drawing draws the tiles.
        */
-      columns?: ShelfColumns
+      linked?: CategoryCardsView | null
     }
+  | ProductsSectionView
   | FeaturedProductSectionView
   | { id: string; type: "brands"; title: string; brands: LinkView[] }
   | { id: string; type: "posts"; title: string; posts: PostCardView[]; more: LinkView }
@@ -117,6 +122,11 @@ export type HomeSectionView = { look?: SectionLookView } & (
       title: string | null
       /** Plain text; the theme keeps the answers in the HTML (open or closed). */
       items: { question: string; answer: string }[]
+      /**
+       * The first question open, one open at a time (bilesen-denetimi (b) 8).
+       * Absent (an older storefront): all closed, each opened on its own.
+       */
+      settings?: FaqSettings
     }
 )
 

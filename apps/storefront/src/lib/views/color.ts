@@ -26,6 +26,32 @@ export function readableOn(hex: string): string {
     : INK
 }
 
+/**
+ * Whether `#rrggbb` reads near a theme's sale red (Tezgâh audits K-05 and
+ * the second round's colour sets): a warm hue, from 15° short of pure red
+ * through orange and amber to 45°, and saturated enough (HSL saturation
+ * from 0.45) to be a colour, not a brown or a grey. Beside a red sale such
+ * a colour reads as the same family, the two inks' contrast near 1:1 (an
+ * orange #c2410c: 1.17:1). Wine (330°), yellow, green and blue do not.
+ */
+export function readsNearSale(hex: string): boolean {
+  const parts = HEX.exec(hex)
+  if (!parts) {
+    return false
+  }
+  const [r = 0, g = 0, b = 0] = parts.slice(1).map((part) => Number.parseInt(part, 16) / 255)
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  const spread = max - min
+  if (max !== r || spread === 0) {
+    return false
+  }
+  const lightness = (max + min) / 2
+  const saturation = spread / (1 - Math.abs(2 * lightness - 1))
+  const hue = (60 * ((g - b) / spread) + 360) % 360
+  return saturation >= 0.45 && (hue <= 45 || hue >= 345)
+}
+
 /** Whether `value` is a lower-case `#rrggbb`: the only colour form that goes into CSS. */
 export const isHexColor = (value: unknown): value is string =>
   typeof value === "string" && HEX.test(value)

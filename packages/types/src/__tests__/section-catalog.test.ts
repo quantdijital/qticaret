@@ -10,11 +10,11 @@ describe("the catalogue home page's parts", () => {
     expect(variantOf("hero", "bento")).toBe("standard")
   })
 
-  it("ranges each band from the one before's bound to its own", () => {
+  it("ranges each band from just above the one before's bound to its own, never overlapping", () => {
     expect(bandRanges([{ max: 500 }, { max: 1000 }, { max: null }])).toEqual([
       { min: null, max: 500 },
-      { min: 500, max: 1000 },
-      { min: 1000, max: null },
+      { min: 501, max: 1000 },
+      { min: 1001, max: null },
     ])
   })
 

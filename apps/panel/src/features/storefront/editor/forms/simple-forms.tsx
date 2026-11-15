@@ -8,6 +8,8 @@ import type {
 } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import type { Problem } from "@/features/storefront/layout/problems"
+import { CategoryCardsFields } from "./category-cards-fields"
+import { FIELD_IDS } from "./field-registry"
 import { CountField, F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
@@ -35,6 +37,7 @@ export function TitleField({ id, title, placeholder, problem, onChange }: TitleF
     <TextField
       id={`${id}-title`}
       label={t(`${F}.title`)}
+      term={t(`${F}.titleTerm`)}
       value={title}
       max={L.title}
       placeholder={placeholder}
@@ -73,18 +76,25 @@ export function CategoriesForm({
           onChange({ ...section, category_ids })
         }}
       />
-      <SwitchRow
-        id={`${section.id}-show-count`}
-        label={t("storefront.editor.heroCatalog.showCount")}
-        hint={t("storefront.editor.categories.showCountHint")}
-        checked={section.show_count}
-        onChange={(show_count) => {
-          onChange({ ...section, show_count })
-        }}
-      />
+      {section.variant === "linked" ? (
+        <CategoryCardsFields section={section} onChange={onChange} />
+      ) : null}
+      <div id={FIELD_IDS.content(section.id, "show_count")}>
+        <SwitchRow
+          id={`${section.id}-show-count`}
+          label={t("storefront.editor.categories.showCount")}
+          term={t("storefront.editor.categories.showCountTerm")}
+          hint={t("storefront.editor.categories.showCountHint")}
+          checked={section.show_count}
+          onChange={(show_count) => {
+            onChange({ ...section, show_count })
+          }}
+        />
+      </div>
       <LinkField
         id={`${section.id}-more`}
         label={t("storefront.editor.categories.more")}
+        term={t("storefront.editor.categories.moreTerm")}
         hint={t("storefront.editor.categories.moreHint")}
         link={section.more}
         error={text(problems["more"], L.label)}
@@ -138,16 +148,19 @@ export function CountedForm({ section, problems, onChange }: SectionFormProps<Co
           onChange({ ...section, title }, "title")
         }}
       />
-      <CountField
-        id={`${section.id}-limit`}
-        label={t(`${F}.limit`)}
-        hint={t(`${F}.limitHint`, { max })}
-        value={section.limit}
-        max={max}
-        onChange={(limit) => {
-          onChange({ ...section, limit }, "limit")
-        }}
-      />
+      <div id={FIELD_IDS.content(section.id, "limit")}>
+        <CountField
+          id={`${section.id}-limit`}
+          label={t(`${F}.limit`)}
+          term={t(`${F}.limitTerm`)}
+          hint={t(`${F}.limitHint`, { max })}
+          value={section.limit}
+          max={max}
+          onChange={(limit) => {
+            onChange({ ...section, limit }, "limit")
+          }}
+        />
+      </div>
     </div>
   )
 }

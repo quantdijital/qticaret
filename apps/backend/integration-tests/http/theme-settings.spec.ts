@@ -15,10 +15,27 @@ interface Frame {
     colors: { primary: string | null; accent: string | null; background: string }
     typography: { heading: string; body: string }
     radius: string
-    product_card: { ratio: string; show_brand: boolean; show_rating: boolean }
+    product_card: Record<string, unknown>
     header: { layout: string; sticky: boolean }
     buttons: string
+    section_spacing: string
+    surface_style: string
   }
+}
+
+/** The card's variant and the framed card's switches at their defaults (adr/0049 Ek 2026-11-14 §3.3). */
+const CARD = {
+  variant: "standard",
+  hover_image: true,
+  delivery_note: true,
+  full_button: true,
+  // adr/0049 Ek 2026-11-15: every pill, the price on a sold-out card, no stars without reviews
+  sale_badge: true,
+  low_stock_badge: true,
+  sold_out_badge: true,
+  sold_out_row: "price",
+  no_reviews: "hide",
+  button_style: "outline",
 }
 
 /** F18 D11 (adr/0053): the shop picks its look from fixed lists; the storefront reads it. */
@@ -58,6 +75,8 @@ medusaIntegrationTestRunner({
         product_card: { show_rating: true },
         header: { layout: "centered" },
         buttons: "rounded",
+        section_spacing: "roomy",
+        surface_style: "lined",
       })
       const after = await frame()
 
@@ -68,9 +87,12 @@ medusaIntegrationTestRunner({
         colors: { primary: null, accent: null, background: "steel" },
         typography: { heading: "manrope", body: "manrope" },
         radius: "soft",
-        product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+        product_card: { ...CARD, ratio: "1:1", show_brand: true, show_rating: false },
         header: { layout: "left", sticky: true },
         buttons: "pill",
+        section_spacing: "normal",
+        // A row before the surface style reads today's filled boxes (Z-04)
+        surface_style: "filled",
       })
       expect(fallback.data.theme.colors.primary).toBe("#0b5c99")
       expect(pale.status).toBe(400)
@@ -83,9 +105,11 @@ medusaIntegrationTestRunner({
         colors: { primary: "#1e3a8a", accent: null, background: "cool" },
         typography: { heading: "playfair", body: "manrope" },
         radius: "soft",
-        product_card: { ratio: "1:1", show_brand: true, show_rating: true },
+        product_card: { ...CARD, ratio: "1:1", show_brand: true, show_rating: true },
         header: { layout: "centered", sticky: true },
         buttons: "rounded",
+        section_spacing: "roomy",
+        surface_style: "lined",
       })
       // The old field stays until the storefront and the panel move over
       expect(after.data.storefront.primary_color).toBe("#0b5c99")
@@ -120,9 +144,11 @@ medusaIntegrationTestRunner({
         colors: { primary: "#7a1a48", accent: null, background: "steel" },
         typography: { heading: "manrope", body: "manrope" },
         radius: "soft",
-        product_card: { ratio: "1:1", show_brand: false, show_rating: false },
+        product_card: { ...CARD, ratio: "1:1", show_brand: false, show_rating: false },
         header: { layout: "left", sticky: false },
         buttons: "pill",
+        section_spacing: "normal",
+        surface_style: "filled",
       }
 
       const read = await section()

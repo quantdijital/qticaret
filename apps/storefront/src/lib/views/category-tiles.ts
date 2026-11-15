@@ -1,6 +1,7 @@
 import "server-only"
+import type { StoreCategory } from "@qticaret/types"
 import type { CategoryCardView } from "@qticaret/ui"
-import { subtreeIds } from "./categories"
+import { childrenOf, subtreeIds } from "./categories"
 import { mapLimited } from "./limited"
 import { newestPhoto, PHOTO_REQUESTS } from "./nav-pictures"
 import { namedCategories } from "./section-data"
@@ -19,12 +20,31 @@ export async function categoryTiles(ids: readonly string[]): Promise<CategoryCar
   return (await picturedCategories(ids)).map(({ card }) => card)
 }
 
-/** `categoryTiles` with each tile's category id beside it (its count, a tile's own picture). */
+/**
+ * A category page's tiles: its own children, none without any. An empty
+ * list would ask `categoryTiles` for the top categories, the page itself
+ * among them (Tezgâh audit Z-05).
+ */
+export async function subcategoryTiles(
+  categories: readonly StoreCategory[],
+  parentId: string
+): Promise<CategoryCardView[]> {
+  const ids = childrenOf(categories, parentId).map((child) => child.id)
+  return ids.length > 0 ? categoryTiles(ids) : []
+}
+
+/**
+ * `categoryTiles` with each tile's category id beside it (its count, a
+ * tile's own picture). With a `limit` only that many are kept, and only
+ * their photos are asked for.
+ */
 export async function picturedCategories(
-  ids: readonly string[]
+  ids: readonly string[],
+  limit?: number
 ): Promise<{ id: string; card: CategoryCardView }[]> {
   const { categories, named } = await namedCategories(ids)
-  return mapLimited(named, PHOTO_REQUESTS, async ({ id, card }) => {
+  const kept = limit === undefined ? named : named.slice(0, limit)
+  return mapLimited(kept, PHOTO_REQUESTS, async ({ id, card }) => {
     if (card.image) {
       return { id, card }
     }

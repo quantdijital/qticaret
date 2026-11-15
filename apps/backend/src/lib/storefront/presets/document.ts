@@ -1,5 +1,5 @@
 import { ValidationError } from "../../errors"
-import { themeSection } from "../../../modules/platform-settings/sections/theme"
+import { themeSection, withCardDefaults } from "../../../modules/platform-settings/sections/theme"
 import type { ThemeSettings } from "../../../modules/platform-settings/sections"
 import { layoutDocument } from "../layout"
 import type { LayoutDocument } from "../layout"
@@ -55,7 +55,8 @@ export function withShopFrame(
  * refused there too. Refused, nothing is written.
  */
 export function presetTheme(raw: unknown): ThemeSettings {
-  const parsed = themeSection.full.safeParse(raw)
+  // A preset written before the card's variant and E5 fields draws its cards as before
+  const parsed = themeSection.full.safeParse(withCardDefaults(raw))
   if (!parsed.success) {
     throw new ValidationError("storefront_preset.theme_invalid", {
       field: fieldOf(parsed.error, "theme"),

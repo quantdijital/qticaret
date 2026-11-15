@@ -6,6 +6,7 @@ import type {
   HomeSectionView,
   ImageView,
   ProductCardView,
+  ProductsSectionView,
 } from "@qticaret/ui"
 import { renderPage } from "@/test/theme-render"
 
@@ -145,6 +146,9 @@ describe("the theme's home page: opening, promises, aisles", () => {
     expect(html).not.toContain("auto-rows-fr grid-cols-2 gap-2")
     // As many columns as badges: no empty box
     expect(html).toContain("lg:grid-cols-2")
+    // On the page's ground with the theme's lined boxes, else the field colour (W-03)
+    expect(html).toContain("bg-[color:var(--box-ground,var(--color-field))]")
+    expect(html).not.toContain("border-rule bg-field")
     const three = home([
       hero,
       {
@@ -229,6 +233,24 @@ describe("the theme's home page: the shelf", () => {
     expect(html).toContain('data-panel="1"')
     expect(html).toContain('href="/urun/c"')
     expect(html).toContain('href="/kategori/caki"')
+  })
+
+  it("sets each tab's whole-list link as a plain link beside the tab row, no button under it (K-04, K-12)", () => {
+    const html = home([
+      hero,
+      shelf("yeni", "Yeni ürünler", [product("a")]),
+      {
+        ...(shelf("caki", "Çakılar", [product("c")]) as ProductsSectionView),
+        variant: "carousel",
+      },
+    ])
+    expect(html).not.toContain("gf-btn--quiet")
+    expect(html.match(/class="gf-tab-aside[^"]*"/g)).toHaveLength(2)
+    expect(html).toMatch(
+      /class="gf-tab-aside[^"]*"><h2 id="[^"]+" class="sr-only">Çakılar<\/h2><a href="\/kategori\/caki" class="gf-link/
+    )
+    // A carousel's arrows share its head row, which stands on the tab row's line from 1024 px
+    expect(html).toContain("gf-scroller-head")
   })
 
   it("starts the tabs and the tiles on the page's left line, though their rows run to the screen's edges", () => {

@@ -3,17 +3,21 @@ import { useTranslation } from "react-i18next"
 import {
   BODY_FONTS,
   BUTTON_SHAPES,
-  CARD_RATIOS,
   HEADING_FONTS,
   NO_LIRA_FONTS,
   RADII,
+  SECTION_SPACINGS,
+  SURFACE_STYLES,
   SERIF_FONTS,
   SINGLE_WEIGHT_FONTS,
 } from "@/features/storefront/api/theme"
 import type { BodyFont, HeadingFont, ThemeSettings } from "@/features/storefront/api/theme"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { PanelGroup } from "./panel-header"
-import { ChoiceSelect, SwitchRow } from "./theme-fields"
+import { ChoiceSelect } from "./theme-fields"
+import { ThemeCardGroups } from "./theme-card-fields"
+import { THEME_GROUP_TITLES, THEME_IDS } from "./forms/theme-registry"
+import type { CardVariantsInUse, ThemeGroupName } from "./forms/theme-registry"
 
 const C = "storefront.editor.theme"
 
@@ -58,6 +62,10 @@ function useHeadingNote(): (font: HeadingFont) => string | undefined {
 
 interface ThemeChoicesProps {
   theme: ThemeSettings
+  /** The card variants the draft draws: a field meaningless for all of them is hidden. */
+  variants: CardVariantsInUse
+  /** A group to open now (the settings search's pick); null: none. */
+  reveal: (group: ThemeGroupName) => number | null
   /** The theme with one choice changed: the draft takes it at once (adr/0063 §3). */
   onChange: (theme: ThemeSettings) => void
 }
@@ -67,17 +75,22 @@ interface ThemeChoicesProps {
  * card. The header's layout and stickiness are the header bar's now
  * (adr/0049 Ek 2026-11-14 §5), in the tree under "Üst bilgi".
  */
-export function ThemeChoices({ theme, onChange }: ThemeChoicesProps) {
+export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoicesProps) {
   const { t } = useTranslation()
   const headingNote = useHeadingNote()
-  const { typography, product_card: card } = theme
+  const { typography } = theme
   return (
     <>
-      <PanelGroup title={t(`${C}.fontsTitle`)} hint={t(`${C}.fontsHint`)}>
+      <PanelGroup
+        title={t(THEME_GROUP_TITLES.fonts)}
+        hint={t(`${C}.fontsHint`)}
+        reveal={reveal("fonts")}
+      >
         <Pair long>
           <ChoiceSelect
-            id="theme-heading"
+            id={THEME_IDS["typography.heading"]}
             label={t(`${C}.heading`)}
+            term={t(`${C}.fontTerm`)}
             value={typography.heading}
             options={HEADING_FONTS}
             onChange={(value) => {
@@ -87,8 +100,9 @@ export function ThemeChoices({ theme, onChange }: ThemeChoicesProps) {
             hint={headingNote(typography.heading)}
           />
           <ChoiceSelect
-            id="theme-body"
+            id={THEME_IDS["typography.body"]}
             label={t(`${C}.body`)}
+            term={t(`${C}.fontTerm`)}
             value={typography.body}
             options={BODY_FONTS}
             onChange={(value) => {
@@ -98,11 +112,12 @@ export function ThemeChoices({ theme, onChange }: ThemeChoicesProps) {
           />
         </Pair>
       </PanelGroup>
-      <PanelGroup title={t(`${C}.shapes`)}>
+      <PanelGroup title={t(THEME_GROUP_TITLES.shapes)} reveal={reveal("shapes")}>
         <Pair>
           <ChoiceSelect
-            id="theme-radius"
+            id={THEME_IDS.radius}
             label={t(`${C}.radius`)}
+            term={t(`${C}.radiusTerm`)}
             value={theme.radius}
             options={RADII}
             onChange={(value) => {
@@ -112,7 +127,7 @@ export function ThemeChoices({ theme, onChange }: ThemeChoicesProps) {
             hint={t(`${C}.radiusHint`)}
           />
           <ChoiceSelect
-            id="theme-buttons"
+            id={THEME_IDS.buttons}
             label={t(`${C}.buttons`)}
             value={theme.buttons}
             options={BUTTON_SHAPES}
@@ -123,34 +138,34 @@ export function ThemeChoices({ theme, onChange }: ThemeChoicesProps) {
             hint={t(`${C}.buttonsHint`)}
           />
         </Pair>
-      </PanelGroup>
-      <PanelGroup title={t(`${C}.card`)}>
         <Pair>
           <ChoiceSelect
-            id="theme-ratio"
-            label={t(`${C}.ratio`)}
-            value={card.ratio}
-            options={CARD_RATIOS}
+            id={THEME_IDS.section_spacing}
+            label={t(`${C}.sectionSpacing`)}
+            term={t(`${C}.sectionSpacingTerm`)}
+            value={theme.section_spacing}
+            options={SECTION_SPACINGS}
             onChange={(value) => {
-              onChange({ ...theme, product_card: { ...card, ratio: value } })
+              onChange({ ...theme, section_spacing: value })
             }}
-            render={(option) => t(`${C}.ratios.${option.replace(":", "x")}`)}
-            hint={t(`${C}.ratioHint`)}
+            render={(option) => t(`${C}.sectionSpacings.${option}`)}
+            hint={t(`${C}.sectionSpacingHint`)}
+          />
+          <ChoiceSelect
+            id={THEME_IDS.surface_style}
+            label={t(`${C}.surfaceStyle`)}
+            term={t(`${C}.surfaceStyleTerm`)}
+            value={theme.surface_style}
+            options={SURFACE_STYLES}
+            onChange={(value) => {
+              onChange({ ...theme, surface_style: value })
+            }}
+            render={(option) => t(`${C}.surfaceStyles.${option}`)}
+            hint={t(`${C}.surfaceStyleHint`)}
           />
         </Pair>
-        {(["show_brand", "show_rating"] as const).map((name) => (
-          <SwitchRow
-            key={name}
-            id={`theme-${name}`}
-            label={t(`${C}.${name}`)}
-            hint={t(`${C}.${name}Hint`)}
-            checked={card[name]}
-            onChange={(value) => {
-              onChange({ ...theme, product_card: { ...card, [name]: value } })
-            }}
-          />
-        ))}
       </PanelGroup>
+      <ThemeCardGroups theme={theme} variants={variants} reveal={reveal} onChange={onChange} />
     </>
   )
 }

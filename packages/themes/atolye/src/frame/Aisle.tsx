@@ -2,77 +2,120 @@
 
 import { ChevronDown } from "lucide-react"
 import { NavigationMenu } from "radix-ui"
-import { useLayoutEffect, useRef, useState } from "react"
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react"
 import type { NavCategoryView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
+import { useAisleFit } from "./aisle-fit"
+import { Drop } from "./AisleDrop"
 import type { MenuWords } from "./menu-words"
-import { MenuCount, MenuThumb } from "./MenuParts"
 
 const ITEM =
-  "group inline-flex min-h-11 items-center gap-1 rounded-button px-3 text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text data-[state=open]:bg-text data-[state=open]:text-paper"
+  "gf-aisle-item group inline-flex min-h-11 items-center gap-1 rounded-button px-3 text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text data-[state=open]:bg-text data-[state=open]:text-paper"
+/**
+ * In the menu bar (Tezgâh audits Y-05, Y-06): 8 px in below 1280 px, so one
+ * more category fits; open, the bar's own raised tone and a line under it,
+ * never the filled box the highlighted link beside it is drawn as.
+ */
+const BAR_ITEM =
+  "px-2 xl:px-3 data-[state=open]:bg-paper-2 data-[state=open]:text-text data-[state=open]:shadow-[inset_0_-2px_0_currentColor]"
 
 /**
- * A category's dropdown: its children as 48 px rows (a 40 px picture, the
- * name, the product count in a pill), then "Tümünü gör" with the
- * category's own count in the dark pill. No panel, no big picture.
+ * The categories that did not fit on the bar's line, each with its
+ * children under it: a column each, two at most below 1280 px and three
+ * from it, the panel as wide as they are (Tezgâh audit Y-06).
  */
-function Drop({ category, words }: { category: NavCategoryView; words: MenuWords }) {
+function MorePanel({ categories }: { categories: readonly NavCategoryView[] }) {
+  const columns =
+    categories.length === 1
+      ? "grid-cols-1"
+      : categories.length === 2
+        ? "grid-cols-2"
+        : "grid-cols-2 xl:grid-cols-3"
   return (
-    <>
-      <ul>
-        {category.children.map((child) => (
-          <li key={child.path}>
-            <NavigationMenu.Link asChild>
-              <a href={child.path} className="gf-drop-row">
-                <MenuThumb category={child} size={40} />
-                <span>{child.label}</span>
-                <MenuCount count={words.counts[child.path]} />
-              </a>
-            </NavigationMenu.Link>
-          </li>
-        ))}
-      </ul>
-      <NavigationMenu.Link asChild>
-        <a href={category.path} className="gf-drop-row gf-drop-all">
-          {/* Heard in full ("Tümünü gör: Çakılar"), its visible words first (WCAG 2.5.3) */}
-          <span aria-hidden="true">{words.seeAll}</span>
-          <span className="sr-only">{words.allIn[category.path] ?? category.label}</span>
-          <MenuCount count={words.counts[category.path]} dark />
-        </a>
-      </NavigationMenu.Link>
-    </>
+    <ul className={cn("grid w-max gap-x-(--gap-columns) gap-y-4", columns)}>
+      {categories.map((category) => (
+        <li key={category.path} className="w-52">
+          <NavigationMenu.Link asChild>
+            <a
+              href={category.path}
+              className="-mx-3 flex min-h-10 items-center rounded-inner px-3 py-2 text-sm leading-snug font-bold text-text no-underline pointer-coarse:min-h-11 hover:bg-paper-2"
+            >
+              {category.label}
+            </a>
+          </NavigationMenu.Link>
+          {category.children.length > 0 && (
+            <ul>
+              {category.children.map((child) => (
+                <li key={child.path}>
+                  <NavigationMenu.Link asChild>
+                    <a
+                      href={child.path}
+                      className="-mx-3 flex min-h-10 items-center rounded-inner px-3 py-2 text-sm leading-snug text-text-2 no-underline pointer-coarse:min-h-11 hover:bg-paper-2 hover:text-text"
+                    >
+                      {child.label}
+                    </a>
+                  </NavigationMenu.Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </li>
+      ))}
+    </ul>
   )
 }
+
+/** "Daha fazla"'s panel: the floating surfaces' one recipe, the page's ink. */
+const MORE_PANEL =
+  "absolute top-full right-0 z-(--z-dropdown) w-max rounded-tile border border-rule bg-field p-6 text-text shadow-float data-[state=closed]:hidden xl:p-8"
 
 /**
  * The category aisle from 1024 px: one line of the shop's top categories
  * (from the start, or centred under a centred header); a category with
- * children opens its dropdown, after a 150 ms hover or by a press, Enter
- * or Space; Escape, a press outside it or leaving it closes it, the focus
- * back on its button (Radix: the button says whether it is open and which
- * list it opens; the arrow keys move along the line). The dropdown hangs
- * under its own category, 336 px wide, over the page, so nothing below
- * moves; one that would pass the aisle's end lines up with its
- * category's end instead. A category without children is a plain link.
- * Every dropdown is in the first HTML, closed (`forceMount`), so each
- * link reaches a crawler without a script (docs/13). A closed dropdown
- * still listens for presses outside it; it lets them pass, or a press
- * inside the open one would close the menu before its link is followed.
+ * children opens its dropdown (`AisleDrop`), after a 150 ms hover or by a
+ * press, Enter or Space; Escape, a press outside it or leaving it closes
+ * it, the focus back on its button (Radix: the button says whether it is
+ * open and which list it opens; the arrow keys move along the line). The
+ * dropdown hangs under its own category, 336 px wide, over the page, so
+ * nothing below moves; one that would pass the aisle's end lines up with
+ * its category's end instead. A category without children is a plain
+ * link. Every dropdown is in the first HTML, closed (`forceMount`), so
+ * each link reaches a crawler without a script (docs/13). A closed
+ * dropdown still listens for presses outside it; it lets them pass, or a
+ * press inside the open one would close the menu before its link is
+ * followed. Dropdowns take the page's ink, never the bar's.
+ *
+ * In the catalog header's menu bar (`inBar`) the bar's ground is on its
+ * items, and the line never wraps: the categories that do not fit go
+ * under "Daha fazla" (`more`), whose panel lists them with their children
+ * (`aisle-fit.ts`); each category on the line opens the same dropdown.
  */
 export function Aisle({
   categories,
   label,
   words,
   centered = false,
+  inBar = false,
+  more = "",
+  tail,
 }: {
   categories: readonly NavCategoryView[]
   label: string
   words: MenuWords
   /** The centred header's aisle: the line centred. */
   centered?: boolean
+  /** In the catalog header's menu bar: the bar's ground on its items, no line under it. */
+  inBar?: boolean
+  /** The bar's "Daha fazla", in words. */
+  more?: string
+  /** In the bar, an item always shown right after the last category (the highlighted link). */
+  tail?: ReactNode
 }) {
   const [open, setOpen] = useState("")
   const root = useRef<HTMLElement>(null)
+  const { list, fit } = useAisleFit(categories.length, inBar)
+  const shown = fit ?? categories.length
+  const rest = categories.slice(shown)
 
   // Measured as it opens, before it is painted: past the aisle's end, it lines up at its end
   useLayoutEffect(() => {
@@ -93,23 +136,42 @@ export function Aisle({
       onValueChange={setOpen}
       delayDuration={150}
       aria-label={label}
-      className="relative pb-2"
+      className={inBar ? "gf-menubar-aisle static min-w-0 flex-1" : "relative pb-2"}
     >
       <NavigationMenu.List
-        className={cn("flex flex-wrap items-center gap-x-1", centered ? "justify-center" : "-ml-3")}
+        ref={list}
+        className={
+          inBar
+            ? cn(
+                "flex flex-nowrap items-center gap-x-1",
+                // Clipped only while measured: the "Daha fazla" panel opens leftward from its button
+                fit === null && "overflow-x-clip [overflow-clip-margin:0.375rem]"
+              )
+            : cn("flex flex-wrap items-center gap-x-1", centered ? "justify-center" : "-ml-3")
+        }
       >
-        {categories.map((category) =>
-          category.children.length === 0 ? (
-            <NavigationMenu.Item key={category.path}>
+        {categories.map((category, index) => {
+          const away = inBar && index >= shown
+          return category.children.length === 0 ? (
+            <NavigationMenu.Item
+              key={category.path}
+              data-aisle-item=""
+              className={away ? "hidden" : undefined}
+            >
               <NavigationMenu.Link asChild>
-                <a href={category.path} className={ITEM}>
+                <a href={category.path} className={cn(ITEM, inBar && BAR_ITEM)}>
                   {category.label}
                 </a>
               </NavigationMenu.Link>
             </NavigationMenu.Item>
           ) : (
-            <NavigationMenu.Item key={category.path} value={category.path} className="relative">
-              <NavigationMenu.Trigger className={ITEM}>
+            <NavigationMenu.Item
+              key={category.path}
+              value={category.path}
+              data-aisle-item=""
+              className={cn("relative", away && "hidden")}
+            >
+              <NavigationMenu.Trigger className={cn(ITEM, inBar && BAR_ITEM)}>
                 {category.label}
                 <ChevronDown
                   className="size-4 group-data-[state=open]:rotate-180 motion-safe:transition-transform"
@@ -131,6 +193,44 @@ export function Aisle({
               </NavigationMenu.Content>
             </NavigationMenu.Item>
           )
+        })}
+        {inBar && more !== "" && (fit === null || rest.length > 0) && (
+          // Measured while hidden; shown once some categories wait under it
+          <NavigationMenu.Item
+            value="more"
+            data-aisle-more=""
+            className={fit === null ? "invisible relative" : "relative"}
+            aria-hidden={fit === null ? true : undefined}
+          >
+            <NavigationMenu.Trigger
+              className={cn(ITEM, BAR_ITEM)}
+              tabIndex={fit === null ? -1 : undefined}
+            >
+              {more}
+              <ChevronDown
+                className="size-4 group-data-[state=open]:rotate-180 motion-safe:transition-transform"
+                aria-hidden="true"
+                strokeWidth={2}
+              />
+            </NavigationMenu.Trigger>
+            {rest.length > 0 && fit !== null && (
+              <NavigationMenu.Content
+                onInteractOutside={(event) => {
+                  if (open !== "more") {
+                    event.preventDefault()
+                  }
+                }}
+                className={MORE_PANEL}
+              >
+                <MorePanel categories={rest} />
+              </NavigationMenu.Content>
+            )}
+          </NavigationMenu.Item>
+        )}
+        {inBar && tail && (
+          <li data-aisle-tail="" className="flex shrink-0 items-center">
+            {tail}
+          </li>
         )}
       </NavigationMenu.List>
     </NavigationMenu.Root>

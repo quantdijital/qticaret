@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import type { GoogleRatingSection } from "@/features/storefront/api/layout"
 import { GOOGLE_RATING_LIMITS } from "@/features/storefront/api/layout"
 import { SwitchRow } from "../theme-fields"
+import { FIELD_IDS } from "./field-registry"
 import { CountField } from "./fields"
 import type { SectionFormProps } from "./form-props"
 import { TitleField } from "./simple-forms"
@@ -36,36 +37,45 @@ export function GoogleRatingForm({
           set({ title }, "title")
         }}
       />
-      <SwitchRow
-        id={`${section.id}-excerpts`}
-        label={t(`${G}.excerpts`)}
-        hint={t(`${G}.excerptsHint`)}
-        checked={section.excerpts > 0}
-        onChange={(checked) => {
-          set({ excerpts: checked ? on : 0 })
-        }}
-      />
-      {section.excerpts > 0 ? (
-        <CountField
-          id={`${section.id}-count`}
-          label={t(`${G}.count`)}
-          hint={t(`${G}.countHint`, { max })}
-          max={max}
-          value={section.excerpts}
-          onChange={(excerpts) => {
-            set({ excerpts }, "excerpts")
+      <div id={FIELD_IDS.content(section.id, "excerpts")}>
+        <SwitchRow
+          id={`${section.id}-excerpts`}
+          label={t(`${G}.excerpts`)}
+          term={t(`${G}.excerptsTerm`)}
+          hint={t(`${G}.excerptsHint`)}
+          checked={section.excerpts > 0}
+          onChange={(checked) => {
+            set({ excerpts: checked ? on : 0 })
           }}
         />
+      </div>
+      {section.excerpts > 0 ? (
+        <div id={FIELD_IDS.content(section.id, "excerpt_count")}>
+          <CountField
+            id={`${section.id}-count`}
+            label={t(`${G}.count`)}
+            term={t(`${G}.countTerm`)}
+            hint={t(`${G}.countHint`, { max })}
+            max={max}
+            value={section.excerpts}
+            onChange={(excerpts) => {
+              set({ excerpts }, "excerpts")
+            }}
+          />
+        </div>
       ) : null}
-      <SwitchRow
-        id={`${section.id}-profile`}
-        label={t(`${G}.profileLink`)}
-        hint={t(`${G}.profileLinkHint`)}
-        checked={section.profile_link}
-        onChange={(profile_link) => {
-          set({ profile_link })
-        }}
-      />
+      <div id={FIELD_IDS.content(section.id, "profile_link")}>
+        <SwitchRow
+          id={`${section.id}-profile`}
+          label={t(`${G}.profileLink`)}
+          term={t(`${G}.profileLinkTerm`)}
+          hint={t(`${G}.profileLinkHint`)}
+          checked={section.profile_link}
+          onChange={(profile_link) => {
+            set({ profile_link })
+          }}
+        />
+      </div>
       <p className="text-[13px] text-muted-foreground">
         {t(`${G}.source`)}{" "}
         <Link to="/reviews/google" className="font-medium text-foreground underline">

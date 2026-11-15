@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
 import type { StoreMarqueeSection } from "@qticaret/types"
+import { MARQUEE_DEFAULTS } from "@qticaret/types/section-marquee"
 import { t } from "@/lib/i18n"
 
 vi.mock("server-only", () => ({}))
@@ -22,15 +23,18 @@ const section = (over: Record<string, unknown> = {}) =>
     ],
     speed: "fast",
     direction: "right",
+    // A strip saved before the dictionary named the light tint `well`
     ground: "light",
     size: "small",
     separator: "line",
     ...over,
-  }) as StoreMarqueeSection
+  }) as unknown as StoreMarqueeSection
 
 describe("the scrolling strip's view (adr/0049 Ek 2026-11-14 §4.1)", () => {
   it("carries its items with their links as paths and its steps", () => {
+    // A backend before the newer settings (adr/0049 Ek 2026-11-15): each reads as its default
     expect(marqueeView(section(), t)).toEqual({
+      ...MARQUEE_DEFAULTS,
       id: "kayan1",
       type: "marquee",
       items: [
@@ -45,9 +49,27 @@ describe("the scrolling strip's view (adr/0049 Ek 2026-11-14 §4.1)", () => {
       ],
       speed: "fast",
       direction: "right",
-      ground: "light",
+      // The light tint's old name reads as the dictionary's (bilesen-denetimi (b) 5)
+      ground: "well",
       size: "small",
       separator: "line",
+    })
+  })
+
+  it("carries the newer settings as saved", () => {
+    const set = {
+      speed: "fastest",
+      hover_pause: "off",
+      pause_button: "hover",
+      weight: "normal",
+      uppercase: "on",
+      gap: "tight",
+      outline: "on",
+      closable: "on",
+    }
+    expect(marqueeView(section(set), t)).toMatchObject(set)
+    expect(marqueeView(section({ pause_button: "none" }), t)).toMatchObject({
+      pause_button: "always",
     })
   })
 
@@ -64,5 +86,12 @@ describe("the scrolling strip's view (adr/0049 Ek 2026-11-14 §4.1)", () => {
 
     expect(headerMarquee(header, t)).toBeNull()
     expect(headerMarquee([...header, section()], t)).toMatchObject({ id: "kayan1" })
+    expect(headerMarquee([...header, section()], t)).not.toHaveProperty("device")
+  })
+
+  it("carries the header strip's screens only when not everywhere (bilesen-standardi §2)", () => {
+    expect(headerMarquee([section({ device: "desktop" })], t)).toMatchObject({ device: "desktop" })
+    expect(headerMarquee([section({ device: "all" })], t)).not.toHaveProperty("device")
+    expect(headerMarquee([section({ device: "tablet" })], t)).not.toHaveProperty("device")
   })
 })

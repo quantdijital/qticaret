@@ -7779,7 +7779,7 @@
       "types": {
         "announcement_bar": {
           "name": "Announcement bar",
-          "description": "Short notices at the very top of the page, shown in turn."
+          "description": "A thin bar at the very top; several announcements show the first only, in turn or side by side."
         },
         "hero": {
           "name": "Hero",
@@ -7790,8 +7790,8 @@
           "description": "2–6 slides shown in turn at the top of the page, each with a picture, a heading, a short line and a button."
         },
         "banner": {
-          "name": "Image slider",
-          "description": "1–6 images shown in turn, each with its own heading, line and link."
+          "name": "Image band",
+          "description": "1–6 images, side by side on a wide screen, each with its own heading, line and one or two buttons."
         },
         "categories": {
           "name": "Categories",
@@ -7843,7 +7843,7 @@
         },
         "faq": {
           "name": "Frequently asked questions",
-          "description": "Questions and answers; search engines are told about them as a FAQ too."
+          "description": "Questions and answers that open and close; shown on the page only."
         },
         "related_products": {
           "name": "Related products",
@@ -7859,7 +7859,7 @@
         },
         "footer_bar": {
           "name": "Footer",
-          "description": "Your contact details, menus and payment marks, at the bottom of every page. Menus and contact details are edited on their own screens."
+          "description": "Your contact details, menus, social accounts and payment marks, at the bottom of every page. Menus, contact details and social account addresses are edited on their own screens."
         },
         "product_main": {
           "name": "The product's own details",
@@ -7881,7 +7881,8 @@
         },
         "header_bar": {
           "standard": "Logo on the left",
-          "centered": "Logo in the middle"
+          "centered": "Logo in the middle",
+          "catalog": "Classic catalogue"
         },
         "footer_bar": {
           "ledger": "Standard"
@@ -7895,14 +7896,29 @@
         "soon": "{{name}} (coming soon)",
         "kept": "The saved layout is being prepared; until it is ready, the storefront draws the standard one.",
         "hero": {
-          "standard": "Stage",
+          "standard": "Single image",
           "category_list": "Category list"
+        },
+        "products": {
+          "grid": "Grid",
+          "carousel": "Carousel",
+          "featured": "Featured",
+          "compact": "Compact list",
+          "columns": "Lists side by side"
+        },
+        "categories": {
+          "tiles": "Picture tiles",
+          "linked": "Cards with subcategories"
+        },
+        "related_products": {
+          "grid": "Grid",
+          "carousel": "Carousel"
         }
       },
       "look": {
-        "title": "Look settings",
-        "titleSet_one": "Look settings · {{count}} set",
-        "titleSet_other": "Look settings · {{count}} set",
+        "title": "More settings",
+        "titleSet_one": "More settings · {{count}} setting",
+        "titleSet_other": "More settings · {{count}} settings",
         "hint": "The section's spacing and look. Any field left unset uses the theme's own look; the preview shows it at once.",
         "reset": "Back to default",
         "space_outer": {
@@ -7970,8 +7986,20 @@
         "placement": "Position",
         "sections": "Sections",
         "content": "Content",
+        "layout": "Layout",
+        "scroll": "Scrolling",
+        "motion": "Motion",
+        "appearance": "Style",
         "variant": "Layout",
-        "variantHint": "How the section looks on the storefront; the preview shows it at once. Shared content (title, text) stays when the layout changes, and \"Undo\" brings the previous one back."
+        "variantHint": "How the section looks on the storefront; the preview shows it at once. Shared content (title, text) stays when the layout changes, and \"Undo\" brings the previous one back.",
+        "device": {
+          "label": "Device",
+          "term": "device",
+          "all": "Everywhere",
+          "mobile": "Phones only",
+          "desktop": "Desktop only",
+          "hint": "Phones: screens narrower than 1024 pixels (tablets included). Where it is hidden its pictures are not downloaded; the page's first picture still is."
+        }
       },
       "defaults": {
         "heading": "Your shop's name",
@@ -7995,6 +8023,7 @@
         "heading": "Heading",
         "text": "Text",
         "title": "Title",
+        "titleTerm": "title",
         "titleHint": "Left empty, the storefront uses its own title.",
         "titleOptional": "Optional; left empty, no title shows.",
         "textHint": "Left empty, the storefront uses its own text.",
@@ -8003,15 +8032,22 @@
         "altHint": "For visitors who cannot see it and for search engines: say briefly what it shows.",
         "noImage": "No image",
         "limit": "How many to show",
+        "limitTerm": "limit",
         "limitHint": "Between 1 and {{max}}.",
         "columns": "Products per row",
+        "columnsTerm": "columns",
         "columnsOption": "{{n}} products per row",
         "columnsHint": {
           "3": "3 products side by side on a wide screen, two rows ({{total}} products); 2 on a phone.",
           "4": "4 products side by side on a wide screen, two rows ({{total}} products); 3 on a tablet, 2 on a phone.",
           "5": "5 products side by side on a wide screen, two rows ({{total}} products); 4 and 3 on narrower screens, 2 on a phone."
         },
-        "columnsShort": "The storefront shows full rows only: set the number to show to at least {{total}} for two full rows."
+        "columnsShort": "The storefront shows full rows only: set the number to show to at least {{total}} for two full rows.",
+        "columnsMobile": "Columns on a phone",
+        "columnsMobileTerm": "columns mobile",
+        "columnsMobileHint": "How many products side by side on a phone; in one column the cards grow and three show.",
+        "columnsMobileOption_one": "{{count}} card",
+        "columnsMobileOption_other": "{{count}} cards"
       },
       "hero": {
         "eyebrowPlaceholder": "New season",
@@ -8026,13 +8062,68 @@
       "banner": {
         "empty": "No images yet. The section is saved once it has one.",
         "slide": "Image {{number}}",
-        "link": "Link",
-        "linkHint": "Where a visitor clicking the image goes; optional.",
+        "link": "Button",
+        "linkHint": "The picture's main button; optional.",
         "add": "Add image",
-        "hint": "Up to {{max}} images, shown in turn."
+        "hint": "Up to {{max}} images, side by side on a wide screen.",
+        "secondLink": "Second button",
+        "secondLinkHint": "Optional; drawn one step quieter than the first.",
+        "mobileImage": "Phone image",
+        "mobileImageHint": "Optional. Shown instead of the wide image on screens narrower than 640 px.",
+        "tone": {
+          "label": "Text colour",
+          "hint": "Pick by the picture: light text on a dark one, dark text on a light one. The text stays readable at every setting.",
+          "light": "Light text",
+          "dark": "Dark text"
+        },
+        "width": {
+          "label": "Width",
+          "term": "width",
+          "hint": "Boxed: the page's width, rounded corners. Full: edge to edge.",
+          "boxed": "Boxed",
+          "full": "Full"
+        },
+        "height": {
+          "label": "Height",
+          "term": "height",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
+        },
+        "text_position": {
+          "label": "Text position",
+          "term": "position",
+          "top_left": "Top left",
+          "top_center": "Top centre",
+          "top_right": "Top right",
+          "middle_left": "Middle left",
+          "middle_center": "Centre",
+          "middle_right": "Middle right",
+          "bottom_left": "Bottom left",
+          "bottom_center": "Bottom centre",
+          "bottom_right": "Bottom right"
+        },
+        "overlay": {
+          "label": "Overlay strength",
+          "term": "overlay",
+          "hint": "The overlay keeps the text readable; the stronger, the more of the picture it covers. With none the text stands on its own plate.",
+          "none": "None",
+          "light": "Light",
+          "medium": "Medium",
+          "strong": "Strong"
+        },
+        "button_style": {
+          "label": "Button style",
+          "term": "button",
+          "hint": "A second button is drawn one step quieter.",
+          "solid": "Filled",
+          "outline": "Outlined",
+          "text": "Text"
+        }
       },
       "products": {
         "source": "Which products",
+        "sourceTerm": "source",
         "sources": {
           "newest": "The newest products",
           "best_sellers": "Best sellers",
@@ -8046,10 +8137,16 @@
         "products": "Products",
         "manualEmpty": "Pick at least one product.",
         "days": "Days of sales",
+        "daysTerm": "days",
         "daysHint": "The best sellers of the last so many days ({{min}}–{{max}}). Paid orders count, cancellations and returns are taken off. With too few sales the list is made up with the newest products.",
         "onSaleHint": "The products on the campaigns page, the deepest discount first. While nothing is on sale the section does not show in the storefront.",
         "more": "See all link",
-        "moreHint": "The link under the list; removed, it does not show."
+        "moreTerm": "link",
+        "moreHint": "The link under the list; removed, it does not show.",
+        "cardVariant": "Card style",
+        "cardVariantTerm": "card",
+        "cardVariantTheme": "The theme's style",
+        "cardVariantHint": "The style of this rail's cards. The framed card's settings come from Theme > Framed card."
       },
       "records": {
         "pick": {
@@ -8100,7 +8197,37 @@
         "line": "Announcement {{number}}",
         "placeholder": "Free shipping from {ücretsiz_kargo_eşiği}",
         "add": "Add announcement",
-        "hint": "Up to {{max}} lines of up to {{length}} characters each, shown in turn."
+        "hint": "Up to {{max}} lines of up to {{length}} characters each.",
+        "mode": {
+          "label": "Several announcements",
+          "term": "multiple",
+          "first": "First only",
+          "rotate": "In turn",
+          "inline": "Side by side",
+          "hint": "Side by side: all on one line on a wide screen, the first only on a phone. In turn: with reduced motion the first one stays."
+        },
+        "interval": {
+          "label": "Interval",
+          "term": "interval",
+          "slow": "Slow",
+          "medium": "Medium",
+          "fast": "Fast",
+          "hint": "How long each announcement stays: 8, 6 or 4 seconds."
+        },
+        "pause_button": {
+          "label": "Pause button",
+          "term": "pause button",
+          "always": "Always",
+          "hover": "On hover",
+          "hint": "It cannot be removed (accessibility); touch screens always show it."
+        },
+        "hover_pause": {
+          "label": "Pause on hover",
+          "term": "pause on hover",
+          "on": "On",
+          "off": "Off",
+          "hint": "It always stops when the keyboard reaches the bar."
+        }
       },
       "problems": {
         "required": "Write this line or remove it.",
@@ -8124,7 +8251,8 @@
         "contrast": "This colour does not read well enough with white text or on the page colour (3:1 at least). Pick a darker shade.",
         "wellContrast": "This colour does not read well enough on the areas one shade darker than the page (the boxes links and outlined buttons stand on; 3:1 at least). Pick a darker shade.",
         "marqueeLimit": "A page may show up to {{max}} scrolling strips (the header's counts on every page); remove one.",
-        "bandsOrder": "Upper bounds must rise; only the last band may have none."
+        "bandsOrder": "Upper bounds must rise; only the last band may have none.",
+        "bandsLimit": "The home page can have at most {{max}} price bands sections (hidden ones count too); remove one."
       },
       "theme": {
         "title": "Theme settings",
@@ -8168,6 +8296,7 @@
         "fontsHint": "The storefront loads its fonts from its own server; nothing about visitors goes to third parties.",
         "heading": "Headings",
         "body": "Body text",
+        "fontTerm": "font-family",
         "serif": "serif",
         "sans": "sans-serif",
         "fonts": {
@@ -8185,6 +8314,7 @@
         },
         "shapes": "Corners and buttons",
         "radius": "Corners",
+        "radiusTerm": "border-radius",
         "radii": {
           "sharp": "Sharp",
           "soft": "Soft",
@@ -8198,8 +8328,24 @@
           "square": "Square"
         },
         "buttonsHint": "Buttons, the search field, form fields and the quantity stepper change together. Chips and counts are always pills.",
+        "sectionSpacing": "Section spacing",
+        "sectionSpacingTerm": "section spacing",
+        "sectionSpacings": {
+          "compact": "Compact",
+          "normal": "Normal",
+          "roomy": "Roomy"
+        },
+        "sectionSpacingHint": "The space between the page's sections, changing for every section together. Normal is the theme's own gap (120 px on a wide screen); Compact brings it to 66 px, Roomy to 144 px.",
+        "surfaceStyle": "Box style",
+        "surfaceStyleTerm": "surface style",
+        "surfaceStyles": {
+          "filled": "Filled",
+          "lined": "Lined"
+        },
+        "surfaceStyleHint": "The product page's info boxes, the category page's filters and subcategories, the cart's boxes. Filled is a tone darker than the page; Lined is a 1 px rule on the page's ground.",
         "card": "Product card",
         "ratio": "Image ratio",
+        "ratioTerm": "aspect-ratio",
         "ratios": {
           "4x5": "4:5 (portrait)",
           "1x1": "1:1 (square)",
@@ -8210,6 +8356,53 @@
         "show_brandHint": "The brand's name above the product's on the product card. Nothing shows for a product without a brand.",
         "show_rating": "Show the rating",
         "show_ratingHint": "Stars, the average and the number of reviews on the cards of products with approved reviews. Nothing shows for a product without reviews.",
+        "no_reviews": "Rating row without reviews",
+        "no_reviewsTerm": "rating",
+        "noReviews": {
+          "hide": "Hide",
+          "empty_stars": "Show empty stars",
+          "write_first": "“Write the first review” link"
+        },
+        "no_reviewsHint": "What stands where the stars go on a product without reviews. The link opens the reviews on the product page.",
+        "badges": "Badges",
+        "badgeTerm": "badge",
+        "sale_badge": "Show the sale badge",
+        "sale_badgeHint": "The discount (30%) in the photo's corner of a product on sale.",
+        "low_stock_badge": "Show the “Few left” badge",
+        "low_stock_badgeHint": "On a product running low; no number is shown. The compact card does not draw it.",
+        "sold_out_badge": "Show the “Sold out” badge",
+        "sold_out_badgeHint": "On the photo of a product that has sold out.",
+        "sold_out_row": "Price row when sold out",
+        "sold_out_rowTerm": "sold out",
+        "soldOutRows": {
+          "price": "Keep the price, button off",
+          "text": "“Sold out” text",
+          "notify": "“Notify me” link"
+        },
+        "sold_out_rowHint": "What stands in the price's place. None of them adds the product to the cart from the card; the link opens the stock alert form on the product page.",
+        "cardVariant": "Card style",
+        "cardVariants": {
+          "standard": "Standard",
+          "framed": "Framed",
+          "compact": "Compact"
+        },
+        "cardVariantHint": "The style of every product card in the shop. A product rail can pick its own; listing, search and category pages use this one.",
+        "framed": "Framed card",
+        "framedHint": "Applies wherever a card is drawn framed: as the shop's style or on a rail set to framed.",
+        "hover_image": "Second photo on hover",
+        "hover_imageHint": "The product's second photo shows when the pointer is over the card; on a phone the photos swipe sideways. No effect on a product with one photo.",
+        "delivery_note": "Free shipping note",
+        "delivery_noteHint": "\"Free shipping\" under the price of a product whose price reaches the free shipping threshold. The threshold is set on the Promotions page.",
+        "full_button": "Full-width button",
+        "full_buttonHint": "An \"Add to cart\" button at the card's foot; on a product with options \"Options\" opens its page. Off, the round + stays on the photo's corner.",
+        "button_style": "Button style",
+        "button_styleTerm": "button",
+        "buttonStyles": {
+          "solid": "Solid",
+          "outline": "Outline",
+          "text": "Text"
+        },
+        "button_styleHint": "The “Add to cart” and “Options” button at the card's foot. Outline fills with the main colour while the card is pointed at.",
         "grafit": {
           "action": "Back to Grafit",
           "hint": "Sets every field to the theme's default look (Grafit). The change goes into the draft; the storefront does not change until you publish.",
@@ -8222,10 +8415,17 @@
         "question": "Question {{number}}'s text",
         "answer": "Question {{number}}'s answer",
         "add": "Add question",
-        "hint": "Up to {{max}} questions; answers may hold the shop's details."
+        "hint": "Up to {{max}} questions; answers may hold the shop's details.",
+        "openFirst": "First question open",
+        "openFirstTerm": "open first",
+        "openFirstHint": "The first answer shows when the page opens.",
+        "singleOpen": "One question open at a time",
+        "singleOpenTerm": "accordion",
+        "singleOpenHint": "Opening a question closes the one already open."
       },
       "related": {
         "source": "Which products",
+        "sourceTerm": "source",
         "sources": {
           "same_category": "From the product's own category",
           "collection": "A collection's products",
@@ -8277,6 +8477,7 @@
         "add": "Add slides",
         "options": "Options",
         "height": "Height",
+        "heightTerm": "height",
         "heights": {
           "compact": "Compact",
           "regular": "Regular"
@@ -8285,14 +8486,6 @@
           "compact": "A low strip on wide screens; more of the sections below fit the first screen.",
           "regular": "As tall as the hero; the picture leads on wide screens."
         },
-        "autoplay": "Play automatically",
-        "autoplayHint": "Off: a slide changes only when the visitor moves on. On: it waits on hover or focus and stops once the visitor steps on their own; it does not play for visitors who ask for reduced motion, and a pause button shows.",
-        "interval": "Seconds per slide",
-        "intervalHint": "Between {{min}} and {{max}} seconds.",
-        "dots": "Show dots",
-        "dotsHint": "Under the slides; they show which slide is on and go to one when clicked.",
-        "arrows": "Show arrows",
-        "arrowsHint": "On wide screens (1024 px and up), either side of the slide. Phones swipe.",
         "editSlide": "Edit slide",
         "previous": "Previous slide",
         "next": "Next slide",
@@ -8323,10 +8516,13 @@
       },
       "googleRating": {
         "excerpts": "Show excerpts from recent reviews",
+        "excerptsTerm": "excerpts",
         "excerptsHint": "Reviews you hid never show; only recent 4 and 5 star reviews with text.",
         "count": "Number of excerpts",
+        "countTerm": "count",
         "countHint": "Between 1 and {{max}}.",
         "profileLink": "Link to your Google page",
+        "profileLinkTerm": "link",
         "profileLinkHint": "Beside the link to the reviews, your page on Google Maps opens in a new tab.",
         "source": "The rating and count are Google's; the storefront never changes them. Connection and reviews:",
         "sourceLink": "Reviews > Google reviews"
@@ -8401,8 +8597,8 @@
         "subtextPlaceholder": "On orders placed before 2 pm",
         "link": "Link (optional)",
         "full": "This page already has {{max}} scrolling strips (the header's counts too).",
-        "lookHint": "Background, speed, direction and separator; also the space around the strip and its width.",
-        "headerLookHint": "Background, speed, direction and separator.",
+        "lookHint": "A close button; the space around the strip and its width.",
+        "headerLookHint": "A close button.",
         "size": {
           "label": "Size",
           "term": "size",
@@ -8416,14 +8612,16 @@
           "term": "background",
           "stage": "Dark",
           "primary": "Main colour",
-          "light": "Light"
+          "well": "Light tint"
         },
         "speed": {
           "label": "Speed",
           "term": "speed",
+          "slowest": "Slowest",
           "slow": "Slow",
           "medium": "Medium",
-          "fast": "Fast"
+          "fast": "Fast",
+          "fastest": "Fastest"
         },
         "direction": {
           "label": "Direction",
@@ -8438,12 +8636,189 @@
           "dot": "Dot",
           "star": "Star",
           "line": "Line"
+        },
+        "hover_pause": {
+          "label": "Pause on hover",
+          "term": "pause on hover",
+          "off": "Off",
+          "on": "On",
+          "hint": "When off it keeps moving under the pointer; it still stops when an item gets keyboard focus."
+        },
+        "pause_button": {
+          "label": "Pause button",
+          "term": "pause button",
+          "always": "Always",
+          "hover": "On hover",
+          "hint": "The button cannot be removed: some visitors need to stop moving text. It always shows on phones."
+        },
+        "weight": {
+          "label": "Font weight",
+          "term": "font weight",
+          "bold": "Bold",
+          "normal": "Normal"
+        },
+        "uppercase": {
+          "label": "Uppercase",
+          "term": "uppercase",
+          "off": "Off",
+          "on": "On",
+          "hint": "Each item's main line is set in CAPITALS; the second line stays as written."
+        },
+        "gap": {
+          "label": "Space between items",
+          "term": "gap",
+          "tight": "Tight",
+          "normal": "Normal",
+          "wide": "Wide"
+        },
+        "outline": {
+          "label": "Filled / outline text",
+          "term": "outline",
+          "off": "Off",
+          "on": "On",
+          "hint": "Items alternate between filled and outlined letters. Large size only."
+        },
+        "closable": {
+          "label": "Close button",
+          "term": "close button",
+          "off": "Off",
+          "on": "On",
+          "hint": "Once a visitor closes it, the strip stays hidden in that browser; changing its text shows it again."
         }
       },
       "headerBar": {
         "sticky": "Keep the header in view",
         "stickyHint": "The header stays at the top of the screen while the page scrolls. Off, it scrolls away with the page.",
-        "stickyTerm": "sticky"
+        "stickyTerm": "sticky",
+        "search_placeholder": {
+          "label": "Search box text",
+          "term": "placeholder",
+          "hint": "Left empty: “Search products, categories or brands”."
+        },
+        "search_label": {
+          "label": "Written search button",
+          "term": "button",
+          "hint": "On: a filled “Search” button instead of the magnifier."
+        },
+        "account_text": {
+          "label": "“My account” in the top strip",
+          "term": "link",
+          "hint": "The account icon always stays on the menu bar."
+        },
+        "cart_total": {
+          "label": "Show the cart's total",
+          "term": "subtotal",
+          "hint": "With items in the cart, the subtotal shows beside its icon."
+        },
+        "highlight_link": {
+          "label": "Highlighted link",
+          "term": "link",
+          "hint": "One standout link at the end of the main menu on the menu bar (e.g. Offers)."
+        },
+        "utility_bar": {
+          "label": "Top utility strip",
+          "term": "top bar",
+          "hint": "A thin light strip: the “Top menu” links from Menus and My account. Hidden on phones."
+        },
+        "phone": {
+          "label": "Phone number",
+          "term": "phone",
+          "hint": "The phone from your store details, right of the search under “Customer service”. Not shown without a phone."
+        },
+        "categories_button": {
+          "label": "“Categories” button",
+          "term": "dropdown",
+          "hint": "At the start of the menu bar; top categories and their subcategories as a dropdown."
+        },
+        "menu_ground": {
+          "label": "Menu bar background",
+          "term": "background",
+          "hint": "Text and icon colours are picked to read on it.",
+          "stage": "Dark",
+          "primary": "Brand colour",
+          "well": "Light tint"
+        },
+        "phoneNote": "On phones the header stays as it is: menu, logo, favourites and cart, with the search below.",
+        "otherHint": "The search button, the My account text and the cart total."
+      },
+      "categoryCards": {
+        "columns": {
+          "label": "Cards in a row",
+          "term": "columns",
+          "hint": "How many cards side by side on a wide screen; the theme shows fewer on narrow screens."
+        },
+        "image_position": {
+          "label": "Picture position",
+          "term": "image position",
+          "hint": "The category's picture; a category without one shows its initial.",
+          "side": "Beside",
+          "top": "Above",
+          "none": "None"
+        },
+        "frame": {
+          "label": "Card frame",
+          "term": "border",
+          "lined": "Outlined",
+          "plain": "Plain ground"
+        },
+        "links": {
+          "label": "Subcategories shown",
+          "term": "links",
+          "hint": "At most this many subcategories under each name; 0 shows only the name and picture. A \"See all\" link appears when there are more."
+        },
+        "columns_mobile": {
+          "1": "1 card",
+          "2": "2 cards",
+          "label": "Columns on a phone",
+          "term": "columns mobile",
+          "hint": "How many cards side by side on a phone; in two columns the cards narrow."
+        }
+      },
+      "footerBar": {
+        "social": {
+          "label": "Social accounts",
+          "term": "social links",
+          "hint": "The addresses come from your social accounts in Store settings.",
+          "text": "As text",
+          "icons": "As icons",
+          "hidden": "Hidden"
+        },
+        "payment_badges": {
+          "label": "Payment badges",
+          "term": "payment badges",
+          "hint": "The ones you pick show as written badges in this order. With none picked, your payment providers' marks show.",
+          "visa": "Visa",
+          "mastercard": "Mastercard",
+          "troy": "Troy",
+          "amex": "American Express",
+          "bank_transfer": "Bank transfer",
+          "cash_on_delivery": "Cash on delivery",
+          "installments": "Instalments",
+          "up": "Move {{name}} up",
+          "down": "Move {{name}} down"
+        },
+        "back_to_top": {
+          "label": "Back to top button",
+          "term": "back to top",
+          "hint": "Shows in a corner after a screen of scrolling; takes the visitor back to the top."
+        },
+        "back_to_top_side": {
+          "label": "Button position",
+          "term": "position",
+          "right": "Right",
+          "left": "Left"
+        },
+        "back_to_top_shape": {
+          "label": "Button shape",
+          "term": "shape",
+          "round": "Round",
+          "square": "Square"
+        },
+        "back_to_top_mobile": {
+          "label": "Show on phones too",
+          "term": "mobile",
+          "hint": "When off, the button shows only on wide screens."
+        }
       },
       "main": {
         "fixed": "This section is a fixed part of the page; it cannot be hidden, moved, copied or removed."
@@ -8459,8 +8834,10 @@
         },
         "listEmpty": "Choose at least one category.",
         "listLimit": "Categories at most",
+        "listLimitTerm": "limit",
         "listLimitHint": "Between {{min}} and {{max}}.",
         "showCount": "Show product counts",
+        "showCountTerm": "product count",
         "showCountHint": "Each category's live product count beside it.",
         "tiles": "Tiles beside it",
         "tilesHint": "Up to {{max}} category tiles beside the opening.",
@@ -8478,11 +8855,15 @@
         "pickLabelHint": "Left empty, the product's name shows.",
         "pickLabelPlaceholder": "Pine green",
         "showPrice": "Show the starting price",
+        "showPriceTerm": "price",
         "showPriceHint": "The lowest current price among the products you chose."
       },
       "categories": {
+        "showCount": "Show product counts",
+        "showCountTerm": "product count",
         "showCountHint": "Each tile's live product count under it.",
         "more": "Link beside the title",
+        "moreTerm": "link",
         "moreHint": "Left empty, it goes to All categories."
       },
       "priceBands": {
@@ -8490,18 +8871,118 @@
         "bandsHint": "2 to 4 bands; upper bounds rise. Each band filters the shop by its price range.",
         "band": "Band {{number}}",
         "label": "Band name",
-        "labelUnder": "Under {{amount}} TL",
-        "labelOpen": "{{amount}} TL and up",
+        "labelUnder": "Up to {{amount}} TL",
+        "labelOpen": "Over {{amount}} TL",
         "text": "Short line",
-        "textPlaceholder": "Keyring knives, mini models",
+        "textPlaceholder": "Everyday use, gifts",
         "max": "Upper bound (TL)",
-        "maxHint": "The band covers products from the band before's bound up to this amount.",
+        "maxHint": "The band covers products above the band before's bound, up to and including this amount.",
         "open": "No upper bound",
         "openHint": "The last band covers every product above the bound before.",
         "addBand": "Add band",
         "thumbs": "Product pictures",
+        "thumbsTerm": "thumbnails",
         "thumbsHint": "A few products from each range show small; the storefront picks them by price.",
-        "thumbsCount": "Products per band"
+        "thumbsCount": "Products per band",
+        "thumbsCountTerm": "per band",
+        "full": "The home page already has {{max}} price bands sections (hidden ones count too)."
+      },
+      "shelf": {
+        "firstTitle": "First list's title",
+        "list": "List {{n}}",
+        "addList": "Add a list",
+        "removeList": "Remove",
+        "rows": "Rows",
+        "rowsTerm": "rows",
+        "rowsOption": "{{n}} rows",
+        "rowsHint": "Three columns on a wide screen; one under another on a phone.",
+        "perList": "Products per list",
+        "perListTerm": "per list",
+        "perListOption": "{{n}} products",
+        "perListHint": "How many products each list shows; side by side on a wide screen, one under another on a phone.",
+        "featuredHint": "The first product large on the left, small cards beside it ({{n}} products in all); the large card on top on a phone.",
+        "cardCompact": "Cards in this layout are always compact: a small photo, name, stars and price.",
+        "tabs": "Join the rail beside it in tabs",
+        "tabsTerm": "tabs",
+        "tabsJoined": "Joins this rail in one tabbed shelf: {{names}}. Turn it off to draw this rail on its own.",
+        "tabsAlone": "A product rail put right before or after it joins it in one tabbed shelf.",
+        "tabsApart": "This rail never joins the rails beside it; it is drawn on its own under its own heading."
+      },
+      "scroller": {
+        "desktop": {
+          "label": "Cards in view (desktop)",
+          "term": "per view",
+          "three": "3",
+          "four": "4",
+          "five": "5",
+          "six": "6",
+          "hint": "Narrower screens show fewer by themselves."
+        },
+        "mobile": {
+          "label": "Cards in view (phone)",
+          "term": "per view",
+          "one": "1",
+          "peek": "1.5",
+          "two": "2",
+          "hint": "1.5: the next card's edge shows, so it reads as scrollable."
+        },
+        "arrows": {
+          "label": "Arrows",
+          "term": "arrows",
+          "always": "Always",
+          "hover": "On hover",
+          "hidden": "Hidden",
+          "hint": "Hidden, it still scrolls by touch, mouse and keyboard."
+        },
+        "arrow_style": {
+          "label": "Arrow style",
+          "term": "arrow style",
+          "round": "Round",
+          "square": "Square",
+          "plain": "Plain"
+        },
+        "arrow_position": {
+          "label": "Arrow position",
+          "term": "position",
+          "head": "Beside the heading",
+          "sides": "On the sides",
+          "hint": "Side arrows are not shown on a phone; it swipes there."
+        },
+        "dots": {
+          "label": "Show dots",
+          "term": "dots",
+          "off": "Off",
+          "on": "On",
+          "hint": "Dots showing which page is in view."
+        },
+        "autoplay": {
+          "label": "Autoplay",
+          "term": "autoplay",
+          "off": "Off",
+          "on": "On",
+          "hint": "Stops on hover and keyboard focus, with a visible pause button; never runs for a visitor asking for reduced motion."
+        },
+        "speed": {
+          "label": "Interval",
+          "term": "interval",
+          "slow": "Slow",
+          "medium": "Medium",
+          "fast": "Fast"
+        },
+        "loop": {
+          "label": "Loop",
+          "term": "loop",
+          "off": "Off",
+          "on": "On",
+          "hint": "Back to the start at the end."
+        },
+        "drag": {
+          "label": "Drag to scroll",
+          "term": "drag",
+          "off": "Off",
+          "on": "On",
+          "hint": "Scrolls by dragging with a mouse on a wide screen."
+        }
       }
     },
     "preferences": {

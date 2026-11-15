@@ -113,4 +113,26 @@ describe("the main sections in the theme editor (adr/0049 Ek 2026-11-14 §5, §7
     expect(screen.queryByText("Biçim")).toBeNull()
     expect(screen.queryByRole("button", { name: "Çoğalt" })).toBeNull()
   })
+  it("edits the footer's own settings and saves them with it (adr/0049 Ek 2026-11-15)", async () => {
+    renderEditor()
+    const tree = await opened()
+    await frame()
+
+    await user.click(within(tree).getByRole("button", { name: "Alt bilgi" }))
+    await user.click(await screen.findByRole("radio", { name: "Simgeyle" }))
+    await user.click(screen.getByRole("checkbox", { name: "Havale / EFT" }))
+    await user.click(screen.getByRole("switch", { name: /Yukarı çık düğmesi/ }))
+    expect(screen.getByRole("radio", { name: "Sağda" })).toBeChecked()
+    await pass(AUTOSAVE_MS)
+    await waitFor(() => {
+      expect(
+        lastSaved(fetchMock)?.footer.find((section) => section.type === "footer_bar")
+      ).toMatchObject({
+        social: "icons",
+        payment_badges: ["bank_transfer"],
+        back_to_top: true,
+        back_to_top_side: "right",
+      })
+    })
+  })
 })

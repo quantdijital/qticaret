@@ -28,7 +28,19 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       ...ALWAYS,
     })
     expect(doc.footer).toEqual([
-      { id: MAIN_SECTION_IDS.footer_bar, type: "footer_bar", variant: "ledger", ...ALWAYS },
+      {
+        id: MAIN_SECTION_IDS.footer_bar,
+        type: "footer_bar",
+        variant: "ledger",
+        ...ALWAYS,
+        // The footer's own settings read in with their defaults (adr/0049 Ek 2026-11-15)
+        social: "text",
+        payment_badges: [],
+        back_to_top: false,
+        back_to_top_side: "right",
+        back_to_top_shape: "round",
+        back_to_top_mobile: true,
+      },
     ])
     expect(doc.product.map((section) => section.type)).toEqual(["product_main", "help"])
     expect(doc.category).toEqual([
@@ -87,7 +99,7 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       })
     ).toContain("storefront_layout.section_duplicate")
     expect(
-      issues({ header: [{ id: "mainheader", type: "header_bar", variant: "catalog" }] })
+      issues({ header: [{ id: "mainheader", type: "header_bar", variant: "shrinking" }] })
     ).toContain("storefront_layout.section_invalid")
     expect(
       issues({ category: [{ id: "maincategory", type: "category_main", by_variant: { x: {} } }] })
@@ -116,7 +128,7 @@ describe("the main sections (adr/0049 Ek 2026-11-14 §5, §7)", () => {
 
   it("reads a variant taken off the list (or a newer build's) as the default, and a dropped by_variant key", () => {
     const doc = readStoredLayout({
-      header: [{ id: "mainheader", type: "header_bar", variant: "catalog", sticky: false }],
+      header: [{ id: "mainheader", type: "header_bar", variant: "shrinking", sticky: false }],
       category: [
         { id: "maincategory", type: "category_main", by_variant: { showcase: { tabs: true } } },
       ],

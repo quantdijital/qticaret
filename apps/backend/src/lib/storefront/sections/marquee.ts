@@ -1,6 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { TRUST_ICONS } from "../../../modules/platform-settings/sections/storefront"
-import { base, optional, placement, shopText } from "../layout-fields"
+import { base, device, optional, placement, shopText } from "../layout-fields"
 import { storefrontLink } from "../menus"
 import { bodyFields } from "./look"
 
@@ -20,24 +20,46 @@ import { bodyFields } from "./look"
  * them equal.
  */
 export const MARQUEE_SETTINGS = {
-  speed: ["slow", "medium", "fast"],
+  speed: ["slowest", "slow", "medium", "fast", "fastest"],
   direction: ["left", "right"],
-  ground: ["stage", "primary", "light"],
+  hover_pause: ["on", "off"],
+  pause_button: ["always", "hover"],
   size: ["small", "medium", "large"],
+  ground: ["stage", "primary", "well"],
   separator: ["none", "dot", "star", "line"],
+  weight: ["bold", "normal"],
+  uppercase: ["off", "on"],
+  gap: ["tight", "normal", "wide"],
+  outline: ["off", "on"],
+  closable: ["off", "on"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
-type Setting = keyof typeof MARQUEE_SETTINGS
+export type MarqueeSettingName = keyof typeof MARQUEE_SETTINGS
+type Setting = MarqueeSettingName
 type Step<S extends Setting> = (typeof MARQUEE_SETTINGS)[S][number]
 
-/** A new strip's steps, filled where a section has none. */
+/**
+ * A new strip's steps, filled where a section has none: a strip saved
+ * before a setting existed reads as it was drawn then (adr/0049 Ek
+ * 2026-11-15), so no migration.
+ */
 export const MARQUEE_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   speed: "medium",
   direction: "left",
-  ground: "stage",
+  hover_pause: "on",
+  pause_button: "always",
   size: "medium",
+  ground: "stage",
   separator: "dot",
+  weight: "bold",
+  uppercase: "off",
+  gap: "normal",
+  outline: "off",
+  closable: "off",
 }
+
+/** The settings' names, in the contract's order. */
+export const MARQUEE_SETTING_NAMES = Object.keys(MARQUEE_SETTINGS) as Setting[]
 
 export const MARQUEE_LIMITS = { items: { min: 1, max: 8 }, text: 60, subtext: 80 } as const
 
@@ -54,8 +76,22 @@ const SETTING_ERROR = { error: "storefront_layout.section_invalid" }
 const setting = <S extends Setting>(name: S) => {
   const steps: readonly unknown[] = MARQUEE_SETTINGS[name]
   return z
-    .custom<Step<S>>((value) => steps.includes(value), SETTING_ERROR)
+    .custom<Step<S>>((value) => steps.includes(value) || isOldName(name, value), SETTING_ERROR)
     .default(MARQUEE_DEFAULTS[name])
+    .transform((value) => (isOldName(name, value) ? "well" : value))
+}
+
+/**
+ * The light tint's name before the dictionary had one (bilesen-denetimi
+ * (b) 5): a strip saved with it reads, and is written again, as `well`.
+ */
+const isOldName = (name: Setting, value: unknown) => name === "ground" && value === "light"
+
+/** Every setting's field, each with its default. */
+function settingFields() {
+  return Object.fromEntries(MARQUEE_SETTING_NAMES.map((name) => [name, setting(name)])) as {
+    [S in Setting]: ReturnType<typeof setting<S>>
+  }
 }
 
 const item = z
@@ -76,11 +112,7 @@ const item = z
 const fields = {
   type: z.literal("marquee"),
   items: z.array(item).min(MARQUEE_LIMITS.items.min).max(MARQUEE_LIMITS.items.max),
-  speed: setting("speed"),
-  direction: setting("direction"),
-  ground: setting("ground"),
-  size: setting("size"),
-  separator: setting("separator"),
+  ...settingFields(),
 }
 
 /** On a page's body: the home and product pages', with its look (§6). */
@@ -90,7 +122,7 @@ export const marquee = z.object({ ...bodyFields, ...fields }).strict()
 export const placedMarquee = marquee.extend({ placement })
 
 /** In the header group, above the shop's header: no look (the header's frame is §9 V3's). */
-export const headerMarquee = z.object({ ...base, ...fields }).strict()
+export const headerMarquee = z.object({ ...base, device, ...fields }).strict()
 
 export type MarqueeSection = z.infer<typeof marquee>
 export type HeaderMarquee = z.infer<typeof headerMarquee>

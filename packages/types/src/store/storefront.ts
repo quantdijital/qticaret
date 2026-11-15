@@ -4,6 +4,7 @@
  * backend's build does not compile workspace TypeScript (adr/0046 §8).
  */
 import type { MediaDerivatives, StoreImage } from "./catalog.js"
+import type { CardVariant } from "./section-variants.js"
 
 export type TrustIcon =
   "truck" | "clock" | "shield" | "card" | "refresh" | "award" | "gift" | "phone"
@@ -98,10 +99,85 @@ export interface StoreThemeSettings {
   }
   typography: { heading: ThemeHeadingFont; body: ThemeBodyFont }
   radius: "sharp" | "soft" | "round"
-  product_card: { ratio: "4:5" | "1:1" | "3:4"; show_brand: boolean; show_rating: boolean }
+  product_card: {
+    ratio: "4:5" | "1:1" | "3:4"
+    show_brand: boolean
+    show_rating: boolean
+    /** How cards are drawn; a product rail may draw its own (`card_variant`). */
+    variant: CardVariant
+    /** A framed card's second photo on hover, swiped on a touch screen (E5). */
+    hover_image: boolean
+    /** A framed card's "free shipping" line, from its price and the shop's threshold (E5). */
+    delivery_note: boolean
+    /** A framed card's add button across its foot instead of the round "+" (E5). */
+    full_button: boolean
+    /** The discount pill on the photo ("%30"), on every variant (adr/0049 Ek 2026-11-15). */
+    sale_badge: boolean
+    /** The "Az kaldı" pill on a low stock bucket; the compact card draws none. */
+    low_stock_badge: boolean
+    /** The "Tükendi" pill on a sold-out card's photo. */
+    sold_out_badge: boolean
+    /** A sold-out card's price row (`CARD_SOLD_OUT_ROWS`). */
+    sold_out_row: CardSoldOutRow
+    /** Where the stars stand on a product without reviews, while they are shown (`CARD_NO_REVIEWS`). */
+    no_reviews: CardNoReviews
+    /** The framed card's add button across its foot (`CARD_BUTTON_STYLES`). */
+    button_style: CardButtonStyle
+  }
   header: { layout: "centered" | "left"; sticky: boolean }
   buttons: "pill" | "rounded" | "square"
+  /** The gap between sections, theme-wide; `normal` is the theme's own (`SECTION_SPACINGS`). */
+  section_spacing: SectionSpacing
+  /** How the theme's boxes stand on the page (`SURFACE_STYLES`); `filled` is today's tone. */
+  surface_style: SurfaceStyle
 }
+
+/**
+ * How the theme draws its boxes (product page summary, rating summary,
+ * info blocks, category filters and tiles, the cart drawer's boxes;
+ * Tezgâh audit Z-04): `filled` a tone darker than the page (the default,
+ * today's look), `lined` the page's ground inside a 1 px rule. One
+ * theme-wide choice, as Shopify themes' card style; the backend mirrors
+ * the list.
+ */
+export const SURFACE_STYLES = ["filled", "lined"] as const
+export type SurfaceStyle = (typeof SURFACE_STYLES)[number]
+
+/**
+ * The gap between sections, theme-wide (Tezgâh audit K-11, as Shopify
+ * themes' section spacing): `compact` a dense catalog's, `normal` the
+ * theme's own (the default, today's gaps), `roomy` a showcase's. The
+ * theme maps each onto its own scale; the backend mirrors the list.
+ */
+export const SECTION_SPACINGS = ["compact", "normal", "roomy"] as const
+export type SectionSpacing = (typeof SECTION_SPACINGS)[number]
+
+/**
+ * A sold-out card's price row (adr/0049 Ek 2026-11-15, the owner's
+ * decision b): `price` the price stays and nothing adds it to the cart
+ * (today's card, the default), `text` "Tükendi" in its place, `notify`
+ * "Gelince haber ver" to the product page's stock alert form.
+ */
+export const CARD_SOLD_OUT_ROWS = ["price", "text", "notify"] as const
+export type CardSoldOutRow = (typeof CARD_SOLD_OUT_ROWS)[number]
+
+/**
+ * A card's stars on a product without reviews, while the shop shows the
+ * stars (decision c): `hide` nothing (today's, the default), `empty_stars`
+ * empty stars and "Henüz yorum yok", `write_first` "İlk yorumu sen yaz" to
+ * the product page's reviews. Replaces the framed card's `empty_stars` switch.
+ */
+export const CARD_NO_REVIEWS = ["hide", "empty_stars", "write_first"] as const
+export type CardNoReviews = (typeof CARD_NO_REVIEWS)[number]
+
+/**
+ * The framed card's add button across its foot (decision d), the
+ * standard's names (`button_style`): `solid` filled in the action's colour,
+ * `outline` the quiet bordered button filled on hover (today's, the
+ * default), `text` an underlined word.
+ */
+export const CARD_BUTTON_STYLES = ["solid", "outline", "text"] as const
+export type CardButtonStyle = (typeof CARD_BUTTON_STYLES)[number]
 
 /** `GET /store/storefront`: the frame and the free shipping threshold (F4.5). */
 export interface StorefrontAnswer {

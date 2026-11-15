@@ -1,5 +1,6 @@
 import "server-only"
 import type {
+  CardVariant,
   RelatedSource,
   StoreLayoutSection,
   StoreProduct,
@@ -135,12 +136,19 @@ export async function relatedProducts(
   }
 }
 
-/** Cards for a rail: each product's path, live price, stock bucket and quick add. */
-export async function railCards(products: readonly StoreProduct[]): Promise<ProductCardView[]> {
+/**
+ * Cards for a rail: each product's path, live price, stock bucket and
+ * quick add; drawn as the rail's own card variant when it has one (a
+ * product rail's `card_variant`), else as the theme setting says.
+ */
+export async function railCards(
+  products: readonly StoreProduct[],
+  variant: CardVariant | null = null
+): Promise<ProductCardView[]> {
   if (products.length === 0) {
     return []
   }
-  const [paths, displays, options, facts] = await Promise.all([
+  const [paths, displays, shopOptions, facts] = await Promise.all([
     pathsOf(
       "product",
       products.map((product) => product.id)
@@ -149,6 +157,7 @@ export async function railCards(products: readonly StoreProduct[]): Promise<Prod
     cardOptions(),
     cardFacts(products.map((product) => product.id)),
   ])
+  const options = variant ? { ...shopOptions, variant } : shopOptions
   return withCardFacts(productCards(products, paths, displays, options), facts, options, words)
 }
 

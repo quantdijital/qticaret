@@ -66,12 +66,12 @@ const reviews: HomeSectionView = {
 }
 
 describe("the theme's home sections", () => {
-  it("sets the shop's average large with its spread, then three quotes, first sentence each", () => {
+  it("sets the shop's average large with its spread, then three quotes, each whole", () => {
     const html = home([reviews])
     expect(html).toContain(">4,8</span>")
     expect(html).toContain("28 değerlendirme")
     expect(html).toContain("5 yıldız: 26 değerlendirme")
-    expect(html).toContain("“Çok güzel bir çakı.”")
+    expect(html).toContain("“Çok güzel bir çakı. Kutusu da özenliydi ve hızlı geldi.”")
     expect(html).not.toContain("Dördüncü yorum.")
     expect(html).toContain('aria-label="Doğrulanmış alışveriş"')
   })
@@ -178,8 +178,16 @@ describe("the theme's home sections", () => {
             heading: "Kış seçkisi",
             text: null,
             link: { label: "İncele", path: "/kis" },
+            mobileImage: null,
+            secondLink: null,
+            tone: "light",
           },
         ],
+        width: "boxed",
+        height: "medium",
+        text_position: "bottom_left",
+        overlay: "medium",
+        button_style: "solid",
       },
       { id: "hikaye", type: "rich_text", title: "Neden biz?", html: "<p>Atölyemizden.</p>" },
     ])

@@ -1,8 +1,16 @@
 import type { LayoutDocument } from "./layout"
+import type { MenuLinkInput } from "./menus"
+import { footerBarDefaults, footerSettingsOf } from "./sections/footer-bar"
 import { hasLook } from "./sections/look"
 import type { SectionLook } from "./sections/look"
 import { MAIN_SECTION_IDS } from "./sections/main"
-import type { CategoryMain, FooterBar, HeaderBar, ProductMain } from "./sections/main"
+import type {
+  CategoryMain,
+  FooterBar,
+  HeaderBar,
+  HeaderCatalog,
+  ProductMain,
+} from "./sections/main"
 
 /**
  * The main sections read into a design stored without them (adr/0049 Ek
@@ -42,6 +50,7 @@ const FOOTER_BAR: FooterBar = {
   starts_at: null,
   ends_at: null,
   variant: "ledger",
+  ...footerBarDefaults(),
 }
 
 const PRODUCT_MAIN: ProductMain = {
@@ -71,7 +80,9 @@ export function withMainSections(doc: LayoutDocument, theme: ThemeHeader): Layou
   return {
     ...doc,
     header: has(doc.header, "header_bar") ? doc.header : [...doc.header, defaultHeaderBar(theme)],
-    footer: has(doc.footer, "footer_bar") ? doc.footer : [{ ...FOOTER_BAR }, ...doc.footer],
+    footer: has(doc.footer, "footer_bar")
+      ? doc.footer
+      : [{ ...FOOTER_BAR, payment_badges: [] }, ...doc.footer],
     product: has(doc.product, "product_main") ? doc.product : [{ ...PRODUCT_MAIN }, ...doc.product],
     category: has(doc.category, "category_main")
       ? doc.category
@@ -94,10 +105,15 @@ const lookOf = (section: { look?: SectionLook | undefined }) =>
  * The main sections as the storefront draws them (`GET /store/storefront-
  * layout`'s `main`): each with its id (the section's box) and variant; the
  * product's block and the category grid with their look only when the shop
- * set a step, as a body section prints it. Read off a document
- * `withMainSections` filled; one somehow missing is its default.
+ * set a step, as a body section prints it; the catalog header with its
+ * own settings, its highlighted link placed by `resolve` (a broken one
+ * null); the footer with the settings the shop changed. Read off a
+ * document `withMainSections` filled; one somehow missing is its default.
  */
-export function mainSectionsOf(doc: LayoutDocument) {
+export function mainSectionsOf<L>(
+  doc: LayoutDocument,
+  resolve: (link: MenuLinkInput) => L | null = () => null
+) {
   const header = mainOf(doc.header, "header_bar") ?? defaultHeaderBar(DEFAULT_THEME_HEADER)
   const footer = mainOf(doc.footer, "footer_bar") ?? FOOTER_BAR
   const product = mainOf(doc.product, "product_main") ?? PRODUCT_MAIN
@@ -108,8 +124,15 @@ export function mainSectionsOf(doc: LayoutDocument) {
       type: header.type,
       variant: header.variant,
       sticky: header.sticky,
+      ...(header.variant === "catalog" ? { catalog: catalogOf(header, resolve) } : {}),
     },
-    footer_bar: { id: footer.id, type: footer.type, variant: footer.variant },
+    // Its own settings only when the shop changed them, so a footer left alone prints as before
+    footer_bar: {
+      id: footer.id,
+      type: footer.type,
+      variant: footer.variant,
+      ...footerSettingsOf(footer),
+    },
     product_main: {
       id: product.id,
       type: product.type,
@@ -123,5 +146,20 @@ export function mainSectionsOf(doc: LayoutDocument) {
       by_variant: category.by_variant,
       ...lookOf(category),
     },
+  }
+}
+
+/** The catalog header's own settings as the storefront draws them. */
+function catalogOf<L>(header: HeaderCatalog, resolve: (link: MenuLinkInput) => L | null) {
+  return {
+    search_placeholder: header.search_placeholder,
+    search_label: header.search_label,
+    account_text: header.account_text,
+    cart_total: header.cart_total,
+    highlight_link: header.highlight_link ? resolve(header.highlight_link) : null,
+    utility_bar: header.utility_bar,
+    phone: header.phone,
+    categories_button: header.categories_button,
+    menu_ground: header.menu_ground,
   }
 }

@@ -1,4 +1,5 @@
 import type { NavCategoryView, Translate } from "@qticaret/ui"
+import { allInOf } from "./header-words"
 
 /** A menu row's product count: "58" in its pill, "58 ürün" for a screen reader. */
 export interface CountWords {
@@ -31,9 +32,7 @@ export function menuWords(categories: readonly NavCategoryView[], t: Translate):
   }
   return {
     seeAll: t("categories.see_all"),
-    allIn: Object.fromEntries(
-      categories.map((category) => [category.path, t("nav.see_all", { name: category.label })])
-    ),
+    allIn: allInOf(categories, t),
     counts,
   }
 }

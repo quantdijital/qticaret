@@ -6,7 +6,8 @@
   min-height: 2.75rem;
   align-items: center;
   padding: var(--space-xs) var(--space-lg);
-  border-radius: var(--radius-pill);
+  /* The buttons' shape: pills by default, square beside square buttons (K-22) */
+  border-radius: var(--button-radius, var(--radius-pill));
   background: var(--color-paper-2);
   color: var(--color-text);
   font-size: var(--text-md);
@@ -59,6 +60,27 @@
   }
   .gf-tab-row {
     display: none;
+  }
+}
+/* From 1024 px the shown panel's whole-list link and its arrows (a carousel's
+   head row, else the panel's own aside) stand on the tab row's line, at its
+   right end, and the cards follow right under the tabs (Tezgâh audit K-04).
+   The tab row leaves them room; on a phone they keep their own row under it */
+@media (width >= 64rem) {
+  @supports selector(:has(*)) {
+    .gf-tabs {
+      position: relative;
+    }
+    .gf-tabs > [data-panel] :is(.gf-scroller-head, section > .gf-tab-aside) {
+      position: absolute;
+      top: 0.25rem;
+      right: 0;
+      max-width: 40%;
+      align-items: center;
+    }
+    .gf-tabs > .gf-tab-row {
+      padding-inline-end: min(22rem, 40%);
+    }
   }
 }
 

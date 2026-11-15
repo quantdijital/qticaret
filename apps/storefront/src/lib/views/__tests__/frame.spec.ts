@@ -17,12 +17,17 @@ describe("contact details", () => {
         "https://tr.pinterest.com/ornek",
         "https://www.ornek-blog.com/",
         "not a url",
+        "https://wa.me/905321234567",
+        // Never anything but https, as the store details take them (a stale or tampered answer)
+        "http://facebook.com/ornek",
+        "javascript:alert(1)",
       ])
     ).toEqual([
-      { label: "Instagram", href: "https://www.instagram.com/ornek" },
-      { label: "YouTube", href: "https://youtu.be/abc" },
-      { label: "Pinterest", href: "https://tr.pinterest.com/ornek" },
-      { label: "ornek-blog.com", href: "https://www.ornek-blog.com/" },
+      { label: "Instagram", href: "https://www.instagram.com/ornek", network: "instagram" },
+      { label: "YouTube", href: "https://youtu.be/abc", network: "youtube" },
+      { label: "Pinterest", href: "https://tr.pinterest.com/ornek", network: "pinterest" },
+      { label: "ornek-blog.com", href: "https://www.ornek-blog.com/", network: null },
+      { label: "WhatsApp", href: "https://wa.me/905321234567", network: "whatsapp" },
     ])
   })
 })

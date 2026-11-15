@@ -3,9 +3,11 @@
 import { CircleAlert, LoaderCircle, Plus } from "lucide-react"
 import { useActionState, useEffect, useId, useRef } from "react"
 import type { ActionResult, FormAction } from "@qticaret/ui"
+import type { CardButtonStyle } from "@qticaret/types"
 import { emitShopEvent } from "@qticaret/ui/lib/shop-events"
 import { cn } from "@qticaret/ui/lib/utils"
-import { announceCartAdded } from "../frame/events"
+import { announceCartAdded, submitterOf } from "../frame/events"
+import { cardButtonClass } from "./card-button"
 
 export interface QuickAddWords {
   /** The visible word ("Sepete ekle"); a round button keeps it for the reader only. */
@@ -26,7 +28,9 @@ const INITIAL: ActionResult = { ok: false, error: null }
  * A card's quick add: a plain form posting the one variant, quantity 1,
  * to the storefront's add-to-cart action, so it works before the script.
  * On a card a 44 px round button on the photo's corner; `wide`, the
- * filled button the close-up's width. Busy while sent; once in, the cart
+ * filled button the close-up's width; `fill`, a framed card's button
+ * across its foot in the shop's look, like its "Seçenekler" (UK5: quiet,
+ * `outline`, unless the shop asks otherwise). Busy while sent; once in, the cart
  * sheet opens and says so; refused, the reason in words with the
  * product's page as the way on.
  */
@@ -36,20 +40,25 @@ export function QuickAdd({
   action,
   words,
   wide = false,
+  fill = null,
 }: {
   variantId: string
   path: string
   action: FormAction
   words: QuickAddWords
   wide?: boolean
+  /** Across a framed card's foot, in this look; none: the round "+" or `wide`. */
+  fill?: CardButtonStyle | null
 }) {
+  const shown = wide || fill !== null
   const [state, submit, pending] = useActionState(action, INITIAL)
   const sent = useRef(false)
+  const origin = useRef<HTMLElement | null>(null)
   const errorId = useId()
   useEffect(() => {
     if (state.ok && sent.current) {
       sent.current = false
-      announceCartAdded(words.added)
+      announceCartAdded(words.added, origin.current)
       emitShopEvent({ type: "add_to_cart", variantId, quantity: 1 })
     }
   }, [state, variantId, words.added])
@@ -61,19 +70,26 @@ export function QuickAdd({
   return (
     <form
       action={submit}
-      onSubmit={() => {
+      onSubmit={(event) => {
         sent.current = true
+        origin.current = submitterOf(event)
       }}
-      className={cn("relative z-(--z-raised)", wide ? "flex flex-col gap-2" : "contents")}
+      // A framed card's button keeps to the card's foot: no gap under it until there is an error
+      className={cn(
+        "relative z-(--z-raised)",
+        fill !== null ? "flex flex-col" : wide ? "flex flex-col gap-2" : "contents"
+      )}
     >
       <input type="hidden" name="variant_id" value={variantId} />
       <input type="hidden" name="quantity" value="1" />
       <button
         type="submit"
         className={
-          wide
-            ? "gf-btn w-full sm:w-auto"
-            : "gf-icon-btn absolute right-2 bottom-2 z-(--z-raised) size-11 bg-field text-text shadow-float hover:bg-paper-2"
+          fill !== null
+            ? `${cardButtonClass(fill)} w-full`
+            : wide
+              ? "gf-btn w-full sm:w-auto"
+              : "gf-icon-btn absolute right-2 bottom-2 z-(--z-raised) size-11 bg-field text-text shadow-float hover:bg-paper-2"
         }
         aria-label={words.label}
         aria-busy={pending}
@@ -81,20 +97,28 @@ export function QuickAdd({
         aria-describedby={error ? errorId : undefined}
         disabled={pending}
       >
-        <Icon
-          className={cn("size-5 shrink-0", pending && "motion-safe:animate-spin")}
-          aria-hidden="true"
-          strokeWidth={1.75}
-        />
-        {wide && words.add}
+        {/* A framed card's foot reads as its "Seçenekler" twin: words only, the spinner while busy (Z-02) */}
+        {(fill === null || pending) && (
+          <Icon
+            className={cn("size-5 shrink-0", pending && "motion-safe:animate-spin")}
+            aria-hidden="true"
+            strokeWidth={1.75}
+          />
+        )}
+        {shown && words.add}
       </button>
       <span
         id={errorId}
         role="alert"
-        className={wide ? "" : "absolute inset-x-2 bottom-14 z-(--z-raised)"}
+        className={shown ? "" : "absolute inset-x-2 bottom-14 z-(--z-raised)"}
       >
         {error && (
-          <span className="flex items-start gap-2 rounded-inner bg-field p-2 text-sm text-error shadow-float">
+          <span
+            className={cn(
+              "flex items-start gap-2 rounded-inner bg-field p-2 text-sm text-error shadow-float",
+              fill !== null && "mt-2"
+            )}
+          >
             <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2} />
             <span>
               {error}{" "}

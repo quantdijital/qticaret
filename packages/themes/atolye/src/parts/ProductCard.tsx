@@ -1,33 +1,15 @@
-import type { ShelfColumns } from "@qticaret/types"
+import type { ShelfColumns, ShelfPhoneColumns } from "@qticaret/types"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { FormAction, ProductCardView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
-import { Price } from "./Price"
-import { QuickAdd, type QuickAddWords } from "./QuickAdd"
+import { CardBadges, drawnCardVariant, isOut, quickAddWords } from "./card-parts"
+import { CardPriceRow, CardStars } from "./card-rows"
+import { CompactCard } from "./CompactCard"
+import { FramedCard } from "./FramedCard"
+import { QuickAdd } from "./QuickAdd"
 import { shelfCard, shelfGrid, shelfSizes } from "./shelf-grid"
-import { Stars } from "./Stars"
 
-/** The add-to-cart action's message keys a quick add can come back with. */
-const QUICK_ADD_ERRORS = [
-  "cart.add_failed",
-  "cart.quantity_invalid",
-  "cart.payment_link_locked",
-  "errors.too_many_requests",
-] as const
-
-/** A quick add's words for a product. */
-export const quickAddWords = (t: Translate, title: string): QuickAddWords => ({
-  add: t("product.quick_add"),
-  label: t("product.quick_add_label", { title }),
-  added: t("product.quick_added"),
-  errors: {
-    ...Object.fromEntries(QUICK_ADD_ERRORS.map((key) => [key, t(key)])),
-    "cart.variant_unavailable": t("product.quick_add_unavailable"),
-  },
-  openPage: t("product.quick_add_open"),
-})
-
-const isOut = (product: ProductCardView) => !product.available || product.stock === "out"
+export { quickAddWords } from "./card-parts"
 
 /**
  * How wide a card's photo shows, for its `sizes` (the container stops at
@@ -51,7 +33,9 @@ const SIZES = {
  * the quick add is a round "+" on the photo's corner, above the link.
  * The name and price take their larger size from 1024 px only on a card
  * 256 px wide or more (a container query): five across at 1440 px, or a
- * listing's four at 1024, keep the smaller one.
+ * listing's four at 1024, keep the smaller one. A card the storefront
+ * sends as `framed` is drawn by `FramedCard` (adr/0049 Ek 2026-11-14 §3.3),
+ * one sent as `compact` by `CompactCard` (Ek 2026-11-15).
  */
 export function ProductCard({
   product,
@@ -68,8 +52,16 @@ export function ProductCard({
   /** How wide the card shows at each width (the grid's own, else a shelf's). */
   sizes?: string
 }) {
+  const variant = drawnCardVariant(product)
+  if (variant === "framed") {
+    return (
+      <FramedCard product={product} t={t} quickAdd={quickAdd} priority={priority} sizes={sizes} />
+    )
+  }
+  if (variant === "compact") {
+    return <CompactCard product={product} t={t} priority={priority} />
+  }
   const out = isOut(product)
-  const discount = product.price?.discount ?? null
   const add = quickAdd && product.quickAdd && !out ? product.quickAdd : null
   return (
     <article className="group @container relative flex h-full flex-col gap-3">
@@ -82,23 +74,7 @@ export function ProductCard({
             className="h-full w-full object-cover"
           />
         )}
-        <ul className="absolute top-2 left-2 flex flex-wrap gap-1 text-xs font-extrabold">
-          {discount !== null && (
-            <li className="rounded-pill bg-deal px-2 py-1 text-deal-ink">
-              <span aria-hidden="true">{t("product.discount_short", { percent: discount })}</span>
-              <span className="sr-only">{t("product.discount", { percent: discount })}</span>
-            </li>
-          )}
-          {out ? (
-            <li className="rounded-pill bg-text px-2 py-1 text-paper">
-              {t("product.out_of_stock")}
-            </li>
-          ) : (
-            product.stock === "low" && (
-              <li className="rounded-pill bg-field px-2 py-1 text-text">{t("product.few_left")}</li>
-            )
-          )}
-        </ul>
+        <CardBadges product={product} t={t} />
         {add && quickAdd && (
           <QuickAdd
             variantId={add.variantId}
@@ -119,18 +95,8 @@ export function ProductCard({
             {product.title}
           </a>
         </h3>
-        {product.rating && (
-          <p className="flex items-center gap-1.5 text-xs text-text-2">
-            <Stars rating={Number(product.rating.average.replace(",", "."))} />
-            {/* The eye reads "4,3 (12)"; a screen reader hears the label's whole sentence */}
-            <span aria-hidden="true" className="tabular">
-              <span className="font-semibold text-text">{product.rating.average}</span> (
-              {product.rating.count})
-            </span>
-            <span className="sr-only">{product.rating.label}</span>
-          </p>
-        )}
-        {product.price && <Price price={product.price} t={t} className="mt-auto pt-1" />}
+        <CardStars product={product} t={t} />
+        <CardPriceRow product={product} t={t} className="mt-auto pt-1" />
       </div>
     </article>
   )
@@ -152,6 +118,7 @@ export function ProductGrid({
   wide = false,
   beside = false,
   columns,
+  phone = 2,
   eager = 0,
 }: {
   products: readonly ProductCardView[]
@@ -160,22 +127,24 @@ export function ProductGrid({
   wide?: boolean
   beside?: boolean
   columns?: ShelfColumns | undefined
+  /** With `columns`: cards in a row on a phone, two by default (bilesen-denetimi (b) 3). */
+  phone?: ShelfPhoneColumns | undefined
   eager?: number
 }) {
-  const sizes = wide ? SIZES.wide : beside ? SIZES.beside : shelfSizes(columns ?? 3)
+  const sizes = wide ? SIZES.wide : beside ? SIZES.beside : shelfSizes(columns ?? 3, phone)
   return (
     <ul
       data-columns={columns}
       className={cn(
         "grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-(--gap-columns) gap-y-8 md:grid-cols-[repeat(3,minmax(0,1fr))] lg:gap-y-10",
         wide && "lg:grid-cols-[repeat(4,minmax(0,1fr))]",
-        columns && shelfGrid(columns)
+        columns && shelfGrid(columns, phone)
       )}
     >
       {products.map((product, index) => (
         <li
           key={product.id}
-          className={cn("min-w-0", columns && shelfCard(columns, products.length, index))}
+          className={cn("min-w-0", columns && shelfCard(columns, products.length, index, phone))}
         >
           <ProductCard
             product={product}

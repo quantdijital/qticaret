@@ -39,9 +39,25 @@ describe("themeSettings", () => {
       colors: { primary: "#0b5c99", accent: "#f5d90a", background: "cool" },
       typography: { heading: "playfair", body: "nunito" },
       radius: "round",
-      product_card: { ratio: "1:1", show_brand: false, show_rating: true },
+      product_card: {
+        ratio: "1:1",
+        show_brand: false,
+        show_rating: true,
+        variant: "framed",
+        hover_image: false,
+        delivery_note: true,
+        full_button: false,
+        sale_badge: false,
+        low_stock_badge: true,
+        sold_out_badge: false,
+        sold_out_row: "notify",
+        no_reviews: "write_first",
+        button_style: "text",
+      },
       header: { layout: "left", sticky: false },
       buttons: "square",
+      section_spacing: "compact",
+      surface_style: "lined",
     }
     expect(themeSettings(answer, null)).toEqual(answer)
   })
@@ -53,9 +69,25 @@ describe("themeSettings", () => {
       colors: { primary: null, accent: null, background: "steel" },
       typography: { heading: "manrope", body: "manrope" },
       radius: "soft",
-      product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+      product_card: {
+        ratio: "1:1",
+        show_brand: true,
+        show_rating: false,
+        variant: "standard",
+        hover_image: true,
+        delivery_note: true,
+        full_button: true,
+        sale_badge: true,
+        low_stock_badge: true,
+        sold_out_badge: true,
+        sold_out_row: "price",
+        no_reviews: "hide",
+        button_style: "outline",
+      },
       header: { layout: "left", sticky: true },
       buttons: "pill",
+      section_spacing: "normal",
+      surface_style: "filled",
     })
     expect(themeSettings(undefined, null)).toEqual(DEFAULT_THEME)
     expect(themeSettings(undefined, "#0b5c99").colors.primary).toBe("#0b5c99")
@@ -67,7 +99,18 @@ describe("themeSettings", () => {
         colors: { primary: "red;}body{display:none", accent: "#FFF", background: "pink" },
         typography: { heading: "comic-sans", body: "url(https://fonts.example/x)" },
         radius: "blob",
-        product_card: { ratio: "16:9", show_brand: "no", show_rating: 1 },
+        product_card: {
+          ratio: "16:9",
+          show_brand: "no",
+          show_rating: 1,
+          variant: "technical",
+          hover_image: "yes",
+          empty_stars: null,
+          sale_badge: "no",
+          sold_out_row: "hidden",
+          no_reviews: "stars",
+          button_style: "ghost",
+        },
         header: { layout: "right", sticky: null },
         buttons: "circle",
         extra: "ignored",
@@ -77,6 +120,24 @@ describe("themeSettings", () => {
     expect(settings).toEqual(DEFAULT_THEME)
     expect(themeSettings("not an object", null)).toEqual(DEFAULT_THEME)
     expect(themeSettings({ colors: null }, null)).toEqual(DEFAULT_THEME)
+  })
+
+  it("reads a backend before the no-reviews choice by the framed card's empty stars switch", () => {
+    const old = (empty_stars: unknown, variant = "framed") =>
+      themeSettings({ product_card: { show_rating: true, variant, empty_stars } }, null)
+        .product_card.no_reviews
+    expect(old(true)).toBe("empty_stars")
+    expect(old(false)).toBe("hide")
+    // The switch drew only on the framed card: another's saved look does not change
+    expect(old(true, "standard")).toBe("hide")
+    expect(old(true, "technical")).toBe("hide")
+    expect(
+      themeSettings({ product_card: { empty_stars: true } }, null).product_card.no_reviews
+    ).toBe("hide")
+    expect(
+      themeSettings({ product_card: { empty_stars: true, no_reviews: "write_first" } }, null)
+        .product_card.no_reviews
+    ).toBe("write_first")
   })
 
   it("leaves the section's own version out: it is not a choice", () => {
@@ -222,12 +283,19 @@ describe("themeView", () => {
       card: { ratio: "1:1", showBrand: true, showRating: false },
       header: { layout: "left", sticky: true },
       buttons: "pill",
+      surface: "filled",
     })
+    expect(themeView(theme({ surface_style: "lined" })).surface).toBe("lined")
     expect(
       themeView(
         theme({
           header: { layout: "centered", sticky: false },
-          product_card: { ratio: "4:5", show_brand: false, show_rating: true },
+          product_card: {
+            ...DEFAULT_THEME.product_card,
+            ratio: "4:5",
+            show_brand: false,
+            show_rating: true,
+          },
         })
       )
     ).toMatchObject({

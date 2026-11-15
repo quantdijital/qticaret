@@ -57,7 +57,7 @@ async function openTheme(options: ServeOptions = {}) {
   return screen.findByRole("textbox", { name: "Ana renk" })
 }
 
-async function choose(field: string, option: RegExp | string) {
+async function choose(field: RegExp | string, option: RegExp | string) {
   await user.click(screen.getByRole("combobox", { name: field }))
   await user.click(await screen.findByRole("option", { name: option }))
 }
@@ -74,6 +74,27 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
   })
   afterEach(() => {
     releaseClock()
+  })
+
+  it("saves the card style and the framed card's switches into the draft (adr/0049 Ek 2026-11-14 §3.3)", async () => {
+    await openTheme()
+    await choose("Kart biçimi", "Çerçeveli")
+    await user.click(screen.getByRole("switch", { name: /^Üstüne gelince ikinci fotoğraf/ }))
+    await user.click(screen.getByRole("switch", { name: /^İndirim etiketini göster/ }))
+    await choose(/^Tükenmiş üründe fiyat satırı/, "“Gelince haber ver” bağlantısı")
+    await choose(/^Düğme stili/, "Yazı")
+    await pass(AUTOSAVE_MS)
+
+    await waitFor(() => {
+      expect(savedTheme()?.product_card).toEqual({
+        ...THEME.product_card,
+        variant: "framed",
+        hover_image: false,
+        sale_badge: false,
+        sold_out_row: "notify",
+        button_style: "text",
+      })
+    })
   })
 
   it("saves every choice into the draft as it is made, the preview reloading, nothing live", async () => {
@@ -95,7 +116,7 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
         ...THEME,
         colors: { primary: "#0b5c99", accent: null, background: "neutral" },
         typography: { heading: "playfair", body: "manrope" },
-        product_card: { ratio: "1:1", show_brand: true, show_rating: true },
+        product_card: { ...THEME.product_card, ratio: "1:1", show_brand: true, show_rating: true },
       })
     })
     // Neither the theme section nor the storefront section is written: "Yayınla" puts it live

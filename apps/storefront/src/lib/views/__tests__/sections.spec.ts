@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { StoreCategorySection, StoreProduct, StoreProductSection } from "@qticaret/types"
+import { SCROLLER_DEFAULTS } from "@qticaret/types/section-scroller"
 import { t } from "@/lib/i18n"
 import type { ProductQuery } from "@/lib/store-api/requests"
 
@@ -84,6 +85,55 @@ describe("a related products section under a product", () => {
       more: null,
       columns: 3,
     })
+    expect(views[0]).not.toHaveProperty("phoneColumns")
+  })
+
+  it("passes one card on a phone on when the shop asks (bilesen-denetimi (b) 3)", async () => {
+    const section = { ...related({ kind: "same_category" }, 3), columns_mobile: 1 as const }
+    const views = await sectionViews([section], t, onProduct)
+
+    expect(views[0]).toMatchObject({ type: "products", columns: 3, phoneColumns: 1 })
+  })
+
+  it("slides as a carousel with its scroller and draws its own cards (bilesen-denetimi (b) 7)", async () => {
+    const section = {
+      ...(related({ kind: "same_category" }, 3) as Extract<
+        StoreProductSection,
+        { type: "related_products" }
+      >),
+      variant: "carousel" as const,
+      scroller: { ...SCROLLER_DEFAULTS, arrows: "hover" as const },
+      card_variant: "framed" as const,
+      columns_mobile: 1 as const,
+    }
+    const [view] = await sectionViews([section], t, onProduct)
+
+    expect(view).toMatchObject({
+      type: "products",
+      variant: "carousel",
+      scroller: { ...SCROLLER_DEFAULTS, arrows: "hover" },
+    })
+    expect(view).not.toHaveProperty("columns")
+    expect(view).not.toHaveProperty("phoneColumns")
+    const cards = view?.type === "products" ? view.products : []
+    expect(cards.every((card) => card.variant === "framed")).toBe(true)
+  })
+
+  it("reads a variant or a card it does not know as the grid and the theme's card", async () => {
+    const section = {
+      ...(related({ kind: "same_category" }, 3) as Extract<
+        StoreProductSection,
+        { type: "related_products" }
+      >),
+      variant: "mosaic" as never,
+      card_variant: "tall" as never,
+    }
+    const [view] = await sectionViews([section], t, onProduct)
+
+    expect(view).toMatchObject({ type: "products", columns: 3 })
+    expect(view).not.toHaveProperty("variant")
+    const cards = view?.type === "products" ? view.products : []
+    expect(cards.some((card) => card.variant === "framed")).toBe(false)
   })
 
   it("leaves the product out of a collection's rail too, in the shop's words", async () => {
@@ -143,7 +193,24 @@ describe("a FAQ section", () => {
 
     const views = await sectionViews([{ id: "sss", type: "faq", title: null, items }], t)
 
-    expect(views).toEqual([{ id: "sss", type: "faq", title: null, items }])
+    expect(views).toEqual([
+      {
+        id: "sss",
+        type: "faq",
+        title: null,
+        items,
+        settings: { open_first: "off", single_open: "off" },
+      },
+    ])
+  })
+
+  it("passes the shop's switches on, one off the list read as closed (bilesen-denetimi (b) 8)", async () => {
+    const items = [{ question: "Kargo ne zaman?", answer: "1–3 iş günü." }]
+    const section = { id: "sss", type: "faq", title: null, items, open_first: "on" } as const
+
+    const [view] = await sectionViews([{ ...section, single_open: "always" as unknown as "on" }], t)
+
+    expect(view).toMatchObject({ settings: { open_first: "on", single_open: "off" } })
   })
 })
 

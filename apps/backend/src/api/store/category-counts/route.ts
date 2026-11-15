@@ -11,7 +11,7 @@ import { storeCategoryCounts } from "../../../workflows/catalog/category-counts"
  */
 export async function GET(req: MedusaStoreRequest, res: MedusaResponse): Promise<void> {
   const counts = await storeCategoryCounts(req.scope, req.publishable_key_context.sales_channel_ids)
-  res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
+  res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=60")
   res.vary("x-publishable-api-key")
   res.json({ counts })
 }

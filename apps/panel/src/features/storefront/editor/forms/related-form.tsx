@@ -3,7 +3,7 @@ import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import type { RelatedProductsSection, RelatedSource } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
-import { ColumnsField } from "./columns-field"
+import { FIELD_IDS } from "./field-registry"
 import { CountField, F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
@@ -29,7 +29,8 @@ function sourceOf(kind: SourceKind): RelatedSource {
 /**
  * Products shown under every product's own: from the product's own
  * category (the storefront finds it per product), a collection, or the
- * same chosen ones on every page.
+ * same chosen ones on every page, and how many. Its cards in a row stand
+ * in the open "Diziliş" group (`SectionLayoutGroup`), as a product rail's.
  */
 export function RelatedForm({
   section,
@@ -48,6 +49,7 @@ export function RelatedForm({
       <TextField
         id={`${section.id}-title`}
         label={t(`${F}.title`)}
+        term={t(`${F}.titleTerm`)}
         value={section.title}
         max={L.title}
         placeholder={t("storefront.editor.defaults.related_products")}
@@ -57,7 +59,7 @@ export function RelatedForm({
           set({ title }, "title")
         }}
       />
-      <Field label={t(`${P}.source`)}>
+      <Field label={t(`${P}.source`)} term={t(`${P}.sourceTerm`)}>
         <RadioGroup
           aria-label={t(`${P}.source`)}
           value={source.kind}
@@ -101,24 +103,19 @@ export function RelatedForm({
           }}
         />
       )}
-      <ColumnsField
-        id={`${section.id}-columns`}
-        value={section.columns}
-        limit={section.limit}
-        onChange={(columns) => {
-          set({ columns })
-        }}
-      />
-      <CountField
-        id={`${section.id}-limit`}
-        label={t(`${F}.limit`)}
-        hint={t(`${F}.limitHint`, { max: L.related })}
-        value={section.limit}
-        max={L.related}
-        onChange={(limit) => {
-          set({ limit }, "limit")
-        }}
-      />
+      <div id={FIELD_IDS.content(section.id, "limit")}>
+        <CountField
+          id={`${section.id}-limit`}
+          label={t(`${F}.limit`)}
+          term={t(`${F}.limitTerm`)}
+          hint={t(`${F}.limitHint`, { max: L.related })}
+          value={section.limit}
+          max={L.related}
+          onChange={(limit) => {
+            set({ limit }, "limit")
+          }}
+        />
+      </div>
     </div>
   )
 }

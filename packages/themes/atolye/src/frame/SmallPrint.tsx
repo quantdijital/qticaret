@@ -1,5 +1,6 @@
 import { ArrowUp, Plus } from "lucide-react"
 import type { LinkView, ShopView, Translate } from "@qticaret/ui"
+import { cn } from "@qticaret/ui/lib/utils"
 import { CookiePreferencesLink } from "./CookiePreferencesLink"
 
 const PHONE_LINK =
@@ -82,11 +83,14 @@ function Legal({ shop, t }: { shop: ShopView; t: Translate }) {
  * rule one muted line with the year and the registered title and the
  * identity lines the law asks for (6563, ETBİS; only those filled in),
  * dots between them drawn by the stylesheet (a wrapped line starts
- * without one), and "Yukarı çık" at its end (an arrow alone on a phone).
+ * without one), and "Yukarı çık" at its end (an arrow alone on a phone),
+ * unless the floating button is on there (`back_to_top`): one way up, not two.
  */
 export function SmallPrint({ shop, t }: { shop: ShopView; t: Translate }) {
   const year = new Date().getFullYear()
   const title = shop.companyTitle ?? shop.name
+  // The floating button does the same job: the line's link stays only where it does not show
+  const floating = shop.cookieBanner?.due === true ? null : (shop.footerBar?.backToTop ?? null)
   return (
     <>
       <Legal shop={shop} t={t} />
@@ -99,13 +103,18 @@ export function SmallPrint({ shop, t }: { shop: ShopView; t: Translate }) {
             ))}
           </ul>
         </div>
-        <a
-          href="#top"
-          className="-mr-3 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-button px-3 text-xs font-semibold text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
-        >
-          <span className="max-sm:sr-only">{t("footer.back_to_top")}</span>
-          <ArrowUp className="size-4" aria-hidden="true" strokeWidth={2} />
-        </a>
+        {floating?.mobile !== true && (
+          <a
+            href="#top"
+            className={cn(
+              floating && "lg:hidden",
+              "-mr-3 inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center gap-1.5 rounded-button px-3 text-xs font-semibold text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-8"
+            )}
+          >
+            <span className="max-sm:sr-only">{t("footer.back_to_top")}</span>
+            <ArrowUp className="size-4" aria-hidden="true" strokeWidth={2} />
+          </a>
+        )}
       </div>
     </>
   )

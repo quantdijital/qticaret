@@ -108,6 +108,9 @@ medusaIntegrationTestRunner({
       expect(sale).toEqual({
         id: "indirimde01",
         type: "products",
+        // Saved without them: today's grid (adr/0049 Ek 2026-11-15), the theme's card
+        variant: "grid",
+        card_variant: null,
         title: null,
         source: { kind: "on_sale" },
         limit: 4,

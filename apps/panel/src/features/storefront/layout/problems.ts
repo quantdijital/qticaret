@@ -1,14 +1,16 @@
 import type { AnySection, LayoutDocument, LayoutLink } from "@/features/storefront/api/layout"
+import { HEADER_CATALOG_LIMITS } from "@qticaret/types"
 import {
-  BEST_SELLER_DAYS,
   LAYOUT_LIMITS as L,
   MARQUEE_LIMITS,
+  PRICE_BANDS_LIMITS,
   SLIDER_LIMITS,
 } from "@/features/storefront/api/layout"
 import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
 import { heroCatalogProblems, priceBandsProblems } from "./catalog-problems"
-import { BODY_GROUPS, allSections, marqueesOn } from "./sections"
+import { listProblems } from "./shelf-problems"
+import { BODY_GROUPS, allSections, marqueesOn, priceBandsOn } from "./sections"
 import { SETTINGS_KEY, badgeProblems, settingsProblems } from "./settings-problems"
 
 /**
@@ -39,6 +41,7 @@ export type Problem =
   | "thresholdRange"
   | "marqueeLimit"
   | "bandsOrder"
+  | "bandsLimit"
 
 /** A section's problems by field (`heading`, `lines.0`, `slides.1.text`, `schedule`). */
 export type SectionProblems = Record<string, Problem>
@@ -104,9 +107,11 @@ function fieldsOf(section: AnySection): Found[] {
           const at = `slides.${String(index)}`
           return [
             [`${at}.image`, textProblem(slide.image.alt, L.alt)],
+            [`${at}.mobile_image`, textProblem(slide.mobile_image?.alt ?? null, L.alt)],
             [`${at}.heading`, textProblem(slide.heading, L.heading, true)],
             [`${at}.text`, textProblem(slide.text, L.slideText, true)],
             [`${at}.link`, linkProblem(slide.link)],
+            [`${at}.second_link`, linkProblem(slide.second_link)],
           ]
         }),
       ]
@@ -125,26 +130,11 @@ function fieldsOf(section: AnySection): Found[] {
         }),
       ]
     case "products": {
-      const { source } = section
+      // The rail's own list, then a columns rail's more, each under its prefix
+      const lists = section.variant === "columns" ? (section.lists ?? []) : []
       return [
-        ["title", textProblem(section.title, L.title)],
-        [
-          "source",
-          source.kind === "manual" && source.product_ids.length === 0
-            ? "productsRequired"
-            : source.kind === "category" && source.category_id === ""
-              ? "categoryRequired"
-              : source.kind === "collection" && source.collection_id === ""
-                ? "collectionRequired"
-                : null,
-        ],
-        [
-          "days",
-          source.kind === "best_sellers" &&
-          (source.days < BEST_SELLER_DAYS.min || source.days > BEST_SELLER_DAYS.max)
-            ? "daysRange"
-            : null,
-        ],
+        ...listProblems("", section),
+        ...lists.flatMap((list, index) => listProblems(`lists.${String(index)}.`, list)),
         ["more", linkProblem(section.more)],
       ]
     }
@@ -207,6 +197,16 @@ function fieldsOf(section: AnySection): Found[] {
     case "rich_text":
       return [["title", textProblem(section.title, L.title)]]
     case "header_bar":
+      // The catalog header's words and highlighted link (adr/0049 Ek 2026-11-15)
+      return section.variant === "catalog"
+        ? [
+            [
+              "search_placeholder",
+              textProblem(section.search_placeholder, HEADER_CATALOG_LIMITS.search_placeholder),
+            ],
+            ["highlight_link", linkProblem(section.highlight_link)],
+          ]
+        : []
     case "footer_bar":
     case "product_main":
     case "category_main":
@@ -231,7 +231,8 @@ function fieldsOf(section: AnySection): Found[] {
 
 /**
  * The scrolling strips of a page showing more than it may (adr/0049 Ek
- * 2026-11-14 §4.1): the header's and the page's, each marked, by id.
+ * 2026-11-14 §4.1): the header's and the page's, each marked, by id; and
+ * the price bands strips of a page with more than two.
  */
 function marqueeLimitIds(doc: LayoutDocument): Set<string> {
   const ids = new Set<string>()
@@ -239,6 +240,13 @@ function marqueeLimitIds(doc: LayoutDocument): Set<string> {
     if (marqueesOn(doc, page) > MARQUEE_LIMITS.perPage) {
       for (const section of [...doc.header, ...doc[page]]) {
         if (section.type === "marquee") ids.add(section.id)
+      }
+    }
+  }
+  for (const page of BODY_GROUPS) {
+    if (priceBandsOn(doc, page) > PRICE_BANDS_LIMITS.perPage) {
+      for (const section of doc[page]) {
+        if (section.type === "price_bands") ids.add(section.id)
       }
     }
   }
@@ -271,7 +279,12 @@ export function documentProblems(
     const found: SectionProblems = {
       ...sectionProblems(section),
       ...(section.type === "trust_badges" ? badges : {}),
-      ...(overLimit.has(section.id) ? { limit: "marqueeLimit" as const } : {}),
+      ...(overLimit.has(section.id)
+        ? {
+            limit:
+              section.type === "price_bands" ? ("bandsLimit" as const) : ("marqueeLimit" as const),
+          }
+        : {}),
     }
     if (Object.keys(found).length > 0) {
       problems.set(section.id, found)

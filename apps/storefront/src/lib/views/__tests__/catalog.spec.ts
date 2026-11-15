@@ -26,12 +26,11 @@ const extras = vi.hoisted(() => ({
 vi.mock("@/lib/store-api/extras", () => extras)
 // Each category a card with its picture; the ids the section names, in its order
 const tiles = vi.hoisted(() => ({
-  picturedCategories: vi.fn((ids: readonly string[]) =>
+  picturedCategories: vi.fn((ids: readonly string[], limit?: number) =>
     Promise.resolve(
-      (ids.length > 0 ? ids : ["pcat_caki", "pcat_balta", "pcat_kilic"]).map((id) => ({
-        id,
-        card: { label: id, path: `/kategori/${id}` },
-      }))
+      (ids.length > 0 ? ids : ["pcat_caki", "pcat_balta", "pcat_kilic"])
+        .slice(0, limit)
+        .map((id) => ({ id, card: { label: id, path: `/kategori/${id}` } }))
     )
   ),
 }))
@@ -99,6 +98,7 @@ const section = (over: Partial<StoreHeroCatalog> = {}): StoreHeroCatalog => ({
 })
 
 beforeEach(() => {
+  tiles.picturedCategories.mockClear()
   requests.listProducts.mockReset()
   requests.listProducts.mockImplementation((query: ProductQuery) => {
     const ids = query.ids ?? []
@@ -119,6 +119,32 @@ describe("the opening's category list (H17)", () => {
     expect(view.all).toEqual({ label: "Tüm kategoriler", path: "/kategoriler" })
   })
 
+  it("cuts the list to its limit before any category's photo is asked for", async () => {
+    await heroCatalogView(section({ list_limit: 2 }), t)
+
+    expect(tiles.picturedCategories).toHaveBeenCalledWith([], 2)
+  })
+
+  it("draws no tile and no quick link when there are none, and asks nothing for them", async () => {
+    const view = await heroCatalogView(section({ tiles: [], chips: [] }), t)
+
+    expect(view.tiles).toEqual([])
+    expect(view.chips).toEqual([])
+    // Only the list's own request: an empty pick never reads as "the top categories"
+    expect(tiles.picturedCategories).toHaveBeenCalledTimes(1)
+    expect(tiles.picturedCategories).toHaveBeenCalledWith([], 2)
+  })
+
+  it("lists nothing when a picked list's categories are all gone", async () => {
+    const view = await heroCatalogView(
+      section({ list: { kind: "manual", category_ids: [] }, tiles: [], chips: [] }),
+      t
+    )
+
+    expect(view.list).toEqual([])
+    expect(tiles.picturedCategories).not.toHaveBeenCalled()
+  })
+
   it("shows no count when the shop turned counts off", async () => {
     const view = await heroCatalogView(section({ show_count: false }), t)
 
@@ -128,7 +154,7 @@ describe("the opening's category list (H17)", () => {
   it("takes the header menu's categories as the list when the shop chose the menu", async () => {
     const view = await heroCatalogView(section({ list: { kind: "menu" } }), t)
 
-    expect(tiles.picturedCategories).toHaveBeenCalledWith(["pcat_kilic"])
+    expect(tiles.picturedCategories).toHaveBeenCalledWith(["pcat_kilic"], 2)
     expect(view.list.map((card) => card.label)).toEqual(["pcat_kilic"])
   })
 
@@ -161,7 +187,7 @@ describe("the price bands", () => {
         title: null,
         bands: [
           { label: "₺500 altı", text: null, min: null, max: 500, product_ids: ["p2", "yok"] },
-          { label: "Üstü", text: "Koleksiyon", min: 500, max: null, product_ids: ["p1"] },
+          { label: "Üstü", text: "Koleksiyon", min: 501, max: null, product_ids: ["p1"] },
         ],
       },
       t
@@ -170,7 +196,7 @@ describe("the price bands", () => {
     expect(view?.title).toBe("Fiyata göre alışveriş")
     expect(view?.bands.map((band) => [band.path, band.products.map((each) => each.path)])).toEqual([
       ["/magaza?fiyat=-500", ["/urun/p2"]],
-      ["/magaza?fiyat=500-", ["/urun/p1"]],
+      ["/magaza?fiyat=501-", ["/urun/p1"]],
     ])
   })
 })

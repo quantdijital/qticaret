@@ -4,12 +4,18 @@ import { ShopTokenPreview, TokenSlot } from "@/features/settings/components/shop
 import { ListFooter, RowActions, RowCell } from "@/features/settings/components/storefront-rows"
 import type { AnnouncementBar } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import { AnnouncementMode } from "./announcement-settings"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 
 const A = "storefront.editor.announcement"
 
-/** The thin bar on top of every page: lines shown in turn, each may hold the shop's details. */
+/**
+ * The thin bar on top of every page: its lines, each may hold the shop's
+ * details, and once there are several how they show (only the first, taking
+ * turns, side by side; docs/tema/bilesen-denetimi (b) 6). How they turn
+ * stands in the open "Hareket" group (`AnnouncementMotion`).
+ */
 export function AnnouncementForm({
   section,
   problems,
@@ -84,6 +90,7 @@ export function AnnouncementForm({
           setLines([...section.lines, ""])
         }}
       />
+      <AnnouncementMode section={section} onChange={onChange} />
     </div>
   )
 }

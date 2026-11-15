@@ -21,7 +21,8 @@ function laidOutTop(bar: HTMLElement, style: CSSStyleDeclaration): number {
  * `<html>`, `data-js-scroll` is "down" once the visitor scrolls down
  * past the header and "up" when they turn back; none near the top. It
  * also gives the header's height (`--gf-head-h`) and the part that folds
- * (`--gf-head-fold`: the aisle from 1024 px, the top row on a phone),
+ * (`--gf-head-fold`: the aisle from 1024 px, the catalog header's strip
+ * above it (whose rows below stay put), the top row on a phone),
  * and marks a listing's sticky bar `data-js-stuck` while it is pinned under
  * the header. Only attributes and custom properties change; the
  * stylesheet moves things by transform, so nothing shifts the layout.
@@ -53,7 +54,7 @@ export function ScrollCue() {
       const sticky = head !== null && getComputedStyle(head).position === "sticky"
       const height = sticky ? head.offsetHeight : 0
       const part = head?.querySelector<HTMLElement>(
-        wide.matches ? "[data-gf-aisle]" : "[data-gf-head-row]"
+        wide.matches ? "[data-gf-aisle], [data-gf-strip]" : "[data-gf-head-row]"
       )
       root.style.setProperty("--gf-head-h", `${String(height)}px`)
       root.style.setProperty(

@@ -7779,7 +7779,7 @@
       "types": {
         "announcement_bar": {
           "name": "Duyuru şeridi",
-          "description": "Sayfanın en üstünde sırayla dönen kısa duyurular."
+          "description": "Sayfanın en üstünde ince bir şerit; birden çok duyuru yalnız ilki, sırayla ya da yan yana gösterilir."
         },
         "hero": {
           "name": "Giriş",
@@ -7790,8 +7790,8 @@
           "description": "Sayfanın başında sırayla gösterilen 2–6 slayt; her birinin görseli, başlığı, kısa metni ve düğmesi olur."
         },
         "banner": {
-          "name": "Görsel slayt",
-          "description": "Sırayla kayan 1–6 görsel; her birinin başlığı, satırı ve bağlantısı olabilir."
+          "name": "Görsel bant",
+          "description": "1–6 görsel; geniş ekranda yan yana. Her birinin başlığı, satırı ve bir ya da iki düğmesi olabilir."
         },
         "categories": {
           "name": "Kategoriler",
@@ -7843,7 +7843,7 @@
         },
         "faq": {
           "name": "Sık sorulan sorular",
-          "description": "Soru ve cevaplar; arama motorlarına da soru-cevap olarak bildirilir."
+          "description": "Açılır kapanır soru ve cevaplar; yalnız sayfada görünür."
         },
         "related_products": {
           "name": "Benzer ürünler",
@@ -7859,7 +7859,7 @@
         },
         "footer_bar": {
           "name": "Alt bilgi",
-          "description": "İletişim bilgileriniz, menüleriniz ve ödeme işaretleri; her sayfanın altında. Menüler ve iletişim bilgileri kendi ekranlarında düzenlenir."
+          "description": "İletişim bilgileriniz, menüleriniz, sosyal hesaplarınız ve ödeme işaretleri; her sayfanın altında. Menüler, iletişim bilgileri ve sosyal hesap adresleri kendi ekranlarında düzenlenir."
         },
         "product_main": {
           "name": "Ürünün kendi bilgileri",
@@ -7881,7 +7881,8 @@
         },
         "header_bar": {
           "standard": "Solda logo",
-          "centered": "Ortada logo"
+          "centered": "Ortada logo",
+          "catalog": "Klasik katalog"
         },
         "footer_bar": {
           "ledger": "Standart"
@@ -7895,14 +7896,29 @@
         "soon": "{{name}} (hazırlanıyor)",
         "kept": "Kayıtlı biçim hazırlanıyor; hazır olana kadar vitrin standart biçimi çizer.",
         "hero": {
-          "standard": "Sahne",
+          "standard": "Tek görsel",
           "category_list": "Kategori listesi"
+        },
+        "products": {
+          "grid": "Izgara",
+          "carousel": "Kayan sıra",
+          "featured": "Öne çıkan",
+          "compact": "Kompakt liste",
+          "columns": "Yan yana listeler"
+        },
+        "categories": {
+          "tiles": "Görselli karo",
+          "linked": "Alt kategorili kart"
+        },
+        "related_products": {
+          "grid": "Izgara",
+          "carousel": "Kayan sıra"
         }
       },
       "look": {
-        "title": "Görünüm ayarları",
-        "titleSet_one": "Görünüm ayarları · {{count}} ayar",
-        "titleSet_other": "Görünüm ayarları · {{count}} ayar",
+        "title": "Diğer ayarlar",
+        "titleSet_one": "Diğer ayarlar · {{count}} ayar",
+        "titleSet_other": "Diğer ayarlar · {{count}} ayar",
         "hint": "Bölümün boşluğu ve görünüşü. Seçilmeyen her alan temanın kendi görünümünü kullanır; önizleme hemen gösterir.",
         "reset": "Varsayılana dön",
         "space_outer": {
@@ -7970,8 +7986,20 @@
         "placement": "Yeri",
         "sections": "Bölümler",
         "content": "İçerik",
+        "layout": "Diziliş",
+        "scroll": "Kaydırma",
+        "motion": "Hareket",
+        "appearance": "Stil",
         "variant": "Biçim",
-        "variantHint": "Bölümün vitrinde nasıl görüneceği; önizleme hemen gösterir. Ortak içerik (başlık, metin) biçim değişince korunur, \"Geri al\" önceki biçimi getirir."
+        "variantHint": "Bölümün vitrinde nasıl görüneceği; önizleme hemen gösterir. Ortak içerik (başlık, metin) biçim değişince korunur, \"Geri al\" önceki biçimi getirir.",
+        "device": {
+          "label": "Cihaz",
+          "term": "device",
+          "all": "Her yerde",
+          "mobile": "Yalnız telefonda",
+          "desktop": "Yalnız masaüstünde",
+          "hint": "Telefon: 1024 pikselden dar ekranlar (tablet dahil). Gizlendiği cihazda bölümün görselleri indirilmez; sayfanın ilk görseli yine indirilir."
+        }
       },
       "defaults": {
         "heading": "Mağazanızın adı",
@@ -7995,6 +8023,7 @@
         "heading": "Başlık",
         "text": "Metin",
         "title": "Başlık",
+        "titleTerm": "title",
         "titleHint": "Boş bırakırsanız vitrin kendi başlığını kullanır.",
         "titleOptional": "İsteğe bağlı; boş bırakırsanız başlık görünmez.",
         "textHint": "Boş bırakırsanız vitrin kendi metnini kullanır.",
@@ -8003,15 +8032,22 @@
         "altHint": "Görmeyen ziyaretçiler ve arama motorları için görselde ne olduğunu kısaca yazın.",
         "noImage": "Görsel yok",
         "limit": "Gösterilecek sayı",
+        "limitTerm": "limit",
         "limitHint": "1 ile {{max}} arası.",
         "columns": "Satırda ürün",
+        "columnsTerm": "columns",
         "columnsOption": "Satırda {{n}} ürün",
         "columnsHint": {
           "3": "Geniş ekranda yan yana 3 ürün, iki sıra ({{total}} ürün); telefonda 2.",
           "4": "Geniş ekranda yan yana 4 ürün, iki sıra ({{total}} ürün); tablette 3, telefonda 2.",
           "5": "Geniş ekranda yan yana 5 ürün, iki sıra ({{total}} ürün); daha dar ekranda 4 ve 3, telefonda 2."
         },
-        "columnsShort": "Vitrin yalnız dolu sıraları gösterir: iki tam sıra için gösterilecek sayıyı en az {{total}} yapın."
+        "columnsShort": "Vitrin yalnız dolu sıraları gösterir: iki tam sıra için gösterilecek sayıyı en az {{total}} yapın.",
+        "columnsMobile": "Telefonda sütun",
+        "columnsMobileTerm": "columns mobile",
+        "columnsMobileHint": "Telefonda yan yana kaç ürün; tek sütunda kartlar büyür, üç ürün görünür.",
+        "columnsMobileOption_one": "{{count}} kart",
+        "columnsMobileOption_other": "{{count}} kart"
       },
       "hero": {
         "eyebrowPlaceholder": "Yeni sezon",
@@ -8026,13 +8062,68 @@
       "banner": {
         "empty": "Henüz görsel yok. Bölüm en az bir görselle kaydedilir.",
         "slide": "{{number}}. görsel",
-        "link": "Bağlantı",
-        "linkHint": "Görsele tıklayan ziyaretçinin gideceği yer; isteğe bağlı.",
+        "link": "Düğme",
+        "linkHint": "Görselin ana düğmesi; isteğe bağlı.",
         "add": "Görsel ekle",
-        "hint": "En çok {{max}} görsel; sırayla kayar."
+        "hint": "En çok {{max}} görsel; geniş ekranda yan yana gösterilir.",
+        "secondLink": "İkinci düğme",
+        "secondLinkHint": "İsteğe bağlı; ilk düğmeden bir basamak sade çizilir.",
+        "mobileImage": "Telefon görseli",
+        "mobileImageHint": "İsteğe bağlı. 640 px'ten dar ekranlarda geniş görselin yerine gösterilir.",
+        "tone": {
+          "label": "Yazı rengi",
+          "hint": "Görsele göre seçin: koyu görselde açık yazı, açık görselde koyu yazı. Yazı her ayarda okunur kalır.",
+          "light": "Açık yazı",
+          "dark": "Koyu yazı"
+        },
+        "width": {
+          "label": "Genişlik",
+          "term": "width",
+          "hint": "Kutulu: sayfanın genişliğinde, köşeleri yuvarlak. Tam: ekranın kenarından kenarına.",
+          "boxed": "Kutulu",
+          "full": "Tam"
+        },
+        "height": {
+          "label": "Yükseklik",
+          "term": "height",
+          "low": "Alçak",
+          "medium": "Orta",
+          "high": "Yüksek"
+        },
+        "text_position": {
+          "label": "Yazının yeri",
+          "term": "position",
+          "top_left": "Sol üst",
+          "top_center": "Orta üst",
+          "top_right": "Sağ üst",
+          "middle_left": "Sol orta",
+          "middle_center": "Tam orta",
+          "middle_right": "Sağ orta",
+          "bottom_left": "Sol alt",
+          "bottom_center": "Orta alt",
+          "bottom_right": "Sağ alt"
+        },
+        "overlay": {
+          "label": "Perde gücü",
+          "term": "overlay",
+          "hint": "Perde yazının okunmasını sağlar; güçlendikçe görselin daha çoğunu örter. Yok seçilirse yazı kendi zemininde durur.",
+          "none": "Yok",
+          "light": "Hafif",
+          "medium": "Orta",
+          "strong": "Güçlü"
+        },
+        "button_style": {
+          "label": "Düğme stili",
+          "term": "button",
+          "hint": "İkinci düğme bir basamak sade çizilir.",
+          "solid": "Dolu",
+          "outline": "Çerçeveli",
+          "text": "Yazı"
+        }
       },
       "products": {
         "source": "Hangi ürünler",
+        "sourceTerm": "source",
         "sources": {
           "newest": "En yeni ürünler",
           "best_sellers": "Çok satanlar",
@@ -8046,10 +8137,16 @@
         "products": "Ürünler",
         "manualEmpty": "En az bir ürün seçin.",
         "days": "Kaç günün satışı",
+        "daysTerm": "days",
         "daysHint": "Son kaç günde en çok satılanlar ({{min}}–{{max}} gün). Ödenmiş siparişler sayılır, iptal ve iadeler düşülür. Satış az olduğunda liste en yeni ürünlerle tamamlanır.",
         "onSaleHint": "Kampanyalar sayfasındaki ürünler, indirimi en büyük olan önce. İndirimde ürün yokken bölüm vitrinde görünmez.",
         "more": "Tümünü gör bağlantısı",
-        "moreHint": "Listenin altındaki bağlantı; kaldırırsanız görünmez."
+        "moreTerm": "link",
+        "moreHint": "Listenin altındaki bağlantı; kaldırırsanız görünmez.",
+        "cardVariant": "Kart biçimi",
+        "cardVariantTerm": "card",
+        "cardVariantTheme": "Temadaki biçim",
+        "cardVariantHint": "Bu raftaki kartların biçimi. Çerçeveli kartın ayarları Tema > Çerçeveli kart'tan gelir."
       },
       "records": {
         "pick": {
@@ -8100,7 +8197,37 @@
         "line": "{{number}}. duyuru",
         "placeholder": "{ücretsiz_kargo_eşiği} ve üzeri kargo bedava",
         "add": "Duyuru ekle",
-        "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter; sırayla gösterilir."
+        "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter.",
+        "mode": {
+          "label": "Birden çok duyuru",
+          "term": "multiple",
+          "first": "Yalnız ilki",
+          "rotate": "Sırayla dönsün",
+          "inline": "Yan yana",
+          "hint": "Yan yana: geniş ekranda hepsi tek satırda, telefonda yalnız ilki. Sırayla: hareket azaltılmışsa ilk duyuru kalır."
+        },
+        "interval": {
+          "label": "Geçiş süresi",
+          "term": "interval",
+          "slow": "Yavaş",
+          "medium": "Orta",
+          "fast": "Hızlı",
+          "hint": "Her duyurunun ekranda kalma süresi: 8, 6 ya da 4 saniye."
+        },
+        "pause_button": {
+          "label": "Durdur düğmesi",
+          "term": "pause button",
+          "always": "Her zaman",
+          "hover": "Üzerine gelince",
+          "hint": "Düğme tamamen kaldırılamaz (erişilebilirlik); dokunmatik ekranda her zaman görünür."
+        },
+        "hover_pause": {
+          "label": "Üzerine gelince dur",
+          "term": "pause on hover",
+          "on": "Açık",
+          "off": "Kapalı",
+          "hint": "Klavyeyle şeride gelince her zaman durur."
+        }
       },
       "problems": {
         "required": "Bu satırı yazın ya da kaldırın.",
@@ -8124,7 +8251,8 @@
         "contrast": "Bu renk beyaz yazıyla ya da sayfa zemininde yeterince okunmuyor (en az 3:1 gerekir). Daha koyu bir ton seçin.",
         "wellContrast": "Bu renk, sayfa zemininin bir ton koyusu olan alanlarda (bağlantıların ve çerçeveli düğmelerin durduğu kutular) yeterince okunmuyor (en az 3:1 gerekir). Daha koyu bir ton seçin.",
         "marqueeLimit": "Aynı sayfada en çok {{max}} kayan yazı olabilir (üst bilgideki her sayfada sayılır); birini kaldırın.",
-        "bandsOrder": "Üst sınırlar sırayla artmalı; sınırı olmayan bant yalnız en sonda olabilir."
+        "bandsOrder": "Üst sınırlar sırayla artmalı; sınırı olmayan bant yalnız en sonda olabilir.",
+        "bandsLimit": "Ana sayfada en çok {{max}} fiyat bandı bölümü olabilir (gizli olanlar da sayılır); birini kaldırın."
       },
       "theme": {
         "title": "Tema ayarları",
@@ -8168,6 +8296,7 @@
         "fontsHint": "Vitrin yazı tiplerini kendi sunucusundan yükler; ziyaretçi bilgisi üçüncü taraflara gitmez.",
         "heading": "Başlıklar",
         "body": "Metin",
+        "fontTerm": "font-family",
         "serif": "tırnaklı",
         "sans": "tırnaksız",
         "fonts": {
@@ -8185,6 +8314,7 @@
         },
         "shapes": "Köşeler ve düğmeler",
         "radius": "Köşeler",
+        "radiusTerm": "border-radius",
         "radii": {
           "sharp": "Keskin",
           "soft": "Yumuşak",
@@ -8198,8 +8328,24 @@
           "square": "Köşeli"
         },
         "buttonsHint": "Düğmeler, arama alanı, form alanları ve adet seçici birlikte değişir. Çipler ve sayı rozetleri her zaman hap biçimindedir.",
+        "sectionSpacing": "Bölüm aralığı",
+        "sectionSpacingTerm": "section spacing",
+        "sectionSpacings": {
+          "compact": "Sık",
+          "normal": "Normal",
+          "roomy": "Ferah"
+        },
+        "sectionSpacingHint": "Sayfadaki bölümler arasındaki boşluk, her bölümde birlikte değişir. Normal, temanın kendi aralığıdır (geniş ekranda 120 px); Sık bunu 66 px'e indirir, Ferah 144 px'e çıkarır.",
+        "surfaceStyle": "Kutu stili",
+        "surfaceStyleTerm": "surface style",
+        "surfaceStyles": {
+          "filled": "Dolu",
+          "lined": "Çizgili"
+        },
+        "surfaceStyleHint": "Ürün sayfasındaki bilgi kutuları, kategori sayfasındaki filtreler ve alt kategoriler, sepetteki kutular. Dolu, sayfadan bir ton koyu zemindir; Çizgili, sayfa zemininde 1 px çizgidir.",
         "card": "Ürün kartı",
         "ratio": "Görsel oranı",
+        "ratioTerm": "aspect-ratio",
         "ratios": {
           "4x5": "4:5 (dikey)",
           "1x1": "1:1 (kare)",
@@ -8210,6 +8356,53 @@
         "show_brandHint": "Ürün kartında, ürün adının üstünde marka adı. Markası olmayan üründe bir şey görünmez.",
         "show_rating": "Puanı göster",
         "show_ratingHint": "Onaylı değerlendirmesi olan ürünlerin kartında yıldız, ortalama puan ve değerlendirme sayısı. Değerlendirmesi olmayan üründe bir şey görünmez.",
+        "no_reviews": "Yorumsuz üründe puan satırı",
+        "no_reviewsTerm": "rating",
+        "noReviews": {
+          "hide": "Gizle",
+          "empty_stars": "Boş yıldız göster",
+          "write_first": "“İlk yorumu sen yaz” bağlantısı"
+        },
+        "no_reviewsHint": "Değerlendirmesi olmayan üründe yıldızların yeri. Bağlantı ürün sayfasındaki değerlendirmeleri açar.",
+        "badges": "Etiketler",
+        "badgeTerm": "badge",
+        "sale_badge": "İndirim etiketini göster",
+        "sale_badgeHint": "İndirimli üründe fotoğrafın köşesinde indirim oranı (%30).",
+        "low_stock_badge": "“Az kaldı” etiketini göster",
+        "low_stock_badgeHint": "Stoğu azalan üründe; adet yazılmaz. Kompakt kart bu etiketi çizmez.",
+        "sold_out_badge": "“Tükendi” etiketini göster",
+        "sold_out_badgeHint": "Stoğu biten ürünün fotoğrafında.",
+        "sold_out_row": "Tükenmiş üründe fiyat satırı",
+        "sold_out_rowTerm": "sold out",
+        "soldOutRows": {
+          "price": "Fiyat kalsın, düğme pasif",
+          "text": "“Tükendi” yazısı",
+          "notify": "“Gelince haber ver” bağlantısı"
+        },
+        "sold_out_rowHint": "Fiyatın yerinde ne görünür. Hiçbirinde ürün karttan sepete eklenmez; bağlantı ürün sayfasındaki stok bildirimi formunu açar.",
+        "cardVariant": "Kart biçimi",
+        "cardVariants": {
+          "standard": "Standart",
+          "framed": "Çerçeveli",
+          "compact": "Kompakt"
+        },
+        "cardVariantHint": "Mağazadaki bütün ürün kartlarının biçimi. Ürün rafı kendi biçimini seçebilir; liste, arama ve kategori sayfası bunu kullanır.",
+        "framed": "Çerçeveli kart",
+        "framedHint": "Kart çerçeveli çizildiği her yerde geçer: genel biçimde ya da çerçeveli seçilmiş bir rafta.",
+        "hover_image": "Üstüne gelince ikinci fotoğraf",
+        "hover_imageHint": "Fare kartın üstüne gelince ürünün ikinci fotoğrafı görünür; telefonda fotoğraflar yana kaydırılır. Tek fotoğraflı üründe etkisi yok.",
+        "delivery_note": "Ücretsiz kargo notu",
+        "delivery_noteHint": "Fiyatı ücretsiz kargo eşiğine ulaşan üründe fiyatın altında \"Ücretsiz kargo\" yazar. Eşik Kampanyalar sayfasındaki ayardan gelir.",
+        "full_button": "Tam genişlik düğme",
+        "full_buttonHint": "Kartın altında \"Sepete ekle\" düğmesi; seçenekli üründe \"Seçenekler\" ürün sayfasını açar. Kapalıyken fotoğrafın köşesinde yuvarlak + durur.",
+        "button_style": "Düğme stili",
+        "button_styleTerm": "button",
+        "buttonStyles": {
+          "solid": "Dolu",
+          "outline": "Çerçeveli",
+          "text": "Yazı"
+        },
+        "button_styleHint": "Kartın altındaki “Sepete ekle” ve “Seçenekler” düğmesi. Çerçeveli, fare kartın üstüne gelince ana renkle dolar.",
         "grafit": {
           "action": "Grafit'e dön",
           "hint": "Bütün alanları temanın varsayılan görünümüne (Grafit) çeker. Değişiklik taslağa yazılır; Yayınla'ya basana kadar vitrin değişmez.",
@@ -8222,10 +8415,17 @@
         "question": "{{number}}. sorunun metni",
         "answer": "{{number}}. sorunun cevabı",
         "add": "Soru ekle",
-        "hint": "En çok {{max}} soru; cevaplarda mağaza bilgisi kullanılabilir."
+        "hint": "En çok {{max}} soru; cevaplarda mağaza bilgisi kullanılabilir.",
+        "openFirst": "İlk soru açık gelsin",
+        "openFirstTerm": "open first",
+        "openFirstHint": "Sayfa açıldığında ilk sorunun cevabı görünür.",
+        "singleOpen": "Aynı anda tek soru açık",
+        "singleOpenTerm": "accordion",
+        "singleOpenHint": "Bir soru açılınca açık olan öteki kapanır."
       },
       "related": {
         "source": "Hangi ürünler",
+        "sourceTerm": "source",
         "sources": {
           "same_category": "Ürünün kendi kategorisinden",
           "collection": "Bir koleksiyonun ürünleri",
@@ -8277,6 +8477,7 @@
         "add": "Slayt ekle",
         "options": "Seçenekler",
         "height": "Yükseklik",
+        "heightTerm": "height",
         "heights": {
           "compact": "Kısa",
           "regular": "Standart"
@@ -8285,14 +8486,6 @@
           "compact": "Geniş ekranda alçak bir şerit; altındaki bölümler ilk ekrana daha çok girer.",
           "regular": "Giriş bölümüyle aynı boy; geniş ekranda görsel öne çıkar."
         },
-        "autoplay": "Kendiliğinden geçsin",
-        "autoplayHint": "Kapalıyken slayt yalnız ziyaretçi geçince değişir. Açıkken üzerine gelince ya da odaklanınca bekler, ziyaretçi kendisi geçince durur; hareketi azaltmayı seçen ziyaretçide oynamaz ve durdurma düğmesi görünür.",
-        "interval": "Her slayt kaç saniye",
-        "intervalHint": "{{min}} ile {{max}} saniye arası.",
-        "dots": "Noktaları göster",
-        "dotsHint": "Slaytların altında; hangi slaytta olunduğunu gösterir ve tıklanınca o slayta geçer.",
-        "arrows": "Okları göster",
-        "arrowsHint": "Geniş ekranda (1024 px ve üstü) slaydın iki yanında. Telefonda kaydırarak geçilir.",
         "editSlide": "Slaydı düzenle",
         "previous": "Önceki slayt",
         "next": "Sonraki slayt",
@@ -8323,10 +8516,13 @@
       },
       "googleRating": {
         "excerpts": "Son yorumlardan alıntı göster",
+        "excerptsTerm": "excerpts",
         "excerptsHint": "Gizlediğiniz yorumlar hiçbir zaman çıkmaz; yalnızca 4 ve 5 yıldızlı, metni olan son yorumlar.",
         "count": "Alıntı sayısı",
+        "countTerm": "count",
         "countHint": "1 ile {{max}} arası.",
         "profileLink": "Google'daki sayfanıza bağlantı",
+        "profileLinkTerm": "link",
         "profileLinkHint": "\"Google'da değerlendirmeler\" bağlantısının yanında Google Haritalar'daki sayfanız yeni sekmede açılır.",
         "source": "Puan ve sayı Google'ındır; vitrin onları değiştirmez. Bağlantı ve yorumlar:",
         "sourceLink": "Yorumlar > Google yorumları"
@@ -8401,8 +8597,8 @@
         "subtextPlaceholder": "Saat 14.00'e kadar verilen siparişlerde",
         "link": "Bağlantı (isteğe bağlı)",
         "full": "Bu sayfada zaten {{max}} kayan yazı var (üst bilgideki de sayılır).",
-        "lookHint": "Zemin, hız, yön ve ayraç; ayrıca şeridin çevresindeki boşluk ve genişliği.",
-        "headerLookHint": "Zemin, hız, yön ve ayraç.",
+        "lookHint": "Kapatma düğmesi; şeridin çevresindeki boşluk ve genişliği.",
+        "headerLookHint": "Kapatma düğmesi.",
         "size": {
           "label": "Boy",
           "term": "size",
@@ -8416,14 +8612,16 @@
           "term": "background",
           "stage": "Koyu",
           "primary": "Ana renk",
-          "light": "Açık"
+          "well": "Hafif ton"
         },
         "speed": {
           "label": "Hız",
           "term": "speed",
+          "slowest": "Çok yavaş",
           "slow": "Yavaş",
           "medium": "Orta",
-          "fast": "Hızlı"
+          "fast": "Hızlı",
+          "fastest": "Çok hızlı"
         },
         "direction": {
           "label": "Yön",
@@ -8438,12 +8636,189 @@
           "dot": "Nokta",
           "star": "Yıldız",
           "line": "Çizgi"
+        },
+        "hover_pause": {
+          "label": "Üzerine gelince dur",
+          "term": "pause on hover",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Kapalıyken fare üstündeyken de akar; klavyeyle bir ögeye gelinince yine durur."
+        },
+        "pause_button": {
+          "label": "Durdur düğmesi",
+          "term": "pause button",
+          "always": "Her zaman",
+          "hover": "Üzerine gelince",
+          "hint": "Düğme tamamen kaldırılamaz: hareketli yazıyı durdurabilmek bazı ziyaretçiler için gerekli. Telefonda her zaman görünür."
+        },
+        "weight": {
+          "label": "Yazı kalınlığı",
+          "term": "font weight",
+          "bold": "Kalın",
+          "normal": "Normal"
+        },
+        "uppercase": {
+          "label": "Büyük harf",
+          "term": "uppercase",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Ögelerin ana satırı BÜYÜK HARFLE yazılır; alt satır olduğu gibi kalır."
+        },
+        "gap": {
+          "label": "Ögeler arası boşluk",
+          "term": "gap",
+          "tight": "Sıkı",
+          "normal": "Normal",
+          "wide": "Geniş"
+        },
+        "outline": {
+          "label": "Dolu / çerçeve yazı",
+          "term": "outline",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Ögeler sırayla dolu ve yalnız çerçeveli yazılır. Yalnız büyük boyda."
+        },
+        "closable": {
+          "label": "Kapatma düğmesi",
+          "term": "close button",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Ziyaretçi kapatırsa şerit o tarayıcıda bir daha görünmez; yazıyı değiştirirseniz yeniden görünür."
         }
       },
       "headerBar": {
         "sticky": "Üst bilgi sabit kalsın",
         "stickyHint": "Sayfa kaydırılırken üst bilgi ekranın üstünde durur. Kapalıyken sayfayla birlikte kayar.",
-        "stickyTerm": "sticky"
+        "stickyTerm": "sticky",
+        "search_placeholder": {
+          "label": "Arama kutusundaki yazı",
+          "term": "placeholder",
+          "hint": "Boş bırakırsanız: “Ürün, kategori veya marka ara”."
+        },
+        "search_label": {
+          "label": "Arama düğmesi yazılı olsun",
+          "term": "button",
+          "hint": "Açıkken büyüteç yerine “Ara” yazan dolu düğme çıkar."
+        },
+        "account_text": {
+          "label": "Üst şeritte “Hesabım” yazısı",
+          "term": "link",
+          "hint": "Hesap simgesi menü çubuğunda her zaman durur."
+        },
+        "cart_total": {
+          "label": "Sepette tutarı göster",
+          "term": "subtotal",
+          "hint": "Sepet doluyken simgenin yanında ara toplam yazar."
+        },
+        "highlight_link": {
+          "label": "Vurgulu bağlantı",
+          "term": "link",
+          "hint": "Menü çubuğunda ana menünün sonunda öne çıkan tek bağlantı (ör. Kampanyalar)."
+        },
+        "utility_bar": {
+          "label": "Üst yardımcı şerit",
+          "term": "top bar",
+          "hint": "İnce açık şerit: Menüler'deki “Üst menü” bağlantıları ve Hesabım. Telefonda görünmez."
+        },
+        "phone": {
+          "label": "Telefon numarası",
+          "term": "phone",
+          "hint": "Mağaza bilgilerindeki telefon, aramanın sağında “Müşteri hizmetleri” yazısıyla. Telefon girilmemişse görünmez."
+        },
+        "categories_button": {
+          "label": "“Kategoriler” düğmesi",
+          "term": "dropdown",
+          "hint": "Menü çubuğunun başında; üst kategoriler ve alt kategorileri açılır liste olarak."
+        },
+        "menu_ground": {
+          "label": "Menü çubuğu zemini",
+          "term": "background",
+          "hint": "Yazı ve simge renkleri zemine göre okunur seçilir.",
+          "stage": "Koyu",
+          "primary": "Ana renk",
+          "well": "Hafif ton"
+        },
+        "phoneNote": "Telefonda üst bilgi değişmez: menü, logo, favori ve sepet; altında arama.",
+        "otherHint": "Arama düğmesi, Hesabım yazısı ve sepet tutarı."
+      },
+      "categoryCards": {
+        "columns": {
+          "label": "Bir sıradaki kart",
+          "term": "columns",
+          "hint": "Geniş ekranda yan yana kaç kart; dar ekranda tema kendiliğinden azaltır."
+        },
+        "image_position": {
+          "label": "Görselin yeri",
+          "term": "image position",
+          "hint": "Kategorinin görseli; görseli olmayan kategoride adının baş harfi görünür.",
+          "side": "Yanda",
+          "top": "Üstte",
+          "none": "Yok"
+        },
+        "frame": {
+          "label": "Kart çerçevesi",
+          "term": "border",
+          "lined": "Çizgili",
+          "plain": "Düz zemin"
+        },
+        "links": {
+          "label": "Alt kategori sayısı",
+          "term": "links",
+          "hint": "Her kartta adın altında en çok bu kadar alt kategori; 0 seçerseniz yalnız ad ve görsel. Daha fazlası varsa \"Tümünü gör\" bağlantısı çıkar."
+        },
+        "columns_mobile": {
+          "1": "1 kart",
+          "2": "2 kart",
+          "label": "Telefonda sütun",
+          "term": "columns mobile",
+          "hint": "Telefonda yan yana kaç kart; iki sütunda kartlar daralır."
+        }
+      },
+      "footerBar": {
+        "social": {
+          "label": "Sosyal hesaplar",
+          "term": "social links",
+          "hint": "Adresler Mağaza ayarlarındaki sosyal hesaplarınızdan gelir.",
+          "text": "Yazıyla",
+          "icons": "Simgeyle",
+          "hidden": "Gizli"
+        },
+        "payment_badges": {
+          "label": "Ödeme rozetleri",
+          "term": "payment badges",
+          "hint": "Seçtikleriniz bu sırayla yazılı rozet olarak görünür. Hiçbirini seçmezseniz bağlı ödeme sağlayıcılarınızın işaretleri görünür.",
+          "visa": "Visa",
+          "mastercard": "Mastercard",
+          "troy": "Troy",
+          "amex": "American Express",
+          "bank_transfer": "Havale / EFT",
+          "cash_on_delivery": "Kapıda ödeme",
+          "installments": "Taksit",
+          "up": "{{name}} rozetini yukarı taşı",
+          "down": "{{name}} rozetini aşağı taşı"
+        },
+        "back_to_top": {
+          "label": "Yukarı çık düğmesi",
+          "term": "back to top",
+          "hint": "Sayfa bir ekran boyu kaydırılınca köşede görünür; tıklanınca sayfanın başına döner."
+        },
+        "back_to_top_side": {
+          "label": "Düğmenin yeri",
+          "term": "position",
+          "right": "Sağda",
+          "left": "Solda"
+        },
+        "back_to_top_shape": {
+          "label": "Düğmenin biçimi",
+          "term": "shape",
+          "round": "Yuvarlak",
+          "square": "Köşeli"
+        },
+        "back_to_top_mobile": {
+          "label": "Telefonda da göster",
+          "term": "mobile",
+          "hint": "Kapalıysa düğme yalnız geniş ekranlarda görünür."
+        }
       },
       "main": {
         "fixed": "Bu bölüm sayfanın sabit parçasıdır; gizlenemez, taşınamaz, kopyalanamaz ve kaldırılamaz."
@@ -8459,8 +8834,10 @@
         },
         "listEmpty": "En az bir kategori seçin.",
         "listLimit": "En çok kaç kategori",
+        "listLimitTerm": "limit",
         "listLimitHint": "{{min}} ile {{max}} arası.",
         "showCount": "Ürün sayısını göster",
+        "showCountTerm": "product count",
         "showCountHint": "Her kategorinin yanında yayındaki ürün sayısı.",
         "tiles": "Yandaki karolar",
         "tilesHint": "Girişin yanında en çok {{max}} kategori karosu.",
@@ -8478,11 +8855,15 @@
         "pickLabelHint": "Boş bırakırsanız ürünün adı görünür.",
         "pickLabelPlaceholder": "Çam yeşili",
         "showPrice": "Başlangıç fiyatını göster",
+        "showPriceTerm": "price",
         "showPriceHint": "Seçtiğiniz ürünlerin en düşük güncel fiyatı."
       },
       "categories": {
+        "showCount": "Ürün sayısını göster",
+        "showCountTerm": "product count",
         "showCountHint": "Her karonun altında yayındaki ürün sayısı.",
         "more": "Başlığın yanındaki bağlantı",
+        "moreTerm": "link",
         "moreHint": "Seçmezseniz Tüm kategoriler sayfasına gider."
       },
       "priceBands": {
@@ -8490,18 +8871,118 @@
         "bandsHint": "2 ile 4 bant; üst sınırlar sırayla artar. Her bant mağazayı kendi fiyat aralığıyla süzer.",
         "band": "{{number}}. bant",
         "label": "Bandın adı",
-        "labelUnder": "{{amount}} TL altı",
-        "labelOpen": "{{amount}} TL ve üzeri",
+        "labelUnder": "{{amount}} TL'ye kadar",
+        "labelOpen": "{{amount}} TL üzeri",
         "text": "Kısa açıklama",
-        "textPlaceholder": "Anahtarlık çakılar, mini modeller",
+        "textPlaceholder": "Günlük kullanım, hediyelik",
         "max": "Üst sınır (TL)",
-        "maxHint": "Bant, önceki bandın sınırından bu tutara kadar olan ürünleri kapsar.",
+        "maxHint": "Bant, önceki bandın sınırının üstünden bu tutara kadar (bu tutar dahil) olan ürünleri kapsar.",
         "open": "Üst sınır yok",
         "openHint": "Son bant önceki sınırın üstündeki bütün ürünleri kapsar.",
         "addBand": "Bant ekle",
         "thumbs": "Ürün görselleri",
+        "thumbsTerm": "thumbnails",
         "thumbsHint": "Her bantta o aralıktan birkaç ürün küçük görünür; vitrin fiyatlara göre kendisi seçer.",
-        "thumbsCount": "Bant başına ürün"
+        "thumbsCount": "Bant başına ürün",
+        "thumbsCountTerm": "per band",
+        "full": "Ana sayfada zaten {{max}} fiyat bandı bölümü var (gizli olanlar da sayılır)."
+      },
+      "shelf": {
+        "firstTitle": "İlk listenin başlığı",
+        "list": "{{n}}. liste",
+        "addList": "Liste ekle",
+        "removeList": "Kaldır",
+        "rows": "Sıra sayısı",
+        "rowsTerm": "rows",
+        "rowsOption": "{{n}} sıra",
+        "rowsHint": "Masaüstünde üç sütun; telefonda kartlar alt alta.",
+        "perList": "Liste başına ürün",
+        "perListTerm": "per list",
+        "perListOption": "{{n}} ürün",
+        "perListHint": "Her listede gösterilecek ürün sayısı; listeler masaüstünde yan yana, telefonda alt alta.",
+        "featuredHint": "İlk ürün solda büyük, yanında küçük kartlar (toplam {{n}} ürün); telefonda büyük kart üstte.",
+        "cardCompact": "Bu biçimde kartlar her zaman kompakt çizilir: küçük görsel, ad, puan ve fiyat.",
+        "tabs": "Yanındaki rafla sekmeli birleşsin",
+        "tabsTerm": "tabs",
+        "tabsJoined": "Şu rafla sekmeli tek rafta birleşiyor: {{names}}. Kapatırsan bu raf ayrı çizilir.",
+        "tabsAlone": "Hemen önüne ya da arkasına bir ürün rafı gelirse ikisi sekmeli tek rafta birleşir.",
+        "tabsApart": "Bu raf yanındaki raflarla birleşmez, kendi başlığıyla ayrı çizilir."
+      },
+      "scroller": {
+        "desktop": {
+          "label": "Görünen kart (masaüstü)",
+          "term": "per view",
+          "three": "3",
+          "four": "4",
+          "five": "5",
+          "six": "6",
+          "hint": "Daha dar ekranlarda sayı kendiliğinden azalır."
+        },
+        "mobile": {
+          "label": "Görünen kart (telefon)",
+          "term": "per view",
+          "one": "1",
+          "peek": "1,5",
+          "two": "2",
+          "hint": "1,5: bir sonraki kartın ucu görünür, kaydırılabildiği anlaşılır."
+        },
+        "arrows": {
+          "label": "Oklar",
+          "term": "arrows",
+          "always": "Her zaman",
+          "hover": "Üzerine gelince",
+          "hidden": "Gizli",
+          "hint": "Gizliyken de dokunarak, fareyle ve klavyeyle kaydırılır."
+        },
+        "arrow_style": {
+          "label": "Ok biçimi",
+          "term": "arrow style",
+          "round": "Yuvarlak",
+          "square": "Kare",
+          "plain": "Yalın"
+        },
+        "arrow_position": {
+          "label": "Okların yeri",
+          "term": "position",
+          "head": "Başlığın yanında",
+          "sides": "Yanlarda",
+          "hint": "Yanlardaki oklar telefonda gösterilmez; orada parmakla kaydırılır."
+        },
+        "dots": {
+          "label": "Noktaları göster",
+          "term": "dots",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Kaçıncı sayfada olunduğunu gösteren noktalar."
+        },
+        "autoplay": {
+          "label": "Otomatik geçiş",
+          "term": "autoplay",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Üzerine gelince ve klavye odağındayken durur, görünür bir durdur düğmesi olur; hareketi azaltmayı seçen ziyaretçide çalışmaz."
+        },
+        "speed": {
+          "label": "Geçiş süresi",
+          "term": "interval",
+          "slow": "Yavaş",
+          "medium": "Orta",
+          "fast": "Hızlı"
+        },
+        "loop": {
+          "label": "Döngü",
+          "term": "loop",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Sona gelince başa döner."
+        },
+        "drag": {
+          "label": "Sürükleyerek kaydırma",
+          "term": "drag",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Masaüstünde fareyle tutup sürükleyerek kaydırılır."
+        }
       }
     },
     "preferences": {

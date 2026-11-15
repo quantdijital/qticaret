@@ -70,14 +70,14 @@ Güncel faz ve görevler: `PROGRESS.md`
 
 ## Ortak çalışma (iki geliştirici: Deniz, Oğuzhan)
 - **Dallar:** `dev` ortak ve varsayılan dal; `main` canlı sürüm (yalnız `dev`'den). Her iş `dev`'den açılan kısa ömürlü dalda: `deniz/<konu>`, `oguzhan/<konu>`; 1–3 günde PR ile `dev`'e girer, sonra silinir. `dev`'e doğrudan commit yok, hiçbir dala force push yok.
-- **Çakışmayı küçük tut:** işe başlarken ve PR açmadan önce `git pull --rebase origin dev`. Başkasının alanına (Deniz: backend, üst panel, `infra/`, F16; Oğuzhan: tema ve vitrin) dokunacaksan önce haber ver.
+- **Çakışmayı küçük tut:** işe başlarken ve PR açmadan önce `git pull --rebase origin dev`. Alanlar ağırlık merkezidir, kilit değildir (Deniz: backend, üst panel, `infra/`, F16; Oğuzhan: tema ve vitrin): ikisi de her alanda çalışabilir. Başkasının alanına ya da açık PR'ının dokunduğu dosyalara gireceksen önce `git fetch` ile dallarına ve açık PR'larına bak, PR'ında ona not düş.
 - **Kim olduğun:** `git config user.name` (Deniz → `progress/deniz.md`, Oğuzhan → `progress/oguzhan.md`).
 - **PROGRESS:** oturum notu yalnız kendi `progress/<kişi>.md` dosyana, en üste. `PROGRESS.md` ortak durumdur (aktif faz, sıradaki görev, açık sorular, faz durumu); yalnız bunlar değişince dokunulur.
 - **ADR:** numara önce `adr/README.md`'de ayrılır ve hemen `dev`'e push edilir; sonra ADR kendi dalında yazılır.
 - **Migration:** aynı modülün migration'ını aynı anda tek kişi üretir; birleştirmede migration adlarının benzersizliği kontrol edilir.
 - **Çeviri dosyaları:** yeni anahtar kendi bölümünün altına; çakışmada iki tarafın satırları da tutulur.
 - **`pnpm-lock.yaml`:** paket eklemeyi haber ver; çakışırsa elle düzeltme, `pnpm install` ile yeniden üret. Yeni ortam değişkeni `.env.example`'a yazılır.
-- **PR:** GitHub Actions kapalı (CI kotası); PR'ı açan `pnpm verify:changed` çalıştırır ve sonucu PR'a yazar. Ödeme, auth, migration ve güvenlik dokunan PR'a diğeri bakar; gerisini açan birleştirir.
+- **PR:** GitHub Actions kapalı (CI kotası); PR'ı açan `pnpm verify:changed` çalıştırır ve sonucu PR'a yazar. **PR'ı açan birleştirir; kimse kimsenin onayını beklemez** (sahip kararı 2026-11-15). Ödeme, auth, migration ya da güvenlik dokunan PR birleşmeden önce: (1) `security-reviewer` (ve gerekiyorsa `code-reviewer`) çalıştırılır, bulgular ve nasıl kapatıldıkları PR'a yazılır; (2) ilgili testler koşulur, sonucu PR'a yazılır; (3) kapatılmamış ciddi bulgu varsa birleşmez. Birleşince diğerine PR'da haber notu düşülür; o isterse sonradan bakar, bulgu çıkarsa ayrı düzeltme PR'ı açılır.
 
 ## Oturum düzeni
 Oturum başı: `PROGRESS.md` ve kendi `progress/<kişi>.md` dosyanı oku → `dev`'i çek, iş dalı aç → tek görev seç → plan modu → onay → kodla → test → `/oturum-kapat`.

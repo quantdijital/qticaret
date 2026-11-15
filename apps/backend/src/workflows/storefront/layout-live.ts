@@ -1,8 +1,12 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { BodySection } from "../../lib/storefront/layout"
 import type { RecordLinkKind } from "../../lib/storefront/menus"
+import { shelfSources } from "../../lib/storefront/sections/products"
 import { resolveLinks } from "./menu-links"
 import type { StoredLink } from "./menu-links"
+
+/** Where a rail or a related rail takes its products from. */
+type AnySource = Extract<BodySection, { type: "products" | "related_products" }>["source"]
 
 /** Keeps a group's sections with only the records live now. */
 export type LiveFilter = <T extends BodySection>(group: readonly T[]) => T[]
@@ -44,10 +48,15 @@ export async function liveRecords(
     } else if (section.type === "featured_product") {
       want("product", section.product_id)
     } else if (section.type === "products" || section.type === "related_products") {
-      const { source } = section
-      if (source.kind === "category") want("category", source.category_id)
-      if (source.kind === "collection") want("collection", source.collection_id)
-      if (source.kind === "manual") source.product_ids.forEach((id) => want("product", id))
+      const sources =
+        section.type === "products"
+          ? shelfSources(section).map(({ source }) => source)
+          : [section.source]
+      for (const source of sources) {
+        if (source.kind === "category") want("category", source.category_id)
+        if (source.kind === "collection") want("collection", source.collection_id)
+        if (source.kind === "manual") source.product_ids.forEach((id) => want("product", id))
+      }
     }
   }
   if (wanted.size === 0) {
@@ -56,6 +65,20 @@ export async function liveRecords(
   const resolved = await resolveLinks(container, [...wanted.values()])
   const live = (kind: RecordLinkKind) => (id: string) =>
     resolved.get(`${kind}:${id}`)?.broken === false
+  /** A source as it stands now: its category or collection live, its chosen products those live; else null. */
+  function liveSource<S extends AnySource>(source: S): S | null {
+    if (source.kind === "category") {
+      return live("category")(source.category_id) ? source : null
+    }
+    if (source.kind === "collection") {
+      return live("collection")(source.collection_id) ? source : null
+    }
+    if (source.kind === "manual") {
+      const ids = source.product_ids.filter(live("product"))
+      return ids.length > 0 ? { ...source, product_ids: ids } : null
+    }
+    return source
+  }
   const keep = (section: BodySection): BodySection[] => {
     if (section.type === "categories" && section.category_ids.length > 0) {
       const ids = section.category_ids.filter(live("category"))
@@ -87,18 +110,24 @@ export async function liveRecords(
       const ids = section.brand_ids.filter(live("brand"))
       return ids.length > 0 ? [{ ...section, brand_ids: ids }] : []
     }
-    if (section.type === "products" || section.type === "related_products") {
-      const { source } = section
-      if (source.kind === "category") {
-        return live("category")(source.category_id) ? [section] : []
+    if (section.type === "related_products") {
+      const source = liveSource(section.source)
+      return source ? [{ ...section, source }] : []
+    }
+    if (section.type === "products") {
+      const source = liveSource(section.source)
+      if (source === null) {
+        return []
       }
-      if (source.kind === "collection") {
-        return live("collection")(source.collection_id) ? [section] : []
+      // A columns rail's list whose records are gone is left out; the rail's own decides the rail
+      if (section.variant === "columns") {
+        const lists = section.lists.flatMap((list) => {
+          const kept = liveSource(list.source)
+          return kept ? [{ ...list, source: kept }] : []
+        })
+        return [{ ...section, source, lists }]
       }
-      if (source.kind === "manual") {
-        const ids = source.product_ids.filter(live("product"))
-        return ids.length > 0 ? [{ ...section, source: { ...source, product_ids: ids } }] : []
-      }
+      return [{ ...section, source }]
     }
     return [section]
   }

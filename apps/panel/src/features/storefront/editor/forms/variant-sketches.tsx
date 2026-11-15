@@ -1,5 +1,13 @@
 import type { ReactElement } from "react"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
+import { CategoriesLinked, CategoriesTiles } from "./category-sketches"
+import {
+  ShelfCarousel,
+  ShelfColumns,
+  ShelfCompact,
+  ShelfFeatured,
+  ShelfGrid,
+} from "./shelf-sketches"
 
 // Each variant drawn in small for the "Biçim" choice (adr/0049 Ek 2026-11-14 §2.6):
 // a plain sketch in the current colour, not a picture of the storefront
@@ -79,6 +87,26 @@ const HeaderStandard = () => <HeaderRow mark={6} />
 /** The theme setting's centred header: the wordmark in the middle. */
 const HeaderCentered = () => <HeaderRow mark={47} />
 
+/** N14: a thin strip, the wordmark with a wide search and the phone, a filled menu bar. */
+function HeaderCatalog() {
+  return (
+    <>
+      <rect x={1} y={2} width={110} height={4} rx={1} className="fill-current opacity-10" />
+      <rect x={6} y={11} width={16} height={6} rx={1.5} className="fill-current opacity-70" />
+      <rect
+        x={28}
+        y={10}
+        width={52}
+        height={8}
+        rx={3}
+        className="fill-none stroke-current opacity-50"
+      />
+      <rect x={86} y={11} width={20} height={6} rx={1.5} className="fill-current opacity-40" />
+      <rect x={1} y={22} width={110} height={8} rx={1.5} className="fill-current opacity-70" />
+    </>
+  )
+}
+
 /** Today's opening: one dark stage, the words on its left, the picture on its right. */
 function HeroStandard() {
   return (
@@ -123,7 +151,15 @@ const SKETCHES: {
 } = {
   trust_badges: { strip: TrustStrip, lined: TrustLined },
   hero: { standard: HeroStandard, category_list: HeroCategoryList },
-  header_bar: { standard: HeaderStandard, centered: HeaderCentered },
+  categories: { tiles: CategoriesTiles, linked: CategoriesLinked },
+  header_bar: { standard: HeaderStandard, centered: HeaderCentered, catalog: HeaderCatalog },
+  products: {
+    grid: ShelfGrid,
+    carousel: ShelfCarousel,
+    featured: ShelfFeatured,
+    compact: ShelfCompact,
+    columns: ShelfColumns,
+  },
 }
 
 /** A variant in small, in the current colour; a variant without a sketch yet draws nothing. */

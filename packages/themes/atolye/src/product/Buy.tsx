@@ -14,7 +14,7 @@ import type {
 } from "@qticaret/ui"
 import { useKeptForm } from "@qticaret/ui/hooks/use-kept-form"
 import { emitShopEvent } from "@qticaret/ui/lib/shop-events"
-import { announceCartAdded } from "../frame/events"
+import { announceCartAdded, submitterOf } from "../frame/events"
 import { BuyBar } from "./BuyBar"
 import { choiceText, matching, soldOutOf } from "./choices"
 import { AddonPicks, GiftRecipientFields, picksKurus, picksLimit, picksOf } from "./Extras"
@@ -26,6 +26,7 @@ import { Quantity } from "./Quantity"
 import { StockAlert } from "./StockAlert"
 import { useScrolledAway } from "./use-scrolled-away"
 import { announceVariant, pressedAgain } from "./variant-pictures"
+import { STOCK_ALERT_ID } from "./anchors"
 import type {
   AddonWords,
   AlertWords,
@@ -36,7 +37,7 @@ import type {
 } from "./words"
 
 const FORM = "sepet-formu"
-const ALERT = "stok-bildirimi"
+const ALERT = STOCK_ALERT_ID
 
 /**
  * The buy column's working part: the chosen variant's price (with the
@@ -101,6 +102,8 @@ export function Buy({
   const [quantity, setQuantity] = useState(1)
   const [stale, setStale] = useState(false)
   const sent = useRef<{ variantId: string; quantity: number } | null>(null)
+  // The button that sent it (the page's or the phone bar's): the cart drawer gives the focus back to it
+  const origin = useRef<HTMLElement | null>(null)
   const row = useRef<HTMLDivElement>(null)
   // The phone's bar shows once the row with the button has scrolled away above
   const barOpen = useScrolledAway(row)
@@ -108,7 +111,7 @@ export function Buy({
 
   useEffect(() => {
     if (state.ok && sent.current) {
-      announceCartAdded(words.added)
+      announceCartAdded(words.added, origin.current)
       emitShopEvent({ type: "add_to_cart", ...sent.current })
       sent.current = null
     }
@@ -168,6 +171,7 @@ export function Buy({
         action={form.action}
         onSubmit={(event) => {
           setStale(false)
+          origin.current = submitterOf(event)
           const fields = new FormData(event.currentTarget)
           const variantId = fields.get("variant_id")
           sent.current = {

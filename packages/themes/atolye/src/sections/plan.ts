@@ -1,3 +1,4 @@
+import { shelfJoins } from "@qticaret/types/section-shelf"
 import type { HomeSectionView, ProductCardView } from "@qticaret/ui"
 
 export type Of<T extends HomeSectionView["type"]> = Extract<HomeSectionView, { type: T }>
@@ -11,16 +12,24 @@ export type Block =
   | { kind: "one"; section: Exclude<HomeSectionView, Of<"products">> }
 
 /**
+ * Whether a rail joins its neighbours' tabs: every variant does, each
+ * panel drawn as its own, but a columns rail, whose lists are already side
+ * by side under their own headings (adr/0049 Ek 2026-11-15), and one the
+ * shop set apart (`tabs: "off"`, bilesen-denetimi (b) 2).
+ */
+const joins = (section: Of<"products">) => shelfJoins(section)
+
+/**
  * The shop's sections in its order (adr/0049), product sections that
- * stand next to each other joined into one shelf with tabs. Nothing is
- * moved or invented.
+ * stand next to each other joined into one shelf with tabs (a columns
+ * rail, or one set apart, stands alone). Nothing is moved or invented.
  */
 export function blocksOf(sections: readonly HomeSectionView[]): Block[] {
   const out: Block[] = []
   for (const section of sections) {
     const last = out.at(-1)
     if (section.type === "products") {
-      if (last?.kind === "shelf") {
+      if (last?.kind === "shelf" && joins(section) && last.sections.every(joins)) {
         last.sections.push(section)
       } else {
         out.push({ kind: "shelf", sections: [section] })

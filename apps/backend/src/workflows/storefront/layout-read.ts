@@ -73,8 +73,10 @@ export async function storeLayout(
   const product = keepLive(pages.product)
   const category = keepLive(pages.category)
   const body: BodySection[] = [...home, ...product, ...category]
-  // The header's scrolling strip links like a body section (adr/0049 Ek 2026-11-14 §4.1)
-  const links = [...body, ...headerLinked({ header })].flatMap(linksOf)
+  // The header's scrolling strip links like a body section (adr/0049 Ek 2026-11-14 §4.1),
+  // the catalog header bar's highlighted link too (it always shows)
+  const bar = doc.header.filter((section) => section.type === "header_bar")
+  const links = [...body, ...headerLinked({ header: [...header, ...bar] })].flatMap(linksOf)
   const urls = body.flatMap(imageUrls)
   const [values, resolved, assets, picks, bands] = await Promise.all([
     shopInfoValues(container),
@@ -143,6 +145,11 @@ export async function storeLayout(
             id: section.id,
             type: section.type,
             lines: section.lines.map((line) => fillShopText(line, values)),
+            // How it shows more than one line (docs/tema/bilesen-denetimi (b) 6), as saved
+            mode: section.mode,
+            interval: section.interval,
+            pause_button: section.pause_button,
+            hover_pause: section.hover_pause,
           }
     ),
     home: await Promise.all(home.map((section) => hydrateSection(section, at))),
@@ -159,7 +166,7 @@ export async function storeLayout(
         placement: section.placement,
       }))
     ),
-    main: mainSectionsOf(doc),
+    main: mainSectionsOf(doc, (link) => at.links.get(link) ?? null),
     settings: sharedOf(doc, legacy, values),
   }
 }

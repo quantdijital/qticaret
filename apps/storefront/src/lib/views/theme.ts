@@ -4,7 +4,15 @@ import type {
   ThemeBodyFont,
   ThemeHeadingFont,
 } from "@qticaret/types"
+import {
+  CARD_BUTTON_STYLES,
+  CARD_NO_REVIEWS,
+  CARD_SOLD_OUT_ROWS,
+  SECTION_SPACINGS,
+  SURFACE_STYLES,
+} from "@qticaret/types/storefront"
 import type { ThemeView } from "@qticaret/ui"
+import { cardVariantOf } from "@qticaret/types/section-variants"
 import { brandDeclarations, isHexColor, readableOn } from "./color"
 
 /**
@@ -25,9 +33,25 @@ export const DEFAULT_THEME: StoreThemeSettings = {
   colors: { primary: null, accent: null, background: "steel" },
   typography: { heading: "manrope", body: "manrope" },
   radius: "soft",
-  product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+  product_card: {
+    ratio: "1:1",
+    show_brand: true,
+    show_rating: false,
+    variant: "standard",
+    hover_image: true,
+    delivery_note: true,
+    full_button: true,
+    sale_badge: true,
+    low_stock_badge: true,
+    sold_out_badge: true,
+    sold_out_row: "price",
+    no_reviews: "hide",
+    button_style: "outline",
+  },
   header: { layout: "left", sticky: true },
   buttons: "pill",
+  section_spacing: "normal",
+  surface_style: "filled",
 }
 
 /**
@@ -97,6 +121,39 @@ const oneOf = <T extends string>(value: unknown, allowed: readonly T[], fallback
 const flag = (value: unknown, fallback: boolean): boolean =>
   typeof value === "boolean" ? value : fallback
 
+const CARD_FLAGS = [
+  "hover_image",
+  "delivery_note",
+  "full_button",
+  "sale_badge",
+  "low_stock_badge",
+  "sold_out_badge",
+] as const
+
+/**
+ * The card's stars without reviews (adr/0049 Ek 2026-11-15); a backend
+ * before the choice answers the framed card's `empty_stars` switch it replaced
+ * (on only drew there: another card's stays hidden, as the backend reads it).
+ */
+const noReviews = (raw: unknown) =>
+  oneOf(
+    at(raw, "product_card", "no_reviews"),
+    CARD_NO_REVIEWS,
+    at(raw, "product_card", "empty_stars") === true &&
+      at(raw, "product_card", "variant") === "framed"
+      ? "empty_stars"
+      : DEFAULT_THEME.product_card.no_reviews
+  )
+
+/** The card's switches (E5, adr/0049 Ek 2026-11-14 §3.3 and 2026-11-15), each checked. */
+const cardFlags = (raw: unknown) =>
+  Object.fromEntries(
+    CARD_FLAGS.map((key) => [
+      key,
+      flag(at(raw, "product_card", key), DEFAULT_THEME.product_card[key]),
+    ])
+  ) as Pick<StoreThemeSettings["product_card"], (typeof CARD_FLAGS)[number]>
+
 /** A nested field of an answer read as nothing in particular: what is missing is undefined. */
 const at = (value: unknown, ...keys: string[]): unknown =>
   keys.reduce<unknown>(
@@ -136,12 +193,27 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
       ratio: oneOf(at(raw, "product_card", "ratio"), ["4:5", "1:1", "3:4"], d.product_card.ratio),
       show_brand: flag(at(raw, "product_card", "show_brand"), d.product_card.show_brand),
       show_rating: flag(at(raw, "product_card", "show_rating"), d.product_card.show_rating),
+      variant: cardVariantOf(at(raw, "product_card", "variant")),
+      ...cardFlags(raw),
+      sold_out_row: oneOf(
+        at(raw, "product_card", "sold_out_row"),
+        CARD_SOLD_OUT_ROWS,
+        d.product_card.sold_out_row
+      ),
+      no_reviews: noReviews(raw),
+      button_style: oneOf(
+        at(raw, "product_card", "button_style"),
+        CARD_BUTTON_STYLES,
+        d.product_card.button_style
+      ),
     },
     header: {
       layout: oneOf(at(raw, "header", "layout"), ["centered", "left"], d.header.layout),
       sticky: flag(at(raw, "header", "sticky"), d.header.sticky),
     },
     buttons: oneOf(at(raw, "buttons"), ["pill", "rounded", "square"], d.buttons),
+    section_spacing: oneOf(at(raw, "section_spacing"), SECTION_SPACINGS, d.section_spacing),
+    surface_style: oneOf(at(raw, "surface_style"), SURFACE_STYLES, d.surface_style),
   }
 }
 
@@ -155,6 +227,7 @@ export function themeView(settings: StoreThemeSettings): ThemeView {
     },
     header: { layout: settings.header.layout, sticky: settings.header.sticky },
     buttons: settings.buttons,
+    surface: settings.surface_style,
   }
 }
 

@@ -10,6 +10,7 @@ import {
   useSyncExternalStore,
 } from "react"
 import { useHydrated } from "@qticaret/ui/hooks/use-hydrated"
+import type { ScrollerStep } from "@qticaret/types"
 import { cn } from "@qticaret/ui/lib/utils"
 import { SliderArrows, SliderDots, type SliderWords } from "./SliderControls"
 import { type PlayChoice, isPlaying, wrapIndex } from "./slider-play"
@@ -29,8 +30,11 @@ const watchMotion = (change: () => void) => {
 /**
  * The slider's stage (WAI-ARIA APG carousel): a rail that snaps, one slide
  * wide, so a phone swipes it and a keyboard scrolls it; from 1024 px two
- * round arrows; dots under the slides; a pause button whenever the shop
- * turned autoplay on. Autoplay starts only if the visitor does not ask
+ * arrows (always, or while the pointer is over it; round, square or bare,
+ * the scroller kit's steps); dots under the slides; a pause button whenever
+ * the shop turned autoplay on. Past the last slide is the first unless the
+ * shop turned looping off: then the arrows stop at either end and the
+ * autoplay at the last slide. Autoplay starts only if the visitor does not ask
  * for reduced motion, waits while the pointer or the focus is on the
  * stage or the tab is hidden, and stops for good once the visitor steps
  * on their own (arrow, dot, swipe, keys) or presses pause. Only the slide
@@ -44,6 +48,8 @@ export function SliderStage({
   interval,
   dots,
   arrows,
+  arrowStyle,
+  loop,
   focusable,
   children,
 }: {
@@ -52,7 +58,11 @@ export function SliderStage({
   /** Seconds a slide stays while it plays. */
   interval: number
   dots: boolean
-  arrows: boolean
+  /** When the arrows show (from 1024 px): always, while the pointer is over the stage, never. */
+  arrows: ScrollerStep<"arrows">
+  arrowStyle: ScrollerStep<"arrow_style">
+  /** Past the last slide is the first. */
+  loop: boolean
   /** A slide without a link: the rail itself takes the focus so its keys scroll it. */
   focusable: boolean
   children: ReactNode
@@ -79,14 +89,14 @@ export function SliderStage({
       if (!list || count === 0) {
         return
       }
-      const next = wrapIndex(to, count)
+      const next = loop ? wrapIndex(to, count) : Math.min(count - 1, Math.max(0, to))
       // The rail passes other slides on its way: they are not where it goes
       heading.current = Math.round(list.scrollLeft / list.clientWidth) === next ? null : next
       setMoving(heading.current !== null)
       list.scrollTo({ left: next * list.clientWidth, behavior: reduced() ? "auto" : "smooth" })
       setIndex(next)
     },
-    [count]
+    [count, loop]
   )
 
   // The slide in view follows the rail (a swipe, a key, a step)
@@ -131,7 +141,9 @@ export function SliderStage({
     }
   }, [])
 
-  const running = playing && !held.pointer && !held.focus && !held.hidden
+  // Not looping: the autoplay ends on the last slide
+  const atEnd = !loop && index >= count - 1
+  const running = playing && !atEnd && !held.pointer && !held.focus && !held.hidden
   useEffect(() => {
     if (!running) {
       return
@@ -157,6 +169,7 @@ export function SliderStage({
   return (
     <div
       className="gf-stage relative overflow-hidden rounded-tile"
+      data-arrows={arrows}
       onPointerEnter={(event) => {
         if (event.pointerType === "mouse") {
           setHeld((was) => ({ ...was, pointer: true }))
@@ -220,9 +233,12 @@ export function SliderStage({
           </div>
         ))}
       </div>
-      {controls && arrows && (
+      {controls && arrows !== "hidden" && (
         <SliderArrows
           words={words}
+          shape={arrowStyle}
+          atStart={!loop && index === 0}
+          atEnd={atEnd}
           onStep={(by) => {
             step(index + by)
           }}
@@ -235,7 +251,7 @@ export function SliderStage({
           index={index}
           dots={dots}
           playControl={autoplay}
-          playing={playing}
+          playing={playing && !atEnd}
           onPick={step}
           onPlay={() => {
             setChoice(playing ? "stop" : "play")

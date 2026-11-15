@@ -1,6 +1,17 @@
 import { z } from "@medusajs/framework/zod"
 import { AA_LARGE_TEXT, contrastRatio } from "../../../lib/color/contrast"
 import { defineSection, isPlainObject } from "./define"
+import { PRODUCT_CARD_VARIANTS, productCardSchema, upgradeCard } from "./theme-card"
+import type { ProductCardSettings } from "./theme-card"
+
+export {
+  CARD_BUTTON_STYLES,
+  CARD_NO_REVIEWS,
+  CARD_SOLD_OUT_ROWS,
+  PRODUCT_CARD_VARIANTS,
+  upgradeCard,
+} from "./theme-card"
+export type { ProductCardSettings } from "./theme-card"
 
 /** The storefront themes this build carries (adr/0046 §7); a new theme is a deploy. */
 export const INSTALLED_THEMES = ["atolye"] as const
@@ -79,10 +90,30 @@ export interface ThemeSettings {
     body: (typeof BODY_FONTS)[number]
   }
   radius: "sharp" | "soft" | "round"
-  product_card: { ratio: "4:5" | "1:1" | "3:4"; show_brand: boolean; show_rating: boolean }
+  product_card: ProductCardSettings
   header: { layout: "centered" | "left"; sticky: boolean }
   buttons: "pill" | "rounded" | "square"
+  /** The gap between the home page's sections, on the theme's own scale (`SECTION_SPACINGS`). */
+  section_spacing: (typeof SECTION_SPACINGS)[number]
+  /** How the theme draws its boxes (`SURFACE_STYLES`): a filled tone or a 1 px rule. */
+  surface_style: (typeof SURFACE_STYLES)[number]
 }
+
+/**
+ * The gap between sections, theme-wide (Tezgâh audit K-11, as Shopify
+ * themes' section spacing): `normal` the theme's own gaps, `compact` a
+ * dense catalog's, `roomy` a showcase's. Mirrors `@qticaret/types`'
+ * `SECTION_SPACINGS` (a unit test keeps them equal).
+ */
+export const SECTION_SPACINGS = ["compact", "normal", "roomy"] as const
+
+/**
+ * How the theme draws its boxes (Tezgâh audit Z-04): `filled` a tone darker
+ * than the page (today's, the default), `lined` the page's ground inside a
+ * 1 px rule. Mirrors `@qticaret/types`' `SURFACE_STYLES` (a unit test keeps
+ * them equal).
+ */
+export const SURFACE_STYLES = ["filled", "lined"] as const
 
 const color = z
   .string()
@@ -135,9 +166,56 @@ const GRAFIT: ThemeSettings = {
   colors: { primary: null, accent: null, background: "steel" },
   typography: { heading: "manrope", body: "manrope" },
   radius: "soft",
-  product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+  product_card: {
+    ratio: "1:1",
+    show_brand: true,
+    show_rating: false,
+    variant: "standard",
+    hover_image: true,
+    delivery_note: true,
+    full_button: true,
+    sale_badge: true,
+    low_stock_badge: true,
+    sold_out_badge: true,
+    sold_out_row: "price",
+    no_reviews: "hide",
+    button_style: "outline",
+  },
   header: { layout: "left", sticky: true },
   buttons: "pill",
+  section_spacing: "normal",
+  surface_style: "filled",
+}
+
+/**
+ * Theme settings with the card's later fields (adr/0049 Ek 2026-11-14
+ * §3.3) at their defaults where they are missing: a design's theme or a
+ * preset written before them reads as it always drew (a `standard` card).
+ * A card variant off the list (taken off since, or a newer build's) reads
+ * as `standard` (§2.3). A settings row needs none of this: it is read over
+ * the defaults.
+ */
+export function withCardDefaults(value: unknown): unknown {
+  if (!isPlainObject(value)) {
+    return value
+  }
+  // The section spacing came later still (K-11): without it, the theme's own gaps
+  if (!Object.hasOwn(value, "section_spacing")) {
+    value = { ...value, section_spacing: GRAFIT.section_spacing }
+  }
+  // So did the surface style (Z-04): without it, today's filled boxes
+  if (isPlainObject(value) && !Object.hasOwn(value, "surface_style")) {
+    value = { ...value, surface_style: GRAFIT.surface_style }
+  }
+  if (!isPlainObject(value) || !isPlainObject(value["product_card"])) {
+    return value
+  }
+  const card = { ...GRAFIT.product_card, ...(upgradeCard(value["product_card"]) as object) }
+  const listed: readonly unknown[] = PRODUCT_CARD_VARIANTS
+  return {
+    ...value,
+    product_card: listed.includes(card.variant) ? card : { ...card, variant: "standard" },
+  }
 }
 
 /** `group`'s own `keys`, for spreading over a default group; nothing from anything but an object. */
@@ -157,7 +235,9 @@ const kept = (group: unknown, keys: readonly string[]): Record<string, unknown> 
  */
 export function upgradeStoredTheme(stored: Record<string, unknown>): Record<string, unknown> {
   if (Object.hasOwn(stored, "settings_version")) {
-    return stored
+    // The card's `empty_stars` switch became the no-reviews choice (adr/0049 Ek 2026-11-15)
+    const card = upgradeCard(stored["product_card"])
+    return card === stored["product_card"] ? stored : { ...stored, product_card: card }
   }
   const card = kept(stored["product_card"], ["ratio", "show_brand"])
   if (card["ratio"] === "4:5") {
@@ -194,15 +274,11 @@ export const themeSection = defineSection<ThemeSettings>(
       .strict(),
     typography: z.object({ heading: z.enum(HEADING_FONTS), body: z.enum(BODY_FONTS) }).strict(),
     radius: z.enum(["sharp", "soft", "round"]),
-    product_card: z
-      .object({
-        ratio: z.enum(["4:5", "1:1", "3:4"]),
-        show_brand: z.boolean(),
-        show_rating: z.boolean(),
-      })
-      .strict(),
+    product_card: productCardSchema,
     header: z.object({ layout: z.enum(["centered", "left"]), sticky: z.boolean() }).strict(),
     buttons: z.enum(["pill", "rounded", "square"]),
+    section_spacing: z.enum(SECTION_SPACINGS),
+    surface_style: z.enum(SURFACE_STYLES),
   },
   GRAFIT,
   (values, ctx) => {

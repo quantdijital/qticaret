@@ -133,7 +133,7 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     expect(declared(tokens, "--radius-pill")).not.toContain("--radius-scale")
   })
 
-  it("shapes buttons, icon buttons and fields with the button choice; chips and counts stay pills", () => {
+  it("shapes buttons, icon buttons, fields and tabs with the button choice; chips and counts stay pills", () => {
     expect(entry.style(chosen({ buttons: "pill" }))).toBeNull()
     expect(entry.style(chosen({ buttons: "rounded" }))).toBe(":root{--button-radius:0.75rem}")
     expect(entry.style(chosen({ buttons: "square" }))).toBe(":root{--button-radius:0px}")
@@ -143,8 +143,9 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     for (const pill of [".gf-chip", ".gf-count"]) {
       expect(ruleBody(controls, pill), pill).toContain("border-radius: var(--radius-pill);")
     }
+    // The shelf's tabs are controls: they take the button shape, pills by default (K-22)
     expect(ruleBody(atolyeCss("tabs.css"), ".gf-tab")).toContain(
-      "border-radius: var(--radius-pill);"
+      "border-radius: var(--button-radius, var(--radius-pill));"
     )
     // A box field (a textarea) keeps the inner corner, never rounder than the button
     expect(declared(tokens, "--radius-box")).toBe(
@@ -202,7 +203,7 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     }
     // Badges, option chips and counts: pills whatever the shape
     for (const file of [
-      "parts/ProductCard.tsx",
+      "parts/card-parts.tsx",
       "product/Price.tsx",
       "product/Options.tsx",
       "product/InstallmentPlans.tsx",
@@ -229,7 +230,8 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     expect(atolyeCss("listing/Toolbar.tsx")).toContain("rounded-pill bg-mark px-2")
     expect(atolyeCss("account/BillingForm.tsx")).toContain('"bg-mark text-mark-ink"')
     // The sale badge and the stock badges on a card keep their fixed colours
-    const card = atolyeCss("parts/ProductCard.tsx")
+    // (`card-parts.tsx`: both card variants draw the same pills)
+    const card = atolyeCss("parts/card-parts.tsx")
     expect(card).toContain("rounded-pill bg-deal px-2 py-1 text-deal-ink")
     expect(card).not.toMatch(/bg-mark|highlight/)
     expect(atolyeCss("product/Price.tsx")).toContain("bg-deal")
@@ -242,6 +244,83 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
       "checkout/Consents.tsx",
     ]) {
       expect(atolyeCss(file), file).toContain("bg-highlight-soft")
+    }
+  })
+
+  it("scales every section gap with the section spacing, the theme's own at normal (K-11)", () => {
+    expect(entry.style(chosen({ section_spacing: "normal" }))).toBeNull()
+    expect(entry.style(chosen({ section_spacing: "compact" }))).toBe(":root{--section-scale:0.55}")
+    expect(entry.style(chosen({ section_spacing: "roomy" }))).toBe(":root{--section-scale:1.2}")
+    for (const token of ["--section-gap-s", "--section-gap", "--section-gap-l"]) {
+      expect(declared(tokens, token)).toMatch(/^calc\(\d+px \* var\(--section-scale, 1\)\)$/)
+    }
+    // A wide screen's gap at compact: 66 px, a dense catalog's rhythm
+    const wide = /^calc\((\d+)px/.exec(declared(tokens, "--section-gap"))
+    expect(Number(wide?.[1]) * 0.55).toBe(66)
+    expect(themeSettings({ section_spacing: "dense" }, null).section_spacing).toBe("normal")
+    expect(themeSettings({ section_spacing: "compact" }, null).section_spacing).toBe("compact")
+  })
+
+  it("draws the boxes filled by default and lined on the page's ground when asked (Z-04)", () => {
+    expect(entry.style(chosen({ surface_style: "filled" }))).toBeNull()
+    expect(entry.style(chosen({ surface_style: "lined" }))).toBe(
+      ":root{--box-ground:var(--color-paper);--box-line:var(--color-rule)}"
+    )
+    expect(themeSettings({ surface_style: "glass" }, null).surface_style).toBe("filled")
+    expect(themeSettings({ surface_style: "lined" }, null).surface_style).toBe("lined")
+    // One class for every box: the filled tone and a rule only through the variables
+    const surface = atolyeCss("surface.css")
+    expect(ruleBody(surface, ".gf-box")).toContain("var(--box-ground, var(--color-paper-2))")
+    expect(ruleBody(surface, ".gf-box")).toContain("var(--box-line, transparent)")
+    for (const file of [
+      "product/Shipping.tsx",
+      "product/ReviewList.tsx",
+      "product/Assurances.tsx",
+      "product/Community.tsx",
+      "listing/FilterPanel.tsx",
+      "frame/CartSheet.tsx",
+      "frame/CartSheetLine.tsx",
+    ]) {
+      expect(atolyeCss(file), file).toContain("gf-box")
+      expect(atolyeCss(file), file).not.toMatch(/rounded-(media|tile) bg-paper-2/)
+    }
+    expect(atolyeCss("parts/CategoryTile.tsx")).toContain("gf-subtile")
+  })
+
+  it("draws the cart count on a graphite bar in the stage's light ink, not the shop's colour (audit C)", () => {
+    const count = ruleBody(
+      atolyeCss("header-catalog.css"),
+      '.gf-menubar[data-ground="stage"] .gf-on-bar .gf-count'
+    )
+    expect(count).toContain("background: var(--color-stage-text)")
+    expect(count).toContain("color: var(--color-stage)")
+  })
+
+  it("keeps a sale apart from a warm main colour: a graphite badge, an ink price (K-05)", () => {
+    const deal = ["--color-deal:var(--color-text)", "--color-deal-ink:var(--color-paper)"]
+    // Tezgâh's red and reds around it, its orange set's (old and new) and an amber
+    for (const primary of [
+      "#b3261e",
+      "#be2323",
+      "#d32f2f",
+      "#a4161a",
+      "#c2410c",
+      "#b03b0b",
+      "#d38e00",
+    ]) {
+      expect(atolyeDeclarations(colours({ primary })), primary).toEqual(deal)
+    }
+    // Wine, navy, green, a yellow, the theme's own ink and a brown keep the theme's sale red
+    for (const primary of [
+      "#7a1a48",
+      "#2f6690",
+      "#33709c",
+      "#1d6835",
+      "#e5c100",
+      null,
+      "#6b4a3a",
+    ]) {
+      expect(atolyeDeclarations(colours({ primary })), String(primary)).toEqual([])
     }
   })
 

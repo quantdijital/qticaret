@@ -6,15 +6,13 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { EmptyLine, RowActions } from "@/features/settings/components/storefront-rows"
 import type { BannerSection, BannerSlide } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
-import { F, TextField } from "./fields"
+import { BannerSlideFields } from "./banner-slide"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
-import { ImageField } from "./image-field"
-import { LinkField } from "./link-field"
 
 const B = "storefront.editor.banner"
 
-/** Images that slide in turn, each with a heading, a line and a link of its own. */
+/** The band's pictures side by side, each with its words, one or two buttons and its tone. */
 export function BannerForm({ section, problems, onChange }: SectionFormProps<BannerSection>) {
   const { t } = useTranslation()
   const problem = useProblemText()
@@ -61,49 +59,13 @@ export function BannerForm({ section, problems, onChange }: SectionFormProps<Ban
                     }}
                   />
                 </div>
-                <ImageField
-                  id={`${id}-image`}
-                  label={t(`${F}.image`)}
-                  image={slide.image}
-                  removable={false}
-                  altError={problem(problems[`${at}.image`], L.alt)}
-                  onChange={(image) => {
-                    if (image) {
-                      setSlide(index, { image }, "image")
-                    }
-                  }}
-                />
-                <TextField
-                  id={`${id}-heading`}
-                  label={t(`${F}.heading`)}
-                  value={slide.heading}
-                  max={L.heading}
-                  tokens
-                  error={problem(problems[`${at}.heading`], L.heading)}
-                  onChange={(heading) => {
-                    setSlide(index, { heading }, "heading")
-                  }}
-                />
-                <TextField
-                  id={`${id}-text`}
-                  label={t(`${F}.text`)}
-                  value={slide.text}
-                  max={L.slideText}
-                  tokens
-                  multiline
-                  error={problem(problems[`${at}.text`], L.slideText)}
-                  onChange={(text) => {
-                    setSlide(index, { text }, "text")
-                  }}
-                />
-                <LinkField
-                  id={`${id}-link`}
-                  label={t(`${B}.link`)}
-                  hint={t(`${B}.linkHint`)}
-                  link={slide.link}
-                  error={problem(problems[`${at}.link`])}
-                  onChange={(link, field) => {
-                    setSlide(index, { link }, field && "link.label")
+                <BannerSlideFields
+                  id={id}
+                  at={at}
+                  slide={slide}
+                  problems={problems}
+                  onChange={(next, field) => {
+                    setSlide(index, next, field)
                   }}
                 />
               </li>
@@ -142,9 +104,12 @@ export function BannerForm({ section, problems, onChange }: SectionFormProps<Ban
             ...section.slides,
             ...assets.map((asset) => ({
               image: { url: asset.url, alt: asset.alt },
+              mobile_image: null,
               heading: null,
               text: null,
               link: null,
+              second_link: null,
+              tone: "light" as const,
             })),
           ])
         }}

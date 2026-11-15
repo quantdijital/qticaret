@@ -76,28 +76,32 @@ function Strip({ badges }: { badges: readonly TrustBadgeView[] }) {
 /**
  * GB4 (adr/0049 Ek 2026-11-14 §3.2): one framed row of boxes split by
  * hairlines; two by two on a phone, a column per badge from 1024 px; the
- * icon beside its words, no chip. Each box draws its right and bottom
- * hairline as a one-pixel shadow on the field-coloured frame; the frame
- * clips the ones on its edge.
+ * icon beside its words, no chip. Between 1024 and 1279 px the boxes are
+ * tighter (16 px in, a 24 px icon, the phone's type), so four badges'
+ * words keep to one line each and the row stays even (third audit Z-07). Each box draws its right and bottom
+ * hairline as a one-pixel shadow on the frame; the frame
+ * clips the ones on its edge. The frame is the field colour, or with the
+ * theme's lined boxes (`surface_style`, `--box-ground`) the page's ground,
+ * as the other boxes on the page (fourth audit W-03).
  */
 function Lined({ badges }: { badges: readonly TrustBadgeView[] }) {
   return (
     <ul
       data-variant="lined"
-      className={`grid auto-rows-fr grid-cols-2 overflow-hidden rounded-inner border border-rule bg-field ${columnsFor(badges)}`}
+      className={`grid auto-rows-fr grid-cols-2 overflow-hidden rounded-inner border border-rule bg-[color:var(--box-ground,var(--color-field))] ${columnsFor(badges)}`}
     >
       {badges.map((badge) => (
         <li
           key={badge.title}
-          className="flex items-center gap-3 p-3 shadow-[1px_0_0_0_var(--color-rule),0_1px_0_0_var(--color-rule)] last:odd:col-span-2 lg:gap-4 lg:px-6 lg:py-4 lg:last:odd:col-span-1"
+          className="flex items-center gap-3 p-3 shadow-[1px_0_0_0_var(--color-rule),0_1px_0_0_var(--color-rule)] last:odd:col-span-2 lg:px-4 lg:last:odd:col-span-1 xl:gap-4 xl:px-6 xl:py-4"
         >
-          <TrustIcon icon={badge.icon} className="size-6 shrink-0 text-text-2 lg:size-8" />
+          <TrustIcon icon={badge.icon} className="size-6 shrink-0 text-text-2 xl:size-8" />
           <span className="flex min-w-0 flex-col gap-px leading-snug">
-            <span className="text-sm font-extrabold tracking-[-0.01em] text-balance lg:text-md">
+            <span className="text-sm font-extrabold tracking-[-0.01em] text-balance xl:text-md">
               {badge.title}
             </span>
             {badge.text && (
-              <span className="text-2xs text-balance text-text-2 lg:text-xs">{badge.text}</span>
+              <span className="text-2xs text-balance text-text-2 xl:text-xs">{badge.text}</span>
             )}
           </span>
         </li>

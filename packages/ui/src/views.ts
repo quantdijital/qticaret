@@ -1,4 +1,4 @@
-import type { TrustIcon } from "@qticaret/types"
+import type { AnnouncementSettings, SocialNetwork, TrustIcon } from "@qticaret/types"
 import type { CategoryCardView, ShopMarkView } from "./card-views"
 import type { CartLineView, FreeShippingView } from "./cart-views"
 import type { BottomNavView, ThemeView } from "./frame-views"
@@ -98,6 +98,8 @@ export interface SocialLinkView {
   /** The network's name ("Instagram"), or the address's host. */
   label: string
   href: string
+  /** The network a theme draws a glyph for; none: an address it does not know (its first letter). */
+  network?: SocialNetwork | null
 }
 
 /** The cart as the header's drawer shows it (D6): its lines read-only, the subtotal. */
@@ -119,6 +121,14 @@ export interface ShopView {
   cart: MiniCartView | null
   /** The announcement bar's lines; none: no bar. */
   announcements: string[]
+  /**
+   * How the bar shows more than one line (docs/tema/bilesen-denetimi (b) 6):
+   * only the first, taking turns every `interval` (stopped under the pointer
+   * when `hover_pause`, on focus, by its pause button and under reduced
+   * motion), or side by side on a wide screen. Absent (an older storefront):
+   * the first line alone.
+   */
+  announcementSettings?: AnnouncementSettings
   /**
    * The header group's scrolling strip, drawn above the shop's header on
    * every page but the checkout's (adr/0049 Ek 2026-11-14 §4.1); none or

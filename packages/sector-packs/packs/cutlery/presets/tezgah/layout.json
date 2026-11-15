@@ -1,0 +1,371 @@
+{
+  "header": [
+    {
+      "id": "mainheader",
+      "type": "header_bar",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "catalog",
+      "sticky": true,
+      "search_placeholder": "Model, çelik ya da kategori ara",
+      "search_label": false,
+      "account_text": true,
+      "cart_total": true,
+      "highlight_link": { "$href": "/kampanyalar", "label": "İndirimdekiler" },
+      "utility_bar": true,
+      "phone": true,
+      "categories_button": true,
+      "menu_ground": "stage"
+    }
+  ],
+  "home": [
+    {
+      "id": "tezgahacilis",
+      "type": "hero",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "category_list",
+      "eyebrow": null,
+      "heading": "Bıçak, çakı ve kamp aletleri",
+      "text": "Her modelin çeliği, namlu boyu ve sertliği ürün sayfasında yazılı. Kategoriden seçin ya da aramaya model adını yazın.",
+      "links": [{ "$href": "/magaza", "label": "Tüm ürünler" }],
+      "image": null,
+      "list": { "kind": "top" },
+      "list_limit": 8,
+      "show_count": true,
+      "tiles": [],
+      "chips": [],
+      "picks": [],
+      "show_price": true
+    },
+    {
+      "id": "guvenseridi",
+      "type": "trust_badges",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "lined",
+      "look": {
+        "space_outer": "none",
+        "space_inner": null,
+        "ground": null,
+        "align": null,
+        "width": null
+      }
+    },
+    {
+      "id": "yenirafi",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Yeni gelenler",
+      "source": { "kind": "newest" },
+      "limit": 12,
+      "more": { "$href": "/magaza", "label": "Tüm ürünler" },
+      "card_variant": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "square",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "off"
+      }
+    },
+    {
+      "id": "avrafi",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Av bıçakları",
+      "source": { "kind": "category", "category_id": { "$handle": "category:av-bicaklari" } },
+      "limit": 12,
+      "more": { "$href": "/kategori/av-bicaklari", "label": "Tüm av bıçakları" },
+      "card_variant": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "square",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "off"
+      }
+    },
+    {
+      "id": "kamprafi",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Kamp bıçakları",
+      "source": { "kind": "category", "category_id": { "$handle": "category:kamp-bicaklari" } },
+      "limit": 12,
+      "more": {
+        "$href": "/kategori/outdoor-ve-kamp/kamp-bicaklari",
+        "label": "Tüm kamp bıçakları"
+      },
+      "card_variant": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "square",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "off"
+      }
+    },
+    {
+      "id": "sefrafi",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Şef bıçakları",
+      "source": { "kind": "category", "category_id": { "$handle": "category:sef-bicaklari" } },
+      "limit": 12,
+      "more": {
+        "$href": "/kategori/mutfak-ve-sef-bicaklari/sef-bicaklari",
+        "label": "Tüm şef bıçakları"
+      },
+      "card_variant": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "square",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "off"
+      }
+    },
+    {
+      "id": "yakinplan",
+      "type": "featured_product",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": null,
+      "text": "Katmanlı Şam çeliği namlu. Çeliği, ölçüleri ve bakımı ürün sayfasında yazılı.",
+      "product_id": { "$handle": "product:karacelik-alageyik-sam-celigi-av-bicagi" }
+    },
+    {
+      "id": "fiyatbantlari",
+      "type": "price_bands",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Fiyata göre",
+      "bands": [
+        {
+          "label": "1.000 TL’ye kadar",
+          "text": "Cep çakıları, bileme taşları ve kılıflar",
+          "max": 1000
+        },
+        { "label": "2.500 TL’ye kadar", "text": "Av ve kamp bıçakları, baltalar", "max": 2500 },
+        { "label": "5.000 TL’ye kadar", "text": "Şef bıçakları ve mutfak setleri", "max": 5000 },
+        { "label": "5.000 TL üstü", "text": "Şam çeliği ve koleksiyon parçaları", "max": null }
+      ],
+      "thumbs": 0
+    },
+    {
+      "id": "coksatanlar",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "featured",
+      "title": "Çok satanlar",
+      "source": { "kind": "best_sellers", "days": 90 },
+      "limit": 7,
+      "more": null,
+      "card_variant": null
+    },
+    {
+      "id": "kullanimagore",
+      "type": "categories",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "linked",
+      "look": {
+        "space_outer": null,
+        "space_inner": "medium",
+        "ground": "well",
+        "align": null,
+        "width": null
+      },
+      "title": "Kullanıma göre",
+      "category_ids": [
+        { "$handle": "category:outdoor-ve-kamp" },
+        { "$handle": "category:mutfak-ve-sef-bicaklari" },
+        { "$handle": "category:kasap-bicaklari" }
+      ],
+      "columns": 3,
+      "image_position": "side",
+      "frame": "lined",
+      "links": 5,
+      "show_count": true,
+      "more": { "$href": "/kategoriler", "label": "Tüm kategoriler" }
+    },
+    {
+      "id": "indirimdekiler",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "compact",
+      "title": "İndirimdekiler",
+      "source": { "kind": "on_sale" },
+      "limit": 6,
+      "more": { "$href": "/kampanyalar", "label": "Tüm indirimler" },
+      "card_variant": null,
+      "rows": 2
+    },
+    {
+      "id": "yazilar",
+      "type": "posts",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": null,
+      "limit": 3
+    },
+    {
+      "id": "markalar",
+      "type": "brands",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "look": {
+        "space_outer": null,
+        "space_inner": "medium",
+        "ground": "well",
+        "align": null,
+        "width": null
+      },
+      "title": null,
+      "brand_ids": []
+    },
+    {
+      "id": "kisalisteler",
+      "type": "products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "columns",
+      "title": "Kılıçlar",
+      "source": { "kind": "category", "category_id": { "$handle": "category:kiliclar" } },
+      "limit": 4,
+      "more": null,
+      "card_variant": null,
+      "per_list": 3,
+      "lists": [
+        {
+          "title": "Mutfak bıçak setleri",
+          "source": {
+            "kind": "category",
+            "category_id": { "$handle": "category:mutfak-bicak-setleri" }
+          }
+        },
+        {
+          "title": "Kasap bıçakları",
+          "source": { "kind": "category", "category_id": { "$handle": "category:kasap-bicaklari" } }
+        }
+      ]
+    },
+    {
+      "id": "musteriyorumlari",
+      "type": "reviews",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Müşteri yorumları",
+      "limit": 3
+    }
+  ],
+  "footer": [
+    {
+      "id": "mainfooter",
+      "type": "footer_bar",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "ledger",
+      "social": "icons",
+      "payment_badges": ["visa", "mastercard", "troy", "bank_transfer", "cash_on_delivery"],
+      "back_to_top": true,
+      "back_to_top_side": "right",
+      "back_to_top_shape": "square",
+      "back_to_top_mobile": true
+    },
+    {
+      "id": "ebultenkutusu",
+      "type": "newsletter",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "title": "Yeni modeller e-postanızda",
+      "text": "Yeni gelen modelleri ve indirimleri e-postayla haber veririz."
+    }
+  ],
+  "product": [
+    {
+      "id": "benzerurunler",
+      "type": "related_products",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "carousel",
+      "title": "Benzer ürünler",
+      "source": { "kind": "same_category" },
+      "limit": 12,
+      "card_variant": null,
+      "scroller": {
+        "desktop": "four",
+        "mobile": "peek",
+        "arrows": "always",
+        "arrow_style": "square",
+        "arrow_position": "head",
+        "dots": "off",
+        "autoplay": "off",
+        "speed": "medium",
+        "loop": "off",
+        "drag": "off"
+      }
+    }
+  ],
+  "category": [
+    {
+      "id": "kategoriguvence",
+      "type": "trust_badges",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "lined",
+      "placement": "bottom"
+    }
+  ]
+}

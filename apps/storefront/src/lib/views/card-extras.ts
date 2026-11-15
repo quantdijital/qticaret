@@ -12,6 +12,7 @@ import type {
   ShopRatingView,
   Translate,
 } from "@qticaret/ui"
+import { unrated } from "./card-shown"
 import type {
   StoreCardFacts,
   StoreImage,
@@ -75,16 +76,17 @@ export function withCardFacts(
   return cards.map((card) => {
     const fact = facts[card.id]
     if (!fact) {
-      return card
+      return unrated(card)
     }
     const quick = fact.quick_add && card.price && card.available ? fact.quick_add : null
     const rating = options.showRating ? cardRating(fact.rating, t) : null
-    return {
+    const read = {
       ...card,
       stock: fact.stock,
       quickAdd: quick ? { variantId: quick.variant_id } : null,
-      ...(rating ? { rating } : {}),
     }
+    // A backend before the stars says nothing of reviews: no empty stars for it
+    return rating ? { ...read, rating } : fact.rating === undefined ? unrated(read) : read
   })
 }
 

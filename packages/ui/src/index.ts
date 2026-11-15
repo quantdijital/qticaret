@@ -1,19 +1,24 @@
 export { formatLira } from "./money"
 export { ResponsiveImage } from "./ResponsiveImage"
 export {
+  CARD_VARIANTS,
   SECTION_VARIANTS,
+  cardVariantOf,
   defaultVariant,
   drawnVariant,
   hasVariants,
   variantOf,
 } from "./section-variants"
 export type {
+  CardVariant,
+  CategoriesVariant,
   CategoryMainVariant,
   DefaultVariant,
   FooterBarVariant,
   HeaderBarVariant,
   HeroVariant,
   ProductMainVariant,
+  ProductsVariant,
   SectionVariant,
   TrustBadgesVariant,
   VariantSectionType,
@@ -40,12 +45,15 @@ export type {
 } from "./theme"
 export type * from "./account-views"
 export type * from "./addon-views"
+export type * from "./banner-views"
 export type * from "./card-views"
 export type * from "./catalog-views"
+export type * from "./category-card-views"
 export type * from "./checkout-views"
 export type * from "./frame-views"
 export type * from "./home-views"
 export type * from "./main-views"
 export type * from "./marquee-views"
 export type * from "./payment-link-views"
+export type * from "./shelf-views"
 export type * from "./views"

@@ -11,17 +11,25 @@ import { MenuSheet } from "./MenuSheet"
 import { SearchBox } from "./SearchBox"
 import { PHONE_SEARCH } from "./SearchLink"
 import { Wordmark } from "./Wordmark"
+import { HeaderCatalog, catalogParts } from "./HeaderCatalog"
+import { LABELLED, accountOf, searchOf } from "./header-words"
 
-const LABELLED =
-  "gf-icon-btn flex-col gap-0.5 px-2 text-2xs font-semibold leading-none max-lg:size-11 lg:min-w-16 lg:py-1"
+/** The catalog header's strip and phone when the shop's bar is drawn as it (else null). */
+export function catalogOf(shop: ShopView) {
+  const catalog = shop.headerBar?.catalog
+  return catalog && drawnVariant("header_bar", shop.headerBar?.variant, ["catalog"]) === "catalog"
+    ? catalogParts(shop, catalog)
+    : null
+}
 
 /** The header bar's variants this theme draws (`drawnVariant`). */
-export const HEADER_VARIANTS = ["standard", "centered"] as const
+export const HEADER_VARIANTS = ["standard", "centered", "catalog"] as const
 
 /**
  * The header, sticky unless the shop says not, in the design's variant
  * (adr/0049 Ek 2026-11-14 §5; the theme's `header.layout` "centered" is
- * the bar's `centered`, adr/0062 karar 10). A phone, both: a 56 px row
+ * the bar's `centered`, adr/0062 karar 10; `catalog`, N14, is
+ * `HeaderCatalog`'s own drawing). A phone, both: a 56 px row
  * (the menu, the wordmark, favourites, the cart with its count) over the
  * 48 px search pill, 112 px in all; centred, the wordmark stands in the
  * row's middle. From 1024 px, standard: the wordmark, a wide search in
@@ -48,40 +56,27 @@ export function Header({
   /** The cart drawer's quantity and remove buttons; none: its lines read only. */
   changeCartLine?: ((form: FormData) => Promise<void>) | undefined
 }) {
-  const menu = menuWords(shop.categories, t)
-  const search = {
-    words: {
-      label: t("search.label"),
-      placeholder: t("search.placeholder"),
-      submit: t("search.submit"),
-      clear: t("search.clear"),
-      results: t("search.help"),
-      products: t("search.suggest.products"),
-      categories: t("search.suggest.categories"),
-      brands: t("search.suggest.brands"),
-      phrases: t("search.suggest.phrases"),
-      // Filled in the browser with the answer's own numbers and words
-      all: t("search.suggest.all"),
-      none: t("search.suggest.none"),
-      browse: t("search.suggest.browse"),
-      loading: t("search.suggest.loading"),
-      error: t("search.suggest.error"),
-      found: t("search.suggest.found"),
-      priceBefore: t("price.before"),
-      from: t("price.from"),
-    },
-    suggest: searchSuggest,
-    // A search that finds nothing offers the shop's own top categories
-    browse: shop.categories.slice(0, 6).map(({ label, path }) => ({ label, path })),
-  }
-  // The design's header bar (adr/0049 Ek 2026-11-14 §5): a variant this theme lacks falls
-  // to the standard drawing; its own `sticky` over the theme's
+  // The design's header bar (adr/0049 Ek 2026-11-14 §5): `catalog` is its own drawing (N14),
+  // `centered` and `standard` are drawn here, a variant this theme lacks falls to the
+  // standard drawing; its own `sticky` over the theme's
   const variant = drawnVariant("header_bar", shop.headerBar?.variant, HEADER_VARIANTS)
-  const centered = variant === "centered"
   const sticky = shop.headerBar?.sticky ?? shop.theme.header.sticky
-  const account = shop.customerName
-    ? t("nav.account_of", { name: shop.customerName })
-    : t("nav.account")
+  if (variant === "catalog" && shop.headerBar?.catalog) {
+    return (
+      <HeaderCatalog
+        shop={shop}
+        catalog={shop.headerBar.catalog}
+        sticky={sticky}
+        t={t}
+        searchSuggest={searchSuggest}
+        changeCartLine={changeCartLine}
+      />
+    )
+  }
+  const centered = variant === "centered"
+  const menu = menuWords(shop.categories, t)
+  const search = searchOf(shop, t, searchSuggest)
+  const account = accountOf(shop, t)
 
   const sheet = (
     <MenuSheet
@@ -136,7 +131,7 @@ export function Header({
         "z-(--z-sticky-nav) border-b border-rule bg-paper",
         sticky ? "gf-head sticky top-0" : "relative"
       )}
-      data-variant={variant}
+      data-variant={variant === "catalog" ? "standard" : variant}
     >
       {centered ? (
         <Container

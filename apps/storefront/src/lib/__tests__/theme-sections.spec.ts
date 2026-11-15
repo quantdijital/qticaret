@@ -50,6 +50,31 @@ describe("the theme's FAQ section", () => {
     expect(html).not.toContain("<script")
   })
 
+  it("keeps every question closed and on its own by default (bilesen-denetimi (b) 8)", () => {
+    const html = renderToStaticMarkup(
+      createElement(atolyeTheme.HomePage, { t, view: { sections: [faq] } })
+    )
+
+    expect(html).not.toMatch(/<details[^>]* open/)
+    expect(html).not.toMatch(/<details[^>]* name=/)
+  })
+
+  it("opens the first question and ties them into one open at a time, as the shop asks", () => {
+    const html = renderToStaticMarkup(
+      createElement(atolyeTheme.HomePage, {
+        t,
+        view: {
+          sections: [{ ...faq, settings: { open_first: "on", single_open: "on" } }],
+        },
+      })
+    )
+
+    expect(html.match(/<details[^>]* open=""/g)).toHaveLength(1)
+    expect(html.indexOf('open=""')).toBeLessThan(html.indexOf("İade var mı?"))
+    expect(html.match(/<details[^>]* name="sss-sss"/g)).toHaveLength(2)
+    expect(html).not.toContain("<script")
+  })
+
   it("takes the shop's own title", () => {
     const html = renderToStaticMarkup(
       createElement(atolyeTheme.HomePage, {

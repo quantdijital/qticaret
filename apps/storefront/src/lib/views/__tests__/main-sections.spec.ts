@@ -38,13 +38,13 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
   it("reads a variant this build does not know as the default", () => {
     const newer = {
       ...MAIN,
-      header_bar: { ...MAIN.header_bar, variant: "catalog" },
+      header_bar: { ...MAIN.header_bar, variant: "shrinking" },
       footer_bar: { ...MAIN.footer_bar, variant: "dark_rich" },
     } as unknown as StoreMainSections
     expect(headerBarOf(newer, { header: { layout: "left", sticky: true } }).variant).toBe(
       "standard"
     )
-    expect(footerBarOf(newer).variant).toBe("ledger")
+    expect(footerBarOf(newer, (key) => key).variant).toBe("ledger")
   })
 
   it("gives the product's block the steps the shop set, and none when it set none", () => {
@@ -55,5 +55,62 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
     })
     expect(categoryMainOf(MAIN)).toEqual({ id: "maincategory", variant: "standard" })
     expect(productMainOf(undefined)).toEqual({ id: "mainproduct", variant: "standard" })
+  })
+
+  it("gives the catalog header its settings, the link named and the tree only with its button", () => {
+    const t = (key: string) => (key === "menu.system.sale" ? "Kampanyalar" : key)
+    const tree = [{ label: "Bıçaklar", path: "/bicaklar", image: null, children: [] }]
+    const catalog = {
+      ...MAIN,
+      header_bar: {
+        ...MAIN.header_bar,
+        variant: "catalog",
+        catalog: {
+          search_placeholder: "Ürün ya da kod",
+          search_label: true,
+          account_text: false,
+          cart_total: true,
+          highlight_link: { label: null, kind: "system", target: "sale", path: null },
+          utility_bar: true,
+          phone: false,
+          categories_button: true,
+          menu_ground: "primary",
+        },
+      },
+    } satisfies StoreMainSections
+    const view = headerBarOf(
+      catalog,
+      { header: { layout: "left", sticky: true } },
+      {
+        t,
+        tree: () => tree,
+      }
+    )
+    expect(view.catalog).toEqual({
+      searchPlaceholder: "Ürün ya da kod",
+      searchLabel: true,
+      accountText: false,
+      cartTotal: true,
+      highlight: { label: "Kampanyalar", path: "/kampanyalar" },
+      utilityBar: true,
+      phone: false,
+      categories: tree,
+      menuGround: "primary",
+    })
+    const off = {
+      ...catalog,
+      header_bar: {
+        ...catalog.header_bar,
+        catalog: { ...catalog.header_bar.catalog, categories_button: false },
+      },
+    }
+    const parts = { t, tree: () => tree }
+    expect(
+      headerBarOf(off, { header: { layout: "left", sticky: true } }, parts).catalog?.categories
+    ).toEqual([])
+    // Today's bar carries none
+    expect(
+      headerBarOf(MAIN, { header: { layout: "left", sticky: true } }, parts)
+    ).not.toHaveProperty("catalog")
   })
 })

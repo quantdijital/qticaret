@@ -14,7 +14,8 @@ const CONTRACT_FILE = path.resolve(
   "../../../../../../packages/types/src/store/section-catalog.ts"
 )
 
-const ALWAYS = { visible: true, starts_at: null, ends_at: null }
+// Every body section shows on every screen unless the shop picks one (bilesen-standardi §2)
+const ALWAYS = { visible: true, starts_at: null, ends_at: null, device: "all" }
 const IMAGE = { url: "http://localhost:9000/static/kamp.webp", alt: null }
 const hero = (more: Record<string, unknown> = {}) => ({ id: "giris00001", type: "hero", ...more })
 const bands = (list: unknown[], more: Record<string, unknown> = {}) => ({
@@ -163,6 +164,22 @@ describe("the price bands (adr/0049 Ek 2026-11-14, Katalog ana sayfası)", () =>
     expect(issues({ product: [bands([band("A", 1), band("B", 2)])] })).toHaveLength(1)
   })
 
+  it("takes two strips on the home page, a third refused, hidden ones counted", () => {
+    const strip = (id: string, more: Record<string, unknown> = {}) => ({
+      ...bands([band("A", 500), band("B", null)]),
+      id,
+      ...more,
+    })
+
+    expect(issues({ home: [strip("fiyatbant1"), strip("fiyatbant2")] })).toEqual([])
+    expect(
+      issues({
+        home: [strip("fiyatbant1"), strip("fiyatbant2"), strip("fiyatbant3", { visible: false })],
+      })
+    ).toEqual(["storefront_layout.price_bands_limit"])
+    expect(PRICE_BANDS_LIMITS.perPage).toBe(2)
+  })
+
   it("fills a band's line and the products shown small", () => {
     const [section] = layoutDocument.parse({
       home: [bands([band("₺500 altı", 500), band("Daha fazlası", null)])],
@@ -188,8 +205,8 @@ describe("the price bands (adr/0049 Ek 2026-11-14, Katalog ana sayfası)", () =>
       title: null,
       bands: [
         { label: "₺500 altı", text: null, min: null, max: 500, product_ids: ["prod_1"] },
-        { label: "₺1.000 altı", text: null, min: 500, max: 1000, product_ids: [] },
-        { label: "Üstü", text: null, min: 1000, max: null, product_ids: ["prod_2"] },
+        { label: "₺1.000 altı", text: null, min: 501, max: 1000, product_ids: [] },
+        { label: "Üstü", text: null, min: 1001, max: null, product_ids: ["prod_2"] },
       ],
     })
     expect(hydratePriceBands(section, undefined, (text) => text).bands[0]?.product_ids).toEqual([])

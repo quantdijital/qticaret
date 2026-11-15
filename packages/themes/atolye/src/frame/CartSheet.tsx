@@ -1,12 +1,12 @@
 "use client"
 
 import { ShoppingBag } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CategoryCardView, MiniCartView } from "@qticaret/ui"
 import { FreeShippingMeter } from "../parts/FreeShippingMeter"
 import { CartSheetLine, type SheetLineWords } from "./CartSheetLine"
-import { CART_ADDED_EVENT, cartAddedMessage, isOwnClick } from "./events"
+import { CART_ADDED_EVENT, cartAddedMessage, cartAddedOrigin, isOwnClick } from "./events"
 import { Sheet } from "./Sheet"
 
 export interface CartSheetWords {
@@ -41,7 +41,7 @@ function EmptyCart({
   const tiles = categories.slice(0, EMPTY_TILES)
   return (
     <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-4 pt-2 pb-8 sm:px-6">
-      <p className="flex items-center gap-3 rounded-media bg-paper-2 p-4 text-md font-semibold">
+      <p className="flex items-center gap-3 rounded-media gf-box p-4 text-md font-semibold">
         <ShoppingBag
           className="size-6 shrink-0 text-text-3"
           aria-hidden="true"
@@ -103,7 +103,7 @@ export function CartSheetBody({
   return (
     <>
       {cart.freeShipping && (
-        <div className="mx-4 mb-3 rounded-media bg-paper-2 px-4 py-3 sm:mx-6">
+        <div className="mx-4 mb-3 rounded-media gf-box px-4 py-3 sm:mx-6">
           <FreeShippingMeter view={cart.freeShipping} />
         </div>
       )}
@@ -149,12 +149,19 @@ export function CartSheetBody({
  * picture tiles. It opens by itself when a line went in, so no toast says
  * so; a card's quick add has its words said in the live region.
  */
+/** The element that has the focus, if any; the page itself is none (a busy button's focus drops there). */
+const focusedElement = () =>
+  document.activeElement instanceof HTMLElement && document.activeElement !== document.body
+    ? document.activeElement
+    : null
+
 export function CartSheet({
   cart,
   count,
   categories,
   change,
   buttonClass,
+  total = null,
   words,
 }: {
   cart: MiniCartView | null
@@ -163,13 +170,28 @@ export function CartSheet({
   /** The storefront's `changeCartLine`; none: the lines read only. */
   change?: ((form: FormData) => Promise<void>) | undefined
   buttonClass: string
+  /** The subtotal in place of "Sepet" (the catalog header's choice); null: the word. */
+  total?: string | null
   words: CartSheetWords
 }) {
   const [open, setOpen] = useState(false)
   const [said, setSaid] = useState("")
+  const trigger = useRef<HTMLAnchorElement>(null)
+  // What had the focus when it opened: the cart link, or a card's add button
+  const opener = useRef<HTMLElement | null>(null)
+  const openSheet = () => {
+    opener.current = focusedElement()
+    setOpen(true)
+  }
   useEffect(() => {
     const show = (event: Event) => {
+      // A header may hold one cart a screen width (the catalog's): only the one shown opens
+      if (trigger.current?.getClientRects().length === 0) {
+        return
+      }
       setSaid(cartAddedMessage(event))
+      // The add button that sent it (Tezgâh audit Z-03), else what has the focus
+      opener.current = cartAddedOrigin(event) ?? focusedElement()
       setOpen(true)
     }
     window.addEventListener(CART_ADDED_EVENT, show)
@@ -180,8 +202,9 @@ export function CartSheet({
   return (
     <>
       <a
+        ref={trigger}
         href="/sepet"
-        aria-label={words.label}
+        aria-label={total ? `${words.label}, ${total}` : words.label}
         className={`${buttonClass} -mr-2 lg:mr-0`}
         onClick={(event) => {
           if (isOwnClick(event)) {
@@ -189,12 +212,12 @@ export function CartSheet({
           }
           event.preventDefault()
           setSaid("")
-          setOpen(true)
+          openSheet()
         }}
       >
         <ShoppingBag className="size-6" aria-hidden="true" strokeWidth={1.75} />
-        <span aria-hidden="true" className="max-lg:hidden">
-          {words.short}
+        <span aria-hidden="true" className={total ? "tabular max-lg:hidden" : "max-lg:hidden"}>
+          {total ?? words.short}
         </span>
         <span aria-live="polite" className="gf-count tabular empty:hidden lg:right-2">
           {count > 0 ? count : ""}
@@ -207,6 +230,13 @@ export function CartSheet({
         title={words.title}
         description={said ? `${said}. ${words.label}` : words.label}
         closeLabel={words.close}
+        onCloseAutoFocus={(event) => {
+          // Back to what opened it while it is still on the page and shown, else the cart link (Tezgâh audit Y-03)
+          event.preventDefault()
+          const back = opener.current
+          opener.current = null
+          ;(back?.isConnected && back.getClientRects().length > 0 ? back : trigger.current)?.focus()
+        }}
       >
         {/* A link followed from inside (a line's product, checkout, the cart) shuts it: back here, it is closed */}
         <div

@@ -3,7 +3,9 @@ import { docStats } from "../../lib/content"
 import { ValidationError } from "../../lib/errors"
 import { bodySections } from "../../lib/storefront/layout"
 import type { BodySection, HeaderSection, LayoutDocument } from "../../lib/storefront/layout"
+import { bannerImages, bannerLinks } from "../../lib/storefront/sections/banner"
 import { sliderImages } from "../../lib/storefront/sections/hero-slider"
+import { shelfSources } from "../../lib/storefront/sections/products"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import { unknownDocTokens } from "../../lib/shop/tokens"
 import type { MenuLinkKind } from "../../modules/storefront-menus/service"
@@ -24,18 +26,31 @@ export function linksOf(section: BodySection | HeaderSection): MenuLinkInput[] {
   if (section.type === "categories") {
     return section.more ? [section.more] : []
   }
-  if (section.type === "banner" || section.type === "hero_slider") {
+  if (section.type === "banner") {
+    return bannerLinks(section)
+  }
+  if (section.type === "hero_slider") {
     return section.slides.flatMap((slide) => (slide.link ? [slide.link] : []))
   }
   if (section.type === "products") {
     return section.more ? [section.more] : []
   }
+  // The catalog header's highlighted last link (adr/0049 Ek 2026-11-15)
+  if (section.type === "header_bar" && section.variant === "catalog") {
+    return section.highlight_link ? [section.highlight_link] : []
+  }
   return []
 }
 
-/** The header's sections that hold links: its scrolling strip (the announcement's lines are words). */
+/**
+ * The header's sections that hold links: its scrolling strip and the
+ * catalog header bar (the announcement's lines are words).
+ */
 export const headerLinked = (doc: Pick<LayoutDocument, "header">): HeaderSection[] =>
-  doc.header.filter((section) => section.type === "marquee")
+  doc.header.filter(
+    (section) =>
+      section.type === "marquee" || (section.type === "header_bar" && section.variant === "catalog")
+  )
 
 /** Every record a section names by id, as a link would point at it. */
 function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }[] {
@@ -60,15 +75,21 @@ function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }
     return [as("product")(section.product_id)]
   }
   // A rail's or a product page's related products: their category, collection or choice
+  // (each of a columns rail's lists too)
   if (section.type === "products" || section.type === "related_products") {
-    const { source } = section
-    return source.kind === "category"
-      ? [as("category")(source.category_id)]
-      : source.kind === "collection"
-        ? [as("collection")(source.collection_id)]
-        : source.kind === "manual"
-          ? source.product_ids.map(as("product"))
-          : []
+    const sources =
+      section.type === "products"
+        ? shelfSources(section).map(({ source }) => source)
+        : [section.source]
+    return sources.flatMap((source) =>
+      source.kind === "category"
+        ? [as("category")(source.category_id)]
+        : source.kind === "collection"
+          ? [as("collection")(source.collection_id)]
+          : source.kind === "manual"
+            ? source.product_ids.map(as("product"))
+            : []
+    )
   }
   return []
 }
@@ -85,7 +106,7 @@ export function imagesOf(section: BodySection): string[] {
     return sliderImages(section)
   }
   if (section.type === "banner") {
-    return section.slides.map((slide) => slide.image.url)
+    return bannerImages(section)
   }
   if (section.type === "rich_text") {
     return docStats(section.body).images.map((each) => each.src)

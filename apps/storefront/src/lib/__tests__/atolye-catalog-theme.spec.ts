@@ -64,6 +64,13 @@ describe("the catalogue opening (H17)", () => {
     expect(html).toContain('<nav aria-label="Kategoriler" class="gf-mosaic-list">')
   })
 
+  it("keeps the words the shop wrote for its picture, and preloads one picture only", () => {
+    const html = home([opening(), opening({ id: "ikinci", variant: "standard" })])
+
+    expect(html).toMatch(/<img[^>]*alt="elmax"/)
+    expect(html.match(/rel="preload"/g)).toHaveLength(1)
+  })
+
   it("lists the categories with their counts, the tiles with theirs, a missing count left out", () => {
     const html = home([opening()])
 
@@ -83,6 +90,9 @@ describe("the catalogue opening (H17)", () => {
     expect(html).toContain(">Çam yeşili</span>")
     expect(html).toContain('aria-label="Hızlı bağlantılar"')
     expect(html).toContain(">Kampanyalar</a>")
+    // A long category name wraps rather than losing its end (K-15)
+    expect(html).toContain('class="line-clamp-3 leading-snug break-words"')
+    expect(html).not.toMatch(/gf-mosaic-row[^>]*>(?:(?!<\/a>).)*class="truncate"/)
   })
 
   it("draws today's opening when the variant is not the category list or its parts did not come", () => {
@@ -121,6 +131,9 @@ describe("the price bands", () => {
     expect(html).toContain("Anahtarlık çakılar")
     expect(html).toContain('alt=""')
     expect(html).toContain("lg:grid-cols-2")
+    // The band's big figure in the page's ink: the shop's colour stays on actions (K-05)
+    expect(html).not.toMatch(/text-display[^"]*text-signal/)
+    expect(html).toMatch(/text-display[^"]*text-text/)
   })
 })
 

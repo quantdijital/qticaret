@@ -29,10 +29,7 @@ function Refusal({
 function Sent({ text, done }: { text: string; done?: ReactNode }) {
   return (
     <div className="flex flex-col gap-5">
-      <p
-        role="status"
-        className="flex items-start gap-3 rounded-media bg-paper-2 p-4 font-semibold"
-      >
+      <p role="status" className="flex items-start gap-3 rounded-media gf-box p-4 font-semibold">
         <CircleCheck className="size-5 shrink-0 text-ok" aria-hidden="true" strokeWidth={2} />
         {text}
       </p>

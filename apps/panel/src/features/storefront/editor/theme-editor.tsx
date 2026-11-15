@@ -4,7 +4,12 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { LeaveGuard } from "@qticaret/admin-ui/patterns/leave-guard"
-import { LAYOUT_ACTION_KEY, MARQUEE_LIMITS, layoutQuery } from "@/features/storefront/api/layout"
+import {
+  LAYOUT_ACTION_KEY,
+  MARQUEE_LIMITS,
+  PRICE_BANDS_LIMITS,
+  layoutQuery,
+} from "@/features/storefront/api/layout"
 import type {
   AdminLayout,
   AnySection,
@@ -19,6 +24,7 @@ import {
   findSection,
   idsOf,
   marqueesOn,
+  priceBandsOn,
   newBodySection,
   newSectionId,
 } from "@/features/storefront/layout/sections"
@@ -160,8 +166,14 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
       <SettingsSearch
         doc={doc}
         page={page}
-        onPick={({ section, field }) => {
+        onPick={(hit) => {
           picks.current += 1
+          if ("theme" in hit) {
+            const { target, group } = hit.field
+            setOpened({ kind: "theme", focus: { target, group, nonce: picks.current } })
+            return
+          }
+          const { section, field } = hit
           const focus = field
             ? { target: field.target, group: field.group, nonce: picks.current }
             : undefined
@@ -266,6 +278,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
         page={page}
         placement={adding ?? "bottom"}
         marqueeFull={marqueesOn(doc, page) >= MARQUEE_LIMITS.perPage}
+        priceBandsFull={priceBandsOn(doc, page) >= PRICE_BANDS_LIMITS.perPage}
         onOpenChange={(open) => {
           if (!open) {
             setAdding(null)

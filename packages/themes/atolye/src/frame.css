@@ -16,6 +16,30 @@
 :root {
   --gf-stick-top: calc(var(--gf-head-h, 8.3125rem) + 1.6875rem);
 }
+/* Folded, the header is its folding part shorter: the column starts under what
+   is left of it, not where the whole header ended (Tezgâh audit Y-08) */
+html[data-js-scroll="down"]:not(:has(.gf-head:focus-within, .gf-head [data-state="open"])) {
+  --gf-stick-top: calc(var(--gf-head-h, 8.3125rem) - var(--gf-head-fold, 0px) + 1rem);
+}
+
+/* A sticky column that scrolls on its own (the listing's filters) fades at its
+   foot while more waits below it, so a half-cut row reads as "there is more";
+   where the browser cannot drive that by scrolling, no fade */
+@supports (animation-timeline: scroll()) {
+  .gf-scroll-fade {
+    animation: gf-scroll-fade linear both;
+    animation-timeline: scroll(self);
+  }
+}
+@keyframes gf-scroll-fade {
+  0%,
+  98% {
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+  }
+  100% {
+    mask-image: none;
+  }
+}
 
 @layer components {
   .gf-head,
@@ -106,4 +130,44 @@ body:has(
    just under the window's top, not under the room a sticky header needs */
 html:has([data-gf-checkout]) {
   scroll-padding-top: var(--space-md);
+}
+
+/* The "Yukarı çık" button (frame/BackToTop): out of sight and out of the tab
+   order until the visitor has scrolled a screen down; it fades and rises in
+   (reduced motion: at once, base.css). It keeps clear of an open drawer, the
+   live search's panel and, on a phone, the product page's buy bar */
+@layer components {
+  [data-back-to-top] {
+    visibility: hidden;
+    opacity: 0;
+    transform: translateY(0.75rem);
+    transition:
+      opacity var(--dur-short) var(--ease-out),
+      transform var(--dur-short) var(--ease-out),
+      visibility 0s linear var(--dur-short);
+  }
+  [data-back-to-top][data-shown] {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity var(--dur-short) var(--ease-out),
+      transform var(--dur-short) var(--ease-out),
+      visibility 0s;
+  }
+  /* 1024 px and below it stands over the content's edge: see-through until pointed at or focused */
+  @media (width < 64.0625rem) {
+    [data-back-to-top][data-shown]:not(:hover, :focus-visible) {
+      opacity: 0.8;
+    }
+  }
+}
+body:has([data-drawer][data-state="open"]) [data-back-to-top],
+body:has(.gf-suggest:not([hidden])) [data-back-to-top] {
+  display: none;
+}
+@media (width < 64rem) {
+  body:has(.gf-buybar[data-open="true"]) [data-back-to-top] {
+    display: none;
+  }
 }

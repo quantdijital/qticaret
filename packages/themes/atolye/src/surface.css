@@ -1,0 +1,56 @@
+/*
+ * The theme's boxes (theme setting `surface_style`, Tezgâh audit Z-04):
+ * the product page's info blocks and rating summary, a listing's filter
+ * groups and its sort and filter buttons, the cart's and the cart
+ * drawer's boxes. `filled` (the default) is a tone darker than the page;
+ * `lined` is the page's own ground inside a 1 px rule. The storefront
+ * prints `--box-ground` and `--box-line` on `:root` for `lined`, so a box
+ * in a drawer (outside the layout) follows it too. The rule is drawn
+ * inside the box: switching moves nothing.
+ */
+@layer components {
+  .gf-box {
+    background-color: var(--box-ground, var(--color-paper-2));
+    box-shadow: inset 0 0 0 1px var(--box-line, transparent);
+  }
+}
+
+/*
+ * The subcategory tiles above a listing's grid, `lined`: no graphite and
+ * no gradient, a plain row on the page's ground: a small square picture,
+ * the name beside it, inside the same 1 px rule. Outside the layers, as
+ * it reshapes a tile drawn with utilities. Every tile of the row is as
+ * tall as the tallest (its cell is stretched; the name stops at two lines,
+ * `CategoryTile`), so the row reads level (fifth audit V-03).
+ */
+[data-surface="lined"] .gf-subtile {
+  aspect-ratio: auto;
+  height: 100%;
+  min-height: 3.5rem;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-sm);
+  padding: var(--space-xs);
+  background: var(--color-paper);
+  color: var(--color-text);
+  box-shadow: inset 0 0 0 1px var(--color-rule);
+}
+[data-surface="lined"] .gf-subtile::after {
+  display: none;
+}
+[data-surface="lined"] .gf-subtile picture {
+  display: block;
+  flex: none;
+}
+[data-surface="lined"] .gf-subtile img {
+  position: static;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--radius-inner);
+  background: var(--color-paper-2);
+}
+[data-surface="lined"] .gf-subtile > span {
+  padding: 0;
+}

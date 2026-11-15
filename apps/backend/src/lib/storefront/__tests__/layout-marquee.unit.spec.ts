@@ -29,6 +29,7 @@ describe("the scrolling strip (adr/0049 Ek 2026-11-14 §4.1)", () => {
     expect(doc.home[0]).toEqual({
       ...strip("kayan00001"),
       ...ALWAYS,
+      device: "all",
       ...MARQUEE_DEFAULTS,
       items: [
         {
@@ -67,6 +68,43 @@ describe("the scrolling strip (adr/0049 Ek 2026-11-14 §4.1)", () => {
     expect(
       issues({ home: [strip("kayan00001", { items: [{ text: "Kargo", icon: "rocket" }] })] })
     ).toEqual(["storefront_layout.section_invalid"])
+  })
+
+  it("keeps the newer settings (adr/0049 Ek 2026-11-15), the pause button never taken away", () => {
+    const set = {
+      speed: "fastest",
+      hover_pause: "off",
+      pause_button: "hover",
+      weight: "normal",
+      uppercase: "on",
+      gap: "wide",
+      outline: "on",
+      closable: "on",
+    }
+    const doc = layoutDocument.parse({ home: [strip("kayan00001", { size: "large", ...set })] })
+
+    expect(doc.home[0]).toMatchObject(set)
+    expect(issues({ home: [strip("kayan00001", { pause_button: "none" })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+    expect(issues({ home: [strip("kayan00001", { closable: true })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+  })
+
+  it("reads a strip saved before the newer settings as it was drawn then", () => {
+    const saved = { speed: "slow", direction: "right", ground: "light", size: "small" }
+    const doc = layoutDocument.parse({
+      home: [strip("kayan00001", { ...saved, separator: "line" })],
+    })
+
+    // The light tint's old name reads as the dictionary's (bilesen-denetimi (b) 5)
+    expect(doc.home[0]).toMatchObject({
+      ...MARQUEE_DEFAULTS,
+      ...saved,
+      ground: "well",
+      separator: "line",
+    })
   })
 
   it("holds an item's lines to their lengths and the shop's details", () => {

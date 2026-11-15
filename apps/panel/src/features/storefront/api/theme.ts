@@ -1,3 +1,11 @@
+import {
+  CARD_BUTTON_STYLES,
+  CARD_NO_REVIEWS,
+  CARD_SOLD_OUT_ROWS,
+  CARD_VARIANTS,
+  SECTION_SPACINGS,
+  SURFACE_STYLES,
+} from "@qticaret/types"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { StorefrontBackground } from "@/theme/storefront"
 
@@ -21,8 +29,23 @@ export const BACKGROUNDS = [
 ] as const satisfies StorefrontBackground[]
 export const RADII = ["sharp", "soft", "round"] as const
 export const CARD_RATIOS = ["4:5", "1:1", "3:4"] as const
+/** How cards are drawn (adr/0049 Ek 2026-11-14 §3.3): the contract's list; a rail may pick its own. */
+export { CARD_VARIANTS }
+/** The framed card's switches (E5), each the theme setting's wherever a framed card shows. */
+export const FRAMED_CARD_SWITCHES = ["hover_image", "delivery_note", "full_button"] as const
+/** The pills on every card's photo (adr/0049 Ek 2026-11-15, decision a), each on or off. */
+export const CARD_BADGE_SWITCHES = ["sale_badge", "low_stock_badge", "sold_out_badge"] as const
+/**
+ * A sold-out card's price row, the stars without reviews, the framed
+ * card's foot button (decisions b, c, d): the contract's lists.
+ */
+export { CARD_BUTTON_STYLES, CARD_NO_REVIEWS, CARD_SOLD_OUT_ROWS }
 export const HEADER_LAYOUTS = ["centered", "left"] as const
 export const BUTTON_SHAPES = ["pill", "rounded", "square"] as const
+/** The gap between sections, theme-wide (Tezgâh audit K-11): the contract's list, `normal` the theme's own. */
+export { SECTION_SPACINGS }
+/** How the theme's boxes stand (Tezgâh audit Z-04): the contract's list, `filled` today's tone. */
+export { SURFACE_STYLES }
 
 export type HeadingFont = (typeof HEADING_FONTS)[number]
 export type BodyFont = (typeof BODY_FONTS)[number]
@@ -48,9 +71,15 @@ export interface ThemeSettings {
     ratio: (typeof CARD_RATIOS)[number]
     show_brand: boolean
     show_rating: boolean
-  }
+    variant: (typeof CARD_VARIANTS)[number]
+    sold_out_row: (typeof CARD_SOLD_OUT_ROWS)[number]
+    no_reviews: (typeof CARD_NO_REVIEWS)[number]
+    button_style: (typeof CARD_BUTTON_STYLES)[number]
+  } & Record<(typeof FRAMED_CARD_SWITCHES)[number] | (typeof CARD_BADGE_SWITCHES)[number], boolean>
   header: { layout: (typeof HEADER_LAYOUTS)[number]; sticky: boolean }
   buttons: (typeof BUTTON_SHAPES)[number]
+  section_spacing: (typeof SECTION_SPACINGS)[number]
+  surface_style: (typeof SURFACE_STYLES)[number]
 }
 
 export const THEME_SECTION = "theme"
@@ -76,9 +105,25 @@ export const GRAFIT_THEME: ThemeChoices = {
   colors: { primary: null, accent: null, background: "steel" },
   typography: { heading: "manrope", body: "manrope" },
   radius: "soft",
-  product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+  product_card: {
+    ratio: "1:1",
+    show_brand: true,
+    show_rating: false,
+    variant: "standard",
+    hover_image: true,
+    delivery_note: true,
+    full_button: true,
+    sale_badge: true,
+    low_stock_badge: true,
+    sold_out_badge: true,
+    sold_out_row: "price",
+    no_reviews: "hide",
+    button_style: "outline",
+  },
   header: { layout: "left", sticky: true },
   buttons: "pill",
+  section_spacing: "normal",
+  surface_style: "filled",
 }
 
 /**

@@ -1,6 +1,8 @@
 import { z } from "@medusajs/framework/zod"
 import { isPlainObject } from "../../../modules/platform-settings/sections/define"
-import { base } from "../layout-fields"
+import { base, optional, text } from "../layout-fields"
+import { storefrontLink } from "../menus"
+import { footerBarFields } from "./footer-bar"
 import { sectionLook } from "./look"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
 import type { SectionVariant, VariantBranch } from "./variants"
@@ -59,15 +61,72 @@ const headerStandard = z.object({ ...headerCommon, variant: defaultVariant("head
 /** The theme setting's centred header, by name only (its drawing is adr/0062 karar 6's). */
 const headerCentered = z.object({ ...headerCommon, variant: z.literal("centered") }).strict()
 
+/**
+ * The catalog header's menu bar ground and words (adr/0049 Ek 2026-11-15):
+ * mirrors `@qticaret/types`' `HEADER_MENU_GROUNDS` and
+ * `HEADER_CATALOG_LIMITS`; a unit test keeps them equal.
+ */
+export const HEADER_MENU_GROUNDS = ["stage", "primary", "well"] as const
+export const HEADER_CATALOG_LIMITS = { search_placeholder: 60 } as const
+
+type MenuGround = (typeof HEADER_MENU_GROUNDS)[number]
+
+/**
+ * N14 (adr/0049 Ek 2026-11-14, Ek 2026-11-15): a utility strip (the shop's
+ * top menu, a written account link), the wordmark, a wide search and the
+ * shop's phone, then a filled menu bar with a "Kategoriler" button, the
+ * main menu, a highlighted last link and the icons. Every setting has a
+ * default, so a bar switched to it, or saved before a setting existed,
+ * reads whole; a step off its list is a stale or forged editor.
+ */
+const headerCatalog = z
+  .object({
+    ...headerCommon,
+    variant: z.literal("catalog"),
+    /** The search box's words; none: the theme's. */
+    search_placeholder: optional(text(HEADER_CATALOG_LIMITS.search_placeholder)),
+    /** The search button written ("Ara") rather than a magnifier. */
+    search_label: z.boolean().default(false),
+    /** "Hesabım" written at the utility strip's end (the icon stays in the menu bar). */
+    account_text: z.boolean().default(true),
+    /** The cart's subtotal beside its icon. */
+    cart_total: z.boolean().default(false),
+    /** The menu bar's highlighted last link: its words and where it goes. */
+    highlight_link: optional(storefrontLink),
+    /** The thin strip above: the shop's top menu and the account link. */
+    utility_bar: z.boolean().default(true),
+    /** The shop's phone (its store details) beside the search; none there: not drawn. */
+    phone: z.boolean().default(true),
+    /** The "Kategoriler" button opening the shop's top categories. */
+    categories_button: z.boolean().default(true),
+    // `light`, the light tint's name before the dictionary had one, reads and is written as `well`
+    menu_ground: z
+      .custom<MenuGround>(
+        (value) => value === "light" || (HEADER_MENU_GROUNDS as readonly unknown[]).includes(value),
+        MAIN_ERROR
+      )
+      .default("stage")
+      .transform((value): MenuGround => ((value as unknown) === "light" ? "well" : value)),
+  })
+  .strict()
+
 export const headerBar = z.discriminatedUnion(
   "variant",
-  [headerStandard, headerCentered],
+  [headerStandard, headerCentered, headerCatalog],
   VARIANT_ERROR
 )
 
-/** Today's footer: Grafit's ledger of the shop's details, menus and marks. */
+/**
+ * Today's footer: Grafit's ledger of the shop's details, menus and marks,
+ * with the footer's own settings (adr/0049 Ek 2026-11-15, `footer-bar.ts`).
+ */
 export const footerBar = z
-  .object({ ...mainBase, type: z.literal("footer_bar"), variant: defaultVariant("footer_bar") })
+  .object({
+    ...mainBase,
+    type: z.literal("footer_bar"),
+    variant: defaultVariant("footer_bar"),
+    ...footerBarFields,
+  })
   .strict()
 
 /** The product's own block: its gallery and buying column, above the group's other sections. */
@@ -111,7 +170,7 @@ export const categoryMain = z
 
 /** Each main section's variants' branches: what a section read as that variant keeps. */
 export const MAIN_BRANCHES = {
-  header_bar: { standard: headerStandard, centered: headerCentered },
+  header_bar: { standard: headerStandard, centered: headerCentered, catalog: headerCatalog },
   footer_bar: { ledger: footerBar },
   product_main: { standard: productMain },
   category_main: { standard: categoryMain },
@@ -120,6 +179,7 @@ export const MAIN_BRANCHES = {
 }
 
 export type HeaderBar = z.infer<typeof headerBar>
+export type HeaderCatalog = z.infer<typeof headerCatalog>
 export type FooterBar = z.infer<typeof footerBar>
 export type ProductMain = z.infer<typeof productMain>
 export type CategoryMain = z.infer<typeof categoryMain>

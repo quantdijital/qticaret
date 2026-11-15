@@ -1,4 +1,3 @@
-import { ArrowRight } from "lucide-react"
 import type { ProductShippingView, Translate } from "@qticaret/ui"
 import { Marks } from "../content/Facts"
 import { TrustIcon } from "../parts/TrustIcon"
@@ -17,9 +16,10 @@ export function ShippingCard({ shipping, t }: { shipping: ProductShippingView; t
     <section
       id="kargo-ve-teslimat"
       aria-labelledby="kargo-ve-teslimat-baslik"
-      className="flex scroll-mt-40 flex-col gap-5 rounded-tile bg-paper-2 p-5 sm:p-6"
+      className="flex scroll-mt-40 flex-col gap-5 rounded-tile gf-box p-5 sm:p-6"
     >
-      <h2 id="kargo-ve-teslimat-baslik" className="text-title">
+      {/* The page's one heading size and no arrow on a link (Tezgâh audits K-13, Y-09) */}
+      <h2 id="kargo-ve-teslimat-baslik" className="text-section">
         {t("product.shipping_title")}
       </h2>
       {shipping.facts.length > 0 && (
@@ -51,7 +51,6 @@ export function ShippingCard({ shipping, t }: { shipping: ProductShippingView; t
             <li key={link.path}>
               <a href={link.path} className="gf-link text-sm">
                 {link.label}
-                <ArrowRight className="size-4" aria-hidden="true" strokeWidth={2} />
               </a>
             </li>
           ))}

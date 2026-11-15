@@ -15,8 +15,6 @@ import { MARQUEE_LIMITS as L } from "@/features/storefront/api/layout"
 import type { HeaderMarquee, MarqueeItem, MarqueeSection } from "@/features/storefront/api/layout"
 import { BADGE_ICONS } from "../shared/badge-icons"
 import { LinkField } from "./link-field"
-import { MARQUEE_CONTENT_SETTINGS } from "./field-registry"
-import { MarqueeSettings } from "./marquee-settings"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 
@@ -34,8 +32,8 @@ type AnyMarquee = MarqueeSection | HeaderMarquee
 /**
  * A scrolling strip (adr/0049 Ek 2026-11-14 §4.1): one to eight short
  * items, each with an optional icon, its line (it may hold the shop's
- * details), an optional second line and link; then the strip's size.
- * How it moves and looks sits in the closed "Görünüm ayarları" group.
+ * details), an optional second line and link. How it moves and looks
+ * sits in the open "Hareket" and "Görünüm" groups below (`MarqueeGroups`).
  */
 export function MarqueeForm<S extends AnyMarquee>({
   section,
@@ -180,13 +178,6 @@ export function MarqueeForm<S extends AnyMarquee>({
           }}
         />
       </div>
-      <MarqueeSettings
-        section={section}
-        settings={MARQUEE_CONTENT_SETTINGS}
-        onChange={(next) => {
-          onChange(next)
-        }}
-      />
     </div>
   )
 }

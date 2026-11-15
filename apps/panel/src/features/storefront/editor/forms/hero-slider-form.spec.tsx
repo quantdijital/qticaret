@@ -53,18 +53,14 @@ function renderForm(section: HeroSliderSection = start()) {
 }
 
 describe("the hero slider's form (adr/0049 Ek 2026-11-06)", () => {
-  it("is still by default; its seconds show once autoplay is on", async () => {
+  it("sets the height under the slides; how it turns is the kit's, not the content's", async () => {
     const user = userEvent.setup()
     const form = renderForm()
-    expect(screen.getByRole("switch", { name: /Kendiliğinden geçsin/ })).not.toBeChecked()
+    // The switches from before the kit left the content (bilesen-denetimi (b) 4)
+    expect(screen.queryByRole("switch", { name: /Otomatik geçiş/ })).toBeNull()
     expect(screen.queryByRole("spinbutton", { name: "Her slayt kaç saniye" })).toBeNull()
-    expect(screen.getByRole("switch", { name: /Noktaları göster/ })).toBeChecked()
-    expect(screen.getByRole("switch", { name: /Okları göster/ })).toBeChecked()
-
-    await user.click(screen.getByRole("switch", { name: /Kendiliğinden geçsin/ }))
-    expect(screen.getByRole("spinbutton", { name: "Her slayt kaç saniye" })).toHaveValue(6)
     await user.click(screen.getByRole("radio", { name: "Kısa" }))
-    expect(form.last()).toMatchObject({ autoplay: true, interval: 6, height: "compact" })
+    expect(form.last()).toMatchObject({ height: "compact", scroller: { autoplay: "off" } })
   })
 
   it("lists the slides as rows with their heading, moves and removes them", async () => {

@@ -1,11 +1,12 @@
 import type { ReactNode } from "react"
 import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Announcement } from "./frame/Announcement"
+import { BackToTop } from "./frame/BackToTop"
 import { BottomBar } from "./frame/BottomBar"
 import { CheckoutFooter, CheckoutHeader } from "./frame/CheckoutFrame"
 import { Consent } from "./frame/Consent"
 import { Footer } from "./frame/Footer"
-import { Header } from "./frame/Header"
+import { Header, catalogOf } from "./frame/Header"
 import { Marquee } from "./sections/Marquee"
 import { ScrollCue } from "./frame/ScrollCue"
 import { WhatsApp } from "./frame/WhatsApp"
@@ -50,7 +51,7 @@ export function Layout({
   )
   if (shop.checkout) {
     return (
-      <div className="flex min-h-dvh flex-col">
+      <div className="flex min-h-dvh flex-col" data-surface={shop.theme.surface ?? "filled"}>
         {skip}
         <CheckoutHeader shop={shop} t={t} />
         <main id="icerik" className="flex-1">
@@ -61,19 +62,29 @@ export function Layout({
       </div>
     )
   }
+  // The catalog header draws the top links in its strip and the phone by its search: not twice
+  const catalog = catalogOf(shop)
   const whatsapp =
     shop.contact.whatsappHref !== null &&
     shop.bottomNav !== null &&
     shop.bottomNav.current !== "cart" &&
     shop.cookieBanner?.due !== true
+  // The footer's floating "Yukarı çık" (adr/0049 Ek 2026-11-15), away while the cookie question waits
+  const backToTop = shop.cookieBanner?.due === true ? null : (shop.footerBar?.backToTop ?? null)
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="flex min-h-dvh flex-col" data-surface={shop.theme.surface ?? "filled"}>
       {skip}
       <Announcement
         lines={shop.announcements}
-        links={shop.topLinks}
-        contact={shop.contact}
-        words={{ announcements: t("nav.announcements"), links: t("nav.top_links") }}
+        settings={shop.announcementSettings}
+        links={catalog?.strip ? [] : shop.topLinks}
+        contact={catalog?.phone ? { ...shop.contact, phone: null, phoneHref: null } : shop.contact}
+        words={{
+          announcements: t("nav.announcements"),
+          links: t("nav.top_links"),
+          pause: t("nav.announcements_pause"),
+          play: t("nav.announcements_play"),
+        }}
       />
       {shop.marquee && <Marquee section={shop.marquee} t={t} header />}
       <Header shop={shop} t={t} searchSuggest={searchSuggest} changeCartLine={changeCartLine} />
@@ -105,6 +116,14 @@ export function Layout({
           />
           <WhatsAppClear />
         </>
+      )}
+      {backToTop && (
+        <BackToTop
+          view={backToTop}
+          label={t("footer.back_to_top")}
+          aboveBottomBar={shop.bottomNav !== null}
+          overWhatsApp={whatsapp && backToTop.side === "right"}
+        />
       )}
       {consent}
       <ScrollCue />

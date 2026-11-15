@@ -1,6 +1,9 @@
+import path from "node:path"
 import { mergePatch } from "../sections/define"
 import { parseStored } from "../sections/stored"
 import {
+  SECTION_SPACINGS,
+  SURFACE_STYLES,
   THEME_BACKGROUNDS,
   THEME_WELLS,
   primaryReadable,
@@ -8,8 +11,14 @@ import {
   themeSaveIssue,
   themeSection,
   upgradeStoredTheme,
+  withCardDefaults,
 } from "../sections/theme"
 import type { ThemeSettings } from "../sections/theme"
+
+const CONTRACT_FILE = path.resolve(
+  __dirname,
+  "../../../../../../packages/types/src/store/storefront.ts"
+)
 
 const { full, patch, defaults } = themeSection
 
@@ -24,9 +33,27 @@ describe("theme section", () => {
       colors: { primary: null, accent: null, background: "steel" },
       typography: { heading: "manrope", body: "manrope" },
       radius: "soft",
-      product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+      product_card: {
+        ratio: "1:1",
+        show_brand: true,
+        show_rating: false,
+        // adr/0049 Ek 2026-11-14 §3.3: today's card; the framed card's switches for when it is chosen
+        variant: "standard",
+        hover_image: true,
+        delivery_note: true,
+        full_button: true,
+        // adr/0049 Ek 2026-11-15: every pill, the price on a sold-out card, no stars without reviews
+        sale_badge: true,
+        low_stock_badge: true,
+        sold_out_badge: true,
+        sold_out_row: "price",
+        no_reviews: "hide",
+        button_style: "outline",
+      },
       header: { layout: "left", sticky: true },
       buttons: "pill",
+      section_spacing: "normal",
+      surface_style: "filled",
     })
     expect(full.safeParse(defaults).success).toBe(true)
     expect(parseStored("theme", undefined)).toEqual(defaults)
@@ -83,6 +110,9 @@ describe("theme section", () => {
     ["an unknown page colour", { colors: { primary: null, accent: null, background: "pink" } }],
     ["a card shape", { product_card: { ratio: "16:9", show_brand: true, show_rating: false } }],
     ["a button shape", { buttons: "blob" }],
+    ["a section spacing off the list", { section_spacing: "dense" }],
+    ["a section spacing in pixels", { section_spacing: 64 }],
+    ["a surface style off the list", { surface_style: "glass" }],
     ["CSS of its own", { css: "body{display:none}" }],
     ["a version it does not write", { settings_version: 1 }],
   ])("refuses %s", (_, body) => {
@@ -158,7 +188,7 @@ describe("a theme row stored before adr/0062 (no settings_version)", () => {
     expect(parseStored("theme", stored)).toEqual({
       ...defaults,
       colors: { ...defaults.colors, primary: "#7a1a48" },
-      product_card: { ratio: "3:4", show_brand: false, show_rating: false },
+      product_card: { ...defaults.product_card, ratio: "3:4", show_brand: false },
       header: { layout: "left", sticky: false },
     })
     const square = { ...stored, product_card: { ...stored.product_card, ratio: "1:1" } }
@@ -223,7 +253,75 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
       buttons: "square",
     }
     expect(upgradeStoredTheme(stored)).toBe(stored)
-    expect(parseStored("theme", stored)).toEqual(stored)
+    // Its card stored before the variant and E5 fields: read over the defaults, today's card
+    expect(parseStored("theme", stored)).toEqual({
+      ...stored,
+      product_card: { ...defaults.product_card, ...stored.product_card },
+      // Stored before the section spacing (K-11): the theme's own gaps
+      section_spacing: "normal",
+      // and before the surface style (Z-04): today's filled boxes
+      surface_style: "filled",
+    })
+    const framed = {
+      ...stored,
+      section_spacing: "compact",
+      surface_style: "lined",
+      product_card: { ...defaults.product_card, variant: "framed" },
+    }
+    expect(parseStored("theme", framed)).toEqual(framed)
+  })
+
+  it("takes a card variant on its list only (adr/0049 Ek 2026-11-14 §3.3)", () => {
+    const card = (product_card: Record<string, unknown>) =>
+      full.safeParse({ ...defaults, product_card: { ...defaults.product_card, ...product_card } })
+        .success
+    expect(card({ variant: "framed", hover_image: false, no_reviews: "empty_stars" })).toBe(true)
+    // `technical` comes with Faz 4's card facts, not yet
+    expect(card({ variant: "technical" })).toBe(false)
+    expect(card({ full_button: "yes" })).toBe(false)
+    // A patch of one switch keeps the others
+    const after = full.parse(
+      mergePatch(defaults, patch.parse({ product_card: { full_button: false } }))
+    )
+    expect(after.product_card).toEqual({ ...defaults.product_card, full_button: false })
+  })
+
+  it("takes the section spacing from its list, the contract's (Tezgâh audit K-11)", () => {
+    const contract = jest.requireActual<{ SECTION_SPACINGS: unknown }>(CONTRACT_FILE)
+    expect(SECTION_SPACINGS).toEqual(contract.SECTION_SPACINGS)
+    for (const section_spacing of SECTION_SPACINGS) {
+      expect(saved({ section_spacing }).success).toBe(true)
+    }
+    expect(full.parse(mergePatch(defaults, patch.parse({ section_spacing: "compact" })))).toEqual({
+      ...defaults,
+      section_spacing: "compact",
+    })
+    // A design's theme or a preset written before it reads with the theme's own gaps
+    const before: Record<string, unknown> = { ...defaults }
+    delete before["section_spacing"]
+    expect(withCardDefaults(before)).toEqual(defaults)
+    expect(withCardDefaults({ ...defaults, section_spacing: "roomy" })).toMatchObject({
+      section_spacing: "roomy",
+    })
+  })
+
+  it("takes the surface style from its list, the contract's; one stored before it reads filled (Z-04)", () => {
+    const contract = jest.requireActual<{ SURFACE_STYLES: unknown }>(CONTRACT_FILE)
+    expect(SURFACE_STYLES).toEqual(contract.SURFACE_STYLES)
+    for (const surface_style of SURFACE_STYLES) {
+      expect(saved({ surface_style }).success).toBe(true)
+    }
+    expect(full.parse(mergePatch(defaults, patch.parse({ surface_style: "lined" })))).toEqual({
+      ...defaults,
+      surface_style: "lined",
+    })
+    const before: Record<string, unknown> = { ...defaults }
+    delete before["surface_style"]
+    expect(withCardDefaults(before)).toEqual(defaults)
+    expect(parseStored("theme", before)).toEqual(defaults)
+    expect(withCardDefaults({ ...defaults, surface_style: "lined" })).toMatchObject({
+      surface_style: "lined",
+    })
   })
 })
 

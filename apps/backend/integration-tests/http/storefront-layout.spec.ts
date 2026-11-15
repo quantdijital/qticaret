@@ -117,8 +117,17 @@ medusaIntegrationTestRunner({
       ).toEqual([["product_main"], ["category_main"]])
       const defaultLive = await live()
       expect([defaultLive.product, defaultLive.category]).toEqual([[], []])
+      // The bar's settings as saved: the first line alone (bilesen-denetimi (b) 6)
       expect(defaultLive.header).toEqual([
-        { id: "duyurular", type: "announcement_bar", lines: ["Bize 0532 123 45 67 ile ulaşın"] },
+        {
+          id: "duyurular",
+          type: "announcement_bar",
+          lines: ["Bize 0532 123 45 67 ile ulaşın"],
+          mode: "first",
+          interval: "medium",
+          pause_button: "always",
+          hover_pause: "on",
+        },
       ])
       expect(defaultLive.footer.map((section) => section.type)).toEqual(["newsletter"])
 
@@ -171,6 +180,10 @@ medusaIntegrationTestRunner({
       expect(saved.data.layout).toMatchObject({ is_default: false, has_changes: true, revision: 0 })
       // A draft reaches no shopper
       expect((await live()).home.map((section) => section.id)).toContain("yeniurunler")
+      // A rail without a card variant of its own draws the theme's (adr/0049 Ek 2026-11-14 §3.3)
+      expect(defaultLive.home.find((section) => section.id === "yeniurunler")).toMatchObject({
+        card_variant: null,
+      })
 
       const preview = await action("preview")
       const token = (preview.data as unknown as { path: string }).path.split("/").pop() ?? ""

@@ -133,6 +133,9 @@ const CARD_FIELDS = [
   "images.id",
   "images.url",
   "images.rank",
+  // A framed card's free shipping line is for a product the shop ships (adr/0049 §3.3)
+  "product_extension.kind",
+  "product_extension.is_gift_card",
   "variants.id",
   "variants.manage_inventory",
   "variants.allow_backorder",
@@ -142,7 +145,9 @@ const CARD_FIELDS = [
 
 const PAGE_FIELDS = [
   ...CARD_FIELDS,
-  "categories.id",
+  // The related rails' category (W-02): asked as `categories.id` the store answers
+  // each category as `{ is_internal }` only, so the whole category is asked for
+  "*categories",
   "subtitle",
   "description",
   "options.id",

@@ -7,6 +7,7 @@ import { RowActions } from "@/features/settings/components/storefront-rows"
 import type { PriceBand, PriceBandsSection } from "@/features/storefront/api/layout"
 import { PRICE_BANDS_LIMITS as B } from "@/features/storefront/api/layout"
 import { SwitchRow } from "../theme-fields"
+import { FIELD_IDS } from "./field-registry"
 import { CountField, FieldGroup, TextField } from "./fields"
 import type { SectionFormProps } from "./form-props"
 import { useProblemText } from "./problem-text"
@@ -48,13 +49,18 @@ export function PriceBandsForm({
   }
   const last = section.bands.length - 1
   const before = (index: number) => section.bands[index - 1]?.max ?? null
-  /** "500 TL altı", "2.500 TL ve üzeri": the label a band's bound suggests. */
+  /** "500 TL'ye kadar", "2.500 TL üzeri": the label a band's bound suggests. */
   const suggested = (band: PriceBand, index: number) =>
     band.max === null
       ? t(`${P}.labelOpen`, { amount: LIRA.format(before(index) ?? 0) })
       : t(`${P}.labelUnder`, { amount: LIRA.format(band.max) })
   return (
     <div className="flex flex-col gap-5">
+      {problems["limit"] ? (
+        <p role="alert" className="text-sm text-destructive-text">
+          {t(`storefront.editor.problems.${problems["limit"]}`, { max: B.perPage })}
+        </p>
+      ) : null}
       <TitleField
         id={section.id}
         title={section.title}
@@ -176,25 +182,31 @@ export function PriceBandsForm({
           {t(`${P}.addBand`)}
         </Button>
       </FieldGroup>
-      <SwitchRow
-        id={`${section.id}-thumbs`}
-        label={t(`${P}.thumbs`)}
-        hint={t(`${P}.thumbsHint`)}
-        checked={section.thumbs > 0}
-        onChange={(checked) => {
-          set({ thumbs: checked ? B.thumbs.default : 0 })
-        }}
-      />
-      {section.thumbs > 0 ? (
-        <CountField
-          id={`${section.id}-thumbs-count`}
-          label={t(`${P}.thumbsCount`)}
-          value={section.thumbs}
-          max={B.thumbs.max}
-          onChange={(thumbs) => {
-            set({ thumbs }, "thumbs")
+      <div id={FIELD_IDS.content(section.id, "thumbs")}>
+        <SwitchRow
+          id={`${section.id}-thumbs`}
+          label={t(`${P}.thumbs`)}
+          term={t(`${P}.thumbsTerm`)}
+          hint={t(`${P}.thumbsHint`)}
+          checked={section.thumbs > 0}
+          onChange={(checked) => {
+            set({ thumbs: checked ? B.thumbs.default : 0 })
           }}
         />
+      </div>
+      {section.thumbs > 0 ? (
+        <div id={FIELD_IDS.content(section.id, "thumbs_count")}>
+          <CountField
+            id={`${section.id}-thumbs-count`}
+            label={t(`${P}.thumbsCount`)}
+            term={t(`${P}.thumbsCountTerm`)}
+            value={section.thumbs}
+            max={B.thumbs.max}
+            onChange={(thumbs) => {
+              set({ thumbs }, "thumbs")
+            }}
+          />
+        </div>
       ) : null}
     </div>
   )

@@ -1,27 +1,10 @@
 import { ResponsiveImage } from "@qticaret/ui"
-import type { ImageView, ProductCardView } from "@qticaret/ui"
+import type { ProductCardView } from "@qticaret/ui"
 import { Container } from "../parts/Container"
+import { Preload } from "../parts/Preload"
 import { type Of, headingId } from "./plan"
 
 const SIZES = "(min-width: 1024px) 56vw, 100vw"
-
-/** The LCP picture asked for first, before the parser reaches it (React puts the link in <head>). */
-function Preload({ image }: { image: ImageView }) {
-  const set = image.sources.avif ?? image.sources.webp
-  return set ? (
-    <link
-      rel="preload"
-      as="image"
-      href={image.src}
-      imageSrcSet={set}
-      imageSizes={SIZES}
-      type={image.sources.avif ? "image/avif" : "image/webp"}
-      fetchPriority="high"
-    />
-  ) : (
-    <link rel="preload" as="image" href={image.src} fetchPriority="high" />
-  )
-}
 
 /**
  * The opening (docs/tema/yon-2026-11-05.md § Hero): one graphite stage,
@@ -50,7 +33,7 @@ export function Hero({
   const Heading = first ? "h1" : "h2"
   return (
     <section aria-labelledby={id} className="pt-3 lg:pt-6">
-      {first && image && <Preload image={image} />}
+      {first && image && <Preload image={image} sizes={SIZES} />}
       <Container>
         <div className="gf-stage relative grid overflow-hidden rounded-tile lg:min-h-[clamp(28rem,58svh,36rem)] lg:grid-cols-12">
           {image && (

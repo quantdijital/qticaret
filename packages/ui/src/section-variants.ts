@@ -12,18 +12,23 @@ import type { DefaultVariant, SectionVariant, VariantSectionType } from "@qticar
  * are erased and may name the root (`storefront-imports.spec.ts` guards it).
  */
 export {
+  CARD_VARIANTS,
   SECTION_VARIANTS,
+  cardVariantOf,
   defaultVariant,
   hasVariants,
   variantOf,
 } from "@qticaret/types/section-variants"
 export type {
+  CardVariant,
+  CategoriesVariant,
   CategoryMainVariant,
   DefaultVariant,
   FooterBarVariant,
   HeaderBarVariant,
   HeroVariant,
   ProductMainVariant,
+  ProductsVariant,
   SectionVariant,
   TrustBadgesVariant,
   VariantSectionType,

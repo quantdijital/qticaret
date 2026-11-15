@@ -1,13 +1,25 @@
 import type {
+  AnnouncementSettings,
+  BannerSettings,
+  BannerTone,
+  CardVariant,
+  FaqSettings,
   MarqueeSettings,
   ProductSource,
+  RelatedProductsVariant,
+  ScrollerSettings,
+  SectionDevice,
   SectionLook,
   ShelfColumns,
+  ShelfPhoneColumns,
+  SliderSettings,
   TrustBadgesVariant,
 } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
+import type { CategoriesLinkedFields } from "@/features/storefront/api/layout-cards"
 import type { HeroCatalogFields, PriceBand } from "@/features/storefront/api/layout-catalog"
+import type { ProductsSection } from "@/features/storefront/api/layout-shelf"
 import type { MenuInput } from "@/features/storefront/api/menus"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
 import type { LinkInput } from "@/features/storefront/api/menus"
@@ -44,8 +56,13 @@ interface SectionBase {
  * §6), absent until the shop sets a step, each step `null` for the
  * theme's own. The header's bar and the footer's box have none.
  */
-interface BodySectionBase extends SectionBase {
+export interface BodySectionBase extends SectionBase {
   look?: SectionLook
+  /**
+   * Which screens show it (docs/tema/bilesen-standardi §2): the server fills
+   * `all` on reading; absent in a section the editor just made, read as `all`.
+   */
+  device?: SectionDevice
 }
 
 /** The opening's words, buttons and picture, the same in every variant (adr/0049 Ek 2026-11-14 §2). */
@@ -90,27 +107,39 @@ export interface HeroSliderSection extends BodySectionBase {
   type: "hero_slider"
   slides: HeroSlide[]
   height: "compact" | "regular"
-  /** Off by default: nothing moves by itself unless the shop turns it on. */
-  autoplay: boolean
-  /** Seconds a slide stays while it plays (5–10). */
-  interval: number
-  dots: boolean
-  arrows: boolean
+  /**
+   * The scroller kit's settings a slider has use for (bilesen-denetimi (b)
+   * 4); the server fills them on reading, a slider saved before the kit too.
+   */
+  scroller?: SliderSettings
+  /** Seconds saved before the kit that no speed step keeps; dropped once the shop picks a speed. */
+  interval?: number
+  /** A slider's switches from before the kit; the server reads them into `scroller`. */
+  autoplay?: boolean
+  dots?: boolean
+  arrows?: boolean
 }
 
+/** One picture of the band (adr/0049 Ek 2026-11-14 §3.3 E2). */
 export interface BannerSlide {
   image: LayoutImage
+  /** A phone's own picture (a closer crop); none: the wide one. */
+  mobile_image: LayoutImage | null
   heading: string | null
   text: string | null
   link: LayoutLink | null
+  /** A second, quieter button. */
+  second_link: LayoutLink | null
+  tone: BannerTone
 }
 
-export interface BannerSection extends BodySectionBase {
+/** The picture band: its slides and how the whole band stands. */
+export type BannerSection = BodySectionBase & {
   type: "banner"
   slides: BannerSlide[]
-}
+} & BannerSettings
 
-export interface CategoriesSection extends BodySectionBase {
+interface CategoriesBase extends BodySectionBase {
   type: "categories"
   title: string | null
   /** None: the top categories. */
@@ -121,16 +150,8 @@ export interface CategoriesSection extends BodySectionBase {
   more: LayoutLink | null
 }
 
-export interface ProductsSection extends BodySectionBase {
-  type: "products"
-  title: string | null
-  source: ProductSource
-  limit: number
-  /** Cards in a row on a wide screen; the theme steps down on narrower ones. */
-  columns: ShelfColumns
-  /** A "see all" link under the rail. */
-  more: LayoutLink | null
-}
+/** Today's picture tiles, or the linked cards with their own fields (adr/0049 Ek 2026-11-15). */
+export type CategoriesSection = CategoriesBase & ({ variant: "tiles" } | CategoriesLinkedFields)
 
 /** One product up close (adr/0046 Ek 2026-11-05): the storefront adds its facts and spec table. */
 export interface FeaturedProductSection extends BodySectionBase {
@@ -195,8 +216,12 @@ export interface FaqItem {
   answer: string
 }
 
-/** Questions and answers, shown on the page; never `FAQPage` structured data (docs/13 §5). */
-export interface FaqSection extends BodySectionBase {
+/**
+ * Questions and answers, shown on the page; never `FAQPage` structured data
+ * (docs/13 §5). Its switches (bilesen-denetimi (b) 8) are filled on reading;
+ * one absent reads as its default (`faqSettingsOf`).
+ */
+export interface FaqSection extends BodySectionBase, Partial<FaqSettings> {
   type: "faq"
   title: string | null
   items: FaqItem[]
@@ -213,7 +238,16 @@ export interface RelatedProductsSection extends BodySectionBase {
   title: string | null
   source: RelatedSource
   limit: number
-  columns: ShelfColumns
+  /** How the cards stand (bilesen-denetimi (b) 7); the server fills `grid` on reading. */
+  variant: RelatedProductsVariant
+  /** The rail's own card style over the theme's; null or absent: the theme's. */
+  card_variant?: CardVariant | null
+  /** `grid`: cards in a row on a wide screen. */
+  columns?: ShelfColumns
+  /** Cards in a row on a phone (bilesen-denetimi (b) 3); the server fills 2 on reading. */
+  columns_mobile?: ShelfPhoneColumns
+  /** `carousel`: the scroller kit's settings. */
+  scroller?: ScrollerSettings
 }
 
 /** One item of a scrolling strip: an optional icon, its line, an optional second line and link. */
@@ -233,7 +267,7 @@ type MarqueeFields = { type: "marquee"; items: MarqueeItem[] } & MarqueeSettings
 export type MarqueeSection = BodySectionBase & MarqueeFields
 
 /** The header group's scrolling strip, above the shop's header: no look. */
-export type HeaderMarquee = SectionBase & MarqueeFields
+export type HeaderMarquee = SectionBase & MarqueeFields & { device?: SectionDevice }
 
 export type HomeSection =
   | HeroSection
@@ -272,10 +306,15 @@ export type CategorySection = (
   RichTextSection | BannerSection | FaqSection | TrustBadgesSection | WordedSection | MarqueeSection
 ) & { placement: Placement }
 
-export interface AnnouncementBar extends SectionBase {
+/**
+ * The header's announcement bar: its lines and how it shows more than one
+ * (docs/tema/bilesen-denetimi (b) 6). The server fills each setting on
+ * reading; one absent reads as its default (`announcementSettingsOf`).
+ */
+export type AnnouncementBar = SectionBase & {
   type: "announcement_bar"
   lines: string[]
-}
+} & Partial<AnnouncementSettings>
 
 export interface FooterNewsletter extends SectionBase {
   type: "newsletter"

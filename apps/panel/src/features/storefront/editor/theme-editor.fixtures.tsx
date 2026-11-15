@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event"
 import type { UserEvent } from "@testing-library/user-event"
 import { vi } from "vitest"
 import type { Mock } from "vitest"
+import { FOOTER_BAR_DEFAULTS } from "@qticaret/types"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import type { AdminLayout, LayoutDocument } from "@/features/storefront/api/layout"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
@@ -26,9 +27,25 @@ export const THEME: ThemeSettings = {
   colors: { primary: null, accent: null, background: "steel" },
   typography: { heading: "manrope", body: "manrope" },
   radius: "soft",
-  product_card: { ratio: "1:1", show_brand: true, show_rating: false },
+  product_card: {
+    ratio: "1:1",
+    show_brand: true,
+    show_rating: false,
+    variant: "standard",
+    hover_image: true,
+    delivery_note: true,
+    full_button: true,
+    sale_badge: true,
+    low_stock_badge: true,
+    sold_out_badge: true,
+    sold_out_row: "price",
+    no_reviews: "hide",
+    button_style: "outline",
+  },
   header: { layout: "left", sticky: true },
   buttons: "pill",
+  section_spacing: "normal",
+  surface_style: "filled",
 }
 
 export const DOC: LayoutDocument = {
@@ -52,6 +69,7 @@ export const DOC: LayoutDocument = {
     {
       id: "yeniurunler",
       type: "products",
+      variant: "grid",
       ...ALWAYS,
       title: null,
       source: { kind: "newest" },
@@ -62,7 +80,14 @@ export const DOC: LayoutDocument = {
     { id: "blogyazilari", type: "posts", ...ALWAYS, title: null, limit: 3 },
   ],
   footer: [
-    { id: "mainfooter", type: "footer_bar", ...MAIN, variant: "ledger" },
+    {
+      id: "mainfooter",
+      type: "footer_bar",
+      ...MAIN,
+      variant: "ledger",
+      ...FOOTER_BAR_DEFAULTS,
+      payment_badges: [],
+    },
     { id: "ebultenkutusu", type: "newsletter", ...ALWAYS, title: null, text: null },
   ],
   product: [
@@ -70,6 +95,7 @@ export const DOC: LayoutDocument = {
     {
       id: "benzerurunler",
       type: "related_products",
+      variant: "grid",
       ...ALWAYS,
       title: null,
       source: { kind: "same_category" },

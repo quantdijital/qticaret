@@ -1,10 +1,25 @@
-import { MARQUEE_SETTINGS, SECTION_VARIANTS } from "@qticaret/types"
-import type { MarqueeSetting, SectionLookField } from "@qticaret/types"
-import type { AnySection, LayoutGroup, LookedSection } from "@/features/storefront/api/layout"
+import {
+  BANNER_SETTINGS,
+  HEADER_MENU_GROUNDS,
+  MARQUEE_SETTINGS,
+  SECTION_VARIANTS,
+} from "@qticaret/types"
+import type { BannerSetting, MarqueeSetting, SectionLookField } from "@qticaret/types"
+import type {
+  AnySection,
+  HeaderCatalogFields,
+  LayoutGroup,
+  LookedSection,
+} from "@/features/storefront/api/layout"
 import { lookFieldsFor, lookStepsFor } from "@/features/storefront/layout/look"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
-import { isMain } from "@/features/storefront/layout/main-sections"
 import { offersVariants } from "@/features/storefront/layout/variants"
+import { ANNOUNCEMENT_IDS, announcementFields } from "./announcement-registry"
+import { cardFooterFields } from "./card-field-ids"
+import { BANNER_GROUPS } from "./banner-groups"
+import { CONTENT_IDS, contentFields } from "./content-registry"
+import { SHELF_IDS, shelfFields } from "./shelf-registry"
+import { VISIBILITY_IDS, visibilityFields } from "./visibility-registry"
 
 /**
  * The section panel's fields as the settings search knows them (adr/0049
@@ -17,7 +32,16 @@ import { offersVariants } from "@/features/storefront/layout/variants"
  */
 
 /** The panel group a field sits in: a field in a closed group opens it. */
-export type FieldGroupName = "variant" | "placement" | "content" | "look" | "visibility"
+export type FieldGroupName =
+  | "variant"
+  | "placement"
+  | "content"
+  | "layout"
+  | "scroll"
+  | "motion"
+  | "appearance"
+  | "look"
+  | "visibility"
 
 export interface RegistryField {
   /** The field's name in the search: `variant`, `look.ground`, `starts_at`. */
@@ -36,14 +60,56 @@ export interface RegistryField {
 const P = "storefront.editor.panel"
 const LOOK = "storefront.editor.look"
 const MARQUEE = "storefront.editor.marquee"
+const BANNER = "storefront.editor.banner"
+const HEADER = "storefront.editor.headerBar"
 
-/** A strip's size sits in its content (it is what the strip is); how it moves and looks, with the look. */
+/**
+ * Where the catalog header's settings sit (adr/0049 Ek 2026-11-15, the
+ * owner's rule: the basics open and first): what it shows and its menu
+ * bar's ground with the header's own content; the written search button,
+ * the written account link and the cart's subtotal closed in "Diğer
+ * ayarlar". In the form's order.
+ */
+export const HEADER_CATALOG_GROUPS: Readonly<Record<keyof HeaderCatalogFields, FieldGroupName>> = {
+  search_placeholder: "content",
+  utility_bar: "content",
+  phone: "content",
+  categories_button: "content",
+  menu_ground: "content",
+  highlight_link: "content",
+  search_label: "look",
+  account_text: "look",
+  cart_total: "look",
+}
+
+export type HeaderCatalogField = keyof HeaderCatalogFields
+
+/** The catalog header's fields of a group, in the form's order. */
+export const headerCatalogIn = (group: FieldGroupName): HeaderCatalogField[] =>
+  (Object.keys(HEADER_CATALOG_GROUPS) as HeaderCatalogField[]).filter(
+    (field) => HEADER_CATALOG_GROUPS[field] === group
+  )
+
+/**
+ * Where a strip's settings sit (adr/0049 Ek 2026-11-15, the owner's "kayma
+ * hızı ayarı yok": it was there, in a closed group): how it moves and how
+ * it looks in two open groups under its items, the rarely changed close
+ * button closed in "Diğer ayarlar" with the page's look. Its screens are
+ * every section's, in "Görünürlük" (`visibility-registry.ts`).
+ */
 const MARQUEE_GROUPS: Readonly<Record<MarqueeSetting, FieldGroupName>> = {
-  size: "content",
-  ground: "look",
-  speed: "look",
-  direction: "look",
-  separator: "look",
+  speed: "motion",
+  direction: "motion",
+  hover_pause: "motion",
+  pause_button: "motion",
+  size: "appearance",
+  ground: "appearance",
+  separator: "appearance",
+  weight: "appearance",
+  uppercase: "appearance",
+  gap: "appearance",
+  outline: "appearance",
+  closable: "look",
 }
 
 const settingsIn = (group: FieldGroupName): readonly MarqueeSetting[] =>
@@ -51,11 +117,24 @@ const settingsIn = (group: FieldGroupName): readonly MarqueeSetting[] =>
     (setting) => MARQUEE_GROUPS[setting] === group
   )
 
-/** A strip's settings in its content: the size. */
-export const MARQUEE_CONTENT_SETTINGS = settingsIn("content")
+/** How the strip moves: the open "Hareket" group. */
+export const MARQUEE_MOTION_SETTINGS = settingsIn("motion")
 
-/** How it moves and looks, in the closed "Görünüm ayarları" group with the look's fields. */
-export const MARQUEE_LOOK_SETTINGS = settingsIn("look")
+/** How it looks: the open "Stil" group. */
+export const MARQUEE_APPEARANCE_SETTINGS = settingsIn("appearance")
+
+/** The rarely changed ones, in the closed "Diğer ayarlar" group with the page's look. */
+export const MARQUEE_OTHER_SETTINGS = settingsIn("look")
+
+/** Whether the strip offers the setting as it stands: the outline only at the large size. */
+export const marqueeOffers = (section: { size: string }, setting: MarqueeSetting): boolean =>
+  setting !== "outline" || section.size === "large"
+
+/** The settings told as a switch: two steps, one of them "on". */
+export const isSwitch = (setting: MarqueeSetting): boolean => {
+  const steps: readonly string[] = MARQUEE_SETTINGS[setting]
+  return steps.length === 2 && steps.includes("on") && steps.includes("off")
+}
 
 /** The elements' ids, shared by the forms and the search. */
 export const FIELD_IDS = {
@@ -63,10 +142,13 @@ export const FIELD_IDS = {
   placement: (sectionId: string) => `${sectionId}-placement`,
   look: (sectionId: string, field: SectionLookField) => `${sectionId}-look-${field}`,
   marquee: (sectionId: string, setting: MarqueeSetting) => `${sectionId}-marquee-${setting}`,
+  banner: (sectionId: string, setting: BannerSetting) => `${sectionId}-banner-${setting}`,
+  ...SHELF_IDS,
+  ...CONTENT_IDS,
   sticky: (sectionId: string) => `${sectionId}-sticky`,
-  visible: (sectionId: string) => `${sectionId}-schedule-visible`,
-  starts: (sectionId: string) => `${sectionId}-schedule-starts`,
-  ends: (sectionId: string) => `${sectionId}-schedule-ends`,
+  header: (sectionId: string, field: HeaderCatalogField) => `${sectionId}-header-${field}`,
+  ...ANNOUNCEMENT_IDS,
+  ...VISIBILITY_IDS,
 } as const
 
 /**
@@ -84,7 +166,8 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
     const variants: readonly string[] = SECTION_VARIANTS[section.type]
     fields.push({
       key: "variant",
-      group: "variant",
+      // A product rail's sits first in its open "Diziliş"
+      group: section.type === "products" ? "layout" : "variant",
       label: `${P}.variant`,
       term: null,
       options: variants.map((variant) => `storefront.editor.variants.${section.type}.${variant}`),
@@ -101,11 +184,18 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       target: FIELD_IDS.placement(id),
     })
   }
+  // The content's counts and switches (docs/tema/bilesen-denetimi O2)
+  fields.push(...contentFields(section))
+  // How the announcement bar shows several lines, and how they turn
+  fields.push(...announcementFields(section))
   if (section.type === "marquee") {
     for (const [setting, steps] of Object.entries(MARQUEE_SETTINGS) as [
       MarqueeSetting,
       readonly string[],
     ][]) {
+      if (!marqueeOffers(section, setting)) {
+        continue
+      }
       fields.push({
         key: `marquee.${setting}`,
         group: MARQUEE_GROUPS[setting],
@@ -116,6 +206,27 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       })
     }
   }
+  // The linked category cards' and the footer's own settings (adr/0049 Ek 2026-11-15)
+  fields.push(...cardFooterFields(section))
+  // The band's basics open in "Diziliş", its width and buttons closed in "Diğer ayarlar"
+  if (section.type === "banner") {
+    for (const [setting, steps] of Object.entries(BANNER_SETTINGS) as [
+      BannerSetting,
+      readonly string[],
+    ][]) {
+      fields.push({
+        key: `banner.${setting}`,
+        group: BANNER_GROUPS[setting],
+        label: `${BANNER}.${setting}.label`,
+        term: `${BANNER}.${setting}.term`,
+        options: steps.map((step) => `${BANNER}.${setting}.${step}`),
+        target: FIELD_IDS.banner(id, setting),
+      })
+    }
+  }
+  if (section.type === "products") {
+    fields.push(...shelfFields(section))
+  }
   if (section.type === "header_bar") {
     fields.push({
       key: "sticky",
@@ -125,6 +236,21 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       options: [],
       target: FIELD_IDS.sticky(id),
     })
+    if (section.variant === "catalog") {
+      for (const field of Object.keys(HEADER_CATALOG_GROUPS) as HeaderCatalogField[]) {
+        fields.push({
+          key: `header.${field}`,
+          group: HEADER_CATALOG_GROUPS[field],
+          label: `${HEADER}.${field}.label`,
+          term: `${HEADER}.${field}.term`,
+          options:
+            field === "menu_ground"
+              ? HEADER_MENU_GROUNDS.map((ground) => `${HEADER}.menu_ground.${ground}`)
+              : [],
+          target: FIELD_IDS.header(id, field),
+        })
+      }
+    }
   }
   if (takesLook(section, group)) {
     for (const field of lookFieldsFor(section.type)) {
@@ -139,35 +265,7 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       })
     }
   }
-  // A main section always shows (adr/0049 Ek 2026-11-14 §5): no visibility
-  if (isMain(section)) {
-    return fields
-  }
-  fields.push(
-    {
-      key: "visible",
-      group: "visibility",
-      label: `${P}.visible`,
-      term: null,
-      options: [],
-      target: FIELD_IDS.visible(id),
-    },
-    {
-      key: "starts_at",
-      group: "visibility",
-      label: `${P}.startsAt`,
-      term: null,
-      options: [],
-      target: FIELD_IDS.starts(id),
-    },
-    {
-      key: "ends_at",
-      group: "visibility",
-      label: `${P}.endsAt`,
-      term: null,
-      options: [],
-      target: FIELD_IDS.ends(id),
-    }
-  )
+  // Whether, when and where it shows; a main section always does (adr/0049 Ek 2026-11-14 §5)
+  fields.push(...visibilityFields(section, group))
   return fields
 }

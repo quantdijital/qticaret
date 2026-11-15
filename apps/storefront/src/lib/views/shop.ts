@@ -1,4 +1,5 @@
 import "server-only"
+import { announcementSettingsOf } from "@qticaret/types/section-announcement"
 import { headers } from "next/headers"
 import type { ContactView, ShopView, Translate } from "@qticaret/ui"
 import type { LegalIdentity, StoreLayout } from "@qticaret/types"
@@ -136,10 +137,14 @@ export async function shopView(): Promise<ShopView> {
     announcements: layout.header.flatMap((section) =>
       section.type === "announcement_bar" ? section.lines : []
     ),
+    announcementSettings: announcementSettingsOf(
+      layout.header.find((section) => section.type === "announcement_bar") ?? {}
+    ),
     marquee: headerMarquee(layout.header, t),
     // The design's header bar and footer (Ek 2026-11-14 §5); the theme's header before them
-    headerBar: headerBarOf(layout.main, theme),
-    footerBar: footerBarOf(layout.main),
+    // The catalog header's "Kategoriler" lists the top categories already read (no request)
+    headerBar: headerBarOf(layout.main, theme, { t, tree: () => navigation(categories, paths) }),
+    footerBar: footerBarOf(layout.main, t),
     newsletter: newsletterOf(layout, identity.company_title ?? site.shop.name),
     topLinks: topLinks(menus, t),
     footerGroups: footerGroups(footerMenus(menus, t), menu, t),

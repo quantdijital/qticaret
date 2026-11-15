@@ -1,5 +1,7 @@
 import type {
   BreadcrumbView,
+  CardShownView,
+  CardVariant,
   InstallmentSummaryView,
   ProductCardView,
   ProductPageView,
@@ -7,6 +9,8 @@ import type {
   TrustBadgeView,
 } from "@qticaret/ui"
 import type { PriceDisplay, SeoPayload, StoreProduct } from "@qticaret/types"
+import { framedCard, type FramedCardOptions } from "./card-framed"
+import { cardShown } from "./card-shown"
 import { productImages, variantImages } from "./image"
 import { cardPrice, isAvailable, shownAmount, variantPrice } from "./price"
 import { specGroupsOf, specsOf } from "./specs"
@@ -21,10 +25,24 @@ export interface CardOptions {
   showBrand: boolean
   /** The stars of its approved reviews, from the card facts (`withCardFacts`, adr/0062). */
   showRating: boolean
+  /** How the cards are drawn (adr/0049 Ek 2026-11-14 §3.3); none: `standard`. */
+  variant?: CardVariant
+  /** A framed card's own, from the theme setting; none: a framed card shows only today's. */
+  framed?: FramedCardOptions
+  /** Every card's pills and rows (adr/0049 Ek 2026-11-15); none: today's card. */
+  shown?: CardShownView
 }
 
 // Without the shop's settings: the brand as ever, no stars (the setting's own default)
 const ALL_SHOWN: CardOptions = { showBrand: true, showRating: false }
+
+const NO_FRAMED_EXTRAS: FramedCardOptions = {
+  hoverImage: false,
+  deliveryNote: false,
+  fullButton: false,
+  buttonStyle: "outline",
+  freeShippingFrom: null,
+}
 
 /** A product in a grid; one without a live path is left out by the caller. */
 export function productCard(
@@ -34,6 +52,9 @@ export function productCard(
   options: CardOptions = ALL_SHOWN
 ): ProductCardView {
   const variants = product.variants ?? []
+  const variant = options.variant ?? "standard"
+  const framed = framedCard(variant, product, displays, options.framed ?? NO_FRAMED_EXTRAS)
+  const shown = cardShown(options.shown)
   return {
     id: product.id,
     title: product.title,
@@ -42,6 +63,9 @@ export function productCard(
     image: productImages(product)[0] ?? null,
     price: cardPrice(variants, displays),
     available: variants.some(isAvailable),
+    // Left out for today's card: its view is as it was; the compact card carries no extras
+    ...(framed ? { variant, framed } : variant === "compact" ? { variant } : {}),
+    ...(shown ? { shown } : {}),
   }
 }
 

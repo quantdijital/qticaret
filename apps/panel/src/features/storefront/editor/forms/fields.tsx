@@ -15,6 +15,8 @@ const oneLine = (value: string) => value.replace(/\s*[\r\n\t]+\s*/g, " ")
 interface TextFieldProps {
   id: string
   label: string
+  /** The technical term shown small beside the label. */
+  term?: string | undefined
   /** None shows as an empty field: the storefront's own words. */
   value: string | null
   onChange: (value: string | null) => void
@@ -35,6 +37,7 @@ interface TextFieldProps {
 export function TextField({
   id,
   label,
+  term,
   value,
   onChange,
   max,
@@ -74,7 +77,7 @@ export function TextField({
     />
   )
   return (
-    <Field label={label} htmlFor={id} hint={hint} error={error} required={required}>
+    <Field label={label} term={term} htmlFor={id} hint={hint} error={error} required={required}>
       {tokens ? (
         <TokenSlot fieldId={id} multiline={multiline} onInsert={set}>
           {control}
@@ -95,6 +98,7 @@ export function TextField({
 export function CountField({
   id,
   label,
+  term,
   value,
   onChange,
   max,
@@ -104,6 +108,7 @@ export function CountField({
 }: {
   id: string
   label: string
+  term?: string | undefined
   value: number
   onChange: (value: number) => void
   max: number
@@ -112,7 +117,7 @@ export function CountField({
   error?: string | undefined
 }) {
   return (
-    <Field label={label} htmlFor={id} hint={hint} error={error}>
+    <Field label={label} term={term} htmlFor={id} hint={hint} error={error}>
       <NumberField
         plain
         id={id}
@@ -125,7 +130,9 @@ export function CountField({
         onChange={(event) => {
           const next = Math.trunc(Number(event.target.value))
           if (Number.isFinite(next) && event.target.value !== "") {
-            onChange(Math.max(1, Math.min(max, next)))
+            // A count on its way past a higher least ("3" towards "30") stands until the blur;
+            // a field whose least is 0 takes 0
+            onChange(Math.max(Math.min(min, 1), Math.min(max, next)))
           }
         }}
         onBlur={() => {

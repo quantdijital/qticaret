@@ -154,7 +154,7 @@ describe("the aisle's dropdown (M1)", () => {
     expect(html).not.toContain("gf-menu-count")
     expect(html).toContain('class="gf-drop-row gf-drop-all"')
     expect(html).toMatch(
-      /<a [^>]*href="\/kategori\/aksesuar"[^>]*class="group inline-flex[^>]*>Aksesuar<\/a>/
+      /<a [^>]*href="\/kategori\/aksesuar"[^>]*class="gf-aisle-item group inline-flex[^>]*>Aksesuar<\/a>/
     )
     // Closed in the first HTML, its links there for a crawler
     expect(html).toMatch(

@@ -263,9 +263,18 @@ describe("ThemeEditor", () => {
 
     await user.click(screen.getByRole("button", { name: "Bölüm ekle" }))
     const chooser = await screen.findByRole("dialog", { name: "Bölüm ekle" })
-    await user.click(within(chooser).getByRole("button", { name: /Görsel slayt/ }))
+    await user.click(within(chooser).getByRole("button", { name: /Görsel bant/ }))
 
-    expect(await screen.findByRole("heading", { name: "Görsel slayt" })).toBeVisible()
+    expect(await screen.findByRole("heading", { name: "Görsel bant" })).toBeVisible()
+    // Its basics open in "Diziliş", its width and buttons closed in "Diğer ayarlar" (denetim 1.4)
+    const layout = screen.getByRole("group", { name: "Diziliş" })
+    for (const name of ["Yükseklik height", "Yazının yeri position", "Perde gücü overlay"]) {
+      expect(within(layout).getByRole("radiogroup", { name })).toBeVisible()
+    }
+    expect(screen.getByRole("button", { name: "Diğer ayarlar" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    )
     expect(screen.getByRole("alert")).toHaveTextContent("En az bir görsel ekleyin.")
     expect(status()).toHaveTextContent("Düzeltilecek alan var")
     // However long it waits
@@ -275,7 +284,7 @@ describe("ThemeEditor", () => {
     await user.click(screen.getByRole("button", { name: "Bölümlere dön" }))
     expect(
       within(screen.getByRole("list", { name: "Ana sayfa" })).getByRole("button", {
-        name: /Görsel slayt\s*Düzeltilecek alan var/,
+        name: /Görsel bant\s*Düzeltilecek alan var/,
       })
     ).toBeVisible()
   })

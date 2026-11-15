@@ -1,7 +1,8 @@
 /**
  * The catalogue home page's parts (adr/0049 Ek 2026-11-14 §3.2 and the
  * dated note "Katalog ana sayfası"): the opening's `category_list`
- * variant (H17) and the price bands strip (`price_bands`). Their limits
+ * variant (H17) and the price bands strip (`price_bands`), and their
+ * shapes in `GET /store/storefront-layout`. Their limits
  * are the contract's; the backend's schema mirrors them
  * (`lib/storefront/sections/hero.ts`, `price-bands.ts`) and a test keeps
  * them equal.
@@ -9,6 +10,8 @@
  * Imports nothing at run time (the storefront takes it from the
  * `@qticaret/types/section-catalog` subpath, which Turbopack resolves).
  */
+
+import type { StoreLayoutImage, StoreLayoutLink } from "./layout.js"
 
 /**
  * H17's own parts: the category list's rows (shown at most), the tiles
@@ -42,6 +45,8 @@ export const PRICE_BANDS_LIMITS = {
   /** The highest upper bound a band takes, in whole units. */
   max: 10_000_000,
   thumbs: { min: 0, max: 4, default: 3 },
+  /** Strips a page (the home page) shows at most. */
+  perPage: 2,
 } as const
 
 /** One band as the design keeps it. */
@@ -53,14 +58,19 @@ export interface PriceBand {
 }
 
 /**
- * Each band's range: from the band before's upper bound (none for the
- * first) to its own (none for "and up"), as a listing's price filter reads
- * it (`fiyat=min-max`, either end left out).
+ * Each band's range: from one whole unit above the band before's upper
+ * bound (none for the first) to its own (none for "and up"), as a
+ * listing's price filter reads it (`fiyat=min-max`, both ends included,
+ * whole units, either end left out). So a price on a bound is in one band
+ * only, the lower one.
  */
 export function bandRanges(
   bands: readonly Pick<PriceBand, "max">[]
 ): { min: number | null; max: number | null }[] {
-  return bands.map((band, index) => ({ min: bands[index - 1]?.max ?? null, max: band.max }))
+  return bands.map((band, index) => {
+    const before = bands[index - 1]?.max
+    return { min: before === undefined || before === null ? null : before + 1, max: band.max }
+  })
 }
 
 /**
@@ -75,4 +85,67 @@ export function bandsRise(bands: readonly Pick<PriceBand, "max">[]): boolean {
     const before = bands[index - 1]?.max
     return before === undefined || (before !== null && band.max > before)
   })
+}
+
+/**
+ * The opening (adr/0049): a line above, a heading, a text, up to two
+ * buttons and a picture; drawn as today's graphite stage (`standard`, and
+ * absent from a backend before variants) or, as `category_list` (H17,
+ * adr/0049 Ek 2026-11-14 §3.2), beside the shop's category list and two
+ * category tiles, with quick links under it. A reader takes a variant it
+ * does not know as `standard` and leaves the other's fields unread.
+ */
+export type StoreHeroSection = {
+  id: string
+  type: "hero"
+  eyebrow: string | null
+  /** None: the shop's name. */
+  heading: string | null
+  text: string | null
+  links: StoreLayoutLink[]
+  image: StoreLayoutImage | null
+} & ({ variant?: "standard" } | StoreHeroCatalog)
+
+/** H17's own fields; the categories' names, pictures and counts are the storefront's to fetch. */
+export interface StoreHeroCatalog {
+  variant: "category_list"
+  list: HeroListSource
+  /** Rows the list shows at most. */
+  list_limit: number
+  /** Each row's and tile's product count. */
+  show_count: boolean
+  /** The tiles beside the opening: a category, and the shop's picture for it (none: the category's). */
+  tiles: { category_id: string; image: StoreLayoutImage | null }[]
+  /** Quick links under the opening; a broken one left out. */
+  chips: StoreLayoutLink[]
+  /** Products shown small under the button, each with the shop's short label (none: its title). */
+  picks: { product_id: string; label: string | null }[]
+  /** The lowest price among the picks, "from", worked out from their live prices. */
+  show_price: boolean
+}
+
+/**
+ * The price bands strip (adr/0049 Ek 2026-11-14, note "Katalog ana
+ * sayfası"): each band's words, its range in whole units of the shop's
+ * currency (from just above the band before's bound to its own, `bandRanges`; null: open) and the
+ * products shown small in it, picked on the server for the shopper's sales
+ * channels by their indexed prices. The storefront links each band to the
+ * whole catalogue's listing filtered by its range and fetches the products.
+ */
+export interface StorePriceBandsSection {
+  id: string
+  type: "price_bands"
+  title: string | null
+  bands: {
+    label: string
+    text: string | null
+    min: number | null
+    max: number | null
+    product_ids: string[]
+  }[]
+}
+
+/** `GET /store/category-counts`: each shown category's products, its shown subcategories' included. */
+export interface StoreCategoryCounts {
+  counts: Record<string, number>
 }
