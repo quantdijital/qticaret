@@ -115,6 +115,18 @@ describe("WholesalerPage", () => {
     ])
   })
 
+  it("offers no new password where the customer keeps their own, or on a closed account (M4)", async () => {
+    serve(account({ staff_login: false }))
+    const { unmount } = renderWith(clientWith(), <WholesalerPage />)
+    expect(await screen.findByText(/Şifremi unuttum/)).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Yeni şifre" })).not.toBeInTheDocument()
+    unmount()
+    serve(account({ status: "inactive" }))
+    renderWith(clientWith(), <WholesalerPage />)
+    expect(await screen.findByRole("button", { name: "Yeniden aç" })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: "Yeni şifre" })).not.toBeInTheDocument()
+  })
+
   it("keeps the window open with the server's refusal of a new password", async () => {
     const why =
       "Bu müşteri e-posta ve şifreyle değil, başka bir yolla (ör. Google) giriş yapıyor; şifre belirlenemez."

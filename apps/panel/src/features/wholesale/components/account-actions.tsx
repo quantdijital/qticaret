@@ -27,7 +27,8 @@ function announceCarts(t: TFunction, done: string, carts: CartsRepriced) {
 
 /**
  * The wholesaler's actions (ADR-0068 §3, Ek 2026-11-15 (2)): edit, a new
- * password for a bound one, close an active one or open a closed one
+ * password where staff made or took over the sign-in (an open account),
+ * close an active one or open a closed one
  * again. Each state change asks first and says what it did to the
  * customer's open carts. No invitation is sent any more.
  */
@@ -37,6 +38,8 @@ export function AccountActions({ account }: { account: WholesaleAccount }) {
   const [editing, setEditing] = useState(false)
   const [password, setPassword] = useState(false)
   const [confirming, setConfirming] = useState<Confirming>(null)
+  // Only a sign-in staff made or took over, on an open account (review M4)
+  const settable = account.staff_login && account.status === "active" && account.customer !== null
   const change = (to: "deactivate" | "reactivate") => {
     state.mutate(to, {
       onSuccess: ({ carts }) => {
@@ -56,7 +59,7 @@ export function AccountActions({ account }: { account: WholesaleAccount }) {
         <Pencil />
         {t("common.edit")}
       </Button>
-      {account.customer ? (
+      {settable ? (
         <Button
           variant="outline"
           onClick={() => {
@@ -90,7 +93,7 @@ export function AccountActions({ account }: { account: WholesaleAccount }) {
         </Button>
       ) : null}
       <AccountEditDialog account={account} open={editing} onOpenChange={setEditing} />
-      {account.customer ? (
+      {settable ? (
         <PasswordDialog account={account} open={password} onOpenChange={setPassword} />
       ) : null}
       <ConfirmDialog

@@ -47,6 +47,11 @@ export function AccountInfoCard({ account }: { account: WholesaleAccount }) {
               <span className="text-muted-foreground">{t(`${D}.noCustomer`)}</span>
             ),
           ],
+          ...(account.customer
+            ? ([
+                [t(`${D}.signIn`), t(account.staff_login ? `${D}.signInStaff` : `${D}.signInOwn`)],
+              ] as [string, ReactNode][])
+            : []),
           [
             t("wholesale.ownPrices"),
             account.own_prices

@@ -1,6 +1,7 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import { refreshStandingAfter } from "@/features/auth/api/staff"
 import { responseFailure } from "@/lib/errors"
+import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 import type {
   AccountStatus,
@@ -80,10 +81,15 @@ export const accountQuery = (id: string) =>
   })
 
 /** Every wholesale change refreshes every wholesale read; a refused one re-reads the role. */
-export function useWholesaleMutation<T, R>(run: (input: T) => Promise<R>) {
+export function useWholesaleMutation<T, R>(
+  run: (input: T) => Promise<R>,
+  /** A mutation that carries a password keeps nothing once done (review L8). */
+  { secret = false }: { secret?: boolean } = {}
+) {
   const client = useQueryClient()
   return useMutation({
     mutationFn: run,
+    ...(secret ? { gcTime: 0 } : {}),
     onError: (failure) => {
       refreshStandingAfter(client, failure)
     },
@@ -102,18 +108,23 @@ export const UNPROVEN_SIGNUP = "wholesale.unproven_signup"
  * only, over the session, and is kept nowhere in the panel.
  */
 export const useCreateAccount = () =>
-  useWholesaleMutation(async (body: CreateAccountBody) => {
-    const response = await fetch(ROOT, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(body),
-    })
-    if (!response.ok) {
-      throw await responseFailure(response)
-    }
-    return (await response.json()) as CreatedAccount
-  })
+  useWholesaleMutation(
+    // A take-over replaces someone's password: the API asks staff to prove themselves (428)
+    (body: CreateAccountBody) =>
+      withReauth(async ({ headers }) => {
+        const response = await fetch(ROOT, {
+          method: "POST",
+          headers: { "content-type": "application/json", ...headers },
+          credentials: "include",
+          body: JSON.stringify(body),
+        })
+        if (!response.ok) {
+          throw await responseFailure(response)
+        }
+        return (await response.json()) as CreatedAccount
+      }),
+    { secret: true }
+  )
 
 export const useUpdateAccount = (id: string) =>
   useWholesaleMutation((body: UpdateAccountBody) =>
@@ -131,9 +142,14 @@ export const useSetAccountState = (id: string) =>
 
 /** A bound wholesaler's new password, typed by staff; every older sign-in of theirs ends. */
 export const useSetAccountPassword = (id: string) =>
-  useWholesaleMutation((password: string) =>
-    sdk.client.fetch<{ account: WholesaleAccount; signed_out: boolean }>(`${at(id)}/password`, {
-      method: "POST",
-      body: { password },
-    })
+  useWholesaleMutation(
+    (password: string) =>
+      withReauth((extra) =>
+        sdk.client.fetch<{ account: WholesaleAccount; signed_out: boolean }>(`${at(id)}/password`, {
+          method: "POST",
+          body: { password },
+          ...extra,
+        })
+      ),
+    { secret: true }
   )

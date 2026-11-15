@@ -17,6 +17,7 @@ export const account = (more: Partial<WholesaleAccount> = {}): WholesaleAccount 
   customer: { id: "cus_1", email: "satinalma@kayabicak.com.tr" },
   tier: { id: "wst_1", name: "Toptan A" },
   own_prices: false,
+  staff_login: true,
   percent: null,
   min_quantity: null,
   sync_pending: false,
@@ -41,6 +42,7 @@ export const pendingAccount = (more: Partial<WholesaleAccount> = {}) =>
     invitation_expires_at: "2027-02-12T09:00:00Z",
     invitations_sent: 2,
     activated_at: null,
+    staff_login: false,
     ...more,
   })
 

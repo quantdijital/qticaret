@@ -102,7 +102,7 @@ export function NewWholesalerDialog({
               <Field
                 label={t(`${F}.email`)}
                 htmlFor="wholesale-email"
-                hint={t(`${F}.emailHint`)}
+                hint={t(`${F}.emailCheck`)}
                 error={message(errors.email?.message)}
                 required
                 className="sm:col-span-2"

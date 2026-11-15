@@ -10069,7 +10069,8 @@
       "passwordHint": "The wholesaler signs in on the storefront with this e-mail and password. You pass the password on; it is not shown again. If a verified customer account exists for this e-mail, your password is not used.",
       "takeOverTitle": "Take over the unverified account?",
       "takeOverText": "An account was opened with this e-mail but its address was never verified; the address may belong to someone else. Taking it over replaces its password with yours, ends its open sessions and removes its open carts. This is written to the audit log.",
-      "takeOver": "Take over the account"
+      "takeOver": "Take over the account",
+      "emailCheck": "Check the address once more: wholesale prices show only to the account signed in with it; a mistyped address hands the account to that address's owner."
     },
     "outcome": {
       "billing": {
@@ -10120,7 +10121,10 @@
       "tier": "Wholesale level",
       "noOwnPrices": "This wholesaler has no prices of their own; they buy at their level's prices.",
       "openOwn": "Open own prices",
-      "ownOpened": "A price list of their own was opened for this wholesaler."
+      "ownOpened": "A price list of their own was opened for this wholesaler.",
+      "signIn": "Sign-in",
+      "signInStaff": "You set the password; you can give a new one if needed.",
+      "signInOwn": "Signs in with an account they verified and their own password; if forgotten, they renew it with \"Forgot password\" on the storefront."
     },
     "prices": {
       "title": "Wholesale prices",

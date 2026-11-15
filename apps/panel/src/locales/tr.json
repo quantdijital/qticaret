@@ -10069,7 +10069,8 @@
       "passwordHint": "Toptancı bu e-posta ve şifreyle vitrinde giriş yapar. Şifreyi toptancıya siz iletirsiniz; bir daha gösterilmez. Bu e-postayla doğrulanmış bir müşteri hesabı varsa yazdığınız şifre kullanılmaz.",
       "takeOverTitle": "Doğrulanmamış hesap devralınsın mı?",
       "takeOverText": "Bu e-postayla açılmış ama adresi doğrulanmamış bir hesap var; adres başkasına ait olabilir. Devralırsanız hesabın şifresi yazdığınız şifreyle değişir, açık oturumları kapanır ve açık sepetleri kaldırılır. İşlem denetim kaydına yazılır.",
-      "takeOver": "Hesabı devral"
+      "takeOver": "Hesabı devral",
+      "emailCheck": "Adresi bir kez daha kontrol edin: toptan fiyatlar yalnızca bu adresle giriş yapan hesapta görünür; yanlış yazılan bir adres hesabı o adresin sahibine verir."
     },
     "outcome": {
       "billing": {
@@ -10120,7 +10121,10 @@
       "tier": "Toptan seviyesi",
       "noOwnPrices": "Bu toptancıya özel fiyat yok; seviyesinin fiyatlarıyla alışveriş yapar.",
       "openOwn": "Özel fiyat aç",
-      "ownOpened": "Bu toptancıya özel fiyat listesi açıldı."
+      "ownOpened": "Bu toptancıya özel fiyat listesi açıldı.",
+      "signIn": "Giriş",
+      "signInStaff": "Şifresini siz belirlediniz; gerekirse yeni şifre verebilirsiniz.",
+      "signInOwn": "Kendi doğruladığı hesabıyla, kendi şifresiyle giriş yapar; unutursa vitrindeki \"Şifremi unuttum\" ile yeniler."
     },
     "prices": {
       "title": "Toptan fiyatlar",

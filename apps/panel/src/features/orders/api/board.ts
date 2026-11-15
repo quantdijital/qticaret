@@ -40,8 +40,8 @@ export interface BoardOrder {
   addons: { lines: number; non_withdrawable: boolean }
   /** Units a paid order was placed without (adr/0026 Ek 2026-11-06), while it is still to send. */
   stock_short?: number
-  /** The wholesaler who placed it (ADR-0068 Ek 2026-11-15 (2)); on the wholesale and a customer's lists. */
-  wholesaler?: { id: string; name: string | null } | null
+  /** The wholesaler who placed it (ADR-0068 Ek 2026-11-15 (2)); its id for owner and admin only. */
+  wholesaler?: { id?: string; name: string | null } | null
 }
 
 /** Where a carrier's parcel stands (adr/0031), as the server names it. */

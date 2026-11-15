@@ -34,7 +34,7 @@ function useWholesalerColumn(): Column<BoardOrder> {
     header: t(`${O}.wholesaler`),
     className: "hidden md:table-cell",
     cell: (order) =>
-      order.wholesaler ? (
+      order.wholesaler?.id ? (
         <Link
           to="/customers/wholesale/$id"
           params={{ id: order.wholesaler.id }}
@@ -45,6 +45,8 @@ function useWholesalerColumn(): Column<BoardOrder> {
         >
           {order.wholesaler.name ?? t(`${O}.unnamed`)}
         </Link>
+      ) : order.wholesaler ? (
+        <span>{order.wholesaler.name ?? t(`${O}.unnamed`)}</span>
       ) : (
         <span className="text-muted-foreground">—</span>
       ),

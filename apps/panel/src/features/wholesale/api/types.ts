@@ -35,6 +35,8 @@ export interface WholesaleAccount {
   tier: { id: string; name: string } | null
   /** Whether the wholesaler has a price list of its own. */
   own_prices: boolean
+  /** The sign-in is one staff made or took over: only then may staff set its password. */
+  staff_login: boolean
   /** The own list's rate; null without one. */
   percent: number | null
   min_quantity: number | null
