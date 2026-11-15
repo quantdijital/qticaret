@@ -71,15 +71,15 @@ describe("a product list's layout and scrolling (adr/0049 Ek 2026-11-15)", HEAVY
 
   it("picks a carousel in Stil › Diziliş, offers Kaydırma with its arrows, and saves the kit's steps", async () => {
     await open("Ürün listesi")
-    // The variant sits in "Diziliş" (closed at first), not in a group of its own
+    // The variant stands in its own "Biçim", open, as every section's; "Diziliş" closed
     await openTab(user, "style")
+    expect(screen.getByRole("button", { name: "Biçim" })).toHaveAttribute("aria-expanded", "true")
     expect(screen.getByRole("button", { name: "Diziliş" })).toHaveAttribute(
       "aria-expanded",
       "false"
     )
     expect(screen.queryByRole("button", { name: "Kaydırma" })).toBeNull()
 
-    await openGroup(user, "Diziliş")
     await user.click(screen.getByRole("radio", { name: /Kayan sıra/ }))
     expect(screen.getByRole("button", { name: "Kaydırma" })).toBeVisible()
     await openGroup(user, "Kaydırma")

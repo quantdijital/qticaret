@@ -9,6 +9,7 @@ import { SwitchRow } from "../theme-fields"
 import { FIELD_IDS } from "./field-registry"
 import type { FieldGroupName } from "./field-registry"
 import { HeaderCatalogFields } from "./header-catalog-fields"
+import { headerSetIn } from "./header-marks"
 import { StepChoice } from "./step-choice"
 
 const H = "storefront.editor.headerBar"
@@ -67,7 +68,12 @@ export function HeaderGroups({
     />
   )
   const group = (name: FieldGroupName, fields: ReactNode) => (
-    <PanelGroup name={name} title={t(PANEL_GROUPS[name].title)} reveal={reveal(name)}>
+    <PanelGroup
+      name={name}
+      title={t(PANEL_GROUPS[name].title)}
+      marked={headerSetIn(section, name)}
+      reveal={reveal(name)}
+    >
       {fields}
     </PanelGroup>
   )

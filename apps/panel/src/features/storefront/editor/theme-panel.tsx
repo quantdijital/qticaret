@@ -52,6 +52,7 @@ export function ThemePanel({
         tabOf={allContent}
         tabbed={false}
         searchLabel="storefront.editor.panelSearch.themeLabel"
+        searchPlaceholder="storefront.editor.panelSearch.themePlaceholder"
         focus={focus}
       >
         <ThemeForm

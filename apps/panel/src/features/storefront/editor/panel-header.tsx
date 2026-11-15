@@ -120,6 +120,8 @@ export function PanelGroup({
   }
   const register = layout?.register
   useLayoutEffect(() => register?.(key), [register, key])
+  const mark = layout?.mark
+  useLayoutEffect(() => (marked > 0 ? mark?.(key, marked) : undefined), [mark, key, marked])
   const open = layout ? layout.isOpen(key) : ownOpen
   const lone = layout ? layout.isLone(key) : false
   const shown = layout ? layout.isShown(key) : true

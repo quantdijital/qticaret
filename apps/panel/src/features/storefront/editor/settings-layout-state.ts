@@ -21,6 +21,10 @@ export interface SettingsLayout {
   tabbed: boolean
   query: string
   register: (name: string) => () => void
+  /** A group tells how many of its settings are off their defaults (its title's mark). */
+  mark: (name: string, count: number) => () => void
+  /** Whether a group of the tab holds a setting off its default: a dot beside its name. */
+  isMarked: (tab: SettingsTab) => boolean
   tabOf: (name: string) => SettingsTab
   isOpen: (name: string) => boolean
   /** Alone in its tab: open, its header not drawn. */
@@ -125,6 +129,17 @@ export function useSettingsLayout({
       setNames((was) => was.filter((other) => other !== name))
     }
   }, [])
+  const [marks, setMarks] = useState<ReadonlyMap<string, number>>(new Map())
+  const mark = useCallback((name: string, count: number) => {
+    setMarks((was) => (was.get(name) === count ? was : new Map(was).set(name, count)))
+    return () => {
+      setMarks((was) => {
+        const next = new Map(was)
+        next.delete(name)
+        return next
+      })
+    }
+  }, [])
   const tabs = useMemo(
     () => SETTINGS_TABS.filter((tab) => names.some((name) => tabOf(name) === tab)),
     [names, tabOf]
@@ -143,6 +158,8 @@ export function useSettingsLayout({
     tabbed,
     query: current.query,
     register,
+    mark,
+    isMarked: (tab) => [...marks].some(([name, count]) => count > 0 && tabOf(name) === tab),
     tabOf,
     isOpen,
     isLone,

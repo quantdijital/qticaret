@@ -8033,7 +8033,8 @@
           "style": "Stil",
           "styleTerm": "style",
           "advanced": "Gelişmiş",
-          "advancedTerm": "advanced"
+          "advancedTerm": "advanced",
+          "marked": "varsayılandan farklı ayar var"
         },
         "groups": {
           "search": "Arama",
@@ -9193,7 +9194,8 @@
       "panelSearch": {
         "label": "Bu bölümün ayarlarında ara",
         "themeLabel": "Tema ayarlarında ara",
-        "placeholder": "Ayar ara: başlık, zemin, margin…",
+        "placeholder": "Bu bölümün ayarlarında ara…",
+        "themePlaceholder": "Tema ayarlarında ara…",
         "clear": "Aramayı temizle",
         "results": "Bulunan ayarlar",
         "empty": "“{{query}}” için ayar bulunamadı.",

@@ -71,6 +71,12 @@ export function SettingsTabs({ base }: { base: string }) {
           >
             {t(label)}
             <small className="text-[11px] font-normal text-muted-foreground">{t(term)}</small>
+            {layout.isMarked(tab) ? (
+              // A setting of this tab is off its default: its group says how many
+              <span data-tab-marked className="size-1.5 shrink-0 rounded-full bg-primary">
+                <span className="sr-only">{`, ${t("storefront.editor.panel.tabs.marked")}`}</span>
+              </span>
+            ) : null}
           </button>
         )
       })}

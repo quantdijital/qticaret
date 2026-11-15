@@ -127,8 +127,8 @@ export function SectionPanel({
               onChange={onChange}
             />
           ) : null}
-          {/* Stil: the variant first (a product rail's sits first in its "Diziliş") */}
-          {offersVariants(section) && !shelf ? (
+          {/* Stil: the variant first, open */}
+          {offersVariants(section) ? (
             <PanelGroup name="variant" title={t(`${P}.variant`)} reveal={reveal("variant")}>
               <VariantField
                 id={FIELD_IDS.variant(section.id)}

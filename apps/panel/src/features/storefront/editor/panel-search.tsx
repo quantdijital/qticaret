@@ -18,13 +18,15 @@ const S = "storefront.editor.panelSearch"
 export function PanelSearchBox({
   base,
   label,
+  placeholder,
   hits,
   onPick,
   listRef,
 }: {
   base: string
-  /** Its name (i18n key): this section's settings, the theme's. */
+  /** Its name and the words standing in it while empty (i18n keys): this section's settings, the theme's. */
   label: string
+  placeholder: string
   hits: readonly PanelHit[]
   onPick: (field: PanelField) => void
   listRef: RefObject<HTMLUListElement | null>
@@ -47,7 +49,7 @@ export function PanelSearchBox({
           type="search"
           aria-label={t(label)}
           aria-controls={searching ? `${base}-hits` : undefined}
-          placeholder={t(`${S}.placeholder`)}
+          placeholder={t(placeholder)}
           value={query}
           className="h-8 pr-8 pl-8 text-sm [&::-webkit-search-cancel-button]:hidden"
           onChange={(event) => {

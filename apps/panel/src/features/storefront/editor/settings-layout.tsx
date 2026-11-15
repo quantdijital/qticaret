@@ -25,6 +25,7 @@ export function SettingsLayout({
   tabOf,
   tabbed = true,
   searchLabel = "storefront.editor.panelSearch.label",
+  searchPlaceholder = "storefront.editor.panelSearch.placeholder",
   focus,
   children,
 }: {
@@ -36,6 +37,8 @@ export function SettingsLayout({
   tabbed?: boolean
   /** The search box's name (i18n key). */
   searchLabel?: string
+  /** Its words while empty (i18n key), told apart from the editor's search over every section. */
+  searchPlaceholder?: string
   focus: (FieldFocus & { group: string }) | null
   children: ReactNode
 }) {
@@ -63,7 +66,14 @@ export function SettingsLayout({
   }
   return (
     <SettingsLayoutContext.Provider value={value}>
-      <PanelSearchBox base={base} label={searchLabel} hits={hits} onPick={pick} listRef={list} />
+      <PanelSearchBox
+        base={base}
+        label={searchLabel}
+        placeholder={searchPlaceholder}
+        hits={hits}
+        onPick={pick}
+        listRef={list}
+      />
       {showTabs ? <SettingsTabs base={base} /> : null}
       <PanelSearchHits base={base} hits={hits} onPick={pick} listRef={list} />
       <div

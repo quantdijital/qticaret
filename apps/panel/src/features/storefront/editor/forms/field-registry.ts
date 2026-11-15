@@ -220,8 +220,7 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
     const variants: readonly string[] = SECTION_VARIANTS[section.type]
     fields.push({
       key: "variant",
-      // A product rail's sits first in its open "Diziliş"
-      group: section.type === "products" ? "layout" : "variant",
+      group: "variant",
       label: `${P}.variant`,
       term: null,
       options: variants.map((variant) => `storefront.editor.variants.${section.type}.${variant}`),

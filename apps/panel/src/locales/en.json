@@ -8033,7 +8033,8 @@
           "style": "Style",
           "styleTerm": "style",
           "advanced": "Advanced",
-          "advancedTerm": "advanced"
+          "advancedTerm": "advanced",
+          "marked": "some settings are off their defaults"
         },
         "groups": {
           "search": "Search",
@@ -9193,7 +9194,8 @@
       "panelSearch": {
         "label": "Search this section's settings",
         "themeLabel": "Search the theme settings",
-        "placeholder": "Search settings: title, ground, margin…",
+        "placeholder": "Search this section's settings…",
+        "themePlaceholder": "Search the theme settings…",
         "clear": "Clear search",
         "results": "Settings found",
         "empty": "No setting found for “{{query}}”.",
