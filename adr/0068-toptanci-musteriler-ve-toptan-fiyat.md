@@ -1,6 +1,6 @@
 # ADR-0068: Toptancı müşteriler ve toptan fiyat
 
-- **Durum:** Kabul (sahip, 2026-11-15). Açık soruların önerilen varsayılanları sahip tarafından onaylandı ("önerilerin uygundur"); yalnız yasal ve mali konu (Açık sorular 10) danışman görene kadar açık ve işaretli.
+- **Durum:** Kabul (sahip, 2026-11-15). Açık soruların önerilen varsayılanları sahip tarafından onaylandı ("önerilerin uygundur"); yalnız yasal ve mali konu (Açık sorular 10) danışman görene kadar açık ve işaretli. Ek 2026-11-15: öncelik kapısının sonucu (özel satırlarda grup fiyat kuralı; karar 11 değişti, seviye listesi `override`).
 - **Tarih:** 2026-11-15
 - **İlgili:** adr/0007 (KDV modeli, KDV dahil fiyat), adr/0009 (vergi kimliği), adr/0010 (para ve yuvarlama), adr/0011 (denetim kaydı), adr/0012 (özellik bayrakları), adr/0023 (fiyat geçmişi, 30 gün kuralı), adr/0024 (kupon ve kampanya kuralları), adr/0037 §6 (segmentler), adr/0040 (roller), adr/0041 (yasal metinler), adr/0042 G6 (hesap daveti), adr/0046 (vitrin, Store API çağrıları), adr/0050 (toplu kampanya), adr/0051 (ödeme bağlantısı), adr/0056 (arama dizini), adr/0061 §5.5 (paket koruması), adr/0066 (tema katmanları), docs/13 (JSON-LD, akışlar), `docs/kvkk-envanter.md`, docs/20 (B2B → F19), PROGRESS D14 (teklif isteme)
 - **Dayanak:** sahip (2026-11-15): "müşteri tarafında sahip veya yöneticiler yeni müşteri oluşturabilecek; bu oluşturduğu müşteri Toptancı olabilir; toptancı müşterisi oluştururken mağazadaki tüm ürünlerin / tekil ürünlerin fiyatlarını güncelleyebilecek ve bunları yalnızca o mail ile giren toptancı görecek; perakende fiyatlardan ziyade toptancıya o toptan fiyatlarla alışveriş yapabilmesini sağlayacak."
@@ -24,7 +24,7 @@
 8. **En az adet** ilk sürümde **sipariş başına toplam adet** (toptancı ya da seviye düzeyinde); ürün başına en az adet sonraki sürümde (§8, §11).
 9. Toptan fiyat **KDV hariç girilir**; KDV dahil karşılığı yanında bilgi olarak gösterilir (§4).
 10. **Otomatik kampanyalar toptancıya uygulanmaz**; kargo bedava eşiği kampanya değildir, uygulanır (§6).
-11. Herkese açık bir indirim seviye fiyatından **düşükse toptancı düşük olanı alır** (seviye listesi `sale`, §2).
+11. ~~Herkese açık bir indirim seviye fiyatından düşükse toptancı düşük olanı alır.~~ **Değişti (Ek 2026-11-15):** toptancı **her zaman toptan fiyatı** öder (özel > seviye); herkese açık indirimler toptancıya yansımaz. Seviye listesi `override` olur (§2).
 12. Toptancıya listede **fiyat süzgeci gösterilmez**; sıralama perakende sırasıyladır (§7).
 13. Kabul edilmeyen davet **90 gün** sonra silinir; yeniden gönderilebilir (§10).
 14. Özellik **mağaza bayrağıdır**: `customers.wholesale` (`owner: tenant`), kapalı başlar; F17'de pakete bağlanabilir (§9).
@@ -55,7 +55,7 @@
 - `GET /store/products` ara katmanları `authenticate("customer", ["session","bearer"], { allowUnauthenticated: true })` → `setPricingContext()` → `setTaxContext()`: oturum açık müşterinin grupları fiyat bağlamına kendiliğinden girer; `region_id` + `country_code` verilirse `calculated_amount_with_tax` / `calculated_amount_without_tax` gelir.
 - Sepet satırı fiyatı sepetin bağlamından hesaplanır: `customer_id`, `customer` (gruplarıyla, `cartFieldsForPricingContext`), bölge, para birimi, adet (`update-line-item-in-cart` workflow'u). Yani sepet müşteriye bağlıysa satırlar grup fiyatıyla gelir; birim fiyatı biz yazmayız.
 - Fiyat listesi kuralı `customer.groups.id`; Medusa'nın kendi B2B deseni "grup başına bir liste" (pricing modülü entegrasyon testi).
-- `calculatePrices`: tek SQL; satırlar "önce fiyat listesi fiyatları, sonra kuralı çok olan, sonra en düşük tutar" sırasıyla gelir. Fiyat seti başına seçim: **`override` liste fiyatı her zaman kazanır; `sale` liste fiyatı yalnız varsayılan fiyattan düşükse** kullanılır. `original_amount` override varsa o, yoksa varsayılan fiyattır. KDV dahil olma `PricePreference`'tan (bölge ya da para birimi) gelir.
+- `calculatePrices`: tek SQL; satırlar "önce fiyat listesi fiyatları, sonra kuralı çok olan (fiyatın kuralları + listenin kuralları), sonra en düşük tutar" sırasıyla gelir. Fiyat seti başına **yalnız ilk liste satırı** değerlendirilir: `override` ise kazanır; `sale` ise yalnız varsayılan fiyattan düşükse kullanılır (Ek 2026-11-15, ölçüldü). `original_amount` override varsa o, yoksa varsayılan fiyattır. KDV dahil olma `PricePreference`'tan (bölge ya da para birimi) gelir.
 - Promosyon kuralları `customer.groups.id` üzerinde `in` / `eq` ile kurulur. Bir grubu **dışlayan** kuralın 2.21.2'de nasıl davrandığı belgelerde açık değil (Uygulama sırası, dilim 4).
 - Context7 belgeleri `develop` dalını anlatır; aşağıdaki öncelik kuralı 2.21.2'de entegrasyon testiyle kanıtlanmadan dilim 1 kapanmaz.
 
@@ -67,8 +67,8 @@ Bugünkü vitrin "fiyat herkes için aynıdır" varsayımıyla hızlıdır: `/st
 
 ### 1. Kavramlar ve veri modeli
 
-- **Toptan seviyesi** (`wholesale_tier`): ad (ör. "Toptan A"), bir Medusa müşteri grubu, bir Medusa fiyat listesi (`sale` türü, kuralı `customer.groups.id = [seviyenin grubu]`), isteğe bağlı genel indirim oranı (`rate_bps`; boş: yalnız tekil fiyatlar), isteğe bağlı en az adet.
-- **Toptancı hesabı** (`wholesale_account`): bir müşteriye bağlı toptan kaydı; seviye (isteğe bağlı), isteğe bağlı **özel liste** (tek üyeli gizli grup + `override` türü liste, kuralı `customer.groups.id = [gizli grup]`), isteğe bağlı özel indirim oranı, isteğe bağlı en az adet (seviyeninkini ezer), durum `pending | active | inactive`, davet/etkinleşme/kapanma zamanları ve işlemi yapan personel.
+- **Toptan seviyesi** (`wholesale_tier`): ad (ör. "Toptan A"), bir Medusa müşteri grubu, bir Medusa fiyat listesi (`override` türü, kuralı `customer.groups.id = [seviyenin grubu]`; Ek 2026-11-15), isteğe bağlı genel indirim oranı (`rate_bps`; boş: yalnız tekil fiyatlar), isteğe bağlı en az adet.
+- **Toptancı hesabı** (`wholesale_account`): bir müşteriye bağlı toptan kaydı; seviye (isteğe bağlı), isteğe bağlı **özel liste** (tek üyeli gizli grup + `override` türü liste, kuralı `customer.groups.id = [gizli grup]`; listenin her satırı ayrıca aynı grubu fiyat kuralı olarak taşır, Ek 2026-11-15), isteğe bağlı özel indirim oranı, isteğe bağlı en az adet (seviyeninkini ezer), durum `pending | active | inactive`, davet/etkinleşme/kapanma zamanları ve işlemi yapan personel.
 - **Elle fiyat işareti** (`wholesale_manual_price`): bir listede elle girilmiş satırı (liste, varyant, girilen **KDV hariç** tutar) oran satırlarından ayırır. Oranla üretilen satırlar taban fiyat değişince yeniden hesaplanır; elle girilenler değişmez.
 - **Yeni modül `wholesale`** (`apps/backend/src/modules/wholesale`, migration yalnız bu modülde). `customer` metadata'sı **kullanılmaz**: durum, seviye ve liste ilişkisi sorgulanabilir, indekslenebilir ve denetlenebilir olmalı. Segmentlerdeki gibi Medusa grup ve liste kimlikleri metin sütunlarında tutulur; toptancı ↔ müşteri için modül bağlantısı (`src/links/wholesale-account-customer.ts`) panel listelerinin sorgusu içindir.
 - **Medusa çekirdeğinde kalan:** müşteri, müşteri grubu, fiyat listesi ve fiyatları, fiyat hesabı, sepet, KDV. **Bizim olan:** seviye/hesap kayıtları, oranla toplu üretim ve eşitleme, davet ve sahiplenme, korumalar, kişisel fiyat ucu, en az adet ve kupon kuralı.
@@ -79,14 +79,14 @@ Bugünkü vitrin "fiyat herkes için aynıdır" varsayımıyla hızlıdır: `/st
 
 | Katman | Liste türü | Kural | Sonuç |
 | --- | --- | --- | --- |
-| Toptancıya özel | `override` | gizli tek üyeli grup | Varsa her zaman kazanır (perakende ve seviyeden yüksek olsa bile) |
-| Seviye | `sale` | seviyenin grubu | Perakendeden düşükse uygulanır |
+| Toptancıya özel | `override` | liste: gizli tek üyeli grup; **her satır: aynı grup fiyat kuralı** (2 kural) | Varsa her zaman kazanır (perakende ve seviyeden yüksek olsa bile) |
+| Seviye | `override` | liste: seviyenin grubu (1 kural) | Her zaman uygulanır; herkese açık indirim ve listeler toptancıya yansımaz |
 | Perakende | (liste yok) | — | Varsayılan fiyat |
 
-- Bu kurgu Medusa'nın kendi seçim kuralına dayanır: override her zaman kazanır, sale yalnız düşükse. İki ayrı listenin "eşitliğini" Medusa'ya bırakmayız.
+- Bu kurgu Medusa'nın sıralamasına dayanır (Ek 2026-11-15): liste satırları önce, sonra kural sayısı çok olan (fiyat + liste), sonra düşük tutar; **ilk satır karar verir**. Özel satır 2 kuralla seviyenin (1) ve herkese açık listelerin (0) önüne geçer; seviye satırı herkese açık listelerin önüne geçer. İki ayrı listenin "eşitliğini" Medusa'ya bırakmayız.
 - Toptancı aynı anda **en çok bir seviyede** ve en çok bir özel listededir. Seviye değişince gizli grup aynı kalır, yalnız seviye grubu üyeliği değişir.
-- Yan etkiler (bilerek kabul): (a) herkese açık bir `sale` indirim listesi seviye fiyatından düşükse toptancı o düşük fiyatı alır ("hangisi düşükse"); (b) seviye fiyatı perakendeden yüksek girilirse uygulanmaz, panel uyarır; (c) mağazanın herkese açık bir `override` listesi seviyeyi ezer ama toptancıya özel listeyi ezmez (özel listenin kuralı daha çoktur); panel, toptancının bulunduğu bir segmente `override` liste verilirse uyarır.
-- **Kabul ölçütü:** dilim 1'de HTTP entegrasyon testi üç durumu 2.21.2'de kanıtlar: yalnız seviye, seviye + özel (özel kazanır, seviyeden pahalı olsa da), herkese açık sale + seviye (düşük olan). Test tutmazsa geri dönüş yolu "tek grup, birleşik liste"dir (Alternatifler).
+- Yan etkiler (bilerek kabul, Ek 2026-11-15): (a) herkese açık bir indirim (sale ya da override) perakendeyi toptan fiyatın altına indirse de toptancı toptan fiyatı öder; panel bu satırları **uyarı** olarak gösterir, engellemez; (b) toptan fiyat perakendeden yüksek girilse de uygulanır, panel aynı uyarıyı gösterir; (c) toptancının da bulunduğu bir segmente (tek kurallı grup listesi) verilen liste seviyeyle eşit kurallıdır, ucuz olan önce gelir: panel uyarır, segmentler toptancıları dışarıda bırakmalıdır (dilim 1b).
+- **Kabul ölçütü:** HTTP entegrasyon testi (`integration-tests/http/wholesale-precedence.spec.ts`) 2.21.2'de: yalnız seviye; seviye + özel (özel kazanır, pahalı da ucuz da olsa); herkese açık sale ve override + seviye (seviye kazanır, misafir perakende/indirimli öder). Ölçüm sonuçları Ek 2026-11-15'te.
 
 ### 3. Toptancı açma akışı
 
@@ -174,7 +174,7 @@ Bugünkü vitrin "fiyat herkes için aynıdır" varsayımıyla hızlıdır: `/st
 
 | Seçenek | Artı | Eksi | Karar |
 | --- | --- | --- | --- |
-| Seviye `sale` + özel `override` listeler (bu ADR) | Medusa'nın kendi seçim kuralı; sepet ve KDV çekirdekte | "Hangisi düşükse" yan etkisi; oranlı liste üretilip eşitlenmeli | **Seçildi** (2.21.2 testi şartıyla) |
+| Seviye `override` + özel `override` listeler, özel satırlarda grup fiyat kuralı (bu ADR, Ek 2026-11-15) | Medusa'nın kendi seçim kuralı; sepet ve KDV çekirdekte | Herkese açık indirim toptancıya yansımaz (sahip istedi); oranlı liste üretilip eşitlenmeli | **Seçildi** (2.21.2 testiyle ölçüldü) |
 | Tek grup, birleşik liste (seviye satırları + özel satırlar toptancının tek listesine kopyalanır) | Önceliği tamamen biz belirleriz | Seviye her değişince bütün üyelerin listeleri yeniden yazılır; satır sayısı katlanır | Yedek yol |
 | Fiyatı çalışma anında hesaplamak (liste yerine oran kuralı, sepette `unit_price` ezmek) | Toplu üretim yok | Medusa'nın sepet fiyatını ezmek; her fiyat okuyan yerde kendi hesabımız; altın kural 2'ye ters | Reddedildi |
 | Müşteri `metadata`'sında "toptancı" bayrağı | Migration yok | Sorgulanamaz, denetlenemez, kurallar dağınık | Reddedildi |
@@ -209,3 +209,35 @@ Her dilim ayrı PR, `dev`'den `deniz/<konu>` dalı; Opus kodlayıcı ajan, sıra
 Öneri sürümündeki 1–9, 11 ve 12. sorular sahibin onayıyla karara bağlandı (Bağlam, "Sahibin onayladığı varsayılanlar", karar 7–17). Açık kalan:
 
 10. **Yasal ve mali (danışman yok; taslak işaretli kalır):** toptancıya KDV hariç gösterim, toptancıya 30 gün kuralının uygulanmaması, ödeme adımında tüketici sözleşmelerinin (ön bilgilendirme, mesafeli satış, adr/0041) toptancıya da gösterilmesi, kurumsal profili olmayan toptancının faturası. Uygulanan varsayılan: KDV hariç gösterim ve indirim gösterimi yok; sözleşmeler aynen gösterilir (güvenli taraf). Mali müşavir ve avukat görünce kesinleşir; o zamana kadar bu konular **taslak** olarak işaretli kalır.
+
+## Ek 2026-11-15: öncelik kapısının sonucu
+
+### Ölçüm (Medusa 2.21.2, Store API, giriş yapmış müşteri)
+
+`integration-tests/http/wholesale-precedence.spec.ts`, ana çalışma kopyasında çalıştırıldı. Ürün perakende 100 TL; listeler Medusa'nın kendi admin uçlarıyla kuruldu.
+
+| # | Kurgu | ADR'nin beklediği | Ölçülen |
+| --- | --- | --- | --- |
+| 1 | Seviye `sale` 80 | 80 (misafir 100) | 80 (misafir 100) ✓ |
+| 2 | Seviye `sale` 80 + özel `override` 90 | 90 | **80** ✗ |
+| 3 | Seviye `sale` 80 + özel `override` 70 | 70 | 70 ✓ |
+| 4 | Seviye `sale` 80 + herkese açık `sale` 60 | 60 | **80** ✗ |
+| 5 | Seviye `sale` 80 + özel `override` 90, özel satırda grup fiyat kuralı | 90 | 90 ✓ |
+
+### Medusa'nın sıralaması (düzeltilmiş açıklama)
+
+`PricingRepository.calculatePrices` (2.21.2) satırları şöyle sıralar: önce fiyat listesi satırları, sonra `price.rules_count + pl.rules_count` çok olan, sonra düşük tutar. Servis fiyat seti başına **yalnız ilk liste satırını** değerlendirir: `override` ise kazanır, `sale` ise yalnız varsayılan fiyattan düşükse uygulanır. Bu yüzden:
+
+- Seviye ve özel liste ikisi de tek kurallıdır (`customer.groups.id`); eşitlikte ucuz satır önce gelir. Özel liste yalnız ucuzsa kazanıyordu (durum 2 ve 3). §2'deki "özel listenin kuralı daha çoktur" iddiası yanlıştı, kaldırıldı.
+- Seviye satırı (1 kural) herkese açık listelerin (0 kural) her zaman önündedir; herkese açık indirim toptancıya hiç ulaşmaz (durum 4). Eski yan etki (c) ("herkese açık override seviyeyi ezer") de yanlıştı, kaldırıldı.
+
+### Kararlar
+
+1. **Özel liste önceliği (düzeltme b):** toptancıya özel listenin her satırı, listenin kuralına ek olarak gizli grubu **fiyat kuralı** (`rules: { "customer.groups.id": <gizli grup> }`) olarak taşır. Satır 2 kurallı olur ve seviyenin (1) önüne geçer: özel fiyat pahalı da ucuz da olsa kazanır (durum 5). Kuralı modül yazar; personel girmez.
+2. **Karar 11 değişti (sahip, 2026-11-15):** "toptan fiyatlar perakendedeki fiyatlarla hiçbir zaman zaten eşitlenemez, öyle bir durum söz konusu değil; toptancıya 1000 TL'den verdiğim ürün perakendede 800 TL olursa toptancı bunu 800 TL'den de almaz zaten." Toptancı **her zaman toptan fiyatı** öder (özel > seviye); herkese açık indirimler ona yansımaz. Bunun için seviye listesi de `override` olur (eski Açık soru 5'in "seviye fiyatı her zaman geçerli" seçeneği): toptan fiyat perakendeden yüksek girilse de uygulanır ve toptancıya üstü çizili fiyat çıkmaz (§6 ile uyumlu). Herkese açık listeleri izleyen bir `min()` eşitlemesi **yoktur**.
+3. **Uyarı sinyali (engel değil):** seviye ve özel liste satırlarını dönen yönetici uçları, bugünkü perakende fiyatı (yürürlükteki herkese açık indirim dahil) toptan fiyatın altında olan satırları işaretler (satır başına bayrak ve toplam sayı). Panel (dilim 2) bunu uyarı olarak gösterir; hiçbir yazma engellenmez.
+4. Segment listeleri (tek kurallı grup listesi) seviyeyle eşit kurallıdır; toptancı bir segmentteyse ucuz satır önce gelir. Segment kitlesinden toptancılar dilim 1b'de çıkarılır; o zamana kadar uyarı sinyali bu satırları da gösterir.
+
+### Kabul testi (yeni hali)
+
+Durum 2 özel satırı fiyat kuralıyla (modülün yazdığı biçimde) 90 bekler; durum 4'te üye 80, misafir 60 öder; yeni durum: kuralsız herkese açık `override` 60 varken üye yine 80 öder. Seviye listeleri `override` türündedir.
