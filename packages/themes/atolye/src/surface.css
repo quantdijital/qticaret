@@ -19,10 +19,13 @@
  * The subcategory tiles above a listing's grid, `lined`: no graphite and
  * no gradient, a plain row on the page's ground: a small square picture,
  * the name beside it, inside the same 1 px rule. Outside the layers, as
- * it reshapes a tile drawn with utilities.
+ * it reshapes a tile drawn with utilities. Every tile of the row is as
+ * tall as the tallest (its cell is stretched; the name stops at two lines,
+ * `CategoryTile`), so the row reads level (fifth audit V-03).
  */
 [data-surface="lined"] .gf-subtile {
   aspect-ratio: auto;
+  height: 100%;
   min-height: 3.5rem;
   flex-direction: row;
   align-items: center;
