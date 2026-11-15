@@ -28,6 +28,16 @@ export const UPDATE_HINT =
   "and name the affected presets in the PR body (docs/tema/bilesen-standardi.md §7); " +
   "else draw the new design as a setting or a new variant and leave the published one as it was."
 
+/** A snapshot's header: what it is and what the fixed shop could not give the preset. */
+export const header = (key: string, notes: string[]) =>
+  [`<!-- preset lock: ${key} (docs/tema/bilesen-standardi.md §7) -->`, ...notes].join("\n") + "\n"
+
+/** What the fixed shop could not give a preset, as its snapshots' header lines say. */
+export const fixtureNotes = (answer: { skipped: string[]; dropped: string[] }): string[] => [
+  ...answer.skipped.map((each) => `<!-- not in the fixture shop: ${each} -->`),
+  ...answer.dropped.map((each) => `<!-- section dropped: ${each} -->`),
+]
+
 const folders = (dir: string): string[] =>
   existsSync(dir)
     ? readdirSync(dir, { withFileTypes: true })
