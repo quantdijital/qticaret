@@ -3,9 +3,6 @@ import { useTranslation } from "react-i18next"
 import {
   BODY_FONTS,
   BUTTON_SHAPES,
-  CARD_RATIOS,
-  CARD_VARIANTS,
-  FRAMED_CARD_SWITCHES,
   HEADING_FONTS,
   NO_LIRA_FONTS,
   RADII,
@@ -16,7 +13,8 @@ import {
 import type { BodyFont, HeadingFont, ThemeSettings } from "@/features/storefront/api/theme"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 import { PanelGroup } from "./panel-header"
-import { ChoiceSelect, SwitchRow } from "./theme-fields"
+import { ChoiceSelect } from "./theme-fields"
+import { ThemeCardGroups } from "./theme-card-fields"
 import { THEME_GROUP_TITLES, THEME_IDS } from "./forms/theme-registry"
 import type { CardVariantsInUse, ThemeGroupName } from "./forms/theme-registry"
 
@@ -76,10 +74,10 @@ interface ThemeChoicesProps {
  * card. The header's layout and stickiness are the header bar's now
  * (adr/0049 Ek 2026-11-14 §5), in the tree under "Üst bilgi".
  */
-export function ThemeChoices({ theme, reveal, onChange }: ThemeChoicesProps) {
+export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoicesProps) {
   const { t } = useTranslation()
   const headingNote = useHeadingNote()
-  const { typography, product_card: card } = theme
+  const { typography } = theme
   return (
     <>
       <PanelGroup
@@ -152,61 +150,7 @@ export function ThemeChoices({ theme, reveal, onChange }: ThemeChoicesProps) {
           hint={t(`${C}.sectionSpacingHint`)}
         />
       </PanelGroup>
-      <PanelGroup title={t(THEME_GROUP_TITLES.card)} reveal={reveal("card")}>
-        <Pair>
-          <ChoiceSelect
-            id={THEME_IDS["product_card.ratio"]}
-            label={t(`${C}.ratio`)}
-            term={t(`${C}.ratioTerm`)}
-            value={card.ratio}
-            options={CARD_RATIOS}
-            onChange={(value) => {
-              onChange({ ...theme, product_card: { ...card, ratio: value } })
-            }}
-            render={(option) => t(`${C}.ratios.${option.replace(":", "x")}`)}
-            hint={t(`${C}.ratioHint`)}
-          />
-          <ChoiceSelect
-            id={THEME_IDS["product_card.variant"]}
-            label={t(`${C}.cardVariant`)}
-            value={card.variant}
-            options={CARD_VARIANTS}
-            onChange={(value) => {
-              onChange({ ...theme, product_card: { ...card, variant: value } })
-            }}
-            render={(option) => t(`${C}.cardVariants.${option}`)}
-            hint={t(`${C}.cardVariantHint`)}
-          />
-        </Pair>
-        {(["show_brand", "show_rating"] as const).map((name) => (
-          <SwitchRow
-            key={name}
-            id={THEME_IDS[`product_card.${name}`]}
-            label={t(`${C}.${name}`)}
-            hint={t(`${C}.${name}Hint`)}
-            checked={card[name]}
-            onChange={(value) => {
-              onChange({ ...theme, product_card: { ...card, [name]: value } })
-            }}
-          />
-        ))}
-      </PanelGroup>
-      {/* Read wherever a card is framed: a rail may frame its own while the shop's cards stay standard */}
-      <PanelGroup title={t(THEME_GROUP_TITLES.framed)} reveal={reveal("framed")}>
-        <p className="text-sm text-muted-foreground">{t(`${C}.framedHint`)}</p>
-        {FRAMED_CARD_SWITCHES.map((name) => (
-          <SwitchRow
-            key={name}
-            id={THEME_IDS[`product_card.${name}`]}
-            label={t(`${C}.${name}`)}
-            hint={t(`${C}.${name}Hint`)}
-            checked={card[name]}
-            onChange={(value) => {
-              onChange({ ...theme, product_card: { ...card, [name]: value } })
-            }}
-          />
-        ))}
-      </PanelGroup>
+      <ThemeCardGroups theme={theme} variants={variants} reveal={reveal} onChange={onChange} />
     </>
   )
 }

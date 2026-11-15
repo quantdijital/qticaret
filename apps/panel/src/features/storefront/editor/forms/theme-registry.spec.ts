@@ -65,6 +65,30 @@ describe("the settings search over the theme", () => {
     expect(keys("ürün kartı biçimi")).toEqual(["product_card.variant"])
   })
 
+  it("finds the card's pills, rows and button (Ek 2026-11-15), hiding what means nothing now", () => {
+    const card = GRAFIT_THEME.product_card
+    const framedRail: ReadonlySet<CardVariant> = new Set(["standard", "framed"])
+    expect(keys("badge")).toEqual([
+      "product_card.sale_badge",
+      "product_card.low_stock_badge",
+      "product_card.sold_out_badge",
+    ])
+    // Only compact cards: they draw no "Az kaldı"; a rail drawing standard brings it back
+    expect(keys("badge", new Set(["compact"]))).not.toContain("product_card.low_stock_badge")
+    expect(keys("badge", new Set(["compact", "standard"]))).toContain(
+      "product_card.low_stock_badge"
+    )
+    expect(keys("gelince haber ver")).toEqual(["product_card.sold_out_row"])
+    // The stars' place without reviews, only while the stars are shown
+    expect(keys("ilk yorumu")).toEqual([])
+    const stars = { ...GRAFIT_THEME, product_card: { ...card, show_rating: true } }
+    expect(keys("ilk yorumu", standard, stars)).toEqual(["product_card.no_reviews"])
+    // The foot button's look, only while there is one
+    expect(keys("düğme stili", framedRail)).toEqual(["product_card.button_style"])
+    const round = { ...GRAFIT_THEME, product_card: { ...card, full_button: false } }
+    expect(keys("düğme stili", framedRail, round)).toEqual([])
+  })
+
   it("puts the page's parts first and caps the whole list", () => {
     const theme = searchTheme("a", GRAFIT_THEME, standard, t)
     expect(allHits([], theme).length).toBeLessThanOrEqual(SEARCH_LIMIT)

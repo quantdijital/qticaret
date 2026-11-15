@@ -2,13 +2,20 @@ import {
   BACKGROUNDS,
   BODY_FONTS,
   BUTTON_SHAPES,
+  CARD_BUTTON_STYLES,
+  CARD_NO_REVIEWS,
   CARD_RATIOS,
+  CARD_SOLD_OUT_ROWS,
   CARD_VARIANTS,
   HEADING_FONTS,
   RADII,
   SECTION_SPACINGS,
 } from "@/features/storefront/api/theme"
-import type { ThemeChoices, FRAMED_CARD_SWITCHES } from "@/features/storefront/api/theme"
+import type {
+  CARD_BADGE_SWITCHES,
+  FRAMED_CARD_SWITCHES,
+  ThemeChoices,
+} from "@/features/storefront/api/theme"
 import type { CardVariant } from "@qticaret/types"
 import type { AnySection, LayoutDocument } from "@/features/storefront/api/layout"
 import { LAYOUT_GROUPS } from "@/features/storefront/layout/sections"
@@ -66,6 +73,13 @@ const framedSwitch = (name: (typeof FRAMED_CARD_SWITCHES)[number]): FieldMeta =>
   label: `${C}.${name}`,
 })
 
+/** A pill's switch (adr/0049 Ek 2026-11-15, decision a): "badge" finds them all. */
+const badge = (name: (typeof CARD_BADGE_SWITCHES)[number]): FieldMeta => ({
+  group: "card",
+  label: `${C}.${name}`,
+  term: `${C}.badgeTerm`,
+})
+
 /**
  * Each field's place, name and choices; null: not in the theme panel (the
  * header's layout and stickiness are the header bar's, adr/0049 Ek
@@ -121,10 +135,38 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
   },
   "product_card.show_brand": { group: "card", label: `${C}.show_brand` },
   "product_card.show_rating": { group: "card", label: `${C}.show_rating` },
+  // The owner's card decisions (adr/0049 Ek 2026-11-15), each hidden where it means nothing
+  "product_card.no_reviews": {
+    group: "card",
+    label: `${C}.no_reviews`,
+    term: `${C}.no_reviewsTerm`,
+    options: named(CARD_NO_REVIEWS, "noReviews"),
+    shown: (theme) => theme.product_card.show_rating,
+  },
+  "product_card.sale_badge": badge("sale_badge"),
+  "product_card.low_stock_badge": {
+    ...badge("low_stock_badge"),
+    // The compact card draws no "Az kaldı"
+    shown: (_theme, variants) => [...variants].some((variant) => variant !== "compact"),
+  },
+  "product_card.sold_out_badge": badge("sold_out_badge"),
+  "product_card.sold_out_row": {
+    group: "card",
+    label: `${C}.sold_out_row`,
+    term: `${C}.sold_out_rowTerm`,
+    options: named(CARD_SOLD_OUT_ROWS, "soldOutRows"),
+  },
   "product_card.hover_image": framedSwitch("hover_image"),
   "product_card.delivery_note": framedSwitch("delivery_note"),
   "product_card.full_button": framedSwitch("full_button"),
-  "product_card.empty_stars": framedSwitch("empty_stars"),
+  "product_card.button_style": {
+    group: "framed",
+    label: `${C}.button_style`,
+    term: `${C}.button_styleTerm`,
+    options: named(CARD_BUTTON_STYLES, "buttonStyles"),
+    // Only the button across the foot has a look; the round "+" has none
+    shown: (theme) => theme.product_card.full_button,
+  },
   "header.layout": null,
   "header.sticky": null,
 }
@@ -172,9 +214,10 @@ export const THEME_IDS = Object.fromEntries(
   THEME_FIELDS.map((field) => [field.key, field.target])
 ) as Readonly<Record<PanelField, string>>
 
-/** A field by its path, for the form's labels and visibility. */
-export const themeField = (key: ThemeField): ThemeRegistryField | undefined =>
-  THEME_FIELDS.find((field) => field.key === key)
+/** Each field by its path, for the form's labels, hints and visibility. */
+export const THEME_FIELD = Object.fromEntries(
+  THEME_FIELDS.map((field) => [field.key, field])
+) as Readonly<Record<PanelField, ThemeRegistryField>>
 
 /** The card variants the draft draws: the theme's, and every product rail's own. */
 export function cardVariantsInUse(doc: LayoutDocument): CardVariantsInUse {
