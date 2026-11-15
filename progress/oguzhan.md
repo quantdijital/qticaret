@@ -2,6 +2,36 @@
 
 > Yalnız Oğuzhan'ın oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## 2026-11-15 gündüz: görünüm izolasyonu, stil takımı, öğe düzeyinde "Düzenle"
+
+- **Amaç:** İki geliştiricinin hazır görünümleri birbirini bozmasın (adr/0066 tema katmanları, adr/0067 stil takımı), stil takımının beş adımını koda taşımak, canlı düzenleyicide Faz 2 ve Faz 2b.
+- **`dev`'e giren PR'lar:**
+  - #39 başlık testi düzeltmesi, #40 düzenleyici Faz 2 (önizlemede bölüm üstünde "Düzenle"), #51 düzenleyici ağacında ipucu.
+  - #41 "Aynı işi iki kez yapma" kuralı, #46 "Yayımlanmış biçim sözleşmedir" kuralı, #50 ADR-0066, #53 ADR-0067.
+  - #52 ve #55 görünüm kilidi testi (çerçeve, ana sayfa, ürün, liste; `pnpm lock:presets`), #58 çözülmüş stil denetimi (`pnpm style:capture`, `pnpm style:diff`), #59 stil takımı sözleşmesi.
+  - #43 bakım kapısı (bakımda yazma yolları kapalı).
+  - #42 menü resimleri ayarı (`header_bar.menu_images`: all, submenus, off), #49 açılış panosu slayt gösterisi.
+  - Stil takımı: #62 `chip_style`, #63 `media_ground`, #65 `menu_style`, #66 `shadow`, #64 `surface_style` kapsamı (80 kutu `gf-pane` / `gf-pane-inner`), #67 işaretlerin portallara ulaşması (`frame/root-marks.ts`, `frame/Layers.tsx` `LayerPortal`), #72 çizgili stilde sepet özeti, adet denetimi ve Tezgâh'ta çizgili stilin çekmece ve pencerelere ulaşması.
+  - Düzenleyici Faz 2b: #68 öğe düzeyinde "Düzenle" (`data-qf`, yalnız geçerli düzenleyici oturumunda) ve güvenlik düzeltmeleri (basış kapısı: çerçeve odakta ve saniyede 4, geçerli oturum koşulu), #71 kalan bölümler (SSS, bant, kayan yazı, rozetler, sekmeler, sütunlu raf, fiyat bantları, katalog üst bilgisi, alt bilgi bülteni).
+  - #70 yakınlaştırma kapanınca odak düğmeye döner, `CLAUDE.md`'ye stil denetimi komut satırı.
+- **Kanıt düzeni:** Tema çizimine dokunan her PR'da `style:diff` dev ile dal arasında koşuldu (varsayılanlarda değer farkı yok), varsayılan dışı basamak tarayıcıda gözle bakıldı. Son `dev`'de vitrin 1482, panel 1392 test yeşil.
+- **Dersler:**
+  1. Kökteki `data-*` işareti Radix portallarına ulaşmaz. Katmanlar `LayerPortal` ile çizilir, çıplak `Dialog.Portal` kullanımını test yakalar.
+  2. Taşıyıcı yalnız kit basamağı varsayılan dışındayken açılıyordu, bu yüzden Tezgâh'ta çizgili stil çekmecelere ulaşmıyordu (#72).
+  3. Ortak geliştirme DB'sinde taslağa yazılan yeni alan, alanı tanımayan dalın önizlemesini 500'e düşürür. Deneme sonrası taslak eski hâline yazılır.
+  4. Ana klasörde dal değiştirmek backend'i yeniden başlatır, sahipsiz kalan eski süreç portu tutabilir (`EADDRINUSE`). Vitrin sunucusu dal değişimini kaçırabilir.
+  5. wt klasörlerinde backend typecheck 8 hata verir (`apps/backend/.medusa/types` yok). Ana klasörde 0 hata.
+  6. Docker Desktop kapanırsa Redis düşer, vitrin her sayfada 500 verir.
+- **Yerel durum:** Taslakta Tezgâh (yayın değişmedi, yayında Grafit). `free_shipping_threshold` geçici 1500 duruyor (geri alınacak). Bakım kapalı.
+- **Doğrulanmayanlar:** Safari ve iOS (Playwright'ta WebKit kurulu değil), gerçek üretim derlemesinde CSP (kurallar geliştirme sunucusunda taklit edildi, ihlal yok), hesap ve sipariş sayfalarında çizgili stil (demo veride yok), hızlı bakış ve taksit penceresinde stil takımı (yerelde açılamadı).
+- **Sıradaki işler:**
+  1. Tezgâh'ın yeni basamakları seçmesi (çizgili çip, sayfa zemini, menü stili, gölge): sahibin göreceği karar, yalnız `layout.json` verisi.
+  2. `deniz/katalog-ust-sade`: menü stili ve gölge adımları `dev`'de, dal bunların üstüne kurulabilir (adr/0067 §5).
+  3. Faz 2b: "Tümünü gör" bağlantıları ve alt bilgi çubuğu işaretli değil. `slide-dialog.tsx` ve `use-live-preview.ts` 300 satırın üstünde.
+  4. Yoğunluk basamağı (`density`) ve tema ayarlarının ayar araması (adr/0067 açık kalanlar).
+  5. Üretim CSP'sinde http demo medya ve satır içi stil ihlali.
+  6. Bakım modu Store API'de uygulanmıyor.
+
 ## 2026-11-15 gece: Tezgâh görünümü ve tarayıcı turları
 
 - **Amaç:** Sahibin referans resmindeki klasik teknik katalog düzeninden, bıçak içeriğiyle ikinci hazır görünüm "Tezgâh" (`packages/sector-packs/packs/cutlery/presets/tezgah`; renk kardeşleri `tezgah-lacivert`, `tezgah-turuncu`). Kod sektörsüz. Tasarım dili `docs/tema/tezgah-tasarim-dili.md`.
