@@ -155,7 +155,7 @@ export interface AdminMock {
   productCollection: { list: Mock }
 }
 
-const PATH = "/admin/storefront-layout"
+export const PATH = "/admin/storefront-layout"
 export const SETTINGS = "/admin/platform-settings/storefront"
 export const THEME_SETTINGS = "/admin/platform-settings/theme"
 const STOREFRONT: StorefrontSettings = {
