@@ -88,25 +88,37 @@ jobs:
           REDIS_URL: redis://localhost:6379
           PLATFORM_DOMAIN: qticaret-ci.dev
           CP_PANEL_URL: https://cp.qticaret-ci.dev
-      - run: pnpm turbo run lint typecheck test
+      # --continue: every failing package is reported, not only the first
+      - run: pnpm turbo run lint typecheck --continue
+      # One package's tests at a time: beside lint and typecheck the runner's
+      # four cores starved the UI suites past their 5 s per-test timeout
+      - run: pnpm turbo run test --continue --concurrency=1
 
   integration:
     name: Integration tests (${{ matrix.suite }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    # Side by side: one runner takes about 25 minutes for the HTTP suite alone
+    timeout-minutes: 35
+    # Side by side: each HTTP spec file boots Medusa (~45 s on a runner), and
+    # there are about 290 of them; twelve shards of ~24 files take ~20 minutes
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - suite: HTTP 1/3
-            script: test:integration:http --shard=1/3
-          - suite: HTTP 2/3
-            script: test:integration:http --shard=2/3
-          - suite: HTTP 3/3
-            script: test:integration:http --shard=3/3
-          - suite: modules
-            script: test:integration:modules
+        suite:
+          [
+            "HTTP 1/12",
+            "HTTP 2/12",
+            "HTTP 3/12",
+            "HTTP 4/12",
+            "HTTP 5/12",
+            "HTTP 6/12",
+            "HTTP 7/12",
+            "HTTP 8/12",
+            "HTTP 9/12",
+            "HTTP 10/12",
+            "HTTP 11/12",
+            "HTTP 12/12",
+            "modules",
+          ]
     services:
       postgres:
         image: postgres:16.15-alpine@sha256:f4610795587492cd4fb887c2dc3de301b813278bb6f616992061141b5f15ac36
@@ -136,10 +148,12 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       # Random per run and useless outside this job; masked all the same,
-      # since every later step lists its env in the (public) log
+      # since every later step lists its env in the (public) log. Staff 2FA
+      # (adr/0040) needs its sealing key: the 2FA and team suites turn it on
       - name: Generate throwaway secrets
         run: |
-          for name in JWT_SECRET COOKIE_SECRET PII_ENCRYPTION_KEY PII_HASH_KEY CREDENTIALS_ENCRYPTION_KEY; do
+          for name in JWT_SECRET COOKIE_SECRET PII_ENCRYPTION_KEY PII_HASH_KEY CREDENTIALS_ENCRYPTION_KEY \
+            AUTH_MFA_ENCRYPTION_KEY; do
             value="$(openssl rand -hex 32)"
             # Masking only tidies the log: the values are worthless outside this
             # job, so a branch that stops workflow commands exposes nothing
@@ -149,7 +163,15 @@ jobs:
           done
       - run: pnpm install --frozen-lockfile
       # One jest worker, replaced when its heap grows (jest.config.js)
-      - run: pnpm --filter @qticaret/backend ${{ matrix.script }}
+      - name: Run the suite
+        env:
+          SUITE: ${{ matrix.suite }}
+        run: |
+          if [ "$SUITE" = modules ]; then
+            pnpm --filter @qticaret/backend test:integration:modules
+          else
+            pnpm --filter @qticaret/backend test:integration:http --shard="${SUITE#HTTP }"
+          fi
 
   e2e:
     name: Panel e2e (smoke, accessibility)
@@ -224,6 +246,8 @@ jobs:
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: e2e-report
+          # The report and traces live in dot directories, which are left out by default
+          include-hidden-files: true
           path: |
             apps/panel/e2e/.report
             apps/panel/e2e/.results
