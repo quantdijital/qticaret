@@ -74,13 +74,14 @@ type Outcome = unknown
 const ID_FIELD = /^[a-z]+_(ids?)$/
 
 /**
- * A list's items whose one record is a choice the item stands without, by
- * the list's field: a price band's category (adr/0049, 2026-11-15). The
- * shop has no such record, and the field is cleared: the band is a price
- * band again, as before band categories; the section keeps it.
+ * A list's items that go when their one record does, by the list's field:
+ * a price band whose category the shop lacks (adr/0049, 2026-11-15). The
+ * band is dropped, never turned into a whole-shop price band under the
+ * category's own label; the list keeps the others while it has at least
+ * `min` (a strip has two to four bands), else the section goes.
  */
-const OPTIONAL_IN_ITEMS: Readonly<Record<string, readonly string[]>> = {
-  bands: ["category_id"],
+const DROPPED_IN_ITEMS: Readonly<Record<string, { field: string; min: number }>> = {
+  bands: { field: "category_id", min: 2 },
 }
 
 const isObject = (value: unknown): value is Record<string, unknown> =>
@@ -130,15 +131,18 @@ function marker(node: Record<string, unknown>, walk: Walk): Outcome {
 
 function resolveList(list: unknown[], key: string | null, walk: Walk): Outcome {
   const out: unknown[] = []
-  const optional = (key === null ? undefined : OPTIONAL_IN_ITEMS[key]) ?? []
+  const dropping = key === null ? undefined : DROPPED_IN_ITEMS[key]
   for (const item of list) {
-    const resolved = resolveNode(item, walk, null, optional)
+    const resolved = resolveNode(item, walk, null, dropping?.field)
     if (resolved === NO_SECTION) {
       return NO_SECTION
     }
     if (resolved !== GONE) {
       out.push(resolved)
     }
+  }
+  if (dropping && out.length < dropping.min) {
+    return NO_SECTION
   }
   // A choice the preset made and the shop has none of: never "every category" instead
   if (key !== null && ID_FIELD.exec(key)?.[1] === "ids" && list.length > 0 && out.length === 0) {
@@ -151,7 +155,7 @@ function resolveNode(
   node: unknown,
   walk: Walk,
   key: string | null = null,
-  optional: readonly string[] = []
+  dropsItem?: string
 ): Outcome {
   if (Array.isArray(node)) {
     return resolveList(node, key, walk)
@@ -169,8 +173,12 @@ function resolveNode(
       return NO_SECTION
     }
     if (resolved === GONE) {
-      // A section's one record is the section; a single link (and a band's category) only cleared
-      if (ID_FIELD.exec(name)?.[1] === "id" && !optional.includes(name)) {
+      // The item goes with its record (a band without its category)
+      if (name === dropsItem) {
+        return GONE
+      }
+      // A section's one record is the section; a single link only cleared
+      if (ID_FIELD.exec(name)?.[1] === "id") {
         return NO_SECTION
       }
       out[name] = null
