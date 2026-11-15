@@ -33,6 +33,7 @@
 - Kırılırsa: fark bilerekse görünümlere tarayıcıda bakılır, `pnpm lock:presets` ile örnekler yeniden yazılır ve PR'da etkilenen görünümler yazılır; değilse tasarım ayar ya da yeni biçim olarak gelir.
 - Örneği olmayan görünüm ya da sayfa testi kırar; mesaj dosya adını ve `pnpm lock:presets` komutunu söyler.
 - Kapsamaz: backend'in bölüm şemalarının varsayılanları (fikstür, backend'in yayın yolunu testte yeniden yazar), istemcide açılan yüzeyler (sepet çekmecesi, arama paneli, hızlı bakış: Radix diyaloğu, etkileşim ve istek ister; tarayıcı denetimine kalır, adr/0067 §3), hesap, sepet, ödeme ve içerik sayfaları, ürün sayfasının `?variant=` ile seçilmiş hâli ve süzgeç uygulanmış liste, istemci tarafı davranış ve gerçek CSS çizimi (ekran görüntüsü karşılaştırması yok; stil yalnız dosya özetiyle kilitli).
+- Çözülmüş stil denetimi (adr/0067 §3, adım 0b): `apps/storefront/e2e/resolved-style/`, `pnpm style:capture` ve `pnpm style:diff`. Çalışan vitrini Playwright ile 390 ve 1440 px'te açar, görünür öğelerin hesaplanmış stilini yakalar ve iki yakalamayı karşılaştırır; sınıf ya da CSS düzeni değişince değil, gerçek görünüş değişince fark verir. Sunucu ister; `pnpm verify:changed` koşmaz, temanın çizimine dokunan PR birleşmeden önce elle koşulur (docs/tema/bilesen-standardi.md §7). Karşılaştırma mantığının birim testi vitrin testleriyle koşar (`e2e/resolved-style/__tests__`).
 
 ## Kurallar
 - Dış servisler testte **asla** gerçek çağrılmaz. `packages/testing` altında mock sunucular (msw veya küçük HTTP sunucu):

@@ -8,7 +8,9 @@
     "noEmit": true,
     "declaration": false,
     "sourceMap": false,
-    "types": ["node"]
+    "types": ["node"],
+    // resolved-style/ runs under Node's own type stripping, which wants `.ts` in imports
+    "allowImportingTsExtensions": true
   },
   "include": ["./**/*.ts"]
 }
