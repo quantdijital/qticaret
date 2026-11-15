@@ -11,10 +11,7 @@
           <picture>
             <source
               type="image/webp"
-              srcset="
-                https://cdn.example.com/p/01-400.webp 400w,
-                https://cdn.example.com/p/01-800.webp 800w
-              "
+              srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
               sizes="(min-width: 1024px) 56vw, 100vw"
             />
             <img
@@ -23,7 +20,7 @@
               width="1200"
               height="1200"
               loading="eager"
-              fetchpriority="high"
+              fetchPriority="high"
               decoding="sync"
               class="absolute inset-0 h-full w-full object-cover"
             />

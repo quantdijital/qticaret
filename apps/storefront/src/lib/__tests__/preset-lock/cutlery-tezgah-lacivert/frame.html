@@ -1,33 +1,31 @@
 <!-- preset lock: cutlery-tezgah-lacivert (docs/tema/bilesen-standardi.md §7) -->
-<link rel="preload" href="/fonts/inter-latin.c940764593.woff2" as="font" type="font/woff2" />
-<link rel="preload" href="/fonts/inter-tr.51341ab647.woff2" as="font" type="font/woff2" />
+<link rel="preload" href="/fonts/inter-latin.c940764593.woff2" as="font" type="font/woff2"/>
+<link rel="preload" href="/fonts/inter-tr.51341ab647.woff2" as="font" type="font/woff2"/>
 <style>
-  :root {
-    --primary: #33709c;
-    --primary-foreground: #ffffff;
-    --ring: #33709c;
-    --announcement: #33709c;
-    --announcement-foreground: #ffffff;
-    --highlight: #1f4f8f;
-    --highlight-foreground: #ffffff;
-    --font-heading:
-      var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
-      sans-serif;
-    --font-sans:
-      var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
-      sans-serif;
-    --radius-scale: 0.2;
-    --button-radius: 0px;
-    --color-mark: #1f4f8f;
-    --color-mark-ink: #ffffff;
-    --color-mark-deep: color-mix(in oklab, #1f4f8f 85%, #111113);
-    --section-scale: 0.55;
-    --box-ground: var(--color-paper);
-    --box-line: var(--color-rule);
+  :root{
+  --primary:#33709c;
+  --primary-foreground:#ffffff;
+  --ring:#33709c;
+  --announcement:#33709c;
+  --announcement-foreground:#ffffff;
+  --highlight:#1f4f8f;
+  --highlight-foreground:#ffffff;
+  --font-heading:var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-sans:var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --radius-scale:0.2;
+  --button-radius:0px;
+  --color-mark:#1f4f8f;
+  --color-mark-ink:#ffffff;
+  --color-mark-deep:color-mix(in oklab,#1f4f8f 85%,#111113);
+  --section-scale:0.55;
+  --box-ground:var(--color-paper);
+  --box-line:var(--color-rule)
   }
 </style>
 <div class="flex min-h-dvh flex-col" data-surface="lined">
-  <a href="#icerik" class="gf-skip"> İçeriğe geç </a>
+  <a href="#icerik" class="gf-skip">
+    İçeriğe geç
+  </a>
   <header
     data-gf-head=""
     data-qs="mainheader"
@@ -91,14 +89,16 @@
         action="/arama"
         method="get"
       >
-        <label for="arama-genis" class="sr-only"> Ürün ara </label>
+        <label for="arama-genis" class="sr-only">
+          Ürün ara
+        </label>
         <input
           id="arama-genis"
           type="search"
           placeholder="Model, çelik ya da kategori ara"
-          autocomplete="off"
-          enterkeyhint="search"
-          maxlength="100"
+          autoComplete="off"
+          enterKeyHint="search"
+          maxLength="100"
           class="gf-field pr-14"
           name="q"
           value=""
@@ -121,8 +121,12 @@
         href="tel:+905320000000"
         class="ml-auto hidden min-h-11 shrink-0 flex-col items-end justify-center leading-tight no-underline lg:flex"
       >
-        <span class="text-xs text-text-2"> Müşteri hizmetleri </span>
-        <span class="tabular text-lg font-extrabold"> 0532 000 00 00 </span>
+        <span class="text-xs text-text-2">
+          Müşteri hizmetleri
+        </span>
+        <span class="tabular text-lg font-extrabold">
+          0532 000 00 00
+        </span>
       </a>
       <nav aria-label="Hesabım" class="flex items-center lg:hidden">
         <a
@@ -150,21 +154,26 @@
             class="lucide lucide-shopping-bag size-6"
             aria-hidden="true"
           />
-          <span aria-hidden="true" class="max-lg:hidden"> Sepet </span>
-          <span aria-live="polite" class="gf-count tabular empty:hidden lg:right-2"> </span>
+          <span aria-hidden="true" class="max-lg:hidden">
+            Sepet
+          </span>
+          <span aria-live="polite" class="gf-count tabular empty:hidden lg:right-2">
+          </span>
         </a>
       </nav>
     </div>
     <div class="mx-auto w-full max-w-(--container) px-(--gutter) pb-2 lg:hidden">
       <form role="search" class="relative" action="/arama" method="get">
-        <label for="arama-dar" class="sr-only"> Ürün ara </label>
+        <label for="arama-dar" class="sr-only">
+          Ürün ara
+        </label>
         <input
           id="arama-dar"
           type="search"
           placeholder="Model, çelik ya da kategori ara"
-          autocomplete="off"
-          enterkeyhint="search"
-          maxlength="100"
+          autoComplete="off"
+          enterKeyHint="search"
+          maxLength="100"
           class="gf-field pr-14"
           name="q"
           value=""
@@ -221,7 +230,7 @@
                   <a
                     href="/kategori/el-yapimi-caki"
                     data-cm-top="0"
-                    class="flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text justify-between font-semibold"
+                    class="flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text justify-between font-semibold "
                     aria-expanded="false"
                     aria-controls="«id»-0"
                   >
@@ -303,7 +312,7 @@
                 <li>
                   <a
                     href="/kategori/av-bicaklari"
-                    class="flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text justify-between font-semibold"
+                    class="flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text justify-between font-semibold "
                   >
                     Av Bıçakları
                   </a>
@@ -312,7 +321,7 @@
                   <a
                     href="/kategori/outdoor-ve-kamp"
                     data-cm-top="2"
-                    class="flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text justify-between font-semibold"
+                    class="flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text justify-between font-semibold "
                     aria-expanded="false"
                     aria-controls="«id»-2"
                   >
@@ -363,7 +372,7 @@
                   <a
                     href="/kategori/mutfak-ve-sef-bicaklari"
                     data-cm-top="3"
-                    class="flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text justify-between font-semibold"
+                    class="flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text justify-between font-semibold "
                     aria-expanded="false"
                     aria-controls="«id»-3"
                   >
@@ -421,7 +430,7 @@
                 <li>
                   <a
                     href="/kategori/mutfak-sef-serisi"
-                    class="flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text justify-between font-semibold"
+                    class="flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text justify-between font-semibold "
                   >
                     Mutfak &amp; Şef Serisi
                   </a>
@@ -430,7 +439,7 @@
                   <a
                     href="/kategori/kiliclar"
                     data-cm-top="5"
-                    class="flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text justify-between font-semibold"
+                    class="flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text justify-between font-semibold "
                     aria-expanded="false"
                     aria-controls="«id»-5"
                   >
@@ -472,7 +481,7 @@
                 <li>
                   <a
                     href="/kategori/ozel-koleksiyon"
-                    class="flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text justify-between font-semibold"
+                    class="flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text justify-between font-semibold "
                   >
                     Özel Koleksiyon
                   </a>
@@ -486,7 +495,7 @@
             dir="ltr"
             class="gf-menubar-aisle static min-w-0 flex-1"
           >
-            <div style="position: relative">
+            <div style="position:relative">
               <ul
                 data-orientation="horizontal"
                 class="flex flex-nowrap items-center gap-x-1 overflow-x-clip [overflow-clip-margin:0.375rem]"
@@ -516,7 +525,7 @@
                     data-state="closed"
                     data-gf-drop="/kategori/el-yapimi-caki"
                     class="gf-drop data-[state=closed]:hidden"
-                    style="pointer-events: none"
+                    style="pointer-events:none"
                     dir="ltr"
                   >
                     <ul>
@@ -532,10 +541,7 @@
                             <picture>
                               <source
                                 type="image/webp"
-                                srcset="
-                                  https://cdn.example.com/p/01-400.webp 400w,
-                                  https://cdn.example.com/p/01-800.webp 800w
-                                "
+                                srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
                                 sizes="40px"
                               />
                               <img
@@ -544,16 +550,22 @@
                                 width="1200"
                                 height="1200"
                                 loading="lazy"
-                                fetchpriority="auto"
+                                fetchPriority="auto"
                                 decoding="async"
                                 class="h-full w-full object-cover"
                               />
                             </picture>
                           </span>
-                          <span> Damascus Çelik </span>
+                          <span>
+                            Damascus Çelik
+                          </span>
                           <span class="gf-menu-count">
-                            <span aria-hidden="true"> 10 </span>
-                            <span class="sr-only"> 10 ürün </span>
+                            <span aria-hidden="true">
+                              10
+                            </span>
+                            <span class="sr-only">
+                              10 ürün
+                            </span>
                           </span>
                         </a>
                       </li>
@@ -573,16 +585,22 @@
                                 width="800"
                                 height="800"
                                 loading="lazy"
-                                fetchpriority="auto"
+                                fetchPriority="auto"
                                 decoding="async"
                                 class="h-full w-full object-cover"
                               />
                             </picture>
                           </span>
-                          <span> Elmax Çakılar </span>
+                          <span>
+                            Elmax Çakılar
+                          </span>
                           <span class="gf-menu-count">
-                            <span aria-hidden="true"> 6 </span>
-                            <span class="sr-only"> 6 ürün </span>
+                            <span aria-hidden="true">
+                              6
+                            </span>
+                            <span class="sr-only">
+                              6 ürün
+                            </span>
                           </span>
                         </a>
                       </li>
@@ -598,10 +616,7 @@
                             <picture>
                               <source
                                 type="image/webp"
-                                srcset="
-                                  https://cdn.example.com/p/02-400.webp 400w,
-                                  https://cdn.example.com/p/02-800.webp 800w
-                                "
+                                srcSet="https://cdn.example.com/p/02-400.webp 400w, https://cdn.example.com/p/02-800.webp 800w"
                                 sizes="40px"
                               />
                               <img
@@ -610,16 +625,22 @@
                                 width="1200"
                                 height="1200"
                                 loading="lazy"
-                                fetchpriority="auto"
+                                fetchPriority="auto"
                                 decoding="async"
                                 class="h-full w-full object-cover"
                               />
                             </picture>
                           </span>
-                          <span> N690 Çakılar </span>
+                          <span>
+                            N690 Çakılar
+                          </span>
                           <span class="gf-menu-count">
-                            <span aria-hidden="true"> 13 </span>
-                            <span class="sr-only"> 13 ürün </span>
+                            <span aria-hidden="true">
+                              13
+                            </span>
+                            <span class="sr-only">
+                              13 ürün
+                            </span>
                           </span>
                         </a>
                       </li>
@@ -639,16 +660,22 @@
                                 width="800"
                                 height="800"
                                 loading="lazy"
-                                fetchpriority="auto"
+                                fetchPriority="auto"
                                 decoding="async"
                                 class="h-full w-full object-cover"
                               />
                             </picture>
                           </span>
-                          <span> Geyik Boynuzu Saplı </span>
+                          <span>
+                            Geyik Boynuzu Saplı
+                          </span>
                           <span class="gf-menu-count">
-                            <span aria-hidden="true"> 9 </span>
-                            <span class="sr-only"> 9 ürün </span>
+                            <span aria-hidden="true">
+                              9
+                            </span>
+                            <span class="sr-only">
+                              9 ürün
+                            </span>
                           </span>
                         </a>
                       </li>
@@ -664,10 +691,7 @@
                             <picture>
                               <source
                                 type="image/webp"
-                                srcset="
-                                  https://cdn.example.com/p/03-400.webp 400w,
-                                  https://cdn.example.com/p/03-800.webp 800w
-                                "
+                                srcSet="https://cdn.example.com/p/03-400.webp 400w, https://cdn.example.com/p/03-800.webp 800w"
                                 sizes="40px"
                               />
                               <img
@@ -676,16 +700,22 @@
                                 width="1200"
                                 height="1200"
                                 loading="lazy"
-                                fetchpriority="auto"
+                                fetchPriority="auto"
                                 decoding="async"
                                 class="h-full w-full object-cover"
                               />
                             </picture>
                           </span>
-                          <span> Kemik Saplı </span>
+                          <span>
+                            Kemik Saplı
+                          </span>
                           <span class="gf-menu-count">
-                            <span aria-hidden="true"> 5 </span>
-                            <span class="sr-only"> 5 ürün </span>
+                            <span aria-hidden="true">
+                              5
+                            </span>
+                            <span class="sr-only">
+                              5 ürün
+                            </span>
                           </span>
                         </a>
                       </li>
@@ -705,16 +735,22 @@
                                 width="800"
                                 height="800"
                                 loading="lazy"
-                                fetchpriority="auto"
+                                fetchPriority="auto"
                                 decoding="async"
                                 class="h-full w-full object-cover"
                               />
                             </picture>
                           </span>
-                          <span> Epoksi Saplı </span>
+                          <span>
+                            Epoksi Saplı
+                          </span>
                           <span class="gf-menu-count">
-                            <span aria-hidden="true"> 12 </span>
-                            <span class="sr-only"> 12 ürün </span>
+                            <span aria-hidden="true">
+                              12
+                            </span>
+                            <span class="sr-only">
+                              12 ürün
+                            </span>
                           </span>
                         </a>
                       </li>
@@ -724,11 +760,19 @@
                       class="gf-drop-row gf-drop-all"
                       data-radix-collection-item=""
                     >
-                      <span aria-hidden="true"> Tümünü gör </span>
-                      <span class="sr-only"> Tümünü gör: El Yapımı Çakılar </span>
+                      <span aria-hidden="true">
+                        Tümünü gör
+                      </span>
+                      <span class="sr-only">
+                        Tümünü gör: El Yapımı Çakılar
+                      </span>
                       <span class="gf-menu-count gf-menu-count--dark">
-                        <span aria-hidden="true"> 3 </span>
-                        <span class="sr-only"> 3 ürün </span>
+                        <span aria-hidden="true">
+                          3
+                        </span>
+                        <span class="sr-only">
+                          3 ürün
+                        </span>
                       </span>
                     </a>
                   </div>
@@ -766,7 +810,7 @@
                     data-state="closed"
                     data-gf-drop="/kategori/outdoor-ve-kamp"
                     class="gf-drop data-[state=closed]:hidden"
-                    style="pointer-events: none"
+                    style="pointer-events:none"
                     dir="ltr"
                   >
                     <ul>
@@ -782,10 +826,7 @@
                             <picture>
                               <source
                                 type="image/webp"
-                                srcset="
-                                  https://cdn.example.com/p/02-400.webp 400w,
-                                  https://cdn.example.com/p/02-800.webp 800w
-                                "
+                                srcSet="https://cdn.example.com/p/02-400.webp 400w, https://cdn.example.com/p/02-800.webp 800w"
                                 sizes="40px"
                               />
                               <img
@@ -794,16 +835,22 @@
                                 width="1200"
                                 height="1200"
                                 loading="lazy"
-                                fetchpriority="auto"
+                                fetchPriority="auto"
                                 decoding="async"
                                 class="h-full w-full object-cover"
                               />
                             </picture>
                           </span>
-                          <span> Kamp Bıçakları </span>
+                          <span>
+                            Kamp Bıçakları
+                          </span>
                           <span class="gf-menu-count">
-                            <span aria-hidden="true"> 11 </span>
-                            <span class="sr-only"> 11 ürün </span>
+                            <span aria-hidden="true">
+                              11
+                            </span>
+                            <span class="sr-only">
+                              11 ürün
+                            </span>
                           </span>
                         </a>
                       </li>
@@ -823,16 +870,22 @@
                                 width="800"
                                 height="800"
                                 loading="lazy"
-                                fetchpriority="auto"
+                                fetchPriority="auto"
                                 decoding="async"
                                 class="h-full w-full object-cover"
                               />
                             </picture>
                           </span>
-                          <span> Kamp Baltaları </span>
+                          <span>
+                            Kamp Baltaları
+                          </span>
                           <span class="gf-menu-count">
-                            <span aria-hidden="true"> 7 </span>
-                            <span class="sr-only"> 7 ürün </span>
+                            <span aria-hidden="true">
+                              7
+                            </span>
+                            <span class="sr-only">
+                              7 ürün
+                            </span>
                           </span>
                         </a>
                       </li>
@@ -842,11 +895,19 @@
                       class="gf-drop-row gf-drop-all"
                       data-radix-collection-item=""
                     >
-                      <span aria-hidden="true"> Tümünü gör </span>
-                      <span class="sr-only"> Tümünü gör: Outdoor ve Kamp </span>
+                      <span aria-hidden="true">
+                        Tümünü gör
+                      </span>
+                      <span class="sr-only">
+                        Tümünü gör: Outdoor ve Kamp
+                      </span>
                       <span class="gf-menu-count gf-menu-count--dark">
-                        <span aria-hidden="true"> 4 </span>
-                        <span class="sr-only"> 4 ürün </span>
+                        <span aria-hidden="true">
+                          4
+                        </span>
+                        <span class="sr-only">
+                          4 ürün
+                        </span>
                       </span>
                     </a>
                   </div>
@@ -875,7 +936,7 @@
                     data-state="closed"
                     data-gf-drop="/kategori/mutfak-ve-sef-bicaklari"
                     class="gf-drop data-[state=closed]:hidden"
-                    style="pointer-events: none"
+                    style="pointer-events:none"
                     dir="ltr"
                   >
                     <ul>
@@ -895,16 +956,22 @@
                                 width="800"
                                 height="800"
                                 loading="lazy"
-                                fetchpriority="auto"
+                                fetchPriority="auto"
                                 decoding="async"
                                 class="h-full w-full object-cover"
                               />
                             </picture>
                           </span>
-                          <span> Şef Bıçakları </span>
+                          <span>
+                            Şef Bıçakları
+                          </span>
                           <span class="gf-menu-count">
-                            <span aria-hidden="true"> 10 </span>
-                            <span class="sr-only"> 10 ürün </span>
+                            <span aria-hidden="true">
+                              10
+                            </span>
+                            <span class="sr-only">
+                              10 ürün
+                            </span>
                           </span>
                         </a>
                       </li>
@@ -920,10 +987,7 @@
                             <picture>
                               <source
                                 type="image/webp"
-                                srcset="
-                                  https://cdn.example.com/p/01-400.webp 400w,
-                                  https://cdn.example.com/p/01-800.webp 800w
-                                "
+                                srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
                                 sizes="40px"
                               />
                               <img
@@ -932,16 +996,22 @@
                                 width="1200"
                                 height="1200"
                                 loading="lazy"
-                                fetchpriority="auto"
+                                fetchPriority="auto"
                                 decoding="async"
                                 class="h-full w-full object-cover"
                               />
                             </picture>
                           </span>
-                          <span> Mutfak Bıçak Setleri </span>
+                          <span>
+                            Mutfak Bıçak Setleri
+                          </span>
                           <span class="gf-menu-count">
-                            <span aria-hidden="true"> 6 </span>
-                            <span class="sr-only"> 6 ürün </span>
+                            <span aria-hidden="true">
+                              6
+                            </span>
+                            <span class="sr-only">
+                              6 ürün
+                            </span>
                           </span>
                         </a>
                       </li>
@@ -961,16 +1031,22 @@
                                 width="800"
                                 height="800"
                                 loading="lazy"
-                                fetchpriority="auto"
+                                fetchPriority="auto"
                                 decoding="async"
                                 class="h-full w-full object-cover"
                               />
                             </picture>
                           </span>
-                          <span> Kasap Bıçakları </span>
+                          <span>
+                            Kasap Bıçakları
+                          </span>
                           <span class="gf-menu-count">
-                            <span aria-hidden="true"> 13 </span>
-                            <span class="sr-only"> 13 ürün </span>
+                            <span aria-hidden="true">
+                              13
+                            </span>
+                            <span class="sr-only">
+                              13 ürün
+                            </span>
                           </span>
                         </a>
                       </li>
@@ -980,11 +1056,19 @@
                       class="gf-drop-row gf-drop-all"
                       data-radix-collection-item=""
                     >
-                      <span aria-hidden="true"> Tümünü gör </span>
-                      <span class="sr-only"> Tümünü gör: Mutfak ve Şef Bıçakları </span>
+                      <span aria-hidden="true">
+                        Tümünü gör
+                      </span>
+                      <span class="sr-only">
+                        Tümünü gör: Mutfak ve Şef Bıçakları
+                      </span>
                       <span class="gf-menu-count gf-menu-count--dark">
-                        <span aria-hidden="true"> 3 </span>
-                        <span class="sr-only"> 3 ürün </span>
+                        <span aria-hidden="true">
+                          3
+                        </span>
+                        <span class="sr-only">
+                          3 ürün
+                        </span>
                       </span>
                     </a>
                   </div>
@@ -1022,7 +1106,7 @@
                     data-state="closed"
                     data-gf-drop="/kategori/kiliclar"
                     class="gf-drop data-[state=closed]:hidden"
-                    style="pointer-events: none"
+                    style="pointer-events:none"
                     dir="ltr"
                   >
                     <ul>
@@ -1038,10 +1122,7 @@
                             <picture>
                               <source
                                 type="image/webp"
-                                srcset="
-                                  https://cdn.example.com/p/01-400.webp 400w,
-                                  https://cdn.example.com/p/01-800.webp 800w
-                                "
+                                srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
                                 sizes="40px"
                               />
                               <img
@@ -1050,16 +1131,22 @@
                                 width="1200"
                                 height="1200"
                                 loading="lazy"
-                                fetchpriority="auto"
+                                fetchPriority="auto"
                                 decoding="async"
                                 class="h-full w-full object-cover"
                               />
                             </picture>
                           </span>
-                          <span> Kılıç Modelleri </span>
+                          <span>
+                            Kılıç Modelleri
+                          </span>
                           <span class="gf-menu-count">
-                            <span aria-hidden="true"> 12 </span>
-                            <span class="sr-only"> 12 ürün </span>
+                            <span aria-hidden="true">
+                              12
+                            </span>
+                            <span class="sr-only">
+                              12 ürün
+                            </span>
                           </span>
                         </a>
                       </li>
@@ -1069,11 +1156,19 @@
                       class="gf-drop-row gf-drop-all"
                       data-radix-collection-item=""
                     >
-                      <span aria-hidden="true"> Tümünü gör </span>
-                      <span class="sr-only"> Tümünü gör: Kılıçlar </span>
+                      <span aria-hidden="true">
+                        Tümünü gör
+                      </span>
+                      <span class="sr-only">
+                        Tümünü gör: Kılıçlar
+                      </span>
                       <span class="gf-menu-count gf-menu-count--dark">
-                        <span aria-hidden="true"> 5 </span>
-                        <span class="sr-only"> 5 ürün </span>
+                        <span aria-hidden="true">
+                          5
+                        </span>
+                        <span class="sr-only">
+                          5 ürün
+                        </span>
                       </span>
                     </a>
                   </div>
@@ -1107,7 +1202,9 @@
                   </button>
                 </li>
                 <li data-aisle-tail="" class="flex shrink-0 items-center">
-                  <a href="/kampanyalar" class="gf-btn gf-btn--small shrink-0"> İndirimdekiler </a>
+                  <a href="/kampanyalar" class="gf-btn gf-btn--small shrink-0">
+                    İndirimdekiler
+                  </a>
                 </li>
               </ul>
             </div>
@@ -1151,8 +1248,11 @@
                 class="lucide lucide-shopping-bag size-6"
                 aria-hidden="true"
               />
-              <span aria-hidden="true" class="max-lg:hidden"> Sepet </span>
-              <span aria-live="polite" class="gf-count tabular empty:hidden lg:right-2"> </span>
+              <span aria-hidden="true" class="max-lg:hidden">
+                Sepet
+              </span>
+              <span aria-live="polite" class="gf-count tabular empty:hidden lg:right-2">
+              </span>
             </a>
           </nav>
         </div>
@@ -1160,7 +1260,8 @@
     </div>
   </header>
   <main id="icerik" class="flex-1">
-    <main data-preset-lock="page"></main>
+    <main data-preset-lock="page">
+    </main>
   </main>
   <footer
     data-gf-clear=""
@@ -1179,21 +1280,25 @@
           Yeni modeller e-postanızda
         </h2>
         <form class="flex flex-col gap-3 gf-news lg:col-span-6">
-          <label for="bulten-alt-eposta" class="text-sm font-semibold"> E-posta adresiniz </label>
+          <label for="bulten-alt-eposta" class="text-sm font-semibold">
+            E-posta adresiniz
+          </label>
           <div class="flex flex-col gap-2 sm:flex-row">
             <input
               id="bulten-alt-eposta"
               type="email"
               required=""
-              maxlength="254"
-              autocomplete="email"
-              inputmode="email"
+              maxLength="254"
+              autoComplete="email"
+              inputMode="email"
               placeholder="ornek@eposta.com"
               aria-describedby="bulten-alt-durum"
               class="gf-field min-w-0 flex-1"
               name="email"
             />
-            <button type="submit" class="gf-btn shrink-0">Abone ol</button>
+            <button type="submit" class="gf-btn shrink-0">
+              Abone ol
+            </button>
           </div>
           <div class="gf-news-more flex flex-col gap-3">
             <label class="flex cursor-pointer items-start gap-3 text-xs leading-relaxed">
@@ -1211,7 +1316,8 @@
                 </a>
               </span>
             </label>
-            <p id="bulten-alt-durum" role="alert" class="min-h-[1lh] text-sm font-semibold"></p>
+            <p id="bulten-alt-durum" role="alert" class="min-h-[1lh] text-sm font-semibold">
+            </p>
           </div>
         </form>
       </section>
@@ -1223,7 +1329,9 @@
           Örnek Atölye
         </h2>
         <ul class="flex flex-col text-sm">
-          <li class="pb-1 font-semibold text-text">Örnek Atölye Ltd. Şti.</li>
+          <li class="pb-1 font-semibold text-text">
+            Örnek Atölye Ltd. Şti.
+          </li>
           <li class="flex items-start gap-3 py-2 text-text-2">
             <svg
               width="24"
@@ -1232,7 +1340,9 @@
               class="lucide lucide-map-pin mt-0.5 size-4 shrink-0"
               aria-hidden="true"
             />
-            <span class="max-w-[36ch]"> Örnek Mah. 1. Sok. No: 1, Denizli </span>
+            <span class="max-w-[36ch]">
+              Örnek Mah. 1. Sok. No: 1, Denizli
+            </span>
           </li>
           <li>
             <a
@@ -1286,7 +1396,8 @@
                   stroke-width="1.75"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                ></rect>
+                >
+                </rect>
                 <circle
                   cx="12"
                   cy="12"
@@ -1296,8 +1407,10 @@
                   stroke-width="1.75"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                ></circle>
-                <circle cx="17" cy="7" r="1" fill="currentColor"></circle>
+                >
+                </circle>
+                <circle cx="17" cy="7" r="1" fill="currentColor">
+                </circle>
               </svg>
             </a>
           </li>
@@ -1321,8 +1434,10 @@
                   stroke-width="1.75"
                   stroke-linecap="round"
                   stroke-linejoin="round"
-                ></rect>
-                <path d="M10.25 9.25v5.5L15 12z" fill="currentColor"></path>
+                >
+                </rect>
+                <path d="M10.25 9.25v5.5L15 12z" fill="currentColor">
+                </path>
               </svg>
             </a>
           </li>
@@ -1367,7 +1482,9 @@
         </div>
         <div class="grid gap-x-(--gap-columns) gap-y-8 max-lg:hidden grid-cols-1">
           <nav aria-label="Yardım" class="flex flex-col gap-3">
-            <h2 class="text-sm font-semibold tracking-normal text-text">Yardım</h2>
+            <h2 class="text-sm font-semibold tracking-normal text-text">
+              Yardım
+            </h2>
             <ul class="flex flex-col">
               <li>
                 <a
@@ -1422,7 +1539,8 @@
                 Kapıda ödeme
               </li>
             </ul>
-            <span aria-hidden="true" class="h-6 w-px shrink-0 bg-rule max-lg:hidden"> </span>
+            <span aria-hidden="true" class="h-6 w-px shrink-0 bg-rule max-lg:hidden">
+            </span>
             <ul aria-label="Kargo firmaları" class="flex flex-wrap items-center gap-x-6 gap-y-4">
               <li class="flex h-6 items-center gap-1.5 text-xs font-semibold text-text-2">
                 marks.[object Object]
@@ -1541,9 +1659,15 @@
             <ul
               class="-ml-5 flex flex-wrap gap-y-1 text-xs text-text-3 *:relative *:pl-5 *:before:absolute *:before:top-1/2 *:before:left-2 *:before:size-[3px] *:before:-translate-y-1/2 *:before:rounded-full *:before:bg-current *:before:opacity-60 *:before:content-[&#x27;&#x27;]"
             >
-              <li>© 2026 Örnek Atölye Ltd. Şti.</li>
-              <li>MERSİS: 0000000000000000</li>
-              <li>Denizli V.D. 0000000000</li>
+              <li>
+                © 2026 Örnek Atölye Ltd. Şti.
+              </li>
+              <li>
+                MERSİS: 0000000000000000
+              </li>
+              <li>
+                Denizli V.D. 0000000000
+              </li>
             </ul>
           </div>
         </div>
@@ -1551,7 +1675,8 @@
     </div>
   </footer>
   <div class="lg:hidden" data-bottom-nav="">
-    <div aria-hidden="true" class="h-[calc(4rem+env(safe-area-inset-bottom))]"></div>
+    <div aria-hidden="true" class="h-[calc(4rem+env(safe-area-inset-bottom))]">
+    </div>
     <nav
       aria-label="Hızlı gezinme"
       class="fixed inset-x-0 bottom-0 z-(--z-sticky) border-t border-rule bg-paper px-2 pt-1 pb-[calc(0.25rem+env(safe-area-inset-bottom))]"
@@ -1656,7 +1781,8 @@
     >
       <path
         d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"
-      ></path>
+      >
+      </path>
     </svg>
   </a>
   <button

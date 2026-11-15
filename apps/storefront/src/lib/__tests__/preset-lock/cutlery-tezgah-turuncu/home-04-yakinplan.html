@@ -10,10 +10,7 @@
             <picture>
               <source
                 type="image/webp"
-                srcset="
-                  https://cdn.example.com/p/01-400.webp 400w,
-                  https://cdn.example.com/p/01-800.webp 800w
-                "
+                srcSet="https://cdn.example.com/p/01-400.webp 400w, https://cdn.example.com/p/01-800.webp 800w"
                 sizes="(min-width: 1024px) 44vw, 100vw"
               />
               <img
@@ -22,7 +19,7 @@
                 width="1200"
                 height="1200"
                 loading="lazy"
-                fetchpriority="auto"
+                fetchPriority="auto"
                 decoding="async"
                 class="absolute inset-0 h-full w-full object-cover"
               />
@@ -35,7 +32,7 @@
                   src="https://cdn.example.com/p/01-b.webp"
                   alt="Alageyik Şam Çeliği Av Bıçağı"
                   loading="lazy"
-                  fetchpriority="auto"
+                  fetchPriority="auto"
                   decoding="async"
                   class="absolute inset-0 h-full w-full object-cover"
                 />
@@ -51,15 +48,17 @@
             Katmanlı Şam çeliği namlu. Çeliği, ölçüleri ve bakımı ürün sayfasında yazılı.
           </p>
           <p class="flex flex-wrap items-baseline gap-x-2 [&amp;_s]:text-stage-text-2">
-            <span class="tabular font-extrabold tracking-[-0.01em] text-price"> 450,00 TL </span>
+            <span class="tabular font-extrabold tracking-[-0.01em] text-price ">
+              450,00 TL
+            </span>
           </p>
           <div class="flex flex-wrap items-center gap-3">
             <form
               class="relative z-(--z-raised) flex flex-col gap-2"
               action="javascript:throw new Error(&#x27;React form unexpectedly submitted.&#x27;)"
             >
-              <input type="hidden" name="variant_id" value="variant_01" />
-              <input type="hidden" name="quantity" value="1" />
+              <input type="hidden" name="variant_id" value="variant_01"/>
+              <input type="hidden" name="quantity" value="1"/>
               <button
                 type="submit"
                 class="gf-btn w-full sm:w-auto"
@@ -76,7 +75,8 @@
                 />
                 Sepete ekle
               </button>
-              <span id="«id»" role="alert" class=""> </span>
+              <span id="«id»" role="alert" class="">
+              </span>
             </form>
             <a href="/urun/karacelik-alageyik-sam-celigi-av-bicagi" class="gf-link">
               Ürünü incele
