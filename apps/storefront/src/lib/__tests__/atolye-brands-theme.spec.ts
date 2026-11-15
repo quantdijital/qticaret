@@ -5,8 +5,8 @@ import { renderPage } from "@/test/theme-render"
 
 /**
  * The home page's brands section: a brand with a logo shows it in place
- * of its name (the logo's alt text is the name) on a light plate of a
- * fixed height; one without draws its name exactly as before logos.
+ * of its name (the logo's alt text is the name) on its cell's own light
+ * ground, at a fixed height; one without draws its name exactly as before.
  */
 
 const home = (brands: SectionBrandView[]) =>
@@ -52,13 +52,20 @@ describe("the brands section", () => {
     expect(cell).toContain('src="https://cdn.example/bora.png"')
     expect(cell).toContain('alt="Bora"')
     expect(cell).toContain('loading="lazy"')
-    // The plate is light on any ground and a fixed height: the row does not move as the file arrives
-    expect(cell).toMatch(/<span class="[^"]*\bh-10\b[^"]*\bbg-chip\b/)
+    // A fixed height row with no ground of its own: the row does not move as the file arrives, and
+    // the logo stands on the cell itself, not on a plate inside it
+    expect(cell).toContain('<span class="flex h-10 max-w-full items-center"><img')
     expect(cell).toMatch(/<img[^>]*class="h-9 w-auto max-w-full object-contain"/)
     // The name is the logo's alt text, not printed beside it
     expect(cell).not.toContain(">Bora<")
-    // The link keeps the cell's size (a 48 px target), its padding taken in for the 40 px plate
-    expect(html).toMatch(/<a href="\/marka\/bora" class="gf-chip flex min-h-12 w-full [^"]* py-1"/)
+    // The cell is the logo's light ground (a mark's, which no section ground turns; its hover kept
+    // light by `gf-logo-cell`) and keeps the cell's size (a 48 px target), its padding taken in
+    // for the 40 px row
+    const link = /<a href="\/marka\/bora" class="([^"]*)"/.exec(html)?.[1] ?? ""
+    expect(link.split(" ")).toEqual(
+      expect.arrayContaining(["gf-chip", "gf-logo-cell", "min-h-12", "w-full", "bg-chip", "py-1"])
+    )
+    expect(link.split(" ")).not.toContain("bg-field")
     // The brand without one keeps its name
     expect(html).toContain(CELL)
   })
