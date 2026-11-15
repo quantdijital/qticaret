@@ -14,7 +14,8 @@ import type { PresetMenuInput } from "./resolve-menus"
  * of a list (`category_ids`, a hero's buttons) is taken out; a list of
  * records the preset filled and the shop has none of, or a section's one
  * record (`product_id`, a rail's `category_id`), drops the section; a
- * button's single link (`more`, a slide's `link`) is cleared; a menu
+ * button's single link (`more`, a slide's `link`) and a price band's
+ * category (`OPTIONAL_IN_ITEMS`) are cleared; a menu
  * whose every link is gone leaves the set, the shop's live menu kept in its
  * place (`resolveMenus`), never an empty menu put live. Each is named in
  * `skipped`.
@@ -72,6 +73,17 @@ type Outcome = unknown
 /** A field naming one record (`product_id`) or a list of them (`category_ids`). */
 const ID_FIELD = /^[a-z]+_(ids?)$/
 
+/**
+ * A list's items that go when their one record does, by the list's field:
+ * a price band whose category the shop lacks (adr/0049, 2026-11-15). The
+ * band is dropped, never turned into a whole-shop price band under the
+ * category's own label; the list keeps the others while it has at least
+ * `min` (a strip has two to four bands), else the section goes.
+ */
+const DROPPED_IN_ITEMS: Readonly<Record<string, { field: string; min: number }>> = {
+  bands: { field: "category_id", min: 2 },
+}
+
 const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value)
 
@@ -119,14 +131,18 @@ function marker(node: Record<string, unknown>, walk: Walk): Outcome {
 
 function resolveList(list: unknown[], key: string | null, walk: Walk): Outcome {
   const out: unknown[] = []
+  const dropping = key === null ? undefined : DROPPED_IN_ITEMS[key]
   for (const item of list) {
-    const resolved = resolveNode(item, walk)
+    const resolved = resolveNode(item, walk, null, dropping?.field)
     if (resolved === NO_SECTION) {
       return NO_SECTION
     }
     if (resolved !== GONE) {
       out.push(resolved)
     }
+  }
+  if (dropping && out.length < dropping.min) {
+    return NO_SECTION
   }
   // A choice the preset made and the shop has none of: never "every category" instead
   if (key !== null && ID_FIELD.exec(key)?.[1] === "ids" && list.length > 0 && out.length === 0) {
@@ -135,7 +151,12 @@ function resolveList(list: unknown[], key: string | null, walk: Walk): Outcome {
   return out
 }
 
-function resolveNode(node: unknown, walk: Walk, key: string | null = null): Outcome {
+function resolveNode(
+  node: unknown,
+  walk: Walk,
+  key: string | null = null,
+  dropsItem?: string
+): Outcome {
   if (Array.isArray(node)) {
     return resolveList(node, key, walk)
   }
@@ -152,7 +173,11 @@ function resolveNode(node: unknown, walk: Walk, key: string | null = null): Outc
       return NO_SECTION
     }
     if (resolved === GONE) {
-      // A section's one record is the section; a single link is only cleared
+      // The item goes with its record (a band without its category)
+      if (name === dropsItem) {
+        return GONE
+      }
+      // A section's one record is the section; a single link only cleared
       if (ID_FIELD.exec(name)?.[1] === "id") {
         return NO_SECTION
       }

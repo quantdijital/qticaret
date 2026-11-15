@@ -321,6 +321,35 @@ describe("a preset's references resolved for a shop (adr/0063 §4)", () => {
     expect(none.skipped).toContainEqual({ where: "menus", ref: "main", kept_live: true })
   })
 
+  it("drops a price band whose category the shop lacks, and the strip under two bands", () => {
+    const band = (label: string, category: string | null, max: number | null) => ({
+      label,
+      text: null,
+      max,
+      category_id: category === null ? null : { $handle: category },
+    })
+    const strip = (bands: unknown[]) => ({
+      layout: { home: [{ id: "bantlar", type: "price_bands", ...SCHEDULE, bands }] },
+    })
+    const kept = resolvePreset(
+      strip([band("Ucuz", null, 500), band("Orta", null, 1000), band("Kamp", "category:yok", null)])
+        .layout,
+      null,
+      lookups
+    )
+    const bands = (kept.groups.home[0] as { bands: { label: string }[] }).bands
+    expect(bands.map((each) => each.label)).toEqual(["Ucuz", "Orta"])
+    expect(kept.skipped).toContainEqual({ where: "home.bantlar", ref: "category:yok" })
+
+    const gone = resolvePreset(
+      strip([band("Ucuz", null, 500), band("Kamp", "category:yok", null)]).layout,
+      null,
+      lookups
+    )
+    expect(gone.groups.home).toEqual([])
+    expect(gone.dropped).toEqual(["home.bantlar"])
+  })
+
   it("finds every reference a preset writes, menus' addresses included", () => {
     const found = presetMarkers({
       layout: { home: [hero, { id: "x", category_ids: [{ $handle: "category:cakilar" }] }] },

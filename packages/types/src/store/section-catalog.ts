@@ -33,10 +33,10 @@ export type HeroListSource =
   { kind: "top" } | { kind: "menu" } | { kind: "manual"; category_ids: string[] }
 
 /**
- * The price bands: 2–4 bands, each a label, an optional line and an
- * upper bound in whole units of the shop's currency (none: "and up", the
- * last band only); the products shown small in a band are picked on the
- * server, as many as `thumbs`.
+ * The price bands: 2–4 bands, each a label, an optional line, an optional
+ * category and an upper bound in whole units of the shop's currency; the
+ * products shown small in a band are picked on the server, as many as
+ * `thumbs`.
  */
 export const PRICE_BANDS_LIMITS = {
   bands: { min: 2, max: 4 },
@@ -49,40 +49,60 @@ export const PRICE_BANDS_LIMITS = {
   perPage: 2,
 } as const
 
-/** One band as the design keeps it. */
+/**
+ * One band as the design keeps it. A band without a category is a price
+ * band: the price bands together split the shop's prices, each from just
+ * above the price band before's bound to its own (null: "and up", the last
+ * price band only). A band with a category stands apart: the category's
+ * products up to its own bound (null: the whole category, no price).
+ */
 export interface PriceBand {
   label: string
   text: string | null
-  /** Whole units; null: no upper bound ("and up"), the last band only. */
+  /** Whole units; null: no upper bound ("and up" or, with a category, no price at all). */
   max: number | null
+  /** The category the band shows; none (a design from before it): the whole shop by price. */
+  category_id?: string | null
 }
 
+type BandBounds = Pick<PriceBand, "max" | "category_id">
+
+/** Whether the band is a price band: no category of its own. */
+const priced = (band: BandBounds) => !band.category_id
+
 /**
- * Each band's range: from one whole unit above the band before's upper
- * bound (none for the first) to its own (none for "and up"), as a
- * listing's price filter reads it (`fiyat=min-max`, both ends included,
- * whole units, either end left out). So a price on a bound is in one band
- * only, the lower one.
+ * Each band's range, as a listing's price filter reads it (`fiyat=min-max`,
+ * both ends included, whole units, either end left out): a price band's
+ * from one whole unit above the price band before's upper bound (none for
+ * the first) to its own (none for "and up"), so a price on a bound is in
+ * one band only, the lower one; a category band's up to its own bound.
  */
 export function bandRanges(
-  bands: readonly Pick<PriceBand, "max">[]
+  bands: readonly BandBounds[]
 ): { min: number | null; max: number | null }[] {
-  return bands.map((band, index) => {
-    const before = bands[index - 1]?.max
-    return { min: before === undefined || before === null ? null : before + 1, max: band.max }
+  let before: number | null | undefined
+  return bands.map((band) => {
+    if (!priced(band)) {
+      return { min: null, max: band.max }
+    }
+    const min = before === undefined || before === null ? null : before + 1
+    before = band.max
+    return { min, max: band.max }
   })
 }
 
 /**
- * Whether the bands rise: every upper bound above the one before, and only
- * the last without one. A design that does not is refused on saving.
+ * Whether the price bands rise: every upper bound above the price band
+ * before's, and only the last price band without one; a category band's
+ * own bound is free. A design that does not is refused on saving.
  */
-export function bandsRise(bands: readonly Pick<PriceBand, "max">[]): boolean {
-  return bands.every((band, index) => {
+export function bandsRise(bands: readonly BandBounds[]): boolean {
+  const prices = bands.filter(priced)
+  return prices.every((band, index) => {
     if (band.max === null) {
-      return index === bands.length - 1
+      return index === prices.length - 1
     }
-    const before = bands[index - 1]?.max
+    const before = prices[index - 1]?.max
     return before === undefined || (before !== null && band.max > before)
   })
 }
@@ -126,11 +146,13 @@ export interface StoreHeroCatalog {
 
 /**
  * The price bands strip (adr/0049 Ek 2026-11-14, note "Katalog ana
- * sayfası"): each band's words, its range in whole units of the shop's
- * currency (from just above the band before's bound to its own, `bandRanges`; null: open) and the
- * products shown small in it, picked on the server for the shopper's sales
- * channels by their indexed prices. The storefront links each band to the
- * whole catalogue's listing filtered by its range and fetches the products.
+ * sayfası"): each band's words, its category (a live one; a band whose
+ * category is hidden is left out), its range in whole units of the shop's
+ * currency (`bandRanges`; null: open) and the products shown small in it,
+ * picked on the server for the shopper's sales channels by their indexed
+ * prices (and its category's shown subtree). The storefront links each band
+ * to its category's listing, else the whole catalogue's, filtered by its
+ * range, and fetches the category's name and the products.
  */
 export interface StorePriceBandsSection {
   id: string
@@ -139,6 +161,8 @@ export interface StorePriceBandsSection {
   bands: {
     label: string
     text: string | null
+    /** None: the whole catalogue (absent from a backend before band categories). */
+    category_id?: string | null
     min: number | null
     max: number | null
     product_ids: string[]

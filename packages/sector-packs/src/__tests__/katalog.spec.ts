@@ -8,7 +8,7 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
     expect(katalog).toMatchObject({
       pack: "cutlery",
       code: "katalog",
-      version: 1,
+      version: 2,
       theme: "atolye",
       name: "Katalog",
       tone: "light",
@@ -47,12 +47,28 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
       "category:kilic-modelleri",
       "category:mutfak-sef-serisi",
       "category:n690-cakilar",
+      "category:ozel-koleksiyon",
       "category:sef-bicaklari",
     ])
   })
 
-  it("is still on its first version, beside the Tezgâh presets added after it", () => {
-    expect(katalogVersion()).toBe(1)
+  it("points the collectors' band at the shop's special collection, on its second version", () => {
+    const strip = storefrontPreset("cutlery", "katalog")?.layout.home?.find(
+      (each) => each.type === "price_bands"
+    ) as { bands: { label: string; max: number | null; category_id?: unknown }[] } | undefined
+    expect(strip?.bands.at(-1)).toEqual({
+      label: "Koleksiyonluk",
+      text: "Özel çelik ve koleksiyon bıçakları",
+      max: null,
+      category_id: { $handle: "category:ozel-koleksiyon" },
+    })
+    // The price bands before it keep splitting the shop by price
+    expect(strip?.bands.slice(0, -1).map((band) => band.category_id)).toEqual([
+      undefined,
+      undefined,
+      undefined,
+    ])
+    expect(katalogVersion()).toBe(2)
     expect(sectorPack("cutlery")?.presets.map((preset) => preset.code)).toContain("katalog")
   })
 })

@@ -23,7 +23,7 @@ import { currentMenus, layoutImage, layoutLink } from "./layout"
 import { hrefOf } from "./listing"
 import { shownAmount } from "./price"
 import { variantIdsOf } from "./product"
-import { productsInOrder } from "./section-data"
+import { namedCategories, productsInOrder } from "./section-data"
 
 /**
  * The catalogue home page's sections as the theme draws them (adr/0049
@@ -173,29 +173,62 @@ export async function heroView(section: StoreHeroSection, t: Translate): Promise
   }
 }
 
-/** The catalogue's listing filtered by a band's range (`/magaza?fiyat=min-max`). */
-export const bandPath = (min: number | null, max: number | null): string =>
-  hrefOf("/magaza", { filters: [], price: { min, max }, sort: null, page: 1 })
+/**
+ * A band's listing filtered by its range: the catalogue's
+ * (`/magaza?fiyat=min-max`), or its category's page (`/kategori/…`, the
+ * same `fiyat=` filter); without a range, the listing unfiltered.
+ */
+export const bandPath = (min: number | null, max: number | null, listing = "/magaza"): string =>
+  hrefOf(listing, {
+    filters: [],
+    price: min === null && max === null ? null : { min, max },
+    sort: null,
+    page: 1,
+  })
 
-/** The price bands: each band at its filtered listing with its products, picked on the server. */
+/**
+ * The price bands: each band at its filtered listing with its products,
+ * picked on the server; a band with a category at its category's page, the
+ * category's name on it. A band whose category the Store API does not show
+ * (hidden since the design was read) is left out.
+ */
 export async function priceBandsView(
   section: StorePriceBandsSection,
   t: Translate
 ): Promise<PriceBandsSectionView | null> {
-  if (section.bands.length === 0) {
+  const categoryIds = section.bands.flatMap((band) => band.category_id ?? [])
+  const [{ views }, categories] = await Promise.all([
+    thumbs(section.bands.flatMap((band) => band.product_ids)),
+    // An empty list would ask for the top categories
+    categoryIds.length > 0 ? namedCategories(categoryIds) : null,
+  ])
+  const shown = new Map(categories?.named.map(({ id, card }) => [id, card]))
+  const bands = section.bands.flatMap((band) => {
+    const products = band.product_ids.flatMap((id) => views.get(id) ?? [])
+    if (!band.category_id) {
+      return [{ label: band.label, text: band.text, path: bandPath(band.min, band.max), products }]
+    }
+    const card = shown.get(band.category_id)
+    return card
+      ? [
+          {
+            label: band.label,
+            text: band.text,
+            category: card.label,
+            path: bandPath(band.min, band.max, card.path),
+            products,
+          },
+        ]
+      : []
+  })
+  if (bands.length === 0) {
     return null
   }
-  const { views } = await thumbs(section.bands.flatMap((band) => band.product_ids))
   return {
     id: section.id,
     type: "price_bands",
     title: section.title ?? t("home.price_bands"),
-    bands: section.bands.map((band) => ({
-      label: band.label,
-      text: band.text,
-      path: bandPath(band.min, band.max),
-      products: band.product_ids.flatMap((id) => views.get(id) ?? []),
-    })),
+    bands,
   }
 }
 

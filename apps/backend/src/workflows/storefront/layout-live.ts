@@ -16,7 +16,8 @@ export type LiveFilter = <T extends BodySection>(group: readonly T[]) => T[]
  * L8): a draft product's or an inactive category's id never leaves the
  * backend. A section whose every chosen record is gone, or whose rail's
  * category or collection is, is left out (an emptied choice would read as
- * "the top categories" or "every brand"). A product page's "same category"
+ * "the top categories" or "every brand"); a price band whose category is
+ * not live is left out of its strip. A product page's "same category"
  * names no record: the storefront takes the product's own. The records of
  * every group are looked up at once.
  */
@@ -47,6 +48,8 @@ export async function liveRecords(
       section.picks.forEach((pick) => want("product", pick.product_id))
     } else if (section.type === "featured_product") {
       want("product", section.product_id)
+    } else if (section.type === "price_bands") {
+      for (const band of section.bands) if (band.category_id) want("category", band.category_id)
     } else if (section.type === "products" || section.type === "related_products") {
       const sources =
         section.type === "products"
@@ -105,6 +108,13 @@ export async function liveRecords(
     // A featured product that is not live now: no close-up of nothing
     if (section.type === "featured_product") {
       return live("product")(section.product_id) ? [section] : []
+    }
+    // A band whose category is not live is left out: none of its products shown under it
+    if (section.type === "price_bands") {
+      const bands = section.bands.filter(
+        (band) => !band.category_id || live("category")(band.category_id)
+      )
+      return bands.length > 0 ? [{ ...section, bands }] : []
     }
     if (section.type === "brands" && section.brand_ids.length > 0) {
       const ids = section.brand_ids.filter(live("brand"))
