@@ -3,9 +3,11 @@ import { EDITOR_BRIDGE_MAX_BYTES, bridgeMessage } from "@qticaret/types/editor-b
 import type { AnySection } from "@/features/storefront/api/layout"
 import {
   KEYS_PER_SECOND,
+  PICKS_PER_SECOND,
   acceptFromFrame,
   bridgeOn,
   createKeyGate,
+  createPickGate,
   frameOrigin,
   whyNotShown,
 } from "./bridge-client"
@@ -148,5 +150,22 @@ describe("the panel's bridge client (adr/0065 §2, §7)", () => {
     expect(gate(true, 1001)).toBe(false)
     expect(gate(true, 1040)).toBe(true)
     expect(KEYS_PER_SECOND).toBe(5)
+  })
+
+  it("takes the frame's presses only while it has the focus, four a second at most", () => {
+    const gate = createPickGate()
+    expect(gate(false, 0)).toBe(false)
+    expect(gate(true, 0)).toBe(true)
+    expect([gate(true, 10), gate(true, 20), gate(true, 30), gate(true, 40)]).toEqual([
+      true,
+      true,
+      true,
+      false,
+    ])
+    expect(gate(true, 1000)).toBe(true)
+    expect(PICKS_PER_SECOND).toBe(4)
+    // Its own room: the keys' gate is apart
+    const keys = createKeyGate()
+    expect(keys(true, 40)).toBe(true)
   })
 })

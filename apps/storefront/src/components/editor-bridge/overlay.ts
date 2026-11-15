@@ -1,6 +1,6 @@
 import { sectionSelector } from "./bridge-core"
 import { FIELD_CSS, createFieldLayer } from "./field-layer"
-import { drawnSections, labelPlace, strokeFactor, type LabelPlace } from "./overlay-core"
+import { drawnSections, knownName, labelPlace, strokeFactor, type LabelPlace } from "./overlay-core"
 
 /**
  * The editor layer in the preview frame (adr/0065 §4, Faz 2; owner's
@@ -104,7 +104,7 @@ export function createOverlay({
   })
 
   const labelText = (id: string) => {
-    const known = names[id]
+    const known = knownName(names, id)
     return known ? `${edit}: ${known}` : edit
   }
   const viewport = () => ({
@@ -129,7 +129,7 @@ export function createOverlay({
       fields.reposition(null)
       return
     }
-    name.textContent = names[current] ?? ""
+    name.textContent = knownName(names, current)
     word.textContent = edit
     label.setAttribute("aria-label", labelText(current))
     setCorner(label, labelPlace(rect, viewport(), factor))

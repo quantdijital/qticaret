@@ -4,7 +4,13 @@ import { t } from "@/lib/i18n"
 // The request's headers as the proxy set them: the preview's token or none
 const request = vi.hoisted(() => ({ headers: new Headers() }))
 vi.mock("next/headers", () => ({ headers: () => Promise.resolve(request.headers) }))
+// The backend's sessions: the one open session opens; any other token is a 404 (null)
+const sessions = vi.hoisted(() => ({ open: new Set<string>(), asked: [] as string[] }))
 vi.mock("@/lib/store-api/requests", () => ({
+  layoutSession: vi.fn((token: string) => {
+    sessions.asked.push(token)
+    return Promise.resolve(sessions.open.has(token) ? { layout: {}, edition: null } : null)
+  }),
   listProducts: vi.fn(),
   pathsOf: vi.fn(),
   priceDisplays: vi.fn(),
@@ -30,6 +36,8 @@ type Section = Parameters<typeof sectionViews>[0][number]
  */
 
 const SESSION = `sfs_${"a".repeat(32)}.m1x2.${"b".repeat(43)}`
+// The session's form, but no session the backend knows (a made-up address)
+const FORGED = `sfs_${"c".repeat(32)}.m1x2.${"d".repeat(43)}`
 const LINK = `sfl_abc123.m1x2.${"b".repeat(43)}`
 
 const faq = { id: "sss111", type: "faq", title: null, items: [{ question: "Q?", answer: "A." }] }
@@ -42,6 +50,8 @@ const viewsOn = async (token: string | null) => {
 describe("the editor's views", () => {
   beforeEach(() => {
     request.headers = new Headers()
+    sessions.open = new Set([SESSION])
+    sessions.asked = []
   })
 
   it("say so in the editor's live session only", async () => {
@@ -57,6 +67,19 @@ describe("the editor's views", () => {
       expect(view).not.toHaveProperty("editor")
       expect(await isEditorSession()).toBe(false)
     }
+    // Only a token of the session's form is asked about
+    expect(sessions.asked).toEqual([])
+  })
+
+  it("stay as they were on a session's form that opens none (security review, DÜŞÜK-2)", async () => {
+    const [view] = await viewsOn(FORGED)
+    expect(view).not.toHaveProperty("editor")
+    expect(await isEditorSession()).toBe(false)
+    // An ended session too
+    sessions.open = new Set()
+    const [ended] = await viewsOn(SESSION)
+    expect(ended).not.toHaveProperty("editor")
+    expect(await isEditorSession()).toBe(false)
   })
 })
 

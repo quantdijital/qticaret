@@ -238,6 +238,14 @@ export function sectionStep(event: {
 export const strokeFactor = (scale: number): number =>
   Math.round((1 / Math.min(Math.max(scale, 0.05), 4)) * 1000) / 1000
 
+/**
+ * A section's name from the panel's labels: its own entry only, never the
+ * object's prototype (an id such as `constructor` would else read a
+ * function; security review 2026-11-15, BİLGİ-1). Empty: not named.
+ */
+export const knownName = (names: Readonly<Record<string, string>>, id: string): string =>
+  Object.hasOwn(names, id) ? (names[id] ?? "") : ""
+
 /** A label's corner: from the right edge of the view, or (under a header) from the left. */
 export type LabelPlace = { top: number; right: number } | { top: number; left: number }
 

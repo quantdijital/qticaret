@@ -95,4 +95,16 @@ describe("the editor layer's field labels", () => {
     buttons[field]?.click()
     expect(onEditField).toHaveBeenCalledWith("marka1", "title")
   })
+
+  it("names a section by the labels' own entry only, never the prototype (BİLGİ-1)", () => {
+    document.body.innerHTML = `<section data-qs="constructor"><h1>Bölüm</h1></section>`
+    const { overlay } = layer()
+    overlay.show("constructor")
+    const label = must(shadow?.querySelector<HTMLButtonElement>(".label"))
+    expect(label.getAttribute("aria-label")).toBe("Düzenle")
+    expect(label.textContent).not.toContain("function")
+    // Named by the panel: shown
+    overlay.setLabels("Düzenle", { constructor: "Kurucu" })
+    expect(label.getAttribute("aria-label")).toBe("Düzenle: Kurucu")
+  })
 })
