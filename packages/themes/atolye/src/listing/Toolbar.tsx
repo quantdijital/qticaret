@@ -100,7 +100,10 @@ export function Toolbar({
             )}
           >
             {sheet && (
-              <SheetOpener id={sheet} className="gf-chip justify-center bg-paper-2 lg:hidden">
+              <SheetOpener
+                id={sheet}
+                className="gf-chip justify-center rounded-button bg-paper-2 lg:hidden"
+              >
                 <SlidersHorizontal className="size-4" aria-hidden="true" strokeWidth={2} />
                 {t("listing.show_filters")}
                 {on > 0 && (

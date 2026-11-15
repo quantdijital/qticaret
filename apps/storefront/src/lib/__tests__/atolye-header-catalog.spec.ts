@@ -117,8 +117,19 @@ describe("the catalog header", () => {
     const html = renderFrame(atolyeTheme, catalogShop())
     expect(html).toMatch(/<ul[^>]*class="flex flex-nowrap items-center gap-x-1 overflow-x-clip/)
     // Before it is measured every category is drawn; "Daha fazla" waits unseen
-    expect(html).toMatch(/data-aisle-more=""[^>]*class="invisible static"/)
+    expect(html).toMatch(/data-aisle-more=""[^>]*class="invisible relative"/)
     expect(html).toContain("Daha fazla")
+  })
+
+  it("puts the highlighted link right after the main menu, its width kept (Y-05)", () => {
+    const html = renderFrame(
+      atolyeTheme,
+      catalogShop({ highlight: { label: "Kampanyalar", path: "/kampanyalar" } })
+    )
+    // The highlighted link is the line's last item, its width kept when the line is fitted
+    expect(html).toMatch(
+      /<li data-aisle-tail=""[^>]*><a href="\/kampanyalar"[^>]*>Kampanyalar<\/a><\/li>/
+    )
   })
 
   it.each(["stage", "primary", "light"] as const)(

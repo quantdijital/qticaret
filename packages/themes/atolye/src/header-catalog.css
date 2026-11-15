@@ -65,7 +65,7 @@
 }
 
 /* Where a page's sticky column stops before the header is measured (frame.css):
-   the strip, the 64 px row and the 52 px menu bar from 1024 px */
+   the strip, the 64 px row and the 52 px menu bar from 1024 px (folded: frame.css) */
 @media (width >= 64rem) {
   :root:has(.gf-head[data-variant="catalog"]) {
     --gf-stick-top: calc(var(--gf-head-h, 9.5625rem) + 1.6875rem);

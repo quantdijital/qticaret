@@ -44,9 +44,9 @@ const span = (min: number, max: number): string =>
 /** The dative ending of an hour read aloud, by its last word: on 'a, bir 'e, iki 'ye, üç 'e… */
 const DATIVE = ["a", "e", "ye", "e", "e", "e", "ya", "ye", "e", "a"] as const
 
-/** "15:00'e", "16:00'ya", "20:00'ye" (yirmi, not on). */
+/** "15.00'e", "16.00'ya", "20.00'ye" (yirmi, not on): the hour as Turkish prints it, a full stop (Tezgâh audit K-29). */
 const untilHour = (hour: number): string =>
-  `${String(hour).padStart(2, "0")}:00'${hour === 20 ? "ye" : (DATIVE[hour % 10] ?? "e")}`
+  `${String(hour).padStart(2, "0")}.00'${hour === 20 ? "ye" : (DATIVE[hour % 10] ?? "e")}`
 
 /**
  * The delivery facts from the shop's settings: when an order leaves (the

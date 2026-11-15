@@ -161,8 +161,8 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     }
     expect(CODES.map((code) => read(code).theme_settings["colors"])).toEqual([
       { primary: "#b3261e", accent: "#2e3338", background: "steel" },
-      { primary: "#2f6690", accent: "#1c2b4a", background: "steel" },
-      { primary: "#c2410c", accent: "#2e3338", background: "steel" },
+      { primary: "#33709c", accent: "#1f4f8f", background: "steel" },
+      { primary: "#b03b0b", accent: "#2e3338", background: "steel" },
     ])
   })
 

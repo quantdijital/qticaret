@@ -32,8 +32,9 @@ export const fillOf = (percent: number): string =>
 
 /**
  * How near the cart is to free shipping: the storefront's sentence over a
- * rounded 8 px track; past the threshold the sentence turns the "ok"
- * green and the track is full.
+ * rounded 8 px track filled in the selection's colour (`mark`: a state,
+ * not an action; Tezgâh audit Y-11); past the threshold the sentence turns
+ * the "ok" green and the track is full.
  */
 export function FreeShippingMeter({ view }: { view: FreeShippingView }) {
   return (
@@ -43,7 +44,7 @@ export function FreeShippingMeter({ view }: { view: FreeShippingView }) {
         <div
           className={cn(
             "h-full rounded-pill",
-            view.reached ? "bg-ok" : "bg-signal",
+            view.reached ? "bg-ok" : "bg-mark",
             fillOf(view.percent)
           )}
         />
