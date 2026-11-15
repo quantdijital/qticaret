@@ -14,8 +14,8 @@
  *
  * The rules read the mark from an ancestor. The Radix drawers and dialogs
  * (the cart and the phone's menu, the quick view, installments and review)
- * are portalled into `body`, outside the root: they follow once the style
- * kit's shared portal fix carries the root's marks to them.
+ * are portalled outside the root, into the layer host that carries the
+ * root's marks (`frame/Layers.tsx`, adr/0067 Ek 2026-11-15), so they follow.
  */
 @layer utilities {
   [data-shadow="none"] .shadow-float {
