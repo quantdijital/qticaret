@@ -29,6 +29,7 @@ const SAVED: ThemeSettings = {
   },
   header: { layout: "centered", sticky: true },
   buttons: "pill",
+  section_spacing: "normal",
 }
 
 describe("the theme settings as the form holds them (adr/0053 §B)", () => {
@@ -40,6 +41,7 @@ describe("the theme settings as the form holds them (adr/0053 §B)", () => {
       product_card: { ...SAVED.product_card },
       header: { layout: "centered", sticky: true },
       buttons: "pill",
+      section_spacing: "normal",
     })
   })
 })
@@ -62,6 +64,7 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
       },
       header: { layout: "left", sticky: true },
       buttons: "pill",
+      section_spacing: "normal",
     })
     // As the form holds it
     expect(GRAFIT_VALUES.colors).toEqual({ primary: "", accent: "", background: "steel" })
@@ -79,6 +82,7 @@ describe("Grafit, the theme's defaults (adr/0062 §2)", () => {
       { ...g, typography: { ...g.typography, body: "inter" } },
       { ...g, radius: "sharp" },
       { ...g, buttons: "square" },
+      { ...g, section_spacing: "compact" },
       { ...g, product_card: { ...g.product_card, ratio: "4:5" } },
       { ...g, product_card: { ...g.product_card, show_brand: false } },
       { ...g, product_card: { ...g.product_card, show_rating: true } },

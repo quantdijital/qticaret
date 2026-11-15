@@ -1,6 +1,8 @@
+import path from "node:path"
 import { mergePatch } from "../sections/define"
 import { parseStored } from "../sections/stored"
 import {
+  SECTION_SPACINGS,
   THEME_BACKGROUNDS,
   THEME_WELLS,
   primaryReadable,
@@ -8,8 +10,14 @@ import {
   themeSaveIssue,
   themeSection,
   upgradeStoredTheme,
+  withCardDefaults,
 } from "../sections/theme"
 import type { ThemeSettings } from "../sections/theme"
+
+const CONTRACT_FILE = path.resolve(
+  __dirname,
+  "../../../../../../packages/types/src/store/storefront.ts"
+)
 
 const { full, patch, defaults } = themeSection
 
@@ -37,6 +45,7 @@ describe("theme section", () => {
       },
       header: { layout: "left", sticky: true },
       buttons: "pill",
+      section_spacing: "normal",
     })
     expect(full.safeParse(defaults).success).toBe(true)
     expect(parseStored("theme", undefined)).toEqual(defaults)
@@ -93,6 +102,8 @@ describe("theme section", () => {
     ["an unknown page colour", { colors: { primary: null, accent: null, background: "pink" } }],
     ["a card shape", { product_card: { ratio: "16:9", show_brand: true, show_rating: false } }],
     ["a button shape", { buttons: "blob" }],
+    ["a section spacing off the list", { section_spacing: "dense" }],
+    ["a section spacing in pixels", { section_spacing: 64 }],
     ["CSS of its own", { css: "body{display:none}" }],
     ["a version it does not write", { settings_version: 1 }],
   ])("refuses %s", (_, body) => {
@@ -237,8 +248,14 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
     expect(parseStored("theme", stored)).toEqual({
       ...stored,
       product_card: { ...defaults.product_card, ...stored.product_card },
+      // Stored before the section spacing (K-11): the theme's own gaps
+      section_spacing: "normal",
     })
-    const framed = { ...stored, product_card: { ...defaults.product_card, variant: "framed" } }
+    const framed = {
+      ...stored,
+      section_spacing: "compact",
+      product_card: { ...defaults.product_card, variant: "framed" },
+    }
     expect(parseStored("theme", framed)).toEqual(framed)
   })
 
@@ -255,6 +272,25 @@ describe("a theme row stored since adr/0062 (settings_version 2)", () => {
       mergePatch(defaults, patch.parse({ product_card: { empty_stars: true } }))
     )
     expect(after.product_card).toEqual({ ...defaults.product_card, empty_stars: true })
+  })
+
+  it("takes the section spacing from its list, the contract's (Tezgâh audit K-11)", () => {
+    const contract = jest.requireActual<{ SECTION_SPACINGS: unknown }>(CONTRACT_FILE)
+    expect(SECTION_SPACINGS).toEqual(contract.SECTION_SPACINGS)
+    for (const section_spacing of SECTION_SPACINGS) {
+      expect(saved({ section_spacing }).success).toBe(true)
+    }
+    expect(full.parse(mergePatch(defaults, patch.parse({ section_spacing: "compact" })))).toEqual({
+      ...defaults,
+      section_spacing: "compact",
+    })
+    // A design's theme or a preset written before it reads with the theme's own gaps
+    const before: Record<string, unknown> = { ...defaults }
+    delete before["section_spacing"]
+    expect(withCardDefaults(before)).toEqual(defaults)
+    expect(withCardDefaults({ ...defaults, section_spacing: "roomy" })).toMatchObject({
+      section_spacing: "roomy",
+    })
   })
 })
 

@@ -31,7 +31,8 @@ export function FormSection({ title, description, children, className }: FormSec
 }
 
 interface FieldProps {
-  label: string
+  /** Its name; a small technical term may follow it (`<small>`). */
+  label: ReactNode
   htmlFor?: string
   hint?: string | undefined
   /** An i18n'd error sentence; replaces the hint. */

@@ -4,6 +4,7 @@ import type {
   ThemeBodyFont,
   ThemeHeadingFont,
 } from "@qticaret/types"
+import { SECTION_SPACINGS } from "@qticaret/types"
 import type { ThemeView } from "@qticaret/ui"
 import { cardVariantOf } from "@qticaret/types/section-variants"
 import { brandDeclarations, isHexColor, readableOn } from "./color"
@@ -38,6 +39,7 @@ export const DEFAULT_THEME: StoreThemeSettings = {
   },
   header: { layout: "left", sticky: true },
   buttons: "pill",
+  section_spacing: "normal",
 }
 
 /**
@@ -165,6 +167,7 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
       sticky: flag(at(raw, "header", "sticky"), d.header.sticky),
     },
     buttons: oneOf(at(raw, "buttons"), ["pill", "rounded", "square"], d.buttons),
+    section_spacing: oneOf(at(raw, "section_spacing"), SECTION_SPACINGS, d.section_spacing),
   }
 }
 

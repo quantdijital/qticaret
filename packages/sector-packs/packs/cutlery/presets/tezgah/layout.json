@@ -48,7 +48,7 @@
       "ends_at": null,
       "variant": "lined",
       "look": {
-        "space_outer": "small",
+        "space_outer": "none",
         "space_inner": null,
         "ground": null,
         "align": null,

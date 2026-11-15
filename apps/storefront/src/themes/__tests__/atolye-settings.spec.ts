@@ -246,6 +246,20 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     }
   })
 
+  it("scales every section gap with the section spacing, the theme's own at normal (K-11)", () => {
+    expect(entry.style(chosen({ section_spacing: "normal" }))).toBeNull()
+    expect(entry.style(chosen({ section_spacing: "compact" }))).toBe(":root{--section-scale:0.55}")
+    expect(entry.style(chosen({ section_spacing: "roomy" }))).toBe(":root{--section-scale:1.2}")
+    for (const token of ["--section-gap-s", "--section-gap", "--section-gap-l"]) {
+      expect(declared(tokens, token)).toMatch(/^calc\(\d+px \* var\(--section-scale, 1\)\)$/)
+    }
+    // A wide screen's gap at compact: 66 px, a dense catalog's rhythm
+    const wide = /^calc\((\d+)px/.exec(declared(tokens, "--section-gap"))
+    expect(Number(wide?.[1]) * 0.55).toBe(66)
+    expect(themeSettings({ section_spacing: "dense" }, null).section_spacing).toBe("normal")
+    expect(themeSettings({ section_spacing: "compact" }, null).section_spacing).toBe("compact")
+  })
+
   it("leaves a malformed accent or an unknown tone out of CSS", () => {
     expect(
       entry.style(themeSettings({ colors: { accent: "#fff}", background: "pink" } }, null))

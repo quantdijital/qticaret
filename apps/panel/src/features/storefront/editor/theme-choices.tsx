@@ -9,6 +9,7 @@ import {
   HEADING_FONTS,
   NO_LIRA_FONTS,
   RADII,
+  SECTION_SPACINGS,
   SERIF_FONTS,
   SINGLE_WEIGHT_FONTS,
 } from "@/features/storefront/api/theme"
@@ -125,6 +126,24 @@ export function ThemeChoices({ theme, onChange }: ThemeChoicesProps) {
             hint={t(`${C}.buttonsHint`)}
           />
         </Pair>
+        <ChoiceSelect
+          id="theme-section-spacing"
+          label={
+            <>
+              {t(`${C}.sectionSpacing`)}{" "}
+              <small className="text-[11px] font-normal text-muted-foreground">
+                {t(`${C}.sectionSpacingTerm`)}
+              </small>
+            </>
+          }
+          value={theme.section_spacing}
+          options={SECTION_SPACINGS}
+          onChange={(value) => {
+            onChange({ ...theme, section_spacing: value })
+          }}
+          render={(option) => t(`${C}.sectionSpacings.${option}`)}
+          hint={t(`${C}.sectionSpacingHint`)}
+        />
       </PanelGroup>
       <PanelGroup title={t(`${C}.card`)}>
         <Pair>

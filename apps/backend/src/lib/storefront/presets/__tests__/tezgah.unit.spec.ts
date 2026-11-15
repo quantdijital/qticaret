@@ -83,6 +83,7 @@ describe("the tezgah presets' drafts (docs/tema/tezgah-tasarim-dili.md)", () => 
       expect(doc.settings.theme).toMatchObject({
         radius: "sharp",
         buttons: "square",
+        section_spacing: "compact",
         typography: { heading: "inter", body: "inter" },
         product_card: { variant: "framed", hover_image: false },
       })

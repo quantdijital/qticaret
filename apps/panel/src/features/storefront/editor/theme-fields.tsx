@@ -123,7 +123,7 @@ export function BackgroundField({
 
 interface ChoiceSelectProps<T extends string> {
   id: string
-  label: string
+  label: ReactNode
   value: T
   options: readonly T[]
   onChange: (value: T) => void
