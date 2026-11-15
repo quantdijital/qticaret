@@ -98,6 +98,44 @@ describe("picking in the preview", () => {
     expect(hook.result.current.announce).toMatch(/^Seçildi: /)
   })
 
+  it("opens a section at a field its register knows (Faz 2b), said aloud", () => {
+    const { hook, onOpen } = setup()
+    act(() => {
+      hook.result.current.onPick(pickOf("field", { id: "girisbolumu", field: "heading" }))
+    })
+    expect(onOpen).toHaveBeenCalledWith("girisbolumu", {
+      target: "girisbolumu-heading",
+      group: "content",
+    })
+    expect(hook.result.current.announce).toMatch(/^Seçildi: .*ilgili alana gidildi/)
+    act(() => {
+      hook.result.current.onPick(pickOf("field", { id: "duyurular", field: "lines.0" }))
+    })
+    expect(onOpen).toHaveBeenLastCalledWith("duyurular", {
+      target: "duyurular-lines-0",
+      group: "content",
+    })
+  })
+
+  it("opens the section alone for a key it does not know there; ignores an unknown section", () => {
+    const { hook, onOpen } = setup()
+    act(() => {
+      // The opening has no buttons: its first is not a field; a title is not the opening's
+      hook.result.current.onPick(pickOf("field", { id: "girisbolumu", field: "links.0" }))
+      hook.result.current.onPick(pickOf("field", { id: "girisbolumu", field: "title" }))
+    })
+    expect(onOpen.mock.calls).toEqual([
+      ["girisbolumu", undefined],
+      ["girisbolumu", undefined],
+    ])
+    expect(hook.result.current.announce).toMatch(/^Seçildi: /)
+    expect(hook.result.current.announce).not.toMatch(/alana/)
+    act(() => {
+      hook.result.current.onPick(pickOf("field", { id: "unknown01", field: "heading" }))
+    })
+    expect(onOpen).toHaveBeenCalledTimes(2)
+  })
+
   it("lights a row for a known section only", () => {
     const { hook } = setup()
     act(() => {

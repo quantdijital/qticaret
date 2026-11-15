@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next"
 import { BRIDGE_MAX_NAME, BRIDGE_MAX_SECTIONS } from "@qticaret/types/editor-bridge"
 import type { BodyGroup, LayoutDocument } from "@/features/storefront/api/layout"
 import { allSections, findSection, isBodyGroup } from "@/features/storefront/layout/sections"
+import { previewField } from "../forms/preview-fields"
+import type { PreviewField } from "../forms/preview-fields"
 import { sectionLabel } from "../section-meta"
 import type { LivePreview, PickMessage } from "./use-live-preview"
 
@@ -15,8 +17,11 @@ interface Options {
   /** Each `ready` from the frame: a bridge set up again starts without names. */
   handshakes?: number
   post: LivePreview["post"]
-  /** A section's edit label was pressed in the frame: its form opens. */
-  onOpen: (id: string) => void
+  /**
+   * A section's edit label was pressed in the frame: its form opens; a
+   * field's (Faz 2b), at that field when the register knows it.
+   */
+  onOpen: (id: string, focus?: PreviewField) => void
   /** A link followed in the frame: that page is shown. */
   onVisit: (path: string) => void
   /** The frame drew `path`, with `group`'s sections (null: none of the editor's pages). */
@@ -103,6 +108,18 @@ export function usePreviewPicking({
           setBlocked(null)
           onOpen(found.section.id)
           setAnnounce(t(`${V}.selected`, { name: names[found.section.id] ?? "" }))
+        }
+        return
+      }
+      case "field": {
+        // The key is the frame's word: matched against the register, never used otherwise
+        const found = findSection(doc, message.payload.id)
+        if (found) {
+          const focus = previewField(found.section, message.payload.field)
+          setBlocked(null)
+          onOpen(found.section.id, focus ?? undefined)
+          const name = names[found.section.id] ?? ""
+          setAnnounce(t(focus ? `${V}.fieldSelected` : `${V}.selected`, { name }))
         }
         return
       }

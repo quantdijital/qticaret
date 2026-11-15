@@ -71,6 +71,29 @@ describe("the panel's bridge client (adr/0065 §2, §7)", () => {
     expect(take(bridgeMessage("error", { code: "x".repeat(40) }, 1))).not.toBeNull()
   })
 
+  it("takes a field's label (Faz 2b) only from the frame, with a key of the schema's form", () => {
+    const field = bridgeMessage("field", { id: "giris1", field: "slides.2.heading" }, 3)
+    const take = (data: unknown, origin = ORIGIN, source: unknown = frameWindow) =>
+      acceptFromFrame({ origin, source, data }, ORIGIN, frameWindow)
+    expect(take(field)).toEqual(field)
+    expect(take(field, "https://evil.example")).toBeNull()
+    expect(take(field, ORIGIN, {})).toBeNull()
+    // A key that is not one (a selector, markup, too deep, too long) is dropped whole
+    for (const key of [
+      '"]{}',
+      "<img src=x>",
+      "Heading",
+      "a.b.c.d.e",
+      "slides.100.heading",
+      `a${"b".repeat(80)}`,
+      "",
+    ]) {
+      expect(take(bridgeMessage("field", { id: "giris1", field: key }, 4))).toBeNull()
+    }
+    expect(take(bridgeMessage("field", { id: "a],[b", field: "heading" }, 5))).toBeNull()
+    expect(take({ ...field, payload: { ...field.payload, extra: 1 } })).toBeNull()
+  })
+
   it("says why a section would not show on the page in the frame", () => {
     const now = new Date("2026-11-15T12:00:00.000Z")
     const section = (more: object) =>

@@ -174,6 +174,7 @@ export function useLivePreview({
         return
       case "hover":
       case "click":
+      case "field":
       case "navigate-request":
       case "location":
         onPick?.(message)

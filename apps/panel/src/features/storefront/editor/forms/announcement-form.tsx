@@ -7,6 +7,7 @@ import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import { AnnouncementMode } from "./announcement-settings"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
+import { PREVIEW_IDS } from "./preview-fields"
 
 const A = "storefront.editor.announcement"
 
@@ -37,7 +38,7 @@ export function AnnouncementForm({
       <ol className="flex flex-col gap-2">
         {section.lines.map((line, index) => {
           const number = index + 1
-          const id = `announcement-line-${String(index)}`
+          const id = PREVIEW_IDS.text(section.id, `lines.${String(index)}`)
           const error = problem(problems[`lines.${String(index)}`], L.line)
           return (
             <li key={index} className="flex items-start gap-1">

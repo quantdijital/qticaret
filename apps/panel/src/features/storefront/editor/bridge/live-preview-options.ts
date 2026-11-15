@@ -17,7 +17,7 @@ export type Payload<T extends ToStorefrontMessage["type"]> = Extract<
 /** The frame's Faz 2 messages, handed on as read (still the frame's word: checked by the taker). */
 export type PickMessage = Extract<
   ToPanelMessage,
-  { type: "hover" | "click" | "navigate-request" | "location" | "left" }
+  { type: "hover" | "click" | "field" | "navigate-request" | "location" | "left" }
 >
 
 /** What the theme editor's preview (`useLivePreview`) is given. */
@@ -37,6 +37,6 @@ export interface LivePreviewOptions {
   selected: string | null
   onKey: (key: "undo" | "redo" | "escape") => void
   onMissing: (id: string, reason: MissingReason) => void
-  /** Faz 2's messages from the frame (hover, click, links held, the page shown, a page left). */
+  /** Faz 2's messages from the frame (hover, click, a field's label, links held, the page shown, a page left). */
   onPick?: (message: PickMessage) => void
 }
