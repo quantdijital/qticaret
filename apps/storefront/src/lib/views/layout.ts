@@ -10,6 +10,7 @@ import type {
 import type { ImageView, LinkView, Translate } from "@qticaret/ui"
 import {
   layoutPreview,
+  layoutSession,
   storefrontLayout,
   storefrontMenus,
   storefrontSettings,
@@ -22,15 +23,24 @@ import { menusOf, sharedSettingsOf } from "./shared-settings"
 const LAYOUT_PREVIEW_HEADER = "x-qt-layout-preview"
 
 const LAYOUT_TOKEN = /^sfl_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}$/
+// The theme editor's live session (adr/0065 §1)
+const SESSION_TOKEN = /^sfs_[0-9a-f]{32}\.[0-9a-z]{1,12}\.[\w-]{43}$/
 
 /**
  * The design this request shows: the draft on a signed preview address
- * (its header and footer too), else the published one. A preview link
- * that no longer opens falls back to what is live; its page says 404.
+ * or the theme editor's live session (its header and footer too), else
+ * the published one. A preview that no longer opens falls back to what is
+ * live; its page says 404.
  */
 export async function currentLayout(): Promise<StoreLayout> {
   const token = (await headers()).get(LAYOUT_PREVIEW_HEADER)
-  const preview = token && LAYOUT_TOKEN.test(token) ? await layoutPreview(token) : null
+  const preview = !token
+    ? null
+    : SESSION_TOKEN.test(token)
+      ? ((await layoutSession(token))?.layout ?? null)
+      : LAYOUT_TOKEN.test(token)
+        ? await layoutPreview(token)
+        : null
   return preview ?? (await storefrontLayout())
 }
 

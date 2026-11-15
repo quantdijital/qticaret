@@ -35,10 +35,14 @@ import { REFRESH_PATH } from "./lib/refresh/contract"
 /** The address the page renders, query included; set here, never taken from the browser. */
 export const URL_HEADER = "x-qt-url"
 
-/** A design preview's token (adr/0049): set here only, so the frame shows the draft's header and footer. */
+/**
+ * A design preview's token (adr/0049) or the theme editor's live session's
+ * (adr/0065): set here only, so the frame shows the draft's header and footer.
+ */
 export const LAYOUT_PREVIEW_HEADER = "x-qt-layout-preview"
 
-const LAYOUT_PREVIEW = /^\/onizleme\/(sfl_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43})$/
+const LAYOUT_PREVIEW =
+  /^\/onizleme\/((?:sfl_[0-9A-Za-z]{1,40}|sfs_[0-9a-f]{32})\.[0-9a-z]{1,12}\.[\w-]{43})$/
 
 /** A signed preview's page (`/onizleme/<token>`): a draft product, content entry or design. */
 export const isPreviewPath = (pathname: string) => pathname.startsWith("/onizleme/")
