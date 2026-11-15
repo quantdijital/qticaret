@@ -6,5 +6,6 @@
   "radius": "soft",
   "product_card": { "ratio": "1:1", "show_brand": true, "show_rating": false },
   "header": { "layout": "left", "sticky": true },
-  "buttons": "pill"
+  "buttons": "pill",
+  "menu_style": "plain"
 }
