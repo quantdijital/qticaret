@@ -120,7 +120,7 @@ export function HeroCatalog({
   const image = hero.image ?? product?.image ?? null
   const Heading = first ? "h1" : "h2"
   return (
-    <section aria-labelledby={id} className="pt-3 lg:pt-6">
+    <section aria-labelledby={id} data-gf-catalog-hero="" className="pt-3 lg:pt-6">
       {first && image && <Preload image={image} />}
       <Container>
         <div className="gf-mosaic">

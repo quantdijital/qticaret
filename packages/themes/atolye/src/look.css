@@ -39,6 +39,14 @@
     }
   }
 
+  /* The catalogue opening is dense; what follows it sits closer (sahip
+     2026-11-15), unless the shop set that section's own outer space */
+  [data-gf-catalog-hero] + :not([data-outer]) {
+    --section-gap-s: var(--space-xl);
+    --section-gap: var(--space-xl);
+    --section-gap-l: var(--space-xl);
+  }
+
   .gf-look[data-outer="none"] {
     --look-outer: 0px;
   }
