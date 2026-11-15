@@ -8816,6 +8816,14 @@
           "term": "dropdown",
           "hint": "At the start of the menu bar; top categories and their subcategories as a dropdown."
         },
+        "menu_images": {
+          "label": "Category pictures in the menu",
+          "term": "thumbnails",
+          "hint": "Submenus: the list that opens on hover and the phone menu. Everywhere: the catalog header's “Kategoriler” list too. A category without a picture shows an empty square.",
+          "all": "Everywhere",
+          "submenus": "In submenus",
+          "off": "None"
+        },
         "menu_ground": {
           "label": "Menu bar background",
           "term": "background",

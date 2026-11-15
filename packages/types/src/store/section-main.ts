@@ -6,6 +6,7 @@ import type {
   FooterBarVariant,
   HeaderBarVariant,
   HeaderMenuGround,
+  HeaderMenuImages,
   ProductMainVariant,
 } from "./section-variants.js"
 
@@ -46,6 +47,12 @@ export interface StoreMainSections {
     variant: HeaderBarVariant
     /** The header stays at the top of a long page. */
     sticky: boolean
+    /**
+     * Where the menus show the categories' pictures (adr/0049 Ek
+     * 2026-11-15; `HEADER_MENU_IMAGES`), every variant's; an older backend
+     * prints none: a reader takes `submenus` (`headerMenuImagesOf`).
+     */
+    menu_images?: HeaderMenuImages
     /** The `catalog` variant's own settings; absent on the others. */
     catalog?: StoreHeaderCatalog
   }

@@ -63,7 +63,12 @@ describe("the tezgah presets' drafts (docs/tema/tezgah-tasarim-dili.md)", () => 
       expect(resolved.dropped).toEqual([])
       expect(doc.home).toHaveLength(15)
       expect(doc.header).toEqual([
-        expect.objectContaining({ type: "header_bar", variant: "catalog", menu_ground: "stage" }),
+        expect.objectContaining({
+          type: "header_bar",
+          variant: "catalog",
+          menu_ground: "stage",
+          menu_images: "all",
+        }),
       ])
       expect(doc.header[0]).toHaveProperty("highlight_link.kind", "system")
       expect(doc.footer.map((section) => section.type)).toEqual(["footer_bar", "newsletter"])
