@@ -59,7 +59,7 @@ export function Summary({
   filter?: ReviewFilterView | null
 }) {
   return (
-    <div className="flex flex-col gap-5 rounded-tile bg-paper-2 p-6 lg:p-8">
+    <div className="flex flex-col gap-5 rounded-tile border border-rule p-6 lg:p-8">
       <p className="flex items-end gap-3">
         <span className="tabular text-figure leading-none font-extrabold tracking-(--tracking-display)">
           {summary.average}
@@ -115,10 +115,12 @@ export function Summary({
 
 /**
  * The shop's approved reviews: its average set large with the stars, the
- * count and the spread on a tinted panel (only when the storefront has
- * the shop-wide summary), beside the three newest reviews as quotes (the
- * stars, the review up to about 140 characters, cut at a word with "…",
- * the name with its verified-purchase mark). Nothing is written for the shop.
+ * count and the spread in a hairline box (only when the storefront has
+ * the shop-wide summary), beside the three newest reviews as quotes in the
+ * same boxes, each as tall as its words (the stars, the review up to about
+ * 140 characters, cut at a word with "…", the name with its
+ * verified-purchase mark, the product it is about as a link; Tezgâh audit
+ * K-25). Nothing is written for the shop.
  */
 export function Reviews({ section, t }: { section: Of<"reviews">; t: Translate }) {
   const id = headingId(section.id)
@@ -141,8 +143,8 @@ export function Reviews({ section, t }: { section: Of<"reviews">; t: Translate }
             <ul
               className={
                 summary
-                  ? "grid gap-(--gap-columns) md:grid-cols-[repeat(3,minmax(0,1fr))] lg:col-span-8"
-                  : "grid gap-(--gap-columns) md:grid-cols-[repeat(3,minmax(0,1fr))] lg:col-span-12"
+                  ? "grid items-start gap-(--gap-columns) md:grid-cols-[repeat(3,minmax(0,1fr))] lg:col-span-8"
+                  : "grid items-start gap-(--gap-columns) md:grid-cols-[repeat(3,minmax(0,1fr))] lg:col-span-12"
               }
             >
               {reviews.map((review, index) => (
@@ -157,7 +159,7 @@ export function Reviews({ section, t }: { section: Of<"reviews">; t: Translate }
                   <blockquote className="text-md leading-relaxed font-semibold">
                     <p>“{quoteOf(review.body)}”</p>
                   </blockquote>
-                  <footer className="mt-auto pt-2 text-sm">
+                  <footer className="flex flex-col gap-1 pt-2 text-sm">
                     <span className="flex items-center gap-1.5 font-semibold text-text">
                       {review.author}
                       {review.verified && (
@@ -169,6 +171,16 @@ export function Reviews({ section, t }: { section: Of<"reviews">; t: Translate }
                         />
                       )}
                     </span>
+                    {review.product && (
+                      // Which tool it is about (Tezgâh audit K-25: a catalogue labels its items)
+                      <a
+                        href={review.product.path}
+                        className="gf-link line-clamp-2 self-start text-text-2"
+                        aria-label={`${t("reviews.about")}: ${review.product.label}`}
+                      >
+                        {review.product.label}
+                      </a>
+                    )}
                   </footer>
                 </li>
               ))}
