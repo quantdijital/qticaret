@@ -104,7 +104,7 @@ function LookField<F extends SectionLookField>({
 }
 
 /**
- * A body section's look, in the closed "Görünüm ayarları" group: only the
+ * A body section's look, in the closed "Diğer ayarlar" group: only the
  * fields its type offers (no alignment where the words sit on a picture),
  * each set and reset on its own; every change shows in the preview at once.
  */

@@ -16,6 +16,8 @@ import { isBodyGroup } from "@/features/storefront/layout/sections"
 import { isMain } from "@/features/storefront/layout/main-sections"
 import { offersVariants } from "@/features/storefront/layout/variants"
 import { cardFooterFields } from "./card-field-ids"
+import { BANNER_GROUPS } from "./banner-groups"
+import { CONTENT_IDS, contentFields } from "./content-registry"
 import { SHELF_IDS, shelfFields } from "./shelf-registry"
 
 /**
@@ -118,7 +120,7 @@ const settingsIn = (group: FieldGroupName): readonly MarqueeSetting[] =>
 /** How the strip moves: the open "Hareket" group. */
 export const MARQUEE_MOTION_SETTINGS = settingsIn("motion")
 
-/** How it looks: the open "Görünüm" group. */
+/** How it looks: the open "Stil" group. */
 export const MARQUEE_APPEARANCE_SETTINGS = settingsIn("appearance")
 
 /** The rarely changed ones, in the closed "Diğer ayarlar" group with the page's look. */
@@ -142,6 +144,7 @@ export const FIELD_IDS = {
   marquee: (sectionId: string, setting: MarqueeSetting) => `${sectionId}-marquee-${setting}`,
   banner: (sectionId: string, setting: BannerSetting) => `${sectionId}-banner-${setting}`,
   ...SHELF_IDS,
+  ...CONTENT_IDS,
   sticky: (sectionId: string) => `${sectionId}-sticky`,
   header: (sectionId: string, field: HeaderCatalogField) => `${sectionId}-header-${field}`,
   visible: (sectionId: string) => `${sectionId}-schedule-visible`,
@@ -182,6 +185,8 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       target: FIELD_IDS.placement(id),
     })
   }
+  // The content's counts and switches (docs/tema/bilesen-denetimi O2)
+  fields.push(...contentFields(section))
   if (section.type === "marquee") {
     for (const [setting, steps] of Object.entries(MARQUEE_SETTINGS) as [
       MarqueeSetting,
@@ -202,7 +207,7 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
   }
   // The linked category cards' and the footer's own settings (adr/0049 Ek 2026-11-15)
   fields.push(...cardFooterFields(section))
-  // The band's settings sit with the look, in the closed "Görünüm ayarları" group
+  // The band's basics open in "Diziliş", its width and buttons closed in "Diğer ayarlar"
   if (section.type === "banner") {
     for (const [setting, steps] of Object.entries(BANNER_SETTINGS) as [
       BannerSetting,
@@ -210,7 +215,7 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
     ][]) {
       fields.push({
         key: `banner.${setting}`,
-        group: "look",
+        group: BANNER_GROUPS[setting],
         label: `${BANNER}.${setting}.label`,
         term: `${BANNER}.${setting}.term`,
         options: steps.map((step) => `${BANNER}.${setting}.${step}`),

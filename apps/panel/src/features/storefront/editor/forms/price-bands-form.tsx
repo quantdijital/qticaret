@@ -7,6 +7,7 @@ import { RowActions } from "@/features/settings/components/storefront-rows"
 import type { PriceBand, PriceBandsSection } from "@/features/storefront/api/layout"
 import { PRICE_BANDS_LIMITS as B } from "@/features/storefront/api/layout"
 import { SwitchRow } from "../theme-fields"
+import { FIELD_IDS } from "./field-registry"
 import { CountField, FieldGroup, TextField } from "./fields"
 import type { SectionFormProps } from "./form-props"
 import { useProblemText } from "./problem-text"
@@ -181,25 +182,31 @@ export function PriceBandsForm({
           {t(`${P}.addBand`)}
         </Button>
       </FieldGroup>
-      <SwitchRow
-        id={`${section.id}-thumbs`}
-        label={t(`${P}.thumbs`)}
-        hint={t(`${P}.thumbsHint`)}
-        checked={section.thumbs > 0}
-        onChange={(checked) => {
-          set({ thumbs: checked ? B.thumbs.default : 0 })
-        }}
-      />
-      {section.thumbs > 0 ? (
-        <CountField
-          id={`${section.id}-thumbs-count`}
-          label={t(`${P}.thumbsCount`)}
-          value={section.thumbs}
-          max={B.thumbs.max}
-          onChange={(thumbs) => {
-            set({ thumbs }, "thumbs")
+      <div id={FIELD_IDS.content(section.id, "thumbs")}>
+        <SwitchRow
+          id={`${section.id}-thumbs`}
+          label={t(`${P}.thumbs`)}
+          term={t(`${P}.thumbsTerm`)}
+          hint={t(`${P}.thumbsHint`)}
+          checked={section.thumbs > 0}
+          onChange={(checked) => {
+            set({ thumbs: checked ? B.thumbs.default : 0 })
           }}
         />
+      </div>
+      {section.thumbs > 0 ? (
+        <div id={FIELD_IDS.content(section.id, "thumbs_count")}>
+          <CountField
+            id={`${section.id}-thumbs-count`}
+            label={t(`${P}.thumbsCount`)}
+            term={t(`${P}.thumbsCountTerm`)}
+            value={section.thumbs}
+            max={B.thumbs.max}
+            onChange={(thumbs) => {
+              set({ thumbs }, "thumbs")
+            }}
+          />
+        </div>
       ) : null}
     </div>
   )

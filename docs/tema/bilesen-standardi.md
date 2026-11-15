@@ -210,7 +210,8 @@ Yeni bölüm hangi aileye giriyorsa o listenin **her maddesi için** ya ayar yaz
 
 - **Bölüm türü (kod):** İngilizce, sektörsüz, ne olduğunu söyler (`price_bands`, `marquee`).
   **Türkçe adı** gündelik ve çizimi anlatır; iki tür birbirine benzer adla anılmaz ("Giriş slaytı" ile
-  "Görsel slayt" çakışır: denetim 1.4). Açıklama satırı tek cümle, ne gösterdiğini söyler.
+  "Görsel slayt" çakışıyordu; tür "Görsel bant" oldu: denetim 1.4). Açıklama satırı tek cümle, ne
+  gösterdiğini söyler.
 - **Biçim (variant):** İngilizce, çizimi anlatır (`category_list`, `carousel`); maket kodu ya da sektör adı
   değil. Türkçesi kısa ve görsel ("Kayan sıra", "Yan yana listeler").
 - **Hazır görünüm (preset):** **özel ad + açıklayıcı alt satır.** Ad kısa ve akılda kalır (Grafit,

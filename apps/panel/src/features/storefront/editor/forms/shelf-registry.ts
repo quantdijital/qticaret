@@ -32,12 +32,18 @@ export function shelfFields(section: Extract<AnySection, { type: "products" }>):
   })
   const { variant } = section
   const fields: RegistryField[] = [
-    variant === "grid" ? field("columns", "storefront.editor.fields.columns", null) : null,
+    variant === "grid"
+      ? field("columns", "storefront.editor.fields.columns", "storefront.editor.fields.columnsTerm")
+      : null,
     variant === "compact" ? field("rows", `${SHELF}.rows`, `${SHELF}.rowsTerm`) : null,
     variant === "columns" ? field("per_list", `${SHELF}.perList`, `${SHELF}.perListTerm`) : null,
     variant === "compact" || variant === "columns"
       ? null
-      : field("card_variant", "storefront.editor.products.cardVariant", null),
+      : field(
+          "card_variant",
+          "storefront.editor.products.cardVariant",
+          "storefront.editor.products.cardVariantTerm"
+        ),
   ].filter((each) => each !== null)
   if (variant !== "carousel") {
     return fields

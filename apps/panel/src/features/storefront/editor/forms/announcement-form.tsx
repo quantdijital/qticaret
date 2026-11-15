@@ -9,7 +9,11 @@ import type { SectionFormProps } from "./form-props"
 
 const A = "storefront.editor.announcement"
 
-/** The thin bar on top of every page: lines shown in turn, each may hold the shop's details. */
+/**
+ * The thin bar on top of every page: its lines, each may hold the shop's
+ * details. The theme draws the first line only for now (denetim O14); the
+ * others are kept, and the hint says so.
+ */
 export function AnnouncementForm({
   section,
   problems,

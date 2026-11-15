@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@qticaret/admin-ui/ui/button"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import { cn } from "@qticaret/admin-ui/lib/utils"
-import { BANNER_DEFAULTS, BANNER_SETTINGS, BANNER_SETTING_NAMES } from "@qticaret/types"
+import { BANNER_DEFAULTS, BANNER_SETTINGS } from "@qticaret/types"
 import type { BannerSetting, BannerStep } from "@qticaret/types"
 import type { BannerSection } from "@/features/storefront/api/layout"
 import { FIELD_IDS } from "./field-registry"
@@ -22,11 +22,11 @@ const COLUMNS: Readonly<Record<number, string>> = {
 function PlaceSketch({ step }: { step: string }) {
   const at = BANNER_SETTINGS.text_position.indexOf(step as BannerStep<"text_position">)
   return (
-    <span aria-hidden="true" className="grid size-5 grid-cols-3 gap-px rounded-[3px] border p-0.5">
+    <span aria-hidden="true" className="grid size-5 grid-cols-3 gap-px rounded-sm border p-0.5">
       {BANNER_SETTINGS.text_position.map((cell, index) => (
         <span
           key={cell}
-          className={cn("rounded-[1px]", index === at ? "bg-current" : "bg-muted-foreground/25")}
+          className={cn("rounded-xs", index === at ? "bg-current" : "bg-muted-foreground/25")}
         />
       ))}
     </span>
@@ -118,17 +118,23 @@ function BannerSettingField<S extends BannerSetting>({
   )
 }
 
-/** The band's settings, each its own step in the editor's history. */
+/**
+ * Some of the band's settings (its basics open in "Diziliş", the rarer
+ * ones closed in "Diğer ayarlar": `banner-groups.ts`), each its own step
+ * in the editor's history.
+ */
 export function BannerSettings({
   section,
+  settings,
   onChange,
 }: {
   section: BannerSection
+  settings: readonly BannerSetting[]
   onChange: (section: BannerSection) => void
 }) {
   return (
     <div className="flex flex-col gap-5">
-      {BANNER_SETTING_NAMES.map((setting) => (
+      {settings.map((setting) => (
         <BannerSettingField
           key={setting}
           section={section}

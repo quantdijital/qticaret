@@ -56,12 +56,12 @@ describe("the hero slider's form (adr/0049 Ek 2026-11-06)", () => {
   it("is still by default; its seconds show once autoplay is on", async () => {
     const user = userEvent.setup()
     const form = renderForm()
-    expect(screen.getByRole("switch", { name: /Kendiliğinden geçsin/ })).not.toBeChecked()
+    expect(screen.getByRole("switch", { name: /Otomatik geçiş/ })).not.toBeChecked()
     expect(screen.queryByRole("spinbutton", { name: "Her slayt kaç saniye" })).toBeNull()
     expect(screen.getByRole("switch", { name: /Noktaları göster/ })).toBeChecked()
     expect(screen.getByRole("switch", { name: /Okları göster/ })).toBeChecked()
 
-    await user.click(screen.getByRole("switch", { name: /Kendiliğinden geçsin/ }))
+    await user.click(screen.getByRole("switch", { name: /Otomatik geçiş/ }))
     expect(screen.getByRole("spinbutton", { name: "Her slayt kaç saniye" })).toHaveValue(6)
     await user.click(screen.getByRole("radio", { name: "Kısa" }))
     expect(form.last()).toMatchObject({ autoplay: true, interval: 6, height: "compact" })

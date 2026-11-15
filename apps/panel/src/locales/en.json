@@ -7779,7 +7779,7 @@
       "types": {
         "announcement_bar": {
           "name": "Announcement bar",
-          "description": "Short notices at the very top of the page, shown in turn."
+          "description": "A thin bar at the very top of the page; the storefront shows the first notice."
         },
         "hero": {
           "name": "Hero",
@@ -7790,7 +7790,7 @@
           "description": "2–6 slides shown in turn at the top of the page, each with a picture, a heading, a short line and a button."
         },
         "banner": {
-          "name": "Image slider",
+          "name": "Image band",
           "description": "1–6 images, side by side on a wide screen, each with its own heading, line and one or two buttons."
         },
         "categories": {
@@ -7912,9 +7912,9 @@
         }
       },
       "look": {
-        "title": "Look settings",
-        "titleSet_one": "Look settings · {{count}} set",
-        "titleSet_other": "Look settings · {{count}} set",
+        "title": "More settings",
+        "titleSet_one": "More settings · {{count}} setting",
+        "titleSet_other": "More settings · {{count}} settings",
         "hint": "The section's spacing and look. Any field left unset uses the theme's own look; the preview shows it at once.",
         "reset": "Back to default",
         "space_outer": {
@@ -7982,8 +7982,10 @@
         "placement": "Position",
         "sections": "Sections",
         "content": "Content",
+        "layout": "Layout",
+        "scroll": "Scrolling",
         "motion": "Motion",
-        "appearance": "Appearance",
+        "appearance": "Style",
         "variant": "Layout",
         "variantHint": "How the section looks on the storefront; the preview shows it at once. Shared content (title, text) stays when the layout changes, and \"Undo\" brings the previous one back."
       },
@@ -8009,6 +8011,7 @@
         "heading": "Heading",
         "text": "Text",
         "title": "Title",
+        "titleTerm": "title",
         "titleHint": "Left empty, the storefront uses its own title.",
         "titleOptional": "Optional; left empty, no title shows.",
         "textHint": "Left empty, the storefront uses its own text.",
@@ -8017,8 +8020,10 @@
         "altHint": "For visitors who cannot see it and for search engines: say briefly what it shows.",
         "noImage": "No image",
         "limit": "How many to show",
+        "limitTerm": "limit",
         "limitHint": "Between 1 and {{max}}.",
         "columns": "Products per row",
+        "columnsTerm": "columns",
         "columnsOption": "{{n}} products per row",
         "columnsHint": {
           "3": "3 products side by side on a wide screen, two rows ({{total}} products); 2 on a phone.",
@@ -8101,6 +8106,7 @@
       },
       "products": {
         "source": "Which products",
+        "sourceTerm": "source",
         "sources": {
           "newest": "The newest products",
           "best_sellers": "Best sellers",
@@ -8114,11 +8120,14 @@
         "products": "Products",
         "manualEmpty": "Pick at least one product.",
         "days": "Days of sales",
+        "daysTerm": "days",
         "daysHint": "The best sellers of the last so many days ({{min}}–{{max}}). Paid orders count, cancellations and returns are taken off. With too few sales the list is made up with the newest products.",
         "onSaleHint": "The products on the campaigns page, the deepest discount first. While nothing is on sale the section does not show in the storefront.",
         "more": "See all link",
+        "moreTerm": "link",
         "moreHint": "The link under the list; removed, it does not show.",
         "cardVariant": "Card style",
+        "cardVariantTerm": "card",
         "cardVariantTheme": "The theme's style",
         "cardVariantHint": "The style of this rail's cards. The framed card's settings come from Theme > Framed card."
       },
@@ -8171,7 +8180,7 @@
         "line": "Announcement {{number}}",
         "placeholder": "Free shipping from {ücretsiz_kargo_eşiği}",
         "add": "Add announcement",
-        "hint": "Up to {{max}} lines of up to {{length}} characters each, shown in turn."
+        "hint": "Up to {{max}} lines of up to {{length}} characters each. For now the storefront shows only the first line; the others are kept."
       },
       "problems": {
         "required": "Write this line or remove it.",
@@ -8315,6 +8324,7 @@
       },
       "related": {
         "source": "Which products",
+        "sourceTerm": "source",
         "sources": {
           "same_category": "From the product's own category",
           "collection": "A collection's products",
@@ -8366,6 +8376,7 @@
         "add": "Add slides",
         "options": "Options",
         "height": "Height",
+        "heightTerm": "height",
         "heights": {
           "compact": "Compact",
           "regular": "Regular"
@@ -8374,13 +8385,17 @@
           "compact": "A low strip on wide screens; more of the sections below fit the first screen.",
           "regular": "As tall as the hero; the picture leads on wide screens."
         },
-        "autoplay": "Play automatically",
+        "autoplay": "Autoplay",
+        "autoplayTerm": "autoplay",
         "autoplayHint": "Off: a slide changes only when the visitor moves on. On: it waits on hover or focus and stops once the visitor steps on their own; it does not play for visitors who ask for reduced motion, and a pause button shows.",
         "interval": "Seconds per slide",
+        "intervalTerm": "interval",
         "intervalHint": "Between {{min}} and {{max}} seconds.",
         "dots": "Show dots",
+        "dotsTerm": "dots",
         "dotsHint": "Under the slides; they show which slide is on and go to one when clicked.",
         "arrows": "Show arrows",
+        "arrowsTerm": "arrows",
         "arrowsHint": "On wide screens (1024 px and up), either side of the slide. Phones swipe.",
         "editSlide": "Edit slide",
         "previous": "Previous slide",
@@ -8412,10 +8427,13 @@
       },
       "googleRating": {
         "excerpts": "Show excerpts from recent reviews",
+        "excerptsTerm": "excerpts",
         "excerptsHint": "Reviews you hid never show; only recent 4 and 5 star reviews with text.",
         "count": "Number of excerpts",
+        "countTerm": "count",
         "countHint": "Between 1 and {{max}}.",
         "profileLink": "Link to your Google page",
+        "profileLinkTerm": "link",
         "profileLinkHint": "Beside the link to the reviews, your page on Google Maps opens in a new tab.",
         "source": "The rating and count are Google's; the storefront never changes them. Connection and reviews:",
         "sourceLink": "Reviews > Google reviews"
@@ -8492,9 +8510,6 @@
         "full": "This page already has {{max}} scrolling strips (the header's counts too).",
         "lookHint": "Which devices show it, a close button; the space around the strip and its width.",
         "headerLookHint": "Which devices show it and a close button.",
-        "otherTitle": "More settings",
-        "otherTitleSet_one": "More settings · {{count}} setting",
-        "otherTitleSet_other": "More settings · {{count}} settings",
         "size": {
           "label": "Size",
           "term": "size",
@@ -8536,6 +8551,8 @@
         "hover_pause": {
           "label": "Pause on hover",
           "term": "pause on hover",
+          "off": "Off",
+          "on": "On",
           "hint": "When off it keeps moving under the pointer; it still stops when an item gets keyboard focus."
         },
         "pause_button": {
@@ -8554,6 +8571,8 @@
         "uppercase": {
           "label": "Uppercase",
           "term": "uppercase",
+          "off": "Off",
+          "on": "On",
           "hint": "Each item's main line is set in CAPITALS; the second line stays as written."
         },
         "gap": {
@@ -8566,6 +8585,8 @@
         "outline": {
           "label": "Filled / outline text",
           "term": "outline",
+          "off": "Off",
+          "on": "On",
           "hint": "Items alternate between filled and outlined letters. Large size only."
         },
         "device": {
@@ -8579,6 +8600,8 @@
         "closable": {
           "label": "Close button",
           "term": "close button",
+          "off": "Off",
+          "on": "On",
           "hint": "Once a visitor closes it, the strip stays hidden in that browser; changing its text shows it again."
         }
       },
@@ -8723,8 +8746,10 @@
         },
         "listEmpty": "Choose at least one category.",
         "listLimit": "Categories at most",
+        "listLimitTerm": "limit",
         "listLimitHint": "Between {{min}} and {{max}}.",
         "showCount": "Show product counts",
+        "showCountTerm": "product count",
         "showCountHint": "Each category's live product count beside it.",
         "tiles": "Tiles beside it",
         "tilesHint": "Up to {{max}} category tiles beside the opening.",
@@ -8742,11 +8767,15 @@
         "pickLabelHint": "Left empty, the product's name shows.",
         "pickLabelPlaceholder": "Pine green",
         "showPrice": "Show the starting price",
+        "showPriceTerm": "price",
         "showPriceHint": "The lowest current price among the products you chose."
       },
       "categories": {
+        "showCount": "Show product counts",
+        "showCountTerm": "product count",
         "showCountHint": "Each tile's live product count under it.",
         "more": "Link beside the title",
+        "moreTerm": "link",
         "moreHint": "Left empty, it goes to All categories."
       },
       "priceBands": {
@@ -8764,13 +8793,13 @@
         "openHint": "The last band covers every product above the bound before.",
         "addBand": "Add band",
         "thumbs": "Product pictures",
+        "thumbsTerm": "thumbnails",
         "thumbsHint": "A few products from each range show small; the storefront picks them by price.",
         "thumbsCount": "Products per band",
+        "thumbsCountTerm": "per band",
         "full": "The home page already has {{max}} price bands sections (hidden ones count too)."
       },
       "shelf": {
-        "layout": "Layout",
-        "scroll": "Scrolling",
         "firstTitle": "First list's title",
         "list": "List {{n}}",
         "addList": "Add a list",
@@ -8827,10 +8856,10 @@
           "hint": "Side arrows are not shown on a phone; it swipes there."
         },
         "dots": {
-          "label": "Dots",
+          "label": "Show dots",
           "term": "dots",
-          "off": "Hide",
-          "on": "Show",
+          "off": "Off",
+          "on": "On",
           "hint": "Dots showing which page is in view."
         },
         "autoplay": {

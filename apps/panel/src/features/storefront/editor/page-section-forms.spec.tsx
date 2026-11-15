@@ -163,4 +163,25 @@ describe("the product and category pages' section forms", HEAVY, () => {
     await user.click(screen.getByRole("radio", { name: "Bir koleksiyonun ürünleri" }))
     expect(screen.getByRole("alert")).toHaveTextContent("Bir koleksiyon seçin.")
   })
+
+  it("stands related products' cards in a row open in Diziliş, as a product rail's (denetim 1.15)", async () => {
+    await openOn("Ürün sayfası", "Benzer ürünler")
+    const layout = screen.getByRole("group", { name: "Diziliş" })
+    expect(within(layout).getByRole("button", { name: "Diziliş" })).toHaveAttribute(
+      "aria-expanded",
+      "true"
+    )
+    const content = screen.getByRole("group", { name: "İçerik" })
+    expect(within(content).queryByRole("radiogroup", { name: /Satırda ürün/ })).toBeNull()
+    expect(screen.getByRole("button", { name: "Diğer ayarlar" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    )
+
+    const columns = within(layout).getByRole("radiogroup", { name: "Satırda ürün columns" })
+    await user.click(within(columns).getByRole("radio", { name: "Satırda 5 ürün" }))
+    await saved((doc) => {
+      expect(doc.product[1]).toMatchObject({ type: "related_products", columns: 5 })
+    })
+  })
 })
