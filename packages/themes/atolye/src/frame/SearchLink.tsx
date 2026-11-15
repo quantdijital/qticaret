@@ -27,6 +27,8 @@ export function SearchLink({
     if (isOwnClick(event)) {
       return
     }
+    // Safari gives a pressed link no focus: the dropping search takes it as the one to go back to
+    event.currentTarget.focus({ preventScroll: true })
     if (askFrame(OPEN_SEARCH_EVENT)) {
       event.preventDefault()
       return
