@@ -778,6 +778,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "price_lists.unknown": "Fiyat listesi bulunamadı.",
   "price_lists.no_currency": "Mağazanın para birimi tanımlı değil.",
   "price_lists.rate": "Oran yüzde 0 ile 100 arasında olmalı.",
+  "wholesale.managed":
+    "Bu grup ya da fiyat listesi toptan satışa ait; toptan ekranlarından değiştirin.",
+  "wholesale.tier_exists": "Bu adla bir toptan seviyesi ya da müşteri grubu zaten var.",
+  "wholesale.tier_in_use": "Bu seviyede toptancılar var; önce onları başka bir seviyeye taşıyın.",
+  "wholesale.tier_unknown": "Toptan seviyesi bulunamadı.",
+  "wholesale.variant_unknown": "Seçilen ürünlerden biri artık yok.",
   "platform_settings.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",
   "platform_settings.color_duplicate": "Her renk adı bir kez yazılabilir.",
   "platform_settings.color_contrast":
