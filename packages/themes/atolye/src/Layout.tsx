@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { styleKitAttributes } from "@qticaret/types/style-kit"
 import type { PlaceOrderResult, QuickViewSetup, ShopView, Translate } from "@qticaret/ui"
 import { Announcement } from "./frame/Announcement"
 import { BackToTop } from "./frame/BackToTop"
@@ -50,12 +51,18 @@ export function Layout({
       {t("nav.skip_to_content")}
     </a>
   )
+  // The style kit's steps off the default (adr/0067): none at today's drawing
+  const kit = styleKitAttributes(shop.theme.styleKit)
   const consent = shop.cookieBanner && (
     <Consent banner={shop.cookieBanner} save={saveCookies} t={t} />
   )
   if (shop.checkout) {
     return (
-      <div className="flex min-h-dvh flex-col" data-surface={shop.theme.surface ?? "filled"}>
+      <div
+        className="flex min-h-dvh flex-col"
+        data-surface={shop.theme.surface ?? "filled"}
+        {...kit}
+      >
         {skip}
         <CheckoutHeader shop={shop} t={t} />
         <main id="icerik" className="flex-1">
@@ -76,7 +83,7 @@ export function Layout({
   // The footer's floating "Yukarı çık" (adr/0049 Ek 2026-11-15), away while the cookie question waits
   const backToTop = shop.cookieBanner?.due === true ? null : (shop.footerBar?.backToTop ?? null)
   return (
-    <div className="flex min-h-dvh flex-col" data-surface={shop.theme.surface ?? "filled"}>
+    <div className="flex min-h-dvh flex-col" data-surface={shop.theme.surface ?? "filled"} {...kit}>
       {skip}
       <Announcement
         lines={shop.announcements}

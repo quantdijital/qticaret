@@ -8342,7 +8342,7 @@
           "noLira": "This font has no ₺ sign. Prices are drawn in the body font; a ₺ you type into a heading shows in a fallback font.",
           "singleWeight": "It has one weight: headings are drawn regular, not bold."
         },
-        "shapes": "Corners and buttons",
+        "shapes": "Shapes",
         "radius": "Corners",
         "radiusTerm": "border-radius",
         "radii": {
@@ -8373,6 +8373,46 @@
           "lined": "Lined"
         },
         "surfaceStyleHint": "The product page's info boxes, the category page's filters and subcategories, the cart's boxes. Filled is a tone darker than the page; Lined is a 1 px rule on the page's ground.",
+        "surfaces": "Surfaces",
+        "styleKit": {
+          "menu_style": {
+            "label": "Menu style",
+            "term": "menu items",
+            "steps": {
+              "filled": "Filled",
+              "underline": "Underlined",
+              "plain": "Plain"
+            },
+            "hint": "How a desktop menu item looks when pointed at or open: the header's menu, the dropdown and the list menu. Filled is each header layout's drawing today. The phone's menu stays the same."
+          },
+          "shadow": {
+            "label": "Shadow",
+            "term": "shadow",
+            "steps": {
+              "float": "On floating layers",
+              "none": "None"
+            },
+            "hint": "Surfaces that open over the page: dropdown menus, drawers, dialogs, the sticky header and floating buttons. With None, a 1 px rule takes the shadow's place."
+          },
+          "chip_style": {
+            "label": "Chip style",
+            "term": "chips",
+            "steps": {
+              "filled": "Filled",
+              "lined": "Lined"
+            },
+            "hint": "Unselected chips, tabs, option buttons and page numbers. A selected chip stays filled with the highlight colour in both styles."
+          },
+          "media_ground": {
+            "label": "Photo background",
+            "term": "image background",
+            "steps": {
+              "well": "Light tone",
+              "page": "Page"
+            },
+            "hint": "Behind product and category photos, list thumbnails included. Light tone is a tone darker than the page; Page is the page's own ground."
+          }
+        },
         "card": "Product card",
         "ratio": "Image ratio",
         "ratioTerm": "aspect-ratio",

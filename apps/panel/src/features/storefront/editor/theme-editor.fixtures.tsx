@@ -51,6 +51,10 @@ export const THEME: ThemeSettings = {
   buttons: "pill",
   section_spacing: "normal",
   surface_style: "filled",
+  menu_style: "filled",
+  shadow: "float",
+  chip_style: "filled",
+  media_ground: "well",
 }
 
 export const DOC: LayoutDocument = {

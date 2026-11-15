@@ -3,6 +3,8 @@ import { AA_LARGE_TEXT, contrastRatio } from "../../../lib/color/contrast"
 import { defineSection, isPlainObject } from "./define"
 import { PRODUCT_CARD_VARIANTS, productCardSchema, upgradeCard } from "./theme-card"
 import type { ProductCardSettings } from "./theme-card"
+import { STYLE_KIT_DEFAULTS, styleKitSchema, withStyleKitDefaults } from "./theme-style-kit"
+import type { StyleKitSettings } from "./theme-style-kit"
 
 export {
   CARD_BUTTON_STYLES,
@@ -13,6 +15,7 @@ export {
   upgradeCard,
 } from "./theme-card"
 export type { ProductCardSettings } from "./theme-card"
+export { STYLE_KIT, STYLE_KIT_DEFAULTS, withStyleKitDefaults } from "./theme-style-kit"
 
 /** The storefront themes this build carries (adr/0046 §7); a new theme is a deploy. */
 export const INSTALLED_THEMES = ["atolye"] as const
@@ -71,8 +74,8 @@ const WHITE = "#ffffff"
  */
 export const THEME_SETTINGS_VERSION = 2
 
-/** How the storefront looks (F18 D11, adr/0053): choices from fixed lists, no CSS. */
-export interface ThemeSettings {
+/** How the storefront looks (F18 D11, adr/0053): choices from fixed lists, no CSS; the style kit's (adr/0067). */
+export interface ThemeSettings extends StyleKitSettings {
   /** Not a choice and not shown by the panel: see `THEME_SETTINGS_VERSION`. */
   settings_version: typeof THEME_SETTINGS_VERSION
   theme: (typeof INSTALLED_THEMES)[number]
@@ -191,6 +194,7 @@ const GRAFIT: ThemeSettings = {
   buttons: "pill",
   section_spacing: "normal",
   surface_style: "filled",
+  ...STYLE_KIT_DEFAULTS,
 }
 
 /**
@@ -213,6 +217,8 @@ export function withCardDefaults(value: unknown): unknown {
   if (isPlainObject(value) && !Object.hasOwn(value, "surface_style")) {
     value = { ...value, surface_style: GRAFIT.surface_style }
   }
+  // And the style kit (adr/0067): without a field, today's drawing
+  value = withStyleKitDefaults(value)
   if (!isPlainObject(value) || !isPlainObject(value["product_card"])) {
     return value
   }
@@ -285,6 +291,7 @@ export const themeSection = defineSection<ThemeSettings>(
     buttons: z.enum(["pill", "rounded", "square"]),
     section_spacing: z.enum(SECTION_SPACINGS),
     surface_style: z.enum(SURFACE_STYLES),
+    ...styleKitSchema,
   },
   GRAFIT,
   (values, ctx) => {

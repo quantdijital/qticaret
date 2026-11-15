@@ -8342,7 +8342,7 @@
           "noLira": "Bu yazı tipinde ₺ işareti yok. Fiyatlar metin yazı tipiyle çizilir; başlık metnine yazdığınız ₺ yedek bir yazı tipiyle görünür.",
           "singleWeight": "Tek kalınlığı vardır: başlıklar kalın değil, normal kalınlıkta çizilir."
         },
-        "shapes": "Köşeler ve düğmeler",
+        "shapes": "Şekiller",
         "radius": "Köşeler",
         "radiusTerm": "border-radius",
         "radii": {
@@ -8373,6 +8373,46 @@
           "lined": "Çizgili"
         },
         "surfaceStyleHint": "Ürün sayfasındaki bilgi kutuları, kategori sayfasındaki filtreler ve alt kategoriler, sepetteki kutular. Dolu, sayfadan bir ton koyu zemindir; Çizgili, sayfa zemininde 1 px çizgidir.",
+        "surfaces": "Yüzeyler",
+        "styleKit": {
+          "menu_style": {
+            "label": "Menü stili",
+            "term": "menu items",
+            "steps": {
+              "filled": "Dolu",
+              "underline": "Alt çizgili",
+              "plain": "Sade"
+            },
+            "hint": "Masaüstü menüde üzerine gelinen ve açık olan öğenin görünüşü: üst bilginin menüsü, açılır liste ve liste menüsü. Dolu, her üst bilgi biçiminin bugünkü çizimidir. Telefondaki menü değişmez."
+          },
+          "shadow": {
+            "label": "Gölge",
+            "term": "shadow",
+            "steps": {
+              "float": "Açılır katmanlarda",
+              "none": "Yok"
+            },
+            "hint": "Sayfanın üstünde açılan yüzeyler: açılır menü, çekmece, pencere, yapışkan üst bilgi ve yüzen düğmeler. Yok seçilince gölgenin yerine 1 px çizgi gelir."
+          },
+          "chip_style": {
+            "label": "Çip stili",
+            "term": "chips",
+            "steps": {
+              "filled": "Dolu",
+              "lined": "Çizgili"
+            },
+            "hint": "Seçili olmayan çipler, sekmeler, seçenek düğmeleri ve sayfa numaraları. Seçili çip iki stilde de vurgu rengiyle dolu kalır."
+          },
+          "media_ground": {
+            "label": "Fotoğraf zemini",
+            "term": "image background",
+            "steps": {
+              "well": "Hafif ton",
+              "page": "Sayfa"
+            },
+            "hint": "Ürün ve kategori fotoğraflarının arkası, liste küçük resimleri dahil. Hafif ton, sayfadan bir ton koyu zemindir; Sayfa, sayfanın kendi zeminidir."
+          }
+        },
         "card": "Ürün kartı",
         "ratio": "Görsel oranı",
         "ratioTerm": "aspect-ratio",
