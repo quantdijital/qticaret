@@ -116,6 +116,12 @@ medusaIntegrationTestRunner({
         const asked = await me(customer, `?fields=${fields}`)
         expect(JSON.stringify(asked.data)).not.toContain("cusgroup_")
       }
+      // Nor the wholesale account linked to them (review M3)
+      for (const fields of ["+wholesale_account.*", "*wholesale_account", "wholesale_account.id"]) {
+        const asked = await me(customer, `?fields=${encodeURIComponent(fields)}`)
+        expect({ fields, status: asked.status }).toEqual({ fields, status: 400 })
+        expect(JSON.stringify(asked.data)).not.toContain("wacc_")
+      }
     })
 
     it("binds nothing to another address, nor while the flag is off", async () => {

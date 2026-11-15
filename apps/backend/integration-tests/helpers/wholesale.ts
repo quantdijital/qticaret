@@ -108,6 +108,7 @@ export interface AccountAnswer {
   percent: number | null
   min_quantity: number | null
   invitation_expires_at: string | null
+  invitations_sent: number | null
 }
 
 /** Staff calls on wholesalers (ADR-0068 slice 1b), as the given staff member. */

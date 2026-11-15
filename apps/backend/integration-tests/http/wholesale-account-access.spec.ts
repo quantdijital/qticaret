@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto"
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import type { Knex } from "@medusajs/framework/mikro-orm/knex"
 import { createAdminUser } from "../helpers/admin"
 import { registerCustomer } from "../helpers/customer"
 import type { HttpClient } from "../helpers/http"
@@ -16,9 +17,10 @@ const message = (answer: { data: unknown }) => (answer.data as { message?: strin
  * ADR-0068 §9 for wholesalers (slice 1b): the routes take the account's id
  * only, its hidden group and own list are the module's (read as missing,
  * written as `wholesale.managed` through Medusa's routes, left out of its
- * lists), only a pending wholesaler is taken back, with its own list, and
- * invitations are sent again to a pending one only, within a staff
- * member's budget.
+ * lists), only a pending wholesaler is taken back, with its own list,
+ * invitations are sent again to a pending one only, an hour apart, five
+ * times, within 180 days and a staff member's budget (security review
+ * L2), and the customer's wholesale link is the managers' to expand (M3).
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -108,16 +110,26 @@ medusaIntegrationTestRunner({
       expect([refused.status, message(refused)]).toEqual([409, "wholesale.account_not_pending"])
     })
 
-    it("sends an invitation again to a pending wholesaler only, a staff member's budget", async () => {
-      await staff.flag(true)
-      const pending = await accounts.made({
-        email: fresh(),
-        contact_name: "Ali Kaya",
-        own_prices: true,
-      })
+    /** Moves an account's dates back as time would (the columns, not the API). */
+    const age = (id: string, fields: Record<string, unknown>) =>
+      getContainer()
+        .resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)("wholesale_account")
+        .where({ id })
+        .update(fields)
+
+    const HOUR = 3_600_000
+    const DAY = 24 * HOUR
+
+    it("sends an invitation again to a pending wholesaler only, an hour apart (L2)", async () => {
+      const pending = await accounts.made({ email: fresh(), contact_name: "Ali", own_prices: true })
+      const soon = await accounts.action(pending.id, "invitation")
+      expect([soon.status, message(soon)]).toEqual([409, "wholesale.invite_too_soon"])
+
+      await age(pending.id, { invited_at: new Date(Date.now() - 2 * HOUR) })
       const resent = await accounts.action(pending.id, "invitation")
       expect(resent.status).toBe(200)
       expect(resent.data.message).toMatch(/^(sent|not_sent)$/)
+      expect((await accounts.get(pending.id)).data.account).toMatchObject({ invitations_sent: 2 })
 
       const customer = await registerCustomer(http, store)
       const active = await accounts.made({
@@ -127,14 +139,66 @@ medusaIntegrationTestRunner({
       })
       const refused = await accounts.action(active.id, "invitation")
       expect([refused.status, message(refused)]).toEqual([409, "wholesale.account_not_pending"])
+    })
 
-      // Twenty an hour per staff member, the openings counted: the next is refused
-      const statuses: number[] = []
-      for (let i = 0; i < 20; i += 1) {
-        statuses.push((await accounts.action(pending.id, "invitation")).status)
+    it("resends five times at most, the invitation never past 180 days (L2)", async () => {
+      const pending = await accounts.made({ email: fresh(), contact_name: "Ali", own_prices: true })
+      await age(pending.id, { invited_at: new Date(Date.now() - 2 * HOUR), invite_count: 6 })
+      const capped = await accounts.action(pending.id, "invitation")
+      expect([capped.status, message(capped)]).toEqual([409, "wholesale.invite_limit"])
+
+      // Opened 100 days ago: a resend now ends 180 days from the opening, 80 from today
+      await age(pending.id, {
+        invited_at: new Date(Date.now() - 2 * HOUR),
+        invite_count: 2,
+        created_at: new Date(Date.now() - 100 * DAY),
+      })
+      const resent = await accounts.action(pending.id, "invitation")
+      expect(resent.status).toBe(200)
+      const ends = new Date(resent.data.account.invitation_expires_at ?? 0).getTime()
+      expect(Math.round((ends - Date.now()) / DAY)).toBe(80)
+    })
+
+    it("expands a customer's wholesale link for the owner and admin only (M3)", async () => {
+      const customer = await registerCustomer(http, store)
+      const account = await accounts.made({
+        email: customer.email,
+        contact_name: "Ali Kaya",
+        own_prices: true,
+      })
+      const asks = [
+        `/admin/customers/${customer.id}?fields=*wholesale_account`,
+        `/admin/customers?fields=id,+wholesale_account.status`,
+        `/admin/orders?fields=id,customer.wholesale_account.*`,
+      ]
+      for (const role of ["operations", "readonly"] as const) {
+        const other = wholesaleApi(
+          http,
+          (await createAdminUser(http, getContainer(), role)).headers
+        )
+        for (const url of asks) {
+          const answer = await other.get(url)
+          expect({ role, url, status: answer.status }).toEqual({ role, url, status: 400 })
+          expect(JSON.stringify(answer.data)).not.toContain(account.id)
+        }
       }
-      expect(statuses).toContain(429)
-      expect(statuses.slice(0, statuses.indexOf(429)).every((status) => status === 200)).toBe(true)
+      const owned = await staff.get<{ customer: Record<string, unknown> }>(asks[0] ?? "")
+      expect(owned.status).toBe(200)
+      expect(JSON.stringify(owned.data)).toContain(account.id)
+    })
+
+    it("counts openings against a staff member's budget: twenty an hour", async () => {
+      const statuses: number[] = []
+      for (let i = 0; i < 21; i += 1) {
+        const made = await accounts.create({
+          email: fresh(),
+          contact_name: "Ali",
+          own_prices: true,
+        })
+        statuses.push(made.status)
+      }
+      expect(statuses.slice(0, 20).every((status) => status === 201)).toBe(true)
+      expect(statuses[20]).toBe(429)
     })
   },
 })
