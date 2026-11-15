@@ -713,6 +713,12 @@
             "label": "Orders by payment link",
             "description": "The team prepares an order in the panel; the customer pays through a payment link on the storefront."
           }
+        },
+        "customers": {
+          "wholesale": {
+            "label": "Wholesale customers",
+            "description": "Wholesalers are opened from the panel; signed in, they see products at their level’s or their own prices, without KDV, and order. Public prices do not change. Turned off, wholesalers see retail prices; their records and prices are kept."
+          }
         }
       }
     },
@@ -1588,7 +1594,9 @@
           "account": {
             "password_reset": "Password reset",
             "verify_email": "E-mail verification",
-            "migration_invite": "Moved customer's account invitation"
+            "migration_invite": "Moved customer's account invitation",
+            "wholesale_invite": "Wholesaler invitation",
+            "wholesale_enabled": "Wholesale account opened"
           },
           "payment": {
             "failed": "Payment failed"
@@ -4656,6 +4664,8 @@
     "sections": "Customer screens",
     "sectionCustomers": "Customers",
     "sectionGroups": "Groups and segments",
+    "sectionWholesale": "Wholesalers",
+    "sectionWholesaleTiers": "Wholesale levels",
     "sectionContact": "Contact messages",
     "contactMessages": {
       "title": "Contact messages",
@@ -9950,5 +9960,226 @@
     },
     "createBlocked": "New products cannot be added: your product limit is reached.",
     "inviteBlocked": "No new invitation can be sent: your team limit is reached."
+  },
+  "wholesale": {
+    "gate": {
+      "off": "Wholesale is off in this shop. Turn it on to manage wholesalers and wholesale levels here.",
+      "denied": "Only the shop owner and admins can see wholesalers.",
+      "turnOn": "Go to features"
+    },
+    "kind": {
+      "label": "Customer type",
+      "individual": "Individual",
+      "wholesale": "Wholesaler"
+    },
+    "status": {
+      "pending": "Pending",
+      "active": "Active",
+      "inactive": "Closed"
+    },
+    "ownPrices": "Own prices",
+    "units_one": "{{count}} unit",
+    "units_other": "{{count}} units",
+    "invitationLine_one": "Sent {{count}} time · valid until {{date}}",
+    "invitationLine_other": "Sent {{count}} times · valid until {{date}}",
+    "columns": {
+      "who": "Company / contact",
+      "email": "Email",
+      "source": "Prices",
+      "rate": "Rate",
+      "minimum": "Minimum units",
+      "status": "Status",
+      "invitation": "Invitation"
+    },
+    "list": {
+      "title": "Wholesalers",
+      "description": "Customers who buy at wholesale prices. Invited ones become active once they sign up.",
+      "views": "Wholesaler states",
+      "tabs": {
+        "all": "All"
+      },
+      "search": "Search email, company or contact",
+      "empty": "No wholesalers yet. They appear here once you open one.",
+      "noMatch": "No wholesaler matches your search.",
+      "add": "New wholesaler"
+    },
+    "form": {
+      "newTitle": "New wholesaler",
+      "newText": "If a customer account exists for this email, the wholesaler is active at once; otherwise an invitation to sign up on the storefront is sent. No password is set in the panel.",
+      "create": "Open wholesaler",
+      "editTitle": "Edit wholesaler",
+      "saved": "Wholesaler saved.",
+      "who": "Wholesaler",
+      "prices": "Prices",
+      "email": "Email",
+      "emailHint": "Wholesale prices show only to the account signed in with this address.",
+      "contact": "Contact name",
+      "company": "Company name",
+      "taxOffice": "Tax office",
+      "taxId": "Tax number",
+      "taxHint": "Optional; entered together with the tax office.",
+      "tier": "Wholesale level",
+      "tierHint": "The level's rate and prices apply.",
+      "noTier": "No level",
+      "minimum": "Minimum units per order",
+      "minimumHint": "Left empty, the level's applies; without one there is no minimum.",
+      "units": "units",
+      "ownPrices": "Prices of their own",
+      "ownPricesHint": "When on, this wholesaler's own prices come before the level's. You enter per-product prices on the wholesaler's page.",
+      "ownPricesOpen": "This wholesaler has a price list of its own. Per-product prices are in the list on the page.",
+      "ownPercent": "Discount on every product",
+      "ownPercentHint": "Taken off each product's own price. Left empty, only prices you enter by hand apply.",
+      "errors": {
+        "emailRequired": "Enter the email address.",
+        "email": "Enter a valid email address.",
+        "tooLong": "This field is too long.",
+        "contact": "Enter the contact's name, at least 2 letters.",
+        "taxId": "A tax number has 10 digits, a Turkish ID number 11.",
+        "taxPair": "Enter the tax office and the tax number together.",
+        "companyForTax": "Tax details need a company name.",
+        "priceSource": "Choose a wholesale level or turn on prices of their own.",
+        "percent": "The rate must be between 0.01 and 99.",
+        "minimum": "The minimum must be a whole number from 1 to 100,000.",
+        "tierName": "Give the level a name."
+      }
+    },
+    "outcome": {
+      "activeSent": "The wholesaler is active at once: a customer account existed for this email. The \"wholesale account opened\" email was sent.",
+      "activeNotSent": "The wholesaler is active at once: a customer account existed for this email. The notice email could not be sent; they still see wholesale prices when they sign in.",
+      "invitedSent": "The invitation was sent. The wholesaler becomes active on signing up with this address; the invitation is valid for 90 days.",
+      "invitedNotSent": "The wholesaler was opened but the invitation email could not be sent. Try again with \"Resend invitation\".",
+      "billing": {
+        "written": "The tax details were written to the customer's invoice details.",
+        "kept": "The customer already had invoice details; they were not changed.",
+        "none": "The tax details were not kept; the wholesaler enters them on the storefront after signing up."
+      }
+    },
+    "actions": {
+      "resend": "Resend invitation",
+      "resent": "The invitation was sent again.",
+      "resendNotSent": "The invitation email could not be sent. Try again shortly.",
+      "delete": "Delete invitation",
+      "deleteTitle": "Delete the pending invitation?",
+      "deleteText": "The wholesaler record is deleted; an account opened from the invitation link sees no wholesale prices. You can open it again later.",
+      "deleted": "The pending invitation was deleted.",
+      "deactivate": "Deactivate",
+      "deactivateTitle": "Deactivate the wholesaler?",
+      "deactivateText": "The customer sees retail prices from their next request and their open carts are priced again at retail. Their prices are kept and come back on reopening. No message is sent.",
+      "deactivated": "The wholesaler was deactivated.",
+      "reactivate": "Reopen",
+      "reactivateTitle": "Reopen the wholesaler?",
+      "reactivateText": "The customer sees wholesale prices again; their open carts are priced again at wholesale.",
+      "reactivated": "The wholesaler was reopened.",
+      "cartsRepriced_one": "{{count}} open cart was priced again.",
+      "cartsRepriced_other": "{{count}} open carts were priced again.",
+      "cartsFailed_one": "{{count}} open cart could not be priced again; its prices update when the customer opens it.",
+      "cartsFailed_other": "{{count}} open carts could not be priced again; their prices update when the customer opens them."
+    },
+    "detail": {
+      "title": "Wholesaler",
+      "info": "Details",
+      "state": "Status",
+      "status": "Status",
+      "customer": "Customer record",
+      "openCustomer": "Open the customer's page",
+      "noCustomer": "Not signed up yet",
+      "ownManual": "On · prices entered by hand only",
+      "ownRate": "On · {{percent}} off every product",
+      "ownOff": "None · the level's prices apply",
+      "minimumFromTier": "The level's applies",
+      "invitedAt": "Last invitation",
+      "invitationsSent": "Invitations sent",
+      "times_one": "{{count}} time",
+      "times_other": "{{count}} times",
+      "expiresAt": "Invitation valid until",
+      "activatedAt": "Activated",
+      "deactivatedAt": "Closed",
+      "tier": "Wholesale level",
+      "noOwnPrices": "This wholesaler has no prices of their own; they buy at their level's prices.",
+      "openOwn": "Open own prices",
+      "ownOpened": "A price list of their own was opened for this wholesaler."
+    },
+    "prices": {
+      "title": "Wholesale prices",
+      "hint": "Prices are entered without KDV; the price with KDV is for information. A price entered by hand replaces the rate's.",
+      "add": "Add a price",
+      "search": "Search product, variant or SKU",
+      "count_one": "{{formatted}} variant",
+      "count_other": "{{formatted}} variants",
+      "noMatch": "No price matches your search.",
+      "emptyManual": "No prices yet. Without a rate, enter per-product prices with \"Add a price\".",
+      "emptyRate": "The rate's prices appear here shortly.",
+      "columns": {
+        "product": "Product",
+        "retail": "Retail (now)",
+        "net": "Wholesale, excl. KDV",
+        "gross": "Incl. KDV",
+        "source": "Source"
+      },
+      "source": {
+        "manual": "By hand",
+        "rate": "Rate"
+      },
+      "undercut": "Retail is cheaper",
+      "undercutCount_one": "For {{formatted}} variant today's retail price is below the wholesale price. The wholesaler still pays wholesale; you may want to review the price.",
+      "undercutCount_other": "For {{formatted}} variants today's retail price is below the wholesale price. The wholesaler still pays wholesale; you may want to review the prices.",
+      "rateZero_one": "The rate would price {{formatted}} variant at 0.00; it keeps its retail price. You can enter a price by hand.",
+      "rateZero_other": "The rate would price {{formatted}} variants at 0.00; they keep their retail price. You can enter prices by hand.",
+      "priceIt": "Enter price",
+      "syncing": "Prices are being updated.",
+      "editTitle": "Wholesale price",
+      "addTitle": "Add a price",
+      "addText": "Choose a variant and enter its wholesale price without KDV.",
+      "variant": "Variant",
+      "variantPlaceholder": "Search product name or SKU",
+      "noVariants": "No matching product.",
+      "net": "Wholesale price, excl. KDV",
+      "netHint": "The price with KDV is worked out with the product's KDV rate.",
+      "fromRate": "Priced by the rate now. A price you type replaces the rate's.",
+      "retailNow": "Retail price (now)",
+      "vatRate": "KDV rate",
+      "gross": "Incl. KDV",
+      "undercutHint": "Today's retail price is below this wholesale price. You can save it; the wholesaler still pays wholesale.",
+      "remove": "Remove hand-entered price",
+      "removed": "The hand-entered price was removed; the rate applies again where there is one.",
+      "saved": "Wholesale price saved.",
+      "errors": {
+        "net": "Enter a price above 0 and at most 20,000,000 TL.",
+        "variant": "Choose a variant."
+      }
+    },
+    "tiers": {
+      "title": "Wholesale levels",
+      "description": "Price levels that group wholesalers: a discount on every product and/or per-product prices. Wholesalers do not see the level's name.",
+      "add": "New level",
+      "empty": "No wholesale levels yet. Open one, give it a rate and put wholesalers on it.",
+      "one": "Wholesale level",
+      "manualOnly": "Hand-entered prices only",
+      "rateLine": "{{percent}} off every product",
+      "noMinimum": "No minimum",
+      "minimumLine_one": "At least {{count}} unit per order",
+      "minimumLine_other": "At least {{count}} units per order",
+      "delete": "Delete level",
+      "deleteTitle": "Delete \"{{name}}\"?",
+      "deleteText": "The level and its prices are deleted. It is not deleted while wholesalers are on it; move them to another level first.",
+      "deleted": "The level was deleted.",
+      "columns": {
+        "name": "Level",
+        "percent": "Discount",
+        "minimum": "Minimum units"
+      },
+      "form": {
+        "newTitle": "New wholesale level",
+        "editTitle": "Edit level",
+        "text": "The rate comes off each product's own price and the prices are written in the background. Per-product prices are entered on the level's page.",
+        "create": "Open level",
+        "name": "Level name",
+        "nameHint": "Shown in the panel only, e.g. \"Wholesale A\".",
+        "percent": "Discount on every product",
+        "percentHint": "Left empty, only prices entered by hand apply.",
+        "created": "The level was opened.",
+        "saved": "The level was saved."
+      }
+    }
   }
 }

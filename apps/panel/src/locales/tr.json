@@ -713,6 +713,12 @@
             "label": "Ödeme bağlantısıyla sipariş",
             "description": "Ekip panelden sipariş hazırlar; müşteri vitrindeki ödeme bağlantısıyla öder."
           }
+        },
+        "customers": {
+          "wholesale": {
+            "label": "Toptancı müşteriler",
+            "description": "Panelden toptancı açılır; toptancı giriş yaptığında ürünleri toptan seviyesinin ya da kendine özel fiyatlarla, KDV hariç görür ve sipariş verir. Herkese açık fiyatlar değişmez. Kapatılırsa toptancılar perakende fiyat görür; kayıtları ve fiyatları silinmez."
+          }
         }
       }
     },
@@ -1588,7 +1594,9 @@
           "account": {
             "password_reset": "Şifre sıfırlama",
             "verify_email": "E-posta doğrulama",
-            "migration_invite": "Taşınan müşteriye hesap daveti"
+            "migration_invite": "Taşınan müşteriye hesap daveti",
+            "wholesale_invite": "Toptancı daveti",
+            "wholesale_enabled": "Toptan hesabı açıldı"
           },
           "payment": {
             "failed": "Ödeme alınamadı"
@@ -4656,6 +4664,8 @@
     "sections": "Müşteri ekranları",
     "sectionCustomers": "Müşteriler",
     "sectionGroups": "Gruplar ve segmentler",
+    "sectionWholesale": "Toptancılar",
+    "sectionWholesaleTiers": "Toptan seviyeleri",
     "sectionContact": "İletişim mesajları",
     "contactMessages": {
       "title": "İletişim mesajları",
@@ -9950,5 +9960,226 @@
     },
     "createBlocked": "Ürün limitinize ulaştığınız için yeni ürün eklenemez.",
     "inviteBlocked": "Ekip limitinize ulaştığınız için yeni davet gönderilemez."
+  },
+  "wholesale": {
+    "gate": {
+      "off": "Toptan satış bu mağazada kapalı. Açınca toptancılar ve toptan seviyeleri burada yönetilir.",
+      "denied": "Toptancıları yalnızca mağaza sahibi ve yöneticiler görebilir.",
+      "turnOn": "Özelliklere git"
+    },
+    "kind": {
+      "label": "Müşteri türü",
+      "individual": "Bireysel",
+      "wholesale": "Toptancı"
+    },
+    "status": {
+      "pending": "Bekliyor",
+      "active": "Etkin",
+      "inactive": "Kapalı"
+    },
+    "ownPrices": "Özel fiyat",
+    "units_one": "{{count}} adet",
+    "units_other": "{{count}} adet",
+    "invitationLine_one": "{{count}} kez gönderildi · {{date}} tarihine kadar geçerli",
+    "invitationLine_other": "{{count}} kez gönderildi · {{date}} tarihine kadar geçerli",
+    "columns": {
+      "who": "Firma / yetkili",
+      "email": "E-posta",
+      "source": "Fiyat",
+      "rate": "Oran",
+      "minimum": "En az adet",
+      "status": "Durum",
+      "invitation": "Davet"
+    },
+    "list": {
+      "title": "Toptancılar",
+      "description": "Toptan fiyatla alışveriş yapan müşterileriniz. Davet edilenler hesap açınca etkinleşir.",
+      "views": "Toptancı durumları",
+      "tabs": {
+        "all": "Tümü"
+      },
+      "search": "E-posta, firma ya da yetkili ara",
+      "empty": "Henüz toptancı yok. Bir toptancı açtığınızda burada görünür.",
+      "noMatch": "Aramanıza uyan toptancı yok.",
+      "add": "Yeni toptancı"
+    },
+    "form": {
+      "newTitle": "Yeni toptancı",
+      "newText": "Bu e-postayla açılmış bir müşteri hesabı varsa toptancı hemen etkinleşir; yoksa vitrinde hesap açması için davet gider. Şifre panelde belirlenmez.",
+      "create": "Toptancıyı aç",
+      "editTitle": "Toptancıyı düzenle",
+      "saved": "Toptancı kaydedildi.",
+      "who": "Toptancı",
+      "prices": "Fiyat",
+      "email": "E-posta",
+      "emailHint": "Toptan fiyatlar yalnızca bu adresle giriş yapan hesapta görünür.",
+      "contact": "Yetkili adı soyadı",
+      "company": "Firma adı",
+      "taxOffice": "Vergi dairesi",
+      "taxId": "Vergi numarası",
+      "taxHint": "İsteğe bağlı; vergi dairesiyle birlikte girilir.",
+      "tier": "Toptan seviyesi",
+      "tierHint": "Seviyenin oranı ve fiyatları uygulanır.",
+      "noTier": "Seviye yok",
+      "minimum": "Siparişte en az adet",
+      "minimumHint": "Boş bırakılırsa seviyeninki geçerlidir; o da yoksa sınır yok.",
+      "units": "adet",
+      "ownPrices": "Bu toptancıya özel fiyat",
+      "ownPricesHint": "Açılırsa seviyeden önce bu toptancının kendi fiyatları geçerli olur. Ürün başına fiyatları toptancının sayfasında girersiniz.",
+      "ownPricesOpen": "Bu toptancının kendi fiyat listesi açık. Ürün başına fiyatlar sayfasındaki listede.",
+      "ownPercent": "Bütün ürünlerde indirim oranı",
+      "ownPercentHint": "Her ürünün kendi fiyatından bu oran düşülür. Boş bırakılırsa yalnız elle girdiğiniz fiyatlar geçerli olur.",
+      "errors": {
+        "emailRequired": "E-posta adresini girin.",
+        "email": "Geçerli bir e-posta adresi girin.",
+        "tooLong": "Bu alan çok uzun.",
+        "contact": "Yetkilinin adını en az 2 harfle girin.",
+        "taxId": "Vergi numarası 10, T.C. kimlik numarası 11 haneli olmalı.",
+        "taxPair": "Vergi dairesi ve vergi numarasını birlikte girin.",
+        "companyForTax": "Vergi bilgisi için firma adı gerekir.",
+        "priceSource": "Bir toptan seviyesi seçin ya da bu toptancıya özel fiyatı açın.",
+        "percent": "Oran 0,01 ile 99 arasında olmalı.",
+        "minimum": "En az adet 1 ile 100.000 arasında bir tam sayı olmalı.",
+        "tierName": "Seviyeye bir ad verin."
+      }
+    },
+    "outcome": {
+      "activeSent": "Toptancı hemen etkinleşti: bu e-postayla açılmış bir müşteri hesabı vardı. \"Toptan hesabınız açıldı\" e-postası gönderildi.",
+      "activeNotSent": "Toptancı hemen etkinleşti: bu e-postayla açılmış bir müşteri hesabı vardı. Bilgilendirme e-postası gönderilemedi; toptancı giriş yaptığında toptan fiyatları yine görür.",
+      "invitedSent": "Davet e-postası gönderildi. Toptancı bu adresle hesap açınca etkinleşir; davet 90 gün geçerlidir.",
+      "invitedNotSent": "Toptancı kaydı açıldı ama davet e-postası gönderilemedi. \"Daveti yeniden gönder\" ile tekrar deneyin.",
+      "billing": {
+        "written": "Vergi bilgileri müşterinin fatura bilgilerine yazıldı.",
+        "kept": "Müşterinin kayıtlı fatura bilgileri vardı; değiştirilmedi.",
+        "none": "Vergi bilgileri saklanmadı; toptancı hesabını açınca vitrinde kendisi girer."
+      }
+    },
+    "actions": {
+      "resend": "Daveti yeniden gönder",
+      "resent": "Davet yeniden gönderildi.",
+      "resendNotSent": "Davet e-postası gönderilemedi. Biraz sonra yeniden deneyin.",
+      "delete": "Daveti sil",
+      "deleteTitle": "Bekleyen davet silinsin mi?",
+      "deleteText": "Toptancı kaydı silinir; gönderilen davet bağlantısıyla açılan hesap toptan fiyat görmez. İsterseniz sonra yeniden açabilirsiniz.",
+      "deleted": "Bekleyen davet silindi.",
+      "deactivate": "Devre dışı bırak",
+      "deactivateTitle": "Toptancı devre dışı bırakılsın mı?",
+      "deactivateText": "Müşteri bir sonraki isteğinde perakende fiyat görür ve açık sepetleri perakende fiyatla yeniden hesaplanır. Fiyatları silinmez; yeniden açınca geri gelir. Müşteriye ileti gitmez.",
+      "deactivated": "Toptancı devre dışı bırakıldı.",
+      "reactivate": "Yeniden aç",
+      "reactivateTitle": "Toptancı yeniden açılsın mı?",
+      "reactivateText": "Müşteri yeniden toptan fiyat görür; açık sepetleri toptan fiyatla yeniden hesaplanır.",
+      "reactivated": "Toptancı yeniden açıldı.",
+      "cartsRepriced_one": "{{count}} açık sepet yeniden fiyatlandı.",
+      "cartsRepriced_other": "{{count}} açık sepet yeniden fiyatlandı.",
+      "cartsFailed_one": "{{count}} açık sepet yeniden fiyatlanamadı; müşteri sepetini açtığında fiyatlar güncellenir.",
+      "cartsFailed_other": "{{count}} açık sepet yeniden fiyatlanamadı; müşteri sepetini açtığında fiyatlar güncellenir."
+    },
+    "detail": {
+      "title": "Toptancı",
+      "info": "Bilgiler",
+      "state": "Durum",
+      "status": "Durum",
+      "customer": "Müşteri kaydı",
+      "openCustomer": "Müşteri sayfasını aç",
+      "noCustomer": "Henüz hesap açmadı",
+      "ownManual": "Açık · yalnız elle girilen fiyatlar",
+      "ownRate": "Açık · bütün ürünlerde {{percent}} indirim",
+      "ownOff": "Yok · seviyenin fiyatları geçerli",
+      "minimumFromTier": "Seviyeninki geçerli",
+      "invitedAt": "Son davet",
+      "invitationsSent": "Gönderilen davet",
+      "times_one": "{{count}} kez",
+      "times_other": "{{count}} kez",
+      "expiresAt": "Davet geçerliliği",
+      "activatedAt": "Etkinleşme",
+      "deactivatedAt": "Kapanma",
+      "tier": "Toptan seviyesi",
+      "noOwnPrices": "Bu toptancıya özel fiyat yok; seviyesinin fiyatlarıyla alışveriş yapar.",
+      "openOwn": "Özel fiyat aç",
+      "ownOpened": "Bu toptancıya özel fiyat listesi açıldı."
+    },
+    "prices": {
+      "title": "Toptan fiyatlar",
+      "hint": "Fiyatlar KDV hariç girilir; KDV dahil tutar bilgi içindir. Elle girilen fiyat oranla hesaplananın yerine geçer.",
+      "add": "Elle fiyat ekle",
+      "search": "Ürün, varyant ya da stok kodu ara",
+      "count_one": "{{formatted}} ürün çeşidi",
+      "count_other": "{{formatted}} ürün çeşidi",
+      "noMatch": "Aramanıza uyan fiyat yok.",
+      "emptyManual": "Henüz fiyat yok. Oran vermediyseniz ürün başına fiyatı \"Elle fiyat ekle\" ile girin.",
+      "emptyRate": "Oranla hesaplanan fiyatlar birazdan burada görünür.",
+      "columns": {
+        "product": "Ürün",
+        "retail": "Perakende (şimdi)",
+        "net": "Toptan, KDV hariç",
+        "gross": "KDV dahil",
+        "source": "Kaynak"
+      },
+      "source": {
+        "manual": "Elle",
+        "rate": "Oran"
+      },
+      "undercut": "Perakende daha ucuz",
+      "undercutCount_one": "{{formatted}} ürün çeşidinde bugünkü perakende fiyat toptan fiyatın altında. Toptancı yine toptan fiyatı öder; fiyatı gözden geçirmek isteyebilirsiniz.",
+      "undercutCount_other": "{{formatted}} ürün çeşidinde bugünkü perakende fiyat toptan fiyatın altında. Toptancı yine toptan fiyatı öder; fiyatları gözden geçirmek isteyebilirsiniz.",
+      "rateZero_one": "{{formatted}} ürün çeşidinin fiyatı bu oranla 0,00 TL olurdu; ona perakende fiyat uygulanır. İsterseniz elle fiyat girin.",
+      "rateZero_other": "{{formatted}} ürün çeşidinin fiyatı bu oranla 0,00 TL olurdu; bunlara perakende fiyat uygulanır. İsterseniz elle fiyat girin.",
+      "priceIt": "Fiyat gir",
+      "syncing": "Fiyatlar güncelleniyor.",
+      "editTitle": "Toptan fiyat",
+      "addTitle": "Elle fiyat ekle",
+      "addText": "Bir ürün çeşidi seçip KDV hariç toptan fiyatını girin.",
+      "variant": "Ürün çeşidi",
+      "variantPlaceholder": "Ürün adı ya da stok kodu ara",
+      "noVariants": "Uyan ürün yok.",
+      "net": "Toptan fiyat, KDV hariç",
+      "netHint": "KDV dahil fiyatı ürünün KDV oranıyla biz hesaplarız.",
+      "fromRate": "Şu an oranla hesaplanıyor. Yazdığınız fiyat oranın yerine geçer.",
+      "retailNow": "Perakende fiyat (şimdi)",
+      "vatRate": "KDV oranı",
+      "gross": "KDV dahil",
+      "undercutHint": "Bugünkü perakende fiyat bu toptan fiyatın altında. Kaydedebilirsiniz; toptancı yine toptan fiyatı öder.",
+      "remove": "Elle fiyatı kaldır",
+      "removed": "Elle girilen fiyat kaldırıldı; varsa oran yeniden uygulanır.",
+      "saved": "Toptan fiyat kaydedildi.",
+      "errors": {
+        "net": "Fiyatı 0'dan büyük, en çok 20.000.000 TL olarak girin.",
+        "variant": "Bir ürün çeşidi seçin."
+      }
+    },
+    "tiers": {
+      "title": "Toptan seviyeleri",
+      "description": "Toptancıları gruplayan fiyat seviyeleri: bütün ürünlerde bir indirim oranı ve/veya ürün başına fiyat. Toptancı seviye adını görmez.",
+      "add": "Yeni seviye",
+      "empty": "Henüz toptan seviyesi yok. Bir seviye açıp oranını verin; toptancıları ona bağlayın.",
+      "one": "Toptan seviyesi",
+      "manualOnly": "Yalnız elle fiyat",
+      "rateLine": "Bütün ürünlerde {{percent}} indirim",
+      "noMinimum": "En az adet yok",
+      "minimumLine_one": "Siparişte en az {{count}} adet",
+      "minimumLine_other": "Siparişte en az {{count}} adet",
+      "delete": "Seviyeyi sil",
+      "deleteTitle": "\"{{name}}\" silinsin mi?",
+      "deleteText": "Seviye ve fiyatları silinir. Bu seviyede toptancı varsa silinmez; önce onları başka bir seviyeye taşıyın.",
+      "deleted": "Seviye silindi.",
+      "columns": {
+        "name": "Seviye",
+        "percent": "İndirim oranı",
+        "minimum": "En az adet"
+      },
+      "form": {
+        "newTitle": "Yeni toptan seviyesi",
+        "editTitle": "Seviyeyi düzenle",
+        "text": "Oran her ürünün kendi fiyatından düşülür ve fiyatlar arka planda yazılır. Ürün başına fiyatı seviyenin sayfasında girersiniz.",
+        "create": "Seviyeyi aç",
+        "name": "Seviye adı",
+        "nameHint": "Yalnız panelde görünür, ör. \"Toptan A\".",
+        "percent": "Bütün ürünlerde indirim oranı",
+        "percentHint": "Boş bırakılırsa yalnız elle girilen fiyatlar geçerli olur.",
+        "created": "Seviye açıldı.",
+        "saved": "Seviye kaydedildi."
+      }
+    }
   }
 }

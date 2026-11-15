@@ -18,6 +18,9 @@ export const SECTIONS = [
   // Google reviews (adr/0058): the connection, or the reviews it brought
   "/reviews/google",
   "/customers/groups",
+  // Wholesalers and their levels (ADR-0068): the lists, or why they are closed while the flag is off
+  "/customers/wholesale",
+  "/customers/wholesale/tiers",
   "/customers/contact-messages",
   "/promotions",
   "/promotions/price-lists",
