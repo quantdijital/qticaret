@@ -176,7 +176,8 @@ jobs:
   e2e:
     name: Panel e2e (smoke, accessibility)
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    # About 120 tests take 20 to 25 minutes on a runner (the accessibility pass alone ~11)
+    timeout-minutes: 40
     # A real backend on a fresh database with the demo shop; the panel's dev
     # server proxies to it, as on a developer's machine (apps/panel/e2e)
     services:
