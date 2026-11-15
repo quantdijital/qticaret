@@ -84,7 +84,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
       columns: 4,
       height: "medium",
       lead: "on",
-      links: 4,
+      links: 5,
       show_count: true,
     })
     const categories = sectorPack("cutlery")?.categories ?? []

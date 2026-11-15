@@ -84,7 +84,7 @@ describe("the tezgah presets' drafts (docs/tema/tezgah-tasarim-dili.md)", () => 
         columns_mobile: 1,
         height: "medium",
         lead: "on",
-        links: 4,
+        links: 5,
       })
       expect(doc.settings.theme).toMatchObject({
         radius: "sharp",

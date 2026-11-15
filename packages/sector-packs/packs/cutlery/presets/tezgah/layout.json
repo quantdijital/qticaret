@@ -227,7 +227,7 @@
       "columns": 4,
       "height": "medium",
       "lead": "on",
-      "links": 4,
+      "links": 5,
       "show_count": true,
       "more": { "$href": "/kategoriler", "label": "Tüm kategoriler" }
     },
