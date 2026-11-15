@@ -197,6 +197,13 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 30, windowMs: 15 * MINUTE },
     perIdentityAnyIp: { max: 20, windowMs: HOUR },
   },
+  // ADR-0068 §7: a wholesaler's own prices, asked by the storefront's server for each
+  // page's cards (a hundred variants a call); per customer from any address too
+  wholesale_prices: {
+    name: "wholesale_prices",
+    perIp: { max: 600, windowMs: MINUTE },
+    perIdentityAnyIp: { max: 600, windowMs: MINUTE },
+  },
   // F5 (adr/0027): saving or testing a provider account calls the provider
   // and per staff member from any address: not an oracle for other people's details
   provider_check: {

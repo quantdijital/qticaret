@@ -6,6 +6,7 @@ import {
   netOfGross,
   percentToBps,
   ratePrice,
+  shownWholesale,
   vatBps,
 } from "../money"
 
@@ -75,5 +76,19 @@ describe("KDV excluded and included (adr/0007)", () => {
     expect(vatBps(20)).toBe(2000)
     expect(vatBps(1)).toBe(100)
     expect(vatBps(0.5)).toBe(50)
+  })
+})
+
+describe("a wholesaler's shown price (ADR-0068 §5)", () => {
+  it("gives a KDV-included price's net back to the kuruş it was entered as", () => {
+    // 66.67 entered without KDV is written as 80.00 with 20%
+    expect(shownWholesale(kurus(8000), true, 2000)).toEqual({ net: 6667, gross: 8000 })
+    const gross = grossOfNet(kurus(12_345), 1000)
+    expect(shownWholesale(gross, true, 1000)).toEqual({ net: 12_345, gross })
+  })
+
+  it("adds KDV to a price kept without it, and takes none off a zero rate", () => {
+    expect(shownWholesale(kurus(10_000), false, 2000)).toEqual({ net: 10_000, gross: 12_000 })
+    expect(shownWholesale(kurus(5000), true, 0)).toEqual({ net: 5000, gross: 5000 })
   })
 })
