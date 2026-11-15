@@ -1,0 +1,118 @@
+/*
+ * The featured product's slanted strips (`featured_product` with
+ * `gallery: "strips"`, adr/0049 Ek 2026-11-15; `sections/SpotlightStrips.tsx`).
+ * The photographs stand side by side as equal upright strips the gallery's
+ * full height; every seam between two is slanted at one fixed run
+ * (`--strip-slant`, the same for every strip so the seams stay parallel and
+ * the gap between them even), the first strip's left edge and the last
+ * one's right edge straight, so the gallery ends a rectangle. A strip
+ * overlaps the one before it by the run, less the collage's gap.
+ *
+ * From 1024 px the strip under a hovering pointer, or holding the
+ * keyboard's focus, widens (`flex-grow` 1 → `--strip-grow`) and the others
+ * narrow, in one ease-out slide; the height never changes. Its photograph
+ * is drawn as wide as a widened strip and centred in it, so only the
+ * window onto it grows: the picture neither moves nor scales. A phone, a
+ * screen whose pointer does not hover (a tap goes straight to the
+ * product's page) and reduced motion keep them equal or snap at once.
+ * The widening carries nothing: every photograph is whole in its own
+ * page. No script, no inline style (CSP): the count is an attribute.
+ */
+@layer components {
+  .gf-strips {
+    --strip-gap: var(--space-sm);
+    --strip-slant: var(--space-xs);
+    --strip-grow: 2.75;
+    --strip-count: 1;
+    container-type: inline-size;
+    display: flex;
+    overflow: hidden;
+  }
+  .gf-strips[data-count="2"] {
+    --strip-count: 2;
+  }
+  .gf-strips[data-count="3"] {
+    --strip-count: 3;
+  }
+  .gf-strips[data-count="4"] {
+    --strip-count: 4;
+  }
+
+  .gf-strip {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    clip-path: polygon(var(--strip-slant) 0, 100% 0, calc(100% - var(--strip-slant)) 100%, 0 100%);
+  }
+  .gf-strip:first-child {
+    clip-path: polygon(0 0, 100% 0, calc(100% - var(--strip-slant)) 100%, 0 100%);
+  }
+  .gf-strip:last-child {
+    clip-path: polygon(var(--strip-slant) 0, 100% 0, 100% 100%, 0 100%);
+  }
+  /* One photograph: one straight strip */
+  .gf-strip:only-child {
+    clip-path: none;
+  }
+  .gf-strip + .gf-strip {
+    margin-left: calc(var(--strip-gap) - var(--strip-slant));
+  }
+
+  .gf-strip-link {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+  }
+  /* Inside the strip: its slanted clip would cut a ring drawn outside it */
+  .gf-strip-link:focus-visible {
+    outline-offset: -4px;
+  }
+
+  .gf-strip-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (min-width: 64rem) {
+    .gf-strips {
+      --strip-slant: var(--space-lg);
+      /* A widened strip's width: the strips' sum (the gallery less the seams' overlap) by its share */
+      --strip-open: calc(
+        (100cqw - (var(--strip-count) - 1) * (var(--strip-gap) - var(--strip-slant))) *
+          var(--strip-grow) / (var(--strip-grow) + var(--strip-count) - 1)
+      );
+    }
+    .gf-strip {
+      transition: flex-grow var(--dur-long) var(--ease-out);
+    }
+    .gf-strip-image {
+      left: 50%;
+      width: var(--strip-open);
+      transform: translateX(-50%);
+    }
+    .gf-strip:only-child .gf-strip-image {
+      left: 0;
+      width: 100%;
+      transform: none;
+    }
+    .gf-strip:has(.gf-strip-link:focus-visible) {
+      flex-grow: var(--strip-grow);
+    }
+  }
+  @media (min-width: 64rem) and (hover: hover) and (pointer: fine) {
+    .gf-strip:hover {
+      flex-grow: var(--strip-grow);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gf-strip {
+      transition: none;
+    }
+  }
+}
