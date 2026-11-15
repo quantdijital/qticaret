@@ -8391,7 +8391,7 @@
               "float": "On floating layers",
               "none": "None"
             },
-            "hint": "Surfaces that open over the page: dropdown menus, drawers, dialogs, the sticky header and floating buttons. With None, a 1 px rule takes the shadow's place."
+            "hint": "Surfaces that open or float over the page: dropdown menus, drawers, dialogs, the phone's sticky buy bar and floating buttons. With None the shadow goes; a surface with no edge of its own gets a 1 px rule."
           },
           "chip_style": {
             "label": "Chip style",

@@ -34,7 +34,7 @@
       "file": "frame.css"
     },
     {
-      "sha256": "48bce7e4a70cac1f21c93040e1d1c23aa9bad8a8caa529ea01977d981240cab3",
+      "sha256": "a4325631494c4c9bb5d57212117f6ebb2846cf32aba28d3dfb4b8e09e9abcf72",
       "file": "header-catalog.css"
     },
     {
@@ -54,7 +54,7 @@
       "file": "media.css"
     },
     {
-      "sha256": "0c4e2ccad01cdd25f6c0c49ede9ccbba3cda6100c1fecc8abdf1d1957a047e42",
+      "sha256": "c59f8b48de8a12788d4fec20c417de9343b102831cbbbe9b4e257f87cb53ed22",
       "file": "menu.css"
     },
     {
@@ -66,11 +66,15 @@
       "file": "scroller.css"
     },
     {
+      "sha256": "c5b8abb98e34e8679c59eed0088d136c120617ceaff68d90548b46ce4638313a",
+      "file": "shadow.css"
+    },
+    {
       "sha256": "f2535c467207a43b88f19881bb32353bd8d1092ba4160a8987d40952f5fe57de",
       "file": "slider.css"
     },
     {
-      "sha256": "58004a2b88bb28402595ac312cf0214232c4ce29d738a6f92709798ad73bcafa",
+      "sha256": "19daaeba5056b1612848faa52bc80b13533848e28b2be686d6fe90e502fb4655",
       "file": "styles.css"
     },
     {
@@ -82,11 +86,11 @@
       "file": "tabs.css"
     },
     {
-      "sha256": "0796d3f2bbf461ef9c0db4d02e4bf4f3c7d6a0944363d5c7ee8e54564860c77a",
+      "sha256": "99227965f65f0b48037afb83a1aa05c486d001ff338ae349834c955fb1bebfb4",
       "file": "tokens.css"
     },
     {
-      "sha256": "3eeb6df6a9d05b79d62a22ff0b1ae79054e6ad8fae07bc73eb72bb6448b56284",
+      "sha256": "b90cddf079830af5f328cb4084ba11bef37acd0a31470759e0666703ee7dc579",
       "file": "ui.css"
     }
   ]

@@ -52,6 +52,11 @@ export interface JobType<Input = unknown> {
    */
   ownerOnly?: boolean
   /**
+   * Seen by the owner and admin only (ADR-0068 decision 17: the wholesale
+   * sync tells how many wholesale prices it wrote).
+   */
+  managersOnly?: boolean
+  /**
    * Queued only by its own route (an import queued with the file it was
    * sent), never through `POST /admin/async-jobs`, whose input it would trust.
    */

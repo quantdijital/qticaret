@@ -24,6 +24,11 @@ export async function mayReach(
   if (!type || type.ownerOnly) {
     return owner()
   }
+  // The wholesale sync: the owner's and admin's (ADR-0068 decision 17)
+  if (type.managersOnly) {
+    const role = await staffRoleOf(req)
+    return role === "owner" || role === "admin"
+  }
   if (type.privateToAsker || (file && type.containsPersonalData)) {
     return job.requested_by === req.auth_context.actor_id || owner()
   }
