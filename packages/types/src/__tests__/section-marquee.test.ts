@@ -51,7 +51,8 @@ describe("the scrolling strip's settings (adr/0049 Ek 2026-11-14 §4.1)", () => 
       ...MARQUEE_DEFAULTS,
       speed: "fast",
       size: "large",
-      ground: "light",
+      // The light tint's old name reads as the dictionary's (bilesen-denetimi (b) 5)
+      ground: "well",
       separator: "none",
     })
     expect(marqueeSettingsOf({ gap: "huge", closable: true })).toEqual(MARQUEE_DEFAULTS)

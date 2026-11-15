@@ -51,6 +51,10 @@ describe("the catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15)", () =>
       menu_ground: "primary",
     }
     expect(layoutDocument.parse({ header: [catalog(set)] }).header[0]).toMatchObject(set)
+    // The light tint's old name reads, and is written again, as the dictionary's (bilesen-denetimi (b) 5)
+    expect(
+      layoutDocument.parse({ header: [catalog({ menu_ground: "light" })] }).header[0]
+    ).toMatchObject({ menu_ground: "well" })
     expect(issues({ header: [catalog({ menu_ground: "red" })] })).toContain(
       "storefront_layout.section_invalid"
     )

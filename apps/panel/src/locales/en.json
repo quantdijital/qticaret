@@ -8572,7 +8572,7 @@
           "term": "background",
           "stage": "Dark",
           "primary": "Main colour",
-          "light": "Light"
+          "well": "Light tint"
         },
         "speed": {
           "label": "Speed",
@@ -8696,7 +8696,7 @@
           "hint": "Text and icon colours are picked to read on it.",
           "stage": "Dark",
           "primary": "Brand colour",
-          "light": "Light"
+          "well": "Light tint"
         },
         "phoneNote": "On phones the header stays as it is: menu, logo, favourites and cart, with the search below.",
         "otherHint": "The search button, the My account text and the cart total."

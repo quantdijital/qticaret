@@ -98,7 +98,13 @@ describe("the scrolling strip (adr/0049 Ek 2026-11-14 §4.1)", () => {
       home: [strip("kayan00001", { ...saved, separator: "line" })],
     })
 
-    expect(doc.home[0]).toMatchObject({ ...MARQUEE_DEFAULTS, ...saved, separator: "line" })
+    // The light tint's old name reads as the dictionary's (bilesen-denetimi (b) 5)
+    expect(doc.home[0]).toMatchObject({
+      ...MARQUEE_DEFAULTS,
+      ...saved,
+      ground: "well",
+      separator: "line",
+    })
   })
 
   it("holds an item's lines to their lengths and the shop's details", () => {

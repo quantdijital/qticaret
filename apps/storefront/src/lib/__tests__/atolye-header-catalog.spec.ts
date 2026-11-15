@@ -132,7 +132,7 @@ describe("the catalog header", () => {
     )
   })
 
-  it.each(["stage", "primary", "light"] as const)(
+  it.each(["stage", "primary", "well"] as const)(
     "writes the opened panels in the page's ink on a %s bar",
     (menuGround) => {
       const html = renderFrame(atolyeTheme, catalogShop({ menuGround }))

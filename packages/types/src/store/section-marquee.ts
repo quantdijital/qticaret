@@ -28,8 +28,12 @@ export const MARQUEE_SETTINGS = {
   pause_button: ["always", "hover"],
   /** Small: a thin line of text; medium: items with an icon and a second line; large: a campaign set big. */
   size: ["small", "medium", "large"],
-  /** Its ground: the dark stage, the shop's own colour, a light tint; pairs the theme measured. */
-  ground: ["stage", "primary", "light"],
+  /**
+   * Its ground: the dark stage, the shop's own colour, the light tint
+   * (`well`, the look's name for it; `light` before, read as `well`,
+   * bilesen-denetimi (b) 5); pairs the theme measured.
+   */
+  ground: ["stage", "primary", "well"],
   /** What stands between two items. */
   separator: ["none", "dot", "star", "line"],
   /** The lines' weight: the theme's heavy one (as before) or its regular. */
@@ -82,7 +86,9 @@ export const MARQUEE_PER_PAGE = 2
 /** A setting's step as a reader takes it: one this build does not know reads as the default. */
 export function marqueeStepOf<S extends MarqueeSetting>(setting: S, step: unknown): MarqueeStep<S> {
   const steps: readonly unknown[] = MARQUEE_SETTINGS[setting]
-  return steps.includes(step) ? (step as MarqueeStep<S>) : MARQUEE_DEFAULTS[setting]
+  // The light tint's name before the dictionary had one (bilesen-denetimi (b) 5)
+  const named = setting === "ground" && step === "light" ? "well" : step
+  return steps.includes(named) ? (named as MarqueeStep<S>) : MARQUEE_DEFAULTS[setting]
 }
 
 /** The strip's settings as the design keeps them. */

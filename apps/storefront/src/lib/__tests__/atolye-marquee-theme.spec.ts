@@ -107,7 +107,7 @@ describe("the scrolling strip in Atölye", () => {
   it("maps every step onto the stylesheet, stops on hover and focus, keeps still on reduced motion", () => {
     for (const [name, steps] of Object.entries({
       size: ["small", "medium", "large"],
-      ground: ["primary", "light", "stage"],
+      ground: ["primary", "well", "stage"],
       speed: ["slowest", "slow", "fast", "fastest"],
       direction: ["right"],
       separator: ["dot", "star", "line"],

@@ -35,7 +35,7 @@ function Size({ step }: { step: MarqueeStep<"size"> }) {
 const GROUND: Readonly<Record<MarqueeStep<"ground">, string>> = {
   stage: "bg-foreground",
   primary: "bg-primary",
-  light: "bg-muted",
+  well: "bg-muted",
 }
 
 const SEPARATOR: Readonly<Record<MarqueeStep<"separator">, string>> = {

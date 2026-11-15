@@ -8572,7 +8572,7 @@
           "term": "background",
           "stage": "Koyu",
           "primary": "Ana renk",
-          "light": "Açık"
+          "well": "Hafif ton"
         },
         "speed": {
           "label": "Hız",
@@ -8696,7 +8696,7 @@
           "hint": "Yazı ve simge renkleri zemine göre okunur seçilir.",
           "stage": "Koyu",
           "primary": "Ana renk",
-          "light": "Açık"
+          "well": "Hafif ton"
         },
         "phoneNote": "Telefonda üst bilgi değişmez: menü, logo, favori ve sepet; altında arama.",
         "otherHint": "Arama düğmesi, Hesabım yazısı ve sepet tutarı."
