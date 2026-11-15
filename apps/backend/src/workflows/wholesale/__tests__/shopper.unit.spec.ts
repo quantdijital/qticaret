@@ -23,13 +23,13 @@ function container(shop: Shop) {
   const listWholesaleAccounts = jest.fn((filters: Record<string, unknown>) =>
     Promise.resolve(filters["status"] === "active" ? (shop.accounts ?? []) : [])
   )
+  const answers: Record<string, unknown[]> = {
+    customer: [{ groups: (shop.groups ?? []).map((id) => ({ id })) }],
+    store: [{ default_region_id: "reg_tr" }],
+    region: [{ id: "reg_other" }, { id: "reg_tr" }],
+  }
   const graph = jest.fn((config: { entity: string }) =>
-    Promise.resolve({
-      data:
-        config.entity === "customer"
-          ? [{ groups: (shop.groups ?? []).map((id) => ({ id })) }]
-          : (shop.variants ?? []),
-    })
+    Promise.resolve({ data: answers[config.entity] ?? shop.variants ?? [] })
   )
   const services: Record<string, unknown> = {
     [PLATFORM_SETTINGS_MODULE]: { isFeatureEnabled: () => Promise.resolve(shop.enabled ?? true) },
@@ -125,6 +125,8 @@ describe("wholesalePrices", () => {
       .find((config) => config.entity === "product_variant")
     expect(JSON.stringify(variantRead?.context)).toContain("cusgroup_own")
     expect(JSON.stringify(variantRead?.context)).toContain('"customer_id":"cus_1"')
+    // The store's own region in the currency, as the cart is priced (review L3)
+    expect(JSON.stringify(variantRead?.context)).toContain('"region_id":"reg_tr"')
   })
 
   it("leaves out a variant a shopper may not see", async () => {

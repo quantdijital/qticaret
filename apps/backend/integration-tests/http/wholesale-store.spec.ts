@@ -1,13 +1,13 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { createAdminUser } from "../helpers/admin"
 import { registerCustomer } from "../helpers/customer"
-import type { HttpClient, HttpResponse } from "../helpers/http"
-import { settle } from "../helpers/http"
+import type { HttpClient } from "../helpers/http"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
 import { accountApi, wholesaleApi } from "../helpers/wholesale"
+import { outcome, plain } from "../helpers/wholesale-store"
 
 jest.setTimeout(240 * 1000)
 
@@ -19,37 +19,7 @@ interface PricesAnswer {
   wholesale_prices: Record<string, { net: string; gross: string; vat_rate: number }>
 }
 
-interface CartAnswer {
-  cart: { id: string; items?: { unit_price: number }[] }
-}
-
-/** An answer as an assertion sees it: never axios' own objects (they hold each other). */
-interface Plain<T> {
-  status: number
-  data: T
-  cacheControl: string | null
-}
-
-async function plain<T>(request: Promise<HttpResponse<T>>): Promise<Plain<T>> {
-  try {
-    const { status, data, headers } = await settle(request)
-    const cacheControl = headers["cache-control"]
-    return { status, data, cacheControl: typeof cacheControl === "string" ? cacheControl : null }
-  } catch (error) {
-    const { message, code } = error as { message?: unknown; code?: unknown }
-    // The cause would carry axios' circular objects to Jest's worker: its text is enough
-    // eslint-disable-next-line preserve-caught-error
-    throw new Error(`request failed without an answer: ${String(code)} ${String(message)}`)
-  }
-}
-
 const NOT_WHOLESALE = { active: false, vat_exclusive: false, min_quantity: null }
-
-/** Status and, only when it is not the one expected, the body: what a failure needs to say. */
-const outcome = (answer: { status: number; data: unknown }, expected: number) => ({
-  status: answer.status,
-  data: answer.status === expected ? null : answer.data,
-})
 
 /**
  * ADR-0068 slice 3 (§7): the signed-in wholesaler's own answers. Retail
@@ -221,41 +191,6 @@ medusaIntegrationTestRunner({
       }
     })
 
-    it("prices a guest's cart again at wholesale once the wholesaler takes it", async () => {
-      const { variantId, customer } = await levelWholesaler("sepet")
-      const made = await plain(
-        http.post<CartAnswer>(
-          "/store/carts",
-          { region_id: shop.regionId },
-          { headers: store.headers }
-        )
-      )
-      expect(outcome(made, 200)).toEqual({ status: 200, data: null })
-      const cartId = made.data.cart.id
-      const added = await plain(
-        http.post(
-          `/store/carts/${cartId}/line-items`,
-          { variant_id: variantId, quantity: 1 },
-          { headers: store.headers }
-        )
-      )
-      expect(outcome(added, 200)).toEqual({ status: 200, data: null })
-      const unit = async () => {
-        const read = await plain(
-          http.get<CartAnswer>(`/store/carts/${cartId}`, { headers: store.headers })
-        )
-        expect(read.status).toBe(200)
-        return read.data.cart.items?.[0]?.unit_price
-      }
-      expect(await unit()).toBe(100)
-
-      const taken = await plain(
-        http.post<CartAnswer>(`/store/carts/${cartId}/customer`, {}, { headers: customer.headers })
-      )
-      expect(outcome(taken, 200)).toEqual({ status: 200, data: null })
-      // The transfer's own answer is the cart as priced now
-      expect(taken.data.cart.items?.[0]?.unit_price).toBe(80)
-      expect(await unit()).toBe(80)
-    })
+    // The carts (a guest's taken, others left alone, the unit against the cart): wholesale-store-cart.spec.ts
   },
 })

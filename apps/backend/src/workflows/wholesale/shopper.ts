@@ -99,9 +99,26 @@ async function groupsOf(container: Container, customerId: string): Promise<strin
 }
 
 /**
+ * The region a cart in the currency is priced in (security review L3):
+ * the store's default when it sells in it, else the first; null when
+ * none does (the price is then the currency's alone, as before).
+ */
+async function regionOf(container: Container, currency: string): Promise<string | null> {
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const [{ data: stores }, { data: regions }] = await Promise.all([
+    query.graph({ entity: "store", fields: ["default_region_id"] }),
+    query.graph({ entity: "region", fields: ["id"], filters: { currency_code: currency } }),
+  ])
+  const ids = (regions as { id: string }[]).map((region) => region.id)
+  const preferred = (stores[0] as { default_region_id?: string | null } | undefined)
+    ?.default_region_id
+  return preferred && ids.includes(preferred) ? preferred : (ids[0] ?? null)
+}
+
+/**
  * What the signed-in wholesaler pays for each variant (ADR-0068 §7):
- * Medusa's own price for the customer's groups in the shop's currency,
- * as their cart will price the line (own list > level, Ek
+ * Medusa's own price for the customer's groups in the shop's currency
+ * and region, as their cart will price the line (own list > level, Ek
  * 2026-11-15), shown without KDV beside the KDV-included amount, by the
  * product type's KDV rate (adr/0007). Only variants a shopper may see
  * answer (`shopperVariantIds`); a variant with no price has none. Anyone
@@ -128,6 +145,7 @@ export async function wholesalePrices(
     wholesaleContext(scope),
     groupsOf(container, input.customer_id),
   ])
+  const region = await regionOf(container, context.currency)
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   for (const chunk of chunksOf(visible, VARIANT_CHUNK)) {
     const { data } = await query.graph({
@@ -142,6 +160,7 @@ export async function wholesalePrices(
       context: {
         calculated_price: QueryContext({
           currency_code: context.currency,
+          ...(region ? { region_id: region } : {}),
           customer_id: input.customer_id,
           customer: { groups: { id: groups } },
         }),

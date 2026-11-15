@@ -2,6 +2,7 @@ import type { AuthenticatedMedusaRequest } from "@medusajs/framework/http"
 import { authenticate, validateAndTransformQuery } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { StoreGetWholesalePrices } from "../store/customers/me/wholesale-prices/validators"
+import { StoreGetWholesale } from "../store/customers/me/wholesale/validators"
 import { rateLimit } from "./rate-limit"
 import { repriceWholesaleTransfer } from "./wholesale-cart-transfer"
 
@@ -20,7 +21,7 @@ export const WHOLESALE_STORE_ROUTES = [
   {
     matcher: "/store/customers/me/wholesale",
     methods: ["GET" as const],
-    middlewares: [signedIn()],
+    middlewares: [signedIn(), validateAndTransformQuery(StoreGetWholesale, {})],
   },
   {
     matcher: "/store/customers/me/wholesale-prices",

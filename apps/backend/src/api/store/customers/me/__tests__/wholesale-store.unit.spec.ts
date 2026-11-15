@@ -5,6 +5,7 @@ import { kurus } from "../../../../../lib/money"
 import { MAX_WHOLESALE_VARIANTS, StoreGetWholesalePrices } from "../wholesale-prices/validators"
 import type { StoreGetWholesalePricesType } from "../wholesale-prices/validators"
 import { GET as getWholesale } from "../wholesale/route"
+import { StoreGetWholesale } from "../wholesale/validators"
 
 jest.mock("../../../../../workflows/wholesale/shopper", () => ({
   wholesaleShopper: jest.fn(),
@@ -100,6 +101,15 @@ describe("the wholesale prices query", () => {
   it("takes no customer, group or currency from the request", () => {
     for (const extra of ["customer_id", "group_id", "customer_group_id", "currency_code"]) {
       expect(parse({ variant_id: "variant_1", [extra]: "x" }).success).toBe(false)
+    }
+  })
+})
+
+describe("the wholesale state's query (review I1)", () => {
+  it("takes none: no customer, group or fields from the request", () => {
+    expect(StoreGetWholesale.safeParse({}).success).toBe(true)
+    for (const extra of ["customer_id", "group_id", "fields"]) {
+      expect(StoreGetWholesale.safeParse({ [extra]: "x" }).success).toBe(false)
     }
   })
 })
