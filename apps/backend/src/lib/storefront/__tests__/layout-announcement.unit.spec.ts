@@ -29,10 +29,19 @@ describe("the announcement bar's settings (bilesen-denetimi (b) 6)", () => {
       ...ANNOUNCEMENT_DEFAULTS,
     })
     expect(ANNOUNCEMENT_DEFAULTS.mode).toBe("first")
+    // Its lines where they stood (centred on a phone, at the start wide), the bar as tall
+    expect(doc.header[0]).toMatchObject({ align: "auto", size: "medium" })
   })
 
   it("keeps the shop's steps as saved", () => {
-    const set = { mode: "rotate", interval: "slow", pause_button: "hover", hover_pause: "off" }
+    const set = {
+      mode: "rotate",
+      interval: "slow",
+      pause_button: "hover",
+      hover_pause: "off",
+      align: "right",
+      size: "small",
+    }
     const doc = layoutDocument.parse({ header: [bar(set)] })
 
     expect(doc.header[0]).toMatchObject(set)
@@ -52,6 +61,23 @@ describe("the announcement bar's settings (bilesen-denetimi (b) 6)", () => {
     expect(issues({ header: [bar({ interval: 5 })] })).toEqual([
       "storefront_layout.section_invalid",
     ])
+    expect(issues({ header: [bar({ align: "middle" })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+    expect(issues({ header: [bar({ size: "huge" })] })).toEqual([
+      "storefront_layout.section_invalid",
+    ])
+  })
+
+  it("keeps every alignment and size with every way of showing the lines", () => {
+    for (const mode of ANNOUNCEMENT_SETTINGS.mode) {
+      for (const align of ANNOUNCEMENT_SETTINGS.align) {
+        for (const size of ANNOUNCEMENT_SETTINGS.size) {
+          const doc = layoutDocument.parse({ header: [bar({ mode, align, size })] })
+          expect(doc.header[0]).toMatchObject({ mode, align, size })
+        }
+      }
+    }
   })
 
   it("mirrors the contract's lists: a step goes there first", () => {

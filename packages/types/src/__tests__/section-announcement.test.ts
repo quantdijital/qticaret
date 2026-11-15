@@ -8,9 +8,18 @@ import {
 
 describe("the announcement bar's settings (bilesen-denetimi (b) 6)", () => {
   it("names the settings with their steps, the way it shows several lines first", () => {
-    expect(ANNOUNCEMENT_SETTING_NAMES).toEqual(["mode", "interval", "pause_button", "hover_pause"])
+    expect(ANNOUNCEMENT_SETTING_NAMES).toEqual([
+      "mode",
+      "interval",
+      "pause_button",
+      "hover_pause",
+      "align",
+      "size",
+    ])
     expect(ANNOUNCEMENT_SETTINGS.mode).toEqual(["first", "rotate", "inline"])
     expect(ANNOUNCEMENT_SETTINGS.interval).toEqual(["slow", "medium", "fast"])
+    expect(ANNOUNCEMENT_SETTINGS.align).toEqual(["auto", "left", "center", "right"])
+    expect(ANNOUNCEMENT_SETTINGS.size).toEqual(["small", "medium", "large"])
   })
 
   it("never offers to take the pause button away (WCAG 2.2.2)", () => {
@@ -23,6 +32,13 @@ describe("the announcement bar's settings (bilesen-denetimi (b) 6)", () => {
     expect(announcementSettingsOf({ mode: "rotate", interval: "warp" })).toEqual({
       ...ANNOUNCEMENT_DEFAULTS,
       mode: "rotate",
+    })
+    // Where the lines sit and the bar's size as before: centred on a phone, at the start wide
+    expect(ANNOUNCEMENT_DEFAULTS.align).toBe("auto")
+    expect(ANNOUNCEMENT_DEFAULTS.size).toBe("medium")
+    expect(announcementSettingsOf({ align: "middle", size: "large" })).toEqual({
+      ...ANNOUNCEMENT_DEFAULTS,
+      size: "large",
     })
     for (const name of ANNOUNCEMENT_SETTING_NAMES) {
       expect(ANNOUNCEMENT_SETTINGS[name]).toContain(ANNOUNCEMENT_DEFAULTS[name])
