@@ -7713,7 +7713,10 @@
           "hidden": "Bu bölüm gizli; önizlemede görünmez.",
           "scheduled": "Bu bölüm zamanlaması dışında; önizlemede şu an görünmez.",
           "other_page": "Bu bölüm başka bir sayfada.",
-          "timeout": "Bölüm önizlemede bulunamadı."
+          "timeout": "Bölüm önizlemede bulunamadı.",
+          "incomplete": "Bu bölüm henüz boş; doldurulması gereken alanları doldurunca önizlemede görünür.",
+          "unsaved": "Başka bir bölümde eksik alan olduğu için değişiklikler henüz kaydedilmedi; o alanlar dolunca bu bölüm önizlemede görünür.",
+          "empty": "Bu bölümün şu an gösterecek bir şeyi yok; mağazanızda ilgili içerik (ürün, yorum, yazı gibi) olunca önizlemede görünür."
         },
         "liveOff": "Canlı önizleme kullanılamıyor; önizleme her kayıttan sonra yeniden yüklenecek.",
         "edit": "Düzenle",

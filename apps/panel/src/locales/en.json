@@ -7713,7 +7713,10 @@
           "hidden": "This section is hidden; it does not show in the preview.",
           "scheduled": "This section is outside its dates; it does not show in the preview now.",
           "other_page": "This section is on another page.",
-          "timeout": "The section was not found in the preview."
+          "timeout": "The section was not found in the preview.",
+          "incomplete": "This section is still empty; fill in its required fields and it will show in the preview.",
+          "unsaved": "Changes are not saved yet because another section has missing fields; once they are filled in, this section will show in the preview.",
+          "empty": "This section has nothing to show right now; it will show in the preview once your shop has the content it uses (products, reviews, posts and so on)."
         },
         "liveOff": "Live preview is unavailable; the preview will reload after each save.",
         "edit": "Edit",
