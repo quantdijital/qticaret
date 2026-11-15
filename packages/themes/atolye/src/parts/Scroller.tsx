@@ -116,8 +116,12 @@ export function Scroller({
 
   useScrollerDrag(track, settings.drag === "on")
 
+  // Every card in view (measured, so never before the script runs): no
+  // arrows, dots nor pause, as there is nothing to move; a resize that
+  // makes the row overflow measures again and brings them back (V-04)
+  const fits = hydrated && place.pages <= 1
   const arrows =
-    settings.arrows === "hidden" ? null : (
+    settings.arrows === "hidden" || fits ? null : (
       <div className="gf-scroller-arrows" data-position={settings.arrow_position}>
         <button
           type="button"
@@ -193,7 +197,7 @@ export function Scroller({
       {(dots || autoplay) && (
         <div className="flex min-h-11 items-center justify-center gap-1">
           {/* The visitor's own word, whatever holds the row now (the pointer, focus) */}
-          {autoplay && !reduced && (
+          {autoplay && !reduced && !fits && (
             <button
               type="button"
               className="gf-scroller-arrow"
