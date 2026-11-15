@@ -71,12 +71,38 @@ describe("the proxy on a preview page", () => {
 
   it("drops a preview header a visitor sends itself", async () => {
     const forged = `sfs_${"0a".repeat(16)}.to51q5.${"b".repeat(43)}`
-    const response = await proxy(
-      new NextRequest("http://localhost:8000/urun/bir-urun", {
-        headers: { "x-qt-layout-preview": forged },
-      })
-    )
-    expect(response.headers.get("x-middleware-request-x-qt-layout-preview")).toBeNull()
+    // The shop's own quick view answers and a product page: neither reads a draft
+    for (const path of ["/urun/bir-urun", "/urun/x", "/api/quick-view?id=prod_01"]) {
+      const response = await proxy(
+        new NextRequest(`http://localhost:8000${path}`, {
+          headers: { "x-qt-layout-preview": forged },
+        })
+      )
+      expect(response.headers.get("x-middleware-request-x-qt-layout-preview")).toBeNull()
+      // The page gets the proxy's headers in place of the visitor's: the forged one is not among them
+      const forwarded = response.headers.get("x-middleware-override-headers")?.split(",") ?? []
+      expect(forwarded).toContain("x-qt-url")
+      expect(forwarded).not.toContain("x-qt-layout-preview")
+    }
+  })
+
+  it("sets no draft header on an encoded or slash-ended quick view address", async () => {
+    const design = `sfl_01JABCDEF.to51q5.${"a".repeat(43)}`
+    const header = "x-middleware-request-x-qt-layout-preview"
+    // `%2F` is no path separator here: not the quick view's address, still never indexed
+    const encoded = await visit(`/onizleme/${design}%2Fhizli-bakis?id=prod_01`)
+    expect(encoded.headers.get(header)).toBeNull()
+    expect(encoded.headers.get("x-robots-tag")).toBe("noindex, nofollow")
+    expect(encoded.headers.get("cache-control")).toBe("private, no-store")
+    // A trailing slash: one 301 to the clean address, the token's case kept, no header on the way
+    for (const path of [`/onizleme/${design}/hizli-bakis/`, `/onizleme/${design}/`]) {
+      const slashed = await visit(`${path}?id=prod_01`)
+      expect(slashed.status).toBe(301)
+      expect(slashed.headers.get("location")).toBe(
+        `http://localhost:8000${path.slice(0, -1)}?id=prod_01`
+      )
+      expect(slashed.headers.get(header)).toBeNull()
+    }
   })
 
   it("leaves a live product page indexable", async () => {

@@ -83,7 +83,9 @@ export function QuickViewBuy({
   const error = !stale && state.error ? (words.errors[state.error] ?? words.fallback) : null
   return (
     <div className="flex flex-col gap-5">
-      {variant?.price && <Price price={variant.price} words={{ ...words, discount: discounts }} />}
+      {variant?.price && (
+        <Price price={variant.price} words={{ ...words, discount: discounts }} compact />
+      )}
       <form
         id={formId}
         action={form.action}

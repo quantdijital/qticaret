@@ -126,7 +126,7 @@
 - **Bakım açıkken** her sayfa isteği şunu alır: `503`, `Retry-After`, `Cache-Control: no-store` ve sade bir sayfa (başlık, metin, beklenen zaman; tema çerçevesi ve menü yok).
   - `Retry-After`: `expected_at` ilerideyse kalan saniye, 300 ile 86400 arasına kırpılır. Yoksa ya da geçmişse 3600.
 - **Açık kalanlar:**
-  - `/onizleme/*`
+  - `/onizleme/*`, yalnız `GET` ve `HEAD` (Ek 2026-11-15: kök düzen her sayfaya sepet ve çerez Server Action'larını taşıyor; Next bunları jetona bakılmadan önce `/onizleme/x`'e gönderilen POST'ta da çalıştırıyordu. Önizleme altındaki diğer yöntemler atlama çerezi ister, `allow_paths` de açamaz)
   - `/odeme/sonuc*`: sağlayıcı dönüşü. Öneri: `/odeme/durum` da açık kalsın, `/odeme/sonuc`'un yönlendirdiği yer orası; yoksa ödemesi geçen alıcı bakım sayfası görür.
   - `/{indexnow_key}.txt`, `/robots.txt`, `/sitemap*`
   - `/bakim/gir`

@@ -46,11 +46,15 @@ describe("the preview's quick view answers", () => {
     const none = await ask()
     expect(none.status).toBe(404)
     expect(none.headers.get("cache-control")).toBe("private, no-store")
+    // The 404 is nobody's search result either
+    expect(none.headers.get("x-robots-tag")).toBe("noindex, nofollow")
     expect(layout.previewLayoutOf).not.toHaveBeenCalled()
 
     layout.layoutPreviewToken.mockResolvedValue(TOKEN)
     layout.previewLayoutOf.mockResolvedValue(null)
-    expect((await ask()).status).toBe(404)
+    const lapsed = await ask()
+    expect(lapsed.status).toBe(404)
+    expect(lapsed.headers.get("x-robots-tag")).toBe("noindex, nofollow")
     // An ended live session as well
     layout.layoutPreviewToken.mockResolvedValue(SESSION)
     expect((await ask(SESSION)).status).toBe(404)

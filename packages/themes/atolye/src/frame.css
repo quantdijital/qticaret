@@ -155,12 +155,6 @@ html:has([data-gf-checkout]) {
       transform var(--dur-short) var(--ease-out),
       visibility 0s;
   }
-  /* 1024 px and below it stands over the content's edge: see-through until pointed at or focused */
-  @media (width < 64.0625rem) {
-    [data-back-to-top][data-shown]:not(:hover, :focus-visible) {
-      opacity: 0.8;
-    }
-  }
 }
 body:has([data-drawer][data-state="open"]) [data-back-to-top],
 body:has(.gf-suggest:not([hidden])) [data-back-to-top] {
