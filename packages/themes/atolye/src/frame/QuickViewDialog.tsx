@@ -8,6 +8,7 @@ import { loadQuickView, type QuickViewAnswer } from "@qticaret/ui/lib/quick-view
 import { CardRating } from "../parts/card-parts"
 import { Summary } from "../product/Summary"
 import { announceCartAdded, type QuickViewAsk } from "./events"
+import { LayerPortal } from "./Layers"
 import { QuickViewBuy } from "./QuickViewBuy"
 import { QuickViewGallery } from "./QuickViewGallery"
 import type { QuickViewWords } from "./quick-view-words"
@@ -88,7 +89,7 @@ export default function QuickViewDialog({
   }, [onOpenChange])
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
+      <LayerPortal>
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-scrim duration-(--dur-short) motion-safe:data-[state=closed]:animate-out data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:animate-in data-[state=open]:fade-in-0" />
         <Dialog.Content
           data-quick-view-dialog=""
@@ -165,7 +166,7 @@ export default function QuickViewDialog({
             </div>
           </div>
         </Dialog.Content>
-      </Dialog.Portal>
+      </LayerPortal>
     </Dialog.Root>
   )
 }

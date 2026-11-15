@@ -423,6 +423,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "aras.secret_invalid":
     "Aras Kargo did not accept this user name and password. Copy them again from Aras's integration document; test and live accounts differ.",
   "customers.unknown": "Customer not found.",
+  "customer_groups.unknown": "Customer group not found.",
   "customers.email_is_login":
     "A member's e-mail is their sign-in address; only the customer can change it from their account.",
   "customers.email_taken": "A guest customer with this e-mail already exists.",
@@ -777,6 +778,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "price_lists.unknown": "Price list not found.",
   "price_lists.no_currency": "The shop has no currency set.",
   "price_lists.rate": "The rate must be between 0 and 100 percent.",
+  "wholesale.managed":
+    "This group or price list belongs to wholesale; change it on the wholesale screens.",
+  "wholesale.tier_exists": "A wholesale level or customer group with this name already exists.",
+  "wholesale.tier_in_use": "Wholesalers are on this level; move them to another level first.",
+  "wholesale.tier_unknown": "Wholesale level not found.",
+  "wholesale.variant_unknown": "One of the products chosen no longer exists.",
   "platform_settings.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
   "platform_settings.color_duplicate": "Each colour name can be listed once.",
   "platform_settings.color_contrast":

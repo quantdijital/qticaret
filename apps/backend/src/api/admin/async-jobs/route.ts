@@ -4,6 +4,7 @@ import type AsyncJobModuleService from "../../../modules/async-job/service"
 import { ValidationError } from "../../../lib/errors"
 import { enqueueAsyncJobWorkflow } from "../../../workflows/async-job/enqueue-async-job"
 import {
+  MANAGER_JOB_TYPES,
   OWNER_JOB_TYPES,
   PLATFORM_JOB_TYPES,
   PRIVATE_JOB_TYPES,
@@ -29,11 +30,16 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
     { type: { $nin: PLATFORM_JOB_TYPES } },
     { $or: [{ type: { $nin: SCHEDULED_JOB_TYPES } }, { requested_by: { $ne: null } }] },
   ]
+  const role = await staffRoleOf(req)
+  // The wholesale sync is the owner's and admin's (ADR-0068 decision 17)
+  const managers =
+    role === "owner" || role === "admin" ? [] : [{ type: { $nin: MANAGER_JOB_TYPES } }]
   const seen =
-    (await staffRoleOf(req)) === "owner"
+    role === "owner"
       ? shops
       : [
           ...shops,
+          ...managers,
           { type: { $nin: OWNER_JOB_TYPES } },
           {
             $or: [

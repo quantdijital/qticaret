@@ -51,7 +51,8 @@ export const styleKitAttribute = (field: StyleKitField): `data-${string}` =>
  * it did before the kit. A theme's stylesheet reads a step with an
  * attribute selector over its own (`[data-shadow="none"] .gf-drop`) or sets
  * a token there (`[data-shadow="none"] { --shadow-float: none }`); the
- * element holds the page's dialogs and drawers too. No kit: every default.
+ * theme gives the same marks to the dialogs and drawers it portals to
+ * `body` (adr/0067 Ek 2026-11-15). No kit: every default.
  */
 export function styleKitAttributes(kit: Partial<StyleKit> | undefined): Record<string, string> {
   const marks: Record<string, string> = {}
