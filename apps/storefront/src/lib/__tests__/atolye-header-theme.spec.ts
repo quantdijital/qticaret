@@ -60,7 +60,10 @@ const rowOf = (html: string, path: string) => {
 describe("the centred header (header bar `centered`)", () => {
   it("puts the search on the left, the wordmark in the middle and the tools on the right", () => {
     const head = headerOf(centred())
-    expect(head).toMatch(/<header data-gf-head="" class="[^"]*gf-head sticky top-0[^"]*"/)
+    // The section mark (`data-qs`, sectionMark) may sit between the hook and the class
+    expect(head).toMatch(
+      /<header data-gf-head=""(?: data-qs="[^"]*")? class="[^"]*gf-head sticky top-0[^"]*"/
+    )
     expect(head).toContain('data-variant="centered"')
     expect(head).toMatch(
       /class="[^"]*grid h-14 grid-cols-\[minmax\(0,1fr\)_auto_minmax\(0,1fr\)\][^"]*lg:h-20[^"]*" data-gf-head-row=""/
