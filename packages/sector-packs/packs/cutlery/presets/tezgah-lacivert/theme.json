@@ -1,7 +1,7 @@
 {
   "settings_version": 2,
   "theme": "atolye",
-  "colors": { "primary": "#2f6690", "accent": "#1c2b4a", "background": "steel" },
+  "colors": { "primary": "#33709c", "accent": "#1f4f8f", "background": "steel" },
   "typography": { "heading": "inter", "body": "inter" },
   "radius": "sharp",
   "product_card": {

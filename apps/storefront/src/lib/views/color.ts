@@ -27,12 +27,14 @@ export function readableOn(hex: string): string {
 }
 
 /**
- * Whether `#rrggbb` reads as a red, a theme's sale colour (Tezgâh audit
- * K-05): its hue within 15° of pure red and saturated enough (HSL
- * saturation from 0.45) to be a colour, not a brown or a grey. Orange
- * (#c2410c, 18°) and wine (340°) are not.
+ * Whether `#rrggbb` reads near a theme's sale red (Tezgâh audits K-05 and
+ * the second round's colour sets): a warm hue, from 15° short of pure red
+ * through orange and amber to 45°, and saturated enough (HSL saturation
+ * from 0.45) to be a colour, not a brown or a grey. Beside a red sale such
+ * a colour reads as the same family, the two inks' contrast near 1:1 (an
+ * orange #c2410c: 1.17:1). Wine (330°), yellow, green and blue do not.
  */
-export function readsAsRed(hex: string): boolean {
+export function readsNearSale(hex: string): boolean {
   const parts = HEX.exec(hex)
   if (!parts) {
     return false
@@ -47,7 +49,7 @@ export function readsAsRed(hex: string): boolean {
   const lightness = (max + min) / 2
   const saturation = spread / (1 - Math.abs(2 * lightness - 1))
   const hue = (60 * ((g - b) / spread) + 360) % 360
-  return saturation >= 0.45 && (hue <= 15 || hue >= 345)
+  return saturation >= 0.45 && (hue <= 45 || hue >= 345)
 }
 
 /** Whether `value` is a lower-case `#rrggbb`: the only colour form that goes into CSS. */

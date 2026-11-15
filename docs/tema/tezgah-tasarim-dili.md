@@ -23,8 +23,18 @@ Ziyaretçi bir alet arıyor. Önce nerede olduğunu (kategori listesi), sonra ne
 **Renk: vurgu nerede.** Takım iki renk taşır: *eylem rengi* (`colors.primary`) ve *taban rengi* (`colors.accent`).
 - Eylem rengi yalnız eylemde: birincil düğme, bağlantı, odak halkası; kartın düğmesi durağanken çerçeveli ve nötr, kartın üzerine gelinince ya da düğme odaktayken eylem renginde (bir sıra kart bir sıra dolu düğme olmaz). Başlıkta, zeminde, süste, fiyat bandının büyük rakamında yok (rakam mürekkep rengi).
 - Taban rengi seçimde: seçili raf sekmesi, seçili seçenek, sayaç.
-- İndirim temanın kendi kırmızısı (`deal`). Eylem rengi kırmızı okunan takımda (varsayılan `#b3261e`) indirim renge yaslanmaz: rozet grafit zeminde açık yazı, indirimli fiyat mürekkep rengi; üstü çizili eski fiyat ve rozet indirimi söyler (tema bunu kendisi yapar, `readsAsRed`). Lacivert ve turuncu takımlarda indirim kırmızı kalır.
+- İndirim temanın kendi kırmızısı (`deal`, `#be2323`). Eylem rengi indirim kırmızısına yakın okunan takımda indirim renge yaslanmaz: rozet grafit zeminde açık yazı, indirimli fiyat mürekkep rengi; üstü çizili eski fiyat ve rozet indirimi söyler (tema bunu kendisi yapar, `readsNearSale`). "Yakın": sıcak ton (kırmızıdan 15° önce başlayıp turuncu ve kehribar dahil 45°'ye kadar) ve doygun (HSL doygunluğu ≥ 0,45); böyle bir rengin indirim kırmızısıyla kontrastı 1:1'e yakındır, iki renk aynı aileden okunur. Kırmızı ve turuncu takımda indirim grafit rozettir; lacivert takımda indirim kırmızı kalır.
 - Menü çubuğu her takımda grafit (`menu_ground: stage`): tezgâhın kendisi, renk takımıyla değişmez. Çubuğun vurgulu bağlantısı sahnenin açık mürekkebiyle yazılır, renkli değil.
+
+**Renk takımları ve kontrast** (WCAG oranı; sayfa `#f8fafc`, alan `#fcfdfe`, grafit çubuk `#11151a`, indirim `#be2323`; 2026-11-15 ikinci denetimden sonra lacivert ve turuncu yeniden ayarlandı):
+
+| Takım | Eylem (`primary`) | Beyaz yazı | Sayfada | Çubukta (sepet sayacı) | İndirimle | Taban (`accent`) | Beyaz yazı | Çubukla | İndirim |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Tezgâh (kırmızı) | `#b3261e` | 6,54 | 6,25 | 2,80 | 1,08 | `#2e3338` | 12,75 | 1,44 | grafit rozet |
+| Lacivert | `#33709c` (eski `#2f6690`) | 5,33 | 5,10 | 3,44 (eski 2,99) | 1,14 | `#1f4f8f` (eski `#1c2b4a`) | 8,16 | 2,25 (eski 1,30) | kırmızı |
+| Turuncu | `#b03b0b` (eski `#c2410c`) | 6,04 | 5,77 (eski 4,95) | 3,03 | 1,01 | `#2e3338` | 12,75 | 1,44 | grafit rozet |
+
+Lacivert takımın tabanı artık grafitten ayrışan bir mavi (seçili sekme lacivert okunur); eylem mavisi sayacı çubukta 3:1'in üstüne çıkacak kadar açıldı, sayfada 4,5:1'in üstünde kaldı. Turuncu, sayfada metin bağlantısı olarak rahat okunacak kadar koyulaştı. Bilinen sınır: varsayılan kırmızının sayacı çubukta 2,80:1 (sayacın rakamı beyaz yazıyla 6,54:1 okunur).
 
 **Zemin sırası.** Sayfa zemini çelik beyazı (`steel`). Ritim: açık bölümler arasına iki kuyu bandı (`look.ground: well`) ve tek grafit sahne. Kuyu bandının iç boşluğu `medium`. Kuyu bandı iki kez üst üste gelmez, alt bilginin kuyusuna da yapışmaz.
 
