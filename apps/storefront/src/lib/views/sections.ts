@@ -10,7 +10,7 @@ import { legalIdentity, siteSeo } from "@/lib/store-api/requests"
 import { googleRatingReviews, reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
 import { heroView, priceBandsView, withCounts } from "./catalog"
-import { linkedCategoriesView } from "./category-cards-data"
+import { collageCategoriesView, linkedCategoriesView } from "./category-cards-data"
 import { picturedCategories } from "./category-tiles"
 import { featuredView } from "./featured"
 import { EXCERPT_MIN_RATING, googleRatingView } from "./google-rating"
@@ -64,6 +64,21 @@ async function sectionView(
     case "banner":
       return bannerView(section, t)
     case "categories": {
+      if (section.variant === "collage") {
+        const { cards, collage } = await collageCategoriesView(section, t, context.home === true)
+        const more = layoutLink(section.more ?? null, t)
+        return cards.length > 0
+          ? {
+              id,
+              type: "categories",
+              title: section.title ?? t("home.shop_categories"),
+              categories: cards,
+              ...(more ? { more } : {}),
+              variant: "collage",
+              collage,
+            }
+          : null
+      }
       if (section.variant === "linked") {
         const { cards, linked } = await linkedCategoriesView(section, t, context.home === true)
         const more = layoutLink(section.more ?? null, t)

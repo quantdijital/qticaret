@@ -17,9 +17,10 @@ export const SECTION_VARIANTS = {
   hero: ["standard", "category_list"],
   /**
    * `tiles`: today's picture tiles; `linked`: each category a card with its
-   * first subcategories as links (adr/0049 Ek 2026-11-15).
+   * first subcategories as links (adr/0049 Ek 2026-11-15); `collage`:
+   * photo-led cards filling each row, the first one wider while `lead` is on.
    */
-  categories: ["tiles", "linked"],
+  categories: ["tiles", "linked", "collage"],
   /**
    * The product rail (adr/0049 Ek 2026-11-15): `grid`, today's rows of
    * cards; `carousel`, one row that slides (the scroller kit,

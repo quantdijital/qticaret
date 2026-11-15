@@ -3,6 +3,8 @@ import {
   CATEGORY_CARD_DEFAULTS,
   CATEGORY_CARD_LIMITS,
   CATEGORY_CARD_SETTINGS,
+  CATEGORY_COLLAGE_DEFAULTS,
+  CATEGORY_COLLAGE_SETTINGS,
 } from "../store/section-categories.js"
 import {
   FOOTER_BAR_DEFAULTS,
@@ -14,9 +16,10 @@ import { SECTION_VARIANTS, defaultVariant, variantOf } from "../store/section-va
 
 describe("the category cards' linked variant", () => {
   it("draws today's tiles by default, the linked cards on request", () => {
-    expect(SECTION_VARIANTS.categories).toEqual(["tiles", "linked"])
+    expect(SECTION_VARIANTS.categories).toEqual(["tiles", "linked", "collage"])
     expect(defaultVariant("categories")).toBe("tiles")
     expect(variantOf("categories", "linked")).toBe("linked")
+    expect(variantOf("categories", "collage")).toBe("collage")
     expect(variantOf("categories", "bento")).toBe("tiles")
   })
 
@@ -30,6 +33,22 @@ describe("the category cards' linked variant", () => {
     expect(CATEGORY_CARD_SETTINGS.columns).toEqual([2, 3, 4])
     expect(CATEGORY_CARD_DEFAULTS.links).toBe(5)
     expect(CATEGORY_CARD_LIMITS.links).toMatchObject({ min: 0, max: 8 })
+  })
+})
+
+describe("the category cards' collage variant", () => {
+  it("shares the cards' columns, starts every own setting on its list, the lead on", () => {
+    for (const [setting, steps] of Object.entries(CATEGORY_COLLAGE_SETTINGS)) {
+      const listed: readonly unknown[] = steps
+      expect(listed).toContain(
+        CATEGORY_COLLAGE_DEFAULTS[setting as keyof typeof CATEGORY_COLLAGE_SETTINGS]
+      )
+    }
+    expect(CATEGORY_COLLAGE_SETTINGS.columns).toBe(CATEGORY_CARD_SETTINGS.columns)
+    expect(CATEGORY_COLLAGE_SETTINGS.columns_mobile).toBe(CATEGORY_CARD_SETTINGS.columns_mobile)
+    expect(CATEGORY_COLLAGE_SETTINGS.height).toEqual(["low", "medium", "high"])
+    expect(CATEGORY_COLLAGE_DEFAULTS).toMatchObject({ height: "medium", lead: "on", links: 4 })
+    expect(CATEGORY_COLLAGE_DEFAULTS.links).toBeLessThanOrEqual(CATEGORY_CARD_LIMITS.links.max)
   })
 })
 
