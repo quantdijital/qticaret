@@ -2,9 +2,9 @@ import { z } from "@medusajs/framework/zod"
 
 const name = z.string().trim().min(1).max(100)
 /** Off every variant's own price, as a price list's percentage (adr/0010: two decimals). */
-const percent = z.number().multipleOf(0.01).min(0.01).max(99)
+export const percent = z.number().multipleOf(0.01).min(0.01).max(99)
 /** Fewest units an order holds (ADR-0068 §8). */
-const minQuantity = z.number().int().min(1).max(100_000)
+export const minQuantity = z.number().int().min(1).max(100_000)
 
 /** A new wholesale level: its name, and optionally a rate and the fewest units. */
 export const AdminPostWholesaleTier = z

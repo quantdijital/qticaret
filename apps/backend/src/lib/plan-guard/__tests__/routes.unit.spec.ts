@@ -148,6 +148,8 @@ describe("the plan guard's allow-list", () => {
     "POST /admin/bulk-messages/:id/pause",
     "POST /admin/bulk-messages/:id/cancel",
     "DELETE /admin/google",
+    // ADR-0068 §9: a wholesaler closed is access taken away
+    "POST /admin/wholesale/accounts/:id/deactivate",
   ])("keeps %s open", (route) => {
     expect(decisionOf(route)).toEqual({ allowed: true, reason: "open" })
   })
@@ -188,6 +190,14 @@ describe("the plan guard's allow-list", () => {
     "POST /admin/google/merchant/sync",
     "POST /admin/gift-cards",
     "POST /admin/store-credit-accounts/:id/credit",
+    // ADR-0068 §9: a wholesaler opened, changed, reopened, invited again or priced sells anew
+    "POST /admin/wholesale/accounts",
+    "POST /admin/wholesale/accounts/:id",
+    "DELETE /admin/wholesale/accounts/:id",
+    "POST /admin/wholesale/accounts/:id/reactivate",
+    "POST /admin/wholesale/accounts/:id/invitation",
+    "POST /admin/wholesale/accounts/:id/prices",
+    "POST /admin/wholesale/tiers",
   ])("closes %s", (route) => {
     expect(decisionOf(route)).toEqual({ allowed: false, reason: "closed" })
   })

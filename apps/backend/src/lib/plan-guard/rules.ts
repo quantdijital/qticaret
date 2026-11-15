@@ -160,6 +160,8 @@ export const PLAN_OPEN: readonly Rule[] = [
     "/admin/marketing-feeds/token",
   ]),
   ...open(POST, ["/admin/api-access/:id/revoke", "/admin/staff/members/:id/reset-mfa"]),
+  // ADR-0068 §9: a wholesaler closed (pays retail from the next request); reopening sells anew
+  { methods: POST, path: "/admin/wholesale/accounts/:id/deactivate" },
 ]
 
 const closed = (paths: readonly string[]): Rule[] =>
@@ -205,7 +207,7 @@ export const PLAN_CLOSED: readonly Rule[] = closed([
   "/admin/customer-segments*",
   "/admin/customer-groups*",
   "/admin/customers*",
-  // ADR-0068 §9: wholesale levels and prices are selling anew; closing an account (slice 1b) opens
+  // ADR-0068 §9: wholesale levels, accounts and prices are selling anew; closing an account opens
   "/admin/wholesale*",
   "/admin/abandoned-carts*",
   "/admin/payment-links*",

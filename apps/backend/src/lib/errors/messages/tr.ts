@@ -785,6 +785,16 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "wholesale.tier_in_use": "Bu seviyede toptancılar var; önce onları başka bir seviyeye taşıyın.",
   "wholesale.tier_unknown": "Toptan seviyesi bulunamadı.",
   "wholesale.variant_unknown": "Seçilen ürünlerden biri artık yok.",
+  "wholesale.exists": "Bu e-posta adresi için zaten bir toptancı kaydı var.",
+  "wholesale.account_unknown": "Toptancı bulunamadı.",
+  "wholesale.account_not_active": "Bu toptancı etkin değil.",
+  "wholesale.account_not_inactive": "Bu toptancı kapalı değil.",
+  "wholesale.account_not_pending": "Bu toptancı davet aşamasında değil.",
+  "wholesale.no_price_source":
+    "Toptancı için bir seviye seçin ya da toptancıya özel fiyatları açın.",
+  "wholesale.own_prices_off": "Bu toptancıya özel fiyatlar açık değil; önce açın.",
+  "wholesale.tax_pair": "Vergi dairesi ve vergi numarasını birlikte girin.",
+  "wholesale.company_for_tax": "Vergi bilgisi için firma adı gerekir.",
   "platform_settings.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",
   "platform_settings.color_duplicate": "Her renk adı bir kez yazılabilir.",
   "platform_settings.color_contrast":

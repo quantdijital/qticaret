@@ -15,6 +15,12 @@ import {
   AdminPostWholesaleTier,
   AdminUpdateWholesaleTier,
 } from "../admin/wholesale/validators"
+import {
+  AdminGetWholesaleAccounts,
+  AdminPostWholesaleAccount,
+  AdminPostWholesaleAccountAction,
+  AdminUpdateWholesaleAccount,
+} from "../admin/wholesale/account-validators"
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
 import { requireFeature } from "./require-feature"
@@ -29,6 +35,12 @@ const perStaff = () =>
     identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
   })
 
+// A wholesaler opened or invited again mails an address in the shop's name
+const perStaffInvite = () =>
+  rateLimit(() => RATE_LIMIT_PROFILES.wholesale_invite, {
+    identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
+  })
+
 /** Behind `customers.wholesale` (first: a shop without it sees no route), for people only. */
 const staff = (...middlewares: Middleware[]): Middleware[] => [
   requireFeature(CUSTOMERS_WHOLESALE),
@@ -39,7 +51,8 @@ const staff = (...middlewares: Middleware[]): Middleware[] => [
 /**
  * ADR-0068 slice 1a: wholesale levels and their prices (owner and admin,
  * `lib/staff/permission-rules.ts`), and the guards on Medusa's own group
- * and price list routes. The guards run with the flag off too.
+ * and price list routes. The guards run with the flag off too. Slice 1b:
+ * wholesalers; the claim on sign-in is `http/wholesale-claim.ts`.
  */
 export const WHOLESALE_ROUTES = [
   {
@@ -66,6 +79,44 @@ export const WHOLESALE_ROUTES = [
   },
   {
     matcher: "/admin/wholesale/tiers/:id/prices",
+    methods: ["POST" as const],
+    middlewares: staff(validateAndTransformBody(AdminPostWholesalePrices)),
+  },
+  // Slice 1b: wholesalers (ADR-0068 §3), their own prices as a level's
+  {
+    matcher: "/admin/wholesale/accounts",
+    methods: ["GET" as const],
+    middlewares: staff(validateAndTransformQuery(AdminGetWholesaleAccounts, {})),
+  },
+  {
+    matcher: "/admin/wholesale/accounts",
+    methods: ["POST" as const],
+    middlewares: staff(perStaffInvite(), validateAndTransformBody(AdminPostWholesaleAccount)),
+  },
+  { matcher: "/admin/wholesale/accounts/:id", methods: ["GET" as const], middlewares: staff() },
+  {
+    matcher: "/admin/wholesale/accounts/:id",
+    methods: ["POST" as const],
+    middlewares: staff(perStaff(), validateAndTransformBody(AdminUpdateWholesaleAccount)),
+  },
+  { matcher: "/admin/wholesale/accounts/:id", methods: ["DELETE" as const], middlewares: staff() },
+  ...["deactivate", "reactivate"].map((action) => ({
+    matcher: `/admin/wholesale/accounts/:id/${action}`,
+    methods: ["POST" as const],
+    middlewares: staff(validateAndTransformBody(AdminPostWholesaleAccountAction)),
+  })),
+  {
+    matcher: "/admin/wholesale/accounts/:id/invitation",
+    methods: ["POST" as const],
+    middlewares: staff(perStaffInvite(), validateAndTransformBody(AdminPostWholesaleAccountAction)),
+  },
+  {
+    matcher: "/admin/wholesale/accounts/:id/lines",
+    methods: ["GET" as const],
+    middlewares: staff(validateAndTransformQuery(AdminGetWholesaleLines, {})),
+  },
+  {
+    matcher: "/admin/wholesale/accounts/:id/prices",
     methods: ["POST" as const],
     middlewares: staff(validateAndTransformBody(AdminPostWholesalePrices)),
   },
