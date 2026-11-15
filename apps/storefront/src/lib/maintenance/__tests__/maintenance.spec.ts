@@ -76,9 +76,20 @@ describe("the paths a dark shop keeps open", () => {
   })
 
   it("is open when either the storefront or the shop keeps the path", () => {
-    expect(isOpenDuringMaintenance("/odeme/sonuc", [])).toBe(true)
-    expect(isOpenDuringMaintenance("/iletisim", ["/iletisim"])).toBe(true)
-    expect(isOpenDuringMaintenance("/", ["/iletisim"])).toBe(false)
+    expect(isOpenDuringMaintenance("/odeme/sonuc", "GET", [])).toBe(true)
+    expect(isOpenDuringMaintenance("/iletisim", "GET", ["/iletisim"])).toBe(true)
+    expect(isOpenDuringMaintenance("/iletisim", "POST", ["/iletisim"])).toBe(true)
+    expect(isOpenDuringMaintenance("/", "GET", ["/iletisim"])).toBe(false)
+  })
+
+  it("keeps a preview open to look at only: no Server Action posted under it", () => {
+    expect(isOpenDuringMaintenance("/onizleme/x", "GET", [])).toBe(true)
+    expect(isOpenDuringMaintenance("/onizleme/x", "HEAD", [])).toBe(true)
+    for (const method of ["POST", "PUT", "PATCH", "DELETE"]) {
+      expect(isOpenDuringMaintenance("/onizleme/x", method, [])).toBe(false)
+      // Not even when the shop listed it among its open paths
+      expect(isOpenDuringMaintenance("/onizleme/x", method, ["/onizleme/*"])).toBe(false)
+    }
   })
 })
 

@@ -124,7 +124,8 @@ export default function QuickViewDialog({
             ) : null}
             <div className="flex min-w-0 flex-col gap-4 md:pr-8">
               {view?.brand && <p className="text-xs text-text-3">{view.brand}</p>}
-              <Dialog.Title className="max-w-none text-title">
+              {/* A section's size: the name heads the dialog, the price follows it */}
+              <Dialog.Title className="max-w-none text-section leading-tight font-bold tracking-(--tracking-head)">
                 {view?.title ?? ask.title}
               </Dialog.Title>
               {view?.rating && <CardRating rating={view.rating} />}

@@ -72,6 +72,32 @@ describe("maintenanceGate", () => {
     }
   })
 
+  it("answers a Server Action posted under a preview with the 503, the bypass cookie aside", async () => {
+    // `addToCart` posted to `/onizleme/x`: the root layout carries it on every route
+    const action = (cookie?: string) =>
+      new NextRequest("http://localhost:8000/onizleme/x", {
+        method: "POST",
+        headers: { "next-action": "7f00aa", ...(cookie ? { cookie } : {}) },
+      })
+    const dark = await maintenanceGate(action(), "/onizleme/x", site(true), context)
+    expect(dark.blocked?.status).toBe(503)
+    expect(edge.checkBypass).not.toHaveBeenCalled()
+    // The shop's own people with a bypass link act as on any page
+    edge.checkBypass.mockResolvedValue("open")
+    const bypassed = await maintenanceGate(
+      action(`qt_bypass=${TOKEN}`),
+      "/onizleme/x",
+      site(true),
+      context
+    )
+    expect(bypassed).toEqual({ blocked: null, bypassed: true })
+    // An open shop's preview acts as usual
+    expect(await maintenanceGate(action(), "/onizleme/x", site(false), context)).toEqual({
+      blocked: null,
+      bypassed: false,
+    })
+  })
+
   it("lets a bypass cookie the backend accepts through, marked", async () => {
     edge.checkBypass.mockResolvedValue("open")
     const gate = await maintenanceGate(

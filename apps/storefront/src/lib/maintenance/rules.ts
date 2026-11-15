@@ -142,6 +142,20 @@ export function isAllowedPath(path: string, allowPaths: readonly string[]): bool
   })
 }
 
-/** Whether `path` is answered as usual while the shop is dark, cookie aside. */
-export const isOpenDuringMaintenance = (path: string, allowPaths: readonly string[]): boolean =>
-  isStorefrontOpenPath(path) || isAllowedPath(path, allowPaths)
+/**
+ * A preview is open to look at, never to act from: every page carries the
+ * root layout's Server Actions (the cart, the cookie choices), and Next runs
+ * one posted to any address its route matches (`/onizleme/x` included)
+ * before the page reads the token. So while dark, only GET and HEAD pass
+ * there by path; anything else needs the bypass cookie like every page.
+ */
+const isPreviewWrite = (path: string, method: string) =>
+  path.startsWith("/onizleme/") && method !== "GET" && method !== "HEAD"
+
+/** Whether a request is answered as usual while the shop is dark, cookie aside. */
+export const isOpenDuringMaintenance = (
+  path: string,
+  method: string,
+  allowPaths: readonly string[]
+): boolean =>
+  !isPreviewWrite(path, method) && (isStorefrontOpenPath(path) || isAllowedPath(path, allowPaths))
