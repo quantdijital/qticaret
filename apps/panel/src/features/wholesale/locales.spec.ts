@@ -22,15 +22,24 @@ describe("the wholesale screens' words", () => {
 
   it.each([
     "customers.sectionWholesale",
-    "customers.sectionWholesaleTiers",
+    // Toptancılar's three tabs and the retail list's pointer to wholesale orders
+    "wholesale.nav.accounts",
+    "wholesale.nav.tiers",
+    "wholesale.nav.orders",
+    "orders.wholesaleMatchesLink",
     // Ayarlar > Özellikler lists the flag by its key (`customers.wholesale`)
     "settings.features.flags.customers.wholesale.label",
     "settings.features.flags.customers.wholesale.description",
-    // Bildirimler > Müşteri mesajları names the two new templates
-    "settings.notifications.templates.names.account.wholesale_invite",
-    "settings.notifications.templates.names.account.wholesale_enabled",
   ])("name %s in both languages", (path) => {
     expect(typeof at(tr, path)).toBe("string")
     expect(typeof at(en, path)).toBe("string")
+  })
+  it("name no invitation template any more (Ek 2026-11-15 (2))", () => {
+    expect(
+      at(tr, "settings.notifications.templates.names.account.wholesale_invite")
+    ).toBeUndefined()
+    expect(
+      at(en, "settings.notifications.templates.names.account.wholesale_enabled")
+    ).toBeUndefined()
   })
 })

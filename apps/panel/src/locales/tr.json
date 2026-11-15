@@ -1594,9 +1594,7 @@
           "account": {
             "password_reset": "Şifre sıfırlama",
             "verify_email": "E-posta doğrulama",
-            "migration_invite": "Taşınan müşteriye hesap daveti",
-            "wholesale_invite": "Toptancı daveti",
-            "wholesale_enabled": "Toptan hesabı açıldı"
+            "migration_invite": "Taşınan müşteriye hesap daveti"
           },
           "payment": {
             "failed": "Ödeme alınamadı"
@@ -4586,7 +4584,10 @@
       "title": "Stok yetersiz: ödemesi alınan bu siparişin bazı ürünleri stokta yoktu",
       "description": "Sipariş anında bu ürünlerin stoğu başka siparişlere ayrılmıştı. Eksikleri üretin ya da tedarik edin; edemeyecekseniz siparişi iptal edip ödemeyi iade edin.",
       "line": "{{title}}: {{short}} adet eksik (siparişte {{quantity}})"
-    }
+    },
+    "wholesaleMatches_one": "Aramanız {{count}} toptan siparişini de buldu; toptan siparişler burada listelenmez.",
+    "wholesaleMatches_other": "Aramanız {{count}} toptan siparişini de buldu; toptan siparişler burada listelenmez.",
+    "wholesaleMatchesLink": "Toptancılar > Siparişler'de gör"
   },
   "customers": {
     "description": "Sipariş veren ya da üye olan herkes",
@@ -4665,7 +4666,6 @@
     "sectionCustomers": "Müşteriler",
     "sectionGroups": "Gruplar ve segmentler",
     "sectionWholesale": "Toptancılar",
-    "sectionWholesaleTiers": "Toptan seviyeleri",
     "sectionContact": "İletişim mesajları",
     "contactMessages": {
       "title": "İletişim mesajları",
@@ -10004,16 +10004,13 @@
     "ownPrices": "Özel fiyat",
     "units_one": "{{count}} adet",
     "units_other": "{{count}} adet",
-    "invitationLine_one": "{{count}} kez gönderildi · {{date}} tarihine kadar geçerli",
-    "invitationLine_other": "{{count}} kez gönderildi · {{date}} tarihine kadar geçerli",
     "columns": {
       "who": "Firma / yetkili",
       "email": "E-posta",
       "source": "Fiyat",
       "rate": "Oran",
       "minimum": "En az adet",
-      "status": "Durum",
-      "invitation": "Davet"
+      "status": "Durum"
     },
     "list": {
       "title": "Toptancılar",
@@ -10029,7 +10026,7 @@
     },
     "form": {
       "newTitle": "Yeni toptancı",
-      "newText": "Bu e-postayla açılmış bir müşteri hesabı varsa toptancı hemen etkinleşir; yoksa vitrinde hesap açması için davet gider. Şifre panelde belirlenmez.",
+      "newText": "Toptancının hesabını şifresiyle siz açarsınız; hesap hemen etkinleşir ve e-posta gönderilmez. Şifreyi toptancıya iletin.",
       "create": "Toptancıyı aç",
       "editTitle": "Toptancıyı düzenle",
       "saved": "Toptancı kaydedildi.",
@@ -10064,28 +10061,29 @@
         "priceSource": "Bir toptan seviyesi seçin ya da bu toptancıya özel fiyatı açın.",
         "percent": "Oran 0,01 ile 99 arasında olmalı.",
         "minimum": "En az adet 1 ile 100.000 arasında bir tam sayı olmalı.",
-        "tierName": "Seviyeye bir ad verin."
-      }
+        "tierName": "Seviyeye bir ad verin.",
+        "passwordShort": "Şifre en az 10 karakter olmalı."
+      },
+      "signIn": "Giriş",
+      "password": "Şifre",
+      "passwordHint": "Toptancı bu e-posta ve şifreyle vitrinde giriş yapar. Şifreyi toptancıya siz iletirsiniz; bir daha gösterilmez. Bu e-postayla doğrulanmış bir müşteri hesabı varsa yazdığınız şifre kullanılmaz.",
+      "takeOverTitle": "Doğrulanmamış hesap devralınsın mı?",
+      "takeOverText": "Bu e-postayla açılmış ama adresi doğrulanmamış bir hesap var; adres başkasına ait olabilir. Devralırsanız hesabın şifresi yazdığınız şifreyle değişir, açık oturumları kapanır ve açık sepetleri kaldırılır. İşlem denetim kaydına yazılır.",
+      "takeOver": "Hesabı devral"
     },
     "outcome": {
-      "activeSent": "Toptancı hemen etkinleşti: bu e-postayla açılmış bir müşteri hesabı vardı. \"Toptan hesabınız açıldı\" e-postası gönderildi.",
-      "activeNotSent": "Toptancı hemen etkinleşti: bu e-postayla açılmış bir müşteri hesabı vardı. Bilgilendirme e-postası gönderilemedi; toptancı giriş yaptığında toptan fiyatları yine görür.",
-      "invitedSent": "Davet e-postası gönderildi. Toptancı bu adresle hesap açınca etkinleşir; davet 90 gün geçerlidir.",
-      "invitedNotSent": "Toptancı kaydı açıldı ama davet e-postası gönderilemedi. \"Daveti yeniden gönder\" ile tekrar deneyin.",
       "billing": {
         "written": "Vergi bilgileri müşterinin fatura bilgilerine yazıldı.",
         "kept": "Müşterinin kayıtlı fatura bilgileri vardı; değiştirilmedi.",
-        "none": "Vergi bilgileri saklanmadı; toptancı hesabını açınca vitrinde kendisi girer."
+        "none": "Vergi bilgileri yazılmadı."
+      },
+      "password": {
+        "set": "Toptancı hesabı açıldı ve etkin. Şifreyi toptancıya iletin; ilk girişte değiştirmesini önerin.",
+        "replaced": "Adresteki doğrulanmamış hesap devralındı: şifresi değişti, açık oturumları kapandı ve açık sepetleri kaldırıldı. Şifreyi toptancıya iletin.",
+        "kept": "Bu e-postayla doğrulanmış bir müşteri hesabı vardı; toptancı kendi şifresiyle giriş yapar, yazdığınız şifre kullanılmadı."
       }
     },
     "actions": {
-      "resend": "Daveti yeniden gönder",
-      "resent": "Davet yeniden gönderildi.",
-      "resendNotSent": "Davet e-postası gönderilemedi. Biraz sonra yeniden deneyin.",
-      "delete": "Daveti sil",
-      "deleteTitle": "Bekleyen davet silinsin mi?",
-      "deleteText": "Toptancı kaydı silinir; gönderilen davet bağlantısıyla açılan hesap toptan fiyat görmez. İsterseniz sonra yeniden açabilirsiniz.",
-      "deleted": "Bekleyen davet silindi.",
       "deactivate": "Devre dışı bırak",
       "deactivateTitle": "Toptancı devre dışı bırakılsın mı?",
       "deactivateText": "Müşteri bir sonraki isteğinde perakende fiyat görür ve açık sepetleri perakende fiyatla yeniden hesaplanır. Fiyatları silinmez; yeniden açınca geri gelir. Müşteriye ileti gitmez.",
@@ -10097,7 +10095,8 @@
       "cartsRepriced_one": "{{count}} açık sepet yeniden fiyatlandı.",
       "cartsRepriced_other": "{{count}} açık sepet yeniden fiyatlandı.",
       "cartsFailed_one": "{{count}} açık sepet yeniden fiyatlanamadı; müşteri sepetini açtığında fiyatlar güncellenir.",
-      "cartsFailed_other": "{{count}} açık sepet yeniden fiyatlanamadı; müşteri sepetini açtığında fiyatlar güncellenir."
+      "cartsFailed_other": "{{count}} açık sepet yeniden fiyatlanamadı; müşteri sepetini açtığında fiyatlar güncellenir.",
+      "password": "Yeni şifre"
     },
     "detail": {
       "title": "Toptancı",
@@ -10204,6 +10203,28 @@
         "created": "Seviye açıldı.",
         "saved": "Seviye kaydedildi."
       }
+    },
+    "nav": {
+      "label": "Toptancılar bölümleri",
+      "accounts": "Toptancılar",
+      "tiers": "Toptan seviyeleri",
+      "orders": "Siparişler"
+    },
+    "orders": {
+      "description": "Toptancıların verdiği siparişler; perakende siparişlerden ayrı tutulur. Kargo, fatura ve iade işlemleri her siparişte aynıdır.",
+      "wholesaler": "Toptancı",
+      "unnamed": "Adı olmayan toptancı",
+      "pick": "Toptancı",
+      "every": "Tüm toptancılar"
+    },
+    "password": {
+      "generate": "Güçlü şifre üret",
+      "copy": "Şifreyi kopyala",
+      "copyFailed": "Şifre kopyalanamadı; alanı seçip kopyalayın.",
+      "title": "Yeni şifre belirle",
+      "hint": "Şifreyi toptancıya iletin; ilk girişte değiştirmesini önerin. Açık oturumları kapanır. Bu şifre bir daha gösterilmez.",
+      "save": "Şifreyi kaydet",
+      "saved": "Yeni şifre kaydedildi; toptancının açık oturumları kapandı."
     }
   }
 }

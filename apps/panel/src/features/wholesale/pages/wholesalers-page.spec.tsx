@@ -66,7 +66,9 @@ describe("WholesalersPage", () => {
     expect(screen.getByText("Toptan A + Özel fiyat")).toBeInTheDocument()
     expect(screen.getByText("%12,5")).toBeInTheDocument()
     expect(screen.getAllByText("Etkin").length).toBeGreaterThan(0)
-    expect(screen.getByText(/^2 kez gönderildi · .* tarihine kadar geçerli$/)).toBeInTheDocument()
+    // No invitation column, no "Bekliyor" tab: accounts open active (Ek 2026-11-15 (2))
+    expect(screen.queryByRole("columnheader", { name: "Davet" })).not.toBeInTheDocument()
+    expect(screen.queryByRole("tab", { name: /Bekliyor/ })).not.toBeInTheDocument()
     expect(listReads()[0]?.[1]?.query).toEqual({ limit: 20, offset: 0 })
   })
 
@@ -136,7 +138,7 @@ describe("WholesalersPage", () => {
     expect(listReads()).toHaveLength(0)
   })
 
-  it("puts the wholesale screens among Müşteriler's for owner and admin", async () => {
+  it("gives owner and admin Toptancılar's three tabs", async () => {
     serve([account()])
     renderWith(clientWith({ role: "admin" }), <WholesalersPage />)
     expect(await screen.findByRole("link", { name: "Toptancılar" })).toHaveAttribute(
@@ -144,5 +146,9 @@ describe("WholesalersPage", () => {
       "/customers/wholesale"
     )
     expect(screen.getByRole("link", { name: "Toptan seviyeleri" })).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Siparişler" })).toHaveAttribute(
+      "href",
+      "/customers/wholesale/orders"
+    )
   })
 })

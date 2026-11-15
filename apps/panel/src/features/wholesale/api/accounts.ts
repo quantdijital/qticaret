@@ -1,5 +1,6 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import { refreshStandingAfter } from "@/features/auth/api/staff"
+import { responseFailure } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
 import type {
   AccountStatus,
@@ -7,7 +8,6 @@ import type {
   CartsRepriced,
   CreateAccountBody,
   CreatedAccount,
-  MessageOutcome,
   UpdateAccountBody,
   WholesaleAccount,
 } from "./types"
@@ -53,14 +53,24 @@ export const accountCountsQuery = () =>
             query: { limit: 1, ...(status ? { status } : {}) },
           })
         ).count
-      const [all, pending, active, inactive] = await Promise.all([
+      const [all, active, inactive] = await Promise.all([
         count(),
-        count("pending"),
         count("active"),
         count("inactive"),
       ])
-      return { all, pending, active, inactive }
+      return { all, active, inactive }
     },
+  })
+
+// The wholesale orders' picker reads a shop's wholesalers in one go (the API's page limit)
+const ALL_ACCOUNTS = 100
+
+/** Every wholesaler, newest first, for the wholesale orders' picker. */
+export const accountOptionsQuery = () =>
+  queryOptions({
+    queryKey: [...WHOLESALE_KEY, "accounts", "options"],
+    queryFn: async () =>
+      (await sdk.client.fetch<AccountsPage>(ROOT, { query: { limit: ALL_ACCOUNTS } })).accounts,
   })
 
 export const accountQuery = (id: string) =>
@@ -83,10 +93,27 @@ export function useWholesaleMutation<T, R>(run: (input: T) => Promise<R>) {
   })
 }
 
+/** The refusal staff answer with "Hesabı devral": an unconfirmed sign-up at the address. */
+export const UNPROVEN_SIGNUP = "wholesale.unproven_signup"
+
+/**
+ * A new wholesaler. A plain request, so a refusal's key stays in `code`
+ * (`UNPROVEN_SIGNUP` asks staff first); the password goes in the body
+ * only, over the session, and is kept nowhere in the panel.
+ */
 export const useCreateAccount = () =>
-  useWholesaleMutation((body: CreateAccountBody) =>
-    sdk.client.fetch<CreatedAccount>(ROOT, { method: "POST", body })
-  )
+  useWholesaleMutation(async (body: CreateAccountBody) => {
+    const response = await fetch(ROOT, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(body),
+    })
+    if (!response.ok) {
+      throw await responseFailure(response)
+    }
+    return (await response.json()) as CreatedAccount
+  })
 
 export const useUpdateAccount = (id: string) =>
   useWholesaleMutation((body: UpdateAccountBody) =>
@@ -102,14 +129,11 @@ export const useSetAccountState = (id: string) =>
     })
   )
 
-export const useResendInvitation = (id: string) =>
-  useWholesaleMutation(() =>
-    sdk.client.fetch<{ account: WholesaleAccount; message: MessageOutcome }>(
-      `${at(id)}/invitation`,
-      { method: "POST", body: {} }
-    )
+/** A bound wholesaler's new password, typed by staff; every older sign-in of theirs ends. */
+export const useSetAccountPassword = (id: string) =>
+  useWholesaleMutation((password: string) =>
+    sdk.client.fetch<{ account: WholesaleAccount; signed_out: boolean }>(`${at(id)}/password`, {
+      method: "POST",
+      body: { password },
+    })
   )
-
-/** A pending wholesaler taken back; an active or closed one is closed instead. */
-export const useDeleteAccount = (id: string) =>
-  useWholesaleMutation(() => sdk.client.fetch<{ id: string }>(at(id), { method: "DELETE" }))

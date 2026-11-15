@@ -18,6 +18,8 @@ const valid: AccountValues = {
   ...blankAccount,
   email: " Satinalma@KayaBicak.com.tr ",
   contact_name: "Ali Kaya",
+  // A password made for the test, not anyone's
+  password: "Toptan-Kaya-2026",
   tier_id: "wst_1",
 }
 
@@ -38,6 +40,7 @@ describe("the new wholesaler's form", () => {
     expect(issues(blankAccount)).toMatchObject({
       email: `${E}.emailRequired`,
       contact_name: `${E}.contact`,
+      password: `${E}.passwordShort`,
       tier_id: `${E}.priceSource`,
     })
     expect(issues(valid)).toEqual({})
@@ -93,6 +96,7 @@ describe("the new wholesaler's form", () => {
       own_prices: true,
       percent: 12.5,
       min_quantity: 1000,
+      password: "Toptan-Kaya-2026",
     })
     // A rate typed and then hidden (own prices turned off) is not sent
     expect(createBodyOf({ ...valid, percent: "10" })).toMatchObject({

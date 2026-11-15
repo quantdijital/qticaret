@@ -1,5 +1,6 @@
 import { z } from "zod"
 import { percentOf } from "@/features/price-lists/form"
+import { MAX_PASSWORD, MIN_PASSWORD } from "./password"
 import type {
   CreateAccountBody,
   TierBody,
@@ -72,6 +73,8 @@ export const accountSchema = z
       .string()
       .trim()
       .refine((value) => value === "" || /^\d{10,11}$/.test(digits(value)), `${E}.taxId`),
+    // Not trimmed: spaces are the password's own; the server checks the rest (adr/0043)
+    password: z.string().min(MIN_PASSWORD, `${E}.passwordShort`).max(MAX_PASSWORD, `${E}.tooLong`),
     tier_id: z.string(),
     own_prices: z.boolean(),
     percent: z.string(),
@@ -95,6 +98,7 @@ export const blankAccount: AccountValues = {
   company_name: "",
   tax_office: "",
   tax_id: "",
+  password: "",
   tier_id: "",
   own_prices: false,
   percent: "",
@@ -116,8 +120,15 @@ export function createBodyOf(values: AccountValues): CreateAccountBody {
     own_prices: values.own_prices,
     percent: ownRate(values),
     min_quantity: values.min_quantity.trim() === "" ? null : minimumOf(values.min_quantity),
+    password: values.password,
   }
 }
+
+/** The new-password window: the same rule. */
+export const passwordSchema = z.object({
+  password: z.string().min(MIN_PASSWORD, `${E}.passwordShort`).max(MAX_PASSWORD, `${E}.tooLong`),
+})
+export type PasswordValues = z.infer<typeof passwordSchema>
 
 /** The edit window: no address and no tax details (the customer's invoice identity holds those). */
 export const editSchema = z

@@ -1594,9 +1594,7 @@
           "account": {
             "password_reset": "Password reset",
             "verify_email": "E-mail verification",
-            "migration_invite": "Moved customer's account invitation",
-            "wholesale_invite": "Wholesaler invitation",
-            "wholesale_enabled": "Wholesale account opened"
+            "migration_invite": "Moved customer's account invitation"
           },
           "payment": {
             "failed": "Payment failed"
@@ -4586,7 +4584,10 @@
       "title": "Short of stock: some items of this paid order were not on the shelf",
       "description": "When the order was placed, these items' stock was held by other orders. Make or source the missing units; if you cannot, cancel the order and refund the payment.",
       "line": "{{title}}: {{short}} missing (ordered {{quantity}})"
-    }
+    },
+    "wholesaleMatches_one": "Your search also found {{count}} wholesale order; wholesale orders are not listed here.",
+    "wholesaleMatches_other": "Your search also found {{count}} wholesale orders; wholesale orders are not listed here.",
+    "wholesaleMatchesLink": "See them in Wholesalers > Orders"
   },
   "customers": {
     "description": "Everyone who ordered or signed up",
@@ -4665,7 +4666,6 @@
     "sectionCustomers": "Customers",
     "sectionGroups": "Groups and segments",
     "sectionWholesale": "Wholesalers",
-    "sectionWholesaleTiers": "Wholesale levels",
     "sectionContact": "Contact messages",
     "contactMessages": {
       "title": "Contact messages",
@@ -10004,16 +10004,13 @@
     "ownPrices": "Own prices",
     "units_one": "{{count}} unit",
     "units_other": "{{count}} units",
-    "invitationLine_one": "Sent {{count}} time · valid until {{date}}",
-    "invitationLine_other": "Sent {{count}} times · valid until {{date}}",
     "columns": {
       "who": "Company / contact",
       "email": "Email",
       "source": "Prices",
       "rate": "Rate",
       "minimum": "Minimum units",
-      "status": "Status",
-      "invitation": "Invitation"
+      "status": "Status"
     },
     "list": {
       "title": "Wholesalers",
@@ -10029,7 +10026,7 @@
     },
     "form": {
       "newTitle": "New wholesaler",
-      "newText": "If a customer account exists for this email, the wholesaler is active at once; otherwise an invitation to sign up on the storefront is sent. No password is set in the panel.",
+      "newText": "You open the wholesaler's account with its password; it is active at once and no e-mail is sent. Pass the password on to the wholesaler.",
       "create": "Open wholesaler",
       "editTitle": "Edit wholesaler",
       "saved": "Wholesaler saved.",
@@ -10064,28 +10061,29 @@
         "priceSource": "Choose a wholesale level or turn on prices of their own.",
         "percent": "The rate must be between 0.01 and 99.",
         "minimum": "The minimum must be a whole number from 1 to 100,000.",
-        "tierName": "Give the level a name."
-      }
+        "tierName": "Give the level a name.",
+        "passwordShort": "The password must be at least 10 characters."
+      },
+      "signIn": "Sign-in",
+      "password": "Password",
+      "passwordHint": "The wholesaler signs in on the storefront with this e-mail and password. You pass the password on; it is not shown again. If a verified customer account exists for this e-mail, your password is not used.",
+      "takeOverTitle": "Take over the unverified account?",
+      "takeOverText": "An account was opened with this e-mail but its address was never verified; the address may belong to someone else. Taking it over replaces its password with yours, ends its open sessions and removes its open carts. This is written to the audit log.",
+      "takeOver": "Take over the account"
     },
     "outcome": {
-      "activeSent": "The wholesaler is active at once: a customer account existed for this email. The \"wholesale account opened\" email was sent.",
-      "activeNotSent": "The wholesaler is active at once: a customer account existed for this email. The notice email could not be sent; they still see wholesale prices when they sign in.",
-      "invitedSent": "The invitation was sent. The wholesaler becomes active on signing up with this address; the invitation is valid for 90 days.",
-      "invitedNotSent": "The wholesaler was opened but the invitation email could not be sent. Try again with \"Resend invitation\".",
       "billing": {
         "written": "The tax details were written to the customer's invoice details.",
         "kept": "The customer already had invoice details; they were not changed.",
-        "none": "The tax details were not kept; the wholesaler enters them on the storefront after signing up."
+        "none": "The tax details were not written."
+      },
+      "password": {
+        "set": "The wholesaler account is open and active. Pass the password on; suggest they change it at first sign-in.",
+        "replaced": "The unverified account at this address was taken over: its password changed, its open sessions ended and its open carts were removed. Pass the password on to the wholesaler.",
+        "kept": "A verified customer account existed for this e-mail; the wholesaler signs in with their own password, yours was not used."
       }
     },
     "actions": {
-      "resend": "Resend invitation",
-      "resent": "The invitation was sent again.",
-      "resendNotSent": "The invitation email could not be sent. Try again shortly.",
-      "delete": "Delete invitation",
-      "deleteTitle": "Delete the pending invitation?",
-      "deleteText": "The wholesaler record is deleted; an account opened from the invitation link sees no wholesale prices. You can open it again later.",
-      "deleted": "The pending invitation was deleted.",
       "deactivate": "Deactivate",
       "deactivateTitle": "Deactivate the wholesaler?",
       "deactivateText": "The customer sees retail prices from their next request and their open carts are priced again at retail. Their prices are kept and come back on reopening. No message is sent.",
@@ -10097,7 +10095,8 @@
       "cartsRepriced_one": "{{count}} open cart was priced again.",
       "cartsRepriced_other": "{{count}} open carts were priced again.",
       "cartsFailed_one": "{{count}} open cart could not be priced again; its prices update when the customer opens it.",
-      "cartsFailed_other": "{{count}} open carts could not be priced again; their prices update when the customer opens them."
+      "cartsFailed_other": "{{count}} open carts could not be priced again; their prices update when the customer opens them.",
+      "password": "New password"
     },
     "detail": {
       "title": "Wholesaler",
@@ -10204,6 +10203,28 @@
         "created": "The level was opened.",
         "saved": "The level was saved."
       }
+    },
+    "nav": {
+      "label": "Wholesale sections",
+      "accounts": "Wholesalers",
+      "tiers": "Wholesale levels",
+      "orders": "Orders"
+    },
+    "orders": {
+      "description": "Orders placed by wholesalers, kept apart from retail orders. Shipping, invoices and returns work the same for every order.",
+      "wholesaler": "Wholesaler",
+      "unnamed": "Unnamed wholesaler",
+      "pick": "Wholesaler",
+      "every": "All wholesalers"
+    },
+    "password": {
+      "generate": "Generate a strong password",
+      "copy": "Copy the password",
+      "copyFailed": "The password could not be copied; select the field and copy it.",
+      "title": "Set a new password",
+      "hint": "Pass the password on to the wholesaler; suggest they change it at first sign-in. Their open sessions end. This password is not shown again.",
+      "save": "Save password",
+      "saved": "New password saved; the wholesaler's open sessions were ended."
     }
   }
 }

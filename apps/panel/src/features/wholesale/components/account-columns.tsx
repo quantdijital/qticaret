@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next"
 import type { Column } from "@qticaret/admin-ui/patterns/data-table"
 import type { WholesaleAccount } from "@/features/wholesale/api/types"
-import { formatDate } from "@qticaret/admin-ui/lib/format"
 import { ratePercent } from "@/features/wholesale/format"
 import { AccountBadge } from "./account-badge"
 
@@ -16,7 +15,7 @@ export function useSourceText(): (account: WholesaleAccount) => string {
       .join(" + ") || "—"
 }
 
-/** The wholesalers' table: who, the address, the prices, the minimum, the state, the invitation. */
+/** The wholesalers' table: who, the address, the prices, the minimum, the state. */
 export function useAccountColumns(): Column<WholesaleAccount>[] {
   const { t } = useTranslation()
   const sourceText = useSourceText()
@@ -74,22 +73,6 @@ export function useAccountColumns(): Column<WholesaleAccount>[] {
       key: "status",
       header: t(`${C}.status`),
       cell: (account) => <AccountBadge status={account.status} />,
-    },
-    {
-      key: "invitation",
-      header: t(`${C}.invitation`),
-      className: "hidden xl:table-cell",
-      cell: (account) =>
-        account.status === "pending" && account.invitation_expires_at ? (
-          <span className="text-[13px] text-muted-foreground">
-            {t("wholesale.invitationLine", {
-              count: account.invitations_sent ?? 1,
-              date: formatDate(account.invitation_expires_at),
-            })}
-          </span>
-        ) : (
-          <span className="text-muted-foreground">—</span>
-        ),
     },
   ]
 }

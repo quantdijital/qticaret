@@ -93,15 +93,19 @@ export interface LinesPage extends Page {
   rate_zero: { count: number; variant_ids: string[] }
 }
 
-/** How the new wholesaler's e-mail went. */
-export type MessageOutcome = "sent" | "not_sent"
+/**
+ * What became of the password staff typed (Ek 2026-11-15 (2)): set on a
+ * new sign-in, replaced on an unconfirmed sign-up taken over, or not
+ * applied (a customer who proved the address keeps theirs).
+ */
+export type PasswordOutcome = "set" | "replaced" | "kept"
 
 /** Whether the typed tax details reached the customer's invoice identity. */
 export type BillingOutcome = "written" | "kept" | "none"
 
 export interface CreatedAccount {
   account: WholesaleAccount
-  message: MessageOutcome
+  password: PasswordOutcome
   billing_profile: BillingOutcome
 }
 
@@ -122,6 +126,10 @@ export interface CreateAccountBody {
   own_prices: boolean
   percent: number | null
   min_quantity: number | null
+  /** The sign-in's password, typed or made in the window; never kept by the panel. */
+  password: string
+  /** Take over an address whose sign-up never proved it (asked after `wholesale.unproven_signup`). */
+  take_over?: boolean
 }
 
 /** `POST /admin/wholesale/accounts/:id`'s body: only what changed. */

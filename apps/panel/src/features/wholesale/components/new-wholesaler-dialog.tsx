@@ -2,26 +2,32 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useNavigate } from "@tanstack/react-router"
 import type { ReactNode } from "react"
 import { useState } from "react"
-import { FormProvider, useForm } from "react-hook-form"
+import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
 import { FormDialog } from "@qticaret/admin-ui/patterns/form-dialog"
 import { Field } from "@qticaret/admin-ui/patterns/form-section"
 import { DialogBody, DialogSection } from "@qticaret/admin-ui/ui/dialog"
 import { Input } from "@qticaret/admin-ui/ui/input"
 import { accountSchema, blankAccount, createBodyOf } from "@/features/wholesale/account-form"
 import type { AccountValues } from "@/features/wholesale/account-form"
-import { useCreateAccount } from "@/features/wholesale/api/accounts"
+import { UNPROVEN_SIGNUP, useCreateAccount } from "@/features/wholesale/api/accounts"
 import { rememberOutcome } from "@/features/wholesale/outcome"
 import { errorText } from "@/lib/errors"
+import { PasswordField } from "./password-field"
 import { PriceSourceFields } from "./price-source-fields"
 
 const F = "wholesale.form"
 
+const codeOf = (error: unknown) => (error as { code?: unknown } | null)?.code
+
 /**
- * A new wholesaler (ADR-0068 §3): the address, the contact, optionally the
- * company and its tax details, then where the prices come from. No
- * password: an address with an account becomes a wholesaler at once, any
- * other is invited to sign up. What happened is said on its page.
+ * A new wholesaler (ADR-0068 §3, Ek 2026-11-15 (2)): the address, the
+ * contact, optionally the company and its tax details, the password staff
+ * hand over, then where the prices come from. Active at once; no mail
+ * goes. An address with an unconfirmed sign-up is refused first, and
+ * staff may take it over (its password replaced, its sign-ins ended).
+ * What happened is said on the new wholesaler's page.
  */
 export function NewWholesalerDialog({
   open,
@@ -39,24 +45,34 @@ export function NewWholesalerDialog({
   const navigate = useNavigate()
   const create = useCreateAccount()
   const [failure, setFailure] = useState<string | null>(null)
+  // The address had an unconfirmed sign-up: the values to send again with `take_over`
+  const [takeOver, setTakeOver] = useState<AccountValues | null>(null)
   const form = useForm<AccountValues>({
     resolver: zodResolver(accountSchema),
     defaultValues: blankAccount,
   })
   const { errors, isDirty, isSubmitting } = form.formState
   const message = (key: string | undefined) => (key ? t(key) : undefined)
-  const submit = form.handleSubmit(async (values) => {
+  const send = async (values: AccountValues, takingOver: boolean) => {
     setFailure(null)
     try {
-      const made = await create.mutateAsync(createBodyOf(values))
+      const made = await create.mutateAsync({
+        ...createBodyOf(values),
+        ...(takingOver ? { take_over: true } : {}),
+      })
       rememberOutcome(made, values.tax_id.trim() !== "")
       form.reset(blankAccount)
       onOpenChange(false)
       void navigate({ to: "/customers/wholesale/$id", params: { id: made.account.id } })
     } catch (error) {
+      if (!takingOver && codeOf(error) === UNPROVEN_SIGNUP) {
+        setTakeOver(values)
+        return
+      }
       setFailure(errorText(t, error))
     }
-  })
+  }
+  const submit = form.handleSubmit((values) => send(values, false))
   return (
     <FormDialog
       open={open}
@@ -147,6 +163,29 @@ export function NewWholesalerDialog({
               </Field>
             </div>
           </DialogSection>
+          <DialogSection title={t(`${F}.signIn`)}>
+            <Field
+              label={t(`${F}.password`)}
+              htmlFor="wholesale-password"
+              hint={t(`${F}.passwordHint`)}
+              error={message(errors.password?.message)}
+              required
+            >
+              <Controller
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <PasswordField
+                    id="wholesale-password"
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    aria-invalid={errors.password ? true : undefined}
+                  />
+                )}
+              />
+            </Field>
+          </DialogSection>
           <DialogSection title={t(`${F}.prices`)}>
             <PriceSourceFields />
           </DialogSection>
@@ -157,6 +196,24 @@ export function NewWholesalerDialog({
           ) : null}
         </DialogBody>
       </FormProvider>
+      <ConfirmDialog
+        open={takeOver !== null}
+        onOpenChange={(next) => {
+          if (!next) {
+            setTakeOver(null)
+          }
+        }}
+        title={t(`${F}.takeOverTitle`)}
+        description={t(`${F}.takeOverText`)}
+        confirmLabel={t(`${F}.takeOver`)}
+        destructive
+        onConfirm={() => {
+          if (takeOver) {
+            void send(takeOver, true)
+          }
+          setTakeOver(null)
+        }}
+      />
     </FormDialog>
   )
 }

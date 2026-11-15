@@ -1,15 +1,15 @@
 import { useState } from "react"
-import type { BillingOutcome, CreatedAccount, MessageOutcome } from "./api/types"
+import type { BillingOutcome, CreatedAccount, PasswordOutcome } from "./api/types"
 
 /**
- * What happened when a wholesaler was opened (ADR-0068 §3), carried to
- * its page for one look: active at once or invited, whether the e-mail
- * went, whether the tax details were written. Kept in memory only: a
- * reload of the page no longer says it.
+ * What happened when a wholesaler was opened (ADR-0068 Ek 2026-11-15
+ * (2)), carried to its page for one look: the password set, the
+ * unconfirmed sign-up taken over, or the customer's own password kept;
+ * whether the tax details were written. Kept in memory only: a reload of
+ * the page no longer says it, and the password itself is never in it.
  */
 export interface CreateOutcome {
-  status: "active" | "pending"
-  message: MessageOutcome
+  password: PasswordOutcome
   billing: BillingOutcome
   /** Whether tax details were typed at all (none typed: nothing to say about them). */
   taxTyped: boolean
@@ -19,8 +19,7 @@ const outcomes = new Map<string, CreateOutcome>()
 
 export function rememberOutcome(made: CreatedAccount, taxTyped: boolean): void {
   outcomes.set(made.account.id, {
-    status: made.account.status === "active" ? "active" : "pending",
-    message: made.message,
+    password: made.password,
     billing: made.billing_profile,
     taxTyped,
   })
@@ -38,20 +37,12 @@ export function useOutcome(id: string): [CreateOutcome | null, () => void] {
   ]
 }
 
-/** The outcome's sentences as i18n keys, and whether any of them is a warning. */
+/** The outcome's sentences as i18n keys, and whether one is worth a second look (a take-over). */
 export function outcomeLines(outcome: CreateOutcome): { keys: string[]; warning: boolean } {
   const O = "wholesale.outcome"
-  const keys = [
-    outcome.status === "active"
-      ? outcome.message === "sent"
-        ? `${O}.activeSent`
-        : `${O}.activeNotSent`
-      : outcome.message === "sent"
-        ? `${O}.invitedSent`
-        : `${O}.invitedNotSent`,
-  ]
+  const keys = [`${O}.password.${outcome.password}`]
   if (outcome.taxTyped) {
     keys.push(`${O}.billing.${outcome.billing}`)
   }
-  return { keys, warning: outcome.message === "not_sent" }
+  return { keys, warning: outcome.password === "replaced" }
 }

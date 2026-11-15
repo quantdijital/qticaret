@@ -175,4 +175,25 @@ describe("OrdersPage", () => {
     await screen.findByText("#1042")
     expect(screen.queryByRole("button", { name: "Dışa aktar" })).toBeNull()
   })
+
+  it("says where a searched wholesale order is: they are not on this list (Ek 2026-11-15 (2))", async () => {
+    search.current = { q: "1050" }
+    fetchMock.mockResolvedValue({
+      orders: [],
+      count: 0,
+      counts: { all: 0, awaiting_payment: 0, to_ship: 0, shipped: 0, delivered: 0, canceled: 0 },
+      offset: 0,
+      limit: 20,
+      limited: false,
+      wholesale_matches: 1,
+    })
+    renderPage()
+
+    expect(await screen.findByText(/Aramanız 1 toptan siparişini de buldu/)).toBeInTheDocument()
+    expect(screen.getByText("Toptancılar > Siparişler'de gör")).toBeInTheDocument()
+    // The retail list asks for the server's default: no segment named
+    expect(fetchMock).toHaveBeenCalledWith("/admin/order-board", {
+      query: { stage: "all", q: "1050", offset: 0 },
+    })
+  })
 })

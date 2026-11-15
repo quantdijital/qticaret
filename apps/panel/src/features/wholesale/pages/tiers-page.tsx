@@ -9,12 +9,12 @@ import { PageHeader } from "@qticaret/admin-ui/patterns/page-header"
 import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
-import { CustomersNav } from "@/features/customers/components/customers-nav"
 import { useWholesaleOpen } from "@/features/wholesale/api/access"
 import { TIERS_PAGE_SIZE, tiersQuery } from "@/features/wholesale/api/tiers"
 import type { WholesaleTier } from "@/features/wholesale/api/types"
 import { TierDialog } from "@/features/wholesale/components/tier-dialog"
 import { WholesaleGate } from "@/features/wholesale/components/wholesale-gate"
+import { WholesaleNav } from "@/features/wholesale/components/wholesale-nav"
 import { ratePercent } from "@/features/wholesale/format"
 import { errorText } from "@/lib/errors"
 
@@ -134,7 +134,7 @@ export function TiersPage() {
           ) : undefined
         }
       />
-      <CustomersNav />
+      <WholesaleNav />
       <WholesaleGate>
         <TiersList onAdd={open} />
         <TierDialog tier={null} open={adding} onOpenChange={setAdding} />

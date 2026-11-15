@@ -1,23 +1,19 @@
 import type { TFunction } from "i18next"
-import { useNavigate } from "@tanstack/react-router"
-import { Pencil, Power, RotateCcw, Send, Trash2 } from "lucide-react"
+import { KeyRound, Pencil, Power, RotateCcw } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@qticaret/admin-ui/patterns/confirm-dialog"
 import { Button } from "@qticaret/admin-ui/ui/button"
-import {
-  useDeleteAccount,
-  useResendInvitation,
-  useSetAccountState,
-} from "@/features/wholesale/api/accounts"
+import { useSetAccountState } from "@/features/wholesale/api/accounts"
 import type { CartsRepriced, WholesaleAccount } from "@/features/wholesale/api/types"
 import { errorText } from "@/lib/errors"
 import { AccountEditDialog } from "./account-edit-dialog"
+import { PasswordDialog } from "./password-dialog"
 
 const A = "wholesale.actions"
 
-type Confirming = "deactivate" | "reactivate" | "delete" | null
+type Confirming = "deactivate" | "reactivate" | null
 
 /** What a state change did to the open carts, in words; a cart not priced again is a warning. */
 function announceCarts(t: TFunction, done: string, carts: CartsRepriced) {
@@ -30,42 +26,25 @@ function announceCarts(t: TFunction, done: string, carts: CartsRepriced) {
 }
 
 /**
- * The wholesaler's actions (ADR-0068 §3), the next step first: a pending
- * one's invitation sent again (or taken back), an active one closed, a
- * closed one opened again. Each state change asks first and says what it
- * did to the customer's open carts.
+ * The wholesaler's actions (ADR-0068 §3, Ek 2026-11-15 (2)): edit, a new
+ * password for a bound one, close an active one or open a closed one
+ * again. Each state change asks first and says what it did to the
+ * customer's open carts. No invitation is sent any more.
  */
 export function AccountActions({ account }: { account: WholesaleAccount }) {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const state = useSetAccountState(account.id)
-  const resend = useResendInvitation(account.id)
-  const remove = useDeleteAccount(account.id)
   const [editing, setEditing] = useState(false)
+  const [password, setPassword] = useState(false)
   const [confirming, setConfirming] = useState<Confirming>(null)
-  const failed = (failure: unknown) => toast.error(errorText(t, failure))
   const change = (to: "deactivate" | "reactivate") => {
     state.mutate(to, {
       onSuccess: ({ carts }) => {
         announceCarts(t, t(`${A}.${to}d`), carts)
       },
-      onError: failed,
+      onError: (failure) => toast.error(errorText(t, failure)),
     })
   }
-  const confirmed = () => {
-    if (confirming === "delete") {
-      remove.mutate(undefined, {
-        onSuccess: () => {
-          toast.success(t(`${A}.deleted`))
-          void navigate({ to: "/customers/wholesale" })
-        },
-        onError: failed,
-      })
-    } else if (confirming) {
-      change(confirming)
-    }
-  }
-  const busy = state.isPending || resend.isPending || remove.isPending
   return (
     <>
       <Button
@@ -77,42 +56,21 @@ export function AccountActions({ account }: { account: WholesaleAccount }) {
         <Pencil />
         {t("common.edit")}
       </Button>
-      {account.status === "pending" ? (
-        <>
-          <Button
-            disabled={busy}
-            onClick={() => {
-              resend.mutate(undefined, {
-                onSuccess: ({ message }) => {
-                  if (message === "sent") {
-                    toast.success(t(`${A}.resent`))
-                  } else {
-                    toast.warning(t(`${A}.resendNotSent`))
-                  }
-                },
-                onError: failed,
-              })
-            }}
-          >
-            <Send />
-            {t(`${A}.resend`)}
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
-            aria-label={t(`${A}.delete`)}
-            disabled={busy}
-            onClick={() => {
-              setConfirming("delete")
-            }}
-          >
-            <Trash2 />
-          </Button>
-        </>
-      ) : account.status === "active" ? (
+      {account.customer ? (
         <Button
           variant="outline"
-          disabled={busy}
+          onClick={() => {
+            setPassword(true)
+          }}
+        >
+          <KeyRound />
+          {t(`${A}.password`)}
+        </Button>
+      ) : null}
+      {account.status === "active" ? (
+        <Button
+          variant="outline"
+          disabled={state.isPending}
           onClick={() => {
             setConfirming("deactivate")
           }}
@@ -120,9 +78,9 @@ export function AccountActions({ account }: { account: WholesaleAccount }) {
           <Power />
           {t(`${A}.deactivate`)}
         </Button>
-      ) : (
+      ) : account.status === "inactive" ? (
         <Button
-          disabled={busy}
+          disabled={state.isPending}
           onClick={() => {
             setConfirming("reactivate")
           }}
@@ -130,8 +88,11 @@ export function AccountActions({ account }: { account: WholesaleAccount }) {
           <RotateCcw />
           {t(`${A}.reactivate`)}
         </Button>
-      )}
+      ) : null}
       <AccountEditDialog account={account} open={editing} onOpenChange={setEditing} />
+      {account.customer ? (
+        <PasswordDialog account={account} open={password} onOpenChange={setPassword} />
+      ) : null}
       <ConfirmDialog
         open={confirming !== null}
         onOpenChange={(open) => {
@@ -142,8 +103,12 @@ export function AccountActions({ account }: { account: WholesaleAccount }) {
         title={confirming ? t(`${A}.${confirming}Title`) : ""}
         description={confirming ? t(`${A}.${confirming}Text`) : ""}
         confirmLabel={confirming ? t(`${A}.${confirming}`) : ""}
-        destructive={confirming !== "reactivate"}
-        onConfirm={confirmed}
+        destructive={confirming === "deactivate"}
+        onConfirm={() => {
+          if (confirming) {
+            change(confirming)
+          }
+        }}
       />
     </>
   )

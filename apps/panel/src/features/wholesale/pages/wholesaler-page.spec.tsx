@@ -67,61 +67,67 @@ describe("WholesalerPage", () => {
   })
 
   it("shows who they are, the state and the level, and what opening them did", async () => {
-    const record = pendingAccount()
-    rememberOutcome({ account: record, message: "sent", billing_profile: "none" }, false)
+    const record = account()
+    rememberOutcome({ account: record, password: "set", billing_profile: "none" }, false)
     serve(record)
     renderWith(clientWith(), <WholesalerPage />)
-    expect(await screen.findByRole("heading", { name: "Yılmaz Ticaret" })).toBeInTheDocument()
-    expect(screen.getByText("Ayşe Yılmaz · siparis@yilmazticaret.com")).toBeInTheDocument()
-    expect(screen.getByText("2 kez")).toBeInTheDocument()
+    expect(await screen.findByRole("heading", { name: "Kaya Bıçak Ltd" })).toBeInTheDocument()
+    expect(screen.getByText("Ali Kaya · satinalma@kayabicak.com.tr")).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Toptan A" })).toHaveAttribute(
       "href",
       "/customers/wholesale/tiers/$id"
     )
-    expect(screen.getByRole("status")).toHaveTextContent(/^Davet e-postası gönderildi\./)
+    expect(screen.getByRole("status")).toHaveTextContent(/^Toptancı hesabı açıldı ve etkin\./)
     await userEvent.click(screen.getByRole("button", { name: "Kapat" }))
     expect(screen.queryByRole("status")).not.toBeInTheDocument()
   })
 
-  it("sends a pending invitation again, and says so when it did not go", async () => {
-    serve(pendingAccount(), () =>
-      Promise.resolve({ account: pendingAccount(), message: "not_sent" })
+  it("offers no invitation: an older pending one has no resend and no delete", async () => {
+    serve(pendingAccount())
+    renderWith(clientWith(), <WholesalerPage />)
+    expect(await screen.findByRole("heading", { name: "Yılmaz Ticaret" })).toBeInTheDocument()
+    expect(screen.queryByRole("button", { name: /Davet/ })).not.toBeInTheDocument()
+    // No sign-in to set a password on yet
+    expect(screen.queryByRole("button", { name: "Yeni şifre" })).not.toBeInTheDocument()
+  })
+
+  it("sets a new password, every open sign-in ended, and says why one is refused", async () => {
+    // A password made for the test, not anyone's
+    const password = "Toptan-Kaya-2026"
+    serve(account(), (path) =>
+      path.endsWith("/password")
+        ? Promise.resolve({ account: account(), signed_out: true })
+        : Promise.resolve({})
     )
     renderWith(clientWith(), <WholesalerPage />)
-    await userEvent.click(await screen.findByRole("button", { name: "Daveti yeniden gönder" }))
+    await userEvent.click(await screen.findByRole("button", { name: "Yeni şifre" }))
+    const dialog = await screen.findByRole("dialog")
+    await userEvent.type(within(dialog).getByRole("textbox", { name: /^Şifre/ }), password)
+    await userEvent.click(within(dialog).getByRole("button", { name: "Şifreyi kaydet" }))
     await waitFor(() => {
-      expect(toast.warning).toHaveBeenCalledWith(
-        "Davet e-postası gönderilemedi. Biraz sonra yeniden deneyin."
+      expect(toast.success).toHaveBeenCalledWith(
+        "Yeni şifre kaydedildi; toptancının açık oturumları kapandı."
       )
     })
     expect(writes()[0]).toEqual([
-      "/admin/wholesale/accounts/wsa_2/invitation",
-      { method: "POST", body: {} },
+      "/admin/wholesale/accounts/wsa_1/password",
+      { method: "POST", body: { password } },
     ])
   })
 
-  it.each([
-    "Davet az önce gönderildi; bir saat sonra yeniden gönderebilirsiniz.",
-    "Bu davet en çok 5 kez yeniden gönderilebilir.",
-    "Bu davetin süresi doldu; toptancıyı silip yeniden açın.",
-  ])("says why a resend was refused: %s", async (message) => {
-    serve(pendingAccount(), () => refusal(message))
+  it("keeps the window open with the server's refusal of a new password", async () => {
+    const why =
+      "Bu müşteri e-posta ve şifreyle değil, başka bir yolla (ör. Google) giriş yapıyor; şifre belirlenemez."
+    serve(account(), () => refusal(why))
     renderWith(clientWith(), <WholesalerPage />)
-    await userEvent.click(await screen.findByRole("button", { name: "Daveti yeniden gönder" }))
-    await waitFor(() => {
-      expect(toast.error).toHaveBeenCalledWith(message)
-    })
-  })
-
-  it("takes a pending invitation back after asking, and goes to the list", async () => {
-    serve(pendingAccount(), () => Promise.resolve({ id: "wsa_2", deleted: true }))
-    renderWith(clientWith(), <WholesalerPage />)
-    await userEvent.click(await screen.findByRole("button", { name: "Daveti sil" }))
-    await confirmWith("Daveti sil")
-    await waitFor(() => {
-      expect(navigate).toHaveBeenCalledWith({ to: "/customers/wholesale" })
-    })
-    expect(writes()[0]).toEqual(["/admin/wholesale/accounts/wsa_2", { method: "DELETE" }])
+    await userEvent.click(await screen.findByRole("button", { name: "Yeni şifre" }))
+    const dialog = await screen.findByRole("dialog")
+    await userEvent.type(
+      within(dialog).getByRole("textbox", { name: /^Şifre/ }),
+      "Toptan-Kaya-2026"
+    )
+    await userEvent.click(within(dialog).getByRole("button", { name: "Şifreyi kaydet" }))
+    expect(await within(dialog).findByText(why)).toBeInTheDocument()
   })
 
   it("closes an active wholesaler after asking, the carts' result in words, a failure warned", async () => {

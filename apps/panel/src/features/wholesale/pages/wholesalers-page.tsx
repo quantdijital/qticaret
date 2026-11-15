@@ -10,7 +10,6 @@ import { Pagination } from "@qticaret/admin-ui/patterns/pagination"
 import { SearchInput } from "@qticaret/admin-ui/patterns/search-input"
 import { ErrorState } from "@qticaret/admin-ui/patterns/states"
 import { Button } from "@qticaret/admin-ui/ui/button"
-import { CustomersNav } from "@/features/customers/components/customers-nav"
 import { useWholesaleOpen } from "@/features/wholesale/api/access"
 import {
   ACCOUNTS_PAGE_SIZE,
@@ -21,6 +20,7 @@ import type { AccountStatus } from "@/features/wholesale/api/types"
 import { useAccountColumns } from "@/features/wholesale/components/account-columns"
 import { NewWholesalerDialog } from "@/features/wholesale/components/new-wholesaler-dialog"
 import { WholesaleGate } from "@/features/wholesale/components/wholesale-gate"
+import { WholesaleNav } from "@/features/wholesale/components/wholesale-nav"
 import { errorText } from "@/lib/errors"
 
 const route = getRouteApi("/_auth/customers/wholesale/")
@@ -61,7 +61,6 @@ function WholesalersList({ onAdd }: { onAdd: () => void }) {
         }}
         tabs={[
           { key: "all", label: t(`${W}.tabs.all`), count: counts.data?.all },
-          { key: "pending", label: t("wholesale.status.pending"), count: counts.data?.pending },
           { key: "active", label: t("wholesale.status.active"), count: counts.data?.active },
           { key: "inactive", label: t("wholesale.status.inactive"), count: counts.data?.inactive },
         ]}
@@ -122,8 +121,8 @@ function WholesalersList({ onAdd }: { onAdd: () => void }) {
 }
 
 /**
- * Müşteriler > Toptancılar (ADR-0068 slice 2): every wholesaler, invited,
- * active or closed, found by address, company or contact. Owner and admin
+ * Müşteriler > Toptancılar (ADR-0068 slice 2, Ek 2026-11-15 (2)): every
+ * wholesaler, active or closed, found by address, company or contact. Owner and admin
  * only, while the shop sells wholesale.
  */
 export function WholesalersPage() {
@@ -147,7 +146,7 @@ export function WholesalersPage() {
           ) : undefined
         }
       />
-      <CustomersNav />
+      <WholesaleNav />
       <WholesaleGate>
         <WholesalersList onAdd={open} />
         <NewWholesalerDialog open={adding} onOpenChange={setAdding} />

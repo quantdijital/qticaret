@@ -92,6 +92,7 @@ import { Route as FullscreenStorefrontEditorRouteImport } from './routes/_fullsc
 import { Route as AuthContentLandingsIdRouteImport } from './routes/_auth/content/landings/$id'
 import { Route as AuthCustomersWholesaleIndexRouteImport } from './routes/_auth/customers/wholesale/index'
 import { Route as AuthCustomersWholesaleIdRouteImport } from './routes/_auth/customers/wholesale/$id'
+import { Route as AuthCustomersWholesaleOrdersRouteImport } from './routes/_auth/customers/wholesale/orders'
 import { Route as AuthPromotionsPriceListsIndexRouteImport } from './routes/_auth/promotions/price-lists/index'
 import { Route as AuthPromotionsPriceListsIdRouteImport } from './routes/_auth/promotions/price-lists/$id'
 import { Route as AuthPromotionsPriceListsNewRouteImport } from './routes/_auth/promotions/price-lists/new'
@@ -530,6 +531,12 @@ const AuthCustomersWholesaleIdRoute =
     path: '/customers/wholesale/$id',
     getParentRoute: () => AuthRoute,
   } as any)
+const AuthCustomersWholesaleOrdersRoute =
+  AuthCustomersWholesaleOrdersRouteImport.update({
+    id: '/customers/wholesale/orders',
+    path: '/customers/wholesale/orders',
+    getParentRoute: () => AuthRoute,
+  } as any)
 const AuthPromotionsPriceListsIndexRoute =
   AuthPromotionsPriceListsIndexRouteImport.update({
     id: '/promotions/price-lists/',
@@ -698,6 +705,7 @@ export interface FileRoutesByFullPath {
   '/settings/': typeof AuthSettingsIndexRoute
   '/content/landings/$id': typeof AuthContentLandingsIdRoute
   '/customers/wholesale/$id': typeof AuthCustomersWholesaleIdRoute
+  '/customers/wholesale/orders': typeof AuthCustomersWholesaleOrdersRoute
   '/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
   '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
@@ -794,6 +802,7 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthSettingsIndexRoute
   '/content/landings/$id': typeof AuthContentLandingsIdRoute
   '/customers/wholesale/$id': typeof AuthCustomersWholesaleIdRoute
+  '/customers/wholesale/orders': typeof AuthCustomersWholesaleOrdersRoute
   '/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
   '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
@@ -895,6 +904,7 @@ export interface FileRoutesById {
   '/_auth/settings/': typeof AuthSettingsIndexRoute
   '/_auth/content/landings/$id': typeof AuthContentLandingsIdRoute
   '/_auth/customers/wholesale/$id': typeof AuthCustomersWholesaleIdRoute
+  '/_auth/customers/wholesale/orders': typeof AuthCustomersWholesaleOrdersRoute
   '/_auth/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
   '/_auth/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/_auth/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
@@ -995,6 +1005,7 @@ export interface FileRouteTypes {
     | '/settings/'
     | '/content/landings/$id'
     | '/customers/wholesale/$id'
+    | '/customers/wholesale/orders'
     | '/promotions/price-lists/$id'
     | '/promotions/price-lists/new'
     | '/settings/legal/$kind'
@@ -1091,6 +1102,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/content/landings/$id'
     | '/customers/wholesale/$id'
+    | '/customers/wholesale/orders'
     | '/promotions/price-lists/$id'
     | '/promotions/price-lists/new'
     | '/settings/legal/$kind'
@@ -1191,6 +1203,7 @@ export interface FileRouteTypes {
     | '/_auth/settings/'
     | '/_auth/content/landings/$id'
     | '/_auth/customers/wholesale/$id'
+    | '/_auth/customers/wholesale/orders'
     | '/_auth/promotions/price-lists/$id'
     | '/_auth/promotions/price-lists/new'
     | '/_auth/settings/legal/$kind'
@@ -1802,6 +1815,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCustomersWholesaleIdRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/customers/wholesale/orders': {
+      id: '/_auth/customers/wholesale/orders'
+      path: '/customers/wholesale/orders'
+      fullPath: '/customers/wholesale/orders'
+      preLoaderRoute: typeof AuthCustomersWholesaleOrdersRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/promotions/price-lists/': {
       id: '/_auth/promotions/price-lists/'
       path: '/promotions/price-lists'
@@ -2052,6 +2072,7 @@ interface AuthRouteChildren {
   AuthSeoIndexRoute: typeof AuthSeoIndexRoute
   AuthContentLandingsIdRoute: typeof AuthContentLandingsIdRoute
   AuthCustomersWholesaleIdRoute: typeof AuthCustomersWholesaleIdRoute
+  AuthCustomersWholesaleOrdersRoute: typeof AuthCustomersWholesaleOrdersRoute
   AuthPromotionsPriceListsIdRoute: typeof AuthPromotionsPriceListsIdRoute
   AuthPromotionsPriceListsNewRoute: typeof AuthPromotionsPriceListsNewRoute
   AuthCustomersWholesaleIndexRoute: typeof AuthCustomersWholesaleIndexRoute
@@ -2106,6 +2127,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthSeoIndexRoute: AuthSeoIndexRoute,
   AuthContentLandingsIdRoute: AuthContentLandingsIdRoute,
   AuthCustomersWholesaleIdRoute: AuthCustomersWholesaleIdRoute,
+  AuthCustomersWholesaleOrdersRoute: AuthCustomersWholesaleOrdersRoute,
   AuthPromotionsPriceListsIdRoute: AuthPromotionsPriceListsIdRoute,
   AuthPromotionsPriceListsNewRoute: AuthPromotionsPriceListsNewRoute,
   AuthCustomersWholesaleIndexRoute: AuthCustomersWholesaleIndexRoute,
