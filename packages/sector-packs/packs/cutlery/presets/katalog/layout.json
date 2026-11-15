@@ -30,6 +30,13 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
+      "look": {
+        "space_outer": "small",
+        "space_inner": null,
+        "ground": null,
+        "align": null,
+        "width": null
+      },
       "title": null,
       "source": { "kind": "best_sellers", "days": 90 },
       "limit": 10,
