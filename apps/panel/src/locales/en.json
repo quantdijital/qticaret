@@ -8550,8 +8550,41 @@
         },
         "galleryHint": {
           "collage": "One large photo on the left; on wide screens two small ones beside it.",
-          "strips": "Up to four photos side by side as equal slanted strips. On wide screens the strip under the mouse widens; on phones they stay equal."
-        }
+          "strips": "The photos side by side as slanted strips. On wide screens the strip under the mouse widens; on phones at most three, and they stay equal."
+        },
+        "stripsLayout": "Where the strips stand",
+        "stripsLayoutTerm": "strips_layout",
+        "stripsLayouts": {
+          "side": "Beside the text",
+          "wide": "Full width"
+        },
+        "stripsLayoutHint": {
+          "side": "The strips on the left, the product's name and price on the right; up to four strips.",
+          "wide": "The strips fill the section's whole width, the product's name and price under them; up to six strips. To run them from one edge of the screen to the other, set the width to “Full” under Look."
+        },
+        "stripsSlant": "Slant",
+        "stripsSlantTerm": "strips_slant",
+        "stripsSlants": {
+          "soft": "Slight",
+          "medium": "Medium",
+          "steep": "Sharp"
+        },
+        "stripsSlantHint": "How far the lines between the strips lean.",
+        "stripsLine": "Line thickness",
+        "stripsLineTerm": "strips_line",
+        "stripsLines": {
+          "none": "None",
+          "thin": "Thin",
+          "medium": "Medium",
+          "thick": "Thick"
+        },
+        "stripsLineHint": "The space between the strips. With “None” the strips touch.",
+        "stripsOverlap": "Overlap",
+        "stripsOverlapTerm": "strips_overlap",
+        "stripsOverlapHint": "Each strip lies over the one before it with a thin shadow on its edge; the one under the mouse comes to the top.",
+        "stripsDim": "Darken the others",
+        "stripsDimTerm": "strips_dim",
+        "stripsDimHint": "On wide screens, while the mouse is over a strip or the keyboard selects one, the other strips darken."
       },
       "sample": {
         "label": {
