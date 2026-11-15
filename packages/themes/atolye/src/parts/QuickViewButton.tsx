@@ -10,8 +10,9 @@ import { QUICK_VIEW_SOON_EVENT, askQuickView } from "../frame/events"
  * card's link, never instead of it (the product's address stays the one
  * link a crawler follows). Pressed, it asks the layout's dialog to show
  * the product; with no dialog on the page it goes to the product's page.
- * On the photo's top right corner, above the card's link: `hover` a pill
- * with its word shown while the card is pointed at or focused (a touch
+ * On the photo's top right corner, above the card's link, in the shop's
+ * button shape (Tezgâh's square, a pill elsewhere): `hover` the icon with
+ * its word, shown while the card is pointed at or focused (a touch
  * screen, with nothing to point, shows the 44 px icon always); `icon` the
  * 44 px icon always; `inline` (the compact card) the icon at the row's end.
  * Absolutely placed, or in a row of its own size: nothing moves when it shows.
@@ -39,10 +40,14 @@ export function QuickViewButton({
       aria-label={words.label}
       aria-haspopup="dialog"
       className={cn(
-        "gf-quick-view z-(--z-raised) inline-flex shrink-0 items-center justify-center gap-1.5 bg-field text-text shadow-float hover:bg-paper-2",
+        "gf-quick-view z-(--z-raised) inline-flex shrink-0 items-center justify-center gap-1.5 rounded-button bg-field text-text hover:bg-paper-2",
+        // On the photo it floats, as the round "+" beside it; in the compact row it sits on the
+        // page, drawn by a 1 px line like the row's other surfaces (no shadow). A compact card
+        // narrower than 18rem (a two-column listing on a phone, a short list's narrow column) leaves
+        // its name, stars and price no room beside it: there the card's link alone, nothing under it
         inline
-          ? "relative size-11 rounded-pill"
-          : "absolute top-2 right-2 min-h-11 min-w-11 rounded-pill",
+          ? "relative size-11 border border-rule @max-[18rem]:hidden"
+          : "absolute top-2 right-2 min-h-11 min-w-11 shadow-float",
         hover && "px-3 text-sm font-semibold"
       )}
       onPointerEnter={() => {

@@ -8390,7 +8390,7 @@
           "hover": "Üzerine gelince düğme",
           "icon": "Her zaman simge"
         },
-        "quick_view_triggerHint": "Telefonda ve kompakt kartta her zaman küçük simge görünür.",
+        "quick_view_triggerHint": "Telefonda ve kompakt kartta her zaman küçük simge görünür; adın ve fiyatın sığmadığı dar kompakt kartta (telefonda iki sütun) simge çizilmez.",
         "quick_view_rating": "Pencerede puanı göster",
         "quick_view_ratingHint": "Ürünün yıldızları ve değerlendirme sayısı; değerlendirmesi yoksa görünmez.",
         "quick_view_summary": "Pencerede kısa açıklamayı göster",

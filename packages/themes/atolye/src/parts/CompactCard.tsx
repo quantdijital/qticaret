@@ -30,7 +30,7 @@ export function CompactCard({
   // One pill: "Tükendi" over a discount, each as the shop shows it
   const out = isOut(product) && badges.soldOut
   return (
-    <article className="group gf-card relative flex h-full items-center gap-3 md:gap-4">
+    <article className="group gf-card @container relative flex h-full items-center gap-3 md:gap-4">
       <div className="relative aspect-card w-20 shrink-0 overflow-hidden rounded-media bg-paper-2 md:w-24">
         {product.image && (
           <ResponsiveImage

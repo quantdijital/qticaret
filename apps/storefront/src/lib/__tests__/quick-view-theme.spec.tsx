@@ -170,6 +170,13 @@ describe("a card's quick view button", () => {
     draw({ ...CARD, quickView: "hover", variant: "compact" })
     expect(trigger().dataset["quickView"]).toBe("inline")
     expect(trigger().textContent).toBe("")
+    // Tezgâh audit of PR 31: in the shop's button shape (square there), and in the row a line, no shadow
+    expect(trigger().classList).toContain("rounded-button")
+    expect(trigger().classList).toContain("border-rule")
+    expect(trigger().classList).not.toContain("shadow-float")
+    // A compact card too narrow for its name, stars and price beside the icon draws none
+    expect(trigger().classList).toContain("@max-[18rem]:hidden")
+    expect(trigger().closest("article")?.classList).toContain("@container")
   })
 })
 

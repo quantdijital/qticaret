@@ -8390,7 +8390,7 @@
           "hover": "Button on hover",
           "icon": "Icon always"
         },
-        "quick_view_triggerHint": "Phones and the compact card always show the small icon.",
+        "quick_view_triggerHint": "Phones and the compact card always show the small icon; a narrow compact card with no room beside its name and price (two columns on a phone) draws none.",
         "quick_view_rating": "Show the rating in the dialog",
         "quick_view_ratingHint": "The product's stars and review count; hidden without reviews.",
         "quick_view_summary": "Show the short description in the dialog",
