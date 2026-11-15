@@ -3,8 +3,8 @@ import { cn } from "@qticaret/ui/lib/utils"
 
 /**
  * A section's head: its h2 on the left, the link to the whole list on
- * the right on one baseline (a destination, never a label above the
- * head). `children` sits under the head (a tab row). In a section the shop
+ * the right on the h2's baseline (Tezgâh audit Y-07; a destination, never
+ * a label above the head). `children` sits under the head (a tab row). In a section the shop
  * centred (its look, `Look.tsx`) the link stands under the centred head.
  */
 export function SectionHead({
@@ -21,7 +21,7 @@ export function SectionHead({
   return (
     <div
       className={cn(
-        "flex items-end justify-between gap-4 group-data-[align=center]/look:flex-col group-data-[align=center]/look:items-center group-data-[align=center]/look:gap-1 group-data-[align=center]/look:text-center",
+        "flex items-baseline justify-between gap-4 group-data-[align=center]/look:flex-col group-data-[align=center]/look:items-center group-data-[align=center]/look:gap-1 group-data-[align=center]/look:text-center",
         className
       )}
     >

@@ -169,12 +169,12 @@ export const DEMO_STOCKED_QUANTITY = 100
  */
 export const DEMO_STOREFRONT = {
   announcements: [
-    "1500 TL ve üzeri siparişlerde kargo ücretsiz",
-    "Hafta içi 16:00'ya kadar verilen siparişler aynı gün kargoda",
+    "1.500 TL ve üzeri siparişlerde kargo ücretsiz",
+    "Hafta içi 16.00'ya kadar verilen siparişler aynı gün kargoda",
   ],
   trust_badges: [
-    { icon: "truck", title: "Ücretsiz kargo", text: "1500 TL ve üzeri siparişlerde" },
-    { icon: "clock", title: "Aynı gün kargo", text: "Hafta içi 16:00'ya kadar" },
+    { icon: "truck", title: "Ücretsiz kargo", text: "1.500 TL ve üzeri siparişlerde" },
+    { icon: "clock", title: "Aynı gün kargo", text: "Hafta içi 16.00'ya kadar" },
     { icon: "refresh", title: "Kolay iade", text: "14 gün içinde ücretsiz" },
     { icon: "shield", title: "Güvenli ödeme", text: "Kartınız bizde saklanmaz" },
   ],

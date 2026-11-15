@@ -133,15 +133,15 @@ describe("the product's shipping card", () => {
       { icon: "truck", title: "Aynı gün kargoda", text: "Tahmini teslimat 1–2 iş günü" },
       {
         icon: "clock",
-        title: "Saat 15:00'e kadar verilen siparişler aynı gün kargoda",
+        title: "Saat 15.00'e kadar verilen siparişler aynı gün kargoda",
         text: null,
       },
     ])
-    expect(facts(16)[1]?.title).toBe("Saat 16:00'ya kadar verilen siparişler aynı gün kargoda")
-    expect(facts(12)[1]?.title).toContain("12:00'ye kadar")
-    expect(facts(10)[1]?.title).toContain("10:00'a kadar")
-    expect(facts(19)[1]?.title).toContain("19:00'a kadar")
-    expect(facts(20)[1]?.title).toContain("20:00'ye kadar")
+    expect(facts(16)[1]?.title).toBe("Saat 16.00'ya kadar verilen siparişler aynı gün kargoda")
+    expect(facts(12)[1]?.title).toContain("12.00'ye kadar")
+    expect(facts(10)[1]?.title).toContain("10.00'a kadar")
+    expect(facts(19)[1]?.title).toContain("19.00'a kadar")
+    expect(facts(20)[1]?.title).toContain("20.00'ye kadar")
     // One day to leave, said once
     expect(facts(14, { min: 1, max: 1 })[0]?.title).toBe("1 iş gününde kargoda")
   })
