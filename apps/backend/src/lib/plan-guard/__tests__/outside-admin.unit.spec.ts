@@ -40,8 +40,8 @@ const DECISIONS: Record<string, Decision> = {
 }
 
 const API = join(__dirname, "../../../api")
-// `/admin` has its own inventory; `/store` is the storefront's API, whose
-// only closed writes are the checkout's (plan-status-suspended.spec.ts)
+// `/admin` has its own inventory; `/store` has its own too (store-writes.unit.spec.ts:
+// what a suspended shop refuses there)
 const COVERED_ELSEWHERE = new Set(["admin", "store"])
 const HANDLER = /^export (?:async function|function|const|let) (GET|POST|PUT|PATCH|DELETE)\b/gm
 

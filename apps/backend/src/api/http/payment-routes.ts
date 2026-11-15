@@ -14,7 +14,7 @@ import type { FeeCart } from "../../lib/payments/cod"
 import { guardCheckout, guardPaymentStart } from "./checkout-guard"
 import { holdFloodingCheckoutSms } from "./checkout-sms"
 import { requireMailDomain } from "./mail-domain"
-import { refuseSuspendedCheckout } from "./plan-guard"
+import { refuseSuspendedCartWrite, refuseSuspendedCheckout } from "./plan-guard"
 import { rateLimit } from "./rate-limit"
 
 const FEE_LINE_FIELDS = ["items.id", "items.metadata", "items.variant_id", "items.is_custom_price"]
@@ -142,6 +142,10 @@ const checkoutLimit = rateLimit(() => RATE_LIMIT_PROFILES.checkout, {
 })
 
 export const PAYMENT_ROUTES = [
+  // adr/0061 §5.5 (#43 review): a suspended shop builds no cart. A wildcard runs before the
+  // routes below (Medusa sorts wildcard matchers first). No `methods` on purpose (a method-scoped
+  // middleware may sort after the core route): the guard itself only stops writes
+  { matcher: "/store/carts*", middlewares: [refuseSuspendedCartWrite] },
   {
     matcher: "/store/carts/:id/payment-session",
     methods: ["POST" as const],

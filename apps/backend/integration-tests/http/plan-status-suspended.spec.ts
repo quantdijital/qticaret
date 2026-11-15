@@ -10,8 +10,8 @@ jest.setTimeout(240 * 1000)
 
 /**
  * adr/0061 §5.5, Ek C15: a shop the platform suspended. The storefront's
- * edge hears it (its 503), the Store API starts no payment and completes no cart (503
- * `plan.suspended`), the panel is restricted's; a payment already started
+ * edge hears it (its 503), the Store API starts no payment, completes no cart and
+ * builds none (503 `plan.suspended`), the panel is restricted's; a payment already started
  * settles through its provider's hook, and the control plane's next
  * document still reaches the shop to lift it.
  */
@@ -70,6 +70,74 @@ medusaIntegrationTestRunner({
       // Review I1: never kept on the way, so the end of a suspension is not held back
       const raw = await http.get("/store/seo/site", { headers: selling.storefront.headers })
       expect(raw.headers["cache-control"]).toBe("no-store")
+    })
+
+    it("builds no cart while suspended, and still shows the one it has (#43 review)", async () => {
+      const started = await selling.startPayment()
+      await setPlanStatus(getContainer(), "suspended")
+      const store = { headers: selling.storefront.headers }
+
+      const created = await settle(http.post<Answer>("/store/carts", {}, store))
+      const added = await settle(
+        http.post<Answer>(
+          `/store/carts/${started.cartId}/line-items`,
+          { variant_id: selling.variantId, quantity: 1 },
+          store
+        )
+      )
+      const updated = await settle(
+        http.post<Answer>(`/store/carts/${started.cartId}`, { email: "yeni@example.com" }, store)
+      )
+      const cart = (
+        await settle(
+          http.get<{ cart: { items: { id: string }[] } }>(`/store/carts/${started.cartId}`, store)
+        )
+      ).data.cart
+      const lineId = cart.items[0]?.id ?? ""
+      const removed = await settle(
+        http.delete<Answer>(`/store/carts/${started.cartId}/line-items/${lineId}`, store)
+      )
+      const shipping = await settle(
+        http.post<Answer>(
+          `/store/carts/${started.cartId}/shipping-methods`,
+          { option_id: "so_1" },
+          store
+        )
+      )
+      const coded = await settle(
+        http.post<Answer>(
+          `/store/carts/${started.cartId}/promotions`,
+          { promo_codes: ["X"] },
+          store
+        )
+      )
+      const declared = await settle(
+        http.post<Answer>(`/store/carts/${started.cartId}/age-declaration`, {}, store)
+      )
+      // Upper case and a trailing slash reach the same guard
+      const shouted = await settle(http.post<Answer>("/STORE/CARTS/", {}, store))
+      const read = await settle(http.get(`/store/carts/${started.cartId}`, store))
+      // A read by POST stays open: the payment result page asks it (security review M1)
+      const access = await settle(
+        http.post<Answer>(`/store/carts/${started.cartId}/order-access`, {}, store)
+      )
+
+      for (const refused of [
+        created,
+        added,
+        updated,
+        removed,
+        shipping,
+        coded,
+        declared,
+        shouted,
+      ]) {
+        expect(refused.status).toBe(503)
+        expect(refused.data).toMatchObject({ type: "unavailable", message: "plan.suspended" })
+        expect(refused.headers["retry-after"]).toBe("3600")
+      }
+      expect(read.status).toBe(200)
+      expect(access.status).not.toBe(503)
     })
 
     it("answers its product feeds 503 with Retry-After, as the storefront (Ek C19 L1)", async () => {
