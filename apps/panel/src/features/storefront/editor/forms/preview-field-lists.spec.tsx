@@ -160,6 +160,7 @@ describe("a list row named by the preview", () => {
           variant: "standard",
           sticky: true,
           menu_images: "submenus",
+          search_style: "field",
         },
         "catalog"
       ) as HeaderBarSection),

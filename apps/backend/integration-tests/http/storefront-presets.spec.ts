@@ -229,6 +229,7 @@ medusaIntegrationTestRunner({
           variant: "standard",
           sticky: true,
           menu_images: "submenus",
+          search_style: "field",
         },
       ])
       // Grafit fills the footer: its own stands (after the footer, read in)

@@ -12,7 +12,9 @@ import { HeaderCatalogStrip } from "./HeaderCatalogStrip"
 import { HeaderCatalogTools } from "./HeaderCatalogTools"
 import { MenuSheet } from "./MenuSheet"
 import { SearchBox } from "./SearchBox"
+import { SearchDrop } from "./SearchDrop"
 import { PHONE_SEARCH } from "./SearchLink"
+import { SearchToggle } from "./SearchToggle"
 import { Wordmark } from "./Wordmark"
 import { LABELLED, accountOf, allInOf, searchOf } from "./header-words"
 import { menuWords } from "./menu-words"
@@ -61,7 +63,9 @@ const NARROW_SEARCH = "lg:[&>[role=search]]:max-w-140"
  * the tools named in the top row after the phone (`toolsPlace: row`,
  * `HeaderCatalogTools`), the top links quiet at the menu bar's end
  * (`topLinksPlace: bar`, `Aisle`'s `links`), the search 35 rem
- * (`searchWidth: narrow`).
+ * (`searchWidth: narrow`). Every header's `searchStyle: icon` puts a
+ * magnifier before the phone that opens the box as wide (`SearchToggle`),
+ * and drops a phone's search from the top (`SearchDrop`).
  */
 export function HeaderCatalog({
   shop,
@@ -93,7 +97,12 @@ export function HeaderCatalog({
       {catalog.highlight.label}
     </a>
   )
-  const search = searchOf(shop, t, searchSuggest, catalog.searchPlaceholder)
+  const box = {
+    ...searchOf(shop, t, searchSuggest, catalog.searchPlaceholder),
+    written: catalog.searchLabel,
+    marks: shop.editor,
+  }
+  const icon = shop.headerBar?.searchStyle === "icon"
   const account = accountOf(shop, t)
   const parts = catalogParts(shop, catalog)
   const cart = {
@@ -148,13 +157,22 @@ export function HeaderCatalog({
           }}
         />
         <Wordmark name={shop.name} logo={shop.logo} className="mr-auto lg:mr-0" />
-        <SearchBox
-          {...search}
-          id="arama-genis"
-          written={catalog.searchLabel}
-          marks={shop.editor}
-          className="hidden max-w-180 flex-1 lg:block"
-        />
+        {icon ? (
+          // The magnifier opens the box as wide as `searchWidth` draws it (adr/0049 Ek 2026-11-15)
+          <SearchToggle
+            {...box}
+            id="arama-genis"
+            align="end"
+            openLabel={t("search.open")}
+            className={
+              catalog.searchWidth === "narrow"
+                ? "[--gf-search-open:35rem]"
+                : "[--gf-search-open:45rem]"
+            }
+          />
+        ) : (
+          <SearchBox {...box} id="arama-genis" className="hidden max-w-180 flex-1 lg:block" />
+        )}
         {parts.phone && (
           <a
             href={shop.contact.phoneHref ?? undefined}
@@ -181,14 +199,13 @@ export function HeaderCatalog({
           </nav>
         )}
       </Container>
-      <Container className="pb-2 lg:hidden">
-        <SearchBox
-          {...search}
-          id={PHONE_SEARCH}
-          written={catalog.searchLabel}
-          marks={shop.editor}
-        />
-      </Container>
+      {icon ? (
+        <SearchDrop {...box} title={t("search.title")} closeLabel={t("search.close")} />
+      ) : (
+        <Container className="pb-2 lg:hidden">
+          <SearchBox {...box} id={PHONE_SEARCH} />
+        </Container>
+      )}
       <div className="gf-menubar hidden lg:block" data-ground={catalog.menuGround}>
         <Container>
           <div className="relative flex min-h-13 items-center gap-2 py-1">

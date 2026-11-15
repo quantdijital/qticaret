@@ -24,6 +24,7 @@ const standard: HeaderBarSection = {
   variant: "standard",
   sticky: true,
   menu_images: "submenus",
+  search_style: "field",
 }
 
 /** The bar's open content and its closed "Diğer ayarlar", every change kept. */

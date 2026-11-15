@@ -3,6 +3,9 @@
  *
  * - `qt:open-menu`: the bottom bar asks the menu drawer to open; the
  *   drawer cancels it when it heard it, else the link goes to `/kategoriler`.
+ * - `qt:open-search`: the bottom bar asks the header's dropping search (a
+ *   header whose search is an icon, `SearchDrop`) to open; it cancels it
+ *   when it heard it, else "Ara" puts the cursor in the header's field.
  * - `qt:cookie-preferences`: the footer's link asks the cookie banner to
  *   open again; else the link goes to `/cerez-tercihleri`.
  * - `qt:cart-added`: the purchase form put a line in the cart; the cart
@@ -15,6 +18,7 @@
  *   the dialog's code may load now, before the click.
  */
 export const OPEN_MENU_EVENT = "qt:open-menu"
+export const OPEN_SEARCH_EVENT = "qt:open-search"
 export const COOKIE_PREFERENCES_EVENT = "qt:cookie-preferences"
 export const CART_ADDED_EVENT = "qt:cart-added"
 export const QUICK_VIEW_EVENT = "qt:quick-view"
