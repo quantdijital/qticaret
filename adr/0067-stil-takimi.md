@@ -84,3 +84,32 @@ Dökümün sayımı: daldaki 17 değişikliğin 3'ü takımla ifade edilir (`men
 1. `density` ne zaman ve hangi adla ("Sık" bölüm aralığında kullanılıyor; öneri "Sıkı").
 2. Hesap, sipariş ve ödeme sayfalarındaki kutuların tam listesi adım 4'te çıkarılır.
 3. Tema ayarlarının ayar aramasına girmesi.
+
+## Uygulama notu (2026-11-15): önce sözleşme
+
+Dört yeni alan (S1–S4) çizime dokunmadan uçtan uca tanımlandı; her alanın çizimi kendi adımında, ayrı dosyalarda bağlanır. Bu PR'dan sonra varsayılan dışı değerler kaydedilir ve vitrine ulaşır, ama görünüşü değiştirmez; panel onları henüz göstermez.
+
+- **Sözleşme:** `packages/types/src/store/style-kit.ts` (`STYLE_KIT`: alan → basamak listesi, ilk basamak varsayılan; `STYLE_KIT_DEFAULTS`, `styleKitAttributes`). `StoreThemeSettings` bu alanları taşır. Backend aynası `platform-settings/sections/theme-style-kit.ts` (eşitlik testi `theme-style-kit.unit.spec.ts`); alan yoksa varsayılan (`withCardDefaults` içinden `withStyleKitDefaults`), liste dışı değer reddedilir. Ayarlar JSON'da, migration yok.
+- **İşaret:** `:root` değişkeni değil, `data-*` özniteliği. Temanın kök öğesi (Atölye `Layout`'unun en dıştaki `div`'i, ödeme çerçevesi dahil) varsayılan dışı her alan için `data-menu-style="underline|plain"`, `data-shadow="none"`, `data-chip-style="lined"`, `data-media-ground="page"` taşır; varsayılanda hiçbiri basılmaz, HTML ve stil çıktısı önceki gibidir (görünüm kilidi değişmeden geçti). Temanın `style(settings)` işlevi kit için hiçbir şey basmaz. Neden öznitelik: çizim ajanları yalnız CSS yazar, ortak TS dosyasına (`themes/atolye.ts`) dokunmaz; `:root` değişkenini değerine göre seçen taşınabilir bir CSS yolu da yoktur.
+- **CSS'te okuma** (öğe sayfanın diyaloglarını ve çekmecelerini de kapsar; `<dialog>` üst katmanda da DOM'daki atasını korur):
+
+  ```css
+  [data-menu-style="plain"] .gf-aisle a:hover { background: none; }
+  [data-chip-style="lined"] .gf-chip:not([aria-pressed="true"]) { background: var(--color-paper); box-shadow: inset 0 0 0 1px var(--color-rule); }
+  /* Belirteçle (§3, tercih edilen): mevcut sınıf belirteci okur, öznitelik belirteci değiştirir */
+  [data-shadow="none"] { --shadow-float: none; --float-line: var(--color-rule); }
+  [data-media-ground="page"] { --media-ground: var(--color-paper); }
+  ```
+
+  Sınıf ve belirteç adları örnektir (`--shadow-float`, `--media-ground` taşıma adımında tanımlanır). Katman sırası özgüllükten önce gelir: kural ya katmansız (`surface.css` deseni) ya da okuduğu kuralla aynı katmanda yazılır; o zaman öznitelik + sınıf, tek sınıflı kuralı geçer. Kök öğenin dışında kalan yalnız `html`/`body` zeminidir.
+- **Panelde hazır-değil:** `apps/panel/src/features/storefront/editor/forms/style-kit-ready.ts` içindeki `STYLE_KIT_READY` (alan başına bir `false` satırı, aralarında yorum satırı). Kayıt defteri bu alanı `shown: () => STYLE_KIT_READY[alan]` ile bağlar: `false` iken alan formda da ayar aramasında da yoktur. Gruplar ikiye bölündü (§2.7): "Şekiller" (köşe, düğme, çip) ve "Yüzeyler" (kutu, gölge, fotoğraf zemini, menü, bölüm aralığı). Etiketler, basamak adları ve açıklamalar `storefront.editor.theme.styleKit.<alan>.{label,term,steps,hint}` altında yazılı.
+
+**Çizim adımının yapacakları** (alan başına):
+
+1. Taşıma (§3 a): kimliği sabit yazan yerleri sınıf ya da belirtece toplamak; çözülmüş stil aynı kalır, CSS özeti bilerek güncellenir (`pnpm lock:presets`).
+2. Yeni basamak (§3 b): yalnız CSS, yukarıdaki seçicilerle. Yeni TS işareti gerekmez; `styleKitAttributes`'e, `themes/atolye.ts`'e, sözleşmeye, backend'e ve i18n'e dokunulmaz (açıklama metni değişecekse yalnız kendi `styleKit.<alan>` bloğu).
+3. `STYLE_KIT_READY.<alan>` satırını `true` yapmak; panelde alan açılır.
+4. Test: vitrinde basamağın CSS'te okunduğu (ör. `atolye-settings.spec.ts` deseniyle `ruleBody`), panelde alanın göründüğü. Çip adımı `theme-registry.spec.ts`'teki `keys("cizgili")` beklentisini günceller ("Çizgili" artık iki alanda geçer).
+5. PR gövdesi: etkilenen hazır görünümler (hepsi varsayılanı taşır: yok), CSS kilidi bilerek güncellendi, çözülmüş stil denetimi sonucu.
+
+Ortak kalan dosyalar: `style-kit-ready.ts` (ayrı satırlar, birleşir), `styles.lock.json` (iki adım aynı anda girerse rebase sonrası `pnpm lock:presets` yeniden koşulur) ve yeni CSS dosyası açılırsa `styles.css`'teki `@import` satırı.

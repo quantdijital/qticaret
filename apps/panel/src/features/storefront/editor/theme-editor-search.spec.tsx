@@ -85,7 +85,7 @@ describe("the theme editor's settings search", () => {
     await user.type(searchbox(), "border-radius")
     const hits = within(screen.getByRole("list", { name: "Arama sonuçları" }))
     const hit = hits.getByRole("button", { name: /Köşeler border-radius/ })
-    expect(hit).toHaveTextContent("Köşeler border-radius" + "Tema ayarları · Köşeler ve düğmeler")
+    expect(hit).toHaveTextContent("Köşeler border-radius" + "Tema ayarları · Şekiller")
     await user.click(hit)
 
     expect(screen.getByRole("heading", { name: "Tema ayarları" })).toBeInTheDocument()

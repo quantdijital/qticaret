@@ -5,8 +5,11 @@ import {
   CARD_SOLD_OUT_ROWS,
   CARD_VARIANTS,
   SECTION_SPACINGS,
+  STYLE_KIT,
+  STYLE_KIT_DEFAULTS,
   SURFACE_STYLES,
 } from "@qticaret/types"
+import type { StyleKit } from "@qticaret/types"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { StorefrontBackground } from "@/theme/storefront"
 
@@ -55,11 +58,13 @@ export const BUTTON_SHAPES = ["pill", "rounded", "square"] as const
 export { SECTION_SPACINGS }
 /** How the theme's boxes stand (Tezgâh audit Z-04): the contract's list, `filled` today's tone. */
 export { SURFACE_STYLES }
+/** The style kit (adr/0067 §1): menu items, shadow, chips, the photos' ground; first step the default. */
+export { STYLE_KIT }
 
 export type HeadingFont = (typeof HEADING_FONTS)[number]
 export type BodyFont = (typeof BODY_FONTS)[number]
 
-export interface ThemeSettings {
+export interface ThemeSettings extends StyleKit {
   /**
    * What the fields mean (adr/0062 §4): the server's own, read with the
    * section and never sent. A row stored before it reads as Grafit already.
@@ -146,6 +151,7 @@ export const GRAFIT_THEME: ThemeChoices = {
   buttons: "pill",
   section_spacing: "normal",
   surface_style: "filled",
+  ...STYLE_KIT_DEFAULTS,
 }
 
 /**

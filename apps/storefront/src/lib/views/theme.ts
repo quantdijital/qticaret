@@ -14,7 +14,9 @@ import {
 } from "@qticaret/types/storefront"
 import type { ThemeView } from "@qticaret/ui"
 import { cardVariantOf } from "@qticaret/types/section-variants"
+import { STYLE_KIT_DEFAULTS } from "@qticaret/types/style-kit"
 import { brandDeclarations, isHexColor, readableOn } from "./color"
+import { styleKitOf, styleKitView } from "./style-kit"
 
 /**
  * The shop's theme settings (adr/0053 §B) as the storefront applies them:
@@ -58,6 +60,7 @@ export const DEFAULT_THEME: StoreThemeSettings = {
   buttons: "pill",
   section_spacing: "normal",
   surface_style: "filled",
+  ...STYLE_KIT_DEFAULTS,
 }
 
 /**
@@ -229,6 +232,7 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
     buttons: oneOf(at(raw, "buttons"), ["pill", "rounded", "square"], d.buttons),
     section_spacing: oneOf(at(raw, "section_spacing"), SECTION_SPACINGS, d.section_spacing),
     surface_style: oneOf(at(raw, "surface_style"), SURFACE_STYLES, d.surface_style),
+    ...styleKitOf(raw),
   }
 }
 
@@ -243,6 +247,7 @@ export function themeView(settings: StoreThemeSettings): ThemeView {
     header: { layout: settings.header.layout, sticky: settings.header.sticky },
     buttons: settings.buttons,
     surface: settings.surface_style,
+    styleKit: styleKitView(settings),
   }
 }
 

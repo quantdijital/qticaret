@@ -20,8 +20,15 @@ interface Frame {
     buttons: string
     section_spacing: string
     surface_style: string
+    menu_style: string
+    shadow: string
+    chip_style: string
+    media_ground: string
   }
 }
+
+/** The style kit at today's drawing (adr/0067 §1). */
+const KIT = { menu_style: "filled", shadow: "float", chip_style: "filled", media_ground: "well" }
 
 /** The card's variant and the framed card's switches at their defaults (adr/0049 Ek 2026-11-14 §3.3). */
 const CARD = {
@@ -75,6 +82,7 @@ medusaIntegrationTestRunner({
       })
       const css = await save(admin.headers, { css: "body{display:none}" })
       const byOps = await save(ops.headers, { radius: "round" })
+      const offKit = await save(admin.headers, { menu_style: "boxed" })
       const saved = await save(admin.headers, {
         colors: { primary: "#1E3A8A", background: "cool" },
         typography: { heading: "playfair" },
@@ -83,6 +91,8 @@ medusaIntegrationTestRunner({
         buttons: "rounded",
         section_spacing: "roomy",
         surface_style: "lined",
+        menu_style: "plain",
+        shadow: "none",
       })
       const after = await frame()
 
@@ -99,12 +109,15 @@ medusaIntegrationTestRunner({
         section_spacing: "normal",
         // A row before the surface style reads today's filled boxes (Z-04)
         surface_style: "filled",
+        // and before the style kit, today's drawing (adr/0067)
+        ...KIT,
       })
       expect(fallback.data.theme.colors.primary).toBe("#0b5c99")
       expect(pale.status).toBe(400)
       expect(pale.data).toMatchObject({ message: "platform_settings.color_contrast" })
       expect([fontAddress.status, css.status]).toEqual([400, 400])
       expect(byOps.status).toBe(403)
+      expect(offKit.status).toBe(400)
       expect(saved.status).toBe(200)
       expect(after.data.theme).toEqual({
         theme: "atolye",
@@ -116,6 +129,9 @@ medusaIntegrationTestRunner({
         buttons: "rounded",
         section_spacing: "roomy",
         surface_style: "lined",
+        ...KIT,
+        menu_style: "plain",
+        shadow: "none",
       })
       // The old field stays until the storefront and the panel move over
       expect(after.data.storefront.primary_color).toBe("#0b5c99")
@@ -155,6 +171,7 @@ medusaIntegrationTestRunner({
         buttons: "pill",
         section_spacing: "normal",
         surface_style: "filled",
+        ...KIT,
       }
 
       const read = await section()

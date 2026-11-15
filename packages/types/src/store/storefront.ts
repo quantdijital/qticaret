@@ -5,6 +5,7 @@
  */
 import type { MediaDerivatives, StoreImage } from "./catalog.js"
 import type { CardVariant } from "./section-variants.js"
+import type { StyleKit } from "./style-kit.js"
 
 export type TrustIcon =
   "truck" | "clock" | "shield" | "card" | "refresh" | "award" | "gift" | "phone"
@@ -86,9 +87,10 @@ export type ThemeBackground = "steel" | "warm" | "neutral" | "cool"
 
 /**
  * How the storefront looks (F18 D11, adr/0053 §B): choices from fixed
- * lists, never CSS. The defaults are today's Grafit look (adr/0062 §2).
+ * lists, never CSS. The defaults are today's Grafit look (adr/0062 §2);
+ * the style kit's fields (`STYLE_KIT`, adr/0067) at their first step.
  */
-export interface StoreThemeSettings {
+export interface StoreThemeSettings extends StyleKit {
   theme: "atolye"
   colors: {
     /** `#rrggbb`; null: the theme's own ink. Falls back to `storefront.primary_color`. */
