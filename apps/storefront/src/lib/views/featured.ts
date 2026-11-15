@@ -1,5 +1,6 @@
 import "server-only"
 import type { StoreFeaturedProductSection } from "@qticaret/types"
+import { featuredProductSettingsOf } from "@qticaret/types/section-featured"
 import type { FeaturedProductSectionView, Translate } from "@qticaret/ui"
 import { cardFacts } from "@/lib/store-api/extras"
 import { isStoreApiError } from "@/lib/store-api/errors"
@@ -47,6 +48,7 @@ export async function featuredView(
       images: productImages(product),
       facts: specsOf(product.attribute_values, t).filter((spec) => spec.highlight),
       specGroups: specGroupsOf(product.attribute_values, t),
+      settings: featuredProductSettingsOf(section),
     }
   } catch (error) {
     if (isStoreApiError(error)) {
