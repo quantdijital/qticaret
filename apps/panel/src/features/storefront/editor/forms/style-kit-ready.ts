@@ -13,7 +13,7 @@ export const STYLE_KIT_READY: Readonly<Record<StyleKitField, boolean>> = {
   // S1, adr/0067 step 1: menu items (`data-menu-style`)
   menu_style: true,
   // S2, step 2: floating surfaces' shadow (`data-shadow`)
-  shadow: false,
+  shadow: true,
   // S3, step 3: chips, tabs, option buttons (`data-chip-style`)
   chip_style: true,
   // S4, step 5: the photos' ground (`data-media-ground`)

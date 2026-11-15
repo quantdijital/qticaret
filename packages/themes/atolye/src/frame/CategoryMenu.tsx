@@ -204,7 +204,7 @@ export function CategoryMenu({
         id={id}
         aria-label={words.label}
         hidden={!open}
-        className={`absolute top-full left-0 z-(--z-dropdown) mt-1 ${pictures ? "w-80" : "w-72"} rounded-tile border border-rule bg-field p-2 text-text shadow-float`}
+        className={`absolute top-full left-0 z-(--z-dropdown) mt-1 ${pictures ? "w-80" : "w-72"} rounded-tile border border-rule bg-field p-2 text-text shadow-float-edged`}
       >
         <ul data-cm-list="top" className="flex flex-col">
           {categories.map((category, index) => {
@@ -236,7 +236,7 @@ export function CategoryMenu({
                     id={panel}
                     data-cm-sub={String(index)}
                     hidden={active !== index}
-                    className={`absolute top-0 left-full ml-1 rounded-tile border border-rule bg-field p-5 shadow-float ${panelWidth(wide, pictures)}`}
+                    className={`absolute top-0 left-full ml-1 rounded-tile border border-rule bg-field p-5 shadow-float-edged ${panelWidth(wide, pictures)}`}
                   >
                     <ul
                       data-cm-list={String(index)}

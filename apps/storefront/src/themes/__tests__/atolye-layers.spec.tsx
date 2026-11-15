@@ -69,6 +69,14 @@ describe("the layers' marks (adr/0067 Ek 2026-11-15)", () => {
     expect(layerMarks(view)).toEqual({ "data-surface": "lined", "data-chip-style": "lined" })
   })
 
+  it("carries shadow none to the layers (the cart and menu sheets, the dialogs), float not", () => {
+    expect(layerMarks(theme({ shadow: "float" }))).toBeNull()
+    expect(layerMarks(theme({ shadow: "none" }))).toEqual({
+      "data-surface": "filled",
+      "data-shadow": "none",
+    })
+  })
+
   it("leaves a layer a child of body at today's drawing: no host", () => {
     draw(null)
     expect(dialog()?.parentElement).toBe(document.body)
