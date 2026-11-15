@@ -54,11 +54,11 @@ describe("the brands section", () => {
     expect(cell).toContain('loading="lazy"')
     // The plate is light on any ground and a fixed height: the row does not move as the file arrives
     expect(cell).toMatch(/<span class="[^"]*\bh-10\b[^"]*\bbg-chip\b/)
-    expect(cell).toMatch(/<img[^>]*class="h-7 w-auto max-w-full object-contain"/)
+    expect(cell).toMatch(/<img[^>]*class="h-9 w-auto max-w-full object-contain"/)
     // The name is the logo's alt text, not printed beside it
     expect(cell).not.toContain(">Bora<")
-    // The link keeps the cell's size: a 48 px target
-    expect(html).toContain('<a href="/marka/bora" class="gf-chip flex min-h-12 w-full')
+    // The link keeps the cell's size (a 48 px target), its padding taken in for the 40 px plate
+    expect(html).toMatch(/<a href="\/marka\/bora" class="gf-chip flex min-h-12 w-full [^"]* py-1"/)
     // The brand without one keeps its name
     expect(html).toContain(CELL)
   })
