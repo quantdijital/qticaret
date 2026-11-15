@@ -299,6 +299,8 @@ module.exports = defineConfig({
     { resolve: "./src/modules/wishlist" },
     // F10.3 (adr/0037 §6): customer segments by rules, members in Medusa groups
     { resolve: "./src/modules/customer-segments" },
+    // ADR-0068: wholesale levels and accounts, their Medusa groups and price lists
+    { resolve: "./src/modules/wholesale" },
     // F9 (adr/0036): commercial consent and the suppression list, addresses hashed
     {
       resolve: "./src/modules/messaging",
