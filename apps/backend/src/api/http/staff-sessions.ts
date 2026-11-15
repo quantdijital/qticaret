@@ -136,6 +136,36 @@ export async function sessionIdsOf(
   }
 }
 
+/**
+ * Whether panel session `sid` is still open and signed in as `userId`
+ * (adr/0065: the theme editor's live preview ends with the panel session
+ * it was opened from: a sign-out, a password change, "end other
+ * sessions"). False when the store cannot say.
+ */
+export async function sessionHolds(
+  req: MedusaRequest,
+  sid: string,
+  userId: string
+): Promise<boolean> {
+  const sessions = asSession(req).sessionStore
+  if (!sessions || !sid) {
+    return false
+  }
+  try {
+    return staffOf(await read(sessions, sid)) === userId
+  } catch (error) {
+    logger.warn({ event: "staff.sessions_unreadable", err: errorSummary(error) })
+    return false
+  }
+}
+
+/** The panel session making the request and who it is signed in as; null for a bearer request. */
+export function currentStaffSession(req: MedusaRequest): { sid: string; userId: string } | null {
+  const { session, sessionID } = asSession(req)
+  const userId = staffOf(session)
+  return userId && sessionID ? { sid: sessionID, userId } : null
+}
+
 /** How many sessions the user has open, this one counted; null when unknown. */
 export async function openSessionCount(
   req: MedusaRequest,

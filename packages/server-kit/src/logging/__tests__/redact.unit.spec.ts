@@ -328,6 +328,16 @@ describe("redactText", () => {
       "GET /feeds/feed-token-for-a-redaction-test/google 404",
       `GET /feeds/${REDACTED}/google 404`,
     ],
+    [
+      "theme editor's live session token in its address",
+      `GET /store/storefront-layout/session/sfs_${"0a".repeat(16)}.mabc12.${"A".repeat(43)} 200`,
+      `GET /store/storefront-layout/session/sfs_${REDACTED} 200`,
+    ],
+    [
+      "design preview token in a storefront address",
+      `GET /onizleme/sfl_01ABC.mabc12.${"b-".repeat(21)}c?sayfa=%2F 200`,
+      `GET /onizleme/sfl_${REDACTED}?sayfa=%2F 200`,
+    ],
   ])("masks a %s", (_label, input, expected) => {
     expect(redactText(input)).toBe(expected)
   })

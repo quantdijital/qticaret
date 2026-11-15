@@ -124,6 +124,12 @@ const TEXT_PATTERNS: readonly (readonly [
   [/(?<=[?&](?:code|state)=)[^\s&"#]{1,2048}/g, () => REDACTED],
   // A feed's address carries its token in the path (F10.8)
   [/(?<=\/feeds\/)[A-Za-z0-9_-]{16,128}(?![A-Za-z0-9_-])/g, () => REDACTED],
+  // A signed preview's token in a path (`/onizleme/…`, `/store/…/session/…`): a draft
+  // entry's, product's, design link's or the theme editor's live session (adr/0065 §7)
+  [
+    /(?<![A-Za-z0-9])((?:sfs|sfl|cnt|prod)_)[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}(?![\w-])/g,
+    (_match, kind = "") => `${kind}${REDACTED}`,
+  ],
   // Authorization header values; case-sensitive so "basic shipping" stays
   [/\b(Bearer|Basic)\s+[A-Za-z0-9._~+/=-]{6,}/g, (_match, scheme = "") => `${scheme} ${REDACTED}`],
   [/(?<![A-Za-z0-9_-])eyJ[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]*/g, () => REDACTED],

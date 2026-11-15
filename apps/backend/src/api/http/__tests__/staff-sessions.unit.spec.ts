@@ -1,6 +1,13 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { createMemoryAccountStore } from "../../../lib/staff/account-store"
-import { endOtherSessions, openSessionCount, renewSession, sessionIdsOf } from "../staff-sessions"
+import {
+  currentStaffSession,
+  endOtherSessions,
+  openSessionCount,
+  renewSession,
+  sessionHolds,
+  sessionIdsOf,
+} from "../staff-sessions"
 
 interface Session {
   auth_context?: { actor_type: string; actor_id: string } | null
@@ -122,5 +129,31 @@ describe("a session renewed after a password change", () => {
     expect(req.sessionID).toBe("new")
     expect(req.session.auth_context).toEqual(auth)
     await expect(store.sessionIds("user_1")).resolves.toEqual(["new"])
+  })
+})
+
+describe("the panel session a live preview is bound to (adr/0065)", () => {
+  it("holds while the session is open and signed in as the same member", async () => {
+    const { req } = requestWith({ s1: staff("user_1"), s2: staff("user_2") })
+    await expect(sessionHolds(req, "s1", "user_1")).resolves.toBe(true)
+    await expect(sessionHolds(req, "s2", "user_1")).resolves.toBe(false)
+    await expect(sessionHolds(req, "gone", "user_1")).resolves.toBe(false)
+    await expect(sessionHolds(req, "", "user_1")).resolves.toBe(false)
+  })
+
+  it("does not hold without a session store", async () => {
+    const req = {} as unknown as MedusaRequest
+    await expect(sessionHolds(req, "s1", "user_1")).resolves.toBe(false)
+  })
+
+  it("names the session asking and its member; none for a bearer request", () => {
+    const signedIn = { sessionID: "s9", session: staff("user_9") } as unknown as MedusaRequest
+    expect(currentStaffSession(signedIn)).toEqual({ sid: "s9", userId: "user_9" })
+    expect(currentStaffSession({ session: null } as unknown as MedusaRequest)).toBeNull()
+    const customer = {
+      sessionID: "s8",
+      session: { auth_context: { actor_type: "customer", actor_id: "cus_1" } },
+    } as unknown as MedusaRequest
+    expect(currentStaffSession(customer)).toBeNull()
   })
 })
