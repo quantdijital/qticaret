@@ -33,6 +33,15 @@ interface StoreProduct {
  * asked for another address proves nothing; the real confirmation does.
  * Retail 100, the level 80.
  */
+/** What the intruder saves on their record before the take-over (M5): none of it may follow. */
+const PLANTED = {
+  first_name: "Saldırgan",
+  last_name: "Kişi",
+  address_1: "Bilinmeyen Sk. 1",
+  city: "Kadıköy",
+  phone: "+905321112233",
+}
+
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
@@ -158,8 +167,23 @@ medusaIntegrationTestRunner({
       await getContainer()
         .resolve(Modules.CUSTOMER)
         .createCustomerAddresses([
-          { customer_id: intruder.id, first_name: "Saldırgan", address_1: "Bilinmeyen Sk. 1" },
+          { customer_id: intruder.id, ...PLANTED, is_default_shipping: true },
         ])
+      // Really saved on the intruder's record, so the cart check below proves something
+      const { data: before } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({
+          entity: "customer",
+          fields: [
+            "addresses.first_name",
+            "addresses.last_name",
+            "addresses.address_1",
+            "addresses.city",
+            "addresses.phone",
+          ],
+          filters: { id: intruder.id },
+        })
+      expect((before[0] as { addresses?: unknown[] } | undefined)?.addresses).toEqual([PLANTED])
       // A second sign-in at the address in another case, where the provider keeps them apart (M2)
       const variant = email.replace(/^d/, "D")
       const second = await settle(
@@ -235,7 +259,12 @@ medusaIntegrationTestRunner({
           { headers }
         )
       )
-      expect(cart.data.cart.shipping_address ?? null).toBeNull()
+      // Medusa may give a new cart the single-country region's country code; nothing planted
+      const given = cart.data.cart.shipping_address as Record<string, unknown> | null | undefined
+      for (const [field, planted] of Object.entries(PLANTED)) {
+        expect({ field, value: given?.[field] ?? null }).not.toEqual({ field, value: planted })
+      }
+      expect(JSON.stringify(given ?? {})).not.toContain("Bilinmeyen")
     })
 
     it("counts no code confirmed for another address (c)", async () => {
