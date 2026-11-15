@@ -165,6 +165,31 @@
   }
 }
 
+/* A framed card's foot button as the shop chose it (adr/0049 Ek 2026-11-15):
+   `solid` in the action's colour at rest too; `text` an underlined word, a
+   thicker line while pointed at, never a filled box. `outline` is the rule above */
+.gf-card-framed .gf-card-btn--solid {
+  border-color: var(--color-signal);
+  background: var(--color-signal);
+  color: var(--color-signal-ink);
+}
+.gf-card-framed .gf-card-btn--text,
+.gf-card-framed .gf-card-btn--text:focus-visible {
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-text);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+@media (hover: hover) {
+  .gf-card-framed:hover .gf-card-btn--text:not(:disabled):not([aria-disabled="true"]) {
+    border-color: transparent;
+    background: transparent;
+    color: var(--color-text);
+    text-decoration-thickness: 2px;
+  }
+}
+
 /* The lead card of a "1 big + 6 small" shelf (sections/ShelfLayouts, Tezgâh
    audit K-07): from 1024 px its photo grows to the two rows beside it and the
    words keep to the foot, so no empty box opens under its price */

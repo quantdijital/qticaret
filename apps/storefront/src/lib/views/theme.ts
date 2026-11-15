@@ -4,7 +4,12 @@ import type {
   ThemeBodyFont,
   ThemeHeadingFont,
 } from "@qticaret/types"
-import { SECTION_SPACINGS } from "@qticaret/types/storefront"
+import {
+  CARD_BUTTON_STYLES,
+  CARD_NO_REVIEWS,
+  CARD_SOLD_OUT_ROWS,
+  SECTION_SPACINGS,
+} from "@qticaret/types/storefront"
 import type { ThemeView } from "@qticaret/ui"
 import { cardVariantOf } from "@qticaret/types/section-variants"
 import { brandDeclarations, isHexColor, readableOn } from "./color"
@@ -35,7 +40,12 @@ export const DEFAULT_THEME: StoreThemeSettings = {
     hover_image: true,
     delivery_note: true,
     full_button: true,
-    empty_stars: false,
+    sale_badge: true,
+    low_stock_badge: true,
+    sold_out_badge: true,
+    sold_out_row: "price",
+    no_reviews: "hide",
+    button_style: "outline",
   },
   header: { layout: "left", sticky: true },
   buttons: "pill",
@@ -109,9 +119,29 @@ const oneOf = <T extends string>(value: unknown, allowed: readonly T[], fallback
 const flag = (value: unknown, fallback: boolean): boolean =>
   typeof value === "boolean" ? value : fallback
 
-const CARD_FLAGS = ["hover_image", "delivery_note", "full_button", "empty_stars"] as const
+const CARD_FLAGS = [
+  "hover_image",
+  "delivery_note",
+  "full_button",
+  "sale_badge",
+  "low_stock_badge",
+  "sold_out_badge",
+] as const
 
-/** The framed card's E5 switches (adr/0049 Ek 2026-11-14 §3.3), each checked. */
+/**
+ * The card's stars without reviews (adr/0049 Ek 2026-11-15); a backend
+ * before the choice answers the framed card's `empty_stars` switch it replaced.
+ */
+const noReviews = (raw: unknown) =>
+  oneOf(
+    at(raw, "product_card", "no_reviews"),
+    CARD_NO_REVIEWS,
+    at(raw, "product_card", "empty_stars") === true
+      ? "empty_stars"
+      : DEFAULT_THEME.product_card.no_reviews
+  )
+
+/** The card's switches (E5, adr/0049 Ek 2026-11-14 §3.3 and 2026-11-15), each checked. */
 const cardFlags = (raw: unknown) =>
   Object.fromEntries(
     CARD_FLAGS.map((key) => [
@@ -161,6 +191,17 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
       show_rating: flag(at(raw, "product_card", "show_rating"), d.product_card.show_rating),
       variant: cardVariantOf(at(raw, "product_card", "variant")),
       ...cardFlags(raw),
+      sold_out_row: oneOf(
+        at(raw, "product_card", "sold_out_row"),
+        CARD_SOLD_OUT_ROWS,
+        d.product_card.sold_out_row
+      ),
+      no_reviews: noReviews(raw),
+      button_style: oneOf(
+        at(raw, "product_card", "button_style"),
+        CARD_BUTTON_STYLES,
+        d.product_card.button_style
+      ),
     },
     header: {
       layout: oneOf(at(raw, "header", "layout"), ["centered", "left"], d.header.layout),

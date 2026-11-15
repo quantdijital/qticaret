@@ -10,6 +10,7 @@ import type {
 } from "./card-views"
 import type { InstallmentSummaryView } from "./cart-views"
 import type { CardVariant } from "./section-variants"
+import type { CardButtonStyle, CardNoReviews, CardSoldOutRow } from "@qticaret/types"
 import type { HomeSectionView } from "./content-views"
 import type { ImageView, LinkView, PriceView, TrustBadgeView } from "./views"
 
@@ -40,6 +41,30 @@ export interface ProductCardView {
   variant?: CardVariant
   /** What only a framed card shows (UK5 + E5); present with `variant: "framed"`. */
   framed?: FramedCardView
+  /**
+   * What the shop set every card to show (adr/0049 Ek 2026-11-15): its
+   * pills, a sold-out card's price row, the stars' place without reviews.
+   * None: today's card (`CARD_SHOWN_DEFAULTS`).
+   */
+  shown?: CardShownView
+}
+
+/** A card's pills and rows as the shop set them, on every variant (adr/0049 Ek 2026-11-15). */
+export interface CardShownView {
+  /** The discount pill ("%30"). */
+  saleBadge: boolean
+  /** "Az kaldı" on a low stock bucket. */
+  lowStockBadge: boolean
+  /** "Tükendi" on the photo. */
+  soldOutBadge: boolean
+  /** A sold-out card's price row: the price, "Tükendi", or "Gelince haber ver" to its page's stock alert. */
+  soldOutRow: CardSoldOutRow
+  /**
+   * A product without reviews, the stars shown: nothing, empty stars and
+   * "Henüz yorum yok", or "İlk yorumu sen yaz" to its page's reviews. Only
+   * `hide` when the storefront does not know its reviews.
+   */
+  noReviews: CardNoReviews
 }
 
 /** A framed card's own (adr/0049 Ek 2026-11-14 §3.3, E5), each as the shop set it. */
@@ -54,8 +79,8 @@ export interface FramedCardView {
   freeShipping: boolean
   /** The add button across the card's foot ("Sepete ekle", or "Seçenekler" to its page). */
   fullButton: boolean
-  /** Without reviews, empty stars and "no reviews yet" where the stars stand (the stars shown). */
-  emptyStars: boolean
+  /** That button's look: filled, the quiet bordered one (today's), or an underlined word. */
+  buttonStyle: CardButtonStyle
 }
 
 /** A card's stars: the average and how many reviews, formatted, and in words for a screen reader. */

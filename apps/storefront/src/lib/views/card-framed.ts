@@ -1,4 +1,5 @@
 import type { CardVariant, FramedCardView } from "@qticaret/ui"
+import type { CardButtonStyle } from "@qticaret/types"
 import type { PriceDisplay, StoreLayoutSection, StoreProduct } from "@qticaret/types"
 import { CARD_VARIANTS } from "@qticaret/types/section-variants"
 import { productImages } from "./image"
@@ -13,7 +14,8 @@ export interface FramedCardOptions {
   hoverImage: boolean
   deliveryNote: boolean
   fullButton: boolean
-  emptyStars: boolean
+  /** The foot button's look (adr/0049 Ek 2026-11-15). */
+  buttonStyle: CardButtonStyle
   /** Lira, KDV in (`free_shipping_threshold`); null or 0: no free shipping. */
   freeShippingFrom: number | null
 }
@@ -52,7 +54,7 @@ export function framedCard(
     secondImage: options.hoverImage ? (productImages(product)[1] ?? null) : null,
     freeShipping: options.deliveryNote && shipsFree(product, displays, options.freeShippingFrom),
     fullButton: options.fullButton,
-    emptyStars: options.emptyStars,
+    buttonStyle: options.buttonStyle,
   }
 }
 

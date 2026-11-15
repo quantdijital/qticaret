@@ -1,7 +1,7 @@
 import { ResponsiveImage } from "@qticaret/ui"
 import type { ProductCardView, Translate } from "@qticaret/ui"
-import { CardRating, isOut } from "./card-parts"
-import { Price } from "./Price"
+import { badgesOf, isOut } from "./card-parts"
+import { CardPriceRow, CardStars } from "./card-rows"
 
 /** The photo's width: 80 px on a phone, 96 px from 768 px (`w-20 md:w-24`). */
 const SIZES = "(min-width: 768px) 96px, 80px"
@@ -24,8 +24,10 @@ export function CompactCard({
   t: Translate
   priority?: boolean
 }) {
-  const discount = product.price?.discount ?? null
-  const out = isOut(product)
+  const badges = badgesOf(product)
+  const discount = badges.sale ? (product.price?.discount ?? null) : null
+  // One pill: "Tükendi" over a discount, each as the shop shows it
+  const out = isOut(product) && badges.soldOut
   return (
     <article className="group relative flex h-full items-center gap-3 md:gap-4">
       <div className="relative aspect-card w-20 shrink-0 overflow-hidden rounded-media bg-paper-2 md:w-24">
@@ -65,8 +67,8 @@ export function CompactCard({
             {product.title}
           </a>
         </h3>
-        {product.rating && <CardRating rating={product.rating} />}
-        {product.price && <Price price={product.price} t={t} />}
+        <CardStars product={product} t={t} />
+        <CardPriceRow product={product} t={t} />
       </div>
     </article>
   )

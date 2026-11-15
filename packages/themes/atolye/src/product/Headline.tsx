@@ -1,5 +1,6 @@
 import type { ProductPageView, Translate } from "@qticaret/ui"
 import { Stars } from "../parts/Stars"
+import { REVIEWS_ID } from "./anchors"
 
 /** A rating as the shop's language writes it: "4,6". */
 export const ratingText = (average: number) => average.toFixed(1).replace(".", ",")
@@ -39,7 +40,7 @@ export function Headline({ view, t }: { view: ProductPageView; t: Translate }) {
       {view.subtitle && <p className="text-md text-text-2">{view.subtitle}</p>}
       {average !== null && count > 0 && (
         <a
-          href="#degerlendirmeler"
+          href={`#${REVIEWS_ID}`}
           className="flex min-h-11 items-center gap-2 self-start text-sm no-underline"
         >
           <Stars rating={average} />
