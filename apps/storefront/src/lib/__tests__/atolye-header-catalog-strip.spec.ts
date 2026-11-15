@@ -81,7 +81,7 @@ describe("the catalog strip's note", () => {
       )
     )
     expect(strip).toContain(
-      '<a href="/kampanyalar" class="mr-auto min-w-0 truncate pr-3 text-text leading-9 pointer-coarse:leading-11">&lt;b&gt;Fırsat&lt;/b&gt; &amp; indirim</a>'
+      '<a href="/kampanyalar" class="mr-auto min-w-0 truncate pr-3 text-text leading-9 underline pointer-coarse:leading-11">&lt;b&gt;Fırsat&lt;/b&gt; &amp; indirim</a>'
     )
     expect(strip).not.toContain("<b>")
   })

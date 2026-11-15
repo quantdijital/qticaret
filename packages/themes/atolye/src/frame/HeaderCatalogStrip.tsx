@@ -37,7 +37,7 @@ export function HeaderCatalogStrip({
             <a
               href={note.path}
               // Underlined as the page's links are: it reads as one; 36 px tall as the strip's others
-              className={`${NOTE} leading-9 pointer-coarse:leading-11`}
+              className={`${NOTE} leading-9 underline pointer-coarse:leading-11`}
               {...fieldMark(marks, "strip_note")}
             >
               {note.text}
