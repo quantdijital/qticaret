@@ -167,7 +167,7 @@ export function AddonPicks({
     (field) => field.price !== null || field.choices.some((choice) => choice.price !== null)
   )
   return (
-    <fieldset className={cn("flex flex-col gap-5 rounded-media bg-paper-2 p-4", className)}>
+    <fieldset className={cn("flex flex-col gap-5 rounded-media gf-box p-4", className)}>
       <legend className="float-left mb-1 w-full text-md font-extrabold tracking-[-0.01em]">
         {words.title}
       </legend>
@@ -213,7 +213,7 @@ export function GiftRecipientFields({
     </div>
   )
   return (
-    <fieldset className={cn("flex flex-col gap-4 rounded-media bg-paper-2 p-4", className)}>
+    <fieldset className={cn("flex flex-col gap-4 rounded-media gf-box p-4", className)}>
       <legend className="float-left mb-1 flex w-full items-center gap-2 text-md font-extrabold tracking-[-0.01em]">
         <Gift className="size-5" aria-hidden="true" strokeWidth={2} />
         {words.title}

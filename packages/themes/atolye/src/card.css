@@ -191,27 +191,31 @@
 }
 
 /* The lead card of a "1 big + 6 small" shelf (sections/ShelfLayouts, Tezgâh
-   audits K-07, Y-01): from 1024 px its photo well grows to the two rows
-   beside it and the words keep to the foot, so no empty box opens under its
-   price; the photo is never cropped nor blown up past the well's width, the
-   whole product sits in the well's quiet tone */
+   audits K-07, Y-01, third audit D-4): from 1024 px its photo well takes the
+   photo's own shape (no grey bands over and under a wide photo; a tall one
+   stops at 34rem, whole), never cropped nor blown up past the well's width;
+   the words under it are larger and take the rest of the two rows beside it,
+   the button at the foot */
 @media (width >= 64rem) {
   .gf-card-lead > .gf-card-framed .gf-card-media {
-    flex: 1 1 auto;
-    min-height: 20rem;
     aspect-ratio: auto;
+    min-height: 12rem;
   }
-  .gf-card-lead > .gf-card-framed > :not(.gf-card-media) {
-    flex-grow: 0;
-  }
-  .gf-card-lead > .gf-card-framed .gf-card-media :is(.gf-card-slides, img) {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+  .gf-card-lead > .gf-card-framed .gf-card-media :is(.gf-card-slides, .gf-card-slide, picture) {
+    height: auto;
   }
   .gf-card-lead > .gf-card-framed .gf-card-media img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 34rem;
     object-fit: contain;
-    padding: var(--space-md);
+  }
+  .gf-card-lead > .gf-card-framed h3 {
+    font-size: var(--text-section);
+    line-height: 1.25;
+  }
+  .gf-card-lead > .gf-card-framed > div:not(.gf-card-media) {
+    padding-inline: var(--space-xs);
   }
 }

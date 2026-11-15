@@ -25,7 +25,7 @@ function Note({ text, error = false }: { text: string; error?: boolean }) {
 /** A payment link's cart (adr/0051): the note, and the way out for a shopper who wants to shop anew. */
 function LockedNote({ note, view, t, actions }: Page) {
   return (
-    <div role="note" className="flex flex-col gap-3 rounded-media bg-paper-2 p-4 text-sm">
+    <div role="note" className="flex flex-col gap-3 rounded-media gf-box p-4 text-sm">
       <p className="font-semibold">{note}</p>
       {actions.leaveLinkCart && view.locked && (
         <form action={actions.leaveLinkCart}>
@@ -52,7 +52,7 @@ function EmptyCart({ view, t, actions }: Omit<Page, "note">) {
       <div className="flex flex-col gap-6">
         <h1>{t("cart.title")}</h1>
         {view.error && <Note text={view.error} error />}
-        <div className="flex flex-col items-start gap-5 rounded-tile bg-paper-2 p-6 sm:flex-row sm:items-center sm:p-8">
+        <div className="flex flex-col items-start gap-5 rounded-tile gf-box p-6 sm:flex-row sm:items-center sm:p-8">
           <span className="flex size-14 shrink-0 items-center justify-center rounded-pill bg-paper">
             <ShoppingBag className="size-6" aria-hidden="true" strokeWidth={1.75} />
           </span>
@@ -110,7 +110,7 @@ export function CartPage({
         <div className="grid items-start gap-(--gap-columns) lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:gap-12">
           <div className="flex min-w-0 flex-col gap-3">
             {view.freeShipping && (
-              <div className="flex items-center gap-4 rounded-tile bg-paper-2 p-4 sm:p-5">
+              <div className="flex items-center gap-4 rounded-tile gf-box p-4 sm:p-5">
                 <Truck
                   className="size-6 shrink-0 text-text-2"
                   aria-hidden="true"

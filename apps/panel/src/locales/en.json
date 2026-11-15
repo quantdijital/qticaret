@@ -8336,6 +8336,13 @@
           "roomy": "Roomy"
         },
         "sectionSpacingHint": "The space between the page's sections, changing for every section together. Normal is the theme's own gap (120 px on a wide screen); Compact brings it to 66 px, Roomy to 144 px.",
+        "surfaceStyle": "Box style",
+        "surfaceStyleTerm": "surface style",
+        "surfaceStyles": {
+          "filled": "Filled",
+          "lined": "Lined"
+        },
+        "surfaceStyleHint": "The product page's info boxes, the category page's filters and subcategories, the cart's boxes. Filled is a tone darker than the page; Lined is a 1 px rule on the page's ground.",
         "card": "Product card",
         "ratio": "Image ratio",
         "ratioTerm": "aspect-ratio",

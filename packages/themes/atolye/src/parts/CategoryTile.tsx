@@ -32,7 +32,8 @@ export function CategoryTile({
       className={cn(
         "gf-stage group relative flex aspect-[4/5] flex-col justify-end overflow-hidden rounded-tile no-underline after:absolute after:inset-0 after:bg-linear-to-t after:from-stage after:via-stage/0 after:to-transparent",
         // A count under the name lifts the text: the graphite foot reaches higher
-        note ? "after:from-15% after:via-65%" : "after:from-5% after:via-55%"
+        note ? "after:from-15% after:via-65%" : "after:from-5% after:via-55%",
+        compact && "gf-subtile"
       )}
     >
       {category.image && (

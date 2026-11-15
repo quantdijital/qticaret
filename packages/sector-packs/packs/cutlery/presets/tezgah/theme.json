@@ -16,5 +16,6 @@
   },
   "header": { "layout": "left", "sticky": true },
   "buttons": "square",
-  "section_spacing": "compact"
+  "section_spacing": "compact",
+  "surface_style": "lined"
 }

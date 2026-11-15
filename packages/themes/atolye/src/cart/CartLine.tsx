@@ -92,7 +92,7 @@ export function CartLine({
   )
   if (locked) {
     return (
-      <li className="flex gap-4 rounded-tile bg-paper-2 p-3 sm:p-4">
+      <li className="flex gap-4 rounded-tile gf-box p-3 sm:p-4">
         <Picture line={line} />
         <div className="flex min-w-0 flex-1 flex-col justify-between gap-3">
           <Words line={line} t={t} />
@@ -110,7 +110,7 @@ export function CartLine({
     )
   }
   return (
-    <li className="flex gap-4 rounded-tile bg-paper-2 p-3 sm:p-4">
+    <li className="flex gap-4 rounded-tile gf-box p-3 sm:p-4">
       <Picture line={line} />
       <div className="flex min-w-0 flex-1 flex-col gap-3">
         <form

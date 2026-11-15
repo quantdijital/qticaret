@@ -27,7 +27,7 @@ function Empty({
   action: ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-5 rounded-tile bg-paper-2 p-6 sm:flex-row sm:items-center sm:gap-6 lg:px-8">
+    <div className="flex flex-col gap-5 rounded-tile gf-box p-6 sm:flex-row sm:items-center sm:gap-6 lg:px-8">
       <span className="flex size-12 shrink-0 items-center justify-center rounded-pill bg-paper">
         {icon}
       </span>
@@ -59,7 +59,7 @@ function Question({ question, t }: { question: QuestionView; t: Translate }) {
         <span>{question.date}</span>
       </p>
       {question.answers.map((answer, each) => (
-        <div key={String(each)} className="flex max-w-[46rem] gap-3 rounded-media bg-paper-2 p-4">
+        <div key={String(each)} className="flex max-w-[46rem] gap-3 rounded-media gf-box p-4">
           <MessageSquareReply
             className="mt-0.5 size-5 shrink-0 text-text-2"
             aria-hidden="true"
@@ -185,7 +185,7 @@ export function Community({
         {questions.items.length > 0 ? (
           <div className="grid gap-8 lg:grid-cols-12 lg:gap-(--gap-columns)">
             <div className="lg:col-span-4">
-              <div className="flex flex-col gap-5 rounded-tile bg-paper-2 p-6 lg:sticky lg:top-(--gf-stick-top) lg:p-8">
+              <div className="flex flex-col gap-5 rounded-tile gf-box p-6 lg:sticky lg:top-(--gf-stick-top) lg:p-8">
                 <p className="flex items-center gap-4">
                   <span className="flex size-12 shrink-0 items-center justify-center rounded-pill bg-paper">
                     <MessageCircleQuestion

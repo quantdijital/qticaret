@@ -55,6 +55,10 @@ export function atolyeDeclarations(settings: StoreThemeSettings): string[] {
   if (scale) {
     declarations.push(`--section-scale:${scale}`)
   }
+  if (settings.surface_style === "lined") {
+    // The boxes on the page's ground inside a 1 px rule (`surface.css`, Z-04)
+    declarations.push("--box-ground:var(--color-paper)", "--box-line:var(--color-rule)")
+  }
   return declarations
 }
 

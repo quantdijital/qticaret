@@ -7,6 +7,7 @@ import {
   NO_LIRA_FONTS,
   RADII,
   SECTION_SPACINGS,
+  SURFACE_STYLES,
   SERIF_FONTS,
   SINGLE_WEIGHT_FONTS,
 } from "@/features/storefront/api/theme"
@@ -137,18 +138,32 @@ export function ThemeChoices({ theme, variants, reveal, onChange }: ThemeChoices
             hint={t(`${C}.buttonsHint`)}
           />
         </Pair>
-        <ChoiceSelect
-          id={THEME_IDS.section_spacing}
-          label={t(`${C}.sectionSpacing`)}
-          term={t(`${C}.sectionSpacingTerm`)}
-          value={theme.section_spacing}
-          options={SECTION_SPACINGS}
-          onChange={(value) => {
-            onChange({ ...theme, section_spacing: value })
-          }}
-          render={(option) => t(`${C}.sectionSpacings.${option}`)}
-          hint={t(`${C}.sectionSpacingHint`)}
-        />
+        <Pair>
+          <ChoiceSelect
+            id={THEME_IDS.section_spacing}
+            label={t(`${C}.sectionSpacing`)}
+            term={t(`${C}.sectionSpacingTerm`)}
+            value={theme.section_spacing}
+            options={SECTION_SPACINGS}
+            onChange={(value) => {
+              onChange({ ...theme, section_spacing: value })
+            }}
+            render={(option) => t(`${C}.sectionSpacings.${option}`)}
+            hint={t(`${C}.sectionSpacingHint`)}
+          />
+          <ChoiceSelect
+            id={THEME_IDS.surface_style}
+            label={t(`${C}.surfaceStyle`)}
+            term={t(`${C}.surfaceStyleTerm`)}
+            value={theme.surface_style}
+            options={SURFACE_STYLES}
+            onChange={(value) => {
+              onChange({ ...theme, surface_style: value })
+            }}
+            render={(option) => t(`${C}.surfaceStyles.${option}`)}
+            hint={t(`${C}.surfaceStyleHint`)}
+          />
+        </Pair>
       </PanelGroup>
       <ThemeCardGroups theme={theme} variants={variants} reveal={reveal} onChange={onChange} />
     </>

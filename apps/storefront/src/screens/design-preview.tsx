@@ -1,4 +1,5 @@
 import type { StoreLayout } from "@qticaret/types"
+import { addToCart } from "@/app/actions/cart"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { resolvePath } from "@/lib/store-api/requests"
@@ -17,6 +18,8 @@ async function DraftHome({ layout }: { layout: StoreLayout }) {
       t={t}
       view={{ sections, notice: t("preview.design_notice") }}
       subscribe={subscribeNewsletter}
+      // As live and as the draft's other pages: a one-variant card says "Sepete ekle" (Z-02)
+      quickAdd={addToCart}
     />
   )
 }

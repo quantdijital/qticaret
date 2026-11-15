@@ -6,7 +6,7 @@ import type { ActionResult, FormAction } from "@qticaret/ui"
 import type { CardButtonStyle } from "@qticaret/types"
 import { emitShopEvent } from "@qticaret/ui/lib/shop-events"
 import { cn } from "@qticaret/ui/lib/utils"
-import { announceCartAdded } from "../frame/events"
+import { announceCartAdded, submitterOf } from "../frame/events"
 
 export interface QuickAddWords {
   /** The visible word ("Sepete ekle"); a round button keeps it for the reader only. */
@@ -64,11 +64,12 @@ export function QuickAdd({
   const shown = wide || fill !== null
   const [state, submit, pending] = useActionState(action, INITIAL)
   const sent = useRef(false)
+  const origin = useRef<HTMLElement | null>(null)
   const errorId = useId()
   useEffect(() => {
     if (state.ok && sent.current) {
       sent.current = false
-      announceCartAdded(words.added)
+      announceCartAdded(words.added, origin.current)
       emitShopEvent({ type: "add_to_cart", variantId, quantity: 1 })
     }
   }, [state, variantId, words.added])
@@ -80,8 +81,9 @@ export function QuickAdd({
   return (
     <form
       action={submit}
-      onSubmit={() => {
+      onSubmit={(event) => {
         sent.current = true
+        origin.current = submitterOf(event)
       }}
       // A framed card's button keeps to the card's foot: no gap under it until there is an error
       className={cn(
@@ -106,11 +108,14 @@ export function QuickAdd({
         aria-describedby={error ? errorId : undefined}
         disabled={pending}
       >
-        <Icon
-          className={cn("size-5 shrink-0", pending && "motion-safe:animate-spin")}
-          aria-hidden="true"
-          strokeWidth={1.75}
-        />
+        {/* A framed card's foot reads as its "Seçenekler" twin: words only, the spinner while busy (Z-02) */}
+        {(fill === null || pending) && (
+          <Icon
+            className={cn("size-5 shrink-0", pending && "motion-safe:animate-spin")}
+            aria-hidden="true"
+            strokeWidth={1.75}
+          />
+        )}
         {shown && words.add}
       </button>
       <span

@@ -128,7 +128,20 @@ export interface StoreThemeSettings {
   buttons: "pill" | "rounded" | "square"
   /** The gap between sections, theme-wide; `normal` is the theme's own (`SECTION_SPACINGS`). */
   section_spacing: SectionSpacing
+  /** How the theme's boxes stand on the page (`SURFACE_STYLES`); `filled` is today's tone. */
+  surface_style: SurfaceStyle
 }
+
+/**
+ * How the theme draws its boxes (product page summary, rating summary,
+ * info blocks, category filters and tiles, the cart drawer's boxes;
+ * Tezgâh audit Z-04): `filled` a tone darker than the page (the default,
+ * today's look), `lined` the page's ground inside a 1 px rule. One
+ * theme-wide choice, as Shopify themes' card style; the backend mirrors
+ * the list.
+ */
+export const SURFACE_STYLES = ["filled", "lined"] as const
+export type SurfaceStyle = (typeof SURFACE_STYLES)[number]
 
 /**
  * The gap between sections, theme-wide (Tezgâh audit K-11, as Shopify

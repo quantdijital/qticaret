@@ -10,6 +10,7 @@ import {
   HEADING_FONTS,
   RADII,
   SECTION_SPACINGS,
+  SURFACE_STYLES,
 } from "@/features/storefront/api/theme"
 import type {
   CARD_BADGE_SWITCHES,
@@ -121,6 +122,12 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
     label: `${C}.sectionSpacing`,
     term: `${C}.sectionSpacingTerm`,
     options: named(SECTION_SPACINGS, "sectionSpacings"),
+  },
+  surface_style: {
+    group: "shapes",
+    label: `${C}.surfaceStyle`,
+    term: `${C}.surfaceStyleTerm`,
+    options: named(SURFACE_STYLES, "surfaceStyles"),
   },
   "product_card.ratio": {
     group: "card",

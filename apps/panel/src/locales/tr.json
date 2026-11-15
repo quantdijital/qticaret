@@ -8336,6 +8336,13 @@
           "roomy": "Ferah"
         },
         "sectionSpacingHint": "Sayfadaki bölümler arasındaki boşluk, her bölümde birlikte değişir. Normal, temanın kendi aralığıdır (geniş ekranda 120 px); Sık bunu 66 px'e indirir, Ferah 144 px'e çıkarır.",
+        "surfaceStyle": "Kutu stili",
+        "surfaceStyleTerm": "surface style",
+        "surfaceStyles": {
+          "filled": "Dolu",
+          "lined": "Çizgili"
+        },
+        "surfaceStyleHint": "Ürün sayfasındaki bilgi kutuları, kategori sayfasındaki filtreler ve alt kategoriler, sepetteki kutular. Dolu, sayfadan bir ton koyu zemindir; Çizgili, sayfa zemininde 1 px çizgidir.",
         "card": "Ürün kartı",
         "ratio": "Görsel oranı",
         "ratioTerm": "aspect-ratio",

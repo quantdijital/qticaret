@@ -1,9 +1,10 @@
 // @vitest-environment jsdom
 import { act } from "react"
 import { createRoot, type Root } from "react-dom/client"
-import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 // The theme's own part: it exports pages, not this
 import { CartSheet } from "../../../../../packages/themes/atolye/src/frame/CartSheet"
+import { announceCartAdded } from "../../../../../packages/themes/atolye/src/frame/events"
 
 /**
  * The header's cart drawer (Tezgâh audit Y-03): closed, the focus goes
@@ -66,5 +67,36 @@ describe("the header's cart drawer", () => {
     })
     expect(document.querySelector("[role=dialog]")).toBeNull()
     expect(document.activeElement).toBe(link)
+  })
+
+  it("gives the focus back to the add button that opened it, though the busy button dropped it (Z-03)", async () => {
+    // jsdom lays nothing out: every element is "shown" here
+    const rects = vi
+      .spyOn(HTMLElement.prototype, "getClientRects")
+      .mockReturnValue([{}] as unknown as DOMRectList)
+    const add = document.createElement("button")
+    add.textContent = "Sepete ekle"
+    document.body.append(add)
+    act(() => {
+      root.render(
+        <CartSheet cart={null} count={0} categories={[]} buttonClass="gf-icon-btn" words={WORDS} />
+      )
+    })
+    // Pressed, the button went busy (disabled) and the focus fell to the page
+    ;(document.activeElement as HTMLElement | null)?.blur()
+    expect(document.activeElement).toBe(document.body)
+    act(() => {
+      announceCartAdded("Sepete eklendi", add)
+    })
+    const dialog = document.querySelector<HTMLElement>("[role=dialog]")
+    expect(dialog).not.toBeNull()
+    await act(async () => {
+      dialog?.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
+      await new Promise((done) => setTimeout(done, 20))
+    })
+    expect(document.querySelector("[role=dialog]")).toBeNull()
+    expect(document.activeElement).toBe(add)
+    add.remove()
+    rects.mockRestore()
   })
 })

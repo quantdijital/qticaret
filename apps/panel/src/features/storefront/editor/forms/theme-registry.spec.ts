@@ -48,6 +48,8 @@ describe("the settings search over the theme", () => {
     expect(keys("yazı tipleri font")).toEqual(["typography.heading", "typography.body"])
     expect(keys("köşeler")).toEqual(["radius"])
     expect(keys("bolum araligi")).toEqual(["section_spacing"])
+    expect(keys("kutu stili")).toEqual(["surface_style"])
+    expect(keys("cizgili")).toEqual(["surface_style"])
   })
 
   it("finds a field by its technical term and a choice by its name, naming it", () => {
@@ -84,9 +86,10 @@ describe("the settings search over the theme", () => {
     const stars = { ...GRAFIT_THEME, product_card: { ...card, show_rating: true } }
     expect(keys("ilk yorumu", standard, stars)).toEqual(["product_card.no_reviews"])
     // The foot button's look, only while there is one
-    expect(keys("düğme stili", framedRail)).toEqual(["product_card.button_style"])
+    // ("stili" also names the box style, Z-04: the button's is the one at stake)
+    expect(keys("düğme stili", framedRail)).toContain("product_card.button_style")
     const round = { ...GRAFIT_THEME, product_card: { ...card, full_button: false } }
-    expect(keys("düğme stili", framedRail, round)).toEqual([])
+    expect(keys("düğme stili", framedRail, round)).not.toContain("product_card.button_style")
   })
 
   it("puts the page's parts first and caps the whole list", () => {
