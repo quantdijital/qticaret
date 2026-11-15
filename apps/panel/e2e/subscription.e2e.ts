@@ -8,10 +8,10 @@ import { expect, pageHeading, test } from "./support/guard"
  */
 test("opens Settings > Abonelik from the settings menu, read only", async ({ page, guard }) => {
   await page.goto("/settings")
-  await page
-    .getByRole("link", { name: /^Abonelik/ })
-    .first()
-    .click()
+  // The settings home's own card (its line on what the section holds); the side menu's
+  // link of the same name sat under the app's sidebar after Playwright scrolled it into
+  // view on a CI runner, and the sidebar took the click
+  await page.getByRole("link", { name: /^Abonelik\s+Paketiniz/ }).click()
   await page.waitForURL("**/settings/subscription")
 
   await expect(pageHeading(page)).toHaveText("Abonelik")
