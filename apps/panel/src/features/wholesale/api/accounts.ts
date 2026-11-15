@@ -153,3 +153,15 @@ export const useSetAccountPassword = (id: string) =>
       ),
     { secret: true }
   )
+
+/**
+ * A wholesaler deleted, whatever its state (Ek 2026-11-15 (2)): the
+ * wholesale side only; the customer stays a retail customer, and past
+ * orders stay wholesale orders. Open carts are priced again at retail.
+ */
+export const useDeleteAccount = (id: string) =>
+  useWholesaleMutation(() =>
+    sdk.client.fetch<{ id: string; deleted: boolean; carts: CartsRepriced }>(at(id), {
+      method: "DELETE",
+    })
+  )

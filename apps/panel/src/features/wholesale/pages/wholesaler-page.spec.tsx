@@ -163,6 +163,22 @@ describe("WholesalerPage", () => {
     expect(writes()[0]?.[0]).toBe("/admin/wholesale/accounts/wsa_1/deactivate")
   })
 
+  it("deletes a wholesaler after asking, says the customer stays, and goes to the list", async () => {
+    serve(account(), () =>
+      Promise.resolve({ id: "wsa_1", deleted: true, carts: { repriced: 1, failed: 0 } })
+    )
+    renderWith(clientWith(), <WholesalerPage />)
+    await userEvent.click(await screen.findByRole("button", { name: "Sil" }))
+    const ask = await screen.findByRole("alertdialog")
+    expect(within(ask).getByText(/Müşteri kaydı ve girişi kalır/)).toBeInTheDocument()
+    await userEvent.click(within(ask).getByRole("button", { name: "Sil" }))
+    await waitFor(() => {
+      expect(navigate).toHaveBeenCalledWith({ to: "/customers/wholesale" })
+    })
+    expect(toast.success).toHaveBeenCalledWith("Toptancı silindi. 1 açık sepet yeniden fiyatlandı.")
+    expect(writes()[0]).toEqual(["/admin/wholesale/accounts/wsa_1", { method: "DELETE" }])
+  })
+
   it("opens a closed wholesaler again", async () => {
     const closed = account({ status: "inactive", deactivated_at: "2026-11-12T09:00:00Z" })
     serve(closed)

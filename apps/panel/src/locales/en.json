@@ -10010,7 +10010,8 @@
       "source": "Prices",
       "rate": "Rate",
       "minimum": "Minimum units",
-      "status": "Status"
+      "status": "Status",
+      "actions": "Actions"
     },
     "list": {
       "title": "Wholesalers",
@@ -10097,7 +10098,13 @@
       "cartsRepriced_other": "{{count}} open carts were priced again.",
       "cartsFailed_one": "{{count}} open cart could not be priced again; its prices update when the customer opens it.",
       "cartsFailed_other": "{{count}} open carts could not be priced again; their prices update when the customer opens them.",
-      "password": "New password"
+      "password": "New password",
+      "delete": "Delete",
+      "deleteTitle": "Delete {{name}}?",
+      "deleteText": "Their wholesale access is deleted: off their level and own prices, and their open carts are priced again at retail. The customer record and sign-in stay; they can keep shopping as an ordinary customer. Past wholesale orders stay under Wholesalers > Orders. You can open the same e-mail as a wholesaler again later.",
+      "deletePendingText": "The pending wholesaler record and its own prices are deleted. You can open the same e-mail as a wholesaler again later.",
+      "deleted": "The wholesaler was deleted.",
+      "more": "Actions for {{name}}"
     },
     "detail": {
       "title": "Wholesaler",

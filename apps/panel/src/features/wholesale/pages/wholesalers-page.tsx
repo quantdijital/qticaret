@@ -16,8 +16,9 @@ import {
   accountCountsQuery,
   accountsQuery,
 } from "@/features/wholesale/api/accounts"
-import type { AccountStatus } from "@/features/wholesale/api/types"
+import type { AccountStatus, WholesaleAccount } from "@/features/wholesale/api/types"
 import { useAccountColumns } from "@/features/wholesale/components/account-columns"
+import { DeleteAccountDialog } from "@/features/wholesale/components/delete-account"
 import { NewWholesalerDialog } from "@/features/wholesale/components/new-wholesaler-dialog"
 import { WholesaleGate } from "@/features/wholesale/components/wholesale-gate"
 import { WholesaleNav } from "@/features/wholesale/components/wholesale-nav"
@@ -37,7 +38,13 @@ function WholesalersList({ onAdd }: { onAdd: () => void }) {
   const q = search.q ?? ""
   const list = useQuery(accountsQuery({ q, status, page }))
   const counts = useQuery(accountCountsQuery())
-  const columns = useAccountColumns()
+  // The account stays mounted after the dialog closes, so the delete's answer still reports
+  const [deleting, setDeleting] = useState<WholesaleAccount | null>(null)
+  const [asking, setAsking] = useState(false)
+  const columns = useAccountColumns((account) => {
+    setDeleting(account)
+    setAsking(true)
+  })
   const setSearch = (next: { q?: string; status?: StatusTab; page?: number }) => {
     const nextStatus = next.status ?? status
     void navigate({
@@ -104,6 +111,14 @@ function WholesalersList({ onAdd }: { onAdd: () => void }) {
               </div>
             }
           />
+          {deleting ? (
+            <DeleteAccountDialog
+              key={deleting.id}
+              account={deleting}
+              open={asking}
+              onOpenChange={setAsking}
+            />
+          ) : null}
           {list.data && list.data.count > 0 ? (
             <Pagination
               page={page}

@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react"
+import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -100,6 +100,28 @@ describe("WholesalersPage", () => {
     expect(navigate).toHaveBeenCalledWith({
       to: "/customers/wholesale/$id",
       params: { id: "wsa_1" },
+    })
+  })
+
+  it("deletes a wholesaler from its row's menu, after asking", async () => {
+    serve([account()])
+    renderWith(clientWith(), <WholesalersPage />)
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Kaya Bıçak Ltd için işlemler" })
+    )
+    await userEvent.click(await screen.findByRole("menuitem", { name: "Sil" }))
+    const ask = await screen.findByRole("alertdialog")
+    expect(navigate).not.toHaveBeenCalled()
+    fetchMock.mockResolvedValueOnce({
+      id: "wsa_1",
+      deleted: true,
+      carts: { repriced: 0, failed: 0 },
+    })
+    await userEvent.click(within(ask).getByRole("button", { name: "Sil" }))
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/wholesale/accounts/wsa_1", {
+        method: "DELETE",
+      })
     })
   })
 

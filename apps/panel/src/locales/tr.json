@@ -10010,7 +10010,8 @@
       "source": "Fiyat",
       "rate": "Oran",
       "minimum": "En az adet",
-      "status": "Durum"
+      "status": "Durum",
+      "actions": "İşlemler"
     },
     "list": {
       "title": "Toptancılar",
@@ -10097,7 +10098,13 @@
       "cartsRepriced_other": "{{count}} açık sepet yeniden fiyatlandı.",
       "cartsFailed_one": "{{count}} açık sepet yeniden fiyatlanamadı; müşteri sepetini açtığında fiyatlar güncellenir.",
       "cartsFailed_other": "{{count}} açık sepet yeniden fiyatlanamadı; müşteri sepetini açtığında fiyatlar güncellenir.",
-      "password": "Yeni şifre"
+      "password": "Yeni şifre",
+      "delete": "Sil",
+      "deleteTitle": "{{name}} silinsin mi?",
+      "deleteText": "Toptancılığı silinir: toptan seviyesinden ve özel fiyatlarından çıkar, açık sepetleri perakende fiyatla yeniden hesaplanır. Müşteri kaydı ve girişi kalır; normal bir müşteri olarak alışverişe devam edebilir. Geçmiş toptan siparişleri Toptancılar > Siparişler'de kalır. Aynı e-postayla sonra yeniden toptancı açabilirsiniz.",
+      "deletePendingText": "Bekleyen toptancı kaydı ve özel fiyatları silinir. Aynı e-postayla sonra yeniden toptancı açabilirsiniz.",
+      "deleted": "Toptancı silindi.",
+      "more": "{{name}} için işlemler"
     },
     "detail": {
       "title": "Toptancı",

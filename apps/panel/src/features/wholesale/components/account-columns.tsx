@@ -3,6 +3,7 @@ import type { Column } from "@qticaret/admin-ui/patterns/data-table"
 import type { WholesaleAccount } from "@/features/wholesale/api/types"
 import { ratePercent } from "@/features/wholesale/format"
 import { AccountBadge } from "./account-badge"
+import { AccountRowMenu } from "./delete-account"
 
 const C = "wholesale.columns"
 
@@ -16,7 +17,9 @@ export function useSourceText(): (account: WholesaleAccount) => string {
 }
 
 /** The wholesalers' table: who, the address, the prices, the minimum, the state. */
-export function useAccountColumns(): Column<WholesaleAccount>[] {
+export function useAccountColumns(
+  onDelete?: (account: WholesaleAccount) => void
+): Column<WholesaleAccount>[] {
   const { t } = useTranslation()
   const sourceText = useSourceText()
   return [
@@ -74,5 +77,22 @@ export function useAccountColumns(): Column<WholesaleAccount>[] {
       header: t(`${C}.status`),
       cell: (account) => <AccountBadge status={account.status} />,
     },
+    ...(onDelete
+      ? [
+          {
+            key: "actions",
+            header: <span className="sr-only">{t(`${C}.actions`)}</span>,
+            align: "right" as const,
+            cell: (account: WholesaleAccount) => (
+              <AccountRowMenu
+                name={account.company_name ?? account.contact_name ?? account.email ?? ""}
+                onDelete={() => {
+                  onDelete(account)
+                }}
+              />
+            ),
+          },
+        ]
+      : []),
   ]
 }
