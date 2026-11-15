@@ -157,7 +157,7 @@ export function FramedCard({
           />
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-1 px-0.5">
+      <div className="gf-card-info flex flex-1 flex-col gap-1 px-0.5">
         {product.brand && <p className="truncate text-xs text-text-3">{product.brand}</p>}
         <h3 className="text-sm leading-snug font-semibold tracking-normal">
           <a

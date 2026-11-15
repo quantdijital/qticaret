@@ -191,31 +191,56 @@
 }
 
 /* The lead card of a "1 big + 6 small" shelf (sections/ShelfLayouts, Tezgâh
-   audits K-07, Y-01, third audit D-4): from 1024 px its photo well takes the
-   photo's own shape (no grey bands over and under a wide photo; a tall one
-   stops at 34rem, whole), never cropped nor blown up past the well's width;
-   the words under it are larger and take the rest of the two rows beside it,
-   the button at the foot */
+   audits K-07, Y-01, third audit D-4, fifth audit V-02): from 1024 px the card
+   stays as tall as the two rows beside it, and its photo well takes what the
+   words and the button leave, on the well's light tone. The photo sits whole
+   in the well's middle (`contain`), never cropped and never drawn past its own
+   size (an `auto` width and height inside the well's bounds), so the room it
+   does not fill is the well's own margin, not an empty band under the price.
+   The words (name, stars, price) and the button keep together at the foot,
+   the price as far from the button as on a small card (~32 px) */
 @media (width >= 64rem) {
-  .gf-card-lead > .gf-card-framed .gf-card-media {
-    aspect-ratio: auto;
-    min-height: 12rem;
+  .gf-card-lead {
+    display: flex;
+    flex-direction: column;
   }
-  .gf-card-lead > .gf-card-framed .gf-card-media :is(.gf-card-slides, .gf-card-slide, picture) {
-    height: auto;
+  .gf-card-lead > .gf-card-framed {
+    flex: 1 1 auto;
+  }
+  .gf-card-lead > .gf-card-framed .gf-card-media {
+    flex: 1 1 16rem;
+    aspect-ratio: auto;
+    min-height: 16rem;
+  }
+  .gf-card-lead > .gf-card-framed .gf-card-media > :is(picture, .gf-card-slides) {
+    position: absolute;
+    inset: 0;
+  }
+  .gf-card-lead
+    > .gf-card-framed
+    .gf-card-media
+    :is(.gf-card-slide:not(.gf-card-slide--second), picture) {
+    position: relative;
+    height: 100%;
   }
   .gf-card-lead > .gf-card-framed .gf-card-media img {
+    position: absolute;
+    inset: 0;
     display: block;
-    width: 100%;
+    width: auto;
     height: auto;
-    max-height: 34rem;
+    max-width: 100%;
+    max-height: 100%;
+    margin: auto;
     object-fit: contain;
   }
   .gf-card-lead > .gf-card-framed h3 {
     font-size: var(--text-section);
     line-height: 1.25;
   }
-  .gf-card-lead > .gf-card-framed > div:not(.gf-card-media) {
+  .gf-card-lead > .gf-card-framed > .gf-card-info {
+    flex: none;
     padding-inline: var(--space-xs);
+    padding-bottom: 1.25rem;
   }
 }
