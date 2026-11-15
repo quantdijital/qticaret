@@ -19,6 +19,7 @@ export default defineConfig({
   },
   test: {
     environment: "node",
-    include: ["src/**/*.spec.{ts,tsx}"],
+    // e2e/resolved-style: the style check's pure comparison (its capture needs a browser)
+    include: ["src/**/*.spec.{ts,tsx}", "e2e/resolved-style/**/*.spec.ts"],
   },
 })
