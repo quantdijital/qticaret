@@ -51,6 +51,7 @@ export function SliderStage({
   arrowStyle,
   loop,
   focusable,
+  fill = false,
   children,
 }: {
   words: SliderWords
@@ -65,6 +66,8 @@ export function SliderStage({
   loop: boolean
   /** A slide without a link: the rail itself takes the focus so its keys scroll it. */
   focusable: boolean
+  /** As tall as its box (a grid cell): the rail and its slides stretch to it. */
+  fill?: boolean
   children: ReactNode
 }) {
   const rail = useRef<HTMLDivElement>(null)
@@ -168,7 +171,7 @@ export function SliderStage({
   const controls = hydrated && count > 1
   return (
     <div
-      className="gf-stage relative overflow-hidden rounded-tile"
+      className={cn("gf-stage relative overflow-hidden rounded-tile", fill && "h-full")}
       data-arrows={arrows}
       onPointerEnter={(event) => {
         if (event.pointerType === "mouse") {
@@ -193,7 +196,7 @@ export function SliderStage({
         tabIndex={focusable && count > 1 ? 0 : undefined}
         aria-label={focusable && count > 1 ? words.label : undefined}
         role={focusable && count > 1 ? "group" : undefined}
-        className="gf-rail flex overflow-x-auto"
+        className={cn("gf-rail flex overflow-x-auto", fill && "h-full")}
         onPointerDown={(event) => {
           if (event.pointerType !== "mouse") {
             heading.current = null

@@ -12,11 +12,13 @@
  */
 
 import type { StoreLayoutImage, StoreLayoutLink } from "./layout.js"
+import type { SliderSettings } from "./section-scroller.js"
 
 /**
  * H17's own parts: the category list's rows (shown at most), the tiles
  * beside the opening's picture, the quick links under it, the products
- * shown small under its button and a pick's label.
+ * shown small under its button, a pick's label, and the opening's slides
+ * (as many as the sliding opening's).
  */
 export const HERO_CATALOG_LIMITS = {
   list: { min: 4, max: 12, default: 9 },
@@ -26,7 +28,27 @@ export const HERO_CATALOG_LIMITS = {
   chips: 4,
   picks: 4,
   pickLabel: 24,
+  slides: 6,
 } as const
+
+/**
+ * One slide of H17's opening (adr/0049 Ek 2026-11-15): the opening's own
+ * words, buttons and picture, and a link for the picture. A slide without
+ * words (no heading, line or button) is its picture alone, across the
+ * opening, the whole of it the link when it has one. No heading is none
+ * (the opening's own heading falls back to the shop's name; a slide's
+ * does not). No picture: the first slide shows the shop's newest pictured
+ * product, as the opening does; another its words alone.
+ */
+export interface HeroCatalogSlide {
+  image: StoreLayoutImage | null
+  heading: string | null
+  text: string | null
+  /** Up to two buttons, as the opening's; a broken one left out. */
+  links: StoreLayoutLink[]
+  /** Where the picture leads; null: nowhere (a broken one too). */
+  link: StoreLayoutLink | null
+}
 
 /** Where the opening's category list comes from: the top categories, the header's menu or a pick. */
 export type HeroListSource =
@@ -142,6 +164,15 @@ export interface StoreHeroCatalog {
   picks: { product_id: string; label: string | null }[]
   /** The lowest price among the picks, "from", worked out from their live prices. */
   show_price: boolean
+  /**
+   * The opening's slides (adr/0049 Ek 2026-11-15); absent from an opening
+   * saved before them, which is one slide of its own words, buttons and
+   * picture (no migration). The shop's editor keeps the common fields the
+   * first slide's, so another variant shows it.
+   */
+  slides?: HeroCatalogSlide[]
+  /** How two or more slides turn: the slider's settings (`HERO_CATALOG_SLIDER_DEFAULTS`). */
+  scroller?: SliderSettings
 }
 
 /**

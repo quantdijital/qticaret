@@ -120,6 +120,17 @@ export const SLIDER_DEFAULTS: SliderSettings = {
 }
 
 /**
+ * The catalogue opening's slides (`hero` `category_list` with two or more,
+ * adr/0049 Ek 2026-11-15): the slider's settings under the same names and
+ * steps, turning by itself unless the shop turns that off (the owner's
+ * slideshow, Shopify's emsal); one slide never moves whatever they say.
+ */
+export const HERO_CATALOG_SLIDER_DEFAULTS: SliderSettings = {
+  ...SLIDER_DEFAULTS,
+  autoplay: "on",
+}
+
+/**
  * Seconds a slide stays while it plays, by the kit's speed step: the
  * slider's own (a slide holds longer than a rail's page). A slider saved
  * with seconds (5–10) before the kit reads them as the nearest step
@@ -159,8 +170,12 @@ export interface SliderSource {
  * has one (a step off the list or missing reads as the slider's default);
  * else the switches and seconds saved before the kit (`autoplay`, `dots`,
  * `arrows` yes/no, `interval` the nearest step), so it draws as it did.
+ * A section with its own defaults (the catalogue opening's) passes them.
  */
-export function sliderSettingsOf(section: SliderSource): SliderSettings {
+export function sliderSettingsOf(
+  section: SliderSource,
+  defaults: SliderSettings = SLIDER_DEFAULTS
+): SliderSettings {
   const given: Partial<Record<SliderSetting, unknown>> =
     typeof section.scroller === "object" && section.scroller !== null
       ? section.scroller
@@ -173,7 +188,7 @@ export function sliderSettingsOf(section: SliderSource): SliderSettings {
   const settings: Partial<Record<SliderSetting, string>> = {}
   for (const name of SLIDER_SCROLLER) {
     const steps: readonly unknown[] = SCROLLER_SETTINGS[name]
-    settings[name] = steps.includes(given[name]) ? (given[name] as string) : SLIDER_DEFAULTS[name]
+    settings[name] = steps.includes(given[name]) ? (given[name] as string) : defaults[name]
   }
   return settings as SliderSettings
 }

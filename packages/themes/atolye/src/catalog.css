@@ -80,6 +80,15 @@
     aspect-ratio: 16 / 10;
     background: var(--color-stage);
   }
+  /* Two or more slides (adr/0049 Ek 2026-11-15): the tile is the slider stage, each slide a tile */
+  .gf-mosaic-stage {
+    min-width: 0;
+  }
+  /* A slide that is its picture alone: across the tile, a ratio of its own while nothing beside sets the height */
+  .gf-mosaic-feature--whole .gf-mosaic-photo {
+    order: 0;
+    min-height: 100%;
+  }
   .gf-mosaic-side {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -119,10 +128,19 @@
       grid-column: 1 / -1;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
+    .gf-mosaic-stage {
+      grid-column: 1 / -1;
+    }
+    .gf-mosaic-feature.gf-mosaic-feature--whole {
+      grid-template-columns: minmax(0, 1fr);
+    }
     .gf-mosaic-photo {
       order: 0;
       aspect-ratio: auto;
       min-height: 100%;
+    }
+    .gf-mosaic-feature--whole .gf-mosaic-photo {
+      aspect-ratio: 2 / 1;
     }
     .gf-mosaic-list > ul {
       grid-template-columns: minmax(0, 1fr);
@@ -158,8 +176,12 @@
       grid-template-columns: minmax(0, 1fr);
       grid-template-areas: "feature";
     }
-    .gf-mosaic-feature {
+    .gf-mosaic-feature,
+    .gf-mosaic-stage {
       grid-area: feature;
+    }
+    .gf-mosaic-feature--whole .gf-mosaic-photo {
+      aspect-ratio: 12 / 5;
     }
     .gf-mosaic-list {
       grid-area: list;
