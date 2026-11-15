@@ -1,4 +1,5 @@
 import type { ComponentProps, ReactNode } from "react"
+import { useReturnFocus } from "../hooks/use-return-focus"
 import { Dialog, DialogContent, DialogFooter } from "../ui/dialog"
 import type { DialogPane, DialogSize } from "../ui/dialog"
 import { DialogHeading } from "./dialog-heading"
@@ -47,6 +48,7 @@ export function DetailDialog({
   onOpenAutoFocus,
   children,
 }: DetailDialogProps) {
+  const onCloseAutoFocus = useReturnFocus(open)
   return (
     <Dialog
       open={open}
@@ -67,6 +69,7 @@ export function DetailDialog({
         pane={pane}
         className={className}
         {...(onOpenAutoFocus ? { onOpenAutoFocus } : {})}
+        onCloseAutoFocus={onCloseAutoFocus}
       >
         <DialogHeading
           title={title}

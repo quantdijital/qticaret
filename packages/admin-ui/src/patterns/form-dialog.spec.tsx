@@ -70,16 +70,18 @@ describe("FormDialog returning the caret", () => {
     })
   })
 
-  it("leaves Radix's own way unchanged without it: no trigger, the caret falls to the page", async () => {
+  it("returns it to what had it on opening without it, never to the page", async () => {
     const user = userEvent.setup()
     render(<Rows back={false} />)
-    await user.click(screen.getByRole("button", { name: "Slaytı düzenle" }))
+    const row = screen.getByRole("button", { name: "Slaytı düzenle" })
+    await user.click(row)
     expect(await screen.findByRole("dialog")).toBeInTheDocument()
     await user.keyboard("{Escape}")
     await waitFor(() => {
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
     })
-    await new Promise((resolve) => setTimeout(resolve, 10))
-    expect(document.activeElement).toBe(document.body)
+    await waitFor(() => {
+      expect(document.activeElement).toBe(row)
+    })
   })
 })
