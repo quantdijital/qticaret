@@ -5,6 +5,7 @@ import { BRAND_DELETED, BRAND_SAVED } from "../workflows/brands/workflows"
 import { CATALOG_PRODUCT_SAVED } from "../workflows/catalog/events"
 import { productsOfEvent } from "../workflows/search/affected"
 import { drainSearchIndex, queueAllProducts, queueSearchProducts } from "../workflows/search/drain"
+import { isWholesalePriceEvent } from "../workflows/wholesale/events"
 
 /**
  * What search reads of a product changed (adr/0056): its products are
@@ -19,6 +20,10 @@ export default async function searchIndex({
   const ids = [event.data.id ?? []].flat()
   try {
     for (const id of ids) {
+      // A wholesale list's rows are not in the index (ADR-0068 §7)
+      if (await isWholesalePriceEvent(container, event.name, id)) {
+        continue
+      }
       const products = await productsOfEvent(container, event.name, id)
       if (products === "all") {
         await queueAllProducts(container)

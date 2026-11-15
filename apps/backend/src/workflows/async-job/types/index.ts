@@ -17,6 +17,7 @@ import { seoAudit } from "./seo-audit"
 import { seoSitemap } from "./seo-sitemap"
 import { seoUrlStyle } from "./seo-url-style"
 import { trAddressSync } from "./tr-address-sync"
+import { wholesaleSync } from "./wholesale-sync"
 import type { JobType } from "./types"
 
 export type { JobContext, JobResult, JobType, ResultWriter } from "./types"
@@ -46,6 +47,7 @@ const JOB_TYPES: Readonly<Record<string, JobType>> = Object.freeze({
   "seo.sitemap": erase(seoSitemap),
   "seo.url_style": erase(seoUrlStyle),
   "tr_address.sync": erase(trAddressSync),
+  "wholesale.sync": erase(wholesaleSync),
 })
 
 /** The job type, or undefined; own keys only. */

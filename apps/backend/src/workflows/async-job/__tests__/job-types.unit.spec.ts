@@ -35,6 +35,7 @@ describe("job types", () => {
       "seo.sitemap",
       "seo.url_style",
       "tr_address.sync",
+      "wholesale.sync",
     ])
     expect(jobType("__proto__")).toBeUndefined()
     expect(jobType("constructor")).toBeUndefined()

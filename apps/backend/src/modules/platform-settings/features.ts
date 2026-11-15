@@ -58,6 +58,9 @@ export const PRODUCT_ADDONS = "catalog.addons"
 /** Orders staff make and the customer pays through a link (adr/0051). */
 export const PAYMENT_LINKS = "orders.payment_links"
 
+/** Wholesale customers and their prices (ADR-0068). */
+export const CUSTOMERS_WHOLESALE = "customers.wholesale"
+
 export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.freeze({
   // F3.2: products that need no shipping (e-books, gift codes, courses, services)
   [NON_PHYSICAL_PRODUCTS]: {
@@ -143,6 +146,14 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.orders_payment_links.label",
     descriptionKey: "qticaret.features.orders_payment_links.description",
+  },
+  // ADR-0068 §9: off until the shop sells wholesale; off, its routes are missing and its
+  // price lists are drafts, so wholesalers pay retail until it is on again
+  [CUSTOMERS_WHOLESALE]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.customers_wholesale.label",
+    descriptionKey: "qticaret.features.customers_wholesale.description",
   },
 })
 
