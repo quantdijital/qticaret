@@ -216,10 +216,14 @@
     position: absolute;
     inset: 0;
   }
+  /* Only inside the strip: a lone photo's picture is the well's direct child
+     and stays absolute (above), its box the well's; matching it here too
+     would outrank that rule, leave it inline at 0 wide and draw the photo
+     0×0 (sixth audit V-05) */
   .gf-card-lead
     > .gf-card-framed
     .gf-card-media
-    :is(.gf-card-slide:not(.gf-card-slide--second), picture) {
+    :is(.gf-card-slide:not(.gf-card-slide--second), .gf-card-slide picture) {
     position: relative;
     height: 100%;
   }

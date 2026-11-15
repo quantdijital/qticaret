@@ -42,6 +42,24 @@ describe("the featured shelf's large card (V-02)", () => {
     expect(img).toContain("max-height: 100%")
   })
 
+  // Sixth audit V-05: a lone photo's <picture> is the well's direct child and
+  // must stay absolute over it; a later, more specific rule naming a bare
+  // `picture` outranked that, left it inline at 0 wide and drew the photo 0×0
+  it("keeps a lone photo's picture absolute over the well", () => {
+    const lead = card.slice(card.indexOf(".gf-card-lead {"))
+    expect(
+      rule(card, ".gf-card-lead > .gf-card-framed .gf-card-media > :is(picture, .gf-card-slides)")
+    ).toMatch(/position: absolute;\s*inset: 0/)
+    const relative = [...lead.matchAll(/([^{}]+)\{[^}]*position: relative/g)].map((m) =>
+      m[1].replace(/\s+/g, " ")
+    )
+    expect(relative.length).toBeGreaterThan(0)
+    for (const selector of relative) {
+      // A `picture` it names sits inside a slide, never one standing alone in the list
+      expect(selector).not.toMatch(/[(,]\s*picture\s*[,)]/)
+    }
+  })
+
   it("keeps the words from growing, so the button sits right under the price", () => {
     const info = rule(card, ".gf-card-lead > .gf-card-framed > .gf-card-info")
     expect(info).toContain("flex: none")
