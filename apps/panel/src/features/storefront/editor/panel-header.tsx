@@ -108,7 +108,8 @@ export function PanelGroup({
 }) {
   const { t } = useTranslation()
   const layout = useContext(SettingsLayoutContext)
-  const placed = layout && name !== undefined ? layout : null
+  // A group with no name still stands in a layout: in "İçerik", under its own title
+  const key = name ?? `untitled:${title}`
   const [ownOpen, setOwnOpen] = useState(defaultOpen || reveal !== null)
   const [revealed, setRevealed] = useState(reveal)
   if (reveal !== revealed) {
@@ -117,20 +118,17 @@ export function PanelGroup({
       setOwnOpen(true)
     }
   }
-  const register = placed?.register
-  useLayoutEffect(
-    () => (register && name !== undefined ? register(name) : undefined),
-    [register, name]
-  )
-  const open = placed && name !== undefined ? placed.isOpen(name) : ownOpen
-  const lone = placed && name !== undefined ? placed.isLone(name) : false
-  const shown = placed && name !== undefined ? placed.isShown(name) : true
+  const register = layout?.register
+  useLayoutEffect(() => register?.(key), [register, key])
+  const open = layout ? layout.isOpen(key) : ownOpen
+  const lone = layout ? layout.isLone(key) : false
+  const shown = layout ? layout.isShown(key) : true
   const id = useId()
   return (
     <div
       role="group"
       aria-labelledby={`${id}-title`}
-      data-panel-group={name}
+      data-panel-group={layout ? key : (name ?? "")}
       hidden={!shown}
       className="border-b last:border-b-0"
     >
@@ -149,8 +147,8 @@ export function PanelGroup({
             aria-expanded={open}
             aria-controls={`${id}-body`}
             onClick={() => {
-              if (placed && name !== undefined) {
-                placed.toggle(name)
+              if (layout) {
+                layout.toggle(key)
               } else {
                 setOwnOpen((was) => !was)
               }
