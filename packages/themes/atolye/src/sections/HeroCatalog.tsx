@@ -37,7 +37,8 @@ function ListRow({ category, t }: { category: CategoryCardView; t: Translate }) 
             />
           )}
         </span>
-        <span className="truncate">{category.label}</span>
+        {/* A name wraps to a second line rather than losing its end (K-15) */}
+        <span className="line-clamp-2 leading-snug break-words">{category.label}</span>
         {typeof category.count === "number" ? <Count count={category.count} t={t} /> : <span />}
       </a>
     </li>

@@ -109,6 +109,8 @@ export function HeaderCatalog({
           categories={shop.categories}
           topLinks={shop.topLinks}
           contact={shop.contact}
+          highlight={catalog.highlight}
+          account={{ label: account, path: "/hesap" }}
           words={{
             open: t("nav.open_menu"),
             title: t("nav.menu"),
