@@ -116,6 +116,8 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       toolsPlace: "bar",
       topLinksPlace: "strip",
       searchWidth: "wide",
+      // Nor a strip note (Ek 2026-11-15): none
+      stripNote: null,
     })
     const laid = (set: Record<string, unknown>) =>
       headerBarOf(

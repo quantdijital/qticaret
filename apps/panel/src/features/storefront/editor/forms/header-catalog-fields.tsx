@@ -53,8 +53,10 @@ function CatalogField({
   const { t } = useTranslation()
   const problemText = useProblemText()
   const id = FIELD_IDS.header(section.id, field)
-  if (field === "search_placeholder") {
-    const error = problemText(problems[field], HEADER_CATALOG_LIMITS.search_placeholder)
+  if (field === "search_placeholder" || field === "strip_note") {
+    // One line of plain words: the search box's, or the strip's note (Ek 2026-11-15)
+    const max = HEADER_CATALOG_LIMITS[field]
+    const error = problemText(problems[field], max)
     return (
       <div className="flex flex-col gap-1.5">
         <label htmlFor={id}>
@@ -62,13 +64,13 @@ function CatalogField({
         </label>
         <Input
           id={id}
-          value={section.search_placeholder ?? ""}
-          maxLength={HEADER_CATALOG_LIMITS.search_placeholder}
+          value={section[field] ?? ""}
+          maxLength={max}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${id}-error` : undefined}
           onChange={(event) => {
             const words = event.target.value.replace(/\s*[\r\n\t]+\s*/g, " ")
-            onChange({ ...section, search_placeholder: words.trim() === "" ? null : words }, id)
+            onChange({ ...section, [field]: words.trim() === "" ? null : words }, id)
           }}
         />
         {error ? (
@@ -81,17 +83,17 @@ function CatalogField({
       </div>
     )
   }
-  if (field === "highlight_link") {
+  if (field === "highlight_link" || field === "strip_note_link") {
     return (
       <div id={id}>
         <LinkField
           id={`${id}-input`}
-          label={t(`${H}.highlight_link.label`)}
-          hint={t(`${H}.highlight_link.hint`)}
-          link={section.highlight_link}
+          label={t(`${H}.${field}.label`)}
+          hint={t(`${H}.${field}.hint`)}
+          link={section[field]}
           error={problemText(problems[field])}
           onChange={(link, typing) => {
-            onChange({ ...section, highlight_link: link }, typing ? id : undefined)
+            onChange({ ...section, [field]: link }, typing ? id : undefined)
           }}
         />
       </div>

@@ -79,6 +79,8 @@ export const HEADER_CATALOG_GROUPS: Readonly<Record<keyof HeaderCatalogFields, F
   search_placeholder: "content",
   search_width: "content",
   utility_bar: "content",
+  strip_note: "content",
+  strip_note_link: "content",
   top_links: "content",
   phone: "content",
   tools_place: "content",

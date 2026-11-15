@@ -132,6 +132,9 @@ const CATALOG_FIELDS = [
   "tools_place",
   "top_links",
   "search_width",
+  // The strip's note (Ek 2026-11-15); a preset without one: none
+  "strip_note",
+  "strip_note_link",
 ] as const
 
 /** The header bar as `mainSectionsOf` prints it; none in the preset: the theme's header. */

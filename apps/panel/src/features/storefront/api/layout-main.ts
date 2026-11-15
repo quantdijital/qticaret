@@ -60,6 +60,9 @@ export interface HeaderCatalogFields {
   tools_place: HeaderToolsPlace
   top_links: HeaderTopLinksPlace
   search_width: HeaderSearchWidth
+  /** The strip's short note and where it goes (Ek 2026-11-15); null: none. */
+  strip_note: string | null
+  strip_note_link: LayoutLink | null
 }
 
 export type HeaderCatalogSection = HeaderBarCommon & { variant: "catalog" } & HeaderCatalogFields

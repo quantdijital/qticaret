@@ -66,8 +66,8 @@ const TITLED: ReadonlySet<AnySection["type"]> = new Set([
 /** The sections whose one line of text the theme marks (`text`). */
 const TEXTED: ReadonlySet<AnySection["type"]> = new Set(["featured_product", "newsletter", "help"])
 
-/** The catalog header's fields the theme marks: its search box's words, its highlighted link. */
-const HEADER_FIELDS: readonly string[] = ["search_placeholder", "highlight_link"]
+/** The catalog header's fields the theme marks: its search box's words, its highlighted link, its strip's note. */
+const HEADER_FIELDS: readonly string[] = ["search_placeholder", "highlight_link", "strip_note"]
 
 const content = (target: string): PreviewField => ({ target, group: "content" })
 

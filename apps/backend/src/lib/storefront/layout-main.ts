@@ -166,5 +166,7 @@ function catalogOf<L>(header: HeaderCatalog, resolve: (link: MenuLinkInput) => L
     tools_place: header.tools_place,
     top_links: header.top_links,
     search_width: header.search_width,
+    strip_note: header.strip_note,
+    strip_note_link: header.strip_note_link ? resolve(header.strip_note_link) : null,
   }
 }

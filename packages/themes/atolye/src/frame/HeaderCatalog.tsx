@@ -8,6 +8,7 @@ import { BarLinks } from "./AisleMore"
 import { CartSheet } from "./CartSheet"
 import { cartSheetWords } from "./cart-sheet-words"
 import { CategoryMenu } from "./CategoryMenu"
+import { HeaderCatalogStrip } from "./HeaderCatalogStrip"
 import { HeaderCatalogTools } from "./HeaderCatalogTools"
 import { MenuSheet } from "./MenuSheet"
 import { SearchBox } from "./SearchBox"
@@ -21,18 +22,20 @@ const ON_BAR = "gf-on-bar gf-icon-btn gf-tool text-text transition-colors durati
 
 /**
  * What the catalog header draws: the strip and what it holds (the shop's
- * top links while they stand there, "Hesabım" beside the menu bar's
- * icons), whether it says the top links anywhere (the strip or the menu
- * bar's end, `links`: the bar above then leaves them out) and the phone
- * beside its search.
+ * note, its top links while they stand there, "Hesabım" beside the menu
+ * bar's icons), whether it says the top links anywhere (the strip or the
+ * menu bar's end, `links`: the bar above then leaves them out) and the
+ * phone beside its search.
  */
 export function catalogParts(shop: ShopView, catalog: HeaderCatalogView) {
   const stripLinks = catalog.topLinksPlace !== "bar" && shop.topLinks.length > 0
   const stripAccount = catalog.accountText && catalog.toolsPlace !== "row"
+  const stripNote = catalog.stripNote ?? null
   return {
-    strip: catalog.utilityBar && (stripLinks || stripAccount),
+    strip: catalog.utilityBar && (stripLinks || stripAccount || stripNote !== null),
     stripLinks,
     stripAccount,
+    stripNote,
     links: shop.topLinks.length > 0 && (catalog.topLinksPlace === "bar" || catalog.utilityBar),
     phone: catalog.phone && shop.contact.phone !== null && shop.contact.phoneHref !== null,
   }
@@ -43,7 +46,7 @@ const NARROW_SEARCH = "lg:[&>[role=search]]:max-w-140"
 
 /**
  * The catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15). From
- * 1024 px: a thin light strip (the shop's top links, "Hesabım" at its
+ * 1024 px: a thin light strip (`HeaderCatalogStrip`: the shop's note, its top links, "Hesabım" at its
  * end), the wordmark with a wide search and the shop's phone under
  * "Müşteri hizmetleri", then the menu bar on its ground: "Kategoriler"
  * (the shop's top categories in a column, each one's children beside it),
@@ -114,32 +117,13 @@ export function HeaderCatalog({
       data-variant="catalog"
     >
       {parts.strip && (
-        <div data-gf-strip="" className="hidden border-b border-rule bg-paper-2 text-xs lg:block">
-          <Container className="flex min-h-9 items-center">
-            {parts.stripLinks && (
-              <nav aria-label={t("nav.top_links")} className="-ml-3 flex flex-wrap items-center">
-                {shop.topLinks.map((link) => (
-                  <a
-                    key={link.path}
-                    href={link.path}
-                    className="inline-flex min-h-9 items-center rounded-button px-3 text-text-2 no-underline pointer-coarse:min-h-11 hover:text-text"
-                  >
-                    {link.label}
-                  </a>
-                ))}
-              </nav>
-            )}
-            {parts.stripAccount && (
-              <a
-                href="/hesap"
-                className="-mr-3 ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-button px-3 font-semibold text-text no-underline pointer-coarse:min-h-11"
-              >
-                <UserRound className="size-4" aria-hidden="true" strokeWidth={2} />
-                {account}
-              </a>
-            )}
-          </Container>
-        </div>
+        <HeaderCatalogStrip
+          note={parts.stripNote}
+          links={parts.stripLinks ? shop.topLinks : []}
+          account={parts.stripAccount ? account : null}
+          marks={shop.editor}
+          words={{ links: t("nav.top_links") }}
+        />
       )}
       <Container
         data-gf-head-row=""
