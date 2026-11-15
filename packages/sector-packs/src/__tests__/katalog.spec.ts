@@ -1,5 +1,7 @@
 import { sectorPack, storefrontPreset } from "../index"
 
+const katalogVersion = () => storefrontPreset("cutlery", "katalog")?.version
+
 describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/0063)", () => {
   it("reads katalog in the cutlery pack: Grafit's theme, the catalogue home page, no menus or demo", () => {
     const katalog = storefrontPreset("cutlery", "katalog")
@@ -49,8 +51,8 @@ describe("the katalog preset (adr/0049 Ek 2026-11-14, Katalog ana sayfası; adr/
     ])
   })
 
-  it("raised the cutlery pack's version with its first preset", () => {
-    expect(sectorPack("cutlery")?.version).toBe(2)
-    expect(sectorPack("cutlery")?.presets.map((preset) => preset.code)).toEqual(["katalog"])
+  it("is still on its first version, beside the Tezgâh presets added after it", () => {
+    expect(katalogVersion()).toBe(1)
+    expect(sectorPack("cutlery")?.presets.map((preset) => preset.code)).toContain("katalog")
   })
 })

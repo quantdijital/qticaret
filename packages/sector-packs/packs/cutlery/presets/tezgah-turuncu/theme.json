@@ -1,0 +1,19 @@
+{
+  "settings_version": 2,
+  "theme": "atolye",
+  "colors": { "primary": "#c2410c", "accent": "#2e3338", "background": "steel" },
+  "typography": { "heading": "inter", "body": "inter" },
+  "radius": "sharp",
+  "product_card": {
+    "ratio": "1:1",
+    "show_brand": true,
+    "show_rating": true,
+    "variant": "framed",
+    "hover_image": false,
+    "delivery_note": true,
+    "full_button": true,
+    "empty_stars": false
+  },
+  "header": { "layout": "left", "sticky": true },
+  "buttons": "square"
+}
