@@ -124,7 +124,7 @@ describe("the aisle's dropdown (M1)", () => {
       /<span class="block shrink-0 overflow-hidden rounded-inner bg-paper-3 size-10">/
     )
     expect(row).toContain('src="/media/katlanir.jpg"')
-    expect(row).toContain("<span>Katlanır çakılar</span>")
+    expect(row).toContain('<span class="gf-menu-word">Katlanır çakılar</span>')
     expect(row).toContain(
       '<span class="gf-menu-count"><span aria-hidden="true">5</span><span class="sr-only">5 ürün</span></span>'
     )
@@ -133,7 +133,7 @@ describe("the aisle's dropdown (M1)", () => {
   it("shows no pill on a row the storefront did not count, never a guessed number", () => {
     const html = renderFrame(atolyeTheme, shopFixture({ categories: COUNTED }))
     const row = rowOf(html, "/kategori/cakilar/sabit")
-    expect(row).toContain("<span>Sabit çakılar</span>")
+    expect(row).toContain('<span class="gf-menu-word">Sabit çakılar</span>')
     expect(row).not.toContain("gf-menu-count")
     // A picture-less row keeps its empty square, so the names line up
     expect(row).toMatch(/size-10"><\/span>/)
@@ -145,7 +145,7 @@ describe("the aisle's dropdown (M1)", () => {
       /<a [^>]*href="\/kategori\/cakilar"[^>]*class="gf-drop-row gf-drop-all"[^>]*>(.*?)<\/a>/.exec(
         html
       )?.[1]
-    expect(all).toContain('<span aria-hidden="true">Tümünü gör</span>')
+    expect(all).toContain('<span class="gf-menu-word" aria-hidden="true">Tümünü gör</span>')
     expect(all).toContain('<span class="sr-only">Tümünü gör: Çakılar</span>')
     expect(all).toContain(
       '<span class="gf-menu-count gf-menu-count--dark"><span aria-hidden="true">1.240</span><span class="sr-only">1.240 ürün</span></span>'
@@ -157,7 +157,7 @@ describe("the aisle's dropdown (M1)", () => {
     expect(html).not.toContain("gf-menu-count")
     expect(html).toContain('class="gf-drop-row gf-drop-all"')
     expect(html).toMatch(
-      /<a [^>]*href="\/kategori\/aksesuar"[^>]*class="gf-aisle-item group inline-flex[^>]*>Aksesuar<\/a>/
+      /<a [^>]*href="\/kategori\/aksesuar"[^>]*class="gf-menu-item group inline-flex[^>]*><span class="gf-menu-word" data-text="Aksesuar">Aksesuar<\/span><\/a>/
     )
     // Closed in the first HTML, its links there for a crawler
     expect(html).toMatch(

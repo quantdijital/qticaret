@@ -8,8 +8,56 @@
  * the float shadow), as the search panel does, and the page's ink under
  * the catalog header's coloured menu bar. The shop may choose no pictures
  * (`header_bar.menu_images` `off`): the rows are then words and counts only.
+ *
+ * A menu item's look is one recipe (adr/0067 S1, `menu_style`): the aisle's
+ * items in the standard and centred headers and on the catalog header's
+ * menu bar (`.gf-menu-item`, `--bar`), the bar's "Kategoriler" button
+ * (`.gf-bar-button`), the rows of the dropdowns, the bar's "Daha fazla"
+ * panel and "Kategoriler" column and the listing's sort menu
+ * (`.gf-drop-row`, `.gf-menu-row`), the header's tools (`.gf-tool`). The
+ * default, `filled`, is each header's drawing as it was: the aisle's open
+ * item a dark pill, the bar's open item its raised tone with a 2 px line
+ * under it, a row a tinted fill. The other steps are at the end.
+ * Only the backgrounds, lines and the items' colours live here; a row's
+ * resting and hovered ink stays on the row.
  */
 @layer components {
+  .gf-menu-item {
+    color: var(--color-text-2);
+  }
+  @media (hover: hover) {
+    .gf-menu-item:hover {
+      background-color: var(--color-paper-2);
+      color: var(--color-text);
+    }
+    .gf-bar-button:hover {
+      background-color: var(--color-paper-3);
+    }
+    .gf-menu-row:hover {
+      background-color: var(--color-paper-2);
+    }
+  }
+  .gf-menu-item[data-state="open"] {
+    background-color: var(--color-text);
+    color: var(--color-paper);
+  }
+  /* On the menu bar (Tezgâh audits Y-05, Y-06): the bar's raised tone and a line, never a filled box */
+  .gf-menu-item--bar[data-state="open"] {
+    background-color: var(--color-paper-2);
+    color: var(--color-text);
+    @apply shadow-[inset_0_-2px_0_currentColor];
+  }
+  .gf-bar-button {
+    background-color: var(--color-paper-2);
+  }
+  .gf-bar-button[aria-expanded="true"] {
+    background-color: var(--color-paper-3);
+    @apply shadow-[inset_0_-2px_0_currentColor];
+  }
+  .gf-menu-row[aria-expanded="true"] {
+    background-color: var(--color-paper-2);
+  }
+
   .gf-drop {
     position: absolute;
     top: calc(100% + var(--space-xs));

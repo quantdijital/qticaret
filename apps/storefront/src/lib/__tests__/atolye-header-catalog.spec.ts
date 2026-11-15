@@ -145,7 +145,7 @@ describe("the catalog header", () => {
     "writes the opened dropdowns in the page's ink on a %s bar",
     (menuGround) => {
       const html = renderFrame(atolyeTheme, catalogShop({ menuGround }))
-      // The bar's ground reaches its own items only (`.gf-on-bar`, `.gf-aisle-item`)
+      // The bar's ground reaches its own items only (`.gf-on-bar`, `.gf-menu-item`)
       expect(html).toMatch(/data-ground="[^"]+"/)
       expect(html).toContain('class="gf-drop data-[state=closed]:hidden"')
       expect(css(MENU_CSS, ".gf-drop")).toContain("color: var(--color-text)")
@@ -183,8 +183,12 @@ describe("the menu bar's open states (third audit)", () => {
   it("draws the open Kategoriler button as the bar's open items, not as the highlighted link", () => {
     const html = renderFrame(atolyeTheme, catalogShop())
     const button = /<button[^>]*aria-expanded="false"[^>]*class="gf-on-bar[^"]*"/.exec(html)?.[0]
-    expect(button).toContain("aria-expanded:shadow-[inset_0_-2px_0_currentColor]")
+    // Its look is the menus' one recipe (`menu.css`, adr/0067 S1): the raised tone and the line
+    expect(button).toContain("gf-bar-button")
     expect(button).not.toContain("aria-expanded:bg-text")
+    const open = css(MENU_CSS, '.gf-bar-button[aria-expanded="true"]')
+    expect(open).toContain("background-color: var(--color-paper-3)")
+    expect(open).toContain("shadow-[inset_0_-2px_0_currentColor]")
   })
 })
 

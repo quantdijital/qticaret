@@ -6,18 +6,22 @@ import { useLayoutEffect, useRef, useState, type ReactNode } from "react"
 import type { NavCategoryView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { useAisleFit } from "./aisle-fit"
-import { Drop } from "./AisleDrop"
+import { Drop, Word } from "./AisleDrop"
 import type { MenuWords } from "./menu-words"
 
+/** An aisle item; its hovered and open look is the menus' one recipe (`menu.css`, `menu_style`). */
 const ITEM =
-  "gf-aisle-item group inline-flex min-h-11 items-center gap-1 rounded-button px-3 text-sm font-semibold whitespace-nowrap text-text-2 transition-colors duration-(--dur-micro) hover:bg-paper-2 hover:text-text data-[state=open]:bg-text data-[state=open]:text-paper"
+  "gf-menu-item group inline-flex min-h-11 items-center gap-1 rounded-button px-3 text-sm font-semibold whitespace-nowrap transition-colors duration-(--dur-micro)"
 /**
  * In the menu bar (Tezgâh audits Y-05, Y-06): 8 px in below 1280 px, so one
- * more category fits; open, the bar's own raised tone and a line under it,
- * never the filled box the highlighted link beside it is drawn as.
+ * more category fits; open, the bar's own raised tone and a line under it
+ * (`.gf-menu-item--bar`), never the filled box the highlighted link beside
+ * it is drawn as.
  */
-const BAR_ITEM =
-  "px-2 xl:px-3 data-[state=open]:bg-paper-2 data-[state=open]:text-text data-[state=open]:shadow-[inset_0_-2px_0_currentColor]"
+const BAR_ITEM = "gf-menu-item--bar px-2 xl:px-3"
+/** A row of the "Daha fazla" panel: its hovered fill is the recipe's (`.gf-menu-row`). */
+const MORE_ROW =
+  "gf-menu-row -mx-3 flex min-h-10 items-center rounded-inner px-3 py-2 text-sm leading-snug no-underline pointer-coarse:min-h-11"
 
 /**
  * The categories that did not fit on the bar's line, each with its
@@ -36,11 +40,8 @@ function MorePanel({ categories }: { categories: readonly NavCategoryView[] }) {
       {categories.map((category) => (
         <li key={category.path} className="w-52">
           <NavigationMenu.Link asChild>
-            <a
-              href={category.path}
-              className="-mx-3 flex min-h-10 items-center rounded-inner px-3 py-2 text-sm leading-snug font-bold text-text no-underline pointer-coarse:min-h-11 hover:bg-paper-2"
-            >
-              {category.label}
+            <a href={category.path} className={cn(MORE_ROW, "font-bold text-text")}>
+              <span className="gf-menu-word">{category.label}</span>
             </a>
           </NavigationMenu.Link>
           {category.children.length > 0 && (
@@ -48,11 +49,8 @@ function MorePanel({ categories }: { categories: readonly NavCategoryView[] }) {
               {category.children.map((child) => (
                 <li key={child.path}>
                   <NavigationMenu.Link asChild>
-                    <a
-                      href={child.path}
-                      className="-mx-3 flex min-h-10 items-center rounded-inner px-3 py-2 text-sm leading-snug text-text-2 no-underline pointer-coarse:min-h-11 hover:bg-paper-2 hover:text-text"
-                    >
-                      {child.label}
+                    <a href={child.path} className={cn(MORE_ROW, "text-text-2 hover:text-text")}>
+                      <span className="gf-menu-word">{child.label}</span>
                     </a>
                   </NavigationMenu.Link>
                 </li>
@@ -163,7 +161,7 @@ export function Aisle({
             >
               <NavigationMenu.Link asChild>
                 <a href={category.path} className={cn(ITEM, inBar && BAR_ITEM)}>
-                  {category.label}
+                  <Word text={category.label} />
                 </a>
               </NavigationMenu.Link>
             </NavigationMenu.Item>
@@ -175,7 +173,7 @@ export function Aisle({
               className={cn("relative", away && "hidden")}
             >
               <NavigationMenu.Trigger className={cn(ITEM, inBar && BAR_ITEM)}>
-                {category.label}
+                <Word text={category.label} />
                 <ChevronDown
                   className="size-4 group-data-[state=open]:rotate-180 motion-safe:transition-transform"
                   aria-hidden="true"
@@ -209,7 +207,7 @@ export function Aisle({
               className={cn(ITEM, BAR_ITEM)}
               tabIndex={fit === null ? -1 : undefined}
             >
-              {more}
+              <Word text={more} />
               <ChevronDown
                 className="size-4 group-data-[state=open]:rotate-180 motion-safe:transition-transform"
                 aria-hidden="true"
