@@ -42,9 +42,11 @@ export async function GET(req: MedusaStoreRequest, res: MedusaResponse): Promise
   if (!session || !(await sessionHolds(req, session.sid, session.user_id))) {
     throw unknown()
   }
-  const role = await req.scope
+  // A plain read: `roleOf` may make a first user owner, which no unsigned request may set off
+  const roles = await req.scope
     .resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE)
-    .roleOf(session.user_id)
+    .rolesOf([session.user_id])
+  const role = roles.get(session.user_id)
   if (!role || !DESIGNERS.has(role)) {
     throw unknown()
   }
