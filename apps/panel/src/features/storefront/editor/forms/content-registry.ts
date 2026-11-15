@@ -1,3 +1,4 @@
+import { FEATURED_PRODUCT_SETTINGS } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
 import { scrollerFields, sliderFields } from "./shelf-registry"
@@ -30,6 +31,7 @@ export type ContentField =
   | "slides"
   | "open_first"
   | "single_open"
+  | "gallery"
 
 /** The content fields' elements' ids (spread into `FIELD_IDS`). */
 export const CONTENT_IDS = {
@@ -127,12 +129,22 @@ export function contentFields(section: AnySection): RegistryField[] {
         entry(section, "open_first", `${E}.faq.openFirst`),
         entry(section, "single_open", `${E}.faq.singleOpen`),
       ]
+    case "featured_product":
+      // Its photographs layout, open in "Diziliş" (adr/0049 Ek 2026-11-15)
+      return [
+        entry(
+          section,
+          "gallery",
+          `${E}.featured.gallery`,
+          FEATURED_PRODUCT_SETTINGS.gallery.map((step) => `${E}.featured.galleries.${step}`),
+          "layout"
+        ),
+      ]
     // No count or switch in their content, or their own register (the band, the strip, the header)
     case "announcement_bar":
     case "banner":
     case "brands":
     case "category_main":
-    case "featured_product":
     case "footer_bar":
     case "header_bar":
     case "help":

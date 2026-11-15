@@ -174,6 +174,8 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         title: section.title,
         text: fill(section.text, at.values),
         product_id: section.product_id,
+        // Printed only off the collage, so a section from before it prints as it did
+        ...(section.gallery === "strips" ? { gallery: section.gallery } : {}),
       }
     case "rich_text": {
       const body = fillShopDoc(section.body, at.values)

@@ -8527,7 +8527,17 @@
       },
       "featured": {
         "product": "Product",
-        "hint": "The pictures, headline facts, price and spec table come from the product's own page. While the product is not published the section does not show."
+        "hint": "The pictures, headline facts, price and spec table come from the product's own page. While the product is not published the section does not show.",
+        "gallery": "Photo layout",
+        "galleryTerm": "gallery",
+        "galleries": {
+          "collage": "Collage",
+          "strips": "Slanted strips"
+        },
+        "galleryHint": {
+          "collage": "One large photo on the left; on wide screens two small ones beside it.",
+          "strips": "Up to four photos side by side as equal slanted strips. On wide screens the strip under the mouse widens; on phones they stay equal."
+        }
       },
       "sample": {
         "label": {

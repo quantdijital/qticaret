@@ -13,6 +13,7 @@
     "./section-device": "./src/store/section-device.ts",
     "./section-announcement": "./src/store/section-announcement.ts",
     "./section-faq": "./src/store/section-faq.ts",
+    "./section-featured": "./src/store/section-featured.ts",
     "./section-marquee": "./src/store/section-marquee.ts",
     "./section-banner": "./src/store/section-banner.ts",
     "./section-catalog": "./src/store/section-catalog.ts",
