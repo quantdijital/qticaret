@@ -4,7 +4,7 @@ import type {
   ThemeBodyFont,
   ThemeHeadingFont,
 } from "@qticaret/types"
-import { SECTION_SPACINGS } from "@qticaret/types"
+import { SECTION_SPACINGS } from "@qticaret/types/storefront"
 import type { ThemeView } from "@qticaret/ui"
 import { cardVariantOf } from "@qticaret/types/section-variants"
 import { brandDeclarations, isHexColor, readableOn } from "./color"

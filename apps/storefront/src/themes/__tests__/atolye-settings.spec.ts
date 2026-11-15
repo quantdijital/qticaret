@@ -133,7 +133,7 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     expect(declared(tokens, "--radius-pill")).not.toContain("--radius-scale")
   })
 
-  it("shapes buttons, icon buttons and fields with the button choice; chips and counts stay pills", () => {
+  it("shapes buttons, icon buttons, fields and tabs with the button choice; chips and counts stay pills", () => {
     expect(entry.style(chosen({ buttons: "pill" }))).toBeNull()
     expect(entry.style(chosen({ buttons: "rounded" }))).toBe(":root{--button-radius:0.75rem}")
     expect(entry.style(chosen({ buttons: "square" }))).toBe(":root{--button-radius:0px}")
@@ -143,8 +143,9 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     for (const pill of [".gf-chip", ".gf-count"]) {
       expect(ruleBody(controls, pill), pill).toContain("border-radius: var(--radius-pill);")
     }
+    // The shelf's tabs are controls: they take the button shape, pills by default (K-22)
     expect(ruleBody(atolyeCss("tabs.css"), ".gf-tab")).toContain(
-      "border-radius: var(--radius-pill);"
+      "border-radius: var(--button-radius, var(--radius-pill));"
     )
     // A box field (a textarea) keeps the inner corner, never rounder than the button
     expect(declared(tokens, "--radius-box")).toBe(

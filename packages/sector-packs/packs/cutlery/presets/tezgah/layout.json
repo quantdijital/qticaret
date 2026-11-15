@@ -90,7 +90,7 @@
       "title": "Av bıçakları",
       "source": { "kind": "category", "category_id": { "$handle": "category:av-bicaklari" } },
       "limit": 12,
-      "more": { "$href": "/kategori/av-bicaklari", "label": null },
+      "more": { "$href": "/kategori/av-bicaklari", "label": "Tüm av bıçakları" },
       "card_variant": null,
       "scroller": {
         "desktop": "four",
@@ -115,7 +115,10 @@
       "title": "Kamp bıçakları",
       "source": { "kind": "category", "category_id": { "$handle": "category:kamp-bicaklari" } },
       "limit": 12,
-      "more": { "$href": "/kategori/outdoor-ve-kamp/kamp-bicaklari", "label": null },
+      "more": {
+        "$href": "/kategori/outdoor-ve-kamp/kamp-bicaklari",
+        "label": "Tüm kamp bıçakları"
+      },
       "card_variant": null,
       "scroller": {
         "desktop": "four",
@@ -140,7 +143,10 @@
       "title": "Şef bıçakları",
       "source": { "kind": "category", "category_id": { "$handle": "category:sef-bicaklari" } },
       "limit": 12,
-      "more": { "$href": "/kategori/mutfak-ve-sef-bicaklari/sef-bicaklari", "label": null },
+      "more": {
+        "$href": "/kategori/mutfak-ve-sef-bicaklari/sef-bicaklari",
+        "label": "Tüm şef bıçakları"
+      },
       "card_variant": null,
       "scroller": {
         "desktop": "four",
@@ -234,7 +240,7 @@
       "title": "İndirimdekiler",
       "source": { "kind": "on_sale" },
       "limit": 6,
-      "more": { "$href": "/kampanyalar", "label": null },
+      "more": { "$href": "/kampanyalar", "label": "Tüm indirimler" },
       "card_variant": null,
       "rows": 2
     },
