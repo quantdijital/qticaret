@@ -18,7 +18,9 @@ type BoxProps = Omit<ComponentProps<typeof SearchBox>, "id" | "className" | "onL
  * the whole width, in 220 ms (at once under reduced motion), a scrim
  * under it. The field has the cursor at once (the keyboard opens), the
  * live panel answers under it; the 44 px X, Escape or a press on the scrim
- * close it, and the focus goes back to "Ara". Nothing without script:
+ * close it, and the focus goes back to "Ara". Escape in the field is the
+ * field's, as on wide screens (`SearchToggle`): the panel first, then the
+ * layer, the words kept. Nothing without script:
  * "Ara" is then a link to the search page.
  */
 export function SearchDrop({
@@ -58,6 +60,12 @@ export function SearchDrop({
             event.preventDefault()
             document.getElementById(PHONE_SEARCH)?.focus()
           }}
+          onEscapeKeyDown={(event) => {
+            // Heard before the field (Radix listens on the document's capture): the field decides
+            if (event.target instanceof Element && event.target.id === PHONE_SEARCH) {
+              event.preventDefault()
+            }
+          }}
           onCloseAutoFocus={(event) => {
             event.preventDefault()
             opener.current?.focus()
@@ -66,7 +74,14 @@ export function SearchDrop({
           className="fixed inset-x-0 top-0 z-(--z-modal) flex items-center gap-2 rounded-b-tile bg-paper px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 text-text shadow-float outline-none duration-(--dur-short) data-[state=closed]:animate-out data-[state=closed]:slide-out-to-top data-[state=open]:animate-in data-[state=open]:slide-in-from-top lg:hidden"
         >
           <Dialog.Title className="sr-only">{title}</Dialog.Title>
-          <SearchBox {...box} id={PHONE_SEARCH} className="min-w-0 flex-1" />
+          <SearchBox
+            {...box}
+            id={PHONE_SEARCH}
+            className="min-w-0 flex-1"
+            onLeave={() => {
+              setOpen(false)
+            }}
+          />
           <Dialog.Close className="gf-icon-btn shrink-0 bg-paper-2" aria-label={closeLabel}>
             <X className="size-5" aria-hidden="true" strokeWidth={1.75} />
           </Dialog.Close>

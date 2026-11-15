@@ -13,6 +13,7 @@ import { HeaderCatalogTools } from "./HeaderCatalogTools"
 import { MenuSheet } from "./MenuSheet"
 import { SearchBox } from "./SearchBox"
 import { SearchDrop } from "./SearchDrop"
+import { SearchDropOpener } from "./SearchDropOpener"
 import { PHONE_SEARCH } from "./SearchLink"
 import { SearchToggle } from "./SearchToggle"
 import { Wordmark } from "./Wordmark"
@@ -182,6 +183,8 @@ export function HeaderCatalog({
             <span className="tabular text-lg font-extrabold">{shop.contact.phone}</span>
           </a>
         )}
+        {/* The editor's preview draws no bottom bar: a phone's way into the dropping search there */}
+        {icon && shop.editor && <SearchDropOpener label={t("search.open")} className={LABELLED} />}
         {row ? (
           <HeaderCatalogTools
             account={account}
