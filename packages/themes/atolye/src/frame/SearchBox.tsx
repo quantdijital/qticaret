@@ -256,7 +256,7 @@ export function SearchBox({
           type="button"
           aria-label={words.clear}
           className={cn(
-            "gf-icon-btn absolute top-0.5 text-text-2",
+            "gf-icon-btn absolute top-1/2 -translate-y-1/2 text-text-2",
             written ? "right-22" : "right-12"
           )}
           onClick={clear}
@@ -265,14 +265,17 @@ export function SearchBox({
         </button>
       )}
       {written ? (
-        <button type="submit" className="gf-btn gf-btn--small absolute top-0.5 right-0.5 min-w-20">
+        <button
+          type="submit"
+          className="gf-btn gf-btn--small absolute top-1/2 right-0.5 min-w-20 -translate-y-1/2"
+        >
           {words.submit}
         </button>
       ) : (
         <button
           type="submit"
           aria-label={words.submit}
-          className="gf-icon-btn absolute top-0.5 right-1 text-text"
+          className="gf-icon-btn absolute top-1/2 right-1 -translate-y-1/2 text-text"
         >
           <Search className="size-5" aria-hidden="true" strokeWidth={1.75} />
         </button>
