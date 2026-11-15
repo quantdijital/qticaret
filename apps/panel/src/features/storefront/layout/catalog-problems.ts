@@ -38,6 +38,25 @@ export function heroCatalogProblems(section: HeroSection): Found[] {
       `picks.${String(index)}`,
       textProblem(pick.label, HERO_CATALOG_LIMITS.pickLabel),
     ]),
+    // The opening's slides (adr/0049 Ek 2026-11-15): one with neither picture nor words is refused
+    ...(section.slides ?? []).flatMap((slide, index): Found[] => {
+      const at = `slides.${String(index)}`
+      const empty =
+        slide.image === null &&
+        slide.heading === null &&
+        slide.text === null &&
+        slide.links.length === 0
+      return [
+        [`${at}.image`, empty ? "required" : textProblem(slide.image?.alt ?? null, L.alt)],
+        [`${at}.heading`, textProblem(slide.heading, L.heading, true)],
+        [`${at}.text`, textProblem(slide.text, L.text, true)],
+        ...slide.links.map((link, place): Found => [
+          `${at}.links.${String(place)}`,
+          linkProblem(link),
+        ]),
+        [`${at}.link`, linkProblem(slide.link)],
+      ]
+    }),
   ]
 }
 

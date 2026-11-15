@@ -1,6 +1,7 @@
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
 import { scrollerFields, sliderFields } from "./shelf-registry"
+import { kitDefaultsOf, turnsAsSlider } from "./slider-kit"
 
 /**
  * The content fields the settings search finds (docs/tema/bilesen-standardi
@@ -26,6 +27,7 @@ export type ContentField =
   | "thumbs"
   | "thumbs_count"
   | "slider_height"
+  | "slides"
   | "open_first"
   | "single_open"
 
@@ -88,9 +90,14 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "hero":
       return section.variant === "category_list"
         ? [
+            entry(section, "slides", `${C}.slides`),
             entry(section, "list_limit", `${C}.listLimit`),
             entry(section, "show_count", `${C}.showCount`),
             entry(section, "show_price", `${C}.showPrice`),
+            // Two or more slides turn on the slider's settings (adr/0049 Ek 2026-11-15)
+            ...(turnsAsSlider(section)
+              ? sliderFields(section.id, section, kitDefaultsOf(section))
+              : []),
           ]
         : []
     case "google_rating":

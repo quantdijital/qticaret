@@ -1,3 +1,4 @@
+import type { SliderSettings } from "@qticaret/types"
 import type { CategoryCardView } from "./card-views"
 import type { ImageView, LinkView } from "./views"
 
@@ -30,6 +31,28 @@ export interface HeroCatalogView {
   picks: ProductThumbView[]
   /** "4.249,00 TL": the lowest live price among the picks; null: not shown. */
   from: string | null
+  /**
+   * The opening's slides when the shop saved them (adr/0049 Ek 2026-11-15),
+   * each with something to show; absent: one slide, the opening's own
+   * heading, line, buttons and picture, drawn as before slides.
+   */
+  slides?: HeroCatalogSlideView[]
+  /** How two or more slides turn: the slider's settings and the seconds a slide stays. */
+  slider?: { settings: SliderSettings; interval: number }
+}
+
+/**
+ * One slide of the opening: its heading (null: none), line, buttons, its
+ * picture (null: the first slide's the shop's newest pictured product,
+ * another's none) and where the picture leads. Without heading, line and
+ * buttons the slide is its picture alone.
+ */
+export interface HeroCatalogSlideView {
+  heading: string | null
+  intro: string | null
+  actions: LinkView[]
+  image: ImageView | null
+  link: LinkView | null
 }
 
 /**

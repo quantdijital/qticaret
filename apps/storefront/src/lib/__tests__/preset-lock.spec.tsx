@@ -3,19 +3,21 @@ import { join } from "node:path"
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
 import { createElement } from "react"
 import { renderToStaticMarkup } from "react-dom/server"
-import type { StoreLayout, StoreMenu } from "@qticaret/types"
+import type { StoreLayout } from "@qticaret/types"
 import type { FormAction, PlaceOrderResult } from "@qticaret/ui"
-import { StoreApiError } from "@/lib/store-api/errors"
-import { menusOf, storeAnswer } from "@/test/preset-lock/fake-store-api"
+import { menusOf } from "@/test/preset-lock/fake-store-api"
 import { htmlLines, pageParts } from "@/test/preset-lock/html-lines"
 import {
   LOCK_DIR,
   UPDATE_HINT,
   UPDATING,
   allPresets,
+  fixtureNotes,
+  header,
   styleDigests,
 } from "@/test/preset-lock/presets"
 import { presetAnswer } from "@/test/preset-lock/store-layout"
+import { store } from "@/test/preset-lock/store-mock"
 
 /**
  * The preset lock (docs/tema/bilesen-standardi.md §7): a published
@@ -23,50 +25,14 @@ import { presetAnswer } from "@/test/preset-lock/store-layout"
  * `packages/sector-packs/packs/*\/presets/*` is applied to one fixed shop
  * and drawn through the storefront's own views (`shopView`, `homeSections`)
  * and the theme, its frame and its home page kept as HTML beside this
- * file; the theme's stylesheets are kept by their digests. A change that
+ * file (its product and category pages: `preset-lock-pages.spec.tsx`);
+ * the theme's stylesheets are kept by their digests. A change that
  * moves any of them fails here until it is written again on purpose with
  * `pnpm lock:presets`.
  */
 
 // The shop the presets are drawn in: every Store API call answered from the fixture
-const store = vi.hoisted(() => ({
-  layout: null as StoreLayout | null,
-  menus: [] as StoreMenu[],
-}))
-
-vi.mock("@/lib/store-api/server", () => {
-  const get = (path: string, query?: Record<string, unknown>) => {
-    if (!store.layout) {
-      throw new Error("preset lock: no preset applied")
-    }
-    try {
-      return Promise.resolve(storeAnswer(store.layout, store.menus, path, query))
-    } catch (error) {
-      return Promise.reject(error instanceof Error ? error : new Error(String(error)))
-    }
-  }
-  const find = async (path: string, query?: Record<string, unknown>) => {
-    try {
-      return await get(path, query)
-    } catch (error) {
-      if (error instanceof StoreApiError && error.status === 404) return null
-      throw error
-    }
-  }
-  const call = (path: string, options: { query?: Record<string, unknown> }) =>
-    get(path, options.query)
-  const refused = (path: string) =>
-    Promise.reject(new Error(`preset lock: the page wrote to ${path}`))
-  return {
-    storeGet: get,
-    storePublicGet: get,
-    storePublicFind: find,
-    storeCall: call,
-    storeCallWithHeaders: refused,
-    storePost: refused,
-    storeDelete: refused,
-  }
-})
+vi.mock("@/lib/store-api/server", () => import("@/test/preset-lock/store-mock"))
 // A guest on the home page, no cookies: no customer, no cart, no preview
 vi.mock("next/headers", () => ({
   headers: () => Promise.resolve(new Headers({ "x-qt-url": "/" })),
@@ -132,10 +98,6 @@ const folders = (dir: string): string[] =>
         .map((entry) => entry.name)
     : []
 
-/** A snapshot's header: what it is and what the fixed shop could not give the preset. */
-const header = (key: string, notes: string[]) =>
-  [`<!-- preset lock: ${key} (docs/tema/bilesen-standardi.md §7) -->`, ...notes].join("\n") + "\n"
-
 beforeAll(() => {
   // The storefront's own settings: a shop on its own address, the backend never asked
   vi.stubEnv("MEDUSA_BACKEND_URL", "http://backend.test")
@@ -175,10 +137,7 @@ describe("the preset lock (docs/tema/bilesen-standardi.md §7)", () => {
     const answer = presetAnswer(preset)
     store.layout = answer.layout
     store.menus = menusOf(preset.menus)
-    const notes = [
-      ...answer.skipped.map((each) => `<!-- not in the fixture shop: ${each} -->`),
-      ...answer.dropped.map((each) => `<!-- section dropped: ${each} -->`),
-    ]
+    const notes = fixtureNotes(answer)
     const frame = header(key, notes) + htmlLines(await frameHtml())
     const home = pageParts(htmlLines(await homeHtml(answer.layout)))
     const message = (file: string) =>

@@ -2,7 +2,12 @@ import type { MedusaRequest } from "@medusajs/framework/http"
 import type { TenantStatus } from "@qticaret/types/control-plane"
 import { DEFAULT_PLAN_STATE } from "../../../modules/control-plane/types"
 import { forDashboard } from "../dashboard-messages"
-import { guardPlanStatus, refuseSellingEdit, refuseSuspendedCheckout } from "../plan-guard"
+import {
+  guardPlanStatus,
+  refuseSellingEdit,
+  refuseSuspendedCartWrite,
+  refuseSuspendedCheckout,
+} from "../plan-guard"
 import { fakeResponse } from "./fakes"
 
 function request(
@@ -155,5 +160,60 @@ describe("refuseSuspendedCheckout", () => {
     ]) {
       expect((await run(refuseSuspendedCheckout, complete(plan))).passed).toBe(true)
     }
+  })
+})
+
+describe("refuseSuspendedCartWrite (#43 review, adr/0061 §5.5)", () => {
+  const writes: [string, string][] = [
+    ["POST", "/store/carts"],
+    ["POST", "/store/carts/cart_1"],
+    ["POST", "/store/carts/cart_1/line-items"],
+    ["DELETE", "/store/carts/cart_1/line-items/item_1"],
+    ["POST", "/store/carts/cart_1/shipping-methods"],
+    ["POST", "/store/carts/cart_1/promotions"],
+  ]
+
+  it("answers every cart write 503 plan.suspended while suspended", async () => {
+    for (const [method, path] of writes) {
+      expect(await run(refuseSuspendedCartWrite, request(method, path, SUSPENDED))).toMatchObject({
+        passed: false,
+        status: 503,
+        body: { type: "unavailable", message: "plan.suspended" },
+        retryAfter: "3600",
+      })
+    }
+  })
+
+  it("lets a cart be read while suspended, and every write of a shop that sells", async () => {
+    expect(
+      (await run(refuseSuspendedCartWrite, request("GET", "/store/carts/cart_1", SUSPENDED))).passed
+    ).toBe(true)
+    for (const plan of [
+      RESTRICTED,
+      { managed: true, status: "active" as const },
+      { managed: false, status: "suspended" as const },
+    ]) {
+      for (const [method, path] of writes) {
+        expect((await run(refuseSuspendedCartWrite, request(method, path, plan))).passed).toBe(true)
+      }
+    }
+  })
+
+  it("keeps the order access read by POST open while suspended", async () => {
+    const access = request("POST", "/store/carts/cart_1/order-access", SUSPENDED)
+    expect((await run(refuseSuspendedCartWrite, access)).passed).toBe(true)
+  })
+
+  it("hands an unreadable plan state to the error handler, never to the write", async () => {
+    const failure = new Error("control plane unreachable")
+    const req = request("POST", "/store/carts/cart_1/line-items", SUSPENDED)
+    ;(req as { scope: unknown }).scope = {
+      resolve: () => ({ planState: () => Promise.reject(failure) }),
+    }
+    const answer = fakeResponse()
+    const next = jest.fn()
+    await refuseSuspendedCartWrite(req, answer.res, next)
+    expect(next).toHaveBeenCalledTimes(1)
+    expect(next).toHaveBeenCalledWith(failure)
   })
 })
