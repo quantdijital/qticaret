@@ -8038,7 +8038,12 @@
           "4": "Geniş ekranda yan yana 4 ürün, iki sıra ({{total}} ürün); tablette 3, telefonda 2.",
           "5": "Geniş ekranda yan yana 5 ürün, iki sıra ({{total}} ürün); daha dar ekranda 4 ve 3, telefonda 2."
         },
-        "columnsShort": "Vitrin yalnız dolu sıraları gösterir: iki tam sıra için gösterilecek sayıyı en az {{total}} yapın."
+        "columnsShort": "Vitrin yalnız dolu sıraları gösterir: iki tam sıra için gösterilecek sayıyı en az {{total}} yapın.",
+        "columnsMobile": "Telefonda sütun",
+        "columnsMobileTerm": "columns mobile",
+        "columnsMobileHint": "Telefonda yan yana kaç ürün; tek sütunda kartlar büyür, üç ürün görünür.",
+        "columnsMobileOption_one": "{{count}} kart",
+        "columnsMobileOption_other": "{{count}} kart"
       },
       "hero": {
         "eyebrowPlaceholder": "Yeni sezon",
@@ -8720,6 +8725,13 @@
           "label": "Alt kategori sayısı",
           "term": "links",
           "hint": "Her kartta adın altında en çok bu kadar alt kategori; 0 seçerseniz yalnız ad ve görsel. Daha fazlası varsa \"Tümünü gör\" bağlantısı çıkar."
+        },
+        "columns_mobile": {
+          "1": "1 kart",
+          "2": "2 kart",
+          "label": "Telefonda sütun",
+          "term": "columns mobile",
+          "hint": "Telefonda yan yana kaç kart; iki sütunda kartlar daralır."
         }
       },
       "footerBar": {

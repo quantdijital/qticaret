@@ -14,6 +14,7 @@ import type { FieldGroupName, RegistryField } from "./field-registry"
 export type ContentField =
   | "limit"
   | "columns"
+  | "columns_mobile"
   | "show_count"
   | "list_limit"
   | "show_price"
@@ -69,7 +70,11 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "reviews":
       return [limit(section)]
     case "related_products":
-      return [limit(section), entry(section, "columns", `${F}.columns`, [], "layout")]
+      return [
+        limit(section),
+        entry(section, "columns", `${F}.columns`, [], "layout"),
+        entry(section, "columns_mobile", `${F}.columnsMobile`, [], "layout"),
+      ]
     case "categories":
       return [entry(section, "show_count", `${E}.categories.showCount`)]
     case "hero":

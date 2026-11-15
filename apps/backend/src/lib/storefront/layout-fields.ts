@@ -109,5 +109,22 @@ export const columns = z
   })
   .default(3)
 
+/**
+ * Cards in a row on a phone (docs/tema/bilesen-denetimi (b) 3, the
+ * dictionary's `columns_mobile`) for a grid rail and the related products:
+ * one or two, two by default (the look before the setting). Mirrors
+ * `@qticaret/types`' `SHELF_PHONE_COLUMNS`; a unit test keeps them equal.
+ */
+export const SHELF_PHONE_COLUMNS = [1, 2] as const
+export const SHELF_PHONE_DEFAULT = 2
+
+/** A count off the list is a stale or forged editor (a custom check: Medusa's answer drops an enum's key). */
+export const columnsMobile = z
+  .custom<(typeof SHELF_PHONE_COLUMNS)[number]>(
+    (value) => (SHELF_PHONE_COLUMNS as readonly unknown[]).includes(value),
+    { error: "storefront_layout.section_invalid" }
+  )
+  .default(SHELF_PHONE_DEFAULT)
+
 /** Where a category page shows a section: above its product grid or below it. */
 export const placement = z.enum(["top", "bottom"]).default("bottom")

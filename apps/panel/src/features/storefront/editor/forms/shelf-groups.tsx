@@ -1,6 +1,11 @@
 import { useTranslation } from "react-i18next"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
-import { SHELF_LIMITS, scrollerSettingsOf } from "@qticaret/types"
+import {
+  SHELF_LIMITS,
+  SHELF_PHONE_DEFAULT,
+  scrollerSettingsOf,
+  shelfPhoneColumnsOf,
+} from "@qticaret/types"
 import type { ProductsSection } from "@/features/storefront/api/layout"
 import { switchVariant } from "@/features/storefront/layout/variants"
 import { PanelGroup } from "../panel-header"
@@ -8,6 +13,7 @@ import { CardVariantField } from "./card-variant-field"
 import { ColumnsField } from "./columns-field"
 import type { FieldGroupName } from "./field-registry"
 import { FIELD_IDS } from "./field-registry"
+import { PhoneColumnsField } from "./phone-columns-field"
 import { ScrollerFields } from "./scroller-fields"
 import { SCROLLER_MAIN } from "./scroller-groups"
 import { VariantField } from "./variant-field"
@@ -105,16 +111,26 @@ export function ShelfGroups({
             }}
           />
           {variant === "grid" ? (
-            <div id={FIELD_IDS.shelf(id, "columns")}>
-              <ColumnsField
-                id={`${id}-columns`}
-                value={section.columns ?? 3}
-                limit={section.limit}
-                onChange={(columns) => {
-                  set({ columns })
+            <>
+              <div id={FIELD_IDS.shelf(id, "columns")}>
+                <ColumnsField
+                  id={`${id}-columns`}
+                  value={section.columns ?? 3}
+                  limit={section.limit}
+                  onChange={(columns) => {
+                    set({ columns })
+                  }}
+                />
+              </div>
+              <PhoneColumnsField
+                id={FIELD_IDS.shelf(id, "columns_mobile")}
+                value={shelfPhoneColumnsOf(section.columns_mobile)}
+                fallback={SHELF_PHONE_DEFAULT}
+                onChange={(columns_mobile) => {
+                  set({ columns_mobile })
                 }}
               />
-            </div>
+            </>
           ) : variant === "compact" ? (
             <CountChoice
               id={FIELD_IDS.shelf(id, "rows")}

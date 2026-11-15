@@ -1,4 +1,4 @@
-import type { ShelfColumns } from "@qticaret/types"
+import type { ShelfColumns, ShelfPhoneColumns } from "@qticaret/types"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { FormAction, ProductCardView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
@@ -118,6 +118,7 @@ export function ProductGrid({
   wide = false,
   beside = false,
   columns,
+  phone = 2,
   eager = 0,
 }: {
   products: readonly ProductCardView[]
@@ -126,22 +127,24 @@ export function ProductGrid({
   wide?: boolean
   beside?: boolean
   columns?: ShelfColumns | undefined
+  /** With `columns`: cards in a row on a phone, two by default (bilesen-denetimi (b) 3). */
+  phone?: ShelfPhoneColumns | undefined
   eager?: number
 }) {
-  const sizes = wide ? SIZES.wide : beside ? SIZES.beside : shelfSizes(columns ?? 3)
+  const sizes = wide ? SIZES.wide : beside ? SIZES.beside : shelfSizes(columns ?? 3, phone)
   return (
     <ul
       data-columns={columns}
       className={cn(
         "grid grid-cols-[repeat(2,minmax(0,1fr))] gap-x-(--gap-columns) gap-y-8 md:grid-cols-[repeat(3,minmax(0,1fr))] lg:gap-y-10",
         wide && "lg:grid-cols-[repeat(4,minmax(0,1fr))]",
-        columns && shelfGrid(columns)
+        columns && shelfGrid(columns, phone)
       )}
     >
       {products.map((product, index) => (
         <li
           key={product.id}
-          className={cn("min-w-0", columns && shelfCard(columns, products.length, index))}
+          className={cn("min-w-0", columns && shelfCard(columns, products.length, index, phone))}
         >
           <ProductCard
             product={product}

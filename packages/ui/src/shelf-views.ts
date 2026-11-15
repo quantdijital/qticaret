@@ -3,6 +3,7 @@ import type {
   ScrollerSettings,
   ShelfColumns,
   ShelfPerList,
+  ShelfPhoneColumns,
   ShelfRows,
 } from "@qticaret/types"
 import type { ProductCardView } from "./product-views"
@@ -28,6 +29,8 @@ export interface ProductsSectionView {
    * Ek 2026-11-05); the theme steps down on narrower ones. None: 3.
    */
   columns?: ShelfColumns
+  /** `grid`: cards in a row on a phone (bilesen-denetimi (b) 3); none: 2. */
+  phoneColumns?: ShelfPhoneColumns
   /** `carousel`: the scroller kit's settings, each a step the contract knows. */
   scroller?: ScrollerSettings
   /** `compact`: rows of three small cards (one card a row on a phone). */

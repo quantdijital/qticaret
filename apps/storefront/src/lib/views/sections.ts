@@ -66,6 +66,7 @@ async function relatedView(
           more: null,
           empty: "",
           columns: section.columns,
+          ...(section.columns_mobile === 1 ? { phoneColumns: 1 as const } : {}),
         }
       : null
   } catch (error) {

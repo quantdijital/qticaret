@@ -17,8 +17,10 @@ export interface LinkedCategoryCardView extends CategoryCardView {
 }
 
 export interface CategoryCardsView {
-  /** Cards in a row on a wide screen; a phone shows one, a tablet two. */
+  /** Cards in a row on a wide screen; a tablet shows two. */
   columns: CategoryCardStep<"columns">
+  /** Cards in a row on a phone (bilesen-denetimi (b) 3); absent: one, as before. */
+  phoneColumns?: CategoryCardStep<"columns_mobile">
   /** Where the picture stands; `none` (or a card without one): the words alone. */
   imagePosition: CategoryCardStep<"image_position">
   /** A hairline frame round each card, or plain on the page. */

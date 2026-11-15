@@ -65,6 +65,7 @@ describe("storefront layout document (adr/0049)", () => {
         source: { kind: "same_category" },
         limit: 8,
         columns: 3,
+        columns_mobile: 2,
       },
       { ...faq("sss001"), ...ALWAYS, title: null, open_first: "off", single_open: "off" },
     ])

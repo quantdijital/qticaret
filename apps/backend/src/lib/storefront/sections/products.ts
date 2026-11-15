@@ -1,5 +1,5 @@
 import { z } from "@medusajs/framework/zod"
-import { LAYOUT_LIMITS, columns, optional, recordId, title } from "../layout-fields"
+import { LAYOUT_LIMITS, columns, columnsMobile, optional, recordId, title } from "../layout-fields"
 import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
 import { scroller } from "./scroller"
@@ -70,7 +70,14 @@ const common = {
 }
 
 /** Today's rows of cards; the shop's cards in a row on a wide screen (adr/0049 Ek 2026-11-05). */
-const grid = z.object({ ...common, variant: defaultVariant("products"), columns }).strict()
+const grid = z
+  .object({
+    ...common,
+    variant: defaultVariant("products"),
+    columns,
+    columns_mobile: columnsMobile,
+  })
+  .strict()
 
 /** One row that slides sideways, driven by the scroller kit. */
 const carousel = z.object({ ...common, variant: z.literal("carousel"), scroller }).strict()

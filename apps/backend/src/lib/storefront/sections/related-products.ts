@@ -1,5 +1,5 @@
 import { z } from "@medusajs/framework/zod"
-import { LAYOUT_LIMITS, columns, title } from "../layout-fields"
+import { LAYOUT_LIMITS, columns, columnsMobile, title } from "../layout-fields"
 import { bodyFields } from "./look"
 import { collectionSource, manualSource } from "./sources"
 
@@ -16,5 +16,6 @@ export const relatedProducts = z
     ]),
     limit: z.number().int().min(1).max(LAYOUT_LIMITS.related).default(8),
     columns,
+    columns_mobile: columnsMobile,
   })
   .strict()

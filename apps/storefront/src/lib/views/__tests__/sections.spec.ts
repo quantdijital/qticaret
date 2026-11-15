@@ -84,6 +84,14 @@ describe("a related products section under a product", () => {
       more: null,
       columns: 3,
     })
+    expect(views[0]).not.toHaveProperty("phoneColumns")
+  })
+
+  it("passes one card on a phone on when the shop asks (bilesen-denetimi (b) 3)", async () => {
+    const section = { ...related({ kind: "same_category" }, 3), columns_mobile: 1 as const }
+    const views = await sectionViews([section], t, onProduct)
+
+    expect(views[0]).toMatchObject({ type: "products", columns: 3, phoneColumns: 1 })
   })
 
   it("leaves the product out of a collection's rail too, in the shop's words", async () => {

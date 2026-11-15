@@ -47,10 +47,12 @@ export function linkedCards(
 
 /** The settings the theme lays the cards out by, with the cards. */
 export const cardsView = (
-  section: Pick<StoreCategoriesLinked, "columns" | "image_position" | "frame">,
+  section: Pick<StoreCategoriesLinked, "columns" | "columns_mobile" | "image_position" | "frame">,
   cards: LinkedCategoryCardView[]
 ): CategoryCardsView => ({
   columns: section.columns,
+  // Two on a phone only when the shop asks (bilesen-denetimi (b) 3); one, as before
+  ...(section.columns_mobile === 2 ? { phoneColumns: 2 as const } : {}),
   imagePosition: section.image_position,
   frame: section.frame,
   cards,

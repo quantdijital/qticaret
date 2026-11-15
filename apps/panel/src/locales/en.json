@@ -8038,7 +8038,12 @@
           "4": "4 products side by side on a wide screen, two rows ({{total}} products); 3 on a tablet, 2 on a phone.",
           "5": "5 products side by side on a wide screen, two rows ({{total}} products); 4 and 3 on narrower screens, 2 on a phone."
         },
-        "columnsShort": "The storefront shows full rows only: set the number to show to at least {{total}} for two full rows."
+        "columnsShort": "The storefront shows full rows only: set the number to show to at least {{total}} for two full rows.",
+        "columnsMobile": "Columns on a phone",
+        "columnsMobileTerm": "columns mobile",
+        "columnsMobileHint": "How many products side by side on a phone; in one column the cards grow and three show.",
+        "columnsMobileOption_one": "{{count}} card",
+        "columnsMobileOption_other": "{{count}} cards"
       },
       "hero": {
         "eyebrowPlaceholder": "New season",
@@ -8720,6 +8725,13 @@
           "label": "Subcategories shown",
           "term": "links",
           "hint": "At most this many subcategories under each name; 0 shows only the name and picture. A \"See all\" link appears when there are more."
+        },
+        "columns_mobile": {
+          "1": "1 card",
+          "2": "2 cards",
+          "label": "Columns on a phone",
+          "term": "columns mobile",
+          "hint": "How many cards side by side on a phone; in two columns the cards narrow."
         }
       },
       "footerBar": {

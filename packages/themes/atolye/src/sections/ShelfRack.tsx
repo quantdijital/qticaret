@@ -1,7 +1,7 @@
 import { drawnVariant } from "@qticaret/ui"
 import type { FormAction, Translate } from "@qticaret/ui"
 import { ProductGrid } from "../parts/ProductCard"
-import { shelfColumns, shelfCount } from "../parts/shelf-grid"
+import { shelfColumns, shelfCount, shelfPhone } from "../parts/shelf-grid"
 import { type Of, headingId } from "./plan"
 import { SectionHead } from "./SectionHead"
 import { CarouselShelf, ColumnsShelf, CompactShelf, FeaturedShelf } from "./ShelfLayouts"
@@ -15,7 +15,7 @@ export const shelfVariant = (section: Of<"products">) =>
 
 /**
  * One rail's panel, drawn as its variant: `grid` two rows of the shop's
- * cards-in-a-row (3, 4 or 5; three rows of two on a phone), whole rows
+ * cards-in-a-row (3, 4 or 5; three rows of the shop's two or one on a phone), whole rows
  * only, the rest behind "Tümünü gör"; `carousel`, `featured`, `compact`
  * and `columns` as `ShelfLayouts` draws them. In tabs its own head is for
  * the reader only (its pill names it) and its "all products" link sits
@@ -43,6 +43,7 @@ export function Rack({
     <SectionHead id={id} title={section.title} more={section.more} />
   )
   const columns = shelfColumns(section.columns)
+  const phone = shelfPhone(section.phoneColumns)
   const empty = section.products.length === 0
   const props = { section, t, quickAdd }
   return (
@@ -65,10 +66,14 @@ export function Rack({
             <CompactShelf {...props} />
           ) : (
             <ProductGrid
-              products={section.products.slice(0, shelfCount(columns, section.products.length))}
+              products={section.products.slice(
+                0,
+                shelfCount(columns, section.products.length, phone)
+              )}
               t={t}
               quickAdd={quickAdd}
               columns={columns}
+              phone={phone}
             />
           )}
         </>

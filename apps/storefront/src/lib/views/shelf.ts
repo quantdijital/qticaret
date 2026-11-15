@@ -94,6 +94,7 @@ export async function shelfView(
     ...base,
     products,
     ...(variant === "grid" && section.columns ? { columns: section.columns } : {}),
+    ...(variant === "grid" && section.columns_mobile === 1 ? { phoneColumns: 1 as const } : {}),
     ...(variant === "carousel" ? { scroller: scrollerSettingsOf(section.scroller) } : {}),
     ...(variant === "compact" ? { rows: shelfRowsOf(section.rows) } : {}),
   }

@@ -8,7 +8,7 @@ import { SCROLLER_MAIN, scrollerOffers } from "./scroller-groups"
 // `field-registry.ts`'s, built from what `ShelfGroups` and `ScrollerFields` show
 
 /** A product rail's "Diziliş" fields beside its variant (adr/0049 Ek 2026-11-15). */
-export type ShelfField = "columns" | "rows" | "per_list" | "card_variant"
+export type ShelfField = "columns" | "columns_mobile" | "rows" | "per_list" | "card_variant"
 
 /** The rail's and the scroller's elements' ids (spread into `FIELD_IDS`). */
 export const SHELF_IDS = {
@@ -34,6 +34,13 @@ export function shelfFields(section: Extract<AnySection, { type: "products" }>):
   const fields: RegistryField[] = [
     variant === "grid"
       ? field("columns", "storefront.editor.fields.columns", "storefront.editor.fields.columnsTerm")
+      : null,
+    variant === "grid"
+      ? field(
+          "columns_mobile",
+          "storefront.editor.fields.columnsMobile",
+          "storefront.editor.fields.columnsMobileTerm"
+        )
       : null,
     variant === "compact" ? field("rows", `${SHELF}.rows`, `${SHELF}.rowsTerm`) : null,
     variant === "columns" ? field("per_list", `${SHELF}.perList`, `${SHELF}.perListTerm`) : null,

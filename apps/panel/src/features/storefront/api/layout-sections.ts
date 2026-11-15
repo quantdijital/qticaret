@@ -8,6 +8,7 @@ import type {
   SectionDevice,
   SectionLook,
   ShelfColumns,
+  ShelfPhoneColumns,
   TrustBadgesVariant,
 } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
@@ -229,6 +230,8 @@ export interface RelatedProductsSection extends BodySectionBase {
   source: RelatedSource
   limit: number
   columns: ShelfColumns
+  /** Cards in a row on a phone (bilesen-denetimi (b) 3); the server fills 2 on reading. */
+  columns_mobile?: ShelfPhoneColumns
 }
 
 /** One item of a scrolling strip: an optional icon, its line, an optional second line and link. */

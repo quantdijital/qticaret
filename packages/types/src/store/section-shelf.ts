@@ -23,6 +23,20 @@ export const SHELF_LIMITS = {
   columns: { lists: { min: 1, max: 2 }, per_list: [3, 4], default: 4 },
 } as const
 
+/**
+ * Cards in a row on a phone (docs/tema/bilesen-denetimi (b) 3, O8; the
+ * dictionary's `columns_mobile`) for a grid rail and the related products:
+ * one or two, two by default (the look before the setting). Mirrored by the
+ * backend's `layout-fields.ts`; a unit test keeps them equal.
+ */
+export const SHELF_PHONE_COLUMNS = [1, 2] as const
+export type ShelfPhoneColumns = (typeof SHELF_PHONE_COLUMNS)[number]
+export const SHELF_PHONE_DEFAULT: ShelfPhoneColumns = 2
+
+/** A grid's phone columns as a reader takes them: 1 or 2, anything else the default. */
+export const shelfPhoneColumnsOf = (value: unknown): ShelfPhoneColumns =>
+  value === 1 ? 1 : SHELF_PHONE_DEFAULT
+
 export type ShelfRows = (typeof SHELF_LIMITS.compact.rows)[number]
 export type ShelfPerList = (typeof SHELF_LIMITS.columns.per_list)[number]
 
@@ -90,6 +104,8 @@ export interface StoreProductsSection extends ShelfPick {
   card_variant?: CardVariant | null
   /** `grid`: cards in a row on a wide screen. */
   columns?: ShelfColumns
+  /** `grid`: cards in a row on a phone; printed only when not the default (2). */
+  columns_mobile?: ShelfPhoneColumns
   /** `carousel`: the scroller kit's settings. */
   scroller?: ScrollerSettings
   /** `compact`: its rows. */

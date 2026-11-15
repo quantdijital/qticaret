@@ -26,10 +26,11 @@ describe("the content fields' register", () => {
     expect(keys(switchVariant(rail, "compact"))).toEqual([])
   })
 
-  it("puts related products' columns in Diziliş beside their count", () => {
+  it("puts related products' columns in Diziliş (wide, phone) beside their count", () => {
     expect(keys(newBodySection("product", "related_products", "benzer0001"))).toEqual([
       "content:limit",
       "layout:columns",
+      "layout:columns_mobile",
     ])
   })
 

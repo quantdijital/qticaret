@@ -160,6 +160,8 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         source: section.source,
         limit: section.limit,
         columns: section.columns,
+        // Printed only when not the default (2), so a rail from before it prints as it did
+        ...(section.columns_mobile === 1 ? { columns_mobile: 1 as const } : {}),
       }
     case "featured_product":
       return {
@@ -208,6 +210,8 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
           ? {
               variant: section.variant,
               columns: section.columns,
+              // Printed only when not the default (1), as the settings before it
+              ...(section.columns_mobile === 2 ? { columns_mobile: 2 as const } : {}),
               image_position: section.image_position,
               frame: section.frame,
               links: section.links,

@@ -294,6 +294,9 @@ Kapsamda geçen kısaltmalar: **T** = `packages/types/src/store/…`, **B** = `a
    indirilmez, ilk bölümün öncelikli görseli indirilir (adr/0049 Ek 2026-11-15, orta işler).
 2. **Raf sekmesi ayarı (O11):** `products`'a `tabs: on/off` (varsayılan `on`, bugünkü davranış). T `section-shelf.ts`, B `products.ts`, P `shelf-groups.tsx`, A `plan.ts`.
 3. **Telefon sütunu (O8):** ızgaraya `columns_mobile` 1/2 (varsayılan 2); `related_products` ve `categories`'e de. T `layout.ts`, B `layout-fields.ts`, P `columns-field.tsx`, A `ShelfRack.tsx`, `Aisles.tsx`.
+   **Yapıldı (2026-11-15):** `columns_mobile` 1/2 ürün rafı ızgarasında ve benzer ürünlerde (varsayılan 2),
+   kategori kartlarının `linked` biçiminde (varsayılan 1). Görsel kutular telefonda yana kaydığı, markalar
+   çip olarak aktığı için bu ayarı almadı (adr/0049 Ek 2026-11-15, orta işler).
 4. **Giriş slaytını kaydırma takımına bağla (1.3, O6, O7, O9):** `autoplay/dots/arrows` boolean'ları ve `interval` sayısı okumada takım adımlarına eşlenir (`interval` 5→fast, 6–7→medium, 8–10→slow), panel takımın alanlarını gösterir. T `layout.ts`, B `hero-slider.ts`, P `hero-slider-form.tsx`, A `SliderStage.tsx`, `SliderControls.tsx`.
 5. **Zemin sözlüğünü tekle (O5):** `light` ile `well` tek ada iner; okumada eşleme. T `section-look.ts`, `section-marquee.ts`, `section-variants.ts`; B aynaları; İ; A `marquee.css`, `header-catalog.css`.
 6. **Duyuru şeridine hareketli aile (1.1):** oto dönme, süre, oklar, durdurma, satır bağlantısı, kapatma. T `layout.ts`, B `announcement-bar.ts`, P `announcement-form.tsx`, A `frame/Announcement.tsx`.

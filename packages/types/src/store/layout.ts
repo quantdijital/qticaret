@@ -13,7 +13,7 @@ import type { FaqSettings } from "./section-faq.js"
 import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
 import type { StoreCategoriesLinked } from "./section-categories.js"
-import type { StoreProductsSection } from "./section-shelf.js"
+import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
 import type { TrustBadgesVariant } from "./section-variants.js"
 import type {
   MenuLinkKind,
@@ -237,6 +237,8 @@ export type StoreProductSection =
       source: RelatedSource
       limit: number
       columns: ShelfColumns
+      /** Cards in a row on a phone; printed only when not the default (2). */
+      columns_mobile?: ShelfPhoneColumns
     })
 
 /** A section of every category page: above the product grid (`top`) or below it. */
