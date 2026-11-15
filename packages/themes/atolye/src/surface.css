@@ -57,8 +57,8 @@
 }
 
 /*
- * A shape a box draws inside (`gf-shape`: an icon's disc, a status pill),
- * `lined`. Each is a step off its box's `filled` ground: the page's paper
+ * A shape a box draws inside (`gf-shape`: an icon's disc, a status pill,
+ * the cart summary's subtotal well), `lined`. Each is a step off its box's `filled` ground: the page's paper
  * or the field on the tone, the tone on the field. A ruled box stands on
  * the paper and a box inside it on the tone, so the shape would vanish
  * into it; it steps to the tone in a ruled box and back to the paper in a
@@ -75,6 +75,29 @@
 }
 [data-surface="lined"] .gf-pane .ring-paper-2 {
   --tw-ring-color: var(--color-paper);
+}
+
+/*
+ * A cart line's quantity (`gf-stepper`, `parts/Stepper`), `lined`: drawn
+ * in the field's light ground, a step off its box's tone at `filled`; in a
+ * ruled box on the paper the two are a step apart in lightness and the
+ * control vanishes. It takes the edge a field takes (`.gf-field`,
+ * `ui.css`; the product page's quantity field): a form control's boundary
+ * at 3:1, not the box's hairline. Drawn inside, on a layer over the minus
+ * and plus: the pill keeps its size, and their hover tone (they fill the
+ * pill's ends, positioned) would cover a border or an inset shadow of the
+ * pill itself. Unlayered as the shape above: the pill's ground is a utility.
+ */
+[data-surface="lined"] .gf-stepper {
+  position: relative;
+}
+[data-surface="lined"] .gf-stepper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--color-edge);
+  pointer-events: none;
 }
 
 /*

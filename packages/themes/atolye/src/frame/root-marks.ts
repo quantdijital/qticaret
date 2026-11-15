@@ -17,9 +17,11 @@ export function rootMarks(theme: ShopView["theme"]): Marks {
  * The marks the page's layers carry (adr/0067 Ek 2026-11-15): a dialog or
  * a drawer is drawn at the end of `body`, outside the root element, so it
  * gets the root's marks on a host of its own (`frame/Layers`). Only while
- * a kit step is off its default: at today's drawing `null`, no host, the
- * layers where they always were.
+ * the box style is `lined` (the cart drawer's quantity reads it,
+ * `surface.css`) or a kit step is off its default: at `filled` and the
+ * kit's defaults `null`, no host, the layers where they always were.
  */
 export function layerMarks(theme: ShopView["theme"]): Marks | null {
-  return Object.keys(styleKitAttributes(theme.styleKit)).length === 0 ? null : rootMarks(theme)
+  const marks = rootMarks(theme)
+  return marks["data-surface"] === "filled" && Object.keys(marks).length === 1 ? null : marks
 }

@@ -7,8 +7,9 @@ import { createContext, useContext, useLayoutEffect, useState, type ReactNode } 
  * Where the page's layers go (adr/0067 Ek 2026-11-15). A Radix portal
  * draws its dialog at the end of `body`, outside the theme's root element,
  * so the marks the stylesheet reads there (`data-chip-style`,
- * `data-media-ground`, …) would never reach a drawer or a dialog. While a
- * style kit step is off its default, `LayerMarks` keeps one host at the
+ * `data-media-ground`, `data-surface="lined"`, …) would never reach a
+ * drawer or a dialog. While the box style is `lined` or a style kit step
+ * is off its default, `LayerMarks` keeps one host at the
  * end of `body` carrying the root's marks, `display: contents` so it draws
  * nothing, and every layer of the theme goes into it: still a child of
  * `body` (no stacking, overflow or transform of the page above it; focus

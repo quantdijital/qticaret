@@ -14,7 +14,8 @@ import { Sheet } from "../../../../../packages/themes/atolye/src/frame/Sheet"
 /**
  * The style kit's marks reach the page's layers (adr/0067 Ek 2026-11-15):
  * a Radix portal draws a dialog or a drawer at the end of `body`, outside
- * the theme's root element, so while a kit step is off its default the
+ * the theme's root element, so while the box style is `lined` or a kit
+ * step is off its default the
  * layers go into a host of their own carrying the root's marks. At
  * today's drawing nothing changes: no host, the layer a child of `body`.
  */
@@ -57,10 +58,14 @@ function draw(marks: Record<string, string> | null, open = true) {
 const dialog = () => document.querySelector<HTMLElement>('[role="dialog"]')
 
 describe("the layers' marks (adr/0067 Ek 2026-11-15)", () => {
-  it("has no layer marks at today's drawing, whatever the box style", () => {
+  it("has no layer marks at today's drawing: filled boxes, the kit's defaults", () => {
     expect(layerMarks(theme())).toBeNull()
-    expect(layerMarks(theme({ surface_style: "lined" }))).toBeNull()
+    expect(layerMarks(theme({ surface_style: "filled" }))).toBeNull()
     expect(rootMarks(theme())).toEqual({ "data-surface": "filled" })
+  })
+
+  it("gives the layers the lined box style alone (Tezgâh: the cart drawer's quantity)", () => {
+    expect(layerMarks(theme({ surface_style: "lined" }))).toEqual({ "data-surface": "lined" })
   })
 
   it("gives the layers the root's marks while a kit step is off its default", () => {
