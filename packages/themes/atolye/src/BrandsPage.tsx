@@ -11,7 +11,7 @@ function BrandTile({ brand }: { brand: BrandLinkView }) {
       className="flex min-h-16 min-w-0 items-center gap-3 rounded-media gf-pane p-3 transition-colors duration-(--dur-micro) hover:bg-paper-3"
     >
       {brand.logo && (
-        <span className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-inner bg-field">
+        <span className="gf-logo-plate flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-inner bg-field">
           <ResponsiveImage
             image={brand.logo}
             sizes="40px"
