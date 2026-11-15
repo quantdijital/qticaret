@@ -5,6 +5,7 @@ import { lookFieldsFor, lookStepsFor } from "@/features/storefront/layout/look"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
 import { isMain } from "@/features/storefront/layout/main-sections"
 import { offersVariants } from "@/features/storefront/layout/variants"
+import { cardFooterFields } from "./card-field-ids"
 
 /**
  * The section panel's fields as the settings search knows them (adr/0049
@@ -149,6 +150,8 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       })
     }
   }
+  // The linked category cards' and the footer's own settings (adr/0049 Ek 2026-11-15)
+  fields.push(...cardFooterFields(section))
   // The band's settings sit with the look, in the closed "Görünüm ayarları" group
   if (section.type === "banner") {
     for (const [setting, steps] of Object.entries(BANNER_SETTINGS) as [

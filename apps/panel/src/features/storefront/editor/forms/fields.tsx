@@ -125,7 +125,7 @@ export function CountField({
         onChange={(event) => {
           const next = Math.trunc(Number(event.target.value))
           if (Number.isFinite(next) && event.target.value !== "") {
-            onChange(Math.max(1, Math.min(max, next)))
+            onChange(Math.max(min, Math.min(max, next)))
           }
         }}
         onBlur={() => {

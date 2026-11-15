@@ -168,7 +168,15 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
     case "banner":
       return { ...base, type, slides: [], ...BANNER_DEFAULTS }
     case "categories":
-      return { ...base, type, title: null, category_ids: [], show_count: false, more: null }
+      return {
+        ...base,
+        type,
+        title: null,
+        category_ids: [],
+        show_count: false,
+        more: null,
+        variant: defaultVariant(type),
+      }
     case "products":
       return {
         ...base,

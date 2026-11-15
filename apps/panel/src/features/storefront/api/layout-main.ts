@@ -5,6 +5,7 @@ import type {
   ProductMainVariant,
   SectionLook,
 } from "@qticaret/types"
+import type { FooterBarFields } from "@/features/storefront/api/layout-cards"
 
 /**
  * The main sections (adr/0049 Ek 2026-11-14 §5, §7): the shop's header
@@ -28,7 +29,8 @@ export interface HeaderBarSection extends MainBase {
   sticky: boolean
 }
 
-export interface FooterBarSection extends MainBase {
+/** The footer, with its own settings (adr/0049 Ek 2026-11-15). */
+export interface FooterBarSection extends MainBase, FooterBarFields {
   type: "footer_bar"
   variant: FooterBarVariant
 }

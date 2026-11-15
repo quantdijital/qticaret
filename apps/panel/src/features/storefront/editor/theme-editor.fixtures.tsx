@@ -4,6 +4,7 @@ import userEvent from "@testing-library/user-event"
 import type { UserEvent } from "@testing-library/user-event"
 import { vi } from "vitest"
 import type { Mock } from "vitest"
+import { FOOTER_BAR_DEFAULTS } from "@qticaret/types"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import type { AdminLayout, LayoutDocument } from "@/features/storefront/api/layout"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
@@ -71,7 +72,14 @@ export const DOC: LayoutDocument = {
     { id: "blogyazilari", type: "posts", ...ALWAYS, title: null, limit: 3 },
   ],
   footer: [
-    { id: "mainfooter", type: "footer_bar", ...MAIN, variant: "ledger" },
+    {
+      id: "mainfooter",
+      type: "footer_bar",
+      ...MAIN,
+      variant: "ledger",
+      ...FOOTER_BAR_DEFAULTS,
+      payment_badges: [],
+    },
     { id: "ebultenkutusu", type: "newsletter", ...ALWAYS, title: null, text: null },
   ],
   product: [

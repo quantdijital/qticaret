@@ -1,4 +1,4 @@
-import { HERO_CATALOG_LIMITS, hasVariants } from "@qticaret/types"
+import { CATEGORY_CARD_DEFAULTS, HERO_CATALOG_LIMITS, hasVariants } from "@qticaret/types"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 
@@ -27,6 +27,8 @@ export const VARIANT_FIELDS: {
       show_price: true,
     },
   },
+  // The linked cards start from the contract's defaults (adr/0049 Ek 2026-11-15)
+  categories: { tiles: {}, linked: CATEGORY_CARD_DEFAULTS },
   header_bar: { standard: {}, centered: {} },
   footer_bar: { ledger: {} },
   product_main: { standard: {} },
