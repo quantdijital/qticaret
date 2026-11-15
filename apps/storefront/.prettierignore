@@ -1,0 +1,3 @@
+# lint-staged runs prettier from this folder, which reads this file, not the root's.
+# The preset lock's snapshots, written by `pnpm lock:presets` (docs/tema/bilesen-standardi.md §7)
+src/lib/__tests__/preset-lock/

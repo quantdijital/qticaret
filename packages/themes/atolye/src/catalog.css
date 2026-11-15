@@ -80,6 +80,36 @@
     aspect-ratio: 16 / 10;
     background: var(--color-stage);
   }
+  /* Two or more slides (adr/0049 Ek 2026-11-15): the tile is the slider stage, each slide a tile */
+  .gf-mosaic-stage {
+    min-width: 0;
+  }
+  /* The stage's graphite inks are for its controls only: a slide keeps the
+     light tile's own (dark heading, shop-colour button, page focus ring) */
+  .gf-mosaic-stage .gf-stage {
+    background: var(--color-paper-3);
+  }
+  .gf-mosaic-stage .gf-mosaic-feature {
+    color: var(--color-text);
+  }
+  .gf-mosaic-stage .gf-mosaic-feature .gf-btn:not(.gf-btn--quiet) {
+    background: var(--color-signal);
+    color: var(--color-signal-ink);
+  }
+  .gf-mosaic-stage .gf-mosaic-feature .gf-btn--quiet {
+    border-color: var(--color-edge);
+    color: var(--color-text);
+  }
+  .gf-mosaic-stage .gf-mosaic-feature :focus-visible {
+    outline-color: var(--color-focus);
+  }
+  /* A slide that is its picture alone: across the tile, a ratio of its own while nothing beside sets the height */
+  .gf-mosaic-feature--whole .gf-mosaic-photo {
+    order: 0;
+    /* The tile's width, not the ratio's: a taller row would widen the picture past the tile and crop it off-centre */
+    width: 100%;
+    min-height: 100%;
+  }
   .gf-mosaic-side {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -119,10 +149,19 @@
       grid-column: 1 / -1;
       grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     }
+    .gf-mosaic-stage {
+      grid-column: 1 / -1;
+    }
+    .gf-mosaic-feature.gf-mosaic-feature--whole {
+      grid-template-columns: minmax(0, 1fr);
+    }
     .gf-mosaic-photo {
       order: 0;
       aspect-ratio: auto;
       min-height: 100%;
+    }
+    .gf-mosaic-feature--whole .gf-mosaic-photo {
+      aspect-ratio: 2 / 1;
     }
     .gf-mosaic-list > ul {
       grid-template-columns: minmax(0, 1fr);
@@ -158,8 +197,12 @@
       grid-template-columns: minmax(0, 1fr);
       grid-template-areas: "feature";
     }
-    .gf-mosaic-feature {
+    .gf-mosaic-feature,
+    .gf-mosaic-stage {
       grid-area: feature;
+    }
+    .gf-mosaic-feature--whole .gf-mosaic-photo {
+      aspect-ratio: 12 / 5;
     }
     .gf-mosaic-list {
       grid-area: list;
@@ -173,5 +216,15 @@
       aspect-ratio: auto;
       min-height: 12rem;
     }
+  }
+}
+/* Out of the layer, as the stage's own hover inks are (ui.css) */
+@media (hover: hover) {
+  .gf-mosaic-stage .gf-mosaic-feature .gf-btn:not(.gf-btn--quiet):hover:not(:disabled) {
+    background: var(--color-signal-deep);
+  }
+  .gf-mosaic-stage .gf-mosaic-feature .gf-btn--quiet:hover:not(:disabled) {
+    border-color: var(--color-text);
+    background: var(--color-paper-2);
   }
 }

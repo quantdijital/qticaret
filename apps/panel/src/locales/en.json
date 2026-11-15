@@ -7715,7 +7715,11 @@
           "other_page": "This section is on another page.",
           "timeout": "The section was not found in the preview."
         },
-        "liveOff": "Live preview is unavailable; the preview will reload after each save."
+        "liveOff": "Live preview is unavailable; the preview will reload after each save.",
+        "edit": "Edit",
+        "selected": "Selected: {{name}}",
+        "elsewhere": "The preview shows {{path}}; on this page the header and footer can be edited. Pick a page to go back.",
+        "blocked": "{{path}} does not open in the preview (a checkout, account or sign-in page)."
       },
       "publish": {
         "open": "Publish",
@@ -7755,7 +7759,6 @@
         "addMarquee": "Add scrolling strip"
       },
       "row": {
-        "drag": "Drag to move",
         "problem": "A field needs fixing",
         "scheduled": "Scheduled",
         "moveUpOf": "Move {{name}} up",
@@ -8236,6 +8239,23 @@
           "on": "On",
           "off": "Off",
           "hint": "It always stops when the keyboard reaches the bar."
+        },
+        "align": {
+          "label": "Alignment",
+          "term": "alignment",
+          "auto": "Automatic",
+          "left": "Left",
+          "center": "Centre",
+          "right": "Right",
+          "hint": "Automatic: centred on a phone, on the left on a wide screen. On a wide screen the links and phone stay at the right end; centred, the announcement stands in the middle of the bar and moves just left of the links if they would reach it."
+        },
+        "size": {
+          "label": "Size",
+          "term": "size",
+          "small": "Small",
+          "medium": "Medium",
+          "large": "Large",
+          "hint": "The bar's height and text size together: 32, 36 or 44 pixels."
         }
       },
       "problems": {
@@ -8882,7 +8902,17 @@
         "pickLabelPlaceholder": "Pine green",
         "showPrice": "Show the starting price",
         "showPriceTerm": "price",
-        "showPriceHint": "The lowest current price among the products you chose."
+        "showPriceHint": "The lowest current price among the products you chose.",
+        "slides": "Slides",
+        "slidesTerm": "slides",
+        "slidesHint": "Up to {{max}} slides. One slide stays still; two or more turn by themselves, set in the Scrolling group.",
+        "pictureOnly": "Picture only",
+        "slideImageHint": "With no heading, text or button the picture fills the whole tile.",
+        "slideImageFirstHint": "Left empty, the shop's newest product photo shows. With no heading, text or button the picture fills the whole tile.",
+        "slideLink": "Picture link",
+        "slideLinkTerm": "link",
+        "slideLinkHint": "A click on the picture goes here.",
+        "slideWordsHint": "Leave them all empty for a picture-only slide."
       },
       "categories": {
         "showCount": "Show product counts",

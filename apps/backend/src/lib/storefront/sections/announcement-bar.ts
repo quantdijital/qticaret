@@ -5,7 +5,8 @@ import { base, shopText } from "../layout-fields"
  * The announcement bar's settings (docs/tema/bilesen-denetimi (b) 6): how
  * it shows more than one line (only the first, as before; taking turns;
  * side by side) and, when they take turns, how long each stays and how the
- * turning stops. Mirrors `@qticaret/types`' `ANNOUNCEMENT_SETTINGS` and
+ * turning stops; where its lines sit and how big the bar is (adr/0049 Ek
+ * 2026-11-15). Mirrors `@qticaret/types`' `ANNOUNCEMENT_SETTINGS` and
  * `ANNOUNCEMENT_DEFAULTS` (the backend reads no runtime value from that
  * package); a unit test keeps them equal.
  */
@@ -14,6 +15,8 @@ export const ANNOUNCEMENT_SETTINGS = {
   interval: ["slow", "medium", "fast"],
   pause_button: ["always", "hover"],
   hover_pause: ["on", "off"],
+  align: ["auto", "left", "center", "right"],
+  size: ["small", "medium", "large"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
 
 type Setting = keyof typeof ANNOUNCEMENT_SETTINGS
@@ -25,6 +28,8 @@ export const ANNOUNCEMENT_DEFAULTS: { readonly [S in Setting]: Step<S> } = {
   interval: "medium",
   pause_button: "always",
   hover_pause: "on",
+  align: "auto",
+  size: "medium",
 }
 
 export const ANNOUNCEMENT_SETTING_NAMES = Object.keys(ANNOUNCEMENT_SETTINGS) as Setting[]
@@ -49,6 +54,8 @@ export const announcementBar = z
     interval: setting("interval"),
     pause_button: setting("pause_button"),
     hover_pause: setting("hover_pause"),
+    align: setting("align"),
+    size: setting("size"),
   })
   .strict()
 

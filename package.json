@@ -30,7 +30,10 @@
     "db:down": "docker compose --env-file infra/docker/.env -f infra/docker/compose.dev.yml down",
     "prepare": "husky",
     "audit:deps": "bash scripts/dependency-report.sh",
-    "verify:changed": "node scripts/verify-changed.mjs"
+    "verify:changed": "node scripts/verify-changed.mjs",
+    "lock:presets": "pnpm --filter storefront lock:presets",
+    "style:capture": "pnpm --filter storefront style:capture",
+    "style:diff": "pnpm --filter storefront style:diff"
   },
   "prettier": "@qticaret/config/prettier",
   "devDependencies": {

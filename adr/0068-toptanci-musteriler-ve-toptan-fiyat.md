@@ -1,0 +1,211 @@
+# ADR-0068: Toptancı müşteriler ve toptan fiyat
+
+- **Durum:** Kabul (sahip, 2026-11-15). Açık soruların önerilen varsayılanları sahip tarafından onaylandı ("önerilerin uygundur"); yalnız yasal ve mali konu (Açık sorular 10) danışman görene kadar açık ve işaretli.
+- **Tarih:** 2026-11-15
+- **İlgili:** adr/0007 (KDV modeli, KDV dahil fiyat), adr/0009 (vergi kimliği), adr/0010 (para ve yuvarlama), adr/0011 (denetim kaydı), adr/0012 (özellik bayrakları), adr/0023 (fiyat geçmişi, 30 gün kuralı), adr/0024 (kupon ve kampanya kuralları), adr/0037 §6 (segmentler), adr/0040 (roller), adr/0041 (yasal metinler), adr/0042 G6 (hesap daveti), adr/0046 (vitrin, Store API çağrıları), adr/0050 (toplu kampanya), adr/0051 (ödeme bağlantısı), adr/0056 (arama dizini), adr/0061 §5.5 (paket koruması), adr/0066 (tema katmanları), docs/13 (JSON-LD, akışlar), `docs/kvkk-envanter.md`, docs/20 (B2B → F19), PROGRESS D14 (teklif isteme)
+- **Dayanak:** sahip (2026-11-15): "müşteri tarafında sahip veya yöneticiler yeni müşteri oluşturabilecek; bu oluşturduğu müşteri Toptancı olabilir; toptancı müşterisi oluştururken mağazadaki tüm ürünlerin / tekil ürünlerin fiyatlarını güncelleyebilecek ve bunları yalnızca o mail ile giren toptancı görecek; perakende fiyatlardan ziyade toptancıya o toptan fiyatlarla alışveriş yapabilmesini sağlayacak."
+
+## Bağlam
+
+### Sahibin kararları (2026-11-15)
+
+1. **Fiyat modeli:** toptan **seviyeleri** (her biri bir müşteri grubu ve bir fiyat listesi, ör. "Toptan A/B": bütün ürünlerde yüzde indirim ve/veya ürün başına fiyat) ile **toptancıya özel** fiyatlar (tek bir toptancının listesi; teknik olarak tek üyeli gizli bir grup) birlikte. Öncelik: toptancıya özel > seviye > perakende. (Sahip "seviye" ne demek diye sordu; açıklandı, ikisi birlikte varsayılan seçildi; sahip değiştirebilir.)
+2. Toptancı **yalnız panelden** açılır (sahip ve yönetici rolü). İlk sürümde vitrinde başvuru formu yok.
+3. Toptancı fiyatları **KDV hariç** görür; KDV ödeme adımında ayrı satır olarak eklenir; tahsil edilen tutar değişmez. (Mali müşavire sorulacak: Açık sorular 10.)
+4. En az sipariş **adet** olarak (tutar değil). Ödeme yöntemi kısıtı yok.
+5. Acele yok; F16 canlıya çıkıştan bağımsız.
+6. Toptancı için fatura profili **zorunlu değil**.
+
+### Sahibin onayladığı varsayılanlar (2026-11-15, "önerilerin uygundur")
+
+Öneri sürümündeki açık sorular 1–9, 11 ve 12 önerilen varsayılanlarla karara bağlandı:
+
+7. **Seviye ve toptancıya özel fiyat birlikte** (karar 1 aynen; dilim 1a ikisini de kurar).
+8. **En az adet** ilk sürümde **sipariş başına toplam adet** (toptancı ya da seviye düzeyinde); ürün başına en az adet sonraki sürümde (§8, §11).
+9. Toptan fiyat **KDV hariç girilir**; KDV dahil karşılığı yanında bilgi olarak gösterilir (§4).
+10. **Otomatik kampanyalar toptancıya uygulanmaz**; kargo bedava eşiği kampanya değildir, uygulanır (§6).
+11. Herkese açık bir indirim seviye fiyatından **düşükse toptancı düşük olanı alır** (seviye listesi `sale`, §2).
+12. Toptancıya listede **fiyat süzgeci gösterilmez**; sıralama perakende sırasıyladır (§7).
+13. Kabul edilmeyen davet **90 gün** sonra silinir; yeniden gönderilebilir (§10).
+14. Özellik **mağaza bayrağıdır**: `customers.wholesale` (`owner: tenant`), kapalı başlar; F17'de pakete bağlanabilir (§9).
+15. Toptancı **seviye adını görmez**; vitrinde yalnız "Toptan fiyat · KDV hariç" (§7).
+16. **Toplu kampanya e-postası ve sepet hatırlatması toptancılara gitmez** (kampanya kitlesinde varsayılan hariç); işlemsel iletiler (sipariş, kargo) değişmez.
+17. Toptancıları **yalnız sahip ve yönetici** görür; operations siparişleri görür, toptancı listesini ve fiyatlarını görmez (§3, §9).
+
+### Elimizde olan (kod, 2026-11-15 `dev`)
+
+- **Fiyat listeleri (F4.1):** panel `apps/panel/src/features/price-lists/` (müşteri grubu kuralı `customer.groups.id`, `form.ts` `GROUPS_RULE`; yüzde indirim penceresi `components/discount-dialog.tsx`; satırlar `components/price-lines-card.tsx`). Backend `POST /admin/price-lists/:id/discount` (`apps/backend/src/api/admin/price-lists/[id]/discount/`, en çok 500 ürün, yüzde 0,01–99) → `workflows/pricing/discount-price-list.ts` (`batchPriceListPricesWorkflow`, kuruşa yarım-yukarı yuvarlama, `lib/money` `multiplyByRateBps`); `GET /admin/price-lists/:id/lines` (`workflows/pricing/price-list-lines.ts`). Katalog yazıcıları liste fiyatlarına dokunmaz (`workflows/catalog/prices.ts`).
+- **Müşteri grupları ve segmentler:** panel `features/customers/pages/customer-groups-page.tsx`; segment modülü `modules/customer-segments` kendi Medusa grubunu `customer_group_id` metin sütunuyla tutar ve günlük doldurur (adr/0037 §6). Bu, "modül bir Medusa grubunun sahibidir" emsalidir.
+- **Panelden müşteri:** `features/customers/customer-form.ts` (ad, e-posta, telefon, `company_name`, not) elle misafir kaydı açar (`POST /admin/customers`, `lib/staff/permission-rules.ts` `OPERATIONS_WRITES`). Şifre panelde yazılmaz.
+- **Hesap daveti emsali (adr/0042 G6):** davet vitrinin kayıt sayfasına gider (`/hesap/kayit?email=`), e-posta kayıtta doğrulanır; şablon `lib/messaging/templates/account.ts` (`account.migration_invite`). Girişte sahiplenme `api/http/account-routes.ts` içinde `GET /store/customers/me` ara katmanında (`attachGuestOrders`, `workflows/orders/attach-guest-orders.ts`): yalnız doğrulanmış giriş e-postası, aynı adresli `has_account=false` kayıtlar. Aynı e-postayla misafir ve hesap kaydı birlikte durabilir.
+- **Fatura profili:** `modules/billing-profile` (bireysel/kurumsal, vergi dairesi, VKN/TCKN şifreli, adr/0009); vitrinde `POST /store/customers/me/billing-profile`.
+- **Fiyatın sunucuda hesabı ve gösterimi:** `workflows/pricing/selling-prices.ts` **müşteri grubu olmadan** satış fiyatı okur; `workflows/pricing/price-display.ts` buna fiyat geçmişini ve otomatik kampanyaları ekler (adr/0023). `GET /store/price-display` (`api/store/price-display/route.ts`) `Cache-Control: public, max-age=60` ile döner. `GET /store/card-facts` `no-store`.
+- **Vitrin:** her sayfa isteğe göre çizilir (`app/layout.tsx` `dynamic = "force-dynamic"`), Store API çağrıları Next'te önbelleğe girmez (`lib/store-api/core.ts`). Oturum açık müşterinin anahtarı `storeGet` ile her çağrıya eklenir (`lib/store-api/server.ts` `visit()`, `lib/account/session.ts`). **Paylaşılan önbellek** `storePublicGet` / `shared.ts` yalnız anahtarsız çağrılar içindir; yenileme sözleşmesi `lib/refresh/contract.ts` bu yolları düşürür. Fiyat gösterimi tek bir boğazdan geçer: `lib/store-api/requests.ts` `priceDisplays()`; çağıranlar ürün, liste, raflar (`lib/views/section-data.ts`), hızlı bakış (`app/api/quick-view`), canlı arama (`app/api/search/suggest`), sepet ekleri, analitik. `lib/views/price.ts` `shownAmount()` önce bu gösterimi, yoksa Medusa'nın `calculated_price`'ını kullanır: bugün oturum açık bir grup üyesi bile **perakende** görür.
+- **Herkese açık fiyat okuyanlar (hepsi grupsuz bağlam):** arama dizini `workflows/search/prices.ts` (belge başına `prices`, `modules/search-index/types.ts`; sıralama ve fiyat süzgeci `sql/listing.ts`), akışlar `workflows/marketing/feed-catalog.ts`, JSON-LD `workflows/seo/payload.ts`, ana sayfa rafları `workflows/storefront/rails.ts`, toplu kampanya e-postası `workflows/campaigns/prepare.ts`.
+- **Sepet:** sipariş tamamlama kancası `workflows/hooks/complete-cart-validate.ts` (tek kod kuralı, ödeme tutarı tutarlılığı, yasal onay); ödeme öncesi koruma `api/http/checkout-guard.ts`.
+- **Kampanyalar:** otomatik kampanyalar fiyatın parçası gösterilir (`workflows/pricing/automatic-offers.ts`, adr/0023 Ek 2026-11-05); kupon kuralları adr/0024 (sepette en çok bir kod).
+- **Roller:** `lib/staff/permission-rules.ts`: `OWNER_ONLY`, `PRIVATE` (operations ve readonly okuyamaz), `OPERATIONS_WRITES`; yazılmayan yazma operations/readonly için kapalıdır.
+- **Denetim:** `api/http/audit/registry.ts`, fiyat kaynakları `api/http/audit/resources/prices.ts` (liste kuralı `rule:customer.groups.id` dahil).
+- **Paket koruması:** `api/http/plan-guard.ts` (kısıtlı/askıdaki mağazada izin listesi dışındaki panel yazmaları 403), Store yazma envanteri `lib/plan-guard/__tests__/store-writes.unit.spec.ts`.
+- **Özellik bayrakları:** `modules/platform-settings/features.ts` (`owner: tenant | platform`).
+- **Hız sınırı profilleri:** `lib/security/rate-limit/profiles.ts` (`store_default`, `listing`, `coupon`…).
+
+### Medusa 2.21.2 (Context7 `/medusajs/medusa`, 2026-11-15)
+
+- `GET /store/products` ara katmanları `authenticate("customer", ["session","bearer"], { allowUnauthenticated: true })` → `setPricingContext()` → `setTaxContext()`: oturum açık müşterinin grupları fiyat bağlamına kendiliğinden girer; `region_id` + `country_code` verilirse `calculated_amount_with_tax` / `calculated_amount_without_tax` gelir.
+- Sepet satırı fiyatı sepetin bağlamından hesaplanır: `customer_id`, `customer` (gruplarıyla, `cartFieldsForPricingContext`), bölge, para birimi, adet (`update-line-item-in-cart` workflow'u). Yani sepet müşteriye bağlıysa satırlar grup fiyatıyla gelir; birim fiyatı biz yazmayız.
+- Fiyat listesi kuralı `customer.groups.id`; Medusa'nın kendi B2B deseni "grup başına bir liste" (pricing modülü entegrasyon testi).
+- `calculatePrices`: tek SQL; satırlar "önce fiyat listesi fiyatları, sonra kuralı çok olan, sonra en düşük tutar" sırasıyla gelir. Fiyat seti başına seçim: **`override` liste fiyatı her zaman kazanır; `sale` liste fiyatı yalnız varsayılan fiyattan düşükse** kullanılır. `original_amount` override varsa o, yoksa varsayılan fiyattır. KDV dahil olma `PricePreference`'tan (bölge ya da para birimi) gelir.
+- Promosyon kuralları `customer.groups.id` üzerinde `in` / `eq` ile kurulur. Bir grubu **dışlayan** kuralın 2.21.2'de nasıl davrandığı belgelerde açık değil (Uygulama sırası, dilim 4).
+- Context7 belgeleri `develop` dalını anlatır; aşağıdaki öncelik kuralı 2.21.2'de entegrasyon testiyle kanıtlanmadan dilim 1 kapanmaz.
+
+### Asıl risk
+
+Bugünkü vitrin "fiyat herkes için aynıdır" varsayımıyla hızlıdır: `/store/price-display` herkese açık önbelleklenir, dizin tek fiyat tutar, akış ve JSON-LD aynı kaynaktan beslenir. Toptan fiyat bu yollardan birine sızarsa perakende müşteriye, Google'a ya da başka bir toptancıya görünür. Karar bu yüzden toptan fiyatı **ayrı ve kişisel bir yoldan** taşır; herkese açık yollar hiç değişmez.
+
+## Karar
+
+### 1. Kavramlar ve veri modeli
+
+- **Toptan seviyesi** (`wholesale_tier`): ad (ör. "Toptan A"), bir Medusa müşteri grubu, bir Medusa fiyat listesi (`sale` türü, kuralı `customer.groups.id = [seviyenin grubu]`), isteğe bağlı genel indirim oranı (`rate_bps`; boş: yalnız tekil fiyatlar), isteğe bağlı en az adet.
+- **Toptancı hesabı** (`wholesale_account`): bir müşteriye bağlı toptan kaydı; seviye (isteğe bağlı), isteğe bağlı **özel liste** (tek üyeli gizli grup + `override` türü liste, kuralı `customer.groups.id = [gizli grup]`), isteğe bağlı özel indirim oranı, isteğe bağlı en az adet (seviyeninkini ezer), durum `pending | active | inactive`, davet/etkinleşme/kapanma zamanları ve işlemi yapan personel.
+- **Elle fiyat işareti** (`wholesale_manual_price`): bir listede elle girilmiş satırı (liste, varyant, girilen **KDV hariç** tutar) oran satırlarından ayırır. Oranla üretilen satırlar taban fiyat değişince yeniden hesaplanır; elle girilenler değişmez.
+- **Yeni modül `wholesale`** (`apps/backend/src/modules/wholesale`, migration yalnız bu modülde). `customer` metadata'sı **kullanılmaz**: durum, seviye ve liste ilişkisi sorgulanabilir, indekslenebilir ve denetlenebilir olmalı. Segmentlerdeki gibi Medusa grup ve liste kimlikleri metin sütunlarında tutulur; toptancı ↔ müşteri için modül bağlantısı (`src/links/wholesale-account-customer.ts`) panel listelerinin sorgusu içindir.
+- **Medusa çekirdeğinde kalan:** müşteri, müşteri grubu, fiyat listesi ve fiyatları, fiyat hesabı, sepet, KDV. **Bizim olan:** seviye/hesap kayıtları, oranla toplu üretim ve eşitleme, davet ve sahiplenme, korumalar, kişisel fiyat ucu, en az adet ve kupon kuralı.
+- Pending hesap yalnız e-posta (küçük harf), firma adı ve karşılama için yetkili adı tutar. Etkinleşince bunlar müşteri kaydına (`first_name`, `last_name`, `company_name`, boşsa) taşınır ve hesaptaki e-posta silinir; tek kaynak müşteri kaydıdır.
+- Vergi dairesi ve numarası **bu modülde tutulmaz**. Formda isteğe bağlıdır; müşteri hesabı varsa mevcut fatura profiline (kurumsal, VKN şifreli, adr/0009) yazılır, yoksa toptancı davetten sonra vitrinde kendisi girer ya da yetkili sonradan ekler. Fatura profili zorunlu değildir (karar 6).
+
+### 2. Fiyat önceliği Medusa'da nasıl kurulur
+
+| Katman | Liste türü | Kural | Sonuç |
+| --- | --- | --- | --- |
+| Toptancıya özel | `override` | gizli tek üyeli grup | Varsa her zaman kazanır (perakende ve seviyeden yüksek olsa bile) |
+| Seviye | `sale` | seviyenin grubu | Perakendeden düşükse uygulanır |
+| Perakende | (liste yok) | — | Varsayılan fiyat |
+
+- Bu kurgu Medusa'nın kendi seçim kuralına dayanır: override her zaman kazanır, sale yalnız düşükse. İki ayrı listenin "eşitliğini" Medusa'ya bırakmayız.
+- Toptancı aynı anda **en çok bir seviyede** ve en çok bir özel listededir. Seviye değişince gizli grup aynı kalır, yalnız seviye grubu üyeliği değişir.
+- Yan etkiler (bilerek kabul): (a) herkese açık bir `sale` indirim listesi seviye fiyatından düşükse toptancı o düşük fiyatı alır ("hangisi düşükse"); (b) seviye fiyatı perakendeden yüksek girilirse uygulanmaz, panel uyarır; (c) mağazanın herkese açık bir `override` listesi seviyeyi ezer ama toptancıya özel listeyi ezmez (özel listenin kuralı daha çoktur); panel, toptancının bulunduğu bir segmente `override` liste verilirse uyarır.
+- **Kabul ölçütü:** dilim 1'de HTTP entegrasyon testi üç durumu 2.21.2'de kanıtlar: yalnız seviye, seviye + özel (özel kazanır, seviyeden pahalı olsa da), herkese açık sale + seviye (düşük olan). Test tutmazsa geri dönüş yolu "tek grup, birleşik liste"dir (Alternatifler).
+
+### 3. Toptancı açma akışı
+
+- **Panel:** Müşteriler > "Yeni müşteri" penceresinde tür seçimi **Bireysel / Toptancı**. Bireysel bugünkü akıştır. Toptancı alanları: e-posta (zorunlu), firma adı (zorunlu), yetkili adı soyadı, telefon, vergi dairesi ve numarası (isteğe bağlı), seviye ve/veya "bu toptancıya özel fiyat" (açılınca oran ve tekil fiyatlar toptancının sayfasında girilir), en az adet (isteğe bağlı). Şifre alanı yoktur.
+- **Workflow** `createWholesaleAccountWorkflow` (adımlar telafili):
+  1. E-postayı küçük harfe çevir; bu e-postada etkin/pending toptancı varsa 409 `wholesale.exists`.
+  2. Hesap kaydını yaz (telafi: sil).
+  3. E-postada `has_account=true` müşteri **varsa**: hesaba bağla, seviye grubuna ekle (telafi: çıkar), durum `active`.
+  4. Özel fiyat istendiyse gizli grubu ve `override` listeyi aç, müşteri varsa gruba ekle (telafi: liste ve grubu sil).
+  5. Son adım ileti: müşteri varsa `account.wholesale_enabled` ("Toptan hesabınız açıldı", giriş bağlantısı); yoksa `account.wholesale_invite` (vitrinin kayıt sayfası `/hesap/kayit?email=`, adr/0042 G6 gibi). İleti kuyruğa yazılır; gönderilemezse iş geri alınmaz, panelde "Daveti yeniden gönder" vardır.
+- **Sahiplenme:** toptancı kayıt olup e-postasını doğruladığında ya da sosyal girişle geldiğinde, `GET /store/customers/me` ara katmanı (`attachGuestOrders`'ın yanında, aynı kanıtla: doğrulanmış giriş e-postası) pending hesabı bulur, müşteriye bağlar, gruplara ekler, `active` yapar. Tekrar çalışması zararsızdır. Yeni Store yazma ucu açılmaz.
+- E-posta yalnız misafir kaydında (`has_account=false`) varsa hesap pending kalır; misafir kaydı gruba eklenmez (fiyat yalnız giriş yapmış hesaba).
+- **Kapatma** (`deactivateWholesaleAccountWorkflow`): durum `inactive`, seviye ve gizli grup üyeliği hemen kaldırılır (liste ve elle fiyatlar yeniden açılış için kalır), müşterinin açık sepetleri yeniden fiyatlanır. Müşteri bir sonraki istekte perakende görür. İleti gönderilmez. Yeniden açma üyelikleri geri ekler.
+- **Silme:** pending hesap silinebilir. Etkin ya da kapalı hesap silinmez, kapatılır; kayıt müşterinin KVKK silme akışıyla gider (§10).
+- **Roller:** yalnız sahip ve yönetici (`/admin/wholesale*` `PRIVATE`'a eklenir: operations ve readonly okumaz da). Operations siparişleri yine görür.
+- **Denetim:** hesap aç/değiştir/kapat/yeniden aç, davet yeniden gönderme, seviye aç/değiştir, oran değişikliği, elle fiyat yazma ve silme yeni denetim kaynağıyla (`api/http/audit/resources/wholesale.ts`) önce/sonra yazılır. Vergi numarası denetime girmez.
+
+### 4. Toptan fiyatın düzenlenmesi
+
+- **Bütün ürünlere yüzde:** seviyede ya da özel listede `rate_bps`. Medusa fiyat listesi oran tutmaz, varyant başına fiyat ister; oran bu yüzden **üretilir**: listeye her TRY taban fiyatlı varyant için `taban × (1 − oran)` satırı, kuruşa yarım-yukarı (`lib/money`, `discount-price-list.ts` ile aynı hesap). Oran KDV'den bağımsızdır (dahil fiyatın yüzdesi = hariç fiyatın yüzdesi).
+- **Toplu üretim** bir arka plan işi (`async-job`, `wholesale.sync`) ile 500'lük parçalarla `batchPriceListPricesWorkflow`'a gider; panel ilerlemeyi gösterir.
+- **Eşitleme:** taban fiyat değişince (adr/0023'ün kullandığı `pricing.price.*` olayları) ve yeni varyant açılınca (`workflows/hooks/product-variants-created.ts`) oranlı listelerin yalnız oran satırları yeniden hesaplanır; gece tam eşitleme işi kaçanı düzeltir. Elle satırlar hiç değişmez.
+- **Tekil ürün:** toptancının/seviyenin sayfasında ürün arayıcı (`SearchPicker` deseni) ile varyant başına fiyat. Giriş **KDV hariç**; sunucu varyantın KDV oranıyla (ürün tipi = KDV grubu, adr/0007) dahil fiyatı hesaplar, kuruşa yuvarlar ve listeye yazar; girilen hariç tutar işarette saklanır. Tek birimde hariç → dahil → hariç dönüşü her zaman aynı kuruşa döner (dahil fiyatın yuvarlama hatası ≤ 0,005, bölünürken küçülür). Ürünün KDV oranı değişirse elle satırların dahil fiyatı işaretteki hariç tutardan yeniden hesaplanır.
+- Panelde iki sütun: "KDV hariç" (girilen) ve "KDV dahil" (bilgi). Varsayılan fiyat listesi ekranı (`features/price-lists`) toptan listelerini **listelemez**; onlar yalnız toptan ekranlarından düzenlenir.
+- Fiyat istemciden kabul edilmez: panelin gönderdiği tutar personelin girdisidir, sepet ve vitrin hiçbir tutar göndermez.
+
+### 5. KDV hariç gösterim
+
+- Mağaza KDV dahil çalışmaya devam eder (adr/0007; `PricePreference`). Toptancıya gösterilen birim fiyat Medusa'nın `calculated_amount_without_tax` değeridir; "KDV hariç" notuyla.
+- Sepet ve ödeme özetinde toptancıya: ara toplam (KDV hariç, Medusa `subtotal`), KDV (Medusa `tax_total`), toplam. Tutarlar Medusa'nındır; yeni hesap yazılmaz. Satırların hariç birim fiyatlarının toplamı sepetin hariç toplamından kuruş kadar ayrılabilir; geçerli olan sepettir.
+- Tahsil edilen tutar, fatura ve sipariş kayıtları değişmez. Perakende müşteri bugünkü gibi KDV dahil görür.
+
+### 6. Kampanyalar, kuponlar, indirimli fiyat gösterimi
+
+- **Kupon:** toptancı sepetinde kod kabul edilmez (varsayılan). Store'daki kod yolu (`api/http/promotion-routes.ts`, `/store/carts` altında `oneCodePerCart`'ın yanında) `promotions.wholesale_no_code` ile reddeder; tamamlama kancası da kodlu toptancı sepetini reddeder.
+- **Otomatik kampanyalar:** toptancıya uygulanmaz (varsayılan). Mekanizma dilim 4'te seçilir (§Uygulama sırası).
+- **Kargo bedava eşiği** (adr/0024, kargo seçeneği fiyat kuralı) promosyon değildir; toptancıya da uygulanır.
+- **İndirimden önceki fiyat (Fiyat Etiketi Yön., adr/0023):** toptancı tacirdir; ona üstü çizili fiyat, "%X indirim" rozeti ve 30 gün bilgisi gösterilmez. Tek fiyat ve "KDV hariç" notu. Perakende fiyat "karşılaştırma" olarak da gösterilmez.
+- Hediye kartı ve mağaza kredisi toptancıya da açıktır (değişiklik yok).
+
+### 7. Vitrin ve önbellek
+
+**Kural: toptan fiyat hiçbir paylaşılan ya da herkese açık yola girmez.**
+
+- **Herkese açık yollar değişmez:** `/store/price-display` (grupsuz, `public, max-age=60`), arama dizini fiyatı, akışlar, site haritası, JSON-LD, raflar, kampanya e-postası. Hepsi bugün olduğu gibi müşteri bağlamı olmadan okur. Birim test: bu okuyucular (`selling-prices.ts`, `search/prices.ts`) bağlama müşteri koymaz. Entegrasyon testi: toptan listesi varken herkese açık uçlar perakende döner.
+- **Yeni kişisel uçlar** (oturum zorunlu, `Cache-Control: private, no-store`, müşteri yalnız `auth_context`'ten, sorgudan kimlik alınmaz):
+  - `GET /store/customers/me/wholesale`: `{ active, min_quantity, vat_exclusive }`. Seviye adı ve grup kimliği dönmez.
+  - `GET /store/customers/me/wholesale-prices?variant_id=` (en çok 100): her görünür varyant için `{ net, gross, vat_rate }`. Etkin toptancı değilse boş. Fiyat sunucuda, müşterinin gruplarıyla Medusa'dan hesaplanır; görünürlük `shopperVariantIds` ile aynı. Hız sınırı `store_default` + yeni müşteri başı profil `wholesale_prices`.
+- **Vitrin tek boğaz:** `lib/store-api/requests.ts` `priceDisplays()` oturumdaki müşteri toptancıysa (istek ömürlü React `cache` ile bir kez `/me/wholesale`) kişisel uçtan okur ve gösterimi `current = net`, `before = null`, `cart_offer = null`, "KDV hariç" işaretiyle kurar. Ürün, liste, raflar, hızlı bakış, canlı arama ve sepet ekleri böylece ek iş istemeden toptan fiyatı gösterir. Bu çağrılar `storeGet` iledir; `storePublicGet` / `shared.ts`'e hiç girmez (birim test: kişisel uçlar paylaşılan önbelleğin yol listesinde yok). Sayfalar zaten isteğe göre çizilir; yeni önbellek eklenmez.
+- **Ürün sayfasının JSON-LD'si** toptancıya da perakende kalır (backend `seo/payload.ts`); botlar giriş yapmaz, kaynak tek kalır.
+- **Liste sıralama ve fiyat süzgeci:** dizin yalnız perakende fiyat tutar. Toptancı için sıralama perakende sırasıyla yapılır (tek oranlı seviyede sıra aynıdır; elle fiyatlarda kayabilir). Fiyat aralığı süzgeci toptancıya **gösterilmez** (sınırlar yanıltıcı olurdu). Toptan fiyatı dizine koymak reddedildi (Alternatifler).
+- **Sepet ve ödeme:** Medusa sepetin müşterisinin gruplarıyla fiyatlar. Giriş yapınca misafir sepetinin müşteriye aktarılmasında satırların yeniden fiyatlandığı dilim 3'te doğrulanır; değilse aktarımdan sonra sepet yenilenir. Kapanan toptancının açık sepeti yenilenir; tamamlama kancası ayrıca, müşterinin artık ait olmadığı bir toptan listesinden fiyatlanmış satırı olan sepeti `wholesale.prices_changed` ile reddeder (savunma katmanı).
+- **Analitik:** olaylar gösterilen ve ödenen tutarı taşır; ek iş yok.
+- **Ödeme bağlantısı (adr/0051):** ilk sürümde toptan fiyat okumaz; personel tutarı bugünkü gibi belirler.
+
+### 8. En az adet kuralı
+
+- **İlk sürüm:** sipariş başına en az **toplam adet** (sepetteki ürün satırlarının adetleri toplamı; ek seçenek ve hediye paketi satırları sayılmaz). Geçerli değer: toptancının kendi değeri, yoksa seviyeninki, yoksa kural yok.
+- **Ürün başına en az adet** sonraya bırakılır (karar 8); veri modeli işaret tablosuna ya da seviyeye yeni alanla eklenebilir.
+- **Gösterim:** sepet sayfası `/me/wholesale`'deki değerle "Toptan siparişte en az {n} adet gerekir; sepetinizde {m} adet var." der, ödemeye geç düğmesini kapatır.
+- **Sunucu:** ödeme başlamadan (`POST /store/carts/:id/payment-session`, `checkout-guard.ts`) ve tamamlamada (`complete-cart-validate.ts`) `wholesale.min_quantity` (`ValidationError`, `{ field: "items" }`) ile reddeder. Ödeme başladıktan sonra sepet değişirse mevcut `payments.cart_changed` kuralı geçerlidir; para alınıp siparişin reddedildiği bir yol kalmaz.
+
+### 9. Güvenlik
+
+- Yazma ve okuma yalnız sahip ve yönetici (`PRIVATE`). Yeni yeniden doğrulama yok (fiyat listeleriyle aynı düzey).
+- **Medusa'nın yan yolları kapanır:** toptan modülüne ait grup ve listelere `/admin/customer-groups/:id*`, `/admin/price-lists/:id*` ve Medusa'nın müşteriyi gruba bağlayan öbür uçları (dilim 1a'da Context7 ile listelenir) üzerinden yazma `wholesale.managed` (409) ile reddedilir; yoksa biri müşteriyi davetsiz ve denetimsiz toptan grubuna ekleyebilirdi. Bu uçların okumaları da toptan kayıtlarını listelemez.
+- **IDOR:** toptan uçları yalnız hesap/seviye kimliği alır; liste ve grup kimlikleri modülden çözülür, istemciden alınmaz. Store uçları müşteriyi yalnız oturumdan alır. `/store/customers/me` yanıtında `groups` alanının dönmediği testle kilitlenir.
+- Bir toptancı başkasının fiyatını göremez: gizli grup tek üyelidir, kişisel uç yalnız oturumun müşterisini fiyatlar.
+- **Paket koruması:** yeni panel yazmaları izin listesine girmez (kısıtlı/askıdaki mağazada satış ayarı değiştirilmez); **kapatma** izin listesine girer (erişim almak, adr/0061 §5.5). Store tarafında yeni yazma ucu yok, `store-writes.unit.spec.ts` değişmez; ileride eklenirse sahiplenme `open` sınıfındadır.
+- **Özellik bayrağı:** `customers.wholesale` (`owner: tenant`, varsayılan kapalı). Kapalıyken panel ekranı görünmez, uçlar 404; var olan toptancılar perakendeye düşer (gruplar korunur, açılınca döner).
+- Güvenlik incelemesi: dilim 1, 3 ve 4 (`/guvenlik-review` + diğer geliştirici; CLAUDE.md "Ortak çalışma").
+
+### 10. KVKK
+
+- **Yeni veri:** `wholesale_account`: pending iken e-posta, firma adı, yetkili adı (K); toptancı olma bilgisi, seviye, durum, zamanlar, işlemi yapan personel kimliği (D). Vergi kimliği yeni yerde tutulmaz (fatura profili). Amaç: toptan fiyatla satış (sözleşmenin kurulması ve ifası).
+- **Saklama:** pending davet 90 gün kabul edilmezse silinir (yeniden gönderilebilir). Etkin/kapalı kayıt müşteri hesabı süresince. Müşteri silme akışı (`workflows/legal/erasure/customer.ts`) toptan kaydını, gizli grubu ve özel listeyi siler; siparişler bugünkü kurala tabidir.
+- `docs/kvkk-envanter.md`'ye `wholesale_account` ve `wholesale_manual_price` (kişisel veri yok) satırları dilim 5'te eklenir.
+
+### 11. Kapsam dışı (F19 "tam B2B") ve açık kapı
+
+- Vadeli ödeme ve cari hesap, teklif isteme (RFQ, D14), çok kullanıcılı firma hesapları ve onaylı satın alma, kademeli adet fiyatı, ürün başına en az adet, vitrinde başvuru formu, yalnız toptancıya görünen ürünler, ödeme yöntemi kısıtı, çoklu para birimi.
+- Kapılar: firma kavramı ileride hesabın üstüne `wholesale_company` olarak eklenir (hesap → firma bağı); kademeli fiyat Medusa fiyatının `min_quantity`/`max_quantity` alanlarıyla aynı listeye girer (bugün yalnız düz satır yazarız, `isPlainPrice`); başvuru formu pending hesap durumunu yeniden kullanır.
+
+## Alternatifler
+
+| Seçenek | Artı | Eksi | Karar |
+| --- | --- | --- | --- |
+| Seviye `sale` + özel `override` listeler (bu ADR) | Medusa'nın kendi seçim kuralı; sepet ve KDV çekirdekte | "Hangisi düşükse" yan etkisi; oranlı liste üretilip eşitlenmeli | **Seçildi** (2.21.2 testi şartıyla) |
+| Tek grup, birleşik liste (seviye satırları + özel satırlar toptancının tek listesine kopyalanır) | Önceliği tamamen biz belirleriz | Seviye her değişince bütün üyelerin listeleri yeniden yazılır; satır sayısı katlanır | Yedek yol |
+| Fiyatı çalışma anında hesaplamak (liste yerine oran kuralı, sepette `unit_price` ezmek) | Toplu üretim yok | Medusa'nın sepet fiyatını ezmek; her fiyat okuyan yerde kendi hesabımız; altın kural 2'ye ters | Reddedildi |
+| Müşteri `metadata`'sında "toptancı" bayrağı | Migration yok | Sorgulanamaz, denetlenemez, kurallar dağınık | Reddedildi |
+| Toptan fiyatı arama dizinine koymak (grup başına fiyat anahtarı) | Toptancıya doğru sıralama ve süzgeç | Gizli fiyat herkese açık belgeye girer; dizin boyu toptancı sayısıyla büyür | Reddedildi |
+| Toptan fiyatı `/store/price-display`'e eklemek (oturum varsa) | Tek uç | Herkese açık önbellekli uçta kişisel yanıt; sızıntı riski | Reddedildi |
+| Panelde şifre belirleyip toptancıya iletmek | Hızlı | Şifre personelin elinden geçer; adr/0043'e ters | Reddedildi |
+
+## Sonuçlar
+
+- Toptancı yalnız kendi oturumunda toptan fiyat görür; perakende müşteri, botlar, akışlar ve başka toptancılar perakende görür. Herkese açık önbellek ve dizin aynı kalır.
+- Toptancı için liste sıralaması perakende sırasıdır ve fiyat süzgeci yoktur (bilerek kabul edilen sınır).
+- Oranlı her liste katalog büyüklüğünde satır taşır (ör. 5.000 varyant × 20 liste = 100.000 satır). Özel oranlı liste toptancı başınadır; çok toptancılı mağazada seviye + az sayıda elle satır önerilir, panel bunu söyler. Fiyat geçmişi aboneliği (adr/0023) toptan listesi olaylarını atlar (herkese açık fiyat değişmez).
+- Toptancıya toplu kampanya e-postası ve sepet hatırlatması perakende fiyat gösterebilir; kampanya kitlesinde toptancılar varsayılan hariçtir (karar 16).
+- Vitrin ve tema dokunuşu ekleyicidir: `PriceView`'a isteğe bağlı "KDV hariç" işareti, sepet özetine isteğe bağlı KDV satırı ve en az adet iletisi. Varsayılan çizim değişmez (adr/0066 K3(b)); görünüm kilidi testi yeşil kalır.
+- Sonradan: F19 B2B ADR'leri; e-fatura tarafında kurumsal profili olmayan toptancının faturası bireysel kesilir (mali müşavir).
+
+## Uygulama sırası
+
+Her dilim ayrı PR, `dev`'den `deniz/<konu>` dalı; Opus kodlayıcı ajan, sırayla (tek seferde tek ajan).
+
+| # | Dilim | Boyut | Güvenlik incelemesi | Partnerin alanı |
+| --- | --- | --- | --- | --- |
+| 1a | Backend çekirdek: `wholesale` modülü (modeller, migration), link, seviye workflow'ları, oran üretimi ve eşitleme işi, elle fiyat (KDV hariç → dahil), `/admin/wholesale/tiers*`, `wholesale.managed` korumaları, `PRIVATE` kuralı, denetim kaynağı, özellik bayrağı, **öncelik entegrasyon testi** | L | Evet | Hayır |
+| 1b | Backend hesaplar: hesap aç/değiştir/kapat/yeniden aç workflow'ları (telafili), `/admin/wholesale/accounts*`, ileti şablonları `account.wholesale_invite` / `account.wholesale_enabled`, `/store/customers/me` sahiplenmesi, paket koruması izin listesi (kapatma), KVKK silme adımı | M | Evet | Hayır |
+| 2 | Panel: Müşteriler > Toptancılar (liste, ayrıntı), "Yeni müşteri" penceresinde Bireysel/Toptancı, Toptan seviyeleri ekranı (oran, tekil fiyatlar: `price-lines-card` / `discount-dialog` desenleri, iki sütun), fiyat listeleri ekranından toptan listelerinin çıkarılması, i18n | L | Hayır | Hayır (panel Deniz'in) |
+| 3 | Vitrin kişisel fiyat: `/store/customers/me/wholesale` ve `/wholesale-prices`, hız sınırı profili, vitrinde `priceDisplays()` boğazı, `PriceView` isteğe bağlı "KDV hariç", sepet/ödeme özetine KDV satırı, toptancıya fiyat süzgecinin gizlenmesi, önbellek ve herkese açık okuyucu testleri, sepet aktarımında yeniden fiyatlama doğrulaması | M–L | Evet | **Evet:** `packages/ui/src/views.ts`, `packages/themes/atolye/src/parts/Price.tsx`, `parts/LinePrice.tsx`, `cart/CartSummary.tsx`, `checkout/Summary.tsx`, liste süzgeci. Yalnız yeni veri ve isteğe bağlı alan, yeniden çizim yok (adr/0066); Oğuzhan'a önceden haber |
+| 4 | Sepet kuralları: en az adet (sepet iletisi, ödeme öncesi koruma, tamamlama kancası), kupon reddi, otomatik kampanyanın toptancıya uygulanmaması (önce Context7 + test: promosyon kuralında grup dışlama 2.21.2'de çalışıyor mu; çalışmıyorsa toptancı sepetinde otomatik promosyonları kaldıran sepet kancası), kapanan toptancının sepetinin yenilenmesi ve `wholesale.prices_changed` | M | Evet (ödeme/sepet) | Sepet iletisi teması: `cart/CartPage.tsx` (yalnız ileti alanı) |
+| 5 | Belgeler ve uçtan uca: `docs/kvkk-envanter.md`, docs/06 ekran planı, docs/13 notu (herkese açık fiyat tek kaynak), e2e (toptancı daveti → kayıt → toptan fiyatla sipariş, kapatma → perakende), PROGRESS | S | Hayır | Hayır |
+
+## Açık sorular
+
+Öneri sürümündeki 1–9, 11 ve 12. sorular sahibin onayıyla karara bağlandı (Bağlam, "Sahibin onayladığı varsayılanlar", karar 7–17). Açık kalan:
+
+10. **Yasal ve mali (danışman yok; taslak işaretli kalır):** toptancıya KDV hariç gösterim, toptancıya 30 gün kuralının uygulanmaması, ödeme adımında tüketici sözleşmelerinin (ön bilgilendirme, mesafeli satış, adr/0041) toptancıya da gösterilmesi, kurumsal profili olmayan toptancının faturası. Uygulanan varsayılan: KDV hariç gösterim ve indirim gösterimi yok; sözleşmeler aynen gösterilir (güvenli taraf). Mali müşavir ve avukat görünce kesinleşir; o zamana kadar bu konular **taslak** olarak işaretli kalır.

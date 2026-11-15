@@ -2,6 +2,20 @@
 
 > Yalnız Deniz'in oturumlarının notları; en yeni en üstte. Ortak durum `PROGRESS.md`'de.
 
+## Sıradaki işler (güncel tutulur; Oğuzhan başlamadan önce buraya bakar)
+
+1. **Panel biçim çizimleri** (`deniz/bicim-cizim`): üç üst bilgi çizimi aynı çerçevede; seçenekler ayrık kutular (`spacing={2}`). K3(a) düzeltme; `catalog` çizimi bugünkü düzeni gösterir. Dosyalar: panel `forms/variant-sketches.tsx`, `forms/variant-field.tsx`.
+2. **Askıdaki mağazada sepet yazmaları** (#43 güvenlik bulgusu 2, adr/0061 §5.5): ödeme ve sipariş zaten 503 (`plan-guard.ts`, Ek C15); sepet oluşturma, satır ve adres yazmaları da reddedilecek. Dosyalar: backend `api/http/plan-guard.ts`, `payment-routes.ts` (yalnız ara katman sırası), testler.
+3. **Bakım modunda backend** (#43 bulgu 2'nin ikinci yarısı, adr/0053): ödeme ve sipariş reddedilir; personelin atlatma çereziyle denemesi vitrinin imzalı başlığıyla geçer. Güvenlik incelemesi şart. Dosyalar: backend `api/http/`, vitrin `proxy.ts` / `lib/maintenance` (Oğuzhan'ın #43'ü birleştikten sonra, üstüne).
+4. **Sade klasik katalog üst bilgisi** (adr/0066 uyarlaması): `deniz/katalog-ust-sade` olduğu gibi birleşmez. (a) #42 (G2) birleşince bölüm ayarları: araçların yeri (menü çubuğu / üst satır) ve üst bağlantıların yeri (şerit / menü çubuğu sonu), yeni alanlar, varsayılan bugünkü çizim; (b) ADR-0067 ve G5'ten sonra Katalog görünümünün verisine sade değerler (şerit kapalı, düz menü, dar arama). Görünüş basamaklarını Oğuzhan'ın adlarıyla kullanırım, ayrıca açmam. İş bitince dal silinir.
+5. **ADR-0068 toptancı müşteriler ve toptan fiyat** (Kabul; 1a kodlanıyor, `deniz/toptanci-1a`). Dilim 3 vitrin/tema dosyalarına (`parts/Price.tsx`, `LinePrice.tsx`, sepet ve ödeme özeti) yalnız yeni veri ekler; başlamadan Oğuzhan'a haber.
+
+## 2026-11-15: vitrin işleri ve ortak çalışma
+
+- `dev`'e giren PR'lar: #9–#12 yorum alıntısı (~140 karakter, "…"), #37 ortalı üst bilgi + M1 açılır menü + katalog ana sayfası düzeltmeleri, #38 fiyat bandına kategori (güvenlik incelemesi: düşük bulgu kapatıldı), #44 ve #45 yorum kutuları eşit boy, #47 arama düğmelerinin hizası (alan yüksekliği aynı), #48 duyuru şeridine hizalama (`auto` varsayılan) ve boyut.
+- Kurallar: adr/0066 (üç katman, K1–K9), "Aynı işi iki kez yapma", "Yayımlanmış biçim sözleşmedir". Görünümlerim: Katalog, Grafit.
+- Yerel geliştirme veritabanı: My L'arte taslağına cutlery paketi ve `katalog` uygulandı (2026-11-14); sahip klasik katalog üst bilgisini ve duyuru şeridinde orta + büyük seçti. Yerel önizleme dalı `deniz/onizleme-yerel` (push edilmez) sade üst bilgiyi gösterir.
+
 ## Geçmiş (2026-10-22 → 2026-11-14, bölünmeden önceki `PROGRESS.md` "Son oturum özeti")
 
 **2026-11-02 gece → 2026-11-03 (otonom gece; ana oturum yönetici, kodlama Opus 5.5 alt ajanlarında).** Kullanıcı: "shopify ikas gibi bir altyapıyı inceliyorsun bizim projedeki eksiklikleri … tespit ediyorsun … dengeli olmalı … sen bu işin beynisin sadece plan yaparsın ve yönetirsin … ben yatıyorum baştan sonra geliştirmeyi yapabilirsin. durmaksızın … demo programlar test uygulamaları gibi şeyleri panelimizden kaldır … Yurtiçi kargo entegrasyon güncel belgesi … eksiklik veya yanlış varsa güncellersin."

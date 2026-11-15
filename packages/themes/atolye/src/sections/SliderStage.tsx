@@ -51,6 +51,7 @@ export function SliderStage({
   arrowStyle,
   loop,
   focusable,
+  fill = false,
   children,
 }: {
   words: SliderWords
@@ -65,6 +66,8 @@ export function SliderStage({
   loop: boolean
   /** A slide without a link: the rail itself takes the focus so its keys scroll it. */
   focusable: boolean
+  /** As tall as its box (a grid cell): the rail and its slides stretch to it. */
+  fill?: boolean
   children: ReactNode
 }) {
   const rail = useRef<HTMLDivElement>(null)
@@ -80,8 +83,9 @@ export function SliderStage({
   const [choice, setChoice] = useState<PlayChoice>(null)
   const still = useSyncExternalStore(watchMotion, reduced, () => true)
   const playing = isPlaying({ autoplay, count, choice, hydrated, reducedMotion: still })
-  // Held while the pointer or the focus is on the stage, or the tab is hidden
-  const [held, setHeld] = useState({ pointer: false, focus: false, hidden: false })
+  // Held while the pointer or the focus is on the stage, the tab is hidden, or the theme
+  // editor has its section selected (adr/0065 §2, `qt:section:select`)
+  const [held, setHeld] = useState({ pointer: false, focus: false, hidden: false, editing: false })
 
   const goTo = useCallback(
     (to: number) => {
@@ -141,9 +145,34 @@ export function SliderStage({
     }
   }, [])
 
+  // The theme editor's preview only: its section selected, the slider holds still
+  useEffect(() => {
+    const section = rail.current?.closest("[data-qs]")
+    if (!section) {
+      return
+    }
+    const hold = (editing: boolean) => (event: Event) => {
+      if (event.target === section) {
+        setHeld((was) => ({ ...was, editing }))
+      }
+    }
+    const select = hold(true)
+    const deselect = hold(false)
+    // A slider just added is selected before this listens: the editor's mark says so
+    if (section.hasAttribute("data-qt-selected")) {
+      setHeld((was) => ({ ...was, editing: true }))
+    }
+    section.addEventListener("qt:section:select", select)
+    section.addEventListener("qt:section:deselect", deselect)
+    return () => {
+      section.removeEventListener("qt:section:select", select)
+      section.removeEventListener("qt:section:deselect", deselect)
+    }
+  }, [])
+
   // Not looping: the autoplay ends on the last slide
   const atEnd = !loop && index >= count - 1
-  const running = playing && !atEnd && !held.pointer && !held.focus && !held.hidden
+  const running = playing && !atEnd && !held.pointer && !held.focus && !held.hidden && !held.editing
   useEffect(() => {
     if (!running) {
       return
@@ -168,7 +197,7 @@ export function SliderStage({
   const controls = hydrated && count > 1
   return (
     <div
-      className="gf-stage relative overflow-hidden rounded-tile"
+      className={cn("gf-stage relative overflow-hidden rounded-tile", fill && "h-full")}
       data-arrows={arrows}
       onPointerEnter={(event) => {
         if (event.pointerType === "mouse") {
@@ -193,7 +222,7 @@ export function SliderStage({
         tabIndex={focusable && count > 1 ? 0 : undefined}
         aria-label={focusable && count > 1 ? words.label : undefined}
         role={focusable && count > 1 ? "group" : undefined}
-        className="gf-rail flex overflow-x-auto"
+        className={cn("gf-rail flex overflow-x-auto", fill && "h-full")}
         onPointerDown={(event) => {
           if (event.pointerType !== "mouse") {
             heading.current = null

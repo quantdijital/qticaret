@@ -9,6 +9,7 @@ import { errorText } from "@/lib/errors"
 import type { LivePreview } from "./bridge/use-live-preview"
 import { DEVICES, fitPreview, useRoom } from "./preview-fit"
 import type { Device } from "./preview-fit"
+import { Hint } from "./shared/hint"
 
 const V = "storefront.editor.preview"
 const D = "storefront.editor.device"
@@ -30,6 +31,8 @@ interface PreviewFrameProps {
   finding: boolean
   /** What the frame cannot show of what is asked (a hidden section, the live preview off). */
   notice?: string | null
+  /** Said by a live region: the section just opened from the preview. */
+  announce?: string | null
 }
 
 /** A message in place of the storefront: why it does not show, and what to do. */
@@ -75,25 +78,26 @@ function PreviewBar({
         {DEVICES.map((each) => {
           const Icon = DEVICE_ICONS[each]
           return (
-            <ToggleGroupItem
-              key={each}
-              value={each}
-              aria-label={t(`${D}.${each}`)}
-              title={t(`${D}.${each}`)}
-            >
-              <Icon />
-              <span className="hidden @min-[34rem]:inline">{t(`${D}.${each}`)}</span>
-            </ToggleGroupItem>
+            <Hint key={each} label={t(`${D}.${each}`)} side="bottom">
+              {/* Its own state named again: the hint's would take the place of on/off */}
+              <ToggleGroupItem
+                value={each}
+                data-state={device === each ? "on" : "off"}
+                aria-label={t(`${D}.${each}`)}
+              >
+                <Icon />
+                <span className="hidden @min-[34rem]:inline">{t(`${D}.${each}`)}</span>
+              </ToggleGroupItem>
+            </Hint>
           )
         })}
       </ToggleGroup>
-      <span
-        className="tabular w-11 shrink-0 text-right text-xs text-muted-foreground"
-        title={t(`${V}.scaleHint`)}
-      >
-        <span className="sr-only">{t(`${V}.scale`)} </span>
-        {percent}
-      </span>
+      <Hint label={t(`${V}.scaleHint`)} side="bottom" align="end" describe>
+        <span className="tabular w-11 shrink-0 text-right text-xs text-muted-foreground">
+          <span className="sr-only">{t(`${V}.scale`)} </span>
+          {percent}
+        </span>
+      </Hint>
     </div>
   )
 }
@@ -114,6 +118,7 @@ export function PreviewFrame({
   missing,
   finding,
   notice = null,
+  announce = null,
 }: PreviewFrameProps) {
   const { t } = useTranslation()
   const stage = useRef<HTMLDivElement>(null)
@@ -159,8 +164,10 @@ export function PreviewFrame({
     )
   } else if (address) {
     content = (
+      // `overflow-clip`, not hidden: a hidden box still scrolls, and a `scrollIntoView` in the
+      // frame (Next's scroll on a page change, the bridge's reveal) would shift the scaled page
       <div
-        className="shrink-0 overflow-hidden rounded-md bg-background shadow-card ring-1 ring-border"
+        className="shrink-0 overflow-clip rounded-md bg-background shadow-card ring-1 ring-border"
         style={{ width: fit.width * fit.scale, height: fit.height * fit.scale }}
       >
         <iframe
@@ -209,6 +216,10 @@ export function PreviewFrame({
             {notice}
           </p>
         ) : null}
+        {/* The section opened from the preview's edit label, said aloud (adr/0065 §6) */}
+        <p aria-live="polite" className="sr-only">
+          {announce}
+        </p>
       </div>
     </div>
   )

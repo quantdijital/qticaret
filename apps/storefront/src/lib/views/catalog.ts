@@ -20,6 +20,7 @@ import { categoryCounts } from "@/lib/store-api/extras"
 import { picturedCategories } from "./category-tiles"
 import { productImages } from "./image"
 import { currentMenus, layoutImage, layoutLink } from "./layout"
+import { heroCatalogSlides } from "./hero-slides"
 import { hrefOf } from "./listing"
 import { shownAmount } from "./price"
 import { variantIdsOf } from "./product"
@@ -108,7 +109,10 @@ async function thumbs(
   return { views, lowest: amounts.length > 0 ? Math.min(...amounts) : null }
 }
 
-/** H17's own parts: its list, tiles and quick links with pictures and counts, its picks, "from". */
+/**
+ * H17's own parts: its list, tiles and quick links with pictures and
+ * counts, its picks, "from", and its slides when the shop saved them.
+ */
 export async function heroCatalogView(
   section: StoreHeroCatalog,
   t: Translate
@@ -148,6 +152,7 @@ export async function heroCatalogView(
     chips: section.chips.flatMap(chipView),
     picks: section.picks.flatMap((pick) => picks.views.get(pick.product_id) ?? []),
     from: section.show_price && picks.lowest !== null ? formatLira(picks.lowest) : null,
+    ...heroCatalogSlides(section, t),
   }
 }
 

@@ -3,10 +3,16 @@ import type { Dispatch } from "react"
 import { useTranslation } from "react-i18next"
 import type { BodyGroup, LayoutDocument } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
-import { findSection, idsOf, newSectionId } from "@/features/storefront/layout/sections"
+import {
+  findSection,
+  idsOf,
+  isBodyGroup,
+  newSectionId,
+} from "@/features/storefront/layout/sections"
 import { isDiscrete } from "@/features/storefront/layout/use-autosave"
 import { BRIDGE_ON, whyNotShown } from "./bridge/bridge-client"
 import { useLivePreview } from "./bridge/use-live-preview"
+import { usePreviewPicking } from "./bridge/use-preview-picking"
 import type { Opened } from "./opened"
 
 const V = "storefront.editor.preview"
@@ -25,6 +31,14 @@ interface Options {
   dispatch: Dispatch<EditorAction>
   /** The autosave's: the next change is saved at once. */
   hurry: () => void
+  /** A page reached in the frame that is none of the editor's (its path); null: the page picked. */
+  visited?: string | null
+  /** Faz 2: open a section's form (its edit label pressed in the frame). */
+  onOpen?: (id: string) => void
+  /** Faz 2: a link followed in the frame. */
+  onVisit?: (path: string) => void
+  /** Faz 2: the page the frame drew and whose sections it has. */
+  onLand?: (path: string, group: BodyGroup | null) => void
 }
 
 /**
@@ -46,6 +60,10 @@ export function useEditorPreview({
   round,
   dispatch,
   hurry,
+  visited = null,
+  onOpen = () => undefined,
+  onVisit = () => undefined,
+  onLand = () => undefined,
 }: Options) {
   const { t } = useTranslation()
   // Sections added in this editor whose form opens next: scrolled to whatever the view
@@ -88,8 +106,25 @@ export function useEditorPreview({
     onMissing: (id) => {
       setLost(id)
     },
+    onPick: (message) => {
+      pick.current(message)
+    },
   })
   const { selectAfterSave, select, connected } = preview
+  // Faz 2: hovering both ways, the edit label, the names, links held in the frame
+  const picking = usePreviewPicking({
+    doc,
+    connected,
+    handshakes: preview.handshakes,
+    post: preview.post,
+    onOpen,
+    onVisit,
+    onLand,
+  })
+  const pick = useRef(picking.onPick)
+  useEffect(() => {
+    pick.current = picking.onPick
+  })
   useEffect(() => {
     afterSave.current = (id) => {
       selectAfterSave(id, "if_hidden")
@@ -98,7 +133,12 @@ export function useEditorPreview({
 
   // Why the open section is not in the frame, read from the document itself
   const found = selected ? findSection(doc, selected) : null
-  const reason = found ? whyNotShown(found, page) : null
+  // On a page reached in the frame (the cart, a brand) only the header and footer show
+  const reason = found
+    ? visited !== null && isBodyGroup(found.group)
+      ? "other_page"
+      : whyNotShown(found, page)
+    : null
   // The opened section, shown in the frame; once per opening, not on every keystroke
   const shownReason = useRef(reason)
   useEffect(() => {
@@ -119,14 +159,20 @@ export function useEditorPreview({
   const notice =
     BRIDGE_ON && !preview.live
       ? t(`${V}.liveOff`)
-      : reason
-        ? t(`${V}.missing.${reason}`)
-        : selected !== null && lost === selected
-          ? t(`${V}.missing.timeout`)
-          : null
+      : (picking.blocked ??
+        (reason
+          ? t(`${V}.missing.${reason}`)
+          : selected !== null && lost === selected
+            ? t(`${V}.missing.timeout`)
+            : visited !== null
+              ? t(`${V}.elsewhere`, { path: visited })
+              : null))
 
   return {
     preview,
+    /** Faz 2: the tree's side of hovering, and what a live region says. */
+    hover: picking.hover,
+    announce: picking.announce,
     act,
     /** What the frame cannot show of what is asked, said beside it; null: nothing. */
     notice,
