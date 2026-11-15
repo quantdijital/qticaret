@@ -7708,7 +7708,14 @@
         "noHost": "The preview needs your shop's address; enter your domain in the SEO settings.",
         "noHostLink": "Go to SEO settings",
         "scale": "Scale",
-        "scaleHint": "The storefront is drawn at the chosen device's width and scaled down to fit here."
+        "scaleHint": "The storefront is drawn at the chosen device's width and scaled down to fit here.",
+        "missing": {
+          "hidden": "This section is hidden; it does not show in the preview.",
+          "scheduled": "This section is outside its dates; it does not show in the preview now.",
+          "other_page": "This section is on another page.",
+          "timeout": "The section was not found in the preview."
+        },
+        "liveOff": "Live preview is unavailable; the preview will reload after each save."
       },
       "publish": {
         "open": "Publish",

@@ -118,3 +118,24 @@ export const useRestoreRevision = () =>
 /** A fresh link to the draft as saved now. */
 export const fetchLayoutPreview = () =>
   sdk.client.fetch<LayoutPreview>(`${PATH}/preview`, { method: "POST", body: {} })
+
+/** The theme editor's live preview session (adr/0065 §1): one address while the editor is open. */
+export interface EditorSession extends LayoutPreview {
+  id: string
+  /** How long it lasts without a renewal. */
+  idle_ms: number
+}
+
+export const openEditorSession = () =>
+  sdk.client.fetch<EditorSession>(`${PATH}/editor-session`, { method: "POST", body: {} })
+
+export const renewEditorSession = (id: string) =>
+  sdk.client.fetch<{ renewed: boolean }>(`${PATH}/editor-session/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    body: {},
+  })
+
+export const closeEditorSession = (id: string) =>
+  sdk.client.fetch<{ deleted: boolean }>(`${PATH}/editor-session/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  })
