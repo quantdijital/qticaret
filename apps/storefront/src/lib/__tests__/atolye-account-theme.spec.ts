@@ -254,3 +254,57 @@ describe("the theme's account pages", () => {
     expect(html).toContain('href="/hesap/sifre-sifirla"')
   })
 })
+
+describe("the account pages' boxes (adr/0067)", () => {
+  it("draws the menu, the details parts and the requests on the theme's box recipe", () => {
+    const html = renderPage(atolyeTheme, "AccountPage", {
+      view: account({
+        section: "profile",
+        privacyRequests: [
+          {
+            kind: "Veri kopyası",
+            status: "İnceleniyor",
+            received: "5 Kasım 2026",
+            due: "5 Aralık 2026",
+          },
+        ],
+      }),
+      actions,
+    })
+    expect(html).toContain("hidden flex-col gap-2 self-start rounded-tile gf-pane p-3")
+    expect(html.match(/grid scroll-mt-40 gap-5 rounded-tile gf-pane p-5/g)?.length).toBeGreaterThan(
+      1
+    )
+    // Inside a part: a request, the consents' group, the erasure's confirmation
+    expect(html).toContain("flex flex-col gap-1 rounded-media gf-pane-inner p-4 text-sm")
+    expect(html).toContain("flex flex-col rounded-media gf-pane-inner px-4 py-2")
+    expect(html).toContain("mt-3 flex flex-col gap-3 rounded-media gf-pane-inner p-4")
+    expect(html).not.toMatch(/rounded-(tile|media) bg-(paper-2|field) p/)
+  })
+
+  it("draws an address card as a box and its removal inside it as an inner box", () => {
+    const html = renderPage(atolyeTheme, "AccountPage", {
+      view: account({
+        section: "addresses",
+        addresses: [{ id: "cuaddr_1", name: "Elif Yıldız", lines: ["Kınıklı Cad. No: 12"] }],
+      }),
+      actions,
+    })
+    expect(html).toContain("flex flex-col gap-5 rounded-tile gf-pane p-5 sm:p-6")
+    expect(html).toContain("mt-3 flex flex-wrap items-center gap-3 rounded-media gf-pane-inner p-4")
+    expect(html).not.toMatch(/rounded-(tile|media) bg-(paper-2|field) p/)
+  })
+
+  it("draws an order's row and the empty list as boxes", () => {
+    const rows = renderPage(atolyeTheme, "AccountPage", {
+      view: account({ section: "orders", orders: [order("713")] }),
+      actions,
+    })
+    expect(rows).toContain("group flex flex-col gap-4 rounded-tile gf-pane p-4")
+    const none = renderPage(atolyeTheme, "AccountPage", {
+      view: account({ section: "orders", orders: [] }),
+      actions,
+    })
+    expect(none).toContain("flex flex-col items-start justify-between gap-8 rounded-tile gf-pane")
+  })
+})

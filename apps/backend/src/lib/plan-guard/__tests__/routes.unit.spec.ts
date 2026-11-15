@@ -112,6 +112,7 @@ describe("every admin write route has a plan decision", () => {
       "seo.sitemap",
       "seo.url_style",
       "tr_address.sync",
+      "wholesale.sync",
     ]
     expect([...PLAN_OPEN_JOBS, ...closedJobs].sort()).toEqual([...JOB_TYPE_KEYS].sort())
     for (const job of JOB_TYPE_KEYS) {

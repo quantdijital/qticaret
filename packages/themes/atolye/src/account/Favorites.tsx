@@ -10,7 +10,7 @@ type Favorite = AccountPageView["favorites"][number]
 function PlainCard({ item }: { item: Favorite }) {
   return (
     <article className="group relative flex flex-col gap-3">
-      <div className="aspect-card overflow-hidden rounded-media bg-paper-2">
+      <div className="aspect-card overflow-hidden rounded-media bg-media">
         {item.image && (
           <ResponsiveImage
             image={item.image}
@@ -49,8 +49,8 @@ export function Favorites({
   if (view.favorites.length === 0) {
     return (
       <>
-        <div className="flex flex-col items-start gap-5 rounded-tile bg-paper-2 p-6 sm:flex-row sm:items-center sm:p-8">
-          <span className="flex size-14 shrink-0 items-center justify-center rounded-pill bg-paper">
+        <div className="flex flex-col items-start gap-5 rounded-tile gf-pane p-6 sm:flex-row sm:items-center sm:p-8">
+          <span className="flex size-14 shrink-0 items-center justify-center rounded-pill gf-shape bg-paper">
             <Heart className="size-6" aria-hidden="true" strokeWidth={1.75} />
           </span>
           <p className="flex flex-1 flex-col gap-1">

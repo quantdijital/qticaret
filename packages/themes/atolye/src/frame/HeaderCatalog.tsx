@@ -14,9 +14,8 @@ import { Wordmark } from "./Wordmark"
 import { LABELLED, accountOf, allInOf, searchOf } from "./header-words"
 import { menuWords } from "./menu-words"
 
-/** An icon on the menu bar: its ground's colours (`header-catalog.css`), 44 px. */
-const ON_BAR =
-  "gf-on-bar gf-icon-btn text-text transition-colors duration-(--dur-micro) hover:bg-paper-2"
+/** An icon on the menu bar: its ground's colours (`header-catalog.css`), 44 px; hovered, the menus' look. */
+const ON_BAR = "gf-on-bar gf-icon-btn gf-tool text-text transition-colors duration-(--dur-micro)"
 
 /** Whether the catalog header draws the strip, and the phone beside its search. */
 export function catalogParts(shop: ShopView, catalog: HeaderCatalogView) {

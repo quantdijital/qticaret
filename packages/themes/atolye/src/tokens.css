@@ -103,7 +103,14 @@
   --radius-box: min(var(--button-radius, 999px), var(--radius-inner));
   /* Chips, badges and status pills: never scaled, whatever the button shape */
   --radius-pill: 999px;
+  /* The floating surfaces' one shadow (adr/0067 S2): a dropdown, a drawer, a dialog, a
+     floating button. Two names for one value, by what the surface has of its own: a
+     surface with no edge (a drawer, a dialog, a button on a photo) takes `shadow-float`;
+     one with its own rule (a dropdown, the search panel, the back-to-top button, the
+     phone's buy bar) takes `shadow-float-edged`. The shop's `shadow` setting tells them
+     apart: off, the first draws a 1 px rule in the shadow's place, the second nothing */
   --shadow-float: 0 12px 32px oklch(20% 0.012 255 / 0.14), 0 1px 2px oklch(20% 0.012 255 / 0.08);
+  --shadow-float-edged: var(--shadow-float);
 }
 
 :root {
@@ -174,4 +181,19 @@
   :root {
     --color-signal-on-stage: oklch(from var(--primary) 78% min(c, 0.13) h);
   }
+}
+
+/*
+ * The photo well (adr/0067 S4, `media_ground`): the ground behind a product's
+ * or a category's photograph and a list's thumbnail, `bg-media` (a card, a
+ * gallery) and `bg-media-deep` (a row's small picture, a tone darker). One
+ * name for the decision, apart from the same tones on boxes, skeletons and
+ * empty states. `inline` on purpose: the utility prints the tone itself, so
+ * it resolves on the well and follows a section that retones the page
+ * (`look.css`, a menu bar's ground), as `bg-paper-2` / `bg-paper-3` did. A
+ * variable declared at `:root` would freeze the root's tone instead.
+ */
+@theme inline {
+  --color-media: var(--color-paper-2);
+  --color-media-deep: var(--color-paper-3);
 }

@@ -25,7 +25,7 @@ function Part({
     <section
       id={id}
       aria-labelledby={`${id}-baslik`}
-      className="grid scroll-mt-40 gap-5 rounded-tile bg-paper-2 p-5 sm:p-7 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-10"
+      className="grid scroll-mt-40 gap-5 rounded-tile gf-pane p-5 sm:p-7 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)] lg:gap-10"
     >
       <div className="flex flex-col gap-2">
         <h2 id={`${id}-baslik`} className="text-title">
@@ -58,11 +58,11 @@ function Requests({ view, t }: { view: AccountPageView; t: Translate }) {
       {view.privacyRequests.map((request, index) => (
         <li
           key={`${request.kind}:${request.received}:${String(index)}`}
-          className="flex flex-col gap-1 rounded-media bg-field p-4 text-sm"
+          className="flex flex-col gap-1 rounded-media gf-pane-inner p-4 text-sm"
         >
           <span className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-md font-extrabold">{request.kind}</span>
-            <span className="rounded-pill bg-paper-2 px-2.5 py-1 text-xs font-semibold">
+            <span className="rounded-pill gf-shape bg-paper-2 px-2.5 py-1 text-xs font-semibold">
               {request.status}
             </span>
           </span>
@@ -166,7 +166,7 @@ export function Profile({
             </summary>
             <form
               action={actions.requestPrivacy}
-              className="mt-3 flex flex-col gap-3 rounded-media bg-field p-4"
+              className="mt-3 flex flex-col gap-3 rounded-media gf-pane-inner p-4"
             >
               <input type="hidden" name="kind" value="erasure" />
               <p className="text-sm">{t("account.erasure_confirm")}</p>

@@ -2,7 +2,7 @@ import type { NavCategoryView, ShopView, Translate } from "@qticaret/ui"
 
 /** A header icon with its name under it from 1024 px (account, favourites, cart). */
 export const LABELLED =
-  "gf-icon-btn flex-col gap-0.5 px-2 text-2xs font-semibold leading-none max-lg:size-11 lg:min-w-16 lg:py-1"
+  "gf-icon-btn gf-tool flex-col gap-0.5 px-2 text-2xs font-semibold leading-none max-lg:size-11 lg:min-w-16 lg:py-1"
 
 /** "Tümünü gör: {name}" for each category path, in words. */
 export const allInOf = (categories: readonly NavCategoryView[], t: Translate) =>

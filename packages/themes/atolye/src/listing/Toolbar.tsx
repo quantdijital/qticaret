@@ -37,11 +37,11 @@ function Sort({
               rel="nofollow"
               aria-current={option.current ? "true" : undefined}
               className={cn(
-                "flex min-h-11 items-center justify-between gap-4 rounded-inner px-3 text-sm no-underline hover:bg-paper-2",
+                "gf-menu-row flex min-h-11 items-center justify-between gap-4 rounded-inner px-3 text-sm no-underline",
                 option.current && "font-semibold"
               )}
             >
-              {option.label}
+              <span className="gf-menu-word">{option.label}</span>
               {option.current && (
                 <Check className="size-4 shrink-0" aria-hidden="true" strokeWidth={2.5} />
               )}

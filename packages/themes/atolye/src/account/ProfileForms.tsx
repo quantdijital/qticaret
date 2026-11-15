@@ -155,7 +155,7 @@ export function ConsentForm({
   return (
     <form {...form} className="flex flex-col gap-4">
       <input type="hidden" name="marketing_version" value={profile.marketingVersion} />
-      <div className="flex flex-col rounded-media bg-field px-4 py-2">
+      <div className="flex flex-col rounded-media gf-pane-inner px-4 py-2">
         <CheckField name="marketing_email" defaultChecked={profile.marketingEmail}>
           {words.email}
         </CheckField>

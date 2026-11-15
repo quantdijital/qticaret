@@ -150,7 +150,7 @@ export function BackToTop({
         }
       }}
       className={cn(
-        "z-(--z-raised) inline-flex items-center justify-center border border-rule bg-field text-text shadow-float hover:border-edge",
+        "z-(--z-raised) inline-flex items-center justify-center border border-rule bg-field text-text shadow-float-edged hover:border-edge",
         docked ? "absolute" : cn("fixed", bottomOf(aboveBottomBar, overWhatsApp)),
         view.side === "left"
           ? mode === "tab"

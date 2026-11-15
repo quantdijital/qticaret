@@ -60,7 +60,7 @@ export function Rack({
       {empty ? (
         <>
           {head}
-          <p className="rounded-media bg-paper-2 p-4 text-text-2">{section.empty}</p>
+          <p className="rounded-media gf-pane p-4 text-text-2">{section.empty}</p>
         </>
       ) : variant === "carousel" ? (
         <CarouselShelf {...props} head={head} />

@@ -6,7 +6,7 @@ import { LineName, LinePhoto } from "../parts/LineLink"
 import { CopyIban } from "./CopyIban"
 import { OrderGift } from "./OrderGift"
 
-const WELL = "flex flex-col gap-5 rounded-tile bg-paper-2 p-5 sm:p-7"
+const WELL = "flex flex-col gap-5 rounded-tile gf-pane p-5 sm:p-7"
 
 /** A transfer not paid yet: the account, the amount and the reference, the IBAN large with a button that copies it. */
 export function BankTransfer({ view, t }: { view: OrderPageView; t: Translate }) {
@@ -66,7 +66,7 @@ export function CashOnDelivery({ view, t }: { view: OrderPageView; t: Translate 
     return null
   }
   return (
-    <p className="flex items-start gap-3 rounded-tile bg-paper-2 p-5 text-md sm:p-7">
+    <p className="flex items-start gap-3 rounded-tile gf-pane p-5 text-md sm:p-7">
       <HandCoins className="size-6 shrink-0" aria-hidden="true" strokeWidth={1.75} />
       {t("order.cod_text", { amount: view.total })}
     </p>
@@ -87,7 +87,7 @@ export function Parcels({ view, t }: { view: OrderPageView; t: Translate }) {
         {view.shipments.map((parcel, index) => (
           <li
             key={String(index)}
-            className="flex flex-col gap-3 rounded-media bg-field p-4 sm:flex-row sm:items-center"
+            className="flex flex-col gap-3 rounded-media gf-pane-inner p-4 sm:flex-row sm:items-center"
           >
             <Truck className="size-6 shrink-0 text-text-2" aria-hidden="true" strokeWidth={1.75} />
             <div className="flex min-w-0 flex-1 flex-col gap-0.5 text-sm">
@@ -135,7 +135,7 @@ export function OrderLines({ view, t }: { view: OrderPageView; t: Translate }) {
           <li key={`${String(index)}:${line.title}`} className="flex items-start gap-4">
             <LinePhoto
               path={line.path}
-              className="size-18 shrink-0 overflow-hidden rounded-inner bg-paper-3 sm:size-20"
+              className="size-18 shrink-0 overflow-hidden rounded-inner bg-media-deep sm:size-20"
             >
               {line.image && (
                 <ResponsiveImage

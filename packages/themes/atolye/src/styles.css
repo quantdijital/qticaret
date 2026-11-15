@@ -25,12 +25,14 @@
 @import "./ui.css";
 @import "./tabs.css";
 @import "./buy.css";
+@import "./chips.css";
 @import "./pages.css";
 @import "./slider.css";
 @import "./scroller.css";
 @import "./banner.css";
 @import "./content.css";
 @import "./frame.css";
+@import "./shadow.css";
 @import "./menu.css";
 @import "./header-catalog.css";
 @import "./look.css";
@@ -39,6 +41,7 @@
 @import "./card.css";
 @import "./catalog.css";
 @import "./surface.css";
+@import "./media.css";
 
 /*
  * The theme's values for the contract's names (shadcn's names, wired to

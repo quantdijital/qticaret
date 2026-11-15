@@ -31,7 +31,7 @@ export function CustomerPhotos({
             const alt = t("reviews.customer_photo_by", { author: photo.author, product: name })
             const frame = (
               <>
-                <span className="relative block aspect-square overflow-hidden rounded-media bg-paper-2">
+                <span className="relative block aspect-square overflow-hidden rounded-media bg-media">
                   <ResponsiveImage
                     image={{ ...photo.image, alt }}
                     sizes="(min-width: 1024px) 15vw, 40vw"

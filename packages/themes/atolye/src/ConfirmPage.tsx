@@ -22,7 +22,7 @@ export function ConfirmPage({
   )
   return (
     <Container className="pt-8 lg:pt-16">
-      <div className="mx-auto flex max-w-2xl flex-col items-start gap-6 rounded-tile bg-paper-2 p-6 sm:p-10">
+      <div className="mx-auto flex max-w-2xl flex-col items-start gap-6 rounded-tile gf-pane p-6 sm:p-10">
         <h1>{view.title}</h1>
         <p className="max-w-[52ch] text-lg text-text-2">{view.text}</p>
         {view.warning && (

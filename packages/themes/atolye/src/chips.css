@@ -1,0 +1,97 @@
+/*
+ * The chip family's grounds (adr/0067 S3, theme setting `chip_style`):
+ * the choosable pills the shop's chips, tabs, option buttons and page
+ * numbers share. Today's drawing (`filled`) is a tinted pill a step darker
+ * than the page, one more step under the pointer, and the chosen one
+ * filled: the accent's mark for a chip, a tab and an option (adr/0062
+ * §11), graphite for the current page (a place, not a choice).
+ *
+ * The family's members: `.gf-chip` (`ui.css`, its search panel variant
+ * `.gf-option-chip`), `.gf-tab` (`tabs.css`, the shelf's tabs), and here
+ * the radio pills of a product's options and its installment programs
+ * (`.gf-pill`), a listing's page numbers (`.gf-page-link`) and a
+ * product's highlighted facts (`.gf-fact`, a pill to read, not to press).
+ * Their shape, size and type stay in the markup; only the grounds live
+ * here, so a step of the setting is written once for all of them.
+ */
+@layer components {
+  .gf-pill {
+    background-color: var(--color-paper-2);
+  }
+  .gf-pill:has(:checked) {
+    background-color: var(--color-mark);
+    color: var(--color-mark-ink);
+  }
+  .gf-page-link {
+    background-color: var(--color-paper-2);
+  }
+  .gf-page-link[aria-current="page"] {
+    background-color: var(--color-text);
+    color: var(--color-paper);
+  }
+  .gf-fact {
+    background-color: var(--color-paper-2);
+  }
+}
+
+/* Unlayered like `ui.css`'s hover rules: a step darker under the pointer, the chosen one stays */
+@media (hover: hover) {
+  .gf-pill:hover:not(:has(:checked)),
+  .gf-page-link:hover:not([aria-current="page"]) {
+    background-color: var(--color-paper-3);
+  }
+}
+
+/*
+ * `chip_style: lined` (adr/0067 S3): the theme's root element carries
+ * `data-chip-style="lined"`; at the default nothing is printed and none
+ * of this applies. A resting member stands on its surroundings' own
+ * ground (`paper`, which a section's ground turns into its well, the
+ * graphite stage or the shop's colour, `look.css`) inside a 1 px edge
+ * drawn within the pill, so switching moves nothing. The edge is the
+ * controls' `edge`: 3:1 on the counter, both wells and the field in
+ * every page tone (WCAG 1.4.11, `atolye-tones.spec.ts`), the ground's
+ * own light ink on a stage and on the shop's colour. Under the pointer
+ * the edge turns to the ink over the next tint, as a quiet button does.
+ * The chosen one keeps today's fill (adr/0062 §11): every rule here
+ * leaves it out. A sold-out option keeps its struck, quieter words. A
+ * fact is read, not pressed: a box's hairline, not a control's edge.
+ * A chip a box draws (`gf-box`, a listing's sort and filter buttons)
+ * follows the box style instead. Each rule sits in the layer of the rule
+ * it reads: the chips in `components`, the tabs (`tabs.css`) and the
+ * hover (`ui.css`, `buy.css`) outside the layers.
+ */
+@layer components {
+  [data-chip-style="lined"]
+    :is(.gf-chip:not(.gf-box), .gf-pill, .gf-page-link):not(
+      [aria-selected="true"],
+      [aria-current="page"],
+      :has(:checked)
+    ) {
+    background-color: var(--color-paper);
+    box-shadow: inset 0 0 0 1px var(--color-edge);
+  }
+  /* The live search's chip stands on its panel's field */
+  [data-chip-style="lined"] .gf-chip.gf-option-chip:not([aria-selected="true"]) {
+    background-color: var(--color-field);
+  }
+  [data-chip-style="lined"] .gf-fact {
+    background-color: var(--color-paper);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+  }
+}
+[data-chip-style="lined"] .gf-tab:not(:has(> input:checked)) {
+  background-color: var(--color-paper);
+  box-shadow: inset 0 0 0 1px var(--color-edge);
+}
+@media (hover: hover) {
+  [data-chip-style="lined"]
+    :is(.gf-chip:not(.gf-box), .gf-pill, .gf-page-link, .gf-tab):hover:not(
+      [aria-selected="true"],
+      [aria-current="page"],
+      :has(:checked)
+    ) {
+    background-color: var(--color-paper-2);
+    box-shadow: inset 0 0 0 1px var(--color-text);
+  }
+}

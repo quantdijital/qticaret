@@ -42,7 +42,7 @@ export function BuyBar({
       data-sticky-buy=""
       data-open={open ? "true" : "false"}
       inert={!open}
-      className="gf-buybar fixed inset-x-0 bottom-0 z-(--z-sticky-nav) border-t border-rule bg-paper px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-float lg:hidden"
+      className="gf-buybar fixed inset-x-0 bottom-0 z-(--z-sticky-nav) border-t border-rule bg-paper px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-float-edged lg:hidden"
     >
       <div className="mx-auto flex max-w-xl items-center gap-3">
         {image && (

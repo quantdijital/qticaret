@@ -136,7 +136,7 @@ function Imprint({
   return (
     <section
       aria-labelledby="kunye"
-      className="flex flex-col gap-4 rounded-tile bg-paper-2 p-5 sm:p-6 lg:gap-5 lg:p-8"
+      className="flex flex-col gap-4 rounded-tile gf-pane p-5 sm:p-6 lg:gap-5 lg:p-8"
     >
       <h2 id="kunye" className="text-title">
         {t("content.identity")}

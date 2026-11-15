@@ -2,7 +2,7 @@ import { FileText, UserRoundPlus } from "lucide-react"
 import type { OrderPageView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 
-const WELL = "flex flex-col gap-5 rounded-tile bg-paper-2 p-5 sm:p-7"
+const WELL = "flex flex-col gap-5 rounded-tile gf-pane p-5 sm:p-7"
 
 function Totals({ view, t }: { view: OrderPageView; t: Translate }) {
   const row = "flex items-baseline justify-between gap-4"
@@ -45,7 +45,7 @@ export function OrderAside({ view, t }: { view: OrderPageView; t: Translate }) {
         </h2>
         <Totals view={view} t={t} />
         {view.address && (
-          <div className="flex flex-col gap-1 rounded-media bg-field p-4 text-sm">
+          <div className="flex flex-col gap-1 rounded-media gf-pane-inner p-4 text-sm">
             <h3 className="text-sm font-semibold tracking-normal text-text-2">
               {t("order.delivery")}
             </h3>

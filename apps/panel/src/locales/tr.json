@@ -8392,7 +8392,7 @@
               "float": "Açılır katmanlarda",
               "none": "Yok"
             },
-            "hint": "Sayfanın üstünde açılan yüzeyler: açılır menü, çekmece, pencere, yapışkan üst bilgi ve yüzen düğmeler. Yok seçilince gölgenin yerine 1 px çizgi gelir."
+            "hint": "Sayfanın üstünde açılan ya da yüzen yüzeyler: açılır menü, çekmece, pencere, telefondaki yapışkan satın alma çubuğu ve yüzen düğmeler. Yok seçilince gölge kalkar; kendi kenarı olmayan yüzeye 1 px çizgi gelir."
           },
           "chip_style": {
             "label": "Çip stili",

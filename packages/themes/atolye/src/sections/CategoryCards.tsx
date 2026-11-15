@@ -66,7 +66,7 @@ function Card({
           tabIndex={-1}
           aria-hidden="true"
           className={cn(
-            "block shrink-0 overflow-hidden rounded-media bg-paper-2",
+            "block shrink-0 overflow-hidden rounded-media bg-media",
             side ? "size-20 sm:size-24" : "aspect-[4/3] w-full"
           )}
         >

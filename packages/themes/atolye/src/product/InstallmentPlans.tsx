@@ -5,7 +5,7 @@ import type { InstallmentFamilyView } from "@qticaret/ui"
 import type { InstallmentWords } from "./words"
 
 const PILL =
-  "inline-flex min-h-10 cursor-pointer items-center justify-center rounded-pill bg-paper-2 px-4 text-sm font-semibold whitespace-nowrap transition-colors duration-(--dur-micro) hover:bg-paper-3 has-[:checked]:bg-mark has-[:checked]:text-mark-ink has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
+  "inline-flex min-h-10 cursor-pointer items-center justify-center gf-pill rounded-pill px-4 text-sm font-semibold whitespace-nowrap transition-colors duration-(--dur-micro) has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
 
 /**
  * The dialog's inside (owner 2026-11-05): the card programs as real

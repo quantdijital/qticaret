@@ -26,7 +26,7 @@ export function PaymentFramePage({ view, t }: { view: PaymentFramePageView; t: T
           <FoldedSummary summary={view.summary} t={t} />
           <section
             aria-labelledby="kart-formu"
-            className="flex flex-col gap-4 rounded-tile bg-paper-2 p-2 sm:p-4"
+            className="flex flex-col gap-4 rounded-tile gf-pane p-2 sm:p-4"
           >
             <h2
               id="kart-formu"

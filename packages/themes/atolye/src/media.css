@@ -1,0 +1,61 @@
+/*
+ * The photo well's ground (theme setting `media_ground`, adr/0067 S4).
+ * `well` (the default) draws a tone darker than the page behind a product's
+ * or a category's photograph and a list's thumbnail (`bg-media`,
+ * `bg-media-deep`, tokens.css), and prints nothing. `page` (the root's
+ * `data-media-ground="page"`) draws the ground the photo sits on, so a
+ * white-ground product photograph merges with the page: the page's paper,
+ * or the field inside a white box (a framed card, a price band, a dropdown,
+ * the live search). Each resolves on the well, so on a graphite or the
+ * shop's-colour section the well is that section's own ground and the
+ * photo reads on it as it does on the page.
+ *
+ * No edge is added: the setting's point is a photo without a frame. A shop
+ * that wants the card's outline picks the framed card (`product_card.variant`),
+ * which keeps its 1 px rule; a row's thumbnail stands beside its name.
+ *
+ * Unlayered, as `surface.css`: the attribute and the class outrank the
+ * well's utility whatever its layer (adr/0067 "Uygulama notu").
+ */
+[data-media-ground="page"] :is(.bg-media, .bg-media-deep) {
+  background-color: var(--color-paper);
+}
+/*
+ * A well in one of the theme's boxes (`gf-pane`, `gf-pane-inner`, surface.css)
+ * sits on that box, so it takes the box's ground at each `surface_style`
+ * step: `filled` the tone (a box) or the field (a box inside one), `lined`
+ * the page's paper (a ruled box) or the tone (a box inside it). The inner
+ * box is written after the box, so a well in both reads the nearer one.
+ * The order's lines, the payment link's rows, a guide's card, an account's
+ * order row.
+ */
+[data-media-ground="page"] .gf-pane :is(.bg-media, .bg-media-deep) {
+  background-color: var(--color-paper-2);
+}
+[data-media-ground="page"] .gf-pane-inner :is(.bg-media, .bg-media-deep) {
+  background-color: var(--color-field);
+}
+[data-media-ground="page"][data-surface="lined"] .gf-pane :is(.bg-media, .bg-media-deep) {
+  background-color: var(--color-paper);
+}
+[data-media-ground="page"][data-surface="lined"] .gf-pane-inner :is(.bg-media, .bg-media-deep) {
+  background-color: var(--color-paper-2);
+}
+[data-media-ground="page"] :is(.bg-field, .gf-drop, .gf-suggest) :is(.bg-media, .bg-media-deep) {
+  background-color: var(--color-field);
+}
+/*
+ * A well without its photo (a product or a category with no picture yet)
+ * would vanish into the ground it now takes: the card would be words under
+ * an empty space. It keeps its shape with the rule a framed card draws,
+ * inside the well so nothing moves (as `shadow: none` gives a floating
+ * surface its 1 px line, adr/0067 §2.2). A well with its photo stays
+ * unframed.
+ */
+[data-media-ground="page"] :is(.bg-media, .bg-media-deep):not(:has(img)) {
+  box-shadow: inset 0 0 0 1px var(--color-rule);
+}
+/* The lined subcategory tile's small picture (surface.css) is a photo well too */
+[data-media-ground="page"][data-surface="lined"] .gf-subtile img {
+  background: var(--color-paper);
+}

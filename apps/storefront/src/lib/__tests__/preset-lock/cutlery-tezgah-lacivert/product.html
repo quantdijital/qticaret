@@ -39,7 +39,7 @@
     <div class="min-w-0">
       <div class="md:sticky md:top-(--gf-stick-top)">
         <section aria-label="Ürün görselleri" class="gf-pictures flex flex-col gap-3">
-          <div class="relative overflow-hidden rounded-tile bg-paper-2">
+          <div class="relative overflow-hidden rounded-tile bg-media">
             <ul class="gf-gallery flex overflow-x-auto" tabindex="0" aria-label="Ürün görselleri">
               <li id="gorsel-1" data-index="0" class="relative aspect-square w-full shrink-0">
                 <picture>
@@ -113,7 +113,7 @@
                   href="#gorsel-1"
                   aria-current="true"
                   aria-label="Görsel 1"
-                  class="relative block aspect-square overflow-hidden rounded-inner bg-paper-2 outline-offset-2 transition-opacity duration-(--dur-micro) outline-2 outline-text"
+                  class="relative block aspect-square overflow-hidden rounded-inner bg-media outline-offset-2 transition-opacity duration-(--dur-micro) outline-2 outline-text"
                 >
                   <picture>
                     <source
@@ -138,7 +138,7 @@
                 <a
                   href="#gorsel-2"
                   aria-label="Görsel 2"
-                  class="relative block aspect-square overflow-hidden rounded-inner bg-paper-2 outline-offset-2 transition-opacity duration-(--dur-micro) opacity-70 hover:opacity-100"
+                  class="relative block aspect-square overflow-hidden rounded-inner bg-media outline-offset-2 transition-opacity duration-(--dur-micro) opacity-70 hover:opacity-100"
                 >
                   <picture>
                     <source
@@ -163,7 +163,7 @@
                 <a
                   href="#gorsel-3"
                   aria-label="Görsel 3"
-                  class="relative block aspect-square overflow-hidden rounded-inner bg-paper-2 outline-offset-2 transition-opacity duration-(--dur-micro) opacity-70 hover:opacity-100"
+                  class="relative block aspect-square overflow-hidden rounded-inner bg-media outline-offset-2 transition-opacity duration-(--dur-micro) opacity-70 hover:opacity-100"
                 >
                   <picture>
                     <source
@@ -342,7 +342,7 @@
               <div class="flex flex-wrap gap-2">
                 <label
                   for="secenek-opt_length-18 cm"
-                  class="inline-flex min-h-11 min-w-12 cursor-pointer items-center justify-center rounded-pill bg-paper-2 px-5 text-sm font-semibold transition-colors duration-(--dur-micro) hover:bg-paper-3 has-[:checked]:bg-mark has-[:checked]:text-mark-ink has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
+                  class="inline-flex min-h-11 min-w-12 cursor-pointer items-center justify-center gf-pill rounded-pill px-5 text-sm font-semibold transition-colors duration-(--dur-micro) has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
                 >
                   <input
                     id="secenek-opt_length-18 cm"
@@ -356,7 +356,7 @@
                 </label>
                 <label
                   for="secenek-opt_length-22 cm"
-                  class="inline-flex min-h-11 min-w-12 cursor-pointer items-center justify-center rounded-pill bg-paper-2 px-5 text-sm font-semibold transition-colors duration-(--dur-micro) hover:bg-paper-3 has-[:checked]:bg-mark has-[:checked]:text-mark-ink has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
+                  class="inline-flex min-h-11 min-w-12 cursor-pointer items-center justify-center gf-pill rounded-pill px-5 text-sm font-semibold transition-colors duration-(--dur-micro) has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
                 >
                   <input
                     id="secenek-opt_length-22 cm"
@@ -379,7 +379,7 @@
               <div class="flex flex-wrap gap-2">
                 <label
                   for="secenek-opt_handle-Ceviz"
-                  class="inline-flex min-h-11 min-w-12 cursor-pointer items-center justify-center rounded-pill bg-paper-2 px-5 text-sm font-semibold transition-colors duration-(--dur-micro) hover:bg-paper-3 has-[:checked]:bg-mark has-[:checked]:text-mark-ink has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
+                  class="inline-flex min-h-11 min-w-12 cursor-pointer items-center justify-center gf-pill rounded-pill px-5 text-sm font-semibold transition-colors duration-(--dur-micro) has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus"
                 >
                   <input
                     id="secenek-opt_handle-Ceviz"
@@ -393,7 +393,7 @@
                 </label>
                 <label
                   for="secenek-opt_handle-Geyik boynuzu"
-                  class="inline-flex min-h-11 min-w-12 cursor-pointer items-center justify-center rounded-pill bg-paper-2 px-5 text-sm font-semibold transition-colors duration-(--dur-micro) hover:bg-paper-3 has-[:checked]:bg-mark has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus text-text-3 line-through decoration-1 has-[:checked]:text-paper"
+                  class="inline-flex min-h-11 min-w-12 cursor-pointer items-center justify-center gf-pill rounded-pill px-5 text-sm font-semibold transition-colors duration-(--dur-micro) has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus text-text-3 line-through decoration-1 has-[:checked]:text-paper"
                 >
                   <input
                     id="secenek-opt_handle-Geyik boynuzu"
@@ -513,7 +513,7 @@
             data-sticky-buy=""
             data-open="false"
             inert=""
-            class="gf-buybar fixed inset-x-0 bottom-0 z-(--z-sticky-nav) border-t border-rule bg-paper px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-float lg:hidden"
+            class="gf-buybar fixed inset-x-0 bottom-0 z-(--z-sticky-nav) border-t border-rule bg-paper px-4 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] shadow-float-edged lg:hidden"
           >
             <div class="mx-auto flex max-w-xl items-center gap-3">
               <span class="gf-stage relative size-12 shrink-0 overflow-hidden rounded-inner">
@@ -1348,7 +1348,7 @@
                   class="group gf-card gf-card-framed @container relative flex h-full flex-col gap-3 rounded-tile border border-rule bg-field p-2.5"
                 >
                   <div
-                    class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-paper-2"
+                    class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
                   >
                     <picture>
                       <source
@@ -1429,7 +1429,7 @@
                   class="group gf-card gf-card-framed @container relative flex h-full flex-col gap-3 rounded-tile border border-rule bg-field p-2.5"
                 >
                   <div
-                    class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-paper-2"
+                    class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
                   >
                     <picture>
                       <source
@@ -1544,7 +1544,7 @@
                   class="group gf-card gf-card-framed @container relative flex h-full flex-col gap-3 rounded-tile border border-rule bg-field p-2.5"
                 >
                   <div
-                    class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-paper-2"
+                    class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
                   >
                     <picture>
                       <source
@@ -1673,7 +1673,7 @@
                   class="group gf-card gf-card-framed @container relative flex h-full flex-col gap-3 rounded-tile border border-rule bg-field p-2.5"
                 >
                   <div
-                    class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-paper-2"
+                    class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
                   >
                     <picture>
                       <source
@@ -1725,7 +1725,7 @@
                   class="group gf-card gf-card-framed @container relative flex h-full flex-col gap-3 rounded-tile border border-rule bg-field p-2.5"
                 >
                   <div
-                    class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-paper-2"
+                    class="gf-card-media relative aspect-card overflow-hidden rounded-media bg-media"
                   >
                     <picture>
                       <source

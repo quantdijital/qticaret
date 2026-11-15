@@ -55,6 +55,21 @@ describe("the theme's sign-in pages", () => {
     expect(html).toContain(t("account.perk_favorites"))
   })
 
+  it("draws the panel as a box, the terms inside it as an inner box and their text a third (adr/0067)", () => {
+    const html = renderPage(atolyeTheme, "AuthPage", {
+      view: authView("register", {
+        terms: { kind: "membership", version: 3, title: "Üyelik Sözleşmesi", html: "<p>Metin</p>" },
+      }),
+      actions: auth,
+    })
+    expect(html).toMatch(
+      /<div class="mx-auto grid max-w-\[64rem\] overflow-hidden rounded-tile gf-pane /
+    )
+    expect(html).toContain('<details class="group rounded-media gf-pane-inner">')
+    expect(html).toMatch(/class="gf-contract [^"]*rounded-inner gf-pane px-4/)
+    expect(html).not.toMatch(/rounded-(tile|media|inner) bg-(paper-2|field)/)
+  })
+
   it("asks a new link instead of a password when the reset link has no key", () => {
     const html = renderPage(atolyeTheme, "AuthPage", {
       view: authView("reset", { notice: t("account.reset_link_invalid") }),
