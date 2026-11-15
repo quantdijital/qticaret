@@ -8,6 +8,7 @@ import type { StoreBannerSection } from "./section-banner.js"
 import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
 import type { SectionDevice } from "./section-device.js"
+import type { AnnouncementSettings } from "./section-announcement.js"
 import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
 import type { StoreCategoriesLinked } from "./section-categories.js"
@@ -237,8 +238,19 @@ export type StoreProductSection =
 export type StoreCategorySection = StorePageSection & { placement: "top" | "bottom" }
 
 /** A section of the header group: drawn above the shop's header on every page but the checkout's. */
-export type StoreHeaderSection =
-  { id: string; type: "announcement_bar"; lines: string[] } | StoreMarqueeSection
+export type StoreHeaderSection = StoreAnnouncementBar | StoreMarqueeSection
+
+/**
+ * The announcement bar: its lines in the shop's words and how it shows more
+ * than one (docs/tema/bilesen-denetimi (b) 6). A backend before the settings
+ * sends none: the storefront reads each as its default (`announcementSettingsOf`),
+ * the first line alone.
+ */
+export type StoreAnnouncementBar = {
+  id: string
+  type: "announcement_bar"
+  lines: string[]
+} & Partial<AnnouncementSettings>
 
 export interface StoreLayout {
   /** The announcement bar and the scrolling strip, each at most once (adr/0049 §10 karar 9). */

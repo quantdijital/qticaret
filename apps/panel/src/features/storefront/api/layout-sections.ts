@@ -1,4 +1,5 @@
 import type {
+  AnnouncementSettings,
   BannerSettings,
   BannerTone,
   MarqueeSettings,
@@ -281,10 +282,15 @@ export type CategorySection = (
   RichTextSection | BannerSection | FaqSection | TrustBadgesSection | WordedSection | MarqueeSection
 ) & { placement: Placement }
 
-export interface AnnouncementBar extends SectionBase {
+/**
+ * The header's announcement bar: its lines and how it shows more than one
+ * (docs/tema/bilesen-denetimi (b) 6). The server fills each setting on
+ * reading; one absent reads as its default (`announcementSettingsOf`).
+ */
+export type AnnouncementBar = SectionBase & {
   type: "announcement_bar"
   lines: string[]
-}
+} & Partial<AnnouncementSettings>
 
 export interface FooterNewsletter extends SectionBase {
   type: "newsletter"

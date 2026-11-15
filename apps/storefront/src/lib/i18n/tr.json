@@ -64,6 +64,8 @@
   "nav.customer_service": "Müşteri hizmetleri",
   "nav.category_menu": "Tüm kategoriler",
   "nav.announcements": "Duyurular",
+  "nav.announcements_pause": "Duyuruları durdur",
+  "nav.announcements_play": "Duyuruları oynat",
   "marquee.label": "Kayan duyurular",
   "marquee.pause": "Kayan yazıyı durdur",
   "marquee.play": "Kayan yazıyı oynat",

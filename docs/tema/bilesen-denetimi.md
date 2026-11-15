@@ -26,7 +26,7 @@
 | O11 | **Gizli ikili karar:** art arda duran ürün rafları kendiliğinden sekmeli tek rafa birleşir; kapatan ayar yok. | `atolye/src/sections/plan.ts` `blocksOf` |
 | O12 | **Görsel odağı (focal point) hiçbir görselde yok;** telefonda kırpma hep ortadan. | `layout-fields.ts` `image` = `url` + `alt` |
 | O13 | **Gelişmiş CSS (adr/0049 §8, E8) yazılmadı;** "Diğer" grubunun gelişmiş katmanı boş. | `custom_css` hiçbir pakette yok |
-| O14 | **Panelin söylediğini tema yapmıyor:** duyuru şeridinin 2.–5. satırı kaydediliyor ama vitrinde hiç görünmüyor. | `tr.json` `types.announcement_bar`, `frame/Announcement.tsx` (`const [line] = lines`). Metin yapıldı (2026-11-15): (a) 8; dönme (b) 6 |
+| O14 | **Panelin söylediğini tema yapmıyor:** duyuru şeridinin 2.–5. satırı kaydediliyor ama vitrinde hiç görünmüyor. | `tr.json` `types.announcement_bar`, `frame/Announcement.tsx` (`const [line] = lines`). Metin yapıldı (2026-11-15): (a) 8; dönme yapıldı (2026-11-15): (b) 6 |
 
 İyi olanlar (korunacak): `look` beş alanı ve "varsayılana dön"; tür başına anlamsız `look` alanının
 gizlenmesi (`lookFieldsFor`); görünürlük + başlangıç/bitiş tarihi her gövde bölümünde (`base`);
@@ -297,6 +297,7 @@ Kapsamda geçen kısaltmalar: **T** = `packages/types/src/store/…`, **B** = `a
 4. **Giriş slaytını kaydırma takımına bağla (1.3, O6, O7, O9):** `autoplay/dots/arrows` boolean'ları ve `interval` sayısı okumada takım adımlarına eşlenir (`interval` 5→fast, 6–7→medium, 8–10→slow), panel takımın alanlarını gösterir. T `layout.ts`, B `hero-slider.ts`, P `hero-slider-form.tsx`, A `SliderStage.tsx`, `SliderControls.tsx`.
 5. **Zemin sözlüğünü tekle (O5):** `light` ile `well` tek ada iner; okumada eşleme. T `section-look.ts`, `section-marquee.ts`, `section-variants.ts`; B aynaları; İ; A `marquee.css`, `header-catalog.css`.
 6. **Duyuru şeridine hareketli aile (1.1):** oto dönme, süre, oklar, durdurma, satır bağlantısı, kapatma. T `layout.ts`, B `announcement-bar.ts`, P `announcement-form.tsx`, A `frame/Announcement.tsx`.
+   **Kısmen yapıldı (2026-11-15):** birden çok duyuru (yalnız ilki / sırayla / yan yana), süre, durdur düğmesi, üzerine gelince dur, azaltılmış harekette durma (adr/0049 Ek 2026-11-15, orta işler). Oklar, satır bağlantısı, kapatma ve zemin açık.
 7. **Benzer ürünlere biçim + kart biçimi (1.15).** T `layout.ts`, B `related-products.ts`, P `related-form.tsx`, A ürün sayfası rafı.
 8. **SSS ayarları (1.14):** ilk soru açık, tek açık. B `faq.ts`, P `faq-form.tsx`, A `Faq.tsx`.
 

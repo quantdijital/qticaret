@@ -117,8 +117,17 @@ medusaIntegrationTestRunner({
       ).toEqual([["product_main"], ["category_main"]])
       const defaultLive = await live()
       expect([defaultLive.product, defaultLive.category]).toEqual([[], []])
+      // The bar's settings as saved: the first line alone (bilesen-denetimi (b) 6)
       expect(defaultLive.header).toEqual([
-        { id: "duyurular", type: "announcement_bar", lines: ["Bize 0532 123 45 67 ile ulaşın"] },
+        {
+          id: "duyurular",
+          type: "announcement_bar",
+          lines: ["Bize 0532 123 45 67 ile ulaşın"],
+          mode: "first",
+          interval: "medium",
+          pause_button: "always",
+          hover_pause: "on",
+        },
       ])
       expect(defaultLive.footer.map((section) => section.type)).toEqual(["newsletter"])
 

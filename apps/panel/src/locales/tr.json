@@ -7779,7 +7779,7 @@
       "types": {
         "announcement_bar": {
           "name": "Duyuru şeridi",
-          "description": "Sayfanın en üstünde ince bir şerit; vitrin ilk duyuruyu gösterir."
+          "description": "Sayfanın en üstünde ince bir şerit; birden çok duyuru yalnız ilki, sırayla ya da yan yana gösterilir."
         },
         "hero": {
           "name": "Giriş",
@@ -8188,7 +8188,37 @@
         "line": "{{number}}. duyuru",
         "placeholder": "{ücretsiz_kargo_eşiği} ve üzeri kargo bedava",
         "add": "Duyuru ekle",
-        "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter. Vitrin şimdilik yalnız ilk satırı gösterir; diğer satırlar saklanır."
+        "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter.",
+        "mode": {
+          "label": "Birden çok duyuru",
+          "term": "multiple",
+          "first": "Yalnız ilki",
+          "rotate": "Sırayla dönsün",
+          "inline": "Yan yana",
+          "hint": "Yan yana: geniş ekranda hepsi tek satırda, telefonda yalnız ilki. Sırayla: hareket azaltılmışsa ilk duyuru kalır."
+        },
+        "interval": {
+          "label": "Geçiş süresi",
+          "term": "interval",
+          "slow": "Yavaş",
+          "medium": "Orta",
+          "fast": "Hızlı",
+          "hint": "Her duyurunun ekranda kalma süresi: 8, 6 ya da 4 saniye."
+        },
+        "pause_button": {
+          "label": "Durdur düğmesi",
+          "term": "pause button",
+          "always": "Her zaman",
+          "hover": "Üzerine gelince",
+          "hint": "Düğme tamamen kaldırılamaz (erişilebilirlik); dokunmatik ekranda her zaman görünür."
+        },
+        "hover_pause": {
+          "label": "Üzerine gelince dur",
+          "term": "pause on hover",
+          "on": "Açık",
+          "off": "Kapalı",
+          "hint": "Klavyeyle şeride gelince her zaman durur."
+        }
       },
       "problems": {
         "required": "Bu satırı yazın ya da kaldırın.",

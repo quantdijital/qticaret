@@ -76,9 +76,15 @@ export function Layout({
       {skip}
       <Announcement
         lines={shop.announcements}
+        settings={shop.announcementSettings}
         links={catalog?.strip ? [] : shop.topLinks}
         contact={catalog?.phone ? { ...shop.contact, phone: null, phoneHref: null } : shop.contact}
-        words={{ announcements: t("nav.announcements"), links: t("nav.top_links") }}
+        words={{
+          announcements: t("nav.announcements"),
+          links: t("nav.top_links"),
+          pause: t("nav.announcements_pause"),
+          play: t("nav.announcements_play"),
+        }}
       />
       {shop.marquee && <Marquee section={shop.marquee} t={t} header />}
       <Header shop={shop} t={t} searchSuggest={searchSuggest} changeCartLine={changeCartLine} />

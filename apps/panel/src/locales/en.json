@@ -7779,7 +7779,7 @@
       "types": {
         "announcement_bar": {
           "name": "Announcement bar",
-          "description": "A thin bar at the very top of the page; the storefront shows the first notice."
+          "description": "A thin bar at the very top; several announcements show the first only, in turn or side by side."
         },
         "hero": {
           "name": "Hero",
@@ -8188,7 +8188,37 @@
         "line": "Announcement {{number}}",
         "placeholder": "Free shipping from {ücretsiz_kargo_eşiği}",
         "add": "Add announcement",
-        "hint": "Up to {{max}} lines of up to {{length}} characters each. For now the storefront shows only the first line; the others are kept."
+        "hint": "Up to {{max}} lines of up to {{length}} characters each.",
+        "mode": {
+          "label": "Several announcements",
+          "term": "multiple",
+          "first": "First only",
+          "rotate": "In turn",
+          "inline": "Side by side",
+          "hint": "Side by side: all on one line on a wide screen, the first only on a phone. In turn: with reduced motion the first one stays."
+        },
+        "interval": {
+          "label": "Interval",
+          "term": "interval",
+          "slow": "Slow",
+          "medium": "Medium",
+          "fast": "Fast",
+          "hint": "How long each announcement stays: 8, 6 or 4 seconds."
+        },
+        "pause_button": {
+          "label": "Pause button",
+          "term": "pause button",
+          "always": "Always",
+          "hover": "On hover",
+          "hint": "It cannot be removed (accessibility); touch screens always show it."
+        },
+        "hover_pause": {
+          "label": "Pause on hover",
+          "term": "pause on hover",
+          "on": "On",
+          "off": "Off",
+          "hint": "It always stops when the keyboard reaches the bar."
+        }
       },
       "problems": {
         "required": "Write this line or remove it.",

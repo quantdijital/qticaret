@@ -145,6 +145,11 @@ export async function storeLayout(
             id: section.id,
             type: section.type,
             lines: section.lines.map((line) => fillShopText(line, values)),
+            // How it shows more than one line (docs/tema/bilesen-denetimi (b) 6), as saved
+            mode: section.mode,
+            interval: section.interval,
+            pause_button: section.pause_button,
+            hover_pause: section.hover_pause,
           }
     ),
     home: await Promise.all(home.map((section) => hydrateSection(section, at))),

@@ -14,6 +14,7 @@ import type {
 import { lookFieldsFor, lookStepsFor } from "@/features/storefront/layout/look"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
 import { offersVariants } from "@/features/storefront/layout/variants"
+import { ANNOUNCEMENT_IDS, announcementFields } from "./announcement-registry"
 import { cardFooterFields } from "./card-field-ids"
 import { BANNER_GROUPS } from "./banner-groups"
 import { CONTENT_IDS, contentFields } from "./content-registry"
@@ -146,6 +147,7 @@ export const FIELD_IDS = {
   ...CONTENT_IDS,
   sticky: (sectionId: string) => `${sectionId}-sticky`,
   header: (sectionId: string, field: HeaderCatalogField) => `${sectionId}-header-${field}`,
+  ...ANNOUNCEMENT_IDS,
   ...VISIBILITY_IDS,
 } as const
 
@@ -184,6 +186,8 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
   }
   // The content's counts and switches (docs/tema/bilesen-denetimi O2)
   fields.push(...contentFields(section))
+  // How the announcement bar shows several lines, and how they turn
+  fields.push(...announcementFields(section))
   if (section.type === "marquee") {
     for (const [setting, steps] of Object.entries(MARQUEE_SETTINGS) as [
       MarqueeSetting,
