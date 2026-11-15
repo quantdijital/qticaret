@@ -1,5 +1,5 @@
 import { kurus } from "../../money"
-import { isUndercut, planListRows } from "../plan"
+import { isUndercut, planListRows, rateGivesNothing } from "../plan"
 import type { PlanList, PlanRow, PlanVariant } from "../plan"
 
 const LEVEL: PlanList = { kind: "level", price_list_id: "plist_level", rate_bps: 2000 }
@@ -83,6 +83,21 @@ describe("a wholesale list's rows planned (ADR-0068 §4)", () => {
     )
     expect(plan.delete).toEqual([{ id: stale.id, price_set_id: "pset_a", amount: 8000 }])
     expect(plan.create).toEqual([])
+  })
+
+  it("writes no row where the rate leaves a priced variant at 0,00 (L3), and takes one away", () => {
+    const free = row("a", 0, { price_list_id: "plist_level" })
+    const plan = planListRows(
+      { ...LEVEL, rate_bps: 9900 },
+      [variant("a"), variant("b")],
+      // 0.01 less 99% is 0.0001: nothing; 0.50 less 99% is 0.005: half-up to 0.01
+      [row("a", 1), free, row("b", 50)],
+      new Map()
+    )
+    expect(plan.delete).toEqual([{ id: free.id, price_set_id: "pset_a", amount: 0 }])
+    expect(plan.create).toEqual([{ variant_id: "b", price_set_id: "pset_b", amount: 1 }])
+    expect(rateGivesNothing(kurus(1), 9900)).toBe(true)
+    expect(rateGivesNothing(kurus(0), 9900)).toBe(false)
   })
 
   it("prices no variant without its own price by the rate", () => {

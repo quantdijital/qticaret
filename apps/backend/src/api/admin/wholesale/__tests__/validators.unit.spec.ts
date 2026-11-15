@@ -1,5 +1,6 @@
 import {
   AdminGetWholesaleLines,
+  AdminGetWholesaleTiers,
   AdminPostWholesalePrices,
   AdminPostWholesaleTier,
   AdminUpdateWholesaleTier,
@@ -49,9 +50,9 @@ describe("a page of a level's lines", () => {
     })
   })
 
-  it("refuses a page past 200, a negative offset, a long search and other filters", () => {
+  it("refuses a page past 100, a negative offset, a long search and other filters", () => {
     for (const query of [
-      { limit: "201" },
+      { limit: "101" },
       { limit: "0" },
       { offset: "-1" },
       { q: "x".repeat(101) },
@@ -81,6 +82,9 @@ describe("hand-entered wholesale prices", () => {
       { set: [{ variant_id: "v", net: "1.005" }] },
       { set: [{ variant_id: "v", net: "-1" }] },
       { set: [{ variant_id: "v", net: "1e3" }] },
+      // Past 20 million lira: past the integer column (L2)
+      { set: [{ variant_id: "v", net: "20000000.01" }] },
+      { set: [{ variant_id: "v", net: "999999999.99" }] },
       { set: [{ variant_id: "v", net: 10 }] },
       { set: [{ variant_id: "v", net: "10" }], remove: ["v"] },
       { set: [{ variant_id: "v", net: "10", price_list_id: "plist_x" }] },
@@ -88,5 +92,18 @@ describe("hand-entered wholesale prices", () => {
     ]) {
       expect(AdminPostWholesalePrices.safeParse(body).success).toBe(false)
     }
+  })
+
+  it("takes a price up to 20 million lira, the column's bound (L2)", () => {
+    const top = { set: [{ variant_id: "v", net: "20000000.00" }] }
+    expect(AdminPostWholesalePrices.safeParse(top).success).toBe(true)
+  })
+})
+
+describe("a page of the levels", () => {
+  it("reads 50 from the start by default, at most 100", () => {
+    expect(AdminGetWholesaleTiers.parse({})).toEqual({ limit: 50, offset: 0 })
+    expect(AdminGetWholesaleTiers.safeParse({ limit: "101" }).success).toBe(false)
+    expect(AdminGetWholesaleTiers.safeParse({ name: "x" }).success).toBe(false)
   })
 })

@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { errorSummary, logger } from "../lib/logging"
 import { WHOLESALE_MODULE } from "../modules/wholesale"
 import type WholesaleModuleService from "../modules/wholesale/service"
+import { removeOrphanMarks } from "../workflows/wholesale/orphans"
 import { queueWholesaleSync } from "../workflows/wholesale/queue"
 
 /**
@@ -17,12 +18,14 @@ export default async function wholesaleNightly(container: MedusaContainer) {
     if (lists.length === 0) {
       return
     }
+    // Hand-entered prices of variants since deleted go first: nothing to write for them
+    const orphans = await removeOrphanMarks(container)
     const now = new Date()
     for (const list of lists) {
       await service.requestSync(list, now)
     }
     const queued = await queueWholesaleSync(container, null)
-    logger.info({ event: "wholesale.nightly_queued", lists: lists.length, queued })
+    logger.info({ event: "wholesale.nightly_queued", lists: lists.length, orphans, queued })
   } catch (error) {
     logger.error({ event: "wholesale.nightly_failed", err: errorSummary(error) })
   }

@@ -55,6 +55,8 @@ export async function isWholesalePriceEvent(
   if (!listId) {
     return false
   }
-  const owned = await container.resolve<WholesaleModuleService>(WHOLESALE_MODULE).ownedIds()
+  const owned = await container
+    .resolve<WholesaleModuleService>(WHOLESALE_MODULE)
+    .ownedIds({ withDeleted: true })
   return owned.priceListIds.has(listId)
 }

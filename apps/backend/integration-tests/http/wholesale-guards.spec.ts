@@ -69,8 +69,15 @@ medusaIntegrationTestRunner({
       expect(refused.map((answer) => [answer.status, message(answer)])).toEqual(
         refused.map(() => [409, "wholesale.managed"])
       )
-      // Reads pass; another group is anyone's
-      expect((await staff.get(`/admin/price-lists/${priceListId}`)).status).toBe(200)
+      // A read by id answers as missing, for the owner too (M1): the wholesale screens read them
+      const missing = [
+        await staff.get(`/admin/price-lists/${priceListId}`),
+        await staff.get(`/admin/price-lists/${priceListId}/lines`),
+        await staff.get(`/admin/customer-groups/${groupId}`),
+        await staff.get(`/admin/customer-groups/${groupId}/customers`),
+      ]
+      expect(missing.map((answer) => answer.status)).toEqual([404, 404, 404, 404])
+      // Another group is anyone's
       const other = await staff.post<{ customer_group: { id: string } }>("/admin/customer-groups", {
         name: "Sadık",
       })

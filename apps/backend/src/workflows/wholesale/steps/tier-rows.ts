@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
-import { ConflictError } from "../../../lib/errors"
+import { ConflictError, uniqueViolationKeys } from "../../../lib/errors"
 import { WHOLESALE_MODULE } from "../../../modules/wholesale"
 import type WholesaleModuleService from "../../../modules/wholesale/service"
 
@@ -34,6 +34,17 @@ export const checkTierNameStep = createStep(
   }
 )
 
+/**
+ * Two levels of one name saved at once pass the check above; the unique
+ * index stops the second, answered as the check would (409).
+ */
+export function nameTaken(error: unknown): never {
+  if (uniqueViolationKeys(error)?.includes("name")) {
+    throw new ConflictError("wholesale.tier_exists")
+  }
+  throw error
+}
+
 export interface TierRowInput {
   name: string
   customer_group_id: string
@@ -46,11 +57,13 @@ export interface TierRowInput {
 export const createTierRowStep = createStep(
   "wholesale-create-tier-row",
   async (input: TierRowInput, { container }) => {
-    const tier = await wholesale(container).createWholesaleTiers({
-      ...input,
-      // A rate prices every variant: the sync job writes them
-      sync_requested_at: input.rate_bps === null ? null : new Date(),
-    })
+    const tier = await wholesale(container)
+      .createWholesaleTiers({
+        ...input,
+        // A rate prices every variant: the sync job writes them
+        sync_requested_at: input.rate_bps === null ? null : new Date(),
+      })
+      .catch(nameTaken)
     return new StepResponse(tier, tier.id)
   },
   async (id, { container }) => {
@@ -74,13 +87,15 @@ export const updateTierRowStep = createStep(
     const service = wholesale(container)
     const before = await service.retrieveWholesaleTier(input.id)
     const rateChanged = input.rate_bps !== undefined && input.rate_bps !== before.rate_bps
-    const updated = await service.updateWholesaleTiers({
-      id: input.id,
-      ...(input.name !== undefined ? { name: input.name } : {}),
-      ...(input.rate_bps !== undefined ? { rate_bps: input.rate_bps } : {}),
-      ...(input.min_quantity !== undefined ? { min_quantity: input.min_quantity } : {}),
-      ...(rateChanged ? { sync_requested_at: new Date() } : {}),
-    })
+    const updated = await service
+      .updateWholesaleTiers({
+        id: input.id,
+        ...(input.name !== undefined ? { name: input.name } : {}),
+        ...(input.rate_bps !== undefined ? { rate_bps: input.rate_bps } : {}),
+        ...(input.min_quantity !== undefined ? { min_quantity: input.min_quantity } : {}),
+        ...(rateChanged ? { sync_requested_at: new Date() } : {}),
+      })
+      .catch(nameTaken)
     return new StepResponse(
       { tier: updated, rate_changed: rateChanged, name_changed: updated.name !== before.name },
       {

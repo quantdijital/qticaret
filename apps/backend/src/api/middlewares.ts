@@ -104,6 +104,7 @@ import { StorePostBillingProfile } from "./store/customers/me/billing-profile/va
 import { GetTrDistricts, GetTrNeighborhoods, GetTrProvinces } from "./tr-address/validators"
 import {
   STORE_ATTRIBUTE_FIELDS,
+  rejectStorePriceRows,
   rejectStoreVariantExtension,
   restrictStoreAttributeFields,
 } from "./validation/attribute-fields"
@@ -155,6 +156,8 @@ export default defineMiddlewares({
         rejectSensitiveFields,
         restrictStoreAttributeFields,
         rejectStoreVariantExtension,
+        // ADR-0068 §7: no price list row, a wholesale one included, by any `fields`
+        rejectStorePriceRows,
         restrictStoreMediaFields,
         rejectStoreSeoFields,
         restrictStoreGiftCardFields,

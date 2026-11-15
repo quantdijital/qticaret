@@ -34,11 +34,15 @@ class WholesaleModuleService extends MedusaService({
   WholesaleAccount,
   WholesaleManualPrice,
 }) {
-  /** Every list the module writes: the levels' and the wholesalers' own. */
-  async wholesaleLists(): Promise<WholesaleList[]> {
+  /**
+   * Every list the module writes: the levels' and the wholesalers' own.
+   * `withDeleted`: those of levels taken away too (their lists' events).
+   */
+  async wholesaleLists(options: { withDeleted?: boolean } = {}): Promise<WholesaleList[]> {
+    const read = { ...EVERY, withDeleted: options.withDeleted === true }
     const [tiers, accounts] = await Promise.all([
-      this.listWholesaleTiers({}, EVERY),
-      this.listWholesaleAccounts({ private_price_list_id: { $ne: null } }, EVERY),
+      this.listWholesaleTiers({}, read),
+      this.listWholesaleAccounts({ private_price_list_id: { $ne: null } }, read),
     ])
     return [
       ...tiers.map((tier): WholesaleList => ({
@@ -68,12 +72,22 @@ class WholesaleModuleService extends MedusaService({
     ]
   }
 
-  /** The Medusa price lists and customer groups no one writes but this module. */
-  async ownedIds(): Promise<{ priceListIds: Set<string>; groupIds: Set<string> }> {
+  /** One list as it stands now, by its owner; null once the level or its list is gone. */
+  async wholesaleList(
+    list: Pick<WholesaleList, "kind" | "owner_id">
+  ): Promise<WholesaleList | null> {
     const lists = await this.wholesaleLists()
+    return lists.find((each) => each.kind === list.kind && each.owner_id === list.owner_id) ?? null
+  }
+
+  /** The Medusa price lists and customer groups no one writes but this module. */
+  async ownedIds(
+    options: { withDeleted?: boolean } = {}
+  ): Promise<{ priceListIds: Set<string>; groupIds: Set<string> }> {
+    const lists = await this.wholesaleLists(options)
     const accounts = await this.listWholesaleAccounts(
       { private_group_id: { $ne: null } },
-      { select: ["private_group_id"], take: null }
+      { select: ["private_group_id"], take: null, withDeleted: options.withDeleted === true }
     )
     return {
       priceListIds: new Set(lists.map((list) => list.price_list_id)),

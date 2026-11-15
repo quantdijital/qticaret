@@ -432,6 +432,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "aras.secret_invalid":
     "Aras Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Aras'ın verdiği entegrasyon belgesinden yeniden kopyalayın; test ve canlı hesap ayrıdır.",
   "customers.unknown": "Müşteri bulunamadı.",
+  "customer_groups.unknown": "Müşteri grubu bulunamadı.",
   "customers.email_is_login":
     "Üye müşterinin e-postası giriş adresidir; yalnızca müşteri kendi hesabından değiştirebilir.",
   "customers.email_taken": "Bu e-postayla bir misafir müşteri zaten var.",

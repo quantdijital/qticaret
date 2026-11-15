@@ -1,6 +1,7 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { MedusaError } from "@medusajs/framework/utils"
 import { ConflictError } from "../../lib/errors"
-import { touchesOwned } from "../../lib/wholesale"
+import { READ_GUARDED, readsOwned, touchesOwned } from "../../lib/wholesale"
 import type { GuardCheck } from "../../lib/wholesale"
 import { WHOLESALE_MODULE } from "../../modules/wholesale"
 import type WholesaleModuleService from "../../modules/wholesale/service"
@@ -8,21 +9,34 @@ import type WholesaleModuleService from "../../modules/wholesale/service"
 const ownedOf = (req: MedusaRequest) =>
   req.scope.resolve<WholesaleModuleService>(WHOLESALE_MODULE).ownedIds()
 
+// As Medusa answers an id it does not have
+const MISSING: Record<"group" | "price_list", string> = {
+  group: "customer_groups.unknown",
+  price_list: "price_lists.unknown",
+}
+
 /**
  * Refuses a write through Medusa's own routes to a customer group or
- * price list the wholesale module owns (ADR-0068 §9): `wholesale.managed`,
- * 409. The wholesale screens are the one way to them, recorded there.
- * Reads pass. Runs whether the flag is on or off: the records stay.
+ * price list the wholesale module owns, or a rule naming its group
+ * (ADR-0068 §9): `wholesale.managed`, 409. A read of the group or list by
+ * its id is answered as missing, whoever asks (decision 17: members and
+ * prices are read on the wholesale screens, by the owner and admin). Runs
+ * whether the flag is on or off: the records stay.
  */
 export function guardWholesaleRecords(check: GuardCheck) {
   return async (req: MedusaRequest, _res: MedusaResponse, next: MedusaNextFunction) => {
     try {
-      if (["GET", "HEAD", "OPTIONS"].includes(req.method)) {
+      const reading = ["GET", "HEAD", "OPTIONS"].includes(req.method)
+      if (reading && !READ_GUARDED.has(check)) {
         next()
         return
       }
       const owned = await ownedOf(req)
       const request = { method: req.method, id: req.params["id"], body: req.body }
+      if (readsOwned(check, request, owned)) {
+        next(new MedusaError(MedusaError.Types.NOT_FOUND, MISSING[check as "group"]))
+        return
+      }
       next(touchesOwned(check, request, owned) ? new ConflictError("wholesale.managed") : undefined)
     } catch (error) {
       next(error)

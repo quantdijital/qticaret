@@ -423,6 +423,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "aras.secret_invalid":
     "Aras Kargo did not accept this user name and password. Copy them again from Aras's integration document; test and live accounts differ.",
   "customers.unknown": "Customer not found.",
+  "customer_groups.unknown": "Customer group not found.",
   "customers.email_is_login":
     "A member's e-mail is their sign-in address; only the customer can change it from their account.",
   "customers.email_taken": "A guest customer with this e-mail already exists.",

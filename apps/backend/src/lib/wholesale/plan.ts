@@ -72,11 +72,19 @@ export function desiredPrice(
   if (manualNet !== undefined) {
     return grossOfNet(manualNet, variant.vat_bps)
   }
-  if (list.rate_bps !== null && base !== null) {
+  if (list.rate_bps !== null && base !== null && !rateGivesNothing(base, list.rate_bps)) {
     return ratePrice(base, list.rate_bps)
   }
   return null
 }
+
+/**
+ * A rate that leaves a priced variant at 0,00 (a few kuruş less 99%):
+ * no row is written, so the variant keeps its retail price rather than
+ * going free; the lines screen names these.
+ */
+export const rateGivesNothing = (base: Kurus, rateBps: number): boolean =>
+  base > 0 && ratePrice(base, rateBps) === 0
 
 /** A variant's own price: outside every list, for anyone, any quantity. */
 export const baseOf = (rows: readonly PlanRow[]): Kurus | null =>

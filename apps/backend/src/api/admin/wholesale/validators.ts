@@ -27,21 +27,33 @@ export const AdminUpdateWholesaleTier = z
   .refine((body) => Object.keys(body).length > 0)
 export type AdminUpdateWholesaleTierType = z.infer<typeof AdminUpdateWholesaleTier>
 
+/** A page of the shop's levels, by name. */
+export const AdminGetWholesaleTiers = z
+  .object({
+    limit: z.coerce.number().int().min(1).max(100).default(50),
+    offset: z.coerce.number().int().min(0).max(100_000).default(0),
+  })
+  .strict()
+export type AdminGetWholesaleTiersType = z.infer<typeof AdminGetWholesaleTiers>
+
 /** A page of a level's lines, by product name; `q` finds by product, variant or SKU. */
 export const AdminGetWholesaleLines = z
   .object({
-    limit: z.coerce.number().int().min(1).max(200).default(50),
+    limit: z.coerce.number().int().min(1).max(100).default(50),
     offset: z.coerce.number().int().min(0).max(100_000).default(0),
     q: z.string().trim().max(100).optional(),
   })
   .strict()
 export type AdminGetWholesaleLinesType = z.infer<typeof AdminGetWholesaleLines>
 
+/** The most a price may be: 20 million lira, 2 billion kuruş, inside the column's integer. */
+export const MAX_NET_LIRA = 20_000_000
+
 /** Lira with up to two decimals, as Medusa writes amounts ("1250.50"); never zero. */
 const netAmount = z
   .string()
   .regex(/^\d{1,9}(\.\d{1,2})?$/)
-  .refine((value) => Number(value) > 0)
+  .refine((value) => Number(value) > 0 && Number(value) <= MAX_NET_LIRA)
 
 const variantId = z.string().min(1).max(100)
 

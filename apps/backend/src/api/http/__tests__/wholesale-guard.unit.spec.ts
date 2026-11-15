@@ -29,7 +29,7 @@ const run = async (
   })
 
 describe("the wholesale guard on Medusa's routes (ADR-0068 §9)", () => {
-  it("answers wholesale.managed for a write to the module's list, passes others and reads", async () => {
+  it("answers wholesale.managed for a write to the module's list, passes others", async () => {
     const refused = await run(
       guardWholesaleRecords("price_list"),
       request("POST", { id: "plist_w" })
@@ -39,9 +39,25 @@ describe("the wholesale guard on Medusa's routes (ADR-0068 §9)", () => {
     expect(
       await run(guardWholesaleRecords("price_list"), request("POST", { id: "plist_x" }))
     ).toBeUndefined()
+  })
+
+  it("answers a read of the module's group or list as missing, whoever asks (M1)", async () => {
+    const group = await run(guardWholesaleRecords("group"), request("GET", { id: "cusgroup_w" }))
+    expect(group).toMatchObject({ type: "not_found", message: "customer_groups.unknown" })
+    const list = await run(guardWholesaleRecords("price_list"), request("GET", { id: "plist_w" }))
+    expect(list).toMatchObject({ type: "not_found", message: "price_lists.unknown" })
     expect(
-      await run(guardWholesaleRecords("group"), request("GET", { id: "cusgroup_w" }))
+      await run(guardWholesaleRecords("price_list"), request("GET", { id: "plist_x" }))
     ).toBeUndefined()
+    expect(
+      await run(guardWholesaleRecords("rules"), request("GET", { id: "plist_w" }))
+    ).toBeUndefined()
+  })
+
+  it("refuses a product price whose rule names the module's group (M2)", async () => {
+    const body = { variants: [{ prices: [{ rules: { "customer.groups.id": "cusgroup_w" } }] }] }
+    const req = request("POST", { id: "prod_1" }, { body })
+    expect(isConflictError(await run(guardWholesaleRecords("rules"), req))).toBe(true)
   })
 
   it("refuses a customer put in the module's group from the customer's side", async () => {

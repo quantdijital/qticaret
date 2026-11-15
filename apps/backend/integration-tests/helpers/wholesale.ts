@@ -48,9 +48,12 @@ export function wholesaleApi(http: HttpClient, headers: Record<string, string>) 
     /** A page of a level's lines; `query` as the panel sends it (`q=…&limit=…`). */
     lines: async (tierId: string, query = "") =>
       (
-        await get<{ lines: LineAnswer[]; count: number; undercut_count: number }>(
-          `/admin/wholesale/tiers/${tierId}/lines${query ? `?${query}` : ""}`
-        )
+        await get<{
+          lines: LineAnswer[]
+          count: number
+          undercut_count: number
+          rate_zero: { count: number; variant_ids: string[] }
+        }>(`/admin/wholesale/tiers/${tierId}/lines${query ? `?${query}` : ""}`)
       ).data,
   }
 }

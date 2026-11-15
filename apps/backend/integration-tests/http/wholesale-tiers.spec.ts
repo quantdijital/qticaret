@@ -68,7 +68,7 @@ medusaIntegrationTestRunner({
 
       // Every variant of the shop is on the list: a page at a time, found by name
       const everything = await eventually(
-        () => staff.lines(tier.id, "limit=200"),
+        () => staff.lines(tier.id, "limit=100"),
         ({ count, lines }) => count > 2 && lines.length === count,
         150
       )
@@ -139,6 +139,21 @@ medusaIntegrationTestRunner({
         400,
         "wholesale.variant_unknown",
       ])
+    })
+
+    it("writes no row where the rate leaves a variant at 0,00, and names it (L3)", async () => {
+      await staff.flag(true)
+      const penny = await stockedProduct(getContainer(), shop, "toptan-kurus", null, 0.01)
+      const tier = await staff.tier({ name: "Toptan Sıfır", percent: 99 })
+      await eventually(
+        () => staff.get<{ tier: { sync_pending: boolean } }>(`/admin/wholesale/tiers/${tier.id}`),
+        ({ data }) => !data.tier.sync_pending,
+        150
+      )
+      const lines = await staff.lines(tier.id, "q=toptan-kurus")
+      expect(lines.count).toBe(0)
+      expect(lines.rate_zero.variant_ids).toContain(penny.variantId)
+      expect(lines.rate_zero.count).toBeGreaterThanOrEqual(1)
     })
 
     it("refuses a second level of a name and records the level's changes", async () => {
