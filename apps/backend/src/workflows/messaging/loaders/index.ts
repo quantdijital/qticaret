@@ -27,6 +27,7 @@ import { loadStaffPaymentIssue } from "./payment-issue"
 import { loadStaffSmtpRejections } from "./smtp-rejections"
 import { loadStaffStockShort } from "./stock-short"
 import { loadStockAlert } from "./stock"
+import { loadWholesaleEnabled, loadWholesaleInvite } from "./wholesale"
 import type { Loaded } from "./types"
 
 export type { Loaded, MessageRecipients } from "./types"
@@ -53,6 +54,8 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "account.password_reset": loadPasswordReset,
   "account.verify_email": loadVerification,
   "account.migration_invite": (container, id) => loadMigrationInvite(container, id),
+  "account.wholesale_invite": (container, id) => loadWholesaleInvite(container, id),
+  "account.wholesale_enabled": (container, id) => loadWholesaleEnabled(container, id),
   "payment.failed": (container, id) => loadPaymentFailed(container, id),
   "gift_card.issued": loadGiftCardMessage,
   "marketing.announcement": loadAnnouncement,
