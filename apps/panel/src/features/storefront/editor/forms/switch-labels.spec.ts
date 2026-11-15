@@ -38,10 +38,8 @@ describe("the on/off settings' names", () => {
 
   it("names the dots as a sentence that says what turns on", () => {
     expect(i18next.t("storefront.editor.scroller.dots.label")).toBe("Noktaları göster")
-    expect(i18next.t("storefront.editor.slider.dots")).toBe("Noktaları göster")
-    // One idea, one name: the slider's turning by itself as the scroller's
-    expect(i18next.t("storefront.editor.slider.autoplay")).toBe(
-      i18next.t("storefront.editor.scroller.autoplay.label")
-    )
+    // One idea, one name: the slider turns on the scroller kit's own fields (bilesen-denetimi (b) 4)
+    expect(i18next.exists("storefront.editor.slider.autoplay")).toBe(false)
+    expect(i18next.exists("storefront.editor.slider.dots")).toBe(false)
   })
 })

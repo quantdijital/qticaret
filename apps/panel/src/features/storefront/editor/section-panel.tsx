@@ -28,6 +28,8 @@ import { SectionLayoutGroup } from "./forms/layout-group"
 import { MarqueeSettings } from "./forms/marquee-settings"
 import { ScrollerFields } from "./forms/scroller-fields"
 import { SCROLLER_OTHER } from "./forms/scroller-groups"
+import { SliderGroups, SliderOther } from "./forms/slider-groups"
+import { sliderOtherCount } from "./forms/slider-kit"
 import { ShelfGroups } from "./forms/shelf-groups"
 import { ScheduleFields } from "./forms/schedule-fields"
 import { takesDevice } from "./forms/visibility-registry"
@@ -108,10 +110,13 @@ export function SectionPanel({
   // The related products slide the same way (bilesen-denetimi (b) 7)
   const rail = shelf ?? (section.type === "related_products" ? section : null)
   const scroller = rail?.variant === "carousel" ? scrollerSettingsOf(rail.scroller) : null
+  // The sliding opening turns on the kit's settings it has use for (bilesen-denetimi (b) 4)
+  const slider = section.type === "hero_slider" ? section : null
   // The linked category cards' frame sits with the look (adr/0049 Ek 2026-11-15)
   const cards = section.type === "categories" && section.variant === "linked" ? section : null
   const set =
     cardsSetCount(section) +
+    (slider ? sliderOtherCount(slider) : 0) +
     (scroller
       ? SCROLLER_OTHER.filter((name) => scroller[name] !== SCROLLER_DEFAULTS[name]).length
       : 0) +
@@ -177,6 +182,7 @@ export function SectionPanel({
       {shelf ? (
         <ShelfGroups section={shelf} mates={shelfMates} reveal={reveal} onChange={onChange} />
       ) : null}
+      {slider ? <SliderGroups section={slider} reveal={reveal} onChange={onChange} /> : null}
       {section.type === "header_bar" && section.variant === "catalog" ? (
         <HeaderCatalogOther
           section={section}
@@ -219,6 +225,7 @@ export function SectionPanel({
               }}
             />
           ) : null}
+          {slider ? <SliderOther section={slider} onChange={onChange} /> : null}
           {band ? (
             <BannerSettings section={band} settings={BANNER_OTHER_SETTINGS} onChange={onChange} />
           ) : null}

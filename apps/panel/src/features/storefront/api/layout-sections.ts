@@ -12,6 +12,7 @@ import type {
   SectionLook,
   ShelfColumns,
   ShelfPhoneColumns,
+  SliderSettings,
   TrustBadgesVariant,
 } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
@@ -106,12 +107,17 @@ export interface HeroSliderSection extends BodySectionBase {
   type: "hero_slider"
   slides: HeroSlide[]
   height: "compact" | "regular"
-  /** Off by default: nothing moves by itself unless the shop turns it on. */
-  autoplay: boolean
-  /** Seconds a slide stays while it plays (5–10). */
-  interval: number
-  dots: boolean
-  arrows: boolean
+  /**
+   * The scroller kit's settings a slider has use for (bilesen-denetimi (b)
+   * 4); the server fills them on reading, a slider saved before the kit too.
+   */
+  scroller?: SliderSettings
+  /** Seconds saved before the kit that no speed step keeps; dropped once the shop picks a speed. */
+  interval?: number
+  /** A slider's switches from before the kit; the server reads them into `scroller`. */
+  autoplay?: boolean
+  dots?: boolean
+  arrows?: boolean
 }
 
 /** One picture of the band (adr/0049 Ek 2026-11-14 §3.3 E2). */

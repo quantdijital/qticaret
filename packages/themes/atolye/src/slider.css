@@ -14,6 +14,25 @@
     outline-color: var(--color-focus);
   }
 }
+/* "Üzerine gelince" arrows (the kit's `arrows: hover`): in view under the pointer or with focus in the stage; always on touch */
+@media (hover: hover) {
+  .gf-stage[data-arrows="hover"] .gf-slider-arrow {
+    opacity: 0;
+  }
+  .gf-stage[data-arrows="hover"]:hover .gf-slider-arrow,
+  .gf-stage[data-arrows="hover"]:focus-within .gf-slider-arrow {
+    opacity: 1;
+  }
+  .gf-stage[data-arrows="hover"]:hover .gf-slider-arrow:disabled,
+  .gf-stage[data-arrows="hover"]:focus-within .gf-slider-arrow:disabled {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gf-slider-arrow {
+    transition: none;
+  }
+}
 @media (min-width: 40rem) and (hover: hover) {
   .gf-stage .gf-slide--dark .gf-btn:not(.gf-btn--quiet):hover:not(:disabled) {
     background: var(--color-signal-deep);

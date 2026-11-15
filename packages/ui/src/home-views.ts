@@ -1,3 +1,4 @@
+import type { SliderSettings } from "@qticaret/types"
 import type { RatingBarView, SpecGroupView } from "./card-views"
 import type { CardRatingView, ImageView, LinkView, ProductCardView, SpecView } from "./views"
 
@@ -45,7 +46,7 @@ export interface GoogleRatingExcerptView {
 /**
  * The home page's sliding opening (`hero_slider`, adr/0049 Ek 2026-11-06),
  * an extra to the still hero: 2–6 slides in the shop's order. Nothing
- * moves by itself unless `autoplay`; the theme stops it on hover, focus,
+ * moves by itself unless its `autoplay` is on; the theme stops it on hover, focus,
  * a visitor's own step and reduced motion. A theme without a slider draws
  * the first slide as its opening.
  */
@@ -55,11 +56,10 @@ export interface HeroSliderSectionView {
   slides: HeroSlideView[]
   /** `compact` a lower stage, `regular` the opening's own. */
   height: "compact" | "regular"
-  autoplay: boolean
-  /** Seconds a slide stays while it plays (5–10). */
+  /** The scroller kit's settings a slider has use for (bilesen-denetimi (b) 4). */
+  settings: SliderSettings
+  /** Seconds a slide stays while it plays (`sliderSecondsOf`). */
   interval: number
-  dots: boolean
-  arrows: boolean
 }
 
 export interface HeroSlideView {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import { SLIDER_DEFAULTS } from "@qticaret/types"
 import { i18next } from "@/lib/i18n"
 import type {
   AnySection,
@@ -54,15 +55,23 @@ describe("the content fields' register", () => {
     expect(keys({ ...bands, thumbs: 3 })).toEqual(["content:thumbs", "content:thumbs_count"])
   })
 
-  it("names the sliding opening's options, the seconds only while it turns by itself", () => {
+  it("names the sliding opening's height and its kit settings, the speed only while it turns", () => {
     const slider = newHomeSection("hero_slider", "slayt00001") as HeroSliderSection
-    expect(keys({ ...slider, autoplay: false })).toEqual([
+    expect(keys(slider)).toEqual([
       "content:slider_height",
-      "content:autoplay",
-      "content:dots",
-      "content:arrows",
+      "scroll:scroller.autoplay",
+      "look:scroller.loop",
+      "scroll:scroller.arrows",
+      "scroll:scroller.arrow_style",
+      "scroll:scroller.dots",
     ])
-    expect(keys({ ...slider, autoplay: true })).toContain("content:interval")
+    expect(keys({ ...slider, scroller: { ...SLIDER_DEFAULTS, autoplay: "on" } })).toContain(
+      "scroll:scroller.speed"
+    )
+    // A slider saved before the kit: its switches read as the kit's steps
+    const old: HeroSliderSection = { ...slider, autoplay: true }
+    delete old.scroller
+    expect(keys(old)).toContain("scroll:scroller.speed")
   })
 
   it("names the FAQ's two switches (bilesen-denetimi (b) 8)", () => {
@@ -85,7 +94,10 @@ describe("the content fields' register", () => {
       newBodySection("product", "related_products", "benzer0001"),
       { ...(newHomeSection("google_rating", "google0001") as GoogleRatingSection), excerpts: 2 },
       { ...(newHomeSection("price_bands", "fiyat00001") as PriceBandsSection), thumbs: 2 },
-      { ...(newHomeSection("hero_slider", "slayt00001") as HeroSliderSection), autoplay: true },
+      {
+        ...(newHomeSection("hero_slider", "slayt00001") as HeroSliderSection),
+        scroller: { ...SLIDER_DEFAULTS, autoplay: "on" },
+      },
       switchVariant(newHomeSection("hero", "giris00001") as HeroSection, "category_list"),
       newHomeSection("categories", "kategori01"),
     ]
@@ -97,7 +109,11 @@ describe("the content fields' register", () => {
             true
           )
         }
-        expect(field.target).toBe(FIELD_IDS.content(section.id, field.key as "limit"))
+        expect(field.target).toBe(
+          field.key.startsWith("scroller.")
+            ? FIELD_IDS.scroller(section.id, field.key.slice("scroller.".length) as "dots")
+            : FIELD_IDS.content(section.id, field.key as "limit")
+        )
       }
     }
   })

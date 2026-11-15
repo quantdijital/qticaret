@@ -7,10 +7,9 @@ import { EmptyLine, RowActions } from "@/features/settings/components/storefront
 import type { HeroSlide, HeroSliderSection } from "@/features/storefront/api/layout"
 import { SLIDER_LIMITS } from "@/features/storefront/api/layout"
 import { FIELD_IDS } from "./field-registry"
-import { CountField, FieldGroup } from "./fields"
+import { FieldGroup } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
-import { SwitchRow } from "../theme-fields"
 import { Choice, SlideDialog } from "./slide-dialog"
 
 const S = "storefront.editor.slider"
@@ -30,8 +29,8 @@ const slideOf = (image: { url: string; alt: string | null }): HeroSlide => ({
  * The home page's sliding opening (adr/0049 Ek 2026-11-06): its slides as
  * rows (a small picture and the heading) that open one dialog each, moved
  * and taken off in place; pictures added from the media library; then how
- * tall it stands, whether it moves by itself (off by default) and how
- * often, and its dots and arrows.
+ * tall it stands. How it turns (by itself, arrows, dots, looping) is the
+ * scroller kit's, in its own "Kaydırma" group (`SliderGroups`).
  */
 export function HeroSliderForm({
   section,
@@ -145,58 +144,6 @@ export function HeroSliderForm({
             set({ height })
           }}
         />
-        <div id={FIELD_IDS.content(section.id, "autoplay")}>
-          <SwitchRow
-            id={`${section.id}-autoplay`}
-            label={t(`${S}.autoplay`)}
-            term={t(`${S}.autoplayTerm`)}
-            hint={t(`${S}.autoplayHint`)}
-            checked={section.autoplay}
-            onChange={(autoplay) => {
-              set({ autoplay })
-            }}
-          />
-        </div>
-        {section.autoplay ? (
-          <div id={FIELD_IDS.content(section.id, "interval")}>
-            <CountField
-              id={`${section.id}-interval`}
-              label={t(`${S}.interval`)}
-              term={t(`${S}.intervalTerm`)}
-              hint={t(`${S}.intervalHint`, SLIDER_LIMITS.interval)}
-              min={SLIDER_LIMITS.interval.min}
-              max={SLIDER_LIMITS.interval.max}
-              value={section.interval}
-              onChange={(interval) => {
-                set({ interval }, "interval")
-              }}
-            />
-          </div>
-        ) : null}
-        <div id={FIELD_IDS.content(section.id, "dots")}>
-          <SwitchRow
-            id={`${section.id}-dots`}
-            label={t(`${S}.dots`)}
-            term={t(`${S}.dotsTerm`)}
-            hint={t(`${S}.dotsHint`)}
-            checked={section.dots}
-            onChange={(dots) => {
-              set({ dots })
-            }}
-          />
-        </div>
-        <div id={FIELD_IDS.content(section.id, "arrows")}>
-          <SwitchRow
-            id={`${section.id}-arrows`}
-            label={t(`${S}.arrows`)}
-            term={t(`${S}.arrowsTerm`)}
-            hint={t(`${S}.arrowsHint`)}
-            checked={section.arrows}
-            onChange={(arrows) => {
-              set({ arrows })
-            }}
-          />
-        </div>
       </FieldGroup>
       <MediaPicker
         open={picking}

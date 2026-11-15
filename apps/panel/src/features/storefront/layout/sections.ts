@@ -18,9 +18,10 @@ import {
   ANNOUNCEMENT_DEFAULTS,
   BANNER_DEFAULTS,
   MARQUEE_DEFAULTS,
+  SLIDER_DEFAULTS,
   defaultVariant,
 } from "@qticaret/types"
-import { LAYOUT_LIMITS, PRICE_BANDS_LIMITS, SLIDER_LIMITS } from "@/features/storefront/api/layout"
+import { LAYOUT_LIMITS, PRICE_BANDS_LIMITS } from "@/features/storefront/api/layout"
 
 /** The groups in the order the storefront draws them (a page's body between header and footer). */
 export const LAYOUT_GROUPS: readonly LayoutGroup[] = [
@@ -165,10 +166,7 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
         type,
         slides: [],
         height: "regular",
-        autoplay: false,
-        interval: SLIDER_LIMITS.interval.default,
-        dots: true,
-        arrows: true,
+        scroller: SLIDER_DEFAULTS,
       }
     case "banner":
       return { ...base, type, slides: [], ...BANNER_DEFAULTS }

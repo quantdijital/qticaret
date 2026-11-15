@@ -15,7 +15,7 @@ import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog
 import type { StoreCategoriesLinked } from "./section-categories.js"
 import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
 import type { CardVariant, RelatedProductsVariant, TrustBadgesVariant } from "./section-variants.js"
-import type { ScrollerSettings } from "./section-scroller.js"
+import type { ScrollerSettings, SliderSettings } from "./section-scroller.js"
 import type {
   MenuLinkKind,
   StoreMenu,
@@ -163,18 +163,25 @@ export interface StoreGoogleRatingSection {
 
 /**
  * The home page's sliding opening (adr/0049 Ek 2026-11-06), an extra to
- * the still `hero`: 2–6 slides, still unless `autoplay` (every
- * `interval` seconds, 5–10).
+ * the still `hero`: 2–6 slides, driven by the scroller kit's settings it
+ * has use for (bilesen-denetimi (b) 4; `sliderSettingsOf`).
  */
 export interface StoreHeroSliderSection {
   id: string
   type: "hero_slider"
   slides: StoreHeroSlide[]
   height: "compact" | "regular"
-  autoplay: boolean
-  interval: number
-  dots: boolean
-  arrows: boolean
+  /** The kit's settings; absent from a backend before the kit, which sends the four below. */
+  scroller?: SliderSettings
+  /**
+   * Seconds saved before the kit that no speed step keeps (7, 9, 10),
+   * printed while they still stand for the speed in force (`sliderSecondsOf`).
+   */
+  interval?: number
+  /** A backend before the kit: still unless on, dots and arrows unless off. */
+  autoplay?: boolean
+  dots?: boolean
+  arrows?: boolean
 }
 
 export interface StoreHeroSlide {
