@@ -220,6 +220,27 @@ Yeni bölüm hangi aileye giriyorsa o listenin **her maddesi için** ya ayar yaz
   `<görünüm>-<renk>` (`tezgah-lacivert`). Renk adları gündelik Türkçe, marka adı değil.
 - **Basamak adları:** §3 sözlüğünden; yeni basamak sözlüğe önce yazılır.
 
+## 7. Yayımlanmış biçim sözleşmedir
+
+Sahip kararı, 2026-11-15. Sebep: iki geliştirici aynı bileşene farklı tasarım yönleriyle girdiğinde birinin çizimi ötekinin hazır görünümünü habersiz değiştirmesin; ileride de mağaza sahibinin seçtiği görünüm o istemeden değişmesin.
+
+**Kural.** `dev`'e girmiş bir bölüm biçiminin çizimi yerinde yeniden tasarlanmaz. Yeni tasarım iki yoldan biriyle gelir:
+
+| Fark | Yol | Örnek |
+| --- | --- | --- |
+| Küçük, her mağazanın işine yarar | Ayar; varsayılanı bugünkü görünümü korur | Yardımcı şerit aç/kapat, arama genişliği, menü öğesi kutulu/çizgili, gölge var/yok |
+| Düzenin iskeleti değişiyor | Yeni biçim; eskisi olduğu gibi kalır | Kategori listesi solda yerine üstte |
+
+**Hazır görünüm yalnız veridir.** Bir görünüm `layout.json` dosyasıdır: hangi bölüm, hangi biçim, hangi ayar değeri. İçine kod ya da gizli CSS girmez. Bir görünüm ayarlarla kurulamıyorsa eksik olan ayardır; ayar eklenir. Emsal: Divi'nin hazır tasarımları da modül ayarlarının kayıtlı değerleridir; Shopify tema ön ayarları da ayar değerleridir.
+
+**Yerinde değiştirilebilenler.** Hata düzeltmesi, erişilebilirlik, performans, görünümü değiştirmeyen iç düzenleme, bütün biçimlerin paylaştığı ortak parçalarda herkese gelen iyileştirme (ör. açılır menülerin tek tarife geçmesi). Ölçüt: bu biçimi seçmiş bir mağaza sahibi farkı görür ve itiraz edebilir mi? Evetse seçenek olur.
+
+**Sınır.** §0'ın üçüncü ilkesi (geniş düşün, az göster) burada da geçerlidir: bölüm başına bir avuç anlamlı ayar. Divi'nin ayar sayısına gidilmez; iskelet farkı biçimle çözülür.
+
+**Eskiyen biçim.** Silinmez. Seçim listesinden gizlenebilir; onu kullanan kayıtlı görünümler çizilmeye devam eder. Silmek ayrı ve bilinçli bir karardır.
+
+**PR'da.** Bir biçimin ya da ortak parçanın görünümüne dokunan PR, gövdesinde hangi hazır görünümlerin (`packages/sector-packs/packs/*/presets/*`) etkilendiğini ve görünümlerinin değişip değişmediğini yazar. Hazır görünümlerin ekran görüntüsü karşılaştırma testi ayrı iş olarak kurulacak; kurulunca bu beyan testle doğrulanır.
+
 ## Kaynaklar
 
 Bu belge ve denetim yazılırken açılıp okunan resmi sayfalar (2026-11-15). Dawn ve Horizon dosyaları
