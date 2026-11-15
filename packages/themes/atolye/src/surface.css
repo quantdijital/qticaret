@@ -57,6 +57,27 @@
 }
 
 /*
+ * A shape a box draws inside (`gf-shape`: an icon's disc, a status pill),
+ * `lined`. Each is a step off its box's `filled` ground: the page's paper
+ * or the field on the tone, the tone on the field. A ruled box stands on
+ * the paper and a box inside it on the tone, so the shape would vanish
+ * into it; it steps to the tone in a ruled box and back to the paper in a
+ * box inside one, as a box inside a box does (above). The inner box is
+ * written after the box, so the nearer one wins. Unlayered: the shape's
+ * colour is a utility. An order row's overlapping thumbnails are ringed in
+ * their row's ground, the paper in a ruled box.
+ */
+[data-surface="lined"] :is(.gf-pane, .gf-box) .gf-shape {
+  background-color: var(--color-paper-2);
+}
+[data-surface="lined"] .gf-pane-inner .gf-shape {
+  background-color: var(--color-paper);
+}
+[data-surface="lined"] .gf-pane .ring-paper-2 {
+  --tw-ring-color: var(--color-paper);
+}
+
+/*
  * The subcategory tiles above a listing's grid, `lined`: no graphite and
  * no gradient, a plain row on the page's ground: a small square picture,
  * the name beside it, inside the same 1 px rule. Outside the layers, as

@@ -147,6 +147,46 @@ describe("the theme's other boxes (adr/0067 step 4)", () => {
     expect(css).toContain('[data-surface="lined"] .gf-pane-inner .gf-icon-btn:hover:not(:disabled)')
   })
 
+  it("keeps a shape inside a lined box apart from the box's ground", async () => {
+    const css = await buildAtolyeCss(["bg-paper", "bg-paper-2", "bg-field", "ring-paper-2"])
+    // A disc or a pill drawn in the paper or the field would vanish into a ruled box's paper
+    const inBox = find(css, '[data-surface="lined"] :is(.gf-pane, .gf-box) .gf-shape')
+    expect(inBox.body).toBe("background-color: var(--color-paper-2);")
+    // In a box inside one (the tone) a pill drawn in the tone steps back to the paper, written after
+    const inInner = '[data-surface="lined"] .gf-pane-inner .gf-shape'
+    expect(find(css, inInner).body).toBe("background-color: var(--color-paper);")
+    expect(css.indexOf(`${inInner} {`)).toBeGreaterThan(
+      css.indexOf(":is(.gf-pane, .gf-box) .gf-shape {")
+    )
+    // Unlayered: the shape's own colour is a utility, which a layered rule could not outrank
+    expect(inBox.around).toEqual([])
+    expect(find(css, inInner).around).toEqual([])
+    // An order row's thumbnails are ringed in the row's ground
+    const ring = find(css, '[data-surface="lined"] .gf-pane .ring-paper-2')
+    expect(ring.around).toEqual([])
+    expect(ring.body).toBe("--tw-ring-color: var(--color-paper);")
+    // Nothing at `filled`: no rule names the shape without the lined mark
+    expect(css.match(/[^\n]*\.gf-shape[^\n]*\{/g)?.every((rule) => rule.includes("lined"))).toBe(
+      true
+    )
+  })
+
+  it("marks every shape a box draws on its ground", () => {
+    const SHAPES: Record<string, number> = {
+      "PaymentLinkPage.tsx": 1,
+      "account/AccountNav.tsx": 2,
+      "account/Favorites.tsx": 1,
+      "account/Orders.tsx": 2,
+      "account/Profile.tsx": 1,
+      "cart/CartPage.tsx": 1,
+      "checkout/CheckoutResultPage.tsx": 1,
+      "content/Facts.tsx": 1,
+    }
+    for (const [file, shapes] of Object.entries(SHAPES)) {
+      expect(count(atolyeCss(file), "gf-shape"), file).toBe(shapes)
+    }
+  })
+
   it("moved every listed box off its utility", () => {
     for (const [file, [pane, inner]] of Object.entries(MOVED)) {
       const source = atolyeCss(file)

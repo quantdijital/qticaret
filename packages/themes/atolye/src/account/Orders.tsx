@@ -107,7 +107,7 @@ export function OrderRow({ order, t }: { order: AccountOrderView; t: Translate }
           />
         </span>
         <span className="flex items-center gap-3">
-          <span className="shrink-0 rounded-pill bg-field px-2.5 py-1 text-xs font-semibold">
+          <span className="shrink-0 rounded-pill gf-shape bg-field px-2.5 py-1 text-xs font-semibold">
             {statusOf(order)}
           </span>
           {order.progress && <StepBar steps={order.progress} />}
@@ -122,7 +122,7 @@ export function NoOrders({ t }: { t: Translate }) {
   return (
     <div className="flex flex-col items-start justify-between gap-8 rounded-tile gf-pane p-6 sm:p-8">
       <div className="flex flex-col gap-3">
-        <span className="mb-1 flex size-14 shrink-0 items-center justify-center rounded-pill bg-paper">
+        <span className="mb-1 flex size-14 shrink-0 items-center justify-center rounded-pill gf-shape bg-paper">
           <ShoppingBag className="size-6" aria-hidden="true" strokeWidth={1.75} />
         </span>
         <p className="text-title font-extrabold">{t("account.no_orders")}</p>

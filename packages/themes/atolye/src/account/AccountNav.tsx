@@ -47,7 +47,7 @@ function SignOut({
     <SignOutForm action={actions.logout}>
       <button type="submit" className={className}>
         {circle ? (
-          <span className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-field">
+          <span className="flex size-11 shrink-0 items-center justify-center rounded-pill gf-shape bg-field">
             {icon}
           </span>
         ) : (
@@ -142,7 +142,7 @@ export function Hub({
           return (
             <li key={link.path}>
               <a href={link.path} className={row}>
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-field">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-pill gf-shape bg-field">
                   <NavIcon link={link} />
                 </span>
                 <span className="flex min-w-0 flex-1 flex-col">

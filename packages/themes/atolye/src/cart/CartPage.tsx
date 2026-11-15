@@ -53,7 +53,7 @@ function EmptyCart({ view, t, actions }: Omit<Page, "note">) {
         <h1>{t("cart.title")}</h1>
         {view.error && <Note text={view.error} error />}
         <div className="flex flex-col items-start gap-5 rounded-tile gf-box p-6 sm:flex-row sm:items-center sm:p-8">
-          <span className="flex size-14 shrink-0 items-center justify-center rounded-pill bg-paper">
+          <span className="flex size-14 shrink-0 items-center justify-center rounded-pill gf-shape bg-paper">
             <ShoppingBag className="size-6" aria-hidden="true" strokeWidth={1.75} />
           </span>
           <p className="flex-1 text-lg font-semibold">{t("cart.empty")}</p>

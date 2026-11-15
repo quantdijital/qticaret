@@ -8,7 +8,7 @@ function Unavailable({ t }: { t: Translate }) {
   return (
     <Container className="pt-8 lg:pt-16">
       <div className="mx-auto flex max-w-2xl flex-col items-start gap-6 rounded-tile gf-pane p-6 sm:p-10">
-        <span className="flex size-14 items-center justify-center rounded-pill bg-paper text-text-2">
+        <span className="flex size-14 items-center justify-center rounded-pill gf-shape bg-paper text-text-2">
           <CircleAlert className="size-7" aria-hidden="true" strokeWidth={1.75} />
         </span>
         <h1>{t("payment_link.unavailable_title")}</h1>

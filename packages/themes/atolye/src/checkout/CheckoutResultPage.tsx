@@ -23,7 +23,7 @@ export function CheckoutResultPage({ view, t }: { view: CheckoutResultPageView; 
       <div className="mx-auto flex max-w-2xl flex-col items-start gap-6 rounded-tile gf-pane p-6 sm:p-10">
         <span
           className={cn(
-            "flex size-14 items-center justify-center rounded-pill bg-paper",
+            "flex size-14 items-center justify-center rounded-pill gf-shape bg-paper",
             view.state === "failed" || view.state === "refund" ? "text-error" : "text-text-2"
           )}
         >

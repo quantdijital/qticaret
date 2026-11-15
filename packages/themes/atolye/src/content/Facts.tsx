@@ -157,7 +157,7 @@ export function ShippingFacts({ facts, t }: { facts: ShippingFactsView; t: Trans
           <ul className="flex flex-col gap-4">
             {facts.promises.map((promise) => (
               <li key={promise.title} className="flex items-start gap-3">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-pill bg-paper">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-pill gf-shape bg-paper">
                   <TrustIcon icon={promise.icon} className="size-5" />
                 </span>
                 <span className="flex flex-col pt-1.5">

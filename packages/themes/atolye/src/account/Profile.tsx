@@ -62,7 +62,7 @@ function Requests({ view, t }: { view: AccountPageView; t: Translate }) {
         >
           <span className="flex flex-wrap items-center justify-between gap-2">
             <span className="text-md font-extrabold">{request.kind}</span>
-            <span className="rounded-pill bg-paper-2 px-2.5 py-1 text-xs font-semibold">
+            <span className="rounded-pill gf-shape bg-paper-2 px-2.5 py-1 text-xs font-semibold">
               {request.status}
             </span>
           </span>
