@@ -55,6 +55,35 @@ describe("picking in the preview", () => {
     )
   })
 
+  it("sends the names again on each ready (a bridge set up again starts without them)", () => {
+    const post = vi.fn(() => true)
+    const noop = vi.fn()
+    const hook = renderHook(
+      ({ handshakes }) =>
+        usePreviewPicking({
+          doc: DOC,
+          connected: true,
+          handshakes,
+          post,
+          onOpen: noop,
+          onVisit: noop,
+          onLand: noop,
+        }),
+      { initialProps: { handshakes: 1 } }
+    )
+    const labels = () => post.mock.calls.filter(([type]) => (type as string) === "labels")
+    expect(labels()).toHaveLength(1)
+    hook.rerender({ handshakes: 1 })
+    expect(labels()).toHaveLength(1)
+    hook.rerender({ handshakes: 2 })
+    expect(labels()).toHaveLength(2)
+  })
+
+  it("cuts a long name to what the label carries", () => {
+    const names = sectionNames(DOC, () => "x".repeat(300))
+    expect(Object.values(names).every((name) => name.length === 80)).toBe(true)
+  })
+
   it("opens a section the document has and says so; one it has not is ignored", () => {
     const { hook, onOpen } = setup()
     act(() => {

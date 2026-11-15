@@ -51,5 +51,10 @@ describe("previewPage (?sayfa= of a design preview)", () => {
     for (const raw of ["/odeme", "/odeme/sonuc", "/hesap", "/giris", "/onizleme/sfs_x", "/api/x"]) {
       expect(previewPage(raw, { system: true }).kind).toBe("home")
     }
+    // Case, dot segments and escapes do not reach checkout either
+    for (const raw of ["/Odeme", "/ODEME", "/sepet/../odeme", "/%6fdeme", "/sepet/%2e%2e/odeme"]) {
+      expect(previewPage(raw, { system: true }).kind).not.toBe("cart")
+      expect(previewPage(raw, { system: true }).kind).not.toBe("search")
+    }
   })
 })

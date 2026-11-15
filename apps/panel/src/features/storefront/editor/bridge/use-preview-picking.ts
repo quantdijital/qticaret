@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { BRIDGE_MAX_SECTIONS } from "@qticaret/types/editor-bridge"
+import { BRIDGE_MAX_NAME, BRIDGE_MAX_SECTIONS } from "@qticaret/types/editor-bridge"
 import type { BodyGroup, LayoutDocument } from "@/features/storefront/api/layout"
 import { allSections, findSection, isBodyGroup } from "@/features/storefront/layout/sections"
 import { sectionLabel } from "../section-meta"
@@ -12,6 +12,8 @@ interface Options {
   doc: LayoutDocument
   /** The frame listens (the bridge said it is ready). */
   connected: boolean
+  /** Each `ready` from the frame: a bridge set up again starts without names. */
+  handshakes?: number
   post: LivePreview["post"]
   /** A section's edit label was pressed in the frame: its form opens. */
   onOpen: (id: string) => void
@@ -40,7 +42,7 @@ export function sectionNames(
   const footer = new Set(doc.footer.map((section) => section.id))
   const names: Record<string, string> = {}
   for (const section of allSections(doc).slice(0, BRIDGE_MAX_SECTIONS)) {
-    names[section.id] = name(section, footer.has(section.id)).slice(0, 120)
+    names[section.id] = name(section, footer.has(section.id)).slice(0, BRIDGE_MAX_NAME)
   }
   return names
 }
@@ -54,7 +56,15 @@ export function sectionNames(
  * is its word only: an id is acted on only when the document has it, a
  * path is printed as text.
  */
-export function usePreviewPicking({ doc, connected, post, onOpen, onVisit, onLand }: Options) {
+export function usePreviewPicking({
+  doc,
+  connected,
+  handshakes = 0,
+  post,
+  onOpen,
+  onVisit,
+  onLand,
+}: Options) {
   const { t } = useTranslation()
   const [hovered, setHovered] = useState<string | null>(null)
   const [announce, setAnnounce] = useState<string | null>(null)
@@ -69,9 +79,9 @@ export function usePreviewPicking({ doc, connected, post, onOpen, onVisit, onLan
     if (connected) {
       post("labels", { edit: t(`${V}.edit`), names })
     }
-    // Sent again only when a name changes, not on every keystroke elsewhere
+    // Sent again when a name changes (not on every keystroke elsewhere) and on each `ready`
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [connected, labelKey, t, post])
+  }, [connected, handshakes, labelKey, t, post])
 
   const hover = useCallback(
     (id: string | null) => {
@@ -109,6 +119,7 @@ export function usePreviewPicking({ doc, connected, post, onOpen, onVisit, onLan
         return
       case "left":
         if (message.payload.path) {
+          setBlocked(null)
           onVisit(message.payload.path)
         }
         return

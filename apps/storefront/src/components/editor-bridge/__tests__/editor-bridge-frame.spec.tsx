@@ -76,8 +76,8 @@ describe("the editor bridge in the preview frame", () => {
   it("framed, writes to the panel's exact origin only, never '*'", () => {
     const posted = framed()
     mount()
-    // The editor's keys, and Faz 2's Alt+↓/↑ through the sections
-    expect(listening().sort()).toEqual(["keydown", "keydown", "message"])
+    // The editor's keys, Faz 2's Alt+↓/↑ through the sections and Enter in a search field
+    expect(listening().sort()).toEqual(["keydown", "keydown", "keydown", "message"])
     act(() => {
       window.dispatchEvent(new KeyboardEvent("keydown", { key: "z", ctrlKey: true }))
     })

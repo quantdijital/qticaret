@@ -66,6 +66,9 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
     live.current.edition = edition
     live.current.pathname = pathname
   }, [edition, pathname])
+  // The document's own nonce: each redraw (`router.refresh()`) renders the page with a new one,
+  // but the CSP that holds is the first response's, so the style elements keep that one
+  const docNonce = useRef(nonce)
 
   // A redraw ended (its transition settled): what is on show now, and the next waiting one
   const draw = useRef<(job: () => void) => void>(() => undefined)
@@ -104,6 +107,7 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
       return
     }
     const state = live.current
+    const nonce = docNonce.current
     const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches
     const paint = () => {
       if (!state.style) {
@@ -263,8 +267,12 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
     }
     window.addEventListener("message", onMessage)
     window.addEventListener("keydown", onKey, true)
-    const page = new URL(window.location.href).searchParams.get("sayfa")
-    send("ready", { v: EDITOR_BRIDGE_VERSION, path: page ?? "/", edition: state.edition })
+    // A page the bridge may name only (else the home page): the panel reads it with the same rule
+    send("ready", {
+      v: EDITOR_BRIDGE_VERSION,
+      path: shownPage(window.location.search),
+      edition: state.edition,
+    })
     sendLocation()
     const base = previewBase(window.location.pathname)
     return () => {
@@ -284,9 +292,9 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
         send("left", { path: held.kind === "ask" && held.previewable ? held.path : null })
       }
     }
-    // Set up once per frame: the panel's origin and the nonce do not change
+    // Set up once per frame: the panel's origin does not change, the nonce is the first one
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [panelOrigin, nonce])
+  }, [panelOrigin])
 
   return null
 }

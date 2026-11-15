@@ -5,6 +5,9 @@ import type { MissingReason } from "./bridge-client"
 export const READY_MS = 5000
 /** A redraw asked for must be done this soon, or the live preview is given up. */
 export const RENDER_MS = 15000
+/** A frame that left the preview is loaded again at most this often, else given up. */
+export const RELOAD_LIMIT = 3
+export const RELOAD_WINDOW_MS = 10_000
 
 export type Payload<T extends ToStorefrontMessage["type"]> = Extract<
   ToStorefrontMessage,

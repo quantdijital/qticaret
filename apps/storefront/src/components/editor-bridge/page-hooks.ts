@@ -1,5 +1,12 @@
 import { isEditable, needsScroll } from "./bridge-core"
-import { formAddress, holdAddress, isPlainClick, linkAddress } from "./bridge-nav"
+import {
+  enterSubmits,
+  formAddress,
+  holdAddress,
+  isPlainClick,
+  linkAddress,
+  submitOf,
+} from "./bridge-nav"
 import type { Held } from "./bridge-nav"
 import type { Overlay } from "./overlay"
 import { drawnSections, sectionAround, sectionStep, stepSection } from "./overlay-core"
@@ -57,16 +64,37 @@ export function installPageHooks({
     point(null)
   }
 
-  const act = (event: Event, held: Held) => {
+  /** Held here: neither the browser nor the page's router leaves the preview. */
+  const act = (event: Event, held: Held, stop: boolean) => {
     if (held.kind === "pass") {
       return
     }
-    // Held here: neither the browser nor the page's router leaves the preview
     event.preventDefault()
-    event.stopPropagation()
+    // A link's click goes no further (the router would follow it); a form's submit does, for the
+    // page's own `onSubmit` (a search closing its panel): it is cancelled, nothing is sent
+    if (stop) {
+      event.stopPropagation()
+    }
     if (held.kind === "ask") {
       onAsk(held.path, held.previewable)
     }
+  }
+  /**
+   * The frame has no `allow-forms`: the browser sends no form and fires no
+   * `submit`. A search form's button or Enter fires one here instead, so
+   * the page hears it as it would live, and `onSubmit` below asks the panel.
+   */
+  const submit = (event: Event, form: HTMLFormElement, submitter: HTMLElement | null) => {
+    if (formAddress(form, submitter) === null) {
+      return
+    }
+    event.preventDefault()
+    const init = { bubbles: true, cancelable: true, submitter }
+    form.dispatchEvent(
+      typeof SubmitEvent === "function"
+        ? new SubmitEvent("submit", init)
+        : new Event("submit", init)
+    )
   }
   const onClick = (event: MouseEvent) => {
     if (!isPlainClick(event) || !(event.target instanceof Element) || isLayer(event.target)) {
@@ -75,7 +103,19 @@ export function installPageHooks({
     const anchor = event.target.closest("a[href]")
     const address = anchor ? linkAddress(anchor) : null
     if (address !== null) {
-      act(event, holdAddress(address, window.location))
+      act(event, holdAddress(address, window.location), true)
+      return
+    }
+    const sent = anchor ? null : submitOf(event.target)
+    if (sent) {
+      submit(event, sent.form, sent.submitter)
+    }
+  }
+  // Enter in a search field, after the page had its say (a highlighted suggestion opens itself)
+  const onEnter = (event: KeyboardEvent) => {
+    const form = enterSubmits(event)
+    if (form) {
+      submit(event, form, null)
     }
   }
   const onSubmit = (event: SubmitEvent) => {
@@ -84,7 +124,7 @@ export function installPageHooks({
     }
     const address = formAddress(event.target, event.submitter)
     if (address !== null) {
-      act(event, holdAddress(address, window.location))
+      act(event, holdAddress(address, window.location), false)
     }
   }
 
@@ -126,6 +166,7 @@ export function installPageHooks({
   window.addEventListener("click", onClick, true)
   window.addEventListener("submit", onSubmit, true)
   window.addEventListener("keydown", onKey, true)
+  window.addEventListener("keydown", onEnter)
   window.addEventListener("scroll", onMove, { capture: true, passive: true })
   window.addEventListener("resize", onMove)
   return () => {
@@ -136,6 +177,7 @@ export function installPageHooks({
     window.removeEventListener("click", onClick, true)
     window.removeEventListener("submit", onSubmit, true)
     window.removeEventListener("keydown", onKey, true)
+    window.removeEventListener("keydown", onEnter)
     window.removeEventListener("scroll", onMove, true)
     window.removeEventListener("resize", onMove)
   }

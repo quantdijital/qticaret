@@ -115,6 +115,7 @@ export function useEditorPreview({
   const picking = usePreviewPicking({
     doc,
     connected,
+    handshakes: preview.handshakes,
     post: preview.post,
     onOpen,
     onVisit,

@@ -66,8 +66,13 @@ export const isBridgePath = (path: string): boolean =>
   path.length <= 2048 && BRIDGE_PATH.test(path) && !ESCAPED.test(path) && !hasControl(path)
 const framePath = z.string().refine(isBridgePath)
 
+/**
+ * The longest section name a label carries: 400 names stay well inside the
+ * 64 KB message limit (a longer name is cut by the panel, ellipsised in the frame).
+ */
+export const BRIDGE_MAX_NAME = 80
 /** A section's name as the panel shows it, written by the frame as text only. */
-const sectionName = z.string().max(120)
+const sectionName = z.string().max(BRIDGE_MAX_NAME)
 /** The most sections a page or a label set carries. */
 export const BRIDGE_MAX_SECTIONS = 400
 
@@ -136,7 +141,7 @@ export const toPanelMessage = z.discriminatedUnion("type", [
     "ready",
     z.strictObject({
       v: z.literal(EDITOR_BRIDGE_VERSION),
-      path: z.string().max(2048),
+      path: framePath,
       edition: edition.nullable(),
     })
   ),

@@ -101,6 +101,23 @@ describe("the live preview's picking messages (adr/0065 Faz 2)", () => {
     expect(frameElement().getAttribute("src")).toBe(`${ORIGIN}${SESSION_PATH}`)
   })
 
+  it("stops loading a page that keeps leaving: 3 times in 10 s, then signed links", async () => {
+    await connected()
+    for (let time = 0; time < 3; time++) {
+      fromFrame(panelMessage("left", { path: null }))
+      await pass()
+      expect(frameElement().getAttribute("src")).toBe(`${ORIGIN}${SESSION_PATH}`)
+      watchFrame()
+      fromFrame(readyAt())
+      await pass()
+    }
+    fromFrame(panelMessage("left", { path: null }))
+    await pass()
+    expect(document.querySelector("iframe")?.getAttribute("src") ?? null).not.toBe(
+      `${ORIGIN}${SESSION_PATH}`
+    )
+  })
+
   it("loads the page left for on the preview's address once the editor shows it", async () => {
     const { picked, rerenderWith } = await connected()
     const before = frameElement()

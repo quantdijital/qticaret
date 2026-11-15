@@ -12,7 +12,7 @@ import { isSystemPath, normalizedPath } from "@/lib/seo/paths"
 /** The storefront's own pages a live session draws with the draft (adr/0065 Ek 2026-11-15). */
 export const PREVIEW_SYSTEM_PAGES: readonly string[] = ["/sepet", "/arama"]
 
-const PREVIEW_ROOT = /^\/onizleme\/[^/?#]+/
+const PREVIEW_ROOT = /^\/onizleme\/[^/?#]+/i
 
 /** The preview's own address (`/onizleme/<token>`) from the frame's path; null outside it. */
 export function previewBase(pathname: string): string | null {
@@ -106,6 +106,65 @@ export function linkAddress(anchor: Element): string | null {
     return null
   }
   return anchor.getAttribute("href")
+}
+
+/**
+ * The form a click sends, with the control that sends it: a submit button
+ * (a `<button>` without a type is one) or a submit/image input in a form.
+ * The panel's frame has no `allow-forms`, so the browser never sends a form
+ * there nor fires `submit`: the bridge reads the click (and Enter, below).
+ */
+export function submitOf(
+  target: Element
+): { form: HTMLFormElement; submitter: HTMLElement } | null {
+  const control = target.closest("button, input")
+  if (control instanceof HTMLButtonElement && control.type === "submit" && control.form) {
+    return { form: control.form, submitter: control }
+  }
+  if (
+    control instanceof HTMLInputElement &&
+    (control.type === "submit" || control.type === "image") &&
+    control.form
+  ) {
+    return { form: control.form, submitter: control }
+  }
+  return null
+}
+
+const TYPED = new Set(["text", "search", "email", "url", "tel", "number", "password"])
+
+interface EnterLike {
+  key: string
+  target: EventTarget | null
+  defaultPrevented: boolean
+  isComposing: boolean
+  ctrlKey: boolean
+  metaKey: boolean
+  shiftKey: boolean
+  altKey: boolean
+}
+
+/**
+ * The form Enter sends from a typed field (the browser's implicit
+ * submission), unless the page took the key itself (a highlighted
+ * suggestion opening) or an input method is composing.
+ */
+export function enterSubmits(event: EnterLike): HTMLFormElement | null {
+  const { target } = event
+  if (
+    event.key !== "Enter" ||
+    event.defaultPrevented ||
+    event.isComposing ||
+    event.ctrlKey ||
+    event.metaKey ||
+    event.shiftKey ||
+    event.altKey ||
+    !(target instanceof HTMLInputElement) ||
+    !TYPED.has(target.type)
+  ) {
+    return null
+  }
+  return target.form
 }
 
 /**

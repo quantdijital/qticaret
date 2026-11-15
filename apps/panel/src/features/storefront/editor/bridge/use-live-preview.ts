@@ -5,7 +5,7 @@ import type { Reveal, ToStorefrontMessage } from "@qticaret/types/editor-bridge"
 import { LAYOUT_KEY, fetchLayoutPreview } from "@/features/storefront/api/layout"
 import { previewAddress } from "@/features/storefront/layout/preview-url"
 import { BRIDGE_ON, acceptFromFrame, createKeyGate, frameOrigin } from "./bridge-client"
-import { READY_MS, RENDER_MS } from "./live-preview-options"
+import { READY_MS, RELOAD_LIMIT, RELOAD_WINDOW_MS, RENDER_MS } from "./live-preview-options"
 import type { LivePreviewOptions as Options, Payload } from "./live-preview-options"
 import { useEditorSession } from "./use-editor-session"
 
@@ -74,9 +74,13 @@ export function useLivePreview({
     scale: 1,
     after: null as { id: string; reveal: Reveal; flash: boolean; round: number } | null,
     sentRound: round,
+    /** When the frame was loaded again after leaving the preview (the last few). */
+    reloads: [] as number[],
   })
   const keyGate = useRef(createKeyGate())
   const [connected, setConnected] = useState(false)
+  // Each `ready` the frame says: what it was told before (the names) is told again
+  const [handshakes, setHandshakes] = useState(0)
   // What the live frame shows now: the save drawn and the page; anything else is on its way
   const [drawn, setDrawn] = useState<{ round: number; page: string | null } | null>(null)
   const busy = connected && drawn !== null && (drawn.round !== round || drawn.page !== page)
@@ -118,6 +122,7 @@ export function useLivePreview({
         now.stray = false
         now.connected = true
         setConnected(true)
+        setHandshakes((was) => was + 1)
         send("init", { scale: now.scale, selected })
         // A frame just loaded shows the draft as last saved, on the page it opened at
         const shows = message.payload.path === "/" ? null : message.payload.path
@@ -224,6 +229,14 @@ export function useLivePreview({
     }
     state.current.stray = false
     state.current.sentRound = round
+    // A page that keeps leaving is not chased: past the limit, back to signed links
+    const now = Date.now()
+    const recent = state.current.reloads.filter((at) => now - at < RELOAD_WINDOW_MS)
+    if (recent.length >= RELOAD_LIMIT) {
+      giveUp()
+      return
+    }
+    state.current.reloads = [...recent, now]
     setFrameKey((was) => was + 1)
   }, [round, page, left])
 
@@ -293,6 +306,8 @@ export function useLivePreview({
     /** A redraw or page change in the live frame is under way. */
     busy,
     connected,
+    /** How many times the frame has said it is ready (a new bridge knows nothing yet). */
+    handshakes,
     /** The frame's key: a new one reloads the session's address. */
     frameKey,
     frame: attach,

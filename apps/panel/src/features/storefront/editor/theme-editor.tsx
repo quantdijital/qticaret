@@ -116,6 +116,8 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
     visited: place.visited,
     onOpen: (id) => {
       setOpened({ kind: "section", id })
+      // On a phone the preview hides the form: the edit label brings the form up
+      setView("edit")
     },
     onVisit: place.visit,
     onLand: place.land,

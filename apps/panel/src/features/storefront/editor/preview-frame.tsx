@@ -162,8 +162,10 @@ export function PreviewFrame({
     )
   } else if (address) {
     content = (
+      // `overflow-clip`, not hidden: a hidden box still scrolls, and a `scrollIntoView` in the
+      // frame (Next's scroll on a page change, the bridge's reveal) would shift the scaled page
       <div
-        className="shrink-0 overflow-hidden rounded-md bg-background shadow-card ring-1 ring-border"
+        className="shrink-0 overflow-clip rounded-md bg-background shadow-card ring-1 ring-border"
         style={{ width: fit.width * fit.scale, height: fit.height * fit.scale }}
       >
         <iframe
