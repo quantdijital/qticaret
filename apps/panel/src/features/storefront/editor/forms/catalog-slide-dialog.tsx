@@ -11,7 +11,7 @@ import { F, TextField } from "./fields"
 import { ImageField } from "./image-field"
 import { LinkField } from "./link-field"
 import { useProblemText } from "./problem-text"
-import { SlideStepper } from "./slide-dialog"
+import { SlideStepper } from "./slide-controls"
 import type { CatalogHero } from "./slider-kit"
 
 const S = "storefront.editor.slider"
