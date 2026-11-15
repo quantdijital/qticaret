@@ -4,6 +4,7 @@ import { X } from "lucide-react"
 import { Dialog } from "radix-ui"
 import type { ComponentProps, ReactNode } from "react"
 import { cn } from "@qticaret/ui/lib/utils"
+import { LayerPortal } from "./Layers"
 
 /**
  * A sheet over the page: from the left (the menu) or the right (the
@@ -35,7 +36,7 @@ export function Sheet({
 }) {
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
-      <Dialog.Portal>
+      <LayerPortal>
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-scrim duration-(--dur-short) data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0" />
         <Dialog.Content
           data-drawer=""
@@ -59,7 +60,7 @@ export function Sheet({
           )}
           {children}
         </Dialog.Content>
-      </Dialog.Portal>
+      </LayerPortal>
     </Dialog.Root>
   )
 }

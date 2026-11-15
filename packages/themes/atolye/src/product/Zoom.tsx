@@ -6,6 +6,7 @@ import { useRef, useState } from "react"
 import type { PointerEvent } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { ImageView } from "@qticaret/ui"
+import { LayerPortal } from "../frame/Layers"
 import type { GalleryWords } from "./words"
 
 /** Where the pointer is over the picture, as the enlarged picture's origin (CSSOM, never a style attribute). */
@@ -59,7 +60,7 @@ export function Zoom({
         }
       }}
     >
-      <Dialog.Portal>
+      <LayerPortal>
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-stage" />
         <Dialog.Content
           aria-describedby={undefined}
@@ -137,7 +138,7 @@ export function Zoom({
           </div>
           <div className="h-[env(safe-area-inset-bottom)] shrink-0" />
         </Dialog.Content>
-      </Dialog.Portal>
+      </LayerPortal>
     </Dialog.Root>
   )
 }
