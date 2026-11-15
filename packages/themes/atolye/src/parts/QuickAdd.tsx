@@ -7,6 +7,7 @@ import type { CardButtonStyle } from "@qticaret/types"
 import { emitShopEvent } from "@qticaret/ui/lib/shop-events"
 import { cn } from "@qticaret/ui/lib/utils"
 import { announceCartAdded, submitterOf } from "../frame/events"
+import { cardButtonClass } from "./card-button"
 
 export interface QuickAddWords {
   /** The visible word ("Sepete ekle"); a round button keeps it for the reader only. */
@@ -33,18 +34,6 @@ const INITIAL: ActionResult = { ok: false, error: null }
  * sheet opens and says so; refused, the reason in words with the
  * product's page as the way on.
  */
-/**
- * A framed card's foot button in the shop's look (adr/0049 Ek 2026-11-15):
- * `solid` filled in the action's colour, `outline` the quiet bordered one
- * filled while the card is pointed at (today's), `text` an underlined word.
- */
-export const cardButtonClass = (look: CardButtonStyle): string =>
-  look === "solid"
-    ? "gf-btn gf-card-btn gf-card-btn--solid"
-    : look === "text"
-      ? "gf-btn gf-btn--quiet gf-card-btn gf-card-btn--text"
-      : "gf-btn gf-btn--quiet gf-card-btn"
-
 export function QuickAdd({
   variantId,
   path,
