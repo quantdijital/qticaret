@@ -5,6 +5,7 @@ import type {
   ScrollerSettings,
   ShelfColumns,
   ShelfPerList,
+  ShelfPhoneColumns,
   ShelfRows,
 } from "@qticaret/types"
 import type { BodySectionBase, LayoutLink } from "@/features/storefront/api/layout-sections"
@@ -26,6 +27,8 @@ export interface ProductsSection extends BodySectionBase {
   card_variant?: CardVariant | null
   /** `grid`: cards in a row on a wide screen; the theme steps down on narrower ones. */
   columns?: ShelfColumns
+  /** `grid`: cards in a row on a phone (bilesen-denetimi (b) 3); the server fills 2 on reading. */
+  columns_mobile?: ShelfPhoneColumns
   /** `carousel`: the scroller kit's settings. */
   scroller?: ScrollerSettings
   /** `compact`: rows of three small cards. */

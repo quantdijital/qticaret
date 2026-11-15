@@ -3,6 +3,7 @@ import {
   HERO_CATALOG_LIMITS,
   SCROLLER_DEFAULTS,
   SHELF_LIMITS,
+  SHELF_PHONE_DEFAULT,
   hasVariants,
 } from "@qticaret/types"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
@@ -50,7 +51,7 @@ export const VARIANT_FIELDS: {
   categories: { tiles: {}, linked: CATEGORY_CARD_DEFAULTS },
   // A rail's own by variant (Ek 2026-11-15): a columns rail starts one more list, the newest
   products: {
-    grid: { columns: 3 },
+    grid: { columns: 3, columns_mobile: SHELF_PHONE_DEFAULT },
     carousel: { scroller: SCROLLER_DEFAULTS },
     featured: {},
     compact: { rows: SHELF_LIMITS.compact.default },
@@ -58,6 +59,11 @@ export const VARIANT_FIELDS: {
       per_list: SHELF_LIMITS.columns.default,
       lists: [{ title: null, source: { kind: "newest" } }],
     },
+  },
+  // The related products as a rail's grid or carousel (bilesen-denetimi (b) 7)
+  related_products: {
+    grid: { columns: 3, columns_mobile: SHELF_PHONE_DEFAULT },
+    carousel: { scroller: SCROLLER_DEFAULTS },
   },
   header_bar: { standard: {}, centered: {}, catalog: HEADER_CATALOG_DEFAULTS },
   footer_bar: { ledger: {} },

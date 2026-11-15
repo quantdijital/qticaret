@@ -7779,7 +7779,7 @@
       "types": {
         "announcement_bar": {
           "name": "Announcement bar",
-          "description": "A thin bar at the very top of the page; the storefront shows the first notice."
+          "description": "A thin bar at the very top; several announcements show the first only, in turn or side by side."
         },
         "hero": {
           "name": "Hero",
@@ -7909,6 +7909,10 @@
         "categories": {
           "tiles": "Picture tiles",
           "linked": "Cards with subcategories"
+        },
+        "related_products": {
+          "grid": "Grid",
+          "carousel": "Carousel"
         }
       },
       "look": {
@@ -7987,7 +7991,15 @@
         "motion": "Motion",
         "appearance": "Style",
         "variant": "Layout",
-        "variantHint": "How the section looks on the storefront; the preview shows it at once. Shared content (title, text) stays when the layout changes, and \"Undo\" brings the previous one back."
+        "variantHint": "How the section looks on the storefront; the preview shows it at once. Shared content (title, text) stays when the layout changes, and \"Undo\" brings the previous one back.",
+        "device": {
+          "label": "Device",
+          "term": "device",
+          "all": "Everywhere",
+          "mobile": "Phones only",
+          "desktop": "Desktop only",
+          "hint": "Phones: screens narrower than 1024 pixels (tablets included). Where it is hidden its pictures are not downloaded; the page's first picture still is."
+        }
       },
       "defaults": {
         "heading": "Your shop's name",
@@ -8030,7 +8042,12 @@
           "4": "4 products side by side on a wide screen, two rows ({{total}} products); 3 on a tablet, 2 on a phone.",
           "5": "5 products side by side on a wide screen, two rows ({{total}} products); 4 and 3 on narrower screens, 2 on a phone."
         },
-        "columnsShort": "The storefront shows full rows only: set the number to show to at least {{total}} for two full rows."
+        "columnsShort": "The storefront shows full rows only: set the number to show to at least {{total}} for two full rows.",
+        "columnsMobile": "Columns on a phone",
+        "columnsMobileTerm": "columns mobile",
+        "columnsMobileHint": "How many products side by side on a phone; in one column the cards grow and three show.",
+        "columnsMobileOption_one": "{{count}} card",
+        "columnsMobileOption_other": "{{count}} cards"
       },
       "hero": {
         "eyebrowPlaceholder": "New season",
@@ -8180,7 +8197,37 @@
         "line": "Announcement {{number}}",
         "placeholder": "Free shipping from {ücretsiz_kargo_eşiği}",
         "add": "Add announcement",
-        "hint": "Up to {{max}} lines of up to {{length}} characters each. For now the storefront shows only the first line; the others are kept."
+        "hint": "Up to {{max}} lines of up to {{length}} characters each.",
+        "mode": {
+          "label": "Several announcements",
+          "term": "multiple",
+          "first": "First only",
+          "rotate": "In turn",
+          "inline": "Side by side",
+          "hint": "Side by side: all on one line on a wide screen, the first only on a phone. In turn: with reduced motion the first one stays."
+        },
+        "interval": {
+          "label": "Interval",
+          "term": "interval",
+          "slow": "Slow",
+          "medium": "Medium",
+          "fast": "Fast",
+          "hint": "How long each announcement stays: 8, 6 or 4 seconds."
+        },
+        "pause_button": {
+          "label": "Pause button",
+          "term": "pause button",
+          "always": "Always",
+          "hover": "On hover",
+          "hint": "It cannot be removed (accessibility); touch screens always show it."
+        },
+        "hover_pause": {
+          "label": "Pause on hover",
+          "term": "pause on hover",
+          "on": "On",
+          "off": "Off",
+          "hint": "It always stops when the keyboard reaches the bar."
+        }
       },
       "problems": {
         "required": "Write this line or remove it.",
@@ -8361,7 +8408,13 @@
         "question": "Question {{number}}'s text",
         "answer": "Question {{number}}'s answer",
         "add": "Add question",
-        "hint": "Up to {{max}} questions; answers may hold the shop's details."
+        "hint": "Up to {{max}} questions; answers may hold the shop's details.",
+        "openFirst": "First question open",
+        "openFirstTerm": "open first",
+        "openFirstHint": "The first answer shows when the page opens.",
+        "singleOpen": "One question open at a time",
+        "singleOpenTerm": "accordion",
+        "singleOpenHint": "Opening a question closes the one already open."
       },
       "related": {
         "source": "Which products",
@@ -8549,8 +8602,8 @@
         "subtextPlaceholder": "On orders placed before 2 pm",
         "link": "Link (optional)",
         "full": "This page already has {{max}} scrolling strips (the header's counts too).",
-        "lookHint": "Which devices show it, a close button; the space around the strip and its width.",
-        "headerLookHint": "Which devices show it and a close button.",
+        "lookHint": "A close button; the space around the strip and its width.",
+        "headerLookHint": "A close button.",
         "size": {
           "label": "Size",
           "term": "size",
@@ -8629,14 +8682,6 @@
           "off": "Off",
           "on": "On",
           "hint": "Items alternate between filled and outlined letters. Large size only."
-        },
-        "device": {
-          "label": "Device",
-          "term": "device",
-          "all": "Everywhere",
-          "mobile": "Phones only",
-          "desktop": "Desktop only",
-          "hint": "Phones: screens narrower than 1024 pixels (tablets included). A hidden strip still counts toward the two-per-page limit."
         },
         "closable": {
           "label": "Close button",
@@ -8725,6 +8770,13 @@
           "label": "Subcategories shown",
           "term": "links",
           "hint": "At most this many subcategories under each name; 0 shows only the name and picture. A \"See all\" link appears when there are more."
+        },
+        "columns_mobile": {
+          "1": "1 card",
+          "2": "2 cards",
+          "label": "Columns on a phone",
+          "term": "columns mobile",
+          "hint": "How many cards side by side on a phone; in two columns the cards narrow."
         }
       },
       "footerBar": {

@@ -1,5 +1,5 @@
 import { z } from "@medusajs/framework/zod"
-import { LAYOUT_LIMITS, columns, optional, recordId, title } from "../layout-fields"
+import { LAYOUT_LIMITS, columns, columnsMobile, optional, recordId, title } from "../layout-fields"
 import { bodyFields } from "./look"
 import { storefrontLink } from "../menus"
 import { scroller } from "./scroller"
@@ -70,7 +70,14 @@ const common = {
 }
 
 /** Today's rows of cards; the shop's cards in a row on a wide screen (adr/0049 Ek 2026-11-05). */
-const grid = z.object({ ...common, variant: defaultVariant("products"), columns }).strict()
+const grid = z
+  .object({
+    ...common,
+    variant: defaultVariant("products"),
+    columns,
+    columns_mobile: columnsMobile,
+  })
+  .strict()
 
 /** One row that slides sideways, driven by the scroller kit. */
 const carousel = z.object({ ...common, variant: z.literal("carousel"), scroller }).strict()
@@ -150,7 +157,7 @@ export function shelfSources(
 export const listKey = (sectionId: string, index: number) => `${sectionId}:${String(index + 1)}`
 
 /**
- * A stored product rail's card variant as today's list reads it (adr/0049
+ * A stored product rail's (or related products') card variant as today's list reads it (adr/0049
  * Ek 2026-11-14 §2.3, forgiving on reading): one off the list (taken off
  * since, or a newer build's) is the theme setting's (null). A save is
  * still held to the list.
@@ -158,7 +165,7 @@ export const listKey = (sectionId: string, index: number) => `${sectionId}:${Str
 export function storedCardVariant(section: Record<string, unknown>): Record<string, unknown> {
   const listed: readonly unknown[] = PRODUCT_CARD_VARIANTS
   const variant = section["card_variant"]
-  return section["type"] !== "products" ||
+  return (section["type"] !== "products" && section["type"] !== "related_products") ||
     variant === undefined ||
     variant === null ||
     listed.includes(variant)

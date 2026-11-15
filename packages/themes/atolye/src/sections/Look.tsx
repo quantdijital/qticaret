@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import type { SectionLookView } from "@qticaret/ui"
+import type { SectionDeviceView, SectionLookView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 
 /**
@@ -14,18 +14,32 @@ import { cn } from "@qticaret/ui/lib/utils"
  * main section (`main`: the product's block, the category's grid) keeps
  * the gaps between its own parts; only a home section gives its top gap
  * to the box.
+ *
+ * The screens it shows on (docs/tema/bilesen-standardi §2) ride the same
+ * box (`data-show-on`); a section shown everywhere with no look set gets
+ * none. `look.css` hides it at the theme's frame breakpoint (64rem), so
+ * every visitor gets the same page and a lazy picture in it is not fetched.
  */
 export function Look({
   look,
+  device,
   main = false,
   children,
 }: {
   look: SectionLookView | undefined
+  device?: SectionDeviceView | undefined
   main?: boolean
   children: ReactNode
 }) {
-  if (!look || Object.keys(look).length === 0) {
-    return children
+  const looked = look !== undefined && Object.keys(look).length > 0
+  if (!looked) {
+    return device ? (
+      <div className="gf-device" data-show-on={device}>
+        {children}
+      </div>
+    ) : (
+      children
+    )
   }
   return (
     <div
@@ -36,6 +50,7 @@ export function Look({
       data-align={look.align}
       data-width={look.width}
       data-main={main ? "" : undefined}
+      data-show-on={device}
     >
       {children}
     </div>

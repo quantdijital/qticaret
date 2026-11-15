@@ -120,7 +120,12 @@ export function Header({
       </Container>
       {shop.categories.length > 0 && (
         <Container data-gf-aisle="" className="hidden lg:block">
-          <Aisle categories={shop.categories} label={t("nav.categories")} allIn={allIn} />
+          <Aisle
+            categories={shop.categories}
+            label={t("nav.categories")}
+            allIn={allIn}
+            seeAll={t("categories.see_all")}
+          />
         </Container>
       )}
     </header>

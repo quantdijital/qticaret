@@ -1,6 +1,7 @@
 import { layoutDocument } from "../layout"
 
-const ALWAYS = { visible: true, starts_at: null, ends_at: null }
+// Every body section shows on every screen unless the shop picks one (bilesen-standardi §2)
+const ALWAYS = { visible: true, starts_at: null, ends_at: null, device: "all" }
 const badge = (more: Record<string, unknown> = {}) => ({
   id: "puan00001",
   type: "google_rating",

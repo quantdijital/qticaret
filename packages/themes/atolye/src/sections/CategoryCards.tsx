@@ -13,7 +13,10 @@ import { SectionHead } from "./SectionHead"
 /** The category cards' variants this theme draws (`drawnVariant`). */
 export const CATEGORY_VARIANTS = ["tiles", "linked"] as const satisfies readonly CategoriesVariant[]
 
-/** Cards in a row from 1024 px, the shop's choice; one on a phone, two from 640 px. Written whole for Tailwind. */
+/**
+ * Cards in a row from 1024 px, the shop's choice; two from 640 px; one on a
+ * phone, or two when the shop asks (`phoneColumns`). Written whole for Tailwind.
+ */
 const COLUMNS: Record<CategoryCardsView["columns"], string> = {
   2: "lg:grid-cols-2",
   3: "lg:grid-cols-3",
@@ -26,6 +29,10 @@ const SIZES: Record<CategoryCardsView["columns"], string> = {
   3: "(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw",
   4: "(min-width: 1280px) 22vw, (min-width: 1024px) 30vw, (min-width: 640px) 45vw, 90vw",
 }
+
+/** The above picture's `sizes`: half the phone's width when two stand in a row there. */
+const sizesOf = (view: CategoryCardsView): string =>
+  view.phoneColumns === 2 ? SIZES[view.columns].replace(/90vw$/, "45vw") : SIZES[view.columns]
 
 const LINK =
   "flex min-h-11 items-center text-sm text-text-2 no-underline underline-offset-4 hover:text-text hover:underline lg:pointer-fine:min-h-8"
@@ -65,7 +72,7 @@ function Card({
         >
           <ResponsiveImage
             image={{ ...picture, alt: "" }}
-            sizes={side ? "96px" : SIZES[view.columns]}
+            sizes={side ? "96px" : sizesOf(view)}
             className="h-full w-full object-cover"
           />
         </a>
@@ -76,7 +83,10 @@ function Card({
             href={card.path}
             className={cn(
               "no-underline underline-offset-4 hover:underline",
-              leaf && "after:absolute after:inset-0 after:content-['']"
+              leaf
+                ? "after:absolute after:inset-0 after:content-['']"
+                : // A touch target of 44 px where only the name links (Tezgâh audit K-32)
+                  "pointer-coarse:inline-flex pointer-coarse:min-h-11 pointer-coarse:items-center"
             )}
           >
             {card.label}
@@ -123,8 +133,9 @@ function SeeAll({ link, name }: { link: LinkView; name: string }) {
  * square beside the words, a 4:3 picture above them, or none), its name
  * in 800, its count when the shop shows counts, its first subcategories
  * as quiet links and "Tümünü gör" to its own page at the card's foot (one
- * line across a row, no arrow); a card with none to list is one link, its
- * picture and words centred in the row's height (Tezgâh audit K-08, K-09). Cards stand in a grid:
+ * line across a row, no arrow); a card with none to list is one link, as
+ * tall as its picture and words, at the row's top: never stretched to its
+ * neighbours' lists (Tezgâh audits K-08, K-09). Cards stand in a grid:
  * one column on a phone, two from 640 px, the shop's two to four from
  * 1024 px (four from 1280, three between). A card is framed by a hairline
  * on the field colour (`--radius-tile`), or plain on the page; nothing
@@ -150,13 +161,16 @@ export function CategoryCards({
         <SectionHead id={id} title={title} more={all} />
         <ul
           className={cn(
-            "grid grid-cols-1 sm:grid-cols-2",
+            view.phoneColumns === 2 ? "grid grid-cols-2" : "grid grid-cols-1 sm:grid-cols-2",
             view.frame === "lined" ? "gap-(--gap-columns)" : "gap-x-(--gap-columns) gap-y-8",
             COLUMNS[view.columns]
           )}
         >
           {view.cards.map((card) => (
-            <li key={card.path} className="min-w-0">
+            <li
+              key={card.path}
+              className={cn("min-w-0", card.children.length === 0 && "self-start")}
+            >
               <Card card={card} view={view} t={t} />
             </li>
           ))}

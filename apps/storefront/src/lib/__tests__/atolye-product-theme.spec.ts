@@ -337,7 +337,7 @@ describe("the theme's product page", () => {
     })
     const at = (needle: string) => html.indexOf(needle)
     expect(html).toContain(
-      '<h2 id="kargo-ve-teslimat-baslik" class="text-title">Kargo ve Teslimat</h2>'
+      '<h2 id="kargo-ve-teslimat-baslik" class="text-section">Kargo ve teslimat</h2>'
     )
     // Beside the panels, whichever is open: after both, before the reviews
     expect(at('id="kargo-ve-teslimat"')).toBeGreaterThan(at('id="ozellikler"'))

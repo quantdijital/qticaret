@@ -12,8 +12,10 @@
  * `@qticaret/types/section-categories` subpath, which Turbopack resolves).
  */
 export const CATEGORY_CARD_SETTINGS = {
-  /** Cards in a row on a wide screen; a phone shows one, a tablet two. */
+  /** Cards in a row on a wide screen; a tablet shows two. */
   columns: [2, 3, 4],
+  /** Cards in a row on a phone (`columns_mobile`, bilesen-denetimi (b) 3): one, as before, or two. */
+  columns_mobile: [1, 2],
   /** Where the category's picture stands: beside the words, above them, or none. */
   image_position: ["side", "top", "none"],
   /** The card's edge: a hairline frame, or plain on the page. */
@@ -30,6 +32,7 @@ export const CATEGORY_CARD_LIMITS = { links: { min: 0, max: 8, default: 5 } } as
 /** A card section switched to `linked`, and what a reader takes for a field it lacks. */
 export const CATEGORY_CARD_DEFAULTS = {
   columns: 3,
+  columns_mobile: 1,
   image_position: "side",
   frame: "lined",
   links: CATEGORY_CARD_LIMITS.links.default,
@@ -41,6 +44,8 @@ export const CATEGORY_CARD_DEFAULTS = {
 export interface StoreCategoriesLinked {
   variant: "linked"
   columns: CategoryCardStep<"columns">
+  /** Printed only when not the default (1): a backend before it sends none. */
+  columns_mobile?: CategoryCardStep<"columns_mobile">
   image_position: CategoryCardStep<"image_position">
   frame: CategoryCardStep<"frame">
   /** Subcategory links under each card's name at most (0–8). */

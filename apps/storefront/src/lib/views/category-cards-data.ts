@@ -35,6 +35,7 @@ export function linkedSettings(section: Partial<StoreCategoriesLinked>): StoreCa
   return {
     variant: "linked",
     columns: stepOf("columns", section.columns),
+    columns_mobile: stepOf("columns_mobile", section.columns_mobile),
     image_position: stepOf("image_position", section.image_position),
     frame: stepOf("frame", section.frame),
     links,

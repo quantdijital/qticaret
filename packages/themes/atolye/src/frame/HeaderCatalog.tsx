@@ -53,6 +53,12 @@ export function HeaderCatalog({
   changeCartLine?: ((form: FormData) => Promise<void>) | undefined
 }) {
   const allIn = allInOf(shop.categories, t)
+  // The highlighted link stands right after the main menu's last item (Tezgâh audit Y-05)
+  const highlight = catalog.highlight && (
+    <a href={catalog.highlight.path} className="gf-btn gf-btn--small shrink-0">
+      {catalog.highlight.label}
+    </a>
+  )
   const search = searchOf(shop, t, searchSuggest, catalog.searchPlaceholder)
   const account = accountOf(shop, t)
   const parts = catalogParts(shop, catalog)
@@ -165,13 +171,11 @@ export function HeaderCatalog({
                 label={t("nav.categories")}
                 allIn={allIn}
                 more={t("nav.more")}
+                seeAll={t("categories.see_all")}
+                tail={highlight}
               />
             )}
-            {catalog.highlight && (
-              <a href={catalog.highlight.path} className="gf-btn gf-btn--small shrink-0">
-                {catalog.highlight.label}
-              </a>
-            )}
+            {shop.categories.length === 0 && highlight}
             <nav aria-label={t("nav.account")} className="ml-auto flex shrink-0 items-center gap-1">
               <a href="/hesap" aria-label={account} className={ON_BAR}>
                 <UserRound className="size-6" aria-hidden="true" strokeWidth={1.75} />

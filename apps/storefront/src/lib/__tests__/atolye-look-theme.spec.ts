@@ -81,3 +81,28 @@ describe("a section's look in Atölye", () => {
     )
   })
 })
+
+/** docs/tema/bilesen-standardi §2: which screens show a section, hidden with CSS at 64rem. */
+describe("the screens a section shows on in Atölye", () => {
+  it("puts them on a box that draws nothing, or on the look's box when there is one", () => {
+    const plain = home([{ ...faq("sss1"), device: "mobile" }])
+    expect(plain).toContain('<div class="gf-device" data-show-on="mobile">')
+    expect(plain).not.toContain("gf-look")
+
+    const looked = home([{ ...faq("sss1", { ground: "well" }), device: "desktop" }])
+    expect(looked).toMatch(/<div class="[^"]*gf-look[^"]*"[^>]*data-show-on="desktop"/)
+    expect(looked).not.toContain("gf-device")
+
+    expect(home([faq("sss1")])).not.toContain("data-show-on")
+  })
+
+  it("hides each at the theme's frame breakpoint, the plain box drawing nothing", () => {
+    expect(LOOK_CSS).toMatch(/\.gf-device \{\s*display: contents;/)
+    expect(LOOK_CSS).toMatch(
+      /@media \(width >= 64rem\) \{\s*\[data-show-on="mobile"\] \{\s*display: none;/
+    )
+    expect(LOOK_CSS).toMatch(
+      /@media \(width < 64rem\) \{\s*\[data-show-on="desktop"\] \{\s*display: none;/
+    )
+  })
+})

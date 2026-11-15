@@ -20,6 +20,7 @@ import { FIELD_IDS, MARQUEE_OTHER_SETTINGS, takesLook } from "./forms/field-regi
 import type { FieldGroupName } from "./forms/field-registry"
 import { LookFields } from "./forms/look-fields"
 import { MarqueeGroups } from "./forms/marquee-groups"
+import { AnnouncementMotion } from "./forms/announcement-settings"
 import { BannerSettings } from "./forms/banner-settings"
 import { BANNER_OTHER_SETTINGS } from "./forms/banner-groups"
 import { SectionLayoutGroup } from "./forms/layout-group"
@@ -28,6 +29,7 @@ import { ScrollerFields } from "./forms/scroller-fields"
 import { SCROLLER_OTHER } from "./forms/scroller-groups"
 import { ShelfGroups } from "./forms/shelf-groups"
 import { ScheduleFields } from "./forms/schedule-fields"
+import { takesDevice } from "./forms/visibility-registry"
 import { HeaderCatalogOther } from "./forms/header-catalog-other"
 import { CategoryCardsOther } from "./forms/category-cards-fields"
 import { cardsSetCount } from "./forms/card-field-ids"
@@ -99,7 +101,9 @@ export function SectionPanel({
   const band = section.type === "banner" ? section : null
   // A product rail stands in "Diziliş"; a carousel's rarely changed scroller settings sit there too
   const shelf = section.type === "products" ? section : null
-  const scroller = shelf?.variant === "carousel" ? scrollerSettingsOf(shelf.scroller) : null
+  // The related products slide the same way (bilesen-denetimi (b) 7)
+  const rail = shelf ?? (section.type === "related_products" ? section : null)
+  const scroller = rail?.variant === "carousel" ? scrollerSettingsOf(rail.scroller) : null
   // The linked category cards' frame sits with the look (adr/0049 Ek 2026-11-15)
   const cards = section.type === "categories" && section.variant === "linked" ? section : null
   const set =
@@ -163,6 +167,9 @@ export function SectionPanel({
       ) : null}
       <SectionLayoutGroup section={section} reveal={reveal} onChange={onChange} />
       {strip ? <MarqueeGroups section={strip} reveal={reveal} onChange={onChange} /> : null}
+      {section.type === "announcement_bar" ? (
+        <AnnouncementMotion section={section} reveal={reveal} onChange={onChange} />
+      ) : null}
       {shelf ? <ShelfGroups section={shelf} reveal={reveal} onChange={onChange} /> : null}
       {section.type === "header_bar" && section.variant === "catalog" ? (
         <HeaderCatalogOther
@@ -196,13 +203,13 @@ export function SectionPanel({
               }}
             />
           ) : null}
-          {shelf && scroller ? (
+          {rail && scroller ? (
             <ScrollerFields
               value={scroller}
               settings={SCROLLER_OTHER}
-              fieldId={(setting) => FIELD_IDS.scroller(shelf.id, setting)}
+              fieldId={(setting) => FIELD_IDS.scroller(rail.id, setting)}
               onChange={(next) => {
-                onChange({ ...shelf, scroller: next })
+                onChange({ ...rail, scroller: next })
               }}
             />
           ) : null}
@@ -221,7 +228,12 @@ export function SectionPanel({
       ) : (
         <>
           <PanelGroup title={t(`${P}.visibility`)} reveal={reveal("visibility")}>
-            <ScheduleFields section={section} problem={problems["schedule"]} onChange={onChange} />
+            <ScheduleFields
+              section={section}
+              problem={problems["schedule"]}
+              offersDevice={takesDevice(section, group)}
+              onChange={onChange}
+            />
           </PanelGroup>
           <SectionActions
             canCopy={isBodyGroup(group)}

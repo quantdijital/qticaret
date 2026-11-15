@@ -26,7 +26,12 @@ export function hydrateShelf<L>(
   }
   switch (section.variant) {
     case "grid":
-      return { ...common, columns: section.columns }
+      return {
+        ...common,
+        columns: section.columns,
+        // Printed only when not the default (2), so a rail from before it prints as it did
+        ...(section.columns_mobile === 1 ? { columns_mobile: 1 as const } : {}),
+      }
     case "carousel":
       return { ...common, scroller: section.scroller }
     case "compact":

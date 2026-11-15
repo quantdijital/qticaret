@@ -185,6 +185,7 @@ describe("editorReducer", () => {
     expect(added.doc.product[2]).toEqual({
       id: "dahabenzer",
       type: "related_products",
+      variant: "grid",
       visible: true,
       starts_at: null,
       ends_at: null,

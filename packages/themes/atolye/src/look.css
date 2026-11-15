@@ -150,3 +150,26 @@
 .gf-look[data-ground="primary"] .text-deal {
   color: var(--primary-foreground);
 }
+
+/*
+ * Which screens show a section (docs/tema/bilesen-standardi §2; `Look.tsx`):
+ * phones are the frame below 64rem (as the header, the bottom bar and the
+ * strip have it). Outside the layers, so no layered `display` brings a hidden
+ * section back. A section with no look set stands in a box that draws
+ * nothing of its own (`display: contents`). A lazy picture in a hidden one
+ * never meets the viewport, so it is not fetched; an eager one (the
+ * opening's, the LCP) still is.
+ */
+.gf-device {
+  display: contents;
+}
+@media (width >= 64rem) {
+  [data-show-on="mobile"] {
+    display: none;
+  }
+}
+@media (width < 64rem) {
+  [data-show-on="desktop"] {
+    display: none;
+  }
+}

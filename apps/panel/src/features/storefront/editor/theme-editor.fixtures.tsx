@@ -94,6 +94,7 @@ export const DOC: LayoutDocument = {
     {
       id: "benzerurunler",
       type: "related_products",
+      variant: "grid",
       ...ALWAYS,
       title: null,
       source: { kind: "same_category" },

@@ -1,4 +1,5 @@
 import type { MarqueeSettings, TrustIcon } from "@qticaret/types"
+import type { SectionDeviceView } from "./content-views"
 import type { LinkView } from "./views"
 
 /**
@@ -15,6 +16,8 @@ export interface MarqueeSectionView extends MarqueeSettings {
   id: string
   type: "marquee"
   items: MarqueeItemView[]
+  /** Which screens show it; none: everywhere. On a page it comes as every section's (`HomeSectionView`). */
+  device?: SectionDeviceView
 }
 
 export interface MarqueeItemView {

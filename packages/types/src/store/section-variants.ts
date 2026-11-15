@@ -30,6 +30,11 @@ export const SECTION_VARIANTS = {
    */
   products: ["grid", "carousel", "featured", "compact", "columns"],
   /**
+   * A product page's related products (bilesen-denetimi (b) 7): `grid`,
+   * today's rows; `carousel`, one row that slides (the scroller kit).
+   */
+  related_products: ["grid", "carousel"],
+  /**
    * The main sections (adr/0049 Ek 2026-11-14 §5, §7), each with today's
    * drawing first. The header bar's `centered` is the theme setting's
    * centred header (`header.layout`), read into the bar by name; its
@@ -80,6 +85,7 @@ export type TrustBadgesVariant = SectionVariant<"trust_badges">
 export type HeroVariant = SectionVariant<"hero">
 export type CategoriesVariant = SectionVariant<"categories">
 export type ProductsVariant = SectionVariant<"products">
+export type RelatedProductsVariant = SectionVariant<"related_products">
 export type HeaderBarVariant = SectionVariant<"header_bar">
 export type FooterBarVariant = SectionVariant<"footer_bar">
 export type ProductMainVariant = SectionVariant<"product_main">

@@ -5,7 +5,8 @@ import { Container } from "../parts/Container"
 import { Preload } from "../parts/Preload"
 import { type Of, headingId } from "./plan"
 
-const SIZES = "(min-width: 1024px) 26vw, (min-width: 768px) 50vw, 100vw"
+// The photo as drawn: about a third of the width from 1024 px (495 px at 1440), half a tablet, a phone across (K-28)
+const SIZES = "(min-width: 1440px) 500px, (min-width: 1024px) 35vw, (min-width: 768px) 50vw, 92vw"
 
 /** The opening's variants this theme draws (`drawnVariant`): today's and the category list. */
 export const HERO_VARIANTS = ["standard", "category_list"] as const
@@ -37,8 +38,8 @@ function ListRow({ category, t }: { category: CategoryCardView; t: Translate }) 
             />
           )}
         </span>
-        {/* A name wraps to a second line rather than losing its end (K-15) */}
-        <span className="line-clamp-2 leading-snug break-words">{category.label}</span>
+        {/* A name wraps rather than losing its end: three lines in a phone's narrow cell (K-15) */}
+        <span className="line-clamp-3 leading-snug break-words">{category.label}</span>
         {typeof category.count === "number" ? <Count count={category.count} t={t} /> : <span />}
       </a>
     </li>

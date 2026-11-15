@@ -93,7 +93,20 @@ describe("a product rail's variants (adr/0049 Ek 2026-11-15)", () => {
       t
     )
     expect(old).toMatchObject({ variant: "grid", columns: 3 })
+    expect(old).not.toHaveProperty("phoneColumns")
     expect(unknown).toMatchObject({ variant: "grid" })
+  })
+
+  it("passes a grid's one card on a phone on, and no other variant's (bilesen-denetimi (b) 3)", async () => {
+    const [grid, carousel] = await sectionViews(
+      [
+        rail({ kind: "newest" }, { columns_mobile: 1 }),
+        rail({ kind: "newest" }, { id: "raf0002", variant: "carousel", columns_mobile: 1 }),
+      ],
+      t
+    )
+    expect(grid).toMatchObject({ variant: "grid", phoneColumns: 1 })
+    expect(carousel).not.toHaveProperty("phoneColumns")
   })
 
   it("asks for seven on a featured rail, rows of three on a compact one drawn compact", async () => {

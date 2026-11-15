@@ -17,7 +17,8 @@ const contract = (file: string) =>
     path.resolve(__dirname, `../../../../../../packages/types/src/store/${file}.ts`)
   )
 
-const ALWAYS = { visible: true, starts_at: null, ends_at: null }
+// Every body section shows on every screen unless the shop picks one (bilesen-standardi §2)
+const ALWAYS = { visible: true, starts_at: null, ends_at: null, device: "all" }
 const LEFT = { layout: "left", sticky: true } as const
 const cards = (more: Record<string, unknown> = {}) => ({
   id: "kategori01",
@@ -128,9 +129,12 @@ describe("the footer bar's own settings (adr/0049 Ek 2026-11-15)", () => {
   it("reads a footer saved before them with the defaults, and prints it as before", () => {
     const doc = withMainSections(layoutDocument.parse({ footer: [footer()] }), LEFT)
 
+    // A main section always shows: no screens of its own
     expect(doc.footer[0]).toEqual({
       ...footer(),
-      ...ALWAYS,
+      visible: true,
+      starts_at: null,
+      ends_at: null,
       variant: "ledger",
       ...FOOTER_BAR_DEFAULTS,
     })

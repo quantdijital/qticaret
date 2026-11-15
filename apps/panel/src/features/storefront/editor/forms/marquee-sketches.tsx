@@ -1,12 +1,4 @@
-import {
-  ArrowLeft,
-  ArrowRight,
-  Monitor,
-  MonitorSmartphone,
-  MousePointer2,
-  Pause,
-  Smartphone,
-} from "lucide-react"
+import { ArrowLeft, ArrowRight, MousePointer2, Pause } from "lucide-react"
 import type { MarqueeSetting, MarqueeStep } from "@qticaret/types"
 import { cn } from "@qticaret/admin-ui/lib/utils"
 
@@ -52,8 +44,6 @@ const SEPARATOR: Readonly<Record<MarqueeStep<"separator">, string>> = {
   star: "✦",
   line: "|",
 }
-
-const DEVICE = { all: MonitorSmartphone, mobile: Smartphone, desktop: Monitor } as const
 
 /** The room between items: two words with a narrow, normal or wide gap. */
 function Gap({ step }: { step: MarqueeStep<"gap"> }) {
@@ -114,10 +104,6 @@ export function MarqueeSketch<S extends MarqueeSetting>({
       )
     case "gap":
       return <Gap step={step as MarqueeStep<"gap">} />
-    case "device": {
-      const Icon = DEVICE[step as MarqueeStep<"device">]
-      return <Icon aria-hidden="true" className="size-4" />
-    }
     case "separator":
       return (
         <span aria-hidden="true" className="flex h-4 w-6 items-center justify-center gap-0.5">

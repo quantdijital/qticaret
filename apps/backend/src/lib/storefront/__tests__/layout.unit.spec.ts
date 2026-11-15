@@ -1,6 +1,7 @@
 import { isShowing, layoutDocument } from "../layout"
 
-const ALWAYS = { visible: true, starts_at: null, ends_at: null }
+// Every body section shows on every screen unless the shop picks one (bilesen-standardi §2)
+const ALWAYS = { visible: true, starts_at: null, ends_at: null, device: "all" }
 const QA = { question: "İade süresi ne kadar?", answer: "14 gün içinde iade edebilirsiniz." }
 const faq = (id: string, more: Record<string, unknown> = {}) => ({
   id,
@@ -59,13 +60,16 @@ describe("storefront layout document (adr/0049)", () => {
       {
         id: "benzerler1",
         type: "related_products",
+        variant: "grid",
+        card_variant: null,
         ...ALWAYS,
         title: null,
         source: { kind: "same_category" },
         limit: 8,
         columns: 3,
+        columns_mobile: 2,
       },
-      { ...faq("sss001"), ...ALWAYS, title: null },
+      { ...faq("sss001"), ...ALWAYS, title: null, open_first: "off", single_open: "off" },
     ])
     expect(doc.category).toEqual([
       // No variant saved: the default, today's strip (adr/0049 Ek 2026-11-14 §2)

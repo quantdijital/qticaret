@@ -211,7 +211,7 @@ medusaIntegrationTestRunner({
       const draft = first.data.layout.draft
       // The header bar read in from grafit's theme header (adr/0049 Ek 2026-11-14 §5)
       expect(draft.header).toEqual([
-        bar,
+        { ...bar, mode: "first", interval: "medium", pause_button: "always", hover_pause: "on" },
         {
           id: "mainheader",
           type: "header_bar",

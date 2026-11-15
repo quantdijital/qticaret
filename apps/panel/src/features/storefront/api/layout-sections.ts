@@ -1,10 +1,17 @@
 import type {
+  AnnouncementSettings,
   BannerSettings,
   BannerTone,
+  CardVariant,
+  FaqSettings,
   MarqueeSettings,
   ProductSource,
+  RelatedProductsVariant,
+  ScrollerSettings,
+  SectionDevice,
   SectionLook,
   ShelfColumns,
+  ShelfPhoneColumns,
   TrustBadgesVariant,
 } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
@@ -50,6 +57,11 @@ interface SectionBase {
  */
 export interface BodySectionBase extends SectionBase {
   look?: SectionLook
+  /**
+   * Which screens show it (docs/tema/bilesen-standardi §2): the server fills
+   * `all` on reading; absent in a section the editor just made, read as `all`.
+   */
+  device?: SectionDevice
 }
 
 /** The opening's words, buttons and picture, the same in every variant (adr/0049 Ek 2026-11-14 §2). */
@@ -198,8 +210,12 @@ export interface FaqItem {
   answer: string
 }
 
-/** Questions and answers, shown on the page; never `FAQPage` structured data (docs/13 §5). */
-export interface FaqSection extends BodySectionBase {
+/**
+ * Questions and answers, shown on the page; never `FAQPage` structured data
+ * (docs/13 §5). Its switches (bilesen-denetimi (b) 8) are filled on reading;
+ * one absent reads as its default (`faqSettingsOf`).
+ */
+export interface FaqSection extends BodySectionBase, Partial<FaqSettings> {
   type: "faq"
   title: string | null
   items: FaqItem[]
@@ -216,7 +232,16 @@ export interface RelatedProductsSection extends BodySectionBase {
   title: string | null
   source: RelatedSource
   limit: number
-  columns: ShelfColumns
+  /** How the cards stand (bilesen-denetimi (b) 7); the server fills `grid` on reading. */
+  variant: RelatedProductsVariant
+  /** The rail's own card style over the theme's; null or absent: the theme's. */
+  card_variant?: CardVariant | null
+  /** `grid`: cards in a row on a wide screen. */
+  columns?: ShelfColumns
+  /** Cards in a row on a phone (bilesen-denetimi (b) 3); the server fills 2 on reading. */
+  columns_mobile?: ShelfPhoneColumns
+  /** `carousel`: the scroller kit's settings. */
+  scroller?: ScrollerSettings
 }
 
 /** One item of a scrolling strip: an optional icon, its line, an optional second line and link. */
@@ -236,7 +261,7 @@ type MarqueeFields = { type: "marquee"; items: MarqueeItem[] } & MarqueeSettings
 export type MarqueeSection = BodySectionBase & MarqueeFields
 
 /** The header group's scrolling strip, above the shop's header: no look. */
-export type HeaderMarquee = SectionBase & MarqueeFields
+export type HeaderMarquee = SectionBase & MarqueeFields & { device?: SectionDevice }
 
 export type HomeSection =
   | HeroSection
@@ -275,10 +300,15 @@ export type CategorySection = (
   RichTextSection | BannerSection | FaqSection | TrustBadgesSection | WordedSection | MarqueeSection
 ) & { placement: Placement }
 
-export interface AnnouncementBar extends SectionBase {
+/**
+ * The header's announcement bar: its lines and how it shows more than one
+ * (docs/tema/bilesen-denetimi (b) 6). The server fills each setting on
+ * reading; one absent reads as its default (`announcementSettingsOf`).
+ */
+export type AnnouncementBar = SectionBase & {
   type: "announcement_bar"
   lines: string[]
-}
+} & Partial<AnnouncementSettings>
 
 export interface FooterNewsletter extends SectionBase {
   type: "newsletter"

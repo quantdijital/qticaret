@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight, ChevronDown, Menu, Phone, UserRound } from "lucide-react"
+import { ArrowRight, ChevronDown, Menu, Phone, Tag, UserRound } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CategoryCardView, ContactView, LinkView, NavCategoryView } from "@qticaret/ui"
@@ -166,7 +166,9 @@ export function MenuSheet({
             <ul className="mt-2 flex flex-col gap-0.5 border-t border-rule pt-2">
               {highlight && (
                 <li>
+                  {/* With its own mark, so its words start where the account's do (Tezgâh audit Y-10) */}
                   <a href={highlight.path} className={`${ROW} font-bold`}>
+                    <Tag className="size-6 shrink-0" aria-hidden="true" strokeWidth={1.75} />
                     {highlight.label}
                   </a>
                 </li>

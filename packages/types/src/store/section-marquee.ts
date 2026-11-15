@@ -7,7 +7,8 @@
  * contract's list: a new step goes here first, then into the backend's
  * schema (`lib/storefront/sections/marquee.ts`, a mirror a test keeps
  * equal), then into the themes. The panel's Turkish names are
- * `storefront.editor.marquee.<setting>.<step>`.
+ * `storefront.editor.marquee.<setting>.<step>`. Which screens show it is
+ * every section's (`section-device.ts`): the strip's saved `device` reads there.
  *
  * Imports nothing at run time (the storefront takes it from the
  * `@qticaret/types/section-marquee` subpath, which Turbopack resolves).
@@ -39,8 +40,6 @@ export const MARQUEE_SETTINGS = {
   gap: ["tight", "normal", "wide"],
   /** Large only: every other item drawn as an outline. A theme ignores it at the other sizes. */
   outline: ["off", "on"],
-  /** Which screens show it: everywhere, phones (the theme's narrow frame) or wide screens. */
-  device: ["all", "mobile", "desktop"],
   /** A close button: a shopper who closes it does not see it again in that browser. */
   closable: ["off", "on"],
 } as const satisfies Record<string, readonly [string, ...string[]]>
@@ -65,7 +64,6 @@ export const MARQUEE_DEFAULTS: { readonly [S in MarqueeSetting]: MarqueeStep<S> 
   uppercase: "off",
   gap: "normal",
   outline: "off",
-  device: "all",
   closable: "off",
 }
 

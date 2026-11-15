@@ -191,8 +191,10 @@
 }
 
 /* The lead card of a "1 big + 6 small" shelf (sections/ShelfLayouts, Tezgâh
-   audit K-07): from 1024 px its photo grows to the two rows beside it and the
-   words keep to the foot, so no empty box opens under its price */
+   audits K-07, Y-01): from 1024 px its photo well grows to the two rows
+   beside it and the words keep to the foot, so no empty box opens under its
+   price; the photo is never cropped nor blown up past the well's width, the
+   whole product sits in the well's quiet tone */
 @media (width >= 64rem) {
   .gf-card-lead > .gf-card-framed .gf-card-media {
     flex: 1 1 auto;
@@ -207,5 +209,9 @@
     inset: 0;
     width: 100%;
     height: 100%;
+  }
+  .gf-card-lead > .gf-card-framed .gf-card-media img {
+    object-fit: contain;
+    padding: var(--space-md);
   }
 }

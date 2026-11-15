@@ -27,18 +27,27 @@ export function aisleFit(widths: readonly number[], more: number, gap: number, r
  * what does not fit, so nothing wraps or shifts; once laid out, each
  * item's width is read (`data-aisle-item`, and the "Daha fazla" item's,
  * `data-aisle-more`) and kept, and the line's width decides how many
- * stay, again whenever it changes. The widths are read again when the
+ * stay, again whenever it changes. An item always shown after them (the
+ * bar's highlighted link, `data-aisle-tail`) keeps its own width of the
+ * line, so it stands right after the last one (Tezgâh audit Y-05). The
+ * widths are read again when the
  * web fonts arrive. `null`: not measured yet, or not in the bar.
  */
 export function useAisleFit(count: number, on: boolean) {
   const list = useRef<HTMLUListElement>(null)
-  const sizes = useRef<{ count: number; widths: number[]; more: number; gap: number } | null>(null)
+  const sizes = useRef<{
+    count: number
+    widths: number[]
+    more: number
+    gap: number
+    tail: number
+  } | null>(null)
   const [fit, setFit] = useState<number | null>(null)
 
   const decide = (line: HTMLUListElement) => {
     if (sizes.current) {
-      const { widths, more, gap } = sizes.current
-      setFit(aisleFit(widths, more, gap, line.clientWidth))
+      const { widths, more, gap, tail } = sizes.current
+      setFit(aisleFit(widths, more, gap, line.clientWidth - (tail > 0 ? tail + gap : 0)))
     }
   }
 
@@ -57,11 +66,13 @@ export function useAisleFit(count: number, on: boolean) {
     }
     const items = [...line.querySelectorAll<HTMLElement>(":scope > [data-aisle-item]")]
     const more = line.querySelector<HTMLElement>(":scope > [data-aisle-more]")
+    const tail = line.querySelector<HTMLElement>(":scope > [data-aisle-tail]")
     sizes.current = {
       count,
       widths: items.map((item) => item.getBoundingClientRect().width),
       more: more?.getBoundingClientRect().width ?? 0,
       gap: Number.parseFloat(getComputedStyle(line).columnGap) || 0,
+      tail: tail?.getBoundingClientRect().width ?? 0,
     }
     decide(line)
   }, [on, fit, count])
