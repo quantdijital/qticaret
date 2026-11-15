@@ -14,6 +14,48 @@ export interface CollagePlace {
   row: number
 }
 
+/** A card's width at each screen, and whether (and where) it is the lead standing alone in its row. */
+export interface CollageCard {
+  phone: 6 | 12
+  tablet: 6 | 12
+  lg: CollageSpan
+  xl: CollageSpan
+  /** The lead card: under 1024 px it stands alone in its row, and its photo is taller. */
+  lead: boolean
+  /** The wide screens where the lead stands alone in its row too, its photo taller there. */
+  alone: ("lg" | "xl")[]
+}
+
+/**
+ * Every card's widths: one a row on a phone (two when the shop asks), two
+ * on a tablet, at most three from 1024 px and the shop's `columns` from
+ * 1280 px (a narrow card would crop a long, flat product to a sliver).
+ */
+export function collageCards(
+  count: number,
+  lead: boolean,
+  columns: number,
+  phoneColumns: 1 | 2
+): CollageCard[] {
+  const pairs = collageRows(count, lead, 2)
+  const lg = collageRows(count, lead, Math.min(columns, 3))
+  const xl = collageRows(count, lead, columns)
+  const leading = lead && count > 1
+  return pairs.map((pair, index) => {
+    const tablet = pair.span === 12 ? 12 : 6
+    const rows = { lg: lg[index] ?? pair, xl: xl[index] ?? pair }
+    return {
+      phone: phoneColumns === 2 ? tablet : 12,
+      tablet,
+      lg: rows.lg.span,
+      xl: rows.xl.span,
+      lead: leading && index === 0,
+      alone:
+        leading && index === 0 ? (["lg", "xl"] as const).filter((at) => rows[at].span === 12) : [],
+    }
+  })
+}
+
 /** The cards' places for `count` cards, the first two units wide while `lead` (and more than one). */
 export function collageRows(count: number, lead: boolean, perRow: number): CollagePlace[] {
   if (count <= 0) {

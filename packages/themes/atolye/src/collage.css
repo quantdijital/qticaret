@@ -1,9 +1,10 @@
 /*
  * The category collage (sections/CategoryCollage.tsx, adr/0049 Ek
  * 2026-11-15). The photo well's height is the section's `height` step,
- * a phone's and a wide screen's own; the lead card's photo (on a phone
- * and a tablet, where it stands alone in its row) and the lead's whole
- * row on a wide screen are a third taller. Heights are set before the
+ * a phone's and a wide screen's own. The lead card's photo is a third
+ * taller where it stands alone in its row: always on a phone and a
+ * tablet, on a wide screen only when its row has no other card (1024
+ * and 1280 px lay the rows out apart). Heights are set before the
  * photo loads, so nothing moves.
  */
 @layer components {
@@ -37,32 +38,70 @@
     .gf-collage-card[data-lead] .gf-collage-photo {
       height: var(--collage-photo);
     }
-    .gf-collage-card[data-lead-row] .gf-collage-photo {
+    .gf-collage-card[data-alone~="lg"] .gf-collage-photo {
       height: calc(var(--collage-photo) * 1.34);
     }
   }
-
-  /* The one movement: the photo eases in a little under a pointer that hovers */
-  .gf-collage-photo img {
-    transition: transform var(--dur-long) var(--ease-out);
-  }
-  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
-    .gf-collage-card:hover .gf-collage-photo img {
-      transform: scale(1.04);
+  @media (min-width: 80rem) {
+    .gf-collage-card[data-alone~="lg"] .gf-collage-photo {
+      height: var(--collage-photo);
+    }
+    .gf-collage-card[data-alone~="xl"] .gf-collage-photo {
+      height: calc(var(--collage-photo) * 1.34);
     }
   }
+}
+
+/*
+ * Unlayered, as `surface.css`: these outrank the card's own utilities
+ * (its words' padding, its name's `no-underline`) whatever their layer.
+ */
+
+/* A phone in one column with the lead on: the lead stands large on top and the
+   others follow as rows, a square photo beside the words, so the section keeps
+   its hierarchy and does not run three screens long */
+@media (max-width: 39.99rem) {
+  .gf-collage[data-phone-rows] .gf-collage-card:not([data-lead]) {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    align-items: center;
+  }
+  .gf-collage[data-phone-rows] .gf-collage-card:not([data-lead]) .gf-collage-photo {
+    height: 5.5rem;
+  }
+  .gf-collage[data-phone-rows] .gf-collage-card:not([data-lead]) .gf-collage-words {
+    padding: 0 var(--space-xs) 0 var(--space-md);
+  }
+  /* The links under the photo and the words, across the card */
+  .gf-collage[data-phone-rows] .gf-collage-card:not([data-lead]) .gf-collage-links {
+    grid-column: 1 / -1;
+    margin-top: var(--space-xs);
+  }
+}
+
+/* The one movement: the photo eases in a little under a pointer that hovers */
+.gf-collage-photo img {
+  transition: transform var(--dur-long) var(--ease-out);
+}
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .gf-collage-card:hover .gf-collage-photo img {
+    transform: scale(1.04);
+  }
+}
+/* The name underlined while the card is hovered: a touch leaves no hover behind */
+@media (hover: hover) {
   .gf-collage-card:hover .gf-collage-link {
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 0.18em;
   }
+}
 
-  /* The card is the link's face: the focus ring goes round the card, not round the name's words */
-  .gf-collage-link:focus-visible {
-    outline: none;
-  }
-  .gf-collage-card:has(.gf-collage-link:focus-visible) {
-    outline: 2px solid var(--color-focus);
-    outline-offset: 2px;
-  }
+/* The card is the link's face: the focus ring goes round the card, not round the name's words */
+.gf-collage-link:focus-visible {
+  outline: none;
+}
+.gf-collage-card:has(.gf-collage-link:focus-visible) {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
 }

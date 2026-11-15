@@ -7922,7 +7922,8 @@
         },
         "categories": {
           "tiles": "Picture tiles",
-          "linked": "Cards with subcategories"
+          "linked": "Cards with subcategories",
+          "collage": "Photo collage"
         },
         "related_products": {
           "grid": "Grid",
@@ -8864,7 +8865,23 @@
         "columns": {
           "label": "Cards in a row",
           "term": "columns",
-          "hint": "How many cards side by side on a wide screen; the theme shows fewer on narrow screens."
+          "hint": "How many cards side by side on a wide screen; the theme shows fewer on narrow screens.",
+          "hintCollage": "At most this many cards in a row on a wide screen; the featured first card counts as two. Rows always fill edge to edge."
+        },
+        "lead": {
+          "label": "Feature the first category",
+          "term": "featured",
+          "hint": "The first card twice as wide, its row taller; on a phone it stands large at the top.",
+          "off": "Off",
+          "on": "On"
+        },
+        "height": {
+          "label": "Photo height",
+          "term": "height",
+          "hint": "The cards' photo area; the featured card's row a little taller.",
+          "low": "Low",
+          "medium": "Medium",
+          "high": "High"
         },
         "image_position": {
           "label": "Picture position",
@@ -8883,7 +8900,8 @@
         "links": {
           "label": "Subcategories shown",
           "term": "links",
-          "hint": "At most this many subcategories under each name; 0 shows only the name and picture. A \"See all\" link appears when there are more."
+          "hint": "At most this many subcategories under each name; 0 shows only the name and picture. A \"See all\" link appears when there are more.",
+          "hintCollage": "At most this many subcategories under each name; 0 shows only the photo and the name. The whole card goes to the category."
         },
         "columns_mobile": {
           "1": "1 card",

@@ -7922,7 +7922,8 @@
         },
         "categories": {
           "tiles": "Görselli karo",
-          "linked": "Alt kategorili kart"
+          "linked": "Alt kategorili kart",
+          "collage": "Fotoğraflı kolaj"
         },
         "related_products": {
           "grid": "Izgara",
@@ -8864,7 +8865,23 @@
         "columns": {
           "label": "Bir sıradaki kart",
           "term": "columns",
-          "hint": "Geniş ekranda yan yana kaç kart; dar ekranda tema kendiliğinden azaltır."
+          "hint": "Geniş ekranda yan yana kaç kart; dar ekranda tema kendiliğinden azaltır.",
+          "hintCollage": "Geniş ekranda bir sırada en çok kaç kart; öne çıkan ilk kart iki kart sayılır. Sıralar her zaman uçtan uca dolar."
+        },
+        "lead": {
+          "label": "İlk kategoriyi öne çıkar",
+          "term": "featured",
+          "hint": "İlk kart iki kat geniş, sırası daha yüksek; telefonda en üstte büyük durur.",
+          "off": "Kapalı",
+          "on": "Açık"
+        },
+        "height": {
+          "label": "Fotoğraf yüksekliği",
+          "term": "height",
+          "hint": "Kartların fotoğraf alanı; öne çıkan kartın sırası biraz daha yüksek.",
+          "low": "Alçak",
+          "medium": "Orta",
+          "high": "Yüksek"
         },
         "image_position": {
           "label": "Görselin yeri",
@@ -8883,7 +8900,8 @@
         "links": {
           "label": "Alt kategori sayısı",
           "term": "links",
-          "hint": "Her kartta adın altında en çok bu kadar alt kategori; 0 seçerseniz yalnız ad ve görsel. Daha fazlası varsa \"Tümünü gör\" bağlantısı çıkar."
+          "hint": "Her kartta adın altında en çok bu kadar alt kategori; 0 seçerseniz yalnız ad ve görsel. Daha fazlası varsa \"Tümünü gör\" bağlantısı çıkar.",
+          "hintCollage": "Her kartta adın altında en çok bu kadar alt kategori; 0 seçerseniz yalnız fotoğraf ve ad. Kartın tamamı kategoriye gider."
         },
         "columns_mobile": {
           "1": "1 kart",

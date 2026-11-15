@@ -1,6 +1,6 @@
 import type { ReactElement } from "react"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
-import { CategoriesLinked, CategoriesTiles } from "./category-sketches"
+import { CategoriesCollage, CategoriesLinked, CategoriesTiles } from "./category-sketches"
 import {
   ShelfCarousel,
   ShelfColumns,
@@ -169,7 +169,7 @@ const SKETCHES: {
 } = {
   trust_badges: { strip: TrustStrip, lined: TrustLined },
   hero: { standard: HeroStandard, category_list: HeroCategoryList },
-  categories: { tiles: CategoriesTiles, linked: CategoriesLinked },
+  categories: { tiles: CategoriesTiles, linked: CategoriesLinked, collage: CategoriesCollage },
   header_bar: { standard: HeaderStandard, centered: HeaderCentered, catalog: HeaderCatalog },
   products: {
     grid: ShelfGrid,

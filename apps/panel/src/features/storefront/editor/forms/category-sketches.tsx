@@ -14,6 +14,42 @@ export function CategoriesTiles() {
   )
 }
 
+/**
+ * The collage: a wide first card and two narrower ones in one row, each a
+ * large photo with its name and a line of links under it.
+ */
+export function CategoriesCollage() {
+  return (
+    <>
+      {[
+        { x: 1, width: 54 },
+        { x: 57, width: 26 },
+        { x: 85, width: 26 },
+      ].map(({ x, width }, index) => (
+        <g key={x}>
+          <rect x={x} y={2} width={width} height={19} rx={3} className="fill-current opacity-40" />
+          <rect
+            x={x + 2}
+            y={23.5}
+            width={index === 0 ? 22 : 15}
+            height={3}
+            rx={1}
+            className="fill-current opacity-70"
+          />
+          <rect
+            x={x + 2}
+            y={28}
+            width={width - 8}
+            height={2}
+            rx={1}
+            className="fill-current opacity-35"
+          />
+        </g>
+      ))}
+    </>
+  )
+}
+
 /** The linked cards: three framed cards, a small picture beside the name and its links. */
 export function CategoriesLinked() {
   return (
