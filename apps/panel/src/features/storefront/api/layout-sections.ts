@@ -2,9 +2,12 @@ import type {
   AnnouncementSettings,
   BannerSettings,
   BannerTone,
+  CardVariant,
   FaqSettings,
   MarqueeSettings,
   ProductSource,
+  RelatedProductsVariant,
+  ScrollerSettings,
   SectionDevice,
   SectionLook,
   ShelfColumns,
@@ -229,9 +232,16 @@ export interface RelatedProductsSection extends BodySectionBase {
   title: string | null
   source: RelatedSource
   limit: number
-  columns: ShelfColumns
+  /** How the cards stand (bilesen-denetimi (b) 7); the server fills `grid` on reading. */
+  variant: RelatedProductsVariant
+  /** The rail's own card style over the theme's; null or absent: the theme's. */
+  card_variant?: CardVariant | null
+  /** `grid`: cards in a row on a wide screen. */
+  columns?: ShelfColumns
   /** Cards in a row on a phone (bilesen-denetimi (b) 3); the server fills 2 on reading. */
   columns_mobile?: ShelfPhoneColumns
+  /** `carousel`: the scroller kit's settings. */
+  scroller?: ScrollerSettings
 }
 
 /** One item of a scrolling strip: an optional icon, its line, an optional second line and link. */

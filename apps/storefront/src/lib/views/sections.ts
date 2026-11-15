@@ -7,7 +7,6 @@ import { variantOf } from "@qticaret/types/section-variants"
 import type { HomeSectionView, Translate } from "@qticaret/ui"
 import { blogPosts } from "@/lib/store-api/blog"
 import { legalIdentity, siteSeo } from "@/lib/store-api/requests"
-import { isStoreApiError } from "@/lib/store-api/errors"
 import { googleRatingReviews, reviewSummary } from "@/lib/store-api/extras"
 import { shopRatingView } from "./card-extras"
 import { heroView, priceBandsView, withCounts } from "./catalog"
@@ -26,10 +25,9 @@ import {
   categoryLinks,
   customerPhotoViews,
   type ProductContext,
-  railCards,
-  relatedProducts,
   reviewViews,
 } from "./section-data"
+import { relatedView } from "./related"
 import { shelfView } from "./shelf"
 import { contactOf } from "./shop"
 
@@ -43,39 +41,6 @@ export interface SectionContext {
   product?: ProductContext
   /** The home page: its category cards take a product photo where the category has none. */
   home?: boolean
-}
-
-/** A related rail under a product; none when its source has nothing else or cannot be read. */
-async function relatedView(
-  section: Extract<StoreProductSection, { type: "related_products" }>,
-  t: Translate,
-  context: SectionContext
-): Promise<HomeSectionView | null> {
-  if (!context.product) {
-    return null
-  }
-  try {
-    const products = await relatedProducts(section.source, section.limit, context.product)
-    const cards = await railCards(products)
-    return cards.length > 0
-      ? {
-          id: section.id,
-          type: "products",
-          title: section.title ?? t("product.related"),
-          products: cards,
-          more: null,
-          empty: "",
-          columns: section.columns,
-          ...(section.columns_mobile === 1 ? { phoneColumns: 1 as const } : {}),
-        }
-      : null
-  } catch (error) {
-    // A rail the backend could not answer is left out, not the product page
-    if (isStoreApiError(error)) {
-      return null
-    }
-    throw error
-  }
 }
 
 /**
@@ -135,7 +100,7 @@ async function sectionView(
     case "products":
       return shelfView(section, t)
     case "related_products":
-      return relatedView(section, t, context)
+      return relatedView(section, t, context.product)
     case "brands": {
       const brands = await brandLinks(section.brand_ids)
       return brands.length > 0

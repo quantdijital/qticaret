@@ -60,6 +60,11 @@ export const VARIANT_FIELDS: {
       lists: [{ title: null, source: { kind: "newest" } }],
     },
   },
+  // The related products as a rail's grid or carousel (bilesen-denetimi (b) 7)
+  related_products: {
+    grid: { columns: 3, columns_mobile: SHELF_PHONE_DEFAULT },
+    carousel: { scroller: SCROLLER_DEFAULTS },
+  },
   header_bar: { standard: {}, centered: {}, catalog: HEADER_CATALOG_DEFAULTS },
   footer_bar: { ledger: {} },
   product_main: { standard: {} },

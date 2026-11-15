@@ -159,9 +159,14 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         title: section.title,
         source: section.source,
         limit: section.limit,
-        columns: section.columns,
-        // Printed only when not the default (2), so a rail from before it prints as it did
-        ...(section.columns_mobile === 1 ? { columns_mobile: 1 as const } : {}),
+        // Each printed only off its default, so a rail from before them prints as it did
+        ...(section.card_variant ? { card_variant: section.card_variant } : {}),
+        ...(section.variant === "carousel"
+          ? { variant: section.variant, scroller: section.scroller }
+          : {
+              columns: section.columns,
+              ...(section.columns_mobile === 1 ? { columns_mobile: 1 as const } : {}),
+            }),
       }
     case "featured_product":
       return {

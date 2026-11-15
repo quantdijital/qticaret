@@ -7909,6 +7909,10 @@
         "categories": {
           "tiles": "Görselli karo",
           "linked": "Alt kategorili kart"
+        },
+        "related_products": {
+          "grid": "Izgara",
+          "carousel": "Kayan sıra"
         }
       },
       "look": {

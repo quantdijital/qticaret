@@ -157,7 +157,7 @@ export function shelfSources(
 export const listKey = (sectionId: string, index: number) => `${sectionId}:${String(index + 1)}`
 
 /**
- * A stored product rail's card variant as today's list reads it (adr/0049
+ * A stored product rail's (or related products') card variant as today's list reads it (adr/0049
  * Ek 2026-11-14 §2.3, forgiving on reading): one off the list (taken off
  * since, or a newer build's) is the theme setting's (null). A save is
  * still held to the list.
@@ -165,7 +165,7 @@ export const listKey = (sectionId: string, index: number) => `${sectionId}:${Str
 export function storedCardVariant(section: Record<string, unknown>): Record<string, unknown> {
   const listed: readonly unknown[] = PRODUCT_CARD_VARIANTS
   const variant = section["card_variant"]
-  return section["type"] !== "products" ||
+  return (section["type"] !== "products" && section["type"] !== "related_products") ||
     variant === undefined ||
     variant === null ||
     listed.includes(variant)

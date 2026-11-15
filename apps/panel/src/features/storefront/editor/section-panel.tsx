@@ -101,7 +101,9 @@ export function SectionPanel({
   const band = section.type === "banner" ? section : null
   // A product rail stands in "Diziliş"; a carousel's rarely changed scroller settings sit there too
   const shelf = section.type === "products" ? section : null
-  const scroller = shelf?.variant === "carousel" ? scrollerSettingsOf(shelf.scroller) : null
+  // The related products slide the same way (bilesen-denetimi (b) 7)
+  const rail = shelf ?? (section.type === "related_products" ? section : null)
+  const scroller = rail?.variant === "carousel" ? scrollerSettingsOf(rail.scroller) : null
   // The linked category cards' frame sits with the look (adr/0049 Ek 2026-11-15)
   const cards = section.type === "categories" && section.variant === "linked" ? section : null
   const set =
@@ -201,13 +203,13 @@ export function SectionPanel({
               }}
             />
           ) : null}
-          {shelf && scroller ? (
+          {rail && scroller ? (
             <ScrollerFields
               value={scroller}
               settings={SCROLLER_OTHER}
-              fieldId={(setting) => FIELD_IDS.scroller(shelf.id, setting)}
+              fieldId={(setting) => FIELD_IDS.scroller(rail.id, setting)}
               onChange={(next) => {
-                onChange({ ...shelf, scroller: next })
+                onChange({ ...rail, scroller: next })
               }}
             />
           ) : null}

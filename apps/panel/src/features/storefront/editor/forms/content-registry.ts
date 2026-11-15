@@ -1,5 +1,6 @@
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { FieldGroupName, RegistryField } from "./field-registry"
+import { scrollerFields } from "./shelf-registry"
 
 /**
  * The content fields the settings search finds (docs/tema/bilesen-standardi
@@ -15,6 +16,7 @@ export type ContentField =
   | "limit"
   | "columns"
   | "columns_mobile"
+  | "card_variant"
   | "show_count"
   | "list_limit"
   | "show_price"
@@ -70,10 +72,20 @@ export function contentFields(section: AnySection): RegistryField[] {
     case "reviews":
       return [limit(section)]
     case "related_products":
+      // As a rail's (bilesen-denetimi (b) 7): a grid's columns, the card, a carousel's scroller
       return [
         limit(section),
-        entry(section, "columns", `${F}.columns`, [], "layout"),
-        entry(section, "columns_mobile", `${F}.columnsMobile`, [], "layout"),
+        ...(section.variant === "carousel"
+          ? []
+          : [
+              entry(section, "columns", `${F}.columns`, [], "layout"),
+              entry(section, "columns_mobile", `${F}.columnsMobile`, [], "layout"),
+            ]),
+        {
+          ...entry(section, "card_variant", `${E}.products.cardVariant`, [], "layout"),
+          term: `${E}.products.cardVariantTerm`,
+        },
+        ...(section.variant === "carousel" ? scrollerFields(section.id, section.scroller) : []),
       ]
     case "categories":
       return [entry(section, "show_count", `${E}.categories.showCount`)]

@@ -231,6 +231,7 @@ export function newBodySection(
       ...base,
       type,
       title: null,
+      variant: "grid",
       source: { kind: "same_category" },
       limit: 8,
       columns: 3,

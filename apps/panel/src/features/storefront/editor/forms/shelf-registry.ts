@@ -52,24 +52,23 @@ export function shelfFields(section: Extract<AnySection, { type: "products" }>):
           "storefront.editor.products.cardVariantTerm"
         ),
   ].filter((each) => each !== null)
-  if (variant !== "carousel") {
-    return fields
-  }
-  const settings = scrollerSettingsOf(section.scroller)
-  for (const [setting, steps] of Object.entries(SCROLLER_SETTINGS) as [
-    ScrollerSetting,
-    readonly string[],
-  ][]) {
-    if (scrollerOffers(settings, setting)) {
-      fields.push({
-        key: `scroller.${setting}`,
-        group: SCROLLER_MAIN.includes(setting) ? "scroll" : "look",
-        label: `${SCROLLER}.${setting}.label`,
-        term: `${SCROLLER}.${setting}.term`,
-        options: steps.map((step) => `${SCROLLER}.${setting}.${step}`),
-        target: SHELF_IDS.scroller(id, setting),
-      })
-    }
-  }
-  return fields
+  return variant === "carousel" ? [...fields, ...scrollerFields(id, section.scroller)] : fields
+}
+
+/**
+ * A carousel's scroller settings as the panel shows them (a product rail's or
+ * the related products'): what is in view and the arrows open, the rest closed.
+ */
+export function scrollerFields(id: string, scroller: unknown): RegistryField[] {
+  const settings = scrollerSettingsOf(scroller)
+  return (Object.entries(SCROLLER_SETTINGS) as [ScrollerSetting, readonly string[]][])
+    .filter(([setting]) => scrollerOffers(settings, setting))
+    .map(([setting, steps]) => ({
+      key: `scroller.${setting}`,
+      group: SCROLLER_MAIN.includes(setting) ? "scroll" : "look",
+      label: `${SCROLLER}.${setting}.label`,
+      term: `${SCROLLER}.${setting}.term`,
+      options: steps.map((step) => `${SCROLLER}.${setting}.${step}`),
+      target: SHELF_IDS.scroller(id, setting),
+    }))
 }

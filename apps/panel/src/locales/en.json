@@ -7909,6 +7909,10 @@
         "categories": {
           "tiles": "Picture tiles",
           "linked": "Cards with subcategories"
+        },
+        "related_products": {
+          "grid": "Grid",
+          "carousel": "Carousel"
         }
       },
       "look": {

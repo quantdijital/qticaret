@@ -302,6 +302,8 @@ Kapsamda geçen kısaltmalar: **T** = `packages/types/src/store/…`, **B** = `a
 6. **Duyuru şeridine hareketli aile (1.1):** oto dönme, süre, oklar, durdurma, satır bağlantısı, kapatma. T `layout.ts`, B `announcement-bar.ts`, P `announcement-form.tsx`, A `frame/Announcement.tsx`.
    **Kısmen yapıldı (2026-11-15):** birden çok duyuru (yalnız ilki / sırayla / yan yana), süre, durdur düğmesi, üzerine gelince dur, azaltılmış harekette durma (adr/0049 Ek 2026-11-15, orta işler). Oklar, satır bağlantısı, kapatma ve zemin açık.
 7. **Benzer ürünlere biçim + kart biçimi (1.15).** T `layout.ts`, B `related-products.ts`, P `related-form.tsx`, A ürün sayfası rafı.
+   **Yapıldı (2026-11-15):** biçim Izgara / Kayan sıra (kayan sırada ortak kaydırma takımı) ve rafın kart
+   biçimi seçimi; telefon sütunu (b) 3'te (adr/0049 Ek 2026-11-15, orta işler).
 8. **SSS ayarları (1.14):** ilk soru açık, tek açık. B `faq.ts`, P `faq-form.tsx`, A `Faq.tsx`.
    **Yapıldı (2026-11-15):** `open_first` ve `single_open` off/on (ikisi de kapalı); tek açık yerel
    `<details name>` ile, betiksiz (adr/0049 Ek 2026-11-15, orta işler).

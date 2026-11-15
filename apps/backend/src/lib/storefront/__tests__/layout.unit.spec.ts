@@ -60,6 +60,8 @@ describe("storefront layout document (adr/0049)", () => {
       {
         id: "benzerler1",
         type: "related_products",
+        variant: "grid",
+        card_variant: null,
         ...ALWAYS,
         title: null,
         source: { kind: "same_category" },

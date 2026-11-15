@@ -21,6 +21,8 @@ export const SECTION_VARIANTS = {
   categories: ["tiles", "linked"],
   // The product rail (adr/0049 Ek 2026-11-15): today's grid first
   products: ["grid", "carousel", "featured", "compact", "columns"],
+  // A product page's related products (bilesen-denetimi (b) 7): today's grid first
+  related_products: ["grid", "carousel"],
   // The main sections (adr/0049 Ek 2026-11-14 §5, §7): today's drawing first.
   // `centered` is the theme setting's centred header (`header.layout`), read
   // into the bar; its drawing stays on adr/0062 karar 6's branch. `catalog` is N14

@@ -14,7 +14,8 @@ import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
 import type { StoreCategoriesLinked } from "./section-categories.js"
 import type { ShelfPhoneColumns, StoreProductsSection } from "./section-shelf.js"
-import type { TrustBadgesVariant } from "./section-variants.js"
+import type { CardVariant, RelatedProductsVariant, TrustBadgesVariant } from "./section-variants.js"
+import type { ScrollerSettings } from "./section-scroller.js"
 import type {
   MenuLinkKind,
   StoreMenu,
@@ -236,9 +237,19 @@ export type StoreProductSection =
       title: string | null
       source: RelatedSource
       limit: number
-      columns: ShelfColumns
-      /** Cards in a row on a phone; printed only when not the default (2). */
+      /**
+       * How the cards stand (bilesen-denetimi (b) 7): printed only for
+       * `carousel`; absent, or one this build does not know, reads as `grid`.
+       */
+      variant?: RelatedProductsVariant
+      /** The rail's own card variant; absent: the theme setting's. */
+      card_variant?: CardVariant | null
+      /** `grid` (and a backend before variants): cards in a row on a wide screen. */
+      columns?: ShelfColumns
+      /** `grid`: cards in a row on a phone; printed only when not the default (2). */
       columns_mobile?: ShelfPhoneColumns
+      /** `carousel`: the scroller kit's settings. */
+      scroller?: ScrollerSettings
     })
 
 /** A section of every category page: above the product grid (`top`) or below it. */
