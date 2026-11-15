@@ -13,7 +13,7 @@ import {
   siteSeo,
   storefrontSettings,
 } from "@/lib/store-api/requests"
-import { categoryImages } from "@/lib/store-api/extras"
+import { categoryCounts, categoryImages } from "@/lib/store-api/extras"
 import { bottomNavOf, isCheckoutPage } from "./bottom-nav"
 import { shopMarks } from "./card-extras"
 import { miniCartOf } from "./cart"
@@ -21,6 +21,7 @@ import { linePicturesOf, productPathsOf } from "./line-paths"
 import { imageView } from "./image"
 import { navigation } from "./categories"
 import { withNavPictures } from "./nav-pictures"
+import { withNavCounts } from "./nav-counts"
 import { cookieBannerOf } from "./cookies"
 import { identityLinesOf, legalDocument, legalPath, publishedLegalLinks } from "./legal"
 import { displayPhone, footerGroups, socialLinks, whatsappHref } from "./frame"
@@ -75,6 +76,7 @@ export async function shopView(): Promise<ShopView> {
     theme,
     requestHeaders,
     pictures,
+    counts,
   ] = await Promise.all([
     siteSeo(),
     allCategories(),
@@ -91,6 +93,7 @@ export async function shopView(): Promise<ShopView> {
     currentTheme(),
     headers(),
     categoryImages(),
+    categoryCounts(),
   ])
   // The drawer's lines link to their products' pages (gone or hidden ones read as text)
   const [paths, linePaths, linePictures] = await Promise.all([
@@ -102,11 +105,16 @@ export async function shopView(): Promise<ShopView> {
     linePicturesOf(cart?.items ?? []),
   ])
   // The shop's own menu when it made one (adr/0049), else its top categories; pictures on both
-  // Each top entry without the shop's own picture shows its newest product's photo
-  const menu = await withNavPictures(
-    mainMenu(menus, t, pictures) ?? navigation(categories, paths, pictures),
-    categories,
-    paths
+  // Each top entry without the shop's own picture shows its newest product's photo;
+  // each category's page its product count (the dropdown's and the sheet's badges)
+  const menu = withNavCounts(
+    await withNavPictures(
+      mainMenu(menus, t, pictures) ?? navigation(categories, paths, pictures),
+      categories,
+      paths
+    ),
+    paths,
+    counts
   )
   // The page's address as the proxy set it (never the visitor's)
   const url = requestHeaders.get("x-qt-url") ?? ""

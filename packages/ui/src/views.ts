@@ -53,8 +53,9 @@ export interface LinkView {
 }
 
 /**
- * A mega menu entry: its picture when the category has one (adr/0046 Ek
- * 2026-11-04); its children too carry one, for the phone drawer's rows.
+ * A menu entry: its picture when the category has one (adr/0046 Ek
+ * 2026-11-04) and its product count when counted; its children carry
+ * both too, for the header's dropdown and the phone drawer's rows.
  */
 export interface NavCategoryView extends CategoryCardView {
   children: CategoryCardView[]
