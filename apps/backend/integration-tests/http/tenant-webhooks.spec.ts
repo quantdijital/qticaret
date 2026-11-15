@@ -119,7 +119,8 @@ medusaIntegrationTestRunner({
       const stock = await queueStockChanges(getContainer())
       await deliverWebhooks(getContainer(), minutesLater(3))
 
-      const [refused, sent] = received
+      // The order's own deliveries: the scheduled jobs may deliver a stock change between them
+      const [refused, sent] = received.filter((each) => each.body.includes('"type":"order.placed"'))
       const signature = String(sent?.headers["x-webhook-signature"] ?? "")
       const [, t = "", v1 = ""] = /^t=(\d+),v1=([0-9a-f]{64})$/.exec(signature) ?? []
       const expected = createHmac("sha256", made.data.secret)
