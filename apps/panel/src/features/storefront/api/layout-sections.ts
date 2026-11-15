@@ -4,6 +4,7 @@ import type {
   BannerTone,
   CardVariant,
   FaqSettings,
+  FeaturedProductSettings,
   MarqueeSettings,
   ProductSource,
   RelatedProductsVariant,
@@ -153,8 +154,12 @@ interface CategoriesBase extends BodySectionBase {
 /** Today's picture tiles, or the linked cards with their own fields (adr/0049 Ek 2026-11-15). */
 export type CategoriesSection = CategoriesBase & ({ variant: "tiles" } | CategoriesLinkedFields)
 
-/** One product up close (adr/0046 Ek 2026-11-05): the storefront adds its facts and spec table. */
-export interface FeaturedProductSection extends BodySectionBase {
+/**
+ * One product up close (adr/0046 Ek 2026-11-05): the storefront adds its
+ * facts and spec table. Its photographs layout (adr/0049 Ek 2026-11-15) is
+ * filled on reading; one absent reads as the collage (`featuredProductSettingsOf`).
+ */
+export interface FeaturedProductSection extends BodySectionBase, Partial<FeaturedProductSettings> {
   type: "featured_product"
   title: string | null
   /** A line about it; may hold the shop's details (`{telefon}`). */

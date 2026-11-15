@@ -25,12 +25,18 @@ module.exports = {
 // is replaced once it holds more than this after a file
 const INTEGRATION_WORKER_MEMORY = "1GB"
 
+// A failure leaves an integration test as a plain error, never with axios'
+// circular objects that crash the worker and hide it (plain-failures.js)
+const PLAIN_FAILURES = ["./integration-tests/plain-failures.js"]
+
 if (process.env.TEST_TYPE === "integration:http") {
   module.exports.testMatch = ["**/integration-tests/http/*.spec.[jt]s"]
   module.exports.workerIdleMemoryLimit = INTEGRATION_WORKER_MEMORY
+  module.exports.setupFilesAfterEnv = PLAIN_FAILURES
 } else if (process.env.TEST_TYPE === "integration:modules") {
   module.exports.testMatch = ["**/src/modules/*/__tests__/**/*.[jt]s"]
   module.exports.workerIdleMemoryLimit = INTEGRATION_WORKER_MEMORY
+  module.exports.setupFilesAfterEnv = PLAIN_FAILURES
 } else if (process.env.TEST_TYPE === "unit") {
   module.exports.testMatch = ["**/src/**/__tests__/**/*.unit.spec.[jt]s"]
 }

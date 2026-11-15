@@ -1588,7 +1588,9 @@
           "account": {
             "password_reset": "Şifre sıfırlama",
             "verify_email": "E-posta doğrulama",
-            "migration_invite": "Taşınan müşteriye hesap daveti"
+            "migration_invite": "Taşınan müşteriye hesap daveti",
+            "wholesale_invite": "Toptancı daveti",
+            "wholesale_enabled": "Toptan hesap açıldı"
           },
           "payment": {
             "failed": "Ödeme alınamadı"
@@ -8525,7 +8527,17 @@
       },
       "featured": {
         "product": "Ürün",
-        "hint": "Görseller, öne çıkan özellikler, fiyat ve özellik tablosu ürünün kendi sayfasından gelir. Ürün yayında değilken bölüm vitrinde görünmez."
+        "hint": "Görseller, öne çıkan özellikler, fiyat ve özellik tablosu ürünün kendi sayfasından gelir. Ürün yayında değilken bölüm vitrinde görünmez.",
+        "gallery": "Fotoğraf düzeni",
+        "galleryTerm": "gallery",
+        "galleries": {
+          "collage": "Kolaj",
+          "strips": "Çapraz şeritler"
+        },
+        "galleryHint": {
+          "collage": "Solda büyük bir fotoğraf; geniş ekranda yanında iki küçük fotoğraf.",
+          "strips": "En çok dört fotoğraf eşit, çapraz şeritler hâlinde yan yana. Geniş ekranda fareyle üstüne gelinen şerit genişler; telefonda eşit kalır."
+        }
       },
       "sample": {
         "label": {

@@ -5,11 +5,13 @@ import { Price } from "../parts/Price"
 import { quickAddWords } from "../parts/ProductCard"
 import { QuickAdd } from "../parts/QuickAdd"
 import { type Of, headingId } from "./plan"
+import { SpotlightStrips } from "./SpotlightStrips"
 
 /**
  * One product up close (`featured_product`), on a graphite stage like the
- * opening but mirrored: its photographs (the first large, two more
- * beside it from 1024 px) on the left, then its name, the shop's line, the
+ * opening but mirrored: its photographs (the collage: the first large, two
+ * more beside it from 1024 px; or the shop's equal slanted strips,
+ * `SpotlightStrips`) on the left, then its name, the shop's line, the
  * facts the shop marked as headline ones as rows, the price large and one
  * action: the quick add when it can go straight in, else its page.
  */
@@ -27,12 +29,21 @@ export function Spotlight({
   const pictures = section.images.length > 0 ? section.images : product.image ? [product.image] : []
   const [main, ...more] = pictures
   const extra = more.slice(0, 2)
+  // The shop's photographs layout (adr/0049 Ek 2026-11-15): absent or unknown, the collage
+  const strips = section.settings?.gallery === "strips"
   const add = quickAdd && product.quickAdd && product.available ? product.quickAdd : null
   return (
     <section aria-labelledby={id} className="pt-(--section-gap)">
       <Container>
         <div className="gf-stage grid gap-6 overflow-hidden rounded-tile p-3 sm:p-4 lg:grid-cols-12 lg:gap-(--gap-columns) lg:p-4">
-          {main && (
+          {main && strips && (
+            <SpotlightStrips
+              pictures={pictures}
+              path={product.path}
+              className="aspect-square lg:col-span-7 lg:aspect-[4/3]"
+            />
+          )}
+          {main && !strips && (
             <div className="grid gap-3 lg:col-span-7 lg:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]">
               <div className="relative aspect-square overflow-hidden rounded-media bg-stage-2">
                 <ResponsiveImage

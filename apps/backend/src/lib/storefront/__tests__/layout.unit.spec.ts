@@ -105,7 +105,7 @@ describe("storefront layout document (adr/0049)", () => {
   it("takes one featured product on the home page only (adr/0046 Ek 2026-11-05)", () => {
     const featured = { id: "yakin001", type: "featured_product", product_id: "prod_1" }
     expect(layoutDocument.parse({ home: [featured] }).home).toEqual([
-      { ...featured, ...ALWAYS, title: null, text: null },
+      { ...featured, ...ALWAYS, title: null, text: null, gallery: "collage" },
     ])
     expect(layoutDocument.safeParse({ product: [featured] }).success).toBe(false)
     expect(layoutDocument.safeParse({ home: [{ ...featured, product_id: "" }] }).success).toBe(
