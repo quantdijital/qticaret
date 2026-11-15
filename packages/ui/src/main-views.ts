@@ -1,5 +1,6 @@
 import type {
   CategoryMainVariant,
+  FooterBarStep,
   FooterBarVariant,
   HeaderBarVariant,
   HeaderMenuGround,
@@ -57,6 +58,26 @@ export interface HeaderCatalogView {
 export interface FooterBarView {
   id: string
   variant: FooterBarVariant
+  /**
+   * The footer's own settings (adr/0049 Ek 2026-11-15). How the shop's
+   * profiles show; absent: written, as before.
+   */
+  social?: FooterBarStep<"social">
+  /**
+   * The ways to pay the shop names, in its order, each its key and words:
+   * drawn as the words in a small framed box, never a company's mark.
+   * None (or absent): the providers' marks, as before.
+   */
+  paymentBadges?: { key: string; label: string }[]
+  /** The floating "back to top" button; none (or absent): not drawn. */
+  backToTop?: BackToTopView | null
+}
+
+export interface BackToTopView {
+  side: FooterBarStep<"back_to_top_side">
+  shape: FooterBarStep<"back_to_top_shape">
+  /** Shown on a phone too. */
+  mobile: boolean
 }
 
 export interface ProductMainView {

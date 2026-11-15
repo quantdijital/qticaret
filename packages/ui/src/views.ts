@@ -1,4 +1,4 @@
-import type { TrustIcon } from "@qticaret/types"
+import type { SocialNetwork, TrustIcon } from "@qticaret/types"
 import type { CategoryCardView, ShopMarkView } from "./card-views"
 import type { CartLineView, FreeShippingView } from "./cart-views"
 import type { BottomNavView, ThemeView } from "./frame-views"
@@ -97,6 +97,8 @@ export interface SocialLinkView {
   /** The network's name ("Instagram"), or the address's host. */
   label: string
   href: string
+  /** The network a theme draws a glyph for; none: an address it does not know (its first letter). */
+  network?: SocialNetwork | null
 }
 
 /** The cart as the header's drawer shows it (D6): its lines read-only, the subtotal. */

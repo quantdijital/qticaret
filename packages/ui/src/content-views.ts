@@ -1,6 +1,12 @@
-import type { HeroVariant, SectionLook, TrustBadgesVariant } from "@qticaret/types"
+import type {
+  CategoriesVariant,
+  HeroVariant,
+  SectionLook,
+  TrustBadgesVariant,
+} from "@qticaret/types"
 import type { BannerSectionView } from "./banner-views"
 import type { CategoryCardView, CustomerPhotoView, ShopMarkView } from "./card-views"
+import type { CategoryCardsView } from "./category-card-views"
 import type { HeroCatalogView, PriceBandsSectionView } from "./catalog-views"
 import type {
   FeaturedProductSectionView,
@@ -64,6 +70,13 @@ export type HomeSectionView = { look?: SectionLookView } & (
       categories: CategoryCardView[]
       /** The link beside the title; none (or absent): the theme's "every category". */
       more?: LinkView | null
+      /** How the cards are drawn (adr/0049 Ek 2026-11-15); none: today's tiles. */
+      variant?: CategoriesVariant
+      /**
+       * `linked`'s settings and cards (the same cards as `categories`, with
+       * their subcategories); a theme without that drawing draws the tiles.
+       */
+      linked?: CategoryCardsView | null
     }
   | ProductsSectionView
   | FeaturedProductSectionView

@@ -21,6 +21,7 @@ export {
 } from "@qticaret/types/section-variants"
 export type {
   CardVariant,
+  CategoriesVariant,
   CategoryMainVariant,
   DefaultVariant,
   FooterBarVariant,

@@ -55,6 +55,32 @@ function Marks({ marks, label }: { marks: readonly ShopMarkView[]; label: string
 }
 
 /**
+ * The ways to pay the shop named (the footer's `payment_badges`): each its
+ * name in a small framed box on the field colour, in the shop's order,
+ * never a company's mark, never a link.
+ */
+function Badges({
+  badges,
+  label,
+}: {
+  badges: readonly { key: string; label: string }[]
+  label: string
+}) {
+  return (
+    <ul aria-label={label} className="flex flex-wrap items-center gap-2">
+      {badges.map((badge) => (
+        <li
+          key={badge.key}
+          className="inline-flex h-7 items-center rounded-inner border border-rule bg-field px-2.5 text-xs font-semibold whitespace-nowrap text-text-2"
+        >
+          {badge.label}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+/**
  * The footer's trust band (sahip 2026-11-06): the ways to pay and the
  * carriers the shop has now in one quiet row, every mark the provider's
  * own (served by the storefront) straight on the well, one 24 px row
@@ -63,20 +89,24 @@ function Marks({ marks, label }: { marks: readonly ShopMarkView[]; label: string
  * and its name. On a phone and a tablet the two groups are two wrapping
  * rows. The ETBİS registration's QR code at the end on its own light
  * plate (a code needs its quiet zone). Each only when the shop has it;
- * with none, nothing is drawn.
+ * with none, nothing is drawn. When the shop names its ways to pay itself
+ * (`Badges`), those stand in the marks' place.
  */
 export function FooterMarks({ shop, t }: { shop: ShopView; t: Translate }) {
-  const payments = shop.paymentMarks ?? []
+  // The ways to pay the shop named itself take the providers' marks' place (adr/0049 Ek 2026-11-15)
+  const badges = shop.footerBar?.paymentBadges ?? []
+  const payments = badges.length > 0 ? [] : (shop.paymentMarks ?? [])
   const carriers = shop.carrierMarks ?? []
   const qr = shop.etbisQr ?? null
-  if (!qr && payments.length === 0 && carriers.length === 0) {
+  if (!qr && badges.length === 0 && payments.length === 0 && carriers.length === 0) {
     return null
   }
   return (
     <div className="flex items-center justify-between gap-6 border-b border-rule py-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
+        {badges.length > 0 && <Badges badges={badges} label={t("footer.payment_marks")} />}
         {payments.length > 0 && <Marks marks={payments} label={t("footer.payment_marks")} />}
-        {payments.length > 0 && carriers.length > 0 && (
+        {(payments.length > 0 || badges.length > 0) && carriers.length > 0 && (
           <span aria-hidden="true" className="h-6 w-px shrink-0 bg-rule max-lg:hidden" />
         )}
         {carriers.length > 0 && <Marks marks={carriers} label={t("footer.carrier_marks")} />}

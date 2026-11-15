@@ -2,6 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import { isPlainObject } from "../../../modules/platform-settings/sections/define"
 import { base, optional, text } from "../layout-fields"
 import { storefrontLink } from "../menus"
+import { footerBarFields } from "./footer-bar"
 import { sectionLook } from "./look"
 import { VARIANT_ERROR, defaultVariant } from "./variants"
 import type { SectionVariant, VariantBranch } from "./variants"
@@ -113,9 +114,17 @@ export const headerBar = z.discriminatedUnion(
   VARIANT_ERROR
 )
 
-/** Today's footer: Grafit's ledger of the shop's details, menus and marks. */
+/**
+ * Today's footer: Grafit's ledger of the shop's details, menus and marks,
+ * with the footer's own settings (adr/0049 Ek 2026-11-15, `footer-bar.ts`).
+ */
 export const footerBar = z
-  .object({ ...mainBase, type: z.literal("footer_bar"), variant: defaultVariant("footer_bar") })
+  .object({
+    ...mainBase,
+    type: z.literal("footer_bar"),
+    variant: defaultVariant("footer_bar"),
+    ...footerBarFields,
+  })
   .strict()
 
 /** The product's own block: its gallery and buying column, above the group's other sections. */

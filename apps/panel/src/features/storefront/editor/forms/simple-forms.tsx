@@ -8,6 +8,7 @@ import type {
 } from "@/features/storefront/api/layout"
 import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import type { Problem } from "@/features/storefront/layout/problems"
+import { CategoryCardsFields } from "./category-cards-fields"
 import { CountField, F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
@@ -73,6 +74,9 @@ export function CategoriesForm({
           onChange({ ...section, category_ids })
         }}
       />
+      {section.variant === "linked" ? (
+        <CategoryCardsFields section={section} onChange={onChange} />
+      ) : null}
       <SwitchRow
         id={`${section.id}-show-count`}
         label={t("storefront.editor.heroCatalog.showCount")}

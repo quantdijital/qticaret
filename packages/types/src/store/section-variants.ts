@@ -16,6 +16,11 @@ export const SECTION_VARIANTS = {
    */
   hero: ["standard", "category_list"],
   /**
+   * `tiles`: today's picture tiles; `linked`: each category a card with its
+   * first subcategories as links (adr/0049 Ek 2026-11-15).
+   */
+  categories: ["tiles", "linked"],
+  /**
    * The product rail (adr/0049 Ek 2026-11-15): `grid`, today's rows of
    * cards; `carousel`, one row that slides (the scroller kit,
    * `section-scroller`); `featured`, one large card beside two rows of
@@ -73,6 +78,7 @@ export type DefaultVariant<T extends VariantSectionType> = (typeof SECTION_VARIA
 
 export type TrustBadgesVariant = SectionVariant<"trust_badges">
 export type HeroVariant = SectionVariant<"hero">
+export type CategoriesVariant = SectionVariant<"categories">
 export type ProductsVariant = SectionVariant<"products">
 export type HeaderBarVariant = SectionVariant<"header_bar">
 export type FooterBarVariant = SectionVariant<"footer_bar">

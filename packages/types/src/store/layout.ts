@@ -9,6 +9,7 @@ import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
 import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
+import type { StoreCategoriesLinked } from "./section-categories.js"
 import type { StoreProductsSection } from "./section-shelf.js"
 import type { TrustBadgesVariant } from "./section-variants.js"
 import type {
@@ -67,21 +68,29 @@ export interface StoreSectionLookPart {
   look?: SectionLook
 }
 
+/**
+ * The category cards: today's picture tiles (`tiles`, and absent from a
+ * backend before variants) or, as `linked` (adr/0049 Ek 2026-11-15), each
+ * category a card with its first subcategories as links. A reader takes a
+ * variant it does not know as `tiles` and leaves the other's fields unread.
+ */
+export type StoreCategoriesSection = {
+  id: string
+  type: "categories"
+  title: string | null
+  category_ids: string[]
+  /** Each tile's product count (`/store/category-counts`); absent from an older backend: none. */
+  show_count?: boolean
+  /** The link beside the title; none (or absent): the storefront's "every category". */
+  more?: StoreLayoutLink | null
+} & ({ variant?: "tiles" } | StoreCategoriesLinked)
+
 export type StoreLayoutSection = StoreSectionLookPart &
   (
     | StoreHeroSection
     | StoreBannerSection
     | StoreHeroSliderSection
-    | {
-        id: string
-        type: "categories"
-        title: string | null
-        category_ids: string[]
-        /** Each tile's product count (`/store/category-counts`); absent from an older backend: none. */
-        show_count?: boolean
-        /** The link beside the title; none (or absent): the storefront's "every category". */
-        more?: StoreLayoutLink | null
-      }
+    | StoreCategoriesSection
     | StoreProductsSection
     | StoreFeaturedProductSection
     | { id: string; type: "brands"; title: string | null; brand_ids: string[] }

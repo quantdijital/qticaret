@@ -1,3 +1,4 @@
+import type { SocialNetwork } from "@qticaret/types"
 import type { FooterGroupView, NavCategoryView, SocialLinkView } from "@qticaret/ui"
 import type { Translate } from "@qticaret/ui"
 
@@ -12,27 +13,42 @@ export function displayPhone(e164: string): string {
 /** A WhatsApp chat with the shop (`wa.me` takes the number without its `+`). */
 export const whatsappHref = (e164: string): string => `https://wa.me/${e164.replace(/^\+/, "")}`
 
-const NETWORKS: readonly [RegExp, string][] = [
-  [/(^|\.)instagram\.com$/, "Instagram"],
-  [/(^|\.)facebook\.com$/, "Facebook"],
-  [/(^|\.)(youtube\.com|youtu\.be)$/, "YouTube"],
-  [/(^|\.)(x\.com|twitter\.com)$/, "X"],
-  [/(^|\.)tiktok\.com$/, "TikTok"],
-  [/(^|\.)pinterest\.[a-z.]+$/, "Pinterest"],
-  [/(^|\.)linkedin\.com$/, "LinkedIn"],
+/** Each network the theme draws a glyph for, by the profile address's host. */
+const NETWORKS: readonly [RegExp, SocialNetwork, string][] = [
+  [/(^|\.)instagram\.com$/, "instagram", "Instagram"],
+  [/(^|\.)facebook\.com$/, "facebook", "Facebook"],
+  [/(^|\.)(youtube\.com|youtu\.be)$/, "youtube", "YouTube"],
+  [/(^|\.)(x\.com|twitter\.com)$/, "x", "X"],
+  [/(^|\.)tiktok\.com$/, "tiktok", "TikTok"],
+  [/(^|\.)pinterest\.[a-z.]+$/, "pinterest", "Pinterest"],
+  [/(^|\.)linkedin\.com$/, "linkedin", "LinkedIn"],
+  [/(^|\.)(wa\.me|whatsapp\.com)$/, "whatsapp", "WhatsApp"],
 ]
 
-/** The shop's profiles (`same_as`) named by their network; an unknown one by its host. */
+/**
+ * The shop's profiles (`same_as`, its store details' social accounts)
+ * named by their network; an unknown one by its host, without a network.
+ * Only https addresses, as the store details take them: anything else a
+ * stale record or a tampered answer, left out.
+ */
 export function socialLinks(sameAs: readonly string[]): SocialLinkView[] {
   return sameAs.flatMap((href) => {
-    let host: string
+    let url: URL
     try {
-      host = new URL(href).hostname.toLowerCase()
+      url = new URL(href)
     } catch {
       return []
     }
+    if (url.protocol !== "https:") {
+      return []
+    }
+    const host = url.hostname.toLowerCase()
     const network = NETWORKS.find(([pattern]) => pattern.test(host))
-    return [{ label: network ? network[1] : host.replace(/^www\./, ""), href }]
+    return [
+      network
+        ? { label: network[2], href, network: network[1] }
+        : { label: host.replace(/^www\./, ""), href, network: null },
+    ]
   })
 }
 

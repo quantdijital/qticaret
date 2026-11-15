@@ -4,6 +4,7 @@ import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { FooterLinks } from "./FooterLinks"
 import { FooterMarks } from "./FooterMarks"
+import { FooterSocial } from "./FooterSocial"
 import { NewsletterForm } from "./NewsletterForm"
 import { newsletterWords } from "./newsletter-words"
 import { SmallPrint } from "./SmallPrint"
@@ -11,7 +12,7 @@ import { SmallPrint } from "./SmallPrint"
 const LINE =
   "inline-flex min-h-11 items-center gap-3 text-text-2 no-underline hover:text-text hover:underline underline-offset-4 lg:pointer-fine:min-h-9"
 
-/** How the shop is reached: its name, registered title when it differs, address, phone, e-mail, profiles. */
+/** How the shop is reached: its name, registered title when it differs, address, phone, e-mail, profiles (`FooterSocial`). */
 function Contact({ shop, t }: { shop: ShopView; t: Translate }) {
   const { contact } = shop
   const title = shop.companyTitle ?? shop.name
@@ -48,22 +49,11 @@ function Contact({ shop, t }: { shop: ShopView; t: Translate }) {
           </li>
         )}
       </ul>
-      {shop.social.length > 0 && (
-        <ul aria-label={t("footer.social")} className="flex flex-wrap gap-2">
-          {shop.social.map((profile) => (
-            <li key={profile.href}>
-              <a
-                href={profile.href}
-                rel="noopener me"
-                target="_blank"
-                className="inline-flex min-h-11 items-center rounded-button border border-rule bg-field px-4 text-sm font-semibold no-underline hover:border-edge"
-              >
-                {profile.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
+      <FooterSocial
+        profiles={shop.social}
+        style={shop.footerBar?.social ?? "text"}
+        label={t("footer.social")}
+      />
     </section>
   )
 }

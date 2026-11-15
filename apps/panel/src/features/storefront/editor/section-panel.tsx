@@ -28,6 +28,8 @@ import { SCROLLER_OTHER } from "./forms/scroller-groups"
 import { ShelfGroups } from "./forms/shelf-groups"
 import { ScheduleFields } from "./forms/schedule-fields"
 import { HeaderCatalogOther } from "./forms/header-catalog-other"
+import { CategoryCardsOther } from "./forms/category-cards-fields"
+import { cardsSetCount } from "./forms/card-field-ids"
 import { isMain } from "@/features/storefront/layout/main-sections"
 import { VariantField } from "./forms/variant-field"
 import { Panel, PanelGroup } from "./panel-header"
@@ -97,7 +99,10 @@ export function SectionPanel({
   // A product rail stands in "Diziliş"; a carousel's rarely changed scroller settings sit there too
   const shelf = section.type === "products" ? section : null
   const scroller = shelf?.variant === "carousel" ? scrollerSettingsOf(shelf.scroller) : null
+  // The linked category cards' frame sits with the look (adr/0049 Ek 2026-11-15)
+  const cards = section.type === "categories" && section.variant === "linked" ? section : null
   const set =
+    cardsSetCount(section) +
     (scroller
       ? SCROLLER_OTHER.filter((name) => scroller[name] !== SCROLLER_DEFAULTS[name]).length
       : 0) +
@@ -204,6 +209,7 @@ export function SectionPanel({
             />
           ) : null}
           {band ? <BannerSettings section={band} onChange={onChange} /> : null}
+          {cards ? <CategoryCardsOther section={cards} onChange={onChange} /> : null}
           {looked ? <LookFields section={looked} onChange={onChange} /> : null}
         </PanelGroup>
       ) : null}
@@ -232,6 +238,4 @@ export function SectionPanel({
 
 // The main sections whose content group would be empty: their variant and look are elsewhere
 const hasContent = (section: AnySection) =>
-  section.type !== "footer_bar" &&
-  section.type !== "product_main" &&
-  section.type !== "category_main"
+  section.type !== "product_main" && section.type !== "category_main"

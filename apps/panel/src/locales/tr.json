@@ -7859,7 +7859,7 @@
         },
         "footer_bar": {
           "name": "Alt bilgi",
-          "description": "İletişim bilgileriniz, menüleriniz ve ödeme işaretleri; her sayfanın altında. Menüler ve iletişim bilgileri kendi ekranlarında düzenlenir."
+          "description": "İletişim bilgileriniz, menüleriniz, sosyal hesaplarınız ve ödeme işaretleri; her sayfanın altında. Menüler, iletişim bilgileri ve sosyal hesap adresleri kendi ekranlarında düzenlenir."
         },
         "product_main": {
           "name": "Ürünün kendi bilgileri",
@@ -7905,6 +7905,10 @@
           "featured": "Öne çıkan",
           "compact": "Kompakt liste",
           "columns": "Yan yana listeler"
+        },
+        "categories": {
+          "tiles": "Görselli karo",
+          "linked": "Alt kategorili kart"
         }
       },
       "look": {
@@ -8632,6 +8636,78 @@
         },
         "phoneNote": "Telefonda üst bilgi değişmez: menü, logo, favori ve sepet; altında arama.",
         "otherHint": "Arama düğmesi, Hesabım yazısı ve sepet tutarı."
+      },
+      "categoryCards": {
+        "columns": {
+          "label": "Bir sıradaki kart",
+          "term": "columns",
+          "hint": "Geniş ekranda yan yana kaç kart; dar ekranda tema kendiliğinden azaltır."
+        },
+        "image_position": {
+          "label": "Görselin yeri",
+          "term": "image position",
+          "hint": "Kategorinin görseli; görseli olmayan kategoride adının baş harfi görünür.",
+          "side": "Yanda",
+          "top": "Üstte",
+          "none": "Yok"
+        },
+        "frame": {
+          "label": "Kart çerçevesi",
+          "term": "border",
+          "lined": "Çizgili",
+          "plain": "Düz zemin"
+        },
+        "links": {
+          "label": "Alt kategori sayısı",
+          "term": "links",
+          "hint": "Her kartta adın altında en çok bu kadar alt kategori; 0 seçerseniz yalnız ad ve görsel. Daha fazlası varsa \"Tümünü gör\" bağlantısı çıkar."
+        }
+      },
+      "footerBar": {
+        "social": {
+          "label": "Sosyal hesaplar",
+          "term": "social links",
+          "hint": "Adresler Mağaza ayarlarındaki sosyal hesaplarınızdan gelir.",
+          "text": "Yazıyla",
+          "icons": "Simgeyle",
+          "hidden": "Gizli"
+        },
+        "payment_badges": {
+          "label": "Ödeme rozetleri",
+          "term": "payment badges",
+          "hint": "Seçtikleriniz bu sırayla yazılı rozet olarak görünür. Hiçbirini seçmezseniz bağlı ödeme sağlayıcılarınızın işaretleri görünür.",
+          "visa": "Visa",
+          "mastercard": "Mastercard",
+          "troy": "Troy",
+          "amex": "American Express",
+          "bank_transfer": "Havale / EFT",
+          "cash_on_delivery": "Kapıda ödeme",
+          "installments": "Taksit",
+          "up": "{{name}} rozetini yukarı taşı",
+          "down": "{{name}} rozetini aşağı taşı"
+        },
+        "back_to_top": {
+          "label": "Yukarı çık düğmesi",
+          "term": "back to top",
+          "hint": "Sayfa bir ekran boyu kaydırılınca köşede görünür; tıklanınca sayfanın başına döner."
+        },
+        "back_to_top_side": {
+          "label": "Düğmenin yeri",
+          "term": "position",
+          "right": "Sağda",
+          "left": "Solda"
+        },
+        "back_to_top_shape": {
+          "label": "Düğmenin biçimi",
+          "term": "shape",
+          "round": "Yuvarlak",
+          "square": "Köşeli"
+        },
+        "back_to_top_mobile": {
+          "label": "Telefonda da göster",
+          "term": "mobile",
+          "hint": "Kapalıysa düğme yalnız geniş ekranlarda görünür."
+        }
       },
       "main": {
         "fixed": "Bu bölüm sayfanın sabit parçasıdır; gizlenemez, taşınamaz, kopyalanamaz ve kaldırılamaz."

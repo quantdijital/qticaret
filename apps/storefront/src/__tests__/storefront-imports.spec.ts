@@ -111,6 +111,8 @@ describe("the storefront's value imports", () => {
       "@qticaret/types/section-marquee",
       "@qticaret/types/section-banner",
       "@qticaret/types/section-catalog",
+      "@qticaret/types/section-categories",
+      "@qticaret/types/section-footer",
       "@qticaret/types/section-scroller",
       "@qticaret/types/section-shelf",
     ]) {

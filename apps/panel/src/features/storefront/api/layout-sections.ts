@@ -9,6 +9,7 @@ import type {
 } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
+import type { CategoriesLinkedFields } from "@/features/storefront/api/layout-cards"
 import type { HeroCatalogFields, PriceBand } from "@/features/storefront/api/layout-catalog"
 import type { ProductsSection } from "@/features/storefront/api/layout-shelf"
 import type { MenuInput } from "@/features/storefront/api/menus"
@@ -120,7 +121,7 @@ export type BannerSection = BodySectionBase & {
   slides: BannerSlide[]
 } & BannerSettings
 
-export interface CategoriesSection extends BodySectionBase {
+interface CategoriesBase extends BodySectionBase {
   type: "categories"
   title: string | null
   /** None: the top categories. */
@@ -130,6 +131,9 @@ export interface CategoriesSection extends BodySectionBase {
   /** The link beside the title; none: "every category". */
   more: LayoutLink | null
 }
+
+/** Today's picture tiles, or the linked cards with their own fields (adr/0049 Ek 2026-11-15). */
+export type CategoriesSection = CategoriesBase & ({ variant: "tiles" } | CategoriesLinkedFields)
 
 /** One product up close (adr/0046 Ek 2026-11-05): the storefront adds its facts and spec table. */
 export interface FeaturedProductSection extends BodySectionBase {

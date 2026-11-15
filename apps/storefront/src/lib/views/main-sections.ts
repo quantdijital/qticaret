@@ -1,6 +1,17 @@
-import type { StoreLayout, StoreThemeSettings } from "@qticaret/types"
+import type {
+  FooterBarSetting,
+  FooterBarStep,
+  PaymentBadge,
+  StoreLayout,
+  StoreThemeSettings,
+} from "@qticaret/types"
 import { lookOf } from "@qticaret/types/section-look"
 import { variantOf } from "@qticaret/types/section-variants"
+import {
+  FOOTER_BAR_DEFAULTS,
+  FOOTER_BAR_SETTINGS,
+  PAYMENT_BADGES,
+} from "@qticaret/types/section-footer"
 import type {
   CategoryMainView,
   FooterBarView,
@@ -58,10 +69,43 @@ export function headerBarOf(
   }
 }
 
-export const footerBarOf = (main: Main): FooterBarView => ({
-  id: main?.footer_bar.id ?? "mainfooter",
-  variant: variantOf("footer_bar", main?.footer_bar.variant),
-})
+/** A footer setting's step as a reader takes it: one on the list as it is, anything else the default. */
+const footerStep = <S extends FooterBarSetting>(setting: S, value: unknown): FooterBarStep<S> => {
+  const listed: readonly unknown[] = FOOTER_BAR_SETTINGS[setting]
+  return listed.includes(value) ? (value as FooterBarStep<S>) : FOOTER_BAR_DEFAULTS[setting]
+}
+
+const isBadge = (value: unknown): value is PaymentBadge =>
+  (PAYMENT_BADGES as readonly unknown[]).includes(value)
+
+/**
+ * The footer with its own settings (adr/0049 Ek 2026-11-15): each read
+ * forgivingly (a step this build does not know is the default, a way to
+ * pay it does not know is left out, a repeat too); a backend before them
+ * prints none, and the footer is drawn as before.
+ */
+export function footerBarOf(main: Main, t: Translate): FooterBarView {
+  const bar = main?.footer_bar
+  const social = footerStep("social", bar?.social)
+  const badges = [...new Set((bar?.payment_badges ?? []).filter(isBadge))]
+  return {
+    id: bar?.id ?? "mainfooter",
+    variant: variantOf("footer_bar", bar?.variant),
+    ...(social !== FOOTER_BAR_DEFAULTS.social ? { social } : {}),
+    ...(badges.length > 0
+      ? { paymentBadges: badges.map((key) => ({ key, label: t(`marks.${key}`) })) }
+      : {}),
+    ...(bar?.back_to_top === true
+      ? {
+          backToTop: {
+            side: footerStep("back_to_top_side", bar.back_to_top_side),
+            shape: footerStep("back_to_top_shape", bar.back_to_top_shape),
+            mobile: bar.back_to_top_mobile !== false,
+          },
+        }
+      : {}),
+  }
+}
 
 export const productMainOf = (main: Main): ProductMainView => ({
   id: main?.product_main.id ?? "mainproduct",

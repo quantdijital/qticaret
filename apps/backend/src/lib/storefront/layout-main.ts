@@ -1,5 +1,6 @@
 import type { LayoutDocument } from "./layout"
 import type { MenuLinkInput } from "./menus"
+import { footerBarDefaults, footerSettingsOf } from "./sections/footer-bar"
 import { hasLook } from "./sections/look"
 import type { SectionLook } from "./sections/look"
 import { MAIN_SECTION_IDS } from "./sections/main"
@@ -49,6 +50,7 @@ const FOOTER_BAR: FooterBar = {
   starts_at: null,
   ends_at: null,
   variant: "ledger",
+  ...footerBarDefaults(),
 }
 
 const PRODUCT_MAIN: ProductMain = {
@@ -78,7 +80,9 @@ export function withMainSections(doc: LayoutDocument, theme: ThemeHeader): Layou
   return {
     ...doc,
     header: has(doc.header, "header_bar") ? doc.header : [...doc.header, defaultHeaderBar(theme)],
-    footer: has(doc.footer, "footer_bar") ? doc.footer : [{ ...FOOTER_BAR }, ...doc.footer],
+    footer: has(doc.footer, "footer_bar")
+      ? doc.footer
+      : [{ ...FOOTER_BAR, payment_badges: [] }, ...doc.footer],
     product: has(doc.product, "product_main") ? doc.product : [{ ...PRODUCT_MAIN }, ...doc.product],
     category: has(doc.category, "category_main")
       ? doc.category
@@ -103,8 +107,8 @@ const lookOf = (section: { look?: SectionLook | undefined }) =>
  * product's block and the category grid with their look only when the shop
  * set a step, as a body section prints it; the catalog header with its
  * own settings, its highlighted link placed by `resolve` (a broken one
- * null). Read off a document `withMainSections` filled; one somehow
- * missing is its default.
+ * null); the footer with the settings the shop changed. Read off a
+ * document `withMainSections` filled; one somehow missing is its default.
  */
 export function mainSectionsOf<L>(
   doc: LayoutDocument,
@@ -122,7 +126,13 @@ export function mainSectionsOf<L>(
       sticky: header.sticky,
       ...(header.variant === "catalog" ? { catalog: catalogOf(header, resolve) } : {}),
     },
-    footer_bar: { id: footer.id, type: footer.type, variant: footer.variant },
+    // Its own settings only when the shop changed them, so a footer left alone prints as before
+    footer_bar: {
+      id: footer.id,
+      type: footer.type,
+      variant: footer.variant,
+      ...footerSettingsOf(footer),
+    },
     product_main: {
       id: product.id,
       type: product.type,

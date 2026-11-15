@@ -6,6 +6,7 @@ import type {
   ProductMainVariant,
   SectionLook,
 } from "@qticaret/types"
+import type { FooterBarFields } from "@/features/storefront/api/layout-cards"
 import type { LayoutLink } from "./layout-sections"
 
 /**
@@ -51,7 +52,8 @@ export type HeaderCatalogSection = HeaderBarCommon & { variant: "catalog" } & He
 export type HeaderBarSection =
   (HeaderBarCommon & { variant: Exclude<HeaderBarVariant, "catalog"> }) | HeaderCatalogSection
 
-export interface FooterBarSection extends MainBase {
+/** The footer, with its own settings (adr/0049 Ek 2026-11-15). */
+export interface FooterBarSection extends MainBase, FooterBarFields {
   type: "footer_bar"
   variant: FooterBarVariant
 }

@@ -125,7 +125,9 @@ export function CountField({
         onChange={(event) => {
           const next = Math.trunc(Number(event.target.value))
           if (Number.isFinite(next) && event.target.value !== "") {
-            onChange(Math.max(1, Math.min(max, next)))
+            // A count on its way past a higher least ("3" towards "30") stands until the blur;
+            // a field whose least is 0 takes 0
+            onChange(Math.max(Math.min(min, 1), Math.min(max, next)))
           }
         }}
         onBlur={() => {

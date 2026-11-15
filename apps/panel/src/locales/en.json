@@ -7859,7 +7859,7 @@
         },
         "footer_bar": {
           "name": "Footer",
-          "description": "Your contact details, menus and payment marks, at the bottom of every page. Menus and contact details are edited on their own screens."
+          "description": "Your contact details, menus, social accounts and payment marks, at the bottom of every page. Menus, contact details and social account addresses are edited on their own screens."
         },
         "product_main": {
           "name": "The product's own details",
@@ -7905,6 +7905,10 @@
           "featured": "Featured",
           "compact": "Compact list",
           "columns": "Lists side by side"
+        },
+        "categories": {
+          "tiles": "Picture tiles",
+          "linked": "Cards with subcategories"
         }
       },
       "look": {
@@ -8632,6 +8636,78 @@
         },
         "phoneNote": "On phones the header stays as it is: menu, logo, favourites and cart, with the search below.",
         "otherHint": "The search button, the My account text and the cart total."
+      },
+      "categoryCards": {
+        "columns": {
+          "label": "Cards in a row",
+          "term": "columns",
+          "hint": "How many cards side by side on a wide screen; the theme shows fewer on narrow screens."
+        },
+        "image_position": {
+          "label": "Picture position",
+          "term": "image position",
+          "hint": "The category's picture; a category without one shows its initial.",
+          "side": "Beside",
+          "top": "Above",
+          "none": "None"
+        },
+        "frame": {
+          "label": "Card frame",
+          "term": "border",
+          "lined": "Outlined",
+          "plain": "Plain ground"
+        },
+        "links": {
+          "label": "Subcategories shown",
+          "term": "links",
+          "hint": "At most this many subcategories under each name; 0 shows only the name and picture. A \"See all\" link appears when there are more."
+        }
+      },
+      "footerBar": {
+        "social": {
+          "label": "Social accounts",
+          "term": "social links",
+          "hint": "The addresses come from your social accounts in Store settings.",
+          "text": "As text",
+          "icons": "As icons",
+          "hidden": "Hidden"
+        },
+        "payment_badges": {
+          "label": "Payment badges",
+          "term": "payment badges",
+          "hint": "The ones you pick show as written badges in this order. With none picked, your payment providers' marks show.",
+          "visa": "Visa",
+          "mastercard": "Mastercard",
+          "troy": "Troy",
+          "amex": "American Express",
+          "bank_transfer": "Bank transfer",
+          "cash_on_delivery": "Cash on delivery",
+          "installments": "Instalments",
+          "up": "Move {{name}} up",
+          "down": "Move {{name}} down"
+        },
+        "back_to_top": {
+          "label": "Back to top button",
+          "term": "back to top",
+          "hint": "Shows in a corner after a screen of scrolling; takes the visitor back to the top."
+        },
+        "back_to_top_side": {
+          "label": "Button position",
+          "term": "position",
+          "right": "Right",
+          "left": "Left"
+        },
+        "back_to_top_shape": {
+          "label": "Button shape",
+          "term": "shape",
+          "round": "Round",
+          "square": "Square"
+        },
+        "back_to_top_mobile": {
+          "label": "Show on phones too",
+          "term": "mobile",
+          "hint": "When off, the button shows only on wide screens."
+        }
       },
       "main": {
         "fixed": "This section is a fixed part of the page; it cannot be hidden, moved, copied or removed."
