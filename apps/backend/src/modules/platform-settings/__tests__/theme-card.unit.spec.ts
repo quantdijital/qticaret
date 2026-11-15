@@ -90,7 +90,8 @@ describe("theme section: the product card's badges, sold-out row, no-reviews row
       delete card["no_reviews"]
       return { ...defaults, product_card: card }
     }
-    expect(parseStored("theme", old(true)).product_card.no_reviews).toBe("empty_stars")
+    const read = parseStored("theme", old(true))
+    expect(read["product_card"]).toMatchObject({ no_reviews: "empty_stars" })
     expect(parseStored("theme", old(false))).toEqual(defaults)
     // A design's theme and a preset (`withCardDefaults`) read the same
     expect(withCardDefaults(old(true))).toEqual({

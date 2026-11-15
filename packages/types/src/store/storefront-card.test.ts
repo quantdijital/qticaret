@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { CARD_BUTTON_STYLES, CARD_NO_REVIEWS, CARD_SOLD_OUT_ROWS } from "./storefront"
+import { CARD_BUTTON_STYLES, CARD_NO_REVIEWS, CARD_SOLD_OUT_ROWS } from "./storefront.js"
 
 /** adr/0049 Ek 2026-11-15: the card's lists; the backend mirrors them (`theme-card.unit.spec.ts`). */
 describe("the product card's choices", () => {
