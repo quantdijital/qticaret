@@ -13,8 +13,8 @@ moduleIntegrationTestRunner<WebhookEventsModuleService>({
       await service.markProcessed(first.id)
       const repeat = await service.claim("paytr", "payses01A:success", { amount: 21000 })
 
-      expect(first.state).toBe("new")
-      expect(repeat).toEqual({ id: first.id, state: "done" })
+      expect(first).toMatchObject({ state: "new", attempts: 1 })
+      expect(repeat).toEqual({ id: first.id, state: "done", attempts: 1 })
     })
 
     it("lets one of two racing deliveries handle the event; the other comes back later", async () => {
@@ -33,7 +33,7 @@ moduleIntegrationTestRunner<WebhookEventsModuleService>({
       const again = await service.claim("paytr", "payses01C:success", {})
       const [stored] = await service.listWebhookEvents({ id: first.id })
 
-      expect(again).toEqual({ id: first.id, state: "retry" })
+      expect(again).toEqual({ id: first.id, state: "retry", attempts: 2 })
       expect(stored).toMatchObject({ status: "processing", attempts: 2, error_code: null })
     })
 

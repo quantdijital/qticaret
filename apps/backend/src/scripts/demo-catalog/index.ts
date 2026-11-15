@@ -3,7 +3,8 @@ import path from "node:path"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { logger } from "../../lib/logging"
-import { ensureBrands, ensureCategories, hideRecords } from "./categories"
+import { ensureBrands } from "./brands"
+import { ensureCategories, hideRecords } from "./categories"
 import { addDemoReviews, ensureSalePrices, setDemoProductDetails } from "./details"
 import { createDemoProduct, salePricesOf, stockDemoProduct } from "./products"
 import type { ShopContext } from "./products"
@@ -13,6 +14,7 @@ export interface DemoCatalogSummary {
   categories_created: number
   category_images: number
   brands_created: number
+  brand_logos: number
   products_created: number
   products_kept: number
   reviews_created: number
@@ -65,7 +67,7 @@ export async function loadDemoCatalog(
   const imageDir = path.join(path.dirname(file), "images")
   const hidden = await hideRecords(container, catalog.hide)
   const categories = await ensureCategories(container, catalog, imageDir)
-  const brands = await ensureBrands(container, catalog)
+  const brands = await ensureBrands(container, catalog, imageDir)
   const shop: ShopContext = {
     ...(await shopOf(container)),
     catalogName: catalog.name,
@@ -84,6 +86,7 @@ export async function loadDemoCatalog(
     categories_created: categories.created,
     category_images: categories.images,
     brands_created: brands.created,
+    brand_logos: brands.logos,
     products_created: 0,
     products_kept: 0,
     reviews_created: 0,

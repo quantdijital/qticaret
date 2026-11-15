@@ -13,6 +13,8 @@
 
 ## 2026-11-15: vitrin işleri ve ortak çalışma
 
+- **CI yeşile (`deniz/ci-yesil`, repo public oldu):** gitleaks'in 19 geçmiş bulgusu tek tek incelendi, hepsi uydurma test değeri; `.gitleaksignore`'a parmak iziyle ve gerekçeyle yazıldı (kural docs/04); Stripe biçimli fixture parçalardan kuruluyor. Semgrep XSS bulgusu (`checkout/return.ts`) kaçışlarla düzeltildi + test, satırda dar `nosemgrep`. CI: kazara commit'lenen `apps/panel/test-results/` çıkarıldı, üretilen CI sırları maskeleniyor, üst panelin build/test env'i CI'da veriliyor, HTTP testleri 12 parça, entegrasyon hataları düz hata (jest alt süreci artık çökmüyor), MFA anahtarı CI'da, birkaç eskimiş test güncellendi (webhook `attempts`, şablon sayısı 37, editör `sfs_`, toptan şablon adları panelde, arama performansı testi dakikalık işle yarışmıyor).
+
 - `dev`'e giren PR'lar: #9–#12 yorum alıntısı (~140 karakter, "…"), #37 ortalı üst bilgi + M1 açılır menü + katalog ana sayfası düzeltmeleri, #38 fiyat bandına kategori (güvenlik incelemesi: düşük bulgu kapatıldı), #44 ve #45 yorum kutuları eşit boy, #47 arama düğmelerinin hizası (alan yüksekliği aynı), #48 duyuru şeridine hizalama (`auto` varsayılan) ve boyut.
 - Kurallar: adr/0066 (üç katman, K1–K9), "Aynı işi iki kez yapma", "Yayımlanmış biçim sözleşmedir". Görünümlerim: Katalog, Grafit.
 - Yerel geliştirme veritabanı: My L'arte taslağına cutlery paketi ve `katalog` uygulandı (2026-11-14); sahip klasik katalog üst bilgisini ve duyuru şeridinde orta + büyük seçti. Yerel önizleme dalı `deniz/onizleme-yerel` (push edilmez) sade üst bilgiyi gösterir.

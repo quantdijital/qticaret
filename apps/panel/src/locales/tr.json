@@ -1588,7 +1588,9 @@
           "account": {
             "password_reset": "Şifre sıfırlama",
             "verify_email": "E-posta doğrulama",
-            "migration_invite": "Taşınan müşteriye hesap daveti"
+            "migration_invite": "Taşınan müşteriye hesap daveti",
+            "wholesale_invite": "Toptancı daveti",
+            "wholesale_enabled": "Toptan hesap açıldı"
           },
           "payment": {
             "failed": "Ödeme alınamadı"
@@ -8526,7 +8528,17 @@
       },
       "featured": {
         "product": "Ürün",
-        "hint": "Görseller, öne çıkan özellikler, fiyat ve özellik tablosu ürünün kendi sayfasından gelir. Ürün yayında değilken bölüm vitrinde görünmez."
+        "hint": "Görseller, öne çıkan özellikler, fiyat ve özellik tablosu ürünün kendi sayfasından gelir. Ürün yayında değilken bölüm vitrinde görünmez.",
+        "gallery": "Fotoğraf düzeni",
+        "galleryTerm": "gallery",
+        "galleries": {
+          "collage": "Kolaj",
+          "strips": "Çapraz şeritler"
+        },
+        "galleryHint": {
+          "collage": "Solda büyük bir fotoğraf; geniş ekranda yanında iki küçük fotoğraf.",
+          "strips": "En çok dört fotoğraf eşit, çapraz şeritler hâlinde yan yana. Geniş ekranda fareyle üstüne gelinen şerit genişler; telefonda eşit kalır."
+        }
       },
       "sample": {
         "label": {
@@ -8809,7 +8821,17 @@
         "utility_bar": {
           "label": "Üst yardımcı şerit",
           "term": "top bar",
-          "hint": "İnce açık şerit: Menüler'deki “Üst menü” bağlantıları (yerleri aşağıda) ve Hesabım. Telefonda görünmez."
+          "hint": "İnce açık şerit: kısa bir not, Menüler'deki “Üst menü” bağlantıları (yerleri aşağıda) ve Hesabım. Telefonda görünmez."
+        },
+        "strip_note": {
+          "label": "Şerit notu",
+          "term": "strip note",
+          "hint": "Kısa bir duyuru ya da kampanya cümlesi. Örnek: 1500 TL üzeri kargo bedava."
+        },
+        "strip_note_link": {
+          "label": "Not bağlantısı",
+          "term": "link",
+          "hint": "Seçersen not tıklanır. Boş bırakırsan düz yazı kalır."
         },
         "phone": {
           "label": "Telefon numarası",

@@ -7,9 +7,6 @@ import {
 } from "@medusajs/medusa/core-flows"
 import { CATALOG_EXTENSION_MODULE } from "../../modules/catalog-extension"
 import type CatalogExtensionModuleService from "../../modules/catalog-extension/service"
-import { BRANDS_MODULE } from "../../modules/brands"
-import type BrandsModuleService from "../../modules/brands/service"
-import { saveBrandWorkflow } from "../../workflows/brands/workflows"
 import { setCategoryImageWorkflow } from "../../workflows/catalog/category-images"
 import { deriveLibraryMediaWorkflow } from "../../workflows/media/workflows"
 import { uploadDemoImage } from "./images"
@@ -104,33 +101,6 @@ export async function ensureCategories(
     }
   }
   return { ids, created, images }
-}
-
-/** The file's brands by handle; one missing is made through the panel's workflow. */
-export async function ensureBrands(
-  container: MedusaContainer,
-  catalog: DemoCatalog
-): Promise<Ensured> {
-  const service = container.resolve<BrandsModuleService>(BRANDS_MODULE)
-  const known = await service.listBrands(
-    { handle: catalog.brands.map((brand) => brand.handle) },
-    { select: ["id", "handle"] }
-  )
-  const ids = new Map(known.map((brand) => [brand.handle, brand.id]))
-  let created = 0
-  for (const brand of catalog.brands) {
-    if (ids.has(brand.handle)) {
-      continue
-    }
-    const { result } = await saveBrandWorkflow(container).run({
-      input: {
-        values: { name: brand.name, handle: brand.handle, description: brand.description },
-      },
-    })
-    ids.set(brand.handle, result.id)
-    created += 1
-  }
-  return { ids, created }
 }
 
 /**

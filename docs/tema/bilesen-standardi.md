@@ -109,6 +109,7 @@ varsayılan değer ayarın nasıl kullanılacağını gösterir, deneme metni (l
 | Oklar | `arrows`, `arrow_style`, `arrow_position` | Oklar, Ok biçimi, Okların yeri | always/hover/hidden; round/square/plain; head/sides |
 | Aç/kapat | — | Etiket olumlu cümle ("Noktaları göster") | `off`/`on` → Kapalı/Açık; anahtar düğmesiyle çizilir |
 | Cihaz | `device` | Cihaz <small>device</small> | all/mobile/desktop → Her yerde/Yalnız telefonda/Yalnız masaüstünde |
+| Fotoğraf düzeni (öne çıkan ürün) | `gallery` | Fotoğraf düzeni <small>gallery</small> | collage/strips → Kolaj/Çapraz şeritler |
 
 **Aç/kapat saklama kuralı:** ileride üçüncü seçenek alabilecek ayar (`dots`: kapalı/açık → sayılı)
 adlandırılmış adım `off`/`on` olur; kesin evet/hayır olan içerik anahtarı (`show_count`, `phone`)

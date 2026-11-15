@@ -10,6 +10,7 @@ import type { SectionLook } from "./section-look.js"
 import type { SectionDevice } from "./section-device.js"
 import type { AnnouncementSettings } from "./section-announcement.js"
 import type { FaqSettings } from "./section-faq.js"
+import type { FeaturedProductSettings } from "./section-featured.js"
 import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
 import type { StoreCategoriesCollage, StoreCategoriesLinked } from "./section-categories.js"
@@ -198,15 +199,19 @@ export interface StoreHeroSlide {
   tone: "light" | "dark"
 }
 
-/** One live product up close on the home page (adr/0046 Ek 2026-11-05); the storefront reads it. */
-export interface StoreFeaturedProductSection {
+/**
+ * One live product up close on the home page (adr/0046 Ek 2026-11-05); the
+ * storefront reads it. Its settings (adr/0049 Ek 2026-11-15) are printed
+ * only off their default: one absent reads as it (`featuredProductSettingsOf`).
+ */
+export type StoreFeaturedProductSection = {
   id: string
   type: "featured_product"
   title: string | null
   /** The shop's line about it, its `{tokens}` filled; null: none. */
   text: string | null
   product_id: string
-}
+} & Partial<FeaturedProductSettings>
 
 /**
  * Questions and answers in plain text, the answers' `{tokens}` already

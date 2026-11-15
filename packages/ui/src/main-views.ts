@@ -78,6 +78,12 @@ export interface HeaderCatalogView {
   topLinksPlace?: HeaderTopLinksPlace
   /** The search: `wide`; `narrow`, 35 rem at most right after the wordmark. Absent: `wide`. */
   searchWidth?: HeaderSearchWidth
+  /**
+   * The strip's short note at its start (Ek 2026-11-15), plain words, and
+   * where it goes (null: not a link). Absent or null: no note, the strip
+   * as drawn before it.
+   */
+  stripNote?: { text: string; path: string | null } | null
 }
 
 export interface FooterBarView {

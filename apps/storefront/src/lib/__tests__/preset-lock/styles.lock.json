@@ -78,11 +78,15 @@
       "file": "slider.css"
     },
     {
-      "sha256": "0944afbeda0d96e797dd01483d6e33f125ea4b4fbecf9503274d54673657f7cd",
+      "sha256": "36f7f04e0b75b57e99e2ec7d99925acb775b74cfd5857e22935290f0e42edd48",
+      "file": "spotlight.css"
+    },
+    {
+      "sha256": "2cbeb356c32cf4498a2a97eff01013ae8f51e83a5bc8b6256f1ef493ff13dd9d",
       "file": "styles.css"
     },
     {
-      "sha256": "6d43b7f13073c87531d51a7cb498501c27fac4db0751e8b1f40623e2db8d538a",
+      "sha256": "72ae9bb94afea4a7f1209ec47f4c52042649fd62b8cf50d13c62d8af24be0324",
       "file": "surface.css"
     },
     {

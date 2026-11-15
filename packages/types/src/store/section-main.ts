@@ -30,7 +30,7 @@ import type {
  * subtotal beside its icon, the highlighted last link of the menu bar (a
  * broken one null), the utility strip, the shop's phone number, the
  * "Kategoriler" button and the menu bar's ground; where its tools and the
- * shop's top links stand and how wide its search is.
+ * shop's top links stand and how wide its search is; the strip's note.
  */
 export interface StoreHeaderCatalog {
   search_placeholder: string | null
@@ -50,6 +50,14 @@ export interface StoreHeaderCatalog {
   tools_place?: HeaderToolsPlace
   top_links?: HeaderTopLinksPlace
   search_width?: HeaderSearchWidth
+  /**
+   * The strip's note (Ek 2026-11-15): a short plain line at its start
+   * (`HEADER_CATALOG_LIMITS.strip_note`) and where it goes, placed as the
+   * highlighted link is (a broken one null: the note stays plain words).
+   * An older backend prints neither: no note.
+   */
+  strip_note?: string | null
+  strip_note_link?: StoreLayoutLink | null
 }
 
 export interface StoreMainSections {

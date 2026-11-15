@@ -46,6 +46,15 @@ export type SectionLookView = Partial<SectionLook>
 export type SectionDeviceView = Exclude<SectionDevice, "all">
 
 /**
+ * A brand in the brands section: its page, and its logo when the shop
+ * gave it one (its `alt` the brand's name, as the logo stands for the
+ * name); none (or absent): the theme draws the name.
+ */
+export interface SectionBrandView extends LinkView {
+  logo?: ImageView | null
+}
+
+/**
  * A section as the theme draws it (adr/0049): the shop lays the home,
  * product and category pages out in the theme editor; every title already
  * in words (the shop's own or the storefront's default, a FAQ's aside),
@@ -102,7 +111,7 @@ export type HomeSectionView = {
     }
   | ProductsSectionView
   | FeaturedProductSectionView
-  | { id: string; type: "brands"; title: string; brands: LinkView[] }
+  | { id: string; type: "brands"; title: string; brands: SectionBrandView[] }
   | { id: string; type: "posts"; title: string; posts: PostCardView[]; more: LinkView }
   | {
       id: string

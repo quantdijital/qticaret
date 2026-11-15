@@ -28,7 +28,7 @@ const DEFAULTS: StoreHeaderCatalog = {
  * the "Kategoriler" list only when its button shows, the shop's top
  * categories (`tree`, built from the categories the frame already read:
  * no request of its own); each layout choice the answer lacks (an older
- * backend) or names off its list, today's drawing.
+ * backend) or names off its list, today's drawing; the strip's note.
  */
 export function headerCatalogOf(
   catalog: StoreHeaderCatalog | undefined,
@@ -49,5 +49,26 @@ export function headerCatalogOf(
     toolsPlace: headerToolsPlaceOf(set.tools_place),
     topLinksPlace: headerTopLinksPlaceOf(set.top_links),
     searchWidth: headerSearchWidthOf(set.search_width),
+    stripNote: stripNoteOf(set, t),
   }
+}
+
+/**
+ * The strip's note (Ek 2026-11-15): its words, and the link's path when it
+ * has one (a broken link, one without an address: plain words).
+ * None, blank or not words at all (an older or odd answer): no note.
+ */
+function stripNoteOf(
+  set: StoreHeaderCatalog,
+  t: Translate
+): NonNullable<HeaderCatalogView["stripNote"]> | null {
+  const text = typeof set.strip_note === "string" ? set.strip_note.trim() : ""
+  if (text === "") {
+    return null
+  }
+  // The note's own words name the link: only where it goes is read
+  const link = set.strip_note_link
+    ? menuLink({ ...set.strip_note_link, label: text, children: [] }, t)
+    : null
+  return { text, path: link?.path ?? null }
 }

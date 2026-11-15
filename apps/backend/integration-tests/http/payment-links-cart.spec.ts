@@ -125,11 +125,16 @@ medusaIntegrationTestRunner({
       const { data: orders } = await getContainer()
         .resolve(ContainerRegistrationKeys.QUERY)
         .graph({ entity: "order", fields: ["metadata"], filters: { id: order.order_id ?? "" } })
-      const bells = await (
-        getContainer().resolve(Modules.NOTIFICATION) as unknown as {
-          listNotifications: (filters: Record<string, unknown>) => Promise<unknown[]>
-        }
-      ).listNotifications({ resource_id: id, trigger_type: "payment_links.paid" })
+      // The bell follows the paid mark: on a slow runner it can come a moment later
+      const bells = await eventually(
+        () =>
+          (
+            getContainer().resolve(Modules.NOTIFICATION) as unknown as {
+              listNotifications: (filters: Record<string, unknown>) => Promise<unknown[]>
+            }
+          ).listNotifications({ resource_id: id, trigger_type: "payment_links.paid" }),
+        (found) => found.length > 0
+      )
       const reopened = await open(token)
 
       expect(first.status).toBe(200)
