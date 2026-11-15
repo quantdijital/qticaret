@@ -8808,7 +8808,17 @@
         "utility_bar": {
           "label": "Üst yardımcı şerit",
           "term": "top bar",
-          "hint": "İnce açık şerit: Menüler'deki “Üst menü” bağlantıları (yerleri aşağıda) ve Hesabım. Telefonda görünmez."
+          "hint": "İnce açık şerit: kısa bir not, Menüler'deki “Üst menü” bağlantıları (yerleri aşağıda) ve Hesabım. Telefonda görünmez."
+        },
+        "strip_note": {
+          "label": "Şerit notu",
+          "term": "strip note",
+          "hint": "Kısa bir duyuru ya da kampanya cümlesi. Örnek: 1500 TL üzeri kargo bedava."
+        },
+        "strip_note_link": {
+          "label": "Not bağlantısı",
+          "term": "link",
+          "hint": "Seçersen not tıklanır. Boş bırakırsan düz yazı kalır."
         },
         "phone": {
           "label": "Telefon numarası",

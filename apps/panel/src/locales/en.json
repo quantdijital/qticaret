@@ -8808,7 +8808,17 @@
         "utility_bar": {
           "label": "Top utility strip",
           "term": "top bar",
-          "hint": "A thin light strip: the “Top menu” links from Menus (where they stand is chosen below) and My account. Hidden on phones."
+          "hint": "A thin light strip: a short note, the “Top menu” links from Menus (where they stand is chosen below) and My account. Hidden on phones."
+        },
+        "strip_note": {
+          "label": "Strip note",
+          "term": "strip note",
+          "hint": "A short announcement or offer. Example: Free shipping over 1500 TL."
+        },
+        "strip_note_link": {
+          "label": "Note link",
+          "term": "link",
+          "hint": "Pick one and the note becomes clickable. Leave it empty and it stays plain text."
         },
         "phone": {
           "label": "Phone number",
