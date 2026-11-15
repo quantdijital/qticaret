@@ -4,6 +4,7 @@ import { ChevronRight, CreditCard, X } from "lucide-react"
 import { Dialog } from "radix-ui"
 import { useState } from "react"
 import type { InstallmentFamilyView, InstallmentSummaryView } from "@qticaret/ui"
+import { LayerPortal } from "../frame/Layers"
 import { InstallmentPlans } from "./InstallmentPlans"
 import type { InstallmentWords } from "./words"
 
@@ -97,7 +98,7 @@ export function Installments({
           strokeWidth={2}
         />
       </Dialog.Trigger>
-      <Dialog.Portal>
+      <LayerPortal>
         <Dialog.Overlay className="fixed inset-0 z-(--z-modal) bg-scrim duration-(--dur-short) motion-safe:data-[state=closed]:animate-out data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:animate-in data-[state=open]:fade-in-0" />
         <Dialog.Content
           data-installments=""
@@ -124,7 +125,7 @@ export function Installments({
             </Dialog.Description>
           </div>
         </Dialog.Content>
-      </Dialog.Portal>
+      </LayerPortal>
     </Dialog.Root>
   )
 }
