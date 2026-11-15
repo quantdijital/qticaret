@@ -231,8 +231,7 @@ export function SearchBox({
         maxLength={100}
         defaultValue={asked}
         className={cn(
-          // One exact height: the text centres in it and the buttons centre on it
-          "gf-field h-12 py-0",
+          "gf-field",
           written ? (text === "" ? "pr-24" : "pr-34") : text === "" ? "pr-14" : "pr-24"
         )}
         onChange={change}
@@ -266,7 +265,10 @@ export function SearchBox({
         </button>
       )}
       {written ? (
-        <button type="submit" className="gf-btn gf-btn--small absolute top-1/2 right-1 min-w-20 -translate-y-1/2">
+        <button
+          type="submit"
+          className="gf-btn gf-btn--small absolute top-1/2 right-0.5 min-w-20 -translate-y-1/2"
+        >
           {words.submit}
         </button>
       ) : (
