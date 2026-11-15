@@ -31,7 +31,7 @@ export function CompactCard({
   const out = isOut(product) && badges.soldOut
   return (
     <article className="group gf-card @container relative flex h-full items-center gap-3 md:gap-4">
-      <div className="relative aspect-card w-20 shrink-0 overflow-hidden rounded-media bg-paper-2 md:w-24">
+      <div className="relative aspect-card w-20 shrink-0 overflow-hidden rounded-media bg-media md:w-24">
         {product.image && (
           <ResponsiveImage
             image={product.image}

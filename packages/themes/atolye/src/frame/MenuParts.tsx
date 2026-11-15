@@ -31,7 +31,7 @@ export function MenuThumb({
   return (
     <span
       className={cn(
-        "block shrink-0 overflow-hidden rounded-inner bg-paper-3",
+        "block shrink-0 overflow-hidden rounded-inner bg-media-deep",
         size === 36 ? "size-9" : "size-10"
       )}
     >

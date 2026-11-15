@@ -12,7 +12,7 @@ function Picture({ line }: { line: CartLineView }) {
   return (
     <LinePhoto
       path={line.path}
-      className="size-24 shrink-0 overflow-hidden rounded-media bg-paper-3 sm:size-32"
+      className="size-24 shrink-0 overflow-hidden rounded-media bg-media-deep sm:size-32"
     >
       {line.image && (
         <ResponsiveImage

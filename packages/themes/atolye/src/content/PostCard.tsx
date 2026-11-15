@@ -35,7 +35,7 @@ export function PostCard({
   const Heading = level
   return (
     <article className="group relative flex h-full flex-col gap-4">
-      <div className="relative aspect-[16/10] overflow-hidden rounded-media bg-paper-2">
+      <div className="relative aspect-[16/10] overflow-hidden rounded-media bg-media">
         {post.image ? (
           <ResponsiveImage
             image={{ ...post.image, alt: "" }}

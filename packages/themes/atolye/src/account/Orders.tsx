@@ -41,7 +41,7 @@ export function Thumbs({
         <span
           key={`${image.src}:${String(index)}`}
           className={cn(
-            "relative overflow-hidden bg-paper-3 ring-2 ring-paper-2",
+            "relative overflow-hidden bg-media-deep ring-2 ring-paper-2",
             box,
             index > 0 && "-ml-6"
           )}
