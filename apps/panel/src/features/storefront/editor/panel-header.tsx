@@ -164,7 +164,7 @@ export function PanelGroup({
               {marked > 0 ? (
                 <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1.5 text-[11px] font-medium text-accent-foreground">
                   <span aria-hidden="true">{marked}</span>
-                  <span className="sr-only">{t(`${P}.marked`, { count: marked })}</span>
+                  <span className="sr-only">{`, ${t(`${P}.marked`, { count: marked })}`}</span>
                 </span>
               ) : null}
             </span>

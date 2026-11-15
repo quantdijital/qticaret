@@ -130,7 +130,7 @@ export function useSettingsLayout({
     [names, tabOf]
   )
   const active =
-    current.active !== null && tabs.includes(current.active)
+    current.active !== null && (tabs.length === 0 || tabs.includes(current.active))
       ? current.active
       : (tabs[0] ?? "content")
   const isLone = (name: string) =>
