@@ -41,8 +41,11 @@ export const URL_HEADER = "x-qt-url"
  */
 export const LAYOUT_PREVIEW_HEADER = "x-qt-layout-preview"
 
+// The draft's page, or its quick view dialog's answers (`/hizli-bakis`): the dialog asks from the
+// browser, so its request carries the token only in its own address (adr/0049 Ek 2026-11-15).
+// A signed design link (`sfl_`) or the theme editor's live session (`sfs_`, adr/0065 §1)
 const LAYOUT_PREVIEW =
-  /^\/onizleme\/((?:sfl_[0-9A-Za-z]{1,40}|sfs_[0-9a-f]{32})\.[0-9a-z]{1,12}\.[\w-]{43})$/
+  /^\/onizleme\/((?:sfl_[0-9A-Za-z]{1,40}|sfs_[0-9a-f]{32})\.[0-9a-z]{1,12}\.[\w-]{43})(?:\/hizli-bakis)?$/
 
 /** A signed preview's page (`/onizleme/<token>`): a draft product, content entry or design. */
 export const isPreviewPath = (pathname: string) => pathname.startsWith("/onizleme/")

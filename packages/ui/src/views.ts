@@ -16,6 +16,7 @@ export type * from "./product-views"
 export type * from "./listing-views"
 export type * from "./content-views"
 export type * from "./cart-views"
+export type * from "./quick-view-views"
 
 /** A picture with its versions (adr/0016): one `<source>` per format. */
 export interface ImageView {

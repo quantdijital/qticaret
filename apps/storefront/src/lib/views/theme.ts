@@ -6,6 +6,7 @@ import type {
 } from "@qticaret/types"
 import {
   CARD_BUTTON_STYLES,
+  CARD_QUICK_VIEW_TRIGGERS,
   CARD_NO_REVIEWS,
   CARD_SOLD_OUT_ROWS,
   SECTION_SPACINGS,
@@ -47,6 +48,11 @@ export const DEFAULT_THEME: StoreThemeSettings = {
     sold_out_row: "price",
     no_reviews: "hide",
     button_style: "outline",
+    quick_view: false,
+    quick_view_trigger: "hover",
+    quick_view_rating: true,
+    quick_view_summary: true,
+    quick_view_quantity: true,
   },
   header: { layout: "left", sticky: true },
   buttons: "pill",
@@ -128,6 +134,10 @@ const CARD_FLAGS = [
   "sale_badge",
   "low_stock_badge",
   "sold_out_badge",
+  "quick_view",
+  "quick_view_rating",
+  "quick_view_summary",
+  "quick_view_quantity",
 ] as const
 
 /**
@@ -205,6 +215,11 @@ export function themeSettings(raw: unknown, fallbackPrimary: string | null): Sto
         at(raw, "product_card", "button_style"),
         CARD_BUTTON_STYLES,
         d.product_card.button_style
+      ),
+      quick_view_trigger: oneOf(
+        at(raw, "product_card", "quick_view_trigger"),
+        CARD_QUICK_VIEW_TRIGGERS,
+        d.product_card.quick_view_trigger
       ),
     },
     header: {

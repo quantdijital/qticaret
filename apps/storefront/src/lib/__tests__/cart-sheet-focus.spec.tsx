@@ -4,7 +4,10 @@ import { createRoot, type Root } from "react-dom/client"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 // The theme's own part: it exports pages, not this
 import { CartSheet } from "../../../../../packages/themes/atolye/src/frame/CartSheet"
-import { announceCartAdded } from "../../../../../packages/themes/atolye/src/frame/events"
+import {
+  announceCartAdded,
+  sheetDescription,
+} from "../../../../../packages/themes/atolye/src/frame/events"
 
 /**
  * The header's cart drawer (Tezgâh audit Y-03): closed, the focus goes
@@ -98,5 +101,16 @@ describe("the header's cart drawer", () => {
     expect(document.activeElement).toBe(add)
     add.remove()
     rects.mockRestore()
+  })
+
+  // The product page's and the quick view's words end in a stop: never "Sepete eklendi.. Sepet"
+  it("says what came with the line and the cart's name with one stop between", () => {
+    expect(sheetDescription("Sepete eklendi.", "Sepet, 2 ürün")).toBe(
+      "Sepete eklendi. Sepet, 2 ürün"
+    )
+    expect(sheetDescription("Sepete eklendi", "Sepet, 2 ürün")).toBe(
+      "Sepete eklendi. Sepet, 2 ürün"
+    )
+    expect(sheetDescription("", "Sepet")).toBe("Sepet")
   })
 })

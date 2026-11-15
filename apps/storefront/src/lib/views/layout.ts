@@ -33,15 +33,31 @@ const SESSION_TOKEN = /^sfs_[0-9a-f]{32}\.[0-9a-z]{1,12}\.[\w-]{43}$/
  * live; its page says 404.
  */
 export async function currentLayout(): Promise<StoreLayout> {
-  const token = (await headers()).get(LAYOUT_PREVIEW_HEADER)
-  const preview = !token
-    ? null
-    : SESSION_TOKEN.test(token)
-      ? ((await layoutSession(token))?.layout ?? null)
-      : LAYOUT_TOKEN.test(token)
-        ? await layoutPreview(token)
-        : null
+  const token = await layoutPreviewToken()
+  const preview = token ? await previewLayoutOf(token) : null
   return preview ?? (await storefrontLayout())
+}
+
+/**
+ * The preview token this request came on (its form only; the backend
+ * checks it), a signed design link's or the theme editor's live
+ * session's, or null.
+ */
+export async function layoutPreviewToken(): Promise<string | null> {
+  const token = (await headers()).get(LAYOUT_PREVIEW_HEADER)
+  return token && (LAYOUT_TOKEN.test(token) || SESSION_TOKEN.test(token)) ? token : null
+}
+
+/**
+ * The draft a preview token opens: the live session's as last saved, else
+ * the signed link's; null when it no longer opens.
+ */
+export async function previewLayoutOf(token: string): Promise<StoreLayout | null> {
+  return SESSION_TOKEN.test(token)
+    ? ((await layoutSession(token))?.layout ?? null)
+    : LAYOUT_TOKEN.test(token)
+      ? layoutPreview(token)
+      : null
 }
 
 /**

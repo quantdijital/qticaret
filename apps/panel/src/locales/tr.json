@@ -8387,6 +8387,23 @@
           "notify": "“Gelince haber ver” bağlantısı"
         },
         "sold_out_rowHint": "Fiyatın yerinde ne görünür. Hiçbirinde ürün karttan sepete eklenmez; bağlantı ürün sayfasındaki stok bildirimi formunu açar.",
+        "quickViewTitle": "Hızlı bakış",
+        "quick_view": "Hızlı bakışı göster",
+        "quick_viewTerm": "quick view",
+        "quick_viewHint": "Kartta “Hızlı bak” düğmesi: ürün sayfa değişmeden bir pencerede açılır, oradan sepete eklenir. Ürün bağlantısı aynen kalır.",
+        "quick_view_trigger": "Düğmenin görünüşü",
+        "quick_view_triggerTerm": "trigger",
+        "quickViewTriggers": {
+          "hover": "Üzerine gelince düğme",
+          "icon": "Her zaman simge"
+        },
+        "quick_view_triggerHint": "Telefonda ve kompakt kartta her zaman küçük simge görünür; adın ve fiyatın sığmadığı dar kompakt kartta (telefonda iki sütun) simge çizilmez.",
+        "quick_view_rating": "Pencerede puanı göster",
+        "quick_view_ratingHint": "Ürünün yıldızları ve değerlendirme sayısı; değerlendirmesi yoksa görünmez.",
+        "quick_view_summary": "Pencerede kısa açıklamayı göster",
+        "quick_view_summaryHint": "Ürünün kısa açıklaması; yoksa açıklamanın ilk paragrafı.",
+        "quick_view_quantity": "Pencerede adet seçiciyi göster",
+        "quick_view_quantityHint": "Kapalıyken pencereden bir adet eklenir.",
         "cardVariant": "Kart biçimi",
         "cardVariants": {
           "standard": "Standart",

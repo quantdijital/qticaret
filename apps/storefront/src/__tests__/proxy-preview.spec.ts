@@ -49,6 +49,36 @@ describe("the proxy on a preview page", () => {
     expect(response.headers.get("x-middleware-request-x-qt-layout-preview")).toBeNull()
   })
 
+  // adr/0049 Ek 2026-11-15: the frame's quick view dialog asks under the preview's address
+  it("sets the draft design's header on a design preview and on its quick view answers", async () => {
+    const design = `sfl_01JABCDEF.to51q5.${"a".repeat(43)}`
+    const header = "x-middleware-request-x-qt-layout-preview"
+    expect((await visit(`/onizleme/${design}`)).headers.get(header)).toBe(design)
+    const answers = await visit(`/onizleme/${design}/hizli-bakis?id=prod_01`)
+    expect(answers.headers.get(header)).toBe(design)
+    expect(answers.headers.get("x-robots-tag")).toBe("noindex, nofollow")
+    expect(answers.headers.get("cache-control")).toBe("private, no-store")
+    // Nothing else under a preview's address carries the token on
+    expect((await visit(`/onizleme/${design}/baska`)).headers.get(header)).toBeNull()
+    expect((await visit(`/onizleme/${design}/hizli-bakis/x`)).headers.get(header)).toBeNull()
+    // The theme editor's live session's frame asks its quick view the same way (adr/0065)
+    const session = `sfs_${"0a".repeat(16)}.to51q5.${"b".repeat(43)}`
+    expect((await visit(`/onizleme/${session}/hizli-bakis?id=prod_01`)).headers.get(header)).toBe(
+      session
+    )
+    expect((await visit(`/onizleme/${session}/baska`)).headers.get(header)).toBeNull()
+  })
+
+  it("drops a preview header a visitor sends itself", async () => {
+    const forged = `sfs_${"0a".repeat(16)}.to51q5.${"b".repeat(43)}`
+    const response = await proxy(
+      new NextRequest("http://localhost:8000/urun/bir-urun", {
+        headers: { "x-qt-layout-preview": forged },
+      })
+    )
+    expect(response.headers.get("x-middleware-request-x-qt-layout-preview")).toBeNull()
+  })
+
   it("leaves a live product page indexable", async () => {
     const response = await visit("/urun/bir-urun")
     expect(response.headers.get("x-robots-tag")).toBeNull()

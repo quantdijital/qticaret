@@ -8,7 +8,7 @@ import type {
   Translate,
   TrustBadgeView,
 } from "@qticaret/ui"
-import type { PriceDisplay, SeoPayload, StoreProduct } from "@qticaret/types"
+import type { CardQuickViewTrigger, PriceDisplay, SeoPayload, StoreProduct } from "@qticaret/types"
 import { framedCard, type FramedCardOptions } from "./card-framed"
 import { cardShown } from "./card-shown"
 import { productImages, variantImages } from "./image"
@@ -31,6 +31,8 @@ export interface CardOptions {
   framed?: FramedCardOptions
   /** Every card's pills and rows (adr/0049 Ek 2026-11-15); none: today's card. */
   shown?: CardShownView
+  /** The quick view button's look while the shop has it on (adr/0049 Ek 2026-11-15); none: no button. */
+  quickView?: CardQuickViewTrigger | null
 }
 
 // Without the shop's settings: the brand as ever, no stars (the setting's own default)
@@ -66,6 +68,7 @@ export function productCard(
     // Left out for today's card: its view is as it was; the compact card carries no extras
     ...(framed ? { variant, framed } : variant === "compact" ? { variant } : {}),
     ...(shown ? { shown } : {}),
+    ...(options.quickView ? { quickView: options.quickView } : {}),
   }
 }
 

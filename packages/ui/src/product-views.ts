@@ -10,7 +10,12 @@ import type {
 } from "./card-views"
 import type { InstallmentSummaryView } from "./cart-views"
 import type { CardVariant } from "./section-variants"
-import type { CardButtonStyle, CardNoReviews, CardSoldOutRow } from "@qticaret/types"
+import type {
+  CardButtonStyle,
+  CardNoReviews,
+  CardQuickViewTrigger,
+  CardSoldOutRow,
+} from "@qticaret/types"
 import type { HomeSectionView } from "./content-views"
 import type { ImageView, LinkView, PriceView, TrustBadgeView } from "./views"
 
@@ -47,6 +52,8 @@ export interface ProductCardView {
    * None: today's card (`CARD_SHOWN_DEFAULTS`).
    */
   shown?: CardShownView
+  /** The quick view button's look while the shop has it on (adr/0049 Ek 2026-11-15); none: no button. */
+  quickView?: CardQuickViewTrigger
 }
 
 /** A card's pills and rows as the shop set them, on every variant (adr/0049 Ek 2026-11-15). */

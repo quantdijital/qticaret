@@ -7,6 +7,7 @@ import { CardPriceRow, CardStars } from "./card-rows"
 import { CompactCard } from "./CompactCard"
 import { FramedCard } from "./FramedCard"
 import { QuickAdd } from "./QuickAdd"
+import { CardQuickView } from "./card-quick-view"
 import { shelfCard, shelfGrid, shelfSizes } from "./shelf-grid"
 
 export { quickAddWords } from "./card-parts"
@@ -64,7 +65,7 @@ export function ProductCard({
   const out = isOut(product)
   const add = quickAdd && product.quickAdd && !out ? product.quickAdd : null
   return (
-    <article className="group @container relative flex h-full flex-col gap-3">
+    <article className="group gf-card @container relative flex h-full flex-col gap-3">
       <div className="relative aspect-card overflow-hidden rounded-media bg-paper-2">
         {product.image && (
           <ResponsiveImage
@@ -75,6 +76,7 @@ export function ProductCard({
           />
         )}
         <CardBadges product={product} t={t} />
+        <CardQuickView product={product} t={t} />
         {add && quickAdd && (
           <QuickAdd
             variantId={add.variantId}

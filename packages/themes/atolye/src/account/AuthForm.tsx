@@ -3,6 +3,7 @@
 import { ChevronDown, CircleAlert } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import type { AuthAction, AuthPageView } from "@qticaret/ui"
+import { forgetQuickViews } from "@qticaret/ui/lib/quick-view"
 import { CheckField, FieldError, TextField } from "../checkout/fields"
 import type { PlaceholderWords } from "../parts/placeholders"
 import { useChallengeForm } from "../frame/useChallengeForm"
@@ -99,6 +100,9 @@ export function AuthForm({
           event.currentTarget.querySelector<HTMLElement>(`[name="${found.field}"]`)?.focus()
           return
         }
+        // The sign-in (or the code that signs in) is a soft navigation: the page lives on, and
+        // the quick views kept for the guest's prices must not outlive the session
+        forgetQuickViews()
         onSubmit(event)
       }}
       onChange={() => {

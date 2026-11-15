@@ -4,6 +4,7 @@ import {
   BUTTON_SHAPES,
   CARD_BUTTON_STYLES,
   CARD_NO_REVIEWS,
+  CARD_QUICK_VIEW_TRIGGERS,
   CARD_RATIOS,
   CARD_SOLD_OUT_ROWS,
   CARD_VARIANTS,
@@ -15,6 +16,7 @@ import {
 import type {
   CARD_BADGE_SWITCHES,
   FRAMED_CARD_SWITCHES,
+  QUICK_VIEW_SWITCHES,
   ThemeChoices,
 } from "@/features/storefront/api/theme"
 import type { CardVariant } from "@qticaret/types"
@@ -79,6 +81,17 @@ const badge = (name: (typeof CARD_BADGE_SWITCHES)[number]): FieldMeta => ({
   group: "card",
   label: `${C}.${name}`,
   term: `${C}.badgeTerm`,
+})
+
+/** Whether the shop has the quick view on: its other fields mean nothing while it is off. */
+const quickViewOn = (theme: ThemeChoices) => theme.product_card.quick_view
+
+/** What the quick view dialog shows (adr/0049 Ek 2026-11-15): "quick view" finds them all. */
+const quickViewSwitch = (name: (typeof QUICK_VIEW_SWITCHES)[number]): FieldMeta => ({
+  group: "card",
+  label: `${C}.${name}`,
+  term: `${C}.quick_viewTerm`,
+  shown: quickViewOn,
 })
 
 /**
@@ -163,6 +176,22 @@ const META: Readonly<Record<ThemeField, FieldMeta | null>> = {
     term: `${C}.sold_out_rowTerm`,
     options: named(CARD_SOLD_OUT_ROWS, "soldOutRows"),
   },
+  // The quick view (adr/0049 Ek 2026-11-15): its look and contents only while it is on
+  "product_card.quick_view": {
+    group: "card",
+    label: `${C}.quick_view`,
+    term: `${C}.quick_viewTerm`,
+  },
+  "product_card.quick_view_trigger": {
+    group: "card",
+    label: `${C}.quick_view_trigger`,
+    term: `${C}.quick_view_triggerTerm`,
+    options: named(CARD_QUICK_VIEW_TRIGGERS, "quickViewTriggers"),
+    shown: quickViewOn,
+  },
+  "product_card.quick_view_rating": quickViewSwitch("quick_view_rating"),
+  "product_card.quick_view_summary": quickViewSwitch("quick_view_summary"),
+  "product_card.quick_view_quantity": quickViewSwitch("quick_view_quantity"),
   "product_card.hover_image": framedSwitch("hover_image"),
   "product_card.delivery_note": framedSwitch("delivery_note"),
   "product_card.full_button": framedSwitch("full_button"),
