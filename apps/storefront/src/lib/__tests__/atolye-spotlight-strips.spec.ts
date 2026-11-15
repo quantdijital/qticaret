@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
+import { FEATURED_PRODUCT_DEFAULTS } from "@qticaret/types"
 import type { FeaturedProductSettings } from "@qticaret/types"
 import type { HomeSectionView, ImageView, ProductCardView } from "@qticaret/ui"
 import { renderPage } from "@/test/theme-render"
@@ -49,15 +50,25 @@ const featured = (over: Partial<Featured> = {}): Featured => ({
 const home = (section: Featured) =>
   renderPage(atolyeTheme, "HomePage", { view: { sections: [section] } })
 
-const strips = (images: ImageView[], product: ProductCardView = card) =>
-  home(featured({ images, product, settings: { gallery: "strips" } }))
+const strips = (
+  images: ImageView[],
+  product: ProductCardView = card,
+  look: Partial<FeaturedProductSettings> = {}
+) =>
+  home(
+    featured({
+      images,
+      product,
+      settings: { ...FEATURED_PRODUCT_DEFAULTS, gallery: "strips", ...look },
+    })
+  )
 
 const count = (html: string, needle: string) => html.split(needle).length - 1
 
 describe("the featured product's collage (the default)", () => {
   it("draws the same HTML with no setting, the collage's or an unknown one", () => {
     const before = home(featured())
-    expect(home(featured({ settings: { gallery: "collage" } }))).toBe(before)
+    expect(home(featured({ settings: FEATURED_PRODUCT_DEFAULTS }))).toBe(before)
     expect(
       home(featured({ settings: { gallery: "mosaic" } as unknown as FeaturedProductSettings }))
     ).toBe(before)
@@ -86,12 +97,17 @@ describe("the featured product's slanted strips", () => {
   })
 
   it("asks for an image as wide as a widened strip, and a phone's equal share", () => {
-    const html = strips(["bir", "iki", "uc", "dort"].map(picture))
+    const before = { strips_slant: "soft", strips_line: "medium" } as const
+    const html = strips(["bir", "iki", "uc", "dort"].map(picture), card, before)
     // 53vw × 2.75 / (2.75 + 3) from 1024 px; a quarter of a tablet's screen, a third of a phone's
     expect(html).toContain('sizes="(min-width: 1024px) 26vw, (min-width: 640px) 25vw, 34vw"')
     // Three: 53vw × 2.75 / (2.75 + 2); a third below 1024 px
-    expect(strips(["bir", "iki", "uc"].map(picture))).toContain(
+    expect(strips(["bir", "iki", "uc"].map(picture), card, before)).toContain(
       'sizes="(min-width: 1024px) 31vw, 34vw"'
+    )
+    // The default's steeper seams widen the strips' sum: a larger image
+    expect(strips(["bir", "iki", "uc"].map(picture))).toContain(
+      'sizes="(min-width: 1024px) 37vw, 34vw"'
     )
   })
 
@@ -110,5 +126,56 @@ describe("the featured product's slanted strips", () => {
     expect(bare).not.toContain("gf-strip")
     expect(bare).not.toContain("<img")
     expect(bare).toContain("Mutfağın en çok kullanılanı.")
+  })
+})
+
+const SIX = ["bir", "iki", "uc", "dort", "bes", "alti"].map(picture)
+const rootOf = (html: string) => /<ul class="gf-strips[^>]*>/.exec(html)?.[0] ?? ""
+
+describe("the strips' look (adr/0049 Ek 2026-11-16)", () => {
+  it("draws the bolder default: steeper seams, a thin line, the others darkening", () => {
+    expect(rootOf(strips(SIX))).toBe(
+      '<ul class="gf-strips rounded-media aspect-square lg:col-span-7 lg:aspect-[4/3]" data-count="4" data-slant="medium" data-line="thin" data-dim="on">'
+    )
+  })
+
+  it("prints the drawing from before as no attribute, each other step as its own", () => {
+    const before = {
+      strips_slant: "soft",
+      strips_line: "medium",
+      strips_overlap: "off",
+      strips_dim: "off",
+    } as const
+    expect(rootOf(strips(SIX, card, before))).toMatch(/lg:aspect-\[4\/3\]" data-count="4">$/)
+    const bold = { strips_slant: "steep", strips_line: "none", strips_overlap: "on" } as const
+    expect(rootOf(strips(SIX, card, bold))).toContain(
+      'data-slant="steep" data-line="none" data-overlap="on" data-dim="on"'
+    )
+  })
+
+  it("runs six strips across the stage when wide, the words under them in two columns", () => {
+    const html = strips(SIX, card, { strips_layout: "wide" })
+    expect(rootOf(html)).toContain(
+      'class="gf-strips rounded-media aspect-square sm:aspect-[16/9] lg:col-span-12 lg:aspect-[21/9]" data-count="6"'
+    )
+    expect(html).toContain('alt="Şef bıçağı alti"')
+    // 92vw of the screen from 1024 px, a widened strip of six
+    expect(html).toContain('sizes="(min-width: 1024px) 48vw, (min-width: 640px) 25vw, 34vw"')
+    expect(html).toMatch(
+      /<div class="grid gap-5 [^"]*lg:col-span-12 lg:grid-cols-12[^"]*"><div class="flex flex-col gap-4 lg:col-span-7"><h2/
+    )
+    expect(html).toMatch(/<div class="flex flex-col gap-5 lg:col-span-5">[\s\S]*Sepete|Ürünü/)
+    expect(html).not.toContain("lg:col-span-5 lg:px-8 lg:py-10")
+  })
+
+  it("leaves the collage as it was whatever the strips' look says", () => {
+    const before = home(featured())
+    const look = {
+      ...FEATURED_PRODUCT_DEFAULTS,
+      strips_layout: "wide",
+      strips_slant: "steep",
+      strips_overlap: "on",
+    } as const
+    expect(home(featured({ settings: look }))).toBe(before)
   })
 })

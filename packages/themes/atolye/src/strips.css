@@ -175,6 +175,10 @@
     inset: 4px calc(var(--strip-run) + 4px);
     outline: 2px solid var(--color-focus);
   }
+  /* On a graphite stage the stage's own ring colour, as every other focus there (`ui.css`) */
+  .gf-stage .gf-strip-cut:focus-visible::after {
+    outline-color: var(--color-signal-on-stage);
+  }
 
   .gf-strip-image {
     position: absolute;
