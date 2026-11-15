@@ -25,7 +25,7 @@ export function GiftRecipient({
 }) {
   const recipient = gift.recipient
   return (
-    <div className="flex flex-col gap-2 rounded-media bg-field p-3 text-sm sm:p-4">
+    <div className="flex flex-col gap-2 rounded-media gf-pane-inner p-3 text-sm sm:p-4">
       {recipient ? (
         <p className="flex items-start gap-2">
           <Gift className="mt-0.5 size-4 shrink-0" aria-hidden="true" strokeWidth={2} />

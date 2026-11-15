@@ -5,11 +5,11 @@
  */
 
 @media (hover: hover) {
-  .bg-paper-2 .gf-icon-btn:hover,
-  .bg-paper-2 .gf-chip:hover:not([aria-selected="true"]):not([aria-current="page"]) {
+  :is(.bg-paper-2, .gf-pane) .gf-icon-btn:hover,
+  :is(.bg-paper-2, .gf-pane) .gf-chip:hover:not([aria-selected="true"]):not([aria-current="page"]) {
     background: var(--color-paper-3);
   }
-  .bg-field .gf-icon-btn:hover:not(:disabled) {
+  :is(.bg-field, .gf-pane-inner) .gf-icon-btn:hover:not(:disabled) {
     background: var(--color-paper-2);
   }
 }

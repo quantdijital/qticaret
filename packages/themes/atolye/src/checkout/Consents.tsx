@@ -61,7 +61,7 @@ export function Consents({
             {words.contracts}
           </legend>
           {contracts.map((contract) => (
-            <details key={contract.kind} className="group rounded-media bg-field">
+            <details key={contract.kind} className="group rounded-media gf-pane-inner">
               <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-3 px-4 text-sm font-semibold">
                 {contract.title}
                 <span className="ml-auto text-xs font-semibold text-text-2 group-open:hidden">
@@ -79,7 +79,7 @@ export function Consents({
                 role="region"
                 aria-label={contract.title}
                 tabIndex={0}
-                className="gf-contract mx-4 mb-4 max-h-56 overflow-y-auto rounded-inner bg-paper-2 px-4 py-3 text-xs leading-relaxed text-text-2"
+                className="gf-contract mx-4 mb-4 max-h-56 overflow-y-auto rounded-inner gf-pane px-4 py-3 text-xs leading-relaxed text-text-2"
                 dangerouslySetInnerHTML={{ __html: contract.html }}
               />
               <input

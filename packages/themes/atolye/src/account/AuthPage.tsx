@@ -142,7 +142,7 @@ function Notice({ text, error }: { text: string; error: boolean }) {
     <p
       role={error ? "alert" : "status"}
       className={cn(
-        "flex items-start gap-3 rounded-media bg-field p-4 text-md font-semibold",
+        "flex items-start gap-3 rounded-media gf-pane-inner p-4 text-md font-semibold",
         error && "text-error"
       )}
     >
@@ -186,7 +186,7 @@ export function AuthPage({
   const perks = mode === "login" || mode === "register"
   return (
     <Container className="pt-6 lg:pt-12">
-      <div className="mx-auto grid max-w-[64rem] overflow-hidden rounded-tile bg-paper-2 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+      <div className="mx-auto grid max-w-[64rem] overflow-hidden rounded-tile gf-pane lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
         <div className="gf-stage flex flex-col justify-between gap-10 p-6 sm:p-8 lg:p-10">
           <header className="flex flex-col gap-3">
             {sent && (

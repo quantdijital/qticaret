@@ -217,7 +217,7 @@ export function AuthForm({
       {view.invite && <input type="hidden" name="davet" value={view.invite} />}
       {terms && (
         <div className="flex flex-col gap-2">
-          <details className="group rounded-media bg-field">
+          <details className="group rounded-media gf-pane-inner">
             <summary className="flex min-h-12 cursor-pointer items-center justify-between gap-3 px-4 text-sm font-semibold">
               {terms.title}
               <span className="ml-auto text-xs font-semibold text-text-2 group-open:hidden">
@@ -235,7 +235,7 @@ export function AuthForm({
               role="region"
               aria-label={terms.title}
               tabIndex={0}
-              className="gf-contract mx-4 mb-4 max-h-56 overflow-y-auto rounded-inner bg-paper-2 px-4 py-3 text-xs leading-relaxed text-text-2"
+              className="gf-contract mx-4 mb-4 max-h-56 overflow-y-auto rounded-inner gf-pane px-4 py-3 text-xs leading-relaxed text-text-2"
               dangerouslySetInnerHTML={{ __html: terms.html }}
             />
           </details>
@@ -266,7 +266,7 @@ export function AuthForm({
         {problem?.field === null && (
           <p
             role="alert"
-            className="flex items-start gap-2 rounded-media bg-field p-4 text-sm font-semibold text-error"
+            className="flex items-start gap-2 rounded-media gf-pane-inner p-4 text-sm font-semibold text-error"
           >
             <CircleAlert className="mt-0.5 size-4.5 shrink-0" aria-hidden="true" strokeWidth={2} />
             {message}

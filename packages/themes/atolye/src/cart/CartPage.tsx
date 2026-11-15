@@ -14,7 +14,7 @@ function Note({ text, error = false }: { text: string; error?: boolean }) {
       role={error ? "alert" : "note"}
       className={cn(
         "rounded-media p-4 text-sm font-semibold",
-        error ? "bg-paper-2 text-error" : "bg-paper-2 text-text"
+        error ? "gf-pane text-error" : "gf-pane text-text"
       )}
     >
       {text}

@@ -60,7 +60,7 @@ export function PaymentMarks({ marks, t }: { marks: readonly ShopMarkView[]; t: 
   return (
     <section
       aria-labelledby="odeme-yontemleri"
-      className="flex flex-col gap-4 rounded-tile bg-paper-2 p-6 lg:p-8"
+      className="flex flex-col gap-4 rounded-tile gf-pane p-6 lg:p-8"
     >
       <h2 id="odeme-yontemleri" className="text-title">
         {t("content.payments")}
@@ -149,7 +149,7 @@ export function ShippingFacts({ facts, t }: { facts: ShippingFactsView; t: Trans
       {facts.promises.length > 0 && (
         <section
           aria-labelledby="guvencelerimiz"
-          className="flex flex-col gap-4 rounded-tile bg-paper-2 p-6 lg:p-8"
+          className="flex flex-col gap-4 rounded-tile gf-pane p-6 lg:p-8"
         >
           <h2 id="guvencelerimiz" className="text-title">
             {t("content.promises")}
@@ -172,7 +172,7 @@ export function ShippingFacts({ facts, t }: { facts: ShippingFactsView; t: Trans
       {facts.carriers.length > 0 && (
         <section
           aria-labelledby="kargo-firmalari"
-          className="flex flex-col gap-4 rounded-tile bg-paper-2 p-6 lg:p-8"
+          className="flex flex-col gap-4 rounded-tile gf-pane p-6 lg:p-8"
         >
           <h2 id="kargo-firmalari" className="text-title">
             {t("content.carriers")}

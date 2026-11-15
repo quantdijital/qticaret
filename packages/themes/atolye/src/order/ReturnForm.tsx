@@ -88,7 +88,7 @@ export function ReturnForm({
     return (
       <ul className="flex flex-col gap-2 text-sm">
         {lines.map((line) => (
-          <li key={line.id} className="flex flex-col gap-0.5 rounded-media bg-field p-4">
+          <li key={line.id} className="flex flex-col gap-0.5 rounded-media gf-pane-inner p-4">
             <span className="font-semibold">{line.title}</span>
             {line.note && <span className="text-xs text-text-2">{line.note}</span>}
           </li>
@@ -104,7 +104,7 @@ export function ReturnForm({
         {shown.map((line) => (
           <li
             key={line.id}
-            className="flex flex-wrap items-center justify-between gap-3 rounded-media bg-field p-4"
+            className="flex flex-wrap items-center justify-between gap-3 rounded-media gf-pane-inner p-4"
           >
             <span className="flex min-w-0 flex-col gap-0.5">
               <span className="font-semibold">{line.title}</span>

@@ -16,6 +16,26 @@
 }
 
 /*
+ * Every other box of the theme (adr/0067 step 4): the account, order,
+ * checkout, payment link and content pages' boxes and the home sections'
+ * (FAQ, guides, signup, story, Google rating, an empty rack). `gf-pane` is
+ * a box on its ground, a tone darker (as `gf-box`); `gf-pane-inner` is a
+ * box inside one, on the field's light ground. They draw `filled` exactly
+ * as the utilities they replace (`bg-paper-2`, `bg-field`). Kept apart
+ * from `gf-box`: these sit in sections a shop may put on graphite or its
+ * colour, so their `lined` look reads the section's own tokens (below)
+ * rather than the page's, which `:root` would carry into them.
+ */
+@layer components {
+  .gf-pane {
+    background-color: var(--color-paper-2);
+  }
+  .gf-pane-inner {
+    background-color: var(--color-field);
+  }
+}
+
+/*
  * The subcategory tiles above a listing's grid, `lined`: no graphite and
  * no gradient, a plain row on the page's ground: a small square picture,
  * the name beside it, inside the same 1 px rule. Outside the layers, as

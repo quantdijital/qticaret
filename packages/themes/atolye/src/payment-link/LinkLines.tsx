@@ -12,7 +12,7 @@ export function LinkLines({ lines, t }: { lines: PaymentLinkLineView[]; t: Trans
       {lines.map((line, index) => (
         <li
           key={`${line.title}-${String(index)}`}
-          className="flex items-start gap-4 rounded-media bg-field p-3"
+          className="flex items-start gap-4 rounded-media gf-pane-inner p-3"
         >
           <div className="size-16 shrink-0 overflow-hidden rounded-inner bg-paper-3 sm:size-20">
             {line.image ? (
@@ -69,7 +69,7 @@ export function LinkTotals({ order, t }: { order: PaymentLinkOrderView; t: Trans
             : t("payment_link.shipping_at_checkout")}
         </dd>
       </div>
-      <div className="flex items-baseline justify-between gap-4 rounded-media bg-field px-4 py-3">
+      <div className="flex items-baseline justify-between gap-4 rounded-media gf-pane-inner px-4 py-3">
         <dt className="font-semibold">{t("cart.total")}</dt>
         <dd className="text-price font-extrabold tracking-[-0.01em]">{order.total}</dd>
       </div>

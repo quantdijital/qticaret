@@ -118,7 +118,7 @@ export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }
               <Summary summary={summary} t={t} filter={filter} />
             ) : (
               view.average !== null && (
-                <p className="rounded-tile bg-paper-2 p-6 text-text-2">
+                <p className="rounded-tile gf-pane p-6 text-text-2">
                   {t("reviews.summary", { average: view.average, count: view.count })}
                 </p>
               )
@@ -128,7 +128,7 @@ export function ReviewsPage({ view, t }: { view: ReviewsPageView; t: Translate }
         <div className="flex min-w-0 flex-col gap-(--gap-columns) lg:col-span-8">
           {shown && <ActiveFilter filter={shown} t={t} />}
           {view.reviews.length === 0 ? (
-            <div className="flex flex-col items-center gap-4 rounded-tile bg-paper-2 p-8 text-center text-text-2">
+            <div className="flex flex-col items-center gap-4 rounded-tile gf-pane p-8 text-center text-text-2">
               <p>{t(shown ? "reviews.filter_empty" : "product.no_reviews")}</p>
               {shown && (
                 <a href={shown.clearPath} rel="nofollow" className="gf-btn">

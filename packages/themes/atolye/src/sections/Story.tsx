@@ -17,7 +17,7 @@ export function Story({ section }: { section: Of<"rich_text"> }) {
   return (
     <section {...(section.title ? { "aria-labelledby": id } : {})} className="pt-(--section-gap)">
       <Container>
-        <div className="grid gap-6 rounded-tile bg-paper-2 p-6 sm:p-10 lg:grid-cols-12 lg:gap-(--gap-columns) lg:p-16">
+        <div className="grid gap-6 rounded-tile gf-pane p-6 sm:p-10 lg:grid-cols-12 lg:gap-(--gap-columns) lg:p-16">
           {section.title && (
             <h2 id={id} className="lg:col-span-5">
               {section.title}

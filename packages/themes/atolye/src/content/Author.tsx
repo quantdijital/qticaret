@@ -65,7 +65,7 @@ export function AuthorBox({ author, t }: { author: AuthorView; t: Translate }) {
   return (
     <section
       aria-labelledby="yazar-hakkinda"
-      className="mt-12 flex flex-col gap-4 rounded-media bg-paper-2 p-6 sm:flex-row sm:gap-6"
+      className="mt-12 flex flex-col gap-4 rounded-media gf-pane p-6 sm:flex-row sm:gap-6"
     >
       <Photo author={author} size="box" />
       <div className="flex min-w-0 flex-col items-start gap-3">

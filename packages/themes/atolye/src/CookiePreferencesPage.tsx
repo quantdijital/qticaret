@@ -28,7 +28,7 @@ export function CookiePreferencesPage({
         {view.notice && (
           <p
             role="status"
-            className="flex items-start gap-3 rounded-media bg-paper-2 p-4 text-md font-semibold"
+            className="flex items-start gap-3 rounded-media gf-pane p-4 text-md font-semibold"
           >
             <CircleCheck
               className="mt-0.5 size-5 shrink-0 text-ok"
@@ -43,7 +43,7 @@ export function CookiePreferencesPage({
           key={`${String(banner.due)}:${String(banner.analytics)}:${String(banner.marketing)}`}
           action={save}
           aria-labelledby="cerez-tercihleri-baslik"
-          className="flex flex-col gap-5 rounded-tile bg-paper-2 p-5 sm:p-8"
+          className="flex flex-col gap-5 rounded-tile gf-pane p-5 sm:p-8"
         >
           <input type="hidden" name="policy_version" value={banner.policyVersion ?? ""} />
           <input type="hidden" name="return" value="preferences" />
@@ -58,7 +58,7 @@ export function CookiePreferencesPage({
               )}
             </p>
           </div>
-          <div className="flex flex-col gap-1 rounded-media bg-field p-2">
+          <div className="flex flex-col gap-1 rounded-media gf-pane-inner p-2">
             <Choice
               label={t("cookies.necessary")}
               text={t("cookies.necessary_text")}

@@ -258,3 +258,23 @@ describe("the theme's card form and result pages", () => {
     expect(html).not.toContain("animate-spin")
   })
 })
+
+describe("the checkout's boxes (adr/0067)", () => {
+  it("draws each step as a box, its notes and contracts inside as inner boxes, a contract's text a third", () => {
+    const html = renderPage(atolyeTheme, "CheckoutPage", { view: paying(), actions })
+    expect(html.match(/class="rounded-tile gf-pane p-5 sm:p-7/g)).toHaveLength(3)
+    // The invoice line and each contract to read
+    expect(html).toContain("mb-8 flex items-start gap-3 rounded-media gf-pane-inner p-4 text-sm")
+    expect(html.match(/<details class="group rounded-media gf-pane-inner">/g)).toHaveLength(2)
+    expect(html.match(/class="gf-contract [^"]*rounded-inner gf-pane px-4/g)).toHaveLength(2)
+    expect(html).not.toMatch(/rounded-(tile|media|inner) bg-(paper-2|field) p-/)
+  })
+
+  it("draws a missing payment method's note as an inner box", () => {
+    const html = renderPage(atolyeTheme, "CheckoutPage", {
+      view: paying({ paymentMethods: [] }),
+      actions,
+    })
+    expect(html).toContain('class="rounded-media gf-pane-inner p-4 text-sm font-semibold"')
+  })
+})
