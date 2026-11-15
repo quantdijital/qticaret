@@ -28,6 +28,8 @@ interface Options {
   onVisit: (path: string) => void
   /** The frame drew `path`, with `group`'s sections (null: none of the editor's pages). */
   onLand: (path: string, group: BodyGroup | null) => void
+  /** The ids of the sections the frame has drawn, after each redraw or page shown. */
+  onSections?: (ids: readonly string[]) => void
 }
 
 /** The page group whose sections the frame shows: the first body section's; null for none. */
@@ -93,6 +95,7 @@ export function usePreviewPicking({
   onOpen,
   onVisit,
   onLand,
+  onSections,
 }: Options) {
   const { t } = useTranslation()
   const [hovered, setHovered] = useState<string | null>(null)
@@ -159,6 +162,7 @@ export function usePreviewPicking({
         return
       case "location":
         onLand(message.payload.path, groupOf(doc, message.payload.sections))
+        onSections?.(message.payload.sections)
         return
       case "left":
         if (message.payload.path) {

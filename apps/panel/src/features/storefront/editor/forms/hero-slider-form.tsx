@@ -12,6 +12,7 @@ import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
 import { Choice } from "./slide-controls"
 import { SlideDialog } from "./slide-dialog"
+import { useSlideRows } from "./slide-rows"
 import { useSlideFocus } from "../use-field-focus"
 
 const S = "storefront.editor.slider"
@@ -45,6 +46,7 @@ export function HeroSliderForm({
   const [editing, setEditing] = useState<number | null>(null)
   // The field an edit label in the preview named: its slide's dialog opens at it (Faz 2b)
   const [initial, setInitial] = useState<string | null>(null)
+  const { rowRef, rowAt } = useSlideRows()
   useSlideFocus((slide, target) => {
     if (slide < section.slides.length) {
       setEditing(slide)
@@ -77,6 +79,7 @@ export function HeroSliderForm({
                   className="flex items-center gap-2 rounded-md border p-1.5"
                 >
                   <button
+                    ref={rowRef(index)}
                     type="button"
                     className="flex min-h-12 min-w-0 flex-1 items-center gap-3 rounded-sm p-1 text-left transition-colors hover:bg-muted/60"
                     aria-label={t(`${S}.open`, { item })}
@@ -171,6 +174,7 @@ export function HeroSliderForm({
           index={editing}
           onIndexChange={setEditing}
           initialFocus={initial}
+          returnFocus={rowAt}
           onSave={(index, slide) => {
             setSlides(section.slides.map((each, at) => (at === index ? slide : each)))
           }}
