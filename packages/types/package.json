@@ -8,6 +8,7 @@
     ".": "./src/index.ts",
     "./section-variants": "./src/store/section-variants.ts",
     "./section-look": "./src/store/section-look.ts",
+    "./section-device": "./src/store/section-device.ts",
     "./section-marquee": "./src/store/section-marquee.ts",
     "./section-banner": "./src/store/section-banner.ts",
     "./section-catalog": "./src/store/section-catalog.ts",

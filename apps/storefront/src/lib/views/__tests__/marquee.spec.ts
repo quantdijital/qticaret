@@ -63,7 +63,6 @@ describe("the scrolling strip's view (adr/0049 Ek 2026-11-14 §4.1)", () => {
       uppercase: "on",
       gap: "tight",
       outline: "on",
-      device: "desktop",
       closable: "on",
     }
     expect(marqueeView(section(set), t)).toMatchObject(set)
@@ -85,5 +84,12 @@ describe("the scrolling strip's view (adr/0049 Ek 2026-11-14 §4.1)", () => {
 
     expect(headerMarquee(header, t)).toBeNull()
     expect(headerMarquee([...header, section()], t)).toMatchObject({ id: "kayan1" })
+    expect(headerMarquee([...header, section()], t)).not.toHaveProperty("device")
+  })
+
+  it("carries the header strip's screens only when not everywhere (bilesen-standardi §2)", () => {
+    expect(headerMarquee([section({ device: "desktop" })], t)).toMatchObject({ device: "desktop" })
+    expect(headerMarquee([section({ device: "all" })], t)).not.toHaveProperty("device")
+    expect(headerMarquee([section({ device: "tablet" })], t)).not.toHaveProperty("device")
   })
 })

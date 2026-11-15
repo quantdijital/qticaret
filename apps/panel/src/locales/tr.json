@@ -7987,7 +7987,15 @@
         "motion": "Hareket",
         "appearance": "Stil",
         "variant": "Biçim",
-        "variantHint": "Bölümün vitrinde nasıl görüneceği; önizleme hemen gösterir. Ortak içerik (başlık, metin) biçim değişince korunur, \"Geri al\" önceki biçimi getirir."
+        "variantHint": "Bölümün vitrinde nasıl görüneceği; önizleme hemen gösterir. Ortak içerik (başlık, metin) biçim değişince korunur, \"Geri al\" önceki biçimi getirir.",
+        "device": {
+          "label": "Cihaz",
+          "term": "device",
+          "all": "Her yerde",
+          "mobile": "Yalnız telefonda",
+          "desktop": "Yalnız masaüstünde",
+          "hint": "Telefon: 1024 pikselden dar ekranlar (tablet dahil). Gizlendiği cihazda bölümün görselleri indirilmez; sayfanın ilk görseli yine indirilir."
+        }
       },
       "defaults": {
         "heading": "Mağazanızın adı",
@@ -8508,8 +8516,8 @@
         "subtextPlaceholder": "Saat 14.00'e kadar verilen siparişlerde",
         "link": "Bağlantı (isteğe bağlı)",
         "full": "Bu sayfada zaten {{max}} kayan yazı var (üst bilgideki de sayılır).",
-        "lookHint": "Hangi cihazda görüneceği, kapatma düğmesi; şeridin çevresindeki boşluk ve genişliği.",
-        "headerLookHint": "Hangi cihazda görüneceği ve kapatma düğmesi.",
+        "lookHint": "Kapatma düğmesi; şeridin çevresindeki boşluk ve genişliği.",
+        "headerLookHint": "Kapatma düğmesi.",
         "size": {
           "label": "Boy",
           "term": "size",
@@ -8588,14 +8596,6 @@
           "off": "Kapalı",
           "on": "Açık",
           "hint": "Ögeler sırayla dolu ve yalnız çerçeveli yazılır. Yalnız büyük boyda."
-        },
-        "device": {
-          "label": "Cihaz",
-          "term": "device",
-          "all": "Her yerde",
-          "mobile": "Yalnız telefonda",
-          "desktop": "Yalnız masaüstünde",
-          "hint": "Telefon: 1024 pikselden dar ekranlar (tablet dahil). Sayfadaki en çok iki şerit sınırına gizli olan da sayılır."
         },
         "closable": {
           "label": "Kapatma düğmesi",

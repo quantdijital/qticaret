@@ -74,6 +74,27 @@ export const base = {
   ends_at: optional(z.iso.datetime({ offset: true })),
 }
 
+/**
+ * Which screens show a section (docs/tema/bilesen-standardi §2): everywhere,
+ * phones only (the theme's narrow frame) or wide screens only. Mirrors
+ * `@qticaret/types`' `SECTION_DEVICES`; a unit test keeps them equal. The
+ * scrolling strip had it alone before, under the same key: its saved step
+ * reads as it is.
+ */
+export const SECTION_DEVICES = ["all", "mobile", "desktop"] as const
+export type SectionDevice = (typeof SECTION_DEVICES)[number]
+
+/** A step off the list is a stale or forged editor (a custom check: Medusa's answer drops an enum's key). */
+export const device = z
+  .custom<SectionDevice>((value) => (SECTION_DEVICES as readonly unknown[]).includes(value), {
+    error: "storefront_layout.section_invalid",
+  })
+  .default("all")
+
+/** What the storefront is given: the screens only when not everywhere, so a section prints as before. */
+export const shownDevice = (value: SectionDevice): { device?: SectionDevice } =>
+  value === "all" ? {} : { device: value }
+
 export const title = optional(text(60))
 
 /**

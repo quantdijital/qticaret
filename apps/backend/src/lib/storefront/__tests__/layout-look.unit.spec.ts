@@ -9,7 +9,8 @@ const CONTRACT_FILE = path.resolve(
   "../../../../../../packages/types/src/store/section-look.ts"
 )
 
-const ALWAYS = { visible: true, starts_at: null, ends_at: null }
+// Every body section shows on every screen unless the shop picks one (bilesen-standardi §2)
+const ALWAYS = { visible: true, starts_at: null, ends_at: null, device: "all" }
 const NONE = { space_outer: null, space_inner: null, ground: null, align: null, width: null }
 const faq = (more: Record<string, unknown> = {}) => ({
   id: "sssbolumu",

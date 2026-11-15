@@ -1,5 +1,6 @@
 import "server-only"
 import type { StoreCategorySection, StoreLayoutSection, StoreProductSection } from "@qticaret/types"
+import { deviceOf } from "@qticaret/types/section-device"
 import { lookOf } from "@qticaret/types/section-look"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { HomeSectionView, Translate } from "@qticaret/ui"
@@ -230,11 +231,15 @@ async function sectionView(
 /**
  * A section's look as the theme reads it (adr/0049 Ek 2026-11-14 §6): the
  * steps the shop set that the contract knows (`lookOf`); none, no `look`,
- * so the theme draws its own and the view is as it was before looks.
+ * so the theme draws its own and the view is as it was before looks. Its
+ * screens beside (docs/tema/bilesen-standardi §2), only when not everywhere
+ * (`deviceOf`: none or a newer backend's step, everywhere).
  */
 function withLook(view: HomeSectionView, section: BodySection): HomeSectionView {
   const look = lookOf(section.look)
-  return Object.keys(look).length > 0 ? { ...view, look } : view
+  const device = deviceOf(section.device)
+  const shown: HomeSectionView = Object.keys(look).length > 0 ? { ...view, look } : view
+  return device === "all" ? shown : { ...shown, device }
 }
 
 /** A page's sections, in the shop's order, each fetched at once; the empty ones left out. */

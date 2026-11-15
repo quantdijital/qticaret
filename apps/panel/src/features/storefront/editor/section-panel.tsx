@@ -28,6 +28,7 @@ import { ScrollerFields } from "./forms/scroller-fields"
 import { SCROLLER_OTHER } from "./forms/scroller-groups"
 import { ShelfGroups } from "./forms/shelf-groups"
 import { ScheduleFields } from "./forms/schedule-fields"
+import { takesDevice } from "./forms/visibility-registry"
 import { HeaderCatalogOther } from "./forms/header-catalog-other"
 import { CategoryCardsOther } from "./forms/category-cards-fields"
 import { cardsSetCount } from "./forms/card-field-ids"
@@ -221,7 +222,12 @@ export function SectionPanel({
       ) : (
         <>
           <PanelGroup title={t(`${P}.visibility`)} reveal={reveal("visibility")}>
-            <ScheduleFields section={section} problem={problems["schedule"]} onChange={onChange} />
+            <ScheduleFields
+              section={section}
+              problem={problems["schedule"]}
+              offersDevice={takesDevice(section, group)}
+              onChange={onChange}
+            />
           </PanelGroup>
           <SectionActions
             canCopy={isBodyGroup(group)}

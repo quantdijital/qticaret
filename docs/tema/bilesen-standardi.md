@@ -70,7 +70,7 @@ Yeni bir gövde bölümü bunları **kendisi yazmaz**, ortak takımdan alır:
 | --- | --- | --- | --- |
 | `look` | `space_outer` none/small/medium/large · `space_inner` aynı · `ground` page/well/stage/primary · `align` start/center · `width` narrow/boxed/full; hepsi **null** (temanın kendi) | `section-look.ts`, backend `sections/look.ts` (`bodyFields`) | Bölümde anlamsız alan `lookFieldsFor`'da gizlenir; uzun metinde `primary` zemin sunulmaz (3:1 kuralı) |
 | Görünürlük | `visible` **true**, `starts_at`, `ends_at` **null** | backend `layout-fields.ts` `base` | Ana bölümlerde (üst/alt bilgi, ürün, kategori) kilitli |
-| Cihaz | `device` **all**/mobile/desktop | Bugün yalnız `marquee`; **ortak takıma taşınacak** (denetim O1) | Telefon = temanın dar çerçevesi (1024 px altı) |
+| Cihaz | `device` **all**/mobile/desktop | `section-device.ts`, backend `layout-fields.ts` (`bodyFields`), panel `visibility-registry.ts`; her gövde bölümü + üst bilgideki kayan yazı (denetim O1, yapıldı) | Telefon = temanın dar çerçevesi (1024 px altı) |
 | Kaydırma | `scroller` (§4.4) | `section-scroller.ts` | Kayan her bölüm bunu kullanır, kendi ok/nokta alanını yazmaz |
 
 Shopify'da bölüm başına üst/alt boşluk ve renk şeması tekrar tekrar her bölüm şemasına yazılır;

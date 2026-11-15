@@ -11,7 +11,8 @@ const CONTRACT_FILE = path.resolve(
   "../../../../../../packages/types/src/store/section-banner.ts"
 )
 
-const ALWAYS = { visible: true, starts_at: null, ends_at: null }
+// Every body section shows on every screen unless the shop picks one (bilesen-standardi §2)
+const ALWAYS = { visible: true, starts_at: null, ends_at: null, device: "all" }
 const WIDE = { url: "http://localhost:9000/static/afis.webp", alt: "Afiş" }
 const PHONE = { url: "http://localhost:9000/static/afis-dar.webp", alt: "Afiş yakın" }
 const band = (more: Record<string, unknown> = {}, slide: Record<string, unknown> = {}) => ({

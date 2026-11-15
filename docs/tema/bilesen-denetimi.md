@@ -13,7 +13,7 @@
 
 | # | Bulgu | Kanıt |
 | --- | --- | --- |
-| O1 | **Cihaza göre gösterim ortak değil.** Yalnız `marquee`'de `device` var; diğer bölümler telefonda ya da masaüstünde gizlenemez. | `section-marquee.ts` `device`; `layout-fields.ts` `base`'de yok |
+| O1 | **Cihaza göre gösterim ortak değil.** Yalnız `marquee`'de `device` var; diğer bölümler telefonda ya da masaüstünde gizlenemez. | `section-marquee.ts` `device`; `layout-fields.ts` `base`'de yok. Yapıldı (2026-11-15): (b) 1 |
 | O2 | **Ayar araması içerik alanlarını bilmiyor.** Kayıt yalnız biçim, yer, kayan yazı, görsel bandı, raf/kaydırma, üst bilgi, `look` ve görünürlüğü tutar; giriş slaytının oto geçiş/süre/nokta/ok, Google puanının alıntı sayısı, kategorilerin ürün sayısı, `limit`, `columns` (benzer ürünler) gibi alanlar aranamaz. | `field-registry.ts` `sectionFields`. Yapıldı (2026-11-15): (a) 1 |
 | O3 | **İçerik alanlarında teknik terim yok.** `look`, `marquee`, `scroller`, `banner`, `headerBar` alanlarının `term` anahtarı var; `fields.*`, `slider.*`, `googleRating.*`, `categories.*`, `products.*` alanlarının yok. | `tr.json`. Yapıldı (2026-11-15): (a) 2 |
 | O4 | **Kapalı grubun adı iki türlü:** çoğu bölümde "Görünüm ayarları", kayan yazı ve kayan rafta "Diğer ayarlar"; kayan yazının açık "Görünüm" grubu kapalı "Görünüm ayarları" ile karışıyor. | `section-panel.tsx`, `look.title`, `marquee.otherTitle`, `panel.appearance`. Yapıldı (2026-11-15): (a) 3 |
@@ -195,7 +195,7 @@ Sütunlar: **Var** = bugünkü ayarlar (grup); **Eksik** = standarda göre; **Gr
 | --- | --- |
 | Var | `items` 1–8 (İçerik); açık "Hareket": `speed` 5, `direction`, `hover_pause`, `pause_button` always/hover; açık "Görünüm": `size`, `ground`, `separator`, `weight`, `uppercase`, `gap`, `outline`; kapalı "Diğer ayarlar": `device`, `closable` + `look` (dış boşluk, genişlik) |
 | Eksik | — (hareketli ailenin örnek uygulaması) |
-| Grup | `device` standarda göre ortak "Görünürlük" grubuna taşınmalı (O1) |
+| Grup | `device` standarda göre ortak "Görünürlük" grubuna taşınmalı (O1). Yapıldı (2026-11-15): (b) 1 |
 | Ad | O4 ("Görünüm" / "Görünüm ayarları"), O5 (`light`) |
 | Shopify | Dawn'da yok. Horizon `marquee`: yalnız yön, zemin rengi, üst/alt boşluk ve ögeler arası boşluk; hız kodda sabit, üzerine gelince durma ayarı yok. Bizimki daha geniş |
 
@@ -288,6 +288,10 @@ Kapsamda geçen kısaltmalar: **T** = `packages/types/src/store/…`, **B** = `a
 ### (b) Orta (M; sözleşme + backend + panel + tema, migration yok, okumada varsayılan)
 
 1. **Ortak `device` (O1):** `base`'e `device: all/mobile/desktop` (varsayılan `all`), panelde "Görünürlük" grubunda; kayan yazının `device`'ı buraya taşınır (eski alan okunur). T `layout.ts`, B `layout-fields.ts`, `marquee.ts`, P `schedule-fields.tsx`, `field-registry.ts`, A her bölüm sarmalayıcısı (`Look.tsx`) + CSS.
+   **Yapıldı (2026-11-15).** Alan `base` yerine `bodyFields`'ta (duyuru şeridi ve alt bilgi kutusunu tema
+   gizleyemiyor) ve üst bilgideki kayan yazıda; sözleşme `section-device.ts`, panel kaydı
+   `forms/visibility-registry.ts`. Vitrin `data-show-on` + CSS (64rem); tembel görseller gizli cihazda
+   indirilmez, ilk bölümün öncelikli görseli indirilir (adr/0049 Ek 2026-11-15, orta işler).
 2. **Raf sekmesi ayarı (O11):** `products`'a `tabs: on/off` (varsayılan `on`, bugünkü davranış). T `section-shelf.ts`, B `products.ts`, P `shelf-groups.tsx`, A `plan.ts`.
 3. **Telefon sütunu (O8):** ızgaraya `columns_mobile` 1/2 (varsayılan 2); `related_products` ve `categories`'e de. T `layout.ts`, B `layout-fields.ts`, P `columns-field.tsx`, A `ShelfRack.tsx`, `Aisles.tsx`.
 4. **Giriş slaytını kaydırma takımına bağla (1.3, O6, O7, O9):** `autoplay/dots/arrows` boolean'ları ve `interval` sayısı okumada takım adımlarına eşlenir (`interval` 5→fast, 6–7→medium, 8–10→slow), panel takımın alanlarını gösterir. T `layout.ts`, B `hero-slider.ts`, P `hero-slider-form.tsx`, A `SliderStage.tsx`, `SliderControls.tsx`.

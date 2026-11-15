@@ -7,6 +7,7 @@ import type { MediaDerivatives } from "./catalog.js"
 import type { StoreBannerSection } from "./section-banner.js"
 import type { MarqueeSettings } from "./section-marquee.js"
 import type { SectionLook } from "./section-look.js"
+import type { SectionDevice } from "./section-device.js"
 import type { StoreMainSections } from "./section-main.js"
 import type { StoreHeroSection, StorePriceBandsSection } from "./section-catalog.js"
 import type { StoreCategoriesLinked } from "./section-categories.js"
@@ -66,6 +67,11 @@ export type ShelfColumns = 3 | 4 | 5
  */
 export interface StoreSectionLookPart {
   look?: SectionLook
+  /**
+   * Which screens show it (docs/tema/bilesen-standardi §2), only when not
+   * everywhere; absent from a backend before the setting. Read with `deviceOf`.
+   */
+  device?: SectionDevice
 }
 
 /**
@@ -125,6 +131,8 @@ export type StoreMarqueeSection = {
   id: string
   type: "marquee"
   items: StoreMarqueeItem[]
+  /** Which screens show it, only when not everywhere (the header's strip has no look part). */
+  device?: SectionDevice
 } & MarqueeSettings
 
 export interface StoreMarqueeItem {

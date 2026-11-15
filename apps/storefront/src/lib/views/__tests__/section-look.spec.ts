@@ -69,3 +69,21 @@ describe("a section's look (adr/0049 Ek 2026-11-14 §6)", () => {
     expect(view?.look).toEqual({ width: "full" })
   })
 })
+
+describe("which screens show a section (docs/tema/bilesen-standardi §2)", () => {
+  it("carries a screen beside the look, and none for everywhere or a step it does not know", async () => {
+    const [mobile, everywhere, unknown] = await sectionViews(
+      [
+        { ...faq(), device: "mobile" },
+        { ...faq(), id: "sss2", device: "all" },
+        { ...faq(), id: "sss3", device: "tablet" } as unknown as Section,
+      ],
+      t
+    )
+
+    expect(mobile).toMatchObject({ type: "faq", device: "mobile" })
+    expect(mobile).not.toHaveProperty("look")
+    expect(everywhere).not.toHaveProperty("device")
+    expect(unknown).not.toHaveProperty("device")
+  })
+})

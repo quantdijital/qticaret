@@ -1,6 +1,7 @@
 import { isShowing, layoutDocument } from "../layout"
 
-const ALWAYS = { visible: true, starts_at: null, ends_at: null }
+// Every body section shows on every screen unless the shop picks one (bilesen-standardi §2)
+const ALWAYS = { visible: true, starts_at: null, ends_at: null, device: "all" }
 const QA = { question: "İade süresi ne kadar?", answer: "14 gün içinde iade edebilirsiniz." }
 const faq = (id: string, more: Record<string, unknown> = {}) => ({
   id,

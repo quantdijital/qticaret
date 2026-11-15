@@ -1,7 +1,8 @@
 import { layoutDocument } from "../layout"
 import { sliderImages } from "../sections/hero-slider"
 
-const ALWAYS = { visible: true, starts_at: null, ends_at: null }
+// Every body section shows on every screen unless the shop picks one (bilesen-standardi §2)
+const ALWAYS = { visible: true, starts_at: null, ends_at: null, device: "all" }
 const picture = (name: string) => ({ url: `http://localhost:9000/static/${name}.webp`, alt: null })
 const slide = (name: string, more: Record<string, unknown> = {}) => ({
   image: picture(name),

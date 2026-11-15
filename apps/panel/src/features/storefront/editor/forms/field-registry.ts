@@ -13,12 +13,12 @@ import type {
 } from "@/features/storefront/api/layout"
 import { lookFieldsFor, lookStepsFor } from "@/features/storefront/layout/look"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
-import { isMain } from "@/features/storefront/layout/main-sections"
 import { offersVariants } from "@/features/storefront/layout/variants"
 import { cardFooterFields } from "./card-field-ids"
 import { BANNER_GROUPS } from "./banner-groups"
 import { CONTENT_IDS, contentFields } from "./content-registry"
 import { SHELF_IDS, shelfFields } from "./shelf-registry"
+import { VISIBILITY_IDS, visibilityFields } from "./visibility-registry"
 
 /**
  * The section panel's fields as the settings search knows them (adr/0049
@@ -92,9 +92,9 @@ export const headerCatalogIn = (group: FieldGroupName): HeaderCatalogField[] =>
 /**
  * Where a strip's settings sit (adr/0049 Ek 2026-11-15, the owner's "kayma
  * hızı ayarı yok": it was there, in a closed group): how it moves and how
- * it looks in two open groups under its items, the rarely changed ones
- * (the screens, the close button) closed in "Diğer ayarlar" with the
- * page's look.
+ * it looks in two open groups under its items, the rarely changed close
+ * button closed in "Diğer ayarlar" with the page's look. Its screens are
+ * every section's, in "Görünürlük" (`visibility-registry.ts`).
  */
 const MARQUEE_GROUPS: Readonly<Record<MarqueeSetting, FieldGroupName>> = {
   speed: "motion",
@@ -108,7 +108,6 @@ const MARQUEE_GROUPS: Readonly<Record<MarqueeSetting, FieldGroupName>> = {
   uppercase: "appearance",
   gap: "appearance",
   outline: "appearance",
-  device: "look",
   closable: "look",
 }
 
@@ -147,9 +146,7 @@ export const FIELD_IDS = {
   ...CONTENT_IDS,
   sticky: (sectionId: string) => `${sectionId}-sticky`,
   header: (sectionId: string, field: HeaderCatalogField) => `${sectionId}-header-${field}`,
-  visible: (sectionId: string) => `${sectionId}-schedule-visible`,
-  starts: (sectionId: string) => `${sectionId}-schedule-starts`,
-  ends: (sectionId: string) => `${sectionId}-schedule-ends`,
+  ...VISIBILITY_IDS,
 } as const
 
 /**
@@ -264,35 +261,7 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       })
     }
   }
-  // A main section always shows (adr/0049 Ek 2026-11-14 §5): no visibility
-  if (isMain(section)) {
-    return fields
-  }
-  fields.push(
-    {
-      key: "visible",
-      group: "visibility",
-      label: `${P}.visible`,
-      term: null,
-      options: [],
-      target: FIELD_IDS.visible(id),
-    },
-    {
-      key: "starts_at",
-      group: "visibility",
-      label: `${P}.startsAt`,
-      term: null,
-      options: [],
-      target: FIELD_IDS.starts(id),
-    },
-    {
-      key: "ends_at",
-      group: "visibility",
-      label: `${P}.endsAt`,
-      term: null,
-      options: [],
-      target: FIELD_IDS.ends(id),
-    }
-  )
+  // Whether, when and where it shows; a main section always does (adr/0049 Ek 2026-11-14 §5)
+  fields.push(...visibilityFields(section, group))
   return fields
 }

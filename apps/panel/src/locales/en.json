@@ -7987,7 +7987,15 @@
         "motion": "Motion",
         "appearance": "Style",
         "variant": "Layout",
-        "variantHint": "How the section looks on the storefront; the preview shows it at once. Shared content (title, text) stays when the layout changes, and \"Undo\" brings the previous one back."
+        "variantHint": "How the section looks on the storefront; the preview shows it at once. Shared content (title, text) stays when the layout changes, and \"Undo\" brings the previous one back.",
+        "device": {
+          "label": "Device",
+          "term": "device",
+          "all": "Everywhere",
+          "mobile": "Phones only",
+          "desktop": "Desktop only",
+          "hint": "Phones: screens narrower than 1024 pixels (tablets included). Where it is hidden its pictures are not downloaded; the page's first picture still is."
+        }
       },
       "defaults": {
         "heading": "Your shop's name",
@@ -8508,8 +8516,8 @@
         "subtextPlaceholder": "On orders placed before 2 pm",
         "link": "Link (optional)",
         "full": "This page already has {{max}} scrolling strips (the header's counts too).",
-        "lookHint": "Which devices show it, a close button; the space around the strip and its width.",
-        "headerLookHint": "Which devices show it and a close button.",
+        "lookHint": "A close button; the space around the strip and its width.",
+        "headerLookHint": "A close button.",
         "size": {
           "label": "Size",
           "term": "size",
@@ -8588,14 +8596,6 @@
           "off": "Off",
           "on": "On",
           "hint": "Items alternate between filled and outlined letters. Large size only."
-        },
-        "device": {
-          "label": "Device",
-          "term": "device",
-          "all": "Everywhere",
-          "mobile": "Phones only",
-          "desktop": "Desktop only",
-          "hint": "Phones: screens narrower than 1024 pixels (tablets included). A hidden strip still counts toward the two-per-page limit."
         },
         "closable": {
           "label": "Close button",

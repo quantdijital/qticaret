@@ -3,6 +3,7 @@ import type {
   BannerTone,
   MarqueeSettings,
   ProductSource,
+  SectionDevice,
   SectionLook,
   ShelfColumns,
   TrustBadgesVariant,
@@ -50,6 +51,11 @@ interface SectionBase {
  */
 export interface BodySectionBase extends SectionBase {
   look?: SectionLook
+  /**
+   * Which screens show it (docs/tema/bilesen-standardi §2): the server fills
+   * `all` on reading; absent in a section the editor just made, read as `all`.
+   */
+  device?: SectionDevice
 }
 
 /** The opening's words, buttons and picture, the same in every variant (adr/0049 Ek 2026-11-14 §2). */
@@ -236,7 +242,7 @@ type MarqueeFields = { type: "marquee"; items: MarqueeItem[] } & MarqueeSettings
 export type MarqueeSection = BodySectionBase & MarqueeFields
 
 /** The header group's scrolling strip, above the shop's header: no look. */
-export type HeaderMarquee = SectionBase & MarqueeFields
+export type HeaderMarquee = SectionBase & MarqueeFields & { device?: SectionDevice }
 
 export type HomeSection =
   | HeroSection

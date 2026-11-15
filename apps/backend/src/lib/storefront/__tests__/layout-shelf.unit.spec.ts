@@ -7,7 +7,8 @@ import { SCROLLER_DEFAULTS, SCROLLER_SETTINGS } from "../sections/scroller"
 // The contract's own files (`@qticaret/types`), through jest: the package is ESM for tsc here
 const CONTRACT = path.resolve(__dirname, "../../../../../../packages/types/src/store")
 
-const ALWAYS = { visible: true, starts_at: null, ends_at: null }
+// Every body section shows on every screen unless the shop picks one (bilesen-standardi §2)
+const ALWAYS = { visible: true, starts_at: null, ends_at: null, device: "all" }
 const rail = (more: Record<string, unknown> = {}) => ({
   id: "yeniurunler",
   type: "products",
