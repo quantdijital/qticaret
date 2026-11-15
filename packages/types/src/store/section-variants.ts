@@ -90,6 +90,26 @@ export function headerMenuImagesOf(value: unknown): HeaderMenuImages {
 }
 
 /**
+ * How the header's search stands (adr/0049 Ek 2026-11-15, adr/0066 §2
+ * "küçük yerleşim → bölüm ayarı"), every variant's setting: `field`
+ * "Kutu" (the search box drawn open, the drawing from before the setting,
+ * so the default), `icon` "Simge, basınca açılır" (from 1024 px a
+ * magnifier that opens the box beside it; on a phone no box in the
+ * header, the bottom bar's "Ara" drops it down from the top). Mirrored by
+ * the backend's `HEADER_SEARCH_STYLES`.
+ */
+export const HEADER_SEARCH_STYLES = ["field", "icon"] as const
+
+export type HeaderSearchStyle = (typeof HEADER_SEARCH_STYLES)[number]
+
+/** The search's look as a reader takes it: absent or off the list, the default (`field`). */
+export function headerSearchStyleOf(value: unknown): HeaderSearchStyle {
+  return (HEADER_SEARCH_STYLES as readonly unknown[]).includes(value)
+    ? (value as HeaderSearchStyle)
+    : "field"
+}
+
+/**
  * The catalog header's small layout choices (adr/0049 Ek 2026-11-15,
  * adr/0066 §2 "küçük yerleşim → bölüm ayarı"), each list's first step the
  * drawing from before it, so a bar saved without one reads as drawn:

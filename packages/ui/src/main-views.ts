@@ -5,6 +5,7 @@ import type {
   HeaderBarVariant,
   HeaderMenuGround,
   HeaderMenuImages,
+  HeaderSearchStyle,
   HeaderSearchWidth,
   HeaderToolsPlace,
   HeaderTopLinksPlace,
@@ -34,6 +35,13 @@ export interface HeaderBarView {
    * none; absent: `submenus`.
    */
   menuImages?: HeaderMenuImages
+  /**
+   * How the search stands (adr/0049 Ek 2026-11-15): `field`, the box drawn
+   * open (the drawing from before); `icon`, a magnifier that opens it from
+   * 1024 px, and on a phone none in the header (the bottom bar's "Ara"
+   * drops it down). Absent: `field`.
+   */
+  searchStyle?: HeaderSearchStyle
   /** The `catalog` variant's own settings (adr/0049 N14); absent on the others. */
   catalog?: HeaderCatalogView
 }

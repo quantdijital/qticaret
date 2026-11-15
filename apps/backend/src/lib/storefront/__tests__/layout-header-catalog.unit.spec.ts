@@ -109,6 +109,7 @@ describe("the catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15)", () =>
       variant: "catalog",
       sticky: true,
       menu_images: "submenus",
+      search_style: "field",
       catalog: { ...DEFAULTS, cart_total: true, highlight_link: placed },
     })
     expect(mainSectionsOf(doc).header_bar.catalog?.highlight_link).toBeNull()

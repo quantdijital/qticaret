@@ -9,7 +9,10 @@ import { cartSheetWords } from "./cart-sheet-words"
 import { menuWords } from "./menu-words"
 import { MenuSheet } from "./MenuSheet"
 import { SearchBox } from "./SearchBox"
+import { SearchDrop } from "./SearchDrop"
+import { SearchDropOpener } from "./SearchDropOpener"
 import { PHONE_SEARCH } from "./SearchLink"
+import { SearchToggle } from "./SearchToggle"
 import { Wordmark } from "./Wordmark"
 import { HeaderCatalog, catalogParts } from "./HeaderCatalog"
 import { LABELLED, accountOf, searchOf } from "./header-words"
@@ -41,7 +44,12 @@ export const HEADER_VARIANTS = ["standard", "centered", "catalog"] as const
  * show their live panel as the shopper types once the storefront gives
  * its address. Sticky, it folds while the page scrolls down (`frame.css`,
  * `ScrollCue`): the aisle from 1024 px, the top row on a phone; the
- * search always stays.
+ * search always stays. The shop may ask for its search as an icon
+ * (`searchStyle: icon`, adr/0049 Ek 2026-11-15): from 1024 px a magnifier
+ * in the box's place opens it (`SearchToggle`); a phone's header is its
+ * 56 px row alone, the bottom bar's "Ara" dropping the search down
+ * (`SearchDrop`; the editor's preview, which has no bottom bar, puts a
+ * magnifier in the row for it, `SearchDropOpener`).
  */
 export function Header({
   shop,
@@ -95,9 +103,23 @@ export function Header({
       }}
     />
   )
-  const wideSearch = (className: string) => (
-    <SearchBox {...search} id="arama-genis" className={cn("hidden flex-1 lg:block", className)} />
-  )
+  // The search as a magnifier that opens it (adr/0049 Ek 2026-11-15), as wide as the box
+  const icon = shop.headerBar?.searchStyle === "icon"
+  const wideSearch = (className: string, align: "start" | "end", opened: string) =>
+    icon ? (
+      <SearchToggle
+        {...search}
+        id="arama-genis"
+        align={align}
+        openLabel={t("search.open")}
+        className={opened}
+      />
+    ) : (
+      <SearchBox {...search} id="arama-genis" className={cn("hidden flex-1 lg:block", className)} />
+    )
+  // The editor's preview draws no bottom bar: a phone's way into the dropping search there
+  const opener =
+    icon && shop.editor ? <SearchDropOpener label={t("search.open")} className={LABELLED} /> : null
   const tools = (
     <nav
       aria-label={t("nav.account")}
@@ -144,7 +166,8 @@ export function Header({
         >
           <div className="flex min-w-0 items-center">
             {sheet}
-            {wideSearch("max-w-88")}
+            {opener}
+            {wideSearch("max-w-88", "start", "[--gf-search-open:22rem]")}
           </div>
           {/* A long name truncates before it pushes the menu or the cart off a phone's row */}
           <Wordmark
@@ -161,13 +184,18 @@ export function Header({
         >
           {sheet}
           <Wordmark name={shop.name} logo={shop.logo} className="mr-auto lg:mr-0" />
-          {wideSearch("max-w-160")}
+          {wideSearch("max-w-160", "end", "[--gf-search-open:40rem]")}
+          {opener}
           {tools}
         </Container>
       )}
-      <Container className="pb-2 lg:hidden">
-        <SearchBox {...search} id={PHONE_SEARCH} />
-      </Container>
+      {icon ? (
+        <SearchDrop {...search} title={t("search.title")} closeLabel={t("search.close")} />
+      ) : (
+        <Container className="pb-2 lg:hidden">
+          <SearchBox {...search} id={PHONE_SEARCH} />
+        </Container>
+      )}
       {shop.categories.length > 0 && (
         <Container data-gf-aisle="" className="hidden lg:block">
           <Aisle

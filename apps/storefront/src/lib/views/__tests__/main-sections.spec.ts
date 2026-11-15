@@ -28,6 +28,7 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
       variant: "centered",
       sticky: false,
       menuImages: "submenus",
+      searchStyle: "field",
     })
   })
 
@@ -45,12 +46,25 @@ describe("the main sections' views (adr/0049 Ek 2026-11-14 §5, §7)", () => {
     expect(headerBarOf(stray, theme).menuImages).toBe("submenus")
   })
 
+  it("reads the search's look as saved, and as the box when absent or off the list (adr/0049 Ek 2026-11-15)", () => {
+    const theme = { header: { layout: "centered", sticky: true } } as const
+    for (const step of ["field", "icon"] as const) {
+      const saved = { ...MAIN, header_bar: { ...MAIN.header_bar, search_style: step } }
+      expect(headerBarOf(saved, theme).searchStyle).toBe(step)
+    }
+    expect(headerBarOf(MAIN, theme).searchStyle).toBe("field")
+    expect(headerBarOf(undefined, theme).searchStyle).toBe("field")
+    const stray = { ...MAIN, header_bar: { ...MAIN.header_bar, search_style: "drawer" as never } }
+    expect(headerBarOf(stray, theme).searchStyle).toBe("field")
+  })
+
   it("reads the theme's header from a backend before the main sections", () => {
     expect(headerBarOf(undefined, { header: { layout: "centered", sticky: false } })).toEqual({
       id: "mainheader",
       variant: "centered",
       sticky: false,
       menuImages: "submenus",
+      searchStyle: "field",
     })
     expect(headerBarOf(undefined, { header: { layout: "left", sticky: true } })).toMatchObject({
       variant: "standard",
