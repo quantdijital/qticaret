@@ -79,10 +79,11 @@ describe("the tezgah presets' drafts (docs/tema/tezgah-tasarim-dili.md)", () => 
         back_to_top_shape: "square",
       })
       expect(doc.home.find((section) => section.id === "kullanimagore")).toMatchObject({
-        variant: "linked",
-        columns: 3,
-        image_position: "side",
-        frame: "lined",
+        variant: "collage",
+        columns: 4,
+        columns_mobile: 1,
+        height: "medium",
+        lead: "on",
         links: 5,
       })
       expect(doc.settings.theme).toMatchObject({

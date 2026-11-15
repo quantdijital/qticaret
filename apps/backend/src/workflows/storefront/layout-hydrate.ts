@@ -223,6 +223,16 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
               links: section.links,
             }
           : {}),
+        ...(section.variant === "collage"
+          ? {
+              variant: section.variant,
+              columns: section.columns,
+              ...(section.columns_mobile === 2 ? { columns_mobile: 2 as const } : {}),
+              height: section.height,
+              lead: section.lead,
+              links: section.links,
+            }
+          : {}),
       }
     case "brands":
       return { id, type, title: section.title, brand_ids: section.brand_ids }

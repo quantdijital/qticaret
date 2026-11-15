@@ -18,7 +18,10 @@ import type {
 } from "@qticaret/types"
 import type { JSONContent } from "@tiptap/react"
 import type { TrustIcon } from "@/features/settings/api/sections"
-import type { CategoriesLinkedFields } from "@/features/storefront/api/layout-cards"
+import type {
+  CategoriesCollageFields,
+  CategoriesLinkedFields,
+} from "@/features/storefront/api/layout-cards"
 import type { HeroCatalogFields, PriceBand } from "@/features/storefront/api/layout-catalog"
 import type { ProductsSection } from "@/features/storefront/api/layout-shelf"
 import type { MenuInput } from "@/features/storefront/api/menus"
@@ -151,8 +154,9 @@ interface CategoriesBase extends BodySectionBase {
   more: LayoutLink | null
 }
 
-/** Today's picture tiles, or the linked cards with their own fields (adr/0049 Ek 2026-11-15). */
-export type CategoriesSection = CategoriesBase & ({ variant: "tiles" } | CategoriesLinkedFields)
+/** Today's picture tiles, the linked cards or the collage, each with its own fields (adr/0049 Ek 2026-11-15). */
+export type CategoriesSection = CategoriesBase &
+  ({ variant: "tiles" } | CategoriesLinkedFields | CategoriesCollageFields)
 
 /**
  * One product up close (adr/0046 Ek 2026-11-05): the storefront adds its

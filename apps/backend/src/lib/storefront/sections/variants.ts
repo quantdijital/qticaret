@@ -17,8 +17,9 @@ export const SECTION_VARIANTS = {
   trust_badges: ["strip", "lined"],
   // H17: the category list, the opening's tile and two category tiles side by side
   hero: ["standard", "category_list"],
-  // Today's picture tiles; `linked` each category a card with its subcategories' links
-  categories: ["tiles", "linked"],
+  // Today's picture tiles; `linked` each category a card with its subcategories' links;
+  // `collage` photo-led cards filling each row, the first wider
+  categories: ["tiles", "linked", "collage"],
   // The product rail (adr/0049 Ek 2026-11-15): today's grid first
   products: ["grid", "carousel", "featured", "compact", "columns"],
   // A product page's related products (bilesen-denetimi (b) 7): today's grid first

@@ -1,4 +1,9 @@
-import { CATEGORY_CARD_SETTINGS, FOOTER_BAR_SETTINGS, PAYMENT_BADGES } from "@qticaret/types"
+import {
+  CATEGORY_CARD_SETTINGS,
+  CATEGORY_COLLAGE_SETTINGS,
+  FOOTER_BAR_SETTINGS,
+  PAYMENT_BADGES,
+} from "@qticaret/types"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { RegistryField } from "./field-registry"
 
@@ -21,6 +26,10 @@ export const CARD_FIELDS = [
 ] as const
 export type CardField = (typeof CARD_FIELDS)[number]
 
+/** The collage's fields, in its form's order (adr/0049 Ek 2026-11-15). */
+export const COLLAGE_FIELDS = ["lead", "columns", "columns_mobile", "height", "links"] as const
+export type CollageField = (typeof COLLAGE_FIELDS)[number]
+
 export const FOOTER_FIELDS = [
   "social",
   "payment_badges",
@@ -32,7 +41,7 @@ export const FOOTER_FIELDS = [
 export type FooterField = (typeof FOOTER_FIELDS)[number]
 
 export const CARD_FIELD_IDS = {
-  card: (sectionId: string, field: CardField) => `${sectionId}-cards-${field}`,
+  card: (sectionId: string, field: CardField | CollageField) => `${sectionId}-cards-${field}`,
   footer: (sectionId: string, field: FooterField) => `${sectionId}-footer-${field}`,
 } as const
 
@@ -40,6 +49,7 @@ export const CARD_FIELD_IDS = {
 const stepsOf = (prefix: string, field: string): readonly string[] => {
   const lists: Readonly<Record<string, readonly (string | number)[]>> = {
     ...CATEGORY_CARD_SETTINGS,
+    ...CATEGORY_COLLAGE_SETTINGS,
     ...FOOTER_BAR_SETTINGS,
     // The ways to pay, found by name ("Troy", "Kapıda ödeme")
     payment_badges: PAYMENT_BADGES,
@@ -57,6 +67,16 @@ export function cardFooterFields(section: AnySection): RegistryField[] {
     return CARD_FIELDS.map((field) => ({
       key: `cards.${field}`,
       group: field === "frame" ? "look" : "content",
+      label: `${CARDS}.${field}.label`,
+      term: `${CARDS}.${field}.term`,
+      options: stepsOf(CARDS, field),
+      target: CARD_FIELD_IDS.card(section.id, field),
+    }))
+  }
+  if (section.type === "categories" && section.variant === "collage") {
+    return COLLAGE_FIELDS.map((field) => ({
+      key: `cards.${field}`,
+      group: "content",
       label: `${CARDS}.${field}.label`,
       term: `${CARDS}.${field}.term`,
       options: stepsOf(CARDS, field),

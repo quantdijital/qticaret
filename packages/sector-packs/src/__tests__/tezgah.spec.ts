@@ -18,7 +18,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     expect(read("tezgah")).toMatchObject({
       pack: "cutlery",
       code: "tezgah",
-      version: 4,
+      version: 5,
       theme: "atolye",
       name: "Tezgâh",
       tone: "light",
@@ -42,7 +42,7 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
       ["yakinplan", "featured_product", null],
       ["fiyatbantlari", "price_bands", null],
       ["coksatanlar", "products", "featured"],
-      ["kullanimagore", "categories", "linked"],
+      ["kullanimagore", "categories", "collage"],
       ["indirimdekiler", "products", "compact"],
       ["yazilar", "posts", null],
       ["markalar", "brands", null],
@@ -76,14 +76,14 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     expect(home[at("fiyatbantlari")]).toMatchObject({ thumbs: 0 })
   })
 
-  it("draws the category cards with their subcategories, only top categories that have some", () => {
+  it("draws the categories as the photo collage with their subcategories, only top categories that have some", () => {
     const cards = (read("tezgah").layout.home ?? []).find((each) => each.id === "kullanimagore")
     expect(cards).toMatchObject({
       type: "categories",
-      variant: "linked",
-      columns: 3,
-      image_position: "side",
-      frame: "lined",
+      variant: "collage",
+      columns: 4,
+      height: "medium",
+      lead: "on",
       links: 5,
       show_count: true,
     })
@@ -195,9 +195,9 @@ describe("the tezgah presets (adr/0063; docs/tema/tezgah-tasarim-dili.md)", () =
     ])
   })
 
-  it("raised the cutlery pack's version with them (katalog's third, tezgah's fourth)", () => {
-    expect(sectorPack("cutlery")?.version).toBe(7)
-    expect(CODES.map((code) => read(code).version)).toEqual([4, 4, 4])
+  it("raised the cutlery pack's version with them (katalog's third, tezgah's fifth)", () => {
+    expect(sectorPack("cutlery")?.version).toBe(8)
+    expect(CODES.map((code) => read(code).version)).toEqual([5, 5, 5])
     expect(sectorPack("cutlery")?.presets.map((preset) => preset.code)).toEqual([
       "katalog",
       ...CODES,

@@ -79,11 +79,11 @@ Sütunlar: **Var** = bugünkü ayarlar (grup); **Eksik** = standarda göre; **Gr
 | Ad | **Tür adı yanıltıcı:** "Görsel slayt" kaymaz, yan yana durur; "Giriş slaytı" ile karışır. Öneri: "Görsel bandı" |
 | Shopify | Dawn `image-banner` (iki görsel yan yana alabilir): 1.2'deki takım + `stack_images_on_mobile`; perde yüzde, yükseklikte `adapt` (görsele göre) |
 
-### 1.5 `categories` "Kategoriler"
+### 1.5 `categories` "Kategoriler" — `tiles`, `linked`, `collage`
 
 | | |
 | --- | --- |
-| Var | `title`, `category_ids` ≤24 (boş: üst kategoriler), `show_count`, `more` (İçerik); `look` tam |
+| Var | `title`, `category_ids` ≤24 (boş: üst kategoriler), `show_count`, `more` (İçerik); `look` tam. Sonradan (adr/0049 Ek 2026-11-15): `linked` (alt kategorili kart: `columns`, `columns_mobile`, `image_position`, `frame`, `links`) ve `collage` (fotoğraflı kolaj: `lead`, `columns`, `columns_mobile`, `height`, `links`) biçimleri |
 | Eksik | Liste/ızgara ailesi: sütun sayısı (masaüstü/telefon), adet sınırı, biçim (ızgara/kayan; kaydırma takımı), görsel oranı, kart biçimi (görsel üstte/yanında) |
 | Grup | — |
 | Ad | `show_count` etiketi `heroCatalog.showCount`'tan ödünç (doğru ama anahtar ailesi dağınık) |

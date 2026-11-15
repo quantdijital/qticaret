@@ -10,6 +10,7 @@ import { Aisles } from "./Aisles"
 import { Brands } from "./Brands"
 import { Campaign } from "./Campaign"
 import { CATEGORY_VARIANTS, CategoryCards } from "./CategoryCards"
+import { CategoryCollage } from "./CategoryCollage"
 import { CustomerPhotos } from "./CustomerPhotos"
 import { Faq } from "./Faq"
 import { GoogleRating } from "./GoogleRating"
@@ -101,10 +102,23 @@ function BlockView({
           marks={section.editor}
         />
       )
-    case "categories":
-      // The linked cards when the theme draws them and the view has them; else today's tiles
-      return drawnVariant("categories", section.variant, CATEGORY_VARIANTS) === "linked" &&
-        section.linked ? (
+    case "categories": {
+      // The variant's drawing when the theme draws it and the view has it; else today's tiles
+      const drawn = drawnVariant("categories", section.variant, CATEGORY_VARIANTS)
+      if (drawn === "collage" && section.collage) {
+        return (
+          <CategoryCollage
+            id={headingId(section.id)}
+            title={section.title}
+            view={section.collage}
+            all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
+            ownAll={Boolean(section.more)}
+            t={t}
+            marks={section.editor}
+          />
+        )
+      }
+      return drawn === "linked" && section.linked ? (
         <CategoryCards
           id={headingId(section.id)}
           title={section.title}
@@ -125,6 +139,7 @@ function BlockView({
           marks={section.editor}
         />
       )
+    }
     case "banner":
       return <Campaign section={section} label={t("home.banner")} first={first} />
     case "featured_product":

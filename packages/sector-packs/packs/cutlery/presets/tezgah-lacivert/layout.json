@@ -210,7 +210,7 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "linked",
+      "variant": "collage",
       "look": {
         "space_outer": null,
         "space_inner": "medium",
@@ -224,9 +224,9 @@
         { "$handle": "category:mutfak-ve-sef-bicaklari" },
         { "$handle": "category:kasap-bicaklari" }
       ],
-      "columns": 3,
-      "image_position": "side",
-      "frame": "lined",
+      "columns": 4,
+      "height": "medium",
+      "lead": "on",
       "links": 5,
       "show_count": true,
       "more": { "$href": "/kategoriler", "label": "Tüm kategoriler" }
