@@ -203,6 +203,7 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
+      "variant": "linked",
       "look": {
         "space_outer": null,
         "space_inner": "medium",
@@ -212,13 +213,14 @@
       },
       "title": "Kullanıma göre",
       "category_ids": [
-        { "$handle": "category:kamp-bicaklari" },
-        { "$handle": "category:kamp-baltalari" },
-        { "$handle": "category:av-bicaklari" },
-        { "$handle": "category:sef-bicaklari" },
-        { "$handle": "category:mutfak-bicak-setleri" },
+        { "$handle": "category:outdoor-ve-kamp" },
+        { "$handle": "category:mutfak-ve-sef-bicaklari" },
         { "$handle": "category:kasap-bicaklari" }
       ],
+      "columns": 3,
+      "image_position": "side",
+      "frame": "lined",
+      "links": 5,
       "show_count": true,
       "more": { "$href": "/kategoriler", "label": "Tüm kategoriler" }
     },
@@ -305,7 +307,13 @@
       "visible": true,
       "starts_at": null,
       "ends_at": null,
-      "variant": "ledger"
+      "variant": "ledger",
+      "social": "icons",
+      "payment_badges": ["visa", "mastercard", "troy", "bank_transfer", "cash_on_delivery"],
+      "back_to_top": true,
+      "back_to_top_side": "right",
+      "back_to_top_shape": "square",
+      "back_to_top_mobile": true
     },
     {
       "id": "ebultenkutusu",

@@ -48,6 +48,10 @@ Ziyaretçi bir alet arıyor. Önce nerede olduğunu (kategori listesi), sonra ne
 
 **Kart.** Her yerde çerçeveli kart: kare fotoğraf, marka, iki satır ad, puan (yalnız yorumu olanda; boş yıldız yok), fiyat, tek durum satırı (ücretsiz kargo), ayakta tam genişlik düğme. İkinci fotoğrafa geçiş kapalı (`hover_image: false`): kart kıpırdamaz. Kısa listeler kompakt kart.
 
+**Kategori kartları.** Raf etiketi gibi: alt kategori bağlantılı kart (`categories.variant: linked`), üç sütun, görsel yanda, 1 px çizgili çerçeve (`frame: lined`), adın altında en çok beş alt kategori, sayılar açık. Yalnız alt kategorisi olan üst kategoriler (paketin iskeletinde: Outdoor ve Kamp, Mutfak ve Şef Bıçakları, Kasap Bıçakları); yaprak kategori kartta boş durur.
+
+**Alt bilgi.** Sosyal hesaplar simgeyle (`social: icons`), ödeme yolları yazılı rozetle (Visa, Mastercard, Troy, havale/EFT, kapıda ödeme; şirket logosu yok). Yukarı çık düğmesi sağda, kare (`back_to_top_shape: square`), telefonda da açık; ziyaretçi kaydırınca belirir, kendi kendine oynamaz.
+
 **Hareket.** Kendi kendine oynayan hiçbir şey yok: kayan yazı şeridi yok, otomatik geçiş her rafta kapalı. Kaydırma takımı yalnız sekmeli rafta: masaüstünde dört kart, telefonda bir sonrakinin ucu görünür, oklar her zaman başlığın yanında ve kare (`arrows: always`, `arrow_style: square`, `arrow_position: head`), nokta yok, döngü yok, fareyle sürükleme yok. Hareket yalnız ziyaretçinin yaptığına cevap.
 
 ## Referanstan bilinçli ayrılınan yerler
