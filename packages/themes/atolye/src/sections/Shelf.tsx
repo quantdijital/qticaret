@@ -1,3 +1,4 @@
+import { sectionMark } from "@qticaret/ui"
 import type { FormAction, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { type Of, headingId } from "./plan"
@@ -33,8 +34,11 @@ export function Shelf({
             label={t("home.shelf")}
             tabs={sections.map((section) => section.title)}
           >
-            {sections.map((section) => (
-              <Rack key={section.id} section={section} t={t} quickAdd={quickAdd} tabbed />
+            {sections.map((section, index) => (
+              // Each rail its own mark (adr/0065 §4); the first's is the shelf's box (one element per id)
+              <div key={section.id} {...(index > 0 ? sectionMark(section.id) : {})}>
+                <Rack section={section} t={t} quickAdd={quickAdd} tabbed />
+              </div>
             ))}
           </ShelfTabs>
         )}

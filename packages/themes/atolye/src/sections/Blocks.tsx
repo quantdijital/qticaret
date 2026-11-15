@@ -166,7 +166,7 @@ function BlockView({
  * (`heroFirst`, with `opening` the newest pictured product when the hero
  * has none; an opening picture band's picture is the LCP too); on a
  * listing or a product page every section heads with an h2.
- * Each block stands in its look's box when the shop set one (`Look`).
+ * Each block stands in its look's box, marked with its id (`Look`, adr/0065 §4).
  */
 export function Blocks({
   sections,
@@ -189,6 +189,7 @@ export function Blocks({
     joined(block, blocks[index - 1]) ? null : (
       <Look
         key={block.kind === "shelf" ? (block.sections[0]?.id ?? "raf") : block.section.id}
+        id={block.kind === "shelf" ? block.sections[0]?.id : block.section.id}
         look={lookOf(block)}
         device={deviceOf(block)}
       >

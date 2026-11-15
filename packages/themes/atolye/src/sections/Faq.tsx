@@ -1,4 +1,5 @@
 import { Plus } from "lucide-react"
+import { sectionMark } from "@qticaret/ui"
 import type { Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { Reach } from "./Help"
@@ -53,7 +54,10 @@ export function Faq({
           ))}
         </div>
         {help && (
-          <div className="flex flex-col gap-3 pt-4 lg:col-span-4 lg:row-start-2 lg:pt-0">
+          <div
+            className="flex flex-col gap-3 pt-4 lg:col-span-4 lg:row-start-2 lg:pt-0"
+            {...sectionMark(help.id)}
+          >
             <Reach
               contact={help.contact}
               t={t}

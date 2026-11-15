@@ -65,7 +65,7 @@ export function ProductPage({
   return (
     <>
       {/* The product's own block: the design's main section, in its look when the shop set one */}
-      <Look look={view.main?.look} main>
+      <Look id={view.main?.id} look={view.main?.look} main>
         {/* A draft's signed preview says so above everything (F18), as the home page's draft does */}
         {view.notice && (
           <Container className="pt-4">
