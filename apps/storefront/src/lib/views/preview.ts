@@ -9,6 +9,10 @@ export type PreviewPage =
   | { kind: "blog"; url: URL }
   /** A record's page, found by resolving the path. */
   | { kind: "resolve"; url: URL }
+  /** The visitor's own cart, drawn with the draft (live session only; adr/0065 Ek 2026-11-15). */
+  | { kind: "cart"; url: URL }
+  /** The site search's results, drawn with the draft (live session only). */
+  | { kind: "search"; url: URL }
 
 /**
  * Which page `/onizleme/<sfl_…>?sayfa=<path>` shows with the draft design:
@@ -16,8 +20,14 @@ export type PreviewPage =
  * one form the proxy would have sent it on to (docs/13 §2.2). The home
  * page for none, `/`, the storefront's own system pages, or anything that
  * is not a path here (another host, `//host`, a backslash, too long).
+ * With `system` (the theme editor's live session only, adr/0065 Ek
+ * 2026-11-15) the cart and the site search too: drawn with the draft's
+ * look, their data the visitor's own as live, never checkout or account.
  */
-export function previewPage(raw: string | string[] | undefined): PreviewPage {
+export function previewPage(
+  raw: string | string[] | undefined,
+  { system = false }: { system?: boolean } = {}
+): PreviewPage {
   if (
     typeof raw !== "string" ||
     !raw.startsWith("/") ||
@@ -43,6 +53,12 @@ export function previewPage(raw: string | string[] | undefined): PreviewPage {
   }
   if (url.pathname === "/blog") {
     return { kind: "blog", url }
+  }
+  if (system && url.pathname === "/sepet") {
+    return { kind: "cart", url }
+  }
+  if (system && url.pathname === "/arama") {
+    return { kind: "search", url }
   }
   if (url.pathname === "/" || isSystemPath(url.pathname) || isStorefrontIndex(url.pathname)) {
     return { kind: "home" }

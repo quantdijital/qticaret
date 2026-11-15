@@ -71,3 +71,4 @@ Yeni ADR açmadan önce numarasını burada **ayır**: `dev`'i çek, tablonun so
 | 0063 | [Hazır görünümler (preset)](0063-hazir-gorunumler.md) | — |
 | 0064 | [Görünüm kitaplığı: kayıtlı tasarımlar ve galeri](0064-gorunum-kitapligi.md) | — |
 | 0065 | [Canlı tema düzenleyici: önizleme köprüsü ve anında yansıma](0065-canli-tema-duzenleyici.md) | — |
+| 0066 | [Tema katmanları ve görünüm izolasyonu](0066-tema-katmanlari-ve-gorunum-izolasyonu.md) | — |

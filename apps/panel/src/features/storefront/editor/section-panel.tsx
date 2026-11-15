@@ -21,7 +21,7 @@ import { FIELD_IDS, MARQUEE_OTHER_SETTINGS, takesLook } from "./forms/field-regi
 import type { FieldGroupName } from "./forms/field-registry"
 import { LookFields } from "./forms/look-fields"
 import { MarqueeGroups } from "./forms/marquee-groups"
-import { AnnouncementMotion } from "./forms/announcement-settings"
+import { AnnouncementMotion, AnnouncementStyle } from "./forms/announcement-settings"
 import { BannerSettings } from "./forms/banner-settings"
 import { BANNER_OTHER_SETTINGS } from "./forms/banner-groups"
 import { SectionLayoutGroup } from "./forms/layout-group"
@@ -178,7 +178,10 @@ export function SectionPanel({
       <SectionLayoutGroup section={section} reveal={reveal} onChange={onChange} />
       {strip ? <MarqueeGroups section={strip} reveal={reveal} onChange={onChange} /> : null}
       {section.type === "announcement_bar" ? (
-        <AnnouncementMotion section={section} reveal={reveal} onChange={onChange} />
+        <>
+          <AnnouncementMotion section={section} reveal={reveal} onChange={onChange} />
+          <AnnouncementStyle section={section} reveal={reveal} onChange={onChange} />
+        </>
       ) : null}
       {shelf ? (
         <ShelfGroups section={shelf} mates={shelfMates} reveal={reveal} onChange={onChange} />

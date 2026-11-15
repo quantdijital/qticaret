@@ -83,8 +83,9 @@ export function SliderStage({
   const [choice, setChoice] = useState<PlayChoice>(null)
   const still = useSyncExternalStore(watchMotion, reduced, () => true)
   const playing = isPlaying({ autoplay, count, choice, hydrated, reducedMotion: still })
-  // Held while the pointer or the focus is on the stage, or the tab is hidden
-  const [held, setHeld] = useState({ pointer: false, focus: false, hidden: false })
+  // Held while the pointer or the focus is on the stage, the tab is hidden, or the theme
+  // editor has its section selected (adr/0065 §2, `qt:section:select`)
+  const [held, setHeld] = useState({ pointer: false, focus: false, hidden: false, editing: false })
 
   const goTo = useCallback(
     (to: number) => {
@@ -144,9 +145,34 @@ export function SliderStage({
     }
   }, [])
 
+  // The theme editor's preview only: its section selected, the slider holds still
+  useEffect(() => {
+    const section = rail.current?.closest("[data-qs]")
+    if (!section) {
+      return
+    }
+    const hold = (editing: boolean) => (event: Event) => {
+      if (event.target === section) {
+        setHeld((was) => ({ ...was, editing }))
+      }
+    }
+    const select = hold(true)
+    const deselect = hold(false)
+    // A slider just added is selected before this listens: the editor's mark says so
+    if (section.hasAttribute("data-qt-selected")) {
+      setHeld((was) => ({ ...was, editing: true }))
+    }
+    section.addEventListener("qt:section:select", select)
+    section.addEventListener("qt:section:deselect", deselect)
+    return () => {
+      section.removeEventListener("qt:section:select", select)
+      section.removeEventListener("qt:section:deselect", deselect)
+    }
+  }, [])
+
   // Not looping: the autoplay ends on the last slide
   const atEnd = !loop && index >= count - 1
-  const running = playing && !atEnd && !held.pointer && !held.focus && !held.hidden
+  const running = playing && !atEnd && !held.pointer && !held.focus && !held.hidden && !held.editing
   useEffect(() => {
     if (!running) {
       return

@@ -1,5 +1,6 @@
 import type { StoreLayout } from "@qticaret/types"
 import { addToCart } from "@/app/actions/cart"
+import CartPage from "@/app/sepet/page"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { resolvePath } from "@/lib/store-api/requests"
@@ -8,6 +9,7 @@ import type { PreviewPage } from "@/lib/views/preview"
 import { theme } from "@/theme"
 import { BlogIndexScreen } from "./blog"
 import { EntityScreen } from "./entity"
+import { SearchScreen } from "./search"
 import { queryOf, ShopScreen } from "./shop"
 
 /** The draft's home page, said to be a preview. */
@@ -44,6 +46,11 @@ export async function DesignPreviewScreen({
       return <ShopScreen query={queryOf(target.url.searchParams)} />
     case "blog":
       return <BlogIndexScreen query={queryOf(target.url.searchParams)} />
+    // The visitor's own cart and the site search with the draft's look (adr/0065 Ek 2026-11-15)
+    case "cart":
+      return <CartPage searchParams={Promise.resolve(queryOf(target.url.searchParams))} />
+    case "search":
+      return <SearchScreen query={queryOf(target.url.searchParams)} />
     case "resolve": {
       const page = await resolvePath(`${target.url.pathname}${target.url.search}`)
       return page.type === "entity" ? (

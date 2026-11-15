@@ -12,6 +12,9 @@ pnpm-lock.yaml
 # Documentation is hand-formatted (Turkish tables); prettier would reflow it
 *.md
 
+# The preset lock's snapshots, written by `pnpm lock:presets` (docs/tema/bilesen-standardi.md §7)
+apps/storefront/src/lib/__tests__/preset-lock/
+
 # TanStack Router writes it on every dev/build run
 apps/panel/src/routeTree.gen.ts
 apps/control-plane-panel/src/routeTree.gen.ts

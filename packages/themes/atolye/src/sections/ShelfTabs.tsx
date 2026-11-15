@@ -1,5 +1,6 @@
 import { Children } from "react"
 import type { ReactNode } from "react"
+import { ShelfTabsReveal } from "./ShelfTabsReveal"
 
 /**
  * The shop's product sections in a row as tabs, with no script: a group
@@ -23,6 +24,7 @@ export function ShelfTabs({
   const panels = Children.toArray(children)
   return (
     <div className="gf-tabs flex flex-col gap-6">
+      <ShelfTabsReveal />
       <fieldset className="gf-tab-row min-w-0 border-0 p-0">
         <legend className="sr-only">{label}</legend>
         <div className="gf-rail -mx-(--gutter) flex scroll-px-(--gutter) gap-2 overflow-x-auto px-(--gutter) py-1">

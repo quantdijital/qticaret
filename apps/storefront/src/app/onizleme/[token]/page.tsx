@@ -101,7 +101,11 @@ export default async function PreviewPage({
     const nonce = (await headers()).get("x-nonce") ?? undefined
     return (
       <>
-        <DesignPreviewScreen layout={session.layout} target={previewPage(sayfa)} />
+        <DesignPreviewScreen
+          layout={session.layout}
+          // The cart and the search too (adr/0065 Ek 2026-11-15); a shared link keeps today's pages
+          target={previewPage(sayfa, { system: true })}
+        />
         {panelOrigin && (
           <EditorBridgeLoader panelOrigin={panelOrigin} edition={session.edition} nonce={nonce} />
         )}
