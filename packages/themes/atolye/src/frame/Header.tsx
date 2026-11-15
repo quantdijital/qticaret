@@ -10,6 +10,7 @@ import { menuWords } from "./menu-words"
 import { MenuSheet } from "./MenuSheet"
 import { SearchBox } from "./SearchBox"
 import { SearchDrop } from "./SearchDrop"
+import { SearchDropOpener } from "./SearchDropOpener"
 import { PHONE_SEARCH } from "./SearchLink"
 import { SearchToggle } from "./SearchToggle"
 import { Wordmark } from "./Wordmark"
@@ -47,7 +48,8 @@ export const HEADER_VARIANTS = ["standard", "centered", "catalog"] as const
  * (`searchStyle: icon`, adr/0049 Ek 2026-11-15): from 1024 px a magnifier
  * in the box's place opens it (`SearchToggle`); a phone's header is its
  * 56 px row alone, the bottom bar's "Ara" dropping the search down
- * (`SearchDrop`).
+ * (`SearchDrop`; the editor's preview, which has no bottom bar, puts a
+ * magnifier in the row for it, `SearchDropOpener`).
  */
 export function Header({
   shop,
@@ -115,6 +117,9 @@ export function Header({
     ) : (
       <SearchBox {...search} id="arama-genis" className={cn("hidden flex-1 lg:block", className)} />
     )
+  // The editor's preview draws no bottom bar: a phone's way into the dropping search there
+  const opener =
+    icon && shop.editor ? <SearchDropOpener label={t("search.open")} className={LABELLED} /> : null
   const tools = (
     <nav
       aria-label={t("nav.account")}
@@ -161,6 +166,7 @@ export function Header({
         >
           <div className="flex min-w-0 items-center">
             {sheet}
+            {opener}
             {wideSearch("max-w-88", "start", "[--gf-search-open:22rem]")}
           </div>
           {/* A long name truncates before it pushes the menu or the cart off a phone's row */}
@@ -179,6 +185,7 @@ export function Header({
           {sheet}
           <Wordmark name={shop.name} logo={shop.logo} className="mr-auto lg:mr-0" />
           {wideSearch("max-w-160", "end", "[--gf-search-open:40rem]")}
+          {opener}
           {tools}
         </Container>
       )}
