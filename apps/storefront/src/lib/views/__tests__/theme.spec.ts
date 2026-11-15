@@ -51,6 +51,7 @@ describe("themeSettings", () => {
       },
       header: { layout: "left", sticky: false },
       buttons: "square",
+      section_spacing: "compact",
     }
     expect(themeSettings(answer, null)).toEqual(answer)
   })
@@ -74,6 +75,7 @@ describe("themeSettings", () => {
       },
       header: { layout: "left", sticky: true },
       buttons: "pill",
+      section_spacing: "normal",
     })
     expect(themeSettings(undefined, null)).toEqual(DEFAULT_THEME)
     expect(themeSettings(undefined, "#0b5c99").colors.primary).toBe("#0b5c99")

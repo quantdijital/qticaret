@@ -18,8 +18,9 @@ export const shelfVariant = (section: Of<"products">) =>
  * cards-in-a-row (3, 4 or 5; three rows of two on a phone), whole rows
  * only, the rest behind "Tümünü gör"; `carousel`, `featured`, `compact`
  * and `columns` as `ShelfLayouts` draws them. In tabs its own head is for
- * the reader only (its pill names it) and its "all products" link sits
- * under it; a columns rail's lists carry their own headings.
+ * the reader only (its pill names it) and its "all products" link stands
+ * with its arrows beside the tab row, as a section head's link does; a
+ * columns rail's lists carry their own headings, its link under them.
  */
 export function Rack({
   section,
@@ -36,9 +37,17 @@ export function Rack({
   const columnsRail = variant === "columns"
   const id = headingId(columnsRail ? (section.lists?.[0]?.id ?? section.id) : section.id)
   const head = tabbed ? (
-    <h2 id={id} className="sr-only">
-      {section.title}
-    </h2>
+    // Beside the tab row from 1024 px (`tabs.css`): the panel's whole list, then its arrows
+    <div className="gf-tab-aside flex min-h-11 items-center justify-end gap-4">
+      <h2 id={id} className="sr-only">
+        {section.title}
+      </h2>
+      {section.more && (
+        <a href={section.more.path} className="gf-link shrink-0 text-sm lg:text-md">
+          {section.more.label}
+        </a>
+      )}
+    </div>
   ) : (
     <SectionHead id={id} title={section.title} more={section.more} />
   )
@@ -73,7 +82,7 @@ export function Rack({
           )}
         </>
       )}
-      {(tabbed || columnsRail) && section.more && (
+      {columnsRail && section.more && (
         <p className="flex justify-center">
           <a href={section.more.path} className="gf-btn gf-btn--quiet">
             {section.more.label}

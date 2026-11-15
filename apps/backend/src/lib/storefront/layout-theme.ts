@@ -44,6 +44,7 @@ const shown = (theme: ThemeSettings): ShownTheme => ({
   product_card: theme.product_card,
   header: theme.header,
   buttons: theme.buttons,
+  section_spacing: theme.section_spacing,
 })
 
 /**

@@ -172,7 +172,7 @@ export function Scroller({
       }}
     >
       {(head ?? (besideHead && arrows)) && (
-        <div className="flex items-end gap-4">
+        <div className="gf-scroller-head flex items-end gap-4">
           <div className="min-w-0 flex-1">{head}</div>
           {besideHead && arrows}
         </div>

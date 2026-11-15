@@ -58,6 +58,12 @@ describe("the linked category cards", () => {
     expect(html).toMatch(/<a href="\/kategori\/mutfak" tabindex="-1" aria-hidden="true"/)
     // A card without a shown subcategory has no see-all link
     expect(html.match(/Tümünü gör/g)).toHaveLength(1)
+    // ...and is one link, its words centred in the row's height, no empty list (K-08);
+    // the see-all link sits at the card's foot, with no arrow (K-09)
+    expect(html.match(/after:absolute after:inset-0/g)).toHaveLength(1)
+    expect(html).toContain("flex-row items-center")
+    expect(html).not.toContain("lucide-arrow-right")
+    expect(html).toMatch(/class="gf-link mt-auto[^"]*">Tümünü gör/)
   })
 
   it("lays out four columns, pictures above or none, plain cards", () => {
@@ -158,6 +164,14 @@ describe("the footer's own settings", () => {
     expect(left).toContain("bottom-[calc(5rem+env(safe-area-inset-bottom))]")
     expect(left).toContain("rounded-inner")
     expect(left).toContain("max-lg:hidden")
+    // Inside the 48 px gutter from 1024 px: a 40 px face 4 px from the edge (K-10)
+    expect(right).toContain("lg:size-10")
+    expect(right).toContain("lg:right-1")
+    // One way up: the footer line's link goes where the button shows
+    const link = /<a href="#top"[^>]*>/
+    expect(renderFrame(atolyeTheme, shopFixture())).toMatch(link)
+    expect(right).not.toMatch(link)
+    expect(left).toMatch(/<a href="#top" class="lg:hidden /)
   })
 
   it("leaves the button out while the cookie question waits", () => {

@@ -67,9 +67,23 @@ describe("the tezgah presets' drafts (docs/tema/tezgah-tasarim-dili.md)", () => 
       ])
       expect(doc.header[0]).toHaveProperty("highlight_link.kind", "system")
       expect(doc.footer.map((section) => section.type)).toEqual(["footer_bar", "newsletter"])
+      expect(doc.footer[0]).toMatchObject({
+        social: "icons",
+        payment_badges: ["visa", "mastercard", "troy", "bank_transfer", "cash_on_delivery"],
+        back_to_top: true,
+        back_to_top_shape: "square",
+      })
+      expect(doc.home.find((section) => section.id === "kullanimagore")).toMatchObject({
+        variant: "linked",
+        columns: 3,
+        image_position: "side",
+        frame: "lined",
+        links: 5,
+      })
       expect(doc.settings.theme).toMatchObject({
         radius: "sharp",
         buttons: "square",
+        section_spacing: "compact",
         typography: { heading: "inter", body: "inter" },
         product_card: { variant: "framed", hover_image: false },
       })

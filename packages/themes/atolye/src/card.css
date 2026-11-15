@@ -147,3 +147,40 @@
     display: block;
   }
 }
+
+/* Outside the layers, as the quiet button's own hover (`ui.css`) it takes over */
+/* The card's one action at rest is quiet, so a row of cards is not a row of
+   filled buttons; the card pointed at, or its button in focus, shows it in
+   the action's colour (Tezgâh audit K-27: "kartın Sepete ekle'si eylem rengi") */
+.gf-card-framed .gf-card-btn:focus-visible {
+  border-color: var(--color-signal);
+  background: var(--color-signal);
+  color: var(--color-signal-ink);
+}
+@media (hover: hover) {
+  .gf-card-framed:hover .gf-card-btn:not(:disabled):not([aria-disabled="true"]) {
+    border-color: var(--color-signal);
+    background: var(--color-signal);
+    color: var(--color-signal-ink);
+  }
+}
+
+/* The lead card of a "1 big + 6 small" shelf (sections/ShelfLayouts, Tezgâh
+   audit K-07): from 1024 px its photo grows to the two rows beside it and the
+   words keep to the foot, so no empty box opens under its price */
+@media (width >= 64rem) {
+  .gf-card-lead > .gf-card-framed .gf-card-media {
+    flex: 1 1 auto;
+    min-height: 20rem;
+    aspect-ratio: auto;
+  }
+  .gf-card-lead > .gf-card-framed > :not(.gf-card-media) {
+    flex-grow: 0;
+  }
+  .gf-card-lead > .gf-card-framed .gf-card-media :is(.gf-card-slides, img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+}

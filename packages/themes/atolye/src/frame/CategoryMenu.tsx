@@ -11,6 +11,8 @@ const LINK =
 /** How long the pointer rests on the button before the list opens, and off it before it closes (ms). */
 const OPEN_AFTER = 150
 const CLOSE_AFTER = 250
+/** Up to this many children (and "Tümünü gör") a category's panel is one narrow column. */
+const SHORT_LIST = 5
 
 /** The links of the list the focus is in: the top categories', or one category's children. */
 function linksBeside(from: HTMLElement): HTMLAnchorElement[] {
@@ -195,12 +197,14 @@ export function CategoryMenu({
         id={id}
         aria-label={words.label}
         hidden={!open}
-        className="absolute top-full left-0 z-(--z-dropdown) mt-1 w-72 rounded-tile border border-rule bg-field p-2 shadow-float"
+        className="absolute top-full left-0 z-(--z-dropdown) mt-1 w-72 rounded-tile border border-rule bg-field p-2 text-text shadow-float"
       >
         <ul data-cm-list="top" className="flex flex-col">
           {categories.map((category, index) => {
             const own = category.children.length > 0
             const panel = `${id}-${String(index)}`
+            // A short list stands in one narrow column, not in a wide empty panel
+            const wide = category.children.length > SHORT_LIST
             return (
               <li key={category.path}>
                 <a
@@ -225,9 +229,12 @@ export function CategoryMenu({
                     id={panel}
                     data-cm-sub={String(index)}
                     hidden={active !== index}
-                    className="absolute top-0 left-full ml-1 min-h-full w-[min(34rem,calc(100vw-24rem))] rounded-tile border border-rule bg-field p-5 shadow-float"
+                    className={`absolute top-0 left-full ml-1 rounded-tile border border-rule bg-field p-5 shadow-float ${wide ? "min-h-full w-[min(34rem,calc(100vw-24rem))]" : "w-64"}`}
                   >
-                    <ul data-cm-list={String(index)} className="columns-2 gap-x-6">
+                    <ul
+                      data-cm-list={String(index)}
+                      className={wide ? "columns-2 gap-x-6" : "flex flex-col"}
+                    >
                       {category.children.map((each) => (
                         <li key={each.path} className="break-inside-avoid">
                           <a href={each.path} className={LINK}>

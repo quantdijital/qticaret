@@ -1,4 +1,4 @@
-import type { ThemeBackground } from "@qticaret/types"
+import type { SectionSpacing, ThemeBackground } from "@qticaret/types"
 
 /** The surfaces a page tone sets, by their token's name (`--color-<name>` in `tokens.css`). */
 export const TONE_SURFACES = ["paper", "paper-2", "paper-3", "field", "chip", "rule"] as const
@@ -54,4 +54,17 @@ export const ATOLYE_TONES: Readonly<Record<ThemeBackground, ToneSet>> = {
     chip: "#f4f6f8",
     rule: "#d4d8de",
   },
+}
+
+/**
+ * The section spacing the shop may choose (Tezgâh audit K-11), as a factor
+ * on every section gap (`--section-scale` over `tokens.css`'s gaps, each
+ * screen width's own): `normal` is the theme's own and never printed;
+ * `compact` brings a wide screen's 120 px gap to 66 px, a dense catalog's
+ * rhythm; `roomy` opens it to 144 px.
+ */
+export const ATOLYE_SECTION_SCALE: Readonly<Record<SectionSpacing, string | null>> = {
+  compact: "0.55",
+  normal: null,
+  roomy: "1.2",
 }

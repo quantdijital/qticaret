@@ -8,13 +8,15 @@ import { cn } from "@qticaret/ui/lib/utils"
 const REDUCED = "(prefers-reduced-motion: reduce)"
 
 /**
- * Where the button stands: its corner, 16 px in (24 from 1024 px); on a
+ * Where the button stands: its corner, 16 px in; from 1024 px 4 px in, a
+ * 40 px face inside the page's 48 px gutter, so it never covers the
+ * content's edge (Tezgâh audit K-10); on a
  * phone above the bottom bar; above the WhatsApp button when both are on
  * the right (56 px and a 16 px gap), so the two never overlap. Written
  * whole for Tailwind.
  */
 function placeOf(side: BackToTopView["side"], aboveBottomBar: boolean, overWhatsApp: boolean) {
-  const corner = side === "left" ? "left-4 lg:left-6" : "right-4 lg:right-6"
+  const corner = side === "left" ? "left-4 lg:left-1" : "right-4 lg:right-1"
   if (overWhatsApp) {
     return cn(
       corner,
@@ -89,7 +91,7 @@ export function BackToTop({
         }
       }}
       className={cn(
-        "fixed z-(--z-raised) inline-flex size-12 items-center justify-center border border-rule bg-field text-text shadow-float hover:border-edge",
+        "fixed z-(--z-raised) inline-flex size-12 items-center lg:size-10 justify-center border border-rule bg-field text-text shadow-float hover:border-edge",
         view.shape === "square" ? "rounded-inner" : "rounded-pill",
         placeOf(view.side, aboveBottomBar, overWhatsApp),
         !view.mobile && "max-lg:hidden"

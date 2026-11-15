@@ -8279,6 +8279,14 @@
           "square": "Köşeli"
         },
         "buttonsHint": "Düğmeler, arama alanı, form alanları ve adet seçici birlikte değişir. Çipler ve sayı rozetleri her zaman hap biçimindedir.",
+        "sectionSpacing": "Bölüm aralığı",
+        "sectionSpacingTerm": "section spacing",
+        "sectionSpacings": {
+          "compact": "Sık",
+          "normal": "Normal",
+          "roomy": "Ferah"
+        },
+        "sectionSpacingHint": "Sayfadaki bölümler arasındaki boşluk, her bölümde birlikte değişir. Normal, temanın kendi aralığıdır (geniş ekranda 120 px); Sık bunu 66 px'e indirir, Ferah 144 px'e çıkarır.",
         "card": "Ürün kartı",
         "ratio": "Görsel oranı",
         "ratios": {

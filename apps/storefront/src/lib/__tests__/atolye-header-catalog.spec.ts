@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import { atolyeTheme } from "@qticaret/theme-atolye"
 import type { HeaderCatalogView, ShopView } from "@qticaret/ui"
 import { renderFrame, shopFixture } from "@/test/theme-render"
+import { aisleFit } from "../../../../../packages/themes/atolye/src/frame/aisle-fit"
 
 /**
  * The catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15) as the
@@ -110,5 +111,37 @@ describe("the catalog header", () => {
     )
     expect(html).toContain('data-variant="standard"')
     expect(html).toContain('data-gf-aisle=""')
+  })
+
+  it("keeps the main menu on one line, a hidden Daha fazla measured beside it", () => {
+    const html = renderFrame(atolyeTheme, catalogShop())
+    expect(html).toMatch(/<ul[^>]*class="flex flex-nowrap items-center gap-x-1 overflow-x-clip/)
+    // Before it is measured every category is drawn; "Daha fazla" waits unseen
+    expect(html).toMatch(/data-aisle-more=""[^>]*class="invisible static"/)
+    expect(html).toContain("Daha fazla")
+  })
+
+  it.each(["stage", "primary", "light"] as const)(
+    "writes the opened panels in the page's ink on a %s bar",
+    (menuGround) => {
+      const html = renderFrame(atolyeTheme, catalogShop({ menuGround }))
+      const panels = html.match(/class="absolute top-full z-\(--z-dropdown\)[^"]*"/g) ?? []
+      expect(panels.length).toBeGreaterThan(0)
+      for (const panel of panels) {
+        expect(panel).toContain(" text-text ")
+        expect(panel).toContain("inset-x-0")
+      }
+      expect(html).toMatch(/aria-label="Tüm kategoriler" hidden=""[^>]*class="[^"]* text-text /)
+    }
+  )
+})
+
+describe("the menu bar's fit", () => {
+  it("keeps every item that fits and makes room for Daha fazla otherwise", () => {
+    expect(aisleFit([100, 100, 100], 80, 4, 308)).toBe(3)
+    expect(aisleFit([100, 100, 100], 80, 4, 300)).toBe(2)
+    expect(aisleFit([100, 100, 100], 80, 4, 288)).toBe(2)
+    expect(aisleFit([100, 100, 100], 80, 4, 288 - 20)).toBe(1)
+    expect(aisleFit([100, 100, 100], 80, 4, 150)).toBe(0)
   })
 })

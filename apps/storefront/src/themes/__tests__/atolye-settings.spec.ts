@@ -133,7 +133,7 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     expect(declared(tokens, "--radius-pill")).not.toContain("--radius-scale")
   })
 
-  it("shapes buttons, icon buttons and fields with the button choice; chips and counts stay pills", () => {
+  it("shapes buttons, icon buttons, fields and tabs with the button choice; chips and counts stay pills", () => {
     expect(entry.style(chosen({ buttons: "pill" }))).toBeNull()
     expect(entry.style(chosen({ buttons: "rounded" }))).toBe(":root{--button-radius:0.75rem}")
     expect(entry.style(chosen({ buttons: "square" }))).toBe(":root{--button-radius:0px}")
@@ -143,8 +143,9 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
     for (const pill of [".gf-chip", ".gf-count"]) {
       expect(ruleBody(controls, pill), pill).toContain("border-radius: var(--radius-pill);")
     }
+    // The shelf's tabs are controls: they take the button shape, pills by default (K-22)
     expect(ruleBody(atolyeCss("tabs.css"), ".gf-tab")).toContain(
-      "border-radius: var(--radius-pill);"
+      "border-radius: var(--button-radius, var(--radius-pill));"
     )
     // A box field (a textarea) keeps the inner corner, never rounder than the button
     expect(declared(tokens, "--radius-box")).toBe(
@@ -243,6 +244,32 @@ describe("the settings Atölye takes (adr/0062 §1): every one of them", () => {
       "checkout/Consents.tsx",
     ]) {
       expect(atolyeCss(file), file).toContain("bg-highlight-soft")
+    }
+  })
+
+  it("scales every section gap with the section spacing, the theme's own at normal (K-11)", () => {
+    expect(entry.style(chosen({ section_spacing: "normal" }))).toBeNull()
+    expect(entry.style(chosen({ section_spacing: "compact" }))).toBe(":root{--section-scale:0.55}")
+    expect(entry.style(chosen({ section_spacing: "roomy" }))).toBe(":root{--section-scale:1.2}")
+    for (const token of ["--section-gap-s", "--section-gap", "--section-gap-l"]) {
+      expect(declared(tokens, token)).toMatch(/^calc\(\d+px \* var\(--section-scale, 1\)\)$/)
+    }
+    // A wide screen's gap at compact: 66 px, a dense catalog's rhythm
+    const wide = /^calc\((\d+)px/.exec(declared(tokens, "--section-gap"))
+    expect(Number(wide?.[1]) * 0.55).toBe(66)
+    expect(themeSettings({ section_spacing: "dense" }, null).section_spacing).toBe("normal")
+    expect(themeSettings({ section_spacing: "compact" }, null).section_spacing).toBe("compact")
+  })
+
+  it("keeps a sale apart from a red main colour: a graphite badge, an ink price (K-05)", () => {
+    const deal = ["--color-deal:var(--color-text)", "--color-deal-ink:var(--color-paper)"]
+    // Tezgâh's red, and reds around it
+    for (const primary of ["#b3261e", "#be2323", "#d32f2f", "#a4161a"]) {
+      expect(atolyeDeclarations(colours({ primary })), primary).toEqual(deal)
+    }
+    // Orange, wine, navy, the theme's own ink and a brown keep the theme's sale red
+    for (const primary of ["#c2410c", "#7a1a48", "#2f6690", null, "#6b4a3a"]) {
+      expect(atolyeDeclarations(colours({ primary })), String(primary)).toEqual([])
     }
   })
 

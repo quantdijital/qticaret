@@ -1,6 +1,6 @@
 "use client"
 
-import { ArrowRight, ChevronDown, Menu, Phone } from "lucide-react"
+import { ArrowRight, ChevronDown, Menu, Phone, UserRound } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CategoryCardView, ContactView, LinkView, NavCategoryView } from "@qticaret/ui"
@@ -57,14 +57,21 @@ export function MenuSheet({
   topLinks,
   contact,
   words,
+  highlight = null,
+  account = null,
 }: {
   categories: readonly NavCategoryView[]
   topLinks: readonly LinkView[]
   contact: ContactView
   words: MenuSheetWords
+  /** The header's highlighted link (the catalog header's), first under the categories. */
+  highlight?: LinkView | null
+  /** The account's page in words, where the header has no account icon on a phone. */
+  account?: LinkView | null
 }) {
   const [open, setOpen] = useState(false)
   const opener = useRef<HTMLElement | null>(null)
+  const button = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     const show = (event: Event) => {
@@ -81,6 +88,7 @@ export function MenuSheet({
   return (
     <>
       <button
+        ref={button}
         type="button"
         aria-label={words.open}
         aria-expanded={open}
@@ -100,11 +108,10 @@ export function MenuSheet({
         title={words.title}
         closeLabel={words.close}
         onCloseAutoFocus={(event) => {
-          if (opener.current) {
-            event.preventDefault()
-            opener.current.focus()
-            opener.current = null
-          }
+          // Back to what opened it: the bottom bar's button, else the menu button
+          event.preventDefault()
+          ;(opener.current ?? button.current)?.focus()
+          opener.current = null
         }}
       >
         <nav aria-label={words.title} className="flex-1 overflow-y-auto px-2 pb-6 sm:px-4">
@@ -155,6 +162,25 @@ export function MenuSheet({
               </li>
             ))}
           </ul>
+          {(highlight ?? account) && (
+            <ul className="mt-2 flex flex-col gap-0.5 border-t border-rule pt-2">
+              {highlight && (
+                <li>
+                  <a href={highlight.path} className={`${ROW} font-bold`}>
+                    {highlight.label}
+                  </a>
+                </li>
+              )}
+              {account && (
+                <li>
+                  <a href={account.path} className={ROW}>
+                    <UserRound className="size-6 shrink-0" aria-hidden="true" strokeWidth={1.75} />
+                    {account.label}
+                  </a>
+                </li>
+              )}
+            </ul>
+          )}
           {topLinks.length > 0 && (
             <ul className="mt-4 flex flex-wrap gap-2 rounded-tile bg-paper-2 p-3">
               {topLinks.map((link) => (
