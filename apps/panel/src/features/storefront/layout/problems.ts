@@ -1,7 +1,6 @@
 import type { AnySection, LayoutDocument, LayoutLink } from "@/features/storefront/api/layout"
 import { HEADER_CATALOG_LIMITS } from "@qticaret/types"
 import {
-  BEST_SELLER_DAYS,
   LAYOUT_LIMITS as L,
   MARQUEE_LIMITS,
   PRICE_BANDS_LIMITS,
@@ -10,6 +9,7 @@ import {
 import { isCleanText } from "@/features/settings/storefront"
 import { unknownShopTokens } from "@/features/settings/shop-tokens"
 import { heroCatalogProblems, priceBandsProblems } from "./catalog-problems"
+import { listProblems } from "./shelf-problems"
 import { BODY_GROUPS, allSections, marqueesOn, priceBandsOn } from "./sections"
 import { SETTINGS_KEY, badgeProblems, settingsProblems } from "./settings-problems"
 
@@ -130,26 +130,11 @@ function fieldsOf(section: AnySection): Found[] {
         }),
       ]
     case "products": {
-      const { source } = section
+      // The rail's own list, then a columns rail's more, each under its prefix
+      const lists = section.variant === "columns" ? (section.lists ?? []) : []
       return [
-        ["title", textProblem(section.title, L.title)],
-        [
-          "source",
-          source.kind === "manual" && source.product_ids.length === 0
-            ? "productsRequired"
-            : source.kind === "category" && source.category_id === ""
-              ? "categoryRequired"
-              : source.kind === "collection" && source.collection_id === ""
-                ? "collectionRequired"
-                : null,
-        ],
-        [
-          "days",
-          source.kind === "best_sellers" &&
-          (source.days < BEST_SELLER_DAYS.min || source.days > BEST_SELLER_DAYS.max)
-            ? "daysRange"
-            : null,
-        ],
+        ...listProblems("", section),
+        ...lists.flatMap((list, index) => listProblems(`lists.${String(index)}.`, list)),
         ["more", linkProblem(section.more)],
       ]
     }

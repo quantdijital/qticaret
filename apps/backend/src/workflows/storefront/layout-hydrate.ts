@@ -14,6 +14,7 @@ import { fillShopDoc, fillShopText } from "../../lib/shop/tokens"
 import type { ShopInfoValues } from "../../lib/shop/tokens"
 import { cardTargets } from "../../api/store/content/cards"
 import { hydrateHero, hydratePriceBands } from "./layout-hydrate-catalog"
+import { hydrateShelf } from "./layout-hydrate-shelf"
 import type { BandPick } from "./price-bands"
 
 /** A button or slide link as the storefront prints it; a broken one is not there. */
@@ -146,18 +147,7 @@ async function hydrateBody(section: BodySection, at: HydrateContext): Promise<Hy
         arrows: section.arrows,
       }
     case "products":
-      return {
-        id,
-        type,
-        title: section.title,
-        source: section.source,
-        limit: section.limit,
-        columns: section.columns,
-        more: link(section.more),
-        card_variant: section.card_variant,
-        // A sale or best-seller rail: its products in order, and whether the newest made it up
-        ...at.picks?.get(id),
-      }
+      return hydrateShelf(section, at.picks, link(section.more))
     case "related_products":
       return {
         id,

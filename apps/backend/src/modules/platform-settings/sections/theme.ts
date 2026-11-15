@@ -61,11 +61,12 @@ export const THEME_SETTINGS_VERSION = 2
 
 /**
  * How a product card is drawn (adr/0049 Ek 2026-11-14 §3.3): `standard`
- * today's card, `framed` the bordered box (UK5). Mirrors `@qticaret/types`'
+ * today's card, `framed` the bordered box (UK5), `compact` the small
+ * side-by-side card (Ek 2026-11-15). Mirrors `@qticaret/types`'
  * `CARD_VARIANTS` (a unit test keeps them equal); a product rail's
  * `card_variant` takes the same list.
  */
-export const PRODUCT_CARD_VARIANTS = ["standard", "framed"] as const
+export const PRODUCT_CARD_VARIANTS = ["standard", "framed", "compact"] as const
 
 export interface ProductCardSettings {
   ratio: "4:5" | "1:1" | "3:4"

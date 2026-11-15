@@ -7898,6 +7898,13 @@
         "hero": {
           "standard": "Tek görsel",
           "category_list": "Kategori listesi"
+        },
+        "products": {
+          "grid": "Izgara",
+          "carousel": "Kayan sıra",
+          "featured": "Öne çıkan",
+          "compact": "Kompakt liste",
+          "columns": "Yan yana listeler"
         }
       },
       "look": {
@@ -8274,7 +8281,8 @@
         "cardVariant": "Kart biçimi",
         "cardVariants": {
           "standard": "Standart",
-          "framed": "Çerçeveli"
+          "framed": "Çerçeveli",
+          "compact": "Kompakt"
         },
         "cardVariantHint": "Mağazadaki bütün ürün kartlarının biçimi. Ürün rafı kendi biçimini seçebilir; liste, arama ve kategori sayfası bunu kullanır.",
         "framed": "Çerçeveli kart",
@@ -8683,6 +8691,100 @@
         "thumbsHint": "Her bantta o aralıktan birkaç ürün küçük görünür; vitrin fiyatlara göre kendisi seçer.",
         "thumbsCount": "Bant başına ürün",
         "full": "Ana sayfada zaten {{max}} fiyat bandı bölümü var (gizli olanlar da sayılır)."
+      },
+      "shelf": {
+        "layout": "Diziliş",
+        "scroll": "Kaydırma",
+        "firstTitle": "İlk listenin başlığı",
+        "list": "{{n}}. liste",
+        "addList": "Liste ekle",
+        "removeList": "Kaldır",
+        "rows": "Sıra sayısı",
+        "rowsTerm": "rows",
+        "rowsOption": "{{n}} sıra",
+        "rowsHint": "Masaüstünde üç sütun; telefonda kartlar alt alta.",
+        "perList": "Liste başına ürün",
+        "perListTerm": "per list",
+        "perListOption": "{{n}} ürün",
+        "perListHint": "Her listede gösterilecek ürün sayısı; listeler masaüstünde yan yana, telefonda alt alta.",
+        "featuredHint": "İlk ürün solda büyük, yanında küçük kartlar (toplam {{n}} ürün); telefonda büyük kart üstte.",
+        "cardCompact": "Bu biçimde kartlar her zaman kompakt çizilir: küçük görsel, ad, puan ve fiyat."
+      },
+      "scroller": {
+        "desktop": {
+          "label": "Görünen kart (masaüstü)",
+          "term": "per view",
+          "three": "3",
+          "four": "4",
+          "five": "5",
+          "six": "6",
+          "hint": "Daha dar ekranlarda sayı kendiliğinden azalır."
+        },
+        "mobile": {
+          "label": "Görünen kart (telefon)",
+          "term": "per view",
+          "one": "1",
+          "peek": "1,5",
+          "two": "2",
+          "hint": "1,5: bir sonraki kartın ucu görünür, kaydırılabildiği anlaşılır."
+        },
+        "arrows": {
+          "label": "Oklar",
+          "term": "arrows",
+          "always": "Her zaman",
+          "hover": "Üzerine gelince",
+          "hidden": "Gizli",
+          "hint": "Gizliyken de dokunarak, fareyle ve klavyeyle kaydırılır."
+        },
+        "arrow_style": {
+          "label": "Ok biçimi",
+          "term": "arrow style",
+          "round": "Yuvarlak",
+          "square": "Kare",
+          "plain": "Yalın"
+        },
+        "arrow_position": {
+          "label": "Okların yeri",
+          "term": "position",
+          "head": "Başlığın yanında",
+          "sides": "Yanlarda",
+          "hint": "Yanlardaki oklar telefonda gösterilmez; orada parmakla kaydırılır."
+        },
+        "dots": {
+          "label": "Noktalar",
+          "term": "dots",
+          "off": "Gizle",
+          "on": "Göster",
+          "hint": "Kaçıncı sayfada olunduğunu gösteren noktalar."
+        },
+        "autoplay": {
+          "label": "Otomatik geçiş",
+          "term": "autoplay",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Üzerine gelince ve klavye odağındayken durur, görünür bir durdur düğmesi olur; hareketi azaltmayı seçen ziyaretçide çalışmaz."
+        },
+        "speed": {
+          "label": "Geçiş süresi",
+          "term": "interval",
+          "slow": "Yavaş",
+          "medium": "Orta",
+          "fast": "Hızlı"
+        },
+        "loop": {
+          "label": "Döngü",
+          "term": "loop",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Sona gelince başa döner."
+        },
+        "drag": {
+          "label": "Sürükleyerek kaydırma",
+          "term": "drag",
+          "off": "Kapalı",
+          "on": "Açık",
+          "hint": "Masaüstünde fareyle tutup sürükleyerek kaydırılır."
+        }
       }
     },
     "preferences": {

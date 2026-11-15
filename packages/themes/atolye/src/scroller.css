@@ -1,0 +1,148 @@
+/*
+ * The scroller kit (`parts/Scroller`, adr/0049 Ek 2026-11-15): one row of
+ * cards the browser scrolls and snaps, its counts and its arrows' look set
+ * from the row's data attributes (no inline style, CSP). Cards in view:
+ * the shop's phone step (one, one with the next one's edge, two) below
+ * 768 px; three from 768; at most four from 1024; the shop's wide-screen
+ * step from 1280. A card's width leaves room for the gaps between those
+ * in view: (100% - gaps × gap) / cards.
+ */
+.gf-scroller {
+  --per: 1.5;
+  --gaps: 1;
+}
+.gf-scroller[data-mobile="one"] {
+  --per: 1;
+  --gaps: 0;
+}
+.gf-scroller[data-mobile="two"] {
+  --per: 2;
+  --gaps: 1;
+}
+@media (min-width: 48rem) {
+  .gf-scroller[data-mobile] {
+    --per: 3;
+    --gaps: 2;
+  }
+}
+@media (min-width: 64rem) {
+  .gf-scroller[data-desktop="four"],
+  .gf-scroller[data-desktop="five"],
+  .gf-scroller[data-desktop="six"] {
+    --per: 4;
+    --gaps: 3;
+  }
+}
+@media (min-width: 80rem) {
+  .gf-scroller[data-desktop="five"] {
+    --per: 5;
+    --gaps: 4;
+  }
+  .gf-scroller[data-desktop="six"] {
+    --per: 6;
+    --gaps: 5;
+  }
+}
+
+.gf-scroller-track {
+  display: flex;
+  gap: var(--gap-columns);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  /* A focus ring on a card is not cut by the row's edge */
+  padding-block: 0.25rem;
+}
+.gf-scroller-track::-webkit-scrollbar {
+  display: none;
+}
+.gf-scroller-track > li {
+  flex: 0 0 auto;
+  width: calc((100% - var(--gaps) * var(--gap-columns)) / var(--per));
+  min-width: 0;
+  scroll-snap-align: start;
+}
+/* Dragging with a mouse (`scroller-drag.ts`): the snap off while it moves */
+@media (pointer: fine) {
+  .gf-scroller-track[data-drag] {
+    cursor: grab;
+  }
+}
+.gf-scroller-track[data-dragging] {
+  cursor: grabbing;
+  scroll-snap-type: none;
+  user-select: none;
+}
+
+/* The arrows: beside the head, or either side of the row from 768 px (a phone swipes) */
+.gf-scroller-arrows {
+  display: flex;
+  gap: 0.5rem;
+  transition: opacity 150ms ease;
+}
+.gf-scroller-arrows[data-position="sides"] {
+  position: absolute;
+  inset: 0 -0.75rem;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: none;
+}
+@media (min-width: 48rem) {
+  .gf-scroller-arrows[data-position="sides"] {
+    display: flex;
+  }
+}
+.gf-scroller-arrows[data-position="sides"] > * {
+  pointer-events: auto;
+}
+.gf-scroller-arrow {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  color: var(--color-text);
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease;
+}
+.gf-scroller-arrow:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+.gf-scroller[data-arrow-style="round"] .gf-scroller-arrow,
+.gf-scroller[data-arrow-style="square"] .gf-scroller-arrow {
+  border: 1px solid var(--color-rule);
+  background: var(--color-field);
+}
+.gf-scroller[data-arrow-style="round"] .gf-scroller-arrow {
+  border-radius: 999px;
+}
+.gf-scroller[data-arrow-style="square"] .gf-scroller-arrow {
+  border-radius: var(--radius-inner);
+}
+@media (hover: hover) {
+  .gf-scroller-arrow:hover:not(:disabled) {
+    border-color: var(--color-edge);
+  }
+  .gf-scroller[data-arrow-style="plain"] .gf-scroller-arrow:hover:not(:disabled) {
+    color: var(--color-text-2);
+  }
+  /* "Üzerine gelince": in view under the pointer or with focus in the row; always on touch */
+  .gf-scroller[data-arrows="hover"] .gf-scroller-arrows {
+    opacity: 0;
+  }
+  .gf-scroller[data-arrows="hover"]:hover .gf-scroller-arrows,
+  .gf-scroller[data-arrows="hover"]:focus-within .gf-scroller-arrows {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gf-scroller-arrows,
+  .gf-scroller-arrow {
+    transition: none;
+  }
+}

@@ -174,6 +174,7 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
         ...base,
         type,
         title: null,
+        variant: "grid",
         source: { kind: "newest" },
         limit: 12,
         columns: 3,

@@ -1,5 +1,11 @@
 import { useTranslation } from "react-i18next"
-import { BANNER_DEFAULTS, BANNER_SETTING_NAMES, MARQUEE_DEFAULTS } from "@qticaret/types"
+import {
+  BANNER_DEFAULTS,
+  BANNER_SETTING_NAMES,
+  MARQUEE_DEFAULTS,
+  SCROLLER_DEFAULTS,
+  scrollerSettingsOf,
+} from "@qticaret/types"
 import { RadioGroup, RadioGroupItem } from "@qticaret/admin-ui/ui/radio-group"
 import type {
   AnySection,
@@ -11,34 +17,23 @@ import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
 import { lookCount } from "@/features/storefront/layout/look"
 import { offersVariants, switchVariant } from "@/features/storefront/layout/variants"
-import { AnnouncementForm } from "./forms/announcement-form"
-import { BannerForm } from "./forms/banner-form"
-import { FaqForm } from "./forms/faq-form"
-import { FeaturedForm } from "./forms/featured-form"
 import { FIELD_IDS, MARQUEE_OTHER_SETTINGS, takesLook } from "./forms/field-registry"
 import type { FieldGroupName } from "./forms/field-registry"
-import { GoogleRatingForm } from "./forms/google-rating-form"
-import { HeroForm } from "./forms/hero-form"
-import { HeroSliderForm } from "./forms/hero-slider-form"
 import { LookFields } from "./forms/look-fields"
-import { MarqueeForm } from "./forms/marquee-form"
 import { MarqueeGroups } from "./forms/marquee-groups"
 import { BannerSettings } from "./forms/banner-settings"
 import { MarqueeSettings } from "./forms/marquee-settings"
-import { PriceBandsForm } from "./forms/price-bands-form"
-import { ProductsForm } from "./forms/products-form"
-import { RelatedForm } from "./forms/related-form"
-import { RichTextForm } from "./forms/rich-text-form"
+import { ScrollerFields } from "./forms/scroller-fields"
+import { SCROLLER_OTHER } from "./forms/scroller-groups"
+import { ShelfGroups } from "./forms/shelf-groups"
 import { ScheduleFields } from "./forms/schedule-fields"
-import { HeaderBarForm } from "./forms/header-bar-form"
 import { HeaderCatalogOther } from "./forms/header-catalog-other"
 import { isMain } from "@/features/storefront/layout/main-sections"
 import { VariantField } from "./forms/variant-field"
 import { Panel, PanelGroup } from "./panel-header"
 import { SectionActions } from "./section-actions"
-import { BrandsForm, CategoriesForm, CountedForm, WordedForm } from "./forms/simple-forms"
+import { FormOf } from "./section-form"
 import { SECTION_ICONS, kindOf } from "./section-meta"
-import { TrustBadgeList } from "./shared/trust-badge-list"
 import { useFieldFocus } from "./use-field-focus"
 import type { FieldFocus } from "./use-field-focus"
 
@@ -63,63 +58,6 @@ interface SectionPanelProps {
   onBadges: (badges: TrustBadge[], field?: string) => void
   /** The field the settings search picked: its group opens, the field is shown and marked. */
   focus?: (FieldFocus & { group: FieldGroupName }) | null
-}
-
-/** The form for one section type. */
-function FormOf({
-  section,
-  problems,
-  onChange,
-  badges,
-  onBadges,
-}: Pick<SectionPanelProps, "section" | "problems" | "onChange" | "badges" | "onBadges">) {
-  const props = { problems, onChange }
-  switch (section.type) {
-    case "announcement_bar":
-      return <AnnouncementForm section={section} {...props} />
-    case "hero":
-      return <HeroForm section={section} {...props} />
-    case "hero_slider":
-      return <HeroSliderForm section={section} {...props} />
-    case "banner":
-      return <BannerForm section={section} {...props} />
-    case "categories":
-      return <CategoriesForm section={section} {...props} />
-    case "products":
-      return <ProductsForm section={section} {...props} />
-    case "featured_product":
-      return <FeaturedForm section={section} {...props} />
-    case "brands":
-      return <BrandsForm section={section} {...props} />
-    case "posts":
-    case "reviews":
-      return <CountedForm section={section} {...props} />
-    case "google_rating":
-      return <GoogleRatingForm section={section} {...props} />
-    case "rich_text":
-      return <RichTextForm section={section} {...props} />
-    case "faq":
-      return <FaqForm section={section} {...props} />
-    case "related_products":
-      return <RelatedForm section={section} {...props} />
-    case "marquee":
-      return <MarqueeForm section={section} {...props} />
-    case "price_bands":
-      return <PriceBandsForm section={section} {...props} />
-    case "trust_badges":
-      // The strip's problems are the badges' (`trust_badges.0.title`) and its schedule
-      return <TrustBadgeList badges={badges} problems={problems} onChange={onBadges} />
-    case "newsletter":
-    case "help":
-      return <WordedForm section={section} {...props} />
-    case "header_bar":
-      return <HeaderBarForm section={section} {...props} />
-    // The other main sections have nothing of their own yet: their variant and look
-    case "footer_bar":
-    case "product_main":
-    case "category_main":
-      return null
-  }
 }
 
 /**
@@ -156,7 +94,13 @@ export function SectionPanel({
   const strip = section.type === "marquee" ? section : null
   // The band's width, height, words' place, veil and buttons sit there too (E2)
   const band = section.type === "banner" ? section : null
+  // A product rail stands in "Diziliş"; a carousel's rarely changed scroller settings sit there too
+  const shelf = section.type === "products" ? section : null
+  const scroller = shelf?.variant === "carousel" ? scrollerSettingsOf(shelf.scroller) : null
   const set =
+    (scroller
+      ? SCROLLER_OTHER.filter((name) => scroller[name] !== SCROLLER_DEFAULTS[name]).length
+      : 0) +
     (looked ? lookCount(looked) : 0) +
     (strip
       ? MARQUEE_OTHER_SETTINGS.filter((name) => strip[name] !== MARQUEE_DEFAULTS[name]).length
@@ -167,7 +111,7 @@ export function SectionPanel({
       <p className="border-b px-5 py-4 text-[13px] leading-5 text-muted-foreground">
         {t(`storefront.editor.types.${kind}.description`)}
       </p>
-      {offersVariants(section) ? (
+      {offersVariants(section) && !shelf ? (
         <PanelGroup title={t(`${P}.variant`)} reveal={reveal("variant")}>
           <VariantField
             id={FIELD_IDS.variant(section.id)}
@@ -212,6 +156,7 @@ export function SectionPanel({
         </PanelGroup>
       ) : null}
       {strip ? <MarqueeGroups section={strip} reveal={reveal} onChange={onChange} /> : null}
+      {shelf ? <ShelfGroups section={shelf} reveal={reveal} onChange={onChange} /> : null}
       {section.type === "header_bar" && section.variant === "catalog" ? (
         <HeaderCatalogOther
           section={section}
@@ -223,7 +168,7 @@ export function SectionPanel({
       {looked || strip ? (
         <PanelGroup
           title={
-            strip
+            strip || scroller
               ? t(`storefront.editor.marquee.${set > 0 ? "otherTitleSet" : "otherTitle"}`, {
                   count: set,
                 })
@@ -245,6 +190,16 @@ export function SectionPanel({
               settings={MARQUEE_OTHER_SETTINGS}
               onChange={(next) => {
                 onChange(next)
+              }}
+            />
+          ) : null}
+          {shelf && scroller ? (
+            <ScrollerFields
+              value={scroller}
+              settings={SCROLLER_OTHER}
+              fieldId={(setting) => FIELD_IDS.scroller(shelf.id, setting)}
+              onChange={(next) => {
+                onChange({ ...shelf, scroller: next })
               }}
             />
           ) : null}

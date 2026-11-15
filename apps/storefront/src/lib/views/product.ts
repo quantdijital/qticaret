@@ -58,8 +58,8 @@ export function productCard(
     image: productImages(product)[0] ?? null,
     price: cardPrice(variants, displays),
     available: variants.some(isAvailable),
-    // Left out for today's card: its view is as it was
-    ...(framed ? { variant, framed } : {}),
+    // Left out for today's card: its view is as it was; the compact card carries no extras
+    ...(framed ? { variant, framed } : variant === "compact" ? { variant } : {}),
   }
 }
 
