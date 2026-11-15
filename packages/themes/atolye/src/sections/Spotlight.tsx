@@ -4,14 +4,17 @@ import { Container } from "../parts/Container"
 import { Price } from "../parts/Price"
 import { quickAddWords } from "../parts/ProductCard"
 import { QuickAdd } from "../parts/QuickAdd"
+import { STRIPS_LOOK_BEFORE, Strips } from "../parts/Strips"
 import { type Of, headingId } from "./plan"
-import { SpotlightStrips } from "./SpotlightStrips"
+
+/** The gallery's share of the screen from 1024 px (7 of the stage's 12 columns), in vw. */
+const GALLERY = 53
 
 /**
  * One product up close (`featured_product`), on a graphite stage like the
  * opening but mirrored: its photographs (the collage: the first large, two
- * more beside it from 1024 px; or the shop's equal slanted strips,
- * `SpotlightStrips`) on the left, then its name, the shop's line, the
+ * more beside it from 1024 px; or the shop's slanted strips, `Strips`,
+ * each a link to its page) on the left, then its name, the shop's line, the
  * facts the shop marked as headline ones as rows, the price large and one
  * action: the quick add when it can go straight in, else its page.
  */
@@ -37,9 +40,10 @@ export function Spotlight({
       <Container>
         <div className="gf-stage grid gap-6 overflow-hidden rounded-tile p-3 sm:p-4 lg:grid-cols-12 lg:gap-(--gap-columns) lg:p-4">
           {main && strips && (
-            <SpotlightStrips
-              pictures={pictures}
-              path={product.path}
+            <Strips
+              items={pictures.map((image) => ({ key: image.src, image, href: product.path }))}
+              look={STRIPS_LOOK_BEFORE}
+              span={GALLERY}
               className="aspect-square lg:col-span-7 lg:aspect-[4/3]"
             />
           )}

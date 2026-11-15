@@ -1,0 +1,300 @@
+/*
+ * Slanted strips (`parts/Strips.tsx`; the featured product's `gallery:
+ * "strips"`, adr/0049 Ek 2026-11-15 and 2026-11-16). Photographs stand
+ * side by side as upright strips the box's full height; every seam
+ * between two is slanted at one run (`--strip-run`, the same for every
+ * strip so the seams stay parallel), the first strip's left edge and the
+ * last one's right edge straight, so the strips end a rectangle.
+ *
+ * Each strip (`li`) is a flex item that takes no pointer; its cut
+ * (`.gf-strip-cut`, the link or a plain box) is the parallelogram, its
+ * frame inside it holds the photograph and the words. A strip after the
+ * first steps back over the one before it by `--strip-step`: apart, the
+ * line less the run (the gap between the seams is the line); overlapping,
+ * the run and an overlap more, the frame then leaving a line of the
+ * ground along its left seam over the strip below and a shadow under it.
+ *
+ * The look is attributes (`data-slant`, `data-line`, `data-overlap`,
+ * `data-dim`, `data-hover`) and the count `data-count`, the values theme
+ * tokens: no script, no inline style (CSP). With none set they draw as
+ * the strips did before the settings (soft seams, a 12 px gap).
+ *
+ * From 1024 px the strip under a hovering pointer, or holding the
+ * keyboard's focus, widens (`flex-grow` 1 → `--strip-grow`) and the
+ * others narrow, in one ease-out slide; the height never changes. Its
+ * photograph is drawn as wide as a widened strip and centred in it, so
+ * only the window onto it grows. A tablet's width shows four at most, a
+ * phone's three, the last shown then ending the strips straight; a
+ * screen whose pointer does not hover keeps them equal, reduced motion
+ * snaps.
+ */
+@layer components {
+  .gf-strips {
+    /* The ground the overlap's line takes (the page's paper; a graphite stage's own below) */
+    --strip-ground: var(--color-paper);
+    --strip-well: var(--color-paper-3);
+    --strip-line: var(--space-sm);
+    --strip-run: var(--space-xs);
+    --strip-overlap: 0px;
+    --strip-step: calc(var(--strip-line) - var(--strip-run));
+    --strip-grow: 2.75;
+    --strip-count: 1;
+    /* The seams' run is a share of the height (`cqh`): the box's height is its own */
+    container-type: size;
+    display: flex;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .gf-stage .gf-strips {
+    --strip-ground: var(--color-stage);
+    --strip-well: var(--color-stage-2);
+  }
+  .gf-strips[data-count="2"] {
+    --strip-count: 2;
+  }
+  .gf-strips[data-count="3"] {
+    --strip-count: 3;
+  }
+  .gf-strips[data-count="4"] {
+    --strip-count: 4;
+  }
+  .gf-strips[data-count="5"] {
+    --strip-count: 5;
+  }
+  .gf-strips[data-count="6"] {
+    --strip-count: 6;
+  }
+  .gf-strips[data-count="7"] {
+    --strip-count: 7;
+  }
+  .gf-strips[data-count="8"] {
+    --strip-count: 8;
+  }
+  .gf-strips[data-line="none"] {
+    --strip-line: 0px;
+  }
+  .gf-strips[data-line="thin"] {
+    --strip-line: var(--space-2xs);
+  }
+  .gf-strips[data-line="thick"] {
+    --strip-line: var(--space-md);
+  }
+  /* About 7° and 12° from upright: a share of the height, so any box slants alike */
+  .gf-strips[data-slant="medium"] {
+    --strip-run: calc(100cqh * 0.12);
+  }
+  .gf-strips[data-slant="steep"] {
+    --strip-run: calc(100cqh * 0.22);
+  }
+  .gf-strips[data-overlap="on"] {
+    --strip-overlap: var(--space-md);
+    --strip-step: calc(0px - var(--strip-run) - var(--strip-overlap));
+  }
+
+  .gf-strip {
+    position: relative;
+    flex: 1 1 0;
+    min-width: 0;
+    /* The cut takes the pointer: the strip's box runs under its neighbours' seams */
+    pointer-events: none;
+  }
+  .gf-strip + .gf-strip {
+    margin-left: var(--strip-step);
+  }
+  .gf-strip-cut {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+    pointer-events: auto;
+    background: var(--strip-well);
+    clip-path: polygon(var(--strip-run) 0, 100% 0, calc(100% - var(--strip-run)) 100%, 0 100%);
+  }
+  .gf-strip:first-child .gf-strip-cut {
+    clip-path: polygon(0 0, 100% 0, calc(100% - var(--strip-run)) 100%, 0 100%);
+  }
+  .gf-strip:last-child .gf-strip-cut {
+    clip-path: polygon(var(--strip-run) 0, 100% 0, 100% 100%, 0 100%);
+  }
+  /* One photograph: one straight strip */
+  .gf-strip:only-child .gf-strip-cut {
+    clip-path: none;
+  }
+  /* A tablet's width shows four, a phone's three: more upright strips there are slivers */
+  @media (max-width: 63.99rem) {
+    .gf-strip:nth-child(n + 5) {
+      display: none;
+    }
+    .gf-strip:nth-child(4):not(:last-child) .gf-strip-cut {
+      clip-path: polygon(var(--strip-run) 0, 100% 0, 100% 100%, 0 100%);
+    }
+  }
+  @media (max-width: 39.99rem) {
+    .gf-strip:nth-child(n + 4) {
+      display: none;
+    }
+    .gf-strip:nth-child(3):not(:last-child) .gf-strip-cut {
+      clip-path: polygon(var(--strip-run) 0, 100% 0, 100% 100%, 0 100%);
+    }
+  }
+
+  .gf-strip-frame {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+  }
+  /* Overlapping: a strip below the next shows through nowhere; the line is the ground's, on the seam */
+  .gf-strips[data-overlap="on"] .gf-strip {
+    filter: drop-shadow(0 0 var(--space-sm) oklch(12% 0.01 255 / 0.55));
+  }
+  .gf-strips[data-overlap="on"] .gf-strip-cut {
+    background: var(--strip-ground);
+  }
+  .gf-strips[data-overlap="on"] .gf-strip + .gf-strip .gf-strip-frame {
+    background: var(--strip-well);
+    clip-path: polygon(
+      calc(var(--strip-run) + var(--strip-line)) 0,
+      100% 0,
+      100% 100%,
+      var(--strip-line) 100%
+    );
+  }
+
+  /*
+   * The ring is drawn by a layer over the photograph (the link's own outline
+   * would lie under it), inside the straight middle of the strip: its slanted
+   * clip would cut a ring drawn outside it or along the seams.
+   */
+  .gf-strip-cut:focus-visible {
+    outline: none;
+  }
+  .gf-strip-cut:focus-visible::after {
+    content: "";
+    position: absolute;
+    inset: 4px calc(var(--strip-run) + 4px);
+    outline: 2px solid var(--color-focus);
+  }
+
+  .gf-strip-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* The words over the foot, on a graphite fade of their own (the photograph's light never under them) */
+  .gf-strip-text {
+    position: absolute;
+    inset: auto 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    padding: var(--space-xl) calc(var(--strip-run) + var(--space-sm)) var(--space-md)
+      calc(var(--strip-line) + var(--space-sm));
+    background: linear-gradient(
+      to top,
+      color-mix(in oklab, var(--color-stage) 82%, transparent),
+      transparent
+    );
+    color: var(--color-stage-text);
+  }
+  .gf-strip:first-child .gf-strip-text {
+    padding-left: var(--space-md);
+  }
+  .gf-strip-title {
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    font-weight: 600;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+  .gf-strip-note {
+    overflow: hidden;
+    color: var(--color-stage-text-2);
+    font-size: var(--text-sm);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* The others darken while one is looked at (`data-dim`) */
+  .gf-strips[data-dim="on"] .gf-strip-frame::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--color-stage);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  @media (min-width: 64rem) {
+    .gf-strips {
+      --strip-run: var(--space-lg);
+      /* A widened strip's width: the strips' sum (the box and every seam's step back) by its share */
+      --strip-open: calc(
+        (100cqw - (var(--strip-count) - 1) * var(--strip-step)) * var(--strip-grow) /
+          (var(--strip-grow) + var(--strip-count) - 1)
+      );
+    }
+    .gf-strips[data-line="thick"] {
+      --strip-line: var(--space-lg);
+    }
+    .gf-strips[data-overlap="on"] {
+      --strip-overlap: var(--space-xl);
+    }
+    .gf-strip {
+      transition: flex-grow var(--dur-long) var(--ease-out);
+    }
+    .gf-strips[data-dim="on"] .gf-strip-frame::after {
+      transition: opacity var(--dur-long) var(--ease-out);
+    }
+    .gf-strip-image {
+      left: 50%;
+      width: var(--strip-open);
+      transform: translateX(-50%);
+    }
+    .gf-strip:only-child .gf-strip-image,
+    .gf-strips[data-hover="still"] .gf-strip-image {
+      left: 0;
+      width: 100%;
+      transform: none;
+    }
+    .gf-strip:has(.gf-strip-cut:focus-visible) {
+      z-index: 1;
+      flex-grow: var(--strip-grow);
+    }
+    .gf-strips[data-hover="still"] .gf-strip:has(.gf-strip-cut:focus-visible) {
+      flex-grow: 1;
+    }
+    .gf-strips[data-dim="on"]:has(.gf-strip-cut:focus-visible)
+      .gf-strip:not(:has(.gf-strip-cut:focus-visible))
+      .gf-strip-frame::after {
+      opacity: 0.55;
+    }
+  }
+  @media (min-width: 64rem) and (hover: hover) and (pointer: fine) {
+    .gf-strip:hover {
+      z-index: 1;
+      flex-grow: var(--strip-grow);
+    }
+    .gf-strips[data-hover="still"] .gf-strip:hover {
+      flex-grow: 1;
+    }
+    .gf-strips[data-dim="on"]:has(.gf-strip:hover) .gf-strip:not(:hover) .gf-strip-frame::after {
+      opacity: 0.55;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gf-strip {
+      transition: none;
+    }
+    .gf-strips[data-dim="on"] .gf-strip-frame::after {
+      transition: none;
+    }
+  }
+}
