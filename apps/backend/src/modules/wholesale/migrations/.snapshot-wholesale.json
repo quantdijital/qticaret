@@ -164,6 +164,22 @@
           "enumItems": [],
           "mappedType": "integer"
         },
+        "invite_count": {
+          "name": "invite_count",
+          "type": "integer",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "1",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
         "status": {
           "name": "status",
           "type": "text",

@@ -6,9 +6,8 @@ import { model } from "@medusajs/framework/utils"
  * active the customer record is the one source and these are cleared.
  * Its own prices live in a private `override` list for a one-member hidden
  * group, every row of which also carries that group as a price rule, so
- * it outranks the level's list (Ek 2026-11-15). Opening and closing
- * accounts is slice 1b; slice 1a keeps the table and the private list's
- * pricing.
+ * it outranks the level's list (Ek 2026-11-15). Opened, changed, closed
+ * and taken on sign-in by `workflows/wholesale/accounts/`.
  */
 export const WholesaleAccount = model
   .define("wholesale_account", {
@@ -24,6 +23,8 @@ export const WholesaleAccount = model
     rate_bps: model.number().nullable(),
     /** Overrides the level's; null: the level's, or no rule. */
     min_quantity: model.number().nullable(),
+    /** Invitations sent while pending, the first counted; a resend is capped (review L2). */
+    invite_count: model.number().default(1),
     status: model.enum(["pending", "active", "inactive"]).default("pending"),
     invited_at: model.dateTime().nullable(),
     activated_at: model.dateTime().nullable(),

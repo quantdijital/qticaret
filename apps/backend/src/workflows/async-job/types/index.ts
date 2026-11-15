@@ -17,6 +17,7 @@ import { seoAudit } from "./seo-audit"
 import { seoSitemap } from "./seo-sitemap"
 import { seoUrlStyle } from "./seo-url-style"
 import { trAddressSync } from "./tr-address-sync"
+import { wholesaleCarts } from "./wholesale-carts"
 import { wholesaleSync } from "./wholesale-sync"
 import type { JobType } from "./types"
 
@@ -47,6 +48,7 @@ const JOB_TYPES: Readonly<Record<string, JobType>> = Object.freeze({
   "seo.sitemap": erase(seoSitemap),
   "seo.url_style": erase(seoUrlStyle),
   "tr_address.sync": erase(trAddressSync),
+  "wholesale.carts": erase(wholesaleCarts),
   "wholesale.sync": erase(wholesaleSync),
 })
 

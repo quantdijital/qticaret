@@ -22,6 +22,7 @@ import { requireMailDomain } from "./mail-domain"
 import { notePasswordChange, tokenAfterPasswordChange } from "./password-change"
 import { newPasswordPolicy } from "./password-policy"
 import { verificationOfOwnIdentity } from "./verification"
+import { claimWholesaleAccount } from "./wholesale-claim"
 import { optionalCustomer, orderPageAccess } from "./order-access"
 import { rateLimit } from "./rate-limit"
 import { rejectRequest } from "./reject"
@@ -152,7 +153,8 @@ export const ACCOUNT_ROUTES = [
   },
   { matcher: "/store/orders/:id", middlewares: [orderPageAccess] },
   { matcher: "/store/orders", middlewares: [attachGuestOrders] },
-  { matcher: "/store/customers/me", middlewares: [attachGuestOrders] },
+  // ADR-0068 §3: an invited wholesaler's account taken on the same proof
+  { matcher: "/store/customers/me", middlewares: [attachGuestOrders, claimWholesaleAccount] },
   // adr/0038 §2: consent from the account and at checkout; the explicit
   // authenticate keeps the route closed whatever core's /me matchers do
   {

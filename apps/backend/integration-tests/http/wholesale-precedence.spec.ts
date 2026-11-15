@@ -1,5 +1,4 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { setManualPricesWorkflow } from "../../src/workflows/wholesale/manual-prices"
 import { createAdminUser } from "../helpers/admin"
 import { registerCustomer } from "../helpers/customer"
 import type { HttpClient } from "../helpers/http"
@@ -8,7 +7,7 @@ import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
-import { joinGroup, privateList, tierRecords, wholesaleApi } from "../helpers/wholesale"
+import { accountApi, wholesaleApi } from "../helpers/wholesale"
 
 jest.setTimeout(240 * 1000)
 
@@ -29,6 +28,7 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
     let staff: ReturnType<typeof wholesaleApi>
+    let accounts: ReturnType<typeof accountApi>
     let shop: StockShop
     let store: Storefront
 
@@ -36,6 +36,7 @@ medusaIntegrationTestRunner({
       const container = getContainer()
       const admin = await createAdminUser(http, container)
       staff = wholesaleApi(http, admin.headers)
+      accounts = accountApi(http, admin.headers)
       shop = await stockShop(container)
       store = await createStorefront(container)
       expect((await staff.flag(true)).status).toBe(200)
@@ -53,7 +54,11 @@ medusaIntegrationTestRunner({
       return answer.data.product.variants[0]?.calculated_price.calculated_amount
     }
 
-    /** A product at 100 TL, a member of a level priced 80.00 (66.67 net) by hand. */
+    /**
+     * A product at 100 TL, a level priced 80.00 (66.67 net) by hand, and a
+     * registered customer made its wholesaler through the accounts API
+     * (slice 1b): active at once, in the level's group.
+     */
     async function levelMember(handle: string) {
       const product = await stockedProduct(getContainer(), shop, handle, null, 100)
       const customer = await registerCustomer(http, store)
@@ -62,30 +67,20 @@ medusaIntegrationTestRunner({
         set: [{ variant_id: product.variantId, net: "66.67" }],
       })
       expect(set.status).toBe(200)
-      await joinGroup(
-        getContainer(),
-        (await tierRecords(getContainer(), tier.id)).groupId,
-        customer.id
-      )
-      return { ...product, customer, tier }
+      const account = await accounts.made({
+        email: customer.email,
+        contact_name: "Ali Kaya",
+        tier_id: tier.id,
+      })
+      expect(account.status).toBe("active")
+      return { ...product, customer, tier, account }
     }
 
-    /** The wholesaler's own price, KDV excluded, as the module writes it. */
-    async function ownPrice(customerId: string, variantId: string, net: number) {
-      const own = await privateList(getContainer(), customerId)
-      await setManualPricesWorkflow(getContainer()).run({
-        input: {
-          list: {
-            kind: "private",
-            price_list_id: own.priceListId,
-            customer_group_id: own.groupId,
-            rate_bps: null,
-          },
-          set: [{ variant_id: variantId, net_amount: net }],
-          remove: [],
-          created_by: null,
-        },
-      })
+    /** The wholesaler's own price, KDV excluded, through its own list (opened on the account). */
+    async function ownPrice(accountId: string, variantId: string, net: string) {
+      expect((await accounts.update(accountId, { own_prices: true })).status).toBe(200)
+      const written = await accounts.prices(accountId, { set: [{ variant_id: variantId, net }] })
+      expect(written.status).toBe(200)
     }
 
     async function publicList(type: "sale" | "override", variantId: string, amount: number) {
@@ -110,17 +105,17 @@ medusaIntegrationTestRunner({
     })
 
     it("gives the wholesaler's own price over the level's when dearer", async () => {
-      const { productId, variantId, customer } = await levelMember("ozel-pahali")
+      const { productId, variantId, customer, account } = await levelMember("ozel-pahali")
       // 75.00 net is 90.00
-      await ownPrice(customer.id, variantId, 7500)
+      await ownPrice(account.id, variantId, "75.00")
 
       expect(await priceFor(productId, customer.headers)).toBe(90)
     })
 
     it("gives the wholesaler's own price over the level's when cheaper", async () => {
-      const { productId, variantId, customer } = await levelMember("ozel-ucuz")
+      const { productId, variantId, customer, account } = await levelMember("ozel-ucuz")
       // 58.33 net is 69.996: 70.00
-      await ownPrice(customer.id, variantId, 5833)
+      await ownPrice(account.id, variantId, "58.33")
 
       expect(await priceFor(productId, customer.headers)).toBe(70)
     })

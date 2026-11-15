@@ -36,6 +36,7 @@ describe("job types", () => {
       "seo.sitemap",
       "seo.url_style",
       "tr_address.sync",
+      "wholesale.carts",
       "wholesale.sync",
     ])
     expect(jobType("__proto__")).toBeUndefined()
@@ -66,7 +67,14 @@ describe("job types", () => {
       managersOnly: true,
       containsPersonalData: false,
     })
-    expect(MANAGER_JOB_TYPES).toEqual(["wholesale.sync"])
+    // Review M2: the carts repriced when the flag turns, likewise
+    expect(jobType("wholesale.carts")).toMatchObject({
+      singleton: true,
+      internal: true,
+      managersOnly: true,
+      containsPersonalData: false,
+    })
+    expect(MANAGER_JOB_TYPES).toEqual(["wholesale.carts", "wholesale.sync"])
   })
 
   it("syncs the address data one run at a time, never through the jobs route", () => {

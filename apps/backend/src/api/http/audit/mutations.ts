@@ -3,6 +3,7 @@ import { errorSummary, logger } from "../../../lib/logging"
 import type { AuditEntryInput } from "../../../modules/audit-log/service"
 import { auditContext, auditService } from "./context"
 import { diffSnapshots } from "./diff"
+import { AUDIT_RESOURCE_ID, AUDIT_RESULT } from "./notes"
 import { auditPath, describeRoute, matchAuditedResource } from "./registry"
 import type { ResourceMatch } from "./registry"
 import type { Snapshot } from "./types"
@@ -43,16 +44,33 @@ interface PendingEntry {
   fields: string[]
 }
 
+/** What the handler added to its entry (`notes.ts`). */
+function handlerNotes(res: MedusaResponse): { resourceId?: string; result?: unknown } {
+  const locals = (res as { locals?: Record<string, unknown> }).locals ?? {}
+  const resourceId = locals[AUDIT_RESOURCE_ID]
+  const result = locals[AUDIT_RESULT]
+  return {
+    ...(typeof resourceId === "string" && resourceId !== "" ? { resourceId } : {}),
+    ...(result !== undefined ? { result } : {}),
+  }
+}
+
 async function writeEntry({ req, res, match, before, entry: sent, fields }: PendingEntry) {
   // A path no route answered names no kind of thing: anyone could make up
   // kinds by the hundred and push the real ones out of the viewer's filter
-  const entry = !match && res.statusCode === 404 ? { ...sent, resource_type: null } : sent
-  let changes: Record<string, unknown> = { fields }
+  const named = !match && res.statusCode === 404 ? { ...sent, resource_type: null } : sent
+  const notes = handlerNotes(res)
+  const entry =
+    !named.resource_id && notes.resourceId ? { ...named, resource_id: notes.resourceId } : named
+  let changes: Record<string, unknown> = {
+    fields,
+    ...(notes.result !== undefined ? { result: notes.result } : {}),
+  }
   // Read again whatever the status: a failed request may still have changed something
   if (match && before) {
     const after = await snapshotOf(req, match)
     if (after) {
-      changes = { fields, diff: diffSnapshots(before, after, match.resource.sensitive) }
+      changes = { ...changes, diff: diffSnapshots(before, after, match.resource.sensitive) }
     }
   }
   const service = auditService(req)
