@@ -1,6 +1,7 @@
 import { ChevronRight, Heart, House, LogOut, MapPin, Package, UserRound } from "lucide-react"
 import type { AccountActions, AccountPageView, AccountSection, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
+import { SignOutForm } from "./SignOutForm"
 
 /** Each section's icon; a link the storefront did not name has none. */
 const ICONS: Record<AccountSection, typeof House> = {
@@ -43,7 +44,7 @@ function SignOut({
 }) {
   const icon = <LogOut className="size-5 shrink-0" aria-hidden="true" strokeWidth={1.75} />
   return (
-    <form action={actions.logout}>
+    <SignOutForm action={actions.logout}>
       <button type="submit" className={className}>
         {circle ? (
           <span className="flex size-11 shrink-0 items-center justify-center rounded-pill bg-field">
@@ -54,7 +55,7 @@ function SignOut({
         )}
         {t("account.logout")}
       </button>
-    </form>
+    </SignOutForm>
   )
 }
 

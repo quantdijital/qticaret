@@ -4,6 +4,7 @@ import { parseStored } from "../sections/stored"
 import {
   CARD_BUTTON_STYLES,
   CARD_NO_REVIEWS,
+  CARD_QUICK_VIEW_TRIGGERS,
   CARD_SOLD_OUT_ROWS,
   themeSection,
   upgradeCard,
@@ -125,5 +126,72 @@ describe("theme section: the product card's badges, sold-out row, no-reviews row
       no_reviews: "write_first",
     })
     expect(upgradeCard(null)).toBeNull()
+  })
+})
+
+/** adr/0049 Ek 2026-11-15: the quick view, off until the shop turns it on. */
+describe("theme section: the product card's quick view", () => {
+  const QUICK_VIEW_KEYS = [
+    "quick_view",
+    "quick_view_trigger",
+    "quick_view_rating",
+    "quick_view_summary",
+    "quick_view_quantity",
+  ]
+
+  it("holds the contract's trigger list and draws no quick view by default", () => {
+    const contract = jest.requireActual<Record<string, unknown>>(CONTRACT_FILE)
+    expect(CARD_QUICK_VIEW_TRIGGERS).toEqual(contract["CARD_QUICK_VIEW_TRIGGERS"])
+    expect(defaults.product_card).toMatchObject({
+      quick_view: false,
+      quick_view_trigger: "hover",
+      quick_view_rating: true,
+      quick_view_summary: true,
+      quick_view_quantity: true,
+    })
+  })
+
+  it("takes each trigger on its list and refuses one off it with the error key", () => {
+    const issue = (product_card: Record<string, unknown>) =>
+      full.safeParse({ ...defaults, product_card: { ...defaults.product_card, ...product_card } })
+        .error?.issues[0]
+    for (const quick_view_trigger of CARD_QUICK_VIEW_TRIGGERS) {
+      expect(issue({ quick_view: true, quick_view_trigger })).toBeUndefined()
+    }
+    expect(issue({ quick_view_trigger: "always" })).toMatchObject({
+      message: "platform_settings.invalid",
+      path: ["product_card", "quick_view_trigger"],
+    })
+    expect(issue({ quick_view_trigger: null })?.message).toBe("platform_settings.invalid")
+    expect(issue({ quick_view: "on" })).toBeDefined()
+    expect(issue({ quick_view_quantity: 1 })).toBeDefined()
+  })
+
+  it("keeps the stored quick view on a patch that leaves it out", () => {
+    const stored = full.parse({
+      ...defaults,
+      product_card: {
+        ...defaults.product_card,
+        quick_view: true,
+        quick_view_trigger: "icon",
+        quick_view_rating: false,
+        quick_view_summary: false,
+        quick_view_quantity: false,
+      },
+    })
+    const patched = patch.parse({ product_card: { quick_view_summary: true } })
+    expect(patched).toEqual({ product_card: { quick_view_summary: true } })
+    expect(full.parse(mergePatch(stored, patched)).product_card).toEqual({
+      ...stored.product_card,
+      quick_view_summary: true,
+    })
+  })
+
+  it("reads a row saved before it as today's card: no quick view", () => {
+    const card = Object.fromEntries(
+      Object.entries(defaults.product_card).filter(([key]) => !QUICK_VIEW_KEYS.includes(key))
+    )
+    expect(parseStored("theme", { ...defaults, product_card: card })).toEqual(defaults)
+    expect(withCardDefaults({ ...defaults, product_card: card })).toEqual(defaults)
   })
 })

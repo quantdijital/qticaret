@@ -45,5 +45,7 @@ export async function cardOptions(): Promise<CardOptions> {
       buttonStyle: card.button_style,
       freeShippingFrom: answer.free_shipping_threshold,
     },
+    // The quick view button (adr/0049 Ek 2026-11-15): none while the shop has it off
+    quickView: card.quick_view ? card.quick_view_trigger : null,
   }
 }

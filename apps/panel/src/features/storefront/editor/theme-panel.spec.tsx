@@ -97,6 +97,30 @@ describe("the theme settings in the draft (adr/0063 §3)", HEAVY, () => {
     })
   })
 
+  it("shows the quick view's look and contents only once it is on, and saves them (adr/0049 Ek 2026-11-15)", async () => {
+    await openTheme()
+    const off = screen.getByRole("switch", { name: /^Hızlı bakışı göster/ })
+    expect(off.getAttribute("aria-checked")).toBe("false")
+    expect(screen.queryByRole("combobox", { name: /^Düğmenin görünüşü/ })).toBeNull()
+    expect(screen.queryByRole("switch", { name: /^Pencerede adet seçiciyi göster/ })).toBeNull()
+
+    await user.click(off)
+    await choose(/^Düğmenin görünüşü/, "Her zaman simge")
+    await user.click(screen.getByRole("switch", { name: /^Pencerede adet seçiciyi göster/ }))
+    expect(screen.getByRole("switch", { name: /^Pencerede puanı göster/ })).toBeTruthy()
+    expect(screen.getByRole("switch", { name: /^Pencerede kısa açıklamayı göster/ })).toBeTruthy()
+    await pass(AUTOSAVE_MS)
+
+    await waitFor(() => {
+      expect(savedTheme()?.product_card).toEqual({
+        ...THEME.product_card,
+        quick_view: true,
+        quick_view_trigger: "icon",
+        quick_view_quantity: false,
+      })
+    })
+  })
+
   it("saves every choice into the draft as it is made, the preview reloading, nothing live", async () => {
     const primary = await openTheme()
     const preview = await screen.findByTitle("Vitrin önizlemesi")

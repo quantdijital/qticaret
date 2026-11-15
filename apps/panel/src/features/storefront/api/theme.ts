@@ -1,6 +1,7 @@
 import {
   CARD_BUTTON_STYLES,
   CARD_NO_REVIEWS,
+  CARD_QUICK_VIEW_TRIGGERS,
   CARD_SOLD_OUT_ROWS,
   CARD_VARIANTS,
   SECTION_SPACINGS,
@@ -40,6 +41,14 @@ export const CARD_BADGE_SWITCHES = ["sale_badge", "low_stock_badge", "sold_out_b
  * card's foot button (decisions b, c, d): the contract's lists.
  */
 export { CARD_BUTTON_STYLES, CARD_NO_REVIEWS, CARD_SOLD_OUT_ROWS }
+/** The quick view button's look (adr/0049 Ek 2026-11-15): the contract's list. */
+export { CARD_QUICK_VIEW_TRIGGERS }
+/** What the quick view dialog shows besides the photos, name, price and options, each on or off. */
+export const QUICK_VIEW_SWITCHES = [
+  "quick_view_rating",
+  "quick_view_summary",
+  "quick_view_quantity",
+] as const
 export const HEADER_LAYOUTS = ["centered", "left"] as const
 export const BUTTON_SHAPES = ["pill", "rounded", "square"] as const
 /** The gap between sections, theme-wide (Tezgâh audit K-11): the contract's list, `normal` the theme's own. */
@@ -75,7 +84,15 @@ export interface ThemeSettings {
     sold_out_row: (typeof CARD_SOLD_OUT_ROWS)[number]
     no_reviews: (typeof CARD_NO_REVIEWS)[number]
     button_style: (typeof CARD_BUTTON_STYLES)[number]
-  } & Record<(typeof FRAMED_CARD_SWITCHES)[number] | (typeof CARD_BADGE_SWITCHES)[number], boolean>
+    /** The quick view (adr/0049 Ek 2026-11-15): off by default, as cards were. */
+    quick_view: boolean
+    quick_view_trigger: (typeof CARD_QUICK_VIEW_TRIGGERS)[number]
+  } & Record<
+    | (typeof FRAMED_CARD_SWITCHES)[number]
+    | (typeof CARD_BADGE_SWITCHES)[number]
+    | (typeof QUICK_VIEW_SWITCHES)[number],
+    boolean
+  >
   header: { layout: (typeof HEADER_LAYOUTS)[number]; sticky: boolean }
   buttons: (typeof BUTTON_SHAPES)[number]
   section_spacing: (typeof SECTION_SPACINGS)[number]
@@ -119,6 +136,11 @@ export const GRAFIT_THEME: ThemeChoices = {
     sold_out_row: "price",
     no_reviews: "hide",
     button_style: "outline",
+    quick_view: false,
+    quick_view_trigger: "hover",
+    quick_view_rating: true,
+    quick_view_summary: true,
+    quick_view_quantity: true,
   },
   header: { layout: "left", sticky: true },
   buttons: "pill",

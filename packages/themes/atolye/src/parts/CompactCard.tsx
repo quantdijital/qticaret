@@ -2,6 +2,7 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { ProductCardView, Translate } from "@qticaret/ui"
 import { badgesOf, isOut } from "./card-parts"
 import { CardPriceRow, CardStars } from "./card-rows"
+import { CardQuickView } from "./card-quick-view"
 
 /** The photo's width: 80 px on a phone, 96 px from 768 px (`w-20 md:w-24`). */
 const SIZES = "(min-width: 768px) 96px, 80px"
@@ -29,7 +30,7 @@ export function CompactCard({
   // One pill: "Tükendi" over a discount, each as the shop shows it
   const out = isOut(product) && badges.soldOut
   return (
-    <article className="group relative flex h-full items-center gap-3 md:gap-4">
+    <article className="group gf-card @container relative flex h-full items-center gap-3 md:gap-4">
       <div className="relative aspect-card w-20 shrink-0 overflow-hidden rounded-media bg-paper-2 md:w-24">
         {product.image && (
           <ResponsiveImage
@@ -70,6 +71,7 @@ export function CompactCard({
         <CardStars product={product} t={t} />
         <CardPriceRow product={product} t={t} />
       </div>
+      <CardQuickView product={product} t={t} inline />
     </article>
   )
 }

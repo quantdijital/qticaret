@@ -36,6 +36,13 @@ export interface ProductCardSettings {
   no_reviews: (typeof CARD_NO_REVIEWS)[number]
   /** The framed card's foot button (decision d). */
   button_style: (typeof CARD_BUTTON_STYLES)[number]
+  /** The quick view (adr/0049 Ek 2026-11-15): off by default, as cards were. */
+  quick_view: boolean
+  quick_view_trigger: (typeof CARD_QUICK_VIEW_TRIGGERS)[number]
+  /** What the quick view dialog shows besides the photos, name, price and options. */
+  quick_view_rating: boolean
+  quick_view_summary: boolean
+  quick_view_quantity: boolean
 }
 
 /**
@@ -46,6 +53,8 @@ export interface ProductCardSettings {
 export const CARD_SOLD_OUT_ROWS = ["price", "text", "notify"] as const
 export const CARD_NO_REVIEWS = ["hide", "empty_stars", "write_first"] as const
 export const CARD_BUTTON_STYLES = ["solid", "outline", "text"] as const
+/** The quick view button (`CARD_QUICK_VIEW_TRIGGERS`): on hover, or an icon always. */
+export const CARD_QUICK_VIEW_TRIGGERS = ["hover", "icon"] as const
 
 const CHOICE_ERROR = { error: "platform_settings.invalid" }
 
@@ -96,5 +105,10 @@ export const productCardSchema = z
     sold_out_row: choice(CARD_SOLD_OUT_ROWS),
     no_reviews: choice(CARD_NO_REVIEWS),
     button_style: choice(CARD_BUTTON_STYLES),
+    quick_view: z.boolean(),
+    quick_view_trigger: choice(CARD_QUICK_VIEW_TRIGGERS),
+    quick_view_rating: z.boolean(),
+    quick_view_summary: z.boolean(),
+    quick_view_quantity: z.boolean(),
   })
   .strict()
