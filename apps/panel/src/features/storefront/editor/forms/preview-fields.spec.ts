@@ -114,8 +114,8 @@ describe("the preview's field register", () => {
     expect(previewField(bar, "lines.2")).toBeNull()
     const brands = newHomeSection("brands", "marka00001") as AnySection
     expect(previewField(brands, "title")).toEqual({ target: "marka00001-title", group: "content" })
-    const faq = newHomeSection("faq", "sss0000001") as AnySection
-    expect(previewField(faq, "title")).toBeNull()
+    // A section without a title of its own (the trust strip) takes none
+    expect(previewField(newHomeSection("trust_badges", "guven00001"), "title")).toBeNull()
   })
 
   it("never takes a key of another form, however it looks", () => {

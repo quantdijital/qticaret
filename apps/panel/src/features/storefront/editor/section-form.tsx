@@ -66,7 +66,14 @@ export function FormOf({
       return <PriceBandsForm section={section} {...props} />
     case "trust_badges":
       // The strip's problems are the badges' (`trust_badges.0.title`) and its schedule
-      return <TrustBadgeList badges={badges} problems={problems} onChange={onBadges} />
+      return (
+        <TrustBadgeList
+          badges={badges}
+          problems={problems}
+          onChange={onBadges}
+          section={section.id}
+        />
+      )
     case "newsletter":
     case "help":
       return <WordedForm section={section} {...props} />

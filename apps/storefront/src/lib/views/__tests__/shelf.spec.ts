@@ -180,5 +180,28 @@ describe("a product rail's variants (adr/0049 Ek 2026-11-15)", () => {
       ["home.on_sale", ["prod_8", "prod_9"]],
     ])
     expect(lists[0]?.products.every((card) => card.variant === "compact")).toBe(true)
+    // Nothing moved: no list says its place
+    expect(lists.some((list) => "at" in list)).toBe(false)
+  })
+
+  it("says each list's place in the design once one before it was left out (adr/0065 Faz 2b)", async () => {
+    const [columns] = await sectionViews(
+      [
+        rail(
+          { kind: "newest" },
+          {
+            variant: "columns",
+            title: "Yeni gelenler",
+            lists: [
+              { title: "Boş", source: { kind: "on_sale" }, product_ids: [] },
+              { title: null, source: { kind: "on_sale" }, product_ids: ["prod_8"] },
+            ],
+          }
+        ),
+      ],
+      t
+    )
+    const lists = columns && "lists" in columns ? (columns.lists ?? []) : []
+    expect(lists.map((list) => list.at)).toEqual([0, 2])
   })
 })
