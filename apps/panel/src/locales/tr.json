@@ -7940,7 +7940,7 @@
           "title": "Boşluk",
           "titleSet_one": "Boşluk · {{count}} ayar",
           "titleSet_other": "Boşluk · {{count}} ayar",
-          "hint": "Bölümün üstündeki ve altındaki boşluk. Seçilmeyen taraf temanın bölüm aralığını kullanır (Tema ayarları > Bölüm aralığı)."
+          "hint": "Bölümün üstündeki ve altındaki boşluk. Seçilmeyen taraf temanın bölüm aralığını kullanır (Tema ayarları > Bölüm aralığı); ince şeritlerde dar aralığı."
         },
         "space_outer": {
           "label": "Üst boşluk",

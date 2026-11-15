@@ -7940,7 +7940,7 @@
           "title": "Spacing",
           "titleSet_one": "Spacing · {{count}} setting",
           "titleSet_other": "Spacing · {{count}} settings",
-          "hint": "The space above and below the section. A side left unset uses the theme's section spacing (Theme settings > Section spacing)."
+          "hint": "The space above and below the section. A side left unset uses the theme's section spacing (Theme settings > Section spacing); a thin strip uses the narrow one."
         },
         "space_outer": {
           "label": "Top spacing",
