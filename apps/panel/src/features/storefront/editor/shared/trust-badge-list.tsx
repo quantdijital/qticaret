@@ -21,6 +21,7 @@ import { STOREFRONT_LIMITS as L } from "@/features/settings/storefront"
 import type { TrustBadge } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { useProblemText } from "../forms/problem-text"
+import { PREVIEW_IDS } from "../forms/preview-fields"
 import { BADGE_ICONS } from "./badge-icons"
 
 const B = "storefront.editor.shared.badges"
@@ -31,6 +32,11 @@ interface TrustBadgeListProps {
   problems: SectionProblems
   /** The new list; `field` names the field being typed in (one undo step per field). */
   onChange: (badges: TrustBadge[], field?: string) => void
+  /**
+   * A strip section's id: each badge's fields take the ids the preview's edit
+   * labels name (`PREVIEW_IDS`, adr/0065 Faz 2b); none (the buy box's dialog), ids of its own.
+   */
+  section?: string
 }
 
 /**
@@ -39,7 +45,7 @@ interface TrustBadgeListProps {
  * section's form and from the product page's buy box. Part of the draft:
  * "Yayınla" puts them live with the rest of the design.
  */
-export function TrustBadgeList({ badges, problems, onChange: set }: TrustBadgeListProps) {
+export function TrustBadgeList({ badges, problems, onChange: set, section }: TrustBadgeListProps) {
   const { t } = useTranslation()
   const problem = useProblemText()
   // Two lists may be open at once (a strip's form and the buy box's dialog)
@@ -60,7 +66,9 @@ export function TrustBadgeList({ badges, problems, onChange: set }: TrustBadgeLi
       <ol className="flex flex-col gap-3">
         {badges.map((badge, index) => {
           const number = index + 1
-          const id = `${base}-badge-${String(index)}`
+          const id = section
+            ? PREVIEW_IDS.text(section, `badges.${String(index)}`)
+            : `${base}-badge-${String(index)}`
           const at = `trust_badges.${String(index)}`
           const titleError = problem(problems[`${at}.title`], L.badgeTitleLength)
           const textError = problem(problems[`${at}.text`], L.badgeTextLength)

@@ -1,5 +1,5 @@
 import { Mail, MapPin, Phone } from "lucide-react"
-import { drawnVariant, sectionMark } from "@qticaret/ui"
+import { drawnVariant, fieldMark, sectionMark } from "@qticaret/ui"
 import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { FooterLinks } from "./FooterLinks"
@@ -93,9 +93,14 @@ export function Footer({
         {subscribe && shop.newsletter && (
           <section
             aria-labelledby="bulten"
+            {...sectionMark(shop.newsletter.mark)}
             className="grid gap-4 border-b border-rule pb-10 lg:col-span-12 lg:grid-cols-12 lg:items-start lg:gap-(--gap-columns) lg:pb-12"
           >
-            <h2 id="bulten" className="max-w-[24ch] text-title lg:col-span-4 lg:pt-8">
+            <h2
+              id="bulten"
+              className="max-w-[24ch] text-title lg:col-span-4 lg:pt-8"
+              {...fieldMark(Boolean(shop.newsletter.mark), "title")}
+            >
               {shop.newsletter.title}
             </h2>
             <NewsletterForm
@@ -104,6 +109,7 @@ export function Footer({
               action={subscribe}
               privacyPath={shop.privacyPath}
               words={newsletterWords(t, shop.newsletter.text)}
+              marks={Boolean(shop.newsletter.mark)}
               className="lg:col-span-6"
             />
           </section>

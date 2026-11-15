@@ -10,6 +10,7 @@ import { FIELD_IDS } from "./field-registry"
 import { F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
+import { PREVIEW_IDS } from "./preview-fields"
 
 const Q = "storefront.editor.faq"
 
@@ -75,7 +76,7 @@ export function FaqForm({ section, problems, onChange }: SectionFormProps<FaqSec
                 />
               </div>
               <TextField
-                id={`${section.id}-${at}-question`}
+                id={PREVIEW_IDS.text(section.id, `${at}.question`)}
                 label={t(`${Q}.question`, { number })}
                 value={item.question}
                 max={L.question}
@@ -86,7 +87,7 @@ export function FaqForm({ section, problems, onChange }: SectionFormProps<FaqSec
                 }}
               />
               <TextField
-                id={`${section.id}-${at}-answer`}
+                id={PREVIEW_IDS.text(section.id, `${at}.answer`)}
                 label={t(`${Q}.answer`, { number })}
                 value={item.answer}
                 max={L.answer}

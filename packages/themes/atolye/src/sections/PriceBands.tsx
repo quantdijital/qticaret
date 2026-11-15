@@ -1,4 +1,4 @@
-import { ResponsiveImage } from "@qticaret/ui"
+import { ResponsiveImage, fieldKey, fieldMark } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { type Of, headingId } from "./plan"
@@ -36,7 +36,7 @@ export function PriceBands({ section }: { section: Of<"price_bands"> }) {
             COLUMNS[section.bands.length]
           )}
         >
-          {section.bands.map((band) => (
+          {section.bands.map((band, drawn) => (
             <li key={`${band.label}|${band.path}`} className="min-w-0">
               <a
                 href={band.path}
@@ -45,10 +45,20 @@ export function PriceBands({ section }: { section: Of<"price_bands"> }) {
                 {band.category && (
                   <span className="text-sm font-semibold text-text-2">{band.category}</span>
                 )}
-                <span className="text-display leading-[1.15] font-extrabold tracking-(--tracking-head) text-text group-hover:underline group-hover:underline-offset-4">
+                <span
+                  className="text-display leading-[1.15] font-extrabold tracking-(--tracking-head) text-text group-hover:underline group-hover:underline-offset-4"
+                  {...fieldMark(section.editor, fieldKey("bands", band.at ?? drawn, "label"))}
+                >
                   {band.label}
                 </span>
-                {band.text && <span className="text-sm text-text-2">{band.text}</span>}
+                {band.text && (
+                  <span
+                    className="text-sm text-text-2"
+                    {...fieldMark(section.editor, fieldKey("bands", band.at ?? drawn, "text"))}
+                  >
+                    {band.text}
+                  </span>
+                )}
                 {band.products.length > 0 && (
                   <span className="mt-2 flex gap-2">
                     {band.products.map((product) => (

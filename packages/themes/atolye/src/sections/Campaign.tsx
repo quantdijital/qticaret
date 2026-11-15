@@ -1,4 +1,5 @@
-import type { BannerSectionView, BannerSlideView } from "@qticaret/ui"
+import { fieldKey, fieldMark } from "@qticaret/ui"
+import type { BannerSlideView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { BandPicture } from "./BandPicture"
@@ -15,16 +16,21 @@ function Slide({
   section,
   count,
   eager,
+  at,
 }: {
   slide: BannerSlideView
-  section: BannerSectionView
+  section: Of<"banner">
   count: number
   eager: boolean
+  /** Its place among the design's slides, for the editor's field marks. */
+  at: number
 }) {
   const { row, column } = placeOf(section.text_position)
   const height = HEIGHT[section.height]
   const dark = slide.tone === "dark"
   const links = [slide.link, slide.secondLink].filter((link) => link !== null)
+  // The editor's field marks (adr/0065 Faz 2b): in its live preview only
+  const qf = (part: string) => fieldMark(section.editor, fieldKey("slides", at, part))
   return (
     <li
       data-tone={slide.tone}
@@ -47,19 +53,29 @@ function Slide({
         phone={slide.mobileImage}
         sizes={sizesOf(count)}
         eager={eager}
+        mark={qf("image")}
       />
       <span aria-hidden="true" className="gf-band-veil" />
       <div className={cn("flex max-w-xl flex-col p-5 sm:p-8 lg:p-12", COLUMN[column])}>
         <div className={cn("gf-band-words flex flex-col gap-3", WORDS[column])}>
-          {slide.heading && <h2 className="text-display">{slide.heading}</h2>}
-          {slide.text && <p className={dark ? "text-text" : "text-stage-text"}>{slide.text}</p>}
+          {slide.heading && (
+            <h2 className="text-display" {...qf("heading")}>
+              {slide.heading}
+            </h2>
+          )}
+          {slide.text && (
+            <p className={dark ? "text-text" : "text-stage-text"} {...qf("text")}>
+              {slide.text}
+            </p>
+          )}
           {links.length > 0 && (
             <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1">
-              {links.map((link, at) => (
+              {links.map((link, drawn) => (
                 <a
-                  key={`${link.path}-${String(at)}`}
+                  key={`${link.path}-${String(drawn)}`}
                   href={link.path}
-                  className={buttonClass(section.button_style, at === 1)}
+                  className={buttonClass(section.button_style, drawn === 1)}
+                  {...qf(drawn === 0 && !slide.secondFirst ? "link" : "second_link")}
                 >
                   {link.label}
                 </a>
@@ -109,6 +125,7 @@ export function Campaign({
           section={section}
           count={slides.length}
           eager={first && at === 0}
+          at={at}
         />
       ))}
     </ul>

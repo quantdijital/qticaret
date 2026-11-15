@@ -1,5 +1,5 @@
 import { Heart, UserRound } from "lucide-react"
-import { sectionMark } from "@qticaret/ui"
+import { fieldMark, sectionMark } from "@qticaret/ui"
 import type { HeaderCatalogView, ShopView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
@@ -60,7 +60,11 @@ export function HeaderCatalog({
   const pictures = images !== "off"
   // The highlighted link stands right after the main menu's last item (Tezgâh audit Y-05)
   const highlight = catalog.highlight && (
-    <a href={catalog.highlight.path} className="gf-btn gf-btn--small shrink-0">
+    <a
+      href={catalog.highlight.path}
+      className="gf-btn gf-btn--small shrink-0"
+      {...fieldMark(shop.editor, "highlight_link")}
+    >
       {catalog.highlight.label}
     </a>
   )
@@ -137,6 +141,7 @@ export function HeaderCatalog({
           {...search}
           id="arama-genis"
           written={catalog.searchLabel}
+          marks={shop.editor}
           className="hidden max-w-180 flex-1 lg:block"
         />
         {parts.phone && (
@@ -156,7 +161,12 @@ export function HeaderCatalog({
         </nav>
       </Container>
       <Container className="pb-2 lg:hidden">
-        <SearchBox {...search} id={PHONE_SEARCH} written={catalog.searchLabel} />
+        <SearchBox
+          {...search}
+          id={PHONE_SEARCH}
+          written={catalog.searchLabel}
+          marks={shop.editor}
+        />
       </Container>
       <div className="gf-menubar hidden lg:block" data-ground={catalog.menuGround}>
         <Container>

@@ -1,5 +1,6 @@
-import type { AnySection, HeroSection } from "@/features/storefront/api/layout"
+import type { AnySection, HeroSection, ProductsSection } from "@/features/storefront/api/layout"
 import { slidesOf } from "./catalog-slides"
+import { listField, placeOf, tabRail } from "./preview-lists"
 
 /**
  * The fields the live preview can point at (adr/0065 §9, Faz 2b): the
@@ -20,6 +21,16 @@ export interface PreviewField {
   group: "content"
   /** A slide's field: that slide's dialog opens at it. */
   slide?: number
+  /** Another section's field (a shelf's pill names the rail beside it): that section opens. */
+  section?: string
+}
+
+/** What the register reads beside the section: the document around it. */
+export interface PreviewContext {
+  /** A product rail's whole shelf on its page, itself among them (`shelfRun`). */
+  shelf?: readonly ProductsSection[]
+  /** How many trust badges the design has (a strip's form edits the shared list). */
+  badges?: number
 }
 
 /** The elements' ids, shared by the forms and the preview's register. */
@@ -31,9 +42,11 @@ export const PREVIEW_IDS = {
   /** A field of the catalogue opening's slide dialog (`catalog-slide-dialog.tsx`). */
   catalogSlide: (sectionId: string, slide: number, part: string) =>
     `${sectionId}-slide-${String(slide)}-${part}`,
+  /** A catalog header's own field (`FIELD_IDS.header`, `header-catalog-fields.tsx`). */
+  header: (sectionId: string, field: string) => `${sectionId}-header-${field}`,
 } as const
 
-/** The sections whose title the theme marks (`SectionHead`). */
+/** The sections whose title the theme marks (`SectionHead` and their own headings). */
 const TITLED: ReadonlySet<AnySection["type"]> = new Set([
   "products",
   "categories",
@@ -42,18 +55,19 @@ const TITLED: ReadonlySet<AnySection["type"]> = new Set([
   "reviews",
   "google_rating",
   "price_bands",
+  "related_products",
+  "featured_product",
+  "rich_text",
+  "faq",
+  "newsletter",
+  "help",
 ])
 
-const PLACE = /^(?:0|[1-9][0-9]?)$/
+/** The sections whose one line of text the theme marks (`text`). */
+const TEXTED: ReadonlySet<AnySection["type"]> = new Set(["featured_product", "newsletter", "help"])
 
-/** A place in a list as the key writes it (`2`), when the list has it; else null. */
-function placeOf(part: string | undefined, length: number): number | null {
-  if (part === undefined || !PLACE.test(part)) {
-    return null
-  }
-  const place = Number(part)
-  return place < length ? place : null
-}
+/** The catalog header's fields the theme marks: its search box's words, its highlighted link. */
+const HEADER_FIELDS: readonly string[] = ["search_placeholder", "highlight_link"]
 
 const content = (target: string): PreviewField => ({ target, group: "content" })
 
@@ -97,11 +111,31 @@ function heroField(section: HeroSection, parts: readonly string[]): PreviewField
   return link === null ? null : content(PREVIEW_IDS.text(section.id, `links.${String(link)}`))
 }
 
+/** A field of one word (`title`, `text`, `body`, a catalog header's own). */
+function wordField(section: AnySection, word: string): PreviewField | null {
+  if (
+    (word === "title" && TITLED.has(section.type)) ||
+    (word === "text" && TEXTED.has(section.type)) ||
+    (word === "body" && section.type === "rich_text")
+  ) {
+    return content(PREVIEW_IDS.text(section.id, word))
+  }
+  return section.type === "header_bar" &&
+    section.variant === "catalog" &&
+    HEADER_FIELDS.includes(word)
+    ? content(PREVIEW_IDS.header(section.id, word))
+    : null
+}
+
 /**
  * The panel's place for a field the preview named in `section`; null for
  * a key it does not know there (the section's form opens without it).
  */
-export function previewField(section: AnySection, key: string): PreviewField | null {
+export function previewField(
+  section: AnySection,
+  key: string,
+  context: PreviewContext = {}
+): PreviewField | null {
   if (key.length > 80) {
     return null
   }
@@ -122,7 +156,13 @@ export function previewField(section: AnySection, key: string): PreviewField | n
       parts.length === 2 && first === "lines" ? placeOf(second, section.lines.length) : null
     return line === null ? null : content(PREVIEW_IDS.text(section.id, `lines.${String(line)}`))
   }
-  return parts.length === 1 && first === "title" && TITLED.has(section.type)
-    ? content(PREVIEW_IDS.text(section.id, "title"))
-    : null
+  if (section.type === "products" && first === "tabs") {
+    const rail = tabRail(section, parts, context.shelf ?? [])
+    return rail ? { ...content(PREVIEW_IDS.text(rail.id, "title")), section: rail.id } : null
+  }
+  if (parts.length === 1 && first !== undefined) {
+    return wordField(section, first)
+  }
+  const field = listField(section, parts, context.badges ?? 0)
+  return field === null ? null : content(PREVIEW_IDS.text(section.id, field))
 }

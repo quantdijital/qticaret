@@ -3,7 +3,7 @@
 import { Search, X } from "lucide-react"
 import { useEffect, useId, useRef, useState, useSyncExternalStore } from "react"
 import type { ChangeEvent, KeyboardEvent } from "react"
-import { IDLE, createSuggester, moveActive } from "@qticaret/ui"
+import { IDLE, createSuggester, fieldMark, moveActive } from "@qticaret/ui"
 import type { LinkView, SuggestState } from "@qticaret/ui"
 import { useHydrated } from "@qticaret/ui/hooks/use-hydrated"
 import { cn } from "@qticaret/ui/lib/utils"
@@ -56,6 +56,7 @@ export function SearchBox({
   suggest,
   browse = [],
   written = false,
+  marks = false,
   className,
 }: {
   id: string
@@ -66,6 +67,8 @@ export function SearchBox({
   browse?: readonly LinkView[]
   /** The submit written ("Ara") in a filled button rather than the magnifier (the catalog header). */
   written?: boolean
+  /** The theme editor's live preview (adr/0065 Faz 2b): the box carries the search words' field mark. */
+  marks?: boolean | undefined
   className?: string
 }) {
   const hydrated = useHydrated()
@@ -211,6 +214,7 @@ export function SearchBox({
       action="/arama"
       method="get"
       role="search"
+      {...fieldMark(marks, "search_placeholder")}
       className={cn("relative", className)}
       onSubmit={() => {
         suggester?.cancel()

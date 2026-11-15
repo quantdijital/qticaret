@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { SHELF_LIMITS } from "@qticaret/types/section-shelf"
 import { scrollerSettingsOf } from "@qticaret/types/section-scroller"
+import { fieldKey, fieldMark } from "@qticaret/ui"
 import type { FormAction, ProductCardView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { CompactCard } from "../parts/CompactCard"
@@ -115,6 +116,9 @@ export function CompactShelf({ section, t }: LayoutProps) {
  * `columns`: two or three lists side by side from 1024 px (two from 768,
  * one under another on a phone), each its own heading and compact cards.
  */
+/** A columns list's title as the editor's field key: the rail's own, then its more lists'. */
+const listKey = (at: number) => (at === 0 ? "title" : fieldKey("lists", at - 1, "title"))
+
 export function ColumnsShelf({ section, t }: LayoutProps) {
   const lists = section.lists ?? []
   return (
@@ -124,9 +128,11 @@ export function ColumnsShelf({ section, t }: LayoutProps) {
         lists.length > 2 && "lg:grid-cols-[repeat(3,minmax(0,1fr))]"
       )}
     >
-      {lists.map((list) => (
+      {lists.map((list, drawn) => (
         <section key={list.id} aria-labelledby={headingId(list.id)} className="flex flex-col gap-5">
-          <h2 id={headingId(list.id)}>{list.title}</h2>
+          <h2 id={headingId(list.id)} {...fieldMark(section.editor, listKey(list.at ?? drawn))}>
+            {list.title}
+          </h2>
           <CompactList products={list.products} t={t} />
         </section>
       ))}
