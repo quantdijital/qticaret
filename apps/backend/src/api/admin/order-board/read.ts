@@ -8,6 +8,7 @@ import type { LineMetadataRow } from "../../../lib/orders/line-metadata"
 import { fromMedusaAmount, toMedusaAmount } from "../../../lib/money"
 import { shortUnits, stockShortOf } from "../../../lib/stock"
 import type { MedusaAmount } from "../../../lib/money"
+import { wholesaleOrders, wholesalerNames } from "../../../workflows/wholesale/orders"
 import { deliveriesOf, shippingOf } from "./parcels"
 import type { ShippingMethodRow } from "./parcels"
 import { boardRows } from "./rows"
@@ -52,6 +53,18 @@ function addonsOf(items: DisplayRow["items"]) {
   }
 }
 
+/** The page's wholesale orders and who placed them (ADR-0068 Ek 2026-11-15 (2)). */
+async function wholesalersOf(scope: MedusaContainer, ids: string[]) {
+  const linked = await wholesaleOrders(scope, { order_ids: ids })
+  const names = await wholesalerNames(scope, [...linked.values()])
+  return new Map(
+    [...linked].map(([orderId, accountId]) => [
+      orderId,
+      { id: accountId, name: names.get(accountId) ?? null },
+    ])
+  )
+}
+
 /**
  * The order list by stage (adr/0022): the filters' orders sorted into
  * stages (`rows.ts`), and only the page's orders read in full.
@@ -59,7 +72,7 @@ function addonsOf(items: DisplayRow["items"]) {
 export async function readOrderBoard(scope: MedusaContainer, params: AdminGetOrderBoardType) {
   const query = scope.resolve(ContainerRegistrationKeys.QUERY)
   const { offset, ...filters } = params
-  const { rows, limited } = await boardRows(scope, filters)
+  const { rows, limited, wholesale_matches: wholesaleMatches } = await boardRows(scope, filters)
   const slice = boardSlice(rows, params.stage, offset, ORDER_BOARD_PAGE)
   const ids = slice.page.map((row) => row.id)
   const { data: full } = ids.length
@@ -86,9 +99,10 @@ export async function readOrderBoard(scope: MedusaContainer, params: AdminGetOrd
       })
     : { data: [] }
   const byId = new Map((full as unknown as DisplayRow[]).map((order) => [order.id, order]))
-  const [shipping, deliveries] = await Promise.all([
+  const [shipping, deliveries, wholesalers] = await Promise.all([
     shippingOf(scope, ids),
     deliveriesOf(scope, full as unknown as DisplayRow[]),
+    wholesalersOf(scope, params.segment === "retail" ? [] : ids),
   ])
   return {
     orders: slice.page.flatMap(({ id, stage }) => {
@@ -112,6 +126,8 @@ export async function readOrderBoard(scope: MedusaContainer, params: AdminGetOrd
                 stage === "awaiting_payment" || stage === "to_ship"
                   ? shortUnits(stockShortOf(order.metadata))
                   : 0,
+              // The wholesaler who placed it, on the wholesale and the customer's lists
+              wholesaler: wholesalers.get(id) ?? null,
             },
           ]
         : []
@@ -121,6 +137,7 @@ export async function readOrderBoard(scope: MedusaContainer, params: AdminGetOrd
     offset,
     limit: ORDER_BOARD_PAGE,
     limited,
+    wholesale_matches: wholesaleMatches,
   }
 }
 
