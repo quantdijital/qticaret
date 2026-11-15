@@ -105,12 +105,17 @@ export const deleteAccountWorkflow = createWorkflow(
     const account = checkAccountStep(
       transform({ input }, ({ input }) => ({ id: input.id, action: "delete" as const }))
     )
-    // The sync job writes the own list's rows under this lock: none while it is deleted
+    // The sync job writes the own list's rows under this lock: none while it is deleted. Always
+    // taken after the account's; nothing holding a list's lock asks for an account's, so the
+    // two never wait on each other the other way round
     const listLock = transform(
       { account },
       ({ account }) => `wholesale-list:${account.private_price_list_id ?? account.id}`
     )
-    acquireLockStep({ key: listLock, timeout: 30, ttl: 120 })
+    // Its own step name: one workflow may hold a step name once (the boot refused a second)
+    acquireLockStep({ key: listLock, timeout: 30, ttl: 120 }).config({
+      name: "wholesale-delete-list-lock",
+    })
     const read = readForDeleteStep(transform({ input }, ({ input }) => ({ id: input.id })))
     // On an undo, after its groups are back: its carts at wholesale again (review L3)
     repriceOnUndoStep(transform({ read }, ({ read }) => ({ customer_id: read.customer_id })))
@@ -175,7 +180,7 @@ export const deleteAccountWorkflow = createWorkflow(
         company_name: read.company_name,
       }))
     )
-    releaseLockStep({ key: listLock })
+    releaseLockStep({ key: listLock }).config({ name: "wholesale-delete-list-unlock" })
     releaseLockStep({ key: lock })
     return new WorkflowResponse(
       transform({ input, carts }, ({ input, carts }) => ({ id: input.id, carts }))
