@@ -72,6 +72,8 @@ describe("the live preview's picking messages (adr/0065 Faz 2)", () => {
       payload: { path: "//evil.example", previewable: true },
     })
     expect(picked).toEqual([])
+    // A press in the frame moves the focus to it
+    frameElement().focus()
     for (const message of messages) {
       fromFrame(message)
     }
@@ -81,6 +83,53 @@ describe("the live preview's picking messages (adr/0065 Faz 2)", () => {
       "navigate-request",
       "location",
     ])
+  })
+
+  it("takes a single press from the frame that has the focus", async () => {
+    const { picked } = await connected()
+    frameElement().focus()
+    fromFrame(panelMessage("field", { id: "girisbolumu", field: "heading" }))
+    expect(picked).toEqual([
+      expect.objectContaining({
+        type: "field",
+        payload: { id: "girisbolumu", field: "heading" },
+      }),
+    ])
+  })
+
+  it("drops presses while the focus is elsewhere in the panel (security review, DÜŞÜK-1)", async () => {
+    const { picked } = await connected()
+    // A page in the frame cannot open forms or pages, or take the focus, on its own
+    fromFrame(panelMessage("click", { id: "girisbolumu" }))
+    fromFrame(panelMessage("field", { id: "girisbolumu", field: "heading" }))
+    fromFrame(panelMessage("navigate-request", { path: "/sepet", previewable: true }))
+    // What only shows (hover, the page drawn) still passes
+    fromFrame(panelMessage("hover", { id: "girisbolumu" }))
+    fromFrame(panelMessage("location", { path: "/", sections: ["mainheader"] }))
+    expect(picked.map((message) => message.type)).toEqual(["hover", "location"])
+  })
+
+  it("takes the frame's presses four a second at most (security review, DÜŞÜK-1)", async () => {
+    const { picked } = await connected()
+    frameElement().focus()
+    const presses = [
+      panelMessage("click", { id: "girisbolumu" }),
+      panelMessage("field", { id: "girisbolumu", field: "heading" }),
+      panelMessage("navigate-request", { path: "/sepet", previewable: true }),
+    ]
+    for (let index = 0; index < 9; index++) {
+      fromFrame(presses[index % presses.length])
+    }
+    // One gate for the three kinds: the first four only
+    expect(picked.map((message) => message.type)).toEqual([
+      "click",
+      "field",
+      "navigate-request",
+      "click",
+    ])
+    await pass(1000)
+    fromFrame(panelMessage("click", { id: "girisbolumu" }))
+    expect(picked).toHaveLength(5)
   })
 
   it("posts the tree's hover to the frame's exact origin", async () => {
