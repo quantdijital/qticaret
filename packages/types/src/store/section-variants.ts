@@ -119,8 +119,8 @@ export const headerTopLinksPlaceOf = (value: unknown): HeaderTopLinksPlace =>
 export const headerSearchWidthOf = (value: unknown): HeaderSearchWidth =>
   stepOf(HEADER_SEARCH_WIDTHS, value)
 
-/** The catalog header's words: the search box's placeholder. Mirrored by the backend. */
-export const HEADER_CATALOG_LIMITS = { search_placeholder: 60 } as const
+/** The catalog header's words: the search box's placeholder, the strip's note. Mirrored by the backend. */
+export const HEADER_CATALOG_LIMITS = { search_placeholder: 60, strip_note: 80 } as const
 
 /**
  * How a product card is drawn (adr/0049 Ek 2026-11-14 §3.3, owner's

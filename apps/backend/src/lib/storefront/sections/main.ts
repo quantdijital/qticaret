@@ -127,7 +127,7 @@ const headerCentered = z.object({ ...headerCommon, variant: z.literal("centered"
  * `HEADER_CATALOG_LIMITS`; a unit test keeps them equal.
  */
 export const HEADER_MENU_GROUNDS = ["stage", "primary", "well"] as const
-export const HEADER_CATALOG_LIMITS = { search_placeholder: 60 } as const
+export const HEADER_CATALOG_LIMITS = { search_placeholder: 60, strip_note: 80 } as const
 
 type MenuGround = (typeof HEADER_MENU_GROUNDS)[number]
 
@@ -179,6 +179,10 @@ const headerCatalog = z
     top_links: step(HEADER_TOP_LINKS_PLACES),
     /** The search: wide, or 35 rem right after the wordmark. */
     search_width: step(HEADER_SEARCH_WIDTHS),
+    /** A short plain line at the strip's start (a campaign, free shipping); none: no note. */
+    strip_note: optional(text(HEADER_CATALOG_LIMITS.strip_note)),
+    /** Where the note goes; none, or broken on reading: the note stays plain words. */
+    strip_note_link: optional(storefrontLink),
   })
   .strict()
 

@@ -23,6 +23,8 @@ export const HEADER_CATALOG_DEFAULTS: Readonly<HeaderCatalogFields> = {
   tools_place: "bar",
   top_links: "strip",
   search_width: "wide",
+  strip_note: null,
+  strip_note_link: null,
 }
 
 /** A section whose type is drawn more than one way (adr/0049 Ek 2026-11-14 §2). */

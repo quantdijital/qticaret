@@ -39,6 +39,8 @@ const DEFAULTS = {
   tools_place: "bar",
   top_links: "strip",
   search_width: "wide",
+  strip_note: null,
+  strip_note_link: null,
 }
 
 describe("the catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15)", () => {
@@ -133,6 +135,66 @@ describe("the catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15)", () =>
       tools_place: "bar",
       top_links: "bar",
       search_width: "wide",
+    })
+  })
+
+  describe("the strip's note (Ek 2026-11-15)", () => {
+    const sale = { kind: "system", target: "sale", label: null } as const
+
+    it("keeps a short plain line and its link, trimmed", () => {
+      const bar = layoutDocument.parse({
+        header: [catalog({ strip_note: "  Kargo 1500 TL üzeri bedava ", strip_note_link: sale })],
+      }).header[0]
+      expect(bar).toMatchObject({ strip_note: "Kargo 1500 TL üzeri bedava", strip_note_link: sale })
+      // A bar stored before the note reads none (no migration)
+      const stored = readStoredLayout({ header: [catalog({ phone: false })] })
+      expect(layoutDocument.parse(stored).header[0]).toMatchObject({
+        strip_note: null,
+        strip_note_link: null,
+      })
+    })
+
+    it("refuses a too long, blank, control-character or non-text note", () => {
+      expect(issues({ header: [catalog({ strip_note: "a".repeat(80) })] })).toEqual([])
+      for (const strip_note of ["a".repeat(81), "   ", "Kargo\u0007", 3, true, ["x"]]) {
+        expect(issues({ header: [catalog({ strip_note })] }).length).toBeGreaterThan(0)
+      }
+    })
+
+    it("refuses a link that is not a safe one, as the highlighted link does", () => {
+      for (const url of [
+        "javascript:alert(1)",
+        "//evil.example",
+        "http://plain.example",
+        "data:x",
+      ]) {
+        expect(
+          issues({ header: [catalog({ strip_note_link: { kind: "url", url, label: "Git" } })] })
+        ).toContain("storefront_menus.url_invalid")
+      }
+      expect(
+        issues({
+          header: [catalog({ strip_note_link: { kind: "url", url: "/kampanya", label: "Git" } })],
+        })
+      ).toEqual([])
+    })
+
+    it("names its link for the save's checks and gives the storefront it placed (a broken one none)", () => {
+      const category = { kind: "category", target: "pcat_02", label: null } as const
+      const doc = layoutDocument.parse({
+        header: [catalog({ strip_note: "Yeni sezon", strip_note_link: category })],
+      })
+      expect(headerLinked(doc).flatMap(linksOf)).toEqual([category])
+      const read = withMainSections(doc, LEFT)
+      const placed = { label: "Yeni", kind: "category", target: "pcat_02", path: "/kategori/yeni" }
+      expect(mainSectionsOf(read, () => placed).header_bar.catalog).toMatchObject({
+        strip_note: "Yeni sezon",
+        strip_note_link: placed,
+      })
+      expect(mainSectionsOf(read).header_bar.catalog).toMatchObject({
+        strip_note: "Yeni sezon",
+        strip_note_link: null,
+      })
     })
   })
 

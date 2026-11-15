@@ -81,6 +81,24 @@ describe("a field named by the preview", () => {
     expect(document.activeElement?.id).toBe(button.target)
   })
 
+  it("lands on the catalog strip's note", () => {
+    const header = switchVariant(
+      {
+        id: "mainheader",
+        type: "header_bar",
+        visible: true,
+        starts_at: null,
+        ends_at: null,
+        variant: "standard",
+        sticky: true,
+        menu_images: "submenus",
+      },
+      "catalog"
+    ) as AnySection
+    openAt({ ...header, strip_note: "Kargo bedava" } as AnySection, "strip_note", "header")
+    expect(document.activeElement).toHaveValue("Kargo bedava")
+  })
+
   it("lands on an announcement's line", () => {
     const bar = { ...newAnnouncementBar("duyuru0001"), lines: ["Bir", "İki"] }
     openAt(bar, "lines.1", "header")
