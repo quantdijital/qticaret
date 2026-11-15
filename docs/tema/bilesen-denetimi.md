@@ -23,7 +23,7 @@
 | O8 | **Sütun sayısı iki dilde:** ızgara `columns` 3/4/5 sayı ("Satırda ürün"); kaydırma `desktop` `three…six` adım ("Görünen kart (masaüstü)"). Telefon sütunu ızgarada seçilemiyor (hep 2). | `layout.ts` `ShelfColumns`, `section-scroller.ts`, `fields.columnsHint` |
 | O9 | **Yükseklik iki takım:** görsel bandı `low / medium / high` ("Alçak / Orta / Yüksek"); giriş slaytı `compact / regular` ("Kısa / Standart"); giriş (`hero`) seçilemez. | `section-banner.ts`, `sections/hero-slider.ts` |
 | O10 | **Yazı konumu iki takım:** görsel bandı 9 konum `text_position`; giriş slaytı slayt başına `position` 3 konum; giriş seçilemez. | aynı |
-| O11 | **Gizli ikili karar:** art arda duran ürün rafları kendiliğinden sekmeli tek rafa birleşir; kapatan ayar yok. | `atolye/src/sections/plan.ts` `blocksOf` |
+| O11 | **Gizli ikili karar:** art arda duran ürün rafları kendiliğinden sekmeli tek rafa birleşir; kapatan ayar yok. | `atolye/src/sections/plan.ts` `blocksOf`. Yapıldı (2026-11-15): (b) 2 |
 | O12 | **Görsel odağı (focal point) hiçbir görselde yok;** telefonda kırpma hep ortadan. | `layout-fields.ts` `image` = `url` + `alt` |
 | O13 | **Gelişmiş CSS (adr/0049 §8, E8) yazılmadı;** "Diğer" grubunun gelişmiş katmanı boş. | `custom_css` hiçbir pakette yok |
 | O14 | **Panelin söylediğini tema yapmıyor:** duyuru şeridinin 2.–5. satırı kaydediliyor ama vitrinde hiç görünmüyor. | `tr.json` `types.announcement_bar`, `frame/Announcement.tsx` (`const [line] = lines`). Metin yapıldı (2026-11-15): (a) 8; dönme yapıldı (2026-11-15): (b) 6 |
@@ -293,6 +293,7 @@ Kapsamda geçen kısaltmalar: **T** = `packages/types/src/store/…`, **B** = `a
    `forms/visibility-registry.ts`. Vitrin `data-show-on` + CSS (64rem); tembel görseller gizli cihazda
    indirilmez, ilk bölümün öncelikli görseli indirilir (adr/0049 Ek 2026-11-15, orta işler).
 2. **Raf sekmesi ayarı (O11):** `products`'a `tabs: on/off` (varsayılan `on`, bugünkü davranış). T `section-shelf.ts`, B `products.ts`, P `shelf-groups.tsx`, A `plan.ts`.
+   **Yapıldı (2026-11-15):** basamaklar `auto`/`off` (varsayılan `auto`: art arda raflar birleşir); `off` rafı ayrı çizer. Panelde "Diziliş"te anahtar düğmesi, `columns` biçiminde yok; ipucu birleştiği rafın adını söyler (adr/0049 Ek 2026-11-15, orta işler).
 3. **Telefon sütunu (O8):** ızgaraya `columns_mobile` 1/2 (varsayılan 2); `related_products` ve `categories`'e de. T `layout.ts`, B `layout-fields.ts`, P `columns-field.tsx`, A `ShelfRack.tsx`, `Aisles.tsx`.
    **Yapıldı (2026-11-15):** `columns_mobile` 1/2 ürün rafı ızgarasında ve benzer ürünlerde (varsayılan 2),
    kategori kartlarının `linked` biçiminde (varsayılan 1). Görsel kutular telefonda yana kaydığı, markalar

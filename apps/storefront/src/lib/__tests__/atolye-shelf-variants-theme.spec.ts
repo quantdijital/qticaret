@@ -122,4 +122,24 @@ describe("the theme's product rail variants", () => {
     expect(html).toContain('role="region"')
     expect(html).toContain('data-columns="3"')
   })
+
+  it("keeps a rail set apart out of its neighbours' tabs (bilesen-denetimi (b) 2)", () => {
+    const html = home([
+      rail({ id: "bir", title: "Bir" }),
+      rail({ id: "iki", title: "İki", tabs: "off" }),
+      rail({ id: "uc", title: "Üç" }),
+    ])
+    // Three rails, each on its own: none joins across the one set apart
+    expect(html).not.toContain('type="radio"')
+    expect(html).toContain('id="bolum-bir"')
+    expect(html).toContain('id="bolum-iki"')
+    expect(html).toContain('id="bolum-uc"')
+    // Two neighbours that both join still share one shelf
+    const joined = home([
+      rail({ id: "bir", title: "Bir", tabs: "auto" }),
+      rail({ id: "iki", title: "İki" }),
+      rail({ id: "uc", title: "Üç", tabs: "off" }),
+    ])
+    expect(joined.match(/type="radio"/g)).toHaveLength(2)
+  })
 })

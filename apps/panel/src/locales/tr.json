@@ -8873,7 +8873,12 @@
         "perListOption": "{{n}} ürün",
         "perListHint": "Her listede gösterilecek ürün sayısı; listeler masaüstünde yan yana, telefonda alt alta.",
         "featuredHint": "İlk ürün solda büyük, yanında küçük kartlar (toplam {{n}} ürün); telefonda büyük kart üstte.",
-        "cardCompact": "Bu biçimde kartlar her zaman kompakt çizilir: küçük görsel, ad, puan ve fiyat."
+        "cardCompact": "Bu biçimde kartlar her zaman kompakt çizilir: küçük görsel, ad, puan ve fiyat.",
+        "tabs": "Yanındaki rafla sekmeli birleşsin",
+        "tabsTerm": "tabs",
+        "tabsJoined": "Şu rafla sekmeli tek rafta birleşiyor: {{names}}. Kapatırsan bu raf ayrı çizilir.",
+        "tabsAlone": "Hemen önüne ya da arkasına bir ürün rafı gelirse ikisi sekmeli tek rafta birleşir.",
+        "tabsApart": "Bu raf yanındaki raflarla birleşmez, kendi başlığıyla ayrı çizilir."
       },
       "scroller": {
         "desktop": {

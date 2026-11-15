@@ -109,6 +109,20 @@ describe("a product rail's variants (adr/0049 Ek 2026-11-15)", () => {
     expect(carousel).not.toHaveProperty("phoneColumns")
   })
 
+  it("passes a rail set apart from the tabs on, and nothing for one that joins (bilesen-denetimi (b) 2)", async () => {
+    const [apart, joins, unknown] = await sectionViews(
+      [
+        rail({ kind: "newest" }, { tabs: "off" }),
+        rail({ kind: "newest" }, { id: "raf0002" }),
+        rail({ kind: "newest" }, { id: "raf0003", tabs: "maybe" as never }),
+      ],
+      t
+    )
+    expect(apart).toMatchObject({ tabs: "off" })
+    expect(joins).not.toHaveProperty("tabs")
+    expect(unknown).not.toHaveProperty("tabs")
+  })
+
   it("asks for seven on a featured rail, rows of three on a compact one drawn compact", async () => {
     const [featured, compact] = await sectionViews(
       [

@@ -1,7 +1,7 @@
 import "server-only"
 import type { ProductSource, StoreProductsSection } from "@qticaret/types"
 import { scrollerSettingsOf } from "@qticaret/types/section-scroller"
-import { shelfLimit, shelfPerListOf, shelfRowsOf } from "@qticaret/types/section-shelf"
+import { shelfLimit, shelfPerListOf, shelfRowsOf, shelfTabsOf } from "@qticaret/types/section-shelf"
 import { variantOf } from "@qticaret/types/section-variants"
 import type { CardVariant, ProductsSectionView, ShelfListView, Translate } from "@qticaret/ui"
 import { railCardVariant } from "./card-framed"
@@ -74,6 +74,8 @@ export async function shelfView(
     more: layoutLink(section.more, t),
     empty: t("home.no_products"),
     variant,
+    // Set apart from its neighbours' tabs (bilesen-denetimi (b) 2); none: it joins them
+    ...(shelfTabsOf(section.tabs) === "off" ? { tabs: "off" as const } : {}),
   }
   if (variant === "columns") {
     const lists = await listViews(section, limit, t)

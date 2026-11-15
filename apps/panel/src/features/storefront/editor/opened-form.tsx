@@ -14,6 +14,7 @@ import { MARQUEE_LIMITS, PRICE_BANDS_LIMITS } from "@/features/storefront/api/la
 import type { findSection } from "@/features/storefront/layout/sections"
 import type { AnySection } from "@/features/storefront/api/layout"
 import { bodyOf, isMain } from "@/features/storefront/layout/main-sections"
+import { tabMates } from "@/features/storefront/layout/shelf-tabs"
 import type { Opened } from "./opened"
 import { SectionPanel } from "./section-panel"
 import { LooksPanel } from "./shared/looks-panel"
@@ -91,6 +92,11 @@ export function OpenedForm({
           onRemove(found.section)
         }}
         focus={opened?.kind === "section" ? (opened.focus ?? null) : null}
+        shelfMates={
+          found.section.type === "products" && isBodyGroup(found.group)
+            ? tabMates(bodyOf(doc, found.group), found.section.id)
+            : []
+        }
         badges={doc.settings.trust_badges}
         onBadges={(trust_badges, field) => {
           dispatch({ type: "settings", settings: { ...doc.settings, trust_badges }, merge: field })

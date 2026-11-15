@@ -10,6 +10,7 @@ import type {
   AnySection,
   LayoutGroup,
   Placement,
+  ProductsSection,
   TrustBadge,
 } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
@@ -61,6 +62,8 @@ interface SectionPanelProps {
   /** The theme's one list of trust badges, edited in every strip's form (adr/0049 Ek 2026-11-06). */
   badges: TrustBadge[]
   onBadges: (badges: TrustBadge[], field?: string) => void
+  /** A product rail's neighbours in one tabbed shelf on the page (bilesen-denetimi (b) 2). */
+  shelfMates?: readonly ProductsSection[]
   /** The field the settings search picked: its group opens, the field is shown and marked. */
   focus?: (FieldFocus & { group: FieldGroupName }) | null
 }
@@ -87,6 +90,7 @@ export function SectionPanel({
   onRemove,
   badges,
   onBadges,
+  shelfMates = [],
   focus = null,
 }: SectionPanelProps) {
   const { t } = useTranslation()
@@ -170,7 +174,9 @@ export function SectionPanel({
       {section.type === "announcement_bar" ? (
         <AnnouncementMotion section={section} reveal={reveal} onChange={onChange} />
       ) : null}
-      {shelf ? <ShelfGroups section={shelf} reveal={reveal} onChange={onChange} /> : null}
+      {shelf ? (
+        <ShelfGroups section={shelf} mates={shelfMates} reveal={reveal} onChange={onChange} />
+      ) : null}
       {section.type === "header_bar" && section.variant === "catalog" ? (
         <HeaderCatalogOther
           section={section}
