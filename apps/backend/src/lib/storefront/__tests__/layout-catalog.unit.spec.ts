@@ -199,6 +199,7 @@ describe("the price bands (adr/0049 Ek 2026-11-14, Katalog ana sayfası)", () =>
       throw new Error("no bands")
     }
 
+    // A band without a category prints none, as before band categories
     expect(hydratePriceBands(section, [["prod_1"], [], ["prod_2"]], (text) => text)).toEqual({
       id: "fiyatbant1",
       type: "price_bands",
@@ -216,7 +217,19 @@ describe("the price bands (adr/0049 Ek 2026-11-14, Katalog ana sayfası)", () =>
     const contract = jest.requireActual<Record<string, unknown>>(CONTRACT_FILE)
     const rises = contract["bandsRise"] as typeof bandsRise
     const ranges = contract["bandRanges"] as typeof bandRanges
-    const cases = [[{ max: 1 }, { max: null }], [{ max: 2 }, { max: 1 }], [{ max: null }]]
+    const cat = "pcat_kamp"
+    const cases = [
+      [{ max: 1 }, { max: null }],
+      [{ max: 2 }, { max: 1 }],
+      [{ max: null }],
+      [{ max: 5 }, { max: 1, category_id: cat }, { max: 9 }],
+      [{ max: null }, { max: null, category_id: cat }],
+      [{ max: null }, { max: null, category_id: cat }, { max: 3 }],
+      [
+        { max: 4, category_id: null },
+        { max: 2, category_id: cat },
+      ],
+    ]
 
     expect(PRICE_BANDS_LIMITS).toEqual(contract["PRICE_BANDS_LIMITS"])
     expect(HERO_CATALOG_LIMITS).toEqual(contract["HERO_CATALOG_LIMITS"])

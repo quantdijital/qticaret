@@ -61,6 +61,14 @@ describe("the katalog preset's draft (adr/0049 Ek 2026-11-14, Katalog ana sayfas
     })
     // The owner (2026-11-15): no quick links under the opening
     expect(doc.home[0]).toHaveProperty("chips.length", 0)
+    // The collectors' band shows the shop's special collection; the others split it by price
+    const strip = doc.home.find((section) => section.type === "price_bands")
+    expect(strip?.type === "price_bands" && strip.bands.map((band) => band.category_id)).toEqual([
+      null,
+      null,
+      null,
+      everything.records.get("category:ozel-koleksiyon"),
+    ])
   })
 
   it("leaves out what a shop without those categories lacks, keeping the rest", () => {
@@ -77,6 +85,17 @@ describe("the katalog preset's draft (adr/0049 Ek 2026-11-14, Katalog ana sayfas
     const doc = presetDocument(resolved, presetTheme(katalog.theme_settings), APPLIED, KEPT)
 
     expect(resolved.dropped).toEqual(["home.kilicrafi", "home.mutfakrafi", "home.celiksap"])
+    // A shop without the special collection keeps the strip, its last band "and up" by price
+    expect(resolved.skipped).toContainEqual({
+      where: "home.fiyatbantlari",
+      ref: "category:ozel-koleksiyon",
+    })
+    const strip = doc.home.find((section) => section.type === "price_bands")
+    expect(strip?.type === "price_bands" && strip.bands.at(-1)).toMatchObject({
+      label: "Koleksiyonluk",
+      max: null,
+      category_id: null,
+    })
     expect(doc.home.map((section) => section.id)).toEqual([
       "katalogacilis",
       "coksatanlar",

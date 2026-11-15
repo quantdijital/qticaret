@@ -14,7 +14,8 @@ import type { PresetMenuInput } from "./resolve-menus"
  * of a list (`category_ids`, a hero's buttons) is taken out; a list of
  * records the preset filled and the shop has none of, or a section's one
  * record (`product_id`, a rail's `category_id`), drops the section; a
- * button's single link (`more`, a slide's `link`) is cleared; a menu
+ * button's single link (`more`, a slide's `link`) and a price band's
+ * category (`OPTIONAL_IN_ITEMS`) are cleared; a menu
  * whose every link is gone leaves the set, the shop's live menu kept in its
  * place (`resolveMenus`), never an empty menu put live. Each is named in
  * `skipped`.
@@ -72,6 +73,16 @@ type Outcome = unknown
 /** A field naming one record (`product_id`) or a list of them (`category_ids`). */
 const ID_FIELD = /^[a-z]+_(ids?)$/
 
+/**
+ * A list's items whose one record is a choice the item stands without, by
+ * the list's field: a price band's category (adr/0049, 2026-11-15). The
+ * shop has no such record, and the field is cleared: the band is a price
+ * band again, as before band categories; the section keeps it.
+ */
+const OPTIONAL_IN_ITEMS: Readonly<Record<string, readonly string[]>> = {
+  bands: ["category_id"],
+}
+
 const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !Array.isArray(value)
 
@@ -119,8 +130,9 @@ function marker(node: Record<string, unknown>, walk: Walk): Outcome {
 
 function resolveList(list: unknown[], key: string | null, walk: Walk): Outcome {
   const out: unknown[] = []
+  const optional = (key === null ? undefined : OPTIONAL_IN_ITEMS[key]) ?? []
   for (const item of list) {
-    const resolved = resolveNode(item, walk)
+    const resolved = resolveNode(item, walk, null, optional)
     if (resolved === NO_SECTION) {
       return NO_SECTION
     }
@@ -135,7 +147,12 @@ function resolveList(list: unknown[], key: string | null, walk: Walk): Outcome {
   return out
 }
 
-function resolveNode(node: unknown, walk: Walk, key: string | null = null): Outcome {
+function resolveNode(
+  node: unknown,
+  walk: Walk,
+  key: string | null = null,
+  optional: readonly string[] = []
+): Outcome {
   if (Array.isArray(node)) {
     return resolveList(node, key, walk)
   }
@@ -152,8 +169,8 @@ function resolveNode(node: unknown, walk: Walk, key: string | null = null): Outc
       return NO_SECTION
     }
     if (resolved === GONE) {
-      // A section's one record is the section; a single link is only cleared
-      if (ID_FIELD.exec(name)?.[1] === "id") {
+      // A section's one record is the section; a single link (and a band's category) only cleared
+      if (ID_FIELD.exec(name)?.[1] === "id" && !optional.includes(name)) {
         return NO_SECTION
       }
       out[name] = null

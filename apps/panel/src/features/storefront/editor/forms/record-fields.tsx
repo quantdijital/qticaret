@@ -108,10 +108,13 @@ interface RecordFieldProps {
   id: string
   onChange: (id: string) => void
   error?: string | undefined
+  hint?: string | undefined
+  /** An optional choice (a price band's category): not marked required, and taken back here. */
+  onClear?: (() => void) | undefined
 }
 
 /** One record the section draws from: a category or a collection. */
-export function RecordField({ kind, label, id, onChange, error }: RecordFieldProps) {
+export function RecordField({ kind, label, id, onChange, error, hint, onClear }: RecordFieldProps) {
   const { t } = useTranslation()
   const [picking, setPicking] = useState(false)
   const names = useRecordNames(kind, id ? [id] : [])
@@ -119,7 +122,7 @@ export function RecordField({ kind, label, id, onChange, error }: RecordFieldPro
     ? (names.data?.[id] ?? (names.isPending ? t("common.loading") : t(`${R}.missing`)))
     : null
   return (
-    <Field label={label} error={error} required>
+    <Field label={label} error={error} hint={hint} required={!onClear}>
       <div className="flex items-center gap-2">
         <span
           className={
@@ -141,6 +144,17 @@ export function RecordField({ kind, label, id, onChange, error }: RecordFieldPro
         >
           {t(name ? `${R}.change` : `${R}.choose`)}
         </Button>
+        {onClear && id ? (
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            aria-label={t(`${R}.clearOf`, { label })}
+            onClick={onClear}
+          >
+            {t(`${R}.clear`)}
+          </Button>
+        ) : null}
       </div>
       {picking ? (
         <RecordPickerDialog

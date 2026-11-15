@@ -6,8 +6,24 @@ import type { ProductQuery } from "@/lib/store-api/requests"
 // The Store API as the catalogue sections ask it: two products, every one with a path
 const requests = vi.hoisted(() => ({
   listProducts: vi.fn(),
-  pathsOf: vi.fn((_type: string, ids: readonly string[]) =>
-    Promise.resolve(Object.fromEntries(ids.map((id) => [id, `/urun/${id}`])))
+  pathsOf: vi.fn((type: string, ids: readonly string[]) =>
+    Promise.resolve(
+      Object.fromEntries(
+        ids.map((id) => [id, type === "product_category" ? `/kategori/${id}` : `/urun/${id}`])
+      )
+    )
+  ),
+  // The categories the Store API shows: a hidden one is not among them
+  allCategories: vi.fn(() =>
+    Promise.resolve([
+      {
+        id: "pcat_kamp",
+        name: "Kamp",
+        handle: "kamp",
+        description: null,
+        parent_category_id: null,
+      },
+    ])
   ),
   priceDisplays: vi.fn(() => Promise.resolve({})),
   siteSeo: vi.fn(() => Promise.resolve({ shop: { name: "Atölye" } })),
@@ -22,6 +38,7 @@ const extras = vi.hoisted(() => ({
       ])
     )
   ),
+  categoryImages: vi.fn(() => Promise.resolve(new Map())),
 }))
 vi.mock("@/lib/store-api/extras", () => extras)
 // Each category a card with its picture; the ids the section names, in its order
@@ -177,6 +194,90 @@ describe("the price bands", () => {
     expect(bandPath(null, 500)).toBe("/magaza?fiyat=-500")
     expect(bandPath(500, 1000)).toBe("/magaza?fiyat=500-1000")
     expect(bandPath(2500, null)).toBe("/magaza?fiyat=2500-")
+  })
+
+  it("links a band with a category to its page, filtered only when the band has a bound", () => {
+    expect(bandPath(null, null, "/kategori/kamp")).toBe("/kategori/kamp")
+    expect(bandPath(null, 1000, "/kategori/kamp")).toBe("/kategori/kamp?fiyat=-1000")
+  })
+
+  it("names a band's category and leaves out one the Store API does not show", async () => {
+    const view = await priceBandsView(
+      {
+        id: "fiyat",
+        type: "price_bands",
+        title: "Bantlar",
+        bands: [
+          { label: "₺500 altı", text: null, min: null, max: 500, product_ids: ["p2"] },
+          {
+            label: "Kamp, ₺1.000'e kadar",
+            text: null,
+            category_id: "pcat_kamp",
+            min: null,
+            max: 1000,
+            product_ids: [],
+          },
+          {
+            label: "Kamp",
+            text: "Hepsi",
+            category_id: "pcat_kamp",
+            min: null,
+            max: null,
+            product_ids: ["p1"],
+          },
+          {
+            label: "Gizli",
+            text: null,
+            category_id: "pcat_gizli",
+            min: null,
+            max: null,
+            product_ids: [],
+          },
+        ],
+      },
+      t
+    )
+
+    expect(view?.bands.map((band) => [band.label, band.category, band.path])).toEqual([
+      ["₺500 altı", undefined, "/magaza?fiyat=-500"],
+      ["Kamp, ₺1.000'e kadar", "Kamp", "/kategori/pcat_kamp?fiyat=-1000"],
+      ["Kamp", "Kamp", "/kategori/pcat_kamp"],
+    ])
+    expect(view?.bands[2]?.products.map((each) => each.path)).toEqual(["/urun/p1"])
+  })
+
+  it("draws no strip when every band's category is hidden, and asks no category for price bands", async () => {
+    const hidden = await priceBandsView(
+      {
+        id: "fiyat",
+        type: "price_bands",
+        title: null,
+        bands: [
+          {
+            label: "Gizli",
+            text: null,
+            category_id: "pcat_gizli",
+            min: null,
+            max: null,
+            product_ids: [],
+          },
+        ],
+      },
+      t
+    )
+    requests.allCategories.mockClear()
+    await priceBandsView(
+      {
+        id: "fiyat",
+        type: "price_bands",
+        title: null,
+        bands: [{ label: "A", text: null, min: null, max: 1, product_ids: [] }],
+      },
+      t
+    )
+
+    expect(hidden).toBeNull()
+    expect(requests.allCategories).not.toHaveBeenCalled()
   })
 
   it("gives each band its products as picked, the storefront's title when the shop wrote none", async () => {
