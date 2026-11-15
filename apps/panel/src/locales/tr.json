@@ -7715,7 +7715,11 @@
           "other_page": "Bu bölüm başka bir sayfada.",
           "timeout": "Bölüm önizlemede bulunamadı."
         },
-        "liveOff": "Canlı önizleme kullanılamıyor; önizleme her kayıttan sonra yeniden yüklenecek."
+        "liveOff": "Canlı önizleme kullanılamıyor; önizleme her kayıttan sonra yeniden yüklenecek.",
+        "edit": "Düzenle",
+        "selected": "Seçildi: {{name}}",
+        "elsewhere": "Önizlemede {{path}} açık; bu sayfada üst ve alt bilgi düzenlenir. Sayfa seçerek geri dönün.",
+        "blocked": "{{path}} önizlemede açılmaz (ödeme, hesap ya da giriş sayfası)."
       },
       "publish": {
         "open": "Yayınla",

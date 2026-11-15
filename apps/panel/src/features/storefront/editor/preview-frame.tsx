@@ -30,6 +30,8 @@ interface PreviewFrameProps {
   finding: boolean
   /** What the frame cannot show of what is asked (a hidden section, the live preview off). */
   notice?: string | null
+  /** Said by a live region: the section just opened from the preview. */
+  announce?: string | null
 }
 
 /** A message in place of the storefront: why it does not show, and what to do. */
@@ -114,6 +116,7 @@ export function PreviewFrame({
   missing,
   finding,
   notice = null,
+  announce = null,
 }: PreviewFrameProps) {
   const { t } = useTranslation()
   const stage = useRef<HTMLDivElement>(null)
@@ -209,6 +212,10 @@ export function PreviewFrame({
             {notice}
           </p>
         ) : null}
+        {/* The section opened from the preview's edit label, said aloud (adr/0065 §6) */}
+        <p aria-live="polite" className="sr-only">
+          {announce}
+        </p>
       </div>
     </div>
   )

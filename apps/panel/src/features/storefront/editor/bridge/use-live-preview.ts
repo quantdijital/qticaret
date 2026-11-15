@@ -5,44 +5,21 @@ import type { Reveal, ToStorefrontMessage } from "@qticaret/types/editor-bridge"
 import { LAYOUT_KEY, fetchLayoutPreview } from "@/features/storefront/api/layout"
 import { previewAddress } from "@/features/storefront/layout/preview-url"
 import { BRIDGE_ON, acceptFromFrame, createKeyGate, frameOrigin } from "./bridge-client"
-import type { MissingReason } from "./bridge-client"
+import { READY_MS, RENDER_MS } from "./live-preview-options"
+import type { LivePreviewOptions as Options, Payload } from "./live-preview-options"
 import { useEditorSession } from "./use-editor-session"
 
-/** The frame must say it is ready this soon, or the live preview is given up (adr/0065 §6). */
-export const READY_MS = 5000
-/** A redraw asked for must be done this soon, or the live preview is given up. */
-export const RENDER_MS = 15000
-
-type Payload<T extends ToStorefrontMessage["type"]> = Extract<
-  ToStorefrontMessage,
-  { type: T }
->["payload"]
-
-interface Options {
-  /** The draft has been saved once: there is something to show. */
-  ready: boolean
-  /** Grows with each save: the frame redraws (live) or a new link is asked for. */
-  round: number
-  /** The page shown with the draft; null: the home page. */
-  page: string | null
-  /**
-   * The page asked for is still looked up (its first sample): the frame
-   * stays on the page it shows until `page` names it.
-   */
-  holding?: boolean
-  /** The section whose form is open. */
-  selected: string | null
-  onKey: (key: "undo" | "redo" | "escape") => void
-  onMissing: (id: string, reason: MissingReason) => void
-}
+export { READY_MS, RENDER_MS } from "./live-preview-options"
+export type { PickMessage } from "./live-preview-options"
 
 /**
- * The theme editor's preview (adr/0065 Faz 1): a live session at one
+ * The theme editor's preview (adr/0065 Faz 1–2): a live session at one
  * address while the bridge works (a save redraws the frame in place, the
- * page changes inside it, a section is scrolled to and flashed), else
- * today's signed link per save (adr/0049), the frame reloading each time:
- * when the build turns the bridge off, the session is refused, or the
- * frame does not answer.
+ * page changes inside it, a section is scrolled to and flashed; Faz 2's
+ * picking messages handed on, a page that left the preview loaded again),
+ * else today's signed link per save (adr/0049), the frame reloading each
+ * time: when the build turns the bridge off, the session is refused, or
+ * the frame does not answer.
  */
 export function useLivePreview({
   ready,
@@ -52,6 +29,7 @@ export function useLivePreview({
   selected,
   onKey,
   onMissing,
+  onPick,
 }: Options) {
   const [failed, setFailed] = useState(false)
   const session = useEditorSession(BRIDGE_ON && ready && !failed)
@@ -63,13 +41,20 @@ export function useLivePreview({
     staleTime: Infinity,
     placeholderData: keepPreviousData,
   })
-  // The live frame's one address: the session's, on the page shown when it opened
-  const [base, setBase] = useState<string | null>(null)
+  // The live frame's one address: the session's, on the page shown when it opened (or was
+  // loaded again, `frameKey`, after it left the preview)
+  const [frameKey, setFrameKey] = useState(0)
+  const [left, setLeft] = useState(0)
+  const [base, setBase] = useState<{ address: string; key: number } | null>(null)
   const sessionAddress = session.data ? previewAddress(session.data, undefined, page) : null
-  if (live && sessionAddress && base === null) {
-    setBase(sessionAddress)
+  if (live && sessionAddress && base?.key !== frameKey) {
+    setBase({ address: sessionAddress, key: frameKey })
   }
-  const address = live ? base : legacy.data ? previewAddress(legacy.data, undefined, page) : null
+  const address = live
+    ? (base?.address ?? null)
+    : legacy.data
+      ? previewAddress(legacy.data, undefined, page)
+      : null
   const origin = frameOrigin(address)
 
   const frame = useRef<HTMLIFrameElement | null>(null)
@@ -171,6 +156,23 @@ export function useLivePreview({
       case "error":
         giveUp()
         return
+      case "left":
+        // Out of the preview with no bridge: reloaded on the preview's address for that page
+        now.connected = false
+        now.stray = true
+        setConnected(false)
+        setDrawn(null)
+        if (message.payload.path === null) {
+          setLeft((was) => was + 1)
+        }
+        onPick?.(message)
+        return
+      case "hover":
+      case "click":
+      case "navigate-request":
+      case "location":
+        onPick?.(message)
+        return
     }
   })
   useEffect(() => {
@@ -214,8 +216,8 @@ export function useLivePreview({
     }
   }, [live, loads])
 
-  // Out of the preview: the next save or page change loads the session's address again
-  const [frameKey, setFrameKey] = useState(0)
+  // Out of the preview: the next save or page change (or the frame saying it left) loads the
+  // session's address again, on the page shown now
   useEffect(() => {
     if (!state.current.stray) {
       return
@@ -223,7 +225,7 @@ export function useLivePreview({
     state.current.stray = false
     state.current.sentRound = round
     setFrameKey((was) => was + 1)
-  }, [round, page])
+  }, [round, page, left])
 
   // A save: the frame redraws in place
   useEffect(() => {
@@ -300,6 +302,8 @@ export function useLivePreview({
     select,
     /** Select a section once the next save is drawn (a moved one). */
     selectAfterSave,
+    /** Posts to the connected frame (Faz 2: hover, labels); false when none listens. */
+    post: send,
   }
 }
 

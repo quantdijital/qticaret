@@ -13,8 +13,19 @@ export function usePreviewTarget(page: BodyGroup) {
   const { t } = useTranslation()
   const [chosen, setChosen] = useState<Partial<Record<SamplePage, PreviewSample>>>({})
   const first = usePreviewSamples(page)
+  /** A sample for a page, the current one or another (a page reached in the frame). */
+  const chooseFor = (group: SamplePage, next: PreviewSample) => {
+    setChosen((was) => ({ ...was, [group]: next }))
+  }
   if (page === "home") {
-    return { path: null, sample: null, finding: false, missing: null, choose: () => undefined }
+    return {
+      path: null,
+      sample: null,
+      finding: false,
+      missing: null,
+      choose: () => undefined,
+      chooseFor,
+    }
   }
   const sample = chosen[page] ?? first.data?.[0] ?? null
   const finding = !sample && first.isPending
@@ -25,7 +36,8 @@ export function usePreviewTarget(page: BodyGroup) {
     // None live yet (or none found): nothing to show the draft on
     missing: sample || finding ? null : t(`storefront.editor.sample.missing.${page}`),
     choose: (next: PreviewSample) => {
-      setChosen((was) => ({ ...was, [page]: next }))
+      chooseFor(page, next)
     },
+    chooseFor,
   }
 }

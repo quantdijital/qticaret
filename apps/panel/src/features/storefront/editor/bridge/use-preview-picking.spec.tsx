@@ -1,0 +1,102 @@
+import { act, renderHook } from "@testing-library/react"
+import { describe, expect, it, vi } from "vitest"
+import "@/lib/i18n"
+import { bridgeMessage } from "@qticaret/types/editor-bridge"
+import { DOC } from "../theme-editor.fixtures"
+import { groupOf, sectionNames, usePreviewPicking } from "./use-preview-picking"
+import type { PickMessage } from "./use-live-preview"
+
+const pickOf = <T extends PickMessage["type"]>(
+  type: T,
+  payload: Extract<PickMessage, { type: T }>["payload"]
+) => bridgeMessage(type, payload as never, 0) as PickMessage
+
+function setup(connected = true) {
+  const post = vi.fn(() => true)
+  const onOpen = vi.fn()
+  const onVisit = vi.fn()
+  const onLand = vi.fn()
+  const hook = renderHook(() =>
+    usePreviewPicking({ doc: DOC, connected, post, onOpen, onVisit, onLand })
+  )
+  return { hook, post, onOpen, onVisit, onLand }
+}
+
+/**
+ * Picking in the preview, the panel's side (adr/0065 §6, Faz 2): what the
+ * frame says is acted on only for ids the document has; a path is text.
+ */
+describe("picking in the preview", () => {
+  it("knows a page by the body sections the frame shows", () => {
+    expect(groupOf(DOC, ["mainheader", "mainproduct", "benzerurunler"])).toBe("product")
+    expect(groupOf(DOC, ["mainheader", "girisbolumu"])).toBe("home")
+    expect(groupOf(DOC, ["mainheader", "mainfooter"])).toBeNull()
+    expect(groupOf(DOC, ["unknown01"])).toBeNull()
+  })
+
+  it("names every section as the tree does, footer included", () => {
+    const names = sectionNames(DOC, (section, inFooter) => `${section.type}${inFooter ? "*" : ""}`)
+    expect(names["girisbolumu"]).toBe("hero")
+    expect(names["ebultenkutusu"]).toBe("newsletter*")
+    expect(Object.keys(names)).toHaveLength(
+      DOC.header.length +
+        DOC.home.length +
+        DOC.product.length +
+        DOC.category.length +
+        DOC.footer.length
+    )
+  })
+
+  it("sends the edit word and the names once connected", () => {
+    const { post } = setup()
+    expect(post).toHaveBeenCalledWith(
+      "labels",
+      expect.objectContaining({ edit: "Düzenle", names: expect.any(Object) as unknown })
+    )
+  })
+
+  it("opens a section the document has and says so; one it has not is ignored", () => {
+    const { hook, onOpen } = setup()
+    act(() => {
+      hook.result.current.onPick(pickOf("click", { id: "unknown01" }))
+    })
+    expect(onOpen).not.toHaveBeenCalled()
+    act(() => {
+      hook.result.current.onPick(pickOf("click", { id: "yeniurunler" }))
+    })
+    expect(onOpen).toHaveBeenCalledWith("yeniurunler")
+    expect(hook.result.current.announce).toMatch(/^Seçildi: /)
+  })
+
+  it("lights a row for a known section only", () => {
+    const { hook } = setup()
+    act(() => {
+      hook.result.current.onPick(pickOf("hover", { id: "unknown01" }))
+    })
+    expect(hook.result.current.hover.hovered).toBeNull()
+    act(() => {
+      hook.result.current.onPick(pickOf("hover", { id: "mainheader" }))
+    })
+    expect(hook.result.current.hover.hovered).toBe("mainheader")
+  })
+
+  it("shows a page asked for, or says the preview will not open it", () => {
+    const { hook, onVisit, onLand } = setup()
+    act(() => {
+      hook.result.current.onPick(pickOf("navigate-request", { path: "/odeme", previewable: false }))
+    })
+    expect(onVisit).not.toHaveBeenCalled()
+    expect(hook.result.current.blocked).toContain("/odeme")
+    act(() => {
+      hook.result.current.onPick(pickOf("navigate-request", { path: "/sepet", previewable: true }))
+    })
+    expect(onVisit).toHaveBeenCalledWith("/sepet")
+    expect(hook.result.current.blocked).toBeNull()
+    act(() => {
+      hook.result.current.onPick(
+        pickOf("location", { path: "/urun/a", sections: ["mainheader", "mainproduct"] })
+      )
+    })
+    expect(onLand).toHaveBeenCalledWith("/urun/a", "product")
+  })
+})

@@ -13,7 +13,6 @@ import {
 import type {
   AdminLayout,
   AnySection,
-  BodyGroup,
   LayoutDocument,
   Placement,
 } from "@/features/storefront/api/layout"
@@ -30,7 +29,12 @@ import {
 } from "@/features/storefront/layout/sections"
 import { useAutosave } from "@/features/storefront/layout/use-autosave"
 import { AddSectionDialog } from "./add-section-dialog"
-import { OpenedSectionContext, editorLayoutNow, useEditorLayout } from "./editor-layout"
+import {
+  OpenedSectionContext,
+  SectionHoverContext,
+  editorLayoutNow,
+  useEditorLayout,
+} from "./editor-layout"
 import type { EditorView } from "./editor-layout"
 import { EditorShell } from "./editor-shell"
 import { EditorTopBar } from "./editor-top-bar"
@@ -49,7 +53,7 @@ import { SectionTree } from "./section-tree"
 import { SettingsSearch } from "./settings-search-panel"
 import { useEditorActions } from "./use-editor-actions"
 import { useEditorPreview } from "./use-editor-preview"
-import { usePreviewTarget } from "./use-preview-target"
+import { usePreviewPlace } from "./use-preview-place"
 import { useUndoKeys } from "./use-undo-keys"
 
 const E = "storefront.editor"
@@ -84,7 +88,13 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
   const [opened, setOpened] = useState<Opened>(null)
   // Each pick of the settings search a fresh number: the same field picked again is shown again
   const picks = useRef(0)
-  const [page, setPage] = useState<BodyGroup>("home")
+  // The page worked on and shown; a link followed in the preview may change it (adr/0065 Faz 2)
+  const place = usePreviewPlace({
+    onPageChange: () => {
+      setOpened(null)
+    },
+  })
+  const { page, target } = place
   // The chooser is open for this side of a category page's products (the others have one)
   const [adding, setAdding] = useState<Placement | null>(null)
   const shape = useEditorLayout()
@@ -93,8 +103,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
   const [device, setDevice] = useState<Device>(() =>
     editorLayoutNow() === "narrow" ? "mobile" : "desktop"
   )
-  const target = usePreviewTarget(page)
-  const { preview, act, notice, markNew } = useEditorPreview({
+  const { preview, act, notice, markNew, hover, announce } = useEditorPreview({
     doc,
     page,
     path: target.path,
@@ -104,6 +113,12 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
     round: autosave.round,
     dispatch,
     hurry: autosave.hurry,
+    visited: place.visited,
+    onOpen: (id) => {
+      setOpened({ kind: "section", id })
+    },
+    onVisit: place.visit,
+    onLand: place.land,
   })
   const actions = useEditorActions({
     flush: autosave.flush,
@@ -240,10 +255,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
         layout={shape}
         onExit={() => void exit()}
         page={page}
-        onPage={(next) => {
-          setPage(next)
-          setOpened(null)
-        }}
+        onPage={place.choosePage}
         view={view}
         onView={setView}
         canUndo={state.past.length > 0}
@@ -262,28 +274,31 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
         publish={<PublishButton actions={actions} changed={changed} />}
       />
       <OpenedSectionContext.Provider value={found ? found.section.id : null}>
-        <EditorShell
-          layout={shape}
-          view={view}
-          tree={tree}
-          form={form}
-          formKey={formKey}
-          preview={
-            <PreviewFrame
-              preview={preview}
-              device={device}
-              onDevice={setDevice}
-              sample={
-                page === "home" ? null : (
-                  <SamplePicker page={page} sample={target.sample} onChange={target.choose} />
-                )
-              }
-              missing={target.missing}
-              notice={notice}
-              finding={target.finding}
-            />
-          }
-        />
+        <SectionHoverContext.Provider value={hover}>
+          <EditorShell
+            layout={shape}
+            view={view}
+            tree={tree}
+            form={form}
+            formKey={formKey}
+            preview={
+              <PreviewFrame
+                preview={preview}
+                device={device}
+                onDevice={setDevice}
+                sample={
+                  page === "home" ? null : (
+                    <SamplePicker page={page} sample={target.sample} onChange={target.choose} />
+                  )
+                }
+                missing={target.missing}
+                notice={notice}
+                announce={announce}
+                finding={target.finding}
+              />
+            }
+          />
+        </SectionHoverContext.Provider>
       </OpenedSectionContext.Provider>
       <AddSectionDialog
         open={adding !== null}

@@ -57,3 +57,17 @@ export const EditorChromeContext = createContext<EditorChrome>({ openSections: n
 
 /** The section whose settings are open: its row in the list is marked. */
 export const OpenedSectionContext = createContext<string | null>(null)
+
+/**
+ * The section pointed at (adr/0065 Faz 2): in the preview, its row lights
+ * up; over a row, the preview frames its section.
+ */
+export interface SectionHover {
+  hovered: string | null
+  hover: (id: string | null) => void
+}
+
+export const SectionHoverContext = createContext<SectionHover>({
+  hovered: null,
+  hover: () => undefined,
+})
