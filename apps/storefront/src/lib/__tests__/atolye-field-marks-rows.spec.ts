@@ -185,9 +185,43 @@ describe("the field marks on Atölye's other sections", () => {
     expect(html).toMatch(/<label class="gf-tab" data-qf="tabs\.1\.2">.*?Çok satan<\/label>/)
   })
 
-  it("mark only the scrolling strip's first round (its copies are inert)", () => {
-    const found = marks(home(true)).filter((key) => key === "items.0.text")
-    expect(found).toHaveLength(1)
+  it("mark every round of the scrolling strip, its copies hidden but under the pointer", () => {
+    const strip = (editor: boolean) => {
+      const html = renderPage(atolyeTheme, "HomePage", {
+        view: {
+          sections: [
+            {
+              id: "kayan2",
+              type: "marquee",
+              ...MARQUEE_DEFAULTS,
+              items: [
+                {
+                  icon: null,
+                  text: "Hızlı kargo",
+                  subtext: null,
+                  link: { label: "Kargo", path: "/kargo" },
+                },
+              ],
+              ...(editor ? { editor: true as const } : {}),
+            },
+          ],
+        },
+        subscribe,
+      })
+      return html.slice(html.indexOf("<section"), html.lastIndexOf("</section>"))
+    }
+    const live = strip(false)
+    const preview = strip(true)
+    const copies = live.match(/data-part="item"/g)?.length ?? 0
+    expect(copies).toBeGreaterThan(2)
+    // In the preview: each round marked, nothing inert, the copies still hidden, one link only
+    expect(marks(preview).filter((key) => key === "items.0.text")).toHaveLength(copies)
+    expect(preview).not.toContain("inert")
+    expect(preview).toContain('aria-hidden="true"')
+    expect(preview.match(/<a /g)).toHaveLength(1)
+    // On a live page the copies stay inert, their links drawn
+    expect(live).toContain("inert")
+    expect(live.match(/<a /g)).toHaveLength(copies)
   })
 })
 

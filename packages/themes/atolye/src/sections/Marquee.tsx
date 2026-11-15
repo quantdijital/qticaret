@@ -24,18 +24,26 @@ export function closedKey(section: MarqueeSectionView): string {
 /**
  * One item: its icon, its line and second line, the whole a link when it
  * has one. A round that only fills the screen (`loop`) is hidden and inert.
+ * In the editor's live preview every round carries the item's field marks
+ * (`at`): a strip slides its first round off the screen in a second, so
+ * the round under the pointer is the one pressed. A copy there is hidden
+ * but not inert (an inert element is never under the pointer), and its
+ * link is a plain span (`copy`): nothing focusable under `aria-hidden`.
  */
 function Item({
   item,
   loop = false,
   at,
+  copy = false,
 }: {
   item: MarqueeItemView
   loop?: boolean
   /** Its place among the strip's items, in the editor's live preview only (its field marks). */
   at?: number | undefined
+  /** A hidden copy in that preview: drawn without its link. */
+  copy?: boolean
 }) {
-  // The editor's field marks (adr/0065 Faz 2b): the first round only, the rest are inert copies
+  // The editor's field marks (adr/0065 Faz 2b), on each round
   const qf = (part: string) => fieldMark(at !== undefined, fieldKey("items", at ?? 0, part))
   const body = (
     <>
@@ -56,9 +64,11 @@ function Item({
     <li
       data-part="item"
       className="gf-marquee-item"
-      {...(loop ? { "data-loop": "", "aria-hidden": true, inert: true } : {})}
+      {...(loop
+        ? { "data-loop": "", "aria-hidden": true, ...(at === undefined ? { inert: true } : {}) }
+        : {})}
     >
-      {item.link ? (
+      {item.link && !copy ? (
         <a href={item.link.path} className="gf-marquee-link">
           {body}
         </a>
@@ -73,7 +83,8 @@ function Item({
  * The scrolling strip (adr/0049 Ek 2026-11-14 §4.1; KY1, KY3): a band of
  * the shop's short lines sliding sideways, with CSS only (`marquee.css`).
  * Each item is written once for assistive tech; the rounds that fill a
- * wide screen and the loop's second copy are `aria-hidden` and `inert`.
+ * wide screen and the loop's second copy are `aria-hidden` and `inert`
+ * (in the editor's preview only hidden, see `Item`).
  * It stops under the pointer and while focus is in it (a focused link
  * scrolls into view), and its pause button holds it (WCAG 2.2.2); under
  * `prefers-reduced-motion` it does not move and its items wrap. Its size,
@@ -143,14 +154,30 @@ export function Marquee({
             ))}
             {repeats.map((round) =>
               items.map((item, index) => (
-                <Item key={`${String(round)}-${String(index)}`} item={item} loop />
+                <Item
+                  key={`${String(round)}-${String(index)}`}
+                  item={item}
+                  loop
+                  at={marked ? index : undefined}
+                  copy={marked}
+                />
               ))
             )}
           </ul>
-          <ul className="gf-marquee-copy" aria-hidden="true" inert data-loop="">
+          <ul
+            className="gf-marquee-copy"
+            aria-hidden="true"
+            data-loop=""
+            {...(marked ? {} : { inert: true })}
+          >
             {[...repeats, rounds - 1].map((round) =>
               items.map((item, index) => (
-                <Item key={`${String(round)}-${String(index)}`} item={item} />
+                <Item
+                  key={`${String(round)}-${String(index)}`}
+                  item={item}
+                  at={marked ? index : undefined}
+                  copy={marked}
+                />
               ))
             )}
           </ul>
