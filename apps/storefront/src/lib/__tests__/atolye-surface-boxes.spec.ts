@@ -112,6 +112,41 @@ describe("the theme's other boxes (adr/0067 step 4)", () => {
     expect(css).toContain(":is(.bg-field, .gf-pane-inner) .gf-icon-btn:hover:not(:disabled)")
   })
 
+  it("draws a box lined on its section's own ground and rule, under every utility it carries", async () => {
+    const css = await buildAtolyeCss([])
+    const lined = find(css, '[data-surface="lined"] .gf-pane')
+    expect(lined.around).toEqual(["@layer components"])
+    expect(lined.body).toContain("background-color: var(--color-paper);")
+    expect(lined.body).toContain("box-shadow: inset 0 0 0 1px var(--color-rule);")
+    // Not `--box-ground`/`--box-line`: those resolve on `:root`, the page's light paper
+    expect(lined.body).not.toContain("--box-")
+    // Graphite and the shop's colour turn those two tokens for the section inside
+    const look = atolyeCss("look.css")
+    for (const ground of ["stage", "primary"]) {
+      const tokens = find(look, `.gf-look[data-ground="${ground}"] > *`).body
+      expect(tokens, ground).toMatch(/--color-paper: /)
+      expect(tokens, ground).toMatch(/--color-rule: /)
+    }
+  })
+
+  it("draws a box inside a lined box without a rule of its own: no double line", async () => {
+    const css = await buildAtolyeCss([])
+    expect(find(css, '[data-surface="lined"] .gf-pane-inner').body).toBe(
+      "background-color: var(--color-paper-2);"
+    )
+    const nested = find(css, '[data-surface="lined"] :is(.gf-pane, .gf-box) .gf-pane')
+    expect(nested.around).toEqual(["@layer components"])
+    expect(nested.body).toContain("box-shadow: none;")
+    // A contract's text in its fold (third level) back on the field, written after
+    const third = '[data-surface="lined"] .gf-pane-inner .gf-pane'
+    expect(find(css, third).body).toBe("background-color: var(--color-field);")
+    expect(css.indexOf(`${third} {`)).toBeGreaterThan(
+      css.indexOf(":is(.gf-pane, .gf-box) .gf-pane {")
+    )
+    // A control on an inner box, now on the tone, still answers a step darker
+    expect(css).toContain('[data-surface="lined"] .gf-pane-inner .gf-icon-btn:hover:not(:disabled)')
+  })
+
   it("moved every listed box off its utility", () => {
     for (const [file, [pane, inner]] of Object.entries(MOVED)) {
       const source = atolyeCss(file)

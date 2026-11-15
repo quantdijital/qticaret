@@ -12,6 +12,10 @@
   :is(.bg-field, .gf-pane-inner) .gf-icon-btn:hover:not(:disabled) {
     background: var(--color-paper-2);
   }
+  /* `lined` turns an inner box to that tone (`surface.css`): one step darker still */
+  [data-surface="lined"] .gf-pane-inner .gf-icon-btn:hover:not(:disabled) {
+    background: var(--color-paper-3);
+  }
 }
 
 /* A code's answer on the checkout's graphite summary (WCAG 1.4.3); its chips stay light */

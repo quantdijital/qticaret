@@ -33,6 +33,27 @@
   .gf-pane-inner {
     background-color: var(--color-field);
   }
+
+  /* `lined`: the ground the box stands on inside a 1 px rule. On graphite
+     or the shop's colour a section turns `--color-paper` and `--color-rule`
+     to its own (`look.css`), so the box follows it there. */
+  [data-surface="lined"] .gf-pane {
+    background-color: var(--color-paper);
+    box-shadow: inset 0 0 0 1px var(--color-rule);
+  }
+  /* A box inside a ruled box takes no rule of its own (one ruled box, no
+     double line, docs/tema/tezgah-tasarim-dili.md): it steps to the tone,
+     and a third level (a contract's text in its fold) back to the field. */
+  [data-surface="lined"] .gf-pane-inner {
+    background-color: var(--color-paper-2);
+  }
+  [data-surface="lined"] :is(.gf-pane, .gf-box) .gf-pane {
+    background-color: var(--color-paper-2);
+    box-shadow: none;
+  }
+  [data-surface="lined"] .gf-pane-inner .gf-pane {
+    background-color: var(--color-field);
+  }
 }
 
 /*
