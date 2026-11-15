@@ -4,7 +4,7 @@ import { bridgeMessage } from "@qticaret/types/editor-bridge"
 import type { Reveal, ToStorefrontMessage } from "@qticaret/types/editor-bridge"
 import { LAYOUT_KEY, fetchLayoutPreview } from "@/features/storefront/api/layout"
 import { previewAddress } from "@/features/storefront/layout/preview-url"
-import { BRIDGE_ON, acceptFromFrame, frameOrigin } from "./bridge-client"
+import { BRIDGE_ON, acceptFromFrame, createKeyGate, frameOrigin } from "./bridge-client"
 import type { MissingReason } from "./bridge-client"
 import { useEditorSession } from "./use-editor-session"
 
@@ -77,6 +77,7 @@ export function useLivePreview({ ready, round, page, selected, onKey, onMissing 
     after: null as { id: string; reveal: Reveal; flash: boolean; round: number } | null,
     sentRound: round,
   })
+  const keyGate = useRef(createKeyGate())
   const [connected, setConnected] = useState(false)
   // What the live frame shows now: the save drawn and the page; anything else is on its way
   const [drawn, setDrawn] = useState<{ round: number; page: string | null } | null>(null)
@@ -143,6 +144,10 @@ export function useLivePreview({ ready, round, page, selected, onKey, onMissing 
         onMissing(message.payload.id, message.payload.reason)
         return
       case "key":
+        // A key pressed in the frame: it has the focus; and a few a second at most
+        if (!keyGate.current(document.activeElement === frame.current, Date.now())) {
+          return
+        }
         if (message.payload.key === "escape") {
           // Focus back to the panel
           frame.current?.blur()

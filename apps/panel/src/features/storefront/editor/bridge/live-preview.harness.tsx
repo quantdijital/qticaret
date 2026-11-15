@@ -11,7 +11,7 @@ export const ORIGIN = "http://localhost:8000"
 export const PATH = "/admin/storefront-layout"
 export const SESSION_PATH = "/onizleme/sfs_0123456789abcdef0123456789abcdef.abc.mac"
 
-type Init = { method?: string; body?: unknown } | undefined
+type Init = { method?: string; body?: unknown; keepalive?: boolean } | undefined
 export type FetchMock = Mock<(url: string, init?: Init) => Promise<unknown>>
 
 /** The server: a live session (unless refused) and a signed link per call (`sfl_1`, `sfl_2`…). */

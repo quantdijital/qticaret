@@ -135,7 +135,9 @@ export const renewEditorSession = (id: string) =>
     body: {},
   })
 
-export const closeEditorSession = (id: string) =>
+/** With `keepalive`, the request outlives the page (a tab closing). */
+export const closeEditorSession = (id: string, { keepalive = false } = {}) =>
   sdk.client.fetch<{ deleted: boolean }>(`${PATH}/editor-session/${encodeURIComponent(id)}`, {
     method: "DELETE",
+    ...(keepalive ? { keepalive: true } : {}),
   })

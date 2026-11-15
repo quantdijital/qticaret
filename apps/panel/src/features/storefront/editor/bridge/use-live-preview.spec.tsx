@@ -126,6 +126,7 @@ describe("the theme editor's live preview (adr/0065 Faz 1)", () => {
     const onMissing = vi.fn()
     await openLive({ round: 0, onKey, onMissing })
     fromFrame(readyAt())
+    frameElement().focus()
     fromFrame(panelMessage("key", { key: "undo" }))
     fromFrame(panelMessage("missing", { id: "abc123", reason: "timeout" }))
     // From elsewhere: not taken
@@ -133,6 +134,42 @@ describe("the theme editor's live preview (adr/0065 Faz 1)", () => {
     await pass()
     expect(onKey.mock.calls).toEqual([["undo"]])
     expect(onMissing.mock.calls).toEqual([["abc123", "timeout"]])
+  })
+
+  it("takes the frame's keys only while it has the focus, five a second at most", async () => {
+    const onKey = vi.fn()
+    await openLive({ round: 0, onKey })
+    fromFrame(readyAt())
+    // The focus elsewhere in the panel: a page in the frame cannot drive the history
+    fromFrame(panelMessage("key", { key: "undo" }))
+    expect(onKey).not.toHaveBeenCalled()
+
+    frameElement().focus()
+    for (let index = 0; index < 8; index++) {
+      fromFrame(panelMessage("key", { key: "redo" }))
+    }
+    expect(onKey).toHaveBeenCalledTimes(5)
+    await pass(1000)
+    fromFrame(panelMessage("key", { key: "undo" }))
+    expect(onKey).toHaveBeenCalledTimes(6)
+    expect(onKey).toHaveBeenLastCalledWith("undo")
+  })
+
+  it("closes its session with a request that outlives the page when the tab closes", async () => {
+    await openLive()
+    act(() => {
+      window.dispatchEvent(new Event("pagehide"))
+    })
+    const closes = fetchMock.mock.calls.filter(
+      ([url, init]) => url === `${PATH}/editor-session/ses1` && init?.method === "DELETE"
+    )
+    expect(closes).toHaveLength(1)
+    expect(closes[0]?.[1]?.keepalive).toBe(true)
+    // No renewal after it, and no second close
+    await pass(10 * 60_000)
+    expect(
+      fetchMock.mock.calls.filter(([url]) => url === `${PATH}/editor-session/ses1`)
+    ).toHaveLength(1)
   })
 
   it("goes back to signed links when the frame never says it is ready", async () => {

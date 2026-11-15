@@ -22,7 +22,8 @@ export const renewEvery = (idleMs: number) => Math.max(30_000, Math.min(idleMs /
 /**
  * The theme editor's live preview session (adr/0065 §1): opened once while
  * the editor is open and `enabled`, renewed on a timer, closed when the
- * editor goes (or the live preview is given up). Never retried: a refusal
+ * editor goes (or the live preview is given up) and when the tab closes
+ * (`pagehide`, a `keepalive` request that outlives the page). Never retried: a refusal
  * falls back to the signed link per save.
  */
 export function useEditorSession(enabled: boolean) {
@@ -49,8 +50,25 @@ export function useEditorSession(enabled: boolean) {
       // A renewal refused (ended elsewhere): the frame's next redraw says so and falls back
       renewEditorSession(id).catch(() => undefined)
     }, renewEvery(idle))
+    // The tab closing (or the page left): the session ends now, not 30 idle minutes later.
+    // Brought back from the back-forward cache, the frame's next redraw finds it ended and
+    // falls back to signed links.
+    let left = false
+    const onLeave = () => {
+      if (left) {
+        return
+      }
+      left = true
+      clearInterval(timer)
+      closeEditorSession(id, { keepalive: true }).catch(() => undefined)
+    }
+    window.addEventListener("pagehide", onLeave)
     return () => {
       clearInterval(timer)
+      window.removeEventListener("pagehide", onLeave)
+      if (left) {
+        return
+      }
       closing.set(
         id,
         setTimeout(() => {

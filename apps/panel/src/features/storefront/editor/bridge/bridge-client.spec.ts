@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest"
 import { EDITOR_BRIDGE_MAX_BYTES, bridgeMessage } from "@qticaret/types/editor-bridge"
 import type { AnySection } from "@/features/storefront/api/layout"
-import { acceptFromFrame, frameOrigin, whyNotShown } from "./bridge-client"
+import {
+  KEYS_PER_SECOND,
+  acceptFromFrame,
+  bridgeOn,
+  createKeyGate,
+  frameOrigin,
+  whyNotShown,
+} from "./bridge-client"
 import { renewEvery } from "./use-editor-session"
 
 const ORIGIN = "http://localhost:8000"
@@ -94,5 +101,29 @@ describe("the panel's bridge client (adr/0065 §2, §7)", () => {
     expect(renewEvery(30 * 60_000)).toBe(5 * 60_000)
     expect(renewEvery(6 * 60_000)).toBe(2 * 60_000)
     expect(renewEvery(1000)).toBe(30_000)
+  })
+
+  it("runs the bridge only with a frame origin the build names (security review 2026-11-15)", () => {
+    // Development's derived origin, or `VITE_STOREFRONT_ORIGIN`
+    expect(bridgeOn(undefined, ORIGIN)).toBe(true)
+    expect(bridgeOn("true", "https://shop.example")).toBe(true)
+    // A production build without `VITE_STOREFRONT_ORIGIN`: shut, signed links instead
+    expect(bridgeOn(undefined, null)).toBe(false)
+    expect(bridgeOn("true", null)).toBe(false)
+    // Turned off by the build
+    expect(bridgeOn(" FALSE ", ORIGIN)).toBe(false)
+  })
+
+  it("takes the frame's keys only while it has the focus, five a second at most", () => {
+    const gate = createKeyGate()
+    expect(gate(false, 0)).toBe(false)
+    const burst = Array.from({ length: 8 }, (_, index) => gate(true, index * 10))
+    expect(burst).toEqual([true, true, true, true, true, false, false, false])
+    // A second after the first one, room for one more; refusals took none
+    expect(gate(true, 999)).toBe(false)
+    expect(gate(true, 1000)).toBe(true)
+    expect(gate(true, 1001)).toBe(false)
+    expect(gate(true, 1040)).toBe(true)
+    expect(KEYS_PER_SECOND).toBe(5)
   })
 })
