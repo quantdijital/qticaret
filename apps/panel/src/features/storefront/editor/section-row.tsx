@@ -26,7 +26,7 @@ import {
 } from "@qticaret/admin-ui/ui/dropdown-menu"
 import type { LucideIcon } from "lucide-react"
 import { cn } from "@qticaret/admin-ui/lib/utils"
-import { OpenedSectionContext } from "./editor-layout"
+import { OpenedSectionContext, SectionHoverContext } from "./editor-layout"
 
 const R = "storefront.editor.row"
 
@@ -94,14 +94,24 @@ export function SectionRow({
   const { t } = useTranslation()
   // Its settings open beside the list: the row stays marked
   const current = useContext(OpenedSectionContext) === id
+  // Pointed at in the preview: the row lights up; pointed at here, the preview frames it
+  const { hovered, hover } = useContext(SectionHoverContext)
   return (
     <li
       data-section={id}
+      data-hovered={hovered === id ? "" : undefined}
       className={cn(
         "group/row relative flex items-center gap-0.5 rounded-md py-0.5 pr-1 hover:bg-muted/60 focus-within:bg-muted/60",
+        hovered === id && "bg-muted/60 ring-1 ring-primary/40",
         current && "bg-muted",
         drag?.dragging && "opacity-50"
       )}
+      onPointerEnter={() => {
+        hover(id)
+      }}
+      onPointerLeave={() => {
+        hover(null)
+      }}
       onDragOver={(event) => {
         if (drag?.active) {
           event.preventDefault()

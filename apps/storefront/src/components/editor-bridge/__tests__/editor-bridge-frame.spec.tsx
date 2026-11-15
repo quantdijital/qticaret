@@ -76,17 +76,96 @@ describe("the editor bridge in the preview frame", () => {
   it("framed, writes to the panel's exact origin only, never '*'", () => {
     const posted = framed()
     mount()
-    expect(listening().sort()).toEqual(["keydown", "message"])
+    // The editor's keys, Faz 2's Alt+↓/↑ through the sections and Enter in a search field
+    expect(listening().sort()).toEqual(["keydown", "keydown", "keydown", "message"])
     act(() => {
       window.dispatchEvent(new KeyboardEvent("keydown", { key: "z", ctrlKey: true }))
     })
-    expect(posted.mock.calls.map(([message]) => (message as { type: string }).type)).toEqual([
-      "ready",
-      "key",
-    ])
-    expect(posted.mock.calls[1]?.[0]).toMatchObject({ payload: { key: "undo" } })
+    expect(types(posted)).toEqual(["ready", "location", "key"])
+    expect(posted.mock.calls[2]?.[0]).toMatchObject({ payload: { key: "undo" } })
     for (const [, target] of posted.mock.calls) {
       expect(target).toBe(PANEL)
     }
   })
+
+  it("outside a frame puts nothing of the editor in the page", () => {
+    // Its own top window, as a page opened on its own is
+    Object.defineProperty(window, "parent", { value: window, configurable: true })
+    mount()
+    expect(document.querySelector("qt-editor-layer")).toBeNull()
+    expect(document.documentElement.hasAttribute("data-qt-editor")).toBe(false)
+  })
+
+  it("framed, marks the page and adds its own layer, both gone when it unmounts", () => {
+    framed()
+    mount()
+    expect(document.documentElement.hasAttribute("data-qt-editor")).toBe(true)
+    expect(document.querySelectorAll("qt-editor-layer")).toHaveLength(1)
+    act(() => {
+      root.unmount()
+    })
+    root = createRoot(host)
+    expect(document.querySelector("qt-editor-layer")).toBeNull()
+    expect(document.documentElement.hasAttribute("data-qt-editor")).toBe(false)
+  })
+
+  it("holds a link in the preview and asks the panel for its page (Faz 2)", () => {
+    const posted = framed()
+    mount()
+    const shop = link("/urun/sef-bicagi?renk=siyah#yorum")
+    const checkout = link("/odeme")
+    const away = link("https://evil.example/x")
+    const clicks = [shop, checkout, away].map((anchor) => click(anchor))
+    expect(clicks).toEqual([false, false, false])
+    const asked = posted.mock.calls
+      .map(([message]) => message as { type: string; payload: unknown })
+      .filter((message) => message.type === "navigate-request")
+      .map((message) => message.payload)
+    expect(asked).toEqual([
+      { path: "/urun/sef-bicagi?renk=siyah", previewable: true },
+      { path: "/odeme", previewable: false },
+    ])
+  })
+
+  it("holds a search in the preview: the results page is asked for", () => {
+    const posted = framed()
+    mount()
+    const form = document.createElement("form")
+    form.setAttribute("action", "/arama")
+    form.setAttribute("method", "get")
+    const field = document.createElement("input")
+    field.name = "q"
+    field.value = "bıçak"
+    form.append(field)
+    host.append(form)
+    const submit = new Event("submit", { bubbles: true, cancelable: true })
+    act(() => {
+      form.dispatchEvent(submit)
+    })
+    expect(submit.defaultPrevented).toBe(true)
+    expect(posted.mock.calls.at(-1)?.[0]).toMatchObject({
+      type: "navigate-request",
+      payload: { path: "/arama?q=b%C4%B1%C3%A7ak", previewable: true },
+    })
+  })
 })
+
+const types = (posted: { mock: { calls: unknown[][] } }) =>
+  posted.mock.calls.map(([message]) => (message as { type: string }).type)
+
+function link(href: string) {
+  const anchor = document.createElement("a")
+  anchor.href = href
+  anchor.textContent = href
+  host.append(anchor)
+  return anchor
+}
+
+/** Clicks like a person; true when nothing held it. */
+function click(element: Element) {
+  const event = new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 })
+  act(() => {
+    element.dispatchEvent(event)
+  })
+  return !event.defaultPrevented
+}

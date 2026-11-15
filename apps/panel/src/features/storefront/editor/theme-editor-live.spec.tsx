@@ -128,4 +128,60 @@ describe("the theme editor on the live preview (adr/0065 Faz 1)", () => {
     expect(fetchMock.mock.calls.filter(([url]) => url === `${PATH}/preview`)).toEqual([])
     expect(new Set(spy.mock.calls.map(([, to]) => to))).toEqual(new Set([ORIGIN]))
   })
+
+  it("opens a section from the preview's edit label and follows a link inside it (Faz 2)", async () => {
+    renderEditor()
+    await opened()
+    const frame = await screen.findByTitle<HTMLIFrameElement>("Vitrin önizlemesi")
+    await waitFor(() => {
+      expect(frame).toHaveAttribute("src", `${ORIGIN}${SESSION}`)
+    })
+    const target = frame.contentWindow
+    if (!target) {
+      throw new Error("the frame has no window")
+    }
+    const spy = vi.spyOn(target, "postMessage").mockImplementation(() => undefined)
+    const posted = (type: ToStorefrontMessage["type"]) =>
+      spy.mock.calls
+        .map(([message]) => message as ToStorefrontMessage)
+        .filter((message) => message.type === type)
+    const fromFrame = (data: unknown) => {
+      act(() => {
+        window.dispatchEvent(new MessageEvent("message", { origin: ORIGIN, source: target, data }))
+      })
+    }
+    fromFrame(bridgeMessage("ready", { v: 1, path: "/", edition: null }, 0))
+    await waitFor(() => {
+      expect(posted("labels")).toHaveLength(1)
+    })
+    expect(posted("labels")[0]).toMatchObject({ payload: { edit: "Düzenle" } })
+
+    // The edit label: the section's form opens and is said aloud
+    fromFrame(bridgeMessage("click", { id: "yeniurunler" }, 1))
+    await waitFor(() => {
+      expect(screen.getByText(/^Seçildi: /)).toBeInTheDocument()
+    })
+    expect(posted("select")).toContainEqual(
+      expect.objectContaining({
+        payload: expect.objectContaining({ id: "yeniurunler" }) as unknown,
+      })
+    )
+
+    // A link followed in the frame: shown there with the draft, the frame kept
+    fromFrame(bridgeMessage("navigate-request", { path: "/sepet", previewable: true }, 2))
+    await waitFor(() => {
+      expect(posted("navigate")).toContainEqual(
+        expect.objectContaining({ payload: { page: "/sepet" } })
+      )
+    })
+    fromFrame(bridgeMessage("location", { path: "/sepet", sections: ["mainheader"] }, 3))
+    // The home section's form still open: it is not on the cart page
+    expect(await screen.findByText("Bu bölüm başka bir sayfada.")).toBeInTheDocument()
+    // Checkout does not open in the preview: said, nothing sent
+    const navigations = posted("navigate").length
+    fromFrame(bridgeMessage("navigate-request", { path: "/odeme", previewable: false }, 4))
+    expect(await screen.findByText(/\/odeme önizlemede açılmaz/)).toBeInTheDocument()
+    expect(posted("navigate")).toHaveLength(navigations)
+    expect(screen.getByTitle("Vitrin önizlemesi")).toBe(frame)
+  })
 })
