@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-import { styleKitAttributes } from "@qticaret/types/style-kit"
 import type { PlaceOrderResult, QuickViewSetup, ShopView, Translate } from "@qticaret/ui"
 import { Announcement } from "./frame/Announcement"
 import { BackToTop } from "./frame/BackToTop"
@@ -8,6 +7,8 @@ import { CheckoutFooter, CheckoutHeader } from "./frame/CheckoutFrame"
 import { Consent } from "./frame/Consent"
 import { Footer } from "./frame/Footer"
 import { Header, catalogOf } from "./frame/Header"
+import { LayerMarks } from "./frame/Layers"
+import { layerMarks, rootMarks } from "./frame/root-marks"
 import { Marquee } from "./sections/Marquee"
 import { QuickViewHost } from "./frame/QuickViewHost"
 import { quickViewWords } from "./frame/quick-view-words"
@@ -51,25 +52,25 @@ export function Layout({
       {t("nav.skip_to_content")}
     </a>
   )
-  // The style kit's steps off the default (adr/0067): none at today's drawing
-  const kit = styleKitAttributes(shop.theme.styleKit)
+  // The box style and the style kit's steps off the default (adr/0067): no kit mark at
+  // today's drawing. The page's dialogs and drawers get them on their own host (`Layers`).
+  const marks = rootMarks(shop.theme)
+  const layers = layerMarks(shop.theme)
   const consent = shop.cookieBanner && (
     <Consent banner={shop.cookieBanner} save={saveCookies} t={t} />
   )
   if (shop.checkout) {
     return (
-      <div
-        className="flex min-h-dvh flex-col"
-        data-surface={shop.theme.surface ?? "filled"}
-        {...kit}
-      >
-        {skip}
-        <CheckoutHeader shop={shop} t={t} />
-        <main id="icerik" className="flex-1">
-          {children}
-        </main>
-        <CheckoutFooter shop={shop} t={t} />
-        {consent}
+      <div className="flex min-h-dvh flex-col" {...marks}>
+        <LayerMarks marks={layers}>
+          {skip}
+          <CheckoutHeader shop={shop} t={t} />
+          <main id="icerik" className="flex-1">
+            {children}
+          </main>
+          <CheckoutFooter shop={shop} t={t} />
+          {consent}
+        </LayerMarks>
       </div>
     )
   }
@@ -83,63 +84,67 @@ export function Layout({
   // The footer's floating "Yukarı çık" (adr/0049 Ek 2026-11-15), away while the cookie question waits
   const backToTop = shop.cookieBanner?.due === true ? null : (shop.footerBar?.backToTop ?? null)
   return (
-    <div className="flex min-h-dvh flex-col" data-surface={shop.theme.surface ?? "filled"} {...kit}>
-      {skip}
-      <Announcement
-        lines={shop.announcements}
-        settings={shop.announcementSettings}
-        links={catalog?.strip ? [] : shop.topLinks}
-        contact={catalog?.phone ? { ...shop.contact, phone: null, phoneHref: null } : shop.contact}
-        words={{
-          announcements: t("nav.announcements"),
-          links: t("nav.top_links"),
-          pause: t("nav.announcements_pause"),
-          play: t("nav.announcements_play"),
-        }}
-      />
-      {shop.marquee && <Marquee section={shop.marquee} t={t} header />}
-      <Header shop={shop} t={t} searchSuggest={searchSuggest} changeCartLine={changeCartLine} />
-      <main id="icerik" className="flex-1">
-        {children}
-      </main>
-      <Footer shop={shop} t={t} subscribe={subscribe} />
-      {shop.bottomNav && (
-        <BottomBar
-          nav={shop.bottomNav}
-          cartCount={shop.cartQuantity}
+    <div className="flex min-h-dvh flex-col" {...marks}>
+      <LayerMarks marks={layers}>
+        {skip}
+        <Announcement
+          lines={shop.announcements}
+          settings={shop.announcementSettings}
+          links={catalog?.strip ? [] : shop.topLinks}
+          contact={
+            catalog?.phone ? { ...shop.contact, phone: null, phoneHref: null } : shop.contact
+          }
           words={{
-            label: t("nav.bottom.label"),
-            home: t("nav.bottom.home"),
-            categories: t("nav.bottom.categories"),
-            search: t("nav.bottom.search"),
-            cart: t("nav.bottom.cart"),
-            cartLabel: t("nav.bottom.cart_label", { count: shop.cartQuantity }),
-            account: t("nav.bottom.account"),
+            announcements: t("nav.announcements"),
+            links: t("nav.top_links"),
+            pause: t("nav.announcements_pause"),
+            play: t("nav.announcements_play"),
           }}
         />
-      )}
-      {whatsapp && shop.contact.whatsappHref && (
-        <>
-          <WhatsApp
-            href={shop.contact.whatsappHref}
-            label={t("whatsapp.label")}
-            aboveBottomBar={shop.bottomNav !== null}
+        {shop.marquee && <Marquee section={shop.marquee} t={t} header />}
+        <Header shop={shop} t={t} searchSuggest={searchSuggest} changeCartLine={changeCartLine} />
+        <main id="icerik" className="flex-1">
+          {children}
+        </main>
+        <Footer shop={shop} t={t} subscribe={subscribe} />
+        {shop.bottomNav && (
+          <BottomBar
+            nav={shop.bottomNav}
+            cartCount={shop.cartQuantity}
+            words={{
+              label: t("nav.bottom.label"),
+              home: t("nav.bottom.home"),
+              categories: t("nav.bottom.categories"),
+              search: t("nav.bottom.search"),
+              cart: t("nav.bottom.cart"),
+              cartLabel: t("nav.bottom.cart_label", { count: shop.cartQuantity }),
+              account: t("nav.bottom.account"),
+            }}
           />
-          <WhatsAppClear />
-        </>
-      )}
-      {backToTop && (
-        <BackToTop
-          view={backToTop}
-          label={t("footer.back_to_top")}
-          aboveBottomBar={shop.bottomNav !== null}
-          overWhatsApp={whatsapp && backToTop.side === "right"}
-        />
-      )}
-      {/* The cards' quick view (adr/0049 Ek 2026-11-15): its dialog's code only on the first look */}
-      {quickView && <QuickViewHost setup={quickView} words={quickViewWords(t)} />}
-      {consent}
-      <ScrollCue />
+        )}
+        {whatsapp && shop.contact.whatsappHref && (
+          <>
+            <WhatsApp
+              href={shop.contact.whatsappHref}
+              label={t("whatsapp.label")}
+              aboveBottomBar={shop.bottomNav !== null}
+            />
+            <WhatsAppClear />
+          </>
+        )}
+        {backToTop && (
+          <BackToTop
+            view={backToTop}
+            label={t("footer.back_to_top")}
+            aboveBottomBar={shop.bottomNav !== null}
+            overWhatsApp={whatsapp && backToTop.side === "right"}
+          />
+        )}
+        {/* The cards' quick view (adr/0049 Ek 2026-11-15): its dialog's code only on the first look */}
+        {quickView && <QuickViewHost setup={quickView} words={quickViewWords(t)} />}
+        {consent}
+        <ScrollCue />
+      </LayerMarks>
     </div>
   )
 }
