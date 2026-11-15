@@ -77,9 +77,10 @@ const squares = (within: Element | null | undefined) =>
     src: square.querySelector("img")?.getAttribute("src") ?? null,
   }))
 
-// "Kategoriler" as drawn before the setting: its link recipe, word for word
+// "Kategoriler" as drawn before the setting: its link recipe, word for word (its fill the
+// menus' one recipe, `.gf-menu-row`, adr/0067 step 1)
 const WORDS_LINK =
-  "flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:bg-paper-2 hover:text-text"
+  "gf-menu-row flex min-h-11 items-center gap-2 rounded-inner px-3 text-sm leading-snug text-text-2 no-underline hover:text-text"
 const LIST = 'nav[aria-label="Tüm kategoriler"]'
 
 describe("the menus' pictures in the header as the server prints it", () => {
@@ -90,14 +91,13 @@ describe("the menus' pictures in the header as the server prints it", () => {
     expect(list?.className).toContain(" w-72 ")
     expect(list?.className).not.toContain("w-80")
     const top = list?.querySelector<HTMLAnchorElement>('a[data-cm-top="0"]')
-    expect(top?.className).toBe(`${WORDS_LINK} justify-between font-semibold `)
-    // The name is the row's own words, no box around it
-    expect(top?.firstChild?.nodeType).toBe(Node.TEXT_NODE)
-    expect(top?.firstChild?.textContent).toBe("Mutfak")
+    expect(top?.className).toBe(`${WORDS_LINK} justify-between font-semibold`)
+    // The name is the row's own words, no box around it (the words' span carries menu_style)
+    expect(top?.firstElementChild?.outerHTML).toBe('<span class="gf-menu-word">Mutfak</span>')
     expect(list?.querySelector('[data-cm-sub="0"]')?.className).toMatch(/ w-64$/)
     const child = list?.querySelector<HTMLAnchorElement>('a[href="/kategori/mutfak/sef"]')
     expect(child?.className).toBe(WORDS_LINK)
-    expect(child?.innerHTML).toBe("Şef bıçakları")
+    expect(child?.innerHTML).toBe('<span class="gf-menu-word">Şef bıçakları</span>')
     // The dropdown under the main menu keeps its 40 px squares
     const drop = doc.querySelector('[data-gf-drop="/kategori/mutfak"]')
     expect(squares(drop)).toEqual([
