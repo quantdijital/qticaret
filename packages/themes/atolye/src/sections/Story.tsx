@@ -1,3 +1,4 @@
+import { fieldMark } from "@qticaret/ui"
 import { Container } from "../parts/Container"
 import { type Of, headingId } from "./plan"
 
@@ -19,7 +20,7 @@ export function Story({ section }: { section: Of<"rich_text"> }) {
       <Container>
         <div className="grid gap-6 rounded-tile gf-pane p-6 sm:p-10 lg:grid-cols-12 lg:gap-(--gap-columns) lg:p-16">
           {section.title && (
-            <h2 id={id} className="lg:col-span-5">
+            <h2 id={id} className="lg:col-span-5" {...fieldMark(section.editor, "title")}>
               {section.title}
             </h2>
           )}
@@ -27,6 +28,7 @@ export function Story({ section }: { section: Of<"rich_text"> }) {
             className={`${PROSE} ${section.title ? "lg:col-span-7" : "lg:col-span-8 lg:col-start-3"}`}
             // adr/0019: built by the backend from an allow-listed document schema
             dangerouslySetInnerHTML={{ __html: section.html }}
+            {...fieldMark(section.editor, "body")}
           />
         </div>
       </Container>

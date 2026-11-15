@@ -7,7 +7,7 @@ import { F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import { ImageField } from "./image-field"
 import { LinkField } from "./link-field"
-import { Choice } from "./slide-dialog"
+import { Choice } from "./slide-controls"
 
 const B = "storefront.editor.banner"
 
@@ -92,7 +92,7 @@ export function BannerSlideFields({
         }}
       />
       <LinkField
-        id={`${id}-second`}
+        id={`${id}-second_link`}
         label={t(`${B}.secondLink`)}
         hint={t(`${B}.secondLinkHint`)}
         link={slide.second_link}

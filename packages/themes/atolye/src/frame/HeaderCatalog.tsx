@@ -1,12 +1,14 @@
 import { Heart, UserRound } from "lucide-react"
-import { sectionMark } from "@qticaret/ui"
+import { fieldMark, sectionMark } from "@qticaret/ui"
 import type { HeaderCatalogView, ShopView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
 import { Aisle } from "./Aisle"
+import { BarLinks } from "./AisleMore"
 import { CartSheet } from "./CartSheet"
 import { cartSheetWords } from "./cart-sheet-words"
 import { CategoryMenu } from "./CategoryMenu"
+import { HeaderCatalogTools } from "./HeaderCatalogTools"
 import { MenuSheet } from "./MenuSheet"
 import { SearchBox } from "./SearchBox"
 import { PHONE_SEARCH } from "./SearchLink"
@@ -17,13 +19,27 @@ import { menuWords } from "./menu-words"
 /** An icon on the menu bar: its ground's colours (`header-catalog.css`), 44 px; hovered, the menus' look. */
 const ON_BAR = "gf-on-bar gf-icon-btn gf-tool text-text transition-colors duration-(--dur-micro)"
 
-/** Whether the catalog header draws the strip, and the phone beside its search. */
+/**
+ * What the catalog header draws: the strip and what it holds (the shop's
+ * top links while they stand there, "Hesabım" beside the menu bar's
+ * icons), whether it says the top links anywhere (the strip or the menu
+ * bar's end, `links`: the bar above then leaves them out) and the phone
+ * beside its search.
+ */
 export function catalogParts(shop: ShopView, catalog: HeaderCatalogView) {
+  const stripLinks = catalog.topLinksPlace !== "bar" && shop.topLinks.length > 0
+  const stripAccount = catalog.accountText && catalog.toolsPlace !== "row"
   return {
-    strip: catalog.utilityBar && (shop.topLinks.length > 0 || catalog.accountText),
+    strip: catalog.utilityBar && (stripLinks || stripAccount),
+    stripLinks,
+    stripAccount,
+    links: shop.topLinks.length > 0 && (catalog.topLinksPlace === "bar" || catalog.utilityBar),
     phone: catalog.phone && shop.contact.phone !== null && shop.contact.phoneHref !== null,
   }
 }
+
+/** The narrow search (`search_width: narrow`): 35 rem at most, right after the wordmark. */
+const NARROW_SEARCH = "lg:[&>[role=search]]:max-w-140"
 
 /**
  * The catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15). From
@@ -37,6 +53,12 @@ export function catalogParts(shop: ShopView, catalog: HeaderCatalogView) {
  * (`ScrollCue`, `data-gf-strip`); the search and the menu bar stay. A
  * phone keeps the standard header's rows: the menu, the wordmark,
  * favourites and the cart over the search pill (`data-gf-head-row` folds).
+ *
+ * Its layout choices (Ek 2026-11-15; each default the drawing above):
+ * the tools named in the top row after the phone (`toolsPlace: row`,
+ * `HeaderCatalogTools`), the top links quiet at the menu bar's end
+ * (`topLinksPlace: bar`, `Aisle`'s `links`), the search 35 rem
+ * (`searchWidth: narrow`).
  */
 export function HeaderCatalog({
   shop,
@@ -60,7 +82,11 @@ export function HeaderCatalog({
   const pictures = images !== "off"
   // The highlighted link stands right after the main menu's last item (Tezgâh audit Y-05)
   const highlight = catalog.highlight && (
-    <a href={catalog.highlight.path} className="gf-btn gf-btn--small shrink-0">
+    <a
+      href={catalog.highlight.path}
+      className="gf-btn gf-btn--small shrink-0"
+      {...fieldMark(shop.editor, "highlight_link")}
+    >
       {catalog.highlight.label}
     </a>
   )
@@ -75,6 +101,8 @@ export function HeaderCatalog({
     words: cartSheetWords(t, shop.cartQuantity),
   }
   const total = catalog.cartTotal && shop.cart && shop.cartQuantity > 0 ? shop.cart.subtotal : null
+  const row = catalog.toolsPlace === "row"
+  const barLinks = catalog.topLinksPlace === "bar" ? shop.topLinks : []
   return (
     <header
       data-gf-head=""
@@ -88,7 +116,7 @@ export function HeaderCatalog({
       {parts.strip && (
         <div data-gf-strip="" className="hidden border-b border-rule bg-paper-2 text-xs lg:block">
           <Container className="flex min-h-9 items-center">
-            {shop.topLinks.length > 0 && (
+            {parts.stripLinks && (
               <nav aria-label={t("nav.top_links")} className="-ml-3 flex flex-wrap items-center">
                 {shop.topLinks.map((link) => (
                   <a
@@ -101,7 +129,7 @@ export function HeaderCatalog({
                 ))}
               </nav>
             )}
-            {catalog.accountText && (
+            {parts.stripAccount && (
               <a
                 href="/hesap"
                 className="-mr-3 ml-auto inline-flex min-h-9 items-center gap-1.5 rounded-button px-3 font-semibold text-text no-underline pointer-coarse:min-h-11"
@@ -115,7 +143,10 @@ export function HeaderCatalog({
       )}
       <Container
         data-gf-head-row=""
-        className="flex h-14 items-center gap-1 lg:h-16 lg:gap-(--space-xl)"
+        className={cn(
+          "flex h-14 items-center gap-1 lg:h-16 lg:gap-(--space-xl)",
+          catalog.searchWidth === "narrow" && NARROW_SEARCH
+        )}
       >
         <MenuSheet
           categories={shop.categories}
@@ -137,6 +168,7 @@ export function HeaderCatalog({
           {...search}
           id="arama-genis"
           written={catalog.searchLabel}
+          marks={shop.editor}
           className="hidden max-w-180 flex-1 lg:block"
         />
         {parts.phone && (
@@ -148,15 +180,30 @@ export function HeaderCatalog({
             <span className="tabular text-lg font-extrabold">{shop.contact.phone}</span>
           </a>
         )}
-        <nav aria-label={t("nav.account")} className="flex items-center lg:hidden">
-          <a href="/hesap/favoriler" aria-label={t("nav.favorites")} className={LABELLED}>
-            <Heart className="size-6" aria-hidden="true" strokeWidth={1.75} />
-          </a>
-          <CartSheet {...cart} buttonClass={LABELLED} />
-        </nav>
+        {row ? (
+          <HeaderCatalogTools
+            account={account}
+            cart={cart}
+            total={total}
+            alone={!parts.phone}
+            t={t}
+          />
+        ) : (
+          <nav aria-label={t("nav.account")} className="flex items-center lg:hidden">
+            <a href="/hesap/favoriler" aria-label={t("nav.favorites")} className={LABELLED}>
+              <Heart className="size-6" aria-hidden="true" strokeWidth={1.75} />
+            </a>
+            <CartSheet {...cart} buttonClass={LABELLED} />
+          </nav>
+        )}
       </Container>
       <Container className="pb-2 lg:hidden">
-        <SearchBox {...search} id={PHONE_SEARCH} written={catalog.searchLabel} />
+        <SearchBox
+          {...search}
+          id={PHONE_SEARCH}
+          written={catalog.searchLabel}
+          marks={shop.editor}
+        />
       </Container>
       <div className="gf-menubar hidden lg:block" data-ground={catalog.menuGround}>
         <Container>
@@ -181,25 +228,39 @@ export function HeaderCatalog({
                 more={t("nav.more")}
                 tail={highlight}
                 pictures={pictures}
+                links={barLinks}
+                linksLabel={t("nav.top_links")}
               />
             )}
             {shop.categories.length === 0 && highlight}
-            <nav aria-label={t("nav.account")} className="ml-auto flex shrink-0 items-center gap-1">
-              <a href="/hesap" aria-label={account} className={ON_BAR}>
-                <UserRound className="size-6" aria-hidden="true" strokeWidth={1.75} />
-              </a>
-              <a href="/hesap/favoriler" aria-label={t("nav.favorites")} className={ON_BAR}>
-                <Heart className="size-6" aria-hidden="true" strokeWidth={1.75} />
-              </a>
-              <CartSheet
-                {...cart}
-                total={total}
-                buttonClass={cn(
-                  ON_BAR,
-                  "gap-2 px-2 text-sm font-semibold [&_.gf-count]:right-auto [&_.gf-count]:left-6"
+            {shop.categories.length === 0 && barLinks.length > 0 && (
+              <BarLinks links={barLinks} label={t("nav.top_links")} className="ml-auto" />
+            )}
+            {!row && (
+              <nav
+                aria-label={t("nav.account")}
+                className={cn(
+                  "ml-auto flex shrink-0 items-center gap-1",
+                  // After the links standing at the bar's end on their own
+                  shop.categories.length === 0 && barLinks.length > 0 && "ml-0"
                 )}
-              />
-            </nav>
+              >
+                <a href="/hesap" aria-label={account} className={ON_BAR}>
+                  <UserRound className="size-6" aria-hidden="true" strokeWidth={1.75} />
+                </a>
+                <a href="/hesap/favoriler" aria-label={t("nav.favorites")} className={ON_BAR}>
+                  <Heart className="size-6" aria-hidden="true" strokeWidth={1.75} />
+                </a>
+                <CartSheet
+                  {...cart}
+                  total={total}
+                  buttonClass={cn(
+                    ON_BAR,
+                    "gap-2 px-2 text-sm font-semibold [&_.gf-count]:right-auto [&_.gf-count]:left-6"
+                  )}
+                />
+              </nav>
+            )}
           </div>
         </Container>
       </div>

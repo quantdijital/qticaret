@@ -20,6 +20,9 @@ export const HEADER_CATALOG_DEFAULTS: Readonly<HeaderCatalogFields> = {
   phone: true,
   categories_button: true,
   menu_ground: "stage",
+  tools_place: "bar",
+  top_links: "strip",
+  search_width: "wide",
 }
 
 /** A section whose type is drawn more than one way (adr/0049 Ek 2026-11-14 §2). */

@@ -1,5 +1,28 @@
 {
-  "header": [],
+  "header": [
+    {
+      "id": "mainheader",
+      "type": "header_bar",
+      "visible": true,
+      "starts_at": null,
+      "ends_at": null,
+      "variant": "catalog",
+      "sticky": true,
+      "menu_images": "all",
+      "search_placeholder": null,
+      "search_label": false,
+      "account_text": true,
+      "cart_total": false,
+      "highlight_link": null,
+      "utility_bar": false,
+      "phone": true,
+      "categories_button": true,
+      "menu_ground": "stage",
+      "tools_place": "row",
+      "top_links": "bar",
+      "search_width": "narrow"
+    }
+  ],
   "home": [
     {
       "id": "katalogacilis",

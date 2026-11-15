@@ -14,9 +14,11 @@ import { BRIDGE_ON, whyNotShown } from "./bridge/bridge-client"
 import { useLivePreview } from "./bridge/use-live-preview"
 import { usePreviewPicking } from "./bridge/use-preview-picking"
 import type { PreviewField } from "./forms/preview-fields"
+import { lostReason } from "./lost-reason"
 import type { Opened } from "./opened"
 
 const V = "storefront.editor.preview"
+const NO_PROBLEMS: ReadonlyMap<string, unknown> = new Map()
 
 interface Options {
   doc: LayoutDocument
@@ -40,6 +42,8 @@ interface Options {
   onVisit?: (path: string) => void
   /** Faz 2: the page the frame drew and whose sections it has. */
   onLand?: (path: string, group: BodyGroup | null) => void
+  /** The draft's problems by section id: a part with one is not saved, so not drawn yet. */
+  problems?: ReadonlyMap<string, unknown>
 }
 
 /**
@@ -65,6 +69,7 @@ export function useEditorPreview({
   onOpen = () => undefined,
   onVisit = () => undefined,
   onLand = () => undefined,
+  problems = NO_PROBLEMS,
 }: Options) {
   const { t } = useTranslation()
   // Sections added in this editor whose form opens next: scrolled to whatever the view
@@ -121,6 +126,10 @@ export function useEditorPreview({
     onOpen,
     onVisit,
     onLand,
+    // A section the frame could not find, drawn by a later save: no longer lost
+    onSections: (ids) => {
+      setLost((was) => (was !== null && ids.includes(was) ? null : was))
+    },
   })
   const pick = useRef(picking.onPick)
   useEffect(() => {
@@ -157,14 +166,22 @@ export function useEditorPreview({
     select(selected, isNew ? "always" : "if_hidden", true)
   }, [selected, connected, page, select])
 
+  // The frame looked for it and gave up: why, as far as the draft tells (a new empty one is no error)
+  const lostWhy =
+    found && lost === selected
+      ? lostReason(found.section, {
+          own: problems.has(found.section.id),
+          blocked: problems.size > 0,
+        })
+      : null
   const notice =
     BRIDGE_ON && !preview.live
       ? t(`${V}.liveOff`)
       : (picking.blocked ??
         (reason
           ? t(`${V}.missing.${reason}`)
-          : selected !== null && lost === selected
-            ? t(`${V}.missing.timeout`)
+          : lostWhy
+            ? t(`${V}.missing.${lostWhy}`)
             : visited !== null
               ? t(`${V}.elsewhere`, { path: visited })
               : null))

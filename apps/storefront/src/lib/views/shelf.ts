@@ -46,7 +46,11 @@ async function listViews(
       products: await railCards(await railProducts(sourceOf(list, limit)), "compact"),
     }))
   )
-  return views.filter((view) => view.products.length > 0)
+  const kept = views.flatMap((view, at) => (view.products.length > 0 ? [{ view, at }] : []))
+  // Once one is left out, each says its place in the design (the editor's field mark)
+  return kept.every(({ at }, drawn) => at === drawn)
+    ? kept.map(({ view }) => view)
+    : kept.map(({ view, at }) => ({ ...view, at }))
 }
 
 /** The card a rail draws: compact on a compact or columns rail, else its own or the setting's. */

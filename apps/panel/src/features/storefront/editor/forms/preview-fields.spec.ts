@@ -114,8 +114,23 @@ describe("the preview's field register", () => {
     expect(previewField(bar, "lines.2")).toBeNull()
     const brands = newHomeSection("brands", "marka00001") as AnySection
     expect(previewField(brands, "title")).toEqual({ target: "marka00001-title", group: "content" })
-    const faq = newHomeSection("faq", "sss0000001") as AnySection
-    expect(previewField(faq, "title")).toBeNull()
+    // A section without a title of its own (the trust strip) takes none
+    expect(previewField(newHomeSection("trust_badges", "guven00001"), "title")).toBeNull()
+  })
+
+  it("places a rail's and the categories' own see-all link, never the theme's fallback", () => {
+    for (const type of ["products", "categories"] as const) {
+      const section = newHomeSection(type, `${type.slice(0, 5)}00001`) as AnySection
+      // No link of the shop's own: the theme draws its fallback, unmarked; the form has no element
+      expect(previewField({ ...section, more: null } as AnySection, "more")).toBeNull()
+      expect(previewField({ ...section, more: link } as AnySection, "more")).toEqual({
+        target: `${section.id}-more`,
+        group: "content",
+      })
+    }
+    // A section whose see-all link is the theme's own (posts, reviews) takes none
+    expect(previewField(newHomeSection("posts", "yazil00001"), "more")).toBeNull()
+    expect(previewField(newHomeSection("reviews", "yorum00001"), "more")).toBeNull()
   })
 
   it("never takes a key of another form, however it looks", () => {

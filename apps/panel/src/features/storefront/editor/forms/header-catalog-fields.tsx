@@ -8,8 +8,11 @@ import { Switch } from "@qticaret/admin-ui/ui/switch"
 import { ToggleGroup, ToggleGroupItem } from "@qticaret/admin-ui/ui/toggle-group"
 import type { HeaderCatalogSection } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
+import { HEADER_CATALOG_DEFAULTS } from "@/features/storefront/layout/variants"
 import { FIELD_IDS, headerCatalogIn } from "./field-registry"
 import type { FieldGroupName, HeaderCatalogField } from "./field-registry"
+import { HEADER_CATALOG_STEPS, headerCatalogOffers } from "./header-catalog-steps"
+import { StepChoice } from "./step-choice"
 import { LinkField } from "./link-field"
 import { useProblemText } from "./problem-text"
 
@@ -94,6 +97,25 @@ function CatalogField({
       </div>
     )
   }
+  if (field === "tools_place" || field === "top_links" || field === "search_width") {
+    // A layout choice (Ek 2026-11-15): its steps side by side, "Varsayılana dön" off the default
+    const steps: readonly string[] = HEADER_CATALOG_STEPS[field]
+    return (
+      <StepChoice
+        id={id}
+        label={t(`${H}.${field}.label`)}
+        term={t(`${H}.${field}.term`)}
+        hint={t(`${H}.${field}.hint`)}
+        steps={steps}
+        value={section[field]}
+        fallback={HEADER_CATALOG_DEFAULTS[field]}
+        nameOf={(step) => t(`${H}.${field}.${step}`)}
+        onChange={(step) => {
+          onChange({ ...section, [field]: step })
+        }}
+      />
+    )
+  }
   if (field === "menu_ground") {
     return (
       <div id={id} className="flex flex-col gap-2">
@@ -162,12 +184,14 @@ export function HeaderCatalogFields({
 }) {
   return (
     <div className="flex flex-col gap-5">
-      {headerCatalogIn(group).map((field) => (
-        <Fragment key={field}>
-          <CatalogField section={section} field={field} problems={problems} onChange={onChange} />
-          {field === "categories_button" && afterCategories}
-        </Fragment>
-      ))}
+      {headerCatalogIn(group)
+        .filter((field) => headerCatalogOffers(section, field))
+        .map((field) => (
+          <Fragment key={field}>
+            <CatalogField section={section} field={field} problems={problems} onChange={onChange} />
+            {field === "categories_button" && afterCategories}
+          </Fragment>
+        ))}
     </div>
   )
 }

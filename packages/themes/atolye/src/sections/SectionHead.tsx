@@ -14,6 +14,7 @@ export function SectionHead({
   more,
   className,
   marks,
+  ownMore = false,
 }: {
   id: string
   title: string
@@ -21,6 +22,8 @@ export function SectionHead({
   className?: string
   /** The editor's live preview (adr/0065 Faz 2b): the title carries its field mark. */
   marks?: boolean | undefined
+  /** The link is the shop's own (`more`, a field of its form): in the preview it is marked too. */
+  ownMore?: boolean
 }) {
   return (
     <div
@@ -33,7 +36,11 @@ export function SectionHead({
         {title}
       </h2>
       {more && (
-        <a href={more.path} className="gf-link shrink-0 text-sm lg:text-md">
+        <a
+          href={more.path}
+          className="gf-link shrink-0 text-sm lg:text-md"
+          {...fieldMark(marks && ownMore, "more")}
+        >
           {more.label}
         </a>
       )}

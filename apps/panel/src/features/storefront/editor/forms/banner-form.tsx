@@ -9,6 +9,7 @@ import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
 import { BannerSlideFields } from "./banner-slide"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
+import { PREVIEW_IDS } from "./preview-fields"
 
 const B = "storefront.editor.banner"
 
@@ -36,7 +37,7 @@ export function BannerForm({ section, problems, onChange }: SectionFormProps<Ban
         <ol className="flex flex-col gap-4">
           {section.slides.map((slide, index) => {
             const at = `slides.${String(index)}`
-            const id = `banner-slide-${String(index)}`
+            const id = PREVIEW_IDS.text(section.id, at)
             const item = t(`${B}.slide`, { number: index + 1 })
             return (
               <li

@@ -8,6 +8,7 @@ import { FIELD_IDS } from "./field-registry"
 import { CountField, F, TextField } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
+import { PREVIEW_IDS } from "./preview-fields"
 import { LinkField } from "./link-field"
 import { ProductSourceField } from "./product-source-field"
 import { NAMED, sourceOf } from "./product-sources"
@@ -141,7 +142,7 @@ export function ProductsForm({ section, problems, onChange }: SectionFormProps<P
                 ) : null}
               </legend>
               <ListFields
-                id={`products-list-${String(index)}`}
+                id={PREVIEW_IDS.text(section.id, `lists.${String(index)}`)}
                 list={list}
                 titleLabel={t(`${F}.title`)}
                 problems={problems}
@@ -171,7 +172,7 @@ export function ProductsForm({ section, problems, onChange }: SectionFormProps<P
         </Button>
       ) : null}
       <LinkField
-        id="products-more"
+        id={PREVIEW_IDS.text(section.id, "more")}
         label={t(`${P}.more`)}
         term={t(`${P}.moreTerm`)}
         hint={t(`${P}.moreHint`)}

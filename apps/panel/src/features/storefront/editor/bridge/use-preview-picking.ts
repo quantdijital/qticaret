@@ -4,7 +4,9 @@ import { BRIDGE_MAX_NAME, BRIDGE_MAX_SECTIONS } from "@qticaret/types/editor-bri
 import type { BodyGroup, LayoutDocument } from "@/features/storefront/api/layout"
 import { allSections, findSection, isBodyGroup } from "@/features/storefront/layout/sections"
 import { previewField } from "../forms/preview-fields"
-import type { PreviewField } from "../forms/preview-fields"
+import type { PreviewContext, PreviewField } from "../forms/preview-fields"
+import { bodyOf } from "@/features/storefront/layout/main-sections"
+import { shelfRun } from "@/features/storefront/layout/shelf-tabs"
 import { sectionLabel } from "../section-meta"
 import type { LivePreview, PickMessage } from "./use-live-preview"
 
@@ -26,6 +28,8 @@ interface Options {
   onVisit: (path: string) => void
   /** The frame drew `path`, with `group`'s sections (null: none of the editor's pages). */
   onLand: (path: string, group: BodyGroup | null) => void
+  /** The ids of the sections the frame has drawn, after each redraw or page shown. */
+  onSections?: (ids: readonly string[]) => void
 }
 
 /** The page group whose sections the frame shows: the first body section's; null for none. */
@@ -37,6 +41,20 @@ export function groupOf(doc: LayoutDocument, ids: readonly string[]): BodyGroup 
     }
   }
   return null
+}
+
+/** What the field register reads beside a section (Faz 2b): a rail's shelf, the badges' count. */
+export function fieldContext(
+  doc: LayoutDocument,
+  found: NonNullable<ReturnType<typeof findSection>>
+): PreviewContext {
+  const { group, section } = found
+  return {
+    badges: doc.settings.trust_badges.length,
+    ...(section.type === "products" && isBodyGroup(group)
+      ? { shelf: shelfRun(bodyOf(doc, group), section.id) }
+      : {}),
+  }
 }
 
 /** Each section's name as the tree shows it, for the frame's labels (text only there). */
@@ -77,6 +95,7 @@ export function usePreviewPicking({
   onOpen,
   onVisit,
   onLand,
+  onSections,
 }: Options) {
   const { t } = useTranslation()
   const [hovered, setHovered] = useState<string | null>(null)
@@ -123,10 +142,12 @@ export function usePreviewPicking({
         // The key is the frame's word: matched against the register, never used otherwise
         const found = findSection(doc, message.payload.id)
         if (found) {
-          const focus = previewField(found.section, message.payload.field)
+          const focus = previewField(found.section, message.payload.field, fieldContext(doc, found))
+          // A shelf's pill names the rail beside it: that rail opens
+          const id = focus?.section ?? found.section.id
           setBlocked(null)
-          onOpen(found.section.id, focus ?? undefined)
-          const name = nameOf(names, found.section.id)
+          onOpen(id, focus ?? undefined)
+          const name = nameOf(names, id)
           setAnnounce(t(focus ? `${V}.fieldSelected` : `${V}.selected`, { name }))
         }
         return
@@ -141,6 +162,7 @@ export function usePreviewPicking({
         return
       case "location":
         onLand(message.payload.path, groupOf(doc, message.payload.sections))
+        onSections?.(message.payload.sections)
         return
       case "left":
         if (message.payload.path) {

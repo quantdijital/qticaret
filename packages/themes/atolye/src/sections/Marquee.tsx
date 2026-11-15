@@ -1,3 +1,4 @@
+import { fieldKey, fieldMark, sectionMark } from "@qticaret/ui"
 import type { MarqueeItemView, MarqueeSectionView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Container } from "../parts/Container"
@@ -23,16 +24,39 @@ export function closedKey(section: MarqueeSectionView): string {
 /**
  * One item: its icon, its line and second line, the whole a link when it
  * has one. A round that only fills the screen (`loop`) is hidden and inert.
+ * In the editor's live preview every round carries the item's field marks
+ * (`at`): a strip slides its first round off the screen in a second, so
+ * the round under the pointer is the one pressed. A copy there is hidden
+ * but not inert (an inert element is never under the pointer), and its
+ * link is a plain span (`copy`): nothing focusable under `aria-hidden`.
  */
-function Item({ item, loop = false }: { item: MarqueeItemView; loop?: boolean }) {
+function Item({
+  item,
+  loop = false,
+  at,
+  copy = false,
+}: {
+  item: MarqueeItemView
+  loop?: boolean
+  /** Its place among the strip's items, in the editor's live preview only (its field marks). */
+  at?: number | undefined
+  /** A hidden copy in that preview: drawn without its link. */
+  copy?: boolean
+}) {
+  // The editor's field marks (adr/0065 Faz 2b), on each round
+  const qf = (part: string) => fieldMark(at !== undefined, fieldKey("items", at ?? 0, part))
   const body = (
     <>
       {item.icon && <TrustIcon icon={item.icon} className="gf-marquee-icon" />}
       <span className="gf-marquee-words">
-        <span data-part="text" className="gf-marquee-text">
+        <span data-part="text" className="gf-marquee-text" {...qf("text")}>
           {item.text}
         </span>
-        {item.subtext && <span className="gf-marquee-sub">{item.subtext}</span>}
+        {item.subtext && (
+          <span className="gf-marquee-sub" {...qf("subtext")}>
+            {item.subtext}
+          </span>
+        )}
       </span>
     </>
   )
@@ -40,9 +64,11 @@ function Item({ item, loop = false }: { item: MarqueeItemView; loop?: boolean })
     <li
       data-part="item"
       className="gf-marquee-item"
-      {...(loop ? { "data-loop": "", "aria-hidden": true, inert: true } : {})}
+      {...(loop
+        ? { "data-loop": "", "aria-hidden": true, ...(at === undefined ? { inert: true } : {}) }
+        : {})}
     >
-      {item.link ? (
+      {item.link && !copy ? (
         <a href={item.link.path} className="gf-marquee-link">
           {body}
         </a>
@@ -57,7 +83,8 @@ function Item({ item, loop = false }: { item: MarqueeItemView; loop?: boolean })
  * The scrolling strip (adr/0049 Ek 2026-11-14 §4.1; KY1, KY3): a band of
  * the shop's short lines sliding sideways, with CSS only (`marquee.css`).
  * Each item is written once for assistive tech; the rounds that fill a
- * wide screen and the loop's second copy are `aria-hidden` and `inert`.
+ * wide screen and the loop's second copy are `aria-hidden` and `inert`
+ * (in the editor's preview only hidden, see `Item`).
  * It stops under the pointer and while focus is in it (a focused link
  * scrolls into view), and its pause button holds it (WCAG 2.2.2); under
  * `prefers-reduced-motion` it does not move and its items wrap. Its size,
@@ -76,6 +103,8 @@ export function Marquee({
   t,
   boxed = false,
   header = false,
+  marks = false,
+  mark,
 }: {
   section: MarqueeSectionView
   t: Translate
@@ -83,8 +112,13 @@ export function Marquee({
   boxed?: boolean
   /** Above the shop's header: no gap of its own. */
   header?: boolean
+  /** The theme editor's live preview (adr/0065 Faz 2b): its items carry their field marks. */
+  marks?: boolean | undefined
+  /** In the header, in that preview: the strip's section id, its own section mark (a page's strip has its look's). */
+  mark?: string | undefined
 }) {
   const { items } = section
+  const marked = marks || mark !== undefined
   const { rounds, span } = loopOf(section)
   const repeats = Array.from({ length: rounds - 1 }, (_, round) => round)
   // The outermost box carries what takes the strip off the page
@@ -105,7 +139,7 @@ export function Marquee({
       data-gap={section.gap}
       data-outline={outlined(section) ? "on" : undefined}
       data-span={span}
-      {...(header ? shell : {})}
+      {...(header ? { ...shell, ...sectionMark(mark) } : {})}
       className={cn(
         "gf-marquee",
         section.ground === "stage" && "gf-stage",
@@ -116,18 +150,34 @@ export function Marquee({
         <div className="gf-marquee-track">
           <ul className="gf-marquee-copy">
             {items.map((item, index) => (
-              <Item key={index} item={item} />
+              <Item key={index} item={item} at={marked ? index : undefined} />
             ))}
             {repeats.map((round) =>
               items.map((item, index) => (
-                <Item key={`${String(round)}-${String(index)}`} item={item} loop />
+                <Item
+                  key={`${String(round)}-${String(index)}`}
+                  item={item}
+                  loop
+                  at={marked ? index : undefined}
+                  copy={marked}
+                />
               ))
             )}
           </ul>
-          <ul className="gf-marquee-copy" aria-hidden="true" inert data-loop="">
+          <ul
+            className="gf-marquee-copy"
+            aria-hidden="true"
+            data-loop=""
+            {...(marked ? {} : { inert: true })}
+          >
             {[...repeats, rounds - 1].map((round) =>
               items.map((item, index) => (
-                <Item key={`${String(round)}-${String(index)}`} item={item} />
+                <Item
+                  key={`${String(round)}-${String(index)}`}
+                  item={item}
+                  at={marked ? index : undefined}
+                  copy={marked}
+                />
               ))
             )}
           </ul>

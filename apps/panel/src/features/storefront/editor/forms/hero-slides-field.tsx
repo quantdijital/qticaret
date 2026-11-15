@@ -11,6 +11,7 @@ import { CatalogSlideDialog } from "./catalog-slide-dialog"
 import { isPictureOnly, pictureSlide, slidesOf, withSlides } from "./catalog-slides"
 import { FIELD_IDS } from "./field-registry"
 import { FieldGroup } from "./fields"
+import { useSlideRows } from "./slide-rows"
 import type { CatalogHero } from "./slider-kit"
 import { useSlideFocus } from "../use-field-focus"
 
@@ -40,6 +41,7 @@ export function HeroSlidesField({
   const [editing, setEditing] = useState<number | null>(null)
   // The field an edit label in the preview named: its slide's dialog opens at it (Faz 2b)
   const [initial, setInitial] = useState<string | null>(null)
+  const { rowRef, rowAt } = useSlideRows()
   useSlideFocus((slide, target) => {
     if (slide < slidesOf(section).length) {
       setEditing(slide)
@@ -69,6 +71,7 @@ export function HeroSlidesField({
               className="flex items-center gap-2 rounded-md border p-1.5"
             >
               <button
+                ref={rowRef(index)}
                 type="button"
                 className="flex min-h-12 min-w-0 flex-1 items-center gap-3 rounded-sm p-1 text-left transition-colors hover:bg-muted/60"
                 aria-label={t(`${S}.open`, { item })}
@@ -149,6 +152,7 @@ export function HeroSlidesField({
           index={editing}
           onIndexChange={setEditing}
           initialFocus={initial}
+          returnFocus={rowAt}
           onSave={(index, slide) => {
             setSlides(slides.map((each, at) => (at === index ? slide : each)))
           }}

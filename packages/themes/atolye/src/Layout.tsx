@@ -74,7 +74,8 @@ export function Layout({
       </div>
     )
   }
-  // The catalog header draws the top links in its strip and the phone by its search: not twice
+  // The catalog header draws the top links (its strip's or its menu bar's) and the phone by
+  // its search: not twice
   const catalog = catalogOf(shop)
   const whatsapp =
     shop.contact.whatsappHref !== null &&
@@ -91,7 +92,7 @@ export function Layout({
           lines={shop.announcements}
           settings={shop.announcementSettings}
           mark={shop.announcementMark}
-          links={catalog?.strip ? [] : shop.topLinks}
+          links={catalog?.links ? [] : shop.topLinks}
           contact={
             catalog?.phone ? { ...shop.contact, phone: null, phoneHref: null } : shop.contact
           }
@@ -102,7 +103,14 @@ export function Layout({
             play: t("nav.announcements_play"),
           }}
         />
-        {shop.marquee && <Marquee section={shop.marquee} t={t} header />}
+        {shop.marquee && (
+          <Marquee
+            section={shop.marquee}
+            t={t}
+            header
+            mark={shop.editor ? shop.marquee.id : undefined}
+          />
+        )}
         <Header shop={shop} t={t} searchSuggest={searchSuggest} changeCartLine={changeCartLine} />
         <main id="icerik" className="flex-1">
           {children}

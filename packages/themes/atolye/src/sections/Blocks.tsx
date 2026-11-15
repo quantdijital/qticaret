@@ -98,6 +98,7 @@ function BlockView({
           badges={section.badges}
           label={t("footer.trust")}
           variant={drawnVariant("trust_badges", section.variant, PROMISE_VARIANTS)}
+          marks={section.editor}
         />
       )
     case "categories":
@@ -109,6 +110,7 @@ function BlockView({
           title={section.title}
           view={section.linked}
           all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
+          ownAll={Boolean(section.more)}
           t={t}
           marks={section.editor}
         />
@@ -118,6 +120,7 @@ function BlockView({
           title={section.title}
           categories={section.categories}
           all={section.more ?? { label: t("home.all_categories"), path: "/kategoriler" }}
+          ownAll={Boolean(section.more)}
           t={t}
           marks={section.editor}
         />
@@ -155,6 +158,7 @@ function BlockView({
           section={section}
           t={t}
           boxed={section.look?.width === "boxed" || section.look?.width === "narrow"}
+          marks={section.editor}
         />
       )
   }
