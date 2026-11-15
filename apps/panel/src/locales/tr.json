@@ -7881,7 +7881,8 @@
         },
         "header_bar": {
           "standard": "Solda logo",
-          "centered": "Ortada logo"
+          "centered": "Ortada logo",
+          "catalog": "Klasik katalog"
         },
         "footer_bar": {
           "ledger": "Standart"
@@ -8580,7 +8581,57 @@
       "headerBar": {
         "sticky": "Üst bilgi sabit kalsın",
         "stickyHint": "Sayfa kaydırılırken üst bilgi ekranın üstünde durur. Kapalıyken sayfayla birlikte kayar.",
-        "stickyTerm": "sticky"
+        "stickyTerm": "sticky",
+        "search_placeholder": {
+          "label": "Arama kutusundaki yazı",
+          "term": "placeholder",
+          "hint": "Boş bırakırsanız: “Ürün, kategori veya marka ara”."
+        },
+        "search_label": {
+          "label": "Arama düğmesi yazılı olsun",
+          "term": "button",
+          "hint": "Açıkken büyüteç yerine “Ara” yazan dolu düğme çıkar."
+        },
+        "account_text": {
+          "label": "Üst şeritte “Hesabım” yazısı",
+          "term": "link",
+          "hint": "Hesap simgesi menü çubuğunda her zaman durur."
+        },
+        "cart_total": {
+          "label": "Sepette tutarı göster",
+          "term": "subtotal",
+          "hint": "Sepet doluyken simgenin yanında ara toplam yazar."
+        },
+        "highlight_link": {
+          "label": "Vurgulu bağlantı",
+          "term": "link",
+          "hint": "Menü çubuğunda ana menünün sonunda öne çıkan tek bağlantı (ör. Kampanyalar)."
+        },
+        "utility_bar": {
+          "label": "Üst yardımcı şerit",
+          "term": "top bar",
+          "hint": "İnce açık şerit: Menüler'deki “Üst menü” bağlantıları ve Hesabım. Telefonda görünmez."
+        },
+        "phone": {
+          "label": "Telefon numarası",
+          "term": "phone",
+          "hint": "Mağaza bilgilerindeki telefon, aramanın sağında “Müşteri hizmetleri” yazısıyla. Telefon girilmemişse görünmez."
+        },
+        "categories_button": {
+          "label": "“Kategoriler” düğmesi",
+          "term": "dropdown",
+          "hint": "Menü çubuğunun başında; üst kategoriler ve alt kategorileri açılır liste olarak."
+        },
+        "menu_ground": {
+          "label": "Menü çubuğu zemini",
+          "term": "background",
+          "hint": "Yazı ve simge renkleri zemine göre okunur seçilir.",
+          "stage": "Koyu",
+          "primary": "Ana renk",
+          "light": "Açık"
+        },
+        "phoneNote": "Telefonda üst bilgi değişmez: menü, logo, favori ve sepet; altında arama.",
+        "otherHint": "Arama düğmesi, Hesabım yazısı ve sepet tutarı."
       },
       "main": {
         "fixed": "Bu bölüm sayfanın sabit parçasıdır; gizlenemez, taşınamaz, kopyalanamaz ve kaldırılamaz."

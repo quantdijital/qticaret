@@ -2,9 +2,11 @@ import type {
   CategoryMainVariant,
   FooterBarVariant,
   HeaderBarVariant,
+  HeaderMenuGround,
   ProductMainVariant,
 } from "@qticaret/types"
 import type { SectionLookView } from "./content-views"
+import type { LinkView, NavCategoryView } from "./views"
 
 /**
  * The main sections as a theme draws them (adr/0049 Ek 2026-11-14 §5, §7):
@@ -20,6 +22,36 @@ export interface HeaderBarView {
   variant: HeaderBarVariant
   /** The header stays at the top of a long page. */
   sticky: boolean
+  /** The `catalog` variant's own settings (adr/0049 N14); absent on the others. */
+  catalog?: HeaderCatalogView
+}
+
+/**
+ * The catalog header (adr/0049 Ek 2026-11-14 N14, Ek 2026-11-15): a
+ * utility strip over the wordmark, a wide search and the shop's phone,
+ * then a filled menu bar with a "Kategoriler" button, the main menu, a
+ * highlighted last link and the icons. On a phone the theme's phone header
+ * stays as it is.
+ */
+export interface HeaderCatalogView {
+  /** The search box's words; null: the theme's own. */
+  searchPlaceholder: string | null
+  /** The search button written ("Ara") rather than a magnifier. */
+  searchLabel: boolean
+  /** "Hesabım" written at the utility strip's end. */
+  accountText: boolean
+  /** The cart's subtotal beside its icon (when the cart holds something). */
+  cartTotal: boolean
+  /** The menu bar's highlighted last link; null: none. */
+  highlight: LinkView | null
+  /** The thin strip above the header: the shop's top links and the account link. */
+  utilityBar: boolean
+  /** The shop's phone beside the search (`ShopView.contact.phone`); none there: not drawn. */
+  phone: boolean
+  /** The shop's top categories with their children for "Kategoriler"; empty: no button. */
+  categories: NavCategoryView[]
+  /** The menu bar's ground: "Koyu / Ana renk / Açık". */
+  menuGround: HeaderMenuGround
 }
 
 export interface FooterBarView {

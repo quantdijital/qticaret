@@ -1,6 +1,16 @@
-import { BANNER_SETTINGS, MARQUEE_SETTINGS, SECTION_VARIANTS } from "@qticaret/types"
+import {
+  BANNER_SETTINGS,
+  HEADER_MENU_GROUNDS,
+  MARQUEE_SETTINGS,
+  SECTION_VARIANTS,
+} from "@qticaret/types"
 import type { BannerSetting, MarqueeSetting, SectionLookField } from "@qticaret/types"
-import type { AnySection, LayoutGroup, LookedSection } from "@/features/storefront/api/layout"
+import type {
+  AnySection,
+  HeaderCatalogFields,
+  LayoutGroup,
+  LookedSection,
+} from "@/features/storefront/api/layout"
 import { lookFieldsFor, lookStepsFor } from "@/features/storefront/layout/look"
 import { isBodyGroup } from "@/features/storefront/layout/sections"
 import { isMain } from "@/features/storefront/layout/main-sections"
@@ -47,6 +57,34 @@ const P = "storefront.editor.panel"
 const LOOK = "storefront.editor.look"
 const MARQUEE = "storefront.editor.marquee"
 const BANNER = "storefront.editor.banner"
+const HEADER = "storefront.editor.headerBar"
+
+/**
+ * Where the catalog header's settings sit (adr/0049 Ek 2026-11-15, the
+ * owner's rule: the basics open and first): what it shows and its menu
+ * bar's ground with the header's own content; the written search button,
+ * the written account link and the cart's subtotal closed in "Diğer
+ * ayarlar". In the form's order.
+ */
+export const HEADER_CATALOG_GROUPS: Readonly<Record<keyof HeaderCatalogFields, FieldGroupName>> = {
+  search_placeholder: "content",
+  utility_bar: "content",
+  phone: "content",
+  categories_button: "content",
+  menu_ground: "content",
+  highlight_link: "content",
+  search_label: "look",
+  account_text: "look",
+  cart_total: "look",
+}
+
+export type HeaderCatalogField = keyof HeaderCatalogFields
+
+/** The catalog header's fields of a group, in the form's order. */
+export const headerCatalogIn = (group: FieldGroupName): HeaderCatalogField[] =>
+  (Object.keys(HEADER_CATALOG_GROUPS) as HeaderCatalogField[]).filter(
+    (field) => HEADER_CATALOG_GROUPS[field] === group
+  )
 
 /**
  * Where a strip's settings sit (adr/0049 Ek 2026-11-15, the owner's "kayma
@@ -104,6 +142,7 @@ export const FIELD_IDS = {
   banner: (sectionId: string, setting: BannerSetting) => `${sectionId}-banner-${setting}`,
   ...SHELF_IDS,
   sticky: (sectionId: string) => `${sectionId}-sticky`,
+  header: (sectionId: string, field: HeaderCatalogField) => `${sectionId}-header-${field}`,
   visible: (sectionId: string) => `${sectionId}-schedule-visible`,
   starts: (sectionId: string) => `${sectionId}-schedule-starts`,
   ends: (sectionId: string) => `${sectionId}-schedule-ends`,
@@ -188,6 +227,21 @@ export function sectionFields(section: AnySection, group: LayoutGroup): Registry
       options: [],
       target: FIELD_IDS.sticky(id),
     })
+    if (section.variant === "catalog") {
+      for (const field of Object.keys(HEADER_CATALOG_GROUPS) as HeaderCatalogField[]) {
+        fields.push({
+          key: `header.${field}`,
+          group: HEADER_CATALOG_GROUPS[field],
+          label: `${HEADER}.${field}.label`,
+          term: `${HEADER}.${field}.term`,
+          options:
+            field === "menu_ground"
+              ? HEADER_MENU_GROUNDS.map((ground) => `${HEADER}.menu_ground.${ground}`)
+              : [],
+          target: FIELD_IDS.header(id, field),
+        })
+      }
+    }
   }
   if (takesLook(section, group)) {
     for (const field of lookFieldsFor(section.type)) {

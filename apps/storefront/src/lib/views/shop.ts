@@ -130,7 +130,8 @@ export async function shopView(): Promise<ShopView> {
     ),
     marquee: headerMarquee(layout.header, t),
     // The design's header bar and footer (Ek 2026-11-14 §5); the theme's header before them
-    headerBar: headerBarOf(layout.main, theme),
+    // The catalog header's "Kategoriler" lists the top categories already read (no request)
+    headerBar: headerBarOf(layout.main, theme, { t, tree: () => navigation(categories, paths) }),
     footerBar: footerBarOf(layout.main),
     newsletter: newsletterOf(layout, identity.company_title ?? site.shop.name),
     topLinks: topLinks(menus, t),

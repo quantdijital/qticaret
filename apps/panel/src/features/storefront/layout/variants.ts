@@ -1,6 +1,19 @@
 import { HERO_CATALOG_LIMITS, SCROLLER_DEFAULTS, SHELF_LIMITS, hasVariants } from "@qticaret/types"
 import type { SectionVariant, VariantSectionType } from "@qticaret/types"
-import type { AnySection } from "@/features/storefront/api/layout"
+import type { AnySection, HeaderCatalogFields } from "@/features/storefront/api/layout"
+
+/** A bar switched to the catalog header starts from the backend's defaults (adr/0049 Ek 2026-11-15). */
+export const HEADER_CATALOG_DEFAULTS: Readonly<HeaderCatalogFields> = {
+  search_placeholder: null,
+  search_label: false,
+  account_text: true,
+  cart_total: false,
+  highlight_link: null,
+  utility_bar: true,
+  phone: true,
+  categories_button: true,
+  menu_ground: "stage",
+}
 
 /** A section whose type is drawn more than one way (adr/0049 Ek 2026-11-14 §2). */
 export type VariantSection = Extract<AnySection, { type: VariantSectionType }>
@@ -38,7 +51,7 @@ export const VARIANT_FIELDS: {
       lists: [{ title: null, source: { kind: "newest" } }],
     },
   },
-  header_bar: { standard: {}, centered: {} },
+  header_bar: { standard: {}, centered: {}, catalog: HEADER_CATALOG_DEFAULTS },
   footer_bar: { ledger: {} },
   product_main: { standard: {} },
   category_main: { standard: {} },
