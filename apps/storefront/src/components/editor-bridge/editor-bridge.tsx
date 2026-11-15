@@ -4,14 +4,13 @@ import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useRef, useTransition } from "react"
 import { EDITOR_BRIDGE_VERSION, bridgeMessage } from "@qticaret/types/editor-bridge"
 import type { Reveal, ToPanelMessage, ToStorefrontMessage } from "@qticaret/types/editor-bridge"
-import {
-  acceptMessage,
-  editorKey,
-  needsScroll,
-  previewHref,
-  sectionSelector,
-  selectionCss,
-} from "./bridge-core"
+import { acceptMessage, editorKey, needsScroll, previewHref, selectionCss } from "./bridge-core"
+import { holdAddress, previewBase, shownPage } from "./bridge-nav"
+import { createOverlay } from "./overlay"
+import type { Overlay } from "./overlay"
+import { announceSelection, drawnSections } from "./overlay-core"
+import { installPageHooks } from "./page-hooks"
+import { waitForSection } from "./wait-for"
 
 /** How long a section asked for may take to turn up (a new one after its redraw). */
 const WAIT_MS = 5000
@@ -36,9 +35,12 @@ type Payload<T extends ToPanelMessage["type"]> = Extract<ToPanelMessage, { type:
  * ready, then redraws the draft in place after each save
  * (`router.refresh()`: the scroll and the page's own state stay), shows
  * another page without reloading the frame, scrolls to and flashes the
- * section asked for, and passes the editor's keys to the panel. It reads
- * the panel's exact origin only and writes to it only; it writes nothing
- * but its own style element, never HTML.
+ * section asked for, and passes the editor's keys to the panel. Faz 2:
+ * the editor layer frames the section pointed at with its "edit" label,
+ * links and searches stay in the preview (asked of the panel), the theme
+ * hears `qt:section:select`, and the page is marked `data-qt-editor`. It
+ * reads the panel's exact origin only and writes to it only; it writes
+ * nothing but its own style element and layer, never HTML.
  */
 export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
   const router = useRouter()
@@ -57,6 +59,8 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
     style: null as HTMLStyleElement | null,
     waiting: null as (() => void) | null,
     pathname,
+    overlay: null as Overlay | null,
+    chosen: null as { id: string; element: Element } | null,
   })
   useEffect(() => {
     live.current.edition = edition
@@ -75,6 +79,8 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
       edition: state.edition,
       ms: Math.round(performance.now() - state.startedAt),
     })
+    state.overlay?.reposition()
+    sendLocation()
     if (state.again) {
       state.again = false
       draw.current(() => {
@@ -86,6 +92,11 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
   function send<T extends ToPanelMessage["type"]>(type: T, payload: Payload<T>) {
     const message = bridgeMessage(type as never, payload as never, live.current.seq++)
     window.parent.postMessage(message, panelOrigin)
+  }
+  /** The page on show and its sections in page order (Faz 2), for the panel's page and tree. */
+  function sendLocation() {
+    const sections = drawnSections(document).map((section) => section.id)
+    send("location", { path: shownPage(window.location.search), sections })
   }
 
   useEffect(() => {
@@ -118,34 +129,14 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
     /** Calls `found` with the section's element once it is in the page, or says it is missing. */
     const whenFound = (id: string, found: (element: Element) => void) => {
       state.waiting?.()
-      const selector = sectionSelector(id)
-      const now = selector ? document.querySelector(selector) : null
-      if (now || !selector) {
-        if (now) {
-          found(now)
-        }
-        return
-      }
-      const observer = new MutationObserver(() => {
-        const element = document.querySelector(selector)
-        if (element) {
-          stop()
-          found(element)
-        }
-      })
-      const timer = setTimeout(() => {
-        stop()
-        send("missing", { id, reason: "timeout" })
-      }, WAIT_MS)
-      const stop = () => {
-        observer.disconnect()
-        clearTimeout(timer)
-        if (state.waiting === stop) {
-          state.waiting = null
-        }
-      }
-      state.waiting = stop
-      observer.observe(document.body, { childList: true, subtree: true })
+      state.waiting = waitForSection(
+        id,
+        found,
+        () => {
+          send("missing", { id, reason: "timeout" })
+        },
+        WAIT_MS
+      )
     }
     const reveal = (element: Element, how: Reveal, block: "start" | "center" = "start") => {
       if (needsScroll(element.getBoundingClientRect(), window.innerHeight, how)) {
@@ -174,10 +165,12 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
         case "init":
           state.scale = message.payload.scale
           state.selected = message.payload.selected
+          overlay.setScale(state.scale)
           paint()
           return
         case "scale":
           state.scale = message.payload.scale
+          overlay.setScale(state.scale)
           paint()
           return
         case "refresh":
@@ -197,8 +190,15 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
           const { id, reveal: how, flash: flashing } = message.payload
           state.selected = id
           paint()
+          if (!id) {
+            announceSelection(state.chosen, null)
+            state.chosen = null
+          }
           if (id) {
             whenFound(id, (element) => {
+              const chosen = { id, element }
+              announceSelection(state.chosen, chosen)
+              state.chosen = chosen
               reveal(element, how)
               if (flashing) {
                 flash(id)
@@ -215,8 +215,36 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
             reveal(element, "always", message.payload.block)
           })
           return
+        case "hover":
+          // The panel's tree row: framed here, not said back
+          overlay.show(message.payload.id)
+          return
+        case "labels":
+          overlay.setLabels(message.payload.edit, message.payload.names)
+          return
       }
     }
+    // The editor layer (Faz 2): a closed shadow root of its own, framed and on a session only
+    const overlay = createOverlay({
+      nonce,
+      touch: typeof window.matchMedia === "function" && window.matchMedia("(hover: none)").matches,
+      onEdit: (id) => {
+        send("click", { id })
+      },
+    })
+    state.overlay = overlay
+    const unhook = installPageHooks({
+      overlay,
+      reduced,
+      onHover: (id) => {
+        send("hover", { id })
+      },
+      onAsk: (path, previewable) => {
+        send("navigate-request", { path, previewable })
+      },
+    })
+    const root = document.documentElement
+    root.dataset["qtEditor"] = ""
     const onMessage = (event: MessageEvent) => {
       const message = acceptMessage(event, panelOrigin, window.parent)
       if (message) {
@@ -237,13 +265,24 @@ export function EditorBridge({ panelOrigin, edition, nonce }: Props) {
     window.addEventListener("keydown", onKey, true)
     const page = new URL(window.location.href).searchParams.get("sayfa")
     send("ready", { v: EDITOR_BRIDGE_VERSION, path: page ?? "/", edition: state.edition })
+    sendLocation()
+    const base = previewBase(window.location.pathname)
     return () => {
       window.removeEventListener("message", onMessage)
       window.removeEventListener("keydown", onKey, true)
       clearTimeout(flashTimer)
+      unhook()
+      overlay.destroy()
+      state.overlay = null
+      delete root.dataset["qtEditor"]
       state.waiting?.()
       state.style?.remove()
       state.style = null
+      // The page left the preview on its own (a form's redirect): the panel brings it back
+      if (base && previewBase(window.location.pathname) !== base) {
+        const held = holdAddress(window.location.href, window.location)
+        send("left", { path: held.kind === "ask" && held.previewable ? held.path : null })
+      }
     }
     // Set up once per frame: the panel's origin and the nonce do not change
     // eslint-disable-next-line react-hooks/exhaustive-deps

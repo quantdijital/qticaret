@@ -38,4 +38,18 @@ describe("previewPage (?sayfa= of a design preview)", () => {
       expect(shown(raw)).toBe("home")
     }
   })
+
+  it("draws the cart and the search on a live session only (adr/0065 Ek 2026-11-15)", () => {
+    const cart = previewPage("/sepet/?hata=cart.update_failed", { system: true })
+    expect(cart.kind).toBe("cart")
+    expect(cart.kind === "cart" && cart.url.search).toBe("?hata=cart.update_failed")
+    expect(previewPage("/arama?q=b%C4%B1%C3%A7ak", { system: true }).kind).toBe("search")
+    // A shared link keeps today's pages
+    expect(previewPage("/sepet").kind).toBe("home")
+    expect(previewPage("/arama?q=x").kind).toBe("home")
+    // Never checkout, an account or another system page
+    for (const raw of ["/odeme", "/odeme/sonuc", "/hesap", "/giris", "/onizleme/sfs_x", "/api/x"]) {
+      expect(previewPage(raw, { system: true }).kind).toBe("home")
+    }
+  })
 })

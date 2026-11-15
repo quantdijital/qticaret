@@ -11,8 +11,11 @@ import { z } from "zod"
  *
  * Faz 1 carries the stable session's handshake, the redraw after a save,
  * selecting and scrolling to a section, changing the shown page and the
- * undo keys. Hover, click, sections and patches come with later phases:
- * until then their types are unknown here, so dropped.
+ * undo keys. Faz 2 adds hovering both ways, the edit label's click, the
+ * section names, and links held in the frame (`navigate-request`, then
+ * `location`). Patches come with Faz 3: until then unknown, so dropped.
+ * A new message is a new type, never a new field on an old one: a panel
+ * and a storefront a release apart drop what they do not know.
  *
  * Imported by the panel and the storefront's preview route only (the
  * `@qticaret/types/editor-bridge` subpath), never by a live page.
@@ -40,6 +43,33 @@ const page = z
   .string()
   .max(2048)
   .regex(/^\/(?![/\\])[^\\]*$/)
+
+/**
+ * A page the frame asks to show or says it shows (Faz 2): a relative path
+ * as `page`, and nothing a decoder could turn into another host or a
+ * hidden character (`%2F`, `%5C`, `%00`, a control character or a space).
+ */
+export const BRIDGE_PATH = /^\/(?![/\\])[^\\\s]*$/
+const ESCAPED = /%(?:2f|5c|00)/i
+/** A control character (C0 or DEL): never in a page's path. */
+const hasControl = (path: string): boolean => {
+  for (let at = 0; at < path.length; at++) {
+    const code = path.charCodeAt(at)
+    if (code < 0x20 || code === 0x7f) {
+      return true
+    }
+  }
+  return false
+}
+/** Whether the frame may name `path` as a page (`navigate-request`, `location`, `left`). */
+export const isBridgePath = (path: string): boolean =>
+  path.length <= 2048 && BRIDGE_PATH.test(path) && !ESCAPED.test(path) && !hasControl(path)
+const framePath = z.string().refine(isBridgePath)
+
+/** A section's name as the panel shows it, written by the frame as text only. */
+const sectionName = z.string().max(120)
+/** The most sections a page or a label set carries. */
+export const BRIDGE_MAX_SECTIONS = 400
 
 const seq = z
   .number()
@@ -81,6 +111,18 @@ export const toStorefrontMessage = z.discriminatedUnion("type", [
   envelope("navigate", z.strictObject({ page: page.nullable() })),
   /** The frame's scale changed (the device or the room). */
   envelope("scale", z.strictObject({ scale: z.number().min(0.05).max(4) })),
+  /** Faz 2: the section the pointer is over in the panel's tree (null: none) is framed. */
+  envelope("hover", z.strictObject({ id: sectionId.nullable() })),
+  /** Faz 2: the edit label's word and each section's name, written as text. */
+  envelope(
+    "labels",
+    z.strictObject({
+      edit: z.string().min(1).max(40),
+      names: z
+        .record(sectionId, sectionName)
+        .refine((names) => Object.keys(names).length <= BRIDGE_MAX_SECTIONS),
+    })
+  ),
 ])
 export type ToStorefrontMessage = z.infer<typeof toStorefrontMessage>
 
@@ -109,6 +151,29 @@ export const toPanelMessage = z.discriminatedUnion("type", [
   envelope("key", z.strictObject({ key: z.enum(["undo", "redo", "escape"]) })),
   /** Something the frame could not do. */
   envelope("error", z.strictObject({ code: z.string().regex(/^[a-z_]{1,40}$/) })),
+  /** Faz 2: the section the pointer is over in the frame (null: none). */
+  envelope("hover", z.strictObject({ id: sectionId.nullable() })),
+  /** Faz 2: a section's edit label was pressed: its form opens. */
+  envelope("click", z.strictObject({ id: sectionId })),
+  /**
+   * Faz 2: a link followed (or a search sent) in the frame, held there: the
+   * panel shows that page in the frame, or says it cannot be previewed.
+   */
+  envelope("navigate-request", z.strictObject({ path: framePath, previewable: z.boolean() })),
+  /**
+   * Faz 2: the page left the preview on its own (a form's redirect, say):
+   * the panel reloads the frame on the preview's address for `path`
+   * (null: the page left for is none the preview shows).
+   */
+  envelope("left", z.strictObject({ path: framePath.nullable() })),
+  /** Faz 2: the page now shown and the sections on it, in page order. */
+  envelope(
+    "location",
+    z.strictObject({
+      path: framePath,
+      sections: z.array(sectionId).max(BRIDGE_MAX_SECTIONS),
+    })
+  ),
 ])
 export type ToPanelMessage = z.infer<typeof toPanelMessage>
 

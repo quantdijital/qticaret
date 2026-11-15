@@ -59,7 +59,8 @@ interface KeyLike {
   target: unknown
 }
 
-const isEditable = (target: unknown): boolean => {
+/** Whether a key goes to a field of the page being typed in. */
+export const isEditable = (target: unknown): boolean => {
   if (typeof target !== "object" || target === null) {
     return false
   }
