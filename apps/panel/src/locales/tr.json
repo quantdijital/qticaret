@@ -8756,6 +8756,11 @@
           "term": "dropdown",
           "hint": "Menü çubuğunun başında; üst kategoriler ve alt kategorileri açılır liste olarak."
         },
+        "menu_images": {
+          "label": "Menüde kategori resimleri",
+          "term": "thumbnails",
+          "hint": "Açılır menülerde ve telefon menüsünde her kategorinin yanında küçük resim. Resmi olmayan kategoride boş kare durur; kapalıyken yalnız yazı."
+        },
         "menu_ground": {
           "label": "Menü çubuğu zemini",
           "term": "background",

@@ -23,6 +23,7 @@ const standard: HeaderBarSection = {
   ends_at: null,
   variant: "standard",
   sticky: true,
+  menu_images: true,
 }
 
 /** The bar's open content and its closed "Diğer ayarlar", every change kept. */
@@ -69,10 +70,31 @@ describe("the catalog header's settings", () => {
     expect(headerCatalogIn("look")).toEqual(["search_label", "account_text", "cart_total"])
   })
 
-  it("shows today's bar only its sticky switch", () => {
+  it("shows today's bar only its pictures and sticky switches", () => {
     renderBar(standard)
     expect(screen.getByRole("switch", { name: /Üst bilgi sabit kalsın/ })).toBeInTheDocument()
+    expect(screen.getByRole("switch", { name: /Menüde kategori resimleri/ })).toBeChecked()
     expect(screen.queryByText(/Menü çubuğu zemini/)).toBeNull()
+  })
+
+  it("turns the menus' pictures off on today's bar too", async () => {
+    const changes = renderBar(standard)
+    await userEvent.click(screen.getByRole("switch", { name: /Menüde kategori resimleri/ }))
+    expect(changes.at(-1)).toMatchObject({ variant: "standard", menu_images: false })
+  })
+
+  it("puts the pictures' switch right under the catalog's Kategoriler button, kept across variants", async () => {
+    const catalog = switchVariant({ ...standard, menu_images: false }, "catalog")
+    expect(catalog).toMatchObject({ menu_images: false })
+    expect(switchVariant(catalog, "centered")).toMatchObject({ menu_images: false })
+    const changes = renderBar(catalog)
+    const names = screen
+      .getAllByRole("switch")
+      .map((each) => each.getAttribute("id") ?? "")
+      .filter((id) => id.includes("categories_button") || id.includes("menu-images"))
+    expect(names).toEqual(["mainheader-header-categories_button-input", "mainheader-menu-images"])
+    await userEvent.click(screen.getByRole("switch", { name: /Menüde kategori resimleri/ }))
+    expect(changes.at(-1)).toMatchObject({ variant: "catalog", menu_images: true })
   })
 
   it("changes what the catalog bar shows, its ground and words", async () => {
@@ -103,6 +125,12 @@ describe("the catalog header's settings", () => {
     expect(keys("placeholder")).toContain("header.search_placeholder")
     expect(keys("kategoriler")).toContain("header.categories_button")
     expect(keys("tutar")).toContain("header.cart_total")
+    expect(keys("thumbnails")).toEqual(["menu_images"])
+    expect(
+      searchSettings("kategori resim", [{ section: standard, group: "header", names: [] }], t).map(
+        (hit) => hit.field?.key ?? null
+      )
+    ).toEqual(["menu_images"])
     expect(
       searchSettings("telefon", [{ section: standard, group: "header", names: [] }], t)
     ).toEqual([])

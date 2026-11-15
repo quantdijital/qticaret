@@ -8756,6 +8756,11 @@
           "term": "dropdown",
           "hint": "At the start of the menu bar; top categories and their subcategories as a dropdown."
         },
+        "menu_images": {
+          "label": "Category pictures in the menu",
+          "term": "thumbnails",
+          "hint": "A small picture beside each category in the dropdowns and the phone menu. A category without one shows an empty square; off, words only."
+        },
         "menu_ground": {
           "label": "Menu bar background",
           "term": "background",
