@@ -165,16 +165,14 @@ describe("the footer's own settings", () => {
     expect(left).toContain("bottom-[calc(5rem+env(safe-area-inset-bottom))]")
     expect(left).toContain("rounded-inner")
     expect(left).toContain("max-lg:hidden")
-    // A 40 px face inside the 48 px gutter wider than 1024 px, 4 px from the edge (K-10, Y-02);
-    // narrower a 32 px see-through face, as little over the content as it can be (third audit)
-    expect(right).toContain("min-[64.0625rem]:size-10")
-    expect(right).toContain("size-8")
+    // A 40 px face inside the 48 px gutter, 4 px from the edge (K-10, Y-02); narrower the
+    // browser moves it to an edge tab or onto the footer's rule, never over the content
+    expect(right).toContain('data-mode="corner"')
+    expect(right).toContain("size-10")
     expect(right).not.toContain("size-12")
     expect(right).toContain("right-1")
     expect(/<button[^>]*data-back-to-top=""[^>]*>/.exec(right)?.[0]).not.toMatch(/ right-2 /)
-    expect(atolyeCss("frame.css")).toContain(
-      "[data-back-to-top][data-shown]:not(:hover, :focus-visible) {\n      opacity: 0.8;"
-    )
+    expect(atolyeCss("frame.css")).not.toContain("opacity: 0.8")
     // One way up: the footer line's link goes where the button shows
     const link = /<a href="#top"[^>]*>/
     expect(renderFrame(atolyeTheme, shopFixture())).toMatch(link)

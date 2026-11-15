@@ -45,7 +45,10 @@ export async function maintenanceGate(
         }
   }
   const { maintenance } = site
-  if (!maintenance.enabled || isOpenDuringMaintenance(pathname, maintenance.allowPaths)) {
+  if (
+    !maintenance.enabled ||
+    isOpenDuringMaintenance(pathname, request.method, maintenance.allowPaths)
+  ) {
     return { blocked: null, bypassed: false }
   }
   const name = bypassCookieName(context.production)
