@@ -106,11 +106,14 @@ export function QuickAdd({
         aria-describedby={error ? errorId : undefined}
         disabled={pending}
       >
-        <Icon
-          className={cn("size-5 shrink-0", pending && "motion-safe:animate-spin")}
-          aria-hidden="true"
-          strokeWidth={1.75}
-        />
+        {/* A framed card's foot reads as its "Seçenekler" twin: words only, the spinner while busy (Z-02) */}
+        {(fill === null || pending) && (
+          <Icon
+            className={cn("size-5 shrink-0", pending && "motion-safe:animate-spin")}
+            aria-hidden="true"
+            strokeWidth={1.75}
+          />
+        )}
         {shown && words.add}
       </button>
       <span
