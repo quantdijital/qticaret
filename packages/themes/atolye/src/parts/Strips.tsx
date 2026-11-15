@@ -63,30 +63,50 @@ const SEAM_SHARE: Readonly<Record<StripSlant, number>> = { soft: 0, medium: 0.09
 const OVERLAP_SHARE = 0.04
 
 /**
+ * The box's height against its width below 640 px, from 640 px and from
+ * 1024 px (what the section's aspect classes draw). With it an image asks
+ * for the width its photograph is drawn at: a strip is far taller than
+ * wide, and the photograph covers its height.
+ */
+export interface StripsShape {
+  phone: number
+  tablet: number
+  desktop: number
+}
+
+/** A photograph's width against its height, when the image says both. */
+function aspectOf(image: ImageView): number | null {
+  return image.width && image.height ? image.width / image.height : null
+}
+
+/**
  * The image's `sizes` for `count` strips over `span` vw of the screen from
  * 1024 px (below, the strips take the screen's width): from 1024 px a
  * widened strip's share (the image is drawn that wide, so it does not jump
  * as the strip widens); below, an equal share of the screen, of the four a
- * tablet or the three a phone shows when there are more.
+ * tablet or the three a phone shows when there are more. Given the box's
+ * `shape` and the photograph's `aspect`, never less than the width the
+ * photograph covers the box's height at (at most the screen's width).
  */
 export function stripSizes(
   count: number,
   span: number,
-  look: Pick<StripsLook, "slant" | "overlap" | "hover"> = STRIPS_LOOK_BEFORE
+  look: Pick<StripsLook, "slant" | "overlap" | "hover"> = STRIPS_LOOK_BEFORE,
+  fit?: { shape: StripsShape; aspect: number | null }
 ): string {
   const grow = look.hover !== "still"
   const seams = (count - 1) * (SEAM_SHARE[look.slant] + (look.overlap ? OVERLAP_SHARE : 0))
   const sum = span * (1 + seams)
-  const open = Math.ceil(
-    count > 1 ? (grow ? (sum * GROW) / (GROW + count - 1) : sum / count) : span
-  )
-  const wide = `(min-width: 1024px) ${open}vw`
-  const share = (strips: number) => `${Math.ceil(100 / strips)}vw`
-  const tablet = Math.min(count, STRIPS_TABLET_MAX)
-  const phone = Math.min(count, STRIPS_PHONE_MAX)
+  const open = count > 1 ? (grow ? (sum * GROW) / (GROW + count - 1) : sum / count) : span
+  const covered = (share: number, height: number) =>
+    Math.ceil(fit?.aspect ? Math.min(100, Math.max(share, height * fit.aspect)) : share)
+  const desktop = covered(open, span * (fit?.shape.desktop ?? 0))
+  const tablet = covered(100 / Math.min(count, STRIPS_TABLET_MAX), 100 * (fit?.shape.tablet ?? 0))
+  const phone = covered(100 / Math.min(count, STRIPS_PHONE_MAX), 100 * (fit?.shape.phone ?? 0))
+  const wide = `(min-width: 1024px) ${desktop}vw`
   return tablet === phone
-    ? `${wide}, ${share(phone)}`
-    : `${wide}, (min-width: 640px) ${share(tablet)}, ${share(phone)}`
+    ? `${wide}, ${phone}vw`
+    : `${wide}, (min-width: 640px) ${tablet}vw, ${phone}vw`
 }
 
 /**
@@ -107,6 +127,7 @@ export function Strips({
   look,
   max = 4,
   span,
+  shape,
   label,
   className,
 }: {
@@ -116,13 +137,16 @@ export function Strips({
   max?: number | undefined
   /** The strips' share of the screen from 1024 px, in vw (the images' `sizes`). */
   span: number
+  /** The box's height against its width, as `className` draws it (the images' `sizes`). */
+  shape?: StripsShape | undefined
   /** The list's name, when the section's heading does not name it. */
   label?: string | undefined
   className?: string | undefined
 }) {
   const shown = items.slice(0, Math.min(max, STRIPS_MOST))
   const grow = look.hover !== "still"
-  const sizes = stripSizes(shown.length, span, look)
+  const sizesOf = (image: ImageView) =>
+    stripSizes(shown.length, span, look, shape && { shape, aspect: aspectOf(image) })
   return (
     <ul
       className={cn("gf-strips rounded-media", className)}
@@ -138,7 +162,11 @@ export function Strips({
         const words = Boolean(item.title) || Boolean(item.note)
         const inner = (
           <span className="gf-strip-frame">
-            <ResponsiveImage image={item.image} sizes={sizes} className="gf-strip-image" />
+            <ResponsiveImage
+              image={item.image}
+              sizes={sizesOf(item.image)}
+              className="gf-strip-image"
+            />
             {words ? (
               <span className="gf-strip-text">
                 {item.title ? (

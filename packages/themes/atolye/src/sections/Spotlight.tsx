@@ -7,7 +7,7 @@ import { Price } from "../parts/Price"
 import { quickAddWords } from "../parts/ProductCard"
 import { QuickAdd } from "../parts/QuickAdd"
 import { Strips } from "../parts/Strips"
-import type { StripsLook } from "../parts/Strips"
+import type { StripsLook, StripsShape } from "../parts/Strips"
 import { type Of, headingId } from "./plan"
 
 /** The strips' share of the screen from 1024 px: beside the words 7 of 12 columns, across the stage. */
@@ -21,6 +21,12 @@ const BOX = {
   side: "aspect-square lg:col-span-7 lg:aspect-[4/3]",
   wide: "aspect-square sm:aspect-[16/9] lg:col-span-12 lg:aspect-[21/9]",
 } as const
+
+/** The same box's height against its width (the images ask for the width they cover it at). */
+const SHAPE = {
+  side: { phone: 1, tablet: 1, desktop: 3 / 4 },
+  wide: { phone: 1, tablet: 9 / 16, desktop: 9 / 21 },
+} as const satisfies Record<keyof typeof BOX, StripsShape>
 
 /** The shop's settings as the strips' look (adr/0049 Ek 2026-11-16). */
 function stripsLook(settings: FeaturedProductSettings): StripsLook {
@@ -116,6 +122,7 @@ export function Spotlight({
               look={stripsLook(settings)}
               max={MOST[layout]}
               span={SPAN[layout]}
+              shape={SHAPE[layout]}
               className={BOX[layout]}
             />
           )}

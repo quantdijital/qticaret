@@ -97,17 +97,26 @@ describe("the featured product's slanted strips", () => {
   })
 
   it("asks for an image as wide as a widened strip, and a phone's equal share", () => {
+    // A slim upright photograph: the strip's width, not its height, sets the image's
+    const slim = (name: string): ImageView => ({ ...picture(name), width: 200, height: 800 })
     const before = { strips_slant: "soft", strips_line: "medium" } as const
-    const html = strips(["bir", "iki", "uc", "dort"].map(picture), card, before)
+    const html = strips(["bir", "iki", "uc", "dort"].map(slim), card, before)
     // 53vw × 2.75 / (2.75 + 3) from 1024 px; a quarter of a tablet's screen, a third of a phone's
     expect(html).toContain('sizes="(min-width: 1024px) 26vw, (min-width: 640px) 25vw, 34vw"')
     // Three: 53vw × 2.75 / (2.75 + 2); a third below 1024 px
-    expect(strips(["bir", "iki", "uc"].map(picture), card, before)).toContain(
+    expect(strips(["bir", "iki", "uc"].map(slim), card, before)).toContain(
       'sizes="(min-width: 1024px) 31vw, 34vw"'
     )
     // The default's steeper seams widen the strips' sum: a larger image
-    expect(strips(["bir", "iki", "uc"].map(picture))).toContain(
+    expect(strips(["bir", "iki", "uc"].map(slim))).toContain(
       'sizes="(min-width: 1024px) 37vw, 34vw"'
+    )
+  })
+
+  it("asks for the width a square photograph covers the strips' height at", () => {
+    // From 1024 px the 4:3 box is 53vw × 0.75 ≈ 40vw high; below, a square box the screen wide
+    expect(strips(["bir", "iki", "uc"].map(picture))).toContain(
+      'sizes="(min-width: 1024px) 40vw, 100vw"'
     )
   })
 
@@ -159,8 +168,9 @@ describe("the strips' look (adr/0049 Ek 2026-11-16)", () => {
       'class="gf-strips rounded-media aspect-square sm:aspect-[16/9] lg:col-span-12 lg:aspect-[21/9]" data-count="6"'
     )
     expect(html).toContain('alt="Şef bıçağı alti"')
-    // 92vw of the screen from 1024 px, a widened strip of six
-    expect(html).toContain('sizes="(min-width: 1024px) 48vw, (min-width: 640px) 25vw, 34vw"')
+    // 92vw of the screen from 1024 px, a widened strip of six; below, the square photograph
+    // covering a 16:9 box (≈ 57vw high) and a phone's square one
+    expect(html).toContain('sizes="(min-width: 1024px) 48vw, (min-width: 640px) 57vw, 100vw"')
     expect(html).toMatch(
       /<div class="grid gap-5 [^"]*lg:col-span-12 lg:grid-cols-12[^"]*"><div class="flex flex-col gap-4 lg:col-span-7"><h2/
     )

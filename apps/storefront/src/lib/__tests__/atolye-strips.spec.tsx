@@ -96,6 +96,35 @@ describe("the strips' markup", () => {
       "(min-width: 1024px) 14vw, (min-width: 640px) 25vw, 34vw"
     )
   })
+
+  it("asks for the width a photograph covers the box's height at, at most the screen's", () => {
+    const shape = { phone: 1, tablet: 9 / 16, desktop: 3 / 4 }
+    // 4:3 photograph: 53vw × 0.75 × 4/3 from 1024 px, 56.25vw × 4/3 on a tablet, capped on a phone
+    expect(stripSizes(4, 53, STRIPS_LOOK_BEFORE, { shape, aspect: 4 / 3 })).toBe(
+      "(min-width: 1024px) 53vw, (min-width: 640px) 75vw, 100vw"
+    )
+    // A slim photograph keeps the strips' shares; an unknown one too
+    expect(stripSizes(4, 53, STRIPS_LOOK_BEFORE, { shape, aspect: 0.2 })).toBe(
+      "(min-width: 1024px) 26vw, (min-width: 640px) 25vw, 34vw"
+    )
+    expect(stripSizes(4, 53, STRIPS_LOOK_BEFORE, { shape, aspect: null })).toBe(stripSizes(4, 53))
+  })
+
+  it("sizes each image by its own photograph when the box's shape is given", () => {
+    const wide = { ...picture("genis"), width: 1600, height: 900 }
+    const slim = { ...picture("ince"), width: 300, height: 900 }
+    const html = renderToStaticMarkup(
+      <Strips
+        items={[wide, slim].map((image) => ({ key: image.src, image }))}
+        look={STRIPS_LOOK_BEFORE}
+        span={53}
+        shape={{ phone: 1, tablet: 1, desktop: 3 / 4 }}
+        className="aspect-square"
+      />
+    )
+    expect(html).toContain('sizes="(min-width: 1024px) 71vw, 100vw"')
+    expect(html).toContain('sizes="(min-width: 1024px) 39vw, 50vw"')
+  })
 })
 
 /** Every rule written for `selector`, with the at-rules around it, in the built stylesheet. */
