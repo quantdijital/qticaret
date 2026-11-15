@@ -7932,14 +7932,10 @@
       },
       "look": {
         "title": "More settings",
-        "titleSet_one": "More settings · {{count}} setting",
-        "titleSet_other": "More settings · {{count}} settings",
-        "hint": "The section's inner spacing and look. Any field left unset uses the theme's own look; the preview shows it at once.",
+        "hint": "A field left unpicked uses the theme's own look; the preview shows it at once.",
         "reset": "Back to default",
         "spacing": {
           "title": "Spacing",
-          "titleSet_one": "Spacing · {{count}} setting",
-          "titleSet_other": "Spacing · {{count}} settings",
           "hint": "The space above and below the section. A side left unset uses the theme's section spacing (Theme settings > Section spacing); a thin strip uses the narrow one."
         },
         "space_outer": {
@@ -8019,7 +8015,7 @@
         "layout": "Layout",
         "scroll": "Scrolling",
         "motion": "Motion",
-        "appearance": "Style",
+        "appearance": "Text and ground",
         "variant": "Layout",
         "variantHint": "How the section looks on the storefront; the preview shows it at once. Shared content (title, text) stays when the layout changes, and \"Undo\" brings the previous one back.",
         "device": {
@@ -8029,7 +8025,25 @@
           "mobile": "Phones only",
           "desktop": "Desktop only",
           "hint": "Phones: screens narrower than 1024 pixels (tablets included). Where it is hidden its pictures are not downloaded; the page's first picture still is."
-        }
+        },
+        "tabs": {
+          "label": "Settings tabs",
+          "content": "Content",
+          "contentTerm": "content",
+          "style": "Style",
+          "styleTerm": "style",
+          "advanced": "Advanced",
+          "advancedTerm": "advanced"
+        },
+        "groups": {
+          "search": "Search",
+          "topBar": "Top strip",
+          "menu": "Menu bar",
+          "icons": "Icons and contact",
+          "frame": "Look"
+        },
+        "marked_one": "{{count}} setting differs from the default",
+        "marked_other": "{{count}} settings differ from the default"
       },
       "defaults": {
         "heading": "Your shop's name",
@@ -8713,8 +8727,6 @@
         "subtextPlaceholder": "On orders placed before 2 pm",
         "link": "Link (optional)",
         "full": "This page already has {{max}} scrolling strips (the header's counts too).",
-        "lookHint": "A close button; the space around the strip and its width.",
-        "headerLookHint": "A close button.",
         "size": {
           "label": "Size",
           "term": "size",
@@ -8900,8 +8912,7 @@
           "bar": "On the menu bar",
           "row": "In the logo row"
         },
-        "phoneNote": "On phones the header stays as it is: menu, logo, favourites and cart, with the search below (with the search as an icon there is no box; the bottom bar’s “Ara” opens it).",
-        "otherHint": "The search button, the My account text and the cart total."
+        "phoneNote": "On phones the header stays as it is: menu, logo, favourites and cart, with the search below (with the search as an icon there is no box; the bottom bar’s “Ara” opens it)."
       },
       "categoryCards": {
         "columns": {
@@ -9178,6 +9189,16 @@
           "on": "On",
           "hint": "Scrolls by dragging with a mouse on a wide screen."
         }
+      },
+      "panelSearch": {
+        "label": "Search this section's settings",
+        "themeLabel": "Search the theme settings",
+        "placeholder": "Search settings: title, ground, margin…",
+        "clear": "Clear search",
+        "results": "Settings found",
+        "empty": "No setting found for “{{query}}”.",
+        "count_one": "{{count}} setting found",
+        "count_other": "{{count}} settings found"
       }
     },
     "preferences": {

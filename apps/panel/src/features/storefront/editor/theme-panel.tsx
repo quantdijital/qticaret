@@ -5,10 +5,13 @@ import type { SectionProblems } from "@/features/storefront/layout/problems"
 import { Panel } from "./panel-header"
 import { ThemeForm } from "./theme-form"
 import type { CardVariantsInUse, ThemeGroupName } from "./forms/theme-registry"
-import { useFieldFocus } from "./use-field-focus"
+import { SettingsLayout } from "./settings-layout"
 import type { FieldFocus } from "./use-field-focus"
 
 const C = "storefront.editor.theme"
+
+// The theme's settings stand in one list of closed groups, no tabs
+const allContent = () => "content" as const
 
 interface ThemePanelProps {
   /** The draft's theme settings. */
@@ -41,18 +44,26 @@ export function ThemePanel({
   onBack,
 }: ThemePanelProps) {
   const { t } = useTranslation()
-  useFieldFocus(focus)
   return (
     <Panel icon={Palette} title={t(`${C}.title`)} onBack={onBack}>
-      <ThemeForm
-        theme={theme}
-        variants={variants}
-        reveal={(group) => (focus?.group === group ? focus.nonce : null)}
-        problems={problems}
-        announcement={announcement ?? t(`${C}.sampleLine`)}
-        onChange={onChange}
-        onUndo={onUndo}
-      />
+      <SettingsLayout
+        scope="theme"
+        resetKey="theme"
+        tabOf={allContent}
+        tabbed={false}
+        searchLabel="storefront.editor.panelSearch.themeLabel"
+        focus={focus}
+      >
+        <ThemeForm
+          theme={theme}
+          variants={variants}
+          reveal={(group) => (focus?.group === group ? focus.nonce : null)}
+          problems={problems}
+          announcement={announcement ?? t(`${C}.sampleLine`)}
+          onChange={onChange}
+          onUndo={onUndo}
+        />
+      </SettingsLayout>
     </Panel>
   )
 }

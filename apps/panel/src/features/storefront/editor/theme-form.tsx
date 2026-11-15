@@ -72,7 +72,7 @@ export function ThemeForm({
       <div className="border-b px-5 py-4">
         <ThemeSample values={shown} announcement={announcement} />
       </div>
-      <PanelGroup title={t(THEME_GROUP_TITLES.colors)} reveal={reveal("colors")}>
+      <PanelGroup name="colors" title={t(THEME_GROUP_TITLES.colors)} reveal={reveal("colors")}>
         <ColorInput
           id={THEME_IDS["colors.primary"]}
           label={t(`${C}.primary`)}

@@ -66,7 +66,7 @@ export function FeaturedGroups({
   const { t } = useTranslation()
   const { gallery } = featuredProductSettingsOf(section)
   return (
-    <PanelGroup title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
+    <PanelGroup name="layout" title={t("storefront.editor.panel.layout")} reveal={reveal("layout")}>
       <StepChoice
         id={FIELD_IDS.content(section.id, "gallery")}
         label={t(`${P}.gallery`)}
