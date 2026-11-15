@@ -51,11 +51,15 @@ export async function layoutPreviewToken(): Promise<string | null> {
 /**
  * Whether this request is the theme editor's live session (adr/0065 §1):
  * its views say so (`editor`), and the theme marks its fields for the
- * editor's labels (Faz 2b). A shared design link and a live page never are.
+ * editor's labels (Faz 2b). A shared design link and a live page never are,
+ * nor a token of the session's form that opens none (a made-up or ended
+ * one's 404; security review 2026-11-15, DÜŞÜK-2). The session is asked
+ * through `layoutSession`'s request cache: the layout read for the same
+ * request already asked, so no second call.
  */
 export async function isEditorSession(): Promise<boolean> {
   const token = await layoutPreviewToken()
-  return token !== null && SESSION_TOKEN.test(token)
+  return token !== null && SESSION_TOKEN.test(token) && (await layoutSession(token)) !== null
 }
 
 /**
