@@ -28,9 +28,11 @@ export function HeaderCatalogOther({
   ).length
   return (
     <PanelGroup
-      title={t(`storefront.editor.marquee.${set > 0 ? "otherTitleSet" : "otherTitle"}`, {
-        count: set,
-      })}
+      title={
+        set > 0
+          ? t("storefront.editor.look.titleSet", { count: set })
+          : t("storefront.editor.look.title")
+      }
       hint={t("storefront.editor.headerBar.otherHint")}
       defaultOpen={false}
       reveal={reveal}

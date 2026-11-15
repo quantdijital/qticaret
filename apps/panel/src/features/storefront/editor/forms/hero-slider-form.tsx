@@ -6,6 +6,7 @@ import { Button } from "@qticaret/admin-ui/ui/button"
 import { EmptyLine, RowActions } from "@/features/settings/components/storefront-rows"
 import type { HeroSlide, HeroSliderSection } from "@/features/storefront/api/layout"
 import { SLIDER_LIMITS } from "@/features/storefront/api/layout"
+import { FIELD_IDS } from "./field-registry"
 import { CountField, FieldGroup } from "./fields"
 import { useProblemText } from "./problem-text"
 import type { SectionFormProps } from "./form-props"
@@ -131,8 +132,9 @@ export function HeroSliderForm({
       </FieldGroup>
       <FieldGroup title={t(`${S}.options`)}>
         <Choice
-          id={`${section.id}-height`}
+          id={FIELD_IDS.content(section.id, "slider_height")}
           label={t(`${S}.height`)}
+          term={t(`${S}.heightTerm`)}
           hint={t(`${S}.heightHint.${section.height}`)}
           value={section.height}
           options={(["compact", "regular"] as const).map((value) => ({
@@ -143,46 +145,58 @@ export function HeroSliderForm({
             set({ height })
           }}
         />
-        <SwitchRow
-          id={`${section.id}-autoplay`}
-          label={t(`${S}.autoplay`)}
-          hint={t(`${S}.autoplayHint`)}
-          checked={section.autoplay}
-          onChange={(autoplay) => {
-            set({ autoplay })
-          }}
-        />
-        {section.autoplay ? (
-          <CountField
-            id={`${section.id}-interval`}
-            label={t(`${S}.interval`)}
-            hint={t(`${S}.intervalHint`, SLIDER_LIMITS.interval)}
-            min={SLIDER_LIMITS.interval.min}
-            max={SLIDER_LIMITS.interval.max}
-            value={section.interval}
-            onChange={(interval) => {
-              set({ interval }, "interval")
+        <div id={FIELD_IDS.content(section.id, "autoplay")}>
+          <SwitchRow
+            id={`${section.id}-autoplay`}
+            label={t(`${S}.autoplay`)}
+            term={t(`${S}.autoplayTerm`)}
+            hint={t(`${S}.autoplayHint`)}
+            checked={section.autoplay}
+            onChange={(autoplay) => {
+              set({ autoplay })
             }}
           />
+        </div>
+        {section.autoplay ? (
+          <div id={FIELD_IDS.content(section.id, "interval")}>
+            <CountField
+              id={`${section.id}-interval`}
+              label={t(`${S}.interval`)}
+              term={t(`${S}.intervalTerm`)}
+              hint={t(`${S}.intervalHint`, SLIDER_LIMITS.interval)}
+              min={SLIDER_LIMITS.interval.min}
+              max={SLIDER_LIMITS.interval.max}
+              value={section.interval}
+              onChange={(interval) => {
+                set({ interval }, "interval")
+              }}
+            />
+          </div>
         ) : null}
-        <SwitchRow
-          id={`${section.id}-dots`}
-          label={t(`${S}.dots`)}
-          hint={t(`${S}.dotsHint`)}
-          checked={section.dots}
-          onChange={(dots) => {
-            set({ dots })
-          }}
-        />
-        <SwitchRow
-          id={`${section.id}-arrows`}
-          label={t(`${S}.arrows`)}
-          hint={t(`${S}.arrowsHint`)}
-          checked={section.arrows}
-          onChange={(arrows) => {
-            set({ arrows })
-          }}
-        />
+        <div id={FIELD_IDS.content(section.id, "dots")}>
+          <SwitchRow
+            id={`${section.id}-dots`}
+            label={t(`${S}.dots`)}
+            term={t(`${S}.dotsTerm`)}
+            hint={t(`${S}.dotsHint`)}
+            checked={section.dots}
+            onChange={(dots) => {
+              set({ dots })
+            }}
+          />
+        </div>
+        <div id={FIELD_IDS.content(section.id, "arrows")}>
+          <SwitchRow
+            id={`${section.id}-arrows`}
+            label={t(`${S}.arrows`)}
+            term={t(`${S}.arrowsTerm`)}
+            hint={t(`${S}.arrowsHint`)}
+            checked={section.arrows}
+            onChange={(arrows) => {
+              set({ arrows })
+            }}
+          />
+        </div>
       </FieldGroup>
       <MediaPicker
         open={picking}

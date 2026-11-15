@@ -7779,7 +7779,7 @@
       "types": {
         "announcement_bar": {
           "name": "Duyuru şeridi",
-          "description": "Sayfanın en üstünde sırayla dönen kısa duyurular."
+          "description": "Sayfanın en üstünde ince bir şerit; vitrin ilk duyuruyu gösterir."
         },
         "hero": {
           "name": "Giriş",
@@ -7790,7 +7790,7 @@
           "description": "Sayfanın başında sırayla gösterilen 2–6 slayt; her birinin görseli, başlığı, kısa metni ve düğmesi olur."
         },
         "banner": {
-          "name": "Görsel slayt",
+          "name": "Görsel bant",
           "description": "1–6 görsel; geniş ekranda yan yana. Her birinin başlığı, satırı ve bir ya da iki düğmesi olabilir."
         },
         "categories": {
@@ -7912,9 +7912,9 @@
         }
       },
       "look": {
-        "title": "Görünüm ayarları",
-        "titleSet_one": "Görünüm ayarları · {{count}} ayar",
-        "titleSet_other": "Görünüm ayarları · {{count}} ayar",
+        "title": "Diğer ayarlar",
+        "titleSet_one": "Diğer ayarlar · {{count}} ayar",
+        "titleSet_other": "Diğer ayarlar · {{count}} ayar",
         "hint": "Bölümün boşluğu ve görünüşü. Seçilmeyen her alan temanın kendi görünümünü kullanır; önizleme hemen gösterir.",
         "reset": "Varsayılana dön",
         "space_outer": {
@@ -7982,8 +7982,10 @@
         "placement": "Yeri",
         "sections": "Bölümler",
         "content": "İçerik",
+        "layout": "Diziliş",
+        "scroll": "Kaydırma",
         "motion": "Hareket",
-        "appearance": "Görünüm",
+        "appearance": "Stil",
         "variant": "Biçim",
         "variantHint": "Bölümün vitrinde nasıl görüneceği; önizleme hemen gösterir. Ortak içerik (başlık, metin) biçim değişince korunur, \"Geri al\" önceki biçimi getirir."
       },
@@ -8009,6 +8011,7 @@
         "heading": "Başlık",
         "text": "Metin",
         "title": "Başlık",
+        "titleTerm": "title",
         "titleHint": "Boş bırakırsanız vitrin kendi başlığını kullanır.",
         "titleOptional": "İsteğe bağlı; boş bırakırsanız başlık görünmez.",
         "textHint": "Boş bırakırsanız vitrin kendi metnini kullanır.",
@@ -8017,8 +8020,10 @@
         "altHint": "Görmeyen ziyaretçiler ve arama motorları için görselde ne olduğunu kısaca yazın.",
         "noImage": "Görsel yok",
         "limit": "Gösterilecek sayı",
+        "limitTerm": "limit",
         "limitHint": "1 ile {{max}} arası.",
         "columns": "Satırda ürün",
+        "columnsTerm": "columns",
         "columnsOption": "Satırda {{n}} ürün",
         "columnsHint": {
           "3": "Geniş ekranda yan yana 3 ürün, iki sıra ({{total}} ürün); telefonda 2.",
@@ -8101,6 +8106,7 @@
       },
       "products": {
         "source": "Hangi ürünler",
+        "sourceTerm": "source",
         "sources": {
           "newest": "En yeni ürünler",
           "best_sellers": "Çok satanlar",
@@ -8114,11 +8120,14 @@
         "products": "Ürünler",
         "manualEmpty": "En az bir ürün seçin.",
         "days": "Kaç günün satışı",
+        "daysTerm": "days",
         "daysHint": "Son kaç günde en çok satılanlar ({{min}}–{{max}} gün). Ödenmiş siparişler sayılır, iptal ve iadeler düşülür. Satış az olduğunda liste en yeni ürünlerle tamamlanır.",
         "onSaleHint": "Kampanyalar sayfasındaki ürünler, indirimi en büyük olan önce. İndirimde ürün yokken bölüm vitrinde görünmez.",
         "more": "Tümünü gör bağlantısı",
+        "moreTerm": "link",
         "moreHint": "Listenin altındaki bağlantı; kaldırırsanız görünmez.",
         "cardVariant": "Kart biçimi",
+        "cardVariantTerm": "card",
         "cardVariantTheme": "Temadaki biçim",
         "cardVariantHint": "Bu raftaki kartların biçimi. Çerçeveli kartın ayarları Tema > Çerçeveli kart'tan gelir."
       },
@@ -8171,7 +8180,7 @@
         "line": "{{number}}. duyuru",
         "placeholder": "{ücretsiz_kargo_eşiği} ve üzeri kargo bedava",
         "add": "Duyuru ekle",
-        "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter; sırayla gösterilir."
+        "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter. Vitrin şimdilik yalnız ilk satırı gösterir; diğer satırlar saklanır."
       },
       "problems": {
         "required": "Bu satırı yazın ya da kaldırın.",
@@ -8315,6 +8324,7 @@
       },
       "related": {
         "source": "Hangi ürünler",
+        "sourceTerm": "source",
         "sources": {
           "same_category": "Ürünün kendi kategorisinden",
           "collection": "Bir koleksiyonun ürünleri",
@@ -8366,6 +8376,7 @@
         "add": "Slayt ekle",
         "options": "Seçenekler",
         "height": "Yükseklik",
+        "heightTerm": "height",
         "heights": {
           "compact": "Kısa",
           "regular": "Standart"
@@ -8374,13 +8385,17 @@
           "compact": "Geniş ekranda alçak bir şerit; altındaki bölümler ilk ekrana daha çok girer.",
           "regular": "Giriş bölümüyle aynı boy; geniş ekranda görsel öne çıkar."
         },
-        "autoplay": "Kendiliğinden geçsin",
+        "autoplay": "Otomatik geçiş",
+        "autoplayTerm": "autoplay",
         "autoplayHint": "Kapalıyken slayt yalnız ziyaretçi geçince değişir. Açıkken üzerine gelince ya da odaklanınca bekler, ziyaretçi kendisi geçince durur; hareketi azaltmayı seçen ziyaretçide oynamaz ve durdurma düğmesi görünür.",
         "interval": "Her slayt kaç saniye",
+        "intervalTerm": "interval",
         "intervalHint": "{{min}} ile {{max}} saniye arası.",
         "dots": "Noktaları göster",
+        "dotsTerm": "dots",
         "dotsHint": "Slaytların altında; hangi slaytta olunduğunu gösterir ve tıklanınca o slayta geçer.",
         "arrows": "Okları göster",
+        "arrowsTerm": "arrows",
         "arrowsHint": "Geniş ekranda (1024 px ve üstü) slaydın iki yanında. Telefonda kaydırarak geçilir.",
         "editSlide": "Slaydı düzenle",
         "previous": "Önceki slayt",
@@ -8412,10 +8427,13 @@
       },
       "googleRating": {
         "excerpts": "Son yorumlardan alıntı göster",
+        "excerptsTerm": "excerpts",
         "excerptsHint": "Gizlediğiniz yorumlar hiçbir zaman çıkmaz; yalnızca 4 ve 5 yıldızlı, metni olan son yorumlar.",
         "count": "Alıntı sayısı",
+        "countTerm": "count",
         "countHint": "1 ile {{max}} arası.",
         "profileLink": "Google'daki sayfanıza bağlantı",
+        "profileLinkTerm": "link",
         "profileLinkHint": "\"Google'da değerlendirmeler\" bağlantısının yanında Google Haritalar'daki sayfanız yeni sekmede açılır.",
         "source": "Puan ve sayı Google'ındır; vitrin onları değiştirmez. Bağlantı ve yorumlar:",
         "sourceLink": "Yorumlar > Google yorumları"
@@ -8492,9 +8510,6 @@
         "full": "Bu sayfada zaten {{max}} kayan yazı var (üst bilgideki de sayılır).",
         "lookHint": "Hangi cihazda görüneceği, kapatma düğmesi; şeridin çevresindeki boşluk ve genişliği.",
         "headerLookHint": "Hangi cihazda görüneceği ve kapatma düğmesi.",
-        "otherTitle": "Diğer ayarlar",
-        "otherTitleSet_one": "Diğer ayarlar · {{count}} ayar",
-        "otherTitleSet_other": "Diğer ayarlar · {{count}} ayar",
         "size": {
           "label": "Boy",
           "term": "size",
@@ -8536,6 +8551,8 @@
         "hover_pause": {
           "label": "Üzerine gelince dur",
           "term": "pause on hover",
+          "off": "Kapalı",
+          "on": "Açık",
           "hint": "Kapalıyken fare üstündeyken de akar; klavyeyle bir ögeye gelinince yine durur."
         },
         "pause_button": {
@@ -8554,6 +8571,8 @@
         "uppercase": {
           "label": "Büyük harf",
           "term": "uppercase",
+          "off": "Kapalı",
+          "on": "Açık",
           "hint": "Ögelerin ana satırı BÜYÜK HARFLE yazılır; alt satır olduğu gibi kalır."
         },
         "gap": {
@@ -8566,6 +8585,8 @@
         "outline": {
           "label": "Dolu / çerçeve yazı",
           "term": "outline",
+          "off": "Kapalı",
+          "on": "Açık",
           "hint": "Ögeler sırayla dolu ve yalnız çerçeveli yazılır. Yalnız büyük boyda."
         },
         "device": {
@@ -8579,6 +8600,8 @@
         "closable": {
           "label": "Kapatma düğmesi",
           "term": "close button",
+          "off": "Kapalı",
+          "on": "Açık",
           "hint": "Ziyaretçi kapatırsa şerit o tarayıcıda bir daha görünmez; yazıyı değiştirirseniz yeniden görünür."
         }
       },
@@ -8723,8 +8746,10 @@
         },
         "listEmpty": "En az bir kategori seçin.",
         "listLimit": "En çok kaç kategori",
+        "listLimitTerm": "limit",
         "listLimitHint": "{{min}} ile {{max}} arası.",
         "showCount": "Ürün sayısını göster",
+        "showCountTerm": "product count",
         "showCountHint": "Her kategorinin yanında yayındaki ürün sayısı.",
         "tiles": "Yandaki karolar",
         "tilesHint": "Girişin yanında en çok {{max}} kategori karosu.",
@@ -8742,11 +8767,15 @@
         "pickLabelHint": "Boş bırakırsanız ürünün adı görünür.",
         "pickLabelPlaceholder": "Çam yeşili",
         "showPrice": "Başlangıç fiyatını göster",
+        "showPriceTerm": "price",
         "showPriceHint": "Seçtiğiniz ürünlerin en düşük güncel fiyatı."
       },
       "categories": {
+        "showCount": "Ürün sayısını göster",
+        "showCountTerm": "product count",
         "showCountHint": "Her karonun altında yayındaki ürün sayısı.",
         "more": "Başlığın yanındaki bağlantı",
+        "moreTerm": "link",
         "moreHint": "Seçmezseniz Tüm kategoriler sayfasına gider."
       },
       "priceBands": {
@@ -8764,13 +8793,13 @@
         "openHint": "Son bant önceki sınırın üstündeki bütün ürünleri kapsar.",
         "addBand": "Bant ekle",
         "thumbs": "Ürün görselleri",
+        "thumbsTerm": "thumbnails",
         "thumbsHint": "Her bantta o aralıktan birkaç ürün küçük görünür; vitrin fiyatlara göre kendisi seçer.",
         "thumbsCount": "Bant başına ürün",
+        "thumbsCountTerm": "per band",
         "full": "Ana sayfada zaten {{max}} fiyat bandı bölümü var (gizli olanlar da sayılır)."
       },
       "shelf": {
-        "layout": "Diziliş",
-        "scroll": "Kaydırma",
         "firstTitle": "İlk listenin başlığı",
         "list": "{{n}}. liste",
         "addList": "Liste ekle",
@@ -8827,10 +8856,10 @@
           "hint": "Yanlardaki oklar telefonda gösterilmez; orada parmakla kaydırılır."
         },
         "dots": {
-          "label": "Noktalar",
+          "label": "Noktaları göster",
           "term": "dots",
-          "off": "Gizle",
-          "on": "Göster",
+          "off": "Kapalı",
+          "on": "Açık",
           "hint": "Kaçıncı sayfada olunduğunu gösteren noktalar."
         },
         "autoplay": {

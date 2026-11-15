@@ -119,7 +119,7 @@ describe("the theme editor's pages", () => {
     ).toEqual([
       "Benzer ürünler",
       "Metin",
-      "Görsel slayt",
+      "Görsel bant",
       "Sık sorulan sorular",
       "Güven rozetleri",
       "Kayan yazı",

@@ -85,6 +85,8 @@ export function LinkCard({ id, link, onChange, onEdit, actions, onRemove, error 
 interface LinkFieldProps {
   id: string
   label: string
+  /** The technical term shown small beside the label. */
+  term?: string | undefined
   hint?: string | undefined
   link: LayoutLink | null
   onChange: (link: LayoutLink | null, field?: "label") => void
@@ -92,13 +94,13 @@ interface LinkFieldProps {
 }
 
 /** One optional link (a slide's, a list's "see all"): picked, reworded, or taken off. */
-export function LinkField({ id, label, hint, link, onChange, error }: LinkFieldProps) {
+export function LinkField({ id, label, term, hint, link, onChange, error }: LinkFieldProps) {
   const { t } = useTranslation()
   const picker = useLinkPicker((next) => {
     onChange(next)
   })
   return (
-    <Field label={label} hint={hint} {...(link ? { htmlFor: id } : {})}>
+    <Field label={label} term={term} hint={hint} {...(link ? { htmlFor: id } : {})}>
       {link ? (
         <LinkCard
           id={id}

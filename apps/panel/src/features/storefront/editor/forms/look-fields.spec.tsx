@@ -59,7 +59,7 @@ function renderPanel(
   return changes
 }
 
-const lookToggle = (name = /^Görünüm ayarları/) => screen.getByRole("button", { name })
+const lookToggle = (name = /^Diğer ayarlar/) => screen.getByRole("button", { name })
 
 /** adr/0049 Ek 2026-11-14 §6: a body section's look, closed at first. */
 describe("the section's look settings", () => {
@@ -122,7 +122,7 @@ describe("the section's look settings", () => {
   it("is not offered for the footer's box", () => {
     renderPanel(newFooterNewsletter("bulten0001"), { group: "footer" })
 
-    expect(screen.queryByRole("button", { name: /^Görünüm ayarları/ })).toBeNull()
+    expect(screen.queryByRole("button", { name: /^Diğer ayarlar/ })).toBeNull()
   })
 
   it("opens at the field the settings search picked, focused and marked", () => {

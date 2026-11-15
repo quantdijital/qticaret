@@ -26,6 +26,7 @@ export function CardVariantField({
     <ChoiceSelect
       id={id}
       label={t("storefront.editor.products.cardVariant")}
+      term={t("storefront.editor.products.cardVariantTerm")}
       value={value ?? THEME}
       options={OPTIONS}
       onChange={(next) => {

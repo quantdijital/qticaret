@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next"
 import {
   BANNER_DEFAULTS,
-  BANNER_SETTING_NAMES,
   MARQUEE_DEFAULTS,
   SCROLLER_DEFAULTS,
   scrollerSettingsOf,
@@ -22,6 +21,8 @@ import type { FieldGroupName } from "./forms/field-registry"
 import { LookFields } from "./forms/look-fields"
 import { MarqueeGroups } from "./forms/marquee-groups"
 import { BannerSettings } from "./forms/banner-settings"
+import { BANNER_OTHER_SETTINGS } from "./forms/banner-groups"
+import { SectionLayoutGroup } from "./forms/layout-group"
 import { MarqueeSettings } from "./forms/marquee-settings"
 import { ScrollerFields } from "./forms/scroller-fields"
 import { SCROLLER_OTHER } from "./forms/scroller-groups"
@@ -94,7 +95,7 @@ export function SectionPanel({
   const looked = takesLook(section, group) ? section : null
   // A strip moves and looks in two open groups; its screens and close button sit with the look
   const strip = section.type === "marquee" ? section : null
-  // The band's width, height, words' place, veil and buttons sit there too (E2)
+  // The band's width and buttons sit there too; its basics stand open in "Diziliş"
   const band = section.type === "banner" ? section : null
   // A product rail stands in "Diziliş"; a carousel's rarely changed scroller settings sit there too
   const shelf = section.type === "products" ? section : null
@@ -110,7 +111,7 @@ export function SectionPanel({
     (strip
       ? MARQUEE_OTHER_SETTINGS.filter((name) => strip[name] !== MARQUEE_DEFAULTS[name]).length
       : 0) +
-    (band ? BANNER_SETTING_NAMES.filter((name) => band[name] !== BANNER_DEFAULTS[name]).length : 0)
+    (band ? BANNER_OTHER_SETTINGS.filter((name) => band[name] !== BANNER_DEFAULTS[name]).length : 0)
   return (
     <Panel icon={SECTION_ICONS[kind]} title={name} onBack={onBack}>
       <p className="border-b px-5 py-4 text-[13px] leading-5 text-muted-foreground">
@@ -160,6 +161,7 @@ export function SectionPanel({
           />
         </PanelGroup>
       ) : null}
+      <SectionLayoutGroup section={section} reveal={reveal} onChange={onChange} />
       {strip ? <MarqueeGroups section={strip} reveal={reveal} onChange={onChange} /> : null}
       {shelf ? <ShelfGroups section={shelf} reveal={reveal} onChange={onChange} /> : null}
       {section.type === "header_bar" && section.variant === "catalog" ? (
@@ -173,13 +175,9 @@ export function SectionPanel({
       {looked || strip ? (
         <PanelGroup
           title={
-            strip || scroller
-              ? t(`storefront.editor.marquee.${set > 0 ? "otherTitleSet" : "otherTitle"}`, {
-                  count: set,
-                })
-              : set > 0
-                ? t("storefront.editor.look.titleSet", { count: set })
-                : t("storefront.editor.look.title")
+            set > 0
+              ? t("storefront.editor.look.titleSet", { count: set })
+              : t("storefront.editor.look.title")
           }
           hint={
             strip
@@ -208,7 +206,9 @@ export function SectionPanel({
               }}
             />
           ) : null}
-          {band ? <BannerSettings section={band} onChange={onChange} /> : null}
+          {band ? (
+            <BannerSettings section={band} settings={BANNER_OTHER_SETTINGS} onChange={onChange} />
+          ) : null}
           {cards ? <CategoryCardsOther section={cards} onChange={onChange} /> : null}
           {looked ? <LookFields section={looked} onChange={onChange} /> : null}
         </PanelGroup>
