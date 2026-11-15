@@ -103,7 +103,7 @@ export function HeaderCatalog({
       )}
       <Container
         data-gf-head-row=""
-        className="flex h-14 items-center gap-1 lg:h-20 lg:gap-(--space-xl)"
+        className="flex h-14 items-center gap-1 lg:h-16 lg:gap-(--space-xl)"
       >
         <MenuSheet
           categories={shop.categories}
@@ -145,7 +145,7 @@ export function HeaderCatalog({
       </Container>
       <div className="gf-menubar hidden lg:block" data-ground={catalog.menuGround}>
         <Container>
-          <div className="relative flex min-h-14 items-center gap-2 py-1.5">
+          <div className="relative flex min-h-13 items-center gap-2 py-1">
             {catalog.categories.length > 0 && (
               <CategoryMenu
                 categories={catalog.categories}
@@ -157,7 +157,13 @@ export function HeaderCatalog({
               />
             )}
             {shop.categories.length > 0 && (
-              <Aisle inBar categories={shop.categories} label={t("nav.categories")} allIn={allIn} />
+              <Aisle
+                inBar
+                categories={shop.categories}
+                label={t("nav.categories")}
+                allIn={allIn}
+                more={t("nav.more")}
+              />
             )}
             {catalog.highlight && (
               <a href={catalog.highlight.path} className="gf-btn gf-btn--small shrink-0">
