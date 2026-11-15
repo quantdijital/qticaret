@@ -33,8 +33,9 @@ export interface HeroCatalogView {
 }
 
 /**
- * The price bands: each band its label, line, the catalogue's listing
- * filtered by its range and the products picked in it on the server.
+ * The price bands: each band its label, line, its category's name when it
+ * has one, its category's listing (else the catalogue's) filtered by its
+ * range and the products picked in it on the server.
  */
 export interface PriceBandsSectionView {
   id: string
@@ -43,6 +44,8 @@ export interface PriceBandsSectionView {
   bands: {
     label: string
     text: string | null
+    /** The band's category's name; absent: a price band over the whole shop. */
+    category?: string
     path: string
     products: ProductThumbView[]
   }[]

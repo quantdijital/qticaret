@@ -97,6 +97,61 @@ describe("PriceBandsForm", () => {
     await user.click(screen.getByRole("switch", { name: /Ürün görselleri/ }))
     expect(changes.at(-1)?.thumbs).toBe(0)
   })
+
+  it("takes a category per band, its price limit optional and the price bands' order apart", async () => {
+    const user = userEvent.setup()
+    const strip: PriceBandsSection = {
+      ...bands(),
+      bands: [
+        { label: "Ucuzlar", text: null, max: 500, category_id: null },
+        { label: "Koleksiyon", text: null, max: null, category_id: "pcat_koleksiyon" },
+        { label: "Üstü", text: null, max: null, category_id: null },
+      ],
+    }
+    const changes = holder(PriceBandsForm, strip)
+
+    // Every band offers its category, marked optional and explained
+    expect(screen.getAllByText("Kategori (isteğe bağlı)")).toHaveLength(3)
+    expect(screen.getAllByText(/küçük görseller de bu kategoriden seçilir/)).toHaveLength(3)
+    // A category band without a price: no bound, a price limit to turn on; the open price band still last
+    expect(screen.getAllByLabelText("Üst sınır (TL)")).toHaveLength(1)
+    expect(screen.getByPlaceholderText("Kategorinin adı ya da kısa bir ad")).toBeInTheDocument()
+    expect(screen.getByRole("switch", { name: /Üst sınır yok/ })).toBeChecked()
+    expect(sectionProblems(strip)).toEqual({})
+
+    await user.click(screen.getByRole("switch", { name: /Fiyat sınırı/ }))
+    expect(changes.at(-1)?.bands[1]).toMatchObject({ category_id: "pcat_koleksiyon", max: 500 })
+    expect(screen.getAllByLabelText("Üst sınır (TL)")).toHaveLength(2)
+    expect(screen.getByText(/kategori sayfası bu fiyatla süzülür/)).toBeInTheDocument()
+
+    // Taken back: a price band again, its bound kept
+    await user.click(screen.getByRole("button", { name: /seçimini kaldır/ }))
+    expect(changes.at(-1)?.bands[1]).toEqual({
+      label: "Koleksiyon",
+      text: null,
+      max: 500,
+      category_id: null,
+    })
+    expect(screen.queryByRole("button", { name: /seçimini kaldır/ })).toBeNull()
+  })
+
+  it("makes a band without a price a price band before the next one when its category is taken back", async () => {
+    const user = userEvent.setup()
+    const changes = holder(PriceBandsForm, {
+      ...bands(),
+      bands: [
+        { label: "Koleksiyon", text: null, max: null, category_id: "pcat_koleksiyon" },
+        { label: "Ucuzlar", text: null, max: 500, category_id: null },
+        { label: "Üstü", text: null, max: null, category_id: null },
+      ],
+    })
+
+    await user.click(screen.getByRole("button", { name: /seçimini kaldır/ }))
+    const next = changes.at(-1)
+    expect(next?.bands[0]).toMatchObject({ category_id: null, max: 500 })
+    // Not rising yet: the shop is told, the save refused until it is fixed
+    expect(next && sectionProblems(next)).toEqual({ bands: "bandsOrder" })
+  })
 })
 
 const hero = () => newHomeSection("hero", "girisbolum") as HeroSection

@@ -71,6 +71,12 @@ function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }
   if (section.type === "brands") {
     return section.brand_ids.map(as("brand"))
   }
+  // A price band's own category (adr/0049, 2026-11-15)
+  if (section.type === "price_bands") {
+    return section.bands.flatMap((band) =>
+      band.category_id ? [as("category")(band.category_id)] : []
+    )
+  }
   if (section.type === "featured_product") {
     return [as("product")(section.product_id)]
   }

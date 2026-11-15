@@ -248,9 +248,9 @@ export function newBodySection(
 const newPriceBands = () => ({
   title: null,
   bands: [
-    { label: "", text: null, max: 500 },
-    { label: "", text: null, max: 1000 },
-    { label: "", text: null, max: null },
+    { label: "", text: null, max: 500, category_id: null },
+    { label: "", text: null, max: 1000, category_id: null },
+    { label: "", text: null, max: null, category_id: null },
   ],
   thumbs: PRICE_BANDS_LIMITS.thumbs.default,
 })
