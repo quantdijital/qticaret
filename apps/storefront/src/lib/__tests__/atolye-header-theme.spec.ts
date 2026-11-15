@@ -121,7 +121,7 @@ describe("the aisle's dropdown (M1)", () => {
     const html = renderFrame(atolyeTheme, shopFixture({ categories: COUNTED }))
     const row = rowOf(html, "/kategori/cakilar/katlanir")
     expect(row).toMatch(
-      /<span class="block shrink-0 overflow-hidden rounded-inner bg-paper-3 size-10">/
+      /<span class="block shrink-0 overflow-hidden rounded-inner bg-media-deep size-10">/
     )
     expect(row).toContain('src="/media/katlanir.jpg"')
     expect(row).toContain("<span>Katlanır çakılar</span>")

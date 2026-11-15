@@ -17,5 +17,5 @@ export const STYLE_KIT_READY: Readonly<Record<StyleKitField, boolean>> = {
   // S3, step 3: chips, tabs, option buttons (`data-chip-style`)
   chip_style: true,
   // S4, step 5: the photos' ground (`data-media-ground`)
-  media_ground: false,
+  media_ground: true,
 }

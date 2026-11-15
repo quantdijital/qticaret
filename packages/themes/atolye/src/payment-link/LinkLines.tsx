@@ -14,7 +14,7 @@ export function LinkLines({ lines, t }: { lines: PaymentLinkLineView[]; t: Trans
           key={`${line.title}-${String(index)}`}
           className="flex items-start gap-4 rounded-media bg-field p-3"
         >
-          <div className="size-16 shrink-0 overflow-hidden rounded-inner bg-paper-3 sm:size-20">
+          <div className="size-16 shrink-0 overflow-hidden rounded-inner bg-media-deep sm:size-20">
             {line.image ? (
               <ResponsiveImage
                 image={{ ...line.image, alt: "" }}
